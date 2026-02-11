@@ -34,33 +34,40 @@ set "HTML_NAME="
 set "DOCX_NAME="
 set "PB_EXTRA_ARGS="
 
-if "%MODE%"=="1" (
-  set "PROFILE=paper"
-  set "HTML_NAME=pmodel_paper.html"
-  set "DOCX_NAME=pmodel_paper.docx"
-  goto single_profile
-)
-if "%MODE%"=="2" (
-  set "PROFILE=part2_astrophysics"
-  set "HTML_NAME=pmodel_paper_part2_astrophysics.html"
-  set "DOCX_NAME=pmodel_paper_part2_astrophysics.docx"
-  set "PB_EXTRA_ARGS=--skip-tables"
-  goto single_profile
-)
-if "%MODE%"=="3" (
-  set "PROFILE=part3_quantum"
-  set "HTML_NAME=pmodel_paper_part3_quantum.html"
-  set "DOCX_NAME=pmodel_paper_part3_quantum.docx"
-  set "PB_EXTRA_ARGS=--skip-tables"
-  goto single_profile
-)
-if "%MODE%"=="4" (
-  set "PROFILE=part4_verification"
-  set "HTML_NAME=pmodel_paper_part4_verification.html"
-  set "DOCX_NAME=pmodel_paper_part4_verification.docx"
-  set "PB_EXTRA_ARGS=--skip-tables"
-  goto single_profile
-)
+if "%MODE%"=="1" goto mode1
+if "%MODE%"=="2" goto mode2
+if "%MODE%"=="3" goto mode3
+if "%MODE%"=="4" goto mode4
+goto dispatch
+
+:mode1
+set "PROFILE=paper"
+set "HTML_NAME=pmodel_paper.html"
+set "DOCX_NAME=pmodel_paper.docx"
+goto single_profile
+
+:mode2
+set "PROFILE=part2_astrophysics"
+set "HTML_NAME=pmodel_paper_part2_astrophysics.html"
+set "DOCX_NAME=pmodel_paper_part2_astrophysics.docx"
+set "PB_EXTRA_ARGS=--skip-tables"
+goto single_profile
+
+:mode3
+set "PROFILE=part3_quantum"
+set "HTML_NAME=pmodel_paper_part3_quantum.html"
+set "DOCX_NAME=pmodel_paper_part3_quantum.docx"
+set "PB_EXTRA_ARGS=--skip-tables"
+goto single_profile
+
+:mode4
+set "PROFILE=part4_verification"
+set "HTML_NAME=pmodel_paper_part4_verification.html"
+set "DOCX_NAME=pmodel_paper_part4_verification.docx"
+set "PB_EXTRA_ARGS=--skip-tables"
+goto single_profile
+
+:dispatch
 
 if /I "%MODE%"=="full" goto full
 if /I "%MODE%"=="quick" goto quick
