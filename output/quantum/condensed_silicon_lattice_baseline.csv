@@ -1,0 +1,3 @@
+code,name,value_m,sigma_m,unit_si,value_A,sigma_A,rel_sigma,codata_year,source_url,local_path,local_sha256
+asil,lattice parameter of silicon,5.431020511e-10,8.9e-18,m,5.431020511,8.9e-08,1.6387343745017943e-08,2022,https://physics.nist.gov/cgi-bin/cuu/Value?asil,C:\develop\waveP\data\quantum\sources\nist_codata_2022_silicon_lattice\nist_cuu_Value_asil.html,fe14057cc8a9b02596f43962f9ec36024cd5f099c60b433503f52c428f3f05ed
+d220sil,lattice spacing of ideal Si (220),1.920155716e-10,3.2e-18,m,1.9201557159999998,3.1999999999999995e-08,1.6665315074894688e-08,2022,https://physics.nist.gov/cgi-bin/cuu/Value?d220sil,C:\develop\waveP\data\quantum\sources\nist_codata_2022_silicon_lattice\nist_cuu_Value_d220sil.html,d3ba898215a2a2cd002d61943109caa38f5d445425c6da739f4862cd337e194a

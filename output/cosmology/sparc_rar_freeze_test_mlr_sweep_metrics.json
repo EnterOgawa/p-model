@@ -1,0 +1,1050 @@
+{
+  "counts": {
+    "n_rows": 3391,
+    "n_splits": 250,
+    "n_variants": 9
+  },
+  "envelope": {
+    "pass_rate_abs_lt_threshold_galaxy": {
+      "baryons_only": {
+        "max": 0.0,
+        "median": 0.0,
+        "min": 0.0,
+        "n": 9,
+        "status": "ok"
+      },
+      "baseline_rar_mcgaugh2016_fit_a0": {
+        "max": 0.808,
+        "median": 0.752,
+        "min": 0.66,
+        "n": 9,
+        "status": "ok"
+      },
+      "candidate_rar_pbg_a0_fixed_kappa": {
+        "max": 1.0,
+        "median": 0.976,
+        "min": 0.852,
+        "n": 9,
+        "status": "ok"
+      },
+      "candidate_rar_pbg_fit_kappa": {
+        "max": 0.808,
+        "median": 0.752,
+        "min": 0.66,
+        "n": 9,
+        "status": "ok"
+      }
+    }
+  },
+  "generated_utc": "2026-01-29T22:25:55.057650+00:00",
+  "inputs": {
+    "h0p_km_s_mpc": null,
+    "h0p_metrics": "output/cosmology/cosmology_redshift_pbg_metrics.json",
+    "low_accel_cut_log10_gbar": -10.5,
+    "note": "g_bar is recomputed from vgas/vdisk/vbul with vdisk→vdisk*sqrt(Υ_disk), vbul→vbul*sqrt(Υ_bulge).",
+    "pbg_kappa": 0.15915494309189535,
+    "preferred_metric": "sweep_summary_galaxy",
+    "rar_csv": "output/cosmology/sparc_rar_reconstruction.csv",
+    "ref_upsilon": {
+      "bulge": 0.7,
+      "disk": 0.5
+    },
+    "seeds": {
+      "count": 50,
+      "start": 20260129
+    },
+    "sigma_floor_dex": 0.01,
+    "threshold_abs_z": 3.0,
+    "train_fracs": {
+      "start": 0.5,
+      "step": 0.1,
+      "stop": 0.9
+    },
+    "upsilon_bulge": [
+      0.65,
+      0.7,
+      0.75
+    ],
+    "upsilon_disk": [
+      0.45,
+      0.5,
+      0.55
+    ]
+  },
+  "marginal": {
+    "pass_rate_abs_lt_threshold_galaxy": {
+      "baseline_rar_mcgaugh2016_fit_a0": {
+        "by_upsilon_bulge": [
+          {
+            "max": 0.768,
+            "median": 0.72,
+            "min": 0.66,
+            "n": 3,
+            "status": "ok",
+            "upsilon_bulge": 0.65
+          },
+          {
+            "max": 0.796,
+            "median": 0.752,
+            "min": 0.7,
+            "n": 3,
+            "status": "ok",
+            "upsilon_bulge": 0.7
+          },
+          {
+            "max": 0.808,
+            "median": 0.768,
+            "min": 0.724,
+            "n": 3,
+            "status": "ok",
+            "upsilon_bulge": 0.75
+          }
+        ],
+        "by_upsilon_disk": [
+          {
+            "max": 0.724,
+            "median": 0.7,
+            "min": 0.66,
+            "n": 3,
+            "status": "ok",
+            "upsilon_disk": 0.45
+          },
+          {
+            "max": 0.768,
+            "median": 0.752,
+            "min": 0.72,
+            "n": 3,
+            "status": "ok",
+            "upsilon_disk": 0.5
+          },
+          {
+            "max": 0.808,
+            "median": 0.796,
+            "min": 0.768,
+            "n": 3,
+            "status": "ok",
+            "upsilon_disk": 0.55
+          }
+        ]
+      },
+      "candidate_rar_pbg_a0_fixed_kappa": {
+        "by_upsilon_bulge": [
+          {
+            "max": 1.0,
+            "median": 0.976,
+            "min": 0.88,
+            "n": 3,
+            "status": "ok",
+            "upsilon_bulge": 0.65
+          },
+          {
+            "max": 1.0,
+            "median": 0.976,
+            "min": 0.86,
+            "n": 3,
+            "status": "ok",
+            "upsilon_bulge": 0.7
+          },
+          {
+            "max": 0.996,
+            "median": 0.976,
+            "min": 0.852,
+            "n": 3,
+            "status": "ok",
+            "upsilon_bulge": 0.75
+          }
+        ],
+        "by_upsilon_disk": [
+          {
+            "max": 1.0,
+            "median": 1.0,
+            "min": 0.996,
+            "n": 3,
+            "status": "ok",
+            "upsilon_disk": 0.45
+          },
+          {
+            "max": 0.976,
+            "median": 0.976,
+            "min": 0.976,
+            "n": 3,
+            "status": "ok",
+            "upsilon_disk": 0.5
+          },
+          {
+            "max": 0.88,
+            "median": 0.86,
+            "min": 0.852,
+            "n": 3,
+            "status": "ok",
+            "upsilon_disk": 0.55
+          }
+        ]
+      }
+    }
+  },
+  "outputs": {
+    "metrics_json": "output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json",
+    "plot_png": "output/cosmology/sparc_rar_freeze_test_mlr_sweep.png"
+  },
+  "robustness": {
+    "candidate": {
+      "max": 1.0,
+      "median": 0.976,
+      "min": 0.852,
+      "n": 9,
+      "status": "ok"
+    },
+    "decision_rule": "robust_adopted := (min pass_rate(|z|<3) across M/L variants) >= 0.95 (galaxy-level).",
+    "pass_rate_required": 0.95,
+    "robust_adopted": false
+  },
+  "variants": [
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 40.972055125356796,
+          "median": 27.50199055750563,
+          "min": 10.506024192758652,
+          "n": 250,
+          "p16": 16.85931124514291,
+          "p84": 34.751881124377675,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 5.309513951272619,
+          "median": -6.188231554162632,
+          "min": -19.468905356369103,
+          "n": 250,
+          "p16": -9.937826472450666,
+          "p84": -2.677934937675006,
+          "pass_rate_abs_lt_threshold": 0.172,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 8.006456748692768,
+          "median": 0.35513964449671986,
+          "min": -7.965959959526688,
+          "n": 250,
+          "p16": -2.288481538509792,
+          "p84": 3.317949256042912,
+          "pass_rate_abs_lt_threshold": 0.708,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 5.309513951272619,
+          "median": -6.188231554162632,
+          "min": -19.468905356369103,
+          "n": 250,
+          "p16": -9.937826472450666,
+          "p84": -2.677934937675006,
+          "pass_rate_abs_lt_threshold": 0.172,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 29.60652876895878,
+          "median": 20.26751380201393,
+          "min": 7.064712558394644,
+          "n": 250,
+          "p16": 13.071256469257145,
+          "p84": 25.208582918250006,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 0.83815065699726,
+          "median": -2.5663071556839645,
+          "min": -5.687790843521709,
+          "n": 250,
+          "p16": -3.64841787625797,
+          "p84": -1.588545599259981,
+          "pass_rate_abs_lt_threshold": 0.66,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 1.5751485957750067,
+          "median": -0.9602317112330498,
+          "min": -2.9874842789952685,
+          "n": 250,
+          "p16": -1.7489271681285472,
+          "p84": -0.15018132909832763,
+          "pass_rate_abs_lt_threshold": 1.0,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 0.83815065699726,
+          "median": -2.5663071556839645,
+          "min": -5.687790843521709,
+          "n": 250,
+          "p16": -3.64841787625797,
+          "p84": -1.588545599259981,
+          "pass_rate_abs_lt_threshold": 0.66,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.65,
+      "upsilon_disk": 0.45
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.062441395163326,
+          "median": 27.552846505297985,
+          "min": 10.489781747276725,
+          "n": 250,
+          "p16": 16.864787937134928,
+          "p84": 34.81196261149689,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 5.467665687176294,
+          "median": -5.762173097355026,
+          "min": -18.429291324427695,
+          "n": 250,
+          "p16": -9.564807909274359,
+          "p84": -2.161654977718182,
+          "pass_rate_abs_lt_threshold": 0.212,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 7.8267322674286985,
+          "median": 0.2668065458997812,
+          "min": -8.001658271709614,
+          "n": 250,
+          "p16": -2.3901181182271105,
+          "p84": 3.131714755636588,
+          "pass_rate_abs_lt_threshold": 0.708,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 5.467665687176294,
+          "median": -5.762173097355026,
+          "min": -18.429291324427695,
+          "n": 250,
+          "p16": -9.564807909274359,
+          "p84": -2.161654977718182,
+          "pass_rate_abs_lt_threshold": 0.212,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 29.543192714375515,
+          "median": 20.238155330616426,
+          "min": 7.064712558394644,
+          "n": 250,
+          "p16": 13.001254356525278,
+          "p84": 25.172392879734392,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 0.8872626096225145,
+          "median": -2.444544620565328,
+          "min": -5.520731229136591,
+          "n": 250,
+          "p16": -3.5014173609844557,
+          "p84": -1.4961179586123876,
+          "pass_rate_abs_lt_threshold": 0.7,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 1.5355971570601326,
+          "median": -0.9917658637136104,
+          "min": -2.9975505010229053,
+          "n": 250,
+          "p16": -1.7769241195318097,
+          "p84": -0.1783664208904742,
+          "pass_rate_abs_lt_threshold": 1.0,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 0.8872626096225145,
+          "median": -2.444544620565328,
+          "min": -5.520731229136591,
+          "n": 250,
+          "p16": -3.5014173609844557,
+          "p84": -1.4961179586123876,
+          "pass_rate_abs_lt_threshold": 0.7,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.7,
+      "upsilon_disk": 0.45
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.10526640719412,
+          "median": 27.58398910873685,
+          "min": 10.459978915207472,
+          "n": 250,
+          "p16": 16.86669385240456,
+          "p84": 34.81945574437235,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 5.574684488079707,
+          "median": -5.3857681941048945,
+          "min": -17.715899245195985,
+          "n": 250,
+          "p16": -9.135945117341686,
+          "p84": -1.917686165570823,
+          "pass_rate_abs_lt_threshold": 0.252,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 7.591455526705906,
+          "median": 0.11951639861765508,
+          "min": -8.018976741873551,
+          "n": 250,
+          "p16": -2.5266658218131957,
+          "p84": 2.9975638750203806,
+          "pass_rate_abs_lt_threshold": 0.708,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 5.574684488079707,
+          "median": -5.3857681941048945,
+          "min": -17.715899245195985,
+          "n": 250,
+          "p16": -9.135945117341686,
+          "p84": -1.917686165570823,
+          "pass_rate_abs_lt_threshold": 0.252,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 29.46697156601402,
+          "median": 20.19383836464612,
+          "min": 7.064712558394644,
+          "n": 250,
+          "p16": 12.965661100765228,
+          "p84": 25.134524868155736,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 0.9403780942717824,
+          "median": -2.3450209216088616,
+          "min": -5.287105781882163,
+          "n": 250,
+          "p16": -3.396730077703155,
+          "p84": -1.4356533515578425,
+          "pass_rate_abs_lt_threshold": 0.724,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 1.4992650740186644,
+          "median": -1.0301641012972347,
+          "min": -3.0089953045927365,
+          "n": 250,
+          "p16": -1.8058819763825635,
+          "p84": -0.22351962618001917,
+          "pass_rate_abs_lt_threshold": 0.996,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 0.9403780942717824,
+          "median": -2.3450209216088616,
+          "min": -5.287105781882163,
+          "n": 250,
+          "p16": -3.396730077703155,
+          "p84": -1.4356533515578425,
+          "pass_rate_abs_lt_threshold": 0.724,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.75,
+      "upsilon_disk": 0.45
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.12056450751346,
+          "median": 27.28413126136146,
+          "min": 10.1758169907406,
+          "n": 250,
+          "p16": 16.896434360864077,
+          "p84": 34.54220956553916,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 5.928998024208161,
+          "median": -5.523716880835829,
+          "min": -18.927115653372997,
+          "n": 250,
+          "p16": -9.167865195081454,
+          "p84": -2.2072369043803546,
+          "pass_rate_abs_lt_threshold": 0.22,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 5.640758646864565,
+          "median": -1.7127615934671923,
+          "min": -9.815226847264165,
+          "n": 250,
+          "p16": -4.336319473947057,
+          "p84": 1.0592925959980286,
+          "pass_rate_abs_lt_threshold": 0.66,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 5.928998024208161,
+          "median": -5.523716880835829,
+          "min": -18.927115653372997,
+          "n": 250,
+          "p16": -9.167865195081454,
+          "p84": -2.2072369043803546,
+          "pass_rate_abs_lt_threshold": 0.22,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 28.62264375573845,
+          "median": 19.26217339274136,
+          "min": 6.724160855930279,
+          "n": 250,
+          "p16": 12.46814719158534,
+          "p84": 24.022791199642217,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 0.9401477404654149,
+          "median": -2.4253049566742515,
+          "min": -5.516847623008491,
+          "n": 250,
+          "p16": -3.4551796813324587,
+          "p84": -1.4615144885334725,
+          "pass_rate_abs_lt_threshold": 0.72,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.866754600467503,
+          "median": -1.5392656139387673,
+          "min": -3.6445682920138407,
+          "n": 250,
+          "p16": -2.3725314881827915,
+          "p84": -0.7602450316594663,
+          "pass_rate_abs_lt_threshold": 0.976,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 0.9401477404654149,
+          "median": -2.4253049566742515,
+          "min": -5.516847623008491,
+          "n": 250,
+          "p16": -3.4551796813324587,
+          "p84": -1.4615144885334725,
+          "pass_rate_abs_lt_threshold": 0.72,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.65,
+      "upsilon_disk": 0.5
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.18165920794993,
+          "median": 27.34115805498432,
+          "min": 10.185160401228607,
+          "n": 250,
+          "p16": 16.918401103012297,
+          "p84": 34.594286466919584,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 6.082007978163136,
+          "median": -5.099810926800109,
+          "min": -17.863498894934008,
+          "n": 250,
+          "p16": -8.6858025473667,
+          "p84": -1.7174858973337457,
+          "pass_rate_abs_lt_threshold": 0.268,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 5.467910595537683,
+          "median": -1.8306457314994977,
+          "min": -9.85998957972052,
+          "n": 250,
+          "p16": -4.464600831852997,
+          "p84": 0.9245914189320625,
+          "pass_rate_abs_lt_threshold": 0.648,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 6.082007978163136,
+          "median": -5.099810926800109,
+          "min": -17.863498894934008,
+          "n": 250,
+          "p16": -8.6858025473667,
+          "p84": -1.7174858973337457,
+          "pass_rate_abs_lt_threshold": 0.268,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 28.489886213563324,
+          "median": 19.209055957628824,
+          "min": 6.724160855930279,
+          "n": 250,
+          "p16": 12.40734342676819,
+          "p84": 23.98266096373736,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 0.9930840078232664,
+          "median": -2.314521027840857,
+          "min": -5.297210627795419,
+          "n": 250,
+          "p16": -3.3171345224524673,
+          "p84": -1.398457335773827,
+          "pass_rate_abs_lt_threshold": 0.752,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.8630174614594558,
+          "median": -1.5613340553161796,
+          "min": -3.650682676582941,
+          "n": 250,
+          "p16": -2.4050155229004293,
+          "p84": -0.7668213721769142,
+          "pass_rate_abs_lt_threshold": 0.976,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 0.9930840078232664,
+          "median": -2.314521027840857,
+          "min": -5.297210627795419,
+          "n": 250,
+          "p16": -3.3171345224524673,
+          "p84": -1.398457335773827,
+          "pass_rate_abs_lt_threshold": 0.752,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.7,
+      "upsilon_disk": 0.5
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.239420588913184,
+          "median": 27.39460516003523,
+          "min": 10.151258573231972,
+          "n": 250,
+          "p16": 16.916633218952224,
+          "p84": 34.596444017494605,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 6.19395488963613,
+          "median": -4.652273817776923,
+          "min": -17.099576189443567,
+          "n": 250,
+          "p16": -8.212846706576025,
+          "p84": -1.2104899679799082,
+          "pass_rate_abs_lt_threshold": 0.304,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 5.258757604444613,
+          "median": -1.9244802573350965,
+          "min": -9.875824239043599,
+          "n": 250,
+          "p16": -4.553519018412365,
+          "p84": 0.8341108994423981,
+          "pass_rate_abs_lt_threshold": 0.64,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 6.19395488963613,
+          "median": -4.652273817776923,
+          "min": -17.099576189443567,
+          "n": 250,
+          "p16": -8.212846706576025,
+          "p84": -1.2104899679799082,
+          "pass_rate_abs_lt_threshold": 0.304,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 28.408742581161835,
+          "median": 19.19497010609054,
+          "min": 6.724160855930279,
+          "n": 250,
+          "p16": 12.367379685002108,
+          "p84": 23.926433710198015,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 1.0541891201080225,
+          "median": -2.211387652941884,
+          "min": -5.13520179481013,
+          "n": 250,
+          "p16": -3.21000098121263,
+          "p84": -1.328243271728799,
+          "pass_rate_abs_lt_threshold": 0.768,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.8592895988867334,
+          "median": -1.5959344884573277,
+          "min": -3.652360230299337,
+          "n": 250,
+          "p16": -2.4275411788777084,
+          "p84": -0.7733131251912808,
+          "pass_rate_abs_lt_threshold": 0.976,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 1.0541891201080225,
+          "median": -2.211387652941884,
+          "min": -5.13520179481013,
+          "n": 250,
+          "p16": -3.21000098121263,
+          "p84": -1.328243271728799,
+          "pass_rate_abs_lt_threshold": 0.768,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.75,
+      "upsilon_disk": 0.5
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.238175437833924,
+          "median": 27.142067306449455,
+          "min": 9.949295578170181,
+          "n": 250,
+          "p16": 16.884706894795535,
+          "p84": 34.33273729797944,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 6.353079557879772,
+          "median": -4.702989965539103,
+          "min": -17.956740173845393,
+          "n": 250,
+          "p16": -8.479194508646401,
+          "p84": -1.6044095664295905,
+          "pass_rate_abs_lt_threshold": 0.276,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 4.302106122532711,
+          "median": -3.890681541101646,
+          "min": -12.41317599038977,
+          "n": 250,
+          "p16": -6.473096043043389,
+          "p84": -0.9344920012139234,
+          "pass_rate_abs_lt_threshold": 0.348,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 6.353079557879772,
+          "median": -4.702989965539103,
+          "min": -17.956740173845393,
+          "n": 250,
+          "p16": -8.479194508646401,
+          "p84": -1.6044095664295905,
+          "pass_rate_abs_lt_threshold": 0.276,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 27.289728729712305,
+          "median": 18.292440645053915,
+          "min": 6.28157963799282,
+          "n": 250,
+          "p16": 11.735889649265678,
+          "p84": 22.648574912078967,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 1.059794563316066,
+          "median": -2.285438399843428,
+          "min": -5.363751457863511,
+          "n": 250,
+          "p16": -3.263970460992835,
+          "p84": -1.3631386869847046,
+          "pass_rate_abs_lt_threshold": 0.768,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.5411723457643431,
+          "median": -2.0406014203186515,
+          "min": -4.194858634333703,
+          "n": 250,
+          "p16": -2.9097686473495155,
+          "p84": -1.1630068335837271,
+          "pass_rate_abs_lt_threshold": 0.88,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 1.059794563316066,
+          "median": -2.285438399843428,
+          "min": -5.363751457863511,
+          "n": 250,
+          "p16": -3.263970460992835,
+          "p84": -1.3631386869847046,
+          "pass_rate_abs_lt_threshold": 0.768,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.65,
+      "upsilon_disk": 0.55
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.30608738007601,
+          "median": 27.1989809957565,
+          "min": 9.910741465586888,
+          "n": 250,
+          "p16": 16.877995518260658,
+          "p84": 34.39631150451754,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 6.769758617926603,
+          "median": -4.369589789774356,
+          "min": -17.27756535312796,
+          "n": 250,
+          "p16": -7.978437853665831,
+          "p84": -1.067865648536099,
+          "pass_rate_abs_lt_threshold": 0.32,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 4.160272422780831,
+          "median": -4.067076849248645,
+          "min": -12.466379342991873,
+          "n": 250,
+          "p16": -6.652487187935955,
+          "p84": -1.0184328966323493,
+          "pass_rate_abs_lt_threshold": 0.336,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 6.769758617926603,
+          "median": -4.369589789774356,
+          "min": -17.27756535312796,
+          "n": 250,
+          "p16": -7.978437853665831,
+          "p84": -1.067865648536099,
+          "pass_rate_abs_lt_threshold": 0.32,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 27.186085632590068,
+          "median": 18.259706014459926,
+          "min": 6.28157963799282,
+          "n": 250,
+          "p16": 11.710535538356677,
+          "p84": 22.609501607305674,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 1.205085828869335,
+          "median": -2.179068042407671,
+          "min": -5.214590279465238,
+          "n": 250,
+          "p16": -3.1663129122972506,
+          "p84": -1.278538706066704,
+          "pass_rate_abs_lt_threshold": 0.796,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.5362777327111042,
+          "median": -2.0748271703409475,
+          "min": -4.2006838537054465,
+          "n": 250,
+          "p16": -2.9443929435211964,
+          "p84": -1.189748565701751,
+          "pass_rate_abs_lt_threshold": 0.86,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 1.205085828869335,
+          "median": -2.179068042407671,
+          "min": -5.214590279465238,
+          "n": 250,
+          "p16": -3.1663129122972506,
+          "p84": -1.278538706066704,
+          "pass_rate_abs_lt_threshold": 0.796,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.7,
+      "upsilon_disk": 0.55
+    },
+    {
+      "counts": {
+        "n_galaxies": 175,
+        "n_points": 3391,
+        "n_splits": 250
+      },
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.3728278549142,
+          "median": 27.242473889606785,
+          "min": 9.893754145535663,
+          "n": 250,
+          "p16": 16.90303508834258,
+          "p84": 34.41528848117158,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 6.929780045227833,
+          "median": -3.9445696195237105,
+          "min": -16.204424872720406,
+          "n": 250,
+          "p16": -7.7111745812497485,
+          "p84": -0.5795926089935534,
+          "pass_rate_abs_lt_threshold": 0.368,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 4.010870680728594,
+          "median": -4.147426596158418,
+          "min": -12.493744516407585,
+          "n": 250,
+          "p16": -6.755891311606835,
+          "p84": -1.0884693998145718,
+          "pass_rate_abs_lt_threshold": 0.32,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 6.929780045227833,
+          "median": -3.9445696195237105,
+          "min": -16.204424872720406,
+          "n": 250,
+          "p16": -7.7111745812497485,
+          "p84": -0.5795926089935534,
+          "pass_rate_abs_lt_threshold": 0.368,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 27.069536497788167,
+          "median": 18.22138723099996,
+          "min": 6.28157963799282,
+          "n": 250,
+          "p16": 11.690410075608447,
+          "p84": 22.569330901149133,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 1.2605350459365354,
+          "median": -2.0901852358572857,
+          "min": -4.98801870689694,
+          "n": 250,
+          "p16": -3.0703557589960404,
+          "p84": -1.1803325097776756,
+          "pass_rate_abs_lt_threshold": 0.808,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.5314429747623391,
+          "median": -2.10115292083022,
+          "min": -4.2248616036212,
+          "n": 250,
+          "p16": -2.965535756518112,
+          "p84": -1.2199633372610137,
+          "pass_rate_abs_lt_threshold": 0.852,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 1.2605350459365354,
+          "median": -2.0901852358572857,
+          "min": -4.98801870689694,
+          "n": 250,
+          "p16": -3.0703557589960404,
+          "p84": -1.1803325097776756,
+          "pass_rate_abs_lt_threshold": 0.808,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "upsilon_bulge": 0.75,
+      "upsilon_disk": 0.55
+    }
+  ]
+}

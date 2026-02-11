@@ -1,0 +1,7 @@
+split,model_id,train_min_T_K,train_max_T_K,test_min_T_K,test_max_T_K,supported,reason,train_n,train_max_abs_z,train_reduced_chi2,test_n,test_max_abs_z,test_reduced_chi2,train_exceed_3sigma_n,test_exceed_3sigma_n,param_B0_GPa,param_a_GPa,param_b_GPa_per_K
+A_low_to_high,ioffe_piecewise_frozen,0.0,300.0,400.0,600.0,True,,301,0.0,0.0,201,0.0,0.0,0,0,,,
+A_low_to_high,const_1p_fit,0.0,300.0,400.0,600.0,True,,301,0.0,0.0,201,2.9866666666666504,2.980826074073988,0,0,98.0,,
+A_low_to_high,linear_2p_fit,0.0,300.0,400.0,600.0,True,,301,8.526512829121202e-14,2.0532545514354523e-27,201,2.9866666666668493,2.9808260740745,0,0,,97.99999999999996,2.4012533104387446e-16
+B_high_to_low,ioffe_piecewise_frozen,400.0,600.0,0.0,300.0,True,,201,0.0,0.0,301,0.0,0.0,0,0,,,
+B_high_to_low,const_1p_fit,400.0,600.0,0.0,300.0,True,,201,1.4933333333333678,0.7545355377777773,301,1.4933333333332826,2.230044444444293,0,0,97.25333333333336,,
+B_high_to_low,linear_2p_fit,400.0,600.0,0.0,300.0,True,,201,1.4210854715202004e-13,3.0485073807873537e-27,301,5.97333333333296,15.621461333331293,0,200,,100.98666666666648,-0.007466666666666247

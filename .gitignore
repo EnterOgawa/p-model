@@ -20,8 +20,9 @@ Thumbs.db
 .tmp*/
 temp_*.pdf
 
-# Manuscripts (published separately; kept local but not tracked here)
-doc/paper/
+# Local-only docs (kept local; not tracked here)
+doc/
+AGENTS.md
 
 # Legacy folders (kept local; scripts/ + output/ are canonical)
 cassini/
@@ -32,11 +33,13 @@ viking/
 # Generated outputs (verification results; tracked selectively)
 output/**
 !output/**/
-!output/summary/build_materials.bat
 !output/summary/*.json
-!output/theory/*.json
 !output/quantum/**/*.json
-!output/cosmology/*falsification_pack*.json
+!output/quantum/**/*.csv
+!output/quantum/**/*.png
+!output/cosmology/*.json
+!output/cosmology/*.csv
+!output/cosmology/*.png
 
 # Input data caches (not tracked here)
 data/

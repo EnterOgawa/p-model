@@ -1,0 +1,23 @@
+{
+  "generated_utc": "2026-02-10T15:34:02.884008+00:00",
+  "model": {
+    "P_factorization": "P(x,t)=P_bg(t) P_local(x)",
+    "redshift_relation": "1+z = P_em/P_obs",
+    "P_bg_model": "P_bg(t) ∝ exp(-H0^(P) (t-t0))",
+    "H0P_definition": "H0^(P) = - (d/dt ln P_bg)|t0"
+  },
+  "params": {
+    "H0P_km_s_Mpc": 70.0,
+    "lookback_gyr_max": 15.0
+  },
+  "derived": {
+    "H0P_SI_s^-1": 2.2685455026110557e-18
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\cosmology\\cosmology_redshift_pbg.png"
+  },
+  "notes": [
+    "この図は“宇宙膨張なしでも赤方偏移が出る”という機構の例示であり、宇宙論全体（CMB/元素合成など）を単独で置き換える主張ではない。",
+    "差分予測（ΛCDMとの比較）を行う場合は、距離-時間の扱い（静的近似の限界）と観測の定義（D_L 等）を明確化して追加する。"
+  ]
+}

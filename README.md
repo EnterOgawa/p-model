@@ -22,20 +22,12 @@ isolate **where strong predictions diverge** (so the model can be rejected if na
 ## What this GitHub repository is for
 
 - **Scripts**: reproducible analysis code (the primary “methods”).
-- **Verification outputs**: fixed JSON artifacts (the primary “results”).
-- **Minimal operational docs**: roadmap / status / history / primary-source index for auditability.
+- **Verification outputs**: fixed artifacts (JSON/CSV/PNG) that are intended to be cited by manuscripts.
 
 Documents such as full manuscripts are **published separately**.
-This repo is intended to stay focused on **verification methods and verifiable outputs**.
-
-## Reproducibility / verification materials
-
-Reproducibility details (fixed artifacts, audit gates, hashes, and minimal rebuild commands) are collected in
-`doc/verification/VERIFICATION_MATERIALS.md`.
-
-Primary sources (URLs + accessed dates + caching policy) are indexed in `doc/PRIMARY_SOURCES.md`.
+This repo is intended to stay focused on **verification scripts and the cited outputs they produce**.
 
 ## Notes
 
-- Large raw inputs are not stored here; the repo prefers **fetch + cache** workflows with primary source URLs recorded.
+- Large raw inputs are not stored here; scripts are expected to **fetch / cache / preprocess** as needed.
 - Claims should be evaluated against the **fixed outputs** and **explicit falsification criteria** (not narratives).
