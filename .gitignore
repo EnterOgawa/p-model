@@ -33,7 +33,8 @@ viking/
 # Generated outputs (verification results; tracked selectively)
 output/**
 !output/**/
-!output/summary/*.json
+!output/summary/part3_audit_summary.json
+!output/summary/part3_completion_inventory.json
 !output/quantum/**/*.json
 !output/quantum/**/*.csv
 !output/quantum/**/*.png
