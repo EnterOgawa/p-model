@@ -1,0 +1,178 @@
+{
+  "generated_utc": "2026-01-26T20:52:54.905867+00:00",
+  "phase": 7,
+  "step": "7.13.15.14",
+  "inputs": {
+    "metrics_7_13_15_7": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_surface_term_metrics.json",
+      "sha256": "76a872d4fd4763d103fc5918aeacb67b0d11c77e375b7bc120b16a0535ac296a"
+    },
+    "metrics_7_13_15_13": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json",
+      "sha256": "3397501566083b2d83f0272157703b685d78bf10dbc1bdb5015c95e36fe2018f"
+    }
+  },
+  "definition": {
+    "model_magic_boundaries": [
+      0,
+      2,
+      8,
+      14,
+      20,
+      28,
+      50,
+      76,
+      82,
+      114,
+      164,
+      210
+    ],
+    "S_shell": "p(p-g)/g  within MODEL_MAGIC shell [Mk, Mk1] (0..g)",
+    "pairing": "B_pair = B_shell + a_p*s(Z,N)/sqrt(A); s=+1 even-even, -1 odd-odd, 0 odd-A",
+    "freeze_pairing": "a_p frozen from OES (3-point) on B_obs using mid-shell nuclei (exclude near observed magic; tol=1)"
+  },
+  "diag": {
+    "domain_min_A": 16,
+    "observed_magic_boundaries": [
+      0,
+      2,
+      8,
+      20,
+      28,
+      50,
+      82,
+      126,
+      184
+    ],
+    "model_magic_boundaries": [
+      0,
+      2,
+      8,
+      14,
+      20,
+      28,
+      50,
+      76,
+      82,
+      114,
+      164,
+      210
+    ],
+    "frozen_from_step_7_13_15_13": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json",
+      "sha256": "3397501566083b2d83f0272157703b685d78bf10dbc1bdb5015c95e36fe2018f",
+      "kN": -0.17861589075581644,
+      "kZ": -0.13030263196831635
+    },
+    "pairing": {
+      "form": "B_pair = B_shell + a_p * s(Z,N)/sqrt(A); s=+1 even-even, -1 odd-odd, 0 odd-A",
+      "a_p_MeV": 12.01816373122435,
+      "freeze_method": "OES 3-point on B_obs (independent of model)",
+      "exclude_near_observed_magic_tol": 1,
+      "a_p_n_median_MeV": 11.785395176130484,
+      "a_p_p_median_MeV": 12.250932286318216,
+      "n_oed_pairs_n": 473,
+      "n_oed_pairs_p": 246
+    },
+    "Sn": {
+      "n": 731,
+      "rms_resid_uncorrected_MeV": 12.798027545882732,
+      "rms_resid_shell_MeV": 12.793776560300556,
+      "rms_resid_shell_pairing_MeV": 12.642886374447118
+    },
+    "S2n": {
+      "n": 763,
+      "rms_resid_uncorrected_MeV": 23.42918512005021,
+      "rms_resid_shell_MeV": 23.376131730782213,
+      "rms_resid_shell_pairing_MeV": 23.372794617480455
+    },
+    "Sp": {
+      "n": 565,
+      "rms_resid_uncorrected_MeV": 18.716057729404735,
+      "rms_resid_shell_MeV": 18.66816138710571,
+      "rms_resid_shell_pairing_MeV": 18.42131266345368
+    },
+    "S2p": {
+      "n": 495,
+      "rms_resid_uncorrected_MeV": 21.002477437489073,
+      "rms_resid_shell_MeV": 20.78122776901005,
+      "rms_resid_shell_pairing_MeV": 20.780940530080578
+    },
+    "gap_Sn": {
+      "n": 21,
+      "rms_resid_uncorrected_MeV": 5.658153546387464,
+      "rms_resid_shell_MeV": 5.545240689883072,
+      "rms_resid_shell_pairing_MeV": 5.54756070206417,
+      "train_magic": {
+        "n": 12,
+        "rms_resid_uncorrected_MeV": 3.4483816730362093,
+        "rms_resid_shell_MeV": 1.8384827417843825,
+        "rms_resid_shell_pairing_MeV": 3.0006140762834232
+      },
+      "other_magic": {
+        "n": 9,
+        "rms_resid_uncorrected_MeV": 7.671105227404788,
+        "rms_resid_shell_MeV": 8.200158230054429,
+        "rms_resid_shell_pairing_MeV": 7.733331943874432
+      }
+    },
+    "gap_S2n": {
+      "n": 21,
+      "rms_resid_uncorrected_MeV": 15.227119440620054,
+      "rms_resid_shell_MeV": 10.671866742495855,
+      "rms_resid_shell_pairing_MeV": 10.67152589823248,
+      "train_magic": {
+        "n": 14,
+        "rms_resid_uncorrected_MeV": 14.243813011245395,
+        "rms_resid_shell_MeV": 9.402437473875349,
+        "rms_resid_shell_pairing_MeV": 9.402203912591547
+      },
+      "other_magic": {
+        "n": 7,
+        "rms_resid_uncorrected_MeV": 17.024191057964558,
+        "rms_resid_shell_MeV": 12.839570024284162,
+        "rms_resid_shell_pairing_MeV": 12.839062199476876
+      }
+    },
+    "gap_Sp": {
+      "n": 15,
+      "rms_resid_uncorrected_MeV": 6.971510422029082,
+      "rms_resid_shell_MeV": 7.249678631128366,
+      "rms_resid_shell_pairing_MeV": 6.911423469444061,
+      "train_magic": {
+        "n": 10,
+        "rms_resid_uncorrected_MeV": 2.322328652399395,
+        "rms_resid_shell_MeV": 1.549929347375604,
+        "rms_resid_shell_pairing_MeV": 2.3783312834589627
+      },
+      "other_magic": {
+        "n": 5,
+        "rms_resid_uncorrected_MeV": 11.619787087286493,
+        "rms_resid_shell_MeV": 12.364018715620153,
+        "rms_resid_shell_pairing_MeV": 11.488707661620927
+      }
+    },
+    "gap_S2p": {
+      "n": 30,
+      "rms_resid_uncorrected_MeV": 34.145660516585394,
+      "rms_resid_shell_MeV": 31.28541703614526,
+      "rms_resid_shell_pairing_MeV": 31.285259654269744,
+      "train_magic": {
+        "n": 24,
+        "rms_resid_uncorrected_MeV": 37.38775460629421,
+        "rms_resid_shell_MeV": 34.50851923276522,
+        "rms_resid_shell_pairing_MeV": 34.508463624168265
+      },
+      "other_magic": {
+        "n": 6,
+        "rms_resid_uncorrected_MeV": 15.4354748086218,
+        "rms_resid_shell_MeV": 11.425191336478077,
+        "rms_resid_shell_pairing_MeV": 11.42370830217642
+      }
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model.csv"
+  }
+}

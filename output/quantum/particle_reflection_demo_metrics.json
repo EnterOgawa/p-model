@@ -1,0 +1,32 @@
+{
+  "generated_utc": "2026-01-24T12:25:27.287287+00:00",
+  "config": {
+    "L": 1.0,
+    "n_x": 1200,
+    "c": 1.0,
+    "dt_cfl": 0.45,
+    "steps": 1600,
+    "snapshot_steps": [
+      0,
+      400,
+      800,
+      1200,
+      1600
+    ],
+    "packet_center": 0.25,
+    "packet_sigma": 0.03,
+    "packet_k": 120.0
+  },
+  "derived": {
+    "dx": 0.0008340283569641367,
+    "dt": 0.00037531276063386155,
+    "cfl": 0.45
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\particle_reflection_demo.png"
+  },
+  "notes": [
+    "This is a toy model: 1D wave equation with Dirichlet boundaries (reflection).",
+    "It illustrates how boundary (reflection) conditions produce discrete modes and particle-like bounded behavior."
+  ]
+}

@@ -1,0 +1,1102 @@
+{
+  "baselines": {
+    "note": "Baselines are included for comparison; they are not treated as P-model predictions.",
+    "rar_mcgaugh2016_a0_pbg_fixed_kappa": {
+      "a0_m_s2": 1.0824013602392005e-10,
+      "chi2": 96272.07296662999,
+      "chi2_dof": 28.39046681410498,
+      "dof": 3391,
+      "log10_a0_m_s2": -9.965611670638069,
+      "low_accel": {
+        "cut_log10_gbar": -10.5,
+        "sem_dex": 0.0005197521594779537,
+        "weighted_mean_residual_dex": 0.017005430665238845,
+        "z": 32.718345378919324
+      },
+      "model": "g_obs=g_bar/(1-exp(-sqrt(g_bar/a0)))",
+      "n_used": 3391,
+      "pbg_a0": {
+        "H0P_source": {
+          "H0P_SI_s^-1": 2.2685455026110557e-18,
+          "mode": "metrics",
+          "path": "output/cosmology/cosmology_redshift_pbg_metrics.json"
+        },
+        "a0_m_s2": 1.0824013602391996e-10,
+        "kappa": 0.15915494309189535,
+        "log10_a0_m_s2": -9.965611670638069
+      },
+      "residual_stats_dex": {
+        "median": -2.9058587228902866e-05,
+        "q16": -0.15022568744132023,
+        "q84": 0.1344293570793223,
+        "rms": 0.20034976302719795
+      },
+      "status": "ok"
+    },
+    "rar_mcgaugh2016_fit_a0": {
+      "a0_1sigma_m_s2": [
+        1.244514611771387e-10,
+        1.244514611771387e-10
+      ],
+      "a0_best_m_s2": 1.244514611771387e-10,
+      "chi2_dof": 27.343590218390702,
+      "chi2_min": 92694.77084034448,
+      "dof": 3390,
+      "log10_a0_1sigma_m_s2": [
+        -9.905,
+        -9.905
+      ],
+      "log10_a0_best_m_s2": -9.905,
+      "model": "g_obs=g_bar/(1-exp(-sqrt(g_bar/a0)))",
+      "n_used": 3391,
+      "residual_stats_dex": {
+        "median": -0.01935957355008,
+        "q16": -0.17369230048528514,
+        "q84": 0.11286282498433309,
+        "rms": 0.2042568541962867
+      },
+      "status": "ok"
+    }
+  },
+  "binned_residuals": [
+    {
+      "log10_gbar_hi": -12.25,
+      "log10_gbar_lo": -12.5,
+      "median_residual_dex": 1.4328819827371468,
+      "n": 1,
+      "q16_residual_dex": 1.4328819827371468,
+      "q84_residual_dex": 1.4328819827371468
+    },
+    {
+      "log10_gbar_hi": -12.0,
+      "log10_gbar_lo": -12.25,
+      "median_residual_dex": 1.0088123089998735,
+      "n": 10,
+      "q16_residual_dex": 0.5979380686512076,
+      "q84_residual_dex": 1.169653759172965
+    },
+    {
+      "log10_gbar_hi": -11.75,
+      "log10_gbar_lo": -12.0,
+      "median_residual_dex": 0.9785935180137857,
+      "n": 44,
+      "q16_residual_dex": 0.8386814175288114,
+      "q84_residual_dex": 1.093611954041146
+    },
+    {
+      "log10_gbar_hi": -11.5,
+      "log10_gbar_lo": -11.75,
+      "median_residual_dex": 0.8063849762108095,
+      "n": 189,
+      "q16_residual_dex": 0.558998285240465,
+      "q84_residual_dex": 0.9987151014657512
+    },
+    {
+      "log10_gbar_hi": -11.25,
+      "log10_gbar_lo": -11.5,
+      "median_residual_dex": 0.7016503563681802,
+      "n": 444,
+      "q16_residual_dex": 0.5089757959885108,
+      "q84_residual_dex": 0.86117936155346
+    },
+    {
+      "log10_gbar_hi": -11.0,
+      "log10_gbar_lo": -11.25,
+      "median_residual_dex": 0.6171238933268848,
+      "n": 568,
+      "q16_residual_dex": 0.4379415615281716,
+      "q84_residual_dex": 0.7803366622672231
+    },
+    {
+      "log10_gbar_hi": -10.75,
+      "log10_gbar_lo": -11.0,
+      "median_residual_dex": 0.5308249261449696,
+      "n": 419,
+      "q16_residual_dex": 0.39541589633948254,
+      "q84_residual_dex": 0.6835006516751558
+    },
+    {
+      "log10_gbar_hi": -10.5,
+      "log10_gbar_lo": -10.75,
+      "median_residual_dex": 0.44736429127373345,
+      "n": 308,
+      "q16_residual_dex": 0.30597268598587657,
+      "q84_residual_dex": 0.5723235235274189
+    },
+    {
+      "log10_gbar_hi": -10.25,
+      "log10_gbar_lo": -10.5,
+      "median_residual_dex": 0.34801188348121137,
+      "n": 317,
+      "q16_residual_dex": 0.21385330464205765,
+      "q84_residual_dex": 0.5131397176374167
+    },
+    {
+      "log10_gbar_hi": -10.0,
+      "log10_gbar_lo": -10.25,
+      "median_residual_dex": 0.2575500797362249,
+      "n": 307,
+      "q16_residual_dex": 0.14833263103356495,
+      "q84_residual_dex": 0.3759387482052293
+    },
+    {
+      "log10_gbar_hi": -9.75,
+      "log10_gbar_lo": -10.0,
+      "median_residual_dex": 0.18667145276133468,
+      "n": 249,
+      "q16_residual_dex": 0.05281950090207317,
+      "q84_residual_dex": 0.2984535798057063
+    },
+    {
+      "log10_gbar_hi": -9.5,
+      "log10_gbar_lo": -9.75,
+      "median_residual_dex": 0.1450735686992246,
+      "n": 174,
+      "q16_residual_dex": 0.021563315821110294,
+      "q84_residual_dex": 0.24265555136964045
+    },
+    {
+      "log10_gbar_hi": -9.25,
+      "log10_gbar_lo": -9.5,
+      "median_residual_dex": 0.07297160550317727,
+      "n": 141,
+      "q16_residual_dex": -0.040382084644433644,
+      "q84_residual_dex": 0.17385615505056506
+    },
+    {
+      "log10_gbar_hi": -9.0,
+      "log10_gbar_lo": -9.25,
+      "median_residual_dex": 0.037063861255244746,
+      "n": 110,
+      "q16_residual_dex": -0.08977335176588581,
+      "q84_residual_dex": 0.09416616937749701
+    },
+    {
+      "log10_gbar_hi": -8.75,
+      "log10_gbar_lo": -9.0,
+      "median_residual_dex": -0.0017804841413626704,
+      "n": 54,
+      "q16_residual_dex": -0.08422482363102908,
+      "q84_residual_dex": 0.16231355965982835
+    },
+    {
+      "log10_gbar_hi": -8.5,
+      "log10_gbar_lo": -8.75,
+      "median_residual_dex": 0.013761291848075174,
+      "n": 38,
+      "q16_residual_dex": -0.13888477114479364,
+      "q84_residual_dex": 0.11273571124929382
+    },
+    {
+      "log10_gbar_hi": -8.25,
+      "log10_gbar_lo": -8.5,
+      "median_residual_dex": 0.033108969552491985,
+      "n": 13,
+      "q16_residual_dex": -0.05919723862556488,
+      "q84_residual_dex": 0.27407729831524913
+    },
+    {
+      "log10_gbar_hi": -8.0,
+      "log10_gbar_lo": -8.25,
+      "median_residual_dex": -0.09914681757004118,
+      "n": 5,
+      "q16_residual_dex": -0.20699430310897923,
+      "q84_residual_dex": -0.07136724567008834
+    }
+  ],
+  "counts": {
+    "n_low_accel": 1983,
+    "n_points": 3391
+  },
+  "generated_utc": "2026-01-30T00:04:37.584118+00:00",
+  "inputs": {
+    "bin_edges": [
+      -13.0,
+      -12.75,
+      -12.5,
+      -12.25,
+      -12.0,
+      -11.75,
+      -11.5,
+      -11.25,
+      -11.0,
+      -10.75,
+      -10.5,
+      -10.25,
+      -10.0,
+      -9.75,
+      -9.5,
+      -9.25,
+      -9.0,
+      -8.75,
+      -8.5,
+      -8.25,
+      -8.0
+    ],
+    "freeze_test_metrics": "output/cosmology/sparc_rar_freeze_test_metrics.json",
+    "freeze_test_mlr_sweep_metrics": "output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json",
+    "freeze_test_procedure_sweep_metrics": "output/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json",
+    "freeze_test_upsilon_fit_metrics": "output/cosmology/sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json",
+    "h0p_source": {
+      "H0P_SI_s^-1": 2.2685455026110557e-18,
+      "mode": "metrics",
+      "path": "output/cosmology/cosmology_redshift_pbg_metrics.json"
+    },
+    "low_accel_cut_log10_gbar": -10.5,
+    "null_model": "baryons_only: log10(g_obs) - log10(g_bar) = 0",
+    "pbg_kappa": 0.15915494309189535,
+    "rar_csv": "output/cosmology/sparc_rar_reconstruction.csv",
+    "sigma_floor_dex": 0.01
+  },
+  "null_test_low_accel": {
+    "domain": "log10(g_bar) < -10.5",
+    "note": "Uses only σ(log10 g_obs) from V_obs errors; g_bar systematics (e.g., M/L) are not included.",
+    "sem_dex": 0.0005197521594779537,
+    "weighted_mean_residual_dex": 0.6161321053049715,
+    "z": 1185.4344307560418
+  },
+  "reject": {
+    "decision_rule": "Reject if z_low_accel >= 3 in the low-acceleration domain.",
+    "hypothesis": "baryons_only (g_P=g_bar) as a sufficient explanation",
+    "threshold": {
+      "z_low_accel": 3.0
+    }
+  },
+  "scenario_b": {
+    "adoption": {
+      "evaluation": {
+        "criteria": {
+          "decision_rule": "Adopt if pass_rate(|z|<threshold) >= pass_rate_required over the sweep_summary and n_runs>=min_runs.",
+          "min_runs": 100,
+          "pass_rate_required": 0.95,
+          "threshold_abs_z": 3.0
+        },
+        "models": {
+          "baryons_only": {
+            "adopted": false,
+            "max_z": 41.18165920794993,
+            "median_z": 27.34115805498432,
+            "min_z": 10.185160401228607,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.0
+          },
+          "baseline_rar_mcgaugh2016_fit_a0": {
+            "adopted": false,
+            "max_z": 6.082007978163136,
+            "median_z": -5.099810926800109,
+            "min_z": -17.863498894934008,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.268
+          },
+          "candidate_rar_pbg_a0_fixed_kappa": {
+            "adopted": false,
+            "max_z": 5.467910595537683,
+            "median_z": -1.8306457314994977,
+            "min_z": -9.85998957972052,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.648
+          },
+          "candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global": {
+            "adopted": false,
+            "max_z": 3.928159969082532,
+            "median_z": -4.36139844218629,
+            "min_z": -16.44458236550338,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.316
+          },
+          "candidate_rar_pbg_fit_kappa": {
+            "adopted": false,
+            "max_z": 6.082007978163136,
+            "median_z": -5.099810926800109,
+            "min_z": -17.863498894934008,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.268
+          }
+        }
+      },
+      "evaluation_galaxy": {
+        "criteria": {
+          "decision_rule": "Adopt if pass_rate(|z|<threshold) >= pass_rate_required over the sweep_summary and n_runs>=min_runs.",
+          "min_runs": 100,
+          "pass_rate_required": 0.95,
+          "threshold_abs_z": 3.0
+        },
+        "models": {
+          "baryons_only": {
+            "adopted": false,
+            "max_z": 28.489886213563324,
+            "median_z": 19.209055957628824,
+            "min_z": 6.724160855930279,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.0
+          },
+          "baseline_rar_mcgaugh2016_fit_a0": {
+            "adopted": false,
+            "max_z": 0.9930840078232664,
+            "median_z": -2.314521027840857,
+            "min_z": -5.297210627795419,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.752
+          },
+          "candidate_rar_pbg_a0_fixed_kappa": {
+            "adopted": true,
+            "max_z": 0.8630174614594558,
+            "median_z": -1.5613340553161796,
+            "min_z": -3.650682676582941,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.976
+          },
+          "candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global": {
+            "adopted": false,
+            "max_z": 0.4781334219292667,
+            "median_z": -2.1535414957107295,
+            "min_z": -5.2812212250175135,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.752
+          },
+          "candidate_rar_pbg_fit_kappa": {
+            "adopted": false,
+            "max_z": 0.9930840078232664,
+            "median_z": -2.314521027840857,
+            "min_z": -5.297210627795419,
+            "n": 250,
+            "pass_rate_abs_lt_threshold": 0.752
+          }
+        }
+      },
+      "final": {
+        "adopted_final": false,
+        "adopted_fixed_ml": true,
+        "decision_rule": "adopted_final := adopted_fixed_ml && robust_adopted_mlr && robust_adopted_procedure",
+        "note": "robust_adopted_mlr is computed from sparc_rar_freeze_test_mlr_sweep_metrics.json over the specified (upsilon_disk, upsilon_bulge) grid; robust_adopted_procedure is computed from sparc_rar_freeze_test_procedure_sweep_metrics.json over the specified procedure grid.",
+        "robust_adopted_mlr": false,
+        "robust_adopted_procedure": false
+      },
+      "note": "This is a stability criterion against split-dependence; it is stricter than the per-split reject rule.",
+      "preferred_metric": "sweep_summary_galaxy"
+    },
+    "freeze_test_summary": {
+      "counts": {
+        "n_points_test": 1181,
+        "n_points_total": 3391,
+        "n_points_train": 2210
+      },
+      "generated_utc": "2026-01-29T21:43:23.336601+00:00",
+      "inputs": {
+        "fit_upsilon_global": true,
+        "h0p_km_s_mpc": null,
+        "h0p_metrics": "output/cosmology/cosmology_redshift_pbg_metrics.json",
+        "low_accel_cut_log10_gbar": -10.5,
+        "note": "Split is by galaxy (not by radial points) to reduce leakage; baselines/candidates here are not treated as established P-model predictions.",
+        "pbg_kappa": 0.15915494309189535,
+        "rar_csv": "output/cosmology/sparc_rar_reconstruction.csv",
+        "seeds": [
+          20260129,
+          20260130,
+          20260131,
+          20260132,
+          20260133,
+          20260134,
+          20260135,
+          20260136,
+          20260137,
+          20260138,
+          20260139,
+          20260140,
+          20260141,
+          20260142,
+          20260143,
+          20260144,
+          20260145,
+          20260146,
+          20260147,
+          20260148,
+          20260149,
+          20260150,
+          20260151,
+          20260152,
+          20260153,
+          20260154,
+          20260155,
+          20260156,
+          20260157,
+          20260158,
+          20260159,
+          20260160,
+          20260161,
+          20260162,
+          20260163,
+          20260164,
+          20260165,
+          20260166,
+          20260167,
+          20260168,
+          20260169,
+          20260170,
+          20260171,
+          20260172,
+          20260173,
+          20260174,
+          20260175,
+          20260176,
+          20260177,
+          20260178
+        ],
+        "sigma_floor_dex": 0.01,
+        "train_fracs": [
+          0.5,
+          0.6,
+          0.7,
+          0.8,
+          0.9
+        ],
+        "upsilon_fit_objective": "chi2_low_accel",
+        "upsilon_grid": {
+          "bulge": [
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.8500000000000001,
+            0.9
+          ],
+          "disk": [
+            0.3,
+            0.35,
+            0.4,
+            0.45,
+            0.5,
+            0.55,
+            0.6000000000000001,
+            0.65,
+            0.7
+          ]
+        }
+      },
+      "metrics_path": "output/cosmology/sparc_rar_freeze_test_metrics.json",
+      "models": [
+        {
+          "fit": {
+            "pbg_a0": {},
+            "pbg_kappa_fit": {},
+            "rar_fit": {},
+            "sigma_int_dex": 0.5451885931495881
+          },
+          "holdout_with_sigma_int": {
+            "chi2_dof": 0.7470255703656747,
+            "low_accel": {
+              "cut_log10_gbar": -10.5,
+              "sem_dex": 0.023634541347167963,
+              "weighted_mean_residual_dex": 0.5786910807723362,
+              "z": 24.484971900742156
+            },
+            "low_accel_galaxy": {
+              "cut_log10_gbar": -10.5,
+              "mean_residual_dex": 0.5385600615175177,
+              "min_points_per_galaxy": 3,
+              "n_galaxies_low_accel": 46,
+              "sem_dex": 0.034367336621633104,
+              "z": 15.670695330475853
+            },
+            "sigma_int_dex": 0.5451885931495881
+          },
+          "name": "baryons_only"
+        },
+        {
+          "fit": {
+            "pbg_a0": {},
+            "pbg_kappa_fit": {},
+            "rar_fit": {
+              "a0_1sigma_m_s2": [
+                1.1885022274370164e-10,
+                1.1885022274370164e-10
+              ],
+              "a0_best_m_s2": 1.1885022274370164e-10,
+              "chi2_dof": 22.872202106402234,
+              "chi2_min": 50524.69445304254,
+              "dof": 2209,
+              "log10_a0_1sigma_m_s2": [
+                -9.925,
+                -9.925
+              ],
+              "log10_a0_best_m_s2": -9.925,
+              "model": "g_obs=g_bar/(1-exp(-sqrt(g_bar/a0)))",
+              "n_used": 2210,
+              "residual_stats_dex": {
+                "median": -0.016671945347055406,
+                "q16": -0.18959938685268427,
+                "q84": 0.11469943929707015,
+                "rms": 0.20113997994518304
+              },
+              "status": "ok"
+            },
+            "sigma_int_dex": 0.14992416314386542
+          },
+          "holdout_with_sigma_int": {
+            "chi2_dof": 1.1611077997491308,
+            "low_accel": {
+              "cut_log10_gbar": -10.5,
+              "sem_dex": 0.006912726309277841,
+              "weighted_mean_residual_dex": -0.024023884617482626,
+              "z": -3.4753125673786953
+            },
+            "low_accel_galaxy": {
+              "cut_log10_gbar": -10.5,
+              "mean_residual_dex": -0.07302420733323893,
+              "min_points_per_galaxy": 3,
+              "n_galaxies_low_accel": 46,
+              "sem_dex": 0.03532924655064193,
+              "z": -2.066961921437073
+            },
+            "sigma_int_dex": 0.14992416314386542
+          },
+          "name": "baseline_rar_mcgaugh2016_fit_a0"
+        },
+        {
+          "fit": {
+            "pbg_a0": {
+              "H0P_source": {
+                "H0P_SI_s^-1": 2.2685455026110557e-18,
+                "mode": "metrics",
+                "path": "output/cosmology/cosmology_redshift_pbg_metrics.json"
+              },
+              "a0_m_s2": 1.0824013602391996e-10,
+              "kappa": 0.15915494309189535,
+              "log10_a0_m_s2": -9.965611670638069
+            },
+            "pbg_kappa_fit": {},
+            "rar_fit": {},
+            "sigma_int_dex": 0.14778252511922266
+          },
+          "holdout_with_sigma_int": {
+            "chi2_dof": 1.1886367159881652,
+            "low_accel": {
+              "cut_log10_gbar": -10.5,
+              "sem_dex": 0.006823244503468242,
+              "weighted_mean_residual_dex": -0.006442886733313696,
+              "z": -0.9442555854533411
+            },
+            "low_accel_galaxy": {
+              "cut_log10_gbar": -10.5,
+              "mean_residual_dex": -0.0556564934156602,
+              "min_points_per_galaxy": 3,
+              "n_galaxies_low_accel": 46,
+              "sem_dex": 0.035296267597952256,
+              "z": -1.5768379265939485
+            },
+            "sigma_int_dex": 0.14778252511922266
+          },
+          "name": "candidate_rar_pbg_a0_fixed_kappa"
+        },
+        {
+          "fit": {
+            "pbg_a0": {},
+            "pbg_kappa_fit": {
+              "H0P_source": {
+                "H0P_SI_s^-1": 2.2685455026110557e-18,
+                "mode": "metrics",
+                "path": "output/cosmology/cosmology_redshift_pbg_metrics.json"
+              },
+              "a0_best_m_s2": 1.1885022274370164e-10,
+              "kappa_best": 0.1747558819868146,
+              "log10_a0_best_m_s2": -9.925,
+              "log10_kappa_best": -0.7575681977200468,
+              "note": "Equivalent to baseline a0 fit, expressed as kappa=a0/(c H0^(P)).",
+              "status": "ok"
+            },
+            "rar_fit": {},
+            "sigma_int_dex": 0.14992416314386542
+          },
+          "holdout_with_sigma_int": {
+            "chi2_dof": 1.1611077997491308,
+            "low_accel": {
+              "cut_log10_gbar": -10.5,
+              "sem_dex": 0.006912726309277841,
+              "weighted_mean_residual_dex": -0.024023884617482626,
+              "z": -3.4753125673786953
+            },
+            "low_accel_galaxy": {
+              "cut_log10_gbar": -10.5,
+              "mean_residual_dex": -0.07302420733323893,
+              "min_points_per_galaxy": 3,
+              "n_galaxies_low_accel": 46,
+              "sem_dex": 0.03532924655064193,
+              "z": -2.066961921437073
+            },
+            "sigma_int_dex": 0.14992416314386542
+          },
+          "name": "candidate_rar_pbg_fit_kappa"
+        },
+        {
+          "fit": {
+            "pbg_a0": {
+              "H0P_source": {
+                "H0P_SI_s^-1": 2.2685455026110557e-18,
+                "mode": "metrics",
+                "path": "output/cosmology/cosmology_redshift_pbg_metrics.json"
+              },
+              "a0_m_s2": 1.0824013602391996e-10,
+              "kappa": 0.15915494309189535,
+              "log10_a0_m_s2": -9.965611670638069
+            },
+            "sigma_int_dex": 0.15245415319314465,
+            "upsilon_fit": {
+              "chi2_min": 29424.667895177234,
+              "grid": {
+                "upsilon_bulge": [
+                  0.5,
+                  0.55,
+                  0.6,
+                  0.65,
+                  0.7,
+                  0.75,
+                  0.8,
+                  0.8500000000000001,
+                  0.9
+                ],
+                "upsilon_disk": [
+                  0.3,
+                  0.35,
+                  0.4,
+                  0.45,
+                  0.5,
+                  0.55,
+                  0.6000000000000001,
+                  0.65,
+                  0.7
+                ]
+              },
+              "n_combo": 81,
+              "n_used": 2210,
+              "note": "Fit Υ on train only (nuisance), then freeze (Υ, a0) and evaluate on holdout.",
+              "objective": "chi2_low_accel",
+              "score_min": 20.91305465186726,
+              "status": "ok",
+              "upsilon_bulge_best": 0.9,
+              "upsilon_disk_best": 0.55
+            }
+          },
+          "holdout_with_sigma_int": {
+            "chi2_dof": 1.1528507535336516,
+            "low_accel": {
+              "cut_log10_gbar": -10.5,
+              "sem_dex": 0.007151264136054852,
+              "weighted_mean_residual_dex": -0.026233574892383895,
+              "z": -3.668382875150827
+            },
+            "low_accel_galaxy": {
+              "cut_log10_gbar": -10.5,
+              "mean_residual_dex": -0.07433131099802501,
+              "min_points_per_galaxy": 3,
+              "n_galaxies_low_accel": 46,
+              "sem_dex": 0.03515029749847192,
+              "z": -2.114670892935014
+            },
+            "sigma_int_dex": 0.15245415319314465
+          },
+          "name": "candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global"
+        }
+      ],
+      "n_runs": 250,
+      "status": "ok",
+      "sweep_summary": {
+        "baryons_only": {
+          "max": 41.18165920794993,
+          "median": 27.34115805498432,
+          "min": 10.185160401228607,
+          "n": 250,
+          "p16": 16.918401103012297,
+          "p84": 34.594286466919584,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 6.082007978163136,
+          "median": -5.099810926800109,
+          "min": -17.863498894934008,
+          "n": 250,
+          "p16": -8.6858025473667,
+          "p84": -1.7174858973337457,
+          "pass_rate_abs_lt_threshold": 0.268,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 5.467910595537683,
+          "median": -1.8306457314994977,
+          "min": -9.85998957972052,
+          "n": 250,
+          "p16": -4.464600831852997,
+          "p84": 0.9245914189320625,
+          "pass_rate_abs_lt_threshold": 0.648,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global": {
+          "max": 3.928159969082532,
+          "median": -4.36139844218629,
+          "min": -16.44458236550338,
+          "n": 250,
+          "p16": -8.683341656640977,
+          "p84": -0.7870837778102138,
+          "pass_rate_abs_lt_threshold": 0.316,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 6.082007978163136,
+          "median": -5.099810926800109,
+          "min": -17.863498894934008,
+          "n": 250,
+          "p16": -8.6858025473667,
+          "p84": -1.7174858973337457,
+          "pass_rate_abs_lt_threshold": 0.268,
+          "threshold_abs_z": 3.0
+        }
+      },
+      "sweep_summary_galaxy": {
+        "baryons_only": {
+          "max": 28.489886213563324,
+          "median": 19.209055957628824,
+          "min": 6.724160855930279,
+          "n": 250,
+          "p16": 12.40734342676819,
+          "p84": 23.98266096373736,
+          "pass_rate_abs_lt_threshold": 0.0,
+          "threshold_abs_z": 3.0
+        },
+        "baseline_rar_mcgaugh2016_fit_a0": {
+          "max": 0.9930840078232664,
+          "median": -2.314521027840857,
+          "min": -5.297210627795419,
+          "n": 250,
+          "p16": -3.3171345224524673,
+          "p84": -1.398457335773827,
+          "pass_rate_abs_lt_threshold": 0.752,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa": {
+          "max": 0.8630174614594558,
+          "median": -1.5613340553161796,
+          "min": -3.650682676582941,
+          "n": 250,
+          "p16": -2.4050155229004293,
+          "p84": -0.7668213721769142,
+          "pass_rate_abs_lt_threshold": 0.976,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global": {
+          "max": 0.4781334219292667,
+          "median": -2.1535414957107295,
+          "min": -5.2812212250175135,
+          "n": 250,
+          "p16": -3.2054407112413155,
+          "p84": -1.2654324360641183,
+          "pass_rate_abs_lt_threshold": 0.752,
+          "threshold_abs_z": 3.0
+        },
+        "candidate_rar_pbg_fit_kappa": {
+          "max": 0.9930840078232664,
+          "median": -2.314521027840857,
+          "min": -5.297210627795419,
+          "n": 250,
+          "p16": -3.3171345224524673,
+          "p84": -1.398457335773827,
+          "pass_rate_abs_lt_threshold": 0.752,
+          "threshold_abs_z": 3.0
+        }
+      }
+    },
+    "note": "Scenario (B) candidates are evaluated via fit→freeze→holdout (galaxy split) in sparc_rar_freeze_test_metrics.json. Candidates/baselines here are not treated as established P-model predictions.",
+    "reject": {
+      "decision_rule": "Reject a candidate if |z_low_accel| >= 3 on holdout when parameters (e.g., a0, κ) are frozen.",
+      "threshold": {
+        "abs_z_low_accel_holdout_with_sigma_int": 3.0
+      }
+    },
+    "sigma_int_rule": "Estimate σ_int (dex) on train by solving chi2/dof≈1 with dof=n_used-1, then carry σ_int to holdout; evaluate low-accel z on holdout with σ_total^2=σ_y^2+σ_int^2.",
+    "systematics": {
+      "mlr_sweep": {
+        "candidate": {
+          "best": {
+            "median_z": -0.9602317112330498,
+            "pass_rate_abs_lt_threshold": 1.0,
+            "upsilon_bulge": 0.65,
+            "upsilon_disk": 0.45
+          },
+          "decision_rule": "robust_adopted := (min pass_rate(|z|<3) across M/L variants) >= 0.95 (galaxy-level).",
+          "envelope": {
+            "max": 1.0,
+            "median": 0.976,
+            "min": 0.852,
+            "n": 9,
+            "status": "ok"
+          },
+          "marginal_by_upsilon_bulge": [
+            {
+              "max": 1.0,
+              "median": 0.976,
+              "min": 0.88,
+              "n": 3,
+              "status": "ok",
+              "upsilon_bulge": 0.65
+            },
+            {
+              "max": 1.0,
+              "median": 0.976,
+              "min": 0.86,
+              "n": 3,
+              "status": "ok",
+              "upsilon_bulge": 0.7
+            },
+            {
+              "max": 0.996,
+              "median": 0.976,
+              "min": 0.852,
+              "n": 3,
+              "status": "ok",
+              "upsilon_bulge": 0.75
+            }
+          ],
+          "marginal_by_upsilon_disk": [
+            {
+              "max": 1.0,
+              "median": 1.0,
+              "min": 0.996,
+              "n": 3,
+              "status": "ok",
+              "upsilon_disk": 0.45
+            },
+            {
+              "max": 0.976,
+              "median": 0.976,
+              "min": 0.976,
+              "n": 3,
+              "status": "ok",
+              "upsilon_disk": 0.5
+            },
+            {
+              "max": 0.88,
+              "median": 0.86,
+              "min": 0.852,
+              "n": 3,
+              "status": "ok",
+              "upsilon_disk": 0.55
+            }
+          ],
+          "name": "candidate_rar_pbg_a0_fixed_kappa",
+          "pass_rate_required": 0.95,
+          "robust_adopted": false,
+          "worst": {
+            "median_z": -2.10115292083022,
+            "pass_rate_abs_lt_threshold": 0.852,
+            "upsilon_bulge": 0.75,
+            "upsilon_disk": 0.55
+          }
+        },
+        "envelope_pass_rate_abs_lt_threshold_galaxy": {
+          "baryons_only": {
+            "max": 0.0,
+            "median": 0.0,
+            "min": 0.0,
+            "n": 9,
+            "status": "ok"
+          },
+          "baseline_rar_mcgaugh2016_fit_a0": {
+            "max": 0.808,
+            "median": 0.752,
+            "min": 0.66,
+            "n": 9,
+            "status": "ok"
+          },
+          "candidate_rar_pbg_a0_fixed_kappa": {
+            "max": 1.0,
+            "median": 0.976,
+            "min": 0.852,
+            "n": 9,
+            "status": "ok"
+          },
+          "candidate_rar_pbg_fit_kappa": {
+            "max": 0.808,
+            "median": 0.752,
+            "min": 0.66,
+            "n": 9,
+            "status": "ok"
+          }
+        },
+        "generated_utc": "2026-01-29T22:25:55.057650+00:00",
+        "inputs": {
+          "low_accel_cut_log10_gbar": -10.5,
+          "preferred_metric": "sweep_summary_galaxy",
+          "ref_upsilon": {
+            "bulge": 0.7,
+            "disk": 0.5
+          },
+          "sigma_floor_dex": 0.01,
+          "threshold_abs_z": 3.0,
+          "upsilon_bulge": [
+            0.65,
+            0.7,
+            0.75
+          ],
+          "upsilon_disk": [
+            0.45,
+            0.5,
+            0.55
+          ]
+        },
+        "metrics_path": "output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json",
+        "status": "ok"
+      },
+      "note": "g_bar systematics (e.g., stellar M/L) change the input g_bar itself; this is evaluated separately via M/L sweep using the same freeze-test split grid.",
+      "procedure_sweep": {
+        "candidate": {
+          "best": {
+            "median_z": -1.2046477165150646,
+            "params": {
+              "galaxy_clipping": {
+                "k": 3.5,
+                "method": "mad"
+              },
+              "low_accel_cut_log10_gbar": -10.5,
+              "min_points_per_galaxy": 3,
+              "sigma_floor_dex": 0.005
+            },
+            "pass_rate_abs_lt_threshold": 1.0
+          },
+          "decision_rule": "robust_adopted := (min pass_rate(|z|<3) across procedure variants) >= 0.95 (galaxy-level).",
+          "envelope_pass_rate_abs_lt_threshold_galaxy": {
+            "max": 1.0,
+            "median": 0.975,
+            "min": 0.9333333333333333,
+            "n": 54,
+            "status": "ok"
+          },
+          "robust_adopted": false,
+          "worst": {
+            "median_z": -1.7742946870970862,
+            "params": {
+              "galaxy_clipping": {
+                "k": null,
+                "method": "none"
+              },
+              "low_accel_cut_log10_gbar": -10.3,
+              "min_points_per_galaxy": 2,
+              "sigma_floor_dex": 0.005
+            },
+            "pass_rate_abs_lt_threshold": 0.9333333333333333
+          }
+        },
+        "generated_utc": "2026-01-30T00:04:20.794827+00:00",
+        "inputs": {
+          "models": [
+            "baryons_only",
+            "candidate_rar_pbg_a0_fixed_kappa"
+          ],
+          "procedure_grid": {
+            "galaxy_clipping": [
+              {
+                "k": null,
+                "method": "none"
+              },
+              {
+                "k": 3.5,
+                "method": "mad"
+              }
+            ],
+            "low_accel_cut_log10_gbar": [
+              -10.7,
+              -10.5,
+              -10.3
+            ],
+            "min_points_per_galaxy": [
+              2,
+              3,
+              5
+            ],
+            "sigma_floor_dex": [
+              0.005,
+              0.01,
+              0.02
+            ]
+          },
+          "seeds": {
+            "count": 20,
+            "start": 20260129
+          },
+          "threshold_abs_z": 3.0,
+          "train_fracs": {
+            "start": 0.6,
+            "step": 0.1,
+            "stop": 0.8
+          }
+        },
+        "metrics_path": "output/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json",
+        "note": "This sweep keeps g_bar fixed (from sparc_rar_reconstruction.csv) and varies only evaluation procedure knobs.",
+        "status": "ok"
+      },
+      "upsilon_fit_on_train": {
+        "generated_utc": "2026-01-29T23:19:10.751189+00:00",
+        "inputs": {
+          "fit_upsilon_global": true,
+          "low_accel_cut_log10_gbar": -10.5,
+          "sigma_floor_dex": 0.01,
+          "upsilon_fit_objective": "chi2_high_accel",
+          "upsilon_grid": {
+            "bulge": [
+              0.65,
+              0.7000000000000001,
+              0.75
+            ],
+            "disk": [
+              0.45,
+              0.5,
+              0.55
+            ]
+          }
+        },
+        "metrics_path": "output/cosmology/sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json",
+        "model": {
+          "name": "candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global",
+          "sweep_summary_galaxy": {
+            "max": 0.8622211816468638,
+            "median": -2.064902503338608,
+            "min": -4.2248616036212,
+            "n": 250,
+            "p16": -2.891331343148369,
+            "p84": -1.1384321595744384,
+            "pass_rate_abs_lt_threshold": 0.888,
+            "threshold_abs_z": 3.0
+          },
+          "upsilon_fit_counts": {
+            "n_ok": 250,
+            "upsilon_bulge_best": {
+              "0.65": 9,
+              "0.7": 24,
+              "0.75": 217
+            },
+            "upsilon_disk_best": {
+              "0.45": 2,
+              "0.5": 44,
+              "0.55": 204
+            }
+          }
+        },
+        "note": "Fits (upsilon_disk, upsilon_bulge) on train only (nuisance), then freezes (upsilon,a0) and evaluates holdout. This adds 2 nuisance DOF per split.",
+        "status": "ok"
+      }
+    }
+  },
+  "summary": {
+    "log10_gbar_range": [
+      -12.331989226424978,
+      -8.13428829943818
+    ],
+    "log10_gobs_range": [
+      -12.09576437505865,
+      -7.716369094877175
+    ],
+    "residual_dex_median": 0.4378339727226628,
+    "residual_dex_rms": 0.528135812766796
+  }
+}

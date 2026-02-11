@@ -1,0 +1,183 @@
+{
+  "generated_utc": "2026-02-11T02:47:19.472256+00:00",
+  "phase": 7,
+  "step": "7.14.15",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    }
+  },
+  "assumptions": {
+    "sigma_fit_proxy": {
+      "lt_T_K": 50.0,
+      "lt_sigma_1e-8_per_K": 0.03,
+      "ge_sigma_1e-8_per_K": 0.5,
+      "note": "σ_fit is the NIST TRC curve-fit standard-error scale, treated here as a proxy for data-level accuracy."
+    },
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test range)"
+    }
+  },
+  "data_range_T_K": [
+    13,
+    600
+  ],
+  "splits": [
+    {
+      "name": "A",
+      "train_T_K": [
+        50.0,
+        300.0
+      ],
+      "test_T_K": [
+        300.0,
+        600.0
+      ],
+      "models": {
+        "einstein_1": {
+          "params": {
+            "theta_E_K": 571.3431344634413,
+            "A_D_mol_per_J": -2.3491308890387908e-07,
+            "A_E_mol_per_J": 3.951707501920454e-07,
+            "theta_E_scan": {
+              "lo_K": 10.0,
+              "hi_K": 4000.0,
+              "n": 900
+            }
+          },
+          "train": {
+            "n": 251,
+            "sign_mismatch_n": 1,
+            "max_abs_z": 14.465726244720432,
+            "rms_z": 5.401780902153378,
+            "reduced_chi2": 29.53221155496819,
+            "exceed_3sigma_n": 159
+          },
+          "test": {
+            "n": 301,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 50.13098548074385,
+            "rms_z": 32.549530615029916,
+            "reduced_chi2": 1059.4719432587697,
+            "exceed_3sigma_n": 301
+          }
+        },
+        "einstein_2": {
+          "params": {
+            "theta_E1_K": 211.63024340005452,
+            "theta_E2_K": 706.7450267823758,
+            "A_D_mol_per_J": 7.51188256800584e-08,
+            "A_E1_mol_per_J": -5.531858372146454e-08,
+            "A_E2_mol_per_J": 1.5061239916208157e-07,
+            "theta_E_scan": {
+              "lo_K": 10.0,
+              "hi_K": 4000.0,
+              "n": 160,
+              "pairs_tested": 12720,
+              "ordering": "theta_E1 < theta_E2"
+            }
+          },
+          "train": {
+            "n": 251,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 0.9440161319062395,
+            "rms_z": 0.4291352330467549,
+            "reduced_chi2": 0.18790007767790753,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 301,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 15.401787600121017,
+            "rms_z": 7.943917084556915,
+            "reduced_chi2": 63.10581864631524,
+            "exceed_3sigma_n": 201
+          }
+        }
+      }
+    },
+    {
+      "name": "B",
+      "train_T_K": [
+        200.0,
+        600.0
+      ],
+      "test_T_K": [
+        50.0,
+        200.0
+      ],
+      "models": {
+        "einstein_1": {
+          "params": {
+            "theta_E_K": 731.1215452563646,
+            "A_D_mol_per_J": -2.368737262848945e-08,
+            "A_E_mol_per_J": 1.9870032192843e-07,
+            "theta_E_scan": {
+              "lo_K": 10.0,
+              "hi_K": 4000.0,
+              "n": 900
+            }
+          },
+          "train": {
+            "n": 401,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 3.5643889587352118,
+            "rms_z": 1.286911399534795,
+            "reduced_chi2": 1.6686244247519961,
+            "exceed_3sigma_n": 3
+          },
+          "test": {
+            "n": 151,
+            "sign_mismatch_n": 29,
+            "max_abs_z": 85.94743383426876,
+            "rms_z": 55.01624018673252,
+            "reduced_chi2": 3026.786684284242,
+            "exceed_3sigma_n": 151
+          }
+        },
+        "einstein_2": {
+          "params": {
+            "theta_E1_K": 631.2004351406835,
+            "theta_E2_K": 2360.194482871785,
+            "A_D_mol_per_J": -1.2006778629617762e-07,
+            "A_E1_mol_per_J": 2.8875875238342034e-07,
+            "A_E2_mol_per_J": 1.3415492918297549e-08,
+            "theta_E_scan": {
+              "lo_K": 10.0,
+              "hi_K": 4000.0,
+              "n": 160,
+              "pairs_tested": 12720,
+              "ordering": "theta_E1 < theta_E2"
+            }
+          },
+          "train": {
+            "n": 401,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 0.3060207200398875,
+            "rms_z": 0.07596654831738642,
+            "reduced_chi2": 0.005843781570117121,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 151,
+            "sign_mismatch_n": 4,
+            "max_abs_z": 45.30281731030026,
+            "rms_z": 23.697246908530378,
+            "reduced_chi2": 561.5595110438526,
+            "exceed_3sigma_n": 105
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png"
+  }
+}

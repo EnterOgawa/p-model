@@ -1,0 +1,20 @@
+{
+  "generated_utc": "2026-02-11T02:47:10.318667+00:00",
+  "dataset_id": "delft_hensen2015",
+  "supported": false,
+  "baseline": {
+    "param_name": "start_offset_ps",
+    "value": -30,
+    "statistic_name": "CHSH S (event-ready trials)",
+    "statistic": 2.430692394782927,
+    "sigma_boot": 0.20303274757321624
+  },
+  "methods": [],
+  "inputs": {
+    "natural_window_frozen_json": {
+      "path": "output/quantum/bell/delft_hensen2015/natural_window_frozen.json",
+      "sha256": "5c8152f447865cb4fa1682927064fb06050d9b938fafd66a7ef7c8da52280031"
+    }
+  },
+  "reason": "pairing crosscheck not implemented for this dataset type"
+}

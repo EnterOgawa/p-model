@@ -1,0 +1,524 @@
+{
+  "generated_utc": "2026-01-26T22:31:45.774669+00:00",
+  "phase": 7,
+  "step": "7.13.15.20",
+  "baseline_step": "7.13.15.16",
+  "train_magic": [
+    50,
+    82
+  ],
+  "inputs": {
+    "baseline_csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze.csv",
+      "sha256": "1cf87d8e61409f814a2e3397e96d1564605bb3f0d542e34c4f5d9093473e32d7"
+    }
+  },
+  "diag": {
+    "by_magic": [
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "magic": 8,
+        "count": 1,
+        "rms_resid_MeV": 11.7209290809,
+        "mean_resid_MeV": 11.7209290809,
+        "max_abs_resid_MeV": 11.7209290809,
+        "worst_Z": 10,
+        "worst_N": 8,
+        "worst_A": 18,
+        "worst_resid_MeV": 11.7209290809,
+        "worst_obs_MeV": 7.6172736,
+        "worst_pred_MeV": 19.3382026809
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "magic": 20,
+        "count": 3,
+        "rms_resid_MeV": 11.95280085083156,
+        "mean_resid_MeV": -11.512808798396668,
+        "max_abs_resid_MeV": 16.0569645571,
+        "worst_Z": 20,
+        "worst_N": 20,
+        "worst_A": 40,
+        "worst_resid_MeV": -16.0569645571,
+        "worst_obs_MeV": 7.2721876,
+        "worst_pred_MeV": -8.78477695714
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "magic": 28,
+        "count": 2,
+        "rms_resid_MeV": 2.456278144034835,
+        "mean_resid_MeV": 1.5919374009310001,
+        "max_abs_resid_MeV": 3.46250887307,
+        "worst_Z": 25,
+        "worst_N": 28,
+        "worst_A": 53,
+        "worst_resid_MeV": 3.46250887307,
+        "worst_obs_MeV": 3.1110592,
+        "worst_pred_MeV": 6.57356807307
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "magic": 126,
+        "count": 3,
+        "rms_resid_MeV": 0.4003636453671084,
+        "mean_resid_MeV": 0.004971449999566669,
+        "max_abs_resid_MeV": 0.505785787075,
+        "worst_Z": 83,
+        "worst_N": 126,
+        "worst_A": 209,
+        "worst_resid_MeV": 0.505785787075,
+        "worst_obs_MeV": 2.855113,
+        "worst_pred_MeV": 3.36089878707
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "magic": 50,
+        "count": 7,
+        "rms_resid_MeV": 1.549138100124417,
+        "mean_resid_MeV": 1.1497795831168571,
+        "max_abs_resid_MeV": 3.45879382286,
+        "worst_Z": 37,
+        "worst_N": 50,
+        "worst_A": 87,
+        "worst_resid_MeV": 3.45879382286,
+        "worst_obs_MeV": 3.8395926,
+        "worst_pred_MeV": 7.29838642286
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "magic": 82,
+        "count": 5,
+        "rms_resid_MeV": 2.2118607037066775,
+        "mean_resid_MeV": -2.0065487336098,
+        "max_abs_resid_MeV": 3.34518903959,
+        "worst_Z": 55,
+        "worst_N": 82,
+        "worst_A": 137,
+        "worst_resid_MeV": -3.34518903959,
+        "worst_obs_MeV": 3.865656,
+        "worst_pred_MeV": 0.520466960408
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "other",
+        "magic": 20,
+        "count": 5,
+        "rms_resid_MeV": 12.036364567176063,
+        "mean_resid_MeV": -3.8319451397839996,
+        "max_abs_resid_MeV": 18.4338663751,
+        "worst_Z": 20,
+        "worst_N": 24,
+        "worst_A": 44,
+        "worst_resid_MeV": -18.4338663751,
+        "worst_obs_MeV": 5.289745,
+        "worst_pred_MeV": -13.1441213751
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "magic": 50,
+        "count": 2,
+        "rms_resid_MeV": 2.1665653906627362,
+        "mean_resid_MeV": 1.5188351629719001,
+        "max_abs_resid_MeV": 3.06387410738,
+        "worst_Z": 50,
+        "worst_N": 70,
+        "worst_A": 120,
+        "worst_resid_MeV": 3.06387410738,
+        "worst_obs_MeV": 4.8976693,
+        "worst_pred_MeV": 7.96154340738
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "magic": 82,
+        "count": 8,
+        "rms_resid_MeV": 1.372299933553475,
+        "mean_resid_MeV": -0.48758988485112503,
+        "max_abs_resid_MeV": 2.82329642085,
+        "worst_Z": 82,
+        "worst_N": 126,
+        "worst_A": 208,
+        "worst_resid_MeV": -2.82329642085,
+        "worst_obs_MeV": 4.2040206,
+        "worst_pred_MeV": 1.38072417915
+      }
+    ],
+    "by_A_min": [
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "A_min": 0,
+        "count": 12,
+        "rms_resid_MeV": 1.854284247263811
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "A_min": 16,
+        "count": 12,
+        "rms_resid_MeV": 1.854284247263811
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "A_min": 40,
+        "count": 12,
+        "rms_resid_MeV": 1.854284247263811
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "A_min": 60,
+        "count": 12,
+        "rms_resid_MeV": 1.854284247263811
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "train",
+        "A_min": 80,
+        "count": 12,
+        "rms_resid_MeV": 1.854284247263811
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "A_min": 0,
+        "count": 9,
+        "rms_resid_MeV": 8.017591775074827
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "A_min": 16,
+        "count": 9,
+        "rms_resid_MeV": 8.017591775074827
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "A_min": 40,
+        "count": 6,
+        "rms_resid_MeV": 6.712843269624862
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "A_min": 60,
+        "count": 3,
+        "rms_resid_MeV": 0.4003636453671084
+      },
+      {
+        "kind": "gap_Sn",
+        "split": "other",
+        "A_min": 80,
+        "count": 3,
+        "rms_resid_MeV": 0.4003636453671084
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "A_min": 0,
+        "count": 10,
+        "rms_resid_MeV": 1.5637668638605349
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "A_min": 16,
+        "count": 10,
+        "rms_resid_MeV": 1.5637668638605349
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "A_min": 40,
+        "count": 10,
+        "rms_resid_MeV": 1.5637668638605349
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "A_min": 60,
+        "count": 10,
+        "rms_resid_MeV": 1.5637668638605349
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "train",
+        "A_min": 80,
+        "count": 10,
+        "rms_resid_MeV": 1.5637668638605349
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "other",
+        "A_min": 0,
+        "count": 5,
+        "rms_resid_MeV": 12.036364567176063
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "other",
+        "A_min": 16,
+        "count": 5,
+        "rms_resid_MeV": 12.036364567176063
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "other",
+        "A_min": 40,
+        "count": 5,
+        "rms_resid_MeV": 12.036364567176063
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "other",
+        "A_min": 60,
+        "count": 0,
+        "rms_resid_MeV": NaN
+      },
+      {
+        "kind": "gap_Sp",
+        "split": "other",
+        "A_min": 80,
+        "count": 0,
+        "rms_resid_MeV": NaN
+      }
+    ],
+    "worst": {
+      "gap_Sn_train": [
+        {
+          "magic": 50,
+          "Z": 37,
+          "N": 50,
+          "A": 87,
+          "obs_MeV": 3.8395926,
+          "pred_MeV": 7.29838642286,
+          "resid_MeV": 3.45879382286
+        },
+        {
+          "magic": 82,
+          "Z": 55,
+          "N": 82,
+          "A": 137,
+          "obs_MeV": 3.865656,
+          "pred_MeV": 0.520466960408,
+          "resid_MeV": -3.34518903959
+        },
+        {
+          "magic": 82,
+          "Z": 56,
+          "N": 82,
+          "A": 138,
+          "obs_MeV": 3.888285,
+          "pred_MeV": 1.35873455208,
+          "resid_MeV": -2.52955044792
+        },
+        {
+          "magic": 82,
+          "Z": 60,
+          "N": 82,
+          "A": 142,
+          "obs_MeV": 3.7062907,
+          "pred_MeV": 1.46407110319,
+          "resid_MeV": -2.24221959681
+        },
+        {
+          "magic": 50,
+          "Z": 31,
+          "N": 50,
+          "A": 81,
+          "obs_MeV": 3.1015204,
+          "pred_MeV": 4.42085329195,
+          "resid_MeV": 1.31933289195
+        }
+      ],
+      "gap_Sn_other": [
+        {
+          "magic": 20,
+          "Z": 20,
+          "N": 20,
+          "A": 40,
+          "obs_MeV": 7.2721876,
+          "pred_MeV": -8.78477695714,
+          "resid_MeV": -16.0569645571
+        },
+        {
+          "magic": 8,
+          "Z": 10,
+          "N": 8,
+          "A": 18,
+          "obs_MeV": 7.6172736,
+          "pred_MeV": 19.3382026809,
+          "resid_MeV": 11.7209290809
+        },
+        {
+          "magic": 20,
+          "Z": 19,
+          "N": 20,
+          "A": 39,
+          "obs_MeV": 5.278131,
+          "pred_MeV": -3.96559279098,
+          "resid_MeV": -9.24372379098
+        },
+        {
+          "magic": 20,
+          "Z": 18,
+          "N": 20,
+          "A": 38,
+          "obs_MeV": 5.2397778,
+          "pred_MeV": -3.99796024711,
+          "resid_MeV": -9.23773804711
+        },
+        {
+          "magic": 28,
+          "Z": 25,
+          "N": 28,
+          "A": 53,
+          "obs_MeV": 3.1110592,
+          "pred_MeV": 6.57356807307,
+          "resid_MeV": 3.46250887307
+        },
+        {
+          "magic": 126,
+          "Z": 83,
+          "N": 126,
+          "A": 209,
+          "obs_MeV": 2.855113,
+          "pred_MeV": 3.36089878707,
+          "resid_MeV": 0.505785787075
+        },
+        {
+          "magic": 126,
+          "Z": 82,
+          "N": 126,
+          "A": 208,
+          "obs_MeV": 3.430504,
+          "pred_MeV": 2.95640204071,
+          "resid_MeV": -0.47410195929
+        },
+        {
+          "magic": 28,
+          "Z": 19,
+          "N": 28,
+          "A": 47,
+          "obs_MeV": 3.725549,
+          "pred_MeV": 3.44691492879,
+          "resid_MeV": -0.278634071208
+        }
+      ],
+      "gap_Sp_train": [
+        {
+          "magic": 50,
+          "Z": 50,
+          "N": 70,
+          "A": 120,
+          "obs_MeV": 4.8976693,
+          "pred_MeV": 7.96154340738,
+          "resid_MeV": 3.06387410738
+        },
+        {
+          "magic": 82,
+          "Z": 82,
+          "N": 126,
+          "A": 208,
+          "obs_MeV": 4.2040206,
+          "pred_MeV": 1.38072417915,
+          "resid_MeV": -2.82329642085
+        },
+        {
+          "magic": 82,
+          "Z": 82,
+          "N": 127,
+          "A": 209,
+          "obs_MeV": 3.6871264,
+          "pred_MeV": 1.71818708499,
+          "resid_MeV": -1.96893931501
+        },
+        {
+          "magic": 82,
+          "Z": 82,
+          "N": 124,
+          "A": 206,
+          "obs_MeV": 3.6956539,
+          "pred_MeV": 2.43949322676,
+          "resid_MeV": -1.25616067324
+        },
+        {
+          "magic": 82,
+          "Z": 82,
+          "N": 119,
+          "A": 201,
+          "obs_MeV": 2.743985,
+          "pred_MeV": 3.5319797134,
+          "resid_MeV": 0.787994713403
+        }
+      ],
+      "gap_Sp_other": [
+        {
+          "magic": 20,
+          "Z": 20,
+          "N": 24,
+          "A": 44,
+          "obs_MeV": 5.289745,
+          "pred_MeV": -13.1441213751,
+          "resid_MeV": -18.4338663751
+        },
+        {
+          "magic": 20,
+          "Z": 20,
+          "N": 21,
+          "A": 41,
+          "obs_MeV": 4.6193144,
+          "pred_MeV": 20.9971533997,
+          "resid_MeV": 16.3778389997
+        },
+        {
+          "magic": 20,
+          "Z": 20,
+          "N": 22,
+          "A": 42,
+          "obs_MeV": 5.3468898,
+          "pred_MeV": -2.4421178298,
+          "resid_MeV": -7.7890076298
+        },
+        {
+          "magic": 20,
+          "Z": 20,
+          "N": 25,
+          "A": 45,
+          "obs_MeV": 4.0813128,
+          "pred_MeV": -3.0538288377,
+          "resid_MeV": -7.1351416377
+        },
+        {
+          "magic": 20,
+          "Z": 20,
+          "N": 23,
+          "A": 43,
+          "obs_MeV": 3.9796756,
+          "pred_MeV": 1.80012654398,
+          "resid_MeV": -2.17954905602
+        }
+      ]
+    }
+  },
+  "conclusion": "Failure localization (baseline): the dominant other-magic shell-gap residuals are concentrated in light nuclei (notably N=8/20 and Z=20), while the heavy-domain other-magic coverage is sparse and much smaller in RMS. Therefore the next extension should first (i) make the applicability domain explicit and/or (ii) expand coverage beyond the radii-joined set (e.g., via a frozen radius model) before introducing additional correlation DoF such as deformation/configuration-mixing.",
+  "next_design_points": [
+    "Decide an explicit domain boundary for the mean-field+shell model (A_min) and avoid mixing few-body light nuclei into the same extrapolation test without additional physics.",
+    "Expand shell-gap coverage beyond the radii-joined set by introducing a frozen charge-radius model (r_charge(A,Z,N)) so that B_pred can be evaluated for a wider mass table (enabling Z=28 etc).",
+    "After coverage is expanded, introduce one minimal collective/deformation proxy DoF that can be frozen independently (not by gap fitting) and re-run the strict other-magic decision test."
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_failure_modes.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_failure_modes.csv"
+  }
+}

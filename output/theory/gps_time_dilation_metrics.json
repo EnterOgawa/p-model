@@ -1,0 +1,32 @@
+{
+  "generated_utc": "2026-02-10T15:36:29.967439+00:00",
+  "model": "P-model",
+  "notes": [
+    "教科書的な内訳（重力 +45.7us/日、速度 -7.2us/日）に合わせ、地上の速度は0として計算しています。",
+    "本スクリプトの“exact”は exp(-mu/(c^2 r)) と、delta付きの速度因子（飽和）を用います。"
+  ],
+  "constants": {
+    "C_m_s": 299792458.0,
+    "MU_E_m3_s2": 398600441800000.0
+  },
+  "metrics": {
+    "delta": 0.0,
+    "r_ground_m": 6378137.0,
+    "r_sat_m": 26560000.0,
+    "v_sat_m_s": 3873.957505512686,
+    "interval_s": 86400.0,
+    "grav_us": 45.650919844320015,
+    "vel_us": -7.213602515321327,
+    "net_us": 38.43731732899869,
+    "grav_approx_us": 45.650911342222365,
+    "sr_approx_us": -7.213599822661272,
+    "net_approx_us": 38.437311519561085,
+    "ref_grav_us_day": 45.7,
+    "ref_sr_us_day": -7.2,
+    "ref_net_us_day": 38.5,
+    "abs_error_net_us_vs_ref": 0.06268848043891495
+  },
+  "outputs": {
+    "plot_png": "C:\\develop\\waveP\\output\\theory\\gps_time_dilation.png"
+  }
+}

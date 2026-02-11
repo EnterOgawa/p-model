@@ -1,0 +1,285 @@
+{
+  "generated_utc": "2026-02-11T00:28:19.442540+00:00",
+  "phase": 7,
+  "step": "7.14.4",
+  "inputs": {
+    "extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_nbsir74_496_silicon_resistivity\\extracted_values.json",
+      "sha256": "24a5dcac360fc14ee19a695cb6ac702369a50bc88d3c72bec4e56f0d4f8ab2b5"
+    }
+  },
+  "results": {
+    "n_samples": 21,
+    "counts_by_type_doping": {
+      "p:B": 12,
+      "n:": 8,
+      "p:Al": 1
+    },
+    "min_rho_23C_ohm_cm": 0.0007761,
+    "max_rho_23C_ohm_cm": 1159.0,
+    "min_pct_per_K_proxy": 0.020512827705569947,
+    "max_pct_per_K_proxy": 0.9571413860602096,
+    "corr_log10rho_vs_pct_per_K_proxy": 0.857438583715196,
+    "pct_per_K_proxy_range_by_type_doping": {
+      "p:B": {
+        "min": 0.020512827705569947,
+        "max": 0.9571413860602096
+      },
+      "n:": {
+        "min": 0.17683103856065863,
+        "max": 0.8123841732892156
+      },
+      "p:Al": {
+        "min": 0.6006614652278591,
+        "max": 0.6006614652278591
+      }
+    }
+  },
+  "falsification": {
+    "target": "d ln rho / dT around room temperature (proxy: 20–30°C)",
+    "accept_range_pct_per_K_proxy": {
+      "min": 0.020512827705569947,
+      "max": 0.9571413860602096
+    },
+    "accept_ranges_by_type_doping_pct_per_K_proxy": {
+      "p:B": {
+        "min": 0.020512827705569947,
+        "max": 0.9571413860602096
+      },
+      "n:": {
+        "min": 0.17683103856065863,
+        "max": 0.8123841732892156
+      },
+      "p:Al": {
+        "min": 0.6006614652278591,
+        "max": 0.6006614652278591
+      }
+    },
+    "reject_if_pct_per_K_proxy_non_positive": true,
+    "notes": [
+      "NBS IR 74-496 provides mean resistivity values and confidence limits, but per-sample uncertainties are not propagated here.",
+      "This baseline therefore freezes a necessary-condition envelope (min/max) rather than a precise ±σ target."
+    ]
+  },
+  "rows": [
+    {
+      "sample_id": "sample_001",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.0007761,
+      "dlnrho_dT_23C_per_K_proxy": 0.001759049015699965,
+      "pct_per_K_proxy": 0.1759049015699965,
+      "rho_20C_ohm_cm": 0.000772,
+      "rho_30C_ohm_cm": 0.0007857000000000001
+    },
+    {
+      "sample_id": "sample_002",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.014570000000000001,
+      "dlnrho_dT_23C_per_K_proxy": 0.0002743485945750912,
+      "pct_per_K_proxy": 0.02743485945750912,
+      "rho_20C_ohm_cm": 0.01456,
+      "rho_30C_ohm_cm": 0.0146
+    },
+    {
+      "sample_id": "sample_005",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.22599999999999998,
+      "dlnrho_dT_23C_per_K_proxy": 0.0038635182628690814,
+      "pct_per_K_proxy": 0.3863518262869081,
+      "rho_20C_ohm_cm": 0.22340000000000002,
+      "rho_30C_ohm_cm": 0.23220000000000002
+    },
+    {
+      "sample_id": "sample_008",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.9549,
+      "dlnrho_dT_23C_per_K_proxy": 0.0019562803657643506,
+      "pct_per_K_proxy": 0.19562803657643507,
+      "rho_20C_ohm_cm": 0.9567000000000001,
+      "rho_30C_ohm_cm": 0.9756
+    },
+    {
+      "sample_id": "sample_013",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 0.0546,
+      "dlnrho_dT_23C_per_K_proxy": 0.0034561460977521998,
+      "pct_per_K_proxy": 0.34561460977521996,
+      "rho_20C_ohm_cm": 0.054029999999999995,
+      "rho_30C_ohm_cm": 0.05593
+    },
+    {
+      "sample_id": "sample_014",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 0.08794,
+      "dlnrho_dT_23C_per_K_proxy": 0.004507805431799161,
+      "pct_per_K_proxy": 0.45078054317991606,
+      "rho_20C_ohm_cm": 0.08675000000000001,
+      "rho_30C_ohm_cm": 0.09075
+    },
+    {
+      "sample_id": "sample_016",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 0.191,
+      "dlnrho_dT_23C_per_K_proxy": 0.005798725765034929,
+      "pct_per_K_proxy": 0.5798725765034929,
+      "rho_20C_ohm_cm": 0.1876,
+      "rho_30C_ohm_cm": 0.1988
+    },
+    {
+      "sample_id": "sample_017",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 0.4739,
+      "dlnrho_dT_23C_per_K_proxy": 0.006807330476793816,
+      "pct_per_K_proxy": 0.6807330476793816,
+      "rho_20C_ohm_cm": 0.46420000000000006,
+      "rho_30C_ohm_cm": 0.49690000000000006
+    },
+    {
+      "sample_id": "sample_018",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 8.959,
+      "dlnrho_dT_23C_per_K_proxy": 0.008105422587255351,
+      "pct_per_K_proxy": 0.8105422587255351,
+      "rho_20C_ohm_cm": 8.741,
+      "rho_30C_ohm_cm": 9.479
+    },
+    {
+      "sample_id": "sample_020",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.01076,
+      "dlnrho_dT_23C_per_K_proxy": 0.00027868109071800263,
+      "pct_per_K_proxy": 0.027868109071800262,
+      "rho_20C_ohm_cm": 0.01075,
+      "rho_30C_ohm_cm": 0.010780000000000001
+    },
+    {
+      "sample_id": "sample_021",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.01462,
+      "dlnrho_dT_23C_per_K_proxy": 0.00020512827705569946,
+      "pct_per_K_proxy": 0.020512827705569947,
+      "rho_20C_ohm_cm": 0.014610000000000001,
+      "rho_30C_ohm_cm": 0.01464
+    },
+    {
+      "sample_id": "sample_022",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.028900000000000002,
+      "dlnrho_dT_23C_per_K_proxy": 0.0007599345725388229,
+      "pct_per_K_proxy": 0.07599345725388229,
+      "rho_20C_ohm_cm": 0.02884,
+      "rho_30C_ohm_cm": 0.029060000000000002
+    },
+    {
+      "sample_id": "sample_023",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 0.25320000000000004,
+      "dlnrho_dT_23C_per_K_proxy": 0.005391930946770085,
+      "pct_per_K_proxy": 0.5391930946770085,
+      "rho_20C_ohm_cm": 0.24910000000000002,
+      "rho_30C_ohm_cm": 0.2629
+    },
+    {
+      "sample_id": "sample_025",
+      "type": "p",
+      "doping": "Al",
+      "rho_23C_ohm_cm": 0.7189000000000001,
+      "dlnrho_dT_23C_per_K_proxy": 0.006006614652278591,
+      "pct_per_K_proxy": 0.6006614652278591,
+      "rho_20C_ohm_cm": 0.7059000000000001,
+      "rho_30C_ohm_cm": 0.7496
+    },
+    {
+      "sample_id": "sample_027",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 1.585,
+      "dlnrho_dT_23C_per_K_proxy": 0.007396971374854277,
+      "pct_per_K_proxy": 0.7396971374854278,
+      "rho_20C_ohm_cm": 1.55,
+      "rho_30C_ohm_cm": 1.669
+    },
+    {
+      "sample_id": "sample_028",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 4.85,
+      "dlnrho_dT_23C_per_K_proxy": 0.007934390130383773,
+      "pct_per_K_proxy": 0.7934390130383773,
+      "rho_20C_ohm_cm": 4.735,
+      "rho_30C_ohm_cm": 5.126
+    },
+    {
+      "sample_id": "sample_029",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 100.49999999999999,
+      "dlnrho_dT_23C_per_K_proxy": 0.008432723548705834,
+      "pct_per_K_proxy": 0.8432723548705834,
+      "rho_20C_ohm_cm": 105.69999999999999,
+      "rho_30C_ohm_cm": 114.99999999999999
+    },
+    {
+      "sample_id": "sample_030",
+      "type": "p",
+      "doping": "B",
+      "rho_23C_ohm_cm": 1159.0,
+      "dlnrho_dT_23C_per_K_proxy": 0.009571413860602096,
+      "pct_per_K_proxy": 0.9571413860602096,
+      "rho_20C_ohm_cm": 1125.0,
+      "rho_30C_ohm_cm": 1238.0
+    },
+    {
+      "sample_id": "sample_031",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 0.001071,
+      "dlnrho_dT_23C_per_K_proxy": 0.0017683103856065863,
+      "pct_per_K_proxy": 0.17683103856065863,
+      "rho_20C_ohm_cm": 0.001065,
+      "rho_30C_ohm_cm": 0.0010840000000000001
+    },
+    {
+      "sample_id": "sample_032",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 0.08868000000000001,
+      "dlnrho_dT_23C_per_K_proxy": 0.004526165019972428,
+      "pct_per_K_proxy": 0.4526165019972428,
+      "rho_20C_ohm_cm": 0.08747,
+      "rho_30C_ohm_cm": 0.09151999999999999
+    },
+    {
+      "sample_id": "sample_035",
+      "type": "n",
+      "doping": "",
+      "rho_23C_ohm_cm": 8.962,
+      "dlnrho_dT_23C_per_K_proxy": 0.008123841732892156,
+      "pct_per_K_proxy": 0.8123841732892156,
+      "rho_20C_ohm_cm": 8.744,
+      "rho_30C_ohm_cm": 9.484
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.png"
+  },
+  "notes": [
+    "This is an operational baseline extracted from Appendix E of NBS IR 74-496 (v.d. Pauw method data).",
+    "Coefficient is computed as a finite-difference proxy around room temperature: d ln rho / dT ~ (ln rho30 - ln rho20)/10.",
+    "The report provides confidence limits; this baseline prioritizes mean values for robustness of extraction."
+  ]
+}

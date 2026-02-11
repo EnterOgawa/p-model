@@ -1,0 +1,190 @@
+{
+  "generated_utc": "2026-01-26T22:09:20.903666+00:00",
+  "phase": 7,
+  "step": "7.13.15.19",
+  "baseline_step": "7.13.15.16",
+  "baseline": {
+    "gap_n_train_rms_MeV": 1.8542842472632113,
+    "gap_n_other_rms_MeV": 8.017591775087704,
+    "gap_p_train_rms_MeV": 1.5637668638590456,
+    "gap_p_other_rms_MeV": 12.036364567194651
+  },
+  "criteria": {
+    "train_ok": "train RMS <= baseline_train + 0.5 MeV (for both gap_n and gap_p)",
+    "other_ok": "other-magic RMS strictly improves simultaneously for gap_n and gap_p"
+  },
+  "diag": {
+    "n_steps": 6,
+    "n_pass_all": 0,
+    "rows": [
+      {
+        "step": "7.13.15.13",
+        "label": "shell (MODEL_MAGIC)",
+        "metrics_path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json",
+        "sha256": "3397501566083b2d83f0272157703b685d78bf10dbc1bdb5015c95e36fe2018f",
+        "gap_n_train_rms_MeV": 1.8384827417843825,
+        "gap_n_other_rms_MeV": 8.200158230054429,
+        "gap_p_train_rms_MeV": 1.549929347375604,
+        "gap_p_other_rms_MeV": 12.364018715620153,
+        "gap_n_train_key": "rms_resid_corrected_MeV",
+        "gap_n_other_key": "rms_resid_corrected_MeV",
+        "gap_p_train_key": "rms_resid_corrected_MeV",
+        "gap_p_other_key": "rms_resid_corrected_MeV",
+        "delta_gap_n_train_MeV": -0.015801505478828748,
+        "delta_gap_n_other_MeV": 0.1825664549667252,
+        "delta_gap_p_train_MeV": -0.01383751648344167,
+        "delta_gap_p_other_MeV": 0.327654148425502,
+        "train_ok": true,
+        "other_ok": false,
+        "pass_all": false,
+        "gap_n_other_improves": false,
+        "gap_p_other_improves": false
+      },
+      {
+        "step": "7.13.15.14",
+        "label": "+ pairing (a_p, no refreeze)",
+        "metrics_path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model_metrics.json",
+        "sha256": "bc43b5ec5feb5530ff8444a3995cf7b48a77a9cfa4189e94e30afe36398445a6",
+        "gap_n_train_rms_MeV": 3.0006140762834232,
+        "gap_n_other_rms_MeV": 7.733331943874432,
+        "gap_p_train_rms_MeV": 2.3783312834589627,
+        "gap_p_other_rms_MeV": 11.488707661620927,
+        "gap_n_train_key": "rms_resid_shell_pairing_MeV",
+        "gap_n_other_key": "rms_resid_shell_pairing_MeV",
+        "gap_p_train_key": "rms_resid_shell_pairing_MeV",
+        "gap_p_other_key": "rms_resid_shell_pairing_MeV",
+        "delta_gap_n_train_MeV": 1.146329829020212,
+        "delta_gap_n_other_MeV": -0.28425983121327203,
+        "delta_gap_p_train_MeV": 0.8145644195999171,
+        "delta_gap_p_other_MeV": -0.5476569055737244,
+        "train_ok": false,
+        "other_ok": true,
+        "pass_all": false,
+        "gap_n_other_improves": true,
+        "gap_p_other_improves": true
+      },
+      {
+        "step": "7.13.15.15",
+        "label": "pairing fixed -> refreeze kN/kZ",
+        "metrics_path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_refreeze_metrics.json",
+        "sha256": "de915f89afb9d80044de0e316a2c25cf4ed97ac434e54f62550a5028aabf8709",
+        "gap_n_train_rms_MeV": 1.8546002759314721,
+        "gap_n_other_rms_MeV": 8.015991613539477,
+        "gap_p_train_rms_MeV": 1.5635018446538362,
+        "gap_p_other_rms_MeV": 12.041941441558526,
+        "gap_n_train_key": "rms_resid_pairing_shell_MeV",
+        "gap_n_other_key": "rms_resid_pairing_shell_MeV",
+        "gap_p_train_key": "rms_resid_pairing_shell_MeV",
+        "gap_p_other_key": "rms_resid_pairing_shell_MeV",
+        "delta_gap_n_train_MeV": 0.0003160286682608593,
+        "delta_gap_n_other_MeV": -0.0016001615482270637,
+        "delta_gap_p_train_MeV": -0.0002650192052093825,
+        "delta_gap_p_other_MeV": 0.005576874363875106,
+        "train_ok": true,
+        "other_ok": false,
+        "pass_all": false,
+        "gap_n_other_improves": true,
+        "gap_p_other_improves": false
+      },
+      {
+        "step": "7.13.15.16",
+        "label": "pairing sep (a_n/a_p) -> refreeze kN/kZ",
+        "metrics_path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json",
+        "sha256": "2c31feac2c1b2f32fe4555e278cd93b8c92f0ebce6316e30d4fbe218a9742a33",
+        "gap_n_train_rms_MeV": 1.8542842472632113,
+        "gap_n_other_rms_MeV": 8.017591775087704,
+        "gap_p_train_rms_MeV": 1.5637668638590456,
+        "gap_p_other_rms_MeV": 12.036364567194651,
+        "gap_n_train_key": "rms_resid_pairing_shell_MeV",
+        "gap_n_other_key": "rms_resid_pairing_shell_MeV",
+        "gap_p_train_key": "rms_resid_pairing_shell_MeV",
+        "gap_p_other_key": "rms_resid_pairing_shell_MeV",
+        "delta_gap_n_train_MeV": 0.0,
+        "delta_gap_n_other_MeV": 0.0,
+        "delta_gap_p_train_MeV": 0.0,
+        "delta_gap_p_other_MeV": 0.0,
+        "train_ok": true,
+        "other_ok": false,
+        "pass_all": false,
+        "gap_n_other_improves": false,
+        "gap_p_other_improves": false
+      },
+      {
+        "step": "7.13.15.17",
+        "label": "+ pn-collective (1DoF)",
+        "metrics_path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_pn_metrics.json",
+        "sha256": "1e39130d55f733f23cb14533616abf1db5200e612b48721cdf9661e1debb2d48",
+        "gap_n_train_rms_MeV": 2.802508968021324,
+        "gap_n_other_rms_MeV": 9.86516203047163,
+        "gap_p_train_rms_MeV": 2.1009889002368074,
+        "gap_p_other_rms_MeV": 10.407678878798384,
+        "gap_n_train_key": "rms_resid_collective_MeV",
+        "gap_n_other_key": "rms_resid_collective_MeV",
+        "gap_p_train_key": "rms_resid_collective_MeV",
+        "gap_p_other_key": "rms_resid_collective_MeV",
+        "delta_gap_n_train_MeV": 0.9482247207581127,
+        "delta_gap_n_other_MeV": 1.8475702553839266,
+        "delta_gap_p_train_MeV": 0.5372220363777618,
+        "delta_gap_p_other_MeV": -1.628685688396267,
+        "train_ok": false,
+        "other_ok": false,
+        "pass_all": false,
+        "gap_n_other_improves": false,
+        "gap_p_other_improves": true
+      },
+      {
+        "step": "7.13.15.18",
+        "label": "+ q(N)+q(Z) (2DoF)",
+        "metrics_path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_q_sep_metrics.json",
+        "sha256": "a324ed3e5abe197269faf0bcc166da68c48a5bc93c9e19118db3a025c6babffb",
+        "gap_n_train_rms_MeV": 3.4498648252726922,
+        "gap_n_other_rms_MeV": 9.850594684338645,
+        "gap_p_train_rms_MeV": 4.394409246075148,
+        "gap_p_other_rms_MeV": 13.846520809915686,
+        "gap_n_train_key": "rms_resid_collective_MeV",
+        "gap_n_other_key": "rms_resid_collective_MeV",
+        "gap_p_train_key": "rms_resid_collective_MeV",
+        "gap_p_other_key": "rms_resid_collective_MeV",
+        "delta_gap_n_train_MeV": 1.595580578009481,
+        "delta_gap_n_other_MeV": 1.8330029092509417,
+        "delta_gap_p_train_MeV": 2.8306423822161024,
+        "delta_gap_p_other_MeV": 1.8101562427210354,
+        "train_ok": false,
+        "other_ok": false,
+        "pass_all": false,
+        "gap_n_other_improves": false,
+        "gap_p_other_improves": false
+      }
+    ]
+  },
+  "inputs": {
+    "7.13.15.13": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json",
+      "sha256": "3397501566083b2d83f0272157703b685d78bf10dbc1bdb5015c95e36fe2018f"
+    },
+    "7.13.15.14": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model_metrics.json",
+      "sha256": "bc43b5ec5feb5530ff8444a3995cf7b48a77a9cfa4189e94e30afe36398445a6"
+    },
+    "7.13.15.15": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_refreeze_metrics.json",
+      "sha256": "de915f89afb9d80044de0e316a2c25cf4ed97ac434e54f62550a5028aabf8709"
+    },
+    "7.13.15.16": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json",
+      "sha256": "2c31feac2c1b2f32fe4555e278cd93b8c92f0ebce6316e30d4fbe218a9742a33"
+    },
+    "7.13.15.17": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_pn_metrics.json",
+      "sha256": "1e39130d55f733f23cb14533616abf1db5200e612b48721cdf9661e1debb2d48"
+    },
+    "7.13.15.18": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_q_sep_metrics.json",
+      "sha256": "a324ed3e5abe197269faf0bcc166da68c48a5bc93c9e19118db3a025c6babffb"
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_no_go_pack.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_no_go_pack.csv"
+  }
+}

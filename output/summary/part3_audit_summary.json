@@ -1,0 +1,891 @@
+{
+  "generated_utc": "2026-02-11T02:47:25.165609+00:00",
+  "phase": 7,
+  "step": "7.20.7",
+  "script": "scripts/summary/part3_audit.py",
+  "regenerated": true,
+  "commands": [
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\bell_primary_products.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 61.628721475601196,
+      "stdout_tail": "[run] weihs1998_longdist_longdist1\n[run] delft (2015/2016)\n[run] nist_03_43_afterfixingModeLocking_s3600\n[run] kwiat2013_prl111_130406_05082013_15\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\bell\\table1_row.json\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\bell\\falsification_pack.json\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\bell\\selection_loophole_quantification.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.8013074398040771,
+      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.png\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_table.csv\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.7592926025390625,
+      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 1.158653736114502,
+      "stdout_tail": "[ok] wrote:\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.png\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.csv\n  C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\nuclear_holdout_audit.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.8251760005950928,
+      "stdout_tail": "[ok] wrote:\n- C:\\develop\\waveP\\output\\quantum\\nuclear_holdout_audit_summary.json\n- C:\\develop\\waveP\\output\\quantum\\nuclear_holdout_audit_groups.csv\n- C:\\develop\\waveP\\output\\quantum\\nuclear_holdout_audit_outliers.csv\n- C:\\develop\\waveP\\output\\quantum\\nuclear_holdout_audit.png\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 4.134550333023071,
+      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py",
+        "--groups",
+        "4",
+        "--enforce-signs",
+        "--use-bulk-modulus",
+        "--mode-softening",
+        "kim2015_fig2_features",
+        "--gamma-omega-model",
+        "pwlinear_split_leaky",
+        "--gamma-omega-pwlinear-leak",
+        "0.24",
+        "--gamma-omega-pwlinear-warp-power",
+        "1.32",
+        "--ridge-factor",
+        "1e-06"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 2.3066208362579346,
+      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model.csv\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model.png\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_heat_capacity_holdout_splits.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.7936878204345703,
+      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.6696054935455322,
+      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_silicon_bulk_modulus_holdout_splits_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.7202262878417969,
+      "stdout_tail": "[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.csv\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.png\n[ok] wrote: C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_holdout_audit.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.8758482933044434,
+      "stdout_tail": "[ok] wrote:\n- C:\\develop\\waveP\\output\\quantum\\condensed_holdout_audit_summary.json\n- C:\\develop\\waveP\\output\\quantum\\condensed_holdout_audit.csv\n- C:\\develop\\waveP\\output\\quantum\\condensed_holdout_audit.png\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\condensed_falsification_pack.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.08761191368103027,
+      "stdout_tail": "[ok] wrote: output/quantum/condensed_falsification_pack.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\quantum\\frozen_parameters_quantum.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.09197473526000977,
+      "stdout_tail": "[ok] wrote: output/quantum/frozen_parameters_quantum.json\n",
+      "stderr_tail": ""
+    },
+    {
+      "cmd": [
+        "C:\\Users\\ogawa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+        "-B",
+        "C:\\develop\\waveP\\scripts\\summary\\part3_completion_inventory.py"
+      ],
+      "cwd": "C:\\develop\\waveP",
+      "ok": true,
+      "returncode": 0,
+      "seconds": 0.09062647819519043,
+      "stdout_tail": "[ok] wrote: output/summary/part3_completion_inventory.json\n[ok] wrote: output/summary/part3_completion_inventory.md\n",
+      "stderr_tail": ""
+    }
+  ],
+  "gates": {
+    "bell": {
+      "ok": true,
+      "inputs": {
+        "falsification_pack_json": {
+          "path": "output/quantum/bell/falsification_pack.json",
+          "exists": true
+        },
+        "freeze_policy_json": {
+          "path": "output/quantum/bell/freeze_policy.json",
+          "exists": true
+        },
+        "null_tests_summary_json": {
+          "path": "output/quantum/bell/null_tests_summary.json",
+          "exists": true
+        },
+        "pairing_crosscheck_summary_json": {
+          "path": "output/quantum/bell/crosscheck_pairing_summary.json",
+          "exists": true
+        }
+      },
+      "pack": {
+        "version": "1.4",
+        "generated_utc": "2026-02-11T02:47:11.492841+00:00",
+        "thresholds": {
+          "selection_origin_ratio_min": 1.0,
+          "delay_signature_z_min": 3.0,
+          "ks_delay_min_legacy": 0.01,
+          "note": "These are operational thresholds for this repository (not universal physics thresholds)."
+        },
+        "cross_dataset_keys": [
+          "covariance_summary",
+          "generated_utc",
+          "inputs",
+          "null_tests_summary",
+          "pairing_crosscheck_summary",
+          "selection_loophole_summary",
+          "statistic_groups",
+          "summary",
+          "systematics_15items_summary"
+        ]
+      },
+      "dataset_gates": [
+        {
+          "dataset_id": "weihs1998_longdist_longdist1",
+          "selection_knob": "window_ns",
+          "statistic": "CHSH|S|",
+          "ratio_sys_stat": 19.316744077961687,
+          "ratio_ge_threshold": true,
+          "delay_z": 5.53541064134177,
+          "delay_z_ge_threshold": true
+        },
+        {
+          "dataset_id": "delft_hensen2015",
+          "selection_knob": "event_ready_offset_ps",
+          "statistic": "CHSH_S",
+          "ratio_sys_stat": 3.6508938846257903,
+          "ratio_ge_threshold": true,
+          "delay_z": null,
+          "delay_z_ge_threshold": null
+        },
+        {
+          "dataset_id": "delft_hensen2016_srep30289",
+          "selection_knob": "event_ready_offset_ps",
+          "statistic": "CHSH_S",
+          "ratio_sys_stat": 7.599442954268822,
+          "ratio_ge_threshold": true,
+          "delay_z": null,
+          "delay_z_ge_threshold": null
+        },
+        {
+          "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+          "selection_knob": "window_ns",
+          "statistic": "CH_J",
+          "ratio_sys_stat": 654.1026883136847,
+          "ratio_ge_threshold": true,
+          "delay_z": 43.90965148631052,
+          "delay_z_ge_threshold": true
+        },
+        {
+          "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+          "selection_knob": "window_ns",
+          "statistic": "CH_J",
+          "ratio_sys_stat": 5.822553917580089,
+          "ratio_ge_threshold": true,
+          "delay_z": 0.7214698844113343,
+          "delay_z_ge_threshold": false
+        }
+      ],
+      "pairing_crosscheck_gate": {
+        "ok": true,
+        "supported_n": 3,
+        "max_delta_over_sigma_boot": 0.08612854215724108,
+        "threshold": 1.0,
+        "details": [
+          {
+            "dataset_id": "weihs1998_longdist_longdist1",
+            "delta_over_sigma_boot": 0.08612854215724108
+          },
+          {
+            "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+            "delta_over_sigma_boot": 0.020516605714527774
+          },
+          {
+            "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+            "delta_over_sigma_boot": 0.0
+          }
+        ]
+      },
+      "notes": []
+    },
+    "nuclear": {
+      "ok": true,
+      "inputs": {
+        "falsification_pack_json": {
+          "path": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+          "exists": true
+        },
+        "minimal_additional_physics_metrics_json": {
+          "path": "output/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json",
+          "exists": true
+        },
+        "theory_diff_metrics_json": {
+          "path": "output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
+          "exists": true
+        }
+      },
+      "artifacts": {
+        "zn_residual_map_png": {
+          "path": "output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_zn_residual_map.png",
+          "exists": true
+        },
+        "holdout_audit_summary_json": {
+          "path": "output/quantum/nuclear_holdout_audit_summary.json",
+          "exists": true
+        }
+      },
+      "thresholds": {
+        "z_median_abs_max": 3.0,
+        "z_delta_median_abs_max": 3.0,
+        "a_low_bin": [
+          40,
+          60
+        ],
+        "a_high_bin": [
+          250,
+          300
+        ],
+        "channel_decision_sigma_level": 3.0,
+        "note": "Operational thresholds for this repository (not universal physics thresholds)."
+      },
+      "baseline_models": [
+        {
+          "model_id": "global_R_in_exp (Step 7.13.17.7)",
+          "z_median": -3.2216758659274283,
+          "z_delta_median": -2.6127532797215185,
+          "passes": {
+            "median_within_3sigma": false,
+            "a_trend_within_3sigma": true
+          }
+        },
+        {
+          "model_id": "local_spacing_d_in_exp (Step 7.13.17.9)",
+          "z_median": 5.630622881380629,
+          "z_delta_median": 2.39234897045046,
+          "passes": {
+            "median_within_3sigma": false,
+            "a_trend_within_3sigma": true
+          }
+        }
+      ],
+      "main_gate": {
+        "ok": true,
+        "model_id": "local_spacing_d_in_exp + nu_saturation (Step 7.13.18)",
+        "passes": {
+          "median_within_3sigma": true,
+          "a_trend_within_3sigma": true
+        },
+        "thresholds": {
+          "z_median_abs_max": 3.0,
+          "z_delta_median_abs_max": 3.0,
+          "a_low_bin": [
+            40,
+            60
+          ],
+          "a_high_bin": [
+            250,
+            300
+          ],
+          "channel_decision_sigma_level": 3.0,
+          "note": "Operational thresholds for this repository (not universal physics thresholds)."
+        }
+      },
+      "notes": []
+    },
+    "condensed_and_thermal": {
+      "ok": true,
+      "inputs": {
+        "condensed_falsification_pack_json": {
+          "path": "output/quantum/condensed_falsification_pack.json",
+          "exists": true
+        },
+        "condensed_holdout_audit_summary_json": {
+          "path": "output/quantum/condensed_holdout_audit_summary.json",
+          "exists": true
+        }
+      },
+      "tests": [
+        {
+          "step": "7.14.1",
+          "metrics_json": {
+            "path": "output/quantum/condensed_silicon_lattice_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "targets_by_code",
+          "targets": [
+            {
+              "code": "asil",
+              "abs_diff": 0.0,
+              "threshold": 2.67e-17,
+              "ok": true
+            },
+            {
+              "code": "d220sil",
+              "abs_diff": 0.0,
+              "threshold": 9.6e-18,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "step": "7.14.2",
+          "metrics_json": {
+            "path": "output/quantum/condensed_silicon_heat_capacity_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "targets_by_cp_keypoints",
+          "targets": [
+            {
+              "phase": "solid",
+              "T_K": 298.15,
+              "abs_diff": 0.0,
+              "threshold": 1.1994342877746043,
+              "ok": true
+            },
+            {
+              "phase": "solid",
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 1.2028012208199999,
+              "ok": true
+            },
+            {
+              "phase": "solid",
+              "T_K": 1000.0,
+              "abs_diff": 0.0,
+              "threshold": 1.5793117799999998,
+              "ok": true
+            },
+            {
+              "phase": "liquid",
+              "T_K": 1685.0,
+              "abs_diff": 0.0,
+              "threshold": 1.631762399994917,
+              "ok": true
+            },
+            {
+              "phase": "liquid",
+              "T_K": 2000.0,
+              "abs_diff": 0.0,
+              "threshold": 1.6317623999950646,
+              "ok": true
+            },
+            {
+              "phase": "liquid",
+              "T_K": 3000.0,
+              "abs_diff": 0.0,
+              "threshold": 1.6317623999960398,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "step": "7.14.3",
+          "metrics_json": {
+            "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "baseline_freeze_fit_target_self",
+          "targets": [
+            {
+              "target": "theta_D_K",
+              "value": 622.1452045992636,
+              "abs_diff": 0.0,
+              "threshold": 52.088750034898645,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "step": "7.14.4",
+          "metrics_json": {
+            "path": "output/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "necessary_conditions",
+          "targets": [
+            {
+              "check": "min_pct_per_K_proxy>0",
+              "value": 0.020512827705569947,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "step": null,
+          "metrics_json": {
+            "path": "output/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "targets_by_alpha_samples",
+          "targets": [
+            {
+              "T_K": 20.0,
+              "abs_diff": 0.0,
+              "threshold": 0.09,
+              "ok": true
+            },
+            {
+              "T_K": 50.0,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            },
+            {
+              "T_K": 100.0,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            },
+            {
+              "T_K": 200.0,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            },
+            {
+              "T_K": 293.15,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            },
+            {
+              "T_K": 298.15,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            },
+            {
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            },
+            {
+              "T_K": 600.0,
+              "abs_diff": 0.0,
+              "threshold": 1.5,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "step": "7.14.6",
+          "metrics_json": {
+            "path": "output/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "targets_by_rrr_selected_T",
+          "targets": [
+            {
+              "rrr": 50,
+              "T_K": 4.0,
+              "abs_diff": 0.0,
+              "threshold": 19.22298797551511,
+              "ok": true
+            },
+            {
+              "rrr": 50,
+              "T_K": 10.0,
+              "abs_diff": 0.0,
+              "threshold": 46.68892627809943,
+              "ok": true
+            },
+            {
+              "rrr": 50,
+              "T_K": 20.0,
+              "abs_diff": 0.0,
+              "threshold": 82.07128868722974,
+              "ok": true
+            },
+            {
+              "rrr": 50,
+              "T_K": 50.0,
+              "abs_diff": 0.0,
+              "threshold": 51.813543630148786,
+              "ok": true
+            },
+            {
+              "rrr": 50,
+              "T_K": 77.0,
+              "abs_diff": 0.0,
+              "threshold": 30.904459357165813,
+              "ok": true
+            },
+            {
+              "rrr": 50,
+              "T_K": 100.0,
+              "abs_diff": 0.0,
+              "threshold": 26.635310008883202,
+              "ok": true
+            },
+            {
+              "rrr": 50,
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 23.54209469209723,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 4.0,
+              "abs_diff": 0.0,
+              "threshold": 19.268908822288754,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 10.0,
+              "abs_diff": 0.0,
+              "threshold": 46.19746726700723,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 20.0,
+              "abs_diff": 0.0,
+              "threshold": 72.67530793609481,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 50.0,
+              "abs_diff": 0.0,
+              "threshold": 30.145388311398463,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 77.0,
+              "abs_diff": 0.0,
+              "threshold": 16.415990942380812,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 100.0,
+              "abs_diff": 0.0,
+              "threshold": 13.846480142077533,
+              "ok": true
+            },
+            {
+              "rrr": 100,
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 11.889718770450378,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 4.0,
+              "abs_diff": 0.0,
+              "threshold": 57.705750883012385,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 10.0,
+              "abs_diff": 0.0,
+              "threshold": 136.4847969170713,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 20.0,
+              "abs_diff": 0.0,
+              "threshold": 194.67779083424796,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 50.0,
+              "abs_diff": 0.0,
+              "threshold": 63.34800586872359,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 77.0,
+              "abs_diff": 0.0,
+              "threshold": 33.35078253388906,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 100.0,
+              "abs_diff": 0.0,
+              "threshold": 27.967910573478477,
+              "ok": true
+            },
+            {
+              "rrr": 150,
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 23.85847908725133,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 4.0,
+              "abs_diff": 0.0,
+              "threshold": 56.65137933207964,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 10.0,
+              "abs_diff": 0.0,
+              "threshold": 129.59714017910193,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 20.0,
+              "abs_diff": 0.0,
+              "threshold": 151.56802279787476,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 50.0,
+              "abs_diff": 0.0,
+              "threshold": 33.91402464631125,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 77.0,
+              "abs_diff": 0.0,
+              "threshold": 17.163589795312067,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 100.0,
+              "abs_diff": 0.0,
+              "threshold": 14.132882085399608,
+              "ok": true
+            },
+            {
+              "rrr": 300,
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 11.936217001601408,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 4.0,
+              "abs_diff": 0.0,
+              "threshold": 190.90111521040373,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 10.0,
+              "abs_diff": 0.0,
+              "threshold": 412.66322293178695,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 20.0,
+              "abs_diff": 0.0,
+              "threshold": 394.4926344430049,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 50.0,
+              "abs_diff": 0.0,
+              "threshold": 70.40896785401783,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 77.0,
+              "abs_diff": 0.0,
+              "threshold": 34.74219638866994,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 100.0,
+              "abs_diff": 0.0,
+              "threshold": 28.76414852638338,
+              "ok": true
+            },
+            {
+              "rrr": 500,
+              "T_K": 300.0,
+              "abs_diff": 0.0,
+              "threshold": 24.071241349651583,
+              "ok": true
+            }
+          ]
+        },
+        {
+          "step": "7.15.2",
+          "metrics_json": {
+            "path": "output/quantum/thermo_blackbody_entropy_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "baseline_note_only",
+          "targets": []
+        },
+        {
+          "step": "7.15.1",
+          "metrics_json": {
+            "path": "output/quantum/thermo_blackbody_radiation_baseline_metrics.json",
+            "exists": true
+          },
+          "metrics_sha256_ok": true,
+          "gate_ok": true,
+          "gate_reason": "baseline_note_only",
+          "targets": []
+        }
+      ],
+      "summary": {
+        "tests_total": 8,
+        "tests_ok": 8,
+        "tests_unknown": 0,
+        "tests_failed": 0
+      },
+      "notes": []
+    },
+    "completion_inventory": {
+      "ok": true,
+      "inputs": {
+        "inventory_json": {
+          "path": "output/summary/part3_completion_inventory.json",
+          "exists": true
+        }
+      },
+      "summary": {
+        "sections_scanned": 26,
+        "missing_sections": 0
+      },
+      "notes": []
+    }
+  },
+  "ok": true
+}

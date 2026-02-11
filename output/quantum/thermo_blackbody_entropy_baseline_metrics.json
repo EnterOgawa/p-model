@@ -1,0 +1,59 @@
+{
+  "generated_utc": "2026-01-31T13:47:21.989943+00:00",
+  "phase": 7,
+  "step": "7.15.2",
+  "inputs": {
+    "blackbody_constants_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_blackbody_constants\\extracted_values.json",
+      "sha256": "ffe4c2234b9bf48c59898745bd5688a50a9f314e5e1eec63e172c24486032742"
+    }
+  },
+  "derived": {
+    "sigma_W_per_m2K4": 5.6703744191844314e-08,
+    "radiation_constant_a_J_per_m3K4": 7.565733250280007e-16,
+    "entropy_density_coeff_J_per_m3K4": 1.0087644333706676e-15,
+    "zeta3": 1.2020569031595942,
+    "photon_number_density_coeff_per_m3K3": 20286846.033907045,
+    "entropy_per_photon_kB_theory": 3.6015707105587516
+  },
+  "examples": [
+    {
+      "T_K": 2.725,
+      "energy_density_J_per_m3": 4.1717382508831196e-14,
+      "pressure_Pa": 1.3905794169610398e-14,
+      "entropy_density_J_per_m3K": 2.0412174927868475e-14,
+      "entropy_per_photon_kB": 3.601570710558753
+    },
+    {
+      "T_K": 77.0,
+      "energy_density_J_per_m3": 2.6595853114215635e-08,
+      "pressure_Pa": 8.865284371405212e-09,
+      "entropy_density_J_per_m3K": 4.60534253060011e-10,
+      "entropy_per_photon_kB": 3.601570710558753
+    },
+    {
+      "T_K": 300.0,
+      "energy_density_J_per_m3": 6.128243932726806e-06,
+      "pressure_Pa": 2.042747977575602e-06,
+      "entropy_density_J_per_m3K": 2.7236639701008026e-08,
+      "entropy_per_photon_kB": 3.6015707105587533
+    },
+    {
+      "T_K": 5772.0,
+      "energy_density_J_per_m3": 0.8397621860165138,
+      "pressure_Pa": 0.27992072867217127,
+      "entropy_density_J_per_m3K": 0.00019398525895507362,
+      "entropy_per_photon_kB": 3.6015707105587533
+    }
+  ],
+  "falsification": {
+    "notes": [
+      "For a photon gas in equilibrium, the relations u=aT^4, p=u/3, s=(4/3)aT^3 are standard and tightly constrained.",
+      "Any P-model extension that changes these equilibrium scalings without an explicit, testable mechanism should be treated as falsified."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.png"
+  }
+}

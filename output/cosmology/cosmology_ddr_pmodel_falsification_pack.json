@@ -1,0 +1,108 @@
+{
+  "generated_utc": "2026-02-10T15:34:08.777894+00:00",
+  "definition": {
+    "eta_pmodel": "η^(P)(z) ≡ D_L / [(1+z) D_A]",
+    "model_predictions": {
+      "FRW_photon_conservation": "η^(P)=(1+z)",
+      "P_model_minimal": "η^(P)=1"
+    },
+    "equivalent_exponent": "p ≡ 1+ε0  （η^(P)=(1+z)^p）"
+  },
+  "decision_rule_examples": [
+    "距離指標推定が『FRWの膨張（D_A=D_M/(1+z)）を前提に埋め込んでいない』ことを監査したうえで、η^(P) を評価する。",
+    "同一の推定I/F（入力・選別・校正）を固定した複数の独立データセットで、η^(P)=1（P-model最小）からの乖離が 3σ を超えて一貫するなら、P-model最小は棄却される。",
+    "逆に、η^(P)=(1+z)（FRW+光子保存）からの乖離が 3σ を超えて一貫するなら、光子保存（または距離推定前提）が破れている可能性が高い（opacity/系統/定義差の切り分けへ進む）。"
+  ],
+  "precision_targets": {
+    "exponent_space": {
+      "delta_p_between_models": 1.0,
+      "sigma_p_required_for_3sigma_separation": 0.3333333333333333,
+      "sigma_p_required_for_5sigma_separation": 0.2,
+      "note": "p=1（FRW）と p=0（P-model最小）の識別に必要な精度（単純な目安）。"
+    },
+    "eta_space_examples": [
+      {
+        "z_ref": 1.0,
+        "delta_eta_between_models": 1.0,
+        "sigma_eta_required_for_3sigma_separation": 0.3333333333333333,
+        "sigma_eta_required_for_5sigma_separation": 0.2,
+        "note": "η^(P)_FRW-(η^(P)_P)= (1+z_ref)-1 = z_ref を用いた目安。"
+      },
+      {
+        "z_ref": 0.5,
+        "delta_eta_between_models": 0.5,
+        "sigma_eta_required_for_3sigma_separation": 0.16666666666666666
+      },
+      {
+        "z_ref": 2.0,
+        "delta_eta_between_models": 2.0,
+        "sigma_eta_required_for_3sigma_separation": 0.6666666666666666
+      }
+    ]
+  },
+  "representative_constraints": {
+    "bao": {
+      "id": "martinelli2021_snIa_bao",
+      "short_label": "SNIa+BAO (2021)",
+      "epsilon0_obs": 0.013,
+      "epsilon0_sigma": 0.029,
+      "p_obs": 1.013,
+      "p_sigma": 0.029,
+      "eta_p_obs_z1": 2.0181032676893627,
+      "eta_p_sigma_approx_z1": 0.040566435112253135,
+      "z_vs_pmodel_in_epsilon_space": -34.93103448275861,
+      "z_vs_frw_in_epsilon_space": -0.44827586206896547,
+      "z_vs_pmodel_in_eta_space_z1": -25.09718354280146,
+      "z_vs_frw_in_eta_space_z1": -0.44626222736280186,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Euclid: Forecast constraints on the cosmic distance duality relation with complementary external probes",
+        "authors": "M. Martinelli et al.",
+        "year": 2021,
+        "doi": "10.1051/0004-6361/202039637",
+        "url": "https://arxiv.org/abs/2007.16153",
+        "retrieved_utc": "2026-01-08T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_2007.16153.pdf",
+        "local_pdf_sha256": "58454e08f65f9f055a95f3e81796929c813c0f875fed1c1978fd8ab820156312",
+        "note": "ここでは『現在データでのε0制約』のみを固定入力として利用し、Euclid予測（将来改善）は参考に留める。"
+      }
+    },
+    "no_bao": {
+      "id": "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical",
+      "short_label": "Clusters+SNIa (2012, non-iso)",
+      "epsilon0_obs": -0.7131188522118385,
+      "epsilon0_sigma": 0.2630344058337938,
+      "p_obs": 0.28688114778816154,
+      "p_sigma": 0.2630344058337938,
+      "eta_p_obs_z1": 1.22,
+      "eta_p_sigma_approx_z1": 0.2224322992886246,
+      "z_vs_pmodel_in_epsilon_space": -1.0906601624178247,
+      "z_vs_frw_in_epsilon_space": 2.7111238545061065,
+      "z_vs_pmodel_in_eta_space_z1": -0.9890649905773419,
+      "z_vs_frw_in_eta_space_z1": 3.5066849665923945,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Probing the cosmic distance duality relation with the Sunyaev-Zel’dovich effect, X-ray observations and supernovae Ia",
+        "authors": "R. F. L. Holanda, J. A. S. Lima, M. B. Ribeiro",
+        "year": 2012,
+        "doi": "10.1051/0004-6361/201118343",
+        "arxiv_id": "1104.3753",
+        "url": "https://arxiv.org/abs/1104.3753",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1104.3753.pdf",
+        "local_pdf_sha256": "a294e48cf13fd390f15cc56af664d801fd80393188b6e5994fbe47882b28d34e",
+        "note": "BAOに依存しない直接比較（クラスターD_AとSNe IaのD_L）。同一論文内でもクラスター幾何モデルで η0 が変わるため、別行として固定入力に追加。"
+      }
+    }
+  },
+  "related_outputs": {
+    "eta_p_constraints_png": "C:/develop/waveP/output/cosmology/cosmology_ddr_pmodel_eta_constraints.png",
+    "eta_p_constraints_json": "C:/develop/waveP/output/cosmology/cosmology_ddr_pmodel_eta_constraints.json",
+    "ddr_constraints_png": "C:/develop/waveP/output/cosmology/cosmology_distance_duality_constraints.png",
+    "ddr_constraints_metrics": "C:/develop/waveP/output/cosmology/cosmology_distance_duality_constraints_metrics.json"
+  },
+  "notes": [
+    "ここでの反証条件は『距離推定が前提を埋め込んでいない（循環でない）』ことを要請するため、最終的には距離指標の再導出（標準化/校正/系統の監査）と一体で固定する必要がある。",
+    "一方で、p_t（時間伸長）や T(z) 等の独立プローブを固定したうえで、距離指標側の前提が許容できるかを詰める、という役割分担は維持する。"
+  ]
+}

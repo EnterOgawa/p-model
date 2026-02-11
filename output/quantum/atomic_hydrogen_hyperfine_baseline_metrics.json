@@ -1,0 +1,23 @@
+{
+  "generated_utc": "2026-01-26T03:07:09.230862+00:00",
+  "phase": 7,
+  "step": "7.12",
+  "title": "Atomic baseline (Hydrogen hyperfine; NIST AtSpec)",
+  "source_cache": {
+    "extracted_values": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_atspec_handbook\\extracted_values.json",
+    "raw_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_atspec_handbook\\AtSpec.PDF"
+  },
+  "hyperfine": {
+    "transition": "H I 1s ground-state hyperfine (21 cm)",
+    "token": "1420.405 751 766 7(10)",
+    "frequency_mhz": 1420.4057517667,
+    "sigma_mhz": 1e-09,
+    "frequency_hz": 1420405751.7667,
+    "sigma_hz": 0.001,
+    "fractional_sigma": 7.040241837631258e-13,
+    "wavelength_m": 0.21106114054179115,
+    "wavelength_cm": 21.106114054179116,
+    "photon_energy_eV": 5.874326184106391e-06
+  },
+  "note": "This output fixes the hydrogen 21 cm hyperfine transition frequency as a baseline target. A P-model derivation is tracked in Roadmap Step 7.12+."
+}

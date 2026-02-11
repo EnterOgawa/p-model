@@ -1,0 +1,55 @@
+{
+  "generated_utc": "2026-02-10T15:36:31.368308+00:00",
+  "input": "C:\\develop\\waveP\\data\\theory\\gravitational_redshift_experiments.json",
+  "model": "P-model",
+  "definition": {
+    "epsilon": "重力赤方偏移の偏差パラメータ。z_obs = (1+epsilon) * ΔU/c^2（ここで z ≡ Δf/f）。GRは epsilon=0。",
+    "pmodel_prediction": "P-model（静止時計）: dτ/dt = P0/P = exp(φ/c^2) ≈ 1 + φ/c^2 なので、弱場の重力赤方偏移は GR と同じ一次の形（epsilon=0）になる。"
+  },
+  "scale": 1e-05,
+  "rows": [
+    {
+      "id": "gp_a_1976_vessot_1980",
+      "short_label": "GP-A (1976)",
+      "title": "Gravity Probe A（重力赤方偏移）",
+      "epsilon": 0.0,
+      "sigma": 7e-05,
+      "z_score": 0.0,
+      "sigma_note": "一次ソースの記述「agreement ... at the 70×10^-6 level」を、epsilon=0±70×10^-6（1σ相当の目安）として扱う。",
+      "source": {
+        "kind": "primary_paper_copy",
+        "title": "Test of Relativistic Gravitation with a Space-Borne Hydrogen Maser",
+        "authors": "R. F. C. Vessot et al.",
+        "year": 1980,
+        "doi": "10.1103/PhysRevLett.45.2081",
+        "url": "https://ntrs.nasa.gov/citations/19810000898",
+        "retrieved_utc": "2026-01-04T00:00:00Z",
+        "note": "APS(PDF)は直接取得制限がある場合があるため、NTRSの公開コピーを一次ソースとして参照する。"
+      }
+    },
+    {
+      "id": "great_galileo_2018_delva_prl121",
+      "short_label": "Galileo 5/6 (2018)",
+      "title": "Galileo 5/6（楕円軌道）重力赤方偏移テスト（GREAT）",
+      "epsilon": 1.9e-06,
+      "sigma": 2.48e-05,
+      "z_score": 0.07661290322580645,
+      "sigma_note": "論文要旨の結果（epsilon = (0.19 ± 2.48)×10^-5）。",
+      "source": {
+        "kind": "primary_paper",
+        "title": "A gravitational redshift test using eccentric Galileo satellites",
+        "authors": "P. Delva et al.",
+        "year": 2018,
+        "doi": "10.1103/PhysRevLett.121.231101",
+        "url": "https://arxiv.org/abs/1810.12191",
+        "retrieved_utc": "2026-01-04T00:00:00Z",
+        "note": "arXivページ（要旨）に数値が明示されているため、この値を固定入力として採用する。"
+      }
+    }
+  ],
+  "outputs": {
+    "plot_png": "C:\\develop\\waveP\\output\\theory\\gravitational_redshift_experiments.png",
+    "rows_json": "C:\\develop\\waveP\\output\\theory\\gravitational_redshift_experiments.json",
+    "rows_csv": "C:\\develop\\waveP\\output\\theory\\gravitational_redshift_experiments.csv"
+  }
+}

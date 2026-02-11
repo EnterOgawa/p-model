@@ -1,0 +1,79 @@
+{
+  "generated_utc": "2026-02-11T02:47:11.487487+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.20.3",
+    "name": "Bell pairing/estimator cross-checks"
+  },
+  "main_script": {
+    "path": "scripts/quantum/bell_primary_products.py",
+    "repro": "python -B scripts/quantum/bell_primary_products.py"
+  },
+  "datasets": [
+    {
+      "dataset_id": "weihs1998_longdist_longdist1",
+      "display_name": "Weihs 1998",
+      "supported": true,
+      "crosscheck_pairing_json": {
+        "path": "output/quantum/bell/weihs1998_longdist_longdist1/crosscheck_pairing.json",
+        "sha256": "a2642c5ed080ac81ff2b4e10248c94a69dd9764a0621c3e44e97c3b860c81737"
+      },
+      "delta": {
+        "abs_delta_statistic_abs": 0.002181156390948402,
+        "delta_over_sigma_boot": 0.08612854215724108,
+        "note": "Treat this pairing-choice delta as an implementation/systematic sensitivity (not an optimizer)."
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2015",
+      "display_name": "Delft (Hensen 2015)",
+      "supported": false,
+      "crosscheck_pairing_json": {
+        "path": "output/quantum/bell/delft_hensen2015/crosscheck_pairing.json",
+        "sha256": "2052bcaa2bb96e94aad73aed5d61540325861d93f803810d44e95f76294f790d"
+      },
+      "delta": null
+    },
+    {
+      "dataset_id": "delft_hensen2016_srep30289",
+      "display_name": "Delft (Hensen 2016)",
+      "supported": false,
+      "crosscheck_pairing_json": {
+        "path": "output/quantum/bell/delft_hensen2016_srep30289/crosscheck_pairing.json",
+        "sha256": "a2f8108c1648a9e52a274fc6f335eee52f2c9d510808439b4a40c54087e4db4b"
+      },
+      "delta": null
+    },
+    {
+      "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+      "display_name": "NIST",
+      "supported": true,
+      "crosscheck_pairing_json": {
+        "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/crosscheck_pairing.json",
+        "sha256": "3fb8b6b094565c38f791b02dffd510baf54d337281ed25f9ed37d6657f119006"
+      },
+      "delta": {
+        "abs_delta_statistic": 1.867090885505733e-07,
+        "delta_over_sigma_boot": 0.020516605714527774,
+        "note": "Treat this pairing-choice delta as an implementation/systematic sensitivity (not an optimizer)."
+      }
+    },
+    {
+      "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+      "display_name": "Kwiat/Christensen 2013",
+      "supported": true,
+      "crosscheck_pairing_json": {
+        "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/crosscheck_pairing.json",
+        "sha256": "ed5529192d19df5aff6a471d11b412619cb8d23b9a82faaaae60a25f78f6da13"
+      },
+      "delta": {
+        "abs_delta_statistic": 0.0,
+        "delta_over_sigma_boot": 0.0,
+        "note": "Internal consistency check for trial-based CH J_prob at the frozen window (not a coincidence-pairing convention)."
+      }
+    }
+  ],
+  "outputs": {
+    "crosscheck_pairing_summary_json": "output/quantum/bell/crosscheck_pairing_summary.json"
+  }
+}

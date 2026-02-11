@@ -1,0 +1,153 @@
+{
+  "generated_utc": "2026-02-01T05:04:53.595093+00:00",
+  "phase": 7,
+  "step": "7.14.20",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_phonon_dos_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\hadley_si_phonon_dos\\extracted_values.json",
+      "sha256": "322e42459408b8c66a2fd8515432e2e3fbb98b196ded3aa781e81e7cfac11161"
+    },
+    "silicon_phonon_feature_softening_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity\\fig2_digitized_softening.json",
+      "sha256": "76e851c08d731cb5f81774fda580d573f7efe0910b6fd8690239a6ffd6876efc"
+    }
+  },
+  "dos": {
+    "mode": "static_omega",
+    "integral_dos_domega_per_m3": 1.498453217241528e+29,
+    "implied_atom_number_density_per_m3": 4.99484405747176e+28,
+    "integral_per_atom": 2.999999999999996,
+    "splits": {
+      "acoustic_optical": {
+        "omega_rad_s": 73015966594013.5,
+        "nu_THz": 11.62085200806995
+      }
+    }
+  },
+  "model": {
+    "name": "DOS-split Grüneisen 2-group (A_low/A_high weighted LS; split at half-integral) + mode softening (Kim2015 Fig.2 digitized)",
+    "groups": 2,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "enforce_signs": true,
+    "mode_softening": {
+      "mode": "kim2015_fig2_features",
+      "source": {
+        "path": "C:\\develop\\waveP\\data\\quantum\\sources\\caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity\\fig2_digitized_softening.json",
+        "sha256": "76e851c08d731cb5f81774fda580d573f7efe0910b6fd8690239a6ffd6876efc"
+      },
+      "note": "Mode-dependent ω(T) scales are frozen from Kim2015 Fig.2 digitization (no fit parameters)."
+    },
+    "A_low_mol_per_J": -9.450173892875188e-08,
+    "A_high_mol_per_J": 4.4236169321066646e-07
+  },
+  "fit_metrics": {
+    "n": 551,
+    "sign_mismatch_n": 1,
+    "max_abs_z": 26.354891624009518,
+    "rms_z": 7.815893645775842,
+    "reduced_chi2": 61.31073699203211,
+    "exceed_3sigma_n": 327
+  },
+  "holdout_splits": [
+    {
+      "name": "A",
+      "train_T_K": [
+        50.0,
+        300.0
+      ],
+      "test_T_K": [
+        300.0,
+        600.0
+      ],
+      "params": {
+        "A_low_mol_per_J": -1.007145951561467e-07,
+        "A_high_mol_per_J": 4.5771973762484816e-07,
+        "softening_frac_at_Tmax": "",
+        "enforce_signs": true,
+        "fit_sse": 22792.49175428582,
+        "constraint_solution_kind": "unconstrained"
+      },
+      "train": {
+        "n": 251,
+        "sign_mismatch_n": 2,
+        "max_abs_z": 22.187894523833116,
+        "rms_z": 9.529257056922939,
+        "reduced_chi2": 91.53611146299527,
+        "exceed_3sigma_n": 195
+      },
+      "test": {
+        "n": 301,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 20.835172605024514,
+        "rms_z": 18.590275843184635,
+        "reduced_chi2": 345.59835592569414,
+        "exceed_3sigma_n": 301
+      }
+    },
+    {
+      "name": "B",
+      "train_T_K": [
+        200.0,
+        600.0
+      ],
+      "test_T_K": [
+        50.0,
+        200.0
+      ],
+      "params": {
+        "A_low_mol_per_J": -8.464322085221433e-08,
+        "A_high_mol_per_J": 4.3016498905435614e-07,
+        "softening_frac_at_Tmax": "",
+        "enforce_signs": true,
+        "fit_sse": 1373.9339134073878,
+        "constraint_solution_kind": "unconstrained"
+      },
+      "train": {
+        "n": 401,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 4.5966856544352614,
+        "rms_z": 1.8510183982720472,
+        "reduced_chi2": 3.4434433919984655,
+        "exceed_3sigma_n": 32
+      },
+      "test": {
+        "n": 151,
+        "sign_mismatch_n": 3,
+        "max_abs_z": 33.450241501379445,
+        "rms_z": 18.020612113077895,
+        "reduced_chi2": 324.7424609300098,
+        "exceed_3sigma_n": 96
+      }
+    }
+  ],
+  "falsification": {
+    "strict_criteria": {
+      "max_abs_z_le": 3.0,
+      "reduced_chi2_le": 2.0,
+      "sign_mismatch_n_eq": 0
+    },
+    "strict_ok": false,
+    "holdout_ok": false,
+    "notes": [
+      "This test freezes the mode-weighting via a phonon DOS proxy, and fits only a small number of effective coefficients (per-group A).",
+      "holdout_ok requires the test ranges (A/B) to remain within the same strict criteria, to reject range-selection artifacts.",
+      "Mode-dependent ω(T) scales are frozen from a primary INS-based reference (Kim et al. PRB 91, 014307; Fig.2 digitized); they are not fit and are not counted as free parameters."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_mode_softening_kim2015_fig2_model.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_mode_softening_kim2015_fig2_model.png"
+  },
+  "notes": [
+    "ω-split is defined at the half-integral of D(ω) to proxy the 3+3 mode count split (acoustic vs optical) in diamond Si.",
+    "For groups=3, TA/LA split uses the 2:1 mode-count ratio within acoustic branches (2 TA, 1 LA).",
+    "A parameters correspond to effective (γ/(B V_m)) per group up to a convention factor; this step focuses on procedure sensitivity (holdout) rather than absolute γ values."
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "generated_utc": "2026-01-26T03:57:46.384555+00:00",
+  "phase": 7,
+  "step": "7.8",
+  "sources": [
+    {
+      "topic": "casimir_force_measurement",
+      "reference": "Roy, Lin, Mohideen (quant-ph/9906062v3): improved precision measurement of the Casimir force (AFM; Al sphere vs plate)",
+      "url": "https://arxiv.org/abs/quant-ph/9906062",
+      "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_quant-ph_9906062v3.pdf",
+      "local_pdf_sha256": "AF4DB4DED1BE34D2A0828365B5DC63CEA19738A3736D2C14BAA41A61F99F870B",
+      "abstract_value": {
+        "relative_precision_at_closest_separation": 0.01
+      },
+      "main_text_value": {
+        "sphere_diameter_um": 201.7
+      }
+    },
+    {
+      "topic": "lamb_shift_scaling_and_definitions",
+      "reference": "Ivanov & Karshenboim (physics/0009069v1): Lamb shift in light hydrogen-like atoms (definitions + scaling)",
+      "url": "https://arxiv.org/abs/physics/0009069",
+      "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_physics_0009069v1.pdf",
+      "local_pdf_sha256": "87196CFA73B9C09B190C147DD028502017E1BAFA2FD83B412C7ADA0C1E132CFD",
+      "key_points": [
+        "Lamb shift scales as Z^4",
+        "unknown higher-order two-loop terms scale as Z^6"
+      ],
+      "table4_nuclear_term_mhz": [
+        {
+          "label": "He (Z=2)",
+          "Z": 2,
+          "deltaE_mhz": 8.8,
+          "sigma_mhz": 0.12
+        },
+        {
+          "label": "N-14 (Z=7)",
+          "Z": 7,
+          "deltaE_mhz": 3145.0,
+          "sigma_mhz": 33.0
+        },
+        {
+          "label": "N-15 (Z=7)",
+          "Z": 7,
+          "deltaE_mhz": 3274.0,
+          "sigma_mhz": 30.0
+        }
+      ]
+    },
+    {
+      "topic": "hydrogen_1s2s_frequency",
+      "reference": "Parthey et al. 2011 (1107.3101v1): Improved Measurement of the Hydrogen 1S–2S Transition Frequency",
+      "url": "https://arxiv.org/abs/1107.3101",
+      "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_1107.3101v1.pdf",
+      "local_pdf_sha256": "1DAFA322B45A9626C65CDFBB134C6B5DC057DF5D5F4DFB06C02759E05F368A65",
+      "extracted_value": {
+        "f_1s2s_hz": 2466061413187035,
+        "sigma_hz": 10,
+        "fractional_sigma": 4.055049053736426e-15,
+        "extract_match": "f1S−2S= 2466061413187035(10)Hz"
+      }
+    },
+    {
+      "topic": "alpha_inverse_recoil_rb",
+      "reference": "Bouchendira et al. 2008 (0812.3139v1): Determination of the fine structure constant with atom interferometry and Bloch oscillations",
+      "url": "https://arxiv.org/abs/0812.3139",
+      "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_0812.3139v1.pdf",
+      "local_pdf_sha256": "F763334508B9D7F06A390BCF32E38E246CD4468FEEBD5D9EB6FB57AC93782B55",
+      "extracted_value": {
+        "alpha_inv": 137.03599945,
+        "sigma_alpha_inv": 6.2e-07,
+        "fractional_sigma": 4.5243585808721596e-09,
+        "extract_match": "α−1= 137.03599945(62)"
+      }
+    },
+    {
+      "topic": "alpha_inverse_electron_g2_qed",
+      "reference": "Gabrielse et al. 2008 (0801.1134v2): New Measurement of the Electron Magnetic Moment and the Fine Structure Constant",
+      "url": "https://arxiv.org/abs/0801.1134",
+      "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_0801.1134v2.pdf",
+      "local_pdf_sha256": "562D23333D57C1C8D415F357C761508FDC4A5AEF512B28639D3AC0079A7C69F5",
+      "extracted_value": {
+        "alpha_inv": 137.035999084,
+        "sigma_alpha_inv": 5.1e-08,
+        "fractional_sigma": 3.7216498103347386e-10,
+        "extract_match": "α−1= 137.035 999 084 (51)"
+      }
+    }
+  ],
+  "constants_si": {
+    "c_m_per_s": 299792458.0,
+    "h_j_s": 6.62607015e-34,
+    "hbar_j_s": 1.0545718176461565e-34,
+    "G_m3_kg_s2": 6.6743e-11,
+    "m_p_kg": 1.67262192369e-27,
+    "m_e_kg": 9.1093837015e-31,
+    "a0_m": 5.29177210903e-11,
+    "e_charge_c": 1.602176634e-19
+  },
+  "casimir": {
+    "sphere_radius_m": 0.00010084999999999998,
+    "formula_notes": [
+      "Ideal plates: P = -π^2 ħ c / (240 a^4)",
+      "Sphere-plate (PFA): F = -π^3 ħ c R / (360 a^3)"
+    ],
+    "sample_points": [
+      {
+        "a_nm": 100.0,
+        "force_n": 2.7461223569199787e-10,
+        "force_sigma_n_assuming_rel_precision": 2.7461223569199787e-12,
+        "pressure_pa_plates": 13.001257732443651,
+        "rho_equiv_kg_m3": 1.4465850144770969e-16
+      },
+      {
+        "a_nm": 200.0,
+        "force_n": 3.4326529461499734e-11,
+        "force_sigma_n_assuming_rel_precision": 3.4326529461499734e-13,
+        "pressure_pa_plates": 0.8125786082777282,
+        "rho_equiv_kg_m3": 9.041156340481855e-18
+      },
+      {
+        "a_nm": 500.0,
+        "force_n": 2.1968978855359825e-12,
+        "force_sigma_n_assuming_rel_precision": 2.1968978855359826e-14,
+        "pressure_pa_plates": 0.020802012371909834,
+        "rho_equiv_kg_m3": 2.3145360231633543e-19
+      },
+      {
+        "a_nm": 1000.0,
+        "force_n": 2.746122356919978e-13,
+        "force_sigma_n_assuming_rel_precision": 2.7461223569199783e-15,
+        "pressure_pa_plates": 0.0013001257732443647,
+        "rho_equiv_kg_m3": 1.4465850144770964e-20
+      }
+    ]
+  },
+  "lamb_shift": {
+    "z_grid": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "z4_rel": [
+      1.0,
+      16.0,
+      81.0,
+      256.0,
+      625.0,
+      1296.0,
+      2401.0,
+      4096.0,
+      6561.0,
+      10000.0
+    ],
+    "z6_rel": [
+      1.0,
+      64.0,
+      729.0,
+      4096.0,
+      15625.0,
+      46656.0,
+      117649.0,
+      262144.0,
+      531441.0,
+      1000000.0
+    ],
+    "nuclear_table4_mhz": [
+      {
+        "label": "He (Z=2)",
+        "Z": 2,
+        "deltaE_mhz": 8.8,
+        "sigma_mhz": 0.12
+      },
+      {
+        "label": "N-14 (Z=7)",
+        "Z": 7,
+        "deltaE_mhz": 3145.0,
+        "sigma_mhz": 33.0
+      },
+      {
+        "label": "N-15 (Z=7)",
+        "Z": 7,
+        "deltaE_mhz": 3274.0,
+        "sigma_mhz": 30.0
+      }
+    ]
+  },
+  "atomic_gravity_safety": {
+    "assumption_note": "Order-of-magnitude check under minimal coupling: use nuclear gravity only with r~a0/Z; ΔE~m_e|φ| (no new short-range coupling).",
+    "cases": [
+      {
+        "label": "H (Z=1, A=1)",
+        "Z": 1,
+        "A": 1,
+        "phi_over_c2_abs": 2.3472587668255334e-44,
+        "deltaE_eV_abs": 1.1994467652171388e-38
+      },
+      {
+        "label": "U-238 (Z=92, A=238)",
+        "Z": 92,
+        "A": 238,
+        "phi_over_c2_abs": 5.139557795841188e-40,
+        "deltaE_eV_abs": 2.6263086371194473e-34
+      }
+    ]
+  },
+  "hydrogen_1s2s": {
+    "f_hz": 2466061413187035,
+    "sigma_hz": 10,
+    "fractional_sigma": 4.055049053736426e-15,
+    "sigma_energy_eV": 4.135667696923859e-14,
+    "ratio_sigma_energy_to_deltaE_grav_H": 3.44797936586637e+24
+  },
+  "alpha_precision": {
+    "recoil": {
+      "alpha_inv": 137.03599945,
+      "sigma_alpha_inv": 6.2e-07,
+      "fractional_sigma": 4.5243585808721596e-09,
+      "extract_match": "α−1= 137.03599945(62)"
+    },
+    "g2": {
+      "alpha_inv": 137.035999084,
+      "sigma_alpha_inv": 5.1e-08,
+      "fractional_sigma": 3.7216498103347386e-10,
+      "extract_match": "α−1= 137.035 999 084 (51)"
+    },
+    "derived": {
+      "delta_alpha_inv": 3.65999994755839e-07,
+      "sigma_delta_alpha_inv": 6.220940443373493e-07,
+      "z_score": 0.5883354744951784,
+      "epsilon_required": -5.341662001612235e-09,
+      "epsilon_units": "dimensionless (fractional scaling in recoil-based h/m)"
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\qed_vacuum_precision.png"
+  },
+  "notes": [
+    "This step fixes observables and primary sources; it does not claim a derivation of QED from P-model.",
+    "A P-model quantum interpretation must reproduce Casimir/Lamb phenomenology (or be falsified by precision comparisons)."
+  ]
+}

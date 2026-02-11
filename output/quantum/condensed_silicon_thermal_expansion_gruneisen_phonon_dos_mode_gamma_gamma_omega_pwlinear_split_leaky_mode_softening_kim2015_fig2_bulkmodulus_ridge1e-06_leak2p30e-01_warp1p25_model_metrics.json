@@ -1,0 +1,285 @@
+{
+  "generated_utc": "2026-02-01T16:59:12.173403+00:00",
+  "phase": 7,
+  "step": "7.14.20",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_phonon_dos_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\hadley_si_phonon_dos\\extracted_values.json",
+      "sha256": "322e42459408b8c66a2fd8515432e2e3fbb98b196ded3aa781e81e7cfac11161"
+    },
+    "ioffe_silicon_mechanical_properties_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\ioffe_silicon_mechanical_properties\\extracted_values.json",
+      "sha256": "5aa209cd7e7174a1d272bb5fa31eeb0b153bc6ef88938d3b0d44e21344eb8561"
+    },
+    "silicon_lattice_codata_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\extracted_values.json",
+      "sha256": "0060fba3290185382c3e0895a8b3022b830ca6dc81f66e90c0aabcd292710fb2"
+    },
+    "silicon_phonon_feature_softening_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity\\fig2_digitized_softening.json",
+      "sha256": "76e851c08d731cb5f81774fda580d573f7efe0910b6fd8690239a6ffd6876efc"
+    }
+  },
+  "dos": {
+    "mode": "static_omega",
+    "integral_dos_domega_per_m3": 1.498453217241528e+29,
+    "implied_atom_number_density_per_m3": 4.99484405747176e+28,
+    "integral_per_atom": 2.999999999999996,
+    "splits": {
+      "acoustic_optical": {
+        "omega_rad_s": 73015966594013.5,
+        "nu_THz": 11.62085200806995
+      },
+      "ta_la": {
+        "omega_rad_s": 43604038360860.27,
+        "nu_THz": 6.9397982438995385
+      },
+      "to_lo": {
+        "omega_rad_s": 92148534711842.6,
+        "nu_THz": 14.66589479806485
+      }
+    }
+  },
+  "model": {
+    "name": "DOS-constrained Gruneisen gamma(omega) basis (pwlinear_split_leaky; weighted LS) + mode softening (Kim2015 Fig.2 digitized) + B(T) scaling (fit γ) + ridge (factor=1e-06) + pwlinear leak (epsilon=0.23, warp_p=1.25)",
+    "groups": 4,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "enforce_signs": true,
+    "coeff_unit": "gamma_dimensionless",
+    "ridge_factor": 1e-06,
+    "delta_ridge_factor": 0.0,
+    "cv_omega_dependence": "harmonic",
+    "formula": "alpha≈Σ γ_i·Cv_i/(B(T)·V_m)",
+    "bulk_modulus_model": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\ioffe_silicon_mechanical_properties\\extracted_values.json",
+      "sha256": "5aa209cd7e7174a1d272bb5fa31eeb0b153bc6ef88938d3b0d44e21344eb8561",
+      "b_ref_1e11_dyn_cm2": 9.8,
+      "t_lin_min_K": 400.0,
+      "t_lin_max_K": 873.0,
+      "c11_intercept_1e11_dyn_cm2": 16.38,
+      "c11_slope_1e11_dyn_cm2_per_K": -0.00128,
+      "c12_intercept_1e11_dyn_cm2": 5.92,
+      "c12_slope_1e11_dyn_cm2_per_K": -0.00048
+    },
+    "silicon_molar_volume": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\extracted_values.json",
+      "sha256": "0060fba3290185382c3e0895a8b3022b830ca6dc81f66e90c0aabcd292710fb2",
+      "a_m": 5.431020511e-10,
+      "V_m3_per_mol": 1.2058831987701815e-05
+    },
+    "mode_softening": {
+      "mode": "kim2015_fig2_features",
+      "source": {
+        "path": "C:\\develop\\waveP\\data\\quantum\\sources\\caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity\\fig2_digitized_softening.json",
+        "sha256": "76e851c08d731cb5f81774fda580d573f7efe0910b6fd8690239a6ffd6876efc"
+      },
+      "eq8_quasiharmonic": "",
+      "note": "Mode-dependent ω(T) scales are frozen from Kim2015 Fig.2 digitization (no fit parameters)."
+    },
+    "A_TA_mol_per_J": NaN,
+    "A_LA_mol_per_J": NaN,
+    "A_TO_mol_per_J": NaN,
+    "A_LO_mol_per_J": NaN
+  },
+  "kim2015_gruneisen_diagnostics": {
+    "source": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity\\fig2_digitized_softening.json",
+      "sha256": "76e851c08d731cb5f81774fda580d573f7efe0910b6fd8690239a6ffd6876efc"
+    },
+    "t_eval_K": 300.0,
+    "t_base_for_delta_K": 100.0,
+    "computed": {
+      "alpha_300K_per_K": 2.614416296296297e-06,
+      "dlnomega_dT_300K_mean_per_K": -5.7942429768756744e-05,
+      "gammaT_eq6_mean": 7.387554645988688,
+      "delta_lnV_100_to_300": 0.0007729250672307922,
+      "delta_lnomega_100_to_300_mean": -0.004019661026121136,
+      "bar_gamma_eq4_proxy": 5.200583079188558,
+      "Cv_total_300K_J_per_molK": 19.596425675425014,
+      "B_300K_Pa": 98000000000.0,
+      "V_m_m3_per_mol": 1.2058831987701815e-05,
+      "gamma_thermo_eq9": 0.4729883587561588,
+      "Eq8_table_ref": {
+        "bar_gamma_P_ref": 0.98,
+        "bar_gamma_T_ref": 7.0
+      },
+      "Eq8_intrinsic_dlnomega_dT_300K_at_V_from_table_ref_per_K": -4.7216358311111125e-05,
+      "Eq8_intrinsic_dlnomega_dT_300K_at_V_from_digitized_gammaT_per_K": -5.025604585764563e-05,
+      "Eq8_quasiharmonic_dlnomega_dT_300K_from_bar_gamma_P_ref_per_K": -7.686383911111113e-06,
+      "Eq8_fraction_quasiharmonic_vs_isobaric_300K": 0.132655533117731,
+      "Eq8_fraction_intrinsic_vs_isobaric_300K_from_table_ref": 0.8148839891517762,
+      "Eq8_fraction_intrinsic_vs_isobaric_300K_from_digitized_gammaT": 0.867344466882269
+    },
+    "by_feature": {
+      "dlnomega_dT_300K_per_K": {
+        "TA_sq": -6.875455208797614e-05,
+        "TA_circ": -5.899551331534729e-05,
+        "LA_pent": -5.953828444930109e-05,
+        "LA_LO_hex": -2.9028139355536216e-05,
+        "TO_LO_tri": -7.339565963562298e-05
+      },
+      "delta_lnomega_100_to_300": {
+        "TA_sq": -0.006870020282199162,
+        "TA_circ": -0.0077872073088853635,
+        "LA_pent": -0.0032901492850891715,
+        "LA_LO_hex": -0.0033045207590882662,
+        "TO_LO_tri": 0.0011535925046562783
+      }
+    },
+    "kim2015_table1_reference": {
+      "note": "Values transcribed from the extracted text of Kim et al., Phys. Rev. B 91, 014307 (2015), Table I.",
+      "bar_gamma": {
+        "value": 1.0,
+        "sigma": 0.6
+      },
+      "bar_gamma_T": {
+        "value": 7.0,
+        "sigma": 0.67
+      },
+      "bar_gamma_P": {
+        "value": 0.98
+      },
+      "gamma_thermo": {
+        "value": 0.367
+      }
+    },
+    "notes": [
+      "Eq.(6) uses α(T); here α(T) is taken from the NIST TRC fit used for the main α(T) evaluation.",
+      "Eq.(4) proxy uses Δ ln V inferred from integrating α(T) (Δ ln V≈3∫α dT) between 100 K and 300 K.",
+      "Eq.(9) uses B(T) and Cv(T); here B(T) is from Ioffe and Cv_total is from the current DOS-based basis.",
+      "Eq.(8) decomposes the isobaric phonon shift into a quasiharmonic (volume) term and an intrinsic (T|_V) term."
+    ]
+  },
+  "fit_metrics": {
+    "n": 551,
+    "sign_mismatch_n": 0,
+    "max_abs_z": 3.157837322742003,
+    "rms_z": 0.5591321606335241,
+    "reduced_chi2": 0.3143402444400491,
+    "exceed_3sigma_n": 1
+  },
+  "holdout_splits": [
+    {
+      "name": "A",
+      "train_T_K": [
+        50.0,
+        300.0
+      ],
+      "test_T_K": [
+        300.0,
+        600.0
+      ],
+      "params": {
+        "gamma_omega_model": "pwlinear_split_leaky",
+        "coefficients": {
+          "low": -0.4063322903776008,
+          "mid": 0.32451605328530664,
+          "high": 0.5335082346116649
+        },
+        "pwlinear_leak_epsilon": 0.23,
+        "pwlinear_leak_warp_power": 1.25,
+        "gamma_omega_softening_fit": "",
+        "gamma_omega_softening_fit_delta": "",
+        "gamma_omega_softening_delta": "",
+        "gamma_omega_high_softening_delta": "",
+        "enforce_signs": true,
+        "ridge_factor": 1e-06,
+        "ridge_lambda": 180.8673788093934,
+        "coeff_unit": "gamma_dimensionless",
+        "fit_sse": 132.07627328218973
+      },
+      "train": {
+        "n": 251,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 3.4992595940856472,
+        "rms_z": 0.7253966445751695,
+        "reduced_chi2": 0.5325656180733452,
+        "exceed_3sigma_n": 3
+      },
+      "test": {
+        "n": 301,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 1.8117332210915085,
+        "rms_z": 1.3041839619987061,
+        "reduced_chi2": 1.7008958067346427,
+        "exceed_3sigma_n": 0
+      }
+    },
+    {
+      "name": "B",
+      "train_T_K": [
+        200.0,
+        600.0
+      ],
+      "test_T_K": [
+        50.0,
+        200.0
+      ],
+      "params": {
+        "gamma_omega_model": "pwlinear_split_leaky",
+        "coefficients": {
+          "low": -0.3917856800638183,
+          "mid": 0.2979376446954458,
+          "high": 0.554847196414061
+        },
+        "pwlinear_leak_epsilon": 0.23,
+        "pwlinear_leak_warp_power": 1.25,
+        "gamma_omega_softening_fit": "",
+        "gamma_omega_softening_fit_delta": "",
+        "gamma_omega_softening_delta": "",
+        "gamma_omega_high_softening_delta": "",
+        "enforce_signs": true,
+        "ridge_factor": 1e-06,
+        "ridge_lambda": 488.0914581038069,
+        "coeff_unit": "gamma_dimensionless",
+        "fit_sse": 28.20881859045042
+      },
+      "train": {
+        "n": 401,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 0.7435210091420008,
+        "rms_z": 0.26522854488830416,
+        "reduced_chi2": 0.07087642861922219,
+        "exceed_3sigma_n": 0
+      },
+      "test": {
+        "n": 151,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 2.453812986062642,
+        "rms_z": 1.1783975148415153,
+        "reduced_chi2": 1.3886207029846593,
+        "exceed_3sigma_n": 0
+      }
+    }
+  ],
+  "falsification": {
+    "strict_criteria": {
+      "max_abs_z_le": 3.0,
+      "reduced_chi2_le": 2.0,
+      "sign_mismatch_n_eq": 0
+    },
+    "strict_ok": false,
+    "holdout_ok": true,
+    "notes": [
+      "This test freezes the mode-weighting via a phonon DOS proxy, and fits only a small number of effective coefficients (omega-basis γ).",
+      "holdout_ok requires the test ranges (A/B) to remain within the same strict criteria, to reject range-selection artifacts.",
+      "Mode-dependent ω(T) scales are frozen from a primary INS-based reference (Kim et al. PRB 91, 014307; Fig.2 digitized); they are not fit and are not counted as free parameters."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p30e-01_warp1p25_model.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p30e-01_warp1p25_model.png"
+  },
+  "notes": [
+    "ω-split is defined at the half-integral of D(ω) to proxy the 3+3 mode count split (acoustic vs optical) in diamond Si.",
+    "For groups=3, TA/LA split uses the 2:1 mode-count ratio within acoustic branches (2 TA, 1 LA).",
+    "With --use-bulk-modulus, coefficients are γ_i (dimensionless) and α is computed as Σ γ_i·Cv_i/(B(T)·V_m)."
+  ]
+}

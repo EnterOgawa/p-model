@@ -1,0 +1,140 @@
+{
+  "generated_utc": "2026-02-01T04:14:36.560879+00:00",
+  "phase": 7,
+  "step": "7.14.20",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_phonon_dos_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\hadley_si_phonon_dos\\extracted_values.json",
+      "sha256": "322e42459408b8c66a2fd8515432e2e3fbb98b196ded3aa781e81e7cfac11161"
+    }
+  },
+  "dos": {
+    "mode": "static_omega",
+    "integral_dos_domega_per_m3": 1.498453217241528e+29,
+    "implied_atom_number_density_per_m3": 4.99484405747176e+28,
+    "integral_per_atom": 2.999999999999996,
+    "splits": {
+      "acoustic_optical": {
+        "omega_rad_s": 73015966594013.5,
+        "nu_THz": 11.62085200806995
+      }
+    }
+  },
+  "model": {
+    "name": "DOS-split Grüneisen 2-group (A_low/A_high weighted LS; split at half-integral)",
+    "groups": 2,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "enforce_signs": true,
+    "A_low_mol_per_J": -9.4252774636453e-08,
+    "A_high_mol_per_J": 4.432526846458604e-07
+  },
+  "fit_metrics": {
+    "n": 551,
+    "sign_mismatch_n": 0,
+    "max_abs_z": 26.548379302218084,
+    "rms_z": 8.050670176119676,
+    "reduced_chi2": 65.04940427477086,
+    "exceed_3sigma_n": 307
+  },
+  "holdout_splits": [
+    {
+      "name": "A",
+      "train_T_K": [
+        50.0,
+        300.0
+      ],
+      "test_T_K": [
+        300.0,
+        600.0
+      ],
+      "params": {
+        "A_low_mol_per_J": -1.0003079955944026e-07,
+        "A_high_mol_per_J": 4.578467079974959e-07,
+        "softening_frac_at_Tmax": "",
+        "enforce_signs": true,
+        "fit_sse": 25473.779039816305,
+        "constraint_solution_kind": "unconstrained"
+      },
+      "train": {
+        "n": 251,
+        "sign_mismatch_n": 2,
+        "max_abs_z": 22.66620893072757,
+        "rms_z": 10.074182821508675,
+        "reduced_chi2": 102.30433349323818,
+        "exceed_3sigma_n": 203
+      },
+      "test": {
+        "n": 301,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 19.795495681139755,
+        "rms_z": 17.934391582693888,
+        "reduced_chi2": 321.6424014414014,
+        "exceed_3sigma_n": 301
+      }
+    },
+    {
+      "name": "B",
+      "train_T_K": [
+        200.0,
+        600.0
+      ],
+      "test_T_K": [
+        50.0,
+        200.0
+      ],
+      "params": {
+        "A_low_mol_per_J": -8.516583212429303e-08,
+        "A_high_mol_per_J": 4.31939221909697e-07,
+        "softening_frac_at_Tmax": "",
+        "enforce_signs": true,
+        "fit_sse": 2148.9159221934556,
+        "constraint_solution_kind": "unconstrained"
+      },
+      "train": {
+        "n": 401,
+        "sign_mismatch_n": 0,
+        "max_abs_z": 5.1881511646646805,
+        "rms_z": 2.3149282006249177,
+        "reduced_chi2": 5.385754190961043,
+        "exceed_3sigma_n": 56
+      },
+      "test": {
+        "n": 151,
+        "sign_mismatch_n": 3,
+        "max_abs_z": 33.08997828670628,
+        "rms_z": 17.789034286098858,
+        "reduced_chi2": 316.4497408320007,
+        "exceed_3sigma_n": 121
+      }
+    }
+  ],
+  "falsification": {
+    "strict_criteria": {
+      "max_abs_z_le": 3.0,
+      "reduced_chi2_le": 2.0,
+      "sign_mismatch_n_eq": 0
+    },
+    "strict_ok": false,
+    "holdout_ok": false,
+    "notes": [
+      "This test freezes the mode-weighting via a phonon DOS proxy, and fits only a small number of effective coefficients (per-group A).",
+      "holdout_ok requires the test ranges (A/B) to remain within the same strict criteria, to reject range-selection artifacts."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.png"
+  },
+  "notes": [
+    "ω-split is defined at the half-integral of D(ω) to proxy the 3+3 mode count split (acoustic vs optical) in diamond Si.",
+    "For groups=3, TA/LA split uses the 2:1 mode-count ratio within acoustic branches (2 TA, 1 LA).",
+    "A parameters correspond to effective (γ/(B V_m)) per group up to a convention factor; this step focuses on procedure sensitivity (holdout) rather than absolute γ values."
+  ]
+}

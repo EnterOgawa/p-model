@@ -1,0 +1,24 @@
+{
+  "generated_utc": "2026-02-11T02:46:59.715340+00:00",
+  "dataset_id": "delft_hensen2016_srep30289",
+  "supported": true,
+  "natural_window": {
+    "recommended_start_offset_ps": 0,
+    "frozen_start_offset_ps": -30
+  },
+  "baseline": {
+    "param_name": "start_offset_ps",
+    "value": -30,
+    "statistic_name": "CHSH S (combined; event-ready trials)",
+    "statistic": 2.3205222517758677,
+    "sigma_boot": 0.18396758088495538
+  },
+  "reject": {
+    "threshold_sigma": 3.0,
+    "rule": "abs(stat - frozen_stat) >= threshold_sigma * sigma_boot"
+  },
+  "sources": {
+    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2016_srep30289\\covariance_bootstrap.json",
+    "offset_sweep_metrics_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2016_srep30289\\offset_sweep_metrics.json"
+  }
+}

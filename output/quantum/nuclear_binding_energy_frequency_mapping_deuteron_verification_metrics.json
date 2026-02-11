@@ -1,0 +1,84 @@
+{
+  "generated_utc": "2026-02-06T15:24:11.149135+00:00",
+  "phase": 7,
+  "step": "7.13.17.4",
+  "inputs": {
+    "deuteron_binding_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_deuteron_metrics.json",
+      "sha256": "8f994d4a79851816195ad7b2286d94987600f49bc257488413f2a2871bcce8ec"
+    },
+    "np_scattering_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_np_scattering_baseline_metrics.json",
+      "sha256": "cf61439f8ed677782ca78a5289c79f14ccaa6d7380785c872a99b5db9d276e69"
+    }
+  },
+  "constants": {
+    "c_m_per_s": 299792458.0,
+    "e_C": 1.602176634e-19,
+    "hbarc_MeV_fm": 197.3269804
+  },
+  "observed": {
+    "B_obs_MeV": {
+      "value": 2.22456634198942,
+      "sigma": 7.919062410999653e-07
+    },
+    "mu_c2_MeV": 469.4591551497099
+  },
+  "method": {
+    "ere_truncation": "k cot δ = -1/a_t + (r_t/2) k^2",
+    "bound_state_condition": "(r_t/2) κ^2 - κ + 1/a_t = 0  (κ>0; choose smaller root)",
+    "binding_from_kappa": "B_pred = (ħc)^2 κ^2 / (2 μ c^2)",
+    "notes": [
+      "Eq.(18) and Eq.(19) are treated as two analysis-dependent low-energy parameter sets (phase-shift analyses).",
+      "Their difference is used as a proxy for systematic uncertainty (not a statistical error bar).",
+      "Shape parameter v2t is ignored in the truncated ERE prediction; its effect is higher order for κ≈0.23 fm^-1."
+    ]
+  },
+  "rows": [
+    {
+      "eq_label": 18,
+      "kind": "gwu_said_phase_shifts",
+      "a_t_fm": 5.403,
+      "r_t_fm": 1.7494,
+      "v2t_fm3": 0.163,
+      "disc": 0.35243383305570974,
+      "kappa_physical_fm1": 0.23227313415027157,
+      "inv_kappa_fm": 4.305276215685967,
+      "B_pred_MeV": 2.237397208503531,
+      "Delta_B_pred_minus_obs_keV": 12.830866514110806
+    },
+    {
+      "eq_label": 19,
+      "kind": "nijmegen_phase_shifts",
+      "a_t_fm": 5.42,
+      "r_t_fm": 1.753,
+      "v2t_fm3": 0.04,
+      "disc": 0.35313653136531364,
+      "kappa_physical_fm1": 0.231458688713791,
+      "inv_kappa_fm": 4.320425409635603,
+      "B_pred_MeV": 2.2217342417665646,
+      "Delta_B_pred_minus_obs_keV": -2.832100222855516
+    }
+  ],
+  "summary": {
+    "B_pred_MeV": {
+      "min": 2.2217342417665646,
+      "max": 2.237397208503531,
+      "mean": 2.229565725135048,
+      "sys_half_range": 0.00783148336848316
+    },
+    "residuals": {
+      "Delta_mean_keV": 4.999383145627867,
+      "z_total_proxy": 0.6383698827974464,
+      "z_sys_proxy": 0.6383698860610837
+    },
+    "acceptance": {
+      "envelope_pass": true,
+      "criterion": "B_obs must lie within the envelope spanned by Eq.(18) and Eq.(19) predictions (ERE truncated)."
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_deuteron_verification.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_deuteron_verification.csv"
+  }
+}

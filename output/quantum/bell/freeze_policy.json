@@ -1,0 +1,314 @@
+{
+  "generated_utc": "2026-02-11T02:47:08.341065+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.20.2",
+    "name": "Bell blind freeze policy (window/offset)"
+  },
+  "main_script": {
+    "path": "scripts/quantum/bell_primary_products.py",
+    "repro": "python -B scripts/quantum/bell_primary_products.py"
+  },
+  "policy_id": "bell_freeze_policy_v1",
+  "policy": {
+    "blind_freeze_requirement": "Do not inspect Bell statistics (S/J) when selecting natural window/offset.",
+    "plateau_fraction_pairs": 0.99,
+    "overrides": {
+      "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+      "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+    },
+    "note": "This policy fixes the operational freeze point for window/offset selection and reduces p-hacking degrees of freedom."
+  },
+  "rules": [
+    {
+      "rule_id": "event_ready_protocol_offset_nearest_grid",
+      "applies_to": "delft_*",
+      "recommended": {
+        "start_offset_ps": 0,
+        "method": {
+          "name": "event_ready_protocol"
+        }
+      },
+      "freeze": {
+        "snap_rule": "nearest_grid_to_recommended_start_offset_ps"
+      },
+      "note": "Use the published event-ready protocol baseline; treat offset sweep as systematic only."
+    },
+    {
+      "rule_id": "time_tag_window_from_dt_peak_then_snap_min_ge",
+      "applies_to": "time-tag datasets (e.g., weihs1998_*)",
+      "recommended": {
+        "method": {
+          "name": "dt_peak_hist_signal_fraction",
+          "signal_fraction": 0.99
+        }
+      },
+      "freeze": {
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "note": "Derive recommended window from dt peak width/drift (pairing structure), not from maximizing S/J."
+    },
+    {
+      "rule_id": "nist_trial_match_pairs_total_then_snap_min_ge",
+      "applies_to": "nist_*",
+      "recommended": {
+        "method": {
+          "name": "trial_match_pairs_total"
+        }
+      },
+      "freeze": {
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "note": "Use independent trial-based coincidence total to pick a matching window (blind to S/J)."
+    },
+    {
+      "rule_id": "kwiat_dataset_recommendation_then_snap_min_ge",
+      "applies_to": "kwiat2013_*",
+      "recommended": {
+        "method": {
+          "name": "dataset_recommendation",
+          "recommended_window_bins": 18000
+        }
+      },
+      "freeze": {
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "note": "Use public dataset guidance for the coincidence window; do not optimize J over the sweep."
+    },
+    {
+      "rule_id": "fallback_pairs_plateau_then_snap_min_ge",
+      "applies_to": "other",
+      "recommended": {
+        "method": {
+          "name": "pairs_plateau",
+          "plateau_fraction_pairs": 0.99
+        }
+      },
+      "freeze": {
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "note": "Fallback: use a pairs-total plateau (not a statistic plateau)."
+    }
+  ],
+  "datasets": [
+    {
+      "dataset_id": "weihs1998_longdist_longdist1",
+      "display_name": "Weihs 1998",
+      "selection_knob": "window_ns",
+      "recommended": {
+        "recommended_window_ns": 22.251267208428718,
+        "recommended_start_offset_ps": null,
+        "recommended_window_method": {
+          "name": "dt_peak_hist_signal_fraction",
+          "signal_fraction": 0.99,
+          "sample_max": 200000,
+          "hist_half_range_ns": 200.0,
+          "hist_bin_width_ns": 0.5,
+          "background_exclusion_ns": 50.0,
+          "background_median_per_bin": 3.0,
+          "background_threshold_ksigma": 3.0,
+          "peak_center_ns": -4.408291266875841,
+          "selected_dt_count": 11322,
+          "near_peak_count": 8157,
+          "width_ns": 22.0,
+          "drift_window_ns": 10.0,
+          "drift_half_ns": 0.2512672084287178,
+          "time_tag_schema": {
+            "schema": "a_t_s/b_t_s",
+            "time_unit": "s"
+          }
+        }
+      },
+      "frozen": {
+        "frozen_window_ns": 25.0,
+        "frozen_start_offset_ps": null,
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "applied_rule_id": "time_tag_window_from_dt_peak_then_snap_min_ge",
+      "natural_window_overrides": {
+        "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+        "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+      },
+      "evidence": {
+        "natural_window_frozen_json": {
+          "path": "output/quantum/bell/weihs1998_longdist_longdist1/natural_window_frozen.json",
+          "sha256": "17e1e872690ae990dcc26eefff1a719b408c774bc7a3c904ab4e05167770ddb0"
+        },
+        "window_sweep_metrics_json": {
+          "path": "output/quantum/bell/weihs1998_longdist_longdist1/window_sweep_metrics.json",
+          "sha256": "6e49cdaaed5c924806abcd42c8a549bd31750e956f0ff120cb4165403b6e1685"
+        },
+        "offset_sweep_metrics_json": {
+          "path": "output/quantum/bell/weihs1998_longdist_longdist1/offset_sweep_metrics.json",
+          "sha256": "bb43194f74b92b8e96f5a0b51448a0d588be5ea6fd31e2060b1e2cd976b2376b"
+        }
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2015",
+      "display_name": "Delft (Hensen 2015)",
+      "selection_knob": "event_ready_offset_ps",
+      "recommended": {
+        "recommended_window_ns": null,
+        "recommended_start_offset_ps": 0,
+        "recommended_window_method": {
+          "name": "event_ready_protocol",
+          "note": "Use the published event-ready protocol baseline; treat offset sweep as a systematic (not an optimizer)."
+        }
+      },
+      "frozen": {
+        "frozen_window_ns": null,
+        "frozen_start_offset_ps": -30,
+        "snap_rule": "nearest_grid_to_recommended_start_offset_ps"
+      },
+      "applied_rule_id": "event_ready_protocol_offset_nearest_grid",
+      "natural_window_overrides": {
+        "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+        "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+      },
+      "evidence": {
+        "natural_window_frozen_json": {
+          "path": "output/quantum/bell/delft_hensen2015/natural_window_frozen.json",
+          "sha256": "5c8152f447865cb4fa1682927064fb06050d9b938fafd66a7ef7c8da52280031"
+        },
+        "window_sweep_metrics_json": {
+          "path": "output/quantum/bell/delft_hensen2015/window_sweep_metrics.json",
+          "sha256": "353b41c0c4b676570d5e07c83b61e7b0afeea261aaa4bc762e13c88f45a26819"
+        },
+        "offset_sweep_metrics_json": {
+          "path": "output/quantum/bell/delft_hensen2015/offset_sweep_metrics.json",
+          "sha256": "9a71a43be49546c8bda04be6cb1abd4cb199d9c1e088a83abb68d17658a76cfe"
+        }
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2016_srep30289",
+      "display_name": "Delft (Hensen 2016)",
+      "selection_knob": "event_ready_offset_ps",
+      "recommended": {
+        "recommended_window_ns": null,
+        "recommended_start_offset_ps": 0,
+        "recommended_window_method": {
+          "name": "event_ready_protocol",
+          "note": "Use the published event-ready protocol baseline; treat offset sweep as a systematic (not an optimizer)."
+        }
+      },
+      "frozen": {
+        "frozen_window_ns": null,
+        "frozen_start_offset_ps": -30,
+        "snap_rule": "nearest_grid_to_recommended_start_offset_ps"
+      },
+      "applied_rule_id": "event_ready_protocol_offset_nearest_grid",
+      "natural_window_overrides": {
+        "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+        "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+      },
+      "evidence": {
+        "natural_window_frozen_json": {
+          "path": "output/quantum/bell/delft_hensen2016_srep30289/natural_window_frozen.json",
+          "sha256": "90bbe7a0dd522a4f99acd4c758d4cc40fd40dfbb2a9cc279547b064df7620700"
+        },
+        "window_sweep_metrics_json": {
+          "path": "output/quantum/bell/delft_hensen2016_srep30289/window_sweep_metrics.json",
+          "sha256": "272b1a61a99d461f0e48d573b2ac6d0a86af01a3bdf149ed591724a1e3ff0338"
+        },
+        "offset_sweep_metrics_json": {
+          "path": "output/quantum/bell/delft_hensen2016_srep30289/offset_sweep_metrics.json",
+          "sha256": "e2de773960a441f764e1432b12e24b773c9b9df32ae694e6ce2408e5505d9191"
+        }
+      }
+    },
+    {
+      "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+      "display_name": "NIST",
+      "selection_knob": "window_ns",
+      "recommended": {
+        "recommended_window_ns": 1000.0,
+        "recommended_start_offset_ps": null,
+        "recommended_window_method": {
+          "name": "trial_match_pairs_total",
+          "note": "Recommended window matches the trial-based coincidence total (independent pipeline).",
+          "trial_total_coinc": 38158,
+          "selected_pairs_total": 40056,
+          "abs_delta_pairs": 1898
+        }
+      },
+      "frozen": {
+        "frozen_window_ns": 1000.0,
+        "frozen_start_offset_ps": null,
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "applied_rule_id": "nist_trial_match_pairs_total_then_snap_min_ge",
+      "natural_window_overrides": {
+        "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+        "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+      },
+      "evidence": {
+        "natural_window_frozen_json": {
+          "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/natural_window_frozen.json",
+          "sha256": "ec4111742765d90c69f4e820ed56ef12fb724e71d8ba18d08b0048b617c67ae2"
+        },
+        "window_sweep_metrics_json": {
+          "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/window_sweep_metrics.json",
+          "sha256": "356cd6b4cfa74f039ff6daed620f7e8191a7fccfe67457047f3107b1d57c6c1f"
+        },
+        "offset_sweep_metrics_json": {
+          "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/offset_sweep_metrics.json",
+          "sha256": "50f11bebbeae4ad4d6957ffbb0086001002f7202ea1b97e3a4bbc6b2c5080db9"
+        },
+        "trial_based_counts_json": {
+          "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/trial_based_counts.json",
+          "sha256": "5e6c9d60a95ed45f560cc2d5758fbd269aab5fa75d9b3a0f9356df8280390e2a"
+        }
+      }
+    },
+    {
+      "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+      "display_name": "Kwiat/Christensen 2013",
+      "selection_knob": "window_ns",
+      "recommended": {
+        "recommended_window_ns": 2812.5,
+        "recommended_start_offset_ps": null,
+        "recommended_window_method": {
+          "name": "dataset_recommendation",
+          "recommended_window_bins": 18000,
+          "timebins_per_second": 6400000000.0,
+          "note": "Use the public dataset guidance (data_organization.txt) to avoid p-hacking optics."
+        }
+      },
+      "frozen": {
+        "frozen_window_ns": 2812.5,
+        "frozen_start_offset_ps": null,
+        "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+      },
+      "applied_rule_id": "kwiat_dataset_recommendation_then_snap_min_ge",
+      "natural_window_overrides": {
+        "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+        "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+      },
+      "evidence": {
+        "natural_window_frozen_json": {
+          "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/natural_window_frozen.json",
+          "sha256": "06b509151ba89fba578b499ead86cde941c7f9ad4ba1346aaef89a42937cd8c1"
+        },
+        "window_sweep_metrics_json": {
+          "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/window_sweep_metrics.json",
+          "sha256": "17069eb825cbd2dfece381f3d45226a2f694003e26c115ea71614506349ee1ab"
+        },
+        "trial_based_counts_json": {
+          "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/trial_based_counts.json",
+          "sha256": "9322f8bb8dc459dbc1005cc87d3f6eb426a1175ef4ef707597f2228621ad61c0"
+        }
+      }
+    }
+  ],
+  "inputs": {
+    "falsification_pack_json": {
+      "path": "output/quantum/bell/falsification_pack.json",
+      "sha256": "2d69f5ebb5345b357b2af7664322cb6f04e92cc34213efac3c51180636699196"
+    }
+  },
+  "outputs": {
+    "freeze_policy_json": "output/quantum/bell/freeze_policy.json"
+  }
+}

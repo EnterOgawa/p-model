@@ -1,0 +1,137 @@
+{
+  "generated_utc": "2026-02-10T15:40:29.172325+00:00",
+  "inputs": {
+    "frozen_parameters": "C:\\develop\\waveP\\output\\theory\\frozen_parameters.json",
+    "eht_shadow_compare": "C:\\develop\\waveP\\output\\eht\\eht_shadow_compare.json",
+    "eht_kappa_error_budget": "C:\\develop\\waveP\\output\\eht\\eht_kappa_error_budget.json",
+    "delta_saturation_constraints": "C:\\develop\\waveP\\output\\theory\\delta_saturation_constraints.json"
+  },
+  "policy": {
+    "beta": 1.0000105000000001,
+    "beta_source": "cassini2003",
+    "delta": 1e-60
+  },
+  "eht": {
+    "shadow_diameter_coeff_ratio_p_over_gr": 1.0462781494012832,
+    "shadow_diameter_coeff_diff_percent": 4.627814940128316,
+    "rel_sigma_needed_3sigma_percent": 1.5426049800427721,
+    "rows": [
+      {
+        "key": "m87",
+        "name": "M87*",
+        "diff_uas": 1.8367493101075212,
+        "sigma_obs_now_uas": 3.0,
+        "sigma_obs_now_with_kappa_uas": 6.17839388679681,
+        "sigma_obs_now_with_kappa_obs_uas": 6.17839388679681,
+        "sigma_obs_now_with_kappa_kerr_uas": 2.8489586931470248,
+        "sigma_obs_now_with_kappa_budget_uas": NaN,
+        "sigma_obs_now_with_kappa_scattering_uas": NaN,
+        "ring_diameter_sigma_now_uas": 3.0,
+        "ring_diameter_sigma_required_3sigma_uas_if_kappa1": NaN,
+        "ring_diameter_sigma_improvement_factor_to_3sigma_if_kappa1": NaN,
+        "kappa_gr_kerr_coeff_range_low": 1.0582185952965486,
+        "kappa_gr_kerr_coeff_range_high": 1.139142751992817,
+        "kappa_obs": 1.0579345088161207,
+        "kappa_obs_sigma": 0.14627733355958678,
+        "kappa_budget_sigma": NaN,
+        "kappa_sigma_assumed_kerr": 0.023360791826267012,
+        "kappa_sigma_required_3sigma_if_ring_sigma_zero": NaN,
+        "kappa_sigma_required_3sigma_if_ring_sigma_current": NaN,
+        "sigma_shadow_from_kappa_uas": 5.489196253569744,
+        "sigma_shadow_from_kappa_obs_uas": 5.489196253569744,
+        "sigma_shadow_from_kappa_kerr_uas": 0.8128190610189447,
+        "sigma_shadow_from_kappa_budget_uas": NaN,
+        "kappa_systematics_source": "obs",
+        "z_separation_now_sigma": 0.230042557656531,
+        "z_separation_now_with_kappa_sigma": 0.16622637236034146,
+        "z_separation_now_with_kappa_scattering_sigma": NaN,
+        "sigma_obs_needed_3sigma_uas": NaN,
+        "gap_factor_now_over_needed": NaN,
+        "gap_factor_now_over_needed_with_kappa": NaN,
+        "gap_factor_now_over_needed_with_kappa_scattering": NaN,
+        "theta_unit_rel_sigma_now_pct": 11.77506128741579,
+        "theta_unit_rel_sigma_needed_pct": 1.0658449297379515,
+        "source_keys": "eht_m87_paper1_2019;eht_m87_paper6_2019;eht_m87_persistent_paper1_2018_2024;eht_m87_persistent_paper2_2018_2025;mertens_m87_jet_viewing_angle_2016"
+      },
+      {
+        "key": "sgra",
+        "name": "Sgr A*",
+        "diff_uas": 2.4113774564843027,
+        "sigma_obs_now_uas": 2.3,
+        "sigma_obs_now_with_kappa_uas": 6.681489662758127,
+        "sigma_obs_now_with_kappa_obs_uas": 7.638819288921522,
+        "sigma_obs_now_with_kappa_kerr_uas": 2.4750825796878297,
+        "sigma_obs_now_with_kappa_budget_uas": 6.681489662758127,
+        "sigma_obs_now_with_kappa_scattering_uas": 7.547344176168442,
+        "ring_diameter_sigma_now_uas": 2.3,
+        "ring_diameter_sigma_required_3sigma_uas_if_kappa1": 0.5118589064445136,
+        "ring_diameter_sigma_improvement_factor_to_3sigma_if_kappa1": 4.493425768394486,
+        "kappa_gr_kerr_coeff_range_low": 0.9941239736401563,
+        "kappa_gr_kerr_coeff_range_high": 1.071082236662505,
+        "kappa_obs": 1.0636550308008212,
+        "kappa_obs_sigma": 0.16001511930929782,
+        "kappa_budget_sigma": 0.12110311750599523,
+        "kappa_sigma_assumed_kerr": 0.02221593693615954,
+        "kappa_sigma_required_3sigma_if_ring_sigma_zero": 0.009881446070357406,
+        "kappa_sigma_required_3sigma_if_ring_sigma_current": NaN,
+        "sigma_shadow_from_kappa_uas": 6.273141486810553,
+        "sigma_shadow_from_kappa_obs_uas": 7.326375643140321,
+        "sigma_shadow_from_kappa_kerr_uas": 1.079263625624174,
+        "sigma_shadow_from_kappa_budget_uas": 6.273141486810553,
+        "kappa_systematics_source": "budget",
+        "z_separation_now_sigma": 0.7371078449605145,
+        "z_separation_now_with_kappa_sigma": 0.2550234897777894,
+        "z_separation_now_with_kappa_scattering_sigma": 0.22579975699083177,
+        "sigma_obs_needed_3sigma_uas": 0.5118589064445136,
+        "gap_factor_now_over_needed": 4.493425768394486,
+        "gap_factor_now_over_needed_with_kappa": 13.05338166169511,
+        "gap_factor_now_over_needed_with_kappa_scattering": 14.744969914842319,
+        "theta_unit_rel_sigma_now_pct": 0.4633169358389895,
+        "theta_unit_rel_sigma_needed_pct": 1.0658449297379515,
+        "source_keys": "eht_sgra_paper1_2022;gravity_r0_m_2019;johnson_scattering_2018;psaltis_scattering_2018;zhu_scattering_limitations_2018"
+      }
+    ],
+    "rejection_rule": "βをCassini等で固定した上で、観測から得た『影直径係数（=θ_shadow/(GM/c^2D)）』の推定値 r_obs と 1σ誤差 σ_r を用い、もし |r_obs - r_P| > 3σ_r なら P-model（β固定）は棄却、|r_obs - r_GR| > 3σ_r なら GR（Schwarzschild近似）は棄却。（EHTはリング直径→影直径の変換 κ、Kerrスピン/散乱などの系統を含むため、σ_r はそれらも含めた“総合誤差”で評価する。）",
+    "notes": [
+      "図の『参考：+κ/散乱』は、κの不確かさと屈折散乱スケール（Zhu 2018）を影直径へ伝播させた“誤差予算の目安”。",
+      "κ は κ誤差予算（output/eht/eht_kappa_error_budget.json）があればそれを優先し、無ければ κ_obs（リング/シャドウ比）→Kerr係数レンジ（参考）の順で用いる。",
+      "κ は放射モデル/散乱/スピンなどの影響を受けるため、厳密な評価には追加観測量（形状・非円形性・偏心など）や外部制約が必要。"
+    ]
+  },
+  "delta": {
+    "delta_adopted": 1e-60,
+    "gamma_max_for_delta_adopted": 1e+30,
+    "gamma_needed_to_probe_delta_adopted": 1.0000000000000002e+30,
+    "rows": [
+      {
+        "key": "lhc_proton_7tev",
+        "label": "LHCの陽子（7 TeV）",
+        "gamma_obs": 7460.52252807237,
+        "delta_upper_from_gamma": 1.7966418660486763e-08,
+        "log10_delta_upper": -7.7455384844378665,
+        "source": "CERN/LHC（ビームエネルギーの公開情報）"
+      },
+      {
+        "key": "uhecr_proton_1e20ev",
+        "label": "超高エネルギー宇宙線（陽子 10^20 eV）",
+        "gamma_obs": 106578893258.17671,
+        "delta_upper_from_gamma": 8.803544985470337e-23,
+        "log10_delta_upper": -22.05534241221207,
+        "source": "UHECR（代表値・オーダー）"
+      },
+      {
+        "key": "icecube_neutrino_10pev_m0p1ev",
+        "label": "高エネルギーν（10 PeV, m=0.1 eV仮定）",
+        "gamma_obs": 1e+17,
+        "delta_upper_from_gamma": 1.0000000000000001e-34,
+        "log10_delta_upper": -34.0,
+        "source": "IceCube等（エネルギースケール）＋ν質量は仮定"
+      }
+    ],
+    "rejection_rule": "P-modelの速度飽和は γ_max ≈ 1/√δ を与える。もし観測で γ_obs > γ_max が確定すれば、その δ は棄却される。逆に、観測が更新されるほど δ の“上限”が下がる（δ < 1/γ_obs^2）。"
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\summary\\decisive_falsification.png",
+    "json": "C:\\develop\\waveP\\output\\summary\\decisive_falsification.json"
+  }
+}

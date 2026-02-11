@@ -1,0 +1,1124 @@
+{
+  "generated_utc": "2026-02-11T02:47:24.819338+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "holdout_metrics": [
+      {
+        "dataset": "Si α(T)",
+        "path": "output/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json",
+        "exists": true,
+        "sha256": "35654ac4c3f326af3f54e440413b4b7c1dfa83cd0cf068c3005dfbdf91123cc0",
+        "repro": "python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py"
+      },
+      {
+        "dataset": "Si α(T) (DOS+γ(ω) basis)",
+        "path": "output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json",
+        "exists": true,
+        "sha256": "1df6faf84874f2a65044d95bd825ad9b7a6b8b29d0d9d335c07e9c6d9e7603bc",
+        "repro": "python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 4 --enforce-signs --use-bulk-modulus --mode-softening kim2015_fig2_features --gamma-omega-model pwlinear_split_leaky --gamma-omega-pwlinear-leak 0.24 --gamma-omega-pwlinear-warp-power 1.32 --ridge-factor 1e-06"
+      },
+      {
+        "dataset": "Si Cp(T)",
+        "path": "output/quantum/condensed_silicon_heat_capacity_holdout_splits_metrics.json",
+        "exists": true,
+        "sha256": "84cbf7ea94dc41d18847724632b789909c682190344a27dd9f538ae3bb3472fd",
+        "repro": "python -B scripts/quantum/condensed_silicon_heat_capacity_holdout_splits.py"
+      },
+      {
+        "dataset": "Si B(T)",
+        "path": "output/quantum/condensed_silicon_bulk_modulus_holdout_splits_metrics.json",
+        "exists": true,
+        "sha256": "b8373c166caf38b6625ad79c59d7dd2b91333c8815484183655b9ae48228908a",
+        "repro": "python -B scripts/quantum/condensed_silicon_bulk_modulus_holdout_splits.py"
+      },
+      {
+        "dataset": "Cu κ(T)",
+        "path": "output/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json",
+        "exists": true,
+        "sha256": "4d017d88ff835281e5b5ca7aeb26840e717c9a6c71338f06d82455a91a30daa2",
+        "repro": "python -B scripts/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits.py"
+      }
+    ]
+  },
+  "thresholds": {
+    "z_outlier_abs_gt": 3.0,
+    "max_abs_z_le": 3.0,
+    "reduced_chi2_le": 9.0,
+    "note": "Operational gates used to label holdout severity; not universal physics thresholds."
+  },
+  "summary": {
+    "datasets_n": 5,
+    "datasets": [
+      {
+        "dataset": "Si α(T)",
+        "inputs": {
+          "holdout_metrics_json": {
+            "path": "output/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json",
+            "sha256": "35654ac4c3f326af3f54e440413b4b7c1dfa83cd0cf068c3005dfbdf91123cc0"
+          }
+        },
+        "n_splits": 2,
+        "splits": [
+          {
+            "split": "A",
+            "train_range": "50-300K",
+            "test_range": "300-600K",
+            "best_model_by_test_max_abs_z": "einstein_2",
+            "best_test_max_abs_z": 15.401787600121017,
+            "models": [
+              {
+                "dataset": "Si α(T)",
+                "split": "A",
+                "train_range": "50-300K",
+                "test_range": "300-600K",
+                "model_id": "einstein_1",
+                "supported": true,
+                "reason": "",
+                "train_n": 251,
+                "train_max_abs_z": 14.465726244720432,
+                "train_rms_z": 5.401780902153378,
+                "train_reduced_chi2": 29.53221155496819,
+                "train_exceed_abs_z_gt3_n": 159,
+                "train_exceed_abs_z_gt3_frac": 0.6334661354581673,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": false,
+                "train_gate_ok": false,
+                "test_n": 301,
+                "test_max_abs_z": 50.13098548074385,
+                "test_rms_z": 32.549530615029916,
+                "test_reduced_chi2": 1059.4719432587697,
+                "test_exceed_abs_z_gt3_n": 301,
+                "test_exceed_abs_z_gt3_frac": 1.0,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              },
+              {
+                "dataset": "Si α(T)",
+                "split": "A",
+                "train_range": "50-300K",
+                "test_range": "300-600K",
+                "model_id": "einstein_2",
+                "supported": true,
+                "reason": "",
+                "train_n": 251,
+                "train_max_abs_z": 0.9440161319062395,
+                "train_rms_z": 0.4291352330467549,
+                "train_reduced_chi2": 0.18790007767790753,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 301,
+                "test_max_abs_z": 15.401787600121017,
+                "test_rms_z": 7.943917084556915,
+                "test_reduced_chi2": 63.10581864631524,
+                "test_exceed_abs_z_gt3_n": 201,
+                "test_exceed_abs_z_gt3_frac": 0.6677740863787376,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          },
+          {
+            "split": "B",
+            "train_range": "200-600K",
+            "test_range": "50-200K",
+            "best_model_by_test_max_abs_z": "einstein_2",
+            "best_test_max_abs_z": 45.30281731030026,
+            "models": [
+              {
+                "dataset": "Si α(T)",
+                "split": "B",
+                "train_range": "200-600K",
+                "test_range": "50-200K",
+                "model_id": "einstein_1",
+                "supported": true,
+                "reason": "",
+                "train_n": 401,
+                "train_max_abs_z": 3.5643889587352118,
+                "train_rms_z": 1.286911399534795,
+                "train_reduced_chi2": 1.6686244247519961,
+                "train_exceed_abs_z_gt3_n": 3,
+                "train_exceed_abs_z_gt3_frac": 0.007481296758104738,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": false,
+                "test_n": 151,
+                "test_max_abs_z": 85.94743383426876,
+                "test_rms_z": 55.01624018673252,
+                "test_reduced_chi2": 3026.786684284242,
+                "test_exceed_abs_z_gt3_n": 151,
+                "test_exceed_abs_z_gt3_frac": 1.0,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              },
+              {
+                "dataset": "Si α(T)",
+                "split": "B",
+                "train_range": "200-600K",
+                "test_range": "50-200K",
+                "model_id": "einstein_2",
+                "supported": true,
+                "reason": "",
+                "train_n": 401,
+                "train_max_abs_z": 0.3060207200398875,
+                "train_rms_z": 0.07596654831738642,
+                "train_reduced_chi2": 0.005843781570117121,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 151,
+                "test_max_abs_z": 45.30281731030026,
+                "test_rms_z": 23.697246908530378,
+                "test_reduced_chi2": 561.5595110438526,
+                "test_exceed_abs_z_gt3_n": 105,
+                "test_exceed_abs_z_gt3_frac": 0.695364238410596,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          }
+        ],
+        "audit_gates": {
+          "criteria": {
+            "max_abs_z_le": 3.0,
+            "reduced_chi2_le": 9.0
+          },
+          "recommended_model_by_minimax_test_max_abs_z": {
+            "model_id": "einstein_2",
+            "worst_test_max_abs_z": 45.30281731030026
+          },
+          "strict_ok": true,
+          "holdout_ok": false,
+          "by_split": [
+            {
+              "split": "A",
+              "train_gate_ok": true,
+              "test_gate_ok": false,
+              "train_max_abs_z": 0.9440161319062395,
+              "train_reduced_chi2": 0.18790007767790753,
+              "test_max_abs_z": 15.401787600121017,
+              "test_reduced_chi2": 63.10581864631524
+            },
+            {
+              "split": "B",
+              "train_gate_ok": true,
+              "test_gate_ok": false,
+              "train_max_abs_z": 0.3060207200398875,
+              "train_reduced_chi2": 0.005843781570117121,
+              "test_max_abs_z": 45.30281731030026,
+              "test_reduced_chi2": 561.5595110438526
+            }
+          ]
+        }
+      },
+      {
+        "dataset": "Si α(T) (DOS+γ(ω) basis)",
+        "inputs": {
+          "holdout_metrics_json": {
+            "path": "output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json",
+            "sha256": "1df6faf84874f2a65044d95bd825ad9b7a6b8b29d0d9d335c07e9c6d9e7603bc"
+          }
+        },
+        "n_splits": 2,
+        "splits": [
+          {
+            "split": "A",
+            "train_range": "50-300K",
+            "test_range": "300-600K",
+            "best_model_by_test_max_abs_z": "gamma_omega:pwlinear_split_leaky",
+            "best_test_max_abs_z": 1.9028224114461305,
+            "models": [
+              {
+                "dataset": "Si α(T) (DOS+γ(ω) basis)",
+                "split": "A",
+                "train_range": "50-300K",
+                "test_range": "300-600K",
+                "model_id": "gamma_omega:pwlinear_split_leaky",
+                "supported": true,
+                "reason": "",
+                "train_n": 251,
+                "train_max_abs_z": 3.3685104171301674,
+                "train_rms_z": 0.714082217384419,
+                "train_reduced_chi2": 0.5160817206022048,
+                "train_exceed_abs_z_gt3_n": 2,
+                "train_exceed_abs_z_gt3_frac": 0.00796812749003984,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": false,
+                "test_n": 301,
+                "test_max_abs_z": 1.9028224114461305,
+                "test_rms_z": 1.413256269701495,
+                "test_reduced_chi2": 1.997293283850585,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              }
+            ]
+          },
+          {
+            "split": "B",
+            "train_range": "200-600K",
+            "test_range": "50-200K",
+            "best_model_by_test_max_abs_z": "gamma_omega:pwlinear_split_leaky",
+            "best_test_max_abs_z": 2.50854155484332,
+            "models": [
+              {
+                "dataset": "Si α(T) (DOS+γ(ω) basis)",
+                "split": "B",
+                "train_range": "200-600K",
+                "test_range": "50-200K",
+                "model_id": "gamma_omega:pwlinear_split_leaky",
+                "supported": true,
+                "reason": "",
+                "train_n": 401,
+                "train_max_abs_z": 0.7367961698513615,
+                "train_rms_z": 0.2600639705243311,
+                "train_reduced_chi2": 0.06814306727315815,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 151,
+                "test_max_abs_z": 2.50854155484332,
+                "test_rms_z": 1.168020548708708,
+                "test_reduced_chi2": 1.3642720022057913,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              }
+            ]
+          }
+        ],
+        "falsification": {
+          "strict_ok": true,
+          "holdout_ok": true,
+          "strict_criteria": {
+            "max_abs_z_le": 3.0,
+            "reduced_chi2_le": 2.0,
+            "sign_mismatch_n_eq": 0
+          }
+        },
+        "model": {
+          "name": "DOS-constrained Gruneisen gamma(omega) basis (pwlinear_split_leaky; weighted LS) + mode softening (Kim2015 Fig.2 digitized) + B(T) scaling (fit γ) + ridge (factor=1e-06) + pwlinear leak (epsilon=0.24, warp_p=1.32)"
+        },
+        "audit_gates": {
+          "criteria": {
+            "max_abs_z_le": 3.0,
+            "reduced_chi2_le": 2.0
+          },
+          "recommended_model_by_minimax_test_max_abs_z": {
+            "model_id": "gamma_omega:pwlinear_split_leaky",
+            "worst_test_max_abs_z": 2.50854155484332
+          },
+          "strict_ok": true,
+          "holdout_ok": true,
+          "by_split": [
+            {
+              "split": "A",
+              "train_gate_ok": false,
+              "test_gate_ok": true,
+              "train_max_abs_z": 3.3685104171301674,
+              "train_reduced_chi2": 0.5160817206022048,
+              "test_max_abs_z": 1.9028224114461305,
+              "test_reduced_chi2": 1.997293283850585
+            },
+            {
+              "split": "B",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 0.7367961698513615,
+              "train_reduced_chi2": 0.06814306727315815,
+              "test_max_abs_z": 2.50854155484332,
+              "test_reduced_chi2": 1.3642720022057913
+            }
+          ],
+          "strict_ok_source": "metrics_falsification",
+          "holdout_ok_source": "metrics_falsification"
+        }
+      },
+      {
+        "dataset": "Si Cp(T)",
+        "inputs": {
+          "holdout_metrics_json": {
+            "path": "output/quantum/condensed_silicon_heat_capacity_holdout_splits_metrics.json",
+            "sha256": "84cbf7ea94dc41d18847724632b789909c682190344a27dd9f538ae3bb3472fd"
+          }
+        },
+        "n_splits": 2,
+        "splits": [
+          {
+            "split": "A_low_to_high",
+            "train_range": "100-300K",
+            "test_range": "350-1685K",
+            "best_model_by_test_max_abs_z": "debye_lowT_minimax_plus_shomate_frozen",
+            "best_test_max_abs_z": 0.04020202870606965,
+            "models": [
+              {
+                "dataset": "Si Cp(T)",
+                "split": "A_low_to_high",
+                "train_range": "100-300K",
+                "test_range": "350-1685K",
+                "model_id": "debye_lowT_minimax_plus_shomate_frozen",
+                "supported": true,
+                "reason": "",
+                "train_n": 5,
+                "train_max_abs_z": 2.99592483460044,
+                "train_rms_z": 2.1474973085993567,
+                "train_reduced_chi2": 4.611744690441482,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 16,
+                "test_max_abs_z": 0.04020202870606965,
+                "test_rms_z": 0.021105771391048297,
+                "test_reduced_chi2": 0.0004454535860111928,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Si Cp(T)",
+                "split": "A_low_to_high",
+                "train_range": "100-300K",
+                "test_range": "350-1685K",
+                "model_id": "debye_1p",
+                "supported": true,
+                "reason": "",
+                "train_n": 5,
+                "train_max_abs_z": 3.3276565425261095,
+                "train_rms_z": 2.3180489865814957,
+                "train_reduced_chi2": 6.716688880239374,
+                "train_exceed_abs_z_gt3_n": 1,
+                "train_exceed_abs_z_gt3_frac": 0.2,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": false,
+                "test_n": 16,
+                "test_max_abs_z": 7.595498655047026,
+                "test_rms_z": 4.198672000483488,
+                "test_reduced_chi2": 17.62884656764402,
+                "test_exceed_abs_z_gt3_n": 8,
+                "test_exceed_abs_z_gt3_frac": 0.5,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              },
+              {
+                "dataset": "Si Cp(T)",
+                "split": "A_low_to_high",
+                "train_range": "100-300K",
+                "test_range": "350-1685K",
+                "model_id": "shomate_5p_fit",
+                "supported": false,
+                "reason": "not enough points to fit Shomate (need >=6, got 5)",
+                "train_n": 0,
+                "train_max_abs_z": null,
+                "train_rms_z": null,
+                "train_reduced_chi2": null,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": null,
+                "train_pass_all_abs_z_le_3": null,
+                "train_pass_reduced_chi2_le_thr": null,
+                "train_gate_ok": null,
+                "test_n": 0,
+                "test_max_abs_z": null,
+                "test_rms_z": null,
+                "test_reduced_chi2": null,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": null,
+                "test_pass_all_abs_z_le_3": null,
+                "test_pass_reduced_chi2_le_thr": null,
+                "test_gate_ok": null
+              }
+            ]
+          },
+          {
+            "split": "B_high_to_low",
+            "train_range": "350-1685K",
+            "test_range": "100-300K",
+            "best_model_by_test_max_abs_z": "debye_lowT_minimax_plus_shomate_frozen",
+            "best_test_max_abs_z": 2.99592483460044,
+            "models": [
+              {
+                "dataset": "Si Cp(T)",
+                "split": "B_high_to_low",
+                "train_range": "350-1685K",
+                "test_range": "100-300K",
+                "model_id": "debye_lowT_minimax_plus_shomate_frozen",
+                "supported": true,
+                "reason": "",
+                "train_n": 16,
+                "train_max_abs_z": 0.04020202870606965,
+                "train_rms_z": 0.021105771391048297,
+                "train_reduced_chi2": 0.0004454535860111928,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 5,
+                "test_max_abs_z": 2.99592483460044,
+                "test_rms_z": 2.1474973085993567,
+                "test_reduced_chi2": 4.611744690441482,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Si Cp(T)",
+                "split": "B_high_to_low",
+                "train_range": "350-1685K",
+                "test_range": "100-300K",
+                "model_id": "debye_1p",
+                "supported": true,
+                "reason": "",
+                "train_n": 16,
+                "train_max_abs_z": 7.54862767330473,
+                "train_rms_z": 4.168980669966569,
+                "train_reduced_chi2": 18.539093148325225,
+                "train_exceed_abs_z_gt3_n": 8,
+                "train_exceed_abs_z_gt3_frac": 0.5,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": false,
+                "train_gate_ok": false,
+                "test_n": 5,
+                "test_max_abs_z": 6.439614737518149,
+                "test_rms_z": 4.2559048434880795,
+                "test_reduced_chi2": 18.112726036825293,
+                "test_exceed_abs_z_gt3_n": 4,
+                "test_exceed_abs_z_gt3_frac": 0.8,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              },
+              {
+                "dataset": "Si Cp(T)",
+                "split": "B_high_to_low",
+                "train_range": "350-1685K",
+                "test_range": "100-300K",
+                "model_id": "shomate_5p_fit",
+                "supported": true,
+                "reason": "",
+                "train_n": 16,
+                "train_max_abs_z": 0.014263391206875827,
+                "train_rms_z": 0.008058629215231719,
+                "train_reduced_chi2": 9.446037065976173e-05,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 5,
+                "test_max_abs_z": 91.03003327720782,
+                "test_rms_z": 40.723281038421085,
+                "test_reduced_chi2": 1658.385618534226,
+                "test_exceed_abs_z_gt3_n": 1,
+                "test_exceed_abs_z_gt3_frac": 0.2,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          }
+        ],
+        "audit_gates": {
+          "criteria": {
+            "max_abs_z_le": 3.0,
+            "reduced_chi2_le": 9.0
+          },
+          "recommended_model_by_minimax_test_max_abs_z": {
+            "model_id": "debye_lowT_minimax_plus_shomate_frozen",
+            "worst_test_max_abs_z": 2.99592483460044
+          },
+          "strict_ok": true,
+          "holdout_ok": true,
+          "by_split": [
+            {
+              "split": "A_low_to_high",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 2.99592483460044,
+              "train_reduced_chi2": 4.611744690441482,
+              "test_max_abs_z": 0.04020202870606965,
+              "test_reduced_chi2": 0.0004454535860111928
+            },
+            {
+              "split": "B_high_to_low",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 0.04020202870606965,
+              "train_reduced_chi2": 0.0004454535860111928,
+              "test_max_abs_z": 2.99592483460044,
+              "test_reduced_chi2": 4.611744690441482
+            }
+          ]
+        }
+      },
+      {
+        "dataset": "Si B(T)",
+        "inputs": {
+          "holdout_metrics_json": {
+            "path": "output/quantum/condensed_silicon_bulk_modulus_holdout_splits_metrics.json",
+            "sha256": "b8373c166caf38b6625ad79c59d7dd2b91333c8815484183655b9ae48228908a"
+          }
+        },
+        "n_splits": 2,
+        "splits": [
+          {
+            "split": "A_low_to_high",
+            "train_range": "0-300K",
+            "test_range": "400-600K",
+            "best_model_by_test_max_abs_z": "ioffe_piecewise_frozen",
+            "best_test_max_abs_z": 0.0,
+            "models": [
+              {
+                "dataset": "Si B(T)",
+                "split": "A_low_to_high",
+                "train_range": "0-300K",
+                "test_range": "400-600K",
+                "model_id": "ioffe_piecewise_frozen",
+                "supported": true,
+                "reason": "",
+                "train_n": 301,
+                "train_max_abs_z": 0.0,
+                "train_rms_z": 0.0,
+                "train_reduced_chi2": 0.0,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 201,
+                "test_max_abs_z": 0.0,
+                "test_rms_z": 0.0,
+                "test_reduced_chi2": 0.0,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Si B(T)",
+                "split": "A_low_to_high",
+                "train_range": "0-300K",
+                "test_range": "400-600K",
+                "model_id": "const_1p_fit",
+                "supported": true,
+                "reason": "",
+                "train_n": 301,
+                "train_max_abs_z": 0.0,
+                "train_rms_z": 0.0,
+                "train_reduced_chi2": 0.0,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 201,
+                "test_max_abs_z": 2.9866666666666504,
+                "test_rms_z": 1.7265068995153154,
+                "test_reduced_chi2": 2.980826074073988,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Si B(T)",
+                "split": "A_low_to_high",
+                "train_range": "0-300K",
+                "test_range": "400-600K",
+                "model_id": "linear_2p_fit",
+                "supported": true,
+                "reason": "",
+                "train_n": 301,
+                "train_max_abs_z": 8.526512829121202e-14,
+                "train_rms_z": 4.516206000671913e-14,
+                "train_reduced_chi2": 2.0532545514354523e-27,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 201,
+                "test_max_abs_z": 2.9866666666668493,
+                "test_rms_z": 1.7265068995154638,
+                "test_reduced_chi2": 2.9808260740745,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              }
+            ]
+          },
+          {
+            "split": "B_high_to_low",
+            "train_range": "400-600K",
+            "test_range": "0-300K",
+            "best_model_by_test_max_abs_z": "ioffe_piecewise_frozen",
+            "best_test_max_abs_z": 0.0,
+            "models": [
+              {
+                "dataset": "Si B(T)",
+                "split": "B_high_to_low",
+                "train_range": "400-600K",
+                "test_range": "0-300K",
+                "model_id": "ioffe_piecewise_frozen",
+                "supported": true,
+                "reason": "",
+                "train_n": 201,
+                "train_max_abs_z": 0.0,
+                "train_rms_z": 0.0,
+                "train_reduced_chi2": 0.0,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 301,
+                "test_max_abs_z": 0.0,
+                "test_rms_z": 0.0,
+                "test_reduced_chi2": 0.0,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Si B(T)",
+                "split": "B_high_to_low",
+                "train_range": "400-600K",
+                "test_range": "0-300K",
+                "model_id": "const_1p_fit",
+                "supported": true,
+                "reason": "",
+                "train_n": 201,
+                "train_max_abs_z": 1.4933333333333678,
+                "train_rms_z": 0.8664765603463426,
+                "train_reduced_chi2": 0.7545355377777773,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 301,
+                "test_max_abs_z": 1.4933333333332826,
+                "test_rms_z": 1.4933333333332826,
+                "test_reduced_chi2": 2.230044444444293,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Si B(T)",
+                "split": "B_high_to_low",
+                "train_range": "400-600K",
+                "test_range": "0-300K",
+                "model_id": "linear_2p_fit",
+                "supported": true,
+                "reason": "",
+                "train_n": 201,
+                "train_max_abs_z": 1.4210854715202004e-13,
+                "train_rms_z": 5.493791017151408e-14,
+                "train_reduced_chi2": 3.0485073807873537e-27,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 301,
+                "test_max_abs_z": 5.97333333333296,
+                "test_rms_z": 3.952399440002401,
+                "test_reduced_chi2": 15.621461333331293,
+                "test_exceed_abs_z_gt3_n": 200,
+                "test_exceed_abs_z_gt3_frac": 0.6644518272425249,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          }
+        ],
+        "audit_gates": {
+          "criteria": {
+            "max_abs_z_le": 3.0,
+            "reduced_chi2_le": 9.0
+          },
+          "recommended_model_by_minimax_test_max_abs_z": {
+            "model_id": "ioffe_piecewise_frozen",
+            "worst_test_max_abs_z": 0.0
+          },
+          "strict_ok": true,
+          "holdout_ok": true,
+          "by_split": [
+            {
+              "split": "A_low_to_high",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 0.0,
+              "train_reduced_chi2": 0.0,
+              "test_max_abs_z": 0.0,
+              "test_reduced_chi2": 0.0
+            },
+            {
+              "split": "B_high_to_low",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 0.0,
+              "train_reduced_chi2": 0.0,
+              "test_max_abs_z": 0.0,
+              "test_reduced_chi2": 0.0
+            }
+          ]
+        }
+      },
+      {
+        "dataset": "Cu κ(T)",
+        "inputs": {
+          "holdout_metrics_json": {
+            "path": "output/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json",
+            "sha256": "4d017d88ff835281e5b5ca7aeb26840e717c9a6c71338f06d82455a91a30daa2"
+          }
+        },
+        "n_splits": 4,
+        "splits": [
+          {
+            "split": "RRR100_A_low_to_high",
+            "train_range": "4-40K",
+            "test_range": "40-300K",
+            "best_model_by_test_max_abs_z": "rational9_refit",
+            "best_test_max_abs_z": 4.9451788761117706e-09,
+            "models": [
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR100_A_low_to_high",
+                "train_range": "4-40K",
+                "test_range": "40-300K",
+                "model_id": "rational9_refit",
+                "supported": true,
+                "reason": "",
+                "train_n": 224,
+                "train_max_abs_z": 1.0499481567967199e-09,
+                "train_rms_z": 3.7379919693636925e-10,
+                "train_reduced_chi2": 1.4557482826596043e-19,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 196,
+                "test_max_abs_z": 4.9451788761117706e-09,
+                "test_rms_z": 3.1744063047567427e-09,
+                "test_reduced_chi2": 1.0076855387679359e-17,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR100_A_low_to_high",
+                "train_range": "4-40K",
+                "test_range": "40-300K",
+                "model_id": "logpoly2",
+                "supported": true,
+                "reason": "",
+                "train_n": 224,
+                "train_max_abs_z": 23.46238335691307,
+                "train_rms_z": 7.84550953061326,
+                "train_reduced_chi2": 62.38756757496535,
+                "train_exceed_abs_z_gt3_n": 179,
+                "train_exceed_abs_z_gt3_frac": 0.7991071428571429,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": false,
+                "train_gate_ok": false,
+                "test_n": 196,
+                "test_max_abs_z": 87.31264391196736,
+                "test_rms_z": 58.974550489874765,
+                "test_reduced_chi2": 3477.9976054827875,
+                "test_exceed_abs_z_gt3_n": 192,
+                "test_exceed_abs_z_gt3_frac": 0.9795918367346939,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          },
+          {
+            "split": "RRR100_B_high_to_low",
+            "train_range": "40-300K",
+            "test_range": "4-40K",
+            "best_model_by_test_max_abs_z": "rational9_refit",
+            "best_test_max_abs_z": 6.681229890779542e-08,
+            "models": [
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR100_B_high_to_low",
+                "train_range": "40-300K",
+                "test_range": "4-40K",
+                "model_id": "rational9_refit",
+                "supported": true,
+                "reason": "",
+                "train_n": 196,
+                "train_max_abs_z": 1.4611563584590006e-08,
+                "train_rms_z": 6.192978033423116e-09,
+                "train_reduced_chi2": 4.019884212193799e-17,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 224,
+                "test_max_abs_z": 6.681229890779542e-08,
+                "test_rms_z": 3.2061917795886116e-08,
+                "test_reduced_chi2": 1.0279665727501589e-15,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR100_B_high_to_low",
+                "train_range": "40-300K",
+                "test_range": "4-40K",
+                "model_id": "logpoly2",
+                "supported": true,
+                "reason": "",
+                "train_n": 196,
+                "train_max_abs_z": 12.168791081579732,
+                "train_rms_z": 4.876870877849294,
+                "train_reduced_chi2": 24.153567013502855,
+                "train_exceed_abs_z_gt3_n": 137,
+                "train_exceed_abs_z_gt3_frac": 0.6989795918367347,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": false,
+                "train_gate_ok": false,
+                "test_n": 224,
+                "test_max_abs_z": 200506.80125739728,
+                "test_rms_z": 42715.882154834595,
+                "test_reduced_chi2": 1824646588.2657163,
+                "test_exceed_abs_z_gt3_n": 216,
+                "test_exceed_abs_z_gt3_frac": 0.9642857142857143,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          },
+          {
+            "split": "RRR300_A_low_to_high",
+            "train_range": "4-40K",
+            "test_range": "40-300K",
+            "best_model_by_test_max_abs_z": "rational9_refit",
+            "best_test_max_abs_z": 7.343054220209985e-09,
+            "models": [
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR300_A_low_to_high",
+                "train_range": "4-40K",
+                "test_range": "40-300K",
+                "model_id": "rational9_refit",
+                "supported": true,
+                "reason": "",
+                "train_n": 224,
+                "train_max_abs_z": 3.189334833227921e-10,
+                "train_rms_z": 2.33948962846424e-10,
+                "train_reduced_chi2": 5.702322910041636e-20,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 196,
+                "test_max_abs_z": 7.343054220209985e-09,
+                "test_rms_z": 2.7266248372448726e-09,
+                "test_reduced_chi2": 7.434483003080627e-18,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR300_A_low_to_high",
+                "train_range": "4-40K",
+                "test_range": "40-300K",
+                "model_id": "logpoly2",
+                "supported": true,
+                "reason": "",
+                "train_n": 224,
+                "train_max_abs_z": 19.494713006811313,
+                "train_rms_z": 7.955103152267713,
+                "train_reduced_chi2": 64.14272045502813,
+                "train_exceed_abs_z_gt3_n": 181,
+                "train_exceed_abs_z_gt3_frac": 0.8080357142857143,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": false,
+                "train_gate_ok": false,
+                "test_n": 196,
+                "test_max_abs_z": 98.85541737621931,
+                "test_rms_z": 64.6864533746241,
+                "test_reduced_chi2": 4184.337250187417,
+                "test_exceed_abs_z_gt3_n": 193,
+                "test_exceed_abs_z_gt3_frac": 0.9846938775510204,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          },
+          {
+            "split": "RRR300_B_high_to_low",
+            "train_range": "40-300K",
+            "test_range": "4-40K",
+            "best_model_by_test_max_abs_z": "rational9_refit",
+            "best_test_max_abs_z": 2.204716804487246e-08,
+            "models": [
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR300_B_high_to_low",
+                "train_range": "40-300K",
+                "test_range": "4-40K",
+                "model_id": "rational9_refit",
+                "supported": true,
+                "reason": "",
+                "train_n": 196,
+                "train_max_abs_z": 8.79099640623795e-09,
+                "train_rms_z": 3.515899168806526e-09,
+                "train_reduced_chi2": 1.2956487728246131e-17,
+                "train_exceed_abs_z_gt3_n": 0,
+                "train_exceed_abs_z_gt3_frac": 0.0,
+                "train_pass_all_abs_z_le_3": true,
+                "train_pass_reduced_chi2_le_thr": true,
+                "train_gate_ok": true,
+                "test_n": 224,
+                "test_max_abs_z": 2.204716804487246e-08,
+                "test_rms_z": 1.6320512963555678e-08,
+                "test_reduced_chi2": 2.663591433935889e-16,
+                "test_exceed_abs_z_gt3_n": 0,
+                "test_exceed_abs_z_gt3_frac": 0.0,
+                "test_pass_all_abs_z_le_3": true,
+                "test_pass_reduced_chi2_le_thr": true,
+                "test_gate_ok": true
+              },
+              {
+                "dataset": "Cu κ(T)",
+                "split": "RRR300_B_high_to_low",
+                "train_range": "40-300K",
+                "test_range": "4-40K",
+                "model_id": "logpoly2",
+                "supported": true,
+                "reason": "",
+                "train_n": 196,
+                "train_max_abs_z": 15.563443650358957,
+                "train_rms_z": 5.864860234814898,
+                "train_reduced_chi2": 34.931247525839176,
+                "train_exceed_abs_z_gt3_n": 146,
+                "train_exceed_abs_z_gt3_frac": 0.7448979591836735,
+                "train_pass_all_abs_z_le_3": false,
+                "train_pass_reduced_chi2_le_thr": false,
+                "train_gate_ok": false,
+                "test_n": 224,
+                "test_max_abs_z": 217448.4160878962,
+                "test_rms_z": 43435.65170822047,
+                "test_reduced_chi2": 1886655839.3178356,
+                "test_exceed_abs_z_gt3_n": 218,
+                "test_exceed_abs_z_gt3_frac": 0.9732142857142857,
+                "test_pass_all_abs_z_le_3": false,
+                "test_pass_reduced_chi2_le_thr": false,
+                "test_gate_ok": false
+              }
+            ]
+          }
+        ],
+        "audit_gates": {
+          "criteria": {
+            "max_abs_z_le": 3.0,
+            "reduced_chi2_le": 9.0
+          },
+          "recommended_model_by_minimax_test_max_abs_z": {
+            "model_id": "rational9_refit",
+            "worst_test_max_abs_z": 6.681229890779542e-08
+          },
+          "strict_ok": true,
+          "holdout_ok": true,
+          "by_split": [
+            {
+              "split": "RRR100_A_low_to_high",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 1.0499481567967199e-09,
+              "train_reduced_chi2": 1.4557482826596043e-19,
+              "test_max_abs_z": 4.9451788761117706e-09,
+              "test_reduced_chi2": 1.0076855387679359e-17
+            },
+            {
+              "split": "RRR100_B_high_to_low",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 1.4611563584590006e-08,
+              "train_reduced_chi2": 4.019884212193799e-17,
+              "test_max_abs_z": 6.681229890779542e-08,
+              "test_reduced_chi2": 1.0279665727501589e-15
+            },
+            {
+              "split": "RRR300_A_low_to_high",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 3.189334833227921e-10,
+              "train_reduced_chi2": 5.702322910041636e-20,
+              "test_max_abs_z": 7.343054220209985e-09,
+              "test_reduced_chi2": 7.434483003080627e-18
+            },
+            {
+              "split": "RRR300_B_high_to_low",
+              "train_gate_ok": true,
+              "test_gate_ok": true,
+              "train_max_abs_z": 8.79099640623795e-09,
+              "train_reduced_chi2": 1.2956487728246131e-17,
+              "test_max_abs_z": 2.204716804487246e-08,
+              "test_reduced_chi2": 2.663591433935889e-16
+            }
+          ]
+        }
+      }
+    ],
+    "missing_inputs": [],
+    "note": "This audit catalogs temperature-band sensitivity (procedure/systematic) rather than claiming a universally valid condensed-matter prediction model."
+  },
+  "outputs": {
+    "csv": "output/quantum/condensed_holdout_audit.csv",
+    "json": "output/quantum/condensed_holdout_audit_summary.json",
+    "png": "output/quantum/condensed_holdout_audit.png"
+  }
+}

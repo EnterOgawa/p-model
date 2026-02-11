@@ -1,0 +1,34 @@
+{
+  "generated_utc": "2026-02-11T02:47:09.276166+00:00",
+  "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+  "supported": true,
+  "baseline": {
+    "param_name": "window_ns",
+    "value": 1000.0,
+    "statistic_name": "CH J_prob (A1=0,B1=0)",
+    "statistic": -0.0006990843043696472,
+    "sigma_boot": 9.100388784991122e-06,
+    "delay_signature_z_max": 43.90965148631052
+  },
+  "tests": [
+    {
+      "id": "shuffle_settings",
+      "supported": true,
+      "method": {
+        "name": "shuffle_click_settings",
+        "seed_a": 3059074514,
+        "seed_b": 2977767790,
+        "note": "Shuffle setting labels across time-tag clicks; keep click_delay marginals unchanged."
+      },
+      "result": {
+        "delay_signature_z_max": 0.017237339027354585
+      }
+    }
+  ],
+  "inputs": {
+    "natural_window_frozen_json": {
+      "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/natural_window_frozen.json",
+      "sha256": "ec4111742765d90c69f4e820ed56ef12fb724e71d8ba18d08b0048b617c67ae2"
+    }
+  }
+}

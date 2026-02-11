@@ -1,0 +1,388 @@
+{
+  "generated_utc": "2026-01-29T05:34:08.186328+00:00",
+  "phase": 7,
+  "step": "7.13.12",
+  "inputs": {
+    "potential_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_canonical_metrics.json",
+      "sha256": "ebfb59839987e6c1442e2082c6100fb15154fb0d7ba8e8db2a9053491cc95373",
+      "step": "7.13.8.5",
+      "canonical": {
+        "selected_step": "7.13.8.5",
+        "selected_metrics_json": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json"
+      }
+    },
+    "potential_metrics_7_13_8": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_canonical_metrics.json",
+      "sha256": "ebfb59839987e6c1442e2082c6100fb15154fb0d7ba8e8db2a9053491cc95373",
+      "step": "7.13.8.5",
+      "canonical": {
+        "selected_step": "7.13.8.5",
+        "selected_metrics_json": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json"
+      }
+    },
+    "targets_7_13_11": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_representative_nuclei_metrics.json",
+      "sha256": "0c3b6cb7145aa17ccff799f52b79ce5e4da3599767971744101b7a8438f0c669"
+    }
+  },
+  "model": {
+    "type": "uniform_sphere_mean_field",
+    "positioning": "consistency check (declared approximation), not a full many-body solve",
+    "mix": {
+      "w_triplet": 0.75,
+      "w_singlet": 0.25
+    },
+    "density": "from charge radii (uniform sphere R=sqrt(5/3) r_rms)",
+    "kinetic": "nonrelativistic symmetric Fermi gas (g=4)",
+    "units": {
+      "length": "fm",
+      "energy": "MeV"
+    }
+  },
+  "constants": {
+    "hbarc_MeV_fm": 197.3269804,
+    "m_nucleon_c2_MeV": 938.9183102994198
+  },
+  "stats": {
+    "18": {
+      "residual_mean_MeV": 17.750690932137033,
+      "residual_rms_MeV": 23.443553853288854
+    },
+    "19": {
+      "residual_mean_MeV": 17.90254386344211,
+      "residual_rms_MeV": 23.622664482151333
+    }
+  },
+  "rows": [
+    {
+      "key": "d",
+      "label": "d (H-2)",
+      "A": 2,
+      "Z": 1,
+      "N": 1,
+      "r_charge_fm": 2.1421,
+      "R_sharp_fm": 2.7654392086369692,
+      "rho_fm3": 0.02257610614473508,
+      "B_over_A_obs_MeV": 1.1122831000000002,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 0.693979562697901,
+          "T_kin_MeV_per_A": 5.991833659217295,
+          "U_pot_MeV_per_A": -8.635987546964412,
+          "E_total_MeV_per_A": -2.644153887747117,
+          "B_over_A_pred_MeV": 2.644153887747117,
+          "B_over_A_residual_MeV": 1.5318707877471167
+        },
+        "19": {
+          "kf_fm1": 0.693979562697901,
+          "T_kin_MeV_per_A": 5.991833659217295,
+          "U_pot_MeV_per_A": -8.66699123217514,
+          "E_total_MeV_per_A": -2.675157572957846,
+          "B_over_A_pred_MeV": 2.675157572957846,
+          "B_over_A_residual_MeV": 1.5628744729578459
+        }
+      }
+    },
+    {
+      "key": "t",
+      "label": "t (H-3)",
+      "A": 3,
+      "Z": 1,
+      "N": 2,
+      "r_charge_fm": 1.7591,
+      "R_sharp_fm": 2.2709883347711557,
+      "rho_fm3": 0.061148799496561705,
+      "B_over_A_obs_MeV": 2.8272654000000004,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 0.9673708128331986,
+          "T_kin_MeV_per_A": 11.642663518400225,
+          "U_pot_MeV_per_A": -19.989405539814314,
+          "E_total_MeV_per_A": -8.346742021414089,
+          "B_over_A_pred_MeV": 8.346742021414089,
+          "B_over_A_residual_MeV": 5.519476621414089
+        },
+        "19": {
+          "kf_fm1": 0.9673708128331986,
+          "T_kin_MeV_per_A": 11.642663518400225,
+          "U_pot_MeV_per_A": -20.051948232473634,
+          "E_total_MeV_per_A": -8.40928471407341,
+          "B_over_A_pred_MeV": 8.40928471407341,
+          "B_over_A_residual_MeV": 5.58201931407341
+        }
+      }
+    },
+    {
+      "key": "h",
+      "label": "h (He-3)",
+      "A": 3,
+      "Z": 2,
+      "N": 1,
+      "r_charge_fm": 1.9661,
+      "R_sharp_fm": 2.5382241856594674,
+      "rho_fm3": 0.043796833414932436,
+      "B_over_A_obs_MeV": 2.57268044,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 0.8655215893672141,
+          "T_kin_MeV_per_A": 9.320134870855181,
+          "U_pot_MeV_per_A": -15.724785264199422,
+          "E_total_MeV_per_A": -6.404650393344241,
+          "B_over_A_pred_MeV": 6.404650393344241,
+          "B_over_A_residual_MeV": 3.831969953344241
+        },
+        "19": {
+          "kf_fm1": 0.8655215893672141,
+          "T_kin_MeV_per_A": 9.320134870855181,
+          "U_pot_MeV_per_A": -15.778474235099468,
+          "E_total_MeV_per_A": -6.458339364244287,
+          "B_over_A_pred_MeV": 6.458339364244287,
+          "B_over_A_residual_MeV": 3.8856589242442867
+        }
+      }
+    },
+    {
+      "key": "alpha",
+      "label": "alpha (He-4)",
+      "A": 4,
+      "Z": 2,
+      "N": 2,
+      "r_charge_fm": 1.6755,
+      "R_sharp_fm": 2.1630611988568424,
+      "rho_fm3": 0.09435500915103119,
+      "B_over_A_obs_MeV": 7.0739156,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.1178546091541879,
+          "T_kin_MeV_per_A": 15.546657471030825,
+          "U_pot_MeV_per_A": -29.470269844437336,
+          "E_total_MeV_per_A": -13.923612373406511,
+          "B_over_A_pred_MeV": 13.923612373406511,
+          "B_over_A_residual_MeV": 6.849696773406511
+        },
+        "19": {
+          "kf_fm1": 1.1178546091541879,
+          "T_kin_MeV_per_A": 15.546657471030825,
+          "U_pot_MeV_per_A": -29.5580354548921,
+          "E_total_MeV_per_A": -14.011377983861275,
+          "B_over_A_pred_MeV": 14.011377983861275,
+          "B_over_A_residual_MeV": 6.937462383861274
+        }
+      }
+    },
+    {
+      "key": "li6",
+      "label": "Li-6",
+      "A": 6,
+      "Z": 3,
+      "N": 3,
+      "r_charge_fm": 2.589,
+      "R_sharp_fm": 3.3423846277770006,
+      "rho_fm3": 0.03836130433646229,
+      "B_over_A_obs_MeV": 5.3323312,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 0.8281228916514493,
+          "T_kin_MeV_per_A": 8.532100577537417,
+          "U_pot_MeV_per_A": -16.49394310312741,
+          "E_total_MeV_per_A": -7.961842525589994,
+          "B_over_A_pred_MeV": 7.961842525589994,
+          "B_over_A_residual_MeV": 2.629511325589994
+        },
+        "19": {
+          "kf_fm1": 0.8281228916514493,
+          "T_kin_MeV_per_A": 8.532100577537417,
+          "U_pot_MeV_per_A": -16.557973728477954,
+          "E_total_MeV_per_A": -8.025873150940537,
+          "B_over_A_pred_MeV": 8.025873150940537,
+          "B_over_A_residual_MeV": 2.6935419509405376
+        }
+      }
+    },
+    {
+      "key": "c12",
+      "label": "C-12",
+      "A": 12,
+      "Z": 6,
+      "N": 6,
+      "r_charge_fm": 2.4702,
+      "R_sharp_fm": 3.1890144872671873,
+      "rho_fm3": 0.08833303657239168,
+      "B_over_A_obs_MeV": 7.680144599999999,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.0935485142675982,
+          "T_kin_MeV_per_A": 14.87792949200243,
+          "U_pot_MeV_per_A": -36.99360325565846,
+          "E_total_MeV_per_A": -22.115673763656034,
+          "B_over_A_pred_MeV": 22.115673763656034,
+          "B_over_A_residual_MeV": 14.435529163656035
+        },
+        "19": {
+          "kf_fm1": 1.0935485142675982,
+          "T_kin_MeV_per_A": 14.87792949200243,
+          "U_pot_MeV_per_A": -37.134909517237595,
+          "E_total_MeV_per_A": -22.256980025235165,
+          "B_over_A_pred_MeV": 22.256980025235165,
+          "B_over_A_residual_MeV": 14.576835425235167
+        }
+      }
+    },
+    {
+      "key": "o16",
+      "label": "O-16",
+      "A": 16,
+      "Z": 8,
+      "N": 8,
+      "r_charge_fm": 2.6991,
+      "R_sharp_fm": 3.484523116582813,
+      "rho_fm3": 0.09028203159327217,
+      "B_over_A_obs_MeV": 7.9762072,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.101532822981863,
+          "T_kin_MeV_per_A": 15.09597860506803,
+          "U_pot_MeV_per_A": -39.68203223480974,
+          "E_total_MeV_per_A": -24.58605362974171,
+          "B_over_A_pred_MeV": 24.58605362974171,
+          "B_over_A_residual_MeV": 16.609846429741708
+        },
+        "19": {
+          "kf_fm1": 1.101532822981863,
+          "T_kin_MeV_per_A": 15.09597860506803,
+          "U_pot_MeV_per_A": -39.83809288034524,
+          "E_total_MeV_per_A": -24.742114275277213,
+          "B_over_A_pred_MeV": 24.742114275277213,
+          "B_over_A_residual_MeV": 16.765907075277212
+        }
+      }
+    },
+    {
+      "key": "ca40",
+      "label": "Ca-40",
+      "A": 40,
+      "Z": 20,
+      "N": 20,
+      "r_charge_fm": 3.4776,
+      "R_sharp_fm": 4.489562294923637,
+      "rho_fm3": 0.10552597562534592,
+      "B_over_A_obs_MeV": 8.5513046,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.1603351811307592,
+          "T_kin_MeV_per_A": 16.75071335221568,
+          "U_pot_MeV_per_A": -51.842936216550136,
+          "E_total_MeV_per_A": -35.09222286433446,
+          "B_over_A_pred_MeV": 35.09222286433446,
+          "B_over_A_residual_MeV": 26.540918264334458
+        },
+        "19": {
+          "kf_fm1": 1.1603351811307592,
+          "T_kin_MeV_per_A": 16.75071335221568,
+          "U_pot_MeV_per_A": -52.05914502633675,
+          "E_total_MeV_per_A": -35.30843167412107,
+          "B_over_A_pred_MeV": 35.30843167412107,
+          "B_over_A_residual_MeV": 26.757127074121065
+        }
+      }
+    },
+    {
+      "key": "fe56",
+      "label": "Fe-56",
+      "A": 56,
+      "Z": 26,
+      "N": 30,
+      "r_charge_fm": 3.7377,
+      "R_sharp_fm": 4.82534995103982,
+      "rho_fm3": 0.11899068691074915,
+      "B_over_A_obs_MeV": 8.7903563,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.2077248211961173,
+          "T_kin_MeV_per_A": 18.146896845137416,
+          "U_pot_MeV_per_A": -59.97968398409824,
+          "E_total_MeV_per_A": -41.832787138960825,
+          "B_over_A_pred_MeV": 41.832787138960825,
+          "B_over_A_residual_MeV": 33.042430838960826
+        },
+        "19": {
+          "kf_fm1": 1.2077248211961173,
+          "T_kin_MeV_per_A": 18.146896845137416,
+          "U_pot_MeV_per_A": -60.23287018715034,
+          "E_total_MeV_per_A": -42.08597334201292,
+          "B_over_A_pred_MeV": 42.08597334201292,
+          "B_over_A_residual_MeV": 33.29561704201292
+        }
+      }
+    },
+    {
+      "key": "ni62",
+      "label": "Ni-62",
+      "A": 62,
+      "Z": 28,
+      "N": 34,
+      "r_charge_fm": 3.8399,
+      "R_sharp_fm": 4.95728958370062,
+      "rho_fm3": 0.12149830308390093,
+      "B_over_A_obs_MeV": 8.7945555,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.2161497987360121,
+          "T_kin_MeV_per_A": 18.400962107654713,
+          "U_pot_MeV_per_A": -61.79969828764391,
+          "E_total_MeV_per_A": -43.3987361799892,
+          "B_over_A_pred_MeV": 43.3987361799892,
+          "B_over_A_residual_MeV": 34.6041806799892
+        },
+        "19": {
+          "kf_fm1": 1.2161497987360121,
+          "T_kin_MeV_per_A": 18.400962107654713,
+          "U_pot_MeV_per_A": -62.061648494198806,
+          "E_total_MeV_per_A": -43.66068638654409,
+          "B_over_A_pred_MeV": 43.66068638654409,
+          "B_over_A_residual_MeV": 34.86613088654409
+        }
+      }
+    },
+    {
+      "key": "pb208",
+      "label": "Pb-208",
+      "A": 208,
+      "Z": 82,
+      "N": 126,
+      "r_charge_fm": 5.5012,
+      "R_sharp_fm": 7.102018661385413,
+      "rho_fm3": 0.1386210864340997,
+      "B_over_A_obs_MeV": 7.867453,
+      "per_eq": {
+        "18": {
+          "kf_fm1": 1.2707889629564275,
+          "T_kin_MeV_per_A": 20.091541323522055,
+          "U_pot_MeV_per_A": -77.62116373884523,
+          "E_total_MeV_per_A": -57.529622415323175,
+          "B_over_A_pred_MeV": 57.529622415323175,
+          "B_over_A_residual_MeV": 49.66216941532318
+        },
+        "19": {
+          "kf_fm1": 1.2707889629564275,
+          "T_kin_MeV_per_A": 20.091541323522055,
+          "U_pot_MeV_per_A": -77.96380227211743,
+          "E_total_MeV_per_A": -57.87226094859538,
+          "B_over_A_pred_MeV": 57.87226094859538,
+          "B_over_A_residual_MeV": 50.004807948595385
+        }
+      }
+    }
+  ],
+  "falsification": {
+    "reject_examples": [
+      "If B/A_pred is non-positive across most A (no binding), the approximation class is insufficient.",
+      "If residuals show a monotonic divergence with A under both eq18/eq19 potentials, the fixed u-profile class likely cannot explain A-saturation without additional physics."
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_mean_field.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_mean_field.csv"
+  }
+}

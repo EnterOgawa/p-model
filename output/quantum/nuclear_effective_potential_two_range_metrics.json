@@ -1,0 +1,859 @@
+{
+  "generated_utc": "2026-01-25T17:36:11.656570+00:00",
+  "phase": 7,
+  "step": "7.9.6",
+  "model": {
+    "effective_equation": "Nonrelativistic s-wave Schrödinger equation for relative motion with an effective potential V(r)=μ φ(r)=-μ c^2 u(r).",
+    "ansatz": "Two-range (two-step) attractive well: V=-V1 (r<R1), V=-V2 (R1<r<R2), 0 (r>R2).",
+    "fit_constraints": {
+      "triplet": [
+        "B (CODATA mass defect; solves V1)",
+        "a_t (np low-energy)",
+        "r_t (np low-energy)",
+        "v2t (shape parameter; target)"
+      ],
+      "singlet": [
+        "a_s (np low-energy; fits V2_s with shared geometry and shared V1)"
+      ]
+    },
+    "prediction_targets": {
+      "singlet": [
+        "r_s",
+        "v2s"
+      ]
+    },
+    "positioning": [
+      "Phenomenological constraint (effective model), not a first-principles derivation of nuclear forces.",
+      "The ansatz class is intentionally low-parameter to avoid 'arbitrary function fit'.",
+      "To limit arbitrariness between channels, singlet uses shared geometry and shares V1; only V2_s is adjusted to match a_s."
+    ]
+  },
+  "sources": [
+    {
+      "dataset": "NIST Cuu CODATA constants (mp,mn,md) for deuteron binding baseline",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\manifest.json",
+      "local_manifest_sha256": "a4af996c9eba1f2dff6c6a73923182e26754b75ddbf3eb36263359dfb43d2a2a",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\extracted_values.json",
+      "local_extracted_sha256": "f66aef6422ce5a6e6d9653545a4decd10910923774b19e876132309631b9e245"
+    },
+    {
+      "dataset": "np scattering low-energy parameters (arXiv:0704.1024v1; eq18–eq19)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_manifest.json",
+      "local_manifest_sha256": "eb2aec45ce182215d88ca7ba32c5b8bd62de9ab9820ee66f869b13dc64f6be80",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_extracted.json",
+      "local_extracted_sha256": "1508cdfe8a94b8322348f6e944fe51f3d3047d3ed620bfbe2f490d4c31aa1709"
+    }
+  ],
+  "constants": {
+    "hbarc_MeV_fm": 197.3269804,
+    "mu_c2_MeV": 469.4591551497099,
+    "B_MeV": 2.22456634198942
+  },
+  "results_by_dataset": [
+    {
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "triplet": {
+          "a_t_fm": 5.403,
+          "r_t_fm": 1.7494,
+          "v2t_fm3": 0.163
+        },
+        "singlet": {
+          "a_s_fm": -23.719,
+          "r_s_fm": 2.626,
+          "v2s_fm3": -0.005
+        }
+      },
+      "fit_triplet": {
+        "geometry": {
+          "R1_fm": 0.7308,
+          "R2_fm": 2.35
+        },
+        "V1_t_MeV": 105.05563530536276,
+        "V2_t_MeV": 22.0,
+        "a_t_exact_fm": 5.40051488198114,
+        "ere": {
+          "a_fm": 5.400514881201542,
+          "r_eff_fm": 1.749156449810944,
+          "v2_fm3": 0.163842386606208,
+          "coeffs": {
+            "c0_fm1": -0.1851675297629239,
+            "c2_fm": 0.874578224905472,
+            "c4_fm3": 0.163842386606208
+          },
+          "fit_rms_fm1": 2.225767992266648e-11,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": -0.18516403142124863,
+              "delta_rad": -0.010800813809924113
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": -0.18515353644493343,
+              "delta_rad": -0.02160033212602247
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": -0.18513604471280876,
+              "delta_rad": -0.03239726060593369
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": -0.1851115560674786,
+              "delta_rad": -0.043190307207651296
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": -0.1850800702885913,
+              "delta_rad": -0.05397818333327826
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": -0.18504158709284393,
+              "delta_rad": -0.06475960496510333
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": -0.1849961061339873,
+              "delta_rad": -0.07553329379149001
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": -0.184943627002831,
+              "delta_rad": -0.08629797832011088
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": -0.18488414922725063,
+              "delta_rad": -0.09705239497611201
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": -0.18481767227219528,
+              "delta_rad": -0.10779528918285416
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": -0.18474419553969715,
+              "delta_rad": -0.11852541642294867
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": -0.18466371836888043,
+              "delta_rad": -0.12924154327738674
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": -0.1845762400359733,
+              "delta_rad": -0.13994244844064674
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": -0.1844817597543194,
+              "delta_rad": -0.15062692370976347
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": -0.18438027667439102,
+              "delta_rad": -0.1612937749454435
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": -0.18427178988380366,
+              "delta_rad": -0.17194182300342156
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": -0.18415629840733044,
+              "delta_rad": -0.18256990463436912
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": -0.18403380120691995,
+              "delta_rad": -0.19317687335078332
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": -0.18390429718171208,
+              "delta_rad": -0.2037616002594158
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": -0.18376778516805775,
+              "delta_rad": -0.2143229748579206
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": -0.1836242639395377,
+              "delta_rad": -0.22485990579453963
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": -0.1834737322069841,
+              "delta_rad": -0.2353713215897721
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": -0.1833161886185017,
+              "delta_rad": -0.24585617131911333
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": -0.18315163175949117,
+              "delta_rad": -0.2563134252560796
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": -0.18298006015267299,
+              "delta_rad": -0.2667420754748745
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": -0.18280147225811286,
+              "delta_rad": -0.2771411364121858
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": -0.18261586647324832,
+              "delta_rad": -0.2875096453877336
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": -0.18242324113291591,
+              "delta_rad": -0.2978466630833263
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": -0.18222359450937983,
+              "delta_rad": -0.3081512739803026
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": -0.18201692481236226,
+              "delta_rad": -0.31842258675536955
+            }
+          ]
+        },
+        "fit_score": 0.03414432599957995,
+        "fit_deltas": {
+          "da_fm": -0.0024851180188596445,
+          "dr_fm": -0.0002435501890560854,
+          "dv2_fm3": 0.000842386606208001
+        },
+        "note": "Triplet: solve V1 by B, then search (R1,R2,V2) to match (a_t,r_t,v2t) on this ansatz class."
+      },
+      "fit_singlet": {
+        "V1_s_MeV": 105.05563530536276,
+        "V2_s_MeV": 11.348586246202455,
+        "a_s_exact_fm": -23.719000003240925,
+        "ere": {
+          "a_fm": -23.719000037331533,
+          "r_eff_fm": 1.999669972247818,
+          "v2_fm3": 0.1519818826496141,
+          "coeffs": {
+            "c0_fm1": 0.042160293369285874,
+            "c2_fm": 0.999834986123909,
+            "c4_fm3": 0.1519818826496141
+          },
+          "fit_rms_fm1": 5.041826432905143e-11,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": 0.04216429277095167,
+              "delta_rad": 0.04739797426504978
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": 0.042176290823391874,
+              "delta_rad": 0.09455718827503021
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": 0.04219628767489369,
+              "delta_rad": 0.14124574547265412
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": 0.04222428347160436,
+              "delta_rad": 0.18724499079285242
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": 0.042260278418121924,
+              "delta_rad": 0.232354979624977
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": 0.04230427277748693,
+              "delta_rad": 0.27639872815165634
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": 0.04235626687117122,
+              "delta_rad": 0.31922507667092515
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": 0.0424162610790659,
+              "delta_rad": 0.36071014216530883
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": 0.042484255839464594,
+              "delta_rad": 0.4007574622981702
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": 0.04256025164904722,
+              "delta_rad": 0.439297025487499
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": 0.04264424906285782,
+              "delta_rad": 0.4762834348828108
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": 0.04273624869428392,
+              "delta_rad": 0.5116934699997968
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": 0.042836251215030166,
+              "delta_rad": 0.5455232958615849
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": 0.04294425735509182,
+              "delta_rad": 0.5777855355700305
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": 0.04306026790272406,
+              "delta_rad": 0.6085063780049613
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": 0.04318428370441114,
+              "delta_rad": 0.6377228458379846
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": 0.0433163056648306,
+              "delta_rad": 0.6654803058733018
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": 0.043456334746816754,
+              "delta_rad": 0.6918302671378351
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": 0.04360437197132129,
+              "delta_rad": 0.7168284834352486
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": 0.0437604184173715,
+              "delta_rad": 0.7405333561789154
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": 0.04392447522202592,
+              "delta_rad": 0.7630046193354973
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": 0.04409654358032681,
+              "delta_rad": 0.7843022799750705
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": 0.0442766247452525,
+              "delta_rad": 0.8044857838963564
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": 0.04446472002766468,
+              "delta_rad": 0.823613374848882
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": 0.044660830796254714,
+              "delta_rad": 0.8417416169785513
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": 0.044864958477486706,
+              "delta_rad": 0.8589250524739052
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": 0.045077104555538705,
+              "delta_rad": 0.8752159693916421
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": 0.045297270572241075,
+              "delta_rad": 0.8906642578759172
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": 0.0455254581270127,
+              "delta_rad": 0.9053173361829129
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": 0.0457616688767941,
+              "delta_rad": 0.9192201309141521
+            }
+          ]
+        },
+        "fit_mode": "Shared geometry and shared V1; fit V2_s to match a_s (k->0).",
+        "fit_method": "bisection",
+        "fit_scan": {
+          "v2_min": 0.0,
+          "v2_max": 105.05563530536276,
+          "n_scan": 600
+        },
+        "note_fit": "bisection solve on V2_s (strict (V2<=V1))",
+        "note_profile": "",
+        "note": "Singlet: uses shared geometry and V1; fits V2_s by a_s. (r_s, v2s) are predictions."
+      },
+      "comparison": {
+        "triplet": {
+          "a_t_fit_minus_obs_fm": -0.0024851180188596445,
+          "r_t_fit_minus_obs_fm": -0.0002435501890560854,
+          "v2t_fit_minus_obs_fm3": 0.000842386606208001
+        },
+        "singlet": {
+          "a_s_fit_minus_obs_fm": -3.24092397363529e-09,
+          "r_s_pred_minus_obs_fm": -0.6263300277521819,
+          "v2s_pred_minus_obs_fm3": 0.1569818826496141
+        }
+      }
+    },
+    {
+      "label": "eq19 (Nijmegen)",
+      "eq_label": 19,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "triplet": {
+          "a_t_fm": 5.42,
+          "r_t_fm": 1.753,
+          "v2t_fm3": 0.04
+        },
+        "singlet": {
+          "a_s_fm": -23.739,
+          "r_s_fm": 2.678,
+          "v2s_fm3": -0.48
+        }
+      },
+      "fit_triplet": {
+        "geometry": {
+          "R1_fm": 0.487776,
+          "R2_fm": 2.746112
+        },
+        "V1_t_MeV": 335.1157108481028,
+        "V2_t_MeV": 14.0,
+        "a_t_exact_fm": 5.413957086398762,
+        "ere": {
+          "a_fm": 5.413957079533383,
+          "r_eff_fm": 1.754052989186225,
+          "v2_fm3": 0.03954856037330415,
+          "coeffs": {
+            "c0_fm1": -0.18470778126046536,
+            "c2_fm": 0.8770264945931125,
+            "c4_fm3": 0.03954856037330415
+          },
+          "fit_rms_fm1": 1.9485569848612316e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": -0.18470427292467814,
+              "delta_rad": -0.010827696665476064
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": -0.184693748612207,
+              "delta_rad": -0.02165408851738322
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": -0.18467620806546844,
+              "delta_rad": -0.03247787189339993
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": -0.1846516512455498,
+              "delta_rad": -0.04329774543112552
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": -0.18462007809800432,
+              "delta_rad": -0.054112411211617834
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": -0.18458148855288484,
+              "delta_rad": -0.06492057589525231
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": -0.18453588252478414,
+              "delta_rad": -0.07572095184739437
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": -0.18448325991288547,
+              "delta_rad": -0.08651225825141677
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": -0.18442362060102316,
+              "delta_rad": -0.09729322220664668
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": -0.18435696445775065,
+              "delta_rad": -0.10806257980889036
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": -0.18428329133641866,
+              "delta_rad": -0.11881907721125262
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": -0.1842026010752625,
+              "delta_rad": -0.12956147166304882
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": -0.18411489349749957,
+              "delta_rad": -0.14028853252469553
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": -0.1840201684114338,
+              "delta_rad": -0.15099904225656352
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": -0.1839184256105715,
+              "delta_rad": -0.1616917973798763
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": -0.18380966487374553,
+              "delta_rad": -0.17236560940785034
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": -0.18369388596524938,
+              "delta_rad": -0.18301930574538622
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": -0.1835710886349793,
+              "delta_rad": -0.1936517305557432
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": -0.18344127261858675,
+              "delta_rad": -0.2042617455927504
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": -0.18330443763764132,
+              "delta_rad": -0.2148482309972382
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": -0.18316058339979926,
+              "delta_rad": -0.22541008605650975
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": -0.1830097095989862,
+              "delta_rad": -0.23594622992579278
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": -0.1828518159155857,
+              "delta_rad": -0.2464556023107632
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": -0.18268690201663895,
+              "delta_rad": -0.25693716411035417
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": -0.1825149675560528,
+              "delta_rad": -0.2673898980192079
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": -0.1823360121748185,
+              "delta_rad": -0.277812809089256
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": -0.1821500355012395,
+              "delta_rad": -0.2882049252500535
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": -0.18195703715116845,
+              "delta_rad": -0.29856529778761864
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": -0.18175701672825387,
+              "delta_rad": -0.3088930017816608
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": -0.18154997382419613,
+              "delta_rad": -0.31918713650120456
+            }
+          ]
+        },
+        "fit_score": 0.06030314426461167,
+        "fit_deltas": {
+          "da_fm": -0.006042913601238098,
+          "dr_fm": 0.001052989186225206,
+          "dv2_fm3": -0.00045143962669585286
+        },
+        "note": "Triplet: solve V1 by B, then search (R1,R2,V2) to match (a_t,r_t,v2t) on this ansatz class."
+      },
+      "fit_singlet": {
+        "V1_s_MeV": 335.1157108481028,
+        "V2_s_MeV": 5.903911458414845,
+        "a_s_exact_fm": -23.7390000053361,
+        "ere": {
+          "a_fm": -23.739000150495617,
+          "r_eff_fm": 1.882571029356831,
+          "v2_fm3": -0.07065029856055403,
+          "coeffs": {
+            "c0_fm1": 0.04212477331228806,
+            "c2_fm": 0.9412855146784155,
+            "c4_fm3": -0.07065029856055403
+          },
+          "fit_rms_fm1": 2.141952089383244e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": 0.04212853870524618,
+              "delta_rad": 0.04743814015082688
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": 0.04213983409801438,
+              "delta_rad": 0.0946385058163419
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": 0.04215865970811876,
+              "delta_rad": 0.14137013963015224
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": 0.04218501546877615,
+              "delta_rad": 0.18741523714173358
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": 0.042218901286456376,
+              "delta_rad": 0.23257458218735144
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": 0.042260317040844715,
+              "delta_rad": 0.2766717745418086
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": 0.04230926258479709,
+              "delta_rad": 0.3195560823674883
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": 0.042365737744285134,
+              "delta_rad": 0.36110389511891083
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": 0.04242974231832924,
+              "delta_rad": 0.4012188773003366
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": 0.042501276078922824,
+              "delta_rad": 0.4398310152458292
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": 0.04258033877094669,
+              "delta_rad": 0.47689480205783846
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": 0.04266693011207441,
+              "delta_rad": 0.5123868219603497
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": 0.04276104979266157,
+              "delta_rad": 0.5463029818675418
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": 0.042862697475634606,
+              "delta_rad": 0.578655604610005
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": 0.04297187279636121,
+              "delta_rad": 0.609470554601269
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": 0.04308857536251373,
+              "delta_rad": 0.6387845207049945
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": 0.04321280475392291,
+              "delta_rad": 0.6666425382647996
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": 0.043344560522421624,
+              "delta_rad": 0.6930957959250889
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": 0.0434838421916768,
+              "delta_rad": 0.718199744314026
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": 0.0436306492570112,
+              "delta_rad": 0.7420125028273481
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": 0.04378498118521882,
+              "delta_rad": 0.7645935467762108
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": 0.043946837414364344,
+              "delta_rad": 0.7860026487970759
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": 0.044116217353577264,
+              "delta_rad": 0.8062990443441929
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": 0.044293120382832236,
+              "delta_rad": 0.8255407900807771
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": 0.04447754585272312,
+              "delta_rad": 0.8437842850318863
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": 0.0446694930842234,
+              "delta_rad": 0.8610839266600643
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": 0.04486896136843707,
+              "delta_rad": 0.8774918769803772
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": 0.04507594996634117,
+              "delta_rad": 0.8930579170295969
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": 0.04529045810851597,
+              "delta_rad": 0.907829371171084
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": 0.04551248499486697,
+              "delta_rad": 0.921851085685274
+            }
+          ]
+        },
+        "fit_mode": "Shared geometry and shared V1; fit V2_s to match a_s (k->0).",
+        "fit_method": "bisection",
+        "fit_scan": {
+          "v2_min": 0.0,
+          "v2_max": 335.1157108481028,
+          "n_scan": 600
+        },
+        "note_fit": "bisection solve on V2_s (strict (V2<=V1))",
+        "note_profile": "",
+        "note": "Singlet: uses shared geometry and V1; fits V2_s by a_s. (r_s, v2s) are predictions."
+      },
+      "comparison": {
+        "triplet": {
+          "a_t_fit_minus_obs_fm": -0.006042913601238098,
+          "r_t_fit_minus_obs_fm": 0.001052989186225206,
+          "v2t_fit_minus_obs_fm3": -0.00045143962669585286
+        },
+        "singlet": {
+          "a_s_fit_minus_obs_fm": -5.336097785857419e-09,
+          "r_s_pred_minus_obs_fm": -0.795428970643169,
+          "v2s_pred_minus_obs_fm3": 0.40934970143944593
+        }
+      }
+    }
+  ],
+  "systematics_proxy": {
+    "observed_envelope_v2t_fm3": {
+      "min": 0.04,
+      "max": 0.163
+    },
+    "observed_envelope_r_s_fm": {
+      "min": 2.626,
+      "max": 2.678
+    },
+    "observed_envelope_v2s_fm3": {
+      "min": -0.48,
+      "max": -0.005
+    },
+    "predicted_r_s_within_envelope": false,
+    "predicted_v2s_within_envelope": false,
+    "notes": [
+      "Eq.(18) and Eq.(19) are two phase-shift analyses in the same primary source; their difference is treated as an analysis-dependent systematics proxy.",
+      "Triplet fit is performed per dataset to expose sensitivity of the inferred u-profile to that proxy."
+    ]
+  },
+  "falsification": {
+    "acceptance_criteria": [
+      "Under the two-range ansatz class, after fitting triplet targets and fitting singlet a_s by adjusting only V2_s (shared geometry and shared V1), the predicted singlet (r_s,v2s) should be compatible with the observed range (eq18–eq19).",
+      "If singlet (r_s,v2s) falls outside the analysis-dependent envelope, the ansatz class is rejected as a representation of the nuclear-scale u-profile."
+    ],
+    "within_envelope": {
+      "r_s": false,
+      "v2s": false
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_two_range.png"
+  }
+}

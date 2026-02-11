@@ -1,0 +1,66 @@
+{
+  "generated_utc": "2026-01-31T15:05:37.426410+00:00",
+  "phase": 7,
+  "step": "7.14.1",
+  "inputs": {
+    "extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\extracted_values.json",
+      "sha256": "0060fba3290185382c3e0895a8b3022b830ca6dc81f66e90c0aabcd292710fb2"
+    }
+  },
+  "falsification": {
+    "sigma_multiplier": 3.0,
+    "targets": [
+      {
+        "code": "asil",
+        "target_value_m": 5.431020511e-10,
+        "sigma_m": 8.9e-18,
+        "reject_if_abs_minus_target_gt_m": 2.67e-17
+      },
+      {
+        "code": "d220sil",
+        "target_value_m": 1.920155716e-10,
+        "sigma_m": 3.2e-18,
+        "reject_if_abs_minus_target_gt_m": 9.6e-18
+      }
+    ],
+    "notes": [
+      "CODATA provides explicit uncertainties; reject thresholds use a strict ±3σ envelope.",
+      "This does not claim P-model predicts these material-specific values today; it freezes targets for future derivations."
+    ]
+  },
+  "results": [
+    {
+      "code": "asil",
+      "name": "lattice parameter of silicon",
+      "value_m": 5.431020511e-10,
+      "sigma_m": 8.9e-18,
+      "unit_si": "m",
+      "value_A": 5.431020511,
+      "sigma_A": 8.9e-08,
+      "rel_sigma": 1.6387343745017943e-08,
+      "source_url": "https://physics.nist.gov/cgi-bin/cuu/Value?asil",
+      "local_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\nist_cuu_Value_asil.html",
+      "local_sha256": "fe14057cc8a9b02596f43962f9ec36024cd5f099c60b433503f52c428f3f05ed",
+      "codata_year": 2022
+    },
+    {
+      "code": "d220sil",
+      "name": "lattice spacing of ideal Si (220)",
+      "value_m": 1.920155716e-10,
+      "sigma_m": 3.2e-18,
+      "unit_si": "m",
+      "value_A": 1.9201557159999998,
+      "sigma_A": 3.1999999999999995e-08,
+      "rel_sigma": 1.6665315074894688e-08,
+      "source_url": "https://physics.nist.gov/cgi-bin/cuu/Value?d220sil",
+      "local_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\nist_cuu_Value_d220sil.html",
+      "local_sha256": "d3ba898215a2a2cd002d61943109caa38f5d445425c6da739f4862cd337e194a",
+      "codata_year": 2022
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_lattice_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_lattice_baseline.png"
+  }
+}

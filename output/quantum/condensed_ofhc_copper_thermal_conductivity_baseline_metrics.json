@@ -1,0 +1,406 @@
+{
+  "generated_utc": "2026-01-31T15:05:44.206068+00:00",
+  "phase": 7,
+  "step": "7.14.6",
+  "inputs": {
+    "extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_ofhc_copper_thermal_conductivity\\extracted_values.json",
+      "sha256": "64c84f5035551a06b039d2555a6a649be9cb3f93b5b775dc300dcdb026ee6d8c"
+    }
+  },
+  "results": {
+    "material": "OFHC Copper (UNS C10100/C10200)",
+    "units": "W/(m-K)",
+    "rrr_values": [
+      50,
+      100,
+      150,
+      300,
+      500
+    ],
+    "fit_error_percent_relative_to_data": {
+      "50": 2.0,
+      "100": 1.0,
+      "150": 2.0,
+      "300": 1.0,
+      "500": 2.0
+    },
+    "common_grid": {
+      "t_min_k": 4.0,
+      "t_max_k": 300.0,
+      "n": 600,
+      "kind": "geomspace"
+    },
+    "k_at_selected_T_K": {
+      "50": {
+        "4.0": 320.38313292525186,
+        "10.0": 778.1487713016572,
+        "20.0": 1367.854811453829,
+        "50.0": 863.5590605024797,
+        "77.0": 515.0743226194302,
+        "100.0": 443.92183348138667,
+        "300.0": 392.36824486828715
+      },
+      "100": {
+        "4.0": 642.2969607429585,
+        "10.0": 1539.9155755669074,
+        "20.0": 2422.5102645364937,
+        "50.0": 1004.8462770466153,
+        "77.0": 547.1996980793605,
+        "100.0": 461.54933806925106,
+        "300.0": 396.3239590150126
+      },
+      "150": {
+        "4.0": 961.762514716873,
+        "10.0": 2274.746615284522,
+        "20.0": 3244.6298472374656,
+        "50.0": 1055.8000978120597,
+        "77.0": 555.8463755648177,
+        "100.0": 466.131842891308,
+        "300.0": 397.6413181208555
+      },
+      "300": {
+        "4.0": 1888.3793110693216,
+        "10.0": 4319.904672636731,
+        "20.0": 5052.267426595825,
+        "50.0": 1130.467488210375,
+        "77.0": 572.1196598437356,
+        "100.0": 471.09606951332023,
+        "300.0": 397.8739000533803
+      },
+      "500": {
+        "4.0": 3181.6852535067287,
+        "10.0": 6877.7203821964495,
+        "20.0": 6574.877240716748,
+        "50.0": 1173.4827975669639,
+        "77.0": 579.0366064778324,
+        "100.0": 479.402475439723,
+        "300.0": 401.1873558275264
+      }
+    },
+    "k_extrema_on_common_grid": {
+      "50": {
+        "k_max_W_mK": 1475.9060400034782,
+        "t_at_k_max_K": 26.246616751256973,
+        "k_min_W_mK": 320.38313292525186,
+        "t_min_K": 4.0,
+        "t_max_K": 300.0
+      },
+      "100": {
+        "k_max_W_mK": 2442.253039150549,
+        "t_at_k_max_K": 21.761309607108544,
+        "k_min_W_mK": 396.3239590150126,
+        "t_min_K": 4.0,
+        "t_max_K": 300.0
+      },
+      "150": {
+        "k_max_W_mK": 3247.238471578533,
+        "t_at_k_max_K": 19.531258962652522,
+        "k_min_W_mK": 397.6413181208555,
+        "t_min_K": 4.0,
+        "t_max_K": 300.0
+      },
+      "300": {
+        "k_max_W_mK": 5280.307800146622,
+        "t_at_k_max_K": 16.428676389609052,
+        "k_min_W_mK": 397.8739000533803,
+        "t_min_K": 4.0,
+        "t_max_K": 300.0
+      },
+      "500": {
+        "k_max_W_mK": 7613.591273676797,
+        "t_at_k_max_K": 14.019597661823056,
+        "k_min_W_mK": 401.1873558275264,
+        "t_min_K": 4.0,
+        "t_max_K": 300.0
+      }
+    },
+    "monotonic_checks": {
+      "k_max_increases_with_rrr": true,
+      "t_at_k_max_decreases_with_rrr": true
+    }
+  },
+  "falsification": {
+    "sigma_multiplier": 3.0,
+    "targets_by_rrr": {
+      "50": {
+        "fit_error_percent_relative_to_data": 2.0,
+        "targets_at_selected_T": [
+          {
+            "T_K": 4.0,
+            "k_target_W_mK": 320.38313292525186,
+            "sigma_fit_W_mK": 6.407662658505037,
+            "reject_if_abs_k_minus_target_gt_W_mK": 19.22298797551511
+          },
+          {
+            "T_K": 10.0,
+            "k_target_W_mK": 778.1487713016572,
+            "sigma_fit_W_mK": 15.562975426033145,
+            "reject_if_abs_k_minus_target_gt_W_mK": 46.68892627809943
+          },
+          {
+            "T_K": 20.0,
+            "k_target_W_mK": 1367.854811453829,
+            "sigma_fit_W_mK": 27.35709622907658,
+            "reject_if_abs_k_minus_target_gt_W_mK": 82.07128868722974
+          },
+          {
+            "T_K": 50.0,
+            "k_target_W_mK": 863.5590605024797,
+            "sigma_fit_W_mK": 17.271181210049594,
+            "reject_if_abs_k_minus_target_gt_W_mK": 51.813543630148786
+          },
+          {
+            "T_K": 77.0,
+            "k_target_W_mK": 515.0743226194302,
+            "sigma_fit_W_mK": 10.301486452388604,
+            "reject_if_abs_k_minus_target_gt_W_mK": 30.904459357165813
+          },
+          {
+            "T_K": 100.0,
+            "k_target_W_mK": 443.92183348138667,
+            "sigma_fit_W_mK": 8.878436669627733,
+            "reject_if_abs_k_minus_target_gt_W_mK": 26.635310008883202
+          },
+          {
+            "T_K": 300.0,
+            "k_target_W_mK": 392.36824486828715,
+            "sigma_fit_W_mK": 7.847364897365743,
+            "reject_if_abs_k_minus_target_gt_W_mK": 23.54209469209723
+          }
+        ],
+        "target_peak": {
+          "t_at_k_max_K": 26.246616751256973,
+          "k_max_W_mK": 1475.9060400034782,
+          "sigma_fit_W_mK": 29.518120800069564,
+          "reject_if_abs_k_max_minus_target_gt_W_mK": 88.55436240020869
+        }
+      },
+      "100": {
+        "fit_error_percent_relative_to_data": 1.0,
+        "targets_at_selected_T": [
+          {
+            "T_K": 4.0,
+            "k_target_W_mK": 642.2969607429585,
+            "sigma_fit_W_mK": 6.422969607429585,
+            "reject_if_abs_k_minus_target_gt_W_mK": 19.268908822288754
+          },
+          {
+            "T_K": 10.0,
+            "k_target_W_mK": 1539.9155755669074,
+            "sigma_fit_W_mK": 15.399155755669074,
+            "reject_if_abs_k_minus_target_gt_W_mK": 46.19746726700723
+          },
+          {
+            "T_K": 20.0,
+            "k_target_W_mK": 2422.5102645364937,
+            "sigma_fit_W_mK": 24.225102645364938,
+            "reject_if_abs_k_minus_target_gt_W_mK": 72.67530793609481
+          },
+          {
+            "T_K": 50.0,
+            "k_target_W_mK": 1004.8462770466153,
+            "sigma_fit_W_mK": 10.048462770466154,
+            "reject_if_abs_k_minus_target_gt_W_mK": 30.145388311398463
+          },
+          {
+            "T_K": 77.0,
+            "k_target_W_mK": 547.1996980793605,
+            "sigma_fit_W_mK": 5.471996980793604,
+            "reject_if_abs_k_minus_target_gt_W_mK": 16.415990942380812
+          },
+          {
+            "T_K": 100.0,
+            "k_target_W_mK": 461.54933806925106,
+            "sigma_fit_W_mK": 4.615493380692511,
+            "reject_if_abs_k_minus_target_gt_W_mK": 13.846480142077533
+          },
+          {
+            "T_K": 300.0,
+            "k_target_W_mK": 396.3239590150126,
+            "sigma_fit_W_mK": 3.963239590150126,
+            "reject_if_abs_k_minus_target_gt_W_mK": 11.889718770450378
+          }
+        ],
+        "target_peak": {
+          "t_at_k_max_K": 21.761309607108544,
+          "k_max_W_mK": 2442.253039150549,
+          "sigma_fit_W_mK": 24.42253039150549,
+          "reject_if_abs_k_max_minus_target_gt_W_mK": 73.26759117451647
+        }
+      },
+      "150": {
+        "fit_error_percent_relative_to_data": 2.0,
+        "targets_at_selected_T": [
+          {
+            "T_K": 4.0,
+            "k_target_W_mK": 961.762514716873,
+            "sigma_fit_W_mK": 19.23525029433746,
+            "reject_if_abs_k_minus_target_gt_W_mK": 57.705750883012385
+          },
+          {
+            "T_K": 10.0,
+            "k_target_W_mK": 2274.746615284522,
+            "sigma_fit_W_mK": 45.49493230569043,
+            "reject_if_abs_k_minus_target_gt_W_mK": 136.4847969170713
+          },
+          {
+            "T_K": 20.0,
+            "k_target_W_mK": 3244.6298472374656,
+            "sigma_fit_W_mK": 64.89259694474931,
+            "reject_if_abs_k_minus_target_gt_W_mK": 194.67779083424796
+          },
+          {
+            "T_K": 50.0,
+            "k_target_W_mK": 1055.8000978120597,
+            "sigma_fit_W_mK": 21.116001956241195,
+            "reject_if_abs_k_minus_target_gt_W_mK": 63.34800586872359
+          },
+          {
+            "T_K": 77.0,
+            "k_target_W_mK": 555.8463755648177,
+            "sigma_fit_W_mK": 11.116927511296353,
+            "reject_if_abs_k_minus_target_gt_W_mK": 33.35078253388906
+          },
+          {
+            "T_K": 100.0,
+            "k_target_W_mK": 466.131842891308,
+            "sigma_fit_W_mK": 9.32263685782616,
+            "reject_if_abs_k_minus_target_gt_W_mK": 27.967910573478477
+          },
+          {
+            "T_K": 300.0,
+            "k_target_W_mK": 397.6413181208555,
+            "sigma_fit_W_mK": 7.95282636241711,
+            "reject_if_abs_k_minus_target_gt_W_mK": 23.85847908725133
+          }
+        ],
+        "target_peak": {
+          "t_at_k_max_K": 19.531258962652522,
+          "k_max_W_mK": 3247.238471578533,
+          "sigma_fit_W_mK": 64.94476943157066,
+          "reject_if_abs_k_max_minus_target_gt_W_mK": 194.834308294712
+        }
+      },
+      "300": {
+        "fit_error_percent_relative_to_data": 1.0,
+        "targets_at_selected_T": [
+          {
+            "T_K": 4.0,
+            "k_target_W_mK": 1888.3793110693216,
+            "sigma_fit_W_mK": 18.883793110693215,
+            "reject_if_abs_k_minus_target_gt_W_mK": 56.65137933207964
+          },
+          {
+            "T_K": 10.0,
+            "k_target_W_mK": 4319.904672636731,
+            "sigma_fit_W_mK": 43.199046726367314,
+            "reject_if_abs_k_minus_target_gt_W_mK": 129.59714017910193
+          },
+          {
+            "T_K": 20.0,
+            "k_target_W_mK": 5052.267426595825,
+            "sigma_fit_W_mK": 50.52267426595825,
+            "reject_if_abs_k_minus_target_gt_W_mK": 151.56802279787476
+          },
+          {
+            "T_K": 50.0,
+            "k_target_W_mK": 1130.467488210375,
+            "sigma_fit_W_mK": 11.30467488210375,
+            "reject_if_abs_k_minus_target_gt_W_mK": 33.91402464631125
+          },
+          {
+            "T_K": 77.0,
+            "k_target_W_mK": 572.1196598437356,
+            "sigma_fit_W_mK": 5.721196598437356,
+            "reject_if_abs_k_minus_target_gt_W_mK": 17.163589795312067
+          },
+          {
+            "T_K": 100.0,
+            "k_target_W_mK": 471.09606951332023,
+            "sigma_fit_W_mK": 4.710960695133203,
+            "reject_if_abs_k_minus_target_gt_W_mK": 14.132882085399608
+          },
+          {
+            "T_K": 300.0,
+            "k_target_W_mK": 397.8739000533803,
+            "sigma_fit_W_mK": 3.978739000533803,
+            "reject_if_abs_k_minus_target_gt_W_mK": 11.936217001601408
+          }
+        ],
+        "target_peak": {
+          "t_at_k_max_K": 16.428676389609052,
+          "k_max_W_mK": 5280.307800146622,
+          "sigma_fit_W_mK": 52.80307800146622,
+          "reject_if_abs_k_max_minus_target_gt_W_mK": 158.40923400439866
+        }
+      },
+      "500": {
+        "fit_error_percent_relative_to_data": 2.0,
+        "targets_at_selected_T": [
+          {
+            "T_K": 4.0,
+            "k_target_W_mK": 3181.6852535067287,
+            "sigma_fit_W_mK": 63.633705070134575,
+            "reject_if_abs_k_minus_target_gt_W_mK": 190.90111521040373
+          },
+          {
+            "T_K": 10.0,
+            "k_target_W_mK": 6877.7203821964495,
+            "sigma_fit_W_mK": 137.55440764392898,
+            "reject_if_abs_k_minus_target_gt_W_mK": 412.66322293178695
+          },
+          {
+            "T_K": 20.0,
+            "k_target_W_mK": 6574.877240716748,
+            "sigma_fit_W_mK": 131.49754481433496,
+            "reject_if_abs_k_minus_target_gt_W_mK": 394.4926344430049
+          },
+          {
+            "T_K": 50.0,
+            "k_target_W_mK": 1173.4827975669639,
+            "sigma_fit_W_mK": 23.469655951339277,
+            "reject_if_abs_k_minus_target_gt_W_mK": 70.40896785401783
+          },
+          {
+            "T_K": 77.0,
+            "k_target_W_mK": 579.0366064778324,
+            "sigma_fit_W_mK": 11.580732129556647,
+            "reject_if_abs_k_minus_target_gt_W_mK": 34.74219638866994
+          },
+          {
+            "T_K": 100.0,
+            "k_target_W_mK": 479.402475439723,
+            "sigma_fit_W_mK": 9.58804950879446,
+            "reject_if_abs_k_minus_target_gt_W_mK": 28.76414852638338
+          },
+          {
+            "T_K": 300.0,
+            "k_target_W_mK": 401.1873558275264,
+            "sigma_fit_W_mK": 8.023747116550528,
+            "reject_if_abs_k_minus_target_gt_W_mK": 24.071241349651583
+          }
+        ],
+        "target_peak": {
+          "t_at_k_max_K": 14.019597661823056,
+          "k_max_W_mK": 7613.591273676797,
+          "sigma_fit_W_mK": 152.27182547353593,
+          "reject_if_abs_k_max_minus_target_gt_W_mK": 456.81547642060775
+        }
+      }
+    },
+    "notes": [
+      "NIST TRC provides a curve-fit relative error vs data (typically 1–2% depending on RRR).",
+      "We treat that fit error as a 1σ proxy and define a strict ±3σ envelope for κ(T) at representative temperatures."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.png"
+  },
+  "notes": [
+    "This is a fixed baseline derived from NIST TRC Cryogenics 'Material Properties: OFHC Copper'.",
+    "The NIST page provides a rational fit for log10(κ) as a function of T (K), with separate coefficients for each RRR value.",
+    "The baseline freezes κ(T) on a common temperature grid (intersection of ranges across RRR sets)."
+  ]
+}

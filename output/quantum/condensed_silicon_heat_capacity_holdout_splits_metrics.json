@@ -1,0 +1,214 @@
+{
+  "generated_utc": "2026-02-11T02:47:22.568406+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "janaf_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_janaf_silicon_si\\extracted_values.json",
+      "sha256": "da4e1bc5ad80067347b68ba2f8d2097570e2a9262ac79120f7606c5f0731ea09"
+    },
+    "webbook_condensed_shomate": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_webbook_condensed_silicon_si\\extracted_values.json",
+      "sha256": "be06a252b49767f17ef18d4b93f23a039cc484fdcba8456b3196013124ba7ee3"
+    }
+  },
+  "assumptions": {
+    "sigma_proxy": {
+      "Cp": "max(2% of Cp, 0.2 J/mol·K)"
+    },
+    "hybrid_frozen_model": {
+      "name": "Debye (low-T θ_D) + WebBook Shomate (high-T)",
+      "theta_D_fit": {
+        "objective": "minimize max abs(z) on 100-300 K (JANAF solid points)",
+        "theta_D_K": 598.003797901102
+      },
+      "shomate_solid": {
+        "t_min_k": 298.0,
+        "t_max_k": 1685.0,
+        "coeffs": {
+          "A": 22.81719,
+          "B": 3.89951,
+          "C": -0.082885,
+          "D": 0.042111,
+          "E": -0.354063,
+          "F": -8.163946,
+          "G": 43.27846,
+          "H": 0.0
+        },
+        "reference": "Chase, 1998",
+        "comment": "Data last reviewed in March, 1967"
+      },
+      "policy": "Use Shomate (solid) within its validity range; fallback to Debye outside (includes T=0)."
+    },
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test range)"
+    }
+  },
+  "data_range_T_K": [
+    0.0,
+    1685.0
+  ],
+  "splits": [
+    {
+      "name": "A_low_to_high",
+      "train_T_K": [
+        100.0,
+        300.0
+      ],
+      "test_T_K": [
+        350.0,
+        1685.0
+      ],
+      "models": {
+        "debye_lowT_minimax_plus_shomate_frozen": {
+          "params": {
+            "theta_D_K": 598.003797901102,
+            "shomate_solid_t_min_k": 298.0,
+            "shomate_solid_t_max_k": 1685.0,
+            "A": 22.81719,
+            "B": 3.89951,
+            "C": -0.082885,
+            "D": 0.042111,
+            "E": -0.354063
+          },
+          "train": {
+            "n": 5,
+            "max_abs_z": 2.99592483460044,
+            "rms_z": 2.1474973085993567,
+            "reduced_chi2": 4.611744690441482,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 16,
+            "max_abs_z": 0.04020202870606965,
+            "rms_z": 0.021105771391048297,
+            "reduced_chi2": 0.0004454535860111928,
+            "exceed_3sigma_n": 0
+          },
+          "notes": [
+            "Frozen hybrid: θ_D is fit once by minimax max|z| on 100-300 K (JANAF solid), while high-T Cp is fixed by WebBook Shomate (solid; 298-1685 K).",
+            "This is used as an operational baseline to show a holdout-ok example under minimal additional constraints (no per-split refitting)."
+          ]
+        },
+        "debye_1p": {
+          "params": {
+            "theta_D_K": 601.023465728757
+          },
+          "train": {
+            "n": 5,
+            "max_abs_z": 3.3276565425261095,
+            "rms_z": 2.3180489865814957,
+            "reduced_chi2": 6.716688880239374,
+            "exceed_3sigma_n": 1
+          },
+          "test": {
+            "n": 16,
+            "max_abs_z": 7.595498655047026,
+            "rms_z": 4.198672000483488,
+            "reduced_chi2": 17.62884656764402,
+            "exceed_3sigma_n": 8
+          }
+        },
+        "shomate_5p_fit": {
+          "supported": false,
+          "reason": "not enough points to fit Shomate (need >=6, got 5)"
+        }
+      }
+    },
+    {
+      "name": "B_high_to_low",
+      "train_T_K": [
+        350.0,
+        1685.0
+      ],
+      "test_T_K": [
+        100.0,
+        300.0
+      ],
+      "models": {
+        "debye_lowT_minimax_plus_shomate_frozen": {
+          "params": {
+            "theta_D_K": 598.003797901102,
+            "shomate_solid_t_min_k": 298.0,
+            "shomate_solid_t_max_k": 1685.0,
+            "A": 22.81719,
+            "B": 3.89951,
+            "C": -0.082885,
+            "D": 0.042111,
+            "E": -0.354063
+          },
+          "train": {
+            "n": 16,
+            "max_abs_z": 0.04020202870606965,
+            "rms_z": 0.021105771391048297,
+            "reduced_chi2": 0.0004454535860111928,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 5,
+            "max_abs_z": 2.99592483460044,
+            "rms_z": 2.1474973085993567,
+            "reduced_chi2": 4.611744690441482,
+            "exceed_3sigma_n": 0
+          },
+          "notes": [
+            "Frozen hybrid: θ_D is fit once by minimax max|z| on 100-300 K (JANAF solid), while high-T Cp is fixed by WebBook Shomate (solid; 298-1685 K).",
+            "This is used as an operational baseline to show a holdout-ok example under minimal additional constraints (no per-split refitting)."
+          ]
+        },
+        "debye_1p": {
+          "params": {
+            "theta_D_K": 546.2070068059722
+          },
+          "train": {
+            "n": 16,
+            "max_abs_z": 7.54862767330473,
+            "rms_z": 4.168980669966569,
+            "reduced_chi2": 18.539093148325225,
+            "exceed_3sigma_n": 8
+          },
+          "test": {
+            "n": 5,
+            "max_abs_z": 6.439614737518149,
+            "rms_z": 4.2559048434880795,
+            "reduced_chi2": 18.112726036825293,
+            "exceed_3sigma_n": 4
+          }
+        },
+        "shomate_5p_fit": {
+          "params": {
+            "A": 22.402103651461626,
+            "B": 5.005149013144276,
+            "C": -1.0477049837227075,
+            "D": 0.31026369596933256,
+            "E": -0.3383045842207637
+          },
+          "train": {
+            "n": 16,
+            "max_abs_z": 0.014263391206875827,
+            "rms_z": 0.008058629215231719,
+            "reduced_chi2": 9.446037065976173e-05,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 5,
+            "max_abs_z": 91.03003327720782,
+            "rms_z": 40.723281038421085,
+            "reduced_chi2": 1658.385618534226,
+            "exceed_3sigma_n": 1
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits.png"
+  },
+  "notes": [
+    "This audit treats JANAF solid-phase Cp° points as the operational reference for holdout.",
+    "Debye model is expected to degrade outside the low-temperature fit band; Shomate fit is a flexible empirical proxy.",
+    "Hybrid frozen baseline combines independent low-T (Debye θ_D) and high-T (WebBook Shomate) constraints and is expected to pass strict+holdout under the operational |z|<=3 gate."
+  ]
+}

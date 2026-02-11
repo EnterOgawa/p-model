@@ -1,0 +1,148 @@
+{
+  "generated_utc": "2026-02-08T10:04:20.526280+00:00",
+  "phase": 7,
+  "step": "7.13.17.12",
+  "inputs": {
+    "theory_diff_csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff.csv",
+      "sha256": "c037e323474a77c94035883ebcf5d3e4bb2c18f80c5228da6be6dfd0408d67d5",
+      "rows": 3554
+    }
+  },
+  "definitions": {
+    "delta_be_mev": "B_pred_pmodel - B_pred_standard_proxy",
+    "required_sigma_3sigma_mev": "abs(delta_be_mev)/3",
+    "required_relative_sigma": "required_sigma_3sigma_mev / B_obs"
+  },
+  "global_stats": {
+    "abs_delta_semf_mev": {
+      "n": 3554.0,
+      "median": 75.15361250000001,
+      "p16": 18.154706880000003,
+      "p84": 230.77242284,
+      "max": 472.662184
+    },
+    "abs_delta_yukawa_mev": {
+      "n": 3554.0,
+      "median": 1150.0614905000002,
+      "p16": 439.57214084,
+      "p84": 1866.1822308,
+      "max": 2532.918937
+    },
+    "required_relative_sigma_semf": {
+      "n": 3554.0,
+      "median": 0.027010725304784978,
+      "p16": 0.009696406294208862,
+      "p84": 0.05096675028931154,
+      "max": 239.28215185185186
+    },
+    "required_relative_sigma_yukawa": {
+      "n": 3554.0,
+      "median": 0.33427829325672664,
+      "p16": 0.2877014835080094,
+      "p84": 0.36980788114244645,
+      "max": 3.279192592592593
+    }
+  },
+  "group_stats": {
+    "light_A_le_40": {
+      "abs_delta_semf_mev": {
+        "n": 311.0,
+        "median": 28.968757,
+        "p16": 10.9480898,
+        "p84": 68.72909979999999,
+        "max": 129.81724
+      },
+      "abs_delta_yukawa_mev": {
+        "n": 311.0,
+        "median": 136.864217,
+        "p16": 39.961725200000004,
+        "p84": 220.321845,
+        "max": 254.70261
+      },
+      "required_relative_sigma_semf": {
+        "n": 311.0,
+        "median": 0.058332593958107484,
+        "p16": 0.016471992453589497,
+        "p84": 0.19468502063682436,
+        "max": 239.28215185185186
+      },
+      "required_relative_sigma_yukawa": {
+        "n": 311.0,
+        "median": 0.23247376242642423,
+        "p16": 0.1695284846006849,
+        "p84": 0.2758424443268165,
+        "max": 3.279192592592593
+      }
+    },
+    "mid_A_41_120": {
+      "abs_delta_semf_mev": {
+        "n": 1141.0,
+        "median": 23.551627,
+        "p16": 4.9053968,
+        "p84": 51.73580819999998,
+        "max": 118.174087
+      },
+      "abs_delta_yukawa_mev": {
+        "n": 1141.0,
+        "median": 636.949483,
+        "p16": 386.332783,
+        "p84": 871.0917456,
+        "max": 984.063461
+      },
+      "required_relative_sigma_semf": {
+        "n": 1141.0,
+        "median": 0.01143101708363002,
+        "p16": 0.002324457396035683,
+        "p84": 0.025219627287513223,
+        "max": 0.14953539843725286
+      },
+      "required_relative_sigma_yukawa": {
+        "n": 1141.0,
+        "median": 0.30335078439467233,
+        "p16": 0.27919226461743873,
+        "p84": 0.3180284076173461,
+        "max": 0.3357389470316123
+      }
+    },
+    "heavy_A_ge_121": {
+      "abs_delta_semf_mev": {
+        "n": 2102.0,
+        "median": 145.221502,
+        "p16": 70.58991716,
+        "p84": 282.52983396,
+        "max": 472.662184
+      },
+      "abs_delta_yukawa_mev": {
+        "n": 2102.0,
+        "median": 1530.6001205,
+        "p16": 1156.01326868,
+        "p84": 2061.87889272,
+        "max": 2532.918937
+      },
+      "required_relative_sigma_semf": {
+        "n": 2102.0,
+        "median": 0.033980732642972314,
+        "p16": 0.01967601893107087,
+        "p84": 0.05198215864833734,
+        "max": 0.07548285832400287
+      },
+      "required_relative_sigma_yukawa": {
+        "n": 2102.0,
+        "median": 0.35417095382170927,
+        "p16": 0.33434293303063445,
+        "p84": 0.37814299862126227,
+        "max": 0.40447361447784025
+      }
+    }
+  },
+  "top20_csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_quantification_top20.csv",
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_quantification.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_quantification.csv"
+  },
+  "notes": [
+    "Current sigma_B_obs comes from AME-side tabulated values in the frozen CSV and is used only as an operational precision indicator.",
+    "This step freezes candidate nuclei and precision scale before introducing any new model freedom."
+  ]
+}

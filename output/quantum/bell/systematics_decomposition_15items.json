@@ -1,0 +1,1138 @@
+{
+  "generated_utc": "2026-02-11T02:46:59.826311+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.16.8",
+    "name": "Bell: systematics full decomposition (15 items)"
+  },
+  "main_script": {
+    "path": "scripts/quantum/bell_primary_products.py",
+    "repro": "python -B scripts/quantum/bell_primary_products.py"
+  },
+  "definitions": {
+    "delta_stat": "absolute contribution in observed Bell statistic unit (|S| for CHSH datasets, J_prob for CH datasets)",
+    "delta_over_sigma": "delta_stat / sigma_stat",
+    "correlated_if_abs_corr_ge": 0.6,
+    "note": "Items are operationally decomposed from direct sweep metrics and fixed proxy indicators when direct sweeps are unavailable."
+  },
+  "item_catalog": [
+    {
+      "item_id": "coincidence_window",
+      "label": "coincidence window"
+    },
+    {
+      "item_id": "offset",
+      "label": "offset"
+    },
+    {
+      "item_id": "threshold",
+      "label": "threshold"
+    },
+    {
+      "item_id": "detector_efficiency_drift",
+      "label": "detector efficiency drift"
+    },
+    {
+      "item_id": "dark_count",
+      "label": "dark count"
+    },
+    {
+      "item_id": "accidental_correction",
+      "label": "accidental correction"
+    },
+    {
+      "item_id": "event_ready_definition",
+      "label": "event-ready definition"
+    },
+    {
+      "item_id": "trial_definition",
+      "label": "trial definition"
+    },
+    {
+      "item_id": "setting_switch_timing",
+      "label": "setting switch timing"
+    },
+    {
+      "item_id": "polarization_correction",
+      "label": "polarization correction"
+    },
+    {
+      "item_id": "transmission_loss",
+      "label": "transmission loss"
+    },
+    {
+      "item_id": "clock_sync",
+      "label": "clock synchronization"
+    },
+    {
+      "item_id": "dead_time",
+      "label": "dead time"
+    },
+    {
+      "item_id": "electronic_noise",
+      "label": "electronic noise"
+    },
+    {
+      "item_id": "environmental_variation",
+      "label": "environmental variation"
+    }
+  ],
+  "datasets": [
+    {
+      "dataset_id": "weihs1998_longdist_longdist1",
+      "display_name": "Weihs 1998",
+      "statistic": "CHSH|S|",
+      "stat_unit": "delta_abs_S",
+      "baseline": {
+        "statistic": 2.5527309550940966,
+        "sigma_stat": 0.025324431789015552,
+        "frozen_window_ns": 25.0,
+        "frozen_offset_ns": -4.408291266875854
+      },
+      "items": {
+        "coincidence_window": {
+          "delta_stat": 0.4232879859484395,
+          "source": "direct",
+          "method": "delta_window from sweep summary"
+        },
+        "offset": {
+          "delta_stat": 2.6358958400500647,
+          "source": "direct",
+          "method": "delta_offset from sweep summary"
+        },
+        "accidental_correction": {
+          "delta_stat": 0.09865394947566752,
+          "source": "direct",
+          "method": "raw vs accidental-subtracted at frozen point"
+        },
+        "trial_definition": {
+          "delta_stat": 0.0037986647683523325,
+          "source": "proxy_default",
+          "method": "fallback 0.15*sigma_stat"
+        },
+        "event_ready_definition": {
+          "delta_stat": 0.005064886357803111,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "threshold": {
+          "delta_stat": 0.010367950419058048,
+          "source": "proxy_indicator",
+          "method": "local window slope * median step"
+        },
+        "setting_switch_timing": {
+          "delta_stat": 0.04672704307028349,
+          "source": "proxy_indicator",
+          "method": "scaled by delay z-signature"
+        },
+        "detector_efficiency_drift": {
+          "delta_stat": 0.0018332016174249434,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * coefficient of variation of setting counts"
+        },
+        "dark_count": {
+          "delta_stat": 0.0008837366337008751,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * accidental fraction"
+        },
+        "polarization_correction": {
+          "delta_stat": 0.004212945539494648,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * setting-count imbalance"
+        },
+        "transmission_loss": {
+          "delta_stat": 0.006331107947253888,
+          "source": "proxy_default",
+          "method": "fallback 0.25*sigma_stat"
+        },
+        "clock_sync": {
+          "delta_stat": 0.004465498859764421,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * |frozen_offset|/frozen_window"
+        },
+        "dead_time": {
+          "delta_stat": 0.00491977303750377,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * pair-density proxy"
+        },
+        "electronic_noise": {
+          "delta_stat": 0.00025123166393885066,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative bootstrap noise"
+        },
+        "environmental_variation": {
+          "delta_stat": 0.0011908221571173359,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative spread across sweep"
+        }
+      },
+      "summary": {
+        "delta_stat_total_l2": 2.6719451329966764,
+        "delta_stat_total_l1": 3.247884637545867,
+        "sys_over_stat_l2": 105.50859167373817
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2015",
+      "display_name": "Delft (Hensen 2015)",
+      "statistic": "CHSH_S",
+      "stat_unit": "delta_abs_S",
+      "baseline": {
+        "statistic": 2.430692394782927,
+        "sigma_stat": 0.20303274757321624,
+        "frozen_window_ns": null,
+        "frozen_offset_ns": -0.03
+      },
+      "items": {
+        "coincidence_window": {
+          "delta_stat": 0.10151637378660812,
+          "source": "proxy_default",
+          "method": "fallback 0.5*sigma_stat"
+        },
+        "offset": {
+          "delta_stat": 0.7881399403809839,
+          "source": "direct",
+          "method": "delta_offset from sweep summary"
+        },
+        "accidental_correction": {
+          "delta_stat": 0.04060654951464325,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "trial_definition": {
+          "delta_stat": 0.030454912135982434,
+          "source": "proxy_default",
+          "method": "fallback 0.15*sigma_stat"
+        },
+        "event_ready_definition": {
+          "delta_stat": 0.008192524321556593,
+          "source": "direct",
+          "method": "difference between frozen statistic and event-ready baseline"
+        },
+        "threshold": {
+          "delta_stat": 0.05075818689330406,
+          "source": "proxy_default",
+          "method": "fallback 0.25*sigma_stat"
+        },
+        "setting_switch_timing": {
+          "delta_stat": 0.04060654951464325,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "detector_efficiency_drift": {
+          "delta_stat": 0.07106146165062568,
+          "source": "proxy_default",
+          "method": "fallback 0.35*sigma_stat"
+        },
+        "dark_count": {
+          "delta_stat": 0.04060654951464325,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "polarization_correction": {
+          "delta_stat": 0.06090982427196487,
+          "source": "proxy_default",
+          "method": "fallback 0.3*sigma_stat"
+        },
+        "transmission_loss": {
+          "delta_stat": 0.05075818689330406,
+          "source": "proxy_default",
+          "method": "fallback 0.25*sigma_stat"
+        },
+        "clock_sync": {
+          "delta_stat": 0.030454912135982434,
+          "source": "proxy_default",
+          "method": "fallback 0.15*sigma_stat"
+        },
+        "dead_time": {
+          "delta_stat": 0.04060654951464325,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "electronic_noise": {
+          "delta_stat": 0.016959075807208714,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative bootstrap noise"
+        },
+        "environmental_variation": {
+          "delta_stat": 0.01819498598148748,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative spread across sweep"
+        }
+      },
+      "summary": {
+        "delta_stat_total_l2": 0.8090234983552093,
+        "delta_stat_total_l1": 1.3898265823175813,
+        "sys_over_stat_l2": 3.984694626976197
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2016_srep30289",
+      "display_name": "Delft (Hensen 2016)",
+      "statistic": "CHSH_S",
+      "stat_unit": "delta_abs_S",
+      "baseline": {
+        "statistic": 2.3205222517758677,
+        "sigma_stat": 0.18396758088495538,
+        "frozen_window_ns": null,
+        "frozen_offset_ns": -0.03
+      },
+      "items": {
+        "coincidence_window": {
+          "delta_stat": 0.09198379044247769,
+          "source": "proxy_default",
+          "method": "fallback 0.5*sigma_stat"
+        },
+        "offset": {
+          "delta_stat": 1.441964587271957,
+          "source": "direct",
+          "method": "delta_offset from sweep summary"
+        },
+        "accidental_correction": {
+          "delta_stat": 0.03679351617699108,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "trial_definition": {
+          "delta_stat": 0.027595137132743305,
+          "source": "proxy_default",
+          "method": "fallback 0.15*sigma_stat"
+        },
+        "event_ready_definition": {
+          "delta_stat": 0.025908264015617632,
+          "source": "direct",
+          "method": "difference between frozen statistic and event-ready baseline"
+        },
+        "threshold": {
+          "delta_stat": 0.045991895221238845,
+          "source": "proxy_default",
+          "method": "fallback 0.25*sigma_stat"
+        },
+        "setting_switch_timing": {
+          "delta_stat": 0.03679351617699108,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "detector_efficiency_drift": {
+          "delta_stat": 0.06438865330973438,
+          "source": "proxy_default",
+          "method": "fallback 0.35*sigma_stat"
+        },
+        "dark_count": {
+          "delta_stat": 0.03679351617699108,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "polarization_correction": {
+          "delta_stat": 0.05519027426548661,
+          "source": "proxy_default",
+          "method": "fallback 0.3*sigma_stat"
+        },
+        "transmission_loss": {
+          "delta_stat": 0.045991895221238845,
+          "source": "proxy_default",
+          "method": "fallback 0.25*sigma_stat"
+        },
+        "clock_sync": {
+          "delta_stat": 0.027595137132743305,
+          "source": "proxy_default",
+          "method": "fallback 0.15*sigma_stat"
+        },
+        "dead_time": {
+          "delta_stat": 0.03679351617699108,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "electronic_noise": {
+          "delta_stat": 0.014584678423472192,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative bootstrap noise"
+        },
+        "environmental_variation": {
+          "delta_stat": 0.03370048571271005,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative spread across sweep"
+        }
+      },
+      "summary": {
+        "delta_stat_total_l2": 1.4519307734168603,
+        "delta_stat_total_l1": 2.0220688628573837,
+        "sys_over_stat_l2": 7.8923186706729
+      }
+    },
+    {
+      "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+      "display_name": "NIST",
+      "statistic": "CH_J",
+      "stat_unit": "delta_J_prob",
+      "baseline": {
+        "statistic": -0.0006990843043696472,
+        "sigma_stat": 9.100388784991122e-06,
+        "frozen_window_ns": 1000.0,
+        "frozen_offset_ns": null
+      },
+      "items": {
+        "coincidence_window": {
+          "delta_stat": 0.003506711345143672,
+          "source": "direct",
+          "method": "delta_window from sweep summary"
+        },
+        "offset": {
+          "delta_stat": 5.601373388832483e-07,
+          "source": "direct",
+          "method": "delta_offset from sweep summary"
+        },
+        "accidental_correction": {
+          "delta_stat": 0.0007089691802832767,
+          "source": "direct",
+          "method": "raw vs accidental-subtracted at frozen point"
+        },
+        "trial_definition": {
+          "delta_stat": 0.0007056027315694602,
+          "source": "direct",
+          "method": "difference between frozen statistic and trial-based statistic"
+        },
+        "event_ready_definition": {
+          "delta_stat": 1.8200777569982245e-06,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "threshold": {
+          "delta_stat": 2.834127119310309e-05,
+          "source": "proxy_indicator",
+          "method": "local window slope * median step"
+        },
+        "setting_switch_timing": {
+          "delta_stat": 2.7301166354973364e-05,
+          "source": "proxy_indicator",
+          "method": "scaled by delay z-signature"
+        },
+        "detector_efficiency_drift": {
+          "delta_stat": 4.1438627868865964e-07,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * coefficient of variation of setting counts"
+        },
+        "dark_count": {
+          "delta_stat": 9.106522959576572e-06,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * accidental fraction"
+        },
+        "polarization_correction": {
+          "delta_stat": 9.79650400461397e-07,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * setting-count imbalance"
+        },
+        "transmission_loss": {
+          "delta_stat": 2.2750971962477805e-06,
+          "source": "proxy_default",
+          "method": "fallback 0.25*sigma_stat"
+        },
+        "clock_sync": {
+          "delta_stat": 3.742787898615915e-07,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * KS delay proxy"
+        },
+        "dead_time": {
+          "delta_stat": 3.745615499012072e-07,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * pair-density proxy"
+        },
+        "electronic_noise": {
+          "delta_stat": 1.1846507713067164e-07,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative bootstrap noise"
+        },
+        "environmental_variation": {
+          "delta_stat": 6.625230625314134e-06,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative spread across sweep"
+        }
+      },
+      "summary": {
+        "delta_stat_total_l2": 0.003646809921517376,
+        "delta_stat_total_l1": 0.0049995741025175506,
+        "sys_over_stat_l2": 400.7312223332592
+      }
+    },
+    {
+      "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+      "display_name": "Kwiat/Christensen 2013",
+      "statistic": "CH_J",
+      "stat_unit": "delta_J_prob",
+      "baseline": {
+        "statistic": -8.12025607476813e-05,
+        "sigma_stat": 3.9378181489705475e-05,
+        "frozen_window_ns": 2812.5,
+        "frozen_offset_ns": null
+      },
+      "items": {
+        "coincidence_window": {
+          "delta_stat": 0.00012339088413475033,
+          "source": "direct",
+          "method": "delta_window from sweep summary"
+        },
+        "offset": {
+          "delta_stat": 1.1813454446911643e-05,
+          "source": "proxy_default",
+          "method": "fallback 0.3*sigma_stat"
+        },
+        "accidental_correction": {
+          "delta_stat": 7.875636297941095e-06,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "trial_definition": {
+          "delta_stat": 0.0,
+          "source": "direct",
+          "method": "difference between frozen statistic and trial-based statistic"
+        },
+        "event_ready_definition": {
+          "delta_stat": 7.875636297941095e-06,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "threshold": {
+          "delta_stat": 2.587968960939306e-06,
+          "source": "proxy_indicator",
+          "method": "local window slope * median step"
+        },
+        "setting_switch_timing": {
+          "delta_stat": 9.47005734923545e-06,
+          "source": "proxy_indicator",
+          "method": "scaled by delay z-signature"
+        },
+        "detector_efficiency_drift": {
+          "delta_stat": 2.4255386418422943e-05,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * coefficient of variation of setting counts"
+        },
+        "dark_count": {
+          "delta_stat": 7.875636297941095e-06,
+          "source": "proxy_default",
+          "method": "fallback 0.2*sigma_stat"
+        },
+        "polarization_correction": {
+          "delta_stat": 5.315483501905933e-05,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * setting-count imbalance"
+        },
+        "transmission_loss": {
+          "delta_stat": 1.0958701401964505e-06,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * Alice/Bob click asymmetry"
+        },
+        "clock_sync": {
+          "delta_stat": 6.066185398707491e-07,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * KS delay proxy"
+        },
+        "dead_time": {
+          "delta_stat": 4.322426346127994e-06,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * pair-density proxy"
+        },
+        "electronic_noise": {
+          "delta_stat": 1.9095964008505244e-05,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative bootstrap noise"
+        },
+        "environmental_variation": {
+          "delta_stat": 3.380817624781613e-05,
+          "source": "proxy_indicator",
+          "method": "sigma_stat * relative spread across sweep"
+        }
+      },
+      "summary": {
+        "delta_stat_total_l2": 0.00014348862557750117,
+        "delta_stat_total_l1": 0.00030722855050565885,
+        "sys_over_stat_l2": 3.6438611471942397
+      }
+    }
+  ],
+  "item_summary": [
+    {
+      "item_id": "coincidence_window",
+      "item_label": "coincidence window",
+      "median_delta_stat": 0.09198379044247769,
+      "max_delta_stat": 0.4232879859484395,
+      "median_delta_over_sigma": 3.1334835552781444,
+      "max_delta_over_sigma": 385.33643210135585
+    },
+    {
+      "item_id": "offset",
+      "item_label": "offset",
+      "median_delta_stat": 0.7881399403809839,
+      "max_delta_stat": 2.6358958400500647,
+      "median_delta_over_sigma": 3.8818365500214216,
+      "max_delta_over_sigma": 104.08509308364351
+    },
+    {
+      "item_id": "threshold",
+      "item_label": "threshold",
+      "median_delta_stat": 0.010367950419058048,
+      "max_delta_stat": 0.05075818689330406,
+      "median_delta_over_sigma": 0.25,
+      "max_delta_over_sigma": 3.114292351975679
+    },
+    {
+      "item_id": "detector_efficiency_drift",
+      "item_label": "detector efficiency drift",
+      "median_delta_stat": 0.0018332016174249434,
+      "max_delta_stat": 0.07106146165062568,
+      "median_delta_over_sigma": 0.35,
+      "max_delta_over_sigma": 0.6159600443906725
+    },
+    {
+      "item_id": "dark_count",
+      "item_label": "dark count",
+      "median_delta_stat": 0.0008837366337008751,
+      "max_delta_stat": 0.04060654951464325,
+      "median_delta_over_sigma": 0.2,
+      "max_delta_over_sigma": 1.0006740563211505
+    },
+    {
+      "item_id": "accidental_correction",
+      "item_label": "accidental correction",
+      "median_delta_stat": 0.03679351617699108,
+      "max_delta_stat": 0.09865394947566752,
+      "median_delta_over_sigma": 0.2,
+      "max_delta_over_sigma": 77.9053727300694
+    },
+    {
+      "item_id": "event_ready_definition",
+      "item_label": "event-ready definition",
+      "median_delta_stat": 0.005064886357803111,
+      "max_delta_stat": 0.025908264015617632,
+      "median_delta_over_sigma": 0.19999999999999998,
+      "max_delta_over_sigma": 0.20000000000000004
+    },
+    {
+      "item_id": "trial_definition",
+      "item_label": "trial definition",
+      "median_delta_stat": 0.0037986647683523325,
+      "max_delta_stat": 0.030454912135982434,
+      "median_delta_over_sigma": 0.15,
+      "max_delta_over_sigma": 77.53544911544662
+    },
+    {
+      "item_id": "setting_switch_timing",
+      "item_label": "setting switch timing",
+      "median_delta_stat": 0.03679351617699108,
+      "max_delta_stat": 0.04672704307028349,
+      "median_delta_over_sigma": 0.24048996147044474,
+      "max_delta_over_sigma": 3.0
+    },
+    {
+      "item_id": "polarization_correction",
+      "item_label": "polarization correction",
+      "median_delta_stat": 0.004212945539494648,
+      "max_delta_stat": 0.06090982427196487,
+      "median_delta_over_sigma": 0.3,
+      "max_delta_over_sigma": 1.3498549960453468
+    },
+    {
+      "item_id": "transmission_loss",
+      "item_label": "transmission loss",
+      "median_delta_stat": 0.006331107947253888,
+      "max_delta_stat": 0.05075818689330406,
+      "median_delta_over_sigma": 0.25,
+      "max_delta_over_sigma": 0.25
+    },
+    {
+      "item_id": "clock_sync",
+      "item_label": "clock synchronization",
+      "median_delta_stat": 0.004465498859764421,
+      "max_delta_stat": 0.030454912135982434,
+      "median_delta_over_sigma": 0.15,
+      "max_delta_over_sigma": 0.17633165067503417
+    },
+    {
+      "item_id": "dead_time",
+      "item_label": "dead time",
+      "median_delta_stat": 0.00491977303750377,
+      "max_delta_stat": 0.04060654951464325,
+      "median_delta_over_sigma": 0.19426982917096353,
+      "max_delta_over_sigma": 0.2
+    },
+    {
+      "item_id": "electronic_noise",
+      "item_label": "electronic noise",
+      "median_delta_stat": 0.00025123166393885066,
+      "max_delta_stat": 0.016959075807208714,
+      "median_delta_over_sigma": 0.07927852479939256,
+      "max_delta_over_sigma": 0.48493768087024147
+    },
+    {
+      "item_id": "environmental_variation",
+      "item_label": "environmental variation",
+      "median_delta_stat": 0.0011908221571173359,
+      "max_delta_stat": 0.03370048571271005,
+      "median_delta_over_sigma": 0.18318708954369925,
+      "max_delta_over_sigma": 0.8585509784562932
+    }
+  ],
+  "item_correlation": {
+    "item_order": [
+      "coincidence_window",
+      "offset",
+      "threshold",
+      "detector_efficiency_drift",
+      "dark_count",
+      "accidental_correction",
+      "event_ready_definition",
+      "trial_definition",
+      "setting_switch_timing",
+      "polarization_correction",
+      "transmission_loss",
+      "clock_sync",
+      "dead_time",
+      "electronic_noise",
+      "environmental_variation"
+    ],
+    "matrix": [
+      [
+        1.0,
+        -0.24865282430291574,
+        0.9972859210114715,
+        -0.5973598866347049,
+        0.9743980560977411,
+        0.9999517303986725,
+        0.3726526736498143,
+        0.9992293346702208,
+        0.853958302496631,
+        -0.37780548510097095,
+        0.2566341830935255,
+        -0.4900004503100925,
+        -0.8408842540975482,
+        -0.35187486482672076,
+        0.4971376209403378
+      ],
+      [
+        -0.24865282430291574,
+        1.0,
+        -0.21077009800895993,
+        -0.5050136720842536,
+        -0.45929066763313625,
+        -0.24105971955005032,
+        0.3168481794494248,
+        -0.2852078025928144,
+        0.2903512639789505,
+        -0.3273082278702981,
+        0.2829529728806931,
+        0.586059964087961,
+        0.4082669297205208,
+        -0.37276186922286625,
+        -0.5387764196052391
+      ],
+      [
+        0.9972859210114715,
+        -0.21077009800895993,
+        0.9999999999999999,
+        -0.6488715888818488,
+        0.9642320229108241,
+        0.9979114073924836,
+        0.3458246825795165,
+        0.9956863863737774,
+        0.8694864128809949,
+        -0.4448268053970035,
+        0.3260774375460943,
+        -0.42452458006062843,
+        -0.7992587629970924,
+        -0.4198253789816274,
+        0.4322449394528809
+      ],
+      [
+        -0.5973598866347049,
+        -0.5050136720842536,
+        -0.6488715888818488,
+        1.0,
+        -0.43828312505380895,
+        -0.6051865920262206,
+        -0.21144610592089683,
+        -0.5756036819499665,
+        -0.8461066279238159,
+        0.8732498495875131,
+        -0.7837416312488985,
+        -0.3461696265998297,
+        0.14670295792698368,
+        0.8801062828048989,
+        0.31810152625700916
+      ],
+      [
+        0.9743980560977411,
+        -0.45929066763313625,
+        0.9642320229108241,
+        -0.43828312505380895,
+        1.0,
+        0.9726990390254977,
+        0.2604442916684456,
+        0.9823295708108426,
+        0.7151167744014045,
+        -0.28482973359253716,
+        0.18540743353884676,
+        -0.5722626909192201,
+        -0.856755840203428,
+        -0.2503967516653014,
+        0.568133451158965
+      ],
+      [
+        0.9999517303986725,
+        -0.24105971955005032,
+        0.9979114073924836,
+        -0.6051865920262206,
+        0.9726990390254977,
+        1.0000000000000002,
+        0.3719030943452275,
+        0.9989431937647397,
+        0.8577838210577375,
+        -0.3860444761373681,
+        0.26475373219346443,
+        -0.48190179344475925,
+        -0.8362619960929908,
+        -0.3603644377620925,
+        0.4892967532015474
+      ],
+      [
+        0.3726526736498143,
+        0.3168481794494248,
+        0.3458246825795165,
+        -0.21144610592089683,
+        0.2604442916684456,
+        0.3719030943452275,
+        1.0,
+        0.35032724327371884,
+        0.5516208765670693,
+        0.22165011630986187,
+        -0.35117833020146544,
+        -0.46805885621097626,
+        -0.5600779670094485,
+        0.20402409157561988,
+        0.5473783113614028
+      ],
+      [
+        0.9992293346702208,
+        -0.2852078025928144,
+        0.9956863863737774,
+        -0.5756036819499665,
+        0.9823295708108426,
+        0.9989431937647397,
+        0.35032724327371884,
+        1.0000000000000002,
+        0.8332544997755872,
+        -0.3691693213039384,
+        0.25181587886064505,
+        -0.500545243276234,
+        -0.8430405437173493,
+        -0.341630121552272,
+        0.5056609657841962
+      ],
+      [
+        0.853958302496631,
+        0.2903512639789505,
+        0.8694864128809949,
+        -0.8461066279238159,
+        0.7151167744014045,
+        0.8577838210577375,
+        0.5516208765670693,
+        0.8332544997755872,
+        0.9999999999999999,
+        -0.5210991579738509,
+        0.37496944207681226,
+        -0.1939223188375229,
+        -0.628076311021955,
+        -0.5201162366847766,
+        0.22555987856890725
+      ],
+      [
+        -0.37780548510097095,
+        -0.3273082278702981,
+        -0.4448268053970035,
+        0.8732498495875131,
+        -0.28482973359253716,
+        -0.3860444761373681,
+        0.22165011630986187,
+        -0.3691693213039384,
+        -0.5210991579738509,
+        0.9999999999999998,
+        -0.9864653861351594,
+        -0.6184859384379293,
+        -0.18094402776455096,
+        0.9987746135513849,
+        0.6110646145358447
+      ],
+      [
+        0.2566341830935255,
+        0.2829529728806931,
+        0.3260774375460943,
+        -0.7837416312488985,
+        0.18540743353884676,
+        0.26475373219346443,
+        -0.35117833020146544,
+        0.25181587886064505,
+        0.37496944207681226,
+        -0.9864653861351594,
+        0.9999999999999998,
+        0.6995097825701079,
+        0.3072615793169301,
+        -0.9844291684580093,
+        -0.6982263112015975
+      ],
+      [
+        -0.4900004503100925,
+        0.586059964087961,
+        -0.42452458006062843,
+        -0.3461696265998297,
+        -0.5722626909192201,
+        -0.48190179344475925,
+        -0.46805885621097626,
+        -0.500545243276234,
+        -0.1939223188375229,
+        -0.6184859384379293,
+        0.6995097825701079,
+        0.9999999999999999,
+        0.8751081053918306,
+        -0.6425083963309393,
+        -0.9948842730228044
+      ],
+      [
+        -0.8408842540975482,
+        0.4082669297205208,
+        -0.7992587629970924,
+        0.14670295792698368,
+        -0.856755840203428,
+        -0.8362619960929908,
+        -0.5600779670094485,
+        -0.8430405437173493,
+        -0.628076311021955,
+        -0.18094402776455096,
+        0.3072615793169301,
+        0.8751081053918306,
+        0.9999999999999998,
+        -0.20556441897394323,
+        -0.8811278361222501
+      ],
+      [
+        -0.35187486482672076,
+        -0.37276186922286625,
+        -0.4198253789816274,
+        0.8801062828048989,
+        -0.2503967516653014,
+        -0.3603644377620925,
+        0.20402409157561988,
+        -0.341630121552272,
+        -0.5201162366847766,
+        0.9987746135513849,
+        -0.9844291684580093,
+        -0.6425083963309393,
+        -0.20556441897394323,
+        1.0,
+        0.6324862949013058
+      ],
+      [
+        0.4971376209403378,
+        -0.5387764196052391,
+        0.4322449394528809,
+        0.31810152625700916,
+        0.568133451158965,
+        0.4892967532015474,
+        0.5473783113614028,
+        0.5056609657841962,
+        0.22555987856890725,
+        0.6110646145358447,
+        -0.6982263112015975,
+        -0.9948842730228044,
+        -0.8811278361222501,
+        0.6324862949013058,
+        1.0000000000000002
+      ]
+    ],
+    "top_pairs": [
+      {
+        "item_i": "coincidence_window",
+        "item_j": "accidental_correction",
+        "corr": 0.9999517303986725,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "coincidence_window",
+        "item_j": "trial_definition",
+        "corr": 0.9992293346702208,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "accidental_correction",
+        "item_j": "trial_definition",
+        "corr": 0.9989431937647397,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "polarization_correction",
+        "item_j": "electronic_noise",
+        "corr": 0.9987746135513849,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "threshold",
+        "item_j": "accidental_correction",
+        "corr": 0.9979114073924836,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "coincidence_window",
+        "item_j": "threshold",
+        "corr": 0.9972859210114715,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "threshold",
+        "item_j": "trial_definition",
+        "corr": 0.9956863863737774,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "clock_sync",
+        "item_j": "environmental_variation",
+        "corr": -0.9948842730228044,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "polarization_correction",
+        "item_j": "transmission_loss",
+        "corr": -0.9864653861351594,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "transmission_loss",
+        "item_j": "electronic_noise",
+        "corr": -0.9844291684580093,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "dark_count",
+        "item_j": "trial_definition",
+        "corr": 0.9823295708108426,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "coincidence_window",
+        "item_j": "dark_count",
+        "corr": 0.9743980560977411,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "dark_count",
+        "item_j": "accidental_correction",
+        "corr": 0.9726990390254977,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "threshold",
+        "item_j": "dark_count",
+        "corr": 0.9642320229108241,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "dead_time",
+        "item_j": "environmental_variation",
+        "corr": -0.8811278361222501,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "detector_efficiency_drift",
+        "item_j": "electronic_noise",
+        "corr": 0.8801062828048989,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "clock_sync",
+        "item_j": "dead_time",
+        "corr": 0.8751081053918306,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "detector_efficiency_drift",
+        "item_j": "polarization_correction",
+        "corr": 0.8732498495875131,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "threshold",
+        "item_j": "setting_switch_timing",
+        "corr": 0.8694864128809949,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "accidental_correction",
+        "item_j": "setting_switch_timing",
+        "corr": 0.8577838210577375,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "dark_count",
+        "item_j": "dead_time",
+        "corr": -0.856755840203428,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "coincidence_window",
+        "item_j": "setting_switch_timing",
+        "corr": 0.853958302496631,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "detector_efficiency_drift",
+        "item_j": "setting_switch_timing",
+        "corr": -0.8461066279238159,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "trial_definition",
+        "item_j": "dead_time",
+        "corr": -0.8430405437173493,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "coincidence_window",
+        "item_j": "dead_time",
+        "corr": -0.8408842540975482,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "accidental_correction",
+        "item_j": "dead_time",
+        "corr": -0.8362619960929908,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "trial_definition",
+        "item_j": "setting_switch_timing",
+        "corr": 0.8332544997755872,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "threshold",
+        "item_j": "dead_time",
+        "corr": -0.7992587629970924,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "detector_efficiency_drift",
+        "item_j": "transmission_loss",
+        "corr": -0.7837416312488985,
+        "relation": "correlated"
+      },
+      {
+        "item_i": "dark_count",
+        "item_j": "setting_switch_timing",
+        "corr": 0.7151167744014045,
+        "relation": "correlated"
+      }
+    ]
+  },
+  "outputs": {
+    "json": "output/quantum/bell/systematics_decomposition_15items.json",
+    "csv": "output/quantum/bell/systematics_decomposition_15items.csv",
+    "png": "output/quantum/bell/systematics_decomposition_15items.png"
+  },
+  "plot_written": true
+}

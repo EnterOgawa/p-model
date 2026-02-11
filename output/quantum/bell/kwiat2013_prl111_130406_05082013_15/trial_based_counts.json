@@ -1,0 +1,53 @@
+{
+  "generated_utc": "2026-02-10T04:40:02.880192+00:00",
+  "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+  "source": {
+    "name": "Christensen et al. 2013 (PRL 111, 130406) CH Bell-test data (Illinois QI page)",
+    "zip": "C:\\develop\\waveP\\data\\quantum\\sources\\kwiat2013_prl111_130406\\CH_Bell_Data.zip",
+    "folder": "05082013_15 t753 a252ap38"
+  },
+  "config": {
+    "include_hidden_midpoint_trigger": true,
+    "timebins_per_second": 6400000000.0,
+    "ref_window_bins": 18000,
+    "ref_window_ns": 2812.5
+  },
+  "counts": {
+    "trials_by_setting_pair": [
+      [
+        1950096,
+        1775071
+      ],
+      [
+        2025147,
+        1750110
+      ]
+    ],
+    "alice_trials_by_setting": [
+      3725167,
+      3775257
+    ],
+    "bob_trials_by_setting": [
+      3975243,
+      3525181
+    ],
+    "alice_clicks_by_setting": [
+      3586,
+      11544
+    ],
+    "bob_clicks_by_setting": [
+      4004,
+      11553
+    ],
+    "coinc_by_setting_pair": [
+      [
+        1122,
+        1221
+      ],
+      [
+        1365,
+        85
+      ]
+    ]
+  }
+}

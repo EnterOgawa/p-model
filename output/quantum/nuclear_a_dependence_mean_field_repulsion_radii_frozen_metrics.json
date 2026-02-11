@@ -1,0 +1,500 @@
+{
+  "generated_utc": "2026-01-29T05:34:35.091792+00:00",
+  "phase": 7,
+  "step": "7.13.14",
+  "inputs": {
+    "potential_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_canonical_metrics.json",
+      "sha256": "ebfb59839987e6c1442e2082c6100fb15154fb0d7ba8e8db2a9053491cc95373",
+      "step": "7.13.8.5",
+      "canonical": {
+        "selected_step": "7.13.8.5",
+        "selected_metrics_json": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json"
+      }
+    },
+    "potential_metrics_7_13_8": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_canonical_metrics.json",
+      "sha256": "ebfb59839987e6c1442e2082c6100fb15154fb0d7ba8e8db2a9053491cc95373",
+      "step": "7.13.8.5",
+      "canonical": {
+        "selected_step": "7.13.8.5",
+        "selected_metrics_json": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json"
+      }
+    },
+    "targets_7_13_11": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_representative_nuclei_metrics.json",
+      "sha256": "0c3b6cb7145aa17ccff799f52b79ce5e4da3599767971744101b7a8438f0c669"
+    }
+  },
+  "model": {
+    "type": "uniform_sphere_mean_field_repulsion_radii_frozen",
+    "pair_channels": {
+      "pp_nn": "singlet",
+      "pn_triplet_weight": 0.5
+    },
+    "kinetic": "nonrelativistic 2-component Fermi gas",
+    "coulomb": "(3/5)e^2 Z(Z-1)/R",
+    "repulsion": {
+      "form": "E_rep/A = C*rho^n",
+      "n": 2.0,
+      "freeze": {
+        "method": "radii equilibrium (dE/dR=0)",
+        "freeze_min_A": 40,
+        "derivative_eps_rel": 0.001
+      },
+      "C_frozen_by_eq": {
+        "18": 1467.9465140609946,
+        "19": 1483.8687762781974
+      }
+    }
+  },
+  "constants": {
+    "hbarc_MeV_fm": 197.3269804,
+    "m_nucleon_c2_MeV": 938.9183102994198
+  },
+  "stats": {
+    "18": {
+      "residual_mean_MeV": 4.86570227187265,
+      "residual_rms_MeV": 7.294991048557309
+    },
+    "19": {
+      "residual_mean_MeV": 5.041008172065003,
+      "residual_rms_MeV": 7.504472675808001
+    }
+  },
+  "rows": [
+    {
+      "key": "d",
+      "label": "d (H-2)",
+      "A": 2,
+      "Z": 1,
+      "N": 1,
+      "r_charge_fm": 2.1421,
+      "R_sharp_fm": 2.7654392086369692,
+      "rho_fm3": 0.02257610614473508,
+      "B_over_A_obs_MeV": 1.1122831000000002,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 5.991833659217295,
+          "U_pot_MeV_per_A": -9.059945378284231,
+          "E_coul_MeV_per_A": 0.0,
+          "E_base_MeV_per_A": -3.0681117190669367,
+          "dEbase_dR_MeV_per_fm": 3.646033100272525,
+          "C_est_from_radii": 3297.1248763460712,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 0.7481838140466429,
+          "E_total_MeV_per_A": -2.3199279050202937,
+          "B_over_A_pred_MeV": 2.3199279050202937,
+          "B_over_A_residual_MeV": 1.2076448050202935
+        },
+        "19": {
+          "T_kin_MeV_per_A": 5.991833659217295,
+          "U_pot_MeV_per_A": -9.11953304549333,
+          "E_coul_MeV_per_A": 0.0,
+          "E_base_MeV_per_A": -3.127699386276036,
+          "dEbase_dR_MeV_per_fm": 3.6793874023072877,
+          "C_est_from_radii": 3327.2873285091514,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 0.7562990817078342,
+          "E_total_MeV_per_A": -2.3714003045682017,
+          "B_over_A_pred_MeV": 2.3714003045682017,
+          "B_over_A_residual_MeV": 1.2591172045682015
+        }
+      }
+    },
+    {
+      "key": "t",
+      "label": "t (H-3)",
+      "A": 3,
+      "Z": 1,
+      "N": 2,
+      "r_charge_fm": 1.7591,
+      "R_sharp_fm": 2.2709883347711557,
+      "rho_fm3": 0.061148799496561705,
+      "B_over_A_obs_MeV": 2.8272654000000004,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 12.364393337815535,
+          "U_pot_MeV_per_A": -21.7284808114075,
+          "E_coul_MeV_per_A": 0.0,
+          "E_base_MeV_per_A": -9.364087473591965,
+          "dEbase_dR_MeV_per_fm": 11.026068772001494,
+          "C_est_from_radii": 1116.1138043695664,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 5.4889099047278505,
+          "E_total_MeV_per_A": -3.875177568864115,
+          "B_over_A_pred_MeV": 3.875177568864115,
+          "B_over_A_residual_MeV": 1.0479121688641144
+        },
+        "19": {
+          "T_kin_MeV_per_A": 12.364393337815535,
+          "U_pot_MeV_per_A": -21.84389843344079,
+          "E_coul_MeV_per_A": 0.0,
+          "E_base_MeV_per_A": -9.479505095625253,
+          "dEbase_dR_MeV_per_fm": 11.06086680046967,
+          "C_est_from_radii": 1119.636234778925,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 5.5484460403789395,
+          "E_total_MeV_per_A": -3.9310590552463136,
+          "B_over_A_pred_MeV": 3.9310590552463136,
+          "B_over_A_residual_MeV": 1.1037936552463132
+        }
+      }
+    },
+    {
+      "key": "h",
+      "label": "h (He-3)",
+      "A": 3,
+      "Z": 2,
+      "N": 1,
+      "r_charge_fm": 1.9661,
+      "R_sharp_fm": 2.5382241856594674,
+      "rho_fm3": 0.043796833414932436,
+      "B_over_A_obs_MeV": 2.57268044,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 9.89789091839858,
+          "U_pot_MeV_per_A": -16.755360378444102,
+          "E_coul_MeV_per_A": 0.22692471187305727,
+          "E_base_MeV_per_A": -6.630544748172465,
+          "dEbase_dR_MeV_per_fm": 7.8247534007743065,
+          "C_est_from_radii": 1725.694696131785,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 2.815760127284658,
+          "E_total_MeV_per_A": -3.814784620887807,
+          "B_over_A_pred_MeV": 3.814784620887807,
+          "B_over_A_residual_MeV": 1.2421041808878068
+        },
+        "19": {
+          "T_kin_MeV_per_A": 9.89789091839858,
+          "U_pot_MeV_per_A": -16.858814866169844,
+          "E_coul_MeV_per_A": 0.22692471187305727,
+          "E_base_MeV_per_A": -6.733999235898207,
+          "dEbase_dR_MeV_per_fm": 7.87537186774825,
+          "C_est_from_radii": 1736.8582453849297,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 2.84630161545056,
+          "E_total_MeV_per_A": -3.8876976204476468,
+          "B_over_A_pred_MeV": 3.8876976204476468,
+          "B_over_A_residual_MeV": 1.3150171804476467
+        }
+      }
+    },
+    {
+      "key": "alpha",
+      "label": "alpha (He-4)",
+      "A": 4,
+      "Z": 2,
+      "N": 2,
+      "r_charge_fm": 1.6755,
+      "R_sharp_fm": 2.1630611988568424,
+      "rho_fm3": 0.09435500915103119,
+      "B_over_A_obs_MeV": 7.0739156,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 15.546657471030825,
+          "U_pot_MeV_per_A": -32.20443592057303,
+          "E_coul_MeV_per_A": 0.19971203044477073,
+          "E_base_MeV_per_A": -16.458066419097435,
+          "dEbase_dR_MeV_per_fm": 18.85244398381431,
+          "C_est_from_radii": 763.4055157180193,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 13.0689336815347,
+          "E_total_MeV_per_A": -3.3891327375627345,
+          "B_over_A_pred_MeV": 3.3891327375627345,
+          "B_over_A_residual_MeV": -3.684782862437266
+        },
+        "19": {
+          "T_kin_MeV_per_A": 15.546657471030825,
+          "U_pot_MeV_per_A": -32.35859249716827,
+          "E_coul_MeV_per_A": 0.19971203044477073,
+          "E_base_MeV_per_A": -16.61222299569267,
+          "dEbase_dR_MeV_per_fm": 18.878263197205694,
+          "C_est_from_radii": 764.451031616722,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 13.210687476365392,
+          "E_total_MeV_per_A": -3.401535519327277,
+          "B_over_A_pred_MeV": 3.401535519327277,
+          "B_over_A_residual_MeV": -3.672380080672723
+        }
+      }
+    },
+    {
+      "key": "li6",
+      "label": "Li-6",
+      "A": 6,
+      "Z": 3,
+      "N": 3,
+      "r_charge_fm": 2.589,
+      "R_sharp_fm": 3.3423846277770006,
+      "rho_fm3": 0.03836130433646229,
+      "B_over_A_obs_MeV": 5.3323312,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 8.532100577537417,
+          "U_pot_MeV_per_A": -16.933556640550524,
+          "E_coul_MeV_per_A": 0.2584917010507635,
+          "E_base_MeV_per_A": -8.142964361962344,
+          "dEbase_dR_MeV_per_fm": 7.756609985114365,
+          "C_est_from_radii": 2936.2322142143753,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 2.1602149267840387,
+          "E_total_MeV_per_A": -5.982749435178305,
+          "B_over_A_pred_MeV": 5.982749435178305,
+          "B_over_A_residual_MeV": 0.6504182351783054
+        },
+        "19": {
+          "T_kin_MeV_per_A": 8.532100577537417,
+          "U_pot_MeV_per_A": -17.060969884268438,
+          "E_coul_MeV_per_A": 0.2584917010507635,
+          "E_base_MeV_per_A": -8.270377605680258,
+          "dEbase_dR_MeV_per_fm": 7.832397527199518,
+          "C_est_from_radii": 2964.921270765318,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 2.18364596339219,
+          "E_total_MeV_per_A": -6.086731642288068,
+          "B_over_A_pred_MeV": 6.086731642288068,
+          "B_over_A_residual_MeV": 0.7544004422880688
+        }
+      }
+    },
+    {
+      "key": "c12",
+      "label": "C-12",
+      "A": 12,
+      "Z": 6,
+      "N": 6,
+      "r_charge_fm": 2.4702,
+      "R_sharp_fm": 3.1890144872671873,
+      "rho_fm3": 0.08833303657239168,
+      "B_over_A_obs_MeV": 7.680144599999999,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 14.87792949200243,
+          "U_pot_MeV_per_A": -38.160114285197835,
+          "E_coul_MeV_per_A": 0.6773085317185115,
+          "E_base_MeV_per_A": -22.604876261476893,
+          "dEbase_dR_MeV_per_fm": 20.698503337590385,
+          "C_est_from_radii": 1409.9310186852933,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 11.453983477853894,
+          "E_total_MeV_per_A": -11.150892783622998,
+          "B_over_A_pred_MeV": 11.150892783622998,
+          "B_over_A_residual_MeV": 3.470748183622999
+        },
+        "19": {
+          "T_kin_MeV_per_A": 14.87792949200243,
+          "U_pot_MeV_per_A": -38.43931133734116,
+          "E_coul_MeV_per_A": 0.6773085317185115,
+          "E_base_MeV_per_A": -22.884073313620217,
+          "dEbase_dR_MeV_per_fm": 20.864759455900156,
+          "C_est_from_radii": 1421.2559755881166,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 11.578220516886994,
+          "E_total_MeV_per_A": -11.305852796733223,
+          "B_over_A_pred_MeV": 11.305852796733223,
+          "B_over_A_residual_MeV": 3.625708196733224
+        }
+      }
+    },
+    {
+      "key": "o16",
+      "label": "O-16",
+      "A": 16,
+      "Z": 8,
+      "N": 8,
+      "r_charge_fm": 2.6991,
+      "R_sharp_fm": 3.484523116582813,
+      "rho_fm3": 0.09028203159327217,
+      "B_over_A_obs_MeV": 7.9762072,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 15.09597860506803,
+          "U_pot_MeV_per_A": -40.580646809206236,
+          "E_coul_MeV_per_A": 0.8678161420738372,
+          "E_base_MeV_per_A": -24.616852062064368,
+          "dEbase_dR_MeV_per_fm": 21.09055072399757,
+          "C_est_from_radii": 1502.7176012226741,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 11.965004839986676,
+          "E_total_MeV_per_A": -12.651847222077691,
+          "B_over_A_pred_MeV": 12.651847222077691,
+          "B_over_A_residual_MeV": 4.675640022077691
+        },
+        "19": {
+          "T_kin_MeV_per_A": 15.09597860506803,
+          "U_pot_MeV_per_A": -40.892947943686025,
+          "E_coul_MeV_per_A": 0.8678161420738372,
+          "E_base_MeV_per_A": -24.929153196544156,
+          "dEbase_dR_MeV_per_fm": 21.27508071596274,
+          "C_est_from_radii": 1515.865501934628,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 12.09478473500842,
+          "E_total_MeV_per_A": -12.834368461535737,
+          "B_over_A_pred_MeV": 12.834368461535737,
+          "B_over_A_residual_MeV": 4.858161261535737
+        }
+      }
+    },
+    {
+      "key": "ca40",
+      "label": "Ca-40",
+      "A": 40,
+      "Z": 20,
+      "N": 20,
+      "r_charge_fm": 3.4776,
+      "R_sharp_fm": 4.489562294923637,
+      "rho_fm3": 0.10552597562534592,
+      "B_over_A_obs_MeV": 8.5513046,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 16.75071335221568,
+          "U_pot_MeV_per_A": -52.01989046095044,
+          "E_coul_MeV_per_A": 1.8281954891862362,
+          "E_base_MeV_per_A": -33.44098161954853,
+          "dEbase_dR_MeV_per_fm": 23.285730323369854,
+          "C_est_from_radii": 1564.6739891932216,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 16.346658283450374,
+          "E_total_MeV_per_A": -17.094323336098157,
+          "B_over_A_pred_MeV": 17.094323336098157,
+          "B_over_A_residual_MeV": 8.543018736098157
+        },
+        "19": {
+          "T_kin_MeV_per_A": 16.75071335221568,
+          "U_pot_MeV_per_A": -52.463606319246736,
+          "E_coul_MeV_per_A": 1.8281954891862362,
+          "E_base_MeV_per_A": -33.88469747784482,
+          "dEbase_dR_MeV_per_fm": 23.52020214073821,
+          "C_est_from_radii": 1580.4292156233298,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 16.52396432087817,
+          "E_total_MeV_per_A": -17.360733156966646,
+          "B_over_A_pred_MeV": 17.360733156966646,
+          "B_over_A_residual_MeV": 8.809428556966646
+        }
+      }
+    },
+    {
+      "key": "fe56",
+      "label": "Fe-56",
+      "A": 56,
+      "Z": 26,
+      "N": 30,
+      "r_charge_fm": 3.7377,
+      "R_sharp_fm": 4.82534995103982,
+      "rho_fm3": 0.11899068691074915,
+      "B_over_A_obs_MeV": 8.7903563,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 18.19834336018678,
+          "U_pot_MeV_per_A": -59.93228803217139,
+          "E_coul_MeV_per_A": 2.078258397607378,
+          "E_base_MeV_per_A": -39.65568627437724,
+          "dEbase_dR_MeV_per_fm": 25.743541314666967,
+          "C_est_from_radii": 1462.244210399948,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 20.78433698711566,
+          "E_total_MeV_per_A": -18.87134928726158,
+          "B_over_A_pred_MeV": 18.87134928726158,
+          "B_over_A_residual_MeV": 10.080992987261581
+        },
+        "19": {
+          "T_kin_MeV_per_A": 18.19834336018678,
+          "U_pot_MeV_per_A": -60.45525363349297,
+          "E_coul_MeV_per_A": 2.078258397607378,
+          "E_base_MeV_per_A": -40.17865187569881,
+          "dEbase_dR_MeV_per_fm": 26.007519024453142,
+          "C_est_from_radii": 1477.2382577647352,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 21.009776851817573,
+          "E_total_MeV_per_A": -19.168875023881238,
+          "B_over_A_pred_MeV": 19.168875023881238,
+          "B_over_A_residual_MeV": 10.378518723881239
+        }
+      }
+    },
+    {
+      "key": "ni62",
+      "label": "Ni-62",
+      "A": 62,
+      "Z": 28,
+      "N": 34,
+      "r_charge_fm": 3.8399,
+      "R_sharp_fm": 4.95728958370062,
+      "rho_fm3": 0.12149830308390093,
+      "B_over_A_obs_MeV": 8.7945555,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 18.496734013166368,
+          "U_pot_MeV_per_A": -61.6603224071847,
+          "E_coul_MeV_per_A": 2.125146364696336,
+          "E_base_MeV_per_A": -41.038442029322,
+          "dEbase_dR_MeV_per_fm": 25.988198117910315,
+          "C_est_from_radii": 1454.5504300100483,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 21.66958812278034,
+          "E_total_MeV_per_A": -19.36885390654166,
+          "B_over_A_pred_MeV": 19.36885390654166,
+          "B_over_A_residual_MeV": 10.57429840654166
+        },
+        "19": {
+          "T_kin_MeV_per_A": 18.496734013166368,
+          "U_pot_MeV_per_A": -62.20293627008612,
+          "E_coul_MeV_per_A": 2.125146364696336,
+          "E_base_MeV_per_A": -41.58105589222342,
+          "dEbase_dR_MeV_per_fm": 26.257159570287268,
+          "C_est_from_radii": 1469.6041091622558,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 21.90462997268752,
+          "E_total_MeV_per_A": -19.676425919535898,
+          "B_over_A_pred_MeV": 19.676425919535898,
+          "B_over_A_residual_MeV": 10.881870419535899
+        }
+      }
+    },
+    {
+      "key": "pb208",
+      "label": "Pb-208",
+      "A": 208,
+      "Z": 82,
+      "N": 126,
+      "r_charge_fm": 5.5012,
+      "R_sharp_fm": 7.102018661385413,
+      "rho_fm3": 0.1386210864340997,
+      "B_over_A_obs_MeV": 7.867453,
+      "per_eq": {
+        "18": {
+          "T_kin_MeV_per_A": 20.591860455455567,
+          "U_pot_MeV_per_A": -76.26651191664916,
+          "E_coul_MeV_per_A": 3.8846934821945096,
+          "E_base_MeV_per_A": -51.78995797899909,
+          "dEbase_dR_MeV_per_fm": 23.923352410317047,
+          "C_est_from_radii": 1473.648817722041,
+          "C_frozen": 1467.9465140609946,
+          "E_rep_MeV_per_A": 28.207774851515282,
+          "E_total_MeV_per_A": -23.58218312748381,
+          "B_over_A_pred_MeV": 23.58218312748381,
+          "B_over_A_residual_MeV": 15.714730127483808
+        },
+        "19": {
+          "T_kin_MeV_per_A": 20.591860455455567,
+          "U_pot_MeV_per_A": -76.99519521689453,
+          "E_coul_MeV_per_A": 3.8846934821945096,
+          "E_base_MeV_per_A": -52.518641279244456,
+          "dEbase_dR_MeV_per_fm": 24.196904627351767,
+          "C_est_from_radii": 1490.4992947916598,
+          "C_frozen": 1483.8687762781974,
+          "E_rep_MeV_per_A": 28.513733947059674,
+          "E_total_MeV_per_A": -24.004907332184782,
+          "B_over_A_pred_MeV": 24.004907332184782,
+          "B_over_A_residual_MeV": 16.13745433218478
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_mean_field_repulsion_radii_frozen.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_mean_field_repulsion_radii_frozen.csv"
+  }
+}

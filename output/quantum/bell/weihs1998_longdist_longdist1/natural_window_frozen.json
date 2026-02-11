@@ -1,0 +1,25 @@
+{
+  "generated_utc": "2026-02-11T02:46:57.550112+00:00",
+  "dataset_id": "weihs1998_longdist_longdist1",
+  "supported": true,
+  "natural_window": {
+    "recommended_window_ns": 22.251267208428718,
+    "frozen_window_ns": 25.0,
+    "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+  },
+  "baseline": {
+    "param_name": "window_ns",
+    "value": 25.0,
+    "statistic_name": "CHSH |S| (fixed variant)",
+    "statistic": 2.5527309550940966,
+    "sigma_boot": 0.025324431789015552
+  },
+  "reject": {
+    "threshold_sigma": 3.0,
+    "rule": "abs(stat - frozen_stat) >= threshold_sigma * sigma_boot"
+  },
+  "sources": {
+    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance_bootstrap.json",
+    "window_sweep_metrics_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\window_sweep_metrics.json"
+  }
+}

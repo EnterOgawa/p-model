@@ -1,0 +1,65 @@
+{
+  "generated_utc": "2026-02-07T00:46:32.386745+00:00",
+  "phase": 7,
+  "step": "7.13.17.8",
+  "inputs": {
+    "csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv",
+      "sha256": "b461eb581c447f36193ddb3ec573fb8ef9ae4dd97dce152bb362f19469d48b9d",
+      "rows": 3554
+    }
+  },
+  "derived": {
+    "nu_eff_required_all": {
+      "n": 3554.0,
+      "median": 30.99124896320873,
+      "p16": 10.880998979333878,
+      "p84": 60.6414928289631
+    },
+    "nu_eff_required_magic_any": {
+      "n": 298.0,
+      "median": 15.197297808259929,
+      "p16": 5.315217294966786,
+      "p84": 46.856769929409786
+    },
+    "nu_eff_required_nonmagic": {
+      "n": 3256.0,
+      "median": 32.3799261994365,
+      "p16": 12.063372030443757,
+      "p84": 62.25093196817261
+    },
+    "nu_eff_required_by_A": {
+      "10": {
+        "n": 6.0,
+        "median": 1.4527339441894314,
+        "p16": 0.9665181331075834,
+        "p84": 2.397498319855072
+      },
+      "50": {
+        "n": 12.0,
+        "median": 8.80967376030433,
+        "p16": 8.223881367893565,
+        "p84": 9.855097935909413
+      },
+      "100": {
+        "n": 15.0,
+        "median": 20.388364537600214,
+        "p16": 19.690331009707112,
+        "p84": 21.20378537710138
+      },
+      "200": {
+        "n": 12.0,
+        "median": 52.69582180310198,
+        "p16": 48.92680290774784,
+        "p84": 53.46619859085919
+      }
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_physical_interpretation.png"
+  },
+  "notes": [
+    "ν_eff_required is a diagnostic derived from the frozen Δω→B.E. mapping I/F: it is the effective number of coherent 'bonds' per nucleon required to match B_obs under J_E(R).",
+    "If ν_eff_required grows strongly with A, the dominant mismatch is not pairing/magic fine-structure but the global geometry/range proxy (using nuclear radius R inside an exponential J_E)."
+  ]
+}

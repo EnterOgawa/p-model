@@ -1,0 +1,118 @@
+{
+  "generated_utc": "2026-02-11T02:47:13.338980+00:00",
+  "phase": 7,
+  "step": "7.13.18",
+  "inputs": {
+    "differential_predictions_csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_predictions.csv",
+      "sha256": "43d6a79c747c6215372e59673acfe8335e32d44da8f4f1ff84ef9255475ac91a",
+      "rows": 3554
+    },
+    "frozen_falsification_pack": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+      "sha256": "2b5951d57a3eba3bfb03c1da4ee30e6772640778e50dc4bd6aaa41a674ead637"
+    }
+  },
+  "thresholds": {
+    "z_median_abs_max": 3.0,
+    "z_delta_median_abs_max": 3.0,
+    "a_low_bin": [
+      40,
+      60
+    ],
+    "a_high_bin": [
+      250,
+      300
+    ],
+    "channel_decision_sigma_level": 3.0,
+    "note": "Operational thresholds for this repository (not universal physics thresholds)."
+  },
+  "frozen_if": {
+    "distance_proxy": "local spacing d (same as Step 7.13.17.9)",
+    "bond_count_base": "C_collective=A−1 → ν_base=2(A−1)/A",
+    "bond_count_extra_physics": "ν_eff=min(ν_base, ν_sat) with ν_sat=1.5 (frozen); C_eff=(ν_eff·A)/2",
+    "note": "This is a minimal additional physics step intended to remove heavy-A overbinding while preserving A<=4 exactly under the same distance proxy."
+  },
+  "models": [
+    {
+      "model_id": "local_spacing_d_in_exp (Step 7.13.17.9)",
+      "n": 3554.0,
+      "log10_ratio_stats": {
+        "n": 3554.0,
+        "median": 0.15566315347243942,
+        "p16": 0.13042886521971825,
+        "p84": 0.18572049342916097
+      },
+      "sigma_proxy_log10": 0.02764581410472136,
+      "z_median": 5.630622881380629,
+      "a_bin_medians_log10_ratio": {
+        "a_low_bin": {
+          "range": [
+            40,
+            60
+          ],
+          "n": 254.0,
+          "median": 0.1344297347152714
+        },
+        "a_high_bin": {
+          "range": [
+            250,
+            300
+          ],
+          "n": 267.0,
+          "median": 0.20056816962596635
+        }
+      },
+      "delta_median_log10_ratio_high_minus_low": 0.06613843491069496,
+      "z_delta_median": 2.39234897045046,
+      "passes": {
+        "median_within_3sigma": false,
+        "a_trend_within_3sigma": true
+      }
+    },
+    {
+      "model_id": "local_spacing_d_in_exp + nu_saturation (Step 7.13.18)",
+      "n": 3554.0,
+      "log10_ratio_stats": {
+        "n": 3554.0,
+        "median": 0.03448570092813839,
+        "p16": 0.010911968492482967,
+        "p84": 0.06356324246344863
+      },
+      "sigma_proxy_log10": 0.026325636985482834,
+      "z_median": 1.309966438690748,
+      "a_bin_medians_log10_ratio": {
+        "a_low_bin": {
+          "range": [
+            40,
+            60
+          ],
+          "n": 254.0,
+          "median": 0.01915811236984008
+        },
+        "a_high_bin": {
+          "range": [
+            250,
+            300
+          ],
+          "n": 267.0,
+          "median": 0.07724694505334247
+        }
+      },
+      "delta_median_log10_ratio_high_minus_low": 0.05808883268350239,
+      "z_delta_median": 2.206549938963879,
+      "passes": {
+        "median_within_3sigma": true,
+        "a_trend_within_3sigma": true
+      }
+    }
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"
+  },
+  "notes": [
+    "Thresholds are loaded from the frozen falsification pack (Step 7.13.17.10).",
+    "This step does not modify the thresholds; it tests whether a minimal saturation rule can bring the model within the frozen operational acceptance region."
+  ]
+}

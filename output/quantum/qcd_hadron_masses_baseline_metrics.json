@@ -1,0 +1,86 @@
+{
+  "generated_utc": "2026-01-26T07:53:02.848986+00:00",
+  "step": "Phase 7 / Step 7.13 (QCD/hadron baseline)",
+  "pdg_source": {
+    "path": "C:\\develop\\waveP\\data\\quantum\\sources\\pdg_rpp_2024_mass_width\\mass_width_2024.txt",
+    "edition": "RPP 2024",
+    "url": "https://pdg.lbl.gov/2024/mcdata/mass_width_2024.txt"
+  },
+  "constants": {
+    "hbar_c_mev_fm": 197.3269804
+  },
+  "rows": [
+    {
+      "label": "p",
+      "pdg_id": 2212,
+      "name_field": "p                   +",
+      "mass_mev": 938.27208816,
+      "mass_err_plus_mev": 2.9e-07,
+      "mass_err_minus_mev": -2.9e-07,
+      "compton_lambda_fm": 0.2103089102724652
+    },
+    {
+      "label": "n",
+      "pdg_id": 2112,
+      "name_field": "n                   0",
+      "mass_mev": 939.5654205000001,
+      "mass_err_plus_mev": 5.000000000000001e-07,
+      "mass_err_minus_mev": -5.000000000000001e-07,
+      "compton_lambda_fm": 0.21001941546017122
+    },
+    {
+      "label": "π±",
+      "pdg_id": 211,
+      "name_field": "pi                  +",
+      "mass_mev": 139.57038999999997,
+      "mass_err_plus_mev": 0.00017999999999999998,
+      "mass_err_minus_mev": -0.00017999999999999998,
+      "compton_lambda_fm": 1.413816930654131
+    },
+    {
+      "label": "π0",
+      "pdg_id": 111,
+      "name_field": "pi                  0",
+      "mass_mev": 134.9768,
+      "mass_err_plus_mev": 0.0005,
+      "mass_err_minus_mev": -0.0005,
+      "compton_lambda_fm": 1.461932572116097
+    },
+    {
+      "label": "K±",
+      "pdg_id": 321,
+      "name_field": "K                   +",
+      "mass_mev": 493.67699999999996,
+      "mass_err_plus_mev": 0.015000000000000001,
+      "mass_err_minus_mev": -0.015000000000000001,
+      "compton_lambda_fm": 0.39970867672587546
+    },
+    {
+      "label": "Λ0",
+      "pdg_id": 3122,
+      "name_field": "Lambda              0",
+      "mass_mev": 1115.683,
+      "mass_err_plus_mev": 0.006,
+      "mass_err_minus_mev": -0.006,
+      "compton_lambda_fm": 0.1768665296504473
+    },
+    {
+      "label": "Σ+",
+      "pdg_id": 3222,
+      "name_field": "Sigma               +",
+      "mass_mev": 1189.3700000000001,
+      "mass_err_plus_mev": 0.06999999999999999,
+      "mass_err_minus_mev": -0.06999999999999999,
+      "compton_lambda_fm": 0.1659088260171351
+    },
+    {
+      "label": "Ξ0",
+      "pdg_id": 3322,
+      "name_field": "Xi                  0",
+      "mass_mev": 1314.86,
+      "mass_err_plus_mev": 0.2,
+      "mass_err_minus_mev": -0.2,
+      "compton_lambda_fm": 0.1500745177433339
+    }
+  ]
+}

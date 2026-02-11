@@ -1,0 +1,178 @@
+{
+  "generated_utc": "2026-02-11T02:47:15.310524+00:00",
+  "phase": 7,
+  "step": "7.20.4",
+  "inputs": {
+    "minimal_additional_physics_csv": {
+      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv",
+      "sha256": "4abdecbfd25b1ad943bdda3a1f655957a44ff6f47f63d4b6232d44ac603c6c13"
+    },
+    "beta2_extracted_json": {
+      "path": "data/quantum/sources/nndc_be2_adopted_entries/extracted_beta2.json",
+      "sha256": "19b04d93f0cfe2607b5e3e3c5f02b27fe2e8fa10d59d659a5f1a098eba630882"
+    }
+  },
+  "model": {
+    "b_pred_field": "B_pred_local_spacing_sat_MeV",
+    "log_ratio_definition": "log10(B_pred/B_obs)",
+    "robust_baseline": {
+      "median_log10_ratio": 0.03448570789546429,
+      "mad_log10_ratio": 0.018193335284430616,
+      "robust_sigma_log10_ratio": 0.02697343889269683,
+      "z_definition": "(log10_ratio - median) / (1.4826*MAD)"
+    },
+    "outlier_rule": {
+      "abs_z_gt": 3.0
+    }
+  },
+  "thresholds": {
+    "near_magic_width": 2,
+    "edge_width": 2,
+    "nz_ratio_p05": 0.9387310606060606,
+    "nz_ratio_p95": 1.8000000000000003
+  },
+  "groups": [
+    {
+      "group_id": "all",
+      "n": 3554,
+      "outlier_abs_z_gt3_n": 99,
+      "outlier_abs_z_gt3_frac": 0.027855936972425437,
+      "median_log10_ratio": 0.03448570789546429,
+      "p16_log10_ratio": 0.010911961065984981,
+      "p84_log10_ratio": 0.06356319634630768,
+      "median_abs_z": 0.6744907594765952,
+      "p84_abs_z": 1.3245179221719927,
+      "max_abs_z": 98.29472544877525
+    },
+    {
+      "group_id": "magic_any",
+      "n": 298,
+      "outlier_abs_z_gt3_n": 27,
+      "outlier_abs_z_gt3_frac": 0.09060402684563758,
+      "median_log10_ratio": 0.031077985795895387,
+      "p16_log10_ratio": 0.004966323973058067,
+      "p84_log10_ratio": 0.06228775366400671,
+      "median_abs_z": 0.7908426956159628,
+      "p84_abs_z": 1.932841095419016,
+      "max_abs_z": 15.94913518417285
+    },
+    {
+      "group_id": "nonmagic",
+      "n": 3256,
+      "outlier_abs_z_gt3_n": 72,
+      "outlier_abs_z_gt3_frac": 0.022113022113022112,
+      "median_log10_ratio": 0.03471606349210246,
+      "p16_log10_ratio": 0.011589935524261439,
+      "p84_log10_ratio": 0.06357876307172163,
+      "median_abs_z": 0.6595112218218253,
+      "p84_abs_z": 1.2972141986690977,
+      "max_abs_z": 98.29472544877525
+    },
+    {
+      "group_id": "near_magic_width2",
+      "n": 1270,
+      "outlier_abs_z_gt3_n": 91,
+      "outlier_abs_z_gt3_frac": 0.07165354330708662,
+      "median_log10_ratio": 0.03031459781963984,
+      "p16_log10_ratio": 0.005640138703920224,
+      "p84_log10_ratio": 0.05849076293365009,
+      "median_abs_z": 0.7380378808259476,
+      "p84_abs_z": 1.7832535339298294,
+      "max_abs_z": 98.29472544877525
+    },
+    {
+      "group_id": "deformed_abs_beta2_ge_0p20_nonmagic",
+      "n": 237,
+      "outlier_abs_z_gt3_n": 4,
+      "outlier_abs_z_gt3_frac": 0.016877637130801686,
+      "median_log10_ratio": 0.022592083516146194,
+      "p16_log10_ratio": -0.010122894843467614,
+      "p84_log10_ratio": 0.04168948251661351,
+      "median_abs_z": 0.8388732419966021,
+      "p84_abs_z": 1.7548499631342511,
+      "max_abs_z": 4.866580851834527
+    },
+    {
+      "group_id": "edge_interior",
+      "n": 2852,
+      "outlier_abs_z_gt3_n": 24,
+      "outlier_abs_z_gt3_frac": 0.008415147265077139,
+      "median_log10_ratio": 0.029460397338481464,
+      "p16_log10_ratio": 0.008077425728149854,
+      "p84_log10_ratio": 0.058202070916202685,
+      "median_abs_z": 0.6624374545347984,
+      "p84_abs_z": 1.218920781020977,
+      "max_abs_z": 10.803214888361786
+    },
+    {
+      "group_id": "edge_proton_rich",
+      "n": 348,
+      "outlier_abs_z_gt3_n": 40,
+      "outlier_abs_z_gt3_frac": 0.11494252873563218,
+      "median_log10_ratio": 0.054562173785516414,
+      "p16_log10_ratio": 0.032264773616369896,
+      "p84_log10_ratio": 0.08683581292650466,
+      "median_abs_z": 0.7610561770159353,
+      "p84_abs_z": 1.9965566809140771,
+      "max_abs_z": 98.29472544877525
+    },
+    {
+      "group_id": "edge_neutron_rich",
+      "n": 348,
+      "outlier_abs_z_gt3_n": 35,
+      "outlier_abs_z_gt3_frac": 0.10057471264367816,
+      "median_log10_ratio": 0.05057242275044545,
+      "p16_log10_ratio": 0.03493162108448552,
+      "p84_log10_ratio": 0.08473624714967382,
+      "median_abs_z": 0.5963909503336151,
+      "p84_abs_z": 1.8629637642464298,
+      "max_abs_z": 34.607801765553674
+    },
+    {
+      "group_id": "edge_both",
+      "n": 6,
+      "outlier_abs_z_gt3_n": 0,
+      "outlier_abs_z_gt3_frac": 0.0,
+      "median_log10_ratio": 0.0906428285608362,
+      "p16_log10_ratio": 0.08989587692010545,
+      "p84_log10_ratio": 0.09121897315167189,
+      "median_abs_z": 2.0819414568817436,
+      "p84_abs_z": 2.1033011579242267,
+      "max_abs_z": 2.1069413064997926
+    },
+    {
+      "group_id": "nz_ratio_low_p05",
+      "n": 178,
+      "outlier_abs_z_gt3_n": 37,
+      "outlier_abs_z_gt3_frac": 0.20786516853932585,
+      "median_log10_ratio": 0.05198873444159566,
+      "p16_log10_ratio": 0.02765284155212129,
+      "p84_log10_ratio": 0.12883718340504785,
+      "median_abs_z": 0.8260449232554976,
+      "p84_abs_z": 3.648498239109381,
+      "max_abs_z": 98.29472544877525
+    },
+    {
+      "group_id": "nz_ratio_high_p95",
+      "n": 175,
+      "outlier_abs_z_gt3_n": 55,
+      "outlier_abs_z_gt3_frac": 0.3142857142857143,
+      "median_log10_ratio": 0.07128677609692158,
+      "p16_log10_ratio": 0.03659717185486788,
+      "p84_log10_ratio": 0.17363317314033733,
+      "median_abs_z": 1.3643446928608474,
+      "p84_abs_z": 5.1586846526472305,
+      "max_abs_z": 34.607801765553674
+    }
+  ],
+  "outputs": {
+    "summary_json": "output/quantum/nuclear_holdout_audit_summary.json",
+    "groups_csv": "output/quantum/nuclear_holdout_audit_groups.csv",
+    "outliers_csv": "output/quantum/nuclear_holdout_audit_outliers.csv",
+    "png": "output/quantum/nuclear_holdout_audit.png"
+  },
+  "notes": [
+    "This audit is an operational holdout/segmentation check: it catalogs where residuals concentrate (magic/edges/extreme N/Z/deformed).",
+    "It does not fit parameters; it uses the frozen minimal-additional-physics mapping output as-is."
+  ]
+}

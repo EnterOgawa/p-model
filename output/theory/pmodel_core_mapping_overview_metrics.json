@@ -1,0 +1,14 @@
+{
+  "generated_utc": "2026-02-10T15:36:33.678353+00:00",
+  "script": "scripts/theory/pmodel_core_mapping_overview.py",
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview.png",
+    "metrics_json": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview_metrics.json"
+  },
+  "figure_index_path": "output/theory/pmodel_core_mapping_overview.png",
+  "notes": [
+    "This is a conceptual diagram (not a numerical result).",
+    "Text uses the Part I vocabulary: P-field -> φ -> (gravity, clocks, light), plus pointers to Part II/III.",
+    "Velocity saturation δ is treated as an extension (not used in the Part I core)."
+  ]
+}

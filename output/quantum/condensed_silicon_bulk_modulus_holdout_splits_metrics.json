@@ -1,0 +1,178 @@
+{
+  "generated_utc": "2026-02-11T02:47:23.229342+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "ioffe_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\ioffe_silicon_mechanical_properties\\extracted_values.json",
+      "sha256": "5aa209cd7e7174a1d272bb5fa31eeb0b153bc6ef88938d3b0d44e21344eb8561"
+    }
+  },
+  "assumptions": {
+    "sigma_proxy": {
+      "B_GPa": "max(0.5% of B, 0.5 GPa)"
+    },
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test range)"
+    }
+  },
+  "data_range_T_K": [
+    0.0,
+    600.0
+  ],
+  "splits": [
+    {
+      "name": "A_low_to_high",
+      "train_T_K": [
+        0.0,
+        300.0
+      ],
+      "test_T_K": [
+        400.0,
+        600.0
+      ],
+      "models": {
+        "ioffe_piecewise_frozen": {
+          "params": {},
+          "train": {
+            "n": 301,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 201,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          },
+          "notes": [
+            "Operational baseline: use the Ioffe-derived B(T) curve as a frozen reference (no refit per split)."
+          ]
+        },
+        "const_1p_fit": {
+          "params": {
+            "B0_GPa": 98.0
+          },
+          "train": {
+            "n": 301,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 201,
+            "max_abs_z": 2.9866666666666504,
+            "rms_z": 1.7265068995153154,
+            "reduced_chi2": 2.980826074073988,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "linear_2p_fit": {
+          "params": {
+            "a_GPa": 97.99999999999996,
+            "b_GPa_per_K": 2.4012533104387446e-16
+          },
+          "train": {
+            "n": 301,
+            "max_abs_z": 8.526512829121202e-14,
+            "rms_z": 4.516206000671913e-14,
+            "reduced_chi2": 2.0532545514354523e-27,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 201,
+            "max_abs_z": 2.9866666666668493,
+            "rms_z": 1.7265068995154638,
+            "reduced_chi2": 2.9808260740745,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "B_high_to_low",
+      "train_T_K": [
+        400.0,
+        600.0
+      ],
+      "test_T_K": [
+        0.0,
+        300.0
+      ],
+      "models": {
+        "ioffe_piecewise_frozen": {
+          "params": {},
+          "train": {
+            "n": 201,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 301,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          },
+          "notes": [
+            "Operational baseline: use the Ioffe-derived B(T) curve as a frozen reference (no refit per split)."
+          ]
+        },
+        "const_1p_fit": {
+          "params": {
+            "B0_GPa": 97.25333333333336
+          },
+          "train": {
+            "n": 201,
+            "max_abs_z": 1.4933333333333678,
+            "rms_z": 0.8664765603463426,
+            "reduced_chi2": 0.7545355377777773,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 301,
+            "max_abs_z": 1.4933333333332826,
+            "rms_z": 1.4933333333332826,
+            "reduced_chi2": 2.230044444444293,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "linear_2p_fit": {
+          "params": {
+            "a_GPa": 100.98666666666648,
+            "b_GPa_per_K": -0.007466666666666247
+          },
+          "train": {
+            "n": 201,
+            "max_abs_z": 1.4210854715202004e-13,
+            "rms_z": 5.493791017151408e-14,
+            "reduced_chi2": 3.0485073807873537e-27,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 301,
+            "max_abs_z": 5.97333333333296,
+            "rms_z": 3.952399440002401,
+            "reduced_chi2": 15.621461333331293,
+            "exceed_3sigma_n": 200
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_bulk_modulus_holdout_splits.png"
+  },
+  "notes": [
+    "This audit treats the Ioffe elastic-constants-derived B(T) as an operational reference curve.",
+    "Const/linear fits are used only to quantify temperature-band sensitivity under a simple model class; this is not a first-principles B(T) prediction claim."
+  ]
+}

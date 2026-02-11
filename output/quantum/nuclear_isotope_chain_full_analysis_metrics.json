@@ -1,0 +1,81 @@
+{
+  "generated_utc": "2026-02-07T15:26:14.210228+00:00",
+  "phase": 7,
+  "step": "7.16.4",
+  "inputs": {
+    "all_nuclei_csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv",
+      "sha256": "c45ed52344102f3be025d1d15f2cfdb621a55ccb2bbcd17789c61e93f1c53f0d"
+    },
+    "pairing_csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_pairing_effect_systematics_per_nucleus.csv",
+      "sha256": "2a46dbde91c57d5190eb6efa347ca5eed644e226dcd54f47faefbbebe89fda5e"
+    }
+  },
+  "definitions": {
+    "S_n": "S_n(Z,N)=B(Z,N)-B(Z,N-1)",
+    "dripline_proxy_edge": "edge classes use AME chain envelope at fixed Z (distance<=2 from N_min/N_max)",
+    "residual": "S_n_pred - S_n_obs"
+  },
+  "counts": {
+    "n_total_sn_rows": 3438,
+    "n_chains_z": 118,
+    "n_representative_rows": 128,
+    "n_edge_rows_neutron": 348,
+    "n_edge_rows_proton": 231
+  },
+  "global_stats": {
+    "rms_resid_before_MeV": 9.203795154308555,
+    "rms_resid_after_MeV": 9.261897088480229,
+    "median_abs_resid_before_MeV": 7.234054267273411,
+    "median_abs_resid_after_MeV": 7.273305833232925
+  },
+  "edge_stats": {
+    "proton_rich_edge": {
+      "n": 231,
+      "rms_before_MeV": 14.398313211562202,
+      "rms_after_MeV": 14.359385797871116,
+      "median_abs_before_MeV": 12.873735246634372,
+      "median_abs_after_MeV": 12.88755571601429
+    },
+    "interior": {
+      "n": 2854,
+      "rms_before_MeV": 9.093042035211734,
+      "rms_after_MeV": 9.154729300718786,
+      "median_abs_before_MeV": 7.466393460903095,
+      "median_abs_after_MeV": 7.485173126867885
+    },
+    "neutron_rich_edge": {
+      "n": 348,
+      "rms_before_MeV": 4.529217138047289,
+      "rms_after_MeV": 4.754228336009854,
+      "median_abs_before_MeV": 4.204105879074987,
+      "median_abs_after_MeV": 4.166519852074529
+    },
+    "both_edges": {
+      "n": 5,
+      "rms_before_MeV": 6.726693257804871,
+      "rms_after_MeV": 6.839480448821192,
+      "median_abs_before_MeV": 6.358277204557751,
+      "median_abs_after_MeV": 6.726965045253678
+    }
+  },
+  "representative_Z": [
+    8,
+    20,
+    50,
+    82
+  ],
+  "outputs": {
+    "full_csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_isotope_chain_full_analysis.csv",
+    "summary_by_z_csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_isotope_chain_summary_by_z.csv",
+    "representative_csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_isotope_chain_representative_elements.csv",
+    "figure_png": "C:\\develop\\waveP\\output\\quantum\\nuclear_isotope_chain_full_analysis.png",
+    "representative_figure_png": "C:\\develop\\waveP\\output\\quantum\\nuclear_isotope_chain_representative_elements.png"
+  },
+  "notes": [
+    "Step 7.16.4 freezes isotope-chain Sn diagnostics across all available Z chains.",
+    "Dripline-near precision is evaluated with AME envelope proxy edges (distance<=2 in N within each fixed-Z chain).",
+    "Pred-after uses Step 7.16.3 pairing-corrected per-nucleus predictions."
+  ]
+}

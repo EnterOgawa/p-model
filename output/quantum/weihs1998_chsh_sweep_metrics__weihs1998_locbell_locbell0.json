@@ -1,0 +1,81 @@
+{
+  "generated_utc": "2026-01-24T22:10:24.256771+00:00",
+  "dataset": "Weihs et al. 1998 time-tag (Zenodo 7185335)",
+  "source_dir": "C:\\develop\\waveP\\data\\quantum\\sources\\zenodo_7185335",
+  "subdir": "locbell",
+  "run": "locbell0",
+  "encoding": "bit0-setting",
+  "events": {
+    "alice": 427552,
+    "bob": 521781
+  },
+  "offset": {
+    "offset_s": 3.948651867154383e-09,
+    "offset_method": "nearest_neighbor_dt_peak",
+    "offset_median_s": 4.1986518671544015e-09,
+    "offset_peak_count": 6782.0,
+    "offset_hist_bin_width_s": 5e-10,
+    "offset_hist_half_range_s": 2e-07,
+    "offset_used_s": 3.948651867154383e-09
+  },
+  "windows_ns": [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0
+  ],
+  "fixed_variant": {
+    "ref_window_ns": 1.0,
+    "swap_a": false,
+    "swap_b": false,
+    "sign_matrix": [
+      [
+        -1,
+        -1
+      ],
+      [
+        1,
+        -1
+      ]
+    ]
+  },
+  "best_overall": {
+    "window_ns": 0.25,
+    "offset_ns": 3.948651867154383,
+    "pairs_total": 14509,
+    "N00": 4599,
+    "N01": 3006,
+    "N10": 3925,
+    "N11": 2979,
+    "E00": -0.9734724940204392,
+    "E01": -0.27345309381237526,
+    "E10": 0.08535031847133757,
+    "E11": -0.9315206445115811,
+    "S_canonical": -0.2300546248498958,
+    "S_fixed": 2.263796550815733,
+    "S_fixed_abs": 2.263796550815733,
+    "S_best": 2.263796550815733,
+    "S_best_abs": 2.263796550815733,
+    "S_best_swap_a": false,
+    "S_best_swap_b": false,
+    "S_best_sign00": -1,
+    "S_best_sign01": -1,
+    "S_best_sign10": 1,
+    "S_best_sign11": -1
+  },
+  "repro": {
+    "fetch": "python -B scripts/quantum/fetch_weihs1998_zenodo_7185335.py",
+    "run": "python -B scripts/quantum/weihs1998_time_tag_reanalysis.py --subdir locbell --run locbell0 --encoding bit0-setting --out-tag weihs1998_locbell_locbell0"
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_locbell_locbell0.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_locbell_locbell0.png"
+  }
+}

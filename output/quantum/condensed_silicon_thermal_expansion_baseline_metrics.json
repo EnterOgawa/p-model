@@ -1,0 +1,133 @@
+{
+  "generated_utc": "2026-01-31T15:05:42.408898+00:00",
+  "dataset": "Phase 7 / Step 7.14.5 silicon thermal expansion coefficient baseline (NIST TRC fit)",
+  "inputs": {
+    "extracted_values_json": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+    "extracted_values_sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+  },
+  "source": {
+    "url": "https://trc.nist.gov/cryogenics/materials/Silicon/Silicon.htm",
+    "local_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\Silicon.htm",
+    "local_sha256": "0fa66122c3295aea81fdea31015c08d0c5aba9991e91a024b8143fa3a731064b"
+  },
+  "units": {
+    "alpha": "1e-8 / K",
+    "note": "alpha_per_K = alpha_1e-8_per_K * 1e-8"
+  },
+  "data_range_k": {
+    "t_min_k": 13.0,
+    "t_max_k": 600.0,
+    "grid": {
+      "t0": 13,
+      "t1": 600,
+      "n": 588
+    }
+  },
+  "fit_error_relative_to_data_1e_8_per_k": {
+    "raw": "curve fit standard error relative to data 0.03x10 -8 ( T < 50K); 0.5x10 -8 ( T ≥ 50K)",
+    "lt": {
+      "t_k": 50.0,
+      "sigma_1e_8_per_k": 0.03
+    },
+    "ge": {
+      "t_k": 50.0,
+      "sigma_1e_8_per_k": 0.5
+    }
+  },
+  "falsification": {
+    "sigma_multiplier": 3.0,
+    "targets": [
+      {
+        "T_K": 20.0,
+        "alpha_target_1e-8_per_K": -0.3406056923499412,
+        "sigma_fit_1e-8_per_K": 0.03,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 0.09
+      },
+      {
+        "T_K": 50.0,
+        "alpha_target_1e-8_per_K": -29.219839113498725,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      },
+      {
+        "T_K": 100.0,
+        "alpha_target_1e-8_per_K": -33.87800300190036,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      },
+      {
+        "T_K": 200.0,
+        "alpha_target_1e-8_per_K": 140.53425357267417,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      },
+      {
+        "T_K": 293.15,
+        "alpha_target_1e-8_per_K": 255.47050314843636,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      },
+      {
+        "T_K": 298.15,
+        "alpha_target_1e-8_per_K": 259.8556760834668,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      },
+      {
+        "T_K": 300.0,
+        "alpha_target_1e-8_per_K": 261.4416296296297,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      },
+      {
+        "T_K": 600.0,
+        "alpha_target_1e-8_per_K": 383.9092037037037,
+        "sigma_fit_1e-8_per_K": 0.5,
+        "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+      }
+    ],
+    "notes": [
+      "NIST TRC provides a curve-fit standard error relative to data (given separately for T<50 K and T≥50 K).",
+      "Reject thresholds use a strict ±3σ envelope based on that reported fit error."
+    ]
+  },
+  "coefficients": {
+    "a": 1.005e-05,
+    "b": -5.99688e-06,
+    "c": 1.25574e-06,
+    "d": -1.12086e-07,
+    "e": 3.63225e-09,
+    "f": 0.0267708,
+    "g": -0.000122829,
+    "h": 1.62544e-18,
+    "i": 472.374,
+    "j": -35879.6,
+    "k": -12419100.0,
+    "l": 1259720000.0
+  },
+  "formula_constants": {
+    "poly_low_prefactor_x3": 4.8e-05,
+    "gate_low_poly_erf_center_k": 15.0,
+    "gate_52_erf_slope": 0.2,
+    "gate_52_erf_center_k": 52.0,
+    "gate_200_erf_slope": 0.1,
+    "gate_200_erf_center_k": 200.0,
+    "mid_poly_shift_k": 76.0,
+    "mid_poly_const": -47.6
+  },
+  "sample_alpha_1e-8_per_K": {
+    "20K": -0.3406056923499412,
+    "50K": -29.219839113498725,
+    "100K": -33.87800300190036,
+    "200K": 140.53425357267417,
+    "293.15K": 255.47050314843636,
+    "298.15K": 259.8556760834668,
+    "300K": 261.4416296296297,
+    "600K": 383.9092037037037
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.png",
+    "metrics_json": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline_metrics.json"
+  }
+}

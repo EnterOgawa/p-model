@@ -1,0 +1,1608 @@
+{
+  "generated_utc": "2026-01-27T05:49:29.792108+00:00",
+  "phase": 7,
+  "step": "7.13.15.30",
+  "scan": {
+    "domain_min_A_base": 16,
+    "domain_min_A_candidates": [
+      16,
+      40,
+      60,
+      80,
+      100
+    ],
+    "shell_variants": [
+      {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      },
+      {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    ]
+  },
+  "baseline": {
+    "radius_model": {
+      "form": "r_charge = (r0 + rI*I)*A^(1/3), I=(N-Z)/A",
+      "r0_fm": 0.9889628119917659,
+      "rI_fm": -0.2399027972384209,
+      "fit_min_A": 40,
+      "n_fit": 834,
+      "fit_rms_fm": 0.049233519426792,
+      "mean_I_fit": 0.15615935524157154,
+      "frozen_from_metrics": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json"
+    },
+    "coulomb_finite_size": {
+      "profile": "2pF (fixed a; c from r_rms via bisection)",
+      "a_fm": 0.523,
+      "dr_fm": 0.02,
+      "r_max_rule": "max(20, 3*r_rms + 20*a)",
+      "exchange": "Slater (LDA) on 2pF density",
+      "coef_slater": -0.7385587663820223,
+      "e2_MeV_fm": 1.43996448,
+      "cache_round_fm": 0.001
+    },
+    "deformation_beta2": {
+      "source": "NNDC B(E2) adopted entries",
+      "extracted_beta2_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\extracted_beta2.json",
+      "imputation_policy": "neighbors",
+      "imputation": "direct for even-even when present; otherwise average of available even-even neighbors (Z±1,N±1), else 0",
+      "applied_to": {
+        "coulomb_shape_factor": true,
+        "surface_area_factor": true
+      },
+      "counts_in_domain": {
+        "direct": 423,
+        "imputed": 1553,
+        "missing": 1511
+      },
+      "strict_coverage": true,
+      "direct_only_counts_in_domain": {
+        "direct": 423,
+        "imputed": 0,
+        "missing": 3064
+      },
+      "n_skipped_direct_only": 0,
+      "rule": "pass_strict := pass_strict_primary AND pass_strict_direct_only",
+      "note": "B(E2)-derived β2 is treated as a magnitude; the Coulomb shape factor uses |β2|."
+    },
+    "spectroscopy_e2plus": {
+      "source": "NNDC B(E2) adopted entries",
+      "extracted_e2plus_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\extracted_e2plus.json",
+      "units": {
+        "e2plus_keV": "keV"
+      },
+      "peak_rule": {
+        "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+        "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+      },
+      "strict_peaks": true,
+      "note": "Uses transitionEnergy as E(2+_1) proxy; cross-check is based on local peaks along isotopic/isotonic chains."
+    }
+  },
+  "shell_model": {
+    "form": "kN(I)=kN0+kN1*I, kZ(I)=kZ0+kZ1*I (I=(N-Z)/A)",
+    "train_magic": [
+      50,
+      82
+    ],
+    "note": "All coefficients are frozen using train magic only; other_magic is used for rejection (strict)."
+  },
+  "diag": {
+    "n_ame_total": 3556,
+    "n_in_domain_base": 3487,
+    "n_skipped_base": 0,
+    "n_cached_r_rms": 2062,
+    "best_gap_Sp_other_delta": {
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      },
+      "domain_min_A": 60,
+      "delta": 1.0644552107542522,
+      "pair": 0.718256034045033,
+      "shell": 1.7827112447992852,
+      "n": 19
+    },
+    "conclusion": "strict_pass=0/10 over shell variants x A_min cuts. This step adds an independently constrained deformation input beta2 (NNDC B(E2) adopted entries) and applies Coulomb shape factor f(beta2), surface-area factor g(beta2) on the surface term, robust: require agreement with direct-only (no-imputation) run on top of the frozen radius model + finite-size Coulomb baseline, while keeping the shell refreeze coefficients isospin-dependent kN(I)=kN0+kN1*I and kZ(I)=kZ0+kZ1*I (frozen on train magic N/Z in {50,82} only). If strict_pass==0, additional independently frozen structure inputs (beyond beta2) are still required."
+  },
+  "results": [
+    {
+      "status": "ok",
+      "domain_min_A": 16,
+      "n_in_domain": 3487,
+      "pairing": {
+        "a_n_MeV": 5.538988784156382,
+        "a_p_MeV": 6.615241823661158,
+        "n_samples_a_n": 2538,
+        "n_samples_a_p": 2446
+      },
+      "fit": {
+        "kN0": 0.14355094000349,
+        "kN1": -0.3068854555393796,
+        "kZ0": 0.08245988283817443,
+        "kZ1": 0.1251717118231228,
+        "kZ_over_kN": 0.5744294174330706,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6799734045086387,
+          "rms_resid_pairing_shell_MeV": 0.5816369792900372
+        },
+        "other_magic": {
+          "n": 61,
+          "rms_resid_uncorrected_MeV": 3.4356709441620157,
+          "rms_resid_pairing_only_MeV": 1.3337499292026316,
+          "rms_resid_pairing_shell_MeV": 2.452856025141161
+        },
+        "by_magic": {
+          "8": {
+            "n": 4,
+            "rms_resid_uncorrected_MeV": 5.24158626373529,
+            "rms_resid_pairing_only_MeV": 0.9532766855454738,
+            "rms_resid_pairing_shell_MeV": 4.84854264378467
+          },
+          "20": {
+            "n": 18,
+            "rms_resid_uncorrected_MeV": 3.7453174331771417,
+            "rms_resid_pairing_only_MeV": 1.5874652804879341,
+            "rms_resid_pairing_shell_MeV": 2.733548286785943
+          },
+          "28": {
+            "n": 22,
+            "rms_resid_uncorrected_MeV": 3.286060774564697,
+            "rms_resid_pairing_only_MeV": 1.2968647359309464,
+            "rms_resid_pairing_shell_MeV": 2.2841615020382906
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6844141324311788,
+            "rms_resid_pairing_shell_MeV": 0.5984588385738746
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6761577023030645,
+            "rms_resid_pairing_shell_MeV": 0.5668210343670043
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1508454202301601,
+            "rms_resid_pairing_shell_MeV": 1.180463151276419
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5662077856608245,
+          "rms_resid_pairing_shell_MeV": 0.49053779277876497
+        },
+        "other_magic": {
+          "n": 66,
+          "rms_resid_uncorrected_MeV": 3.716513452105301,
+          "rms_resid_pairing_only_MeV": 1.2211882927138804,
+          "rms_resid_pairing_shell_MeV": 2.6863642500597784
+        },
+        "by_magic": {
+          "8": {
+            "n": 10,
+            "rms_resid_uncorrected_MeV": 3.463529114495624,
+            "rms_resid_pairing_only_MeV": 2.523387429323607,
+            "rms_resid_pairing_shell_MeV": 5.176815323045077
+          },
+          "20": {
+            "n": 27,
+            "rms_resid_uncorrected_MeV": 3.996125377184939,
+            "rms_resid_pairing_only_MeV": 0.8381480613334976,
+            "rms_resid_pairing_shell_MeV": 2.0418129846864814
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.737744138555326,
+            "rms_resid_pairing_shell_MeV": 1.8169253520722193
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.7136820838343068,
+            "rms_resid_pairing_shell_MeV": 0.4397006225451273
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3986545009359013,
+            "rms_resid_pairing_shell_MeV": 0.5377695989389613
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": false,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 42,
+          "n_peak": 32,
+          "rms_resid_uncorrected_MeV": 4.016990440005984,
+          "rms_resid_pairing_only_MeV": 1.6348040741480185,
+          "rms_resid_pairing_shell_MeV": 1.3403743148304201
+        },
+        "gap_Sp_peak": {
+          "n_available": 54,
+          "n_peak": 36,
+          "rms_resid_uncorrected_MeV": 3.9245462856441216,
+          "rms_resid_pairing_only_MeV": 1.55716392509209,
+          "rms_resid_pairing_shell_MeV": 1.7060557620043522
+        }
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 40,
+      "n_in_domain": 3255,
+      "pairing": {
+        "a_n_MeV": 5.575078300991934,
+        "a_p_MeV": 6.659905361097271,
+        "n_samples_a_n": 2416,
+        "n_samples_a_p": 2329
+      },
+      "fit": {
+        "kN0": 0.1427016046070814,
+        "kN1": -0.30698994606001506,
+        "kZ0": 0.08140599780819929,
+        "kZ1": 0.1254029871060528,
+        "kZ_over_kN": 0.5704630864687531,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6675638326887514,
+          "rms_resid_pairing_shell_MeV": 0.581720133217485
+        },
+        "other_magic": {
+          "n": 44,
+          "rms_resid_uncorrected_MeV": 3.234282397868738,
+          "rms_resid_pairing_only_MeV": 1.1451123150995262,
+          "rms_resid_pairing_shell_MeV": 1.9716777134766166
+        },
+        "by_magic": {
+          "20": {
+            "n": 6,
+            "rms_resid_uncorrected_MeV": 4.150887174164224,
+            "rms_resid_pairing_only_MeV": 0.9564525682544525,
+            "rms_resid_pairing_shell_MeV": 2.6535559976473886
+          },
+          "28": {
+            "n": 21,
+            "rms_resid_uncorrected_MeV": 3.3580250584984146,
+            "rms_resid_pairing_only_MeV": 1.196562530706018,
+            "rms_resid_pairing_shell_MeV": 2.241470502115429
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6713555536089157,
+            "rms_resid_pairing_shell_MeV": 0.5985460705843157
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6643069106436976,
+            "rms_resid_pairing_shell_MeV": 0.5669005559564143
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1412224777911888,
+            "rms_resid_pairing_shell_MeV": 1.1705811882607384
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5523567177443842,
+          "rms_resid_pairing_shell_MeV": 0.49053110381563725
+        },
+        "other_magic": {
+          "n": 49,
+          "rms_resid_uncorrected_MeV": 3.6455358571538965,
+          "rms_resid_pairing_only_MeV": 0.7815011473816325,
+          "rms_resid_pairing_shell_MeV": 1.971594617924658
+        },
+        "by_magic": {
+          "20": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.8125274482262768,
+            "rms_resid_pairing_only_MeV": 0.8458801864127091,
+            "rms_resid_pairing_shell_MeV": 2.173014894169872
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.7338183635372374,
+            "rms_resid_pairing_shell_MeV": 1.8197404791131186
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6980042111777638,
+            "rms_resid_pairing_shell_MeV": 0.43968905313396767
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3869425638424087,
+            "rms_resid_pairing_shell_MeV": 0.5377669462783226
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 36,
+          "n_peak": 27,
+          "rms_resid_uncorrected_MeV": 3.824189158821408,
+          "rms_resid_pairing_only_MeV": 1.6717890130072464,
+          "rms_resid_pairing_shell_MeV": 1.0013954016621223
+        },
+        "gap_Sp_peak": {
+          "n_available": 49,
+          "n_peak": 32,
+          "rms_resid_uncorrected_MeV": 3.8772417079646067,
+          "rms_resid_pairing_only_MeV": 1.409508338108072,
+          "rms_resid_pairing_shell_MeV": 0.8873187571280219
+        }
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 60,
+      "n_in_domain": 3001,
+      "pairing": {
+        "a_n_MeV": 5.604303040768533,
+        "a_p_MeV": 6.6947260464427165,
+        "n_samples_a_n": 2323,
+        "n_samples_a_p": 2237
+      },
+      "fit": {
+        "kN0": 0.1420138256930124,
+        "kN1": -0.307074560340804,
+        "kZ0": 0.08058436560756631,
+        "kZ1": 0.12558329463922988,
+        "kZ_over_kN": 0.567440284171792,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6575304401321085,
+          "rms_resid_pairing_shell_MeV": 0.5817875056199276
+        },
+        "other_magic": {
+          "n": 18,
+          "rms_resid_uncorrected_MeV": 2.7225500942531746,
+          "rms_resid_pairing_only_MeV": 1.1167962545385266,
+          "rms_resid_pairing_shell_MeV": 1.26330324815499
+        },
+        "by_magic": {
+          "28": {
+            "n": 1,
+            "rms_resid_uncorrected_MeV": 3.652061165854491,
+            "rms_resid_pairing_only_MeV": 0.7815138010637952,
+            "rms_resid_pairing_shell_MeV": 2.397841020415342
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6608102160235079,
+            "rms_resid_pairing_shell_MeV": 0.5986167888731615
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6547140295725995,
+            "rms_resid_pairing_shell_MeV": 0.5669649475831885
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.133434289682309,
+            "rms_resid_pairing_shell_MeV": 1.1625830819949419
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5415685560942831,
+          "rms_resid_pairing_shell_MeV": 0.4905259140787463
+        },
+        "other_magic": {
+          "n": 19,
+          "rms_resid_uncorrected_MeV": 3.48042010841936,
+          "rms_resid_pairing_only_MeV": 0.718256034045033,
+          "rms_resid_pairing_shell_MeV": 1.850708149875164
+        },
+        "by_magic": {
+          "28": {
+            "n": 19,
+            "rms_resid_uncorrected_MeV": 3.48042010841936,
+            "rms_resid_pairing_only_MeV": 0.718256034045033,
+            "rms_resid_pairing_shell_MeV": 1.850708149875164
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6857911000520835,
+            "rms_resid_pairing_shell_MeV": 0.4396800504577114
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3778227922266606,
+            "rms_resid_pairing_shell_MeV": 0.5377649102417409
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 28,
+          "n_peak": 21,
+          "rms_resid_uncorrected_MeV": 3.756056129029044,
+          "rms_resid_pairing_only_MeV": 1.7733444927048316,
+          "rms_resid_pairing_shell_MeV": 0.7721678197043004
+        },
+        "gap_Sp_peak": {
+          "n_available": 39,
+          "n_peak": 27,
+          "rms_resid_uncorrected_MeV": 3.885774290181525,
+          "rms_resid_pairing_only_MeV": 1.5183296971697484,
+          "rms_resid_pairing_shell_MeV": 0.5978176828501676
+        }
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 80,
+      "n_in_domain": 2730,
+      "pairing": {
+        "a_n_MeV": 5.615758171076965,
+        "a_p_MeV": 6.7753574906386005,
+        "n_samples_a_n": 2134,
+        "n_samples_a_p": 2052
+      },
+      "fit": {
+        "kN0": 0.13390928425413656,
+        "kN1": -0.22806432082589653,
+        "kZ0": 0.0786817801584314,
+        "kZ1": 0.12600080849363637,
+        "kZ_over_kN": 0.5875752424238714,
+        "n_fit_pairs_kN": 48,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 48,
+          "rms_resid_uncorrected_MeV": 3.7461714328684153,
+          "rms_resid_pairing_only_MeV": 1.707546759519578,
+          "rms_resid_pairing_shell_MeV": 0.5546024081793313
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.130382666204385,
+          "rms_resid_pairing_shell_MeV": 1.159917865132487
+        },
+        "by_magic": {
+          "50": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 4.0375683999282765,
+            "rms_resid_pairing_only_MeV": 1.783761589927259,
+            "rms_resid_pairing_shell_MeV": 0.6326156793550334
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.650954883127191,
+            "rms_resid_pairing_shell_MeV": 0.49135279514397967
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.130382666204385,
+            "rms_resid_pairing_shell_MeV": 1.159917865132487
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.516623520351565,
+          "rms_resid_pairing_shell_MeV": 0.4905730909078134
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6575439055001449,
+            "rms_resid_pairing_shell_MeV": 0.43977146384994326
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3567434115514159,
+            "rms_resid_pairing_shell_MeV": 0.5377753745474737
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 27,
+          "n_peak": 21,
+          "rms_resid_uncorrected_MeV": 3.756056129029044,
+          "rms_resid_pairing_only_MeV": 1.7693428048340751,
+          "rms_resid_pairing_shell_MeV": 0.7314075559828893
+        },
+        "gap_Sp_peak": {
+          "n_available": 33,
+          "n_peak": 22,
+          "rms_resid_uncorrected_MeV": 3.8242732508553634,
+          "rms_resid_pairing_only_MeV": 1.5998892449114983,
+          "rms_resid_pairing_shell_MeV": 0.43585907302513294
+        }
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 100,
+      "n_in_domain": 2435,
+      "pairing": {
+        "a_n_MeV": 5.675679178740438,
+        "a_p_MeV": 6.80103425506131,
+        "n_samples_a_n": 1918,
+        "n_samples_a_p": 1840
+      },
+      "fit": {
+        "kN0": 0.12416948321808655,
+        "kN1": -0.07385595836125664,
+        "kZ0": 0.0780759075761325,
+        "kZ1": 0.12613377385248886,
+        "kZ_over_kN": 0.628784992517066,
+        "n_fit_pairs_kN": 28,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 28,
+          "rms_resid_uncorrected_MeV": 3.523306319207567,
+          "rms_resid_pairing_only_MeV": 1.6312995005303397,
+          "rms_resid_pairing_shell_MeV": 0.38682961726294135
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.114429851868883,
+          "rms_resid_pairing_shell_MeV": 1.146381706055135
+        },
+        "by_magic": {
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6312995005303397,
+            "rms_resid_pairing_shell_MeV": 0.38682961726294135
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.114429851868883,
+            "rms_resid_pairing_shell_MeV": 1.146381706055135
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5086908300361601,
+          "rms_resid_pairing_shell_MeV": 0.49068652599956025
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6485589240002898,
+            "rms_resid_pairing_shell_MeV": 0.439987328581904
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.350042377346907,
+            "rms_resid_pairing_shell_MeV": 0.5378038107051791
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 18,
+          "n_peak": 14,
+          "rms_resid_uncorrected_MeV": 3.529462071988887,
+          "rms_resid_pairing_only_MeV": 1.7246387138868764,
+          "rms_resid_pairing_shell_MeV": 0.7560949540288073
+        },
+        "gap_Sp_peak": {
+          "n_available": 33,
+          "n_peak": 22,
+          "rms_resid_uncorrected_MeV": 3.8242732508553634,
+          "rms_resid_pairing_only_MeV": 1.5916596176788516,
+          "rms_resid_pairing_shell_MeV": 0.43561867959275763
+        }
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 16,
+      "n_in_domain": 3487,
+      "pairing": {
+        "a_n_MeV": 5.538988784156382,
+        "a_p_MeV": 6.615241823661158,
+        "n_samples_a_n": 2538,
+        "n_samples_a_p": 2446
+      },
+      "fit": {
+        "kN0": 0.13991490870739304,
+        "kN1": -0.30043267298909365,
+        "kZ0": 0.08170174852122329,
+        "kZ1": 0.10832750591372582,
+        "kZ_over_kN": 0.583938833080954,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6799734045086387,
+          "rms_resid_pairing_shell_MeV": 0.5573652103805079
+        },
+        "other_magic": {
+          "n": 61,
+          "rms_resid_uncorrected_MeV": 3.4356709441620157,
+          "rms_resid_pairing_only_MeV": 1.3337499292026316,
+          "rms_resid_pairing_shell_MeV": 2.391461287399213
+        },
+        "by_magic": {
+          "8": {
+            "n": 4,
+            "rms_resid_uncorrected_MeV": 5.24158626373529,
+            "rms_resid_pairing_only_MeV": 0.9532766855454738,
+            "rms_resid_pairing_shell_MeV": 4.931083700469093
+          },
+          "20": {
+            "n": 18,
+            "rms_resid_uncorrected_MeV": 3.7453174331771417,
+            "rms_resid_pairing_only_MeV": 1.5874652804879341,
+            "rms_resid_pairing_shell_MeV": 2.7844569826825794
+          },
+          "28": {
+            "n": 22,
+            "rms_resid_uncorrected_MeV": 3.286060774564697,
+            "rms_resid_pairing_only_MeV": 1.2968647359309464,
+            "rms_resid_pairing_shell_MeV": 2.232730300320948
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6844141324311788,
+            "rms_resid_pairing_shell_MeV": 0.5809644165412922
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6761577023030645,
+            "rms_resid_pairing_shell_MeV": 0.5363114488175714
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1508454202301601,
+            "rms_resid_pairing_shell_MeV": 0.3735751860700301
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5662077856608245,
+          "rms_resid_pairing_shell_MeV": 0.49691288928303945
+        },
+        "other_magic": {
+          "n": 66,
+          "rms_resid_uncorrected_MeV": 3.716513452105301,
+          "rms_resid_pairing_only_MeV": 1.2211882927138804,
+          "rms_resid_pairing_shell_MeV": 2.673944596493682
+        },
+        "by_magic": {
+          "8": {
+            "n": 10,
+            "rms_resid_uncorrected_MeV": 3.463529114495624,
+            "rms_resid_pairing_only_MeV": 2.523387429323607,
+            "rms_resid_pairing_shell_MeV": 5.1452736594437996
+          },
+          "20": {
+            "n": 27,
+            "rms_resid_uncorrected_MeV": 3.996125377184939,
+            "rms_resid_pairing_only_MeV": 0.8381480613334976,
+            "rms_resid_pairing_shell_MeV": 2.0768739354539987
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.737744138555326,
+            "rms_resid_pairing_shell_MeV": 1.7684817758156428
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.7136820838343068,
+            "rms_resid_pairing_shell_MeV": 0.44872033354589075
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3986545009359013,
+            "rms_resid_pairing_shell_MeV": 0.5419654878596483
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": false,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 42,
+          "n_peak": 32,
+          "rms_resid_uncorrected_MeV": 4.016990440005984,
+          "rms_resid_pairing_only_MeV": 1.6348040741480185,
+          "rms_resid_pairing_shell_MeV": 1.2644700159866231
+        },
+        "gap_Sp_peak": {
+          "n_available": 54,
+          "n_peak": 36,
+          "rms_resid_uncorrected_MeV": 3.9245462856441216,
+          "rms_resid_pairing_only_MeV": 1.55716392509209,
+          "rms_resid_pairing_shell_MeV": 1.6975430155757762
+        }
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 40,
+      "n_in_domain": 3255,
+      "pairing": {
+        "a_n_MeV": 5.575078300991934,
+        "a_p_MeV": 6.659905361097271,
+        "n_samples_a_n": 2416,
+        "n_samples_a_p": 2329
+      },
+      "fit": {
+        "kN0": 0.139085746855716,
+        "kN1": -0.30046140620506256,
+        "kZ0": 0.08066406275831112,
+        "kZ1": 0.10866469682074585,
+        "kZ_over_kN": 0.5799592307757455,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6675638326887514,
+          "rms_resid_pairing_shell_MeV": 0.5576953514806114
+        },
+        "other_magic": {
+          "n": 44,
+          "rms_resid_uncorrected_MeV": 3.234282397868738,
+          "rms_resid_pairing_only_MeV": 1.1451123150995262,
+          "rms_resid_pairing_shell_MeV": 1.8333727931114945
+        },
+        "by_magic": {
+          "20": {
+            "n": 6,
+            "rms_resid_uncorrected_MeV": 4.150887174164224,
+            "rms_resid_pairing_only_MeV": 0.9564525682544525,
+            "rms_resid_pairing_shell_MeV": 2.736508909881242
+          },
+          "28": {
+            "n": 21,
+            "rms_resid_uncorrected_MeV": 3.3580250584984146,
+            "rms_resid_pairing_only_MeV": 1.196562530706018,
+            "rms_resid_pairing_shell_MeV": 2.1886120190820946
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6713555536089157,
+            "rms_resid_pairing_shell_MeV": 0.5813442501485159
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6643069106436976,
+            "rms_resid_pairing_shell_MeV": 0.5365959563682947
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1412224777911888,
+            "rms_resid_pairing_shell_MeV": 0.37368554571553975
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5523567177443842,
+          "rms_resid_pairing_shell_MeV": 0.49681385433123315
+        },
+        "other_magic": {
+          "n": 49,
+          "rms_resid_uncorrected_MeV": 3.6455358571538965,
+          "rms_resid_pairing_only_MeV": 0.7815011473816325,
+          "rms_resid_pairing_shell_MeV": 1.9562965486302242
+        },
+        "by_magic": {
+          "20": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.8125274482262768,
+            "rms_resid_pairing_only_MeV": 0.8458801864127091,
+            "rms_resid_pairing_shell_MeV": 2.1964755778127905
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.7338183635372374,
+            "rms_resid_pairing_shell_MeV": 1.7717866868219265
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6980042111777638,
+            "rms_resid_pairing_shell_MeV": 0.4485945349775541
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3869425638424087,
+            "rms_resid_pairing_shell_MeV": 0.5418883968153112
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 36,
+          "n_peak": 27,
+          "rms_resid_uncorrected_MeV": 3.824189158821408,
+          "rms_resid_pairing_only_MeV": 1.6717890130072464,
+          "rms_resid_pairing_shell_MeV": 0.8494046596027356
+        },
+        "gap_Sp_peak": {
+          "n_available": 49,
+          "n_peak": 32,
+          "rms_resid_uncorrected_MeV": 3.8772417079646067,
+          "rms_resid_pairing_only_MeV": 1.409508338108072,
+          "rms_resid_pairing_shell_MeV": 0.886772464802687
+        }
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 60,
+      "n_in_domain": 3001,
+      "pairing": {
+        "a_n_MeV": 5.604303040768533,
+        "a_p_MeV": 6.6947260464427165,
+        "n_samples_a_n": 2323,
+        "n_samples_a_p": 2237
+      },
+      "fit": {
+        "kN0": 0.1384143041725514,
+        "kN1": -0.30048467339883217,
+        "kZ0": 0.07985505986667028,
+        "kZ1": 0.10892757852077843,
+        "kZ_over_kN": 0.5769277990742964,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6575304401321085,
+          "rms_resid_pairing_shell_MeV": 0.5579630992124149
+        },
+        "other_magic": {
+          "n": 18,
+          "rms_resid_uncorrected_MeV": 2.7225500942531746,
+          "rms_resid_pairing_only_MeV": 1.1167962545385266,
+          "rms_resid_pairing_shell_MeV": 0.6563939682127442
+        },
+        "by_magic": {
+          "28": {
+            "n": 1,
+            "rms_resid_uncorrected_MeV": 3.652061165854491,
+            "rms_resid_pairing_only_MeV": 0.7815138010637952,
+            "rms_resid_pairing_shell_MeV": 2.319543161825038
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6608102160235079,
+            "rms_resid_pairing_shell_MeV": 0.5816522384346353
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6547140295725995,
+            "rms_resid_pairing_shell_MeV": 0.5368267480853538
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.133434289682309,
+            "rms_resid_pairing_shell_MeV": 0.3737783447870755
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5415685560942831,
+          "rms_resid_pairing_shell_MeV": 0.4967372283577419
+        },
+        "other_magic": {
+          "n": 19,
+          "rms_resid_uncorrected_MeV": 3.48042010841936,
+          "rms_resid_pairing_only_MeV": 0.718256034045033,
+          "rms_resid_pairing_shell_MeV": 1.7827112447992852
+        },
+        "by_magic": {
+          "28": {
+            "n": 19,
+            "rms_resid_uncorrected_MeV": 3.48042010841936,
+            "rms_resid_pairing_only_MeV": 0.718256034045033,
+            "rms_resid_pairing_shell_MeV": 1.7827112447992852
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6857911000520835,
+            "rms_resid_pairing_shell_MeV": 0.4484969945313197
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3778227922266606,
+            "rms_resid_pairing_shell_MeV": 0.5418289222574316
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 28,
+          "n_peak": 21,
+          "rms_resid_uncorrected_MeV": 3.756056129029044,
+          "rms_resid_pairing_only_MeV": 1.7733444927048316,
+          "rms_resid_pairing_shell_MeV": 0.5330611573356243
+        },
+        "gap_Sp_peak": {
+          "n_available": 39,
+          "n_peak": 27,
+          "rms_resid_uncorrected_MeV": 3.885774290181525,
+          "rms_resid_pairing_only_MeV": 1.5183296971697484,
+          "rms_resid_pairing_shell_MeV": 0.5871589161232056
+        }
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 80,
+      "n_in_domain": 2730,
+      "pairing": {
+        "a_n_MeV": 5.615758171076965,
+        "a_p_MeV": 6.7753574906386005,
+        "n_samples_a_n": 2134,
+        "n_samples_a_p": 2052
+      },
+      "fit": {
+        "kN0": 0.13122038977089687,
+        "kN1": -0.23175601922887998,
+        "kZ0": 0.0779817190477953,
+        "kZ1": 0.10953630295545809,
+        "kZ_over_kN": 0.5942805015588418,
+        "n_fit_pairs_kN": 48,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 48,
+          "rms_resid_uncorrected_MeV": 3.7461714328684153,
+          "rms_resid_pairing_only_MeV": 1.707546759519578,
+          "rms_resid_pairing_shell_MeV": 0.5319077105502936
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.130382666204385,
+          "rms_resid_pairing_shell_MeV": 0.35745723873608287
+        },
+        "by_magic": {
+          "50": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 4.0375683999282765,
+            "rms_resid_pairing_only_MeV": 1.783761589927259,
+            "rms_resid_pairing_shell_MeV": 0.6077840258219785
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.650954883127191,
+            "rms_resid_pairing_shell_MeV": 0.4702738776944471
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.130382666204385,
+            "rms_resid_pairing_shell_MeV": 0.35745723873608287
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.516623520351565,
+          "rms_resid_pairing_shell_MeV": 0.49657677304348696
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6575439055001449,
+            "rms_resid_pairing_shell_MeV": 0.4482980046953514
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3567434115514159,
+            "rms_resid_pairing_shell_MeV": 0.5416999026075366
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 27,
+          "n_peak": 21,
+          "rms_resid_uncorrected_MeV": 3.756056129029044,
+          "rms_resid_pairing_only_MeV": 1.7693428048340751,
+          "rms_resid_pairing_shell_MeV": 0.4777830691340238
+        },
+        "gap_Sp_peak": {
+          "n_available": 33,
+          "n_peak": 22,
+          "rms_resid_uncorrected_MeV": 3.8242732508553634,
+          "rms_resid_pairing_only_MeV": 1.5998892449114983,
+          "rms_resid_pairing_shell_MeV": 0.4466372714414324
+        }
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 100,
+      "n_in_domain": 2435,
+      "pairing": {
+        "a_n_MeV": 5.675679178740438,
+        "a_p_MeV": 6.80103425506131,
+        "n_samples_a_n": 1918,
+        "n_samples_a_p": 1840
+      },
+      "fit": {
+        "kN0": 0.11493914741891359,
+        "kN1": -0.06839212452637988,
+        "kZ0": 0.07738515934125482,
+        "kZ1": 0.10973015830490782,
+        "kZ_over_kN": 0.6732706921795112,
+        "n_fit_pairs_kN": 28,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 28,
+          "rms_resid_uncorrected_MeV": 3.523306319207567,
+          "rms_resid_pairing_only_MeV": 1.6312995005303397,
+          "rms_resid_pairing_shell_MeV": 0.3868226349760138
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.114429851868883,
+          "rms_resid_pairing_shell_MeV": 0.43052202270215084
+        },
+        "by_magic": {
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6312995005303397,
+            "rms_resid_pairing_shell_MeV": 0.3868226349760138
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.114429851868883,
+            "rms_resid_pairing_shell_MeV": 0.43052202270215084
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5086908300361601,
+          "rms_resid_pairing_shell_MeV": 0.49656006969274163
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6485589240002898,
+            "rms_resid_pairing_shell_MeV": 0.44829313950937216
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.350042377346907,
+            "rms_resid_pairing_shell_MeV": 0.5416729997813854
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro": true,
+        "spectro_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_e2plus": {
+        "source": "NNDC B(E2) adopted entries (transitionEnergy as E(2+1) proxy)",
+        "rule_peak": {
+          "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+          "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+        },
+        "gap_Sn_peak": {
+          "n_available": 18,
+          "n_peak": 14,
+          "rms_resid_uncorrected_MeV": 3.529462071988887,
+          "rms_resid_pairing_only_MeV": 1.7246387138868764,
+          "rms_resid_pairing_shell_MeV": 0.4077456665435662
+        },
+        "gap_Sp_peak": {
+          "n_available": 33,
+          "n_peak": 22,
+          "rms_resid_uncorrected_MeV": 3.8242732508553634,
+          "rms_resid_pairing_only_MeV": 1.5916596176788516,
+          "rms_resid_pairing_shell_MeV": 0.4460174462557353
+        }
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    }
+  ],
+  "inputs": {
+    "ame2020_extracted": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_amdc_ame2020_mass_1_mas20\\extracted_values.json",
+      "sha256": "612448cecf66277b94672a3f389b6d71ebf5fe24861b5fce6cbb7555f6990565"
+    },
+    "iaea_charge_radii_csv": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_charge_radii\\charge_radii.csv",
+      "sha256": "683d028dae93235376ddf7a345f736561ee7c0dba070091912c034bdf740eee6"
+    },
+    "nndc_be2_adopted_entries_json": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\adopted-entries.json",
+      "sha256": "a3f45fcf38f40b6ca3a7ebe03d9a468cc748d3480f3576bb4972ced76c703688"
+    },
+    "nndc_be2_manifest": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\manifest.json",
+      "sha256": "83de2488133f677e98dde23dca3cde52ab72c19a18c6e5eb0bb293c670b28ffc"
+    },
+    "nndc_be2_extracted_beta2": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\extracted_beta2.json",
+      "sha256": "19b04d93f0cfe2607b5e3e3c5f02b27fe2e8fa10d59d659a5f1a098eba630882"
+    },
+    "nndc_be2_extracted_e2plus": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\extracted_e2plus.json",
+      "sha256": "ddc2f7a8bcd9c0fa4e43f79efa43da56a37fd2031be83f600bd11ba4cdd86dce"
+    },
+    "metrics_7_13_15": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json",
+      "sha256": "a7bd0b9a3403cd20f9e11caf08ee4668e2f73accbfa6db8cec5b8ea968ab0df9"
+    },
+    "metrics_7_13_15_7": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_surface_term_metrics.json",
+      "sha256": "76a872d4fd4763d103fc5918aeacb67b0d11c77e375b7bc120b16a0535ac296a"
+    },
+    "metrics_7_13_15_23": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json",
+      "sha256": "7e5c8924bc11fd7703cf378351185f2d9ec536249748d00642774fd514bfb3d6"
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus.csv",
+    "e2plus_png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_e2plus_diagnostics_expanded_shell_i_dep_beta2_surface_cov_e2plus.png"
+  }
+}

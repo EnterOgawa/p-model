@@ -1,0 +1,476 @@
+{
+  "generated_utc": "2026-02-11T02:47:07.773706+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.16.10",
+    "name": "Bell: selection loophole full quantification (fair/detection/locality/freedom-of-choice)"
+  },
+  "main_script": {
+    "path": "scripts/quantum/bell_primary_products.py",
+    "repro": "python -B scripts/quantum/bell_primary_products.py"
+  },
+  "definitions": {
+    "fair_sampling": "selection_ratio = Δ(stat) / σ_stat(median) from sweep summary; closure proxy if <= threshold.",
+    "detection": "eta_min = min(eta_alice, eta_bob) from trial-based counts; closure proxy if >= 2/3 (operational).",
+    "locality": "delay setting-dependence z = |Δmedian|/σ(Δmedian); closure proxy if <= threshold.",
+    "freedom_of_choice": "setting bias max abs from uniform setting distribution; closure proxy if <= threshold.",
+    "note": "All thresholds are operational for this repository; they are not universal loophole-closure criteria."
+  },
+  "thresholds": {
+    "fair_sampling_ratio_max": 1.0,
+    "detection_eta_min_min": 0.6666666666666666,
+    "locality_delay_z_max": 3.0,
+    "freedom_setting_bias_max_abs": 0.05
+  },
+  "datasets": [
+    {
+      "dataset_id": "weihs1998_longdist_longdist1",
+      "display_name": "Weihs 1998",
+      "statistic_family": "CHSH",
+      "fair_sampling": {
+        "supported": true,
+        "metric_name": "selection_ratio",
+        "value": 19.316744077961687,
+        "threshold": 1.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.ratio"
+      },
+      "detection": {
+        "supported": false,
+        "metric_name": "eta_min",
+        "value": null,
+        "threshold": 0.6666666666666666,
+        "pass": null,
+        "direction": "higher_or_equal_is_closure",
+        "source": "trial_based_counts.json not found (no direct denominator for detection efficiency)",
+        "details": {
+          "supported": false,
+          "reason": "trial_based_counts.json not found (no direct denominator for detection efficiency)"
+        }
+      },
+      "locality": {
+        "supported": true,
+        "metric_name": "delay_setting_dependence_z",
+        "value": 5.53541064134177,
+        "threshold": 3.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.delay_signature"
+      },
+      "freedom_of_choice": {
+        "supported": true,
+        "metric_name": "setting_bias_max_abs",
+        "value": 0.01724613510887052,
+        "threshold": 0.05,
+        "pass": true,
+        "direction": "lower_or_equal_is_closure",
+        "source": "time_tag_setting_bit_parity",
+        "details": {
+          "supported": true,
+          "method": "time_tag_setting_bit_parity",
+          "max_abs_bias": 0.01724613510887052,
+          "alice_setting_counts": [
+            227519,
+            243775
+          ],
+          "bob_setting_counts": [
+            156250,
+            158015
+          ],
+          "alice_p1": 0.5172461351088705,
+          "bob_p1": 0.5028081396273846,
+          "alice_abs_bias_from_half": 0.01724613510887052,
+          "bob_abs_bias_from_half": 0.002808139627384576,
+          "marginal_balance_score": 0.965507729782259
+        }
+      },
+      "overall": {
+        "supported": true,
+        "all_pass": false,
+        "supported_item_n": 3
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2015",
+      "display_name": "Delft (Hensen 2015)",
+      "statistic_family": "CHSH",
+      "fair_sampling": {
+        "supported": true,
+        "metric_name": "selection_ratio",
+        "value": 3.6508938846257903,
+        "threshold": 1.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.ratio"
+      },
+      "detection": {
+        "supported": false,
+        "metric_name": "eta_min",
+        "value": null,
+        "threshold": 0.6666666666666666,
+        "pass": null,
+        "direction": "higher_or_equal_is_closure",
+        "source": "trial_based_counts.json not found (no direct denominator for detection efficiency)",
+        "details": {
+          "supported": false,
+          "reason": "trial_based_counts.json not found (no direct denominator for detection efficiency)"
+        }
+      },
+      "locality": {
+        "supported": false,
+        "metric_name": "delay_setting_dependence_z",
+        "value": null,
+        "threshold": 3.0,
+        "pass": null,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.delay_signature"
+      },
+      "freedom_of_choice": {
+        "supported": true,
+        "metric_name": "setting_bias_max_abs",
+        "value": 0.006953223767383054,
+        "threshold": 0.05,
+        "pass": true,
+        "direction": "lower_or_equal_is_closure",
+        "source": "event_ready_marginal_preview",
+        "details": {
+          "supported": true,
+          "method": "event_ready_marginal_preview",
+          "max_abs_bias": 0.006953223767383054,
+          "alice_setting_counts": [
+            2340,
+            2406
+          ],
+          "bob_setting_counts": [
+            2345,
+            2401
+          ],
+          "alice_p1": 0.506953223767383,
+          "bob_p1": 0.5058997050147492,
+          "alice_abs_bias_from_half": 0.006953223767383054,
+          "bob_abs_bias_from_half": 0.005899705014749235,
+          "marginal_balance_score": 0.9860935524652339
+        }
+      },
+      "overall": {
+        "supported": true,
+        "all_pass": false,
+        "supported_item_n": 2
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2016_srep30289",
+      "display_name": "Delft (Hensen 2016)",
+      "statistic_family": "CHSH",
+      "fair_sampling": {
+        "supported": true,
+        "metric_name": "selection_ratio",
+        "value": 7.599442954268822,
+        "threshold": 1.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.ratio"
+      },
+      "detection": {
+        "supported": false,
+        "metric_name": "eta_min",
+        "value": null,
+        "threshold": 0.6666666666666666,
+        "pass": null,
+        "direction": "higher_or_equal_is_closure",
+        "source": "trial_based_counts.json not found (no direct denominator for detection efficiency)",
+        "details": {
+          "supported": false,
+          "reason": "trial_based_counts.json not found (no direct denominator for detection efficiency)"
+        }
+      },
+      "locality": {
+        "supported": false,
+        "metric_name": "delay_setting_dependence_z",
+        "value": null,
+        "threshold": 3.0,
+        "pass": null,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.delay_signature"
+      },
+      "freedom_of_choice": {
+        "supported": true,
+        "metric_name": "setting_bias_max_abs",
+        "value": 0.011740684022460424,
+        "threshold": 0.05,
+        "pass": true,
+        "direction": "lower_or_equal_is_closure",
+        "source": "event_ready_marginal_preview",
+        "details": {
+          "supported": true,
+          "method": "event_ready_marginal_preview",
+          "max_abs_bias": 0.011740684022460424,
+          "alice_setting_counts": [
+            1980,
+            1938
+          ],
+          "bob_setting_counts": [
+            2005,
+            1913
+          ],
+          "alice_p1": 0.4946401225114854,
+          "bob_p1": 0.4882593159775396,
+          "alice_abs_bias_from_half": 0.005359877488514575,
+          "bob_abs_bias_from_half": 0.011740684022460424,
+          "marginal_balance_score": 0.9765186319550792
+        }
+      },
+      "overall": {
+        "supported": true,
+        "all_pass": false,
+        "supported_item_n": 2
+      }
+    },
+    {
+      "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+      "display_name": "NIST",
+      "statistic_family": "CH",
+      "fair_sampling": {
+        "supported": true,
+        "metric_name": "selection_ratio",
+        "value": 654.1026883136847,
+        "threshold": 1.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.ratio"
+      },
+      "detection": {
+        "supported": true,
+        "metric_name": "eta_min",
+        "value": 0.001417697704265023,
+        "threshold": 0.6666666666666666,
+        "pass": false,
+        "direction": "higher_or_equal_is_closure",
+        "source": "trial_based_counts",
+        "details": {
+          "supported": true,
+          "method": "trial_based_counts",
+          "trials_total": 107109576,
+          "coinc_total": 38158,
+          "eta_alice": 0.001417697704265023,
+          "eta_bob": 0.0015095755770707187,
+          "eta_min": 0.001417697704265023,
+          "eta_pair": 0.00035625199375264075
+        }
+      },
+      "locality": {
+        "supported": true,
+        "metric_name": "delay_setting_dependence_z",
+        "value": 43.90965148631052,
+        "threshold": 3.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.delay_signature"
+      },
+      "freedom_of_choice": {
+        "supported": true,
+        "metric_name": "setting_bias_max_abs",
+        "value": 0.00010999950181861395,
+        "threshold": 0.05,
+        "pass": true,
+        "direction": "lower_or_equal_is_closure",
+        "source": "trial_pair_uniformity",
+        "details": {
+          "supported": true,
+          "method": "trial_pair_uniformity",
+          "max_abs_bias": 0.00010999950181861395,
+          "pair_trials_total": 107109576,
+          "pair_trials": [
+            [
+              26789176,
+              26775138
+            ],
+            [
+              26768990,
+              26776272
+            ]
+          ],
+          "pair_probabilities": [
+            [
+              0.2501099995018186,
+              0.2499789374574688
+            ],
+            [
+              0.2499215382945779,
+              0.24998952474613476
+            ]
+          ],
+          "pair_max_abs_bias_from_uniform": 0.00010999950181861395,
+          "pair_balance_score": 0.9995600019927255,
+          "marginal": {
+            "alice_setting_counts": [
+              53564314,
+              53545262
+            ],
+            "bob_setting_counts": [
+              53558166,
+              53551410
+            ],
+            "alice_p1": 0.49991106304071264,
+            "bob_p1": 0.4999684622036035,
+            "alice_abs_bias_from_half": 8.893695928735568e-05,
+            "bob_abs_bias_from_half": 3.153779639647469e-05,
+            "max_abs_bias": 8.893695928735568e-05,
+            "marginal_balance_score": 0.9998221260814253
+          }
+        }
+      },
+      "overall": {
+        "supported": true,
+        "all_pass": false,
+        "supported_item_n": 4
+      }
+    },
+    {
+      "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+      "display_name": "Kwiat/Christensen 2013",
+      "statistic_family": "CH",
+      "fair_sampling": {
+        "supported": true,
+        "metric_name": "selection_ratio",
+        "value": 5.822553917580089,
+        "threshold": 1.0,
+        "pass": false,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.ratio"
+      },
+      "detection": {
+        "supported": true,
+        "metric_name": "eta_min",
+        "value": 0.0020172192932026243,
+        "threshold": 0.6666666666666666,
+        "pass": false,
+        "direction": "higher_or_equal_is_closure",
+        "source": "trial_based_counts",
+        "details": {
+          "supported": true,
+          "method": "trial_based_counts",
+          "trials_total": 7500424,
+          "coinc_total": 3793,
+          "eta_alice": 0.0020172192932026243,
+          "eta_bob": 0.002074149408086796,
+          "eta_min": 0.0020172192932026243,
+          "eta_pair": 0.0005057047441584635
+        }
+      },
+      "locality": {
+        "supported": true,
+        "metric_name": "delay_setting_dependence_z",
+        "value": 0.7214698844113343,
+        "threshold": 3.0,
+        "pass": true,
+        "direction": "lower_or_equal_is_closure",
+        "source": "falsification_pack.delay_signature"
+      },
+      "freedom_of_choice": {
+        "supported": true,
+        "metric_name": "setting_bias_max_abs",
+        "value": 0.020004335754885305,
+        "threshold": 0.05,
+        "pass": true,
+        "direction": "lower_or_equal_is_closure",
+        "source": "trial_pair_uniformity",
+        "details": {
+          "supported": true,
+          "method": "trial_pair_uniformity",
+          "max_abs_bias": 0.020004335754885305,
+          "pair_trials_total": 7500424,
+          "pair_trials": [
+            [
+              1950096,
+              1775071
+            ],
+            [
+              2025147,
+              1750110
+            ]
+          ],
+          "pair_probabilities": [
+            [
+              0.2599981014406652,
+              0.23666275399897393
+            ],
+            [
+              0.2700043357548853,
+              0.23333480880547552
+            ]
+          ],
+          "pair_max_abs_bias_from_uniform": 0.020004335754885305,
+          "pair_balance_score": 0.9199826569804588,
+          "marginal": {
+            "alice_setting_counts": [
+              3725167,
+              3775257
+            ],
+            "bob_setting_counts": [
+              3975243,
+              3525181
+            ],
+            "alice_p1": 0.5033391445603609,
+            "bob_p1": 0.46999756280444943,
+            "alice_abs_bias_from_half": 0.003339144560360885,
+            "bob_abs_bias_from_half": 0.03000243719555057,
+            "max_abs_bias": 0.03000243719555057,
+            "marginal_balance_score": 0.9399951256088989
+          }
+        }
+      },
+      "overall": {
+        "supported": true,
+        "all_pass": false,
+        "supported_item_n": 4
+      }
+    }
+  ],
+  "summary": {
+    "fair_sampling": {
+      "n_supported": 5,
+      "n_pass": 0,
+      "n_fail": 5,
+      "median_value": 7.599442954268822,
+      "max_value": 654.1026883136847,
+      "min_value": 3.6508938846257903
+    },
+    "detection": {
+      "n_supported": 2,
+      "n_pass": 0,
+      "n_fail": 2,
+      "median_value": 0.0017174584987338236,
+      "max_value": 0.0020172192932026243,
+      "min_value": 0.001417697704265023
+    },
+    "locality": {
+      "n_supported": 3,
+      "n_pass": 1,
+      "n_fail": 2,
+      "median_value": 5.53541064134177,
+      "max_value": 43.90965148631052,
+      "min_value": 0.7214698844113343
+    },
+    "freedom_of_choice": {
+      "n_supported": 5,
+      "n_pass": 5,
+      "n_fail": 0,
+      "median_value": 0.011740684022460424,
+      "max_value": 0.020004335754885305,
+      "min_value": 0.00010999950181861395
+    },
+    "overall": {
+      "n_datasets": 5,
+      "n_all_supported": 5,
+      "n_all_pass": 0
+    }
+  },
+  "outputs": {
+    "json": "output/quantum/bell/selection_loophole_quantification.json",
+    "csv": "output/quantum/bell/selection_loophole_quantification.csv",
+    "png": "output/quantum/bell/selection_loophole_quantification.png"
+  },
+  "plot_written": true
+}

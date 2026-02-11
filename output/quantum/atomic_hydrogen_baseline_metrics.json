@@ -1,0 +1,203 @@
+{
+  "generated_utc": "2026-01-26T02:25:21.785632+00:00",
+  "phase": 7,
+  "step": "7.12",
+  "title": "Atomic baseline (Hydrogen; NIST ASD)",
+  "source_cache": {
+    "extracted_values": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_asd_h_i_lines\\extracted_values.json",
+    "raw_tsv": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_asd_h_i_lines\\nist_asd_lines__h_i__format3__obs_ritz_unc.tsv"
+  },
+  "parameters": {
+    "multiplet_window_A": 0.5,
+    "multiplet_filter": "obs_nu present + Type empty (E1) + Aki present"
+  },
+  "lines": [
+    {
+      "id": "H_I_Lyα",
+      "lambda_vac_nm": 121.5669936859319,
+      "lambda_vac_unc_nm": 0.00020689947535369575,
+      "frequency_THz": 2466.067876733986,
+      "photon_energy_eV": 10.198837256230355,
+      "Aki_s^-1": 626480000.0,
+      "Acc": "AAA",
+      "Type": null
+    },
+    {
+      "id": "H_I_Hγ",
+      "lambda_vac_nm": 434.169297370801,
+      "lambda_vac_unc_nm": 0.0005655089363383651,
+      "frequency_THz": 690.4966790960419,
+      "photon_energy_eV": 2.8556648105707003,
+      "Aki_s^-1": 2530400.0,
+      "Acc": "AAA",
+      "Type": null
+    },
+    {
+      "id": "H_I_Hβ",
+      "lambda_vac_nm": 486.2655703779954,
+      "lambda_vac_unc_nm": 1.1822710246751857e-08,
+      "frequency_THz": 616.5200175841326,
+      "photon_energy_eV": 2.5497219212296267,
+      "Aki_s^-1": 9668200.0,
+      "Acc": "AAA",
+      "Type": null
+    },
+    {
+      "id": "H_I_Hα",
+      "lambda_vac_nm": 656.466464051925,
+      "lambda_vac_unc_nm": 6.033275057947723e-06,
+      "frequency_THz": 456.6759681059459,
+      "photon_energy_eV": 1.888660049257191,
+      "Aki_s^-1": 64651000.0,
+      "Acc": "AAA",
+      "Type": null
+    }
+  ],
+  "multiplets": [
+    {
+      "id": "H_I_Lyα",
+      "center_approx_nm": 121.56700000000001,
+      "window_A": 0.5,
+      "filter": "obs_nu present + Type empty (E1) + Aki present",
+      "n_components": 3,
+      "lambda_min_nm": 121.5669936859319,
+      "lambda_max_nm": 121.56700846446768,
+      "delta_lambda_pm": 0.014778535771142742,
+      "components": [
+        {
+          "lambda_vac_nm": 121.5669936859319,
+          "lambda_vac_A": 1215.669936859319,
+          "nu_obs_invA": -0.0008225917,
+          "Aki_s^-1": 626470000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 121.5669936859319,
+          "lambda_vac_A": 1215.669936859319,
+          "nu_obs_invA": -0.0008225917,
+          "Aki_s^-1": 626480000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 121.56700846446768,
+          "lambda_vac_A": 1215.6700846446768,
+          "nu_obs_invA": -0.0008225916,
+          "Aki_s^-1": 469860000.0,
+          "Acc": "AAA",
+          "Type": null
+        }
+      ]
+    },
+    {
+      "id": "H_I_Hα",
+      "center_approx_nm": 656.461,
+      "window_A": 0.5,
+      "filter": "obs_nu present + Type empty (E1) + Aki present",
+      "n_components": 5,
+      "lambda_min_nm": 656.4522551779122,
+      "lambda_max_nm": 656.466464051925,
+      "delta_lambda_pm": 14.208874012751949,
+      "components": [
+        {
+          "lambda_vac_nm": 656.4522551779122,
+          "lambda_vac_A": 6564.522551779122,
+          "nu_obs_invA": -0.00015233400329,
+          "Aki_s^-1": 53877000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 656.453768390562,
+          "lambda_vac_A": 6564.53768390562,
+          "nu_obs_invA": -0.00015233365214,
+          "Aki_s^-1": 22448000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 656.4584403682119,
+          "lambda_vac_A": 6564.584403682119,
+          "nu_obs_invA": -0.00015233256799,
+          "Aki_s^-1": 22449000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 656.4604571196746,
+          "lambda_vac_A": 6564.604571196746,
+          "nu_obs_invA": -0.0001523321,
+          "Aki_s^-1": 44101000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 656.466464051925,
+          "lambda_vac_A": 6564.66464051925,
+          "nu_obs_invA": -0.0001523307061,
+          "Aki_s^-1": 64651000.0,
+          "Acc": "AAA",
+          "Type": null
+        }
+      ]
+    },
+    {
+      "id": "H_I_Hβ",
+      "center_approx_nm": 486.26800000000003,
+      "window_A": 0.5,
+      "filter": "obs_nu present + Type empty (E1) + Aki present",
+      "n_components": 3,
+      "lambda_min_nm": 486.26448895236507,
+      "lambda_max_nm": 486.27016197659094,
+      "delta_lambda_pm": 5.673024225870904,
+      "components": [
+        {
+          "lambda_vac_nm": 486.26448895236507,
+          "lambda_vac_A": 4862.644889523651,
+          "nu_obs_invA": -0.000205649399189,
+          "Aki_s^-1": 9668000.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 486.2655703779954,
+          "lambda_vac_A": 4862.655703779954,
+          "nu_obs_invA": -0.000205648941837,
+          "Aki_s^-1": 9668200.0,
+          "Acc": "AAA",
+          "Type": null
+        },
+        {
+          "lambda_vac_nm": 486.27016197659094,
+          "lambda_vac_A": 4862.7016197659095,
+          "nu_obs_invA": -0.000205647,
+          "Aki_s^-1": 8419300.0,
+          "Acc": "AAA",
+          "Type": null
+        }
+      ]
+    },
+    {
+      "id": "H_I_Hγ",
+      "center_approx_nm": 434.169,
+      "window_A": 0.5,
+      "filter": "obs_nu present + Type empty (E1) + Aki present",
+      "n_components": 1,
+      "lambda_min_nm": 434.169297370801,
+      "lambda_max_nm": 434.169297370801,
+      "delta_lambda_pm": 0.0,
+      "components": [
+        {
+          "lambda_vac_nm": 434.169297370801,
+          "lambda_vac_A": 4341.69297370801,
+          "nu_obs_invA": -0.0002303249,
+          "Aki_s^-1": 2530400.0,
+          "Acc": "AAA",
+          "Type": null
+        }
+      ]
+    }
+  ],
+  "note": "This output fixes a small set of observed vacuum wavelengths as a reproducible baseline. P-model derivation of atomic/molecular binding is tracked in Roadmap Step 7.12+."
+}

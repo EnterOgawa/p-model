@@ -1,0 +1,38 @@
+{
+  "generated_utc": "2026-02-11T02:47:09.922651+00:00",
+  "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+  "supported": true,
+  "baseline": {
+    "param_name": "window_ns",
+    "value": 2812.5,
+    "statistic_name": "CH J_prob (A1=0,B1=0)",
+    "statistic": -8.12025607476813e-05,
+    "sigma_boot": 3.9378181489705475e-05,
+    "delay_signature_z_max": 0.7214698844113343
+  },
+  "tests": [
+    {
+      "id": "shuffle_settings",
+      "supported": true,
+      "method": {
+        "name": "shuffle_delay_samples_labels",
+        "seed_a": 1953446677,
+        "seed_b": 4274747752,
+        "note": "Shuffle setting labels for ref-window delay samples (dt from trigger) and recompute Δmedian z."
+      },
+      "result": {
+        "delay_signature_z_max": 0.4914285880700692
+      }
+    }
+  ],
+  "inputs": {
+    "natural_window_frozen_json": {
+      "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/natural_window_frozen.json",
+      "sha256": "06b509151ba89fba578b499ead86cde941c7f9ad4ba1346aaef89a42937cd8c1"
+    },
+    "delay_signature_ref_samples_npz": {
+      "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/delay_signature_ref_samples.npz",
+      "sha256": "ffa3055c5d885918017c516735092c1f533d52ce455f5a3e85a41106fef6e118"
+    }
+  }
+}

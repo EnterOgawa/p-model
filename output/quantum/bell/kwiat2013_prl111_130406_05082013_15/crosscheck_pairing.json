@@ -1,0 +1,69 @@
+{
+  "generated_utc": "2026-02-11T02:47:11.469789+00:00",
+  "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+  "supported": true,
+  "baseline": {
+    "param_name": "window_ns",
+    "value": 2812.5,
+    "statistic_name": "CH J_prob (A1=0,B1=0)",
+    "statistic": -8.12025607476813e-05,
+    "sigma_boot": 3.9378181489705475e-05
+  },
+  "methods": [
+    {
+      "id": "trial_based_counts_ref_window",
+      "pairing": "trial-based hit counting at ref window (as parsed from raw .mat)",
+      "window_ns": 2812.5,
+      "statistic_name": "CH J_prob (A1=0,B1=0)",
+      "statistic": -8.12025607476813e-05,
+      "pairs_total": 3793,
+      "coinc_by_setting_pair": [
+        [
+          1122,
+          1221
+        ],
+        [
+          1365,
+          85
+        ]
+      ]
+    },
+    {
+      "id": "window_sweep_row_frozen_window",
+      "pairing": "window sweep row at frozen window (consistency check)",
+      "window_ns": 2812.5,
+      "statistic_name": "CH J_prob (A1=0,B1=0)",
+      "statistic": -8.12025607476813e-05,
+      "pairs_total": 3793,
+      "coinc_by_setting_pair": [
+        [
+          1122,
+          1221
+        ],
+        [
+          1365,
+          85
+        ]
+      ]
+    }
+  ],
+  "inputs": {
+    "natural_window_frozen_json": {
+      "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/natural_window_frozen.json",
+      "sha256": "06b509151ba89fba578b499ead86cde941c7f9ad4ba1346aaef89a42937cd8c1"
+    },
+    "trial_based_counts_json": {
+      "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/trial_based_counts.json",
+      "sha256": "9322f8bb8dc459dbc1005cc87d3f6eb426a1175ef4ef707597f2228621ad61c0"
+    },
+    "window_sweep_metrics_json": {
+      "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/window_sweep_metrics.json",
+      "sha256": "17069eb825cbd2dfece381f3d45226a2f694003e26c115ea71614506349ee1ab"
+    }
+  },
+  "delta": {
+    "abs_delta_statistic": 0.0,
+    "delta_over_sigma_boot": 0.0,
+    "note": "Internal consistency check for trial-based CH J_prob at the frozen window (not a coincidence-pairing convention)."
+  }
+}

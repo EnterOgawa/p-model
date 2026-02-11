@@ -1,0 +1,109 @@
+{
+  "generated_utc": "2026-01-26T08:00:25.630398+00:00",
+  "step": "Phase 7 / Step 7.13.2 (QCD↔nuclear range bridge)",
+  "pion_range_scale": {
+    "lambda_pi_pm_fm": 1.413816930654131,
+    "lambda_pi0_fm": 1.461932572116097,
+    "lambda_pi_avg_fm": 1.437874751385114,
+    "notes": [
+      "λπ = ħc/(mπ c^2) from PDG RPP 2024 masses (via cached PDG mcdata file).",
+      "This is used as an operational range scale to constrain/interpret nuclear u(r) ansatz geometry."
+    ]
+  },
+  "inputs": {
+    "hadron_baseline_metrics": "C:\\develop\\waveP\\output\\quantum\\qcd_hadron_masses_baseline_metrics.json",
+    "nuclear_metrics": [
+      "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_two_range_metrics.json",
+      "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_two_range_fit_as_rs_metrics.json",
+      "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_repulsive_core_two_range_metrics.json"
+    ]
+  },
+  "observed_envelope_proxy": {
+    "v2s_min_fm3": -0.48,
+    "v2s_max_fm3": -0.005
+  },
+  "points": [
+    {
+      "step": "7.9.6",
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "R1_fm": 0.7308,
+      "R2_fm": 2.35,
+      "Rc_fm": null,
+      "R1_over_lambda_pi_pm": 0.5168986055796351,
+      "R2_over_lambda_pi_pm": 1.6621671088015086,
+      "Rc_over_lambda_pi_pm": null,
+      "v2s_obs_fm3": -0.005,
+      "v2s_pred_fm3": 0.1519818826496141
+    },
+    {
+      "step": "7.9.6",
+      "label": "eq19 (Nijmegen)",
+      "eq_label": 19,
+      "R1_fm": 0.487776,
+      "R2_fm": 2.746112,
+      "Rc_fm": null,
+      "R1_over_lambda_pi_pm": 0.3450064781543679,
+      "R2_over_lambda_pi_pm": 1.9423391674404802,
+      "Rc_over_lambda_pi_pm": null,
+      "v2s_obs_fm3": -0.48,
+      "v2s_pred_fm3": -0.07065029856055403
+    },
+    {
+      "step": "7.9.7",
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "R1_fm": 0.7308,
+      "R2_fm": 2.35,
+      "Rc_fm": null,
+      "R1_over_lambda_pi_pm": 0.5168986055796351,
+      "R2_over_lambda_pi_pm": 1.6621671088015086,
+      "Rc_over_lambda_pi_pm": null,
+      "v2s_obs_fm3": -0.005,
+      "v2s_pred_fm3": 1.1243870402352645
+    },
+    {
+      "step": "7.9.7",
+      "label": "eq19 (Nijmegen)",
+      "eq_label": 19,
+      "R1_fm": 0.487776,
+      "R2_fm": 2.746112,
+      "Rc_fm": null,
+      "R1_over_lambda_pi_pm": 0.3450064781543679,
+      "R2_over_lambda_pi_pm": 1.9423391674404802,
+      "Rc_over_lambda_pi_pm": null,
+      "v2s_obs_fm3": -0.48,
+      "v2s_pred_fm3": 0.5193230865955244
+    },
+    {
+      "step": "7.9.8",
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "R1_fm": 0.7308,
+      "R2_fm": 2.35,
+      "Rc_fm": 0.5313111111111111,
+      "R1_over_lambda_pi_pm": 0.5168986055796351,
+      "R2_over_lambda_pi_pm": 1.6621671088015086,
+      "Rc_over_lambda_pi_pm": 0.3757990865658181,
+      "v2s_obs_fm3": -0.005,
+      "v2s_pred_fm3": 1.1908189372139237
+    },
+    {
+      "step": "7.9.8",
+      "label": "eq19 (Nijmegen)",
+      "eq_label": 19,
+      "R1_fm": 0.487776,
+      "R2_fm": 2.746112,
+      "Rc_fm": 0.27384355555555573,
+      "R1_over_lambda_pi_pm": 0.3450064781543679,
+      "R2_over_lambda_pi_pm": 1.9423391674404802,
+      "Rc_over_lambda_pi_pm": 0.19369095787306526,
+      "v2s_obs_fm3": -0.48,
+      "v2s_pred_fm3": 0.520135760240394
+    }
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\qcd_nuclear_range_bridge.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\qcd_nuclear_range_bridge.csv"
+  }
+}

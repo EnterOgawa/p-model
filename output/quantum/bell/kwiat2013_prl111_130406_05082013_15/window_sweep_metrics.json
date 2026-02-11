@@ -1,0 +1,451 @@
+{
+  "generated_utc": "2026-02-10T04:40:02.881050+00:00",
+  "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+  "statistic": {
+    "name": "CH J_prob (A1=0,B1=0)",
+    "local_bound": 0.0
+  },
+  "trial_based": {
+    "J_prob": -8.12025607476813e-05,
+    "J_sigma_boot": 3.977197653037473e-05,
+    "a1": 0,
+    "b1": 0,
+    "ref_window_bins": 18000,
+    "ref_window_ns": 2812.5
+  },
+  "time_tag_delay_ks": {
+    "alice": 0.013739762972891811,
+    "bob": 0.015404940424415883
+  },
+  "delay_signature": {
+    "method": {
+      "name": "delta_median",
+      "epsilon": 0.1,
+      "definition": "dt = min(click_t - trigger_t) per trial (ns) at ref window; compare by local setting."
+    },
+    "Alice": {
+      "unit": "ns",
+      "epsilon": 0.1,
+      "n0": 3586,
+      "n1": 11544,
+      "setting0_median_ns": 2237.578125,
+      "setting1_median_ns": 2229.53125,
+      "delta_median_0_minus_1_ns": 8.046875,
+      "q0_midwidth_ns": {
+        "setting0": [
+          2117.9687500000005,
+          2351.40625
+        ],
+        "setting1": [
+          2113.75,
+          2346.875
+        ]
+      },
+      "sigma_median_ns": {
+        "setting0": 9.745530602011415,
+        "setting1": 5.424387403547414
+      },
+      "sigma_delta_median_ns": 11.153445450554948,
+      "z_delta_median": 0.7214698844113343
+    },
+    "Bob": {
+      "unit": "ns",
+      "epsilon": 0.1,
+      "n0": 4004,
+      "n1": 11553,
+      "setting0_median_ns": 2182.421875,
+      "setting1_median_ns": 2177.03125,
+      "delta_median_0_minus_1_ns": 5.390625,
+      "q0_midwidth_ns": {
+        "setting0": [
+          2056.125,
+          2309.4375
+        ],
+        "setting1": [
+          2045.46875,
+          2305.78125
+        ]
+      },
+      "sigma_median_ns": {
+        "setting0": 10.008052971288395,
+        "setting1": 6.054630510885862
+      },
+      "sigma_delta_median_ns": 11.696994267736669,
+      "z_delta_median": 0.4608555733731302
+    }
+  },
+  "config": {
+    "dataset_folder": "05082013_15 t753 a252ap38",
+    "zip": "C:\\develop\\waveP\\data\\quantum\\sources\\kwiat2013_prl111_130406\\CH_Bell_Data.zip",
+    "include_hidden_midpoint_trigger": true,
+    "timebins_per_second": 6400000000.0,
+    "recommended_window_bins": 18000,
+    "windows_bins": [
+      2000,
+      4000,
+      6000,
+      8000,
+      10000,
+      12000,
+      12800,
+      15000,
+      18000,
+      22000,
+      30000,
+      40000,
+      50000
+    ],
+    "windows_ns": [
+      312.5,
+      625.0,
+      937.5,
+      1250.0,
+      1562.5,
+      1875.0,
+      2000.0,
+      2343.75,
+      2812.5,
+      3437.5,
+      4687.5,
+      6250.0,
+      7812.5
+    ],
+    "bootstrap": {
+      "method": "parametric (binomial trials)",
+      "n_boot": 2000,
+      "seed_base": 900
+    }
+  },
+  "rows": [
+    {
+      "window_ns": 312.5,
+      "window_bins": 2000,
+      "pairs_total": 3,
+      "J_prob": -2.877514281541989e-06,
+      "J_sigma_boot": 1.3876654481911934e-06,
+      "click_a_by_setting": [
+        9,
+        60
+      ],
+      "click_b_by_setting": [
+        8,
+        82
+      ],
+      "coinc_by_setting_pair": [
+        [
+          0,
+          1
+        ],
+        [
+          2,
+          0
+        ]
+      ]
+    },
+    {
+      "window_ns": 625.0,
+      "window_bins": 4000,
+      "pairs_total": 15,
+      "J_prob": -1.2194371132133257e-05,
+      "J_sigma_boot": 2.852038960057329e-06,
+      "click_a_by_setting": [
+        28,
+        157
+      ],
+      "click_b_by_setting": [
+        28,
+        153
+      ],
+      "coinc_by_setting_pair": [
+        [
+          4,
+          3
+        ],
+        [
+          3,
+          5
+        ]
+      ]
+    },
+    {
+      "window_ns": 937.5,
+      "window_bins": 6000,
+      "pairs_total": 35,
+      "J_prob": -1.6949080928653505e-05,
+      "J_sigma_boot": 4.120421082225402e-06,
+      "click_a_by_setting": [
+        55,
+        247
+      ],
+      "click_b_by_setting": [
+        43,
+        212
+      ],
+      "coinc_by_setting_pair": [
+        [
+          9,
+          11
+        ],
+        [
+          6,
+          9
+        ]
+      ]
+    },
+    {
+      "window_ns": 1250.0,
+      "window_bins": 8000,
+      "pairs_total": 39,
+      "J_prob": -2.0395871304940284e-05,
+      "J_sigma_boot": 4.405638806606737e-06,
+      "click_a_by_setting": [
+        65,
+        302
+      ],
+      "click_b_by_setting": [
+        50,
+        255
+      ],
+      "coinc_by_setting_pair": [
+        [
+          10,
+          12
+        ],
+        [
+          7,
+          10
+        ]
+      ]
+    },
+    {
+      "window_ns": 1562.5,
+      "window_bins": 10000,
+      "pairs_total": 45,
+      "J_prob": -3.07860276467794e-05,
+      "J_sigma_boot": 4.722544968112007e-06,
+      "click_a_by_setting": [
+        77,
+        351
+      ],
+      "click_b_by_setting": [
+        78,
+        351
+      ],
+      "coinc_by_setting_pair": [
+        [
+          12,
+          13
+        ],
+        [
+          7,
+          13
+        ]
+      ]
+    },
+    {
+      "window_ns": 1875.0,
+      "window_bins": 12000,
+      "pairs_total": 657,
+      "J_prob": -0.00012583070389100495,
+      "J_sigma_boot": 1.725718735462593e-05,
+      "click_a_by_setting": [
+        662,
+        2270
+      ],
+      "click_b_by_setting": [
+        1045,
+        3100
+      ],
+      "coinc_by_setting_pair": [
+        [
+          202,
+          204
+        ],
+        [
+          225,
+          26
+        ]
+      ]
+    },
+    {
+      "window_ns": 2000.0,
+      "window_bins": 12800,
+      "pairs_total": 1061,
+      "J_prob": -0.00012626839841629233,
+      "J_sigma_boot": 2.1191883472679424e-05,
+      "click_a_by_setting": [
+        1062,
+        3504
+      ],
+      "click_b_by_setting": [
+        1430,
+        4219
+      ],
+      "coinc_by_setting_pair": [
+        [
+          319,
+          341
+        ],
+        [
+          368,
+          33
+        ]
+      ]
+    },
+    {
+      "window_ns": 2343.75,
+      "window_bins": 15000,
+      "pairs_total": 2214,
+      "J_prob": -9.659895892722662e-05,
+      "J_sigma_boot": 3.0078139764655333e-05,
+      "click_a_by_setting": [
+        2126,
+        6895
+      ],
+      "click_b_by_setting": [
+        2492,
+        7240
+      ],
+      "coinc_by_setting_pair": [
+        [
+          662,
+          696
+        ],
+        [
+          806,
+          50
+        ]
+      ]
+    },
+    {
+      "window_ns": 2812.5,
+      "window_bins": 18000,
+      "pairs_total": 3793,
+      "J_prob": -8.12025607476813e-05,
+      "J_sigma_boot": 3.977197653037473e-05,
+      "click_a_by_setting": [
+        3586,
+        11544
+      ],
+      "click_b_by_setting": [
+        4004,
+        11553
+      ],
+      "coinc_by_setting_pair": [
+        [
+          1122,
+          1221
+        ],
+        [
+          1365,
+          85
+        ]
+      ]
+    },
+    {
+      "window_ns": 3437.5,
+      "window_bins": 22000,
+      "pairs_total": 5968,
+      "J_prob": -8.79723957240956e-05,
+      "J_sigma_boot": 4.840871162943759e-05,
+      "click_a_by_setting": [
+        5586,
+        17893
+      ],
+      "click_b_by_setting": [
+        6133,
+        17191
+      ],
+      "coinc_by_setting_pair": [
+        [
+          1773,
+          1873
+        ],
+        [
+          2175,
+          147
+        ]
+      ]
+    },
+    {
+      "window_ns": 4687.5,
+      "window_bins": 30000,
+      "pairs_total": 6855,
+      "J_prob": -2.671806359018543e-05,
+      "J_sigma_boot": 5.071768099381531e-05,
+      "click_a_by_setting": [
+        6440,
+        20524
+      ],
+      "click_b_by_setting": [
+        6686,
+        18556
+      ],
+      "coinc_by_setting_pair": [
+        [
+          2062,
+          2133
+        ],
+        [
+          2483,
+          177
+        ]
+      ]
+    },
+    {
+      "window_ns": 6250.0,
+      "window_bins": 40000,
+      "pairs_total": 6892,
+      "J_prob": -5.039518400520339e-05,
+      "J_sigma_boot": 5.257878544143115e-05,
+      "click_a_by_setting": [
+        6491,
+        20666
+      ],
+      "click_b_by_setting": [
+        6737,
+        18662
+      ],
+      "coinc_by_setting_pair": [
+        [
+          2069,
+          2139
+        ],
+        [
+          2492,
+          192
+        ]
+      ]
+    },
+    {
+      "window_ns": 7812.5,
+      "window_bins": 50000,
+      "pairs_total": 6911,
+      "J_prob": -7.422877183726421e-05,
+      "J_sigma_boot": 5.1849541059419054e-05,
+      "click_a_by_setting": [
+        6535,
+        20734
+      ],
+      "click_b_by_setting": [
+        6781,
+        18724
+      ],
+      "coinc_by_setting_pair": [
+        [
+          2071,
+          2143
+        ],
+        [
+          2495,
+          202
+        ]
+      ]
+    }
+  ],
+  "summary": {
+    "J_min": -0.00012626839841629233,
+    "J_max": -2.877514281541989e-06,
+    "delta_J": 0.00012339088413475033
+  }
+}

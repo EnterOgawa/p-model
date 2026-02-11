@@ -1,0 +1,82 @@
+{
+  "generated_utc": "2026-02-08T10:04:42.310706+00:00",
+  "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+  "source": {
+    "hdf5": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\processed_compressed\\hdf5\\2015_09_18\\03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.dat.compressed.build.hdf5"
+  },
+  "counts": {
+    "syncs_used": 107109576,
+    "bad_sync_unique": 18,
+    "invalid_settings": 2,
+    "trials_by_setting_pair": [
+      [
+        26789176,
+        26775138
+      ],
+      [
+        26768990,
+        26776272
+      ]
+    ],
+    "coinc_by_setting_pair": [
+      [
+        12591,
+        12554
+      ],
+      [
+        12861,
+        152
+      ]
+    ],
+    "alice_trials_by_setting": [
+      53564314,
+      53545262
+    ],
+    "bob_trials_by_setting": [
+      53558166,
+      53551410
+    ],
+    "alice_clicks_by_setting": [
+      36913,
+      114936
+    ],
+    "bob_clicks_by_setting": [
+      38454,
+      123236
+    ]
+  },
+  "ch_j_variants": {
+    "A1=0,B1=0": {
+      "A1": 0,
+      "A2": 1,
+      "B1": 0,
+      "B2": 1,
+      "J_prob": 6.518427199813021e-06
+    },
+    "A1=0,B1=1": {
+      "A1": 0,
+      "A2": 1,
+      "B1": 1,
+      "B2": 0,
+      "J_prob": -0.0025262957099371507
+    },
+    "A1=1,B1=0": {
+      "A1": 1,
+      "A2": 0,
+      "B1": 0,
+      "B2": 1,
+      "J_prob": -0.0023772500984495103
+    },
+    "A1=1,B1=1": {
+      "A1": 1,
+      "A2": 0,
+      "B1": 1,
+      "B2": 0,
+      "J_prob": -0.003962800537999224
+    },
+    "_best": {
+      "key": "A1=0,B1=0",
+      "J_prob": 6.518427199813021e-06
+    }
+  }
+}

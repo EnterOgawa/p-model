@@ -1,0 +1,49 @@
+{
+  "generated_utc": "2026-02-11T02:47:09.938938+00:00",
+  "dataset_id": "weihs1998_longdist_longdist1",
+  "supported": true,
+  "baseline": {
+    "param_name": "window_ns",
+    "value": 25.0,
+    "statistic_name": "CHSH |S| (fixed variant)",
+    "statistic": 2.5527309550940966,
+    "sigma_boot": 0.025324431789015552
+  },
+  "methods": [
+    {
+      "id": "greedy_time_order_1to1",
+      "pairing": "greedy 1:1 pairing by time order within |dt-offset|<=window",
+      "window_ns": 25.0,
+      "statistic_name": "CHSH |S| (fixed variant)",
+      "statistic_abs": 2.5527309550940966,
+      "pairs_total": 21664
+    },
+    {
+      "id": "mutual_nearest_neighbor_1to1",
+      "pairing": "mutual nearest-neighbor pairing within |dt-offset|<=window",
+      "window_ns": 25.0,
+      "statistic_name": "CHSH |S| (fixed variant)",
+      "statistic_abs": 2.554912111485045,
+      "pairs_total": 21663
+    }
+  ],
+  "inputs": {
+    "natural_window_frozen_json": {
+      "path": "output/quantum/bell/weihs1998_longdist_longdist1/natural_window_frozen.json",
+      "sha256": "17e1e872690ae990dcc26eefff1a719b408c774bc7a3c904ab4e05167770ddb0"
+    },
+    "normalized_events_npz": {
+      "path": "output/quantum/bell/weihs1998_longdist_longdist1/normalized_events.npz",
+      "sha256": "6c0acc95d5e5ef3f66df60fafc5238c6473b2353387f4ebebb8bdff3292b8492"
+    },
+    "normalized_events_json": {
+      "path": "output/quantum/bell/weihs1998_longdist_longdist1/normalized_events.json",
+      "sha256": "ffffed012479dc37b96f8a9da5c5df92c62425646309479f7748ba1437c2f18c"
+    }
+  },
+  "delta": {
+    "abs_delta_statistic_abs": 0.002181156390948402,
+    "delta_over_sigma_boot": 0.08612854215724108,
+    "note": "Treat this pairing-choice delta as an implementation/systematic sensitivity (not an optimizer)."
+  }
+}

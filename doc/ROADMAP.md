@@ -1,6 +1,6 @@
 # P-model Roadmap（Phase / Step 構造）
 
-最終更新（UTC）：2026-02-11T04:47:59Z
+最終更新（UTC）：2026-02-11T05:09:58Z
 
 本ドキュメントは `doc/old/ROADMAP_source_p_model_roadmap_phase_step.md` を大枠（Phase→Step）として採用し、
 本リポジトリの実装・成果物（`doc/STATUS.md` / `doc/WORK_HISTORY.md` / `output/`）の現状を統合した「公式ロードマップ」である。
@@ -3677,6 +3677,7 @@ Phase 7 の出口は「量子現象を語った」ではなく、Part I の P定
 - 8.2.12（整合改稿）Part I 2.8（量子）を「最小辞書」へさらに圧縮し、Part III への接続点を `粒子` と `selection` に限定（波動関数/測定/もつれ等の語彙は Part III 側で操作的定義＋反証条件へ委譲）。`pmodel_paper.html` を再生成し、`paper_qc` ok=True を確認。【完了】
 - 8.2.13（設計方針変更）Part I–III の論文本文（publish）から、具体的なファイル名・フォルダ名・スクリプト名を排除し、検証用資料へ集約して参照する形へ移行。`paper_qc` に publish HTML の repo-path（`output/`/`data/`/`scripts/`/`doc/`）混入検出を追加し、混入を機械QAで防止。【完了】
 - 8.2.14（公開参照の固定）検証用資料（Verification Materials）の公開先（GitHub/DOI）を確定し、参考文献 `[PModelVerificationMaterials]` の Web 欄と本資料（`doc/verification/VERIFICATION_MATERIALS.md`）の参照先を固定URL/DOIで埋める（GitHub repo 作成＋`TBD` を固定URLへ置換）。【完了】
+- 8.2.15（GitHub運用方針改訂）GitHub repo を「検証（スクリプト＋固定出力JSON）」中心に再構成し、README の概念説明から数式を除去してストーリー化。論文（`doc/paper/`）は追跡対象外（別公開）とする。【完了】
 
 ### Step 8.3：データ・コード公開
 - 現状：完了（初版）

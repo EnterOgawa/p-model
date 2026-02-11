@@ -1,0 +1,67 @@
+{
+  "generated_utc": "2026-01-27T17:43:11.659625+00:00",
+  "phase": 7,
+  "step": "7.13.15.39",
+  "inputs": {
+    "radius_base": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_metrics.json",
+    "radius_shell": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_metrics.json",
+    "radius_shell_nz": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_metrics.json",
+    "radius_beta2": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2_metrics.json"
+  },
+  "strict_threshold": 3.0,
+  "variants": {
+    "radius_base": {
+      "n_total": 10,
+      "n_pass_strict": 0,
+      "n_pass_radii_kink_delta2r": 0,
+      "best": {
+        "shell_variant": "model_magic",
+        "domain_min_A": 100,
+        "max_abs_resid_sigma": 10.857762730329881,
+        "worst_axis": "Sp",
+        "worst_point": "Z0=80,N=101"
+      }
+    },
+    "radius_beta2": {
+      "n_total": 10,
+      "n_pass_strict": 0,
+      "n_pass_radii_kink_delta2r": 0,
+      "best": {
+        "shell_variant": "model_magic",
+        "domain_min_A": 100,
+        "max_abs_resid_sigma": 13.409341778424954,
+        "worst_axis": "Sp",
+        "worst_point": "Z0=80,N=101"
+      }
+    },
+    "radius_shell": {
+      "n_total": 10,
+      "n_pass_strict": 0,
+      "n_pass_radii_kink_delta2r": 0,
+      "best": {
+        "shell_variant": "model_magic",
+        "domain_min_A": 100,
+        "max_abs_resid_sigma": 10.7479671834665,
+        "worst_axis": "Sp",
+        "worst_point": "Z0=80,N=101"
+      }
+    },
+    "radius_shell_nz": {
+      "n_total": 10,
+      "n_pass_strict": 0,
+      "n_pass_radii_kink_delta2r": 0,
+      "best": {
+        "shell_variant": "obs_magic",
+        "domain_min_A": 100,
+        "max_abs_resid_sigma": 10.862432840171454,
+        "worst_axis": "Sp",
+        "worst_point": "Z0=80,N=101"
+      }
+    }
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary.csv",
+    "json": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary_metrics.json",
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary.png"
+  }
+}

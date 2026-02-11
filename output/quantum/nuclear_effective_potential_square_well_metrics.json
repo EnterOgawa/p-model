@@ -1,0 +1,262 @@
+{
+  "generated_utc": "2026-01-25T15:48:18.418387+00:00",
+  "phase": 7,
+  "step": "7.9.3",
+  "model": {
+    "effective_equation": "Nonrelativistic s-wave Schrödinger equation for relative motion with an effective potential V(r)=μ φ(r)=-μ c^2 u(r).",
+    "ansatz": "Short-range u-profile represented as a square-well potential (two parameters: range R, depth V0).",
+    "fit_constraints": [
+      "Deuteron binding energy B (CODATA mass defect)",
+      "Triplet scattering length a_t (np low-energy parameters)"
+    ],
+    "prediction_targets": [
+      "Triplet effective range r_t (effective-range expansion)"
+    ],
+    "positioning": [
+      "This is a phenomenological constraint (effective model), not a first-principles derivation of nuclear forces.",
+      "The goal is to freeze a minimal, reproducible bridge from the P-variable u to low-energy nuclear observables and expose falsification conditions for simple ansatz classes."
+    ]
+  },
+  "sources": [
+    {
+      "dataset": "NIST Cuu CODATA constants (mp,mn,md) for deuteron binding baseline",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\manifest.json",
+      "local_manifest_sha256": "a4af996c9eba1f2dff6c6a73923182e26754b75ddbf3eb36263359dfb43d2a2a",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\extracted_values.json",
+      "local_extracted_sha256": "f66aef6422ce5a6e6d9653545a4decd10910923774b19e876132309631b9e245"
+    },
+    {
+      "dataset": "np scattering low-energy parameters (arXiv:0704.1024v1; eq18–eq19)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_manifest.json",
+      "local_manifest_sha256": "eb2aec45ce182215d88ca7ba32c5b8bd62de9ab9820ee66f869b13dc64f6be80",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_extracted.json",
+      "local_extracted_sha256": "1508cdfe8a94b8322348f6e944fe51f3d3047d3ed620bfbe2f490d4c31aa1709"
+    }
+  ],
+  "constants": {
+    "hbarc_MeV_fm": 197.3269804,
+    "mu_c2_MeV": 469.4591551497099,
+    "B_MeV": 2.22456634198942
+  },
+  "fits": [
+    {
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "a_t_fm": 5.403,
+        "r_t_fm": 1.7494
+      },
+      "fit_square_well": {
+        "R_fm": 2.0868470852588876,
+        "V0_mev": 34.085111610864715,
+        "a_t_fm_target": 5.403,
+        "a_t_fm_fit": 5.402999999999896,
+        "bound_x": 1.8291303812605526,
+        "bound_k_fm1": 0.8765042700930032,
+        "bound_kappa_fm1": 0.23160616482153581
+      },
+      "ere_from_phase_shift": {
+        "a_fm": 5.402999883194123,
+        "r_eff_fm": 1.758054194185596,
+        "intercept_kcot_fm1": -0.18508236565217623,
+        "slope_half_r_fm": 0.879027097092798,
+        "fit_rms_fm1": 3.102018685683008e-09,
+        "points": [
+          {
+            "k_fm1": 0.002,
+            "k2_fm2": 4e-06,
+            "kcot_fm1": -0.18507884587370987,
+            "delta_rad": -0.01080578467318246
+          },
+          {
+            "k_fm1": 0.004,
+            "k2_fm2": 1.6e-05,
+            "kcot_fm1": -0.18506829849994694,
+            "delta_rad": -0.021610277615875643
+          },
+          {
+            "k_fm1": 0.006,
+            "k2_fm2": 3.6e-05,
+            "kcot_fm1": -0.18505071940341636,
+            "delta_rad": -0.032412188249111594
+          },
+          {
+            "k_fm1": 0.008,
+            "k2_fm2": 6.4e-05,
+            "kcot_fm1": -0.1850261083737254,
+            "delta_rad": -0.0432102282943916
+          },
+          {
+            "k_fm1": 0.01,
+            "k2_fm2": 0.0001,
+            "kcot_fm1": -0.18499446511631812,
+            "delta_rad": -0.05400311291749739
+          },
+          {
+            "k_fm1": 0.012,
+            "k2_fm2": 0.000144,
+            "kcot_fm1": -0.18495578925246725,
+            "delta_rad": -0.06478956186462484
+          },
+          {
+            "k_fm1": 0.014,
+            "k2_fm2": 0.00019600000000000002,
+            "kcot_fm1": -0.18491008031926587,
+            "delta_rad": -0.07556830058832997
+          },
+          {
+            "k_fm1": 0.016,
+            "k2_fm2": 0.000256,
+            "kcot_fm1": -0.18485733776961688,
+            "delta_rad": -0.08633806136082013
+          },
+          {
+            "k_fm1": 0.018000000000000002,
+            "k2_fm2": 0.00032400000000000007,
+            "kcot_fm1": -0.1847975609722191,
+            "delta_rad": -0.09709758437217575
+          },
+          {
+            "k_fm1": 0.02,
+            "k2_fm2": 0.0004,
+            "kcot_fm1": -0.1847307492115536,
+            "delta_rad": -0.10784561881114815
+          }
+        ]
+      },
+      "p_profile_mapping": {
+        "u0": 0.07260506316038297,
+        "P_over_P0_attractive_core": 1.0753057751787247,
+        "notes": [
+          "Square well uses V(r)=-V0 for r<R, 0 otherwise.",
+          "With the minimal Part III mapping V=μ φ and u=-φ/c^2, the well corresponds to u≈+V0/(μc^2) and thus P/P0=exp(u)>1 inside the attractive region.",
+          "This does not explain *why* such a u-profile arises (that is the open first-principles problem); it only freezes an effective constraint from low-energy data."
+        ]
+      },
+      "comparison": {
+        "a_t_fit_minus_target_fm": -1.0391687510491465e-13,
+        "r_eff_minus_observed_fm": 0.008654194185595987
+      }
+    },
+    {
+      "label": "eq19 (Nijmegen)",
+      "eq_label": 19,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "a_t_fm": 5.42,
+        "r_t_fm": 1.753
+      },
+      "fit_square_well": {
+        "R_fm": 2.1184804305418092,
+        "V0_mev": 33.25207102306482,
+        "a_t_fm_target": 5.42,
+        "a_t_fm_fit": 5.420000000000121,
+        "bound_x": 1.8324212334869454,
+        "bound_k_fm1": 0.8649696296785224,
+        "bound_kappa_fm1": 0.23160616482153581
+      },
+      "ere_from_phase_shift": {
+        "a_fm": 5.4199998775691,
+        "r_eff_fm": 1.7806660151697902,
+        "intercept_kcot_fm1": -0.18450184918611207,
+        "slope_half_r_fm": 0.8903330075848951,
+        "fit_rms_fm1": 3.231046428085642e-09,
+        "points": [
+          {
+            "k_fm1": 0.002,
+            "k2_fm2": 4e-06,
+            "kcot_fm1": -0.18449828403134977,
+            "delta_rad": -0.010839784640449627
+          },
+          {
+            "k_fm1": 0.004,
+            "k2_fm2": 1.6e-05,
+            "kcot_fm1": -0.18448760102623327,
+            "delta_rad": -0.021678277354009606
+          },
+          {
+            "k_fm1": 0.006,
+            "k2_fm2": 3.6e-05,
+            "kcot_fm1": -0.1844697958716129,
+            "delta_rad": -0.0325141873653084
+          },
+          {
+            "k_fm1": 0.008,
+            "k2_fm2": 6.4e-05,
+            "kcot_fm1": -0.18444486834834545,
+            "delta_rad": -0.04334622619943725
+          },
+          {
+            "k_fm1": 0.01,
+            "k2_fm2": 0.0001,
+            "kcot_fm1": -0.1844128181496234,
+            "delta_rad": -0.05417310882575814
+          },
+          {
+            "k_fm1": 0.012,
+            "k2_fm2": 0.000144,
+            "kcot_fm1": -0.18437364488096683,
+            "delta_rad": -0.06499355479403429
+          },
+          {
+            "k_fm1": 0.014,
+            "k2_fm2": 0.00019600000000000002,
+            "kcot_fm1": -0.18432734806021447,
+            "delta_rad": -0.07580628936037283
+          },
+          {
+            "k_fm1": 0.016,
+            "k2_fm2": 0.000256,
+            "kcot_fm1": -0.18427392711751173,
+            "delta_rad": -0.086610044600513
+          },
+          {
+            "k_fm1": 0.018000000000000002,
+            "k2_fm2": 0.00032400000000000007,
+            "kcot_fm1": -0.18421338139529686,
+            "delta_rad": -0.09740356050804436
+          },
+          {
+            "k_fm1": 0.02,
+            "k2_fm2": 0.0004,
+            "kcot_fm1": -0.18414571014828535,
+            "delta_rad": -0.1081855860752017
+          }
+        ]
+      },
+      "p_profile_mapping": {
+        "u0": 0.07083059443682758,
+        "P_over_P0_attractive_core": 1.0733993706402565,
+        "notes": [
+          "Square well uses V(r)=-V0 for r<R, 0 otherwise.",
+          "With the minimal Part III mapping V=μ φ and u=-φ/c^2, the well corresponds to u≈+V0/(μc^2) and thus P/P0=exp(u)>1 inside the attractive region.",
+          "This does not explain *why* such a u-profile arises (that is the open first-principles problem); it only freezes an effective constraint from low-energy data."
+        ]
+      },
+      "comparison": {
+        "a_t_fit_minus_target_fm": 1.2079226507921703e-13,
+        "r_eff_minus_observed_fm": 0.02766601516979028
+      }
+    }
+  ],
+  "falsification": {
+    "acceptance_criteria": [
+      "Under the simplest short-range ansatz class (square well u-profile; 2 parameters), fitting (B, a_t) should predict r_t within the observed envelope (eq18–eq19). If not, this ansatz class is rejected as a candidate for the nuclear-scale u-profile.",
+      "Future step (7.9.4+): extend to include singlet channel and/or shape parameters (v2) without losing predictive power (avoid 'arbitrary function fit')."
+    ],
+    "observed_envelope_triplet_r_t_fm": {
+      "min": 1.7494,
+      "max": 1.753
+    },
+    "predicted_within_envelope": false
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_square_well.png"
+  },
+  "notes": [
+    "This script intentionally does not introduce a new fundamental coupling constant; it freezes an effective constraint on u via a minimal ansatz.",
+    "If the square well passes, it does not prove P-model; it only shows that a very low-parameter u-profile can satisfy the deuteron+np low-energy constraints.",
+    "Next (7.9.3+): decide and fix what 'first-principles' claim is attempted (e.g., source term/nonlinearity in the u field equation that yields such u-profiles)."
+  ]
+}

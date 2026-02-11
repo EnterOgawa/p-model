@@ -1,0 +1,304 @@
+{
+  "generated_utc": "2026-02-11T02:45:59.316546+00:00",
+  "domain": "summary",
+  "step": "8.2 (paper publish qc)",
+  "inputs": {
+    "paper_html": "output/summary/pmodel_paper.html",
+    "part2_html": "output/summary/pmodel_paper_part2_astrophysics.html",
+    "part3_html": "output/summary/pmodel_paper_part3_quantum.html",
+    "short_note_html": "output/summary/pmodel_short_note.html",
+    "public_html": "output/summary/pmodel_public_report.html"
+  },
+  "ok": true,
+  "checks": {
+    "paper_lint_strict": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "part2_lint_strict": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "part3_lint_strict": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "short_note_lint_strict": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "paper_md_section_references_resolve": {
+      "ok": true,
+      "files": 16,
+      "headings_total": 100,
+      "missing": [],
+      "missing_total": 0
+    },
+    "paper_md_prose_no_latex_escapes": {
+      "ok": true,
+      "files": 16,
+      "hits": [],
+      "hits_total": 0
+    },
+    "paper_html_no_double_backslash": {
+      "ok": true,
+      "found_index": null,
+      "context": null
+    },
+    "short_note_html_no_double_backslash": {
+      "ok": true,
+      "found_index": null,
+      "context": null
+    },
+    "public_html_no_double_backslash": {
+      "ok": true,
+      "found_index": null,
+      "context": null
+    },
+    "paper_html_no_draft_labels": {
+      "ok": true,
+      "found": [],
+      "found_total": 0
+    },
+    "short_note_html_no_draft_labels": {
+      "ok": true,
+      "found": [],
+      "found_total": 0
+    },
+    "public_html_no_draft_labels": {
+      "ok": true,
+      "found": [],
+      "found_total": 0
+    },
+    "paper_html_no_repo_paths": {
+      "ok": true,
+      "hits_total": 0,
+      "hits": []
+    },
+    "paper_html_internal_anchor_links": {
+      "ok": true,
+      "ids_count": 51,
+      "href_anchor_count": 63,
+      "missing": [],
+      "missing_total": 0
+    },
+    "short_note_html_internal_anchor_links": {
+      "ok": true,
+      "ids_count": 18,
+      "href_anchor_count": 10,
+      "missing": [],
+      "missing_total": 0
+    },
+    "public_html_internal_anchor_links": {
+      "ok": true,
+      "ids_count": 66,
+      "href_anchor_count": 66,
+      "missing": [],
+      "missing_total": 0
+    },
+    "paper_equation_alt": {
+      "ok": true,
+      "count": 31,
+      "bad_examples": []
+    },
+    "short_note_equation_alt": {
+      "ok": true,
+      "count": 2,
+      "bad_examples": []
+    },
+    "paper_figure_numbering": {
+      "ok": true,
+      "fig_id_count": 2,
+      "caption_count": 2,
+      "fig_id_dups": [],
+      "caption_dups": [],
+      "fig_id_range": [
+        1,
+        2
+      ],
+      "caption_range": [
+        1,
+        2
+      ],
+      "fig_id_missing_in_range": [],
+      "caption_missing_in_range": [],
+      "fig_id_non_monotone_pairs": 0,
+      "caption_non_monotone_pairs": 0
+    },
+    "short_note_figure_numbering": {
+      "ok": true,
+      "fig_id_count": 2,
+      "caption_count": 2,
+      "fig_id_dups": [],
+      "caption_dups": [],
+      "fig_id_range": [
+        1,
+        2
+      ],
+      "caption_range": [
+        1,
+        2
+      ],
+      "fig_id_missing_in_range": [],
+      "caption_missing_in_range": [],
+      "fig_id_non_monotone_pairs": 0,
+      "caption_non_monotone_pairs": 0
+    },
+    "public_figure_numbering": {
+      "ok": true,
+      "fig_id_count": 0,
+      "caption_count": 0,
+      "fig_id_dups": [],
+      "caption_dups": [],
+      "fig_id_range": null,
+      "caption_range": null,
+      "fig_id_missing_in_range": [],
+      "caption_missing_in_range": [],
+      "fig_id_non_monotone_pairs": 0,
+      "caption_non_monotone_pairs": 0
+    },
+    "paper_md_figure_number_references": {
+      "ok": true,
+      "manuscript": "doc/paper/10_part1_core_theory.md",
+      "figures_in_html": 2,
+      "bad_refs": [],
+      "bad_refs_total": 0
+    },
+    "short_note_md_figure_number_references": {
+      "ok": true,
+      "manuscript": "doc/paper/15_short_note.md",
+      "figures_in_html": 2,
+      "bad_refs": [],
+      "bad_refs_total": 0
+    },
+    "paper_docx_callout_punctuation": {
+      "ok": true,
+      "marker": "要請（P内部）→帰結",
+      "found": true,
+      "has_fullwidth_colon_in_window": true,
+      "has_ascii_colon_in_window": false,
+      "context_ascii": "\\u8981\\u8acb\\uff08P\\u5185\\u90e8\\uff09\\u2192\\u5e30\\u7d50</w:t></w:r><w:r w:rsidR=\"004D49CC\"><w:rPr><w:rFonts w:ascii=\"Yu Gothic\" w:eastAsia=\"Yu Gothic\" w:hAnsi=\"Yu Gothic\" w:hint=\"eastAsia\"/></w:rPr><w:t>\\uff1a</w:t></w:r><w:r w:rsidR=\"004D49CC\"><w:rPr><w:rFonts w:ascii=\"Cambria Math\" w:eastAsia=\"Yu Gothic\" w:hAnsi=\"Cambria Math\" w:cs=\"Cambria Math\""
+    },
+    "paper_docx_a0_table_no_borders": {
+      "ok": true,
+      "marker": "自由度台帳",
+      "found": true,
+      "table_found": true,
+      "border_vals_found": [],
+      "bad_border_vals": []
+    },
+    "part2_html_no_double_backslash": {
+      "ok": true,
+      "found_index": null,
+      "context": null
+    },
+    "part2_html_no_draft_labels": {
+      "ok": true,
+      "found": [],
+      "found_total": 0
+    },
+    "part2_html_no_repo_paths": {
+      "ok": true,
+      "hits_total": 0,
+      "hits": []
+    },
+    "part2_html_internal_anchor_links": {
+      "ok": true,
+      "ids_count": 222,
+      "href_anchor_count": 242,
+      "missing": [],
+      "missing_total": 0
+    },
+    "part2_equation_alt": {
+      "ok": true,
+      "count": 41,
+      "bad_examples": []
+    },
+    "part2_figure_numbering": {
+      "ok": true,
+      "fig_id_count": 67,
+      "caption_count": 67,
+      "fig_id_dups": [],
+      "caption_dups": [],
+      "fig_id_range": [
+        1,
+        67
+      ],
+      "caption_range": [
+        1,
+        67
+      ],
+      "fig_id_missing_in_range": [],
+      "caption_missing_in_range": [],
+      "fig_id_non_monotone_pairs": 0,
+      "caption_non_monotone_pairs": 0
+    },
+    "part2_md_figure_number_references": {
+      "ok": true,
+      "manuscript": "doc/paper/11_part2_astrophysics.md",
+      "figures_in_html": 67,
+      "bad_refs": [],
+      "bad_refs_total": 0
+    },
+    "part3_html_no_double_backslash": {
+      "ok": true,
+      "found_index": null,
+      "context": null
+    },
+    "part3_html_no_draft_labels": {
+      "ok": true,
+      "found": [],
+      "found_total": 0
+    },
+    "part3_html_no_repo_paths": {
+      "ok": true,
+      "hits_total": 0,
+      "hits": []
+    },
+    "part3_html_internal_anchor_links": {
+      "ok": true,
+      "ids_count": 198,
+      "href_anchor_count": 245,
+      "missing": [],
+      "missing_total": 0
+    },
+    "part3_equation_alt": {
+      "ok": true,
+      "count": 53,
+      "bad_examples": []
+    },
+    "part3_figure_numbering": {
+      "ok": true,
+      "fig_id_count": 71,
+      "caption_count": 71,
+      "fig_id_dups": [],
+      "caption_dups": [],
+      "fig_id_range": [
+        1,
+        71
+      ],
+      "caption_range": [
+        1,
+        71
+      ],
+      "fig_id_missing_in_range": [],
+      "caption_missing_in_range": [],
+      "fig_id_non_monotone_pairs": 0,
+      "caption_non_monotone_pairs": 0
+    },
+    "part3_md_figure_number_references": {
+      "ok": true,
+      "manuscript": "doc/paper/12_part3_quantum.md",
+      "figures_in_html": 71,
+      "bad_refs": [],
+      "bad_refs_total": 0
+    }
+  },
+  "outputs": {
+    "json": "output/summary/paper_qc.json"
+  }
+}

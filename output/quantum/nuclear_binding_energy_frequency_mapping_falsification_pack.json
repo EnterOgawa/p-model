@@ -1,0 +1,270 @@
+{
+  "generated_utc": "2026-02-11T02:47:12.584577+00:00",
+  "thresholds": {
+    "z_median_abs_max": 3.0,
+    "z_delta_median_abs_max": 3.0,
+    "a_low_bin": [
+      40,
+      60
+    ],
+    "a_high_bin": [
+      250,
+      300
+    ],
+    "channel_decision_sigma_level": 3.0,
+    "note": "Operational thresholds for this repository (not universal physics thresholds)."
+  },
+  "inputs": {
+    "differential_predictions_csv": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_predictions.csv",
+      "sha256": "43d6a79c747c6215372e59673acfe8335e32d44da8f4f1ff84ef9255475ac91a"
+    },
+    "theory_diff_metrics_json": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
+      "sha256": "9912b460fc467eb434d9024996de5aaad4aa388498b1dbb808c62c379b40ae47"
+    },
+    "differential_quantification_metrics_json": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_quantification_metrics.json",
+      "sha256": "2c476ba32081c5d6d3acdff85de8f59f9d5dcc5ee071b65fff46ec43d4690d66"
+    },
+    "separation_energies_metrics_json": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",
+      "sha256": "9784baa1f6a6f7f2151ecf7a30c3edfac8187e6db176075d110356fbfb817e11"
+    },
+    "charge_radius_kink_metrics_json": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json",
+      "sha256": "445d5a90511a9cf1d0754de638b3f8c5912dfa21b359536e7aa83eff89b76be0"
+    }
+  },
+  "models": [
+    {
+      "model_id": "global_R_in_exp (Step 7.13.17.7)",
+      "n": 3554.0,
+      "log10_ratio_stats": {
+        "n": 3554.0,
+        "median": -1.1932684459103031,
+        "p16": -1.4836985589795664,
+        "p84": -0.7429235738047029
+      },
+      "sigma_proxy_log10": 0.37038749258743175,
+      "z_median": -3.2216758659274283,
+      "scale_to_median_1": 15.605167907121862,
+      "a_bin_medians_log10_ratio": {
+        "a_low_bin": {
+          "range": [
+            40,
+            60
+          ],
+          "n": 254.0,
+          "median": -0.6520036393155251
+        },
+        "a_high_bin": {
+          "range": [
+            250,
+            300
+          ],
+          "n": 267.0,
+          "median": -1.619734775341167
+        }
+      },
+      "delta_median_log10_ratio_high_minus_low": -0.967731136025642,
+      "z_delta_median": -2.6127532797215185,
+      "passes": {
+        "median_within_3sigma": false,
+        "a_trend_within_3sigma": true
+      }
+    },
+    {
+      "model_id": "local_spacing_d_in_exp (Step 7.13.17.9)",
+      "n": 3554.0,
+      "log10_ratio_stats": {
+        "n": 3554.0,
+        "median": 0.15566315347243942,
+        "p16": 0.13042886521971825,
+        "p84": 0.18572049342916097
+      },
+      "sigma_proxy_log10": 0.02764581410472136,
+      "z_median": 5.630622881380629,
+      "scale_to_median_1": 0.6987741756300823,
+      "a_bin_medians_log10_ratio": {
+        "a_low_bin": {
+          "range": [
+            40,
+            60
+          ],
+          "n": 254.0,
+          "median": 0.1344297347152714
+        },
+        "a_high_bin": {
+          "range": [
+            250,
+            300
+          ],
+          "n": 267.0,
+          "median": 0.20056816962596635
+        }
+      },
+      "delta_median_log10_ratio_high_minus_low": 0.06613843491069496,
+      "z_delta_median": 2.39234897045046,
+      "passes": {
+        "median_within_3sigma": false,
+        "a_trend_within_3sigma": true
+      }
+    }
+  ],
+  "differential_channels": [
+    {
+      "channel_id": "P-SEMF",
+      "abs_delta_mev_stats": {
+        "median": 75.15361250000001,
+        "p84": 230.77242284,
+        "max": 472.662184
+      },
+      "required_relative_sigma_3sigma": {
+        "median": 0.027010725304784978,
+        "p84": 0.05096675028931154,
+        "max": 239.28215185185186
+      }
+    },
+    {
+      "channel_id": "P-Yukawa proxy",
+      "abs_delta_mev_stats": {
+        "median": 1150.0614905000002,
+        "p84": 1866.1822308,
+        "max": 2532.918937
+      },
+      "required_relative_sigma_3sigma": {
+        "median": 0.33427829325672664,
+        "p84": 0.36980788114244645,
+        "max": 3.279192592592593
+      }
+    }
+  ],
+  "independent_cross_checks": {
+    "separation_energies": {
+      "step": "7.13.15.9",
+      "metrics_json": {
+        "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",
+        "sha256": "9784baa1f6a6f7f2151ecf7a30c3edfac8187e6db176075d110356fbfb817e11"
+      },
+      "sn_rms_total_mev": 12.798027545882732,
+      "s2n_rms_total_mev": 23.42918512005021,
+      "gap_sn_rms_median_mev": 4.771956399994943,
+      "gap_s2n_rms_median_mev": 11.063210711845818,
+      "gap_sn_points": 21.0,
+      "gap_s2n_points": 21.0,
+      "note": "Diagnostic cross-check from separation energies / shell gaps (Step 7.13.15.9)."
+    },
+    "charge_radius_kink": {
+      "step": "7.13.15.49",
+      "metrics_json": {
+        "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json",
+        "sha256": "445d5a90511a9cf1d0754de638b3f8c5912dfa21b359536e7aa83eff89b76be0"
+      },
+      "domain_min_A": 100,
+      "strict_threshold_sigma": 3.0,
+      "baseline_def0": {
+        "pass": false,
+        "max_abs_resid_sigma_sn": 3.0746788498648843,
+        "max_abs_resid_sigma_sp": 3.7232311952323394,
+        "k_n_fm_per_mev": null,
+        "k_p_fm_per_mev": null
+      },
+      "pairing_def0_fit": {
+        "pass": true,
+        "max_abs_resid_sigma_sn": 0.688159611161517,
+        "max_abs_resid_sigma_sp": 2.0142855285380468,
+        "k_n_fm_per_mev": 0.01154961713764098,
+        "k_p_fm_per_mev": 0.008717962076352056
+      },
+      "note": "Charge-radius kink strict check at shell-closure centers (Step 7.13.15.49, A_min=100)."
+    },
+    "gate_status": {
+      "radius_strict_pass_A100_pairing": true,
+      "separation_gap_available": true
+    }
+  },
+  "representative_table": {
+    "note": "Representative nuclei table is evaluated in a 'shape-only' mode (median-normalized).",
+    "selected_keys": [
+      {
+        "Z": 1,
+        "A": 2
+      },
+      {
+        "Z": 2,
+        "A": 4
+      },
+      {
+        "Z": 6,
+        "A": 12
+      },
+      {
+        "Z": 8,
+        "A": 16
+      },
+      {
+        "Z": 20,
+        "A": 40
+      },
+      {
+        "Z": 26,
+        "A": 56
+      },
+      {
+        "Z": 28,
+        "A": 56
+      },
+      {
+        "Z": 50,
+        "A": 120
+      },
+      {
+        "Z": 82,
+        "A": 208
+      },
+      {
+        "Z": 92,
+        "A": 238
+      }
+    ],
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_table.csv"
+  },
+  "conditions": [
+    {
+      "id": "median_residual_falsified_if_abs_z_median_gt_3",
+      "statement": "log10(B_pred/B_obs) の中央値が 0 から 3σ_proxy を超えてずれるなら、このI/Fは棄却（このσ_proxy定義では）"
+    },
+    {
+      "id": "a_trend_falsified_if_abs_z_delta_median_gt_3",
+      "statement": "A-bin（固定）での log10(B_pred/B_obs) の中央値差（high−low）が 3σ_proxy を超えるなら、A-trend を含むI/Fは棄却（手続き依存の入口）"
+    },
+    {
+      "id": "representative_nuclei_shape_falsified_if_many_fail",
+      "statement": "shape-only（median-normalized）でも代表核種の abs(z) が多数で 3 を超えるなら、距離I/F（R vs d）だけでは説明不十分（追加物理が必要）"
+    },
+    {
+      "id": "channel_precision_gate_for_3sigma_decision",
+      "statement": "差分チャネル（P-SEMF / P-Yukawa）の3σ決着は、対象核種で総相対不確かさ σ_rel(total) <= σ_req,rel を満たす場合のみ採用する"
+    },
+    {
+      "id": "channel_gate_requires_independent_crosschecks",
+      "statement": "差分チャネルの3σ判定は、独立cross-check（separation energies と charge-radius kink）の固定指標を併記し、半径kink strict（A_min=100, pairing凍結）と整合する場合に限って採用する"
+    }
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.png"
+  },
+  "notes": [
+    "This pack is intended to prevent 'fit-escape': thresholds are frozen before adding extra physics parameters.",
+    "σ_proxy is a robust internal proxy derived from (p16,p84) of the log10 ratio distribution; it is not an experimental uncertainty.",
+    "P-SEMF / P-Yukawa differential channels are loaded from Step 7.13.17.11/.12 metrics and tracked in the same pack.",
+    "Independent cross-check bundle is linked from Step 7.13.15.9 (separation) and Step 7.13.15.49 (charge-radius kink)."
+  ],
+  "upstream": {
+    "theory_diff": "7.13.17.11",
+    "differential_quantification": "7.13.17.12",
+    "separation_energies": "7.13.15.9",
+    "charge_radius_kink": "7.13.15.49"
+  }
+}

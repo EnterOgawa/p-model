@@ -1,0 +1,88 @@
+{
+  "generated_utc": "2026-02-01T06:33:40.312499+00:00",
+  "phase": 7,
+  "step": "7.14.17",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_janaf_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_janaf_silicon_si\\extracted_values.json",
+      "sha256": "da4e1bc5ad80067347b68ba2f8d2097570e2a9262ac79120f7606c5f0731ea09"
+    },
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    },
+    "ioffe_bulk_modulus_model": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\ioffe_silicon_mechanical_properties\\extracted_values.json",
+      "sha256": "5aa209cd7e7174a1d272bb5fa31eeb0b153bc6ef88938d3b0d44e21344eb8561",
+      "b_ref_1e11_dyn_cm2": 9.8,
+      "t_lin_min_K": 400.0,
+      "t_lin_max_K": 873.0,
+      "c11_intercept_1e11_dyn_cm2": 16.38,
+      "c11_slope_1e11_dyn_cm2_per_K": -0.00128,
+      "c12_intercept_1e11_dyn_cm2": 5.92,
+      "c12_slope_1e11_dyn_cm2_per_K": -0.00048
+    },
+    "silicon_molar_volume": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\extracted_values.json",
+      "sha256": "0060fba3290185382c3e0895a8b3022b830ca6dc81f66e90c0aabcd292710fb2",
+      "a_m": 5.431020511e-10,
+      "V_m3_per_mol": 1.2058831987701815e-05
+    }
+  },
+  "cp_proxy": {
+    "definition": "Cp_proxy(T)=Cp_JANAF_interp(T) for T>=100K; Cp_proxy(T)=scale*Cv_Debye(T;theta_D) for T<100K; scale=Cp_JANAF(100)/Cv_Debye(100)",
+    "scale_lowT": 1.1805985526747753,
+    "join_T_K": 100.0
+  },
+  "model": {
+    "name": "Cp-proxy + bulk modulus: alpha≈gamma(T)*Cp_proxy/(B(T)*V_m); gamma(T)=gamma_inf*tanh((T−T0)/ΔT)",
+    "theta_D_K": 622.1452045992636,
+    "A_inf_mol_per_J": null,
+    "gamma_inf_dimensionless": 0.18032296079363222,
+    "T0_sign_change_frozen_K": 123.70901530483314,
+    "delta_T_K": 123.53756234387825,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "delta_scan": {
+      "lo_K": 5.0,
+      "hi_K": 1200.0,
+      "n": 500
+    }
+  },
+  "diagnostics": {
+    "alpha_sign_change_T0_K": 123.70901530483314,
+    "fit_range": {
+      "n": 551,
+      "max_abs_z": 54.78751342054621,
+      "reduced_chi2": 442.89604778453287,
+      "exceed_3sigma_n": 504,
+      "sign_mismatch_n": 0
+    },
+    "sigma_fit_1e-8_per_K": {
+      "lt_T_K": 50.0,
+      "lt": 0.03,
+      "ge": 0.5
+    }
+  },
+  "falsification": {
+    "reject_if_sign_mismatch_fit_range_n_gt": 0,
+    "reject_if_max_abs_z_ge": 3.0,
+    "reject_if_reduced_chi2_ge": 2.0,
+    "rejected": true,
+    "notes": [
+      "This ansatz keeps the Grüneisen form alpha≈A_eff(T)*C(T) but replaces Debye Cv by a Cp proxy built from JANAF Cp points.",
+      "Passing would not be a derivation; it would only indicate that the remaining mismatch is largely in C(T) rather than in gamma(T).",
+      "Acceptance is evaluated against the NIST TRC curve-fit standard-error scale σ_fit (proxy)."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model.png"
+  }
+}

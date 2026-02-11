@@ -1,0 +1,193 @@
+{
+  "generated_utc": "2026-01-24T03:42:48.878372+00:00",
+  "phase": {
+    "phase": 6,
+    "step": "6.2.4",
+    "name": "弱場統合の反証条件（棄却基準）"
+  },
+  "inputs": {
+    "weak_field_longterm_consistency_json": "output/summary/weak_field_longterm_consistency.json",
+    "frozen_parameters": {
+      "path": "output/theory/frozen_parameters.json",
+      "exists": true,
+      "beta": 1.0000105000000001,
+      "beta_sigma": 1.15e-05,
+      "gamma_pmodel": 1.0000210000000003,
+      "gamma_pmodel_sigma": 2.3e-05,
+      "delta": 1e-60,
+      "policy": {
+        "fit_predict_separation": true,
+        "beta_source": "cassini2003",
+        "delta_source": "output/theory/delta_saturation_constraints.json",
+        "note": "Phase 7（決定的検証パック）では、ここで凍結したβ/δを以後固定して外挿（predict）する。"
+      }
+    },
+    "per_test_metadata": {
+      "cassini_fig2_run_metadata_json": "output/cassini/cassini_fig2_run_metadata.json",
+      "llr_batch_summary_json": "output/llr/batch/llr_batch_summary.json"
+    }
+  },
+  "policy": {
+    "beta_frozen": 1.0000105000000001,
+    "delta_frozen": 1e-60,
+    "note": "初版の閾値は“逃げ道封鎖”の最低条件（破綻検出）として保守的に設定。必要に応じて一次ソースに基づき更新する。"
+  },
+  "criteria": [
+    {
+      "id": "cassini_beta_frozen",
+      "test_id": "cassini_sce1_doppler",
+      "title": "β を frozen_parameters に固定して実行していること",
+      "value": 1.0000105000000001,
+      "op": "==",
+      "threshold": 1.0000105000000001,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "弱場統合では、データごとの β 付け替えを禁止する（Phase 6.2 の前提）。",
+      "source": {
+        "run_metadata_json": "output/cassini/cassini_fig2_run_metadata.json",
+        "frozen_parameters_json": "output/theory/frozen_parameters.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "cassini_corr_min",
+      "test_id": "cassini_sce1_doppler",
+      "title": "相関（±10日）が十分に高いこと",
+      "value": 0.963080175352264,
+      "op": ">=",
+      "threshold": 0.95,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "形状一致（中心付近の対称性・尖り）を最低限担保する。",
+      "source": {
+        "weak_field_longterm_consistency_json": "output/summary/weak_field_longterm_consistency.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "cassini_nrmse_max",
+      "test_id": "cassini_sce1_doppler",
+      "title": "正規化RMSE（±10日）が過大でないこと",
+      "value": 0.04451295843452894,
+      "op": "<=",
+      "threshold": 0.1,
+      "pass": true,
+      "gate": true,
+      "unit": "(RMSE)/(max_obs-min_obs)",
+      "rationale": "スケール依存を避けるため、観測振幅で正規化した誤差を用いる（10%は保守的な初版閾値）。",
+      "source": {
+        "cassini_fig2_metrics_csv": "output/cassini/cassini_fig2_metrics.csv"
+      },
+      "notes": ""
+    },
+    {
+      "id": "gps_rel_corr_min",
+      "test_id": "gps_satellite_clock",
+      "title": "dt_rel と P-model 周期成分の相関が高いこと",
+      "value": 0.9998184749022323,
+      "op": ">=",
+      "threshold": 0.99,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "少なくとも既知の近日点効果（周期成分）に対して整合することを要求する。",
+      "source": {
+        "gps_compare_metrics_json": "output/gps/gps_compare_metrics.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "gps_rms_ratio_max",
+      "test_id": "gps_satellite_clock",
+      "title": "P-model の中央値RMSが BRDC に対して極端に悪化しないこと",
+      "value": 1.2267059606281334,
+      "op": "<=",
+      "threshold": 2.0,
+      "pass": true,
+      "gate": false,
+      "unit": "(pmodel_rms_median)/(brdc_rms_median)",
+      "rationale": "現状は実装差/系統（衛星依存等）が残るため、初版では“破綻していない”条件として緩く監視する。",
+      "source": {
+        "gps_compare_metrics_json": "output/gps/gps_compare_metrics.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "llr_beta_frozen",
+      "test_id": "llr_batch",
+      "title": "β を frozen_parameters に固定して実行していること",
+      "value": 1.0000105000000001,
+      "op": "==",
+      "threshold": 1.0000105000000001,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "弱場統合では β を固定し、LLR でも同じ β で矛盾しないことを確認する。",
+      "source": {
+        "llr_batch_summary_json": "output/llr/batch/llr_batch_summary.json",
+        "frozen_parameters_json": "output/theory/frozen_parameters.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "llr_shapiro_improves",
+      "test_id": "llr_batch",
+      "title": "Shapiro項を除去するとRMSが悪化すること（中央値）",
+      "value": 0.7768229635398811,
+      "op": "<=",
+      "threshold": 0.95,
+      "pass": true,
+      "gate": true,
+      "unit": "(tropo+tide)/(tropo+no_shapiro)",
+      "rationale": "Shapiro項の符号/係数が逆だと、RMS改善が消えるため、最小の反証条件として採用する。",
+      "source": {
+        "llr_batch_summary_json": "output/llr/batch/llr_batch_summary.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "mercury_ref_agree",
+      "test_id": "mercury_perihelion_precession",
+      "title": "近日点移動（簡易）がおおむね一致すること（|Δ|≤1%）",
+      "value": 0.030043672932890602,
+      "op": "abs<=",
+      "threshold": 1.0,
+      "pass": true,
+      "gate": false,
+      "unit": "percent",
+      "rationale": "本スクリプトは精密暦ではないため、初版では“オーダー整合”の監視に留める。",
+      "source": {
+        "mercury_precession_metrics_json": "output/mercury/mercury_precession_metrics.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "viking_peak_range",
+      "test_id": "viking_shapiro_peak",
+      "title": "Shapiro遅延のピークがオーダー整合すること（100–400 μs）",
+      "value": 247.9578,
+      "op": "range",
+      "threshold": {
+        "min": 100.0,
+        "max": 400.0
+      },
+      "pass": true,
+      "gate": false,
+      "unit": "μs",
+      "rationale": "現状は観測時系列未導入のため、オーダー確認としてのみ扱う。",
+      "source": {
+        "viking_shapiro_result_csv": "output/viking/viking_shapiro_result.csv"
+      },
+      "notes": ""
+    }
+  ],
+  "summary": {
+    "gate_pass": true,
+    "gate_fail_n": 0,
+    "gate_unknown_n": 0,
+    "gate_fail_ids": [],
+    "gate_unknown_ids": []
+  }
+}

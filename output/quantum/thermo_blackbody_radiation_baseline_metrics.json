@@ -1,0 +1,66 @@
+{
+  "generated_utc": "2026-01-31T13:26:07.461371+00:00",
+  "phase": 7,
+  "step": "7.15.1",
+  "inputs": {
+    "blackbody_constants_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_blackbody_constants\\extracted_values.json",
+      "sha256": "ffe4c2234b9bf48c59898745bd5688a50a9f314e5e1eec63e172c24486032742"
+    }
+  },
+  "constants_si": {
+    "c_m_per_s": 299792458.0,
+    "h_J_s": 6.62607015e-34,
+    "hbar_J_s": 1.0545718176461565e-34,
+    "hbar_ref_truncated_J_s": 1.054571817e-34,
+    "kB_J_per_K": 1.380649e-23,
+    "sigma_ref_W_per_m2K4": 5.670374419e-08
+  },
+  "derived": {
+    "sigma_calc_W_per_m2K4": 5.6703744191844314e-08,
+    "sigma_rel_error": 3.252545325389619e-11,
+    "radiation_constant_a_J_per_m3K4": 7.565733250280007e-16,
+    "zeta3": 1.2020569031595942,
+    "photon_number_density_coeff_per_m3K3": 20286846.033907045,
+    "mean_photon_energy_coeff_kT": 2.7011780329190636
+  },
+  "examples": [
+    {
+      "T_K": 2.725,
+      "flux_W_per_m2": 3.126639160912178e-06,
+      "energy_density_J_per_m3": 4.1717382508831196e-14,
+      "photon_number_density_per_m3": 410500842.69444704,
+      "mean_photon_energy_eV": 0.0006342969231988442
+    },
+    {
+      "T_K": 77.0,
+      "flux_W_per_m2": 1.993309044429415,
+      "energy_density_J_per_m3": 2.6595853114215635e-08,
+      "photon_number_density_per_m3": 9261614680397.686,
+      "mean_photon_energy_eV": 0.017923252508737983
+    },
+    {
+      "T_K": 300.0,
+      "flux_W_per_m2": 459.30032795393896,
+      "energy_density_J_per_m3": 6.128243932726806e-06,
+      "photon_number_density_per_m3": 547744842915490.2,
+      "mean_photon_energy_eV": 0.06983085393014798
+    },
+    {
+      "T_K": 5772.0,
+      "flux_W_per_m2": 62938592.470335975,
+      "energy_density_J_per_m3": 0.8397621860165138,
+      "photon_number_density_per_m3": 3.90115764502091e+18,
+      "mean_photon_energy_eV": 1.3435456296160473
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_radiation_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_radiation_baseline.png"
+  },
+  "notes": [
+    "This is a baseline/consistency anchor for Step 7.15 (stat mech / thermo).",
+    "The formulas are standard; the purpose is to fix the numerical scales and provide a reproducible reference for later P-model extensions.",
+    "Example temperatures are illustrative only and are not treated as observational inputs."
+  ]
+}

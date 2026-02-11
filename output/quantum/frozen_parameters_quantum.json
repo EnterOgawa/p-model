@@ -1,0 +1,177 @@
+{
+  "generated_utc": "2026-02-11T02:47:25.036825+00:00",
+  "phase": 7,
+  "step": "7.18.3",
+  "name": "Quantum frozen parameters (Part III): centralized frozen values + audit hashes",
+  "policy": {
+    "note": "This JSON is the canonical index for Part III frozen values. The primary truth remains the referenced input files pinned by sha256."
+  },
+  "inputs": {
+    "theory_frozen_parameters_json": {
+      "path": "output/theory/frozen_parameters.json",
+      "sha256": "aecee79519da0400c3d4a3b0a95ec278359ad5201fd969f7b090a747a10a0d6f"
+    },
+    "bell_falsification_pack_json": {
+      "path": "output/quantum/bell/falsification_pack.json",
+      "sha256": "b47692d0d3c2abe38273e1787de4a8c702b1ec7b65ded67c3a84bccc1d195426"
+    },
+    "bell_freeze_policy_json": {
+      "path": "output/quantum/bell/freeze_policy.json",
+      "sha256": "d5ec5064710c05ca8fc96d8bf1678426a8727ab259511857f8b28c9a6e5928fd"
+    },
+    "nuclear_binding_energy_falsification_pack_json": {
+      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+      "sha256": "2b5951d57a3eba3bfb03c1da4ee30e6772640778e50dc4bd6aaa41a674ead637"
+    },
+    "nuclear_binding_energy_theory_diff_metrics_json": {
+      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
+      "sha256": "01ef95ee1995109c247e8f81f72b09a740a0f6465700bb79bb5be479390b60f9"
+    },
+    "nuclear_effective_potential_canonical_metrics_json": {
+      "path": "output/quantum/nuclear_effective_potential_canonical_metrics.json",
+      "sha256": "ebfb59839987e6c1442e2082c6100fb15154fb0d7ba8e8db2a9053491cc95373"
+    },
+    "nuclear_pairing_effect_systematics_metrics_json": {
+      "path": "output/quantum/nuclear_pairing_effect_systematics_metrics.json",
+      "sha256": "33d52bf62c7cdde6b852957b6eeeec25f6a7e3ff3cfa43e37fc1ff2a3280da03"
+    },
+    "condensed_falsification_pack_json": {
+      "path": "output/quantum/condensed_falsification_pack.json",
+      "sha256": "26420ffa5fe487ecfda8a90c468e92bfef40692819c63506c01c264324827206"
+    }
+  },
+  "frozen": {
+    "beta": {
+      "beta": 1.0000105000000001,
+      "beta_sigma": 1.15e-05,
+      "gamma_pmodel": 1.0000210000000003,
+      "gamma_pmodel_sigma": 2.3e-05,
+      "beta_source": "cassini2003",
+      "source": "output/theory/frozen_parameters.json"
+    },
+    "bell": {
+      "natural_window": {
+        "plateau_fraction_pairs": 0.99,
+        "overrides": {
+          "nist_*": "trial_match_pairs_total (match trial-based coincidence total)",
+          "kwiat2013_*": "dataset_recommendation (≈18000 timebins; PC-triggered trials)"
+        },
+        "note": "Natural window is defined operationally (to avoid p-hacking). See longterm_consistency.json."
+      },
+      "thresholds": {
+        "selection_origin_ratio_min": 1.0,
+        "delay_signature_z_min": 3.0,
+        "ks_delay_min_legacy": 0.01,
+        "note": "These are operational thresholds for this repository (not universal physics thresholds)."
+      },
+      "conditions": [
+        {
+          "id": "selection_origin_falsified_if_ratio_lt_1",
+          "statement": "selection sweep（window/offset）の変動幅 Δ(stat) が 1σ(stat) 未満なら、selection 起源仮説は棄却（このデータ範囲では）"
+        },
+        {
+          "id": "setting_delay_falsified_if_delay_z_lt_3",
+          "statement": "delay シグネチャ（Δmedian; z）が 3 未満なら、setting 依存重み仮説は棄却（このΔmedian定義では）"
+        },
+        {
+          "id": "setting_delay_falsified_if_ks_lt_0p01_legacy",
+          "statement": "legacy: delay 分布の setting 依存（KS）が 0.01 未満なら、setting 依存重み仮説は棄却（KSはproxyとして併記）"
+        }
+      ],
+      "blind_freeze_policy": {
+        "policy_id": "bell_freeze_policy_v1",
+        "source": "output/quantum/bell/freeze_policy.json"
+      },
+      "source": "output/quantum/bell/falsification_pack.json"
+    },
+    "nuclear": {
+      "binding_energy": {
+        "nu_sat_frozen": 1.5,
+        "thresholds": {
+          "z_median_abs_max": 3.0,
+          "z_delta_median_abs_max": 3.0,
+          "a_low_bin": [
+            40,
+            60
+          ],
+          "a_high_bin": [
+            250,
+            300
+          ],
+          "channel_decision_sigma_level": 3.0,
+          "note": "Operational thresholds for this repository (not universal physics thresholds)."
+        },
+        "conditions": [
+          {
+            "id": "median_residual_falsified_if_abs_z_median_gt_3",
+            "statement": "log10(B_pred/B_obs) の中央値が 0 から 3σ_proxy を超えてずれるなら、このI/Fは棄却（このσ_proxy定義では）"
+          },
+          {
+            "id": "a_trend_falsified_if_abs_z_delta_median_gt_3",
+            "statement": "A-bin（固定）での log10(B_pred/B_obs) の中央値差（high−low）が 3σ_proxy を超えるなら、A-trend を含むI/Fは棄却（手続き依存の入口）"
+          },
+          {
+            "id": "representative_nuclei_shape_falsified_if_many_fail",
+            "statement": "shape-only（median-normalized）でも代表核種の abs(z) が多数で 3 を超えるなら、距離I/F（R vs d）だけでは説明不十分（追加物理が必要）"
+          },
+          {
+            "id": "channel_precision_gate_for_3sigma_decision",
+            "statement": "差分チャネル（P-SEMF / P-Yukawa）の3σ決着は、対象核種で総相対不確かさ σ_rel(total) <= σ_req,rel を満たす場合のみ採用する"
+          },
+          {
+            "id": "channel_gate_requires_independent_crosschecks",
+            "statement": "差分チャネルの3σ判定は、独立cross-check（separation energies と charge-radius kink）の固定指標を併記し、半径kink strict（A_min=100, pairing凍結）と整合する場合に限って採用する"
+          }
+        ],
+        "source_pack": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+        "source_metrics_for_nu_sat": "output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
+      },
+      "effective_potential": {
+        "selected_channel_split_kq_from_7_13_8_4": {
+          "k_t_prev": 3.5,
+          "q_t_fixed": 1.3,
+          "k_s": 0.5,
+          "q_s": 1.0
+        },
+        "frozen_singlet_geometry_from_7_13_8_4": {
+          "r1_s_over_lambda_pi_pm_fixed": 0.45,
+          "r2_s_over_lambda_pi_pm_fixed": 1.5
+        },
+        "selected_triplet": {
+          "barrier_len_fraction_t": 0.1,
+          "k_t": 0.0,
+          "q_t_fixed": 1.3,
+          "rank": [
+            0,
+            0,
+            -0.012032676689866066,
+            0.04244410836446111,
+            0.4,
+            3.5,
+            0.1,
+            0.0
+          ]
+        },
+        "source": "output/quantum/nuclear_effective_potential_canonical_metrics.json"
+      },
+      "pairing_effect_systematics": {
+        "fit": {
+          "n_fit_rows": 3191,
+          "k_n_per_MeV": -1.4779752512101132,
+          "k_p_per_MeV": 1.7943788280513446,
+          "fit_target": "centered residual by A median (no intercept)"
+        },
+        "counts": {
+          "n_nuclei": 3556,
+          "n_with_delta_n": 3320,
+          "n_with_delta_p": 3201
+        },
+        "source": "output/quantum/nuclear_pairing_effect_systematics_metrics.json"
+      }
+    },
+    "condensed_thermo": {
+      "pack_json": "output/quantum/condensed_falsification_pack.json",
+      "tests_n": 8
+    }
+  }
+}

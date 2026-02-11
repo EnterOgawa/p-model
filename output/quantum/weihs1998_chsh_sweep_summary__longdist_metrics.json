@@ -1,0 +1,42 @@
+{
+  "generated_utc": "2026-01-24T21:11:55.969029+00:00",
+  "dataset": "Weihs et al. 1998 time-tag (Zenodo 7185335)",
+  "series": [
+    {
+      "subdir": "longdist",
+      "run": "longdist0",
+      "out_tag": "weihs1998_longdist_longdist0",
+      "csv": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_longdist_longdist0.csv",
+      "max_abs_S_fixed": 2.5886508520438447
+    },
+    {
+      "subdir": "longdist",
+      "run": "longdist1",
+      "out_tag": "weihs1998_longdist_longdist1",
+      "csv": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_longdist_longdist1.csv",
+      "max_abs_S_fixed": 2.9002764964975367
+    },
+    {
+      "subdir": "longdist",
+      "run": "longdist2",
+      "out_tag": "weihs1998_longdist_longdist2",
+      "csv": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_longdist_longdist2.csv",
+      "max_abs_S_fixed": 2.091223690740481
+    },
+    {
+      "subdir": "longdist",
+      "run": "longdist10",
+      "out_tag": "weihs1998_longdist_longdist10",
+      "csv": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_longdist_longdist10.csv",
+      "max_abs_S_fixed": 2.3457459766055386
+    }
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep_summary__longdist.png"
+  },
+  "repro": {
+    "fetch": "python -B scripts/quantum/fetch_weihs1998_zenodo_7185335.py  (offline cached in this repo)",
+    "per_run_sweep": "python -B scripts/quantum/weihs1998_time_tag_reanalysis.py --subdir longdist --run <run> --encoding bit0-setting --out-tag weihs1998_longdist_<run>",
+    "summary": "python -B scripts/quantum/weihs1998_chsh_sweep_summary.py"
+  }
+}

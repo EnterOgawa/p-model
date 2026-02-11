@@ -1,0 +1,392 @@
+{
+  "generated_utc": "2026-02-11T02:45:45.694350+00:00",
+  "table1": {
+    "title": "検証サマリ（Table 1）",
+    "rows": [
+      {
+        "topic": "LLR（月レーザー測距）",
+        "observable": "残差RMS（中央値, station×reflector）",
+        "data": "EDC CRD Normal Point",
+        "n": 13132,
+        "reference": "0（理想）",
+        "pmodel": "4.354171 ns",
+        "metric": "tropo+潮汐+海洋荷重まで含む",
+        "metric_public": "典型的なズレ: 0.653 m（小さいほど良い）"
+      },
+      {
+        "topic": "LLR（月レーザー測距：NGLR-1）",
+        "observable": "残差RMS（中央値, station×NGLR-1）",
+        "data": "EDC CRD Normal Point",
+        "n": 24,
+        "reference": "0（理想）",
+        "pmodel": "21.47871 ns",
+        "metric": "tropo+潮汐+海洋荷重まで含む（stations=APOL）",
+        "metric_public": "典型的なズレ: 3.22 m（小さいほど良い）"
+      },
+      {
+        "topic": "Cassini（太陽会合）",
+        "observable": "ドップラー y(t)（観測 vs P-model）",
+        "data": "PDS TDF（処理後）",
+        "n": 190,
+        "reference": "観測 y(t)",
+        "pmodel": "P-model y(t)（β凍結）",
+        "metric": "RMSE=7.069e-11 / corr=0.963081",
+        "metric_public": "形状の一致度: corr=0.963（1に近いほど一致）"
+      },
+      {
+        "topic": "Viking（太陽会合）",
+        "observable": "往復Shapiro遅延ピーク",
+        "data": "HORIZONS（Earth/Mars, Sun-center ICRF）",
+        "n": 355,
+        "reference": "文献代表値: 200-250 μs",
+        "pmodel": "247.96 μs",
+        "metric": "ピーク時刻=1976-11-25T00:00:00+00:00",
+        "metric_public": "文献代表レンジ(200–250 μs)内（目安）"
+      },
+      {
+        "topic": "Mercury（近日点移動）",
+        "observable": "近日点移動（角秒/世紀）",
+        "data": "数値シミュレーション（実C）",
+        "n": 200,
+        "reference": "42.98 ″/世紀（代表値）",
+        "pmodel": "42.992913 ″/世紀",
+        "metric": "差=0.012913 ″/世紀",
+        "metric_public": "代表値との差: 0.012913 ″/世紀（0.03%）（小さいほど良い）"
+      },
+      {
+        "topic": "GPS（衛星時計）",
+        "observable": "残差RMS（中央値, 衛星ごと）",
+        "data": "IGS Final CLK/SP3（準実測, 2025-10-01）",
+        "n": 31,
+        "reference": "BRDC: 0.3278 ns",
+        "pmodel": "P-model: 0.4022 ns",
+        "metric": "P-model優位=6/31",
+        "metric_public": "RMSが小さいほど良い。P-modelはBRDCより22.7%大きい（中央値）"
+      },
+      {
+        "topic": "光偏向（太陽）",
+        "observable": "PPN γ（GR=1）",
+        "data": "VLBI（Shapiro 2004）",
+        "n": 3,
+        "reference": "γ=0.99983±0.00026",
+        "pmodel": "γ=1.000021（β=1.000011）",
+        "metric": "z=-0.735 / 太陽縁α=1.7510415±0.0002276547 ″",
+        "metric_public": "観測との差: 0.73σ（0に近いほど一致）"
+      },
+      {
+        "topic": "重力赤方偏移",
+        "observable": "偏差 ε（GR=0）",
+        "data": "GP-A (1976)",
+        "n": null,
+        "reference": "ε=0.000e+00±7.000e-05",
+        "pmodel": "ε=0",
+        "metric": "z=+0.00 / 1980, 10.1103/PhysRevLett.45.2081",
+        "metric_public": "観測との差: 0σ（0に近いほど一致）"
+      },
+      {
+        "topic": "重力赤方偏移",
+        "observable": "偏差 ε（GR=0）",
+        "data": "Galileo 5/6 (2018)",
+        "n": null,
+        "reference": "ε=1.900e-06±2.480e-05",
+        "pmodel": "ε=0",
+        "metric": "z=+0.08 / 2018, 10.1103/PhysRevLett.121.231101",
+        "metric_public": "観測との差: 0.08σ（0に近いほど一致）"
+      },
+      {
+        "topic": "宇宙論（距離二重性）",
+        "observable": "η^(P)(z=1)（D_L/((1+z)D_A)）",
+        "data": "SNIa+BAO (2021)",
+        "n": null,
+        "reference": "η^(P)(z=1)=2.018±0.041",
+        "pmodel": "η^(P)=1（P-model最小; p=0）",
+        "metric": "Z_eps(FRW)=-0.448 / Z_eps(Pbg_static)=-34.93 / Z_eps_sys=7.75 / σ_cat=0.128 / p=1.013±0.029 / Z_eta(FRW)=-0.446 / Z_eta(Pbg_static)=-25.1 / Δε_needed=1.013 / no-BAO最小abs(z)=1.09→0.85 / 2021, 10.1051/0004-6361/202039637",
+        "metric_public": "η^(P)(z=1)の差: 25.1σ（距離推定I/F監査を前提） / 公表ε0での差: 34.9σ（σ_cat込み: 7.7σ） / 整合にはz=1でD_L×2.02（Δε=1.013）（Δμ=1.52 mag, τ=1.4） / no-BAO最小abs(z)=1.09→0.85"
+      },
+      {
+        "topic": "宇宙論（Tolman表面輝度）",
+        "observable": "指数 n（SB ∝ (1+z)^-n）",
+        "data": "R band (2001)",
+        "n": null,
+        "reference": "n=2.59±0.17",
+        "pmodel": "n=2（静的背景P最小）",
+        "metric": "z(FRW)=8.29 / z(Pbg_static)=-3.47 / evol_needed(Pbg)=-0.59 / 2001, 10.1086/322134",
+        "metric_public": "背景P（静的, n=2）との差: 3.5σ（大きいほど不一致） / 整合には進化補正が逆符号"
+      },
+      {
+        "topic": "宇宙論（Tolman表面輝度）",
+        "observable": "指数 n（SB ∝ (1+z)^-n）",
+        "data": "I band (2001)",
+        "n": null,
+        "reference": "n=3.37±0.13",
+        "pmodel": "n=2（静的背景P最小）",
+        "metric": "z(FRW)=4.85 / z(Pbg_static)=-10.54 / evol_needed(Pbg)=-1.37 / 2001, 10.1086/322134",
+        "metric_public": "背景P（静的, n=2）との差: 10.5σ（大きいほど不一致） / 整合には進化補正が逆符号"
+      },
+      {
+        "topic": "宇宙論（独立プローブ）",
+        "observable": "SN time dilation（p_t）",
+        "data": "SNIa spectra (2008)",
+        "n": null,
+        "reference": "p_t=0.97±0.1",
+        "pmodel": "p_t=1（背景P予測）",
+        "metric": "z=0.3 / 2008, arXiv:0804.3595",
+        "metric_public": "観測との差: 0.3σ（0に近いほど一致）"
+      },
+      {
+        "topic": "宇宙論（独立プローブ）",
+        "observable": "CMB温度スケーリング（p_T）",
+        "data": "SZ+distance (2011)",
+        "n": null,
+        "reference": "p_T=0.996±0.016",
+        "pmodel": "p_T=1（背景P予測）",
+        "metric": "z=0.25 / 2011, arXiv:1112.1862",
+        "metric_public": "観測との差: 0.25σ（0に近いほど一致）"
+      },
+      {
+        "topic": "JWST/MAST（スペクトル一次データ）",
+        "observable": "x1d→z（線同定；距離指標非依存）",
+        "data": "MAST public x1d（cache→QC→z候補→z確定）",
+        "n": 10,
+        "reference": "スペクトル一次データ（線のズレ）",
+        "pmodel": "1+z=P_em/P_obs（距離指標に依存しない）",
+        "metric": "targets=10 / x1d_qc_ok=9/10 / z_candidates=9/10 / z_confirmed=9/10 / release_wait=1; next_release=2026-04-09T20:45:23.996448+00:00 / Table1=not_adopted_yet / reason=proprietary_release_wait（公開待ちが残るため completeness が将来に依存）",
+        "metric_public": "targets=10 / x1d_qc_ok=9/10 / z_confirmed=9/10 / release_wait=1; next_release=2026-04-09T20:45:23.996448+00:00 / Table1=not_adopted_yet"
+      },
+      {
+        "topic": "XRISM（BH/AGN）",
+        "observable": "Fe-K吸収線→v/c（SRドップラー）",
+        "data": "Resolve（公開FITS; PI+RMF）",
+        "n": 5,
+        "reference": "β=(D^2−1)/(D^2+1), D=E_obs(1+z_sys)/E_rest",
+        "pmodel": "SRドップラー（δ上限が極小のため実質同一）",
+        "metric": "detected_obsids=5/5 / |β|_best≈0.092 / σ_total≈0.004 / sys/stat≈0.22",
+        "metric_public": "detected_obsids=5/5 / |β|_best≈0.092 / sys/stat≈0.22"
+      },
+      {
+        "topic": "XRISM（銀河団）",
+        "observable": "Fe-K輝線→z_xray（距離指標非依存）/ σ_v（線幅）",
+        "data": "Resolve（公開FITS; PI+RMF）",
+        "n": 3,
+        "reference": "z_opt（光学; catalog）",
+        "pmodel": "z_xray=z_opt（同一のz写像）",
+        "metric": "detected_obsids=2/3 / Δv(opt−X)≈474.5 km/s / σ_z_total≈2.62e-03 / sys/stat≈1.67",
+        "metric_public": "detected_obsids=2/3 / Δv(opt−X)≈474.5 km/s / sys/stat≈1.67"
+      },
+      {
+        "topic": "宇宙論（BAO一次統計）",
+        "observable": "AP warping ε（ξ0+ξ2; smooth+peak）",
+        "data": "BOSS DR12v5（CMASSLOWZTOT; combined; z-bin; MW multigrid; Ross cov）",
+        "n": 3,
+        "reference": "ε=0（距離写像が正しければ）",
+        "pmodel": "ε=0.036±0.012",
+        "metric": "z_eff=0.384 / pbg(b1): |z|=3.11σ / pbg(b1): ε=0.036±0.012 / lcdm(b1): ε=0.016±0.013 / Δε(pbg−lcdm)=0.02 / pre-recon(Satpathy cov) pbg(b1): |z|=2.45σ / pre-recon z_eff=0.384 / pre-recon pbg(b1): ε=0.036±0.015 / pre-recon lcdm(b1): ε=0.026±0.015 / pre-recon Δε(pbg−lcdm)=0.01 / P(k)window(post; Beutler) max|z|=1.71σ（zbin3: ε=0.04±0.023）",
+        "metric_public": "幾何の歪み（ε）: 3.1σ（0に近いほど一致）"
+      },
+      {
+        "topic": "宇宙論（BAO一次統計）",
+        "observable": "AP warping ε（ξ0+ξ2; smooth+peak）",
+        "data": "eBOSS DR16（LRGpCMASS; recon; combined; reservoir random=2M; diag）",
+        "n": 1,
+        "reference": "ε=0（距離写像が正しければ）",
+        "pmodel": "ε=0.008±0.01",
+        "metric": "z_eff=0.724 / pbg: |z|=0.82σ / pbg: ε=0.008±0.01 / lcdm: ε=-0.02±0.01 / Δε(pbg−lcdm)=0.028 / source=cosmology_bao_catalog_peakfit_lrgpcmass_rec_combined_metrics.json",
+        "metric_public": "幾何の歪み（ε）: 0.8σ（0に近いほど一致）"
+      },
+      {
+        "topic": "宇宙論（BAO一次統計）",
+        "observable": "AP warping ε（ξ0+ξ2; smooth+peak）",
+        "data": "eBOSS DR16（QSO; combined; reservoir random=2M; diag）",
+        "n": 1,
+        "reference": "ε=0（距離写像が正しければ）",
+        "pmodel": "ε=-0.006±0.015",
+        "metric": "pbg: |z|=0.4σ / z_eff=1.516 / pbg: ε=-0.006±0.015 / lcdm: ε=-0.004±0.013 / Δε(pbg−lcdm)=-0.002 / source=cosmology_bao_catalog_peakfit_qso_combined_metrics.json",
+        "metric_public": "幾何の歪み（ε）: 0.4σ（0に近いほど一致）"
+      },
+      {
+        "topic": "宇宙論（BAO一次統計）",
+        "observable": "AP warping ε（ξ0+ξ2; smooth+peak）",
+        "data": "DESI DR1（LRG; combined; y1bins; full random; RascalC）",
+        "n": 2,
+        "reference": "ε=0（距離写像が正しければ）",
+        "pmodel": "ε=0.02±0.016",
+        "metric": "LRG1: z_eff=0.51 / pbg: ε=8.33e-17±0.01 / |z|=8.7e-15σ / lcdm: ε=-0.022±0.014 / Δε(pbg−lcdm)=0.022 / LRG2: z_eff=0.706 / pbg: ε=0.02±0.016 / |z|=1.21σ / lcdm: ε=0.014±0.015 / Δε(pbg−lcdm)=0.006 / cov=RascalC（legendre_projected; dv+cov） / source=cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_reservoir_r0to17_mix_metrics.json",
+        "metric_public": "幾何の歪み（ε）: max|z|=1.2σ（0に近いほど一致）"
+      },
+      {
+        "topic": "回転（フレームドラッグ）",
+        "observable": "比 μ=|Ω_obs|/|Ω_pred|（GR=1）",
+        "data": "GP-B (2011)",
+        "n": null,
+        "reference": "μ=0.949±0.1837",
+        "pmodel": "μ=1",
+        "metric": "z=-0.278 / |Ω|=37.2±7.2 mas/yr（予測 39.2） / 2011, 10.1103/PhysRevLett.106.221101",
+        "metric_public": "観測との差: 0.28σ（1に近いほど一致）"
+      },
+      {
+        "topic": "回転（フレームドラッグ）",
+        "observable": "比 μ=|Ω_obs|/|Ω_pred|（GR=1）",
+        "data": "LAGEOS (2004)",
+        "n": null,
+        "reference": "μ=0.99±0.05",
+        "pmodel": "μ=1",
+        "metric": "z=-0.2 / 2004, 10.1038/nature03007",
+        "metric_public": "観測との差: 0.2σ（1に近いほど一致）"
+      },
+      {
+        "topic": "EHT（ブラックホール影）",
+        "observable": "リング直径（M87*）",
+        "data": "EHT公表値（リング~影の近似）",
+        "n": 1,
+        "reference": "42±3 μas",
+        "pmodel": "41.526±4.89 μas",
+        "metric": "z(P, κ=1)=0.083 / κ_fit=1.011±0.139 / 係数差(P/GR)=+4.628%",
+        "metric_public": "κ=1仮定の差: 0.08σ（0に近いほど一致）"
+      },
+      {
+        "topic": "EHT（ブラックホール影）",
+        "observable": "リング直径（Sgr A*）",
+        "data": "EHT公表値（リング~影の近似）",
+        "n": 1,
+        "reference": "51.8±2.3 μas",
+        "pmodel": "54.518±0.253 μas",
+        "metric": "z(P, κ=1)=-1.174 / κ_fit=0.95±0.042 / 係数差(P/GR)=+4.628%",
+        "metric_public": "κ=1仮定の差: 1.17σ（0に近いほど一致）"
+      },
+      {
+        "topic": "連星パルサー（軌道減衰）",
+        "observable": "一致度 R = Pdot_b(obs)/Pdot_b(P-model quad)（R=1が一致）",
+        "data": "一次ソース（Pb,e,m,Pdot_b補正）からPdot_b(quad)を再計算",
+        "n": 4,
+        "reference": "PSR B1913+16(Hulse?Taylor): 0.998292±0.0016 (1σ); PSR J0737?3039A/B(Double Pulsar): 0.999953±0.00013 (95%); PSR J1738+0333(NS-WD): 0.943158±0.116529 (1σ); PSR J0348+0432(NS-WD): 1.059881±0.173688 (1σ)",
+        "pmodel": "R=1（四重極則, 弱場必要条件）",
+        "metric": "追加放射上限（概算, 3σ）: PSR B1913+16(Hulse?Taylor): <0.651%; PSR J0737?3039A/B(Double Pulsar): <0.025%; PSR J1738+0333(NS-WD): <40.643%; PSR J0348+0432(NS-WD): <58.094%",
+        "metric_public": "R=1からのずれ: 最大 1.07σ（小さいほど良い） / 余分な放射はシステム依存（概算）"
+      },
+      {
+        "topic": "重力波（GW150914）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 38,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.4727, L1: R^2=0.6184 / H1: match=0.058, L1: match=0.018 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.05..-0.02 s, L1: wave=-0.674..-0.025 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "重力波（GW151226）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 48,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.0585, L1: R^2=0.8958 / H1: match=省略（短窓 n=2）, L1: match=0.007 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.195..-0.195 s, L1: wave=-0.91..-0.168 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz / 短窓などでmatchを省略する場合あり"
+      },
+      {
+        "topic": "重力波（GW170104）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 46,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.9468, L1: R^2=0.4766 / H1: match=0.033, L1: match=0.006 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.172..0.011 s, L1: wave=-6.505..-0.093 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "重力波（GW170817）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 188,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.9946, L1: R^2=0.9855 / H1: match=0.045, L1: match=0.009 / wave_f=70..300 Hz / window=-6..-0.1 s / H1: wave=-5.824..-0.063 s, L1: wave=-6.032..0.194 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "重力波（GW190425）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 190,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "L1: R^2=0.3567, V1: R^2=0.6276 / L1: match=6.23e-05, V1: match=0.007 / wave_f=70..300 Hz / window=-6..-0.1 s / L1: wave=-5.228..-1.19 s, V1: wave=-6.688..-1.045 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "重力波（GW200115_042309）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 183,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.573, L1: R^2=0.7391, V1: R^2=0.4794 / H1: match=0.024, L1: match=0.011, V1: match=0.002 / wave_f=70..300 Hz / window=-2..-0.1 s / H1: wave=-2.367..-0.507 s, L1: wave=-8.333..-0.473 s, V1: wave=-2.062..-0.493 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "重力波（GW200129_065458）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 221,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.0586, L1: R^2=0.3235, V1: R^2=0.8861 / H1: match=省略（短窓 n=1）, L1: match=0.247, V1: match=0.015 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.084..-0.084 s, L1: wave=-0.069..-0.026 s, V1: wave=-63.001..-0.289 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz / 短窓などでmatchを省略する場合あり"
+      },
+      {
+        "topic": "重力波（GW200224_222234）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 42,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.5597, L1: R^2=-2.22e-16, V1: R^2=0.7216 / H1: match=省略（短窓 n=4）, L1: match=0.163, V1: match=0.024 / wave_f=70..300 Hz / window=-0.1..-0.01 s / H1: wave=-0.011..-0.01 s, L1: wave=-0.077..-0.017 s, V1: wave=-4.789..0.186 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz / 短窓などでmatchを省略する場合あり"
+      },
+      {
+        "topic": "重力波（GW191216_213338）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 64,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.9106, V1: R^2=0.5192 / H1: match=0.07, V1: match=0.025 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.337..-0.009 s, V1: wave=-5.437..-0.046 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "重力波（GW200311_115853）",
+        "observable": "chirp位相（f(t)抽出→四重極チャープ則fit）",
+        "data": "GWOSC 公開 strain（32秒, 4 kHz, 検出器はイベントにより異なる）",
+        "n": 97,
+        "reference": "GR: t=t_c-A f^{-8/3}（Newton近似）",
+        "pmodel": "四重極チャープ則と整合（弱場の必要条件）",
+        "metric": "H1: R^2=0.044, L1: R^2=0.1159, V1: R^2=0.7076 / H1: match=0.205, L1: match=0.005, V1: match=0.02 / wave_f=70..300 Hz / window=-0.2..-0.01 s / H1: wave=-0.215..-0.123 s, L1: wave=-8.551..0.116 s, V1: wave=-7.938..0.108 s",
+        "metric_public": "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標） / match窓=70..300 Hz"
+      },
+      {
+        "topic": "速度飽和 δ（理論）",
+        "observable": "γ_max（v→cで発散しない）",
+        "data": "モデル仮定（δ>0, 無次元）",
+        "n": null,
+        "reference": "SR: γ→∞（v→c）",
+        "pmodel": "δ=1.0e-60 -> γ_max~=1.0e+30",
+        "metric": "観測からの上限（最も厳しい例）: δ < 1.00e-34（高エネルギーν（10 PeV, m=0.1 eV仮定））",
+        "metric_public": "δが小さいほど γ_max が大きくなり、SR（発散）に近い / 観測上限: δ<1.00e-34"
+      }
+    ],
+    "notes": [
+      "本表は、各テーマで固定した最終集計値から集計し、再計算は行わない。",
+      "βは Cassini 2003 の PPN γ から凍結し、β=1.0000105±1.15e-05 を以後固定する（PPN: (1+γ)=2β）。",
+      "光偏向（太陽）の γ は VLBI 等で推定された PPNパラメータ（一次ソース）で、P-model は γ=2β-1 で対応づける。",
+      "重力赤方偏移の ε は z_obs=(1+ε)ΔU/c^2 の偏差パラメータ（GRとP-model弱場予測は ε=0）。",
+      "距離二重性（DDR）は公表制約の形式 `D_L=(1+z)^(2+ε0)D_A` に基づくが、この(1+z)^2にはフラックス側(1+z)と膨張側 `D_A=D_M/(1+z)` が混在する。本表では P-model固有指標 `η^(P)=D_L/((1+z)D_A)`（p=1+ε0）を併記し、距離推定I/F監査を前提に差のスケールを示す（直ちに“物理棄却”とは解釈しない）。",
+      "Tolman表面輝度の指数 n は SB∝(1+z)^-n で表す（FRW: n=4、静的背景P最小: n=2）。観測から推定される n には銀河進化（系統）が混入するため、ここでは一次ソースの n を固定入力として扱い、差の符号/スケール（zスコア等）を目安として示す。",
+      "宇宙論（独立プローブ）の p_t（SN time dilation）と p_T（CMB T(z)）は距離指標と独立であり、背景Pの最小予測（p_t=1, p_T=1）と整合する。",
+      "宇宙論（BAO一次統計）の ε は AP warping パラメータ。銀河+randomから ξ0/ξ2 を再計算し、(i) post-recon は Ross 2016 full covariance（dv=[ξ0,ξ2]）、(ii) pre-recon クロスチェックは Satpathy 2016 full covariance を用いて smooth+peak peakfit で ε を評価する。加えて P(k) multipoles（Beutler et al.）の peakfit（窓関数込み）でも ε をクロスチェックする。",
+      "EHTは「リング直径~影直径」の近似で比較している（放射モデル/散乱/スピン依存は別途）。",
+      "EHTの指標欄には (i) κ=1仮定の整合性 z(P), (ii) κ_fit（リング/シャドウ比）, (iii) 係数差(P/GR) を併記する。",
+      "二重パルサーとGW150914は、動的現象（放射）に対する整合性チェックとして、四重極則に基づく観測量（Pdot_b と chirp）との一致度を示す（双極放射などの追加項は上限として評価）。",
+      "GW150914のchirp指標は、公開strainから抽出した f(t) を Newton近似の四重極チャープ則（t=t_c−A f^{-8/3}）へ当てはめた簡易指標であり、公式テンプレート解析の代替ではない。"
+    ]
+  }
+}

@@ -1,0 +1,1294 @@
+{
+  "generated_utc": "2026-01-27T01:52:03.644603+00:00",
+  "phase": 7,
+  "step": "7.13.15.27",
+  "scan": {
+    "domain_min_A_base": 16,
+    "domain_min_A_candidates": [
+      16,
+      40,
+      60,
+      80,
+      100
+    ],
+    "shell_variants": [
+      {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      },
+      {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    ]
+  },
+  "baseline": {
+    "radius_model": {
+      "form": "r_charge = (r0 + rI*I)*A^(1/3), I=(N-Z)/A",
+      "r0_fm": 0.9889628119917659,
+      "rI_fm": -0.2399027972384209,
+      "fit_min_A": 40,
+      "n_fit": 834,
+      "fit_rms_fm": 0.049233519426792,
+      "mean_I_fit": 0.15615935524157154,
+      "frozen_from_metrics": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json"
+    },
+    "coulomb_finite_size": {
+      "profile": "2pF (fixed a; c from r_rms via bisection)",
+      "a_fm": 0.523,
+      "dr_fm": 0.02,
+      "r_max_rule": "max(20, 3*r_rms + 20*a)",
+      "exchange": "Slater (LDA) on 2pF density",
+      "coef_slater": -0.7385587663820223,
+      "e2_MeV_fm": 1.43996448,
+      "cache_round_fm": 0.001
+    }
+  },
+  "shell_model": {
+    "form": "kN(I)=kN0+kN1*I, kZ(I)=kZ0+kZ1*I (I=(N-Z)/A)",
+    "train_magic": [
+      50,
+      82
+    ],
+    "note": "All coefficients are frozen using train magic only; other_magic is used for rejection (strict)."
+  },
+  "diag": {
+    "n_ame_total": 3556,
+    "n_in_domain_base": 3487,
+    "n_skipped_base": 0,
+    "n_cached_r_rms": 2062,
+    "best_gap_Sp_other_delta": {
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      },
+      "domain_min_A": 40,
+      "delta": 0.8958572668901262,
+      "pair": 0.7405351967980517,
+      "shell": 1.636392463688178,
+      "n": 49
+    },
+    "conclusion": "strict_pass=0/10 over shell variants × A_min cuts. This step adds a minimal structure DoF candidate by allowing the shell refreeze coefficients to depend linearly on isospin asymmetry kN(I)=kN0+kN1*I and kZ(I)=kZ0+kZ1*I, with all coefficients frozen on train magic N/Z in {50,82} only. If strict_pass==0, additional independently frozen structure inputs are still required."
+  },
+  "results": [
+    {
+      "status": "ok",
+      "domain_min_A": 16,
+      "n_in_domain": 3487,
+      "pairing": {
+        "a_n_MeV": 5.538988784156382,
+        "a_p_MeV": 6.615241823661158,
+        "n_samples_a_n": 2538,
+        "n_samples_a_p": 2446
+      },
+      "fit": {
+        "kN0": 0.12610665340174382,
+        "kN1": -0.24153138801611207,
+        "kZ0": 0.03578220293473191,
+        "kZ1": 0.25172649417273213,
+        "kZ_over_kN": 0.2837455595680498,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.5793638761474926,
+          "rms_resid_pairing_only_MeV": 1.5583473836988964,
+          "rms_resid_pairing_shell_MeV": 0.5876322912900106
+        },
+        "other_magic": {
+          "n": 61,
+          "rms_resid_uncorrected_MeV": 3.345127070738146,
+          "rms_resid_pairing_only_MeV": 1.3173617905838833,
+          "rms_resid_pairing_shell_MeV": 2.3300316884363337
+        },
+        "by_magic": {
+          "8": {
+            "n": 4,
+            "rms_resid_uncorrected_MeV": 5.0420745387359345,
+            "rms_resid_pairing_only_MeV": 0.7418462344395816,
+            "rms_resid_pairing_shell_MeV": 4.291977796761021
+          },
+          "20": {
+            "n": 18,
+            "rms_resid_uncorrected_MeV": 3.6191521257549804,
+            "rms_resid_pairing_only_MeV": 1.5479866984179744,
+            "rms_resid_pairing_shell_MeV": 2.636935763529965
+          },
+          "28": {
+            "n": 22,
+            "rms_resid_uncorrected_MeV": 3.208445719755318,
+            "rms_resid_pairing_only_MeV": 1.3251526179126878,
+            "rms_resid_pairing_shell_MeV": 2.2296817885996996
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.7427939167268587,
+            "rms_resid_pairing_only_MeV": 1.5221583974144284,
+            "rms_resid_pairing_shell_MeV": 0.6190365023450942
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.58871054033227,
+            "rms_resid_pairing_shell_MeV": 0.5593127261653786
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.1348813131296203,
+            "rms_resid_pairing_shell_MeV": 1.161978304996862
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.2241344066063116,
+          "rms_resid_pairing_shell_MeV": 0.4644330196305152
+        },
+        "other_magic": {
+          "n": 66,
+          "rms_resid_uncorrected_MeV": 3.554411810735127,
+          "rms_resid_pairing_only_MeV": 1.2427281622888622,
+          "rms_resid_pairing_shell_MeV": 2.4036553299485695
+        },
+        "by_magic": {
+          "8": {
+            "n": 10,
+            "rms_resid_uncorrected_MeV": 3.3211726856672694,
+            "rms_resid_pairing_only_MeV": 2.6552332980297972,
+            "rms_resid_pairing_shell_MeV": 4.928812747038023
+          },
+          "20": {
+            "n": 27,
+            "rms_resid_uncorrected_MeV": 3.8417952869203282,
+            "rms_resid_pairing_only_MeV": 0.8282607493588002,
+            "rms_resid_pairing_shell_MeV": 1.6505290467187967
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.347815661204878,
+            "rms_resid_pairing_only_MeV": 0.667046234816353,
+            "rms_resid_pairing_shell_MeV": 1.4951910708163532
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4692266350200627,
+            "rms_resid_pairing_shell_MeV": 0.4641938754746884
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.9058377638857029,
+            "rms_resid_pairing_shell_MeV": 0.46467849903329383
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 40,
+      "n_in_domain": 3255,
+      "pairing": {
+        "a_n_MeV": 5.575078300991934,
+        "a_p_MeV": 6.659905361097271,
+        "n_samples_a_n": 2416,
+        "n_samples_a_p": 2329
+      },
+      "fit": {
+        "kN0": 0.12525731800533554,
+        "kN1": -0.24163587853674873,
+        "kZ0": 0.03472831790475717,
+        "kZ1": 0.2519577694556585,
+        "kZ_over_kN": 0.27725579996274435,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.5793638761474926,
+          "rms_resid_pairing_only_MeV": 1.5459836169522607,
+          "rms_resid_pairing_shell_MeV": 0.5877131645614405
+        },
+        "other_magic": {
+          "n": 44,
+          "rms_resid_uncorrected_MeV": 3.1554998913286347,
+          "rms_resid_pairing_only_MeV": 1.1277062045808477,
+          "rms_resid_pairing_shell_MeV": 1.871712057880397
+        },
+        "by_magic": {
+          "20": {
+            "n": 6,
+            "rms_resid_uncorrected_MeV": 3.952839065651759,
+            "rms_resid_pairing_only_MeV": 0.6643939996598983,
+            "rms_resid_pairing_shell_MeV": 2.334341187041127
+          },
+          "28": {
+            "n": 21,
+            "rms_resid_uncorrected_MeV": 3.278453509247234,
+            "rms_resid_pairing_only_MeV": 1.2302081728772285,
+            "rms_resid_pairing_shell_MeV": 2.1699889862030703
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.7427939167268587,
+            "rms_resid_pairing_only_MeV": 1.509102983662379,
+            "rms_resid_pairing_shell_MeV": 0.619117862789416
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5769092092132164,
+            "rms_resid_pairing_shell_MeV": 0.5593933399209097
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.1252598405233611,
+            "rms_resid_pairing_shell_MeV": 1.1520997798102393
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.2109418936615313,
+          "rms_resid_pairing_shell_MeV": 0.4643647330217894
+        },
+        "other_magic": {
+          "n": 49,
+          "rms_resid_uncorrected_MeV": 3.48820045630458,
+          "rms_resid_pairing_only_MeV": 0.7405351967980517,
+          "rms_resid_pairing_shell_MeV": 1.6565399764511994
+        },
+        "by_magic": {
+          "20": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.6822639598754967,
+            "rms_resid_pairing_only_MeV": 0.8341207637500699,
+            "rms_resid_pairing_shell_MeV": 1.8629255863685972
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.347815661204878,
+            "rms_resid_pairing_only_MeV": 0.6684020454569428,
+            "rms_resid_pairing_shell_MeV": 1.4977255765686672
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4539523653314284,
+            "rms_resid_pairing_shell_MeV": 0.46414736367905474
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8951426878864691,
+            "rms_resid_pairing_shell_MeV": 0.4645878713496277
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 60,
+      "n_in_domain": 3001,
+      "pairing": {
+        "a_n_MeV": 5.604303040768533,
+        "a_p_MeV": 6.6947260464427165,
+        "n_samples_a_n": 2323,
+        "n_samples_a_p": 2237
+      },
+      "fit": {
+        "kN0": 0.12456953909126649,
+        "kN1": -0.24172049281753707,
+        "kZ0": 0.03390668570412509,
+        "kZ1": 0.252138076988834,
+        "kZ_over_kN": 0.2721908257144886,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.5793638761474926,
+          "rms_resid_pairing_only_MeV": 1.535989099402701,
+          "rms_resid_pairing_shell_MeV": 0.5877786884748949
+        },
+        "other_magic": {
+          "n": 18,
+          "rms_resid_uncorrected_MeV": 2.70791459174134,
+          "rms_resid_pairing_only_MeV": 1.1015000199689677,
+          "rms_resid_pairing_shell_MeV": 1.2039968774357177
+        },
+        "by_magic": {
+          "28": {
+            "n": 1,
+            "rms_resid_uncorrected_MeV": 3.652061165854491,
+            "rms_resid_pairing_only_MeV": 0.7815138010637952,
+            "rms_resid_pairing_shell_MeV": 1.9596870113201135
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.7427939167268587,
+            "rms_resid_pairing_only_MeV": 1.4985634216742107,
+            "rms_resid_pairing_shell_MeV": 0.6191838185262979
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5673571341871486,
+            "rms_resid_pairing_shell_MeV": 0.559458618331742
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.117472922967034,
+            "rms_resid_pairing_shell_MeV": 1.14410456827246
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.2006804098252513,
+          "rms_resid_pairing_shell_MeV": 0.4643115227411334
+        },
+        "other_magic": {
+          "n": 19,
+          "rms_resid_uncorrected_MeV": 3.2344529562188766,
+          "rms_resid_pairing_only_MeV": 0.6247816316948275,
+          "rms_resid_pairing_shell_MeV": 1.7012081643211643
+        },
+        "by_magic": {
+          "28": {
+            "n": 19,
+            "rms_resid_uncorrected_MeV": 3.2344529562188766,
+            "rms_resid_pairing_only_MeV": 0.6247816316948275,
+            "rms_resid_pairing_shell_MeV": 1.7012081643211643
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4420615622474346,
+            "rms_resid_pairing_shell_MeV": 0.46411113486065875
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8868396609479858,
+            "rms_resid_pairing_shell_MeV": 0.46451723652893223
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 80,
+      "n_in_domain": 2730,
+      "pairing": {
+        "a_n_MeV": 5.615758171076965,
+        "a_p_MeV": 6.7753574906386005,
+        "n_samples_a_n": 2134,
+        "n_samples_a_p": 2052
+      },
+      "fit": {
+        "kN0": 0.1162342486928304,
+        "kN1": -0.16051697113644608,
+        "kZ0": 0.03200410025498952,
+        "kZ1": 0.2525555908432417,
+        "kZ_over_kN": 0.2753413956291491,
+        "n_fit_pairs_kN": 48,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 48,
+          "rms_resid_uncorrected_MeV": 3.6171534222613237,
+          "rms_resid_pairing_only_MeV": 1.5800807765441454,
+          "rms_resid_pairing_shell_MeV": 0.5593775566887106
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.6418896433718175,
+          "rms_resid_pairing_only_MeV": 1.114421818057144,
+          "rms_resid_pairing_shell_MeV": 1.1414386047935803
+        },
+        "by_magic": {
+          "50": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.8601199341041803,
+            "rms_resid_pairing_only_MeV": 1.602849848578106,
+            "rms_resid_pairing_shell_MeV": 0.6474489080115502
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5636141714181606,
+            "rms_resid_pairing_shell_MeV": 0.48681010799131874
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.114421818057144,
+            "rms_resid_pairing_shell_MeV": 1.1414386047935803
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.177001573331885,
+          "rms_resid_pairing_shell_MeV": 0.4641627657736813
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4145875836128696,
+            "rms_resid_pairing_shell_MeV": 0.4639123208460559
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8677362217035567,
+            "rms_resid_pairing_shell_MeV": 0.46441983890263977
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 100,
+      "n_in_domain": 2435,
+      "pairing": {
+        "a_n_MeV": 5.675679178740438,
+        "a_p_MeV": 6.80103425506131,
+        "n_samples_a_n": 1918,
+        "n_samples_a_p": 1840
+      },
+      "fit": {
+        "kN0": 0.11200815203863905,
+        "kN1": -0.04101363616869519,
+        "kZ0": 0.03139822767268838,
+        "kZ1": 0.25268855620210506,
+        "kZ_over_kN": 0.28032091505140666,
+        "n_fit_pairs_kN": 28,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 28,
+          "rms_resid_uncorrected_MeV": 3.4330943358887387,
+          "rms_resid_pairing_only_MeV": 1.5440452041641826,
+          "rms_resid_pairing_shell_MeV": 0.3971262290090294
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.6418896433718175,
+          "rms_resid_pairing_only_MeV": 1.0984719081126093,
+          "rms_resid_pairing_shell_MeV": 1.1282589747983625
+        },
+        "by_magic": {
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5440452041641826,
+            "rms_resid_pairing_shell_MeV": 0.3971262290090294
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.0984719081126093,
+            "rms_resid_pairing_shell_MeV": 1.1282589747983625
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.1694863326297773,
+          "rms_resid_pairing_shell_MeV": 0.4640869157992776
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4058570304167133,
+            "rms_resid_pairing_shell_MeV": 0.4637175522970621
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8616903492656348,
+            "rms_resid_pairing_shell_MeV": 0.46446595634963944
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 16,
+      "n_in_domain": 3487,
+      "pairing": {
+        "a_n_MeV": 5.538988784156382,
+        "a_p_MeV": 6.615241823661158,
+        "n_samples_a_n": 2538,
+        "n_samples_a_p": 2446
+      },
+      "fit": {
+        "kN0": 0.12298960154108712,
+        "kN1": -0.23694902596084136,
+        "kZ0": 0.0344851307184093,
+        "kZ1": 0.23998695059766292,
+        "kZ_over_kN": 0.28039062072161325,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.5793638761474926,
+          "rms_resid_pairing_only_MeV": 1.5583473836988964,
+          "rms_resid_pairing_shell_MeV": 0.5643691499729947
+        },
+        "other_magic": {
+          "n": 61,
+          "rms_resid_uncorrected_MeV": 3.345127070738146,
+          "rms_resid_pairing_only_MeV": 1.3173617905838833,
+          "rms_resid_pairing_shell_MeV": 2.2619213825104376
+        },
+        "by_magic": {
+          "8": {
+            "n": 4,
+            "rms_resid_uncorrected_MeV": 5.0420745387359345,
+            "rms_resid_pairing_only_MeV": 0.7418462344395816,
+            "rms_resid_pairing_shell_MeV": 4.355434442132537
+          },
+          "20": {
+            "n": 18,
+            "rms_resid_uncorrected_MeV": 3.6191521257549804,
+            "rms_resid_pairing_only_MeV": 1.5479866984179744,
+            "rms_resid_pairing_shell_MeV": 2.678733262408786
+          },
+          "28": {
+            "n": 22,
+            "rms_resid_uncorrected_MeV": 3.208445719755318,
+            "rms_resid_pairing_only_MeV": 1.3251526179126878,
+            "rms_resid_pairing_shell_MeV": 2.1838022956072893
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.7427939167268587,
+            "rms_resid_pairing_only_MeV": 1.5221583974144284,
+            "rms_resid_pairing_shell_MeV": 0.6029473138337544
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.58871054033227,
+            "rms_resid_pairing_shell_MeV": 0.529067941516033
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.1348813131296203,
+            "rms_resid_pairing_shell_MeV": 0.3544261112949068
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.2241344066063116,
+          "rms_resid_pairing_shell_MeV": 0.48409296854185857
+        },
+        "other_magic": {
+          "n": 66,
+          "rms_resid_uncorrected_MeV": 3.554411810735127,
+          "rms_resid_pairing_only_MeV": 1.2427281622888622,
+          "rms_resid_pairing_shell_MeV": 2.3822577213532843
+        },
+        "by_magic": {
+          "8": {
+            "n": 10,
+            "rms_resid_uncorrected_MeV": 3.3211726856672694,
+            "rms_resid_pairing_only_MeV": 2.6552332980297972,
+            "rms_resid_pairing_shell_MeV": 4.892766472940224
+          },
+          "20": {
+            "n": 27,
+            "rms_resid_uncorrected_MeV": 3.8417952869203282,
+            "rms_resid_pairing_only_MeV": 0.8282607493588002,
+            "rms_resid_pairing_shell_MeV": 1.661494287065603
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.347815661204878,
+            "rms_resid_pairing_only_MeV": 0.667046234816353,
+            "rms_resid_pairing_shell_MeV": 1.4459596073262242
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4692266350200627,
+            "rms_resid_pairing_shell_MeV": 0.4847900020590872
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.9058377638857029,
+            "rms_resid_pairing_shell_MeV": 0.4833760500365331
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 40,
+      "n_in_domain": 3255,
+      "pairing": {
+        "a_n_MeV": 5.575078300991934,
+        "a_p_MeV": 6.659905361097271,
+        "n_samples_a_n": 2416,
+        "n_samples_a_p": 2329
+      },
+      "fit": {
+        "kN0": 0.12216043968941008,
+        "kN1": -0.23697775917681038,
+        "kZ0": 0.033447444955497306,
+        "kZ1": 0.24032414150468223,
+        "kZ_over_kN": 0.2737993170337027,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.5793638761474926,
+          "rms_resid_pairing_only_MeV": 1.5459836169522607,
+          "rms_resid_pairing_shell_MeV": 0.5646933627289181
+        },
+        "other_magic": {
+          "n": 44,
+          "rms_resid_uncorrected_MeV": 3.1554998913286347,
+          "rms_resid_pairing_only_MeV": 1.1277062045808477,
+          "rms_resid_pairing_shell_MeV": 1.729618934420732
+        },
+        "by_magic": {
+          "20": {
+            "n": 6,
+            "rms_resid_uncorrected_MeV": 3.952839065651759,
+            "rms_resid_pairing_only_MeV": 0.6643939996598983,
+            "rms_resid_pairing_shell_MeV": 2.408677409970294
+          },
+          "28": {
+            "n": 21,
+            "rms_resid_uncorrected_MeV": 3.278453509247234,
+            "rms_resid_pairing_only_MeV": 1.2302081728772285,
+            "rms_resid_pairing_shell_MeV": 2.1233445915625837
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.7427939167268587,
+            "rms_resid_pairing_only_MeV": 1.509102983662379,
+            "rms_resid_pairing_shell_MeV": 0.6033038337368223
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5769092092132164,
+            "rms_resid_pairing_shell_MeV": 0.5293619644739359
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.1252598405233611,
+            "rms_resid_pairing_shell_MeV": 0.3546990794867233
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.2109418936615313,
+          "rms_resid_pairing_shell_MeV": 0.4837295058585228
+        },
+        "other_magic": {
+          "n": 49,
+          "rms_resid_uncorrected_MeV": 3.48820045630458,
+          "rms_resid_pairing_only_MeV": 0.7405351967980517,
+          "rms_resid_pairing_shell_MeV": 1.636392463688178
+        },
+        "by_magic": {
+          "20": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.6822639598754967,
+            "rms_resid_pairing_only_MeV": 0.8341207637500699,
+            "rms_resid_pairing_shell_MeV": 1.8751498648467813
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.347815661204878,
+            "rms_resid_pairing_only_MeV": 0.6684020454569428,
+            "rms_resid_pairing_shell_MeV": 1.4489888763864665
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4539523653314284,
+            "rms_resid_pairing_shell_MeV": 0.4845068127217286
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8951426878864691,
+            "rms_resid_pairing_shell_MeV": 0.48292988839958756
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 60,
+      "n_in_domain": 3001,
+      "pairing": {
+        "a_n_MeV": 5.604303040768533,
+        "a_p_MeV": 6.6947260464427165,
+        "n_samples_a_n": 2323,
+        "n_samples_a_p": 2237
+      },
+      "fit": {
+        "kN0": 0.12148899700624546,
+        "kN1": -0.23700102637057932,
+        "kZ0": 0.03263844206385638,
+        "kZ1": 0.24058702320471662,
+        "kZ_over_kN": 0.26865348194601124,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.5793638761474926,
+          "rms_resid_pairing_only_MeV": 1.535989099402701,
+          "rms_resid_pairing_shell_MeV": 0.564956306903359
+        },
+        "other_magic": {
+          "n": 18,
+          "rms_resid_uncorrected_MeV": 2.70791459174134,
+          "rms_resid_pairing_only_MeV": 1.1015000199689677,
+          "rms_resid_pairing_shell_MeV": 0.5641520157779615
+        },
+        "by_magic": {
+          "28": {
+            "n": 1,
+            "rms_resid_uncorrected_MeV": 3.652061165854491,
+            "rms_resid_pairing_only_MeV": 0.7815138010637952,
+            "rms_resid_pairing_shell_MeV": 1.8940200378403347
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.7427939167268587,
+            "rms_resid_pairing_only_MeV": 1.4985634216742107,
+            "rms_resid_pairing_shell_MeV": 0.6035929422003714
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5673571341871486,
+            "rms_resid_pairing_shell_MeV": 0.5296004604529538
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.117472922967034,
+            "rms_resid_pairing_shell_MeV": 0.3549236074038342
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.2006804098252513,
+          "rms_resid_pairing_shell_MeV": 0.48344656640179784
+        },
+        "other_magic": {
+          "n": 19,
+          "rms_resid_uncorrected_MeV": 3.2344529562188766,
+          "rms_resid_pairing_only_MeV": 0.6247816316948275,
+          "rms_resid_pairing_shell_MeV": 1.6410986255713307
+        },
+        "by_magic": {
+          "28": {
+            "n": 19,
+            "rms_resid_uncorrected_MeV": 3.2344529562188766,
+            "rms_resid_pairing_only_MeV": 0.6247816316948275,
+            "rms_resid_pairing_shell_MeV": 1.6410986255713307
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4420615622474346,
+            "rms_resid_pairing_shell_MeV": 0.4842864484982958
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8868396609479858,
+            "rms_resid_pairing_shell_MeV": 0.4825824632755632
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 80,
+      "n_in_domain": 2730,
+      "pairing": {
+        "a_n_MeV": 5.615758171076965,
+        "a_p_MeV": 6.7753574906386005,
+        "n_samples_a_n": 2134,
+        "n_samples_a_p": 2052
+      },
+      "fit": {
+        "kN0": 0.11407845439010778,
+        "kN1": -0.16624247479031487,
+        "kZ0": 0.030765101244981493,
+        "kZ1": 0.24119574763939522,
+        "kZ_over_kN": 0.2696837138043243,
+        "n_fit_pairs_kN": 48,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 48,
+          "rms_resid_uncorrected_MeV": 3.6171534222613237,
+          "rms_resid_pairing_only_MeV": 1.5800807765441454,
+          "rms_resid_pairing_shell_MeV": 0.5378664255580332
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.6418896433718175,
+          "rms_resid_pairing_only_MeV": 1.114421818057144,
+          "rms_resid_pairing_shell_MeV": 0.32952619409435036
+        },
+        "by_magic": {
+          "50": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.8601199341041803,
+            "rms_resid_pairing_only_MeV": 1.602849848578106,
+            "rms_resid_pairing_shell_MeV": 0.6248588891520164
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5636141714181606,
+            "rms_resid_pairing_shell_MeV": 0.46588783814952167
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.114421818057144,
+            "rms_resid_pairing_shell_MeV": 0.32952619409435036
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.177001573331885,
+          "rms_resid_pairing_shell_MeV": 0.48281899725540506
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4145875836128696,
+            "rms_resid_pairing_shell_MeV": 0.4836022963696601
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8677362217035567,
+            "rms_resid_pairing_shell_MeV": 0.4820132029214297
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 100,
+      "n_in_domain": 2435,
+      "pairing": {
+        "a_n_MeV": 5.675679178740438,
+        "a_p_MeV": 6.80103425506131,
+        "n_samples_a_n": 1918,
+        "n_samples_a_p": 1840
+      },
+      "fit": {
+        "kN0": 0.10369204345337649,
+        "kN1": -0.03798503739148146,
+        "kZ0": 0.03016854153843936,
+        "kZ1": 0.24138960298885245,
+        "kZ_over_kN": 0.29094364942286216,
+        "n_fit_pairs_kN": 28,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 28,
+          "rms_resid_uncorrected_MeV": 3.4330943358887387,
+          "rms_resid_pairing_only_MeV": 1.5440452041641826,
+          "rms_resid_pairing_shell_MeV": 0.39712150290418174
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.6418896433718175,
+          "rms_resid_pairing_only_MeV": 1.0984719081126093,
+          "rms_resid_pairing_shell_MeV": 0.38653380870584775
+        },
+        "by_magic": {
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.4330943358887387,
+            "rms_resid_pairing_only_MeV": 1.5440452041641826,
+            "rms_resid_pairing_shell_MeV": 0.39712150290418174
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.6418896433718175,
+            "rms_resid_pairing_only_MeV": 1.0984719081126093,
+            "rms_resid_pairing_shell_MeV": 0.38653380870584775
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.317533138277639,
+          "rms_resid_pairing_only_MeV": 1.1694863326297773,
+          "rms_resid_pairing_shell_MeV": 0.4826609187051759
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 3.836823032806191,
+            "rms_resid_pairing_only_MeV": 1.4058570304167133,
+            "rms_resid_pairing_shell_MeV": 0.48312706328212474
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 2.681497876263611,
+            "rms_resid_pairing_only_MeV": 0.8616903492656348,
+            "rms_resid_pairing_shell_MeV": 0.4821817065517305
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    }
+  ],
+  "inputs": {
+    "ame2020_extracted": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_amdc_ame2020_mass_1_mas20\\extracted_values.json",
+      "sha256": "612448cecf66277b94672a3f389b6d71ebf5fe24861b5fce6cbb7555f6990565"
+    },
+    "iaea_charge_radii_csv": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_charge_radii\\charge_radii.csv",
+      "sha256": "683d028dae93235376ddf7a345f736561ee7c0dba070091912c034bdf740eee6"
+    },
+    "metrics_7_13_15": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json",
+      "sha256": "a7bd0b9a3403cd20f9e11caf08ee4668e2f73accbfa6db8cec5b8ea968ab0df9"
+    },
+    "metrics_7_13_15_7": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_surface_term_metrics.json",
+      "sha256": "76a872d4fd4763d103fc5918aeacb67b0d11c77e375b7bc120b16a0535ac296a"
+    },
+    "metrics_7_13_15_23": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json",
+      "sha256": "7e5c8924bc11fd7703cf378351185f2d9ec536249748d00642774fd514bfb3d6"
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.csv"
+  }
+}

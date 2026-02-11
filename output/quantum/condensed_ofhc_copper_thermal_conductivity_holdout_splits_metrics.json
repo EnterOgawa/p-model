@@ -1,0 +1,294 @@
+{
+  "generated_utc": "2026-02-11T02:47:23.939146+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_ofhc_copper_thermal_conductivity\\extracted_values.json",
+      "sha256": "64c84f5035551a06b039d2555a6a649be9cb3f93b5b775dc300dcdb026ee6d8c"
+    }
+  },
+  "assumptions": {
+    "sigma_proxy": {
+      "kappa": "NIST curve-fit relative error percent used as 1σ proxy (per RRR)"
+    },
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test range)"
+    },
+    "models": {
+      "rational9_refit": "re-fit NIST rational form via linearized least squares (cross-multiplication)",
+      "logpoly2": "quadratic in log10(T) for log10(kappa); expected to degrade near low-T peak"
+    }
+  },
+  "splits": [
+    {
+      "name": "RRR100_A_low_to_high",
+      "train_T_K": [
+        4.0,
+        40.0
+      ],
+      "test_T_K": [
+        40.0,
+        300.0
+      ],
+      "meta": {
+        "rrr": 100,
+        "fit_error_percent_relative_to_data": 1.0
+      },
+      "models": {
+        "rational9_refit": {
+          "params": {
+            "a": 2.215399999997019,
+            "b": -0.4746100000021462,
+            "c": -0.8806799999997716,
+            "d": 0.13871000000007458,
+            "e": 0.29504999999680814,
+            "f": -0.020429999999952264,
+            "g": -0.0483099999992683,
+            "h": 0.0012809999999964239,
+            "i": 0.00320699999995544
+          },
+          "train": {
+            "n": 224,
+            "max_abs_z": 1.0499481567967199e-09,
+            "rms_z": 3.7379919693636925e-10,
+            "reduced_chi2": 1.4557482826596043e-19,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 196,
+            "max_abs_z": 4.9451788761117706e-09,
+            "rms_z": 3.1744063047567427e-09,
+            "reduced_chi2": 1.0076855387679359e-17,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "logpoly2": {
+          "params": {
+            "a0": 1.3214429378492663,
+            "a1": 3.0248148863124076,
+            "a2": -1.1306675398660158
+          },
+          "train": {
+            "n": 224,
+            "max_abs_z": 23.46238335691307,
+            "rms_z": 7.84550953061326,
+            "reduced_chi2": 62.38756757496535,
+            "exceed_3sigma_n": 179
+          },
+          "test": {
+            "n": 196,
+            "max_abs_z": 87.31264391196736,
+            "rms_z": 58.974550489874765,
+            "reduced_chi2": 3477.9976054827875,
+            "exceed_3sigma_n": 192
+          }
+        }
+      }
+    },
+    {
+      "name": "RRR100_B_high_to_low",
+      "train_T_K": [
+        40.0,
+        300.0
+      ],
+      "test_T_K": [
+        4.0,
+        40.0
+      ],
+      "meta": {
+        "rrr": 100,
+        "fit_error_percent_relative_to_data": 1.0
+      },
+      "models": {
+        "rational9_refit": {
+          "params": {
+            "a": 2.2154000003668273,
+            "b": -0.47460999991190983,
+            "c": -0.8806799999129797,
+            "d": 0.1387099999650982,
+            "e": 0.29504999992798636,
+            "f": -0.020429999995063716,
+            "g": -0.0483099999882798,
+            "h": 0.001280999999747845,
+            "i": 0.0032069999993696308
+          },
+          "train": {
+            "n": 196,
+            "max_abs_z": 1.4611563584590006e-08,
+            "rms_z": 6.192978033423116e-09,
+            "reduced_chi2": 4.019884212193799e-17,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 224,
+            "max_abs_z": 6.681229890779542e-08,
+            "rms_z": 3.2061917795886116e-08,
+            "reduced_chi2": 1.0279665727501589e-15,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "logpoly2": {
+          "params": {
+            "a0": 9.132097472286972,
+            "a1": -5.790660530144886,
+            "a2": 1.2809366071643593
+          },
+          "train": {
+            "n": 196,
+            "max_abs_z": 12.168791081579732,
+            "rms_z": 4.876870877849294,
+            "reduced_chi2": 24.153567013502855,
+            "exceed_3sigma_n": 137
+          },
+          "test": {
+            "n": 224,
+            "max_abs_z": 200506.80125739728,
+            "rms_z": 42715.882154834595,
+            "reduced_chi2": 1824646588.2657163,
+            "exceed_3sigma_n": 216
+          }
+        }
+      }
+    },
+    {
+      "name": "RRR300_A_low_to_high",
+      "train_T_K": [
+        4.0,
+        40.0
+      ],
+      "test_T_K": [
+        40.0,
+        300.0
+      ],
+      "meta": {
+        "rrr": 300,
+        "fit_error_percent_relative_to_data": 1.0
+      },
+      "models": {
+        "rational9_refit": {
+          "params": {
+            "a": 1.3569999999889408,
+            "b": 0.3981000000007259,
+            "c": 2.6690000000231264,
+            "d": -0.13460000000779615,
+            "e": -0.6683000000358152,
+            "f": 0.013420000001949206,
+            "g": 0.0577300000074558,
+            "h": 0.0002146999998182686,
+            "i": -5.825340210208196e-13
+          },
+          "train": {
+            "n": 224,
+            "max_abs_z": 3.189334833227921e-10,
+            "rms_z": 2.33948962846424e-10,
+            "reduced_chi2": 5.702322910041636e-20,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 196,
+            "max_abs_z": 7.343054220209985e-09,
+            "rms_z": 2.7266248372448726e-09,
+            "reduced_chi2": 7.434483003080627e-18,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "logpoly2": {
+          "params": {
+            "a0": 1.4587914302399154,
+            "a1": 3.9189130891371935,
+            "a2": -1.712483639506302
+          },
+          "train": {
+            "n": 224,
+            "max_abs_z": 19.494713006811313,
+            "rms_z": 7.955103152267713,
+            "reduced_chi2": 64.14272045502813,
+            "exceed_3sigma_n": 181
+          },
+          "test": {
+            "n": 196,
+            "max_abs_z": 98.85541737621931,
+            "rms_z": 64.6864533746241,
+            "reduced_chi2": 4184.337250187417,
+            "exceed_3sigma_n": 193
+          }
+        }
+      }
+    },
+    {
+      "name": "RRR300_B_high_to_low",
+      "train_T_K": [
+        40.0,
+        300.0
+      ],
+      "test_T_K": [
+        4.0,
+        40.0
+      ],
+      "meta": {
+        "rrr": 300,
+        "fit_error_percent_relative_to_data": 1.0
+      },
+      "models": {
+        "rational9_refit": {
+          "params": {
+            "a": 1.357000000339174,
+            "b": 0.3980999999398648,
+            "c": 2.6689999996601865,
+            "d": -0.13459999998547117,
+            "e": -0.6682999999305962,
+            "f": 0.013419999998765975,
+            "g": 0.057729999994604375,
+            "h": 0.0002146999999781407,
+            "i": -4.218847493575595e-15
+          },
+          "train": {
+            "n": 196,
+            "max_abs_z": 8.79099640623795e-09,
+            "rms_z": 3.515899168806526e-09,
+            "reduced_chi2": 1.2956487728246131e-17,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 224,
+            "max_abs_z": 2.204716804487246e-08,
+            "rms_z": 1.6320512963555678e-08,
+            "reduced_chi2": 2.663591433935889e-16,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "logpoly2": {
+          "params": {
+            "a0": 10.079629098167077,
+            "a1": -6.643928233940064,
+            "a2": 1.473364009104074
+          },
+          "train": {
+            "n": 196,
+            "max_abs_z": 15.563443650358957,
+            "rms_z": 5.864860234814898,
+            "reduced_chi2": 34.931247525839176,
+            "exceed_3sigma_n": 146
+          },
+          "test": {
+            "n": 224,
+            "max_abs_z": 217448.4160878962,
+            "rms_z": 43435.65170822047,
+            "reduced_chi2": 1886655839.3178356,
+            "exceed_3sigma_n": 218
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.png"
+  },
+  "notes": [
+    "Holdout uses the NIST rational fit curve as the operational reference and tests procedural sensitivity of re-fitting on partial temperature bands.",
+    "This is a methodology audit; it does not claim new condensed-matter physics beyond the NIST baseline definition."
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "generated_utc": "2026-01-28T10:41:35.350239+00:00",
+  "phase": 7,
+  "step": "7.14.3",
+  "inputs": {
+    "janaf_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_janaf_silicon_si\\extracted_values.json",
+      "sha256": "da4e1bc5ad80067347b68ba2f8d2097570e2a9262ac79120f7606c5f0731ea09"
+    },
+    "webbook_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_webbook_condensed_silicon_si\\extracted_values.json",
+      "sha256": "be06a252b49767f17ef18d4b93f23a039cc484fdcba8456b3196013124ba7ee3"
+    }
+  },
+  "fit": {
+    "model": "Debye heat capacity (Cv) used as low-T Cp proxy (monatomic; 3R limit)",
+    "fit_range_T_K": {
+      "min": 100.0,
+      "max": 300.0
+    },
+    "n_points": 5,
+    "theta_D_K": 622.1452045992636,
+    "sse": 1.7428704094910221,
+    "rmse_proxy_J_per_molK": 0.6600890866941791,
+    "theta_D_sigma_proxy_K": 17.36291667829955,
+    "theta_D_covariance_proxy_K2": 301.4708755775726
+  },
+  "fit_points": [
+    {
+      "T_K": 100.0,
+      "Cp_obs_J_per_molK": 7.268,
+      "Cp_debye_J_per_molK": 6.156199313927287,
+      "residual_J_per_molK": 1.111800686072713
+    },
+    {
+      "T_K": 200.0,
+      "Cp_obs_J_per_molK": 15.636,
+      "Cp_debye_J_per_molK": 16.072482957027955,
+      "residual_J_per_molK": -0.43648295702795536
+    },
+    {
+      "T_K": 250.0,
+      "Cp_obs_J_per_molK": 18.221,
+      "Cp_debye_J_per_molK": 18.6508909107747,
+      "residual_J_per_molK": -0.42989091077469865
+    },
+    {
+      "T_K": 298.15,
+      "Cp_obs_J_per_molK": 20.0,
+      "Cp_debye_J_per_molK": 20.25652924695076,
+      "residual_J_per_molK": -0.25652924695075896
+    },
+    {
+      "T_K": 300.0,
+      "Cp_obs_J_per_molK": 20.05,
+      "Cp_debye_J_per_molK": 20.306200746399334,
+      "residual_J_per_molK": -0.2562007463993332
+    }
+  ],
+  "cross_checks": {
+    "janaf_vs_webbook_shomate_solid": [
+      {
+        "T_K": 298.15,
+        "Cp_JANAF_J_per_molK": 20.0,
+        "Cp_Shomate_J_per_molK": 19.990571462910072,
+        "delta_J_per_molK": -0.009428537089927858
+      },
+      {
+        "T_K": 300.0,
+        "Cp_JANAF_J_per_molK": 20.05,
+        "Cp_Shomate_J_per_molK": 20.046687013666663,
+        "delta_J_per_molK": -0.003312986333337875
+      }
+    ]
+  },
+  "falsification": {
+    "target": "theta_D_K",
+    "reject_if_abs_theta_D_minus_target_gt_K": 52.088750034898645,
+    "notes": [
+      "JANAF table provides no explicit uncertainties; sigma is a proxy estimated from residual scatter and local sensitivity.",
+      "Reject threshold uses max(3*sigma_proxy, 5 K) as a conservative floor to avoid false precision."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.png"
+  },
+  "notes": [
+    "This is a baseline/target for Step 7.14: low-temperature Cp and a 1-parameter Debye fit (θ_D) as a compact summary.",
+    "Debye model yields Cv; Cp≈Cv at low T. Near 300 K, Cp−Cv and anharmonicity can matter; this is treated as a proxy."
+  ]
+}

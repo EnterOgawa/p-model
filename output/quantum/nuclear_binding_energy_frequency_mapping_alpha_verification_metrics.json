@@ -1,0 +1,110 @@
+{
+  "generated_utc": "2026-02-06T15:42:07.163813+00:00",
+  "phase": 7,
+  "step": "7.13.17.5",
+  "inputs": {
+    "deuteron_binding_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_deuteron_metrics.json",
+      "sha256": "8f994d4a79851816195ad7b2286d94987600f49bc257488413f2a2871bcce8ec"
+    },
+    "light_nuclei_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_light_nuclei_metrics.json",
+      "sha256": "7cefc36aa17adc6b19363642f2a6f2265a5629692c3896bd52c814f8673dfe92"
+    },
+    "deuteron_two_body_metrics": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json",
+      "sha256": "86d9e7f5ca4796c804fc2f1e2ad0f1263b91c4d2914f86f9fe9c86e513f5fdbb"
+    }
+  },
+  "frozen_if": {
+    "reference_scale": "R_ref = 1/κ_d (deuteron tail scale from CODATA B)",
+    "alpha_scale": "R_alpha = √(5/3) r_rms(alpha) (uniform-sphere equivalent radius)",
+    "range_scale": "L = λπ (PDG mass proxy; frozen in Step 7.13.17.2)",
+    "coupling_scaling": "J_E(R) = J_E(R_ref) exp((R_ref - R)/L), with J_E(R_ref)=B_d/2",
+    "multi_body_binding": "B_pred(alpha) = 2 C J_E(R_alpha), with C chosen by a reduction rule"
+  },
+  "observed": {
+    "deuteron": {
+      "B_d_MeV": 2.22456634198942,
+      "R_ref_fm": 4.317674363595111
+    },
+    "alpha": {
+      "B_obs_MeV": {
+        "value": 28.295610854770015,
+        "sigma": 1.6240316081956133e-06
+      },
+      "r_rms_fm": {
+        "value": 1.6784999999999999,
+        "sigma": 0.0021
+      },
+      "R_uniform_fm": {
+        "value": 2.1669341822030495,
+        "sigma": 0.0027110883423451916
+      }
+    },
+    "range": {
+      "L_fm": 1.413816930654131
+    }
+  },
+  "derived": {
+    "J_ref_MeV": 1.11228317099471,
+    "J_alpha_MeV": {
+      "value": 5.0918663126607,
+      "sigma_from_r_alpha_only": 0.00976399355654037
+    },
+    "C_required": 2.778510777513368
+  },
+  "methods": [
+    {
+      "method": "collective",
+      "C": 3,
+      "description": "collective in-phase coherence (C=A-1)",
+      "B_pred_MeV": 30.5511978759642,
+      "sigma_B_pred_from_r_alpha_MeV": 0.05858396133924222,
+      "Delta_B_pred_minus_obs_MeV": 2.2555870211941844,
+      "Delta_B_pred_minus_obs_percent": 7.971508488617564,
+      "z_from_r_alpha_only": 38.50178392909885
+    },
+    {
+      "method": "pn_only",
+      "C": 4,
+      "description": "pairwise pn only (C=Z*N)",
+      "B_pred_MeV": 40.7349305012856,
+      "sigma_B_pred_from_r_alpha_MeV": 0.07811194845232296,
+      "Delta_B_pred_minus_obs_MeV": 12.439319646515582,
+      "Delta_B_pred_minus_obs_percent": 43.96201131815674,
+      "z_from_r_alpha_only": 159.24989573276545
+    },
+    {
+      "method": "pairwise_all",
+      "C": 6,
+      "description": "pairwise all pairs (C=A(A-1)/2)",
+      "B_pred_MeV": 61.1023957519284,
+      "sigma_B_pred_from_r_alpha_MeV": 0.11716792267848444,
+      "Delta_B_pred_minus_obs_MeV": 32.80678489715838,
+      "Delta_B_pred_minus_obs_percent": 115.94301697723512,
+      "z_from_r_alpha_only": 279.9980075364321
+    }
+  ],
+  "baseline": {
+    "method": "collective",
+    "row": {
+      "method": "collective",
+      "C": 3,
+      "description": "collective in-phase coherence (C=A-1)",
+      "B_pred_MeV": 30.5511978759642,
+      "sigma_B_pred_from_r_alpha_MeV": 0.05858396133924222,
+      "Delta_B_pred_minus_obs_MeV": 2.2555870211941844,
+      "Delta_B_pred_minus_obs_percent": 7.971508488617564,
+      "z_from_r_alpha_only": 38.50178392909885
+    },
+    "notes": [
+      "Baseline chosen as the minimal non-overcounting reduction consistent with a coherent in-phase mode (C=A-1).",
+      "Other methods are retained as a systematics envelope/probe and are expected to overcount binding in this frozen I/F."
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_alpha_verification.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_alpha_verification.csv"
+  }
+}

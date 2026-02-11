@@ -1,0 +1,53 @@
+{
+  "generated_utc": "2026-01-25T20:11:41.391473+00:00",
+  "phase": 7,
+  "step": "7.12",
+  "title": "Molecular baseline (HD; NIST WebBook diatomic constants)",
+  "source_cache": {
+    "extracted_values": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_webbook_diatomic_hd\\extracted_values.json"
+  },
+  "species": "HD",
+  "webbook_id": "C13983205",
+  "state": "X 1Σg+ 1sσ2",
+  "constants": {
+    "Te_cm^-1": 0.0,
+    "omega_e_cm^-1": 3813.15,
+    "omega_e_x_e_cm^-1": 91.65,
+    "B_e_cm^-1": 45.655,
+    "alpha_e_cm^-1": 1.986,
+    "D_e_cm^-1": 0.02605,
+    "r_e_A": 0.74142
+  },
+  "derived": {
+    "omega_e": {
+      "frequency_THz": 114.31536112227,
+      "energy_eV": 0.4727703462555576
+    },
+    "omega_e_x_e": {
+      "frequency_THz": 2.74759787757,
+      "energy_eV": 0.011363151786402804
+    },
+    "B_e": {
+      "frequency_THz": 1.368702466999,
+      "energy_eV": 0.0056604985794677576
+    },
+    "alpha_e": {
+      "frequency_THz": 0.05953878215879999,
+      "energy_eV": 0.0002462326180883357
+    },
+    "D_e": {
+      "frequency_THz": 0.0007809593530900001,
+      "energy_eV": 3.2297883691848667e-06
+    },
+    "r_e": {
+      "meters": 7.414199999999999e-11
+    },
+    "morse": {
+      "D_e_cm^-1": 39662.06470949264,
+      "D0_cm^-1": 37778.40220949264,
+      "D_e_eV": 4.917469301212165,
+      "D0_eV": 4.683924916030987
+    }
+  },
+  "note": "This output fixes a small set of diatomic constants as a reproducible baseline. The Morse D0/De values are phenomenological estimates derived from ωe and ωexe, not independent data. P-model derivation of molecular binding is tracked in Roadmap Step 7.12+."
+}

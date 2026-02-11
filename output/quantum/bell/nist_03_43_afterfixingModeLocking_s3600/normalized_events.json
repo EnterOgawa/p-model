@@ -1,0 +1,27 @@
+{
+  "generated_utc": "2026-02-08T10:05:20.067294+00:00",
+  "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+  "source": {
+    "name": "NIST belltestdata (Shalm et al. 2015; time-tag repository)",
+    "alice_zip": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\compressed\\alice\\2015_09_18\\03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.alice.dat.compressed.zip",
+    "bob_zip": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\compressed\\bob\\2015_09_18\\03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.bob.dat.compressed.zip",
+    "hdf5_build": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\processed_compressed\\hdf5\\2015_09_18\\03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.dat.compressed.build.hdf5"
+  },
+  "config": {
+    "max_seconds": 3600,
+    "seconds_per_timetag": 7.8125e-11
+  },
+  "schema": {
+    "alice_click_t": "uint64 timetag counts (aligned to Alice PPS=0)",
+    "alice_click_setting": "uint8 {0,1}",
+    "alice_click_delay": "uint64 timetag counts since last sync",
+    "bob_click_t": "uint64 timetag counts (PPS-aligned; offset_counts applied)",
+    "bob_click_setting": "uint8 {0,1}",
+    "bob_click_delay": "uint64 timetag counts since last sync",
+    "offset_counts": "int64 counts added to Bob times to align PPS"
+  },
+  "notes": [
+    "normalized_events.npz is a compressed export of the time-tag clicks for max_seconds.",
+    "Trial-based denominators are computed from the published hdf5 build."
+  ]
+}

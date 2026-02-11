@@ -9,26 +9,6 @@ Japanese content begins after this preamble.
 
 ---
 
-## 2026-02-11（UTC） ロードマップ追記：Verification Materials の公開参照（URL/DOI）固定
-
-目的：
-- 論文（Part I–III）から参照する検証用資料（Verification Materials）の参照先を、URL/DOIで固定できる形にする。
-- 参考文献キー `[PModelVerificationMaterials]` の Web 欄が `TBD` のまま残ることを防ぎ、公開時の最終手順をロードマップで明示する。
-
-作業：
-- `doc/ROADMAP.md`：
-  - 8.2.14（公開参照の固定）を追加（準備中）。
-- `doc/STATUS.md` / `doc/AI_CONTEXT_MIN.json`：
-  - 次タスクとして 8.2.14 を明示し、状態辞書を同期。
-
-結果：
-- 公開先（GitHub Releases / DOI）を決めた段階で、論文側の参照キーと検証用資料の参照先を一括で確定できる状態になった。
-
-[work] 2026-02-11T02:56:28Z Phase 8 / Step 8.2.14（準備中）：Verification Materials の公開先（URL/DOI）固定タスクをロードマップへ追加し、STATUS/AI_CONTEXT を同期。
-
-
----
-
 ## 2026-02-11（UTC） GitHub 公開準備：README（英語）追加＋`.gitignore` 整備＋ローカル git 初期化
 
 目的：
@@ -66,3 +46,29 @@ Japanese content begins after this preamble.
 - 論文本文（Part I–III）から参照される検証用資料の参照先が固定でき、公開時の引用（URL/将来のDOI）を同一キーで更新できる状態になった。
 
 [work] 2026-02-11T04:47:59Z Phase 8 / Step 8.2.14（完了）：GitHub repo（EnterOgawa/p-model）を作成して初回pushし、Verification Materials と参考文献キー `[PModelVerificationMaterials]` の `TBD` を固定URLへ置換。
+
+
+---
+
+## 2026-02-11（UTC） GitHub運用方針改訂：検証（スクリプト＋固定出力JSON）中心へ再構成
+
+目的：
+- GitHub は「検証方法（scripts）」と「検証の固定出力（outputのJSON）」を中心に管理する。
+- P-model の概念説明は数式ではなくストーリーで提示する。
+- 論文等のドキュメント（原稿）は別で公開し、このrepoでは追跡しない。
+
+作業：
+- `README.md`：
+  - 概念説明から数式を除去し、ストーリー中心の説明へ変更。
+  - 本repoの役割を「verification workspace（scripts + fixed output JSON）」として明記。
+- `.gitignore`：
+  - `doc/paper/` を追跡対象外へ（別公開）。legacyフォルダ（`cassini/`等）も追跡対象外へ。
+  - `output/` は「固定出力JSONのみ」を追跡対象として許可（大きい中間生成物は除外）。
+  - `data/` は追跡対象外へ固定（入力は一次ソースと取得手順で再現）。
+- git 操作：
+  - `doc/paper/` を `git rm --cached` で追跡から外し、GitHub上からも非公開化（別公開前提）。
+
+結果：
+- GitHub repo は「スクリプト＋固定出力JSON」を中心に閲覧・監査できる構成になった。
+
+[work] 2026-02-11T05:09:58Z Phase 8 / Step 8.2.15（完了）：READMEをストーリー化（数式なし）し、repoを検証（scripts＋固定出力JSON）中心へ再構成。`doc/paper/` を追跡対象外（別公開）へ。

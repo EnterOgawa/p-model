@@ -1,0 +1,40 @@
+{
+  "generated_utc": "2026-02-11T02:47:09.251692+00:00",
+  "dataset_id": "delft_hensen2016_srep30289",
+  "supported": true,
+  "baseline": {
+    "param_name": "start_offset_ps",
+    "value": -30.0,
+    "statistic_name": "CHSH S (combined; event-ready trials)",
+    "statistic": 2.3205222517758677,
+    "sigma_boot": 0.18396758088495538,
+    "delay_signature_z_max": null,
+    "statistic_recomputed": 2.3205222517758677
+  },
+  "tests": [
+    {
+      "id": "shuffle_settings",
+      "supported": true,
+      "method": {
+        "name": "shuffle_trial_settings",
+        "seed_a_old": 4195179077,
+        "seed_b_old": 3138811135,
+        "seed_a_new": 3411614883,
+        "seed_b_new": 3057800801,
+        "note": "Shuffle random_number_a/b across trials within each run (old/new detector); keep outcomes unchanged."
+      },
+      "result": {
+        "statistic_name": "CHSH S_combined (event-ready trials; frozen start offset)",
+        "statistic": 0.8465248577279696,
+        "statistic_abs": 0.8465248577279696,
+        "abs_delta_over_sigma_boot": 8.012267090524315
+      }
+    }
+  ],
+  "inputs": {
+    "natural_window_frozen_json": {
+      "path": "output/quantum/bell/delft_hensen2016_srep30289/natural_window_frozen.json",
+      "sha256": "90bbe7a0dd522a4f99acd4c758d4cc40fd40dfbb2a9cc279547b064df7620700"
+    }
+  }
+}

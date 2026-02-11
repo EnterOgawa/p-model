@@ -1,0 +1,158 @@
+{
+  "generated_utc": "2026-01-24T20:06:34.438548+00:00",
+  "dataset": {
+    "source": "NIST belltestdata (processed_compressed/hdf5 build; Shalm et al. 2015 time-tag repository)",
+    "hdf5": "data\\quantum\\sources\\nist_belltestdata\\processed_compressed\\hdf5\\2015_09_18\\17_04_CH_pockel_100kHz.run.completeblind.dat.compressed.build.hdf5"
+  },
+  "config": {
+    "alice": {
+      "bitoffset": 28,
+      "pk": 90,
+      "radius": 4
+    },
+    "bob": {
+      "bitoffset": 37,
+      "pk": 125,
+      "radius": 5
+    }
+  },
+  "analysis": {
+    "max_syncs": null,
+    "exclude_bad_sync": true,
+    "coincidence_definition": "same-slot within sync: (alice_clicks & bob_clicks) != 0",
+    "setting_mapping": "1->0, 2->1 (other values treated as invalid and excluded)",
+    "ch_definition": "CH J_prob = P11(A1,B1)+P11(A1,B2)+P11(A2,B1)-P11(A2,B2) - P1(A1) - P1(B1)"
+  },
+  "counts": {
+    "syncs_used": 356435856,
+    "bad_sync_unique": 28716,
+    "invalid_settings": 2,
+    "trials_by_setting_pair": [
+      [
+        89138731,
+        89122283
+      ],
+      [
+        89082337,
+        89092505
+      ]
+    ],
+    "coinc_by_setting_pair": [
+      [
+        42987,
+        45117
+      ],
+      [
+        46991,
+        897
+      ]
+    ],
+    "alice_trials_by_setting": [
+      178261014,
+      178174842
+    ],
+    "bob_trials_by_setting": [
+      178221068,
+      178214788
+    ],
+    "alice_clicks_by_setting": [
+      130090,
+      383564
+    ],
+    "bob_clicks_by_setting": [
+      134620,
+      397286
+    ]
+  },
+  "ch_j_variants": {
+    "A1=0,B1=0": {
+      "A1": 0,
+      "A2": 1,
+      "B1": 0,
+      "B2": 1,
+      "J_prob": 2.0791284153203718e-05
+    },
+    "A1=0,B1=1": {
+      "A1": 0,
+      "A2": 1,
+      "B1": 1,
+      "B2": 0,
+      "J_prob": -0.0024879736694484005
+    },
+    "A1=1,B1=0": {
+      "A1": 1,
+      "A2": 0,
+      "B1": 0,
+      "B2": 1,
+      "J_prob": -0.002394513211909019
+    },
+    "A1=1,B1=1": {
+      "A1": 1,
+      "A2": 0,
+      "B1": 1,
+      "B2": 0,
+      "J_prob": -0.0038204355333388337
+    },
+    "_best": {
+      "key": "A1=0,B1=0",
+      "J_prob": 2.0791284153203718e-05
+    }
+  },
+  "comparison": {
+    "coincidence_sweep_csv": "output\\quantum\\nist_belltest_coincidence_sweep__17_04_completeblind_s3600.csv",
+    "windows_ns": [
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0,
+      50.0,
+      100.0,
+      200.0,
+      500.0,
+      1000.0,
+      2000.0,
+      5000.0
+    ],
+    "pairs_total": [
+      66,
+      143,
+      287,
+      765,
+      1483,
+      2972,
+      7435,
+      14706,
+      29436,
+      73478,
+      146765,
+      290747,
+      706743
+    ],
+    "j_prob_a1_0_b1_0": [
+      -0.0014847451095981686,
+      -0.0014844197264261636,
+      -0.0014834771627185142,
+      -0.0014807393288797427,
+      -0.0014768571392268378,
+      -0.0014686328781990986,
+      -0.0014440271412937693,
+      -0.0014034434641908206,
+      -0.0013239829682104808,
+      -0.0010854217112143097,
+      -0.0006867827577201586,
+      9.505411413394352e-05,
+      0.0023539065236054856
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_trial_based__17_04_completeblind_s3600.png",
+    "json": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_trial_based_metrics__17_04_completeblind_s3600.json",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_trial_based_counts__17_04_completeblind_s3600.csv"
+  },
+  "notes": [
+    "This script focuses on trial-based counting using the NIST 'build' (processed) file.",
+    "It is intended to quantify algorithm dependence between trial-based and coincidence-based pipelines."
+  ]
+}

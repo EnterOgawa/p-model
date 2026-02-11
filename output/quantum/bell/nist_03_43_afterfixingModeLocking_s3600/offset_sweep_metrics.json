@@ -1,0 +1,383 @@
+{
+  "generated_utc": "2026-02-11T02:46:49.461192+00:00",
+  "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+  "supported": true,
+  "statistic": {
+    "name": "CH J_prob (A1=0,B1=0)",
+    "local_bound": 0.0
+  },
+  "config": {
+    "window_ns": 200.0,
+    "delta_offset_ns_range": [
+      -50.0,
+      50.0
+    ],
+    "delta_offset_ns_step": 5.0,
+    "max_events_each_side": 400000,
+    "note": "Offset sweep uses a prefix slice of the time-tag clicks for cost control."
+  },
+  "rows": [
+    {
+      "delta_offset_ns": -50.0,
+      "delta_offset_counts": -640,
+      "pairs_total": 618,
+      "J_prob": -0.0013960660383651549,
+      "J_sigma_boot": 5.123142501173498e-06,
+      "coinc_by_setting_pair": [
+        [
+          141,
+          156
+        ],
+        [
+          160,
+          161
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -45.0,
+      "delta_offset_counts": -576,
+      "pairs_total": 620,
+      "J_prob": -0.001396066017212377,
+      "J_sigma_boot": 5.242364886097232e-06,
+      "coinc_by_setting_pair": [
+        [
+          140,
+          158
+        ],
+        [
+          160,
+          162
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -40.0,
+      "delta_offset_counts": -512,
+      "pairs_total": 626,
+      "J_prob": -0.0013958419702892713,
+      "J_sigma_boot": 5.340082225390444e-06,
+      "coinc_by_setting_pair": [
+        [
+          143,
+          159
+        ],
+        [
+          162,
+          162
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -35.0,
+      "delta_offset_counts": -448,
+      "pairs_total": 618,
+      "J_prob": -0.001396066018794103,
+      "J_sigma_boot": 5.038737717693287e-06,
+      "coinc_by_setting_pair": [
+        [
+          140,
+          157
+        ],
+        [
+          160,
+          161
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -30.0,
+      "delta_offset_counts": -384,
+      "pairs_total": 620,
+      "J_prob": -0.001396066045361115,
+      "J_sigma_boot": 5.285382165108981e-06,
+      "coinc_by_setting_pair": [
+        [
+          141,
+          158
+        ],
+        [
+          159,
+          162
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -25.0,
+      "delta_offset_counts": -320,
+      "pairs_total": 621,
+      "J_prob": -0.0013961034200082752,
+      "J_sigma_boot": 5.3343300917364756e-06,
+      "coinc_by_setting_pair": [
+        [
+          142,
+          158
+        ],
+        [
+          158,
+          163
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -20.0,
+      "delta_offset_counts": -256,
+      "pairs_total": 614,
+      "J_prob": -0.0013963648260048945,
+      "J_sigma_boot": 5.322448071277566e-06,
+      "coinc_by_setting_pair": [
+        [
+          140,
+          154
+        ],
+        [
+          157,
+          163
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -15.0,
+      "delta_offset_counts": -192,
+      "pairs_total": 615,
+      "J_prob": -0.0013964021076281546,
+      "J_sigma_boot": 5.325527487285848e-06,
+      "coinc_by_setting_pair": [
+        [
+          138,
+          153
+        ],
+        [
+          160,
+          164
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -10.0,
+      "delta_offset_counts": -128,
+      "pairs_total": 611,
+      "J_prob": -0.0013964020716495029,
+      "J_sigma_boot": 5.199907654943169e-06,
+      "coinc_by_setting_pair": [
+        [
+          136,
+          153
+        ],
+        [
+          160,
+          162
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": -5.0,
+      "delta_offset_counts": -64,
+      "pairs_total": 617,
+      "J_prob": -0.0013962527193049673,
+      "J_sigma_boot": 5.258170059847828e-06,
+      "coinc_by_setting_pair": [
+        [
+          139,
+          153
+        ],
+        [
+          162,
+          163
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 0.0,
+      "delta_offset_counts": 0,
+      "pairs_total": 612,
+      "J_prob": -0.0013963647431404066,
+      "J_sigma_boot": 5.2991354548335176e-06,
+      "coinc_by_setting_pair": [
+        [
+          137,
+          153
+        ],
+        [
+          160,
+          162
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 5.0,
+      "delta_offset_counts": 64,
+      "pairs_total": 620,
+      "J_prob": -0.0013962900923704018,
+      "J_sigma_boot": 5.2574360619845395e-06,
+      "coinc_by_setting_pair": [
+        [
+          140,
+          154
+        ],
+        [
+          161,
+          165
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 10.0,
+      "delta_offset_counts": 128,
+      "pairs_total": 618,
+      "J_prob": -0.001396364797108384,
+      "J_sigma_boot": 5.409716284586484e-06,
+      "coinc_by_setting_pair": [
+        [
+          140,
+          153
+        ],
+        [
+          160,
+          165
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 15.0,
+      "delta_offset_counts": 192,
+      "pairs_total": 620,
+      "J_prob": -0.001396066064932167,
+      "J_sigma_boot": 5.165031902322777e-06,
+      "coinc_by_setting_pair": [
+        [
+          142,
+          157
+        ],
+        [
+          159,
+          162
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 20.0,
+      "delta_offset_counts": 256,
+      "pairs_total": 618,
+      "J_prob": -0.0013959913437865843,
+      "J_sigma_boot": 5.181618654937076e-06,
+      "coinc_by_setting_pair": [
+        [
+          141,
+          157
+        ],
+        [
+          160,
+          160
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 25.0,
+      "delta_offset_counts": 320,
+      "pairs_total": 616,
+      "J_prob": -0.0013961407602585095,
+      "J_sigma_boot": 5.206079178289517e-06,
+      "coinc_by_setting_pair": [
+        [
+          141,
+          157
+        ],
+        [
+          157,
+          161
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 30.0,
+      "delta_offset_counts": 384,
+      "pairs_total": 615,
+      "J_prob": -0.0013961781254940302,
+      "J_sigma_boot": 5.109041131282301e-06,
+      "coinc_by_setting_pair": [
+        [
+          141,
+          158
+        ],
+        [
+          155,
+          161
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 35.0,
+      "delta_offset_counts": 448,
+      "pairs_total": 606,
+      "J_prob": -0.0013962901157664968,
+      "J_sigma_boot": 5.207292702620015e-06,
+      "coinc_by_setting_pair": [
+        [
+          138,
+          155
+        ],
+        [
+          155,
+          158
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 40.0,
+      "delta_offset_counts": 512,
+      "pairs_total": 610,
+      "J_prob": -0.0013962154657442645,
+      "J_sigma_boot": 5.186319171569282e-06,
+      "coinc_by_setting_pair": [
+        [
+          140,
+          157
+        ],
+        [
+          154,
+          159
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 45.0,
+      "delta_offset_counts": 576,
+      "pairs_total": 613,
+      "J_prob": -0.0013961034324971857,
+      "J_sigma_boot": 5.189001200390653e-06,
+      "coinc_by_setting_pair": [
+        [
+          141,
+          158
+        ],
+        [
+          155,
+          159
+        ]
+      ]
+    },
+    {
+      "delta_offset_ns": 50.0,
+      "delta_offset_counts": 640,
+      "pairs_total": 614,
+      "J_prob": -0.0013959166976755762,
+      "J_sigma_boot": 4.965866976043544e-06,
+      "coinc_by_setting_pair": [
+        [
+          142,
+          158
+        ],
+        [
+          157,
+          157
+        ]
+      ]
+    }
+  ],
+  "summary": {
+    "J_min": -0.0013964021076281546,
+    "J_max": -0.0013958419702892713,
+    "delta_J": 5.601373388832483e-07
+  }
+}

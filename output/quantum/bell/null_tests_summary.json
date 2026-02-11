@@ -1,0 +1,212 @@
+{
+  "generated_utc": "2026-02-11T02:47:09.934881+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.20.1",
+    "name": "Bell null tests (shuffle settings / time shift)"
+  },
+  "main_script": {
+    "path": "scripts/quantum/bell_primary_products.py",
+    "repro": "python -B scripts/quantum/bell_primary_products.py"
+  },
+  "datasets": [
+    {
+      "dataset_id": "weihs1998_longdist_longdist1",
+      "display_name": "Weihs 1998",
+      "statistic_family": "CHSH",
+      "baseline": {
+        "param_name": "window_ns",
+        "value": 25.0,
+        "statistic_name": "CHSH |S| (fixed variant)",
+        "statistic": 2.5527309550940966,
+        "sigma_boot": 0.025324431789015552,
+        "delay_signature_z_max": 5.53541064134177,
+        "statistic_abs_recomputed": 2.5527309550940966,
+        "pairs_total_recomputed": 21664
+      },
+      "tests": [
+        {
+          "id": "shuffle_settings",
+          "supported": true,
+          "method": {
+            "name": "shuffle_settings_bits",
+            "encoding": "bit0-setting",
+            "seed_a": 844212394,
+            "seed_b": 3033568538,
+            "note": "Shuffle only setting labels in the code stream; keep outcome/detector bit intact."
+          },
+          "result": {
+            "statistic_name": "CHSH |S| (fixed variant; frozen window)",
+            "statistic_abs": 0.6648716037621234,
+            "pairs_total": 21664,
+            "abs_delta_over_sigma_boot": 74.54695793612358,
+            "delay_signature_z_max": 1.2318497498896581
+          }
+        },
+        {
+          "id": "time_shift_bob",
+          "supported": true,
+          "method": {
+            "name": "circular_time_shift_sorted_pair",
+            "supported": true,
+            "shift_s": 4.999948883440076,
+            "span_s": 9.999897766880151,
+            "wrap": true
+          },
+          "result": {
+            "statistic_name": "CHSH |S| (fixed variant; frozen window)",
+            "statistic_abs": 0.0010720548292321719,
+            "pairs_total": 762,
+            "abs_delta_over_sigma_boot": 100.75878193530266,
+            "delay_signature_z_max": 4.4949483445887415
+          }
+        }
+      ],
+      "null_tests_json": {
+        "path": "output/quantum/bell/weihs1998_longdist_longdist1/null_tests.json",
+        "sha256": "fe49e34b5debcbc8bd52dc458b9068b2e4f18f81bc940d3064430c89d987b99e"
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2015",
+      "display_name": "Delft (Hensen 2015)",
+      "statistic_family": "CHSH",
+      "baseline": {
+        "param_name": "start_offset_ps",
+        "value": -30.0,
+        "statistic_name": "CHSH S (event-ready trials)",
+        "statistic": 2.430692394782927,
+        "sigma_boot": 0.20303274757321624,
+        "delay_signature_z_max": null,
+        "statistic_recomputed": 2.430692394782927
+      },
+      "tests": [
+        {
+          "id": "shuffle_settings",
+          "supported": true,
+          "method": {
+            "name": "shuffle_trial_settings",
+            "seed_a": 3039059391,
+            "seed_b": 1316248753,
+            "note": "Shuffle random_number_a/b across trials; keep trial outcomes unchanged."
+          },
+          "result": {
+            "statistic_name": "CHSH S (event-ready trials; frozen start offset)",
+            "statistic": 0.9082046063389346,
+            "statistic_abs": 0.9082046063389346,
+            "abs_delta_over_sigma_boot": 7.4987301636893005
+          }
+        }
+      ],
+      "null_tests_json": {
+        "path": "output/quantum/bell/delft_hensen2015/null_tests.json",
+        "sha256": "0e376365083f1b1eba5cb24f51db9210aa98a8e669513600e4c591bf397b5c07"
+      }
+    },
+    {
+      "dataset_id": "delft_hensen2016_srep30289",
+      "display_name": "Delft (Hensen 2016)",
+      "statistic_family": "CHSH",
+      "baseline": {
+        "param_name": "start_offset_ps",
+        "value": -30.0,
+        "statistic_name": "CHSH S (combined; event-ready trials)",
+        "statistic": 2.3205222517758677,
+        "sigma_boot": 0.18396758088495538,
+        "delay_signature_z_max": null,
+        "statistic_recomputed": 2.3205222517758677
+      },
+      "tests": [
+        {
+          "id": "shuffle_settings",
+          "supported": true,
+          "method": {
+            "name": "shuffle_trial_settings",
+            "seed_a_old": 4195179077,
+            "seed_b_old": 3138811135,
+            "seed_a_new": 3411614883,
+            "seed_b_new": 3057800801,
+            "note": "Shuffle random_number_a/b across trials within each run (old/new detector); keep outcomes unchanged."
+          },
+          "result": {
+            "statistic_name": "CHSH S_combined (event-ready trials; frozen start offset)",
+            "statistic": 0.8465248577279696,
+            "statistic_abs": 0.8465248577279696,
+            "abs_delta_over_sigma_boot": 8.012267090524315
+          }
+        }
+      ],
+      "null_tests_json": {
+        "path": "output/quantum/bell/delft_hensen2016_srep30289/null_tests.json",
+        "sha256": "39d2d4e24a104ed1933ed6a53d5e4b0dee2666643d88969db25265eb5161a5c3"
+      }
+    },
+    {
+      "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+      "display_name": "NIST",
+      "statistic_family": "CH",
+      "baseline": {
+        "param_name": "window_ns",
+        "value": 1000.0,
+        "statistic_name": "CH J_prob (A1=0,B1=0)",
+        "statistic": -0.0006990843043696472,
+        "sigma_boot": 9.100388784991122e-06,
+        "delay_signature_z_max": 43.90965148631052
+      },
+      "tests": [
+        {
+          "id": "shuffle_settings",
+          "supported": true,
+          "method": {
+            "name": "shuffle_click_settings",
+            "seed_a": 3059074514,
+            "seed_b": 2977767790,
+            "note": "Shuffle setting labels across time-tag clicks; keep click_delay marginals unchanged."
+          },
+          "result": {
+            "delay_signature_z_max": 0.017237339027354585
+          }
+        }
+      ],
+      "null_tests_json": {
+        "path": "output/quantum/bell/nist_03_43_afterfixingModeLocking_s3600/null_tests.json",
+        "sha256": "06660f2ca66b6545f3db83bb96f2dbd71238bf405eb0144be52751b4e6fc3754"
+      }
+    },
+    {
+      "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+      "display_name": "Kwiat/Christensen 2013",
+      "statistic_family": "CH",
+      "baseline": {
+        "param_name": "window_ns",
+        "value": 2812.5,
+        "statistic_name": "CH J_prob (A1=0,B1=0)",
+        "statistic": -8.12025607476813e-05,
+        "sigma_boot": 3.9378181489705475e-05,
+        "delay_signature_z_max": 0.7214698844113343
+      },
+      "tests": [
+        {
+          "id": "shuffle_settings",
+          "supported": true,
+          "method": {
+            "name": "shuffle_delay_samples_labels",
+            "seed_a": 1953446677,
+            "seed_b": 4274747752,
+            "note": "Shuffle setting labels for ref-window delay samples (dt from trigger) and recompute Δmedian z."
+          },
+          "result": {
+            "delay_signature_z_max": 0.4914285880700692
+          }
+        }
+      ],
+      "null_tests_json": {
+        "path": "output/quantum/bell/kwiat2013_prl111_130406_05082013_15/null_tests.json",
+        "sha256": "80707296dc1328fae9052f121a28acd106efa05625eb4999e4caf75ca9962817"
+      }
+    }
+  ],
+  "outputs": {
+    "null_tests_summary_json": "output/quantum/bell/null_tests_summary.json"
+  }
+}

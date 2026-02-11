@@ -1,0 +1,185 @@
+{
+  "generated_utc": "2026-01-24T18:59:50.262197+00:00",
+  "dataset": {
+    "source": "NIST belltestdata (Shalm et al. 2015; time-tag repository)",
+    "run_base_alice": "23_55_CH_pockel_100kHz.run.ClassicalRNGXOR",
+    "run_base_bob": "23_55_CH_pockel_100kHz.run.ClassicalRNGXOR",
+    "alice_zip": "data\\quantum\\sources\\nist_belltestdata\\compressed\\alice\\2015_09_18\\23_55_CH_pockel_100kHz.run.ClassicalRNGXOR.alice.dat.compressed.zip",
+    "bob_zip": "data\\quantum\\sources\\nist_belltestdata\\compressed\\bob\\2015_09_18\\23_55_CH_pockel_100kHz.run.ClassicalRNGXOR.bob.dat.compressed.zip"
+  },
+  "config": {
+    "seconds_per_timetag": 7.8125e-11,
+    "windows_ns": [
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0,
+      50.0,
+      100.0,
+      200.0,
+      500.0,
+      1000.0,
+      2000.0,
+      5000.0
+    ],
+    "pairing": "greedy (1-1 pairing on sorted click streams)",
+    "max_seconds": 3600,
+    "out_tag": "23_55_ClassicalRNGXOR_s3600"
+  },
+  "alignment": {
+    "pps_a_count": 1529,
+    "pps_b_count": 1794,
+    "pps_b_count_aligned": 1794,
+    "offset_counts": 278209957244472,
+    "shift": -5,
+    "mad_counts": 601601234564.0,
+    "n_used": 1529,
+    "offset_seconds": 21735.152909724377
+  },
+  "counts": {
+    "alice_click_total": 9050831,
+    "bob_click_total": 7217944,
+    "alice_click_by_setting": {
+      "0": 4467551,
+      "1": 4583280
+    },
+    "bob_click_by_setting": {
+      "0": 3534716,
+      "1": 3683228
+    },
+    "alice_counts_by_channel": {
+      "0": 9051708,
+      "2": 89489355,
+      "4": 89466416,
+      "5": 1529,
+      "6": 178955769,
+      "64": 1805
+    },
+    "bob_counts_by_channel": {
+      "0": 7217944,
+      "2": 89483803,
+      "4": 89498213,
+      "5": 1794,
+      "6": 178982016,
+      "64": 1806
+    }
+  },
+  "delay_stats_ns": {
+    "alice": {
+      "ks_setting0_vs_1": 0.025356404780549506,
+      "setting0_median": 5047.578125,
+      "setting1_median": 4911.40625
+    },
+    "bob": {
+      "ks_setting0_vs_1": 0.036453742563430355,
+      "setting0_median": 5040.390625,
+      "setting1_median": 4851.015625
+    }
+  },
+  "coincidence_sweep": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_coincidence_sweep__23_55_ClassicalRNGXOR_s3600.csv",
+    "windows_ns": [
+      0.5,
+      1.0,
+      2.0,
+      5.0,
+      10.0,
+      20.0,
+      50.0,
+      100.0,
+      200.0,
+      500.0,
+      1000.0,
+      2000.0,
+      5000.0
+    ],
+    "pairs_total": [
+      38,
+      72,
+      134,
+      357,
+      689,
+      1411,
+      3499,
+      7092,
+      13999,
+      34966,
+      69314,
+      137540,
+      335211
+    ],
+    "counts": {
+      "c00": [
+        11,
+        19,
+        25,
+        76,
+        143,
+        322,
+        796,
+        1677,
+        3351,
+        8401,
+        16730,
+        33279,
+        81091
+      ],
+      "c01": [
+        7,
+        17,
+        31,
+        94,
+        191,
+        389,
+        923,
+        1871,
+        3620,
+        8934,
+        17726,
+        35096,
+        84823
+      ],
+      "c10": [
+        9,
+        16,
+        36,
+        94,
+        172,
+        335,
+        861,
+        1744,
+        3442,
+        8648,
+        17126,
+        34026,
+        82951
+      ],
+      "c11": [
+        11,
+        20,
+        42,
+        93,
+        183,
+        365,
+        919,
+        1800,
+        3586,
+        8983,
+        17732,
+        35139,
+        86346
+      ]
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_time_tag_bias__23_55_ClassicalRNGXOR_s3600.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_coincidence_sweep__23_55_ClassicalRNGXOR_s3600.csv"
+  },
+  "notes": [
+    "This script does NOT reproduce the official loophole-free p-value calculation.",
+    "It demonstrates that detection-time distributions depend on settings, which can make coincidence selection setting-dependent.",
+    "Pairing algorithm choice matters; here we use a simple greedy 1-1 match on click timestamps."
+  ]
+}

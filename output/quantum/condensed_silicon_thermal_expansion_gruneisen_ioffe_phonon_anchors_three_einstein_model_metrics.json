@@ -1,0 +1,593 @@
+{
+  "generated_utc": "2026-01-31T20:13:11.988745+00:00",
+  "phase": 7,
+  "step": "7.14.19",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    },
+    "ioffe_silicon_mechanical_properties_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\ioffe_silicon_mechanical_properties\\extracted_values.json",
+      "sha256": "5aa209cd7e7174a1d272bb5fa31eeb0b153bc6ef88938d3b0d44e21344eb8561"
+    }
+  },
+  "ioffe_phonon_anchors": {
+    "candidates": {
+      "low_candidates": [
+        {
+          "label": "ν_TA(X_3)",
+          "mode": "TA",
+          "point": "X_3",
+          "nu_1e12_Hz": 4.5,
+          "theta_K": 215.96593830147995,
+          "remarks": null
+        },
+        {
+          "label": "ν_TA(L_3)",
+          "mode": "TA",
+          "point": "L_3",
+          "nu_1e12_Hz": 3.45,
+          "theta_K": 165.57388603113463,
+          "remarks": null
+        }
+      ],
+      "high_candidates": [
+        {
+          "label": "ν_LTO(Γ_25')",
+          "mode": "LTO",
+          "point": "Γ_25'",
+          "nu_1e12_Hz": 15.5,
+          "theta_K": 743.8826763717642,
+          "remarks": "T=300K"
+        },
+        {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "nu_1e12_Hz": 12.3,
+          "theta_K": 590.3068980240452,
+          "remarks": null
+        },
+        {
+          "label": "ν_TO(X_4)",
+          "mode": "TO",
+          "point": "X_4",
+          "nu_1e12_Hz": 13.9,
+          "theta_K": 667.0947871979047,
+          "remarks": null
+        },
+        {
+          "label": "ν_LO(L_1)",
+          "mode": "LO",
+          "point": "L_1",
+          "nu_1e12_Hz": 12.6,
+          "theta_K": 604.7046272441438,
+          "remarks": null
+        },
+        {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "nu_1e12_Hz": 14.7,
+          "theta_K": 705.4887317848345,
+          "remarks": null
+        }
+      ],
+      "notes": [
+        "Anchors are selected from the cached Ioffe table and evaluated as a small discrete set.",
+        "Candidate sets: low=TA modes; high=optical-like (mode contains 'O') modes; fall back to all rows if empty."
+      ]
+    },
+    "pair_sweep": [],
+    "triple_sweep": [
+      {
+        "low": {
+          "label": "ν_TA(X_3)",
+          "mode": "TA",
+          "point": "X_3",
+          "theta_K": 215.96593830147995
+        },
+        "mid": {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "theta_K": 590.3068980240452
+        },
+        "high": {
+          "label": "ν_TO(X_4)",
+          "mode": "TO",
+          "point": "X_4",
+          "theta_K": 667.0947871979047
+        },
+        "fit": {
+          "A_D_mol_per_J": 2.1155148013969255e-07,
+          "A_E1_mol_per_J": -8.064220264476544e-08,
+          "A_E2_mol_per_J": -3.1329784288170665e-07,
+          "A_E3_mol_per_J": 3.5569606684306016e-07,
+          "sse": 2996.7948630186893,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 5.38307979387514,
+            "rms_z": 2.3321297460656023,
+            "reduced_chi2": 5.478601212099981,
+            "exceed_3sigma_n": 74
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(X_3)",
+          "mode": "TA",
+          "point": "X_3",
+          "theta_K": 215.96593830147995
+        },
+        "mid": {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "theta_K": 590.3068980240452
+        },
+        "high": {
+          "label": "ν_LO(L_1)",
+          "mode": "LO",
+          "point": "L_1",
+          "theta_K": 604.7046272441438
+        },
+        "fit": {
+          "A_D_mol_per_J": 3.4252430531890883e-07,
+          "A_E1_mol_per_J": -1.006917049998834e-07,
+          "A_E2_mol_per_J": -2.532552998007733e-06,
+          "A_E3_mol_per_J": 2.463688941695969e-06,
+          "sse": 3903.3306086475754,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 5.941613459600043,
+            "rms_z": 2.661594369771069,
+            "reduced_chi2": 7.135887767180212,
+            "exceed_3sigma_n": 190
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(X_3)",
+          "mode": "TA",
+          "point": "X_3",
+          "theta_K": 215.96593830147995
+        },
+        "mid": {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "theta_K": 590.3068980240452
+        },
+        "high": {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "theta_K": 705.4887317848345
+        },
+        "fit": {
+          "A_D_mol_per_J": 1.6080016581233035e-07,
+          "A_E1_mol_per_J": -7.254567437992985e-08,
+          "A_E2_mol_per_J": -1.2661904671327706e-07,
+          "A_E3_mol_per_J": 2.1188464549784274e-07,
+          "sse": 2533.2367163381555,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 5.0486600829029555,
+            "rms_z": 2.144184180749566,
+            "reduced_chi2": 4.63114573370778,
+            "exceed_3sigma_n": 42
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(X_3)",
+          "mode": "TA",
+          "point": "X_3",
+          "theta_K": 215.96593830147995
+        },
+        "mid": {
+          "label": "ν_TO(X_4)",
+          "mode": "TO",
+          "point": "X_4",
+          "theta_K": 667.0947871979047
+        },
+        "high": {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "theta_K": 705.4887317848345
+        },
+        "fit": {
+          "A_D_mol_per_J": 1.2894493020492525e-07,
+          "A_E1_mol_per_J": -6.763172258509164e-08,
+          "A_E2_mol_per_J": -2.512389768836941e-07,
+          "A_E3_mol_per_J": 3.636277034506204e-07,
+          "sse": 2260.722410889994,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 4.751108358477508,
+            "rms_z": 2.025572631226502,
+            "reduced_chi2": 4.132947734716626,
+            "exceed_3sigma_n": 37
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(X_3)",
+          "mode": "TA",
+          "point": "X_3",
+          "theta_K": 215.96593830147995
+        },
+        "mid": {
+          "label": "ν_LO(L_1)",
+          "mode": "LO",
+          "point": "L_1",
+          "theta_K": 604.7046272441438
+        },
+        "high": {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "theta_K": 705.4887317848345
+        },
+        "fit": {
+          "A_D_mol_per_J": 1.5199794134531853e-07,
+          "A_E1_mol_per_J": -7.122213503610117e-08,
+          "A_E2_mol_per_J": -1.307918101694407e-07,
+          "A_E3_mol_per_J": 2.2357197406504948e-07,
+          "sse": 2477.028188920428,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 4.988549318418555,
+            "rms_z": 2.120262708836699,
+            "reduced_chi2": 4.528387913931313,
+            "exceed_3sigma_n": 41
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(L_3)",
+          "mode": "TA",
+          "point": "L_3",
+          "theta_K": 165.57388603113463
+        },
+        "mid": {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "theta_K": 590.3068980240452
+        },
+        "high": {
+          "label": "ν_TO(X_4)",
+          "mode": "TO",
+          "point": "X_4",
+          "theta_K": 667.0947871979047
+        },
+        "fit": {
+          "A_D_mol_per_J": 4.001802191553105e-08,
+          "A_E1_mol_per_J": -3.5530761268058885e-08,
+          "A_E2_mol_per_J": -1.0104795089736497e-07,
+          "A_E3_mol_per_J": 2.69434554868343e-07,
+          "sse": 4719.026726400418,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 10.00410341007627,
+            "rms_z": 2.9265127400070594,
+            "reduced_chi2": 8.627105532724713,
+            "exceed_3sigma_n": 228
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(L_3)",
+          "mode": "TA",
+          "point": "L_3",
+          "theta_K": 165.57388603113463
+        },
+        "mid": {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "theta_K": 590.3068980240452
+        },
+        "high": {
+          "label": "ν_LO(L_1)",
+          "mode": "LO",
+          "point": "L_1",
+          "theta_K": 604.7046272441438
+        },
+        "fit": {
+          "A_D_mol_per_J": 9.802136477544368e-08,
+          "A_E1_mol_per_J": -4.1175591107797545e-08,
+          "A_E2_mol_per_J": -1.615303180611136e-06,
+          "A_E3_mol_per_J": 1.7309615514980818e-06,
+          "sse": 6153.879006471419,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 11.66159471136497,
+            "rms_z": 3.341940220898187,
+            "reduced_chi2": 11.250235843640622,
+            "exceed_3sigma_n": 275
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(L_3)",
+          "mode": "TA",
+          "point": "L_3",
+          "theta_K": 165.57388603113463
+        },
+        "mid": {
+          "label": "ν_LAO(X_1)",
+          "mode": "LAO",
+          "point": "X_1",
+          "theta_K": 590.3068980240452
+        },
+        "high": {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "theta_K": 705.4887317848345
+        },
+        "fit": {
+          "A_D_mol_per_J": 1.572049660873027e-08,
+          "A_E1_mol_per_J": -3.3011807413024064e-08,
+          "A_E2_mol_per_J": 2.4609683732063228e-08,
+          "A_E3_mol_per_J": 1.6578132884826971e-07,
+          "sse": 3987.0398542280905,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 9.079844141318013,
+            "rms_z": 2.689982712764027,
+            "reduced_chi2": 7.288921122903275,
+            "exceed_3sigma_n": 171
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(L_3)",
+          "mode": "TA",
+          "point": "L_3",
+          "theta_K": 165.57388603113463
+        },
+        "mid": {
+          "label": "ν_TO(X_4)",
+          "mode": "TO",
+          "point": "X_4",
+          "theta_K": 667.0947871979047
+        },
+        "high": {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "theta_K": 705.4887317848345
+        },
+        "fit": {
+          "A_D_mol_per_J": 2.5732365264925485e-08,
+          "A_E1_mol_per_J": -3.43792102340398e-08,
+          "A_E2_mol_per_J": 2.7996378821792506e-08,
+          "A_E3_mol_per_J": 1.538286044596505e-07,
+          "sse": 4088.1563694587353,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 10.104315360982275,
+            "rms_z": 2.7238798691696,
+            "reduced_chi2": 7.473777640692388,
+            "exceed_3sigma_n": 182
+          }
+        }
+      },
+      {
+        "low": {
+          "label": "ν_TA(L_3)",
+          "mode": "TA",
+          "point": "L_3",
+          "theta_K": 165.57388603113463
+        },
+        "mid": {
+          "label": "ν_LO(L_1)",
+          "mode": "LO",
+          "point": "L_1",
+          "theta_K": 604.7046272441438
+        },
+        "high": {
+          "label": "ν_TO(L_3')",
+          "mode": "TO",
+          "point": "L_3'",
+          "theta_K": 705.4887317848345
+        },
+        "fit": {
+          "A_D_mol_per_J": 1.84327544768481e-08,
+          "A_E1_mol_per_J": -3.335820104536554e-08,
+          "A_E2_mol_per_J": 2.3365073315524218e-08,
+          "A_E3_mol_per_J": 1.6467398299470988e-07,
+          "sse": 4012.6717003484,
+          "metrics": {
+            "n": 551,
+            "sign_mismatch_n": 0,
+            "max_abs_z": 9.31267468870373,
+            "rms_z": 2.698615528740093,
+            "reduced_chi2": 7.335780073763073,
+            "exceed_3sigma_n": 175
+          }
+        }
+      }
+    ],
+    "best": {
+      "low": {
+        "label": "ν_TA(X_3)",
+        "mode": "TA",
+        "point": "X_3",
+        "theta_K": 215.96593830147995
+      },
+      "mid": {
+        "label": "ν_TO(X_4)",
+        "mode": "TO",
+        "point": "X_4",
+        "theta_K": 667.0947871979047
+      },
+      "high": {
+        "label": "ν_TO(L_3')",
+        "mode": "TO",
+        "point": "L_3'",
+        "theta_K": 705.4887317848345
+      },
+      "fit": {
+        "A_D_mol_per_J": 1.2894493020492525e-07,
+        "A_E1_mol_per_J": -6.763172258509164e-08,
+        "A_E2_mol_per_J": -2.512389768836941e-07,
+        "A_E3_mol_per_J": 3.636277034506204e-07,
+        "sse": 2260.722410889994,
+        "metrics": {
+          "n": 551,
+          "sign_mismatch_n": 0,
+          "max_abs_z": 4.751108358477508,
+          "rms_z": 2.025572631226502,
+          "reduced_chi2": 4.132947734716626,
+          "exceed_3sigma_n": 37
+        }
+      }
+    }
+  },
+  "model": {
+    "name": "Debye+Einstein×3 (θ_D frozen; θ_E anchored from Ioffe phonon frequencies; fit A's)",
+    "einstein_branches": 3,
+    "theta_D_K": 622.1452045992636,
+    "theta_E1_K": 215.96593830147995,
+    "theta_E2_K": 667.0947871979047,
+    "theta_E3_K": 705.4887317848345,
+    "A_D_mol_per_J": 1.2894493020492525e-07,
+    "A_E1_mol_per_J": -6.763172258509164e-08,
+    "A_E2_mol_per_J": -2.512389768836941e-07,
+    "A_E3_mol_per_J": 3.636277034506204e-07,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    }
+  },
+  "diagnostics": {
+    "alpha_sign_change_T_K": {
+      "obs": 123.70901530483314,
+      "pred": 123.00771013389112
+    },
+    "fit_range": {
+      "n": 551,
+      "sign_mismatch_n": 0,
+      "max_abs_z": 4.751108358477508,
+      "rms_z": 2.025572631226502,
+      "reduced_chi2": 4.132947734716626,
+      "exceed_3sigma_n": 37
+    },
+    "sigma_fit_1e-8_per_K": {
+      "lt_T_K": 50.0,
+      "lt": 0.03,
+      "ge": 0.5
+    },
+    "holdout": [
+      {
+        "name": "A",
+        "train_T_K": [
+          50.0,
+          300.0
+        ],
+        "test_T_K": [
+          300.0,
+          600.0
+        ],
+        "params": {
+          "A_D_mol_per_J": 8.310124105989416e-08,
+          "A_E1_mol_per_J": -5.848059692134681e-08,
+          "A_E2_mol_per_J": -1.851914882830938e-08,
+          "A_E3_mol_per_J": 1.6417778142693052e-07
+        },
+        "train": {
+          "n": 251,
+          "sign_mismatch_n": 0,
+          "max_abs_z": 0.8962082871413471,
+          "rms_z": 0.43922978657269424,
+          "reduced_chi2": 0.19604706137079483,
+          "exceed_3sigma_n": 0
+        },
+        "test": {
+          "n": 301,
+          "sign_mismatch_n": 0,
+          "max_abs_z": 15.902626274889682,
+          "rms_z": 8.297119660683643,
+          "reduced_chi2": 68.84219466370305,
+          "exceed_3sigma_n": 208
+        }
+      },
+      {
+        "name": "B",
+        "train_T_K": [
+          200.0,
+          600.0
+        ],
+        "test_T_K": [
+          50.0,
+          200.0
+        ],
+        "params": {
+          "A_D_mol_per_J": 2.0911743718792573e-06,
+          "A_E1_mol_per_J": -6.839986149005631e-07,
+          "A_E2_mol_per_J": -5.105312497941051e-06,
+          "A_E3_mol_per_J": 3.874979171624209e-06
+        },
+        "train": {
+          "n": 401,
+          "sign_mismatch_n": 0,
+          "max_abs_z": 1.9853699097171071,
+          "rms_z": 0.5550807269337943,
+          "reduced_chi2": 0.3112190427676402,
+          "exceed_3sigma_n": 0
+        },
+        "test": {
+          "n": 151,
+          "sign_mismatch_n": 19,
+          "max_abs_z": 530.9124755447206,
+          "rms_z": 284.84831390296335,
+          "reduced_chi2": 81138.56193336115,
+          "exceed_3sigma_n": 145
+        }
+      }
+    ]
+  },
+  "falsification": {
+    "reject_if_sign_mismatch_fit_range_n_gt": 0,
+    "reject_if_max_abs_z_ge": 3.0,
+    "reject_if_reduced_chi2_ge": 2.0,
+    "rejected": true,
+    "notes": [
+      "θ_E anchors are fixed from a primary reference table (Ioffe), to reduce fit-range sensitivity.",
+      "Acceptance is evaluated against the NIST TRC curve-fit standard-error scale σ_fit (proxy).",
+      "This check is still a fit (A's are estimated); it is not a derivation."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_three_einstein_model.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_three_einstein_model.png"
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "generated_utc": "2026-02-11T02:46:18.848849+00:00",
+  "dataset_id": "weihs1998_longdist_longdist1",
+  "statistic": {
+    "name": "CHSH |S| (fixed variant)",
+    "local_bound": 2.0
+  },
+  "config": {
+    "ref_window_ns": 1.0,
+    "delta_offset_ns_range": [
+      -20.0,
+      20.0
+    ],
+    "delta_offset_ns_step": 2.0
+  },
+  "rows": [
+    {
+      "delta_offset_ns": -20.0,
+      "offset_ns": -24.408291266875853,
+      "pairs_total": 545,
+      "S_fixed": 0.16018806145579723,
+      "S_fixed_abs": 0.16018806145579723
+    },
+    {
+      "delta_offset_ns": -18.0,
+      "offset_ns": -22.408291266875857,
+      "pairs_total": 231,
+      "S_fixed": 0.5486093570205719,
+      "S_fixed_abs": 0.5486093570205719
+    },
+    {
+      "delta_offset_ns": -16.0,
+      "offset_ns": -20.408291266875857,
+      "pairs_total": 113,
+      "S_fixed": 1.2086693548387095,
+      "S_fixed_abs": 1.2086693548387095
+    },
+    {
+      "delta_offset_ns": -14.0,
+      "offset_ns": -18.408291266875853,
+      "pairs_total": 126,
+      "S_fixed": 0.3203563091948164,
+      "S_fixed_abs": 0.3203563091948164
+    },
+    {
+      "delta_offset_ns": -12.0,
+      "offset_ns": -16.408291266875857,
+      "pairs_total": 146,
+      "S_fixed": 1.5745454545454545,
+      "S_fixed_abs": 1.5745454545454545
+    },
+    {
+      "delta_offset_ns": -10.0,
+      "offset_ns": -14.408291266875855,
+      "pairs_total": 153,
+      "S_fixed": 0.6426767676767675,
+      "S_fixed_abs": 0.6426767676767675
+    },
+    {
+      "delta_offset_ns": -8.0,
+      "offset_ns": -12.408291266875855,
+      "pairs_total": 144,
+      "S_fixed": 0.8929347826086957,
+      "S_fixed_abs": 0.8929347826086957
+    },
+    {
+      "delta_offset_ns": -6.0,
+      "offset_ns": -10.408291266875855,
+      "pairs_total": 208,
+      "S_fixed": 1.7917350848385332,
+      "S_fixed_abs": 1.7917350848385332
+    },
+    {
+      "delta_offset_ns": -4.0,
+      "offset_ns": -8.408291266875853,
+      "pairs_total": 416,
+      "S_fixed": 2.796083901505862,
+      "S_fixed_abs": 2.796083901505862
+    },
+    {
+      "delta_offset_ns": -2.0,
+      "offset_ns": -6.408291266875854,
+      "pairs_total": 1336,
+      "S_fixed": 2.5572650638346524,
+      "S_fixed_abs": 2.5572650638346524
+    },
+    {
+      "delta_offset_ns": 0.0,
+      "offset_ns": -4.408291266875854,
+      "pairs_total": 13197,
+      "S_fixed": 2.782676031576608,
+      "S_fixed_abs": 2.782676031576608
+    },
+    {
+      "delta_offset_ns": 2.0,
+      "offset_ns": -2.408291266875854,
+      "pairs_total": 3115,
+      "S_fixed": 1.5058005299408022,
+      "S_fixed_abs": 1.5058005299408022
+    },
+    {
+      "delta_offset_ns": 4.0,
+      "offset_ns": -0.40829126687585393,
+      "pairs_total": 319,
+      "S_fixed": 1.4903984008822722,
+      "S_fixed_abs": 1.4903984008822722
+    },
+    {
+      "delta_offset_ns": 6.0,
+      "offset_ns": 1.5917087331241466,
+      "pairs_total": 160,
+      "S_fixed": 1.3835426868213752,
+      "S_fixed_abs": 1.3835426868213752
+    },
+    {
+      "delta_offset_ns": 8.0,
+      "offset_ns": 3.5917087331241464,
+      "pairs_total": 135,
+      "S_fixed": 1.1641243688546372,
+      "S_fixed_abs": 1.1641243688546372
+    },
+    {
+      "delta_offset_ns": 10.0,
+      "offset_ns": 5.591708733124146,
+      "pairs_total": 102,
+      "S_fixed": 1.3139960814379419,
+      "S_fixed_abs": 1.3139960814379419
+    },
+    {
+      "delta_offset_ns": 12.0,
+      "offset_ns": 7.591708733124148,
+      "pairs_total": 119,
+      "S_fixed": 1.322997416020672,
+      "S_fixed_abs": 1.322997416020672
+    },
+    {
+      "delta_offset_ns": 14.0,
+      "offset_ns": 9.591708733124147,
+      "pairs_total": 90,
+      "S_fixed": -0.44079794079794077,
+      "S_fixed_abs": 0.44079794079794077
+    },
+    {
+      "delta_offset_ns": 16.0,
+      "offset_ns": 11.591708733124147,
+      "pairs_total": 145,
+      "S_fixed": 1.0500573467567222,
+      "S_fixed_abs": 1.0500573467567222
+    },
+    {
+      "delta_offset_ns": 18.0,
+      "offset_ns": 13.591708733124149,
+      "pairs_total": 132,
+      "S_fixed": 0.7,
+      "S_fixed_abs": 0.7
+    },
+    {
+      "delta_offset_ns": 20.0,
+      "offset_ns": 15.591708733124147,
+      "pairs_total": 91,
+      "S_fixed": 1.338827838827839,
+      "S_fixed_abs": 1.338827838827839
+    }
+  ],
+  "summary": {
+    "S_abs_min": 0.16018806145579723,
+    "S_abs_max": 2.796083901505862,
+    "delta_S_abs": 2.6358958400500647
+  }
+}

@@ -1,0 +1,104 @@
+{
+  "generated_utc": "2026-02-10T15:36:29.290557+00:00",
+  "model": "P-model",
+  "formula": {
+    "alpha_arcsec": "alpha_arcsec = 4*beta*GM_sun/(c^2*b) * RAD_TO_ARCSEC",
+    "ppn_deflection": "alpha = 2*(1+gamma)*GM_sun/(c^2*b) (PPN), 1+gamma=2*beta"
+  },
+  "constants": {
+    "C_m_s": 299792458.0,
+    "GM_sun_m3_s2": 1.32712440018e+20,
+    "R_sun_m": 695700000.0
+  },
+  "input": {
+    "measurements_json": "C:\\develop\\waveP\\data\\theory\\solar_light_deflection_measurements.json"
+  },
+  "metrics": {
+    "beta": 1.0000105000000001,
+    "gamma_pmodel": 1.0000210000000003,
+    "gamma_gr": 1.0,
+    "impact_parameter_Rsun": 1.0,
+    "alpha_pmodel_arcsec_limb": 1.7512087132959222,
+    "reference_arcsec_limb": 1.7511903257975012,
+    "abs_error_arcsec": 1.8387498420979753e-05,
+    "rel_error": 1.0500000000060525e-05,
+    "measurement_count": 3,
+    "observed_best_id": "vlbi_2004_shapiro_prl92",
+    "observed_best_label": "VLBI（Shapiro 2004）",
+    "observed_gamma_best": 0.99983,
+    "observed_gamma_best_sigma": 0.00026,
+    "observed_alpha_arcsec_limb_best": 1.7510414746198084,
+    "observed_alpha_sigma_arcsec_limb_best": 0.00022765474235367513,
+    "observed_z_score_best": -0.7346153846164396,
+    "beta_source": "output/theory/frozen_parameters.json:beta"
+  },
+  "observations": [
+    {
+      "id": "vlbi_1995_lebach_prl75",
+      "short_label": "VLBI（Lebach 1995）",
+      "year": 1995,
+      "gamma": 0.9996,
+      "sigma": 0.0017,
+      "z_score": -0.2476470588236628,
+      "alpha_arcsec_limb": 1.7508400877323418,
+      "alpha_sigma_arcsec_limb": 0.0014885117769278759,
+      "method": "VLBI",
+      "sigma_note": "文献レビューの引用値：γ = 0.9996 ± 0.0017。",
+      "source": {
+        "kind": "primary_paper",
+        "title": "Measurement of the Solar Gravitational Deflection of Radio Waves Using Very-Long-Baseline Interferometry",
+        "authors": "D. E. Lebach et al.",
+        "year": 1995,
+        "doi": "10.1103/PhysRevLett.75.1439",
+        "url": "https://doi.org/10.1103/PhysRevLett.75.1439",
+        "retrieved_utc": "2026-01-04T00:00:00Z"
+      }
+    },
+    {
+      "id": "vlbi_2004_shapiro_prl92",
+      "short_label": "VLBI（Shapiro 2004）",
+      "year": 2004,
+      "gamma": 0.99983,
+      "sigma": 0.00026,
+      "z_score": -0.7346153846164396,
+      "alpha_arcsec_limb": 1.7510414746198084,
+      "alpha_sigma_arcsec_limb": 0.00022765474235367513,
+      "method": "VLBI",
+      "sigma_note": "文献レビューの引用値：γ = 0.99983 ± 0.00026（統計誤差）。",
+      "source": {
+        "kind": "primary_paper",
+        "title": "Measurement of the Solar Gravitational Deflection of Radio Waves Using Geodetic Very-Long-Baseline Interferometry Data, 1979–1999",
+        "authors": "I. I. Shapiro et al.",
+        "year": 2004,
+        "doi": "10.1103/PhysRevLett.92.121101",
+        "url": "https://doi.org/10.1103/PhysRevLett.92.121101",
+        "retrieved_utc": "2026-01-04T00:00:00Z"
+      }
+    },
+    {
+      "id": "vlbi_2009_fomalont_arxiv0904",
+      "short_label": "VLBI（Fomalont 2009）",
+      "year": 2009,
+      "gamma": 0.9998,
+      "sigma": 0.0003,
+      "z_score": -0.736666666667496,
+      "alpha_arcsec_limb": 1.7510152067649214,
+      "alpha_sigma_arcsec_limb": 0.0002626785488696252,
+      "method": "VLBI",
+      "sigma_note": "arXiv要旨：γ = 0.9998 ± 0.0003（68%）。",
+      "source": {
+        "kind": "preprint",
+        "title": "Measurement of the Solar Gravitational Deflection of Radio Waves in Agreement with General Relativity",
+        "authors": "E. B. Fomalont et al.",
+        "year": 2009,
+        "arxiv": "0904.3992",
+        "url": "https://arxiv.org/abs/0904.3992",
+        "retrieved_utc": "2026-01-04T00:00:00Z"
+      }
+    }
+  ],
+  "outputs": {
+    "plot_png": "C:\\develop\\waveP\\output\\theory\\solar_light_deflection.png",
+    "measurements_csv": "C:\\develop\\waveP\\output\\theory\\solar_light_deflection_measurements.csv"
+  }
+}

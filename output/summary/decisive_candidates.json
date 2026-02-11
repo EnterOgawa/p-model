@@ -1,0 +1,145 @@
+{
+  "generated_utc": "2026-02-10T15:40:29.758066+00:00",
+  "inputs": {
+    "decisive_falsification_json": "output/summary/decisive_falsification.json",
+    "gravity_s2_pmodel_projection_json": "output/eht/gravity_s2_pmodel_projection.json",
+    "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics_json": "output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
+  },
+  "policy": {
+    "selection_goal": "GRとP-modelの差が出る観測量を候補として列挙し、一次ソース・支配誤差・必要精度でスクリーニングする。",
+    "status_scale": {
+      "implemented": "スクリプト＋固定名出力があり、オフライン再現可能",
+      "implemented_constraint_only": "制約の可視化はできているが“測定”としては未達（概算/仮定あり）"
+    }
+  },
+  "candidates": [
+    {
+      "key": "eht_M87*",
+      "topic": "EHT（ブラックホール影）",
+      "target": "M87*",
+      "observable": "リング直径→影直径係数（θ_shadow/(GM/c^2D)）",
+      "diff_percent": 4.627814940128316,
+      "diff_uas": 1.8367493101075212,
+      "sigma_now_uas": 3.0,
+      "sigma_now_with_kappa_uas": 6.17839388679681,
+      "sigma_now_with_kappa_scattering_uas": NaN,
+      "sigma_needed_3sigma_uas": NaN,
+      "kappa_sigma_required_3sigma_if_ring_sigma_zero": NaN,
+      "kappa_sigma_required_3sigma_if_ring_sigma_current": NaN,
+      "kappa_systematics_source": "obs",
+      "kappa_budget_sigma": NaN,
+      "kappa_obs_sigma": 0.14627733355958678,
+      "kappa_sigma_assumed_kerr": 0.023360791826267012,
+      "kappa_sigma_systematics_now": 0.14627733355958678,
+      "kappa_sigma_systematics_improvement_factor_to_3sigma_if_ring_sigma_zero": NaN,
+      "gap_factor_now_over_needed": NaN,
+      "gap_factor_now_over_needed_with_kappa": NaN,
+      "gap_factor_now_over_needed_with_kappa_scattering": NaN,
+      "theta_unit_rel_sigma_now_pct": 11.77506128741579,
+      "theta_unit_rel_sigma_needed_pct": 1.0658449297379515,
+      "status": "implemented",
+      "dominant_systematics": [
+        "κ（リング/シャドウ比）",
+        "Kerrスピン/傾斜",
+        "散乱/放射モデル"
+      ],
+      "source_keys": "eht_m87_paper1_2019;eht_m87_paper6_2019;eht_m87_persistent_paper1_2018_2024;eht_m87_persistent_paper2_2018_2025;mertens_m87_jet_viewing_angle_2016",
+      "paper5_m3_near_passing_rescue": null
+    },
+    {
+      "key": "eht_Sgr_A*",
+      "topic": "EHT（ブラックホール影）",
+      "target": "Sgr A*",
+      "observable": "リング直径→影直径係数（θ_shadow/(GM/c^2D)）",
+      "diff_percent": 4.627814940128316,
+      "diff_uas": 2.4113774564843027,
+      "sigma_now_uas": 2.3,
+      "sigma_now_with_kappa_uas": 6.681489662758127,
+      "sigma_now_with_kappa_scattering_uas": 7.547344176168442,
+      "sigma_needed_3sigma_uas": 0.5118589064445136,
+      "kappa_sigma_required_3sigma_if_ring_sigma_zero": 0.009881446070357406,
+      "kappa_sigma_required_3sigma_if_ring_sigma_current": NaN,
+      "kappa_systematics_source": "budget",
+      "kappa_budget_sigma": 0.12110311750599523,
+      "kappa_obs_sigma": 0.16001511930929782,
+      "kappa_sigma_assumed_kerr": 0.02221593693615954,
+      "kappa_sigma_systematics_now": 0.12110311750599523,
+      "kappa_sigma_systematics_improvement_factor_to_3sigma_if_ring_sigma_zero": 12.255606785051755,
+      "gap_factor_now_over_needed": 4.493425768394486,
+      "gap_factor_now_over_needed_with_kappa": 13.05338166169511,
+      "gap_factor_now_over_needed_with_kappa_scattering": 14.744969914842319,
+      "theta_unit_rel_sigma_now_pct": 0.4633169358389895,
+      "theta_unit_rel_sigma_needed_pct": 1.0658449297379515,
+      "status": "implemented",
+      "dominant_systematics": [
+        "κ（リング/シャドウ比）",
+        "Kerrスピン/傾斜",
+        "散乱/放射モデル"
+      ],
+      "source_keys": "eht_sgra_paper1_2022;gravity_r0_m_2019;johnson_scattering_2018;psaltis_scattering_2018;zhu_scattering_limitations_2018",
+      "paper5_m3_near_passing_rescue": {
+        "ok": true,
+        "source_json": "output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json",
+        "alpha": 0.01,
+        "d": 0.6190476190476191,
+        "p_asymptotic": 0.010614599630806975,
+        "p_minus_alpha": 0.0006145996308069748,
+        "d_step": 0.023809523809523808,
+        "p_next_up_asymptotic": 0.0070392821966424116,
+        "digitize_scale_up_threshold": 1.0282537892546357,
+        "digitize_delta_abs_to_flip_one_step": 0.001401349809788635,
+        "digitize_delta_rel_to_flip_one_step": 0.02825378925463573,
+        "p_if_effective_n_curves_30": 0.01377466529670226
+      }
+    },
+    {
+      "key": "delta_saturation",
+      "topic": "速度飽和 δ（特殊相対論の差分）",
+      "target": "高γ観測（宇宙線/ν等）",
+      "observable": "γ_max ≈ 1/√δ（v→c で dτ/dt が0にならない）",
+      "delta_adopted": 1e-60,
+      "gamma_needed_to_probe_delta_adopted": 1.0000000000000002e+30,
+      "gamma_obs_max_in_sources": 1e+17,
+      "gap_gamma_needed_over_obs": 10000000000000.002,
+      "tightest_delta_upper_from_sources": 1.0000000000000001e-34,
+      "tightest_delta_upper_label": "高エネルギーν（10 PeV, m=0.1 eV仮定）",
+      "status": "implemented_constraint_only",
+      "dominant_systematics": [
+        "粒子質量の仮定（特にν）",
+        "エネルギー推定の系統",
+        "サンプル選定（概算）"
+      ]
+    },
+    {
+      "key": "s2_gravity",
+      "topic": "S2（GRAVITY）強場テスト",
+      "target": "銀河中心 S2 星軌道",
+      "observable": "f（重力赤方偏移; 2018）/ f_SP（Schwarzschild歳差; 2020）",
+      "delta_f_pmodel_minus_gr": -0.00018691708482243552,
+      "sigma_f_needed_3sigma": 6.230569494081184e-05,
+      "sigma_f_now": 0.17492855684535902,
+      "gap_sigma_f_now_over_needed": 2807.5853581528113,
+      "delta_f_sp_order_estimate": 0.0006511506290539789,
+      "sigma_f_sp_needed_3sigma_order": 0.00021705020968465963,
+      "sigma_f_sp_now": 0.19,
+      "gap_sigma_f_sp_now_over_needed_order": 875.3734920414986,
+      "status": "implemented_constraint_only",
+      "dominant_systematics": [
+        "2PN差は微小（係数差）",
+        "視線速度・軌道モデル",
+        "データ系統（校正/参照系）"
+      ],
+      "source_keys": "GRAVITY2018 (f), GRAVITY2020 (f_SP)"
+    }
+  ],
+  "notes": [
+    "この一覧は Phase 8.1 の棚卸し（第一版）。EHTは差分予測の中心、δは“飽和”の反証条件（概算）として扱う。",
+    "EHTのギャップは『参考:+κ』を優先して表示する（κはリング→シャドウ変換の系統誤差）。",
+    "S2（GRAVITY）の f / f_SP は現状は整合性チェック（1PN）であり、P-model と GR の 2PN 差を検出するには桁違いの精度が必要（order estimate）。",
+    "Sgr A* の放射モデル側（Paper V; M3/2.2 μm）の near-passing 救済条件は eht_Sgr_A* の paper5_m3_near_passing_rescue に添付する（p−α、D-step、digitize scale閾値など）。"
+  ],
+  "outputs": {
+    "decisive_candidates_png": "C:/develop/waveP/output/summary/decisive_candidates.png",
+    "decisive_candidates_json": "C:/develop/waveP/output/summary/decisive_candidates.json"
+  }
+}

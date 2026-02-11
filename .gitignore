@@ -20,17 +20,26 @@ Thumbs.db
 .tmp*/
 temp_*.pdf
 
-# Generated outputs (publish via Releases when needed)
-output/*
-!output/summary/
-output/summary/*
-!output/summary/build_materials.bat
+# Manuscripts (published separately; kept local but not tracked here)
+doc/paper/
 
-# Data caches (keep lightweight manifests; fetch raw inputs separately)
+# Legacy folders (kept local; scripts/ + output/ are canonical)
+cassini/
+gps/
+mercury/
+viking/
+
+# Generated outputs (verification results; tracked selectively)
+output/**
+!output/**/
+!output/summary/build_materials.bat
+!output/summary/*.json
+!output/theory/*.json
+!output/quantum/**/*.json
+!output/cosmology/*falsification_pack*.json
+
+# Input data caches (not tracked here)
 data/
-!data/
-!data/**/
-!data/**/manifest*.json
 
 # Local logs
 chatter

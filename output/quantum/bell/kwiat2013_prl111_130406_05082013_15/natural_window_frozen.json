@@ -1,0 +1,25 @@
+{
+  "generated_utc": "2026-02-11T02:46:59.813020+00:00",
+  "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+  "supported": true,
+  "natural_window": {
+    "recommended_window_ns": 2812.5,
+    "frozen_window_ns": 2812.5,
+    "snap_rule": "min(window in grid where window >= recommended_window_ns); fallback: min grid"
+  },
+  "baseline": {
+    "param_name": "window_ns",
+    "value": 2812.5,
+    "statistic_name": "CH J_prob (A1=0,B1=0)",
+    "statistic": -8.12025607476813e-05,
+    "sigma_boot": 3.9378181489705475e-05
+  },
+  "reject": {
+    "threshold_sigma": 3.0,
+    "rule": "abs(stat - frozen_stat) >= threshold_sigma * sigma_boot"
+  },
+  "sources": {
+    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\covariance_bootstrap.json",
+    "window_sweep_metrics_json": "C:\\develop\\waveP\\output\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\window_sweep_metrics.json"
+  }
+}

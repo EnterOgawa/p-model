@@ -1,0 +1,4433 @@
+{
+  "generated_utc": "2026-01-27T19:14:25.886417+00:00",
+  "phase": 7,
+  "step": "7.13.15.42",
+  "scan": {
+    "domain_min_A_base": 16,
+    "domain_min_A_candidates": [
+      16,
+      40,
+      60,
+      80,
+      100
+    ],
+    "shell_variants": [
+      {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      },
+      {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    ],
+    "shell_S_power_g": 1.0
+  },
+  "baseline": {
+    "radius_model": {
+      "form": "r_charge = (r0 + rI*I)*A^(1/3), I=(N-Z)/A",
+      "r0_fm": 0.9889628119917659,
+      "rI_fm": -0.2399027972384209,
+      "fit_min_A": 40,
+      "n_fit": 834,
+      "fit_rms_fm": 0.049233519426792,
+      "mean_I_fit": 0.15615935524157154,
+      "frozen_from_metrics": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json"
+    },
+    "coulomb_finite_size": {
+      "profile": "2pF (fixed a; c from r_rms via bisection)",
+      "a_fm": 0.523,
+      "dr_fm": 0.02,
+      "r_max_rule": "max(20, 3*r_rms + 20*a)",
+      "exchange": "Slater (LDA) on 2pF density",
+      "coef_slater": -0.7385587663820223,
+      "e2_MeV_fm": 1.43996448,
+      "cache_round_fm": 0.001
+    },
+    "deformation_beta2": {
+      "source": "NNDC B(E2) adopted entries",
+      "extracted_beta2_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\extracted_beta2.json",
+      "imputation_policy": "neighbors",
+      "imputation": "direct for even-even when present; otherwise average of available even-even neighbors (Z±1,N±1), else 0",
+      "applied_to": {
+        "coulomb_shape_factor": true,
+        "surface_area_factor": true
+      },
+      "counts_in_domain": {
+        "direct": 423,
+        "imputed": 1553,
+        "missing": 1511
+      },
+      "strict_coverage": true,
+      "direct_only_counts_in_domain": {
+        "direct": 423,
+        "imputed": 0,
+        "missing": 3064
+      },
+      "n_skipped_direct_only": 0,
+      "rule": "pass_strict := pass_strict_primary AND pass_strict_direct_only",
+      "note": "B(E2)-derived β2 is treated as a magnitude; the Coulomb shape factor uses |β2|."
+    },
+    "spectroscopy_nudat3_multi": {
+      "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+      "extracted_spectroscopy_path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_nudat3_primary_secondary\\extracted_spectroscopy.json",
+      "metrics": {
+        "e2plus_keV": "E(2+_1) energy (keV; peak rule)",
+        "e4plus_keV": "E(4+_1) energy (keV; peak rule)",
+        "e3minus_keV": "E(3-_1) energy (keV; peak rule)",
+        "r42": "R4/2 (dimensionless; valley rule)"
+      },
+      "strict_multi": true,
+      "note": "Uses NuDat 3.0 static chart JSON (ENSDF-derived) for E(2+_1), E(4+_1), E(3-_1) and R4/2; strict cross-check uses local extrema along isotopic/isotonic chains."
+    },
+    "radii_kink_delta2r": {
+      "source": "IAEA charge_radii.csv",
+      "definition": {
+        "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+        "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+        "resid_sigma": "resid_sigma = (Δ²r_pred - Δ²r_obs) / σ_obs(Δ²r)",
+        "kink_threshold": 3.0,
+        "residual_threshold": 3.0,
+        "step": 2,
+        "axes": {
+          "gap_Sn": "x=N at fixed Z",
+          "gap_Sp": "x=Z at fixed N"
+        }
+      },
+      "strict_delta2r": true,
+      "fit_rms_fm": 0.049233519426792,
+      "sigma_model_delta2r_fm": 0.12059700083704333,
+      "counts_in_csv": {
+        "adopted": 908,
+        "preliminary": 48,
+        "skipped": 1
+      }
+    }
+  },
+  "shell_model": {
+    "form": "kN(I)=kN0+kN1*I, kZ(I)=kZ0+kZ1*I (I=(N-Z)/A)",
+    "S_shell": {
+      "form": "x in (Mk,Mk1], p=x-Mk, g=Mk1-Mk; S_shell=p(p-g)/g^power (0 at magic boundaries)",
+      "power_g": 1.0
+    },
+    "train_magic": [
+      50,
+      82
+    ],
+    "note": "All coefficients are frozen using train magic only; other_magic is used for rejection (strict)."
+  },
+  "diag": {
+    "n_ame_total": 3556,
+    "n_in_domain_base": 3487,
+    "n_skipped_base": 0,
+    "n_cached_r_rms": 2062,
+    "best_gap_Sp_other_delta": {
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      },
+      "domain_min_A": 60,
+      "delta": 1.0644552107542522,
+      "pair": 0.718256034045033,
+      "shell": 1.7827112447992852,
+      "n": 19
+    },
+    "conclusion": "strict_pass=0/10 over shell variants x A_min cuts. This step adds an independently constrained deformation input beta2 (NNDC B(E2) adopted entries) and applies Coulomb shape factor f(beta2), surface-area factor g(beta2) on the surface term, robust: require agreement with direct-only (no-imputation) run on top of the frozen radius model + finite-size Coulomb baseline, while keeping the shell refreeze coefficients isospin-dependent kN(I)=kN0+kN1*I and kZ(I)=kZ0+kZ1*I (frozen on train magic N/Z in {50,82} only). If strict_pass==0, additional independently frozen structure inputs (beyond beta2) are still required. This step also integrates a spectroscopy-based strict cross-check using multiple NuDat 3.0 metrics (E2+, E4+, E3-, R4/2) via local extrema. This step also compares charge-radii kink as an observable (Δ²r_pred vs Δ²r_obs; step=2) and applies a fixed residual threshold |Δ²r_pred-Δ²r_obs|/σ_obs <= 3."
+  },
+  "results": [
+    {
+      "status": "ok",
+      "domain_min_A": 16,
+      "n_in_domain": 3487,
+      "pairing": {
+        "a_n_MeV": 5.538988784156382,
+        "a_p_MeV": 6.615241823661158,
+        "n_samples_a_n": 2538,
+        "n_samples_a_p": 2446
+      },
+      "fit": {
+        "kN0": 0.14355094000349,
+        "kN1": -0.3068854555393796,
+        "kZ0": 0.08245988283817443,
+        "kZ1": 0.1251717118231228,
+        "kZ_over_kN": 0.5744294174330706,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6799734045086387,
+          "rms_resid_pairing_shell_MeV": 0.5816369792900372
+        },
+        "other_magic": {
+          "n": 61,
+          "rms_resid_uncorrected_MeV": 3.4356709441620157,
+          "rms_resid_pairing_only_MeV": 1.3337499292026316,
+          "rms_resid_pairing_shell_MeV": 2.452856025141161
+        },
+        "by_magic": {
+          "8": {
+            "n": 4,
+            "rms_resid_uncorrected_MeV": 5.24158626373529,
+            "rms_resid_pairing_only_MeV": 0.9532766855454738,
+            "rms_resid_pairing_shell_MeV": 4.84854264378467
+          },
+          "20": {
+            "n": 18,
+            "rms_resid_uncorrected_MeV": 3.7453174331771417,
+            "rms_resid_pairing_only_MeV": 1.5874652804879341,
+            "rms_resid_pairing_shell_MeV": 2.733548286785943
+          },
+          "28": {
+            "n": 22,
+            "rms_resid_uncorrected_MeV": 3.286060774564697,
+            "rms_resid_pairing_only_MeV": 1.2968647359309464,
+            "rms_resid_pairing_shell_MeV": 2.2841615020382906
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6844141324311788,
+            "rms_resid_pairing_shell_MeV": 0.5984588385738746
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6761577023030645,
+            "rms_resid_pairing_shell_MeV": 0.5668210343670043
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1508454202301601,
+            "rms_resid_pairing_shell_MeV": 1.180463151276419
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5662077856608245,
+          "rms_resid_pairing_shell_MeV": 0.49053779277876497
+        },
+        "other_magic": {
+          "n": 66,
+          "rms_resid_uncorrected_MeV": 3.716513452105301,
+          "rms_resid_pairing_only_MeV": 1.2211882927138804,
+          "rms_resid_pairing_shell_MeV": 2.6863642500597784
+        },
+        "by_magic": {
+          "8": {
+            "n": 10,
+            "rms_resid_uncorrected_MeV": 3.463529114495624,
+            "rms_resid_pairing_only_MeV": 2.523387429323607,
+            "rms_resid_pairing_shell_MeV": 5.176815323045077
+          },
+          "20": {
+            "n": 27,
+            "rms_resid_uncorrected_MeV": 3.996125377184939,
+            "rms_resid_pairing_only_MeV": 0.8381480613334976,
+            "rms_resid_pairing_shell_MeV": 2.0418129846864814
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.737744138555326,
+            "rms_resid_pairing_shell_MeV": 1.8169253520722193
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.7136820838343068,
+            "rms_resid_pairing_shell_MeV": 0.4397006225451273
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3986545009359013,
+            "rms_resid_pairing_shell_MeV": 0.5377695989389613
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 50,
+              "n_extrema": 39,
+              "rms_resid_uncorrected_MeV": 3.874341560529009,
+              "rms_resid_pairing_only_MeV": 1.568313635786452,
+              "rms_resid_pairing_shell_MeV": 1.366262185476624
+            },
+            "gap_Sp_extrema": {
+              "n_available": 66,
+              "n_extrema": 48,
+              "rms_resid_uncorrected_MeV": 4.012905722354915,
+              "rms_resid_pairing_only_MeV": 1.582188453050724,
+              "rms_resid_pairing_shell_MeV": 1.530858751220975
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 41,
+              "n_extrema": 28,
+              "rms_resid_uncorrected_MeV": 3.802528195886655,
+              "rms_resid_pairing_only_MeV": 1.589946769481689,
+              "rms_resid_pairing_shell_MeV": 1.081304832419998
+            },
+            "gap_Sp_extrema": {
+              "n_available": 59,
+              "n_extrema": 36,
+              "rms_resid_uncorrected_MeV": 3.9789548633149234,
+              "rms_resid_pairing_only_MeV": 1.5172904493369752,
+              "rms_resid_pairing_shell_MeV": 0.7873528830585281
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 30,
+              "n_extrema": 12,
+              "rms_resid_uncorrected_MeV": 4.150598338482122,
+              "rms_resid_pairing_only_MeV": 1.7392374348242048,
+              "rms_resid_pairing_shell_MeV": 0.9024229136046723
+            },
+            "gap_Sp_extrema": {
+              "n_available": 34,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 4.124460912399736,
+              "rms_resid_pairing_only_MeV": 1.6645510374527006,
+              "rms_resid_pairing_shell_MeV": 0.7482759839365021
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 41,
+              "n_extrema": 30,
+              "rms_resid_uncorrected_MeV": 3.892137437050221,
+              "rms_resid_pairing_only_MeV": 1.666700042213178,
+              "rms_resid_pairing_shell_MeV": 1.034793900097745
+            },
+            "gap_Sp_extrema": {
+              "n_available": 59,
+              "n_extrema": 41,
+              "rms_resid_uncorrected_MeV": 4.001386169366566,
+              "rms_resid_pairing_only_MeV": 1.5202729074428025,
+              "rms_resid_pairing_shell_MeV": 1.1844178822683809
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 253,
+          "n_kink": 17,
+          "n_eval": 17,
+          "rms_resid_sigma": 7.537639179384947,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 12,
+              "N0": 14,
+              "abs_resid_sigma": 11.009210508334158,
+              "delta2r_obs_fm": 0.058699999999999974,
+              "delta2r_pred_fm": 0.0014097778871877686,
+              "resid_fm": -0.057290222112812206,
+              "sigma_obs_fm": 0.005203844732503075
+            },
+            {
+              "Z": 10,
+              "N0": 10,
+              "abs_resid_sigma": 9.399232177970365,
+              "delta2r_obs_fm": -0.08709999999999996,
+              "delta2r_pred_fm": 0.0027598057528224196,
+              "resid_fm": 0.08985980575282237,
+              "sigma_obs_fm": 0.009560334722173696
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 20,
+              "N0": 28,
+              "abs_resid_sigma": 7.370608510244256,
+              "delta2r_obs_fm": 0.05789999999999962,
+              "delta2r_pred_fm": 0.0003525845611118683,
+              "resid_fm": -0.05754741543888775,
+              "sigma_obs_fm": 0.007807688518377254
+            },
+            {
+              "Z": 20,
+              "N0": 24,
+              "abs_resid_sigma": 6.456888414065521,
+              "delta2r_obs_fm": -0.032399999999999984,
+              "delta2r_pred_fm": 0.0005554423150959664,
+              "resid_fm": 0.03295544231509595,
+              "sigma_obs_fm": 0.005103920062069937
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 177,
+          "n_kink": 21,
+          "n_eval": 21,
+          "rms_resid_sigma": 6.141992502504425,
+          "max_abs_resid_sigma": 17.759541030088428,
+          "worst_points": [
+            {
+              "N": 10,
+              "Z0": 10,
+              "abs_resid_sigma": 17.759541030088428,
+              "delta2r_obs_fm": -0.16959999999999997,
+              "delta2r_pred_fm": -0.014735172910508965,
+              "resid_fm": 0.154864827089491,
+              "sigma_obs_fm": 0.008720091742636656
+            },
+            {
+              "N": 28,
+              "Z0": 20,
+              "abs_resid_sigma": 9.082945205121272,
+              "delta2r_obs_fm": 0.053899999999999615,
+              "delta2r_pred_fm": -0.0036890243248599575,
+              "resid_fm": -0.05758902432485957,
+              "sigma_obs_fm": 0.0063403469936589435
+            },
+            {
+              "N": 26,
+              "Z0": 20,
+              "abs_resid_sigma": 8.026388573921649,
+              "delta2r_obs_fm": 0.04689999999999994,
+              "delta2r_pred_fm": -0.003895055736362618,
+              "resid_fm": -0.05079505573636256,
+              "sigma_obs_fm": 0.006328506932918696
+            },
+            {
+              "N": 16,
+              "Z0": 14,
+              "abs_resid_sigma": 7.9665203630939905,
+              "delta2r_obs_fm": 0.06300000000000017,
+              "delta2r_pred_fm": -0.0077182946599574365,
+              "resid_fm": -0.0707182946599576,
+              "sigma_obs_fm": 0.00887693640846886
+            },
+            {
+              "N": 16,
+              "Z0": 12,
+              "abs_resid_sigma": 5.536614317180707,
+              "delta2r_obs_fm": -0.07950000000000035,
+              "delta2r_pred_fm": -0.00897822410566107,
+              "resid_fm": 0.07052177589433928,
+              "sigma_obs_fm": 0.012737346662472527
+            },
+            {
+              "N": 20,
+              "Z0": 18,
+              "abs_resid_sigma": 4.987177718780742,
+              "delta2r_obs_fm": -0.02950000000000008,
+              "delta2r_pred_fm": -0.0051648211540347155,
+              "resid_fm": 0.024335178845965366,
+              "sigma_obs_fm": 0.0048795491595023405
+            },
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 40,
+      "n_in_domain": 3255,
+      "pairing": {
+        "a_n_MeV": 5.575078300991934,
+        "a_p_MeV": 6.659905361097271,
+        "n_samples_a_n": 2416,
+        "n_samples_a_p": 2329
+      },
+      "fit": {
+        "kN0": 0.1427016046070814,
+        "kN1": -0.30698994606001506,
+        "kZ0": 0.08140599780819929,
+        "kZ1": 0.1254029871060528,
+        "kZ_over_kN": 0.5704630864687531,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6675638326887514,
+          "rms_resid_pairing_shell_MeV": 0.581720133217485
+        },
+        "other_magic": {
+          "n": 44,
+          "rms_resid_uncorrected_MeV": 3.234282397868738,
+          "rms_resid_pairing_only_MeV": 1.1451123150995262,
+          "rms_resid_pairing_shell_MeV": 1.9716777134766166
+        },
+        "by_magic": {
+          "20": {
+            "n": 6,
+            "rms_resid_uncorrected_MeV": 4.150887174164224,
+            "rms_resid_pairing_only_MeV": 0.9564525682544525,
+            "rms_resid_pairing_shell_MeV": 2.6535559976473886
+          },
+          "28": {
+            "n": 21,
+            "rms_resid_uncorrected_MeV": 3.3580250584984146,
+            "rms_resid_pairing_only_MeV": 1.196562530706018,
+            "rms_resid_pairing_shell_MeV": 2.241470502115429
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6713555536089157,
+            "rms_resid_pairing_shell_MeV": 0.5985460705843157
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6643069106436976,
+            "rms_resid_pairing_shell_MeV": 0.5669005559564143
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1412224777911888,
+            "rms_resid_pairing_shell_MeV": 1.1705811882607384
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5523567177443842,
+          "rms_resid_pairing_shell_MeV": 0.49053110381563725
+        },
+        "other_magic": {
+          "n": 49,
+          "rms_resid_uncorrected_MeV": 3.6455358571538965,
+          "rms_resid_pairing_only_MeV": 0.7815011473816325,
+          "rms_resid_pairing_shell_MeV": 1.971594617924658
+        },
+        "by_magic": {
+          "20": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.8125274482262768,
+            "rms_resid_pairing_only_MeV": 0.8458801864127091,
+            "rms_resid_pairing_shell_MeV": 2.173014894169872
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.7338183635372374,
+            "rms_resid_pairing_shell_MeV": 1.8197404791131186
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6980042111777638,
+            "rms_resid_pairing_shell_MeV": 0.43968905313396767
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3869425638424087,
+            "rms_resid_pairing_shell_MeV": 0.5377669462783226
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 41,
+              "n_extrema": 34,
+              "rms_resid_uncorrected_MeV": 3.6938382788931037,
+              "rms_resid_pairing_only_MeV": 1.5880532098601645,
+              "rms_resid_pairing_shell_MeV": 1.116147628512765
+            },
+            "gap_Sp_extrema": {
+              "n_available": 58,
+              "n_extrema": 44,
+              "rms_resid_uncorrected_MeV": 3.9873253988616657,
+              "rms_resid_pairing_only_MeV": 1.4758117346017252,
+              "rms_resid_pairing_shell_MeV": 0.8651848909280694
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 35,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.7538913021806373,
+              "rms_resid_pairing_only_MeV": 1.6241573850470115,
+              "rms_resid_pairing_shell_MeV": 1.008617501686265
+            },
+            "gap_Sp_extrema": {
+              "n_available": 54,
+              "n_extrema": 36,
+              "rms_resid_uncorrected_MeV": 3.9789548633149234,
+              "rms_resid_pairing_only_MeV": 1.502744334480239,
+              "rms_resid_pairing_shell_MeV": 0.7888192758809112
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 11,
+              "rms_resid_uncorrected_MeV": 3.897945805838374,
+              "rms_resid_pairing_only_MeV": 1.5966568491218078,
+              "rms_resid_pairing_shell_MeV": 0.9427879502931924
+            },
+            "gap_Sp_extrema": {
+              "n_available": 30,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 4.124460912399736,
+              "rms_resid_pairing_only_MeV": 1.6497584561236187,
+              "rms_resid_pairing_shell_MeV": 0.7496715478193439
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 35,
+              "n_extrema": 28,
+              "rms_resid_uncorrected_MeV": 3.753657005283729,
+              "rms_resid_pairing_only_MeV": 1.6226924804166232,
+              "rms_resid_pairing_shell_MeV": 1.0312488155255137
+            },
+            "gap_Sp_extrema": {
+              "n_available": 54,
+              "n_extrema": 39,
+              "rms_resid_uncorrected_MeV": 3.9385782325883376,
+              "rms_resid_pairing_only_MeV": 1.464045531669241,
+              "rms_resid_pairing_shell_MeV": 0.925626984442779
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 240,
+          "n_kink": 14,
+          "n_eval": 14,
+          "rms_resid_sigma": 7.273447545734157,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 20,
+              "N0": 28,
+              "abs_resid_sigma": 7.370608510244256,
+              "delta2r_obs_fm": 0.05789999999999962,
+              "delta2r_pred_fm": 0.0003525845611118683,
+              "resid_fm": -0.05754741543888775,
+              "sigma_obs_fm": 0.007807688518377254
+            },
+            {
+              "Z": 20,
+              "N0": 24,
+              "abs_resid_sigma": 6.456888414065521,
+              "delta2r_obs_fm": -0.032399999999999984,
+              "delta2r_pred_fm": 0.0005554423150959664,
+              "resid_fm": 0.03295544231509595,
+              "sigma_obs_fm": 0.005103920062069937
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 24,
+              "N0": 28,
+              "abs_resid_sigma": 4.3615206813770575,
+              "delta2r_obs_fm": 0.05689999999999973,
+              "delta2r_pred_fm": 0.00044062438403891235,
+              "resid_fm": -0.056459375615960816,
+              "sigma_obs_fm": 0.01294488315899375
+            },
+            {
+              "Z": 20,
+              "N0": 22,
+              "abs_resid_sigma": 4.222932583297254,
+              "delta2r_obs_fm": -0.020700000000000607,
+              "delta2r_pred_fm": 0.0006915608456896649,
+              "resid_fm": 0.02139156084569027,
+              "sigma_obs_fm": 0.005065570056765576
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 171,
+          "n_kink": 15,
+          "n_eval": 15,
+          "rms_resid_sigma": 4.738843003152144,
+          "max_abs_resid_sigma": 9.082945205121272,
+          "worst_points": [
+            {
+              "N": 28,
+              "Z0": 20,
+              "abs_resid_sigma": 9.082945205121272,
+              "delta2r_obs_fm": 0.053899999999999615,
+              "delta2r_pred_fm": -0.0036890243248599575,
+              "resid_fm": -0.05758902432485957,
+              "sigma_obs_fm": 0.0063403469936589435
+            },
+            {
+              "N": 26,
+              "Z0": 20,
+              "abs_resid_sigma": 8.026388573921649,
+              "delta2r_obs_fm": 0.04689999999999994,
+              "delta2r_pred_fm": -0.003895055736362618,
+              "resid_fm": -0.05079505573636256,
+              "sigma_obs_fm": 0.006328506932918696
+            },
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 22,
+              "Z0": 20,
+              "abs_resid_sigma": 3.811191011864678,
+              "delta2r_obs_fm": 0.0226999999999995,
+              "delta2r_pred_fm": -0.004359456184239718,
+              "resid_fm": -0.027059456184239217,
+              "sigma_obs_fm": 0.0071
+            },
+            {
+              "N": 40,
+              "Z0": 36,
+              "abs_resid_sigma": 3.5264251559478828,
+              "delta2r_obs_fm": -0.07789999999999964,
+              "delta2r_pred_fm": -0.0016248015264848092,
+              "resid_fm": 0.07627519847351483,
+              "sigma_obs_fm": 0.02162960933535324
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 60,
+      "n_in_domain": 3001,
+      "pairing": {
+        "a_n_MeV": 5.604303040768533,
+        "a_p_MeV": 6.6947260464427165,
+        "n_samples_a_n": 2323,
+        "n_samples_a_p": 2237
+      },
+      "fit": {
+        "kN0": 0.1420138256930124,
+        "kN1": -0.307074560340804,
+        "kZ0": 0.08058436560756631,
+        "kZ1": 0.12558329463922988,
+        "kZ_over_kN": 0.567440284171792,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6575304401321085,
+          "rms_resid_pairing_shell_MeV": 0.5817875056199276
+        },
+        "other_magic": {
+          "n": 18,
+          "rms_resid_uncorrected_MeV": 2.7225500942531746,
+          "rms_resid_pairing_only_MeV": 1.1167962545385266,
+          "rms_resid_pairing_shell_MeV": 1.26330324815499
+        },
+        "by_magic": {
+          "28": {
+            "n": 1,
+            "rms_resid_uncorrected_MeV": 3.652061165854491,
+            "rms_resid_pairing_only_MeV": 0.7815138010637952,
+            "rms_resid_pairing_shell_MeV": 2.397841020415342
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6608102160235079,
+            "rms_resid_pairing_shell_MeV": 0.5986167888731615
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6547140295725995,
+            "rms_resid_pairing_shell_MeV": 0.5669649475831885
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.133434289682309,
+            "rms_resid_pairing_shell_MeV": 1.1625830819949419
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5415685560942831,
+          "rms_resid_pairing_shell_MeV": 0.4905259140787463
+        },
+        "other_magic": {
+          "n": 19,
+          "rms_resid_uncorrected_MeV": 3.48042010841936,
+          "rms_resid_pairing_only_MeV": 0.718256034045033,
+          "rms_resid_pairing_shell_MeV": 1.850708149875164
+        },
+        "by_magic": {
+          "28": {
+            "n": 19,
+            "rms_resid_uncorrected_MeV": 3.48042010841936,
+            "rms_resid_pairing_only_MeV": 0.718256034045033,
+            "rms_resid_pairing_shell_MeV": 1.850708149875164
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6857911000520835,
+            "rms_resid_pairing_shell_MeV": 0.4396800504577114
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3778227922266606,
+            "rms_resid_pairing_shell_MeV": 0.5377649102417409
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 31,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.6400932932365904,
+              "rms_resid_pairing_only_MeV": 1.67597574541041,
+              "rms_resid_pairing_shell_MeV": 0.8264489073142685
+            },
+            "gap_Sp_extrema": {
+              "n_available": 44,
+              "n_extrema": 35,
+              "rms_resid_uncorrected_MeV": 3.914489455411088,
+              "rms_resid_pairing_only_MeV": 1.577980374179896,
+              "rms_resid_pairing_shell_MeV": 0.6031382100302399
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 21,
+              "rms_resid_uncorrected_MeV": 3.644389305492504,
+              "rms_resid_pairing_only_MeV": 1.6677639064019434,
+              "rms_resid_pairing_shell_MeV": 0.7507063801692908
+            },
+            "gap_Sp_extrema": {
+              "n_available": 44,
+              "n_extrema": 31,
+              "rms_resid_uncorrected_MeV": 3.949576633782349,
+              "rms_resid_pairing_only_MeV": 1.5669674830901212,
+              "rms_resid_pairing_shell_MeV": 0.6340628505357876
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 20,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 3.958397462163268,
+              "rms_resid_pairing_only_MeV": 1.8230149065219494,
+              "rms_resid_pairing_shell_MeV": 0.38877954936606984
+            },
+            "gap_Sp_extrema": {
+              "n_available": 20,
+              "n_extrema": 7,
+              "rms_resid_uncorrected_MeV": 4.181876667809772,
+              "rms_resid_pairing_only_MeV": 1.7490205087913255,
+              "rms_resid_pairing_shell_MeV": 0.5845955585740653
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 22,
+              "rms_resid_uncorrected_MeV": 3.6413265435853104,
+              "rms_resid_pairing_only_MeV": 1.6926507103433455,
+              "rms_resid_pairing_shell_MeV": 0.7905425428136976
+            },
+            "gap_Sp_extrema": {
+              "n_available": 44,
+              "n_extrema": 32,
+              "rms_resid_uncorrected_MeV": 3.9314534193875867,
+              "rms_resid_pairing_only_MeV": 1.564812616799251,
+              "rms_resid_pairing_shell_MeV": 0.6245554324417151
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 229,
+          "n_kink": 10,
+          "n_eval": 10,
+          "rms_resid_sigma": 7.795955674242352,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 34,
+              "N0": 42,
+              "abs_resid_sigma": 3.3756247750551616,
+              "delta2r_obs_fm": -0.06839999999999957,
+              "delta2r_pred_fm": 0.00021159765238643047,
+              "resid_fm": 0.068611597652386,
+              "sigma_obs_fm": 0.020325599622151372
+            },
+            {
+              "Z": 32,
+              "N0": 42,
+              "abs_resid_sigma": 3.319278997071112,
+              "delta2r_obs_fm": -0.009700000000000486,
+              "delta2r_pred_fm": 0.0001967964567795022,
+              "resid_fm": 0.009896796456779988,
+              "sigma_obs_fm": 0.0029816103031751143
+            },
+            {
+              "Z": 62,
+              "N0": 82,
+              "abs_resid_sigma": 3.3139263123496647,
+              "delta2r_obs_fm": 0.027800000000000935,
+              "delta2r_pred_fm": 6.380275455963869e-05,
+              "resid_fm": -0.027736197245441296,
+              "sigma_obs_fm": 0.008369587803470371
+            },
+            {
+              "Z": 40,
+              "N0": 52,
+              "abs_resid_sigma": 3.2983831583329417,
+              "delta2r_obs_fm": -0.009999999999999787,
+              "delta2r_pred_fm": 0.00013951094921260676,
+              "resid_fm": 0.010139510949212394,
+              "sigma_obs_fm": 0.0030740852297878795
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 163,
+          "n_kink": 10,
+          "n_eval": 10,
+          "rms_resid_sigma": 3.951644827623728,
+          "max_abs_resid_sigma": 4.836101794245573,
+          "worst_points": [
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 40,
+              "Z0": 36,
+              "abs_resid_sigma": 3.5264251559478828,
+              "delta2r_obs_fm": -0.07789999999999964,
+              "delta2r_pred_fm": -0.0016248015264848092,
+              "resid_fm": 0.07627519847351483,
+              "sigma_obs_fm": 0.02162960933535324
+            },
+            {
+              "N": 108,
+              "Z0": 74,
+              "abs_resid_sigma": 3.468714637461421,
+              "delta2r_obs_fm": 0.01750000000000007,
+              "delta2r_pred_fm": -0.00040340694199691995,
+              "resid_fm": -0.01790340694199699,
+              "sigma_obs_fm": 0.005161395160225576
+            },
+            {
+              "N": 112,
+              "Z0": 82,
+              "abs_resid_sigma": 3.3533268281383193,
+              "delta2r_obs_fm": 0.06240000000000023,
+              "delta2r_pred_fm": -0.00035740184164190225,
+              "resid_fm": -0.06275740184164214,
+              "sigma_obs_fm": 0.0187149672722129
+            },
+            {
+              "N": 114,
+              "Z0": 82,
+              "abs_resid_sigma": 3.0462479123605397,
+              "delta2r_obs_fm": 0.056700000000000195,
+              "delta2r_pred_fm": -0.0003527346630365358,
+              "resid_fm": -0.05705273466303673,
+              "sigma_obs_fm": 0.01872885474341664
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 80,
+      "n_in_domain": 2730,
+      "pairing": {
+        "a_n_MeV": 5.615758171076965,
+        "a_p_MeV": 6.7753574906386005,
+        "n_samples_a_n": 2134,
+        "n_samples_a_p": 2052
+      },
+      "fit": {
+        "kN0": 0.13390928425413656,
+        "kN1": -0.22806432082589653,
+        "kZ0": 0.0786817801584314,
+        "kZ1": 0.12600080849363637,
+        "kZ_over_kN": 0.5875752424238714,
+        "n_fit_pairs_kN": 48,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 48,
+          "rms_resid_uncorrected_MeV": 3.7461714328684153,
+          "rms_resid_pairing_only_MeV": 1.707546759519578,
+          "rms_resid_pairing_shell_MeV": 0.5546024081793313
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.130382666204385,
+          "rms_resid_pairing_shell_MeV": 1.159917865132487
+        },
+        "by_magic": {
+          "50": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 4.0375683999282765,
+            "rms_resid_pairing_only_MeV": 1.783761589927259,
+            "rms_resid_pairing_shell_MeV": 0.6326156793550334
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.650954883127191,
+            "rms_resid_pairing_shell_MeV": 0.49135279514397967
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.130382666204385,
+            "rms_resid_pairing_shell_MeV": 1.159917865132487
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.516623520351565,
+          "rms_resid_pairing_shell_MeV": 0.4905730909078134
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6575439055001449,
+            "rms_resid_pairing_shell_MeV": 0.43977146384994326
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3567434115514159,
+            "rms_resid_pairing_shell_MeV": 0.5377753745474737
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 30,
+              "n_extrema": 25,
+              "rms_resid_uncorrected_MeV": 3.658259967750654,
+              "rms_resid_pairing_only_MeV": 1.70037530128975,
+              "rms_resid_pairing_shell_MeV": 0.8057129747194669
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 29,
+              "rms_resid_uncorrected_MeV": 3.871585787443618,
+              "rms_resid_pairing_only_MeV": 1.6600087639750436,
+              "rms_resid_pairing_shell_MeV": 0.4533206542618602
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 21,
+              "rms_resid_uncorrected_MeV": 3.644389305492504,
+              "rms_resid_pairing_only_MeV": 1.6638223022729337,
+              "rms_resid_pairing_shell_MeV": 0.734407005200295
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 25,
+              "rms_resid_uncorrected_MeV": 3.9086927357768664,
+              "rms_resid_pairing_only_MeV": 1.6636305448840456,
+              "rms_resid_pairing_shell_MeV": 0.4771141067694848
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 20,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 3.958397462163268,
+              "rms_resid_pairing_only_MeV": 1.8186774414068922,
+              "rms_resid_pairing_shell_MeV": 0.3428924189700361
+            },
+            "gap_Sp_extrema": {
+              "n_available": 17,
+              "n_extrema": 6,
+              "rms_resid_uncorrected_MeV": 4.233073741610938,
+              "rms_resid_pairing_only_MeV": 1.8515065839456708,
+              "rms_resid_pairing_shell_MeV": 0.34948383183531595
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 22,
+              "rms_resid_uncorrected_MeV": 3.6413265435853104,
+              "rms_resid_pairing_only_MeV": 1.6887670050280006,
+              "rms_resid_pairing_shell_MeV": 0.7620143156726329
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.887730112112215,
+              "rms_resid_pairing_only_MeV": 1.6567538115559566,
+              "rms_resid_pairing_shell_MeV": 0.4686327738226462
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 216,
+          "n_kink": 8,
+          "n_eval": 8,
+          "rms_resid_sigma": 8.553923025907116,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 62,
+              "N0": 82,
+              "abs_resid_sigma": 3.3139263123496647,
+              "delta2r_obs_fm": 0.027800000000000935,
+              "delta2r_pred_fm": 6.380275455963869e-05,
+              "resid_fm": -0.027736197245441296,
+              "sigma_obs_fm": 0.008369587803470371
+            },
+            {
+              "Z": 40,
+              "N0": 52,
+              "abs_resid_sigma": 3.2983831583329417,
+              "delta2r_obs_fm": -0.009999999999999787,
+              "delta2r_pred_fm": 0.00013951094921260676,
+              "resid_fm": 0.010139510949212394,
+              "sigma_obs_fm": 0.0030740852297878795
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 156,
+          "n_kink": 9,
+          "n_eval": 9,
+          "rms_resid_sigma": 3.996099404507567,
+          "max_abs_resid_sigma": 4.836101794245573,
+          "worst_points": [
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 108,
+              "Z0": 74,
+              "abs_resid_sigma": 3.468714637461421,
+              "delta2r_obs_fm": 0.01750000000000007,
+              "delta2r_pred_fm": -0.00040340694199691995,
+              "resid_fm": -0.01790340694199699,
+              "sigma_obs_fm": 0.005161395160225576
+            },
+            {
+              "N": 112,
+              "Z0": 82,
+              "abs_resid_sigma": 3.3533268281383193,
+              "delta2r_obs_fm": 0.06240000000000023,
+              "delta2r_pred_fm": -0.00035740184164190225,
+              "resid_fm": -0.06275740184164214,
+              "sigma_obs_fm": 0.0187149672722129
+            },
+            {
+              "N": 114,
+              "Z0": 82,
+              "abs_resid_sigma": 3.0462479123605397,
+              "delta2r_obs_fm": 0.056700000000000195,
+              "delta2r_pred_fm": -0.0003527346630365358,
+              "resid_fm": -0.05705273466303673,
+              "sigma_obs_fm": 0.01872885474341664
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 100,
+      "n_in_domain": 2435,
+      "pairing": {
+        "a_n_MeV": 5.675679178740438,
+        "a_p_MeV": 6.80103425506131,
+        "n_samples_a_n": 1918,
+        "n_samples_a_p": 1840
+      },
+      "fit": {
+        "kN0": 0.12416948321808655,
+        "kN1": -0.07385595836125664,
+        "kZ0": 0.0780759075761325,
+        "kZ1": 0.12613377385248886,
+        "kZ_over_kN": 0.628784992517066,
+        "n_fit_pairs_kN": 28,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 28,
+          "rms_resid_uncorrected_MeV": 3.523306319207567,
+          "rms_resid_pairing_only_MeV": 1.6312995005303397,
+          "rms_resid_pairing_shell_MeV": 0.38682961726294135
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.114429851868883,
+          "rms_resid_pairing_shell_MeV": 1.146381706055135
+        },
+        "by_magic": {
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6312995005303397,
+            "rms_resid_pairing_shell_MeV": 0.38682961726294135
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.114429851868883,
+            "rms_resid_pairing_shell_MeV": 1.146381706055135
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5086908300361601,
+          "rms_resid_pairing_shell_MeV": 0.49068652599956025
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6485589240002898,
+            "rms_resid_pairing_shell_MeV": 0.439987328581904
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.350042377346907,
+            "rms_resid_pairing_shell_MeV": 0.5378038107051791
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 21,
+              "n_extrema": 17,
+              "rms_resid_uncorrected_MeV": 3.4594359727044686,
+              "rms_resid_pairing_only_MeV": 1.6753580044542127,
+              "rms_resid_pairing_shell_MeV": 0.8312682899259419
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 29,
+              "rms_resid_uncorrected_MeV": 3.871585787443618,
+              "rms_resid_pairing_only_MeV": 1.6518389441503005,
+              "rms_resid_pairing_shell_MeV": 0.4531122033488746
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 17,
+              "n_extrema": 13,
+              "rms_resid_uncorrected_MeV": 3.3717405349541156,
+              "rms_resid_pairing_only_MeV": 1.6139428620673193,
+              "rms_resid_pairing_shell_MeV": 0.7902497201582577
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 25,
+              "rms_resid_uncorrected_MeV": 3.9086927357768664,
+              "rms_resid_pairing_only_MeV": 1.6553606416603628,
+              "rms_resid_pairing_shell_MeV": 0.4769230181661113
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 14,
+              "n_extrema": 4,
+              "rms_resid_uncorrected_MeV": 3.686350737373266,
+              "rms_resid_pairing_only_MeV": 1.7761318179155876,
+              "rms_resid_pairing_shell_MeV": 0.22089048146059376
+            },
+            "gap_Sp_extrema": {
+              "n_available": 17,
+              "n_extrema": 6,
+              "rms_resid_uncorrected_MeV": 4.233073741610938,
+              "rms_resid_pairing_only_MeV": 1.8424905827748068,
+              "rms_resid_pairing_shell_MeV": 0.34825219410701364
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 17,
+              "n_extrema": 15,
+              "rms_resid_uncorrected_MeV": 3.46137324717697,
+              "rms_resid_pairing_only_MeV": 1.677710332155332,
+              "rms_resid_pairing_shell_MeV": 0.7587449720985986
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.887730112112215,
+              "rms_resid_pairing_only_MeV": 1.648528881896288,
+              "rms_resid_pairing_shell_MeV": 0.4684385405471595
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 187,
+          "n_kink": 3,
+          "n_eval": 3,
+          "rms_resid_sigma": 4.590161311522544,
+          "max_abs_resid_sigma": 5.727591406301308,
+          "worst_points": [
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 62,
+              "N0": 82,
+              "abs_resid_sigma": 3.3139263123496647,
+              "delta2r_obs_fm": 0.027800000000000935,
+              "delta2r_pred_fm": 6.380275455963869e-05,
+              "resid_fm": -0.027736197245441296,
+              "sigma_obs_fm": 0.008369587803470371
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 135,
+          "n_kink": 9,
+          "n_eval": 9,
+          "rms_resid_sigma": 3.996099404507567,
+          "max_abs_resid_sigma": 4.836101794245573,
+          "worst_points": [
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 108,
+              "Z0": 74,
+              "abs_resid_sigma": 3.468714637461421,
+              "delta2r_obs_fm": 0.01750000000000007,
+              "delta2r_pred_fm": -0.00040340694199691995,
+              "resid_fm": -0.01790340694199699,
+              "sigma_obs_fm": 0.005161395160225576
+            },
+            {
+              "N": 112,
+              "Z0": 82,
+              "abs_resid_sigma": 3.3533268281383193,
+              "delta2r_obs_fm": 0.06240000000000023,
+              "delta2r_pred_fm": -0.00035740184164190225,
+              "resid_fm": -0.06275740184164214,
+              "sigma_obs_fm": 0.0187149672722129
+            },
+            {
+              "N": 114,
+              "Z0": 82,
+              "abs_resid_sigma": 3.0462479123605397,
+              "delta2r_obs_fm": 0.056700000000000195,
+              "delta2r_pred_fm": -0.0003527346630365358,
+              "resid_fm": -0.05705273466303673,
+              "sigma_obs_fm": 0.01872885474341664
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "model_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          14,
+          20,
+          28,
+          50,
+          76,
+          82,
+          114,
+          164,
+          210
+        ],
+        "note": "S_shell uses model magic list (legacy in 7.13.15.*)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 16,
+      "n_in_domain": 3487,
+      "pairing": {
+        "a_n_MeV": 5.538988784156382,
+        "a_p_MeV": 6.615241823661158,
+        "n_samples_a_n": 2538,
+        "n_samples_a_p": 2446
+      },
+      "fit": {
+        "kN0": 0.13991490870739304,
+        "kN1": -0.30043267298909365,
+        "kZ0": 0.08170174852122329,
+        "kZ1": 0.10832750591372582,
+        "kZ_over_kN": 0.583938833080954,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6799734045086387,
+          "rms_resid_pairing_shell_MeV": 0.5573652103805079
+        },
+        "other_magic": {
+          "n": 61,
+          "rms_resid_uncorrected_MeV": 3.4356709441620157,
+          "rms_resid_pairing_only_MeV": 1.3337499292026316,
+          "rms_resid_pairing_shell_MeV": 2.391461287399213
+        },
+        "by_magic": {
+          "8": {
+            "n": 4,
+            "rms_resid_uncorrected_MeV": 5.24158626373529,
+            "rms_resid_pairing_only_MeV": 0.9532766855454738,
+            "rms_resid_pairing_shell_MeV": 4.931083700469093
+          },
+          "20": {
+            "n": 18,
+            "rms_resid_uncorrected_MeV": 3.7453174331771417,
+            "rms_resid_pairing_only_MeV": 1.5874652804879341,
+            "rms_resid_pairing_shell_MeV": 2.7844569826825794
+          },
+          "28": {
+            "n": 22,
+            "rms_resid_uncorrected_MeV": 3.286060774564697,
+            "rms_resid_pairing_only_MeV": 1.2968647359309464,
+            "rms_resid_pairing_shell_MeV": 2.232730300320948
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6844141324311788,
+            "rms_resid_pairing_shell_MeV": 0.5809644165412922
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6761577023030645,
+            "rms_resid_pairing_shell_MeV": 0.5363114488175714
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1508454202301601,
+            "rms_resid_pairing_shell_MeV": 0.3735751860700301
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5662077856608245,
+          "rms_resid_pairing_shell_MeV": 0.49691288928303945
+        },
+        "other_magic": {
+          "n": 66,
+          "rms_resid_uncorrected_MeV": 3.716513452105301,
+          "rms_resid_pairing_only_MeV": 1.2211882927138804,
+          "rms_resid_pairing_shell_MeV": 2.673944596493682
+        },
+        "by_magic": {
+          "8": {
+            "n": 10,
+            "rms_resid_uncorrected_MeV": 3.463529114495624,
+            "rms_resid_pairing_only_MeV": 2.523387429323607,
+            "rms_resid_pairing_shell_MeV": 5.1452736594437996
+          },
+          "20": {
+            "n": 27,
+            "rms_resid_uncorrected_MeV": 3.996125377184939,
+            "rms_resid_pairing_only_MeV": 0.8381480613334976,
+            "rms_resid_pairing_shell_MeV": 2.0768739354539987
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.737744138555326,
+            "rms_resid_pairing_shell_MeV": 1.7684817758156428
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.7136820838343068,
+            "rms_resid_pairing_shell_MeV": 0.44872033354589075
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3986545009359013,
+            "rms_resid_pairing_shell_MeV": 0.5419654878596483
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 50,
+              "n_extrema": 39,
+              "rms_resid_uncorrected_MeV": 3.874341560529009,
+              "rms_resid_pairing_only_MeV": 1.568313635786452,
+              "rms_resid_pairing_shell_MeV": 1.2678993783775616
+            },
+            "gap_Sp_extrema": {
+              "n_available": 66,
+              "n_extrema": 48,
+              "rms_resid_uncorrected_MeV": 4.012905722354915,
+              "rms_resid_pairing_only_MeV": 1.582188453050724,
+              "rms_resid_pairing_shell_MeV": 1.525006857956756
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 41,
+              "n_extrema": 28,
+              "rms_resid_uncorrected_MeV": 3.802528195886655,
+              "rms_resid_pairing_only_MeV": 1.589946769481689,
+              "rms_resid_pairing_shell_MeV": 0.946336147462194
+            },
+            "gap_Sp_extrema": {
+              "n_available": 59,
+              "n_extrema": 36,
+              "rms_resid_uncorrected_MeV": 3.9789548633149234,
+              "rms_resid_pairing_only_MeV": 1.5172904493369752,
+              "rms_resid_pairing_shell_MeV": 0.7814476614708575
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 30,
+              "n_extrema": 12,
+              "rms_resid_uncorrected_MeV": 4.150598338482122,
+              "rms_resid_pairing_only_MeV": 1.7392374348242048,
+              "rms_resid_pairing_shell_MeV": 0.8650373279296508
+            },
+            "gap_Sp_extrema": {
+              "n_available": 34,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 4.124460912399736,
+              "rms_resid_pairing_only_MeV": 1.6645510374527006,
+              "rms_resid_pairing_shell_MeV": 0.7472993563011444
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 41,
+              "n_extrema": 30,
+              "rms_resid_uncorrected_MeV": 3.892137437050221,
+              "rms_resid_pairing_only_MeV": 1.666700042213178,
+              "rms_resid_pairing_shell_MeV": 0.8919752699341755
+            },
+            "gap_Sp_extrema": {
+              "n_available": 59,
+              "n_extrema": 41,
+              "rms_resid_uncorrected_MeV": 4.001386169366566,
+              "rms_resid_pairing_only_MeV": 1.5202729074428025,
+              "rms_resid_pairing_shell_MeV": 1.1890015503394646
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 253,
+          "n_kink": 17,
+          "n_eval": 17,
+          "rms_resid_sigma": 7.537639179384947,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 12,
+              "N0": 14,
+              "abs_resid_sigma": 11.009210508334158,
+              "delta2r_obs_fm": 0.058699999999999974,
+              "delta2r_pred_fm": 0.0014097778871877686,
+              "resid_fm": -0.057290222112812206,
+              "sigma_obs_fm": 0.005203844732503075
+            },
+            {
+              "Z": 10,
+              "N0": 10,
+              "abs_resid_sigma": 9.399232177970365,
+              "delta2r_obs_fm": -0.08709999999999996,
+              "delta2r_pred_fm": 0.0027598057528224196,
+              "resid_fm": 0.08985980575282237,
+              "sigma_obs_fm": 0.009560334722173696
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 20,
+              "N0": 28,
+              "abs_resid_sigma": 7.370608510244256,
+              "delta2r_obs_fm": 0.05789999999999962,
+              "delta2r_pred_fm": 0.0003525845611118683,
+              "resid_fm": -0.05754741543888775,
+              "sigma_obs_fm": 0.007807688518377254
+            },
+            {
+              "Z": 20,
+              "N0": 24,
+              "abs_resid_sigma": 6.456888414065521,
+              "delta2r_obs_fm": -0.032399999999999984,
+              "delta2r_pred_fm": 0.0005554423150959664,
+              "resid_fm": 0.03295544231509595,
+              "sigma_obs_fm": 0.005103920062069937
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 177,
+          "n_kink": 21,
+          "n_eval": 21,
+          "rms_resid_sigma": 6.141992502504425,
+          "max_abs_resid_sigma": 17.759541030088428,
+          "worst_points": [
+            {
+              "N": 10,
+              "Z0": 10,
+              "abs_resid_sigma": 17.759541030088428,
+              "delta2r_obs_fm": -0.16959999999999997,
+              "delta2r_pred_fm": -0.014735172910508965,
+              "resid_fm": 0.154864827089491,
+              "sigma_obs_fm": 0.008720091742636656
+            },
+            {
+              "N": 28,
+              "Z0": 20,
+              "abs_resid_sigma": 9.082945205121272,
+              "delta2r_obs_fm": 0.053899999999999615,
+              "delta2r_pred_fm": -0.0036890243248599575,
+              "resid_fm": -0.05758902432485957,
+              "sigma_obs_fm": 0.0063403469936589435
+            },
+            {
+              "N": 26,
+              "Z0": 20,
+              "abs_resid_sigma": 8.026388573921649,
+              "delta2r_obs_fm": 0.04689999999999994,
+              "delta2r_pred_fm": -0.003895055736362618,
+              "resid_fm": -0.05079505573636256,
+              "sigma_obs_fm": 0.006328506932918696
+            },
+            {
+              "N": 16,
+              "Z0": 14,
+              "abs_resid_sigma": 7.9665203630939905,
+              "delta2r_obs_fm": 0.06300000000000017,
+              "delta2r_pred_fm": -0.0077182946599574365,
+              "resid_fm": -0.0707182946599576,
+              "sigma_obs_fm": 0.00887693640846886
+            },
+            {
+              "N": 16,
+              "Z0": 12,
+              "abs_resid_sigma": 5.536614317180707,
+              "delta2r_obs_fm": -0.07950000000000035,
+              "delta2r_pred_fm": -0.00897822410566107,
+              "resid_fm": 0.07052177589433928,
+              "sigma_obs_fm": 0.012737346662472527
+            },
+            {
+              "N": 20,
+              "Z0": 18,
+              "abs_resid_sigma": 4.987177718780742,
+              "delta2r_obs_fm": -0.02950000000000008,
+              "delta2r_pred_fm": -0.0051648211540347155,
+              "resid_fm": 0.024335178845965366,
+              "sigma_obs_fm": 0.0048795491595023405
+            },
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 40,
+      "n_in_domain": 3255,
+      "pairing": {
+        "a_n_MeV": 5.575078300991934,
+        "a_p_MeV": 6.659905361097271,
+        "n_samples_a_n": 2416,
+        "n_samples_a_p": 2329
+      },
+      "fit": {
+        "kN0": 0.139085746855716,
+        "kN1": -0.30046140620506256,
+        "kZ0": 0.08066406275831112,
+        "kZ1": 0.10866469682074585,
+        "kZ_over_kN": 0.5799592307757455,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6675638326887514,
+          "rms_resid_pairing_shell_MeV": 0.5576953514806114
+        },
+        "other_magic": {
+          "n": 44,
+          "rms_resid_uncorrected_MeV": 3.234282397868738,
+          "rms_resid_pairing_only_MeV": 1.1451123150995262,
+          "rms_resid_pairing_shell_MeV": 1.8333727931114945
+        },
+        "by_magic": {
+          "20": {
+            "n": 6,
+            "rms_resid_uncorrected_MeV": 4.150887174164224,
+            "rms_resid_pairing_only_MeV": 0.9564525682544525,
+            "rms_resid_pairing_shell_MeV": 2.736508909881242
+          },
+          "28": {
+            "n": 21,
+            "rms_resid_uncorrected_MeV": 3.3580250584984146,
+            "rms_resid_pairing_only_MeV": 1.196562530706018,
+            "rms_resid_pairing_shell_MeV": 2.1886120190820946
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6713555536089157,
+            "rms_resid_pairing_shell_MeV": 0.5813442501485159
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6643069106436976,
+            "rms_resid_pairing_shell_MeV": 0.5365959563682947
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.1412224777911888,
+            "rms_resid_pairing_shell_MeV": 0.37368554571553975
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5523567177443842,
+          "rms_resid_pairing_shell_MeV": 0.49681385433123315
+        },
+        "other_magic": {
+          "n": 49,
+          "rms_resid_uncorrected_MeV": 3.6455358571538965,
+          "rms_resid_pairing_only_MeV": 0.7815011473816325,
+          "rms_resid_pairing_shell_MeV": 1.9562965486302242
+        },
+        "by_magic": {
+          "20": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 3.8125274482262768,
+            "rms_resid_pairing_only_MeV": 0.8458801864127091,
+            "rms_resid_pairing_shell_MeV": 2.1964755778127905
+          },
+          "28": {
+            "n": 29,
+            "rms_resid_uncorrected_MeV": 3.525764000035139,
+            "rms_resid_pairing_only_MeV": 0.7338183635372374,
+            "rms_resid_pairing_shell_MeV": 1.7717866868219265
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6980042111777638,
+            "rms_resid_pairing_shell_MeV": 0.4485945349775541
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3869425638424087,
+            "rms_resid_pairing_shell_MeV": 0.5418883968153112
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 41,
+              "n_extrema": 34,
+              "rms_resid_uncorrected_MeV": 3.6938382788931037,
+              "rms_resid_pairing_only_MeV": 1.5880532098601645,
+              "rms_resid_pairing_shell_MeV": 0.9555565008336737
+            },
+            "gap_Sp_extrema": {
+              "n_available": 58,
+              "n_extrema": 44,
+              "rms_resid_uncorrected_MeV": 3.9873253988616657,
+              "rms_resid_pairing_only_MeV": 1.4758117346017252,
+              "rms_resid_pairing_shell_MeV": 0.867180147193117
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 35,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.7538913021806373,
+              "rms_resid_pairing_only_MeV": 1.6241573850470115,
+              "rms_resid_pairing_shell_MeV": 0.8430254949058972
+            },
+            "gap_Sp_extrema": {
+              "n_available": 54,
+              "n_extrema": 36,
+              "rms_resid_uncorrected_MeV": 3.9789548633149234,
+              "rms_resid_pairing_only_MeV": 1.502744334480239,
+              "rms_resid_pairing_shell_MeV": 0.7829491427712054
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 11,
+              "rms_resid_uncorrected_MeV": 3.897945805838374,
+              "rms_resid_pairing_only_MeV": 1.5966568491218078,
+              "rms_resid_pairing_shell_MeV": 0.902616190066497
+            },
+            "gap_Sp_extrema": {
+              "n_available": 30,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 4.124460912399736,
+              "rms_resid_pairing_only_MeV": 1.6497584561236187,
+              "rms_resid_pairing_shell_MeV": 0.7486872303604282
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 35,
+              "n_extrema": 28,
+              "rms_resid_uncorrected_MeV": 3.753657005283729,
+              "rms_resid_pairing_only_MeV": 1.6226924804166232,
+              "rms_resid_pairing_shell_MeV": 0.8753670707138836
+            },
+            "gap_Sp_extrema": {
+              "n_available": 54,
+              "n_extrema": 39,
+              "rms_resid_uncorrected_MeV": 3.9385782325883376,
+              "rms_resid_pairing_only_MeV": 1.464045531669241,
+              "rms_resid_pairing_shell_MeV": 0.9281819537519432
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 240,
+          "n_kink": 14,
+          "n_eval": 14,
+          "rms_resid_sigma": 7.273447545734157,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 20,
+              "N0": 28,
+              "abs_resid_sigma": 7.370608510244256,
+              "delta2r_obs_fm": 0.05789999999999962,
+              "delta2r_pred_fm": 0.0003525845611118683,
+              "resid_fm": -0.05754741543888775,
+              "sigma_obs_fm": 0.007807688518377254
+            },
+            {
+              "Z": 20,
+              "N0": 24,
+              "abs_resid_sigma": 6.456888414065521,
+              "delta2r_obs_fm": -0.032399999999999984,
+              "delta2r_pred_fm": 0.0005554423150959664,
+              "resid_fm": 0.03295544231509595,
+              "sigma_obs_fm": 0.005103920062069937
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 24,
+              "N0": 28,
+              "abs_resid_sigma": 4.3615206813770575,
+              "delta2r_obs_fm": 0.05689999999999973,
+              "delta2r_pred_fm": 0.00044062438403891235,
+              "resid_fm": -0.056459375615960816,
+              "sigma_obs_fm": 0.01294488315899375
+            },
+            {
+              "Z": 20,
+              "N0": 22,
+              "abs_resid_sigma": 4.222932583297254,
+              "delta2r_obs_fm": -0.020700000000000607,
+              "delta2r_pred_fm": 0.0006915608456896649,
+              "resid_fm": 0.02139156084569027,
+              "sigma_obs_fm": 0.005065570056765576
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 171,
+          "n_kink": 15,
+          "n_eval": 15,
+          "rms_resid_sigma": 4.738843003152144,
+          "max_abs_resid_sigma": 9.082945205121272,
+          "worst_points": [
+            {
+              "N": 28,
+              "Z0": 20,
+              "abs_resid_sigma": 9.082945205121272,
+              "delta2r_obs_fm": 0.053899999999999615,
+              "delta2r_pred_fm": -0.0036890243248599575,
+              "resid_fm": -0.05758902432485957,
+              "sigma_obs_fm": 0.0063403469936589435
+            },
+            {
+              "N": 26,
+              "Z0": 20,
+              "abs_resid_sigma": 8.026388573921649,
+              "delta2r_obs_fm": 0.04689999999999994,
+              "delta2r_pred_fm": -0.003895055736362618,
+              "resid_fm": -0.05079505573636256,
+              "sigma_obs_fm": 0.006328506932918696
+            },
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 22,
+              "Z0": 20,
+              "abs_resid_sigma": 3.811191011864678,
+              "delta2r_obs_fm": 0.0226999999999995,
+              "delta2r_pred_fm": -0.004359456184239718,
+              "resid_fm": -0.027059456184239217,
+              "sigma_obs_fm": 0.0071
+            },
+            {
+              "N": 40,
+              "Z0": 36,
+              "abs_resid_sigma": 3.5264251559478828,
+              "delta2r_obs_fm": -0.07789999999999964,
+              "delta2r_pred_fm": -0.0016248015264848092,
+              "resid_fm": 0.07627519847351483,
+              "sigma_obs_fm": 0.02162960933535324
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 60,
+      "n_in_domain": 3001,
+      "pairing": {
+        "a_n_MeV": 5.604303040768533,
+        "a_p_MeV": 6.6947260464427165,
+        "n_samples_a_n": 2323,
+        "n_samples_a_p": 2237
+      },
+      "fit": {
+        "kN0": 0.1384143041725514,
+        "kN1": -0.30048467339883217,
+        "kZ0": 0.07985505986667028,
+        "kZ1": 0.10892757852077843,
+        "kZ_over_kN": 0.5769277990742964,
+        "n_fit_pairs_kN": 52,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 52,
+          "rms_resid_uncorrected_MeV": 3.700100919005702,
+          "rms_resid_pairing_only_MeV": 1.6575304401321085,
+          "rms_resid_pairing_shell_MeV": 0.5579630992124149
+        },
+        "other_magic": {
+          "n": 18,
+          "rms_resid_uncorrected_MeV": 2.7225500942531746,
+          "rms_resid_pairing_only_MeV": 1.1167962545385266,
+          "rms_resid_pairing_shell_MeV": 0.6563939682127442
+        },
+        "by_magic": {
+          "28": {
+            "n": 1,
+            "rms_resid_uncorrected_MeV": 3.652061165854491,
+            "rms_resid_pairing_only_MeV": 0.7815138010637952,
+            "rms_resid_pairing_shell_MeV": 2.319543161825038
+          },
+          "50": {
+            "n": 24,
+            "rms_resid_uncorrected_MeV": 3.896235289951339,
+            "rms_resid_pairing_only_MeV": 1.6608102160235079,
+            "rms_resid_pairing_shell_MeV": 0.5816522384346353
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6547140295725995,
+            "rms_resid_pairing_shell_MeV": 0.5368267480853538
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.133434289682309,
+            "rms_resid_pairing_shell_MeV": 0.3737783447870755
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5415685560942831,
+          "rms_resid_pairing_shell_MeV": 0.4967372283577419
+        },
+        "other_magic": {
+          "n": 19,
+          "rms_resid_uncorrected_MeV": 3.48042010841936,
+          "rms_resid_pairing_only_MeV": 0.718256034045033,
+          "rms_resid_pairing_shell_MeV": 1.7827112447992852
+        },
+        "by_magic": {
+          "28": {
+            "n": 19,
+            "rms_resid_uncorrected_MeV": 3.48042010841936,
+            "rms_resid_pairing_only_MeV": 0.718256034045033,
+            "rms_resid_pairing_shell_MeV": 1.7827112447992852
+          },
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6857911000520835,
+            "rms_resid_pairing_shell_MeV": 0.4484969945313197
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3778227922266606,
+            "rms_resid_pairing_shell_MeV": 0.5418289222574316
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 31,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.6400932932365904,
+              "rms_resid_pairing_only_MeV": 1.67597574541041,
+              "rms_resid_pairing_shell_MeV": 0.5547477793568052
+            },
+            "gap_Sp_extrema": {
+              "n_available": 44,
+              "n_extrema": 35,
+              "rms_resid_uncorrected_MeV": 3.914489455411088,
+              "rms_resid_pairing_only_MeV": 1.577980374179896,
+              "rms_resid_pairing_shell_MeV": 0.59852971771993
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 21,
+              "rms_resid_uncorrected_MeV": 3.644389305492504,
+              "rms_resid_pairing_only_MeV": 1.6677639064019434,
+              "rms_resid_pairing_shell_MeV": 0.48478578939850264
+            },
+            "gap_Sp_extrema": {
+              "n_available": 44,
+              "n_extrema": 31,
+              "rms_resid_uncorrected_MeV": 3.949576633782349,
+              "rms_resid_pairing_only_MeV": 1.5669674830901212,
+              "rms_resid_pairing_shell_MeV": 0.6283120382584152
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 20,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 3.958397462163268,
+              "rms_resid_pairing_only_MeV": 1.8230149065219494,
+              "rms_resid_pairing_shell_MeV": 0.34885610198531136
+            },
+            "gap_Sp_extrema": {
+              "n_available": 20,
+              "n_extrema": 7,
+              "rms_resid_uncorrected_MeV": 4.181876667809772,
+              "rms_resid_pairing_only_MeV": 1.7490205087913255,
+              "rms_resid_pairing_shell_MeV": 0.5953256671303554
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 22,
+              "rms_resid_uncorrected_MeV": 3.6413265435853104,
+              "rms_resid_pairing_only_MeV": 1.6926507103433455,
+              "rms_resid_pairing_shell_MeV": 0.5486608061236048
+            },
+            "gap_Sp_extrema": {
+              "n_available": 44,
+              "n_extrema": 32,
+              "rms_resid_uncorrected_MeV": 3.9314534193875867,
+              "rms_resid_pairing_only_MeV": 1.564812616799251,
+              "rms_resid_pairing_shell_MeV": 0.6186034744846218
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 229,
+          "n_kink": 10,
+          "n_eval": 10,
+          "rms_resid_sigma": 7.795955674242352,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 34,
+              "N0": 42,
+              "abs_resid_sigma": 3.3756247750551616,
+              "delta2r_obs_fm": -0.06839999999999957,
+              "delta2r_pred_fm": 0.00021159765238643047,
+              "resid_fm": 0.068611597652386,
+              "sigma_obs_fm": 0.020325599622151372
+            },
+            {
+              "Z": 32,
+              "N0": 42,
+              "abs_resid_sigma": 3.319278997071112,
+              "delta2r_obs_fm": -0.009700000000000486,
+              "delta2r_pred_fm": 0.0001967964567795022,
+              "resid_fm": 0.009896796456779988,
+              "sigma_obs_fm": 0.0029816103031751143
+            },
+            {
+              "Z": 62,
+              "N0": 82,
+              "abs_resid_sigma": 3.3139263123496647,
+              "delta2r_obs_fm": 0.027800000000000935,
+              "delta2r_pred_fm": 6.380275455963869e-05,
+              "resid_fm": -0.027736197245441296,
+              "sigma_obs_fm": 0.008369587803470371
+            },
+            {
+              "Z": 40,
+              "N0": 52,
+              "abs_resid_sigma": 3.2983831583329417,
+              "delta2r_obs_fm": -0.009999999999999787,
+              "delta2r_pred_fm": 0.00013951094921260676,
+              "resid_fm": 0.010139510949212394,
+              "sigma_obs_fm": 0.0030740852297878795
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 163,
+          "n_kink": 10,
+          "n_eval": 10,
+          "rms_resid_sigma": 3.951644827623728,
+          "max_abs_resid_sigma": 4.836101794245573,
+          "worst_points": [
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 40,
+              "Z0": 36,
+              "abs_resid_sigma": 3.5264251559478828,
+              "delta2r_obs_fm": -0.07789999999999964,
+              "delta2r_pred_fm": -0.0016248015264848092,
+              "resid_fm": 0.07627519847351483,
+              "sigma_obs_fm": 0.02162960933535324
+            },
+            {
+              "N": 108,
+              "Z0": 74,
+              "abs_resid_sigma": 3.468714637461421,
+              "delta2r_obs_fm": 0.01750000000000007,
+              "delta2r_pred_fm": -0.00040340694199691995,
+              "resid_fm": -0.01790340694199699,
+              "sigma_obs_fm": 0.005161395160225576
+            },
+            {
+              "N": 112,
+              "Z0": 82,
+              "abs_resid_sigma": 3.3533268281383193,
+              "delta2r_obs_fm": 0.06240000000000023,
+              "delta2r_pred_fm": -0.00035740184164190225,
+              "resid_fm": -0.06275740184164214,
+              "sigma_obs_fm": 0.0187149672722129
+            },
+            {
+              "N": 114,
+              "Z0": 82,
+              "abs_resid_sigma": 3.0462479123605397,
+              "delta2r_obs_fm": 0.056700000000000195,
+              "delta2r_pred_fm": -0.0003527346630365358,
+              "resid_fm": -0.05705273466303673,
+              "sigma_obs_fm": 0.01872885474341664
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 80,
+      "n_in_domain": 2730,
+      "pairing": {
+        "a_n_MeV": 5.615758171076965,
+        "a_p_MeV": 6.7753574906386005,
+        "n_samples_a_n": 2134,
+        "n_samples_a_p": 2052
+      },
+      "fit": {
+        "kN0": 0.13122038977089687,
+        "kN1": -0.23175601922887998,
+        "kZ0": 0.0779817190477953,
+        "kZ1": 0.10953630295545809,
+        "kZ_over_kN": 0.5942805015588418,
+        "n_fit_pairs_kN": 48,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 48,
+          "rms_resid_uncorrected_MeV": 3.7461714328684153,
+          "rms_resid_pairing_only_MeV": 1.707546759519578,
+          "rms_resid_pairing_shell_MeV": 0.5319077105502936
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.130382666204385,
+          "rms_resid_pairing_shell_MeV": 0.35745723873608287
+        },
+        "by_magic": {
+          "50": {
+            "n": 20,
+            "rms_resid_uncorrected_MeV": 4.0375683999282765,
+            "rms_resid_pairing_only_MeV": 1.783761589927259,
+            "rms_resid_pairing_shell_MeV": 0.6077840258219785
+          },
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.650954883127191,
+            "rms_resid_pairing_shell_MeV": 0.4702738776944471
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.130382666204385,
+            "rms_resid_pairing_shell_MeV": 0.35745723873608287
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.516623520351565,
+          "rms_resid_pairing_shell_MeV": 0.49657677304348696
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6575439055001449,
+            "rms_resid_pairing_shell_MeV": 0.4482980046953514
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.3567434115514159,
+            "rms_resid_pairing_shell_MeV": 0.5416999026075366
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 30,
+              "n_extrema": 25,
+              "rms_resid_uncorrected_MeV": 3.658259967750654,
+              "rms_resid_pairing_only_MeV": 1.70037530128975,
+              "rms_resid_pairing_shell_MeV": 0.5097216257221983
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 29,
+              "rms_resid_uncorrected_MeV": 3.871585787443618,
+              "rms_resid_pairing_only_MeV": 1.6600087639750436,
+              "rms_resid_pairing_shell_MeV": 0.4729035292069742
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 21,
+              "rms_resid_uncorrected_MeV": 3.644389305492504,
+              "rms_resid_pairing_only_MeV": 1.6638223022729337,
+              "rms_resid_pairing_shell_MeV": 0.46193322159888334
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 25,
+              "rms_resid_uncorrected_MeV": 3.9086927357768664,
+              "rms_resid_pairing_only_MeV": 1.6636305448840456,
+              "rms_resid_pairing_shell_MeV": 0.49744169504145286
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 20,
+              "n_extrema": 8,
+              "rms_resid_uncorrected_MeV": 3.958397462163268,
+              "rms_resid_pairing_only_MeV": 1.8186774414068922,
+              "rms_resid_pairing_shell_MeV": 0.30644432098398283
+            },
+            "gap_Sp_extrema": {
+              "n_available": 17,
+              "n_extrema": 6,
+              "rms_resid_uncorrected_MeV": 4.233073741610938,
+              "rms_resid_pairing_only_MeV": 1.8515065839456708,
+              "rms_resid_pairing_shell_MeV": 0.39320997933489993
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 26,
+              "n_extrema": 22,
+              "rms_resid_uncorrected_MeV": 3.6413265435853104,
+              "rms_resid_pairing_only_MeV": 1.6887670050280006,
+              "rms_resid_pairing_shell_MeV": 0.5119282210019996
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.887730112112215,
+              "rms_resid_pairing_only_MeV": 1.6567538115559566,
+              "rms_resid_pairing_shell_MeV": 0.48808143476980376
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 216,
+          "n_kink": 8,
+          "n_eval": 8,
+          "rms_resid_sigma": 8.553923025907116,
+          "max_abs_resid_sigma": 15.498719524174286,
+          "worst_points": [
+            {
+              "Z": 42,
+              "N0": 50,
+              "abs_resid_sigma": 15.498719524174286,
+              "delta2r_obs_fm": 0.04919999999999991,
+              "delta2r_pred_fm": 0.000164245983577338,
+              "resid_fm": -0.04903575401642257,
+              "sigma_obs_fm": 0.003163858403911275
+            },
+            {
+              "Z": 40,
+              "N0": 50,
+              "abs_resid_sigma": 13.151436263462594,
+              "delta2r_obs_fm": 0.04559999999999942,
+              "delta2r_pred_fm": 0.00015612590287261696,
+              "resid_fm": -0.0454438740971268,
+              "sigma_obs_fm": 0.003455430508634199
+            },
+            {
+              "Z": 38,
+              "N0": 50,
+              "abs_resid_sigma": 7.885017102505048,
+              "delta2r_obs_fm": 0.04379999999999917,
+              "delta2r_pred_fm": 0.00014661968686269233,
+              "resid_fm": -0.04365338031313648,
+              "sigma_obs_fm": 0.005536244214266564
+            },
+            {
+              "Z": 36,
+              "N0": 50,
+              "abs_resid_sigma": 5.993716845234254,
+              "delta2r_obs_fm": 0.03849999999999909,
+              "delta2r_pred_fm": 0.00013552988498233276,
+              "resid_fm": -0.03836447011501676,
+              "sigma_obs_fm": 0.006400781202322104
+            },
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 62,
+              "N0": 82,
+              "abs_resid_sigma": 3.3139263123496647,
+              "delta2r_obs_fm": 0.027800000000000935,
+              "delta2r_pred_fm": 6.380275455963869e-05,
+              "resid_fm": -0.027736197245441296,
+              "sigma_obs_fm": 0.008369587803470371
+            },
+            {
+              "Z": 40,
+              "N0": 52,
+              "abs_resid_sigma": 3.2983831583329417,
+              "delta2r_obs_fm": -0.009999999999999787,
+              "delta2r_pred_fm": 0.00013951094921260676,
+              "resid_fm": 0.010139510949212394,
+              "sigma_obs_fm": 0.0030740852297878795
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 156,
+          "n_kink": 9,
+          "n_eval": 9,
+          "rms_resid_sigma": 3.996099404507567,
+          "max_abs_resid_sigma": 4.836101794245573,
+          "worst_points": [
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 108,
+              "Z0": 74,
+              "abs_resid_sigma": 3.468714637461421,
+              "delta2r_obs_fm": 0.01750000000000007,
+              "delta2r_pred_fm": -0.00040340694199691995,
+              "resid_fm": -0.01790340694199699,
+              "sigma_obs_fm": 0.005161395160225576
+            },
+            {
+              "N": 112,
+              "Z0": 82,
+              "abs_resid_sigma": 3.3533268281383193,
+              "delta2r_obs_fm": 0.06240000000000023,
+              "delta2r_pred_fm": -0.00035740184164190225,
+              "resid_fm": -0.06275740184164214,
+              "sigma_obs_fm": 0.0187149672722129
+            },
+            {
+              "N": 114,
+              "Z0": 82,
+              "abs_resid_sigma": 3.0462479123605397,
+              "delta2r_obs_fm": 0.056700000000000195,
+              "delta2r_pred_fm": -0.0003527346630365358,
+              "resid_fm": -0.05705273466303673,
+              "sigma_obs_fm": 0.01872885474341664
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    },
+    {
+      "status": "ok",
+      "domain_min_A": 100,
+      "n_in_domain": 2435,
+      "pairing": {
+        "a_n_MeV": 5.675679178740438,
+        "a_p_MeV": 6.80103425506131,
+        "n_samples_a_n": 1918,
+        "n_samples_a_p": 1840
+      },
+      "fit": {
+        "kN0": 0.11493914741891359,
+        "kN1": -0.06839212452637988,
+        "kZ0": 0.07738515934125482,
+        "kZ1": 0.10973015830490782,
+        "kZ_over_kN": 0.6732706921795112,
+        "n_fit_pairs_kN": 28,
+        "n_fit_pairs_kZ": 75
+      },
+      "gap_Sn": {
+        "train_magic": {
+          "n": 28,
+          "rms_resid_uncorrected_MeV": 3.523306319207567,
+          "rms_resid_pairing_only_MeV": 1.6312995005303397,
+          "rms_resid_pairing_shell_MeV": 0.3868226349760138
+        },
+        "other_magic": {
+          "n": 17,
+          "rms_resid_uncorrected_MeV": 2.657768541285328,
+          "rms_resid_pairing_only_MeV": 1.114429851868883,
+          "rms_resid_pairing_shell_MeV": 0.43052202270215084
+        },
+        "by_magic": {
+          "82": {
+            "n": 28,
+            "rms_resid_uncorrected_MeV": 3.523306319207567,
+            "rms_resid_pairing_only_MeV": 1.6312995005303397,
+            "rms_resid_pairing_shell_MeV": 0.3868226349760138
+          },
+          "126": {
+            "n": 17,
+            "rms_resid_uncorrected_MeV": 2.657768541285328,
+            "rms_resid_pairing_only_MeV": 1.114429851868883,
+            "rms_resid_pairing_shell_MeV": 0.43052202270215084
+          }
+        }
+      },
+      "gap_Sp": {
+        "train_magic": {
+          "n": 75,
+          "rms_resid_uncorrected_MeV": 3.6878498324627778,
+          "rms_resid_pairing_only_MeV": 1.5086908300361601,
+          "rms_resid_pairing_shell_MeV": 0.49656006969274163
+        },
+        "other_magic": {
+          "n": 0,
+          "rms_resid_uncorrected_MeV": NaN,
+          "rms_resid_pairing_only_MeV": NaN,
+          "rms_resid_pairing_shell_MeV": NaN
+        },
+        "by_magic": {
+          "50": {
+            "n": 38,
+            "rms_resid_uncorrected_MeV": 4.099804157764158,
+            "rms_resid_pairing_only_MeV": 1.6485589240002898,
+            "rms_resid_pairing_shell_MeV": 0.44829313950937216
+          },
+          "82": {
+            "n": 37,
+            "rms_resid_uncorrected_MeV": 3.210198074182347,
+            "rms_resid_pairing_only_MeV": 1.350042377346907,
+            "rms_resid_pairing_shell_MeV": 0.5416729997813854
+          }
+        }
+      },
+      "decision": {
+        "train_guard_mev": 0.5,
+        "pass_strict_train_other": false,
+        "pass_strict": false,
+        "pass_strict_spectro_multi": true,
+        "spectro_multi_strict_applied": true,
+        "pass_strict_radii_kink_delta2r": false,
+        "radii_kink_delta2r_strict_applied": true,
+        "pass_strict_primary": false,
+        "pass_strict_direct_only": false
+      },
+      "spectro_nudat3_multi": {
+        "source": "NNDC NuDat 3.0 (secondary.json: excitedStateEnergies.*)",
+        "metrics": {
+          "e2plus": {
+            "metric_key": "e2plus_keV",
+            "metric": "E2+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E2+(Z,N0) > E2+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E2+(Z0,N) > E2+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 21,
+              "n_extrema": 17,
+              "rms_resid_uncorrected_MeV": 3.4594359727044686,
+              "rms_resid_pairing_only_MeV": 1.6753580044542127,
+              "rms_resid_pairing_shell_MeV": 0.41027786641446123
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 29,
+              "rms_resid_uncorrected_MeV": 3.871585787443618,
+              "rms_resid_pairing_only_MeV": 1.6518389441503005,
+              "rms_resid_pairing_shell_MeV": 0.47236859819745836
+            },
+            "pass": true
+          },
+          "e4plus": {
+            "metric_key": "e4plus_keV",
+            "metric": "E4+",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E4+(Z,N0) > E4+(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E4+(Z0,N) > E4+(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 17,
+              "n_extrema": 13,
+              "rms_resid_uncorrected_MeV": 3.3717405349541156,
+              "rms_resid_pairing_only_MeV": 1.6139428620673193,
+              "rms_resid_pairing_shell_MeV": 0.41154670809913463
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 25,
+              "rms_resid_uncorrected_MeV": 3.9086927357768664,
+              "rms_resid_pairing_only_MeV": 1.6553606416603628,
+              "rms_resid_pairing_shell_MeV": 0.49687868493105347
+            },
+            "pass": true
+          },
+          "e3minus": {
+            "metric_key": "e3minus_keV",
+            "metric": "E3-",
+            "kind": "peak",
+            "rule_extrema": {
+              "gap_Sn": "E3-(Z,N0) > E3-(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "E3-(Z0,N) > E3-(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 14,
+              "n_extrema": 4,
+              "rms_resid_uncorrected_MeV": 3.686350737373266,
+              "rms_resid_pairing_only_MeV": 1.7761318179155876,
+              "rms_resid_pairing_shell_MeV": 0.22086180512037115
+            },
+            "gap_Sp_extrema": {
+              "n_available": 17,
+              "n_extrema": 6,
+              "rms_resid_uncorrected_MeV": 4.233073741610938,
+              "rms_resid_pairing_only_MeV": 1.8424905827748068,
+              "rms_resid_pairing_shell_MeV": 0.3909653373329307
+            },
+            "pass": true
+          },
+          "r42": {
+            "metric_key": "r42",
+            "metric": "R4/2",
+            "kind": "valley",
+            "rule_extrema": {
+              "gap_Sn": "R4/2(Z,N0) < R4/2(Z,N0±2) when neighbors exist (even-even only)",
+              "gap_Sp": "R4/2(Z0,N) < R4/2(Z0±2,N) when neighbors exist (even-even only)"
+            },
+            "gap_Sn_extrema": {
+              "n_available": 17,
+              "n_extrema": 15,
+              "rms_resid_uncorrected_MeV": 3.46137324717697,
+              "rms_resid_pairing_only_MeV": 1.677710332155332,
+              "rms_resid_pairing_shell_MeV": 0.4257344877763562
+            },
+            "gap_Sp_extrema": {
+              "n_available": 36,
+              "n_extrema": 26,
+              "rms_resid_uncorrected_MeV": 3.887730112112215,
+              "rms_resid_pairing_only_MeV": 1.648528881896288,
+              "rms_resid_pairing_shell_MeV": 0.4875324000936623
+            },
+            "pass": true
+          }
+        },
+        "pass_multi": true
+      },
+      "radii_kink_delta2r": {
+        "source": "IAEA charge_radii.csv (charge rms radius)",
+        "rule_delta2r": {
+          "delta2": "Δ²r = r(x+2) - 2 r(x) + r(x-2)",
+          "sigma_obs": "σ_obs(Δ²r) = sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2) (independent; no covariance)",
+          "kink_threshold": "|Δ²r_obs|/σ_obs >= 3 (fixed)",
+          "residual_threshold": "|Δ²r_pred - Δ²r_obs|/σ_obs <= 3 (fixed)",
+          "step": 2,
+          "even_even_only": true,
+          "axes": {
+            "gap_Sn": "x=N at fixed Z",
+            "gap_Sp": "x=Z at fixed N"
+          }
+        },
+        "gap_Sn_delta2r": {
+          "n_available": 187,
+          "n_kink": 3,
+          "n_eval": 3,
+          "rms_resid_sigma": 4.590161311522544,
+          "max_abs_resid_sigma": 5.727591406301308,
+          "worst_points": [
+            {
+              "Z": 58,
+              "N0": 82,
+              "abs_resid_sigma": 5.727591406301308,
+              "delta2r_obs_fm": 0.02579999999999938,
+              "delta2r_pred_fm": 5.767829013336723e-05,
+              "resid_fm": -0.025742321709866012,
+              "sigma_obs_fm": 0.004494441010848846
+            },
+            {
+              "Z": 60,
+              "N0": 82,
+              "abs_resid_sigma": 4.406963997603684,
+              "delta2r_obs_fm": 0.027599999999999625,
+              "delta2r_pred_fm": 6.088233158774159e-05,
+              "resid_fm": -0.027539117668411883,
+              "sigma_obs_fm": 0.006248999919987197
+            },
+            {
+              "Z": 62,
+              "N0": 82,
+              "abs_resid_sigma": 3.3139263123496647,
+              "delta2r_obs_fm": 0.027800000000000935,
+              "delta2r_pred_fm": 6.380275455963869e-05,
+              "resid_fm": -0.027736197245441296,
+              "sigma_obs_fm": 0.008369587803470371
+            }
+          ],
+          "pass": false
+        },
+        "gap_Sp_delta2r": {
+          "n_available": 135,
+          "n_kink": 9,
+          "n_eval": 9,
+          "rms_resid_sigma": 3.996099404507567,
+          "max_abs_resid_sigma": 4.836101794245573,
+          "worst_points": [
+            {
+              "N": 66,
+              "Z0": 50,
+              "abs_resid_sigma": 4.836101794245573,
+              "delta2r_obs_fm": 0.05429999999999957,
+              "delta2r_pred_fm": -0.0008358024857573199,
+              "resid_fm": -0.05513580248575689,
+              "sigma_obs_fm": 0.011400877159236477
+            },
+            {
+              "N": 108,
+              "Z0": 82,
+              "abs_resid_sigma": 4.59566967304652,
+              "delta2r_obs_fm": 0.08610000000000007,
+              "delta2r_pred_fm": -0.00036700890681284903,
+              "resid_fm": -0.08646700890681291,
+              "sigma_obs_fm": 0.018814887722226777
+            },
+            {
+              "N": 64,
+              "Z0": 50,
+              "abs_resid_sigma": 4.415482885468727,
+              "delta2r_obs_fm": 0.05930000000000124,
+              "delta2r_pred_fm": -0.0008543712390247649,
+              "resid_fm": -0.060154371239026005,
+              "sigma_obs_fm": 0.013623509092741121
+            },
+            {
+              "N": 68,
+              "Z0": 50,
+              "abs_resid_sigma": 4.115066429182355,
+              "delta2r_obs_fm": 0.04549999999999965,
+              "delta2r_pred_fm": -0.000817810168163291,
+              "resid_fm": -0.04631781016816294,
+              "sigma_obs_fm": 0.011255665240224587
+            },
+            {
+              "N": 70,
+              "Z0": 50,
+              "abs_resid_sigma": 3.9105276077586444,
+              "delta2r_obs_fm": 0.03029999999999955,
+              "delta2r_pred_fm": -0.0008003746813196599,
+              "resid_fm": -0.03110037468131921,
+              "sigma_obs_fm": 0.007952986860293432
+            },
+            {
+              "N": 110,
+              "Z0": 82,
+              "abs_resid_sigma": 3.864238392333109,
+              "delta2r_obs_fm": 0.07250000000000068,
+              "delta2r_pred_fm": -0.000362159277393026,
+              "resid_fm": -0.0728621592773937,
+              "sigma_obs_fm": 0.018855503175465776
+            },
+            {
+              "N": 108,
+              "Z0": 74,
+              "abs_resid_sigma": 3.468714637461421,
+              "delta2r_obs_fm": 0.01750000000000007,
+              "delta2r_pred_fm": -0.00040340694199691995,
+              "resid_fm": -0.01790340694199699,
+              "sigma_obs_fm": 0.005161395160225576
+            },
+            {
+              "N": 112,
+              "Z0": 82,
+              "abs_resid_sigma": 3.3533268281383193,
+              "delta2r_obs_fm": 0.06240000000000023,
+              "delta2r_pred_fm": -0.00035740184164190225,
+              "resid_fm": -0.06275740184164214,
+              "sigma_obs_fm": 0.0187149672722129
+            },
+            {
+              "N": 114,
+              "Z0": 82,
+              "abs_resid_sigma": 3.0462479123605397,
+              "delta2r_obs_fm": 0.056700000000000195,
+              "delta2r_pred_fm": -0.0003527346630365358,
+              "resid_fm": -0.05705273466303673,
+              "sigma_obs_fm": 0.01872885474341664
+            }
+          ],
+          "pass": false
+        },
+        "pass": false
+      },
+      "shell_variant": {
+        "name": "obs_magic",
+        "magic": [
+          0,
+          2,
+          8,
+          20,
+          28,
+          50,
+          82,
+          126,
+          184
+        ],
+        "note": "S_shell uses observed magic list (domain-independent mapping)."
+      }
+    }
+  ],
+  "inputs": {
+    "ame2020_extracted": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_amdc_ame2020_mass_1_mas20\\extracted_values.json",
+      "sha256": "612448cecf66277b94672a3f389b6d71ebf5fe24861b5fce6cbb7555f6990565"
+    },
+    "iaea_charge_radii_csv": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_charge_radii\\charge_radii.csv",
+      "sha256": "683d028dae93235376ddf7a345f736561ee7c0dba070091912c034bdf740eee6"
+    },
+    "nndc_be2_adopted_entries_json": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\adopted-entries.json",
+      "sha256": "a3f45fcf38f40b6ca3a7ebe03d9a468cc748d3480f3576bb4972ced76c703688"
+    },
+    "nndc_be2_manifest": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\manifest.json",
+      "sha256": "83de2488133f677e98dde23dca3cde52ab72c19a18c6e5eb0bb293c670b28ffc"
+    },
+    "nndc_be2_extracted_beta2": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_be2_adopted_entries\\extracted_beta2.json",
+      "sha256": "19b04d93f0cfe2607b5e3e3c5f02b27fe2e8fa10d59d659a5f1a098eba630882"
+    },
+    "nndc_nudat3_manifest": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_nudat3_primary_secondary\\manifest.json",
+      "sha256": "548fec1297446c435aa9d4f2ff8f801fea916f9fe8a7222297d1b58a1ae41abd"
+    },
+    "nndc_nudat3_extracted_spectroscopy": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nndc_nudat3_primary_secondary\\extracted_spectroscopy.json",
+      "sha256": "095101891a1ec8f36fe3eb53eb3e8c05e5b9a32a0299f10993d13020a6ffaf20"
+    },
+    "metrics_7_13_15": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json",
+      "sha256": "a7bd0b9a3403cd20f9e11caf08ee4668e2f73accbfa6db8cec5b8ea968ab0df9"
+    },
+    "metrics_7_13_15_7": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_surface_term_metrics.json",
+      "sha256": "76a872d4fd4763d103fc5918aeacb67b0d11c77e375b7bc120b16a0535ac296a"
+    },
+    "metrics_7_13_15_23": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json",
+      "sha256": "7e5c8924bc11fd7703cf378351185f2d9ec536249748d00642774fd514bfb3d6"
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.csv",
+    "spectroscopy_png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.png",
+    "radii_kink_delta2r_png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.png",
+    "radii_kink_delta2r_csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.csv"
+  }
+}

@@ -1,0 +1,185 @@
+{
+  "generated_utc": "2026-01-26T20:26:40.937089+00:00",
+  "phase": 7,
+  "step": "7.13.15.13",
+  "inputs": {
+    "metrics_7_13_15_7": {
+      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_surface_term_metrics.json",
+      "sha256": "76a872d4fd4763d103fc5918aeacb67b0d11c77e375b7bc120b16a0535ac296a"
+    }
+  },
+  "definition": {
+    "observed_magic_boundaries": [
+      0,
+      2,
+      8,
+      20,
+      28,
+      50,
+      82,
+      126,
+      184
+    ],
+    "model_magic": {
+      "max_major": 7,
+      "median_gap": 0.12600000000000033,
+      "gap_threshold": 0.25200000000000067,
+      "magic_boundaries": [
+        0,
+        2,
+        8,
+        14,
+        20,
+        28,
+        50,
+        76,
+        82,
+        114,
+        164,
+        210
+      ]
+    },
+    "S_shell": "p(p-g)/g  where p=x-Mk, g=Mk1-Mk, Mk < x <= Mk1 (MODEL_MAGIC)",
+    "hw_mev": "41*A^(-1/3)",
+    "B_corr": "B_pred + kN*hw*S_shell(N) + kZ*hw*S_shell(Z)",
+    "fit": "kN fit on gap_n (obs magic N in {50,82}); kZ fit on gap_p (obs magic Z in {50,82})"
+  },
+  "diag": {
+    "domain_min_A": 16,
+    "observed_magic_boundaries": [
+      0,
+      2,
+      8,
+      20,
+      28,
+      50,
+      82,
+      126,
+      184
+    ],
+    "model_magic": {
+      "max_major": 7,
+      "median_gap": 0.12600000000000033,
+      "gap_threshold": 0.25200000000000067,
+      "magic_boundaries": [
+        0,
+        2,
+        8,
+        14,
+        20,
+        28,
+        50,
+        76,
+        82,
+        114,
+        164,
+        210
+      ]
+    },
+    "model": {
+      "spectrum": {
+        "type": "nilsson_like_spherical_ho",
+        "kappa": 0.07,
+        "mu": 0.6,
+        "gap_factor": 2.0,
+        "energy_tol": 1e-12
+      },
+      "S_shell": "p(p-g)/g  within MODEL_MAGIC shell [Mk, Mk1] (0..g)",
+      "hw_mev": "41*A^(-1/3)",
+      "B_corr": "B_pred + kN*hw*S_shell(N) + kZ*hw*S_shell(Z)"
+    },
+    "fit": {
+      "fit_target": "gap_n @ obs magic N=50/82  AND  gap_p @ obs magic Z=50/82 (separate 1D fits)",
+      "fit_region": "kN: obs magic N in {50,82}; kZ: obs magic Z in {50,82}",
+      "n_fit_pairs_kN": 12,
+      "n_fit_pairs_kZ": 10,
+      "kN": -0.17861589075581644,
+      "kZ": -0.13030263196831635,
+      "kZ_over_kN": 0.7295130988454519
+    },
+    "Sn": {
+      "n": 731,
+      "rms_resid_uncorrected_MeV": 12.798027545882732,
+      "rms_resid_corrected_MeV": 12.793776560300556
+    },
+    "S2n": {
+      "n": 763,
+      "rms_resid_uncorrected_MeV": 23.42918512005021,
+      "rms_resid_corrected_MeV": 23.376131730782213
+    },
+    "Sp": {
+      "n": 565,
+      "rms_resid_uncorrected_MeV": 18.716057729404735,
+      "rms_resid_corrected_MeV": 18.66816138710571
+    },
+    "S2p": {
+      "n": 495,
+      "rms_resid_uncorrected_MeV": 21.002477437489073,
+      "rms_resid_corrected_MeV": 20.78122776901005
+    },
+    "gap_Sn": {
+      "n": 21,
+      "rms_resid_uncorrected_MeV": 5.658153546387464,
+      "rms_resid_corrected_MeV": 5.545240689883072,
+      "train_magicN": {
+        "n": 12,
+        "rms_resid_uncorrected_MeV": 3.4483816730362093,
+        "rms_resid_corrected_MeV": 1.8384827417843825
+      },
+      "other_magicN": {
+        "n": 9,
+        "rms_resid_uncorrected_MeV": 7.671105227404788,
+        "rms_resid_corrected_MeV": 8.200158230054429
+      }
+    },
+    "gap_S2n": {
+      "n": 21,
+      "rms_resid_uncorrected_MeV": 15.227119440620054,
+      "rms_resid_corrected_MeV": 10.671866742495855,
+      "train_magicN": {
+        "n": 14,
+        "rms_resid_uncorrected_MeV": 14.243813011245395,
+        "rms_resid_corrected_MeV": 9.402437473875349
+      },
+      "other_magicN": {
+        "n": 7,
+        "rms_resid_uncorrected_MeV": 17.024191057964558,
+        "rms_resid_corrected_MeV": 12.839570024284162
+      }
+    },
+    "gap_Sp": {
+      "n": 15,
+      "rms_resid_uncorrected_MeV": 6.971510422029082,
+      "rms_resid_corrected_MeV": 7.249678631128366,
+      "train_magicN": {
+        "n": 10,
+        "rms_resid_uncorrected_MeV": 2.322328652399395,
+        "rms_resid_corrected_MeV": 1.549929347375604
+      },
+      "other_magicN": {
+        "n": 5,
+        "rms_resid_uncorrected_MeV": 11.619787087286493,
+        "rms_resid_corrected_MeV": 12.364018715620153
+      }
+    },
+    "gap_S2p": {
+      "n": 30,
+      "rms_resid_uncorrected_MeV": 34.145660516585394,
+      "rms_resid_corrected_MeV": 31.28541703614526,
+      "train_magicN": {
+        "n": 24,
+        "rms_resid_uncorrected_MeV": 37.38775460629421,
+        "rms_resid_corrected_MeV": 34.50851923276522
+      },
+      "other_magicN": {
+        "n": 6,
+        "rms_resid_uncorrected_MeV": 15.4354748086218,
+        "rms_resid_corrected_MeV": 11.425191336478077
+      }
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_model.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_a_dependence_hf_three_body_shell_degeneracy_model.csv"
+  }
+}

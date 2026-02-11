@@ -1,0 +1,620 @@
+{
+  "generated_utc": "2026-02-11T02:47:24.965904+00:00",
+  "phase": 7,
+  "step": "7.18.2",
+  "name": "Condensed/Thermo falsification pack (baseline targets + thresholds)",
+  "policy": {
+    "note": "Reject thresholds are defined per-test in each metrics JSON under `falsification`.",
+    "audit": [
+      "Do not re-fit targets; treat baseline targets as frozen inputs.",
+      "If a test has no numeric threshold (falsification is null/notes-only), treat it as a baseline/audit constraint and define a separate quantitative test before claiming a 3σ rejection."
+    ]
+  },
+  "tests": [
+    {
+      "metrics_json": "output/quantum/condensed_silicon_lattice_baseline_metrics.json",
+      "metrics_sha256": "7c649dd8756e1d3126bc5e6569f3cef69f126be760c090ee9dc3dadadd3feee4",
+      "phase": 7,
+      "step": "7.14.1",
+      "inputs": {
+        "extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_silicon_lattice\\extracted_values.json",
+          "sha256": "0060fba3290185382c3e0895a8b3022b830ca6dc81f66e90c0aabcd292710fb2"
+        }
+      },
+      "falsification": {
+        "sigma_multiplier": 3.0,
+        "targets": [
+          {
+            "code": "asil",
+            "target_value_m": 5.431020511e-10,
+            "sigma_m": 8.9e-18,
+            "reject_if_abs_minus_target_gt_m": 2.67e-17
+          },
+          {
+            "code": "d220sil",
+            "target_value_m": 1.920155716e-10,
+            "sigma_m": 3.2e-18,
+            "reject_if_abs_minus_target_gt_m": 9.6e-18
+          }
+        ],
+        "notes": [
+          "CODATA provides explicit uncertainties; reject thresholds use a strict ±3σ envelope.",
+          "This does not claim P-model predicts these material-specific values today; it freezes targets for future derivations."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_lattice_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_lattice_baseline.png"
+      },
+      "notes": null
+    },
+    {
+      "metrics_json": "output/quantum/condensed_silicon_heat_capacity_baseline_metrics.json",
+      "metrics_sha256": "225d60f8b437fe079ca49dcf308371fb03048f4f970e82f44d327481654dae3b",
+      "phase": 7,
+      "step": "7.14.2",
+      "inputs": {
+        "extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_webbook_condensed_silicon_si\\extracted_values.json",
+          "sha256": "be06a252b49767f17ef18d4b93f23a039cc484fdcba8456b3196013124ba7ee3"
+        }
+      },
+      "falsification": {
+        "sigma_multiplier": 3.0,
+        "sigma_proxy": {
+          "rel": 0.02,
+          "abs_floor_J_per_molK": 0.2
+        },
+        "targets": [
+          {
+            "phase": "solid",
+            "T_K": 298.15,
+            "Cp_target_J_per_molK": 19.990571462910072,
+            "sigma_proxy_J_per_molK": 0.39981142925820146,
+            "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.1994342877746043
+          },
+          {
+            "phase": "solid",
+            "T_K": 300.0,
+            "Cp_target_J_per_molK": 20.046687013666663,
+            "sigma_proxy_J_per_molK": 0.4009337402733333,
+            "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.2028012208199999
+          },
+          {
+            "phase": "solid",
+            "T_K": 1000.0,
+            "Cp_target_J_per_molK": 26.321862999999997,
+            "sigma_proxy_J_per_molK": 0.5264372599999999,
+            "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.5793117799999998
+          },
+          {
+            "phase": "liquid",
+            "T_K": 1685.0,
+            "Cp_target_J_per_molK": 27.196039999915282,
+            "sigma_proxy_J_per_molK": 0.5439207999983057,
+            "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.631762399994917
+          },
+          {
+            "phase": "liquid",
+            "T_K": 2000.0,
+            "Cp_target_J_per_molK": 27.19603999991774,
+            "sigma_proxy_J_per_molK": 0.5439207999983549,
+            "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.6317623999950646
+          },
+          {
+            "phase": "liquid",
+            "T_K": 3000.0,
+            "Cp_target_J_per_molK": 27.196039999933998,
+            "sigma_proxy_J_per_molK": 0.5439207999986799,
+            "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.6317623999960398
+          }
+        ],
+        "notes": [
+          "NIST WebBook condensed Shomate blocks do not provide per-point uncertainties in the table view.",
+          "We use a conservative proxy uncertainty: max(2% of Cp, 0.2 J/mol·K), and reject if deviation exceeds ±3σ_proxy."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.png"
+      },
+      "notes": [
+        "Cp° computed from NIST Shomate coefficients; t=T/1000.",
+        "WebBook condensed-phase Cp table ranges start at 298 K; low-temperature (Debye T^3) regime is not covered here."
+      ]
+    },
+    {
+      "metrics_json": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
+      "metrics_sha256": "6a01d342d24a80e1c6baa85b5e288c219a85c5b98786bb34208fafa4cac79647",
+      "phase": 7,
+      "step": "7.14.3",
+      "inputs": {
+        "janaf_extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_janaf_silicon_si\\extracted_values.json",
+          "sha256": "da4e1bc5ad80067347b68ba2f8d2097570e2a9262ac79120f7606c5f0731ea09"
+        },
+        "webbook_extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_webbook_condensed_silicon_si\\extracted_values.json",
+          "sha256": "be06a252b49767f17ef18d4b93f23a039cc484fdcba8456b3196013124ba7ee3"
+        }
+      },
+      "falsification": {
+        "target": "theta_D_K",
+        "reject_if_abs_theta_D_minus_target_gt_K": 52.088750034898645,
+        "notes": [
+          "JANAF table provides no explicit uncertainties; sigma is a proxy estimated from residual scatter and local sensitivity.",
+          "Reject threshold uses max(3*sigma_proxy, 5 K) as a conservative floor to avoid false precision."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_debye_baseline.png"
+      },
+      "notes": [
+        "This is a baseline/target for Step 7.14: low-temperature Cp and a 1-parameter Debye fit (θ_D) as a compact summary.",
+        "Debye model yields Cv; Cp≈Cv at low T. Near 300 K, Cp−Cv and anharmonicity can matter; this is treated as a proxy."
+      ]
+    },
+    {
+      "metrics_json": "output/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json",
+      "metrics_sha256": "554194954d80a989e6c18d071f7e3c5d5ca10708d4e61b12b08b2773c45f749b",
+      "phase": 7,
+      "step": "7.14.4",
+      "inputs": {
+        "extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_nbsir74_496_silicon_resistivity\\extracted_values.json",
+          "sha256": "24a5dcac360fc14ee19a695cb6ac702369a50bc88d3c72bec4e56f0d4f8ab2b5"
+        }
+      },
+      "falsification": {
+        "target": "d ln rho / dT around room temperature (proxy: 20–30°C)",
+        "accept_range_pct_per_K_proxy": {
+          "min": 0.020512827705569947,
+          "max": 0.9571413860602096
+        },
+        "accept_ranges_by_type_doping_pct_per_K_proxy": {
+          "p:B": {
+            "min": 0.020512827705569947,
+            "max": 0.9571413860602096
+          },
+          "n:": {
+            "min": 0.17683103856065863,
+            "max": 0.8123841732892156
+          },
+          "p:Al": {
+            "min": 0.6006614652278591,
+            "max": 0.6006614652278591
+          }
+        },
+        "reject_if_pct_per_K_proxy_non_positive": true,
+        "notes": [
+          "NBS IR 74-496 provides mean resistivity values and confidence limits, but per-sample uncertainties are not propagated here.",
+          "This baseline therefore freezes a necessary-condition envelope (min/max) rather than a precise ±σ target."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_resistivity_temperature_coefficient_baseline.png"
+      },
+      "notes": [
+        "This is an operational baseline extracted from Appendix E of NBS IR 74-496 (v.d. Pauw method data).",
+        "Coefficient is computed as a finite-difference proxy around room temperature: d ln rho / dT ~ (ln rho30 - ln rho20)/10.",
+        "The report provides confidence limits; this baseline prioritizes mean values for robustness of extraction."
+      ]
+    },
+    {
+      "metrics_json": "output/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json",
+      "metrics_sha256": "d2235d1e76abb13dc3cc745c79ac3d43a1a6c3d50e8a5d95b5b8c2ace5f3c834",
+      "phase": null,
+      "step": null,
+      "inputs": {
+        "extracted_values_json": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+        "extracted_values_sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+      },
+      "falsification": {
+        "sigma_multiplier": 3.0,
+        "targets": [
+          {
+            "T_K": 20.0,
+            "alpha_target_1e-8_per_K": -0.3406056923499412,
+            "sigma_fit_1e-8_per_K": 0.03,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 0.09
+          },
+          {
+            "T_K": 50.0,
+            "alpha_target_1e-8_per_K": -29.219839113498725,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          },
+          {
+            "T_K": 100.0,
+            "alpha_target_1e-8_per_K": -33.87800300190036,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          },
+          {
+            "T_K": 200.0,
+            "alpha_target_1e-8_per_K": 140.53425357267417,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          },
+          {
+            "T_K": 293.15,
+            "alpha_target_1e-8_per_K": 255.47050314843636,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          },
+          {
+            "T_K": 298.15,
+            "alpha_target_1e-8_per_K": 259.8556760834668,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          },
+          {
+            "T_K": 300.0,
+            "alpha_target_1e-8_per_K": 261.4416296296297,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          },
+          {
+            "T_K": 600.0,
+            "alpha_target_1e-8_per_K": 383.9092037037037,
+            "sigma_fit_1e-8_per_K": 0.5,
+            "reject_if_abs_alpha_minus_target_gt_1e-8_per_K": 1.5
+          }
+        ],
+        "notes": [
+          "NIST TRC provides a curve-fit standard error relative to data (given separately for T<50 K and T≥50 K).",
+          "Reject thresholds use a strict ±3σ envelope based on that reported fit error."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline.png",
+        "metrics_json": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_baseline_metrics.json"
+      },
+      "notes": null
+    },
+    {
+      "metrics_json": "output/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json",
+      "metrics_sha256": "9b14cc122bd24ba59726a40e6bbfe2a410a6db94db6785ad0a245aaf184354d5",
+      "phase": 7,
+      "step": "7.14.6",
+      "inputs": {
+        "extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_ofhc_copper_thermal_conductivity\\extracted_values.json",
+          "sha256": "64c84f5035551a06b039d2555a6a649be9cb3f93b5b775dc300dcdb026ee6d8c"
+        }
+      },
+      "falsification": {
+        "sigma_multiplier": 3.0,
+        "targets_by_rrr": {
+          "50": {
+            "fit_error_percent_relative_to_data": 2.0,
+            "targets_at_selected_T": [
+              {
+                "T_K": 4.0,
+                "k_target_W_mK": 320.38313292525186,
+                "sigma_fit_W_mK": 6.407662658505037,
+                "reject_if_abs_k_minus_target_gt_W_mK": 19.22298797551511
+              },
+              {
+                "T_K": 10.0,
+                "k_target_W_mK": 778.1487713016572,
+                "sigma_fit_W_mK": 15.562975426033145,
+                "reject_if_abs_k_minus_target_gt_W_mK": 46.68892627809943
+              },
+              {
+                "T_K": 20.0,
+                "k_target_W_mK": 1367.854811453829,
+                "sigma_fit_W_mK": 27.35709622907658,
+                "reject_if_abs_k_minus_target_gt_W_mK": 82.07128868722974
+              },
+              {
+                "T_K": 50.0,
+                "k_target_W_mK": 863.5590605024797,
+                "sigma_fit_W_mK": 17.271181210049594,
+                "reject_if_abs_k_minus_target_gt_W_mK": 51.813543630148786
+              },
+              {
+                "T_K": 77.0,
+                "k_target_W_mK": 515.0743226194302,
+                "sigma_fit_W_mK": 10.301486452388604,
+                "reject_if_abs_k_minus_target_gt_W_mK": 30.904459357165813
+              },
+              {
+                "T_K": 100.0,
+                "k_target_W_mK": 443.92183348138667,
+                "sigma_fit_W_mK": 8.878436669627733,
+                "reject_if_abs_k_minus_target_gt_W_mK": 26.635310008883202
+              },
+              {
+                "T_K": 300.0,
+                "k_target_W_mK": 392.36824486828715,
+                "sigma_fit_W_mK": 7.847364897365743,
+                "reject_if_abs_k_minus_target_gt_W_mK": 23.54209469209723
+              }
+            ],
+            "target_peak": {
+              "t_at_k_max_K": 26.246616751256973,
+              "k_max_W_mK": 1475.9060400034782,
+              "sigma_fit_W_mK": 29.518120800069564,
+              "reject_if_abs_k_max_minus_target_gt_W_mK": 88.55436240020869
+            }
+          },
+          "100": {
+            "fit_error_percent_relative_to_data": 1.0,
+            "targets_at_selected_T": [
+              {
+                "T_K": 4.0,
+                "k_target_W_mK": 642.2969607429585,
+                "sigma_fit_W_mK": 6.422969607429585,
+                "reject_if_abs_k_minus_target_gt_W_mK": 19.268908822288754
+              },
+              {
+                "T_K": 10.0,
+                "k_target_W_mK": 1539.9155755669074,
+                "sigma_fit_W_mK": 15.399155755669074,
+                "reject_if_abs_k_minus_target_gt_W_mK": 46.19746726700723
+              },
+              {
+                "T_K": 20.0,
+                "k_target_W_mK": 2422.5102645364937,
+                "sigma_fit_W_mK": 24.225102645364938,
+                "reject_if_abs_k_minus_target_gt_W_mK": 72.67530793609481
+              },
+              {
+                "T_K": 50.0,
+                "k_target_W_mK": 1004.8462770466153,
+                "sigma_fit_W_mK": 10.048462770466154,
+                "reject_if_abs_k_minus_target_gt_W_mK": 30.145388311398463
+              },
+              {
+                "T_K": 77.0,
+                "k_target_W_mK": 547.1996980793605,
+                "sigma_fit_W_mK": 5.471996980793604,
+                "reject_if_abs_k_minus_target_gt_W_mK": 16.415990942380812
+              },
+              {
+                "T_K": 100.0,
+                "k_target_W_mK": 461.54933806925106,
+                "sigma_fit_W_mK": 4.615493380692511,
+                "reject_if_abs_k_minus_target_gt_W_mK": 13.846480142077533
+              },
+              {
+                "T_K": 300.0,
+                "k_target_W_mK": 396.3239590150126,
+                "sigma_fit_W_mK": 3.963239590150126,
+                "reject_if_abs_k_minus_target_gt_W_mK": 11.889718770450378
+              }
+            ],
+            "target_peak": {
+              "t_at_k_max_K": 21.761309607108544,
+              "k_max_W_mK": 2442.253039150549,
+              "sigma_fit_W_mK": 24.42253039150549,
+              "reject_if_abs_k_max_minus_target_gt_W_mK": 73.26759117451647
+            }
+          },
+          "150": {
+            "fit_error_percent_relative_to_data": 2.0,
+            "targets_at_selected_T": [
+              {
+                "T_K": 4.0,
+                "k_target_W_mK": 961.762514716873,
+                "sigma_fit_W_mK": 19.23525029433746,
+                "reject_if_abs_k_minus_target_gt_W_mK": 57.705750883012385
+              },
+              {
+                "T_K": 10.0,
+                "k_target_W_mK": 2274.746615284522,
+                "sigma_fit_W_mK": 45.49493230569043,
+                "reject_if_abs_k_minus_target_gt_W_mK": 136.4847969170713
+              },
+              {
+                "T_K": 20.0,
+                "k_target_W_mK": 3244.6298472374656,
+                "sigma_fit_W_mK": 64.89259694474931,
+                "reject_if_abs_k_minus_target_gt_W_mK": 194.67779083424796
+              },
+              {
+                "T_K": 50.0,
+                "k_target_W_mK": 1055.8000978120597,
+                "sigma_fit_W_mK": 21.116001956241195,
+                "reject_if_abs_k_minus_target_gt_W_mK": 63.34800586872359
+              },
+              {
+                "T_K": 77.0,
+                "k_target_W_mK": 555.8463755648177,
+                "sigma_fit_W_mK": 11.116927511296353,
+                "reject_if_abs_k_minus_target_gt_W_mK": 33.35078253388906
+              },
+              {
+                "T_K": 100.0,
+                "k_target_W_mK": 466.131842891308,
+                "sigma_fit_W_mK": 9.32263685782616,
+                "reject_if_abs_k_minus_target_gt_W_mK": 27.967910573478477
+              },
+              {
+                "T_K": 300.0,
+                "k_target_W_mK": 397.6413181208555,
+                "sigma_fit_W_mK": 7.95282636241711,
+                "reject_if_abs_k_minus_target_gt_W_mK": 23.85847908725133
+              }
+            ],
+            "target_peak": {
+              "t_at_k_max_K": 19.531258962652522,
+              "k_max_W_mK": 3247.238471578533,
+              "sigma_fit_W_mK": 64.94476943157066,
+              "reject_if_abs_k_max_minus_target_gt_W_mK": 194.834308294712
+            }
+          },
+          "300": {
+            "fit_error_percent_relative_to_data": 1.0,
+            "targets_at_selected_T": [
+              {
+                "T_K": 4.0,
+                "k_target_W_mK": 1888.3793110693216,
+                "sigma_fit_W_mK": 18.883793110693215,
+                "reject_if_abs_k_minus_target_gt_W_mK": 56.65137933207964
+              },
+              {
+                "T_K": 10.0,
+                "k_target_W_mK": 4319.904672636731,
+                "sigma_fit_W_mK": 43.199046726367314,
+                "reject_if_abs_k_minus_target_gt_W_mK": 129.59714017910193
+              },
+              {
+                "T_K": 20.0,
+                "k_target_W_mK": 5052.267426595825,
+                "sigma_fit_W_mK": 50.52267426595825,
+                "reject_if_abs_k_minus_target_gt_W_mK": 151.56802279787476
+              },
+              {
+                "T_K": 50.0,
+                "k_target_W_mK": 1130.467488210375,
+                "sigma_fit_W_mK": 11.30467488210375,
+                "reject_if_abs_k_minus_target_gt_W_mK": 33.91402464631125
+              },
+              {
+                "T_K": 77.0,
+                "k_target_W_mK": 572.1196598437356,
+                "sigma_fit_W_mK": 5.721196598437356,
+                "reject_if_abs_k_minus_target_gt_W_mK": 17.163589795312067
+              },
+              {
+                "T_K": 100.0,
+                "k_target_W_mK": 471.09606951332023,
+                "sigma_fit_W_mK": 4.710960695133203,
+                "reject_if_abs_k_minus_target_gt_W_mK": 14.132882085399608
+              },
+              {
+                "T_K": 300.0,
+                "k_target_W_mK": 397.8739000533803,
+                "sigma_fit_W_mK": 3.978739000533803,
+                "reject_if_abs_k_minus_target_gt_W_mK": 11.936217001601408
+              }
+            ],
+            "target_peak": {
+              "t_at_k_max_K": 16.428676389609052,
+              "k_max_W_mK": 5280.307800146622,
+              "sigma_fit_W_mK": 52.80307800146622,
+              "reject_if_abs_k_max_minus_target_gt_W_mK": 158.40923400439866
+            }
+          },
+          "500": {
+            "fit_error_percent_relative_to_data": 2.0,
+            "targets_at_selected_T": [
+              {
+                "T_K": 4.0,
+                "k_target_W_mK": 3181.6852535067287,
+                "sigma_fit_W_mK": 63.633705070134575,
+                "reject_if_abs_k_minus_target_gt_W_mK": 190.90111521040373
+              },
+              {
+                "T_K": 10.0,
+                "k_target_W_mK": 6877.7203821964495,
+                "sigma_fit_W_mK": 137.55440764392898,
+                "reject_if_abs_k_minus_target_gt_W_mK": 412.66322293178695
+              },
+              {
+                "T_K": 20.0,
+                "k_target_W_mK": 6574.877240716748,
+                "sigma_fit_W_mK": 131.49754481433496,
+                "reject_if_abs_k_minus_target_gt_W_mK": 394.4926344430049
+              },
+              {
+                "T_K": 50.0,
+                "k_target_W_mK": 1173.4827975669639,
+                "sigma_fit_W_mK": 23.469655951339277,
+                "reject_if_abs_k_minus_target_gt_W_mK": 70.40896785401783
+              },
+              {
+                "T_K": 77.0,
+                "k_target_W_mK": 579.0366064778324,
+                "sigma_fit_W_mK": 11.580732129556647,
+                "reject_if_abs_k_minus_target_gt_W_mK": 34.74219638866994
+              },
+              {
+                "T_K": 100.0,
+                "k_target_W_mK": 479.402475439723,
+                "sigma_fit_W_mK": 9.58804950879446,
+                "reject_if_abs_k_minus_target_gt_W_mK": 28.76414852638338
+              },
+              {
+                "T_K": 300.0,
+                "k_target_W_mK": 401.1873558275264,
+                "sigma_fit_W_mK": 8.023747116550528,
+                "reject_if_abs_k_minus_target_gt_W_mK": 24.071241349651583
+              }
+            ],
+            "target_peak": {
+              "t_at_k_max_K": 14.019597661823056,
+              "k_max_W_mK": 7613.591273676797,
+              "sigma_fit_W_mK": 152.27182547353593,
+              "reject_if_abs_k_max_minus_target_gt_W_mK": 456.81547642060775
+            }
+          }
+        },
+        "notes": [
+          "NIST TRC provides a curve-fit relative error vs data (typically 1–2% depending on RRR).",
+          "We treat that fit error as a 1σ proxy and define a strict ±3σ envelope for κ(T) at representative temperatures."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_baseline.png"
+      },
+      "notes": [
+        "This is a fixed baseline derived from NIST TRC Cryogenics 'Material Properties: OFHC Copper'.",
+        "The NIST page provides a rational fit for log10(κ) as a function of T (K), with separate coefficients for each RRR value.",
+        "The baseline freezes κ(T) on a common temperature grid (intersection of ranges across RRR sets)."
+      ]
+    },
+    {
+      "metrics_json": "output/quantum/thermo_blackbody_entropy_baseline_metrics.json",
+      "metrics_sha256": "b56eb1d027c9a7f65aab2cb0d9619afb179d9992674f463749acf84698a80547",
+      "phase": 7,
+      "step": "7.15.2",
+      "inputs": {
+        "blackbody_constants_extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_blackbody_constants\\extracted_values.json",
+          "sha256": "ffe4c2234b9bf48c59898745bd5688a50a9f314e5e1eec63e172c24486032742"
+        }
+      },
+      "falsification": {
+        "notes": [
+          "For a photon gas in equilibrium, the relations u=aT^4, p=u/3, s=(4/3)aT^3 are standard and tightly constrained.",
+          "Any P-model extension that changes these equilibrium scalings without an explicit, testable mechanism should be treated as falsified."
+        ]
+      },
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_entropy_baseline.png"
+      },
+      "notes": null
+    },
+    {
+      "metrics_json": "output/quantum/thermo_blackbody_radiation_baseline_metrics.json",
+      "metrics_sha256": "40451b2f7f82be47cdd12585a7fe9087a5464b28817e3bced264060e685ebd2e",
+      "phase": 7,
+      "step": "7.15.1",
+      "inputs": {
+        "blackbody_constants_extracted_values": {
+          "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_blackbody_constants\\extracted_values.json",
+          "sha256": "ffe4c2234b9bf48c59898745bd5688a50a9f314e5e1eec63e172c24486032742"
+        }
+      },
+      "falsification": null,
+      "outputs": {
+        "csv": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_radiation_baseline.csv",
+        "png": "C:\\develop\\waveP\\output\\quantum\\thermo_blackbody_radiation_baseline.png"
+      },
+      "notes": [
+        "This is a baseline/consistency anchor for Step 7.15 (stat mech / thermo).",
+        "The formulas are standard; the purpose is to fix the numerical scales and provide a reproducible reference for later P-model extensions.",
+        "Example temperatures are illustrative only and are not treated as observational inputs."
+      ]
+    }
+  ]
+}

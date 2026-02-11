@@ -1,6 +1,6 @@
 # STATUS
 
-最終更新（UTC）：2026-02-11T04:47:59Z
+最終更新（UTC）：2026-02-11T05:09:58Z
 
 ## 現在地（ロードマップ）
 - Phase 7 / Step 7.20.1（Bell：ヌルテスト一式の固定）完了（初版）。
@@ -16,6 +16,8 @@
 - Phase 7 / Step 7.16.8（Bell：15項目系統誤差分解）改訂：Part III 4.2.1 に (i)「sweep幅（選択自由度）と freeze 近傍 drift」を区別する説明（例：Weihs 自然窓で `Δ|S|≈0.0013`）と、(ii) selection項目を除いた「装置/補正」側の合成寄与（L2/L1）表を追記。
 - Phase 8 / Step 8.2.13（設計方針変更：検証用資料へ集約）完了（Part I–III 本文から具体的な file/folder/script 表記を排除し、検証用資料を参照する形へ移行。paper_qc に publish HTML の repo-path 混入検出を追加）。
 - Phase 8 / Step 8.2.14（公開参照の固定：Verification Materials のURL/DOI確定）完了（GitHub repo 作成＋References/Verification Materials の `TBD` を固定URLへ置換）。
+- Phase 8 / Step 8.2.15（GitHub運用方針改訂：検証中心化）完了（READMEをストーリー化、論文は別公開、固定出力JSONを追跡対象へ）。
+- 注記：論文等のドキュメントは別公開とし、本repoでは追跡しない（`doc/paper/` は git 管理外）。
 - 次：（任意）Phase 7 / Step 7.20.6 の追加拡張（物性/熱 holdout 対象の追加：bulk modulus / ρ(T) 係数など）。
 - 保留（公開待ち）：Phase 4 / Step 4.6（GN-z11）、Phase 7 / Step 7.4.7（Giustina click log/thesis）、Phase 4 / Step 4.13（XRISM）。
 
@@ -46,32 +48,6 @@
   - `python -B scripts/quantum/condensed_silicon_bulk_modulus_holdout_splits.py`（Ioffe由来 B(T) の温度帯 holdout を追加）
   - `python -B scripts/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits.py`
   - `python -B scripts/quantum/condensed_holdout_audit.py` → `output/quantum/condensed_holdout_audit_summary.json`（CSV/PNG；minimax推奨モデル＋audit_gates で strict/holdout を機械判定）
-- Part III（量子）論文のみ生成（publish）を再確認：
-  - `python -B scripts/summary/paper_build.py --profile part3_quantum --mode publish --outdir output/summary --skip-docx`
-  - QA：`python -B scripts/summary/paper_qc.py`（ok=True、publish HTML の `Step` は 0件）
-- Part III（量子）本文へ Bell の pairing crosscheck（Δ_impl/σ_boot）要点を反映：
-  - 4.2.1 に実装差クロスチェック表、5.1 の Table 3 に pairing crosscheck max を追記。
-- Si 抵抗率（NBS IR 74-496 Appendix E）抽出の数値パースを修正：
-  - `python -B scripts/quantum/fetch_silicon_resistivity_nbsir74_496_sources.py --offline`（再抽出）
-  - `python -B scripts/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline.py`（baseline更新）
-  - `python -B scripts/quantum/condensed_falsification_pack.py`（pack更新）
-  - `python -B scripts/quantum/frozen_parameters_quantum.py`（sha256参照を更新）
-- Part III（量子）Bell の系統誤差バジェット解釈を補強：
-  - `doc/paper/12_part3_quantum.md`（4.2.1）に drift スケールの具体例を追記。
-  - 同じ箇所に、selection項目を除いた「装置/補正」側の合成寄与（L2/L1）を表として追記。
-  - 再生成：`python -B scripts/summary/paper_build.py --profile part3_quantum --mode publish --outdir output/summary --skip-docx`
-  - QA：`python -B scripts/summary/paper_qc.py`（ok=True）、`python -B scripts/summary/part3_audit.py`（ok=True）
-- Part III（publish）本文の可読性を改善：
-  - `doc/paper/12_part3_quantum.md` から Step 表記を除去し、入出力ファイル名は 8章（Reproducibility）へ集約。
-  - `scripts/summary/part3_completion_inventory.py` の Output 判定を **出力** 行ベースへ更新（file path を本文に必須化しない）。
-  - 凝縮系の長い ansatz 試験ログ（Si α(T)）を `doc/paper/12_part3_quantum_appendix_a.md` へ退避し、publish HTML では本文と分離した「補遺A」セクションとして表示。
-  - 再生成：`python -B scripts/summary/paper_build.py --profile part3_quantum --mode publish --outdir output/summary`（HTMLのみなら `--skip-docx`）
-  - 監査：`python -B scripts/summary/part3_audit.py`（ok=True）
-- Part I（publish）の可読性を改善：
-  - `doc/paper/10_part1_core_theory.md` / `doc/paper/05_definitions.md` の本文表示から `.json` の内部パス表記を除去し、意味（凍結パラメータ集・反証条件パック・manifest）を言葉で説明する形に統一（パスは INTERNAL_ONLY へ退避）。
-  - Part I 2.8（量子）を「最小辞書」へ圧縮し、Part III への接続点を `粒子` と `selection` に限定（他の語彙は Part III 側で操作的定義＋反証条件へ委譲）。
-  - 再生成：`python -B scripts/summary/paper_build.py --profile paper --mode publish --outdir output/summary --skip-docx`
-  - QA：`python -B scripts/summary/paper_qc.py`（ok=True、`rg -n \"\\.json\" output/summary/pmodel_paper.html` no matches）
 
 ## 保留項目（データ未公開/未取得）
 - Phase 4 / Step 4.6（JWST/MAST；GN-z11 公開待ち；t_obs_release_utc=2026-04-09T20:45:23.996448+00:00）

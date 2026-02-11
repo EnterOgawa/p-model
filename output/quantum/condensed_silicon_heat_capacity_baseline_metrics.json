@@ -1,0 +1,138 @@
+{
+  "generated_utc": "2026-01-31T15:05:39.034439+00:00",
+  "phase": 7,
+  "step": "7.14.2",
+  "inputs": {
+    "extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_webbook_condensed_silicon_si\\extracted_values.json",
+      "sha256": "be06a252b49767f17ef18d4b93f23a039cc484fdcba8456b3196013124ba7ee3"
+    }
+  },
+  "shomate_blocks": [
+    {
+      "phase": "liquid",
+      "t_min_k": 1685.0,
+      "t_max_k": 3504.616,
+      "coeffs": {
+        "A": 27.19604,
+        "B": -1.1983060000000002e-10,
+        "C": 5.3532619999999995e-11,
+        "D": -6.956611999999999e-12,
+        "E": -4.294374999999999e-12,
+        "F": 40.36163,
+        "G": 77.37178,
+        "H": 48.46997
+      }
+    },
+    {
+      "phase": "solid",
+      "t_min_k": 298.0,
+      "t_max_k": 1685.0,
+      "coeffs": {
+        "A": 22.81719,
+        "B": 3.89951,
+        "C": -0.082885,
+        "D": 0.042111,
+        "E": -0.354063,
+        "F": -8.163946,
+        "G": 43.27846,
+        "H": 0.0
+      }
+    }
+  ],
+  "key_points": [
+    {
+      "phase": "solid",
+      "T_K": 298.15,
+      "Cp_J_per_molK": 19.990571462910072
+    },
+    {
+      "phase": "solid",
+      "T_K": 300.0,
+      "Cp_J_per_molK": 20.046687013666663
+    },
+    {
+      "phase": "solid",
+      "T_K": 1000.0,
+      "Cp_J_per_molK": 26.321862999999997
+    },
+    {
+      "phase": "liquid",
+      "T_K": 1685.0,
+      "Cp_J_per_molK": 27.196039999915282
+    },
+    {
+      "phase": "liquid",
+      "T_K": 2000.0,
+      "Cp_J_per_molK": 27.19603999991774
+    },
+    {
+      "phase": "liquid",
+      "T_K": 3000.0,
+      "Cp_J_per_molK": 27.196039999933998
+    }
+  ],
+  "falsification": {
+    "sigma_multiplier": 3.0,
+    "sigma_proxy": {
+      "rel": 0.02,
+      "abs_floor_J_per_molK": 0.2
+    },
+    "targets": [
+      {
+        "phase": "solid",
+        "T_K": 298.15,
+        "Cp_target_J_per_molK": 19.990571462910072,
+        "sigma_proxy_J_per_molK": 0.39981142925820146,
+        "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.1994342877746043
+      },
+      {
+        "phase": "solid",
+        "T_K": 300.0,
+        "Cp_target_J_per_molK": 20.046687013666663,
+        "sigma_proxy_J_per_molK": 0.4009337402733333,
+        "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.2028012208199999
+      },
+      {
+        "phase": "solid",
+        "T_K": 1000.0,
+        "Cp_target_J_per_molK": 26.321862999999997,
+        "sigma_proxy_J_per_molK": 0.5264372599999999,
+        "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.5793117799999998
+      },
+      {
+        "phase": "liquid",
+        "T_K": 1685.0,
+        "Cp_target_J_per_molK": 27.196039999915282,
+        "sigma_proxy_J_per_molK": 0.5439207999983057,
+        "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.631762399994917
+      },
+      {
+        "phase": "liquid",
+        "T_K": 2000.0,
+        "Cp_target_J_per_molK": 27.19603999991774,
+        "sigma_proxy_J_per_molK": 0.5439207999983549,
+        "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.6317623999950646
+      },
+      {
+        "phase": "liquid",
+        "T_K": 3000.0,
+        "Cp_target_J_per_molK": 27.196039999933998,
+        "sigma_proxy_J_per_molK": 0.5439207999986799,
+        "reject_if_abs_Cp_minus_target_gt_J_per_molK": 1.6317623999960398
+      }
+    ],
+    "notes": [
+      "NIST WebBook condensed Shomate blocks do not provide per-point uncertainties in the table view.",
+      "We use a conservative proxy uncertainty: max(2% of Cp, 0.2 J/mol·K), and reject if deviation exceeds ±3σ_proxy."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_baseline.png"
+  },
+  "notes": [
+    "Cp° computed from NIST Shomate coefficients; t=T/1000.",
+    "WebBook condensed-phase Cp table ranges start at 298 K; low-temperature (Debye T^3) regime is not covered here."
+  ]
+}

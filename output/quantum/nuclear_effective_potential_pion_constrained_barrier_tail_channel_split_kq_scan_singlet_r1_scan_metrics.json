@@ -1,0 +1,1357 @@
+{
+  "generated_utc": "2026-01-28T19:43:36.495207+00:00",
+  "phase": 7,
+  "step": "7.13.8.3",
+  "model": {
+    "effective_equation": "Nonrelativistic s-wave Schrödinger equation for relative motion with an effective potential V(r)=μ φ(r)=-μ c^2 u(r).",
+    "ansatz": "λπ-constrained three-range (barrier+tail split; channel-split (k,q) + singlet R1_s/λπ scan): reuse the frozen (k_t,q_t)/(k_s,q_s) from step 7.13.8.2 and scan a single global singlet R1_s/λπ; R2_s follows the triplet-fitted R2 per dataset. Singlet restricts V2_s>=0.",
+    "fit_constraints": {
+      "triplet": [
+        "B (CODATA mass defect; solves V1)",
+        "a_t (np low-energy)",
+        "r_t (np low-energy)",
+        "v2t (shape parameter; target)"
+      ],
+      "singlet": [
+        "a_s (np low-energy; fits V1_s,V2_s>=0; barrier+tail split fixed by λπ)",
+        "r_s (np low-energy; fits V1_s,V2_s>=0; barrier+tail split fixed by λπ)"
+      ]
+    },
+    "prediction_targets": {
+      "singlet": [
+        "v2s"
+      ]
+    },
+    "positioning": [
+      "Phenomenological constraint (effective model), not a first-principles derivation of nuclear forces.",
+      "The ansatz class is intentionally low-parameter to avoid 'arbitrary function fit'.",
+      "To limit arbitrariness, reuse the frozen channel-split (k_t,q_t)/(k_s,q_s) from Step 7.13.8.2 and scan only a single additional DOF (global R1_s/λπ) for the singlet before fitting per dataset."
+    ]
+  },
+  "sources": [
+    {
+      "dataset": "NIST Cuu CODATA constants (mp,mn,md) for deuteron binding baseline",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\manifest.json",
+      "local_manifest_sha256": "a4af996c9eba1f2dff6c6a73923182e26754b75ddbf3eb36263359dfb43d2a2a",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\extracted_values.json",
+      "local_extracted_sha256": "f66aef6422ce5a6e6d9653545a4decd10910923774b19e876132309631b9e245"
+    },
+    {
+      "dataset": "np scattering low-energy parameters (arXiv:0704.1024v1; eq18–eq19)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_manifest.json",
+      "local_manifest_sha256": "eb2aec45ce182215d88ca7ba32c5b8bd62de9ab9820ee66f869b13dc64f6be80",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\np_scattering_low_energy_arxiv_0704_1024v1_extracted.json",
+      "local_extracted_sha256": "1508cdfe8a94b8322348f6e944fe51f3d3047d3ed620bfbe2f490d4c31aa1709"
+    }
+  ],
+  "constants": {
+    "hbarc_MeV_fm": 197.3269804,
+    "mu_c2_MeV": 469.4591551497099,
+    "B_MeV": 2.22456634198942
+  },
+  "results_by_dataset": [
+    {
+      "label": "eq18 (GWU/SAID)",
+      "eq_label": 18,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "triplet": {
+          "a_t_fm": 5.403,
+          "r_t_fm": 1.7494,
+          "v2t_fm3": 0.163
+        },
+        "singlet": {
+          "a_s_fm": -23.719,
+          "r_s_fm": 2.626,
+          "v2s_fm3": -0.005
+        }
+      },
+      "fit_triplet": {
+        "geometry": {
+          "R1_fm": 1.0603626979905982,
+          "R2_fm": 2.8983247078409686,
+          "Rb_fm": 3.6052331731680343,
+          "R3_fm": 4.3121416384951,
+          "L3_total_fm": 1.4138169306541313,
+          "Lb_fm": 0.7069084653270655,
+          "Lt_fm": 0.7069084653270655,
+          "lambda_pi_pm_fm": 1.413816930654131,
+          "R1_over_lambda_pi_pm": 0.75,
+          "R2_over_lambda_pi_pm": 2.05,
+          "Rb_over_lambda_pi_pm": 2.5500000000000003,
+          "R3_over_lambda_pi_pm": 3.0500000000000003,
+          "pion_constraint": {
+            "lambda_pi_fm": 1.413816930654131,
+            "R1_over_lambda_pi_bounds": [
+              0.25,
+              0.75
+            ],
+            "R2_over_lambda_pi_bounds": [
+              1.0,
+              2.05
+            ]
+          },
+          "tail_constraint": {
+            "tail_len_over_lambda": 1.0,
+            "barrier_len_fraction": 0.5,
+            "barrier_height_factor": 3.5,
+            "tail_depth_factor": 1.3,
+            "tail_mean_factor_definition": "<V>/V(R2) = (λπ/L3) * (1 - exp(-L3/λπ))",
+            "barrier_tail_rule": "Vb = barrier_height_factor*V3_mean, Vt = tail_depth_factor*V3_mean (no mean-preserving constraint)"
+          },
+          "tail_factor": 0.6321205588285577,
+          "barrier_tail_config": {
+            "lambda_pi_fm": 1.413816930654131,
+            "tail_len_over_lambda": 1.0,
+            "L3_total_fm": 1.413816930654131,
+            "barrier_len_fraction": 0.5,
+            "Lb_fm": 0.7069084653270655,
+            "Lt_fm": 0.7069084653270655,
+            "tail_factor": 0.6321205588285577,
+            "barrier_height_factor": 3.5,
+            "tail_depth_factor": 1.3,
+            "tail_depth_factor_mean_preserving": 5.500000000000001,
+            "barrier_coeff": 2.212421955899952,
+            "tail_depth_coeff": 0.8217567264771249
+          }
+        },
+        "V1_t_MeV": 107.57808079933176,
+        "V2_t_MeV": 2.0,
+        "V3_t_MeV": 0.0,
+        "V3_mean_t_MeV": 1.2642411176571153,
+        "V3_barrier_t_MeV": 4.424843911799904,
+        "V3_tail_t_MeV": 1.6435134529542499,
+        "a_t_exact_fm": 4.854604871025844,
+        "ere": {
+          "a_fm": 4.854604879279256,
+          "r_eff_fm": 0.9581042567539979,
+          "v2_fm3": 0.0471652579508681,
+          "coeffs": {
+            "c0_fm1": -0.20598998782954836,
+            "c2_fm": 0.47905212837699895,
+            "c4_fm3": 0.0471652579508681
+          },
+          "fit_rms_fm1": 2.907693826078024e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": -0.20598807196292712,
+              "delta_rad": -0.009708994979618702
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": -0.20598232330367658,
+              "delta_rad": -0.019416701615377983
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": -0.2059727421757032,
+              "delta_rad": -0.02912183271655931
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": -0.20595932853514912,
+              "delta_rad": -0.03882310339615186
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": -0.20594208232056524,
+              "delta_rad": -0.048519232216281946
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": -0.2059210034528615,
+              "delta_rad": -0.05820894232596352
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": -0.20589609183524538,
+              "delta_rad": -0.06789096258865909
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": -0.20586734735314555,
+              "delta_rad": -0.07756402869718376
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": -0.20583476987412128,
+              "delta_rad": -0.08722688427353684
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": -0.20579835924775972,
+              "delta_rad": -0.0968782819513065
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": -0.20575811530555624,
+              "delta_rad": -0.10651698443836723
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": -0.20571403786078582,
+              "delta_rad": -0.11614176555766369
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": -0.2056661267083558,
+              "delta_rad": -0.12575141126397127
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": -0.20561438162464862,
+              "delta_rad": -0.13534472063461137
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": -0.20555880236734994,
+              "delta_rad": -0.14492050683220795
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": -0.20549938867526152,
+              "delta_rad": -0.15447759803768069
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": -0.20543614026810375,
+              "delta_rad": -0.1640148383517812
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": -0.2053690568463034,
+              "delta_rad": -0.17353108866360573
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": -0.2052981380907654,
+              "delta_rad": -0.18302522748463976
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": -0.20522338366263781,
+              "delta_rad": -0.19249615174701182
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": -0.20514479320305704,
+              "delta_rad": -0.2019427775647802
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": -0.20506236633288247,
+              "delta_rad": -0.21136404095719485
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": -0.20497610265242203,
+              "delta_rad": -0.22075889853301436
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": -0.2048860017411364,
+              "delta_rad": -0.23012632813510878
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": -0.20479206315733892,
+              "delta_rad": -0.23946532944468576
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": -0.20469428643787815,
+              "delta_rad": -0.24877492454464134
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": -0.2045926710978079,
+              "delta_rad": -0.2580541584416524
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": -0.20448721663004904,
+              "delta_rad": -0.2673020995467595
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": -0.20437792250503176,
+              "delta_rad": -0.27651784011433367
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": -0.20426478817033356,
+              "delta_rad": -0.2857004966394179
+            }
+          ]
+        },
+        "fit_score": 20.88458535077346,
+        "fit_deltas": {
+          "da_fm": -0.548395128974156,
+          "dr_fm": -0.7912957432460022,
+          "dv2_fm3": -0.11583474204913191
+        },
+        "note": "Triplet: λπ-constrained geometry + barrier+tail split beyond R2 (free tail depth); reuse frozen (k_t,q_t)/(k_s,q_s) from Step 7.13.8.2 and scan singlet R1_s/λπ, then fit per dataset."
+      },
+      "fit_singlet": {
+        "V1_s_MeV": 86.95521235521235,
+        "V2_s_MeV": 0.19713117824003207,
+        "V3_s_MeV": 0.0,
+        "Vb_s_MeV": 0.06230533527581054,
+        "Vt_s_MeV": 0.12461067055162107,
+        "geometry": {
+          "R1_fm": 1.0603626979905982,
+          "R2_fm": 2.8983247078409686,
+          "Rb_fm": 3.6052331731680343,
+          "R3_fm": 4.3121416384951,
+          "R1_s_over_lambda_pi_pm": 0.75
+        },
+        "a_s_exact_fm": -23.71900001014041,
+        "ere": {
+          "a_fm": -23.718999929420946,
+          "r_eff_fm": 1.1692444133504152,
+          "v2_fm3": -0.06106797439780484,
+          "coeffs": {
+            "c0_fm1": 0.0421602935610959,
+            "c2_fm": 0.5846222066752076,
+            "c4_fm3": -0.06106797439780484
+          },
+          "fit_rms_fm1": 1.1924240473959083e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": 0.042162631908563244,
+              "delta_rad": 0.047399838561775265
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": 0.04216964736955426,
+              "delta_rad": 0.09457199626447924
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": 0.04218133976506193,
+              "delta_rad": 0.14129513566984794
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": 0.0421977090358798,
+              "delta_rad": 0.18736017075133593
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": 0.04221875509913897,
+              "delta_rad": 0.23257535877590885
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": 0.04224447784832802,
+              "delta_rad": 0.2767702940852181
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": 0.042274877153316535,
+              "delta_rad": 0.31979864583222684
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": 0.0423099528603902,
+              "delta_rad": 0.3615396097450802
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": 0.04234970479228302,
+              "delta_rad": 0.40189815686846386
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": 0.04239413274822124,
+              "delta_rad": 0.4408042468401142
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": 0.04244323650397454,
+              "delta_rad": 0.47821122390983034
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": 0.04249701581190428,
+              "delta_rad": 0.5140936317212842
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": 0.04255547040102688,
+              "delta_rad": 0.5484446737704719
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": 0.04261859997707752,
+              "delta_rad": 0.5812735186840515
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": 0.04268640422257863,
+              "delta_rad": 0.6126026114593118
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": 0.042758882796920375,
+              "delta_rad": 0.6424651107350641
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": 0.0428360353364375,
+              "delta_rad": 0.6709025332158569
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": 0.042917861454498954,
+              "delta_rad": 0.6979626527087545
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": 0.04300436074160372,
+              "delta_rad": 0.7236976742809682
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": 0.04309553276547138,
+              "delta_rad": 0.7481626839695743
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": 0.04319137707115487,
+              "delta_rad": 0.7714143606410552
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": 0.04329189318114393,
+              "delta_rad": 0.793509927980267
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": 0.04339708059548347,
+              "delta_rad": 0.8145063200358325
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": 0.043506938791892005,
+              "delta_rad": 0.8344595321763888
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": 0.04362146722588917,
+              "delta_rad": 0.8534241297819282
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": 0.04374066533092765,
+              "delta_rad": 0.8714528887576826
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": 0.043864532518527594,
+              "delta_rad": 0.8885965444467769
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": 0.04399306817842214,
+              "delta_rad": 0.9049036283258777
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": 0.044126271678705316,
+              "delta_rad": 0.9204203747204931
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": 0.044264142365981814,
+              "delta_rad": 0.9351906824987173
+            }
+          ]
+        },
+        "fit_mode": "Channel-split barrier+tail (k_t,q_t)/(k_s,q_s) + singlet R1_s override; fit (V1_s,V2_s>=0) to match (a_s,r_s).",
+        "fit_targets": [
+          "a_s",
+          "r_s"
+        ],
+        "prediction_targets": [
+          "v2s"
+        ],
+        "fit_method": "bracket_best",
+        "fit_scan": {
+          "v1": {},
+          "v2": {
+            "v2_min": 0.0,
+            "v2_max": 86.95521235521235,
+            "n_scan": 900
+          }
+        },
+        "note_fit": "bisection did not converge; using best endpoint (barrier+tail)",
+        "note_profile": "",
+        "note": "Singlet: uses R1_s=(R1_s/λπ)·λπ (global) and R2_s from triplet; fits (V1_s,V2_s) by (a_s,r_s). v2s is a prediction."
+      },
+      "comparison": {
+        "triplet": {
+          "a_t_fit_minus_obs_fm": -0.548395128974156,
+          "r_t_fit_minus_obs_fm": -0.7912957432460022,
+          "v2t_fit_minus_obs_fm3": -0.11583474204913191
+        },
+        "singlet": {
+          "a_s_fit_minus_obs_fm": -1.0140407624703585e-08,
+          "r_s_fit_minus_obs_fm": -1.4567555866495847,
+          "v2s_pred_minus_obs_fm3": -0.056067974397804844
+        }
+      }
+    },
+    {
+      "label": "eq19 (Nijmegen)",
+      "eq_label": 19,
+      "inputs": {
+        "B_MeV": 2.22456634198942,
+        "triplet": {
+          "a_t_fm": 5.42,
+          "r_t_fm": 1.753,
+          "v2t_fm3": 0.04
+        },
+        "singlet": {
+          "a_s_fm": -23.739,
+          "r_s_fm": 2.678,
+          "v2s_fm3": -0.48
+        }
+      },
+      "fit_triplet": {
+        "geometry": {
+          "R1_fm": 1.0603626979905982,
+          "R2_fm": 2.8983247078409686,
+          "Rb_fm": 3.6052331731680343,
+          "R3_fm": 4.3121416384951,
+          "L3_total_fm": 1.4138169306541313,
+          "Lb_fm": 0.7069084653270655,
+          "Lt_fm": 0.7069084653270655,
+          "lambda_pi_pm_fm": 1.413816930654131,
+          "R1_over_lambda_pi_pm": 0.75,
+          "R2_over_lambda_pi_pm": 2.05,
+          "Rb_over_lambda_pi_pm": 2.5500000000000003,
+          "R3_over_lambda_pi_pm": 3.0500000000000003,
+          "pion_constraint": {
+            "lambda_pi_fm": 1.413816930654131,
+            "R1_over_lambda_pi_bounds": [
+              0.25,
+              0.75
+            ],
+            "R2_over_lambda_pi_bounds": [
+              1.0,
+              2.05
+            ]
+          },
+          "tail_constraint": {
+            "tail_len_over_lambda": 1.0,
+            "barrier_len_fraction": 0.5,
+            "barrier_height_factor": 3.5,
+            "tail_depth_factor": 1.3,
+            "tail_mean_factor_definition": "<V>/V(R2) = (λπ/L3) * (1 - exp(-L3/λπ))",
+            "barrier_tail_rule": "Vb = barrier_height_factor*V3_mean, Vt = tail_depth_factor*V3_mean (no mean-preserving constraint)"
+          },
+          "tail_factor": 0.6321205588285577,
+          "barrier_tail_config": {
+            "lambda_pi_fm": 1.413816930654131,
+            "tail_len_over_lambda": 1.0,
+            "L3_total_fm": 1.413816930654131,
+            "barrier_len_fraction": 0.5,
+            "Lb_fm": 0.7069084653270655,
+            "Lt_fm": 0.7069084653270655,
+            "tail_factor": 0.6321205588285577,
+            "barrier_height_factor": 3.5,
+            "tail_depth_factor": 1.3,
+            "tail_depth_factor_mean_preserving": 5.500000000000001,
+            "barrier_coeff": 2.212421955899952,
+            "tail_depth_coeff": 0.8217567264771249
+          }
+        },
+        "V1_t_MeV": 103.48188281293068,
+        "V2_t_MeV": 4.6112,
+        "V3_t_MeV": 0.0,
+        "V3_mean_t_MeV": 2.9148343208702454,
+        "V3_barrier_t_MeV": 10.20192012304586,
+        "V3_tail_t_MeV": 3.789284617131319,
+        "a_t_exact_fm": 4.854903276888966,
+        "ere": {
+          "a_fm": 4.85490329637254,
+          "r_eff_fm": 0.9551688741287415,
+          "v2_fm3": 0.04123873934758254,
+          "coeffs": {
+            "c0_fm1": -0.20597732621104411,
+            "c2_fm": 0.47758443706437076,
+            "c4_fm3": 0.04123873934758254
+          },
+          "fit_rms_fm1": 6.863364567748455e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": -0.2059754166814136,
+              "delta_rad": -0.009709591469940528
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": -0.20596968560542192,
+              "delta_rad": -0.01941789266803329
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": -0.2059601337879839,
+              "delta_rad": -0.029123614477761378
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": -0.20594676119286384,
+              "delta_rad": -0.03882547009069502
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": -0.20592956776921742,
+              "delta_rad": -0.04852217615410931
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": -0.20590855345147688,
+              "delta_rad": -0.058212453910920815
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": -0.20588371815920267,
+              "delta_rad": -0.06789503032943306
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": -0.20585506179690563,
+              "delta_rad": -0.07756863922042091
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": -0.20582258425383287,
+              "delta_rad": -0.08723202233913986
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": -0.20578628540372218,
+              "delta_rad": -0.09688393046990464
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": -0.2057461651045257,
+              "delta_rad": -0.10652312449095375
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": -0.2057022231980997,
+              "delta_rad": -0.1161483764173977
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": -0.20565445950986252,
+              "delta_rad": -0.12575847042013552
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": -0.20560287384841985,
+              "delta_rad": -0.1353522038187215
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": -0.2055474660051602,
+              "delta_rad": -0.14492838804626418
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": -0.20548823575381348,
+              "delta_rad": -0.15448584958455613
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": -0.2054251828499848,
+              "delta_rad": -0.16402343086773624
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": -0.20535830703065183,
+              "delta_rad": -0.17353999115292143
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": -0.20528760801363038,
+              "delta_rad": -0.18303440735635945
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": -0.20521308549701403,
+              "delta_rad": -0.19250557485378142
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": -0.2051347391585759,
+              "delta_rad": -0.2019524082437769
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": -0.20505256865514496,
+              "delta_rad": -0.2113738420731299
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": -0.20496657362194867,
+              "delta_rad": -0.22076883152320503
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": -0.20487675367192568,
+              "delta_rad": -0.2301363530565984
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": -0.20478310839501163,
+              "delta_rad": -0.23947540502340328
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": -0.20468563735738943,
+              "delta_rad": -0.24878500822658836
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": -0.2045843401007146,
+              "delta_rad": -0.2580642064460981
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": -0.2044792161413082,
+              "delta_rad": -0.2673120669214371
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": -0.2043702649693239,
+              "delta_rad": -0.27652768079261036
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": -0.2042574860478816,
+              "delta_rad": -0.2857101634994379
+            }
+          ]
+        },
+        "fit_score": 18.806880919931984,
+        "fit_deltas": {
+          "da_fm": -0.5650967231110338,
+          "dr_fm": -0.7978311258712584,
+          "dv2_fm3": 0.0012387393475825417
+        },
+        "note": "Triplet: λπ-constrained geometry + barrier+tail split beyond R2 (free tail depth); reuse frozen (k_t,q_t)/(k_s,q_s) from Step 7.13.8.2 and scan singlet R1_s/λπ, then fit per dataset."
+      },
+      "fit_singlet": {
+        "V1_s_MeV": 86.95521235521235,
+        "V2_s_MeV": 0.1977315569247065,
+        "V3_s_MeV": 0.0,
+        "Vb_s_MeV": 0.06249509113064312,
+        "Vt_s_MeV": 0.12499018226128623,
+        "geometry": {
+          "R1_fm": 1.0603626979905982,
+          "R2_fm": 2.8983247078409686,
+          "Rb_fm": 3.6052331731680343,
+          "R3_fm": 4.3121416384951,
+          "R1_s_over_lambda_pi_pm": 0.75
+        },
+        "a_s_exact_fm": -23.739000002584152,
+        "ere": {
+          "a_fm": -23.738999921532812,
+          "r_eff_fm": 1.1694859778392022,
+          "v2_fm3": -0.06134962185074004,
+          "coeffs": {
+            "c0_fm1": 0.04212477371858177,
+            "c2_fm": 0.5847429889196011,
+            "c4_fm3": -0.06134962185074004
+          },
+          "fit_rms_fm1": 1.1953111927228563e-10,
+          "points": [
+            {
+              "k_fm1": 0.002,
+              "kcot_fm1": 0.04212711254883382,
+              "delta_rad": 0.04743974369652197
+            },
+            {
+              "k_fm1": 0.004,
+              "kcot_fm1": 0.042134129459166364,
+              "delta_rad": 0.09465124275974014
+            },
+            {
+              "k_fm1": 0.006,
+              "kcot_fm1": 0.042145824270061985,
+              "delta_rad": 0.1414126220558452
+            },
+            {
+              "k_fm1": 0.008,
+              "kcot_fm1": 0.04216219692204256,
+              "delta_rad": 0.18751430752725157
+            },
+            {
+              "k_fm1": 0.01,
+              "kcot_fm1": 0.042183247331858645,
+              "delta_rad": 0.23276413707477756
+            },
+            {
+              "k_fm1": 0.012,
+              "kcot_fm1": 0.042208975392509764,
+              "delta_rad": 0.27699136736596286
+            },
+            {
+              "k_fm1": 0.014,
+              "kcot_fm1": 0.04223938097326788,
+              "delta_rad": 0.32004941808693255
+            },
+            {
+              "k_fm1": 0.016,
+              "kcot_fm1": 0.042274463919712575,
+              "delta_rad": 0.36181732398989735
+            },
+            {
+              "k_fm1": 0.018000000000000002,
+              "kcot_fm1": 0.04231422405376329,
+              "delta_rad": 0.40219997861425816
+            },
+            {
+              "k_fm1": 0.02,
+              "kcot_fm1": 0.042358661173723576,
+              "delta_rad": 0.44112733856403885
+            },
+            {
+              "k_fm1": 0.022,
+              "kcot_fm1": 0.04240777505433206,
+              "delta_rad": 0.47855280801074457
+            },
+            {
+              "k_fm1": 0.024,
+              "kcot_fm1": 0.04246156544681109,
+              "delta_rad": 0.5144510408223469
+            },
+            {
+              "k_fm1": 0.026000000000000002,
+              "kcot_fm1": 0.042520032078930174,
+              "delta_rad": 0.5488153883845445
+            },
+            {
+              "k_fm1": 0.028,
+              "kcot_fm1": 0.04258317465506983,
+              "delta_rad": 0.5816551931107644
+            },
+            {
+              "k_fm1": 0.03,
+              "kcot_fm1": 0.042650992856290225,
+              "delta_rad": 0.6129930893292225
+            },
+            {
+              "k_fm1": 0.032,
+              "kcot_fm1": 0.04272348634041195,
+              "delta_rad": 0.6428624318917622
+            },
+            {
+              "k_fm1": 0.034,
+              "kcot_fm1": 0.04280065474209285,
+              "delta_rad": 0.6713049336889754
+            },
+            {
+              "k_fm1": 0.036000000000000004,
+              "kcot_fm1": 0.04288249767291811,
+              "delta_rad": 0.6983685594429685
+            },
+            {
+              "k_fm1": 0.038,
+              "kcot_fm1": 0.042969014721496175,
+              "delta_rad": 0.7241056961062169
+            },
+            {
+              "k_fm1": 0.04,
+              "kcot_fm1": 0.04306020545354954,
+              "delta_rad": 0.7485716000727838
+            },
+            {
+              "k_fm1": 0.042,
+              "kcot_fm1": 0.04315606941202774,
+              "delta_rad": 0.7718231075638289
+            },
+            {
+              "k_fm1": 0.044,
+              "kcot_fm1": 0.0432566061172113,
+              "delta_rad": 0.7939175859428107
+            },
+            {
+              "k_fm1": 0.046,
+              "kcot_fm1": 0.04336181506682991,
+              "delta_rad": 0.814912099187711
+            },
+            {
+              "k_fm1": 0.048,
+              "kcot_fm1": 0.04347169573618171,
+              "delta_rad": 0.8348627592052857
+            },
+            {
+              "k_fm1": 0.05,
+              "kcot_fm1": 0.04358624757826067,
+              "delta_rad": 0.8538242351734663
+            },
+            {
+              "k_fm1": 0.052000000000000005,
+              "kcot_fm1": 0.04370547002388912,
+              "delta_rad": 0.8718493948905025
+            },
+            {
+              "k_fm1": 0.054,
+              "kcot_fm1": 0.04382936248185231,
+              "delta_rad": 0.8889890546240544
+            },
+            {
+              "k_fm1": 0.056,
+              "kcot_fm1": 0.043957924339044385,
+              "delta_rad": 0.9052918167831326
+            },
+            {
+              "k_fm1": 0.058,
+              "kcot_fm1": 0.04409115496061657,
+              "delta_rad": 0.9208039776058647
+            },
+            {
+              "k_fm1": 0.06,
+              "kcot_fm1": 0.044229053690127466,
+              "delta_rad": 0.9355694897920857
+            }
+          ]
+        },
+        "fit_mode": "Channel-split barrier+tail (k_t,q_t)/(k_s,q_s) + singlet R1_s override; fit (V1_s,V2_s>=0) to match (a_s,r_s).",
+        "fit_targets": [
+          "a_s",
+          "r_s"
+        ],
+        "prediction_targets": [
+          "v2s"
+        ],
+        "fit_method": "bracket_best",
+        "fit_scan": {
+          "v1": {},
+          "v2": {
+            "v2_min": 0.0,
+            "v2_max": 86.95521235521235,
+            "n_scan": 900
+          }
+        },
+        "note_fit": "bisection did not converge; using best endpoint (barrier+tail)",
+        "note_profile": "",
+        "note": "Singlet: uses R1_s=(R1_s/λπ)·λπ (global) and R2_s from triplet; fits (V1_s,V2_s) by (a_s,r_s). v2s is a prediction."
+      },
+      "comparison": {
+        "triplet": {
+          "a_t_fit_minus_obs_fm": -0.5650967231110338,
+          "r_t_fit_minus_obs_fm": -0.7978311258712584,
+          "v2t_fit_minus_obs_fm3": 0.0012387393475825417
+        },
+        "singlet": {
+          "a_s_fit_minus_obs_fm": -2.5841515594038356e-09,
+          "r_s_fit_minus_obs_fm": -1.5085140221607978,
+          "v2s_pred_minus_obs_fm3": 0.4186503781492599
+        }
+      }
+    }
+  ],
+  "systematics_proxy": {
+    "observed_envelope_v2t_fm3": {
+      "min": 0.04,
+      "max": 0.163
+    },
+    "observed_envelope_r_s_fm": {
+      "min": 2.626,
+      "max": 2.678
+    },
+    "observed_envelope_v2s_fm3": {
+      "min": -0.48,
+      "max": -0.005
+    },
+    "predicted_r_s_within_envelope": false,
+    "predicted_v2s_within_envelope": true,
+    "notes": [
+      "Eq.(18) and Eq.(19) are two phase-shift analyses in the same primary source; their difference is treated as an analysis-dependent systematics proxy.",
+      "Triplet fit is performed per dataset to expose sensitivity of the inferred u-profile to that proxy.",
+      "In step 7.9.7/7.9.8/7.13.3/7.13.4/7.13.5/7.13.6/7.13.7/7.13.8/7.13.8.1/7.13.8.2, singlet r_s is fitted per dataset; v2s is the remaining differential prediction."
+    ]
+  },
+  "falsification": {
+    "acceptance_criteria": [
+      "Under the λπ-constrained three-range (barrier+tail split; free tail depth) ansatz class, reuse the frozen channel-split (k_t,q_t)/(k_s,q_s) from Step 7.13.8.2 and scan a single additional DOF (global R1_s/λπ) for the singlet; the resulting triplet v2t and singlet (r_s,v2s) should be compatible with the observed envelopes (eq18–eq19).",
+      "If any of (triplet v2t, singlet r_s, singlet v2s) falls outside the analysis-dependent envelope, the ansatz class is rejected as a representation of the nuclear-scale u-profile."
+    ],
+    "within_envelope": {
+      "r_s": false,
+      "v2s": true,
+      "v2t": true
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan.png",
+    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan.csv"
+  },
+  "pion_range_scale": {
+    "lambda_pi_pm_fm": 1.413816930654131,
+    "lambda_pi0_fm": 1.461932572116097,
+    "metrics_path": "C:\\develop\\waveP\\output\\quantum\\qcd_hadron_masses_baseline_metrics.json",
+    "metrics_sha256": "5f4ebb913b485934cd250ae17a5e2c56bcb41857d302315b7f9b95facc2259e3",
+    "pdg_source": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\pdg_rpp_2024_mass_width\\mass_width_2024.txt",
+      "edition": "RPP 2024",
+      "url": "https://pdg.lbl.gov/2024/mcdata/mass_width_2024.txt"
+    }
+  },
+  "barrier_tail_channel_split_kq_singlet_r1_scan": {
+    "source_step": "7.13.8.2",
+    "source_metrics_json": "C:\\develop\\waveP\\output\\quantum\\nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_metrics.json",
+    "selected_channel_split_kq": {
+      "k_t": 3.5,
+      "q_t": 1.3,
+      "k_s": 0.5,
+      "q_s": 1.0
+    },
+    "r1_over_lambda_grid": [
+      0.25,
+      0.35,
+      0.45,
+      0.55,
+      0.65,
+      0.75
+    ],
+    "selected": {
+      "r1_s_over_lambda_pi_pm": 0.75,
+      "rank": [
+        1,
+        4,
+        0.0,
+        30.170280443215955,
+        15.956622517425167,
+        0.0,
+        0.75
+      ]
+    },
+    "observed_envelope_v2s_fm3": {
+      "min": -0.48,
+      "max": -0.005
+    },
+    "observed_envelope_v2t_fm3": {
+      "min": 0.04,
+      "max": 0.163
+    },
+    "observed_envelope_r_s_fm": {
+      "min": 2.626,
+      "max": 2.678
+    },
+    "rows": [
+      {
+        "r1_s_over_lambda_pi_pm": 0.25,
+        "r1_s_fm": 0.35345423266353276,
+        "within_all": false,
+        "outside_count": 6,
+        "max_dist_v2t_fm3": 0.0,
+        "max_dist_v2s_fm3": 0.4746880270677427,
+        "max_abs_r_s_fit_minus_obs_fm": 0.9194826538333065,
+        "max_triplet_ar_penalty": 15.956622517425167,
+        "max_abs_delta_r1_over_lambda_pi_pm": 0.49999999999999994,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "a_t_fit_fm": 4.854604871025844,
+            "r_t_fit_fm": 0.9581042567539979,
+            "v2t_fit_fm3": 0.0471652579508681,
+            "a_t_fit_minus_obs_fm": -0.548395128974156,
+            "r_t_fit_minus_obs_fm": -0.7912957432460022,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.35345423266353276,
+            "v2s_pred_fm3": 0.4696880270677427,
+            "r_s_fit_fm": 3.5454826538333064,
+            "r_s_fit_minus_obs_fm": 0.9194826538333065,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": false,
+            "error": null
+          },
+          {
+            "label": "eq19 (Nijmegen)",
+            "eq_label": 19,
+            "a_t_fit_fm": 4.854903276888966,
+            "r_t_fit_fm": 0.9551688741287415,
+            "v2t_fit_fm3": 0.04123873934758254,
+            "a_t_fit_minus_obs_fm": -0.5650967231110338,
+            "r_t_fit_minus_obs_fm": -0.7978311258712584,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.35345423266353276,
+            "v2s_pred_fm3": 0.46966016224849416,
+            "r_s_fit_fm": 3.545322501076936,
+            "r_s_fit_minus_obs_fm": 0.8673225010769361,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": false,
+            "error": null
+          }
+        ]
+      },
+      {
+        "r1_s_over_lambda_pi_pm": 0.35,
+        "r1_s_fm": 0.49483592572894586,
+        "within_all": false,
+        "outside_count": 5,
+        "max_dist_v2t_fm3": 0.0,
+        "max_dist_v2s_fm3": 0.17912827853448865,
+        "max_abs_r_s_fit_minus_obs_fm": 0.0005263777221546917,
+        "max_triplet_ar_penalty": 15.956622517425167,
+        "max_abs_delta_r1_over_lambda_pi_pm": 0.39999999999999997,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "a_t_fit_fm": 4.854604871025844,
+            "r_t_fit_fm": 0.9581042567539979,
+            "v2t_fit_fm3": 0.0471652579508681,
+            "a_t_fit_minus_obs_fm": -0.548395128974156,
+            "r_t_fit_minus_obs_fm": -0.7912957432460022,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.49483592572894586,
+            "v2s_pred_fm3": -0.6591282785344886,
+            "r_s_fit_fm": 2.6265263777221546,
+            "r_s_fit_minus_obs_fm": 0.0005263777221546917,
+            "within_r_s_envelope": true,
+            "within_v2s_envelope": false,
+            "error": null
+          },
+          {
+            "label": "eq19 (Nijmegen)",
+            "eq_label": 19,
+            "a_t_fit_fm": 4.854903276888966,
+            "r_t_fit_fm": 0.9551688741287415,
+            "v2t_fit_fm3": 0.04123873934758254,
+            "a_t_fit_minus_obs_fm": -0.5650967231110338,
+            "r_t_fit_minus_obs_fm": -0.7978311258712584,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.49483592572894586,
+            "v2s_pred_fm3": -0.6174895152732472,
+            "r_s_fit_fm": 2.6781120446291755,
+            "r_s_fit_minus_obs_fm": 0.00011204462917557834,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": false,
+            "error": null
+          }
+        ]
+      },
+      {
+        "r1_s_over_lambda_pi_pm": 0.45,
+        "r1_s_fm": 0.636217618794359,
+        "within_all": false,
+        "outside_count": 4,
+        "max_dist_v2t_fm3": 0.0,
+        "max_dist_v2s_fm3": 0.1302669571467444,
+        "max_abs_r_s_fit_minus_obs_fm": 0.0012396481941832072,
+        "max_triplet_ar_penalty": 15.956622517425167,
+        "max_abs_delta_r1_over_lambda_pi_pm": 0.29999999999999993,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "a_t_fit_fm": 4.854604871025844,
+            "r_t_fit_fm": 0.9581042567539979,
+            "v2t_fit_fm3": 0.0471652579508681,
+            "a_t_fit_minus_obs_fm": -0.548395128974156,
+            "r_t_fit_minus_obs_fm": -0.7912957432460022,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.636217618794359,
+            "v2s_pred_fm3": -0.6102669571467444,
+            "r_s_fit_fm": 2.627239648194183,
+            "r_s_fit_minus_obs_fm": 0.0012396481941832072,
+            "within_r_s_envelope": true,
+            "within_v2s_envelope": false,
+            "error": null
+          },
+          {
+            "label": "eq19 (Nijmegen)",
+            "eq_label": 19,
+            "a_t_fit_fm": 4.854903276888966,
+            "r_t_fit_fm": 0.9551688741287415,
+            "v2t_fit_fm3": 0.04123873934758254,
+            "a_t_fit_minus_obs_fm": -0.5650967231110338,
+            "r_t_fit_minus_obs_fm": -0.7978311258712584,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.636217618794359,
+            "v2s_pred_fm3": -0.5720995083938527,
+            "r_s_fit_fm": 2.6777455252107263,
+            "r_s_fit_minus_obs_fm": -0.00025447478927365097,
+            "within_r_s_envelope": true,
+            "within_v2s_envelope": false,
+            "error": null
+          }
+        ]
+      },
+      {
+        "r1_s_over_lambda_pi_pm": 0.55,
+        "r1_s_fm": 0.7775993118597722,
+        "within_all": false,
+        "outside_count": 5,
+        "max_dist_v2t_fm3": 0.0,
+        "max_dist_v2s_fm3": 0.07777942075096678,
+        "max_abs_r_s_fit_minus_obs_fm": 0.0017541023940492728,
+        "max_triplet_ar_penalty": 15.956622517425167,
+        "max_abs_delta_r1_over_lambda_pi_pm": 0.1999999999999999,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "a_t_fit_fm": 4.854604871025844,
+            "r_t_fit_fm": 0.9581042567539979,
+            "v2t_fit_fm3": 0.0471652579508681,
+            "a_t_fit_minus_obs_fm": -0.548395128974156,
+            "r_t_fit_minus_obs_fm": -0.7912957432460022,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.7775993118597722,
+            "v2s_pred_fm3": -0.5577794207509668,
+            "r_s_fit_fm": 2.627409728238718,
+            "r_s_fit_minus_obs_fm": 0.0014097282387179888,
+            "within_r_s_envelope": true,
+            "within_v2s_envelope": false,
+            "error": null
+          },
+          {
+            "label": "eq19 (Nijmegen)",
+            "eq_label": 19,
+            "a_t_fit_fm": 4.854903276888966,
+            "r_t_fit_fm": 0.9551688741287415,
+            "v2t_fit_fm3": 0.04123873934758254,
+            "a_t_fit_minus_obs_fm": -0.5650967231110338,
+            "r_t_fit_minus_obs_fm": -0.7978311258712584,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.7775993118597722,
+            "v2s_pred_fm3": -0.5210128701882322,
+            "r_s_fit_fm": 2.679754102394049,
+            "r_s_fit_minus_obs_fm": 0.0017541023940492728,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": false,
+            "error": null
+          }
+        ]
+      },
+      {
+        "r1_s_over_lambda_pi_pm": 0.65,
+        "r1_s_fm": 0.9189810049251852,
+        "within_all": false,
+        "outside_count": 4,
+        "max_dist_v2t_fm3": 0.0,
+        "max_dist_v2s_fm3": 0.023011154972085057,
+        "max_abs_r_s_fit_minus_obs_fm": 0.0015818506587113035,
+        "max_triplet_ar_penalty": 15.956622517425167,
+        "max_abs_delta_r1_over_lambda_pi_pm": 0.09999999999999995,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "a_t_fit_fm": 4.854604871025844,
+            "r_t_fit_fm": 0.9581042567539979,
+            "v2t_fit_fm3": 0.0471652579508681,
+            "a_t_fit_minus_obs_fm": -0.548395128974156,
+            "r_t_fit_minus_obs_fm": -0.7912957432460022,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.9189810049251852,
+            "v2s_pred_fm3": -0.503011154972085,
+            "r_s_fit_fm": 2.6244181493412886,
+            "r_s_fit_minus_obs_fm": -0.0015818506587113035,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": false,
+            "error": null
+          },
+          {
+            "label": "eq19 (Nijmegen)",
+            "eq_label": 19,
+            "a_t_fit_fm": 4.854903276888966,
+            "r_t_fit_fm": 0.9551688741287415,
+            "v2t_fit_fm3": 0.04123873934758254,
+            "a_t_fit_minus_obs_fm": -0.5650967231110338,
+            "r_t_fit_minus_obs_fm": -0.7978311258712584,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 0.9189810049251852,
+            "v2s_pred_fm3": -0.46875285991157595,
+            "r_s_fit_fm": 2.677745667196366,
+            "r_s_fit_minus_obs_fm": -0.00025433280363396094,
+            "within_r_s_envelope": true,
+            "within_v2s_envelope": true,
+            "error": null
+          }
+        ]
+      },
+      {
+        "r1_s_over_lambda_pi_pm": 0.75,
+        "r1_s_fm": 1.0603626979905982,
+        "within_all": false,
+        "outside_count": 4,
+        "max_dist_v2t_fm3": 0.0,
+        "max_dist_v2s_fm3": 0.0,
+        "max_abs_r_s_fit_minus_obs_fm": 1.5085140221607978,
+        "max_triplet_ar_penalty": 15.956622517425167,
+        "max_abs_delta_r1_over_lambda_pi_pm": 0.0,
+        "per_dataset": [
+          {
+            "label": "eq18 (GWU/SAID)",
+            "eq_label": 18,
+            "a_t_fit_fm": 4.854604871025844,
+            "r_t_fit_fm": 0.9581042567539979,
+            "v2t_fit_fm3": 0.0471652579508681,
+            "a_t_fit_minus_obs_fm": -0.548395128974156,
+            "r_t_fit_minus_obs_fm": -0.7912957432460022,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 1.0603626979905982,
+            "v2s_pred_fm3": -0.06106797439780484,
+            "r_s_fit_fm": 1.1692444133504152,
+            "r_s_fit_minus_obs_fm": -1.4567555866495847,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": true,
+            "error": null
+          },
+          {
+            "label": "eq19 (Nijmegen)",
+            "eq_label": 19,
+            "a_t_fit_fm": 4.854903276888966,
+            "r_t_fit_fm": 0.9551688741287415,
+            "v2t_fit_fm3": 0.04123873934758254,
+            "a_t_fit_minus_obs_fm": -0.5650967231110338,
+            "r_t_fit_minus_obs_fm": -0.7978311258712584,
+            "within_triplet_ar_tolerance": false,
+            "within_v2t_envelope": true,
+            "r1_s_fm": 1.0603626979905982,
+            "v2s_pred_fm3": -0.06134962185074004,
+            "r_s_fit_fm": 1.1694859778392022,
+            "r_s_fit_minus_obs_fm": -1.5085140221607978,
+            "within_r_s_envelope": false,
+            "within_v2s_envelope": true,
+            "error": null
+          }
+        ]
+      }
+    ],
+    "policy": {
+      "r1_s_rule": "R1_s = (R1_s/λπ)·λπ is global across datasets; R2_s follows the triplet-fitted R2 per dataset.",
+      "tail_len_over_lambda_fixed": 1.0,
+      "barrier_len_fraction_fixed": 0.5,
+      "triplet_ar_tolerance": {
+        "tol_a_fm": 0.2,
+        "tol_r_fm": 0.05
+      },
+      "selection_rule": "Prefer any R1_s/λπ that makes singlet (r_s,v2s) within envelope given the frozen (k_t,q_t,k_s,q_s); tie-break by minimal max_dist(v2), then |Δr_s|, then triplet AR penalty, then minimal |R1_s-R1_t|/λπ."
+    }
+  }
+}

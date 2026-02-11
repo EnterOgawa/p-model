@@ -1,0 +1,81 @@
+{
+  "generated_utc": "2026-01-24T21:10:02.076663+00:00",
+  "dataset": "Weihs et al. 1998 time-tag (Zenodo 7185335)",
+  "source_dir": "C:\\develop\\waveP\\data\\quantum\\sources\\zenodo_7185335",
+  "subdir": "longdist",
+  "run": "longdist2",
+  "encoding": "bit0-setting",
+  "events": {
+    "alice": 709042,
+    "bob": 474909
+  },
+  "offset": {
+    "offset_s": -1.7012569151910177e-08,
+    "offset_method": "nearest_neighbor_dt_peak",
+    "offset_median_s": -1.7262569151910157e-08,
+    "offset_peak_count": 1998.0,
+    "offset_hist_bin_width_s": 5e-10,
+    "offset_hist_half_range_s": 2e-07,
+    "offset_used_s": -1.7012569151910177e-08
+  },
+  "windows_ns": [
+    0.25,
+    0.5,
+    0.75,
+    1.0,
+    1.5,
+    2.0,
+    3.0,
+    4.0,
+    6.0,
+    8.0,
+    10.0
+  ],
+  "fixed_variant": {
+    "ref_window_ns": 1.0,
+    "swap_a": false,
+    "swap_b": false,
+    "sign_matrix": [
+      [
+        -1,
+        -1
+      ],
+      [
+        1,
+        -1
+      ]
+    ]
+  },
+  "best_overall": {
+    "window_ns": 0.25,
+    "offset_ns": -17.012569151910178,
+    "pairs_total": 7050,
+    "N00": 2365,
+    "N01": 1495,
+    "N10": 1352,
+    "N11": 1838,
+    "E00": -0.9856236786469345,
+    "E01": -0.5157190635451505,
+    "E10": -0.3905325443786982,
+    "E11": -0.9804134929270947,
+    "S_canonical": -0.9114617936436884,
+    "S_fixed": 2.091223690740481,
+    "S_fixed_abs": 2.091223690740481,
+    "S_best": 2.0912236907404815,
+    "S_best_abs": 2.0912236907404815,
+    "S_best_swap_a": true,
+    "S_best_swap_b": true,
+    "S_best_sign00": -1,
+    "S_best_sign01": 1,
+    "S_best_sign10": -1,
+    "S_best_sign11": -1
+  },
+  "repro": {
+    "fetch": "python -B scripts/quantum/fetch_weihs1998_zenodo_7185335.py",
+    "run": "python -B scripts/quantum/weihs1998_time_tag_reanalysis.py --subdir longdist --run longdist2 --encoding bit0-setting --out-tag weihs1998_longdist_longdist2"
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_longdist_longdist2.csv",
+    "png": "C:\\develop\\waveP\\output\\quantum\\weihs1998_chsh_sweep__weihs1998_longdist_longdist2.png"
+  }
+}
