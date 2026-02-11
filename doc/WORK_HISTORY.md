@@ -23767,3 +23767,21 @@ QC：
 - 次は GitHub 側で repo を作成し、`doc/verification/VERIFICATION_MATERIALS.md` と参考文献キー `[PModelVerificationMaterials]` の `TBD` を固定URL/DOIに置換する（Step 8.2.14）。
 
 [work] 2026-02-11T03:11:03Z Phase 8 / Step 8.2.14（進行中）：README（英語）追加＋`.gitignore` 整備＋ローカル git 初期化（main）。次：GitHub repo作成→URL/DOI確定→paper参照キー更新。
+
+## 2026-02-11（UTC） GitHub repo 作成＋Verification Materials 参照先の固定（`TBD` 解消）
+
+目的：
+- GitHub 上に P-model プロジェクト（公開repo）を作成し、論文から参照する検証用資料（Verification Materials）の参照先を固定する。
+
+作業：
+- GitHub repo を作成：`https://github.com/EnterOgawa/p-model`
+  - 初回 commit を push（default branch: `main`）。
+- `doc/verification/VERIFICATION_MATERIALS.md`：
+  - GitHub / Releases の参照先を固定URLで記載し、`TBD` を解消。
+- `doc/paper/30_references.md`：
+  - `[PModelVerificationMaterials]` の Web 欄を固定URL（repo + releases）へ更新し、`TBD` を解消。
+
+結果：
+- 論文本文（Part I–III）から参照される検証用資料の参照先が固定でき、公開時の引用（URL/将来のDOI）を同一キーで更新できる状態になった。
+
+[work] 2026-02-11T04:47:59Z Phase 8 / Step 8.2.14（完了）：GitHub repo（EnterOgawa/p-model）を作成して初回pushし、Verification Materials と参考文献キー `[PModelVerificationMaterials]` の `TBD` を固定URLへ置換。

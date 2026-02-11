@@ -1,6 +1,6 @@
 # STATUS
 
-最終更新（UTC）：2026-02-11T03:11:03Z
+最終更新（UTC）：2026-02-11T04:47:59Z
 
 ## 現在地（ロードマップ）
 - Phase 7 / Step 7.20.1（Bell：ヌルテスト一式の固定）完了（初版）。
@@ -15,7 +15,7 @@
 - Phase 7 / Step 7.14.4（Si 抵抗率 ρ(T) 抽出）改訂：PDF 抽出の数値パース（`1. 910-01` 等の分割）を修正し、抽出の欠損/誤値を解消。
 - Phase 7 / Step 7.16.8（Bell：15項目系統誤差分解）改訂：Part III 4.2.1 に (i)「sweep幅（選択自由度）と freeze 近傍 drift」を区別する説明（例：Weihs 自然窓で `Δ|S|≈0.0013`）と、(ii) selection項目を除いた「装置/補正」側の合成寄与（L2/L1）表を追記。
 - Phase 8 / Step 8.2.13（設計方針変更：検証用資料へ集約）完了（Part I–III 本文から具体的な file/folder/script 表記を排除し、検証用資料を参照する形へ移行。paper_qc に publish HTML の repo-path 混入検出を追加）。
-- Phase 8 / Step 8.2.14（公開参照の固定：Verification Materials のURL/DOI確定）進行中（README整備＋ローカルgit初期化；次：GitHub repo作成→URL/DOI確定）。
+- Phase 8 / Step 8.2.14（公開参照の固定：Verification Materials のURL/DOI確定）完了（GitHub repo 作成＋References/Verification Materials の `TBD` を固定URLへ置換）。
 - 次：（任意）Phase 7 / Step 7.20.6 の追加拡張（物性/熱 holdout 対象の追加：bulk modulus / ρ(T) 係数など）。
 - 保留（公開待ち）：Phase 4 / Step 4.6（GN-z11）、Phase 7 / Step 7.4.7（Giustina click log/thesis）、Phase 4 / Step 4.13（XRISM）。
 
@@ -79,7 +79,7 @@
 - Phase 4 / Step 4.13（XRISM 追加公開obsid）
 
 ## 次にやること
-- 優先度0：GitHub 上にリポジトリを作成し、検証用資料（Verification Materials）の参照先（GitHub / Releases / DOI）を確定して `[PModelVerificationMaterials]` の Web 欄と `doc/verification/VERIFICATION_MATERIALS.md` の `TBD` を固定URL/DOIで埋める（Phase 8 / Step 8.2.14）。
+- 優先度0：初回 GitHub Release（tag）を作成し、release bundle（paper/repro）を添付して、論文側の参照先を「version固定（Releases/DOI）」へ更新する（必要なら Zenodo DOI も付与）。
 - 優先度1（任意）：物性/熱：holdout の対象を追加（bulk modulus / ρ(T) 係数など可能な範囲）。
 - 優先度2（任意）：物性/熱：cross-check（Cp(T)・α(T)・B(T) など）を保ったまま、一次拘束を増やした最小 ansatz を探索し、監査出力へ固定する（補遺に詳細ログ）。
 - 優先度3（任意）：Bell：cross-dataset 統合を維持したまま、dataset追加（公開時）と bootstrap/jackknife の安定性を上げる（公開待ちでない範囲）。

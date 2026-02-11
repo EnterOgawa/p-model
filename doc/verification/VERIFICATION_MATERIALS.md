@@ -15,9 +15,9 @@
 - 参照先（代替）：GitHub リポジトリ（tag を固定して参照）
 
 （ここは公開時に埋める）
-- GitHub：TBD
-- Releases：TBD
-- DOI（任意）：TBD
+- GitHub：`https://github.com/EnterOgawa/p-model`
+- Releases：`https://github.com/EnterOgawa/p-model/releases`
+- DOI（任意）：未割当（必要なら Zenodo 連携で release ごとに DOI を発行）
 
 ---
 
@@ -106,4 +106,3 @@ LLR（全グラフ生成・固定バッチ）：
 1. GitHub 本体：コード（`scripts/`）＋論文草稿（`doc/paper/`）＋運用doc（`doc/`）
 2. 成果物：GitHub Releases（zip）に `output/summary/` の publish HTML と manifest を同梱
 3. DOI が必要なら：Releases を Zenodo 連携して DOI 発行（引用を固定しやすい）
-

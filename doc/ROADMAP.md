@@ -1,6 +1,6 @@
 # P-model Roadmap（Phase / Step 構造）
 
-最終更新（UTC）：2026-02-11T02:47:38Z
+最終更新（UTC）：2026-02-11T04:47:59Z
 
 本ドキュメントは `doc/old/ROADMAP_source_p_model_roadmap_phase_step.md` を大枠（Phase→Step）として採用し、
 本リポジトリの実装・成果物（`doc/STATUS.md` / `doc/WORK_HISTORY.md` / `output/`）の現状を統合した「公式ロードマップ」である。
@@ -3676,7 +3676,7 @@ Phase 7 の出口は「量子現象を語った」ではなく、Part I の P定
 - 8.2.11（整合改稿）Part I（本文・定義台帳）で残っていた `.json` の内部パス表記（β凍結/反証条件/manifest）を本文表示から除去し、言葉で説明する形に統一（パスは INTERNAL_ONLY へ退避）。Part III と同じ方針（本文は意味、パスは再現性節/内部）で整合。`pmodel_paper.html` を再生成し、`rg -n \"\\.json\" output/summary/pmodel_paper.html` が no matches を確認。【完了】
 - 8.2.12（整合改稿）Part I 2.8（量子）を「最小辞書」へさらに圧縮し、Part III への接続点を `粒子` と `selection` に限定（波動関数/測定/もつれ等の語彙は Part III 側で操作的定義＋反証条件へ委譲）。`pmodel_paper.html` を再生成し、`paper_qc` ok=True を確認。【完了】
 - 8.2.13（設計方針変更）Part I–III の論文本文（publish）から、具体的なファイル名・フォルダ名・スクリプト名を排除し、検証用資料へ集約して参照する形へ移行。`paper_qc` に publish HTML の repo-path（`output/`/`data/`/`scripts/`/`doc/`）混入検出を追加し、混入を機械QAで防止。【完了】
-- 8.2.14（公開参照の固定）検証用資料（Verification Materials）の公開先（GitHub/DOI）を確定し、参考文献 `[PModelVerificationMaterials]` の Web 欄と本資料（`doc/verification/VERIFICATION_MATERIALS.md`）の参照先を固定URL/DOIで埋める（README整備＋ローカルgit初期化まで）。【進行中】
+- 8.2.14（公開参照の固定）検証用資料（Verification Materials）の公開先（GitHub/DOI）を確定し、参考文献 `[PModelVerificationMaterials]` の Web 欄と本資料（`doc/verification/VERIFICATION_MATERIALS.md`）の参照先を固定URL/DOIで埋める（GitHub repo 作成＋`TBD` を固定URLへ置換）。【完了】
 
 ### Step 8.3：データ・コード公開
 - 現状：完了（初版）

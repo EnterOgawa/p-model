@@ -10,7 +10,7 @@ Webページ等のリソースは Accessed（参照日）を併記する。
 
 ## 0) 検証用資料（Verification Materials）
 
-- [PModelVerificationMaterials] P-model Verification Materials（再現コマンド、固定アーティファクト一覧、監査ゲート、ハッシュ/マニフェスト等の補助資料）。Web: TBD（GitHub Releases / DOI 等で固定）。Accessed: 2026-02-11.
+- [PModelVerificationMaterials] P-model Verification Materials（再現コマンド、固定アーティファクト一覧、監査ゲート、ハッシュ/マニフェスト等の補助資料）。Web: `https://github.com/EnterOgawa/p-model`（Releases: `https://github.com/EnterOgawa/p-model/releases`）。Accessed: 2026-02-11.
 
 ---
 
