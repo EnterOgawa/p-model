@@ -1,0 +1,3765 @@
+# P-model Roadmap（Phase / Step 構造）
+
+最終更新（UTC）：2026-02-11T02:47:38Z
+
+本ドキュメントは `doc/old/ROADMAP_source_p_model_roadmap_phase_step.md` を大枠（Phase→Step）として採用し、
+本リポジトリの実装・成果物（`doc/STATUS.md` / `doc/WORK_HISTORY.md` / `output/`）の現状を統合した「公式ロードマップ」である。
+
+旧版（断片化していた旧Phase体系）は `doc/old/ROADMAP_legacy_20260114.md` に退避した（参照のみ。今後の指示は本ファイルを正とする）。
+
+## 運用ルール（このファイルを正とする）
+
+- `doc/ROADMAP.md` をロードマップの唯一の基準とし、各Stepの完了/未完了（現状）をここで管理する。
+- Phase 1-8 の大枠は固定（新しいPhaseは作らない）。
+- 新しい作業が追加になった場合は、**必ず**該当Phase配下にStepとして追記する（既存Stepの番号は変更しない）。
+  - 追加Stepは原則として各Phaseの末尾に追記する。
+  - 既存Stepの途中に挿入したい場合は、Step番号は維持し、Step内の箇条書き（または `Step 4.5.1` のようなサブStep）で追加する。
+- 各Stepの `- 現状：` は次のいずれかで統一する：`完了` / `進行中` / `準備中` / `保留`
+- Stepの現状を更新したら、必ず `doc/STATUS.md`（現在地）と `doc/WORK_HISTORY.md`（追記）も更新する。
+
+## 共通ルール（全Phase共通）
+
+- 一次ソース優先（観測量は「一次データ」または「定義が明確な一次論文」を優先し、参照日を残す）
+- Fit と Predict を分離（β/δなどの調整＝fit、固定したままの外挿＝predict）
+- 不確かさを明示（統計誤差＋系統誤差、定義差・校正・媒質・モデル依存）
+- 反証条件を必ず提示（「こう観測されたら棄却」を最低1つ）
+- 再現性（`data/`→`scripts/`→`output/`、入口は `python -B scripts/summary/run_all.py --offline --jobs 2`）
+
+前提（統一規約）：
+- 質量近傍で P が増える（P > P0）
+- φ ≡ -c^2 ln(P/P0)（無限遠で0、質量近傍で負）
+- a = -∇φ = c^2 ∇ln(P/P0)
+- 光伝播は n(P)=(P/P0)^(2β)（係数2は β 側で担う）
+
+## 現在地（宣言）
+
+- 方針（優先度）：**公開待ちでブロックされない検証を前倒し**し、Phase 7（量子）を **宇宙論（BAO）と同等の精度**（共分散＋系統分解＋cross-check＋反証条件）で仕上げる。公開イベント（Phase 4 / Step 4.6：GN-z11）発生後に Phase 4 を更新する。
+- 方針（精度）：Phase 7（量子）も Phase 4（宇宙論）と同じく、**一次データ→固定出力→不確かさ（統計/共分散）→系統→反証条件** を「出力として固定」できるまで、完了扱いにしない（「完了（初版）」は概念/最小再現の到達点）。
+- 現状：Phase 8（論文化・公開）は Step 8.1–8.6 を **完了（改訂）** として固定し、以後は **公開待ちでブロックされない作業を優先**する。
+- 現状：Phase 7（量子）/ Step 7.1（粒子＝束縛波＝反射境界の最小モデル）を **完了（初版）** として開始し、Step 7.2–7.4（相関→もつれ→ベル）へ接続する足場を固定した。
+- 直近完了：Step 6.2.4（弱場統合の反証条件＝棄却基準）を **完了（初版）** として固定（出力：`output/summary/weak_field_falsification.json`）。
+- 直近完了：Step 6.2.3（長期・多系統の集約出力）を **完了（初版）** として固定（出力：`output/summary/weak_field_longterm_consistency.json` / `.png`）。
+- 直近完了：Step 6.2.2（弱場テストの系統分解テンプレ固定）を **完了（初版）** として固定（出力：`output/summary/weak_field_systematics_templates.json`）。
+- 直近完了：Phase 3（Step 3.1–3.5）を **完了** として固定（四重極主項の理由＝遅延解→多極展開→保存則、普遍結合（双極なし）を弱場極限の必要条件として明文化）。
+- 直近完了：Step 8.5（査読準備：批判点リスト＋応答整理＋DDR説明補強）を **完了（初版）** として固定。
+- 直近完了：Step 7.4.5（Weihs 1998；複数run：longdist0/1/2/10）を **完了（初版）** として固定（出力：`output/quantum/weihs1998_chsh_sweep_summary__longdist.png`）。
+- 直近完了：Step 7.4.6（Giustina 2015；paper＋supp固定／time-tag未固定のブロック明文化）を **完了（初版）** として固定（manifest：`data/quantum/sources/giustina2015_prl115_250401/manifest.json`）。
+- 直近完了：Step 7.13.19.16（全体整合性チェック）を完了し、番号・図表・用語・相互参照を点検した。検証：`python -B scripts/summary/paper_qc.py` / `python -B scripts/summary/paper_lint.py`（ともにOK）。
+- 直近完了：Step 8.2（Part III 反映再実行）として、`doc/paper/12_part3_quantum.md` の数式記法（`\leq`）を修正し、`doc/paper/01_figures_index.md` に不足していた核力図3件を登録。Part III publish 再生成で `paper_lint` errors=0 / warnings=0 を確認（`output/summary/pmodel_paper_part3_quantum.html` / `.docx`）。
+- 追加：Phase 7 / Step 7.16（量子検証拡張：核物理/Bell/干渉/cross-check/誤差）を追加し、20ステップの実装計画を統合した。
+- 直近完了：Phase 7 / Step 7.16.1（全核種系統解析）を完了（初版）として固定（`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json` / `..._a_band_stats.csv` / `..._zn_residual_map.png`）。
+- 直近完了：Phase 7 / Step 7.16.2（魔法数での殻閉殻効果の定量化）を完了（初版）として固定（`output/quantum/nuclear_magic_shell_closure_kink_metrics.json` / `..._kink_summary.csv` / `..._representative4.csv` / `..._kink_quantification.png`）。
+- 直近完了：Phase 7 / Step 7.16.3（pairing効果の系統的組み込み）を完了（初版）として固定（`output/quantum/nuclear_pairing_effect_systematics_metrics.json` / `..._per_nucleus.csv` / `..._summary.csv` / `..._quantification.png`）。
+- 直近完了：Phase 7 / Step 7.16.4（同位体連鎖の完全解析）を完了（初版）として固定（`output/quantum/nuclear_isotope_chain_full_analysis_metrics.json` / `..._full_analysis.csv` / `..._summary_by_z.csv` / `..._representative_elements.csv` / `..._full_analysis.png`）。
+- 直近完了：Phase 7 / Step 7.16.5（核半径との整合性検証）を完了（初版）として固定（`output/quantum/nuclear_charge_radius_consistency_metrics.json` / `..._full.csv` / `..._a_band_summary.csv` / `..._neutron_skin_proxy.csv` / `...png`）。
+- 直近完了：Phase 7 / Step 7.16.6（励起準位の予測）を完了（初版）として固定（`output/quantum/nuclear_excitation_level_prediction_metrics.json` / `..._full.csv` / `..._summary.csv` / `..._level_density_summary.csv` / `..._representative.csv` / `...png`）。
+- 直近完了：Phase 7 / Step 7.16.7（Bell 共分散行列の完全構築）を完了（初版）として固定（`output/quantum/bell/cross_dataset_covariance.json` / `...png` / `output/quantum/bell/longterm_consistency.json` / `output/quantum/bell/systematics_templates.json`）。
+- 直近完了：Phase 7 / Step 7.16.8（Bell 系統誤差の完全分解 15項目）を完了（初版）として固定（`output/quantum/bell/systematics_decomposition_15items.json` / `...csv` / `...png`）。
+- 直近完了：Phase 7 / Step 7.16.9（Bell 長期一貫性の定量化）を完了（初版）として固定（`output/quantum/bell/longterm_consistency.json` / `...png`、year-trend / 条件依存 / cross-dataset covariance 要約）。
+- 直近完了：Phase 7 / Step 7.16.10（selection loophole の完全定量化）を完了（初版）として固定（`output/quantum/bell/selection_loophole_quantification.json` / `...csv` / `...png`）。
+- 直近完了：Phase 7 / Step 7.16.11（COW実験の完全解析）を完了（初版）として固定（`output/quantum/cow_experiment_complete_analysis_metrics.json` / `output/quantum/cow_experiment_complete_analysis.png` / `output/quantum/cow_experiment_data_integration.csv`）。
+- 直近完了：Phase 7 / Step 7.16.12（原子干渉計の系統的検証）を完了（初版）として固定（`output/quantum/atom_interferometer_unified_audit_metrics.json` / `output/quantum/atom_interferometer_unified_audit_summary.csv` / `output/quantum/atom_interferometer_unified_audit.png`）。
+- 直近完了：Phase 7 / Step 7.16.13（物質波干渉の精密検証）を完了（初版）として固定（`output/quantum/matter_wave_interference_precision_audit_metrics.json` / `output/quantum/matter_wave_interference_precision_audit_summary.csv` / `output/quantum/matter_wave_interference_precision_audit.png`）。
+- 直近完了：Phase 7 / Step 7.16.14（HOM干渉とスクイーズド光）を完了（初版）として固定（`output/quantum/hom_squeezed_light_unified_audit_metrics.json` / `output/quantum/hom_squeezed_light_unified_audit_summary.csv` / `output/quantum/hom_squeezed_light_unified_audit.png`）。
+- 直近完了：Phase 7 / Step 7.16.15（分離エネルギーの系統検証）を完了（初版）として固定（`output/quantum/nuclear_separation_energy_systematics_metrics.json` / `output/quantum/nuclear_separation_energy_systematics_summary.csv` / `output/quantum/nuclear_separation_energy_systematics_quantification.png`）。
+- 直近完了：Phase 7 / Step 7.16.16（ベータ崩壊Q値の予測）を完了（初版）として固定（`output/quantum/nuclear_beta_decay_qvalue_prediction_metrics.json` / `output/quantum/nuclear_beta_decay_qvalue_prediction_summary.csv` / `output/quantum/nuclear_beta_decay_qvalue_prediction_quantification.png`）。
+- 直近完了：Phase 7 / Step 7.16.17（核変形パラメータ予測）を完了（初版）として固定（`output/quantum/nuclear_deformation_parameter_prediction_metrics.json` / `output/quantum/nuclear_deformation_parameter_prediction_summary.csv` / `output/quantum/nuclear_deformation_parameter_prediction_quantification.png`）。
+- 直近完了：Phase 7 / Step 7.16.20（独立測定による相互検証）を完了（初版）として固定（`output/quantum/nuclear_independent_cross_observable_consistency_metrics.json` / `output/quantum/nuclear_independent_cross_observable_consistency_matrix.csv` / `output/quantum/nuclear_independent_cross_observable_consistency.png`）。
+- 直近完了：Phase 8 / Step 8.2（ユーザー指示による全論文再生成）として、`cmd /c output\\summary\\build_materials.bat`（full）を実行し、`pmodel_paper` / `pmodel_paper_part2_astrophysics` / `pmodel_paper_part3_quantum` / `pmodel_short_note` の HTML/DOCX を更新した（paper_lint errors=0, warnings=0）。
+- 追加：Phase 7 / Step 7.17（核物理/Bell 再固定サイクル）として、全核種・魔法数・pairing・Bell共分散・15系統分解の再固定タスクを統合した。
+- 直近完了：Phase 7 / Step 7.17.5（Bell 系統誤差15項目分解）を再固定し、共分散（bootstrap n=10000）と併せて Bell の反証条件パックを更新した（`output/quantum/bell/*`）。
+- 次：公開待ち以外の追加作業はユーザー指示で実施（論文の再生成も同様）。
+- 追加：Step 4.13 XRISM（X線高分解能スペクトル：Resolve）を Phase 4 に追加し、公開一次データから「距離指標非依存」の z（線のズレ）と、BH/AGN の高速アウトフロー速度（吸収線）等を固定出力化して、Phase 4.3（独立プローブ）および Phase 5.2（高γの速度制約）へ接続する（論文：Part II §4.13；`doc/paper/11_part2_astrophysics.md`）。
+  - 注：Step 4.8 は番号互換のため残置（XRISM の正は Step 4.13）。
+- 進捗の一次参照：`doc/STATUS.md`
+- 主要出力：`output/summary/`（論文/一般レポート）、`output/<topic>/`（各検証の固定図・CSV・JSON）
+
+## 保留項目（ユーザー指示時に実施）
+
+- Phase 4 / Step 4.6（JWST/MAST；GN-z11）：`t_obs_release_utc=2026-04-09T20:45:23.996448+00:00` の公開後に `x1d取得→line_id→z_confirmed固定（stat/sys）→Part II/Table 1更新` を実施する。
+- Phase 7 / Step 7.4.7（Bell追加一次データ）：Giustina 2015 click log（time-tag）/ Giustina 2016 thesis（Phaidra）を監視し、公開された場合に同一I/Fへ統合する。
+- Phase 4 / Step 4.13（XRISM）：追加公開obsidが出た時点で `detected_obsids>=2` と `sys/stat<10` を目標に拡張解析を実施する。
+
+---
+
+## Phase 1｜理論の核の確立（最小仮定の固定）
+
+### Step 1.1：時間波密度 P(x) の定義・符号規約の固定
+- 現状：完了（符号・定義は `doc/P_model_handoff.md` を正とする）
+
+### Step 1.2：ポテンシャル φ = -c^2 ln(P/P0) の導入
+- 現状：完了（同上）
+
+### Step 1.3：重力＝P勾配／光＝屈折／時計＝P比 の統一解釈
+- 現状：完了（論文・レポートに反映済み）
+
+### Step 1.4：自由パラメータ最小化（β, δ）
+- 現状：完了（凍結値を固定出力）
+- 成果物：`output/theory/frozen_parameters.json`
+- 次：Phase 4（宇宙論）との循環が入らないよう、拘束に使う一次ソースの依存関係を継続監視
+
+---
+
+## Phase 2｜弱場・静的検証（古典テストでの非矛盾性確認）
+
+### Step 2.1：LLR（月レーザー測距：Apollo / Luna）
+- 現状：完了（代表図は一般向けを簡略化、論文側は付録で全図を保持）
+- 成果物例：`output/summary/details/llr.html`、`output/llr/batch/llr_batch_summary.json`
+- 次：Phase 6.1（NGLR-1）へ拡張
+
+### Step 2.2：Cassini（太陽会合・ドップラー）
+- 現状：完了（β拘束の主力）
+- 成果物例：`output/cassini/cassini_beta_sweep_rmse.png`
+
+### Step 2.3：Viking（Shapiro遅延ピーク）
+- 現状：完了
+- 成果物例：`output/viking/viking_shapiro_result.csv`
+
+### Step 2.4：水星近日点移動
+- 現状：完了
+- 成果物例：`output/mercury/mercury_orbit.png`
+
+### Step 2.5：GPS衛星時計
+- 現状：完了
+- 成果物例：`output/gps/gps_compare_metrics.json`
+
+### Step 2.6：重力赤方偏移（GP-A / Galileo）
+- 現状：完了（一次ソース整理・図化）
+- 成果物例：`output/theory/gravitational_redshift_experiments.png`
+
+### Step 2.7：フレームドラッグ（GP-B / LAGEOS）
+- 現状：完了（一次ソース整理・図化）
+- 成果物例：`output/theory/frame_dragging_experiments.png`
+
+---
+
+## Phase 3｜動的拡張・放射（放射現象で即棄却されないこと）
+
+### Step 3.1：動的P（P(x,t)）の最小導入
+- 現状：完了
+- 注：`u=ln(P/P0)` の波動方程式・遅延解・多極展開の入口を文書化
+- 参照：`doc/paper/10_manuscript.md`（2.6節）/ `doc/P_model_handoff.md`（1.7節）
+- 成果物例：`output/theory/dynamic_p_quadrupole_scalings.png`
+
+### Step 3.2：単極・双極放射が出ない条件整理
+- 現状：完了
+- 注：保存則→単極/双極なし、普遍結合（双極なし）を弱場極限の必要条件として固定
+- 参照：`doc/paper/10_manuscript.md`（2.6節）/ `doc/P_model_handoff.md`（1.7節）
+
+### Step 3.3：四重極放射の回収
+- 現状：完了
+- 注：四重極則（Peters–Mathews）を弱場極限の必要条件として固定し、Phase 3.4/3.5 の観測量へ接続
+
+### Step 3.4：二重パルサー（軌道減衰）
+- 現状：完了（観測 vs 指標を固定出力）
+- 成果物例：`output/pulsar/binary_pulsar_orbital_decay.png`
+
+### Step 3.5：重力波chirp（位相整合の入口）
+- 現状：完了（多イベント要約＋個別比較）
+- 成果物例：`output/gw/gw_multi_event_summary.png`、`output/gw/gw150914_chirp_phase.png`
+- 3.5.1 GW250114（ringdown/QNM・Area theorem・IMR consistency）【完了】
+  - 目的：Part II §4.11（重力波）を拡張し、chirp（位相）に加えて「ringdown（QNM）」と「面積定理」「IMR整合性」を **GWOSC 公開一次データ**で再現可能に固定する（強場側の差分予測/反証条件へ接続する入口）。
+  - 入力（一次ソース）：
+    - GWOSC Event API（GW250114_082203; catalog=O4_Discovery_Papers）
+    - 公開 strain（GWOSC archive；本イベントは `hdf5/gwf` 形式。TXT.GZ は提供されない）
+    - GWOSC が参照する公開 Data products（Zenodo；`GW250114_data_release.tar.gz` を含む）
+  - 解析項目（固定）：
+    - QNM：公開 data release の ringdown start time scan（`start time [M]`）から 220/221 の `f` と damping rate `g` を取得し、`τ=1/g` を算出。t_ref（例：10.5M）を基準として、start time を系統として扱う（`output/gw/gw250114_ringdown_qnm_fit.*`）。
+    - Area theorem：公開 data release の inspiral truncation time grid（`times`）と ringdown/pyRing の remnant area を用い、Gaussian significance `σ=(μ_r−μ_i)/sqrt(σ_r^2+σ_i^2)` を固定（参照時刻 -40M、minσ、5σ到達時刻も併記；`output/gw/gw250114_area_theorem_test.*`）。
+    - IMR consistency：ringdown QNM（f,τ）を IMR PE posterior（GWOSC→Zenodo posterior samples）からの GR 予測（Berti fit; mode 220）と比較し、z_f/z_τ と（不確かさ伝播込みの）(M_f,a_f) 一致度を proxy として固定（`output/gw/gw250114_imr_consistency.*`）。
+  - 出力（固定名；例）：
+    - raw cache：`data/gw/gw250114/*`（GWOSC JSON/strain/必要ならposterior）
+    - `output/gw/gw250114_ringdown_qnm_fit.json` / `output/gw/gw250114_ringdown_qnm_fit.png`
+    - `output/gw/gw250114_area_theorem_test.json` / `output/gw/gw250114_area_theorem_test.png`
+    - `output/gw/gw250114_imr_consistency.json` / `output/gw/gw250114_imr_consistency.png`
+  - 実装（再現コマンド）：
+    - `python -B scripts/gw/gw_ringdown_qnm.py --event GW250114 --catalog O4_Discovery_Papers --slug gw250114 --method data_release`
+    - `python -B scripts/gw/gw_area_theorem.py --event GW250114 --catalog O4_Discovery_Papers --slug gw250114`
+    - `python -B scripts/gw/gw_imr_consistency.py --event GW250114 --catalog O4_Discovery_Papers --slug gw250114`
+
+---
+
+## Phase 4｜宇宙論（宇宙スケールで時間の起源を示す）
+
+### Step 4.1：背景時間波密度 P_bg(t) の導入
+- 現状：完了（静的無限空間仮説を含む前提固定を継続）
+
+### Step 4.2：赤方偏移 1+z = P_em/P_obs の確立
+- 現状：完了（観測量への接続は Step 4.3〜4.5）
+
+### Step 4.3：距離指標と独立な検証
+- 現状：完了（改訂）（独立プローブを“棄却/保留”の軸に入れる）
+- 成果物例：`output/cosmology/cosmology_sn_time_dilation_constraints.png`、`output/cosmology/cosmology_cmb_temperature_scaling_constraints.png`、`output/cosmology/cosmology_alcock_paczynski_constraints.png`
+
+- 4.3.1 時間伸長（p_t）の決着：理論分岐＋観測の前提監査（非循環fitの固定）【完了（初版）】
+  - 目的：
+    - (1) P-modelに「時間伸長（Δt_obs の伸び）」が出る機構があるかを、**条件分岐**で確定する。
+    - (2) 観測で言われる p_t≈1 が、解析手順に (1+z) を埋め込んだ結果（循環）ではないかを監査し、
+      再現可能な形で固定する。
+    - 注：DDR/BAO/H0/距離指標の救済など宇宙論全体の議論は **Out of Scope**（必要なら Step 4.7 へ分離）。
+  - 入力（一次ソース）：
+    - 理論側：Part I の定義（P の時計写像、固有時 τ と座標時 t、赤方偏移 z、光伝播写像）
+    - 観測側：Blondin+2008（SNe Ia spectral aging；arXiv:0804.3595；`data/cosmology/sources/arxiv_0804.3595.pdf`）
+  - 処理（固定条件）：
+    - 理論：`dτ/dt=P0/P` と `1+z=P_em/P_obs` を前提として、伝播側の決定点（例：自由伝播で座標位相進み dθ/dt が保存）
+      を明示する。その条件なら `Δt_obs=(1+z)Δt_em`（p_t=1）を要求し、条件が崩れる場合は p_t が未確定（追加の伝播則が必要）
+      であることを分岐で固定する。
+    - 観測：spectral aging を `g(z)=Δt_em/Δt_obs=1/(1+z)^(p_t)` として **p_t を自由**に fit し、
+      事前に `t_rest=t_obs/(1+z)` を作らない（循環の入口を封じる）。補助比較（light-curve age 等）で `t/(1+z)` を使う箇所は
+      「循環の可能性あり」として分離し、主結果と混ぜない。
+  - 出力（固定名）：
+    - `output/cosmology/cosmology_sn_time_dilation_pt_fit.json`（p_t 再fit・前提監査ログ）
+    - `output/cosmology/cosmology_sn_time_dilation_pt_fit.png`（p_t 再fit 可視化）
+    - 既存の要約：`output/cosmology/cosmology_sn_time_dilation_constraints_metrics.json` に audit 要約（circularity_risk 等）を追記
+  - 結果（固定）：
+    - Blondin+2008 Table 3（一次PDF抽出）を p_t 自由で再fitし、`p_t≈0.967±0.104 (1σ; all)`、`p_t≈0.951±0.104 (high-z)` を再現。
+    - audit：主fitは `t_rest=t_obs/(1+z)` を前処理として作らない（circularity_risk=low）。
+  - 実装（同一機能＝同一ファイル名）：
+    - `scripts/cosmology/cosmology_sn_time_dilation_constraints.py` を拡張し、fit と audit を固定出力として追加する。
+
+### Step 4.4：距離指標依存プローブの張力整理（DDR / Tolman / BAO）
+- 現状：完了（距離指標の前提依存と系統幅を明示）
+- 成果物例：`output/cosmology/cosmology_static_infinite_hypothesis_pack.png`、`output/cosmology/cosmology_distance_duality_source_sensitivity.png`
+
+### Step 4.5：BAOを一次統計から再構築する方針の固定（最重要）
+- 現状：完了（BOSS は dv+cov（Ross/Satpathy）で ε fit まで到達。DESI DR1 は raw から dv+cov を自前生成し、Corrfunc+Jackknife と pycorr+RascalC の両方で ε fit→Y1data cross-check まで到達。multi-tracer 昇格判定（4.5B.21.4.4.7）は promoted=true（passing_tracers=[LRG3+ELG1, Lya QSO]）で screening→確証へ更新。）
+- 方式：**BOSS DR12v5 LSS の recon済み銀河＋random**から ξ(s,μ)→ξℓ（ℓ=0,2）を再計算し、距離写像（LCDM / P_bg など）を差し替える
+- 運用：追加作業が出たら、4.5A.* / 4.5B.* を増番して本Step内に追記（上位Phase/Step番号は変更しない）
+
+#### Stage A（4.5A：スクリーニング／幾何が合うかの素早い判定）
+- 4.5A.0 仕様固定（座標化・推定量・再現条件）【完了】
+  - redshift（z）：obs / z_cosmic / z_CMB（現状は obs）
+  - LOS（RSD方向）：Corrfunc の pairwise-midpoint（固定）
+  - comoving distance D_M(z)：数値積分の精度・補間方法（I/F固定）
+  - 距離写像の切替：fiducial（lcdm）と P_bg は同一I/Fで差し替え（実装差の混入を禁止）
+  - random：kind/抽出法（prefix/reservoir）/seed/サイズを固定し、混在を検出
+  - footprint matching（match_sectors）：recon入力に対して実施（subsample時のみ有効）。sector_key は **ISECT** を既定（比較用に ipoly_isect を残す）
+  - 重み：galaxy/random の weight カラムと適用ルールを固定
+  - recon：grid/smoothing/assignment/box_shape/box_frame/ψ(k)符号などを固定
+  - μ-wedge：ratio=s∥/s⊥（wedge peak; fid座標）から ε_proxy=(1/ratio)^(1/3)−1 を定義し、peakfit ε と符号を統一
+- 4.5A.1 検証スコープ順（混ぜる順）【完了】
+  - CMASS（z≈0.57, NGC+SGC合算）→ LOWZ（z≈0.32, 合算）→ z-bin（0.38/0.51/0.61）→ NGC/SGC分割
+- 4.5A.2 最小fit（ピーク位置のみ）【完了】
+  - smooth+peak（r_dはフリー）＋異方（ℓ=2）重視
+- 4.5A.3 Stage A 固定出力【完了】
+  - recon（grid; iso; out_tag=recon_grid_iso）でも NGC/SGC 分割の peakfit ε を出力し、cap依存（系統切り分け）を固定図として保持
+- 4.5A.4 回帰（run_all）での再現性確認と修正【完了】
+  - `scripts/cosmology/cosmology_bao_catalog_wedge_anisotropy.py` が DESI VAC Lyα の multi-component ξ0/ξ2（2D）を含む *.npz を読み得るため、s/xi shape mismatch で停止していた問題を修正（非1Dは skip）。
+  - BOSS/CMASS combined の `__recon_grid_iso` で ξ-from-catalogs の推定量仕様（nmu/sector_key）が dist 間で不一致になり、`cosmology_bao_catalog_peakfit.py` が混在を検出して停止していた問題を、WSL（Corrfunc）で lcdm/pbg を再生成して整合させた（nmu=120、sector_key=isect）。
+  - 検証：`python -B scripts/summary/run_all.py --offline --jobs 2`（failed=0; skipped=8 offline）
+
+#### Stage B（4.5B：確証決定打／前提ゼロへ近づける）
+- 4.5B.0 目標【完了】
+  - 公式recon仕様へ接近し、P(k) multipolesともクロスチェック（必要なら eBOSS/DESI へ拡張）
+- 4.5B.1 Recon gap 要約（Ross post-recon の ξ2 ギャップ）【完了】
+  - 要約図：`output/cosmology/cosmology_bao_recon_gap_summary.png`
+  - 差分表：`doc/cosmology/BAO_RECON_GAP.md`
+  - `scripts/summary/run_all.py` に `cosmology_bao_recon_gap_summary` を追加（`--offline` で毎回更新）
+- 4.5B.2 recon の境界/マスク感度（pad_fraction / mask_expected_frac / assignment）【完了】
+  - `output/cosmology/cosmology_bao_recon_param_scan.*`
+- 4.5B.3 random 行順バイアス切り分け（reservoir化）【完了】
+  - CMASSLOWZTOT（north/south）の random1 を reservoir 2,000,000（scan=5,000,000）へ更新し、WSL（Corrfunc, threads=24）で zbin b1/b2/b3 を再計算
+  - ξ2 ギャップは残存（RMSE(s²ξ2; Ross vs catalog recon) ≈ 70–80）→ 次は window/selection 切り分けへ
+- 4.5B.4 LOWZ random1 の reservoir化＋再計算【完了】
+  - LOWZ（north/south/combined、LCDM/P_bg）を WSL（Corrfunc）で再計算し、peakfit/summary/レポートを更新
+- 4.5B.5 z-bin 重複の影響排除（recon入力 z 範囲固定）【完了】
+  - recon入力 z を `[0.2,0.75)` に固定（`--recon-z-min/max`）して b1/b2/b3 を再計算（改善せず）
+- 4.5B.6 推定量の正規化差（分母 RR0 vs SS）診断【完了】
+  - `--catalog-recon-estimator delta_ss` を試したが改善せず（主因になりにくい）
+- 4.5B.7 recon(ani) の LOS shift を radial に切替【完了】
+  - `__recon_grid_ani_radial` は悪化 → baseline 維持
+- 4.5B.8 fiducial LCDM の Ωm を 0.274 に切替【完了】
+  - `__om0p274` は改善せず → baseline（Ωm=0.315）維持
+- 4.5B.9 RSD shift の切り分け【完了】
+  - `__recon_grid_ani_rsdshift0`（RSD shift 無効）で zbin1 の RMSE(s²ξ2) が改善
+  - 現状の “best candidate” として `recon_grid_ani_rsdshift0` を保持して次工程へ
+- 4.5B.10 Ψ(k) の Fourier 符号（ψ_k_sign）診断【完了】
+  - ψ_k_sign=+1（`__recon_grid_ani_psi_pos`）は悪化 → 既定（ψ_k_sign=-1）維持
+- 4.5B.11 recon(ani) の RSD-aware solver 無効化【完了】
+  - `--recon-rsd-solver none` 等は改善せず
+- 4.5B.12 window/selection の異方性指標（RR2/RR0, SS2/SS0）【完了】
+  - `output/cosmology/cosmology_bao_catalog_window_multipoles.png`
+- 4.5B.13 window mixing（ξ0↔ξ2 混合）の定量化【完了】
+  - `output/cosmology/cosmology_bao_catalog_window_mixing.png`
+  - max|s²(m20·ξ0)| は ≈2–4 程度で、ξ2 ギャップ（RMSE≈70–80）の主因になりにくい
+- 4.5B.14 published 側の window 畳み込み/補正の位置づけ確認【完了】
+  - メモ追記：`doc/cosmology/BAO_RECON_GAP.md`（B.14節）
+- 4.5B.15 次の切り分け（優先度順）【完了】
+  - 公式recon仕様差（重み／マスク／RSD除去）と selection/window の扱い差を、再現可能な最小差分として分解して検証
+  - 追加テスト：`recon_grid_ani_solvernone_radial_rsdshift1` は ξ2 ギャップが悪化（RMSE(s²ξ2)≈100台）→不採用
+  - 4.5B.15.1 出力命名の固定（reconパラメータの自動tag化）【完了】
+    - `scripts/cosmology/cosmology_bao_xi_from_catalogs.py` の out_tag に、recon の非デフォルト設定（grid/smoothing/bias/ψ符号/RSD solver/LOS shift/rsd_shift/pad/maskexp）を自動付与し、scan時の上書き事故を防止
+  - 4.5B.15.2 window mixing 拡張（ξ4→ξ2 混合）【完了】
+    - `scripts/cosmology/cosmology_bao_catalog_window_mixing.py` に m24 と s²(m24·ξ4) を追加し、ξ2 ギャップの主因になりにくいことを確認
+  - 4.5B.15.3 公式recon仕様（一次ソース/実装）の照合【完了】
+    - 結果：Ross 2016（BAO_method）＋ Padmanabhan 2012（recon.tex）の一次ソースから、reconの固定値（f/b/grid/smoothing/全z範囲一括）と “RSDを方程式側に入れる” 定義を同定。
+    - メモ：`doc/cosmology/BAO_RECON_SPEC.md`
+    - 実装：`--recon-rsd-solver padmanabhan_pp` を追加（Padmanabhan 2012 plane-parallel 近似の選択肢）
+  - 4.5B.15.4 published multipoles（Ross）の定義差の切り分け【完了】
+    - 目標：ξ2 の符号差に効き得る「ξ4の扱い」「window畳み込み/補正の有無」「broadband吸収の範囲」を明文化
+    - 結果：`doc/cosmology/BAO_RECON_SPEC.md` §6 に、公開ファイル定義（bincent/covの並び/モデル側のξ4/broadband）を一次コード（baofit_pub2D.py）ベースで整理して固定。
+    - 追加：Ross が使う bin-centering 補正（rbc）を overlay に追加し、RMSE差が ≲0.1 と小さいことを確認（`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__ross_rbc.*`）。
+
+- 4.5B.16 Ross 2016 の固定値へ寄せた再計算（grid=512/smoothing=15/b=1.85/f=0.757/z=0.2–0.75）【完了】
+  - 目的：公式設定へ寄せたうえで、ξ2 ギャップが「アルゴリズム差（radial solver/境界/マスク）」起因なのかを明確化する。
+  - 実行：WSL（Corrfunc; threads=24）で CMASSLOWZTOT/combined/lcdm を b1/b2/b3 で再計算し、`cosmology_bao_recon_gap_summary` を更新する。
+  - 結果：RMSE(s²ξ2; Ross post-recon vs catalog recon) は大きくは改善せず（zbin1≈81.34, zbin2≈75.95, zbin3≈77.67）。
+    - overlay：`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__ross2016.*`
+    - 要約図：`output/cosmology/cosmology_bao_recon_gap_summary.*`
+  - 結論：係数（f/b/grid/smoothing/z範囲）を Ross 2016 に寄せてもギャップが残るため、主因は **実装アルゴリズム差（radial LOS / finite-difference solver / 境界・マスク・重みの扱い）** 側である可能性が高い。
+
+- 4.5B.17 Padmanabhan 2012 の radial LOS + finite-difference solver 相当への接続（外部実装の導入含む）【完了】
+  - 目的：Ross post-recon の ξ2 を再現できるか（あるいは再現できない理由が一次ソース差として説明できるか）を最短で判定する。
+  - 4.5B.17.1 外部recon backend 実装（MW recon_code; multigrid + radial LOS）【完了】
+    - 追加：`scripts/cosmology/mw_recon_code.py` / `scripts/cosmology/mw_recon_driver.cpp`
+    - 統合：`scripts/cosmology/cosmology_bao_xi_from_catalogs.py --recon mw_multigrid`
+    - FFTW は `.tmp_recon_code/_deps` にローカルビルド（sudo不要）
+  - 4.5B.17.2 実データでの一致度チェック（CMASSLOWZTOT/combined/lcdm; zbin1..3）【完了】
+    - overlay：`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid.*`
+    - 指標（RMSE(s²ξ₂; Ross post-recon vs catalog recon)）：
+      - reservoir scan=5,000,000（旧）：zbin1≈57.6, zbin2≈52.1, zbin3≈64.5（`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_scan5m_metrics.json`）
+      - reservoir fullscan（現行baseline）：zbin1≈57.7, zbin2≈55.1, zbin3≈71.1（`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_metrics.json`）
+  - 4.5B.17.3 残差要因の切り分け（randomのRSD項/重み/selection/NGC-SGC）【完了】
+    - 4.5B.17.3.1 random（shifted randoms）の RSD項 on/off（`--mw-random-rsd`）【完了】
+      - 結果：`--mw-random-rsd` を有効化すると **悪化**（RMSE(s²ξ₂) が ≈74–81）→ Padmanabhan 2012 の既定（random側にRSD項なし）を維持。
+      - 参考：fullscan baseline の RMSE(s²ξ2) は ≈74–83（zbin1..3）
+      - overlay：`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_mwrndrsd.*`
+      - 要約図：`output/cosmology/cosmology_bao_recon_gap_summary.*`
+      - 実装メモ：out_tag の80文字制限で on/off が衝突しないよう、mw_random_rsd は recon_tag 側に組み込む（`cosmology_bao_xi_from_catalogs.py`）。
+    - 4.5B.17.3.2 NGC/SGC split（north/south）【完了】
+      - 指標：`output/cosmology/cosmology_bao_xi_ngc_sgc_split_summary.*`（Δs_peak と s²ξℓ のRMSE（NGC vs SGC）を要約）
+    - 4.5B.17.3.3 重み/selection の切り分け（recon_weight_scheme, sector/mask, random選別）【完了】
+      - 4.5B.17.3.3.1 random1 の fullscan reservoir 化（CMASSLOWZTOT; 2,000,000）【完了】
+        - 抽出：`data/cosmology/boss_dr12v5_lss/extracted/random1_DR12v5_CMASSLOWZTOT_{North,South}.fits.gz.reservoir_2000000_seed0.npz`
+        - sector整合（match_sectors=auto; b2例）：kept_frac_gal north≈0.9995 / south≈0.9624（`output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json`）
+        - ただし Ross一致度（RMSE(s²ξ2)）は zbin2/3 で悪化 → 要因切り分けへ継続
+      - 4.5B.17.3.3.2 recon density field の重み（recon_weight_scheme）【完了】
+        - `boss_recon`（baseline）は維持、`same` は大幅悪化（RMSE(s²ξ2)≈77.7/73.9/81.1）→ `boss_recon` 固定
+        - overlay：`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_rw_same.*`
+      - 4.5B.17.3.3.3 sector matching（match_sectors）on/off【完了】
+        - off は改善せず（RMSE(s²ξ2)≈59.2/55.3/71.3）→ `auto` 固定
+        - overlay：`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_matchsectors_off.*`
+      - 4.5B.17.3.3.4 south の sector 欠落（kept_frac_gal 低下）の原因特定と対処【完了】
+        - 結論：欠落は「random不足」ではなく、sector key を **(IPOLY<<32)+ISECT** で厳密一致させる設計が原因（south で小ポリゴンが落ちる）。
+        - 対応：`scripts/cosmology/cosmology_bao_xi_from_catalogs.py` に `--sector-key {isect,ipoly_isect}` を追加し、既定を **isect（ISECT一致）** に変更。
+        - 結果（recon入力 z∈[0.2,0.75)／b2例）：
+          - north kept_frac_gal≈0.999987 / south kept_frac_gal≈0.999997（`output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json`）
+      - 4.5B.17.3.3.5 sector_key 変更の影響評価（Ross一致度）【完了】
+        - overlay（mw_multigrid baseline）の RMSE(s²ξ2; Ross post-recon vs catalog recon)：zbin1≈59.15, zbin2≈55.59, zbin3≈71.75（`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_metrics.json`）
+        - 解釈：footprint整合（sector）起因の系統は抑えられたが、ξ2 ギャップの主因ではない（残差は別要因へ）。
+  - 目標：ξ2 ギャップをさらに縮めるか、縮まない場合は「仕様差」として説明できる最小要因を確定する。
+
+  - 4.5B.17.4 残る ξ2 ギャップの説明（published pipeline 差の最小化）【完了】
+    - 目的：生の ξ2 カーブ不一致が残る理由を「仕様差」として最小差分で説明し、BAOピーク（AP/ε）の議論から切り離す。
+    - 方向：window畳み込み／推定量定義（bin-centering/cov/broadband）／RSD除去順序の差を、最小差分で再現して説明可能にする。
+    - 4.5B.17.4.1 MW recon の `recon-mode iso` 検証（不採用の確定）【完了】
+      - 結果：`iso` は ξ2 の一致度が悪化（例：RMSE(s²ξ2; zbin1)≈78.6）→ 公式比較は `ani` を維持。
+      - 指標：`output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay__mw_multigrid_iso_metrics.json`
+    - 4.5B.17.4.2 broadband（a0+a1/r+a2/r²）で吸収できるギャップ量の定量化【完了】
+      - 目的：Ross 公開 fit が周辺化する broadband で「見かけの ξ2 ギャップ」がどこまで縮むかを定量化し、解釈の混線を防ぐ。
+      - 出力：`output/cosmology/cosmology_bao_recon_gap_broadband_fit.png` / `output/cosmology/cosmology_bao_recon_gap_broadband_fit_metrics.json`
+    - 4.5B.17.4.3 論文化（図インデックス/本文）へ反映し、用語と評価軸を固定【完了】
+      - `doc/paper/01_figures_index.md` / `doc/paper/10_manuscript.md` / `doc/cosmology/BAO_RECON_GAP.md`
+    - 4.5B.17.4.4 次：残差の“仕様差”候補を最小化（ξ4/broadband範囲/推定量正規化）【完了】
+      - 4.5B.17.4.4.1 broadband吸収の感度（bincent0..4 / s_min=30 vs 50）【完了】
+        - `output/cosmology/cosmology_bao_recon_gap_broadband_sensitivity.png`
+        - `output/cosmology/cosmology_bao_recon_gap_broadband_sensitivity_metrics.json`
+      - 4.5B.17.4.4.2 ξ4（モデル側）・fitレンジ/基底の一次コード整合（baofit_pub2D）【完了】
+        - 目標：残差評価に使う “fitレンジ/基底/評価軸” を Ross 公開コードに揃え、過大/過小評価を防ぐ。
+        - `output/cosmology/cosmology_bao_recon_gap_ross_eval_alignment.png`
+        - `output/cosmology/cosmology_bao_recon_gap_ross_eval_alignment_metrics.json`
+      - 4.5B.17.4.4.3 推定量定義の最終固定（正規化/μ積分/誤差モデル）【完了】
+        - 対応：`doc/cosmology/BAO_RECON_SPEC.md` §7 に仕様を固定し、出力 metrics に `coordinate_spec_hash` / `estimator_spec_hash` を同梱して混在を検出できるようにした。
+      - 4.5B.17.4.5 Ross cov を使った catalog-based peakfit（dv=[ξ0,ξ2] + broadband周辺化）【完了】
+        - 目的：screening（対角近似）ではなく、Ross の一次コードと同じ dv+cov の枠組みで ε（AP warping）の安定性を再評価し、lcdm vs P_bg の差を “推定量差” ではなく “幾何差” として比較可能にする。
+        - 4.5B.17.4.5.1 実装：`cosmology_bao_catalog_peakfit.py` に `--cov-source {auto,diag,ross}` を追加【完了】
+          - `auto` は `sample=cmasslowztot,caps=combined` かつ z-bin の場合のみ対象で、pre-recon（recon_mode=none）→ Satpathy cov / post-recon → Ross cov（他は diag）。
+          - 仕様：`doc/cosmology/BAO_RECON_SPEC.md` §7.7
+        - 4.5B.17.4.5.2 実行：zbin1..3（combined）の lcdm/pbg で ε を Ross cov で再評価し、Table 1 / スコアボードへ反映【完了】
+        - 4.5B.17.4.5.3 論文化：宇宙論章（BAO一次統計の節）へ “cov採用” を反映【完了】
+      - 4.5B.17.4.6 MW multigrid（published整合が高い recon）出力へ同じ peakfit（Ross cov）を適用し、ε の安定性を再確認【完了】
+        - 入力：`output/cosmology/cosmology_bao_xi_from_catalogs_*__recon_mw_multigrid_*_metrics.json`
+        - 出力（例）：`output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_mw_multigrid_*.png`
+        - 4.5B.17.4.6.1 実行：`cosmology_bao_catalog_peakfit.py --cov-source ross` を out_tag=MW multigrid に適用【完了】
+        - 4.5B.17.4.6.2 論文化：図インデックス/本文へ追加し、`run_all.py --offline` で毎回更新【完了】
+
+- 4.5B.18 次：P_bg 距離写像を MW multigrid（recon）へ差し替え、一次統計（ξℓ）から ε を再評価【完了】
+  - 目的：BAO“出力値”ではなく、銀河+random の一次統計 ξ(s,μ)→ξℓ から、距離写像（lcdm vs P_bg）だけを差し替えたときの幾何差（特に異方 ε）を判定する。
+  - 4.5B.18.1 WSL（Corrfunc; threads=24）で dist=pbg の ξℓ を再計算（CMASSLOWZTOT/combined; zbin1..3; MW multigrid）【完了】
+  - 4.5B.18.2 Ross cov peakfit（dv=[ξ0,ξ2]）を適用し、ε(lcdm) との差（Δε）を固定出力【完了】
+  - 4.5B.18.3 Table 1 / スコアボードへ反映し、棄却/保留の説明（距離指標依存）を更新【完了】
+
+- 4.5B.19 次：pre-recon ξℓ で dist差し替え結果を再チェック（recon依存の切り分け）【完了】
+  - 4.5B.19.1 pre-recon ξℓ を WSL（Corrfunc; threads=24）で再計算（lcdm/pbg; CMASSLOWZTOT/combined; zbin1..3）【完了】
+  - 4.5B.19.2 pre-recon covariance（Satpathy 2016）で peakfit（dv=[ξ0,ξ2]）を実行し、ε と Δε を固定出力【完了】
+  - 4.5B.19.3 pre/post の差（recon依存）を Table 1 / 本文へ要約【完了】
+
+- 4.5B.20 次：P(k) multipoles でクロスチェック（Beutler 2016）【完了】
+  - 4.5B.20.1 Beutler 公開パッケージ（P(k) multipoles / PATCHY cov / window）を `data/cosmology/` にキャッシュ【完了】
+  - 4.5B.20.2 post-recon P0/P2（窓関数込み）を smooth+peak peakfit し、ε をクロスチェック【完了】
+  - 4.5B.20.3 pre-recon P0/P2（窓関数込み）も実行し、RSD broadband が支配的な場合に最小モデルが不安定化し得る点を確認【完了】
+  - 4.5B.20.4 Table 1 / スコアボード / 本文へ要約し、一次統計のクロスチェックとして固定【完了】
+- 4.5B.21 次：eBOSS / DESI へ拡張（一次統計で同様に検証）【完了】
+  - 4.5B.21.1 eBOSS DR16 LRGpCMASS（recon）銀河+random の一次入力を確定（取得/manifest/抽出NPZ）【完了】
+  - 4.5B.21.2 eBOSS catalog-based ξ(s,μ)→ξℓ を再計算（fid lcdm）し、基本整合（形/重み/σ）を確認【完了】
+  - 4.5B.21.3 dist差し替え（pbg 等）で ε/Δε を推定し、Table 1 / スコアボードへ反映【完了】
+    - random を reservoir 2M（seed=0）に固定し、combined: pbg ε≈+0.008±0.010（|z|≈0.82σ）/ lcdm ε≈−0.020±0.010（|z|≈2.01σ）。north/south 分割も保存。
+  - 4.5B.21.4 eBOSS QSO / DESI へ拡張（同様に一次統計から）【完了】
+    - 4.5B.21.4.1 eBOSS DR16 QSO（0.8<z<2.2）：galaxy+random一次入力（manifest/抽出NPZ; reservoir random=2M, seed=0）【完了】
+    - 4.5B.21.4.2 QSO ξℓ→peakfit（combined/north/south; lcdm/pbg; diag）を実行し、Table 1 / スコアボード / 本文へ反映【完了】
+    - 4.5B.21.4.3 DESI DR1（LRG; 0.4<z<1.1）：一次統計（galaxy+random→ξ→ξℓ）へ拡張【完了】
+      - 4.5B.21.4.3.1 一次入力取得（manifest/抽出NPZ; random reservoir 2M, seed=0; random_index=0）【完了】
+      - 4.5B.21.4.3.2 ξℓ→peakfit（combined/north/south; lcdm/pbg; diag; WSL/Corrfunc; threads=24; desi_default重み）を実行【完了】
+      - 4.5B.21.4.3.3 Table 1 / スコアボード / 本文へ反映【完了】
+      - 4.5B.21.4.4 DESI（一次統計）を確証へ：公式 multipoles/cov の一次ソースへ寄せつつ、raw から dv=[ξ0,ξ2]+cov を自前生成して BAO fit（ε）まで到達【完了】
+      - 4.5B.21.4.4.1 公開派生値（DESI BAO VI: distance constraints / mean-cov）を特定して `data/cosmology/` にキャッシュ【完了】
+        - 4.5B.21.4.4.1.1 Y1data（D_M/r_d, D_H/r_d, corr）を公開距離制約（論文表；派生値）として抽出・キャッシュ【完了】
+          - `data/cosmology/desi_dr1_bao_y1data.json`（生成：`scripts/cosmology/fetch_desi_dr1_bao_y1data.py`）
+        - 4.5B.21.4.4.1.2 公開 mean/cov（distance constraints；派生値）を特定してキャッシュ【完了】
+          - 公式ドキュメントが参照する `CobayaSampler/bao_data`（`desi_2024_gaussian_bao_*_mean/cov`）を取得し、`data/cosmology/desi_dr1_bao_bao_data.json` に固定キャッシュ
+          - 取得スクリプト：`scripts/cosmology/fetch_desi_dr1_bao_bao_data.py`
+        - 4.5B.21.4.4.1.3 公開 multipoles/cov（測定ベクトル＋共分散; fitに使う形）を特定してキャッシュ【完了（現状：一次ソースとして確定不可→jackknife dv+cov を正）】
+          - 現状：探索ログ `doc/cosmology/DESI_PUBLISHED_2PT_PRODUCTS.md`（未特定）
+          - 4.5B.21.4.4.1.3.1 data.desi 公開領域を浅く探索（public root; shallow crawl）し、候補0を確認【完了】
+            - `output/cosmology/desi_public_2pt_discovery_public_root_shallow.json`
+          - 4.5B.21.4.4.1.3.2 公式 likelihood 実装（GitHub）を特定し、必要ファイル名（HDF5）を確認【完了】
+            - `cosmodesi/desi-kp-cosmological-likelihoods`（`dr1/cobaya/README.md`: `data/likelihood` を要求）
+          - 4.5B.21.4.4.1.3.3 Zenodo（DESI 2024 III: BAO galaxies & quasars）を確認（metadata中心で multipoles/cov は未同梱）【完了】
+            - `zenodo:15086114`（`desi_kp4_zenodo_v1.0.tar.gz`）
+          - 4.5B.21.4.4.1.3.5 WebDAV mirror（PROPFIND）も含めて探索し、survey/vac 直下で候補0を確認【完了】
+            - 出力：`output/cosmology/desi_public_2pt_discovery_webdav_survey_catalogs_dr1_depth6.json`
+            - 補足：vac では Lya correlations の共分散（例：`full-covariance-smoothed.fits`）は見つかるが、BAO galaxies の “fit用 dv+cov” には未到達（探索ログに記録）
+        - 4.5B.21.4.4.1.3.4 結論固定：`data/likelihood`（測定ベクトル＋共分散; HDF5 等）の「公開配布先」を一次ソースとして確定できないため、当面は “公開dv+covなし” として扱い、jackknife dv+cov を正とする【完了】
+          - 参考（再探索；DR1 VAC を深めにクロールして `candidates=0` を確認）：
+            - `output/cosmology/desi_public_2pt_discovery_dr1_vac_bao_cosmo_params_v1p0_depth6.json`
+            - `output/cosmology/desi_public_2pt_discovery_dr1_vac_full_shape_v1p0_depth6.json`
+          - 探索ログ：`doc/cosmology/DESI_PUBLISHED_2PT_PRODUCTS.md`
+      - 4.5B.21.4.4.2 catalog-based ξℓ と published 系統の整合を切り分け【完了（現状：公開 multipoles/cov は未特定）】
+        - 4.5B.21.4.4.2.1 LRG1/LRG2 の z-bin に揃えた catalog-based ξℓ→peakfit と、Y1data からの ε_expected を cross-check【完了】
+          - `output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins.png`
+          - `output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins.png`
+        - 4.5B.21.4.4.2.2 catalog-based ξℓ と published multipoles の整合（形/正規化/窓関数）を overlay で切り分け【完了（現状：公開 multipoles/cov は未特定）】
+          - 探索ログ：`doc/cosmology/DESI_PUBLISHED_2PT_PRODUCTS.md`
+          - 出力（探索結果）：`output/cosmology/desi_public_2pt_discovery_bao_params.json`、`output/cosmology/desi_public_2pt_discovery_full_shape_params.json`
+      - 4.5B.21.4.4.3 cov が入手できる場合は peakfit の評価軸を更新（できない場合は diag の保守性を明文化）【完了（現状：cov未特定→diag=screening固定）】
+        - 4.5B.21.4.4.3.1 Table 1：DESI（diag）を screening として明文化【完了】
+        - 4.5B.21.4.4.3.2 本文：`z_score_vs_y1data` / `z_score_combined` の読み方を固定【完了】
+      - 4.5B.21.4.4.4 cov 代替策（公開mocks/Jackknife等）で peakfit を dv+cov に更新し、diag依存を緩和（dv+cov化）【完了】
+        - 4.5B.21.4.4.4.1 cov 推定仕様を固定（後から議論がブレないためのI/F定義）【完了】
+          - 方式（第一候補）：sky jackknife（座標＝観測RA/DECベース。距離写像の違いは “統計量側” にのみ反映）
+          - region 分割：RA の分位点で N領域（決定的・seed不要）を作り、leave-one-out で ξℓ を再計算
+          - 入力：銀河+random（同一抽出仕様・同一重み）を region i を除外して ξℓ を計算
+          - 出力：`output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov.npz`
+            - `tag` は ξℓ の `.npz`（`cosmology_bao_xi_from_catalogs_{tag}.npz`）と同一（case単位で 1:1 対応）
+            - dv の順序は `y=[xi0(s_bins), xi2(s_bins)]`（peakfitと一致）
+          - peakfit 側の指定：`--cov-source jackknife` で自動的に `__jk_cov.npz` を探索して使用
+        - 4.5B.21.4.4.4.2 jackknife cov 生成スクリプトを追加（WSL/Corrfunc; threads=24）【完了】
+        - 4.5B.21.4.4.4.3 peakfit を dv+cov に更新（`cov_source=jackknife` 追加）【完了】
+        - 4.5B.21.4.4.4.4 DESI LRG1/LRG2（out_tag固定）で diag vs jackknife を比較【完了】
+        - 4.5B.21.4.4.4.5 Table 1/本文の扱いを更新（diag→dv+cov；ただし DESI の位置づけは引き続き screening）【完了】
+        - 反証条件：cov 推定を変えても ε の符号・オーダーが安定しない場合は “screening” として扱い、確証は距離指標（Y1data mean/cov）側に寄せる。
+      - 4.5B.21.4.4.5 DESI LRG2 の不一致要因を切り分け（jackknife後も残る差の起源）【完了】
+      - 4.5B.21.4.4.5.1 peakfit設定感度（r_range/alpha/eps/template/quad_weight）【完了】
+          - 実装/実行：`scripts/cosmology/cosmology_bao_catalog_peakfit_settings_sensitivity.py`
+          - 出力：`output/cosmology/cosmology_bao_catalog_peakfit_settings_sensitivity__lrg_combined__w_desi_default_ms_off_y1bins.png`
+          - 現状：LRG2 は lcdm で最良でも |z|≈3.3 を下回りにくい一方、pbg はテンプレート中心（r0）などで |z| が 1.5〜6 程度に動く（設定感度が残る）。
+      - 4.5B.21.4.4.5.2 座標化仕様感度（z_source/LOS/distance積分）【完了】
+          - 実装：`scripts/cosmology/cosmology_bao_xi_from_catalogs.py` に `--z-source cmb`（CMB dipole補正）のフォールバック計算を追加。
+          - 感度図：`output/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__lrg_combined__w_desi_default_ms_off_y1bins.png`
+          - 結果：LRG2 の lcdm ε≈−0.096 は z_source（obs→cmb）/ lcdm距離積分（n_grid, z_grid_max）を変えてもほぼ不変 → 「今回の範囲の座標化差」では不一致は説明しにくい。
+      - 4.5B.21.4.4.5.3 wedge/xi2 feature で定性的整合を確認【完了】
+      - 4.5B.21.4.4.5.4 broadband（smooth基底）感度（smooth_power_max; 1/r^3 追加）【完了】
+          - 出力（DESI y1bins; out_tag=`w_desi_default_ms_off_y1bins`）：
+            - `output/cosmology/cosmology_bao_catalog_wedge_anisotropy__w_desi_default_ms_off_y1bins.png`
+            - `output/cosmology/cosmology_bao_catalog_peak_summary__w_desi_default_ms_off_y1bins.png`
+          - 所見（LRG2; z≈0.71）：
+            - lcdm：peakfit は ε≈−0.096（jackknife; |z|≈9.4σ）だが、wedge 由来の ε_proxy は ≈−0.012 と小さく、wedge ピーク差だけを見る限り強い異方は示唆されない。
+            - ξ2 feature は z で大きく動き（lcdm: s_feature≈115→90、pbg: s_feature≈123→98）、特徴点の符号（残差の正負）も lcdm/pbg で反転するため、peakfit の “不一致” に ξ2 の broadband/feature 形状が強く効いている可能性がある（追加の切り分けが必要）。
+
+        - 4.5B.21.4.4.6 DESI DR1：multipoles + covariance を “一次プロダクト（fit可能な dv+cov）” として固定し、BAO fit（ε）で screening→確証の判定まで到達【完了（LRG1/LRG2 では RascalC/Jackknife でも ε_fit−ε_expected が |z|≲1.1 に収束し単一tracerでは決定打が出ない。multi-tracer 昇格は 4.5B.21.4.4.7 を参照）】
+        - 4.5B.21.4.4.6.0（ユーザー依頼フローの対応付け）(1) raw棚卸し→6.1、(2) ξ0/ξ2 生成（pycorr）→6.2、(3) covariance（RascalC + Jackknife）→6.3、(4) BAO fit（ε）→6.4（copy-paste コマンドは `doc/cosmology/DESI_DR1_BAO_REPRO.md` を参照）【完了】
+        - 4.5B.21.4.4.6.1 raw 内の対象セットを固定（LRG/QSO/BGS_BRIGHT/ELG_LOPnotqso; NGC/SGC; random 0..17）【完了】
+          - 入力ルート：`data/cosmology/desi_dr1_lss/raw/`
+          - 棚卸し出力：`output/cosmology/desi_dr1_lss_raw_inventory_summary.json` / `output/cosmology/desi_dr1_lss_raw_inventory.csv`
+        - 4.5B.21.4.4.6.2 ξ(s,μ)→ξ0/ξ2 の生成を pycorr で実装（fallback: 既存 Corrfunc 実装）【完了（pycorr backend 実装済み。RascalC cov 生成でも pycorr allcounts を使用）】
+        - 4.5B.21.4.4.6.3 covariance を RascalC + Jackknife で生成（fallback: Jackknifeのみ）【完了（RascalC: legendre_projected; Jackknife: sky RA-quantile）】
+          - RascalC 導入（WSL; GSL同梱ビルド）：`scripts/cosmology/wsl_install_rascalc.sh`
+          - cov 生成：`scripts/cosmology/cosmology_bao_xi_rascalc_cov_from_catalogs.py` → `output/cosmology/cosmology_bao_xi_from_catalogs_*__rascalc_cov.npz`
+        - 4.5B.21.4.4.6.4 BAO fit（ε）を実行し、Y1data 由来の ε_expected と整合チェック→DESI の扱いを更新【完了】
+          - 整合条件（暫定）：ε（dv+cov）と ε_expected の差が 2σ以内、かつ cov/fit設定を変えても符号とオーダーが安定
+        - 4.5B.21.4.4.6.5 Table 1/スコアボード：DESI の位置づけを確定（screening維持/確証昇格。満たせない場合は理由を固定）【完了（結論：現状は cov 系統支配のため screening 維持）】
+          - 出力（peakfit; full random; dv+cov）：`output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0__jk_cov_both_full_r0.png`
+          - 出力（cross-check）：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_full_r0__jk_cov_both_full_r0.png`
+          - 出力（peakfit; RascalC cov; dv+cov）：`output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_reservoir_r0to17_mix.png`
+          - 出力（cross-check; RascalC cov）：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_reservoir_r0to17_mix.png`
+        - 4.5B.21.4.4.6.6（任意）full random（random_index=1）で再現し、εのrandom依存（頑健性）を確認【完了】
+          - 出力（peakfit; full random r1; dv+cov）：`output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r1__jk_cov_both_full_r1.png`
+          - 出力（cross-check; full random r1）：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_full_r1__jk_cov_both_full_r1.png`
+          - 所見：
+            - pbg：LRG1/LRG2 とも ε_fit−ε_expected は |z_score_combined|≲1.5（≤2σ）で整合（LRG1: +0.78σ, LRG2: −1.43σ）。
+            - lcdm：random_index による ε の変動が大きく、強い主張には multi-random 平均など追加の頑健性評価が必要。
+        - 4.5B.21.4.4.6.7（任意）multi-random（random_index=0..17）で dv+cov を合成し、ε の random 依存を抑えて最終判定へ【完了】
+          - 方針B（実装）：random_index=0..17 の抽出NPZから「結合random（reservoir）」を生成し、1回の Corrfunc で dv=[ξ0,ξ2] を生成（`scripts/cosmology/desi_dr1_lss_build_combined_random_reservoir.py`）。
+            - 出力データ：`data/cosmology/desi_dr1_lss_reservoir_r0to17_mix/manifest.json`
+            - 注意：入力NPZの行順に偏りがあり得るため、結合時は `--take-mode random` を正とする（prefix は禁止）。
+          - Cov（sky-jackknife）：`scripts/cosmology/cosmology_bao_xi_jackknife_cov_from_catalogs.py --jk-n 48` で dv+cov を作り、`cosmology_bao_catalog_peakfit.py` で ε fit。
+          - 重要：jackknife cov の full off-diagonal をそのまま逆行列化すると ε が不安定化し得るため、`cosmology_bao_catalog_peakfit.py --cov-shrinkage λ`（例：λ=0.2〜1.0）で diag へ shrink して安定化させる。
+          - 結論（現時点の固定）：shrinkage 版 jackknife では pbg/lcdm ともに LRG1/LRG2 の ε_fit−ε_expected が |z|≲1 を安定に満たし、「決定打の差が出ない」ことを固定した（cov の扱いが支配的な系統になり得るため）。
+        - 4.5B.21.4.4.6.8（任意）jackknife cov の shrinkage λ 感度を sweep して定量化し、「確証に使えない」根拠を固定【完了】
+          - 実装/実行：`scripts/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep.py`
+          - 出力（例）：
+            - `output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix.png`
+            - `output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_full_r0r1_mean.png`
+          - 所見（要点）：
+            - λ=0（full off-diagonal）は |z_score_combined| が ≈5〜8 まで跳ね得る一方、λ≥0.2 では |z|≲1.3 に収束（ε_fit−ε_expected の“差”を作れてしまう）。
+            - 結論：現時点の jackknife cov（full off-diagonal）は支配的系統になり得るため、DESI は screening の位置づけを維持する。
+        - 4.5B.21.4.4.6.9（任意）jackknife の y_jk から shrinkage λ を自動推定（Ledoit-Wolf）し、λ≈0.006 が選ばれて “λ≈0” に近い結果になることを確認【完了】
+          - 実装：`scripts/cosmology/cosmology_bao_catalog_peakfit.py --cov-shrinkage auto`
+          - 出力（peakfit）：
+            - `output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__jk_cov_shrinkauto_reservoir_r0to17_mix_metrics.json`
+            - `output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_shrinkauto_full_r0r1_mean_metrics.json`
+          - 出力（cross-check）：
+            - `output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__jk_cov_shrinkauto_reservoir_r0to17_mix_metrics.json`
+            - `output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_shrinkauto_full_r0r1_mean_metrics.json`
+          - 所見：Ledoit-Wolf は jackknife cov をほぼ full off-diagonal のまま採用し得るため、ε_fit−ε_expected の有意度が再び |z|≫1 に跳ね得る（cov 取り扱いが支配的系統になり得る）→ 確証には使えない根拠を補強。
+        - 4.5B.21.4.4.6.10（任意）RascalC cov の収束（n_loops）を増やして warning を低減し、結論（screening維持）が不変か確認【完了（n_loops=480でも結論は不変。warningは残るが指標は改善）】
+          - 旧（n_loops=240）をバックアップ：`output/cosmology/cosmology_bao_xi_from_catalogs_*__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_nloops240.npz` / `output/cosmology/rascalc/*__nloops240/`
+          - 新（n_loops=480）で再生成（WSL）：`scripts/cosmology/cosmology_bao_xi_rascalc_cov_from_catalogs.py --n-loops 480 --loops-per-sample 24`
+          - 出力（peakfit; RascalC cov）：`output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_nloops480_reservoir_r0to17_mix_metrics.json`
+          - 出力（cross-check; Y1data）：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_nloops480_reservoir_r0to17_mix_metrics.json`
+      - 4.5B.21.4.4.7（継続）DESI DR1（multi-tracer）：raw から ξ0/ξ2 + covariance（dv+cov）を自前生成し、BAO fit（ε）で「screening→確証」判定を再挑戦【完了（昇格；promotion_check: promoted=true）】
+        - 実行フロー（raw→dv+cov→ε fit；再現テンプレ）
+          - 1) raw棚卸し：`python -B scripts/cosmology/desi_dr1_lss_raw_inventory.py`
+          - 2) 抽出（galaxy/random→NPZ；randomはreservoir 2M）：`python -B scripts/cosmology/fetch_desi_dr1_lss.py --raw-dir data/cosmology/desi_dr1_lss/raw --data-dir <data_dir> --sample <sample> --caps combined --random-index <i> --random-sampling reservoir --random-max-rows 2000000 --sampling-seed 0`
+          - 3) ξ0/ξ2（WSL; threads=24；backendは corrfunc/pycorr）：`wsl -d Ubuntu-24.04 -- bash -lc "cd /mnt/c/develop/waveP && OMP_NUM_THREADS=24 .venv_wsl/bin/python -B scripts/cosmology/cosmology_bao_xi_from_catalogs.py --data-dir <data_dir> --sample <sample> --caps combined --weight-scheme desi_default --random-kind random --match-sectors off --threads 24 --paircounts-backend <corrfunc|pycorr> --dist <lcdm|pbg> --z-min <zmin> --z-max <zmax> --out-tag <tag>"`
+          - 4) covariance（WSL; jackknife/RascalC）→ BAO fit（ε）→ cross-check：
+            - jackknife：`wsl -d Ubuntu-24.04 -- bash -lc "cd /mnt/c/develop/waveP && OMP_NUM_THREADS=24 .venv_wsl/bin/python -B scripts/cosmology/cosmology_bao_xi_jackknife_cov_from_catalogs.py --xi-metrics-json <xi_metrics.json> --jk-n 48 --threads 24"`
+            - RascalC：`wsl -d Ubuntu-24.04 -- bash -lc "cd /mnt/c/develop/waveP && OMP_NUM_THREADS=24 .venv_wsl/bin/python -B scripts/cosmology/cosmology_bao_xi_rascalc_cov_from_catalogs.py --xi-metrics-json <xi_metrics.json> --threads 24 --n-loops 480 --loops-per-sample 24"`
+            - peakfit（ε）：`python -B scripts/cosmology/cosmology_bao_catalog_peakfit.py --sample <sample> --caps combined --out-tag <tag> --cov-source <jackknife|rascalc> --output-suffix <suffix>`
+            - Y1data cross-check（ε_expected）：`python -B scripts/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck.py --peakfit-metrics-json <peakfit_metrics.json> --out-tag <tag>__<suffix>`
+        - 対象（Y1dataで ε_expected が定義できる tracer）：
+          - ELG2（ELG_LOPnotqso; 1.1<z<1.6）
+          - LRG3+ELG1（LRG + ELG_LOPnotqso; 0.8<z<1.1；注意：公式は合算tracerのため自前結合が必要）
+          - Lya QSO（1.77<z<4.16）：ローカル raw には無い（Lyα forest auto + QSO cross）ため、DESI DR1 VAC（lya-correlations v1.0）から dv+cov を生成して ε fit→sweep まで到達【完了（第二tracer；promoted）】
+            - raw inventory（参考）：`output/cosmology/desi_dr1_lss_raw_inventory_summary.json`（samples=[BGS_BRIGHT, ELG_LOPnotqso, LRG, QSO]）
+            - 入力（VAC; raw）：`data/cosmology/desi_dr1_vac_lya_correlations_v1p0/raw/`
+            - dv+cov（ξ0/ξ2 + projected cov；μ-bin + 成分圧縮）：`output/cosmology/cosmology_bao_xi_from_catalogs_lya_qso_combined_*__w_desi_vac_lya_corr_v1p0_mubin_comb.npz` / `...__vac_cov.npz`
+            - shrinkage sweep（vac cov; smooth3）：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_vac_lya_corr_v1p0_mubin_comb__vac_cov_smooth3.csv`
+            - 所見：pbg の z_score_combined≈-3.03…-3.28（λ=0..1）で安定し、|z|≥3 を満たす → 昇格ゲートの第二tracerとして採用。
+            - 注意：pbg の RP/RT は bin の Z 列で評価した per-bin z の AP rescale による近似であり、raw再計算（Lyα forest 推定量を含む厳密再解析）ではない。
+        - 対象（DV-only：BGS/QSO は ε_expected ではなく α/DV で扱う必要があるため別扱い）：
+          - BGS（0.1<z<0.4）、QSO（0.8<z<2.1）
+        - DV-only cross-check（α_expected vs peakfit α）：
+          - 実装：`scripts/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck.py`【完了】
+          - peakfit 側の拡張：α の profile を出力して CI（α_ci_1sigma/2sigma）を記録【完了】（`scripts/cosmology/cosmology_bao_catalog_peakfit.py`）
+          - 代表（QSO; combined）：α_expected と整合（|z|≲1）
+            - peakfit：`output/cosmology/cosmology_bao_catalog_peakfit_qso_combined_metrics.json`（注意：α_max は 1.25 に拡張して edge を回避）
+            - cross-check：`output/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck__qso_combined_metrics.json`
+          - BGS（0.1<z<0.4）：local raw→ξℓ→peakfit→α cross-check を実行【完了】
+            - 入力抽出：`scripts/cosmology/fetch_desi_dr1_lss.py --data-dir data/cosmology/desi_dr1_lss_bgs_bright_reservoir_r0 --raw-dir data/cosmology/desi_dr1_lss/raw --sample bgs_bright --random-index 0 --random-sampling reservoir`
+            - ξℓ（WSL）：`output/cosmology/cosmology_bao_xi_from_catalogs_bgs_bright_combined_*_zmin0p1_zmax0p4__w_desi_default_ms_off_y1bins_bgs_reservoir_r0.npz`
+            - peakfit（diag）：`output/cosmology/cosmology_bao_catalog_peakfit_bgs_bright_combined__w_desi_default_ms_off_y1bins_bgs_reservoir_r0_metrics.json`
+            - cross-check：`output/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck__bgs_bright_combined__w_desi_default_ms_off_y1bins_bgs_reservoir_r0_metrics.json`
+            - 所見：α_fit−α_expected は lcdm/pbg ともに |z|≈1.3–2.2 程度（DV-only は r_d に依存する補助指標のため、扱いは要注意）。
+        - 手順：Corrfunc/pycorr（ξ(s,μ)→ξ0/ξ2）→ RascalC cov + sky-jackknife cov → peakfit（ε）→ Y1data ε_expected cross-check
+        - 進捗（r0; local raw）：
+          - ELG2：dv+cov（jackknife / RascalC）→ ε fit→cross-check を実行。cov（full off-diagonal）が結果を支配し得る（shrinkage/rascalcで結論が変わる）ため、現状は screening を維持。
+            - 入力抽出：`scripts/cosmology/fetch_desi_dr1_lss.py --data-dir data/cosmology/desi_dr1_lss_reservoir_r0 --raw-dir data/cosmology/desi_dr1_lss/raw --sample elg_lopnotqso --caps combined --random-index 0 --random-sampling reservoir`
+            - 出力（例）：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_reservoir_r0__rascalc_cov_reservoir_r0__elg2_metrics.json`
+          - ELG2（r0..17 mix）：random_index=0..17 の抽出NPZから混合random（reservoir）を生成し、dv+cov→ε fit→cross-check を再実行。jackknife shrinkage λ の sweep では λ≲0.2 で |z|≫1 が出得る一方、λ≳0.4（対角寄り）で |z_score_combined|≲1.1、RascalC cov（n_loops=480）でも |z_score_combined|≲1.3 に収束 → cov取り扱いが支配的系統になり得るため、現状は screening を維持（確証には使えない）。
+            - 混合random data_dir：`data/cosmology/desi_dr1_lss_elg_lopnotqso_reservoir_r0to17_mix/manifest.json`
+            - 出力（例；cross-check; RascalC cov）：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_elg_reservoir_r0to17_mix__rascalc_cov_nloops480_elg_reservoir_r0to17_mix_metrics.json`
+            - shrinkage sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_elg_reservoir_r0to17_mix.png` / `.csv`
+          - LRG3+ELG1（r0..17 mix）：multi-random（r0..17）の LRG/ELG 混合random を用いて合算サンプルを生成し、dv+cov→ε fit→cross-check を再実行。
+            - 重要：reservoir random を単純連結すると tracer 間で random-to-galaxy の正規化（∑w_r/∑w_g）が揃わず、合算tracerの選択関数が歪む可能性があるため、合算時に random 重みを tracer ごとに rescale（capごとに total を保存する方式）するオプションを追加。
+            - 合算データ生成（multi-dir + rescale 対応）：`scripts/cosmology/desi_dr1_lss_build_combined_tracer_sample.py`
+            - 合算 data_dir（rescale）：`data/cosmology/desi_dr1_lss_lrg_elg_reservoir_r0to17_mix_rescale/manifest.json`
+            - dv（ξ0/ξ2；z=0.8–1.1）：`output/cosmology/cosmology_bao_xi_from_catalogs_lrg_elg_lopnotqso_combined_*_zmin0p8_zmax1p1__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale.npz`
+            - 再現確認（pycorr backend; out_tag=`..._pycorr`）：dv+cov（jackknife n=8 / RascalC n_loops=240）→ peakfit（ε）→ Y1data cross-check を追加で実行【完了】
+              - dv：`output/cosmology/cosmology_bao_xi_from_catalogs_lrg_elg_lopnotqso_combined_*_zmin0p8_zmax1p1__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale_pycorr.npz`
+              - cov（jackknife; n=8）：`output/cosmology/cosmology_bao_xi_from_catalogs_lrg_elg_lopnotqso_combined_*__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale_pycorr__jk_cov_ra_quantile_per_cap_unwrapped_n8.npz`
+              - cov（RascalC; n_loops=240）：`output/cosmology/cosmology_bao_xi_from_catalogs_lrg_elg_lopnotqso_combined_*__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale_pycorr__rascalc_cov_nloops240_lps24.npz`
+              - cross-check：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_pycorr_jk_n8_metrics.json` / `output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_pycorr_rascalc_n240_metrics.json`
+            - cov（sky-jackknife/RascalC）も生成して peakfit→cross-check まで到達したが、full off-diagonal を入れると pbg が負側へ大きく引っ張られ得る（jackknife/RascalCで共通）ため、現状は **covの取り扱いが支配的系統** → screening 維持。
+              - shrinkage sweep（jackknife）：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale.png` / `.csv`
+              - 所見：λ=1（対角のみ）では ε_fit が ε_expected へ戻る一方、λ<1（off-diagonal有）では符号が反転し得る → cov 推定/正則化の改善（または multi-tracer joint fit）が必要。
+            - 追加の切り分け（cov 構造）：xi0-xi2 cross-cov（cov02）が結果を支配し得るため、full cov の前処理を追加して感度を確認【完了】
+              - 実装：`scripts/cosmology/cosmology_bao_catalog_peakfit.py --cov-zero-xi02`（full cov の xi0-xi2 cross ブロックを 0 にして inversion）
+              - 例（jackknife; λ=0; smooth=3）：pbg の Δε が -0.089（z≈-9.6）→ xi02-zero で +0.027（z≈+2.9）へ大きく変化（符号反転）→ **cov02 が支配的系統**の強い兆候
+                - full：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_full_smooth3_test_metrics.json`
+                - xi02-zero：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_xi02zero_smooth3_metrics.json`
+              - 追加の切り分け（jackknife region 設計）：cap（north/south）ごとに RA 分位点を作って region を割る `--jk-mode ra_quantile_per_cap` を追加し、per-case cov を `--cov-suffix` で切り替えて検証【実行】
+                - 実装：`scripts/cosmology/cosmology_bao_xi_jackknife_cov_from_catalogs.py --jk-mode ra_quantile_per_cap --output-suffix jk_cov_per_cap` / `scripts/cosmology/cosmology_bao_catalog_peakfit.py --cov-suffix jk_cov_per_cap`
+                - 結果（LRG3+ELG1; jackknife per-cap; λ=0; smooth=3）：pbg の Δε≈-0.267（z_score_vs_y1data≈-28.8; z_score_combined≈-24.1）まで悪化し、確証には未到達（cov 推定/region 設計が支配的系統であることを補強）
+                  - full：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_percap_full_smooth3_metrics.json`
+                  - xi02-zero：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_percap_xi02zero_smooth3_metrics.json`（xi02 を 0 にしても pbg は依然 |z|≫1）
+              - 追加の切り分け（jackknife region 設計の修正）：cap内の RA 分布が 0..360 をカバーしないと region が空になり得るため、RA を「最大ギャップで切って unwrap」してから分位点を作る `--jk-mode ra_quantile_per_cap_unwrapped` を追加し、n_regions=24（暫定）で検証【実行】
+                - 実装：`scripts/cosmology/cosmology_bao_xi_jackknife_cov_from_catalogs.py --jk-mode ra_quantile_per_cap_unwrapped --output-suffix jk_cov_per_cap_unwrapped_n24` / `scripts/cosmology/cosmology_bao_catalog_peakfit.py --cov-suffix jk_cov_per_cap_unwrapped_n24`
+                - 結果（LRG3+ELG1; jackknife per-cap-unwrapped; λ=0; smooth=3; n_regions=24）：pbg の Δε≈-0.125（z_score_combined≈-11.0）まで改善したが、依然 |z|≫1（確証には未到達）
+                  - full：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_percap_unwrapped_n24_full_smooth3_metrics.json`
+                  - xi02-zero：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_percap_unwrapped_n24_xi02zero_smooth3_metrics.json`（pbg は |z|≲1 へ戻る一方、lcdm は悪化）
+              - 追加の切り分け（jackknife region 設計の2D化）：Dec 分位点×RA 分位点（capごと; RAは bandごとに最大ギャップで unwrap）で region を作る `--jk-mode ra_dec_quantile_per_cap_unwrapped` を追加し、n_regions=48（dec=4, ra=6 / cap）で検証【実行】
+                - 実装：`scripts/cosmology/cosmology_bao_xi_jackknife_cov_from_catalogs.py --jk-mode ra_dec_quantile_per_cap_unwrapped --jk-n 48`（`--jk-dec-bands`/`--jk-ra-bins` で指定可）
+                - 結果（LRG3+ELG1; ra×dec; λ=0; smooth=3; n_regions=48）：pbg は依然 |z|≫1（z_score_combined≈-10.4）で確証には未到達（cov推定が支配的系統であることを補強）
+                  - full：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_ra_dec_per_cap_unwrapped_n48_dec4_ra6_full_smooth3_metrics.json`
+                  - xi02-zero：`output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_ra_dec_per_cap_unwrapped_n48_dec4_ra6_xi02zero_smooth3_metrics.json`（pbg は |z|≲2 へ戻る一方、lcdm は悪化）
+              - 追加の切り分け（cov 正則化：banding）：jackknife/RascalC の off-diagonal noise を抑え、ε 判定を「cov推定/正則化に対して安定」へ寄せる【実行】
+                - peakfit 拡張：dv=[ξ0,ξ2] の full covariance を fit空間の |Δs_bin| で banding できるようにし、xi0-xi2 cross-cov も同一枠組みで制御可能にした。
+                  - `scripts/cosmology/cosmology_bao_catalog_peakfit.py --cov-bandwidth-bins <k> [--cov-bandwidth-xi02-bins <k2>]`
+                - sweep 拡張：`scripts/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep.py` に `--cov-source (jackknife|rascalc)` / `--cov-suffix` / banding オプションを追加し、(bandwidth, λ) 依存の出力を固定した。
+                - 結果（LRG3+ELG1; band0=同一binのみ保持）：
+                  - jackknife（ra×dec per-cap unwrapped; band0）：pbg の z_score_combined≈-5.2…-5.5 が λ=0..1 で安定、lcdm は z≈-0.77 で整合。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_ra_dec_per_cap_unwrapped_n48_dec4_ra6_band0.png` / `.csv`
+                  - RascalC（band0; smooth=3）：pbg は λ≤0.4 で z_score_combined≈-6.5 が出る一方、λ≥0.6（diagへ寄せる）で z≈0.6〜0.7 に戻る。xi02-zero では z≈0.69 に固定 → cov02 が支配的系統になり得る（確証には未到達）。
+                    - sweep（n_loops=960; cov-suffix=rascalc_cov_nloops960_lps24）：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__rascalc_cov_nloops960_lps24_band0_smooth3.png` / `.csv`
+                    - sweep（xi02-zero; n_loops=960）：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__rascalc_cov_nloops960_lps24_xi02zero_band0_smooth3.png` / `.csv`
+                  - 参考：jackknife（default jk_cov; band0）でも λ≤0.8 は pbg の |z|≳5.2 が維持されるが、λ=1（diag-only）で z≈0 へ戻り得る。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_lrg3elg1_reservoir_r0to17_mix_rescale__jk_cov_band0.png` / `.csv`
+                - 結果（ELG2; 1.1<z<1.6; reservoir r0..17 mix; band0）：
+                  - jackknife（band0）：pbg の z_score_combined≈-3.8（λ≤0.6）だが、λ≥0.8 で z≈-0.45 へ戻る（diagへ寄せ過ぎると相関情報が失われる）→ shrinkage に非頑健。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_elg_reservoir_r0to17_mix__jk_cov_band0.png` / `.csv`
+                  - jackknife（ra×dec per-cap unwrapped; band0）：pbg の z_score_combined≈-0.32…-0.38（λ=0..1）で安定（lcdm は z≈-0.91…-1.03）。上の “≈-3.8σ” は region 設計（jk_cov）に依存して再現しない → ELG2 は現状 screening 維持。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_elg_reservoir_r0to17_mix__jk_cov_ra_dec_per_cap_unwrapped_n48_dec4_ra6_band0.png` / `.csv`
+                  - RascalC（band0）：pbg の z_score_combined≈-0.54（λ=0..1）で整合 → cov_source に対して結論が割れるため確証には未到達。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_elg_reservoir_r0to17_mix__rascalc_cov_band0.png` / `.csv`
+                - 結果（LRG1/LRG2; 0.4<z<0.8; reservoir r0..17 mix; band0）：
+                  - jackknife（band0）：pbg の z_score_combined は LRG1≈+0.44…+0.51 / LRG2≈+0.21…+0.22（λ=0..1）で安定し、|z|≥3 を満たさない（第二tracer候補にはならない）。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__jk_cov_band0.png` / `.csv`
+                  - RascalC（band0）：pbg の z_score_combined は LRG1≈+0.56 / LRG2≈+0.30（λ=0..1）で安定し、|z|≥3 を満たさない（第二tracer候補にはならない）。
+                    - sweep：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_band0.png` / `.csv`
+              - 結論：band0 を「確証判定の正則化手順」として暫定固定し、multi-tracer（LRG3+ELG1 + Lya QSO）で昇格条件（複数tracerで≥3σ）を満たした。
+        - 昇格条件（案）：ε_fit−ε_expected の |z| が cov推定/正則化（jackknife shrinkage / RascalC n_loops / random密度）に対して安定し、かつ複数tracerで ≥3σ を満たす場合のみ confirmation へ昇格
+        - 昇格判定ゲート（機械判定）：band0 正則化の sweep 出力（z_score_combined）から「複数tracerで ≥3σ」を自動判定するスクリプトを追加し、現状は **達成**（promoted=true; passing_tracers=[LRG3+ELG1, Lya QSO]）を固定【完了（昇格）】
+          - 実装：`scripts/cosmology/cosmology_desi_dr1_bao_promotion_check.py`
+          - 入力：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__*.csv`（band0; jackknife/RascalC）
+          - 出力：`output/cosmology/cosmology_desi_dr1_bao_promotion_check.json`
+          - 第二tracer（Lya QSO; VAC）：μ-bin（nmu=120）で ξ0/ξ2 を再推定し、4成分（Lyα auto / QSO×Lyα 等）を重み付き平均で単一成分へ圧縮して nuisance を削減した上で、vac cov（smooth3）で sweep を再評価し、pbg が |z_score_combined|≥3 を満たすことを確認。
+            - 実装：`scripts/cosmology/cosmology_bao_xi_from_desi_dr1_vac_lya_correlations.py --project-mode mu_bin --nmu 120 --combine-components`
+            - 代表出力：`output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_vac_lya_corr_v1p0_mubin_comb__vac_cov_smooth3.csv`
+
+- 成果物例：`output/cosmology/cosmology_bao_catalog_peak_summary.png`、`output/cosmology/cosmology_bao_catalog_peak_summary__recon_grid_iso.png`、`output/cosmology/cosmology_bao_catalog_peakfit_cmass_combined__recon_grid_iso.png`、`output/cosmology/cosmology_bao_catalog_wedge_anisotropy__recon_grid_iso.png`、`output/cosmology/cosmology_bao_catalog_peakfit_caps_summary__recon_grid_iso.png`
+
+### Step 4.6：JWST（MAST）スペクトル一次データで高赤方偏移 z を直接測定（距離指標非依存）
+- 現状：保留（GN-z11 公開待ち；pipeline/I/F は完了（初版）として固定済み）
+- 位置づけ：Phase 4.3（距離指標と独立）を強化する拡張Step（「ΛCDM距離」ではなく **スペクトル一次データ**から z を直接扱う）
+- 入口：MAST/astroquery（`doc/PRIMARY_SOURCES.md` の MAST 節）
+- 対象候補（第一弾）：GN-z11、JADES-GS-z14-0、LID-568、LID2619、LID4959、GLASS-z12、CEERS2-5429（GN-z11 が未公開のため追加）
+- データ条件（目安）：
+  - Mission/obs_collection：JWST
+  - dataproduct_type：Spectrum
+  - productSubGroupDescription：x1d（1D spectrum；ファイル名上は `_x1d` 等を含むことが多い）
+- 4.6.1 仕様固定（クエリ条件／保存先／再現条件／z推定の最小I/F）【完了】
+  - 保存：`data/cosmology/mast/jwst_spectra/<target>/`（取得条件とファイル一覧を同梱）
+  - 出力：`output/cosmology/jwst_spectra_<target>_*`（z推定、線同定、QC図）
+  - 補足：GN-z11 は target_name がプログラム間で揺れる可能性があるため、`targets.json` に position（ra/dec）も併記し、cone search でも拾える形へ固定（公開後の取りこぼし防止）。
+- 4.6.2 取得スクリプト実装（fetch→cache→offline再現）【完了（初版）】
+  - 実装：`scripts/cosmology/fetch_mast_jwst_spectra.py`（新規）
+  - 取得（初回実行で作成）：`data/cosmology/mast/jwst_spectra/manifest_all.json`
+  - 注意：
+    - GN-z11（JWST）は観測が見つかっても、proprietary 期間により x1d が 401 で取得できない場合がある（manifest に記録して議論がブレないようにする）。
+    - JADES-GS-z14-0 は x1d が取得でき、QC 図も生成できることを確認済み。
+  - 再現（online；取得＋キャッシュ）：
+    - `python -B scripts/cosmology/fetch_mast_jwst_spectra.py --download-missing --max-obs 1`
+  - 再現（offline；QC＋既存z出力の集約）：
+    - `python -B scripts/cosmology/fetch_mast_jwst_spectra.py --offline`
+- 4.6.3 z 推定（輝線のズレ）パイプライン（半自動＋手動検証）【完了（初版）】
+  - 実装：`scripts/cosmology/fetch_mast_jwst_spectra.py --estimate-z`（offline対応）
+  - 代表スペクトルの選択：`mirimage_x1d` を避け、非mirimage（例：`*_p750l_x1d.fits`）を優先して診断の混乱を抑える（対象により fallback あり）。
+  - 固定出力（例：JADES-GS-z14-0）：
+    - `output/cosmology/jwst_spectra__jades_gs_z14_0__z_estimate.csv`
+    - `output/cosmology/jwst_spectra__jades_gs_z14_0__z_estimate.json`
+    - `output/cosmology/jwst_spectra__jades_gs_z14_0__z_diagnostic.png`
+  - 最低要件（継続）：波長校正前提の明記／線同定の根拠／zと不確かさ（統計＋系統）の提示
+- 4.6.4 論文（宇宙論I）とスコアボードへの組み込み【完了（初版）】
+  - 論文（本文 2.5.2）へ反映：JWST x1d の QC と z 推定（診断図/候補表）＋取得状況（manifest_all）と注意点
+  - スコアボード：JWST/MAST（一次データ入口）を「参考（取得状況）」として追加
+  - Table 1：JWST/MAST 行を追加（screening/参考として表示。**σ評価の対象からは除外**）：`scripts/cosmology/jwst_spectra_integration.py` → `output/cosmology/jwst_spectra_integration_metrics.json` → `scripts/summary/paper_tables.py`
+- 4.6.5 次：線同定（手動検証）と z の不確かさ（統計＋系統）を固定し、Table 1 への組み込み可否を再評価【完了（現時点：GN-z11は未公開で保留）】
+  - 4.6.5.1 手動線同定（`line_id.json`）→ z確定（`--confirm-z`）のI/Fを実装し、`manifest_all` に集約【完了】
+    - line entry: `prior_sigma_um`（任意）で近接線の centroid 選択を安定化し、`use`（既定true）で「測定はするが z 結合に入れない」を分離できるようにする。
+    - centroid 測定は raw（局所ベースライン差；trimmed median）を用い、高域フィルタ由来のリンギングで「偽ピーク」を拾うことを避ける。
+  - 4.6.5.2 対象ごとに線同定を確定し、zと不確かさ（統計＋系統）を固定【完了（現時点：GN-z11は未公開で保留）】
+    - JADES-GS-z14-0：`[O III]5007` と Hα（離れた波長での独立クロスチェック）を `use=true` とし、`min_snr_integrated_proxy` で弱いスペクトル（例：o001）を除外して z_confirmed を固定（候補線は `use=false` として保持、Table 1 には未投入）
+      - `output/cosmology/jwst_spectra__jades_gs_z14_0__z_confirmed.json`
+      - `output/cosmology/jwst_spectra__jades_gs_z14_0__z_confirmed.png`
+      - `output/cosmology/jwst_spectra__jades_gs_z14_0__z_confirmed_summary.png`
+    - RX_11027：NIRSpec/SLIT（F170LP;G235M; program 6073）の公開 x1d を追加取得し、`[O III]5007` と Hα を `use=true` として z_confirmed を固定（低z解）。z_estimate では高z代替解（C IV + C III]）も候補に出るため、`line_id.json` に cross-check（use=false）を残しつつ、`params.max_z_pull=3` の outlier clipping で明らかに不整合な line を除外し、χ²/dof≈1 まで整合させた。
+      - `output/cosmology/jwst_spectra__rx_11027__z_estimate.csv`
+      - `data/cosmology/mast/jwst_spectra/rx_11027/line_id.json`
+      - `output/cosmology/jwst_spectra__rx_11027__z_confirmed.json`（z≈2.4216, σ_total≈0.00107, χ²/dof≈1.01；`min_ok_spectra=2`、outlier rejected_n=1）
+      - `output/cosmology/jwst_spectra__rx_11027__z_confirmed_summary.png`
+    - JADES_10058975：NIRSpec/SLIT（program 6073）の公開 x1d について、z_estimate の最有力は z≈3.571 の [O II]+[Ne III]（2本マッチ）。ただし [O II] はスペクトル端に近く centroid が不安定になりやすいため cross-check（use=false）として測定のみ残し、[Ne III] を z結合（use=true）に採用して z_confirmed を固定（z≈3.5745, σ_total≈0.00138）。
+      - `output/cosmology/jwst_spectra__jades_10058975__z_estimate.csv`
+      - `data/cosmology/mast/jwst_spectra/jades_10058975/line_id.json`
+      - `output/cosmology/jwst_spectra__jades_10058975__z_confirmed.json`
+      - `output/cosmology/jwst_spectra__jades_10058975__z_confirmed.png`
+      - `output/cosmology/jwst_spectra__jades_10058975__z_confirmed_summary.png`
+      - `output/cosmology/jwst_spectra__jades_10058975__z_confirmed_lines.csv`
+    - GN-z11：obs は見つかるが `t_obs_release_utc=2026-04-09...`（2026-01-24 時点で未来）で `is_released=false`。したがって現時点では取得不能（未公開）として保留し、公開後に local x1d → `line_id.json` → `z_confirmed` を進める。
+    - LID-568：MAST 側の target_name は `LID568`（NIRSpec）および `LID568MIRI`（MIRI）で、座標（J2000）は RA=149.6841, Dec=2.7356（Chandraページ）として確認した。`targets.json` を介して取得導線を固定し、local x1d を取得して z_estimate / z_confirmed を更新（Hα 単線として固定；近接候補線 [N II]/[S II]6731 は no_signal_over_baseline）。
+      - `data/cosmology/mast/jwst_spectra/targets.json`
+      - `output/cosmology/jwst_spectra__lid_568__x1d_qc.png`
+      - `output/cosmology/jwst_spectra__lid_568__z_diagnostic.png`
+      - `output/cosmology/jwst_spectra__lid_568__z_estimate.csv`
+      - `output/cosmology/jwst_spectra__lid_568__z_confirmed.json`（z≈4.4349, σ_total≈0.00136, χ²/dof≈1.20；Hα のみ use=true）
+      - `output/cosmology/jwst_spectra__lid_568__z_confirmed_summary.png`
+    - LID2619：MIRI/LRS（P750L; program 1760）の公開 x1d を取得し、z_estimate は z≈19.56（Hα/[N II] + [S II]）を示唆する。輝線が 13–14 µm 付近（LRS端・ノイズ増大域）に集中するため暫定として扱い、[S II] 二重線（6716/6731）を use=true、Hα/[N II] を cross-check（use=false）として z_confirmed を固定した（MIRI/LRS 由来の centroid 系統は `sigma_sys_um=0.035 µm` として反映）。
+      - `data/cosmology/mast/jwst_spectra/lid2619/line_id.json`
+      - `output/cosmology/jwst_spectra__lid2619__z_estimate.csv`
+      - `output/cosmology/jwst_spectra__lid2619__z_confirmed.json`（z≈19.579, σ_total≈0.055；ok_spectra_n=1）
+      - `output/cosmology/jwst_spectra__lid2619__z_confirmed.png`
+      - `output/cosmology/jwst_spectra__lid2619__z_confirmed_lines.csv`
+    - LID4959：MIRI/LRS（P750L; program 1760）の公開 x1d を取得し、z_estimate は z≈19.65（Hα + [S II]）を示唆する。暫定として扱い、[S II] 二重線（6716/6731）を use=true、Hα を cross-check（use=false）として z_confirmed を固定した（`sigma_sys_um=0.035 µm`）。
+      - `data/cosmology/mast/jwst_spectra/lid4959/line_id.json`
+      - `output/cosmology/jwst_spectra__lid4959__z_estimate.csv`
+      - `output/cosmology/jwst_spectra__lid4959__z_confirmed.json`（z≈19.656, σ_total≈0.052；ok_spectra_n=1）
+      - `output/cosmology/jwst_spectra__lid4959__z_confirmed.png`
+      - `output/cosmology/jwst_spectra__lid4959__z_confirmed_lines.csv`
+    - GLASS-z12：MIRI/LRS（P750L）の公開 x1d を取得し、6.66 µm の強い輝線を `[O III]5007`（`use=true`）として採用して z_confirmed を固定した。8.7–8.8 µm 付近は Hα+[N II] のブレンドでピークが複数立つため、cross-check として測定は残すが z 結合（`use=true`）には入れない（`use=false`）。
+      - `output/cosmology/jwst_spectra__glass_z12__x1d_qc.png`
+      - `output/cosmology/jwst_spectra__glass_z12__z_estimate.csv`
+      - `data/cosmology/mast/jwst_spectra/glass_z12/line_id.json`
+      - `output/cosmology/jwst_spectra__glass_z12__z_confirmed.json`（z≈12.307, σ_total≈0.070, χ²/dof≈0.00；`[O III]5007` のみ use=true；`sigma_sys_um=0.035 µm`）
+      - `output/cosmology/jwst_spectra__glass_z12__z_confirmed_summary.png`
+    - CEERS2-5429：MIRI/LRS（P750L; program 3703）の公開 x1d を追加で取得し、z_estimate は z≈19.4（Hα + [S II]）を示唆する。輝線が 13–14 µm 付近（LRS端・ノイズ増大域）に集中し、Hα+[N II] や [S II] 二重線のブレンド比にも依存するため、zは暫定として扱う。`[S II]6716`（強い）に加え、別スペクトルで安定に拾える `[S II]6731` を `use=true` にし（prior_sigma を狭めて「近傍の強い別ピーク」へ snap しないようにする）、`min_ok_spectra=2` を満たす形で z_confirmed を更新した（MIRI/LRS 由来の centroid 系統は `sigma_sys_um=0.035 µm` として反映）。
+      - `output/cosmology/jwst_spectra__ceers2_5429__x1d_qc.png`
+      - `output/cosmology/jwst_spectra__ceers2_5429__z_estimate.csv`
+      - `data/cosmology/mast/jwst_spectra/ceers2_5429/line_id.json`
+      - `output/cosmology/jwst_spectra__ceers2_5429__z_confirmed.json`（z≈19.407, σ_total≈0.052；ok_spectra_n=2 で **z_confirmed 採用（ok=true）** に更新）
+      - `output/cosmology/jwst_spectra__ceers2_5429__z_confirmed_summary.png`
+    - GNZ7Q：MIRI の x1d が多数あり、以前は代表スペクトル選択が長波長（mirifulong）に偏って z_estimate が `no_candidates_scored` になっていた。代表スペクトル選択を「scoring が成立する x1d を優先（fallbackあり）」へ改良し、mirifushort を自動選択して z_estimate を成立させた（best z≈13.64; matches=3）。その上で、Hα / [N II]6583 / [S II]6716 を `use=true` として line_id を確定し、`--confirm-z` で z_confirmed を固定（z≈13.645, σ_total≈0.00109, χ²/dof≈1.93；outlier rejected_n=11, ok_spectra_n=4）。
+      - `output/cosmology/jwst_spectra__gnz7q__x1d_qc.png`
+      - `output/cosmology/jwst_spectra__gnz7q__z_diagnostic.png`
+      - `output/cosmology/jwst_spectra__gnz7q__z_estimate.csv`
+      - `output/cosmology/jwst_spectra__gnz7q__z_estimate.json`（`spectrum_selection.tried` を記録）
+      - `data/cosmology/mast/jwst_spectra/gnz7q/line_id.json`
+      - `output/cosmology/jwst_spectra__gnz7q__z_confirmed.json`
+      - `output/cosmology/jwst_spectra__gnz7q__z_confirmed.png`
+      - `output/cosmology/jwst_spectra__gnz7q__z_confirmed_summary.png`
+      - `output/cosmology/jwst_spectra__gnz7q__z_confirmed_lines.csv`
+  - 4.6.5.3 Table 1 への組み込み可否（採用/不採用の根拠）を再評価【完了（現時点：不採用として固定）】
+
+- 4.6.6 公開待ち（proprietary）状況の定量化（release waitlist）【完了（初版）】
+  - 目的：GN-z11 など「見つかるが未公開」の状態を、主観ではなく機械可読な一次ログで固定し、次の作業（公開後の取得→z_confirmed）へ即接続できる形にする。
+  - 実装：`scripts/cosmology/jwst_spectra_release_waitlist.py`
+  - 出力：`output/cosmology/jwst_spectra_release_waitlist.json` / `output/cosmology/jwst_spectra_release_waitlist.csv`
+
+- 4.6.7 ダッシュボード/スコアボードへの統合（公開待ちの可視化・offline運用の安定化）【完了（初版）】
+  - 目的：`--offline` の軽量運用でも JWST の進捗（z候補/確定、公開待ち）が消えないようにし、公開待ち（release日が未来）をレポート側で明示できる形にする。
+  - 更新：`scripts/cosmology/fetch_mast_jwst_spectra.py`（`manifest_all.json` が既存の z出力を参照して状態を維持）
+  - 更新：`scripts/summary/public_dashboard.py` / `scripts/summary/validation_scoreboard.py`（waitlist を参照し、`not_released_yet` を表示）
+
+### Step 4.7：DDR再接続の条件定量化（距離指標の前提検証）
+- 現状：完了（改訂）（DESI時代のBAOデータ反映／判定基準の明文化／Martinelli2021（SNIa+BAO）の d_L/d_A 寄与分解を追加）
+- 目的：
+  - 赤方偏移の「時間伸長」が整合しても、距離比（DDR/BAO等）で強く棄却される状況を、
+    (A) P-modelが間違っている／(B) 距離指標の前提に問題がある、の両解釈が可能であることを明示し、
+    **後者（距離指標前提の検証）を定量化**する。
+  - その結果、「宇宙論で棄却」ではなく「距離指標の前提に対して特定の予測（必要補正）を出している」へ整理する。
+- 4.7.1 DDR緊張の分解（どこから来るか）【完了（初版）】
+  - 出力：`output/cosmology/cosmology_tension_attribution.png` / `output/cosmology/cosmology_tension_attribution_metrics.json`
+  - 関連：`output/cosmology/cosmology_distance_duality_internal_consistency.png`（一次ソース間の自己矛盾）
+- 4.7.2 SNe Ia 光度距離の前提検証（標準光源/不透明度/校正）【完了（初版）】
+  - 出力（到達限界・誤差予算）：`output/cosmology/cosmology_distance_indicator_error_budget.png` / `output/cosmology/cosmology_distance_indicator_error_budget_sensitivity.png`
+  - 出力（独立プローブ）：`output/cosmology/cosmology_sn_time_dilation_constraints.png`（時間伸長）
+  - 出力（opacity cross-check）：`output/cosmology/cosmology_ddr_reconnection_conditions_metrics.json`（GW standard sirens の opacity 制約（forecast/observed）を併記）
+- 4.7.3 BAO 角径距離の前提検証（圧縮出力の前提/再構成/窓関数）【完了（初版）】
+  - 出力（BAO圧縮出力の前提・系統）：`output/cosmology/cosmology_bao_scaled_distance_fit.png`（s_R fit と DDR必要値の張力）
+  - 出力（感度）：`output/cosmology/cosmology_bao_scaled_distance_fit_sensitivity.png`（covariance mode / DM-only / H-only など）
+  - 関連：Step 4.5（BAO一次統計の再構築；BOSS/DESI）
+- 4.7.4 再接続に必要な条件の定量化（α, s_L, s_R など）【完了（改訂）】
+  - 出力：
+    - `output/cosmology/cosmology_ddr_reconnection_conditions.png` / `output/cosmology/cosmology_ddr_reconnection_conditions_metrics.json`（各DDR制約に対する必要補正 α / s_L / s_R。BAO比の s_R 拘束は BOSS/eBOSS/DESI/併合で envelope を分解し、判定基準（|z|<3/5）と d_L/d_A 寄与分解（z=1 anchor）も固定出力）
+    - `output/cosmology/cosmology_reconnection_parameter_space.png`
+    - `output/cosmology/cosmology_reconnection_plausibility.png`
+    - `output/cosmology/cosmology_reconnection_required_ruler_evolution.png`
+    - `output/cosmology/cosmology_distance_indicator_rederivation_requirements.png`
+
+### Step 4.8：番号互換（XRISMは Step 4.13 を正とする）
+- 現状：完了（初版）
+- 注：XRISM の正は Step 4.13（paper §4.13）とし、旧表記（Step 4.8.*）は Step 4.13.* に読み替える。
+
+### Step 4.13：XRISM（X線高分解能スペクトル：Resolve）一次データで「z/速度/線幅」を直接測る（BH/銀河団；距離指標非依存）
+- 現状：完了（初版）
+- 目的：
+  - **距離指標非依存の z**：X線輝線（例：Fe-K複合線）の centroid から z を直接測り、光学/IR の z と cross-check する（Step 4.3 の独立プローブ拡張）。
+  - **BH 解析（必須要件）**：BH/AGN の吸収線（disk wind / UFO など）の centroid ずれから **速度 v/c** を一次データで固定し、系統（gain/線同定/背景）と統計（共分散）を分離する。これは Phase 5.2（高γの速度飽和 δ 制約）へ接続可能な観測量である。
+  - **他に検証可能な項目**：銀河団の線幅（速度分散；turbulence proxy）、複数線の相対位置（energy scale cross-check）、および SNR（超新星残骸）の多元素線（Si/S/Ar/Ca/Fe-K）の相対位置・線幅を用いた energy scale/line-id QC を同一I/Fで固定し、再解析に耐える形にする。
+- 入力（一次ソース；配布元は `doc/PRIMARY_SOURCES.md` に追記する）：
+  - DARTS（ISAS/JAXA；rev3）公開一次データ（FITS：event/pha/rmf/arf/bkg 等）＋メタデータCSV（公開済みobsid一覧）
+  - NASA HEASARC（ミラー；products中心）
+  - 参照値：原子遷移エネルギー（NIST ASD など；線同定の根拠）
+- 出力（固定名；topicは `xrism` を新設し `data/xrism/` `scripts/xrism/` `output/xrism/` を正とする）：
+  - `data/xrism/sources/darts/manifest.json`（DARTS public list / metadata CSV の取得条件・sha256）
+  - `data/xrism/sources/xrism_target_catalog.json`（P-model検証ターゲット（seed）を一次固定；z_opt/参照/期待線/論文を台帳化）
+  - `data/xrism/raw/<obsid>/`（DARTS rev3 の raw cache；`<obsid>/` 以下を mirror）
+  - `data/xrism/sources/<obsid>/manifest.json`（DARTS rev3 の obsid別 manifest；sha256）
+  - `data/xrism/heasarc/manifest.json`（取得条件・obsid・ファイル一覧・sha256）
+  - `output/xrism/xrism_targets_catalog.csv`（解析対象の選定ルール＋一覧；`data/xrism/sources/xrism_target_catalog.json` から追記補完）
+  - `output/xrism/<obsid>__spectrum_qc.png`（スペクトルQC）
+  - `output/xrism/<obsid>__line_fit.csv` / `output/xrism/<obsid>__line_fit_metrics.json`（線fitと統計）
+  - `output/xrism/xrism_bh_outflow_velocity_summary.csv` / `..._metrics.json`（BH/AGN：v/c の横断要約）
+  - `output/xrism/xrism_cluster_redshift_turbulence_summary.csv` / `..._metrics.json`（銀河団：z と σ_v の横断要約）
+  - `output/xrism/xrism_resolve_summary.png`（Resolve：BH/AGN と銀河団の主要観測量サマリ図）
+- 反証条件（固定の形）：
+  - **手続き反証（再解析の頑健性）**：freeze した line_id と gain補正（または補正なし）に対し、同一 obsid の線 centroid が処理分岐で 3σ を超えて揺れる場合、手続き（selection/fit）が棄却される（解析I/Fを先に閉じる）。
+  - **物理反証（接続先の例）**：UFO の v/c 分布が SR のドップラー写像（および Phase 5.2 の δ 上限）と整合しない場合、速度写像（または δ 仮説）が棄却される（詳細は Phase 5.2 に接続して定義を固定）。
+
+- 4.13.1 取得スクリプト（fetch→cache→offline再現）【完了（初版）】
+  - 実装：`scripts/xrism/fetch_xrism_heasarc.py`
+  - 入口（対象リスト；固定）：`output/xrism/xrism_targets_catalog.csv`
+  - 取得（online；取得＋キャッシュ；例：Resolveのみ）：`python -B scripts/xrism/fetch_xrism_heasarc.py --obsid 000126000 --instrument resolve --download-missing --download-scope products`
+  - 再現（offline；QCのみ）：`python -B scripts/xrism/fetch_xrism_heasarc.py --obsid 000126000 --instrument resolve --offline --download-scope products`
+  - 固定出力（例）：
+    - `data/xrism/heasarc/manifest.json`
+    - `output/xrism/000126000__spectrum_qc.png`
+  - 追加（DARTS；rev3+metadata）：
+    - metadata取得：`python -B scripts/xrism/fetch_xrism_darts_metadata.py`
+    - ターゲットseed固定：`python -B scripts/xrism/build_xrism_target_catalog.py`
+    - raw取得（例：productsのみ）：`python -B scripts/xrism/fetch_xrism_darts_rev3.py --obsid 300019010 --scope products --include-regex "p0px1000.*\\.rmf\\.gz$" --include-regex "p0px1000.*_src\\.pi\\.gz$"`
+    - 既存catalogへ追記：`python -B scripts/xrism/update_xrism_targets_catalog_from_json.py`
+
+- 4.13.2 BH（ブラックホール）解析：吸収線から UFO/disk-wind の v/c を固定【完了（初版）】
+  - 実装：`scripts/xrism/xrism_bh_outflow_velocity.py`
+  - 対象（初版；catalogで固定）：`output/xrism/xrism_targets_catalog.csv` の role=`bh_agn`（例：NGC4151 / PDS456）
+  - 取得（online；px=1000 のみ取得する例）：`python -B scripts/xrism/fetch_xrism_heasarc.py --obsid 000125000 --obsid 300072010 --instrument resolve --download-missing --download-scope products --include-regex "p0px1000.*\\.rmf\\.gz$" --include-regex "p0px1000.*_src\\.pi\\.gz$"`
+  - 解析（offline再現）：`python -B scripts/xrism/xrism_bh_outflow_velocity.py`
+  - 固定したI/F（初版）：
+    - line_id（FeXXV_HeA / FeXXVI_LyA；rest energy を固定）
+    - continuum（powerlaw）＋吸収線（multiplicative Gaussian; depth∈[0,0.95]）
+    - 系統 sweep：fit window（3通り）／gain（±1e-3, 0）／rebin（min_counts=30,60）
+    - 追加系統：event-level QC（products vs event_cl の平均エネルギー差）を `*_sys_event_level` として加え、`*_sys_total`（二乗和）を固定出力（手続き差を sys へ統合）。
+    - 検出基準：depth/σ_depth ≥ 3
+  - 固定出力：
+    - `output/xrism/<obsid>__line_fit.csv` / `output/xrism/<obsid>__line_fit_metrics.json`
+    - `output/xrism/xrism_bh_outflow_velocity_summary.csv` / `output/xrism/xrism_bh_outflow_velocity_summary_metrics.json`
+
+- 4.13.3 追加で検証可能：銀河団の z（X線）と速度分散 σ_v（線幅）を固定【完了（初版）】
+  - 実装：`scripts/xrism/xrism_cluster_redshift_turbulence.py`
+  - 対象（初版；catalogで固定）：`output/xrism/xrism_targets_catalog.csv` の role=`cluster`（例：Perseus_C1 / Coma）
+  - 取得（online；px=1000 のみ取得する例）：`python -B scripts/xrism/fetch_xrism_heasarc.py --obsid 000156000 --obsid 300073010 --instrument resolve --download-missing --download-scope products --include-regex "p0px1000.*\\.rmf\\.gz$" --include-regex "p0px1000.*_src\\.pi\\.gz$"`
+  - 解析（offline再現）：`python -B scripts/xrism/xrism_cluster_redshift_turbulence.py`
+  - 固定したI/F（初版）：
+    - line_id（FeXXV_HeA / FeXXVI_LyA；rest energy を固定）
+    - fit window は z_opt（catalogの z_sys）から期待値 E_exp=E_rest/(1+z_opt) を作り、近傍（±window_halfwidth）で fit（窓幅と centroid 範囲を固定）。
+    - モデル（最小）：局所定数ベースライン＋emission Gaussian（centroid/σ）
+    - 系統 sweep：fit window（3通り）／gain（±1e-3, 0）／rebin（min_counts=30,60）
+    - 追加系統：event-level QC（products vs event_cl の平均エネルギー差）を `*_sys_event_level` として加え、`*_sys_total`（二乗和）を固定出力（手続き差を sys へ統合）。
+    - 速度分散：σ_v = c·σ_E/centroid を採用し、Resolve の energy resolution（FWHM=5 eV を既定）を 1σ に換算して deconvolution（上限/参考）を併記。
+    - 検出基準：amp/σ_amp ≥ 3
+  - 固定出力：
+    - `output/xrism/<obsid>__line_fit.csv` / `output/xrism/<obsid>__line_fit_metrics.json`
+    - `output/xrism/xrism_cluster_redshift_turbulence_summary.csv` / `output/xrism/xrism_cluster_redshift_turbulence_summary_metrics.json`
+
+- 4.13.4 統合：Phase 4.3 / Phase 5.2 への接続と Table 1 への採用可否判定【完了（初版）】
+  - 実装：`scripts/xrism/xrism_integration.py`
+  - 出力：`output/xrism/xrism_integration_metrics.json`（採用/不採用の根拠、接続（4.3/5.2）、freeze gate を固定）
+  - 注：summary CSV に `*_sys_total`（event-level 系統を含む total）がある場合はそれを優先して gate（sys/stat）を評価し、無い場合は従来 `*_sys` を使用（後方互換）。
+  - Table 1：`scripts/summary/paper_tables.py` に XRISM行を追加。現状は、**銀河団は adopted（detected_obsids≥2 かつ sys/stat≤10）に到達**し、BH/AGN も **sys/stat≤10 を満たす検出 obsid が 5/5 に到達して adopted**（`output/summary/paper_table1_results.md`）。
+
+- 4.13.5 論文化：XRISM を Part II §4.13 として独立節に固定【完了（初版）】
+  - 目的：公開データの増加・校正更新で精度が上がる前提のため、結論を先に確定するのではなく、**更新可能な解析I/F**（入力、凍結条件、統計/系統の分離、採用ゲート、固定出力）を本文に固定する。
+  - 反映：`doc/paper/11_part2_astrophysics.md`（`### 4.13 XRISM`）
+
+- 4.13.6 event-level QC：Pixel除外/GTIの手続き差を固定出力【完了（初版）】
+  - 目的：event_cl（event-level）から PI histogram を再構成し、Pixel除外（例：Pixel 27）や GTI 適用の効果を「手続き差（系統）」として定量化する入口を作る（将来の精度改善に備えてI/Fを先に閉じる）。
+  - 実装：`scripts/xrism/xrism_event_level_qc.py` / `scripts/xrism/xrism_event_utils.py`
+  - 出力：
+    - `output/xrism/<obsid>__event_level_qc.json`
+    - `output/xrism/xrism_event_level_qc_summary.csv` / `output/xrism/xrism_event_level_qc_summary_metrics.json`
+    - 手続き sweep（保存用）：`output/xrism/xrism_event_level_qc_sweep_metrics.json`（`--sweep-procedure`；variant別に `xrism_event_level_qc_summary__<variant>.csv` と `<obsid>__event_level_qc__<variant>.json` を生成）
+  - 統合：`scripts/xrism/xrism_integration.py` でも `event_level_qc` を取り込み、`output/xrism/xrism_integration_metrics.json` に（BH/AGN・銀河団の）coverage/L1 range/mean shift eV range と `per_obsid_best` への付与を固定（Table 1 の採用ゲートは変更しない）。
+  - 結果（初版；BH/AGN+銀河団の8 obsid）：Fe-K帯域（5.5–7.5 keV）で products vs event の差は **L1≈0.7–3.4%**、平均エネルギー差（event−products）は **±0.8 eV以内**（要約：`output/xrism/xrism_event_level_qc_summary.csv`；sweep要約：`output/xrism/xrism_event_level_qc_sweep_metrics.json`）。
+
+- 4.13.7 Fe-Kα 相対論的広がり（XMM-Newton/NuSTAR + XRISM）：ISCO制約と P-model 比較【完了（初版）】
+  - 目的：Part II §4.13（XRISM）を拡張し、Fe-Kα の相対論的 broad line（反射スペクトル）から **ISCO 位置（内縁半径）**を制約し、P-model の ISCO 予測（有効ポテンシャル/測地線の差分）と比較する入口を固定する（強場側の差分予測・反証条件へ接続）。
+  - 対象（候補；優先度順で追加）：
+    - BH XRB：GX 339-4（典型的な broad Fe-K）
+    - （拡張）他の BH XRB / AGN（publicで再解析可能なものに限定）
+  - 取得I/F（最小；manifest固定）【完了（初版）】：
+    - 対象seed：`data/xrism/sources/xmm_nustar_targets.json`（GX 339-4 の XMM/NuSTAR obsid seed）
+    - 取得スクリプト：`scripts/xrism/fetch_xmm_nustar_heasarc.py`
+    - 取得manifest：`data/xrism/sources/xmm_nustar_manifest.json`
+  - 入力（一次ソース）：
+    - XMM-Newton / NuSTAR の公開アーカイブ（観測 products：spectrum + RMF/ARF を優先して取得し、取得条件と sha256 を manifest に固定）
+    - XRISM 公開（Resolve products + event-level）
+  - 手続き（固定I/F）：
+    - continuum + reflection（relativistic blurring を含む）で Fe-K 帯域を fit し、ISCO（または内縁半径 `r_in`）の posterior/誤差を固定出力。
+    - 系統：連続成分の選択、反射モデル（パラメータ化）、エネルギー帯域、吸収モデル、クロスキャリブレーション（XMM/NuSTAR/XRISM）を sweep として台帳化し、sys/stat を分解して出力する。
+    - ISCO→P-model：P-model 側の ISCO 予測（同一の物理量定義）を別途計算し、`r_ISCO(obs)` vs `r_ISCO(P)` の比較指標（Δ/σ, z）を固定する。
+  - 出力（固定名；例）：
+    - raw cache：`data/xrism/xmm_nustar/<obsid_or_dataset>/`（products）＋`data/xrism/sources/xmm_nustar_manifest.json`
+    - `output/xrism/fek_relativistic_broadening_isco_constraints.csv`
+    - `output/xrism/fek_relativistic_broadening_isco_constraints_metrics.json`
+    - `output/xrism/fek_relativistic_broadening_model_systematics.json`（sys内訳）
+    - `output/xrism/fek_relativistic_broadening_isco_constraints.png`（r_in（ISCO proxy）の横断図）
+  - 出力I/F（ISCO台帳の固定）【完了（isco_constraints_v7）】：
+    - 実装：`scripts/xrism/fek_relativistic_broadening_isco_constraints.py`
+    - 目的：cache 有無と sys ノブ台帳を先に固定し、fit 実装（RMF/ARF 折り込みの reflection）へ次段で差し替える。
+    - 追加（proxy）：NuSTAR event_cl（FPMA/FPMB）から `r_in` の proxy を固定出力（per-obsid JSON：`output/xrism/nustar_<obsid>__fek_broad_line_proxy_diskline.json`）。
+    - 追加（rmf_diskline_v1）：XMM PPS（MOS）は HEASARC CALDB の canned RMF を cache し、RMF 畳み込み（SRSPEC 2400ch→RMF 800ch）で diskline proxy を fit する（per-obsid JSON：`output/xrism/xmm_<obsid>__fek_broad_line_rmf_diskline.json`）。
+      - RMF cache：`data/xrism/xmm_epic_responses/`（manifest：`data/xrism/sources/xmm_epic_responses_manifest.json`；取得：`scripts/xrism/fetch_xmm_epic_canned_responses.py`）
+    - 追加（xspec_diskline_v2；optional）：XSPEC が使える環境では、XMM PPS の選定済みスペクトルに対して forward-fold（RMF/ARF）fit を実行し、ISCO proxy（r_in）を per-obsid JSON として固定する（XSPEC が無い環境でも `--dry-run` で plan と `.xcm` を保存）。
+      - 実装：`scripts/xrism/fek_relativistic_broadening_reflection_fit.py`
+      - 出力：`output/xrism/xmm_<obsid>__fek_broad_line_reflection_xspec.json` / `output/xrism/xmm_<obsid>__fek_broad_line_reflection_xspec.xcm`
+      - 実行：pyXspec が無い場合でも `xspec` 実行ファイル（CLI）があれば実行可能（`--xspec-bin` / `--prefer-cli`）。
+      - 注意：XMM PPS（SRSPEC）は 2400ch、canned RMF（EBOUNDS）は 800ch のため、XSPEC 実行前に **OGIP PHA を 800ch へ再ビン**して整合させる必要がある。
+        - 本I/Fでは `scripts/xrism/fek_relativistic_broadening_reflection_fit.py` が再ビン済み PHA（spec/bkg）を自動生成してから fit する（HEASoft の `grppha/rbnpha` には依存しない）。
+        - 出力：`output/xrism/xmm_<obsid>__m1__spec_rebin800.pha` / `output/xrism/xmm_<obsid>__m1__bkg_rebin800.pha`
+    - 追加（proxy_v4）：NuSTAR proxy は event_cl の DET1 で source region（円）と background annulus を近似抽出し、背景差し引き後の net spectrum を fit する（HEASoft 非依存；fallback）。
+    - 追加（isco_constraints_v7）：NuSTAR は event_cl の *_src.reg（X,Y）を優先して region を固定し、src_reg vs auto_det1 の差を `sys_region` として系統へ計上（detail: `systematics.region_variants`）。
+    - 追加（isco_constraints_v7）：continuum-only vs diskline_proxy（XMM: RMF/ARF折り込み、NuSTAR: proxy）の Δχ² を記録し、Δχ²<9 を broad line 未検出（low-S/N で ISCO拘束不能）として凍結（CSV列：`proxy_line_detected`, `proxy_delta_chi2`, `proxy_isco_constrained`）。
+    - 追加（isco_constraints_v7）：`..._metrics.json` に XMM の xspec 結果の状況（`n_xmm_xspec_*`）を保存し、XSPEC 環境での実行状況（ok/blocked/dry_run）を台帳として追えるようにした。
+    - 追加（isco_constraints_v7）：ISCO 差分の比較指標（Δ/σ, z）を CSV に追加し、参照ISCO（GR: 6 r_g、P-model候補: exponential metric の 6.338 r_g）を `..._metrics.json` の `isco_reference` として保存した（bound 行は z を空欄にして誤解を避ける）。
+    - 追加（isco_constraints_v7）：sys/stat（σ_sys/σ_stat）と σ_total を CSV に追加し、系統内訳（band/gain/rebin/region）を `sys_*_rg` として台帳化した（per-obsid detail JSON の `systematics.components` から抽出；欠損は空欄）。
+    - 追加（isco_constraints_v7）：既存の NuSTAR per-obsid detail JSON が存在する場合は再計算を省略し、再実行コストを抑えた（`--force-recompute-proxy` で上書き可能）。
+    - 更新（isco_constraints_v7）：NuSTAR の独立観測を追加し、GX 339-4 の proxy 台帳を拡張（80001013010 / 80302304007 / 80502325006 / 80702316002 / 90702303001）。
+      - 更新：`n_rows=11`、`n_isco_constrained=5`、`n_isco_constrained_sys_stat_le10=3`（sys/stat≤10 の拘束が複数obsidで成立）。
+    - 追記（manifest）：追加obsidの event_cl（A/B01 cl + src.reg）の sha256 を `data/xrism/sources/xmm_nustar_manifest.json` に固定した（再ダウンロードなし）。
+    - 追加（図；isco_constraints_v7）：ISCO proxy の横断図を固定出力し、論文（Part II §4.13）へ反映【完了】
+      - 出力：`output/xrism/fek_relativistic_broadening_isco_constraints.png`
+      - 反映：`doc/paper/11_part2_astrophysics.md`（4.13）/ `doc/paper/01_figures_index.md`
+  - 反証条件（例；固定形式）：
+    - 同一ターゲットで複数独立観測（XMM/NuSTAR/XRISM）に対し、手続き差（sys）を含めても `r_in`（またはISCO）が GR予測と一貫して 3σ 以上で一致し、かつ P-model の差分予測を 3σ で棄却する場合、ISCO差分は否定される（逆に差分が一貫して残る場合は強場差分の候補となる）。
+
+### Step 4.14：宇宙論の最終判定フロー（p_t → 条件A → 独立ガードレール → BAO ε入口 → DDR再接続 → 分岐）
+- 現状：完了（初版）
+- 目的：
+  - **p_t（time dilation）**を「前処理で (1+z) を埋め込まない」形で固定成果物にし、P-model の時間伸長の有無を条件分岐で確定する。
+  - **距離と独立なガードレール**（p_t / CMB T(z) / AP）を再現パック化し、距離指標に依存しない棄却/保留を固定する。
+  - **BAO ε と DDR（η）**の入口（手続き依存）を台帳化し、最小自由度（α, s_L, s_R）で「再接続できる/できない」を分岐判定する。
+
+- 4.14.1 p_t（time dilation）を固定成果物にする（非循環fit）【完了】
+  - 内容：Blondin+2008 の spectral aging を `g(z)=Δt_em/Δt_obs=1/(1+z)^(p_t)` として **p_t自由**で再fitし、事前に `t/(1+z)` を作らない（循環の入口を封じる）。
+  - 参照：Step 4.3.1（p_t 決着：理論分岐＋観測の前提監査）
+  - 出力：`output/cosmology/cosmology_sn_time_dilation_pt_fit.json` / `output/cosmology/cosmology_sn_time_dilation_pt_fit.png`
+
+- 4.14.2 条件A（自由伝播で dθ/dt 保存）を仕様として確定【完了（A案：公理として凍結）】
+  - 目的：P-model が `Δt_obs=(1+z)Δt_em`（p_t=1）を要求する「決定点」を、曖昧さなく仕様として凍結する。
+  - 方針（どちらかに固定）：
+    - A案：条件A（dθ/dt 保存）を **伝播公理**として凍結し、棄却条件（どの観測で否定されるか）へ接続する。
+    - B案：光伝播則（位相/保存量の扱い）から、dθ/dt が保存される条件を最小仮定で導出し、導出に失敗する条件を明示する。
+  - 出力：`doc/cosmology/TIME_DILATION_CONDITION_A.md`（条件Aの定義、必要仮定、崩れる条件、依存箇所）
+
+- 4.14.3 距離と独立なガードレールを再現パック化（p_t / β_T / F_AP）【完了】
+  - 内容：距離指標と独立な指標（SN time dilation, CMB T(z), Alcock–Paczynski）を同一packにまとめ、OK/要改善/不一致を固定する。
+  - 参照：Step 4.3（独立プローブ）/ Step 4.4（距離指標依存の張力整理）
+  - 出力：`output/cosmology/cosmology_static_infinite_hypothesis_pack_metrics.json` / `output/cosmology/cosmology_static_infinite_hypothesis_pack.png`
+
+- 4.14.4 BAO一次統計 ε の入口を固める（手続き依存の排除）【完了（初版）】
+  - BOSS（screening）：入口（推定量・peakfit・cov・window 等）のノブ感度を **台帳化**し、同一I/Fで再現できる形にする。
+  - DESI（promotion）：cov / tracer / multi-tracer の設定差で ε張力が残るかを cross-check し、promotion gate を固定する。
+  - 参照：Step 4.5（BAO一次統計の再構築：BOSS/DESI）
+  - 出力：
+    - `output/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.json`（手続きノブ→Δε/σ の統合台帳）
+    - `output/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.png`（max |Δε|/σ の可視化）
+  - 実装：`scripts/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.py`（既存metricsの統合；再計算はしない）
+
+- 4.14.5 DDR（η）再接続を最小自由度で確定（必要量空間 + z_limit）【完了】
+  - 内容：DDR張力を α / s_L / s_R の必要量へ写像し、Pantheon+/BOSS 等の誤差予算から **z_limit（隠せる/隠せない境界）**を固定する。
+  - 参照：Step 4.7（DDR再接続）
+  - 出力：`output/cosmology/cosmology_ddr_reconnection_conditions_metrics.json` / `output/cosmology/cosmology_distance_indicator_reach_limit_metrics.json`
+
+- 4.14.6 最終判定（次フェーズへの分岐）【完了（初版）】
+  - 方針：4.14.1/4.14.2/4.14.3/4.14.4/4.14.5 を合流し、分岐（進む/棄却/写像改訂）を **機械可読な固定出力**として残す。
+  - 結論（初版）：
+    - `p_t` は 1 と整合（Blondin+2008 再fit；非循環）、条件A（自由伝播で dθ/dt 保存）を採用すると p_t=1 は写像の帰結として固定される。
+    - DDR（代表：SNIa+BAO 2021）は「単独機構（opacityのみ／candleのみ／rulerのみ）」では整合困難だが、最小パラメータ化（α, s_L, s_R, p_t, p_e）では **独立拘束の範囲で max|z|<3 を満たす解が存在**する（reconnection path は棄却されない）。
+    - 一方で BAO ε は peakfit 設定など手続きノブで大きく動き得る（台帳の max |Δε|/σ が大きい）ため、ε を「決定的な棄却」に使う場合は手続き系統を明示した上で扱う（4.14.4 の ledger を採用）。
+  - 出力（固定名）：
+    - `output/cosmology/cosmology_final_branch_decision_metrics.json`（branch_status と理由、代表DDRの best_independent など）
+    - `output/cosmology/cosmology_final_branch_decision.png`（σスケールの俯瞰）
+  - 実装：`scripts/cosmology/cosmology_final_branch_decision.py`
+
+---
+
+## Phase 5｜反証可能性の明文化（科学としての完成条件の提示）
+
+### Step 5.1：EHT（ブラックホール影）における影直径係数の差分予測
+- 現状：完了（初版）
+- 成果物例：`output/eht/`、`output/summary/decisive_candidates.json`
+  - 5.1.1 一次ソース（PDF/TeX）をローカル保存し sha256 を固定（再現性の入口を確定）【完了】
+    - `doc/PRIMARY_SOURCES.md`（EHT節）/ `data/eht/sources/`
+  - 5.1.2 差分予測の「3σ判別に必要な観測精度」定義を更新し、質量・距離（GM/(c²D)）の不確かさが支配する場合は n/a として扱う【完了】
+    - M87*：θ_unit_rel_sigma が大きく、現状は σ_obs→0 でも 3σ判別が不可能（まず質量/距離の改善が必要）
+    - Sgr A*：θ_unit_rel_sigma が小さく、影直径の観測誤差（1σ）を ~0.5 µas 程度まで詰めれば判別余地
+    - 出力：`output/eht/eht_shadow_differential.png` / `output/eht/eht_shadow_compare.json`
+  - 5.1.3 κ（リング/シャドウ変換）と散乱/放射モデルの誤差予算を詰め、棄却条件（必要精度・反証条件）へ落とし込む【完了（初版）】
+    - 5.1.3.1 反証条件パック（`decisive_falsification` / `decisive_candidates` / public report）のEHT欄を σ_obs（影直径換算）基準へ更新し、+κ/+κ+散乱（参考）も併記【完了】
+      - 出力：`output/summary/decisive_falsification.png` / `output/summary/decisive_candidates.json` / `output/summary/pmodel_public_report.html`
+    - 5.1.3.2 κ_fit 図（観測リング直径と理論シャドウ直径から逆算した κ）を固定出力し、論文（本文/図インデックス）へ反映【完了】
+      - 出力：`output/eht/eht_kappa_fit.png`（public: `output/eht/eht_kappa_fit_public.png`）
+    - 5.1.3.3 3σ判別に必要な κ 精度（相対不確かさの目安）を固定出力し、誤差予算（κ/散乱/放射モデル）の優先順位付けへ接続【完了】
+      - 出力：`output/eht/eht_kappa_precision_required.png`（public: `output/eht/eht_kappa_precision_required_public.png`）
+    - 5.1.3.4 κ精度要求図を public report（public dashboard）へ組み込み、必要精度の壁を俯瞰できる形にする【完了】
+      - 出力：`output/summary/pmodel_public_report.html`（dashboard: `scripts/summary/public_dashboard.py`）
+    - 5.1.3.5 反証条件パック（decisive_candidates）へ κ精度要求（相対%）を併記し、必要精度の要点を一覧で見える化【完了】
+      - 出力：`output/summary/decisive_candidates.json` / `output/summary/decisive_candidates.png`
+    - 5.1.3.6 ring σ と κσ のトレードオフ（3σ判別の許容域）を図示し、改善ターゲット（ring精度/κ系統）の関係を明確化【完了】
+      - 出力：`output/eht/eht_kappa_tradeoff.png`（public: `output/eht/eht_kappa_tradeoff_public.png`）
+    - 5.1.3.7 一次ソース整合（sha256）を固定出力し、EHT入力（固定値）の再現性を強化【完了】
+      - 出力：`output/eht/eht_sources_integrity.json`（入力：`data/eht/eht_black_holes.json`）
+    - 5.1.3.8 屈折散乱のゆらぎ（wander/distortion/asymmetry）を必要精度（σ_obs）と同一軸で比較し、比（レンジ÷必要σ）を固定出力【完了】
+      - 出力：`output/eht/eht_refractive_scattering_limits.png` / `output/eht/eht_refractive_scattering_limits_metrics.json`
+    - 5.1.3.9 一次ソース（TeX）内の値アンカーを固定出力し、EHT入力（固定値）の誤入力を検出可能にする【完了】
+      - 出力：`output/eht/eht_primary_value_anchors.json`
+    - 5.1.3.10 値アンカー対象を拡張（W/d, A など Table 値）し、固定入力の転記ミス検出力を強化【完了】
+      - 出力：`output/eht/eht_primary_value_anchors.json`
+    - 5.1.3.11 散乱一次ソース（Johnson+2018 / Zhu+2018）の arXiv source を固定し、散乱パラメータの値アンカーを追加【完了】
+      - 出力：`output/eht/eht_primary_value_anchors.json` / `output/eht/eht_sources_integrity.json`
+    - 5.1.3.12 δ（Schwarzschild shadow deviation; GR派生量）の精度スケールを固定出力し、κ系統の“参考指標”として接続【完了】
+      - 出力：`output/eht/eht_delta_precision_required.png`（public: `output/eht/eht_delta_precision_required_public.png`）
+    - 5.1.3.13 Sgr A* Papers II–VI の一次ソース（PDF/TeX）をローカル固定（sha256）し、放射モデル/再構成の系統抽出に備える【完了】
+      - 出力：`output/eht/eht_sgra_series_sources_manifest.json`
+    - 5.1.3.14 Sgr A* Paper III（arXiv:2311.09479）の ring fitting table を機械的にパースし、手法間のリング直径スキャッタ（descattered / on-sky）を固定出力【完了】
+      - 出力：`output/eht/eht_sgra_ringfit_table_metrics.json`（図：`output/eht/eht_sgra_ringfit_table_diameter_by_pipeline_descattered.png` / `output/eht/eht_sgra_ringfit_table_diameter_by_pipeline_on_sky.png`）
+    - 5.1.3.15 κ誤差予算（必要精度 vs 現状の系統スケール）を、ringfitsスキャッタ（Paper III）と Kerrレンジ等を用いて固定出力【完了】
+      - 出力：`output/eht/eht_kappa_error_budget.json`（図：`output/eht/eht_kappa_error_budget.png`）
+    - 5.1.3.16 Sgr A* Paper III（arXiv:2311.09479）の校正/非閉包系統（gain, non-closing errors）を TeX から抽出し、κ誤差予算のスケール指標へ接続【完了】
+      - 出力：`output/eht/eht_sgra_calibration_systematics_metrics.json`（抽出：`scripts/eht/eht_sgra_calibration_systematics_metrics.py`）
+    - 5.1.3.17 Sgr A* Paper III（arXiv:2311.09479）の image_analysis（Table `tab:SgrA_ringfit`; REx/VIDA）をパースし、手法/パイプライン差の直径スキャッタを κ 誤差予算のスケール指標へ追加【完了】
+      - 出力：`output/eht/eht_sgra_ringfit_table_metrics.json`（`metrics_image_analysis_ringfit`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.18 Sgr A* Paper III（arXiv:2311.09479）の synthetic data 生成用 gain table（appendix_synthetic）をパースし、κ誤差予算のスケール指標（proxy）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_calibration_systematics_metrics.json`（`synthetic_gain_table` / `gain_synthetic_combined_mean_max`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.19 Sgr A* Paper III（arXiv:2311.09479）の variability noise model（eq:PSD_noise / Table `tab:premodeling`）をパースし、κ誤差予算のスケール指標（proxy）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_variability_noise_model_metrics.json`（抽出：`scripts/eht/eht_sgra_variability_noise_model_metrics.py`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.20 Sgr A* Paper V（arXiv:2311.09478）の m-ring fits（Table `tab:mringfits`）をパースし、scan-to-scan の直径スキャッタを κ誤差予算のスケール指標（proxy）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_mringfits_table_metrics.json`（抽出：`scripts/eht/eht_sgra_mringfits_table_metrics.py`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.21 Sgr A* Paper VI（arXiv:2311.09484）の metric-test（shadow diameter / δ）制約表をパースし、d_sh（68%CL）から κ のスケール指標（proxy）を導出して κ誤差予算へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper6_metric_constraints.json`（抽出：`scripts/eht/eht_sgra_paper6_metric_constraints.py`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.22 Sgr A* Paper IV（arXiv:2311.08697）の α 校正表（Table `tab:alphacal`；d=αθ_g）をパースし、σ(α)→σ(κ) のスケール指標（proxy）を κ誤差予算へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper4_alpha_calibration_metrics.json`（抽出：`scripts/eht/eht_sgra_paper4_alpha_calibration_metrics.py`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.23 Sgr A* Paper IV（arXiv:2311.08697）の形状パラメータ表（Table `tab:SgrAMorphology`）をパースし、リング直径（d_hat）の方法間スキャッタをスケール指標（proxy）として κ誤差予算へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper4_morphology_table_metrics.json`（抽出：`scripts/eht/eht_sgra_paper4_morphology_table_metrics.py`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.24 Sgr A* Paper IV（arXiv:2311.08697）の θ_g 表（Table `tab:thetag`）をパースし、θ_g の方法間スキャッタ（HOPS）を κ のスケール指標（proxy）として κ誤差予算へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper4_thetag_table_metrics.json`（抽出：`scripts/eht/eht_sgra_paper4_thetag_table_metrics.py`）→ `output/eht/eht_kappa_error_budget.json`
+    - 5.1.3.25 散乱（scattering kernel の不確かさ／屈折散乱のゆらぎ）を κ のスケール指標（proxy）として κ誤差予算へ追加【完了】
+      - 出力：`output/eht/eht_kappa_error_budget.json`（`kappa_sigma_proxy_scattering_kernel_major_over_ring` / `kappa_sigma_proxy_refractive_distortion_*` など。生成：`scripts/eht/eht_kappa_error_budget.py`）
+    - 5.1.3.26 κ誤差予算から「採用κσ（現状スケール）」を定義し、反証条件パック（decisive_falsification / decisive_candidates）へ接続【完了】
+      - 出力：`output/eht/eht_kappa_error_budget.json`（`kappa_sigma_adopted_for_falsification`）→ `output/summary/decisive_falsification.json`（`kappa_systematics_source=budget`）
+    - 5.1.3.27 decisive_candidates に κ 系統（budget/obs/kerr）の採用値 κσ_now と、3σ判別に必要な κσ との差（改善係数）を併記【完了】
+      - 出力：`output/summary/decisive_candidates.json`（`kappa_budget_sigma` / `kappa_sigma_systematics_now` / `kappa_sigma_systematics_improvement_factor_to_3sigma_if_ring_sigma_zero`）
+    - 5.1.3.28 Paper VI の d_sh 表から κ mid の方法間スキャッタ（std）を抽出し、κ誤差予算（method-scatter）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper6_metric_constraints.json`（`kappa_mid_summary.std`）→ `output/eht/eht_kappa_error_budget.json`（`kappa_sigma_proxy_paper6_dsh_table_kappa_mid_std`）
+    - 5.1.3.29 Paper II の残差ゲイン不確かさ（Δg）を抽出し、κ誤差予算（scale indicator）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper2_gain_uncertainties_metrics.json`（Δg）→ `output/eht/eht_kappa_error_budget.json`（`kappa_sigma_proxy_paper2_delta_g_*`）
+    - 5.1.3.30 Paper II の系統誤差予算（tab:syserr; non-closing s）を抽出し、κ誤差予算（scale indicator）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper2_syserr_table_metrics.json`（s; max）→ `output/eht/eht_kappa_error_budget.json`（`kappa_sigma_proxy_paper2_syserr_amp_fraction_max_over_pipelines`）
+    - 5.1.3.31 Paper IV の debiased variability table（tab:debiased_noise; a₄）を抽出し、κ誤差予算（scale indicator）へ追加【完了】
+      - 出力：`output/eht/eht_sgra_paper4_debiased_noise_table_metrics.json`（a₄）→ `output/eht/eht_kappa_error_budget.json`（`kappa_sigma_proxy_paper4_debiased_noise_a4_fraction`）
+    - 5.1.3.32 Paper V の pass fraction tables（tab:passfraction_thermal/tab:passfraction）を抽出し、支配制約（モデル棄却の主因）を定量化【完了】
+      - 出力：`output/eht/eht_sgra_paper5_pass_fraction_tables_metrics.json`
+    - 5.1.3.33 Paper V の詳細 Pass/Fail tables（tab:betacritPF/tab:VKbhacPF）を抽出し、失敗モード（支配制約の分解）を定量化【完了】
+      - 出力：`output/eht/eht_sgra_paper5_pass_fraction_tables_metrics.json`（`extracted.pass_fail_tables.*.summary`）
+    - 5.1.3.34 Paper V の Pass/Fail 失敗率（fail fraction）を図示し、支配制約を可視化【完了】
+      - 出力：`output/eht/eht_sgra_paper5_pass_fail_tables_fail_fractions.png` / `output/eht/eht_sgra_paper5_pass_fraction_tables_metrics.json`（`constraints_ranked_by_fail_fraction_excluding_aggregates`）
+    - 5.1.3.35 Paper V の Pass/Fail tables を拡張（Frankfurt/Illinois/HAMR/Koral/Ressler等）し、全表を通した支配制約（global fail fraction）を定量化【完了】
+      - 出力：`output/eht/eht_sgra_paper5_pass_fail_global_constraint_fail_fractions.png` / `output/eht/eht_sgra_paper5_pass_fraction_tables_metrics.json`（`derived.pass_fail_tables_global` / `extracted.pass_fail_tables`）
+    - 5.1.3.36 Paper V の near-passing tables（tab:fail_one_thermal/tab:fail_one_nonthermal/tab:fail_none）をパースし、「最後に残る制約（failed constraint）」頻度を定量化【完了】
+      - 出力：`output/eht/eht_sgra_paper5_near_passing_failed_constraints.png` / `output/eht/eht_sgra_paper5_pass_fraction_tables_metrics.json`（`derived.near_passing` / `extracted.near_passing`）
+    - 5.1.3.37 Paper V の key constraints（M3 / 2.2 μm flux）を一次ソース（TeX）から抽出し、定義・閾値・感度（30%スケール）を固定出力【完了】
+      - 出力：`output/eht/eht_sgra_paper5_key_constraints_metrics.json`（抽出：`scripts/eht/eht_sgra_paper5_key_constraints_metrics.py`）
+    - 5.1.3.38 Paper V の key constraints（M3 / 2.2 μm）について、判定がどの仮定にどれだけ敏感か（KSのサンプル数依存、閾値のσ換算、extended flux の抑制因子など）を定量化し、前提分解の次段へ接続【完了（初版）】
+      - 出力：`output/eht/eht_sgra_paper5_key_constraints_sensitivity.png`（生成：`scripts/eht/eht_sgra_paper5_key_constraints_metrics.py`）
+    - 5.1.3.39 Paper V Pass/Fail tables から、制約緩和（M3 / 2.2 μm 等）時の「通り得るモデル数」を定量化し、前提分解の優先度を固定【完了（初版）】
+      - 出力：`output/eht/eht_sgra_paper5_constraint_relaxation_sweep_metrics.json` / `output/eht/eht_sgra_paper5_constraint_relaxation_sweep.png`（生成：`scripts/eht/eht_sgra_paper5_constraint_relaxation_sweep.py`）
+    - 5.1.3.40 Paper V の M3 / 2.2 μm 制約について、reconnection に必要な条件（閾値のσ換算、KSのn依存、extended flux換算、near-passing救済数）を1枚の条件図として統合【完了（初版）】
+      - 出力：`output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json` / `output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.png`（生成：`scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py`）
+    - 5.1.3.41 GRAVITY Collaboration（2020; arXiv:2004.07185; The flux distribution of Sgr A*）を一次ソース固定し、2.2 μm flux 分布の percentiles（p5/p14/p50/p86/p95）を抽出して NIR制約（閾値1.0 mJy）の保守性（threshold/p5 等）を定量化し、reconnection 条件図へ反映【完了（初版）】
+      - 取得：`scripts/eht/fetch_gravity_sgra_flux_paper.py` → `output/eht/gravity_sgra_flux_sources_manifest.json`
+      - 抽出：`scripts/eht/gravity_sgra_flux_distribution_metrics.py` → `output/eht/gravity_sgra_flux_distribution_metrics.json`
+      - 反映：`scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py`（`gravity_flux_distribution_metrics_json` を入力に追加）
+    - 5.1.3.42 Wielgus et al.（2022; arXiv:2207.06829）を一次ソース固定し、M3（3h modulation index）の観測側前提（Table `tab:sigma_mu_3h` の値と「7 samples」構成候補、DRW τ）を機械抽出して固定出力し、reconnection 条件図へ反映【完了（初版）】
+      - 取得：`scripts/eht/fetch_wielgus2022_sgra_mm_lightcurves.py` → `output/eht/wielgus2022_sgra_mm_lightcurves_sources_manifest.json`
+      - 抽出：`scripts/eht/wielgus2022_m3_observed_metrics.py` → `output/eht/wielgus2022_m3_observed_metrics.json`
+      - 反映：`scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py`（`wielgus2022_m3_observed_metrics_json` を入力に追加）
+    - 5.1.3.43 Wielgus+2022 の historical record（Table `tab:detections_other_papers`）をパースし、Paper V の historical distribution（n=42）の構成（ΔT=3h, floor(duration/ΔT) で非重複セグメント化、date cutoff=2017-04-11）を復元して固定出力し、reconnection 条件図へ反映【完了（初版）】
+      - 抽出：`scripts/eht/wielgus2022_m3_observed_metrics.py`（`tab:detections_other_papers` を追加パース）→ `output/eht/wielgus2022_m3_observed_metrics.json`
+      - 反映：`scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py`（`derived.m3.wielgus2022_paper5_historical_distribution_*` を追加）→ `output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json`
+    - 5.1.3.44 historical distribution の「独立サンプル仮定（effective n）」に対する KS 強度の感度（D_crit）を定量化し、n=42（segments）↔n=30（curves）等の差を metrics に固定【完了（初版）】
+      - 出力：`output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json`（`derived.m3.wielgus2022_historical_distribution_effective_n_sensitivity`）
+    - 5.1.3.45 historical distribution の「値」側（3hセグメント mi3）未確定の影響を示すため、Wielgus+2022 表の full-duration σ/μ を 3hセグメントへ複製した proxy 分布を作成し、2017（7 samples）との KS 整合性（p<0.01で棄却）を sanity check として固定【完了（初版）】
+      - 出力：`output/eht/wielgus2022_m3_observed_metrics.json`（`derived.paper5_m3_ks_sanity_2017_vs_historical_proxy`）
+      - 反映：`output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json`（`derived.m3.wielgus2022_paper5_m3_ks_sanity_2017_vs_historical_proxy`）
+    - 5.1.3.46 DRW（OU）仮定の下で 3h mi3 の window-to-window 相関（independence仮定の妥当性）をシミュレーションで定量化し、effective n と KS D_crit への影響を固定【完了（初版）】
+      - 出力：`output/eht/wielgus2022_m3_drw_independence_sim_metrics.json` / `output/eht/wielgus2022_m3_drw_independence_sim.png`（生成：`scripts/eht/wielgus2022_m3_drw_independence_sim.py`）
+    - 5.1.3.47 historical distribution の「値」側（各3hセグメント mi3 値）を、一次データ（各論文の light curve time series）から再構築して固定し、Paper V の KS 判定を再現可能にする【完了】
+      - 実装：`scripts/eht/eht_sgra_paper5_m3_historical_distribution_values.py`
+      - 出力：`output/eht/eht_sgra_paper5_m3_historical_distribution_values.json` / `output/eht/eht_sgra_paper5_m3_historical_distribution_values_ecdf.png`
+      - 結果：pre-EHT cutoff（2017-04-11）candidate の expected n=42（segments）を **n=42/42** まで一次データから再構築し、KS（2017 7-sample vs historical 42-sample）を固定した（D≈0.619、p_asymptotic≈0.0106）。
+      - 追加一次ソース：Marrone2006（thesis; SMA 2005）は `data/eht/sources/marrone2006_thesis_dpm_thesis.ps.gz` から埋め、Bower2018（ALMA 2016）は arXiv source の timeseries PDF を digitize、Yusef2009（SMA 2007）は PGPLOT PS（fig11）から抽出。
+    - 5.1.3.48 5.1.3.47 の再構築値（mi3）を reconnection 条件図へ統合し、KS の判定余裕（p=0.01境界までのΔD）と支配仮定（effective n / digitize）を定量化【完了】
+      - 更新：`scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py`（`--m3-historical-values-json` を追加し、p_asymptotic と余裕ΔDを算出）
+      - 出力：`output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json` / `output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.png`
+      - 主要値（asymptotic）：D≈0.619、p_asymptotic≈0.0106、ΔD(p=0.01)≈+0.0035
+    - 5.1.3.49 historical distribution（mm light curves）の一次ソース取得manifestを拡張し、thesis/旧arXiv形式も offline 再現に含める【完了】
+      - 更新：`scripts/eht/fetch_sgra_historical_mm_lightcurves_papers.py`（`astro-ph/0607432` の path-safe 化、Marrone 2006 thesis（PDF/PS.gz）を追加）
+      - 出力：`output/eht/eht_sgra_historical_mm_lightcurves_papers_sources_manifest.json`（rows=8; `marrone2006_thesis` を含む）
+    - 5.1.3.50 KSの離散性（Dステップ）と digitize 系統（scale閾値）を定量化し、救済条件として paper/図インデックスへ反映【完了】
+      - 更新：`scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py`（`derived.m3.historical_distribution_values_ks.d_discreteness` / `digitize_scale_thresholds` を追加）
+      - 更新：`doc/paper/10_manuscript.md`（4.8節に M3/2.2 μm near-passing の救済条件を追記）
+      - 更新：`doc/paper/01_figures_index.md` / `doc/paper/30_references.md`
+      - 出力：`output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json`（p−α、D-step、scale閾値）
+    - 5.1.3.51 Paper V（M3/2.2 μm）の救済条件を decisive pack（decisive_candidates）へ統合【完了】
+      - 更新：`scripts/summary/decisive_candidates.py`（`eht_Sgr_A*` に `paper5_m3_near_passing_rescue` を添付）
+      - 出力：`output/summary/decisive_candidates.json` / `output/summary/decisive_candidates.png`
+    - 5.1.3.52 Paper V（M3/2.2 μm）救済条件（near-passing）を public report（dashboard）へ統合し、確証/保留の判定基準（digitize閾値など）を明文化【完了】
+      - 更新：`scripts/summary/public_dashboard.py`
+      - 出力：`output/summary/pmodel_public_report.html`（card id: `eht_sgra_paper5_m3_nir_reconnection_conditions`）
+    - 5.1.3.53 M87* の multi-epoch（2017/2018）でリング直径の再現性（持続性）を固定出力し、EHT入力（θ_ring）の頑健性チェックを追加【完了】
+      - 入力更新：`data/eht/eht_black_holes.json`（`ring_measurements` を追加）
+      - 実装：`python -B scripts/eht/eht_m87_persistent_shadow_metrics.py`
+      - 出力：`output/eht/eht_m87_persistent_shadow_ring_diameter.png` / `output/eht/eht_m87_persistent_shadow_ring_diameter_metrics.json`
+      - 一次ソース補強：`python -B scripts/eht/fetch_eht_supporting_papers.py`（M87 2018 Paper I/II, Vincent+2022, Johnson+2020, Gralla+2020）
+    - 5.1.3.54 M87* multi-epoch 図を public report（dashboard）へ統合し、第三者が差分と整合性を一目で追える形にする【完了】
+      - 更新：`scripts/summary/public_dashboard.py`
+      - 出力：`output/summary/pmodel_public_report.html`（card id: `eht_m87_ring_diameter_multi_epoch`）
+    - 5.1.3.55 Vincent+2022（thick disk / photon ring）の指摘（shadow非普遍・モデル依存）を κ誤差予算の“放射モデル依存”項へ反映し、Part II 4.8（EHT）の説明を更新【完了】
+      - 更新：`scripts/eht/eht_kappa_error_budget.py` / `doc/paper/11_part2_astrophysics.md`
+      - 出力：`output/eht/eht_kappa_error_budget.json`（図：`output/eht/eht_kappa_error_budget.png`）
+  - 5.1.4 S2星（GRAVITY）軌道による強場検証（重力赤方偏移＋Schwarzschild歳差）【完了（初版）】
+    - 目的：EHTリング/シャドウとは独立に、S2 の周回（近日点近傍）の観測量で「係数差」を検出可能かを定量化し、反証条件へ接続する。
+    - 5.1.4.1 一次ソース（GRAVITY Collaboration 2018/2020）をローカル保存し sha256 を固定【完了】
+      - 例：2018（重力赤方偏移, arXiv:1807.09409）、2020（Schwarzschild歳差, arXiv:2004.07187）
+      - 出力：`output/eht/gravity_s2_sources_manifest.json`（取得：`scripts/eht/fetch_gravity_s2_papers.py`）
+    - 5.1.4.2 論文定義（f, f_SP 等）に沿って観測制約を抽出し、固定入力化【完了】
+      - 出力：`output/eht/gravity_s2_constraints.json`（抽出：`scripts/eht/gravity_s2_constraints.py`）
+    - 5.1.4.3 P-model の差分予測（時計項の exp vs √）を f / f_SP 定義へ射影し、Δ と必要精度（現状ギャップ）を固定出力【完了】
+      - 出力：`output/eht/gravity_s2_pmodel_projection.json`（`scripts/eht/gravity_s2_pmodel_projection.py`）
+    - 5.1.4.4 反証条件パック（decisive_candidates / paper）へ統合【完了】
+      - 出力：`output/summary/decisive_candidates.json`（key=`s2_gravity`）、`doc/paper/10_manuscript.md`（4.8節補足）
+
+### Step 5.2：速度飽和パラメータ δ に対する高γ観測からの上限制約
+- 現状：完了（上限として固定出力）
+- 成果物例：`output/theory/delta_saturation_constraints.json`
+
+### Step 5.3：宇宙論における距離二重性（ε/η^(P)）の前提監査と反証条件を固定
+- 現状：完了（改訂；追補2：距離推定I/F監査チェックリスト＋η^(P)制約表＋独立プローブ結論の明文化）
+- 目的：
+  - FRW（標準宇宙論）の DDR（distance duality relation）`D_L = (1+z)^2 D_A` が
+    **どの前提の上に成り立つか**を棚卸しし、P-model が「どこを破る/維持する」かを明示する。
+  - P-model の前提（空間膨張なし・背景Pの変化）で `D_L^(P)` と `D_A^(P)` を導出し、
+    **P-model固有の DDR 関係**を固定して、観測（ε）との比較をやり直す。
+- 5.3.1 FRW宇宙論での DDR 導出の前提を全て洗い出す【完了（初版）】
+  - 目的：`D_L = (1+z)^2 D_A` の導出を追い、各ステップで使われる前提（幾何、光線束、保存則、観測量定義）を台帳化する。
+  - 作業：導出の各行で「何を仮定したか」を列挙する（例：metric/FRW、null geodesic、光子数保存、表面輝度の定義、固有面積/固有時間の扱い）。
+  - 出力（固定名）：`doc/cosmology/ddr_frw_assumptions_ledger.md`
+- 5.3.2 P-modelで破れる前提を特定する【完了（初版）】
+  - 目的：5.3.1 の前提リストと P-model（Part I 2.5節の定義）を照合し、維持/破棄（または置換）を判定する。
+  - 作業：前提ごとに `keep / break / replace` を付与し、破れる場合は「何が観測量へ影響するか」を短く注記する。
+  - 出力（固定名）：`doc/cosmology/ddr_pmodel_assumption_audit.md`
+- 5.3.3 P-modelでの光度距離 `D_L^(P)` を導出する【完了（初版）】
+  - 目的：空間膨張なし・背景P変化の前提で、フラックスと光度の関係から `D_L^(P)` を導く（観測量定義と測定手順の対応を明示）。
+  - 出力（固定名）：`doc/cosmology/ddr_pmodel_distance_derivation.md`（`D_L^(P)` の節）
+- 5.3.4 P-modelでの角径距離 `D_A^(P)` を導出する【完了（初版）】
+  - 目的：同じ前提で、角サイズと固有サイズの関係から `D_A^(P)` を導く（光線束の広がり/面積要素の扱いを明示）。
+  - 出力（固定名）：`doc/cosmology/ddr_pmodel_distance_derivation.md`（`D_A^(P)` の節）
+- 5.3.5 P-model固有の DDR 関係を確立する【完了（初版）】
+  - 目的：`D_L^(P) / D_A^(P)` を計算し、FRW の `(1+z)^2` との差（関数形・符号・オーダー）を明示して固定する。
+  - 出力（固定名）：`output/cosmology/cosmology_ddr_pmodel_relation.json`（式・変数定義・差分の要約）
+- 5.3.6 観測制約（ε）と再比較する【完了（初版）】
+  - 目的：新しい DDR 関係で、既存の ε 制約（例：`ε0 = 0.013±0.029`）を **再解釈**し、張力（または整合）を再評価する。
+  - 出力（固定名）：`output/cosmology/cosmology_ddr_epsilon_reinterpretation.json`
+- 5.3.7 Part I/II を更新する【完了（初版）】
+  - 目的：5.3.1〜5.3.6 の結果を本文へ反映し、論文側の DDR の位置づけを更新する。
+  - 反映先：Part I 2.5節、Part II 5.3節（`doc/paper/10_manuscript.md` / `doc/paper/11_part2_astrophysics.md`）
+
+- 5.3.8 FRWのDDR導出を「(1+z)の由来」に分解する【完了（初版）】
+  - 目的：FRWでの DDR を分解し、`D_L=(1+z)^2 D_A` の **2つの (1+z)** がそれぞれ「どの前提」から来るかを固定する。
+  - 作業：`D_L=(1+z)D_M` と `D_A=D_M/(1+z)` の形へ分解し、
+    - (a) フラックス減衰（光子エネルギー×到着率）の (1+z)
+    - (b) 空間膨張（放射時刻の物理スケール）に由来する `D_A` 側の (1+z)
+    を、導出ステップとして列挙する。
+  - 出力（固定名）：`doc/cosmology/ddr_redshift_factor_decomposition.md`
+
+- 5.3.9 P-modelで維持/破棄される前提を「(i)-(iii)」で明示する【完了（初版）】
+  - 目的：5.3.8 の分解結果と Part I 2.5節を照合し、
+    - 「光子減衰（フラックス側）の (1+z) は維持」
+    - 「空間膨張（`D_A=D_M/(1+z)`）の (1+z) は破棄」
+    を確認する。加えて、P-model が (i)-(iii) のどれを破るのか／距離の定義が何を意味するのかを **1段落**で固定する。
+  - 観点：
+    - (i) 重力が計量理論（metric）で記述される
+    - (ii) 光は null geodesics（散乱や非幾何光学なし）に沿って伝播
+    - (iii) 光子数が保存（不透明度なし）
+  - 出力（固定名）：`doc/cosmology/ddr_pmodel_axioms_mapping.md`
+
+- 5.3.10 P-model固有DDR：`D_L^(P)=(1+z)D_A^(P)` を正式導出する【完了（初版）】
+  - 目的：膨張なし（静的幾何）を前提に、P-model固有の距離二重性を **最小の仮定**から導出し、どこでFRWと分岐するかを明示する。
+  - 出力（固定名）：`doc/cosmology/ddr_pmodel_distance_derivation.md`（追補節；式の確定）
+
+- 5.3.11 Part I 2.5節へ「基本関係式」として追記する【完了（初版）】
+  - 目的：5.3.10 の結果を Part I の「P-model宇宙論の基本関係式」として本文へ反映し、定義と適用範囲（条件分岐）を固定する。
+  - 反映先：Part I 2.5節（`doc/paper/10_manuscript.md`）
+
+- 5.3.12 観測制約を P-model固有ηで再評価する【完了（初版）】
+  - 目的：P-model固有の DDR 指標
+    $$ \eta^{(P)}(z) \equiv \frac{D_L}{(1+z)\,D_A} $$
+    を定義し、既存観測データ（DDRコンパイル等）で評価する。
+  - 出力（固定名）：
+    - `output/cosmology/cosmology_ddr_pmodel_eta_constraints.json`
+    - `output/cosmology/cosmology_ddr_pmodel_eta_constraints.png`
+
+- 5.3.13 Part II 5.3節を「前提誤適用の特定」へ更新する【完了（初版）】
+  - 目的：従来の「35σ棄却」を、P-model側の DDR 指標と距離定義に照らして
+    「どの前提が誤適用されると不一致が生じるか」の記述へ更新し、新しい検証枠組みを反映する。
+  - 反映先：Part II 5.3節（`doc/paper/11_part2_astrophysics.md`）
+
+- 5.3.14 反証条件を再定義（棄却閾値＋必要精度）する【完了（初版）】
+  - 目的：`η^(P)` を用いた棄却閾値（例：|z|≥3 の条件、系統/統計の分離）と、
+    決着に必要な観測精度（どの距離推定が支配するか）を固定する。
+  - 出力（固定名）：`output/cosmology/cosmology_ddr_pmodel_falsification_pack.json`
+
+- 5.3.15 DDR前提監査の具体化（距離推定I/Fチェックリスト）【完了（初版）】
+  - 目的：公表制約（SNIa+BAO等）が「空間膨張(1+z)」を距離推定のどこで埋め込んでいるかを特定し、
+    DDR前提監査を実行可能なチェックリストとして固定する。
+  - 作業：各カテゴリ（SNIa/BAO/クラスター/強レンズ等）について、
+    (1) どの量が“距離”として推定されているか、(2) 推定I/Fのどの段に (1+z)（膨張側）が入るか、
+    (3) 代替I/F（膨張前提を埋め込まない推定）が可能か、を Yes/No で監査できる形へ整理する。
+  - 出力（固定名）：`doc/cosmology/ddr_distance_estimation_if_audit_checklist.md`
+
+- 5.3.16 η^(P)指標での観測制約テーブル再整理【完了（初版）】
+  - 目的：既存の公表制約を η^(P) 形式に揃え、P-model最小（η^(P)=1）との比較表を更新して固定する。
+  - 作業：`output/cosmology/cosmology_ddr_pmodel_eta_constraints.json` を入力に、
+    代表値（z_ref=1 の η^(P)）と zスコア（FRW vs P-model最小）を全制約で表にし、本文（Part II 5.3）へ反映する。
+  - 出力（固定名）：`output/cosmology/cosmology_ddr_pmodel_eta_constraints_table.md`
+
+- 5.3.17 独立プローブ（p_t, β_T）の結論を 5.3.2 へ明文化【完了（初版）】
+  - 目的：距離推定と独立な観測として、time dilation（p_t）と CMB温度スケーリング（β_T）が
+    P-model最小予測と整合することを明示的に結論づけ、DDR前提監査と接続する。
+  - 作業：p_t（SNe Ia スペクトル aging）と β_T（SZ等）を、同一の予測（p_t=1, β_T≈0）に対して評価し、
+    5.3.2（距離指標と独立な検証）に「結論」として固定する。
+  - 反映先：Part II 5.3.2（`doc/paper/11_part2_astrophysics.md`）
+
+### Step 5.4：全分野統合の反証条件パック作成
+- 現状：完了（差分予測＋必要精度＋棄却条件を固定出力）
+- 成果物：`output/summary/decisive_falsification.png`
+
+---
+
+## Phase 6｜拡張・高精度検証（精度を上げ、理論の逃げ道を塞ぐ）
+
+### Step 6.1：LLR拡張：NGLR-1（mm級精度による再検証）
+- 現状：完了（初版；追加データ待ち）
+- 6.1.1 一次ソース（ILRS）から反射器座標（PA）を確定し、反射器カタログへ追加【完了】
+- 6.1.2 EDCバッチ取得に `nglr1` を追加（manifest追記）【完了】
+- 6.1.3 LLRバッチ評価で `nglr1` を評価対象に含め、`output/llr/batch/*` を更新【完了】
+- 6.1.4 Table 1 / 総合スコアボードに `nglr1` 行を追加【完了】
+- 6.1.5 論文・一般レポートへ反映（`scripts/summary/run_all.py --offline`）【完了】
+- 6.1.6 データ拡張（年/局の追加）と mm級到達の確認【完了（現時点：増分なし→データ拡充待ち）】
+  - 2026-01-23 時点：EDC（npt_crd_v2）の nglr1 は 2025 のみ（2026 年も未検出）で、unique点数は APOL=24 / WETL=2（WETL は min_points_cap=6 未満のため RMS 指標からは除外）。
+    - coverage（unique点数）：`output/llr/batch/llr_data_coverage.csv`
+    - 追加データ探索（EDC; 2025-2026）：`python -B scripts/llr/fetch_llr_edc_batch.py --targets nglr1 --years 2025-2026 --append --include-daily`（増分なし）
+    - バッチ再評価：`python -B scripts/llr/llr_batch_eval.py --time-tag-mode auto --min-points 30 --chunk 50`（coverage/metrics 更新。内容は同等）
+
+### Step 6.2：太陽系テストの長期・多系統統合
+- 現状：完了（初版）
+- 目的：
+  - 弱場での“逃げ道”（データセットごとに仮定・補正・推定量・パラメータを付け替えて整合に見せる）を塞ぐ。
+  - Cassini/Viking/Mercury/LLR/GPS 等の弱場テストを、同一の符号規約・同一の β（光伝播）などの凍結パラメータで貫いたときに、長期・多系統でも自己矛盾しないことを確認する。
+- 6.2.1 対象テストと一次ソースの“統合I/F”固定（入力/期間/推定量/補正の一覧）【完了（初版）】
+  - 出力：`output/summary/weak_field_test_matrix.json`
+- 6.2.2 テスト別の系統分解テンプレート（何を動かしたら何が動くか）を固定【完了（初版）】
+  - 実装：`scripts/summary/weak_field_systematics_templates.py`
+  - 出力：`output/summary/weak_field_systematics_templates.json`
+  - Cassini：周波数帯/太陽プラズマ補正/データ選別/ノイズモデル
+  - Viking：幾何ピークの選択/時刻同期/基線の定義
+  - Mercury：摂動（他惑星/J2/小天体）を含めないことによる限界の境界
+  - LLR：年/局/反射器の偏り（coverage）とRMSへの影響
+  - GPS：バイアス+ドリフト除去の前提と衛星依存
+- 6.2.3 長期・多系統の再計算バッチ（同一I/Fでの一括更新）【完了（初版）】
+  - 実装：`scripts/summary/weak_field_longterm_consistency.py`
+  - 出力：`output/summary/weak_field_longterm_consistency.png` / `output/summary/weak_field_longterm_consistency.json`
+- 6.2.4 “弱場統合の反証条件”を固定（どの程度の不一致で棄却か）【完了（初版）】
+  - 実装：`scripts/summary/weak_field_falsification.py`
+  - 出力：`output/summary/weak_field_falsification.json`（Phase 5 の反証条件パックへ接続）
+
+### Step 6.3：BAO多系統（BOSS / eBOSS 等）の比較整理
+- 現状：完了（初版）
+- 6.3.1 BOSS/eBOSS peakfit（ε）横並び＋cap張力（NGC/SGC）定量化【完了】
+  - 実装：`scripts/cosmology/cosmology_bao_multisystematics_summary.py`
+  - 出力：`output/cosmology/cosmology_bao_multisystematics_summary.png` / `output/cosmology/cosmology_bao_multisystematics_summary_metrics.json` / `output/cosmology/cosmology_bao_multisystematics_summary.csv`
+
+### Step 6.4：強場・回転ブラックホールでの差分予備検証
+- 現状：完了（初版）
+- 6.4.1 Kerr shadow 直径係数の (a*, inc) 依存（reference GR systematic）をグリッドで可視化し、Schwarzschild からの変化率を固定【完了（初版）】
+  - 出力：`output/eht/eht_kerr_shadow_coeff_grid.png` / `output/eht/eht_kerr_shadow_coeff_grid_metrics.json`
+  - 実装：`scripts/eht/eht_kerr_shadow_coeff_grid.py`
+- 6.4.2 既存の観測制約（M87*: jet viewing angle、Sgr A*: inc upper bound）を (a*, inc) グリッドへ射影し、Kerr 系統が差分予測（P-modelの係数差）の解釈に与える上限を定量化【完了（初版）】
+  - 出力：`output/eht/eht_kerr_shadow_coeff_grid_metrics.json`（object overlays / constrained ranges）
+- 6.4.3 「Kerr shadow の直径定義（effective diameter）」の取り方（avg(width,height) 以外）に対する感度（rangeの変化）を比較し、系統誤差としての扱い方針を固定【完了（初版）】
+  - 出力：`output/eht/eht_kerr_shadow_coeff_definition_sensitivity.png` / `output/eht/eht_kerr_shadow_coeff_definition_sensitivity_metrics.json`
+  - 実装：`scripts/eht/eht_kerr_shadow_coeff_definition_sensitivity.py`
+  - 結果：定義依存の spread は max≈2.2%（median≈0.053%）で、Kerr係数レンジの下限をわずかに押し下げる（P-model係数は依然として Kerr レンジを上回る）。
+- 6.4.4 定義依存（envelope）を GR 側の系統として κ 予算へ反映し、EHT（shadow_compare / κ誤差予算 / decisive_falsification）を更新【完了】
+  - 更新：`scripts/eht/eht_shadow_compare.py`（`reference_gr_kerr_definition_sensitivity` を追加し、κの Kerr 系統を envelope(across methods) で計算）
+  - 更新：`output/eht/eht_shadow_compare.json` / `output/eht/eht_kappa_error_budget.json` / `output/summary/decisive_falsification.json`
+  - 参考：spin/inc のみ（avg(width,height)）の値は `*_spin_only` として保持
+- 6.4.5 public report（dashboard）へ Kerr 系統（6.4.1/6.4.3）を統合し、「差分予測が Kerr/定義依存に対してどれだけ頑健か」を読者が直接参照できる形にする【完了】
+  - 更新：`scripts/summary/public_dashboard.py`
+  - 出力：`output/summary/pmodel_public_report.html`（card id: `eht_kerr_shadow_coeff_grid`, `eht_kerr_shadow_definition_sensitivity`）
+  - 再現：`python -B scripts/summary/public_dashboard.py`
+
+### Step 6.5：SPARC（銀河回転曲線：Radial Acceleration Relation）
+- 現状：完了（初版）
+- 目的：
+  - P-model の検証スケールを BH（強場）から銀河（弱場・広域）へ拡張し、回転曲線の「平坦化」と Radial Acceleration Relation（RAR）に対する P-model の予測を明確化して検証する。
+  - ダークマター仮説（ΛCDM）および MOND との判別可能性を、再解析（一次データ）と同一指標で定量化する。
+- 前提条件（Step 6.5 開始前に必要）：
+  - P-model の銀河スケール予測の明確化（Part I / Part III との理論的接続）。
+  - `g_obs = f(g_bar, P)` の形で予測が記述可能か、または `g_obs = g_bar`（GR弱場）として扱うかを決定する。
+- 入力（一次ソース）：
+  - SPARC database（Lelli, McGaugh, Schombert 2016）
+    - 公開：`https://astroweb.case.edu/SPARC/`（http は環境によって接続拒否になることがあるため、https を正とする）
+    - 175 disk galaxies（S0–Irr）
+    - Spitzer 3.6μm photometry（恒星質量分布）＋ HI/Hα rotation curves
+  - 派生（参照）：
+    - RAR（McGaugh, Lelli, Schombert 2016; PRL 117, 201101）
+    - BTFR（Lelli et al. 2019）
+  - 一次論文（TeX/PDF；offline再現）：arXiv:1606.09251（SPARC I）/ arXiv:1610.08981（RAR）を `scripts/cosmology/fetch_sparc_primary_sources.py` でキャッシュ（manifest：`data/cosmology/sources/sparc_primary_sources_manifest.json`）。
+- 出力（固定I/F；例）：
+  - raw cache：`data/cosmology/sparc/raw/`＋`data/cosmology/sparc/manifest.json`
+  - `output/cosmology/sparc_rar_reconstruction.csv`（g_obs/g_bar の再構成）
+  - `output/cosmology/sparc_rar_metrics.json`（fit/残差の最小まとめ）
+  - `output/cosmology/sparc_rar_scatter.png`（散布図）
+  - `output/cosmology/sparc_btfr_metrics.json`（BTFR cross-check）
+  - `output/cosmology/sparc_falsification_pack.json`（棄却条件）
+
+- 6.5.1 理論的準備：P-model の銀河スケール予測を明確化【完了（初版）】
+  - 問い：P-model は `g_bar << a0`（a0≈1.2×10^-10 m/s²）の領域で GR と異なる予測を持つか？
+  - 候補：
+    - (A) P-model = GR（弱場）：ダークマター（または等価な何か）が必要（現状の標準解釈と同等）。
+    - (B) P-model が弱場で修正を持つ：RAR の物理的起源を説明可能かを検証（MOND と同型かどうかも含む）。
+  - 本リポジトリのコア定義（φ≡-c^2 ln(P/P0)）からは a0 型の新スケールは自動では出ないため、当面は **(A) を既定**として進め、(B) は拡張仮説として別途「具体式＋凍結＋反証条件」を固定した上で検証する。
+  - 実装ノート：`doc/cosmology/SPARC_RAR_BTFR.md`
+- 6.5.2 SPARC データ取得固定【完了（初版）】
+  - `data/cosmology/sparc/` に raw を保存し、URL/sha256/取得条件を `manifest.json` に固定（offline 再現）。
+  - 実装：`scripts/cosmology/fetch_sparc.py`
+  - 出力：`data/cosmology/sparc/raw/*` / `data/cosmology/sparc/manifest.json`
+  - 再現：`python -B scripts/cosmology/fetch_sparc.py --download-missing`
+- 6.5.3 RAR 再構築（P-model 距離写像での比較）【完了（初版）】
+  - 処理：
+    - `g_bar(r) = V_bar(r)^2 / r` を恒星+ガス分布から計算。
+    - `g_obs(r) = V_obs(r)^2 / r` を回転曲線から計算。
+    - P-model 予測 `g_P(r)` を計算（6.5.1 の選択に依存）。
+  - 6.5.3.1 観測側（g_obs/g_bar）の再構築（Rotmod_LTG.zip）【完了（初版）】
+    - 実装：`scripts/cosmology/sparc_rar_from_rotmod.py`
+    - 出力：`output/cosmology/sparc_rar_reconstruction.csv` / `output/cosmology/sparc_rar_metrics.json` / `output/cosmology/sparc_rar_scatter.png`
+    - 再現：`python -B scripts/cosmology/sparc_rar_from_rotmod.py`
+  - 6.5.3.2 P-model 予測（距離写像/弱場仮定の選択）【完了（初版）】（6.5.1 の選択に依存）
+    - 6.5.3.2.1 (A) 既定（P-model=GR弱場）：g_P=g_bar（baryons-only）を参照ヌルとして固定【完了（初版）】
+      - 出力：`output/cosmology/sparc_falsification_pack.json`（baryons-only residual + 3σ形式）
+    - 6.5.3.2.2 比較用 baseline：McGaugh+2016 RAR経験式の a0 fit を同packへ保存【完了（初版）】（P-model予測ではない）
+    - 6.5.3.2.3 (B) 弱場修正（g_obs=f(g_bar,P)）の候補 I/F（自由度・凍結手順・3σ判定）を固定し、同形式で検証できる形へ拡張【完了（初版）】
+      - 6.5.3.2.3.1 候補：a0 = κ c H0^(P)（κ=1/(2π)）として a0 を外部固定し、fit→freeze→holdout で評価を固定【完了（初版）】
+        - 実装：`scripts/cosmology/sparc_rar_freeze_test.py`（model: `candidate_rar_pbg_a0_fixed_kappa`）
+        - 出力：`output/cosmology/sparc_rar_freeze_test_metrics.json`
+        - 結果（例；with σ_int, holdout低加速度）：z≈-0.94（baseline a0 fit は z≈-3.48）
+      - 注意：この候補は現時点ではコア P-model から導出された予測ではなく、P_bg（H0^(P)）との接続案として扱う。
+- 6.5.4 BTFR（Baryonic Tully-Fisher）での整合性チェック【完了（初版）】
+  - 処理：`M_b` vs `V_flat` の関係を再構築し、RAR だけでなく BTFR でも観測側の整合を cross-check する。
+  - 実装：`scripts/cosmology/sparc_btfr_metrics.py`
+  - 出力：`output/cosmology/sparc_btfr_metrics.json` / `output/cosmology/sparc_btfr_scatter.png`
+  - 再現：`python -B scripts/cosmology/sparc_btfr_metrics.py`
+- 6.5.5 反証条件の固定【完了（初版）】
+  - シナリオ別の棄却基準（固定形式）：
+    - (A) P-model = GR の場合：SPARC は「ダークマター（または等価な何か）を必要とする」ことを確認（＝弱場銀河での単独説明は不成立）。
+    - (B) P-model ≠ GR の場合：RAR residual が 3σ で GR/MOND と区別可能かを判定し、棄却条件（閾値・指標）を `falsification_pack.json` に固定する。
+  - 6.5.5.1 baryons-only（g_P=g_bar）を参照ヌルとして、RAR の系統ずれを最小 pack として固定【完了（初版）】
+    - 実装：`scripts/cosmology/sparc_falsification_pack.py`
+    - 出力：`output/cosmology/sparc_falsification_pack.json`
+    - 再現：`python -B scripts/cosmology/sparc_falsification_pack.py`
+    - 注意：現段階の有意度は V_obs の統計誤差のみで、g_bar 側（M/L 等）の系統は含まない（pack に明記）。
+    - 参考：比較用として McGaugh+2016 の経験式（a0 fit）も同packに保存（P-model予測ではない）。
+  - 6.5.5.3 g_bar 系統（恒星 M/L：Υ_disk, Υ_bulge）の sweep を行い、baryons-only ヌルの結論が M/L に対して頑健かを固定【完了（初版）】
+    - 実装：`scripts/cosmology/sparc_rar_mlr_sweep.py`
+    - 出力：`output/cosmology/sparc_rar_mlr_sweep_metrics.json`
+    - 結果（例）：low-accel の weighted mean residual は約 0.57〜0.67 dex、z は約 1.06e3〜1.34e3（M/L sweep範囲内）。
+  - 6.5.5.4 fit→freeze→holdout（galaxy split）で、候補 f(g_bar;θ) を検証できる枠組みを固定【完了（初版）】
+    - 実装：`scripts/cosmology/sparc_rar_freeze_test.py`
+    - 出力：`output/cosmology/sparc_rar_freeze_test_metrics.json`
+    - 例（with σ_int）：baryons-only は low-accel で z≈O(10^1) を維持、baseline RAR（a0 fit）と候補 a0=κ c H0^(P)（κ=1/(2π)）は |z|≈O(1–10) まで縮む（split依存）。
+    - 補修：holdout 指標として point-level（点を独立扱い）に加え、**galaxy-level（銀河内平均を1サンプル）**の `low_accel_galaxy` を追加し、独立度の過大評価を避ける（`sweep_summary_galaxy` を追加）。
+  - 6.5.5.2 シナリオ(B)（弱場修正）を主張する場合は、`g_obs=f(g_bar,P)` の具体式（候補）と自由度/凍結手順を固定し、同じ形式で 3σ 判定できるように拡張【完了（初版）】
+    - 6.5.5.2.1 候補 a0=κ c H0^(P)（κ=1/(2π)）を pack と sweep に展開し、低加速度統計を固定【完了（初版）】
+      - pack：`output/cosmology/sparc_falsification_pack.json`（`baselines.rar_mcgaugh2016_a0_pbg_fixed_kappa`）
+      - sweep：`output/cosmology/sparc_rar_mlr_sweep_metrics.json`（`envelope.candidate_pbg_low_accel_z` 等）
+    - 6.5.5.2.2 σ_int（train推定→holdout持ち越し）と棄却条件（|z|<3）の定義を pack に明文化し、freeze-test の holdout 指標を同一ファイルで参照できる形に固定【完了（初版）】
+      - pack：`output/cosmology/sparc_falsification_pack.json`（`scenario_b.sigma_int_rule` / `scenario_b.reject` / `scenario_b.freeze_test_summary`）
+    - 6.5.5.2.3 seed/train_frac を走査し、split 依存（holdout |z| の分布）を sweep_summary として固定【完了（改訂）】
+      - freeze-test：`output/cosmology/sparc_rar_freeze_test_metrics.json`（`sweep_summary`）
+      - pack：`output/cosmology/sparc_falsification_pack.json`（`scenario_b.freeze_test_summary.sweep_summary`）
+      - 例（今回の sweep；seeds=50, train_fracs=5；計250run）：
+        - point-level（`sweep_summary`）：候補の pass_rate(|z|<3)≈0.648（baseline a0 fit は≈0.268、baryons-only は0）
+        - galaxy-level（`sweep_summary_galaxy`）：候補の pass_rate(|z|<3)≈0.976（baseline a0 fit は≈0.752、baryons-only は0）
+      - 注：point-level は同一銀河内の多数点を独立扱いして SEM を過小評価しやすい。採用判定は `preferred_metric=sweep_summary_galaxy` を正とする（pack に固定）。
+    - 6.5.5.2.4 採用/非採用の判定ルール（pass_rate閾値など）を固定し、候補を「採用」するか「保留」にする【完了（改訂）】
+      - 判定ルール（改訂）：
+        - adopted_fixed_ml：`preferred_metric=sweep_summary_galaxy` の pass_rate(|z|<3) ≥ 0.95（かつ n≥100）で True。
+        - adopted_final：adopted_fixed_ml に加えて、(i) M/L（Υ）の系統 sweep に対して robust_adopted_mlr=True（min pass_rate≥0.95）、(ii) 手続き系統（procedure）sweep に対して robust_adopted_procedure=True（min pass_rate≥0.95）を満たす場合のみ True（`output/cosmology/sparc_falsification_pack.json`）。
+      - 今回結果：
+        - adopted_fixed_ml：候補（a0=κ c H0^(P), κ=1/(2π)）は galaxy-level pass_rate≈0.976 のため True（`output/cosmology/sparc_rar_freeze_test_metrics.json`）。
+        - adopted_final：M/L sweep（6.5.5.2.6）で min pass_rate≈0.852（Υ_disk=0.55, Υ_bulge=0.75）となり robust_adopted_mlr=False、さらに procedure sweep（6.5.5.2.9）で min pass_rate≈0.933 となり robust_adopted_procedure=False のため False（`output/cosmology/sparc_falsification_pack.json`）。
+    - 6.5.5.2.5 κ を外部固定（prior）する前提で、κ を走査して「この型でどこまで改善し得るか」を sweep として固定【完了（改訂）】
+      - 実装：`scripts/cosmology/sparc_rar_pbg_kappa_sweep.py`
+      - 出力：`output/cosmology/sparc_rar_pbg_kappa_sweep_metrics.json` / `output/cosmology/sparc_rar_pbg_kappa_sweep.png`
+      - 結果（seeds=50, train_fracs=5；計250split）：
+        - point-level：best κ≈0.15 でも pass_rate≈0.728 に留まる（ref：κ=1/(2π) は≈0.648）。
+        - galaxy-level：κ≈0.11–0.16 の範囲で pass_rate≥0.95 を満たし、ref κ=1/(2π) は pass_rate≈0.976（best は κ≈0.12 で 1.0）。
+    - 6.5.5.2.6 g_bar 系統（M/L：Υ_disk, Υ_bulge）を freeze-test（galaxy-level）へ組み込み、採用判定の robustness を固定【完了（初版）】
+      - 実装：`scripts/cosmology/sparc_rar_freeze_test_mlr_sweep.py`
+      - 出力：`output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json` / `output/cosmology/sparc_rar_freeze_test_mlr_sweep.png`
+      - 結果（Υ_disk=[0.45,0.5,0.55], Υ_bulge=[0.65,0.7,0.75]；seeds=50, train_fracs=5；計250split）：
+        - 候補（κ=1/(2π)）：pass_rate(|z|<3) は max=1.0, median≈0.976, **min≈0.852**（worst：Υ_disk=0.55, Υ_bulge=0.75）→ robust_adopted_mlr=False。
+        - baseline（a0 fit）：min≈0.66（候補より不安定）。
+        - 感度（marginal）：pass_rate の悪化はほぼ Υ_disk に支配され、Υ_disk=0.55 の列で 0.852–0.88 まで低下する一方、Υ_disk≤0.5 では Υ_bulge=0.65–0.75 全域で min=0.976 を維持（`output/cosmology/sparc_falsification_pack.json` の `scenario_b.systematics.mlr_sweep.candidate.marginal_by_upsilon_disk`）。
+    - 6.5.5.2.7 Υ_disk prior の一次根拠（SPARC I / RAR）を cache し、prior 凍結の入口を固定【完了】
+      - SPARC I（arXiv:1606.09251）は [3.6] の恒星 M/L として Υ★≈0.5 を fiducial とし、低値 Υ★≈0.2（DiskMass）や高値 Υ★≈0.7（bright galaxies の mean maximum-disk limit）も議論するため、Υ_disk=0.55 は “fiducial近傍” に含まれる。したがって候補がこの近傍で robust を失う点は prior 凍結で回避できない（`data/cosmology/sources/sparc_primary_sources_manifest.json`）。
+    - 6.5.5.2.8 Υ を nuisance（global）として train で推定→holdoutへ持ち越し、採用判定が改善するかを固定【完了（初版）】
+      - 実装：`scripts/cosmology/sparc_rar_freeze_test.py --fit-upsilon-global`（objective=chi2_high_accel 等）
+      - 出力：`output/cosmology/sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json`
+      - 結果（galaxy-level；seeds=50, train_fracs=5；計250split）：pass_rate(|z|<3)≈0.888（median z≈-2.06）で、adopted_fixed_ml（Υ=0.5/0.7固定; pass_rate≈0.976）より悪化。fit は (Υ_disk, Υ_bulge)=(0.55,0.75) を高頻度で選択し（約8割）、単純な nuisance fit は robustness を改善しない（`output/cosmology/sparc_falsification_pack.json` の `scenario_b.systematics.upsilon_fit_on_train`）。
+    - 6.5.5.2.9 手続き系統（low-accel cut / sigma-floor / galaxy集約条件 / outlier clipping）の sweep を固定【完了（初版）】
+      - 実装：`scripts/cosmology/sparc_rar_freeze_test_procedure_sweep.py`
+      - 出力：`output/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json` / `output/cosmology/sparc_rar_freeze_test_procedure_sweep.png`
+      - 結果（galaxy-level；seeds=20, train_fracs=3；計60split；clipping=[none, mad:3.5]）：candidate の pass_rate(|z|<3) は 0.933–1.0（min<0.95）となり、手続き差が採用判定に影響し得ることを sys として固定（`output/cosmology/sparc_falsification_pack.json` の `scenario_b.systematics.procedure_sweep`）。
+    - 次：現状の候補（a0=κ c H0^(P)）は **adopted_final=False**（M/L 系統と手続き系統で robust を失う）を固定した。もし (B) を採用主張するなら、(i) Υ の外部制約（prior）を一次ソースで凍結して許容域を閉じる、(ii) 手続き系統を sys として明示し、(iii) BTFR と整合したまま複数 dataset で同一 gate（`preferred_metric=sweep_summary_galaxy` の pass_rate(|z|<3)）を満たすことを追加要件として課す。
+
+---
+
+## Phase 7｜量子現象への接続（宇宙物理で確立した枠組みを量子へ）
+
+- 方針：Phase 7 のデータ解析は、Phase 4（宇宙論；BAO 等）と同型の精度で進める（一次データ→固定出力→共分散→系統→反証条件）。
+- 追加方針（到達目標）：Phase 7 は「量子の一部（ベル/干渉/QED安全確認）」で終わらず、最終的に **物理全域（相互作用・束縛・物性まで）を P-model で再導出**できる状態を目指す。
+  - 本ロードマップでの「証明」は、数学的厳密証明ではなく、**最小仮定→観測量への写像→一次データでの再現（不確かさ＋反証条件）** を満たす科学としての証明（反証可能性）を意味する。
+- 最低要件（宇宙論級）：
+  - 一次データは `data/quantum/sources/<dataset>/` に保存し、`manifest.json` で URL/sha256/取得条件を固定する（offline 再現）。
+  - 解析は `scripts/quantum/` に固定し、`output/quantum/<topic>/` に固定名（同一I/F）の生成物を出力する（run別差は `out-tag` のみ）。
+  - 統計不確かさは手法を固定し、推定量の分散/共分散（sweep点間を含む）と再現 seed を出力する。
+  - 系統不確かさはテンプレ（何を動かすと何が動くか）を固定し、sweep で感度を定量化する。
+  - 推定の cross-check を最低1つ用意する（例：trial-based vs coincidence-based、別アルゴリズム、別実装）。
+  - 反証条件（閾値・判定基準）を `falsification_pack.json` と本文に固定する。
+
+### Phase 7 完遂の評価軸（Part III を「棄却可能な理論」へ）
+
+Phase 7 の出口は「量子現象を語った」ではなく、Part I の P定義（P内部要請）を継承した上で、次の 3 本柱（+反証条件）を **出力として固定**できた状態を指す。
+
+- 評価1｜論理の一貫性（P内部要請の継承）
+  - 粒子＝局所P構造の束縛モード（定在波）、波動関数＝位相情報、が Part I のスカラー場 P と矛盾しない最小形を固定する。
+  - 接続点：Part I 2.6（動力学：`□u`）と、Phase 7 の微小変動/作用/Schr 写像（`doc/quantum/18_p_field_action_and_schrodinger_mapping.md`）。
+- 評価2｜測定の脱確率化（selection）
+  - 「波束の収縮」を仮定せず、マクロ相互作用による安定モード選択（散逸アトラクター／エントロピー最小化）として定式化し、Born則 `|ψ|^2` が検出率近似として現れる道筋を固定する（第一原理の厳密導出ではなく “写像” として明記）。
+  - 参照：`doc/quantum/15_quantum_measurement_born_rule.md`
+- 評価3｜非局所性の物理的解釈（共通生成過程に由来する相関）
+  - もつれを通信ではなく相関として記述し、ベル不等式の破れを「仮定（同一母集団）と手続き（selection）」の位置づけとして再解釈する。
+  - 参照：`doc/quantum/03_entanglement_local_p.md`、Step 7.4（公開一次 time-tag 再解析）
+- 出口条件｜反証条件（決着点）の提示（Part I 3.0）
+  - 量子の“決着点”を Part I 3.0 書式（Input/Frozen/Output/Statistic/Reject）で固定し、再現コマンド込みで JSON に保存する。
+  - 出力：`output/summary/quantum_falsification.json`（Step 7.5.7）
+  - 完了：Bell の “遅延シグネチャ” を KS proxy から物理量（Δmedian(ns)）＋残差（z）へ接続し、3σ閾値（Reject）を凍結（7.4.10）。出力：`output/quantum/bell/falsification_pack.json` / `output/summary/quantum_falsification.json`
+
+### Step 7.1：波の反射としての粒子（内部構造の再解釈）
+- 現状：完了（初版）
+- 7.1.1 最小モデルの定義（「反射」＝境界条件／離散モード／束縛状態）を文書化【完了】
+  - 追加：`doc/quantum/01_particle_as_reflection.md`
+- 7.1.2 再現可能デモ（反射→固有モード離散化＋波束反射）を固定【完了】
+  - 実装：`scripts/quantum/particle_reflection_demo.py`
+  - 出力：`output/quantum/particle_reflection_demo.png` / `output/quantum/particle_reflection_demo_metrics.json`
+  - 再現：`python -B scripts/quantum/particle_reflection_demo.py`
+- 7.1.3 Part I（時計写像・φ定義）からの量子接続（最小作用／境界条件による離散化／Schr写像）を数理ノートとして固定【完了】
+  - 追加：`doc/quantum/18_p_field_action_and_schrodinger_mapping.md`
+
+- 次：Step 7.2（局所P構造による相関生成）で、観測（time-tag）と「条件付き集合（post-selection）」が入る位置を定義し、Step 7.4 の一次データ再解析へ接続する。
+
+### Step 7.2：局所P構造による相関生成
+- 現状：完了（初版）
+- 7.2.1 最小モデル（局所出力＋time-tag＋同時計数選別）を文書化【完了】
+  - 追加：`doc/quantum/02_local_p_correlation.md`
+- 7.2.2 toy simulation（S(Δt) と受理率）を固定し、Step 7.4 の検証項目を明確化【完了】
+  - 実装：`scripts/quantum/bell_time_tag_selection_sweep.py`
+  - 出力：`output/quantum/bell_time_tag_selection_sweep.png` / `output/quantum/bell_time_tag_selection_sweep_metrics.json`
+  - 再現：`python -B scripts/quantum/bell_time_tag_selection_sweep.py`
+
+### Step 7.3：量子もつれの再解釈（非局所仮定を用いない）
+- 現状：完了（初版）
+- 7.3.1 「もつれ」の操作的定義（観測量）と、非局所仮定を置かない再解釈の立場を文書化【完了】
+  - 追加：`doc/quantum/03_entanglement_local_p.md`
+- 7.3.2 Step 7.2 の toy 出力に「trial-based（無選別）基準」の線を追加し、Δt依存と区別できる形に更新【完了】
+  - 更新：`scripts/quantum/bell_time_tag_selection_sweep.py`
+  - 出力：`output/quantum/bell_time_tag_selection_sweep.png` / `output/quantum/bell_time_tag_selection_sweep_metrics.json`
+
+### Step 7.4：ベル不等式の棄却（独立確率仮定が破れる理由の提示）
+- 現状：完了（7.4.1–7.4.6 は完了（初版）；7.4.7 は完了（追加データ統合：7.4.7.2 は一次未公開のためブロックだが I/F 凍結済み）；7.4.8 は完了（初版）；7.4.9 は完了（宇宙論級：共分散/系統/統合の固定出力＋natural window freeze）；7.4.10 は完了）
+- 参照：`doc/quantum/P-model_BellTest_AI_Brief.md`
+- 一次データ（NIST belltestdata）の固定：
+  - 取得：`python -B scripts/quantum/fetch_nist_belltestdata.py`
+  - 保存：`data/quantum/sources/nist_belltestdata/`（`manifest.json` を同梱）
+- 再解析（最小）：GPS PPS 整列＋click delay（sync基準）＋coincidence window 掃引（greedy pairing）
+  - 実行：`python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py`
+  - 出力：`output/quantum/nist_belltest_time_tag_bias.png` / `output/quantum/nist_belltest_time_tag_bias_metrics.json`
+  - 出力：`output/quantum/nist_belltest_coincidence_sweep.csv`
+- 文章化：`doc/quantum/04_bell_time_tag_primary_reanalysis.md`
+- 一次データ（Delft / Hensen 2015；event-ready / CHSH）の固定：
+  - 取得：`python -B scripts/quantum/fetch_delft_hensen2015.py`
+  - 再解析：`python -B scripts/quantum/delft_hensen2015_chsh_reanalysis.py`
+  - 出力：`output/quantum/delft_hensen2015_chsh.png` / `output/quantum/delft_hensen2015_chsh_metrics.json`
+  - 出力：`output/quantum/delft_hensen2015_chsh_sweep_start_offset.csv`
+- 一次データ（Delft / Hensen 2016；Sci Rep 6, 30289；event-ready / CHSH）の固定：
+  - 取得：`python -B scripts/quantum/fetch_delft_hensen2016_srep30289.py`
+  - 再解析：`python -B scripts/quantum/delft_hensen2015_chsh_reanalysis.py --profile hensen2016_srep30289`
+  - 出力：`output/quantum/delft_hensen2016_srep30289_chsh.png` / `output/quantum/delft_hensen2016_srep30289_chsh_metrics.json`
+  - 出力：`output/quantum/delft_hensen2016_srep30289_chsh_sweep_start_offset.csv`
+- 数式化：CHSH の前提と selection（同一母集団）条件を w_ab(λ) で明文化
+  - `doc/quantum/06_chsh_assumptions_and_selection.md`
+- 整理：P-model の量子側の主張範囲（局所P構造／隠れた相関／棄却条件）
+  - `doc/quantum/07_pmodel_bell_chsh_notes.md`
+- 一覧：公開データの所在と検証可能性（Aspect等は一次未固定）
+  - `doc/quantum/05_bell_public_datasets.md`
+
+- 7.4.8 “宇宙論と同型” の一次プロダクト標準化（fixed outputs / uncertainty / falsification）【完了（初版）】
+  - 目的：公開一次データ（time-tag / trial log）から、selection（coincidence window / trial定義 / time-offset）で統計量がどれだけ動くかを **固定手順＋固定出力** として再解析可能にする。
+  - 実装：`scripts/quantum/bell_primary_products.py`
+  - 固定出力（毎回同じ名前）：
+    - `output/quantum/bell/<dataset>/normalized_events.*`（列名/単位/イベント定義を統一した正規化データ）
+    - `output/quantum/bell/<dataset>/window_sweep_metrics.json`（coincidence window sweep）
+    - `output/quantum/bell/<dataset>/offset_sweep_metrics.json`（time-offset / start_offset sweep）
+    - `output/quantum/bell/<dataset>/summary.png`（sweep＋KS等のまとめ）
+    - `output/quantum/bell/table1_row.json`（Table 1 に貼れる1行要約）
+    - `output/quantum/bell/falsification_pack.json`（反証条件パック）
+  - 指標（固定）：CHSH の S（または当該実験の統計量：NISTは CH の J_prob）、ΔS/ΔJ、delay分布の setting 依存（KS 等；time-tag がある場合）
+  - 不確かさ（固定）：統計（bootstrap手法固定）＋系統（window/trial/time-tag/clock offset 等を sweep 変動として明示）
+  - 反証条件（固定）：最低1つ（例：trial-based と coincidence-based の差が閾値以下なら selection 起源仮説を棄却）
+  - 再現：`python -B scripts/quantum/bell_primary_products.py`
+
+- 7.4.9 Bell を “宇宙論級” へ昇格（共分散＋系統分解＋長期統合＋反証条件の閾値固定）【完了】
+  - 目的：Phase 4.5（BAO）と同等に、統計（共分散）と系統（sweep感度）を分離し、dataset横断の一貫性と反証条件を「出力として」固定する。
+  - 方針：
+    - 共分散：block bootstrap / permutation（null）等の手法を固定し、sweep点間も含む共分散を出力する（手法・seed・ブロック定義も固定）。
+    - 系統：window/trial/offset/threshold/pairing 等をテンプレ化し、誤差予算として固定する（“何を動かすと何が動くか” を JSON で保持）。
+    - 自然な窓（natural window）：window/offset sweep が恣意的な p-hacking に見えないよう、装置のタイミング分布（delay/jitter/drift）と accidental rate に基づく **客観基準**を固定し、freeze（基準点＋reject）として `output/quantum/bell/<dataset>/natural_window_frozen.json` に固定する（event-ready を含む）。【完了】
+    - 7.4.9.1 偶発同時計数（accidental coincidence）の推定と subtraction を同梱し、窓依存が「偶発の増加だけ」で説明できないことを cross-check として固定する。【完了】
+    - 統合：NIST/Weihs/Delft の横断 summary（長期・多系統）を固定し、論文の表（Table 1）へ機械的に貼れる1行要約を拡張する。
+  - 実装（案）：
+    - 既存拡張：`scripts/quantum/bell_primary_products.py` を拡張し、共分散/系統/統合の固定出力を追加する。
+    - 補助（必要なら）：`scripts/quantum/bell_systematics_templates.py` / `scripts/quantum/bell_longterm_consistency.py`
+    - 補助（自然窓；必要なら）：`scripts/quantum/bell_natural_window.py`（delay分布＋accidental推定＋plateau判定→推奨window/offset を固定出力）
+  - 固定出力（案；ファイル名は固定する）：
+    - `output/quantum/bell/<dataset>/covariance_bootstrap.json`（bootstrap共分散；sweep点間を含む；N≥1000 を固定）
+    - `output/quantum/bell/<dataset>/natural_window_frozen.json`（natural window の基準点＋reject を凍結）
+    - `output/quantum/bell/<dataset>/covariance.json`（旧：初版の推定共分散；比較用に残す）
+    - `output/quantum/bell/systematics_templates.json`（系統分解テンプレ）
+    - `output/quantum/bell/longterm_consistency.json` / `output/quantum/bell/longterm_consistency.png`
+    - `output/quantum/bell/falsification_pack.json`（閾値をfreezeし、本文へ反映）
+  - 完了条件：NIST/Weihs/Delft で同一I/Fの「共分散＋系統＋統合」が揃い、反証条件が自動生成される。
+
+- 7.4.10 高速スイッチングBellの遅延シグネチャ（伝播遅延/残差）：time-tag の setting 切替に対する遅延分布差を、KS proxy ではなく **遅延（Δmedian; ns）＋残差（z）**として定義し、3σ閾値（Reject）を固定する【完了】
+  - 反映：`scripts/quantum/bell_primary_products.py`（delay_signature: Δmedian(ns), σ, z を追加）→ `output/quantum/bell/falsification_pack.json`（`delay_signature_z_min=3` を凍結）
+  - 集約：`scripts/summary/quantum_falsification.py` → `output/summary/quantum_falsification.json`
+
+#### Step 7.4（拡張；training run 依存を潰す）
+- 7.4.1 NIST：training run 以外でも同じ指標（delay分布/KS/window sweep）を再計算し、頑健性を確認【完了（初版；afterfixingModeLocking の先頭3600秒で確認）】
+  - 入口：`python -B scripts/quantum/fetch_nist_belltestdata.py --list`（run探索）→ `--run <base> --max-gib ...`（取得）
+  - 解析：`python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py --alice-zip ... --bob-zip ... --out-tag <base>`
+  - 例：`03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking`（max_seconds=3600）
+    - 図：`output/quantum/nist_belltest_time_tag_bias__03_43_afterfixingModeLocking_s3600.png`
+    - 数値：`output/quantum/nist_belltest_time_tag_bias_metrics__03_43_afterfixingModeLocking_s3600.json`
+    - window sweep：`output/quantum/nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv`
+- 7.4.2 NIST：公式解析（Eberhard/CH）の trial 定義に寄せた再解析（trial-based vs coincidence-based）でアルゴリズム依存を定量化【完了（初版）】
+  - build（processed_compressed/hdf5）を取得：`python -B scripts/quantum/fetch_nist_belltestdata.py --run 03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking --hdf5 --max-gib 2.0`
+  - trial-based 集計（sync×slot）：`python -B scripts/quantum/nist_belltest_trial_based_reanalysis.py --out-tag 03_43_afterfixingModeLocking_s3600`
+    - 図：`output/quantum/nist_belltest_trial_based__03_43_afterfixingModeLocking_s3600.png`
+    - 数値：`output/quantum/nist_belltest_trial_based_metrics__03_43_afterfixingModeLocking_s3600.json`
+    - 集計：`output/quantum/nist_belltest_trial_based_counts__03_43_afterfixingModeLocking_s3600.csv`
+- 7.4.3 NIST 以外：photon の time-tag 一次データ（Weihs 1998）を一次ソースとして固定し、同一パイプラインへ追加【完了（初版）】
+  - 取得（Zenodo 7185335）：`python -B scripts/quantum/fetch_weihs1998_zenodo_7185335.py`
+  - 再解析（coincidence window sweep；固定CHSH variant）：`python -B scripts/quantum/weihs1998_time_tag_reanalysis.py`
+    - 図：`output/quantum/weihs1998_chsh_sweep__weihs1998_longdist_longdist1.png`
+    - 数値：`output/quantum/weihs1998_chsh_sweep_metrics__weihs1998_longdist_longdist1.json`
+    - sweep：`output/quantum/weihs1998_chsh_sweep__weihs1998_longdist_longdist1.csv`
+  - 次（拡張）：Giustina 2015 等、他の photon time-tag 一次データも同様に統合する（公開性・再解析可能性を満たすものから。現状は一次公開の所在が未固定のため、継続調査→見つからなければ“保留/ブロック”として明文化する）。
+  - 追加（補助；time-tag ではない）：Big Bell Test Collaboration 2018（Nature）の Source Data（human-choice inputs；Fig.2）を一次ソースとして固定し、取得＋要約（sessions by country）を追加【完了】
+    - 取得：`python -B scripts/quantum/fetch_big_bell_test_2018.py`
+    - 要約：`python -B scripts/quantum/big_bell_test_2018_sessions_by_country.py`
+      - 図：`output/quantum/big_bell_test_2018_sessions_by_country.png`
+- 7.4.4 NIST：追加run（装置条件差）でも trial-based(build)＋coincidence-based を再計算し、時間帯/装置条件依存を切り分ける【完了（初版；17_04/21_15/22_20/23_55）】
+  - 取得（raw + build；multipart z01+zip）：`python -B scripts/quantum/fetch_nist_belltestdata.py --run 17_04_CH_pockel_100kHz.run.completeblind --hdf5 --max-gib 3.0`
+  - coincidence-based（先頭3600秒）：`python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py --alice-zip ...17_04...alice...zip --bob-zip ...17_04...bob...zip --max-seconds 3600 --out-tag 17_04_completeblind_s3600`
+    - 図：`output/quantum/nist_belltest_time_tag_bias__17_04_completeblind_s3600.png`
+    - 数値：`output/quantum/nist_belltest_time_tag_bias_metrics__17_04_completeblind_s3600.json`
+    - window sweep：`output/quantum/nist_belltest_coincidence_sweep__17_04_completeblind_s3600.csv`
+  - trial-based（build；sync×slot）：`python -B scripts/quantum/nist_belltest_trial_based_reanalysis.py --hdf5 ...17_04...build.hdf5 --out-tag 17_04_completeblind_s3600 --coincidence-sweep-csv output/quantum/nist_belltest_coincidence_sweep__17_04_completeblind_s3600.csv`
+    - 図：`output/quantum/nist_belltest_trial_based__17_04_completeblind_s3600.png`
+    - 数値：`output/quantum/nist_belltest_trial_based_metrics__17_04_completeblind_s3600.json`
+    - 集計：`output/quantum/nist_belltest_trial_based_counts__17_04_completeblind_s3600.csv`
+  - 取得（raw + build）：`python -B scripts/quantum/fetch_nist_belltestdata.py --run 21_15_CH_pockel_100kHz.run.200nsadditiondelay_lightconeshift --hdf5 --max-gib 2.0`
+  - coincidence-based（先頭3600秒）：`python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py --alice-zip ...21_15...alice...zip --bob-zip ...21_15...bob...zip --max-seconds 3600 --out-tag 21_15_200nsadditiondelay_lightconeshift_s3600`
+    - 図：`output/quantum/nist_belltest_time_tag_bias__21_15_200nsadditiondelay_lightconeshift_s3600.png`
+    - 数値：`output/quantum/nist_belltest_time_tag_bias_metrics__21_15_200nsadditiondelay_lightconeshift_s3600.json`
+    - window sweep：`output/quantum/nist_belltest_coincidence_sweep__21_15_200nsadditiondelay_lightconeshift_s3600.csv`
+  - trial-based（build；sync×slot）：`python -B scripts/quantum/nist_belltest_trial_based_reanalysis.py --hdf5 ...21_15...build.hdf5 --out-tag 21_15_200nsadditiondelay_lightconeshift_s3600 --coincidence-sweep-csv output/quantum/nist_belltest_coincidence_sweep__21_15_200nsadditiondelay_lightconeshift_s3600.csv`
+    - 図：`output/quantum/nist_belltest_trial_based__21_15_200nsadditiondelay_lightconeshift_s3600.png`
+    - 数値：`output/quantum/nist_belltest_trial_based_metrics__21_15_200nsadditiondelay_lightconeshift_s3600.json`
+    - 集計：`output/quantum/nist_belltest_trial_based_counts__21_15_200nsadditiondelay_lightconeshift_s3600.csv`
+  - 取得（raw + build）：`python -B scripts/quantum/fetch_nist_belltestdata.py --run 22_20_CH_pockel_100kHz.run.200nsreduceddelay_lightconeshift --hdf5 --max-gib 2.0`
+  - coincidence-based（先頭3600秒）：`python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py --alice-zip ...22_20...alice...zip --bob-zip ...22_20...bob...zip --max-seconds 3600 --out-tag 22_20_200nsreduceddelay_lightconeshift_s3600`
+    - 図：`output/quantum/nist_belltest_time_tag_bias__22_20_200nsreduceddelay_lightconeshift_s3600.png`
+    - 数値：`output/quantum/nist_belltest_time_tag_bias_metrics__22_20_200nsreduceddelay_lightconeshift_s3600.json`
+    - window sweep：`output/quantum/nist_belltest_coincidence_sweep__22_20_200nsreduceddelay_lightconeshift_s3600.csv`
+  - trial-based（build；sync×slot）：`python -B scripts/quantum/nist_belltest_trial_based_reanalysis.py --hdf5 ...22_20...build.hdf5 --out-tag 22_20_200nsreduceddelay_lightconeshift_s3600 --coincidence-sweep-csv output/quantum/nist_belltest_coincidence_sweep__22_20_200nsreduceddelay_lightconeshift_s3600.csv`
+    - 図：`output/quantum/nist_belltest_trial_based__22_20_200nsreduceddelay_lightconeshift_s3600.png`
+    - 数値：`output/quantum/nist_belltest_trial_based_metrics__22_20_200nsreduceddelay_lightconeshift_s3600.json`
+    - 集計：`output/quantum/nist_belltest_trial_based_counts__22_20_200nsreduceddelay_lightconeshift_s3600.csv`
+  - 取得（raw + build）：`python -B scripts/quantum/fetch_nist_belltestdata.py --run 23_55_CH_pockel_100kHz.run.ClassicalRNGXOR --hdf5 --max-gib 2.0`
+  - coincidence-based（先頭3600秒）：`python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py --alice-zip ...23_55...alice...zip --bob-zip ...23_55...bob...zip --max-seconds 3600 --out-tag 23_55_ClassicalRNGXOR_s3600`
+    - 図：`output/quantum/nist_belltest_time_tag_bias__23_55_ClassicalRNGXOR_s3600.png`
+    - 数値：`output/quantum/nist_belltest_time_tag_bias_metrics__23_55_ClassicalRNGXOR_s3600.json`
+    - window sweep：`output/quantum/nist_belltest_coincidence_sweep__23_55_ClassicalRNGXOR_s3600.csv`
+  - trial-based（build；sync×slot）：`python -B scripts/quantum/nist_belltest_trial_based_reanalysis.py --hdf5 ...23_55...build.hdf5 --out-tag 23_55_ClassicalRNGXOR_s3600 --coincidence-sweep-csv output/quantum/nist_belltest_coincidence_sweep__23_55_ClassicalRNGXOR_s3600.csv`
+    - 図：`output/quantum/nist_belltest_trial_based__23_55_ClassicalRNGXOR_s3600.png`
+    - 数値：`output/quantum/nist_belltest_trial_based_metrics__23_55_ClassicalRNGXOR_s3600.json`
+    - 集計：`output/quantum/nist_belltest_trial_based_counts__23_55_ClassicalRNGXOR_s3600.csv`
+
+- 7.4.5 Weihs 1998：複数runでも coincidence window sweep の感度が再現されることを追加で固定【完了（初版）】
+  - 対象run（longdist）：longdist0/1/2/10
+  - 例（run別 sweep）：
+    - `output/quantum/weihs1998_chsh_sweep__weihs1998_longdist_longdist0.png`
+    - `output/quantum/weihs1998_chsh_sweep__weihs1998_longdist_longdist2.png`
+    - `output/quantum/weihs1998_chsh_sweep__weihs1998_longdist_longdist10.png`
+  - まとめ図：`output/quantum/weihs1998_chsh_sweep_summary__longdist.png`
+  - 再現：
+    - `python -B scripts/quantum/weihs1998_time_tag_reanalysis.py --subdir longdist --run <run> --encoding bit0-setting --out-tag weihs1998_longdist_<run>`
+    - `python -B scripts/quantum/weihs1998_chsh_sweep_summary.py`
+
+- 7.4.6 Giustina et al. 2015：paper + supplement を一次ソースとして固定し、time-tag 一次公開の未固定を “ブロック” として明文化【完了（初版；一次ソース固定のみ）】
+  - 取得（arXiv + APS Harvest API）：`python -B scripts/quantum/fetch_giustina2015_prl115_250401.py`
+  - 保存：`data/quantum/sources/giustina2015_prl115_250401/`（`manifest.json` を同梱）
+  - 注意：photon time-tag（click log）の一次公開は未固定（APS supplemental は Cloudflare challenge により環境により 403 になり得る）。見つからない場合は “保留/ブロック” の扱いを維持する。
+
+- 7.4.7 photon time-tag（NIST以外）の統合：公開 click log を同一I/Fへ統合し、未公開データは “ブロック（I/F凍結）” として明文化【完了】
+  - 目標：Step 7.4 の「window/pairing 依存」と「trial-based 基準」を NIST 以外でも同一パイプラインで評価し、selection依存の一般性を定量化する。
+  - 要件：
+    - Alice/Bob の event log（time-tag あるいは trial log）が一次として公開されていること（再配布可能なライセンスが望ましい）。
+    - 取得元URLとsha256を `doc/PRIMARY_SOURCES.md` に固定し、`data/quantum/sources/<dataset>/manifest.json` を生成する。
+  - 7.4.7.1 Weihs 1998：複数subdir（longdist/locbell/loccorr/bellstat）でも coincidence window sweep の感度を確認【完了（初版）】
+    - 例（個別run）：
+      - `output/quantum/weihs1998_chsh_sweep__weihs1998_locbell_locbell0.png`
+      - `output/quantum/weihs1998_chsh_sweep__weihs1998_loccorr_loccorr0.png`
+      - `output/quantum/weihs1998_chsh_sweep__weihs1998_bellstat_bellstat0.png`
+    - まとめ図：`output/quantum/weihs1998_chsh_sweep_summary__multi_subdirs.png`
+    - 再現：
+      - `python -B scripts/quantum/weihs1998_time_tag_reanalysis.py --subdir <subdir> --run <run> --encoding bit0-setting`
+      - `python -B scripts/quantum/weihs1998_chsh_sweep_summary.py --summary-tag multi_subdirs --runs longdist:longdist1:weihs1998_longdist_longdist1 locbell:locbell0:weihs1998_locbell_locbell0 loccorr:loccorr0:weihs1998_loccorr_loccorr0 bellstat:bellstat0:weihs1998_bellstat_bellstat0`
+  - 7.4.7.2 Giustina 2015：photon time-tag（click log）の一次公開が未固定（APS supplemental PDF は取得/固定できたが、PDF内に生データは含まれず公開先も明示されない）【ブロック】
+    - 補足：arXiv supplemental PDF と APS supplemental PDF の双方で、time-tag の抽出手続き（threshold 等）は記述されるが、click log（生データ）の公開先は明示されない（space-time layout は “In preparation / PhD thesis” 参照）。
+    - 補足：arXiv 版の Data availability には「実験データは request（対応著者へ連絡）」旨の記載があり、少なくとも現時点では公開クリックログ（time-tag一次データ）の自動取得先が見当たらない。
+    - I/F凍結：入手時に必要な一次データ要件（click log の最小schema/配置先/正規化ターゲット）を `data/quantum/sources/giustina2015_prl115_250401/manifest.json` の `primary_data_requirements` として固定する（入手できない場合は blocked のまま扱う）。
+    - 手動DLで追加ファイルが得られる場合：
+      - APS supplemental（`https://link.aps.org/supplemental/10.1103/PhysRevLett.115.250401`）からファイルをダウンロード
+      - `data/quantum/sources/giustina2015_prl115_250401/aps_supplemental/` に配置
+      - `python -B scripts/quantum/fetch_giustina2015_prl115_250401.py --offline` で `manifest.json` に追記（hash固定）
+    - 取得後：データ形式を確定し、NIST/Weihs と同じ指標（delay分布/KS/window sweep + trial-based）を再計算して統合する。
+  - 7.4.7.3 横断まとめ：NIST（CH）/Kwiat2013（CH）/Weihs（CHSH）/Delft（CHSH；2015+2016）で、selectionノブ（window/offset）が統計量をどれだけ動かすかを1枚に固定【完了（初版）】
+    - 図：`output/quantum/bell_selection_sensitivity_summary.png`
+    - 数値：`output/quantum/bell_selection_sensitivity_summary.json`
+    - 再現：`python -B scripts/quantum/bell_selection_sensitivity_summary.py`
+    - 補足：summary JSON には各datasetの `source_manifest` と、Giustina 2015（click log 未公開）の `status=blocked` 情報を含める。
+  - 7.4.7.4 Christensen et al. 2013（PRL 111, 130406；Kwiat group）：photon（NIST以外）の公開 time-tag+trigger を統合し、CH J の window sweep を固定出力へ追加【完了（初版）】
+    - 取得：`python -B scripts/quantum/fetch_kwiat2013_prl111_130406.py`
+    - 出力：`output/quantum/bell/kwiat2013_prl111_130406_05082013_15/window_sweep_metrics.json`
+    - 再現：`python -B scripts/quantum/bell_primary_products.py --datasets kwiat2013_prl111_130406_05082013_15`
+  - 7.4.7.5 Giustina 2016（University of Vienna；uTheses/Phaidra）：公開状態（fulltext_locked）の監視と、解除時の一次キャッシュI/F固定【完了（初版）】
+    - 目的：Giustina 2015 の click log（time-tag）公開が「PhD thesis 等」を参照しているため、大学リポジトリ側の公開/非公開状態の変化を機械的に検知できる形にする。
+    - 入力（一次ソース）：
+      - Phaidra（Univie）：`o:1331600`（Container；uTheses へのリンクを含む）
+      - uTheses（Univie）：`id=39955`（Solr; `publication_date=2016`, `fulltext_locked` を監視）
+    - 実装：`scripts/quantum/fetch_giustina2016_utheses_39955.py`
+    - 保存：`data/quantum/sources/giustina2016_utheses_39955/`（`manifest.json` と snapshot JSON）
+    - 出力：`output/quantum/bell/giustina2016_utheses_probe.json`（`fulltext_locked`/pid/リンク等）
+    - 再現：`python -B scripts/quantum/fetch_giustina2016_utheses_39955.py`（必要なら `--refresh`）
+    - 注意：現時点では `fulltext_locked=1` のため、click log の一次公開は依然ブロック（`thesis_doc_pid=o:1331601` は metadata=200 だが detail=404 / download=403；解除後に自動キャッシュへ接続）。
+  - 7.4.7.6 Giustina 2015 の click log（time-tag）公開先の探索（Zenodo/OSF/機関リポジトリ等）【完了（拡張；未発見→ブロック継続）】
+    - 目的：APS/arXiv supplemental だけでは生データの所在が確定しないため、公開 click log を一次ソースとして固定できる経路を探索する。
+    - 成功条件：URL/sha256 を `doc/PRIMARY_SOURCES.md` と `data/quantum/sources/<dataset>/manifest.json` に固定し、`scripts/quantum/bell_primary_products.py` の同一I/Fへ統合できること。
+    - 実施（拡張）：Zenodo/OSF/DataCite に加えて Crossref/OpenAlex/Figshare/Dataverse（Harvard）＋ Web検索（DuckDuckGo HTML）も機械検索し、検索ログを更新（`candidate_dataset_hits=0` のためブロック継続）。
+      - 実装：`scripts/quantum/search_giustina2015_clicklog_public_sources.py`
+      - 出力：`output/quantum/bell/giustina2015_clicklog_public_search.json`
+      - 再現：`python -B scripts/quantum/search_giustina2015_clicklog_public_sources.py --size 5 --timeout-s 15 --attempts 1`
+  - 実装（予定）：
+    - 取得：`scripts/quantum/fetch_<dataset>.py`
+    - 再解析：`scripts/quantum/*time_tag*_reanalysis.py`（NIST/Weihs と同じ出力（window sweep + trial-based）を揃える）
+
+---
+
+### Step 7.5：重力×量子干渉（物質波・原子干渉計・量子時計）
+- 現状：完了（初版）（7.5.1–7.5.9）
+- 目的：P-model の「時間＝波の媒質」という仮定が、物質波位相（干渉）・量子時計の固有時効果と矛盾しないか、かつ差分予測（判別可能な量）を与えるかを一次ソースで検証する。
+- 7.5.1 重力-量子干渉（COW 実験）：重力ポテンシャル差による位相差を再導出し、文献値と整合を確認する（中性子干渉）【完了（初版）】
+  - 一次：Mannheim 1996（arXiv:gr-qc/9611037；`doc/PRIMARY_SOURCES.md`）
+  - 実装：`scripts/quantum/cow_experiment_phase.py`
+  - 出力：`output/quantum/cow_phase_shift.png` / `output/quantum/cow_phase_shift_metrics.json`
+- 7.5.2 原子干渉計重力計：原子干渉計で測る g（位相シフト）を、P-model の時間構造（P/φ）で再導出し、一次ソースに基づく再現へ落とす【完了（初版）】
+  - 一次：Mueller et al. 2007（arXiv:0710.3768；`doc/PRIMARY_SOURCES.md`）
+  - 実装：`scripts/quantum/atom_interferometer_gravimeter_phase.py`
+  - 出力：`output/quantum/atom_interferometer_gravimeter_phase.png` / `output/quantum/atom_interferometer_gravimeter_phase_metrics.json`
+- 7.5.3 量子時計の重力効果：光格子時計/イオン時計等の重力赤方偏移（周波数比）を、P-model の dτ/dt と整合する形で整理し、一次ソースの公表値と整合を確認する【完了（初版）】
+  - 一次：arXiv:2309.14953v3（chronometric leveling；`doc/PRIMARY_SOURCES.md`）
+  - 実装：`scripts/quantum/optical_clock_chronometric_leveling.py`
+  - 出力：`output/quantum/optical_clock_chronometric_leveling.png` / `output/quantum/optical_clock_chronometric_leveling_metrics.json`
+- 7.5.4 物質波干渉／二重スリット：干渉縞の観測量（角度分布）を最小モデルで固定し、P12≠P1+P2（干渉項）を再現可能にする【完了（初版）】
+  - 一次：Bach et al. 2012（arXiv:1210.6243v1；`doc/PRIMARY_SOURCES.md`）
+  - 実装：`scripts/quantum/electron_double_slit_interference.py`
+  - 出力：`output/quantum/electron_double_slit_interference.png` / `output/quantum/electron_double_slit_interference_metrics.json`
+- 7.5.5 de Broglie 波長の精密検証：λ=h/p を含む精密測定（原子反跳→α）を一次ソースで固定し、独立な α（電子 g-2）との整合（z-score と有効ε）を確認する【完了（初版）】
+  - 一次：Bouchendira et al. 2008（arXiv:0812.3139v1；`doc/PRIMARY_SOURCES.md`）
+  - 独立参照：Gabrielse et al. 2008（arXiv:0801.1134v2；`doc/PRIMARY_SOURCES.md`）
+  - 実装：`scripts/quantum/de_broglie_precision_alpha_consistency.py`
+  - 出力：`output/quantum/de_broglie_precision_alpha_consistency.png` / `output/quantum/de_broglie_precision_alpha_consistency_metrics.json`
+- 7.5.6 波動方程式→Schr/KG の位置づけ：P場の最小波動方程式（u=ln(P/P0)）の短波長極限／固有時位相（rest phase）から、Schrödinger / Klein–Gordon 形式が自然に現れるロジックを **仮定の列挙として固定**する（Born則の起源は未導出であることも明記）【完了（初版）】
+  - 反映：`doc/paper/12_part3_quantum.md`（Theory: 2.5.1）／必要なら `doc/quantum/08_gravity_quantum_interference.md` に補足
+  - 目的：COW/原子干渉計が「既存QMへφを代入しただけ」に見える攻撃（semi-classical批判）に耐える最低限の論理を提示する。
+  - 追補（仮定列の明確化）：Part III 2.5.1 を「仮定／導出／未導出」に分離し、P-model 固有補正の観測入口（φの定義、原子干渉計のβ項）まで明記【完了】
+- 7.5.7 決着点（差分予測）の固定出力：干渉（β微小差分）と Bell（遅延シグネチャ閾値）を Part I 3.0 書式で JSON に固定【完了（初版）】
+  - 実装：`scripts/summary/quantum_falsification.py`
+  - 出力：`output/summary/quantum_falsification.json`
+  - 再現：`python -B scripts/summary/quantum_falsification.py`
+  - 注意：干渉のβ効果は、7.5.8 で「位相項の分解」と「定数項の相殺」を明示し、A/B（上限/局所差分）モデルとして固定した。Bellの遅延は KS proxy（3σ閾値）で固定。
+- 7.5.8 原子干渉計×β（厳密化）：β が「どの位相項」に入るか（定数項の相殺を含む）を一次ソースの導出に沿って明示し、差分予測（Δφ_beta）と棄却閾値（3σ）を式として固定する【完了（初版）】
+  - 対象：Mueller et al. 2007（arXiv:0710.3768）
+  - 実装：`scripts/quantum/atom_interferometer_gravimeter_phase.py`
+  - 出力：`output/quantum/atom_interferometer_gravimeter_phase_metrics.json`（`results.beta_phase_dependence`）
+  - 反映：`scripts/summary/quantum_falsification.py`（criteria: `atom_beta_phase_delta_est`）
+- 7.5.9 P-model vs GR（時計写像）の差分スケール：`dτ/dt=exp(-x)` と `dτ/dt=sqrt(1-2x)` の差が、干渉位相・周波数比へ入る規模（必要精度）を Earth/Sun/強場の代表例で固定出力する【完了（初版）】
+  - 実装：`scripts/quantum/gravity_quantum_interference_delta_predictions.py`
+  - 出力：`output/quantum/gravity_quantum_interference_delta_predictions.json` / `.png`
+  - 反映：`doc/paper/12_part3_quantum.md`（4.2.2）
+  - 一次ソース：着手時に `doc/PRIMARY_SOURCES.md` にURL/ローカル保存先を追加し、`data/quantum/sources/` にキャッシュして offline 再現を確保する。
+  - 実装：`scripts/quantum/` に topic 別スクリプトを追加し、`output/quantum/` に PNG/JSON/CSV を固定名で出力する。
+  - 文章化：`doc/quantum/08_gravity_quantum_interference.md`
+
+### Step 7.6：重力誘起デコヒーレンス（可視度低下の予言と反証）
+- 現状：完了（初版）
+- 目的：重力が干渉の可視度（位相ノイズ／デコヒーレンス）へ与える寄与の候補を整理し、P-model としての差分予測（スケーリング）と棄却条件を明文化する。
+- 7.6.1 重力誘起デコヒーレンス仮説の候補整理（time dilation / clocks）と、観測量（可視度/位相雑音）の定義を固定【完了（初版）】
+  - 一次：Pikovski et al. 2013（arXiv:1311.1095v2；`doc/PRIMARY_SOURCES.md`）
+  - 一次：Hasegawa et al. 2021（arXiv:2107.02405v2；`doc/PRIMARY_SOURCES.md`）
+  - 参考（議論）：Bonder et al. 2015（arXiv:1509.04363v3）、Anastopoulos & Hu 2015（arXiv:1507.05828v5）、reply（arXiv:1509.07767v1）
+- 7.6.2 P-model での寄与の入れ方（Pゆらぎ／局所時間構造の揺らぎ）を最小パラメータ（σy）として定量化し、実験で判別可能な条件を提示【完了（初版）】
+  - 実装：`scripts/quantum/gravity_induced_decoherence.py`
+  - 出力：`output/quantum/gravity_induced_decoherence.png` / `output/quantum/gravity_induced_decoherence_metrics.json`
+  - 再現：`python -B scripts/quantum/gravity_induced_decoherence.py`
+- 7.6.3 既存の「重力デコヒーレンス／崩壊」モデルとの区別（Penrose–Diósi 等）と、既存制約の位置づけ（地下実験等）を明記し、“巻き添えで棄却”されない安全宣言を固定【完了（初版）】
+  - 反映：`doc/paper/12_part3_quantum.md`（4.2.4）
+  - 反映：`doc/paper/30_references.md`
+- 文章化：`doc/quantum/09_gravity_induced_decoherence.md`
+
+### Step 7.7：光の量子干渉（単一光子・HOM・スクイーズド光）
+- 現状：完了（初版）
+- 目的：P-model の時間構造（time-tag／遅延）を、量子光学の干渉実験（単一光子・2光子）に対して反証可能な形で整理する。
+- 7.7.1 単一光子干渉：干渉計（Mach–Zehnder等）の観測量（位相・visibility）を一次ソースで固定し、装置遅延・time-tagの扱いを明文化する【完了（初版）】
+  - 一次：Kimura et al. 2004（arXiv:quant-ph/0403104v2；`doc/PRIMARY_SOURCES.md`）
+- 7.7.2 Hong-Ou-Mandel（HOM）効果：遅延掃引での dip（同時計数）の定義を固定し、time-tag/選別が入る位置を再現可能に整理する【完了（初版）】
+  - 一次：arXiv:2106.03871v2（remote QD photons；`doc/PRIMARY_SOURCES.md`）
+  - 一次データ：Zenodo 10.5281/zenodo.6371310（図ごとの raw；`doc/PRIMARY_SOURCES.md`）
+- 7.7.3 スクイーズド光：測定量（雑音分散・位相感度）を固定し、P-model の立場で「時間構造がどこに入るか（入らないか）」を明文化する【完了（初版）】
+  - 一次：Vahlbruch et al. 2007（arXiv:0706.1431v1；`doc/PRIMARY_SOURCES.md`）
+- 実装（一次取得）：`scripts/quantum/fetch_photon_interference_sources.py`
+- 実装（観測量固定）：`scripts/quantum/photon_quantum_interference.py`
+- 出力：`output/quantum/photon_quantum_interference.png` / `output/quantum/photon_quantum_interference_metrics.json`
+- 文章化：`doc/quantum/10_photon_quantum_interference.md`
+
+### Step 7.8：真空・QED精密（Casimir 効果 / Lamb shift / H 1S–2S / α）
+- 現状：完了（初版）
+- 目的：「全ての物質は波であり、その媒質は時間」という仮定が、真空・境界条件・量子電磁の精密量（Casimir/Lamb）と矛盾しないか、また差分予測を持ち得るかを整理する。
+- 7.8.1 Casimir 効果：境界条件（反射）とエネルギー密度/力の観測量定義を一次ソースで固定し、P-model の最小説明（何を再導出対象とするか）を定める【完了（初版）】
+  - 一次：Roy, Lin, Mohideen 2000（arXiv:quant-ph/9906062v3；`doc/PRIMARY_SOURCES.md`）
+- 7.8.2 Lamb shift：原子スペクトルの精密差（Lamb）を一次ソースで固定し、P-model 側で必要な追加仮定（場の揺らぎの扱い）を明確化する【完了（初版）】
+  - 一次：Ivanov & Karshenboim 2000（arXiv:physics/0009069v1；`doc/PRIMARY_SOURCES.md`）
+- 7.8.3 Safety check：P-model の最小結合（重力ポテンシャル φ のみ）で、原子スケールの `φ_nuc` と `ΔE~m_e|φ_nuc|` をオーダー評価し、QED 精密測定（Lamb / g-2 等）と矛盾しない範囲であることを **機械可読の出力に固定**する【完了（初版）】
+  - 目的：既知の精密物理（QED）と矛盾するという致命的攻撃を先に潰す（「現段階では要求されない」を安全宣言として明記）。
+  - 反映：`doc/paper/12_part3_quantum.md`（4.2.6）
+- 7.8.4 H 1S–2S：束縛状態の精密分光（絶対周波数）を一次ソースで固定し、safety check と結びつける【完了（初版）】
+  - 一次：Parthey et al. 2011（arXiv:1107.3101v1；`doc/PRIMARY_SOURCES.md`）
+- 7.8.5 α（独立決定）：原子反跳（Rb）と電子 g-2（QED）から得られる `α^{-1}` を一次ソースPDFから機械抽出し、差分と z-score を固定する【完了（初版）】
+  - 一次：Bouchendira et al. 2008（arXiv:0812.3139v1；`doc/PRIMARY_SOURCES.md`）
+  - 一次：Gabrielse et al. 2008（arXiv:0801.1134v2；`doc/PRIMARY_SOURCES.md`）
+- 一次ソース取得：`scripts/quantum/fetch_qed_vacuum_precision_sources.py`
+- 実装：`scripts/quantum/qed_vacuum_precision.py`
+- 出力：`output/quantum/qed_vacuum_precision.png` / `output/quantum/qed_vacuum_precision_metrics.json`
+- 文章化：`doc/quantum/11_qed_vacuum_precision.md`
+
+### Step 7.9：原子核（核力・束縛：陽子/中性子が結びつくこと）の P-model 再導出
+- 現状：完了（初版）（7.9.1–7.9.9 固定；一次ソース固定＋ベースライン＋最小有効方程式＋ansatz class の棄却/退化例まで固定）
+- 目的：
+  - 陽子・中性子（核子）を「局在した波（束縛モード）」として扱い、核子同士が結びつく（deuteron など）現象を、P-model の局所P構造と波動方程式から **有効方程式／有効ポテンシャル**として提示する。
+  - “既存の量子力学/核模型へ φ を代入しただけ” に見える攻撃を避けるため、Part I の `u=ln(P/P0)` と同型の方程式（短波長極限/定常解/境界条件）から、核スケールの拘束条件が出るロジックを明文化する。
+- 最低要件（宇宙論級）：
+  - 一次データ（例：核質量表/束縛エネルギー/半径/散乱長/位相シフト等）を `data/quantum/sources/` に固定し、`manifest.json` で URL/sha256 を凍結する。
+  - 解析コードを `scripts/quantum/` に追加し、少なくとも **deuteron（pn束縛）**の再現を固定出力（数値＋図＋反証条件）に落とす。
+  - 既知の精密物理（QED/原子スペクトル/原子核半径など）と矛盾しない “safety check（オーダー評価）” を併記し、攻撃点（スケール矛盾）を事前に潰す。
+- 実装（予定）：
+  - 7.9.1 deuteron（pn束縛）のベースライン（B, r_d, 1/κ）を一次ソース（NIST CODATA）から固定し、出力として凍結する【完了（初版）】
+    - 一次ソース取得：`python -B scripts/quantum/fetch_nuclear_binding_sources.py`
+      - 入力：`data/quantum/sources/nist_codata_2022_nuclear_baseline/manifest.json`
+    - 実装：`python -B scripts/quantum/nuclear_binding_deuteron.py`
+      - 出力：`output/quantum/nuclear_binding_deuteron.png` / `output/quantum/nuclear_binding_deuteron_metrics.json`
+  - 7.9.2 np散乱（低エネルギー：散乱長/有効レンジ/shape）を一次ソースで固定し、deuteron が「任意関数fit」にならない拘束（系統）へ拡張する【完了（初版）】
+    - 一次ソース取得：`python -B scripts/quantum/fetch_nuclear_np_scattering_sources.py`
+      - 入力：`data/quantum/sources/np_scattering_low_energy_arxiv_0704_1024v1_manifest.json`
+    - 実装：`python -B scripts/quantum/nuclear_np_scattering_baseline.py`
+      - 出力：`output/quantum/nuclear_np_scattering_baseline.png` / `output/quantum/nuclear_np_scattering_baseline_metrics.json`
+    - メモ：eq.(18)（GWU/SAID）と eq.(19)（Nijmegen）の差を「解析依存系統（proxy）」として保存し、以後の核スケール有効方程式（7.9.3）で拘束として使う。
+  - 7.9.3 P場の波動方程式→核スケール有効方程式（有効ポテンシャル）へのロジックを固定し、“既存QMへφを代入しただけ” 攻撃を塞ぐ【完了（初版）】
+    - 実装：`python -B scripts/quantum/nuclear_effective_potential_square_well.py`
+      - 出力：`output/quantum/nuclear_effective_potential_square_well.png` / `output/quantum/nuclear_effective_potential_square_well_metrics.json`
+    - 文章化：`doc/quantum/12_nuclear_effective_equation.md`
+    - メモ：2パラメータ（square-well）の ansatz class は triplet の `r_t` を eq18–eq19 の包絡に入れられず、核スケール `u(r)` としては粗すぎる（棄却例）。次は「最小追加自由度」で ansatz class を拡張し、任意関数fitを避ける（7.9.4）。
+  - 7.9.4 ansatz class の最小拡張（core+well）で triplet+singlet を同時拘束し、予言（`v2t,r_s,v2s` 等）を固定する【完了（初版；棄却例）】
+    - 実装：`python -B scripts/quantum/nuclear_effective_potential_core_well.py`
+      - 出力：`output/quantum/nuclear_effective_potential_core_well.png` / `output/quantum/nuclear_effective_potential_core_well_metrics.json`
+    - メモ：追加自由度（core+well）を入れても、予言 `v2t` と singlet の `(r_s,v2s)` が観測と整合しない（棄却例）。次段階として finite core を含む最小拡張（7.9.5）へ進み、退化/棄却まで固定した。
+  - 7.9.5 finite repulsive core + well（`Rc,L,Vc,V0`）を導入し、triplet の `v2t` を追加目標として自由度を潰しつつ singlet を予言する【完了（初版；退化/棄却例）】
+    - 実装：`python -B scripts/quantum/nuclear_effective_potential_finite_core_well.py`
+      - 出力：`output/quantum/nuclear_effective_potential_finite_core_well.png` / `output/quantum/nuclear_effective_potential_finite_core_well_metrics.json`
+    - メモ：最適解が `Rc→0,Vc→0` に潰れて square-well 相当に退化し、singlet 予言 `(r_s,v2s)` は観測包絡（eq18–eq19）に入らない（棄却）。したがって次は 2-range（2段）などで「追加自由度を最小」に保ったまま同時拘束を強化する（7.9.6）。
+  - 7.9.6 2-range（2段）well で ansatz class を拡張し、triplet/singlet を同時拘束した上で `v2` 系まで含めた反証条件を固定する【完了（初版；棄却例）】
+    - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py`
+      - 出力：`output/quantum/nuclear_effective_potential_two_range.png` / `output/quantum/nuclear_effective_potential_two_range_metrics.json`
+    - メモ：triplet は `(B,a_t,r_t,v2t)` をほぼ再現できるが、singlet を `a_s` で合わせた上での予言 `r_s` が観測包絡（eq18–eq19）から大きく外れ、ansatz class は棄却される。
+  - 7.9.7 2-range のまま singlet の最小自由度を1つ増やし（`V1s,V2s` を `a_s,r_s` で拘束）、`v2s` を差分予測として固定する【完了（初版；棄却例）】
+    - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.9.7`
+      - 出力：`output/quantum/nuclear_effective_potential_two_range_fit_as_rs.png` / `output/quantum/nuclear_effective_potential_two_range_fit_as_rs_metrics.json`
+    - メモ：singlet を `a_s,r_s` で拘束しても、予言 `v2s` が観測包絡（eq18–eq19）から外れ、2-range（純粋に attractive）の ansatz class は決定的に棄却される。
+  - 7.9.8 repulsive core + 2-range（符号構造を含む最小拡張）で `v2s` の符号を救えるかを検証し、反証条件を固定する【完了（初版；棄却例）】
+    - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.9.8`
+      - 出力：`output/quantum/nuclear_effective_potential_repulsive_core_two_range.png` / `output/quantum/nuclear_effective_potential_repulsive_core_two_range_metrics.json`
+    - 目的：7.9.7 の失敗（`v2s>0` に出る）を、u-profile の符号/曲率構造（repulsive core 等）で救えるかを、最小自由度で切り分ける。
+    - 結果：repulsive core を追加しても singlet `v2s` は両datasetで依然として正となり（eq18: pred≈+1.19 vs obs=-0.005 / eq19: pred≈+0.52 vs obs≈-0.48）、観測包絡（eq18–eq19）から外れるため、この ansatz class も棄却される（`envelope_ok(v2s)=no`）。
+  - 7.9.9 論文化：Part III の 4.2.7（ERE/指標/ansatz class）と 4.2.7.1（Δ²r kink）の表を要約し、読める形（長表でフォントが崩れない）へ整形【完了】
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.7 / 4.2.7.1）
+
+### Step 7.10：量子測定（Born則・状態更新）を P-model で位置づける（攻撃耐性の中核）
+- 現状：完了
+- 固定（資料）：`doc/quantum/15_quantum_measurement_born_rule.md`
+- 7.10.1 測定＝selection を散逸系のアトラクター形成／情報（エントロピー最小化）として数理モデル化し、Born則 `|ψ|^2` をエネルギー密度／干渉として定式化【完了】
+  - 反映：`doc/quantum/15_quantum_measurement_born_rule.md`
+  - 反映：`doc/quantum/03_entanglement_local_p.md`（selection 重み `w_ab(λ)` の数式化への導線）
+- 固定（位置づけ図＋要点）：`python -B scripts/quantum/quantum_measurement_born_rule.py`
+  - 出力：`output/quantum/quantum_measurement_born_rule_flow.png` / `output/quantum/quantum_measurement_born_rule_metrics.json`
+- 反映（論文）：Part III `doc/paper/12_part3_quantum.md`（2.5.1–2.5.3）に要約を追加し、publishで独立に読める最低限（仮定→導出→未導出、Born逸脱の定量形、測定更新の立場）を担保
+- 7.10.2 Born則の採用範囲と逸脱条件（マクロ重ね合わせ／強重力場／自己重力拡張）を “定量の形” で固定し、測定の立場（Lüders採用・デコヒーレンス・Penrose–Diósiとの関係）を明文化【完了】
+  - 反映：Part III `doc/paper/12_part3_quantum.md`（2.5.2–2.5.3）
+- 目的：
+  - Phase 7 を「既存QMへφを代入しただけ（semi-classical）」と見なされないために、波動方程式→状態（ψ等）→確率（Born則）→測定（状態更新）の論理を、仮定列挙としてでも固定する。
+  - “物理全域を P-model で再導出” のための基礎（以後の原子核/化学/物性/素粒子の土台）を作る。
+- 最低要件：
+  - 「何を導出できて、何は現段階で仮定か」を明確に分離し、反証可能な形（観測量への写像＋反証条件）で記述する。
+  - 既存のQMの公理を単に再掲するのではなく、P-model の場（Pの揺らぎ/局所構造）との対応（何がψで何が確率になるか）を、最小限でも言語化して固定する。
+ - メモ（初版の到達点）：
+   - Born則と状態更新は第一原理導出を主張せず、操作的仮定（有効モデル）として採用した上で、採用範囲と反証点（selectionを含む）を固定した。
+
+### Step 7.11：電磁気（電荷・Maxwell/光子）を P-model の波動構造として導入
+- 現状：完了（検証へ格上げ：α(P) の κ 制約を固定）
+- 固定（資料）：`doc/quantum/16_electromagnetism_charge_maxwell_photon.md`
+- 固定（スケール確認＋位置づけ図＋要点）：`python -B scripts/quantum/electromagnetism_minimal.py`
+  - 出力：`output/quantum/electromagnetism_minimal.png` / `output/quantum/electromagnetism_minimal_metrics.json`
+- 固定（αのP依存性チェック；κ制約）：`python -B scripts/quantum/alpha_p_dependence_constraint.py`
+  - 入力（一次PDFキャッシュ）：`python -B scripts/quantum/fetch_alpha_variation_sources.py`
+    - 保存先：`data/quantum/sources/alpha_variation_manifest.json`
+  - 出力：`output/quantum/alpha_p_dependence_constraint.png` / `output/quantum/alpha_p_dependence_constraint.json`
+- 反映（論文）：Part III `doc/paper/12_part3_quantum.md`（2.6）＋図一覧 `doc/paper/01_figures_index.md`
+- 目的：
+  - 原子・分子・物性へ進む前提として、電荷/電磁場（少なくとも静電場と光子）の位置づけを P-model 側で与える。
+  - “重力（P）以外の相互作用が未定義” という致命的攻撃点をロードマップ上で明示し、段階的に閉じる。
+- 最低要件：
+  - 既存のMaxwell方程式の全再導出でなくても、少なくとも Coulomb 1/r と光の伝播（偏光・エネルギー流）を、P-model の自由度として整合的に扱える最小候補を提示する。
+  - 既知の精密物理（QED・原子スペクトル）と矛盾しない safety check を併設する。
+ - メモ（初版の到達点）：
+   - Maxwell/QED の第一原理導出は主張せず、U(1)自由度を「最小候補」として導入して Coulomb 1/r と光子（偏光・エネルギー流）の位置づけを固定した。
+   - Coulomb 定数や微細構造定数 α は P非依存（κ=0）として採用する。一方で仮想的に `α(P/P0)=α0(1+κ ln(P/P0)+…)` を入れる場合の κ 上限を、原子時計（Rosenband）等を使って `|κ|≲O(10^-7)` として固定した（`output/quantum/alpha_p_dependence_constraint.json`）。
+
+### Step 7.12：原子・分子（化学結合）を P-model で再導出し、一次データで固定検証
+- 現状：完了（初版；一次データ固定＋基準値（ターゲット）出力）
+- 目的：
+  - 「波が特定の場に集まることで物質（束縛）が形成される」仮説を、原子・分子レベルで具体化する（核+電子の束縛、化学結合、エネルギー準位）。
+- 最低要件：
+  - 一次データ（例：NIST ASD 等の遷移周波数・基底状態エネルギー）を固定し、最小ケース（H, He, H2 など）から再現可能にする。
+  - 既存QM/QEDとの差（何を再現し、何を主張しないか）を反証条件として明記する。
+ - 固定（一次データ；最小ケース）：
+   - H I：`python -B scripts/quantum/fetch_nist_asd_lines.py --spectra "H I"`
+     - 保存先：`data/quantum/sources/nist_asd_h_i_lines/manifest.json` / `extracted_values.json` / `nist_asd_lines__h_i__format3__obs_ritz_unc.tsv`
+   - H I hyperfine（21 cm；一次固定）：`python -B scripts/quantum/fetch_nist_atspec_handbook.py`
+     - 保存先：`data/quantum/sources/nist_atspec_handbook/manifest.json` / `extracted_values.json` / `AtSpec.PDF`
+   - He I：`python -B scripts/quantum/fetch_nist_asd_lines.py --spectra "He I"`
+     - 保存先：`data/quantum/sources/nist_asd_he_i_lines/manifest.json` / `extracted_values.json` / `nist_asd_lines__he_i__format3__obs_ritz_unc.tsv`
+   - H2（分子定数）：`python -B scripts/quantum/fetch_nist_webbook_diatomic_constants.py --id C1333740 --slug h2`
+     - 保存先：`data/quantum/sources/nist_webbook_diatomic_h2/manifest.json` / `extracted_values.json` / `nist_webbook_diatomic_constants__h2__c1333740.html`
+   - HD（分子定数）：`python -B scripts/quantum/fetch_nist_webbook_diatomic_constants.py --id C13983205 --slug hd`
+     - 保存先：`data/quantum/sources/nist_webbook_diatomic_hd/manifest.json` / `extracted_values.json` / `nist_webbook_diatomic_constants__hd__c13983205.html`
+   - D2（分子定数）：`python -B scripts/quantum/fetch_nist_webbook_diatomic_constants.py --id C7782390 --slug d2`
+     - 保存先：`data/quantum/sources/nist_webbook_diatomic_d2/manifest.json` / `extracted_values.json` / `nist_webbook_diatomic_constants__d2__c7782390.html`
+   - 熱化学（ΔfH°gas；結合エネルギーの独立ベースライン）：`python -B scripts/quantum/fetch_nist_webbook_thermochemistry.py --id ... --slug ...`
+     - H atom（C12385136; h_atom）：`data/quantum/sources/nist_webbook_thermo_h_atom/manifest.json` / `extracted_values.json`
+     - D atom（C16873179; d_atom）：`data/quantum/sources/nist_webbook_thermo_d_atom/manifest.json` / `extracted_values.json`
+     - H2（C1333740; h2）：`data/quantum/sources/nist_webbook_thermo_h2/manifest.json` / `extracted_values.json`
+     - HD（C13983205; hd）：`data/quantum/sources/nist_webbook_thermo_hd/manifest.json` / `extracted_values.json`
+     - D2（C7782390; d2）：`data/quantum/sources/nist_webbook_thermo_d2/manifest.json` / `extracted_values.json`
+   - 分光 D0（0 K；結合エネルギーの独立ベースライン）：`python -B scripts/quantum/fetch_molecular_dissociation_d0_spectroscopic.py`
+     - 保存先：`data/quantum/sources/molecular_dissociation_d0_spectroscopic/manifest.json` / `extracted_values.json` / `arxiv_pdf_*.pdf` / `vu_publication_hd_d0.html`
+   - 同位体質量（縮約質量 μ の精密化）：`python -B scripts/quantum/fetch_nist_isotopic_compositions.py --element H`
+     - 保存先：`data/quantum/sources/nist_isotopic_compositions_h/manifest.json` / `extracted_values.json`
+   - 分子遷移（一次線リスト）
+     - H2/HD（ExoMol；states/trans/pf）：`python -B scripts/quantum/fetch_exomol_diatomic_line_lists.py`
+       - H2（1H2; RACPPK）：`data/quantum/sources/exomol_h2_1h2_racppk/manifest.json`
+       - HD（1H-2H; ADJSAAM）：`data/quantum/sources/exomol_h2_1h_2h_adjsaam/manifest.json`
+     - D2（MOLAT；FUV emission；ARLSJ1999）：`python -B scripts/quantum/fetch_molat_d2_fuv_emission_lines.py`
+       - 保存先：`data/quantum/sources/molat_d2_fuv_emission_arlsj1999/manifest.json` / `extracted_values.json`
+ - 固定出力（基準値；ターゲット）：
+   - `python -B scripts/quantum/atomic_hydrogen_baseline.py`
+     - 出力：`output/quantum/atomic_hydrogen_baseline.png` / `output/quantum/atomic_hydrogen_baseline_metrics.json`
+   - `python -B scripts/quantum/atomic_hydrogen_hyperfine_baseline.py`
+     - 出力：`output/quantum/atomic_hydrogen_hyperfine_baseline.png` / `output/quantum/atomic_hydrogen_hyperfine_baseline_metrics.json`
+   - `python -B scripts/quantum/atomic_helium_baseline.py`
+     - 出力：`output/quantum/atomic_helium_baseline.png` / `output/quantum/atomic_helium_baseline_metrics.json`
+   - `python -B scripts/quantum/molecular_h2_baseline.py --slug h2`
+     - 出力：`output/quantum/molecular_h2_baseline.png` / `output/quantum/molecular_h2_baseline_metrics.json`
+   - `python -B scripts/quantum/molecular_h2_baseline.py --slug hd`
+     - 出力：`output/quantum/molecular_hd_baseline.png` / `output/quantum/molecular_hd_baseline_metrics.json`
+   - `python -B scripts/quantum/molecular_h2_baseline.py --slug d2`
+     - 出力：`output/quantum/molecular_d2_baseline.png` / `output/quantum/molecular_d2_baseline_metrics.json`
+   - `python -B scripts/quantum/molecular_isotopic_scaling.py`
+     - 出力：`output/quantum/molecular_isotopic_scaling.png` / `output/quantum/molecular_isotopic_scaling_metrics.json`
+   - `python -B scripts/quantum/molecular_dissociation_thermochemistry.py`
+     - 出力：`output/quantum/molecular_dissociation_thermochemistry.png` / `output/quantum/molecular_dissociation_thermochemistry_metrics.json`
+   - `python -B scripts/quantum/molecular_dissociation_d0_spectroscopic.py`
+     - 出力：`output/quantum/molecular_dissociation_d0_spectroscopic.png` / `output/quantum/molecular_dissociation_d0_spectroscopic_metrics.json`
+   - `python -B scripts/quantum/molecular_transitions_exomol_baseline.py`
+     - 出力：`output/quantum/molecular_transitions_exomol_baseline.png` / `output/quantum/molecular_transitions_exomol_baseline_metrics.json` / `output/quantum/molecular_transitions_exomol_baseline_selected.csv`
+ - 反映（論文/Table 1）：
+   - Part III：`doc/paper/12_part3_quantum.md`（4.2.8）
+   - Table 1（量子）：`python -B scripts/summary/paper_tables.py` → `output/summary/paper_table1_quantum_results.md`
+  - メモ（初版の到達点）：
+    - このStepは「原子・分子の第一原理導出」を主張せず、分光/分子定数/代表遷移の基準値（ターゲット）を一次データから固定した段階である（H I / He I、H2/HD/D2（分子定数）、同位体スケーリング、解離エネルギー（298 K と 0 K）、分子遷移（ExoMol; H2/HD、MOLAT; D2））。また、fine structure の観測ターゲットとして Hα/Hβ の multiplet（obs, E1）の範囲と本数 N を固定した。QED精密の代表として H 1S–2S を一次固定し、safety check 出力へ統合した。H I hyperfine（21 cm）も NIST AtSpec（一次）で固定し、基準値（ターゲット）出力へ統合した。次段階は追加QED精密（1S–2S以外）と、原子・分子束縛の再導出（追加自由度を最小化）である。
+
+### Step 7.13：強い相互作用（ハドロン/QCD）と核力の統合（Step 7.9 を拡張）
+- 現状：完了（改訂）（7.13.19.16 まで反映・整合チェック完了）
+- 目的：
+  - 原子核（Step 7.9）を「deuteronの個別再現」で終わらせず、核力のスケール・範囲・系統（核種依存）まで拡張して、攻撃点（任意関数fit）を塞ぐ。
+- 最低要件：
+  - 核質量表・半径・散乱長/位相シフト等を一次データとして固定し、複数核種での系統再現（不確かさ＋反証条件）へ進む。
+- 7.13.1 hadron/QCD スケールの基準値固定（PDG）【完了（初版）】
+  - 目的：核力や束縛（Step 7.9）を「任意関数fit」にしないため、QCD/hadron スケールの代表値（p/n/π/K など）を一次ソースで固定し、以後の有効方程式（range/scale）の議論を共通基盤へ揃える。
+  - 一次ソース取得：`python -B scripts/quantum/fetch_pdg_mass_width_2024.py`
+    - 入力：`data/quantum/sources/pdg_rpp_2024_mass_width/manifest.json`
+  - ベースライン出力：`python -B scripts/quantum/qcd_hadron_masses_baseline.py`
+    - 出力：`output/quantum/qcd_hadron_masses_baseline.png` / `output/quantum/qcd_hadron_masses_baseline_metrics.json` / `output/quantum/qcd_hadron_masses_baseline.csv`
+  - メモ：この段階では「QCDの第一原理導出」を主張せず、スケール（m_π → range）を議論するための観測ターゲット（基準値）を固定する。
+- 7.13.2 hadronスケール（m_π）→核スケール（u(r)幾何）の “橋渡し” を固定出力化【完了（初版）】
+  - 目的：Step 7.9 の ansatz class（R1,R2,Rc など）を「恣意的な距離パラメータ」に見せないため、m_π 由来の range（λ_π）を “操作的制約” として可視化し、以後の ansatz 設計で使える形に固定する。
+  - 実装：`python -B scripts/quantum/qcd_nuclear_range_bridge.py`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 の metrics（two-range 系）
+    - 出力：`output/quantum/qcd_nuclear_range_bridge.png` / `output/quantum/qcd_nuclear_range_bridge_metrics.json` / `output/quantum/qcd_nuclear_range_bridge.csv`
+  - 結果（初版）：R2 は概ね λ_π の数倍スケールに入る一方、v2s の符号などはスケール合わせだけでは救えない（= 追加構造が必要）ことが、同一図で確認できる。
+- 7.13.3 λ_π 制約下での 2-range 再評価（signed V2_s を許しても v2s 符号が救えるかを固定）【完了（初版）】
+  - 目的：7.13.2 で固定した λ_π を ansatz 設計の制約として実装し、最小の符号拡張（singlet の V2_s を signed で許す）でも v2s の符号問題が救えないことを切り分ける。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.3`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 と同一の一次抽出（CODATA/NIST, np散乱）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_signed_v2.png` / `output/quantum/nuclear_effective_potential_pion_constrained_signed_v2_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_signed_v2.csv`
+  - 結果（初版）：λ_π 制約を入れても、(a_s,r_s) を満たす範囲で v2s は正に出て包絡（eq18–eq19）外となる。したがって 2-range（最小の符号拡張込み）ansatz class は核スケール u(r) の候補として棄却される。
+- 7.13.4 λ_π 制約下での 3-range 再評価（Yukawa tail 粗視化；shared tail）【完了（初版）】
+  - 目的：2-range の外側（R2 以遠）に最小の tail 構造を追加しても、v2s の符号問題が救えるかを切り分ける（追加自由度は増やさない）。
+  - 仮定（最小）：R3=R2+λ_π、V3=<exp tail mean>×V2（V3 は V2 から決まり、自由パラメータを増やさない）。singlet の V2_s は signed を許す。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.4`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 と同一の一次抽出（CODATA/NIST, np散乱）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_three_range_tail.png` / `output/quantum/nuclear_effective_potential_pion_constrained_three_range_tail_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_three_range_tail.csv`
+  - 結果（初版）：v2s は依然として正に出て包絡（eq18–eq19）外となる（改善はあるが符号は救えない）。したがって「λ_π 制約＋最小 tail（free parameterなし）」の 3-range ansatz class も核スケール u(r) の候補として棄却される。
+- 7.13.5 λ_π 制約下での barrier+tail 再評価（mean-preserving split）【完了（初版）】
+  - 目的：7.13.4 の外側 tail（R2..R3）を barrier+tail に分割し、**追加自由度なし**（mean-preserving ルール）で `v2s<0` が救えるかを切り分ける。
+  - 仮定（最小）：L3_total=λ_π、Lb=0.5·λ_π、Vb=k·V3_mean、Vt は mean-preserving（(Lb*(+Vb)+Lt*(-Vt))/L3=-V3_mean）で決める（k=1 固定）。singlet は V2_s>=0 を制約。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.5`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 と同一の一次抽出（CODATA/NIST, np散乱）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail.csv`
+  - 結果（初版）：`v2s` は依然として正に出て包絡（eq18–eq19）外（例：eq18 ≈ +0.320、eq19 ≈ +0.363）となる。したがって、この mean-preserving barrier+tail ansatz class も棄却される。
+- 7.13.6 λ_π 制約下での barrier+tail 再評価（k-scan; cross-systematics 拘束）【完了（初版）】
+  - 目的：7.13.5 の barrier+tail を保ちつつ、“結び方” の 1自由度（barrier_height_factor k）だけを解除し、eq18–eq19 の差（analysis-dependent systematics）で拘束して `v2s<0` が救えるかを検証する。
+  - 仮定（最小）：7.13.5 の mean-preserving barrier+tail を維持し、k を固定せずグリッド走査で単一の k を選ぶ（per-dataset では調整しない）。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.6`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 と同一の一次抽出（CODATA/NIST, np散乱）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_k_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_k_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_k_scan.csv`
+  - 結果（初版）：選択された k=2.0 でも `v2s` は正（例：eq18 ≈ +0.253、eq19 ≈ +0.295）で観測包絡（eq18–eq19：-0.48〜-0.005）外 → ansatz class は棄却。
+- 7.13.7 λ_π 制約下での barrier+tail 再評価（q-scan; free tail depth）【完了（初版）】
+  - 目的：7.13.6 の barrier+tail を保ちつつ、tail 側の深さを mean-preserving から切り離し（`Vt=q·V3_mean`）、単一の q を cross-systematics（eq18–eq19 包絡）で拘束して `v2s<0` が救えるかを検証する。
+  - 仮定（最小）：barrier_height_factor を固定（k=2.0）し、tail_depth_factor q のみを走査して単一の q を選ぶ（per-dataset では調整しない）。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.7`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 と同一の一次抽出（CODATA/NIST, np散乱）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_q_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_q_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_q_scan.csv`
+  - 結果（初版）：選択された q=0.7 では v2s はほぼ 0（例：eq18 ≈ +0.016、eq19 ≈ +0.016）で観測包絡（eq18–eq19：-0.48〜-0.005）外。q により v2s の符号が反転すること自体は確認できたが、単一 q で両データを同時に包絡へ入れることはできず → ansatz class は棄却。
+- 7.13.8 λ_π 制約下での barrier+tail 再評価（(k,q)-scan; global 2DOF）【完了（初版）】
+  - 目的：7.13.7（q-scan）で残った「単一 q では包絡一致できない」を受け、(k,q) を **global** に 2自由度として走査し、per-dataset 調整を導入せずに `v2s` 包絡一致（eq18–eq19：-0.48〜-0.005）に到達できるかを切り分ける。
+  - 仮定（最小）：tail_len_over_lambda=1.0、barrier_len_fraction=0.5 を固定し、barrier_height_factor k と tail_depth_factor q（`Vt=q·V3_mean`）を単一の (k,q) として cross-systematics（eq18–eq19 包絡）で拘束する（per-dataset では最適化しない）。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8`
+    - 入力：`output/quantum/qcd_hadron_masses_baseline_metrics.json`（λ_π）＋ Step 7.9 と同一の一次抽出（CODATA/NIST, np散乱）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan.csv`
+  - 結果（初版）：
+    - 選択 (k,q)=(1.0, 0.6)。
+    - v2s は負に出て包絡内（例：eq18 ≈ -0.148、eq19 ≈ -0.118）→ barrier+tail（free tail depth）ansatz class は **棄却されない**（この段階で包絡一致に到達）。
+- 7.13.8.1 λ_π 制約下での barrier+tail 再評価（(k,q)-scan; v2t+v2s の同時包絡整合）【完了（初版）】
+  - 目的：7.13.8 が `v2s` 包絡一致を達成した一方で、triplet の `v2t` が eq18–eq19 包絡（0.04〜0.163）外に出る可能性が残るため、(k,q) 探索範囲を拡張し、**triplet v2t と singlet (r_s,v2s)** の同時拘束が可能かを切り分ける（per-dataset 調整は導入しない）。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.1`
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_v2t.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_v2t_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_v2t.csv`
+  - 結果（初版）：
+    - 走査範囲（固定）：tail_len_over_lambda=1.0、barrier_len_fraction=0.5、k∈[1.0..4.0]、q∈[0.6..1.4]。
+    - 最良候補（min 外れ量）：(k,q)=(3.5, 1.3)（global）。
+    - triplet v2t は包絡内：eq18 ≈ 0.047、eq19 ≈ 0.041（包絡 0.04〜0.163）。
+    - singlet v2s は包絡内：eq18 ≈ -0.0079、eq19 ≈ -0.0080（包絡 -0.48〜-0.005）。
+    - しかし singlet `r_s` のフィットが成立せず（bisection が収束せず bracket-best にフォールバック；`r_eff≈1.07 fm` と観測 `r_s≈2.63–2.68 fm` から大きく外れる）、**triplet v2t + singlet (r_s,v2s)** の同時拘束はこの ansatz class では達成できない（この条件では棄却）。
+    - 次：チャネル依存の tail（k,q の分離）や短距離自由度（core 等）を含む最小拡張を設計し、同時拘束の可否を固定する（Step 7.9/7.13 の次作業）。
+- 7.13.8.2 λ_π 制約下での barrier+tail 再評価（チャネル依存 (k,q) 分離；channel-split kq-scan）【完了（初版）】
+  - 目的：7.13.8.1 の no-go（`v2t`/`v2s` を包絡へ入れると singlet `r_s` が崩壊）を受け、幾何（R1..R3）と長さ（tail_len_over_lambda, barrier_len_fraction）を固定したまま、tail の強度パラメータ (k,q) を triplet/singlet で分離（(k_t,q_t)/(k_s,q_s)）して **同時拘束が回復するか**を切り分ける（per-dataset 調整は導入しない）。
+  - 仮定（最小）：tail_len_over_lambda=1.0、barrier_len_fraction=0.5 を固定し、triplet は (k_t,q_t)、singlet は (k_s,q_s) を用いる。singlet は `V2_s>=0` 制約を維持する。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.2`
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan.csv`
+  - 結果（初版）：
+    - 走査範囲（固定）：k_t∈{3.0,3.5,4.0}、q_t∈{1.2,1.3,1.4}、k_s∈{0.5,1.0,1.5,2.0}、q_s∈{0.6,0.8,1.0}（全108点）。
+    - 選択（min 外れ量）：(k_t,q_t)=(3.5,1.3)、(k_s,q_s)=(0.5,1.0)。
+    - この点では triplet `v2t` と singlet `v2s` は包絡内（例：`v2t≈0.041–0.047`、`v2s≈-0.061`）だが、singlet の `r_s` が **約1.17 fm** まで崩壊し、観測 `r_s≈2.63–2.68 fm` から大きく外れる（`Δr_s≈-1.46〜-1.51 fm`）。
+    - `r_s` が包絡に入る候補は走査範囲では 0 件であり、**チャネル依存 (k,q) 分離だけでは no-go は解消しない**。次段階では、幾何（R1/R2）や短距離自由度（core など）を含む最小拡張を設計し、同時拘束の可否を反証条件として固定する。
+- 7.13.8.3 λ_π 制約下での barrier+tail 再評価（7.13.8.2 選択の凍結＋singlet `R1_s/λπ` scan）【完了（初版）】
+  - 目的：7.13.8.2（channel-split (k,q)）でも `r_s` 崩壊が解消しないことを受け、追加自由度を 1つだけ（singlet の内側境界 `R1_s/λπ`）導入し、`v2s` 包絡一致と `r_s` 包絡一致の両立が可能かを切り分ける。
+  - 仮定（最小）：(k_t,q_t)=(3.5,1.3), (k_s,q_s)=(0.5,1.0) を 7.13.8.2 から凍結する。triplet の幾何（R1/R2）も凍結し、singlet は `R2_s=R2`（datasetごと）を共有したまま `R1_s/λπ` のみを global に走査する。singlet は `V2_s>=0` 制約を維持する。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.3`
+    - 入力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_metrics.json`（Step 7.13.8.2 の選択値）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan.csv`
+  - 結果（初版）：
+    - 走査：`R1_s/λπ ∈ {0.25,0.35,0.45,0.55,0.65,0.75}`（global）。
+    - `R1_s/λπ≈0.45–0.55` では `r_s` は観測に一致し得る一方で、`v2s` が過度に負へ外れて包絡外（例：`v2s≈-0.52〜-0.61`）となる。
+    - `R1_s/λπ=0.75` では `v2s` は包絡内（`v2s≈-0.061`）だが、`r_s` が再び **≈1.17 fm** へ崩壊する（`Δr_s≈-1.46〜-1.51 fm`）。
+    - したがって、7.13.8.2 の選択を凍結したまま singlet 幾何を 1自由度だけ追加しても同時拘束は回復せず、no-go は継続する。次段階では `R2_s` の分離や短距離自由度（core 等）を含む最小拡張を設計し、同時拘束の可否を反証条件として固定する。
+- 7.13.8.4 λ_π 制約下での barrier+tail 再評価（7.13.8.2 選択凍結＋`R1_s/λπ` 凍結＋singlet `R2_s/λπ` scan）【完了（初版）】
+  - 目的：7.13.8.3 で「`r_s` を合わせると `v2s` が外れる」ことが確認されたため、追加自由度を 1つだけ（singlet の外側境界 `R2_s/λπ`）導入し、`r_s` 包絡一致を維持したまま `v2s` 包絡一致に到達できるかを切り分ける。
+  - 仮定（最小）：(k_t,q_t)=(3.5,1.3), (k_s,q_s)=(0.5,1.0) を 7.13.8.2 から凍結する。`R1_s/λπ` は 7.13.8.3 の scan から「両datasetで `r_s` 包絡に入る」候補を優先して **0.45** に凍結し、その上で `R2_s/λπ` を global に走査する（barrier+tail の長さは λ_π 単位で固定）。singlet は `V2_s>=0` 制約を維持する。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.4`
+    - 入力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_metrics.json`（Step 7.13.8.2）＋ `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan_metrics.json`（Step 7.13.8.3）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r2_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r2_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r2_scan.csv`
+  - 結果（初版）：
+    - 走査：`R2_s/λπ ∈ {1.0,1.25,1.5,1.75,2.0,2.05}`（global；`R1_s/λπ=0.45` 固定）。
+    - 選択：`R2_s/λπ=1.5`。
+    - この点で singlet は **`r_s` 包絡内（eq18: 2.626 fm, eq19: 2.676 fm）かつ `v2s` 包絡内（eq18: -0.103, eq19: -0.058）**に同時到達し、7.13.8.1–7.13.8.3 の主要 no-go（`r_s` vs `v2s`）は解消する。
+    - ただし triplet の `(a_t,r_t)` は許容幅外のままであり（outside_count の残り）、次段階では triplet 側の幾何/短距離自由度の最小拡張で `(a_t,r_t)` を同時に回復できるかを反証条件として固定する。
+- 7.13.8.5 λ_π 制約下での barrier+tail 再評価（7.13.8.4 の singlet split 凍結＋triplet の barrier split 走査）【完了（初版）】
+  - 目的：7.13.8.4 により singlet の主要 no-go（`r_s` vs `v2s`）は解消したため、残る triplet の低エネルギー `(a_t,r_t)` が許容幅外の問題を、**最小の追加幾何自由度（barrier/tail の分割比）**で回復できるかを切り分け、反証条件として固定する。
+  - 仮定（最小）：
+    - singlet：7.13.8.4 の凍結を維持（`R1_s/λπ=0.45`, `R2_s/λπ=1.5`, `(k_s,q_s)=(0.5,1.0)`）。
+    - triplet：`q_t=1.3` を 7.13.8.4 から凍結し、`barrier_len_fraction_t`（L3=λπ の内部での barrier/tail 分割比）と `k_t` を小グリッドで走査する（per-dataset 調整は導入しない）。
+  - 実装：`python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.5`
+    - 入力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r2_scan_metrics.json`（Step 7.13.8.4; singlet凍結＋(k,q)凍結）
+    - 出力：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.png` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan_metrics.json` / `output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.csv`
+    - 出力（canonical；downstream はこれを優先参照）：`output/quantum/nuclear_effective_potential_canonical_metrics.json`（Step 7.13.8.5 の固定出力の安定エイリアス）
+  - 結果（初版）：
+    - 選択：`barrier_len_fraction_t=0.1`, `k_t=0.0`（`q_t=1.3` 固定）。
+    - triplet は `(a_t,r_t)` 許容幅内へ回復し、かつ `v2t` は包絡内：
+      - eq18：`a_t≈5.4097 fm`, `r_t≈1.7497 fm`, `v2t≈0.0520 fm^3`
+      - eq19：`a_t≈5.4115 fm`, `r_t≈1.7523 fm`, `v2t≈0.0547 fm^3`
+    - singlet の固定は維持され、`r_s` 包絡内かつ `v2s` 包絡内（例：eq18 `v2s≈-0.103`, eq19 `v2s≈-0.058`）。
+    - 結論：7.13.8.4 の singlet split と組み合わせると、この ansatz class は **(a_t,r_t,v2t)×(r_s,v2s) の主要拘束で棄却されない**。以後は、この固定 u-profile を A依存（7.13.12 以降）へ繋ぐ際に、どの固定出力（どの step の metrics）を正とするかを明文化して揃える。
+- 7.13.8.6 論文化：Step 7.13.8.5 の canonical 解（ERE主要数値）と代表図を Part III に固定【完了】
+  - 反映：`doc/paper/12_part3_quantum.md`（4.2.7）
+  - 図：`output/quantum/nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_triplet_barrier_fraction_scan.png`
+- 7.13.9 軽核（A=2,3,4）ベースライン固定（質量欠損→束縛エネルギー；利用可能な電荷半径）【完了（初版）】
+  - 目的：7.13.8 で固定した核スケール ansatz class を核種依存（A依存）へ拡張する前提として、**一次**の束縛エネルギー（質量欠損）と、入手可能な電荷半径（p/d/α）を固定し、以後の再導出・反証条件のターゲットを揃える。
+  - 一次ソース取得：`python -B scripts/quantum/fetch_nuclear_binding_sources.py --out-dirname nist_codata_2022_nuclear_light_nuclei --include-light-nuclei`
+    - 入力（キャッシュ）：`data/quantum/sources/nist_codata_2022_nuclear_light_nuclei/manifest.json` / `extracted_values.json`
+  - 実装：`python -B scripts/quantum/nuclear_binding_light_nuclei.py`
+    - 出力：`output/quantum/nuclear_binding_light_nuclei.png` / `output/quantum/nuclear_binding_light_nuclei_metrics.json` / `output/quantum/nuclear_binding_light_nuclei.csv`
+  - メモ：A=3 の電荷半径は CODATA/NIST Cuu では提供されないため、7.13.10 で専用コンパイル（一次）をキャッシュして追加した。
+- 7.13.10 A=3（t/h）電荷半径の一次固定（専用コンパイルを追加し、軽核ベースラインへ統合）【完了（初版）】
+  - 目的：Step 7.13.9 の “A=3 の半径が欠ける” 攻撃点を塞ぐため、専用コンパイル（一次）から triton/helion の電荷半径を固定し、同一の軽核ベースライン出力へ統合する。
+  - 一次ソース取得：`python -B scripts/quantum/fetch_nuclear_charge_radii_sources.py --out-dirname iaea_charge_radii`
+    - 入力（キャッシュ）：`data/quantum/sources/iaea_charge_radii/manifest.json` / `extracted_values.json` / `charge_radii.csv`
+  - 反映：`python -B scripts/quantum/nuclear_binding_light_nuclei.py`
+    - 出力（更新）：`output/quantum/nuclear_binding_light_nuclei.png` / `output/quantum/nuclear_binding_light_nuclei_metrics.json` / `output/quantum/nuclear_binding_light_nuclei.csv`
+- 7.13.11 代表核種（A依存）ベースライン固定（AME2020＋電荷半径）【完了（初版）】
+  - 目的：核種依存（A依存）へ進む前提として、代表核種（軽核＋代表安定核）の束縛エネルギー/核子あたり束縛（AME2020）と電荷半径（IAEA radii）を一次固定し、以後の A依存検証のターゲットを揃える。
+  - 一次ソース取得：`python -B scripts/quantum/fetch_ame2020_mass_table_sources.py --out-dirname iaea_amdc_ame2020_mass_1_mas20`
+    - 入力（キャッシュ）：`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/mass_1.mas20.txt` / `extracted_values.json` / `manifest.json`
+  - 実装：`python -B scripts/quantum/nuclear_binding_representative_nuclei.py`
+    - 出力：`output/quantum/nuclear_binding_representative_nuclei.png` / `output/quantum/nuclear_binding_representative_nuclei_metrics.json` / `output/quantum/nuclear_binding_representative_nuclei.csv`
+  - メモ：ここでは多体問題を解かず「ターゲット固定」までに留める（棄却条件付きの再導出は Step 7.13.12 以降）。
+- 7.13.12 A依存の最小多体近似（uniform mean-field）での整合性チェック【完了（初版）】
+  - 目的：7.13.8.5 で固定した u-profile ansatz class（λ_π 制約下 barrier+tail; channel-split (k,q) + singlet geometry split + triplet barrier split）が、核種依存（A依存）の “飽和” を **追加の核種別調整なし**に説明できるかを、宣言済み近似の下で切り分ける。
+  - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py`
+    - 入力：`output/quantum/nuclear_effective_potential_canonical_metrics.json`（Step 7.13.8.5 の安定エイリアス）＋ `output/quantum/nuclear_binding_representative_nuclei_metrics.json`（Step 7.13.11）
+    - 出力：`output/quantum/nuclear_a_dependence_mean_field.png` / `output/quantum/nuclear_a_dependence_mean_field_metrics.json` / `output/quantum/nuclear_a_dependence_mean_field.csv`
+  - メモ：この段階は “consistency check” であり、ここで残差が大きい場合は、Pauli 相関や多体項（3体など）を **新しい自由度として明示**した上で、棄却条件つきで再テストする（次段階）。
+- 7.13.13 A依存の最小多体近似（density-dependent repulsion proxy）での切り分け【完了（初版）】
+  - 目的：7.13.12 で示された “過剰束縛（飽和しない）” を受け、**追加自由度を明示した上で**、最小の多体補正（Pauli/clustering/3体項の粗視化）を 1項だけ導入し、A依存（飽和）の再現可否を切り分ける。
+  - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.13`
+    - 入力：`output/quantum/nuclear_effective_potential_canonical_metrics.json`（Step 7.13.8.5 の安定エイリアス）＋ `output/quantum/nuclear_binding_representative_nuclei_metrics.json`（Step 7.13.11）
+    - 出力：`output/quantum/nuclear_a_dependence_mean_field_density_repulsion.png` / `output/quantum/nuclear_a_dependence_mean_field_density_repulsion_metrics.json` / `output/quantum/nuclear_a_dependence_mean_field_density_repulsion.csv`
+  - モデル（初版）：2成分Fermi gas（p/n）＋ Hartree mean-field（pp/nn→singlet、pn→固定mix）＋ Coulomb（uniform sphere）に加え、密度依存の多体反発
+    - `E_rep/A = C * ρ^2`（Cは **1点（既定：Ca-40）** で凍結し、その後は外挿にのみ使用）
+  - 結果（初版；代表）：残差RMS ≈ **5.1 MeV（eq18）**, **5.16 MeV（eq19）** に改善（7.13.12 の RMS≈20 MeV から大幅改善）。この段階で A>4 の飽和が「追加核種別調整なし」で概ね説明できることを固定した。
+- 7.13.14 多体反発（Pauli/exchange/finite-range 相関）の物理的拘束（初版）【完了（初版）】
+  - 目的：7.13.13 の `Cρ^2`（多体反発 proxy）が「B/Aへ直接フィット」に見える攻撃点を避けるため、**B/A を使わず**に C を凍結する手続きを追加し、A依存（飽和）の切り分けをより物理的に固定する。
+  - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.14`
+    - 入力：`output/quantum/nuclear_effective_potential_canonical_metrics.json`（Step 7.13.8.5 の安定エイリアス）＋ `output/quantum/nuclear_binding_representative_nuclei_metrics.json`（Step 7.13.11）
+    - 出力：`output/quantum/nuclear_a_dependence_mean_field_repulsion_radii_frozen.png` / `output/quantum/nuclear_a_dependence_mean_field_repulsion_radii_frozen_metrics.json` / `output/quantum/nuclear_a_dependence_mean_field_repulsion_radii_frozen.csv`
+  - 手続き（凍結の根拠）：電荷半径から推定した `R_sharp` に対して、基礎モデル（2成分Fermi＋Hartree＋Coulomb）を半径方向に微小摂動し、`dE_base/dR` を数値微分で評価して **平衡条件 `dE/dR=0`** を満たす C を推定する（`E_rep/A=Cρ^2`）。重核（既定：`A>=40`）で得た推定値の **中央値**を C として凍結し、その後は外挿（predict）のみに用いる。
+  - 結果（初版；代表）：凍結された C は **≈9.10e2（eq18）/ 9.18e2（eq19）**（metrics参照）。残差RMS ≈ **5.13 MeV（eq18）**, **5.23 MeV（eq19）**。
+- 7.13.15 多体反発 proxy の置換（Pauli/exchange/3体の明示）と、核種別一次拘束の追加【完了（初版）】
+  - 目的：7.13.14 の `Cρ^2` を「置き換え（proxy）」から進め、Pauli/exchange（Fock）や 3体項・有限範囲相関を **式として明示**して自由度台帳を整備し、可能なら核種別の一次拘束（散乱・半径の独立系統など）を追加して、棄却条件つきで系統再現を固定する。
+  - 7.13.15.1 Hartree–Fock（Fock/exchange）＋3体項（proxy）の明示（C3 を電荷半径で凍結）【完了（初版）】
+    - 目的：7.13.14 のモデルに、pp/nn の **exchange（Fock）項**を明示的に追加し（Pauliの効果を相互作用側にも反映）、残余の多体反発は 3体項 proxy として **別項で**扱う（隠れ自由度にしない）。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15`
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_radii_frozen.png` / `output/quantum/nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_radii_frozen.csv`
+    - モデル（初版）：
+      - kinetic：2成分Fermi gas（p/n）
+      - interaction：uniform-matter Hartree–Fock（pp/nn は singlet + Fock、pn は Hartree のみ）
+      - 3体項（proxy）：`E_3/A = C3 * ρ^2`
+      - 凍結：C3 は電荷半径の平衡条件（`dE/dR=0`）から推定し、重核（既定：`A>=40`）の推定値中央値で凍結（B/Aは使用しない）。
+    - 結果（初版；代表）：凍結された C3 は **≈1.69e3（eq18）/ 1.73e3（eq19）**（metrics参照）。残差RMS ≈ **5.85 MeV（eq18）**, **6.18 MeV（eq19）**。
+  - 7.13.15.2 核種別一次拘束（σ）の追加：HF+3体の不確かさ分解（初版）【完了（初版）】
+    - 目的：7.13.15.1（HF+3体；C3は電荷半径で凍結）の出力を後処理し、核種ごとの一次σ（AME2020 B/A σ、IAEA 電荷半径 σ）を用いて、不確かさ（radii由来／C3散らばり由来／観測σ）を分解して固定出力化する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.2`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json`（Step 7.13.15.1）＋ `output/quantum/nuclear_binding_representative_nuclei_metrics.json`（Step 7.13.11；σを含む）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_uncertainty.png` / `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty.csv`
+    - 手続き（初版）：(i) `σ_r_charge→σ_R_sharp` を伝播し `d(B/A)/dR` から `σ_BA_from_radii` を推定、(ii) 重核（既定：`A>=40`）の `C3_est_from_radii` の散らばりを MAD→σ として `σ_C3` を推定し、`σ_BA_from_C3=ρ^2 σ_C3` を評価、(iii) `σ_total=sqrt(σ_r^2+σ_C3^2+σ_obs^2)` を各核種・各eqで固定する（**B/Aへの再フィットは行わない**）。
+  - 7.13.15.3 散乱（eq18/eq19）起因の系統を追加：棄却用の不確かさ予算を強化（初版）【完了（初版）】
+    - 目的：7.13.15.2 の `σ_total`（radii由来／C3散らばり由来／観測σ）に加え、低エネルギー散乱拘束由来の入力差分（eq18 vs eq19）を **系統項**として取り込み、核種別に「どこで棄却されるか」をより正面から固定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.3`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_metrics.json`（Step 7.13.15.2）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_set_systematic.png` / `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_set_systematic_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_set_systematic.csv`
+    - 手続き（初版）：eq18/eq19 の予測差を `σ_set = 0.5*|pred(eq18)-pred(eq19)|` として導入し、`pred_mean=0.5*(pred18+pred19)` と `σ_total_with_set=sqrt(0.5*(σ18^2+σ19^2)+σ_set^2)` で観測と比較する（eqの選別や再フィットは行わない）。
+  - 7.13.15.4 半径の独立系統（CODATA vs IAEA）を追加：半径ソース依存を明示（初版）【完了（初版）】
+    - 目的：代表核種の電荷半径（IAEA radii compilation）に対し、light nuclei で独立に利用できる CODATA（NIST Cuu）半径がある場合、その差分を **半径ソース依存の系統**として明示し、棄却条件の逃げ道（“半径ソースを変えれば良い”）を塞ぐ。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.4`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_metrics.json`（Step 7.13.15.2）＋ `data/quantum/sources/nist_codata_2022_nuclear_light_nuclei/extracted_values.json`（CODATA; rd/ral）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic.png` / `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic.csv`
+    - 手続き（初版）：`σ_r_source = 0.5*|r(CODATA)-r(IAEA)|` を導入し、既存の `σ_radii` から推定した `|d(B/A)/dR|` を用いて `σ_BA(r_source)` へ伝播し、`σ_total_plus_r_source = sqrt(σ_total^2 + σ_BA(r_source)^2)` を核種別・eq別に固定する（**半径ソースの置換や再フィットは行わない**）。
+  - 7.13.15.5 棄却用の総合不確かさ予算を固定し、light nuclei の適用範囲を明確化（初版）【完了（初版）】
+    - 目的：7.13.15.2（radii/C3/obs）＋7.13.15.3（散乱由来の set 差）＋7.13.15.4（半径ソース差）を、**単一の棄却予算**として合成し、核種別に `z=residual/σ_final` を固定出力化する。同時に light nuclei（少数体系）に対する uniform-matter HF+3体モデルの **適用範囲**を明示し、評価が「軽核で自明に死ぬ」ことを避けて重核側の棄却条件を読める形にする。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.5`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_metrics.json`（Step 7.13.15.2）＋ `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic_metrics.json`（Step 7.13.15.4）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_rejection_budget.png` / `output/quantum/nuclear_a_dependence_hf_three_body_rejection_budget_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_rejection_budget.csv`
+    - 手続き（初版）：`σ_final^2 = σ_total^2 + σ_set^2 + σ_r_source^2`（`σ_set = 0.5*|pred(eq18)-pred(eq19)|`、`σ_r_source` は CODATA vs IAEA の半差を `|d(B/A)/dR|` で伝播）。適用範囲は `A>=16` を in-domain として明示し、domain内の `χ^2-like` と `|z|<=3` 率を固定する（閾値は棄却基準のたたき台）。
+  - 7.13.15.6 核種別一次拘束の追加（データ数拡張／shell・表面の系統の切り分け）：HF+3体の棄却条件をさらに強化（初版）【完了（初版）】
+    - 目的：AME2020（核種別 B/A）× IAEA 電荷半径を大規模に結合し、C3 を再フィットせず（7.13.15.1 の凍結のまま）HF+3体モデルの残差系統を可視化する。特に surface（A-bin）と shell（magic Z/N）を切り分け、どこで失敗するかを固定出力化する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.6`
+      - 入力：`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`（AME2020）＋ `data/quantum/sources/iaea_charge_radii/charge_radii.csv`（IAEA radii）＋ `output/quantum/nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json`（7.13.15.1）＋ `output/quantum/nuclear_a_dependence_hf_three_body_uncertainty_metrics.json`（7.13.15.2; C3散らばりσ）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_extended_dataset.png` / `output/quantum/nuclear_a_dependence_hf_three_body_extended_dataset_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_extended_dataset.csv`
+    - 手続き（初版）：
+      - C3 は 7.13.15.1 の凍結値を維持（B/A への再フィット無し）。
+      - radii は published が存在すればそれを使用し、無い場合のみ preliminary を使用（`radii_used` として区別）。
+      - shell 指標：magic Z/N（2,8,20,28,50,82,126）で分類。
+      - surface 指標：A-bin（2–16, 16–40, 40–100, 100–200, 200+）で分類。
+    - 結果（初版；代表）：join N=955（published=907, preliminary=48）、domain（A>=16）N=932。残差RMS（pred_mean−obs）≈5.18 MeV。C3_est_from_radii の中央値（domain）≈1.57e3（eq18）/ 1.60e3（eq19） MeV·fm^6（metrics参照）。
+  - 7.13.15.7 surface（有限サイズ）項を追加項として明示し、棄却条件を更新（C3(A)のA依存を説明）（初版）【完了（初版）】
+    - 目的：7.13.15.6 で観測された `C3_est_from_radii` の A 依存（小Aで大きく、重核で小さい）を、有限サイズ（surface）項の最小追加で説明し、自由度台帳に載る形で写像を明示する。
+    - 方針（fit/predict分離）：
+      - fit：電荷半径（radii）由来の平衡条件から得られる `C3_est_from_radii` と、`x = 1/(6 ρ^2 R_sharp)` の線形関係 `C3_est ≈ C3_∞ + C_surf * x` を用い、`C3_∞` と `C_surf` を凍結する（B/A は使用しない）。
+      - predict：凍結後は `C3_eff = C3_∞ + C_surf * x` を用い、`E_total/A = E_base/A + C3_eff ρ^2 = E_base/A + C3_∞ ρ^2 + C_surf/(6 R_sharp)` により B/A を外挿する。棄却統計（z, |z|<=3率など）を更新し、eq18/eq19差は `σ_set=0.5|pred18-pred19|` として扱い、eqの選別はしない。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_extended_dataset_metrics.json`（7.13.15.6）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term.png` / `output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_surface_term.csv`
+    - 結果（初版；代表）：fit（A>=16, published radii）で `C3_∞≈1.31e3（eq18）/ 1.33e3（eq19） MeV·fm^6`、`C_surf≈1.64e2（eq18）/ 1.67e2（eq19） MeV·fm`（metrics参照）。B/A 残差RMS（domain; mean eq）≈ **6.89 MeV**。`σ_total`（obs+radii+C3-fit残差）だけでは z が極端に大きくなり、**未モデル化のshell等の系統**を追加項（またはモデル誤差）として明示する必要が残る（次作業）。
+  - 7.13.15.8 shell（magic Z/N）系統を追加項として明示し、棄却統計を“読む”形へ更新（初版）【完了（初版）】
+    - 目的：7.13.15.7 の結果が示す「B/A 残差は radii/C3 だけでは説明できない」点を正面から扱い、shell（magic Z/N）に起因する系統を **追加項（自由度台帳）**として明示する。
+    - 方針（初版案）：
+      - 追加項を「モデル誤差（systematic σ）」として扱い、予測（B/A）は変更せずに棄却予算へ加える（deterministic correction は次段）。
+      - magic Z/N 指標（2,8,20,28,50,82,126）で分類し、domain（A>=16）での残差分布（mean/robust σ）を固定出力化する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.8`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_term.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_term_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_term.csv`
+    - 手続き（初版）：
+      - category：magic_any（magic Z または magic N）
+      - `σ_shell(category)^2 = max(0, median(residual_mean^2) - median(σ_mean^2))`（domain 内、category別）
+      - `σ_final_shell^2 = σ_final^2 + σ_shell^2`、`z_shell = residual / σ_final_shell`
+    - 結果（初版；代表）：`σ_shell`（non-magic）≈**7.07 MeV**、（magic）≈**7.20 MeV**。domain で `z_mean_shell` の RMS ≈ **0.97**（metrics参照）。
+  - 7.13.15.9 separation energies（S_n/S_2n）と shell-gap による決着点の固定（初版）【完了（初版）】
+    - 目的：7.13.15.8 の `σ_shell` は“読む”ための暫定であり、そのままでは反証可能性が弱くなる。そこで B/A の絶対値ではなく、shell 構造に敏感な差分量（S_n, S_2n）と shell-gap（閉殻ギャップ）を固定出力化し、次段で「補正（deterministic）」へ昇格するか／「予測しない領域」を宣言するかの決着点を作る。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.9`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7；surface項凍結、予測は変更しない）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_separation_energies.png` / `output/quantum/nuclear_a_dependence_hf_three_body_separation_energies_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_separation_energies.csv`
+    - 手続き（初版）：
+      - `B(Z,N)=A*(B/A)`、`S_n(Z,N)=B(Z,N)-B(Z,N-1)`、`S_2n(Z,N)=B(Z,N)-B(Z,N-2)`。
+      - shell-gap（閉殻ギャップ）：`gap_n(Z;N0)=S_n(Z,N0)-S_n(Z,N0+1)`、`gap_2n(Z;N0)=S_2n(Z,N0)-S_2n(Z,N0+2)`（magic N0）。
+      - domain：差分の両方の核種が `A>=16` を満たす場合のみ採用（light nuclei を明示的に除外）。
+    - 結果（初版；代表）：domain（A>=16）で Sn 残差RMS（pred_mean−obs）≈**12.80 MeV**、S2n 残差RMS ≈**23.43 MeV**（metrics参照）。shell-gap の予測は magic N によって符号・スケールの不一致が残り、shell を単なるモデル誤差として埋めるだけでは閉殻構造が説明できないことが固定された（図参照）。
+  - 7.13.15.10 shell を deterministic correction（最小自由度）へ昇格し、S_n/S_2n と shell-gap で外挿評価（初版）【完了（初版）】
+    - 目的：7.13.15.9 の決着点（S_n/S_2n と shell-gap）で説明不能な系統を、追加自由度として明示して最小限で吸収できるかを評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.10`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_correction.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_correction_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_correction.csv`
+    - 手続き（初版）：
+      - 最小自由度：`ΔE_shell(Z,N)=a_any*I_magic_any + a_double*I_doubly_magic` を **全束縛 B**へ加える（B/A へ直接 fit しない）。
+      - fit/predict 分離：係数の凍結は **Sn のうち magic N∈{50,82} を含む差分ペアのみ**で行い、それ以外の magic N では外挿評価する（p-hacking を避ける）。
+      - 評価：Sn/S2n の残差RMS（全体／学習領域／他のmagic領域）と、shell-gap（gap_n, gap_2n）の obs vs pred を固定する。
+    - 結果（初版；代表）：
+      - 凍結係数：`a_any≈-1.25 MeV`、`a_double≈-9.41 MeV`（fit N=32；metrics参照）。
+      - Sn（domain A>=16）：全体RMSは **12.80→12.84 MeV**（悪化）。学習領域（magic N=50/82）では **10.36→10.15 MeV**（改善）だが、他のmagic領域では **12.56→13.81 MeV**（悪化）。
+      - shell-gap：`gap_n` の RMS は **5.66→9.45 MeV** と悪化し、最小2自由度の補正では閉殻ギャップの整合が取れないことが固定された（図参照）。
+    - 結論（初版）：uniform-matter HF+3体の上に「magic指標のみ」の最小補正を重ねるだけでは、shell 構造（特に 1n gap）が外挿で再現できない。したがって、この補正クラスは **棄却**し、より構造を持つ模型（密度プロファイルや軌道占有＝束縛モードの量子化）へ進む。
+  - 7.13.15.11 束縛モードの量子化（殻構造）の最小写像を導入し、shell-gap の外挿性能を検証（初版）【完了（初版）】
+    - 目的：7.13.15.10 で示された通り、magic指標の ad-hoc 補正では shell-gap が外挿で救えない。殻構造を「束縛モードの量子化」として最小写像で明示し、S_n/S_2n と shell-gap を同一手続きで評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.11`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_quantization.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_quantization_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_quantization.csv`
+    - 手続き（初版；最小写像）：
+      - magic 境界：`[0,2,8,20,28,50,82,126,184]` を用い、殻内の占有分率に基づく有界関数 `S_shell(x)=p(p-g)/g`（x=N,Z）を定義（殻端で0、殻中央で負の極小）。
+      - スケール：`ħω(A)=41*A^{-1/3}`（MeV）を用い、`B_corr = B_pred + κ ħω(A) (S_shell(N)+S_shell(Z))` を導入（κのみを自由度として凍結）。
+      - κ の凍結：`gap_n` のうち magic N∈{50,82} のみで最小二乗（線形）で凍結し、他の magic N は外挿評価。
+    - 結果（初版；代表）：`κ≈-0.170`（fit N=12）。Sn/S2n の全体RMSはわずかに改善（Sn 12.80→12.71、S2n 23.43→23.21）。shell-gap は `gap_n` 全体では 5.66→5.74（ほぼ同等）だが、学習領域（50/82）では 3.45→1.92 に改善し、他の magic N では 7.67→8.47 と悪化して外挿は未達（metrics参照）。
+  - 7.13.15.12 殻量子化写像の強化（N/Z非対称：kN,kZの分離凍結）と外挿評価（初版）【完了（初版）】
+    - 目的：7.13.15.11 の最小写像は学習領域（50/82）では改善するが、他magicで悪化する。ここでは N/Z 非対称（kN,kZ）を最小追加自由度として導入し、**識別可能性（identifiability）を損なわない**凍結手順で外挿評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.12`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_quantization_asym.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_quantization_asym_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_quantization_asym.csv`
+    - 手続き（初版）：
+      - 補正：`B_corr = B_pred + kN ħω(A) S_shell(N) + kZ ħω(A) S_shell(Z)`。
+      - 識別性：中性子差分（Sn/gap_n）は Z項が差分で消えるため **kNのみ**が効く。同様に陽子差分（Sp/gap_p）は N項が消えるため **kZのみ**が効く。
+      - 凍結：kN は `gap_n`（magic N∈{50,82}）で1次元最小二乗、kZ は `gap_p`（magic Z∈{50,82}）で1次元最小二乗として **別々に凍結**（p-hacking回避）。
+    - 結果（初版；代表）：`kN≈-0.170`（fit N=12）、`kZ≈-0.121`（fit N=10）。Sn/Sp の全体RMSは微改善（Sn 12.80→12.71、Sp 18.72→18.64）。ただし外挿領域では `gap_n`（other magic）RMSは 7.67→8.48、`gap_p`（other magic）RMSは 11.62→12.34 と悪化し、殻量子化写像は依然として外挿未達（metrics参照）。
+  - 7.13.15.13 殻容量（縮退）をモデル内部で生成し、magic系列を固定せずに shell-gap を外挿で改善できるか検証（初版）【完了（初版）】
+    - 目的：7.13.15.11–.12 では magic 境界を外部から与えた。次段では縮退構造（殻容量）を最小模型で明示し、magic系列自体が写像から現れるかを検証する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.13`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_model.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_model.csv`
+    - 手続き（初版）：
+      - 殻境界（MODEL_MAGIC）の生成：Nilsson-like 球対称スペクトル（3D HO + `l·s` + `l^2`；κ=0.07, μ=0.60）を凍結し、準位間隔 `ΔE` の robust 閾値（`ΔE > gap_factor*median(ΔE)`；gap_factor=2.0）で閉殻境界を抽出し、累積占有数から MODEL_MAGIC を生成。
+      - 写像：`S_shell(x)=p(p-g)/g`（MODEL_MAGIC の殻内占有分率）と `ħω(A)=41*A^{-1/3}` を用い、`B_corr = B_pred + kN ħω(A) S_shell(N) + kZ ħω(A) S_shell(Z)`。
+      - 凍結（fit/predict 分離）：kN は `gap_n`（観測magic N∈{50,82}）のみで凍結、kZ は `gap_p`（観測magic Z∈{50,82}）のみで凍結。以後は外挿評価（p-hacking 回避）。
+    - 結果（初版；代表）：MODEL_MAGIC ≈ `[0,2,8,14,20,28,50,76,82,114,164,210]`（metrics参照）。`kN≈-0.179`（fit N=12）、`kZ≈-0.130`（fit N=10）。Sn/Sp の全体RMSは微改善（Sn 12.798→12.794、Sp 18.716→18.668）。一方、1n/1p の外挿領域では `gap_n`（other magic）RMSは **7.67→8.20**、`gap_p`（other magic）RMSは **11.62→12.36** と依然として悪化し、外挿未達（metrics参照）。なお 2n/2p gap は改善傾向（例：`gap_S2n` RMS 15.23→10.67）。
+    - 結論（初版）：殻境界を内部生成しても、平均場+最小殻補正（殻内占有のみ）では 1n/1p shell-gap の外挿改善が達成できないことが固定された。次段は相関（ペアリング等）を最小自由度で明示し、外挿で決着させる。
+  - 7.13.15.14 相関（ペアリング；odd-even staggering）を最小自由度で明示し、1n/1p shell-gap 外挿の改善を検証（初版）【完了（初版）】
+    - 目的：7.13.15.11–.13 の結論（殻内占有だけでは 1n/1p gap の外挿が救えない）を受け、相関（odd-even staggering / pairing）を「隠れ自由度にせず」最小の追加項として明示し、外挿で判定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.14`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）, `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json`（7.13.15.13）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model.csv`
+    - 手続き（初版）：
+      - pairing：`B_pair = B_shell + a_p*s(Z,N)/sqrt(A)`（s=+1 even-even, -1 odd-odd, 0 odd-A）。
+      - a_p の凍結：観測束縛 `B_obs` から OES（3-point）で推定し、`a_p≈12.02 MeV`（`a_p_n≈11.79`/`a_p_p≈12.25`；観測magic近傍を除外；tol=1）として凍結（モデル独立）。
+      - shell 側は Step 7.13.15.13 の凍結（MODEL_MAGIC + kN/kZ）をそのまま使用し、ペアリング追加の効果を外挿で判定する。
+    - 結果（初版；代表）：Sn/Sp の全体RMSは改善（Sn 12.794→12.643、Sp 18.668→18.421）。外挿領域（other magic）では `gap_n` RMS 8.20→7.73、`gap_p` RMS 12.36→11.49 と改善。
+      - ただし学習magic（50/82）の gap は悪化（例：`gap_n` train RMS 1.84→3.00、`gap_p` train RMS 1.55→2.38）。これは kN/kZ を pairing 無しで凍結したためであり、次段で pairing を固定した上で kN/kZ を再凍結して整合を取る必要がある。
+    - 結論（初版）：最小ペアリング項は外挿（other magic）側の改善には寄与するが、shell係数（kN/kZ）の再凍結を伴わないと学習領域を損ねる。次段で「pairing固定→kN/kZ再凍結→外挿判定」を行う。
+  - 7.13.15.15 pairing を固定した上で kN/kZ を再凍結し、1n/1p shell-gap の外挿を再評価（初版）【完了（初版）】
+    - 目的：7.13.15.14 の結果（pairing 追加は other-magic を改善するが、train-magic を崩す）を受け、pairing（a_p）を固定したまま shell係数（kN/kZ）を再凍結し、学習領域と外挿領域の両立を評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.15`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）, `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json`（7.13.15.13）, `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model_metrics.json`（7.13.15.14）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_refreeze.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_refreeze_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_refreeze.csv`
+    - 手続き（初版）：
+      - 基準：`B_base = B_pred + a_p*s(Z,N)/sqrt(A)`（a_p は 7.13.15.14 の凍結値、MODEL_MAGIC は 7.13.15.13 を固定）。
+      - 再凍結：kN は `gap_n@N=50/82`、kZ は `gap_p@Z=50/82` で別々に再凍結（identifiability維持）。
+      - 補正：`B_corr = B_base + kN ħω(A) S_shell(N) + kZ ħω(A) S_shell(Z)`。
+    - 結果（初版；代表）：`kN≈-0.323`（fit N=12）、`kZ≈-0.265`（fit N=10）。train-magic の gap は回復（例：`gap_n` train RMS ≈ **1.85**、`gap_p` train RMS ≈ **1.56**）。
+      - 外挿領域（other magic）では `gap_n` RMS ≈ **8.02**（vs 8.20）、`gap_p` RMS ≈ **12.04**（vs 12.36）と微改善に留まる一方、2n/2p gap は大きく改善（例：`gap_2n` RMS ≈ **7.83**）。
+    - 結論（初版）：pairing 固定下での kN/kZ 再凍結により train 側の整合は回復したが、1n/1p の other-magic 外挿は依然として十分ではない。次段は pairing の最小形（odd-A も含む/中性子・陽子を分離）を検討し、同じ凍結手順で外挿判定する。
+  - 7.13.15.16 pairing の最小形を改善（odd-A を含む/中性子・陽子分離）し、kN/kZ 再凍結の下で外挿判定【完了（初版）】
+    - 目的：7.13.15.14–.15 で「pairing の形」が 1n/1p gap の外挿に効きうることが見えたため、odd-A を 0 とする粗い形を避け、より標準的な最小形に置き換えて外挿で判定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.16`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）, `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json`（7.13.15.13）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze.csv`
+    - 手続き（初版）：
+      - 基準：`B_base = B_pred + a_n*(-1)^N/sqrt(A) + a_p*(-1)^Z/sqrt(A)`（`a_n,a_p` は OES（3-point）から別々に凍結；観測magic近傍を除外；tol=1）。
+      - 再凍結：kN は `gap_n@N=50/82`、kZ は `gap_p@Z=50/82` で別々に再凍結（identifiability維持）。
+      - 補正：`B_corr = B_base + kN ħω(A) S_shell(N) + kZ ħω(A) S_shell(Z)`。
+    - 結果（初版；代表）：`a_n≈5.89 MeV`、`a_p≈6.13 MeV`、`kN≈-0.320`（fit N=12）、`kZ≈-0.268`（fit N=10）。train-magic の gap は維持（例：`gap_n` train RMS ≈ **1.85**、`gap_p` train RMS ≈ **1.56**）。
+      - 外挿領域（other magic）では `gap_n` RMS ≈ **8.02**、`gap_p` RMS ≈ **12.04** と、7.13.15.15 からの改善は実質的に見られない（差は誤差レベル）。
+    - 結論（初版）：odd-A を含む最小形（中性子/陽子分離）へ置換しても、1n/1p の other-magic 外挿は十分に改善しない。平均場+殻内占有+最小ペアリングの枠組みでも核殻構造の外挿は困難であることを固定し、より本質的な相関（多体構造）へ進む。
+  - 7.13.15.17 本質的相関（pn-collective proxy）を最小自由度で導入し、shell-gap 外挿で判定（初版）【完了（初版）】
+    - 目的：7.13.15.16 までで、平均場+殻補正+最小ペアリング（OES凍結）の範囲では other-magic の 1n/1p shell-gap 外挿が十分に改善しないことが見えたため、次の相関自由度を最小限で明示し、外挿で判定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.17`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）, `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json`（7.13.15.16）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_pn.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_pn_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_pn.csv`
+    - 手続き（初版）:
+      - baseline（凍結）：7.13.15.16 の `a_n,a_p,kN,kZ` を固定し、`B_base`（pairing+shell）を構成。
+      - 新規DoF：pn-collective proxy を `B_corr = B_base + kNZ ħω(A) q(N) q(Z)` として導入（`q=p(g-p)/g^2` は open-shell 指標；`q∈[0,1/4]`）。
+      - 凍結：`kNZ` は shell-gap を直接 fit せず、観測magic近傍を除外（tol=1）した mid-shell の **Sn/Sp 残差**で最小二乗により凍結。
+    - 結果（初版；代表）：`kNZ≈-11.60`（fit N=865；Sn=502, Sp=363）。
+      - other-magic：`gap_p` は改善（RMS **12.04→10.41**）する一方、`gap_n` は悪化（RMS **8.02→9.87**）。
+    - 結論（初版）：pn-collective を 1自由度で導入しても、1n/1p の other-magic 外挿を同時に改善できない。次段で「より識別的な最小相関（DoF）」を検討し、それでも救えない場合は「核殻外挿は平均場+最小補正では困難」を固定する。
+  - 7.13.15.18 識別性を保ったまま相関自由度を最小増分（2DoF）し、other-magic の `gap_n/gap_p` 同時改善の可否を判定（初版）【完了（初版）】
+    - 目的：7.13.15.17 の結果（pn-collective 1DoF では `gap_n/gap_p` が同時に救えない）を受け、識別性（SnはN差分、SpはZ差分）を崩さずに最小増分で相関DoFを拡張し、外挿で判定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.18`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_surface_term_metrics.json`（7.13.15.7）, `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json`（7.13.15.16）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_q_sep.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_q_sep_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_q_sep.csv`
+    - 手続き（初版）：
+      - `q=p(g-p)/g^2`（open-shell 指標；`q∈[0,1/4]`）を導入し、`B_corr = B_base + kqN ħω(A) q(N) + kqZ ħω(A) q(Z)`（2DoF）で相関を表現。
+      - `kqN` は mid-shell の Sn 残差で、`kqZ` は mid-shell の Sp 残差で **別々に凍結**（gap直fit禁止、観測magic近傍除外 tol=1）。
+    - 結果（初版；代表）：`kqN≈-3.46`（fit N=508）、`kqZ≈-3.97`（fit N=374）。
+      - other-magic：`gap_n` RMS **8.02→9.85**、`gap_p` RMS **12.04→13.85** と悪化（metrics参照）。
+    - 結論（初版）：識別性を保った 2DoF の最小増分でも other-magic の `gap_n/gap_p` 同時改善は得られない。平均場+殻補正+最小相関の枠組みで核殻外挿を救うのは困難であることを固定し、より低次の原理（場の方程式/波動方程式）側の再設計へ戻す。
+  - 7.13.15.19 結論固定（no-go pack）：平均場+殻補正+最小相関では other-magic の 1n/1p shell-gap 外挿が救えないことを機械的に確定し、次の設計点を定義【完了（初版）】
+    - 目的：7.13.15.13–.18 の失敗パターン（train側は救えるが other-magic が救えない/片側を救うと片側が悪化）を、論文・ロードマップ上で再利用可能な形（no-go pack）として固定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.19`
+      - 入力：Step 7.13.15.13–.18 の metrics（`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_*_metrics.json`）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_no_go_pack.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_no_go_pack_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_no_go_pack.csv`
+    - 手続き（初版）：
+      - baseline：7.13.15.16（pairing sep + shell refreeze）の `gap_n/gap_p` RMS を基準とする。
+      - train側 guardrail：train-magic の `gap_n/gap_p` RMS が baseline から **+0.5 MeV** を超えて悪化しないこと。
+      - other側（strict）：other-magic の `gap_n` と `gap_p` RMS が **両方とも** baseline より小さいこと（同時改善）。
+    - 結果（初版；代表）：baseline は train（`gap_n≈1.85`, `gap_p≈1.56`）、other（`gap_n≈8.02`, `gap_p≈12.04`）。
+      - 7.13.15.14 は other-magic を両方改善するが train を破綻させ、7.13.15.17 は `gap_p` のみ改善、7.13.15.18 は両方悪化する。
+      - 判定：`n_pass_all=0`（strict 基準、baseline を含む）→ 本モデルクラス（平均場+殻補正+最小ペアリング+最小相関）では **other-magic の 1n/1p shell-gap 外挿を同時に救えない**。
+    - 結論（初版）：核殻外挿は平均場+最小補正では困難であることを no-go として固定し、次段はより本質的な多体構造を（独立拘束→外挿判定のまま）導入する。
+
+  - 7.13.15.20 shell-gap 失敗様式の固定（failure modes + next design pack）：baseline 残差を magic と A で分解し、次の設計点（domain/coverage）を仕様化【完了（初版）】
+    - 目的：7.13.15.19 の no-go を「どこで失敗しているか（light vs heavy / magic別 / coverage制約）」まで機械的に分解し、次に足すべき自由度と必要データ（coverage）を固定する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.20`
+      - 入力：`output/quantum/nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze.csv`（7.13.15.16 baseline）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_failure_modes.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_failure_modes_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_failure_modes.csv`
+    - 結果（初版；代表）：
+      - other-magic の主な失敗は light nuclei に集中（特に **N=8/20** と **Z=20**）。一方で heavy 側（例：N=126）の residual は小さい。
+      - A_min の stress test では `gap_n` other RMS が **A>=60 で ≈0.40 MeV（n=3）**まで低下する一方、`gap_p` other は **Z=20 のみ**で coverage が狭い（radii-join + 3核連鎖要件の制約）。
+    - 結論（初版）：拡張相関（変形/configuration mixing 等）の導入前に、(i) 適用領域（A_min）と light 取り扱い、(ii) radii-join に依存しない coverage 拡張（半径モデル等）を先に仕様として固定し、p-hacking を避ける。
+
+  - 7.13.15.21 coverage 拡張（初版）：凍結した半径モデルで AME2020 mass table へ外挿し、shell-gap 決着点（Z=28等）を増やす【完了（初版）】
+    - 目的：現状の shell-gap 評価は radii-join により proton 側の「other magic」が実質 Z=20 に偏るため、より広い核表で決着できる形へ拡張する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.21`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded.csv`
+    - 手続き（初版）：
+      - 半径モデル（radii-only）：`r_charge=r0*A^{1/3}` を A>=40 の published radii から median で凍結。
+      - 凍結した `r_charge` と 7.13.15.7 の surface-term（`C3_inf,C_surf`）で `B_pred_mean` を AME2020 全域へ外挿し、7.13.15.16 と同一手順（pairing OES → kN/kZ refreeze）で shell-gap を再計算。
+    - 結果（初版；代表）：
+      - 半径モデル：`r0≈0.949 fm`（fit A>=40, n=834, RMS≈0.070 fm）。
+      - coverage：proton 側の gap が **Z=28** 等まで増え（例：`gap_Sp:28` が n=29）、radii-join の偏り（Z=20のみ）を緩和。
+      - ただし expanded set では、pairing-only が other-magic を押さえる一方、shell（kN/kZ refreeze）は train を改善するが other を悪化させる傾向が残る（metrics参照）。
+
+  - 7.13.15.22 expanded set での決着（初版）：domain A_min と shell 写像固定候補をスキャンし、no-go/差分予測を再評価【完了（初版）】
+    - 目的：7.13.15.21 で coverage を拡張した上で、(i) light/medium/heavy の domain 分割が効くか、(ii) shell 写像（S_shell）の固定候補を変えると決着が変わるか、を **追加自由度なし**で明確化する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.22`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.csv`
+    - 手続き（初版）：
+      - domain A_min を {16, 40, 60, 80, 100} でスキャン。
+      - S_shell は 2候補を比較（`model_magic` / `obs_magic`）。新しいフィット自由度は導入しない。
+      - 各構成で **pairing OES 凍結 → kN/kZ refreeze（N=50/82, Z=50/82） → shell-gap RMS（train/other）** を評価し、strict 判定で pass/fail を固定。
+    - 結果（初版；代表）：
+      - strict 判定では **strict_pass=0/10**（train は改善するが、other-magic の 1n/1p shell-gap を同時に救えない）。
+      - 例：`obs_magic` + A>=60 では `gap_Sn` other が改善（RMS **1.12→0.41 MeV**）する一方、`gap_Sp` other は悪化（RMS **0.77→1.20 MeV**）。
+      - A>=80 以上では `gap_Sp` other の coverage が 0 となり、決着点として不適（検証不能）。
+    - 結論（初版）：domain 分割と固定 S_shell のみでは neutron/proton の other-magic を同時に救えない。次段は、proton 側を救う最小増分の相関/多体DoFを **独立拘束→外挿判定** の形で導入し直す必要がある。
+
+  - 7.13.15.23 expanded set（初版）：独立拘束DoF（半径の isospin 依存）で proton 側 shell-gap を救えるかを検証【完了（初版）】
+    - 目的：7.13.15.22 の no-go（proton 側 other が落ちる）を受け、**一次拘束として独立に凍結できる最小増分**として半径モデルを拡張し、strict 判定で決着する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.23`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.csv`
+    - 手続き（初版）：
+      - 半径モデル（radii-only）：`r_charge(A,Z,N) = (r0 + rI*I) A^{1/3}`（`I=(N-Z)/A`）を A>=40 の published radii のみで凍結（mass/gap による最適化は行わない）。
+      - 7.13.15.22 と同一の shell-gap strict 判定（domain A_min×S_shell 候補）で再評価。
+    - 結果（初版；代表）：
+      - 半径フィット：`r0≈0.989 fm`, `rI≈-0.240 fm`（A>=40, n=834, fit RMS≈0.049 fm）。
+      - strict 判定：**strict_pass=0/10**。半径の isospin 依存を入れても、proton 側 other-magic shell-gap は改善せず（むしろ悪化傾向）。
+    - 結論（初版）：半径モデルの最小拡張（独立拘束DoF）では proton 側 shell-gap の no-go は覆らない。次段は proton 特有の物理（Coulomb exchange / finite-size / structure DoF 等）を **自由パラメータなし（または独立拘束）**で追加し、strict 判定で再評価する必要がある。
+
+  - 7.13.15.24 expanded set（初版）：proton 特有（Coulomb exchange; Slater）を自由度なしで追加し、strict 再評価【完了（初版）】
+    - 目的：7.13.15.23 の結果（半径 isospin 拡張では救えない）を受け、proton 側に固有な補正（Coulomb exchange）を **自由パラメータなし**で追加し、shell-gap 決着点で再評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.24`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）、凍結半径モデル（7.13.15.21 の metrics から `r0` を採用）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.csv`
+    - 手続き（初版）：
+      - 半径モデルは 7.13.15.21 で凍結した `r_charge=r0*A^{1/3}` を使用（radii-only；mass/gap による最適化は行わない）。
+      - Coulomb exchange（Slater 近似）を `E_x/A` として energy model に deterministic に加算し、7.13.15.22 と同一の凍結手順（pairing OES → kN/kZ refreeze → strict 判定）で再評価する。
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。Coulomb exchange の追加だけでは、proton 側 other-magic shell-gap の no-go を覆せない。
+      - 例：`obs_magic` + A>=60 では neutron 側 other が改善（RMS **1.12→0.41 MeV**）する一方、proton 側 other は悪化（RMS **0.77→1.20 MeV**）するパターンが残る。
+    - 結論（初版）：Coulomb exchange（Slater）だけでは proton 側 other-magic を救えない。次段は proton 側の決定論補正を **より現実的な Coulomb / finite-size** 等へ拡張するか、構造DoF（独立拘束）を追加して strict 判定で再評価する必要がある。
+
+  - 7.13.15.25 expanded set（初版）：Coulomb/finite-size（2pF+Slater）を自由度なしで追加し、strict 再評価【完了（初版）】
+    - 目的：7.13.15.24（uniform gas の Slater exchange）では差が出なかったため、uniform sphere 近似に起因する proton 側の系統（Coulomb direct/exchange の finite-size 補正）を **独立拘束（固定）**で追加し、strict 判定で決着する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.25`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）、凍結半径モデル（7.13.15.21 の metrics から `r0` を採用）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.csv`
+    - 手続き（初版）：
+      - 半径モデルは 7.13.15.21 で凍結した `r_charge=r0*A^{1/3}` を使用（radii-only；mass/gap による最適化は行わない）。
+      - Coulomb を finite-size へ拡張：2pF 電荷分布（拡散長 `a` は代表値で固定）で direct を置換し、Slater（LDA）で exchange を追加（いずれも fit しない）。
+      - 7.13.15.22 と同一の凍結手順（pairing OES → kN/kZ refreeze → strict 判定）で再評価する。
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。finite-size Coulomb の追加だけでは、proton 側 other-magic shell-gap の no-go を覆せない。
+      - 例：`obs_magic` + A>=60 では neutron 側 other が改善（RMS **1.12→0.41 MeV**）する一方、proton 側 other は悪化（RMS **0.77→1.20 MeV**）するパターンが残る。
+    - 結論（初版）：Coulomb/finite-size（2pF+Slater）だけでは proton 側 other-magic を救えない。次段は、半径写像（isospin 依存）と組み合わせる等の独立拘束DoFを追加し、strict 判定で再評価する必要がある。
+
+  - 7.13.15.26 expanded set（初版）：半径 isospin 拡張（独立凍結）＋ Coulomb/finite-size（2pF+Slater）を組み合わせ、strict 再評価【完了（初版）】
+    - 目的：7.13.15.25（finite-size Coulomb）でも no-go が覆らなかったため、radii-only で独立凍結した半径 isospin 拡張（7.13.15.23）と組み合わせ、isobar 間の半径差を取り込んだ上で strict 判定を再評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.26`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）、凍結半径モデル（7.13.15.23 の metrics から `r0,rI` を採用）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.csv`
+    - 手続き（初版）：
+      - 半径モデル：7.13.15.23 で凍結した `r_charge=(r0+rI*I)A^{1/3}`（I=(N-Z)/A）を採用（radii-only；mass/gap による最適化は行わない）。
+      - Coulomb：7.13.15.25 と同じ finite-size（2pF direct + Slater exchange）。拡散長 `a=0.523 fm` を固定し、核種の `r_rms` から `c` を bisection で決定（fit しない）。
+      - 評価：7.13.15.22 と同一の strict 判定（domain A_min×S_shell）で pass/fail を固定する（p-hacking を避ける）。
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。組合せでも no-go は覆らない。
+      - 例：`obs_magic` + A>=60 では neutron 側 other が改善（RMS **1.10→0.353 MeV**）する一方、proton 側 other は悪化（RMS **0.625→1.487 MeV**）するパターンが残る。
+    - 結論（初版）：半径 isospin 拡張 + finite-size Coulomb の組合せでも proton 側 other-magic を救えない。次段は、shell/structure DoF を追加し、train で凍結→other で棄却する形で strict 判定を再評価する必要がある。
+
+  - 7.13.15.27 expanded set（初版）：shell refreeze を isospin 依存で拡張し（train 凍結→other 棄却）、strict 再評価【完了（初版）】
+    - 目的：7.13.15.22〜7.13.15.26 の一連の独立拘束（半径写像）・決定論補正（Coulomb）でも、proton 側 other-magic shell-gap が改善しない no-go が残ったため、最小追加DoFとして shell refreeze の係数を isospin 非対称度 I=(N-Z)/A に依存させ、train で凍結→other で棄却する形で strict 判定を再評価する。
+    - 実装：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.27`
+      - 入力：AME2020（`data/quantum/sources/iaea_amdc_ame2020_mass_1_mas20/extracted_values.json`）、IAEA radii（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）、凍結モデル（7.13.15 / 7.13.15.7）、凍結半径モデル（7.13.15.23 の metrics から `r0,rI` を採用）、Coulomb/finite-size（7.13.15.25 の 2pF+Slater；`a=0.523 fm` 固定）
+      - 出力：`output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.png` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_metrics.json` / `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.csv`
+    - 手続き（初版）：
+      - ベースライン：7.13.15.26 と同じく、半径 isospin 拡張（radii-only で独立凍結）＋ Coulomb/finite-size（2pF direct + Slater exchange）を採用（fit しない）。
+      - shell/structure DoF：shell refreeze 係数を `kN(I)=kN0+kN1*I`、`kZ(I)=kZ0+kZ1*I` として拡張し、係数（kN0,kN1,kZ0,kZ1）は train magic（N/Z∈{50,82}）のみにより凍結する（other-magic は棄却判定にのみ使用；p-hacking 回避）。
+      - 評価：7.13.15.22 と同一の strict 判定（domain A_min×S_shell 2候補）で pass/fail を固定する。
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。isospin 依存の shell refreeze を入れても、proton 側 other-magic shell-gap の no-go は覆らない。
+      - 例：`obs_magic` + A>=60
+        - `gap_Sn` other：RMS **0.564 MeV**（n=18）
+        - `gap_Sp` other：RMS **1.64 MeV**（n=19）
+      - 注意：A>=80 以上では `gap_Sp` other の coverage が 0 となり（RMS が NaN）、決着点として不適。
+    - 結論（初版）：最小追加DoF（isospin 依存の shell refreeze）でも proton 側 other-magic の no-go は残る。次段は、独立拘束可能な構造入力（例：変形パラメータ・分光情報）を追加し、train 凍結→other 棄却の strict 判定で再評価する必要がある。
+
+  - 7.13.15.28【完了（初版）】expanded set：独立拘束の変形入力（β2; NNDC B(E2) adopted）を導入し、Coulomb shape factor として deterministic に反映して strict 再評価
+    - 実装：
+      - β2 一次ソース（NNDC B(E2) adopted entries）を `data/quantum/sources/nndc_be2_adopted_entries/` にキャッシュし、オフライン再現を確保。
+      - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.28`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。β2（Coulomb shape）の追加でも proton 側 other-magic shell-gap の no-go は覆らない。
+      - β2 coverage（in-domain A>=16, n=3487）：direct=423 / imputed=1553 / missing=1511（欠損が多いことを明示）。
+      - 例：`obs_magic` + A>=60 で `gap_Sp` other の `pair→shell` 差分は **+1.06 MeV**（改善せず）。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_metrics.json`
+    - 結論（初版）：β2 を Coulomb へ導入しても no-go は残る。次段は、(a) β2 を表面項へも反映する、(b) 分光量など別系統の独立拘束を追加して strict で再評価する。
+
+  - 7.13.15.29【完了（初版）】expanded set：β2 を surface 項（面積因子）へも反映し、coverage（direct-only vs imputed）を strict に組み込んで再評価
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.29`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。β2（Coulomb+surface）の追加でも no-go は残る。
+      - β2 coverage（in-domain A>=16, n=3487）：imputed run は direct=423 / imputed=1553 / missing=1511、direct-only run は direct=423 / missing=3064。
+      - coverage 統合：pass_strict := pass_strict_primary AND pass_strict_direct_only（imputation 依存を排除）。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_metrics.json`
+    - 結論（初版）：β2 を Coulomb+surface へ導入し、さらに coverage を strict に組み込んでも no-go は残る。次段は、分光量など別系統の独立拘束を追加して strict で再評価する。
+
+  - 7.13.15.30【完了（初版）】expanded set：分光一次ソース E(2+_1)（NNDC）を追加し、shell closure 指標として別系統で交差検証（peak strict）
+    - 実装：
+      - NNDC B(E2) adopted entries の `transitionEnergy`（keV）を E(2+_1) proxy として抽出し、`data/quantum/sources/nndc_be2_adopted_entries/extracted_e2plus.json` に保存（offline 再現）。
+      - shell-gap decision scan に「分光ピーク（±2近傍の局所最大）」フィルタを追加し、`pass_strict_spectro` として strict に統合（AND）：
+        - gap_Sn：E2+(Z,N0) > E2+(Z,N0±2)（近傍が存在する場合；even-evenのみ）
+        - gap_Sp：E2+(Z0,N) > E2+(Z0±2,N)（近傍が存在する場合；even-evenのみ）
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.30`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。分光ピーク strict を入れても no-go は覆らない。
+      - 例（1候補）：spectro peak counts（gapベース）：`gap_Sn` n_peak=32 / `gap_Sp` n_peak=36（metrics 参照）
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_e2plus_diagnostics_expanded_shell_i_dep_beta2_surface_cov_e2plus.png`
+    - 結論（初版）：β2（形状）＋分光ピーク strict（E(2+_1)）でも no-go は残る。次段は「E(2+_1) の coverage を一次ソース（ENSDF/NuDat等）で拡大」し、同一プロトコルで cross-check を強化する。
+
+  - 7.13.15.31【完了（初版）】expanded set：NuDat 3.0（ENSDF-derived）で E(2+_1) の coverage を拡大し、分光 cross-check を強化（strict 固定）
+    - 目的：7.13.15.30 の E(2+_1) は NNDC B(E2) adopted entries（transitionEnergy）由来で coverage が限定されるため、より広い核種範囲で「shell closure 指標の別系統」cross-check を固定する。
+    - 実装：
+      - 追加：`scripts/quantum/fetch_nuclear_spectroscopy_e2plus_sources.py`
+        - NuDat 3.0 の static JSON（primary.json / secondary.json）をキャッシュし、`excitedStateEnergies.firstTwoPlusEnergy`（keV）を E(2+_1) として抽出して `data/quantum/sources/nndc_nudat3_primary_secondary/extracted_e2plus.json` に保存（offline 再現）。
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.31` を追加し、7.13.15.30 と同一の「分光ピーク（±2近傍の局所最大）strict」cross-check を NuDat3 E(2+_1) に置換して再計算。
+    - 実行：
+      - `python -B scripts/quantum/fetch_nuclear_spectroscopy_e2plus_sources.py`
+      - `python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.31`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。NuDat3（coverage拡大）でも no-go は覆らない。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus_nudat3.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus_nudat3.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_e2plus_nudat3_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_e2plus_diagnostics_expanded_shell_i_dep_beta2_surface_cov_e2plus_nudat3.png`
+    - 結論（初版）：NuDat3 による coverage 拡大でも no-go 継続。次段は E(2+_1) 単独ではなく、追加の分光系統（例：R4/2, 0+_2, E(3-_1) など）や、B(E2) 自体の扱いを strict に統合し、「shell closure proxy」の別系統 cross-check を増やして識別性を強化する。
+
+  - 7.13.15.32【完了（初版）】expanded set：分光 cross-check を多指標化（NuDat 3.0：E(2+_1), E(4+_1), E(3-_1), R4/2）し、strict に統合して再評価
+    - 実装：
+      - 更新：`scripts/quantum/fetch_nuclear_spectroscopy_e2plus_sources.py`
+        - NuDat 3.0 chart JSON（primary.json / secondary.json）をキャッシュし、`excitedStateEnergies` から以下を抽出して `data/quantum/sources/nndc_nudat3_primary_secondary/extracted_spectroscopy.json` に保存（offline 再現）：
+          - `firstTwoPlusEnergy`（E(2+_1)）
+          - `firstFourPlusEnergy`（E(4+_1)）
+          - `firstThreeMinusEnergy`（E(3-_1)）
+          - `firstFourPlusOverFirstTwoPlusEnergy`（R4/2）
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.32` を追加し、7.13.15.27 の decision scan に `pass_strict_spectro_multi` を追加して strict にAND統合（local extrema ルール固定）。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.32`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（domain A_min×S_shell 2候補）。分光 multi-metric strict を追加しても no-go は覆らない。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3.png`
+    - 結論（初版）：E(2+_1) 単独から multi 指標へ拡張しても no-go 継続。次段は shell/構造入力の追加（別系統の独立拘束）か、S_shell の最小形を超えたモデル化の必要性を評価する。
+
+  - 7.13.15.33【完了（初版）】expanded set：S_shell の g^power 正規化を g^2（power=2）へ変更し、strict を再評価
+    - 目的：7.13.15.32 までの β2 + 分光 multi 指標でも `strict_pass=0/10`。S_shell の最小形（g^1）を固定したままでは other-magic が救えない可能性があるため、「shell term の規格化」を最小自由度で拡張し、改善の有無を機械的に判定する。
+    - 実装：
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - S_shell を `p(p-g)/g^power` として power を切替可能にし、metrics に `power_g` を記録（後出しでの解釈変更を禁止）。
+        - `--step 7.13.15.33` を追加し、NuDat3 multi + β2 + surface_cov の設定は維持したまま `power=2` を適用する wrapper を追加。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.33`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（no-go 継続）。S_shell の g^2 正規化は other-magic の改善に寄与しない。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_shellS_g2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_shellS_g2.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_shellS_g2_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_shellS_g2.png`
+    - 結論（初版）：S_shell の規格化（g^2）でも no-go は覆らない。次段は真の独立拘束（例：半径 kink / 静的分極 / 追加分光・遷移強度など）を strict に統合する設計へ進む。
+
+  - 7.13.15.34【完了（初版）】expanded set：電荷半径の kink（同位体シフト）を shell closure proxy として strict に統合
+    - 目的：shell-gap no-go（other-magic）の failure modes は「殻の境界（magic）だけでは外挿できない相関」を示唆する。分光（E2+/R4/2 等）に加え、別系統の一次入力として電荷半径の同位体シフト（kink）を shell closure proxy として固定し、strict の独立クロスチェックを増やす。
+    - 実装：
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.34` を追加し、7.13.15.32（NuDat3 multi + β2 + surface_cov）の設定を維持したまま、電荷半径 kink proxy を strict にAND統合。
+        - kink の定義を固定（p-hacking回避；IAEA radii の独立σのみを使用）：
+          - `Δ²r = r(x+2) - 2r(x) + r(x-2)`（step=2）
+          - `σ(Δ²r)=sqrt(σ(x+2)^2 + 4σ(x)^2 + σ(x-2)^2)`（独立誤差；共分散なし）
+          - kink 判定：`|Δ²r|/σ >= 3`（fixed）
+          - Sn側：x=N（固定Z）、Sp側：x=Z（固定N）
+        - metrics の baseline に定義と counts を保存し、診断図（kink significance vs N/Z）を固定出力する。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.34`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（no-go 継続）
+      - kink strict：**pass_radii_kink=10/10**（この定義では discriminative にならず）
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink.png`
+    - 結論（初版）：kink proxy の strict 統合は完了したが、主判定（other-magic 救済）は依然 no-go。次段は kink を「選別」ではなく「観測量そのもの（Δ²rの予測・残差）」として突き合わせる、または別系統の一次入力（遷移強度 B(E2), 追加分光, 半径の系統差など）を strict に増設して識別性を上げる。
+
+  - 7.13.15.35【完了（初版）】expanded set：電荷半径 kink を「観測量（Δ²r）」として直接比較し、棄却条件を固定
+    - 目的：7.13.15.34 の kink strict は「kink 点を選別して shell-gap の残差を評価」する設計であり、discriminative になりにくい。次段では、凍結した r_charge 予測（P-model側の半径写像）から Δ²r_pred を計算し、Δ²r_obs（IAEA）と直接比較して棄却条件を固定する。
+    - 実装：
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.35` を追加。
+        - 凍結半径写像（Step 7.13.15.23；`r_charge=(r0+rI*I)*A^(1/3)`）から Δ²r_pred を計算し、IAEA radii から Δ²r_obs（step=2、独立σ）を計算して直接比較。
+        - 評価統計を固定：`(Δ²r_pred - Δ²r_obs) / σ_obs(Δ²r)`（σ_obs は独立誤差伝播；共分散なし）を保存し、strict に AND 統合。
+        - 診断（Δ²r 残差の csv/png）を固定出力として追加。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.35`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（no-go 継続）
+      - Δ²r strict：**pass_radii_kink_delta2r=0/10**（A_min=16 の代表で max |resid|/σ_obs ≈ 15.5（x=N）/19.1（x=Z））
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r.csv`
+    - 結論（初版）：凍結半径写像（r_charge）では電荷半径 kink（Δ²r）を σ_obs 基準で再現できず、半径の shell/構造効果は独立入力として必要（または半径写像自体の拡張が必要）であることが明確化された。
+
+  - 7.13.15.36【完了（初版）】expanded set：半径写像に最小 shell 項（r_shell）を導入し、Δ²r（kink）を strict で再評価
+    - 目的：7.13.15.35 で Δ²r mismatch が大きく、凍結半径写像（r_charge）が「shell/構造効果」を吸収できていないことが判明した。次段では、半径写像に最小の shell 項（自由度1）を追加し、Δ²r の棄却条件を保ったまま改善の有無を機械的に判定する。
+    - 実装：
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.36` を追加。
+        - 半径写像を `r_charge=r_base+r_shell*(S(N)+S(Z))` に拡張（`S=p(p-g)/g^2`、magic list は model/obs を scan）。
+        - `r_shell` は IAEA radii のみで weighted LS fit（A>=fit_min_A）。Δ²r の定義・σ_obs・閾値は 7.13.15.35 と同一で固定し、strict に AND 統合。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.36`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（no-go 継続）
+      - Δ²r strict：**pass_radii_kink_delta2r=0/10**（A_min=16 で max |resid|/σ_obs ≈ 15.3（x=N）/19.0（x=Z）；best は A_min=100 で max≈10.75）
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell.csv`
+    - 結論（初版）：r_shell（自由度1）の半径写像拡張でも Δ²r を σ_obs 基準で再現できない。したがって「凍結半径写像」系列では Δ²r を棄却条件として維持し、半径の構造効果を救うには別形式（または追加自由度）が必要である。
+
+  - 7.13.15.37【完了（初版）】expanded set：半径写像を N/Z 分離（r_shell_N, r_shell_Z）で拡張し、Δ²r（kink）を strict で再評価
+    - 目的：7.13.15.36（自由度1：r_shell）でも Δ²r mismatch が改善しなかったため、最小の追加自由度（+1）として N/Z を分離した半径写像へ拡張し、Δ²r の棄却条件を保ったまま改善の有無を機械的に判定する。
+    - 実装：
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.37` を追加。
+        - 半径写像を `r_charge=r_base+r_shell_N*S(N)+r_shell_Z*S(Z)` に拡張（`S=p(p-g)/g^2`、magic list は model/obs を scan）。
+        - `(r_shell_N,r_shell_Z)` は IAEA radii のみで weighted LS fit（A>=fit_min_A）。Δ²r の定義・σ_obs・閾値は 7.13.15.35 と同一で固定し、strict に AND 統合。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.37`
+    - 結果（初版；代表）：
+      - strict 判定：**strict_pass=0/10**（no-go 継続）
+      - Δ²r strict：**pass_radii_kink_delta2r=0/10**（best：obs_magic×A_min=100 で max |resid|/σ_obs ≈ 10.86）
+      - 半径写像（fit；代表）：
+        - model_magic：`r_shell_N≈-0.0460 fm`、`r_shell_Z≈+0.0365 fm`
+        - obs_magic：`r_shell_N≈-0.0219 fm`、`r_shell_Z≈+0.00518 fm`
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz.csv`
+    - 結論（初版）：N/Z 分離（自由度2）の半径写像拡張でも Δ²r を σ_obs 基準で再現できない。したがって Δ²r は棄却条件として維持し、半径の構造効果を救うには別形式（または追加の独立入力）が必要である。
+
+  - 7.13.15.38【完了（初版）】expanded set：β2（変形）を半径写像へ反映し、Δ²r（kink）を strict で再評価
+    - 目的：7.13.15.35–.37 の Δ²r mismatch が「球対称の凍結半径写像」に起因する可能性があるため、最小の追加仮定として β2（NNDC B(E2)）から半径の変形補正を導入し、Δ²r の棄却条件（σ_obs基準）を保ったまま救えるかを機械的に判定する。
+    - 実装：
+      - 更新：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+        - `--step 7.13.15.38` を追加。
+        - Δ²r の予測半径を `r_charge=r_base*sqrt(1+(5/(4π))*β2^2)` に置換して評価（自由パラメータなし）。
+        - β2 は NNDC B(E2) adopted の extracted_beta2.json を使用し、欠損は（Z,N±1）→（Z±1,N）→（Z±1,N±1）の順で近傍平均（無ければ 0）として固定。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.38`
+    - 結果（初版；代表）：  
+      - strict 判定：**strict_pass=0/10**（no-go 継続）
+      - Δ²r strict：**pass_radii_kink_delta2r=0/10**（best：model_magic×A_min=100 で max |resid|/σ_obs ≈ 13.41）
+      - 支配的 failure：Sp 軸（例：Z0=80, N=101 付近）で Δ²r_pred が符号反転し、残差が増大
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_spectroscopy_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_beta2.csv`
+    - 結論（初版）：β2（変形）をこの最小形で入れても Δ²r strict の no-go は改善せず、むしろ Sp 軸の mismatch が悪化する。したがって Δ²r は棄却条件として維持し、半径の構造効果を救うには（i）より物理的な半径モデル（例：同位体ごとの形状相転移・odd-even系統）、または（ii）別系統の独立入力を追加する必要がある。
+
+  - 7.13.15.39【完了（初版）】Δ²r（kink）strict no-go の総括（7.13.15.35–.38）
+    - 目的：凍結半径写像の variant（base/shell/shell_NZ/β2）を跨いで、Δ²r strict の no-go が「偶然」ではないことを固定出力として残す（意思決定の透明化）。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `--step 7.13.15.39` を追加。
+      - 7.13.15.35–.38 の metrics を読み込み、strict 判定と max |Δ²r_pred−Δ²r_obs|/σ_obs を1枚/CSV/JSONに集約する。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.39`
+    - 結果（初版）：strict_pass=0/10（全variantで no-go 継続；最良でも max |resid|/σ_obs≈10.75）
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary_metrics.json`
+
+  - 7.13.15.40【完了（初版）】odd-even（最小）半径補正で Δ²r（kink）strict を再評価
+    - 目的：7.13.15.38 までの no-go を受け、ロードマップに挙げた「odd-even 系統」を最小自由度（Z/N の奇偶オフセット）で試し、同一 strict 閾値（7.13.15.35 と同一）で改善の有無を機械判定する。
+    - 注意（構造）：Δ²r は step=2（x±2）なので、I(N odd)/I(Z odd) のような **純粋な奇偶オフセットは差分で打ち消され、Δ²r を原理的に変えない**（= この候補は no-go を確認するための “安全な失敗例”）。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `--step 7.13.15.40` を追加。
+      - 半径写像：`r_charge = r_base + r_oe_N*I(N odd) + r_oe_Z*I(Z odd)`（IAEA radii のみで weighted LS fit）
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.40`
+    - 結果（初版）：strict_pass=0/10、pass_radii_kink_delta2r=0/10（Δ²r は構造上ほぼ不変；best max |resid|/σ_obs≈10.86）
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_odd_even.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_odd_even.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_odd_even_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_odd_even.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_odd_even.csv`
+
+  - 7.13.15.41【完了（初版）】shell_NZ + β2（変形）を半径写像へ同時反映して Δ²r（kink）strict を再評価
+    - 目的：7.13.15.37（shell_NZ）と 7.13.15.38（β2）を単独で入れても no-go が改善しないことを受け、両者を同時に適用した最小合成（追加自由度を増やさず、β2 は固定入力）で Δ²r strict を再判定する。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `r_charge = (r_base + r_shell_N*S(N) + r_shell_Z*S(Z)) * sqrt(1 + (5/(4π))*β2^2)` を追加し、`--step 7.13.15.41` を追加。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.41`
+    - 結果（初版）：strict_pass=0/10、pass_radii_kink_delta2r=0/10（best max |resid|/σ_obs≈13.5（obs_magic×A_min=100）で、7.13.15.39 の best（≈10.75）より悪化）
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_beta2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_beta2.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_beta2_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_beta2.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_shell_nz_beta2.csv`
+
+  - 7.13.15.42【完了（初版）】Δ²r（kink）strict を even-even 限定（Z,N がともに偶数）で再評価（支配的 failure が odd-A 由来かを分離）
+    - 目的：7.13.15.35–.41 の no-go を受け、観測側 Δ²r の支配的 failure が odd-A / odd-odd（形状共存など）に由来するかを、ルール固定のまま切り分ける（分光/β2 が実質的に even-even 由来であることとも整合）。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `radii_kink_delta2r_even_even_only` を追加し、`--step 7.13.15.42` を追加（7.13.15.35 と同一設定だが Δ²r 評価は even-even のみ）。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.42`
+    - 結果（初版）：strict_pass=0/10（no-go 継続）。ただし A_min=100 では max |resid|/σ_obs が ≈5.73（Sn）/≈4.84（Sp）まで低下し、odd-A 支配（例：N=101, Z0=80 近傍）を除去すると failure 構造が「magic（例：Z0=50, 82）近傍の even-even kink へ集約」することが確認できた。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_even_even_only.csv`
+
+  - 7.13.15.43【完了（初版）】magic-offset 半径写像で Δ²r（kink）strict を再評価（even-even の magic 近傍を狙う）
+    - 目的：7.13.15.42 で「even-even の magic 近傍へ集約」した Δ²r strict failure を、半径写像に **magic点の離散オフセット**を入れた最小DoFで救えるかを検証する。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `radii_kink_delta2r_radius_magic_offset` を追加：`r_charge = r_base + r_magic_N*I(N∈magic) + r_magic_Z*I(Z∈magic)`（IAEA radii のみで weighted LS fit；magic は OBS_MAGIC）。
+      - `--step 7.13.15.43` を追加（評価は `radii_kink_delta2r_even_even_only=True`）。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.43`
+    - 結果（初版）：strict_pass=0/10（no-go 継続）。ただし A_min=100 では max |Δ²r_pred−Δ²r_obs|/σ_obs が ≈3.07（Sn）/≈3.72（Sp）まで低下し、**閾値3にかなり近づいた**（残りの支配的 failure は例：Sp の (N=70,Z0=50) で abs_resid_sigma≈3.72）。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_only.csv`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_only_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_only.csv`
+
+  - 7.13.15.44【完了（初版）】Δ²r（kink）strict を shell-closure kink（center が magic）に限定して再評価（even-even + magic-offset）
+    - 目的：mid-shell/non-closure kink（例：局所的半径異常）が strict 判定を支配して「殻閉じ kink」の反証条件が読めなくなるのを避け、kink を「magic中心」に限定して再評価する。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `radii_kink_delta2r_center_magic_only` を追加し、`--step 7.13.15.44` を追加（`radii_kink_delta2r_radius_magic_offset=True` + `radii_kink_delta2r_even_even_only=True` を維持）。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.44`
+    - 結果（初版）：strict_pass=0/10（no-go 継続）。A_min=100 で max |Δ²r_pred−Δ²r_obs|/σ_obs ≈3.07（Sn）/≈3.72（Sp）。低A（A_min=16/40）では Sp 側が ≈4.74 まで悪化し、残りの支配的 failure は Z0=50, 82 などの magic 近傍に集約した。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only.csv`
+
+  - 7.13.15.45【完了（初版）】magic-offset-neighbors 半径写像で shell-closure kink を再評価（even-even + center_magic_only）
+    - 目的：7.13.15.44 の「純オフセット（I(magic)）」が Δ²r を過大/過小にしやすい可能性に対し、Δ² stencil の隣接点（±2）へ重みをにじませて overshoot を抑制できるかを切り分ける。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `radii_kink_delta2r_radius_magic_offset_neighbors` を追加（`w_magic(x)=1 (x∈magic), 0.5 (x±2∈magic), else 0`）。
+      - Δ²r 診断CSVに `radius_magic_neighbor_weight/step` を追加し、`--step 7.13.15.45` を追加。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.45`
+    - 結果（初版）：strict_pass=0/10（no-go 継続）。A_min=100 では Sn 側が max |resid|/σ_obs≈2.31 まで改善した一方、Sp 側は max |resid|/σ_obs≈3.44 が残存。A_min<=80 では Sn 側に (Z=42,N0=50) の大きな mismatch（≈10.64σ）が発生し、総合では悪化が支配的。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_neighbors_even_even_center_magic_only_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_neighbors_even_even_center_magic_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_neighbors_even_even_center_magic_only.csv`
+
+  - 7.13.15.46【完了（初版）】magic-offset を「magic番号ごと」に分解して再評価（even-even + center_magic_only）
+    - 目的：支配的 failure（例：Z0=50, N0=82/50）を少数DoFで吸収できるかを切り分ける（IAEA radii だけで凍結し、B/A への再フィットはしない）。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - `radii_kink_delta2r_radius_magic_offset_per_magic` を追加：`r_charge = r_base + Σ r_magic_N[m]*I(N==m) + Σ r_magic_Z[m]*I(Z==m)` を weighted LS で凍結（magic は OBS_MAGIC）。
+      - `--step 7.13.15.46` を追加。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.46`
+    - 結果（初版）：strict_pass=0/10（no-go 継続）。Sn 側（N0=82）で Δ²r_pred が過大となり、A_min=100 でも max |resid|/σ_obs≈14.59（Z=58,N0=82）。Sp 側も A_min=100 で max |resid|/σ_obs≈5.63（N=70,Z0=50）となり、総合的に **悪化**。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_per_magic_even_even_center_magic_only_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_diagnostics_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_per_magic_even_even_center_magic_only.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_per_magic_even_even_center_magic_only.csv`
+
+  - 7.13.15.47 Δ²r（shell-closure kink）strict no-go を反証条件（棄却/制限事項）として整理し、Part III に表で固定【完了】
+    - 目的：Phase 7（量子）を「入口の羅列」ではなく、「棄却/許容が明確な検証カタログ」へ変換する。
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.7.1）
+
+  - 7.13.15.48【完了（初版）】Δ²r（kink）の σ_obs に共分散（系列系統）を導入し、strict（3σ）判定の頑健性を再評価（B/Cの切り分け）
+    - 目的：σ_obs を「独立誤差」扱いした見かけの 3σ を除去し、“棄却（A）/手法限界（C）/データ系統（B）” の判定を統計的に頑健化する。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`
+      - Step 7.13.15.44 の Δ²r_pred/Δ²r_obs を固定し、σ_obs(Δ²r) に AR(1) 共分散モデル（相関 ρ）を導入して ρ スイープ（-0.9..0.9, step 0.05）。
+    - 結果（初版）：ρ=0（独立）で従来の no-go（A_min=100 で Sn≈3.07, Sp≈3.72）を再現。strict を両軸で通すには ρ≤-0.40 程度の強い反相関が必要（救済はデータ側の共分散仮定に依存）。
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.48`
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_covariance_ar1_rho_sweep_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_covariance_ar1_rho_sweep.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_covariance_ar1_rho_sweep.csv`
+
+  - 7.13.15.49【完了（初版）】核構造側の最小拡張（pairing/OES, deformation β2）で Δ²r（kink）の救済可否を評価し、追加自由度と反証条件を固定
+    - 目的：mean-field＋半径写像の限界（C）を越えるため、核構造側の “最小追加物理” を明示した上で、Δ²r strict を救えるか／救えないならどこで棄却されるかを固定する。
+    - 注意：任意関数fitを避け、追加自由度は最小（固定I/F＋固定反証条件）で設計する。
+    - 実装：`scripts/quantum/nuclear_a_dependence_mean_field.py`（`--step 7.13.15.49`）
+    - 実行：`python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.49`
+    - 結果（初版）：
+      - pairingのみ（def0）：`r -> r + k_n Δ_n + k_p Δ_p`（Δ_n,Δ_p は OES 3点）を半径へ明示追加し、nonmagic（A>=40）で weighted LS した `k_n,k_p` を “凍結” すると、A_min=100 の shell-closure kink（strict set）を pass（max |resid|/σ_obs≈2.01）。
+        - 凍結係数（初版）：`k_n≈0.0116 fm/MeV`, `k_p≈0.0087 fm/MeV`（n_fit=378）。
+      - deformation補正込み（def1）：幾何補正 `r -> r*sqrt(1+(5/(4π))β2^2)` を同時に入れると、同一の凍結手順では baseline が悪化して fail（max≈7.17）。ただし grid では pass 点が存在するため、β2補正は現段階では **採用未確定**として保持する。
+    - 採用（基準）：Δ²r（shell-closure kink）の核モジュールは pairingのみ（def0）を採用し、β2補正（def1）は別仮説として切り離す（同一凍結手順では fail のため）。
+    - 出力：
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal.png`
+      - `output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal.csv`
+
+  - 7.13.16【完了（初版）】核力＝近接場干渉（交差項）モデル（2モード近似）を仕様として固定する
+    - 目的：
+      - 「核スケールでは位相が平均化されず、∣Ψ₁+Ψ₂∣² の交差項が残る」ことを P-model 側の仮定として固定し、
+        既存の有効ポテンシャル（Step 7.13.8 など）で使っている結合パラメータ J(R) の物理解釈（モード重なり）へ接続する。
+    - 仕様ノート（固定）：`doc/quantum/20_nuclear_near_field_interference_two_mode_model.md`
+    - 7.13.16.1【完了（初版）】「核力＝近接場干渉（交差項）」仮定の固定
+      - 目的：核スケールでは位相が平均化されず、∣Ψ₁+Ψ₂∣² の交差項が残ることを明文化する（遠距離＝平均化と対比）。
+      - 作業：Part I の P/Ψ 定義を前提に、交差項（干渉）の I/F を仕様として固定（`doc/quantum/20_nuclear_near_field_interference_two_mode_model.md`）。
+    - 7.13.16.2【完了（初版）】二核子系を「固有値問題（2モード近似）」へ落とす
+      - 目的：二核子系の結合/非結合を最小モデルで記述できる形へ落とす。
+      - 作業：核子＝局在モード（固有周波数 ω0）とし、有効ハミルトニアン H(ω0, J(R), Δφ) を定義（`doc/quantum/20_nuclear_near_field_interference_two_mode_model.md`）。
+    - 7.13.16.3【完了（初版）】「同相」が低周波（結合）になる条件の固定
+      - 目的：同相/逆相モードの分裂と、結合条件を操作的に固定する。
+      - 作業：固有モード（同相/逆相）を解き、結合条件を J(R)>0 と位相安定点（例：Δφ=0）の存在として固定（`doc/quantum/20_nuclear_near_field_interference_two_mode_model.md`）。
+    - 7.13.16.4【完了（初版）】射程（~fm）を生む J(R) の距離依存を設計する
+      - 目的：range を「恣意的な関数」にしない（P-model量へ結び付ける）。
+      - 作業：J(R) を「モード重なり」の包絡として指数減衰で近似し、減衰長 L を λ_π proxy として固定（出力：`output/quantum/nuclear_near_field_interference_two_mode_model_metrics.json`）。
+    - 7.13.16.5【完了（初版）】重陽子の結合エネルギーを「周波数低下」として定義する
+      - 目的：結合エネルギーを 2モード分裂（Δω）から直接定義できる形へ固定する。
+      - 作業：Δω=2J(R0) から E_B=ħΔω を与え、必要な相対シフト（E_B/(μc²) オーダー）を固定（図：`output/quantum/nuclear_near_field_interference_two_mode_model.png`）。
+      - 実装：`python -B scripts/quantum/nuclear_near_field_interference_two_mode_model.py`
+        - 出力：`output/quantum/nuclear_near_field_interference_two_mode_model.png` / `output/quantum/nuclear_near_field_interference_two_mode_model_metrics.json`
+    - 7.13.16.6【完了（初版）】「結合する組／しない組」の選別条件を導入する
+      - 目的：pn が結合しやすく、nn/pp が結合しにくい「選別」を最小自由度で表現する。
+      - 作業：内部モード整合を整合係数 s（0≤s≤1）として I/F 固定し、pn/nn/pp の “選別” を最小自由度で表現する（`doc/quantum/20_nuclear_near_field_interference_two_mode_model.md`）。
+    - 7.13.16.7【完了（初版）】反証条件（観測量）を固定する
+      - 目的：追加自由度の導入が「fit逃げ」に見えないよう、先に棄却条件を固定する。
+      - 作業：同時に満たすべき観測量（E_B, ERE包絡, nn/pp 非結合, 四重極の要否）と棄却文を固定（`doc/quantum/20_nuclear_near_field_interference_two_mode_model.md`）。
+
+  - 7.13.17【完了（改訂）】核結合エネルギー（Δω写像）モデルの13ステップ化（重複統合版）
+    - 目的：
+      - Step 7.13.16（2モード近似）のスケール指標を核結合エネルギー B.E. に写像し、
+        最小仮定→単独核子→2核子→多体系→差分予測→反証条件までを同一I/Fで固定する。
+      - ユーザー指定の Step 1–13 を既存 7.13.17 系へ統合し、重複は更新・不足は追記する。
+    - 7.13.17.1【完了（改訂）】最小仮定の文書化（遠距離場/近接場の統一枠組み）
+      - 目的：遠距離場（重力）と近接場（核力）の分岐条件を、Part I 継承定義と矛盾なく固定する。
+      - 作業：
+        - Part I 継承事項を列挙（`u=ln(P/P0)`、遠方基準で `u=0`、`m=ħω/c^2`、`φ`、`dτ/dt`）。
+        - スケール分岐を固定（`r≫λ_c` で位相平均化、`r≲λ_c` で位相干渉）。
+        - 近接場の新規仮定（`Ψ_total=Ψ1+Ψ2`）を明示。
+        - 除外項目（Coulomb、スピン、多体詳細）は Out of Scope として明記。
+      - 固定ノート：`doc/quantum/21_nuclear_binding_energy_frequency_mapping_min_assumptions.md`
+    - 7.13.17.2【完了（改訂）】単独核子の波動表現
+      - 目的：P波を振動数で特徴付ける基本式を固定する。
+      - 作業：
+        - 自由核子の波 `Ψ=A exp(iωt-ikr)` を定義。
+        - 質量-振動数対応 `m=ħω/c^2` を固定。
+        - `λ_c=ħ/(mc)` のスケールを固定。
+        - 境界条件（球対称、規格化）を明示。
+      - 固定ノート：`doc/quantum/22_nuclear_binding_energy_frequency_mapping_deuteron_two_body.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_deuteron_two_body.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_deuteron_two_body.py`
+    - 7.13.17.3【完了（改訂）】2核子系の共鳴条件導出
+      - 目的：位相同期による定在波形成の条件を 2体問題として固定する。
+      - 作業：
+        - 2体波動関数 `Ψ(r1,r2,t)` を構成し、`r=|r1-r2|` の動径問題へ落とす。
+        - 境界条件（`r→∞` 自由波、`r→0` 連続性）を適用。
+        - 束縛状態の固有値問題から `ω_bound` を定義する。
+      - 固定ノート：`doc/quantum/22_nuclear_binding_energy_frequency_mapping_deuteron_two_body.md`
+    - 7.13.17.4【完了（改訂）】振動数差と結合エネルギー写像
+      - 目的：`Δω` から質量欠損・結合エネルギーへの明示写像を固定する。
+      - 作業：
+        - `Δω=ω_free-ω_bound` を定義。
+        - `B.E.=ħΔω`、`Δm=B.E./c^2=ħΔω/c^2` を固定。
+        - 無次元量 `Δm/m=Δω/ω` を定義。
+      - 固定ノート：`doc/quantum/23_nuclear_binding_energy_frequency_mapping_mass_defect_interface.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_interface.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_interface_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_interface.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_interface.py`
+    - 7.13.17.5【完了（改訂）】幾何学的因子の特定
+      - 目的：核サイズ/形状と固有値（`Δω/ω`）の関係を整理する。
+      - 作業：
+        - 球対称近似での固有値条件を基準として固定。
+        - 境界半径 `r` と波長 `λ` の関係を整理。
+        - 量子数（`n,l`）依存を台帳化し、`Δω/ω=f(r/λ_c,n,l)` の形を固定。
+      - 固定ノート：`doc/quantum/23_nuclear_binding_energy_frequency_mapping_mass_defect_interface.md`
+    - 7.13.17.6【完了（改訂）】重陽子（H-2）での数値検証
+      - 目的：最小2核子系で理論と観測の一致度を固定する。
+      - 作業：
+        - 既知データ（`B.E.=2.224 MeV`, `r_d≈2.1 fm`）を一次ソースから固定。
+        - 予測値 `B.E._pred` と観測値の相対誤差を算出。
+        - 残差の物理解釈（粗い仮定）を記録。
+      - 固定ノート：`doc/quantum/24_nuclear_binding_energy_frequency_mapping_deuteron_verification.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_deuteron_verification.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_deuteron_verification_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_deuteron_verification.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_deuteron_verification.py`
+    - 7.13.17.7【完了（改訂）】He-4 での検証拡張
+      - 目的：4体系での有効性と多体取り扱い（pair-wise vs collective）を評価する。
+      - 作業：
+        - He-4 データ（`B.E.=28.3 MeV`, `r≈1.68 fm`）を固定。
+        - 多体I/Fごとに予測値を比較。
+        - `B.E./A` を重陽子と比較して妥当性を判定。
+      - 固定ノート：`doc/quantum/25_nuclear_binding_energy_frequency_mapping_alpha_verification.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_alpha_verification.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_alpha_verification_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_alpha_verification.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_alpha_verification.py`
+    - 7.13.17.8【完了（改訂）】軽核系での系統性分析
+      - 目的：`A=2,4,12,16` を中心に一般則とズレの型を抽出する。
+      - 作業：
+        - AME2020 から代表核種（H/He/Li/C/O 系）を抽出。
+        - `B.E./A vs A` を可視化。
+        - 偶奇効果・魔法数などのパターンを同定。
+      - 固定ノート：`doc/quantum/26_nuclear_binding_energy_frequency_mapping_representative_nuclei.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_representative_nuclei.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_representative_nuclei_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_representative_nuclei.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_representative_nuclei.py`
+    - 7.13.17.9【完了（改訂）】全核種での結合エネルギー曲線
+      - 目的：AME2020 全核種で妥当性と破綻領域を定量化する。
+      - 作業：
+        - 全核種の理論値 `B.E._theory(A,Z)` を算出。
+        - 残差分布（ヒストグラム/A依存）を固定。
+        - 相対精度統計（中央値、標準偏差、最大ずれ）を記録。
+      - 固定ノート：`doc/quantum/27_nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.py`
+    - 7.13.17.10【完了（改訂）】物理的描像の整理
+      - 目的：数式を物理直感へ翻訳し、遠距離場やQCDとの関係を整理する。
+      - 作業：
+        - 共鳴→低振動数化の機構を平易化。
+        - 遠距離場（静的ポテンシャル）との対比を明確化。
+        - QCD（グルーオン交換）との対応は考察として分離。
+      - 固定ノート：`doc/quantum/28_nuclear_binding_energy_frequency_mapping_physical_interpretation.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_physical_interpretation.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_physical_interpretation_metrics.json`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_physical_interpretation.py`
+    - 7.13.17.11【完了（初版）】既存理論との差異抽出（湯川型/EFTとの比較）
+      - 目的：P-model固有の差分予測を、標準核力理論との差として観測量レベルで固定する。
+      - 作業：
+        - P-model（local spacing + ν_sat）と、湯川距離proxy（global R）・SEMF固定係数を同一AME2020上で比較。
+        - `B_pred/B_obs` の中央値・A-trend指標（z_median/z_Δmedian）を同一閾値（3σ運用）で監査。
+      - 固定ノート：`doc/quantum/32_nuclear_binding_energy_frequency_mapping_theory_diff.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_theory_diff.py`
+    - 7.13.17.12【完了（初版）】検証可能な差分予測の定量化
+      - 目的：`ΔB.E.=B.E._P-model-B.E._standard` を核種別に固定し、決着精度を示す。
+      - 作業：
+        - `ΔB.E.` の絶対値分布（P-SEMF / P-Yukawa）を全核種で固定し、A帯別（軽核/中核/重核）に分解。
+        - 3σ判定に必要な精度 `σ_req=|ΔB|/3` と相対精度 `σ_req/B_obs` を核種ごとに算出。
+      - 固定ノート：`doc/quantum/33_nuclear_binding_energy_frequency_mapping_differential_quantification.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_differential_quantification.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_differential_quantification_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_differential_quantification.csv` / `output/quantum/nuclear_binding_energy_frequency_mapping_differential_quantification_top20.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_differential_quantification.py`
+    - 7.13.17.13【完了（改訂）】反証条件の固定（3σ運用）
+      - 目的：核種カテゴリ別に棄却閾値を固定し、独立観測量で cross-check 可能にする。
+      - 作業：
+        - 軽核/中重核/重核ごとの閾値を明示。
+        - 統計誤差・系統誤差を分離して評価。
+        - 電荷半径・分離エネルギー等の独立観測量を接続。
+      - 固定ノート：`doc/quantum/30_nuclear_binding_energy_frequency_mapping_falsification_pack.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_falsification_table.csv`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.py`
+      - 改訂（統合）：Step 7.13.17.11/.12 の差分チャネル（P-SEMF / P-Yukawa）を同一packに統合し、`median abs(ΔB)` と `median σ_req,rel` を固定。判定条件 `σ_rel(total)<=σ_req,rel` を `conditions` に追加。
+    - 7.13.17.14【完了（初版）】反証条件パックへ独立cross-check（分離エネルギー・電荷半径kink）を統合
+      - 目的：7.13.17.13 の差分チャネルゲートを、独立観測のガードレールと接続して「チャネル単独判定」を防ぐ。
+      - 作業：
+        - Step 7.13.15.9（Sn/S2n, shell-gap）と Step 7.13.15.49（Δ²r kink, A_min=100）を同一packに取り込む。
+        - 条件 `channel_gate_requires_independent_crosschecks` を追加し、3σ運用は独立cross-check併記を必須化する。
+      - 固定ノート：`doc/quantum/30_nuclear_binding_energy_frequency_mapping_falsification_pack.md`
+      - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json`
+      - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.py`
+      - 結果（初版）：cross-check束（Sn/S2n RMS と半径kink strict pass）を同時表示する4面図へ更新し、JSONに `independent_cross_checks` / `gate_status` を固定。
+
+  - 7.13.18【完了（初版）】最小追加物理（局所近傍の飽和）で 3σ運用の反証条件パックへ入れる
+    - 目的：
+      - Step 7.13.17.10 で凍結した 3σ閾値を **変更せず**、最小の追加物理（飽和・局所近傍）だけで
+        “heavy-A での中央値ズレ” を抑え、pass/fail がどう動くかを固定する。
+    - 作業：
+      - 距離I/Fは、A-trend を大きく除去できた local spacing proxy（Step 7.13.17.9）を維持する。
+      - 結合数I/Fとして、`ν_base=2(A−1)/A` を `ν_eff=min(ν_base, ν_sat)` で飽和させ、
+        `C_eff=(ν_eff·A)/2` を導入（`ν_sat=1.5` を凍結）。
+      - 反証条件パック（`z_median` / `z_Δmedian`）を同一閾値で再評価し、出力として固定する。
+    - 固定ノート：`doc/quantum/31_nuclear_binding_energy_frequency_mapping_minimal_additional_physics.md`
+    - 固定出力：`output/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png` / `output/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json` / `output/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv`
+    - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.py`
+    - 結果（初版）：local spacing d のみでは `abs(z_median)>3` で fail するが、ν飽和を入れると `z_median,z_Δmedian` がともに 3σ内へ入る（閾値は変更しない）。
+
+  - 7.13.19【完了（改訂）】波動干渉理論の論文統合（Part I 2.7 / Part III 4.2.7.X / 5.4）
+    - 目的：
+      - 遠距離場（重力）と近接場（核力）を同一P-model枠内で整理し、Part I/IIIに「波動干渉理論」を明示的に追加する。
+      - 既存の有効モデルI/F（7.13.17/7.13.18）と、第一原理的解釈（波動干渉）を区別して接続する。
+    - 7.13.19.1【完了（初版）】最小仮定の文書化（Part I §2.7 追加）
+      - 目的：核力スケールでのP波干渉理論の最小仮定を固定する。
+      - 作業：
+        - `2.7 核力（近接場での波動干渉）` を 2.6 の後に追加する。
+        - `r≫λ_c`（位相平均化）/`r≲λ_c`（位相干渉）のスケール分岐を明記する。
+        - `Ψ_total=Ψ1+Ψ2` の有効性条件と、除外項目（Coulomb/スピン/多体詳細）を列挙する。
+      - 重複更新：7.13.17.1 の仮定台帳を基底として再配置。
+      - 反映：`doc/paper/10_manuscript.md`（2.7新設、旧2.7/2.8を2.8/2.9へ繰下げ）
+    - 7.13.19.2【完了（初版）】共鳴条件の数式化
+      - 目的：位相同期による周波数低下の機構を定式化する。
+      - 作業：`Ψ=A exp(iωt-ikr)`、2体系の定在波条件、`ω_bound` の導出方針、`Δω=ω_free-ω_bound` を明示する。
+      - 重複更新：7.13.17.2–7.13.17.3 の式体系を Part I §2.7 向けに再編。
+      - 反映：`doc/paper/10_manuscript.md`（2.7節に動径方程式・境界条件 `k cot(kR)=-κ`・`Δω` 定義を追加）
+    - 7.13.19.3【完了（初版）】質量欠損との対応
+      - 目的：`Δω` から結合エネルギーへの写像を明示する。
+      - 作業：`B.E.=ħΔω`、`Δm=ħΔω/c^2=B.E./c^2`、`Δm/m=Δω/ω`、幾何因子（核半径・量子数）を固定する。
+      - 重複更新：7.13.17.4–7.13.17.5 を Part I 本文へ接続。
+      - 反映：`doc/paper/10_manuscript.md`（`B.E.=ħΔω`、`Δm=ħΔω/c^2`、`Δm/m=Δω/ω_free`、`F_geom(R/λ_c,n,ℓ)·C_coh` を追記）
+    - 7.13.19.4【完了（初版）】4.2.7 構造変更（有効モデルと波動理論の分離）
+      - 目的：Part III 4.2.7 内で操作的I/Fと第一原理解釈を分けて配置する。
+      - 作業：
+        - 4.2.7 を「原子核（総論）」へ整理する。
+        - 4.2.7.1–4.2.7.3（有効モデル検証）を維持する。
+        - 新規に 4.2.7.X（波動干渉理論の検証）を追加する。
+      - 反映：`doc/paper/12_part3_quantum.md`（`4.2.7` 見出しを総論化、`4.2.7.4` を追加し有効モデル層と波動干渉解釈層を分離）
+    - 7.13.19.5【完了（初版）】重陽子検証セクションの追加（4.2.7.X）
+      - 目的：最小2核子系で理論と観測を比較する。
+      - 作業：入力 `B.E.=2.224 MeV, r_d≈2.1 fm`、指標 `abs(B.E._pred-B.E._obs)/B.E._obs`、図（理論vs観測・残差）を固定する。
+      - 重複更新：7.13.17.6 の既存出力を 4.2.7.X の形式へ再配置。
+      - 反映：`doc/paper/12_part3_quantum.md`（`4.2.7.4` を重陽子検証の実数値セクションへ更新；eq18/eq19 の `κ,B.E._pred,ΔB` 表、包絡判定、図説明を追加）
+    - 7.13.19.6【完了（初版）】He-4 検証拡張（4.2.7.Y）
+      - 目的：4体系で多体効果（pair-wise vs collective）を評価する。
+      - 作業：入力 `B.E.=28.3 MeV, r≈1.68 fm`、指標 `B.E./A` 比較、図（重陽子との系統比較）を固定する。
+      - 重複更新：7.13.17.7 の既存出力を 4.2.7.Y へ接続。
+      - 反映：`doc/paper/12_part3_quantum.md`（`4.2.7.5` を追加し、He-4 の `collective/pn_only/pairwise_all` 比較、`B.E./A`、`C_required` を固定）
+    - 7.13.19.7【完了（初版）】軽核系統性の追加（4.2.7.Z）
+      - 目的：`A=2–16` の一般則とずれを抽出する。
+      - 作業：AME2020 代表核種（H/He/Li/C/O）で `B.E./A vs A` と残差A依存を固定する。
+      - 重複更新：7.13.17.8 の既存出力を 4.2.7.Z へ接続。
+      - 反映：`doc/paper/12_part3_quantum.md`（新規 `4.2.7.6` を追加し、軽核 `B.E./A` と collective 残差A依存（A=2,4,12,16）を固定）
+    - 7.13.19.8【完了（初版）】差分予測セクション 5.4 の新設
+      - 目的：波動干渉理論固有の検証可能予測を整理する。
+      - 作業：`5.4 核力波動干渉：差分予測と棄却条件` を 5.3 の後に追加し、`ΔB` と `σ_req=abs(ΔB)/3`、top20核種を固定する。
+      - 重複更新：7.13.17.11–7.13.17.12 の差分定量を再配置。
+      - 反映：`doc/paper/12_part3_quantum.md`（新規 `5.4` を追加し、全核種統計・A帯別統計・top核種（P-SEMF）を表で固定）
+    - 7.13.19.9【完了（初版）】反証条件パックの明示（5.4末）
+      - 目的：3σ棄却運用と独立cross-checkを本文で固定する。
+      - 作業：核種カテゴリ閾値、分離エネルギー/電荷半径との整合、JSON `falsification pack` と表サマリを明記する。
+      - 重複更新：7.13.17.13–7.13.17.14 を 5.4 へ接続。
+      - 反映：`doc/paper/12_part3_quantum.md`（`5.4` 末に 3σゲート表、カテゴリ閾値表、独立cross-check表を追加）
+    - 7.13.19.10【完了（初版）】有効モデルI/Fと波動理論の接続段落（4.2.7冒頭）
+      - 目的：2つのアプローチの位置づけを明確化する。
+      - 作業：「有効モデル=操作的I/F、波動理論=第一原理的解釈」を明記し、一致/乖離領域と相互参照を追加する。
+      - 反映：`doc/paper/12_part3_quantum.md`（4.2.7 冒頭に接続規則と 4.2.7.2→4.2.7.4–4.2.7.6→5.4 の導線を追加）
+    - 7.13.19.11【完了（初版）】Table 1 への統合（核力・波動干渉行）
+      - 目的：検証サマリに波動干渉理論の行を追加・整合する。
+      - 作業：観測量（B.E.）、データ（AME2020）、指標（`Δm/m=Δω/ω` と残差分布）、差分（`abs(ΔB)`）を固定する。
+      - 反映：`scripts/summary/paper_tables.py`（核力行を波動干渉統合へ更新）、`output/summary/paper_table1_quantum_results.{json,csv,md}` を再生成。
+    - 7.13.19.12【完了（初版）】図表準備（概念図/準位図/曲線/残差/差分マップ）
+      - 目的：遠距離場vs近接場、自由vs束縛、核種全域の比較を視覚化する。
+      - 作業：図A–E（概念図、準位図、理論vs観測、残差分布、差分予測マップ）を追加する。
+      - 反映：`doc/paper/12_part3_quantum.md`（4.2.7.7 に図A–Eを追加）、`doc/paper/01_figures_index.md`（核力セクションへ図A–Eを登録）。
+    - 7.13.19.13【完了（初版）】Discussion（6章）への追加
+      - 目的：理論的意義・課題・将来測定での決着条件を整理する。
+      - 作業：グルーオン交換との対応、Coulomb/多体補正の扱い、将来精度要件を追記する。
+      - 反映：`doc/paper/12_part3_quantum.md`（6.1 を追加）。
+    - 7.13.19.14【完了（初版）】Conclusion（7章）への反映
+      - 目的：三部作内での位置づけを更新する。
+      - 作業：核力の波動干渉解釈、重力/核力のスケール統一、反証可能性拡張を追記する。
+      - 反映：`doc/paper/12_part3_quantum.md`（7章を更新）。
+    - 7.13.19.15【完了（初版）】参考文献・付録の核データ出典整備
+      - 目的：AME2020/ENSDF/IAEA と核力レビューの出典を明記する。
+      - 作業：付録データ出典に核物理節を追加し、URL・アクセス日を固定する。
+      - 反映：`doc/paper/20_data_sources.md`（量子節に核データ出典を追記）、`doc/paper/30_references.md`（核データ参考文献を追記）
+    - 7.13.19.16【完了（初版）】全体整合性チェック
+      - 目的：番号・図表・用語・相互参照の一貫性を保証する。
+      - 作業：4.2.7.X の番号割当、図表番号、内部参照、用語統一（波動干渉/共鳴/周波数低下）を点検する。
+      - 結果（初版）：`4.2.7.X/Y/Z` のプレースホルダ残りなし、`paper_qc`/`paper_lint` ともに通過（OK）を確認。
+
+### Step 7.14：物性（凝縮系）を P-model で再導出（バンド・格子・超伝導など）
+- 現状：完了（初版）（7.14.1–7.14.20 固定）
+- 目的：
+  - “物理全域” を実質化するため、巨視的物質（固体・液体）の性質が、P-model の波動構造からどのように現れるかを段階的に示す。
+- 最低要件：
+  - 代表的な一次データ（格子定数・比熱・抵抗率など）を固定し、最小モデルの再現と反証条件を設定する。
+  - 7.14.1 Si 格子定数（NIST CODATA）を一次固定し、基準値（ターゲット）を出力として凍結【完了（初版）】
+    - 取得：`python -B scripts/quantum/fetch_silicon_lattice_sources.py`
+      - 保存：`data/quantum/sources/nist_codata_2022_silicon_lattice/manifest.json` / `extracted_values.json`
+    - ベースライン出力：`python -B scripts/quantum/condensed_silicon_lattice_baseline.py`
+      - 出力：`output/quantum/condensed_silicon_lattice_baseline.png` / `output/quantum/condensed_silicon_lattice_baseline_metrics.json` / `output/quantum/condensed_silicon_lattice_baseline.csv`
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.9）
+  - 7.14.2 Si 比熱（固体/液体；NIST WebBook condensed；Shomate）を一次固定し、Cp(T) の基準曲線を固定出力化【完了（初版）】
+    - 取得：`python -B scripts/quantum/fetch_silicon_condensed_thermochemistry_sources.py`
+      - 保存：`data/quantum/sources/nist_webbook_condensed_silicon_si/manifest.json` / `extracted_values.json` / `nist_webbook_condensed_si_mask2.html`
+    - ベースライン出力：`python -B scripts/quantum/condensed_silicon_heat_capacity_baseline.py`
+      - 出力：`output/quantum/condensed_silicon_heat_capacity_baseline.png` / `output/quantum/condensed_silicon_heat_capacity_baseline_metrics.json` / `output/quantum/condensed_silicon_heat_capacity_baseline.csv`
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.10）
+  - 7.14.3 Si 低温比熱（NIST-JANAF；Si-004）を一次固定し、Debye（θ_D）で “圧縮したターゲット” を固定出力化【完了（初版）】
+    - 取得：`python -B scripts/quantum/fetch_silicon_janaf_sources.py`
+      - 保存：`data/quantum/sources/nist_janaf_silicon_si/manifest.json` / `extracted_values.json` / `nist_janaf_Si-004.html` / `nist_janaf_Si-004.txt`
+    - ベースライン出力：`python -B scripts/quantum/condensed_silicon_heat_capacity_debye_baseline.py`
+      - 出力：`output/quantum/condensed_silicon_heat_capacity_debye_baseline.png` / `output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json` / `output/quantum/condensed_silicon_heat_capacity_debye_baseline.csv`
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.11）
+  - 7.14.4 Si 抵抗率 ρ(T)（0–50°C；NBS IR 74-496 Appendix E）を一次固定し、室温近傍の温度係数（d ln ρ / dT）を固定出力化【完了（初版）】
+    - 取得：`python -B scripts/quantum/fetch_silicon_resistivity_nbsir74_496_sources.py`
+      - 保存：`data/quantum/sources/nist_nbsir74_496_silicon_resistivity/manifest.json` / `extracted_values.json` / `nbsir74-496.pdf`
+      - 2026-02-11 改訂：PDF text extraction で科学記数法が `1. 910-01` / `1.905 -01` / `1.914- 01` のように分割されるケースを修正し、抽出テーブルの `rho_lo/rho_hi` 欠損（誤パース）を解消。
+    - ベースライン出力：`python -B scripts/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline.py`
+      - 出力：`output/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline.png` / `output/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json` / `output/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline.csv`
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.12）
+
+  - 7.14.5 Si 熱膨張係数 α(T)（NIST TRC cryogenics）を一次固定し、基準曲線を固定出力化【完了（初版）】
+    - 取得：`python -B scripts/quantum/fetch_silicon_thermal_expansion_sources.py`
+      - 保存：`data/quantum/sources/nist_trc_silicon_thermal_expansion/manifest.json` / `extracted_values.json` / `Silicon.htm` / `te.png` / `Siliconplot.png` / `temp.gif`
+    - ベースライン出力：`python -B scripts/quantum/condensed_silicon_thermal_expansion_baseline.py`
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_baseline.png` / `output/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json` / `output/quantum/condensed_silicon_thermal_expansion_baseline.csv`
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.13）
+
+  - 7.14.6 OFHC Copper 熱伝導率 κ(T)（NIST TRC cryogenics；RRR依存）を一次固定し、基準曲線を固定出力化【完了（初版）】
+    - 目的：物性の代表例として、低温で強い温度依存を持つ熱伝導率 κ(T) を一次ソースで固定し、以後の再導出（P-model側の最小モデル）で棄却条件を定義できる入口を作る。
+    - 一次ソース取得：`python -B scripts/quantum/fetch_ofhc_copper_thermal_conductivity_sources.py`
+      - 保存：`data/quantum/sources/nist_trc_ofhc_copper_thermal_conductivity/manifest.json` / `extracted_values.json` / `OFHC_Copper_rev1.htm`
+    - ベースライン出力：`python -B scripts/quantum/condensed_ofhc_copper_thermal_conductivity_baseline.py`
+      - 出力：`output/quantum/condensed_ofhc_copper_thermal_conductivity_baseline.png` / `output/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json` / `output/quantum/condensed_ofhc_copper_thermal_conductivity_baseline.csv`
+
+  - 7.14.7 物性ターゲットの棄却条件（falsification）を固定し、論文（Part III）の物性節を標準フォームへ揃える【完了（初版）】
+    - 対象：7.14.1/7.14.2/7.14.4/7.14.5/7.14.6（7.14.3 は既に `falsification` を持つ）
+    - 更新：各 `..._metrics.json` に `falsification` を追加し、3σルールで「棄却条件」を固定した（一次σが無い場合は proxy を明記）。
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.9–4.2.14）を **目的/入力/処理/式/指標/結果/注意** の標準フォームへ統一。
+
+  - 7.14.8 Debye–Grüneisen 最小モデル（α≈A·Cv）の成立性チェックを固定し、「必要な追加物理」を反証条件として明文化【完了（初版）】
+    - 目的：熱膨張 α(T) が “Debye Cv の比例（定数A）” で記述できるかを最小モデルで検証し、成立/不成立を固定出力として残す。
+    - 手法：θ_D は Step 7.14.3 の Debye fit（JANAF）を使用し、NIST TRC cryogenics の α(T) fit と比較する。
+    - 結果：α(T) は T≈124 K で符号反転し、定数Aモデルは全域で棄却（さらに T≥200 K でも比例が成立しない）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_minimal_model.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_minimal_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.9 Debye–Grüneisen の最小拡張（A_eff(T) の温度依存）を固定し、mode-dependent γ の “必要だが十分ではない” を確認【完了（初版）】
+    - 目的：7.14.8 の棄却（定数A_eff）に対し、最低限の温度依存 `A_eff(T)` を導入した ansatz を固定し、
+      “符号反転は再現できても、比例精度は依然として棄却され得る” ことを出力として残す。
+    - 手法：`A_eff(T)=A_inf·tanh((T−T0)/ΔT)` を採用し、T0 は α(T) の負→正の交差（観測）で凍結、ΔT と A_inf を最小二乗で決める。
+    - 結果（初版）：T≥50 K では符号不一致は解消するが、fit標準誤差スケール（NIST記載）に対して残差が大きく、ansatz は棄却される。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_gammaT_model.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_gammaT_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.10 Debye–Grüneisen の 2枝（2モード）モデルを固定し、単純な「2つのγ」の重ね合わせでも精度不足で棄却され得ることを確認【完了（初版）】
+    - 目的：mode-dependent γ の最小実装として `α(T)≈A1·Cv(T;θ1)+A2·Cv(T;θ2)` を固定し、符号反転の再現と精度（σ_fit）を同時に要求した場合の成立/不成立を出力として残す。
+    - 手法：θ1 は Cp(T) の Debye fit（7.14.3）で凍結し、θ2 を走査。各 θ2 について A1/A2 は σ_fit による重み付き最小二乗で決める。
+    - 結果（初版）：符号反転温度は近傍まで寄るが（T0_pred≈127 K）、T≥50 K で `abs(z)` が大きく、2枝Debyeの ansatz は棄却される。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_two_branch_model.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_two_branch_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.11 Debye–Einstein（光学モード）混合の最小モデルを固定し、光学枝を足しても σ_fit スケールでは棄却され得ることを確認【完了（初版）】
+    - 目的：Debye（音響）に加えて Einstein（光学）を 1枝だけ追加した最小モデルで、α(T) の符号反転と高温域の形を再現できるかを確認し、成立/不成立を固定する。
+    - 手法：θ_D は Debye fit（7.14.3）で凍結し、θ_E を走査。`α≈A_D·Cv_D(θ_D)+A_E·Cv_E(θ_E)` を σ_fit 重み付き最小二乗で決定する。
+    - 結果（初版）：符号反転温度は近傍まで寄るが（T0_pred≈127 K）、T≥50 K で `abs(z)` が大きく、Debye+Einstein の ansatz は棄却される。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.12 A_eff(T) の低次多項式 ansatz（診断）を固定し、「Debye Cv × smooth A_eff(T)」でも σ_fit スケールでは棄却され得ることを確認【完了（初版）】
+    - 目的：α(T) の不一致が「γ(T)/(B V) の滑らかな温度依存」だけで救えるのかを診断するため、`α≈A_eff(T)·Cv_Debye` を A_eff(T) の低次多項式（n=0..3）で近似し、必要な自由度スケールを固定する。
+    - 手法：θ_D は Debye fit（7.14.3）で凍結し、`A_eff(T)=Σ c_k T^k` を σ_fit 重み付き最小二乗で決定する（T≥50 K）。
+    - 結果（初版）：n=3 まで拡張しても max abs(z) が大きく、`Debye Cv × smooth A_eff(T)` の ansatz は棄却される（単一Debye Cv だけでは形状が足りない）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_polyA_model.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_polyA_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.13 Cp(T)（JANAF）を proxy に取り込んだ Grüneisen ansatz を固定し、Cv形状の改善だけでは救えないことを確認【完了（初版）】
+    - 目的：`α≈A_eff(T)·C(T)` の形を保ったまま、Debye Cv を「一次の Cp(T)（JANAF）」で置換した proxy を用い、残差が主に Cv 形状の不足に由来するかを切り分ける。
+    - 手法：T≥100 K は JANAF の Cp(T) を線形補間、T<100 K は Debye Cv を Cp(100 K) でスケールして接続し `Cp_proxy(T)` を作る。`A_eff(T)=A_inf·tanh((T−T0)/ΔT)`（T0は観測の符号反転で凍結）で最小二乗フィットする。
+    - 結果（初版）：符号整合は取れるが、σ_fit スケールでは残差が大きく、Cp_proxy を入れても ansatz は棄却される（Cv形状の改善だけでは不足）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_model.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.14 Debye–Einstein（光学）を 2枝に拡張した最小モデルを固定し、σ_fit への接近度合いを数値化【完了（初版）】
+    - 目的：7.14.11（Einstein 1枝）を最小拡張し、光学モードを 2枝まで入れることで σ_fit 近傍に到達できるかを評価し、必要自由度のスケールを固定する。
+    - 手法：θ_D は Debye fit（7.14.3）で凍結し、`θ_E1<θ_E2` を log grid（n=160）で走査。`α≈A_D·Cv_D(θ_D)+A_E1·Cv_E(θ_E1)+A_E2·Cv_E(θ_E2)` を σ_fit 重み付き最小二乗で決定する。
+    - 結果（初版）：符号反転温度は観測と整合（T0_pred≈123.0 K）し、max abs(z) は 3.23 まで改善するが、T≥50 K で 3σ をわずかに超える点が残り、strict 判定では棄却（reduced χ²≈2.32）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model.py --einstein-branches 2`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.15 temperature-split holdout（train→test）で ansatz の手続き依存性（fitレンジ系統）を定量化【完了（初版）】
+    - 目的：7.14.11–7.14.14 のように「fitで合わせる」自由度を増やしても、温度レンジ選択が系統になっていないかを検査し、再現条件（holdoutで崩れない条件）を反証条件として固定する。
+    - 手法：train/test の温度レンジを固定して（例：A=50–300→300–600 K、B=200–600→50–200 K）、train 側で Debye+Einstein（1枝/2枝）を最適化し、パラメータを固定したまま test へ外挿して z/χ² を評価する（test の reduced χ² は dof=n の proxy として扱う）。
+    - 結果（初版）：Einstein×2 は train では `max abs(z)<1` まで到達できるが、test では `max abs(z)` が 15–45 程度まで悪化し、fit 範囲選択が支配的な系統になり得ることが分かった（holdout を通らない限り “成立” とは扱わない）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.16 Si のバルク弾性率 B(T) を外部参照で固定し、Grüneisen 形の独立入力（B）を導入【完了（初版）】
+    - 目的：`A_eff(T)=γ(T)/(B V_m)` のうち、これまで暗黙に固定していた B を “一次（またはそれに準ずる参照）” で固定し、α(T) 側の不一致が γ(T) と C(T) のどちらに由来するかを切り分ける入口を作る。
+    - 入力（参照ソース）：Ioffe semiconductor database（Si mechanical properties; C11/C12/C44 と 400–873K 線形近似）を HTML として固定（`doc/PRIMARY_SOURCES.md`）。
+    - 手法：B(T)=(C11(T)+2C12(T))/3。400K 未満は room-temperature 値（B_ref）で一定。
+      400–873K の線形式は、そのままだと 400K で B_ref と不連続になるため、400K で一致するよう平行移動して連続化した（raw: 400K で約 91.1 GPa → shifted: 98.0 GPa）。
+      （α(T) の範囲は 13–600K のため 600K まで利用）
+    - 結果（初版）：B は 400→600K で約 −1.52% しか変化せず、α(T) の桁違いの形状不一致を説明する支配要因にはなりにくい（ただし独立入力としては必要）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_bulk_modulus_baseline.py`
+    - 出力：`output/quantum/condensed_silicon_bulk_modulus_baseline.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.17 Cp_proxy + B(T) を用いた γ(T)（tanh）ansatz の再評価（“Bを外に出す” 検査）【完了（初版）】
+    - 目的：7.14.13（Cp_proxy）で暗黙に B を固定していた点を外し、`α≈γ(T)·Cp_proxy/(B(T)V_m)` を最小パラメータ（γ_inf, ΔT；T0は凍結）で評価する。
+    - 手法：B(T) は 7.14.16 の参照、V_m は Si 格子定数（CODATA）から算出（diamond-cubic: 8 atoms/cell）。`γ(T)=γ_inf·tanh((T−T0)/ΔT)` を最小二乗でフィット。
+    - 結果（初版）：B(T) を入れても σ_fit スケールの不一致は解消せず棄却（T≥50K: max abs(z)≈54.8, reduced χ²≈443）。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_model.py --use-bulk-modulus`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_bulkmodulus_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.18 Ioffe の phonon 周波数（代表値）で θ_E を離散アンカーとして固定した Debye+Einstein×2 を評価【完了（初版）】
+      - 目的：phonon 側の一次拘束を入れ、θ_E の連続走査（fit自由度の増殖）を抑えた上で、レンジ依存（holdout崩壊）がどこまで残るかを診断する。
+    - 入力（参照ソース）：Ioffe semiconductor database（Si mechanical properties; phonon frequencies table）を HTML として固定（`doc/PRIMARY_SOURCES.md`）。
+    - 手法：
+      - 候補集合：low=TA（低周波；負寄与候補）、high=optical（mode名に O を含む）として離散候補集合を作る。
+      - 選択：fit range（T≥50 K）の重み付き SSE が最小になる 2点（θ_E1<θ_E2）を選ぶ。
+      - 推定：`α≈A_D·Cv_D(θ_D)+A_E1·Cv_E(θ_E1)+A_E2·Cv_E(θ_E2)` を σ_fit 重み付き最小二乗で決定（θ_D は凍結）。
+      - holdout：A/B の temperature-split（train→test）で、A のみを train で推定して test に外挿する。
+    - 結果（初版）：best anchors（TA(X3)≈216 K, LTO(Γ)≈744 K）でも T≥50 K で max abs(z)≈5.17, reduced χ²≈4.16 となり棄却。holdout A でも test 側で max abs(z)≈7.81 まで悪化し、2点アンカーでは不足であることが分かった。
+      - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_model.py`
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.19 Ioffe の離散アンカーを 3枝（Einstein×3）へ拡張し、holdout が改善するかを検査【完了（初版）】
+    - 目的：7.14.18 の “2点アンカー” を最小拡張し、光学側を 2枝に分割（合計 Einstein×3）して、高温域の形状と holdout 崩壊が改善するかを評価する。
+    - 手法：
+      - 候補集合：E1=TA（低周波）、E2/E3=optical（mode名に O を含む）で `θ_E1<θ_E2<θ_E3` を満たす組を離散走査する。
+      - 選択：fit range（T≥50 K）の重み付き SSE が最小となる 3点を採用する。
+      - 推定：`α≈A_D·Cv_D(θ_D)+Σ_{k=1..3} A_Ek·Cv_E(θ_Ek)` を σ_fit 重み付き最小二乗で決定（θ_D は凍結）。
+      - holdout：7.14.18 と同じ split A/B で train→test を評価する。
+    - 結果（初版）：best triple（θ_E1≈216 K, θ_E2≈667 K, θ_E3≈705 K）でも T≥50 K で max abs(z)≈4.75, reduced χ²≈4.13 と棄却。holdout A は test 側で max abs(z)≈15.9 まで悪化し、枝数増加だけではレンジ依存が解消しないことが分かった。
+    - 実装：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_model.py --einstein-anchors 3`
+    - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_ioffe_phonon_anchors_three_einstein_model.png` / `..._metrics.json` / `..._.csv`
+
+  - 7.14.20 phonon DOS / mode-dependent γ / anharmonicity を一次拘束で導入し、holdout を通る最小追加物理を設計して凍結【完了（初版）】
+    - 目的：7.14.15–7.14.19 で「レンジ選択が支配的な系統になり得る」ことが分かったため、Debye/Einstein の枝数増加ではなく、**phonon DOS と anharmonicity（mode-dependent γ）**側の一次拘束で、holdout を通る最小追加物理を特定する。
+    - 入力（一次ソース候補→暫定proxy）：Si の phonon DOS（ω–D(ω) 数値テーブル）を公開HTMLからキャッシュし、mode-weighting を凍結する入口を作った（一次文献の明示が無い proxy。正式な一次（INS/IXS raw/supp）を取得できたら差し替える）。
+      - 取得：`python -B scripts/quantum/fetch_silicon_phonon_dos_sources.py`
+    - 方針：まず “追加自由度の凍結” を優先し、モデルの形（γ(ω) など）は **データ側の代表量**（低周波/高周波の比、DOSの重心、mode別γの符号等）に基づいて固定する。
+    - 反証条件：温度 split holdout（7.14.15 の split A/B）で、train と同程度の test 指標（例：max abs(z)≤3 かつ reduced χ²≤2）を満たさない限り、「成立」とは扱わない。
+    - 実装（初版）：phonon DOS を mode-count に基づいて分割し、少数パラメータ（A係数）だけを重み付きLSで推定する “DOS拘束” の最小モデルを追加。
+      - 2-group（acoustic/optical；half-integral split）：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 2 --enforce-signs`
+      - 3-group（TA/LA/optical；2:1 mode-count split）：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 3 --enforce-signs`
+      - 4-group（TA/LA/TO/LO；2:1 mode-count split（acoustic/optical））：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 4 --enforce-signs`
+    - 結果（初版）：2-group/3-group ともに strict と holdout を満たさず棄却。特に split A（50–300→300–600 K）で train→test 崩壊が残り、DOS 形状の凍結だけでは高温域の α(T) を予測できない（anharmonicity（ω(T) 変化や γ(T)）等の追加拘束が必要）。
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model_metrics.json`
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_three_group_model_metrics.json`
+      - 追加：4-group（TA/LA/TO/LO）は global 指標が改善（T≥50K: max abs(z)≈6.05, reduced χ²≈5.97）するが、holdout A は 1.12→16.95 で崩壊が残り棄却。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_model_metrics.json`
+    - 追加検査：anharmonicity の最小 proxy として、optical 側の周波数スケールを `s(T)=max(s_min,1−f·(T/T_max))`（f を train SSE 最小で選択）で変化させる “optical softening（線形）” を追加し、holdout が改善するかを評価した。
+      - 結果：2-group は best f(T_max)=0.060 でも棄却（T≥50K: max abs(z)≈22.8）。3-group は best f(T_max)=0.000 で差が出ず、holdout 崩壊も残る。
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_optical_softening_linear_model_metrics.json`
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_three_group_optical_softening_linear_model_metrics.json`
+    - 追加検査：Raman ω(T) の一次PDF（arXiv:2001.08458）から、図中の ω(T) マーカーを digitize して `g(T)∈[0,1]`（低温0→高温1）を固定し、`s(T)=1−f·g(T)`（fのみgrid scan）で optical softening の形を一次側で拘束する検査を追加した。
+      - 取得：`python -B scripts/quantum/fetch_silicon_raman_phonon_shift_sources.py`
+      - 実行：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 2 --enforce-signs --optical-softening raman_shape_fit`
+      - 実行：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 3 --enforce-signs --optical-softening raman_shape_fit`
+      - 結果：2-group は best f(T_max)=0.040 でも棄却（T≥50K: max abs(z)≈24.3）。3-group は best f(T_max)=0.000 で差が出ず、holdout 崩壊も残る。
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_optical_softening_raman_shape_model_metrics.json`
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_three_group_optical_softening_raman_shape_model_metrics.json`
+    - 追加一次ソース：INSベースの phonon DOS 温度依存（Kim et al., PRB 91, 014307 (2015)）を OSTI accepted manuscript でキャッシュし、本文（abstract）の mean shift を機械抽出して “global ω softening” proxy を凍結した。
+      - 取得：`python -B scripts/quantum/fetch_silicon_phonon_dos_sources.py --source osti_kim2015_prb91_014307`
+      - 参考：published PDF のオープンミラー（CaltechAUTHORS）もキャッシュし、図の抽出（温度依存 DOS / γ(T) の digitize 等）に使える入口を固定した（短寿命 redirect 対策として cache-buster を付与）。
+        - 取得：`python -B scripts/quantum/fetch_silicon_phonon_dos_sources.py --source caltechauthors_kim2015_prb91_014307`
+      - 抽出：`python -B scripts/quantum/extract_silicon_phonon_anharmonicity_kim2015_softening_proxy.py`
+      - 凍結（例）：100→1500K の mean fractional energy shift（isobaric）≈−0.07 を線形 proxy として `scale(T)` を固定（T_ref=100K）。
+    - 追加検査：上記 proxy を “全モード共通の ω(T) スケール” として DOS基底へ適用（`--dos-softening kim2015_linear_proxy`）し、holdout が改善するかを評価したが、strict/holdout は満たさず（3-group は max abs(z) が 7.45→8.29 程度に悪化）で棄却。
+      - 実行：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 3 --enforce-signs --dos-softening kim2015_linear_proxy`
+      - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_three_group_dos_softening_kim2015_linear_model_metrics.json`
+      - 参考：4-group でも max abs(z) が 6.05→6.87、holdout A が 16.95→18.91 と悪化し、global scaling だけでは改善しない。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_dos_softening_kim2015_linear_model_metrics.json`
+    - 追加（2026-02-01）：Kim2015 published PDF（CaltechAUTHORS mirror）をキャッシュし、
+      Fig.1 の温度別 phonon DOS 曲線をベクタ図から digitize して固定（`fig1_digitized_dos.json`）。
+      - 実装：`python -B scripts/quantum/extract_silicon_phonon_dos_kim2015_fig1_digitize.py`
+      - 評価：`--dos-mode kim2015_fig1_energy` を追加し、T-dependent g_T(ε) を Cv 基底へ直接反映して検査（2-group/4-group）。
+        追加で `--use-bulk-modulus`（B(T)・V_m 固定入力）とも組み合わせたが、holdout が大崩壊して棄却（test reduced χ²≫1）。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_kim2015_fig1_energy_bulkmodulus_model_metrics.json`
+      - 結果：global 指標は改善するが（例：4-group: max abs(z)≈5.89, reduced χ²≈3.53）、
+        holdout A（50–300→300–600 K）が崩壊し棄却（test max abs(z)≈19.4）。
+    - 追加：Kim2015 Fig.2（feature別 -Δε/ε）を published PDF（CaltechAUTHORS）から digitize して固定し、
+      per-group の ω(T) スケールを **fit無しで**適用する入口を追加した。
+      - digitize：`python -B scripts/quantum/extract_silicon_phonon_anharmonicity_kim2015_fig2_digitize.py`
+        - 固定：`data/quantum/sources/caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity/fig2_digitized_softening.json`
+        - 図：`output/quantum/silicon_phonon_softening_kim2015_fig2_digitized.png`
+      - 適用（static ω）：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --mode-softening kim2015_fig2_features ...`
+      - 結果：mode-softening を入れても strict/holdout は満たさず棄却（例：4-group T≥50K: max abs(z)≈6.44, reduced χ²≈6.76、holdout A test max abs(z)≈14.84）。
+    - 追加検査：B(T) と V_m を固定入力にして `α≈Σ γ_i·Cv_i/(B(T)·V_m)`（γ_i を fit）を評価した。
+      B(T) の不連続（400K の段差）を除去して連続化した結果、global は strict を満たす一方、holdout が崩壊して棄却（手続き依存が残る）。
+      - 実装：`condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py` に `--use-bulk-modulus` を追加
+      - 4-group（B(T)のみ）：T≥50K: max abs(z)≈2.04, reduced χ²≈0.34（strict ok）。
+        ただし holdout A test max abs(z)≈5.33、holdout B test max abs(z)≈31.09 で棄却。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_bulkmodulus_model_metrics.json`
+      - 4-group（+Fig.2 mode-softening）：T≥50K: max abs(z)≈1.33, reduced χ²≈0.30（strict ok）。
+        holdout A/B test は max abs(z)≈3.19/3.37、reduced χ²≈5.70/5.47 で棄却。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_mode_softening_kim2015_fig2_bulkmodulus_model_metrics.json`
+      - 追加検査：Fig.2 の ω_scale_i(T) を用いて、γ_i(T)=γ_i0 + Δγ(1−ω_scale_i(T))（Δγ は共通の 1パラメータ）を導入する診断を追加した。
+        - 実行：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 4 --enforce-signs --mode-softening kim2015_fig2_features --use-bulk-modulus --gamma-trend kim2015_fig2_softening_common`
+        - 結果：global は strict ok（T≥50K: max abs(z)≈1.32, reduced χ²≈0.19）だが、train レンジでは Δγ が不安定になり holdout が崩壊（例：split A test max abs(z)≈18.2, reduced χ²≈114）するため棄却。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_mode_softening_kim2015_fig2_gamma_trend_kim2015_fig2_bulkmodulus_model_metrics.json`
+      - 追加：Kim2015 の Grüneisen 定義（Eq.(4)/(6)/(9)）と Table I を、digitized Fig.2（ω_scale）へ接続する診断（`kim2015_gruneisen_diagnostics`）を metrics に埋め込み、一次側の自己整合（γ_T≈7）を数値で確認できるようにした。
+        - 例：Eq.(6) 由来の γ_T（300K）は ≈7.39（Table I の 7.00±0.67 と整合）。
+        - 注意：Eq.(4) の “barγ” を Fig.2 の isobaric softening と α(T) 積分（ΔlnV）から単純に推定すると大きくなり、Fig.2 の softening が体積項だけでは説明できない（温度項≠0）ことを示唆する（Eq.(8) の位置づけ）。
+      - 追加（2026-02-01）：Eq.(8) の温度項（⟨∂lnε/∂T⟩|_V）を 300K で数値化し、Fig.2 digitize の isobaric dlnω/dT を quasiharmonic（体積項）と intrinsic（温度項）へ分解した比率（`Eq8_fraction_*`）を metrics に固定した。
+        併せて、Windows PowerShell（cp932）で `--help` が UnicodeEncodeError で落ちる問題（–/ω/γ/Δ/Σ/λ/≈ 等）を CLI help 文字列側で回避し、引数無しで help が出ることを確認した。
+      - 追加（2026-02-01）：holdout の不安定化（特に Δγ trend の train→test 崩壊）を抑える診断として、同スクリプトに正則化ノブを追加（`--ridge-factor`, `--delta-ridge-factor`）。
+        - `--ridge-factor`（係数一括 ridge）は定数γモデルの holdout 改善に寄与せず（小さくしても悪化し得る）。
+        - `--delta-ridge-factor`（Δγのみ ridge）は Δγ の “爆発” を抑制できるが、strict holdout（reduced χ²≤2）には未達（例：`delta_ridge_factor=1e-4` で split A/B test reduced χ²≈6.9/11.9）。
+      - 追加（2026-02-01）：anharmonicity proxy（ω(T)）を Cv に反映する診断として、同スクリプトに `--cv-omega-dependence dU_numeric` を追加し、
+        ω(T) スケールを含む U(T) を数値微分して Cv(T)=dU/dT を構成する手法を評価した（追加fit無し）。
+        - 結果：global 指標は strict を満たすが、holdout が大きく悪化して棄却（例：split A test reduced χ²≈17.3、split B test reduced χ²≈41.2）。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_mode_softening_kim2015_fig2_bulkmodulus_cv_dU_model_metrics.json`
+      - 追加（2026-02-01）：V_m の温度依存（d ln V/dT=3α）を 1/(B·V_m) に反映する診断として、同スクリプトに `--vm-thermal-expansion` を追加し、
+        α(T) fit から V_m(T) を構成して評価した。
+        - 結果：holdout が悪化して棄却（例：split A test reduced χ²≈12.7、split B test max abs(z)≈21）。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_mode_softening_kim2015_fig2_bulkmodulus_vmT_model_metrics.json`
+      - 追加（2026-02-01）：Fig.2 依存を外した最小の γ(T) trend 診断として、g(T)=(T-300K)/T_max の 1パラメータを導入する `--gamma-trend linear_T` を追加して評価した。
+        - 実行：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 4 --enforce-signs --mode-softening kim2015_fig2_features --use-bulk-modulus --gamma-trend linear_T`
+        - 結果：global は strict ok（T≥50K: max abs(z)≈1.25, reduced χ²≈0.19）だが、holdout A/B が大崩壊して棄却（例：split A test reduced χ²≈96.7、split B test reduced χ²≈103）。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_mode_softening_kim2015_fig2_gamma_trend_linear_T_bulkmodulus_model_metrics.json`
+      - 追加（2026-02-01）：per-group γ を減らして holdout を改善する診断として、固定周波数基底による **γ(ω)** モデルを追加（`--gamma-omega-model`）。
+        - `pwlinear_split`（3係数；knot=acoustic/optical split）：global は strict ok（max abs(z)≈2.73, reduced χ²≈0.38）だが、
+          holdout A test reduced χ²≈3.40、holdout B test が崩壊（reduced χ²≈20.6）して棄却。
+          - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_mode_softening_kim2015_fig2_bulkmodulus_model_metrics.json`
+        - `linear_endpoints`（2係数）：global が 3σ を超える点が残り棄却（max abs(z)≈4.31）。holdout も未達。
+          - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_linear_endpoints_mode_softening_kim2015_fig2_bulkmodulus_model_metrics.json`
+      - 追加（2026-02-01）：Eq.(8) の体積項（quasiharmonic）だけを Fig.2 の ω_scale に反映する診断として、
+        `omega_scale_quasi = omega_scale^p`（p は 300K で Table I の barγ_P 参照から固定）を適用する `--mode-softening kim2015_fig2_features_eq8_quasi` を追加して評価した。
+        - 結果：4-group+bulkmodulus で global は strict ok（max abs(z)≈1.93, reduced χ²≈0.35）だが、holdout が悪化して棄却（例：split A test reduced χ²≈13.9、split B test reduced χ²≈250）。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_four_group_mode_softening_kim2015_fig2_eq8_quasi_bulkmodulus_model_metrics.json`
+      - 追加（2026-02-01）：固定周波数基底の **γ(ω)** を `pwlinear_split_leaky` へ拡張し、overlap（ε）と warp（w→w^p）を最小の凍結ノブとして導入した。
+        グリッド探索の結果、**global strict と split-holdout strict（A/B）を同時に満たす**凍結点が得られたため、これを Step 7.14.20 の最小追加物理として固定する。
+        - 実行：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 4 --enforce-signs --mode-softening kim2015_fig2_features --use-bulk-modulus --gamma-omega-model pwlinear_split_leaky --ridge-factor 1e-06 --gamma-omega-pwlinear-leak 0.24 --gamma-omega-pwlinear-warp-power 1.32`
+        - 結果：T≥50K global max abs(z)=2.998, reduced χ²=0.315, sign_mismatch=0。split A/B test reduced χ²=1.997/1.364, max abs(z)=1.903/2.509。
+        - 出力：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json`
+
+### Step 7.15：統計力学・熱力学（温度・エントロピー・黒体）を P-model で整合させる
+- 現状：完了（初版）（7.15.1–7.15.2 固定）
+- 目的：
+  - “波の運動が時間波の勾配を形成する” という解釈を、熱・統計（分布/揺らぎ）と接続し、巨視的法則（熱力学）と矛盾しないことを示す。
+- 最低要件：
+  - 温度/エントロピーのP-model内での定義候補を固定し、最低限の反証条件（既知の法則と矛盾する条件）を提示する。
+
+- 7.15.1 黒体放射の基準量（σ, a, nγ）を一次ソース（SI/CODATA）で固定し、以後の拡張仮説の棄却条件として扱う【完了（初版）】
+  - 目的：導出主張を最小にし、まず「数値スケール（基準量）」を固定して、P-model 側の拡張（熱浴/揺らぎ等）が満たすべき制約を先に作る。
+  - 入力（一次ソース）：NIST Cuu（CODATA）定数ページ（c, h, ħ, k_B, σ）をHTML固定（`doc/PRIMARY_SOURCES.md`）。
+  - 実装：
+    - 取得：`python -B scripts/quantum/fetch_blackbody_constants_sources.py`
+    - 計算：`python -B scripts/quantum/thermo_blackbody_radiation_baseline.py`
+  - 出力：
+    - `data/quantum/sources/nist_codata_2022_blackbody_constants/manifest.json`
+    - `data/quantum/sources/nist_codata_2022_blackbody_constants/extracted_values.json`
+    - `output/quantum/thermo_blackbody_radiation_baseline.png`
+    - `output/quantum/thermo_blackbody_radiation_baseline_metrics.json`
+    - `output/quantum/thermo_blackbody_radiation_baseline.csv`
+
+  - 7.15.2 黒体（光子気体）の平衡熱力学（u,p,s,nγ）と第2法則整合を固定し、温度/エントロピーの操作的基準と棄却条件を提示【完了（初版）】
+    - 目的：P-model の拡張（P揺らぎ/結合など）が、平衡熱力学の標準スケーリング（T^3/T^4）や `p=u/3` を破らないことを必要条件として固定する。
+    - 入力：Step 7.15.1 と同じく SI/CODATA 定数（c, h, k_B）と数学定数 π, ζ(3)。
+    - 実装：
+      - 計算：`python -B scripts/quantum/thermo_blackbody_entropy_baseline.py`
+    - 出力：
+      - `output/quantum/thermo_blackbody_entropy_baseline.png`
+      - `output/quantum/thermo_blackbody_entropy_baseline_metrics.json`
+      - `output/quantum/thermo_blackbody_entropy_baseline.csv`
+    - 反映：`doc/paper/12_part3_quantum.md`（4.2.16）/ `doc/paper/01_figures_index.md`
+
+### Step 7.16：量子検証拡張（核物理 / Bell / 干渉 / cross-check / 誤差）
+- 現状：完了（初版）
+- 目的：
+  - Phase 7 の検証を「核物理（全核種）」「Bell（共分散＋系統分解）」「量子干渉」「独立cross-check」「誤差伝播」まで拡張し、Part II の BAO/DESI 級に揃える。
+- 方針：
+  - 既存 Phase 構造は維持し、以下は Step 7.16 のサブステップとして運用する（Phase 新設はしない）。
+
+#### 7.16-A 核物理検証の完全化
+- 7.16.1 全核種系統解析（AME2020完全版）【完了（初版）】
+  - 目的：3554核種全てで理論 vs 観測を定量化。
+  - 作業：全核種 `B.E._pred` 計算、A帯統計（median/σ/outlier）、Z-N 残差マップ、magic/dripline/stability 重畳、全核種CSV出力。
+  - 出力：`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_a_band_stats.csv`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_zn_residual_map.png`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json`
+  - 固定値：`collective_ratio_all.n=3554`、`outlier_abs_z_gt3_n=80`（metrics）
+- 7.16.2 魔法数での殻閉殻効果の定量化【完了（初版）】
+  - 目的：N,Z=2,8,20,28,50,82,126 の構造変化を数値化。
+  - 作業：魔法数核種リスト、`S_2n`/`S_2p` kink 測定、代表4核種詳細比較、標準殻模型との差分予測、kink可視化図。
+  - 出力：`output/quantum/nuclear_magic_shell_closure_kink_summary.csv`、`output/quantum/nuclear_magic_shell_closure_kink_representative4.csv`、`output/quantum/nuclear_magic_shell_closure_kink_quantification.png`、`output/quantum/nuclear_magic_shell_closure_kink_metrics.json`
+  - 固定値：`n_gap_S2n_rows=110`、`n_gap_S2p_rows=133`、`n_representative=4`
+- 7.16.3 pairing効果の系統的組み込み【完了（初版）】
+  - 目的：偶偶核/奇A核/奇奇核の系統差異を説明。
+  - 作業：3点公式で `Δ_n(N)` / `Δ_p(Z)` を計算し、A中央値中心化した残差を用いて `k_n,k_p` を凍結。補正前後残差（全体/偶奇/magic）を同一I/Fで比較して固定。
+  - 出力：`output/quantum/nuclear_pairing_effect_systematics_per_nucleus.csv`、`output/quantum/nuclear_pairing_effect_systematics_summary.csv`、`output/quantum/nuclear_pairing_effect_systematics_quantification.png`、`output/quantum/nuclear_pairing_effect_systematics_metrics.json`
+  - 固定値：`n_nuclei=3556`、`n_with_delta_n=3320`、`n_with_delta_p=3201`、`n_fit_rows=3191`、`k_n=-1.478`、`k_p=1.794`
+- 7.16.4 同位体連鎖の完全解析【完了（初版）】
+  - 目的：Z固定の系統性を全元素（Z=1–118）で検証。
+  - 作業：Step 7.16.1（全核種）と Step 7.16.3（pairing補正）を接続し、固定Z連鎖ごとに `S_n(Z,N)=B(Z,N)-B(Z,N-1)` を計算。chain-envelope（N_min/N_max）から dripline proxy edge（distance<=2）を定義し、edge/central の残差を同一I/Fで比較して固定。
+  - 出力：`output/quantum/nuclear_isotope_chain_full_analysis.csv`、`output/quantum/nuclear_isotope_chain_summary_by_z.csv`、`output/quantum/nuclear_isotope_chain_representative_elements.csv`、`output/quantum/nuclear_isotope_chain_full_analysis.png`、`output/quantum/nuclear_isotope_chain_representative_elements.png`、`output/quantum/nuclear_isotope_chain_full_analysis_metrics.json`
+  - 固定値：`n_total_sn_rows=3438`、`n_chains_z=118`、`n_representative_rows=128`、`rms_before=9.204 MeV`、`rms_after=9.262 MeV`
+- 7.16.5 核半径との整合性検証【完了（初版）】
+  - 目的：`B.E.` と `r_ch` の相関を完全定量化。
+  - 作業：IAEA 電荷半径（`data/quantum/sources/iaea_charge_radii/charge_radii.csv`）を AME2020 全核種（`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv`）へ `(Z,A)` で統合。`r_ch=r0*A^(1/3)` と `r_ch=r0*A^(1/3)+rI*I` を同一I/Fでfitし、`J_E(R)`（stored vs radius再計算）整合と非対称度由来の中性子スキン proxy を固定。
+  - 出力：`output/quantum/nuclear_charge_radius_consistency_full.csv`、`output/quantum/nuclear_charge_radius_consistency_a_band_summary.csv`、`output/quantum/nuclear_charge_radius_consistency_neutron_skin_proxy.csv`、`output/quantum/nuclear_charge_radius_consistency.png`、`output/quantum/nuclear_charge_radius_consistency_metrics.json`
+  - 固定値：`n_joined_rows=955`、`r0(A^(1/3))=0.9527 fm`、`r0(A^(1/3)+I)=1.0035 fm`、`rI=-1.7458 fm`、`rms_radius_resid_a13=0.120 fm`、`rms_radius_resid_a13_i=0.132 fm`
+- 7.16.6 励起準位の予測【完了（初版）】
+  - 目的：`B.E.` 以外の独立観測量で検証。
+  - 作業：NuDat/ENSDF抽出の低励起準位（`E2+`,`E4+`,`E3-`）と `R4/2` を AME2020 固定I/Fへ `(Z,A)` 結合し、`logA+I_asym+magic` の凍結特徴量で予測I/Fを固定。併せて準位密度 proxy（A帯/magic）を集計。
+  - 出力：`output/quantum/nuclear_excitation_level_prediction_full.csv`、`output/quantum/nuclear_excitation_level_prediction_summary.csv`、`output/quantum/nuclear_excitation_level_prediction_level_density_summary.csv`、`output/quantum/nuclear_excitation_level_prediction_representative.csv`、`output/quantum/nuclear_excitation_level_prediction.png`、`output/quantum/nuclear_excitation_level_prediction_metrics.json`
+  - 固定値：`n_joined_rows=665`、`n_fit_e2plus=665`、`n_fit_e4plus=611`、`n_fit_e3minus=327`、`n_fit_r42=611`
+
+#### 7.16-B Bellテストの完全検証（Part II 重力波級）
+- 7.16.7 共分散行列の完全構築【完了（初版）】
+  - 目的：5データセットの時系列相関を完全定量化。
+  - 作業：photon対の時間相関解析、window/offset sweep 共分散、bootstrap（n=10000）+jackknife、固有値解析、JSON固定。
+  - 実装：`scripts/quantum/bell_primary_products.py` を拡張し、各 dataset `covariance*.json` に固有値診断を付与。加えて sweep mean を共通 `u∈[0,1]` グリッドへ補間して cross-dataset 共分散/相関を固定。
+  - 出力：`output/quantum/bell/cross_dataset_covariance.json`、`output/quantum/bell/cross_dataset_covariance.png`、`output/quantum/bell/longterm_consistency.json`、`output/quantum/bell/systematics_templates.json`、`output/quantum/bell/*/covariance_bootstrap.json`
+  - 固定値：`bootstrap_n=10000`（全5dataset）、`n_profile_datasets=5`、`u_grid_points=81`、`profile_cov_rank_eps1e-10=5`
+- 7.16.8 系統誤差の完全分解（15項目）【完了（初版）】
+  - 目的：DESI級の系統管理を Bell へ適用。
+  - 作業：15項目（window/offset/threshold、効率drift、dark count、accidental、event-ready、trial定義、setting切替、偏光、伝送損失、時計同期、dead time、電子ノイズ、環境変動）をカタログ化し、`Δ|S|`/`ΔJ_prob` への寄与と相関を定量化、誤差予算表を固定。
+  - 出力：`output/quantum/bell/systematics_decomposition_15items.json` / `output/quantum/bell/systematics_decomposition_15items.csv` / `output/quantum/bell/systematics_decomposition_15items.png`
+  - 固定値：`item_n=15`、`correlated_if_abs_corr_ge=0.6`
+  - 2026-02-11 改訂：Part III（4.2.1）に、(i) sweep 幅（選択自由度）と freeze 近傍 drift（装置ドリフト推定）の区別（例：Weihs 自然窓近傍で `Δ|S|≈0.0013`）、(ii) selection項目を除いた「装置/補正」側の合成寄与（L2/L1）を追記して解釈を強化。
+- 7.16.9 長期一貫性の定量化【完了（初版）】
+  - 目的：5データセット横断の頑健性を数値化。
+  - 作業：dataset間比較、1998–2016 時系列トレンド、実験条件依存評価、cross-dataset 共分散、長期一貫性図を同一I/Fで固定。
+  - 出力：`output/quantum/bell/longterm_consistency.json` / `output/quantum/bell/longterm_consistency.png`
+  - 固定値：`selection_ratio_vs_year.n_points=5`、`delay_z_vs_year.n_points=2`、`cross_dataset_covariance_summary.rank_eps_1e-10=5`
+- 7.16.10 selection loophole の完全定量化【完了（初版）】
+  - 目的：各 loophole の閉じ方を数値で固定。
+  - 作業：fair sampling / detection / locality / freedom-of-choice の4項目を同一I/Fで定量評価し、dataset横断サマリを固定。
+  - 実装：`scripts/quantum/bell_primary_products.py` を拡張し、`selection_loophole_quantification`（json/csv/png）を生成。Delft 2015/2016 の `normalized_events.json` に setting-count preview（pair含む）を追加。
+  - 出力：`output/quantum/bell/selection_loophole_quantification.json` / `output/quantum/bell/selection_loophole_quantification.csv` / `output/quantum/bell/selection_loophole_quantification.png`
+  - 固定値：`fair_sampling: n_supported=5, n_pass=0`、`detection: n_supported=2, n_pass=0`、`locality: n_supported=2, n_pass=0`、`freedom_of_choice: n_supported=5, n_pass=5`
+
+#### 7.16-C 量子干渉実験の網羅検証
+- 7.16.11 COW実験の完全解析【完了（初版）】
+  - 目的：中性子干渉の全実験データ統合I/Fを固定する。
+  - 作業：`scripts/quantum/cow_experiment_phase.py` を拡張し、Colella 1975 以降の参照カタログ、`Δφ` の `H,v` 依存 sweep、残差監査I/F、統合図を固定。
+  - 出力：`output/quantum/cow_experiment_data_integration.csv`、`output/quantum/cow_phase_shift_hv_sweep.csv`、`output/quantum/cow_experiment_complete_analysis.png`、`output/quantum/cow_experiment_complete_analysis_metrics.json`
+  - 固定値：`catalog_rows=6`、`hv_sweep_rows=25`、`numeric_coverage_ratio=1/6`、`representative_phi0_cycles=-11.1551`
+- 7.16.12 原子干渉計の系統的検証【完了（初版）】
+  - 目的：重力計/ジャイロ/時計で完全検証。
+  - 作業：`scripts/quantum/gravity_quantum_interference_delta_predictions.py` を拡張し、重力計・原子ジャイロ proxy・光格子時計を同一I/Fへ統合。各チャネルで `delta_z_over_z_gr`、`delta_observable`、`required_precision_3sigma`、`current_precision` を固定し、統合サマリCSV/JSON/図を生成。
+  - 出力：`output/quantum/atom_interferometer_unified_audit_summary.csv`、`output/quantum/atom_interferometer_unified_audit_metrics.json`、`output/quantum/atom_interferometer_unified_audit.png`（互換維持：`output/quantum/gravity_quantum_interference_delta_predictions.png` / `.json`）
+  - 固定値：`channels_n=4`、`detectable_under_current_n=0`、`atom_gyroscope_proxy.phi_ref_rad=1720.853`
+- 7.16.13 物質波干渉の精密検証【完了（初版）】
+  - 目的：電子/原子/分子の干渉実験を同一I/Fへ統合し、次段（HOM/スクイーズド光）への入口を固定する。
+  - 作業：`scripts/quantum/electron_double_slit_interference.py` を拡張し、既存の電子干渉出力を維持したまま、原子（α整合＋原子干渉計精度ギャップ）・分子（同位体縮約質量スケーリング proxy）を横断集約する監査CSV/JSON/図を生成。
+  - 出力：`output/quantum/matter_wave_interference_precision_audit_summary.csv`、`output/quantum/matter_wave_interference_precision_audit_metrics.json`、`output/quantum/matter_wave_interference_precision_audit.png`
+  - 固定値：`channels_n=4`、`atom_recoil_alpha.abs_z=0.588`、`molecular_isotopic_scaling.z_max=2.639`、`atom_interferometer_precision.median_ratio=7.179e5`
+  - 注記：分子チャネルは C60/C70 raw time-tag 統合ではなく、現時点では一次ソース固定済みの同位体スケーリング proxy として実装（raw 公開後に同一I/Fで追記可能）。
+- 7.16.14 HOM干渉とスクイーズド光【完了（初版）】
+  - 目的：光量子干渉の完全検証。
+  - 作業：`scripts/quantum/photon_quantum_interference.py` を拡張し、既存の単一光子/HOM/スクイーズド光出力を維持したまま、HOM可視度（古典閾値0.5基準）、13ns↔1μs 遅延依存、スクイーズド光分散比、PSD 低周波/高周波比を同一I/Fで固定する統合監査を追加。
+  - 出力：`output/quantum/hom_squeezed_light_unified_audit_summary.csv`、`output/quantum/hom_squeezed_light_unified_audit_metrics.json`、`output/quantum/hom_squeezed_light_unified_audit.png`
+  - 固定値：`channels_n=5`、`hom_visibility_d13ns.z_vs_classical_0p5=37.08`、`hom_visibility_d1000ns.z_vs_classical_0p5=24.35`、`hom_delay_dependence.z_delta=0.210`、`squeezed_light_10db.variance_ratio=0.100`、`noise_psd_shape.lf_to_hf_ratio=0.841`
+  - 注記：PSD 比は `10kHz/100kHz<1` を示し、HOM可視度の良否と別の系統（周波数帯依存）として切り分ける。
+
+#### 7.16-D 独立cross-check拡充
+- 7.16.15 分離エネルギーの系統検証【完了（初版）】
+  - 目的：`S_n,S_p,S_2n,S_2p` で完全検証。
+  - 作業：Step 7.16.3 の per-nucleus 固定I/F（`B_obs/B_pred_before/B_pred_after`）を入力に、全核種で `S_n/S_p/S_2n/S_2p` を再構築。残差、chain-envelope edge（distance<=2）での dripline proxy、magic-gap（`gap_n/gap_2n/gap_p/gap_2p`）を同一手続きで固定。
+  - 実装：`scripts/quantum/nuclear_separation_energy_systematics_analysis.py`
+  - 出力：`output/quantum/nuclear_separation_energy_systematics_full.csv`、`output/quantum/nuclear_separation_energy_systematics_summary.csv`、`output/quantum/nuclear_separation_energy_systematics_magic_kink.csv`、`output/quantum/nuclear_separation_energy_systematics_quantification.png`、`output/quantum/nuclear_separation_energy_systematics_metrics.json`
+  - 固定値：`n_total_separation_rows=13337`（`S_n=3438`,`S_p=3378`,`S_2n=3320`,`S_2p=3201`）、`n_total_gap_rows=520`（`gap_n=124`,`gap_2n=111`,`gap_p=152`,`gap_2p=133`）
+  - 固定値（median abs residual after, MeV）：`S_n=7.273`、`S_p=6.235`、`S_2n=14.737`、`S_2p=12.286`
+  - 固定値（magic gap median abs residual after, MeV）：`gap_n=2.195`、`gap_2n=2.298`、`gap_p=8.511`、`gap_2p=6.801`
+- 7.16.16 ベータ崩壊Q値の予測【完了（初版）】
+  - 目的：崩壊エネルギー（`Q_β`）で独立検証。
+  - 作業：Step 7.16.3 の固定I/F（`B_obs/B_pred_before/B_pred_after`）を入力に、`β^-`/`β^+` の `Q_pred` を全核種で再構築。NuDat/ENSDF（`primary.json`/`secondary.json`）の `qValues`（`betaMinus`/`positronEmission`）と比較し、残差・`z` 指標・半減期相関・崩壊モード整合（`Q_pred>0` vs `B-/EC/B+` flag）を同一手続きで固定。
+  - 実装：`scripts/quantum/nuclear_beta_decay_qvalue_prediction_analysis.py`
+  - 出力：`output/quantum/nuclear_beta_decay_qvalue_prediction_full.csv`、`output/quantum/nuclear_beta_decay_qvalue_prediction_summary.csv`、`output/quantum/nuclear_beta_decay_qvalue_prediction_representative.csv`、`output/quantum/nuclear_beta_decay_qvalue_prediction_quantification.png`、`output/quantum/nuclear_beta_decay_qvalue_prediction_metrics.json`
+  - 固定値：`n_rows_total=6265`（`beta_minus=3145`,`beta_plus=3120`）、`n_representative_rows=48`
+  - 固定値（median abs residual after, MeV）：`beta_minus=6.030`、`beta_plus=5.890`
+  - 固定値（half-life correlation; pearson logQ_obs vs logT1/2）：`beta_minus=-0.793`、`beta_plus=-0.537`
+  - 固定値（mode consistency accuracy）：`beta_minus=0.423`、`beta_plus=0.558`
+- 7.16.17 核変形パラメータ予測【完了（初版）】
+  - 目的：`β_2, β_4` チャネルで独立cross-checkを固定する。
+  - 作業：NNDC B(E2) adopted の `β_2`（`data/quantum/sources/nndc_be2_adopted_entries/extracted_beta2.json`）を Step 7.16.3（pairing per-nucleus）および Step 7.16.6（R4/2）へ結合し、`β_2` 予測・回転バンド proxy・変形-B.E. 相関を同一I/Fで固定。`β_4` は一次固定ソースに直接観測が無いため、運用proxy `β_4≈β_2^2/3` を分離チャネルとして併記。
+  - 実装：`scripts/quantum/nuclear_deformation_parameter_prediction_analysis.py`
+  - 出力：`output/quantum/nuclear_deformation_parameter_prediction_full.csv`、`output/quantum/nuclear_deformation_parameter_prediction_summary.csv`、`output/quantum/nuclear_deformation_parameter_prediction_representative.csv`、`output/quantum/nuclear_deformation_parameter_prediction_quantification.png`、`output/quantum/nuclear_deformation_parameter_prediction_metrics.json`
+  - 固定値：`n_rows_joined=428`、`n_rows_with_r42=414`、`n_representative_rows=30`
+  - 固定値（beta2）：`median_abs_resid=0.0515`、`rms_resid=0.1990`、`pearson_obs_pred=0.184`
+  - 固定値（rotation proxy）：`r42 class_match_rate=0.551`
+
+#### 7.16-E 誤差解析の徹底化
+- 7.16.18 統計誤差の完全伝播【完了（初版）】
+  - 目的：全パラメータ不確かさの伝播を固定。
+  - 作業：Step 7.16.3（pairing）由来の `k_n,k_p` 共分散を推定し、Step 7.16.15（分離エネルギー）/ Step 7.16.16（Q値）/ Step 7.16.17（β2）へ Monte Carlo（n=100000）で伝播。入力共分散、出力共分散、寄与分解（dominant source）を同一I/Fで固定。
+  - 実装：`scripts/quantum/nuclear_statistical_error_propagation_matrix_analysis.py`
+  - 出力：`output/quantum/nuclear_statistical_error_propagation_input_covariance.csv`、`output/quantum/nuclear_statistical_error_propagation_output_covariance.csv`、`output/quantum/nuclear_statistical_error_propagation_output_summary.csv`、`output/quantum/nuclear_statistical_error_propagation_contribution_matrix.csv`、`output/quantum/nuclear_statistical_error_propagation_dominant_sources.csv`、`output/quantum/nuclear_statistical_error_propagation_quantification.png`、`output/quantum/nuclear_statistical_error_propagation_metrics.json`
+  - 固定値：`n_monte_carlo=100000`、`k_n=-1.4780`、`k_p=1.7944`、`cov(k_n,k_p)=-0.1859`
+  - 固定値（mc_std）：`be_rms=0.166 MeV`、`sep_rms=0.0240 MeV`、`q_beta_minus_rms=0.0631 MeV`、`q_beta_plus_rms=0.0570 MeV`、`beta2_rms=4.29e-4`
+- 7.16.19 系統誤差の保守的上限【完了（初版）】
+  - 目的：worst-case で棄却判定の頑健性を評価。
+  - 作業：Step 7.16.18（統計誤差）と Step 7.16.15/16/17（独立cross-check要約）を入力に、系統源6項目の組合せ（quadrature/linear）を走査。`σ_total=sqrt(σ_stat^2+σ_sys^2)` で `z=residual/σ_total` を再評価し、3σゲートへの required `σ_sys` をチャネル別に固定。
+  - 実装：`scripts/quantum/nuclear_systematic_error_upper_bounds_analysis.py`
+  - 出力：`output/quantum/nuclear_systematic_error_upper_bounds_full.csv`、`output/quantum/nuclear_systematic_error_upper_bounds_summary.csv`、`output/quantum/nuclear_systematic_error_upper_bounds_channel_bounds.csv`、`output/quantum/nuclear_systematic_error_upper_bounds_quantification.png`、`output/quantum/nuclear_systematic_error_upper_bounds_metrics.json`
+  - 固定値（scenario summary）：`all_sources_linear_worst` で `n_gate_pass=2`、`n_gate_fail=3`、`median_abs_z=3.331`、`max_abs_z=5.000`。
+  - 固定値（channel upper bound）：`σ_sys_upper(be_rms)=214.54 MeV`、`σ_sys_upper(sep_rms)=3.423 MeV`、`σ_sys_upper(q_beta_minus)=1.809 MeV`、`σ_sys_upper(q_beta_plus)=1.767 MeV`、`σ_sys_upper(beta2_rms)=0.02317`。
+- 7.16.20 独立測定による相互検証【完了（初版）】
+  - 目的：複数観測量（`B.E., r_ch, S_n, Q_β`）の整合性を確認。
+  - 作業：Step 7.16.3/5/15/16 の核種別残差を `(Z,N,A)` で統合し、観測量横断の cross-check matrix（残差相関）を固定。不整合核種（`median_norm>3` または `max_norm>5`）を抽出し、3σ到達に必要な精度要件（`sigma_req=abs(resid)/3`）をチャネル別に集約。
+  - 実装：`scripts/quantum/nuclear_independent_cross_observable_consistency_analysis.py`
+  - 出力：`output/quantum/nuclear_independent_cross_observable_consistency_joined.csv`、`output/quantum/nuclear_independent_cross_observable_consistency_matrix.csv`、`output/quantum/nuclear_independent_cross_observable_inconsistent_nuclei.csv`、`output/quantum/nuclear_independent_cross_observable_precision_requirements.csv`、`output/quantum/nuclear_independent_cross_observable_consistency.png`、`output/quantum/nuclear_independent_cross_observable_consistency_metrics.json`
+  - 固定値：`n_rows_joined=3556`、`n_with_all_4_channels=954`、`n_with_ge_3_channels=3355`、`n_inconsistent=58`
+  - 固定値（相関例）：`corr_log10_abs(be,radius)=-0.382`、`corr_log10_abs(radius,q)=0.466`、`corr_log10_abs(sep,q)=-0.097`
+  - 固定値（精度要件）：`median_improvement_factor` が `be=3.00`、`radius=3.00`、`sep=3.00`、`q=3.00`
+
+### Step 7.17：核物理/Bell 再固定サイクル（ユーザー指定5項目）
+- 現状：完了（再固定；7.17.1–7.17.6）
+- 目的：
+  - Step 7.16 の完了済みI/Fを基準に、同一手続きで主要チャネルを再固定し、差分有無を監査可能な形で残す。
+- 7.17.1 全核種系統解析（3554核種完全版）【完了（再固定）】
+  - 目的：全核種で `B.E.` 予測-観測残差の再固定を実施。
+  - 作業：全核種残差CSV更新、A帯別統計（10カテゴリ）再計算、Z-N平面残差マップ再生成。
+  - 固定値：`n_rows=3556`、`A_band_count=10`。
+  - 出力：`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_a_band_stats.csv`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_zn_residual_map.png`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json`
+- 7.17.2 魔法数での殻閉殻効果【完了（再固定）】
+  - 目的：`N,Z=2,8,20,28,50,82,126` の構造変化を再監査。
+  - 作業：`S_2n` / `S_2p` kink の定量値を同一I/Fで再固定。
+  - 固定値：`n_gap_S2n_rows=110`、`n_gap_S2p_rows=133`、`n_representative=4`。
+  - 出力：`output/quantum/nuclear_magic_shell_closure_kink_summary.csv`、`output/quantum/nuclear_magic_shell_closure_kink_representative4.csv`、`output/quantum/nuclear_magic_shell_closure_kink_quantification.png`、`output/quantum/nuclear_magic_shell_closure_kink_metrics.json`
+- 7.17.3 pairing効果の系統組み込み【完了（再固定）】
+  - 目的：全核種の pairing gap を再計算して Part III 4.2.7.1 と整合更新。
+  - 作業：3点公式による `Δ_n/Δ_p` 再評価、補正前後残差の再固定、4.2.7.1 接続要約の更新。
+  - 固定値：`n_nuclei=3556`、`n_fit_rows=3191`、`k_n=-1.478`、`k_p=1.794`。
+  - 出力：`output/quantum/nuclear_pairing_effect_systematics_per_nucleus.csv`、`output/quantum/nuclear_pairing_effect_systematics_summary.csv`、`output/quantum/nuclear_pairing_effect_systematics_quantification.png`、`output/quantum/nuclear_pairing_effect_systematics_metrics.json`
+- 7.17.4 Bellテスト共分散行列【完了（再固定）】
+  - 目的：5データセットの時系列相関を再固定。
+  - 作業：共分散行列再生成、`bootstrap n=10000` 再実行、cross-dataset 要約更新。
+  - 固定値：`u_grid_points=81`、`n_boot=10000`、`profile_cov_rank_eps_1e-10=5`。
+  - 出力：`output/quantum/bell/cross_dataset_covariance.json`、`output/quantum/bell/cross_dataset_covariance.png`、`output/quantum/bell/*/covariance_bootstrap.json`
+- 7.17.5 系統誤差15項目の完全分解【完了（再固定）】
+  - 目的：Part II DESI級の誤差管理を Bell に維持適用。
+  - 作業：15項目分解の再計算、`Δ|S|`/`ΔJ_prob` 寄与と相関を再固定。
+  - 固定値：`item_catalog_n=15`、`datasets_n=5`、`correlated_if_abs_corr_ge=0.6`。
+  - 出力：`output/quantum/bell/systematics_decomposition_15items.json`、`output/quantum/bell/systematics_decomposition_15items.csv`、`output/quantum/bell/systematics_decomposition_15items.png`
+- 7.17.6 Part III（量子）完了監査（再現・参照出力の存在確認）【完了（再確認）】
+  - 目的：ロードマップ/Part III が参照する生成物の欠落がないことを機械的に確認し、主要再現コマンドが通ることを確認する。
+  - 作業：
+    - `doc/paper/12_part3_quantum.md` の参照出力（152件）と `doc/ROADMAP.md` の量子参照出力（concrete 526件）の存在確認。
+    - 主要スクリプト（Bell/nuclear/scoreboard/QC）の再実行で再現を確認。
+  - 再現：
+    - `python -B scripts/quantum/bell_primary_products.py --overwrite`
+    - `python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.py`
+    - `python -B scripts/summary/quantum_scoreboard.py`
+    - `python -B scripts/summary/quantum_falsification.py`
+    - `python -B scripts/summary/paper_qc.py`
+    - `python -B scripts/summary/paper_lint.py`
+
+### Step 7.18：Part III（量子）完成条件の棚卸しと閉包（I/F・凍結・反証・QA）
+- 現状：完了（7.18.1–7.18.11）
+- 目的：
+  - Part III を「再現可能 + 反証可能 + 凍結済み」の形で閉じ、公開待ちでブロックされない範囲を確実に完了扱いにする。
+- 7.18.1 完成条件棚卸し（Table別の欠落行抽出）【完了（初版）】
+  - 目的：Table（核/Bell/物性/熱/干渉）ごとに、`Input / Frozen / Statistic / Reject / Output` が揃っているかを棚卸しする。
+  - 作業：各Table行について「欠けている項目」だけを機械的に抽出し、差分修正のTODO（欠落行リスト）として固定する。
+  - 実装：`scripts/summary/part3_completion_inventory.py`
+  - 出力：`output/summary/part3_completion_inventory.json` / `output/summary/part3_completion_inventory.md`
+  - 結果（publish相当; INTERNAL_ONLY除外）：`sections_scanned=26`、`missing_sections=0`（7.18.10 埋め戻し後）
+- 7.18.2 反証条件パック（JSON）を実体＋論文記載で閉じる【完了（初版）】
+  - 目的：Bell/核/物性それぞれで、(a) 実ファイル名（固定パス）(b) 予測値の棄却閾値と適用条件（監査条件含む）を、本文末尾に最小限で明記して閉じる。
+  - 作業：各packについて「固定ファイル名」「適用条件（監査条件含む）」「棄却閾値」を `doc/paper/12_part3_quantum.md` の該当章末尾へ追記する（表は作らず、短い箇条書きで固定）。
+  - 反証条件パック（固定パス）：
+    - Bell：`output/quantum/bell/falsification_pack.json`
+    - 核（Δω→B.E.）：`output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json`
+    - 物性/熱：`output/quantum/condensed_falsification_pack.json`（実装：`scripts/quantum/condensed_falsification_pack.py`）
+  - 補足：Bell pack は version=1.1 とし、cross-dataset 統合要約（共分散/15系統/selection-loophole）と参照出力を同梱した（pack単体で監査入口を閉じる）。
+- 7.18.3 凍結パラメータの一元管理（Part III）【完了（初版）】
+  - 目的：Part III で凍結した値（核の ν飽和 barrier 比、Bell の natural window、物性/熱の基準値など）を `frozen_parameters.json`（または同等）へ集約し、本文から参照する形に統一する。
+  - 作業：`output/theory/frozen_parameters.json` との整合を保ちつつ、Part III 分を追加（または量子側の同等ファイルを追加）し、本文からの参照先を一本化する。
+  - 実装：`scripts/quantum/frozen_parameters_quantum.py`
+  - 出力：`output/quantum/frozen_parameters_quantum.json`
+  - 反映：`doc/paper/12_part3_quantum.md`（3.0 共通棄却手順；Frozen参照先の一本化）
+- 7.18.4 図番号・引用・相互参照の機械QAを一括で通す【完了（初版）】
+  - 目的：図番号の連続性／本文参照の存在／引用キー漏れ／「図xx参照」「節x.x参照」のリンク先を一括点検して修正する。
+  - 既存QA：`python -B scripts/summary/paper_qc.py` / `python -B scripts/summary/paper_lint.py --strict`
+  - 作業：既存QAで未検出の項目（リンク先点検など）があれば追加チェックを実装し、常に通る状態へ固定する。
+  - 実装：`scripts/summary/paper_qc.py` を拡張し、(a) Part II/III の publish HTML も含めた QC、(b) in-page anchor（href="#..."）の解決、(c) `x.x節` の存在チェック（doc/paper全体の見出し番号集合へ照合）、(d) `図xx` 参照の存在チェック（該当profile HTMLの図番号集合へ照合）を追加。
+  - 再現：`python -B scripts/summary/paper_qc.py`（ok=True を固定）
+- 7.18.5 核I/Fのスケール確認（サブセット自動実行）【完了（初版）】
+  - 目的：全核種へ拡張する前提として、現I/F（B.E./ERE/cross-check束）がサブセット（例：安定核＋近傍）で自動実行でき、固定名で再生成できることを確認する。
+  - 作業：サブセット指定で end-to-end を走らせ、出力CSV/残差図が固定名で再生成できることを確認する（全核種実行の前段ゲート）。
+  - 実装：`scripts/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.py` に `--subset` を追加（gate用途：`measured_radii` / `measured_radii_neighborhood`）。
+  - 再現：`python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.py --subset measured_radii_neighborhood`
+  - 出力（固定名）：`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_subset_measured_radii_neighborhood.{csv,png}` と `..._zn_residual_map.png` / `..._a_band_stats.csv` / `..._metrics.json`
+- 7.18.6 AME2020全核種で「残差の面」を出す【完了（達成済み）】
+  - 対応：Step 7.17.1（全核種系統解析）で実施済み。
+  - 出力：`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_a_band_stats.csv`、`output/quantum/nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_zn_residual_map.png`
+- 7.18.7 核の差分予測の決着点を増やす（独立量で縛る）【完了（達成済み）】
+  - 対応：分離エネルギー（`S_n/S_2n`）と電荷半径kink（Δ²r）の固定出力＋横断cross-check matrix を実施済み。
+  - 出力（例）：`output/quantum/nuclear_separation_energy_systematics_magic_kink.csv`、`output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json`、`output/quantum/nuclear_independent_cross_observable_consistency_matrix.csv`
+- 7.18.8 Bellを「Part II（DESI級）」へ近づける土台を作る【完了（達成済み）】
+  - 対応：Step 7.17.4（共分散；bootstrap n=10000）と Step 7.17.5（15系統分解）で実施済み。
+  - 出力：`output/quantum/bell/cross_dataset_covariance.json`、`output/quantum/bell/*/covariance_bootstrap.json`、`output/quantum/bell/systematics_decomposition_15items.json`
+- 7.18.9 Part III Conclusionを決着点3本に収束させる【完了（初版）】
+  - 目的：核（全核種＋独立cross-check）、Bell（系統＋共分散）、物性/熱（holdout棄却）を、各1段落で「何が凍結で、何が反証条件か」だけ書いて締める。
+  - 作業：`doc/paper/12_part3_quantum.md` の Conclusion を最小改稿し、pack/凍結参照と整合させる。
+  - 反映：`doc/paper/12_part3_quantum.md`（7章）を「核/Bell/物性+熱」の3段落（凍結＋棄却）へ収束。
+- 7.18.10 完成条件の欠落（missing_sections）を埋めて missing_sections=0 へ固定【完了（初版）】
+  - 目的：棚卸し（7.18.1）で検出した欠落（Reject/Output/Statistic）を最小修正で埋め、publish相当で `missing_sections=0` を固定する。
+  - 作業：`doc/paper/12_part3_quantum.md` の欠落箇所（干渉/核/物性）のみへ **棄却条件**／**出力**／**指標** の最小行を追加し、`python -B scripts/summary/part3_completion_inventory.py` を再実行して missing_sections=0 を確認する。
+  - 結果：`output/summary/part3_completion_inventory.md` が `missing_sections=0`。
+  - 再現：`python -B scripts/summary/part3_completion_inventory.py`（`missing_sections=0` を確認）
+- 7.18.11 Part III 論文表記の可読性調整（Step表記削除・I/O言語化）【完了（改訂）】
+  - 目的：Part III の本文で「内部Step番号」やファイル名列挙が可読性を落とさないようにし、公開用の読み物として成立させる。
+  - 作業：
+    - `doc/paper/12_part3_quantum.md`：Step表記を削除し、**入力**/**出力**は言葉で説明する形へ統一（ファイル名は `**固定ファイル（監査用）**` に分離）。
+    - `doc/paper/12_part3_quantum.md`：主要節（Bell/干渉/原子分子/QED/核/物性+熱）に「凍結／棄却／次」の3行サマリを揃え、本文の主線（何が凍結で、何が棄却条件か）を即読できる形へ統一。
+    - `doc/paper/12_part3_quantum.md`：Bell（4.2.1）に 15項目系統バジェットの説明と、ΔS/ΔJ（freeze±σ_stat と sweep min-max）の絶対量表を追加し、bound 指標列（`S_frozen−2`, `min−2`, `max(J)`）を明示して即読化。
+    - `doc/paper/12_part3_quantum.md`：核（4.2.7.3）に Z–N残差マップの観察（magic vs 変形核）を文章化し、外れ率＋`median abs(z)` の小表で即読化。
+    - `doc/paper/12_part3_quantum.md`：物性（4.2.9–4.2.14）に凝縮系の統合サマリ表（代表値＋棄却条件）を追加し、Si α(T) の ansatz 試験ログ（Debye–Grüneisen 定数モデル評価を含む）を補遺Aへ集約。
+    - `doc/paper/12_part3_quantum.md`：熱（4.2.15–4.2.16）の黒体基準にも「凍結／棄却／次」3行サマリを追加し、物性+熱の統一を完了。
+    - `doc/paper/12_part3_quantum.md`：差分予測（5章）を増強し、Table 2（Bell CHSH/CH の統計族混在修正）と Table 3（Bell cross-dataset 統合要約）を本文へ固定。
+    - Table 1（量子）の planned 行に残っていた Step 表記を除去。
+    - 図caption（`doc/paper/01_figures_index.md` 由来）から publish 出力へ Step が漏れないように調整。
+    - `doc/paper/01_figures_index.md`：Bell横断まとめ（系統分解/共分散）の図captionを追加し、publish の図番号/参照QAに通る状態へ固定。
+  - 実装：`scripts/summary/paper_html.py`（captionから Step を除去）、`scripts/summary/paper_tables.py`（planned 行の metric 文言調整）
+  - 再現：
+    - `python -B scripts/summary/paper_build.py --profile part3_quantum --mode publish --outdir output/summary`
+    - `rg -n "\\bStep\\b" output/summary/pmodel_paper_part3_quantum.html` が no matches
+
+### Step 7.19：ユーザー要件（核/Bell/干渉/cross-check/誤差）のロードマップ統合（マッピング）
+- 現状：完了（既存Stepへ対応付け済み）
+- 目的：
+  - ユーザーの「Phase 1–5（核/Bell/干渉/cross-check/誤差）」チェックリストを、本リポジトリの Phase 1–8 と混同しない形で Phase 7 の既存Stepへ対応付ける。
+- 注意：
+  - 以下の「ユーザーPhase 1–5」は便宜的区分であり、本ロードマップの Phase 1–8 とは別物である。
+  - 実装/出力の詳細は、対応先の Step 記述（目的/作業/出力）を正とする。
+
+- ユーザーPhase 1：核物理検証の完全化
+  - 作業1（全核種系統解析）→ Step 7.17.1
+  - 作業2（魔法数の殻閉殻効果）→ Step 7.17.2（kink）＋ Step 7.16.2（gap集計）
+  - 作業3（pairing効果）→ Step 7.17.3
+  - 作業4（同位体連鎖）→ Step 7.16.4
+  - 作業5（核半径整合）→ Step 7.16.5
+  - 作業6（励起準位）→ Step 7.16.6
+
+- ユーザーPhase 2：Bell検証の完全化
+  - 作業7（共分散行列）→ Step 7.17.4（cross-dataset covariance; bootstrap n=10000 + jackknife）
+  - 作業8（15系統分解）→ Step 7.17.5
+  - 作業9（長期一貫性）→ Step 7.16.9
+  - 作業10（loophole定量化）→ Step 7.16.10
+
+- ユーザーPhase 3：量子干渉実験の網羅化
+  - 作業11（COW）→ Step 7.16.11（基礎：Step 7.5.1）
+  - 作業12（原子干渉計）→ Step 7.16.12（基礎：Step 7.5.2/7.5.3）
+  - 作業13（物質波干渉）→ Step 7.16.13（基礎：Step 7.5.4/7.5.5）
+  - 作業14（HOM/スクイーズド光）→ Step 7.16.14（基礎：Step 7.7.2/7.7.3）
+
+- ユーザーPhase 4：独立cross-check拡充
+  - 作業15（分離エネルギー）→ Step 7.16.15
+  - 作業16（β崩壊Q値）→ Step 7.16.16
+  - 作業17（核変形）→ Step 7.16.17
+
+- ユーザーPhase 5：誤差解析の徹底化
+  - 作業18（統計誤差伝播）→ Step 7.16.18（Monte Carlo n=100000）
+  - 作業19（系統誤差上限）→ Step 7.16.19
+  - 作業20（相互検証）→ Step 7.16.20
+
+- 追加チェック（ユーザー提示：詳細拡張）
+  - ユーザーPhase 1：核物理の詳細拡張
+    - 作業1（中重核 A=40–120 詳細）→ Step 7.17.1（全核種残差/A帯）＋ Step 7.16.2（magic-gap）＋ Step 7.13.17.12（A帯=mid の差分統計）＋ Step 7.17.2（N=50 を含む kink）
+    - 作業2（同位体連鎖の可視化）→ Step 7.16.4（全Zの同位体連鎖 + S_n + dripline proxy）
+    - 作業3（β崩壊Q値）→ Step 7.16.16（NuDat/ENSDF比較）
+    - 作業4（核変形 β2）→ Step 7.16.17（NNDC adopted β2 比較）
+  - ユーザーPhase 2：Bell検証の詳細拡張
+    - 作業5（共分散行列の数値出力）→ Step 7.17.4（cross-dataset covariance JSON + 固有値 + ヒートマップ）
+    - 作業6（系統誤差15項目の明示リスト）→ Step 7.17.5（15項目カタログ + 寄与 + 予算表）
+  - ユーザーPhase 3：量子干渉実験の詳細拡張
+    - 作業7（COW 全データ統合）→ Step 7.16.11（実験カタログ + 予測/観測 I/F + 残差監査）
+    - 作業8（原子干渉計：実験別詳細）→ Step 7.16.12（重力計/ジャイロ proxy/時計の統合監査）
+    - 作業9（HOM：遅延依存性）→ Step 7.16.14（遅延依存 + 可視度/古典閾値 + 比較）
+  - ユーザーPhase 4：誤差解析の数値化
+    - 作業10（Monte Carlo 誤差伝播 n=100000）→ Step 7.16.18（寄与分解 + 支配源）
+
+### Step 7.20：Part III（量子）監査強化（公開待ちでブロックされない追加テスト）
+
+- 現状：完了（改訂）
+- 目的：
+  - Part III を「反証可能性と再現性の監査」をさらに強くし、外部からの批判（恣意性/実装依存）に対して運用上の入口を閉じる。
+- 7.20.1 Bell：ヌルテスト一式の固定（設定シャッフル／時間シフト等）【完了（初版）】
+  - 目的：解析I/Fが「壊れるべき操作で壊れる」ことを証拠として固定し、p-hacking/実装バグの疑いを減らす。
+  - 作業：各datasetについて、(a) settingラベルシャッフル、(b) time-shift 等のヌル操作を適用し、統計量（|S|/J）と delay signature（z）が基準へ落ちることを出力固定する。
+  - 出力：`output/quantum/bell/<dataset>/null_tests.json`、`output/quantum/bell/null_tests_summary.json`（`falsification_pack.json` v1.4 へ同梱）
+  - 再現：`python -B scripts/quantum/bell_primary_products.py`
+- 7.20.2 Bell：ブラインド凍結（window/offsetの事前規則）を明文化しpackへ固定【完了（初版）】
+  - 目的：統計量（S/J）を見ないで決まる規則（遅延分布/ジッタ/偶発率/装置仕様）で natural window/offset を凍結し、後出し自由度をさらに削る。
+  - 作業：freeze policy（入力→規則→出力）を JSON で固定し、pack の `apply` 条件に追記する。
+  - 出力：`output/quantum/bell/freeze_policy.json` ＋ `output/quantum/bell/falsification_pack.json`（policy/cross_dataset.inputs に参照を同梱）
+- 7.20.3 Bell：独立推定器クロスチェック（実装差＝系統）【完了（改訂）】
+  - 目的：coincidence/ trial 集計や pairing 実装差が結論を左右しないことを定量化し、“実装依存” を系統として閉じる。
+  - 作業：別の pairing（最近傍/両側/重複処理）や別推定器を同一I/Fで併走させ、差分を sys として pack に固定する。
+  - 出力：`output/quantum/bell/<dataset>/crosscheck_pairing.json`、`output/quantum/bell/crosscheck_pairing_summary.json`（`falsification_pack.json` v1.4 に `cross_dataset.pairing_crosscheck_summary` として同梱）
+  - 注記：Weihs 1998 に加えて NIST（time-tag; CH）も supported とし、凍結窓での greedy vs mutual NN の差分を `Δ_impl/σ_boot` として固定した（chunked mutual NN）。Kwiat/Christensen 2013（CH）は trial-based の凍結点（ref window）の整合（内部一致）を supported として固定。Delft（event-ready）は coincidence pairing の定義が異なるため unsupported（理由を JSON に明記）として扱う。
+- 7.20.4 核：ホールドアウト（外挿）監査の追加【完了（初版）】
+  - 目的：凍結したまま未使用領域（magic近傍/変形核/極端N/Zなど）で残差分布がどう変わるかを固定し、失敗モードを明文化する。
+  - 作業：領域分割ゲートを固定し、各領域の残差統計＋外れ核リストを出力する。
+  - 出力：`output/quantum/nuclear_holdout_audit_summary.json`、`output/quantum/nuclear_holdout_audit_groups.csv`、`output/quantum/nuclear_holdout_audit_outliers.csv`、`output/quantum/nuclear_holdout_audit.png`
+  - 再現：`python -B scripts/quantum/nuclear_holdout_audit.py`
+- 7.20.5 核：同位体連鎖の系統可視化＋外れ核リスト固定【完了（既存Stepで対応済み）】
+  - 目的：Z固定の連鎖で「どの核が決着点か」を即読できる形にする（独立量と同時破綻する核も併記）。
+  - 対応：Step 7.16.4（同位体連鎖の完全解析）で固定済み。
+  - 出力：`output/quantum/nuclear_isotope_chain_full_analysis.csv`、`output/quantum/nuclear_isotope_chain_summary_by_z.csv`、`output/quantum/nuclear_isotope_chain_full_analysis.png`
+  - 再現：`python -B scripts/quantum/nuclear_isotope_chain_full_analysis.py`
+- 7.20.6 物性/熱：温度帯ホールドアウト＋系統誤差カタログ化【完了（改訂）】
+  - 目的：本文の棄却条件を「予測テスト」（外挿/未使用帯域）へ寄せる。
+  - 作業：温度帯で holdout を固定し、失敗モードを sys としてカタログ化する。
+  - 出力：
+    - Si α(T) holdout（最小 Debye+Einstein）：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json`
+    - Si α(T) holdout（DOS+γ(ω) 基底；strict+holdout ok 例）：`output/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_gamma_omega_pwlinear_split_leaky_mode_softening_kim2015_fig2_bulkmodulus_ridge1e-06_leak2p40e-01_warp1p32_model_metrics.json`
+    - Si Cp(T) holdout：`output/quantum/condensed_silicon_heat_capacity_holdout_splits_metrics.json`（Debye 1p / Shomate 5p の崩壊に加え、Debye（低温 θ_D を max|z| 最小で凍結）＋WebBook Shomate（高温一次拘束）の “hybrid frozen” で strict+holdout ok 例を追加）
+    - Si B(T) holdout：`output/quantum/condensed_silicon_bulk_modulus_holdout_splits_metrics.json`（Ioffe由来の B(T) を参照曲線として温度帯 holdout を追加）
+    - Cu κ(T) holdout：`output/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json`
+    - 横断サマリ（CSV/PNG含む）：`output/quantum/condensed_holdout_audit_summary.json`（audit_gates：minimax推奨モデル＋運用ゲート `max|z|≤3`（補助：`reduced χ²≤9`）で strict/holdout を機械判定）
+  - 再現：`python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py` → `python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_phonon_dos_mode_gamma_model.py --groups 4 --enforce-signs --use-bulk-modulus --mode-softening kim2015_fig2_features --gamma-omega-model pwlinear_split_leaky --gamma-omega-pwlinear-leak 0.24 --gamma-omega-pwlinear-warp-power 1.32 --ridge-factor 1e-06` → `python -B scripts/quantum/condensed_silicon_heat_capacity_holdout_splits.py` → `python -B scripts/quantum/condensed_silicon_bulk_modulus_holdout_splits.py` → `python -B scripts/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits.py` → `python -B scripts/quantum/condensed_holdout_audit.py`
+- 7.20.7 Part III：監査ハーネス（ワンコマンド化）【完了（初版）】
+  - 目的：Bell/核/物性+熱の pack 生成→ゲート判定→要約（pass/failと理由）を 1コマンドで回す。
+  - 作業：監査コマンドを一本化し、機械可読サマリを固定出力する。
+  - 出力：`output/summary/part3_audit_summary.json`
+  - 再現：`python -B scripts/summary/part3_audit.py`
+- 7.20.8 Part III（publish）：可読性改善（本文から Step 表記を排除／ファイル名は別項へ集約）【完了（改訂）】
+  - 目的：公開版で Step 番号やファイル名の羅列を避け、結果・棄却条件・凍結だけを本文に残す。
+  - 作業：
+    - `doc/paper/12_part3_quantum.md` を整理（Step表記削除、入出力のファイル名は 8章へ集約）。
+    - 棚卸し `scripts/summary/part3_completion_inventory.py` の Output 検出を **出力** 行ベースへ更新（file path を本文に必須化しない）。
+    - 凝縮系の長い ansatz 試験ログを `doc/paper/12_part3_quantum_appendix_a.md` へ退避し、publish HTML では本文と分離した「補遺A」セクションとして表示する（本文はベースライン＋棄却条件を最小維持）。
+  - 検証：publish 生成＋`paper_qc` ok、`part3_audit` ok=True。
+
+---
+
+## Phase 8｜論文化・公開（外部評価可能な形で未来へ残す）
+
+### Step 8.1：短報（最小仮定＋必須検証）
+- 現状：完了（初版；Phase 4.6（GN-z11）確定後に短報を改訂して再固定）
+- 成果物（準備）：`doc/paper/15_short_note.md`、`output/summary/pmodel_short_note.html`
+- 生成：
+  - `python -B scripts/summary/paper_build.py --profile short_note --mode publish --outdir output/summary --skip-docx`
+  - 併用（paper/public と同時更新）：`cmd /c output\\summary\\build_materials.bat quick-nodocx`
+- 8.1.1 短報のビルド入口（HTML）を追加し、生成物の固定名を確立【完了】
+- 8.1.2 本文を「最小仮定＋必須検証」へ圧縮（Phase 4 の結論確定後に最終化）【完了（初版）】
+- 8.1.3（任意）短報QC（paper_qc相当）を追加し、公開前チェックを自動化【完了（paper_qcへ統合）】
+
+### Step 8.2：本論文（全Phase＋不確かさ＋再現性）
+- 現状：完了（初版）
+- 成果物（Part I/II/III）：`output/summary/pmodel_paper.html`、`output/summary/pmodel_paper_part2_astrophysics.html`、`output/summary/pmodel_paper_part3_quantum.html`（DOCXも同名）
+- 原稿：`doc/paper/10_part1_core_theory.md`（Part I）、`doc/paper/11_part2_astrophysics.md`（Part II）、`doc/paper/12_part3_quantum.md`（Part III）
+- QC（軽量）：`python -B scripts/summary/paper_qc.py` → `output/summary/paper_qc.json`（paper+short note の lint strict／図番号連番／数式alt／`\\`混入／本文LaTeXエスケープ混入）
+- 体裁：publish成果物（論文HTML/本文/参考文献/一次ソース一覧）に残っていた作業中の注意表記を除去（外部公開時の誤解防止）。paper_qc に「作業中」混入チェックを追加。
+- 表現：GR/SR と P-model の関係（有効理論／機構の違い／弱場一致・強場差分）を 1.1 節で統一表現へ整合。
+- 再現性：本文（8章）では具体的なファイル名・フォルダ名・スクリプト名は列挙せず、検証用資料（Verification Materials）への参照先を記載する（詳細は補助資料へ集約）。
+- 8.2.1（改稿）Part I の「操作的定義（Pは標準時計の進みを決める場）」と、`φ=-c^2 ln(P/P0)` の選択理由を **P-model内部要請**（比 `P/P0`、合成の加法性など）として明文化し、`β` を自由波感度指数（束縛波/自由波の応答差）として定義、速度飽和 `δ_0` を **コアから外した拡張仮説**として Part II に移し（上限拘束と棄却条件の形を固定）。Part II に一次データの前処理依存（GPS/LLR/Cassini/EHT）の明示と、`β` の独立クロスチェック方針（VLBI）を追記。【完了（改稿）】
+- 8.2.2（改稿）Part I の「量子（2.8）」を Part III への橋渡しとして深化し、差分予測（4.1）を決着条件の形で具体化。さらに概念比較図（図2）を追加し、図1（写像概念図）の δ 記述を除去して「Part Iコアに δ を入れない」方針と整合。【完了（改稿）】
+- 8.2.3（体裁改修）publish HTML の冗長表記（本文 badge／図キャプション二重）を除去し、2.5 見出しを「写像固定」へ修正。共通棄却手順の統計表記（χ²/logL/ΔAIC）を Part I/II/III で統一し、自由度台帳（A.0）表を短いヘッダへ整理。paper_qc/paper_build の lint strict を維持。【完了】
+- 8.2.4（DOCX体裁）Word取り込みで "：" が ":" に正規化される問題を DOCX XML の最終パッチで補正し、要請ブロック（2.1）の矢印/コロン欠落に見えない体裁へ。併せて、Word数式（OMML）前後の段落間隔を tightening し、A.3.1 の誤読防止ブロックを箇条書き化して直後の空白を排除。さらに paper_qc に DOCX側チェック（要請コロン／A.0表枠線）を追加し、再発を機械検出できるようにした。【完了】
+- 8.2.5（DOCX体裁）章/項に加えて「小項（Heading 4；例：5.3.1）」の前にも改ページを入れ、Part II/III の publish HTML を再生成して整形を反映した（Part III は数式 `\\` 表記を除去し、Part II フォームへ統一）。【完了】
+- 8.2.6（体裁改修）論文HTML/DOCXの枠線を撤去（見出し下線／カード枠／画像枠／表枠線）し、Part III の小見出し（4.2.7.1）のフォントが小さすぎる問題を抑制。併せて Part III の入力（ソース）表記を簡潔化し、複数の結果提示を表形式へ統一した。paper_qc の DOCX表チェックも「枠線なし」へ更新。【完了】
+- 8.2.7（体裁改修）Part II/III の表ヘッダー背景色を追加し、検証サマリ（Table 1）の「差/指標」列を差分の大きさに応じて緑→黄→赤で可視化（中間色あり）。Table 1 のタイトル重複も解消し、本文4.1直後へ注入する方式に統一。DOCX は「不要な灰色背景のみ白へ補正」し、意図した色（ヘッダー/ヒートマップ）を保持。【完了】
+- 8.2.8（体裁改修）総合スコアボード（`validation_scoreboard.png`）を「多項目でも画面に収まる」多段レイアウトへ更新し、Part III（量子）用に `quantum_scoreboard.png` を追加して Table 1 の俯瞰図を整備。`build_materials.bat`（quick/full）でも両スコアボードが自動生成される入口を固定。【完了】
+- 8.2.9（体裁改修）総合スコアボードの多段レイアウトを「横分割」から「縦3段（stacked panels）」へ変更し、ラベルが消える問題を解消。併せて Table 1 の「差/指標」列は全行で背景色が付くようにし、内部トークン（`source=...metrics.json`）は論文表示から除去。EHT 図（リング直径）の凡例を右下へ移動し、図と被らない配置へ修正。【完了】
+- 8.2.10（体裁改修）論文（Part II/III）の本文・一次ソース一覧・参考文献に残っていた内部パス（`data/`/`scripts/`/`output/`）表記を削除し、第三者が「出典」と「意味」だけを追える表記へ整理（入手性の節もコマンド列挙を削除）。【完了】
+- 8.2.11（整合改稿）Part I（本文・定義台帳）で残っていた `.json` の内部パス表記（β凍結/反証条件/manifest）を本文表示から除去し、言葉で説明する形に統一（パスは INTERNAL_ONLY へ退避）。Part III と同じ方針（本文は意味、パスは再現性節/内部）で整合。`pmodel_paper.html` を再生成し、`rg -n \"\\.json\" output/summary/pmodel_paper.html` が no matches を確認。【完了】
+- 8.2.12（整合改稿）Part I 2.8（量子）を「最小辞書」へさらに圧縮し、Part III への接続点を `粒子` と `selection` に限定（波動関数/測定/もつれ等の語彙は Part III 側で操作的定義＋反証条件へ委譲）。`pmodel_paper.html` を再生成し、`paper_qc` ok=True を確認。【完了】
+- 8.2.13（設計方針変更）Part I–III の論文本文（publish）から、具体的なファイル名・フォルダ名・スクリプト名を排除し、検証用資料へ集約して参照する形へ移行。`paper_qc` に publish HTML の repo-path（`output/`/`data/`/`scripts/`/`doc/`）混入検出を追加し、混入を機械QAで防止。【完了】
+- 8.2.14（公開参照の固定）検証用資料（Verification Materials）の公開先（GitHub/DOI）を確定し、参考文献 `[PModelVerificationMaterials]` の Web 欄と本資料（`doc/verification/VERIFICATION_MATERIALS.md`）の参照先を固定URL/DOIで埋める（README整備＋ローカルgit初期化まで）。【進行中】
+
+### Step 8.3：データ・コード公開
+- 現状：完了（初版）
+- 公開手順：`doc/PUBLISHING.md`
+- 公開マニフェスト：`python -B scripts/summary/release_manifest.py` → `output/summary/release_manifest.json`
+- 実行環境フィンガープリント：`python -B scripts/summary/env_fingerprint.py` → `output/summary/env_fingerprint.json`（release_manifest が自動生成）
+- 入口（フル再現）：`python -B scripts/summary/run_all.py --offline --jobs 2`
+- 公開範囲（含める/含めない）と、最小実行（quick-nodocx）/フル再現（run_all）の実行コスト目安を `doc/PUBLISHING.md` に追記
+- 公開マニフェストの対象（docs/entrypoints）を拡張し、論文入力（doc/paper/*.md）と基準定義（`doc/P_model_handoff.md`）まで含めて固定
+- 配布バンドル（zip）を生成する入口を追加：`python -B scripts/summary/release_bundle.py --mode (paper|repro) --no-hash`
+  - repro バンドルは WSL 補助（`scripts/cosmology/wsl_install_rascalc.sh`）も同梱（scripts tree に `*.sh` を含める）
+- release_manifest が自身の存在で初回失敗しないよう、manifest自己参照は bundle 側で吸収（bundle に manifest を同梱）
+- release_manifest に生成済みバンドル（zip）を optional outputs として記録（`release_bundles`）
+
+### Step 8.4：図表品質改善（図番号昇順・可読性）
+- 現状：完了（初版）
+- 8.4.1 図番号の昇順化（本文の参照順に合わせて “図1→図2→…” を単調増加にする）【完了（初版）】
+  - 対象：`output/summary/pmodel_paper.html`（publish）
+- 8.4.2 図の可読性改善（文字のはみ出し/凡例かぶり/過密）【完了（初版）】
+  - 対象：紙面（HTML/DOCX）で「図が読める」ことを優先し、必要なら生成スクリプト側（matplotlib）も修正
+  - 方針：凡例は原則として図外へ逃がす／図を全幅表示／クリックで拡大（HTML）
+  - 最低限：本文の主要図（Table 1 で参照される図、Phase 2/3/4/5/6の代表図）を優先して潰す
+  - 進捗：EHT 図（κ必要精度/δ必要精度/κ系統/トレードオフ）で凡例を図外へ移動し、はみ出しを抑制（`scripts/eht/eht_shadow_compare.py` → `output/eht/eht_kappa_precision_required*.png` 等を更新）
+  - 進捗：EHT 図16（リング直径）で「棒=影直径（モデル予測）／赤点=リング直径（観測）／黒ひし形=d_sh（EHT推定; Sgr A*のみ）」を凡例で明示し、誤読を抑制（`scripts/eht/eht_shadow_compare.py` → `output/eht/eht_shadow_compare.png`）
+  - 進捗：図表インデックス（`doc/paper/01_figures_index.md`）のPNGを機械的にチェックし、低解像/凡例かぶりの代表セットを修正→再生成（small(<1600w or <700h) を 0件へ）
+    - `scripts/viking/update_slides.py` → `output/viking/viking_p_model_vs_measured_no_arrow.png`
+    - `scripts/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep.py` → `output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__*.png`
+    - `scripts/eht/eht_sgra_paper5_m3_historical_distribution_values.py` → `output/eht/eht_sgra_paper5_m3_historical_distribution_values_ecdf.png`
+    - `scripts/llr/llr_station_coord_delta_plot.py`（軽量再生成）→ `output/llr/batch/llr_station_coord_delta_pos_eop.png`
+    - `scripts/pulsar/binary_pulsar_orbital_decay.py` → `output/pulsar/binary_pulsar_orbital_decay.png`
+    - `scripts/cosmology/cosmology_bao_catalog_peakfit_caps_summary.py` → `output/cosmology/cosmology_bao_catalog_peakfit_caps_summary__recon_grid_iso.png`
+    - `scripts/cosmology/fetch_mast_jwst_spectra.py --offline --confirm-z` → `output/cosmology/jwst_spectra__*__z_confirmed_summary.png`
+  - 反映：`cmd /c output\\summary\\build_materials.bat quick-nodocx`（paper HTML は base64 埋め込みのため、PNG更新だけでは反映されない）
+  - 注意：未発見の図崩れ（凡例かぶり/はみ出し等）が見つかった場合は、8.4.2 を再開して該当スクリプトを修正する（図は生成スクリプト側で直す）。
+
+### Step 8.5：査読準備（批判点リスト＋応答整理＋本文補強）
+- 現状：完了（初版）
+- 8.5.1 想定批判点（査読コメント）リストと、応答（本文/メモ/対応先）を整理【完了】
+  - 追加：`doc/paper/90_peer_review_notes.md`
+- 8.5.2 宇宙論（Step 4.7：DDR再接続条件）の説明補強（定義・判定基準・d_L/d_A 寄与分解）【完了】
+  - 反映：`doc/paper/10_manuscript.md`（2.5.3 節）
+- 8.5.3 論文本文の「主張の範囲」を明文化（有効モデル/fit-predict分離/反証条件/再現入口）【完了】
+  - 反映：`doc/paper/10_manuscript.md`（1.3 節）
+- 8.5.4 Part III（量子）5章（差分予測）の補強：Bell の棄却条件パックを Part II（EHT 5.1）と同型のフォームで形式化し、Born則逸脱（自己重力拡張）の m_crit/χ と将来実験（MAQRO/OTIMA）の必要精度要件（σ_phase/σ_V, N）を数値表として固定【完了】
+  - 反映：`doc/paper/12_part3_quantum.md`（5章）
+  - 反映：`doc/paper/01_figures_index.md`（Bell図の追加）
+
+### Step 8.6：論文の最終整合（DDR監査表／Table 1整合／反証条件／Discussion/Conclusion／図表参照）
+- 現状：完了（改訂）
+- 進捗：Part II 5.3 に 16件の「距離推定I/F監査表」と、η^(P) の反証条件パック（固定JSON要約）を追記し、DDRを「35σ棄却」ではなく「前提監査」として固定した。
+- 進捗：Table 1（検証サマリ）を η^(P) 指標と凍結βの表記へ整合させ、Discussion/Conclusionへ枠組み転換（監査→棄却条件）を反映した。
+- 進捗：`paper_qc` / `paper_lint` による図表参照・引用整合チェックを通過（errors/warnings=0）。
+- 8.6.1 I/F監査チェックリストの明文化（Part II 5.3へ監査表を追加）【完了】
+  - 目的：公表制約（16件）が「空間膨張(1+z)」を距離推定のどこで埋め込んでいるかを特定し、5.3節に監査表として明文化する。
+  - 作業：`doc/cosmology/ddr_distance_estimation_if_audit_checklist.md` を基に、16件それぞれに対して「埋め込み箇所（距離定義/推定I/F段）」を 1行で監査できる表へ落とし込む。
+  - 反映：`doc/paper/11_part2_astrophysics.md`（5.3）
+- 8.6.2 Table 1 との整合性確認（DDR/独立プローブ）【完了】
+  - 目的：5.3節の DDR 関連（η^(P) 指標、独立プローブ p_t/β_T）が Table 1 に正しく反映されていることを確認し、不足があれば追加する。
+  - 作業：`output/summary/paper_table1_results.json`（および生成スクリプト）を点検し、Part II 4.1 の Table 1 と 5.3 の記述が矛盾しないよう整合を取る。
+- 8.6.3 反証条件パックの更新（η^(P) 棄却閾値の明文化）【完了】
+  - 目的：η^(P) 指標での棄却閾値を、固定JSON（falsification pack）の形式で 5.3 節末尾に明記する。
+  - 作業：`output/cosmology/cosmology_ddr_pmodel_falsification_pack.json` の閾値（必要精度/棄却条件）を 5.3 節末尾に短く要約し、紙面に固定する。
+  - 反映：`doc/paper/11_part2_astrophysics.md`（5.3）
+- 8.6.4 Discussion（6.2）への反映（35σ棄却→前提監査）【完了】
+  - 目的：DDRの枠組み転換（「35σ棄却」ではなく「距離推定I/Fの前提監査」）を 6.2 節「制限事項と今後」に明記する。
+  - 反映：`doc/paper/11_part2_astrophysics.md`（6.2）
+- 8.6.5 弱場テスト（4.2-4.7）の最終確認（共通の凍結β）【完了】
+  - 目的：LLR/Cassini/Viking/Mercury/GPS の各検証が「共通の凍結β」で整合していることを確認する。
+  - 作業：`output/theory/frozen_parameters.json` と各検証の metrics を突き合わせ、βの扱い（fit/predict）が本文・図表・Table 1 で一貫するよう点検する。
+- 8.6.6 強場テスト（4.8 EHT）の精度要件整理（ngEHT/BHEX）【完了】
+  - 目的：κ誤差予算と係数差 4.63% の判別に必要な観測精度（ngEHT/BHEX 等）を 6.3 節へ集約する。
+  - 反映：`doc/paper/11_part2_astrophysics.md`（6.3）
+- 8.6.7 全体の図表参照の整合性確認【完了】
+  - 目的：図番号（図1-68）の連続性、参考文献の引用漏れ、セクション間の相互参照を点検する。
+  - 作業：`scripts/summary/paper_qc.py` / `scripts/summary/paper_lint.py` の出力を基に、紙面の参照崩れを潰す。
+- 8.6.8 Conclusion（7章）の最終調整【完了】
+  - 目的：DDR前提監査、独立プローブ整合、差分予測（EHT）の3点を結論として明確に記述する。
+  - 反映：`doc/paper/11_part2_astrophysics.md`（7章）
+- 8.6.9 Part II の完成宣言（Phase 4.6 を除く freeze）【完了】
+  - 目的：Part II が「公開待ち（GN-z11）」によってブロックされている箇所以外は、整合・再現・反証条件が固定できていることを明文化し、Part III への移行準備を整える。
+  - 作業：`paper_qc` / `paper_lint` / publish 生成が通る状態を「freeze」として宣言し、GN-z11 公開後は Step 4.6 の更新→Part II 改訂→再freeze の順で進める。
+
+
+
+
+

@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+
+# Virtual environments
+.venv/
+.venv_wsl/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+
+# Local temp
+.tmp*/
+temp_*.pdf
+
+# Generated outputs (publish via Releases when needed)
+output/*
+!output/summary/
+output/summary/*
+!output/summary/build_materials.bat
+
+# Data caches (keep lightweight manifests; fetch raw inputs separately)
+data/
+!data/
+!data/**/
+!data/**/manifest*.json
+
+# Local logs
+chatter

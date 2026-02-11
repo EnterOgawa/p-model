@@ -1,0 +1,114 @@
+## インストール
+pip install astroquery astropy matplotlib
+
+
+## サンプルソース
+from astroquery.mast import Observations
+from astropy.io import fits
+import matplotlib.pyplot as plt
+import numpy as np
+
+# 1. ターゲットと条件を指定して検索（Query）
+target_name = "GN-z11"
+
+print(f"--- Searching for {target_name} ---")
+obs_table = Observations.query_object(
+    target_name,
+    radius=".02 deg",         # 検索半径（少し広めに）
+)
+
+# 2. テーブルから「JWST」かつ「分光(Spectrum)」だけに絞り込む
+# （MASTは画像やHSTのデータも全部返してくるため）
+mask = (obs_table['obs_collection'] == 'JWST') & \
+       (obs_table['dataproduct_type'] == 'spectrum') & \
+       (obs_table['calib_level'] >= 2) # Level 2以上（最低限の補正済み）
+
+jwst_spectra = obs_table[mask]
+print(f"Found {len(jwst_spectra)} JWST spectra observations.")
+
+if len(jwst_spectra) == 0:
+    print("No spectra found.")
+    exit()
+
+# 3. 実際のファイルリスト（Products）を取得
+# ここで一番最初の観測データ（例として）の詳細を取得します
+target_obs = jwst_spectra[0] 
+data_products = Observations.get_product_list(target_obs)
+
+# 4. ダウンロードするファイルの種類を選別
+# P-model検証には 'x1d' (1次元抽出済みスペクトル) が最も扱いやすいです。
+# '_cal.fits' (2次元スペクトル) が欲しい場合は 'cal' でフィルタします。
+filtered_products = Observations.filter_products(
+    data_products,
+    productSubGroupDescription="X1D", # 1Dスペクトルを指定
+    extension="fits"
+)
+
+print(f"Downloading {len(filtered_products)} files...")
+
+# 5. ダウンロード実行
+# download_dir で保存先を指定できます
+manifest = Observations.download_products(
+    filtered_products,
+    download_dir="./mast_data" 
+)
+
+print("Download complete.")
+
+# --- おまけ：中身を簡易チェック（P-model解析への入り口） ---
+if len(manifest) > 0:
+    file_path = manifest['Local Path'][0]
+    
+    with fits.open(file_path) as hdul:
+        hdul.info()
+        # JWSTのx1dデータは通常 'EXTRACT1D' などの拡張にデータがあります
+        # ※ファイル形式は装置(NIRSpec/NIRCam)によって若干異なります
+        try:
+            data = hdul[1].data
+            wave = data['WAVELENGTH'] # 波長 (micron)
+            flux = data['FLUX']       # フラックス (Jy or MJy/sr)
+            
+            # 簡易プロット
+            plt.figure(figsize=(10, 5))
+            plt.plot(wave, flux, lw=1)
+            plt.title(f"Spectrum of {target_name}")
+            plt.xlabel("Wavelength (micron)")
+            plt.ylabel("Flux")
+            plt.grid(True)
+            plt.show()
+            
+            print("この波長(wave)と強度(flux)を使ってP-modelの検証が行えます。")
+            
+        except KeyError:
+            print("データ構造が想定と異なります。hdul.info()を確認してください。")
+
+
+
+## 使い方
+A. 検索条件の指定 (query_criteria)
+
+特定の天体名ではなく、「全天の赤方偏移 z>10 の銀河」のように広範囲に探したい場合は、query_object ではなく query_criteria を使います。
+
+# 例：JWSTで観測された、分光データ全てを検索（範囲指定なし）
+obs = Observations.query_criteria(
+    obs_collection="JWST",
+    dataproduct_type="spectrum",
+    # filters="F444W" # 特定のフィルタだけに絞ることも可能
+)
+
+B. データのレベル (productSubGroupDescription)
+
+ここが検証の「純度」を決めます。filter_products メソッドで指定します。
+
+1.UNCAL (Level 1b): 生データ。検出器のカウント値。バイアスもダークも引かれていません。解析は困難ですが、最も「生」です。
+
+2.CAL (Level 2a/2b): 推奨。 2次元スペクトル画像。検出器の特性は補正済みですが、まだ1本の線（1D）にはなっていません。空間的な広がりを見たいならこれ。
+
+3.X1D (Level 3): 推奨（最初の一歩）。 2次元画像から天体の場所を特定し、波長ごとの強度（1次元配列）に抽出したもの。WAVELENGTH と FLUX の配列がそのまま入っているので、プログラムですぐ解析できます。
+
+
+C. キャッシュと認証
+
+認証: 公開データ（Public）であれば、login() は不要です。
+
+キャッシュ: 一度ダウンロードしたファイルは、デフォルトでは ~/.astropy/cache などにキャッシュされますが、上記のスクリプトのように download_dir を明示的に指定して、プロジェクトフォルダ（あるいはシンボリックリンク先）に保存することをお勧めします。
