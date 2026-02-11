@@ -73,7 +73,7 @@ def _load_pion_range_scale(*, root: Path) -> dict[str, object]:
     Load λπ (Compton wavelength) from the cached PDG-based hadron baseline metrics
     (Phase 7 / Step 7.13.1 output).
     """
-    metrics = root / "output" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    metrics = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
     if not metrics.exists():
         raise SystemExit(
             "[fail] missing hadron baseline metrics (needed for λπ range constraint).\n"
@@ -4327,7 +4327,7 @@ def main(argv: list[str] | None = None) -> None:
     step = str(args.step)
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Exact SI constants (for conversion only).

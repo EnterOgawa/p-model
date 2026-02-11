@@ -6,8 +6,8 @@ REM
 REM Default (full): run the full offline pipeline (heavy).
 REM Optional: pass "quick" to rebuild paper/public materials from what is already computed.
 REM Optional: pass "quick-nodocx" to rebuild HTML only (skip DOCX exports).
-REM Note: quick/quick-nodocx also rebuild the short note HTML (Phase 8 / Step 8.1).
-REM Note: full also rebuilds all paper HTML/DOCX (pmodel_paper + part2/part3 + short_note).
+REM Note: outputs are written under output\private\summary by default.
+REM Note: full also rebuilds all paper HTML/DOCX (pmodel_paper + part2/part3 + part4).
 REM
 REM Usage:
 REM   build_materials.bat
@@ -17,7 +17,7 @@ REM   build_materials.bat quick-nodocx
 REM   build_materials.bat 1  (Part I only)
 REM   build_materials.bat 2  (Part II only)
 REM   build_materials.bat 3  (Part III only)
-REM   build_materials.bat 4  (Short note only)
+REM   build_materials.bat 4  (Part IV only)
 
 for %%I in ("%~dp0..\\..") do set "ROOT=%%~fI"
 pushd "%ROOT%" >nul 2>&1
@@ -55,9 +55,9 @@ if "%MODE%"=="3" (
   goto single_profile
 )
 if "%MODE%"=="4" (
-  set "PROFILE=short_note"
-  set "HTML_NAME=pmodel_short_note.html"
-  set "DOCX_NAME=pmodel_short_note.docx"
+  set "PROFILE=part4_verification"
+  set "HTML_NAME=pmodel_paper_part4_verification.html"
+  set "DOCX_NAME=pmodel_paper_part4_verification.docx"
   set "PB_EXTRA_ARGS=--skip-tables"
   goto single_profile
 )
@@ -78,12 +78,12 @@ echo [info] ROOT=%ROOT%
 
 echo.
 echo === paper_build (%PROFILE%) ===
-python -B scripts\summary\paper_build.py --profile %PROFILE% --mode publish --outdir output\summary --skip-docx --skip-lint %PB_EXTRA_ARGS%
+python -B scripts\summary\paper_build.py --profile %PROFILE% --mode publish --outdir output\private\summary --skip-docx --skip-lint %PB_EXTRA_ARGS%
 if errorlevel 1 goto fail
 
 echo.
 echo === docx_paper (%PROFILE%) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\%HTML_NAME% --out output\summary\%DOCX_NAME% --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\%HTML_NAME% --out output\private\summary\%DOCX_NAME% --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :single_docx_done
 if "%RC%"=="3" (
@@ -92,8 +92,8 @@ if "%RC%"=="3" (
 )
 echo [warn] DOCX export failed (%PROFILE%). Continuing with HTML only.
 :single_docx_done
-if exist output\summary\pmodel_paper_part3_quantum__tmp.docx (
-  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\summary\pmodel_paper_part3_quantum__tmp.docx
+if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
+  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\private\summary\pmodel_paper_part3_quantum__tmp.docx
 )
 
 echo.
@@ -111,7 +111,7 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (paper) ===
-python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx --skip-lint
+python -B scripts\summary\paper_build.py --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -126,22 +126,22 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
-echo === paper_build (short_note) ===
-python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+echo === paper_build (part4_verification) ===
+python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === docx_paper (paper) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_paper.html --out output\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_paper_docx_done
 if "%RC%"=="3" (
@@ -153,7 +153,7 @@ echo [warn] DOCX export failed (paper). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part2_astrophysics) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_paper_part2_astrophysics.html --out output\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_part2_docx_done
 if "%RC%"=="3" (
@@ -165,7 +165,7 @@ echo [warn] DOCX export failed (part2_astrophysics). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part3_quantum) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_paper_part3_quantum.html --out output\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_part3_docx_done
 if "%RC%"=="3" (
@@ -174,21 +174,21 @@ if "%RC%"=="3" (
 )
 echo [warn] DOCX export failed (part3_quantum). Continuing with HTML only.
 :full_part3_docx_done
-if exist output\summary\pmodel_paper_part3_quantum__tmp.docx (
-  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\summary\pmodel_paper_part3_quantum__tmp.docx
+if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
+  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\private\summary\pmodel_paper_part3_quantum__tmp.docx
 )
 
 echo.
-echo === docx_short_note ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_short_note.html --out output\summary\pmodel_short_note.docx --paper-equations --orientation landscape --margin-mm 7
+echo === docx_paper (part4_verification) ===
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :full_short_note_docx_done
+if "%RC%"=="0" goto :full_part4_docx_done
 if "%RC%"=="3" (
   echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :full_short_note_docx_done
+  goto :full_part4_docx_done
 )
-echo [warn] DOCX export failed (short_note). Continuing with HTML only.
-:full_short_note_docx_done
+echo [warn] DOCX export failed (part4_verification). Continuing with HTML only.
+:full_part4_docx_done
 
 echo.
 echo [ok] Done (full)
@@ -200,27 +200,27 @@ echo [info] ROOT=%ROOT%
 
 echo.
 echo === paper_build (paper) ===
-python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx --skip-lint
+python -B scripts\summary\paper_build.py --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
-echo === paper_build (short_note) ===
-python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+echo === paper_build (part4_verification) ===
+python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === docx_paper (paper) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_paper.html --out output\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_paper_docx_done
 if "%RC%"=="3" (
@@ -232,7 +232,7 @@ echo [warn] DOCX export failed (paper). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part2_astrophysics) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_paper_part2_astrophysics.html --out output\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_part2_docx_done
 if "%RC%"=="3" (
@@ -244,7 +244,7 @@ echo [warn] DOCX export failed (part2_astrophysics). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part3_quantum) ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_paper_part3_quantum.html --out output\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_part3_docx_done
 if "%RC%"=="3" (
@@ -253,21 +253,21 @@ if "%RC%"=="3" (
 )
 echo [warn] DOCX export failed (part3_quantum). Continuing with HTML only.
 :quick_part3_docx_done
-if exist output\summary\pmodel_paper_part3_quantum__tmp.docx (
-  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\summary\pmodel_paper_part3_quantum__tmp.docx
+if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
+  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\private\summary\pmodel_paper_part3_quantum__tmp.docx
 )
 
 echo.
-echo === docx_short_note ===
-python -B scripts\summary\html_to_docx.py --in output\summary\pmodel_short_note.html --out output\summary\pmodel_short_note.docx --paper-equations --orientation landscape --margin-mm 7
+echo === docx_paper (part4_verification) ===
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7
 set "RC=%ERRORLEVEL%"
-if "%RC%"=="0" goto :quick_short_note_docx_done
+if "%RC%"=="0" goto :quick_part4_docx_done
 if "%RC%"=="3" (
   echo [warn] DOCX export skipped: Microsoft Word not available.
-  goto :quick_short_note_docx_done
+  goto :quick_part4_docx_done
 )
-echo [warn] DOCX export failed (short_note). Continuing with HTML only.
-:quick_short_note_docx_done
+echo [warn] DOCX export failed (part4_verification). Continuing with HTML only.
+:quick_part4_docx_done
 
 echo.
 echo [ok] Done (quick)
@@ -279,22 +279,22 @@ echo [info] ROOT=%ROOT%
 
 echo.
 echo === paper_build (paper) ===
-python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx --skip-lint
+python -B scripts\summary\paper_build.py --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
-echo === paper_build (short_note) ===
-python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
+echo === paper_build (part4_verification) ===
+python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.

@@ -11,12 +11,12 @@ freeze-test（fit→freeze→holdout; galaxy split）の「手続き系統」を
   統計量（holdout |z|）が動く可能性があるため、系統として台帳化する。
 
 入力：
-- output/cosmology/sparc_rar_reconstruction.csv（g_bar/g_obs の再構成；既定Υで固定）
-- output/cosmology/cosmology_redshift_pbg_metrics.json（H0^(P)；a0=κ c H0^(P)）
+- output/private/cosmology/sparc_rar_reconstruction.csv（g_bar/g_obs の再構成；既定Υで固定）
+- output/private/cosmology/cosmology_redshift_pbg_metrics.json（H0^(P)；a0=κ c H0^(P)）
 
 出力（固定）：
-- output/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json
-- output/cosmology/sparc_rar_freeze_test_procedure_sweep.png（任意；matplotlib が無い場合はスキップ）
+- output/private/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json
+- output/private/cosmology/sparc_rar_freeze_test_procedure_sweep.png（任意；matplotlib が無い場合はスキップ）
 """
 
 from __future__ import annotations
@@ -205,13 +205,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--rar-csv",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_reconstruction.csv"),
-        help="RAR reconstruction CSV (default: output/cosmology/sparc_rar_reconstruction.csv)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_reconstruction.csv"),
+        help="RAR reconstruction CSV (default: output/private/cosmology/sparc_rar_reconstruction.csv)",
     )
     p.add_argument(
         "--h0p-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
-        help="Path to cosmology_redshift_pbg_metrics.json (default: output/cosmology/cosmology_redshift_pbg_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
+        help="Path to cosmology_redshift_pbg_metrics.json (default: output/private/cosmology/cosmology_redshift_pbg_metrics.json)",
     )
     p.add_argument("--h0p-km-s-mpc", type=float, default=None, help="Override H0^(P) in km/s/Mpc (optional)")
     p.add_argument("--pbg-kappa", type=float, default=DEFAULT_PBG_KAPPA, help="a0 = kappa * c * H0^(P) (default: 1/(2π))")
@@ -234,12 +234,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     p.add_argument(
         "--out",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_procedure_sweep_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_procedure_sweep_metrics.json"),
         help="Output JSON path",
     )
     p.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_procedure_sweep.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_procedure_sweep.png"),
         help="Output plot PNG path",
     )
     args = p.parse_args(list(argv) if argv is not None else None)

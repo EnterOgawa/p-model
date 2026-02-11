@@ -12,8 +12,8 @@ peakfit の ε（AP warping）へ与える影響を可視化する。
   A0（z_source/LOS/距離積分）に加えて重み仕様も固定・記録する。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity.png
-- output/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity.png
+- output/private/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json
 """
 
 from __future__ import annotations
@@ -184,32 +184,32 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="BAO catalog-based ε sensitivity to weight schemes.")
     ap.add_argument(
         "--published-post",
-        default="output/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
+        default="output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
         help="published post-recon multipoles peakfit (Ross)",
     )
     ap.add_argument(
         "--catalog-boss",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
         help="catalog peakfit metrics (boss_default weights; out_tag=none)",
     )
     ap.add_argument(
         "--catalog-fkp-only",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__w_fkp_only_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__w_fkp_only_metrics.json",
         help="catalog peakfit metrics (fkp_only weights)",
     )
     ap.add_argument(
         "--catalog-none",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__w_none_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__w_none_metrics.json",
         help="catalog peakfit metrics (no weights)",
     )
     ap.add_argument(
         "--out-png",
-        default="output/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity.png",
+        default="output/private/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity.png",
         help="output png",
     )
     ap.add_argument(
         "--out-json",
-        default="output/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json",
         help="output metrics json",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

@@ -277,7 +277,7 @@ def _fit_debye_einstein_2(
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
@@ -315,7 +315,7 @@ def main() -> None:
         theta_d = float(theta_from_metrics)
         theta_d_source: dict[str, object] = {
             "kind": "frozen_metrics",
-            "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
+            "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
         }
     else:
         theta_d, _ = _fit_theta_d_from_janaf(root)

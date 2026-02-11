@@ -13,8 +13,8 @@ DESI（等）の catalog-based ξℓ→peakfit（ε）について、座標化�
 - Corrfunc は使わない（WSL不要）。`cosmology_bao_catalog_peakfit.py` の出力（metrics）を読むだけ。
 
 出力（固定名）:
-- output/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}.png
-- output/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}.png
+- output/private/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}_metrics.json
 """
 
 from __future__ import annotations
@@ -184,12 +184,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--out-png",
         default="",
-        help="output png path (default: output/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}.png)",
+        help="output png path (default: output/private/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}.png)",
     )
     ap.add_argument(
         "--out-json",
         default="",
-        help="output json path (default: output/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}_metrics.json)",
+        help="output json path (default: output/private/cosmology/cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_out_tag}_metrics.json)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -211,7 +211,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_tags = [base_tag] + [t for t in variant_tags if t != base_tag]
 
     def peakfit_metrics_path(tag: str) -> Path:
-        return (_ROOT / "output" / "cosmology" / f"cosmology_bao_catalog_peakfit_{sample}_{caps}__{tag}_metrics.json").resolve()
+        return (_ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_peakfit_{sample}_{caps}__{tag}_metrics.json").resolve()
 
     p_metrics = {tag: peakfit_metrics_path(tag) for tag in out_tags}
     missing = [tag for tag, p in p_metrics.items() if not p.exists()]
@@ -303,11 +303,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if str(args.out_png).strip():
         out_png = (_ROOT / str(args.out_png)).resolve()
     else:
-        out_png = (_ROOT / "output" / "cosmology" / f"cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_tag}.png").resolve()
+        out_png = (_ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_tag}.png").resolve()
     if str(args.out_json).strip():
         out_json = (_ROOT / str(args.out_json)).resolve()
     else:
-        out_json = (_ROOT / "output" / "cosmology" / f"cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_tag}_metrics.json").resolve()
+        out_json = (_ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_tag}_metrics.json").resolve()
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=180)

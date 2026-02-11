@@ -101,7 +101,7 @@ def _sigma_fit_1e8_per_k(*, t_k: float, fit_error: dict[str, Any]) -> float | No
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion"

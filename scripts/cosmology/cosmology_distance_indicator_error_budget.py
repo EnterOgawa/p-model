@@ -16,11 +16,11 @@ Step 14.2.15（距離指標の“誤差予算”を一次ソースで設定）:
   - data/cosmology/alcock_paczynski_constraints.json（BOSS DR12; BAO距離プロダクト）
   - data/cosmology/boss_dr12_baofs_consensus_reduced_covariance_cij.json（BOSS DR12; BAO+FS reduced covariance c_ij）
   - data/cosmology/bao_sound_horizon_constraints.json（Planck r_drag; BAO校正スケール）
-  - （任意）output/cosmology/cosmology_distance_indicator_reach_limit_metrics.json（DDR→必要補正 Δμ）
+  - （任意）output/private/cosmology/cosmology_distance_indicator_reach_limit_metrics.json（DDR→必要補正 Δμ）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_error_budget.png
-  - output/cosmology/cosmology_distance_indicator_error_budget_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_error_budget.png
+  - output/private/cosmology/cosmology_distance_indicator_error_budget_metrics.json
 """
 
 from __future__ import annotations
@@ -806,8 +806,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--reach-metrics",
         type=str,
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json"),
-        help="Reach-limit metrics JSON (default: output/cosmology/cosmology_distance_indicator_reach_limit_metrics.json).",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json"),
+        help="Reach-limit metrics JSON (default: output/private/cosmology/cosmology_distance_indicator_reach_limit_metrics.json).",
     )
     ap.add_argument(
         "--z-max",
@@ -888,7 +888,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if reach_path.exists():
         reach_reps = _load_reach_representatives(reach_path)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_distance_indicator_error_budget.png"
     out_json = out_dir / "cosmology_distance_indicator_error_budget_metrics.json"

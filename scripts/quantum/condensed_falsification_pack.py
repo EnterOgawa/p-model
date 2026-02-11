@@ -8,7 +8,7 @@ Phase 7 / Step 7.18.2（Part III closeout）:
 falsification（棄却閾値・適用条件）を束ねた “反証条件パック（JSON）” を固定出力する。
 
 出力（固定）:
-  - output/quantum/condensed_falsification_pack.json
+  - output/public/quantum/condensed_falsification_pack.json
 
 方針:
 - 再計算は行わない（既に生成済みの metrics JSON を入力として束ねる）。
@@ -110,8 +110,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_ROOT / "output" / "quantum" / "condensed_falsification_pack.json"),
-        help="Output JSON path (default: output/quantum/condensed_falsification_pack.json).",
+        default=str(_ROOT / "output" / "public" / "quantum" / "condensed_falsification_pack.json"),
+        help="Output JSON path (default: output/public/quantum/condensed_falsification_pack.json).",
     )
     args = ap.parse_args(argv)
 
@@ -121,14 +121,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     metrics_relpaths = [
-        "output/quantum/condensed_silicon_lattice_baseline_metrics.json",
-        "output/quantum/condensed_silicon_heat_capacity_baseline_metrics.json",
-        "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
-        "output/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json",
-        "output/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json",
-        "output/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json",
-        "output/quantum/thermo_blackbody_entropy_baseline_metrics.json",
-        "output/quantum/thermo_blackbody_radiation_baseline_metrics.json",
+        "output/public/quantum/condensed_silicon_lattice_baseline_metrics.json",
+        "output/public/quantum/condensed_silicon_heat_capacity_baseline_metrics.json",
+        "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json",
+        "output/public/quantum/condensed_silicon_resistivity_temperature_coefficient_baseline_metrics.json",
+        "output/public/quantum/condensed_silicon_thermal_expansion_baseline_metrics.json",
+        "output/public/quantum/condensed_ofhc_copper_thermal_conductivity_baseline_metrics.json",
+        "output/public/quantum/thermo_blackbody_entropy_baseline_metrics.json",
+        "output/public/quantum/thermo_blackbody_radiation_baseline_metrics.json",
     ]
 
     payload = build_pack(root=_ROOT, metrics_relpaths=metrics_relpaths)

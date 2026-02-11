@@ -22,10 +22,10 @@ BOSS DR12 だけに依存しない形で、異方的BAO（D_M/r_d, D_H/r_d）の
   - data/cosmology/bao_anisotropic_distance_ratio_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_bao_distance_ratio_fit.png
-  - output/cosmology/cosmology_bao_distance_ratio_fit_residuals.png
-  - output/cosmology/cosmology_bao_distance_ratio_fit_leave_one_out.png
-  - output/cosmology/cosmology_bao_distance_ratio_fit_metrics.json
+  - output/private/cosmology/cosmology_bao_distance_ratio_fit.png
+  - output/private/cosmology/cosmology_bao_distance_ratio_fit_residuals.png
+  - output/private/cosmology/cosmology_bao_distance_ratio_fit_leave_one_out.png
+  - output/private/cosmology/cosmology_bao_distance_ratio_fit_metrics.json
 """
 
 from __future__ import annotations
@@ -686,7 +686,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     fit_desi = _fit_sR_Q(desi) if desi else {"best_fit": {}, "chi2": float("nan"), "dof": 0, "chi2_dof": None}
     fit_all = _fit_sR_Q(pts)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_png = out_dir / "cosmology_bao_distance_ratio_fit.png"
     out_png_resid = out_dir / "cosmology_bao_distance_ratio_fit_residuals.png"
     out_png_loo = out_dir / "cosmology_bao_distance_ratio_fit_leave_one_out.png"

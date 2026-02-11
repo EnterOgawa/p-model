@@ -15,7 +15,7 @@ from typing import Any, Iterable, Literal
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_BASE = ROOT / "output" / "quantum" / "bell"
+OUT_BASE = ROOT / "output" / "public" / "quantum" / "bell"
 
 
 def _utc_now() -> str:
@@ -1194,9 +1194,9 @@ def _write_selection_loophole_quantification(
             },
         },
         "outputs": {
-            "json": "output/quantum/bell/selection_loophole_quantification.json",
-            "csv": "output/quantum/bell/selection_loophole_quantification.csv",
-            "png": "output/quantum/bell/selection_loophole_quantification.png",
+            "json": "output/public/quantum/bell/selection_loophole_quantification.json",
+            "csv": "output/public/quantum/bell/selection_loophole_quantification.csv",
+            "png": "output/public/quantum/bell/selection_loophole_quantification.png",
         },
     }
     _write_json(out_json, payload)
@@ -1782,9 +1782,9 @@ def _write_systematics_decomposition_15items(
             "top_pairs": pair_rel[:30],
         },
         "outputs": {
-            "json": "output/quantum/bell/systematics_decomposition_15items.json",
-            "csv": "output/quantum/bell/systematics_decomposition_15items.csv",
-            "png": "output/quantum/bell/systematics_decomposition_15items.png",
+            "json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+            "csv": "output/public/quantum/bell/systematics_decomposition_15items.csv",
+            "png": "output/public/quantum/bell/systematics_decomposition_15items.png",
         },
     }
     _write_json(out_json, payload)
@@ -3124,7 +3124,7 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
     }
 
     # --- window sweep: prefer existing CSV (fast); fallback to recompute from normalized clicks.
-    sweep_csv = ROOT / "output" / "quantum" / "nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv"
+    sweep_csv = ROOT / "output" / "public" / "quantum" / "nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv"
     sweep_source: dict[str, Any] = {}
     if sweep_csv.exists():
         rows = _load_csv_dicts(sweep_csv)
@@ -4274,12 +4274,12 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
 def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     """
     Phase 7 / Step 7.16.7-7.16.9:
-    - output/quantum/bell/<dataset>/covariance.json
-    - output/quantum/bell/<dataset>/covariance_bootstrap.json
-    - output/quantum/bell/cross_dataset_covariance.json / .png
-    - output/quantum/bell/systematics_decomposition_15items.json / .csv / .png
-    - output/quantum/bell/systematics_templates.json
-    - output/quantum/bell/longterm_consistency.json / .png
+    - output/public/quantum/bell/<dataset>/covariance.json
+    - output/public/quantum/bell/<dataset>/covariance_bootstrap.json
+    - output/public/quantum/bell/cross_dataset_covariance.json / .png
+    - output/public/quantum/bell/systematics_decomposition_15items.json / .csv / .png
+    - output/public/quantum/bell/systematics_templates.json
+    - output/public/quantum/bell/longterm_consistency.json / .png
     """
 
     def _attach_cov_diagnostics(obj: dict[str, Any]) -> None:
@@ -5048,15 +5048,15 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         "main_script": {"path": "scripts/quantum/bell_primary_products.py", "repro": "python -B scripts/quantum/bell_primary_products.py"},
         "datasets": cov_index,
         "systematics_15items": {
-            "json": "output/quantum/bell/systematics_decomposition_15items.json",
-            "csv": "output/quantum/bell/systematics_decomposition_15items.csv",
-            "png": "output/quantum/bell/systematics_decomposition_15items.png" if bool(sys15.get("plot_written")) else None,
+            "json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+            "csv": "output/public/quantum/bell/systematics_decomposition_15items.csv",
+            "png": "output/public/quantum/bell/systematics_decomposition_15items.png" if bool(sys15.get("plot_written")) else None,
         },
         "outputs": {
-            "systematics_templates_json": "output/quantum/bell/systematics_templates.json",
-            "systematics_15items_json": "output/quantum/bell/systematics_decomposition_15items.json",
-            "systematics_15items_csv": "output/quantum/bell/systematics_decomposition_15items.csv",
-            "systematics_15items_png": "output/quantum/bell/systematics_decomposition_15items.png"
+            "systematics_templates_json": "output/public/quantum/bell/systematics_templates.json",
+            "systematics_15items_json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+            "systematics_15items_csv": "output/public/quantum/bell/systematics_decomposition_15items.csv",
+            "systematics_15items_png": "output/public/quantum/bell/systematics_decomposition_15items.png"
             if bool(sys15.get("plot_written"))
             else None,
         },
@@ -5181,8 +5181,8 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         "datasets": [],
         "matrices": {},
         "outputs": {
-            "cross_dataset_covariance_json": "output/quantum/bell/cross_dataset_covariance.json",
-            "cross_dataset_covariance_png": "output/quantum/bell/cross_dataset_covariance.png",
+            "cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json",
+            "cross_dataset_covariance_png": "output/public/quantum/bell/cross_dataset_covariance.png",
         },
     }
     profile_entries: list[dict[str, Any]] = []
@@ -5374,10 +5374,10 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         "generated_utc": _utc_now(),
         "phase": {"phase": 7, "step": "7.16.9", "name": "Bell: longterm cross-dataset consistency quantification"},
         "inputs": {
-            "falsification_pack_json": "output/quantum/bell/falsification_pack.json" if fc_path.exists() else None,
-            "systematics_templates_json": "output/quantum/bell/systematics_templates.json",
-            "systematics_15items_json": "output/quantum/bell/systematics_decomposition_15items.json",
-            "cross_dataset_covariance_json": "output/quantum/bell/cross_dataset_covariance.json",
+            "falsification_pack_json": "output/public/quantum/bell/falsification_pack.json" if fc_path.exists() else None,
+            "systematics_templates_json": "output/public/quantum/bell/systematics_templates.json",
+            "systematics_15items_json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+            "cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json",
         },
         "thresholds": thresholds,
         "datasets": datasets_longterm,
@@ -5401,28 +5401,28 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         "cross_dataset_covariance_summary": cross_cov_summary,
         "covariance_index": cov_index,
         "outputs": {
-            "longterm_consistency_json": "output/quantum/bell/longterm_consistency.json",
-            "longterm_consistency_png": "output/quantum/bell/longterm_consistency.png",
-            "systematics_15items_json": "output/quantum/bell/systematics_decomposition_15items.json",
-            "systematics_15items_csv": "output/quantum/bell/systematics_decomposition_15items.csv",
-            "systematics_15items_png": "output/quantum/bell/systematics_decomposition_15items.png"
+            "longterm_consistency_json": "output/public/quantum/bell/longterm_consistency.json",
+            "longterm_consistency_png": "output/public/quantum/bell/longterm_consistency.png",
+            "systematics_15items_json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+            "systematics_15items_csv": "output/public/quantum/bell/systematics_decomposition_15items.csv",
+            "systematics_15items_png": "output/public/quantum/bell/systematics_decomposition_15items.png"
             if bool(sys15.get("plot_written"))
             else None,
-            "cross_dataset_covariance_json": "output/quantum/bell/cross_dataset_covariance.json",
+            "cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json",
             "cross_dataset_covariance_png": (
-                "output/quantum/bell/cross_dataset_covariance.png" if bool(cross_png_written) else None
+                "output/public/quantum/bell/cross_dataset_covariance.png" if bool(cross_png_written) else None
             ),
         },
     }
     loophole10 = _write_selection_loophole_quantification(longterm=longterm)
     longterm["outputs"]["selection_loophole_quantification_json"] = (
-        "output/quantum/bell/selection_loophole_quantification.json"
+        "output/public/quantum/bell/selection_loophole_quantification.json"
     )
     longterm["outputs"]["selection_loophole_quantification_csv"] = (
-        "output/quantum/bell/selection_loophole_quantification.csv"
+        "output/public/quantum/bell/selection_loophole_quantification.csv"
     )
     longterm["outputs"]["selection_loophole_quantification_png"] = (
-        "output/quantum/bell/selection_loophole_quantification.png" if bool(loophole10.get("plot_written")) else None
+        "output/public/quantum/bell/selection_loophole_quantification.png" if bool(loophole10.get("plot_written")) else None
     )
     _write_json(OUT_BASE / "longterm_consistency.json", longterm)
 
@@ -5476,7 +5476,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
 def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Phase 7 / Step 7.20.2:
-    - output/quantum/bell/freeze_policy.json
+    - output/public/quantum/bell/freeze_policy.json
 
     Freeze policy must be "blind": it must not inspect the Bell statistic values (S/J) to pick window/offset.
     """
@@ -5612,8 +5612,8 @@ def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
 def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Phase 7 / Step 7.20.1:
-    - output/quantum/bell/<dataset>/null_tests.json
-    - output/quantum/bell/null_tests_summary.json
+    - output/public/quantum/bell/<dataset>/null_tests.json
+    - output/public/quantum/bell/null_tests_summary.json
     """
 
     def _safe_float(x: Any) -> float | None:
@@ -6055,8 +6055,8 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
 def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Phase 7 / Step 7.20.3:
-    - output/quantum/bell/<dataset>/crosscheck_pairing.json
-    - output/quantum/bell/crosscheck_pairing_summary.json
+    - output/public/quantum/bell/<dataset>/crosscheck_pairing.json
+    - output/public/quantum/bell/crosscheck_pairing_summary.json
 
     Quantify "implementation/pairing choice" differences as a systematic (for supported datasets).
     """

@@ -14,8 +14,8 @@ Phase 4（宇宙論）/ Step 4.5B.21.4.4.7（DESI DR1 multi-tracer）:
 - `data/cosmology/desi_dr1_lss/raw/`（既定）
 
 出力（固定）：
-- `output/cosmology/desi_dr1_lss_raw_inventory.csv`
-- `output/cosmology/desi_dr1_lss_raw_inventory_summary.json`
+- `output/private/cosmology/desi_dr1_lss_raw_inventory.csv`
+- `output/private/cosmology/desi_dr1_lss_raw_inventory_summary.json`
 """
 
 from __future__ import annotations
@@ -114,8 +114,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out-dir",
         type=str,
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output dir (default: output/cosmology).",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output dir (default: output/private/cosmology).",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 

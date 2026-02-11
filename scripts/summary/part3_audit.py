@@ -11,7 +11,7 @@ Part III（量子）の監査ハーネス（ワンコマンド化）。
   主要ゲート（pass/fail と理由）を機械可読で固定出力する。
 
 出力（固定）：
-- output/summary/part3_audit_summary.json
+- output/public/summary/part3_audit_summary.json
 
 注意：
 - 現状は “publish生成（HTML/DOCX）” は別コマンド（paper_build / paper_qc）で扱う。
@@ -102,7 +102,7 @@ def _path_from_any(root: Path, raw: str) -> Path:
 
 
 def _audit_bell(*, root: Path) -> Dict[str, Any]:
-    bell_dir = root / "output" / "quantum" / "bell"
+    bell_dir = root / "output" / "public" / "quantum" / "bell"
     pack_path = bell_dir / "falsification_pack.json"
     freeze_policy_path = bell_dir / "freeze_policy.json"
     null_summary_path = bell_dir / "null_tests_summary.json"
@@ -207,7 +207,7 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
 
 
 def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     pack_path = out_dir / "nuclear_binding_energy_frequency_mapping_falsification_pack.json"
     metrics_minphys = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json"
     metrics_theory_diff = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
@@ -296,8 +296,8 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
 
 
 def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
-    pack_path = root / "output" / "quantum" / "condensed_falsification_pack.json"
-    holdout_summary = root / "output" / "quantum" / "condensed_holdout_audit_summary.json"
+    pack_path = root / "output" / "public" / "quantum" / "condensed_falsification_pack.json"
+    holdout_summary = root / "output" / "public" / "quantum" / "condensed_holdout_audit_summary.json"
     out: Dict[str, Any] = {
         "ok": False,
         "inputs": {
@@ -533,7 +533,7 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
 
 
 def _audit_completion_inventory(*, root: Path) -> Dict[str, Any]:
-    inv_path = root / "output" / "summary" / "part3_completion_inventory.json"
+    inv_path = root / "output" / "public" / "summary" / "part3_completion_inventory.json"
     out: Dict[str, Any] = {
         "ok": False,
         "inputs": {"inventory_json": {"path": _rel(inv_path), "exists": inv_path.exists()}},
@@ -557,8 +557,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "part3_audit_summary.json"),
-        help="output path (default: output/summary/part3_audit_summary.json)",
+        default=str(_ROOT / "output" / "public" / "summary" / "part3_audit_summary.json"),
+        help="output path (default: output/public/summary/part3_audit_summary.json)",
     )
     ap.add_argument("--no-regenerate", action="store_true", help="skip running upstream generators (audit existing artifacts only)")
     args = ap.parse_args(list(argv) if argv is not None else None)

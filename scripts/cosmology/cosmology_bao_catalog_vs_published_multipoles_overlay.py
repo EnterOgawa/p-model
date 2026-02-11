@@ -12,8 +12,8 @@ Step 16.4（BAO一次情報：銀河+random）/ Phase A6（差分要因の切り
   そこで、s^2 ξ0/ξ2 の曲線そのものを重ね、パイプラインの整合（Phase A）を確認する。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay.png
-- output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay.png
+- output/private/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay_metrics.json
 
 Notes:
 - catalog-based 出力は `cosmology_bao_xi_from_catalogs.py` の out_tag（例: `__om0p274`）で分岐する。
@@ -381,7 +381,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument(
         "--catalog-prefix",
-        default="output/cosmology/cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_",
+        default="output/private/cosmology/cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_",
         help="catalog npz prefix (default: cmasslowztot/combined/lcdm)",
     )
     ap.add_argument(
@@ -412,12 +412,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--s-max", type=float, default=150.0)
     ap.add_argument(
         "--out-png",
-        default="output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay.png",
+        default="output/private/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay.png",
         help="output png",
     )
     ap.add_argument(
         "--out-json",
-        default="output/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_vs_published_multipoles_overlay_metrics.json",
         help="output metrics json",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

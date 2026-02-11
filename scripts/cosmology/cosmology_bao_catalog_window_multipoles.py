@@ -12,8 +12,8 @@ catalog-based（Corrfunc; galaxy+random）で得た pair-count grid（RR0/SS）�
 - ここでは RR(s,μ) の multipoles 比（RR2/RR0）を window anisotropy 指標として使う。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_window_multipoles.png
-- output/cosmology/cosmology_bao_catalog_window_multipoles_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_window_multipoles.png
+- output/private/cosmology/cosmology_bao_catalog_window_multipoles_metrics.json
 
 注意：
 - 本スクリプト自体は Corrfunc を使わず、既に生成済みの npz を読むだけ（Windowsでも実行可）。
@@ -121,7 +121,7 @@ def _path_for(
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}"
     if suffix:
         base = f"{base}{suffix}"
-    return _ROOT / "output" / "cosmology" / f"{base}.npz"
+    return _ROOT / "output" / "private" / "cosmology" / f"{base}.npz"
 
 
 def main(argv: Optional[list[str]] = None) -> int:
@@ -134,10 +134,10 @@ def main(argv: Optional[list[str]] = None) -> int:
         default=";__recon_grid_iso;__recon_grid_ani_rsdshift0",
         help="semicolon-separated NPZ suffixes to include (default: ';__recon_grid_iso;__recon_grid_ani_rsdshift0')",
     )
-    ap.add_argument("--out-png", default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_catalog_window_multipoles.png"))
+    ap.add_argument("--out-png", default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_catalog_window_multipoles.png"))
     ap.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_catalog_window_multipoles_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_catalog_window_multipoles_metrics.json"),
     )
     ap.add_argument("--s-min", type=float, default=30.0, help="evaluation s_min [Mpc/h] (default: 30)")
     ap.add_argument("--s-max", type=float, default=150.0, help="evaluation s_max [Mpc/h] (default: 150)")

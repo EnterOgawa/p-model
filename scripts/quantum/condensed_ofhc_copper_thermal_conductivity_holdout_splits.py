@@ -141,7 +141,7 @@ def _predict_logpoly2(*, t_k: np.ndarray, params: dict[str, float]) -> np.ndarra
 
 
 def main() -> None:
-    out_dir = _ROOT / "output" / "quantum"
+    out_dir = _ROOT / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = _ROOT / "data" / "quantum" / "sources" / "nist_trc_ofhc_copper_thermal_conductivity"

@@ -56,7 +56,7 @@ def main() -> None:
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if args.runs:

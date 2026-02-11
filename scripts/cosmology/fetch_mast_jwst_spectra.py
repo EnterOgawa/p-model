@@ -19,7 +19,7 @@ MAST（JWST）から x1d（1D spectrum）を取得・キャッシュし、最小
 - data/cosmology/mast/jwst_spectra/<target_slug>/
     - manifest.json（取得条件・観測一覧・選択プロダクト・sha256）
     - raw/（downloaded FITS/PNG 等）
-- output/cosmology/
+- output/private/cosmology/
     - jwst_spectra__<target_slug>__x1d_qc.png（取得済みx1dをまとめたQC）
 
 注意：
@@ -1997,7 +1997,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = p.parse_args(argv)
 
     base_dir = _ROOT / "data" / "cosmology" / "mast" / "jwst_spectra"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     base_dir.mkdir(parents=True, exist_ok=True)
     out_dir.mkdir(parents=True, exist_ok=True)
 

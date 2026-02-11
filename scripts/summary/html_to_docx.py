@@ -388,7 +388,7 @@ def _replace_equation_images_with_word_equations(
     if n_found == 0:
         return 0, 0
 
-    # Build candidate markdown source sets (Part I/II/III/short note + legacy), and pick the one
+    # Build candidate markdown source sets (Part I/II/III/Part IV + legacy), and pick the one
     # whose LaTeX block count matches the DOCX equation-image count. This keeps the mapping stable
     # even when manuscripts are split/renamed.
     sources_md = root / "doc" / "paper" / "20_data_sources.md"
@@ -423,9 +423,9 @@ def _replace_equation_images_with_word_equations(
             ],
         ),
         (
-            "short_note",
+            "part4_verification",
             [
-                root / "doc" / "paper" / "15_short_note.md",
+                root / "doc" / "paper" / "13_part4_verification.md",
                 sources_md,
                 refs_md,
             ],

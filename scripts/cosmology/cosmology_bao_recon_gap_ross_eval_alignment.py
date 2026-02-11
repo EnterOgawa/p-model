@@ -15,8 +15,8 @@ Ross の一次コード（.tmp_lssanalysis/baofit_pub2D.py）基準へ揃える�
   “残差評価”と“AP/ε議論”で混線しないように補助図で定量化する。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_recon_gap_ross_eval_alignment.png
-- output/cosmology/cosmology_bao_recon_gap_ross_eval_alignment_metrics.json
+- output/private/cosmology/cosmology_bao_recon_gap_ross_eval_alignment.png
+- output/private/cosmology/cosmology_bao_recon_gap_ross_eval_alignment_metrics.json
 
 注意：
 - Corrfunc は使わない（既存の catalog-based recon NPZ と Ross 公開ファイルのみ）。
@@ -281,12 +281,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_ross_eval_alignment.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_ross_eval_alignment.png"),
         help="output png path",
     )
     ap.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_ross_eval_alignment_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_ross_eval_alignment_metrics.json"),
         help="output metrics json path",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

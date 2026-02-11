@@ -11,8 +11,8 @@ Phase 8 の「図が読める」ことを機械的にチェックするための
   修正対象（生成スクリプト側）をリストアップする。
 
 出力（固定）：
-- output/summary/paper_figures_audit.json
-- output/summary/paper_figures_audit.csv
+- output/private/summary/paper_figures_audit.json
+- output/private/summary/paper_figures_audit.csv
 """
 
 from __future__ import annotations
@@ -257,7 +257,7 @@ def _write_csv(path: Path, audits: Sequence[FigureAudit]) -> None:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Audit readability-related properties of key paper figures.")
-    parser.add_argument("--out-dir", default=None, help="Override output directory (default: output/summary).")
+    parser.add_argument("--out-dir", default=None, help="Override output directory (default: output/private/summary).")
     parser.add_argument("--min-width-px", type=int, default=1600)
     parser.add_argument("--min-height-px", type=int, default=700)
     parser.add_argument("--border-px", type=int, default=2)
@@ -270,7 +270,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     args = parser.parse_args(list(argv) if argv is not None else None)
 
-    out_dir = Path(args.out_dir) if args.out_dir else (ROOT / "output" / "summary")
+    out_dir = Path(args.out_dir) if args.out_dir else (ROOT / "output" / "private" / "summary")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     missing, audits = audit_figures(

@@ -71,7 +71,7 @@ def _maybe_float(x: object) -> Optional[float]:
 
 def build_metrics(root: Path) -> Dict[str, Any]:
     manifest_all = root / "data" / "cosmology" / "mast" / "jwst_spectra" / "manifest_all.json"
-    waitlist_path = root / "output" / "cosmology" / "jwst_spectra_release_waitlist.json"
+    waitlist_path = root / "output" / "private" / "cosmology" / "jwst_spectra_release_waitlist.json"
 
     j = _read_json(manifest_all) if manifest_all.exists() else {}
     items = j.get("items") if isinstance(j.get("items"), dict) else {}
@@ -178,18 +178,18 @@ def build_metrics(root: Path) -> Dict[str, Any]:
             "reasons": reasons,
         },
         "outputs": {
-            "integration_metrics_json": _rel(root / "output" / "cosmology" / "jwst_spectra_integration_metrics.json"),
+            "integration_metrics_json": _rel(root / "output" / "private" / "cosmology" / "jwst_spectra_integration_metrics.json"),
         },
     }
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Integrate JWST/MAST x1d pipeline outputs and freeze Table 1 policy.")
-    ap.add_argument("--out-path", default="", help="Override output path (default: output/cosmology/jwst_spectra_integration_metrics.json).")
+    ap.add_argument("--out-path", default="", help="Override output path (default: output/private/cosmology/jwst_spectra_integration_metrics.json).")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     root = _ROOT
-    out_path = Path(str(args.out_path)).expanduser() if str(args.out_path).strip() else (root / "output" / "cosmology" / "jwst_spectra_integration_metrics.json")
+    out_path = Path(str(args.out_path)).expanduser() if str(args.out_path).strip() else (root / "output" / "private" / "cosmology" / "jwst_spectra_integration_metrics.json")
 
     payload = build_metrics(root)
     _write_json(out_path, payload)

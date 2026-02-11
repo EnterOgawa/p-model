@@ -76,7 +76,7 @@ class ZRow:
 def _load_frozen(root: Path, path: Optional[Path]) -> Dict[str, Any]:
     if path and path.exists():
         return _read_json(path)
-    default = root / "output" / "theory" / "frozen_parameters.json"
+    default = root / "output" / "private" / "theory" / "frozen_parameters.json"
     if default.exists():
         return _read_json(default)
     return {"beta": 1.0, "beta_sigma": None, "gamma_pmodel": 1.0, "policy": {"beta_source": "default_beta_1"}}
@@ -129,7 +129,7 @@ def _z_fit_cassini_gamma(frozen: Dict[str, Any]) -> Optional[ZRow]:
 
 
 def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
-    path = root / "output" / "theory" / "solar_light_deflection_metrics.json"
+    path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -155,7 +155,7 @@ def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
 
 
 def _z_gravitational_redshift(root: Path) -> List[ZRow]:
-    path = root / "output" / "theory" / "gravitational_redshift_experiments.json"
+    path = root / "output" / "private" / "theory" / "gravitational_redshift_experiments.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -186,7 +186,7 @@ def _z_gravitational_redshift(root: Path) -> List[ZRow]:
 
 
 def _z_eht_ring_vs_shadow(root: Path, frozen: Dict[str, Any]) -> List[ZRow]:
-    path = root / "output" / "eht" / "eht_shadow_compare.json"
+    path = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -324,14 +324,29 @@ def plot_scoreboard(rows: List[ZRow], *, beta: float, beta_source: str, out_png:
 
 def main() -> int:
     root = _repo_root()
-    default_outdir = root / "output" / "summary"
+    default_outdir = root / "output" / "private" / "summary"
     default_out_json = default_outdir / "decisive_scoreboard.json"
     default_out_png = default_outdir / "decisive_scoreboard.png"
 
     ap = argparse.ArgumentParser(description="Build Phase 7 decisive scoreboard (z-score summary).")
-    ap.add_argument("--frozen", type=str, default="", help="Frozen parameters JSON (default: output/theory/frozen_parameters.json)")
-    ap.add_argument("--out-json", type=str, default=str(default_out_json), help="Output JSON path (default: output/summary/decisive_scoreboard.json)")
-    ap.add_argument("--out-png", type=str, default=str(default_out_png), help="Output PNG path (default: output/summary/decisive_scoreboard.png)")
+    ap.add_argument(
+        "--frozen",
+        type=str,
+        default="",
+        help="Frozen parameters JSON (default: output/private/theory/frozen_parameters.json)",
+    )
+    ap.add_argument(
+        "--out-json",
+        type=str,
+        default=str(default_out_json),
+        help="Output JSON path (default: output/private/summary/decisive_scoreboard.json)",
+    )
+    ap.add_argument(
+        "--out-png",
+        type=str,
+        default=str(default_out_png),
+        help="Output PNG path (default: output/private/summary/decisive_scoreboard.png)",
+    )
     args = ap.parse_args()
 
     frozen_path = Path(args.frozen) if args.frozen else None
@@ -381,10 +396,19 @@ def main() -> int:
                 "event_type": "decisive_scoreboard",
                 "argv": list(sys.argv),
                 "inputs": {
-                    "frozen_parameters_json": frozen_path or (root / "output" / "theory" / "frozen_parameters.json"),
-                    "solar_light_deflection_metrics_json": root / "output" / "theory" / "solar_light_deflection_metrics.json",
-                    "gravitational_redshift_experiments_json": root / "output" / "theory" / "gravitational_redshift_experiments.json",
-                    "eht_shadow_compare_json": root / "output" / "eht" / "eht_shadow_compare.json",
+                    "frozen_parameters_json": frozen_path
+                    or (root / "output" / "private" / "theory" / "frozen_parameters.json"),
+                    "solar_light_deflection_metrics_json": root
+                    / "output"
+                    / "private"
+                    / "theory"
+                    / "solar_light_deflection_metrics.json",
+                    "gravitational_redshift_experiments_json": root
+                    / "output"
+                    / "private"
+                    / "theory"
+                    / "gravitational_redshift_experiments.json",
+                    "eht_shadow_compare_json": root / "output" / "private" / "eht" / "eht_shadow_compare.json",
                 },
                 "params": {"beta": payload.get("beta"), "beta_source": payload.get("beta_source")},
                 "outputs": {"scoreboard_png": out_png, "scoreboard_json": out_json},

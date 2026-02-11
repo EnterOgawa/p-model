@@ -8,11 +8,11 @@ Phase 16（宇宙論）/ Step 16.4：
 各 DDR 一次ソースごとに「どの観測が支配拘束（limiting）になっているか」を固定出力する。
 
 入力（既存の固定出力）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_search_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search_metrics.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_limiting_summary.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_limiting_summary_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_limiting_summary.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_limiting_summary_metrics.json
 """
 
 from __future__ import annotations
@@ -186,12 +186,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             / "cosmology"
             / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
         ),
-        help="Input metrics JSON (default: output/cosmology/...candidate_search_metrics.json)",
+        help="Input metrics JSON (default: output/private/cosmology/...candidate_search_metrics.json)",
     )
     parser.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     args = parser.parse_args(argv)
 

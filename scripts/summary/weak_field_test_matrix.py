@@ -8,7 +8,7 @@ Phase 6 / Step 6.2.1:
 入力・期間・推定量・補正（knobs）・再現コマンドを JSON にまとめる。
 
 出力（固定）:
-  - output/summary/weak_field_test_matrix.json
+  - output/private/summary/weak_field_test_matrix.json
 """
 
 from __future__ import annotations
@@ -376,7 +376,7 @@ def build_matrix() -> Dict[str, Any]:
         },
         "common": {"frozen_parameters": frozen},
         "tests": tests,
-        "outputs": {"weak_field_test_matrix_json": "output/summary/weak_field_test_matrix.json"},
+        "outputs": {"weak_field_test_matrix_json": "output/private/summary/weak_field_test_matrix.json"},
     }
 
     return payload
@@ -387,8 +387,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_test_matrix.json"),
-        help="Output JSON path (default: output/summary/weak_field_test_matrix.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_test_matrix.json"),
+        help="Output JSON path (default: output/private/summary/weak_field_test_matrix.json).",
     )
     args = ap.parse_args(argv)
 
@@ -416,4 +416,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

@@ -18,7 +18,7 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_atspec_handbook"

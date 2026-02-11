@@ -58,11 +58,11 @@ def _solve_kappa_from_ere(*, a_fm: float, r_fm: float) -> dict[str, float]:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Inputs fixed by earlier steps.
-    deut_path = root / "output" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -72,7 +72,7 @@ def main() -> None:
         )
     deut = _load_json(deut_path)
 
-    np_path = root / "output" / "quantum" / "nuclear_np_scattering_baseline_metrics.json"
+    np_path = root / "output" / "public" / "quantum" / "nuclear_np_scattering_baseline_metrics.json"
     if not np_path.exists():
         raise SystemExit(
             "[fail] missing np scattering baseline metrics.\n"

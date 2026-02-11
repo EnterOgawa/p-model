@@ -11,11 +11,11 @@ Phase 8（論文化・公開）向けの「ビルド入口」。
   3) 整合チェック（paper_lint.py）
 
 出力（既定）:
-  - output/summary/paper_table1_results.md（ほか .json/.csv）
-  - profile=paper: output/summary/pmodel_paper.html（Part I; + .docx）
-  - profile=part2_astrophysics: output/summary/pmodel_paper_part2_astrophysics.html（+ .docx）
-  - profile=part3_quantum: output/summary/pmodel_paper_part3_quantum.html（+ .docx）
-  - profile=short_note: output/summary/pmodel_short_note.html（+ .docx）
+  - output/private/summary/paper_table1_results.md（ほか .json/.csv）
+  - profile=paper: output/private/summary/pmodel_paper.html（Part I; + .docx）
+  - profile=part2_astrophysics: output/private/summary/pmodel_paper_part2_astrophysics.html（+ .docx）
+  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html（+ .docx）
+  - profile=part4_verification: output/private/summary/pmodel_paper_part4_verification.html（+ .docx）
 """
 
 from __future__ import annotations
@@ -43,9 +43,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Build paper artifacts (Table 1 + HTML + lint).")
     ap.add_argument(
         "--profile",
-        choices=["paper", "part2_astrophysics", "part3_quantum", "short_note"],
+        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification"],
         default="paper",
-        help="build profile: paper (Part I) / part2_astrophysics / part3_quantum / short_note",
+        help="build profile: paper (Part I) / part2_astrophysics / part3_quantum / part4_verification",
     )
     ap.add_argument(
         "--mode",
@@ -56,7 +56,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--outdir",
         default=None,
-        help="Output directory for paper artifacts (default: output/summary).",
+        help="Output directory for paper artifacts (default: output/private/summary).",
     )
     ap.add_argument(
         "--no-embed-images",
@@ -88,7 +88,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     root = _repo_root()
-    out_dir = Path(args.outdir) if args.outdir else (root / "output" / "summary")
+    out_dir = Path(args.outdir) if args.outdir else (root / "output" / "private" / "summary")
     out_dir.mkdir(parents=True, exist_ok=True)
     profile = str(args.profile)
 
@@ -156,8 +156,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "--manuscript",
                 "doc/paper/12_part3_quantum_appendix_a.md",
             ]
-        else:
-            lint_argv += ["--manuscript", "doc/paper/15_short_note.md"]
+        elif profile == "part4_verification":
+            lint_argv += ["--manuscript", "doc/paper/13_part4_verification.md"]
         rc = paper_lint.main(lint_argv)
         if rc != 0:
             return rc
@@ -171,9 +171,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     elif profile == "part3_quantum":
         html_name = "pmodel_paper_part3_quantum.html"
         docx_name = "pmodel_paper_part3_quantum.docx"
-    else:
-        html_name = "pmodel_short_note.html"
-        docx_name = "pmodel_short_note.docx"
+    elif profile == "part4_verification":
+        html_name = "pmodel_paper_part4_verification.html"
+        docx_name = "pmodel_paper_part4_verification.docx"
+    else:  # pragma: no cover (guarded by argparse choices)
+        raise ValueError(f"unknown profile: {profile}")
     paper_html_path = out_dir / html_name
     paper_docx_path = out_dir / docx_name
     if not args.skip_docx:

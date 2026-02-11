@@ -253,7 +253,7 @@ def main() -> None:
 
     root = Path(__file__).resolve().parents[2]
     src_dir = root / "data" / "quantum" / "sources" / "zenodo_7185335"
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     subdir = str(args.subdir)

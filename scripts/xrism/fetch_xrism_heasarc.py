@@ -10,7 +10,7 @@ offline 再現できる形に manifest を固定する。併せて最小のス�
 出力（固定）:
 - data/xrism/heasarc/manifest.json（取得条件・obsid・ファイル一覧・sha256）
 - data/xrism/heasarc/obs/<cat>/<obsid>/...（キャッシュ）
-- output/xrism/<obsid>__spectrum_qc.png（最小QC；PHAが取得できた場合）
+- output/private/xrism/<obsid>__spectrum_qc.png（最小QC；PHAが取得できた場合）
 
 注意:
 - HEASARC の XRISM データは mission archive の設計に従い、obsid 配下に
@@ -338,7 +338,7 @@ def _write_spectrum_qc(obsid: str, pha_path: Path, rmf_path: Optional[Path], out
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--base-url", default=_DEFAULT_BASE_URL, help="HEASARC XRISM base URL (obs root)")
-    p.add_argument("--targets", default=str((_ROOT / "output" / "xrism" / "xrism_targets_catalog.csv")), help="targets CSV")
+    p.add_argument("--targets", default=str((_ROOT / "output" / "private" / "xrism" / "xrism_targets_catalog.csv")), help="targets CSV")
     p.add_argument("--obsid", action="append", default=[], help="override: obsid(s) to fetch (can repeat)")
     p.add_argument(
         "--instrument",
@@ -395,7 +395,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     out_manifest = _ROOT / "data" / "xrism" / "heasarc" / "manifest.json"
-    out_dir = _ROOT / "output" / "xrism"
+    out_dir = _ROOT / "output" / "private" / "xrism"
     data_root = _ROOT / "data" / "xrism" / "heasarc" / "obs"
     out_dir.mkdir(parents=True, exist_ok=True)
 

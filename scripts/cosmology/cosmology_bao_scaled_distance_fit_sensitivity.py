@@ -23,8 +23,8 @@ BOSS DR12（BAO+FS consensus）の (D_M,H) 出力から推定する標準定規�
   - data/cosmology/cmb_temperature_scaling_constraints.json（β_T → p_e）
 
 出力（固定名）:
-  - output/cosmology/cosmology_bao_scaled_distance_fit_sensitivity.png
-  - output/cosmology/cosmology_bao_scaled_distance_fit_sensitivity_metrics.json
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_sensitivity.png
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_sensitivity_metrics.json
 """
 
 from __future__ import annotations
@@ -702,7 +702,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     data_dir = _ROOT / "data" / "cosmology"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
 
     ap_path = data_dir / "alcock_paczynski_constraints.json"
     boss_cov_path = data_dir / "boss_dr12_baofs_consensus_reduced_covariance_cij.json"

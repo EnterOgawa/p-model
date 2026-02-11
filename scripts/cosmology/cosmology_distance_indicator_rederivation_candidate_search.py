@@ -33,13 +33,13 @@ best_any / best_independent の max|z| と limiting（支配する拘束）が�
   - data/cosmology/sn_standard_candle_evolution_constraints.json
   - data/cosmology/sn_time_dilation_constraints.json
   - data/cosmology/cmb_temperature_scaling_constraints.json
-  - output/cosmology/cosmology_bao_scaled_distance_fit_metrics.json（s_R の一次データfit）
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_metrics.json（s_R の一次データfit）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_search.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_search_metrics.json
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json
 """
 
 from __future__ import annotations
@@ -967,7 +967,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     data_dir = _ROOT / "data" / "cosmology"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
 
     in_ddr = data_dir / "distance_duality_constraints.json"
     in_opacity = data_dir / "cosmic_opacity_constraints.json"

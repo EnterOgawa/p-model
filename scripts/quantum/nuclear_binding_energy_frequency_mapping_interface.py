@@ -25,10 +25,10 @@ def _load_json(path: Path) -> dict:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    light_metrics_path = root / "output" / "quantum" / "nuclear_binding_light_nuclei_metrics.json"
+    light_metrics_path = root / "output" / "public" / "quantum" / "nuclear_binding_light_nuclei_metrics.json"
     if not light_metrics_path.exists():
         raise SystemExit(
             "[fail] missing light-nuclei binding baseline metrics.\n"

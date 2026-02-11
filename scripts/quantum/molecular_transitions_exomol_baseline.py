@@ -201,7 +201,7 @@ def main() -> None:
         raise SystemExit("[fail] --top-n must be >= 1")
 
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     datasets: list[dict[str, Any]] = [

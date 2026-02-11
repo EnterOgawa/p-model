@@ -30,8 +30,8 @@ cosmology_observable_scalings.py
    - 表面輝度は SB ∝ (1+z)^-2（光子エネルギー×到達率のみ）
 
 出力（固定名）:
-  - output/cosmology/cosmology_observable_scalings.png
-  - output/cosmology/cosmology_observable_scalings_metrics.json
+  - output/private/cosmology/cosmology_observable_scalings.png
+  - output/private/cosmology/cosmology_observable_scalings_metrics.json
 """
 
 from __future__ import annotations
@@ -138,7 +138,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / "cosmology_observable_scalings.png"
     fig.savefig(png_path, dpi=200)

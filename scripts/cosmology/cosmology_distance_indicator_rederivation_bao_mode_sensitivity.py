@@ -17,17 +17,17 @@ BAO(s_R) の一次データ fit の前提（共分散の扱い）によって、
     best_independent を DDR 行ごとに再計算して、影響を固定する。
 
 入力（固定）:
-  - output/cosmology/cosmology_bao_scaled_distance_fit_sensitivity_metrics.json（BAO prior の候補）
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_sensitivity_metrics.json（BAO prior の候補）
   - data/cosmology/distance_duality_constraints.json
   - data/cosmology/cosmic_opacity_constraints.json
   - data/cosmology/sn_standard_candle_evolution_constraints.json
   - data/cosmology/sn_time_dilation_constraints.json
   - data/cosmology/cmb_temperature_scaling_constraints.json
-  - （任意）output/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（DDR σ_cat）
+  - （任意）output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（DDR σ_cat）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_mode_sensitivity.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_mode_sensitivity_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_mode_sensitivity.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_mode_sensitivity_metrics.json
 """
 
 from __future__ import annotations
@@ -457,7 +457,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     data_dir = _ROOT / "data" / "cosmology"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
 
     in_bao_modes = out_dir / "cosmology_bao_scaled_distance_fit_sensitivity_metrics.json"
     in_ddr = data_dir / "distance_duality_constraints.json"

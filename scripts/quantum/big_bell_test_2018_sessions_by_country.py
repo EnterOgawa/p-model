@@ -109,7 +109,7 @@ def main() -> None:
 
     root = Path(__file__).resolve().parents[2]
     xlsx = args.xlsx or (root / "data" / "quantum" / "sources" / "big_bell_test_2018" / "source_data.xlsx")
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rows = _load_sessions_by_country(xlsx)

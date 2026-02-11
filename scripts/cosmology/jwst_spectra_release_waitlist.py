@@ -110,8 +110,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     ap.add_argument(
         "--out-dir",
-        default=str(ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 

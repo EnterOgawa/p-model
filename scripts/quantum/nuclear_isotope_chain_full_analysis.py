@@ -66,7 +66,7 @@ def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     all_nuclei_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"

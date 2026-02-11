@@ -9,7 +9,7 @@ Phase 8 / Step 8.3（データ・コード公開）向けの “実行環境フ�
 - どの Python / OS / パッケージ環境で生成された成果物かを機械可読で固定する（再現性の補助）。
 
 出力（既定）：
-- `output/summary/env_fingerprint.json`
+- `output/private/summary/env_fingerprint.json`
 """
 
 from __future__ import annotations
@@ -95,8 +95,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "env_fingerprint.json"),
-        help="output path (default: output/summary/env_fingerprint.json)",
+        default=str(_ROOT / "output" / "private" / "summary" / "env_fingerprint.json"),
+        help="output path (default: output/private/summary/env_fingerprint.json)",
     )
     ap.add_argument("--no-freeze", action="store_true", help="skip pip freeze (faster)")
     args = ap.parse_args(list(argv) if argv is not None else None)
@@ -134,4 +134,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())
-

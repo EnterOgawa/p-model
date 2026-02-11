@@ -13,12 +13,12 @@ DESI DR1（任意tracer）の ε_fit−ε_expected（Y1data）z_score がどれ�
 
 入出力：
 - 入力：
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag>*.npz
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag>*.npz
   - 対応する __jk_cov.npz
 - 出力：
-  - output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__<out_tag>.png
-  - output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__<out_tag>.json
-  - output/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__<out_tag>.csv
+  - output/private/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__<out_tag>.png
+  - output/private/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__<out_tag>.json
+  - output/private/cosmology/cosmology_desi_dr1_bao_cov_shrinkage_sweep__<out_tag>.csv
 """
 
 from __future__ import annotations
@@ -92,11 +92,11 @@ def _lam_tag(lam: float) -> str:
 
 def _peakfit_metrics_path(*, sample: str, caps: str, out_tag: str, output_suffix: str) -> Path:
     tag = f"{sample}_{caps}__{out_tag}__{output_suffix}"
-    return _ROOT / "output" / "cosmology" / f"cosmology_bao_catalog_peakfit_{tag}_metrics.json"
+    return _ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_peakfit_{tag}_metrics.json"
 
 
 def _cross_metrics_path(*, out_tag: str) -> Path:
-    return _ROOT / "output" / "cosmology" / f"cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}_metrics.json"
+    return _ROOT / "output" / "private" / "cosmology" / f"cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}_metrics.json"
 
 
 def _safe_float(x: Any) -> float:
@@ -243,7 +243,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     out_tag_for_outputs = out_tag if is_default_reg else f"{out_tag}__{reg_tag}"
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / f"cosmology_desi_dr1_bao_cov_shrinkage_sweep__{out_tag_for_outputs}.png"
     out_json = out_dir / f"cosmology_desi_dr1_bao_cov_shrinkage_sweep__{out_tag_for_outputs}.json"

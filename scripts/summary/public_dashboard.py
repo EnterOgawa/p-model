@@ -28,6 +28,45 @@ def _repo_root() -> Path:
     return _ROOT
 
 
+def _remap_output_path(path: Path) -> Path:
+    """Map legacy output paths to the new output layout.
+
+    New layout:
+      - output/public/<topic>/...  (tracked public artifacts)
+      - output/private/<topic>/... (local-only / intermediate artifacts)
+
+    Many scripts historically wrote to output/<topic>/..., so the dashboard accepts legacy
+    paths and remaps them if the target exists.
+    """
+    try:
+        rel = path.resolve().relative_to(_ROOT)
+    except Exception:
+        return path
+
+    parts = list(rel.parts)
+    if len(parts) < 2:
+        return path
+    if parts[0] != "output":
+        return path
+    if parts[1] in ("public", "private"):
+        return path
+
+    topic = parts[1]
+    tail = Path(*parts[2:]) if len(parts) > 2 else Path()
+    # Quantum artifacts are now tracked under output/public/quantum.
+    if topic == "quantum":
+        cand = (_ROOT / "output" / "public" / topic / tail).resolve()
+        if cand.exists():
+            return cand
+
+    # Default: treat as local-only under output/private/<topic>/.
+    cand = (_ROOT / "output" / "private" / topic / tail).resolve()
+    if cand.exists():
+        return cand
+
+    return path
+
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -54,6 +93,7 @@ def _set_japanese_font() -> None:
 
 def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
     try:
+        path = _remap_output_path(path)
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return None
@@ -61,6 +101,7 @@ def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
 
 def _try_read_text(path: Path) -> Optional[str]:
     try:
+        path = _remap_output_path(path)
         return path.read_text(encoding="utf-8")
     except Exception:
         return None
@@ -70,6 +111,7 @@ def _try_read_csv_rows(path: Path, *, max_rows: int = 200) -> List[Dict[str, str
     try:
         import csv
 
+        path = _remap_output_path(path)
         with open(path, "r", encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             rows: List[Dict[str, str]] = []
@@ -88,6 +130,7 @@ def _try_compute_llr_inlier_rms(points_csv: Path) -> Optional[Dict[str, Any]]:
     Keep this dependency-free (no pandas). The input CSV is produced by
     scripts/llr/llr_batch_eval.py and is small enough to stream.
     """
+    points_csv = _remap_output_path(points_csv)
     if not points_csv.exists():
         return None
 
@@ -183,7 +226,7 @@ def _extract_cassini_metrics(root: Path) -> Dict[str, Any]:
 
 
 def _extract_viking_peak(root: Path) -> Dict[str, Any]:
-    csv_path = root / "output" / "viking" / "viking_shapiro_result.csv"
+    csv_path = _remap_output_path(root / "output" / "viking" / "viking_shapiro_result.csv")
     if not csv_path.exists():
         return {}
 
@@ -646,29 +689,29 @@ def _extract_roadmap_table(root: Path) -> Dict[str, Any]:
 
 
 def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
-    json_path = root / "output" / "summary" / "paper_table1_results.json"
-    md_path = root / "output" / "summary" / "paper_table1_results.md"
-    csv_path = root / "output" / "summary" / "paper_table1_results.csv"
-    paper_html = root / "output" / "summary" / "pmodel_paper.html"
+    json_path = root / "output" / "private" / "summary" / "paper_table1_results.json"
+    md_path = root / "output" / "private" / "summary" / "paper_table1_results.md"
+    csv_path = root / "output" / "private" / "summary" / "paper_table1_results.csv"
+    paper_html = root / "output" / "private" / "summary" / "pmodel_paper.html"
 
     j = _try_read_json(json_path)
     if not isinstance(j, dict):
         detail_href = None
         if paper_html.exists():
-            # public report lives in output/summary, so link by filename.
+            # public report lives in output/private/summary, so link by filename.
             detail_href = "pmodel_paper.html"
         return {
             "id": "paper_table1",
             "title": "検証サマリ（Table 1）",
             "kind": "論文化（Phase 8 / Step 8.2）",
             "summary_lines": [
-                "未生成: cmd /c output\\summary\\build_materials.bat quick-nodocx を実行してください。",
+                "未生成: cmd /c scripts\\summary\\build_materials.bat quick-nodocx を実行してください。",
             ],
             **({"detail_href": detail_href} if detail_href else {}),
             "detail_lines": [
                 f"期待する出力: {_rel_repo_path(root, json_path)} / {_rel_repo_path(root, md_path)} / {_rel_repo_path(root, csv_path)}",
                 f"論文HTML（任意）: {_rel_repo_path(root, paper_html)}",
-                "生成（HTMLのみ）: python -B scripts/summary/paper_build.py --mode publish --outdir output/summary --skip-docx",
+                "生成（HTMLのみ）: python -B scripts/summary/paper_build.py --mode publish --outdir output/private/summary --skip-docx",
             ],
         }
 
@@ -722,8 +765,8 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
 
 
 def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
-    json_path = root / "output" / "summary" / "decisive_scoreboard.json"
-    png_path = root / "output" / "summary" / "decisive_scoreboard.png"
+    json_path = root / "output" / "private" / "summary" / "decisive_scoreboard.json"
+    png_path = root / "output" / "private" / "summary" / "decisive_scoreboard.png"
     frozen_path = root / "output" / "theory" / "frozen_parameters.json"
 
     j = _try_read_json(json_path)
@@ -813,15 +856,15 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
             "独立検証（predict）としては、太陽光偏向のPPN γ、重力赤方偏移 ε、EHT（κ仮定）が入る。",
             "将来的にLLR/Cassiniの一次データをさらに詰め、βの固定源と予測側の分離を強化する。",
             "再現: scripts/theory/freeze_parameters.py → output/theory/frozen_parameters.json",
-            "再現: scripts/summary/decisive_scoreboard.py → output/summary/decisive_scoreboard.(png|json)",
+            "再現: scripts/summary/decisive_scoreboard.py → output/private/summary/decisive_scoreboard.(png|json)",
         ],
         "table": table,
     }
 
 
 def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
-    json_path = root / "output" / "summary" / "validation_scoreboard.json"
-    png_path = root / "output" / "summary" / "validation_scoreboard.png"
+    json_path = root / "output" / "private" / "summary" / "validation_scoreboard.json"
+    png_path = root / "output" / "private" / "summary" / "validation_scoreboard.png"
 
     j = _try_read_json(json_path)
     if not isinstance(j, dict) or not png_path.exists():
@@ -936,16 +979,16 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
         "summary_lines": summary_lines,
         "explain_lines": explain_lines,
         "detail_lines": [
-            "再現: scripts/summary/validation_scoreboard.py → output/summary/validation_scoreboard.(png|json)",
-            "補足: σ評価可能な項目の集計は Table 1（output/summary/paper_table1_results.json）を元に計算。",
+            "再現: scripts/summary/validation_scoreboard.py → output/private/summary/validation_scoreboard.(png|json)",
+            "補足: σ評価可能な項目の集計は Table 1（output/private/summary/paper_table1_results.json）を元に計算。",
         ],
         **({"table": table} if table else {}),
     }
 
 
 def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
-    json_path = root / "output" / "summary" / "decisive_falsification.json"
-    png_path = root / "output" / "summary" / "decisive_falsification.png"
+    json_path = root / "output" / "private" / "summary" / "decisive_falsification.json"
+    png_path = root / "output" / "private" / "summary" / "decisive_falsification.png"
 
     j = _try_read_json(json_path)
     if not isinstance(j, dict) or not png_path.exists():
@@ -1151,15 +1194,15 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
             "棄却条件（EHT）: β固定後、観測から得た影直径係数 r_obs と総合誤差 σ_r に対して、|r_obs - r_P| > 3σ_r なら P-model（β固定）は棄却。|r_obs - r_GR| > 3σ_r なら GR（Schwarzschild近似）は棄却。",
             "注意: EHTはリング直径→影直径の変換係数 κ、Kerrスピン、散乱などの系統誤差を含むため、σ_r はそれらも含めた“総合誤差”で評価する。",
             "棄却条件（δ）: 観測で γ_obs > 1/√δ が確定すれば、その δ は棄却（観測更新により δ < 1/γ_obs^2 の上限が下がる）。",
-            "再現: scripts/summary/decisive_falsification.py → output/summary/decisive_falsification.(png|json)",
+            "再現: scripts/summary/decisive_falsification.py → output/private/summary/decisive_falsification.(png|json)",
         ],
         "table": eht_table,
     }
 
 
 def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
-    json_path = root / "output" / "summary" / "decisive_candidates.json"
-    png_path = root / "output" / "summary" / "decisive_candidates.png"
+    json_path = root / "output" / "private" / "summary" / "decisive_candidates.json"
+    png_path = root / "output" / "private" / "summary" / "decisive_candidates.png"
 
     j = _try_read_json(json_path)
     if not isinstance(j, dict) or not png_path.exists():
@@ -1280,14 +1323,14 @@ def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
         "detail_lines": [
             "EHTは κ（リング/シャドウ比）・スピン/傾斜・散乱などの系統が支配しやすいため、現状σだけでなく『参考:+κ』の誤差予算も併記する。",
             "速度飽和δは“測定値”ではなく、既知の高γ観測と矛盾しないための制約（概算）として扱う（粒子質量仮定に依存）。",
-            "再現: scripts/summary/decisive_candidates.py → output/summary/decisive_candidates.(png|json)",
+            "再現: scripts/summary/decisive_candidates.py → output/private/summary/decisive_candidates.(png|json)",
         ],
         "table": table,
     }
 
 
 def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
-    paper_html = root / "output" / "summary" / "pmodel_paper.html"
+    paper_html = root / "output" / "private" / "summary" / "pmodel_paper.html"
     manuscript_md = root / "doc" / "paper" / "10_manuscript.md"
     sources_md = root / "doc" / "paper" / "20_data_sources.md"
 
@@ -1305,8 +1348,8 @@ def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
                 f"出力: {_rel_repo_path(root, paper_html)}",
                 f"本文: {_rel_repo_path(root, manuscript_md)}",
                 f"一次ソース: {_rel_repo_path(root, sources_md)}",
-                "生成（推奨）: cmd /c output\\summary\\build_materials.bat quick-nodocx",
-                "生成（Full）: cmd /c output\\summary\\build_materials.bat",
+                "生成（推奨）: cmd /c scripts\\summary\\build_materials.bat quick-nodocx",
+                "生成（Full）: cmd /c scripts\\summary\\build_materials.bat",
             ],
         }
 
@@ -1315,19 +1358,19 @@ def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
         "title": "論文（HTML版）",
         "kind": "論文化（Phase 8 / Step 8.2）",
         "summary_lines": [
-            "未生成: cmd /c output\\summary\\build_materials.bat quick-nodocx を実行してください。",
+            "未生成: cmd /c scripts\\summary\\build_materials.bat quick-nodocx を実行してください。",
         ],
         "detail_lines": [
             f"期待する出力: {_rel_repo_path(root, paper_html)}",
             f"本文: {_rel_repo_path(root, manuscript_md)}",
             f"一次ソース: {_rel_repo_path(root, sources_md)}",
-            "生成（HTMLのみ）: python -B scripts/summary/paper_build.py --mode publish --outdir output/summary --skip-docx",
+            "生成（HTMLのみ）: python -B scripts/summary/paper_build.py --mode publish --outdir output/private/summary --skip-docx",
         ],
     }
 
 
 def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[str, Any]]:
-    path = root / "output" / "summary" / "work_history.jsonl"
+    path = root / "output" / "private" / "summary" / "work_history.jsonl"
     if not path.exists():
         return None
 
@@ -1374,12 +1417,12 @@ def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[s
     return {
         "headers": ["UTC", "event", "代表出力（例）"],
         "rows": rows,
-        "caption": "機械可読ログ output/summary/work_history.jsonl の直近イベント（重複作業の防止用）。",
+        "caption": "機械可読ログ output/private/summary/work_history.jsonl の直近イベント（重複作業の防止用）。",
     }
 
 
 def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
-    status_path = root / "output" / "summary" / "run_all_status.json"
+    status_path = root / "output" / "private" / "summary" / "run_all_status.json"
     st = _try_read_json(status_path)
     if not isinstance(st, dict):
         return None
@@ -1429,7 +1472,7 @@ def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
     table = {
         "headers": ["task", "status", "elapsed_s", "note"],
         "rows": rows[:30],
-        "caption": "失敗/スキップの要点のみ（全ログは output/summary/logs/ と run_all_status.json）。",
+        "caption": "失敗/スキップの要点のみ（全ログは output/private/summary/logs/ と run_all_status.json）。",
     }
 
     return {
@@ -1439,8 +1482,8 @@ def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
         "summary_lines": summary_lines,
         "detail_lines": [
             "再現: python -B scripts/summary/run_all.py --offline",
-            "状況: output/summary/run_all_status.json",
-            "ログ: output/summary/logs/",
+            "状況: output/private/summary/run_all_status.json",
+            "ログ: output/private/summary/logs/",
         ],
         "table": table,
     }
@@ -1695,7 +1738,7 @@ def _render_llr_detail_html(
 
 
 def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
-    out_q = root / "output" / "quantum"
+    out_q = root / "output" / "public" / "quantum"
 
     cards: List[Dict[str, Any]] = []
 
@@ -1939,7 +1982,7 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
             ],
             "detail_lines": [
                 "生成: scripts/quantum/bell_selection_sensitivity_summary.py",
-                "入力: output/quantum/bell/*（window_sweep/offset_sweep/covariance；固定出力）",
+                "入力: output/public/quantum/bell/*（window_sweep/offset_sweep/covariance；固定出力）",
             ],
         }
     )
@@ -2022,7 +2065,7 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
 
 def main() -> int:
     root = _repo_root()
-    out_dir = root / "output" / "summary"
+    out_dir = root / "output" / "private" / "summary"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Source images (already produced by run_all)
@@ -3352,7 +3395,10 @@ def main() -> int:
 
     # Cosmology: distance duality (DDR) observational constraint (epsilon0)
     cosmo_ddr = (
-        _try_read_json(root / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json") or {}
+        _try_read_json(
+            root / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+        )
+        or {}
     )
     cosmo_ddr_summary_lines: List[str] = []
     cosmo_ddr_table: Optional[Dict[str, Any]] = None
@@ -3454,7 +3500,9 @@ def main() -> int:
 
     # Cosmology: Tolman surface brightness (SB dimming) observational constraint (n exponent)
     cosmo_tolman = (
-        _try_read_json(root / "output" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json")
+        _try_read_json(
+            root / "output" / "private" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
+        )
         or {}
     )
     cosmo_tolman_summary_lines: List[str] = []
@@ -3555,7 +3603,8 @@ def main() -> int:
 
     # Cosmology: tension attribution (Step 16.5 entrance)
     cosmo_tension_attr = (
-        _try_read_json(root / "output" / "cosmology" / "cosmology_tension_attribution_metrics.json") or {}
+        _try_read_json(root / "output" / "private" / "cosmology" / "cosmology_tension_attribution_metrics.json")
+        or {}
     )
     cosmo_tension_attr_summary_lines: List[str] = []
     cosmo_tension_attr_detail_lines: List[str] = []
@@ -3641,7 +3690,8 @@ def main() -> int:
 
     # Cosmology: DESI DR1 BAO promotion check (multi-tracer; screening→確証)
     cosmo_desi_promo = (
-        _try_read_json(root / "output" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json") or {}
+        _try_read_json(root / "output" / "private" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json")
+        or {}
     )
     cosmo_desi_promo_summary_lines: List[str] = []
     cosmo_desi_promo_detail_lines: List[str] = []
@@ -3711,7 +3761,7 @@ def main() -> int:
     jwst_mast_summary_lines: List[str] = []
     jwst_mast_detail_lines: List[str] = []
     jwst_mast_table: Optional[Dict[str, Any]] = None
-    jwst_waitlist_path = root / "output" / "cosmology" / "jwst_spectra_release_waitlist.json"
+    jwst_waitlist_path = root / "output" / "private" / "cosmology" / "jwst_spectra_release_waitlist.json"
     jwst_waitlist_by_slug: Dict[str, Dict[str, Any]] = {}
     try:
         if jwst_waitlist_path.exists():
@@ -3861,7 +3911,7 @@ def main() -> int:
                     "title": "最近の作業履歴（自動ログ）",
                     "kind": "履歴",
                     "summary_lines": ["直近の主要イベントを抜粋（スクリプト実行履歴）。"],
-                    "detail_lines": ["機械可読ログ: output/summary/work_history.jsonl（手動編集しない）"],
+                    "detail_lines": ["機械可読ログ: output/private/summary/work_history.jsonl（手動編集しない）"],
                     "table": recent_worklog_table,
                 }
                 if isinstance(recent_worklog_table, dict)
@@ -3870,7 +3920,7 @@ def main() -> int:
                     "title": "最近の作業履歴（自動ログ）",
                     "kind": "履歴",
                     "summary_lines": ["ログ未生成: 先に python -B scripts/summary/run_all.py --offline を実行してください。"],
-                    "detail_lines": ["機械可読ログ: output/summary/work_history.jsonl（手動編集しない）"],
+                    "detail_lines": ["機械可読ログ: output/private/summary/work_history.jsonl（手動編集しない）"],
                 },
             ],
         ),
@@ -5228,7 +5278,7 @@ def main() -> int:
                     "id": "cosmology_redshift_pbg",
                     "title": "宇宙論：宇宙膨張なしで赤方偏移を P で説明（背景Pの時間変化）",
                     "kind": "機構の提示（差分予測候補）",
-                    "path": root / "output" / "cosmology" / "cosmology_redshift_pbg.png",
+                    "path": root / "output" / "private" / "cosmology" / "cosmology_redshift_pbg.png",
                     "summary_lines": [
                         "P(x,t)=P_bg(t)·P_local(x) を仮定し、1+z=P_em/P_obs を用いる。",
                         "低zでは H0^(P)=-(d/dt ln P_bg)|t0 により z≈H0^(P)·D/c（Hubble則）となる。",
@@ -5251,7 +5301,7 @@ def main() -> int:
                     "id": "cosmology_observable_scalings",
                     "title": "宇宙論：観測量スケーリング（距離二重性 / Tolman表面輝度）",
                     "kind": "差分予測（観測量への接続）",
-                    "path": root / "output" / "cosmology" / "cosmology_observable_scalings.png",
+                    "path": root / "output" / "private" / "cosmology" / "cosmology_observable_scalings.png",
                     "summary_lines": [
                         "距離二重性 η(z)=D_L/((1+z)^2 D_A) を比較：FRWではη=1、静的背景Pではη=1/(1+z)。",
                         "Tolman表面輝度：FRWは(1+z)^-4、静的背景Pは(1+z)^-2（最小仮定）。",
@@ -5272,7 +5322,7 @@ def main() -> int:
                     "id": "cosmology_distance_duality_constraints",
                     "title": "宇宙論：距離二重性ηの観測制約（棄却条件）",
                     "kind": "観測制約（一次ソース）",
-                    "path": root / "output" / "cosmology" / "cosmology_distance_duality_constraints.png",
+                    "path": root / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints.png",
                     "summary_lines": cosmo_ddr_summary_lines,
                     "explain_lines": [
                         "距離二重性（DDR）は、光度距離 D_L と角径距離 D_A の間の関係で、観測から検証できる。",
@@ -5291,7 +5341,7 @@ def main() -> int:
                     "id": "cosmology_distance_duality_source_sensitivity",
                     "title": "宇宙論：DDR一次ソース依存（距離指標で結論がどれだけ変わるか）",
                     "kind": "現状整理（Step 16.5.1）",
-                    "path": root / "output" / "cosmology" / "cosmology_distance_duality_source_sensitivity.png",
+                    "path": root / "output" / "private" / "cosmology" / "cosmology_distance_duality_source_sensitivity.png",
                     "summary_lines": [
                         "同じ静的最小（ε0=-1）でも、一次ソース（距離指標）の採り方で棄却度 |z| が大きく変わる。",
                         "BAOを含む最も強い制約は強く棄却する一方、BAOなしの一部制約は棄却が弱い。",
@@ -5306,7 +5356,7 @@ def main() -> int:
                     "id": "cosmology_tolman_surface_brightness_constraints",
                     "title": "宇宙論：Tolman表面輝度の一次ソース制約（参考）",
                     "kind": "観測制約（一次ソース, 進化が系統）",
-                    "path": root / "output" / "cosmology" / "cosmology_tolman_surface_brightness_constraints.png",
+                    "path": root / "output" / "private" / "cosmology" / "cosmology_tolman_surface_brightness_constraints.png",
                     "summary_lines": cosmo_tolman_summary_lines,
                     "explain_lines": [
                         "Tolman表面輝度（SB dimming）は、膨張（FRW）と“膨張なし”の差が観測量として現れる候補。",
@@ -5323,7 +5373,7 @@ def main() -> int:
                     "id": "cosmology_tension_attribution",
                     "title": "宇宙論：張力の原因切り分け（現状）",
                     "kind": "現状整理（Step 16.5）",
-                    "path": root / "output" / "cosmology" / "cosmology_tension_attribution.png",
+                    "path": root / "output" / "private" / "cosmology" / "cosmology_tension_attribution.png",
                     "summary_lines": cosmo_tension_attr_summary_lines,
                     "explain_lines": [
                         "距離指標依存の張力（DDR/BAO/Tolman）と、独立プローブ（時間伸長/T(z)）の整合を並べて表示する。",
@@ -5350,7 +5400,7 @@ def main() -> int:
                     "id": "cosmology_jwst_mast_x1d",
                     "title": "宇宙論：JWST スペクトル一次データ（MAST; x1d）",
                     "kind": "一次データ（距離指標非依存）",
-                    "path": root / "output" / "cosmology" / "jwst_spectra__jades_gs_z14_0__x1d_qc.png",
+                    "path": root / "output" / "private" / "cosmology" / "jwst_spectra__jades_gs_z14_0__x1d_qc.png",
                     "summary_lines": jwst_mast_summary_lines,
                     "explain_lines": [
                         "赤方偏移 z は本質的に「スペクトル線のズレ」で決まるため、距離指標の前提に依らず一次データから扱える。",
@@ -5408,7 +5458,7 @@ def main() -> int:
         llr_detail_html = None
 
     # Public report should keep LLR minimal: show only the residual (obs - model) card.
-    # Detailed diagnostics stay in output/summary/details/llr.html.
+    # Detailed diagnostics stay in output/private/summary/details/llr.html.
     try:
         if llr_section_idx is not None and isinstance(llr_graphs_detail, list) and llr_graphs_detail:
             llr_public_ids = {"llr_residual"}
@@ -5465,8 +5515,8 @@ def main() -> int:
         },
         "notes": [
             "このダッシュボードは各トピックの既存図を再利用し、読みやすい指標を追記しています。",
-            "詳細は output/<topic>/ と output/summary/pmodel_report.html を参照してください。",
-            "一般向けに全グラフを一覧表示するHTMLは output/summary/pmodel_public_report.html。",
+            "詳細は output/<topic>/ と output/private/summary/pmodel_report.html を参照してください。",
+            "一般向けに全グラフを一覧表示するHTMLは output/private/summary/pmodel_public_report.html。",
         ],
     }
     json_path = out_dir / "pmodel_public_dashboard_metrics.json"

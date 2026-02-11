@@ -22,11 +22,11 @@ Step 14.2.18/14.2.19（距離指標の誤差予算：感度比較）:
   - data/cosmology/alcock_paczynski_constraints.json（BOSS DR12; BAO距離プロダクト）
   - data/cosmology/boss_dr12_baofs_consensus_reduced_covariance_cij.json（BOSS DR12; BAO+FS reduced covariance c_ij）
   - data/cosmology/bao_sound_horizon_constraints.json（Planck r_drag）
-  - output/cosmology/cosmology_distance_indicator_reach_limit_metrics.json（DDR→必要補正 Δε）
+  - output/private/cosmology/cosmology_distance_indicator_reach_limit_metrics.json（DDR→必要補正 Δε）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_error_budget_sensitivity.png
-  - output/cosmology/cosmology_distance_indicator_error_budget_sensitivity_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_error_budget_sensitivity.png
+  - output/private/cosmology/cosmology_distance_indicator_error_budget_sensitivity_metrics.json
 """
 
 from __future__ import annotations
@@ -604,7 +604,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not sigma_multipliers:
         sigma_multipliers = [1.0, 3.0]
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_png = out_dir / "cosmology_distance_indicator_error_budget_sensitivity.png"
     out_json = out_dir / "cosmology_distance_indicator_error_budget_sensitivity_metrics.json"
 
@@ -616,7 +616,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     boss_path = _ROOT / "data" / "cosmology" / "alcock_paczynski_constraints.json"
     boss_cov_path = _ROOT / "data" / "cosmology" / "boss_dr12_baofs_consensus_reduced_covariance_cij.json"
     rdrag_path = _ROOT / "data" / "cosmology" / "bao_sound_horizon_constraints.json"
-    reach_path = _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json"
+    reach_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json"
 
     reach_reps = _read_json(reach_path) if reach_path.exists() else {"reach": {}}
 

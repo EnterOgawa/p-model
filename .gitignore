@@ -30,10 +30,12 @@ gps/
 mercury/
 viking/
 
-# Generated outputs (verification results; tracked selectively)
-# - Tracked artifacts under output/ remain tracked.
-# - New outputs are ignored by default to keep the repo minimal.
-output/
+# Generated outputs
+# - Public artifacts (tracked): output/public/
+# - Local-only / intermediate artifacts: output/private/ (ignored)
+output/**
+!output/public/
+!output/public/**
 
 # Input data caches (not tracked here)
 data/

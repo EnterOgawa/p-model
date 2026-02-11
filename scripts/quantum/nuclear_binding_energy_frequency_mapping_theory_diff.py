@@ -187,7 +187,7 @@ def _top_abs_delta(rows: list[dict[str, object]], *, key: str, top_n: int = 12) 
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"

@@ -14,14 +14,14 @@ random realization（random_index）の違いに対して平均化して「fit�
   raw からの multi-random 合成（DR/RR 合算）や結合random（reservoir）へ接続する。
 
 入力（例）:
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag>_metrics.json
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag>__jk_cov.npz
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag>_metrics.json
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag>__jk_cov.npz
 
 出力（固定規約に合わせて新規 out_tag を付与）:
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>.npz
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>_metrics.json
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>__jk_cov.npz
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>__jk_cov_metrics.json
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>.npz
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>_metrics.json
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>__jk_cov.npz
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*__<out_tag_new>__jk_cov_metrics.json
 """
 
 from __future__ import annotations
@@ -146,8 +146,8 @@ def main(argv: List[str] | None = None) -> int:
     ap.add_argument("--out-tag", required=True, help="New out_tag for the combined outputs.")
     ap.add_argument(
         "--out-dir",
-        default="output/cosmology",
-        help="Output directory (default: output/cosmology).",
+        default="output/private/cosmology",
+        help="Output directory (default: output/private/cosmology).",
     )
     ap.add_argument(
         "--cov-mode",

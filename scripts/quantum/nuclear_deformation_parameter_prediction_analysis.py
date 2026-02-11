@@ -291,7 +291,7 @@ def _build_figure(*, rows: list[dict[str, Any]], out_png: Path, r42_fit_coeffs: 
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_beta2_json = root / "data" / "quantum" / "sources" / "nndc_be2_adopted_entries" / "extracted_beta2.json"

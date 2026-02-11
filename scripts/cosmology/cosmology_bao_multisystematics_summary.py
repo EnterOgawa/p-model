@@ -8,12 +8,12 @@ BOSS / eBOSS など、複数サーベイ・複数tracerの BAO peakfit（ε）�
 特に cap 依存（NGC/SGC）の張力を定量化して固定出力する。
 
 入力（例）:
-- output/cosmology/cosmology_bao_catalog_peakfit_<sample>_<caps>_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_peakfit_<sample>_<caps>_metrics.json
 
 出力（固定）:
-- output/cosmology/cosmology_bao_multisystematics_summary.png
-- output/cosmology/cosmology_bao_multisystematics_summary_metrics.json
-- output/cosmology/cosmology_bao_multisystematics_summary.csv
+- output/private/cosmology/cosmology_bao_multisystematics_summary.png
+- output/private/cosmology/cosmology_bao_multisystematics_summary_metrics.json
+- output/private/cosmology/cosmology_bao_multisystematics_summary.csv
 """
 
 from __future__ import annotations
@@ -199,7 +199,7 @@ def main(argv: list[str] | None = None) -> int:
     caps_list = [c.strip() for c in str(args.caps).split(",") if c.strip()]
     dists = [d.strip() for d in str(args.dists).split(",") if d.strip()]
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_bao_multisystematics_summary.png"
     out_json = out_dir / "cosmology_bao_multisystematics_summary_metrics.json"

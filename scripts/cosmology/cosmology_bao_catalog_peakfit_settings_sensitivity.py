@@ -13,8 +13,8 @@ DESI（等）で catalog-based ξℓ（銀河+random→ξ(s,μ)→ξ0/ξ2）か�
 - 共分散は jackknife（RA quantile）を前提（DESI LRG2 の切り分けの主戦場）。
 
 出力（固定名）:
-- output/cosmology/cosmology_bao_catalog_peakfit_settings_sensitivity__{sample}_{caps}__{out_tag}.png
-- output/cosmology/cosmology_bao_catalog_peakfit_settings_sensitivity__{sample}_{caps}__{out_tag}_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_peakfit_settings_sensitivity__{sample}_{caps}__{out_tag}.png
+- output/private/cosmology/cosmology_bao_catalog_peakfit_settings_sensitivity__{sample}_{caps}__{out_tag}_metrics.json
 """
 
 from __future__ import annotations
@@ -404,12 +404,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--out-png",
         default="",
-        help="output png (default: auto under output/cosmology/)",
+        help="output png (default: auto under output/private/cosmology/)",
     )
     ap.add_argument(
         "--out-json",
         default="",
-        help="output metrics json (default: auto under output/cosmology/)",
+        help="output metrics json (default: auto under output/private/cosmology/)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -477,7 +477,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     tag = f"{_sanitize_tag(sample)}_{_sanitize_tag(caps)}__{_sanitize_tag(out_tag)}"
     out_png = Path(str(args.out_png)).resolve() if str(args.out_png).strip() else out_dir / f"cosmology_bao_catalog_peakfit_settings_sensitivity__{tag}.png"

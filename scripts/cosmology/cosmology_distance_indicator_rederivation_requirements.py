@@ -14,13 +14,13 @@ Step 14.2.21（距離指標の再導出要件の整理）:
     P-model側で再導出すべき対象を固定する。
 
 入力（固定: 既存出力を参照）:
-  - output/cosmology/cosmology_distance_indicator_reach_limit_metrics.json
-  - output/cosmology/cosmology_distance_indicator_error_budget_sensitivity_metrics.json
-  - output/cosmology/cosmology_reconnection_plausibility_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_reach_limit_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_error_budget_sensitivity_metrics.json
+  - output/private/cosmology/cosmology_reconnection_plausibility_metrics.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_requirements.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_requirements_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_requirements.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_requirements_metrics.json
 """
 
 from __future__ import annotations
@@ -348,15 +348,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.parse_args(argv)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_png = out_dir / "cosmology_distance_indicator_rederivation_requirements.png"
     out_metrics = out_dir / "cosmology_distance_indicator_rederivation_requirements_metrics.json"
 
-    in_reach = _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json"
+    in_reach = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json"
     in_sens = (
-        _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_error_budget_sensitivity_metrics.json"
+        _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_indicator_error_budget_sensitivity_metrics.json"
     )
-    in_plaus = _ROOT / "output" / "cosmology" / "cosmology_reconnection_plausibility_metrics.json"
+    in_plaus = _ROOT / "output" / "private" / "cosmology" / "cosmology_reconnection_plausibility_metrics.json"
 
     if not in_reach.exists():
         raise FileNotFoundError(f"missing input: {in_reach}")

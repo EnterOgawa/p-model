@@ -17,12 +17,12 @@ Phase 16（宇宙論）/ Step 16.4：
   - data/cosmology/sn_standard_candle_evolution_constraints.json
   - data/cosmology/sn_time_dilation_constraints.json
   - data/cosmology/cmb_temperature_scaling_constraints.json
-  - output/cosmology/cosmology_bao_scaled_distance_fit_metrics.json
-  - （任意）output/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（DDR σ_cat）
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_metrics.json
+  - （任意）output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（DDR σ_cat）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_relax_thresholds.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_relax_thresholds_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_relax_thresholds.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_relax_thresholds_metrics.json
 """
 
 from __future__ import annotations
@@ -273,7 +273,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     data_dir = _ROOT / "data" / "cosmology"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
 
     in_ddr = data_dir / "distance_duality_constraints.json"
     in_opacity = data_dir / "cosmic_opacity_constraints.json"

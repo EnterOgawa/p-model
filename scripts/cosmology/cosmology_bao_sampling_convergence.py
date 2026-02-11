@@ -13,8 +13,8 @@ random/galaxy の部分抽出（prefix_rows / reservoir）に対して、ξℓ�
 - 収束が悪い場合は reservoir（均一サンプル）へ移行する判断材料にする。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_sampling_convergence.png
-- output/cosmology/cosmology_bao_sampling_convergence_metrics.json
+- output/private/cosmology/cosmology_bao_sampling_convergence.png
+- output/private/cosmology/cosmology_bao_sampling_convergence_metrics.json
 """
 
 from __future__ import annotations
@@ -72,7 +72,7 @@ def _metrics_path(*, sample: str, caps: str, dist: str, ztag: str, out_tag: str)
         base = f"{base}_{ztag}"
     if out_tag:
         base = f"{base}__{out_tag}"
-    return _ROOT / "output" / "cosmology" / f"{base}_metrics.json"
+    return _ROOT / "output" / "private" / "cosmology" / f"{base}_metrics.json"
 
 
 def _extract_key_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
@@ -182,7 +182,7 @@ def main(argv: list[str] | None = None) -> int:
                     fetch_cmd += ["--random-scan-max-rows", str(int(args.random_scan_max_rows))]
                 _run_cmd(fetch_cmd)
 
-                # 2) xi (writes output/cosmology/cosmology_bao_xi_from_catalogs_...__out_tag_*.json)
+                # 2) xi (writes output/private/cosmology/cosmology_bao_xi_from_catalogs_...__out_tag_*.json)
                 xi_cmd = [
                     sys.executable,
                     str(_ROOT / "scripts" / "cosmology" / "cosmology_bao_xi_from_catalogs.py"),
@@ -236,7 +236,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     rows = sorted(rows, key=lambda x: int(x["random_max_rows"]))
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_bao_sampling_convergence.png"
     out_json = out_dir / "cosmology_bao_sampling_convergence_metrics.json"

@@ -15,8 +15,8 @@ cosmology_redshift_pbg.py
   z ≈ H0^(P) Δt ≈ H0^(P) D / c
 
 出力（固定名）:
-  - output/cosmology/cosmology_redshift_pbg.png
-  - output/cosmology/cosmology_redshift_pbg_metrics.json
+  - output/private/cosmology/cosmology_redshift_pbg.png
+  - output/private/cosmology/cosmology_redshift_pbg_metrics.json
 """
 
 from __future__ import annotations
@@ -136,7 +136,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.93))
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / "cosmology_redshift_pbg.png"
     fig.savefig(png_path, dpi=200)

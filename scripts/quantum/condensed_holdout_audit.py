@@ -175,7 +175,7 @@ def _minimax_gate_summary(
 
 
 def main() -> int:
-    out_dir = _ROOT / "output" / "quantum"
+    out_dir = _ROOT / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     inputs = [

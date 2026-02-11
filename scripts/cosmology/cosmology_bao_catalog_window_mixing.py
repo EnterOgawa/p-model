@@ -13,8 +13,8 @@ catalog-based（Corrfunc; galaxy+random / recon）で得た pair-count grid（RR
   order-of-magnitude で切り分ける（mixing が小さければ、主因は recon 仕様差側へ寄せる）。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_window_mixing.png
-- output/cosmology/cosmology_bao_catalog_window_mixing_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_window_mixing.png
+- output/private/cosmology/cosmology_bao_catalog_window_mixing_metrics.json
 
 注意：
 - 本スクリプト自体は Corrfunc を使わず、既に生成済みの npz を読むだけ（Windowsでも実行可）。
@@ -188,7 +188,7 @@ def _path_for(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) -> P
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}"
     if suffix:
         base = f"{base}{suffix}"
-    return _ROOT / "output" / "cosmology" / f"{base}.npz"
+    return _ROOT / "output" / "private" / "cosmology" / f"{base}.npz"
 
 
 def _load_npz(path: Path) -> Dict[str, np.ndarray]:
@@ -223,7 +223,7 @@ def _xi_l_from_xi_mu(*, xi_mu: np.ndarray, mu_edges: np.ndarray, ell: int) -> np
 
 
 def _try_load_recon_gap_rmse() -> Dict[str, Any]:
-    path = _ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"
+    path = _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"
     if not path.exists():
         return {}
     try:
@@ -248,11 +248,11 @@ def main(argv: Optional[list[str]] = None) -> int:
     ap.add_argument("--s-max", type=float, default=150.0, help="eval s_max (default: 150)")
     ap.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_catalog_window_mixing.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_catalog_window_mixing.png"),
     )
     ap.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_catalog_window_mixing_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_catalog_window_mixing_metrics.json"),
     )
     args = ap.parse_args(argv)
 
@@ -523,7 +523,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             "s_eval_range_mpc_over_h": [float(args.s_min), float(args.s_max)],
             "npz_missing": missing[:50],  # cap
             "recon_gap_summary_metrics_json": str(
-                _ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"
+                _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"
             ),
         },
         "results": results,

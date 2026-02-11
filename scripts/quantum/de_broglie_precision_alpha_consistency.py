@@ -34,7 +34,7 @@ def epsilon_from_alpha_inv(*, alpha_inv_ref: float, alpha_inv_meas: float) -> fl
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     recoil = Measurement(

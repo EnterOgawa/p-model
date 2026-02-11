@@ -95,8 +95,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     parser.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     args = parser.parse_args(argv)
 
@@ -106,10 +106,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     _set_japanese_font()
 
     # --- Inputs (precomputed metrics from primary scripts)
-    pack = _load_required(_ROOT / "output" / "cosmology" / "cosmology_static_infinite_hypothesis_pack_metrics.json")
-    ddr = _load_required(_ROOT / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json")
-    ddr_sys = _load_required(_ROOT / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json")
-    bao_fit = _load_required(_ROOT / "output" / "cosmology" / "cosmology_bao_distance_ratio_fit_metrics.json")
+    pack = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_static_infinite_hypothesis_pack_metrics.json")
+    ddr = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json")
+    ddr_sys = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json")
+    bao_fit = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_distance_ratio_fit_metrics.json")
     bao_global_prior_survey_f = _load_required(
         _ROOT
         / "output"
@@ -129,11 +129,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         / "cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json"
     )
     tolman = _load_required(
-        _ROOT / "output" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
+        _ROOT / "output" / "private" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
     )
-    sn_td = _load_required(_ROOT / "output" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json")
+    sn_td = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json")
     cmb_tz = _load_required(
-        _ROOT / "output" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
+        _ROOT / "output" / "private" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
     )
 
     # --- Extract key numbers
@@ -402,16 +402,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             "notes": "この図は『静的背景P（最小仮定）』と一次ソース制約の張力が、どの観測（前提）に集中しているかを要約する。",
         },
         "inputs": {
-            "static_pack_metrics": "output/cosmology/cosmology_static_infinite_hypothesis_pack_metrics.json",
-            "ddr_metrics": "output/cosmology/cosmology_distance_duality_constraints_metrics.json",
-            "ddr_systematics_metrics": "output/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json",
-            "bao_distance_ratio_fit_metrics": "output/cosmology/cosmology_bao_distance_ratio_fit_metrics.json",
-            "bao_global_prior_survey_f_metrics": "output/cosmology/cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan_metrics.json",
-            "bao_global_prior_leave_one_out_f_metrics": "output/cosmology/cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan_metrics.json",
-            "bao_sigma_scan_metrics": "output/cosmology/cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json",
-            "tolman_metrics": "output/cosmology/cosmology_tolman_surface_brightness_constraints_metrics.json",
-            "sn_time_dilation_metrics": "output/cosmology/cosmology_sn_time_dilation_constraints_metrics.json",
-            "cmb_temperature_metrics": "output/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json",
+            "static_pack_metrics": "output/private/cosmology/cosmology_static_infinite_hypothesis_pack_metrics.json",
+            "ddr_metrics": "output/private/cosmology/cosmology_distance_duality_constraints_metrics.json",
+            "ddr_systematics_metrics": "output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json",
+            "bao_distance_ratio_fit_metrics": "output/private/cosmology/cosmology_bao_distance_ratio_fit_metrics.json",
+            "bao_global_prior_survey_f_metrics": "output/private/cosmology/cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan_metrics.json",
+            "bao_global_prior_leave_one_out_f_metrics": "output/private/cosmology/cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan_metrics.json",
+            "bao_sigma_scan_metrics": "output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json",
+            "tolman_metrics": "output/private/cosmology/cosmology_tolman_surface_brightness_constraints_metrics.json",
+            "sn_time_dilation_metrics": "output/private/cosmology/cosmology_sn_time_dilation_constraints_metrics.json",
+            "cmb_temperature_metrics": "output/private/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json",
         },
         "results": {
             "ddr_representative": {

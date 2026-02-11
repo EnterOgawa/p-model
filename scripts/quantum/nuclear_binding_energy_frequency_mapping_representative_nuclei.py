@@ -99,10 +99,10 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    deut_path = root / "output" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -112,7 +112,7 @@ def main() -> None:
         )
     deut = _load_json(deut_path)
 
-    two_body_path = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
+    two_body_path = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
     if not two_body_path.exists():
         raise SystemExit(
             "[fail] missing deuteron two-body mapping metrics.\n"

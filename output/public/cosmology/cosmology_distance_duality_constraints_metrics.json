@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-10T15:34:08.432984+00:00",
+  "generated_utc": "2026-02-11T06:39:26.450225+00:00",
   "input": "C:/develop/waveP/data/cosmology/distance_duality_constraints.json",
   "definition": {
     "epsilon0": "距離二重性（Etherington / DDR）の破れをパラメータ化：d_L(z) = (1+z)^(2+ε0) d_A(z)。標準（FRW + 光子数保存）は ε0=0。",

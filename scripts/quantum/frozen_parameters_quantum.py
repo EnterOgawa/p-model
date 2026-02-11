@@ -8,7 +8,7 @@ Part III（量子）で凍結した値（核/Bell/物性/熱）を 1つのJSON�
 本文（doc/paper/12_part3_quantum.md）から参照できる形に固定する。
 
 出力（固定）:
-  - output/quantum/frozen_parameters_quantum.json
+  - output/public/quantum/frozen_parameters_quantum.json
 
 方針:
 - 既存の確定出力（metrics / pack JSON）から収集し、再計算はしない。
@@ -94,13 +94,13 @@ def _unique_float(values: List[Any], *, name: str) -> float:
 
 def build_quantum_frozen_parameters(*, root: Path) -> Dict[str, Any]:
     theory_frozen = root / "output" / "theory" / "frozen_parameters.json"
-    bell_pack = root / "output" / "quantum" / "bell" / "falsification_pack.json"
-    bell_freeze_policy = root / "output" / "quantum" / "bell" / "freeze_policy.json"
-    nuclear_pack = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.json"
-    nuclear_theory_diff_metrics = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
-    nuclear_effective_potential_canonical = root / "output" / "quantum" / "nuclear_effective_potential_canonical_metrics.json"
-    pairing_metrics = root / "output" / "quantum" / "nuclear_pairing_effect_systematics_metrics.json"
-    condensed_pack = root / "output" / "quantum" / "condensed_falsification_pack.json"
+    bell_pack = root / "output" / "public" / "quantum" / "bell" / "falsification_pack.json"
+    bell_freeze_policy = root / "output" / "public" / "quantum" / "bell" / "freeze_policy.json"
+    nuclear_pack = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.json"
+    nuclear_theory_diff_metrics = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
+    nuclear_effective_potential_canonical = root / "output" / "public" / "quantum" / "nuclear_effective_potential_canonical_metrics.json"
+    pairing_metrics = root / "output" / "public" / "quantum" / "nuclear_pairing_effect_systematics_metrics.json"
+    condensed_pack = root / "output" / "public" / "quantum" / "condensed_falsification_pack.json"
 
     _require_path(theory_frozen, hint="Run: python -B scripts/theory/freeze_parameters.py")
     _require_path(bell_pack, hint="Run: python -B scripts/quantum/bell_primary_products.py --overwrite")
@@ -215,8 +215,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_ROOT / "output" / "quantum" / "frozen_parameters_quantum.json"),
-        help="Output JSON path (default: output/quantum/frozen_parameters_quantum.json).",
+        default=str(_ROOT / "output" / "public" / "quantum" / "frozen_parameters_quantum.json"),
+        help="Output JSON path (default: output/public/quantum/frozen_parameters_quantum.json).",
     )
     args = ap.parse_args(argv)
 

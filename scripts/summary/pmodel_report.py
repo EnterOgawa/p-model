@@ -85,7 +85,7 @@ def _try_float(x: str) -> Optional[float]:
 
 
 def _cassini_section(root: Path) -> Section:
-    out_dir = root / "output" / "cassini"
+    out_dir = root / "output" / "private" / "cassini"
     runbook = root / "doc" / "cassini" / "README.md"
 
     overlay_zoom = out_dir / "cassini_fig2_overlay_zoom10d.png"
@@ -130,7 +130,7 @@ def _cassini_section(root: Path) -> Section:
 
 
 def _viking_section(root: Path) -> Section:
-    out_dir = root / "output" / "viking"
+    out_dir = root / "output" / "private" / "viking"
     runbook = root / "doc" / "viking" / "README.md"
 
     plot = out_dir / "viking_p_model_vs_measured_no_arrow.png"
@@ -175,7 +175,7 @@ def _viking_section(root: Path) -> Section:
 
 
 def _gps_section(root: Path) -> Section:
-    out_dir = root / "output" / "gps"
+    out_dir = root / "output" / "private" / "gps"
     runbook = root / "doc" / "gps" / "README.md"
 
     rms_plot = out_dir / "gps_rms_compare.png"
@@ -253,7 +253,7 @@ def _gps_section(root: Path) -> Section:
 
 
 def _llr_section(root: Path) -> Section:
-    out_root = root / "output" / "llr"
+    out_root = root / "output" / "private" / "llr"
     runbook = root / "doc" / "llr" / "README.md"
 
     out_dir = out_root / "out_llr"
@@ -300,7 +300,7 @@ def _llr_section(root: Path) -> Section:
 
 
 def _mercury_section(root: Path) -> Section:
-    out_dir = root / "output" / "mercury"
+    out_dir = root / "output" / "private" / "mercury"
     runbook = root / "doc" / "mercury" / "README.md"
 
     plot = out_dir / "mercury_orbit.png"
@@ -323,7 +323,7 @@ def _mercury_section(root: Path) -> Section:
 
 
 def _theory_section(root: Path) -> Section:
-    out_dir = root / "output" / "theory"
+    out_dir = root / "output" / "private" / "theory"
     runbook = root / "doc" / "theory" / "README.md"
 
     notes: List[str] = []
@@ -384,7 +384,7 @@ def _theory_section(root: Path) -> Section:
 
 
 def _run_all_status_section(root: Path, out_dir: Path) -> Section:
-    status_path = root / "output" / "summary" / "run_all_status.json"
+    status_path = root / "output" / "private" / "summary" / "run_all_status.json"
     runbook = root / "doc" / "summary" / "README.md"
 
     metrics: Dict[str, Any] = {
@@ -466,7 +466,7 @@ def _run_all_status_section(root: Path, out_dir: Path) -> Section:
 
 
 def _public_section(root: Path) -> Section:
-    out_dir = root / "output" / "summary"
+    out_dir = root / "output" / "private" / "summary"
     runbook = root / "doc" / "summary" / "README.md"
 
     dash_png = out_dir / "pmodel_public_dashboard.png"
@@ -622,10 +622,15 @@ def _render_dashboard_png(sections: List[Section], out_dir: Path) -> Optional[Pa
 
 def main() -> int:
     root = _repo_root()
-    default_out = root / "output" / "summary"
+    default_out = root / "output" / "private" / "summary"
 
     ap = argparse.ArgumentParser(description="Generate a single-page report of P-model comparisons.")
-    ap.add_argument("--outdir", type=str, default=str(default_out), help="Output directory (default: output/summary)")
+    ap.add_argument(
+        "--outdir",
+        type=str,
+        default=str(default_out),
+        help="Output directory (default: output/private/summary)",
+    )
     ap.add_argument("--open", action="store_true", help="Open the HTML report after generation (Windows only).")
     ap.add_argument("--no-dashboard", action="store_true", help="Do not generate dashboard PNG.")
     args = ap.parse_args()

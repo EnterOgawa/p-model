@@ -10,8 +10,8 @@ Phase 8 / Step 8.3（データ・コード公開）向けの “配布バンド�
 - 大きすぎる raw データは同梱せず、一次ソース（doc/PRIMARY_SOURCES.md）と取得スクリプトで再現する。
 
 出力（既定）：
-- paper: `output/summary/pmodel_release_bundle_paper.zip`（読み物＋最小ドキュメント）
-- repro: `output/summary/pmodel_release_bundle_repro.zip`（コード＋docs＋入口＋成果物（summary））
+- paper: `output/private/summary/pmodel_release_bundle_paper.zip`（読み物＋最小ドキュメント）
+- repro: `output/private/summary/pmodel_release_bundle_repro.zip`（コード＋docs＋入口＋成果物（summary））
 """
 
 from __future__ import annotations
@@ -76,7 +76,7 @@ _BUNDLE_SPECS: Dict[str, _BundleSpec] = {
 
 
 def _load_or_build_manifest(*, compute_hash: bool) -> Dict[str, Any]:
-    manifest_path = _ROOT / "output" / "summary" / "release_manifest.json"
+    manifest_path = _ROOT / "output" / "private" / "summary" / "release_manifest.json"
     if (not manifest_path.exists()) or (manifest_path.stat().st_size <= 10):
         argv = [] if compute_hash else ["--no-hash"]
         rc = release_manifest.main(argv)
@@ -150,7 +150,7 @@ def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path]
     if tmp.exists():
         tmp.unlink()
 
-    manifest_path = (_ROOT / "output" / "summary" / "release_manifest.json").resolve()
+    manifest_path = (_ROOT / "output" / "private" / "summary" / "release_manifest.json").resolve()
     file_set = {str(p.resolve()).lower() for p in files}
     if manifest_path.exists() and (str(manifest_path).lower() not in file_set):
         files = list(files) + [manifest_path]
@@ -172,7 +172,7 @@ def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path]
         "domain": "summary",
         "step": "8.3 (release bundle)",
         "mode": spec.name,
-        "manifest": "output/summary/release_manifest.json",
+        "manifest": "output/private/summary/release_manifest.json",
         "file_count": int(len(files)),
         "files_total_size_bytes": int(total_size),
         "largest_files": sizes_sorted[:20],
@@ -202,13 +202,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--out-zip",
         type=str,
         default=None,
-        help="output zip path (default: output/summary/pmodel_release_bundle_<mode>.zip)",
+        help="output zip path (default: output/private/summary/pmodel_release_bundle_<mode>.zip)",
     )
     ap.add_argument("--no-hash", action="store_true", help="skip sha256 in release_manifest (faster)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     spec = _BUNDLE_SPECS[str(args.mode)]
-    out_zip = Path(args.out_zip) if args.out_zip else (_ROOT / "output" / "summary" / f"pmodel_release_bundle_{spec.name}.zip")
+    out_zip = (
+        Path(args.out_zip)
+        if args.out_zip
+        else (_ROOT / "output" / "private" / "summary" / f"pmodel_release_bundle_{spec.name}.zip")
+    )
     if not out_zip.is_absolute():
         out_zip = (_ROOT / out_zip).resolve()
 

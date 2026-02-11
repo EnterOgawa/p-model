@@ -243,8 +243,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--out-dir",
         type=str,
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology).",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology).",
     )
     ap.add_argument(
         "--cap-sigma",

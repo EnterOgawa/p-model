@@ -11,7 +11,7 @@ baryons-only ヌル（g_P=g_bar）の残差・低加速度領域の統計量が�
 - data/cosmology/sparc/raw/Rotmod_LTG.zip
 
 出力（固定）:
-- output/cosmology/sparc_rar_mlr_sweep_metrics.json
+- output/private/cosmology/sparc_rar_mlr_sweep_metrics.json
 
 注意:
 - g_bar 系統（M/L）だけを動かす最小 sweep。距離・inclination・gas の系統などは次段で扱う。
@@ -207,14 +207,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     p.add_argument(
         "--h0p-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
-        help="Path to cosmology_redshift_pbg_metrics.json (default: output/cosmology/cosmology_redshift_pbg_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
+        help="Path to cosmology_redshift_pbg_metrics.json (default: output/private/cosmology/cosmology_redshift_pbg_metrics.json)",
     )
     p.add_argument("--h0p-km-s-mpc", type=float, default=None, help="Override H0^(P) in km/s/Mpc (optional)")
     p.add_argument("--pbg-kappa", type=float, default=DEFAULT_PBG_KAPPA, help="a0 = kappa * c * H0^(P) (default: 1/(2π))")
     p.add_argument(
         "--out",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_mlr_sweep_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_mlr_sweep_metrics.json"),
         help="Output JSON path",
     )
     args = p.parse_args(list(argv) if argv is not None else None)

@@ -637,7 +637,7 @@ def main() -> None:
 
     root = Path(__file__).resolve().parents[2]
     src_dir = root / "data" / "quantum" / "sources" / "nist_belltestdata"
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = Config(max_seconds=args.max_seconds)

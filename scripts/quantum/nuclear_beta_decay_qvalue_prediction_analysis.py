@@ -310,7 +310,7 @@ def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, d
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_binding_csv = out_dir / "nuclear_pairing_effect_systematics_per_nucleus.csv"

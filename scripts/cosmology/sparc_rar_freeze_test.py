@@ -13,10 +13,10 @@ RAR（g_obs vs g_bar）の「fit→freeze→holdout」の最小枠組みを固�
   McGaugh+2016 の経験式（a0 1パラメータ）を同じ枠組みで評価する（P-model予測ではない）。
 
 入力：
-- output/cosmology/sparc_rar_reconstruction.csv
+- output/private/cosmology/sparc_rar_reconstruction.csv
 
 出力（固定）：
-- output/cosmology/sparc_rar_freeze_test_metrics.json
+- output/private/cosmology/sparc_rar_freeze_test_metrics.json
 """
 
 from __future__ import annotations
@@ -823,17 +823,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--rar-csv",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_reconstruction.csv"),
-        help="RAR reconstruction CSV (default: output/cosmology/sparc_rar_reconstruction.csv)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_reconstruction.csv"),
+        help="RAR reconstruction CSV (default: output/private/cosmology/sparc_rar_reconstruction.csv)",
     )
     p.add_argument(
         "--h0p-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
-        help="Path to cosmology_redshift_pbg_metrics.json (default: output/cosmology/cosmology_redshift_pbg_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
+        help="Path to cosmology_redshift_pbg_metrics.json (default: output/private/cosmology/cosmology_redshift_pbg_metrics.json)",
     )
     p.add_argument("--h0p-km-s-mpc", type=float, default=None, help="Override H0^(P) in km/s/Mpc (optional)")
     p.add_argument("--pbg-kappa", type=float, default=DEFAULT_PBG_KAPPA, help="a0 = kappa * c * H0^(P) (default: 1/(2π))")
-    p.add_argument("--out", default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_metrics.json"), help="Output JSON path")
+    p.add_argument("--out", default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_metrics.json"), help="Output JSON path")
     p.add_argument("--sigma-floor-dex", type=float, default=0.01, help="Floor for sigma(log10 g_obs) in dex")
     p.add_argument("--low-accel-cut", type=float, default=-10.5, help="Low-acceleration cut on log10(g_bar)")
     p.add_argument(

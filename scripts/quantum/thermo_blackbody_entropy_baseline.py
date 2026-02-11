@@ -45,7 +45,7 @@ def _get_constant(extracted: Dict[str, Any], code: str) -> Dict[str, Any]:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_blackbody_constants"

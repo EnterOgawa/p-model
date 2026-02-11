@@ -102,7 +102,7 @@ def _find_multiplet_components(
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Source: NIST ASD cached output (Phase 7 / Step 7.12)

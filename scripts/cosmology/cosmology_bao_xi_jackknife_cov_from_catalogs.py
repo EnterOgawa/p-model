@@ -12,16 +12,16 @@ sky jackknife（leave-one-out）で dv=[xi0, xi2] の共分散を推定し、pea
 - 24スレッド運用が原則（`--threads 24` / `OMP_NUM_THREADS=24`）。
 
 入力：
-- `output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json`（1ケース分を指定）
+- `output/private/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json`（1ケース分を指定）
   - この metrics には、入力NPZ（galaxy/random）のパスと、z範囲・重み等の仕様が含まれる。
 
 出力（固定名）：
-- `output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov.npz`（既定）
+- `output/private/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov.npz`（既定）
   - `s`（xi の s bin center; xi出力と一致）
   - `cov`（shape=(2*n_s, 2*n_s); dv順序は y=[xi0, xi2]）
   - `y_jk`（shape=(n_jk, 2*n_s); leave-one-out の推定値）
   - `ra_edges_deg`（jackknife領域境界; 分位点; ra_quantile のみ）
-- `output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov_metrics.json`（既定）
+- `output/private/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov_metrics.json`（既定）
 
 備考：
 - 現状の region 分割は RA 分位点（決定的・seed不要）。

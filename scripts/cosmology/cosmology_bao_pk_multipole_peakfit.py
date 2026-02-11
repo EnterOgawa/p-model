@@ -21,8 +21,8 @@ BAO の圧縮出力（D_M/r_d, D_H/r_d）の前に、BOSS DR12 の power spectru
   ※ 未取得の場合は、先に scripts/cosmology/fetch_boss_dr12_beutler2016_bao_powspec.py を実行する。
 
 出力（固定名）:
-  - output/cosmology/cosmology_bao_pk_multipole_peakfit.png
-  - output/cosmology/cosmology_bao_pk_multipole_peakfit_metrics.json
+  - output/private/cosmology/cosmology_bao_pk_multipole_peakfit.png
+  - output/private/cosmology/cosmology_bao_pk_multipole_peakfit_metrics.json
   - （--window の場合は末尾に _window を付与）
   - （pre-recon の場合は末尾に _pre_recon）
 """
@@ -1155,7 +1155,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     suffix = "" if recon == "postrecon" else "_pre_recon"
     if use_window:

@@ -164,8 +164,8 @@ def main() -> None:
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json"),
-        help="Output JSON path (default: output/cosmology/cosmology_desi_dr1_bao_promotion_check.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json"),
+        help="Output JSON path (default: output/private/cosmology/cosmology_desi_dr1_bao_promotion_check.json)",
     )
     args = ap.parse_args()
 

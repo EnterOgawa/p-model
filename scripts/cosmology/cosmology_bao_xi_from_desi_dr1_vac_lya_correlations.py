@@ -21,9 +21,9 @@ DESI DR1 VAC "lya-correlations"（Y1 BAO; Lyα forest auto/cross）の 2D 相関
 - P_bg（pbg）座標は、fid LCDM→P_bg の AP スケール（z_ref で評価）で (RP,RT) を rescale して作る（近似）。
 
 出力（cosmology_bao_xi_from_catalogs と互換の metrics/npz 形式で保存）:
-- output/cosmology/cosmology_bao_xi_from_catalogs_lya_qso_combined_<dist>_zmin1p77_zmax4p16__<out_tag>.npz
-- output/cosmology/cosmology_bao_xi_from_catalogs_lya_qso_combined_<dist>_...__<out_tag>_metrics.json
-- output/cosmology/...__<out_tag>__vac_cov.npz
+- output/private/cosmology/cosmology_bao_xi_from_catalogs_lya_qso_combined_<dist>_zmin1p77_zmax4p16__<out_tag>.npz
+- output/private/cosmology/cosmology_bao_xi_from_catalogs_lya_qso_combined_<dist>_...__<out_tag>_metrics.json
+- output/private/cosmology/...__<out_tag>__vac_cov.npz
 
 注意：
 - 本スクリプトは Corrfunc/pycorr を使わない（Windows で実行可）。
@@ -630,7 +630,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     da_sel = da[sel_idx]
     nb_sel = nb[sel_idx]
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     zmin_tag = _fmt_tag(float(args.z_min))
     zmax_tag = _fmt_tag(float(args.z_max))

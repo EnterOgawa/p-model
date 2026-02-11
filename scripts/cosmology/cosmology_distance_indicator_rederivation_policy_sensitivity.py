@@ -12,14 +12,14 @@ Phase 16（宇宙論）/ Step 16.4：
 を並べる。
 
 入力（既存の固定出力）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_search_metrics.json
-  - output/cosmology/cosmology_bao_scaled_distance_fit_metrics.json
-  - output/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（policy=category_sys のとき）
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_search_metrics.json
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_metrics.json
+  - output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（policy=category_sys のとき）
   - data/cosmology/*.json（constraints）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_policy_sensitivity.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_policy_sensitivity_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_policy_sensitivity.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_policy_sensitivity_metrics.json
 """
 
 from __future__ import annotations
@@ -121,12 +121,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             / "cosmology"
             / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
         ),
-        help="Input candidate_search metrics JSON (default: output/cosmology/...candidate_search_metrics.json)",
+        help="Input candidate_search metrics JSON (default: output/private/cosmology/...candidate_search_metrics.json)",
     )
     ap.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     args = ap.parse_args(argv)
 
@@ -151,7 +151,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     in_candle = data_dir / "sn_standard_candle_evolution_constraints.json"
     in_pt = data_dir / "sn_time_dilation_constraints.json"
     in_pe = data_dir / "cmb_temperature_scaling_constraints.json"
-    in_bao_fit = _ROOT / "output" / "cosmology" / "cosmology_bao_scaled_distance_fit_metrics.json"
+    in_bao_fit = _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_scaled_distance_fit_metrics.json"
 
     for p in (in_ddr, in_opacity, in_candle, in_pt, in_pe, in_bao_fit):
         if not p.exists():
@@ -166,7 +166,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     env = {}
     if policy == "category_sys":
-        env_path = _ROOT / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
+        env_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
         env = cs._load_ddr_systematics_envelope(env_path) if env_path.exists() else {}
 
     ddr_all = [

@@ -13,8 +13,8 @@ Step 16.4（BAO一次情報：銀河+random） / Phase A（スクリーニング
   ξ2を重視した幾何整合チェックの入口として使う。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_wedge_anisotropy.png
-- output/cosmology/cosmology_bao_catalog_wedge_anisotropy_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_wedge_anisotropy.png
+- output/private/cosmology/cosmology_bao_catalog_wedge_anisotropy_metrics.json
 """
 
 from __future__ import annotations
@@ -327,7 +327,7 @@ def _drift(values: List[float]) -> Dict[str, float]:
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Summarize BAO wedge anisotropy from catalog-based xi outputs.")
-    ap.add_argument("--glob", default="output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json", help="metrics glob")
+    ap.add_argument("--glob", default="output/private/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json", help="metrics glob")
     ap.add_argument("--sample", default="", help="filter by sample (e.g., cmasslowztot); empty => all")
     ap.add_argument("--caps", default="", help="filter by caps (north/south/combined); empty => all")
     ap.add_argument(
@@ -364,7 +364,7 @@ def main(argv: list[str] | None = None) -> int:
 
     groups = _group(pts)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     # Keep the default output names stable for run_all (which may pass sample/caps filters).
     # Only add a suffix when out_tag is explicitly non-default to avoid clobbering baseline outputs.

@@ -334,7 +334,7 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
 def main(argv: Optional[list[str]] = None) -> None:
     args = _parse_args(argv)
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Alpha(T) source (NIST TRC Cryogenics).
@@ -378,7 +378,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     theta_from_metrics = _theta_d_from_existing_metrics(root)
     if theta_from_metrics is not None:
         theta_d_k = float(theta_from_metrics)
-        theta_d_source = {"kind": "frozen_metrics", "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"}
+        theta_d_source = {"kind": "frozen_metrics", "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"}
     else:
         theta_d_k, _ = _fit_theta_d_from_janaf(root)
         theta_d_source = {"kind": "refit_from_janaf", "fit_range_K": [100.0, 300.0]}

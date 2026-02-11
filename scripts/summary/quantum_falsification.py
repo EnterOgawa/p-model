@@ -8,7 +8,7 @@ Phase 7 / (new) Step 7.5.7:
 Part I 3.0 の Rejection Protocol 書式（Input/Frozen/Output/Statistic/Reject）で固定出力化する。
 
 出力（固定）:
-  - output/summary/quantum_falsification.json
+  - output/private/summary/quantum_falsification.json
 
 注意:
 - 現状は一次“生データ（raw fringe）”ではなく、一次論文（PDF）と代表値からのスケーリングを固定している項目を含む。
@@ -57,7 +57,7 @@ def _as_float(v: Any) -> Optional[float]:
 
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
-    p = _ROOT / "output" / "theory" / "frozen_parameters.json"
+    p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
     try:
@@ -187,7 +187,7 @@ def _estimate_atom_interferometer_beta_delta(
         "status": "ok",
         "model": {
             "name": "fallback_absolute_potential_upper_bound",
-            "note": "Fallback only. Regenerate output/quantum/atom_interferometer_gravimeter_phase_metrics.json to use the fixed Step 7.5.8 model.",
+            "note": "Fallback only. Regenerate output/public/quantum/atom_interferometer_gravimeter_phase_metrics.json to use the fixed Step 7.5.8 model.",
         },
         "beta_frozen": float(beta_frozen),
         "delta_beta_vs_gr": float(d_beta),
@@ -198,7 +198,7 @@ def _estimate_atom_interferometer_beta_delta(
 
 
 def _load_nist_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]:
-    npz = _ROOT / "output" / "quantum" / "bell" / dataset_id / "normalized_events.npz"
+    npz = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "normalized_events.npz"
     if not npz.exists():
         return None
     try:
@@ -217,7 +217,7 @@ def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
     Load "physical" (ns) delay summary for NIST time-tag datasets.
 
     Source is the fixed output from scripts/quantum/nist_belltest_time_tag_reanalysis.py:
-      output/quantum/nist_belltest_time_tag_bias_metrics__<out_tag>.json
+      output/public/quantum/nist_belltest_time_tag_bias_metrics__<out_tag>.json
 
     dataset_id example:
       nist_03_43_afterfixingModeLocking_s3600  -> out_tag=03_43_afterfixingModeLocking_s3600
@@ -225,7 +225,7 @@ def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
     if not dataset_id.startswith("nist_"):
         return None
     out_tag = dataset_id[len("nist_") :]
-    p = _ROOT / "output" / "quantum" / f"nist_belltest_time_tag_bias_metrics__{out_tag}.json"
+    p = _ROOT / "output" / "public" / "quantum" / f"nist_belltest_time_tag_bias_metrics__{out_tag}.json"
     if not p.exists():
         return None
     try:
@@ -261,7 +261,7 @@ def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
 
 
 def _load_trial_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]:
-    p = _ROOT / "output" / "quantum" / "bell" / dataset_id / "trial_based_counts.json"
+    p = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "trial_based_counts.json"
     if not p.exists():
         return None
     try:
@@ -280,7 +280,7 @@ def _load_trial_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]
 
 
 def _load_weihs_pair_counts_at_ref_window(dataset_id: str) -> Optional[Dict[str, Any]]:
-    p = _ROOT / "output" / "quantum" / "bell" / dataset_id / "window_sweep_metrics.json"
+    p = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "window_sweep_metrics.json"
     if not p.exists():
         return None
     try:
@@ -322,10 +322,10 @@ def _load_weihs_pair_counts_at_ref_window(dataset_id: str) -> Optional[Dict[str,
 def build_quantum_falsification(*, frozen: Dict[str, Any]) -> Dict[str, Any]:
     beta_frozen = _as_float(frozen.get("beta"))
 
-    cow_path = _ROOT / "output" / "quantum" / "cow_phase_shift_metrics.json"
-    atom_path = _ROOT / "output" / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json"
-    bell_pack_path = _ROOT / "output" / "quantum" / "bell" / "falsification_pack.json"
-    bell_sel_summary_path = _ROOT / "output" / "quantum" / "bell_selection_sensitivity_summary.json"
+    cow_path = _ROOT / "output" / "public" / "quantum" / "cow_phase_shift_metrics.json"
+    atom_path = _ROOT / "output" / "public" / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json"
+    bell_pack_path = _ROOT / "output" / "public" / "quantum" / "bell" / "falsification_pack.json"
+    bell_sel_summary_path = _ROOT / "output" / "public" / "quantum" / "bell_selection_sensitivity_summary.json"
 
     cow = _read_json(cow_path) if cow_path.exists() else {}
     atom = _read_json(atom_path) if atom_path.exists() else {}
@@ -505,8 +505,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "quantum_falsification.json"),
-        help="Output JSON path (default: output/summary/quantum_falsification.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "quantum_falsification.json"),
+        help="Output JSON path (default: output/private/summary/quantum_falsification.json).",
     )
     args = ap.parse_args(argv)
 

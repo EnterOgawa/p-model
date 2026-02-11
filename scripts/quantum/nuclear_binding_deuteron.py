@@ -37,7 +37,7 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     consts = _load_nist_codata_constants(root=root)

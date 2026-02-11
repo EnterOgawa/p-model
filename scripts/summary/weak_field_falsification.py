@@ -8,7 +8,7 @@ Phase 6 / Step 6.2.4:
 現在の固定出力（Step 6.2.3）に対して pass/fail/unknown を機械可読に評価する。
 
 出力（固定）:
-  - output/summary/weak_field_falsification.json
+  - output/private/summary/weak_field_falsification.json
 """
 
 from __future__ import annotations
@@ -404,7 +404,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
         "phase": {"phase": 6, "step": "6.2.4", "name": "弱場統合の反証条件（棄却基準）"},
         "inputs": {
             "weak_field_longterm_consistency_json": consistency.get("outputs", {}).get("weak_field_longterm_consistency_json")
-            or "output/summary/weak_field_longterm_consistency.json",
+            or "output/private/summary/weak_field_longterm_consistency.json",
             "frozen_parameters": frozen,
             "per_test_metadata": {
                 "cassini_fig2_run_metadata_json": _relpath(cass_meta_path),
@@ -432,14 +432,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--consistency",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_longterm_consistency.json"),
-        help="Input consistency JSON (default: output/summary/weak_field_longterm_consistency.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_longterm_consistency.json"),
+        help="Input consistency JSON (default: output/private/summary/weak_field_longterm_consistency.json).",
     )
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_falsification.json"),
-        help="Output JSON path (default: output/summary/weak_field_falsification.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_falsification.json"),
+        help="Output JSON path (default: output/private/summary/weak_field_falsification.json).",
     )
     args = ap.parse_args(argv)
 
@@ -474,4 +474,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

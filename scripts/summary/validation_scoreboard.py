@@ -194,7 +194,7 @@ def _score_higher_better(value: Optional[float], *, ok_min: float, mixed_min: fl
 
 
 def _load_llr_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "llr" / "batch" / "llr_batch_summary.json"
+    path = root / "output" / "private" / "llr" / "batch" / "llr_batch_summary.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -226,11 +226,11 @@ def _load_llr_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_llr_nglr1_row(root: Path) -> Optional[ScoreRow]:
-    metrics_path = root / "output" / "llr" / "batch" / "llr_batch_metrics.csv"
+    metrics_path = root / "output" / "private" / "llr" / "batch" / "llr_batch_metrics.csv"
     if not metrics_path.exists():
         return None
 
-    coverage_path = root / "output" / "llr" / "batch" / "llr_data_coverage.csv"
+    coverage_path = root / "output" / "private" / "llr" / "batch" / "llr_data_coverage.csv"
 
     import csv
     import statistics
@@ -319,7 +319,7 @@ def _load_llr_nglr1_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_cassini_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "cassini" / "cassini_fig2_metrics.csv"
+    path = root / "output" / "private" / "cassini" / "cassini_fig2_metrics.csv"
     if not path.exists():
         return None
 
@@ -371,7 +371,7 @@ def _load_cassini_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_viking_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "viking" / "viking_shapiro_result.csv"
+    path = root / "output" / "private" / "viking" / "viking_shapiro_result.csv"
     if not path.exists():
         return None
 
@@ -413,7 +413,7 @@ def _load_viking_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_mercury_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "mercury" / "mercury_precession_metrics.json"
+    path = root / "output" / "private" / "mercury" / "mercury_precession_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -448,7 +448,7 @@ def _load_mercury_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_gps_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "gps" / "gps_compare_metrics.json"
+    path = root / "output" / "private" / "gps" / "gps_compare_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -483,8 +483,8 @@ def _load_gps_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_solar_deflection_row(root: Path) -> Optional[ScoreRow]:
-    metrics_path = root / "output" / "theory" / "solar_light_deflection_metrics.json"
-    frozen_path = root / "output" / "theory" / "frozen_parameters.json"
+    metrics_path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
+    frozen_path = root / "output" / "private" / "theory" / "frozen_parameters.json"
     if not metrics_path.exists() or not frozen_path.exists():
         return None
     m = (_read_json(metrics_path).get("metrics") or {})
@@ -511,7 +511,7 @@ def _load_solar_deflection_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_redshift_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "theory" / "gravitational_redshift_experiments.json"
+    path = root / "output" / "private" / "theory" / "gravitational_redshift_experiments.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -543,7 +543,7 @@ def _load_redshift_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_cosmology_distance_duality_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    path = root / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -580,7 +580,7 @@ def _load_cosmology_distance_duality_row(root: Path) -> Optional[ScoreRow]:
     sigma_cat = None
     min_no_bao_abs_z_sys = None
     min_no_bao_label_sys = None
-    sys_path = root / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
+    sys_path = root / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
     if sys_path.exists():
         try:
             sj = _read_json(sys_path)
@@ -649,7 +649,7 @@ def _load_cosmology_distance_duality_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_cosmology_tolman_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
+    path = root / "output" / "private" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -678,8 +678,8 @@ def _load_cosmology_tolman_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_cosmology_independent_probes_row(root: Path) -> Optional[ScoreRow]:
-    p_sn = root / "output" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json"
-    p_tz = root / "output" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
+    p_sn = root / "output" / "private" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json"
+    p_tz = root / "output" / "private" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
 
     zs: List[Tuple[str, float]] = []
     sources: List[str] = []
@@ -737,7 +737,7 @@ def _load_cosmology_jwst_mast_row(root: Path) -> Optional[ScoreRow]:
     if not manifest_all.exists():
         return None
 
-    waitlist_path = root / "output" / "cosmology" / "jwst_spectra_release_waitlist.json"
+    waitlist_path = root / "output" / "private" / "cosmology" / "jwst_spectra_release_waitlist.json"
 
     j = _read_json(manifest_all)
     items = j.get("items") if isinstance(j.get("items"), dict) else {}
@@ -829,7 +829,7 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
 
     # pre-recon cross-check: Satpathy full covariance (z-bin only).
     paths_pre = [
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json",
     ]
 
     # Phase A (screening): include combined and NGC/SGC splits (north/south) so the scoreboard reflects systematics.
@@ -859,26 +859,26 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
 
     paths_a = [
         # combined
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmass_combined_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lowz_combined_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmass_combined_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_lowz_combined_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
         # eBOSS extension (Phase 4.5B.21; screening)
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_combined_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_north_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_south_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_combined_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_north_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_south_metrics.json",
         # eBOSS extension (Phase 4.5B.21.4; screening)
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_combined_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_north_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_south_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_combined_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_north_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_south_metrics.json",
         # DESI extension (Phase 4.5B.21.4.4.4; cov alternative): LRG1/LRG2 bins with sky jackknife cov.
         desi_peakfit_path,
         # north/south (NGC/SGC)
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmass_north_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmass_south_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lowz_north_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lowz_south_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_north_zbinonly_metrics.json",
-        root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_south_zbinonly_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmass_north_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmass_south_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_lowz_north_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_lowz_south_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_north_zbinonly_metrics.json",
+        root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_south_zbinonly_metrics.json",
     ]
 
     def _collect(paths: List[Path]) -> Tuple[List[Dict[str, Any]], List[str]]:
@@ -1028,7 +1028,7 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
 
     # Cross-check (independent pipeline): P(k) multipoles peakfit (Beutler et al.; window-convolved).
     sources_pk: List[str] = []
-    pk_path = root / "output" / "cosmology" / "cosmology_bao_pk_multipole_peakfit_window_metrics.json"
+    pk_path = root / "output" / "private" / "cosmology" / "cosmology_bao_pk_multipole_peakfit_window_metrics.json"
     if pk_path.exists():
         try:
             jk = _read_json(pk_path)
@@ -1075,7 +1075,7 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_frame_dragging_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "theory" / "frame_dragging_experiments.json"
+    path = root / "output" / "private" / "theory" / "frame_dragging_experiments.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -1104,7 +1104,7 @@ def _load_frame_dragging_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_eht_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "eht" / "eht_shadow_compare.json"
+    path = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -1134,7 +1134,7 @@ def _load_eht_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_binary_pulsar_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
+    path = root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -1166,7 +1166,7 @@ def _load_binary_pulsar_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_gw_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "gw" / "gw_multi_event_summary_metrics.json"
+    path = root / "output" / "private" / "gw" / "gw_multi_event_summary_metrics.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -1240,7 +1240,7 @@ def _load_gw_row(root: Path) -> Optional[ScoreRow]:
 
 
 def _load_delta_row(root: Path) -> Optional[ScoreRow]:
-    path = root / "output" / "theory" / "delta_saturation_constraints.json"
+    path = root / "output" / "private" / "theory" / "delta_saturation_constraints.json"
     if not path.exists():
         return None
     j = _read_json(path)
@@ -1500,7 +1500,7 @@ def build_validation_scoreboard(root: Path) -> Dict[str, Any]:
         if r:
             rows.append(r)
 
-    table1_path = root / "output" / "summary" / "paper_table1_results.json"
+    table1_path = root / "output" / "private" / "summary" / "paper_table1_results.json"
     sigma_stats = None
     table1_breakdown = None
     table1_status_counts = None
@@ -1709,7 +1709,7 @@ def plot_validation_scoreboard(
 
 def main() -> int:
     root = _repo_root()
-    out_dir = root / "output" / "summary"
+    out_dir = root / "output" / "private" / "summary"
     default_json = out_dir / "validation_scoreboard.json"
     default_png = out_dir / "validation_scoreboard.png"
 
@@ -1736,15 +1736,15 @@ def main() -> int:
                 "event_type": "validation_scoreboard",
                 "argv": list(sys.argv),
                 "inputs": {
-                    "paper_table1_results_json": root / "output" / "summary" / "paper_table1_results.json",
-                    "llr_batch_summary_json": root / "output" / "llr" / "batch" / "llr_batch_summary.json",
-                    "cassini_fig2_metrics_csv": root / "output" / "cassini" / "cassini_fig2_metrics.csv",
-                    "viking_shapiro_result_csv": root / "output" / "viking" / "viking_shapiro_result.csv",
-                    "mercury_precession_metrics_json": root / "output" / "mercury" / "mercury_precession_metrics.json",
-                    "gps_compare_metrics_json": root / "output" / "gps" / "gps_compare_metrics.json",
-                    "solar_light_deflection_metrics_json": root / "output" / "theory" / "solar_light_deflection_metrics.json",
-                    "frozen_parameters_json": root / "output" / "theory" / "frozen_parameters.json",
-                    "gravitational_redshift_experiments_json": root / "output" / "theory" / "gravitational_redshift_experiments.json",
+                    "paper_table1_results_json": root / "output" / "private" / "summary" / "paper_table1_results.json",
+                    "llr_batch_summary_json": root / "output" / "private" / "llr" / "batch" / "llr_batch_summary.json",
+                    "cassini_fig2_metrics_csv": root / "output" / "private" / "cassini" / "cassini_fig2_metrics.csv",
+                    "viking_shapiro_result_csv": root / "output" / "private" / "viking" / "viking_shapiro_result.csv",
+                    "mercury_precession_metrics_json": root / "output" / "private" / "mercury" / "mercury_precession_metrics.json",
+                    "gps_compare_metrics_json": root / "output" / "private" / "gps" / "gps_compare_metrics.json",
+                    "solar_light_deflection_metrics_json": root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json",
+                    "frozen_parameters_json": root / "output" / "private" / "theory" / "frozen_parameters.json",
+                    "gravitational_redshift_experiments_json": root / "output" / "private" / "theory" / "gravitational_redshift_experiments.json",
                     "cosmology_distance_duality_constraints_metrics_json": root
                     / "output"
                     / "cosmology"
@@ -1754,11 +1754,11 @@ def main() -> int:
                     / "cosmology"
                     / "cosmology_tolman_surface_brightness_constraints_metrics.json",
                     "mast_jwst_spectra_manifest_all_json": root / "data" / "cosmology" / "mast" / "jwst_spectra" / "manifest_all.json",
-                    "frame_dragging_experiments_json": root / "output" / "theory" / "frame_dragging_experiments.json",
-                    "eht_shadow_compare_json": root / "output" / "eht" / "eht_shadow_compare.json",
-                    "binary_pulsar_orbital_decay_metrics_json": root / "output" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json",
-                    "gw_multi_event_summary_metrics_json": root / "output" / "gw" / "gw_multi_event_summary_metrics.json",
-                    "delta_saturation_constraints_json": root / "output" / "theory" / "delta_saturation_constraints.json",
+                    "frame_dragging_experiments_json": root / "output" / "private" / "theory" / "frame_dragging_experiments.json",
+                    "eht_shadow_compare_json": root / "output" / "private" / "eht" / "eht_shadow_compare.json",
+                    "binary_pulsar_orbital_decay_metrics_json": root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json",
+                    "gw_multi_event_summary_metrics_json": root / "output" / "private" / "gw" / "gw_multi_event_summary_metrics.json",
+                    "delta_saturation_constraints_json": root / "output" / "private" / "theory" / "delta_saturation_constraints.json",
                 },
                 "outputs": {"scoreboard_png": out_png, "scoreboard_json": out_json},
             }

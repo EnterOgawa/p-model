@@ -58,7 +58,7 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _try_load_h_1s2s_fractional_sigma(root: Path) -> Optional[float]:
-    p = root / "output" / "quantum" / "qed_vacuum_precision_metrics.json"
+    p = root / "output" / "public" / "quantum" / "qed_vacuum_precision_metrics.json"
     if not p.exists():
         return None
     try:
@@ -97,7 +97,7 @@ def _sun_potential_delta_u_earth_orbit(cfg: Config) -> Dict[str, float]:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = Config()
@@ -223,7 +223,7 @@ def main() -> None:
                 "assumed_scaling": f"|Δf/f| ≈ p|Δα/α| with p={alpha_exp:g} (non-relativistic alpha scaling)",
                 "kappa_max_from_orbit_delta_u": kappa_max_h_1s2s,
                 "note": "This is a conservative back-of-envelope constraint using the fixed 1S–2S baseline uncertainty and the same orbit Δu.",
-                "source_metrics": _relpath(root, root / "output" / "quantum" / "qed_vacuum_precision_metrics.json"),
+                "source_metrics": _relpath(root, root / "output" / "public" / "quantum" / "qed_vacuum_precision_metrics.json"),
             },
             "webb_2011_spatial_dipole_scale": {
                 "dipole_amp_ppm": cfg.webb_dipole_amp_ppm,

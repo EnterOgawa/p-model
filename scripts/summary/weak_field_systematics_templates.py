@@ -8,7 +8,7 @@ Phase 6 / Step 6.2.2:
 長期・多系統統合（Step 6.2.3）に向けた入力（JSON）を生成する。
 
 出力（固定）:
-  - output/summary/weak_field_systematics_templates.json
+  - output/private/summary/weak_field_systematics_templates.json
 """
 
 from __future__ import annotations
@@ -691,11 +691,11 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
         "generated_utc": _iso_utc_now(),
         "phase": {"phase": 6, "step": "6.2.2", "name": "弱場テスト系統分解テンプレ固定"},
         "source_matrix": {
-            "path": _relpath(_ROOT / "output" / "summary" / "weak_field_test_matrix.json"),
+            "path": _relpath(_ROOT / "output" / "private" / "summary" / "weak_field_test_matrix.json"),
             "generated_utc": matrix.get("generated_utc"),
         },
         "templates": templates,
-        "outputs": {"weak_field_systematics_templates_json": "output/summary/weak_field_systematics_templates.json"},
+        "outputs": {"weak_field_systematics_templates_json": "output/private/summary/weak_field_systematics_templates.json"},
     }
     return payload
 
@@ -705,14 +705,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--matrix",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_test_matrix.json"),
-        help="Input matrix JSON (default: output/summary/weak_field_test_matrix.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_test_matrix.json"),
+        help="Input matrix JSON (default: output/private/summary/weak_field_test_matrix.json).",
     )
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_systematics_templates.json"),
-        help="Output JSON path (default: output/summary/weak_field_systematics_templates.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_systematics_templates.json"),
+        help="Output JSON path (default: output/private/summary/weak_field_systematics_templates.json).",
     )
     args = ap.parse_args(argv)
 
@@ -746,4 +746,3 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

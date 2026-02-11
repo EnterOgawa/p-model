@@ -18,10 +18,10 @@ Step 14.2.3（独立プローブで相互検証）:
   - data/cosmology/sn_time_dilation_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_sn_time_dilation_constraints.png
-  - output/cosmology/cosmology_sn_time_dilation_constraints_metrics.json
-  - output/cosmology/cosmology_sn_time_dilation_pt_fit.png
-  - output/cosmology/cosmology_sn_time_dilation_pt_fit.json
+  - output/private/cosmology/cosmology_sn_time_dilation_constraints.png
+  - output/private/cosmology/cosmology_sn_time_dilation_constraints_metrics.json
+  - output/private/cosmology/cosmology_sn_time_dilation_pt_fit.png
+  - output/private/cosmology/cosmology_sn_time_dilation_pt_fit.json
 
 補足（Phase 4 / Step 4.3.1）：
 - Blondin+2008（arXiv:0804.3595）の Table 3（aging rate）を一次PDFから抽出し、
@@ -512,7 +512,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     rows = compute(constraints)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / "cosmology_sn_time_dilation_constraints.png"
     _plot(rows, out_png=png_path)

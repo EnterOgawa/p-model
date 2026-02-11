@@ -11,8 +11,8 @@ Alcock–Paczynski（AP）パラメータ F_AP(z)=D_M(z)H(z)/c を一次ソー�
   - data/cosmology/alcock_paczynski_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_alcock_paczynski_constraints.png
-  - output/cosmology/cosmology_alcock_paczynski_constraints_metrics.json
+  - output/private/cosmology/cosmology_alcock_paczynski_constraints.png
+  - output/private/cosmology/cosmology_alcock_paczynski_constraints_metrics.json
 
 モデル（比較用）:
 1) 静的背景P（指数P_bg, H0^(P)=const）:
@@ -327,7 +327,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     h0_lcdm = float(args.lcdm_h0)
     omega_m_lcdm = float(args.lcdm_omega_m)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_alcock_paczynski_constraints.png"
     out_json = out_dir / "cosmology_alcock_paczynski_constraints_metrics.json"

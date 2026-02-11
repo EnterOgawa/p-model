@@ -49,7 +49,7 @@ def main() -> None:
     args = ap.parse_args()
 
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     slug = str(args.slug).strip().lower()

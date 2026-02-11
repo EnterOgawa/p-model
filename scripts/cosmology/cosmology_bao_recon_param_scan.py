@@ -13,8 +13,8 @@ catalog-based ξℓ（Corrfunc; galaxy+random）の reconstruction（recon）パ
   「LCDM fiducialで公開post-reconをどの程度再現できるか」を固定する。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_recon_param_scan.png
-- output/cosmology/cosmology_bao_recon_param_scan_metrics.json
+- output/private/cosmology/cosmology_bao_recon_param_scan.png
+- output/private/cosmology/cosmology_bao_recon_param_scan_metrics.json
 """
 
 from __future__ import annotations
@@ -147,7 +147,7 @@ class CatalogCase:
 
 
 def _iter_metrics_files() -> Iterable[Path]:
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     yield from sorted(out_dir.glob("cosmology_bao_xi_from_catalogs_*_metrics.json"))
 
 
@@ -260,12 +260,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--top-n", type=int, default=10, help="plot top-N configs by score (default: 10)")
     ap.add_argument(
         "--out-png",
-        default="output/cosmology/cosmology_bao_recon_param_scan.png",
+        default="output/private/cosmology/cosmology_bao_recon_param_scan.png",
         help="output PNG path (default: fixed)",
     )
     ap.add_argument(
         "--out-json",
-        default="output/cosmology/cosmology_bao_recon_param_scan_metrics.json",
+        default="output/private/cosmology/cosmology_bao_recon_param_scan_metrics.json",
         help="output metrics JSON path (default: fixed)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

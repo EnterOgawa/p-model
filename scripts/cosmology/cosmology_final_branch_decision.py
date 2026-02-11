@@ -8,8 +8,8 @@ Phase 4 / Step 4.14.6:
 「次フェーズへ進む条件／棄却または写像改訂の条件」を機械可読な形で固定する。
 
 出力（固定）:
-- output/cosmology/cosmology_final_branch_decision_metrics.json
-- output/cosmology/cosmology_final_branch_decision.png
+- output/private/cosmology/cosmology_final_branch_decision_metrics.json
+- output/private/cosmology/cosmology_final_branch_decision.png
 """
 
 from __future__ import annotations
@@ -182,7 +182,7 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--pt-fit",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_sn_time_dilation_pt_fit.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_sn_time_dilation_pt_fit.json"),
         help="Path to cosmology_sn_time_dilation_pt_fit.json",
     )
     p.add_argument(
@@ -192,27 +192,27 @@ def main() -> None:
     )
     p.add_argument(
         "--bao-ledger",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_epsilon_entry_sensitivity_ledger.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_epsilon_entry_sensitivity_ledger.json"),
         help="Path to cosmology_bao_epsilon_entry_sensitivity_ledger.json",
     )
     p.add_argument(
         "--ddr-required",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_ddr_reconnection_conditions_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_ddr_reconnection_conditions_metrics.json"),
         help="Path to cosmology_ddr_reconnection_conditions_metrics.json",
     )
     p.add_argument(
         "--ddr-candidate-search",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"),
         help="Path to cosmology_distance_indicator_rederivation_candidate_search_metrics.json",
     )
     p.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_final_branch_decision_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_final_branch_decision_metrics.json"),
         help="Output json path",
     )
     p.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_final_branch_decision.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_final_branch_decision.png"),
         help="Output png path",
     )
     args = p.parse_args()

@@ -13,12 +13,12 @@ freeze-test（fit→freeze→holdout; galaxy split）の holdout 指標（low-ac
 - baseline（McGaugh+2016; a0 fit）も同一 split 群で併記し、等価性/比較を崩さない。
 
 入力：
-- output/cosmology/sparc_rar_reconstruction.csv
-- output/cosmology/cosmology_redshift_pbg_metrics.json（H0^(P)）
+- output/private/cosmology/sparc_rar_reconstruction.csv
+- output/private/cosmology/cosmology_redshift_pbg_metrics.json（H0^(P)）
 
 出力（固定）：
-- output/cosmology/sparc_rar_pbg_kappa_sweep_metrics.json
-- output/cosmology/sparc_rar_pbg_kappa_sweep.png
+- output/private/cosmology/sparc_rar_pbg_kappa_sweep_metrics.json
+- output/private/cosmology/sparc_rar_pbg_kappa_sweep.png
 """
 
 from __future__ import annotations
@@ -240,17 +240,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--rar-csv",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_reconstruction.csv"),
-        help="RAR reconstruction CSV (default: output/cosmology/sparc_rar_reconstruction.csv)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_reconstruction.csv"),
+        help="RAR reconstruction CSV (default: output/private/cosmology/sparc_rar_reconstruction.csv)",
     )
     p.add_argument(
         "--h0p-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
-        help="Path to cosmology_redshift_pbg_metrics.json (default: output/cosmology/cosmology_redshift_pbg_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
+        help="Path to cosmology_redshift_pbg_metrics.json (default: output/private/cosmology/cosmology_redshift_pbg_metrics.json)",
     )
     p.add_argument("--h0p-km-s-mpc", type=float, default=None, help="Override H0^(P) in km/s/Mpc (optional)")
-    p.add_argument("--out", default=str(_ROOT / "output" / "cosmology" / "sparc_rar_pbg_kappa_sweep_metrics.json"), help="Output JSON path")
-    p.add_argument("--out-png", default=str(_ROOT / "output" / "cosmology" / "sparc_rar_pbg_kappa_sweep.png"), help="Output plot PNG path")
+    p.add_argument("--out", default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_pbg_kappa_sweep_metrics.json"), help="Output JSON path")
+    p.add_argument("--out-png", default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_pbg_kappa_sweep.png"), help="Output plot PNG path")
     p.add_argument("--sigma-floor-dex", type=float, default=0.01, help="Floor for sigma(log10 g_obs) in dex")
     p.add_argument("--low-accel-cut", type=float, default=-10.5, help="Low-acceleration cut on log10(g_bar)")
 

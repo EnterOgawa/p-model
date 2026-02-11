@@ -50,7 +50,7 @@ def main() -> None:
         description=(
             "Phase 7 / Step 7.4: summarize selection sensitivity across representative Bell datasets "
             "(NIST time-tag + trial-based, Weihs 1998 time-tag, Delft event-ready, optional Kwiat2013). "
-            "This script reads the fixed products under output/quantum/bell/*."
+            "This script reads the fixed products under output/public/quantum/bell/*."
         )
     )
     ap.add_argument(
@@ -67,7 +67,7 @@ def main() -> None:
     ap.add_argument(
         "--nist-dataset-id",
         default=None,
-        help="Dataset id under output/quantum/bell/ (default: derived from --nist-trial-tag).",
+        help="Dataset id under output/public/quantum/bell/ (default: derived from --nist-trial-tag).",
     )
     ap.add_argument(
         "--weihs-out-tag",
@@ -77,27 +77,27 @@ def main() -> None:
     ap.add_argument(
         "--weihs-dataset-id",
         default=None,
-        help="Dataset id under output/quantum/bell/ (default: --weihs-out-tag).",
+        help="Dataset id under output/public/quantum/bell/ (default: --weihs-out-tag).",
     )
     ap.add_argument(
         "--delft2015-dataset-id",
         default="delft_hensen2015",
-        help="Dataset id under output/quantum/bell/ (default: delft_hensen2015).",
+        help="Dataset id under output/public/quantum/bell/ (default: delft_hensen2015).",
     )
     ap.add_argument(
         "--delft2016-dataset-id",
         default="delft_hensen2016_srep30289",
-        help="Dataset id under output/quantum/bell/ (default: delft_hensen2016_srep30289).",
+        help="Dataset id under output/public/quantum/bell/ (default: delft_hensen2016_srep30289).",
     )
     ap.add_argument(
         "--kwiat-dataset-id",
         default="kwiat2013_prl111_130406_05082013_15",
-        help="(optional) Dataset id under output/quantum/bell/ (default: kwiat2013_prl111_130406_05082013_15).",
+        help="(optional) Dataset id under output/public/quantum/bell/ (default: kwiat2013_prl111_130406_05082013_15).",
     )
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
     bell_dir = out_dir / "bell"
 

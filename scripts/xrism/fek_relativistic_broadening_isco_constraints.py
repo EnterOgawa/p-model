@@ -12,9 +12,9 @@ ISCO（内縁半径 r_in）制約の I/F を固定するための出力スケル
 ノブ（band/gain/rebin 等）に対する感度を先に台帳化する。
 
 出力（固定）:
-- output/xrism/fek_relativistic_broadening_isco_constraints.csv
-- output/xrism/fek_relativistic_broadening_isco_constraints_metrics.json
-- output/xrism/fek_relativistic_broadening_model_systematics.json
+- output/private/xrism/fek_relativistic_broadening_isco_constraints.csv
+- output/private/xrism/fek_relativistic_broadening_isco_constraints_metrics.json
+- output/private/xrism/fek_relativistic_broadening_model_systematics.json
 """
 
 from __future__ import annotations
@@ -3139,12 +3139,12 @@ def _systematics_template() -> Dict[str, Any]:
             },
         },
         "outputs": {
-            "isco_constraints_csv": "output/xrism/fek_relativistic_broadening_isco_constraints.csv",
-            "isco_constraints_metrics_json": "output/xrism/fek_relativistic_broadening_isco_constraints_metrics.json",
-            "model_systematics_json": "output/xrism/fek_relativistic_broadening_model_systematics.json",
-            "xmm_proxy_detail_json": "output/xrism/xmm_<obsid>__fek_broad_line_proxy_diskline.json",
-            "nustar_proxy_detail_json": "output/xrism/nustar_<obsid>__fek_broad_line_proxy_diskline.json",
-            "xmm_reflection_xspec_json": "output/xrism/xmm_<obsid>__fek_broad_line_reflection_xspec.json",
+            "isco_constraints_csv": "output/private/xrism/fek_relativistic_broadening_isco_constraints.csv",
+            "isco_constraints_metrics_json": "output/private/xrism/fek_relativistic_broadening_isco_constraints_metrics.json",
+            "model_systematics_json": "output/private/xrism/fek_relativistic_broadening_model_systematics.json",
+            "xmm_proxy_detail_json": "output/private/xrism/xmm_<obsid>__fek_broad_line_proxy_diskline.json",
+            "nustar_proxy_detail_json": "output/private/xrism/nustar_<obsid>__fek_broad_line_proxy_diskline.json",
+            "xmm_reflection_xspec_json": "output/private/xrism/xmm_<obsid>__fek_broad_line_reflection_xspec.json",
         },
     }
 
@@ -3163,7 +3163,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     p.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output/xrism"),
+        default=str(_ROOT / "output/private/xrism"),
         help="Output directory",
     )
     p.add_argument(

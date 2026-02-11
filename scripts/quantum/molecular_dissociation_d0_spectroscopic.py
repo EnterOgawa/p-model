@@ -29,7 +29,7 @@ def _cm_inv_to_ev(cm_inv: float) -> float:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src = (

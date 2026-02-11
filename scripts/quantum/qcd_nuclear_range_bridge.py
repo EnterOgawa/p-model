@@ -44,7 +44,7 @@ def _load_pion_lambdas(*, root: Path) -> Dict[str, float]:
     Returns:
       {'lambda_pi_pm_fm': ..., 'lambda_pi0_fm': ..., 'lambda_pi_avg_fm': ...}
     """
-    qcd = root / "output" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    qcd = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
     if not qcd.exists():
         raise SystemExit(
             "[fail] missing hadron baseline metrics.\n"
@@ -152,7 +152,7 @@ def main() -> None:
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     pion = _load_pion_lambdas(root=root)
@@ -161,9 +161,9 @@ def main() -> None:
 
     # Inputs from Step 7.9 (nuclear effective potential fits)
     in_files = [
-        root / "output" / "quantum" / "nuclear_effective_potential_two_range_metrics.json",
-        root / "output" / "quantum" / "nuclear_effective_potential_two_range_fit_as_rs_metrics.json",
-        root / "output" / "quantum" / "nuclear_effective_potential_repulsive_core_two_range_metrics.json",
+        root / "output" / "public" / "quantum" / "nuclear_effective_potential_two_range_metrics.json",
+        root / "output" / "public" / "quantum" / "nuclear_effective_potential_two_range_fit_as_rs_metrics.json",
+        root / "output" / "public" / "quantum" / "nuclear_effective_potential_repulsive_core_two_range_metrics.json",
     ]
     missing = [p for p in in_files if not p.exists()]
     if missing:
@@ -258,7 +258,7 @@ def main() -> None:
             ],
         },
         "inputs": {
-            "hadron_baseline_metrics": str(root / "output" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"),
+            "hadron_baseline_metrics": str(root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"),
             "nuclear_metrics": [str(p) for p in in_files],
         },
         "observed_envelope_proxy": {"v2s_min_fm3": float(v2s_obs_min), "v2s_max_fm3": float(v2s_obs_max)},

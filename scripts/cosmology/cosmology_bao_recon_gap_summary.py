@@ -13,8 +13,8 @@ Ross 2016 post-recon の ξ0/ξ2（公開データ）と、catalog-based recon�
 - “小手先のパラメータ調整で改善しない”状況を可視化し、次工程（公式recon仕様差/選択関数の切り分け）へ繋げる。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_recon_gap_summary.png
-- output/cosmology/cosmology_bao_recon_gap_summary_metrics.json
+- output/private/cosmology/cosmology_bao_recon_gap_summary.png
+- output/private/cosmology/cosmology_bao_recon_gap_summary_metrics.json
 """
 
 from __future__ import annotations
@@ -95,17 +95,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument(
         "--metrics-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="directory containing overlay metrics json (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="directory containing overlay metrics json (default: output/private/cosmology)",
     )
     ap.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_summary.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_summary.png"),
         help="output png path",
     )
     ap.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"),
         help="output json path",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

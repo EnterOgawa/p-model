@@ -18,11 +18,11 @@ max|z|（DDR + BAO(s_R) + α + s_L + p_t + p_e の同時整合）を計算し、
   - data/cosmology/sn_standard_candle_evolution_constraints.json
   - data/cosmology/sn_time_dilation_constraints.json
   - data/cosmology/cmb_temperature_scaling_constraints.json（beta_T→p_T）
-  - output/cosmology/cosmology_bao_scaled_distance_fit_metrics.json（s_R の fit）
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_metrics.json（s_R の fit）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_matrix.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_candidate_matrix_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_matrix.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_candidate_matrix_metrics.json
 """
 
 from __future__ import annotations
@@ -386,7 +386,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     data_dir = _ROOT / "data" / "cosmology"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
 
     in_ddr = data_dir / "distance_duality_constraints.json"
     in_opacity = data_dir / "cosmic_opacity_constraints.json"

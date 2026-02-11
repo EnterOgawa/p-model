@@ -56,7 +56,7 @@ def _try_load_beta_frozen(root: Path) -> float | None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = Config()

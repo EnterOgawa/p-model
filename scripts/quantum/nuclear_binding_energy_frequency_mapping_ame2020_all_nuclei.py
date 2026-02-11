@@ -143,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
     subset = str(args.subset)
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     out_stem = (
@@ -156,7 +156,7 @@ def main(argv: list[str] | None = None) -> int:
     metrics_extended_step = "7.16.1" if subset == "all" else "7.18.5"
 
     # Frozen anchors from earlier steps.
-    deut_path = root / "output" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -166,7 +166,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     deut = _load_json(deut_path)
 
-    two_body_path = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
+    two_body_path = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
     if not two_body_path.exists():
         raise SystemExit(
             "[fail] missing deuteron two-body mapping metrics.\n"

@@ -11,8 +11,8 @@ SPARC の BTFR_Lelli2019.mrt から baryonic Tully–Fisher relation（BTFR）�
 - data/cosmology/sparc/raw/BTFR_Lelli2019.mrt
 
 出力（固定）:
-- output/cosmology/sparc_btfr_metrics.json
-- output/cosmology/sparc_btfr_scatter.png
+- output/private/cosmology/sparc_btfr_metrics.json
+- output/private/cosmology/sparc_btfr_scatter.png
 
 注意:
 - ここでは BTFR の「観測側 cross-check」を目的とし、P-model の予測は導入しない。
@@ -204,8 +204,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     p.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     args = p.parse_args(list(argv) if argv is not None else None)
 

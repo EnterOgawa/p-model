@@ -163,15 +163,15 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = Config()
 
     # Load baseline observables (fixed elsewhere in the repo).
-    cow_m = _read_json(root / "output" / "quantum" / "cow_phase_shift_metrics.json")
-    atom_m = _read_json(root / "output" / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json")
-    clock_m = _read_json(root / "output" / "quantum" / "optical_clock_chronometric_leveling_metrics.json")
+    cow_m = _read_json(root / "output" / "public" / "quantum" / "cow_phase_shift_metrics.json")
+    atom_m = _read_json(root / "output" / "public" / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json")
+    clock_m = _read_json(root / "output" / "public" / "quantum" / "optical_clock_chronometric_leveling_metrics.json")
 
     cow_phase_rad = abs(float(((cow_m.get("results") or {}) if isinstance(cow_m.get("results"), dict) else {}).get("phi0_rad")))
     cow_h_m = float(((cow_m.get("config") or {}) if isinstance(cow_m.get("config"), dict) else {}).get("H_m"))
@@ -445,7 +445,7 @@ def main() -> None:
             "cow": {
                 "phase_ref_rad": cow_phase_rad,
                 "height_scale_m": cow_h_m,
-                "source_metrics": "output/quantum/cow_phase_shift_metrics.json",
+                "source_metrics": "output/public/quantum/cow_phase_shift_metrics.json",
                 "current_phase_fractional_precision_assumed": cfg.cow_phase_fractional_precision,
             },
             "atom_interferometer": {
@@ -454,7 +454,7 @@ def main() -> None:
                 "k_eff_1_per_m": atom_keff,
                 "v_rec_m_per_s": v_rec_m_per_s,
                 "arm_separation_scale_m": atom_dz_m,
-                "source_metrics": "output/quantum/atom_interferometer_gravimeter_phase_metrics.json",
+                "source_metrics": "output/public/quantum/atom_interferometer_gravimeter_phase_metrics.json",
                 "current_phase_fractional_precision_assumed": cfg.atom_interferometer_phase_fractional_precision,
                 "note": "arm separation is estimated as Δz~v_rec T (order).",
             },
@@ -477,7 +477,7 @@ def main() -> None:
                 "height_scale_m": clock_h_m,
                 "z_geodetic_delta_f_over_f": z_geo,
                 "sigma_z_clock_abs": z_clock_sigma,
-                "source_metrics": "output/quantum/optical_clock_chronometric_leveling_metrics.json",
+                "source_metrics": "output/public/quantum/optical_clock_chronometric_leveling_metrics.json",
             },
         },
         "comparisons_earth_field": {

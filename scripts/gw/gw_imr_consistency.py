@@ -355,13 +355,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--ringdown-json",
         type=str,
         default="",
-        help="Optional path to ringdown fit json (default: output/gw/<slug>_ringdown_qnm_fit.json).",
+        help="Optional path to ringdown fit json (default: output/private/gw/<slug>_ringdown_qnm_fit.json).",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     root = _repo_root()
     data_dir = root / "data" / "gw" / str(args.slug)
-    out_dir = root / "output" / "gw"
+    out_dir = root / "output" / "private" / "gw"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     out_json = out_dir / f"{args.slug}_imr_consistency.json"

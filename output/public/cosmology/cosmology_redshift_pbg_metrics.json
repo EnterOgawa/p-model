@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-10T15:34:02.884008+00:00",
+  "generated_utc": "2026-02-11T06:39:20.342569+00:00",
   "model": {
     "P_factorization": "P(x,t)=P_bg(t) P_local(x)",
     "redshift_relation": "1+z = P_em/P_obs",

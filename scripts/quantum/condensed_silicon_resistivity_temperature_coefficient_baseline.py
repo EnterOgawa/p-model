@@ -46,7 +46,7 @@ def _coeff_ln_rho_per_k(*, rho20: float, rho30: float) -> float:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_nbsir74_496_silicon_resistivity"

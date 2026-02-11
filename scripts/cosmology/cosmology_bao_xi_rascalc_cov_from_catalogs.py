@@ -12,13 +12,13 @@ RascalC（Legendre projected）で dv=[xi0, xi2] の共分散を推定し、peak
   - 依存（GSL/pkg-config）が無い環境では `scripts/cosmology/wsl_install_rascalc.sh` を先に実行する。
 
 入力：
-- `output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json`（1ケース分を指定）
+- `output/private/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json`（1ケース分を指定）
 
 出力（固定名）：
-- `output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__<output_suffix>.npz`（default: `rascalc_cov`）
+- `output/private/cosmology/cosmology_bao_xi_from_catalogs_{tag}__<output_suffix>.npz`（default: `rascalc_cov`）
   - `s`（xi の s bin center; xi出力と一致）
   - `cov`（shape=(2*n_s, 2*n_s); dv順序は y=[xi0, xi2]）
-- `output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__<output_suffix>_metrics.json`
+- `output/private/cosmology/cosmology_bao_xi_from_catalogs_{tag}__<output_suffix>_metrics.json`
 
 備考：
 - RascalC の covariance は内部の「RascalC convention（r-major × ℓ）」で出てくるため、本スクリプトで
@@ -256,7 +256,7 @@ def main(argv: List[str] | None = None) -> int:
     out_cov_npz = xi_npz_path.with_name(f"{xi_npz_path.stem}__{output_suffix}.npz")
     out_cov_json = xi_npz_path.with_name(f"{xi_npz_path.stem}__{output_suffix}_metrics.json")
 
-    base_dir = _ROOT / "output" / "cosmology" / "rascalc" / tag
+    base_dir = _ROOT / "output" / "private" / "cosmology" / "rascalc" / tag
     run_dir = base_dir / output_suffix
     tmp_dir = run_dir / "tmp"
     base_dir.mkdir(parents=True, exist_ok=True)

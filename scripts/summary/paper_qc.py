@@ -6,10 +6,10 @@ paper_qc.py
 Phase 8 / Step 8.2（本文整合：最終確認）向けの軽量QC。
 
 目的：
-- `output/summary/pmodel_paper.html`（publish）を対象に、機械的に検出できる崩れ/混入を潰す。
+- `output/private/summary/pmodel_paper.html`（publish）を対象に、機械的に検出できる崩れ/混入を潰す。
 - 8.4（図番号昇順・可読性）と 5.5（LaTeX表記混入防止）の運用チェックを一つにまとめる。
- - Step 8.1（短報）が存在する場合は、短報HTMLも同様に崩れ/混入を検出する。
- - （Wordが使える環境では）`output/summary/pmodel_paper.docx` の体裁崩れ（要請ブロックの記号/コロン、A.0表の枠線有無）も機械的に検出する。
+ - Part IV（検証資料）が存在する場合は、Part IV HTMLも同様に崩れ/混入を検出する。
+ - （Wordが使える環境では）`output/private/summary/pmodel_paper.docx` の体裁崩れ（要請ブロックの記号/コロン、A.0表の枠線有無）も機械的に検出する。
 
 チェック項目：
 - paper_lint strict（引用キー/図表インデックス/参照PNG）
@@ -21,7 +21,7 @@ Phase 8 / Step 8.2（本文整合：最終確認）向けの軽量QC。
    - A.0 自由度台帳：最初の表（自由度台帳直下）が「枠線なし」になっている（tblBorders があっても val=none/nil）
 
 出力：
-- `output/summary/paper_qc.json`
+- `output/private/summary/paper_qc.json`
 """
 
 from __future__ import annotations
@@ -72,11 +72,11 @@ def _check_paper_lint_strict() -> _Check:
     return _Check(ok=ok, details={"errors": result.errors, "warnings": result.warnings})
 
 
-def _check_short_note_lint_strict() -> _Check:
+def _check_part4_lint_strict() -> _Check:
     root = _ROOT
     result = _paper_lint._lint(  # noqa: SLF001
         root=root,
-        manuscript_paths=[root / "doc" / "paper" / "15_short_note.md"],
+        manuscript_paths=[root / "doc" / "paper" / "13_part4_verification.md"],
         references_path=root / "doc" / "paper" / "30_references.md",
         figures_index_path=root / "doc" / "paper" / "01_figures_index.md",
     )
@@ -341,7 +341,7 @@ def _check_markdown_figure_number_references(*, manuscript_md: Path, html_text: 
 
 def _check_no_double_backslash(text: str) -> _Check:
     # Ignore occurrences inside code/pre blocks so Windows paths like
-    # `output\\summary\\...` do not trigger false positives.
+    # `output\\private\\summary\\...` do not trigger false positives.
     scrubbed = re.sub(r"<pre[^>]*>.*?</pre>", "", text, flags=re.DOTALL)
     scrubbed = re.sub(r"<code[^>]*>.*?</code>", "", scrubbed, flags=re.DOTALL)
 
@@ -542,44 +542,44 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument(
         "--paper-html",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "pmodel_paper.html"),
-        help="publish paper html path (default: output/summary/pmodel_paper.html)",
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper.html"),
+        help="publish paper html path (default: output/private/summary/pmodel_paper.html)",
     )
     ap.add_argument(
         "--paper-docx",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "pmodel_paper.docx"),
-        help="publish paper docx path (default: output/summary/pmodel_paper.docx)",
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper.docx"),
+        help="publish paper docx path (default: output/private/summary/pmodel_paper.docx)",
     )
     ap.add_argument(
         "--part2-html",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "pmodel_paper_part2_astrophysics.html"),
-        help="publish Part II html path (optional; default: output/summary/pmodel_paper_part2_astrophysics.html)",
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper_part2_astrophysics.html"),
+        help="publish Part II html path (optional; default: output/private/summary/pmodel_paper_part2_astrophysics.html)",
     )
     ap.add_argument(
         "--part3-html",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "pmodel_paper_part3_quantum.html"),
-        help="publish Part III html path (optional; default: output/summary/pmodel_paper_part3_quantum.html)",
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper_part3_quantum.html"),
+        help="publish Part III html path (optional; default: output/private/summary/pmodel_paper_part3_quantum.html)",
     )
     ap.add_argument(
-        "--short-note-html",
+        "--part4-html",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "pmodel_short_note.html"),
-        help="publish short note html path (default: output/summary/pmodel_short_note.html)",
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_paper_part4_verification.html"),
+        help="publish Part IV html path (default: output/private/summary/pmodel_paper_part4_verification.html)",
     )
     ap.add_argument(
         "--public-html",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "pmodel_public_report.html"),
-        help="public report html path (default: output/summary/pmodel_public_report.html)",
+        default=str(_ROOT / "output" / "private" / "summary" / "pmodel_public_report.html"),
+        help="public report html path (default: output/private/summary/pmodel_public_report.html)",
     )
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "paper_qc.json"),
-        help="output json path (default: output/summary/paper_qc.json)",
+        default=str(_ROOT / "output" / "private" / "summary" / "paper_qc.json"),
+        help="output json path (default: output/private/summary/paper_qc.json)",
     )
     ap.add_argument("--no-log", action="store_true", help="do not append worklog event")
     args = ap.parse_args(list(argv) if argv is not None else None)
@@ -596,9 +596,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     part3_html = Path(str(args.part3_html))
     if not part3_html.is_absolute():
         part3_html = (_ROOT / part3_html).resolve()
-    short_note_html = Path(str(args.short_note_html))
-    if not short_note_html.is_absolute():
-        short_note_html = (_ROOT / short_note_html).resolve()
+    part4_html = Path(str(args.part4_html))
+    if not part4_html.is_absolute():
+        part4_html = (_ROOT / part4_html).resolve()
     public_html = Path(str(args.public_html))
     if not public_html.is_absolute():
         public_html = (_ROOT / public_html).resolve()
@@ -610,49 +610,42 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not paper_html.exists():
         print(f"[err] missing: {paper_html}")
         return 2
-    if not short_note_html.exists():
-        print(f"[err] missing: {short_note_html}")
-        return 2
-    if not public_html.exists():
-        print(f"[err] missing: {public_html}")
+    if not part4_html.exists():
+        print(f"[err] missing: {part4_html}")
         return 2
 
     paper_text = _read_text(paper_html)
     part2_text = _read_text(part2_html) if part2_html.exists() else None
     part3_text = _read_text(part3_html) if part3_html.exists() else None
-    short_note_text = _read_text(short_note_html)
-    public_text = _read_text(public_html)
+    part4_text = _read_text(part4_html)
+    public_text = _read_text(public_html) if public_html.exists() else None
     docx_xml = _read_docx_document_xml(paper_docx)
 
     checks: Dict[str, _Check] = {
         "paper_lint_strict": _check_paper_lint_strict(),
         "part2_lint_strict": _check_part2_lint_strict(),
         "part3_lint_strict": _check_part3_lint_strict(),
-        "short_note_lint_strict": _check_short_note_lint_strict(),
+        "part4_lint_strict": _check_part4_lint_strict(),
         "paper_md_section_references_resolve": _check_markdown_section_references(paper_dir=_ROOT / "doc" / "paper"),
         "paper_md_prose_no_latex_escapes": _check_markdown_prose_no_latex_escapes(paper_dir=_ROOT / "doc" / "paper"),
         "paper_html_no_double_backslash": _check_no_double_backslash(paper_text),
-        "short_note_html_no_double_backslash": _check_no_double_backslash(short_note_text),
-        "public_html_no_double_backslash": _check_no_double_backslash(public_text),
         "paper_html_no_draft_labels": _check_no_substrings(paper_text, ["草稿", "ドラフト"]),
-        "short_note_html_no_draft_labels": _check_no_substrings(short_note_text, ["草稿", "ドラフト"]),
-        "public_html_no_draft_labels": _check_no_substrings(public_text, ["草稿", "ドラフト"]),
+        "part4_html_no_double_backslash": _check_no_double_backslash(part4_text),
+        "part4_html_no_draft_labels": _check_no_substrings(part4_text, ["草稿", "ドラフト"]),
         "paper_html_no_repo_paths": _check_publish_html_no_repo_paths(html_text=paper_text),
         "paper_html_internal_anchor_links": _check_internal_anchor_links(paper_text),
-        "short_note_html_internal_anchor_links": _check_internal_anchor_links(short_note_text),
-        "public_html_internal_anchor_links": _check_internal_anchor_links(public_text),
+        "part4_html_internal_anchor_links": _check_internal_anchor_links(part4_text),
         "paper_equation_alt": _check_equation_alt(paper_text),
-        "short_note_equation_alt": _check_equation_alt(short_note_text),
+        "part4_equation_alt": _check_equation_alt(part4_text),
         "paper_figure_numbering": _check_figure_numbering(paper_text),
-        "short_note_figure_numbering": _check_figure_numbering(short_note_text),
-        "public_figure_numbering": _check_figure_numbering(public_text),
+        "part4_figure_numbering": _check_figure_numbering(part4_text),
         "paper_md_figure_number_references": _check_markdown_figure_number_references(
             manuscript_md=_ROOT / "doc" / "paper" / "10_part1_core_theory.md",
             html_text=paper_text,
         ),
-        "short_note_md_figure_number_references": _check_markdown_figure_number_references(
-            manuscript_md=_ROOT / "doc" / "paper" / "15_short_note.md",
-            html_text=short_note_text,
+        "part4_md_figure_number_references": _check_markdown_figure_number_references(
+            manuscript_md=_ROOT / "doc" / "paper" / "13_part4_verification.md",
+            html_text=part4_text,
         ),
         "paper_docx_callout_punctuation": _check_docx_callout_punctuation(docx_xml=docx_xml),
         "paper_docx_a0_table_no_borders": _check_docx_a0_table_no_borders(docx_xml=docx_xml),
@@ -690,6 +683,16 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
         )
 
+    if isinstance(public_text, str):
+        checks.update(
+            {
+                "public_html_no_double_backslash": _check_no_double_backslash(public_text),
+                "public_html_no_draft_labels": _check_no_substrings(public_text, ["草稿", "ドラフト"]),
+                "public_html_internal_anchor_links": _check_internal_anchor_links(public_text),
+                "public_figure_numbering": _check_figure_numbering(public_text),
+            }
+        )
+
     ok = all(c.ok for c in checks.values())
     payload: Dict[str, Any] = {
         "generated_utc": _utc_now(),
@@ -699,8 +702,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             "paper_html": str(paper_html.relative_to(_ROOT)).replace("\\", "/"),
             "part2_html": (str(part2_html.relative_to(_ROOT)).replace("\\", "/") if part2_html.exists() else None),
             "part3_html": (str(part3_html.relative_to(_ROOT)).replace("\\", "/") if part3_html.exists() else None),
-            "short_note_html": str(short_note_html.relative_to(_ROOT)).replace("\\", "/"),
-            "public_html": str(public_html.relative_to(_ROOT)).replace("\\", "/"),
+            "part4_html": str(part4_html.relative_to(_ROOT)).replace("\\", "/"),
+            "public_html": (str(public_html.relative_to(_ROOT)).replace("\\", "/") if public_html.exists() else None),
         },
         "ok": bool(ok),
         "checks": {k: {"ok": bool(v.ok), **v.details} for k, v in checks.items()},
@@ -719,7 +722,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         worklog.append_event(
             {
                 "tool": "paper_qc",
-                "inputs": [p for p in [paper_html, part2_html, part3_html, short_note_html, public_html] if p.exists()],
+                "inputs": [p for p in [paper_html, part2_html, part3_html, part4_html, public_html] if p.exists()],
                 "outputs": [out_json],
                 "result": {"ok": bool(ok)},
             }

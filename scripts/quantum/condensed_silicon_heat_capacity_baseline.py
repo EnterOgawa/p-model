@@ -49,7 +49,7 @@ def _linspace_inclusive(x0: float, x1: float, n: int) -> list[float]:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_webbook_condensed_silicon_si"

@@ -19,8 +19,8 @@ CMB温度スケーリング T(z) の一次ソース制約を固定出力する�
   - data/cosmology/cmb_temperature_scaling_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_cmb_temperature_scaling_constraints.png
-  - output/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json
+  - output/private/cosmology/cosmology_cmb_temperature_scaling_constraints.png
+  - output/private/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json
 """
 
 from __future__ import annotations
@@ -247,7 +247,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     rows = compute(constraints)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / "cosmology_cmb_temperature_scaling_constraints.png"
     _plot(rows, out_png=png_path)

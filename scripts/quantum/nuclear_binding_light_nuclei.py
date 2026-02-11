@@ -76,7 +76,7 @@ def _binding_energy_from_masses_mev(
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dirname = "nist_codata_2022_nuclear_light_nuclei"

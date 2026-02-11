@@ -129,7 +129,7 @@ def _einstein_cv_molar(*, t_k: float, theta_e_k: float, dof: float = 3.0) -> flo
 
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
-    m = root / "output" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
     if not m.exists():
         return None
     try:
@@ -349,7 +349,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     args = _parse_args(argv)
 
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Alpha(T) source (NIST TRC Cryogenics).
@@ -799,7 +799,7 @@ def main(argv: Optional[list[str]] = None) -> None:
                         else None
                     ),
                     "theta_d_source": (
-                        {"kind": "frozen_metrics", "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"}
+                        {"kind": "frozen_metrics", "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"}
                         if theta_from_metrics is not None
                         else {"kind": "refit_from_janaf", "fit_range_K": [100.0, 300.0]}
                     ),

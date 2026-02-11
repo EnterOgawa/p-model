@@ -8,18 +8,18 @@ freeze-test（fit→freeze→holdout; galaxy split）の安定性を、
 恒星 M/L（Υ_disk, Υ_bulge）系統に対して評価して固定出力化する。
 
 背景：
-- `output/cosmology/sparc_rar_reconstruction.csv` の `vdisk_km_s` / `vbul_km_s` は Rotmod の成分速度（Υ=1）であり、
+- `output/private/cosmology/sparc_rar_reconstruction.csv` の `vdisk_km_s` / `vbul_km_s` は Rotmod の成分速度（Υ=1）であり、
   g_bar は `vdisk*sqrt(Υ_disk)` / `vbul*sqrt(Υ_bulge)` で再計算できる（`sparc_rar_from_rotmod.py` と同一規約）。
 - point-level は同一銀河内の多数点を独立扱いして独立度（SEM）を過大評価し得るため、
   採用判定の正は galaxy-level（銀河内平均を1サンプル）を用いる。
 
 入力：
-- output/cosmology/sparc_rar_reconstruction.csv
-- output/cosmology/cosmology_redshift_pbg_metrics.json（H0^(P); candidate a0=κ c H0^(P) の計算に使用）
+- output/private/cosmology/sparc_rar_reconstruction.csv
+- output/private/cosmology/cosmology_redshift_pbg_metrics.json（H0^(P); candidate a0=κ c H0^(P) の計算に使用）
 
 出力（固定）：
-- output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json
-- output/cosmology/sparc_rar_freeze_test_mlr_sweep.png（任意；matplotlib が無い場合はスキップ）
+- output/private/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json
+- output/private/cosmology/sparc_rar_freeze_test_mlr_sweep.png（任意；matplotlib が無い場合はスキップ）
 """
 
 from __future__ import annotations
@@ -225,13 +225,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--rar-csv",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_reconstruction.csv"),
-        help="RAR reconstruction CSV (default: output/cosmology/sparc_rar_reconstruction.csv)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_reconstruction.csv"),
+        help="RAR reconstruction CSV (default: output/private/cosmology/sparc_rar_reconstruction.csv)",
     )
     p.add_argument(
         "--h0p-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
-        help="Path to cosmology_redshift_pbg_metrics.json (default: output/cosmology/cosmology_redshift_pbg_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
+        help="Path to cosmology_redshift_pbg_metrics.json (default: output/private/cosmology/cosmology_redshift_pbg_metrics.json)",
     )
     p.add_argument("--h0p-km-s-mpc", type=float, default=None, help="Override H0^(P) in km/s/Mpc (optional)")
     p.add_argument("--pbg-kappa", type=float, default=DEFAULT_PBG_KAPPA, help="a0 = kappa * c * H0^(P) (default: 1/(2π))")
@@ -247,8 +247,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     p.add_argument("--upsilon-disk", action="append", type=float, default=[], help="Υ_disk value to include (repeatable)")
     p.add_argument("--upsilon-bulge", action="append", type=float, default=[], help="Υ_bulge value to include (repeatable)")
-    p.add_argument("--out", default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_mlr_sweep_metrics.json"), help="Output JSON path")
-    p.add_argument("--out-png", default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_mlr_sweep.png"), help="Output plot PNG path")
+    p.add_argument("--out", default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_mlr_sweep_metrics.json"), help="Output JSON path")
+    p.add_argument("--out-png", default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_mlr_sweep.png"), help="Output plot PNG path")
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rar_csv = Path(args.rar_csv)

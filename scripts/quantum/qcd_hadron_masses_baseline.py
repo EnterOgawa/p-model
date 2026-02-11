@@ -157,7 +157,7 @@ def main() -> None:
     if missing_ids:
         raise SystemExit(f"[fail] missing PDG ids in file: {missing_ids}")
 
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     out_tag = str(args.out_tag)

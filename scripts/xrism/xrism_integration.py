@@ -9,8 +9,8 @@ Phase 4.3（距離指標と独立な検証）/ Phase 5.2（速度飽和 δ）へ
 Table 1 への採用可否（screening / not adopted）を「出力として」固定する。
 
 前提:
-- 4.13.2 出力: output/xrism/xrism_bh_outflow_velocity_summary.csv
-- 4.13.3 出力: output/xrism/xrism_cluster_redshift_turbulence_summary.csv
+- 4.13.2 出力: output/private/xrism/xrism_bh_outflow_velocity_summary.csv
+- 4.13.3 出力: output/private/xrism/xrism_cluster_redshift_turbulence_summary.csv
 """
 
 from __future__ import annotations
@@ -145,7 +145,7 @@ def _delta_upper_from_gamma(gamma_obs: float) -> Optional[float]:
 
 
 def _load_targets_catalog(root: Path) -> List[Dict[str, str]]:
-    return _read_csv_rows(root / "output" / "xrism" / "xrism_targets_catalog.csv")
+    return _read_csv_rows(root / "output" / "private" / "xrism" / "xrism_targets_catalog.csv")
 
 
 def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
@@ -153,7 +153,7 @@ def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
     Load event-level QC summary (products vs event_cl) keyed by obsid.
     This is a "procedure robustness" check and does not change the Table 1 gate directly.
     """
-    path = root / "output" / "xrism" / "xrism_event_level_qc_summary.csv"
+    path = root / "output" / "private" / "xrism" / "xrism_event_level_qc_summary.csv"
     rows = _read_csv_rows(path)
     out: Dict[str, Dict[str, Any]] = {}
     for r in rows:
@@ -192,7 +192,7 @@ def _summarize_event_level_qc(qc_by_obsid: Dict[str, Dict[str, Any]], *, obsids:
 
 def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any]:
     qc_by_obsid = _load_event_level_qc_by_obsid(root)
-    path = root / "output" / "xrism" / "xrism_bh_outflow_velocity_summary.csv"
+    path = root / "output" / "private" / "xrism" / "xrism_bh_outflow_velocity_summary.csv"
     rows = _read_csv_rows(path)
 
     gate_ratio = 10.0
@@ -358,7 +358,7 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
 
 def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any]:
     qc_by_obsid = _load_event_level_qc_by_obsid(root)
-    path = root / "output" / "xrism" / "xrism_cluster_redshift_turbulence_summary.csv"
+    path = root / "output" / "private" / "xrism" / "xrism_cluster_redshift_turbulence_summary.csv"
     rows = _read_csv_rows(path)
 
     obsids_in_catalog = sorted(
@@ -585,16 +585,16 @@ def build_metrics(root: Path, *, out_dir: Path) -> Dict[str, Any]:
     targets = _load_targets_catalog(root)
     bh = _summarize_bh(root, targets=targets)
     cluster = _summarize_cluster(root, targets=targets)
-    sweep_path = root / "output" / "xrism" / "xrism_event_level_qc_sweep_metrics.json"
+    sweep_path = root / "output" / "private" / "xrism" / "xrism_event_level_qc_sweep_metrics.json"
     sweep = _read_json(sweep_path) if sweep_path.exists() else {}
 
     return {
         "generated_utc": _utc_now(),
         "inputs": {
-            "targets_catalog_csv": _rel(root / "output" / "xrism" / "xrism_targets_catalog.csv"),
+            "targets_catalog_csv": _rel(root / "output" / "private" / "xrism" / "xrism_targets_catalog.csv"),
             "bh_summary_csv": bh.get("inputs", {}).get("summary_csv"),
             "cluster_summary_csv": cluster.get("inputs", {}).get("summary_csv"),
-            "event_level_qc_summary_csv": _rel(root / "output" / "xrism" / "xrism_event_level_qc_summary.csv"),
+            "event_level_qc_summary_csv": _rel(root / "output" / "private" / "xrism" / "xrism_event_level_qc_summary.csv"),
             "event_level_qc_sweep_metrics_json": _rel(sweep_path) if sweep_path.exists() else None,
             "delta_constraints_json": _rel(root / "output" / "theory" / "delta_saturation_constraints.json"),
         },
@@ -615,11 +615,11 @@ def build_metrics(root: Path, *, out_dir: Path) -> Dict[str, Any]:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Integrate XRISM fixed outputs and freeze adoption decisions.")
-    ap.add_argument("--out-dir", default=None, help="Override output directory (default: output/xrism).")
+    ap.add_argument("--out-dir", default=None, help="Override output directory (default: output/private/xrism).")
     args = ap.parse_args(argv)
 
     root = _ROOT
-    out_dir = Path(args.out_dir) if args.out_dir else (root / "output" / "xrism")
+    out_dir = Path(args.out_dir) if args.out_dir else (root / "output" / "private" / "xrism")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     payload = build_metrics(root, out_dir=out_dir)

@@ -11,9 +11,9 @@ SPARC の Rotmod_LTG.zip（各銀河の rotmod.dat）から g_obs / g_bar を再
 - data/cosmology/sparc/raw/Rotmod_LTG.zip
 
 出力（固定）:
-- output/cosmology/sparc_rar_reconstruction.csv
-- output/cosmology/sparc_rar_metrics.json
-- output/cosmology/sparc_rar_scatter.png
+- output/private/cosmology/sparc_rar_reconstruction.csv
+- output/private/cosmology/sparc_rar_metrics.json
+- output/private/cosmology/sparc_rar_scatter.png
 
 注意:
 - これは「取得済みの rotmod.dat から RAR を再構築する最小版」。
@@ -210,8 +210,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--upsilon-bulge", type=float, default=0.7, help="Stellar M/L for bulge (default: 0.7)")
     p.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     args = p.parse_args(list(argv) if argv is not None else None)
 

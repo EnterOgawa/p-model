@@ -12,8 +12,8 @@ Phase 6 / Step 6.2.3:
   2) （任意）基準パラメータでテストを再実行してから収集（--rerun）
 
 出力（固定）:
-  - output/summary/weak_field_longterm_consistency.json
-  - output/summary/weak_field_longterm_consistency.png
+  - output/private/summary/weak_field_longterm_consistency.json
+  - output/private/summary/weak_field_longterm_consistency.png
 """
 
 from __future__ import annotations
@@ -224,7 +224,7 @@ def collect(
     mercury_metrics_json = _ROOT / "output" / "mercury" / "mercury_precession_metrics.json"
     viking_series_csv = _ROOT / "output" / "viking" / "viking_shapiro_result.csv"
 
-    out_dir = _ROOT / "output" / "summary"
+    out_dir = _ROOT / "output" / "private" / "summary"
     out_dir.mkdir(parents=True, exist_ok=True)
     run_log = out_dir / "weak_field_longterm_consistency_run.log"
 
@@ -361,8 +361,8 @@ def collect(
         "rerun": {"enabled": bool(rerun), "timeout_s": float(timeout_s), "status": rerun_status or None, "log": _relpath(run_log)},
         "results": results,
         "outputs": {
-            "weak_field_longterm_consistency_json": "output/summary/weak_field_longterm_consistency.json",
-            "weak_field_longterm_consistency_png": "output/summary/weak_field_longterm_consistency.png",
+            "weak_field_longterm_consistency_json": "output/private/summary/weak_field_longterm_consistency.json",
+            "weak_field_longterm_consistency_png": "output/private/summary/weak_field_longterm_consistency.png",
         },
     }
     meta: Dict[str, Any] = {"matrix": matrix, "templates": templates, "frozen": frozen}
@@ -524,26 +524,26 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--matrix",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_test_matrix.json"),
-        help="Input matrix JSON (default: output/summary/weak_field_test_matrix.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_test_matrix.json"),
+        help="Input matrix JSON (default: output/private/summary/weak_field_test_matrix.json).",
     )
     ap.add_argument(
         "--templates",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_systematics_templates.json"),
-        help="Input systematics templates JSON (default: output/summary/weak_field_systematics_templates.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_systematics_templates.json"),
+        help="Input systematics templates JSON (default: output/private/summary/weak_field_systematics_templates.json).",
     )
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_longterm_consistency.json"),
-        help="Output JSON path (default: output/summary/weak_field_longterm_consistency.json).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_longterm_consistency.json"),
+        help="Output JSON path (default: output/private/summary/weak_field_longterm_consistency.json).",
     )
     ap.add_argument(
         "--out-png",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "weak_field_longterm_consistency.png"),
-        help="Output PNG path (default: output/summary/weak_field_longterm_consistency.png).",
+        default=str(_ROOT / "output" / "private" / "summary" / "weak_field_longterm_consistency.png"),
+        help="Output PNG path (default: output/private/summary/weak_field_longterm_consistency.png).",
     )
     ap.add_argument(
         "--rerun",

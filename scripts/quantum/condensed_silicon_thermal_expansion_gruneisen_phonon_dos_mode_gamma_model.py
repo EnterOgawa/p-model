@@ -2041,7 +2041,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         )
 
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cv_omega_dependence = str(getattr(args, "cv_omega_dependence", "harmonic"))

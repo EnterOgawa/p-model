@@ -12,10 +12,10 @@ XSPEC（pyXspec）を用いた forward-fold（RMF/ARF）fit の入口。
 入力（推奨）:
 - 事前に `scripts/xrism/fek_relativistic_broadening_isco_constraints.py` を実行して、
   XMM の PPS スペクトル選定（rmf_sources）を凍結した detail JSON を生成する。
-  - `output/xrism/xmm_<obsid>__fek_broad_line_rmf_diskline.json`
+  - `output/private/xrism/xmm_<obsid>__fek_broad_line_rmf_diskline.json`
 
 出力（固定名）:
-- `output/xrism/xmm_<obsid>__fek_broad_line_reflection_xspec.json`
+- `output/private/xrism/xmm_<obsid>__fek_broad_line_reflection_xspec.json`
   - status=ok の場合：best-fit の r_in（proxy）等を含む
   - status=blocked_missing_xspec の場合：入力 plan のみを含む（後段で再実行可能）
 
@@ -839,13 +839,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     p.add_argument(
         "--detail-dir",
-        default=str(_ROOT / "output/xrism"),
-        help="Directory containing per-obsid detail JSONs (default: output/xrism)",
+        default=str(_ROOT / "output/private/xrism"),
+        help="Directory containing per-obsid detail JSONs (default: output/private/xrism)",
     )
     p.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output/xrism"),
-        help="Output directory (default: output/xrism)",
+        default=str(_ROOT / "output/private/xrism"),
+        help="Output directory (default: output/private/xrism)",
     )
     p.add_argument("--obsid", default="", help="Optional: run only for this obsid (XMM).")
     p.add_argument("--band-lo", type=float, default=3.0, help="Fit band lower edge (keV).")

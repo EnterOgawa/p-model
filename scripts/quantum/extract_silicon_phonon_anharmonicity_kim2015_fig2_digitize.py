@@ -536,7 +536,7 @@ def main() -> None:
     print(f"[ok] wrote: {out_json}")
 
     # Diagnostic plot.
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "silicon_phonon_softening_kim2015_fig2_digitized.png"
 

@@ -294,7 +294,7 @@ def _build_hom_squeezed_light_audit(
 def main() -> None:
     cfg = Config()
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # --- Panel A: single-photon interference (visibility → path-length noise upper bound) ---

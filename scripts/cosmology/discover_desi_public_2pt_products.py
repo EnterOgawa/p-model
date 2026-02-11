@@ -435,8 +435,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "cosmology" / "desi_public_2pt_discovery.json"),
-        help="output JSON path (default: output/cosmology/desi_public_2pt_discovery.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "desi_public_2pt_discovery.json"),
+        help="output JSON path (default: output/private/cosmology/desi_public_2pt_discovery.json)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 

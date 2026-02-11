@@ -17,8 +17,8 @@ Ross 2016 post-recon の ξ2 ギャップを「broadband（A0+A1/r+A2/r^2）」�
   RMSE(s^2 ξ2) がどの程度縮むかを zbin1..3 で示す。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_recon_gap_broadband_fit.png
-- output/cosmology/cosmology_bao_recon_gap_broadband_fit_metrics.json
+- output/private/cosmology/cosmology_bao_recon_gap_broadband_fit.png
+- output/private/cosmology/cosmology_bao_recon_gap_broadband_fit_metrics.json
 """
 
 from __future__ import annotations
@@ -136,12 +136,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--s-max", type=float, default=150.0, help="s range max (Mpc/h; default: 150)")
     ap.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_broadband_fit.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_broadband_fit.png"),
         help="output png path",
     )
     ap.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_broadband_fit_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_broadband_fit_metrics.json"),
         help="output metrics json path",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
@@ -173,7 +173,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for ax, zbin in zip(axes, zbins):
         b = zbin_to_b[zbin]
-        cat_npz = _ROOT / "output" / "cosmology" / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
+        cat_npz = _ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
         if not cat_npz.exists():
             raise SystemExit(f"missing catalog recon npz: {cat_npz}")
         used_inputs.append(cat_npz)

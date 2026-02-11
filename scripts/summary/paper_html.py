@@ -6,8 +6,10 @@ paper_html.py
 Phase 8 向けに、Markdown草稿（doc/paper/*.md）をHTMLで読める形に整形して出力する。
 
 生成物（既定）:
-  - profile=paper: output/summary/pmodel_paper.html
-  - profile=short_note: output/summary/pmodel_short_note.html
+  - profile=paper: output/private/summary/pmodel_paper.html
+  - profile=part2_astrophysics: output/private/summary/pmodel_paper_part2_astrophysics.html
+  - profile=part3_quantum: output/private/summary/pmodel_paper_part3_quantum.html
+  - profile=part4_verification: output/private/summary/pmodel_paper_part4_verification.html
 
 方針:
   - 公開レポート（pmodel_public_report.html）と同じ “カード” スタイルの単一HTMLにまとめる。
@@ -107,7 +109,7 @@ def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir
     HTML 内の src/href に含まれる `output/...` 等の “repo-root 相対パス” を、
     HTML 出力先（out_dir）からの相対パスに変換する。
 
-    例：out_dir=output/summary のとき
+    例：out_dir=output/private/summary のとき
       src="output/cosmology/foo.png" → src="../cosmology/foo.png"
 
     Markdown 草稿側は `output/...` 表記を維持したまま、生成物だけを表示可能にする。
@@ -1110,7 +1112,7 @@ def _render_html(
     parts.append("</div>")
     if mode != "publish":
         parts.append("<ul>")
-        parts.append("<li>一般向け統一レポート: <a href='pmodel_public_report.html'><code>output/summary/pmodel_public_report.html</code></a></li>")
+        parts.append("<li>一般向け統一レポート: <a href='pmodel_public_report.html'><code>output/private/summary/pmodel_public_report.html</code></a></li>")
         parts.append(
             "<li>Markdown草稿: "
             f"<a href='../../{html.escape(manuscript_link)}'><code>{html.escape(manuscript_link)}</code></a>"
@@ -1167,12 +1169,12 @@ def _render_html(
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Render paper (Markdown draft) as a single HTML page.")
-    ap.add_argument("--outdir", default=None, help="Output directory (default: output/summary).")
+    ap.add_argument("--outdir", default=None, help="Output directory (default: output/private/summary).")
     ap.add_argument(
         "--profile",
-        choices=["paper", "part2_astrophysics", "part3_quantum", "short_note"],
+        choices=["paper", "part2_astrophysics", "part3_quantum", "part4_verification"],
         default="paper",
-        help="render profile: paper (Part I) / part2_astrophysics / part3_quantum / short_note",
+        help="render profile: paper (Part I) / part2_astrophysics / part3_quantum / part4_verification",
     )
     ap.add_argument(
         "--mode",
@@ -1199,7 +1201,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     root = _repo_root()
-    out_dir = Path(args.outdir) if args.outdir else (root / "output" / "summary")
+    out_dir = Path(args.outdir) if args.outdir else (root / "output" / "private" / "summary")
     mode = str(args.mode)
     profile = str(args.profile)
     embed_images = (mode == "publish") and (not bool(args.no_embed_images))
@@ -1213,15 +1215,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             manuscript_md = root / "doc" / "paper" / "11_part2_astrophysics.md"
         elif profile == "part3_quantum":
             manuscript_md = root / "doc" / "paper" / "12_part3_quantum.md"
-        else:
-            manuscript_md = root / "doc" / "paper" / "15_short_note.md"
+        elif profile == "part4_verification":
+            manuscript_md = root / "doc" / "paper" / "13_part4_verification.md"
 
     quantum_appendix_a_md = root / "doc" / "paper" / "12_part3_quantum_appendix_a.md"
     definitions_md = root / "doc" / "paper" / "05_definitions.md"
     uncertainty_md = root / "doc" / "paper" / "06_uncertainty.md"
     llr_appendix_md = root / "doc" / "paper" / "07_llr_appendix.md"
-    table1_astrophysics_md = root / "output" / "summary" / "paper_table1_results.md"
-    table1_quantum_md = root / "output" / "summary" / "paper_table1_quantum_results.md"
+    table1_astrophysics_md = root / "output" / "private" / "summary" / "paper_table1_results.md"
+    table1_quantum_md = root / "output" / "private" / "summary" / "paper_table1_quantum_results.md"
     table1_md = table1_quantum_md if profile == "part3_quantum" else table1_astrophysics_md
     sources_md = root / "doc" / "paper" / "20_data_sources.md"
     refs_md = root / "doc" / "paper" / "30_references.md"
@@ -1243,7 +1245,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     include_quantum_appendix_a = profile == "part3_quantum"
     enable_citation_links = profile != "paper"
     # Keep anchors stable across all paper profiles so intra-doc links and TOC are consistent.
-    standardize_numbered_anchors = profile in {"paper", "part2_astrophysics", "part3_quantum", "short_note"}
+    standardize_numbered_anchors = profile in {"paper", "part2_astrophysics", "part3_quantum", "part4_verification"}
 
     # Used to tailor "データ出典/参考文献" per Part in publish mode.
     used_cite_keys: set[str] = set()
@@ -1387,16 +1389,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             inlined=publish_inlined,
             img_cache=publish_img_cache,
         )
-        if profile != "short_note":
-            sections.append({"id": "manuscript", "title": "本文", "badge": "", "body_html": body, "toc_html": toc})
-        else:
-            sections.append({"id": "short_note", "title": "短報本文", "badge": "短報", "body_html": body, "toc_html": toc})
+        sections.append({"id": "manuscript", "title": "本文", "badge": "", "body_html": body, "toc_html": toc})
     else:
         sections.append(
             {
-                "id": ("short_note" if profile == "short_note" else "manuscript"),
-                "title": ("短報本文" if profile == "short_note" else "本文"),
-                "badge": ("短報" if profile == "short_note" else ""),
+                "id": "manuscript",
+                "title": "本文",
+                "badge": "",
                 "body_html": f"<p class='muted'>Missing: <code>{html.escape(str(manuscript_md))}</code></p>",
                 "toc_html": "",
             }
@@ -1564,13 +1563,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             out_name = "pmodel_paper_part2_astrophysics.html"
         elif profile == "part3_quantum":
             out_name = "pmodel_paper_part3_quantum.html"
-        else:
-            out_name = "pmodel_short_note.html"
+        elif profile == "part4_verification":
+            out_name = "pmodel_paper_part4_verification.html"
+        else:  # pragma: no cover (guarded by argparse choices)
+            raise ValueError(f"unknown profile: {profile}")
 
-    if profile == "short_note":
-        title = "P-model 短報"
-        subtitle = "最小仮定＋必須検証（短報HTML）"
-        header_badge = "短報"
+    if profile == "part4_verification":
+        title = "P-model Part IV（検証資料）"
+        subtitle = "検証方法と公開成果物への参照先（GitHub）"
+        header_badge = "Part IV"
     elif profile == "part2_astrophysics":
         title = "P-model Part II（宇宙物理編）"
         subtitle = "応用検証：宇宙物理（公開体裁）"

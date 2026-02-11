@@ -39,7 +39,7 @@ def _load_lambda_pi_fm(*, root: Path) -> float:
     Prefer the already-fixed PDG baseline output (Step 7.13.1).
     Fallback to the standard π± Compton length if missing.
     """
-    metrics = root / "output" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    metrics = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
     if metrics.exists():
         j = _load_json(metrics)
         rows = j.get("rows")
@@ -78,7 +78,7 @@ def main() -> None:
     args = ap.parse_args()
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     consts = _load_nist_codata_constants(root=root)
@@ -203,7 +203,7 @@ def main() -> None:
         "step": "7.13.16",
         "inputs": {
             "codata_nist_extracted": "data/quantum/sources/nist_codata_2022_nuclear_baseline/extracted_values.json",
-            "pdg_baseline_metrics": "output/quantum/qcd_hadron_masses_baseline_metrics.json",
+            "pdg_baseline_metrics": "output/public/quantum/qcd_hadron_masses_baseline_metrics.json",
         },
         "model": {
             "two_mode_convention": "Delta_omega = 2 J(R0); E_B = hbar * Delta_omega; J_E(R0) = E_B/2",

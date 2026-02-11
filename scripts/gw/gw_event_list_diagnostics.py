@@ -130,7 +130,7 @@ def _event_result(
     Returns (ok, reason, log_path, metrics_path).
     reason is set only when ok is False (best-effort classification).
     """
-    metrics = root / "output" / "gw" / f"{spec.slug}_chirp_phase_metrics.json"
+    metrics = root / "output" / "private" / "gw" / f"{spec.slug}_chirp_phase_metrics.json"
     metrics_path = str(metrics) if metrics.exists() else None
 
     if task_rec is None:
@@ -285,12 +285,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument(
         "--out",
         default=None,
-        help="Output JSON path (default: output/gw/gw_event_list_diagnostics.json).",
+        help="Output JSON path (default: output/private/gw/gw_event_list_diagnostics.json).",
     )
     args = ap.parse_args(argv)
 
     root = _repo_root()
-    out_path = Path(args.out) if args.out else (root / "output" / "gw" / "gw_event_list_diagnostics.json")
+    out_path = Path(args.out) if args.out else (root / "output" / "private" / "gw" / "gw_event_list_diagnostics.json")
     if not out_path.is_absolute():
         out_path = (root / out_path).resolve()
 

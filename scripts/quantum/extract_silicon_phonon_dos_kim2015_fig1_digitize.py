@@ -409,7 +409,7 @@ def main() -> None:
     print(f"[ok] wrote: {out_json}")
 
     # Diagnostic plot (no offsets; all curves overlaid).
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "silicon_phonon_dos_kim2015_fig1_digitized.png"
 

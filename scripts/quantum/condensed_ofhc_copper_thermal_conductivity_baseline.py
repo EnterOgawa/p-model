@@ -71,7 +71,7 @@ def _k_at_t(*, t_k: float, coeffs: dict[str, float], t_min_k: float, t_max_k: fl
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_trc_ofhc_copper_thermal_conductivity"

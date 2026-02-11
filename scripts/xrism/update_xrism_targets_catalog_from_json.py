@@ -5,7 +5,7 @@ update_xrism_targets_catalog_from_json.py
 
 Phase 4 / Step 4.8（XRISM）:
 `data/xrism/sources/xrism_target_catalog.json`（DARTS metadata 由来の選定リスト）を、
-既存の解析スクリプトが参照している `output/xrism/xrism_targets_catalog.csv` に反映する。
+既存の解析スクリプトが参照している `output/private/xrism/xrism_targets_catalog.csv` に反映する。
 
 方針:
 - 既存CSVの行（手動コメント等）は保持しつつ、JSONにある obsid を追加する（不足行の補完）。
@@ -162,7 +162,7 @@ def update_targets_csv(*, catalog_json: Path, targets_csv: Path, overwrite: bool
 def main(argv: Optional[Iterable[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--catalog-json", default=str(_ROOT / "data" / "xrism" / "sources" / "xrism_target_catalog.json"))
-    p.add_argument("--targets-csv", default=str(_ROOT / "output" / "xrism" / "xrism_targets_catalog.csv"))
+    p.add_argument("--targets-csv", default=str(_ROOT / "output" / "private" / "xrism" / "xrism_targets_catalog.csv"))
     p.add_argument("--overwrite", action="store_true")
     args = p.parse_args(list(argv) if argv is not None else None)
 

@@ -76,7 +76,7 @@ def _format_num(x: Any, *, digits: int = 4) -> str:
 
 
 def _load_decisive_falsification(root: Path) -> Dict[str, Any]:
-    path = root / "output" / "summary" / "decisive_falsification.json"
+    path = root / "output" / "private" / "summary" / "decisive_falsification.json"
     if not path.exists():
         return {}
     try:
@@ -87,7 +87,7 @@ def _load_decisive_falsification(root: Path) -> Dict[str, Any]:
 
 
 def _load_eht_paper5_m3_rescue_metrics(root: Path) -> Dict[str, Any]:
-    path = root / "output" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
+    path = root / "output" / "private" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
     if not path.exists():
         return {}
     try:
@@ -248,7 +248,7 @@ def _extract_delta_candidate(fals: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
 
 def _extract_s2_candidate(root: Path) -> Optional[Dict[str, Any]]:
-    path = root / "output" / "eht" / "gravity_s2_pmodel_projection.json"
+    path = root / "output" / "private" / "eht" / "gravity_s2_pmodel_projection.json"
     if not path.exists():
         return None
 
@@ -415,7 +415,7 @@ def _build_payload(root: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     payload: Dict[str, Any] = {
         "generated_utc": _iso_utc_now(),
         "inputs": {
-            "decisive_falsification_json": "output/summary/decisive_falsification.json",
+            "decisive_falsification_json": "output/private/summary/decisive_falsification.json",
             "gravity_s2_pmodel_projection_json": "output/eht/gravity_s2_pmodel_projection.json",
             "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics_json": "output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json",
         },
@@ -440,8 +440,8 @@ def _build_payload(root: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
 def main() -> int:
     root = _repo_root()
     ap = argparse.ArgumentParser(description="Phase 8.1: list decisive differential-prediction candidates and gaps.")
-    ap.add_argument("--out-png", type=str, default=str(root / "output" / "summary" / "decisive_candidates.png"))
-    ap.add_argument("--out-json", type=str, default=str(root / "output" / "summary" / "decisive_candidates.json"))
+    ap.add_argument("--out-png", type=str, default=str(root / "output" / "private" / "summary" / "decisive_candidates.png"))
+    ap.add_argument("--out-json", type=str, default=str(root / "output" / "private" / "summary" / "decisive_candidates.json"))
     args = ap.parse_args()
 
     out_png = Path(args.out_png)
@@ -460,7 +460,9 @@ def main() -> int:
             {
                 "event_type": "decisive_candidates",
                 "argv": list(sys.argv),
-                "inputs": {"decisive_falsification_json": root / "output" / "summary" / "decisive_falsification.json"},
+                "inputs": {
+                    "decisive_falsification_json": root / "output" / "private" / "summary" / "decisive_falsification.json"
+                },
                 "outputs": {"decisive_candidates_png": out_png, "decisive_candidates_json": out_json},
             }
         )

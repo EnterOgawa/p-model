@@ -176,8 +176,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     ap.add_argument(
         "--out-dir",
-        default=str(_ROOT / "output" / "cosmology"),
-        help="Output directory (default: output/cosmology)",
+        default=str(_ROOT / "output" / "private" / "cosmology"),
+        help="Output directory (default: output/private/cosmology)",
     )
     ap.add_argument(
         "--cap",
@@ -198,7 +198,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     _set_japanese_font()
 
-    metrics_path = _ROOT / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    metrics_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
     if not metrics_path.exists():
         raise FileNotFoundError(
             f"missing required metrics: {metrics_path} (run scripts/summary/run_all.py --offline first)"

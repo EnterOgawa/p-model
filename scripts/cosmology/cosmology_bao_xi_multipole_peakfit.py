@@ -20,8 +20,8 @@ Phase 16（宇宙論）/ Step 16.4（BAO一次統計の再導出）:
   ※ 未取得の場合は、先に scripts/cosmology/fetch_boss_dr12_ross2016_corrfunc.py を実行する。
 
 出力（固定名）:
-  - output/cosmology/cosmology_bao_xi_multipole_peakfit.png
-  - output/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json
+  - output/private/cosmology/cosmology_bao_xi_multipole_peakfit.png
+  - output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json
 """
 
 from __future__ import annotations
@@ -916,7 +916,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     suffix = "" if dataset == "ross_post" else "_pre_recon"
     out_png = out_dir / f"cosmology_bao_xi_multipole_peakfit{suffix}.png"

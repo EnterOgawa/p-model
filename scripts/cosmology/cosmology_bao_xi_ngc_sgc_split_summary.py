@@ -15,8 +15,8 @@ catalog-based ξℓ（ℓ=0,2）の出力（*_metrics.json）から要約する�
 - `scripts/cosmology/cosmology_bao_xi_from_catalogs.py` の *_metrics.json（north/south/combined）
 
 出力（固定）:
-- output/cosmology/cosmology_bao_xi_ngc_sgc_split_summary.png
-- output/cosmology/cosmology_bao_xi_ngc_sgc_split_summary_metrics.json
+- output/private/cosmology/cosmology_bao_xi_ngc_sgc_split_summary.png
+- output/private/cosmology/cosmology_bao_xi_ngc_sgc_split_summary_metrics.json
 """
 
 from __future__ import annotations
@@ -111,7 +111,7 @@ def _metrics_path(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) 
     if suffix and not suffix.startswith("__"):
         suffix = "__" + suffix
     name = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}{suffix}_metrics.json"
-    return _ROOT / "output" / "cosmology" / name
+    return _ROOT / "output" / "private" / "cosmology" / name
 
 
 def _load_point(path: Path, *, zbin: str, caps: str) -> Point:
@@ -156,12 +156,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--out-png",
         type=str,
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_xi_ngc_sgc_split_summary.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_xi_ngc_sgc_split_summary.png"),
     )
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_xi_ngc_sgc_split_summary_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_xi_ngc_sgc_split_summary_metrics.json"),
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 

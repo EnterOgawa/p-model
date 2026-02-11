@@ -10,10 +10,10 @@ RAR 再構築（観測側 g_obs/g_bar）を入力として、最小の falsifica
 RAR がそのヌルからどれだけ系統的にずれているかを数値で固定する。
 
 入力：
-- output/cosmology/sparc_rar_reconstruction.csv
+- output/private/cosmology/sparc_rar_reconstruction.csv
 
 出力（固定）：
-- output/cosmology/sparc_falsification_pack.json
+- output/private/cosmology/sparc_falsification_pack.json
 """
 
 from __future__ import annotations
@@ -314,7 +314,7 @@ def _summarize_freeze_test_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
 
 def _summarize_freeze_test_mlr_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Summarize output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json into a small dict
+    Summarize output/private/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json into a small dict
     suitable for inclusion in sparc_falsification_pack.json (avoid embedding the full variants list).
     """
     if not isinstance(d, dict):
@@ -478,7 +478,7 @@ def _summarize_freeze_test_upsilon_fit_metrics(d: Dict[str, Any]) -> Dict[str, A
 
 def _summarize_freeze_test_procedure_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     """
-    Summarize output/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json into a small dict.
+    Summarize output/private/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json into a small dict.
     """
     if not isinstance(d, dict):
         return {"status": "invalid"}
@@ -520,12 +520,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--rar-csv",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_reconstruction.csv"),
-        help="RAR reconstruction CSV (default: output/cosmology/sparc_rar_reconstruction.csv)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_reconstruction.csv"),
+        help="RAR reconstruction CSV (default: output/private/cosmology/sparc_rar_reconstruction.csv)",
     )
     p.add_argument(
         "--out",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_falsification_pack.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_falsification_pack.json"),
         help="Output JSON path",
     )
     p.add_argument("--sigma-floor-dex", type=float, default=0.01, help="Floor for sigma(log10 g_obs) in dex (default: 0.01)")
@@ -545,30 +545,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     p.add_argument(
         "--h0p-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
-        help="Path to cosmology_redshift_pbg_metrics.json (default: output/cosmology/cosmology_redshift_pbg_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_redshift_pbg_metrics.json"),
+        help="Path to cosmology_redshift_pbg_metrics.json (default: output/private/cosmology/cosmology_redshift_pbg_metrics.json)",
     )
     p.add_argument("--h0p-km-s-mpc", type=float, default=None, help="Override H0^(P) in km/s/Mpc (optional)")
     p.add_argument("--pbg-kappa", type=float, default=DEFAULT_PBG_KAPPA, help="a0 = kappa * c * H0^(P) (default: 1/(2π))")
     p.add_argument(
         "--freeze-test-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_metrics.json"),
-        help="Path to sparc_rar_freeze_test_metrics.json (default: output/cosmology/sparc_rar_freeze_test_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_metrics.json"),
+        help="Path to sparc_rar_freeze_test_metrics.json (default: output/private/cosmology/sparc_rar_freeze_test_metrics.json)",
     )
     p.add_argument(
         "--freeze-test-upsilon-fit-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json"),
-        help="Path to freeze-test metrics for nuisance Υ fit on train (default: output/cosmology/sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json"),
+        help="Path to freeze-test metrics for nuisance Υ fit on train (default: output/private/cosmology/sparc_rar_freeze_test_fit_upsilon_global_chi2_high_accel_metrics.json)",
     )
     p.add_argument(
         "--freeze-test-procedure-sweep-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_procedure_sweep_metrics.json"),
-        help="Path to sparc_rar_freeze_test_procedure_sweep_metrics.json (default: output/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_procedure_sweep_metrics.json"),
+        help="Path to sparc_rar_freeze_test_procedure_sweep_metrics.json (default: output/private/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json)",
     )
     p.add_argument(
         "--freeze-test-mlr-sweep-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "sparc_rar_freeze_test_mlr_sweep_metrics.json"),
-        help="Path to sparc_rar_freeze_test_mlr_sweep_metrics.json (default: output/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json)",
+        default=str(_ROOT / "output" / "private" / "cosmology" / "sparc_rar_freeze_test_mlr_sweep_metrics.json"),
+        help="Path to sparc_rar_freeze_test_mlr_sweep_metrics.json (default: output/private/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json)",
     )
     args = p.parse_args(list(argv) if argv is not None else None)
 

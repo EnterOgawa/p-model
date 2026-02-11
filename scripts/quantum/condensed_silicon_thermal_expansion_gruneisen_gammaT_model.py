@@ -131,7 +131,7 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
 
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
-    m = root / "output" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
     if not m.exists():
         return None
     try:
@@ -254,7 +254,7 @@ def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Alpha(T) source (NIST TRC Cryogenics).
@@ -475,7 +475,7 @@ def main() -> None:
                         else None
                     ),
                     "theta_d_source": (
-                        {"kind": "frozen_metrics", "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"}
+                        {"kind": "frozen_metrics", "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"}
                         if theta_from_metrics is not None
                         else {"kind": "refit_from_janaf", "fit_range_K": [100.0, 300.0]}
                     ),

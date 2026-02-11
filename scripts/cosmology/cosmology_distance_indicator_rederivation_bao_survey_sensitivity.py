@@ -12,20 +12,20 @@ BAO prior として採用し、単一prior（α,s_L）で全DDR行を 1σ同時�
 必要となる BAO σスケール f（σ→fσ）を推定して固定する。
 
 入力（固定）:
-  - output/cosmology/cosmology_bao_scaled_distance_fit_metrics.json（BOSS DR12: baseline）
-  - output/cosmology/cosmology_bao_distance_ratio_fit_metrics.json（BOSS / eBOSS / DESI / combined）
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_metrics.json（BOSS DR12: baseline）
+  - output/private/cosmology/cosmology_bao_distance_ratio_fit_metrics.json（BOSS / eBOSS / DESI / combined）
   - data/cosmology/distance_duality_constraints.json
   - data/cosmology/cosmic_opacity_constraints.json
   - data/cosmology/sn_standard_candle_evolution_constraints.json
   - data/cosmology/sn_time_dilation_constraints.json
   - data/cosmology/cmb_temperature_scaling_constraints.json
-  - （任意）output/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（DDR σ_cat）
+  - （任意）output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json（DDR σ_cat）
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan_metrics.json
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan.png
-  - output/cosmology/cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan_metrics.json
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan.png
+  - output/private/cosmology/cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan_metrics.json
 """
 
 from __future__ import annotations
@@ -343,7 +343,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     data_dir = _ROOT / "data" / "cosmology"
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
 
     in_bao_baseline = out_dir / "cosmology_bao_scaled_distance_fit_metrics.json"
     in_bao_ratio = out_dir / "cosmology_bao_distance_ratio_fit_metrics.json"

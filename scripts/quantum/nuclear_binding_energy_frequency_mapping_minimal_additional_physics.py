@@ -140,7 +140,7 @@ def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     diff_csv = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.csv"

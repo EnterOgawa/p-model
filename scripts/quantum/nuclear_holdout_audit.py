@@ -150,7 +150,7 @@ def _group_stats(rows: Sequence[NucleusRow], *, group_id: str) -> Dict[str, Any]
 
 
 def main() -> int:
-    out_dir = _ROOT / "output" / "quantum"
+    out_dir = _ROOT / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"

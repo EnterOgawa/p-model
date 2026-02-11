@@ -825,7 +825,7 @@ def _solve_singlet_depth_from_a(
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     c = 299_792_458.0

@@ -19,13 +19,13 @@ cosmology_distance_duality_constraints.py
   併記：P-model固有指標 η^(P)≡d_L/((1+z)d_A) は最小で η^(P)=1
 
 出力（固定名）:
-  - output/cosmology/cosmology_distance_duality_constraints.png
-  - output/cosmology/cosmology_distance_duality_constraints_metrics.json
-  - output/cosmology/cosmology_ddr_pmodel_relation.json（P-model最小のDDR関係の固定）
-  - output/cosmology/cosmology_ddr_epsilon_reinterpretation.json（代表ε0の再解釈：張力と必要補正）
-  - output/cosmology/cosmology_ddr_pmodel_eta_constraints.json（η^(P)での再評価）
-  - output/cosmology/cosmology_ddr_pmodel_eta_constraints.png（η^(P)での再評価）
-  - output/cosmology/cosmology_ddr_pmodel_falsification_pack.json（η^(P)での反証条件パック）
+  - output/private/cosmology/cosmology_distance_duality_constraints.png
+  - output/private/cosmology/cosmology_distance_duality_constraints_metrics.json
+  - output/private/cosmology/cosmology_ddr_pmodel_relation.json（P-model最小のDDR関係の固定）
+  - output/private/cosmology/cosmology_ddr_epsilon_reinterpretation.json（代表ε0の再解釈：張力と必要補正）
+  - output/private/cosmology/cosmology_ddr_pmodel_eta_constraints.json（η^(P)での再評価）
+  - output/private/cosmology/cosmology_ddr_pmodel_eta_constraints.png（η^(P)での再評価）
+  - output/private/cosmology/cosmology_ddr_pmodel_falsification_pack.json（η^(P)での反証条件パック）
 """
 
 from __future__ import annotations
@@ -728,7 +728,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     rows = compute(constraints)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 5.3.5: Fix the P-model minimal DDR relation as a lightweight, machine-readable artifact.
@@ -1025,10 +1025,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "ddr_constraints_metrics": str(out_json).replace("\\", "/"),
             "ddr_constraints_png": str(png_path).replace("\\", "/"),
             "reach_limit_metrics": str(
-                (_ROOT / "output" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json")
+                (_ROOT / "output" / "private" / "cosmology" / "cosmology_distance_indicator_reach_limit_metrics.json")
             ).replace("\\", "/"),
             "reconnection_conditions_metrics": str(
-                (_ROOT / "output" / "cosmology" / "cosmology_ddr_reconnection_conditions_metrics.json")
+                (_ROOT / "output" / "private" / "cosmology" / "cosmology_ddr_reconnection_conditions_metrics.json")
             ).replace("\\", "/"),
         },
         "docs": {

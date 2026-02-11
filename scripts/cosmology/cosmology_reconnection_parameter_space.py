@@ -29,8 +29,8 @@ Phase 14.2（静的無限空間での再接続）向け：
   - data/cosmology/distance_duality_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_reconnection_parameter_space.png
-  - output/cosmology/cosmology_reconnection_parameter_space_metrics.json
+  - output/private/cosmology/cosmology_reconnection_parameter_space.png
+  - output/private/cosmology/cosmology_reconnection_parameter_space_metrics.json
 """
 
 from __future__ import annotations
@@ -508,7 +508,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     src = _read_json(data_path)
     constraints_raw = src.get("constraints") if isinstance(src.get("constraints"), list) else []
     ddr_sigma_policy = str(args.ddr_sigma_policy)
-    ddr_env_path = _ROOT / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
+    ddr_env_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
     ddr_env = _load_ddr_systematics_envelope(ddr_env_path) if ddr_sigma_policy == "category_sys" else {}
     constraints = [
         _apply_ddr_sigma_policy(DDRConstraint.from_json(c), policy=ddr_sigma_policy, envelope=ddr_env)
@@ -525,7 +525,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not constraints:
         raise SystemExit(f"no constraints found in: {data_path}")
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_reconnection_parameter_space.png"
     out_json = out_dir / "cosmology_reconnection_parameter_space_metrics.json"

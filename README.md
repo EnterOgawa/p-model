@@ -27,6 +27,11 @@ isolate **where strong predictions diverge** (so the model can be rejected if na
 Documents such as full manuscripts are **published separately**.
 This repo is intended to stay focused on **verification scripts and the cited outputs they produce**.
 
+## Output layout
+
+- `output/public/`: **public artifacts** (tracked in Git; intended for citation and external review)
+- `output/private/`: **local artifacts** (ignored; intermediate files and heavy builds such as HTML/DOCX)
+
 ## Notes
 
 - Large raw inputs are not stored here; scripts are expected to **fetch / cache / preprocess** as needed.

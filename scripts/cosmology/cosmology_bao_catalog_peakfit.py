@@ -16,12 +16,12 @@ AP/warping パラメータ（α, ε）をグリッドサーチし、幾何整合
 
 入力：
 - `scripts/cosmology/cosmology_bao_xi_from_catalogs.py` の出力
-  - output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json
   - 対応する .npz（xi0/xi2 + counts/xi_mu 等を含む）
 
 出力（固定名）：
-- output/cosmology/cosmology_bao_catalog_peakfit_{sample}_{caps}{_zbinonly}.png
-- output/cosmology/cosmology_bao_catalog_peakfit_{sample}_{caps}{_zbinonly}_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_peakfit_{sample}_{caps}{_zbinonly}.png
+- output/private/cosmology/cosmology_bao_catalog_peakfit_{sample}_{caps}{_zbinonly}_metrics.json
 """
 
 from __future__ import annotations
@@ -91,7 +91,7 @@ def _resolve_wsl_windows_path(p: str) -> Path:
 
 
 def _iter_metrics_files() -> Iterable[Path]:
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     yield from sorted(out_dir.glob("cosmology_bao_xi_from_catalogs_*_metrics.json"))
 
 
@@ -695,8 +695,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "covariance source: auto/diag/ross/satpathy/jackknife/rascalc/vac (default: auto). "
             "'ross' uses Ross 2016 full cov (post-recon). "
             "'satpathy' uses Satpathy 2016 full cov (pre-recon). "
-            "'jackknife' uses a per-case cov file: output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov.npz. "
-            "'rascalc' uses a per-case cov file: output/cosmology/cosmology_bao_xi_from_catalogs_{tag}__rascalc_cov.npz. "
+            "'jackknife' uses a per-case cov file: output/private/cosmology/cosmology_bao_xi_from_catalogs_{tag}__jk_cov.npz. "
+            "'rascalc' uses a per-case cov file: output/private/cosmology/cosmology_bao_xi_from_catalogs_{tag}__rascalc_cov.npz. "
             "'vac' uses a per-case projected full cov file: ...__vac_cov.npz (DESI DR1 VAC lya-correlations). "
             "Use --cov-path to override the cov npz path for jackknife/rascalc/vac."
         ),
@@ -1637,7 +1637,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     import matplotlib.pyplot as plt
 
     _set_japanese_font()
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     tag = f"{sample}_{caps}"
     if bool(args.require_zbin):
@@ -1715,7 +1715,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "domain": "cosmology",
         "step": "16.4 (BAO catalog-based smooth+peak peakfit)",
         "inputs": {
-            "glob": "output/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json",
+            "glob": "output/private/cosmology/cosmology_bao_xi_from_catalogs_*_metrics.json",
             "coordinate_spec_common": coordinate_spec_common,
             "estimator_spec_common": estimator_spec_common,
             "sample": sample,

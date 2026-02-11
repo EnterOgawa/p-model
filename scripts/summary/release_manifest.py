@@ -7,10 +7,10 @@ Phase 8 / Step 8.3（データ・コード公開）向けの “公開マニフ�
 
 目的：
 - 第三者がどのファイルを見ればよいか（成果物/入口/QC）を機械可読で固定する。
-- 「公開前に何を確認したか」を `output/summary/work_history.jsonl` に残す。
+- 「公開前に何を確認したか」を `output/private/summary/work_history.jsonl` に残す。
 
 出力：
-- `output/summary/release_manifest.json`
+- `output/private/summary/release_manifest.json`
 """
 
 from __future__ import annotations
@@ -78,7 +78,7 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
     Keep this list small and stable: publish artifacts + QC + pointers.
     """
     return {
-        "docs": [
+        "local_docs": [
             _ROOT / "doc" / "STATUS.md",
             _ROOT / "doc" / "ROADMAP.md",
             _ROOT / "doc" / "PRIMARY_SOURCES.md",
@@ -92,14 +92,14 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
             _ROOT / "doc" / "paper" / "06_uncertainty.md",
             _ROOT / "doc" / "paper" / "07_llr_appendix.md",
             _ROOT / "doc" / "paper" / "10_manuscript.md",
-            _ROOT / "doc" / "paper" / "15_short_note.md",
+            _ROOT / "doc" / "paper" / "13_part4_verification.md",
             _ROOT / "doc" / "paper" / "20_data_sources.md",
             _ROOT / "doc" / "paper" / "01_figures_index.md",
             _ROOT / "doc" / "paper" / "30_references.md",
             _ROOT / "doc" / "paper" / "40_publication_plan.md",
         ],
         "entrypoints": [
-            _ROOT / "output" / "summary" / "build_materials.bat",
+            _ROOT / "scripts" / "summary" / "build_materials.bat",
             _ROOT / "scripts" / "summary" / "paper_qc.py",
             _ROOT / "scripts" / "summary" / "paper_build.py",
             _ROOT / "scripts" / "summary" / "public_dashboard.py",
@@ -109,19 +109,24 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
             _ROOT / "scripts" / "summary" / "run_all.py",
         ],
         "publish_outputs": [
-            _ROOT / "output" / "summary" / "pmodel_paper.html",
-            _ROOT / "output" / "summary" / "pmodel_short_note.html",
-            _ROOT / "output" / "summary" / "pmodel_public_report.html",
-            _ROOT / "output" / "summary" / "paper_qc.json",
-            _ROOT / "output" / "summary" / "env_fingerprint.json",
-            _ROOT / "output" / "summary" / "paper_table1_results.json",
-            _ROOT / "output" / "summary" / "paper_table1_results.csv",
-            _ROOT / "output" / "summary" / "paper_table1_results.md",
+            _ROOT / "output" / "private" / "summary" / "pmodel_paper.html",
+            _ROOT / "output" / "private" / "summary" / "pmodel_paper_part2_astrophysics.html",
+            _ROOT / "output" / "private" / "summary" / "pmodel_paper_part3_quantum.html",
+            _ROOT / "output" / "private" / "summary" / "pmodel_paper_part4_verification.html",
+            _ROOT / "output" / "private" / "summary" / "pmodel_public_report.html",
+            _ROOT / "output" / "private" / "summary" / "paper_qc.json",
+            _ROOT / "output" / "private" / "summary" / "env_fingerprint.json",
+            _ROOT / "output" / "private" / "summary" / "paper_table1_results.json",
+            _ROOT / "output" / "private" / "summary" / "paper_table1_results.csv",
+            _ROOT / "output" / "private" / "summary" / "paper_table1_results.md",
+            _ROOT / "output" / "private" / "summary" / "paper_table1_quantum_results.json",
+            _ROOT / "output" / "private" / "summary" / "paper_table1_quantum_results.csv",
+            _ROOT / "output" / "private" / "summary" / "paper_table1_quantum_results.md",
         ],
         # Optional: generated bundles for sharing (not required for manifest ok=true).
         "release_bundles": [
-            _ROOT / "output" / "summary" / "pmodel_release_bundle_paper.zip",
-            _ROOT / "output" / "summary" / "pmodel_release_bundle_repro.zip",
+            _ROOT / "output" / "private" / "summary" / "pmodel_release_bundle_paper.zip",
+            _ROOT / "output" / "private" / "summary" / "pmodel_release_bundle_repro.zip",
         ],
     }
 
@@ -131,8 +136,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(_ROOT / "output" / "summary" / "release_manifest.json"),
-        help="output path (default: output/summary/release_manifest.json)",
+        default=str(_ROOT / "output" / "private" / "summary" / "release_manifest.json"),
+        help="output path (default: output/private/summary/release_manifest.json)",
     )
     ap.add_argument("--no-hash", action="store_true", help="skip sha256 (faster)")
     args = ap.parse_args(list(argv) if argv is not None else None)
@@ -147,7 +152,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     # Always generate a small environment fingerprint for reproducibility.
     try:
-        env_fingerprint.main(["--out-json", str(_ROOT / "output" / "summary" / "env_fingerprint.json")])
+        env_fingerprint.main(["--out-json", str(_ROOT / "output" / "private" / "summary" / "env_fingerprint.json")])
     except Exception:
         # Best-effort only; manifest will report missing files if generation failed.
         pass
@@ -160,7 +165,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         for p in paths:
             info = _file_info(p, compute_hash=compute_hash)
             items.append(info.__dict__)
-            if (group_name in {"docs", "entrypoints", "publish_outputs"}) and (not info.exists):
+            if (group_name in {"entrypoints", "publish_outputs"}) and (not info.exists):
                 missing_required.append(info.path)
         files[group_name] = items
 
@@ -174,9 +179,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         "missing_required": sorted(set(missing_required)),
         "files": files,
         "repro_commands": {
-            "build_quick": r"cmd /c output\summary\build_materials.bat quick",
-            "build_quick_nodocx": r"cmd /c output\summary\build_materials.bat quick-nodocx",
-            "build_short_note_html": "python -B scripts/summary/paper_build.py --profile short_note --mode publish --outdir output/summary --skip-docx",
+            "build_quick": r"cmd /c scripts\summary\build_materials.bat quick",
+            "build_quick_nodocx": r"cmd /c scripts\summary\build_materials.bat quick-nodocx",
+            "build_part4_verification_html": "python -B scripts/summary/paper_build.py --profile part4_verification --mode publish --outdir output/private/summary --skip-docx --skip-tables",
             "paper_qc": "python -B scripts/summary/paper_qc.py",
             "release_manifest_fast": "python -B scripts/summary/release_manifest.py --no-hash",
             "release_bundle_paper": "python -B scripts/summary/release_bundle.py --mode paper --no-hash",

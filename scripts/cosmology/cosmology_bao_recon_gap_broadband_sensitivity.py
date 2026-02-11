@@ -10,8 +10,8 @@ Ross 2016 post-recon の ξ2 ギャップについて、
 に対する「broadband吸収（A0+A1/r+A2/r^2）」の結論が頑健かを確認する。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_recon_gap_broadband_sensitivity.png
-- output/cosmology/cosmology_bao_recon_gap_broadband_sensitivity_metrics.json
+- output/private/cosmology/cosmology_bao_recon_gap_broadband_sensitivity.png
+- output/private/cosmology/cosmology_bao_recon_gap_broadband_sensitivity_metrics.json
 
 注意：
 - Corrfunc は使わない（既存の catalog-based recon NPZ と Ross 公開ファイルのみを使用）。
@@ -146,12 +146,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_broadband_sensitivity.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_broadband_sensitivity.png"),
         help="output png path",
     )
     ap.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_recon_gap_broadband_sensitivity_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_broadband_sensitivity_metrics.json"),
         help="output metrics json path",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
@@ -189,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
     used_inputs: list[str] = []
     for zbin in zbins:
         b = zbin_to_b[zbin]
-        cat_npz = _ROOT / "output" / "cosmology" / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
+        cat_npz = _ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
         if not cat_npz.exists():
             raise SystemExit(f"missing catalog recon npz: {cat_npz}")
         used_inputs.append(str(cat_npz))

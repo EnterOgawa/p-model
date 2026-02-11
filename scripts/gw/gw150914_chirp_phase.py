@@ -1400,11 +1400,11 @@ def main() -> int:
     event_slug = event_name.lower()
     data_dir = root / "data" / "gw" / event_slug
 
-    default_png = root / "output" / "gw" / f"{event_slug}_chirp_phase.png"
-    default_png_public = root / "output" / "gw" / f"{event_slug}_chirp_phase_public.png"
-    default_wave_png = root / "output" / "gw" / f"{event_slug}_waveform_compare.png"
-    default_wave_png_public = root / "output" / "gw" / f"{event_slug}_waveform_compare_public.png"
-    default_json = root / "output" / "gw" / f"{event_slug}_chirp_phase_metrics.json"
+    default_png = root / "output" / "private" / "gw" / f"{event_slug}_chirp_phase.png"
+    default_png_public = root / "output" / "private" / "gw" / f"{event_slug}_chirp_phase_public.png"
+    default_wave_png = root / "output" / "private" / "gw" / f"{event_slug}_waveform_compare.png"
+    default_wave_png_public = root / "output" / "private" / "gw" / f"{event_slug}_waveform_compare_public.png"
+    default_json = root / "output" / "private" / "gw" / f"{event_slug}_chirp_phase_metrics.json"
 
     out_png = Path(args.out_png) if args.out_png else default_png
     out_png_public = Path(args.out_png_public) if args.out_png_public else default_png_public

@@ -91,7 +91,7 @@ def _status_from_score(score: Optional[float]) -> str:
 
 
 def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
-    table1_json = root / "output" / "summary" / "paper_table1_quantum_results.json"
+    table1_json = root / "output" / "private" / "summary" / "paper_table1_quantum_results.json"
     payload: Dict[str, Any] = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "profile": "part3_quantum",
@@ -141,7 +141,7 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
 
 def main() -> int:
     root = _repo_root()
-    out_dir = root / "output" / "summary"
+    out_dir = root / "output" / "private" / "summary"
     default_json = out_dir / "quantum_scoreboard.json"
     default_png = out_dir / "quantum_scoreboard.png"
 
@@ -172,7 +172,9 @@ def main() -> int:
             {
                 "event_type": "quantum_scoreboard",
                 "argv": list(sys.argv),
-                "inputs": {"paper_table1_quantum_results_json": root / "output" / "summary" / "paper_table1_quantum_results.json"},
+                "inputs": {
+                    "paper_table1_quantum_results_json": root / "output" / "private" / "summary" / "paper_table1_quantum_results.json"
+                },
                 "outputs": {"scoreboard_png": out_png, "scoreboard_json": out_json},
             }
         )
@@ -186,4 +188,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

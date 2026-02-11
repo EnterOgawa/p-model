@@ -179,7 +179,7 @@ def _ref_curve_from_ioffe(*, t_k: np.ndarray, obj: dict[str, Any]) -> np.ndarray
 
 
 def main() -> None:
-    out_dir = _ROOT / "output" / "quantum"
+    out_dir = _ROOT / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     ioffe = _load_ioffe_elastic_constants(_ROOT)

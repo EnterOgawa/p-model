@@ -312,7 +312,7 @@ def _fit_effective_range_expansion(
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Exact SI constants (for conversion only).

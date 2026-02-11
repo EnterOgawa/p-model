@@ -162,7 +162,7 @@ def _collect_points(
     wave_franges: List[Optional[Tuple[float, float]]] = []
     match_omitted_by_reason: Dict[str, int] = {}
     for name, slug in events:
-        path = root / "output" / "gw" / f"{slug}_chirp_phase_metrics.json"
+        path = root / "output" / "private" / "gw" / f"{slug}_chirp_phase_metrics.json"
         if not path.exists():
             continue
         j = _read_json(path)
@@ -343,7 +343,7 @@ def _plot_placeholder(out_png: Path, *, title: str) -> None:
     ax.text(
         0.5,
         0.4,
-        "出力未生成: output/gw/*_chirp_phase_metrics.json が見つかりません。\n"
+        "出力未生成: output/private/gw/*_chirp_phase_metrics.json が見つかりません。\n"
         "先に scripts/gw/gw150914_chirp_phase.py を実行してください。",
         ha="center",
         va="center",
@@ -378,13 +378,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--slugs",
         type=str,
         default=",".join([s for _, s in defaults]),
-        help="Comma-separated slugs for output/gw/*_chirp_phase_metrics.json (must match --events order).",
+        help="Comma-separated slugs for output/private/gw/*_chirp_phase_metrics.json (must match --events order).",
     )
     ap.add_argument(
         "--outdir",
         type=str,
-        default="output/gw",
-        help="Output directory (default: output/gw).",
+        default="output/private/gw",
+        help="Output directory (default: output/private/gw).",
     )
     ap.add_argument(
         "--prefix",

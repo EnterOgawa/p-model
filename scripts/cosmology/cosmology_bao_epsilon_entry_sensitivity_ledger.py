@@ -13,8 +13,8 @@ BAO一次統計 ε（AP warping）の「入口（手続きノブ）」がどの�
   1つの JSON に集約する。
 
 出力（固定）：
-- output/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.json
-- output/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.png
+- output/private/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.json
+- output/private/cosmology/cosmology_bao_epsilon_entry_sensitivity_ledger.png
 
 注：
 - 本スクリプトは「再計算」ではなく「既存metricsの統合」である。
@@ -434,12 +434,12 @@ def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument(
         "--weight-scheme-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json"),
         help="Path to cosmology_bao_catalog_weight_scheme_sensitivity_metrics.json",
     )
     p.add_argument(
         "--random-max-rows-metrics",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json"),
         help="Path to cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json",
     )
     p.add_argument(
@@ -464,17 +464,17 @@ def main() -> None:
     )
     p.add_argument(
         "--desi-promotion-check",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json"),
         help="Path to cosmology_desi_dr1_bao_promotion_check.json",
     )
     p.add_argument(
         "--out-json",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_epsilon_entry_sensitivity_ledger.json"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_epsilon_entry_sensitivity_ledger.json"),
         help="Output json path",
     )
     p.add_argument(
         "--out-png",
-        default=str(_ROOT / "output" / "cosmology" / "cosmology_bao_epsilon_entry_sensitivity_ledger.png"),
+        default=str(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_epsilon_entry_sensitivity_ledger.png"),
         help="Output png path",
     )
     args = p.parse_args()

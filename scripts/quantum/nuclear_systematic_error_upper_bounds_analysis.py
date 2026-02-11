@@ -124,7 +124,7 @@ def _build_figure(
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_stat_summary = out_dir / "nuclear_statistical_error_propagation_output_summary.csv"

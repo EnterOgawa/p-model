@@ -17,9 +17,9 @@ Phase 16（宇宙論）/ Step 16.4（BAO一次統計の再導出）:
   （既定：`data/cosmology/boss_dr12v5_lss/manifest.json`、切替：`--data-dir`）
 
 出力（固定名）:
-  - output/cosmology/cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}.png
-  - output/cosmology/cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_metrics.json
-  - output/cosmology/cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}.npz
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}.png
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_metrics.json
+  - output/private/cosmology/cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}.npz
 
 依存：
 - Corrfunc（Linux/WSL推奨）。Windows単体では Corrfunc が動かないため、
@@ -2887,7 +2887,7 @@ def main(argv: list[str] | None = None) -> int:
             # Fall back to per-cap z_eff inside reconstruction.
             pass
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     s_bins_file, edges = _make_s_bins_file(out_dir, s_min=float(args.s_min), s_max=float(args.s_max), s_step=float(args.s_step))
 

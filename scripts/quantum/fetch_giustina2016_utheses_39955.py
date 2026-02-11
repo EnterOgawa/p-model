@@ -118,7 +118,7 @@ def main() -> None:
     args = ap.parse_args()
 
     src_dir = ROOT / "data" / "quantum" / "sources" / "giustina2016_utheses_39955"
-    out_dir = ROOT / "output" / "quantum" / "bell"
+    out_dir = ROOT / "output" / "public" / "quantum" / "bell"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     specs = [

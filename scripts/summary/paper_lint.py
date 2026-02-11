@@ -12,7 +12,7 @@ Phase 8 / Step 8.2（本論文）向けの “整合チェック”。
 
 出力：
 - 標準出力にチェック結果を表示
-- （任意）output/summary/work_history.jsonl に実行ログを追記
+- （任意）output/private/summary/work_history.jsonl に実行ログを追記
 """
 
 from __future__ import annotations
@@ -210,7 +210,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument(
         "--no-log",
         action="store_true",
-        help="do not append an event to output/summary/work_history.jsonl",
+        help="do not append an event to output/private/summary/work_history.jsonl",
     )
 
     args = parser.parse_args(list(argv) if argv is not None else None)

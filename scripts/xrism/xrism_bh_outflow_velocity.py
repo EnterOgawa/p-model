@@ -622,7 +622,7 @@ def _plot_fit(out_png: Path, *, energy: np.ndarray, counts: np.ndarray, model: n
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
-    p.add_argument("--targets", default=str(_ROOT / "output" / "xrism" / "xrism_targets_catalog.csv"))
+    p.add_argument("--targets", default=str(_ROOT / "output" / "private" / "xrism" / "xrism_targets_catalog.csv"))
     p.add_argument("--obsid", action="append", default=[], help="override: obsid(s) to analyze (repeatable)")
     p.add_argument("--role", default="bh_agn", help="targets role to include when --obsid is not provided")
     p.add_argument("--min-counts", type=float, default=30.0, help="min counts per rebinned bin (base)")
@@ -642,7 +642,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=1.0,
         help="tau for sys weighting by fit quality: w=exp(-(chi2_red-min_chi2_red)/tau) over detected fits (default: 1.0)",
     )
-    p.add_argument("--out-dir", default=str(_ROOT / "output" / "xrism"))
+    p.add_argument("--out-dir", default=str(_ROOT / "output" / "private" / "xrism"))
     p.add_argument("--data-root", default=str(_ROOT / "data" / "xrism" / "heasarc" / "obs"))
     args = p.parse_args(list(argv) if argv is not None else None)
 

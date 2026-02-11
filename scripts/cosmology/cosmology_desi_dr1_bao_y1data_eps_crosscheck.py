@@ -17,10 +17,10 @@ F_AP=D_M/D_H を組み立て、AP warping ε を計算する。
   - 入力:
     - data/cosmology/desi_dr1_bao_y1data.json
     - data/cosmology/desi_dr1_bao_bao_data.json（任意：公式 mean/cov）
-    - output/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__*.json（metrics）
+    - output/private/cosmology/cosmology_bao_catalog_peakfit_lrg_combined__*.json（metrics）
   - 出力:
-    - output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}.png
-    - output/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}_metrics.json
+    - output/private/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}.png
+    - output/private/cosmology/cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}_metrics.json
 """
 
 from __future__ import annotations
@@ -330,7 +330,7 @@ def main() -> int:
     if missing:
         raise SystemExit(f"y1data missing tracers: {missing}")
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_tag = str(args.out_tag).strip() or "none"
     out_png = out_dir / f"cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}.png"

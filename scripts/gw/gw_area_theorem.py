@@ -347,7 +347,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     root = _repo_root()
     data_dir = root / "data" / "gw" / str(args.slug)
-    out_dir = root / "output" / "gw"
+    out_dir = root / "output" / "private" / "gw"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     out_json = out_dir / f"{args.slug}_area_theorem_test.json"

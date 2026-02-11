@@ -464,37 +464,37 @@ def main() -> int:
     ap.add_argument(
         "--frozen",
         type=str,
-        default=str(root / "output" / "theory" / "frozen_parameters.json"),
+        default=str(root / "output" / "private" / "theory" / "frozen_parameters.json"),
         help="Path to frozen_parameters.json (beta freeze policy).",
     )
     ap.add_argument(
         "--eht",
         type=str,
-        default=str(root / "output" / "eht" / "eht_shadow_compare.json"),
+        default=str(root / "output" / "private" / "eht" / "eht_shadow_compare.json"),
         help="Path to eht_shadow_compare.json (Phase 4/7 inputs).",
     )
     ap.add_argument(
         "--kappa-error-budget",
         type=str,
-        default=str(root / "output" / "eht" / "eht_kappa_error_budget.json"),
-        help="Optional κ error budget (output/eht/eht_kappa_error_budget.json).",
+        default=str(root / "output" / "private" / "eht" / "eht_kappa_error_budget.json"),
+        help="Optional κ error budget (output/private/eht/eht_kappa_error_budget.json).",
     )
     ap.add_argument(
         "--delta",
         type=str,
-        default=str(root / "output" / "theory" / "delta_saturation_constraints.json"),
+        default=str(root / "output" / "private" / "theory" / "delta_saturation_constraints.json"),
         help="Path to delta_saturation_constraints.json.",
     )
     ap.add_argument(
         "--out-json",
         type=str,
-        default=str(root / "output" / "summary" / "decisive_falsification.json"),
+        default=str(root / "output" / "private" / "summary" / "decisive_falsification.json"),
         help="Output JSON path (fixed name recommended).",
     )
     ap.add_argument(
         "--out-png",
         type=str,
-        default=str(root / "output" / "summary" / "decisive_falsification.png"),
+        default=str(root / "output" / "private" / "summary" / "decisive_falsification.png"),
         help="Output PNG path (fixed name recommended).",
     )
     args = ap.parse_args()

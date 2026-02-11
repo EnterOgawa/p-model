@@ -13,10 +13,10 @@ DESI DR1 BAO 論文（VI）の DV-only 公開距離制約（Y1data: D_V/r_d）�
 入出力:
   - 入力:
     - data/cosmology/desi_dr1_bao_y1data.json
-    - output/cosmology/cosmology_bao_catalog_peakfit_*_metrics.json
+    - output/private/cosmology/cosmology_bao_catalog_peakfit_*_metrics.json
   - 出力:
-    - output/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck__{out_tag}.png
-    - output/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck__{out_tag}_metrics.json
+    - output/private/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck__{out_tag}.png
+    - output/private/cosmology/cosmology_desi_dr1_bao_y1data_alpha_crosscheck__{out_tag}_metrics.json
 """
 
 from __future__ import annotations
@@ -302,7 +302,7 @@ def main(argv: List[str] | None = None) -> int:
                 "z_score_combined": float(z_score_combined),
             }
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_tag = str(args.out_tag)
     out_png = out_dir / f"cosmology_desi_dr1_bao_y1data_alpha_crosscheck__{out_tag}.png"

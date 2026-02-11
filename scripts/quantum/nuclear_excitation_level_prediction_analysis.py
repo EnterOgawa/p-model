@@ -149,7 +149,7 @@ def _r42_class(value: float) -> str:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     spec_json = root / "data" / "quantum" / "sources" / "nndc_nudat3_primary_secondary" / "extracted_spectroscopy.json"

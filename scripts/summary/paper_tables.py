@@ -6,16 +6,16 @@ paper_tables.py
 Phase 8 / Step 8.2（本論文）向けに、`output/` で確定した検証結果から「論文用サマリ表」を生成する。
 
 生成物（固定）:
-  - output/summary/paper_table1_results.json
-  - output/summary/paper_table1_results.csv
-  - output/summary/paper_table1_results.md
-  - output/summary/paper_table1_quantum_results.json
-  - output/summary/paper_table1_quantum_results.csv
-  - output/summary/paper_table1_quantum_results.md
+  - output/private/summary/paper_table1_results.json
+  - output/private/summary/paper_table1_results.csv
+  - output/private/summary/paper_table1_results.md
+  - output/private/summary/paper_table1_quantum_results.json
+  - output/private/summary/paper_table1_quantum_results.csv
+  - output/private/summary/paper_table1_quantum_results.md
 
 方針:
   - “本文参照の固定パス” を優先する（図と同様、表も差し替え運用にする）。
-  - 入力は `output/<topic>/` からのみ読み、計算の再実行は行わない。
+  - 入力は `output/private/<topic>/` と `output/public/<topic>/` からのみ読み、計算の再実行は行わない。
 """
 
 from __future__ import annotations
@@ -35,6 +35,9 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 from scripts.summary import worklog
+
+_OUT_PUBLIC = _ROOT / "output" / "public"
+_OUT_PRIVATE = _ROOT / "output" / "private"
 
 
 def _repo_root() -> Path:
@@ -172,7 +175,7 @@ def _write_markdown(path: Path, *, title: str, rows: Sequence[TableRow], notes: 
 
 
 def _load_llr_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "llr" / "batch" / "llr_batch_summary.json"
+    path = _OUT_PRIVATE / "llr" / "batch" / "llr_batch_summary.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -200,7 +203,7 @@ def _load_llr_rows(root: Path) -> List[TableRow]:
     ]
 
     # Optional: include NGLR-1 (new reflector target) if available in metrics CSV.
-    metrics_path = root / "output" / "llr" / "batch" / "llr_batch_metrics.csv"
+    metrics_path = _OUT_PRIVATE / "llr" / "batch" / "llr_batch_metrics.csv"
     if metrics_path.exists():
         import statistics
 
@@ -249,7 +252,7 @@ def _load_llr_rows(root: Path) -> List[TableRow]:
 
 
 def _load_cassini_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "cassini" / "cassini_fig2_metrics.csv"
+    path = _OUT_PRIVATE / "cassini" / "cassini_fig2_metrics.csv"
     if not path.exists():
         return []
     rows: List[Dict[str, str]] = []
@@ -292,7 +295,7 @@ def _load_cassini_rows(root: Path) -> List[TableRow]:
 
 
 def _load_viking_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "viking" / "viking_shapiro_result.csv"
+    path = _OUT_PRIVATE / "viking" / "viking_shapiro_result.csv"
     if not path.exists():
         return []
 
@@ -333,7 +336,7 @@ def _load_viking_rows(root: Path) -> List[TableRow]:
 
 
 def _load_mercury_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "mercury" / "mercury_precession_metrics.json"
+    path = _OUT_PRIVATE / "mercury" / "mercury_precession_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -361,7 +364,7 @@ def _load_mercury_rows(root: Path) -> List[TableRow]:
 
 
 def _load_gps_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "gps" / "gps_compare_metrics.json"
+    path = _OUT_PRIVATE / "gps" / "gps_compare_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -398,7 +401,7 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
 
     Source: output/theory/solar_light_deflection_metrics.json (fixed-name artifact).
     """
-    path = root / "output" / "theory" / "solar_light_deflection_metrics.json"
+    path = _OUT_PRIVATE / "theory" / "solar_light_deflection_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -483,7 +486,7 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
 
 
 def _load_eht_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "eht" / "eht_shadow_compare.json"
+    path = _OUT_PRIVATE / "eht" / "eht_shadow_compare.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -549,7 +552,7 @@ def _load_eht_rows(root: Path) -> List[TableRow]:
 
 
 def _load_pulsar_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
+    path = _OUT_PRIVATE / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -650,7 +653,7 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
 
     out: List[TableRow] = []
     for name, slug in events:
-        path = root / "output" / "gw" / f"{slug}_chirp_phase_metrics.json"
+        path = _OUT_PRIVATE / "gw" / f"{slug}_chirp_phase_metrics.json"
         if not path.exists():
             continue
         j = _read_json(path)
@@ -776,7 +779,7 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
 
 
 def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "theory" / "gravitational_redshift_experiments.json"
+    path = _OUT_PRIVATE / "theory" / "gravitational_redshift_experiments.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -826,7 +829,7 @@ def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
 
 
 def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    path = _OUT_PRIVATE / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -868,7 +871,7 @@ def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
     delta_mu_z1 = _safe_float(r.get("delta_distance_modulus_mag_z1"))
     tau_z1 = _safe_float(r.get("tau_equivalent_dimming_z1"))
     # Optional: category systematic width (sigma_cat) from the fixed envelope metrics (Step 16.5.3/16.5.4).
-    sys_path = root / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
+    sys_path = _OUT_PRIVATE / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
     z_pbg_sys = None
     sigma_cat = None
     min_no_bao_abs_z = None
@@ -985,7 +988,7 @@ def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
 
 
 def _load_cosmology_tolman_surface_brightness_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
+    path = _OUT_PRIVATE / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -1071,7 +1074,7 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
 
     # SN time dilation (spectral aging): compare to background-P minimal prediction p_t=1.
-    p_sn = root / "output" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json"
+    p_sn = _OUT_PRIVATE / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json"
     if p_sn.exists():
         try:
             j = _read_json(p_sn)
@@ -1109,7 +1112,7 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
             pass
 
     # CMB temperature scaling: compare to background-P minimal prediction p_T=1 (β_T=0).
-    p_tz = root / "output" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
+    p_tz = _OUT_PRIVATE / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
     if p_tz.exists():
         try:
             j = _read_json(p_tz)
@@ -1156,7 +1159,7 @@ def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
     This is treated as a reference/screening row (not sigma-evaluable) so Table 1 can show
     the reproducible entry point and the current 'release wait' blocker.
     """
-    path = root / "output" / "cosmology" / "jwst_spectra_integration_metrics.json"
+    path = _OUT_PRIVATE / "cosmology" / "jwst_spectra_integration_metrics.json"
     if not path.exists():
         return []
     try:
@@ -1221,7 +1224,7 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
     - These rows are currently treated as screening (not sigma-evaluable) unless explicitly adopted
       in `output/xrism/xrism_integration_metrics.json`.
     """
-    path = root / "output" / "xrism" / "xrism_integration_metrics.json"
+    path = _OUT_PRIVATE / "xrism" / "xrism_integration_metrics.json"
     if not path.exists():
         return []
 
@@ -1468,7 +1471,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                         pass
 
                 # Cross-check: P(k) multipoles peakfit (Beutler et al.; window-convolved).
-                pk_post_path = root / "output" / "cosmology" / "cosmology_bao_pk_multipole_peakfit_window_metrics.json"
+                pk_post_path = _OUT_PRIVATE / "cosmology" / "cosmology_bao_pk_multipole_peakfit_window_metrics.json"
                 if pk_post_path.exists():
                     try:
                         jk = _read_json(pk_post_path)
@@ -1518,7 +1521,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 )
 
     # Phase 4.5B.21 extension: eBOSS DR16 LRGpCMASS (recon) screening (diag cov).
-    eboss_path = root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_combined_metrics.json"
+    eboss_path = _OUT_PRIVATE / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_combined_metrics.json"
     if eboss_path.exists():
         try:
             je = _read_json(eboss_path)
@@ -1571,7 +1574,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 )
 
     # Phase 4.5B.21.4 extension: eBOSS DR16 QSO (z~1.5) screening (diag cov).
-    eboss_qso_path = root / "output" / "cosmology" / "cosmology_bao_catalog_peakfit_qso_combined_metrics.json"
+    eboss_qso_path = _OUT_PRIVATE / "cosmology" / "cosmology_bao_catalog_peakfit_qso_combined_metrics.json"
     if eboss_qso_path.exists():
         try:
             jq = _read_json(eboss_qso_path)
@@ -1810,7 +1813,7 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
 
 
 def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "theory" / "frame_dragging_experiments.json"
+    path = _OUT_PRIVATE / "theory" / "frame_dragging_experiments.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -1881,7 +1884,7 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
 
 
 def _load_delta_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "theory" / "delta_saturation_constraints.json"
+    path = _OUT_PRIVATE / "theory" / "delta_saturation_constraints.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -1919,7 +1922,7 @@ def _load_delta_rows(root: Path) -> List[TableRow]:
 
 
 def _load_quantum_bell_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "quantum" / "bell" / "table1_row.json"
+    path = _OUT_PUBLIC / "quantum" / "bell" / "table1_row.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -1946,7 +1949,7 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
     rows: List[TableRow] = []
 
     # COW (neutron interferometry) — magnitude/scaling check.
-    path_cow = root / "output" / "quantum" / "cow_phase_shift_metrics.json"
+    path_cow = _OUT_PUBLIC / "quantum" / "cow_phase_shift_metrics.json"
     if path_cow.exists():
         j = _read_json(path_cow)
         res = j.get("results") or {}
@@ -1975,7 +1978,7 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         )
 
     # Atom interferometer gravimeter — magnitude/scaling check.
-    path_ai = root / "output" / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json"
+    path_ai = _OUT_PUBLIC / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json"
     if path_ai.exists():
         j = _read_json(path_ai)
         res = j.get("results") or {}
@@ -2001,7 +2004,7 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         )
 
     # Optical clock chronometric leveling — consistency check vs geodesy.
-    path_clock = root / "output" / "quantum" / "optical_clock_chronometric_leveling_metrics.json"
+    path_clock = _OUT_PUBLIC / "quantum" / "optical_clock_chronometric_leveling_metrics.json"
     if path_clock.exists():
         j = _read_json(path_clock)
         d = j.get("derived") or {}
@@ -2032,7 +2035,7 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
 def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
     rows: List[TableRow] = []
 
-    path_ds = root / "output" / "quantum" / "electron_double_slit_interference_metrics.json"
+    path_ds = _OUT_PUBLIC / "quantum" / "electron_double_slit_interference_metrics.json"
     if path_ds.exists():
         j = _read_json(path_ds)
         d = j.get("derived") or {}
@@ -2056,7 +2059,7 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
             )
         )
 
-    path_alpha = root / "output" / "quantum" / "de_broglie_precision_alpha_consistency_metrics.json"
+    path_alpha = _OUT_PUBLIC / "quantum" / "de_broglie_precision_alpha_consistency_metrics.json"
     if path_alpha.exists():
         j = _read_json(path_alpha)
         d = j.get("derived") or {}
@@ -2085,7 +2088,7 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
 
 
 def _load_quantum_decoherence_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "quantum" / "gravity_induced_decoherence_metrics.json"
+    path = _OUT_PUBLIC / "quantum" / "gravity_induced_decoherence_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -2122,7 +2125,7 @@ def _load_quantum_decoherence_rows(root: Path) -> List[TableRow]:
 
 
 def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "quantum" / "photon_quantum_interference_metrics.json"
+    path = _OUT_PUBLIC / "quantum" / "photon_quantum_interference_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -2184,7 +2187,7 @@ def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
 
 
 def _load_quantum_qed_vacuum_rows(root: Path) -> List[TableRow]:
-    path = root / "output" / "quantum" / "qed_vacuum_precision_metrics.json"
+    path = _OUT_PUBLIC / "quantum" / "qed_vacuum_precision_metrics.json"
     if not path.exists():
         return []
     j = _read_json(path)
@@ -2321,7 +2324,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
         )
 
     row_h = build_row(
-        path=root / "output" / "quantum" / "atomic_hydrogen_baseline_metrics.json",
+        path=_OUT_PUBLIC / "quantum" / "atomic_hydrogen_baseline_metrics.json",
         observable="H I 遷移波長（vacuum）",
         data="NIST ASD（H I）",
         name_map={
@@ -2335,7 +2338,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
         out.append(row_h)
 
     # Hydrogen ground-state hyperfine (21 cm) benchmark.
-    path_hf = root / "output" / "quantum" / "atomic_hydrogen_hyperfine_baseline_metrics.json"
+    path_hf = _OUT_PUBLIC / "quantum" / "atomic_hydrogen_hyperfine_baseline_metrics.json"
     if path_hf.exists():
         j_hf = _read_json(path_hf)
         hf = j_hf.get("hyperfine") if isinstance(j_hf.get("hyperfine"), dict) else None
@@ -2368,7 +2371,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
                 )
 
     row_he = build_row(
-        path=root / "output" / "quantum" / "atomic_helium_baseline_metrics.json",
+        path=_OUT_PUBLIC / "quantum" / "atomic_helium_baseline_metrics.json",
         observable="He I 遷移波長（vacuum）",
         data="NIST ASD（He I）",
         name_map={
@@ -2382,7 +2385,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
         out.append(row_he)
 
     def add_diatomic_row(*, slug: str, label: str) -> None:
-        path = root / "output" / "quantum" / f"molecular_{slug}_baseline_metrics.json"
+        path = _OUT_PUBLIC / "quantum" / f"molecular_{slug}_baseline_metrics.json"
         if not path.exists():
             return
         j = _read_json(path)
@@ -2445,7 +2448,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
     add_diatomic_row(slug="d2", label="D2")
 
     # Dissociation enthalpy (298 K) from thermochemistry (independent baseline vs spectroscopic constants).
-    path_diss = root / "output" / "quantum" / "molecular_dissociation_thermochemistry_metrics.json"
+    path_diss = _OUT_PUBLIC / "quantum" / "molecular_dissociation_thermochemistry_metrics.json"
     if path_diss.exists():
         j = _read_json(path_diss)
         rows = j.get("rows") if isinstance(j.get("rows"), list) else []
@@ -2474,7 +2477,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
             )
 
     # Spectroscopic dissociation energy D0 (0 K; independent baseline vs 298 K thermochemistry).
-    path_d0 = root / "output" / "quantum" / "molecular_dissociation_d0_spectroscopic_metrics.json"
+    path_d0 = _OUT_PUBLIC / "quantum" / "molecular_dissociation_d0_spectroscopic_metrics.json"
     if path_d0.exists():
         j = _read_json(path_d0)
         rows = j.get("rows") if isinstance(j.get("rows"), list) else []
@@ -2511,7 +2514,7 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
             )
 
     # Molecular line lists: representative transitions (selected objectively as top-N by Einstein A).
-    path_exomol = root / "output" / "quantum" / "molecular_transitions_exomol_baseline_metrics.json"
+    path_exomol = _OUT_PUBLIC / "quantum" / "molecular_transitions_exomol_baseline_metrics.json"
     if path_exomol.exists():
         j = _read_json(path_exomol)
         datasets = j.get("datasets") if isinstance(j.get("datasets"), list) else []
@@ -2597,7 +2600,7 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     NOTE: Keep this row citation-key-free so that "データ出典/参考文献" stays filtered to citations
     actually used in the paper body.
     """
-    path_canonical = root / "output" / "quantum" / "nuclear_effective_potential_canonical_metrics.json"
+    path_canonical = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_canonical_metrics.json"
     path_barrier_tail_kq_v2t = (
         root
         / "output"
@@ -2616,15 +2619,15 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
         / "quantum"
         / "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_metrics.json"
     )
-    path_repulsive = root / "output" / "quantum" / "nuclear_effective_potential_repulsive_core_two_range_metrics.json"
-    path_two_ar = root / "output" / "quantum" / "nuclear_effective_potential_two_range_fit_as_rs_metrics.json"
-    path_two = root / "output" / "quantum" / "nuclear_effective_potential_two_range_metrics.json"
-    path_finite = root / "output" / "quantum" / "nuclear_effective_potential_finite_core_well_metrics.json"
-    path_core = root / "output" / "quantum" / "nuclear_effective_potential_core_well_metrics.json"
-    path_sq = root / "output" / "quantum" / "nuclear_effective_potential_square_well_metrics.json"
-    path_falsification_pack = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.json"
-    path_wave_interface = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_interface_metrics.json"
-    path_wave_all_nuclei = root / "output" / "quantum" / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json"
+    path_repulsive = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_repulsive_core_two_range_metrics.json"
+    path_two_ar = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_two_range_fit_as_rs_metrics.json"
+    path_two = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_two_range_metrics.json"
+    path_finite = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_finite_core_well_metrics.json"
+    path_core = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_core_well_metrics.json"
+    path_sq = _OUT_PUBLIC / "quantum" / "nuclear_effective_potential_square_well_metrics.json"
+    path_falsification_pack = _OUT_PUBLIC / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.json"
+    path_wave_interface = _OUT_PUBLIC / "quantum" / "nuclear_binding_energy_frequency_mapping_interface_metrics.json"
+    path_wave_all_nuclei = _OUT_PUBLIC / "quantum" / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json"
     prefer_canonical = False
     if path_canonical.exists():
         try:
@@ -3358,18 +3361,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument(
         "--out-dir",
         default=None,
-        help="Override output directory (default: output/summary).",
+        help="Override output directory (default: output/private/summary).",
     )
     args = parser.parse_args(argv)
 
     root = _repo_root()
-    out_dir = Path(args.out_dir) if args.out_dir else (root / "output" / "summary")
+    out_dir = Path(args.out_dir) if args.out_dir else (root / "output" / "private" / "summary")
     out_dir.mkdir(parents=True, exist_ok=True)
 
     rows = build_table1_rows(root)
     rows_quantum = build_table1_quantum_rows(root)
     frozen_note = "βの既定値は 1.0（PPN: (1+γ)=2β）とする。"
-    frozen_path = root / "output" / "theory" / "frozen_parameters.json"
+    frozen_path = _OUT_PRIVATE / "theory" / "frozen_parameters.json"
     if frozen_path.exists():
         try:
             fj = _read_json(frozen_path)

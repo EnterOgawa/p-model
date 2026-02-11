@@ -14,8 +14,8 @@ catalog-based ξℓ（Corrfunc: galaxy+random）において、random カタロ�
   reconstruction 自前化（Phase B）で更新される。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity.png
-- output/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity.png
+- output/private/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json
 """
 
 from __future__ import annotations
@@ -249,27 +249,27 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="BAO catalog-based ε sensitivity to random max_rows.")
     ap.add_argument(
         "--published-post",
-        default="output/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
+        default="output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
         help="published post-recon multipoles peakfit (Ross)",
     )
     ap.add_argument(
         "--catalog-baseline",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
         help="catalog peakfit metrics (baseline; out_tag=none)",
     )
     ap.add_argument(
         "--catalog-alt",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__rnd_prefix_500k_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__rnd_prefix_500k_metrics.json",
         help="catalog peakfit metrics (alt; e.g. random prefix 500k)",
     )
     ap.add_argument(
         "--out-png",
-        default="output/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity.png",
+        default="output/private/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity.png",
         help="output png",
     )
     ap.add_argument(
         "--out-json",
-        default="output/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_random_max_rows_sensitivity_metrics.json",
         help="output metrics json",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

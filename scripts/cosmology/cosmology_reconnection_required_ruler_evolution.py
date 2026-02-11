@@ -41,14 +41,14 @@ Step 14.2.2（一次ソースで拘束を追加）:
   - （任意）data/cosmology/cmb_temperature_scaling_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_reconnection_required_ruler_evolution.png
-  - output/cosmology/cosmology_reconnection_required_ruler_evolution_metrics.json
-  - output/cosmology/cosmology_reconnection_required_ruler_evolution_independent.png
-  - output/cosmology/cosmology_reconnection_required_ruler_evolution_independent_metrics.json
-  - output/cosmology/cosmology_bao_scaled_distance_fit.png
-  - output/cosmology/cosmology_bao_scaled_distance_fit_metrics.json
-  - output/cosmology/cosmology_bao_scaled_distance_fit_independent.png
-  - output/cosmology/cosmology_bao_scaled_distance_fit_independent_metrics.json
+  - output/private/cosmology/cosmology_reconnection_required_ruler_evolution.png
+  - output/private/cosmology/cosmology_reconnection_required_ruler_evolution_metrics.json
+  - output/private/cosmology/cosmology_reconnection_required_ruler_evolution_independent.png
+  - output/private/cosmology/cosmology_reconnection_required_ruler_evolution_independent_metrics.json
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit.png
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_metrics.json
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_independent.png
+  - output/private/cosmology/cosmology_bao_scaled_distance_fit_independent_metrics.json
 """
 
 from __future__ import annotations
@@ -129,7 +129,7 @@ def _optional_bool(j: Dict[str, Any], key: str) -> Optional[bool]:
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     """
     Load id -> {sigma_total, sigma_sys_category, category} from
-    `output/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json`.
+    `output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json`.
 
     This captures category-level model spread as a systematic-width proxy (σ_cat).
     """
@@ -1258,7 +1258,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     ddr_rows = [DDRConstraint.from_json(x) for x in (ddr_raw.get("constraints") or []) if isinstance(x, dict)]
     ddr_sigma_policy = str(args.ddr_sigma_policy)
-    ddr_env_path = _ROOT / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
+    ddr_env_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
     ddr_env = _load_ddr_systematics_envelope(ddr_env_path) if ddr_sigma_policy == "category_sys" else {}
     ddr_rows = [_apply_ddr_sigma_policy(d, policy=ddr_sigma_policy, envelope=ddr_env) for d in ddr_rows]
     applied_ddr_sigma_count = len([d for d in ddr_rows if d.sigma_policy == "category_sys"])
@@ -1282,7 +1282,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     bao_rows = sorted(bao_rows, key=lambda r: r.z_eff)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     bao_fit = _fit_bao_ruler_evolution(bao_rows)

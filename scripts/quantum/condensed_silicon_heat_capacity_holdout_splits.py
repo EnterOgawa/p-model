@@ -258,7 +258,7 @@ def _fit_shomate_coeffs(
 
 
 def main() -> None:
-    out_dir = _ROOT / "output" / "quantum"
+    out_dir = _ROOT / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     src_dir = _ROOT / "data" / "quantum" / "sources" / "nist_janaf_silicon_si"

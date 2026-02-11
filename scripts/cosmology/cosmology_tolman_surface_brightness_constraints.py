@@ -25,8 +25,8 @@ Tolman表面輝度テスト（SB dimming）の一次ソース制約を固定入�
     を比較する。
 
 出力（固定名）:
-  - output/cosmology/cosmology_tolman_surface_brightness_constraints.png
-  - output/cosmology/cosmology_tolman_surface_brightness_constraints_metrics.json
+  - output/private/cosmology/cosmology_tolman_surface_brightness_constraints.png
+  - output/private/cosmology/cosmology_tolman_surface_brightness_constraints_metrics.json
 """
 
 from __future__ import annotations
@@ -266,7 +266,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     rows = compute(constraints)
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     png_path = out_dir / "cosmology_tolman_surface_brightness_constraints.png"
     _plot(rows, out_png=png_path, z_max=z_max)

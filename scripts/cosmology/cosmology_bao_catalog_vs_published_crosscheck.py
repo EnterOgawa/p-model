@@ -14,8 +14,8 @@ catalog-based（Corrfunc: galaxy+random）で再計算した ξℓ（ℓ=0,2）�
 - A0（座標化仕様）を固定した上で比較し、ε の変動が「理論差」か「座標化差」かを混ぜない。
 
 出力（固定）:
-- output/cosmology/cosmology_bao_catalog_vs_published_crosscheck.png
-- output/cosmology/cosmology_bao_catalog_vs_published_crosscheck_metrics.json
+- output/private/cosmology/cosmology_bao_catalog_vs_published_crosscheck.png
+- output/private/cosmology/cosmology_bao_catalog_vs_published_crosscheck_metrics.json
 """
 
 from __future__ import annotations
@@ -189,32 +189,32 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Cross-check BAO ε: catalog-based ξℓ vs published multipoles.")
     ap.add_argument(
         "--published-post",
-        default="output/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
+        default="output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json",
         help="Ross post-recon multipoles peakfit metrics JSON",
     )
     ap.add_argument(
         "--published-pre",
-        default="output/cosmology/cosmology_bao_xi_multipole_peakfit_pre_recon_metrics.json",
+        default="output/private/cosmology/cosmology_bao_xi_multipole_peakfit_pre_recon_metrics.json",
         help="Satpathy pre-recon multipoles peakfit metrics JSON",
     )
     ap.add_argument(
         "--catalog",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
         help="catalog-based peakfit metrics JSON (cmasslowztot/combined/zbinonly)",
     )
     ap.add_argument(
         "--catalog-recon",
-        default="output/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_grid_iso_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_grid_iso_metrics.json",
         help="optional catalog-based recon peakfit metrics JSON (when present, include in plot)",
     )
     ap.add_argument(
         "--out-png",
-        default="output/cosmology/cosmology_bao_catalog_vs_published_crosscheck.png",
+        default="output/private/cosmology/cosmology_bao_catalog_vs_published_crosscheck.png",
         help="output PNG path (default: fixed)",
     )
     ap.add_argument(
         "--out-json",
-        default="output/cosmology/cosmology_bao_catalog_vs_published_crosscheck_metrics.json",
+        default="output/private/cosmology/cosmology_bao_catalog_vs_published_crosscheck_metrics.json",
         help="output metrics JSON path (default: fixed)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)

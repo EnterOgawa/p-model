@@ -60,7 +60,7 @@ def _prop_unc_sum(terms: list[tuple[float, Optional[float]]]) -> Optional[float]
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Primary-source-backed thermochemistry baselines (NIST WebBook).

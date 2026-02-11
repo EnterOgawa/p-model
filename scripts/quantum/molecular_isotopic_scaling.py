@@ -64,7 +64,7 @@ def _load_nist_h_isotope_masses_u(root: Path) -> tuple[dict[str, float], dict[st
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Minimal isotopologues for Step 7.12.

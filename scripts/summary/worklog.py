@@ -2,7 +2,7 @@
 """
 worklog.py
 
-スクリプト実行の作業履歴を JSONL で `output/summary/work_history.jsonl` に追記する。
+スクリプト実行の作業履歴を JSONL で `output/private/summary/work_history.jsonl` に追記する。
 （人間向けの要約は `doc/WORK_HISTORY.md` を更新する）
 
 目的:
@@ -24,7 +24,7 @@ def _repo_root() -> Path:
 
 
 def _default_jsonl_path(root: Path) -> Path:
-    return root / "output" / "summary" / "work_history.jsonl"
+    return root / "output" / "private" / "summary" / "work_history.jsonl"
 
 def _lock_path_for(jsonl_path: Path) -> Path:
     # Cross-platform append lock (prevents interleaved JSON when multiple scripts run concurrently).

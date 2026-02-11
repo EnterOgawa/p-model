@@ -30,16 +30,16 @@ Phase 4｜宇宙論 / Step 4.7（DDR再接続の条件定量化）:
   - どの機構が正しいかは決めない（Step 4.7.2/4.7.3 の“前提検証”へ接続するための定量表）。
 
 入力（固定）:
-  - output/cosmology/cosmology_distance_duality_constraints_metrics.json
-  - output/cosmology/cosmology_sn_time_dilation_constraints_metrics.json
-  - output/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json
+  - output/private/cosmology/cosmology_distance_duality_constraints_metrics.json
+  - output/private/cosmology/cosmology_sn_time_dilation_constraints_metrics.json
+  - output/private/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json
   - data/cosmology/cosmic_opacity_constraints.json
   - data/cosmology/sn_standard_candle_evolution_constraints.json
-  - output/cosmology/cosmology_bao_distance_ratio_fit_metrics.json
+  - output/private/cosmology/cosmology_bao_distance_ratio_fit_metrics.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_ddr_reconnection_conditions.png
-  - output/cosmology/cosmology_ddr_reconnection_conditions_metrics.json
+  - output/private/cosmology/cosmology_ddr_reconnection_conditions.png
+  - output/private/cosmology/cosmology_ddr_reconnection_conditions_metrics.json
 """
 
 from __future__ import annotations
@@ -307,7 +307,7 @@ def _factor_to_delta_mu_mag(factor: Optional[float]) -> Optional[float]:
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="DDR reconnection conditions (Step 4.7): quantify required α/s_L/s_R.")
-    ap.add_argument("--out-dir", default=str(_ROOT / "output" / "cosmology"), help="Output dir (default: output/cosmology)")
+    ap.add_argument("--out-dir", default=str(_ROOT / "output" / "private" / "cosmology"), help="Output dir (default: output/private/cosmology)")
     ap.add_argument("--nsigma", type=float, default=3.0, help="Envelope sigma multiplier (default: 3)")
     args = ap.parse_args(argv)
 
@@ -322,10 +322,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     _set_japanese_font()
 
-    ddr_metrics = _load_required(_ROOT / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json")
-    sn_td_metrics = _load_required(_ROOT / "output" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json")
-    cmb_tz_metrics = _load_required(_ROOT / "output" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json")
-    bao_ratio_fit_metrics = _load_required(_ROOT / "output" / "cosmology" / "cosmology_bao_distance_ratio_fit_metrics.json")
+    ddr_metrics = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json")
+    sn_td_metrics = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json")
+    cmb_tz_metrics = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json")
+    bao_ratio_fit_metrics = _load_required(_ROOT / "output" / "private" / "cosmology" / "cosmology_bao_distance_ratio_fit_metrics.json")
 
     opacity_data = _load_required(_ROOT / "data" / "cosmology" / "cosmic_opacity_constraints.json")
     gw_opacity_path = _ROOT / "data" / "cosmology" / "gw_standard_siren_opacity_constraints.json"
@@ -646,13 +646,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             ],
         },
         "inputs": {
-            "ddr_metrics": "output/cosmology/cosmology_distance_duality_constraints_metrics.json",
-            "sn_time_dilation_metrics": "output/cosmology/cosmology_sn_time_dilation_constraints_metrics.json",
-            "cmb_temperature_scaling_metrics": "output/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json",
+            "ddr_metrics": "output/private/cosmology/cosmology_distance_duality_constraints_metrics.json",
+            "sn_time_dilation_metrics": "output/private/cosmology/cosmology_sn_time_dilation_constraints_metrics.json",
+            "cmb_temperature_scaling_metrics": "output/private/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json",
             "opacity_constraints": "data/cosmology/cosmic_opacity_constraints.json",
             "gw_opacity_constraints": (None if gw_opacity_data is None else "data/cosmology/gw_standard_siren_opacity_constraints.json"),
             "sn_evolution_constraints": "data/cosmology/sn_standard_candle_evolution_constraints.json",
-            "bao_ratio_fit_metrics": "output/cosmology/cosmology_bao_distance_ratio_fit_metrics.json",
+            "bao_ratio_fit_metrics": "output/private/cosmology/cosmology_bao_distance_ratio_fit_metrics.json",
         },
         "independent_probes": {
             "p_t_from_sn_time_dilation": {"p_t_obs": p_t_obs, "p_t_sigma": p_t_sig},
@@ -768,13 +768,13 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "event_type": "cosmology_ddr_reconnection_conditions",
                 "argv": list(sys.argv),
                 "inputs": {
-                    "ddr_metrics": _ROOT / "output" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json",
-                    "sn_time_dilation": _ROOT / "output" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json",
-                    "cmb_temperature": _ROOT / "output" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json",
+                    "ddr_metrics": _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json",
+                    "sn_time_dilation": _ROOT / "output" / "private" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json",
+                    "cmb_temperature": _ROOT / "output" / "private" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json",
                     "opacity": _ROOT / "data" / "cosmology" / "cosmic_opacity_constraints.json",
                     "gw_opacity": (gw_opacity_path if gw_opacity_data is not None else None),
                     "sn_evo": _ROOT / "data" / "cosmology" / "sn_standard_candle_evolution_constraints.json",
-                    "bao_ratio_fit": _ROOT / "output" / "cosmology" / "cosmology_bao_distance_ratio_fit_metrics.json",
+                    "bao_ratio_fit": _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_distance_ratio_fit_metrics.json",
                 },
                 "outputs": {"png": out_png, "metrics_json": out_json},
                 "params": {"nsigma": nsigma},

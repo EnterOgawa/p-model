@@ -18,8 +18,8 @@ Step 14.2.2（一次ソースで拘束を追加）:
   - data/cosmology/bao_sound_horizon_constraints.json
 
 出力（固定名）:
-  - output/cosmology/cosmology_reconnection_plausibility.png
-  - output/cosmology/cosmology_reconnection_plausibility_metrics.json
+  - output/private/cosmology/cosmology_reconnection_plausibility.png
+  - output/private/cosmology/cosmology_reconnection_plausibility_metrics.json
 """
 
 from __future__ import annotations
@@ -645,7 +645,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     ddr_src = _read_json(ddr_path)
     ddr_sigma_policy = str(args.ddr_sigma_policy)
-    ddr_env_path = _ROOT / "output" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
+    ddr_env_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
     ddr_env = _load_ddr_systematics_envelope(ddr_env_path) if ddr_sigma_policy == "category_sys" else {}
     ddr_rows = [
         _apply_ddr_sigma_policy(DDRConstraint.from_json(c), policy=ddr_sigma_policy, envelope=ddr_env)
@@ -675,7 +675,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not bao_rows:
         raise SystemExit(f"no BAO constraints found in: {bao_path}")
 
-    out_dir = _ROOT / "output" / "cosmology"
+    out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_png = out_dir / "cosmology_reconnection_plausibility.png"
     out_json = out_dir / "cosmology_reconnection_plausibility_metrics.json"

@@ -93,7 +93,7 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     consts = _load_nist_codata_constants(root=root)
@@ -135,7 +135,7 @@ def main() -> None:
     j_freq_per_s = 0.5 * delta_omega_per_s if math.isfinite(delta_omega_per_s) else float("nan")
 
     # Scale proxies used in nuclear steps
-    qcd_metrics_path = root / "output" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    qcd_metrics_path = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
     qcd_metrics = _load_json(qcd_metrics_path) if qcd_metrics_path.exists() else {}
     hbarc_mev_fm = float(qcd_metrics.get("constants", {}).get("hbar_c_mev_fm", 197.3269804))
 

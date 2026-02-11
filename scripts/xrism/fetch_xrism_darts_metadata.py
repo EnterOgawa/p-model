@@ -16,7 +16,7 @@ offline 再現できる形で `data/xrism/sources/darts/` にキャッシュし�
   - data/xrism/sources/darts/xrism_resolve_data.csv
   - data/xrism/sources/darts/manifest.json
 - サマリ（公開済み観測の抽出）:
-  - output/xrism/darts_resolve_public_observations.csv
+  - output/private/xrism/darts_resolve_public_observations.csv
 
 注意:
 - DARTS 側の directory listing / HTML は安定ではない可能性があるため、一次の正は metadata CSV とし、
@@ -219,7 +219,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     p.add_argument("--public-list-url", default=DEFAULT_PUBLIC_LIST_URL)
     p.add_argument("--metadata-url", default=DEFAULT_METADATA_URL)
     p.add_argument("--out-dir", default=str(_ROOT / "data" / "xrism" / "sources" / "darts"))
-    p.add_argument("--summary-csv", default=str(_ROOT / "output" / "xrism" / "darts_resolve_public_observations.csv"))
+    p.add_argument("--summary-csv", default=str(_ROOT / "output" / "private" / "xrism" / "darts_resolve_public_observations.csv"))
     args = p.parse_args(list(argv) if argv is not None else None)
 
     out_dir = Path(args.out_dir)

@@ -389,7 +389,7 @@ def main() -> None:
     ap.add_argument("--size", type=int, default=20, help="Max hits per query per platform (default: 20)")
     ap.add_argument("--timeout-s", type=int, default=25, help="Per-request timeout in seconds (default: 25)")
     ap.add_argument("--attempts", type=int, default=2, help="Retry attempts per request (default: 2)")
-    ap.add_argument("--out", default="output/quantum/bell/giustina2015_clicklog_public_search.json")
+    ap.add_argument("--out", default="output/public/quantum/bell/giustina2015_clicklog_public_search.json")
     args = ap.parse_args()
 
     global DEFAULT_TIMEOUT_S, DEFAULT_ATTEMPTS

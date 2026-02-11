@@ -11524,9 +11524,9 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     then re-evaluate the strict train/other behavior on the expanded AME2020 set.
 
     Outputs (fixed names):
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.png
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.csv
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_metrics.json
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.png
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.csv
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_metrics.json
     """
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -12218,9 +12218,9 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       r_charge(A,Z,N) = (r0 + rI * I) * A^(1/3), where I = (N-Z)/A
 
     Outputs (fixed names):
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.png
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.csv
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.png
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.csv
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json
     """
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -12932,9 +12932,9 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     and re-run the expanded-set strict shell-gap decision scan.
 
     Outputs (fixed names):
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.png
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.csv
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange_metrics.json
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.png
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.csv
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange_metrics.json
     """
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -13764,9 +13764,9 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     and re-run the expanded-set strict shell-gap decision scan.
 
     Outputs (fixed names):
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.png
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.csv
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size_metrics.json
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.png
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.csv
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size_metrics.json
     """
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -14720,9 +14720,9 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     (Step 7.13.15.25; 2pF+Slater), and re-run the expanded-set strict shell-gap decision scan.
 
     Outputs (fixed names):
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.png
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.csv
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size_metrics.json
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.png
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.csv
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size_metrics.json
     """
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -16009,9 +16009,9 @@ def _run_step_7_13_15_27(
       - deterministic finite-size Coulomb (2pF+Slater, fixed a; c from r_rms)
 
     Outputs (fixed names):
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.png
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.csv
-      - output/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_metrics.json
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.png
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.csv
+      - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_metrics.json
     """
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
@@ -21930,7 +21930,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     parser = argparse.ArgumentParser(description="Phase 7 / nuclear A-dependence checks")

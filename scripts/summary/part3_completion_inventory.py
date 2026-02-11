@@ -9,8 +9,8 @@ Input / Frozen / Statistic / Reject / Output が揃っているかを棚卸し�
 欠けている行（=欠落項目がある行）だけを固定出力する。
 
 出力（固定）:
-  - output/summary/part3_completion_inventory.json
-  - output/summary/part3_completion_inventory.md
+  - output/public/summary/part3_completion_inventory.json
+  - output/public/summary/part3_completion_inventory.md
 
 注意:
 - publish モードに合わせ、INTERNAL_ONLY ブロックは検査対象から除外する。
@@ -388,8 +388,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument(
         "--outdir",
         type=str,
-        default=str(_ROOT / "output" / "summary"),
-        help="Output directory (default: output/summary).",
+        default=str(_ROOT / "output" / "public" / "summary"),
+        help="Output directory (default: output/public/summary).",
     )
     args = ap.parse_args(argv)
 

@@ -39,7 +39,7 @@ def _get_sigma(d: dict, key: str) -> float | None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Load np scattering parameter sets

@@ -43,7 +43,7 @@ def _add_arrow(ax, x0: float, y0: float, x1: float, y1: float) -> None:
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     cfg = Config()
@@ -215,7 +215,7 @@ def main() -> None:
         "sources": {
             "doc": "doc/quantum/16_electromagnetism_charge_maxwell_photon.md",
             "roadmap": "doc/ROADMAP.md (Step 7.11)",
-            "alpha_constraint": "output/quantum/alpha_p_dependence_constraint.json",
+            "alpha_constraint": "output/public/quantum/alpha_p_dependence_constraint.json",
         },
     }
 

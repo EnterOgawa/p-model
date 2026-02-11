@@ -345,7 +345,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p.add_argument("--catalog", default=str(_ROOT / "data" / "xrism" / "sources" / "xrism_target_catalog.json"))
     p.add_argument("--obsid", action="append", default=[], help="override: obsid(s) to QC (repeatable)")
     p.add_argument("--data-root", default=str(_ROOT / "data" / "xrism" / "raw"))
-    p.add_argument("--out-dir", default=str(_ROOT / "output" / "xrism"))
+    p.add_argument("--out-dir", default=str(_ROOT / "output" / "private" / "xrism"))
     p.add_argument("--apply-gti", action="store_true", help="apply auxil/*_gen.gti.gz if available")
     p.add_argument("--pixel-exclude", default="27", help="comma-separated pixel IDs to exclude (default: 27)")
     p.add_argument("--chunk-rows", type=int, default=200_000)

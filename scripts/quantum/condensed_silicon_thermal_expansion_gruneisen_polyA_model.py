@@ -108,7 +108,7 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
 
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
-    m = root / "output" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
     if not m.exists():
         return None
     try:
@@ -223,7 +223,7 @@ def _poly_eval(coeffs: list[float], t: float) -> float:
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
@@ -258,7 +258,7 @@ def main() -> None:
 
     theta_from_metrics = _theta_d_from_existing_metrics(root)
     if theta_from_metrics is None:
-        raise SystemExit("[fail] missing frozen θ_D. Expected output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json")
+        raise SystemExit("[fail] missing frozen θ_D. Expected output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json")
     theta_d = float(theta_from_metrics)
 
     temps = [float(t) for t in range(t_min, t_max + 1)]
@@ -428,7 +428,7 @@ def main() -> None:
                 "step": "7.14.12",
                 "inputs": {
                     "silicon_thermal_expansion_extracted_values": {"path": str(alpha_src), "sha256": _sha256(alpha_src)},
-                    "theta_d_source": {"kind": "frozen_metrics", "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"},
+                    "theta_d_source": {"kind": "frozen_metrics", "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"},
                 },
                 "model_family": {
                     "name": "A_eff(T) polynomial ansatz (diagnostic)",

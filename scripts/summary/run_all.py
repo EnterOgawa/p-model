@@ -232,7 +232,7 @@ def _run_task_quiet(task: Task, env: Dict[str, str], log_dir: Path) -> Dict[str,
 
 def main() -> int:
     root = _repo_root()
-    out_summary = root / "output" / "summary"
+    out_summary = root / "output" / "private" / "summary"
     out_summary.mkdir(parents=True, exist_ok=True)
 
     ap = argparse.ArgumentParser(description="Run all P-model verification pipelines and refresh the summary report.")
@@ -1516,9 +1516,9 @@ def main() -> int:
                 "recon_grid_ani",
                 "--include-baseline",
                 "--out-png",
-                "output/cosmology/cosmology_bao_recon_param_scan_ani.png",
+                "output/private/cosmology/cosmology_bao_recon_param_scan_ani.png",
                 "--out-json",
-                "output/cosmology/cosmology_bao_recon_param_scan_ani_metrics.json",
+                "output/private/cosmology/cosmology_bao_recon_param_scan_ani_metrics.json",
             ],
             cwd=cwd,
             optional=True,
@@ -1669,13 +1669,13 @@ def main() -> int:
             cwd=cwd,
         ),
         Task(
-            key="short_note_lint",
+            key="part4_verification_lint",
             argv=[
                 py,
                 "-B",
                 str(root / "scripts" / "summary" / "paper_lint.py"),
                 "--manuscript",
-                "doc/paper/15_short_note.md",
+                "doc/paper/13_part4_verification.md",
                 "--strict",
             ],
             cwd=cwd,
@@ -1686,13 +1686,13 @@ def main() -> int:
             cwd=cwd,
         ),
         Task(
-            key="short_note_html",
+            key="part4_verification_html",
             argv=[
                 py,
                 "-B",
                 str(root / "scripts" / "summary" / "paper_html.py"),
                 "--profile",
-                "short_note",
+                "part4_verification",
             ],
             cwd=cwd,
         ),
@@ -1988,15 +1988,15 @@ def main() -> int:
             cwd=cwd,
         ),
         Task(
-            key="docx_short_note",
+            key="docx_part4_verification",
             argv=[
                 py,
                 "-B",
                 str(root / "scripts" / "summary" / "html_to_docx.py"),
                 "--in",
-                str(out_summary / "pmodel_short_note.html"),
+                str(out_summary / "pmodel_paper_part4_verification.html"),
                 "--out",
-                str(out_summary / "pmodel_short_note.docx"),
+                str(out_summary / "pmodel_paper_part4_verification.docx"),
                 "--paper-equations",
                 "--orientation",
                 docx_orientation,
@@ -2032,8 +2032,8 @@ def main() -> int:
         public_docx = out_summary / "pmodel_public_report.docx"
         paper_html = out_summary / "pmodel_paper.html"
         paper_docx = out_summary / "pmodel_paper.docx"
-        short_note_html = out_summary / "pmodel_short_note.html"
-        short_note_docx = out_summary / "pmodel_short_note.docx"
+        part4_html = out_summary / "pmodel_paper_part4_verification.html"
+        part4_docx = out_summary / "pmodel_paper_part4_verification.docx"
         worklog.append_event(
             {
                 "event_type": "run_all",
@@ -2047,8 +2047,8 @@ def main() -> int:
                     "public_report_docx": public_docx if public_docx.exists() else None,
                     "paper_html": paper_html if paper_html.exists() else None,
                     "paper_docx": paper_docx if paper_docx.exists() else None,
-                    "short_note_html": short_note_html if short_note_html.exists() else None,
-                    "short_note_docx": short_note_docx if short_note_docx.exists() else None,
+                    "part4_verification_html": part4_html if part4_html.exists() else None,
+                    "part4_verification_docx": part4_docx if part4_docx.exists() else None,
                     "run_all_logs_dir": log_dir,
                 },
             }

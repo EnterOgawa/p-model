@@ -47,7 +47,7 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 
 def _select_metrics_file(*, root: Path, sample: str, caps: str, out_tag: str) -> Path | None:
-    out_dir = root / "output" / "cosmology"
+    out_dir = root / "output" / "private" / "cosmology"
     if out_tag == "any":
         pattern = f"cosmology_bao_catalog_peakfit_{sample}_{caps}*_metrics.json"
         files = sorted(out_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
@@ -128,7 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "cosmology"
+    out_dir = root / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     samples = [s.strip() for s in str(args.samples).split(",") if s.strip()]

@@ -56,7 +56,7 @@ def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_m
 
 def main() -> None:
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     ioffe = _load_ioffe_elastic_constants(root)

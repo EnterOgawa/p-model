@@ -82,7 +82,7 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     ame_src_dirname = "iaea_amdc_ame2020_mass_1_mas20"

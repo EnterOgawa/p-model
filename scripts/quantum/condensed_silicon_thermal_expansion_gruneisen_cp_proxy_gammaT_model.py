@@ -110,7 +110,7 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
 
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
-    m = root / "output" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
     if not m.exists():
         return None
     try:
@@ -372,7 +372,7 @@ def main() -> None:
     args = ap.parse_args()
 
     root = _repo_root()
-    out_dir = root / "output" / "quantum"
+    out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Alpha(T) source (NIST TRC Cryogenics).
@@ -675,7 +675,7 @@ def main() -> None:
                         "path": str(root / "data/quantum/sources/nist_janaf_silicon_si/extracted_values.json"),
                         "sha256": _sha256(root / "data/quantum/sources/nist_janaf_silicon_si/extracted_values.json"),
                     },
-                    "theta_d_source": {"kind": "frozen_metrics", "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"},
+                    "theta_d_source": {"kind": "frozen_metrics", "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"},
                     "ioffe_bulk_modulus_model": (b_model if use_bulk_modulus else None),
                     "silicon_molar_volume": (v_m if use_bulk_modulus else None),
                 },
