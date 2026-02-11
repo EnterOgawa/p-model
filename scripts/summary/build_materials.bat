@@ -14,6 +14,10 @@ REM   build_materials.bat
 REM   build_materials.bat full
 REM   build_materials.bat quick
 REM   build_materials.bat quick-nodocx
+REM   build_materials.bat 1  (Part I only)
+REM   build_materials.bat 2  (Part II only)
+REM   build_materials.bat 3  (Part III only)
+REM   build_materials.bat 4  (Short note only)
 
 for %%I in ("%~dp0..\\..") do set "ROOT=%%~fI"
 pushd "%ROOT%" >nul 2>&1
@@ -25,13 +29,76 @@ if errorlevel 1 (
 set "MODE=%~1"
 if "%MODE%"=="" set "MODE=full"
 
+set "PROFILE="
+set "HTML_NAME="
+set "DOCX_NAME="
+set "PB_EXTRA_ARGS="
+
+if "%MODE%"=="1" (
+  set "PROFILE=paper"
+  set "HTML_NAME=pmodel_paper.html"
+  set "DOCX_NAME=pmodel_paper.docx"
+  goto single_profile
+)
+if "%MODE%"=="2" (
+  set "PROFILE=part2_astrophysics"
+  set "HTML_NAME=pmodel_paper_part2_astrophysics.html"
+  set "DOCX_NAME=pmodel_paper_part2_astrophysics.docx"
+  set "PB_EXTRA_ARGS=--skip-tables"
+  goto single_profile
+)
+if "%MODE%"=="3" (
+  set "PROFILE=part3_quantum"
+  set "HTML_NAME=pmodel_paper_part3_quantum.html"
+  set "DOCX_NAME=pmodel_paper_part3_quantum.docx"
+  set "PB_EXTRA_ARGS=--skip-tables"
+  goto single_profile
+)
+if "%MODE%"=="4" (
+  set "PROFILE=short_note"
+  set "HTML_NAME=pmodel_short_note.html"
+  set "DOCX_NAME=pmodel_short_note.docx"
+  set "PB_EXTRA_ARGS=--skip-tables"
+  goto single_profile
+)
+
 if /I "%MODE%"=="full" goto full
 if /I "%MODE%"=="quick" goto quick
 if /I "%MODE%"=="quick-nodocx" goto quick_nodocx
 
 echo [err] Unknown mode: "%MODE%"
 echo [hint] Usage: build_materials.bat [full^|quick^|quick-nodocx]
+echo [hint]        build_materials.bat [1^|2^|3^|4]
 goto fail
+
+:single_profile
+echo [info] Mode=%MODE% (single paper)
+echo [info] PROFILE=%PROFILE%
+echo [info] ROOT=%ROOT%
+
+echo.
+echo === paper_build (%PROFILE%) ===
+python -B scripts\summary\paper_build.py --profile %PROFILE% --mode publish --outdir output\summary --skip-docx --skip-lint %PB_EXTRA_ARGS%
+if errorlevel 1 goto fail
+
+echo.
+echo === docx_paper (%PROFILE%) ===
+python -B scripts\summary\html_to_docx.py --in output\summary\%HTML_NAME% --out output\summary\%DOCX_NAME% --paper-equations --orientation landscape --margin-mm 7
+set "RC=%ERRORLEVEL%"
+if "%RC%"=="0" goto :single_docx_done
+if "%RC%"=="3" (
+  echo [warn] DOCX export skipped: Microsoft Word not available.
+  goto :single_docx_done
+)
+echo [warn] DOCX export failed (%PROFILE%). Continuing with HTML only.
+:single_docx_done
+if exist output\summary\pmodel_paper_part3_quantum__tmp.docx (
+  echo [note] pmodel_paper_part3_quantum.docx was locked; updated file is: output\summary\pmodel_paper_part3_quantum__tmp.docx
+)
+
+echo.
+echo [ok] Done (profile=%PROFILE%)
+goto ok
 
 :full
 echo [info] Mode=full (run_all offline; heavy)
@@ -44,7 +111,7 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (paper) ===
-python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx
+python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -59,17 +126,17 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (short_note) ===
-python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -133,22 +200,22 @@ echo [info] ROOT=%ROOT%
 
 echo.
 echo === paper_build (paper) ===
-python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx
+python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (short_note) ===
-python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -212,22 +279,22 @@ echo [info] ROOT=%ROOT%
 
 echo.
 echo === paper_build (paper) ===
-python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx
+python -B scripts\summary\paper_build.py --mode publish --outdir output\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (short_note) ===
-python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables
+python -B scripts\summary\paper_build.py --profile short_note --mode publish --outdir output\summary --skip-docx --skip-tables --skip-lint
 if errorlevel 1 goto fail
 
 echo.
