@@ -1,0 +1,26 @@
+{
+  "generated_utc": "2026-02-13T03:01:26.119530+00:00",
+  "reference_arcsec_century": 42.98,
+  "orbits_per_century": 415.2030829042049,
+  "einstein_approx": {
+    "arcsec_per_orbit": 0.10354662683213169,
+    "arcsec_per_century": 42.99287868503234
+  },
+  "simulation_physical": {
+    "num_orbits": 200,
+    "pmodel": {
+      "slope_arcsec_per_orbit": 0.10354670892592052,
+      "arcsec_per_century": 42.99291277062655,
+      "fit_intercept_arcsec": -1.1484504971063139e-08
+    },
+    "newton": {
+      "slope_arcsec_per_orbit": 6.128268168253927e-08,
+      "arcsec_per_century": 2.544475836322735e-05,
+      "fit_intercept_arcsec": -1.2211011565734528e-08
+    }
+  },
+  "visualization": {
+    "c_fake_scale": 1000.0,
+    "num_orbits": 6
+  }
+}

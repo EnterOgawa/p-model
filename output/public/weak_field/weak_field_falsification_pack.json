@@ -1,0 +1,476 @@
+{
+  "generated_utc": "2026-02-13T06:32:12.131051+00:00",
+  "domain": "weak_field",
+  "version": 1,
+  "intent": "Promote weak-field verification outputs into tracked public artifacts and provide an integrated falsification pack.",
+  "inputs": {
+    "frozen_parameters": {
+      "path": "output/public/theory/frozen_parameters.json",
+      "exists": true,
+      "beta": 1.0000105000000001,
+      "beta_sigma": 1.15e-05,
+      "gamma_pmodel": 1.0000210000000003,
+      "gamma_pmodel_sigma": 2.3e-05,
+      "delta": null
+    },
+    "llr_public_pack": {
+      "path": "output/public/llr/llr_falsification_pack.json",
+      "sha256": "233525ae3d3722df48dee4571a60fc83b9f57d30489a83385a6bbc295b57965e",
+      "bytes": 6706
+    },
+    "public_summaries": {
+      "weak_field_test_matrix_json": {
+        "path": "output/public/weak_field/weak_field_test_matrix.json",
+        "sha256": "4de627fb6c224cc57872d13db5eb82b8ebeb52c29e3ac718b488fb95c7e812db",
+        "bytes": 16448
+      },
+      "weak_field_systematics_templates_json": {
+        "path": "output/public/weak_field/weak_field_systematics_templates.json",
+        "sha256": "fe5aa7b759c3b44c384b10f1a733dba563505c948fa83597d83234919387d474",
+        "bytes": 29274
+      },
+      "weak_field_longterm_consistency_json": {
+        "path": "output/public/weak_field/weak_field_longterm_consistency.json",
+        "sha256": "d46e7bf423222cb3005dfc037fb729d927089d579c9acaef4d586ec4047f3d36",
+        "bytes": 5494
+      },
+      "weak_field_falsification_json": {
+        "path": "output/public/weak_field/weak_field_falsification.json",
+        "sha256": "c2f866c55cd4ea40ed92fa82fb9592a3af470c301e9bb716c1467e2cd38698de",
+        "bytes": 7145
+      }
+    }
+  },
+  "policy": {
+    "beta_frozen": 1.0000105000000001,
+    "delta_frozen": null,
+    "note": "初版の閾値は“逃げ道封鎖”の最低条件（破綻検出）として保守的に設定。必要に応じて一次ソースに基づき更新する。"
+  },
+  "criteria": [
+    {
+      "id": "cassini_beta_frozen",
+      "test_id": "cassini_sce1_doppler",
+      "title": "β を frozen_parameters に固定して実行していること",
+      "value": 1.0000105000000001,
+      "op": "==",
+      "threshold": 1.0000105000000001,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "弱場統合では、データごとの β 付け替えを禁止する（Phase 6.2 の前提）。",
+      "source": {
+        "run_metadata_json": "output/public/cassini/cassini_fig2_run_metadata.json",
+        "frozen_parameters_json": "output/public/theory/frozen_parameters.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "cassini_corr_min",
+      "test_id": "cassini_sce1_doppler",
+      "title": "相関（±10日）が十分に高いこと",
+      "value": 0.963080793714787,
+      "op": ">=",
+      "threshold": 0.95,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "形状一致（中心付近の対称性・尖り）を最低限担保する。",
+      "source": {
+        "weak_field_longterm_consistency_json": "output/public/weak_field/weak_field_longterm_consistency.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "cassini_nrmse_max",
+      "test_id": "cassini_sce1_doppler",
+      "title": "正規化RMSE（±10日）が過大でないこと",
+      "value": 0.0445133111463935,
+      "op": "<=",
+      "threshold": 0.1,
+      "pass": true,
+      "gate": true,
+      "unit": "(RMSE)/(max_obs-min_obs)",
+      "rationale": "スケール依存を避けるため、観測振幅で正規化した誤差を用いる（10%は保守的な初版閾値）。",
+      "source": {
+        "cassini_fig2_metrics_csv": "output/public/cassini/cassini_fig2_metrics.csv"
+      },
+      "notes": ""
+    },
+    {
+      "id": "gps_rel_corr_min",
+      "test_id": "gps_satellite_clock",
+      "title": "dt_rel と P-model 周期成分の相関が高いこと",
+      "value": 0.9998184749022323,
+      "op": ">=",
+      "threshold": 0.99,
+      "pass": true,
+      "gate": true,
+      "unit": "",
+      "rationale": "少なくとも既知の近日点効果（周期成分）に対して整合することを要求する。",
+      "source": {
+        "gps_compare_metrics_json": "output/public/gps/gps_compare_metrics.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "gps_rms_ratio_max",
+      "test_id": "gps_satellite_clock",
+      "title": "P-model の中央値RMSが BRDC に対して極端に悪化しないこと",
+      "value": 1.2267059606281334,
+      "op": "<=",
+      "threshold": 2.0,
+      "pass": true,
+      "gate": false,
+      "unit": "(pmodel_rms_median)/(brdc_rms_median)",
+      "rationale": "現状は実装差/系統（衛星依存等）が残るため、初版では“破綻していない”条件として緩く監視する。",
+      "source": {
+        "gps_compare_metrics_json": "output/public/gps/gps_compare_metrics.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "llr_beta_frozen",
+      "test_id": "llr_batch",
+      "title": "β を frozen_parameters に固定して実行していること",
+      "value": 1.0,
+      "op": "==",
+      "threshold": 1.0000105000000001,
+      "pass": false,
+      "gate": true,
+      "unit": "",
+      "rationale": "弱場統合では β を固定し、LLR でも同じ β で矛盾しないことを確認する。",
+      "source": {
+        "llr_batch_summary_json": "output/public/llr/llr_batch_summary.json",
+        "frozen_parameters_json": "output/public/theory/frozen_parameters.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "llr_shapiro_improves",
+      "test_id": "llr_batch",
+      "title": "Shapiro項を除去するとRMSが悪化すること（中央値）",
+      "value": 0.7664295376142947,
+      "op": "<=",
+      "threshold": 0.95,
+      "pass": true,
+      "gate": true,
+      "unit": "(tropo+tide)/(tropo+no_shapiro)",
+      "rationale": "Shapiro項の符号/係数が逆だと、RMS改善が消えるため、最小の反証条件として採用する。",
+      "source": {
+        "llr_batch_summary_json": "output/public/llr/llr_batch_summary.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "mercury_ref_agree",
+      "test_id": "mercury_perihelion_precession",
+      "title": "近日点移動（簡易）がおおむね一致すること（|Δ|≤1%）",
+      "value": 0.030043672932890602,
+      "op": "abs<=",
+      "threshold": 1.0,
+      "pass": true,
+      "gate": false,
+      "unit": "percent",
+      "rationale": "本スクリプトは精密暦ではないため、初版では“オーダー整合”の監視に留める。",
+      "source": {
+        "mercury_precession_metrics_json": "output/public/mercury/mercury_precession_metrics.json"
+      },
+      "notes": ""
+    },
+    {
+      "id": "viking_peak_range",
+      "test_id": "viking_shapiro_peak",
+      "title": "Shapiro遅延のピークがオーダー整合すること（100–400 μs）",
+      "value": 247.9552,
+      "op": "range",
+      "threshold": {
+        "min": 100.0,
+        "max": 400.0
+      },
+      "pass": true,
+      "gate": false,
+      "unit": "μs",
+      "rationale": "現状は観測時系列未導入のため、オーダー確認としてのみ扱う。",
+      "source": {
+        "viking_shapiro_result_csv": "output/public/viking/viking_shapiro_result.csv"
+      },
+      "notes": ""
+    }
+  ],
+  "summary": {
+    "gate_pass": false,
+    "gate_fail_n": 1,
+    "gate_unknown_n": 0,
+    "gate_fail_ids": [
+      "llr_beta_frozen"
+    ],
+    "gate_unknown_ids": []
+  },
+  "consistency_results": {
+    "cassini_sce1_doppler": {
+      "status": "ok",
+      "source": {
+        "cassini_fig2_metrics_csv": "output/public/cassini/cassini_fig2_metrics.csv"
+      },
+      "windows": {
+        "all (available points)": {
+          "n": 193.0,
+          "rmse": 7.017156231534424e-11,
+          "mae": 2.763805528379425e-11,
+          "corr": 0.963074669307983,
+          "max_obs": 5.967241566554105e-10,
+          "min_obs": -9.91399510016498e-10,
+          "max_model": 4.103588430072443e-10,
+          "min_model": -4.380937063023559e-10
+        },
+        "-10 to +10 days": {
+          "n": 190.0,
+          "rmse": 7.069264291351798e-11,
+          "mae": 2.786581933003263e-11,
+          "corr": 0.963080793714787,
+          "max_obs": 5.967241566554105e-10,
+          "min_obs": -9.91399510016498e-10,
+          "max_model": 4.103588430072443e-10,
+          "min_model": -4.380937063023559e-10
+        },
+        "-3 to +3 days": {
+          "n": 67.0,
+          "rmse": 1.171173265670265e-10,
+          "mae": 5.39651010042458e-11,
+          "corr": 0.962504072085275,
+          "max_obs": 5.967241566554105e-10,
+          "min_obs": -9.91399510016498e-10,
+          "max_model": 4.103588430072443e-10,
+          "min_model": -4.380937063023559e-10
+        }
+      },
+      "focus": {
+        "window": "-10 to +10 days",
+        "rmse": 7.069264291351798e-11,
+        "corr": 0.963080793714787
+      }
+    },
+    "gps_satellite_clock": {
+      "status": "ok",
+      "source": {
+        "gps_compare_metrics_json": "output/public/gps/gps_compare_metrics.json"
+      },
+      "metrics": {
+        "n_sats": 31.0,
+        "brdc_rms_ns_median": 0.3278457295427468,
+        "brdc_rms_ns_max": 1.1316556381010203,
+        "pmodel_rms_ns_median": 0.40217031059656644,
+        "pmodel_rms_ns_max": 0.7707148775425553,
+        "pmodel_better_count": 6.0,
+        "brdc_better_count": 25.0,
+        "rel_corr": 0.9998184749022323,
+        "rel_rmse_ns": 0.4776338468165939,
+        "rel_pmodel_peak_to_peak_ns": 84.12409935195916,
+        "rel_dt_rel_peak_to_peak_ns": 84.42373402769955
+      },
+      "derived": {
+        "pmodel_over_brdc_rms_median_ratio": 1.2267059606281334
+      }
+    },
+    "llr_batch": {
+      "status": "ok",
+      "source": {
+        "llr_batch_summary_json": "output/public/llr/llr_batch_summary.json"
+      },
+      "median_rms_ns": {
+        "geocenter_moon": 7303034.688880107,
+        "station_moon": 392909.02343563683,
+        "station_reflector": 7.057968085544082,
+        "station_reflector_no_shapiro": 7.584117062552238,
+        "station_reflector_tropo": 4.63078261920914,
+        "station_reflector_tropo_station_tide": 4.500380735641189,
+        "station_reflector_tropo_moon_tide": 4.474871023851851,
+        "station_reflector_tropo_tide_no_ocean": 4.3595529438764,
+        "station_reflector_tropo_tide": 4.35417001177271,
+        "station_reflector_tropo_no_shapiro": 5.681109349368453,
+        "station_reflector_tropo_earth_shapiro": 4.629765187401678,
+        "station_reflector_iau": 589.807344532432
+      },
+      "derived": {
+        "tropo_tide_over_tropo_no_shapiro_ratio": 0.7664295376142947
+      }
+    },
+    "mercury_perihelion_precession": {
+      "status": "ok",
+      "source": {
+        "mercury_precession_metrics_json": "output/public/mercury/mercury_precession_metrics.json"
+      },
+      "metrics": {
+        "reference_arcsec_century": 42.98,
+        "pmodel_arcsec_century": 42.99291277062655,
+        "einstein_arcsec_century": 42.99287868503234,
+        "pmodel_minus_ref_arcsec_century": 0.01291277062655638,
+        "pmodel_minus_ref_percent": 0.030043672932890602
+      }
+    },
+    "viking_shapiro_peak": {
+      "status": "ok",
+      "source": {
+        "viking_shapiro_result_csv": "output/public/viking/viking_shapiro_result.csv"
+      },
+      "series": {
+        "n": 355,
+        "max_delay_us": 247.9552,
+        "max_time_utc": "1976-11-25T00:00:00+00:00"
+      }
+    }
+  },
+  "artifacts": {
+    "dir": "output/public",
+    "copied": {
+      "theory": {
+        "frozen_parameters.json": {
+          "path": "output/public/theory/frozen_parameters.json",
+          "sha256": "954d2c292b13e8c8069fb400b38e3315018aa6433fb063621dadce73331d3def",
+          "bytes": 2050
+        },
+        "delta_saturation_constraints.json": {
+          "path": "output/public/theory/delta_saturation_constraints.json",
+          "sha256": "61bd20c6c9acf5bef8ff5ce3b19d8bb0fab1b7c9ecb244c0da7f442788d7fd44",
+          "bytes": 2819
+        },
+        "delta_saturation_constraints.png": {
+          "path": "output/public/theory/delta_saturation_constraints.png",
+          "sha256": "b0828667c48d5b668a1b19a15299db99a26c038621bfbf1b9e8a0c0154293351",
+          "bytes": 171677
+        }
+      },
+      "cassini": {
+        "cassini_shapiro_y_full.csv": {
+          "path": "output/public/cassini/cassini_shapiro_y_full.csv",
+          "sha256": "f5dfb9d0185d0de8ba435d6c2cf713f4e573db3bf679006081424a002e8f939c",
+          "bytes": 7300292
+        },
+        "cassini_fig2_overlay_full.png": {
+          "path": "output/public/cassini/cassini_fig2_overlay_full.png",
+          "sha256": "01ae666ee9c74c88994085bbd6f2ea06f43fa0790e3f314ba2da1a52648a6aac",
+          "bytes": 98899
+        },
+        "cassini_fig2_overlay_zoom10d.png": {
+          "path": "output/public/cassini/cassini_fig2_overlay_zoom10d.png",
+          "sha256": "a5a31633e049bdbdc8bd03f6eaac170eafa9a7e91fb97848544927d9633ee7d1",
+          "bytes": 106211
+        },
+        "cassini_fig2_residuals.png": {
+          "path": "output/public/cassini/cassini_fig2_residuals.png",
+          "sha256": "80b481fd8d357e5f92d5060fe2eb808686854255fea288ebac29535409d78536",
+          "bytes": 52481
+        },
+        "cassini_fig2_metrics.csv": {
+          "path": "output/public/cassini/cassini_fig2_metrics.csv",
+          "sha256": "a792f0d9200072c82903b97cf5b4bd33aded0e66bcf7af3ce6f8e3ce4f7a072c",
+          "bytes": 583
+        },
+        "cassini_fig2_run_metadata.json": {
+          "path": "output/public/cassini/cassini_fig2_run_metadata.json",
+          "sha256": "01d31cc2ec4c584e6859a00137d53a5acd03ff2f5f798fd42675811639ebfcb0",
+          "bytes": 3192
+        },
+        "cassini_beta_sweep_rmse.csv": {
+          "path": "output/public/cassini/cassini_beta_sweep_rmse.csv",
+          "sha256": "4cf29e18313f305a9b83e6ff6a28ce27333e4390e987d950b95c7ab556f27eef",
+          "bytes": 9724
+        },
+        "cassini_beta_sweep_rmse.png": {
+          "path": "output/public/cassini/cassini_beta_sweep_rmse.png",
+          "sha256": "2ff7f75ebe9c0f09a392ef2da3577f15b18f26b011244e50e7a17efa586dfcde",
+          "bytes": 42391
+        }
+      },
+      "viking": {
+        "viking_shapiro_result.csv": {
+          "path": "output/public/viking/viking_shapiro_result.csv",
+          "sha256": "bb89ad62be9bbd7fd72352e5ee38db0f57c0dcb978ad6576d0e4e42cee35cfdd",
+          "bytes": 12807
+        },
+        "viking_p_model_vs_measured_no_arrow.png": {
+          "path": "output/public/viking/viking_p_model_vs_measured_no_arrow.png",
+          "sha256": "3589dc90a6763ebaa684bcf7a5f98bdea0d936261e6d33f8070de2652c855fc3",
+          "bytes": 175023
+        }
+      },
+      "mercury": {
+        "mercury_orbit.png": {
+          "path": "output/public/mercury/mercury_orbit.png",
+          "sha256": "9190112ced0af345bad5fa1480e778f4bf1ae6f105be94a5409210d89e2b9ea0",
+          "bytes": 833176
+        },
+        "mercury_precession_metrics.json": {
+          "path": "output/public/mercury/mercury_precession_metrics.json",
+          "sha256": "bd350d44d2fda6c2d579ec5a8de805251bdeb19835fc0282ee7c91421bdc116f",
+          "bytes": 767
+        },
+        "mercury_perihelion_shifts.csv": {
+          "path": "output/public/mercury/mercury_perihelion_shifts.csv",
+          "sha256": "d6461cd35f3ffd33e8f9736352ff3c376b92cbad7d89a4c27b5d47d7bd84d727",
+          "bytes": 6243
+        }
+      },
+      "gps": {
+        "summary_batch.csv": {
+          "path": "output/public/gps/summary_batch.csv",
+          "sha256": "4eafdd281043ecb7d71d50a0eaeeae679a984f7fe640cc5488e092cd25332856",
+          "bytes": 2803
+        },
+        "gps_clock_residuals_all_31.png": {
+          "path": "output/public/gps/gps_clock_residuals_all_31.png",
+          "sha256": "bac230d668cdc5808837e366274dc67b48e5d721dbf23debeeab1b698e49a223",
+          "bytes": 1773885
+        },
+        "gps_residual_compare_G01.png": {
+          "path": "output/public/gps/gps_residual_compare_G01.png",
+          "sha256": "347d3c646a694d6529804aa92ef9790f49162cd744185f9c9ffaa68b18ea7151",
+          "bytes": 205306
+        },
+        "gps_rms_compare.png": {
+          "path": "output/public/gps/gps_rms_compare.png",
+          "sha256": "d51783cd19a93e7bdc1e7fa0420fe8484ac1d588adebfa9eb446c66700286cb1",
+          "bytes": 95957
+        },
+        "gps_relativistic_correction_G02.png": {
+          "path": "output/public/gps/gps_relativistic_correction_G02.png",
+          "sha256": "5ccc652dae3fe2d557aa4c735fde536eaaf2ce0d7ddb7c3398974d947ccb0fe5",
+          "bytes": 174113
+        },
+        "gps_compare_metrics.json": {
+          "path": "output/public/gps/gps_compare_metrics.json",
+          "sha256": "d043601716592eb569bdb1b9c836a28b3594e0e3abebcf043070668302d1c6b0",
+          "bytes": 1486
+        }
+      },
+      "weak_field": {
+        "weak_field_test_matrix.json": {
+          "path": "output/public/weak_field/weak_field_test_matrix.json",
+          "sha256": "4de627fb6c224cc57872d13db5eb82b8ebeb52c29e3ac718b488fb95c7e812db",
+          "bytes": 16448
+        },
+        "weak_field_systematics_templates.json": {
+          "path": "output/public/weak_field/weak_field_systematics_templates.json",
+          "sha256": "fe5aa7b759c3b44c384b10f1a733dba563505c948fa83597d83234919387d474",
+          "bytes": 29274
+        },
+        "weak_field_longterm_consistency.json": {
+          "path": "output/public/weak_field/weak_field_longterm_consistency.json",
+          "sha256": "d46e7bf423222cb3005dfc037fb729d927089d579c9acaef4d586ec4047f3d36",
+          "bytes": 5494
+        },
+        "weak_field_falsification.json": {
+          "path": "output/public/weak_field/weak_field_falsification.json",
+          "sha256": "c2f866c55cd4ea40ed92fa82fb9592a3af470c301e9bb716c1467e2cd38698de",
+          "bytes": 7145
+        },
+        "weak_field_longterm_consistency.png": {
+          "path": "output/public/weak_field/weak_field_longterm_consistency.png",
+          "sha256": "d9391a46afef9c38b211d547e7dd24dd3221e381be63eb551c0e945cc7122423",
+          "bytes": 158620
+        }
+      }
+    }
+  },
+  "warnings": []
+}

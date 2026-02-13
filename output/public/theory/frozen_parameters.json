@@ -1,0 +1,54 @@
+{
+  "generated_utc": "2026-02-13T03:02:36.829879+00:00",
+  "policy": {
+    "fit_predict_separation": true,
+    "beta_source": "cassini2003",
+    "note": "Phase 7（決定的検証パック）では、ここで凍結したβを以後固定して外挿（predict）する。速度飽和δ0は拡張仮説として別途扱う。"
+  },
+  "beta": 1.0000105000000001,
+  "beta_sigma": 1.15e-05,
+  "gamma_pmodel": 1.0000210000000003,
+  "gamma_pmodel_sigma": 2.3e-05,
+  "constraints": [
+    {
+      "id": "cassini_2003_bertotti_nature425",
+      "label": "Cassini（Bertotti 2003）",
+      "kind": "primary_paper_ppn_gamma",
+      "gamma": 1.000021,
+      "sigma": 2.3e-05,
+      "beta": 1.0000105000000001,
+      "beta_sigma": 1.15e-05,
+      "source": {
+        "title": "A test of general relativity using radio links with the Cassini spacecraft",
+        "authors": "Bertotti, Iess, Tortora",
+        "year": 2003,
+        "journal": "Nature",
+        "volume": "425",
+        "pages": "374–376",
+        "doi": "10.1038/nature01997",
+        "url": "https://doi.org/10.1038/nature01997",
+        "retrieved_utc": "2026-01-04T00:00:00Z",
+        "note": "論文の代表結果：γ−1=(2.1±2.3)×10^-5（統計）。ここでは γ=1.000021±0.000023 を拘束として用いる。"
+      }
+    },
+    {
+      "id": "vlbi_best_from_solar_deflection_metrics",
+      "label": "太陽光偏向（VLBI（Shapiro 2004））",
+      "kind": "derived_ppn_gamma",
+      "gamma": 0.99983,
+      "sigma": 0.00026,
+      "beta": 0.999915,
+      "beta_sigma": 0.00013,
+      "source": {
+        "kind": "derived_from_output",
+        "from": "output/private/theory/solar_light_deflection_metrics.json",
+        "observed_best_id": "vlbi_2004_shapiro_prl92",
+        "observed_best_label": "VLBI（Shapiro 2004）",
+        "retrieved_utc": "2026-02-13T03:01:27.815834+00:00"
+      }
+    }
+  ],
+  "outputs": {
+    "frozen_parameters_json": "C:/develop/waveP/output/private/theory/frozen_parameters.json"
+  }
+}

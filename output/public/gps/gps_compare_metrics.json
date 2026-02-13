@@ -1,0 +1,28 @@
+{
+  "generated_utc": "2026-02-13T03:00:13.435602+00:00",
+  "outputs": {
+    "gps_clock_residuals_all_31_png": "C:\\develop\\waveP\\output\\private\\gps\\gps_clock_residuals_all_31.png",
+    "gps_residual_compare_G01_png": "C:\\develop\\waveP\\output\\private\\gps\\gps_residual_compare_G01.png",
+    "gps_rms_compare_png": "C:\\develop\\waveP\\output\\private\\gps\\gps_rms_compare.png",
+    "gps_relativistic_correction_G02_png": "C:\\develop\\waveP\\output\\private\\gps\\gps_relativistic_correction_G02.png"
+  },
+  "metrics": {
+    "n_sats": 31.0,
+    "brdc_rms_ns_median": 0.3278457295427468,
+    "brdc_rms_ns_max": 1.1316556381010203,
+    "pmodel_rms_ns_median": 0.40217031059656644,
+    "pmodel_rms_ns_max": 0.7707148775425553,
+    "pmodel_better_count": 6.0,
+    "brdc_better_count": 25.0,
+    "rel_corr": 0.9998184749022323,
+    "rel_rmse_ns": 0.4776338468165939,
+    "rel_pmodel_peak_to_peak_ns": 84.12409935195916,
+    "rel_dt_rel_peak_to_peak_ns": 84.42373402769955
+  },
+  "notes": [
+    "IGS Final CLK/SP3 を観測（準実測）として使用。",
+    "各系列はバイアス＋ドリフト（一次）を最小二乗で除去した残差を表示。",
+    "IGSの衛星クロックは慣例的に相対補正（-2 r·v / c^2）を別扱いにするため、P-model側も dt_rel を除去して比較しています。",
+    "dt_rel 自体（標準式）と P-model の周期成分が一致することは別図で確認できます。"
+  ]
+}

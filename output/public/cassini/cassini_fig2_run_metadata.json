@@ -1,0 +1,80 @@
+{
+  "generated_utc": "2026-02-13T02:59:59.450331+00:00",
+  "argv": [
+    "C:\\develop\\waveP\\scripts\\cassini\\cassini_fig2_overlay.py",
+    "--no-sweep"
+  ],
+  "requested_source": "pds_tdf",
+  "effective_source": "pds_tdf_processed_plasma",
+  "fallback_reason": null,
+  "params": {
+    "beta": 1.0000105000000001,
+    "beta_source": "output/theory/frozen_parameters.json:beta",
+    "model": "eq2",
+    "align_offset": true,
+    "doy_start": 162,
+    "doy_stop": 182,
+    "odf_downlink_band": "ka",
+    "tdf_downlink_band": "ka",
+    "tdf_plasma_correct": true,
+    "tdf_plasma_used": true,
+    "tdf_plasma_fallback_reason": null,
+    "tdf_effective_downlink_bands": [
+      2,
+      3
+    ],
+    "tdf_plasma_common_bins": 142,
+    "tdf_plasma_common_station_ids": [
+      25
+    ],
+    "tdf_sample_type": "high",
+    "tdf_ground_mode": -1,
+    "tdf_doppler_channel_count": -1,
+    "tdf_effective_ground_mode": 2,
+    "tdf_effective_doppler_channel_count": null,
+    "tdf_effective_doppler_channel_count_by_band": {
+      "3": 1,
+      "2": 2
+    },
+    "tdf_fixed_frac_bits": 0,
+    "tdf_y_sign": 1,
+    "tdf_max_abs_pr_hz": 10.0,
+    "tdf_require_pr_tolerance": true,
+    "tdf_exclude_slipped_cycles": true,
+    "tdf_exclude_pr_sentinel": true,
+    "tdf_exclude_rss_sentinel": true,
+    "tdf_plasma_fill_mode": "merged",
+    "tdf_bin_seconds": 3600,
+    "tdf_bin_stat": "median",
+    "tdf_min_bin_count": 1,
+    "tdf_detrend_poly_order": 0,
+    "tdf_detrend_exclude_inner_days": 5.0,
+    "tdf_reconstruct_shapiro": true,
+    "tdf_reconstruct_beta": 1.0000105000000001,
+    "tdf_reconstruct_beta_source": "output/theory/frozen_parameters.json:beta"
+  },
+  "inputs": {
+    "model_csv": "C:\\develop\\waveP\\output\\private\\cassini\\cassini_shapiro_y_full.csv",
+    "digitized_csv": "C:\\develop\\waveP\\data\\cassini\\cassini_fig2_digitized_raw.csv",
+    "pds_root": "C:\\develop\\waveP\\data\\cassini\\pds_sce1",
+    "pds_manifest_odf": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\manifest_odf.json",
+    "pds_manifest_tdf": "C:\\develop\\waveP\\data\\cassini\\pds_sce1\\manifest_tdf.json"
+  },
+  "outputs": {
+    "points_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_fig2_matched_points.csv",
+    "metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_fig2_metrics.csv",
+    "best_beta_by_rmse10": null,
+    "pds_extracted_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_extracted.csv",
+    "pds_processed_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_paperlike.csv",
+    "pds_dual_binned_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_dual_binned.csv",
+    "pds_binned_merged_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_sce1_tdf_binned_merged.csv",
+    "pds_vs_digitized_metrics_csv": "C:\\develop\\waveP\\output\\cassini\\cassini_pds_vs_digitized_metrics.csv"
+  },
+  "counts": {
+    "n_observed_points": 193,
+    "n_matched_points": 193
+  },
+  "labels": {
+    "obs_label": "観測（一次データ: PDS TDF（Ka+Xプラズマ補正、欠測は単独バンド（疑似残差+参照Shapiro復元））→ 平滑化＋デトレンド）"
+  }
+}
