@@ -54,6 +54,7 @@ class _BundleSpec:
     include_docs: bool
     include_entrypoints: bool
     include_publish_outputs: bool
+    include_public_outputs: bool
     include_scripts_tree: bool
 
 
@@ -63,6 +64,7 @@ _BUNDLE_SPECS: Dict[str, _BundleSpec] = {
         include_docs=True,
         include_entrypoints=False,
         include_publish_outputs=True,
+        include_public_outputs=True,
         include_scripts_tree=False,
     ),
     "repro": _BundleSpec(
@@ -70,6 +72,7 @@ _BUNDLE_SPECS: Dict[str, _BundleSpec] = {
         include_docs=True,
         include_entrypoints=True,
         include_publish_outputs=True,
+        include_public_outputs=True,
         include_scripts_tree=True,
     ),
 }
@@ -115,11 +118,20 @@ def _iter_repo_files(root: Path, *, base: Path, patterns: Sequence[str]) -> Iter
 def _collect_files(spec: _BundleSpec, payload: Dict[str, Any]) -> List[Path]:
     files: List[Path] = []
     if spec.include_docs:
-        files += _manifest_group_paths(payload, "docs")
+        # release_manifest uses "local_docs" as the group key.
+        # Keep a fallback for older manifests.
+        files += _manifest_group_paths(payload, "local_docs") or _manifest_group_paths(payload, "docs")
     if spec.include_entrypoints:
         files += _manifest_group_paths(payload, "entrypoints")
     if spec.include_publish_outputs:
         files += _manifest_group_paths(payload, "publish_outputs")
+
+    if spec.include_public_outputs:
+        public_dir = _ROOT / "output" / "public"
+        if public_dir.exists():
+            public_files = [p for p in public_dir.rglob("*") if p.is_file()]
+            public_files.sort(key=lambda p: _rel(p).lower())
+            files += public_files
 
     if spec.include_scripts_tree:
         scripts_dir = _ROOT / "scripts"
@@ -179,6 +191,7 @@ def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path]
         "notes": [
             "This bundle intentionally excludes raw data under data/ (fetch via PRIMARY_SOURCES + scripts).",
             "Paper HTML embeds PNG as base64; rebuilding requires running build_materials (quick-nodocx).",
+            "Public verification artifacts are included under output/public/.",
         ],
     }
 
