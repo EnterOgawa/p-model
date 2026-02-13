@@ -1,0 +1,32 @@
+{
+  "generated_utc": "2026-02-13T03:01:15.841059+00:00",
+  "n_total": 13132,
+  "n_inliers": 13065,
+  "n_outliers": 9,
+  "max_abs_delta_centered_ns": 2593692.3442149153,
+  "clip": {
+    "sigma": 8.0,
+    "min_ns": 100.0
+  },
+  "paths": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "outliers_csv": "output/private/llr/batch/llr_outliers.csv",
+    "plot": "output/private/llr/batch/llr_outliers_overview.png"
+  },
+  "counts": {
+    "by_station": {
+      "GRSM": 9
+    },
+    "by_target": {
+      "apollo15": 5,
+      "apollo11": 2,
+      "luna17": 2
+    },
+    "by_year_month": {
+      "2012-07": 2,
+      "2015-04": 5,
+      "2015-09": 1,
+      "2017-06": 1
+    }
+  }
+}

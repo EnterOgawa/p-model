@@ -1,0 +1,121 @@
+{
+  "generated_utc": "2026-02-13T03:01:20.351067+00:00",
+  "source_manifest": "data/llr/llr_edc_batch_manifest.json",
+  "n_files": 4626,
+  "n_points_total": 13132,
+  "n_bad_tof_dropped": 6,
+  "n_groups": 17,
+  "beta": 1.0,
+  "time_tag_mode": "auto",
+  "station_coords_mode": "auto",
+  "pos_eop_date_preferred": null,
+  "pos_eop_max_days": 3650,
+  "ocean_loading_mode": "auto",
+  "ocean_loading_harpos": "data/llr/ocean_loading/toc_fes2014b_harmod.hps",
+  "ocean_loading_station_map": {
+    "APOL": {
+      "harpos_site_id": "Apollo",
+      "harpos_dist_m": 2.167111075806256,
+      "validity_radius_m": 3000.0,
+      "warning_outside_validity": false
+    },
+    "GRSM": {
+      "harpos_site_id": "Grasse",
+      "harpos_dist_m": 0.8170228481355183,
+      "validity_radius_m": 3000.0,
+      "warning_outside_validity": false
+    },
+    "MATM": {
+      "harpos_site_id": "Matera",
+      "harpos_dist_m": 0.6972185030918998,
+      "validity_radius_m": 3000.0,
+      "warning_outside_validity": false
+    },
+    "MDOL": {
+      "harpos_site_id": "McDonald",
+      "harpos_dist_m": 0.14532033568698363,
+      "validity_radius_m": 3000.0,
+      "warning_outside_validity": false
+    },
+    "WETL": {
+      "harpos_site_id": "Wettzell",
+      "harpos_dist_m": 0.925789612549161,
+      "validity_radius_m": 3000.0,
+      "warning_outside_validity": false
+    }
+  },
+  "outlier_clip_sigma": 8.0,
+  "outlier_clip_ns": 100.0,
+  "station_coord_summary": {
+    "GRSM": {
+      "station": "GRSM",
+      "pad_id": 7845,
+      "coord_source": "EDC pos+eop (SINEX)",
+      "pos_eop_yymmdd": "190126",
+      "pos_eop_ref_epoch_utc": "2019-01-23T12:00:00+00:00",
+      "delta_vs_slrlog_m": 0.5493086913320029,
+      "dx_m": -0.20775589998811483,
+      "dy_m": 0.4462595300283283,
+      "dz_m": 0.24378260038793087
+    },
+    "MATM": {
+      "station": "MATM",
+      "pad_id": 7941,
+      "coord_source": "EDC pos+eop (SINEX)",
+      "pos_eop_yymmdd": "190806",
+      "pos_eop_ref_epoch_utc": "2019-08-03T12:00:00+00:00",
+      "delta_vs_slrlog_m": 0.6937324432473928,
+      "dx_m": -0.4125941004604101,
+      "dy_m": 0.4433673999737948,
+      "dz_m": 0.3383137001655996
+    },
+    "WETL": {
+      "station": "WETL",
+      "pad_id": 8834,
+      "coord_source": "EDC pos+eop (SINEX)",
+      "pos_eop_yymmdd": "230302",
+      "pos_eop_ref_epoch_utc": "2023-02-27T12:00:00+00:00",
+      "delta_vs_slrlog_m": 0.5964174660391224,
+      "dx_m": -0.3394382996484637,
+      "dy_m": 0.4175912799546495,
+      "dz_m": 0.2571244006976485
+    }
+  },
+  "time_tag_mode_by_station": {
+    "APOL": "tx",
+    "GRSM": "tx",
+    "MATM": "tx",
+    "MDOL": "tx",
+    "WETL": "tx"
+  },
+  "min_points_per_group": 30,
+  "stations": [
+    "APOL",
+    "GRSM",
+    "MATM",
+    "MDOL",
+    "WETL"
+  ],
+  "targets": [
+    "apollo11",
+    "apollo14",
+    "apollo15",
+    "luna17",
+    "luna21",
+    "nglr1"
+  ],
+  "median_rms_ns": {
+    "geocenter_moon": 7303034.688880107,
+    "station_moon": 392909.02343563683,
+    "station_reflector": 7.057968085544082,
+    "station_reflector_no_shapiro": 7.584117062552238,
+    "station_reflector_tropo": 4.63078261920914,
+    "station_reflector_tropo_station_tide": 4.500380735641189,
+    "station_reflector_tropo_moon_tide": 4.474871023851851,
+    "station_reflector_tropo_tide_no_ocean": 4.3595529438764,
+    "station_reflector_tropo_tide": 4.35417001177271,
+    "station_reflector_tropo_no_shapiro": 5.681109349368453,
+    "station_reflector_tropo_earth_shapiro": 4.629765187401678,
+    "station_reflector_iau": 589.807344532432
+  }
+}

@@ -1,0 +1,186 @@
+{
+  "artifacts": {
+    "copied": {
+      "llr_batch_metrics.csv": {
+        "bytes": 5070,
+        "path": "output/public/llr/llr_batch_metrics.csv",
+        "sha256": "fe181427aef4382d96aada4f5d323a22a2ccde20f1309ee0ff25eecd272ae275"
+      },
+      "llr_batch_summary.json": {
+        "bytes": 3649,
+        "path": "output/public/llr/llr_batch_summary.json",
+        "sha256": "47de70ef200e3f3d223a492973daf5b8f0509997b88b82926369c5b847da1907"
+      },
+      "llr_outliers_diagnosis_summary.json": {
+        "bytes": 1320,
+        "path": "output/public/llr/llr_outliers_diagnosis_summary.json",
+        "sha256": "c11324efa59d9116bcfd80e506cd527d64e6839d3edd53497c0dad14d2e616e9"
+      },
+      "llr_outliers_overview.png": {
+        "bytes": 139269,
+        "path": "output/public/llr/llr_outliers_overview.png",
+        "sha256": "c4d78a43d5c8c5efd027b608564e04ba2763b9767b51b404a317bbdbba67d513"
+      },
+      "llr_outliers_summary.json": {
+        "bytes": 728,
+        "path": "output/public/llr/llr_outliers_summary.json",
+        "sha256": "027e92b9490c1c8983845480c6b445fd62271b042743e7e0d7204554ed74c2d5"
+      },
+      "llr_outliers_time_tag_sensitivity.png": {
+        "bytes": 74030,
+        "path": "output/public/llr/llr_outliers_time_tag_sensitivity.png",
+        "sha256": "6599abcee35391211b1d2f0aa487342eeae8217f74015104df0f6d8e078446c4"
+      },
+      "llr_residual_distribution.png": {
+        "bytes": 147937,
+        "path": "output/public/llr/llr_residual_distribution.png",
+        "sha256": "dc4f495ebc8491d6a5b72a54fb3d8ca735168c241737d1ec281fae45493165ad"
+      },
+      "llr_rms_ablations_overall.png": {
+        "bytes": 75231,
+        "path": "output/public/llr/llr_rms_ablations_overall.png",
+        "sha256": "52bcf8b6bc147442f829c6d59618012f9e8acfc743f49562bb8e3c3c29d358f0"
+      },
+      "llr_rms_improvement_overall.png": {
+        "bytes": 63238,
+        "path": "output/public/llr/llr_rms_improvement_overall.png",
+        "sha256": "a44a6357baae0a5b78eeed58edebad8a5ca058173dae6f66c09cdf7f55dcf684"
+      },
+      "llr_shapiro_ablations_overall.png": {
+        "bytes": 75464,
+        "path": "output/public/llr/llr_shapiro_ablations_overall.png",
+        "sha256": "3e7e0fe31b7dc01693822d6844b75a8444ddeb8229e66d0fac597516a004e3de"
+      },
+      "llr_station_coord_delta_pos_eop.png": {
+        "bytes": 71272,
+        "path": "output/public/llr/llr_station_coord_delta_pos_eop.png",
+        "sha256": "fed1a9629b51a6845434822c78fea52f50515fbbdafdbb1e76e13b3e8cf83d1d"
+      },
+      "llr_station_diagnostics.json": {
+        "bytes": 3255,
+        "path": "output/public/llr/llr_station_diagnostics.json",
+        "sha256": "f15b6ca94a0a6a618dd4119d6dbd114a7280b824cfed1e272e6817ab112d309b"
+      },
+      "llr_tide_ablations_overall.png": {
+        "bytes": 106750,
+        "path": "output/public/llr/llr_tide_ablations_overall.png",
+        "sha256": "0c74dca11f521310477ca439944319fc90c7116a3cb826ce0a5877705f9859ae"
+      },
+      "llr_time_tag_best_by_station.json": {
+        "bytes": 1067,
+        "path": "output/public/llr/llr_time_tag_best_by_station.json",
+        "sha256": "2e32b0ccdc951be577dcfed5148cce8a84c75a161b1d8f2dab8718fa98ddd8e1"
+      },
+      "llr_time_tag_selection_by_station.png": {
+        "bytes": 73989,
+        "path": "output/public/llr/llr_time_tag_selection_by_station.png",
+        "sha256": "536d5f6acfa68ba447fdb8a0aea8bc6d0352d678e1bc8135424156097f08c403"
+      }
+    },
+    "dir": "output/public/llr"
+  },
+  "criteria": [
+    {
+      "gate": true,
+      "id": "llr_shapiro_improves",
+      "op": "<=",
+      "pass": true,
+      "rationale": "Shapiro項の符号/係数が逆だと、RMS改善が消えるため、最小の反証条件として採用する。",
+      "threshold": 0.95,
+      "title": "Shapiro項を除去するとRMSが悪化すること（中央値）",
+      "unit": "(tropo+tide)/(tropo+no_shapiro)",
+      "value": 0.7664295376142947
+    }
+  ],
+  "domain": "llr",
+  "generated_utc": "2026-02-13T04:43:43.482781+00:00",
+  "inputs": {
+    "batch_summary": {
+      "beta": 1.0,
+      "generated_utc": "2026-02-13T03:01:20.351067+00:00",
+      "n_files": 4626,
+      "n_points_total": 13132,
+      "outlier_gate": {
+        "clip_min_ns": 100.0,
+        "clip_sigma": 8.0
+      },
+      "station_coords_mode": "auto",
+      "stations": [
+        "APOL",
+        "GRSM",
+        "MATM",
+        "MDOL",
+        "WETL"
+      ],
+      "targets": [
+        "apollo11",
+        "apollo14",
+        "apollo15",
+        "luna17",
+        "luna21",
+        "nglr1"
+      ],
+      "time_tag_mode": "auto"
+    },
+    "outliers_diagnosis_summary": {
+      "by_cause_hint": {
+        "中スパイク（単発）": 1,
+        "局の系統オフセット段差（同月に複数）": 7,
+        "巨大スパイク（ターゲット混入の可能性: 推定=luna17）": 1
+      },
+      "n_outliers": 9,
+      "target_mixing_sensitivity": {
+        "computed": true,
+        "criteria": {
+          "abs_delta_raw_ge_ns": 100000.0,
+          "best_abs_delta_raw_le_ns": 1000.0,
+          "best_target_differs": true
+        },
+        "n_suspected": 1,
+        "policy": {
+          "auto_reassign": false,
+          "baseline": "exclude",
+          "note": "疑いがある場合も観測のターゲットラベルは自動では書き換えず、統計から除外し、source_file:lineno で一次データ行へ追跡して確認する。"
+        }
+      },
+      "time_tag_sensitivity": {
+        "computed": true,
+        "computed_modes": [
+          "tx",
+          "rx",
+          "mid"
+        ],
+        "modes": [
+          "tx",
+          "rx",
+          "mid"
+        ],
+        "n_best_mode_differs": 2
+      }
+    },
+    "time_tag_best_by_station": {
+      "best_mode_by_station": {
+        "APOL": "tx",
+        "GRSM": "tx",
+        "MATM": "tx",
+        "MDOL": "tx",
+        "WETL": "tx"
+      },
+      "selection_metric": "weighted_rms_sr_ns (offset aligned per station×target)"
+    }
+  },
+  "intent": "Promote LLR batch audit outputs into tracked public artifacts and fix a minimal falsification gate.",
+  "metrics": {
+    "median_rms_ns": {
+      "station_reflector": 7.057968085544082,
+      "station_reflector_tropo": 4.63078261920914,
+      "station_reflector_tropo_no_shapiro": 5.681109349368453,
+      "station_reflector_tropo_tide": 4.35417001177271
+    },
+    "shapiro_rms_ratio": {
+      "unit": "(tropo+tide)/(tropo+no_shapiro)",
+      "value": 0.7664295376142947
+    }
+  },
+  "version": 1
+}

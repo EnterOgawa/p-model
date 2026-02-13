@@ -1,0 +1,42 @@
+{
+  "generated_utc": "2026-02-13T03:01:17.792597+00:00",
+  "n_outliers": 9,
+  "by_cause_hint": {
+    "局の系統オフセット段差（同月に複数）": 7,
+    "巨大スパイク（ターゲット混入の可能性: 推定=luna17）": 1,
+    "中スパイク（単発）": 1
+  },
+  "time_tag_sensitivity": {
+    "computed": true,
+    "computed_modes": [
+      "tx",
+      "rx",
+      "mid"
+    ],
+    "n_best_mode_differs": 2,
+    "modes": [
+      "tx",
+      "rx",
+      "mid"
+    ]
+  },
+  "target_mixing_sensitivity": {
+    "computed": true,
+    "n_suspected": 1,
+    "criteria": {
+      "abs_delta_raw_ge_ns": 100000.0,
+      "best_abs_delta_raw_le_ns": 1000.0,
+      "best_target_differs": true
+    },
+    "policy": {
+      "baseline": "exclude",
+      "auto_reassign": false,
+      "note": "疑いがある場合も観測のターゲットラベルは自動では書き換えず、統計から除外し、source_file:lineno で一次データ行へ追跡して確認する。"
+    }
+  },
+  "paths": {
+    "diagnosis_csv": "output/private/llr/batch/llr_outliers_diagnosis.csv",
+    "time_tag_plot": "output/private/llr/batch/llr_outliers_time_tag_sensitivity.png",
+    "target_mixing_plot": "output/private/llr/batch/llr_outliers_target_mixing_sensitivity.png"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "generated_utc": "2026-02-13T02:58:36.702099+00:00",
+  "selection_metric": "weighted_rms_sr_ns (offset aligned per station×target)",
+  "min_points_per_group": 30,
+  "min_points_per_group_selection": 30,
+  "selection_sample_per_group": 80,
+  "selection_sample_points_total": 1223,
+  "best_mode_by_station": {
+    "APOL": "tx",
+    "GRSM": "tx",
+    "MATM": "tx",
+    "MDOL": "tx",
+    "WETL": "tx"
+  },
+  "rms_by_station_and_mode_ns": {
+    "APOL": {
+      "tx": 7.4748377412230385,
+      "rx": 3459.660634666857,
+      "mid": 1728.7494437606595
+    },
+    "GRSM": {
+      "tx": 8.799558542727212,
+      "rx": 2789.0971574167156,
+      "mid": 1395.1585928595491
+    },
+    "MATM": {
+      "tx": 7.017466580789868,
+      "rx": 2736.283801228706,
+      "mid": 1367.863660035281
+    },
+    "MDOL": {
+      "tx": 11.677114623430091,
+      "rx": 2261.7975316790394,
+      "mid": 1132.4653722040648
+    },
+    "WETL": {
+      "tx": 2.7816545263001307,
+      "rx": 1512.1034067794433,
+      "mid": 756.1801645486833
+    }
+  }
+}

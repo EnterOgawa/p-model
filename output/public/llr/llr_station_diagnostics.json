@@ -1,0 +1,127 @@
+{
+  "generated_utc": "2026-02-13T03:01:19.517384+00:00",
+  "station_diagnostics": {
+    "APOL": {
+      "n": 1417,
+      "rms_sr_tropo_tide_ns": 5.897277662908773,
+      "corr_res_vs_elev_deg": 0.4014368324732945,
+      "corr_res_vs_m_1_sin": -0.3544340647371349,
+      "worst_month_target": [
+        {
+          "ym": "2014-04",
+          "target": "apollo15",
+          "n": 33,
+          "rms_ns": 7.9736302292392285
+        },
+        {
+          "ym": "2025-03",
+          "target": "apollo15",
+          "n": 35,
+          "rms_ns": 5.020580107391925
+        }
+      ]
+    },
+    "GRSM": {
+      "n": 10878,
+      "rms_sr_tropo_tide_ns": 4.18551837233033,
+      "corr_res_vs_elev_deg": 0.042293599019992696,
+      "corr_res_vs_m_1_sin": -0.0337925168344912,
+      "worst_month_target": [
+        {
+          "ym": "2019-02",
+          "target": "apollo14",
+          "n": 39,
+          "rms_ns": 7.212589774235593
+        },
+        {
+          "ym": "2019-02",
+          "target": "apollo15",
+          "n": 51,
+          "rms_ns": 7.156228187188723
+        },
+        {
+          "ym": "2019-02",
+          "target": "apollo11",
+          "n": 39,
+          "rms_ns": 6.906750748333427
+        },
+        {
+          "ym": "2019-03",
+          "target": "apollo15",
+          "n": 35,
+          "rms_ns": 6.784848956311905
+        },
+        {
+          "ym": "2019-03",
+          "target": "apollo11",
+          "n": 38,
+          "rms_ns": 6.770354871812678
+        },
+        {
+          "ym": "2016-12",
+          "target": "apollo15",
+          "n": 75,
+          "rms_ns": 6.5338531487285385
+        },
+        {
+          "ym": "2017-03",
+          "target": "apollo15",
+          "n": 60,
+          "rms_ns": 6.401571829595657
+        },
+        {
+          "ym": "2019-03",
+          "target": "apollo14",
+          "n": 30,
+          "rms_ns": 6.238726455319321
+        }
+      ]
+    },
+    "MATM": {
+      "n": 345,
+      "rms_sr_tropo_tide_ns": 3.522620635869545,
+      "corr_res_vs_elev_deg": -0.025981620143098252,
+      "corr_res_vs_m_1_sin": 0.01798953063748056,
+      "worst_month_target": []
+    },
+    "MDOL": {
+      "n": 31,
+      "rms_sr_tropo_tide_ns": 11.33508777937953,
+      "corr_res_vs_elev_deg": -0.0034979820716313113,
+      "corr_res_vs_m_1_sin": -0.044875513590924454,
+      "worst_month_target": []
+    },
+    "WETL": {
+      "n": 394,
+      "rms_sr_tropo_tide_ns": 2.2619878279958776,
+      "corr_res_vs_elev_deg": 0.051380317922938845,
+      "corr_res_vs_m_1_sin": -0.09256893508069051,
+      "worst_month_target": [
+        {
+          "ym": "2025-03",
+          "target": "luna21",
+          "n": 33,
+          "rms_ns": 2.0304290512345093
+        },
+        {
+          "ym": "2023-03",
+          "target": "apollo15",
+          "n": 42,
+          "rms_ns": 1.2412534576166092
+        },
+        {
+          "ym": "2025-03",
+          "target": "apollo15",
+          "n": 60,
+          "rms_ns": 0.9590366581602155
+        },
+        {
+          "ym": "2025-02",
+          "target": "luna21",
+          "n": 41,
+          "rms_ns": 0.7864540659163738
+        }
+      ]
+    }
+  }
+}
