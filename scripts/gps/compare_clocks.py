@@ -21,7 +21,7 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 DATA_DIR = ROOT / "data" / "gps"
-OUT_DIR = ROOT / "output" / "gps"
+OUT_DIR = ROOT / "output" / "private" / "gps"
 
 # 入力ファイル（data/gps）
 FILE_RINEX_NAV = DATA_DIR / "BRDC00IGS_R_20252740000_01D_MN.rnx"

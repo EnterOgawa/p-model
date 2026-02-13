@@ -75,7 +75,7 @@ def _set_japanese_font() -> None:
 
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
-    p = _ROOT / "output" / "theory" / "frozen_parameters.json"
+    p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
     try:
@@ -218,11 +218,11 @@ def collect(
     delta_val = float(delta) if isinstance(delta, (int, float)) else 0.0
 
     # Sources (fixed paths; should be stable outputs from each topic)
-    cassini_metrics_csv = _ROOT / "output" / "cassini" / "cassini_fig2_metrics.csv"
-    gps_metrics_json = _ROOT / "output" / "gps" / "gps_compare_metrics.json"
-    llr_summary_json = _ROOT / "output" / "llr" / "batch" / "llr_batch_summary.json"
-    mercury_metrics_json = _ROOT / "output" / "mercury" / "mercury_precession_metrics.json"
-    viking_series_csv = _ROOT / "output" / "viking" / "viking_shapiro_result.csv"
+    cassini_metrics_csv = _ROOT / "output" / "private" / "cassini" / "cassini_fig2_metrics.csv"
+    gps_metrics_json = _ROOT / "output" / "private" / "gps" / "gps_compare_metrics.json"
+    llr_summary_json = _ROOT / "output" / "private" / "llr" / "batch" / "llr_batch_summary.json"
+    mercury_metrics_json = _ROOT / "output" / "private" / "mercury" / "mercury_precession_metrics.json"
+    viking_series_csv = _ROOT / "output" / "private" / "viking" / "viking_shapiro_result.csv"
 
     out_dir = _ROOT / "output" / "private" / "summary"
     out_dir.mkdir(parents=True, exist_ok=True)

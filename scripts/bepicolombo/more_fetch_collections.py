@@ -184,7 +184,7 @@ def main() -> None:
 
     root = _ROOT
     data_dir = root / "data" / "bepicolombo" / "psa_more"
-    out_dir = root / "output" / "bepicolombo"
+    out_dir = root / "output" / "private" / "bepicolombo"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     base_url = str(args.base_url).rstrip("/") + "/"

@@ -21,6 +21,7 @@ Phase 8（論文化・公開）向けの「ビルド入口」。
 from __future__ import annotations
 
 import argparse
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional, Sequence
@@ -37,6 +38,14 @@ from scripts.summary import html_to_docx, paper_html, paper_lint, paper_tables, 
 
 def _repo_root() -> Path:
     return _ROOT
+
+
+def _run_best_effort(argv: list[str], *, cwd: Path) -> None:
+    try:
+        subprocess.run(argv, cwd=str(cwd), check=True)
+    except Exception as e:
+        cmd = " ".join(str(x) for x in argv)
+        print(f"[warn] pre-step failed (continuing): {cmd}\n  {e}")
 
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
@@ -91,6 +100,32 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir = Path(args.outdir) if args.outdir else (root / "output" / "private" / "summary")
     out_dir.mkdir(parents=True, exist_ok=True)
     profile = str(args.profile)
+    py = sys.executable or "python"
+
+    # Best-effort refresh of Part III (quantum) figures/metrics so a single
+    # `paper_build --profile part3_quantum` yields a consistent publish artifact.
+    if profile == "part3_quantum":
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "molecular_h2_baseline.py"), "--slug", "h2"],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "molecular_h2_baseline.py"), "--slug", "hd"],
+            cwd=root,
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "molecular_h2_baseline.py"), "--slug", "d2"],
+            cwd=root,
+        )
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "molecular_isotopic_scaling.py")], cwd=root)
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "de_broglie_precision_alpha_consistency.py")], cwd=root
+        )
+        _run_best_effort(
+            [py, "-B", str(root / "scripts" / "quantum" / "gravity_quantum_interference_delta_predictions.py")],
+            cwd=root,
+        )
+        _run_best_effort([py, "-B", str(root / "scripts" / "quantum" / "electron_double_slit_interference.py")], cwd=root)
 
     if not args.skip_tables:
         # Best-effort refresh of lightweight inputs used by Table 1 so that
@@ -119,6 +154,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if rc != 0:
             return rc
 
+        if profile == "part3_quantum":
+            _run_best_effort([py, "-B", str(root / "scripts" / "summary" / "quantum_scoreboard.py")], cwd=root)
+
     # Ensure summary figures referenced by the manuscript exist (best effort).
     try:
         gw_multi_event_summary.main([])
@@ -130,7 +168,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except Exception:
             pass
         try:
-            fek_relativistic_broadening_isco_constraints.main(["--plot-only"])
+            # Build Fig (Fe-K ISCO proxy) robustly: --plot-only emits a placeholder when the CSV is missing.
+            out_csv = root / "output" / "private" / "xrism" / "fek_relativistic_broadening_isco_constraints.csv"
+            has_rows = False
+            try:
+                if out_csv.exists():
+                    with out_csv.open("r", encoding="utf-8") as f:
+                        # Skip header; count any non-empty data line.
+                        next(f, "")
+                        for line in f:
+                            if line.strip():
+                                has_rows = True
+                                break
+            except Exception:
+                has_rows = False
+            if has_rows:
+                fek_relativistic_broadening_isco_constraints.main(["--plot-only"])
+            else:
+                fek_relativistic_broadening_isco_constraints.main([])
         except Exception:
             pass
 
@@ -150,12 +205,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         elif profile == "part2_astrophysics":
             lint_argv += ["--manuscript", "doc/paper/11_part2_astrophysics.md"]
         elif profile == "part3_quantum":
-            lint_argv += [
-                "--manuscript",
-                "doc/paper/12_part3_quantum.md",
-                "--manuscript",
-                "doc/paper/12_part3_quantum_appendix_a.md",
-            ]
+            lint_argv += ["--manuscript", "doc/paper/12_part3_quantum.md"]
         elif profile == "part4_verification":
             lint_argv += ["--manuscript", "doc/paper/13_part4_verification.md"]
         rc = paper_lint.main(lint_argv)

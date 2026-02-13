@@ -1242,7 +1242,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     include_definitions = profile == "paper"
     include_uncertainty = False
     include_llr_appendix = profile == "part2_astrophysics"
-    include_quantum_appendix_a = profile == "part3_quantum"
+    # Part III の Si α(T) ansatzログ（旧：補遺A）は本文 4.2.13 に統合したため、補遺セクションは生成しない。
+    include_quantum_appendix_a = False
     enable_citation_links = profile != "paper"
     # Keep anchors stable across all paper profiles so intra-doc links and TOC are consistent.
     standardize_numbered_anchors = profile in {"paper", "part2_astrophysics", "part3_quantum", "part4_verification"}

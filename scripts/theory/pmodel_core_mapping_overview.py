@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "output" / "theory"
+OUT_DIR = ROOT / "output" / "private" / "theory"
 
 
 def _utc_now() -> str:
@@ -152,7 +152,7 @@ def main() -> None:
             "generated_utc": _utc_now(),
             "script": "scripts/theory/pmodel_core_mapping_overview.py",
             "outputs": {"png": str(out_png), "metrics_json": str(out_json)},
-            "figure_index_path": "output/theory/pmodel_core_mapping_overview.png",
+            "figure_index_path": "output/private/theory/pmodel_core_mapping_overview.png",
             "notes": [
                 "This is a conceptual diagram (not a numerical result).",
                 "Text uses the Part I vocabulary: P-field -> φ -> (gravity, clocks, light), plus pointers to Part II/III.",

@@ -137,7 +137,7 @@ def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
 def main():
     print("--- Mercury Simulation (Perihelion Precession) ---")
 
-    out_dir = _ROOT / "output" / "mercury"
+    out_dir = _ROOT / "output" / "private" / "mercury"
     out_dir.mkdir(parents=True, exist_ok=True)
     
     # Reference (GR residual after planetary perturbations), representative value.

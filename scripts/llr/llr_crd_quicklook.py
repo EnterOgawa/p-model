@@ -320,7 +320,7 @@ def iter_inputs(path: Path, recursive: bool) -> List[Path]:
 
 def main() -> None:
     repo = Path(__file__).resolve().parents[2]
-    default_outdir = repo / "output" / "llr"
+    default_outdir = repo / "output" / "private" / "llr"
 
     ap = argparse.ArgumentParser()
     ap.add_argument("input", type=str, help="CRD file or directory")

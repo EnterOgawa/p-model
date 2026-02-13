@@ -173,13 +173,13 @@ def _extract_sgra_syserr_table_rows(tex_lines: Sequence[str], *, source_path: Pa
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
     default_tex = root / "data" / "eht" / "sources" / "arxiv_2311.08679" / "main.tex"
-    default_outdir = root / "output" / "eht"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(
         description="Extract Sgr A* non-closing systematic error budget table (tab:syserr) from Paper II (arXiv:2311.08679) TeX."
     )
     ap.add_argument("--tex", type=str, default=str(default_tex), help="Input TeX (default: Paper II main.tex)")
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/eht)")
+    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/private/eht)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_path = Path(args.tex)
@@ -263,4 +263,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

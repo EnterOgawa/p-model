@@ -1,0 +1,58 @@
+{
+  "generated_utc": "2026-02-11T14:01:48.831001+00:00",
+  "phase": 7,
+  "step": "7.11",
+  "title": "Electromagnetism minimal positioning",
+  "constants": {
+    "c_m_s": 299792458.0,
+    "G": 6.6743e-11,
+    "e_C": 1.602176634e-19,
+    "eps0_F_m": 8.8541878128e-12,
+    "k_e_Nm2_C2": 8987551792.261171,
+    "m_p_kg": 1.67262192369e-27,
+    "m_e_kg": 9.1093837015e-31,
+    "a0_m": 5.29177210903e-11
+  },
+  "scale_check": {
+    "at_r_m": 5.29177210903e-11,
+    "U_coulomb_eV": 27.211386245930335,
+    "U_gravity_eV": 1.1994467652171388e-38,
+    "ratio_Uc_over_Ug": 2.2686614391764346e+39,
+    "note": "p–e interaction energy magnitudes at r=a0 (Bohr radius)."
+  },
+  "postulates": [
+    {
+      "id": "EM-P1",
+      "kind": "degrees_of_freedom",
+      "statement": "Introduce a U(1) gauge field (Aμ, E, B) with sources ρ,J as the minimal EM dof."
+    },
+    {
+      "id": "EM-P2",
+      "kind": "static_limit",
+      "statement": "Coulomb 1/r is fixed via Gauss law in the electrostatic limit."
+    },
+    {
+      "id": "EM-P3",
+      "kind": "photon",
+      "statement": "Photons are transverse EM waves (two polarizations); energy flow is given by the Poynting vector."
+    },
+    {
+      "id": "EM-P4",
+      "kind": "coupling_stance",
+      "statement": "Local Maxwell/QED is kept unchanged at this stage. α is treated as P-independent (κ=0), and κ≠0 is constrained by alpha_p_dependence_constraint.json. P-model affects photon paths via n(P) (coordinate-time description)."
+    }
+  ],
+  "open_problems": [
+    "Derive U(1) charge/gauge symmetry from P-model wave structure (phase/topology)",
+    "Couple EM stress-energy to P consistently (beyond phenomenology)",
+    "Unify photon propagation n(P) with Maxwell-in-background derivation (beyond geometric optics)"
+  ],
+  "outputs": {
+    "figure_png": "output\\public\\quantum\\electromagnetism_minimal.png"
+  },
+  "sources": {
+    "doc": "doc/quantum/16_electromagnetism_charge_maxwell_photon.md",
+    "roadmap": "doc/ROADMAP.md (Step 7.11)",
+    "alpha_constraint": "output/public/quantum/alpha_p_dependence_constraint.json"
+  }
+}

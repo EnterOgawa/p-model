@@ -399,7 +399,7 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
     """
     Solar light deflection summarized via PPN parameter γ (VLBI etc.).
 
-    Source: output/theory/solar_light_deflection_metrics.json (fixed-name artifact).
+    Source: output/private/theory/solar_light_deflection_metrics.json (fixed-name artifact).
     """
     path = _OUT_PRIVATE / "theory" / "solar_light_deflection_metrics.json"
     if not path.exists():
@@ -1222,7 +1222,7 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
 
     Note:
     - These rows are currently treated as screening (not sigma-evaluable) unless explicitly adopted
-      in `output/xrism/xrism_integration_metrics.json`.
+      in `output/private/xrism/xrism_integration_metrics.json`.
     """
     path = _OUT_PRIVATE / "xrism" / "xrism_integration_metrics.json"
     if not path.exists():

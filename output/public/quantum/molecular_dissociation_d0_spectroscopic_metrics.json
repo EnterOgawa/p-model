@@ -1,0 +1,73 @@
+{
+  "generated_utc": "2026-02-11T14:03:45.888038+00:00",
+  "phase": 7,
+  "step": "7.12",
+  "title": "Spectroscopic dissociation energy D0 (0 K; fixed baseline)",
+  "note": "This output fixes spectroscopic dissociation energies D0 at 0 K as an independent baseline for future P-model molecular-binding derivations. Track rotational state (N) where applicable.",
+  "inputs": {
+    "extracted_values": "C:\\develop\\waveP\\data\\quantum\\sources\\molecular_dissociation_d0_spectroscopic\\extracted_values.json"
+  },
+  "rows": [
+    {
+      "molecule": "H2",
+      "rotational_N": 1,
+      "d0_cm^-1": 35999.582834,
+      "d0_unc_cm^-1": 1.1e-05,
+      "d0_eV": 4.463379421603086,
+      "d0_unc_eV": 1.363826182765203e-09,
+      "source": {
+        "type": "arxiv",
+        "arxiv_id": "1902.09471",
+        "url_abs": "https://arxiv.org/abs/1902.09471",
+        "url_pdf": "https://arxiv.org/pdf/1902.09471.pdf",
+        "raw_abs_file": "arxiv_abs_1902.09471.html",
+        "raw_abs_sha256": "a6659ea5d11ca3e4f1971dcf79172ad3ad7936c906c96affd68f61fe34265dfc",
+        "raw_pdf_file": "arxiv_pdf_1902.09471.pdf",
+        "raw_pdf_sha256": "f4b0f3903ed218fa084958acaf036ef4c2939c863ed1945a3bc157fb65a3fed6",
+        "note": "ortho-H2 dissociation energy D0^{N=1} (spectroscopic; wavenumber)",
+        "abstract_text": "The dissociation energy of H$_2$ represents a benchmark quantity to test the accuracy of first-principles calculations. We present a new measurement of the energy interval between the EF $^1\\Sigma_g^+(v=0,N=1)$ state and the 54p1$_1$ Rydberg state of H$_2$. When combined with previously determined intervals, this new measurement leads to an improved value of the dissociation energy $D_0^{N=1}$ of ortho-H$_2$ that has, for the first time, reached a level of uncertainty that is three times smaller than the contribution of about 1 MHz resulting from the finite size of the proton. The new result of 35999.582834(11) cm$^{-1}$ is in remarkable agreement with the theoretical result of 35999.582820(26) cm$^{-1}$ obtained in calculations including high-order relativistic and quantum electrodynamics corrections, as reported in the companion article (M. Puchalski, J. Komasa, P. Czachorowski and K. Pachucki, submitted). This agreement resolves a recent discrepancy between experiment and theory that had hindered a possible use of the dissociation energy of H$_2$ in the context of the current controversy on the charge radius of the proton.",
+        "d0_token": "35999.582834(11)"
+      }
+    },
+    {
+      "molecule": "HD",
+      "rotational_N": 0,
+      "d0_cm^-1": 36405.78253,
+      "d0_unc_cm^-1": 7.000000000000001e-05,
+      "d0_eV": 4.513741765315455,
+      "d0_unc_eV": 8.678893890324019e-09,
+      "source": {
+        "type": "vu_publication_page",
+        "url": "https://research.vu.nl/en/publications/ionization-and-dissociation-energies-of-hd-and-dipole-induced-gu-/",
+        "raw_html_file": "vu_publication_hd_d0.html",
+        "raw_html_sha256": "17745ed178e49fc0dca9aaf89367edb42e293d3573006809bc6f3e5a5c1a8ed8",
+        "note": "VU Amsterdam publication page (abstract text contains D0(HD) in cm^-1)",
+        "d0_token": "36405.78253(7)"
+      }
+    },
+    {
+      "molecule": "D2",
+      "rotational_N": 0,
+      "d0_cm^-1": 36748.362282,
+      "d0_unc_cm^-1": 2.6e-05,
+      "d0_eV": 4.556216241266621,
+      "d0_unc_eV": 3.2235891592632067e-09,
+      "source": {
+        "type": "arxiv",
+        "arxiv_id": "2202.00532",
+        "url_abs": "https://arxiv.org/abs/2202.00532",
+        "url_pdf": "https://arxiv.org/pdf/2202.00532.pdf",
+        "raw_abs_file": "arxiv_abs_2202.00532.html",
+        "raw_abs_sha256": "443014b705a0d89a682067d6a9c223013eb3492fd33a0a996e9885291d502e59",
+        "raw_pdf_file": "arxiv_pdf_2202.00532.pdf",
+        "raw_pdf_sha256": "ade6f9fa3bccbafcbd20df4ffd52821e629dcc9b904640326bb1c62edc9ec724",
+        "note": "D2 dissociation energy D0 (spectroscopic; wavenumber)",
+        "abstract_text": "The ionization energy of D$_2$ has been determined experimentally from measurements involving two-photon Doppler-free vacuum-ultraviolet pulsed laser excitation and near-infrared continuous-wave laser excitation to yield $E_\\mathrm{I}(\\mathrm{D}_2)=124\\,745.393\\,739(26)$ \\wn. From this value, the dissociation energy of D$_2$ is deduced to be $D_0$(D$_2$) = 36\\,748.362\\,282(26) \\wn, representing a 25-fold improvement over previous values, and found in good agreement (at $1.6\\sigma$) with recent ab initio calculations of the 4-particle nonadiabatic relativistic energy and of quantum-electrodynamic corrections up to order $m\\alpha^6$. This result constitutes a test of quantum electrodynamics in the molecular domain, while a perspective is opened to determine nuclear charge radii from molecules.",
+        "d0_token": "36\\,748.362\\,282(26)"
+      }
+    }
+  ],
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_dissociation_d0_spectroscopic.png"
+  }
+}

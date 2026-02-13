@@ -416,8 +416,8 @@ def _build_payload(root: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
         "generated_utc": _iso_utc_now(),
         "inputs": {
             "decisive_falsification_json": "output/private/summary/decisive_falsification.json",
-            "gravity_s2_pmodel_projection_json": "output/eht/gravity_s2_pmodel_projection.json",
-            "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics_json": "output/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json",
+            "gravity_s2_pmodel_projection_json": "output/private/eht/gravity_s2_pmodel_projection.json",
+            "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics_json": "output/private/eht/eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json",
         },
         "policy": {
             "selection_goal": "GRとP-modelの差が出る観測量を候補として列挙し、一次ソース・支配誤差・必要精度でスクリーニングする。",

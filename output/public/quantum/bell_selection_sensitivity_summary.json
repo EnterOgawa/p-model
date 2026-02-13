@@ -1,0 +1,116 @@
+{
+  "generated_utc": "2026-02-11T14:04:50.854725+00:00",
+  "step": "Phase 7 / Step 7.4 (selection sensitivity summary)",
+  "nist": {
+    "trial_tag": "03_43_afterfixingModeLocking_s3600",
+    "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+    "source_manifest": {
+      "manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_belltestdata\\manifest.json",
+      "dataset": "nist-belltestdata (Shalm et al. 2015 time-tag repository)",
+      "n_files": 13
+    },
+    "trial_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\window_sweep_metrics.json",
+    "time_tag_bias_metrics": null,
+    "ks_setting0_vs_1": {
+      "alice": 0.02869748256715876,
+      "bob": 0.04112778021955209
+    },
+    "j_prob_trial_best": 6.518427199813021e-06,
+    "j_prob_sweep_min": -0.0014067091362638773,
+    "j_prob_sweep_max": 0.0021000022088797947,
+    "j_prob_sweep_subtracted_clipped_min": -0.0014092113775486539,
+    "j_prob_sweep_subtracted_clipped_max": -0.0013825120707554501,
+    "recommended_window_ns": null,
+    "recommended_window_method": null
+  },
+  "kwiat2013": {
+    "dataset_id": "kwiat2013_prl111_130406_05082013_15",
+    "source_manifest": {
+      "manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\kwiat2013_prl111_130406\\manifest.json",
+      "dataset": "Christensen et al. 2013 (PRL 111, 130406) CH Bell-test time-tag data (Illinois QI page)",
+      "n_files": 2
+    },
+    "window_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\window_sweep_metrics.json",
+    "j_prob_trial_best": -8.12025607476813e-05,
+    "j_prob_sweep_min": -0.00012626839841629233,
+    "j_prob_sweep_max": -2.877514281541989e-06,
+    "recommended_window_ns": null,
+    "recommended_window_method": null
+  },
+  "weihs": {
+    "out_tag": "weihs1998_longdist_longdist1",
+    "dataset_id": "weihs1998_longdist_longdist1",
+    "source_manifest": {
+      "manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\zenodo_7185335\\manifest.json",
+      "dataset": "Weihs et al. 1998 Bell test time-tag data (Zenodo 7185335; Alice.zip/Bob.zip)",
+      "n_files": 2
+    },
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\window_sweep_metrics.json",
+    "abs_S_min": 2.476988510549097,
+    "abs_S_max": 2.9002764964975367,
+    "abs_S_accidental_subtracted_min": 2.6455215858517867,
+    "abs_S_accidental_subtracted_max": 2.9018438331640475,
+    "recommended_window_ns": null,
+    "recommended_window_method": null
+  },
+  "delft2015": {
+    "source_manifest": {
+      "manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\delft_hensen2015\\manifest.json",
+      "dataset": "Delft loophole-free Bell test (Hensen et al. 2015) open data (trial table)",
+      "n_files": 1
+    },
+    "metrics": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\offset_sweep_metrics.json",
+    "baseline_S": 2.4224998704613703,
+    "baseline_S_err": 0.20382659825201987,
+    "sweep_S_min": 1.7106421112506305,
+    "sweep_S_max": 2.4987820516316144,
+    "recommended_start_offset_ps": 0.0
+  },
+  "delft2016": {
+    "source_manifest": {
+      "manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\delft_hensen2016_srep30289\\manifest.json",
+      "dataset": "Delft second loophole-free Bell test (Hensen et al. 2016; Sci Rep 6, 30289) open data (trial table)",
+      "n_files": 1
+    },
+    "metrics": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\offset_sweep_metrics.json",
+    "baseline_combined_S": 2.3464305157914853,
+    "baseline_combined_S_err": 0.18416242025166854,
+    "sweep_combined_S_min": 1.100325361836174,
+    "sweep_combined_S_max": 2.542289949108131,
+    "recommended_start_offset_ps": 0.0
+  },
+  "giustina2015": {
+    "status": "blocked",
+    "reason": "Raw photon time-tag click logs are not present in the public paper/supplement bundle. Data availability indicates data are available upon request; APS supplemental is also often blocked by Cloudflare in automated environments.",
+    "source_manifest": {
+      "manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\giustina2015_prl115_250401\\manifest.json",
+      "dataset": "Giustina et al. 2015 (PhysRevLett.115.250401) paper PDFs + arXiv source (incl. supplement)",
+      "n_files": 7
+    },
+    "aps_supplemental_http_status": 403,
+    "aps_supplemental_blocked_by_cloudflare": true
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\bell_selection_sensitivity_summary.png",
+    "json": "C:\\develop\\waveP\\output\\public\\quantum\\bell_selection_sensitivity_summary.json"
+  },
+  "repro": {
+    "script": "python -B scripts/quantum/bell_selection_sensitivity_summary.py",
+    "inputs": [
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\window_sweep_metrics.json",
+      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\window_sweep_metrics.json",
+      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\window_sweep_metrics.json",
+      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\offset_sweep_metrics.json",
+      null,
+      "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\offset_sweep_metrics.json",
+      null
+    ]
+  },
+  "notes": [
+    "This summary compares how analysis/selection knobs move reported test statistics across datasets.",
+    "NIST uses CH J_prob; Weihs/Delft use CHSH S. They are plotted separately for sensitivity inspection."
+  ]
+}

@@ -324,8 +324,8 @@ def _kappa_from_dsh(*, ring_uas: float, dsh: Dict[str, float]) -> Dict[str, floa
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
     default_tex = root / "data" / "eht" / "sources" / "arxiv_2311.09484" / "main.tex"
-    default_shadow_compare = root / "output" / "eht" / "eht_shadow_compare.json"
-    default_outdir = root / "output" / "eht"
+    default_shadow_compare = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Extract Sgr A* Paper VI (arXiv:2311.09484) metric-test constraints tables.")
     ap.add_argument("--tex", type=str, default=str(default_tex), help="Input TeX (default: Paper VI main.tex)")
@@ -333,9 +333,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--shadow-compare-json",
         type=str,
         default=str(default_shadow_compare),
-        help="Optional ring diameter source (default: output/eht/eht_shadow_compare.json)",
+        help="Optional ring diameter source (default: output/private/eht/eht_shadow_compare.json)",
     )
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/eht)")
+    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/private/eht)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_path = Path(args.tex)

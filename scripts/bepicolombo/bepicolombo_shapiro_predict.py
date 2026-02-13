@@ -421,7 +421,7 @@ def main() -> int:
 
     root = _ROOT
     kernels_dir = root / "data" / "bepicolombo" / "kernels" / "psa"
-    out_dir = root / "output" / "bepicolombo"
+    out_dir = root / "output" / "private" / "bepicolombo"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     load_info = _load_kernels_from_meta(kernels_dir)

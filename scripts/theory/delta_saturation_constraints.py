@@ -96,11 +96,13 @@ def _parse_example(o: Dict[str, Any]) -> Example:
 def main() -> int:
     root = _repo_root()
     default_in_path = root / "data" / "theory" / "delta_saturation_examples.json"
-    default_out_dir = root / "output" / "theory"
+    default_out_dir = root / "output" / "private" / "theory"
 
     ap = argparse.ArgumentParser(description="Constraint chart for the saturation constant δ (Phase 4 differential).")
     ap.add_argument("--input", type=str, default=str(default_in_path), help="Input JSON (default: data/theory/...)")
-    ap.add_argument("--outdir", type=str, default=str(default_out_dir), help="Output directory (default: output/theory)")
+    ap.add_argument(
+        "--outdir", type=str, default=str(default_out_dir), help="Output directory (default: output/private/theory)"
+    )
     ap.add_argument(
         "--delta",
         type=float,
@@ -274,4 +276,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

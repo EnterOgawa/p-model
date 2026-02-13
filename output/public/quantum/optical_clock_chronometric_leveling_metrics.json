@@ -1,0 +1,36 @@
+{
+  "generated_utc": "2026-02-11T14:02:02.963565+00:00",
+  "source": {
+    "reference": "arXiv:2309.14953v3, 'Long-distance chronometric leveling with a portable optical clock'",
+    "url": "https://arxiv.org/abs/2309.14953",
+    "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_2309.14953v3.pdf",
+    "local_pdf_sha256": "ACB4A20342662C6993F761FEC1AAE05730E26B692D0DCF099471748B0B6B8196",
+    "abstract_values": {
+      "delta_u_clock_m2_s2": 3918.1,
+      "sigma_clock_m2_s2": 2.6,
+      "delta_u_geodetic_m2_s2": 3915.88,
+      "sigma_geodetic_m2_s2": 0.3
+    }
+  },
+  "config": {
+    "c_m_per_s": 299792458.0,
+    "g_m_per_s2": 9.80665
+  },
+  "derived": {
+    "z_clock_delta_f_over_f": 4.359474184623683e-14,
+    "z_geodetic_delta_f_over_f": 4.357004101499244e-14,
+    "delta_u_diff_m2_s2": 2.2199999999998,
+    "sigma_diff_m2_s2": 2.6172504656604803,
+    "z_score": 0.8482183990898893,
+    "epsilon": 0.0005669223776008092,
+    "sigma_epsilon": 0.0006683733837618693,
+    "height_sigma_m": 0.26512621537426134
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\optical_clock_chronometric_leveling.png"
+  },
+  "notes": [
+    "This script treats the geodetic determination of ΔU as the reference and infers epsilon from the clock-derived ΔU.",
+    "P-model (stationary clocks) predicts the same leading redshift relation Δf/f ≈ ΔU/c^2 in the weak field."
+  ]
+}

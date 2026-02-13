@@ -61,14 +61,14 @@ def _load_beta(root: Path) -> Tuple[float, str]:
         beta_source = "data/eht/eht_black_holes.json:pmodel.beta (read failed)"
 
     if not (math.isfinite(beta) and beta > 0):
-        frozen_path = root / "output" / "theory" / "frozen_parameters.json"
+        frozen_path = root / "output" / "private" / "theory" / "frozen_parameters.json"
         try:
             frozen = _read_json(frozen_path) if frozen_path.exists() else {}
             beta = float(frozen.get("beta"))
-            beta_source = "output/theory/frozen_parameters.json:beta"
+            beta_source = "output/private/theory/frozen_parameters.json:beta"
         except Exception:
             beta = float("nan")
-            beta_source = "output/theory/frozen_parameters.json:beta (read failed)"
+            beta_source = "output/private/theory/frozen_parameters.json:beta (read failed)"
 
     if not (math.isfinite(beta) and beta > 0):
         beta = 1.0
@@ -145,11 +145,11 @@ def main() -> int:
     ap.add_argument("--inc-max", type=float, default=90.0)
     ap.add_argument("--inc-step", type=float, default=5.0)
     ap.add_argument("--n-r", type=int, default=2500)
-    ap.add_argument("--outdir", type=str, default="", help="Override output dir (default: output/eht)")
+    ap.add_argument("--outdir", type=str, default="", help="Override output dir (default: output/private/eht)")
     args = ap.parse_args()
 
     root = _repo_root()
-    outdir = Path(args.outdir) if str(args.outdir).strip() else (root / "output" / "eht")
+    outdir = Path(args.outdir) if str(args.outdir).strip() else (root / "output" / "private" / "eht")
     outdir.mkdir(parents=True, exist_ok=True)
 
     out_png = outdir / "eht_kerr_shadow_coeff_definition_sensitivity.png"
@@ -495,4 +495,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

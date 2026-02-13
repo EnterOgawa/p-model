@@ -4,8 +4,8 @@
 llr_station_coord_delta_plot.py
 
 Phase 8 / Step 8.4.2（図表品質改善）:
-`output/llr/batch/llr_station_metadata_used.json` から
-`output/llr/batch/llr_station_coord_delta_pos_eop.png` を高速に再生成する。
+`output/private/llr/batch/llr_station_metadata_used.json` から
+`output/private/llr/batch/llr_station_coord_delta_pos_eop.png` を高速に再生成する。
 
 目的：
 - `scripts/llr/llr_batch_eval.py` は重いので、図だけを差し替えたいときの軽量再生成経路を用意する。
@@ -70,8 +70,8 @@ def _extract_delta_m(stations: Dict[str, Any]) -> List[Tuple[str, float]]:
 
 
 def main(argv: List[str] | None = None) -> int:
-    default_in = _ROOT / "output" / "llr" / "batch" / "llr_station_metadata_used.json"
-    default_out = _ROOT / "output" / "llr" / "batch" / "llr_station_coord_delta_pos_eop.png"
+    default_in = _ROOT / "output" / "private" / "llr" / "batch" / "llr_station_metadata_used.json"
+    default_out = _ROOT / "output" / "private" / "llr" / "batch" / "llr_station_coord_delta_pos_eop.png"
 
     ap = argparse.ArgumentParser(description="Replot LLR station coordinate delta (pos+eop vs slrlog).")
     ap.add_argument("--in-json", type=str, default=str(default_in))

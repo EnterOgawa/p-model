@@ -640,7 +640,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     default_s4 = root / "data" / "eht" / "sources" / "arxiv_2207.06829" / "S4_Variability.tex"
     default_s5 = root / "data" / "eht" / "sources" / "arxiv_2207.06829" / "S5_Modeling.tex"
-    default_out = root / "output" / "eht" / "wielgus2022_m3_observed_metrics.json"
+    default_out = root / "output" / "private" / "eht" / "wielgus2022_m3_observed_metrics.json"
 
     ap = argparse.ArgumentParser(description="Extract Wielgus+2022 (arXiv:2207.06829) M3-related observed metrics for EHT Sgr A* Paper V context.")
     ap.add_argument("--s4-variability-tex", type=str, default=str(default_s4))

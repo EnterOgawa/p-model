@@ -404,7 +404,7 @@ def _build_anchor_specs(eht: Dict[str, Any]) -> List[AnchorSpec]:
 def main() -> int:
     root = _repo_root()
     inp = root / "data" / "eht" / "eht_black_holes.json"
-    out_dir = root / "output" / "eht"
+    out_dir = root / "output" / "private" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_json = out_dir / "eht_primary_value_anchors.json"
 

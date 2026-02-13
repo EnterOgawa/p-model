@@ -55,8 +55,8 @@ def _z_rel_pmodel(*, epsilon: float, beta: float, delta: float) -> float:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
-    default_in = root / "output" / "eht" / "gravity_s2_constraints.json"
-    default_outdir = root / "output" / "eht"
+    default_in = root / "output" / "private" / "eht" / "gravity_s2_constraints.json"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(
         description="Project P-model vs GR differences onto GRAVITY S2 definitions (f, f_SP) as an order-of-magnitude test."

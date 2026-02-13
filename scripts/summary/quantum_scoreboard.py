@@ -90,6 +90,35 @@ def _status_from_score(score: Optional[float]) -> str:
     return "ng"
 
 
+def _short_observable_label(observable: str) -> str:
+    obs = (observable or "").strip()
+    if not obs:
+        return "detail"
+
+    # Prefer stable, short tokens for the overview y-axis.
+    if "COW" in obs:
+        return "COW"
+    if "原子干渉" in obs:
+        return "原子干渉計"
+
+    for token in ("H I", "He I", "H2", "HD", "D2", "D0"):
+        if token in obs:
+            return token
+
+    if "一次線" in obs or "代表遷移" in obs:
+        return "lines"
+
+    if "photon" in obs or "time-tag" in obs:
+        return "time-tag"
+    if "共分散" in obs or "系統" in obs:
+        return "cov+sys"
+
+    # Fallback: remove parenthetical notes and truncate.
+    obs = re.sub(r"[（(].*?[）)]", "", obs).strip()
+    obs = re.sub(r"\s+", " ", obs)
+    return obs[:16] if len(obs) > 16 else obs
+
+
 def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
     table1_json = root / "output" / "private" / "summary" / "paper_table1_quantum_results.json"
     payload: Dict[str, Any] = {
@@ -110,26 +139,45 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
     table1 = j.get("table1") if isinstance(j.get("table1"), dict) else {}
     rows = table1.get("rows") if isinstance(table1.get("rows"), list) else []
 
-    out_rows: List[Dict[str, Any]] = []
+    topic_counts: Dict[str, int] = {}
     for r in rows:
         if not isinstance(r, dict):
             continue
-        label = str(r.get("topic") or "").strip()
+        topic = str(r.get("topic") or "").strip()
+        if not topic:
+            continue
+        topic_counts[topic] = topic_counts.get(topic, 0) + 1
+
+    out_rows: List[Dict[str, Any]] = []
+    for idx, r in enumerate(rows):
+        if not isinstance(r, dict):
+            continue
+        topic = str(r.get("topic") or "").strip()
+        if not topic:
+            continue
+        observable = str(r.get("observable") or "").strip()
         metric = str(r.get("metric") or "")
         metric_public = str(r.get("metric_public") or "")
         pmodel = str(r.get("pmodel") or "")
+
+        label = topic
+        if topic_counts.get(topic, 0) > 1:
+            label = f"{topic}：{_short_observable_label(observable)}"
 
         score = _score_norm_quantum(metric_public, metric, pmodel)
         status = _status_from_score(score)
 
         out_rows.append(
             {
-                "id": re.sub(r"[^a-zA-Z0-9]+", "_", label).strip("_").lower() or f"row_{len(out_rows)+1}",
+                "id": (
+                    re.sub(r"[^a-zA-Z0-9]+", "_", label).strip("_").lower() or f"row_{idx+1}"
+                )
+                + f"__{idx+1}",
                 "label": label,
                 "status": status,
                 "score": score if score is not None and math.isfinite(float(score)) else None,
                 "metric": (metric_public or metric).strip(),
-                "detail": "",
+                "detail": observable,
                 "sources": [str(table1_json).replace("\\", "/")],
                 "score_kind": "table1_quantum_proxy",
             }

@@ -164,8 +164,8 @@ def _render_plot(out_png: Path, *, zmax_pb_hours: float, zmax_f_hz: float) -> Di
 
 def main(argv: list[str] | None = None) -> int:
     root = _ROOT
-    default_png = root / "output" / "theory" / "dynamic_p_quadrupole_scalings.png"
-    default_json = root / "output" / "theory" / "dynamic_p_quadrupole_scalings_metrics.json"
+    default_png = root / "output" / "private" / "theory" / "dynamic_p_quadrupole_scalings.png"
+    default_json = root / "output" / "private" / "theory" / "dynamic_p_quadrupole_scalings_metrics.json"
 
     ap = argparse.ArgumentParser(description="Dynamic P: quadrupole scaling plots (theory-only, no fit).")
     ap.add_argument("--out-png", type=str, default=str(default_png))
@@ -214,4 +214,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

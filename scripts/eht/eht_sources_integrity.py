@@ -57,7 +57,7 @@ def _extract_local_files(source: Dict[str, Any]) -> List[Tuple[str, str, str | N
 def main() -> int:
     root = _repo_root()
     inp = root / "data" / "eht" / "eht_black_holes.json"
-    out_dir = root / "output" / "eht"
+    out_dir = root / "output" / "private" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
     out_json = out_dir / "eht_sources_integrity.json"
 
@@ -161,4 +161,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

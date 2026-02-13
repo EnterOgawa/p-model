@@ -60,7 +60,7 @@ def _output_item(rel: str, *, note: str = "") -> Dict[str, Any]:
 
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
-    p = _ROOT / "output" / "theory" / "frozen_parameters.json"
+    p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
     try:
@@ -96,7 +96,7 @@ def build_matrix() -> Dict[str, Any]:
             },
             "inputs": [
                 _path_item(
-                    "output/cassini/cassini_shapiro_y_full.csv",
+                    "output/private/cassini/cassini_shapiro_y_full.csv",
                     required=True,
                     note="幾何（Earth/Cassini ベクトル由来）のモデルCSV。再生成にはネットワーク（HORIZONS）が必要。",
                 ),
@@ -126,16 +126,16 @@ def build_matrix() -> Dict[str, Any]:
                 ),
             ],
             "outputs": [
-                _output_item("output/cassini/cassini_fig2_overlay_full.png", note="観測 vs モデル（全期間）"),
-                _output_item("output/cassini/cassini_fig2_overlay_zoom10d.png", note="観測 vs モデル（±10日）"),
-                _output_item("output/cassini/cassini_fig2_residuals.png", note="残差（観測-モデル）"),
-                _output_item("output/cassini/cassini_fig2_metrics.csv", note="RMSE/MAE/corr 等の指標"),
-                _output_item("output/cassini/cassini_fig2_run_metadata.json", note="実行条件・入力・パラメータ"),
-                _output_item("output/cassini/cassini_beta_sweep_rmse.csv", note="βスイープのRMSE"),
-                _output_item("output/cassini/cassini_beta_sweep_rmse.png", note="βスイープの可視化"),
+                _output_item("output/private/cassini/cassini_fig2_overlay_full.png", note="観測 vs モデル（全期間）"),
+                _output_item("output/private/cassini/cassini_fig2_overlay_zoom10d.png", note="観測 vs モデル（±10日）"),
+                _output_item("output/private/cassini/cassini_fig2_residuals.png", note="残差（観測-モデル）"),
+                _output_item("output/private/cassini/cassini_fig2_metrics.csv", note="RMSE/MAE/corr 等の指標"),
+                _output_item("output/private/cassini/cassini_fig2_run_metadata.json", note="実行条件・入力・パラメータ"),
+                _output_item("output/private/cassini/cassini_beta_sweep_rmse.csv", note="βスイープのRMSE"),
+                _output_item("output/private/cassini/cassini_beta_sweep_rmse.png", note="βスイープの可視化"),
             ],
             "frozen_parameters_policy": {
-                "beta": "Use output/theory/frozen_parameters.json (no per-dataset retuning).",
+                "beta": "Use output/private/theory/frozen_parameters.json (no per-dataset retuning).",
                 "note": "Cassini は β 拘束の主力。Phase 6.2 では長期・多系統でも同一βで自己矛盾しないことを確認する。",
             },
             "systematics_knobs": [
@@ -170,7 +170,7 @@ def build_matrix() -> Dict[str, Any]:
                     note="スライド雛形（update_slides.py）。",
                 ),
                 _path_item(
-                    "output/viking/horizons_cache/",
+                    "output/private/viking/horizons_cache/",
                     required=False,
                     note="HORIZONS幾何キャッシュ（初回はネットワークが必要）。",
                 ),
@@ -190,9 +190,9 @@ def build_matrix() -> Dict[str, Any]:
                 ),
             ],
             "outputs": [
-                _output_item("output/viking/viking_shapiro_result.csv"),
-                _output_item("output/viking/viking_p_model_vs_measured_no_arrow.png"),
-                _output_item("output/viking/P_model_Verification_Full.pptx"),
+                _output_item("output/private/viking/viking_shapiro_result.csv"),
+                _output_item("output/private/viking/viking_p_model_vs_measured_no_arrow.png"),
+                _output_item("output/private/viking/P_model_Verification_Full.pptx"),
             ],
             "systematics_knobs": [
                 {"key": "start/stop/step", "note": "期間スキャン（幾何ピークの取り方も含む）"},
@@ -221,9 +221,9 @@ def build_matrix() -> Dict[str, Any]:
                 ),
             ],
             "outputs": [
-                _output_item("output/mercury/mercury_orbit.png"),
-                _output_item("output/mercury/mercury_precession_metrics.json", note="数値（角秒/世紀など）"),
-                _output_item("output/mercury/mercury_perihelion_shifts.csv", note="周回ごとの累積値"),
+                _output_item("output/private/mercury/mercury_orbit.png"),
+                _output_item("output/private/mercury/mercury_precession_metrics.json", note="数値（角秒/世紀など）"),
+                _output_item("output/private/mercury/mercury_perihelion_shifts.csv", note="周回ごとの累積値"),
             ],
             "systematics_knobs": [
                 {"key": "unmodeled_perturbations", "note": "他惑星摂動/太陽四重極/小天体摂動等を入れていない限界を明示"},
@@ -283,12 +283,12 @@ def build_matrix() -> Dict[str, Any]:
                 ),
             ],
             "outputs": [
-                _output_item("output/gps/summary_batch.csv", note="衛星ごとのRMSなど"),
-                _output_item("output/gps/gps_clock_residuals_all_31.png", note="全衛星重ね描き"),
-                _output_item("output/gps/gps_residual_compare_G01.png", note="G01例"),
-                _output_item("output/gps/gps_rms_compare.png", note="全衛星RMS比較"),
-                _output_item("output/gps/gps_relativistic_correction_G02.png", note="dt_rel（近日点効果）比較"),
-                _output_item("output/gps/gps_compare_metrics.json", note="指標JSON（Table 1入力）"),
+                _output_item("output/private/gps/summary_batch.csv", note="衛星ごとのRMSなど"),
+                _output_item("output/private/gps/gps_clock_residuals_all_31.png", note="全衛星重ね描き"),
+                _output_item("output/private/gps/gps_residual_compare_G01.png", note="G01例"),
+                _output_item("output/private/gps/gps_rms_compare.png", note="全衛星RMS比較"),
+                _output_item("output/private/gps/gps_relativistic_correction_G02.png", note="dt_rel（近日点効果）比較"),
+                _output_item("output/private/gps/gps_compare_metrics.json", note="指標JSON（Table 1入力）"),
             ],
             "systematics_knobs": [
                 {"key": "ref_include_earth_rotation", "note": "地上基準点速度に地球自転を含める（--ref-include-earth-rotation）"},
@@ -341,13 +341,13 @@ def build_matrix() -> Dict[str, Any]:
                 ),
             ],
             "outputs": [
-                _output_item("output/llr/batch/llr_batch_summary.json"),
-                _output_item("output/llr/batch/llr_batch_metrics.csv"),
-                _output_item("output/llr/batch/llr_outliers.csv"),
-                _output_item("output/llr/batch/llr_outliers_diagnosis.csv"),
-                _output_item("output/llr/batch/llr_residual_distribution.png"),
-                _output_item("output/llr/batch/llr_rms_improvement_overall.png"),
-                _output_item("output/llr/batch/llr_rms_by_station_target.png"),
+                _output_item("output/private/llr/batch/llr_batch_summary.json"),
+                _output_item("output/private/llr/batch/llr_batch_metrics.csv"),
+                _output_item("output/private/llr/batch/llr_outliers.csv"),
+                _output_item("output/private/llr/batch/llr_outliers_diagnosis.csv"),
+                _output_item("output/private/llr/batch/llr_residual_distribution.png"),
+                _output_item("output/private/llr/batch/llr_rms_improvement_overall.png"),
+                _output_item("output/private/llr/batch/llr_rms_by_station_target.png"),
             ],
             "systematics_knobs": [
                 {"key": "time_tag_mode", "note": "tx/rx/mid/auto（局別最適を採用するか）"},

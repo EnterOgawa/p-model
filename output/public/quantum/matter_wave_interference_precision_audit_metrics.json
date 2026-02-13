@@ -1,0 +1,71 @@
+{
+  "generated_utc": "2026-02-12T23:19:05.850932+00:00",
+  "phase": 7,
+  "step": "7.16.13",
+  "title": "Matter-wave interference precision audit (electron/atom/molecule)",
+  "channels_n": 4,
+  "rows": [
+    {
+      "channel": "electron_double_slit",
+      "observable": "fringe_spacing_theta_mrad",
+      "metric_name": "envelope_to_fringe_ratio",
+      "metric_value": 5.6,
+      "threshold_3sigma": 1.0,
+      "pass_3sigma": true,
+      "current_precision": null,
+      "required_precision_3sigma": null,
+      "source": "Bach et al. 2012 (arXiv:1210.6243v1)",
+      "data_status": "direct"
+    },
+    {
+      "channel": "atom_recoil_alpha",
+      "observable": "alpha_consistency_z",
+      "metric_name": "abs_z",
+      "metric_value": 0.5883354744951784,
+      "threshold_3sigma": 3.0,
+      "pass_3sigma": true,
+      "current_precision": 9.084037592891166e-09,
+      "required_precision_3sigma": null,
+      "source": "Bouchendira 2008 + Gabrielse 2008",
+      "data_status": "direct"
+    },
+    {
+      "channel": "atom_interferometer_precision",
+      "observable": "current_over_required_precision_ratio",
+      "metric_name": "median_ratio",
+      "metric_value": 717905.1403824643,
+      "threshold_3sigma": 1.0,
+      "pass_3sigma": false,
+      "current_precision": 717905.1403824643,
+      "required_precision_3sigma": 1.0,
+      "source": "atom_interferometer_unified_audit (Step 7.16.12)",
+      "data_status": "direct"
+    },
+    {
+      "channel": "molecular_isotopic_scaling",
+      "observable": "abs(meas/pred-1)",
+      "metric_name": "z_max",
+      "metric_value": 2.6385399704973964,
+      "threshold_3sigma": 3.0,
+      "pass_3sigma": true,
+      "current_precision": 0.0006990889451634619,
+      "required_precision_3sigma": 0.0007948588457786468,
+      "source": "NIST/WebBook isotopic reduced-mass scaling (Step 7.12)",
+      "data_status": "proxy"
+    }
+  ],
+  "inputs": {
+    "electron_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\electron_double_slit_interference_metrics.json",
+    "alpha_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\de_broglie_precision_alpha_consistency_metrics.json",
+    "atom_audit_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\atom_interferometer_unified_audit_metrics.json",
+    "molecular_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_isotopic_scaling_metrics.json"
+  },
+  "outputs": {
+    "summary_csv": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit_summary.csv",
+    "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit.png"
+  },
+  "notes": [
+    "Molecular channel is a proxy audit based on isotopic reduced-mass scaling because a unified public C60/C70 raw interference cache is not frozen yet.",
+    "Step 7.16.13 freezes a cross-particle I/F with available primary-backed outputs; fullerene raw-integration can be appended without changing this schema."
+  ]
+}

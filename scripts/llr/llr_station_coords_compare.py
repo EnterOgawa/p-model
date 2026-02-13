@@ -6,12 +6,12 @@ LLR（P-model）バッチ結果について、観測局座標ソースの違い�
 残差RMSに与える影響を可視化する。
 
 入力:
-  - scripts/llr/llr_batch_eval.py の出力ディレクトリ（例: output/llr/batch）
+  - scripts/llr/llr_batch_eval.py の出力ディレクトリ（例: output/private/llr/batch）
 
 出力:
-  - output/llr/coord_compare/llr_station_coords_rms_scatter.png
-  - output/llr/coord_compare/llr_station_coords_rms_by_station.png
-  - output/llr/coord_compare/llr_grsm_monthly_rms_pos_eop_vs_slrlog.png
+  - output/private/llr/coord_compare/llr_station_coords_rms_scatter.png
+  - output/private/llr/coord_compare/llr_station_coords_rms_by_station.png
+  - output/private/llr/coord_compare/llr_grsm_monthly_rms_pos_eop_vs_slrlog.png
 """
 
 from __future__ import annotations
@@ -84,20 +84,20 @@ def main() -> int:
     ap.add_argument(
         "--pos-eop-dir",
         type=str,
-        default=str(Path("output") / "llr" / "batch"),
-        help="LLR batch output dir for pos+eop/auto run (default: output/llr/batch)",
+        default=str(Path("output") / "private" / "llr" / "batch"),
+        help="LLR batch output dir for pos+eop/auto run (default: output/private/llr/batch)",
     )
     ap.add_argument(
         "--slrlog-dir",
         type=str,
-        default=str(Path("output") / "llr" / "batch_slrlog"),
-        help="LLR batch output dir for slrlog run (default: output/llr/batch_slrlog)",
+        default=str(Path("output") / "private" / "llr" / "batch_slrlog"),
+        help="LLR batch output dir for slrlog run (default: output/private/llr/batch_slrlog)",
     )
     ap.add_argument(
         "--out-dir",
         type=str,
-        default=str(Path("output") / "llr" / "coord_compare"),
-        help="Output directory for comparison figures (default: output/llr/coord_compare)",
+        default=str(Path("output") / "private" / "llr" / "coord_compare"),
+        help="Output directory for comparison figures (default: output/private/llr/coord_compare)",
     )
     ap.add_argument(
         "--metric-col",

@@ -207,7 +207,7 @@ def main() -> int:
     ap.add_argument(
         "--out",
         type=str,
-        default=str(_repo_root() / "output" / "eht" / "gravity_sgra_flux_distribution_metrics.json"),
+        default=str(_repo_root() / "output" / "private" / "eht" / "gravity_sgra_flux_distribution_metrics.json"),
         help="Output JSON path.",
     )
     args = ap.parse_args()

@@ -9,7 +9,7 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[2]
-OUT_DIR = ROOT / "output" / "theory"
+OUT_DIR = ROOT / "output" / "private" / "theory"
 
 
 def _utc_now() -> str:
@@ -120,7 +120,7 @@ def main() -> None:
             "generated_utc": _utc_now(),
             "script": "scripts/theory/pmodel_core_concept_comparison.py",
             "outputs": {"png": str(out_png), "metrics_json": str(out_json)},
-            "figure_index_path": "output/theory/pmodel_core_concept_comparison.png",
+            "figure_index_path": "output/private/theory/pmodel_core_concept_comparison.png",
             "diag": {"font_family": chosen_font or "default"},
             "notes": [
                 "This is a conceptual comparison diagram (not a numerical result).",
@@ -135,4 +135,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

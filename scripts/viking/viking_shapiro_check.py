@@ -155,7 +155,7 @@ def shapiro_oneway(r1, r2, R, gamma=1.0):
     return (1.0+gamma)*MU_SUN/(C**3) * math.log(val)
 
 def main():
-    out_dir = _ROOT / "output" / "viking"
+    out_dir = _ROOT / "output" / "private" / "viking"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     parser = argparse.ArgumentParser(description="Viking Shapiro delay check (HORIZONS required).")

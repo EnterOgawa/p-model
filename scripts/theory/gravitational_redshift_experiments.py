@@ -154,7 +154,7 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, scale: float) -> Non
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = Path(__file__).resolve().parents[2]
     default_data = root / "data" / "theory" / "gravitational_redshift_experiments.json"
-    default_outdir = root / "output" / "theory"
+    default_outdir = root / "output" / "private" / "theory"
 
     ap = argparse.ArgumentParser(description="Gravitational redshift experiments (observed deviation vs P-model).")
     ap.add_argument(
@@ -167,7 +167,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--outdir",
         type=str,
         default=str(default_outdir),
-        help="Output directory (default: output/theory)",
+        help="Output directory (default: output/private/theory)",
     )
     ap.add_argument(
         "--scale",

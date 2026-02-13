@@ -37,7 +37,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
-OUT_DIR = ROOT / "output" / "viking"
+OUT_DIR = ROOT / "output" / "private" / "viking"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # --- 設定 ---

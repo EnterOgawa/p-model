@@ -85,7 +85,7 @@ def _constraints_from_known_sources() -> List[GammaConstraint]:
 
 
 def _load_vlbi_best_from_solar_deflection_metrics(root: Path) -> Optional[GammaConstraint]:
-    path = root / "output" / "theory" / "solar_light_deflection_metrics.json"
+    path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
     if not path.exists():
         return None
     try:
@@ -96,7 +96,7 @@ def _load_vlbi_best_from_solar_deflection_metrics(root: Path) -> Optional[GammaC
         label = str(m.get("observed_best_label") or "VLBI（best）")
         source = {
             "kind": "derived_from_output",
-            "from": "output/theory/solar_light_deflection_metrics.json",
+            "from": "output/private/theory/solar_light_deflection_metrics.json",
             "observed_best_id": m.get("observed_best_id"),
             "observed_best_label": label,
             "retrieved_utc": str(j.get("generated_utc") or ""),
@@ -126,7 +126,7 @@ def _weighted_average(betas: List[Tuple[float, float]]) -> Tuple[float, float]:
 
 def main() -> int:
     root = _repo_root()
-    default_outdir = root / "output" / "theory"
+    default_outdir = root / "output" / "private" / "theory"
     default_out = default_outdir / "frozen_parameters.json"
 
     ap = argparse.ArgumentParser(description="Freeze global parameter beta for Phase 7 decisive pack.")
@@ -138,7 +138,12 @@ def main() -> int:
     )
     ap.add_argument("--beta", type=float, default=None, help="Override beta (takes precedence).")
     ap.add_argument("--beta-sigma", type=float, default=None, help="Override beta sigma (takes precedence).")
-    ap.add_argument("--out", type=str, default=str(default_out), help="Output JSON path (default: output/theory/frozen_parameters.json)")
+    ap.add_argument(
+        "--out",
+        type=str,
+        default=str(default_out),
+        help="Output JSON path (default: output/private/theory/frozen_parameters.json)",
+    )
     args = ap.parse_args()
 
     # Constraints
@@ -217,7 +222,9 @@ def main() -> int:
                 "event_type": "freeze_parameters",
                 "argv": list(sys.argv),
                 "inputs": {
-                    "solar_light_deflection_metrics_json": (root / "output" / "theory" / "solar_light_deflection_metrics.json"),
+                    "solar_light_deflection_metrics_json": (
+                        root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
+                    ),
                 },
                 "params": {
                     "beta_source": beta_source,

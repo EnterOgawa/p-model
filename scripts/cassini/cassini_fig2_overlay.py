@@ -1138,8 +1138,8 @@ def main() -> None:
     parser.add_argument(
         "--model-csv",
         type=str,
-        default="output/cassini/cassini_shapiro_y_full.csv",
-        help="Model geometry CSV (default: output/cassini/cassini_shapiro_y_full.csv)",
+        default="output/private/cassini/cassini_shapiro_y_full.csv",
+        help="Model geometry CSV (default: output/private/cassini/cassini_shapiro_y_full.csv)",
     )
     parser.add_argument(
         "--digitized-csv",

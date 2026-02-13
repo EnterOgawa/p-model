@@ -1,0 +1,103 @@
+{
+  "generated_utc": "2026-02-11T14:01:48.686631+00:00",
+  "phase": 7,
+  "step": "7.11",
+  "title": "Constraint on alpha(P) dependence (kappa)",
+  "model": {
+    "alpha_of_p": "α(P/P0) = α0 (1 + κ ln(P/P0) + ...)",
+    "u_definition": "u(x,t) ≡ ln(P/P0)",
+    "phi_definition": "φ ≡ -c^2 ln(P/P0) = -c^2 u",
+    "weak_field_relation": "u ≈ -φ/c^2",
+    "note": "If κ=0 is adopted, α is P-independent by construction (this is the current stance)."
+  },
+  "environment": {
+    "constants": {
+      "c_m_per_s": 299792458.0,
+      "gm_sun_m3_s2": 1.32712440018e+20,
+      "au_m": 149597870700.0,
+      "earth_orbit_eccentricity": 0.0167086
+    },
+    "earth_orbit_solar_potential": {
+      "r_peri_m": 147098299717.62198,
+      "r_aphe_m": 152097441682.37802,
+      "U_peri_m2_s2": 902202406.6407439,
+      "U_aphe_m2_s2": 872548798.6519897,
+      "delta_U_m2_s2": 29653607.988754153,
+      "delta_u_lnP_over_1": 3.2994088590879337e-10
+    }
+  },
+  "constraints": {
+    "rosenband_2008_clock_drift": {
+      "alpha_dot_over_alpha_per_year": 1.4e-17,
+      "sigma_per_year": 1.7e-17,
+      "abs_3sigma_per_year_used_as_delta_alpha_over_alpha_over_1yr": 6.5e-17,
+      "kappa_max_from_orbit_delta_u": 1.9700498718418352e-07,
+      "mapping_note": "This treats the annual solar-potential modulation as a 1-year scale for alpha changes (order-of-magnitude; drift vs periodic not strictly identical)."
+    },
+    "hydrogen_1s2s_spectroscopic_baseline": {
+      "fractional_sigma_1s2s": 4.055049053736426e-15,
+      "assumed_scaling": "|Δf/f| ≈ p|Δα/α| with p=2 (non-relativistic alpha scaling)",
+      "kappa_max_from_orbit_delta_u": 6.14511451432754e-06,
+      "note": "This is a conservative back-of-envelope constraint using the fixed 1S–2S baseline uncertainty and the same orbit Δu.",
+      "source_metrics": "output/public/quantum/qed_vacuum_precision_metrics.json"
+    },
+    "webb_2011_spatial_dipole_scale": {
+      "dipole_amp_ppm": 10.2,
+      "dipole_sigma_ppm": 2.1,
+      "amp_abs_3sigma_fraction_used": 1.6499999999999998e-05,
+      "assumed_delta_u_for_translation": {
+        "galaxy_phi_over_c2_1e-6": 1e-06,
+        "cluster_phi_over_c2_1e-5": 1e-05,
+        "unity_delta_u_1": 1.0
+      },
+      "implied_kappa_from_assumed_delta_u": {
+        "galaxy_phi_over_c2_1e-6": 16.5,
+        "cluster_phi_over_c2_1e-5": 1.6499999999999997,
+        "unity_delta_u_1": 1.6499999999999998e-05
+      },
+      "note": "Webb is recorded as an amplitude scale. Translating to κ requires a separate cosmological mapping between absorber environments and u=ln(P/P0)."
+    }
+  },
+  "recommendation": {
+    "adopt_kappa": 0.0,
+    "rationale": "Given tight clock-based constraints, treat α as P-independent at the current stage and keep κ as a rejected/limited degree of freedom unless a full derivation is provided."
+  },
+  "outputs": {
+    "png": "output/public/quantum/alpha_p_dependence_constraint.png"
+  },
+  "sources": {
+    "alpha_variation_manifest": {
+      "manifest": "data/quantum/sources/alpha_variation_manifest.json",
+      "manifest_data": {
+        "generated_utc": "2026-01-28T06:40:53.775216+00:00",
+        "dataset": "Phase 7 / Step 7.11 alpha variation constraint sources (Rosenband 2008; Webb 2011)",
+        "files": [
+          {
+            "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=50655",
+            "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_pub_50655_rosenband2008_al_hg_clocks.pdf",
+            "bytes": 4373445,
+            "sha256": "B704798AFB4532285964926F1DF52F267077B0ACE71981D54477603868F9E582"
+          },
+          {
+            "url": "https://arxiv.org/pdf/1008.3907v2.pdf",
+            "path": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_1008.3907v2.pdf",
+            "bytes": 523484,
+            "sha256": "7895F82145D84ED73DF6E4043E9DD506B1D164DA0F2CA90E1BC29F5D9028B742"
+          }
+        ]
+      }
+    },
+    "rosenband_2008": {
+      "reference": "Rosenband et al., 'Frequency Ratio of Al+ and Hg+ Single-Ion Optical Clocks; Metrology at the 17th Decimal Place' (Science 319, 1808; 2008).",
+      "url": "https://tsapps.nist.gov/publication/get_pdf.cfm?pub_id=50655",
+      "local_pdf": "data/quantum/sources/nist_pub_50655_rosenband2008_al_hg_clocks.pdf",
+      "value_origin": "As-coded value (see primary PDF + manifest; Accessed 2026-01-28)."
+    },
+    "webb_2011": {
+      "reference": "Webb et al., 'Indications of a Spatial Variation of the Fine Structure Constant' (Phys. Rev. Lett. 107, 191101; 2011).",
+      "url": "https://arxiv.org/abs/1008.3907",
+      "local_pdf": "data/quantum/sources/arxiv_1008.3907v2.pdf",
+      "value_origin": "As-coded ppm-scale dipole amplitude (see primary PDF + manifest; Accessed 2026-01-28)."
+    }
+  }
+}

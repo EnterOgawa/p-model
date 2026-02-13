@@ -520,7 +520,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         root / "data" / "eht" / "sources" / "arxiv_2311.09478" / "Tables" / "fail_one_nonthermal.tex"
     )
     default_fail_none = root / "data" / "eht" / "sources" / "arxiv_2311.09478" / "Tables" / "fail_none.tex"
-    default_outdir = root / "output" / "eht"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Parse Sgr A* Paper V pass fraction tables (tab:passfraction_thermal/tab:passfraction).")
     ap.add_argument("--thermal-tex", type=str, default=str(default_thermal))

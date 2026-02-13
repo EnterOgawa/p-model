@@ -1,0 +1,71 @@
+{
+  "generated_utc": "2026-02-11T15:18:31.866686+00:00",
+  "phase": 7,
+  "step": "7.14.14",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_janaf_extracted_values": null,
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    }
+  },
+  "model": {
+    "name": "Debye+Einstein×2 Debye–Grüneisen mixture (theta_D frozen; theta_E1/theta_E2 scanned; A_D/A_E1/A_E2 weighted LS)",
+    "einstein_branches": 2,
+    "theta_D_K": 622.1452045992636,
+    "theta_E1_K": 503.47318681217513,
+    "theta_E2_K": 821.7191152004009,
+    "A_D_mol_per_J": -3.2209998296254187e-07,
+    "A_E1_mol_per_J": 3.805647925459539e-07,
+    "A_E2_mol_per_J": 1.1628246074560297e-07,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "theta_E_scan": {
+      "lo_K": 10.0,
+      "hi_K": 4000.0,
+      "n": 160,
+      "pairs_tested": 12720,
+      "ordering": "theta_E1 < theta_E2"
+    }
+  },
+  "diagnostics": {
+    "alpha_sign_change_T_K": {
+      "obs": 123.70901530483314,
+      "pred": 122.96710528292488
+    },
+    "sign_mismatch_fit_range_n": 1,
+    "fit_range": {
+      "n": 551,
+      "max_abs_z": 3.232951687597989,
+      "rms_z": 1.5177696507754732,
+      "reduced_chi2": 2.3247201772181705,
+      "exceed_3sigma_n": 6
+    },
+    "sigma_fit_1e-8_per_K": {
+      "lt_T_K": 50.0,
+      "lt": 0.03,
+      "ge": 0.5
+    }
+  },
+  "falsification": {
+    "reject_if_sign_mismatch_fit_range_n_gt": 0,
+    "reject_if_max_abs_z_ge": 3.0,
+    "reject_if_reduced_chi2_ge": 2.0,
+    "rejected": true,
+    "notes": [
+      "Debye+Einstein provides a minimal proxy for adding an optical phonon branch on top of an acoustic Debye baseline.",
+      "Mode-dependent Grüneisen signs can be represented by allowing A_E to be negative while A_D is positive (or vice versa).",
+      "Acceptance is evaluated against the NIST TRC curve-fit standard-error scale σ_fit (proxy for data-level accuracy)."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_two_branch_model.png"
+  }
+}

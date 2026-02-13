@@ -1,0 +1,86 @@
+{
+  "generated_utc": "2026-02-12T23:19:03.571673+00:00",
+  "phase": 7,
+  "step": "7.12",
+  "title": "Isotopic reduced-mass scaling check (WebBook diatomic constants)",
+  "mass_model": {
+    "kind": "nist_relative_atomic_mass_u",
+    "note": "Uses relative atomic masses (u) as a primary-source-backed reduced-mass model.",
+    "meta": {
+      "source": "NIST Atomic Weights and Isotopic Compositions (stand_alone.pl)",
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_isotopic_compositions_h\\extracted_values.json",
+      "query_url": "https://physics.nist.gov/cgi-bin/Compositions/stand_alone.pl?ele=H",
+      "raw_sha256": "90fc727e64ac51fcfa590b5515728a47b79737f308232540f37c92beccc86615"
+    },
+    "masses_u": {
+      "H1": 1.00782503223,
+      "D2": 2.01410177812
+    }
+  },
+  "note": "Checks leading reduced-mass scaling (ωe∝μ^{-1/2}, B_e∝μ^{-1}). Prefer NIST primary-source-backed isotope masses when available; otherwise uses mass-number approximation.",
+  "rows": [
+    {
+      "slug": "h2",
+      "label": "H2",
+      "m1": 1.00782503223,
+      "m2": 1.00782503223,
+      "isotopes": [
+        "H1",
+        "H1"
+      ],
+      "mu": 0.503912516115,
+      "omega_e_cm^-1": 4401.213,
+      "B_e_cm^-1": 60.853,
+      "source_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_h2_baseline_metrics.json",
+      "omega_e_pred_cm^-1": 4401.213,
+      "B_e_pred_cm^-1": 60.853,
+      "omega_e_ratio_meas_over_pred": 1.0,
+      "B_e_ratio_meas_over_pred": 1.0
+    },
+    {
+      "slug": "hd",
+      "label": "HD",
+      "m1": 1.00782503223,
+      "m2": 2.01410177812,
+      "isotopes": [
+        "H1",
+        "D2"
+      ],
+      "mu": 0.671711234863822,
+      "omega_e_cm^-1": 3813.15,
+      "B_e_cm^-1": 45.655,
+      "source_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_hd_baseline_metrics.json",
+      "omega_e_pred_cm^-1": 3812.050573443745,
+      "B_e_pred_cm^-1": 45.651444775019755,
+      "omega_e_ratio_meas_over_pred": 1.0002884081769308,
+      "B_e_ratio_meas_over_pred": 1.0000778776005397
+    },
+    {
+      "slug": "d2",
+      "label": "D2",
+      "m1": 2.01410177812,
+      "m2": 2.01410177812,
+      "isotopes": [
+        "D2",
+        "D2"
+      ],
+      "mu": 1.00705088906,
+      "omega_e_cm^-1": 3115.5,
+      "B_e_cm^-1": 30.4436,
+      "source_metrics": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_d2_baseline_metrics.json",
+      "omega_e_pred_cm^-1": 3113.3235099514754,
+      "B_e_pred_cm^-1": 30.449889550039515,
+      "omega_e_ratio_meas_over_pred": 1.0006990889451635,
+      "B_e_ratio_meas_over_pred": 0.9997934458833034
+    }
+  ],
+  "reference": {
+    "slug": "h2",
+    "mu_ref": 0.503912516115,
+    "omega_e_ref_cm^-1": 4401.213,
+    "B_e_ref_cm^-1": 60.853
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\molecular_isotopic_scaling.png"
+  }
+}

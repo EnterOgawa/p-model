@@ -13,7 +13,7 @@ EDC（月次NP2）をまとめて解析し、複数局×複数反射器の LLR �
       2) 観測局→月中心（topocentric）
       3) 観測局→反射器（MOON_PA_DE421 + SPICE）
 
-出力（固定: output/llr/batch/）
+出力（固定: output/private/llr/batch/）
   - llr_batch_metrics.csv
   - llr_batch_summary.json
   - llr_rms_improvement_overall.png
@@ -74,6 +74,20 @@ def _set_japanese_font() -> None:
         llr._set_japanese_font()  # type: ignore[attr-defined]
     except Exception:
         pass
+
+
+def _save_placeholder_plot_png(path: Path, title: str, lines: List[str]) -> None:
+    _set_japanese_font()
+    fig, ax = plt.subplots(figsize=(12.8, 4.8))
+    ax.axis("off")
+    fig.suptitle(title, fontsize=12)
+    y = 0.86
+    for line in lines:
+        ax.text(0.02, y, str(line), transform=ax.transAxes, fontsize=11, va="top")
+        y -= 0.11
+    plt.tight_layout(rect=[0, 0, 1, 0.92])
+    plt.savefig(path, dpi=200)
+    plt.close()
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
@@ -1167,8 +1181,8 @@ def main() -> int:
     ap.add_argument(
         "--out-dir",
         type=str,
-        default=str(Path("output") / "llr" / "batch"),
-        help="Output directory (relative to repo root unless absolute). Default: output/llr/batch",
+        default=str(Path("output") / "private" / "llr" / "batch"),
+        help="Output directory (relative to repo root unless absolute). Default: output/private/llr/batch",
     )
     ap.add_argument("--beta", type=float, default=1.0, help="P-model beta parameter (Shapiro coefficient uses 2*beta).")
     ap.add_argument(
@@ -1224,7 +1238,9 @@ def main() -> int:
         out_dir = root / out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    manifest_path = Path(args.manifest)
+    manifest_path = Path(str(args.manifest))
+    if not manifest_path.is_absolute():
+        manifest_path = (root / manifest_path).resolve()
     if not manifest_path.exists():
         print(f"[err] missing manifest: {manifest_path}")
         return 2
@@ -1236,7 +1252,7 @@ def main() -> int:
         return 2
 
     offline = bool(args.offline) or (os.environ.get("HORIZONS_OFFLINE", "").strip() == "1")
-    cache_dir = root / "output" / "llr" / "horizons_cache"
+    cache_dir = root / "output" / "private" / "llr" / "horizons_cache"
 
     dfs: List[pd.DataFrame] = []
     for rec in file_recs:
@@ -2067,7 +2083,26 @@ def main() -> int:
         # Diagnostics: outlier root-cause (time-tag sensitivity / clustering)
         try:
             o = diag_df.loc[diag_df["outlier_best"] == True].copy()  # noqa: E712
-            if not o.empty:
+            if o.empty:
+                _save_placeholder_plot_png(
+                    out_dir / "llr_outliers_time_tag_sensitivity.png",
+                    f"{LLR_SHORT_NAME}：外れ値の time-tag 感度（tx/rx/mid）",
+                    [
+                        "外れ値が検出されなかったため、time-tag 感度解析は N/A。",
+                        f"判定条件: clip_sigma={clip_sigma}, clip_min_ns={clip_min_ns:.0f} ns。",
+                        "（この図は論文埋め込み用のプレースホルダとして出力）",
+                    ],
+                )
+                _save_placeholder_plot_png(
+                    out_dir / "llr_outliers_target_mixing_sensitivity.png",
+                    f"{LLR_SHORT_NAME}：外れ値のターゲット混入感度（現ターゲット vs 推定ターゲット）",
+                    [
+                        "外れ値が検出されなかったため、ターゲット混入感度解析は N/A。",
+                        f"判定条件: clip_sigma={clip_sigma}, clip_min_ns={clip_min_ns:.0f} ns。",
+                        "（この図は論文埋め込み用のプレースホルダとして出力）",
+                    ],
+                )
+            else:
                 o["delta_centered_ns"] = pd.to_numeric(o["delta_best_centered_ns"], errors="coerce")
                 o["abs_delta_centered_ns"] = np.abs(o["delta_centered_ns"].to_numpy(dtype=float))
                 o["cluster_station_month_n"] = (
@@ -2562,7 +2597,9 @@ def main() -> int:
             diag_el = diag_df[np.isfinite(diag_df["residual_sr_tropo_tide_ns"])].copy()
             diag_el = diag_el[np.isfinite(diag_el["elev_mean_deg"])].copy()
             if not diag_el.empty:
-                min_points_el_plot = 250
+                # Paper figures may be generated from a subset manifest; keep a low threshold so
+                # per-station plots still exist even when n is modest.
+                min_points_el_plot = 30
                 for st in sorted(diag_el["station"].astype(str).unique().tolist()):
                     ssub = diag_el[diag_el["station"].astype(str) == str(st)].copy()
                     if len(ssub) < min_points_el_plot:

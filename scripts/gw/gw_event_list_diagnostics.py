@@ -78,7 +78,7 @@ def _load_event_specs(root: Path) -> List[EventSpec]:
 
 
 def _load_run_all_status(root: Path) -> Dict[str, Any]:
-    path = root / "output" / "summary" / "run_all_status.json"
+    path = root / "output" / "private" / "summary" / "run_all_status.json"
     if not path.exists():
         return {}
     try:
@@ -320,7 +320,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "generated_utc": _iso_utc_now(),
         "inputs": {
             "event_list": str(root / "data" / "gw" / "event_list.json"),
-            "run_all_status": str(root / "output" / "summary" / "run_all_status.json"),
+            "run_all_status": str(root / "output" / "private" / "summary" / "run_all_status.json"),
         },
         "events": rows,
         "by_type": _summarize_by_type(rows),

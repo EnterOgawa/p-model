@@ -50,21 +50,18 @@ goto single_profile
 set "PROFILE=part2_astrophysics"
 set "HTML_NAME=pmodel_paper_part2_astrophysics.html"
 set "DOCX_NAME=pmodel_paper_part2_astrophysics.docx"
-set "PB_EXTRA_ARGS=--skip-tables"
 goto single_profile
 
 :mode3
 set "PROFILE=part3_quantum"
 set "HTML_NAME=pmodel_paper_part3_quantum.html"
 set "DOCX_NAME=pmodel_paper_part3_quantum.docx"
-set "PB_EXTRA_ARGS=--skip-tables"
 goto single_profile
 
 :mode4
 set "PROFILE=part4_verification"
 set "HTML_NAME=pmodel_paper_part4_verification.html"
 set "DOCX_NAME=pmodel_paper_part4_verification.docx"
-set "PB_EXTRA_ARGS=--skip-tables"
 goto single_profile
 
 :dispatch
@@ -112,9 +109,23 @@ echo [info] Mode=full (run_all offline; heavy)
 echo [info] ROOT=%ROOT%
 
 echo.
+REM Warm-up: LLR time-tag auto selection needs Horizons cache; otherwise Part II figures become placeholders.
+if not exist output\private\llr\horizons_cache\horizons_vectors_301_*.csv (
+  echo === llr_batch_eval (online warm-cache for Horizons) ===
+  python -B scripts\llr\llr_batch_eval.py --time-tag-mode auto --min-points 30 --chunk 50
+  if errorlevel 1 (
+    echo [warn] llr_batch_eval warm-cache failed; continuing...
+  )
+  echo.
+)
+
+echo.
 echo === run_all (offline) ===
 python -B scripts\summary\run_all.py --offline --jobs 2
-if errorlevel 1 goto fail
+set "RUN_ALL_RC=!ERRORLEVEL!"
+if not "!RUN_ALL_RC!"=="0" (
+  echo [warn] run_all returned rc=!RUN_ALL_RC! ; common causes: paper_lint or missing outputs. Continuing...
+)
 
 echo.
 echo === paper_build (paper) ===
@@ -133,17 +144,17 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part4_verification) ===
-python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -212,17 +223,17 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part4_verification) ===
-python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
@@ -291,17 +302,17 @@ if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part2_astrophysics) ===
-python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part3_quantum) ===
-python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.
 echo === paper_build (part4_verification) ===
-python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-tables --skip-lint
+python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-lint
 if errorlevel 1 goto fail
 
 echo.

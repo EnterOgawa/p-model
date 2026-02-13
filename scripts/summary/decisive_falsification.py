@@ -313,7 +313,7 @@ def _extract_eht_requirements(eht: Dict[str, Any], *, kappa_budget: Dict[str, An
         ),
         "notes": [
             "図の『参考：+κ/散乱』は、κの不確かさと屈折散乱スケール（Zhu 2018）を影直径へ伝播させた“誤差予算の目安”。",
-            "κ は κ誤差予算（output/eht/eht_kappa_error_budget.json）があればそれを優先し、無ければ κ_obs（リング/シャドウ比）→Kerr係数レンジ（参考）の順で用いる。",
+            "κ は κ誤差予算（output/private/eht/eht_kappa_error_budget.json）があればそれを優先し、無ければ κ_obs（リング/シャドウ比）→Kerr係数レンジ（参考）の順で用いる。",
             "κ は放射モデル/散乱/スピンなどの影響を受けるため、厳密な評価には追加観測量（形状・非円形性・偏心など）や外部制約が必要。",
         ],
     }

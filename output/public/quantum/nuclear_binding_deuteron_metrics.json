@@ -1,0 +1,75 @@
+{
+  "generated_utc": "2026-02-11T14:10:01.162901+00:00",
+  "phase": 7,
+  "step": "7.9",
+  "sources": [
+    {
+      "dataset": "NIST Cuu CODATA constants (mp,mn,md,rd)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\manifest.json",
+      "local_manifest_sha256": "a4af996c9eba1f2dff6c6a73923182e26754b75ddbf3eb36263359dfb43d2a2a",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_baseline\\extracted_values.json",
+      "local_extracted_sha256": "f66aef6422ce5a6e6d9653545a4decd10910923774b19e876132309631b9e245"
+    }
+  ],
+  "assumptions": [
+    "Independent uncertainties for mp,mn,md when propagating σ(B) (no covariance provided).",
+    "The length scale 1/κ is the bound-state tail scale from a single-channel nonrelativistic estimate.",
+    "The 'phi_over_c2' value is a bookkeeping ratio B/(μc^2) under the minimal coupling V=mφ; not a derived nuclear field yet."
+  ],
+  "constants_from_nist_codata": {
+    "mp_kg": {
+      "value": 1.67262192595e-27,
+      "sigma": 5.2e-37
+    },
+    "mn_kg": {
+      "value": 1.67492750056e-27,
+      "sigma": 8.5e-37
+    },
+    "md_kg": {
+      "value": 3.3435837768e-27,
+      "sigma": 1e-36
+    },
+    "rd_m": {
+      "value": 2.12778e-15,
+      "sigma": 2.7e-19
+    }
+  },
+  "derived": {
+    "mass_defect_kg": {
+      "value": 3.965649709999603e-30,
+      "sigma": 1.4117011015083894e-36
+    },
+    "binding_energy": {
+      "B_J": {
+        "value": 3.564148213918302e-13,
+        "sigma": 1.2687736758091348e-19
+      },
+      "B_MeV": {
+        "value": 2.22456634198942,
+        "sigma": 7.919062410999653e-07
+      }
+    },
+    "reduced_mass_kg": 8.368869596449912e-28,
+    "kappa_1_per_m": 231606164751931.47,
+    "inv_kappa_m": 4.31767436359511e-15,
+    "inv_kappa_fm": 4.317674363595111,
+    "deuteron_charge_rms_radius_fm": {
+      "value": 2.12778,
+      "sigma": 0.00027
+    },
+    "phi_over_c2_bookkeeping": 0.004738572711996657
+  },
+  "falsification": {
+    "acceptance_criteria": [
+      "Any proposed P-model nuclear effective equation/potential must support a pn bound state (deuteron) with B within 5σ of this baseline value.",
+      "Any proposed P-model prediction for the deuteron size scale must be compatible with r_d and the tail scale 1/κ (within stated model assumptions)."
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_deuteron.png"
+  },
+  "notes": [
+    "This step fixes nuclear baseline observables and traceable primary sources; it does not claim a first-principles derivation of nuclear forces yet.",
+    "Next: extend primary data to np scattering (a_t, r_t, phase shifts) and derive the effective nuclear-scale constraint from the P-field model (to avoid 'just insert φ' criticism)."
+  ]
+}

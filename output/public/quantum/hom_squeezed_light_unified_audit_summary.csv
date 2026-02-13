@@ -1,0 +1,6 @@
+channel,observable,metric_name,metric_value,threshold_3sigma,pass_3sigma,current_precision,required_precision_3sigma,source,data_status
+hom_visibility_d13ns,visibility,z_vs_classical_0p5,37.07692307692308,3.0,True,0.013,0.16066666666666665,arXiv:2106.03871v2 (reported HOM visibilities),direct
+hom_visibility_d1000ns,visibility,z_vs_classical_0p5,24.349999999999998,3.0,True,0.02,0.16233333333333333,arXiv:2106.03871v2 (reported HOM visibilities),direct
+hom_delay_dependence,abs(Delta_visibility),z_delta_between_13ns_1us,0.20961090407515945,3.0,True,0.023853720883753128,0.07156116265125939,arXiv:2106.03871v2 (13 ns vs 1 us),direct
+squeezed_light_10db,variance_ratio,ratio_vs_3dB_threshold,0.1,0.5,True,0.1,0.5,arXiv:0706.1431v1,direct
+noise_psd_shape,PSD(10kHz)/PSD(100kHz),lf_to_hf_ratio,0.8405951115834224,1.0,False,,,Zenodo 6371310 / DataExfig3b.csv,direct

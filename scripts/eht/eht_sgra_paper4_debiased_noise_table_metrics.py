@@ -221,11 +221,11 @@ def _extract_debiased_table(lines: Sequence[str], *, source_path: Path) -> Tuple
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
     default_tex = root / "data" / "eht" / "sources" / "arxiv_2311.08697" / "results.tex"
-    default_outdir = root / "output" / "eht"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Parse Sgr A* Paper IV debiased variability table (tab:debiased_noise).")
     ap.add_argument("--tex", type=str, default=str(default_tex), help="Input TeX (default: Paper IV results.tex)")
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/eht)")
+    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/private/eht)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_path = Path(args.tex)
@@ -305,4 +305,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

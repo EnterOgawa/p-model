@@ -242,7 +242,7 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _ROOT
     default_data = root / "data" / "theory" / "frame_dragging_experiments.json"
-    default_outdir = root / "output" / "theory"
+    default_outdir = root / "output" / "private" / "theory"
 
     ap = argparse.ArgumentParser(description="Frame-dragging experiments (observed ratio μ vs prediction μ=1).")
     ap.add_argument(
@@ -255,7 +255,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--outdir",
         type=str,
         default=str(default_outdir),
-        help="Output directory (default: output/theory)",
+        help="Output directory (default: output/private/theory)",
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
@@ -308,4 +308,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

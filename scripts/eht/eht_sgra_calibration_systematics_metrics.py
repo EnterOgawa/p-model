@@ -149,7 +149,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
     default_tex = root / "data" / "eht" / "sources" / "arxiv_2311.09479" / "observations.tex"
     default_synth = root / "data" / "eht" / "sources" / "arxiv_2311.09479" / "appendix_synthetic.tex"
-    default_outdir = root / "output" / "eht"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Extract calibration/systematics scalars from Sgr A* Paper III TeX (observations).")
     ap.add_argument("--tex", type=str, default=str(default_tex), help="Input TeX (default: Paper III observations.tex)")
@@ -159,7 +159,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=str(default_synth),
         help="Input TeX (default: Paper III appendix_synthetic.tex; gain table)",
     )
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/eht)")
+    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/private/eht)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_path = Path(args.tex)

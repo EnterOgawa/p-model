@@ -1,0 +1,3 @@
+eq_label,kind,a_t_fm,r_t_fm,v2t_fm3,kappa_physical_fm1,inv_kappa_fm,B_pred_MeV,Delta_B_pred_minus_obs_keV,B_obs_MeV,sigma_B_obs_MeV
+18,gwu_said_phase_shifts,5.403,1.7494,0.163,0.23227313415,4.30527621569,2.2373972085,12.8308665141,2.22456634199,7.919062411e-07
+19,nijmegen_phase_shifts,5.42,1.753,0.04,0.231458688714,4.32042540964,2.22173424177,-2.83210022286,2.22456634199,7.919062411e-07

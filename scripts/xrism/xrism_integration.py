@@ -511,7 +511,32 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
     bh_rows = [r for r in (bh.get("per_obsid_best") or []) if r.get("detected") is True]
     cl_rows = [r for r in (cluster.get("per_obsid_best") or []) if r.get("detected") is True]
     if not bh_rows and not cl_rows:
-        return False
+        fig, ax = plt.subplots(1, 1, figsize=(11, 6.5), constrained_layout=True)
+        ax.axis("off")
+        ax.text(
+            0.5,
+            0.62,
+            "XRISM Resolve: no detected obsid rows yet",
+            ha="center",
+            va="center",
+            fontsize=14,
+            weight="bold",
+            transform=ax.transAxes,
+        )
+        ax.text(
+            0.5,
+            0.45,
+            "This is a placeholder figure so the paper stays readable.\n"
+            "To populate this panel, generate XRISM fixed outputs (BH/AGN, clusters, event-level QC) and rerun xrism_integration.py.",
+            ha="center",
+            va="center",
+            fontsize=10,
+            transform=ax.transAxes,
+        )
+        out_png.parent.mkdir(parents=True, exist_ok=True)
+        fig.savefig(out_png, dpi=200)
+        plt.close(fig)
+        return True
 
     bh_rows = sorted(bh_rows, key=lambda r: (str(r.get("target_name", "")), str(r.get("obsid", ""))))
     cl_rows = sorted(cl_rows, key=lambda r: (str(r.get("target_name", "")), str(r.get("obsid", ""))))
@@ -596,7 +621,7 @@ def build_metrics(root: Path, *, out_dir: Path) -> Dict[str, Any]:
             "cluster_summary_csv": cluster.get("inputs", {}).get("summary_csv"),
             "event_level_qc_summary_csv": _rel(root / "output" / "private" / "xrism" / "xrism_event_level_qc_summary.csv"),
             "event_level_qc_sweep_metrics_json": _rel(sweep_path) if sweep_path.exists() else None,
-            "delta_constraints_json": _rel(root / "output" / "theory" / "delta_saturation_constraints.json"),
+            "delta_constraints_json": _rel(root / "output" / "private" / "theory" / "delta_saturation_constraints.json"),
         },
         "xrism": {
             "bh": bh,

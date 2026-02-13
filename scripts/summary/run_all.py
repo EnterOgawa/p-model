@@ -528,8 +528,8 @@ def main() -> int:
             cwd=cwd,
             requires_network=True,
             requires_cache_globs=[
-                "output/viking/horizons_cache/horizons_vectors_399_*.txt",
-                "output/viking/horizons_cache/horizons_vectors_499_*.txt",
+                "output/private/viking/horizons_cache/horizons_vectors_399_*.txt",
+                "output/private/viking/horizons_cache/horizons_vectors_499_*.txt",
             ],
             optional=True,
         ),
@@ -556,8 +556,8 @@ def main() -> int:
             cwd=cwd,
             requires_network=True,
             requires_cache_globs=[
-                "output/llr/horizons_cache/horizons_vectors_301_*.csv",
-                "output/llr/horizons_cache/horizons_vectors_10_*.csv",
+                "output/private/llr/horizons_cache/horizons_vectors_301_*.csv",
+                "output/private/llr/horizons_cache/horizons_vectors_10_*.csv",
             ],
             optional=True,
         ),
@@ -578,8 +578,8 @@ def main() -> int:
             cwd=cwd,
             requires_network=True,
             requires_cache_globs=[
-                "output/llr/horizons_cache/horizons_vectors_301_*.csv",
-                "output/llr/horizons_cache/horizons_vectors_10_*.csv",
+                "output/private/llr/horizons_cache/horizons_vectors_301_*.csv",
+                "output/private/llr/horizons_cache/horizons_vectors_10_*.csv",
             ],
             optional=True,
         ),

@@ -1091,7 +1091,7 @@ def main() -> int:
     args = ap.parse_args()
 
     root = _repo_root()
-    in_w = root / "output" / "eht" / "wielgus2022_m3_observed_metrics.json"
+    in_w = root / "output" / "private" / "eht" / "wielgus2022_m3_observed_metrics.json"
     if not in_w.exists():
         print(f"[err] missing: {in_w}")
         return 2
@@ -1383,7 +1383,7 @@ def main() -> int:
     is_full = expected_segments_total > 0 and len(computed_values) == expected_segments_total
     hist_label = "historical_reconstructed" if is_full else "historical_reconstructed_partial"
 
-    out_dir = root / "output" / "eht"
+    out_dir = root / "output" / "private" / "eht"
     out_json = out_dir / "eht_sgra_paper5_m3_historical_distribution_values.json"
     out_png = out_dir / "eht_sgra_paper5_m3_historical_distribution_values_ecdf.png"
 

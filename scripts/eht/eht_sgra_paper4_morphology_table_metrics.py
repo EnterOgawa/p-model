@@ -199,8 +199,8 @@ def _select_rows(rows: List[MorphRow], *, analysis_class: str) -> List[MorphRow]
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
     default_tex = root / "data" / "eht" / "sources" / "arxiv_2311.08697" / "results.tex"
-    default_shadow = root / "output" / "eht" / "eht_shadow_compare.json"
-    default_outdir = root / "output" / "eht"
+    default_shadow = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Parse Sgr A* Paper IV morphology table (tab:SgrAMorphology) for diameter scatter proxies.")
     ap.add_argument("--tex", type=str, default=str(default_tex), help="Input TeX (default: Paper IV results.tex)")
@@ -208,9 +208,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--shadow-compare-json",
         type=str,
         default=str(default_shadow),
-        help="eht_shadow_compare.json for reference ring diameter (default: output/eht/eht_shadow_compare.json)",
+        help="eht_shadow_compare.json for reference ring diameter (default: output/private/eht/eht_shadow_compare.json)",
     )
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/eht)")
+    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/private/eht)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_path = Path(args.tex)

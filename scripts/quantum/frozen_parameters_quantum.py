@@ -93,7 +93,7 @@ def _unique_float(values: List[Any], *, name: str) -> float:
 
 
 def build_quantum_frozen_parameters(*, root: Path) -> Dict[str, Any]:
-    theory_frozen = root / "output" / "theory" / "frozen_parameters.json"
+    theory_frozen = root / "output" / "private" / "theory" / "frozen_parameters.json"
     bell_pack = root / "output" / "public" / "quantum" / "bell" / "falsification_pack.json"
     bell_freeze_policy = root / "output" / "public" / "quantum" / "bell" / "freeze_policy.json"
     nuclear_pack = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_falsification_pack.json"

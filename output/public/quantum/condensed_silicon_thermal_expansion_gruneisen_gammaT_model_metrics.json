@@ -1,0 +1,64 @@
+{
+  "generated_utc": "2026-02-11T15:17:19.578742+00:00",
+  "phase": 7,
+  "step": "7.14.9",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_janaf_extracted_values": null,
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    }
+  },
+  "model": {
+    "name": "Debye–Grüneisen minimal extension (temperature-dependent A_eff via tanh)",
+    "theta_D_K": 622.1452045992636,
+    "A_inf_mol_per_J": 1.5574659563312768e-07,
+    "T0_sign_change_frozen_K": 123.70901530483314,
+    "delta_T_K": 136.44295905972552,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "delta_scan": {
+      "lo_K": 5.0,
+      "hi_K": 1000.0,
+      "n": 400
+    }
+  },
+  "diagnostics": {
+    "alpha_sign_change_T0_K": 123.70901530483314,
+    "sign_mismatch_n": {
+      "all": 5,
+      "fit_range": 0
+    },
+    "rel_error_fit_range": {
+      "rmse": 0.23740984777412116,
+      "min": -0.7361463352194735,
+      "max": 0.04338314591957074
+    },
+    "exceed_3sigma_fit_range_n": 514,
+    "sigma_fit_1e-8_per_K": {
+      "lt_T_K": 50.0,
+      "lt": 0.03,
+      "ge": 0.5
+    }
+  },
+  "falsification": {
+    "reject_if_sign_mismatch_fit_range_n_gt": 0,
+    "reject_if_rel_error_rmse_ge": 0.05,
+    "rejected": true,
+    "notes": [
+      "This step tests a minimal extension where the effective Grüneisen factor A_eff(T)=γ(T)/(B V_m) varies smoothly with temperature.",
+      "The sign-change temperature T0 is frozen from the observed α(T) (negative→positive crossing), while ΔT controls how quickly modes with different γ become dominant.",
+      "Even if sign reversal is reproduced, proportionality accuracy is evaluated via the fit-range relative RMSE and treated as a falsification criterion for this ansatz class."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_gammaT_model.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_gammaT_model.png"
+  }
+}

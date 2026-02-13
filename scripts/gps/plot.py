@@ -46,7 +46,7 @@ if str(ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 
-OUT_DIR = ROOT / "output" / "gps"
+OUT_DIR = ROOT / "output" / "private" / "gps"
 
 
 def _to_ns_from_m(rms_m: float) -> float:

@@ -146,7 +146,6 @@ def main() -> None:
     ap.add_argument(
         "--csv",
         action="append",
-        required=True,
         help="Path to a shrinkage sweep CSV (repeatable). Relative paths are resolved from repo root.",
     )
     ap.add_argument("--lam-min", type=float, default=0.0, help="Minimum lambda to include (default: 0.0)")
@@ -174,7 +173,105 @@ def main() -> None:
     if not (math.isfinite(lam_min) and math.isfinite(lam_max) and lam_min <= lam_max):
         raise SystemExit("--lam-min/--lam-max must be finite and lam_min<=lam_max")
 
-    csv_paths = _ensure_paths(list(args.csv or []))
+    out_path = Path(str(args.out_json))
+    out_path = out_path if out_path.is_absolute() else (_ROOT / out_path).resolve()
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_png = out_path.with_suffix("").with_name(out_path.stem + ".png")
+    out_public_png = out_path.with_suffix("").with_name(out_path.stem + "_public.png")
+
+    csv_paths: List[Path] = []
+    if args.csv:
+        csv_paths = _ensure_paths(list(args.csv or []))
+    else:
+        # Convenience: if --csv is omitted, try to reuse the previous inputs (out_json)
+        # or auto-discover sweep CSVs under output/private/cosmology.
+        reuse: List[str] = []
+        try:
+            if out_path.exists():
+                prev = json.loads(out_path.read_text(encoding="utf-8"))
+                prev_inputs = prev.get("inputs") if isinstance(prev, dict) else None
+                prev_csv = prev_inputs.get("csv") if isinstance(prev_inputs, dict) else None
+                if isinstance(prev_csv, list):
+                    reuse = [str(x) for x in prev_csv if str(x).strip()]
+        except Exception:
+            reuse = []
+
+        if reuse:
+            try:
+                csv_paths = _ensure_paths(reuse)
+            except SystemExit:
+                csv_paths = []
+
+        if not csv_paths:
+            sweep_dir = _ROOT / "output" / "private" / "cosmology"
+            try:
+                csv_paths = sorted(
+                    [p for p in sweep_dir.glob("cosmology_desi_dr1_bao_cov_shrinkage_sweep__*.csv") if p.is_file()],
+                    key=lambda p: p.stat().st_mtime,
+                    reverse=True,
+                )
+            except Exception:
+                csv_paths = []
+
+    if not csv_paths:
+        payload = {
+            "root": str(_ROOT),
+            "inputs": {"csv": []},
+            "outputs": {"json": str(out_path), "png": str(out_png), "public_png": str(out_public_png)},
+            "params": {
+                "z_field": str(args.z_field),
+                "lam_min": float(lam_min),
+                "lam_max": float(lam_max),
+                "target_dist": str(args.target_dist),
+                "threshold_abs": float(args.threshold_abs),
+                "min_tracers": int(args.min_tracers),
+            },
+            "result": {"promoted": None, "passing_tracers": [], "passing_tracers_n": 0},
+            "by_method": {},
+            "gate_by_tracer": {},
+            "notes": [
+                "No shrinkage sweep CSV inputs were provided (and no cached inputs were found), so this script emitted a placeholder figure.",
+                "To generate the real promotion check, run the upstream sweep generators (e.g. cosmology_desi_dr1_bao_cov_shrinkage_sweep.py) and pass their CSV(s) via --csv (or rerun after the CSVs exist).",
+            ],
+        }
+        out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        try:
+            import matplotlib.pyplot as plt
+
+            _set_japanese_font()
+            fig, ax = plt.subplots(1, 1, figsize=(10.5, 4.8), dpi=160)
+            ax.axis("off")
+            ax.text(
+                0.5,
+                0.62,
+                "DESI DR1 BAO promotion check (placeholder)",
+                ha="center",
+                va="center",
+                fontsize=14,
+                weight="bold",
+                transform=ax.transAxes,
+            )
+            ax.text(
+                0.5,
+                0.40,
+                "Missing input: shrinkage sweep CSV(s).\n"
+                "Run upstream generators and pass their outputs via --csv.",
+                ha="center",
+                va="center",
+                fontsize=11,
+                transform=ax.transAxes,
+            )
+            fig.savefig(out_png, dpi=160)
+            fig.savefig(out_public_png, dpi=160)
+            plt.close(fig)
+        except Exception:
+            pass
+
+        print(f"[ok] json: {out_path}")
+        print(f"[ok] png : {out_png}")
+        print(f"[ok] png : {out_public_png}")
+        return
 
     summary_by_method: Dict[str, Dict[str, Dict[str, Any]]] = {}
     points_by_method: Dict[str, Dict[Tuple[str, str], List[Tuple[float, float]]]] = {}
@@ -214,11 +311,6 @@ def main() -> None:
             passing_tracers.append(tracer)
 
     promoted = len(passing_tracers) >= min_tracers
-    out_path = Path(str(args.out_json))
-    out_path = out_path if out_path.is_absolute() else (_ROOT / out_path).resolve()
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_png = out_path.with_suffix("").with_name(out_path.stem + ".png")
-    out_public_png = out_path.with_suffix("").with_name(out_path.stem + "_public.png")
 
     payload = {
         "root": str(_ROOT),

@@ -43,7 +43,7 @@ def _as_float(v: object) -> float | None:
 
 
 def _try_load_beta_frozen(root: Path) -> float | None:
-    p = root / "output" / "theory" / "frozen_parameters.json"
+    p = root / "output" / "private" / "theory" / "frozen_parameters.json"
     if not p.exists():
         return None
     try:

@@ -198,14 +198,14 @@ def _extract_near_combo_counts(pass_fraction_metrics: Dict[str, Any]) -> Dict[st
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
 
-    default_key = root / "output" / "eht" / "eht_sgra_paper5_key_constraints_metrics.json"
-    default_pf = root / "output" / "eht" / "eht_sgra_paper5_pass_fraction_tables_metrics.json"
-    default_sweep = root / "output" / "eht" / "eht_sgra_paper5_constraint_relaxation_sweep_metrics.json"
-    default_gravity = root / "output" / "eht" / "gravity_sgra_flux_distribution_metrics.json"
-    default_wielgus = root / "output" / "eht" / "wielgus2022_m3_observed_metrics.json"
-    default_m3_hist_vals = root / "output" / "eht" / "eht_sgra_paper5_m3_historical_distribution_values.json"
-    default_out = root / "output" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
-    default_png = root / "output" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions.png"
+    default_key = root / "output" / "private" / "eht" / "eht_sgra_paper5_key_constraints_metrics.json"
+    default_pf = root / "output" / "private" / "eht" / "eht_sgra_paper5_pass_fraction_tables_metrics.json"
+    default_sweep = root / "output" / "private" / "eht" / "eht_sgra_paper5_constraint_relaxation_sweep_metrics.json"
+    default_gravity = root / "output" / "private" / "eht" / "gravity_sgra_flux_distribution_metrics.json"
+    default_wielgus = root / "output" / "private" / "eht" / "wielgus2022_m3_observed_metrics.json"
+    default_m3_hist_vals = root / "output" / "private" / "eht" / "eht_sgra_paper5_m3_historical_distribution_values.json"
+    default_out = root / "output" / "private" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
+    default_png = root / "output" / "private" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions.png"
 
     ap = argparse.ArgumentParser(description="Quantify reconnection conditions for Paper V M3 / 2.2μm constraints (assumption sensitivity).")
     ap.add_argument("--key-metrics", type=str, default=str(default_key))
@@ -215,19 +215,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "--gravity-flux-metrics",
         type=str,
         default=str(default_gravity),
-        help="Optional: output/eht/gravity_sgra_flux_distribution_metrics.json (GRAVITY 2020 flux distribution percentiles).",
+        help="Optional: output/private/eht/gravity_sgra_flux_distribution_metrics.json (GRAVITY 2020 flux distribution percentiles).",
     )
     ap.add_argument(
         "--wielgus2022-m3-metrics",
         type=str,
         default=str(default_wielgus),
-        help="Optional: output/eht/wielgus2022_m3_observed_metrics.json (Wielgus+2022; (sigma/mu)_3h table and DRW tau).",
+        help="Optional: output/private/eht/wielgus2022_m3_observed_metrics.json (Wielgus+2022; (sigma/mu)_3h table and DRW tau).",
     )
     ap.add_argument(
         "--m3-historical-values-json",
         type=str,
         default=str(default_m3_hist_vals),
-        help="Optional: output/eht/eht_sgra_paper5_m3_historical_distribution_values.json (reconstructed 3h mi3 values; KS vs 2017 sample).",
+        help="Optional: output/private/eht/eht_sgra_paper5_m3_historical_distribution_values.json (reconstructed 3h mi3 values; KS vs 2017 sample).",
     )
     ap.add_argument("--out", type=str, default=str(default_out))
     ap.add_argument("--out-png", type=str, default=str(default_png))

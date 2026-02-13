@@ -79,15 +79,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
-    path = root / "output" / "theory" / "frozen_parameters.json"
+    path = root / "output" / "private" / "theory" / "frozen_parameters.json"
     if not path.exists():
-        return None, "output/theory/frozen_parameters.json (missing)"
+        return None, "output/private/theory/frozen_parameters.json (missing)"
     try:
         j = _read_json(path)
         beta = float(j["beta"])
-        return beta, "output/theory/frozen_parameters.json:beta"
+        return beta, "output/private/theory/frozen_parameters.json:beta"
     except Exception:
-        return None, "output/theory/frozen_parameters.json:beta (read failed)"
+        return None, "output/private/theory/frozen_parameters.json:beta (read failed)"
 
 
 def _write_measurements_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
@@ -203,7 +203,7 @@ def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
-    default_outdir = root / "output" / "theory"
+    default_outdir = root / "output" / "private" / "theory"
     default_measurements = root / "data" / "theory" / "solar_light_deflection_measurements.json"
 
     ap = argparse.ArgumentParser(description="Solar light deflection check (P-model vs GR + observed gamma).")
@@ -211,7 +211,7 @@ def main() -> int:
         "--beta",
         type=float,
         default=None,
-        help="P-model beta. If omitted, read output/theory/frozen_parameters.json (fallback: 1.0).",
+        help="P-model beta. If omitted, read output/private/theory/frozen_parameters.json (fallback: 1.0).",
     )
     ap.add_argument(
         "--measurements",
@@ -219,7 +219,12 @@ def main() -> int:
         default=str(default_measurements),
         help="JSON of observed PPN gamma measurements (default: data/theory/solar_light_deflection_measurements.json)",
     )
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output directory (default: output/theory)")
+    ap.add_argument(
+        "--outdir",
+        type=str,
+        default=str(default_outdir),
+        help="Output directory (default: output/private/theory)",
+    )
     args = ap.parse_args()
 
     outdir = Path(args.outdir)

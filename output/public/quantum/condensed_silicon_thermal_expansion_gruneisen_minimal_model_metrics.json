@@ -1,0 +1,52 @@
+{
+  "generated_utc": "2026-02-11T15:17:12.715399+00:00",
+  "phase": 7,
+  "step": "7.14.8",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_janaf_extracted_values": null,
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    }
+  },
+  "model": {
+    "name": "Debye–Grüneisen minimal (constant A_eff)",
+    "theta_D_K": 622.1452045992636,
+    "fit_range_T_K": {
+      "min": 200.0,
+      "max": 600.0
+    },
+    "A_eff_mol_per_J": 1.4371373371217095e-07
+  },
+  "diagnostics": {
+    "alpha_sign_change_T_K": 123.70901530483314,
+    "sign_mismatch_n": 106,
+    "rel_error_fit_range": {
+      "rmse": 0.18185094048857106,
+      "min": -0.11459301681576121,
+      "max": 0.6436110606907949
+    }
+  },
+  "falsification": {
+    "reject_if_sign_mismatch_n_gt": 0,
+    "reject_if_rel_error_rmse_ge": 0.05,
+    "rejected": true,
+    "notes": [
+      "In a strict Debye–Grüneisen picture with constant A_eff=γ/(B V_m), α(T) is proportional to Cv(T) and cannot change sign.",
+      "The NIST TRC fit shows negative α at low T, so the constant-A_eff minimal model is rejected over the full 13–600 K range.",
+      "Even restricting to the positive-α range (T≥200 K), α is not proportional to Debye Cv with a constant factor; additional physics (e.g., mode-dependent γ or anharmonicity) is required."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_minimal_model.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_minimal_model.png"
+  },
+  "notes": [
+    "This step is a minimal-model check to define what must be reproduced by any future derivation.",
+    "Cv is computed from a 1-parameter Debye model using θ_D fixed (or refit) from JANAF Cp° points."
+  ]
+}

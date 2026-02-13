@@ -284,8 +284,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     default_obs = root / "data" / "eht" / "sources" / "arxiv_2311.09478" / "observations.tex"
     default_disc = root / "data" / "eht" / "sources" / "arxiv_2311.09478" / "discussion.tex"
     default_conc = root / "data" / "eht" / "sources" / "arxiv_2311.09478" / "conclusions.tex"
-    default_out = root / "output" / "eht" / "eht_sgra_paper5_key_constraints_metrics.json"
-    default_png = root / "output" / "eht" / "eht_sgra_paper5_key_constraints_sensitivity.png"
+    default_out = root / "output" / "private" / "eht" / "eht_sgra_paper5_key_constraints_metrics.json"
+    default_png = root / "output" / "private" / "eht" / "eht_sgra_paper5_key_constraints_sensitivity.png"
 
     ap = argparse.ArgumentParser(description="Extract Paper V key constraint definitions (M3, 2.2um) from TeX sources.")
     ap.add_argument("--observations-tex", type=str, default=str(default_obs))

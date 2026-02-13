@@ -125,7 +125,7 @@ def _find_epoch(measurements: List[RingMeasurement], epoch: str) -> RingMeasurem
 def main() -> int:
     root = _repo_root()
     inp = root / "data" / "eht" / "eht_black_holes.json"
-    out_dir = root / "output" / "eht"
+    out_dir = root / "output" / "private" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     eht = _read_json(inp)
@@ -269,4 +269,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

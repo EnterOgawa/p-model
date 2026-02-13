@@ -45,7 +45,7 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
-    p = _ROOT / "output" / "theory" / "frozen_parameters.json"
+    p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
     try:
@@ -170,7 +170,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
                 cass_nrmse = rmse / (max_obs - min_obs)
 
     # Parameter freeze check (metadata)
-    cass_meta_path = _ROOT / "output" / "cassini" / "cassini_fig2_run_metadata.json"
+    cass_meta_path = _ROOT / "output" / "private" / "cassini" / "cassini_fig2_run_metadata.json"
     cass_beta_used = None
     if cass_meta_path.exists():
         try:
@@ -225,7 +225,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
             gate=True,
             unit="(RMSE)/(max_obs-min_obs)",
             rationale="スケール依存を避けるため、観測振幅で正規化した誤差を用いる（10%は保守的な初版閾値）。",
-            source={"cassini_fig2_metrics_csv": "output/cassini/cassini_fig2_metrics.csv"},
+            source={"cassini_fig2_metrics_csv": "output/private/cassini/cassini_fig2_metrics.csv"},
         )
     )
 
@@ -253,7 +253,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
             gate=True,
             unit="",
             rationale="少なくとも既知の近日点効果（周期成分）に対して整合することを要求する。",
-            source={"gps_compare_metrics_json": "output/gps/gps_compare_metrics.json"},
+            source={"gps_compare_metrics_json": "output/private/gps/gps_compare_metrics.json"},
         )
     )
     criteria.append(
@@ -268,14 +268,14 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
             gate=False,
             unit="(pmodel_rms_median)/(brdc_rms_median)",
             rationale="現状は実装差/系統（衛星依存等）が残るため、初版では“破綻していない”条件として緩く監視する。",
-            source={"gps_compare_metrics_json": "output/gps/gps_compare_metrics.json"},
+            source={"gps_compare_metrics_json": "output/private/gps/gps_compare_metrics.json"},
         )
     )
 
     # ----------------
     # LLR
     # ----------------
-    llr_summary_path = _ROOT / "output" / "llr" / "batch" / "llr_batch_summary.json"
+    llr_summary_path = _ROOT / "output" / "private" / "llr" / "batch" / "llr_batch_summary.json"
     llr_beta_used = None
     llr_tide = None
     llr_nosh = None
@@ -330,7 +330,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     # ----------------
     # Mercury (perihelion)
     # ----------------
-    mer_path = _ROOT / "output" / "mercury" / "mercury_precession_metrics.json"
+    mer_path = _ROOT / "output" / "private" / "mercury" / "mercury_precession_metrics.json"
     mer_diff_pct = None
     if mer_path.exists():
         try:
@@ -360,7 +360,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     # ----------------
     # Viking (Shapiro peak)
     # ----------------
-    vik_path = _ROOT / "output" / "viking" / "viking_shapiro_result.csv"
+    vik_path = _ROOT / "output" / "private" / "viking" / "viking_shapiro_result.csv"
     vik_max = None
     if vik_path.exists():
         try:

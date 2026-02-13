@@ -16,10 +16,10 @@ JPL Horizons API から Earth-centered の Moon/Sun ベクトルを取得して
   - 絶対値はズレるので、観測とモデルの間に「定数オフセット（平均差）」を1つ入れて整列。
   - まずは “太陽配置依存の変動成分の整合” を見る用途。
 
-■ 出力（固定: output/llr/out_llr/）
-  output/llr/out_llr/<stem>_overlay_tof.png
-  output/llr/out_llr/<stem>_residual.png
-  output/llr/out_llr/<stem>_table.csv
+■ 出力（固定: output/private/llr/out_llr/）
+  output/private/llr/out_llr/<stem>_overlay_tof.png
+  output/private/llr/out_llr/<stem>_residual.png
+  output/private/llr/out_llr/<stem>_table.csv
 
 ■ SSL/Proxy 対応
   会社VPN/ProxyでSSL中継されている場合、Pythonが社内CAを信頼せずに失敗することがあります。
@@ -1390,14 +1390,14 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     #
     # LLRでは「epoch_utc」が tx/rx/mid のどれを指すかで幾何が変わり、ns級の残差に効く。
     # 既定は "auto" とし、事前に scripts/llr/llr_batch_eval.py で推定した
-    # output/llr/batch/llr_time_tag_best_by_station.json を参照して局別に決める。
+    # output/private/llr/batch/llr_time_tag_best_by_station.json を参照して局別に決める。
     #
     # 強制する場合は環境変数で指定:
     #   LLR_TIME_TAG=tx|rx|mid|auto
     requested = os.environ.get("LLR_TIME_TAG", "").strip().lower() or "auto"
 
     def _load_time_tag_best_by_station(repo_root: Path) -> Optional[Dict[str, str]]:
-        p = repo_root / "output" / "llr" / "batch" / "llr_time_tag_best_by_station.json"
+        p = repo_root / "output" / "private" / "llr" / "batch" / "llr_time_tag_best_by_station.json"
         if not p.exists():
             return None
         try:
@@ -1805,7 +1805,7 @@ def main() -> None:
     repo = Path(__file__).resolve().parents[2]
     data_root = repo / "data" / "llr"
     crd = pick_input_file(data_root)
-    outdir = repo / "output" / "llr" / DEFAULT_OUTDIR
+    outdir = repo / "output" / "private" / "llr" / DEFAULT_OUTDIR
 
     paths = run(crd, beta=DEFAULT_BETA, outdir=outdir, chunk=DEFAULT_CHUNK)
 

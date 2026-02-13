@@ -102,7 +102,6 @@ def _check_part3_lint_strict() -> _Check:
         root=root,
         manuscript_paths=[
             root / "doc" / "paper" / "12_part3_quantum.md",
-            root / "doc" / "paper" / "12_part3_quantum_appendix_a.md",
         ],
         references_path=root / "doc" / "paper" / "30_references.md",
         figures_index_path=root / "doc" / "paper" / "01_figures_index.md",

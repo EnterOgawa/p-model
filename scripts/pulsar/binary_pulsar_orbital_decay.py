@@ -336,9 +336,9 @@ def main() -> int:
     root = _repo_root()
 
     default_in = root / "data" / "pulsar" / "binary_pulsar_orbital_decay.json"
-    default_png = root / "output" / "pulsar" / "binary_pulsar_orbital_decay.png"
-    default_png_public = root / "output" / "pulsar" / "binary_pulsar_orbital_decay_public.png"
-    default_metrics = root / "output" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
+    default_png = root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay.png"
+    default_png_public = root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay_public.png"
+    default_metrics = root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
 
     ap = argparse.ArgumentParser(description="Binary pulsar orbital decay check (observed vs P-model quadrupole limit).")
     ap.add_argument("--in-json", type=str, default=str(default_in))

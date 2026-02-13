@@ -57,14 +57,19 @@ def circular_orbit_speed(mu: float, r_m: float) -> float:
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]
-    default_outdir = root / "output" / "theory"
+    default_outdir = root / "output" / "private" / "theory"
 
     ap = argparse.ArgumentParser(description="GPS time dilation breakdown (P-model, weak field).")
     ap.add_argument("--delta", type=float, default=0.0, help="Clock saturation δ0 (extension; default: 0.0=disabled)")
     ap.add_argument("--r-ground-m", type=float, default=6_378_137.0, help="Ground radius from Earth's center [m]")
     ap.add_argument("--r-sat-m", type=float, default=26_560_000.0, help="Satellite orbit radius [m] (GPS ~ 26,560 km)")
     ap.add_argument("--seconds", type=float, default=86_400.0, help="Integration interval [s] (default: 1 day)")
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output directory (default: output/theory)")
+    ap.add_argument(
+        "--outdir",
+        type=str,
+        default=str(default_outdir),
+        help="Output directory (default: output/private/theory)",
+    )
     args = ap.parse_args()
 
     outdir = Path(args.outdir)

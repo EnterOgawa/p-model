@@ -87,9 +87,9 @@ def _effective_n_from_rhos(n: int, rhos: Dict[str, Any]) -> Optional[float]:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
 
-    default_wielgus = root / "output" / "eht" / "wielgus2022_m3_observed_metrics.json"
-    default_out = root / "output" / "eht" / "wielgus2022_m3_drw_independence_sim_metrics.json"
-    default_png = root / "output" / "eht" / "wielgus2022_m3_drw_independence_sim.png"
+    default_wielgus = root / "output" / "private" / "eht" / "wielgus2022_m3_observed_metrics.json"
+    default_out = root / "output" / "private" / "eht" / "wielgus2022_m3_drw_independence_sim_metrics.json"
+    default_png = root / "output" / "private" / "eht" / "wielgus2022_m3_drw_independence_sim.png"
 
     ap = argparse.ArgumentParser(description="Simulate DRW (OU) process and estimate independence of 3h mi3 windows; derive effective n and KS D_crit impact.")
     ap.add_argument("--wielgus-m3-metrics", type=str, default=str(default_wielgus))

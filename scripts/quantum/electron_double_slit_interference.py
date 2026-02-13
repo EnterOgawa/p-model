@@ -272,7 +272,7 @@ def build_matter_wave_interference_precision_audit(
     ax3.set_title("Molecular isotopic scaling residuals")
     ax3.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
 
-    fig.suptitle("Phase 7 / Step 7.16.13: matter-wave interference precision audit", y=0.98)
+    fig.suptitle("Matter-wave interference precision audit", y=0.98)
     fig.tight_layout()
 
     out_png = out_dir / "matter_wave_interference_precision_audit.png"

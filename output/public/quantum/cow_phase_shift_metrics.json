@@ -1,0 +1,59 @@
+{
+  "generated_utc": "2026-02-11T14:02:03.062031+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.16.11",
+    "name": "COW complete data integration and residual audit"
+  },
+  "source": {
+    "reference": "Mannheim, 'Classical Underpinnings of Gravitationally Induced Quantum Interference' (arXiv:gr-qc/9611037)",
+    "local_pdf": "C:\\develop\\waveP\\data\\quantum\\sources\\arxiv_gr-qc_9611037.pdf",
+    "formula": "Δφ = - m g H^2 / (ħ v0) (square interferometer; lowest order in g)"
+  },
+  "config": {
+    "H_m": 0.03,
+    "v0_m_per_s": 2000.0,
+    "g_m_per_s2": 9.80665,
+    "theta_deg_min": -90.0,
+    "theta_deg_max": 90.0,
+    "n_theta": 361,
+    "model_note": "Didactic orientation proxy: scale by sinθ."
+  },
+  "constants": {
+    "m_neutron_kg": 1.67492749804e-27,
+    "hbar_J_s": 1.054571817e-34
+  },
+  "results": {
+    "phi0_rad": -70.08951280265708,
+    "phi0_cycles": -11.155092421445557,
+    "phi_cycles_min": -11.155092421445557,
+    "phi_cycles_max": 11.155092421445557
+  },
+  "integration": {
+    "reference_rows_n": 6,
+    "observed_rows_n": 1,
+    "numeric_coverage_ratio": 0.16666666666666666,
+    "residual_audit": {
+      "n_observed_rows": 1,
+      "median_abs_residual_cycles": 0.0,
+      "max_abs_residual_cycles": 0.0,
+      "median_abs_residual_fraction": 0.0,
+      "max_abs_residual_fraction": 0.0
+    },
+    "notes": [
+      "This initial freeze includes a relation-level representative point from Mannheim recap.",
+      "Primary experiment tables should be added to upgrade residual audit from initial to full."
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\cow_phase_shift.png",
+    "integration_csv": "C:\\develop\\waveP\\output\\public\\quantum\\cow_experiment_data_integration.csv",
+    "hv_sweep_csv": "C:\\develop\\waveP\\output\\public\\quantum\\cow_phase_shift_hv_sweep.csv",
+    "complete_analysis_png": "C:\\develop\\waveP\\output\\public\\quantum\\cow_experiment_complete_analysis.png"
+  },
+  "notes": [
+    "This script focuses on reproducing the scaling and magnitude of the COW phase shift.",
+    "Step 7.16.11 adds frozen integration I/F (catalog + H-v sweep + residual-audit plumbing).",
+    "Raw per-run fringe-shift tables are required to complete a fully observed residual audit."
+  ]
+}

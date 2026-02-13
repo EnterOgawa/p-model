@@ -251,12 +251,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     default_tex_2018 = root / "data" / "eht" / "sources" / "arxiv_1807.09409" / "GravitationalRedshift_arXiv_20180717.tex"
     default_tex_2020 = root / "data" / "eht" / "sources" / "arxiv_2004.07187" / "s2_precession_afterproof.tex"
-    default_outdir = root / "output" / "eht"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Extract GRAVITY S2 constraints (f, f_SP) from arXiv TeX sources.")
     ap.add_argument("--tex-2018", type=str, default=str(default_tex_2018), help="2018 TeX path.")
     ap.add_argument("--tex-2020", type=str, default=str(default_tex_2020), help="2020 TeX path.")
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/eht).")
+    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output dir (default: output/private/eht).")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_2018_path = Path(args.tex_2018)
@@ -269,7 +269,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "inputs": {
             "tex_2018": str(tex_2018_path),
             "tex_2020": str(tex_2020_path),
-            "sources_manifest": str(root / "output" / "eht" / "gravity_s2_sources_manifest.json"),
+            "sources_manifest": str(root / "output" / "private" / "eht" / "gravity_s2_sources_manifest.json"),
         },
         "ok": True,
         "rows": {},

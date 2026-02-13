@@ -1,0 +1,69 @@
+{
+  "generated_utc": "2026-02-11T15:18:21.984987+00:00",
+  "phase": 7,
+  "step": "7.14.11",
+  "inputs": {
+    "silicon_thermal_expansion_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_trc_silicon_thermal_expansion\\extracted_values.json",
+      "sha256": "da3f26782ddc549b6ad881f4e690905ec53b4e1798925affb581108e3b40e731"
+    },
+    "silicon_janaf_extracted_values": null,
+    "theta_d_source": {
+      "kind": "frozen_metrics",
+      "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    }
+  },
+  "model": {
+    "name": "Debye+Einstein Debye–Grüneisen mixture (theta_D frozen; theta_E scanned; A_D/A_E weighted LS)",
+    "einstein_branches": 1,
+    "theta_D_K": 622.1452045992636,
+    "theta_E_K": 598.6290239775102,
+    "theta_E2_K": null,
+    "A_D_mol_per_J": -1.9386522573768533e-07,
+    "A_E_mol_per_J": 3.6425352223359614e-07,
+    "A_E2_mol_per_J": null,
+    "fit_range_T_K": {
+      "min": 50.0,
+      "max": 600.0
+    },
+    "theta_E_scan": {
+      "lo_K": 10.0,
+      "hi_K": 4000.0,
+      "n": 900
+    }
+  },
+  "diagnostics": {
+    "alpha_sign_change_T_K": {
+      "obs": 123.70901530483314,
+      "pred": 126.8505567036171
+    },
+    "sign_mismatch_fit_range_n": 3,
+    "fit_range": {
+      "n": 551,
+      "max_abs_z": 23.144805404172182,
+      "rms_z": 7.5832109020774645,
+      "reduced_chi2": 57.81989645902914,
+      "exceed_3sigma_n": 428
+    },
+    "sigma_fit_1e-8_per_K": {
+      "lt_T_K": 50.0,
+      "lt": 0.03,
+      "ge": 0.5
+    }
+  },
+  "falsification": {
+    "reject_if_sign_mismatch_fit_range_n_gt": 0,
+    "reject_if_max_abs_z_ge": 3.0,
+    "reject_if_reduced_chi2_ge": 2.0,
+    "rejected": true,
+    "notes": [
+      "Debye+Einstein provides a minimal proxy for adding an optical phonon branch on top of an acoustic Debye baseline.",
+      "Mode-dependent Grüneisen signs can be represented by allowing A_E to be negative while A_D is positive (or vice versa).",
+      "Acceptance is evaluated against the NIST TRC curve-fit standard-error scale σ_fit (proxy for data-level accuracy)."
+    ]
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model.png"
+  }
+}

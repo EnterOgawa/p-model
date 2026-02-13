@@ -359,7 +359,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
     default_tex = root / "data" / "eht" / "sources" / "arxiv_2311.09479" / "appendix_ringfits.tex"
     default_image_analysis_tex = root / "data" / "eht" / "sources" / "arxiv_2311.09479" / "image_analysis.tex"
-    default_outdir = root / "output" / "eht"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="Parse Sgr A* Paper III ring fitting table and summarize diameter scatter.")
     ap.add_argument("--tex", type=str, default=str(default_tex), help="Input TeX (default: Paper III appendix_ringfits.tex).")
@@ -369,7 +369,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         default=str(default_image_analysis_tex),
         help="Input TeX (default: Paper III image_analysis.tex; Table tab:SgrA_ringfit).",
     )
-    ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output directory (default: output/eht).")
+    ap.add_argument(
+        "--outdir", type=str, default=str(default_outdir), help="Output directory (default: output/private/eht)."
+    )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     tex_path = Path(args.tex)

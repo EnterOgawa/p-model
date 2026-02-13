@@ -108,7 +108,7 @@ def main() -> int:
 
     root = _repo_root()
     sources_dir = root / "data" / "eht" / "sources"
-    out_dir = root / "output" / "eht"
+    out_dir = root / "output" / "private" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # Sgr A* 2022 (ApJL 930 L12-L17) series as posted on arXiv (2023-11).
@@ -169,7 +169,7 @@ def main() -> int:
     manifest = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "mode": {"offline": bool(args.offline), "force": bool(args.force)},
-        "output": "output/eht/eht_sgra_series_sources_manifest.json",
+        "output": "output/private/eht/eht_sgra_series_sources_manifest.json",
         "rows": rows,
     }
     out_json = out_dir / "eht_sgra_series_sources_manifest.json"
@@ -199,4 +199,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

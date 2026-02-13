@@ -97,7 +97,7 @@ def main() -> None:
 
     root = _ROOT
     doc_dir = (root / Path(args.doc_dir)).resolve()
-    out_dir = root / "output" / "bepicolombo"
+    out_dir = root / "output" / "private" / "bepicolombo"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     lblx_files = sorted(doc_dir.glob("*.lblx"))
@@ -163,4 +163,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

@@ -598,7 +598,7 @@ def _sigma_needed_for_discrimination(
 def main() -> int:
     root = _repo_root()
     in_path = root / "data" / "eht" / "eht_black_holes.json"
-    out_dir = root / "output" / "eht"
+    out_dir = root / "output" / "private" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     if not in_path.exists():
@@ -609,11 +609,11 @@ def main() -> int:
     beta = float(((ref.get("pmodel") or {}).get("beta")) or float("nan"))
     beta_source = "data/eht/eht_black_holes.json:pmodel.beta"
     if not (math.isfinite(beta) and beta > 0):
-        frozen_path = root / "output" / "theory" / "frozen_parameters.json"
+        frozen_path = root / "output" / "private" / "theory" / "frozen_parameters.json"
         try:
             frozen = _read_json(frozen_path) if frozen_path.exists() else {}
             beta = float(frozen.get("beta"))
-            beta_source = "output/theory/frozen_parameters.json:beta"
+            beta_source = "output/private/theory/frozen_parameters.json:beta"
         except Exception:
             beta = float("nan")
     if not (math.isfinite(beta) and beta > 0):

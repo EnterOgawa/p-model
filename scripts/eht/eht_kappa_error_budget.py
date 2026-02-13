@@ -122,19 +122,21 @@ def _finite_pos(values: Sequence[Optional[float]]) -> List[float]:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
-    default_shadow = root / "output" / "eht" / "eht_shadow_compare.json"
-    default_ringfit = root / "output" / "eht" / "eht_sgra_ringfit_table_metrics.json"
-    default_calib = root / "output" / "eht" / "eht_sgra_calibration_systematics_metrics.json"
-    default_var = root / "output" / "eht" / "eht_sgra_variability_noise_model_metrics.json"
-    default_mring = root / "output" / "eht" / "eht_sgra_mringfits_table_metrics.json"
-    default_paper4 = root / "output" / "eht" / "eht_sgra_paper4_alpha_calibration_metrics.json"
-    default_paper4_morph = root / "output" / "eht" / "eht_sgra_paper4_morphology_table_metrics.json"
-    default_paper4_thetag = root / "output" / "eht" / "eht_sgra_paper4_thetag_table_metrics.json"
-    default_paper4_debiased_noise = root / "output" / "eht" / "eht_sgra_paper4_debiased_noise_table_metrics.json"
-    default_paper6 = root / "output" / "eht" / "eht_sgra_paper6_metric_constraints.json"
-    default_paper2_gains = root / "output" / "eht" / "eht_sgra_paper2_gain_uncertainties_metrics.json"
-    default_paper2_syserr = root / "output" / "eht" / "eht_sgra_paper2_syserr_table_metrics.json"
-    default_outdir = root / "output" / "eht"
+    default_shadow = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
+    default_ringfit = root / "output" / "private" / "eht" / "eht_sgra_ringfit_table_metrics.json"
+    default_calib = root / "output" / "private" / "eht" / "eht_sgra_calibration_systematics_metrics.json"
+    default_var = root / "output" / "private" / "eht" / "eht_sgra_variability_noise_model_metrics.json"
+    default_mring = root / "output" / "private" / "eht" / "eht_sgra_mringfits_table_metrics.json"
+    default_paper4 = root / "output" / "private" / "eht" / "eht_sgra_paper4_alpha_calibration_metrics.json"
+    default_paper4_morph = root / "output" / "private" / "eht" / "eht_sgra_paper4_morphology_table_metrics.json"
+    default_paper4_thetag = root / "output" / "private" / "eht" / "eht_sgra_paper4_thetag_table_metrics.json"
+    default_paper4_debiased_noise = (
+        root / "output" / "private" / "eht" / "eht_sgra_paper4_debiased_noise_table_metrics.json"
+    )
+    default_paper6 = root / "output" / "private" / "eht" / "eht_sgra_paper6_metric_constraints.json"
+    default_paper2_gains = root / "output" / "private" / "eht" / "eht_sgra_paper2_gain_uncertainties_metrics.json"
+    default_paper2_syserr = root / "output" / "private" / "eht" / "eht_sgra_paper2_syserr_table_metrics.json"
+    default_outdir = root / "output" / "private" / "eht"
 
     ap = argparse.ArgumentParser(description="κ error budget helper (uses Paper III ringfit scatter as a systematic scale).")
     ap.add_argument("--shadow-compare-json", type=str, default=str(default_shadow))

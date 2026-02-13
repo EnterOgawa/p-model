@@ -93,7 +93,7 @@ def y_full(r1, r1dot, r2, r2dot, b, bdot, gamma=1.0):
 
 def main():
     root = Path(__file__).resolve().parents[2]
-    out_dir = root / "output" / "cassini"
+    out_dir = root / "output" / "private" / "cassini"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     parser = argparse.ArgumentParser(description="Cassini Shapiro y(t) (cached geometry via HORIZONS).")
@@ -114,8 +114,8 @@ def main():
     parser.add_argument("--gamma", type=float, default=1.0, help="PPN gamma (default: 1.0)")
     parser.add_argument(
         "--out",
-        default="output/cassini/cassini_shapiro_y_full.csv",
-        help="Output CSV path (default: output/cassini/cassini_shapiro_y_full.csv)",
+        default="output/private/cassini/cassini_shapiro_y_full.csv",
+        help="Output CSV path (default: output/private/cassini/cassini_shapiro_y_full.csv)",
     )
     args = parser.parse_args()
 
@@ -238,10 +238,10 @@ def main():
         r1 = norm(rE)
         r2 = norm(rS)
 
-        out = impact_b_and_bdot(rE, vE, rS, vS)
-        if out is None:
+        impact = impact_b_and_bdot(rE, vE, rS, vS)
+        if impact is None:
             continue
-        b, bdot = out
+        b, bdot = impact
 
         # rdot = (r·v)/|r|
         r1dot = dot(rE, vE)/r1

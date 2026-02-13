@@ -1,0 +1,151 @@
+{
+  "generated_utc": "2026-02-11T14:10:01.345217+00:00",
+  "phase": 7,
+  "step": "7.13.10",
+  "sources": [
+    {
+      "dataset": "NIST Cuu CODATA constants (mp,mn,md,mt,mh,mal,rp,rd,ral)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_light_nuclei\\manifest.json",
+      "local_manifest_sha256": "0bce791526a5b358d996491cc556ac693c57bac4c3ad0b6f9d98bdf00cd22a6b",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_nuclear_light_nuclei\\extracted_values.json",
+      "local_extracted_sha256": "989ad72e5fd2b0b2dc1e9e161002b574f29b9b34b27ffd1d7e33c1db07dce9b0"
+    },
+    {
+      "dataset": "IAEA nuclear charge radii compilation (charge_radii.csv)",
+      "local_manifest": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_charge_radii\\manifest.json",
+      "local_manifest_sha256": "6c2dd8cccdd5aa524d0fea9609cd0188ec45cd62a65b98d137f47117f06a5428",
+      "local_extracted": "C:\\develop\\waveP\\data\\quantum\\sources\\iaea_charge_radii\\extracted_values.json",
+      "local_extracted_sha256": "4d3d15b03a520fcdd15b4d6f422c2618f5bb3f4d93d414bf1974f3e574049e84"
+    }
+  ],
+  "assumptions": [
+    "Independent uncertainties for CODATA constants (no covariance provided).",
+    "Binding energy defined via nuclear mass defect using CODATA nuclear masses (not atomic masses).",
+    "A=3 charge radii are taken from a dedicated compilation (IAEA radii database CSV)."
+  ],
+  "constants_from_nist_codata": {
+    "mp_kg": {
+      "value": 1.67262192595e-27,
+      "sigma": 5.2e-37
+    },
+    "mn_kg": {
+      "value": 1.67492750056e-27,
+      "sigma": 8.5e-37
+    },
+    "md_kg": {
+      "value": 3.3435837768e-27,
+      "sigma": 1e-36
+    },
+    "mt_kg": {
+      "value": 5.0073567512e-27,
+      "sigma": 1.6e-36
+    },
+    "mh_kg": {
+      "value": 5.0064127862e-27,
+      "sigma": 1.6e-36
+    },
+    "mal_kg": {
+      "value": 6.644657345e-27,
+      "sigma": 2.1e-36
+    },
+    "rp_fm": {
+      "value": 0.84075,
+      "sigma": 0.0006399999999999999
+    },
+    "rd_fm": {
+      "value": 2.12778,
+      "sigma": 0.00027
+    },
+    "ral_fm": {
+      "value": 1.6784999999999999,
+      "sigma": 0.0021
+    }
+  },
+  "charge_radii_a3_from_iaea": {
+    "rt_fm": {
+      "value": 1.7591,
+      "sigma": 0.0363
+    },
+    "rh_fm": {
+      "value": 1.9661,
+      "sigma": 0.003
+    },
+    "source_dirname": "iaea_charge_radii"
+  },
+  "derived": {
+    "d": {
+      "A": 2,
+      "Z": 1,
+      "N": 1,
+      "mass_defect_kg": {
+        "value": 3.965649709999603e-30,
+        "sigma": 1.4117011015083894e-36
+      },
+      "binding_energy": {
+        "B_MeV": {
+          "value": 2.22456634198942,
+          "sigma": 7.919062410999653e-07
+        }
+      }
+    },
+    "t": {
+      "A": 3,
+      "Z": 1,
+      "N": 2,
+      "mass_defect_kg": {
+        "value": 1.512017586999995e-29,
+        "sigma": 2.39173577135937e-36
+      },
+      "binding_energy": {
+        "B_MeV": {
+          "value": 8.481796624787078,
+          "sigma": 1.3416653726328973e-06
+        }
+      }
+    },
+    "h": {
+      "A": 3,
+      "Z": 2,
+      "N": 1,
+      "mass_defect_kg": {
+        "value": 1.375856625999998e-29,
+        "sigma": 2.0890428430264423e-36
+      },
+      "binding_energy": {
+        "B_MeV": {
+          "value": 7.717989649678434,
+          "sigma": 1.1718670925100384e-06
+        }
+      }
+    },
+    "alpha": {
+      "A": 4,
+      "Z": 2,
+      "N": 2,
+      "mass_defect_kg": {
+        "value": 5.044150801999951e-29,
+        "sigma": 2.8950993074504368e-36
+      },
+      "binding_energy": {
+        "B_MeV": {
+          "value": 28.295610854770015,
+          "sigma": 1.6240316081956133e-06
+        }
+      }
+    }
+  },
+  "falsification": {
+    "acceptance_criteria": [
+      "Any proposed P-model nuclear effective equation/potential must reproduce the fixed binding energies (A=2,3,4) within stated uncertainties when evaluated under its declared approximations.",
+      "If a model claims a single universal nuclear-scale u-profile (once fixed by np scattering), it must explain the A-dependence trend (B and B/A) without per-nucleus tuning beyond declared higher-order corrections."
+    ],
+    "scope_limits": [
+      "This step fixes primary targets and does not solve the A>2 few-/many-body problem yet.",
+      "Charge radii for A=3 are fixed from a dedicated compilation; extension to broader A (nuclear chart) remains a next step."
+    ]
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_light_nuclei.png",
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_light_nuclei.csv"
+  }
+}

@@ -142,9 +142,9 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
     # --- Cassini ---
     test, main_script, primary_outputs = _t("cassini_sce1_doppler")
     cassini_out = [
-        "output/cassini/cassini_fig2_metrics.csv",
-        "output/cassini/cassini_fig2_residuals.png",
-        "output/cassini/cassini_fig2_overlay_zoom10d.png",
+        "output/private/cassini/cassini_fig2_metrics.csv",
+        "output/private/cassini/cassini_fig2_residuals.png",
+        "output/private/cassini/cassini_fig2_overlay_zoom10d.png",
     ]
     cassini_sys: List[Dict[str, Any]] = []
     cassini_sys.append(
@@ -304,7 +304,10 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
 
     # --- Viking ---
     test, main_script, primary_outputs = _t("viking_shapiro_peak")
-    viking_out = ["output/viking/viking_shapiro_result.csv", "output/viking/viking_p_model_vs_measured_no_arrow.png"]
+    viking_out = [
+        "output/private/viking/viking_shapiro_result.csv",
+        "output/private/viking/viking_p_model_vs_measured_no_arrow.png",
+    ]
     viking_sys: List[Dict[str, Any]] = []
     viking_sys.append(
         _sys_item(
@@ -389,7 +392,10 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
 
     # --- Mercury ---
     test, main_script, primary_outputs = _t("mercury_perihelion_precession")
-    mercury_out = ["output/mercury/mercury_precession_metrics.json", "output/mercury/mercury_orbit.png"]
+    mercury_out = [
+        "output/private/mercury/mercury_precession_metrics.json",
+        "output/private/mercury/mercury_orbit.png",
+    ]
     mercury_sys: List[Dict[str, Any]] = []
     mercury_sys.append(
         _sys_item(
@@ -459,7 +465,11 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
 
     # --- GPS ---
     test, main_script, primary_outputs = _t("gps_satellite_clock")
-    gps_out = ["output/gps/summary_batch.csv", "output/gps/gps_rms_compare.png", "output/gps/gps_compare_metrics.json"]
+    gps_out = [
+        "output/private/gps/summary_batch.csv",
+        "output/private/gps/gps_rms_compare.png",
+        "output/private/gps/gps_compare_metrics.json",
+    ]
     gps_sys: List[Dict[str, Any]] = []
     gps_sys.append(
         _sys_item(
@@ -570,9 +580,9 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
     # --- LLR ---
     test, main_script, primary_outputs = _t("llr_batch")
     llr_out = [
-        "output/llr/batch/llr_batch_summary.json",
-        "output/llr/batch/llr_batch_metrics.csv",
-        "output/llr/batch/llr_data_coverage.csv",
+        "output/private/llr/batch/llr_batch_summary.json",
+        "output/private/llr/batch/llr_batch_metrics.csv",
+        "output/private/llr/batch/llr_data_coverage.csv",
     ]
     llr_sys: List[Dict[str, Any]] = []
     llr_sys.append(

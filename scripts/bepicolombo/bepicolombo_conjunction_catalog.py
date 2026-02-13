@@ -407,7 +407,7 @@ def main() -> int:
     args = ap.parse_args()
 
     root = _ROOT
-    out_dir = root / "output" / "bepicolombo"
+    out_dir = root / "output" / "private" / "bepicolombo"
     out_dir.mkdir(parents=True, exist_ok=True)
 
     kernels_dir = Path(args.kernels_dir) if str(args.kernels_dir).strip() else (root / "data" / "bepicolombo" / "kernels" / "psa")

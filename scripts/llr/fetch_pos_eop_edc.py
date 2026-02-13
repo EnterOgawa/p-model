@@ -10,7 +10,7 @@ DGFI-TUM EDC の pos+eop（SINEX .snx.gz）を取得して data/llr/pos_eop/ に
 
 入力:
   - 既に取得済みの EDC LLR（.np2）から観測日の集合を作り、必要日の pos+eop をまとめて取る
-    - 優先: output/llr/batch/llr_batch_points.csv（存在する場合）
+    - 優先: output/private/llr/batch/llr_batch_points.csv（存在する場合）
     - 代替: data/llr/edc/ 配下の .np2 を走査（epoch_utc を抽出）
 
 出力（固定）
@@ -242,7 +242,7 @@ def main() -> int:
     ap.add_argument(
         "--points-csv",
         type=str,
-        default="output/llr/batch/llr_batch_points.csv",
+        default="output/private/llr/batch/llr_batch_points.csv",
         help="Preferred source for required dates (epoch_utc).",
     )
     ap.add_argument("--center", type=str, default="nsgf", help="Preferred analysis center prefix (default: nsgf).")
@@ -273,7 +273,7 @@ def main() -> int:
             dates = _collect_dates_from_np2(root)
 
     if not dates:
-        print("[err] no dates found (need output/llr/batch/llr_batch_points.csv or data/llr/edc/*.np2)")
+        print("[err] no dates found (need output/private/llr/batch/llr_batch_points.csv or data/llr/edc/*.np2)")
         return 2
 
     print(f"[info] target dates: {len(dates)} (min={dates[0]}, max={dates[-1]})")
@@ -335,4 +335,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

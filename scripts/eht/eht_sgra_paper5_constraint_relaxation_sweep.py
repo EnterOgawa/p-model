@@ -99,9 +99,9 @@ def _atomic_keys_in_rows(rows: List[Dict[str, Any]]) -> List[str]:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
-    default_in = root / "output" / "eht" / "eht_sgra_paper5_pass_fraction_tables_metrics.json"
-    default_out = root / "output" / "eht" / "eht_sgra_paper5_constraint_relaxation_sweep_metrics.json"
-    default_png = root / "output" / "eht" / "eht_sgra_paper5_constraint_relaxation_sweep.png"
+    default_in = root / "output" / "private" / "eht" / "eht_sgra_paper5_pass_fraction_tables_metrics.json"
+    default_out = root / "output" / "private" / "eht" / "eht_sgra_paper5_constraint_relaxation_sweep_metrics.json"
+    default_png = root / "output" / "private" / "eht" / "eht_sgra_paper5_constraint_relaxation_sweep.png"
 
     ap = argparse.ArgumentParser(description="Compute pass-fraction under constraint-relaxation scenarios (Paper V Pass/Fail tables).")
     ap.add_argument("--in-metrics", type=str, default=str(default_in))
@@ -229,4 +229,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

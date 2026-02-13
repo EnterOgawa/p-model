@@ -1,0 +1,7 @@
+record_id,year,record_type,citation,doi,has_numeric_phase_point,H_m,v0_m_per_s,phase_pred_cycles,phase_obs_cycles,phase_residual_cycles,phase_residual_fraction,stat_fraction,sys_fraction,notes
+overhauser_colella_1974_prl33_1237,1974,primary_experiment,"Overhauser & Colella, Phys. Rev. Lett. 33, 1237 (1974)",,False,,,,,,,,,Reference listed in Mannheim 1996; raw point not digitized in this pack.
+colella_overhauser_werner_1975_prl34_1472,1975,primary_experiment,"Colella, Overhauser, Werner, Phys. Rev. Lett. 34, 1472 (1975)",10.1103/PhysRevLett.34.1472,False,,,,,,,,,Primary COW source (paywall); raw fringe-shift table not bundled yet.
+greenberger_overhauser_1979_rmp51_43,1979,review,"Greenberger & Overhauser, Rev. Mod. Phys. 51, 43 (1979)",,False,,,,,,,,,Historical review listed in Mannheim 1996 references.
+werner_1994_cqg11_a207,1994,review,"Werner, Class. Quantum Grav. 11, A207 (1994)",,False,,,,,,,,,COW review source listed in Mannheim 1996 references.
+mannheim_1996_grqc_9611037,1996,theory_recap,"Mannheim, arXiv:gr-qc/9611037 (1996)",,False,,,,,,,,,Local cached recap PDF in data/quantum/sources/arxiv_gr-qc_9611037.pdf.
+representative_relation_mannheim1996,1996,representative_relation,"Mannheim recap of COW magnitude relation (typical H,v)",,True,0.03,2000.0,-11.155092421445557,-11.155092421445557,0.0,0.0,,,Relation-level representative point (not a digitized raw fringe table). Used to freeze I/F and residual-audit plumbing in Step 7.16.11.
