@@ -1,0 +1,127 @@
+{
+  "generated_utc": "2026-02-17T02:15:53.561565+00:00",
+  "schema": "wavep.gw.polarization.inconclusive_reduction_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.5",
+  "inputs": {
+    "baseline_json": "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_corr005.json",
+    "refined_json": "output/public/gw/gw_polarization_h1_l1_v1_network_audit_corr005_pruned_sky50k.json",
+    "refined_label": "corr=0.05 + sky50k + pair-pruning",
+    "event_set_match": true,
+    "baseline_events": [
+      "GW200115_042309",
+      "GW200129_065458",
+      "GW200311_115853"
+    ],
+    "refined_events": [
+      "GW200115_042309",
+      "GW200129_065458",
+      "GW200311_115853"
+    ]
+  },
+  "summary": {
+    "overall_status": "pass",
+    "decision": "inconclusive_reduced_and_decisive_events_increased",
+    "n_events_compared": 3,
+    "baseline_n_usable_events": 1,
+    "refined_n_usable_events": 3,
+    "usable_delta": 2,
+    "baseline_n_inconclusive": 2,
+    "refined_n_inconclusive": 0,
+    "inconclusive_delta": -2,
+    "baseline_n_decisive": 1,
+    "refined_n_decisive": 3,
+    "decisive_delta": 2,
+    "transitioned_to_decisive": [
+      "GW200115_042309",
+      "GW200311_115853"
+    ],
+    "transitioned_to_inconclusive": []
+  },
+  "counts": {
+    "baseline": {
+      "n_rows": 3,
+      "n_decisive": 1,
+      "n_inconclusive": 2,
+      "n_reject": 1,
+      "n_watch": 0,
+      "n_pass": 0,
+      "n_other": 0
+    },
+    "refined": {
+      "n_rows": 3,
+      "n_decisive": 3,
+      "n_inconclusive": 0,
+      "n_reject": 3,
+      "n_watch": 0,
+      "n_pass": 0,
+      "n_other": 0
+    }
+  },
+  "rows": [
+    {
+      "event": "GW200115_042309",
+      "before_status": "inconclusive_insufficient_pairs",
+      "after_status": "reject_tensor_response",
+      "before_quality": "low_corr",
+      "after_quality": "usable",
+      "before_usable_pair_count": 1,
+      "after_usable_pair_count": 2,
+      "before_ring_directions_used": 0,
+      "after_ring_directions_used": 186,
+      "before_bucket": "inconclusive",
+      "after_bucket": "reject",
+      "before_decisive": 0,
+      "after_decisive": 1,
+      "transition_class": "inconclusive_to_decisive",
+      "status_changed": 1
+    },
+    {
+      "event": "GW200129_065458",
+      "before_status": "reject_tensor_response",
+      "after_status": "reject_tensor_response",
+      "before_quality": "usable",
+      "after_quality": "usable",
+      "before_usable_pair_count": 3,
+      "after_usable_pair_count": 3,
+      "before_ring_directions_used": 10,
+      "after_ring_directions_used": 100,
+      "before_bucket": "reject",
+      "after_bucket": "reject",
+      "before_decisive": 1,
+      "after_decisive": 1,
+      "transition_class": "status_unchanged",
+      "status_changed": 0
+    },
+    {
+      "event": "GW200311_115853",
+      "before_status": "inconclusive_insufficient_pairs",
+      "after_status": "reject_tensor_response",
+      "before_quality": "missing",
+      "after_quality": "usable",
+      "before_usable_pair_count": 0,
+      "after_usable_pair_count": 2,
+      "before_ring_directions_used": 0,
+      "after_ring_directions_used": 28,
+      "before_bucket": "inconclusive",
+      "after_bucket": "reject",
+      "before_decisive": 0,
+      "after_decisive": 1,
+      "transition_class": "inconclusive_to_decisive",
+      "status_changed": 1
+    }
+  ],
+  "notes": {
+    "preprocess_output_collision_caution": "detector-pair amplitude output names do not encode preprocess mode; refresh runs can overwrite pair metrics when the same event+pair is reused."
+  },
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_inconclusive_reduction_audit_pruned.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_inconclusive_reduction_audit_pruned.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_inconclusive_reduction_audit_pruned.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_inconclusive_reduction_audit_pruned.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_inconclusive_reduction_audit_pruned.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_inconclusive_reduction_audit_pruned.png"
+    ]
+  }
+}

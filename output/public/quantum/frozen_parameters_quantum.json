@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:25.036825+00:00",
+  "generated_utc": "2026-02-20T12:39:04.869680+00:00",
   "phase": 7,
   "step": "7.18.3",
   "name": "Quantum frozen parameters (Part III): centralized frozen values + audit hashes",
@@ -8,36 +8,36 @@
   },
   "inputs": {
     "theory_frozen_parameters_json": {
-      "path": "output/theory/frozen_parameters.json",
-      "sha256": "aecee79519da0400c3d4a3b0a95ec278359ad5201fd969f7b090a747a10a0d6f"
+      "path": "output/private/theory/frozen_parameters.json",
+      "sha256": "789e09011bc8cd4d118d2cc498aa4e4f7130543a2d10f5fd09d8bf8356c22624"
     },
     "bell_falsification_pack_json": {
-      "path": "output/quantum/bell/falsification_pack.json",
-      "sha256": "b47692d0d3c2abe38273e1787de4a8c702b1ec7b65ded67c3a84bccc1d195426"
+      "path": "output/public/quantum/bell/falsification_pack.json",
+      "sha256": "693fc53cc409b4c99b71155d27675adc61bf592624008f052cf31b91745cbc8a"
     },
     "bell_freeze_policy_json": {
-      "path": "output/quantum/bell/freeze_policy.json",
-      "sha256": "d5ec5064710c05ca8fc96d8bf1678426a8727ab259511857f8b28c9a6e5928fd"
+      "path": "output/public/quantum/bell/freeze_policy.json",
+      "sha256": "6cc27820672d26b0cbee2f9e020b0b2ed6ec87df4c7eecf587104986dd7ad021"
     },
     "nuclear_binding_energy_falsification_pack_json": {
-      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
-      "sha256": "2b5951d57a3eba3bfb03c1da4ee30e6772640778e50dc4bd6aaa41a674ead637"
+      "path": "output/public/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+      "sha256": "9bf06ad0cf99fccdb12a81d19b63aa24e7bee5fcb7ab3084a59b2ff16dd8524b"
     },
     "nuclear_binding_energy_theory_diff_metrics_json": {
-      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
-      "sha256": "01ef95ee1995109c247e8f81f72b09a740a0f6465700bb79bb5be479390b60f9"
+      "path": "output/public/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
+      "sha256": "d300df46aea2c7f9948052ea7e51daa63f8b691f424b452c59ef64bac2989c07"
     },
     "nuclear_effective_potential_canonical_metrics_json": {
-      "path": "output/quantum/nuclear_effective_potential_canonical_metrics.json",
-      "sha256": "ebfb59839987e6c1442e2082c6100fb15154fb0d7ba8e8db2a9053491cc95373"
+      "path": "output/public/quantum/nuclear_effective_potential_canonical_metrics.json",
+      "sha256": "0dd1db3581a2859fd80a57d77bd9ec302e929dff0fc8fdb61e7a46fc54c98533"
     },
     "nuclear_pairing_effect_systematics_metrics_json": {
-      "path": "output/quantum/nuclear_pairing_effect_systematics_metrics.json",
-      "sha256": "33d52bf62c7cdde6b852957b6eeeec25f6a7e3ff3cfa43e37fc1ff2a3280da03"
+      "path": "output/public/quantum/nuclear_pairing_effect_systematics_metrics.json",
+      "sha256": "9ae76689d380173300ade325172a2018ba61802b9c9cc92ff4a36fa12fd82e8c"
     },
     "condensed_falsification_pack_json": {
-      "path": "output/quantum/condensed_falsification_pack.json",
-      "sha256": "26420ffa5fe487ecfda8a90c468e92bfef40692819c63506c01c264324827206"
+      "path": "output/public/quantum/condensed_falsification_pack.json",
+      "sha256": "a259f2cead04ac3c539f1e900c13b28ab76ab936b3bf04f3882df362dc21c52c"
     }
   },
   "frozen": {
@@ -47,7 +47,7 @@
       "gamma_pmodel": 1.0000210000000003,
       "gamma_pmodel_sigma": 2.3e-05,
       "beta_source": "cassini2003",
-      "source": "output/theory/frozen_parameters.json"
+      "source": "output/private/theory/frozen_parameters.json"
     },
     "bell": {
       "natural_window": {
@@ -80,9 +80,9 @@
       ],
       "blind_freeze_policy": {
         "policy_id": "bell_freeze_policy_v1",
-        "source": "output/quantum/bell/freeze_policy.json"
+        "source": "output/public/quantum/bell/freeze_policy.json"
       },
-      "source": "output/quantum/bell/falsification_pack.json"
+      "source": "output/public/quantum/bell/falsification_pack.json"
     },
     "nuclear": {
       "binding_energy": {
@@ -123,8 +123,8 @@
             "statement": "差分チャネルの3σ判定は、独立cross-check（separation energies と charge-radius kink）の固定指標を併記し、半径kink strict（A_min=100, pairing凍結）と整合する場合に限って採用する"
           }
         ],
-        "source_pack": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
-        "source_metrics_for_nu_sat": "output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
+        "source_pack": "output/public/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+        "source_metrics_for_nu_sat": "output/public/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
       },
       "effective_potential": {
         "selected_channel_split_kq_from_7_13_8_4": {
@@ -152,7 +152,7 @@
             0.0
           ]
         },
-        "source": "output/quantum/nuclear_effective_potential_canonical_metrics.json"
+        "source": "output/public/quantum/nuclear_effective_potential_canonical_metrics.json"
       },
       "pairing_effect_systematics": {
         "fit": {
@@ -166,11 +166,11 @@
           "n_with_delta_n": 3320,
           "n_with_delta_p": 3201
         },
-        "source": "output/quantum/nuclear_pairing_effect_systematics_metrics.json"
+        "source": "output/public/quantum/nuclear_pairing_effect_systematics_metrics.json"
       }
     },
     "condensed_thermo": {
-      "pack_json": "output/quantum/condensed_falsification_pack.json",
+      "pack_json": "output/public/quantum/condensed_falsification_pack.json",
       "tests_n": 8
     }
   }

@@ -1,0 +1,112 @@
+{
+  "generated_utc": "2026-02-11T14:01:12.578442+00:00",
+  "status": "ok",
+  "event": {
+    "resolved_common_name": "GW250114_082203",
+    "catalog": "O4_Discovery_Papers",
+    "gps": 1420878141.2
+  },
+  "inputs": {
+    "ringdown_json": "C:/develop/waveP/output/private/gw/gw250114_ringdown_qnm_fit.json",
+    "event_json": "C:/develop/waveP/data/gw/gw250114/GW250114_082203_event.json",
+    "posterior": "C:/develop/waveP/data/gw/gw250114/posterior_samples_NRSur7dq4.h5"
+  },
+  "sources": {
+    "event_json_url": "https://gwosc.org/eventapi/json/O4_Discovery_Papers/GW250114_082203/v3",
+    "posterior_url": "https://zenodo.org/api/records/16877102/files/posterior_samples_NRSur7dq4.h5/content",
+    "posterior_ref": "https://doi.org/10.5281/zenodo.16877101",
+    "sha256": {
+      "ringdown_json": "a774bcb47e2672258fd5530528601c78877540f33ef28c5935a7dc55befdde11",
+      "event_json": "179e27f941aa36108fb0769ca5837abb79ec72929783febc9bcf535747a89ddf",
+      "posterior": "55b4a47c2c71580e9ef0cd1ff9fa9d32e64813657e9ea31f32e24cda53922d62"
+    },
+    "selection": {
+      "posterior_key": "O4_Discovery_Papers_GW250114_082203_NRSur7dq4_CC1_PE",
+      "posterior_meta": {
+        "waveform_family": "NRSur7dq4",
+        "date_added": "2025-08-31",
+        "is_preferred": true
+      }
+    }
+  },
+  "ringdown_measurement": {
+    "f_hz": 247.1354890011794,
+    "tau_s": 0.004522383654440175,
+    "sigma_proxy": {
+      "f_hz": 15.528477950813787,
+      "tau_s": 0.000823702920843668
+    }
+  },
+  "gr_prediction_from_pe": {
+    "f_hz": {
+      "median": 249.25722906126916,
+      "p16_p84": [
+        248.4862027819302,
+        250.0365199261867
+      ]
+    },
+    "tau_s": {
+      "median": 0.004073514690073818,
+      "p16_p84": [
+        0.0040337358880424565,
+        0.0041145356321356736
+      ]
+    },
+    "final_mass_det_msun": {
+      "median": 68.06464791149278,
+      "p16_p84": [
+        67.58424077788382,
+        68.56091944284049
+      ]
+    },
+    "final_spin": {
+      "median": 0.6761324911925741,
+      "p16_p84": [
+        0.6695477425737387,
+        0.6824494286927821
+      ]
+    }
+  },
+  "consistency": {
+    "mode": "220",
+    "z_f": -0.13646549644790257,
+    "z_tau": 0.5442860906845309,
+    "ringdown_inferred_final": {
+      "mode": "220",
+      "Q": 3.5111743128383144,
+      "final_spin": 0.7460108197963018,
+      "final_mass_det_msun": 72.69615158341641
+    },
+    "ringdown_inferred_final_mc": {
+      "status": "ok",
+      "n_mc": 8000,
+      "n_ok": 8000,
+      "final_mass_det_msun": {
+        "median": 72.47573631723132,
+        "p16_p84": [
+          64.04389392120684,
+          79.55195405280496
+        ]
+      },
+      "final_spin": {
+        "median": 0.7456796504981379,
+        "p16_p84": [
+          0.5668960891687984,
+          0.8349634923680828
+        ]
+      }
+    },
+    "z_final_mass_det_1d": 0.5677520460059233,
+    "z_final_spin_1d": 0.5182782406232505,
+    "mahalanobis2_m_a": 0.5926115457969299,
+    "p_value_mahalanobis2": 0.7435600327498992
+  },
+  "outputs": {
+    "json": "C:/develop/waveP/output/private/gw/gw250114_imr_consistency.json",
+    "png": "C:/develop/waveP/output/private/gw/gw250114_imr_consistency.png"
+  },
+  "notes": [
+    "This is an IMR-consistency *proxy*: ringdown 220 fit vs full IMR PE posterior (final mass/spin) on GWOSC.",
+    "A full IMR split (inspiral vs post-inspiral posteriors) is not available in this payload; add when public."
+  ]
+}

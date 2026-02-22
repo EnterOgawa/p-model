@@ -1,0 +1,232 @@
+{
+  "generated_utc": "2026-02-16T16:06:27.898742+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.21.3",
+    "name": "Born 2.6.2 A/B cross-channel gate"
+  },
+  "intent": "Apply the same A/B gate logic to COW/atom/HOM proxies with one machine-readable decision.",
+  "inputs": {
+    "born_route_a_proxy_constraints_pack_json": "output/public/quantum/born_route_a_proxy_constraints_pack.json",
+    "cow_experiment_complete_analysis_metrics_json": "output/public/quantum/cow_experiment_complete_analysis_metrics.json",
+    "matter_wave_interference_precision_audit_metrics_json": "output/public/quantum/matter_wave_interference_precision_audit_metrics.json",
+    "hom_squeezed_light_unified_audit_metrics_json": "output/public/quantum/hom_squeezed_light_unified_audit_metrics.json"
+  },
+  "criteria": [
+    {
+      "id": "phase_alpha_consistency",
+      "channel": "atom",
+      "proxy": "phase",
+      "metric": "atom_recoil_alpha_abs_z",
+      "value": 0.5883354744951784,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.19611182483172615,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "位相整合の最小ゲート（abs_z<=3）。"
+    },
+    {
+      "id": "phase_molecular_scaling",
+      "channel": "molecule",
+      "proxy": "phase",
+      "metric": "molecular_isotopic_scaling_zmax",
+      "value": 2.6385399704973964,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.8795133234991321,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "分子スケーリング整合の最小ゲート（z<=3）。"
+    },
+    {
+      "id": "selection_delay_signature_fast",
+      "channel": "bell_selection",
+      "proxy": "selection",
+      "metric": "min_fast_switching_delay_zmax",
+      "value": 5.53541064134177,
+      "threshold": 3.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.5419652116853263,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "fast-switch/time-tag 系で setting依存遅延 z が 3以上。"
+    },
+    {
+      "id": "selection_sweep_sensitivity_fast",
+      "channel": "bell_selection",
+      "proxy": "selection",
+      "metric": "min_fast_switching_selection_ratio",
+      "value": 19.316744077961687,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.051768558715901386,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "selection sweep の変動幅が統計幅1σ以上（ratio>=1）。"
+    },
+    {
+      "id": "visibility_atom_precision_gap",
+      "channel": "atom",
+      "proxy": "visibility",
+      "metric": "log10_atom_interferometer_current_over_required_ratio",
+      "value": 0.3338887327706417,
+      "threshold": 1.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": false,
+      "status": "pass",
+      "normalized_score": 0.3338887327706417,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。"
+    },
+    {
+      "id": "cow_residual_fraction",
+      "channel": "cow",
+      "proxy": "phase",
+      "metric": "max_abs_residual_fraction",
+      "value": 0.0,
+      "threshold": 0.1,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.0,
+      "source": "cow_experiment_complete_analysis_metrics",
+      "note": "COW 位相差の観測-予測残差（fraction）は 10% 以下を hard gate。"
+    },
+    {
+      "id": "cow_numeric_coverage_ratio",
+      "channel": "cow",
+      "proxy": "coverage",
+      "metric": "numeric_coverage_ratio_targeted",
+      "value": 1.0,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": false,
+      "status": "pass",
+      "normalized_score": 1.0,
+      "source": "cow_experiment_complete_analysis_metrics",
+      "note": "COW 数値化カタログの被覆率（targeted）は監視項目。numeric-target rows で 1.0 を閾値とする。"
+    },
+    {
+      "id": "hom_visibility_13ns_significance",
+      "channel": "hom",
+      "proxy": "visibility",
+      "metric": "z_vs_classical_0p5",
+      "value": 37.07692307692308,
+      "threshold": 3.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.08091286307053941,
+      "source": "hom_squeezed_light_unified_audit_metrics",
+      "note": "HOM dip（13 ns）の古典限界 0.5 からの有意差 z。"
+    },
+    {
+      "id": "hom_visibility_1000ns_significance",
+      "channel": "hom",
+      "proxy": "visibility",
+      "metric": "z_vs_classical_0p5",
+      "value": 24.349999999999998,
+      "threshold": 3.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.12320328542094457,
+      "source": "hom_squeezed_light_unified_audit_metrics",
+      "note": "HOM dip（1 us）の古典限界 0.5 からの有意差 z。"
+    },
+    {
+      "id": "hom_delay_stability",
+      "channel": "hom",
+      "proxy": "phase",
+      "metric": "z_delta_between_13ns_1us",
+      "value": 0.20961090407515945,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "status": "pass",
+      "normalized_score": 0.06987030135838648,
+      "source": "hom_squeezed_light_unified_audit_metrics",
+      "note": "13 ns ↔ 1 us の可視度差分 z は 3 以下を hard gate。"
+    },
+    {
+      "id": "hom_noise_psd_shape",
+      "channel": "hom",
+      "proxy": "noise",
+      "metric": "lf_to_hf_ratio",
+      "value": 0.8405951115834224,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": false,
+      "gate": false,
+      "status": "watch",
+      "normalized_score": 1.1896333754740827,
+      "source": "hom_squeezed_light_unified_audit_metrics",
+      "note": "低周波/高周波 PSD 比は運用監視（selectionや装置ドリフトの監視項目）。"
+    }
+  ],
+  "decision": {
+    "route_a_gate": "A_continue",
+    "transition": "A_stay",
+    "hard_fail_ids": [],
+    "hard_unknown_ids": [],
+    "watchlist": [
+      "hom_noise_psd_shape"
+    ],
+    "rule": "A_reject if any hard gate fails/unknown; otherwise A_continue."
+  },
+  "channel_summary": {
+    "atom": {
+      "pass": 2,
+      "watch": 0,
+      "reject": 0
+    },
+    "molecule": {
+      "pass": 1,
+      "watch": 0,
+      "reject": 0
+    },
+    "bell_selection": {
+      "pass": 2,
+      "watch": 0,
+      "reject": 0
+    },
+    "cow": {
+      "pass": 2,
+      "watch": 0,
+      "reject": 0
+    },
+    "hom": {
+      "pass": 3,
+      "watch": 1,
+      "reject": 0
+    }
+  },
+  "diagnostics": {
+    "atom_proxy_snapshot": {
+      "atom_alpha_abs_z": 0.5883354744951784,
+      "atom_precision_ratio": 717905.1403824643
+    },
+    "cow_coverage_snapshot": {
+      "targeted_ratio": 1.0,
+      "legacy_ratio": 0.16666666666666666,
+      "selected_metric": "numeric_coverage_ratio_targeted",
+      "selected_threshold": 1.0
+    },
+    "criteria_n": 11
+  }
+}

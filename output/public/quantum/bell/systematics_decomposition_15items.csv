@@ -1,0 +1,76 @@
+dataset_id,display_name,statistic,item_id,item_label,delta_stat,delta_over_sigma,source,method
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,coincidence_window,coincidence window,0.4232879859484395,16.714609412561046,direct,delta_window from sweep summary
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,offset,offset,2.6358958400500647,104.08509308364351,direct,delta_offset from sweep summary
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,threshold,threshold,0.010367950419058048,0.40940505617011064,proxy_indicator,local window slope * median step
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,detector_efficiency_drift,detector efficiency drift,0.0018332016174249434,0.07238865743159903,proxy_indicator,sigma_stat * coefficient of variation of setting counts
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,dark_count,dark count,0.0008837366337008751,0.03489660265878877,proxy_indicator,sigma_stat * accidental fraction
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,accidental_correction,accidental correction,0.09865394947566752,3.89560367227898,direct,raw vs accidental-subtracted at frozen point
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,event_ready_definition,event-ready definition,0.005064886357803111,0.20000000000000004,proxy_default,fallback 0.2*sigma_stat
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,trial_definition,trial definition,0.0037986647683523325,0.15,proxy_default,fallback 0.15*sigma_stat
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,setting_switch_timing,setting switch timing,0.04672704307028349,1.8451368804472565,proxy_indicator,scaled by delay z-signature
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,polarization_correction,polarization correction,0.004212945539494648,0.1663589364844904,proxy_indicator,sigma_stat * setting-count imbalance
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,transmission_loss,transmission loss,0.006331107947253888,0.25,proxy_default,fallback 0.25*sigma_stat
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,clock_sync,clock synchronization,0.004465498859764421,0.17633165067503417,proxy_indicator,sigma_stat * |frozen_offset|/frozen_window
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,dead_time,dead time,0.00491977303750377,0.19426982917096353,proxy_indicator,sigma_stat * pair-density proxy
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,electronic_noise,electronic noise,0.00025123166393885066,0.00992052520790702,proxy_indicator,sigma_stat * relative bootstrap noise
+weihs1998_longdist_longdist1,Weihs 1998,CHSH|S|,environmental_variation,environmental variation,0.0011908221571173359,0.047022660450524056,proxy_indicator,sigma_stat * relative spread across sweep
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,coincidence_window,coincidence window,0.10151637378660812,0.5,proxy_default,fallback 0.5*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,offset,offset,0.7881399403809839,3.8818365500214216,direct,delta_offset from sweep summary
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,threshold,threshold,0.05075818689330406,0.25,proxy_default,fallback 0.25*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,detector_efficiency_drift,detector efficiency drift,0.07106146165062568,0.35000000000000003,proxy_default,fallback 0.35*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,dark_count,dark count,0.04060654951464325,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,accidental_correction,accidental correction,0.04060654951464325,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,event_ready_definition,event-ready definition,0.008192524321556593,0.040350753361116105,direct,difference between frozen statistic and event-ready baseline
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,trial_definition,trial definition,0.030454912135982434,0.15,proxy_default,fallback 0.15*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,setting_switch_timing,setting switch timing,0.04060654951464325,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,polarization_correction,polarization correction,0.06090982427196487,0.3,proxy_default,fallback 0.3*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,transmission_loss,transmission loss,0.05075818689330406,0.25,proxy_default,fallback 0.25*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,clock_sync,clock synchronization,0.030454912135982434,0.15,proxy_default,fallback 0.15*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,dead_time,dead time,0.04060654951464325,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,electronic_noise,electronic noise,0.016959075807208714,0.08352877065357671,proxy_indicator,sigma_stat * relative bootstrap noise
+delft_hensen2015,Delft (Hensen 2015),CHSH_S,environmental_variation,environmental variation,0.01819498598148748,0.089616016130236,proxy_indicator,sigma_stat * relative spread across sweep
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,coincidence_window,coincidence window,0.09198379044247769,0.5,proxy_default,fallback 0.5*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,offset,offset,1.441964587271957,7.83814507064532,direct,delta_offset from sweep summary
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,threshold,threshold,0.045991895221238845,0.25,proxy_default,fallback 0.25*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,detector_efficiency_drift,detector efficiency drift,0.06438865330973438,0.35,proxy_default,fallback 0.35*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,dark_count,dark count,0.03679351617699108,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,accidental_correction,accidental correction,0.03679351617699108,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,event_ready_definition,event-ready definition,0.025908264015617632,0.14083059575490878,direct,difference between frozen statistic and event-ready baseline
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,trial_definition,trial definition,0.027595137132743305,0.15,proxy_default,fallback 0.15*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,setting_switch_timing,setting switch timing,0.03679351617699108,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,polarization_correction,polarization correction,0.05519027426548661,0.3,proxy_default,fallback 0.3*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,transmission_loss,transmission loss,0.045991895221238845,0.25,proxy_default,fallback 0.25*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,clock_sync,clock synchronization,0.027595137132743305,0.15,proxy_default,fallback 0.15*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,dead_time,dead time,0.03679351617699108,0.2,proxy_default,fallback 0.2*sigma_stat
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,electronic_noise,electronic noise,0.014584678423472192,0.07927852479939256,proxy_indicator,sigma_stat * relative bootstrap noise
+delft_hensen2016_srep30289,Delft (Hensen 2016),CHSH_S,environmental_variation,environmental variation,0.03370048571271005,0.18318708954369925,proxy_indicator,sigma_stat * relative spread across sweep
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,coincidence_window,coincidence window,0.003506711345143672,385.33643210135585,direct,delta_window from sweep summary
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,offset,offset,5.601373388832483e-07,0.06155092404481209,direct,delta_offset from sweep summary
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,threshold,threshold,2.834127119310309e-05,3.114292351975679,proxy_indicator,local window slope * median step
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,detector_efficiency_drift,detector efficiency drift,4.1438627868865964e-07,0.0455350082814142,proxy_indicator,sigma_stat * coefficient of variation of setting counts
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,dark_count,dark count,9.106522959576572e-06,1.0006740563211505,proxy_indicator,sigma_stat * accidental fraction
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,accidental_correction,accidental correction,0.0007089691802832767,77.9053727300694,direct,raw vs accidental-subtracted at frozen point
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,event_ready_definition,event-ready definition,1.8200777569982245e-06,0.2,proxy_default,fallback 0.2*sigma_stat
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,trial_definition,trial definition,0.0007056027315694602,77.53544911544662,direct,difference between frozen statistic and trial-based statistic
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,setting_switch_timing,setting switch timing,2.7301166354973364e-05,3.0,proxy_indicator,scaled by delay z-signature
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,polarization_correction,polarization correction,9.79650400461397e-07,0.10764929099261035,proxy_indicator,sigma_stat * setting-count imbalance
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,transmission_loss,transmission loss,2.2750971962477805e-06,0.25,proxy_default,fallback 0.25*sigma_stat
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,clock_sync,clock synchronization,3.742787898615915e-07,0.04112778021955209,proxy_indicator,sigma_stat * KS delay proxy
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,dead_time,dead time,3.745615499012072e-07,0.04115885142390349,proxy_indicator,sigma_stat * pair-density proxy
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,electronic_noise,electronic noise,1.1846507713067164e-07,0.013017584185639516,proxy_indicator,sigma_stat * relative bootstrap noise
+nist_03_43_afterfixingModeLocking_s3600,NIST,CH_J,environmental_variation,environmental variation,6.625230625314134e-06,0.7280162179709114,proxy_indicator,sigma_stat * relative spread across sweep
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,coincidence_window,coincidence window,0.00012339088413475033,3.1334835552781444,direct,delta_window from sweep summary
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,offset,offset,1.1813454446911643e-05,0.3,proxy_default,fallback 0.3*sigma_stat
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,threshold,threshold,2.587968960939306e-06,0.06572088560300508,proxy_indicator,local window slope * median step
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,detector_efficiency_drift,detector efficiency drift,2.4255386418422943e-05,0.6159600443906725,proxy_indicator,sigma_stat * coefficient of variation of setting counts
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,dark_count,dark count,7.875636297941095e-06,0.19999999999999998,proxy_default,fallback 0.2*sigma_stat
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,accidental_correction,accidental correction,7.875636297941095e-06,0.19999999999999998,proxy_default,fallback 0.2*sigma_stat
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,event_ready_definition,event-ready definition,7.875636297941095e-06,0.19999999999999998,proxy_default,fallback 0.2*sigma_stat
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,trial_definition,trial definition,0.0,0.0,direct,difference between frozen statistic and trial-based statistic
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,setting_switch_timing,setting switch timing,9.47005734923545e-06,0.24048996147044474,proxy_indicator,scaled by delay z-signature
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,polarization_correction,polarization correction,5.315483501905933e-05,1.3498549960453468,proxy_indicator,sigma_stat * setting-count imbalance
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,transmission_loss,transmission loss,1.0958701401964505e-06,0.0278293740020204,proxy_indicator,sigma_stat * Alice/Bob click asymmetry
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,clock_sync,clock synchronization,6.066185398707491e-07,0.015404940424415882,proxy_indicator,sigma_stat * KS delay proxy
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,dead_time,dead time,4.322426346127994e-06,0.10976703805527419,proxy_indicator,sigma_stat * pair-density proxy
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,electronic_noise,electronic noise,1.9095964008505244e-05,0.48493768087024147,proxy_indicator,sigma_stat * relative bootstrap noise
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,CH_J,environmental_variation,environmental variation,3.380817624781613e-05,0.8585509784562932,proxy_indicator,sigma_stat * relative spread across sweep

@@ -1,0 +1,6 @@
+dataset_id,display_name,fair_sampling_ratio,fair_sampling_threshold,fair_sampling_pass,detection_eta_min,detection_threshold_eta_min,detection_pass,locality_delay_z,locality_threshold_delay_z,locality_pass,freedom_bias_max_abs,freedom_threshold_bias,freedom_pass,overall_supported,overall_all_pass
+weihs1998_longdist_longdist1,Weihs 1998,19.316744077961687,1.0,False,,0.6666666666666666,,5.53541064134177,3.0,False,0.01724613510887052,0.05,True,True,False
+delft_hensen2015,Delft (Hensen 2015),3.6508938846257903,1.0,False,,0.6666666666666666,,,3.0,,0.006953223767383054,0.05,True,True,False
+delft_hensen2016_srep30289,Delft (Hensen 2016),7.599442954268822,1.0,False,,0.6666666666666666,,,3.0,,0.011740684022460424,0.05,True,True,False
+nist_03_43_afterfixingModeLocking_s3600,NIST,654.1026883136847,1.0,False,0.001417697704265023,0.6666666666666666,False,43.90965148631052,3.0,False,0.00010999950181861395,0.05,True,True,False
+kwiat2013_prl111_130406_05082013_15,Kwiat/Christensen 2013,5.822553917580089,1.0,False,0.0020172192932026243,0.6666666666666666,False,0.7214698844113343,3.0,True,0.020004335754885305,0.05,True,True,False

@@ -366,6 +366,17 @@ def main() -> None:
             "action_required": "Add raw fringe-shift tables per experiment (post-1975) to enable full residual audit.",
         }
 
+    observed_n = len(observed_rows)
+    total_records_n = len(reference_rows)
+    numeric_target_rows = [
+        row
+        for row in reference_rows
+        if bool(row.get("has_numeric_phase_point")) or str(row.get("record_type") or "") == "representative_relation"
+    ]
+    numeric_target_n = len(numeric_target_rows)
+    coverage_ratio_legacy = float(observed_n / total_records_n) if total_records_n > 0 else float("nan")
+    coverage_ratio_targeted = float(observed_n / numeric_target_n) if numeric_target_n > 0 else None
+
     metrics = {
         "generated_utc": _now_iso_utc(),
         "phase": {"phase": 7, "step": "7.16.11", "name": "COW complete data integration and residual audit"},
@@ -396,11 +407,14 @@ def main() -> None:
         "integration": {
             "reference_rows_n": len(reference_rows),
             "observed_rows_n": len(observed_rows),
-            "numeric_coverage_ratio": float(len(observed_rows) / len(reference_rows)),
+            "numeric_target_rows_n": numeric_target_n,
+            "numeric_coverage_ratio": coverage_ratio_legacy,
+            "numeric_coverage_ratio_targeted": coverage_ratio_targeted,
             "residual_audit": residual_stats,
             "notes": [
                 "This initial freeze includes a relation-level representative point from Mannheim recap.",
                 "Primary experiment tables should be added to upgrade residual audit from initial to full.",
+                "numeric_coverage_ratio is a legacy total-record ratio; numeric_coverage_ratio_targeted is the gate-ready coverage over numeric-target rows.",
             ],
         },
         "outputs": {
@@ -431,8 +445,10 @@ def main() -> None:
                     "hv_sweep_csv": str(out_hv_csv),
                 },
                 "metrics": {
-                    "numeric_observed_rows": len(observed_rows),
-                    "numeric_coverage_ratio": float(len(observed_rows) / len(reference_rows)),
+                    "numeric_observed_rows": observed_n,
+                    "numeric_target_rows": numeric_target_n,
+                    "numeric_coverage_ratio": coverage_ratio_legacy,
+                    "numeric_coverage_ratio_targeted": coverage_ratio_targeted,
                     "residual_audit": residual_stats,
                     "representative_phi0_cycles": phi0_cycles,
                 },

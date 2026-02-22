@@ -1,0 +1,528 @@
+{
+  "generated_utc": "2026-02-13T07:42:52.619320+00:00",
+  "input": "C:/develop/waveP/data/cosmology/distance_duality_constraints.json",
+  "ddr_sigma_policy": {
+    "policy": "category_sys",
+    "envelope_metrics": "C:/develop/waveP/output/private/cosmology/cosmology_distance_duality_systematics_envelope_metrics.json",
+    "applied_count": 16,
+    "note": "If the envelope file is missing, σ_cat inflation is skipped for all rows (falls back to raw)."
+  },
+  "constraints": [
+    {
+      "id": "martinelli2021_snIa_bao",
+      "short_label": "SNIa+BAO (2021)",
+      "title": "Cosmic distance duality (ε0) constraint from SNIa + BAO (parameterized approach)",
+      "epsilon0_obs": 0.013,
+      "epsilon0_sigma": 0.13075996334107776,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Euclid: Forecast constraints on the cosmic distance duality relation with complementary external probes",
+        "authors": "M. Martinelli et al.",
+        "year": 2021,
+        "doi": "10.1051/0004-6361/202039637",
+        "url": "https://arxiv.org/abs/2007.16153",
+        "retrieved_utc": "2026-01-08T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_2007.16153.pdf",
+        "local_pdf_sha256": "58454e08f65f9f055a95f3e81796929c813c0f875fed1c1978fd8ab820156312",
+        "note": "ここでは『現在データでのε0制約』のみを固定入力として利用し、Euclid予測（将来改善）は参考に留める。"
+      },
+      "epsilon0_sigma_raw": 0.029,
+      "sigma_sys_category": 0.1275036,
+      "sigma_policy": "category_sys",
+      "category": "SNIa+BAO"
+    },
+    {
+      "id": "nair2013_bao_snia_opacity",
+      "short_label": "BAO+SNIa (2013)",
+      "title": "Distance duality / opacity exponent ε0 from BAO + SNe Ia: τ(z)=2ε0 ln(1+z)（opacity解釈）",
+      "epsilon0_obs": -0.159,
+      "epsilon0_sigma": 0.16020664160065276,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Cosmic distance duality and cosmic transparency",
+        "authors": "Remya Nair, Sanjay Jhingan, Deepak Jain",
+        "year": 2013,
+        "arxiv_id": "1210.2642",
+        "url": "https://arxiv.org/abs/1210.2642",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1210.2642.pdf",
+        "local_pdf_sha256": "4827e5794c071261b717bc7e149c62fa8c8fbf0526cd3d8f48bd20e36aae2a10",
+        "note": "BAOとSNe Iaの組合せから、不透明度差 Δτ を推定し、τ(z)=2ϵ log(1+z) の ϵ を制約。ここでは DDR の ε0（η=(1+z)^{ε0}）と同値として固定入力に追加。"
+      },
+      "epsilon0_sigma_raw": 0.097,
+      "sigma_sys_category": 0.1275036,
+      "sigma_policy": "category_sys",
+      "category": "SNIa+BAO"
+    },
+    {
+      "id": "avgoustidis2010_snIa_hz",
+      "short_label": "SNIa+H(z) (2010)",
+      "title": "Cosmic opacity / distance duality constraint from SNIa + H(z): d_L=d_A(1+z)^(2+ε)",
+      "epsilon0_obs": -0.04,
+      "epsilon0_sigma": 0.059773446404743844,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Constraints on cosmic opacity and beyond the standard model physics from cosmological distance measurements",
+        "authors": "A. Avgoustidis, C. Burrage, J. Redondo, L. Verde, R. Jimenez",
+        "year": 2010,
+        "doi": "10.1088/1475-7516/2010/10/024",
+        "url": "https://arxiv.org/abs/1004.2053",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1004.2053.pdf",
+        "local_pdf_sha256": "b764f9c621a061d87e5dbcc7d2e0142deb7e99663d8d04c324154fb9d1e450d0",
+        "note": "距離二重性の破れ ε を『不透明度（光子数非保存）』として解釈し、SNIa+H(z)で制約した結果。"
+      },
+      "epsilon0_sigma_raw": 0.0375,
+      "sigma_sys_category": 0.04654691069341536,
+      "sigma_policy": "category_sys",
+      "category": "SNIa+H(z)"
+    },
+    {
+      "id": "liao2015_jla_hz_opacity",
+      "short_label": "JLA+H(z) (2015)",
+      "title": "Distance duality / opacity exponent ε0 from JLA SNe Ia + H(z)（opacity解釈; z_ref=1換算）",
+      "epsilon0_obs": 0.08079092228978195,
+      "epsilon0_sigma": 0.17231575571868044,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Is the Universe Transparent?",
+        "authors": "Kai Liao, A. Avgoustidis, Zhengxiang Li",
+        "year": 2015,
+        "arxiv_id": "1512.01861",
+        "url": "https://arxiv.org/abs/1512.01861",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1512.01861.pdf",
+        "local_pdf_sha256": "69f7692965c9f014081cb405f3fff7520192444aa0000c2b38d75f89be0d809e",
+        "note": "SNe Ia（JLA）と H(z)（differential age; cosmic chronometers）から opacity ϵ を推定。ここでは DDR の ε0（η=(1+z)^{ε0}）と同値として z_ref=1 で換算し固定入力に追加。"
+      },
+      "epsilon0_sigma_raw": 0.16590992970223079,
+      "sigma_sys_category": 0.04654691069341536,
+      "sigma_policy": "category_sys",
+      "category": "SNIa+H(z)"
+    },
+    {
+      "id": "holanda2014_union21_hz_opacity",
+      "short_label": "Union2.1+H(z) (2014)",
+      "title": "Distance duality / opacity exponent ε0 from Union2.1 (+SCP-0401) SNe Ia + H(z)（opacity解釈; z_ref=1換算, Ωk=0）",
+      "epsilon0_obs": 0.02452581569511238,
+      "epsilon0_sigma": 0.09199323922247085,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Model-independent constraints on the cosmic opacity",
+        "authors": "R. F. L. Holanda, J. C. Carvalho, J. S. Alcaniz",
+        "year": 2014,
+        "arxiv_id": "1207.1694",
+        "url": "https://arxiv.org/abs/1207.1694",
+        "retrieved_utc": "2026-01-10T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1207.1694.pdf",
+        "local_pdf_sha256": "81b07b43461aac0f9dc4ce249879074eeed48e659c66c47c3d7df2a8a6710f83",
+        "note": "SNe Ia（Union2.1 + SCP-0401）と H(z) を比較し、τ(z)=2ǫ z の ǫ を推定。ここでは DDR の ε0（η=(1+z)^{ε0}）と同値として z_ref=1 で換算し固定入力に追加。"
+      },
+      "epsilon0_sigma_raw": 0.079348227248893,
+      "sigma_sys_category": 0.04654691069341536,
+      "sigma_policy": "category_sys",
+      "category": "SNIa+H(z)"
+    },
+    {
+      "id": "wang2017_hz_jla_no_h0_prior_opacity",
+      "short_label": "H(z)+JLA (2017, no H0 prior)",
+      "title": "Distance duality / opacity exponent ε0 from H(z) + JLA with curvature K（no H0 prior; opacity解釈）",
+      "epsilon0_obs": 0.018,
+      "epsilon0_sigma": 0.09603444639867918,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Model-independent Constraints on Cosmic Curvature and Opacity",
+        "authors": "Guo-Jian Wang, Jun-Jie Wei, Zheng-Xiang Li, Jun-Qing Xia, Zong-Hong Zhu",
+        "year": 2017,
+        "arxiv_id": "1709.07258",
+        "url": "https://arxiv.org/abs/1709.07258",
+        "retrieved_utc": "2026-01-10T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1709.07258.pdf",
+        "local_pdf_sha256": "c20cb269f0bcd3ce148a70720afcae326605b31cbd62a4b172e7b262e18756f0",
+        "note": "H(z) を Gaussian process で再構成し、JLA と組み合わせて曲率 K と opacity ε を同時推定。ここでは DDR の ε0 と同値として採用（H0 事前分布なし）。"
+      },
+      "epsilon0_sigma_raw": 0.084,
+      "sigma_sys_category": 0.04654691069341536,
+      "sigma_policy": "category_sys",
+      "category": "SNIa+H(z)"
+    },
+    {
+      "id": "holanda2012_clusters_snIa_constitution_eta0_linear",
+      "short_label": "Clusters+SNIa (2012)",
+      "title": "Distance duality constraint from galaxy clusters (SZE+X-ray) + SNe Ia (Constitution): η(z)=1+η0 z (converted to ε0 at z=1)",
+      "epsilon0_obs": -0.47393118833241243,
+      "epsilon0_sigma": 0.48359561365177917,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Probing the cosmic distance duality relation with the Sunyaev-Zel’dovich effect, X-ray observations and supernovae Ia",
+        "authors": "R. F. L. Holanda, J. A. S. Lima, M. B. Ribeiro",
+        "year": 2012,
+        "doi": "10.1051/0004-6361/201118343",
+        "arxiv_id": "1104.3753",
+        "url": "https://arxiv.org/abs/1104.3753",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1104.3753.pdf",
+        "local_pdf_sha256": "a294e48cf13fd390f15cc56af664d801fd80393188b6e5994fbe47882b28d34e",
+        "note": "BAOに依存しない直接比較（クラスターD_AとSNe IaのD_L）として扱い、η0→ε0 は z=1 アンカーで換算した。"
+      },
+      "epsilon0_sigma_raw": 0.4333667345682679,
+      "sigma_sys_category": 0.21461125532664235,
+      "sigma_policy": "category_sys",
+      "category": "Clusters+SNIa"
+    },
+    {
+      "id": "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical",
+      "short_label": "Clusters+SNIa (2012, non-iso)",
+      "title": "Distance duality constraint from galaxy clusters + SNe Ia (Constitution): η(z)=1+η0 z, non-isothermal spherical β model (converted to ε0 at z=1)",
+      "epsilon0_obs": -0.7131188522118385,
+      "epsilon0_sigma": 0.3394776716740207,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Probing the cosmic distance duality relation with the Sunyaev-Zel’dovich effect, X-ray observations and supernovae Ia",
+        "authors": "R. F. L. Holanda, J. A. S. Lima, M. B. Ribeiro",
+        "year": 2012,
+        "doi": "10.1051/0004-6361/201118343",
+        "arxiv_id": "1104.3753",
+        "url": "https://arxiv.org/abs/1104.3753",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1104.3753.pdf",
+        "local_pdf_sha256": "a294e48cf13fd390f15cc56af664d801fd80393188b6e5994fbe47882b28d34e",
+        "note": "BAOに依存しない直接比較（クラスターD_AとSNe IaのD_L）。同一論文内でもクラスター幾何モデルで η0 が変わるため、別行として固定入力に追加。"
+      },
+      "epsilon0_sigma_raw": 0.2630344058337938,
+      "sigma_sys_category": 0.21461125532664235,
+      "sigma_policy": "category_sys",
+      "category": "Clusters+SNIa"
+    },
+    {
+      "id": "li2011_clusters_snIa_union2_eta0_linear",
+      "short_label": "Clusters+SNIa (2011)",
+      "title": "Distance duality constraint from galaxy clusters + SNe Ia (Union2): η(z)=1+η0 z (converted to ε0 at z=1)",
+      "epsilon0_obs": -0.18442457113742744,
+      "epsilon0_sigma": 0.3545738305269939,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Cosmological-model-independent tests for the distance-duality relation from Galaxy Clusters and Type Ia Supernova",
+        "authors": "Zhengxiang Li, Puxun Wu, Hongwei Yu",
+        "year": 2011,
+        "doi": "10.1088/2041-8205/729/1/L14",
+        "arxiv_id": "1101.5255",
+        "url": "https://arxiv.org/abs/1101.5255",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1101.5255.pdf",
+        "local_pdf_sha256": "4427962ae3f5d9b42fd856a24a66326888a40c0933ca1574844ac459dcf20751",
+        "note": "BAOに依存しない直接比較（クラスターD_AとSNe IaのD_L）。η0→ε0 は z=1 アンカーで換算した。"
+      },
+      "epsilon0_sigma_raw": 0.2822491990807204,
+      "sigma_sys_category": 0.21461125532664235,
+      "sigma_policy": "category_sys",
+      "category": "Clusters+SNIa"
+    },
+    {
+      "id": "li2011_clusters_snIa_union2_eta0_linear_bonamente",
+      "short_label": "Clusters+SNIa (2011, Bonamente)",
+      "title": "Distance duality constraint from galaxy clusters + SNe Ia (Union2): η(z)=1+η0 z, Bonamente et al. cluster sample (converted to ε0 at z=1)",
+      "epsilon0_obs": -0.4150374992788438,
+      "epsilon0_sigma": 0.2889718245230599,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Cosmological-model-independent tests for the distance-duality relation from Galaxy Clusters and Type Ia Supernova",
+        "authors": "Zhengxiang Li, Puxun Wu, Hongwei Yu",
+        "year": 2011,
+        "doi": "10.1088/2041-8205/729/1/L14",
+        "arxiv_id": "1101.5255",
+        "url": "https://arxiv.org/abs/1101.5255",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1101.5255.pdf",
+        "local_pdf_sha256": "4427962ae3f5d9b42fd856a24a66326888a40c0933ca1574844ac459dcf20751",
+        "note": "BAOに依存しない直接比較（クラスターD_AとSNe IaのD_L）。クラスターサンプル違い（De Filippis vs Bonamente）を別行で固定。"
+      },
+      "epsilon0_sigma_raw": 0.19351156155462357,
+      "sigma_sys_category": 0.21461125532664235,
+      "sigma_policy": "category_sys",
+      "category": "Clusters+SNIa"
+    },
+    {
+      "id": "li2011_clusters_snIa_union2_eta0_nonlinear",
+      "short_label": "Clusters+SNIa (2011, η0/(1+z))",
+      "title": "Distance duality constraint from galaxy clusters + SNe Ia (Union2): η(z)=1+η0 z/(1+z) (converted to ε0 at z=1)",
+      "epsilon0_obs": -0.1440103026915193,
+      "epsilon0_sigma": 0.288248453337741,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Cosmological-model-independent tests for the distance-duality relation from Galaxy Clusters and Type Ia Supernova",
+        "authors": "Zhengxiang Li, Puxun Wu, Hongwei Yu",
+        "year": 2011,
+        "doi": "10.1088/2041-8205/729/1/L14",
+        "arxiv_id": "1101.5255",
+        "url": "https://arxiv.org/abs/1101.5255",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1101.5255.pdf",
+        "local_pdf_sha256": "4427962ae3f5d9b42fd856a24a66326888a40c0933ca1574844ac459dcf20751",
+        "note": "同一一次ソース内の別パラメータ化（η=1+η0 z/(1+z)）。η0→ε0 は z=1 アンカー換算。"
+      },
+      "epsilon0_sigma_raw": 0.19242967530690944,
+      "sigma_sys_category": 0.21461125532664235,
+      "sigma_policy": "category_sys",
+      "category": "Clusters+SNIa"
+    },
+    {
+      "id": "li2011_clusters_snIa_union2_eta0_nonlinear_bonamente",
+      "short_label": "Clusters+SNIa (2011, Bonamente, η0/(1+z))",
+      "title": "Distance duality constraint from galaxy clusters + SNe Ia (Union2): η(z)=1+η0 z/(1+z), Bonamente et al. cluster sample (converted to ε0 at z=1)",
+      "epsilon0_obs": -0.31293931166010786,
+      "epsilon0_sigma": 0.25343634818356003,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Cosmological-model-independent tests for the distance-duality relation from Galaxy Clusters and Type Ia Supernova",
+        "authors": "Zhengxiang Li, Puxun Wu, Hongwei Yu",
+        "year": 2011,
+        "doi": "10.1088/2041-8205/729/1/L14",
+        "arxiv_id": "1101.5255",
+        "url": "https://arxiv.org/abs/1101.5255",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1101.5255.pdf",
+        "local_pdf_sha256": "4427962ae3f5d9b42fd856a24a66326888a40c0933ca1574844ac459dcf20751",
+        "note": "同一一次ソース内の別パラメータ化（η=1+η0 z/(1+z)、Bonamenteサンプル）。η0→ε0 は z=1 アンカー換算。"
+      },
+      "epsilon0_sigma_raw": 0.13480352987864003,
+      "sigma_sys_category": 0.21461125532664235,
+      "sigma_policy": "category_sys",
+      "category": "Clusters+SNIa"
+    },
+    {
+      "id": "holanda2016_sgl_snIa_grb_powerlaw_plaw",
+      "short_label": "SGL+SNIa+GRB (2016, PLAW)",
+      "title": "Distance duality constraint from strong gravitational lensing + SNe Ia + GRBs: η(z)=(1+z)^η0 (ε0=η0), lens model=PLAW (Table I, 2σ -> 1σ approx)",
+      "epsilon0_obs": -0.16,
+      "epsilon0_sigma": 0.3698155622482645,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Probing the distance-duality relation with high-z data",
+        "authors": "R. F. L. Holanda, V. C. Busti, F. S. Lima, J. S. Alcaniz",
+        "year": 2016,
+        "arxiv_id": "1611.09426",
+        "url": "https://arxiv.org/abs/1611.09426",
+        "retrieved_utc": "2026-01-10T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1611.09426.pdf",
+        "local_pdf_sha256": "2845C29BD02989465E6A810B04D7443A579BE2AC2CB64185FE350A96C8E07C82",
+        "note": "強重力レンズ（SGL）を用いた CDDR（DDR）テスト。ここでは power-law パラメータ化（η=(1+z)^η0）に限り、ε0=η0 として固定入力にする。"
+      },
+      "epsilon0_sigma_raw": 0.1875,
+      "sigma_sys_category": 0.318759,
+      "sigma_policy": "category_sys",
+      "category": "SGL+SNIa+GRB"
+    },
+    {
+      "id": "holanda2016_sgl_snIa_grb_powerlaw_sis",
+      "short_label": "SGL+SNIa+GRB (2016, SIS)",
+      "title": "Distance duality constraint from strong gravitational lensing + SNe Ia + GRBs: η(z)=(1+z)^η0 (ε0=η0), lens model=SIS (Table I, 2σ -> 1σ approx)",
+      "epsilon0_obs": 0.27,
+      "epsilon0_sigma": 0.3522886601652117,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Probing the distance-duality relation with high-z data",
+        "authors": "R. F. L. Holanda, V. C. Busti, F. S. Lima, J. S. Alcaniz",
+        "year": 2016,
+        "arxiv_id": "1611.09426",
+        "url": "https://arxiv.org/abs/1611.09426",
+        "retrieved_utc": "2026-01-10T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1611.09426.pdf",
+        "local_pdf_sha256": "2845C29BD02989465E6A810B04D7443A579BE2AC2CB64185FE350A96C8E07C82",
+        "note": "同一一次ソース（Holanda+ 2016）のレンズモデル違い（SIS）。power-law パラメータ化（η=(1+z)^η0）に限り、ε0=η0 として固定入力にする。"
+      },
+      "epsilon0_sigma_raw": 0.15,
+      "sigma_sys_category": 0.318759,
+      "sigma_policy": "category_sys",
+      "category": "SGL+SNIa+GRB"
+    },
+    {
+      "id": "li_lin2017_snIa_radio_sources_eta0_linear",
+      "short_label": "SNe+radio (2017, η0 z)",
+      "title": "Distance duality constraint from SNe Ia + ultra-compact radio sources: η_src(z)=D_A(1+z)^2/D_L=1+η0 z (converted to ε0 at z=1; η_repo=1/η_src)",
+      "epsilon0_obs": 0.08926733809708741,
+      "epsilon0_sigma": 0.08428117516934987,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Testing the distance duality relation using type-Ia supernovae and ultra-compact radio sources",
+        "authors": "Xin Li, Hai-Nan Lin",
+        "year": 2017,
+        "arxiv_id": "1710.11361",
+        "url": "https://arxiv.org/abs/1710.11361",
+        "retrieved_utc": "2026-01-10T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1710.11361.pdf",
+        "local_pdf_sha256": "742721D8FE90F551E23F2B7F1DBBE07719FA188CC90535D1A03BF4E9A6471DA7",
+        "note": "SNe Ia と電波コンパクトソースの直接比較（モデル非依存）。本repoでは一次ソースの η 定義が逆数である点を明示し、z=1アンカーで ε0 に換算して併記する。"
+      },
+      "epsilon0_sigma_raw": 0.07681159455660591,
+      "sigma_sys_category": 0.03468854896933893,
+      "sigma_policy": "category_sys",
+      "category": "SNe+radio"
+    },
+    {
+      "id": "li_lin2017_snIa_radio_sources_eta0_nonlinear",
+      "short_label": "SNe+radio (2017, η0 z/(1+z))",
+      "title": "Distance duality constraint from SNe Ia + ultra-compact radio sources: η_src(z)=D_A(1+z)^2/D_L=1+η0 z/(1+z) (converted to ε0 at z=1; η_repo=1/η_src)",
+      "epsilon0_obs": 0.13606154957602837,
+      "epsilon0_sigma": 0.13180517270131029,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Testing the distance duality relation using type-Ia supernovae and ultra-compact radio sources",
+        "authors": "Xin Li, Hai-Nan Lin",
+        "year": 2017,
+        "arxiv_id": "1710.11361",
+        "url": "https://arxiv.org/abs/1710.11361",
+        "retrieved_utc": "2026-01-10T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1710.11361.pdf",
+        "local_pdf_sha256": "742721D8FE90F551E23F2B7F1DBBE07719FA188CC90535D1A03BF4E9A6471DA7",
+        "note": "同一一次ソース内の別パラメータ化（η_src=1+η0 z/(1+z)）。本repoでは z=1アンカーで ε0 に換算し、DDRの幅の感度として併記する。"
+      },
+      "epsilon0_sigma_raw": 0.1271585943663424,
+      "sigma_sys_category": 0.03468854896933893,
+      "sigma_policy": "category_sys",
+      "category": "SNe+radio"
+    }
+  ],
+  "primary": {
+    "constraint_id": "avgoustidis2010_snIa_hz",
+    "constraint_label": "SNIa+H(z) (2010)",
+    "epsilon0_obs": -0.04,
+    "epsilon0_sigma": 0.059773446404743844,
+    "model": {
+      "definition": "ε0_model = (p_e+p_t - s_L)/2 - 2 + s_R + α",
+      "p_e": 1.0,
+      "p_t": 1.0,
+      "notes": [
+        "p_t=1 は時間伸長（SN light curve stretch）と整合する最小仮定。",
+        "s_L/s_R/α は距離指標（標準光源/標準定規/不透明度）の“有効スケール”を表す。"
+      ]
+    },
+    "grid": {
+      "n_grid": 220,
+      "ranges": {
+        "alpha_opacity": [
+          -1.5,
+          2.5
+        ],
+        "s_L": [
+          -4.0,
+          4.0
+        ],
+        "s_R": [
+          -1.0,
+          3.0
+        ]
+      },
+      "slices": [
+        {
+          "id": "A",
+          "fixed": {
+            "s_L": 0.0
+          },
+          "axes": [
+            "alpha_opacity",
+            "s_R"
+          ]
+        },
+        {
+          "id": "B",
+          "fixed": {
+            "s_R": 0.0
+          },
+          "axes": [
+            "alpha_opacity",
+            "s_L"
+          ]
+        },
+        {
+          "id": "C",
+          "fixed": {
+            "alpha_opacity": 0.0
+          },
+          "axes": [
+            "s_R",
+            "s_L"
+          ]
+        }
+      ]
+    },
+    "canonical_solutions": [
+      {
+        "mode": "opacity_only",
+        "params": {
+          "alpha_opacity": 0.96,
+          "s_L": 0.0,
+          "s_R": 0.0
+        },
+        "epsilon0_model": -0.040000000000000036,
+        "z_score": -5.804328109945264e-16,
+        "z1": {
+          "z_ref": 1.0,
+          "epsilon0_min_model": -1.0,
+          "delta_epsilon0_needed": 0.96,
+          "eta_boost_factor_z1": 1.945309894824571,
+          "delta_distance_modulus_mag_z1": 1.4449439791871097,
+          "flux_dimming_factor_needed_z1": 3.7842305869023836,
+          "tau_equivalent_dimming_z1": 1.330842586675095,
+          "params": {
+            "alpha_opacity": 0.96,
+            "s_L": 0.0,
+            "s_R": 0.0
+          }
+        }
+      },
+      {
+        "mode": "ruler_only",
+        "params": {
+          "alpha_opacity": 0.0,
+          "s_L": 0.0,
+          "s_R": 0.96
+        },
+        "epsilon0_model": -0.040000000000000036,
+        "z_score": -5.804328109945264e-16,
+        "z1": {
+          "z_ref": 1.0,
+          "epsilon0_min_model": -1.0,
+          "delta_epsilon0_needed": 0.96,
+          "eta_boost_factor_z1": 1.945309894824571,
+          "delta_distance_modulus_mag_z1": 1.4449439791871097,
+          "flux_dimming_factor_needed_z1": 3.7842305869023836,
+          "tau_equivalent_dimming_z1": 1.330842586675095,
+          "params": {
+            "alpha_opacity": 0.0,
+            "s_L": 0.0,
+            "s_R": 0.96
+          }
+        }
+      },
+      {
+        "mode": "candle_only",
+        "params": {
+          "alpha_opacity": 0.0,
+          "s_L": -1.92,
+          "s_R": 0.0
+        },
+        "epsilon0_model": -0.040000000000000036,
+        "z_score": -5.804328109945264e-16,
+        "z1": {
+          "z_ref": 1.0,
+          "epsilon0_min_model": -1.0,
+          "delta_epsilon0_needed": 0.96,
+          "eta_boost_factor_z1": 1.945309894824571,
+          "delta_distance_modulus_mag_z1": 1.4449439791871097,
+          "flux_dimming_factor_needed_z1": 3.7842305869023836,
+          "tau_equivalent_dimming_z1": 1.330842586675095,
+          "params": {
+            "alpha_opacity": 0.0,
+            "s_L": -1.92,
+            "s_R": 0.0
+          }
+        }
+      }
+    ]
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_reconnection_parameter_space.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_reconnection_parameter_space_metrics.json"
+  }
+}

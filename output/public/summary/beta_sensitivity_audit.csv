@@ -1,0 +1,17 @@
+indicator,section,unit,case_low,case_ref,case_high,max_abs_delta_vs_ref,max_rel_delta_percent_vs_ref,pass_abs_threshold,watch_abs_threshold,status,note
+EHT delta_coeff_p_minus_GR,Part II,dimensionless,0.0462671635960652,0.046278149401283164,0.04629018147366426,1.203207238109627e-05,0.025999467430654552,0.001,0.015426049800427721,pass,formula re-evaluation: delta=(4eβ/(2sqrt27))-1
+PPN gamma_pmodel(β),Part II,dimensionless,1.0,1.0000210000000003,1.000044,2.299999999966218e-05,0.002299951700980497,2.3e-05,6.9e-05,pass,derived from frozen beta: gamma=2β-1
+Deuteron binding B,Part III,MeV,2.22456634198942,2.22456634198942,2.22456634198942,0.0,nan,7.919062410999653e-07,3.959531205499827e-06,pass,heavy rerun under beta overrides
+CMB holdout max|Δℓ| (ℓ4-ℓ6),Part II,multipole,0.6762710000004972,0.6762710000004972,0.6762710000004972,0.0,nan,1e-06,0.0001,pass,heavy rerun invariance check (CMB acoustic holdout gate metric).
+CMB holdout max|ΔA/A| (ℓ4-ℓ6),Part II,dimensionless,0.32152427047244037,0.32152427047244037,0.32152427047244037,0.0,nan,1e-06,0.0001,pass,heavy rerun invariance check (CMB amplitude holdout gate metric).
+SPARC chi2/dof (P-model),Part II,dimensionless,21.34489488656301,21.34489488656301,21.34489488656301,0.0,nan,2.134489488656301e-05,0.0021344894886563015,pass,heavy rerun invariance check (SPARC global fit quality).
+SPARC Δchi2 (baryon-pmodel),Part II,dimensionless,288501.3750145193,288501.3750145193,288501.3750145193,0.0,nan,0.2885013750145193,28.850137501451933,pass,heavy rerun invariance check (SPARC model-comparison metric).
+Bell bridge selection max score,Part III,dimensionless,4.158177721371941,4.158177721371941,4.158177721371941,0.0,nan,4.158177721371941e-06,0.0004158177721371941,pass,heavy rerun invariance check (Bell bridge selection summary).
+Bell bridge physics max score,Part III,dimensionless,1.1896333754740827,1.1896333754740827,1.1896333754740827,0.0,nan,1.1896333754740827e-06,0.00011896333754740827,pass,heavy rerun invariance check (Bell bridge physics summary).
+Full-rerun reproducibility max|Δ(run2-run1)|,Part II/III,dimensionless,0.0,0.0,0.0,0.0,,1e-12,1e-09,pass,full-rerun follow-up: heavy rerun run2 vs run1 numeric reproducibility.
+Quantum shared KPI overall status,Part III,,pass,pass,pass,,,,,pass,beta-independent aggregation in current pipeline (invariance by construction).
+CMB holdout overall status (extended),Part II,,pass,pass,pass,,,,,pass,heavy rerun invariance check (CMB core/extended gate status).
+SPARC better model by chi2,Part II,,pmodel_corrected,pmodel_corrected,pmodel_corrected,,,,,pass,heavy rerun invariance check (model-selection label).
+Bell bridge overall status,Part III,,watch,watch,watch,,,,,pass,heavy rerun invariance check (selection/physics bridge gate status).
+Full-rerun categorical reproducibility,Part II/III,,pass,pass,pass,,,,,pass,full-rerun follow-up: status labels (CMB/SPARC/Bell bridge) run2 vs run1 consistency.
+Full-rerun restore-state reproducibility,Part II/III,,pass,pass,pass,,,,,pass,full-rerun follow-up: frozen-parameter restore + ref-rerun consistency for run1/run2.

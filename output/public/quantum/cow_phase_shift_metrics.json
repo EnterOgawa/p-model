@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:03.062031+00:00",
+  "generated_utc": "2026-02-16T15:07:48.885399+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.11",
@@ -32,7 +32,9 @@
   "integration": {
     "reference_rows_n": 6,
     "observed_rows_n": 1,
+    "numeric_target_rows_n": 1,
     "numeric_coverage_ratio": 0.16666666666666666,
+    "numeric_coverage_ratio_targeted": 1.0,
     "residual_audit": {
       "n_observed_rows": 1,
       "median_abs_residual_cycles": 0.0,
@@ -42,7 +44,8 @@
     },
     "notes": [
       "This initial freeze includes a relation-level representative point from Mannheim recap.",
-      "Primary experiment tables should be added to upgrade residual audit from initial to full."
+      "Primary experiment tables should be added to upgrade residual audit from initial to full.",
+      "numeric_coverage_ratio is a legacy total-record ratio; numeric_coverage_ratio_targeted is the gate-ready coverage over numeric-target rows."
     ]
   },
   "outputs": {

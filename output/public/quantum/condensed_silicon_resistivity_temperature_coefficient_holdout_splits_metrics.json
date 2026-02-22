@@ -1,0 +1,154 @@
+{
+  "generated_utc": "2026-02-15T10:04:40.969200+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_nbsir74_496_silicon_resistivity\\extracted_values.json",
+      "sha256": "24a5dcac360fc14ee19a695cb6ac702369a50bc88d3c72bec4e56f0d4f8ab2b5"
+    }
+  },
+  "assumptions": {
+    "sigma_proxy": "max(train residual robust sigma, global heterogeneity floor from all-sample linear baseline)",
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test split)"
+    },
+    "sigma_floor_reference": {
+      "reference_model": "global_linear_logrho_2p",
+      "sigma_mad_pct_per_K": 0.10681431000912764,
+      "sigma_std_pct_per_K": 0.1579163313239616,
+      "sigma_floor_pct_per_K": 0.1579163313239616
+    }
+  },
+  "data_range_log10rho": [
+    -3.110082316563794,
+    3.064083435963596
+  ],
+  "splits": [
+    {
+      "name": "A_low_to_high",
+      "train_log10rho": [
+        -3.110082316563794,
+        -0.6458915608525991
+      ],
+      "test_log10rho": [
+        -0.5965362986546825,
+        3.064083435963596
+      ],
+      "models": {
+        "const_mean_fit": {
+          "params": {
+            "mean_pct_per_K": 0.24725284103292697,
+            "sigma_train_proxy_pct_per_K": 0.23175737941375446,
+            "sigma_floor_pct_per_K": 0.1579163313239616,
+            "sigma_proxy_pct_per_K": 0.23175737941375446
+          },
+          "train": {
+            "n": 11,
+            "max_abs_z": 1.4352066644520636,
+            "rms_z": 0.8335377713691126,
+            "reduced_chi2": 0.7642637379288858,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 10,
+            "max_abs_z": 3.0630677082343283,
+            "rms_z": 2.1302319809707724,
+            "reduced_chi2": 4.537888292750661,
+            "exceed_3sigma_n": 1
+          }
+        },
+        "linear_logrho_2p": {
+          "params": {
+            "intercept_pct_per_K": 0.5031090605637131,
+            "slope_pct_per_K_per_log10rho": 0.15640150743386985,
+            "sigma_train_proxy_pct_per_K": 0.1767361203906187,
+            "sigma_floor_pct_per_K": 0.1579163313239616,
+            "sigma_proxy_pct_per_K": 0.1767361203906187
+          },
+          "train": {
+            "n": 11,
+            "max_abs_z": 1.1066851262968984,
+            "rms_z": 0.8433721941048327,
+            "reduced_chi2": 0.8693381372979105,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 10,
+            "max_abs_z": 1.7220385262556814,
+            "rms_z": 0.9861391945152771,
+            "reduced_chi2": 0.9724705109592395,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "B_high_to_low",
+      "train_log10rho": [
+        -0.5965362986546825,
+        3.064083435963596
+      ],
+      "test_log10rho": [
+        -3.110082316563794,
+        -0.6458915608525991
+      ],
+      "models": {
+        "const_mean_fit": {
+          "params": {
+            "mean_pct_per_K": 0.6972691967630034,
+            "sigma_train_proxy_pct_per_K": 0.12049038842083788,
+            "sigma_floor_pct_per_K": 0.1579163313239616,
+            "sigma_proxy_pct_per_K": 0.1579163313239616
+          },
+          "train": {
+            "n": 10,
+            "max_abs_z": 3.1766262297308776,
+            "rms_z": 1.2856934337557675,
+            "reduced_chi2": 1.8366751173363294,
+            "exceed_3sigma_n": 1
+          },
+          "test": {
+            "n": 11,
+            "max_abs_z": 4.285537558931026,
+            "rms_z": 3.1011810418436654,
+            "reduced_chi2": 9.61732385429056,
+            "exceed_3sigma_n": 6
+          }
+        },
+        "linear_logrho_2p": {
+          "params": {
+            "intercept_pct_per_K": 0.6095821348914096,
+            "slope_pct_per_K_per_log10rho": 0.12947590536617284,
+            "sigma_train_proxy_pct_per_K": 0.08301308057162485,
+            "sigma_floor_pct_per_K": 0.1579163313239616,
+            "sigma_proxy_pct_per_K": 0.1579163313239616
+          },
+          "train": {
+            "n": 10,
+            "max_abs_z": 2.60491821815388,
+            "rms_z": 0.9338541193280636,
+            "reduced_chi2": 1.0901043952324916,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 11,
+            "max_abs_z": 2.225698912295761,
+            "rms_z": 1.3481043257862442,
+            "reduced_chi2": 1.817385273203584,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_resistivity_temperature_coefficient_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_resistivity_temperature_coefficient_holdout_splits.png"
+  },
+  "notes": [
+    "Operational holdout: split samples by median log10 ρ(23°C) and test whether the coefficient trend transfers across resistivity regimes.",
+    "The temperature coefficient is a near-room-temperature proxy (20–30°C finite difference) and does not encode a full ρ(T) curve."
+  ]
+}

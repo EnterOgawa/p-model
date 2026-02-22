@@ -1,15 +1,15 @@
 {
-  "generated_utc": "2026-02-11T02:47:07.763725+00:00",
+  "generated_utc": "2026-02-20T12:38:30.026400+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.9",
     "name": "Bell: longterm cross-dataset consistency quantification"
   },
   "inputs": {
-    "falsification_pack_json": "output/quantum/bell/falsification_pack.json",
-    "systematics_templates_json": "output/quantum/bell/systematics_templates.json",
-    "systematics_15items_json": "output/quantum/bell/systematics_decomposition_15items.json",
-    "cross_dataset_covariance_json": "output/quantum/bell/cross_dataset_covariance.json"
+    "falsification_pack_json": "output/public/quantum/bell/falsification_pack.json",
+    "systematics_templates_json": "output/public/quantum/bell/systematics_templates.json",
+    "systematics_15items_json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+    "cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json"
   },
   "thresholds": {
     "selection_origin_ratio_min": 1.0,
@@ -309,9 +309,9 @@
     {
       "dataset_id": "weihs1998_longdist_longdist1",
       "supported": true,
-      "covariance_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance.json",
-      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance_bootstrap.json",
-      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\natural_window_frozen.json",
+      "covariance_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance.json",
+      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance_bootstrap.json",
+      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\natural_window_frozen.json",
       "sweep_profile": {
         "dataset_id": "weihs1998_longdist_longdist1",
         "source": "bootstrap",
@@ -365,9 +365,9 @@
     {
       "dataset_id": "delft_hensen2015",
       "supported": true,
-      "covariance_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2015\\covariance.json",
-      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2015\\covariance_bootstrap.json",
-      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2015\\natural_window_frozen.json",
+      "covariance_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\covariance.json",
+      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\covariance_bootstrap.json",
+      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\natural_window_frozen.json",
       "sweep_profile": {
         "dataset_id": "delft_hensen2015",
         "source": "bootstrap",
@@ -585,9 +585,9 @@
     {
       "dataset_id": "delft_hensen2016_srep30289",
       "supported": true,
-      "covariance_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2016_srep30289\\covariance.json",
-      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2016_srep30289\\covariance_bootstrap.json",
-      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2016_srep30289\\natural_window_frozen.json",
+      "covariance_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\covariance.json",
+      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\covariance_bootstrap.json",
+      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2016_srep30289\\natural_window_frozen.json",
       "sweep_profile": {
         "dataset_id": "delft_hensen2016_srep30289",
         "source": "bootstrap",
@@ -805,9 +805,9 @@
     {
       "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
       "supported": true,
-      "covariance_json": "C:\\develop\\waveP\\output\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\covariance.json",
-      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\covariance_bootstrap.json",
-      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\natural_window_frozen.json",
+      "covariance_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\covariance.json",
+      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\covariance_bootstrap.json",
+      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\nist_03_43_afterfixingModeLocking_s3600\\natural_window_frozen.json",
       "sweep_profile": {
         "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
         "source": "bootstrap",
@@ -851,9 +851,9 @@
     {
       "dataset_id": "kwiat2013_prl111_130406_05082013_15",
       "supported": true,
-      "covariance_json": "C:\\develop\\waveP\\output\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\covariance.json",
-      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\covariance_bootstrap.json",
-      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\natural_window_frozen.json",
+      "covariance_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\covariance.json",
+      "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\covariance_bootstrap.json",
+      "natural_window_frozen_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\kwiat2013_prl111_130406_05082013_15\\natural_window_frozen.json",
       "sweep_profile": {
         "dataset_id": "kwiat2013_prl111_130406_05082013_15",
         "source": "bootstrap",
@@ -896,15 +896,15 @@
     }
   ],
   "outputs": {
-    "longterm_consistency_json": "output/quantum/bell/longterm_consistency.json",
-    "longterm_consistency_png": "output/quantum/bell/longterm_consistency.png",
-    "systematics_15items_json": "output/quantum/bell/systematics_decomposition_15items.json",
-    "systematics_15items_csv": "output/quantum/bell/systematics_decomposition_15items.csv",
-    "systematics_15items_png": "output/quantum/bell/systematics_decomposition_15items.png",
-    "cross_dataset_covariance_json": "output/quantum/bell/cross_dataset_covariance.json",
-    "cross_dataset_covariance_png": "output/quantum/bell/cross_dataset_covariance.png",
-    "selection_loophole_quantification_json": "output/quantum/bell/selection_loophole_quantification.json",
-    "selection_loophole_quantification_csv": "output/quantum/bell/selection_loophole_quantification.csv",
-    "selection_loophole_quantification_png": "output/quantum/bell/selection_loophole_quantification.png"
+    "longterm_consistency_json": "output/public/quantum/bell/longterm_consistency.json",
+    "longterm_consistency_png": "output/public/quantum/bell/longterm_consistency.png",
+    "systematics_15items_json": "output/public/quantum/bell/systematics_decomposition_15items.json",
+    "systematics_15items_csv": "output/public/quantum/bell/systematics_decomposition_15items.csv",
+    "systematics_15items_png": "output/public/quantum/bell/systematics_decomposition_15items.png",
+    "cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json",
+    "cross_dataset_covariance_png": "output/public/quantum/bell/cross_dataset_covariance.png",
+    "selection_loophole_quantification_json": "output/public/quantum/bell/selection_loophole_quantification.json",
+    "selection_loophole_quantification_csv": "output/public/quantum/bell/selection_loophole_quantification.csv",
+    "selection_loophole_quantification_png": "output/public/quantum/bell/selection_loophole_quantification.png"
   }
 }

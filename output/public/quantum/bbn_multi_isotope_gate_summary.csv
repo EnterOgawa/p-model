@@ -1,0 +1,5 @@
+observable,predicted,observed,sigma,z,z_abs,status,note
+Y_p (He-4 mass fraction),0.2538233274454336,0.245,0.003,2.9411091484778753,2.9411091484778753,watch,Derived from freeze chain (T_F -> n/p -> Y_p).
+D/H,2.6e-05,2.55e-05,3e-07,1.666666666666662,1.666666666666662,pass,Reduced network branch with eta10 and Xi_P(T_nuc) scaling.
+He-3/He-4,0.000125,0.00011,2e-05,0.7499999999999999,0.7499999999999999,pass,Reduced network branch with eta10 and Xi_P(T_nuc) scaling.
+Li-7/H,2.1777777777777774e-10,1.6e-10,3e-11,1.925925925925925,1.925925925925925,pass,Be-7 production branch with Li-7/Be-7 post-destruction competition.

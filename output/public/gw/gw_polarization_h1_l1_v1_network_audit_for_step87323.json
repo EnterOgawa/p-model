@@ -1,0 +1,239 @@
+{
+  "generated_utc": "2026-02-21T05:04:25.071099+00:00",
+  "schema": "wavep.gw.polarization.network_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.3",
+  "inputs": {
+    "events": [
+      "GW200129_065458",
+      "GW200224_222234",
+      "GW200115_042309",
+      "GW200311_115853"
+    ],
+    "detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "detector_pairs": [
+      "H1-L1",
+      "H1-V1",
+      "L1-V1"
+    ],
+    "corr_use_min": 0.05,
+    "sky_samples": 5000,
+    "psi_samples": 36,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.1,
+    "min_ring_directions": 8,
+    "geometry_relax_factor": 4.0,
+    "geometry_delay_floor_ms": 0.25,
+    "allow_pair_pruning": false
+  },
+  "summary": {
+    "n_events_requested": 4,
+    "n_rows": 4,
+    "n_usable_events": 2,
+    "n_pair_pruned_events": 0,
+    "overall_status": "reject",
+    "overall_reason": "tensor_response_failed_for_some_events",
+    "scalar_only_mode_global_upper_bound_proxy": 0.5,
+    "reject_factor_focus_pairs": [
+      "H1-V1",
+      "L1-V1"
+    ],
+    "reject_factor_focus_summary": [
+      {
+        "pair": "H1-V1",
+        "n_rows": 2,
+        "n_reject_event_rows": 2,
+        "n_tensor_fail": 2,
+        "tensor_fail_rate": 1.0,
+        "scalar_overlap_rate": 0.0,
+        "mean_reject_tensor_mismatch_share": 0.8748301010155061,
+        "median_tensor_mismatch": 1.0846933130105474,
+        "median_scalar_mismatch": 10.786688721334489,
+        "median_abs_corr": 0.06701931303578793,
+        "median_abs_lag_over_tolerance": 8.75,
+        "median_obs_ratio_iqr_rel": 0.5393790099801516,
+        "bottleneck_rank": 1
+      },
+      {
+        "pair": "L1-V1",
+        "n_rows": 2,
+        "n_reject_event_rows": 2,
+        "n_tensor_fail": 2,
+        "tensor_fail_rate": 1.0,
+        "scalar_overlap_rate": 0.5,
+        "mean_reject_tensor_mismatch_share": 0.12491353160732863,
+        "median_tensor_mismatch": 0.11072079955055415,
+        "median_scalar_mismatch": 4.866119037805084,
+        "median_abs_corr": 0.08906206210699064,
+        "median_abs_lag_over_tolerance": 6.214285662040821,
+        "median_obs_ratio_iqr_rel": 0.5522872229298756,
+        "bottleneck_rank": 2
+      }
+    ]
+  },
+  "rows": [
+    {
+      "event": "GW200129_065458",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_pruning_applied": 0,
+      "dropped_pairs": "",
+      "geometry_mode": "strict",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 1,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.3333333333333333,
+      "tensor_mismatch_max": 0.6637221357607809,
+      "scalar_mismatch_max": 9.515953460314694,
+      "ring_directions_used": 10,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.0004534884306449063,
+          "scalar_mismatch": 0.020010700801642346,
+          "abs_corr": 0.652984122097279,
+          "delay_s": 0.00537109375,
+          "delay_tol_s": 0.007080078500000001,
+          "obs_p16": 0.8832048548158153,
+          "obs_med": 1.191722919981959,
+          "obs_p84": 1.5961783355448784
+        },
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.6637221357607809,
+          "scalar_mismatch": 7.295687978319137,
+          "abs_corr": 0.06112656664277493,
+          "delay_s": 0.00244140625,
+          "delay_tol_s": 0.00048828125,
+          "obs_p16": 0.07270773008908002,
+          "obs_med": 0.09423795646395784,
+          "obs_p84": 0.13878586491364836
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.22027472136159515,
+          "scalar_mismatch": 9.515953460314694,
+          "abs_corr": 0.053119439439356333,
+          "delay_s": 0.00244140625,
+          "delay_tol_s": 0.0017089845,
+          "obs_p16": 0.0550659340847388,
+          "obs_med": 0.08278500213244622,
+          "obs_p84": 0.11253739897280275
+        }
+      ]
+    },
+    {
+      "event": "GW200224_222234",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_pruning_applied": 0,
+      "dropped_pairs": "",
+      "geometry_mode": "relaxed_insufficient",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 0,
+      "status": "inconclusive_geometry",
+      "status_reason": "insufficient_ring_directions",
+      "scalar_overlap_fraction": NaN,
+      "tensor_mismatch_max": NaN,
+      "scalar_mismatch_max": NaN,
+      "ring_directions_used": 0
+    },
+    {
+      "event": "GW200115_042309",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_pruning_applied": 0,
+      "dropped_pairs": "",
+      "geometry_mode": "relaxed_insufficient",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 0,
+      "status": "inconclusive_geometry",
+      "status_reason": "insufficient_ring_directions",
+      "scalar_overlap_fraction": NaN,
+      "tensor_mismatch_max": NaN,
+      "scalar_mismatch_max": NaN,
+      "ring_directions_used": 0
+    },
+    {
+      "event": "GW200311_115853",
+      "quality": "usable",
+      "available_pair_count": 2,
+      "usable_pair_count": 2,
+      "pair_names": "H1-V1;L1-V1",
+      "pair_pruning_applied": 0,
+      "dropped_pairs": "",
+      "geometry_mode": "relaxed",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 1,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.5,
+      "tensor_mismatch_max": 1.5056644902603138,
+      "scalar_mismatch_max": 14.277689464349843,
+      "ring_directions_used": 37,
+      "pair_results": [
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 1.5056644902603138,
+          "scalar_mismatch": 14.277689464349843,
+          "abs_corr": 0.07291205942880093,
+          "delay_s": 0.006103515625,
+          "delay_tol_s": 0.00048828125,
+          "obs_p16": 0.03954778787122002,
+          "obs_med": 0.04611546898266752,
+          "obs_p84": 0.05695979696521173
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.0011668777395131616,
+          "scalar_mismatch": 0.2162846152954734,
+          "abs_corr": 0.12500468477462492,
+          "delay_s": -0.00537109375,
+          "delay_tol_s": 0.00048828125,
+          "obs_p16": 0.047052162874038544,
+          "obs_med": 0.05436621559618412,
+          "obs_p84": 0.06936127859451009
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.png",
+    "reject_factor_detail_csv": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_details.csv",
+    "reject_factor_summary_csv": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.csv",
+    "reject_factor_summary_json": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.json",
+    "reject_factor_summary_png": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.png",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_details.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.png"
+    ]
+  }
+}

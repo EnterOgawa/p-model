@@ -1,0 +1,152 @@
+{
+  "generated_utc": "2026-02-20T01:36:21.188345+00:00",
+  "phase": 8,
+  "step": "8.7.22.8",
+  "title": "Weak-interaction beta-decay Route-A watch outlier audit",
+  "gate_z_threshold": 3.0,
+  "summary": {
+    "n_rows": 4,
+    "by_channel": {
+      "beta_minus": 2,
+      "beta_plus": 2
+    },
+    "by_mass_number_A": {
+      "249": 4
+    },
+    "by_cause_tag": {
+      "high_precision_small_offset_watch": 2,
+      "mode_or_definition_watch": 2
+    },
+    "by_review_action": {
+      "relabel_route_a_mode_consistent_keep_watch": 4
+    },
+    "max_abs_z_qbeta": 3.503595603372804,
+    "median_abs_delta_q_MeV": 0.10490734999982204,
+    "max_abs_delta_q_MeV": 0.10510786810118411
+  },
+  "rows": [
+    {
+      "nuclide_key": "249cf",
+      "nuclide_name": "249Cf",
+      "A": 249,
+      "Z": 98,
+      "N": 151,
+      "channel": "beta_minus",
+      "daughter_Z": 99,
+      "daughter_N": 150,
+      "q_obs_MeV": -1.452,
+      "q_obs_sigma_MeV": 0.03,
+      "q_route_a_MeV": -1.557107868101184,
+      "delta_q_MeV": -0.10510786810118411,
+      "abs_z_qbeta": 3.503595603372804,
+      "observed_decay_has_channel": false,
+      "legacy_predicted_q_positive": true,
+      "legacy_mode_consistent": false,
+      "route_a_predicted_q_positive": false,
+      "route_a_mode_consistent": true,
+      "observed_modes_primary": "a, SF",
+      "has_beta_minus_mode_primary": false,
+      "has_beta_plus_mode_primary": false,
+      "branch_beta_minus_percent_primary": null,
+      "branch_beta_plus_percent_primary": null,
+      "cause_tag": "mode_or_definition_watch",
+      "review_action": "relabel_route_a_mode_consistent_keep_watch",
+      "review_reason": "legacy mode_consistent used q_pred_after sign; Route-A audit now uses q_route_a sign."
+    },
+    {
+      "nuclide_key": "249es",
+      "nuclide_name": "249Es",
+      "A": 249,
+      "Z": 99,
+      "N": 150,
+      "channel": "beta_plus",
+      "daughter_Z": 98,
+      "daughter_N": 151,
+      "q_obs_MeV": 0.4300022,
+      "q_obs_sigma_MeV": 0.03,
+      "q_route_a_MeV": 0.5351099681010965,
+      "delta_q_MeV": 0.10510776810109645,
+      "abs_z_qbeta": 3.5035922700365485,
+      "observed_decay_has_channel": true,
+      "legacy_predicted_q_positive": false,
+      "legacy_mode_consistent": false,
+      "route_a_predicted_q_positive": true,
+      "route_a_mode_consistent": true,
+      "observed_modes_primary": "a, EC+B+",
+      "has_beta_minus_mode_primary": false,
+      "has_beta_plus_mode_primary": true,
+      "branch_beta_minus_percent_primary": null,
+      "branch_beta_plus_percent_primary": 99.43,
+      "cause_tag": "high_precision_small_offset_watch",
+      "review_action": "relabel_route_a_mode_consistent_keep_watch",
+      "review_reason": "legacy mode_consistent used q_pred_after sign; Route-A audit now uses q_route_a sign."
+    },
+    {
+      "nuclide_key": "249fm",
+      "nuclide_name": "249Fm",
+      "A": 249,
+      "Z": 100,
+      "N": 149,
+      "channel": "beta_plus",
+      "daughter_Z": 99,
+      "daughter_N": 150,
+      "q_obs_MeV": 1.3220021999999998,
+      "q_obs_sigma_MeV": 0.031,
+      "q_route_a_MeV": 1.2172952681014522,
+      "delta_q_MeV": -0.10470693189854763,
+      "abs_z_qbeta": 3.3776429644692785,
+      "observed_decay_has_channel": true,
+      "legacy_predicted_q_positive": false,
+      "legacy_mode_consistent": false,
+      "route_a_predicted_q_positive": true,
+      "route_a_mode_consistent": true,
+      "observed_modes_primary": "a, EC+B+",
+      "has_beta_minus_mode_primary": false,
+      "has_beta_plus_mode_primary": true,
+      "branch_beta_minus_percent_primary": null,
+      "branch_beta_plus_percent_primary": 84.4,
+      "cause_tag": "high_precision_small_offset_watch",
+      "review_action": "relabel_route_a_mode_consistent_keep_watch",
+      "review_reason": "legacy mode_consistent used q_pred_after sign; Route-A audit now uses q_route_a sign."
+    },
+    {
+      "nuclide_key": "249es",
+      "nuclide_name": "249Es",
+      "A": 249,
+      "Z": 99,
+      "N": 150,
+      "channel": "beta_minus",
+      "daughter_Z": 100,
+      "daughter_N": 149,
+      "q_obs_MeV": -2.344,
+      "q_obs_sigma_MeV": 0.031,
+      "q_route_a_MeV": -2.2392931681015398,
+      "delta_q_MeV": 0.10470683189846008,
+      "abs_z_qbeta": 3.3776397386600028,
+      "observed_decay_has_channel": false,
+      "legacy_predicted_q_positive": true,
+      "legacy_mode_consistent": false,
+      "route_a_predicted_q_positive": false,
+      "route_a_mode_consistent": true,
+      "observed_modes_primary": "a, EC+B+",
+      "has_beta_minus_mode_primary": false,
+      "has_beta_plus_mode_primary": true,
+      "branch_beta_minus_percent_primary": null,
+      "branch_beta_plus_percent_primary": 99.43,
+      "cause_tag": "mode_or_definition_watch",
+      "review_action": "relabel_route_a_mode_consistent_keep_watch",
+      "review_reason": "legacy mode_consistent used q_pred_after sign; Route-A audit now uses q_route_a sign."
+    }
+  ],
+  "outputs": {
+    "watch_outliers_csv": "output/public/quantum/weak_interaction_beta_decay_route_a_watch_outliers.csv",
+    "watch_outliers_png": "output/public/quantum/weak_interaction_beta_decay_route_a_watch_outliers.png"
+  },
+  "inputs": {
+    "nudat_primary_json": {
+      "path": "data/quantum/sources/nndc_nudat3_primary_secondary/primary.json",
+      "exists": true,
+      "sha256": "8fe4b48041c42ac01e8bc5daa2aedd51849161d0ac8e098f37039fc388f3e796"
+    }
+  }
+}

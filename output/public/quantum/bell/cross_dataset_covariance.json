@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:00.206478+00:00",
+  "generated_utc": "2026-02-20T12:38:22.543282+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.7",
@@ -1167,7 +1167,7 @@
     ]
   },
   "outputs": {
-    "cross_dataset_covariance_json": "output/quantum/bell/cross_dataset_covariance.json",
-    "cross_dataset_covariance_png": "output/quantum/bell/cross_dataset_covariance.png"
+    "cross_dataset_covariance_json": "output/public/quantum/bell/cross_dataset_covariance.json",
+    "cross_dataset_covariance_png": "output/public/quantum/bell/cross_dataset_covariance.png"
   }
 }

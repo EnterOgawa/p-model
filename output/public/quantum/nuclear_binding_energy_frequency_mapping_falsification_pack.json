@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:12.584577+00:00",
+  "generated_utc": "2026-02-20T12:38:34.718309+00:00",
   "thresholds": {
     "z_median_abs_max": 3.0,
     "z_delta_median_abs_max": 3.0,
@@ -16,23 +16,23 @@
   },
   "inputs": {
     "differential_predictions_csv": {
-      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_differential_predictions.csv",
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_differential_predictions.csv",
       "sha256": "43d6a79c747c6215372e59673acfe8335e32d44da8f4f1ff84ef9255475ac91a"
     },
     "theory_diff_metrics_json": {
-      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
-      "sha256": "9912b460fc467eb434d9024996de5aaad4aa388498b1dbb808c62c379b40ae47"
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json",
+      "sha256": "cb6741040986da0672f5bd35363d5c93e63e0a3d9c334dc9d0285c8a58497a27"
     },
     "differential_quantification_metrics_json": {
-      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_differential_quantification_metrics.json",
-      "sha256": "2c476ba32081c5d6d3acdff85de8f59f9d5dcc5ee071b65fff46ec43d4690d66"
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_differential_quantification_metrics.json",
+      "sha256": "bcf9d55225ea3196233e99b669aeb704035173923110d364d1d46935efdea79f"
     },
     "separation_energies_metrics_json": {
-      "path": "output/quantum/nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",
       "sha256": "9784baa1f6a6f7f2151ecf7a30c3edfac8187e6db176075d110356fbfb817e11"
     },
     "charge_radius_kink_metrics_json": {
-      "path": "output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json",
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json",
       "sha256": "445d5a90511a9cf1d0754de638b3f8c5912dfa21b359536e7aa83eff89b76be0"
     }
   },
@@ -144,7 +144,7 @@
     "separation_energies": {
       "step": "7.13.15.9",
       "metrics_json": {
-        "path": "output/quantum/nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",
+        "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_a_dependence_hf_three_body_separation_energies_metrics.json",
         "sha256": "9784baa1f6a6f7f2151ecf7a30c3edfac8187e6db176075d110356fbfb817e11"
       },
       "sn_rms_total_mev": 12.798027545882732,
@@ -158,7 +158,7 @@
     "charge_radius_kink": {
       "step": "7.13.15.49",
       "metrics_json": {
-        "path": "output/quantum/nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json",
+        "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json",
         "sha256": "445d5a90511a9cf1d0754de638b3f8c5912dfa21b359536e7aa83eff89b76be0"
       },
       "domain_min_A": 100,
@@ -228,7 +228,7 @@
         "A": 238
       }
     ],
-    "csv": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_table.csv"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_table.csv"
   },
   "conditions": [
     {
@@ -253,7 +253,7 @@
     }
   ],
   "outputs": {
-    "png": "output/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.png"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.png"
   },
   "notes": [
     "This pack is intended to prevent 'fit-escape': thresholds are frozen before adding extra physics parameters.",

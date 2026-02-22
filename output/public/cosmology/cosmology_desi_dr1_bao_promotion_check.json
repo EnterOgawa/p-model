@@ -1,0 +1,103 @@
+{
+  "root": "C:\\develop\\waveP",
+  "inputs": {
+    "csv": [
+      "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_vac_lya_corr_v1p0__vac_cov.csv",
+      "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins__jk_cov.csv"
+    ]
+  },
+  "outputs": {
+    "json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_desi_dr1_bao_promotion_check.json",
+    "png": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_desi_dr1_bao_promotion_check.png",
+    "public_png": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_desi_dr1_bao_promotion_check_public.png"
+  },
+  "params": {
+    "z_field": "z_score_combined",
+    "lam_min": 0.0,
+    "lam_max": 1.0,
+    "target_dist": "pbg",
+    "threshold_abs": 3.0,
+    "min_tracers": 2
+  },
+  "result": {
+    "promoted": false,
+    "passing_tracers": [],
+    "passing_tracers_n": 0
+  },
+  "by_method": {
+    "cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_vac_lya_corr_v1p0__vac_cov": {
+      "Lya QSO": {
+        "lcdm": {
+          "lam_min": 0.0,
+          "lam_max": 1.0,
+          "n": 8,
+          "z_min": 5.5240096,
+          "z_max": 7.5220807,
+          "sign_flips": false
+        },
+        "pbg": {
+          "lam_min": 0.0,
+          "lam_max": 1.0,
+          "n": 8,
+          "z_min": 0.67986384,
+          "z_max": 1.3492322,
+          "sign_flips": false
+        }
+      }
+    },
+    "cosmology_desi_dr1_bao_cov_shrinkage_sweep__w_desi_default_ms_off_y1bins__jk_cov": {
+      "LRG3+ELG1": {
+        "lcdm": {
+          "lam_min": 0.0,
+          "lam_max": 1.0,
+          "n": 8,
+          "z_min": -0.91552778,
+          "z_max": -0.49282645,
+          "sign_flips": false
+        },
+        "pbg": {
+          "lam_min": 0.0,
+          "lam_max": 1.0,
+          "n": 8,
+          "z_min": -11.131552,
+          "z_max": 0.70274849,
+          "sign_flips": true
+        }
+      }
+    }
+  },
+  "gate_by_tracer": {
+    "LRG3+ELG1": {
+      "dist": "pbg",
+      "threshold_abs": 3.0,
+      "stable_all_methods": false,
+      "methods_n": 1,
+      "ranges": [
+        {
+          "lam_min": 0.0,
+          "lam_max": 1.0,
+          "n": 8,
+          "z_min": -11.131552,
+          "z_max": 0.70274849,
+          "sign_flips": true
+        }
+      ]
+    },
+    "Lya QSO": {
+      "dist": "pbg",
+      "threshold_abs": 3.0,
+      "stable_all_methods": false,
+      "methods_n": 1,
+      "ranges": [
+        {
+          "lam_min": 0.0,
+          "lam_max": 1.0,
+          "n": 8,
+          "z_min": 0.67986384,
+          "z_max": 1.3492322,
+          "sign_flips": false
+        }
+      ]
+    }
+  }
+}

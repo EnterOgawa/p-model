@@ -1,0 +1,104 @@
+{
+  "generated_utc": "2026-02-16T16:06:27.283187+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.2",
+    "name": "Born route-A proxy constraints packaging"
+  },
+  "intent": "Freeze an operational machine gate for Born route-A using phase/visibility/selection proxies.",
+  "inputs": {
+    "matter_wave_interference_precision_audit_metrics_json": "output/public/quantum/matter_wave_interference_precision_audit_metrics.json",
+    "bell_falsification_pack_json": "output/public/quantum/bell/falsification_pack.json",
+    "bell_selection_sensitivity_summary_json": "output/public/quantum/bell_selection_sensitivity_summary.json"
+  },
+  "criteria": [
+    {
+      "id": "phase_alpha_consistency",
+      "proxy": "phase",
+      "metric": "atom_recoil_alpha_abs_z",
+      "value": 0.5883354744951784,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "note": "位相整合の最小ゲート（abs_z<=3）。"
+    },
+    {
+      "id": "phase_molecular_scaling",
+      "proxy": "phase",
+      "metric": "molecular_isotopic_scaling_zmax",
+      "value": 2.6385399704973964,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": true,
+      "note": "分子スケーリング整合の最小ゲート（z<=3）。"
+    },
+    {
+      "id": "selection_delay_signature_fast",
+      "proxy": "selection",
+      "metric": "min_fast_switching_delay_zmax",
+      "value": 5.53541064134177,
+      "threshold": 3.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "note": "fast-switch/time-tag 系で setting依存遅延 z が 3以上。"
+    },
+    {
+      "id": "selection_sweep_sensitivity_fast",
+      "proxy": "selection",
+      "metric": "min_fast_switching_selection_ratio",
+      "value": 19.316744077961687,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate": true,
+      "note": "selection sweep の変動幅が統計幅1σ以上（ratio>=1）。"
+    },
+    {
+      "id": "visibility_atom_precision_gap",
+      "proxy": "visibility",
+      "metric": "log10_atom_interferometer_current_over_required_ratio",
+      "value": 0.3338887327706417,
+      "threshold": 1.0,
+      "operator": "<=",
+      "pass": true,
+      "gate": false,
+      "note": "可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。"
+    }
+  ],
+  "decision": {
+    "route_a_gate": "A_continue",
+    "hard_fail_ids": [],
+    "hard_unknown_ids": [],
+    "watchlist": [],
+    "rule": "A_to_B if any hard gate fails/unknown; otherwise A_continue."
+  },
+  "diagnostics": {
+    "fast_switching_datasets": [
+      {
+        "dataset_id": "weihs1998_longdist_longdist1",
+        "ratio": 19.316744077961687,
+        "delay_z_alice": 5.53541064134177,
+        "delay_z_bob": 5.5344547303315474,
+        "delay_z_max": 5.53541064134177
+      },
+      {
+        "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
+        "ratio": 654.1026883136847,
+        "delay_z_alice": 34.795228665969034,
+        "delay_z_bob": 43.90965148631052,
+        "delay_z_max": 43.90965148631052
+      }
+    ],
+    "bell_selection_summary_available": true,
+    "matter_rows_n": 3,
+    "visibility_reference": {
+      "channel": "atom_gravimeter",
+      "ratio_raw": 2.157191660961336,
+      "ratio_log10": 0.3338887327706417,
+      "threshold_log10": 1.0
+    }
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:07.773706+00:00",
+  "generated_utc": "2026-02-20T12:38:30.035713+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.10",
@@ -468,9 +468,9 @@
     }
   },
   "outputs": {
-    "json": "output/quantum/bell/selection_loophole_quantification.json",
-    "csv": "output/quantum/bell/selection_loophole_quantification.csv",
-    "png": "output/quantum/bell/selection_loophole_quantification.png"
+    "json": "output/public/quantum/bell/selection_loophole_quantification.json",
+    "csv": "output/public/quantum/bell/selection_loophole_quantification.csv",
+    "png": "output/public/quantum/bell/selection_loophole_quantification.png"
   },
   "plot_written": true
 }

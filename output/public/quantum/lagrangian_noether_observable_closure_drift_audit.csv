@@ -1,0 +1,13 @@
+id,metric,value,expected,status,score,gate_level,source,note
+closure_drift::overall_status,overall_status,pass,pass,pass,1.0,hard,lagrangian_noether_observable_closure_audit,閉包監査の全体判定が pass を維持していること。
+closure_drift::hard_fail_ids_n,hard_fail_ids_n,0,0,pass,1.0,hard,lagrangian_noether_observable_closure_audit,hard gate 逸脱が発生していないこと。
+closure_drift::watch_ids_n,watch_ids_n,0,0,pass,1.0,watch,lagrangian_noether_observable_closure_audit,watch 逸脱の発生数（運用監視）。
+closure_drift::missing_equations_n,missing_equations_n,0,0,pass,1.0,hard,lagrangian_noether_observable_closure_audit,閉包必須式が欠落していないこと。
+closure_drift::missing_nonrel_channels_n,missing_nonrel_channels_n,0,0,pass,1.0,hard,lagrangian_noether_observable_closure_audit,非相対論写像の必須channelが欠落していないこと。
+closure_drift::route_a_gate,route_a_gate,A_continue,A_continue,pass,1.0,hard,lagrangian_noether_observable_closure_audit,route A が継続可能であること。
+closure_drift::transition,transition,A_stay,A_stay,pass,1.0,hard,lagrangian_noether_observable_closure_audit,A->B 移行が要求されていないこと。
+closure_drift::checks_all_pass,checks_pass_n/checks_total_n,14/14,all pass,pass,1.0,hard,lagrangian_noether_observable_closure_audit,閉包監査内の checks が全件 pass であること。
+closure_drift::noether_gauge_margin_positive,noether_gauge_margin,4.999993032890784e-08,> 0,pass,1.0,hard,lagrangian_noether_observable_closure_audit,Noether gauge margin が正であること。
+closure_drift::noether_realness_margin_positive,noether_realness_margin,5e-10,> 0,pass,1.0,hard,lagrangian_noether_observable_closure_audit,Noether realness margin が正であること。
+closure_drift::noether_gauge_margin_ratio,noether_gauge_margin_ratio_vs_frozen,1.0,>=0.5 (watch >= 0.1),pass,1.0,watch,lagrangian_noether_observable_closure_audit,Noether gauge margin の frozen 比率（drift 監視）。
+closure_drift::noether_realness_margin_ratio,noether_realness_margin_ratio_vs_frozen,1.0,>=0.5 (watch >= 0.1),pass,1.0,watch,lagrangian_noether_observable_closure_audit,Noether realness margin の frozen 比率（drift 監視）。

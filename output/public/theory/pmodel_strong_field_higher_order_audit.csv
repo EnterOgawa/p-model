@@ -1,0 +1,14 @@
+channel,source,label,lambda_obs,sigma_lambda,z_baseline_lambda0,z_joint_fit,note
+EHT,m87,EHT M87 shadow,-0.043974558834062205,0.11318185323626971,-0.38853011835973655,-0.3880913667634265,λ_H inferred from fractional shadow-size mismatch (obs/pred - 1).
+EHT,sgra,EHT SGRA shadow,-0.1067097516883091,0.12839900899757364,-0.8310792468057568,-0.8306924936744948,λ_H inferred from fractional shadow-size mismatch (obs/pred - 1).
+GW,gw250114_mass,GW250114 IMR mass,0.06480733451342391,0.11414724961246174,0.5677520460059226,0.5681870868759334,λ_H from ringdown-inferred final mass vs IMR posterior median.
+GW,gw250114_spin,GW250114 IMR spin,0.10286025329576343,0.19846531309527854,0.51827824062325,0.5185284542147652,λ_H from ringdown-inferred final spin vs IMR posterior median.
+PULSAR,psr_b1913p16,Pulsar PSR B1913+16（Hulse?Taylor）,-0.001707608925614057,0.0016,-1.0672555785087856,-1.0362188792708156,λ_H proxy from binary-pulsar orbital-decay ratio R-1 (intrinsic Pbdot corrected).
+PULSAR,psr_j0737m3039ab,Pulsar PSR J0737?3039A/B（Double Pulsar）,-4.678450060680017e-05,6.632774940020501e-05,-0.7053533555693896,0.04333357003581563,λ_H proxy from binary-pulsar orbital-decay ratio R-1 (intrinsic Pbdot corrected).
+PULSAR,psr_j1738p0333,Pulsar PSR J1738+0333（NS-WD）,-0.056841958814318194,0.11652917883375219,-0.4877916362511443,-0.4873654878883244,λ_H proxy from binary-pulsar orbital-decay ratio R-1 (intrinsic Pbdot corrected).
+PULSAR,psr_j0348p0432,Pulsar PSR J0348+0432（NS-WD）,0.05988096513548391,0.17368770368207126,0.34476225930819915,0.34504816739338895,λ_H proxy from binary-pulsar orbital-decay ratio R-1 (intrinsic Pbdot corrected).
+XRAY,80001013010,Fe-Kα NUSTAR 80001013010,-0.08333833333333329,0.6764450000000001,-0.12320045729265984,-0.12312704597499062,"λ_H proxy from Fe-Kα broad-line inner-radius vs GR ISCO baseline (proxy fit, systematics folded)."
+XRAY,80001013006,Fe-Kα NUSTAR 80001013006,-0.5831716666666666,1.34762,-0.4327419203237312,-0.43270507112382267,"λ_H proxy from Fe-Kα broad-line inner-radius vs GR ISCO baseline (proxy fit, systematics folded)."
+XRAY,80001013002,Fe-Kα NUSTAR 80001013002,-0.08342499999999997,0.6943683333333334,-0.12014516791040293,-0.12007365151716196,"λ_H proxy from Fe-Kα broad-line inner-radius vs GR ISCO baseline (proxy fit, systematics folded)."
+XRAY,80302304007,Fe-Kα NUSTAR 80302304007,-0.5000083333333334,1.2366533333333334,-0.40432376629397626,-0.40428361056282486,"λ_H proxy from Fe-Kα broad-line inner-radius vs GR ISCO baseline (proxy fit, systematics folded)."
+XRAY,90702303001,Fe-Kα NUSTAR 90702303001,-0.08333833333333329,0.6779350000000001,-0.12292968106578549,-0.12285643109524148,"λ_H proxy from Fe-Kα broad-line inner-radius vs GR ISCO baseline (proxy fit, systematics folded)."

@@ -1,0 +1,5 @@
+event,slug,status,status_reason,quality,best_lag_ms,abs_corr,ratio_median,ratio_p16,ratio_p84,ratio_halfspan_over_median,metrics_path
+GW150914,gw150914,pass,all_gates_passed,usable,-5.1269531,0.7494812,1.4693133,1.1920785,1.8243826,0.2151699,C:/develop/waveP/output/public/gw/gw150914_h1_l1_amplitude_ratio_metrics.json
+GW151226,gw151226,reject,low_cross_correlation,low_corr,0.9765625,0.5613668,0.4102355,0.2977132,0.5762627,0.3394996,C:/develop/waveP/output/public/gw/gw151226_h1_l1_amplitude_ratio_metrics.json
+GW170104,gw170104,reject,low_cross_correlation,low_corr,-4.6386719,0.4191087,0.9856658,0.6215453,1.4187851,0.4044169,C:/develop/waveP/output/public/gw/gw170104_h1_l1_amplitude_ratio_metrics.json
+GW200129_065458,gw200129_065458,watch,ratio_spread_large;ratio_time_drift_large,usable,-5.3710938,0.6529841,1.1917229,0.8832049,1.5961783,0.2991356,C:/develop/waveP/output/public/gw/gw200129_065458_h1_l1_amplitude_ratio_metrics.json

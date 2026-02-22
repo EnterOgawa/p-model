@@ -1,0 +1,259 @@
+{
+  "generated_utc": "2026-02-11T13:58:16.324837+00:00",
+  "status": "ok",
+  "event": {
+    "resolved_common_name": "GW250114_082203",
+    "catalog": "O4_Discovery_Papers",
+    "gps": 1420878141.2
+  },
+  "sources": {
+    "data_release": {
+      "url": "https://zenodo.org/api/records/16877102/files/GW250114_data_release.tar.gz/content",
+      "path": "C:/develop/waveP/data/gw/gw250114/GW250114_data_release.tar.gz",
+      "sha256": "385dee99e0c0cd93503945e4e090104371d5d989d0b9a664a2047de6646a5640"
+    },
+    "files": {
+      "inspiral_areas": {
+        "path": "C:/develop/waveP/data/gw/gw250114/data_release/data/area_law_inspiral_data.hdf5",
+        "sha256": "85a113aa4e9eb4056ebf03414a73298e1d25fa9b132a70c6268c014b5ea07d21"
+      },
+      "pyring_areas": {
+        "path": "C:/develop/waveP/data/gw/gw250114/data_release/data/remnant_area_pyring_reweighted.npy",
+        "sha256": "5486524aca5009d54c0beaa3645cfd7210b85d0a2ccd71c6d32f942c541bdb08"
+      },
+      "ringdown_220_areas": {
+        "path": "C:/develop/waveP/data/gw/gw250114/data_release/data/ringdown_areas/220_10.5M_final_mass_spin_area.hdf5",
+        "sha256": "0d64acd151c934146b35e628a39a0d405f088e60c971155d3be8cac5c73b2321"
+      },
+      "ringdown_220_221_areas": {
+        "path": "C:/develop/waveP/data/gw/gw250114/data_release/data/ringdown_areas/220+221_6M_final_mass_spin_area.hdf5",
+        "sha256": "ee89fb5e85f980e455122ead4da3209bb0a1c565e476c1b6af420e2a5cd89475"
+      }
+    },
+    "preferred_posterior_url": "https://zenodo.org/api/records/16877102/files/posterior_samples_NRSur7dq4.h5/content"
+  },
+  "summary": {
+    "n_inspiral_ref": 8175,
+    "n_ringdown_220": 4000,
+    "n_pyring_220": 2000,
+    "n_combined": 4000,
+    "sigma_ref": {
+      "reference_inspiral_time": -40.0,
+      "sigma_gaussian_combined": 4.447211293041233,
+      "sigma_gaussian_pyring_only": 4.697381393248944,
+      "sigma_gaussian_ringdown_only": 4.312877098093585,
+      "sigma_gaussian_ringdown_220+221": 3.6333891384311983
+    },
+    "sigma_min_over_times_combined": 3.3584850592548756,
+    "first_time_sigma_ge_5_combined": -10.0
+  },
+  "sigma_vs_inspiral_time": {
+    "combined": [
+      {
+        "time": -250.0,
+        "sigma": 3.3584850592548756
+      },
+      {
+        "time": -200.0,
+        "sigma": 3.691718364108868
+      },
+      {
+        "time": -150.0,
+        "sigma": 3.8988446791560185
+      },
+      {
+        "time": -100.0,
+        "sigma": 4.155136599508016
+      },
+      {
+        "time": -75.0,
+        "sigma": 4.289497663896569
+      },
+      {
+        "time": -50.0,
+        "sigma": 4.254493175332637
+      },
+      {
+        "time": -45.0,
+        "sigma": 4.340739150001558
+      },
+      {
+        "time": -40.0,
+        "sigma": 4.447211293041233
+      },
+      {
+        "time": -35.0,
+        "sigma": 4.441440484458579
+      },
+      {
+        "time": -30.0,
+        "sigma": 4.187840464621736
+      },
+      {
+        "time": -25.0,
+        "sigma": 4.457329999970771
+      },
+      {
+        "time": -20.0,
+        "sigma": 4.637637875185814
+      },
+      {
+        "time": -15.0,
+        "sigma": 4.697685959737137
+      },
+      {
+        "time": -10.0,
+        "sigma": 5.091829233911055
+      },
+      {
+        "time": -5.0,
+        "sigma": 5.176461256326446
+      },
+      {
+        "time": 0.0,
+        "sigma": 5.0744712115559345
+      }
+    ],
+    "pyring_only": [
+      {
+        "time": -250.0,
+        "sigma": 3.5004547219468836
+      },
+      {
+        "time": -200.0,
+        "sigma": 3.855839575417863
+      },
+      {
+        "time": -150.0,
+        "sigma": 4.077449340728194
+      },
+      {
+        "time": -100.0,
+        "sigma": 4.356709589006325
+      },
+      {
+        "time": -75.0,
+        "sigma": 4.505136603587164
+      },
+      {
+        "time": -50.0,
+        "sigma": 4.486792104414876
+      },
+      {
+        "time": -45.0,
+        "sigma": 4.578329341522189
+      },
+      {
+        "time": -40.0,
+        "sigma": 4.697381393248944
+      },
+      {
+        "time": -35.0,
+        "sigma": 4.688683331060631
+      },
+      {
+        "time": -30.0,
+        "sigma": 4.405237140912648
+      },
+      {
+        "time": -25.0,
+        "sigma": 4.6994614803874715
+      },
+      {
+        "time": -20.0,
+        "sigma": 4.903503868366385
+      },
+      {
+        "time": -15.0,
+        "sigma": 4.969274676428539
+      },
+      {
+        "time": -10.0,
+        "sigma": 5.383779813429199
+      },
+      {
+        "time": -5.0,
+        "sigma": 5.487218937293853
+      },
+      {
+        "time": 0.0,
+        "sigma": 5.382145068526221
+      }
+    ],
+    "ringdown_only": [
+      {
+        "time": -250.0,
+        "sigma": 3.263264724066243
+      },
+      {
+        "time": -200.0,
+        "sigma": 3.5876473579587973
+      },
+      {
+        "time": -150.0,
+        "sigma": 3.7894745189850365
+      },
+      {
+        "time": -100.0,
+        "sigma": 4.03761875929319
+      },
+      {
+        "time": -75.0,
+        "sigma": 4.1672106562014735
+      },
+      {
+        "time": -50.0,
+        "sigma": 4.125376887232323
+      },
+      {
+        "time": -45.0,
+        "sigma": 4.210271811614729
+      },
+      {
+        "time": -40.0,
+        "sigma": 4.312877098093585
+      },
+      {
+        "time": -35.0,
+        "sigma": 4.308144025919536
+      },
+      {
+        "time": -30.0,
+        "sigma": 4.06409019091182
+      },
+      {
+        "time": -25.0,
+        "sigma": 4.326066758698403
+      },
+      {
+        "time": -20.0,
+        "sigma": 4.499181364046776
+      },
+      {
+        "time": -15.0,
+        "sigma": 4.557711661672641
+      },
+      {
+        "time": -10.0,
+        "sigma": 4.948173933144486
+      },
+      {
+        "time": -5.0,
+        "sigma": 5.027440937193378
+      },
+      {
+        "time": 0.0,
+        "sigma": 4.925581316574172
+      }
+    ]
+  },
+  "outputs": {
+    "json": "C:/develop/waveP/output/private/gw/gw250114_area_theorem_test.json",
+    "png": "C:/develop/waveP/output/private/gw/gw250114_area_theorem_test.png"
+  },
+  "notes": [
+    "This reproduces the GW250114 area-law / area-theorem check from the public data release.",
+    "Significance uses the Gaussian z = (mean(remnant)-mean(inspiral))/sqrt(var sum), matching the release macro script.",
+    "Combined remnant distribution is a length-matched concat of ringdown(220@10.5M) and pyRing(220) samples."
+  ]
+}

@@ -1,11 +1,11 @@
 {
-  "generated_utc": "2026-02-13T03:01:19.517384+00:00",
+  "generated_utc": "2026-02-19T01:03:36.196636+00:00",
   "station_diagnostics": {
     "APOL": {
-      "n": 1417,
-      "rms_sr_tropo_tide_ns": 5.897277662908773,
-      "corr_res_vs_elev_deg": 0.4014368324732945,
-      "corr_res_vs_m_1_sin": -0.3544340647371349,
+      "n": 1431,
+      "rms_sr_tropo_tide_ns": 6.499845715551323,
+      "corr_res_vs_elev_deg": 0.37395348220671687,
+      "corr_res_vs_m_1_sin": -0.3328083356193205,
       "worst_month_target": [
         {
           "ym": "2014-04",
@@ -86,9 +86,9 @@
     },
     "MDOL": {
       "n": 31,
-      "rms_sr_tropo_tide_ns": 11.33508777937953,
-      "corr_res_vs_elev_deg": -0.0034979820716313113,
-      "corr_res_vs_m_1_sin": -0.044875513590924454,
+      "rms_sr_tropo_tide_ns": 11.392898651182891,
+      "corr_res_vs_elev_deg": -0.017713399230856307,
+      "corr_res_vs_m_1_sin": -0.030456357309167653,
       "worst_month_target": []
     },
     "WETL": {

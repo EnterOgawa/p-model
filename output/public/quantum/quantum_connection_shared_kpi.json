@@ -1,0 +1,116 @@
+{
+  "generated_utc": "2026-02-17T13:31:19.336819+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.21.1",
+    "name": "Quantum connection shared KPI packaging"
+  },
+  "intent": "Project Bell/interference/condensed-holdout outputs onto a shared pass/watch/reject gate.",
+  "inputs": {
+    "part3_audit_summary_json": "output/public/summary/part3_audit_summary.json",
+    "bell_falsification_pack_json": "output/public/quantum/bell/falsification_pack.json",
+    "matter_wave_interference_precision_audit_metrics_json": "output/public/quantum/matter_wave_interference_precision_audit_metrics.json",
+    "condensed_holdout_audit_summary_json": "output/public/quantum/condensed_holdout_audit_summary.json"
+  },
+  "thresholds": {
+    "status_order": [
+      "pass",
+      "watch",
+      "reject"
+    ],
+    "overall_rule": "worst_channel_severity",
+    "interference_watch_rule": "all failures are precision-gap type",
+    "condensed_watch_rule": "reject_ratio <= 0.10 with no inconclusive datasets"
+  },
+  "channels": [
+    {
+      "channel": "bell",
+      "title": "Bell cross-dataset connection",
+      "status": "pass",
+      "severity": 0,
+      "kpi": {
+        "selection_ratio_min": 3.6508938846257903,
+        "selection_ratio_threshold": 1.0,
+        "delay_fast_z_min": 5.53541064134177,
+        "delay_z_threshold": 3.0,
+        "pairing_delta_sigma_max": 0.08612854215724108,
+        "pairing_delta_sigma_threshold": 1.0,
+        "selection_score": 0.2739055233051503,
+        "delay_score": 0.5419652116853263,
+        "pairing_score": 0.08612854215724108
+      },
+      "diagnostics": {
+        "dataset_n": 5,
+        "delay_defined_n": 3,
+        "delay_fail_n": 1,
+        "selection_ok": true,
+        "delay_ok": true,
+        "pairing_ok": true
+      },
+      "notes": [
+        "delay gate fail in 1/3 datasets (time-tag subsets still tracked by delay_fast_min)."
+      ]
+    },
+    {
+      "channel": "interference",
+      "title": "Matter-wave / interference connection",
+      "status": "pass",
+      "severity": 0,
+      "kpi": {
+        "rows_total": 3,
+        "rows_pass": 3,
+        "rows_fail": 0,
+        "fail_ratio": 0.0,
+        "max_fail_over_threshold": null
+      },
+      "diagnostics": {
+        "precision_gap_fail_n": 0,
+        "non_precision_fail_n": 0,
+        "fail_rows": [],
+        "precision_gap_watch": {
+          "median_ratio": 717905.1403824643,
+          "min_ratio": 2.157191660961336,
+          "max_ratio": 21571916.655578464,
+          "pass_if_median_le_threshold": false
+        }
+      },
+      "notes": []
+    },
+    {
+      "channel": "condensed_thermal_holdout",
+      "title": "Condensed / thermal holdout connection",
+      "status": "pass",
+      "severity": 0,
+      "kpi": {
+        "datasets_total": 131,
+        "ok_n": 131,
+        "reject_n": 0,
+        "inconclusive_n": 0,
+        "reject_ratio": 0.0,
+        "reject_ratio_watch_threshold": 0.1,
+        "excluded_n": 1
+      },
+      "diagnostics": {
+        "top_reject": [],
+        "excluded_from_kpi": [
+          {
+            "dataset": "Si α(T)",
+            "reason": "Debye+Einstein baseline is retained as a diagnostic stress-test; KPI gating uses the frozen DOS+γ(ω) basis model for this observable."
+          }
+        ]
+      },
+      "notes": [
+        "1 dataset(s) are excluded from KPI gating (diagnostic-only)."
+      ]
+    }
+  ],
+  "overall": {
+    "status": "pass",
+    "severity": 0,
+    "status_counts": {
+      "pass": 3,
+      "watch": 0,
+      "reject": 0
+    }
+  }
+}

@@ -1,0 +1,5 @@
+model_key,model_label,overall_status,max_abs_delta_ell,max_abs_delta_amp_rel,a3_a1_obs,a3_a1_pred,a3_a1_abs_rel_error,position_status,amplitude_status,ratio_status_a3_a1,improves_a3_a1_vs_baryon,a3_a1_error_reduction_vs_baryon
+pressure,pressure,pass,4.99379718,0.02477645,0.43530490,0.42278589,0.02875916,pass,pass,pass,true,0.35099119
+pressure_ruler,pressure+ruler,pass,0.37281895,0.02493597,0.43530490,0.42273563,0.02887464,pass,pass,pass,true,0.35087571
+baryon_only,baryon-only,reject,4.99379718,0.38757376,0.43530490,0.26999771,0.37975035,pass,reject,reject,false,0.00000000
+ruler,ruler,reject,0.37281895,0.38777421,0.43530490,0.26993347,0.37989792,pass,reject,reject,false,-0.00014757

@@ -149,6 +149,54 @@ def _nearest_pos_eop_yymmdd(repo_root: Path, target_dt: datetime, *, max_days: i
     return best[1] if best else None
 
 
+def _nearest_pos_eop_yymmdd_for_code(
+    repo_root: Path,
+    target_dt: datetime,
+    *,
+    code_key: str,
+    max_days: int = 45,
+) -> Optional[str]:
+    """
+    Return nearest cached YYMMDD (within max_days) that actually contains station code_key.
+
+    This is a fallback for cases where the globally-nearest pos+eop day exists but does not
+    include the requested station in SOLUTION/ESTIMATE.
+    """
+    if target_dt.tzinfo is None:
+        target_dt = target_dt.replace(tzinfo=timezone.utc)
+    target_dt = target_dt.astimezone(timezone.utc)
+
+    yymmdd_all = _iter_cached_pos_eop_yymmdd(repo_root)
+    if not yymmdd_all:
+        return None
+
+    candidates: List[tuple[int, str]] = []
+    for y in yymmdd_all:
+        d0 = _parse_yymmdd_to_date(y)
+        if d0 is None:
+            continue
+        days = abs((d0.date() - target_dt.date()).days)
+        if days > int(max_days):
+            continue
+        candidates.append((days, y))
+
+    # Sort by nearest first, and for ties prefer newer dates.
+    candidates.sort(key=lambda x: (x[0], -int(x[1])))
+
+    for _, y in candidates:
+        snx_path = _pos_eop_snx_path(repo_root, y)
+        if not snx_path.exists():
+            continue
+        parsed = parse_pos_eop_snx_gz(snx_path)
+        stations = parsed.get("stations") if isinstance(parsed, dict) else None
+        if not isinstance(stations, dict):
+            continue
+        rec = stations.get(code_key)
+        if isinstance(rec, dict) and all(k in rec for k in ("x_m", "y_m", "z_m")):
+            return y
+    return None
+
+
 def _sinex_epoch_to_utc(epoch: str) -> Optional[datetime]:
     # YY:DOY:SSSSS (seconds of day) -> UTC
     s = str(epoch).strip()
@@ -257,6 +305,7 @@ def load_station_xyz_from_pos_eop(
     if pad_id is None:
         return None
 
+    code_key = str(int(pad_id))
     yymmdd = str(preferred_yymmdd).strip()
     if yymmdd:
         if not re.fullmatch(r"\d{6}", yymmdd):
@@ -282,11 +331,29 @@ def load_station_xyz_from_pos_eop(
     if not isinstance(stations, dict):
         return None
 
-    code_key = str(int(pad_id))
     rec = stations.get(code_key)
     if not isinstance(rec, dict):
-        # Some stations are keyed by other IDs; best-effort fall back to site log.
-        return None
+        # Fallback: nearest cached day that actually includes this station code.
+        y2 = _nearest_pos_eop_yymmdd_for_code(
+            repo_root,
+            target_dt,
+            code_key=code_key,
+            max_days=int(max_days),
+        )
+        if not y2:
+            # Some stations are absent in pos+eop products.
+            return None
+        yymmdd = y2
+        snx_path = _pos_eop_snx_path(repo_root, yymmdd)
+        if not snx_path.exists():
+            return None
+        parsed = parse_pos_eop_snx_gz(snx_path)
+        stations = parsed.get("stations") if isinstance(parsed, dict) else None
+        if not isinstance(stations, dict):
+            return None
+        rec = stations.get(code_key)
+        if not isinstance(rec, dict):
+            return None
 
     if not all(k in rec for k in ("x_m", "y_m", "z_m")):
         return None

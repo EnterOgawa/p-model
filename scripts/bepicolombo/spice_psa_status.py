@@ -8,8 +8,8 @@ BepiColombo / SPICE kernels (ESA PSA: bc_spice)
   オフライン再現できる形でキャッシュする。
 
 出力：
-- `output/bepicolombo/spice_psa_status.json`
-- `output/bepicolombo/spice_psa_status.png`
+- `output/private/bepicolombo/spice_psa_status.json`
+- `output/private/bepicolombo/spice_psa_status.png`
 
 キャッシュ：
 - `data/bepicolombo/psa_spice/`（index html / bundle xml / inventory csv）
@@ -424,7 +424,7 @@ def main() -> None:
 
         if status_payload.get("errors"):
             lines.append("")
-            lines.append(f"注意: エラー {len(status_payload.get('errors') or [])} 件（details: output/bepicolombo/spice_psa_status.json）")
+            lines.append(f"注意: エラー {len(status_payload.get('errors') or [])} 件（details: output/private/bepicolombo/spice_psa_status.json）")
 
         ax.text(0.01, 0.98, "\n".join(lines), va="top", ha="left", fontsize=12)
         fig.tight_layout()

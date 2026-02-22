@@ -1,0 +1,142 @@
+{
+  "generated_utc": "2026-02-14T00:47:19.415985+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "blackbody_constants_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_blackbody_constants\\extracted_values.json",
+      "sha256": "ffe4c2234b9bf48c59898745bd5688a50a9f314e5e1eec63e172c24486032742"
+    }
+  },
+  "constants": {
+    "kB_J_per_K": 1.380649e-23,
+    "zeta3": 1.2020569031595942
+  },
+  "assumptions": {
+    "sigma_proxy": "1 ppm relative tolerance (operational, analytic baseline)",
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test split)"
+    }
+  },
+  "data_range_T_K": [
+    1.0,
+    10000.0
+  ],
+  "splits": [
+    {
+      "name": "A_low_to_high",
+      "train_T_K": [
+        1.0,
+        94.33732216299774
+      ],
+      "test_T_K": [
+        106.00258488068825,
+        10000.0
+      ],
+      "models": {
+        "powerlaw_fit_2p": {
+          "params": {
+            "log10_coeff": -22.428363508119027,
+            "exponent": 1.0000000000000069
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 1.6400497182672555e-22,
+            "rms_z": 5.326600568268951e-23,
+            "reduced_chi2": 2.9865972225140115e-45,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 2.941857990051503e-20,
+            "rms_z": 9.797754884417598e-21,
+            "reduced_chi2": 9.59960007751289e-41,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "fixed_exponent_1_fit": {
+          "params": {
+            "coeff": 3.729378749971672e-23,
+            "exponent": 1.0
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 0.0,
+            "rms_z": 0.0,
+            "reduced_chi2": 0.0,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "B_high_to_low",
+      "train_T_K": [
+        106.00258488068825,
+        10000.0
+      ],
+      "test_T_K": [
+        1.0,
+        94.33732216299774
+      ],
+      "models": {
+        "powerlaw_fit_2p": {
+          "params": {
+            "log10_coeff": -22.428363508119027,
+            "exponent": 0.9999999999999997
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 4.574083617919685e-21,
+            "rms_z": 1.5990789853334781e-21,
+            "reduced_chi2": 2.6916353698264695e-42,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 4.8148248609680896e-23,
+            "rms_z": 1.6940386232415807e-23,
+            "reduced_chi2": 2.86976685703423e-46,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "fixed_exponent_1_fit": {
+          "params": {
+            "coeff": 3.7293787499716717e-23,
+            "exponent": 1.0
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 4.8148248609680896e-23,
+            "rms_z": 2.0228429224137038e-23,
+            "reduced_chi2": 4.196813834624835e-46,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 7.52316384526264e-25,
+            "rms_z": 2.234830865811151e-25,
+            "reduced_chi2": 4.99446899878222e-50,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_mean_photon_energy_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_mean_photon_energy_holdout_splits.png"
+  },
+  "notes": [
+    "Analytic holdout for blackbody mean photon energy ⟨E⟩=(π^4/(30 ζ(3))) k_B T.",
+    "This is a procedural regression check, not an observational inference."
+  ]
+}

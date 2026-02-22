@@ -1,0 +1,316 @@
+{
+  "generated_utc": "2026-02-22T04:38:28.962842+00:00",
+  "input": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
+  "source_note": {
+    "dataset": "Planck 2018 TT binned spectrum (COM_PowerSpect_CMB-TT-binned_R3.01)",
+    "cached_local": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt"
+  },
+  "model": {
+    "equation": "Theta_k'' + Gamma_P Theta_k' + c_s,P^2 k^2 Theta_k = -k^2 Psi_P",
+    "modal_mapping": {
+      "ell_n": "ell_n^(P) = (n - phi_P) * ell_A^(P)",
+      "amplitude_n": "A_n^(P) = A0 * exp(-delta_P*(n-1)) * [1 + (-1)^(n+1) * R_P] * D_n",
+      "silk_damping": "D_n = exp(-(ell_n/ell_D)^2), ell_D = kappa_D * ell_A^(P)"
+    },
+    "acoustic_solution_formulation": {
+      "assumptions": [
+        "static-space branch (no FRW expansion friction)",
+        "tight-coupling photon-baryon fluid (v_gamma ≈ v_b ≡ v_pb)",
+        "constant c_s,P and slowly varying Ψ_P within one acoustic cycle"
+      ],
+      "fluid_equations_fourier_k": {
+        "continuity": "Theta_k' = -(k/3) v_pb,k",
+        "euler": "v_pb,k' + Gamma_P v_pb,k = 3 c_s,P^2 k (Theta_k + Psi_P)",
+        "note": "prime denotes derivative with respect to propagation variable s."
+      },
+      "reduced_oscillator": {
+        "equation": "Theta_k'' + Gamma_P Theta_k' + c_s,P^2 k^2 Theta_k = -k^2 Psi_P",
+        "normalized_shift": "for Gamma_P≈0 and constant source, define Theta_tilde_k = Theta_k + Psi_P/c_s,P^2",
+        "homogeneous_equation": "Theta_tilde_k'' + c_s,P^2 k^2 Theta_tilde_k = 0",
+        "equilibrium_offset": "Theta_eq,k = -Psi_P / c_s,P^2"
+      },
+      "acoustic_horizon_mapping": {
+        "definition": "r_s(s)=∫_0^s c_s,P(s') ds' ; for constant c_s,P, r_s = c_s,P * s",
+        "solution": "Theta_tilde_k(r_s)=A_k cos(k r_s)+B_k sin(k r_s)",
+        "adiabatic_branch": "Theta_tilde_k'(0)=0 => B_k=0, therefore Theta_tilde_k ∝ cos(k r_s)",
+        "explicit_mode_solution": "Theta_k(r_s)=Theta_eq,k + [Theta_k(0)-Theta_eq,k] cos(k r_s) + [Theta_k'(0)/(k c_s,P)] sin(k r_s)",
+        "peak_condition": "acoustic extrema: k r_s = mπ (m=1,2,3,...)"
+      },
+      "tt_peak_implication": "C_ell^TT ∝ cos^2(k r_s), i.e., temperature peaks follow cosine acoustic extrema."
+    },
+    "acoustic_cosine_validation": {
+      "k_mode": 0.08,
+      "c_s_p": 0.5773502691896258,
+      "omega": 0.04618802153517007,
+      "s_end": 600.0,
+      "n_steps": 6000,
+      "max_abs_error": 1.0142688078307316e-10,
+      "rms_error": 4.3955928424889016e-11,
+      "pass": true,
+      "pass_threshold_max_abs_error": 1e-06
+    },
+    "fitted_from": "n=1..3 (peak positions/heights)",
+    "holdout": "n=4..6 peaks (not used in fit)",
+    "params": {
+      "l_acoustic": 299.7583254999999,
+      "phi": 0.24899846860133315,
+      "delta": 0.2863423432417026,
+      "r_baryon": 0.21298625225878495,
+      "a0": 4876.847356309368,
+      "silk_kappa": 5.2,
+      "ell_damping": 1558.7432925999994,
+      "ratio_a2_a1": 0.44420598199597333,
+      "ratio_a3_a1": 0.435304896614145,
+      "ratio_a3_a1_corrected": 0.5640092163996819
+    },
+    "n_modes_for_plot": 8
+  },
+  "observed_peaks": [
+    {
+      "label": "ℓ1",
+      "n": 1,
+      "ell_range": [
+        150.0,
+        320.0
+      ],
+      "ell": 225.164945,
+      "amplitude": 5793.43954
+    },
+    {
+      "label": "ℓ2",
+      "n": 2,
+      "ell_range": [
+        400.0,
+        650.0
+      ],
+      "ell": 524.78532,
+      "amplitude": 2573.4805
+    },
+    {
+      "label": "ℓ3",
+      "n": 3,
+      "ell_range": [
+        700.0,
+        950.0
+      ],
+      "ell": 824.681596,
+      "amplitude": 2521.9126
+    },
+    {
+      "label": "ℓ4_holdout",
+      "n": 4,
+      "ell_range": [
+        1000.0,
+        1300.0
+      ],
+      "ell": 1124.63318,
+      "amplitude": 1231.87224
+    },
+    {
+      "label": "ℓ5_holdout",
+      "n": 5,
+      "ell_range": [
+        1300.0,
+        1700.0
+      ],
+      "ell": 1424.60514,
+      "amplitude": 809.057064
+    },
+    {
+      "label": "ℓ6_holdout",
+      "n": 6,
+      "ell_range": [
+        1700.0,
+        2100.0
+      ],
+      "ell": 1724.58686,
+      "amplitude": 397.735803
+    }
+  ],
+  "predicted_peaks": [
+    {
+      "label": "ℓ1",
+      "n": 1,
+      "ell": 225.11896149999998,
+      "amplitude": 5793.43954
+    },
+    {
+      "label": "ℓ2",
+      "n": 2,
+      "ell": 524.8772869999999,
+      "amplitude": 2573.4804999999997
+    },
+    {
+      "label": "ℓ3",
+      "n": 3,
+      "ell": 824.6356124999998,
+      "amplitude": 2521.9126
+    },
+    {
+      "label": "ℓ4_holdout",
+      "n": 4,
+      "ell": 1124.3939379999997,
+      "amplitude": 966.2059073366247
+    },
+    {
+      "label": "ℓ5_holdout",
+      "n": 5,
+      "ell": 1424.1522634999997,
+      "amplitude": 816.6464758060823
+    },
+    {
+      "label": "ℓ6_holdout",
+      "n": 6,
+      "ell": 1723.9105889999994,
+      "amplitude": 269.85408909965474
+    }
+  ],
+  "gate": {
+    "thresholds": {
+      "first3_max_abs_delta_ell": 15.0,
+      "first3_max_abs_delta_amp_rel": 0.15,
+      "holdout4_max_abs_delta_ell": 50.0,
+      "holdout4_max_abs_delta_amp_rel": 0.25,
+      "extended46_max_abs_delta_ell": 80.0,
+      "extended46_max_abs_delta_amp_rel": 0.35
+    },
+    "first3": {
+      "rows": [
+        {
+          "label": "ℓ1",
+          "observed": {
+            "ell": 225.164945,
+            "amplitude": 5793.43954
+          },
+          "predicted": {
+            "ell": 225.11896149999998,
+            "amplitude": 5793.43954
+          },
+          "residual": {
+            "delta_ell": -0.045983500000005506,
+            "delta_amp_rel": 0.0
+          }
+        },
+        {
+          "label": "ℓ2",
+          "observed": {
+            "ell": 524.78532,
+            "amplitude": 2573.4805
+          },
+          "predicted": {
+            "ell": 524.8772869999999,
+            "amplitude": 2573.4804999999997
+          },
+          "residual": {
+            "delta_ell": 0.09196699999995417,
+            "delta_amp_rel": -2.220446049250313e-16
+          }
+        },
+        {
+          "label": "ℓ3",
+          "observed": {
+            "ell": 824.681596,
+            "amplitude": 2521.9126
+          },
+          "predicted": {
+            "ell": 824.6356124999998,
+            "amplitude": 2521.9126
+          },
+          "residual": {
+            "delta_ell": -0.0459835000002613,
+            "delta_amp_rel": 0.0
+          }
+        }
+      ],
+      "max_abs_delta_ell": 0.09196699999995417,
+      "max_abs_delta_amp_rel": 2.220446049250313e-16,
+      "pass": true
+    },
+    "holdout4": {
+      "label": "ℓ4_holdout",
+      "observed": {
+        "ell": 1124.63318,
+        "amplitude": 1231.87224
+      },
+      "predicted": {
+        "ell": 1124.3939379999997,
+        "amplitude": 966.2059073366247
+      },
+      "residual": {
+        "delta_ell": -0.23924200000033125,
+        "delta_amp_rel": -0.21566062131846986
+      },
+      "pass": true
+    },
+    "extended_4to6": {
+      "rows": [
+        {
+          "label": "ℓ4_holdout",
+          "n": 4,
+          "observed": {
+            "ell": 1124.63318,
+            "amplitude": 1231.87224
+          },
+          "predicted": {
+            "ell": 1124.3939379999997,
+            "amplitude": 966.2059073366247
+          },
+          "residual": {
+            "delta_ell": -0.23924200000033125,
+            "delta_amp_rel": -0.21566062131846986
+          }
+        },
+        {
+          "label": "ℓ5_holdout",
+          "n": 5,
+          "observed": {
+            "ell": 1424.60514,
+            "amplitude": 809.057064
+          },
+          "predicted": {
+            "ell": 1424.1522634999997,
+            "amplitude": 816.6464758060823
+          },
+          "residual": {
+            "delta_ell": -0.4528765000002295,
+            "delta_amp_rel": 0.009380564293648419
+          }
+        },
+        {
+          "label": "ℓ6_holdout",
+          "n": 6,
+          "observed": {
+            "ell": 1724.58686,
+            "amplitude": 397.735803
+          },
+          "predicted": {
+            "ell": 1723.9105889999994,
+            "amplitude": 269.85408909965474
+          },
+          "residual": {
+            "delta_ell": -0.6762710000004972,
+            "delta_amp_rel": -0.32152427047244037
+          }
+        }
+      ],
+      "max_abs_delta_ell": 0.6762710000004972,
+      "max_abs_delta_amp_rel": 0.32152427047244037,
+      "pass": true
+    },
+    "overall": {
+      "status": "pass",
+      "pass": true
+    },
+    "overall_extended": {
+      "status": "pass",
+      "pass_core": true,
+      "pass_extended_4to6": true
+    }
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
+    "falsification_pack_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_falsification_pack.json",
+    "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_peaks.csv"
+  }
+}

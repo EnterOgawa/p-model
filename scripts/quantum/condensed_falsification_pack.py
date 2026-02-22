@@ -130,8 +130,30 @@ def main(argv: Optional[List[str]] = None) -> int:
         "output/public/quantum/thermo_blackbody_entropy_baseline_metrics.json",
         "output/public/quantum/thermo_blackbody_radiation_baseline_metrics.json",
     ]
+    holdout_summary_relpath = "output/public/quantum/condensed_holdout_audit_summary.json"
+    holdout_summary_path = (_ROOT / holdout_summary_relpath).resolve()
+    if not holdout_summary_path.exists():
+        raise SystemExit(
+            "[fail] missing holdout audit summary:\n"
+            f"- {holdout_summary_relpath}\n\n"
+            "Run: python -B scripts/quantum/condensed_holdout_audit.py"
+        )
+
+    holdout_payload = _read_json(holdout_summary_path)
 
     payload = build_pack(root=_ROOT, metrics_relpaths=metrics_relpaths)
+    payload["holdout_audit"] = {
+        "summary_json": _relpath(holdout_summary_path),
+        "summary_sha256": _sha256(holdout_summary_path),
+        "phase": holdout_payload.get("phase"),
+        "step": holdout_payload.get("step"),
+        "thresholds": holdout_payload.get("thresholds"),
+        "summary": holdout_payload.get("summary"),
+        "notes": [
+            "Holdout audit summary is captured alongside baseline falsification thresholds.",
+            "Use this as the operational gate for temperature-split stability checks.",
+        ],
+    }
     out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(f"[ok] wrote: {_relpath(out_path)}")
 
@@ -140,7 +162,10 @@ def main(argv: Optional[List[str]] = None) -> int:
             {
                 "event_type": "quantum_condensed_falsification_pack",
                 "phase": "7.18.2",
-                "inputs": {"metrics_jsons": metrics_relpaths},
+                "inputs": {
+                    "metrics_jsons": metrics_relpaths,
+                    "holdout_audit_summary": _relpath(holdout_summary_path),
+                },
                 "outputs": {"pack_json": _relpath(out_path)},
             }
         )

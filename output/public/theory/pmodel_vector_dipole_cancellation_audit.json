@@ -1,0 +1,130 @@
+{
+  "generated_utc": "2026-02-20T07:07:11.931335+00:00",
+  "schema": "wavep.theory.pmodel_vector_dipole_cancellation_audit.v1",
+  "title": "P_μ minimal extension audit: dipole cancellation under equivalence principle",
+  "intent": "Show that universal time-wave source-to-inertial-mass ratio cancels dipole radiation in COM frame, leaving quadrupole as the leading binary-radiation term.",
+  "equations": {
+    "interaction": "L_int = g * P_mu * J^mu",
+    "dipole_moment": "d = sum_a(q_a r_a) = sum_a(eta m_a r_a), eta=q/m",
+    "cancellation_condition": "eta_a=eta (universal) => d = eta * M * R_cm = 0 (COM frame)",
+    "radiation_scaling": "P_dipole ∝ |ddot(d)|^2 => 0 under universality; leading term is quadrupole"
+  },
+  "inputs": {
+    "binary_pulsar_metrics_json": "C:/develop/waveP/output/public/pulsar/binary_pulsar_orbital_decay_metrics.json",
+    "eta0": 1.0,
+    "epsilon_counterfactual": 0.001
+  },
+  "gate": {
+    "z_reject": 3.0,
+    "dipole_tol": 1e-12,
+    "epsilon_gate": 0.02
+  },
+  "rows": [
+    {
+      "id": "psr_b1913p16",
+      "name": "PSR B1913+16（Hulse?Taylor）",
+      "m1_msun": 1.438,
+      "m2_msun": 1.39,
+      "delta_R": -0.001707608925614057,
+      "sigma_1_R": 0.0016,
+      "sigma_95_R": 0.003135942375264087,
+      "z_R": -1.0672555785087856,
+      "non_gr_fraction_upper_95": 0.004843551300878143,
+      "dipole_norm_universal": 0.0,
+      "dipole_norm_counterfactual": 0.0002496782999494378,
+      "epsilon_counterfactual": 0.001,
+      "epsilon_limit_95": 0.06959562702410363
+    },
+    {
+      "id": "psr_j0737m3039ab",
+      "name": "PSR J0737?3039A/B（Double Pulsar）",
+      "m1_msun": 1.338185,
+      "m2_msun": 1.248868,
+      "delta_R": -4.678450060680017e-05,
+      "sigma_1_R": 6.632774940020501e-05,
+      "sigma_95_R": 0.00013,
+      "z_R": -0.7053533555693896,
+      "non_gr_fraction_upper_95": 0.00017678450060680016,
+      "dipole_norm_universal": 0.0,
+      "dipole_norm_counterfactual": 0.0002494525602382855,
+      "epsilon_counterfactual": 0.001,
+      "epsilon_limit_95": 0.01329603326585791
+    },
+    {
+      "id": "psr_j1738p0333",
+      "name": "PSR J1738+0333（NS-WD）",
+      "m1_msun": 1.46,
+      "m2_msun": 0.181,
+      "delta_R": -0.056841958814318194,
+      "sigma_1_R": 0.11652917883375219,
+      "sigma_95_R": 0.22839299366218146,
+      "z_R": -0.4877916362511443,
+      "non_gr_fraction_upper_95": 0.28523495247649966,
+      "dipole_norm_universal": 0.0,
+      "dipole_norm_counterfactual": 9.803478282033158e-05,
+      "epsilon_counterfactual": 0.001,
+      "epsilon_limit_95": 0.5340739204234743
+    },
+    {
+      "id": "psr_j0348p0432",
+      "name": "PSR J0348+0432（NS-WD）",
+      "m1_msun": 2.01,
+      "m2_msun": 0.172,
+      "delta_R": 0.05988096513548391,
+      "sigma_1_R": 0.17368770368207126,
+      "sigma_95_R": 0.3404216437743246,
+      "z_R": 0.34476225930819915,
+      "non_gr_fraction_upper_95": 0.4003026089098085,
+      "dipole_norm_universal": 1.272024547004075e-17,
+      "dipole_norm_counterfactual": 7.25405650797163e-05,
+      "epsilon_counterfactual": 0.001,
+      "epsilon_limit_95": 0.6326947201532572
+    }
+  ],
+  "summary": {
+    "overall_status": "pass",
+    "decision": "dipole_cancelled_quadrupole_leading",
+    "hard_reject_n": 0,
+    "watch_n": 0,
+    "gates": [
+      {
+        "id": "dipole::equivalence_principle_cancellation",
+        "metric": "max_dipole_norm_universal",
+        "value": 1.272024547004075e-17,
+        "threshold": 1e-12,
+        "comparator": "<=",
+        "status": "pass",
+        "hardness": "hard",
+        "note": "eta_i/m_i の普遍性を課すと COM 系で双極子モーメントが相殺されること。"
+      },
+      {
+        "id": "dipole::quadrupole_leading_consistency",
+        "metric": "max_abs_z_R_assuming_Req1",
+        "value": 1.0672555785087856,
+        "threshold": 3.0,
+        "comparator": "<=",
+        "status": "pass",
+        "hardness": "hard",
+        "note": "双極子ゼロ（R=1）仮定で連星パルサー観測が 3σ 以内に収まること。"
+      },
+      {
+        "id": "dipole::universality_margin_95",
+        "metric": "min_epsilon_limit_95",
+        "value": 0.01329603326585791,
+        "threshold": 0.02,
+        "comparator": "<=",
+        "status": "pass",
+        "hardness": "watch",
+        "note": "95%上限から逆算した eta 非普遍性許容幅 sqrt(non_gr_fraction_upper_95)。"
+      }
+    ],
+    "max_dipole_norm_universal": 1.272024547004075e-17,
+    "max_abs_z_R_assuming_Req1": 1.0672555785087856,
+    "min_epsilon_limit_95": 0.01329603326585791
+  },
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/pmodel_vector_dipole_cancellation_audit.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/pmodel_vector_dipole_cancellation_audit.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_vector_dipole_cancellation_audit.png"
+  }
+}

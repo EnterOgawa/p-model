@@ -1,0 +1,38 @@
+{
+  "cache_coverage": 1.0,
+  "cache_root": "data/xrism/xmm_nustar",
+  "generated_utc": "2026-02-12T09:45:34.780293+00:00",
+  "isco_reference": {
+    "gr": {
+      "metric": "Schwarzschild",
+      "r_isco_rg": 6.0,
+      "spin_a_star": 0.0
+    },
+    "pmodel": {
+      "definition": "timelike ISCO; circumference radius",
+      "metric": "exponential_metric_yilmaz",
+      "r_isco_rg": 6.337940264856347
+    },
+    "units": "r_g=GM/c^2"
+  },
+  "n_blocked_missing_dependency": 0,
+  "n_isco_constrained": 5,
+  "n_isco_constrained_sys_stat_le10": 3,
+  "n_nustar_isco_constrained_proxy": 5,
+  "n_nustar_line_detected": 8,
+  "n_obsids_cached": 11,
+  "n_obsids_total": 11,
+  "n_proxy_computed": 11,
+  "n_rows": 11,
+  "n_xmm_xspec_blocked": 0,
+  "n_xmm_xspec_dry_run": 0,
+  "n_xmm_xspec_fail": 0,
+  "n_xmm_xspec_ok": 0,
+  "n_xmm_xspec_seen": 0,
+  "outputs": {
+    "csv": "output/private/xrism/fek_relativistic_broadening_isco_constraints.csv",
+    "png": "output/private/xrism/fek_relativistic_broadening_isco_constraints.png"
+  },
+  "status": "isco_constraints_v7",
+  "targets": "data/xrism/sources/xmm_nustar_targets.json"
+}

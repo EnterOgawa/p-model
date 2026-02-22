@@ -1,0 +1,44 @@
+{
+  "generated_utc": "2026-02-17T06:22:05.881109+00:00",
+  "decision": "watch",
+  "inputs": {
+    "apol_metadata": "data\\llr\\stations\\apol.json",
+    "snx_root": "data\\llr\\pos_eop\\snx"
+  },
+  "metrics": {
+    "n_snx_files_scanned": 1111,
+    "n_unique_station_codes": 48,
+    "apol_pad_id": 7045,
+    "apol_code_present_in_cache": false,
+    "n_files_with_apol_code": 0,
+    "nearest_station_code": "7080",
+    "nearest_distance_km": 289.0230755967502,
+    "alias_safe_threshold_km": 5.0,
+    "alias_safe_candidate": false
+  },
+  "apol_reference": {
+    "site_name": "APOLLO",
+    "lat_deg": 32.780361,
+    "lon_deg": -105.820417,
+    "height_m": 2788.0,
+    "ecef_from_geodetic_m": {
+      "x_m": -1463998.7009964918,
+      "y_m": -5166633.734414864,
+      "z_m": 3435013.972334516
+    }
+  },
+  "sample_apol_hits": [],
+  "reasons": [
+    "APOL pad code is absent in cached pos+eop SINEX files.",
+    "Nearest available station code is too far for safe alias mapping.",
+    "APOL remains slrlog-only until primary-source pos+eop coordinates are available."
+  ],
+  "recommended_next": [
+    "APOLの一次座標I/F（pos+eop対応）の取得手段を確認する。",
+    "取得できるまで iers_station_coord_unified は watch を維持する。"
+  ],
+  "artifacts": {
+    "csv": "output\\private\\llr\\llr_apol_pos_eop_feasibility_audit.csv",
+    "png": "output\\private\\llr\\llr_apol_pos_eop_feasibility_audit.png"
+  }
+}

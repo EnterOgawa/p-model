@@ -1,0 +1,92 @@
+{
+  "generated_utc": "2026-02-20T13:10:52.349418+00:00",
+  "schema": "wavep.gw.polarization.network_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.3",
+  "inputs": {
+    "events": [
+      "GW200129_065458"
+    ],
+    "detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "detector_pairs": [
+      "H1-L1",
+      "H1-V1",
+      "L1-V1"
+    ],
+    "corr_use_min": 0.05,
+    "sky_samples": 12000,
+    "psi_samples": 48,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.15,
+    "min_ring_directions": 8,
+    "geometry_relax_factor": 3.0,
+    "geometry_delay_floor_ms": 0.25,
+    "allow_pair_pruning": true
+  },
+  "summary": {
+    "n_events_requested": 1,
+    "n_rows": 1,
+    "n_usable_events": 1,
+    "n_pair_pruned_events": 0,
+    "overall_status": "reject",
+    "overall_reason": "tensor_response_failed_for_some_events",
+    "scalar_only_mode_global_upper_bound_proxy": 0.3333333333333333
+  },
+  "rows": [
+    {
+      "event": "GW200129_065458",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_pruning_applied": 0,
+      "dropped_pairs": "",
+      "geometry_mode": "strict",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 1,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.3333333333333333,
+      "tensor_mismatch_max": 1.1808999242684495,
+      "scalar_mismatch_max": 9.12072282287153,
+      "ring_directions_used": 27,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 2.352365090068264e-05,
+          "scalar_mismatch": 0.002657979816020859
+        },
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 1.1808999242684495,
+          "scalar_mismatch": 5.456466478726243
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.6458033010113916,
+          "scalar_mismatch": 9.12072282287153
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/tmp_gw129_f0p15_m8_r3.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/tmp_gw129_f0p15_m8_r3.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/tmp_gw129_f0p15_m8_r3.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/tmp_gw129_f0p15_m8_r3.json",
+      "C:/develop/waveP/output/public/gw/tmp_gw129_f0p15_m8_r3.csv",
+      "C:/develop/waveP/output/public/gw/tmp_gw129_f0p15_m8_r3.png"
+    ]
+  }
+}

@@ -1,0 +1,12 @@
+id,channel,proxy,metric,value,threshold,operator,pass,gate,status,normalized_score,source,note
+phase_alpha_consistency,atom,phase,atom_recoil_alpha_abs_z,0.5883354744951784,3.0,<=,True,True,pass,0.19611182483172615,born_route_a_proxy_constraints_pack,位相整合の最小ゲート（abs_z<=3）。
+phase_molecular_scaling,molecule,phase,molecular_isotopic_scaling_zmax,2.6385399704973964,3.0,<=,True,True,pass,0.8795133234991321,born_route_a_proxy_constraints_pack,分子スケーリング整合の最小ゲート（z<=3）。
+selection_delay_signature_fast,bell_selection,selection,min_fast_switching_delay_zmax,5.53541064134177,3.0,>=,True,True,pass,0.5419652116853263,born_route_a_proxy_constraints_pack,fast-switch/time-tag 系で setting依存遅延 z が 3以上。
+selection_sweep_sensitivity_fast,bell_selection,selection,min_fast_switching_selection_ratio,19.316744077961687,1.0,>=,True,True,pass,0.051768558715901386,born_route_a_proxy_constraints_pack,selection sweep の変動幅が統計幅1σ以上（ratio>=1）。
+visibility_atom_precision_gap,atom,visibility,log10_atom_interferometer_current_over_required_ratio,0.3338887327706417,1.0,<=,True,False,pass,0.3338887327706417,born_route_a_proxy_constraints_pack,可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。
+cow_residual_fraction,cow,phase,max_abs_residual_fraction,0.0,0.1,<=,True,True,pass,0.0,cow_experiment_complete_analysis_metrics,COW 位相差の観測-予測残差（fraction）は 10% 以下を hard gate。
+cow_numeric_coverage_ratio,cow,coverage,numeric_coverage_ratio_targeted,1.0,1.0,>=,True,False,pass,1.0,cow_experiment_complete_analysis_metrics,COW 数値化カタログの被覆率（targeted）は監視項目。numeric-target rows で 1.0 を閾値とする。
+hom_visibility_13ns_significance,hom,visibility,z_vs_classical_0p5,37.07692307692308,3.0,>=,True,True,pass,0.08091286307053941,hom_squeezed_light_unified_audit_metrics,HOM dip（13 ns）の古典限界 0.5 からの有意差 z。
+hom_visibility_1000ns_significance,hom,visibility,z_vs_classical_0p5,24.349999999999998,3.0,>=,True,True,pass,0.12320328542094457,hom_squeezed_light_unified_audit_metrics,HOM dip（1 us）の古典限界 0.5 からの有意差 z。
+hom_delay_stability,hom,phase,z_delta_between_13ns_1us,0.20961090407515945,3.0,<=,True,True,pass,0.06987030135838648,hom_squeezed_light_unified_audit_metrics,13 ns ↔ 1 us の可視度差分 z は 3 以下を hard gate。
+hom_noise_psd_shape,hom,noise,lf_to_hf_ratio,0.8405951115834224,1.0,>=,False,False,watch,1.1896333754740827,hom_squeezed_light_unified_audit_metrics,低周波/高周波 PSD 比は運用監視（selectionや装置ドリフトの監視項目）。

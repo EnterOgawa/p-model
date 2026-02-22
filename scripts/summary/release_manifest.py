@@ -3,7 +3,7 @@
 """
 release_manifest.py
 
-Phase 8 / Step 8.3（データ・コード公開）向けの “公開マニフェスト” を生成する。
+Phase 8 / Step 8.7.16（公開再現性）向けの “公開マニフェスト” を生成する。
 
 目的：
 - 第三者がどのファイルを見ればよいか（成果物/入口/QC）を機械可読で固定する。
@@ -31,6 +31,9 @@ if str(_ROOT) not in sys.path:
 
 from scripts.summary import worklog  # noqa: E402
 from scripts.summary import env_fingerprint  # noqa: E402
+from scripts.summary import public_outputs_manifest  # noqa: E402
+from scripts.summary import public_outputs_manifest_continuity  # noqa: E402
+from scripts.summary import public_manifest_citation_set  # noqa: E402
 
 
 def _utc_now() -> str:
@@ -104,6 +107,9 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
             _ROOT / "scripts" / "summary" / "paper_build.py",
             _ROOT / "scripts" / "summary" / "public_dashboard.py",
             _ROOT / "scripts" / "summary" / "env_fingerprint.py",
+            _ROOT / "scripts" / "summary" / "public_outputs_manifest.py",
+            _ROOT / "scripts" / "summary" / "public_outputs_manifest_continuity.py",
+            _ROOT / "scripts" / "summary" / "public_manifest_citation_set.py",
             _ROOT / "scripts" / "summary" / "release_manifest.py",
             _ROOT / "scripts" / "summary" / "release_bundle.py",
             _ROOT / "scripts" / "summary" / "run_all.py",
@@ -122,6 +128,12 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
             _ROOT / "output" / "private" / "summary" / "paper_table1_quantum_results.json",
             _ROOT / "output" / "private" / "summary" / "paper_table1_quantum_results.csv",
             _ROOT / "output" / "private" / "summary" / "paper_table1_quantum_results.md",
+            _ROOT / "output" / "public" / "summary" / "public_outputs_manifest.json",
+            _ROOT / "output" / "public" / "summary" / "public_outputs_manifest_topics.csv",
+            _ROOT / "output" / "private" / "summary" / "public_outputs_manifest_continuity.json",
+            _ROOT / "output" / "private" / "summary" / "public_outputs_manifest_continuity_topics.csv",
+            _ROOT / "output" / "private" / "summary" / "public_manifest_citation_set.json",
+            _ROOT / "output" / "private" / "summary" / "public_manifest_citation_set.csv",
         ],
         # Optional: generated bundles for sharing (not required for manifest ok=true).
         "release_bundles": [
@@ -132,7 +144,7 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    ap = argparse.ArgumentParser(description="Phase 8 / Step 8.3: generate release manifest JSON.")
+    ap = argparse.ArgumentParser(description="Phase 8 / Step 8.7.16: generate release manifest JSON.")
     ap.add_argument(
         "--out-json",
         type=str,
@@ -157,6 +169,62 @@ def main(argv: Sequence[str] | None = None) -> int:
         # Best-effort only; manifest will report missing files if generation failed.
         pass
 
+    # Build public-output tree manifest/hash (Step 8.7.16 core artifact).
+    try:
+        po_args: List[str] = [
+            "--out-json",
+            str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest.json"),
+            "--out-topics-csv",
+            str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest_topics.csv"),
+        ]
+        if not compute_hash:
+            po_args.append("--no-hash")
+        public_outputs_manifest.main(po_args)
+    except Exception:
+        # Best-effort only; manifest will report missing files if generation failed.
+        pass
+
+    # Build continuity report against the latest snapshot (Step 8.7.16 follow-up).
+    try:
+        po_cont_args: List[str] = [
+            "--manifest-json",
+            str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest.json"),
+            "--manifest-topics-csv",
+            str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest_topics.csv"),
+            "--out-json",
+            str(_ROOT / "output" / "private" / "summary" / "public_outputs_manifest_continuity.json"),
+            "--out-topics-csv",
+            str(_ROOT / "output" / "private" / "summary" / "public_outputs_manifest_continuity_topics.csv"),
+            "--snapshots-dir",
+            str(_ROOT / "output" / "private" / "summary" / "public_manifest_snapshots"),
+            "--skip-refresh-manifest",
+        ]
+        public_outputs_manifest_continuity.main(po_cont_args)
+    except Exception:
+        # Best-effort only; manifest will report missing files if generation failed.
+        pass
+
+    try:
+        po_cite_args: List[str] = [
+            "--continuity-json",
+            str(_ROOT / "output" / "private" / "summary" / "public_outputs_manifest_continuity.json"),
+            "--manifest-json",
+            str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest.json"),
+            "--topics-csv",
+            str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest_topics.csv"),
+            "--release-manifest-json",
+            str(_ROOT / "output" / "private" / "summary" / "release_manifest.json"),
+            "--out-json",
+            str(_ROOT / "output" / "private" / "summary" / "public_manifest_citation_set.json"),
+            "--out-csv",
+            str(_ROOT / "output" / "private" / "summary" / "public_manifest_citation_set.csv"),
+            "--skip-refresh-continuity",
+        ]
+        public_manifest_citation_set.main(po_cite_args)
+    except Exception:
+        # Best-effort only; manifest will report missing files if generation failed.
+        pass
+
     files: Dict[str, List[Dict[str, Any]]] = {}
     missing_required: List[str] = []
 
@@ -172,7 +240,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     payload: Dict[str, Any] = {
         "generated_utc": _utc_now(),
         "domain": "summary",
-        "step": "8.3 (release manifest)",
+        "step": "8.7.16 (release/public manifest)",
         "env": {"os_name": os.name, "platform": sys.platform, "python": sys.version.split()[0]},
         "params": {"compute_sha256": bool(compute_hash)},
         "ok": (len(missing_required) == 0),
@@ -183,6 +251,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             "build_quick_nodocx": r"cmd /c scripts\summary\build_materials.bat quick-nodocx",
             "build_part4_verification_html": "python -B scripts/summary/paper_build.py --profile part4_verification --mode publish --outdir output/private/summary --skip-docx --skip-tables",
             "paper_qc": "python -B scripts/summary/paper_qc.py",
+            "public_outputs_manifest": "python -B scripts/summary/public_outputs_manifest.py",
+            "public_outputs_manifest_continuity": "python -B scripts/summary/public_outputs_manifest_continuity.py",
+            "public_manifest_citation_set": "python -B scripts/summary/public_manifest_citation_set.py",
             "release_manifest_fast": "python -B scripts/summary/release_manifest.py --no-hash",
             "release_bundle_paper": "python -B scripts/summary/release_bundle.py --mode paper --no-hash",
             "release_bundle_repro": "python -B scripts/summary/release_bundle.py --mode repro --no-hash",

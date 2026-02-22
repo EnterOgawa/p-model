@@ -1,0 +1,217 @@
+{
+  "generated_utc": "2026-02-13T07:42:49.003218+00:00",
+  "input": "C:/develop/waveP/data/cosmology/distance_duality_constraints.json",
+  "definition": {
+    "delta_eps_needed": "Δε_needed = ε0_obs - ε0_model（ここでは ε0_model=-1）",
+    "extra_dl_factor": "extra_dl_factor=(1+z)^Δε_needed（静的背景P最小の d_L を観測ε0へ寄せる倍率）",
+    "delta_mu": "Δμ(z)=5 log10(extra_dl_factor)",
+    "tau_equivalent": "τ(z)=ln(extra_dl_factor^2)=2Δε ln(1+z)（不透明度解釈の等価減光）"
+  },
+  "selection_policy": {
+    "representative_bao": "uses_bao=true の中で最小σ（tightest）",
+    "representative_no_bao": "uses_bao=false の中で |z_pbg_static| 最小（least rejecting）"
+  },
+  "representatives": {
+    "bao": {
+      "id": "martinelli2021_snIa_bao",
+      "short_label": "SNIa+BAO (2021)"
+    },
+    "no_bao": {
+      "id": "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical",
+      "short_label": "Clusters+SNIa (2012, non-iso)"
+    }
+  },
+  "budgets_mag": [
+    0.05,
+    0.1,
+    0.2,
+    0.5,
+    1.0
+  ],
+  "z_refs": [
+    0.1,
+    0.5,
+    1.0,
+    2.0
+  ],
+  "reach": {
+    "bao": {
+      "label": "bao",
+      "id": "martinelli2021_snIa_bao",
+      "short_label": "SNIa+BAO (2021)",
+      "uses_bao": true,
+      "epsilon0_obs": 0.013,
+      "epsilon0_sigma": 0.029,
+      "delta_eps_needed": 1.013,
+      "decomposition_example": {
+        "alpha_opacity_needed": 1.013,
+        "s_R_needed_if_no_luminosity_evolution": 1.013,
+        "s_L_needed_if_no_ruler_evolution": -2.026,
+        "note": "分解は一意ではない（距離指標の前提/系統のどこに吸収するかの“解釈”）。"
+      },
+      "z_refs": [
+        0.1,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "values_at_z": [
+        {
+          "z": 0.1,
+          "extra_dl_factor": 1.1013637802806633,
+          "delta_mu_mag": 0.20965395032640996,
+          "flux_dimming_factor": 1.2130021765141132,
+          "tau_equivalent_dimming": 0.19309842428356233
+        },
+        {
+          "z": 0.5,
+          "extra_dl_factor": 1.507927444216659,
+          "delta_mu_mag": 0.8919022271170254,
+          "flux_dimming_factor": 2.2738451770217853,
+          "tau_equivalent_dimming": 0.821472309027141
+        },
+        {
+          "z": 1.0,
+          "extra_dl_factor": 2.0181032676893627,
+          "delta_mu_mag": 1.5247169280380648,
+          "flux_dimming_factor": 4.072740799058483,
+          "tau_equivalent_dimming": 1.4043161878144492
+        },
+        {
+          "z": 2.0,
+          "extra_dl_factor": 3.0431533026121085,
+          "delta_mu_mag": 2.41661915515509,
+          "flux_dimming_factor": 9.260782023198983,
+          "tau_equivalent_dimming": 2.22578849684159
+        }
+      ],
+      "reach_z_limit_by_budget_mag": [
+        {
+          "budget_mag": 0.05,
+          "z_limit": 0.02299065936577671
+        },
+        {
+          "budget_mag": 0.1,
+          "z_limit": 0.046509889149626504
+        },
+        {
+          "budget_mag": 0.2,
+          "z_limit": 0.09518294808796335
+        },
+        {
+          "budget_mag": 0.5,
+          "z_limit": 0.2552108456576476
+        },
+        {
+          "budget_mag": 1.0,
+          "z_limit": 0.575554267056587
+        }
+      ],
+      "notes": [
+        "Δε_needed = ε0_obs - ε0_model（ここでは ε0_model=-1）",
+        "extra_dl_factor=(1+z)^Δε_needed, Δμ=5 log10(extra_dl_factor), τ=ln(extra_dl_factor^2)=2Δε ln(1+z)"
+      ],
+      "z1_band_abs_delta_mu_mag": {
+        "z": 1.0,
+        "central": 1.5247169280380648,
+        "minus_1sigma": 1.4810675786667873,
+        "plus_1sigma": 1.5683662774093414
+      }
+    },
+    "no_bao": {
+      "label": "no_bao",
+      "id": "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical",
+      "short_label": "Clusters+SNIa (2012, non-iso)",
+      "uses_bao": false,
+      "epsilon0_obs": -0.7131188522118385,
+      "epsilon0_sigma": 0.2630344058337938,
+      "delta_eps_needed": 0.28688114778816154,
+      "decomposition_example": {
+        "alpha_opacity_needed": 0.28688114778816154,
+        "s_R_needed_if_no_luminosity_evolution": 0.28688114778816154,
+        "s_L_needed_if_no_ruler_evolution": -0.5737622955763231,
+        "note": "分解は一意ではない（距離指標の前提/系統のどこに吸収するかの“解釈”）。"
+      },
+      "z_refs": [
+        0.1,
+        0.5,
+        1.0,
+        2.0
+      ],
+      "values_at_z": [
+        {
+          "z": 0.1,
+          "extra_dl_factor": 1.0277199356508078,
+          "delta_mu_mag": 0.059373905141128044,
+          "flux_dimming_factor": 1.0562082661341006,
+          "tau_equivalent_dimming": 0.054685387556321685
+        },
+        {
+          "z": 0.5,
+          "extra_dl_factor": 1.1233556203821147,
+          "delta_mu_mag": 0.2525863125667815,
+          "flux_dimming_factor": 1.2619278498440858,
+          "tau_equivalent_dimming": 0.23264059120424233
+        },
+        {
+          "z": 1.0,
+          "extra_dl_factor": 1.22,
+          "delta_mu_mag": 0.4317991533737411,
+          "flux_dimming_factor": 1.4884,
+          "tau_equivalent_dimming": 0.39770171749033034
+        },
+        {
+          "z": 2.0,
+          "extra_dl_factor": 1.37049385686618,
+          "delta_mu_mag": 0.6843854659405229,
+          "flux_dimming_factor": 1.8782534117079375,
+          "tau_equivalent_dimming": 0.6303423086945728
+        }
+      ],
+      "reach_z_limit_by_budget_mag": [
+        {
+          "budget_mag": 0.05,
+          "z_limit": 0.08357166730679166
+        },
+        {
+          "budget_mag": 0.1,
+          "z_limit": 0.17412755819002035
+        },
+        {
+          "budget_mag": 0.2,
+          "z_limit": 0.3785755229012595
+        },
+        {
+          "budget_mag": 0.5,
+          "z_limit": 1.2313947551037114
+        },
+        {
+          "budget_mag": 1.0,
+          "z_limit": 3.979122553104353
+        }
+      ],
+      "notes": [
+        "Δε_needed = ε0_obs - ε0_model（ここでは ε0_model=-1）",
+        "extra_dl_factor=(1+z)^Δε_needed, Δμ=5 log10(extra_dl_factor), τ=ln(extra_dl_factor^2)=2Δε ln(1+z)"
+      ],
+      "z1_band_abs_delta_mu_mag": {
+        "z": 1.0,
+        "central": 0.4317991533737411,
+        "minus_1sigma": 0.03589292313561688,
+        "plus_1sigma": 0.8277053836118653
+      }
+    }
+  },
+  "params": {
+    "z_max_eta_plot": 1.6,
+    "reach_z_max": 2.3
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_distance_indicator_reach_limit.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_distance_indicator_reach_limit_metrics.json"
+  },
+  "notes": [
+    "ここでの「到達限界」は、距離指標の前提（標準化/校正/系統）に吸収できる“許容補正”を仮定したとき、どのzまで静的背景P最小が隠れ得るかを定量化するための整理。",
+    "Δμの予算（0.05〜1.0 mag）は“参考の目盛り”であり、実際の系統誤差を主張するものではない。"
+  ]
+}

@@ -29,6 +29,7 @@ import json
 import os
 import re
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
@@ -45,6 +46,46 @@ FigureAnchorMap = Dict[str, Tuple[str, str]]
 def _repo_root() -> Path:
     return _ROOT
 
+
+@dataclass(frozen=True)
+class FigureItem:
+    section: str
+    rel: str
+    path: Path
+    caption: str
+
+
+def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
+    """
+    Resolve repo-relative paths, remapping legacy output/<topic>/... to
+    output/private/<topic>/... (or output/public for quantum) when needed.
+    """
+    rel_norm = rel.replace("\\", "/")
+    if not rel_norm.startswith("output/"):
+        return root / Path(rel)
+
+    parts = Path(rel_norm).parts
+    if len(parts) < 2:
+        return root / Path(rel_norm)
+    if parts[1] in ("private", "public"):
+        return root / Path(rel_norm)
+
+    topic = parts[1]
+    tail = Path(*parts[2:]) if len(parts) > 2 else Path()
+    cand_public = (root / "output" / "public" / topic / tail).resolve()
+    cand_private = (root / "output" / "private" / topic / tail).resolve()
+
+    if topic == "quantum":
+        if cand_public.exists():
+            return cand_public
+        if cand_private.exists():
+            return cand_private
+
+    if cand_private.exists():
+        return cand_private
+    if cand_public.exists():
+        return cand_public
+    return root / Path(rel_norm)
 
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -143,7 +184,8 @@ def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir
         if not re.match(r"^(output|doc|data|scripts)/", base):
             return m.group(0)
 
-        rel = _rel_url(out_dir, root / Path(base))
+        target = _resolve_repo_asset(base, root=root)
+        rel = _rel_url(out_dir, target)
         return f"{attr}={q}{rel}{suffix}{q}"
 
     return _ASSET_URL_ATTR_RE.sub(repl, rendered_html)
@@ -533,7 +575,7 @@ def _linkify_repo_paths(
             return m.group(0)
         if " " in cand or "\n" in cand or "\r" in cand:
             return m.group(0)
-        target = root / Path(cand)
+        target = _resolve_repo_asset(cand, root=root)
         if not target.exists():
             return m.group(0)
         # Stable figures: link to the in-page anchor (図番号) rather than opening the raw image.
@@ -678,7 +720,7 @@ def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
     return "".join(parts)
 
 
-def _extract_png_paths_from_figures_index(root: Path) -> List[Tuple[str, Path, str]]:
+def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
     """
     Pull stable figure PNG paths (and optional captions) from doc/paper/01_figures_index.md.
 
@@ -690,7 +732,7 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[Tuple[str, Path, s
     if not idx.exists():
         return []
     text = _read_text(idx)
-    found: List[Tuple[str, Path, str]] = []
+    found: List[FigureItem] = []
     current_section = ""
 
     def _strip_internal_step_refs(s: str) -> str:
@@ -720,35 +762,34 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[Tuple[str, Path, s
             continue
         rel = m.group(1)
         caption = _strip_internal_step_refs((m.group(2) or m.group(3) or "").strip())
-        p = root / rel
+        p = _resolve_repo_asset(rel, root=root)
         if not p.exists():
             continue
-        found.append((current_section, p, caption))
+        found.append(FigureItem(section=current_section, rel=rel, path=p, caption=caption))
 
     # de-dup while preserving order (keep first caption)
-    uniq: List[Tuple[str, Path, str]] = []
+    uniq: List[FigureItem] = []
     seen: set[str] = set()
-    for section, p, caption in found:
-        key = str(p).lower()
+    for fig in found:
+        key = fig.rel.lower()
         if key in seen:
             continue
         seen.add(key)
-        uniq.append((section, p, caption))
+        uniq.append(fig)
     return uniq
 
 
-def _build_fig_anchor_map(figs: List[Tuple[str, Path, str]], *, root: Path) -> FigureAnchorMap:
+def _build_fig_anchor_map(figs: List[FigureItem], *, root: Path) -> FigureAnchorMap:
     """
     Map `output/...png` (repo-relative, POSIX-style) -> ("#fig-001", "図1").
     """
     fig_map: FigureAnchorMap = {}
     fig_no = 0
-    for _, p, _ in figs:
+    for fig in figs:
         fig_no += 1
         fig_id = f"fig-{fig_no:03d}"
         fig_label = f"図{fig_no}"
-        rel = str(p.relative_to(root)).replace("\\", "/")
-        fig_map[rel] = (f"#{fig_id}", fig_label)
+        fig_map[fig.rel] = (f"#{fig_id}", fig_label)
     return fig_map
 
 
@@ -773,11 +814,11 @@ def _extract_output_png_relpaths_in_order(md_text: str) -> List[str]:
 
 
 def _reorder_figs_by_reference_order(
-    figs: List[Tuple[str, Path, str]],
+    figs: List[FigureItem],
     *,
     root: Path,
     reference_relpaths: Sequence[str],
-) -> List[Tuple[str, Path, str]]:
+) -> List[FigureItem]:
     """
     Reorder figures so that numbering becomes ascending in the paper reading order.
 
@@ -785,17 +826,13 @@ def _reorder_figs_by_reference_order(
     - Remaining figures from the index are appended in the original index order.
     - If a referenced PNG exists on disk but is missing from the figures index, include it (caption="").
     """
-    by_rel: Dict[str, Tuple[str, Path, str]] = {}
-    for section, p, caption in figs:
-        try:
-            rel = str(p.relative_to(root)).replace("\\", "/")
-        except Exception:
+    by_rel: Dict[str, FigureItem] = {}
+    for fig in figs:
+        if fig.rel in by_rel:
             continue
-        if rel in by_rel:
-            continue
-        by_rel[rel] = (section, p, caption)
+        by_rel[fig.rel] = fig
 
-    ordered: List[Tuple[str, Path, str]] = []
+    ordered: List[FigureItem] = []
     used: set[str] = set()
 
     for rel in reference_relpaths:
@@ -805,20 +842,16 @@ def _reorder_figs_by_reference_order(
             ordered.append(by_rel[rel])
             used.add(rel)
             continue
-        p = root / rel
+        p = _resolve_repo_asset(rel, root=root)
         if p.exists() and p.is_file():
-            ordered.append(("", p, ""))
+            ordered.append(FigureItem(section="", rel=rel, path=p, caption=""))
             used.add(rel)
 
-    for section, p, caption in figs:
-        try:
-            rel = str(p.relative_to(root)).replace("\\", "/")
-        except Exception:
+    for fig in figs:
+        if fig.rel in used:
             continue
-        if rel in used:
-            continue
-        ordered.append((section, p, caption))
-        used.add(rel)
+        ordered.append(fig)
+        used.add(fig.rel)
 
     return ordered
 
@@ -865,6 +898,14 @@ def _render_equation_png(*, latex: str, eq_dir: Path) -> Path:
     # ここで正規化してから描画する。
     latex_norm = latex.strip().replace("\r\n", "\n")
     latex_norm = latex_norm.replace("\\\\", "\\")
+    # matplotlib mathtext does not support some LaTeX delimiter aliases.
+    # Normalize common variants to equivalent tokens that mathtext can render.
+    latex_norm = (
+        latex_norm.replace("\\lvert", "|")
+        .replace("\\rvert", "|")
+        .replace("\\lVert", "\\|")
+        .replace("\\rVert", "\\|")
+    )
     latex_norm = " ".join(latex_norm.split())
 
     # NOTE: Rendering parameters must be part of the cache key, otherwise changing
@@ -946,7 +987,7 @@ def _inline_png_code_snippets(
     *,
     root: Path,
     out_dir: Path,
-    figs: List[Tuple[str, Path, str]],
+    figs: List[FigureItem],
     mode: str,
     embed_images: bool,
     fig_map: Optional[Dict[str, Dict[str, Any]]] = None,
@@ -967,12 +1008,16 @@ def _inline_png_code_snippets(
         fig_map = {}
         if figs:
             fig_no = 0
-            for _, p, caption in figs:
+            for fig in figs:
                 fig_no += 1
                 fig_id = f"fig-{fig_no:03d}"
                 fig_label = f"図{fig_no}"
-                rel = str(p.relative_to(root)).replace("\\", "/")
-                fig_map[rel] = {"id": fig_id, "label": fig_label, "caption": caption or "", "path": p}
+                fig_map[fig.rel] = {
+                    "id": fig_id,
+                    "label": fig_label,
+                    "caption": fig.caption or "",
+                    "path": fig.path,
+                }
 
     if inlined is None:
         inlined = set()
@@ -1307,9 +1352,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if rel in seen_rel:
                 continue
             seen_rel.add(rel)
-            p = root / rel
+            p = _resolve_repo_asset(rel, root=root)
             if p.exists() and p.is_file():
-                figs.append(("", p, ""))
+                figs.append(FigureItem(section="", rel=rel, path=p, caption=""))
 
     fig_anchor_map = _build_fig_anchor_map(figs, root=root) if figs else None
 
@@ -1319,12 +1364,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if mode == "publish" and figs:
         publish_fig_map = {}
         fig_no = 0
-        for _, p, caption in figs:
+        for fig in figs:
             fig_no += 1
             fig_id = f"fig-{fig_no:03d}"
             fig_label = f"図{fig_no}"
-            rel = str(p.relative_to(root)).replace("\\", "/")
-            publish_fig_map[rel] = {"id": fig_id, "label": fig_label, "caption": caption or "", "path": p}
+            publish_fig_map[fig.rel] = {
+                "id": fig_id,
+                "label": fig_label,
+                "caption": fig.caption or "",
+                "path": fig.path,
+            }
         publish_inlined = set()
         publish_img_cache = {}
 
@@ -1490,18 +1539,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         fig_parts.append("<p class='muted'>固定パス（doc/paper/01_figures_index.md）から .png を抽出して一覧表示します。</p>")
         fig_no = 0
         current_section = None
-        for section, p, caption in figs:
-            if section and section != current_section:
-                current_section = section
+        for fig in figs:
+            if fig.section and fig.section != current_section:
+                current_section = fig.section
                 fig_parts.append(f"<h3>{html.escape(current_section)}</h3>")
 
             fig_no += 1
             fig_id = f"fig-{fig_no:03d}"
             fig_label = f"図{fig_no}"
-            rel = _rel_url(out_dir, p)
+            rel = _rel_url(out_dir, fig.path)
             fig_parts.append(f"<figure id='{html.escape(fig_id)}'>")
-            cap = html.escape(caption) if caption else ""
-            path_code = html.escape(str(p.relative_to(root)).replace("\\", "/"))
+            cap = html.escape(fig.caption) if fig.caption else ""
+            path_code = html.escape(fig.rel)
             if cap:
                 fig_parts.append(
                     f"<figcaption><strong>{html.escape(fig_label)}: {cap}</strong>"

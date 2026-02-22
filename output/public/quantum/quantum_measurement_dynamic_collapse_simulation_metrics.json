@@ -1,0 +1,85 @@
+{
+  "generated_utc": "2026-02-16T07:35:44.260151+00:00",
+  "phase": 8,
+  "step": "8.7.20",
+  "model": {
+    "equation": "d|psi> = [-iH dt - (gamma/2)(M-<M>)^2 dt + sqrt(gamma)(M-<M>) dW]|psi>",
+    "detector_pointer": "dx_k = (-Gamma_k*x_k + chi_k*<M> + eta_k*E)dt + sigma_xi,k dW_k",
+    "environment": "dE = (-lambda_E*E)dt + sigma_E dW_E",
+    "hamiltonian": "H=(omega/2)*sigma_x + (omega_env/2)*E*sigma_z",
+    "measurement_operator": "M=sigma_z"
+  },
+  "parameters": {
+    "seed": 20260216,
+    "n_trajectories": 320,
+    "total_time_s": 1.6,
+    "dt_s": 0.0004,
+    "n_steps": 4000,
+    "collapse_threshold_abs_z": 0.95,
+    "omega_rad_s": 0.8,
+    "gamma_meas_s_inv": 9.0,
+    "pointer_channels_n": 3,
+    "pointer_relax_s_inv": [
+      2.4,
+      2.0,
+      2.8
+    ],
+    "pointer_gain_s_inv": [
+      5.0,
+      4.3,
+      5.7
+    ],
+    "pointer_env_gain_s_inv": [
+      0.85,
+      -0.55,
+      1.05
+    ],
+    "pointer_noise_sqrt_s_inv": [
+      0.3,
+      0.34,
+      0.27
+    ],
+    "env_relax_s_inv": 1.6,
+    "env_noise_sqrt_s_inv": 0.42,
+    "env_detune_rad_s": 0.65
+  },
+  "summary": {
+    "collapse_fraction": 1.0,
+    "collapse_time_median_s": 0.0396,
+    "collapse_time_mean_s": 0.052521250000000005,
+    "collapse_time_p90_s": 0.10248000000000003,
+    "branch_plus_fraction": 0.490625,
+    "branch_minus_fraction": 0.509375,
+    "unresolved_fraction": 0.0,
+    "final_expect_z_mean": -0.04058031222144235,
+    "final_expect_z_abs_mean": 0.9941799198345521,
+    "final_coherence_median": 0.013778995066230532,
+    "coherence_suppression_ratio": 0.027557990132461064,
+    "pointer_z_correlation": 0.992428455611141,
+    "pointer_mean_z_correlation": 0.9943928464655386,
+    "env_z_correlation": 0.023891088792069366,
+    "env_pointer_mean_correlation": 0.03068641066307451,
+    "pointer_channel_z_correlations": [
+      0.992428455611141,
+      0.989910958815716,
+      0.9945387421659073
+    ],
+    "pointer_channel_abs_corr_mean": 0.9922927188642547,
+    "pointer_interchannel_corr_abs_mean": 0.9936358110458987,
+    "pointer_consensus_fraction": 0.965625,
+    "pointer_majority_unresolved_fraction": 0.0,
+    "branch_reversal_fraction": 0.075,
+    "branch_stable_fraction": 0.925,
+    "post_sign_consistency_median": 1.0,
+    "post_abs_z_mean_median": 0.9975590895346242
+  },
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\quantum_measurement_dynamic_collapse_simulation.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\quantum_measurement_dynamic_collapse_simulation.png"
+  },
+  "notes": [
+    "Operational simulation for measurement dynamics; not yet a first-principles derivation from microscopic P-field interactions.",
+    "This revision extends detector dynamics to multi-DOF pointer channels with environment-dissipation coupling.",
+    "Branch-stability gates are included via reversal fraction and post-collapse sign consistency metrics."
+  ]
+}

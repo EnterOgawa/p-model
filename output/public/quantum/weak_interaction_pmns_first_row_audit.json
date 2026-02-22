@@ -1,0 +1,198 @@
+{
+  "generated_utc": "2026-02-19T15:03:54.673412+00:00",
+  "phase": 8,
+  "step": "8.7.22",
+  "title": "Weak-interaction PMNS first-row audit",
+  "source": {
+    "url": "http://www.nu-fit.org/sites/default/files/v52.tbl-mixing.pdf",
+    "local_pdf": "data/quantum/sources/nufit_v52_tbl_mixing.pdf",
+    "sha256": "d58b67092b11885a4e489c6228174102420cecfd6e566667e07ffb3eb7d3d0e4"
+  },
+  "extraction": {
+    "dataset_without_sk_atm_3sigma_ranges": [
+      {
+        "row": "e",
+        "col": "1",
+        "low_3sigma": 0.803,
+        "high_3sigma": 0.845,
+        "center_proxy": 0.8240000000000001,
+        "sigma_proxy": 0.006999999999999988
+      },
+      {
+        "row": "e",
+        "col": "2",
+        "low_3sigma": 0.514,
+        "high_3sigma": 0.578,
+        "center_proxy": 0.546,
+        "sigma_proxy": 0.010666666666666658
+      },
+      {
+        "row": "e",
+        "col": "3",
+        "low_3sigma": 0.142,
+        "high_3sigma": 0.155,
+        "center_proxy": 0.1485,
+        "sigma_proxy": 0.0021666666666666687
+      },
+      {
+        "row": "mu",
+        "col": "1",
+        "low_3sigma": 0.233,
+        "high_3sigma": 0.505,
+        "center_proxy": 0.369,
+        "sigma_proxy": 0.04533333333333334
+      },
+      {
+        "row": "mu",
+        "col": "2",
+        "low_3sigma": 0.46,
+        "high_3sigma": 0.693,
+        "center_proxy": 0.5765,
+        "sigma_proxy": 0.038833333333333324
+      },
+      {
+        "row": "mu",
+        "col": "3",
+        "low_3sigma": 0.63,
+        "high_3sigma": 0.779,
+        "center_proxy": 0.7045,
+        "sigma_proxy": 0.024833333333333336
+      },
+      {
+        "row": "tau",
+        "col": "1",
+        "low_3sigma": 0.262,
+        "high_3sigma": 0.525,
+        "center_proxy": 0.3935,
+        "sigma_proxy": 0.043833333333333335
+      },
+      {
+        "row": "tau",
+        "col": "2",
+        "low_3sigma": 0.473,
+        "high_3sigma": 0.702,
+        "center_proxy": 0.5874999999999999,
+        "sigma_proxy": 0.03816666666666666
+      },
+      {
+        "row": "tau",
+        "col": "3",
+        "low_3sigma": 0.61,
+        "high_3sigma": 0.762,
+        "center_proxy": 0.6859999999999999,
+        "sigma_proxy": 0.025333333333333336
+      }
+    ],
+    "dataset_with_sk_atm_3sigma_ranges": [
+      {
+        "row": "e",
+        "col": "1",
+        "low_3sigma": 0.803,
+        "high_3sigma": 0.845,
+        "center_proxy": 0.8240000000000001,
+        "sigma_proxy": 0.006999999999999988
+      },
+      {
+        "row": "e",
+        "col": "2",
+        "low_3sigma": 0.514,
+        "high_3sigma": 0.578,
+        "center_proxy": 0.546,
+        "sigma_proxy": 0.010666666666666658
+      },
+      {
+        "row": "e",
+        "col": "3",
+        "low_3sigma": 0.143,
+        "high_3sigma": 0.155,
+        "center_proxy": 0.149,
+        "sigma_proxy": 0.0020000000000000018
+      },
+      {
+        "row": "mu",
+        "col": "1",
+        "low_3sigma": 0.244,
+        "high_3sigma": 0.498,
+        "center_proxy": 0.371,
+        "sigma_proxy": 0.042333333333333334
+      },
+      {
+        "row": "mu",
+        "col": "2",
+        "low_3sigma": 0.502,
+        "high_3sigma": 0.693,
+        "center_proxy": 0.5974999999999999,
+        "sigma_proxy": 0.031833333333333325
+      },
+      {
+        "row": "mu",
+        "col": "3",
+        "low_3sigma": 0.632,
+        "high_3sigma": 0.768,
+        "center_proxy": 0.7,
+        "sigma_proxy": 0.02266666666666667
+      },
+      {
+        "row": "tau",
+        "col": "1",
+        "low_3sigma": 0.272,
+        "high_3sigma": 0.517,
+        "center_proxy": 0.3945,
+        "sigma_proxy": 0.04083333333333333
+      },
+      {
+        "row": "tau",
+        "col": "2",
+        "low_3sigma": 0.473,
+        "high_3sigma": 0.672,
+        "center_proxy": 0.5725,
+        "sigma_proxy": 0.03316666666666668
+      },
+      {
+        "row": "tau",
+        "col": "3",
+        "low_3sigma": 0.623,
+        "high_3sigma": 0.761,
+        "center_proxy": 0.692,
+        "sigma_proxy": 0.023000000000000003
+      }
+    ]
+  },
+  "derived": {
+    "without_sk_atm": {
+      "first_row_sum_center_proxy": 0.9991442500000002,
+      "first_row_sigma_uncorrelated_proxy": 0.016406379620440316,
+      "delta_pmns_center_proxy": -0.0008557499999998219,
+      "abs_z_center_proxy": 0.05215958790406529,
+      "first_row_sum_low_3sigma_corner": 0.929169,
+      "first_row_sum_high_3sigma_corner": 1.072134
+    },
+    "with_sk_atm": {
+      "first_row_sum_center_proxy": 0.9992930000000002,
+      "first_row_sigma_uncorrelated_proxy": 0.016404585212677562,
+      "delta_pmns_center_proxy": -0.0007069999999997911,
+      "abs_z_center_proxy": 0.04309770657617221,
+      "first_row_sum_low_3sigma_corner": 0.929454,
+      "first_row_sum_high_3sigma_corner": 1.072134
+    }
+  },
+  "gate": {
+    "dataset": "with_sk_atm",
+    "hard_z_threshold": 3.0,
+    "watch_z_threshold": 2.0,
+    "hard_pass": true,
+    "watch_pass": true,
+    "status": "pass",
+    "rule": "NuFIT v5.2 row-1 3σ range proxies; sigma_proxy=(high-low)/6; hard if abs(z)<=3, watch if abs(z)<=2."
+  },
+  "outputs": {
+    "summary_csv": "output/public/quantum/weak_interaction_pmns_first_row_audit_summary.csv",
+    "audit_json": "output/public/quantum/weak_interaction_pmns_first_row_audit.json",
+    "audit_png": "output/public/quantum/weak_interaction_pmns_first_row_audit.png"
+  },
+  "notes": [
+    "This is an operational PMNS closure gate using NuFIT v5.2 row-1 3σ ranges.",
+    "Row-1 center values are midpoint proxies and the uncertainty is propagated as uncorrelated sigma proxies.",
+    "CKM+PMNS combined closure is evaluated in weak_interaction_beta_decay_route_ab_audit.py."
+  ]
+}

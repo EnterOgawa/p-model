@@ -136,6 +136,27 @@ def _build_gw_tasks(*, root: Path, py: str, offline: bool, cwd: Path) -> List[Ta
 
     tasks.append(
         Task(
+            key="gw150914_h1_l1_amplitude_ratio",
+            argv=[
+                py,
+                "-B",
+                str(root / "scripts" / "gw" / "gw150914_h1_l1_amplitude_ratio.py"),
+                "--event",
+                "GW150914",
+            ]
+            + (["--offline"] if offline else []),
+            cwd=cwd,
+            requires_network=True,
+            requires_cache_globs=[
+                "data/gw/gw150914/*txt.gz",
+                "data/gw/gw150914/GW150914_event.json",
+            ],
+            optional=False,
+        )
+    )
+
+    tasks.append(
+        Task(
             key="gw_multi_event_summary",
             argv=[py, "-B", str(root / "scripts" / "gw" / "gw_multi_event_summary.py")],
             cwd=cwd,
@@ -486,6 +507,21 @@ def main() -> int:
             cwd=cwd,
         ),
         Task(
+            key="theory_gpb_scalar_limit_audit",
+            argv=[py, "-B", str(root / "scripts" / "theory" / "gpb_scalar_limit_audit.py")],
+            cwd=cwd,
+        ),
+        Task(
+            key="theory_frame_dragging_scalar_limit_combined_audit",
+            argv=[py, "-B", str(root / "scripts" / "theory" / "frame_dragging_scalar_limit_combined_audit.py")],
+            cwd=cwd,
+        ),
+        Task(
+            key="theory_pmodel_rotating_sphere_p_distribution_audit",
+            argv=[py, "-B", str(root / "scripts" / "theory" / "pmodel_rotating_sphere_p_distribution_audit.py")],
+            cwd=cwd,
+        ),
+        Task(
             key="theory_dynamic_p_quadrupole_scalings",
             argv=[py, "-B", str(root / "scripts" / "theory" / "dynamic_p_quadrupole_scalings.py")],
             cwd=cwd,
@@ -797,6 +833,15 @@ def main() -> int:
                 py,
                 "-B",
                 str(root / "scripts" / "cosmology" / "cosmology_cmb_temperature_scaling_constraints.py"),
+            ],
+            cwd=cwd,
+        ),
+        Task(
+            key="cosmology_cmb_peak_uplift_audit",
+            argv=[
+                py,
+                "-B",
+                str(root / "scripts" / "cosmology" / "cosmology_cmb_peak_uplift_audit.py"),
             ],
             cwd=cwd,
         ),

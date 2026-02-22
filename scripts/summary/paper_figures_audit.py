@@ -45,6 +45,34 @@ def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _resolve_output_path(root: Path, rel: str) -> Path:
+    rel_norm = rel.replace("\\", "/")
+    if not rel_norm.startswith("output/"):
+        return root / Path(rel)
+
+    parts = Path(rel_norm).parts
+    if len(parts) < 2:
+        return root / Path(rel_norm)
+    if parts[1] in ("private", "public"):
+        return root / Path(rel_norm)
+
+    topic = parts[1]
+    tail = Path(*parts[2:]) if len(parts) > 2 else Path()
+    cand_private = (root / "output" / "private" / topic / tail).resolve()
+    cand_public = (root / "output" / "public" / topic / tail).resolve()
+
+    if topic == "quantum":
+        if cand_public.exists():
+            return cand_public
+        if cand_private.exists():
+            return cand_private
+
+    if cand_private.exists():
+        return cand_private
+    if cand_public.exists():
+        return cand_public
+    return root / Path(rel_norm)
+
 def _extract_result_figure_paths(manuscript_text: str) -> List[str]:
     """
     Extract `output/...png` like paths referenced in the Results chapter (4.2..4.12).
@@ -169,7 +197,7 @@ def audit_figures(
     audits: List[FigureAudit] = []
     missing: List[str] = []
     for rel in paths:
-        full = root / Path(rel)
+        full = _resolve_output_path(root, rel)
         if not full.exists():
             missing.append(rel)
             audits.append(FigureAudit(path=rel, exists=False, notes="missing"))

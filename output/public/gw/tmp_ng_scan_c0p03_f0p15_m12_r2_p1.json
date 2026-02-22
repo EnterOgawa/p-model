@@ -1,0 +1,197 @@
+{
+  "generated_utc": "2026-02-20T13:18:14.066785+00:00",
+  "schema": "wavep.gw.polarization.network_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.3",
+  "inputs": {
+    "events": [
+      "GW200129_065458",
+      "GW200224_222234",
+      "GW200115_042309",
+      "GW200311_115853"
+    ],
+    "detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "detector_pairs": [
+      "H1-L1",
+      "H1-V1",
+      "L1-V1"
+    ],
+    "corr_use_min": 0.03,
+    "sky_samples": 5000,
+    "psi_samples": 36,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.15,
+    "min_ring_directions": 12,
+    "geometry_relax_factor": 2.0,
+    "geometry_delay_floor_ms": 0.25,
+    "allow_pair_pruning": true
+  },
+  "summary": {
+    "n_events_requested": 4,
+    "n_rows": 4,
+    "n_usable_events": 4,
+    "n_pair_pruned_events": 3,
+    "overall_status": "reject",
+    "overall_reason": "tensor_response_failed_for_some_events",
+    "scalar_only_mode_global_upper_bound_proxy": 1.0
+  },
+  "rows": [
+    {
+      "event": "GW200129_065458",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_pruning_applied": 0,
+      "dropped_pairs": "",
+      "geometry_mode": "relaxed",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 2,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.6666666666666666,
+      "tensor_mismatch_max": 0.6268396082264573,
+      "scalar_mismatch_max": 1.911912788578578,
+      "ring_directions_used": 42,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 3.073151182141862e-05,
+          "scalar_mismatch": 0.020010700801642346
+        },
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.6268396082264573,
+          "scalar_mismatch": 0.39307126965246597
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.4988463707726793,
+          "scalar_mismatch": 1.911912788578578
+        }
+      ]
+    },
+    {
+      "event": "GW200224_222234",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 2,
+      "pair_names": "H1-L1;H1-V1",
+      "pair_pruning_applied": 1,
+      "dropped_pairs": "L1-V1",
+      "geometry_mode": "relaxed",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 2,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 1.0,
+      "tensor_mismatch_max": 0.029051115848843397,
+      "scalar_mismatch_max": 0.28456898068870357,
+      "ring_directions_used": 19,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.0006065382966215201,
+          "scalar_mismatch": 0.0207608840638479
+        },
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.029051115848843397,
+          "scalar_mismatch": 0.28456898068870357
+        }
+      ]
+    },
+    {
+      "event": "GW200115_042309",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 2,
+      "pair_names": "H1-V1;L1-V1",
+      "pair_pruning_applied": 1,
+      "dropped_pairs": "H1-L1",
+      "geometry_mode": "relaxed",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 1,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.5,
+      "tensor_mismatch_max": 1.2587327152554135,
+      "scalar_mismatch_max": 9.574069879510814,
+      "ring_directions_used": 27,
+      "pair_results": [
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 1.2587327152554135,
+          "scalar_mismatch": 9.574069879510814
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.0030037905652263567,
+          "scalar_mismatch": 0.18358947804354364
+        }
+      ]
+    },
+    {
+      "event": "GW200311_115853",
+      "quality": "usable",
+      "available_pair_count": 3,
+      "usable_pair_count": 2,
+      "pair_names": "H1-L1;L1-V1",
+      "pair_pruning_applied": 1,
+      "dropped_pairs": "H1-V1",
+      "geometry_mode": "strict",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 0,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.0,
+      "tensor_mismatch_max": 2.812206500109918,
+      "scalar_mismatch_max": 2.3472151663472167,
+      "ring_directions_used": 24,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.00121967509970411,
+          "scalar_mismatch": 0.7263620959349797
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 2.812206500109918,
+          "scalar_mismatch": 2.3472151663472167
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/tmp_ng_scan_c0p03_f0p15_m12_r2_p1.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/tmp_ng_scan_c0p03_f0p15_m12_r2_p1.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/tmp_ng_scan_c0p03_f0p15_m12_r2_p1.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/tmp_ng_scan_c0p03_f0p15_m12_r2_p1.json",
+      "C:/develop/waveP/output/public/gw/tmp_ng_scan_c0p03_f0p15_m12_r2_p1.csv",
+      "C:/develop/waveP/output/public/gw/tmp_ng_scan_c0p03_f0p15_m12_r2_p1.png"
+    ]
+  }
+}

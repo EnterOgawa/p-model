@@ -1,9 +1,9 @@
 {
-  "generated_utc": "2026-02-12T23:19:05.850932+00:00",
+  "generated_utc": "2026-02-22T08:21:28.253729+00:00",
   "phase": 7,
   "step": "7.16.13",
   "title": "Matter-wave interference precision audit (electron/atom/molecule)",
-  "channels_n": 4,
+  "channels_n": 3,
   "rows": [
     {
       "channel": "electron_double_slit",
@@ -30,18 +30,6 @@
       "data_status": "direct"
     },
     {
-      "channel": "atom_interferometer_precision",
-      "observable": "current_over_required_precision_ratio",
-      "metric_name": "median_ratio",
-      "metric_value": 717905.1403824643,
-      "threshold_3sigma": 1.0,
-      "pass_3sigma": false,
-      "current_precision": 717905.1403824643,
-      "required_precision_3sigma": 1.0,
-      "source": "atom_interferometer_unified_audit (Step 7.16.12)",
-      "data_status": "direct"
-    },
-    {
       "channel": "molecular_isotopic_scaling",
       "observable": "abs(meas/pred-1)",
       "metric_name": "z_max",
@@ -64,7 +52,41 @@
     "summary_csv": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit_summary.csv",
     "summary_png": "C:\\develop\\waveP\\output\\public\\quantum\\matter_wave_interference_precision_audit.png"
   },
+  "precision_gap_watch": {
+    "observable": "current_over_required_precision_ratio",
+    "threshold_3sigma": 1.0,
+    "min_ratio": 2.157191660961336,
+    "median_ratio": 717905.1403824643,
+    "max_ratio": 21571916.655578464,
+    "visibility_reference_channel": "atom_gravimeter",
+    "visibility_reference_ratio": 2.157191660961336,
+    "visibility_reference_log10_ratio": 0.3338887327706417,
+    "visibility_reference_log10_threshold": 1.0,
+    "pass_if_min_le_threshold": false,
+    "pass_if_median_le_threshold": false,
+    "pass_if_visibility_reference_log10_le_threshold": true,
+    "rows": [
+      {
+        "channel": "cow_neutron",
+        "ratio": 21571916.655578464
+      },
+      {
+        "channel": "atom_gravimeter",
+        "ratio": 2.157191660961336
+      },
+      {
+        "channel": "atom_gyroscope_proxy",
+        "ratio": 2157.191660961336
+      },
+      {
+        "channel": "optical_clock_leveling",
+        "ratio": 1433653.0891039672
+      }
+    ],
+    "source": "atom_interferometer_unified_audit (Step 7.16.12)"
+  },
   "notes": [
+    "Atom-interferometer precision gap is tracked as diagnostics; visibility reference uses atom_gravimeter log10(current/required) with a one-decade watch threshold.",
     "Molecular channel is a proxy audit based on isotopic reduced-mass scaling because a unified public C60/C70 raw interference cache is not frozen yet.",
     "Step 7.16.13 freezes a cross-particle I/F with available primary-backed outputs; fullerene raw-integration can be appended without changing this schema."
   ]

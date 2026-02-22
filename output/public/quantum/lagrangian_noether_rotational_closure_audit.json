@@ -1,0 +1,254 @@
+{
+  "generated_utc": "2026-02-19T14:29:14.897506+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.21.6+8.7.26.2",
+    "name": "L_rot prior-fixed prediction closure audit"
+  },
+  "intent": "Fix lambda_rot by an independent prior source and audit frame-dragging by holdout prediction consistency in the L_total route.",
+  "equations": {
+    "l_total_with_rot": "L_total^rot = L_total + L_rot",
+    "l_rot_minimal": "L_rot = -(M_chi^2 c^2 / 2) * lambda_rot * (R^6/r^6) * sin(theta)^2 * (J_hat · grad(chi))^2",
+    "mapping": "Omega_LT^(P) = (1 + lambda_rot) * Omega_LT^(ref)",
+    "coefficient_relation": "lambda_rot = kappa_rot - 1"
+  },
+  "inputs": {
+    "rotating_sphere_audit_json": "output/public/theory/pmodel_rotating_sphere_p_distribution_audit.json",
+    "lagrangian_noether_observable_closure_audit_json": "output/public/quantum/lagrangian_noether_observable_closure_audit.json",
+    "lagrangian_noether_observable_closure_drift_audit_json": "output/public/quantum/lagrangian_noether_observable_closure_drift_audit.json",
+    "rotational_coupling_prior_json": "data/theory/rotational_coupling_prior.json"
+  },
+  "calibration": {
+    "kappa_rot": 0.99,
+    "kappa_sigma": 0.05,
+    "lambda_rot": -0.01,
+    "lambda_sigma": 0.05,
+    "prior_mode": "weak_field_spin_indicator_external",
+    "prior_source": "external_prior_json",
+    "prior_source_ids": [
+      "lageos_frame_dragging"
+    ],
+    "holdout_channel_ids": [
+      "gpb_frame_dragging"
+    ],
+    "fit_channels_n": 1,
+    "legacy_fit_channels_n": 2,
+    "legacy_fit": {
+      "kappa_rot_fit": 0.9903379213240999,
+      "kappa_sigma_fit": 0.04824437090643169,
+      "lambda_rot_fit": -0.009662078675900077,
+      "lambda_sigma_fit": 0.04824437090643169
+    },
+    "prior_vs_legacy": {
+      "lambda_delta": -0.0003379213240999237,
+      "combined_sigma": 0.0694803520727792,
+      "max_abs_pred_delta": 0.00033792132409993236
+    },
+    "note": "Frozen from the weak-field spin indicator mu=0.99±0.05. Holdout prediction gate is evaluated on non-prior channels."
+  },
+  "prediction_gate": {
+    "z_reject": 3.0,
+    "prior_source_channels_n": 1,
+    "holdout_channels_n": 1,
+    "holdout_reject_n": 0,
+    "holdout_max_abs_z": 0.026666666666667317,
+    "rule": "Use only holdout channels (not used in prior freeze) for the hard prediction gate."
+  },
+  "channel_rows": [
+    {
+      "id": "gpb_frame_dragging",
+      "label": "GP-B frame-dragging",
+      "experiment": "GP-B",
+      "unit": "arcsec/yr",
+      "observed": 0.039,
+      "observed_sigma": 0.0072,
+      "reference_prediction": 0.0392,
+      "pred_static": 0.0,
+      "pred_vortex_fit": 0.03882124651590472,
+      "pred_lrot_prior": 0.038807999999999995,
+      "pred_lrot": 0.038807999999999995,
+      "residual_lrot_prior": 0.00019200000000000467,
+      "residual_lrot": 0.00019200000000000467,
+      "z_static": 5.416666666666667,
+      "z_lrot_prior": 0.026666666666667317,
+      "z_lrot": 0.026666666666667317,
+      "is_prior_source": false,
+      "gate_role": "holdout_prediction"
+    },
+    {
+      "id": "lageos_frame_dragging",
+      "label": "LAGEOS frame-dragging",
+      "experiment": "LAGEOS",
+      "unit": "mu_ratio",
+      "observed": 0.99,
+      "observed_sigma": 0.05,
+      "reference_prediction": 1.0,
+      "pred_static": 0.0,
+      "pred_vortex_fit": 0.9903379213240999,
+      "pred_lrot_prior": 0.99,
+      "pred_lrot": 0.99,
+      "residual_lrot_prior": 0.0,
+      "residual_lrot": 0.0,
+      "z_static": 19.799999999999997,
+      "z_lrot_prior": 0.0,
+      "z_lrot": 0.0,
+      "is_prior_source": true,
+      "gate_role": "prior_source"
+    }
+  ],
+  "checks": [
+    {
+      "id": "l_rot::input_channels",
+      "metric": "frame_dragging_channels_n",
+      "value": 2,
+      "expected": ">=2",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "GP-B/LAGEOS の2チャネル以上が必要。"
+    },
+    {
+      "id": "l_rot::static_reject",
+      "metric": "static_iso_frame_reject_n/frame_channels_n",
+      "value": "2/2",
+      "expected": "all reject",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "δP_rot=0 分岐が frame-dragging を棄却していること。"
+    },
+    {
+      "id": "l_rot::lambda_defined",
+      "metric": "lambda_rot (prior mean)",
+      "value": -0.01,
+      "expected": "finite",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "独立事前拘束で λ_rot が定義されること。"
+    },
+    {
+      "id": "l_rot::lambda_sigma",
+      "metric": "sigma(lambda_rot prior)",
+      "value": 0.05,
+      "expected": ">0",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "独立事前拘束の不確かさが正。"
+    },
+    {
+      "id": "l_rot::prior_source_channels",
+      "metric": "prior_source_channels_n",
+      "value": 1,
+      "expected": ">=1",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "弱場スピン指標を独立事前拘束の固定源として少なくとも1チャネル確保すること。"
+    },
+    {
+      "id": "l_rot::prediction_holdout_channels",
+      "metric": "holdout_prediction_channels_n",
+      "value": 1,
+      "expected": ">=1",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "事前拘束に使っていない holdout チャネルで予言一致を検証すること。"
+    },
+    {
+      "id": "l_rot::prediction_holdout_reject",
+      "metric": "holdout_prediction_reject_n",
+      "value": 0,
+      "expected": "0",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "holdout 予言チャネルで棄却がゼロであること。"
+    },
+    {
+      "id": "l_rot::prediction_holdout_max_abs_z",
+      "metric": "holdout_prediction_max_abs_z",
+      "value": 0.026666666666667317,
+      "expected": "<=3",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "holdout 予言チャネルの |z| が 3 以下であること。"
+    },
+    {
+      "id": "l_rot::closure_upstream",
+      "metric": "lagrangian_noether_observable_closure.overall_status",
+      "value": "pass",
+      "expected": "pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "上流の L_total 閉包監査が pass。"
+    },
+    {
+      "id": "l_rot::drift_guard",
+      "metric": "closure_drift(overall_status,recalc_required)",
+      "value": {
+        "overall_status": "pass",
+        "recalc_required": false
+      },
+      "expected": "status in {pass,watch} and recalc_required=false",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "note": "drift監査で再計算トリガーが立っていないこと。"
+    },
+    {
+      "id": "l_rot::small_coupling_watch",
+      "metric": "abs(lambda_rot)",
+      "value": 0.01,
+      "expected": "<=0.2",
+      "pass": true,
+      "gate_level": "watch",
+      "status": "pass",
+      "score": 1.0,
+      "note": "最小拡張の範囲（過大結合回避）の運用監視。"
+    },
+    {
+      "id": "l_rot::prior_vs_legacy_watch",
+      "metric": "abs(lambda_prior - lambda_fit_legacy)",
+      "value": 0.0003379213240999237,
+      "expected": "<=2*sqrt(sigma_prior^2 + sigma_fit_legacy^2)",
+      "pass": true,
+      "gate_level": "watch",
+      "status": "pass",
+      "score": 1.0,
+      "note": "独立事前拘束と旧fitの乖離が過大でないこと（運用監視）。"
+    },
+    {
+      "id": "l_rot::prior_source_role_watch",
+      "metric": "prior_source_mode",
+      "value": "weak_field_spin_indicator_external",
+      "expected": "external_prior",
+      "pass": true,
+      "gate_level": "watch",
+      "status": "pass",
+      "score": 1.0,
+      "note": "独立事前拘束が外部JSONから固定されていること（fallback時はwatch）。"
+    }
+  ],
+  "decision": {
+    "overall_status": "pass",
+    "decision": "l_rot_closure_pass",
+    "hard_fail_ids": [],
+    "watch_ids": [],
+    "rule": "Reject if any hard check fails; watch if only watch-level checks fail; otherwise pass."
+  }
+}

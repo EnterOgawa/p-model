@@ -1,0 +1,137 @@
+{
+  "checks": [
+    {
+      "check_id": "n0_terms_explicit",
+      "expected": true,
+      "hard_fail": false,
+      "metric": "N0^(2)=N_metric+N_phi",
+      "value": true
+    },
+    {
+      "check_id": "perturbative_solution_finite",
+      "expected": true,
+      "hard_fail": false,
+      "metric": "isfinite(P0_full)",
+      "value": true
+    },
+    {
+      "check_id": "n0_contribution_resolved",
+      "expected": ">0",
+      "hard_fail": false,
+      "metric": "abs(n0_contribution_pct)",
+      "value": 0.18061989811605983
+    }
+  ],
+  "decision": {
+    "decision": "n0_terms_explicit_and_solution_fixed",
+    "hard_reject_n": 0,
+    "overall_status": "pass"
+  },
+  "explicit_n0_terms": {
+    "N_metric": "epsilon_nl^2 * 2[(∂_r u)(∂_r P0) + (1/r^2)(∂_θ u)(∂_θ P0)]",
+    "N_phi": "epsilon_nl^2 * e^{-2u}[(∂_r P_phi)^2/(r^2 sin^2θ) + (∂_θ P_phi)^2/(r^4 sin^2θ)]",
+    "P_phi_ansatz": "P_phi(r,θ)=mu_drag sin^2θ / r^2",
+    "definition": "N0^(2)=N_metric+N_phi",
+    "integral_solution": "deltaP0(r)=-∫_r^{r_out} dξ ξ^{-2}∫_ξ^{r_out} s^2 Nbar(s) ds",
+    "radial_equation": "(1/r^2)d/dr(r^2 d(deltaP0)/dr)=Nbar(r)",
+    "spherical_average": "Nbar(r)=0.5 ∫_0^π N0^(2)(r,θ) sinθ dθ"
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "N0^(2) explicit decomposition is missing.",
+      "Perturbative solution P0_full is non-finite.",
+      "N0 contribution is numerically unresolved."
+    ]
+  },
+  "generated_utc": "2026-02-21T13:43:00.245625+00:00",
+  "inputs": {
+    "a_effective": 0.4995,
+    "beta_fixed": 1.0000105000000001,
+    "direct_audit_json": "output/public/theory/pmodel_rotating_bh_photon_ring_direct_audit.json",
+    "eta_nonlinear": 0.08,
+    "lambda2_best": -0.14666666666666667,
+    "mu_drag": 3.43656,
+    "n_r": 1600,
+    "n_theta": 181,
+    "omega_ang_epsilon": 0.18,
+    "r_range_rg": [
+      1.9,
+      40.0
+    ],
+    "zeta_best": 6.88
+  },
+  "intent": "Expose explicit N0^(2) terms and show perturbative solution contribution to strong-field 4.6% coefficient gap.",
+  "nonlinear_order": {
+    "epsilon_nl": 0.08,
+    "epsilon_nl_squared": 0.0064
+  },
+  "outputs": {
+    "audit_csv": "output/public/theory/pmodel_effective_metric_n0_source_solution_audit.csv",
+    "audit_json": "output/public/theory/pmodel_effective_metric_n0_source_solution_audit.json",
+    "audit_png": "output/public/theory/pmodel_effective_metric_n0_source_solution_audit.png"
+  },
+  "phase": {
+    "name": "effective metric N0 source solution audit",
+    "phase": 8,
+    "step": "8.7.32.11"
+  },
+  "ring_coefficient_budget": {
+    "c_core": 10.873241481672977,
+    "c_ref": 10.392304845413264,
+    "coeff_full_mean": 10.569104612668946,
+    "coeff_linear_mean": 10.55033404224525,
+    "core_gap_pct": 4.627814940128316,
+    "core_plus_n0_closed_gap_pct": 4.80904450124684,
+    "core_plus_n0_gap_pct": 4.808434838244376,
+    "delta_u_eff": 0.0008653094968311126,
+    "max_abs_deltaP0": 0.002030724720050155,
+    "max_abs_delta_u": 0.001204986761869642,
+    "n0_contribution_pct": 0.18061989811605983,
+    "n0_share_vs_core_pct": 3.90291963816193,
+    "r_ring_eff_rg": 2.2574108818011256
+  },
+  "ring_rows_full": [
+    {
+      "a_star_mid": 0.4995,
+      "b_minus_rg": 5.934238021112217,
+      "b_plus_rg": 4.68989812908185,
+      "inc_deg_mid": 17.5,
+      "key": "m87",
+      "r_minus_rg": 2.5195121951219512,
+      "r_plus_rg": 1.9,
+      "ring_coeff_rg": 10.624136150194069
+    },
+    {
+      "a_star_mid": 0.4995,
+      "b_minus_rg": 6.151672543546276,
+      "b_plus_rg": 4.362400531597547,
+      "inc_deg_mid": 27.5,
+      "key": "sgra",
+      "r_minus_rg": 2.7101313320825513,
+      "r_plus_rg": 1.9,
+      "ring_coeff_rg": 10.514073075143823
+    }
+  ],
+  "ring_rows_linear": [
+    {
+      "a_star_mid": 0.4995,
+      "b_minus_rg": 5.9259433427899095,
+      "b_plus_rg": 4.678609088836029,
+      "inc_deg_mid": 17.5,
+      "key": "m87",
+      "r_minus_rg": 2.5195121951219512,
+      "r_plus_rg": 1.9,
+      "ring_coeff_rg": 10.604552431625939
+    },
+    {
+      "a_star_mid": 0.4995,
+      "b_minus_rg": 6.144215842991483,
+      "b_plus_rg": 4.3518998098730775,
+      "inc_deg_mid": 27.5,
+      "key": "sgra",
+      "r_minus_rg": 2.7101313320825513,
+      "r_plus_rg": 1.9,
+      "ring_coeff_rg": 10.49611565286456
+    }
+  ]
+}

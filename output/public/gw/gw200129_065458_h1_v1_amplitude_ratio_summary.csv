@@ -1,0 +1,2 @@
+event,preprocess,window_start_s,window_end_s,f_lo_hz,f_hi_hz,best_lag_ms,best_corr,abs_best_corr,ratio_median,ratio_p16,ratio_p84,ratio_log_std,ratio_iqr_over_median,ratio_slope_window_fraction,status,status_reason
+GW200129_065458,bandpass,-0.12,-0.01,30,350,-2.441406,0.0611266,0.0611266,0.094238,0.0727077,0.1387859,0.3498095,0.5192098,0.8338715,reject,low_cross_correlation

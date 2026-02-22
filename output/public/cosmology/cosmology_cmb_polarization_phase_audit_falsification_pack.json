@@ -1,0 +1,54 @@
+{
+  "generated_utc": "2026-02-22T05:02:50.496510+00:00",
+  "kind": "cmb_polarization_phase_audit",
+  "decision_rule": {
+    "phase_hard_gate": "|Δφ_EE-0.5|<=0.12 and |Δφ_TE-0.25|<=0.12 and TE signs alternate",
+    "position": "max|Δℓ_EE|<=50 and max|Δℓ_TE|<=55",
+    "overall": "phase_hard_gate fail => reject; phase_hard_gate pass + position pass => pass; otherwise watch"
+  },
+  "result": {
+    "thresholds": {
+      "phase_abs_delta_ee_from_half": 0.12,
+      "phase_abs_delta_te_from_quarter": 0.12,
+      "max_abs_delta_ell_ee": 50.0,
+      "max_abs_delta_ell_te": 55.0,
+      "te_sign_alternation_required": true,
+      "phase_shift_hard_gate_required": true
+    },
+    "checks": {
+      "phase_shift_hard_gate": true,
+      "ee_phase": true,
+      "te_phase": true,
+      "ee_peak_positions": true,
+      "te_peak_positions": true,
+      "te_sign_alternation": true
+    },
+    "hard_gate": {
+      "name": "cmb_phase_shift_lock",
+      "rule": "abs(Δφ_EE-0.5)<=0.12 and abs(Δφ_TE-0.25)<=0.12 and TE sign alternation",
+      "pass": true,
+      "components": {
+        "ee_phase": true,
+        "te_phase": true,
+        "te_sign_alternation": true
+      }
+    },
+    "summary": {
+      "ee_max_abs_delta_ell": 30.134304750000297,
+      "te_max_abs_delta_ell": 45.50513512500038,
+      "abs_delta_ee_from_half": 0.06668867956652258,
+      "abs_delta_te_from_quarter": 0.01749032891609753
+    },
+    "overall_status": "pass",
+    "hard_fail": false
+  },
+  "notes": [
+    "本監査は Planck binned TT/TE/EE の位相関係に限定した最小監査であり、全天球尤度の全パラメータ同時推定ではない。",
+    "TE/EE の位相ずれは Part I 2.7.5 の Stokes 輻射輸送拡張と Thomson 散乱源（四重極）から導く。 "
+  ],
+  "related_outputs": {
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_metrics.json",
+    "figure_png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit.png",
+    "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_peaks.csv"
+  }
+}

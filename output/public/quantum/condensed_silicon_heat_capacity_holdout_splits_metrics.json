@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:22.568406+00:00",
+  "generated_utc": "2026-02-20T12:38:45.212406+00:00",
   "phase": 7,
   "step": "7.20.6",
   "inputs": {
@@ -203,8 +203,8 @@
     }
   ],
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_heat_capacity_holdout_splits.png"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_heat_capacity_holdout_splits.png"
   },
   "notes": [
     "This audit treats JANAF solid-phase Cp° points as the operational reference for holdout.",

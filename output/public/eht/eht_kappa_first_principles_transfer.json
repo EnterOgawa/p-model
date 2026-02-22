@@ -1,0 +1,78 @@
+{
+  "generated_utc": "2026-02-21T14:32:01.497325+00:00",
+  "inputs": {
+    "shadow_compare_json": "output\\public\\eht\\eht_shadow_compare.json",
+    "kappa_budget_json": "output\\public\\eht\\eht_kappa_error_budget.json"
+  },
+  "equations": {
+    "optical_metric": "g_opt_{μν}=g_{μν}(P)+(1-n(P)^{-2})U_μU_ν,  n(P)=(P/P0)^(2β)",
+    "ray_equation": "g_opt^{μν}k_μk_ν=0,  dk_μ/dλ=-(1/2)∂_μg_opt^{αβ}k_αk_β",
+    "transfer_equation": "k^μ∇^{(g(P))}_μĨ_ν = J̃_ν - Ã_ν Ĩ_ν,  Ĩ_ν=I_ν/ν^3",
+    "formal_solution": "Ĩ_obs(b)=∫ J̃_ν(λ,b) exp[-τ_ν(λ,b)] dλ,  τ_ν=∫ Ã_ν dλ",
+    "kappa_definition": "κ=b_peak/b_sh(P),  dI_obs(b)/db|_{b=b_peak}=0",
+    "first_order_closure": "κ≈1 + (Δ_emit-Δ_abs-Δ_scat),  σ_κ^2≈σ_emit^2+σ_abs^2+σ_scat^2"
+  },
+  "boundary_conditions": {
+    "horizon": "r→r_H^+: k^r<0, Ĩ_ν finite, τ_ν finite",
+    "infinity": "r→∞: u→0, P_φ→0, Ĩ_ν→0, τ_ν→0",
+    "axis": "θ=0,π: P_φ=0, ∂_θĨ_ν=0"
+  },
+  "rows": [
+    {
+      "key": "m87",
+      "name": "M87*",
+      "kappa_fit": 1.0114123055156017,
+      "kappa_fp_center": 1.0,
+      "kappa_fp_sigma_1sigma": 0.07592683321217669,
+      "kappa_fp_interval_1sigma": [
+        0.9240731667878233,
+        1.0759268332121767
+      ],
+      "kappa_fp_interval_3sigma": [
+        0.77221950036347,
+        1.22778049963653
+      ],
+      "sigma_components": {
+        "emit_gradient_sigma": 0.07224373610825725,
+        "absorption_sigma": 0.023360791826267012,
+        "scattering_sigma": 0.0
+      },
+      "z_fit_vs_fp_center": 0.15030661800038628,
+      "status": "pass"
+    },
+    {
+      "key": "sgra",
+      "name": "Sgr A*",
+      "kappa_fit": 0.9501526665820448,
+      "kappa_fp_center": 1.0,
+      "kappa_fp_sigma_1sigma": 0.08285467553536911,
+      "kappa_fp_interval_1sigma": [
+        0.9171453244646309,
+        1.0828546755353692
+      ],
+      "kappa_fp_interval_3sigma": [
+        0.7514359733938927,
+        1.2485640266061073
+      ],
+      "sigma_components": {
+        "emit_gradient_sigma": 0.04218824581348848,
+        "absorption_sigma": 0.02221593693615954,
+        "scattering_sigma": 0.06776061776061776
+      },
+      "z_fit_vs_fp_center": -0.6016236633100606,
+      "status": "pass"
+    }
+  ],
+  "overall_status": "pass",
+  "outputs": {
+    "json": "output\\private\\eht\\eht_kappa_first_principles_transfer.json",
+    "csv": "output\\private\\eht\\eht_kappa_first_principles_transfer.csv",
+    "plot_png": "output\\private\\eht\\eht_kappa_first_principles_transfer.png"
+  },
+  "summary": {
+    "n_rows": 2,
+    "max_abs_z_fit_vs_fp": 0.6016236633100606,
+    "all_within_3sigma": true,
+    "scattering_sigma_sgra": 0.06776061776061776
+  }
+}

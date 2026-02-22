@@ -12,7 +12,7 @@ PSA `bc_mpo_more/` の data_raw 等が公開されたタイミングで、
 
 出力：
 - data/bepicolombo/psa_more/fetch_collections_meta.json（キャッシュ/詳細ログ）
-- output/bepicolombo/more_fetch_collections.json（要約）
+- output/private/bepicolombo/more_fetch_collections.json（要約）
 """
 
 from __future__ import annotations

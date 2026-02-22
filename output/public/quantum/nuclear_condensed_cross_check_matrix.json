@@ -1,0 +1,233 @@
+{
+  "generated_utc": "2026-02-20T12:38:37.608703+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.15",
+    "name": "Nuclear-condensed cross-check matrix"
+  },
+  "intent": "Integrate nuclear (B.E./separation/radius) and condensed/thermal holdout gates into one cross-check matrix.",
+  "inputs": {
+    "nuclear_minimal_additional_physics_metrics_json": "output/public/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics_metrics.json",
+    "nuclear_falsification_pack_json": "output/public/quantum/nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+    "nuclear_holdout_audit_summary_json": "output/public/quantum/nuclear_holdout_audit_summary.json",
+    "condensed_holdout_audit_summary_json": "output/public/quantum/condensed_holdout_audit_summary.json"
+  },
+  "thresholds": {
+    "normalized_score_pass_le": 1.0,
+    "normalized_score_watch_le": 1.5,
+    "condensed_reject_ratio_watch_threshold": 0.1,
+    "pair_matrix_definition": "pair_score_max = max(score_i, score_j)"
+  },
+  "axes": [
+    {
+      "axis_id": "nuclear_be_core",
+      "title": "Nuclear B.E. core (ν saturation)",
+      "operator": "<=",
+      "value": 2.206549938963879,
+      "threshold": 3.0,
+      "score": 0.735516646321293,
+      "status": "pass",
+      "details": {
+        "model_id": "local_spacing_d_in_exp + nu_saturation (Step 7.13.18)",
+        "z_median": 1.309966438690748,
+        "z_delta_median": 2.206549938963879,
+        "z_median_threshold": 3.0,
+        "z_delta_threshold": 3.0
+      }
+    },
+    {
+      "axis_id": "nuclear_separation",
+      "title": "Nuclear separation-gap consistency",
+      "operator": "<=",
+      "value": 0.47219784449003954,
+      "threshold": 1.0,
+      "score": 0.47219784449003954,
+      "status": "pass",
+      "details": {
+        "separation_gap_available": true,
+        "ratio_sn_gap_over_total_rms": 0.3728665517312576,
+        "ratio_s2n_gap_over_total_rms": 0.47219784449003954,
+        "gap_sn_rms_median_mev": 4.771956399994943,
+        "gap_s2n_rms_median_mev": 11.063210711845818,
+        "sn_rms_total_mev": 12.798027545882732,
+        "s2n_rms_total_mev": 23.42918512005021
+      }
+    },
+    {
+      "axis_id": "nuclear_radius_kink",
+      "title": "Nuclear charge-radius kink strict",
+      "operator": "<=",
+      "value": 2.0142855285380468,
+      "threshold": 3.0,
+      "score": 0.6714285095126823,
+      "status": "pass",
+      "details": {
+        "radius_strict_pass_A100_pairing": true,
+        "max_abs_resid_sigma_sn": 0.688159611161517,
+        "max_abs_resid_sigma_sp": 2.0142855285380468
+      }
+    },
+    {
+      "axis_id": "condensed_holdout",
+      "title": "Condensed/thermal holdout",
+      "operator": "<=",
+      "value": 0.0,
+      "threshold": 0.1,
+      "score": 0.0,
+      "status": "pass",
+      "details": {
+        "included_datasets_n": 131,
+        "ok_n": 131,
+        "reject_n": 0,
+        "inconclusive_n": 0,
+        "inconclusive_ratio": 0.0,
+        "requirement": "inconclusive_n must be 0 for pass/watch gating"
+      }
+    }
+  ],
+  "matrix": [
+    {
+      "axis_i": "nuclear_be_core",
+      "axis_j": "nuclear_be_core",
+      "score_i": 0.735516646321293,
+      "score_j": 0.735516646321293,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_be_core",
+      "axis_j": "nuclear_separation",
+      "score_i": 0.735516646321293,
+      "score_j": 0.47219784449003954,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_be_core",
+      "axis_j": "nuclear_radius_kink",
+      "score_i": 0.735516646321293,
+      "score_j": 0.6714285095126823,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_be_core",
+      "axis_j": "condensed_holdout",
+      "score_i": 0.735516646321293,
+      "score_j": 0.0,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_separation",
+      "axis_j": "nuclear_be_core",
+      "score_i": 0.47219784449003954,
+      "score_j": 0.735516646321293,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_separation",
+      "axis_j": "nuclear_separation",
+      "score_i": 0.47219784449003954,
+      "score_j": 0.47219784449003954,
+      "pair_score_max": 0.47219784449003954,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_separation",
+      "axis_j": "nuclear_radius_kink",
+      "score_i": 0.47219784449003954,
+      "score_j": 0.6714285095126823,
+      "pair_score_max": 0.6714285095126823,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_separation",
+      "axis_j": "condensed_holdout",
+      "score_i": 0.47219784449003954,
+      "score_j": 0.0,
+      "pair_score_max": 0.47219784449003954,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_radius_kink",
+      "axis_j": "nuclear_be_core",
+      "score_i": 0.6714285095126823,
+      "score_j": 0.735516646321293,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_radius_kink",
+      "axis_j": "nuclear_separation",
+      "score_i": 0.6714285095126823,
+      "score_j": 0.47219784449003954,
+      "pair_score_max": 0.6714285095126823,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_radius_kink",
+      "axis_j": "nuclear_radius_kink",
+      "score_i": 0.6714285095126823,
+      "score_j": 0.6714285095126823,
+      "pair_score_max": 0.6714285095126823,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "nuclear_radius_kink",
+      "axis_j": "condensed_holdout",
+      "score_i": 0.6714285095126823,
+      "score_j": 0.0,
+      "pair_score_max": 0.6714285095126823,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "condensed_holdout",
+      "axis_j": "nuclear_be_core",
+      "score_i": 0.0,
+      "score_j": 0.735516646321293,
+      "pair_score_max": 0.735516646321293,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "condensed_holdout",
+      "axis_j": "nuclear_separation",
+      "score_i": 0.0,
+      "score_j": 0.47219784449003954,
+      "pair_score_max": 0.47219784449003954,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "condensed_holdout",
+      "axis_j": "nuclear_radius_kink",
+      "score_i": 0.0,
+      "score_j": 0.6714285095126823,
+      "pair_score_max": 0.6714285095126823,
+      "pair_status": "pass"
+    },
+    {
+      "axis_i": "condensed_holdout",
+      "axis_j": "condensed_holdout",
+      "score_i": 0.0,
+      "score_j": 0.0,
+      "pair_score_max": 0.0,
+      "pair_status": "pass"
+    }
+  ],
+  "context": {
+    "all_outlier_frac": 0.027855936972425437,
+    "near_magic_outlier_frac": 0.07165354330708662,
+    "deformed_outlier_frac": 0.016877637130801686
+  },
+  "overall": {
+    "status": "pass",
+    "axis_n": 4,
+    "axis_status_counts": {
+      "pass": 4,
+      "watch": 0,
+      "reject": 0
+    },
+    "max_score": 0.735516646321293
+  }
+}

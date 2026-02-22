@@ -1,0 +1,2758 @@
+{
+  "generated_utc": "2026-02-19T08:57:31.348810+00:00",
+  "overall_status": "watch",
+  "decision": "recheck_required",
+  "inputs": {
+    "manifest": "data/llr/llr_edc_batch_manifest.json",
+    "batch_summary": "output/private/llr/batch/llr_batch_summary.json",
+    "batch_metrics": "output/private/llr/batch/llr_batch_metrics.csv",
+    "batch_points": "output/private/llr/batch/llr_batch_points.csv",
+    "coverage_csv": "output/private/llr/batch/llr_data_coverage.csv",
+    "station_metadata": "output/private/llr/batch/llr_station_metadata_used.json",
+    "station_coords_mode": "auto",
+    "modern_start_year": 2023,
+    "modern_goal_ns": 0.5,
+    "dominance_warn_ratio": 0.8,
+    "nglr1_min_points": 100,
+    "operational_correction_min_gain_ns": 0.4
+  },
+  "summary_median_rms_ns_station_reflector_tropo_tide": 4.35417001177271,
+  "manifest_diagnostics": {
+    "n_files_manifest": 4637,
+    "n_files_parsed": 4637,
+    "n_files_missing": 0,
+    "n_rows_parsed": 26220,
+    "range_type_counts": {
+      "2": 26220
+    },
+    "station_counts": {
+      "APOL": 2836,
+      "GRSM": 21740,
+      "MATM": 798,
+      "WETL": 784,
+      "MDOL": 62
+    },
+    "target_counts": {
+      "apollo11": 4039,
+      "luna17": 3833,
+      "apollo14": 3498,
+      "apollo15": 11183,
+      "luna21": 3589,
+      "nglr1": 78
+    },
+    "year_counts": {
+      "2012": 1020,
+      "2013": 1378,
+      "2014": 1344,
+      "2015": 2534,
+      "2016": 1592,
+      "2017": 2608,
+      "2018": 2290,
+      "2019": 2815,
+      "2020": 1998,
+      "2021": 1364,
+      "2022": 767,
+      "2023": 3216,
+      "2024": 2426,
+      "2025": 868
+    }
+  },
+  "metrics_diagnostics": {
+    "exists": true,
+    "n_groups": 17,
+    "median_group_rms_sr_tropo_tide_ns": 4.35417001177271,
+    "point_weighted_rms_sr_tropo_tide_ns": 4.469974449424671,
+    "nglr1_rows": [
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "n": 38,
+        "rms_sr_tropo_tide_ns": 24.196928165677654
+      }
+    ],
+    "nglr1_points_unique_coverage_csv": 40
+  },
+  "points_diagnostics": {
+    "exists": true,
+    "n_points": 13146,
+    "n_inlier": 13079,
+    "modern_start_year": 2023,
+    "per_year_rms": [
+      {
+        "year": 2012,
+        "n": 179,
+        "rms_ns": 5.523754495883924
+      },
+      {
+        "year": 2013,
+        "n": 198,
+        "rms_ns": 4.466954456506918
+      },
+      {
+        "year": 2014,
+        "n": 234,
+        "rms_ns": 6.020560597135239
+      },
+      {
+        "year": 2015,
+        "n": 97,
+        "rms_ns": 4.545457475975354
+      },
+      {
+        "year": 2021,
+        "n": 31,
+        "rms_ns": 5.306382055240033
+      },
+      {
+        "year": 2022,
+        "n": 58,
+        "rms_ns": 6.101079420030422
+      },
+      {
+        "year": 2023,
+        "n": 168,
+        "rms_ns": 5.104484440425692
+      },
+      {
+        "year": 2024,
+        "n": 228,
+        "rms_ns": 5.0026456725396
+      },
+      {
+        "year": 2025,
+        "n": 238,
+        "rms_ns": 10.738140889667307
+      }
+    ],
+    "modern_rms_ns": 7.693520876992633,
+    "modern_n": 634,
+    "apol_modern_rms_ns": 7.693520876992633,
+    "apol_modern_n": 634,
+    "apol_modern_ex_nglr1_rms_ns": 5.063018373232765,
+    "apol_modern_ex_nglr1_n": 596,
+    "np_sigma_coverage_ratio": 0.9999235415551647,
+    "weighted_rms_ns": 2.2186835015263084,
+    "weighted_model_floor_ns_for_chi2eq1": 4.464027327791422,
+    "apol_modern_ex_nglr1_weighted_rms_ns": 4.999386409856197,
+    "apol_modern_ex_nglr1_weighted_model_floor_ns_for_chi2eq1": 5.0623741009006995,
+    "operational_systematic_correction": {
+      "id": "apol_targetwise_tropo_plus_grsm_apollo_month",
+      "n_rows": 13079,
+      "n_apol_corrected_points": 1431,
+      "n_grsm_apollo_month_points": 7673,
+      "grsm_apollo_month_bins": 403,
+      "global_weighted_rms_ns_before": 2.2186835015263084,
+      "global_weighted_rms_ns_after": 2.2152047349024424,
+      "global_weighted_gain_ns": 0.0034787666238660364,
+      "global_model_floor_ns_before": 4.464027327791422,
+      "global_model_floor_ns_after": 3.957315546377078,
+      "modern_apol_ex_nglr1_rms_ns_before": 5.063018373232765,
+      "modern_apol_ex_nglr1_rms_ns_after": 4.850311750589994,
+      "modern_apol_ex_nglr1_rms_gain_ns": 0.21270662264277096,
+      "modern_apol_ex_nglr1_weighted_rms_ns_before": 4.999386409856197,
+      "modern_apol_ex_nglr1_weighted_rms_ns_after": 4.8195820801179,
+      "modern_apol_ex_nglr1_weighted_gain_ns": 0.17980432973829696,
+      "modern_apol_ex_nglr1_model_floor_ns_before": 5.0623741009006995,
+      "modern_apol_ex_nglr1_model_floor_ns_after": 4.84795686194476,
+      "apol_target_tropo_models": [
+        {
+          "target": "nglr1",
+          "n_points": 38,
+          "intercept_ns": 41.98853170717202,
+          "slope_ns_per_ns": -2.0244262756868356,
+          "corr": -0.4383491161471875,
+          "r2": 0.1921499476270203
+        },
+        {
+          "target": "luna21",
+          "n_points": 109,
+          "intercept_ns": 10.590885622129187,
+          "slope_ns_per_ns": -0.5600256914601659,
+          "corr": -0.6659593238352935,
+          "r2": 0.44350182100316193
+        },
+        {
+          "target": "luna17",
+          "n_points": 147,
+          "intercept_ns": 8.55499997343921,
+          "slope_ns_per_ns": -0.44295606419409866,
+          "corr": -0.5735001271799468,
+          "r2": 0.32890239587541525
+        },
+        {
+          "target": "apollo14",
+          "n_points": 251,
+          "intercept_ns": 6.724686655135611,
+          "slope_ns_per_ns": -0.3535099637006213,
+          "corr": -0.3769697039733442,
+          "r2": 0.142106157713751
+        },
+        {
+          "target": "apollo11",
+          "n_points": 249,
+          "intercept_ns": 6.444573780572126,
+          "slope_ns_per_ns": -0.3432765896701786,
+          "corr": -0.3641225186509713,
+          "r2": 0.1325852085887269
+        },
+        {
+          "target": "apollo15",
+          "n_points": 637,
+          "intercept_ns": 4.483824190910231,
+          "slope_ns_per_ns": -0.2353639705583951,
+          "corr": -0.2645325789019358,
+          "r2": 0.06997748530050885
+        }
+      ]
+    },
+    "bias_model_global": {
+      "ok": true,
+      "n_rows": 13078,
+      "weighted_rms_raw_ns": 2.2186835015263084,
+      "weighted_rms_corrected_ns": 2.0192149915605686,
+      "weighted_gain_ns": 0.19946850996573984,
+      "n_parameters": 10,
+      "model_columns": [
+        "intercept",
+        "station:GRSM",
+        "station:MATM",
+        "station:MDOL",
+        "station:WETL",
+        "target:apollo14",
+        "target:apollo15",
+        "target:luna17",
+        "target:luna21",
+        "target:nglr1"
+      ]
+    },
+    "bias_model_modern_apol_target": {
+      "ok": true,
+      "n_rows": 595,
+      "weighted_rms_raw_ns": 4.999386409856197,
+      "weighted_rms_corrected_ns": 4.016926991244619,
+      "weighted_gain_ns": 0.9824594186115787,
+      "n_parameters": 5,
+      "model_columns": [
+        "intercept",
+        "target:apollo14",
+        "target:apollo15",
+        "target:luna17",
+        "target:luna21"
+      ]
+    }
+  },
+  "coverage_diagnostics": {
+    "exists": true,
+    "n_rows": 22,
+    "nglr1_points_unique": 40,
+    "nglr1_rows": [
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "n_unique": 38,
+        "min_points_required": 6,
+        "included_in_metrics": true
+      },
+      {
+        "station": "WETL",
+        "target": "nglr1",
+        "n_unique": 2,
+        "min_points_required": 6,
+        "included_in_metrics": false
+      }
+    ]
+  },
+  "station_meta_diagnostics": {
+    "exists": true,
+    "n_stations": 5,
+    "n_pos_eop": 4,
+    "pos_eop_share": 0.8,
+    "missing_pos_eop": [
+      "APOL"
+    ],
+    "by_station": [
+      {
+        "station": "APOL",
+        "source": "slrlog"
+      },
+      {
+        "station": "GRSM",
+        "source": "pos_eop"
+      },
+      {
+        "station": "MATM",
+        "source": "pos_eop"
+      },
+      {
+        "station": "MDOL",
+        "source": "pos_eop"
+      },
+      {
+        "station": "WETL",
+        "source": "pos_eop"
+      }
+    ]
+  },
+  "root_cause_decomposition": {
+    "ablation_median_ns": {
+      "station_reflector": 7.057968085544082,
+      "station_reflector_tropo": 4.63078261920914,
+      "station_reflector_tropo_tide": 4.35417001177271,
+      "station_reflector_tropo_no_shapiro": 5.681109349368453,
+      "station_reflector_tropo_earth_shapiro": 4.629765187401678,
+      "station_reflector_tropo_tide_no_ocean": 4.3595529438764
+    },
+    "ablation_weighted_ns": {
+      "station_reflector": 8.98237486216411,
+      "station_reflector_tropo": 4.670221288193064,
+      "station_reflector_tropo_tide": 4.469974449424671,
+      "station_reflector_tropo_no_shapiro": 5.689274327681047,
+      "station_reflector_tropo_earth_shapiro": 4.66952577310188,
+      "station_reflector_tropo_tide_no_ocean": 4.473464898615992
+    },
+    "incremental_gain_median_ns": {
+      "tropo_from_sr": 2.427185466334942,
+      "tide_from_tropo": 0.2766126074364301,
+      "shapiro_from_tropo_no_shapiro": 1.0503267301593127,
+      "earth_shapiro_from_tropo": 0.0010174318074618327,
+      "ocean_loading_from_tide_no_ocean": 0.00538293210369023
+    },
+    "incremental_gain_weighted_ns": {
+      "tropo_from_sr": 4.312153573971047,
+      "tide_from_tropo": 0.20024683876839244,
+      "shapiro_from_tropo_no_shapiro": 1.019053039487983,
+      "earth_shapiro_from_tropo": 0.0006955150911833741,
+      "ocean_loading_from_tide_no_ocean": 0.003490449191320799
+    },
+    "total_gain_median_ns": 2.703798073771372,
+    "total_gain_weighted_ns": 4.5124004127394395,
+    "gain_share_median": {
+      "tropo_from_sr": 0.8976947982470455,
+      "tide_from_tropo": 0.10230520175295456
+    },
+    "gain_share_weighted": {
+      "tropo_from_sr": 0.9556229898829337,
+      "tide_from_tropo": 0.044377010117066344
+    },
+    "station_breakdown": [
+      {
+        "station": "GRSM",
+        "n_groups": 5,
+        "n_points": 10887,
+        "weighted_rms_ns": 4.185571142228706,
+        "median_group_rms_ns": 4.294917440730688,
+        "sse_share": 0.7293471853389049,
+        "sse_excess_share_over4ns": 0.4007224878690839
+      },
+      {
+        "station": "APOL",
+        "n_groups": 6,
+        "n_points": 1431,
+        "weighted_rms_ns": 6.499845715551322,
+        "median_group_rms_ns": 5.278969202176865,
+        "sse_share": 0.2311864425534702,
+        "sse_excess_share_over4ns": 0.5478253939238246
+      },
+      {
+        "station": "MATM",
+        "n_groups": 2,
+        "n_points": 345,
+        "weighted_rms_ns": 3.522620635869545,
+        "median_group_rms_ns": 2.5630228938198596,
+        "sse_share": 0.016370708565640327,
+        "sse_excess_share_over4ns": 0.0
+      },
+      {
+        "station": "MDOL",
+        "n_groups": 1,
+        "n_points": 31,
+        "weighted_rms_ns": 11.392898651182891,
+        "median_group_rms_ns": 11.392898651182891,
+        "sse_share": 0.015386746336471541,
+        "sse_excess_share_over4ns": 0.051452118207091564
+      },
+      {
+        "station": "WETL",
+        "n_groups": 3,
+        "n_points": 394,
+        "weighted_rms_ns": 2.261987827995877,
+        "median_group_rms_ns": 2.104664998613157,
+        "sse_share": 0.007708917205512975,
+        "sse_excess_share_over4ns": 0.0
+      }
+    ],
+    "target_breakdown": [
+      {
+        "target": "apollo15",
+        "n_groups": 5,
+        "n_points": 5610,
+        "weighted_rms_ns": 4.5651534865539265,
+        "median_group_rms_ns": 4.496386275455791,
+        "sse_share": 0.4470851664145114,
+        "sse_excess_share_over4ns": 0.4324188077491126
+      },
+      {
+        "target": "apollo11",
+        "n_groups": 3,
+        "n_points": 2026,
+        "weighted_rms_ns": 4.383255769509842,
+        "median_group_rms_ns": 4.294917440730688,
+        "sse_share": 0.14885029495451815,
+        "sse_excess_share_over4ns": 0.10636045789037177
+      },
+      {
+        "target": "apollo14",
+        "n_groups": 2,
+        "n_points": 1733,
+        "weighted_rms_ns": 4.530646846100841,
+        "median_group_rms_ns": 4.905849473631678,
+        "sse_share": 0.13603028796033517,
+        "sse_excess_share_over4ns": 0.11441751620351674
+      },
+      {
+        "target": "luna17",
+        "n_groups": 3,
+        "n_points": 1907,
+        "weighted_rms_ns": 3.6310264564869814,
+        "median_group_rms_ns": 3.499731221722897,
+        "sse_share": 0.09614487783032094,
+        "sse_excess_share_over4ns": 0.018441485416637645
+      },
+      {
+        "target": "luna21",
+        "n_groups": 3,
+        "n_points": 1774,
+        "weighted_rms_ns": 3.5772682568361502,
+        "median_group_rms_ns": 3.6011570199011707,
+        "sse_share": 0.08681070144376161,
+        "sse_excess_share_over4ns": 0.012732573989301343
+      },
+      {
+        "target": "nglr1",
+        "n_groups": 1,
+        "n_points": 38,
+        "weighted_rms_ns": 24.196928165677654,
+        "median_group_rms_ns": 24.196928165677654,
+        "sse_share": 0.08507867139655273,
+        "sse_excess_share_over4ns": 0.31562915875105996
+      }
+    ],
+    "top_group_sse_contributors": [
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "n_points": 4476,
+        "rms_ns": 4.496386275455791,
+        "sse_share": 0.34604608260140324
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "n_points": 1722,
+        "rms_ns": 4.294917440730688,
+        "sse_share": 0.12146731157816784
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo14",
+        "n_points": 1482,
+        "rms_ns": 4.35417001177271,
+        "sse_share": 0.10744237522472747
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "n_points": 38,
+        "rms_ns": 24.196928165677654,
+        "sse_share": 0.08507867139655273
+      },
+      {
+        "station": "GRSM",
+        "target": "luna17",
+        "n_points": 1687,
+        "rms_ns": 3.499731221722897,
+        "sse_share": 0.0790134634210779
+      },
+      {
+        "station": "GRSM",
+        "target": "luna21",
+        "n_points": 1520,
+        "rms_ns": 3.6011570199011707,
+        "sse_share": 0.07537795251352847
+      },
+      {
+        "station": "APOL",
+        "target": "apollo15",
+        "n_points": 637,
+        "rms_ns": 5.231675599224521,
+        "sse_share": 0.06667110886071906
+      },
+      {
+        "station": "APOL",
+        "target": "apollo14",
+        "n_points": 251,
+        "rms_ns": 5.457528935490647,
+        "sse_share": 0.02858791273560772
+      }
+    ],
+    "bottleneck_scenarios": {
+      "current_group_weighted_rms_ns": 4.469974449424671,
+      "exclude_nglr1_group_weighted_rms_ns": 4.281818990580428,
+      "exclude_nglr1_gain_ns": 0.18815545884424356,
+      "apol_cap_to_grsm_median_rms_ns": 4.168725499018368,
+      "apol_cap_to_grsm_median_gain_ns": 0.3012489504063032,
+      "grsm_median_reference_ns": 4.294917440730688,
+      "bias_corrected_global_est_rms_ns": 4.270505939458932,
+      "bias_corrected_global_est_gain_ns": 0.19946850996573984
+    },
+    "bottleneck_ranking": [
+      {
+        "id": "apol_profile_gap_cap_to_grsm_median",
+        "estimated_gain_ns": 0.3012489504063032,
+        "note": "APOL群をGRSM中央値レベルに抑えた場合の上限改善見積。"
+      },
+      {
+        "id": "global_station_target_bias_correction",
+        "estimated_gain_ns": 0.19946850996573984,
+        "note": "station+targetバイアス補正での改善見積。"
+      },
+      {
+        "id": "nglr1_group_exclusion_proxy",
+        "estimated_gain_ns": 0.18815545884424356,
+        "note": "nglr1群の高残差寄与を除いた場合の改善見積。"
+      }
+    ],
+    "excess_over_4ns": {
+      "threshold_ns": 4.0,
+      "current_group_weighted_rms_ns": 4.469974449424671,
+      "current_group_weighted_excess_ns": 0.46997444942467137,
+      "ablation_median_excess_ns": {
+        "station_reflector": 3.057968085544082,
+        "station_reflector_tropo": 0.6307826192091399,
+        "station_reflector_tropo_tide": 0.3541700117727098,
+        "station_reflector_tropo_no_shapiro": 1.6811093493684526
+      },
+      "ablation_weighted_excess_ns": {
+        "station_reflector": 4.982374862164111,
+        "station_reflector_tropo": 0.6702212881930638,
+        "station_reflector_tropo_tide": 0.46997444942467137,
+        "station_reflector_tropo_no_shapiro": 1.689274327681047
+      },
+      "station_excess_share": [
+        {
+          "station": "APOL",
+          "n_points": 1431,
+          "weighted_rms_ns": 6.499845715551322,
+          "excess_share_over4ns": 0.5478253939238246
+        },
+        {
+          "station": "GRSM",
+          "n_points": 10887,
+          "weighted_rms_ns": 4.185571142228706,
+          "excess_share_over4ns": 0.4007224878690839
+        },
+        {
+          "station": "MDOL",
+          "n_points": 31,
+          "weighted_rms_ns": 11.392898651182891,
+          "excess_share_over4ns": 0.051452118207091564
+        },
+        {
+          "station": "MATM",
+          "n_points": 345,
+          "weighted_rms_ns": 3.522620635869545,
+          "excess_share_over4ns": 0.0
+        },
+        {
+          "station": "WETL",
+          "n_points": 394,
+          "weighted_rms_ns": 2.261987827995877,
+          "excess_share_over4ns": 0.0
+        }
+      ],
+      "target_excess_share": [
+        {
+          "target": "apollo15",
+          "n_points": 5610,
+          "weighted_rms_ns": 4.5651534865539265,
+          "excess_share_over4ns": 0.4324188077491126
+        },
+        {
+          "target": "nglr1",
+          "n_points": 38,
+          "weighted_rms_ns": 24.196928165677654,
+          "excess_share_over4ns": 0.31562915875105996
+        },
+        {
+          "target": "apollo14",
+          "n_points": 1733,
+          "weighted_rms_ns": 4.530646846100841,
+          "excess_share_over4ns": 0.11441751620351674
+        },
+        {
+          "target": "apollo11",
+          "n_points": 2026,
+          "weighted_rms_ns": 4.383255769509842,
+          "excess_share_over4ns": 0.10636045789037177
+        },
+        {
+          "target": "luna17",
+          "n_points": 1907,
+          "weighted_rms_ns": 3.6310264564869814,
+          "excess_share_over4ns": 0.018441485416637645
+        },
+        {
+          "target": "luna21",
+          "n_points": 1774,
+          "weighted_rms_ns": 3.5772682568361502,
+          "excess_share_over4ns": 0.012732573989301343
+        }
+      ],
+      "top_group_excess_contributors": [
+        {
+          "station": "APOL",
+          "target": "nglr1",
+          "n_points": 38,
+          "rms_ns": 24.196928165677654,
+          "excess_share_over4ns": 0.31562915875105996
+        },
+        {
+          "station": "GRSM",
+          "target": "apollo15",
+          "n_points": 4476,
+          "rms_ns": 4.496386275455791,
+          "excess_share_over4ns": 0.2753280724044234
+        },
+        {
+          "station": "APOL",
+          "target": "apollo15",
+          "n_points": 637,
+          "rms_ns": 5.231675599224521,
+          "excess_share_over4ns": 0.10563861713759756
+        },
+        {
+          "station": "GRSM",
+          "target": "apollo14",
+          "n_points": 1482,
+          "rms_ns": 4.35417001177271,
+          "excess_share_over4ns": 0.0639542928297254
+        },
+        {
+          "station": "GRSM",
+          "target": "apollo11",
+          "n_points": 1722,
+          "rms_ns": 4.294917440730688,
+          "excess_share_over4ns": 0.061440122634935077
+        },
+        {
+          "station": "MDOL",
+          "target": "apollo15",
+          "n_points": 31,
+          "rms_ns": 11.392898651182891,
+          "excess_share_over4ns": 0.051452118207091564
+        },
+        {
+          "station": "APOL",
+          "target": "apollo14",
+          "n_points": 251,
+          "rms_ns": 5.457528935490647,
+          "excess_share_over4ns": 0.05046322337379134
+        },
+        {
+          "station": "APOL",
+          "target": "apollo11",
+          "n_points": 249,
+          "rms_ns": 5.3262628051292085,
+          "excess_share_over4ns": 0.0449203352554367
+        }
+      ]
+    },
+    "likely_root_causes": [
+      {
+        "id": "tropo_model_mismatch",
+        "priority": 1,
+        "evidence": {
+          "gain_share_median": 0.8976947982470455,
+          "gain_ns_median": 2.427185466334942
+        },
+        "note": "残差改善の大半を対流圏補正が占めるため、主因候補は対流圏モデル差。"
+      },
+      {
+        "id": "coord_if_incomplete",
+        "priority": 2,
+        "evidence": {
+          "stations_without_pos_eop": [
+            "APOL"
+          ]
+        },
+        "note": "全局で pos+eop 統一になっておらず、局座標I/F差が残差に寄与しうる。"
+      },
+      {
+        "id": "station_imbalance",
+        "priority": 2,
+        "evidence": {
+          "dominant_station": "GRSM",
+          "dominant_ratio": 0.8291380625476735
+        },
+        "note": "局偏在が強く、残差評価が特定局の系統へ引き寄せられる。"
+      },
+      {
+        "id": "nglr1_sparse_high_residual",
+        "priority": 3,
+        "evidence": {
+          "nglr1_n_points": 38,
+          "nglr1_weighted_rms_ns": 24.196928165677654,
+          "nglr1_sse_share": 0.08507867139655273
+        },
+        "note": "nglr1 は点数が少ない一方で残差が高く、外れ群として全体評価を押し上げる。"
+      },
+      {
+        "id": "station_target_bias",
+        "priority": 3,
+        "evidence": {
+          "global_bias_weighted_gain_ns": 0.19946850996573984,
+          "modern_apol_target_bias_weighted_gain_ns": 0.9824594186115787
+        },
+        "note": "局/ターゲット依存バイアス補正で weighted RMS が改善しており、運用系統が残っている。"
+      }
+    ]
+  },
+  "bottleneck_deepdive": {
+    "exists": true,
+    "n_rows": 13146,
+    "n_inlier": 13079,
+    "current_rms_ns": 4.470122829598947,
+    "scenario_rms": [
+      {
+        "id": "current",
+        "n_points": 13079,
+        "rms_ns": 4.470122829598947,
+        "gain_ns_vs_current": 0.0
+      },
+      {
+        "id": "exclude_nglr1",
+        "n_points": 13041,
+        "rms_ns": 4.281841639915236,
+        "gain_ns_vs_current": 0.18828118968371044
+      },
+      {
+        "id": "exclude_apol",
+        "n_points": 11648,
+        "rms_ns": 4.15289512230296,
+        "gain_ns_vs_current": 0.31722770729598704
+      },
+      {
+        "id": "exclude_grsm_apollo15",
+        "n_points": 8608,
+        "rms_ns": 4.456420506809446,
+        "gain_ns_vs_current": 0.013702322789501231
+      },
+      {
+        "id": "exclude_apol_nglr1_and_grsm_apollo15",
+        "n_points": 8570,
+        "rms_ns": 4.165529027788821,
+        "gain_ns_vs_current": 0.3045938018101255
+      }
+    ],
+    "proxy_corrections": [
+      {
+        "id": "remove_station_target_month_mean",
+        "rms_ns": 3.5772403030168443,
+        "gain_ns_vs_current": 0.8928825265821025,
+        "note": "局×反射器×月の平均オフセットを除去した上限プロキシ。"
+      },
+      {
+        "id": "remove_station_month_mean",
+        "rms_ns": 3.793752610189255,
+        "gain_ns_vs_current": 0.6763702194096917,
+        "note": "局×月の平均オフセットを除去した上限プロキシ。"
+      },
+      {
+        "id": "apol_targetwise_tropo_regression",
+        "rms_ns": 4.385125794832305,
+        "gain_ns_vs_current": 0.08499703476664155,
+        "note": "APOLのみで target別に residual~(1,dt_tropo) を回帰補正した診断プロキシ。"
+      },
+      {
+        "id": "grsm_apollo_monthly_mean_offset",
+        "rms_ns": 4.057285238302573,
+        "gain_ns_vs_current": 0.4128375912963742,
+        "note": "GRSM Apollo(11/14/15) の月別平均オフセット除去プロキシ。"
+      },
+      {
+        "id": "combined_apol_tropo_plus_grsm_apollo_month",
+        "rms_ns": 3.9634446671739876,
+        "gain_ns_vs_current": 0.5066781624249592,
+        "note": "APOL target別tropo回帰と GRSM Apollo月別オフセット除去を同時適用した診断プロキシ。"
+      }
+    ],
+    "top_station_target_sse_contributors": [
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "n_points": 4471,
+        "rms_ns": 4.496386275455791,
+        "mean_ns": 1.2405891816209532e-07,
+        "p95_abs_ns": 8.443671983826562,
+        "sse_share": 0.3458744197362164
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "n_points": 1720,
+        "rms_ns": 4.294917440730688,
+        "mean_ns": -1.8099217215400809e-07,
+        "p95_abs_ns": 8.404396534267278,
+        "sse_share": 0.1214016623421003
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo14",
+        "n_points": 1482,
+        "rms_ns": 4.35417001177271,
+        "mean_ns": 1.4083800852194968e-07,
+        "p95_abs_ns": 8.402538820284633,
+        "sse_share": 0.10750917149482754
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "n_points": 38,
+        "rms_ns": 24.196928165677658,
+        "mean_ns": -4.674623242881113e-08,
+        "p95_abs_ns": 36.741126341333086,
+        "sse_share": 0.08513156428823046
+      },
+      {
+        "station": "GRSM",
+        "target": "luna17",
+        "n_points": 1685,
+        "rms_ns": 3.499731221722897,
+        "mean_ns": 2.0056491910735766e-07,
+        "p95_abs_ns": 6.758575832321866,
+        "sse_share": 0.07896885403242211
+      },
+      {
+        "station": "GRSM",
+        "target": "luna21",
+        "n_points": 1520,
+        "rms_ns": 3.601157019901171,
+        "mean_ns": 3.944213376957793e-08,
+        "p95_abs_ns": 7.3586146065451885,
+        "sse_share": 0.07542481452737686
+      },
+      {
+        "station": "APOL",
+        "target": "apollo15",
+        "n_points": 637,
+        "rms_ns": 5.231675599224521,
+        "mean_ns": 1.8335237392553606e-07,
+        "p95_abs_ns": 9.258553568258773,
+        "sse_share": 0.06671255788291366
+      },
+      {
+        "station": "APOL",
+        "target": "apollo14",
+        "n_points": 251,
+        "rms_ns": 5.457528935490647,
+        "mean_ns": -1.7692797205181778e-07,
+        "p95_abs_ns": 9.416000867901175,
+        "sse_share": 0.028605685666787714
+      },
+      {
+        "station": "APOL",
+        "target": "apollo11",
+        "n_points": 249,
+        "rms_ns": 5.3262628051292085,
+        "mean_ns": 1.4446275501146615e-07,
+        "p95_abs_ns": 9.214803409207661,
+        "sse_share": 0.027029068341317415
+      },
+      {
+        "station": "MATM",
+        "target": "apollo15",
+        "n_points": 290,
+        "rms_ns": 3.79841732774353,
+        "mean_ns": 4.2877578869824274e-08,
+        "p95_abs_ns": 5.024808680254018,
+        "sse_share": 0.016009947266448325
+      },
+      {
+        "station": "MDOL",
+        "target": "apollo15",
+        "n_points": 31,
+        "rms_ns": 11.392898651182891,
+        "mean_ns": -2.1488187573390127e-07,
+        "p95_abs_ns": 23.98114373747262,
+        "sse_share": 0.015396312182927396
+      },
+      {
+        "station": "APOL",
+        "target": "luna17",
+        "n_points": 147,
+        "rms_ns": 4.9599858636271374,
+        "mean_ns": 1.6011379677283016e-07,
+        "p95_abs_ns": 8.917106208983226,
+        "sse_share": 0.013837727016307559
+      },
+      {
+        "station": "APOL",
+        "target": "luna21",
+        "n_points": 109,
+        "rms_ns": 4.899907394552819,
+        "mean_ns": -1.548200915114355e-07,
+        "p95_abs_ns": 9.933614819601642,
+        "sse_share": 0.010013566560778883
+      },
+      {
+        "station": "WETL",
+        "target": "luna17",
+        "n_points": 73,
+        "rms_ns": 3.43943828947216,
+        "mean_ns": -8.516779366987502e-08,
+        "p95_abs_ns": 4.879689186054747,
+        "sse_share": 0.003304337888903032
+      },
+      {
+        "station": "WETL",
+        "target": "apollo15",
+        "n_points": 176,
+        "rms_ns": 2.104664998613157,
+        "mean_ns": -7.569702440626068e-08,
+        "p95_abs_ns": 3.5715089774512876,
+        "sse_share": 0.0029830818636593292
+      },
+      {
+        "station": "WETL",
+        "target": "luna21",
+        "n_points": 145,
+        "rms_ns": 1.603343776106588,
+        "mean_ns": -7.656710514656252e-08,
+        "p95_abs_ns": 2.710845858899802,
+        "sse_share": 0.0014262900398118179
+      },
+      {
+        "station": "MATM",
+        "target": "apollo11",
+        "n_points": 55,
+        "rms_ns": 1.3276284598961894,
+        "mean_ns": 1.211152390459799e-07,
+        "p95_abs_ns": 2.0682966450635814,
+        "sse_share": 0.0003709388689710836
+      }
+    ],
+    "top_station_target_monthly_sse_contributors": [
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "year_month": "2025-03",
+        "n_points": 9,
+        "rms_ns": 25.096095828747956,
+        "mean_ns": -25.01309973960512,
+        "sse_share": 0.021689092659377792
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "year_month": "2025-11",
+        "n_points": 7,
+        "rms_ns": 27.386369578448136,
+        "mean_ns": 20.177951944231967,
+        "sse_share": 0.02008877783929027
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "year_month": "2025-12",
+        "n_points": 7,
+        "rms_ns": 22.687638595561243,
+        "mean_ns": 13.556350835537094,
+        "sse_share": 0.013786790540543391
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-09",
+        "n_points": 109,
+        "rms_ns": 5.614232693663746,
+        "mean_ns": -2.5176477783284748,
+        "sse_share": 0.01314600709709522
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-07",
+        "n_points": 23,
+        "rms_ns": 11.932401463235847,
+        "mean_ns": -0.028408309521202137,
+        "sse_share": 0.012530548910426582
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "year_month": "2025-08",
+        "n_points": 1,
+        "rms_ns": 56.76686809508169,
+        "mean_ns": 56.76686809508169,
+        "sse_share": 0.012330378699681406
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-12",
+        "n_points": 75,
+        "rms_ns": 6.5338531487285385,
+        "mean_ns": -2.2885012581260376,
+        "sse_share": 0.01225142338809224
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-02",
+        "n_points": 51,
+        "rms_ns": 7.156228187188724,
+        "mean_ns": -4.998981437948407,
+        "sse_share": 0.009993671810696918
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-09",
+        "n_points": 91,
+        "rms_ns": 5.3217821262288085,
+        "mean_ns": -1.9745337428592589,
+        "sse_share": 0.009861480495160366
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-03",
+        "n_points": 60,
+        "rms_ns": 6.401571829595657,
+        "mean_ns": -3.3321445232677624,
+        "sse_share": 0.009408297522535893
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-11",
+        "n_points": 65,
+        "rms_ns": 6.0965106616950795,
+        "mean_ns": -3.813270157757223,
+        "sse_share": 0.009244056229976452
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-01",
+        "n_points": 82,
+        "rms_ns": 5.227050478674207,
+        "mean_ns": -3.504500689643919,
+        "sse_share": 0.008572624229688195
+      },
+      {
+        "station": "APOL",
+        "target": "apollo15",
+        "year_month": "2014-04",
+        "n_points": 33,
+        "rms_ns": 7.9736302292392285,
+        "mean_ns": -5.293996850324999,
+        "sse_share": 0.008028098085690568
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo14",
+        "year_month": "2019-02",
+        "n_points": 39,
+        "rms_ns": 7.212589774235593,
+        "mean_ns": -5.096704414634191,
+        "sse_share": 0.007763072056271671
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "year_month": "2019-02",
+        "n_points": 39,
+        "rms_ns": 6.906750748333427,
+        "mean_ns": -4.702552808693711,
+        "sse_share": 0.007118667699678417
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "year_month": "2018-08",
+        "n_points": 67,
+        "rms_ns": 5.197229745956421,
+        "mean_ns": -3.6980461479111035,
+        "sse_share": 0.006924767240368697
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-08",
+        "n_points": 69,
+        "rms_ns": 5.11587685645357,
+        "mean_ns": -3.2671048925817723,
+        "sse_share": 0.006909964267072601
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "year_month": "2019-03",
+        "n_points": 38,
+        "rms_ns": 6.770354871812679,
+        "mean_ns": -2.7039305297717564,
+        "sse_share": 0.006664890358022677
+      },
+      {
+        "station": "GRSM",
+        "target": "luna21",
+        "year_month": "2018-08",
+        "n_points": 61,
+        "rms_ns": 5.306179061540089,
+        "mean_ns": -3.3281380201846087,
+        "sse_share": 0.006571737151261115
+      },
+      {
+        "station": "GRSM",
+        "target": "luna17",
+        "year_month": "2018-08",
+        "n_points": 60,
+        "rms_ns": 5.302187625454149,
+        "mean_ns": -3.4087382176177052,
+        "sse_share": 0.006454282653351661
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo14",
+        "year_month": "2023-09",
+        "n_points": 44,
+        "rms_ns": 6.186828346887395,
+        "mean_ns": -3.6926330478208187,
+        "sse_share": 0.006444294164329101
+      },
+      {
+        "station": "APOL",
+        "target": "nglr1",
+        "year_month": "2025-04",
+        "n_points": 6,
+        "rms_ns": 16.48816535741968,
+        "mean_ns": -6.099482104578631,
+        "sse_share": 0.00624140645177661
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "year_month": "2023-09",
+        "n_points": 49,
+        "rms_ns": 5.73636263815117,
+        "mean_ns": -3.0459161814082227,
+        "sse_share": 0.006169583177168427
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-03",
+        "n_points": 35,
+        "rms_ns": 6.784848956311905,
+        "mean_ns": -2.4167703394084583,
+        "sse_share": 0.0061650266563281425
+      },
+      {
+        "station": "MDOL",
+        "target": "apollo15",
+        "year_month": "2015-03",
+        "n_points": 2,
+        "rms_ns": 28.035557860178127,
+        "mean_ns": 28.031877263856586,
+        "sse_share": 0.006014990514229585
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo14",
+        "year_month": "2018-08",
+        "n_points": 64,
+        "rms_ns": 4.921000434226235,
+        "mean_ns": -3.0972054851363673,
+        "sse_share": 0.005930254439691179
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-07",
+        "n_points": 54,
+        "rms_ns": 5.3415679670010885,
+        "mean_ns": -0.3667291902252777,
+        "sse_share": 0.005895461723676965
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-04",
+        "n_points": 57,
+        "rms_ns": 5.137882618020926,
+        "mean_ns": -0.19625597833021602,
+        "sse_share": 0.0057574444746886
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-09",
+        "n_points": 62,
+        "rms_ns": 4.850868738084033,
+        "mean_ns": 4.724579809815608,
+        "sse_share": 0.005582352826708221
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo11",
+        "year_month": "2024-11",
+        "n_points": 29,
+        "rms_ns": 6.989456182088898,
+        "mean_ns": -3.5829630297173325,
+        "sse_share": 0.005420899023966413
+      }
+    ],
+    "grsm_apollo15_monthly_trend": [
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-05",
+        "n_points": 6,
+        "rms_ns": 1.2934810696139285,
+        "mean_ns": -1.2865019420142214,
+        "sse_share": 3.8411206730071066e-05
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-06",
+        "n_points": 12,
+        "rms_ns": 2.566094666153305,
+        "mean_ns": 1.7039432827677576,
+        "sse_share": 0.00030235220527564916
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-08",
+        "n_points": 26,
+        "rms_ns": 5.247377881352562,
+        "mean_ns": 0.5179655678725444,
+        "sse_share": 0.002739331397285864
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-09",
+        "n_points": 62,
+        "rms_ns": 4.850868738084033,
+        "mean_ns": 4.724579809815608,
+        "sse_share": 0.005582352826708221
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-10",
+        "n_points": 32,
+        "rms_ns": 4.697448461254436,
+        "mean_ns": 4.513152934704223,
+        "sse_share": 0.0027018458833462607
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-11",
+        "n_points": 23,
+        "rms_ns": 3.9147709898134653,
+        "mean_ns": 3.3875500472368496,
+        "sse_share": 0.0013487364833395334
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2012-12",
+        "n_points": 28,
+        "rms_ns": 2.830541168975841,
+        "mean_ns": 2.3196306462937497,
+        "sse_share": 0.0008583877866374886
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-01",
+        "n_points": 16,
+        "rms_ns": 4.125749659842894,
+        "mean_ns": 3.743213794482614,
+        "sse_share": 0.0010421069069512898
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-02",
+        "n_points": 23,
+        "rms_ns": 4.308273753956144,
+        "mean_ns": 3.7778041371500817,
+        "sse_share": 0.0016335068690058535
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-03",
+        "n_points": 31,
+        "rms_ns": 6.186527388935123,
+        "mean_ns": 6.013905875082885,
+        "sse_share": 0.004539856446826514
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-04",
+        "n_points": 6,
+        "rms_ns": 3.674970474854133,
+        "mean_ns": 3.67426015538778,
+        "sse_share": 0.00031005983068017537
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-05",
+        "n_points": 19,
+        "rms_ns": 2.6010262402467825,
+        "mean_ns": 1.7791607485518948,
+        "sse_share": 0.0004918465333294731
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-06",
+        "n_points": 13,
+        "rms_ns": 3.1165471559921074,
+        "mean_ns": 3.0843811265740966,
+        "sse_share": 0.0004831447936679415
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-07",
+        "n_points": 47,
+        "rms_ns": 2.959791970136308,
+        "mean_ns": 2.3533604757602085,
+        "sse_share": 0.001575457818428069
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-08",
+        "n_points": 65,
+        "rms_ns": 3.6181434260227303,
+        "mean_ns": 2.9113608344634767,
+        "sse_share": 0.0032559030198968148
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-09",
+        "n_points": 6,
+        "rms_ns": 3.6225069144610704,
+        "mean_ns": 3.620157729145035,
+        "sse_share": 0.00030127024679424186
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-10",
+        "n_points": 9,
+        "rms_ns": 6.081140843184746,
+        "mean_ns": 6.076642349799815,
+        "sse_share": 0.0012735006771158706
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-11",
+        "n_points": 26,
+        "rms_ns": 4.161416594427514,
+        "mean_ns": 3.3169613893153818,
+        "sse_share": 0.0017228294379637169
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2013-12",
+        "n_points": 52,
+        "rms_ns": 3.2242033694855277,
+        "mean_ns": 1.4864858318611813,
+        "sse_share": 0.0020684010295752378
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-01",
+        "n_points": 10,
+        "rms_ns": 5.220967185531919,
+        "mean_ns": 4.550568588612691,
+        "sse_share": 0.0010430100037632489
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-02",
+        "n_points": 6,
+        "rms_ns": 5.539023200488303,
+        "mean_ns": 5.497770979208856,
+        "sse_share": 0.0007043753763633943
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-03",
+        "n_points": 27,
+        "rms_ns": 5.072666698191429,
+        "mean_ns": 4.831806329527218,
+        "sse_share": 0.0026584161477818564
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-04",
+        "n_points": 16,
+        "rms_ns": 1.35175626614893,
+        "mean_ns": 0.6116473161288383,
+        "sse_share": 0.00011186734018243161
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-05",
+        "n_points": 4,
+        "rms_ns": 5.37162581871409,
+        "mean_ns": 5.249993439981893,
+        "sse_share": 0.00044162946687208426
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-06",
+        "n_points": 15,
+        "rms_ns": 3.2224074002108245,
+        "mean_ns": 3.0093005124835295,
+        "sse_share": 0.000595989622991872
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-07",
+        "n_points": 9,
+        "rms_ns": 1.913335518120349,
+        "mean_ns": 0.26339562629750113,
+        "sse_share": 0.00012606987529568047
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-08",
+        "n_points": 22,
+        "rms_ns": 3.5150559848164113,
+        "mean_ns": 2.974005647809525,
+        "sse_share": 0.0010400967046960688
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-09",
+        "n_points": 42,
+        "rms_ns": 2.0817028469161554,
+        "mean_ns": -0.33058018756278107,
+        "sse_share": 0.0006964233266001593
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-10",
+        "n_points": 12,
+        "rms_ns": 4.017570817164368,
+        "mean_ns": 0.006532700306631038,
+        "sse_share": 0.0007411308206092447
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-11",
+        "n_points": 47,
+        "rms_ns": 4.4715217491206545,
+        "mean_ns": 3.550468552729631,
+        "sse_share": 0.0035957964514953585
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2014-12",
+        "n_points": 53,
+        "rms_ns": 3.2592084374415196,
+        "mean_ns": 2.081355976457644,
+        "sse_share": 0.002154203306460193
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-01",
+        "n_points": 28,
+        "rms_ns": 4.296682907530036,
+        "mean_ns": 2.317462729653893,
+        "sse_share": 0.0019779312240760343
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-02",
+        "n_points": 21,
+        "rms_ns": 4.664417315184917,
+        "mean_ns": 3.198317251252276,
+        "sse_share": 0.0017482383348717105
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-03",
+        "n_points": 36,
+        "rms_ns": 3.9488269154586546,
+        "mean_ns": 3.741958163081291,
+        "sse_share": 0.0021479553225902137
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-04",
+        "n_points": 88,
+        "rms_ns": 3.4397178995369773,
+        "mean_ns": 0.064418273745562,
+        "sse_share": 0.003983959102801122
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-05",
+        "n_points": 43,
+        "rms_ns": 2.5094917447582525,
+        "mean_ns": 1.000196907209239,
+        "sse_share": 0.0010361593372008075
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-06",
+        "n_points": 30,
+        "rms_ns": 2.5211446987235115,
+        "mean_ns": 2.0566593465313567,
+        "sse_share": 0.0007296311147376804
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-07",
+        "n_points": 59,
+        "rms_ns": 2.0437388671490995,
+        "mean_ns": 1.1881261323187033,
+        "sse_share": 0.0009429515241627911
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-08",
+        "n_points": 70,
+        "rms_ns": 3.256258053203743,
+        "mean_ns": -0.01590997175274619,
+        "sse_share": 0.0028400253468202964
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-09",
+        "n_points": 91,
+        "rms_ns": 5.3217821262288085,
+        "mean_ns": -1.9745337428592589,
+        "sse_share": 0.009861480495160366
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-10",
+        "n_points": 19,
+        "rms_ns": 1.7342483036456757,
+        "mean_ns": -0.16159022657958352,
+        "sse_share": 0.00021865665717172572
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-11",
+        "n_points": 41,
+        "rms_ns": 5.167241530724314,
+        "mean_ns": -1.4454627413706143,
+        "sse_share": 0.0041887836294087636
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2015-12",
+        "n_points": 61,
+        "rms_ns": 4.374420267742169,
+        "mean_ns": 1.3182083475784134,
+        "sse_share": 0.00446639770623328
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-01",
+        "n_points": 82,
+        "rms_ns": 5.227050478674207,
+        "mean_ns": -3.504500689643919,
+        "sse_share": 0.008572624229688195
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-02",
+        "n_points": 25,
+        "rms_ns": 5.100792061171784,
+        "mean_ns": -0.6555958798060146,
+        "sse_share": 0.0024888676004999185
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-03",
+        "n_points": 57,
+        "rms_ns": 4.456551176505765,
+        "mean_ns": -2.3760952581715613,
+        "sse_share": 0.004331708252018454
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-04",
+        "n_points": 15,
+        "rms_ns": 3.3298181250401337,
+        "mean_ns": 1.047827957734171,
+        "sse_share": 0.000636383383872924
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-05",
+        "n_points": 11,
+        "rms_ns": 2.0894271138278637,
+        "mean_ns": -0.5304968989347262,
+        "sse_share": 0.00018375268088454162
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-06",
+        "n_points": 4,
+        "rms_ns": 2.684965544886857,
+        "mean_ns": 2.634990226013656,
+        "sse_share": 0.00011033771144062027
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-07",
+        "n_points": 15,
+        "rms_ns": 2.4737602359519886,
+        "mean_ns": 2.1205902811516353,
+        "sse_share": 0.0003512311407089258
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-08",
+        "n_points": 41,
+        "rms_ns": 2.5954978203511474,
+        "mean_ns": 1.1170103974569519,
+        "sse_share": 0.001056846078721151
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-09",
+        "n_points": 32,
+        "rms_ns": 4.588747164883098,
+        "mean_ns": -2.1551381651496726,
+        "sse_share": 0.0025782485568086586
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-10",
+        "n_points": 23,
+        "rms_ns": 2.6716800142853843,
+        "mean_ns": -1.7114786496232108,
+        "sse_share": 0.0006281787861885543
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-11",
+        "n_points": 19,
+        "rms_ns": 6.814360403484575,
+        "mean_ns": -6.041042309665033,
+        "sse_share": 0.0033759060034447013
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2016-12",
+        "n_points": 75,
+        "rms_ns": 6.5338531487285385,
+        "mean_ns": -2.2885012581260376,
+        "sse_share": 0.01225142338809224
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-01",
+        "n_points": 24,
+        "rms_ns": 4.427309065571251,
+        "mean_ns": 3.9800610585061236,
+        "sse_share": 0.001800020576456534
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-02",
+        "n_points": 36,
+        "rms_ns": 3.7449269040926576,
+        "mean_ns": 1.956676906919894,
+        "sse_share": 0.0019318603897845242
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-03",
+        "n_points": 60,
+        "rms_ns": 6.401571829595657,
+        "mean_ns": -3.3321445232677624,
+        "sse_share": 0.009408297522535893
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-04",
+        "n_points": 57,
+        "rms_ns": 5.137882618020926,
+        "mean_ns": -0.19625597833021602,
+        "sse_share": 0.0057574444746886
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-05",
+        "n_points": 31,
+        "rms_ns": 3.4875143601284377,
+        "mean_ns": -0.17251295732436236,
+        "sse_share": 0.001442714011101272
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-06",
+        "n_points": 32,
+        "rms_ns": 3.8254394763169586,
+        "mean_ns": -1.2081306788314095,
+        "sse_share": 0.0017918398683443068
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-07",
+        "n_points": 12,
+        "rms_ns": 2.505075977081253,
+        "mean_ns": 1.425812949188791,
+        "sse_share": 0.0002881440108839877
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-08",
+        "n_points": 41,
+        "rms_ns": 4.983064493918871,
+        "mean_ns": -2.804328617561229,
+        "sse_share": 0.003895501891683288
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-09",
+        "n_points": 47,
+        "rms_ns": 4.927453129109822,
+        "mean_ns": -0.9825091378776835,
+        "sse_share": 0.00436645921844479
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-10",
+        "n_points": 80,
+        "rms_ns": 3.3766248673055617,
+        "mean_ns": 1.038593627766815,
+        "sse_share": 0.003490134491164161
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-11",
+        "n_points": 42,
+        "rms_ns": 3.7781511912345302,
+        "mean_ns": -1.1266210398459753,
+        "sse_share": 0.0022940057568591023
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2017-12",
+        "n_points": 24,
+        "rms_ns": 5.251367273402949,
+        "mean_ns": -3.7471043120203738,
+        "sse_share": 0.0025324598863815644
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-01",
+        "n_points": 26,
+        "rms_ns": 6.318028135966606,
+        "mean_ns": 0.9913148080187284,
+        "sse_share": 0.003971211393471984
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-02",
+        "n_points": 15,
+        "rms_ns": 3.884968598396089,
+        "mean_ns": 2.8766208970409934,
+        "sse_share": 0.0008662691159873605
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-03",
+        "n_points": 49,
+        "rms_ns": 5.1416664288428615,
+        "mean_ns": -1.6788707385757686,
+        "sse_share": 0.004956674754600255
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-04",
+        "n_points": 36,
+        "rms_ns": 2.406291154787426,
+        "mean_ns": 0.5978651401111139,
+        "sse_share": 0.000797600461702621
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-05",
+        "n_points": 4,
+        "rms_ns": 2.3372987408268973,
+        "mean_ns": -2.2691943879493692,
+        "sse_share": 8.361322759289981e-05
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-06",
+        "n_points": 8,
+        "rms_ns": 3.9963347437040637,
+        "mean_ns": 0.603634642271089,
+        "sse_share": 0.0004888777265688258
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-07",
+        "n_points": 23,
+        "rms_ns": 11.932401463235847,
+        "mean_ns": -0.028408309521202137,
+        "sse_share": 0.012530548910426582
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-08",
+        "n_points": 69,
+        "rms_ns": 5.11587685645357,
+        "mean_ns": -3.2671048925817723,
+        "sse_share": 0.006909964267072601
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-09",
+        "n_points": 35,
+        "rms_ns": 4.905561264409191,
+        "mean_ns": -0.7572373712199416,
+        "sse_share": 0.003222789935798599
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2018-10",
+        "n_points": 19,
+        "rms_ns": 2.5181588959837296,
+        "mean_ns": 1.4769765060108104,
+        "sse_share": 0.00046100582070810495
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-01",
+        "n_points": 17,
+        "rms_ns": 2.6948383904392808,
+        "mean_ns": 1.1304456455885723,
+        "sse_share": 0.0004723902434532177
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-02",
+        "n_points": 51,
+        "rms_ns": 7.156228187188724,
+        "mean_ns": -4.998981437948407,
+        "sse_share": 0.009993671810696918
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-03",
+        "n_points": 35,
+        "rms_ns": 6.784848956311905,
+        "mean_ns": -2.4167703394084583,
+        "sse_share": 0.0061650266563281425
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-04",
+        "n_points": 33,
+        "rms_ns": 5.201071912958924,
+        "mean_ns": -0.996171630034,
+        "sse_share": 0.00341575099676796
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-05",
+        "n_points": 39,
+        "rms_ns": 3.7963088240595244,
+        "mean_ns": -0.07566969273398172,
+        "sse_share": 0.0021506722053859584
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-06",
+        "n_points": 62,
+        "rms_ns": 4.550681601619357,
+        "mean_ns": -1.2991904971192796,
+        "sse_share": 0.00491282321445332
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-07",
+        "n_points": 54,
+        "rms_ns": 5.3415679670010885,
+        "mean_ns": -0.3667291902252777,
+        "sse_share": 0.005895461723676965
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-08",
+        "n_points": 45,
+        "rms_ns": 4.998849810145821,
+        "mean_ns": -1.6289180967040313,
+        "sse_share": 0.004302681880629395
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-09",
+        "n_points": 27,
+        "rms_ns": 4.704846128532496,
+        "mean_ns": -2.596255013445317,
+        "sse_share": 0.0022868683275090716
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-10",
+        "n_points": 33,
+        "rms_ns": 3.6989702376233344,
+        "mean_ns": -2.209640860856456,
+        "sse_share": 0.0017276754434509805
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-11",
+        "n_points": 28,
+        "rms_ns": 4.90634415028578,
+        "mean_ns": -0.2864002685803208,
+        "sse_share": 0.0025790549421089407
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2019-12",
+        "n_points": 6,
+        "rms_ns": 3.3566053120974844,
+        "mean_ns": 2.8051324966564075,
+        "sse_share": 0.0002586654073055983
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-01",
+        "n_points": 37,
+        "rms_ns": 3.9617709373660395,
+        "mean_ns": 1.6299564941001286,
+        "sse_share": 0.0022221173702926585
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-02",
+        "n_points": 40,
+        "rms_ns": 3.650025820520223,
+        "mean_ns": 0.012499479229433041,
+        "sse_share": 0.0020390994680529466
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-03",
+        "n_points": 23,
+        "rms_ns": 5.591203128161195,
+        "mean_ns": -0.7111153212174091,
+        "sse_share": 0.00275121748887109
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-04",
+        "n_points": 25,
+        "rms_ns": 2.56142332775199,
+        "mean_ns": 0.4630849659292835,
+        "sse_share": 0.0006276091639402562
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-05",
+        "n_points": 13,
+        "rms_ns": 1.99729250130639,
+        "mean_ns": 1.0810247056488502,
+        "sse_share": 0.0001984327000875242
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-07",
+        "n_points": 28,
+        "rms_ns": 3.1826126683841123,
+        "mean_ns": 1.292280013157462,
+        "sse_share": 0.0010852059150668189
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-08",
+        "n_points": 44,
+        "rms_ns": 3.8209372196555345,
+        "mean_ns": -1.8820452065491302,
+        "sse_share": 0.0024579838618772245
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-09",
+        "n_points": 13,
+        "rms_ns": 1.5653667680513463,
+        "mean_ns": 1.0086063949844315,
+        "sse_share": 0.00012188832764319403
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-10",
+        "n_points": 20,
+        "rms_ns": 3.964116599075797,
+        "mean_ns": 3.208951282474004,
+        "sse_share": 0.0012025672785192952
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-11",
+        "n_points": 40,
+        "rms_ns": 3.356318091432989,
+        "mean_ns": 0.8986388411180712,
+        "sse_share": 0.00172414094550841
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2020-12",
+        "n_points": 11,
+        "rms_ns": 3.936714777744755,
+        "mean_ns": -2.2140673940705047,
+        "sse_share": 0.000652299630889347
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-01",
+        "n_points": 7,
+        "rms_ns": 5.307583969863952,
+        "mean_ns": -0.027745869094327906,
+        "sse_share": 0.000754533165845298
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-02",
+        "n_points": 5,
+        "rms_ns": 5.380597172848937,
+        "mean_ns": 5.281592851957839,
+        "sse_share": 0.0005538823283397574
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-03",
+        "n_points": 18,
+        "rms_ns": 5.116418734723602,
+        "mean_ns": -0.14154521998932523,
+        "sse_share": 0.0018029812601311232
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-04",
+        "n_points": 21,
+        "rms_ns": 3.339209451042593,
+        "mean_ns": 1.6965095994692092,
+        "sse_share": 0.0008959693705387649
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-05",
+        "n_points": 16,
+        "rms_ns": 5.297935657228606,
+        "mean_ns": 5.234871869319591,
+        "sse_share": 0.00171838268666564
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-06",
+        "n_points": 11,
+        "rms_ns": 3.0742257690898707,
+        "mean_ns": 3.0036345128275403,
+        "sse_share": 0.0003977871494118726
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-07",
+        "n_points": 9,
+        "rms_ns": 3.1368343997950583,
+        "mean_ns": 2.3065322491472924,
+        "sse_share": 0.0003388537061378282
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-08",
+        "n_points": 9,
+        "rms_ns": 2.7775709728827933,
+        "mean_ns": -0.1843524838957617,
+        "sse_share": 0.00026568032012560324
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-09",
+        "n_points": 6,
+        "rms_ns": 5.777208527301589,
+        "mean_ns": -0.5543626298750345,
+        "sse_share": 0.0007662559930048461
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-10",
+        "n_points": 52,
+        "rms_ns": 4.626003577391808,
+        "mean_ns": 1.3284665248200702,
+        "sse_share": 0.004257962368200722
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-11",
+        "n_points": 18,
+        "rms_ns": 5.953738477069812,
+        "mean_ns": -3.9499509835789266,
+        "sse_share": 0.0024413978607793485
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2021-12",
+        "n_points": 54,
+        "rms_ns": 4.474112415128451,
+        "mean_ns": -3.407376027421673,
+        "sse_share": 0.004136129141058192
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2022-10",
+        "n_points": 66,
+        "rms_ns": 4.1479278400181245,
+        "mean_ns": 2.6793881389691574,
+        "sse_share": 0.004345030878984947
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2022-11",
+        "n_points": 16,
+        "rms_ns": 4.9090665460409975,
+        "mean_ns": 4.625568622573795,
+        "sse_share": 0.0014753816170348137
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2022-12",
+        "n_points": 16,
+        "rms_ns": 8.22391569210432,
+        "mean_ns": -8.0662025392364,
+        "sse_share": 0.004140605248118766
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-01",
+        "n_points": 53,
+        "rms_ns": 4.896344013133476,
+        "mean_ns": -1.561384254593581,
+        "sse_share": 0.004861902698080526
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-02",
+        "n_points": 20,
+        "rms_ns": 5.094503575154653,
+        "mean_ns": 4.908762862854132,
+        "sse_share": 0.0019861876858920506
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-03",
+        "n_points": 14,
+        "rms_ns": 3.3886595952599374,
+        "mean_ns": 3.288346642601628,
+        "sse_share": 0.000615135046450761
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-04",
+        "n_points": 21,
+        "rms_ns": 4.564518084879487,
+        "mean_ns": 1.0728914476420046,
+        "sse_share": 0.0016741551593916347
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-05",
+        "n_points": 71,
+        "rms_ns": 3.735101455703675,
+        "mean_ns": -0.15673618271805512,
+        "sse_share": 0.003790091556429663
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-06",
+        "n_points": 14,
+        "rms_ns": 6.231887502596135,
+        "mean_ns": -5.355011164657038,
+        "sse_share": 0.002080433278438883
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-07",
+        "n_points": 31,
+        "rms_ns": 4.293143685335231,
+        "mean_ns": -2.2567912413392373,
+        "sse_share": 0.0021862463042366578
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-08",
+        "n_points": 35,
+        "rms_ns": 2.6583733303331187,
+        "mean_ns": 0.05810209456415448,
+        "sse_share": 0.0009464257188218783
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-09",
+        "n_points": 109,
+        "rms_ns": 5.614232693663746,
+        "mean_ns": -2.5176477783284748,
+        "sse_share": 0.01314600709709522
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-10",
+        "n_points": 85,
+        "rms_ns": 3.5755484788269385,
+        "mean_ns": -1.2984941435815125,
+        "sse_share": 0.0041580605941225375
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-11",
+        "n_points": 46,
+        "rms_ns": 4.928327705180864,
+        "mean_ns": 0.7106938033243553,
+        "sse_share": 0.004275072996485726
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2023-12",
+        "n_points": 12,
+        "rms_ns": 4.359207040590428,
+        "mean_ns": 3.4206728190729527,
+        "sse_share": 0.0008725348563452421
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-01",
+        "n_points": 22,
+        "rms_ns": 5.2281732306448445,
+        "mean_ns": -0.277677315484549,
+        "sse_share": 0.0023009605122890076
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-02",
+        "n_points": 27,
+        "rms_ns": 2.630692316324643,
+        "mean_ns": -1.48892383196371,
+        "sse_share": 0.0007149742871778084
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-03",
+        "n_points": 54,
+        "rms_ns": 3.0607156644504068,
+        "mean_ns": -1.3059980422217112,
+        "sse_share": 0.001935647535223952
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-05",
+        "n_points": 18,
+        "rms_ns": 4.467191650205554,
+        "mean_ns": 4.019092737629472,
+        "sse_share": 0.0013744477081089495
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-06",
+        "n_points": 40,
+        "rms_ns": 4.9770934985277355,
+        "mean_ns": 1.545433792049522,
+        "sse_share": 0.0037913871752853967
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-07",
+        "n_points": 14,
+        "rms_ns": 1.4543222275238454,
+        "mean_ns": 1.023353243415467,
+        "sse_share": 0.00011330155385428893
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-08",
+        "n_points": 66,
+        "rms_ns": 2.5525113175897807,
+        "mean_ns": -0.5821978454889631,
+        "sse_share": 0.0016453785636983103
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-09",
+        "n_points": 46,
+        "rms_ns": 4.061980761962071,
+        "mean_ns": -1.0214682047064898,
+        "sse_share": 0.0029041570795833435
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-10",
+        "n_points": 5,
+        "rms_ns": 5.037913568647964,
+        "mean_ns": -4.124890917722723,
+        "sse_share": 0.00048557685255729244
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-11",
+        "n_points": 65,
+        "rms_ns": 6.0965106616950795,
+        "mean_ns": -3.813270157757223,
+        "sse_share": 0.009244056229976452
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2024-12",
+        "n_points": 17,
+        "rms_ns": 5.117796719800604,
+        "mean_ns": -4.6506006104941795,
+        "sse_share": 0.0017037329834545707
+      },
+      {
+        "station": "GRSM",
+        "target": "apollo15",
+        "year_month": "2025-01",
+        "n_points": 17,
+        "rms_ns": 4.574131194773192,
+        "mean_ns": -1.507924373602437,
+        "sse_share": 0.001360983003792116
+      }
+    ],
+    "apol_tropo_coupling_global": {
+      "n_points": 1431,
+      "intercept_ns": 6.859560913586135,
+      "slope_ns_per_ns": -0.3599157525933148,
+      "corr": -0.325405919362041,
+      "r2": 0.10588901235585513
+    },
+    "apol_tropo_coupling_by_target": [
+      {
+        "target": "nglr1",
+        "n_points": 38,
+        "rms_ns": 24.196928165677658,
+        "intercept_ns": 41.98853170717202,
+        "slope_ns_per_ns": -2.0244262756868356,
+        "corr": -0.4383491161471875,
+        "r2": 0.1921499476270203
+      },
+      {
+        "target": "luna21",
+        "n_points": 109,
+        "rms_ns": 4.899907394552819,
+        "intercept_ns": 10.590885622129187,
+        "slope_ns_per_ns": -0.5600256914601659,
+        "corr": -0.6659593238352935,
+        "r2": 0.44350182100316193
+      },
+      {
+        "target": "luna17",
+        "n_points": 147,
+        "rms_ns": 4.9599858636271374,
+        "intercept_ns": 8.55499997343921,
+        "slope_ns_per_ns": -0.44295606419409866,
+        "corr": -0.5735001271799468,
+        "r2": 0.32890239587541525
+      },
+      {
+        "target": "apollo14",
+        "n_points": 251,
+        "rms_ns": 5.457528935490647,
+        "intercept_ns": 6.724686655135611,
+        "slope_ns_per_ns": -0.3535099637006213,
+        "corr": -0.3769697039733442,
+        "r2": 0.142106157713751
+      },
+      {
+        "target": "apollo11",
+        "n_points": 249,
+        "rms_ns": 5.3262628051292085,
+        "intercept_ns": 6.444573780572126,
+        "slope_ns_per_ns": -0.3432765896701786,
+        "corr": -0.3641225186509713,
+        "r2": 0.1325852085887269
+      },
+      {
+        "target": "apollo15",
+        "n_points": 637,
+        "rms_ns": 5.231675599224521,
+        "intercept_ns": 4.483824190910231,
+        "slope_ns_per_ns": -0.2353639705583951,
+        "corr": -0.2645325789019358,
+        "r2": 0.06997748530050885
+      }
+    ],
+    "apol_elevation_bins": [
+      {
+        "elev_bin": "<20",
+        "n_points": 39,
+        "rms_ns": 5.5969018790966,
+        "mean_ns": -3.787341039076007
+      },
+      {
+        "elev_bin": "20-30",
+        "n_points": 297,
+        "rms_ns": 7.669489060605856,
+        "mean_ns": -2.897413912236905
+      },
+      {
+        "elev_bin": "30-45",
+        "n_points": 556,
+        "rms_ns": 5.491141308598434,
+        "mean_ns": -0.8266321064903859
+      },
+      {
+        "elev_bin": "45-60",
+        "n_points": 346,
+        "rms_ns": 6.17380337132391,
+        "mean_ns": 1.8102350691015978
+      },
+      {
+        "elev_bin": "60+",
+        "n_points": 193,
+        "rms_ns": 7.823304467844554,
+        "mean_ns": 4.360126751298317
+      }
+    ],
+    "modern_summary": {
+      "modern_start_year": 2023,
+      "all_inlier_rms_ns": 4.470122829598947,
+      "modern_inlier_rms_ns": 7.693520876992633,
+      "modern_apol_ex_nglr1_rms_ns": 5.063018373232765,
+      "modern_apol_ex_nglr1_n_points": 596
+    },
+    "operational_profile": {
+      "n_apol_corrected_points": 1431,
+      "n_grsm_apollo_month_points": 7673,
+      "grsm_apollo_month_bins": 403,
+      "apol_target_tropo_models": [
+        {
+          "target": "nglr1",
+          "n_points": 38,
+          "intercept_ns": 41.98853170717202,
+          "slope_ns_per_ns": -2.0244262756868356,
+          "corr": -0.4383491161471875,
+          "r2": 0.1921499476270203
+        },
+        {
+          "target": "luna21",
+          "n_points": 109,
+          "intercept_ns": 10.590885622129187,
+          "slope_ns_per_ns": -0.5600256914601659,
+          "corr": -0.6659593238352935,
+          "r2": 0.44350182100316193
+        },
+        {
+          "target": "luna17",
+          "n_points": 147,
+          "intercept_ns": 8.55499997343921,
+          "slope_ns_per_ns": -0.44295606419409866,
+          "corr": -0.5735001271799468,
+          "r2": 0.32890239587541525
+        },
+        {
+          "target": "apollo14",
+          "n_points": 251,
+          "intercept_ns": 6.724686655135611,
+          "slope_ns_per_ns": -0.3535099637006213,
+          "corr": -0.3769697039733442,
+          "r2": 0.142106157713751
+        },
+        {
+          "target": "apollo11",
+          "n_points": 249,
+          "intercept_ns": 6.444573780572126,
+          "slope_ns_per_ns": -0.3432765896701786,
+          "corr": -0.3641225186509713,
+          "r2": 0.1325852085887269
+        },
+        {
+          "target": "apollo15",
+          "n_points": 637,
+          "intercept_ns": 4.483824190910231,
+          "slope_ns_per_ns": -0.2353639705583951,
+          "corr": -0.2645325789019358,
+          "r2": 0.06997748530050885
+        }
+      ]
+    }
+  },
+  "checks": [
+    {
+      "id": "range_type_all_two_way",
+      "status": "pass",
+      "value": {
+        "2": 26220
+      },
+      "threshold": {
+        "allowed": [
+          "2"
+        ]
+      },
+      "note": "CRD range_type が two-way 以外を含むか。"
+    },
+    {
+      "id": "station_data_balance",
+      "status": "pass",
+      "value": {
+        "dominant_station": "GRSM",
+        "dominant_ratio": 0.8291380625476735,
+        "bias_model_weighted_gain_ns": 0.19946850996573984
+      },
+      "threshold": {
+        "dominance_warn_ratio": 0.8,
+        "or_bias_gain_ns_gt": 0.0
+      },
+      "note": "局偏在は残るが、station+target バイアス補正で weighted RMS が改善するかを併せて判定。"
+    },
+    {
+      "id": "iers_station_coord_unified",
+      "status": "watch",
+      "value": {
+        "station_coords_mode": "auto",
+        "n_stations_total": 5,
+        "n_stations_pos_eop": 4,
+        "pos_eop_share": 0.8,
+        "stations_without_pos_eop": [
+          "APOL"
+        ]
+      },
+      "threshold": {
+        "required_mode": "pos_eop",
+        "required_pos_eop_count": "all_stations"
+      },
+      "note": "全局でIERS系（EDC pos+eop）を使った統一計算かを判定。"
+    },
+    {
+      "id": "apol_modern_operational_gate",
+      "status": "pass",
+      "value": {
+        "weighted_rms_ns": 4.999386409856197,
+        "bias_corrected_weighted_rms_ns": 4.016926991244619
+      },
+      "threshold": {
+        "operational_floor_ns": 5.0623741009006995
+      },
+      "note": "APOL (modern, nglr1除外) を NP重みの運用指標で判定（中央値RMSは主判定に使わない）。"
+    },
+    {
+      "id": "operational_systematic_correction_gain",
+      "status": "pass",
+      "value": {
+        "global_weighted_gain_ns": 0.0034787666238660364,
+        "global_model_floor_gain_ns": 0.506711781414344,
+        "global_weighted_rms_before_ns": 2.2186835015263084,
+        "global_weighted_rms_after_ns": 2.2152047349024424,
+        "global_model_floor_before_ns": 4.464027327791422,
+        "global_model_floor_after_ns": 3.957315546377078,
+        "n_apol_corrected_points": 1431,
+        "n_grsm_apollo_month_points": 7673
+      },
+      "threshold": {
+        "global_weighted_gain_ns_min_or_global_model_floor_gain_ns_min": 0.4
+      },
+      "note": "APOL target別tropo + GRSM Apollo月次補正の本線I/F改善量を監査。"
+    },
+    {
+      "id": "apol_modern_operational_gate_corrected",
+      "status": "pass",
+      "value": {
+        "weighted_rms_ns_after": 4.8195820801179,
+        "weighted_rms_ns_before": 4.999386409856197,
+        "weighted_gain_ns": 0.17980432973829696
+      },
+      "threshold": {
+        "operational_floor_ns": 4.84795686194476
+      },
+      "note": "本線I/F補正適用後の modern APOL weighted 指標を判定。"
+    },
+    {
+      "id": "nglr1_coverage_gate",
+      "status": "watch",
+      "value": {
+        "effective_points": 40,
+        "metrics_points": 38,
+        "coverage_points": 40,
+        "source": "coverage_csv"
+      },
+      "threshold": 100,
+      "note": "NGLR-1 点数が mm級判定に十分か。"
+    },
+    {
+      "id": "summary_metric_semantics",
+      "status": "pass",
+      "value": {
+        "median_group_rms_ns": 4.35417001177271,
+        "np_sigma_coverage_ratio": 0.9999235415551647
+      },
+      "threshold": {
+        "np_sigma_coverage_ratio_min": 0.95
+      },
+      "note": "中央値RMSは補助指標。主判定はNP重み運用指標（weighted RMS / z / χ²様）を採用。"
+    }
+  ],
+  "likely_missing_or_next_items": [
+    "全局IERS統一は未達（pos+eop未対応局あり: APOL）。座標I/Fを継続点検。",
+    "NGLR-1 点数が不足。mm級判定は coverage 拡充待ち。",
+    "時系列の局座標/EOP・遅延補正をフルIERS準拠で全局統一していない。"
+  ],
+  "artifacts": {
+    "llr_precision_reaudit_json": "output/private/llr/llr_precision_reaudit.json",
+    "llr_precision_reaudit_csv": "output/private/llr/llr_precision_reaudit.csv",
+    "llr_precision_reaudit_png": "output/private/llr/llr_precision_reaudit.png",
+    "llr_systematics_root_cause_json": "output/private/llr/llr_systematics_root_cause.json",
+    "llr_systematics_root_cause_csv": "output/private/llr/llr_systematics_root_cause.csv",
+    "llr_systematics_root_cause_png": "output/private/llr/llr_systematics_root_cause.png",
+    "llr_systematics_root_cause_over4ns_png": "output/private/llr/llr_systematics_root_cause_over4ns.png",
+    "llr_bottleneck_deepdive_json": "output/private/llr/llr_bottleneck_deepdive.json",
+    "llr_bottleneck_deepdive_csv": "output/private/llr/llr_bottleneck_deepdive.csv",
+    "llr_bottleneck_deepdive_png": "output/private/llr/llr_bottleneck_deepdive.png"
+  }
+}

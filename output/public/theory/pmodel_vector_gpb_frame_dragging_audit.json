@@ -1,0 +1,215 @@
+{
+  "generated_utc": "2026-02-20T07:14:58.181139+00:00",
+  "schema": "wavep.theory.pmodel_vector_gpb_frame_dragging_audit.v1",
+  "title": "P_mu minimal extension: GP-B / LAGEOS frame-dragging audit",
+  "intent": "Inject minimal rotational current coupling into P_mu and test whether frame-dragging observables are recovered without breaking geodetic control.",
+  "equations": {
+    "interaction": "L_int = g * P_mu * J^mu",
+    "rotational_ansatz": "P_i ~ kappa_rot * epsilon_ijk * J^j * x^k / r^3",
+    "precession_mapping": "Omega_P = kappa_rot * Omega_LT_ref",
+    "scalar_limit": "J^i=0 => P_i=0 (reduction to scalar branch)"
+  },
+  "gate": {
+    "z_reject": 3.0
+  },
+  "inputs": {
+    "gpb_data": "C:/develop/waveP/data/theory/gpb_scalar_limit_audit.json",
+    "frame_data": "C:/develop/waveP/data/theory/frame_dragging_experiments.json"
+  },
+  "fit": {
+    "status": "ok",
+    "fit_method": "weighted_least_squares",
+    "fit_channels_n": 2,
+    "kappa_rot": 0.9903379213240999,
+    "kappa_rot_sigma": 0.04824437090643169
+  },
+  "branches": {
+    "scalar_static": {
+      "summary": {
+        "status": "reject",
+        "z_reject": 3.0,
+        "frame_channels_n": 2,
+        "pass_n": 0,
+        "reject_n": 2,
+        "inconclusive_n": 0,
+        "max_abs_z": 19.799999999999997
+      },
+      "rows": [
+        {
+          "branch": "scalar_static",
+          "id": "gpb_geodetic_control",
+          "label": "GP-B geodetic (control)",
+          "kind": "control",
+          "experiment": "GP-B",
+          "observable": "geodetic_precession",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 6.6,
+          "observed_sigma": 0.018,
+          "reference_prediction": 6.6,
+          "pmodel_prediction": 6.6,
+          "residual": 0.0,
+          "z_score": 0.0,
+          "status": "pass",
+          "note": "GP-B geodetic precession representative value."
+        },
+        {
+          "branch": "scalar_static",
+          "id": "gpb_frame_dragging",
+          "label": "GP-B frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "GP-B",
+          "observable": "frame_dragging",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 0.039,
+          "observed_sigma": 0.0072,
+          "reference_prediction": 0.0392,
+          "pmodel_prediction": 0.0,
+          "residual": 0.039,
+          "z_score": 5.416666666666667,
+          "status": "reject",
+          "note": "GP-B frame-dragging representative value; scalar-only limit predicts zero."
+        },
+        {
+          "branch": "scalar_static",
+          "id": "lageos_frame_dragging",
+          "label": "LAGEOS frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "LAGEOS",
+          "observable": "frame_dragging",
+          "unit": "mu_ratio",
+          "value_domain": "ratio_to_gr",
+          "observed": 0.99,
+          "observed_sigma": 0.05,
+          "reference_prediction": 1.0,
+          "pmodel_prediction": 0.0,
+          "residual": 0.99,
+          "z_score": 19.799999999999997,
+          "status": "reject",
+          "note": "一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。"
+        }
+      ]
+    },
+    "vector_vorticity": {
+      "summary": {
+        "status": "pass",
+        "z_reject": 3.0,
+        "frame_channels_n": 2,
+        "pass_n": 2,
+        "reject_n": 0,
+        "inconclusive_n": 0,
+        "max_abs_z": 0.024826872791011315
+      },
+      "rows": [
+        {
+          "branch": "vector_vorticity",
+          "id": "gpb_geodetic_control",
+          "label": "GP-B geodetic (control)",
+          "kind": "control",
+          "experiment": "GP-B",
+          "observable": "geodetic_precession",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 6.6,
+          "observed_sigma": 0.018,
+          "reference_prediction": 6.6,
+          "pmodel_prediction": 6.6,
+          "residual": 0.0,
+          "z_score": 0.0,
+          "status": "pass",
+          "note": "GP-B geodetic precession representative value."
+        },
+        {
+          "branch": "vector_vorticity",
+          "id": "gpb_frame_dragging",
+          "label": "GP-B frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "GP-B",
+          "observable": "frame_dragging",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 0.039,
+          "observed_sigma": 0.0072,
+          "reference_prediction": 0.0392,
+          "pmodel_prediction": 0.03882124651590472,
+          "residual": 0.00017875348409528147,
+          "z_score": 0.024826872791011315,
+          "status": "pass",
+          "note": "GP-B frame-dragging representative value; scalar-only limit predicts zero."
+        },
+        {
+          "branch": "vector_vorticity",
+          "id": "lageos_frame_dragging",
+          "label": "LAGEOS frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "LAGEOS",
+          "observable": "frame_dragging",
+          "unit": "mu_ratio",
+          "value_domain": "ratio_to_gr",
+          "observed": 0.99,
+          "observed_sigma": 0.05,
+          "reference_prediction": 1.0,
+          "pmodel_prediction": 0.9903379213240999,
+          "residual": -0.00033792132409993236,
+          "z_score": -0.006758426481998647,
+          "status": "pass",
+          "note": "一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "overall_status": "pass",
+    "decision": "vector_branch_required_and_consistent",
+    "hard_reject_n": 0,
+    "watch_n": 0,
+    "gates": [
+      {
+        "id": "vector_gpb::scalar_branch_rejected",
+        "metric": "scalar_frame_reject_n",
+        "value": 2,
+        "threshold": 1,
+        "comparator": ">=",
+        "status": "pass",
+        "hardness": "watch",
+        "note": "拡張必要性の監査。静的スカラー枝が frame-dragging を再現できず reject になること。"
+      },
+      {
+        "id": "vector_gpb::vector_branch_frame_gate",
+        "metric": "vector_max_abs_z_frame",
+        "value": 0.024826872791011315,
+        "threshold": 3.0,
+        "comparator": "<=",
+        "status": "pass",
+        "hardness": "hard",
+        "note": "回転カレント起因の P_i 渦（kappa_rot）導入後、GP-B/LAGEOS の frame-dragging が 3σ 内に入ること。"
+      },
+      {
+        "id": "vector_gpb::geodetic_control_gate",
+        "metric": "abs(z_geodetic_control)",
+        "value": 0.0,
+        "threshold": 3.0,
+        "comparator": "<=",
+        "status": "pass",
+        "hardness": "hard",
+        "note": "拡張で geodetic control が崩れていないこと。"
+      },
+      {
+        "id": "vector_gpb::kappa_rot_nonzero_watch",
+        "metric": "abs(kappa_rot)/sigma",
+        "value": 20.527533113548657,
+        "threshold": 1.0,
+        "comparator": ">=",
+        "status": "pass",
+        "hardness": "watch",
+        "note": "最小拡張係数 kappa_rot の識別性を監視する（補助）。"
+      }
+    ]
+  },
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/pmodel_vector_gpb_frame_dragging_audit.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/pmodel_vector_gpb_frame_dragging_audit.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_vector_gpb_frame_dragging_audit.png"
+  }
+}

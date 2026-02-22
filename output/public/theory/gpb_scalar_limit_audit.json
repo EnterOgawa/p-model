@@ -1,0 +1,61 @@
+{
+  "generated_utc": "2026-02-22T08:15:26.736237+00:00",
+  "schema": "wavep.theory.gpb_scalar_limit_audit.v1",
+  "title": "GP-B scalar-limit audit",
+  "input": "C:/develop/waveP/data/theory/gpb_scalar_limit_audit.json",
+  "gate": {
+    "z_reject": 3.0
+  },
+  "source": {
+    "kind": "primary_paper",
+    "title": "Gravity Probe B: Final Results of a Space Experiment to Test General Relativity",
+    "authors": "C. W. F. Everitt et al.",
+    "year": 2011,
+    "doi": "10.1103/PhysRevLett.106.221101",
+    "url": "https://arxiv.org/abs/1105.3456",
+    "retrieved_utc": "2026-02-16T00:00:00Z"
+  },
+  "rows": [
+    {
+      "id": "geodetic_precession",
+      "label": "Geodetic precession",
+      "unit": "arcsec/yr",
+      "observed": 6.6,
+      "observed_sigma": 0.018,
+      "pmodel_scalar_prediction": 6.6,
+      "reference_prediction": 6.6,
+      "residual_scalar": 0.0,
+      "z_scalar": 0.0,
+      "status": "pass",
+      "note": "GP-B geodetic precession representative value."
+    },
+    {
+      "id": "frame_dragging",
+      "label": "Frame-dragging",
+      "unit": "arcsec/yr",
+      "observed": 0.039,
+      "observed_sigma": 0.0072,
+      "pmodel_scalar_prediction": 0.0,
+      "reference_prediction": 0.0392,
+      "residual_scalar": 0.039,
+      "z_scalar": 5.416666666666667,
+      "status": "reject",
+      "note": "GP-B frame-dragging representative value; scalar-only limit predicts zero."
+    }
+  ],
+  "summary": {
+    "channels_n": 2,
+    "pass_n": 1,
+    "reject_n": 1,
+    "inconclusive_n": 0,
+    "geodetic_status": "pass",
+    "frame_dragging_status": "reject",
+    "overall_status": "reject",
+    "decision": "scalar_limit_rejected_by_frame_dragging"
+  },
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/gpb_scalar_limit_audit.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/gpb_scalar_limit_audit.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/gpb_scalar_limit_audit.png"
+  }
+}

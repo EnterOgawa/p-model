@@ -1,0 +1,67 @@
+{
+  "generated_utc": "2026-02-21T23:08:09.097196+00:00",
+  "schema": "wavep.quantum.route_b_watch_monitor.v1",
+  "phase": 8,
+  "step": "8.7.31.34",
+  "title": "Weak-interaction Route-B watch monitor",
+  "audit_source": {
+    "path": "output/public/quantum/weak_interaction_beta_decay_route_b_standalone_audit.json",
+    "step": "8.7.31.33",
+    "overall_status": "reject",
+    "transition": "B_standalone_reject"
+  },
+  "monitor": {
+    "input_hash_changed": false,
+    "changed_inputs_n": 0,
+    "changed_inputs": [],
+    "rerun_required": false,
+    "rerun_policy": "rerun_route_b_only_if_input_hash_changed",
+    "action_taken": "skip_rerun_keep_fixed"
+  },
+  "inputs": [
+    {
+      "input_id": "beta_qvalue_full_csv",
+      "path": "output/public/quantum/nuclear_beta_decay_qvalue_prediction_full.csv",
+      "exists": true,
+      "expected_sha256": "03fd430899c219d36be461d99eb266b6f99b9d7aabe19441d947d9f7fbf28242",
+      "current_sha256": "03fd430899c219d36be461d99eb266b6f99b9d7aabe19441d947d9f7fbf28242",
+      "hash_changed": false
+    },
+    {
+      "input_id": "beta_qvalue_metrics_json",
+      "path": "output/public/quantum/nuclear_beta_decay_qvalue_prediction_metrics.json",
+      "exists": true,
+      "expected_sha256": "a610f50f4d7eee319d71c1f7fa0342323d419c74c390aca651a04b1b6c70c171",
+      "current_sha256": "a610f50f4d7eee319d71c1f7fa0342323d419c74c390aca651a04b1b6c70c171",
+      "hash_changed": false
+    },
+    {
+      "input_id": "route_ab_audit_json",
+      "path": "output/public/quantum/weak_interaction_beta_decay_route_ab_audit.json",
+      "exists": true,
+      "expected_sha256": "99ffb0d4484cc2043b4b05b3b3ecd2192ff57f602b412d1f79c97bbb9726f372",
+      "current_sha256": "99ffb0d4484cc2043b4b05b3b3ecd2192ff57f602b412d1f79c97bbb9726f372",
+      "hash_changed": false
+    },
+    {
+      "input_id": "ckm_audit_json",
+      "path": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
+      "exists": true,
+      "expected_sha256": "ab36fe790687e17372fee1a54ee93564d9d70490e6ea85e67fd513903785a882",
+      "current_sha256": "ab36fe790687e17372fee1a54ee93564d9d70490e6ea85e67fd513903785a882",
+      "hash_changed": false
+    },
+    {
+      "input_id": "pmns_audit_json",
+      "path": "output/public/quantum/weak_interaction_pmns_first_row_audit.json",
+      "exists": true,
+      "expected_sha256": "9994c08e6a215f784720e6252269f65a4da1987d62ab8c4805cc012cefddd06a",
+      "current_sha256": "9994c08e6a215f784720e6252269f65a4da1987d62ab8c4805cc012cefddd06a",
+      "hash_changed": false
+    }
+  ],
+  "outputs": {
+    "monitor_json": "output/private/quantum/weak_interaction_beta_decay_route_b_watch_monitor.json",
+    "monitor_csv": "output/private/quantum/weak_interaction_beta_decay_route_b_watch_monitor.csv"
+  }
+}

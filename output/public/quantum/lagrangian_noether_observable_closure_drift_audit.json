@@ -1,0 +1,170 @@
+{
+  "generated_utc": "2026-02-19T15:03:56.541399+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.21.3",
+    "name": "Lagrangian-Noether closure drift audit"
+  },
+  "intent": "Monitor drift against frozen closure gates and fix the operational recalculation trigger for L_total -> EL -> observables.",
+  "inputs": {
+    "lagrangian_noether_observable_closure_audit_json": "output/public/quantum/lagrangian_noether_observable_closure_audit.json"
+  },
+  "frozen_baseline": {
+    "noether_gauge_margin": 4.999993032890784e-08,
+    "noether_realness_margin": 5e-10,
+    "pass_ratio": 0.5,
+    "watch_ratio": 0.1
+  },
+  "checks": [
+    {
+      "id": "closure_drift::overall_status",
+      "metric": "overall_status",
+      "value": "pass",
+      "expected": "pass",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "閉包監査の全体判定が pass を維持していること。"
+    },
+    {
+      "id": "closure_drift::hard_fail_ids_n",
+      "metric": "hard_fail_ids_n",
+      "value": 0,
+      "expected": 0,
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "hard gate 逸脱が発生していないこと。"
+    },
+    {
+      "id": "closure_drift::watch_ids_n",
+      "metric": "watch_ids_n",
+      "value": 0,
+      "expected": 0,
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "watch",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "watch 逸脱の発生数（運用監視）。"
+    },
+    {
+      "id": "closure_drift::missing_equations_n",
+      "metric": "missing_equations_n",
+      "value": 0,
+      "expected": 0,
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "閉包必須式が欠落していないこと。"
+    },
+    {
+      "id": "closure_drift::missing_nonrel_channels_n",
+      "metric": "missing_nonrel_channels_n",
+      "value": 0,
+      "expected": 0,
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "非相対論写像の必須channelが欠落していないこと。"
+    },
+    {
+      "id": "closure_drift::route_a_gate",
+      "metric": "route_a_gate",
+      "value": "A_continue",
+      "expected": "A_continue",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "route A が継続可能であること。"
+    },
+    {
+      "id": "closure_drift::transition",
+      "metric": "transition",
+      "value": "A_stay",
+      "expected": "A_stay",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "A->B 移行が要求されていないこと。"
+    },
+    {
+      "id": "closure_drift::checks_all_pass",
+      "metric": "checks_pass_n/checks_total_n",
+      "value": "14/14",
+      "expected": "all pass",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "閉包監査内の checks が全件 pass であること。"
+    },
+    {
+      "id": "closure_drift::noether_gauge_margin_positive",
+      "metric": "noether_gauge_margin",
+      "value": 4.999993032890784e-08,
+      "expected": "> 0",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "Noether gauge margin が正であること。"
+    },
+    {
+      "id": "closure_drift::noether_realness_margin_positive",
+      "metric": "noether_realness_margin",
+      "value": 5e-10,
+      "expected": "> 0",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "hard",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "Noether realness margin が正であること。"
+    },
+    {
+      "id": "closure_drift::noether_gauge_margin_ratio",
+      "metric": "noether_gauge_margin_ratio_vs_frozen",
+      "value": 1.0,
+      "expected": ">=0.5 (watch >= 0.1)",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "watch",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "Noether gauge margin の frozen 比率（drift 監視）。"
+    },
+    {
+      "id": "closure_drift::noether_realness_margin_ratio",
+      "metric": "noether_realness_margin_ratio_vs_frozen",
+      "value": 1.0,
+      "expected": ">=0.5 (watch >= 0.1)",
+      "status": "pass",
+      "score": 1.0,
+      "gate_level": "watch",
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "Noether realness margin の frozen 比率（drift 監視）。"
+    }
+  ],
+  "decision": {
+    "overall_status": "pass",
+    "hard_fail_row_ids": [],
+    "watch_row_ids": [],
+    "drift_reject_row_ids": [],
+    "recalc_required": false,
+    "recalc_reason_row_ids": [],
+    "recalc_commands": [
+      "python -B scripts/quantum/action_principle_el_derivation_audit.py",
+      "python -B scripts/quantum/nonrelativistic_reduction_schrodinger_mapping_audit.py",
+      "python -B scripts/quantum/derivation_parameter_falsification_pack.py",
+      "python -B scripts/quantum/derivation_observable_chain_lock_audit.py",
+      "python -B scripts/quantum/lagrangian_noether_observable_closure_audit.py",
+      "python -B scripts/quantum/lagrangian_noether_observable_closure_drift_audit.py",
+      "python -B scripts/summary/part3_audit.py --no-regenerate"
+    ],
+    "rule": "Reject if any hard row is not pass; watch if only watch rows are degraded; pass otherwise."
+  }
+}

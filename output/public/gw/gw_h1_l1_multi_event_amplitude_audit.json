@@ -1,0 +1,97 @@
+{
+  "generated_utc": "2026-02-16T16:52:59.009973+00:00",
+  "schema": "wavep.gw.h1_l1.multi_event_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.1",
+  "inputs": {
+    "events": [
+      "GW150914",
+      "GW151226",
+      "GW170104",
+      "GW200129_065458"
+    ],
+    "corr_use_min": 0.6
+  },
+  "summary": {
+    "n_events_requested": 4,
+    "n_missing_metrics": 0,
+    "n_usable_events": 2,
+    "status_counts": {
+      "pass": 1,
+      "reject": 2,
+      "watch": 1
+    },
+    "median_abs_corr_usable": 0.7012326509969189,
+    "event_dependency_index_ratio_cv": 0.10431664946732573,
+    "overall_status": "pass",
+    "overall_reason": "usable_events>=2"
+  },
+  "rows": [
+    {
+      "event": "GW150914",
+      "slug": "gw150914",
+      "status": "pass",
+      "status_reason": "all_gates_passed",
+      "quality": "usable",
+      "best_lag_ms": -5.126953125,
+      "abs_corr": 0.7494811798965588,
+      "ratio_median": 1.4693133028600225,
+      "ratio_p16": 1.1920785243847691,
+      "ratio_p84": 1.8243826103830283,
+      "ratio_halfspan_over_median": 0.21516993168423557,
+      "metrics_path": "C:/develop/waveP/output/public/gw/gw150914_h1_l1_amplitude_ratio_metrics.json"
+    },
+    {
+      "event": "GW151226",
+      "slug": "gw151226",
+      "status": "reject",
+      "status_reason": "low_cross_correlation",
+      "quality": "low_corr",
+      "best_lag_ms": 0.9765625,
+      "abs_corr": 0.5613668364243928,
+      "ratio_median": 0.4102355167252238,
+      "ratio_p16": 0.29771316229219424,
+      "ratio_p84": 0.5762627105855872,
+      "ratio_halfspan_over_median": 0.3394995520097371,
+      "metrics_path": "C:/develop/waveP/output/public/gw/gw151226_h1_l1_amplitude_ratio_metrics.json"
+    },
+    {
+      "event": "GW170104",
+      "slug": "gw170104",
+      "status": "reject",
+      "status_reason": "low_cross_correlation",
+      "quality": "low_corr",
+      "best_lag_ms": -4.638671875,
+      "abs_corr": 0.4191087215601068,
+      "ratio_median": 0.9856658135928777,
+      "ratio_p16": 0.6215452598899427,
+      "ratio_p84": 1.4187850790244612,
+      "ratio_halfspan_over_median": 0.40441689675148496,
+      "metrics_path": "C:/develop/waveP/output/public/gw/gw170104_h1_l1_amplitude_ratio_metrics.json"
+    },
+    {
+      "event": "GW200129_065458",
+      "slug": "gw200129_065458",
+      "status": "watch",
+      "status_reason": "ratio_spread_large;ratio_time_drift_large",
+      "quality": "usable",
+      "best_lag_ms": -5.37109375,
+      "abs_corr": 0.652984122097279,
+      "ratio_median": 1.191722919981959,
+      "ratio_p16": 0.8832048548158153,
+      "ratio_p84": 1.5961783355448784,
+      "ratio_halfspan_over_median": 0.29913559132514483,
+      "metrics_path": "C:/develop/waveP/output/public/gw/gw200129_065458_h1_l1_amplitude_ratio_metrics.json"
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_h1_l1_multi_event_amplitude_audit.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_h1_l1_multi_event_amplitude_audit.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_h1_l1_multi_event_amplitude_audit.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_h1_l1_multi_event_amplitude_audit.json",
+      "C:/develop/waveP/output/public/gw/gw_h1_l1_multi_event_amplitude_audit.csv",
+      "C:/develop/waveP/output/public/gw/gw_h1_l1_multi_event_amplitude_audit.png"
+    ]
+  }
+}

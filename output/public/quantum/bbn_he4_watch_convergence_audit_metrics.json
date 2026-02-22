@@ -1,0 +1,208 @@
+{
+  "generated_utc": "2026-02-22T02:33:21.915923+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.22.15",
+    "name": "He-4 watch convergence with freeze uncertainty propagation"
+  },
+  "inputs": {
+    "he4_obs": 0.245,
+    "he4_sigma_obs": 0.003,
+    "delta_m_mev": 1.293,
+    "delta_t_n_sec": 180.0,
+    "tau_n_sec": 880.0,
+    "cf_tref_mev": 0.75,
+    "hard_z_threshold": 3.0,
+    "watch_z_threshold": 2.0,
+    "mc_samples": 30000,
+    "mc_seed": 872215
+  },
+  "freeze_nominal": {
+    "tf_mev": 0.75,
+    "cf_tf": 1.0,
+    "n_eff": 3.0,
+    "y_pred": 0.2538233274454336,
+    "delta_y": 0.008823327445433626
+  },
+  "uncertainty_parameters": [
+    {
+      "name": "cf0",
+      "group": "C_F(T)",
+      "mu": 1.0,
+      "sigma": 0.03,
+      "relative_sigma": 0.03
+    },
+    {
+      "name": "cf_alpha",
+      "group": "C_F(T)",
+      "mu": 0.0,
+      "sigma": 0.03,
+      "relative_sigma": null
+    },
+    {
+      "name": "a_w",
+      "group": "freeze",
+      "mu": 1.1851851851851851,
+      "sigma": 0.017777777777777778,
+      "relative_sigma": 0.015000000000000001
+    },
+    {
+      "name": "q_b",
+      "group": "freeze",
+      "mu": 0.5,
+      "sigma": 0.01,
+      "relative_sigma": 0.02
+    },
+    {
+      "name": "t_b_sec",
+      "group": "freeze",
+      "mu": 1.0,
+      "sigma": 0.02,
+      "relative_sigma": 0.02
+    },
+    {
+      "name": "t_b_mev",
+      "group": "freeze",
+      "mu": 1.0,
+      "sigma": 0.0,
+      "relative_sigma": 0.0
+    }
+  ],
+  "linear_propagation": {
+    "sigma_tf_mev": 0.012544194162103057,
+    "sigma_cf_tf": 0.03,
+    "sigma_y_pred": 0.006390112229270143,
+    "sigma_y_by_group": {
+      "freeze": 0.0051221927368542775,
+      "C_F(T)": 0.0038205596277489412
+    },
+    "sigma_total_with_obs": 0.007059287095923202,
+    "z": 1.2498893054695528,
+    "z_abs": 1.2498893054695528,
+    "status": "pass",
+    "gradient_tf": {
+      "cf0": 0.250000000462963,
+      "cf_alpha": 0.0,
+      "a_w": -0.21093750109343687,
+      "q_b": 0.7876820841124822,
+      "t_b_sec": -0.2500000012961854,
+      "t_b_mev": -0.500000003703704
+    },
+    "gradient_cf_tf": {
+      "cf0": 1.0,
+      "cf_alpha": 0.0,
+      "a_w": 0.0,
+      "q_b": 0.0,
+      "t_b_sec": 0.0,
+      "t_b_mev": 0.0
+    },
+    "gradient_y_pred": {
+      "cf0": 0.12735198759163138,
+      "cf_alpha": 0.0,
+      "a_w": -0.10745323963266716,
+      "q_b": 0.40125151650143276,
+      "t_b_sec": -0.12735198771292325,
+      "t_b_mev": -0.25470397528373795
+    },
+    "contributions": [
+      {
+        "parameter": "q_b",
+        "group": "freeze",
+        "mu": 0.5,
+        "sigma": 0.01,
+        "dY_dp": 0.40125151650143276,
+        "sigma_contribution_abs": 0.004012515165014328
+      },
+      {
+        "parameter": "cf0",
+        "group": "C_F(T)",
+        "mu": 1.0,
+        "sigma": 0.03,
+        "dY_dp": 0.12735198759163138,
+        "sigma_contribution_abs": 0.0038205596277489412
+      },
+      {
+        "parameter": "t_b_sec",
+        "group": "freeze",
+        "mu": 1.0,
+        "sigma": 0.02,
+        "dY_dp": -0.12735198771292325,
+        "sigma_contribution_abs": 0.0025470397542584652
+      },
+      {
+        "parameter": "a_w",
+        "group": "freeze",
+        "mu": 1.1851851851851851,
+        "sigma": 0.017777777777777778,
+        "dY_dp": -0.10745323963266716,
+        "sigma_contribution_abs": 0.0019102798156918606
+      },
+      {
+        "parameter": "cf_alpha",
+        "group": "C_F(T)",
+        "mu": 0.0,
+        "sigma": 0.03,
+        "dY_dp": 0.0,
+        "sigma_contribution_abs": 0.0
+      },
+      {
+        "parameter": "t_b_mev",
+        "group": "freeze",
+        "mu": 1.0,
+        "sigma": 0.0,
+        "dY_dp": -0.25470397528373795,
+        "sigma_contribution_abs": 0.0
+      }
+    ]
+  },
+  "mc_propagation": {
+    "valid_fraction": 1.0,
+    "tf": {
+      "count": 30000,
+      "mean": 0.7498084187673139,
+      "std": 0.01256902345415023,
+      "p05": 0.7289765580454062,
+      "p50": 0.7498763067939616,
+      "p95": 0.7703258092661591
+    },
+    "cf_tf": {
+      "count": 30000,
+      "mean": 0.9998072582505102,
+      "std": 0.029985234359668093,
+      "p05": 0.9505991954711951,
+      "p50": 0.9997679555160597,
+      "p95": 1.0491758947709846
+    },
+    "y_pred": {
+      "count": 30000,
+      "mean": 0.25368749797398754,
+      "std": 0.006405493305778301,
+      "p05": 0.24300781386072065,
+      "p50": 0.25376031343536376,
+      "p95": 0.2640764968180821
+    },
+    "sigma_tf_mev": 0.01256902345415023,
+    "sigma_cf_tf": 0.029985234359668093,
+    "sigma_y_pred": 0.006405493305778301,
+    "sigma_total_with_obs": 0.0070732131659077425,
+    "z": 1.2474284654619598,
+    "z_abs": 1.2474284654619598,
+    "status": "pass"
+  },
+  "decision": {
+    "raw_z": 2.9411091484778753,
+    "raw_z_abs": 2.9411091484778753,
+    "raw_status": "watch",
+    "propagated_linear_z_abs": 1.2498893054695528,
+    "propagated_mc_z_abs": 1.2474284654619598,
+    "propagated_z_abs_conservative": 1.2498893054695528,
+    "overall_status": "pass",
+    "criterion": "use max(|z_linear|, |z_mc|) after adding model sigma to observed sigma",
+    "convergence_outcome": "watch_to_pass_after_uncertainty_propagation"
+  },
+  "outputs": {
+    "metrics_json": "output/public/quantum/bbn_he4_watch_convergence_audit_metrics.json",
+    "summary_csv": "output/public/quantum/bbn_he4_watch_convergence_audit_summary.csv",
+    "figure_png": "output/public/quantum/bbn_he4_watch_convergence_audit.png"
+  }
+}

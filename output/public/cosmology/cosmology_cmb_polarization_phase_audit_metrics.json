@@ -1,0 +1,293 @@
+{
+  "generated_utc": "2026-02-22T05:02:50.495313+00:00",
+  "inputs": {
+    "tt": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
+    "te": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_te_binned_r3.02.txt",
+    "ee": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_ee_binned_r3.02.txt"
+  },
+  "model": {
+    "stokes_transport_equation": "k^μ ∇_μ S̃ = J̃ - Ã S̃ + n_e σ_T M(μ,φ) S̃, S̃=(Ĩ,Q̃,Ũ)^T",
+    "thomson_phase_matrix_axisymmetric": "(3/4)*[[1+μ^2,1-μ^2,0],[1-μ^2,1+μ^2,0],[0,0,2μ]]",
+    "quadrupole_source_note": "Q/U source term is proportional to local quadrupole Π and (1-μ^2).",
+    "quadrupole_generation_derivation": {
+      "continuity_real_space": "Theta' + (1/3) nabla·v_pb = 0",
+      "continuity_fourier": "Theta_k' = -(k/3) v_pb,k",
+      "temperature_mode": "Theta_k(r_s)=Theta_eq,k + DeltaTheta_k cos(k r_s)",
+      "velocity_mode_from_continuity": "v_pb,k(r_s)=3 c_s,P DeltaTheta_k sin(k r_s)",
+      "velocity_gradient_relation": "nabla·v_pb,k = i k v_pb,k ∝ sin(k r_s)",
+      "quadrupole_hierarchy": "Pi_k' + dot_tau_T Pi_k = (8/15) k v_pb,k",
+      "tight_coupling_limit": "dot_tau_T >> partial_s => Pi_k ≈ (8/15)(k/dot_tau_T) v_pb,k ≈ (8/15)(1/dot_tau_T) nabla·v_pb,k",
+      "polarization_source_mapping": "Q/U source in Thomson term is proportional to (1-mu^2) Pi_k; therefore E-mode is sourced by velocity-gradient phase (sin branch)."
+    },
+    "phase_shift_complete_proof": {
+      "symbolic_chain": {
+        "temperature_mode": "Theta_k = Theta_eq,k + DeltaTheta_k cos(x), x = k r_s",
+        "quadrupole_mode": "Pi_k ∝ sin(x) (from continuity + velocity-gradient + Thomson hierarchy)",
+        "polarization_mode": "E_k ∝ Pi_k ∝ sin(x)",
+        "tt_power": "C_ell^TT ∝ |Theta_k|^2 ∝ cos^2(x)",
+        "ee_power": "C_ell^EE ∝ |E_k|^2 ∝ sin^2(x)",
+        "te_cross": "C_ell^TE ∝ Re[Theta_k E_k*] ∝ sin(x)cos(x) = 0.5 sin(2x)"
+      },
+      "peak_positions_x": {
+        "tt_maxima": "x_n^TT = nπ",
+        "ee_maxima": "x_n^EE = (n+1/2)π",
+        "te_extrema": "x_m^TE = (m+1/4)π",
+        "phase_offsets": {
+          "EE_minus_TT": "Δx = π/2 (half-wavelength)",
+          "TE_minus_TT": "Δx = π/4 (intermediate)"
+        }
+      },
+      "multipole_mapping": {
+        "tt": "ell_n^TT ≈ (n-phi) ell_A",
+        "ee": "ell_n^EE ≈ (n-phi+1/2) ell_A",
+        "te": "ell_m^TE,ext ≈ (m-phi+1/4) ell_A"
+      },
+      "planck_consistency": {
+        "delta_ee_expected": 0.5,
+        "delta_te_expected": 0.25,
+        "delta_ee_fit": 0.5666886795665226,
+        "delta_te_fit": 0.26749032891609753,
+        "abs_delta_ee_from_expected": 0.06668867956652258,
+        "abs_delta_te_from_expected": 0.01749032891609753,
+        "max_abs_delta_ell_ee": 30.134304750000297,
+        "max_abs_delta_ell_te": 45.50513512500038,
+        "gate_checks": {
+          "phase_shift_hard_gate": true,
+          "ee_phase": true,
+          "te_phase": true,
+          "ee_peak_positions": true,
+          "te_peak_positions": true,
+          "te_sign_alternation": true
+        },
+        "overall_status": "pass"
+      }
+    },
+    "acoustic_phase_relations": {
+      "TT": "Θ ∝ cos(x), x=k r_s  => ℓ_n^TT ≈ (n-φ)ℓ_A",
+      "EE": "E ∝ sin(x) => C_ℓ^EE ∝ sin^2(x) => ℓ_n^EE ≈ (n-φ+1/2)ℓ_A",
+      "TE": "C_ℓ^TE ∝ sin(x)cos(x)=0.5 sin(2x) => ℓ_m^TE,ext ≈ (m-φ+1/4)ℓ_A"
+    },
+    "tt_fit": {
+      "ell_a": 299.7583254999999,
+      "phi": 0.24899846860133315
+    },
+    "search_windows": {
+      "ee_half_width_ell": 120.0,
+      "te_half_width_ell": 70.0
+    }
+  },
+  "phase_fit": {
+    "ee": {
+      "expected_delta": 0.5,
+      "delta_fit": 0.5666886795665226,
+      "delta_sigma": 0.03340286167219661,
+      "abs_shift_from_expected": 0.06668867956652258
+    },
+    "te": {
+      "expected_delta": 0.25,
+      "delta_fit": 0.26749032891609753,
+      "delta_sigma": 0.05559309369049375,
+      "abs_shift_from_expected": 0.01749032891609753
+    }
+  },
+  "features": [
+    {
+      "channel": "TT",
+      "mode": 1,
+      "kind": "max",
+      "ell_pred": 225.11896149999998,
+      "ell_obs": 225.164945,
+      "delta_ell": 0.045983500000005506,
+      "ell_half_width": 29.91001899999999,
+      "z_ell": 0.001537394543280147,
+      "dl_obs": 5793.43954,
+      "dl_bestfit": 5726.93135,
+      "sigma_dl": 87.1348811
+    },
+    {
+      "channel": "TT",
+      "mode": 2,
+      "kind": "max",
+      "ell_pred": 524.8772869999999,
+      "ell_obs": 524.78532,
+      "delta_ell": -0.09196699999995417,
+      "ell_half_width": 29.983652000000006,
+      "z_ell": -0.003067238106950886,
+      "dl_obs": 2573.4805,
+      "dl_bestfit": 2571.44487,
+      "sigma_dl": 25.9184118
+    },
+    {
+      "channel": "TT",
+      "mode": 3,
+      "kind": "max",
+      "ell_pred": 824.6356124999998,
+      "ell_obs": 824.681596,
+      "delta_ell": 0.0459835000002613,
+      "ell_half_width": 29.993389499999978,
+      "z_ell": 0.0015331211565888989,
+      "dl_obs": 2521.9126,
+      "dl_bestfit": 2522.77302,
+      "sigma_dl": 20.519762
+    },
+    {
+      "channel": "EE",
+      "mode": 1,
+      "kind": "max",
+      "ell_pred": 374.99812424999993,
+      "ell_obs": 404.869791,
+      "delta_ell": 29.871666750000088,
+      "ell_half_width": 29.972482500000012,
+      "z_ell": 0.996636389728481,
+      "dl_obs": 21.1597188,
+      "dl_bestfit": 21.292806,
+      "sigma_dl": 0.364724824
+    },
+    {
+      "channel": "EE",
+      "mode": 2,
+      "kind": "max",
+      "ell_pred": 674.7564497499998,
+      "ell_obs": 674.721939,
+      "delta_ell": -0.0345107499997539,
+      "ell_half_width": 29.99011999999999,
+      "z_ell": -0.0011507373094790522,
+      "dl_obs": 36.4396957,
+      "dl_bestfit": 37.0316549,
+      "sigma_dl": 0.616341788
+    },
+    {
+      "channel": "EE",
+      "mode": 3,
+      "kind": "max",
+      "ell_pred": 974.5147752499997,
+      "ell_obs": 1004.64908,
+      "delta_ell": 30.134304750000297,
+      "ell_half_width": 29.995548499999927,
+      "z_ell": 1.0046258947390267,
+      "dl_obs": 42.4210745,
+      "dl_bestfit": 41.6467345,
+      "sigma_dl": 1.28845629
+    },
+    {
+      "channel": "TE",
+      "mode": 1,
+      "kind": "max",
+      "ell_pred": 300.05854287499994,
+      "ell_obs": 314.975304,
+      "delta_ell": 14.91676112500005,
+      "ell_half_width": 29.95438950000002,
+      "z_ell": 0.4979824784945138,
+      "dl_obs": 119.378961,
+      "dl_bestfit": 118.474043,
+      "sigma_dl": 2.49179651
+    },
+    {
+      "channel": "TE",
+      "mode": 2,
+      "kind": "min",
+      "ell_pred": 599.8168683749999,
+      "ell_obs": 644.732258,
+      "delta_ell": 44.9153896250001,
+      "ell_half_width": 29.989178000000038,
+      "z_ell": 1.4977199316700194,
+      "dl_obs": -5.07511156,
+      "dl_bestfit": -8.29730512,
+      "sigma_dl": 2.14691724
+    },
+    {
+      "channel": "TE",
+      "mode": 3,
+      "kind": "max",
+      "ell_pred": 899.5751938749997,
+      "ell_obs": 914.663738,
+      "delta_ell": 15.088544125000226,
+      "ell_half_width": 29.99462699999998,
+      "z_ell": 0.5030415655777362,
+      "dl_obs": 60.6380162,
+      "dl_bestfit": 57.8711231,
+      "sigma_dl": 2.29690863
+    },
+    {
+      "channel": "TE",
+      "mode": 4,
+      "kind": "min",
+      "ell_pred": 1199.3335193749997,
+      "ell_obs": 1154.62972,
+      "delta_ell": -44.70379937499979,
+      "ell_half_width": 29.996624999999995,
+      "z_ell": -1.49029430394252,
+      "dl_obs": -22.8085844,
+      "dl_bestfit": -25.8896508,
+      "sigma_dl": 2.49860382
+    },
+    {
+      "channel": "TE",
+      "mode": 5,
+      "kind": "max",
+      "ell_pred": 1499.0918448749997,
+      "ell_obs": 1544.59698,
+      "delta_ell": 45.50513512500038,
+      "ell_half_width": 29.998114999999984,
+      "z_ell": 1.516933151466364,
+      "dl_obs": 8.70758155,
+      "dl_bestfit": 5.9551343,
+      "sigma_dl": 3.17133288
+    },
+    {
+      "channel": "TE",
+      "mode": 6,
+      "kind": "min",
+      "ell_pred": 1798.8501703749994,
+      "ell_obs": 1754.58537,
+      "delta_ell": -44.26480037499937,
+      "ell_half_width": 29.998540000000048,
+      "z_ell": -1.4755651566709345,
+      "dl_obs": -13.3227916,
+      "dl_bestfit": -20.4470385,
+      "sigma_dl": 4.29444107
+    }
+  ],
+  "gate": {
+    "thresholds": {
+      "phase_abs_delta_ee_from_half": 0.12,
+      "phase_abs_delta_te_from_quarter": 0.12,
+      "max_abs_delta_ell_ee": 50.0,
+      "max_abs_delta_ell_te": 55.0,
+      "te_sign_alternation_required": true,
+      "phase_shift_hard_gate_required": true
+    },
+    "checks": {
+      "phase_shift_hard_gate": true,
+      "ee_phase": true,
+      "te_phase": true,
+      "ee_peak_positions": true,
+      "te_peak_positions": true,
+      "te_sign_alternation": true
+    },
+    "hard_gate": {
+      "name": "cmb_phase_shift_lock",
+      "rule": "abs(Δφ_EE-0.5)<=0.12 and abs(Δφ_TE-0.25)<=0.12 and TE sign alternation",
+      "pass": true,
+      "components": {
+        "ee_phase": true,
+        "te_phase": true,
+        "te_sign_alternation": true
+      }
+    },
+    "summary": {
+      "ee_max_abs_delta_ell": 30.134304750000297,
+      "te_max_abs_delta_ell": 45.50513512500038,
+      "abs_delta_ee_from_half": 0.06668867956652258,
+      "abs_delta_te_from_quarter": 0.01749032891609753
+    },
+    "overall_status": "pass",
+    "hard_fail": false
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_metrics.json",
+    "falsification_pack_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_falsification_pack.json",
+    "peaks_csv": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_polarization_phase_audit_peaks.csv"
+  }
+}

@@ -1,16 +1,16 @@
 {
-  "generated_utc": "2026-02-11T02:47:13.338980+00:00",
+  "generated_utc": "2026-02-20T12:38:35.419281+00:00",
   "phase": 7,
   "step": "7.13.18",
   "inputs": {
     "differential_predictions_csv": {
-      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_differential_predictions.csv",
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_differential_predictions.csv",
       "sha256": "43d6a79c747c6215372e59673acfe8335e32d44da8f4f1ff84ef9255475ac91a",
       "rows": 3554
     },
     "frozen_falsification_pack": {
-      "path": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.json",
-      "sha256": "2b5951d57a3eba3bfb03c1da4ee30e6772640778e50dc4bd6aaa41a674ead637"
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_falsification_pack.json",
+      "sha256": "9bf06ad0cf99fccdb12a81d19b63aa24e7bee5fcb7ab3084a59b2ff16dd8524b"
     }
   },
   "thresholds": {
@@ -108,8 +108,8 @@
     }
   ],
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png",
-    "csv": "C:\\develop\\waveP\\output\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.png",
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"
   },
   "notes": [
     "Thresholds are loaded from the frozen falsification pack (Step 7.13.17.10).",

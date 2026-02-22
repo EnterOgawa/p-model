@@ -1,0 +1,29 @@
+{
+  "generated_utc": "2026-02-15T01:40:25.380570+00:00",
+  "dataset_id": "weihs1998_longdist_longdist1",
+  "source": {
+    "name": "Weihs et al. 1998 time-tag (Zenodo 7185335)",
+    "path": "C:\\develop\\waveP\\data\\quantum\\sources\\zenodo_7185335",
+    "alice_zip": "C:\\develop\\waveP\\data\\quantum\\sources\\zenodo_7185335\\Alice.zip",
+    "bob_zip": "C:\\develop\\waveP\\data\\quantum\\sources\\zenodo_7185335\\Bob.zip"
+  },
+  "schema": {
+    "a_t_s": "float64 seconds (event time; Alice)",
+    "a_c": "uint16 code in {0,1,2,3} (setting/outcome encoding; see encoding)",
+    "b_t_s": "float64 seconds (event time; Bob)",
+    "b_c": "uint16 code in {0,1,2,3} (setting/outcome encoding; see encoding)",
+    "encoding": "bit0-setting"
+  },
+  "counts": {
+    "alice_events": 471294,
+    "bob_events": 314265
+  },
+  "offset_estimate": {
+    "offset_s": -4.408291266875854e-09,
+    "offset_method": "nearest_neighbor_dt_peak",
+    "offset_median_s": -4.158291266875835e-09,
+    "offset_peak_count": 1883.0,
+    "offset_hist_bin_width_s": 5e-10,
+    "offset_hist_half_range_s": 2e-07
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "generated_utc": "2026-02-13T07:43:08.180692+00:00",
+  "domain": "cosmology",
+  "step": "16.4 (BAO re-derivation entry: xi multipoles peak fit)",
+  "dataset": "ross_post",
+  "inputs": {
+    "ross_corrfunc_dir": "C:/develop/waveP/data/cosmology/ross_2016_combineddr12_corrfunc",
+    "bincent": 0,
+    "z_bins": [
+      1,
+      2,
+      3
+    ]
+  },
+  "fit": {
+    "range_mpc_h": [
+      50.0,
+      150.0
+    ],
+    "mu_n": 80,
+    "basis": {
+      "smooth": [
+        "1",
+        "1/r",
+        "1/r^2"
+      ],
+      "peak": "Gaussian(r0,sigma)"
+    },
+    "smooth_power_max": 2,
+    "nonlinear_params": [
+      "alpha",
+      "eps"
+    ],
+    "template_peak": {
+      "r0_mpc_h": 105.0,
+      "sigma_mpc_h": 10.0
+    }
+  },
+  "notes": [
+    "P_bg の ε(pred) は、距離比（r_d を含む）ではなく F_AP=D_M H / c の比から算出（r_d が相殺）。",
+    "mono-only / quad-only χ² は cross-cov を無視した粗い指標（ℓ=2強調の目安）。"
+  ],
+  "results": [
+    {
+      "zbin": 1,
+      "z_eff": 0.38,
+      "label": "z=0.38 (bin1)",
+      "fit_range_mpc_h": [
+        50.0,
+        150.0
+      ],
+      "template_peak": {
+        "r0_mpc_h": 105.0,
+        "sigma_mpc_h": 10.0
+      },
+      "fid_reference": {
+        "lcdm_flat": {
+          "Omega_m": 0.315,
+          "F_AP": 0.42382791597863056
+        }
+      },
+      "model_reference": {
+        "P_bg_exponential": {
+          "F_AP": 0.4444752288533762,
+          "eps_pred": -0.015730565301132038
+        }
+      },
+      "fit": {
+        "free": {
+          "alpha": 1.0220000000000002,
+          "eps": 0.008000000000000049,
+          "chi2": 39.77877262493089,
+          "dof": 30,
+          "chi2_dof": 1.3259590874976963,
+          "eps_ci_1sigma": [
+            -0.003476977742682642,
+            0.018697121094382756
+          ],
+          "eps_ci_2sigma": [
+            -0.014471273943404535,
+            0.03074808802214915
+          ]
+        },
+        "eps_fixed_0": {
+          "alpha": 1.0220000000000002,
+          "eps": 0.0,
+          "chi2": 40.23781157710467,
+          "dof": 31,
+          "chi2_dof": 1.2979939218420862
+        },
+        "eps_fixed_pbg": {
+          "alpha": 1.0180000000000002,
+          "eps": -0.015730565301132038,
+          "chi2": 44.23327083277673,
+          "dof": 31,
+          "chi2_dof": 1.4268797042831205
+        }
+      },
+      "diagnostics": {
+        "chi2_mono_only_free": 23.086868289159227,
+        "chi2_quad_only_free": 16.163272491726477
+      }
+    },
+    {
+      "zbin": 2,
+      "z_eff": 0.51,
+      "label": "z=0.51 (bin2)",
+      "fit_range_mpc_h": [
+        50.0,
+        150.0
+      ],
+      "template_peak": {
+        "r0_mpc_h": 105.0,
+        "sigma_mpc_h": 10.0
+      },
+      "fid_reference": {
+        "lcdm_flat": {
+          "Omega_m": 0.315,
+          "F_AP": 0.5936254213595695
+        }
+      },
+      "model_reference": {
+        "P_bg_exponential": {
+          "F_AP": 0.6222855727485178,
+          "eps_pred": -0.015593998251695496
+        }
+      },
+      "fit": {
+        "free": {
+          "alpha": 1.0180000000000002,
+          "eps": -0.00199999999999996,
+          "chi2": 23.43249316605816,
+          "dof": 30,
+          "chi2_dof": 0.7810831055352719,
+          "eps_ci_1sigma": [
+            -0.011813204707899748,
+            0.0067893841143240406
+          ],
+          "eps_ci_2sigma": [
+            -0.021552980620833988,
+            0.01649376856636577
+          ]
+        },
+        "eps_fixed_0": {
+          "alpha": 1.0180000000000002,
+          "eps": 0.0,
+          "chi2": 23.501544675036307,
+          "dof": 31,
+          "chi2_dof": 0.7581143443560099
+        },
+        "eps_fixed_pbg": {
+          "alpha": 1.0180000000000002,
+          "eps": -0.015593998251695496,
+          "chi2": 25.375770325086183,
+          "dof": 31,
+          "chi2_dof": 0.8185732362931026
+        }
+      },
+      "diagnostics": {
+        "chi2_mono_only_free": 16.603671439637488,
+        "chi2_quad_only_free": 6.905967805271013
+      }
+    },
+    {
+      "zbin": 3,
+      "z_eff": 0.61,
+      "label": "z=0.61 (bin3)",
+      "fit_range_mpc_h": [
+        50.0,
+        150.0
+      ],
+      "template_peak": {
+        "r0_mpc_h": 105.0,
+        "sigma_mpc_h": 10.0
+      },
+      "fid_reference": {
+        "lcdm_flat": {
+          "Omega_m": 0.315,
+          "F_AP": 0.7341568491275926
+        }
+      },
+      "model_reference": {
+        "P_bg_exponential": {
+          "F_AP": 0.7667370281841581,
+          "eps_pred": -0.014369488514302198
+        }
+      },
+      "fit": {
+        "free": {
+          "alpha": 1.004,
+          "eps": -0.009999999999999967,
+          "chi2": 31.805722610568317,
+          "dof": 30,
+          "chi2_dof": 1.0601907536856106,
+          "eps_ci_1sigma": [
+            -0.01879302644480829,
+            2.697763292373043e-05
+          ],
+          "eps_ci_2sigma": [
+            -0.02857192351191014,
+            0.009727870766189917
+          ]
+        },
+        "eps_fixed_0": {
+          "alpha": 1.004,
+          "eps": 0.0,
+          "chi2": 32.79942364201256,
+          "dof": 31,
+          "chi2_dof": 1.058045923935889
+        },
+        "eps_fixed_pbg": {
+          "alpha": 1.0060000000000002,
+          "eps": -0.014369488514302198,
+          "chi2": 32.08886228588901,
+          "dof": 31,
+          "chi2_dof": 1.0351245898673873
+        }
+      },
+      "diagnostics": {
+        "chi2_mono_only_free": 14.4642797664616,
+        "chi2_quad_only_free": 15.381990083052944
+      }
+    }
+  ],
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_multipole_peakfit.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_bao_xi_multipole_peakfit_metrics.json"
+  }
+}

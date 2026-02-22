@@ -1,0 +1,307 @@
+{
+  "anchors": {
+    "alpha_mapping": {
+      "alpha_from_sparc": 0.8664827492436761,
+      "components": {
+        "a0_term": 0.0017187390191043522,
+        "base": 0.55,
+        "chi_term": 0.199870393203295,
+        "ml_term": 0.11489361702127661
+      }
+    },
+    "lens_sigma_floor_kpc": 10.0,
+    "lens_sigma_scale": 0.6,
+    "sparc": {
+      "a0_m_s2": 1.0824013602391996e-10,
+      "chi2_dof_ratio_pmodel_over_baryon": 0.20051842718682003,
+      "source": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json",
+      "upsilon_baryon_best": 0.9399999999999996,
+      "upsilon_pmodel_best": 0.5399999999999998
+    }
+  },
+  "checks": [
+    {
+      "expected": ">=2",
+      "gate_level": "hard",
+      "id": "bullet::input_clusters",
+      "metric": "n_clusters",
+      "note": "少なくとも2成分（main/sub）のオフセット監査が必要。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 2
+    },
+    {
+      "expected": ">=4.0",
+      "gate_level": "hard",
+      "id": "bullet::baryon_reject",
+      "metric": "chi2_dof(baryon_only)",
+      "note": "baryon-only 基線がオフセットを説明できないことを確認する。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 100.82888888888888
+    },
+    {
+      "expected": "<=0.35",
+      "gate_level": "hard",
+      "id": "bullet::pmodel_improves",
+      "metric": "chi2_dof_ratio(pmodel/baryon)",
+      "note": "P補正で baryon-only より有意に改善すること。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 0.01782685624952707
+    },
+    {
+      "expected": "=1.0",
+      "gate_level": "hard",
+      "id": "bullet::direction_consistency",
+      "metric": "direction_consistency_fraction(pmodel)",
+      "note": "Pピークと観測オフセットの向き（先行/遅延）が一致すること。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 1.0
+    },
+    {
+      "expected": "<=3.0",
+      "gate_level": "hard",
+      "id": "bullet::lens_anchor_gate",
+      "metric": "max_abs_z(delta_x_p_lens)",
+      "note": "観測レンズ重心に対する Pピークのズレが3σ以内。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 1.6912185095801022
+    },
+    {
+      "expected": "primary_map_registered",
+      "gate_level": "watch",
+      "id": "bullet::proxy_input_watch",
+      "metric": "source_mode",
+      "note": "一次マップ（κ/Σ + X線）へ切替時に pass へ昇格する運用監視。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": "primary_map_registered"
+    }
+  ],
+  "cluster_rows": [
+    {
+      "alpha": 0.0,
+      "cluster_id": "bullet_main",
+      "label": "Bullet main halo",
+      "model": "baryon_only",
+      "obs_lens_gas_offset_kpc": 190.0,
+      "obs_lens_gas_sigma_kpc": 25.0,
+      "pred_delta_x_p_gas_kpc": 0.0,
+      "pred_delta_x_p_lens_kpc": -190.0,
+      "residual_delta_x_p_gas_kpc": -190.0,
+      "residual_delta_x_p_lens_kpc": -190.0,
+      "sigma_p_lens_kpc": 15.0,
+      "z_delta_x_p_gas": -7.6,
+      "z_delta_x_p_lens": -12.666666666666666
+    },
+    {
+      "alpha": 0.0,
+      "cluster_id": "bullet_sub",
+      "label": "Bullet sub-halo",
+      "model": "baryon_only",
+      "obs_lens_gas_offset_kpc": 140.0,
+      "obs_lens_gas_sigma_kpc": 20.0,
+      "pred_delta_x_p_gas_kpc": 0.0,
+      "pred_delta_x_p_lens_kpc": -140.0,
+      "residual_delta_x_p_gas_kpc": -140.0,
+      "residual_delta_x_p_lens_kpc": -140.0,
+      "sigma_p_lens_kpc": 12.0,
+      "z_delta_x_p_gas": -7.0,
+      "z_delta_x_p_lens": -11.666666666666666
+    },
+    {
+      "alpha": 0.8664827492436761,
+      "cluster_id": "bullet_main",
+      "label": "Bullet main halo",
+      "model": "pmodel_corrected",
+      "obs_lens_gas_offset_kpc": 190.0,
+      "obs_lens_gas_sigma_kpc": 25.0,
+      "pred_delta_x_p_gas_kpc": 164.63172235629847,
+      "pred_delta_x_p_lens_kpc": -25.368277643701532,
+      "residual_delta_x_p_gas_kpc": -25.368277643701532,
+      "residual_delta_x_p_lens_kpc": -25.368277643701532,
+      "sigma_p_lens_kpc": 15.0,
+      "z_delta_x_p_gas": -1.0147311057480612,
+      "z_delta_x_p_lens": -1.6912185095801022
+    },
+    {
+      "alpha": 0.8664827492436761,
+      "cluster_id": "bullet_sub",
+      "label": "Bullet sub-halo",
+      "model": "pmodel_corrected",
+      "obs_lens_gas_offset_kpc": 140.0,
+      "obs_lens_gas_sigma_kpc": 20.0,
+      "pred_delta_x_p_gas_kpc": 121.30758489411465,
+      "pred_delta_x_p_lens_kpc": -18.692415105885345,
+      "residual_delta_x_p_gas_kpc": -18.692415105885345,
+      "residual_delta_x_p_lens_kpc": -18.692415105885345,
+      "sigma_p_lens_kpc": 12.0,
+      "z_delta_x_p_gas": -0.9346207552942672,
+      "z_delta_x_p_lens": -1.5577012588237789
+    }
+  ],
+  "decision": {
+    "decision": "cluster_collision_p_peak_pass",
+    "hard_fail_ids": [],
+    "overall_status": "pass",
+    "rule": "Reject if any hard gate fails; watch if only watch gates fail; otherwise pass.",
+    "watch_ids": []
+  },
+  "diagnostics": {
+    "input_mode_details": {
+      "fieldnames": [
+        "cluster_id",
+        "label",
+        "lens_gas_offset_kpc_obs",
+        "lens_gas_offset_kpc_sigma",
+        "lens_map_ref",
+        "xray_map_ref",
+        "source_mode",
+        "note"
+      ],
+      "input_csv_exists": true,
+      "mode_decision_reason": "all_rows_have_primary_registration_fields",
+      "n_rows_source_mode_primary_flag": 2,
+      "n_rows_with_primary_refs": 2,
+      "n_valid_rows": 2,
+      "primary_mode_column_present": true,
+      "primary_reference_columns_missing": [],
+      "primary_reference_columns_present": true,
+      "required_primary_mode_column": "source_mode",
+      "required_primary_reference_columns": [
+        "lens_map_ref",
+        "xray_map_ref"
+      ],
+      "rows_missing_primary_refs": [],
+      "rows_source_mode_not_primary": []
+    },
+    "primary_map_update_watchpack": {
+      "baseline_initialized_now": false,
+      "event_counter": 3,
+      "gate_ready_now": true,
+      "gate_ready_previous": true,
+      "gate_ready_state_changed": false,
+      "input_hash_changed": false,
+      "input_metadata_changed_without_hash_change": false,
+      "input_signature": {
+        "exists": true,
+        "mtime_utc": "2026-02-19T22:30:56.497689+00:00",
+        "path": "data/cosmology/bullet_cluster/collision_offset_observables.csv",
+        "sha256": "9844B1E3D73B322616C87003CE836B3322D3F72FBB8A6B379DB6B1337BE0BE84",
+        "size_bytes": 520
+      },
+      "missing_required_columns": [],
+      "n_rows_source_mode_primary_flag": 2,
+      "n_rows_with_primary_refs": 2,
+      "n_valid_rows": 2,
+      "next_action": "run_step_8_7_25_primary_map_recheck_now",
+      "note": "Step 8.7.25 rerun trigger is fixed to input hash change or source-mode transition to primary map. Proxy rows keep watch status until primary-map registration is complete.",
+      "previous_input_signature": {
+        "exists": true,
+        "mtime_utc": "2026-02-19T22:30:56.497689+00:00",
+        "path": "data/cosmology/bullet_cluster/collision_offset_observables.csv",
+        "sha256": "9844B1E3D73B322616C87003CE836B3322D3F72FBB8A6B379DB6B1337BE0BE84",
+        "size_bytes": 520
+      },
+      "primary_readiness_reason": "ready",
+      "rows_missing_primary_refs": [],
+      "rows_source_mode_not_primary": [],
+      "source_mode": "primary_map_registered",
+      "source_mode_changed": false,
+      "source_mode_previous": "primary_map_registered",
+      "transitioned_to_primary_map_registered": false,
+      "update_event_detected": false,
+      "update_event_type": "no_change"
+    },
+    "primary_registration_checklist_summary": {
+      "n_clusters": 2,
+      "n_missing_primary_refs": 0,
+      "n_missing_row": 0,
+      "n_pending": 0,
+      "n_ready": 2,
+      "n_source_mode_pending": 0,
+      "next_action": "run_step_8_7_25_primary_map_recheck_now",
+      "overall_ready": true
+    },
+    "primary_registration_readiness": {
+      "decision_reason": "ready",
+      "missing_required_columns": [],
+      "n_valid_rows": 2,
+      "next_action": "run_step_8_7_25_primary_map_recheck_now",
+      "ready": true,
+      "required_columns": [
+        "lens_map_ref",
+        "xray_map_ref",
+        "source_mode"
+      ],
+      "rows_missing_primary_refs": [],
+      "rows_source_mode_not_primary": []
+    }
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "Any hard check fails.",
+      "baryon-only baseline is not rejected by offset gate (chi2/dof < 4).",
+      "P-model corrected branch fails lens anchor gate (max |z(delta_x_p_lens)| > 3)."
+    ],
+    "watch_if": [
+      "Only watch-level checks fail (current proxy-input stage)."
+    ]
+  },
+  "generated_utc": "2026-02-20T01:42:11.184613+00:00",
+  "inputs": {
+    "offset_observations_csv": "data/cosmology/bullet_cluster/collision_offset_observables.csv",
+    "offset_source_mode": "primary_map_registered",
+    "offset_source_notes": [],
+    "sparc_anchor_mode": "sparc_anchor",
+    "sparc_anchor_source": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json"
+  },
+  "intent": "Quantify whether P-peak offsets can improve lens-gas separation consistency relative to baryon-only baseline using a fixed audit interface.",
+  "models": {
+    "baryon_only": {
+      "chi2": 403.31555555555553,
+      "chi2_dof": 100.82888888888888,
+      "direction_consistency_fraction": 0.0,
+      "dof": 4,
+      "max_abs_z_p_gas": 7.6,
+      "max_abs_z_p_lens": 12.666666666666666,
+      "mean_abs_delta_x_p_lens_kpc": 165.0,
+      "n_clusters": 2
+    },
+    "comparison": {
+      "chi2_dof_ratio_pmodel_over_baryon": 0.01782685624952707,
+      "delta_chi2_baryon_minus_pmodel": 396.1257071234685
+    },
+    "pmodel_corrected": {
+      "chi2": 7.189848432087038,
+      "chi2_dof": 1.7974621080217594,
+      "direction_consistency_fraction": 1.0,
+      "dof": 4,
+      "max_abs_z_p_gas": 1.0147311057480612,
+      "max_abs_z_p_lens": 1.6912185095801022,
+      "mean_abs_delta_x_p_lens_kpc": 22.03034637479344,
+      "n_clusters": 2
+    }
+  },
+  "outputs": {
+    "audit_csv": "output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.csv",
+    "audit_json": "output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.json",
+    "audit_png": "output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.png",
+    "primary_registration_checklist_csv": "output/public/cosmology/collision_offset_primary_registration_checklist.csv",
+    "primary_registration_template_csv": "output/public/cosmology/collision_offset_observables_primary_template.csv"
+  },
+  "phase": {
+    "name": "cluster collision P-peak offset audit",
+    "phase": 8,
+    "step": "8.7.25.9"
+  }
+}

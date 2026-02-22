@@ -1,0 +1,77 @@
+{
+  "counts": {
+    "n_galaxies": 175,
+    "n_points": 3391
+  },
+  "fit_results": {
+    "baryon_only": {
+      "chi2": 360860.5686799679,
+      "chi2_dof": 106.44854533332386,
+      "dof": 3390.0,
+      "max_abs_pull": 45.24881104365897,
+      "median_abs_residual_km_s": 31.53367927504482,
+      "rms_residual_km_s": 47.34461983556302,
+      "upsilon_1sigma": [
+        0.9399999999999996,
+        0.9399999999999996
+      ],
+      "upsilon_best": 0.9399999999999996
+    },
+    "comparison": {
+      "better_model_by_chi2": "pmodel_corrected",
+      "chi2_dof_ratio_pmodel_over_baryon": 0.20051842718682003,
+      "delta_chi2_baryon_minus_pmodel": 288501.3750145193
+    },
+    "galaxy_level_summary": {
+      "median_chi2_dof_baryon": 43.97506483458249,
+      "median_chi2_dof_pmodel": 7.096778154661975
+    },
+    "pmodel_corrected": {
+      "chi2": 72359.1936654486,
+      "chi2_dof": 21.34489488656301,
+      "dof": 3390.0,
+      "max_abs_pull": 24.90148218659571,
+      "median_abs_residual_km_s": 11.531527485060163,
+      "rms_residual_km_s": 22.769703271856685,
+      "upsilon_1sigma": [
+        0.5399999999999998,
+        0.5399999999999998
+      ],
+      "upsilon_best": 0.5399999999999998
+    }
+  },
+  "generated_utc": "2026-02-16T18:01:40.739870+00:00",
+  "inputs": {
+    "acceleration_floor_m_s2": 1e-14,
+    "bulge_to_disk_ml_ratio": 1.4,
+    "h0p_metrics": "output/private/cosmology/cosmology_redshift_pbg_metrics.json",
+    "pbg_kappa": 0.15915494309189535,
+    "rotmod_zip": "data/cosmology/sparc/raw/Rotmod_LTG.zip",
+    "sigma_floor_km_s": 3.0,
+    "upsilon_grid": {
+      "max": 1.2,
+      "min": 0.05,
+      "n": 231,
+      "step": 0.005
+    }
+  },
+  "notes": [
+    "Single free parameter fit: Υ_disk=Υ, Υ_bulge=(bulge_to_disk_ml_ratio)*Υ.",
+    "P-model correction uses gP = gbar / (1 - exp(-sqrt(gbar/a0))) with a0 fixed by kappa*c*H0^(P).",
+    "This is an operational audit I/F for Part II; it does not by itself establish a fundamental derivation."
+  ],
+  "outputs": {
+    "figure_png": "output/public/cosmology/sparc_rotation_curve_pmodel_audit.png",
+    "galaxy_summary_csv": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_galaxy_summary.csv",
+    "metrics_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json",
+    "points_csv": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_points.csv"
+  },
+  "phase": 8,
+  "pmodel_fixed": {
+    "a0_log10_m_s2": -9.965611670638069,
+    "a0_m_s2": 1.0824013602391996e-10,
+    "formula": "a0 = kappa * c * H0^(P)",
+    "h0p_si_s^-1": 2.2685455026110557e-18
+  },
+  "step": "8.7.23"
+}

@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:25.147832+00:00",
+  "generated_utc": "2026-02-20T12:39:04.959049+00:00",
   "source": {
     "paper_md": "doc/paper/12_part3_quantum.md"
   },
@@ -19,7 +19,7 @@
     "note": "INTERNAL_ONLY blocks are excluded (publish mode behavior)."
   },
   "summary": {
-    "sections_scanned": 26,
+    "sections_scanned": 28,
     "missing_sections": 0
   },
   "missing_by_category": {}

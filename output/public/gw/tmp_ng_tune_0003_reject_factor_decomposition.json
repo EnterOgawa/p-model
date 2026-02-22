@@ -1,0 +1,89 @@
+{
+  "generated_utc": "2026-02-21T05:04:41.133062+00:00",
+  "schema": "wavep.gw.polarization.network_reject_factor_decomposition.v1",
+  "source_network_audit_json": "C:/develop/waveP/output/private/gw/tmp_ng_tune_0003.json",
+  "focus_pairs": [
+    "H1-V1",
+    "L1-V1"
+  ],
+  "focus_pair_rows": [
+    {
+      "pair": "H1-V1",
+      "n_rows": 1,
+      "n_reject_event_rows": 1,
+      "n_tensor_fail": 1,
+      "tensor_fail_rate": 1.0,
+      "scalar_overlap_rate": 0.0,
+      "mean_reject_tensor_mismatch_share": 0.8687144530970791,
+      "median_tensor_mismatch": 0.18995067489633885,
+      "median_scalar_mismatch": 7.295687978319137,
+      "median_abs_corr": 0.06112656664277493,
+      "median_abs_lag_over_tolerance": 5.0,
+      "median_obs_ratio_iqr_rel": 0.7011838679867864,
+      "bottleneck_rank": 1
+    },
+    {
+      "pair": "L1-V1",
+      "n_rows": 1,
+      "n_reject_event_rows": 1,
+      "n_tensor_fail": 1,
+      "tensor_fail_rate": 1.0,
+      "scalar_overlap_rate": 0.0,
+      "mean_reject_tensor_mismatch_share": 0.129211577151413,
+      "median_tensor_mismatch": 0.0282530424086181,
+      "median_scalar_mismatch": 9.515953460314694,
+      "median_abs_corr": 0.053119439439356333,
+      "median_abs_lag_over_tolerance": 1.4285713240816404,
+      "median_obs_ratio_iqr_rel": 0.6942255651104097,
+      "bottleneck_rank": 2
+    }
+  ],
+  "pair_summary_rows": [
+    {
+      "pair": "H1-V1",
+      "n_rows": 1,
+      "n_reject_event_rows": 1,
+      "n_tensor_fail": 1,
+      "tensor_fail_rate": 1.0,
+      "scalar_overlap_rate": 0.0,
+      "mean_reject_tensor_mismatch_share": 0.8687144530970791,
+      "median_tensor_mismatch": 0.18995067489633885,
+      "median_scalar_mismatch": 7.295687978319137,
+      "median_abs_corr": 0.06112656664277493,
+      "median_abs_lag_over_tolerance": 5.0,
+      "median_obs_ratio_iqr_rel": 0.7011838679867864,
+      "bottleneck_rank": 1
+    },
+    {
+      "pair": "L1-V1",
+      "n_rows": 1,
+      "n_reject_event_rows": 1,
+      "n_tensor_fail": 1,
+      "tensor_fail_rate": 1.0,
+      "scalar_overlap_rate": 0.0,
+      "mean_reject_tensor_mismatch_share": 0.129211577151413,
+      "median_tensor_mismatch": 0.0282530424086181,
+      "median_scalar_mismatch": 9.515953460314694,
+      "median_abs_corr": 0.053119439439356333,
+      "median_abs_lag_over_tolerance": 1.4285713240816404,
+      "median_obs_ratio_iqr_rel": 0.6942255651104097,
+      "bottleneck_rank": 2
+    },
+    {
+      "pair": "H1-L1",
+      "n_rows": 1,
+      "n_reject_event_rows": 1,
+      "n_tensor_fail": 0,
+      "tensor_fail_rate": 0.0,
+      "scalar_overlap_rate": 1.0,
+      "mean_reject_tensor_mismatch_share": 0.0020739697515080296,
+      "median_tensor_mismatch": 0.0004534884306449063,
+      "median_scalar_mismatch": 0.020010700801642346,
+      "median_abs_corr": 0.652984122097279,
+      "median_abs_lag_over_tolerance": 0.7586206494744372,
+      "median_obs_ratio_iqr_rel": 0.5982711826502897,
+      "bottleneck_rank": 3
+    }
+  ],
+  "detail_rows_count": 3
+}

@@ -1,0 +1,17 @@
+id,metric,value,expected,pass,gate_level,status,score,source,note
+action::status,route_a_el_derivation_gate,pass,pass,True,hard,pass,1.0,action_principle_el_derivation_audit,作用原理→EL 導出の数値監査 status。
+action::criteria,all_action_criteria_pass,True,True,True,hard,pass,1.0,action_principle_el_derivation_audit,作用原理監査の criteria が全て pass。
+action::fail_ids,fail_ids_n,0,0,True,hard,pass,1.0,action_principle_el_derivation_audit,作用原理監査の fail_ids が空。
+nonrel::status,nonrelativistic_reduction_gate,pass,pass,True,hard,pass,1.0,nonrelativistic_reduction_schrodinger_mapping_audit,2.6→2.5 非相対論極限の運用ゲート。
+nonrel::criteria,all_nonrel_criteria_pass,True,True,True,hard,pass,1.0,nonrelativistic_reduction_schrodinger_mapping_audit,非相対論監査の criteria が全て pass。
+nonrel::fail_channels,fail_channels_n,0,0,True,hard,pass,1.0,nonrelativistic_reduction_schrodinger_mapping_audit,非相対論監査の fail_channels が空。
+born_pack::route_a_gate,route_a_gate,A_continue,A_continue,True,hard,pass,1.0,born_route_a_proxy_constraints_pack,Born route-A proxy の gate 判定。
+born_ab::route_transition,route_a_gate/transition,A_continue/A_stay,A_continue/A_stay,True,hard,pass,1.0,quantum_connection_born_ab_gate,横断A/B 判定の route と transition。
+born_ab::hard_lists,hard_fail_or_unknown_n,0,0,True,hard,pass,1.0,quantum_connection_born_ab_gate,横断A/B 判定の hard fail/unknown が空。
+deriv_pack::route_transition,route_a_gate/transition,A_continue/A_stay,A_continue/A_stay,True,hard,pass,1.0,derivation_parameter_falsification_pack,導出由来パラメータ pack の最終判定。
+deriv_pack::hard_lists,hard_fail_or_unknown_n,0,0,True,hard,pass,1.0,derivation_parameter_falsification_pack,導出由来パラメータ pack の hard fail/unknown が空。
+cross::route_consistency,born_ab_vs_deriv_route_transition,A_continue/A_stay == A_continue/A_stay,True,True,hard,pass,1.0,cross,A/B横断判定と導出packの route/transition が一致。
+shared::overall_status,shared_kpi_overall,pass,pass,True,hard,pass,1.0,quantum_connection_shared_kpi,量子接続共通KPIの overall.status。
+bridge::overall_not_reject,bridge_overall_status,watch,pass or watch,True,hard,pass,1.0,quantum_connection_bridge_table,bridge table は reject でないこと（watch は許容）。
+watch::kwiat_nonhard_stability,kwiat_max_abs_z_any_margin_to_3sigma,0.2745629738399318,> 0 (non-hard watch stability),True,soft,pass,1.0,bell_kwiat_delay_signature_watch_audit,Kwiat watch項目の非hard監視安定性（max_abs_z_any<3）。
+watch::hom_nonhard_stability,hom_detrended_ratio_margin_to_1,0.3497738842037228,> 0 (non-hard watch stability),True,soft,pass,1.0,hom_noise_psd_watch_audit,HOM watch項目の非hard監視安定性（detrended_ratio_median<1）。

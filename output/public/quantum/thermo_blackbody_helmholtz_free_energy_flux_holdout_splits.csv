@@ -1,0 +1,5 @@
+split,model_id,train_min_T_K,train_max_T_K,test_min_T_K,test_max_T_K,supported,reason,train_n,train_max_abs_z,train_reduced_chi2,test_n,test_max_abs_z,test_reduced_chi2,train_exceed_3sigma_n,test_exceed_3sigma_n,param_log10_abs_coeff,param_abs_coeff,param_exponent,param_sign
+A_low_to_high,powerlaw_abs_fit_2p,1.0,94.33732216299774,106.00258488068825,10000.0,True,,40,4.894738629792798e-09,9.161480492792139e-18,40,8.829734671829552e-09,4.882267421822109e-17,0,0,-7.723509518081248,,4.000000000000001,-1.0
+A_low_to_high,fixed_exponent_4_abs_fit,1.0,94.33732216299774,106.00258488068825,10000.0,True,,40,0.0,0.0,40,0.0,0.0,0,0,,1.8901248063948104e-08,4.0,-1.0
+B_high_to_low,powerlaw_abs_fit_2p,106.00258488068825,10000.0,1.0,94.33732216299774,True,,40,5.073035203107072e-09,2.530319995421829e-17,40,5.0862598366396295e-09,1.9297127022626478e-17,0,0,-7.723509518081246,,4.0,-1.0
+B_high_to_low,fixed_exponent_4_abs_fit,106.00258488068825,10000.0,1.0,94.33732216299774,True,,40,0.0,0.0,40,0.0,0.0,0,0,,1.8901248063948104e-08,4.0,-1.0

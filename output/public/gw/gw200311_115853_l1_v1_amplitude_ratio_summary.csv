@@ -1,0 +1,2 @@
+event,preprocess,window_start_s,window_end_s,f_lo_hz,f_hi_hz,best_lag_ms,best_corr,abs_best_corr,ratio_median,ratio_p16,ratio_p84,ratio_log_std,ratio_iqr_over_median,ratio_slope_window_fraction,status,status_reason
+GW200311_115853,whiten,-0.12,-0.01,30,350,5.371094,0.1250047,0.1250047,0.0543662,0.0470522,0.0693613,0.1986462,0.2728796,0.1647102,reject,low_cross_correlation

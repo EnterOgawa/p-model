@@ -1,0 +1,64 @@
+{
+  "generated_utc": "2026-02-22T01:04:58.913232+00:00",
+  "phase": {
+    "step": "8.7.18.2",
+    "name": "fsigma8_growth_mapping"
+  },
+  "inputs": {
+    "boss_consensus_json": "C:/develop/waveP/data/cosmology/boss_dr12_baofs_consensus_reduced_covariance_cij.json",
+    "tau_derivation_json": "C:/develop/waveP/output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+    "n_rsd_points": 3,
+    "anchor_z_for_sigma8": 0.51
+  },
+  "derivation": {
+    "continuity_linear": "dδ/dt + θ = 0",
+    "euler_linear": "dθ/dt = c^2 ∇²u - c_s^2 ∇²δ",
+    "delayed_potential": "τ_eff du/dt + u = u_N, ∇²u_N = -(4πG/c²)ρ̄δ",
+    "delta_equation_exact": "τ_eff δ''' + δ'' + τ_eff c_s²k² δ' + (c_s²k² - 4πGρ̄)δ = 0",
+    "delta_equation_slow_manifold": "δ'' + Γ_eff δ' + (c_s²k² - 4πGρ̄)δ = 0, Γ_eff=4πGρ̄τ_eff",
+    "a_eff_mapping": "a_eff = P_bg(t_obs)/P_bg(t) = 1/(1+z),  f = dlnD/dln a_eff"
+  },
+  "fit_policy": {
+    "mu_ref_scan": {
+      "mu_min": 0.05,
+      "mu_max": 2.0,
+      "n_grid": 400,
+      "note": "mu_ref is determined by fσ8 consistency under fixed τ_eff (no free per-z retuning)."
+    },
+    "sigma8_normalization": "sigma8(anchor) = fs8_obs(anchor) / f_pred(anchor)"
+  },
+  "branches": {
+    "delay": {
+      "tau_eff_gyr": 0.05559002731784142,
+      "mu_ref_best": 0.05,
+      "sigma8_anchor": 0.397936122711975,
+      "chi2": 0.15284542732955275,
+      "dof": 2,
+      "chi2_per_dof": 0.07642271366477638,
+      "max_abs_z_score": 0.30820538075001574,
+      "mean_gamma_over_h": 2.5472088355121694e-09
+    },
+    "instant": {
+      "tau_eff_gyr": 0.0,
+      "mu_ref_best": 0.05,
+      "sigma8_anchor": 0.3979361217409893,
+      "chi2": 0.15284543000748166,
+      "dof": 2,
+      "chi2_per_dof": 0.07642271500374083,
+      "max_abs_z_score": 0.308205383183543
+    }
+  },
+  "gates": {
+    "growth_mapping_defined": true,
+    "fsigma8_gate_defined": true,
+    "friction_term_positive": true,
+    "delay_vs_instant_nonworse": true,
+    "overall_status": "pass"
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_metrics.json",
+    "falsification_pack_json": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_falsification_pack.json",
+    "points_csv": "C:/develop/waveP/output/private/cosmology/cosmology_fsigma8_growth_mapping_points.csv"
+  }
+}

@@ -1,0 +1,4 @@
+event,before_status,after_status,before_quality,after_quality,before_usable_pair_count,after_usable_pair_count,before_ring_directions_used,after_ring_directions_used,before_bucket,after_bucket,before_decisive,after_decisive,transition_class,status_changed
+GW200115_042309,inconclusive_insufficient_pairs,inconclusive_geometry,low_corr,usable,1,3,0,0,inconclusive,inconclusive,0,0,status_changed_same_decisiveness,1
+GW200129_065458,reject_tensor_response,reject_tensor_response,usable,usable,3,3,10,100,reject,reject,1,1,status_unchanged,0
+GW200311_115853,inconclusive_insufficient_pairs,reject_tensor_response,missing,usable,0,2,0,28,inconclusive,reject,0,1,inconclusive_to_decisive,1

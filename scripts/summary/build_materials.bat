@@ -8,6 +8,7 @@ REM Optional: pass "quick" to rebuild paper/public materials from what is alread
 REM Optional: pass "quick-nodocx" to rebuild HTML only (skip DOCX exports).
 REM Note: outputs are written under output\private\summary by default.
 REM Note: full also rebuilds all paper HTML/DOCX (pmodel_paper + part2/part3 + part4).
+REM Note: all modes also emit LaTeX (.tex) for available paper profiles.
 REM
 REM Usage:
 REM   build_materials.bat
@@ -28,6 +29,8 @@ if errorlevel 1 (
 
 set "MODE=%~1"
 if "%MODE%"=="" set "MODE=full"
+
+set "DOCX_TIMEOUT=600"
 
 set "PROFILE="
 set "HTML_NAME="
@@ -50,12 +53,14 @@ goto single_profile
 set "PROFILE=part2_astrophysics"
 set "HTML_NAME=pmodel_paper_part2_astrophysics.html"
 set "DOCX_NAME=pmodel_paper_part2_astrophysics.docx"
+set "DOCX_HTML_NAME=pmodel_paper_part2_astrophysics_docx.html"
 goto single_profile
 
 :mode3
 set "PROFILE=part3_quantum"
 set "HTML_NAME=pmodel_paper_part3_quantum.html"
 set "DOCX_NAME=pmodel_paper_part3_quantum.docx"
+set "DOCX_HTML_NAME=pmodel_paper_part3_quantum_docx.html"
 goto single_profile
 
 :mode4
@@ -86,8 +91,27 @@ python -B scripts\summary\paper_build.py --profile %PROFILE% --mode publish --ou
 if errorlevel 1 goto fail
 
 echo.
+echo === latex_paper (%PROFILE%) ===
+python -B scripts\summary\paper_latex.py --profile %PROFILE% --outdir output\private\summary
+if errorlevel 1 goto fail
+
+set "DOCX_HTML_IN=output\private\summary\%HTML_NAME%"
+if /I "%PROFILE%"=="part2_astrophysics" (
+  echo.
+  echo === paper_html docx-friendly %PROFILE% ===
+  python -B scripts\summary\paper_html.py --profile %PROFILE% --mode publish --outdir output\private\summary --out-name %DOCX_HTML_NAME% --no-embed-images
+  set "DOCX_HTML_IN=output\private\summary\%DOCX_HTML_NAME%"
+)
+if /I "%PROFILE%"=="part3_quantum" (
+  echo.
+  echo === paper_html docx-friendly %PROFILE% ===
+  python -B scripts\summary\paper_html.py --profile %PROFILE% --mode publish --outdir output\private\summary --out-name %DOCX_HTML_NAME% --no-embed-images
+  set "DOCX_HTML_IN=output\private\summary\%DOCX_HTML_NAME%"
+)
+
+echo.
 echo === docx_paper (%PROFILE%) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\%HTML_NAME% --out output\private\summary\%DOCX_NAME% --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in %DOCX_HTML_IN% --out output\private\summary\%DOCX_NAME% --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :single_docx_done
 if "%RC%"=="3" (
@@ -145,12 +169,20 @@ if errorlevel 1 goto fail
 echo.
 echo === paper_build (part2_astrophysics) ===
 python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint
-if errorlevel 1 goto fail
+if errorlevel 1 (
+  echo [warn] paper_build part2_astrophysics failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
 
 echo.
 echo === paper_build (part3_quantum) ===
 python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
-if errorlevel 1 goto fail
+if errorlevel 1 (
+  echo [warn] paper_build part3_quantum failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
 
 echo.
 echo === paper_build (part4_verification) ===
@@ -158,8 +190,19 @@ python -B scripts\summary\paper_build.py --profile part4_verification --mode pub
 if errorlevel 1 goto fail
 
 echo.
+echo === latex_paper (paper/part2/part3/part4) ===
+python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
 echo === docx_paper (paper) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_paper_docx_done
 if "%RC%"=="3" (
@@ -171,7 +214,9 @@ echo [warn] DOCX export failed (paper). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part2_astrophysics) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7
+echo === paper_html docx-friendly part2_astrophysics ===
+python -B scripts\summary\paper_html.py --profile part2_astrophysics --mode publish --outdir output\private\summary --out-name pmodel_paper_part2_astrophysics_docx.html --no-embed-images
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics_docx.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_part2_docx_done
 if "%RC%"=="3" (
@@ -183,7 +228,9 @@ echo [warn] DOCX export failed (part2_astrophysics). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part3_quantum) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7
+echo === paper_html docx-friendly part3_quantum ===
+python -B scripts\summary\paper_html.py --profile part3_quantum --mode publish --outdir output\private\summary --out-name pmodel_paper_part3_quantum_docx.html --no-embed-images
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum_docx.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_part3_docx_done
 if "%RC%"=="3" (
@@ -198,7 +245,7 @@ if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
 
 echo.
 echo === docx_paper (part4_verification) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :full_part4_docx_done
 if "%RC%"=="3" (
@@ -224,12 +271,20 @@ if errorlevel 1 goto fail
 echo.
 echo === paper_build (part2_astrophysics) ===
 python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint
-if errorlevel 1 goto fail
+if errorlevel 1 (
+  echo [warn] paper_build part2_astrophysics failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part2_astrophysics --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
 
 echo.
 echo === paper_build (part3_quantum) ===
 python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint
-if errorlevel 1 goto fail
+if errorlevel 1 (
+  echo [warn] paper_build part3_quantum failed; retrying with --skip-tables
+  python -B scripts\summary\paper_build.py --profile part3_quantum --mode publish --outdir output\private\summary --skip-docx --skip-lint --skip-tables
+  if errorlevel 1 goto fail
+)
 
 echo.
 echo === paper_build (part4_verification) ===
@@ -237,8 +292,19 @@ python -B scripts\summary\paper_build.py --profile part4_verification --mode pub
 if errorlevel 1 goto fail
 
 echo.
+echo === latex_paper (paper/part2/part3/part4) ===
+python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
+if errorlevel 1 goto fail
+
+echo.
 echo === docx_paper (paper) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper.html --out output\private\summary\pmodel_paper.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_paper_docx_done
 if "%RC%"=="3" (
@@ -250,7 +316,9 @@ echo [warn] DOCX export failed (paper). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part2_astrophysics) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7
+echo === paper_html docx-friendly part2_astrophysics ===
+python -B scripts\summary\paper_html.py --profile part2_astrophysics --mode publish --outdir output\private\summary --out-name pmodel_paper_part2_astrophysics_docx.html --no-embed-images
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part2_astrophysics_docx.html --out output\private\summary\pmodel_paper_part2_astrophysics.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_part2_docx_done
 if "%RC%"=="3" (
@@ -262,7 +330,9 @@ echo [warn] DOCX export failed (part2_astrophysics). Continuing with HTML only.
 
 echo.
 echo === docx_paper (part3_quantum) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7
+echo === paper_html docx-friendly part3_quantum ===
+python -B scripts\summary\paper_html.py --profile part3_quantum --mode publish --outdir output\private\summary --out-name pmodel_paper_part3_quantum_docx.html --no-embed-images
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part3_quantum_docx.html --out output\private\summary\pmodel_paper_part3_quantum.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_part3_docx_done
 if "%RC%"=="3" (
@@ -277,7 +347,7 @@ if exist output\private\summary\pmodel_paper_part3_quantum__tmp.docx (
 
 echo.
 echo === docx_paper (part4_verification) ===
-python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7
+python -B scripts\summary\html_to_docx.py --in output\private\summary\pmodel_paper_part4_verification.html --out output\private\summary\pmodel_paper_part4_verification.docx --paper-equations --orientation landscape --margin-mm 7 --timeout-s %DOCX_TIMEOUT%
 set "RC=%ERRORLEVEL%"
 if "%RC%"=="0" goto :quick_part4_docx_done
 if "%RC%"=="3" (
@@ -313,6 +383,17 @@ if errorlevel 1 goto fail
 echo.
 echo === paper_build (part4_verification) ===
 python -B scripts\summary\paper_build.py --profile part4_verification --mode publish --outdir output\private\summary --skip-docx --skip-lint
+if errorlevel 1 goto fail
+
+echo.
+echo === latex_paper (paper/part2/part3/part4) ===
+python -B scripts\summary\paper_latex.py --profile paper --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part2_astrophysics --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
+if errorlevel 1 goto fail
+python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 
 echo.

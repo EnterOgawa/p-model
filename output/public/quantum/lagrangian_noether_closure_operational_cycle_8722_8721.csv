@@ -1,0 +1,6 @@
+id,metric,value,expected,status,score,note
+op_cycle::upstream_rc,8.7.22 + 8.7.21.3 command return codes,"0,0,0,0",all 0,pass,1.0,Operational cycle script return codes.
+op_cycle::weak_transition,weak_interaction transition,A_stay_B_reject,A_stay_B_reject,pass,1.0,Route-A/B transition consistency.
+op_cycle::ckm_pmns_closure,weak_interaction ckm_pmns_closure status,watch,pass or watch,watch,0.5,CKM watch is currently allowed as operational watch.
+op_cycle::drift_overall,closure drift overall_status,pass,pass,pass,1.0,L_total->EL->observables drift gate result.
+op_cycle::drift_recalc_required,closure drift recalc_required,False,False,pass,1.0,Operational recalc trigger must remain false.

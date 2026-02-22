@@ -1,0 +1,4 @@
+gate_id,observable,case,value,reference,residual,threshold,comparator,status,z_score,note
+metric_choice::caseA_flat_mercury_coeff,mercury_precession_coeff,A_flat_eta,0.3333298333,0.9997004461,-0.6663706128,0.05,|value-reference|<=threshold,reject,,kappa_flat=(2-beta+2gamma)/3 with gamma_flat=0
+metric_choice::caseA_flat_light_deflection_gamma,ppn_gamma,A_flat_eta,0,0.99983,-0.99983,3,|z|<=threshold,reject,3845.5,gamma from best VLBI constraint row
+metric_choice::caseA_flat_pde_closure,flat_linear_pde_closure,A_flat_eta,1,1,0,0,linear closure expected,pass,,partial_mu F^{mu nu}=0 on eta_{mu nu}

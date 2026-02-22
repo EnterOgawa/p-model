@@ -1,0 +1,173 @@
+{
+  "chain": {
+    "equations": {
+      "coarse_grained_balance": "∂_t P_L + ∂_x q = -(P_L-J^0)/tau_free",
+      "eta": "tau_free / (tau_free + tau_int)",
+      "flux_closure": "q=-D∂_xP_L-ξ[(1-η)J^x+ηJ^x(t-Δt)]",
+      "slow_manifold": "epsilon_slow=tau_free/min(tau_int,tau_damp) << 1 => ∂_t u_L = D ∂_xx u_L + c_w^2 S_L",
+      "tau_eff_harmonic": "1 / (1/tau_free + 1/tau_int + 1/tau_damp)",
+      "tau_eff_kernel_first_moment": "tau_eff = tau_free + eta * tau_kernel",
+      "telegraph_with_memory_friction": "tau_free ∂_tt u_L + ∂_t u_L = D ∂_xx u_L + c_w^2 S_L, D=c_w^2 tau_free",
+      "wave_projected": "(1/c_w^2)∂_tt u_L - ∂_xx u_L = S_L",
+      "xi_derived": "xi = (tau_int + tau_damp) / tau_eff"
+    },
+    "recomputed": {
+      "eta": 0.1326277603951562,
+      "tau_eff_from_kernel_calc_eta_gyr": 0.05559002731784142,
+      "tau_eff_from_kernel_gyr": 0.05559002731784142,
+      "tau_eff_harmonic_gyr": 0.023532647658336684,
+      "xi_from_taus": 6.546626905256627
+    },
+    "relative_error": {
+      "rel_fit_vs_derived_xi": 0.0,
+      "rel_tau_harm": 0.0,
+      "rel_tau_kernel": 0.0,
+      "rel_tau_kernel_calc_eta": 0.0,
+      "rel_xi_chain": 0.0
+    },
+    "stored": {
+      "D_norm_cw1_gyr": 0.03200047270930238,
+      "ad_hoc_parameter_count": 0,
+      "epsilon_slow": 0.20692553271617595,
+      "eta": 0.1326277603951562,
+      "kernel_mode": "double_exp_derived",
+      "tau_damp_gyr": 0.15464728924098026,
+      "tau_eff_gyr": 0.05559002731784142,
+      "tau_eff_harmonic_gyr": 0.023532647658336684,
+      "tau_free_gyr": 0.03200047270930238,
+      "tau_int_gyr": 0.20927987926195124,
+      "tau_kernel_gyr": 0.17786287379245058,
+      "tau_manual_injection": false,
+      "tau_origin_closure_pass": true,
+      "tau_origin_mode": "derived_from_pmu_kernel",
+      "tau_reconstruction_rel_error": 0.12394358575229716,
+      "tau_slow_gyr": 0.15464728924098026,
+      "xi_derived": 6.546626905256627,
+      "xi_fit": 6.546626905256627,
+      "xi_mode": "derived"
+    }
+  },
+  "checks": [
+    {
+      "check_id": "tau_chain::mode",
+      "expected": "derived_from_pmu_kernel",
+      "hard_fail": false,
+      "metric": "tau_origin_mode",
+      "value": "derived_from_pmu_kernel"
+    },
+    {
+      "check_id": "tau_chain::closure_pass",
+      "expected": true,
+      "hard_fail": false,
+      "metric": "tau_origin_closure_pass",
+      "value": true
+    },
+    {
+      "check_id": "tau_chain::manual_injection",
+      "expected": false,
+      "hard_fail": false,
+      "metric": "tau_manual_injection",
+      "value": false
+    },
+    {
+      "check_id": "tau_chain::ad_hoc_count",
+      "expected": 0,
+      "hard_fail": false,
+      "metric": "ad_hoc_parameter_count",
+      "value": 0
+    },
+    {
+      "check_id": "tau_chain::tau_reconstruction",
+      "expected": "<= 0.200",
+      "hard_fail": false,
+      "metric": "tau_reconstruction_rel_error",
+      "value": 0.12394358575229716
+    },
+    {
+      "check_id": "tau_chain::kernel_mode",
+      "expected": "double_exp_derived",
+      "hard_fail": false,
+      "metric": "retarded_kernel_mode",
+      "value": "double_exp_derived"
+    },
+    {
+      "check_id": "tau_chain::xi_mode",
+      "expected": "derived",
+      "hard_fail": false,
+      "metric": "xi_mode",
+      "value": "derived"
+    },
+    {
+      "check_id": "tau_chain::tau_harmonic_consistency",
+      "expected": "<= 0.020",
+      "hard_fail": false,
+      "metric": "rel(tau_eff_harm_calc, tau_eff_harm_stored)",
+      "value": 0.0
+    },
+    {
+      "check_id": "tau_chain::tau_kernel_consistency",
+      "expected": "<= 0.020",
+      "hard_fail": false,
+      "metric": "rel(tau_free + eta*tau_kernel, tau_eff)",
+      "value": 0.0
+    },
+    {
+      "check_id": "tau_chain::xi_consistency",
+      "expected": "<= 0.020",
+      "hard_fail": false,
+      "metric": "rel((tau_int+tau_damp)/tau_eff, xi_derived)",
+      "value": 0.0
+    },
+    {
+      "check_id": "tau_chain::fit_vs_derived_xi",
+      "expected": "<= 0.020",
+      "hard_fail": false,
+      "metric": "rel(xi_fit, xi_derived)",
+      "value": 0.0
+    },
+    {
+      "check_id": "tau_chain::wave_to_relax_slow_manifold",
+      "expected": "<= 0.250",
+      "hard_fail": false,
+      "metric": "epsilon_slow=tau_free/min(tau_int,tau_damp)",
+      "value": 0.20692553271617595
+    }
+  ],
+  "decision": {
+    "chain_rel_threshold": 0.02,
+    "decision": "tau_derivation_chain_fixed_but_reconstruction_margin_watch",
+    "epsilon_slow_threshold": 0.25,
+    "hard_reject_n": 0,
+    "next_action": "update_manuscript_chain_equations_and_references",
+    "overall_status": "watch",
+    "tau_recon_threshold": 0.2
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "tau_origin_mode != derived_from_pmu_kernel",
+      "tau_origin_closure_pass == false",
+      "tau_manual_injection == true",
+      "ad_hoc_parameter_count != 0",
+      "tau_reconstruction_rel_error > 0.200",
+      "kernel_mode != double_exp_derived",
+      "xi_mode != derived",
+      "epsilon_slow > 0.250",
+      "rel_chain_errors > 0.020"
+    ]
+  },
+  "generated_utc": "2026-02-21T13:58:57.660916+00:00",
+  "input": {
+    "derivation_json": "output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json"
+  },
+  "intent": "Lock the equation chain from P_mu/J^mu kernel-derived tau components to first-moment response equation and xi(derived), without ad-hoc injection.",
+  "outputs": {
+    "audit_csv": "output/public/cosmology/cosmology_tau_derivation_chain_audit.csv",
+    "audit_json": "output/public/cosmology/cosmology_tau_derivation_chain_audit.json",
+    "audit_png": "output/public/cosmology/cosmology_tau_derivation_chain_audit.png"
+  },
+  "phase": {
+    "name": "tau derivation chain audit",
+    "phase": 8,
+    "step": "8.7.25.20"
+  }
+}

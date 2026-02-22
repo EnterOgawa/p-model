@@ -1,0 +1,62 @@
+{
+  "generated_utc": "2026-02-13T07:42:46.678338+00:00",
+  "input": "C:/develop/waveP/data/cosmology/cmb_temperature_scaling_constraints.json",
+  "definition": {
+    "beta_T": "CMB温度の赤方偏移依存を、T(z)=T0(1+z)^(1-β_T) としてパラメータ化する（標準は β_T=0）。",
+    "p_T": "等価な指数表現：T(z)=T0(1+z)^(p_T) と置くと p_T=1-β_T。",
+    "note": "T(z) は距離指標と独立に、SZ効果（クラスター）や吸収線等から推定できるため、宇宙論の独立プローブとして使える。"
+  },
+  "assumptions": {
+    "parameterization": "T(z)=T0(1+z)^(1-β_T)  (=> p_T=1-β_T)",
+    "benchmarks": {
+      "standard": {
+        "p_T": 1.0,
+        "beta_T": 0.0
+      },
+      "no_scaling": {
+        "p_T": 0.0,
+        "beta_T": 1.0
+      },
+      "DDR_fix_only": {
+        "p_T": 3.0,
+        "note": "opacity/evolutionなしでε0=0を満たすためのスケール目安"
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "avgoustidis2011_sz_distance",
+      "short_label": "SZ+distance (2011)",
+      "title": "CMB temperature-redshift relation: β_T constraint from SZ + distance measurements",
+      "beta_T_obs": 0.004,
+      "beta_T_sigma": 0.016,
+      "p_T_obs": 0.996,
+      "p_T_sigma": 0.016,
+      "z_std": 0.2500000000000002,
+      "z_no_scaling": -62.25,
+      "z_ddr_fix_only": 125.25,
+      "benchmarks": {
+        "p_T_std": 1.0,
+        "p_T_no_scaling": 0.0,
+        "p_T_ddr_fix_only": 3.0
+      },
+      "sigma_note": "一次ソース要旨の記述「β=0.004±0.016 up to z~3」を採用（1σ）。",
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Constraints on the CMB temperature-redshift dependence from SZ and distance measurements",
+        "authors": "A. Avgoustidis, G. Luzzi, C. J. A. P. Martins, A. M. R. V. L. Monteiro",
+        "year": 2011,
+        "arxiv_id": "1112.1862",
+        "url": "https://arxiv.org/abs/1112.1862",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1112.1862.pdf",
+        "local_pdf_sha256": "bec55b29cd21dd86a550b8cc05f461c837b9b0d015c79d50e13dd9c7299e817b",
+        "note": "非標準モデル（光子生成/消滅など）でのT(z)の破れと距離二重性の破れの関係も議論している。ここではβ_Tの一次ソース制約のみを固定入力として使用する。"
+      }
+    }
+  ],
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_temperature_scaling_constraints.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_temperature_scaling_constraints_metrics.json"
+  }
+}

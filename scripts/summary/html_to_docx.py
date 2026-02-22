@@ -297,6 +297,12 @@ def _normalize_latex(latex: str) -> str:
     # Same normalization used in scripts/summary/paper_html.py for equation PNG rendering.
     latex_norm = latex.strip().replace("\r\n", "\n")
     latex_norm = latex_norm.replace("\\\\", "\\")
+    latex_norm = (
+        latex_norm.replace("\\lvert", "|")
+        .replace("\\rvert", "|")
+        .replace("\\lVert", "\\|")
+        .replace("\\rVert", "\\|")
+    )
     latex_norm = " ".join(latex_norm.split())
     return latex_norm
 
@@ -1633,7 +1639,8 @@ def _postprocess_docx(
             # - Heading 2 = 章
             # - Heading 3 = 項
             # - Heading 4 = 小項（例：5.3.1）
-            _apply_page_breaks_for_headings(doc, levels=(2, 3, 4))
+            # - Heading 5 = 小項の細分（例：4.2.7.2）
+            _apply_page_breaks_for_headings(doc, levels=(2, 3, 4, 5))
 
         try:
             doc.Repaginate()

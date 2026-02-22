@@ -1,0 +1,233 @@
+{
+  "generated_utc": "2026-02-13T07:43:55.398235+00:00",
+  "inputs": {
+    "data_dir": "C:/develop/waveP/data/gw/gw150914",
+    "event_json": "C:/develop/waveP/data/gw/gw150914/GW150914_event.json",
+    "catalog": "GWTC-1-confident",
+    "version": "v3",
+    "detectors_requested": [
+      "H1",
+      "L1"
+    ]
+  },
+  "outputs": {
+    "chirp_phase_png": "C:/develop/waveP/output/private/gw/gw150914_chirp_phase.png",
+    "chirp_phase_public_png": "C:/develop/waveP/output/private/gw/gw150914_chirp_phase_public.png",
+    "waveform_compare_png": "C:/develop/waveP/output/private/gw/gw150914_waveform_compare.png",
+    "waveform_compare_public_png": "C:/develop/waveP/output/private/gw/gw150914_waveform_compare_public.png",
+    "metrics_json": "C:/develop/waveP/output/private/gw/gw150914_chirp_phase_metrics.json"
+  },
+  "event": {
+    "name": "GW150914",
+    "gps_event": 1126259462.4
+  },
+  "params": {
+    "bandpass_hz": [
+      30.0,
+      350.0
+    ],
+    "whiten": false,
+    "whiten_nperseg": 4096,
+    "track_window_s": [
+      -0.2,
+      -0.01
+    ],
+    "track_frange_hz": [
+      30.0,
+      300.0
+    ],
+    "wave_window_s": [
+      -0.08,
+      -0.01
+    ],
+    "wave_window_policy": "frange",
+    "wave_frange_hz": [
+      70.0,
+      300.0
+    ],
+    "amp_percentile": 95.0,
+    "method_requested": "hilbert",
+    "stft_nperseg": 1024,
+    "stft_noverlap": 896,
+    "stft_guided": false,
+    "guided_mc_range_msun": [
+      0.8,
+      2.5,
+      86
+    ],
+    "guided_delta_hz": 25.0
+  },
+  "detectors": [
+    {
+      "detector": "H1",
+      "method_used": "hilbert",
+      "preprocess": "bandpass",
+      "fit": {
+        "ok": 1.0,
+        "tc_s": -0.019036233645579728,
+        "A_s": 2554.923726395682,
+        "chirp_mass_msun": 27.677186373207682,
+        "r2": 0.4726633482372452,
+        "r2_f": -1.1556038130253392,
+        "n_total": 24.0,
+        "n_base": 24.0,
+        "n_inliers": 21.0,
+        "sigma_t_s": 0.02024708603270593,
+        "rank_warning": 0.0
+      },
+      "waveform_fit": {
+        "tc_s": -0.019036233645579728,
+        "A_s": 2554.923726395682,
+        "coeff_c0": -4.3720587306885446e-23,
+        "coeff_c1": 7.227396671747302e-24,
+        "amp0": 4.4313937052690056e-23,
+        "phi0_rad": 2.9777654595831,
+        "overlap": 0.0582047269125909,
+        "rmse": 1.691828752396646e-21,
+        "rmse_rel": 0.9983046678068928,
+        "n": 123,
+        "n_window": 123,
+        "n_dropped_after_tc": 0,
+        "window_duration_s": 0.02978515625,
+        "min_match_samples": 64,
+        "min_match_duration_s": 0.01,
+        "window_s": [
+          -0.049734687277435796,
+          -0.019669696655726394
+        ],
+        "window_s_requested": [
+          -0.049734687277435796,
+          -0.019669696655726394
+        ],
+        "window_auto_shifted": false,
+        "window_frange_hz": [
+          70.0,
+          300.0
+        ],
+        "window_policy": "frange",
+        "ok": 1.0
+      },
+      "fs_hz": 4096.0,
+      "gps_start": 1126259447.0,
+      "n": 131072,
+      "n_track": 24
+    },
+    {
+      "detector": "L1",
+      "method_used": "hilbert",
+      "preprocess": "bandpass",
+      "fit": {
+        "ok": 1.0,
+        "tc_s": -0.01103612813846645,
+        "A_s": 55138.743919991946,
+        "chirp_mass_msun": 4.382022274014825,
+        "r2": 0.6184235450800601,
+        "r2_f": -0.07601483246324126,
+        "n_total": 14.0,
+        "n_base": 14.0,
+        "n_inliers": 14.0,
+        "sigma_t_s": 0.01738115065249678,
+        "rank_warning": 0.0
+      },
+      "waveform_fit": {
+        "tc_s": -0.01103612813846645,
+        "A_s": 55138.743919991946,
+        "coeff_c0": 1.698347598841749e-23,
+        "coeff_c1": 8.052785491112827e-24,
+        "amp0": 1.8795898776462662e-23,
+        "phi0_rad": 0.4427579662725234,
+        "overlap": 0.01762873650560493,
+        "rmse": 1.1040254348458615e-21,
+        "rmse_rel": 0.9998446017502999,
+        "n": 2658,
+        "n_window": 2658,
+        "n_dropped_after_tc": 0,
+        "window_duration_s": 0.648681640625,
+        "min_match_samples": 64,
+        "min_match_duration_s": 0.01,
+        "window_s": [
+          -0.6735506901424646,
+          -0.02470712517779442
+        ],
+        "window_s_requested": [
+          -0.6735506901424646,
+          -0.02470712517779442
+        ],
+        "window_auto_shifted": false,
+        "window_frange_hz": [
+          70.0,
+          300.0
+        ],
+        "window_policy": "frange",
+        "ok": 1.0
+      },
+      "fs_hz": 4096.0,
+      "gps_start": 1126259447.0,
+      "n": 131072,
+      "n_track": 14
+    }
+  ],
+  "skipped_detectors": [],
+  "sources": {
+    "generated_utc": "2026-02-13T07:43:54.119685+00:00",
+    "source": "GWOSC (GWTC-1-confident / GW150914 / v3)",
+    "urls": {
+      "event_json": "https://gwosc.org/eventapi/json/GWTC-1-confident/GW150914/v3",
+      "H1_strain": "https://gwosc.org/eventapi/json/GWTC-1-confident/GW150914/v3/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt.gz",
+      "L1_strain": "https://gwosc.org/eventapi/json/GWTC-1-confident/GW150914/v3/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt.gz"
+    },
+    "files": {
+      "event_json": {
+        "path": "C:/develop/waveP/data/gw/gw150914/GW150914_event.json",
+        "sha256": "6f1226c48f61d734f2b22f1bd51726e2f7a9ef948db6bcf7a07c685cce58758e"
+      },
+      "H1": {
+        "path": "C:/develop/waveP/data/gw/gw150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt.gz",
+        "sha256": "fefe8717306109460b6c9cff74da6beb9e80ee624824b4b09bdd2c54ce9b4dfc"
+      },
+      "L1": {
+        "path": "C:/develop/waveP/data/gw/gw150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt.gz",
+        "sha256": "43d30a710d6ed4a8f27d13f45182f3825cbe99f87287b518618c8ff0e25e0d7c"
+      }
+    },
+    "selection": {
+      "event_key": "GW150914-v3",
+      "event_common_name": "GW150914",
+      "api_version": "v3",
+      "detectors_requested": [
+        "H1",
+        "L1"
+      ],
+      "prefer_duration_s": 32,
+      "prefer_sampling_rate_hz": 4096,
+      "selected": {
+        "H1": {
+          "detector": "H1",
+          "GPSstart": 1126259447,
+          "sampling_rate": 4096,
+          "duration": 32,
+          "format": "txt",
+          "url": "https://gwosc.org/eventapi/json/GWTC-1-confident/GW150914/v3/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt.gz",
+          "path": "C:/develop/waveP/data/gw/gw150914/H-H1_GWOSC_4KHZ_R1-1126259447-32.txt.gz"
+        },
+        "L1": {
+          "detector": "L1",
+          "GPSstart": 1126259447,
+          "sampling_rate": 4096,
+          "duration": 32,
+          "format": "txt",
+          "url": "https://gwosc.org/eventapi/json/GWTC-1-confident/GW150914/v3/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt.gz",
+          "path": "C:/develop/waveP/data/gw/gw150914/L-L1_GWOSC_4KHZ_R1-1126259447-32.txt.gz"
+        }
+      }
+    },
+    "note": "TXT.GZ はサンプル列（時間列は header の GPSstart とサンプルレートから再構成）。"
+  },
+  "notes": [
+    "データ: GWOSC公開 strain（32秒, 4 kHz, H1/L1）",
+    "前処理: bandpass 30–350 Hz + 周波数トラック抽出（Hilbert / STFT）",
+    "fit: t = t_c − A f^(−8/3)（四重極チャープ則, Newton近似）を -0.2〜-0.01 s に当てはめ",
+    "抽出法: H1=hilbert, L1=hilbert",
+    "注: ここでの M_c はデータからの簡易推定（厳密なパラメータ推定ではない）。"
+  ]
+}

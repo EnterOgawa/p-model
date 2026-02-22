@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:23.939146+00:00",
+  "generated_utc": "2026-02-20T12:38:46.381081+00:00",
   "phase": 7,
   "step": "7.20.6",
   "inputs": {
@@ -284,8 +284,8 @@
     }
   ],
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.png"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_ofhc_copper_thermal_conductivity_holdout_splits.png"
   },
   "notes": [
     "Holdout uses the NIST rational fit curve as the operational reference and tests procedural sensitivity of re-fitting on partial temperature bands.",

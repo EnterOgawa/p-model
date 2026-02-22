@@ -1,0 +1,15 @@
+id,metric,value,expected,pass,gate_level,status,score,source,note
+action::route_a_gate,route_a_el_derivation_gate,pass,pass,True,hard,pass,1.0,action_principle_el_derivation_audit,EL 導出ゲートが pass。
+action::criteria_all_pass,all_action_criteria_pass,True,True,True,hard,pass,1.0,action_principle_el_derivation_audit,作用原理監査 criteria が全て pass。
+action::required_equations,missing_equations_n,0,0,True,hard,pass,1.0,action_principle_el_derivation_audit,L_total→EL→Noether に必要な式キーが欠けていない。
+action::noether_gauge,noether_current_gauge_margin,4.999993032890784e-08,> 0,True,hard,pass,1.0,action_principle_el_derivation_audit,Noether 電流のゲージ不変性マージン。
+action::noether_realness,noether_current_realness_margin,5e-10,> 0,True,hard,pass,1.0,action_principle_el_derivation_audit,Noether 電流の実数性マージン。
+nonrel::route_gate,nonrelativistic_reduction_gate,pass,pass,True,hard,pass,1.0,nonrelativistic_reduction_schrodinger_mapping_audit,非相対論写像ゲートが pass。
+nonrel::criteria_all_pass,all_nonrel_criteria_pass,True,True,True,hard,pass,1.0,nonrelativistic_reduction_schrodinger_mapping_audit,非相対論写像 criteria が全て pass。
+nonrel::required_channels,missing_nonrel_channels_n,0,0,True,hard,pass,1.0,nonrelativistic_reduction_schrodinger_mapping_audit,観測写像に必要な channel が揃っている。
+deriv_pack::hard_fail_unknown,hard_fail_or_unknown_n,0,0,True,hard,pass,1.0,derivation_parameter_falsification_pack,導出packの hard fail/unknown が空。
+deriv_pack::derivation_channel_pass,derivation_channel_pass_n/rows_n,3/3,all pass,True,hard,pass,1.0,derivation_parameter_falsification_pack,導出channel行が全件 pass。
+closure::observables_present,present_routes_n/required_n,3/3,all present,True,hard,pass,1.0,lagrangian_noether_observable_closure_audit,3観測量の L_total→EL→観測 route が揃っている。
+closure::observables_unique,unique_routes_n/required_n,3/3,all unique,True,hard,pass,1.0,lagrangian_noether_observable_closure_audit,3観測量の route を一意（route_count=1）で固定。
+chain::hard_fail,hard_fail_ids_n,0,0,True,hard,pass,1.0,derivation_observable_chain_lock_audit,導出チェーン全体で hard fail が無い。
+chain::watch_convergence,remaining_watch_n,0,0,True,watch,pass,1.0,derivation_observable_chain_lock_audit,non-hard watch が安定収束している。

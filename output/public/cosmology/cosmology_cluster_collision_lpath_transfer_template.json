@@ -1,0 +1,203 @@
+{
+  "checks": [
+    {
+      "check_id": "lpath_transfer::pi0_positive",
+      "expected": ">0",
+      "gate_level": "hard",
+      "hard_fail": false,
+      "metric": "Pi0_median",
+      "value": 5.539899618455155
+    },
+    {
+      "check_id": "lpath_transfer::source_lpath_status",
+      "expected": "pass",
+      "gate_level": "hard",
+      "hard_fail": false,
+      "metric": "lpath_source_overall_status",
+      "value": "pass"
+    },
+    {
+      "check_id": "lpath_transfer::bullet_rows_available",
+      "expected": ">=2",
+      "gate_level": "hard",
+      "hard_fail": false,
+      "metric": "bullet_recheck_rows",
+      "value": 2
+    },
+    {
+      "check_id": "lpath_transfer::bullet_max_abs_z",
+      "expected": "<=3",
+      "gate_level": "hard",
+      "hard_fail": false,
+      "metric": "bullet_recheck_max_abs_z",
+      "value": 2.03404559355896
+    },
+    {
+      "check_id": "lpath_transfer::bullet_chi2_dof",
+      "expected": "<=4",
+      "gate_level": "hard",
+      "hard_fail": false,
+      "metric": "bullet_recheck_chi2_dof",
+      "value": 3.141984622437141
+    },
+    {
+      "check_id": "lpath_transfer::nonbullet_observation_ready",
+      "expected": "0",
+      "gate_level": "watch",
+      "hard_fail": false,
+      "metric": "non_bullet_rows_missing_observed_offset",
+      "value": 2,
+      "watch_fail": true
+    }
+  ],
+  "cluster_rows": [
+    {
+      "branch_anchor": "bullet_main",
+      "case_id": "bullet_main_recheck",
+      "cluster_family": "bullet",
+      "label": "Bullet main halo recheck",
+      "lpath_pred_kpc": 180.0,
+      "lpath_ratio": 1.0,
+      "note": "bullet baseline recheck with fixed L_path ratio law",
+      "offset_obs_kpc": 190.0,
+      "offset_pred_kpc": 139.148860161026,
+      "offset_ref_kpc": 139.148860161026,
+      "offset_sigma_kpc": 25.0,
+      "residual_kpc": -50.85113983897401,
+      "rho_ratio": 1.0,
+      "row_status": "pass",
+      "source_mode": "primary_map_registered",
+      "tau_free_pred_gyr": 0.03200047270930238,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0,
+      "z_offset": -2.03404559355896
+    },
+    {
+      "branch_anchor": "bullet_sub",
+      "case_id": "bullet_sub_recheck",
+      "cluster_family": "bullet",
+      "label": "Bullet sub-halo recheck",
+      "lpath_pred_kpc": 180.0,
+      "lpath_ratio": 1.0,
+      "note": "bullet baseline recheck with fixed L_path ratio law",
+      "offset_obs_kpc": 140.0,
+      "offset_pred_kpc": 110.6972508579986,
+      "offset_ref_kpc": 110.6972508579986,
+      "offset_sigma_kpc": 20.0,
+      "residual_kpc": -29.302749142001403,
+      "rho_ratio": 1.0,
+      "row_status": "pass",
+      "source_mode": "primary_map_registered",
+      "tau_free_pred_gyr": 0.03200047270930238,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0,
+      "z_offset": -1.4651374571000702
+    },
+    {
+      "branch_anchor": "bullet_main",
+      "case_id": "el_gordo_main_template",
+      "cluster_family": "el_gordo",
+      "label": "El Gordo main-like transfer",
+      "lpath_pred_kpc": 180.0,
+      "lpath_ratio": 1.0,
+      "note": "replace rho/v/T and observed offsets when El Gordo primary map registration is available",
+      "offset_obs_kpc": null,
+      "offset_pred_kpc": 139.148860161026,
+      "offset_ref_kpc": 139.148860161026,
+      "offset_sigma_kpc": null,
+      "residual_kpc": null,
+      "rho_ratio": 1.0,
+      "row_status": "template_no_observation",
+      "source_mode": "template_pending_primary",
+      "tau_free_pred_gyr": 0.03200047270930238,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0,
+      "z_offset": null
+    },
+    {
+      "branch_anchor": "bullet_sub",
+      "case_id": "el_gordo_sub_template",
+      "cluster_family": "el_gordo",
+      "label": "El Gordo sub-like transfer",
+      "lpath_pred_kpc": 180.0,
+      "lpath_ratio": 1.0,
+      "note": "replace rho/v/T and observed offsets when El Gordo primary map registration is available",
+      "offset_obs_kpc": null,
+      "offset_pred_kpc": 110.6972508579986,
+      "offset_ref_kpc": 110.6972508579986,
+      "offset_sigma_kpc": null,
+      "residual_kpc": null,
+      "rho_ratio": 1.0,
+      "row_status": "template_no_observation",
+      "source_mode": "template_pending_primary",
+      "tau_free_pred_gyr": 0.03200047270930238,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0,
+      "z_offset": null
+    }
+  ],
+  "decision": {
+    "decision": "cluster_collision_lpath_transfer_watch_missing_nonbullet_observed_offsets",
+    "hard_reject_n": 0,
+    "overall_status": "watch",
+    "watch_fail_n": 1
+  },
+  "equations": {
+    "lpath_balance": "L_path=c_w/(v/L_corr + A_col rho T^{temp_power})",
+    "lpath_ratio": "L_path/L_path,0=(1+Pi0)/(r_v + Pi0 r_rho r_T^{temp_power})",
+    "offset_transfer": "Delta_x_pred(case)=Delta_x_ref(anchor) * (L_path/L_path,0)"
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "Pi0 <= 0 or non-finite.",
+      "L_path source status is not pass.",
+      "Bullet recheck rows < 2.",
+      "Bullet max abs z > 3.",
+      "Bullet chi2/dof > 4."
+    ],
+    "watch_if": [
+      "Non-Bullet transfer rows do not yet have observed offsets/sigma."
+    ]
+  },
+  "generated_utc": "2026-02-21T22:43:55.185014+00:00",
+  "inputs": {
+    "bullet_derivation_json": "output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+    "cases_csv": "data/cosmology/bullet_cluster/collision_lpath_transfer_cases.csv",
+    "lpath_scaling_json": "output/public/cosmology/cosmology_lpath_scaling_law_prediction.json"
+  },
+  "intent": "Re-evaluate Bullet offsets with fixed L_path ratio law and lock reusable transfer template for non-Bullet collision clusters.",
+  "outputs": {
+    "private_csv": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.csv",
+    "private_json": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.json",
+    "private_png": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.png",
+    "private_template_csv": "output/private/cosmology/cluster_collision_lpath_transfer_input_template.csv",
+    "public_csv": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.csv",
+    "public_json": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.json",
+    "public_png": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.png",
+    "public_template_csv": "output/public/cosmology/cluster_collision_lpath_transfer_input_template.csv"
+  },
+  "phase": {
+    "name": "cluster collision lpath transfer template",
+    "phase": 8,
+    "step": "8.7.25.22"
+  },
+  "reference_state": {
+    "anchor_offset_reference_kpc": {
+      "bullet_main": 139.148860161026,
+      "bullet_sub": 110.6972508579986
+    },
+    "lpath0_kpc": 180.0,
+    "lpath_source_decision": "lpath_scaling_law_fixed",
+    "lpath_source_status": "pass",
+    "pi0_median": 5.539899618455155,
+    "tau_free0_gyr": 0.03200047270930238,
+    "temp_power_collisional_branch": -1.5
+  },
+  "summary": {
+    "bullet_recheck_chi2_dof": 3.141984622437141,
+    "bullet_recheck_max_abs_z": 2.03404559355896,
+    "bullet_recheck_rows": 2,
+    "non_bullet_rows_missing_observed_offset": 2,
+    "template_case_rows": 4
+  }
+}

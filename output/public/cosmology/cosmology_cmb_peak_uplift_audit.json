@@ -1,0 +1,400 @@
+{
+  "generated_utc": "2026-02-22T08:12:57.155058+00:00",
+  "input": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
+  "step": "8.7.18.1",
+  "purpose": "CMB third-peak uplift audit with four-model comparison (baryon-only / pressure / ruler / pressure+ruler).",
+  "reference_fit_from_step_8_7_18": {
+    "l_acoustic": 299.7583254999999,
+    "phi": 0.24899846860133315,
+    "delta": 0.2863423432417026,
+    "silk_kappa": 5.2
+  },
+  "thresholds": {
+    "position_pass": 8.0,
+    "position_watch": 15.0,
+    "amplitude_pass": 0.08,
+    "amplitude_watch": 0.2,
+    "ratio_pass": 0.05,
+    "ratio_watch": 0.15
+  },
+  "observed_first3": [
+    {
+      "label": "ℓ1",
+      "n": 1,
+      "ell": 225.164945,
+      "amplitude": 5793.43954
+    },
+    {
+      "label": "ℓ2",
+      "n": 2,
+      "ell": 524.78532,
+      "amplitude": 2573.4805
+    },
+    {
+      "label": "ℓ3",
+      "n": 3,
+      "ell": 824.681596,
+      "amplitude": 2521.9126
+    }
+  ],
+  "models": [
+    {
+      "key": "pressure",
+      "label": "pressure",
+      "knobs": {
+        "pressure": 1.0,
+        "ruler": 0.0
+      },
+      "params": {
+        "l_acoustic": 297.9597755469999,
+        "phi": 0.24899846860133315,
+        "delta": 0.32634234324170264,
+        "silk_kappa": 5.8,
+        "ell_damping": 1728.1666981725994
+      },
+      "peaks": [
+        {
+          "label": "ℓ1",
+          "n": 1,
+          "observed": {
+            "ell": 225.164945,
+            "amplitude": 5793.43954
+          },
+          "predicted": {
+            "ell": 223.76824773099997,
+            "amplitude": 5817.196360197251
+          },
+          "residual": {
+            "delta_ell": -1.3966972690000148,
+            "delta_amp_rel": 0.004100641774756664
+          }
+        },
+        {
+          "label": "ℓ2",
+          "n": 2,
+          "observed": {
+            "ell": 524.78532,
+            "amplitude": 2573.4805
+          },
+          "predicted": {
+            "ell": 521.7280232779998,
+            "amplitude": 2528.1944321240107
+          },
+          "residual": {
+            "delta_ell": -3.05729672200016,
+            "delta_amp_rel": -0.017597206536435483
+          }
+        },
+        {
+          "label": "ℓ3",
+          "n": 3,
+          "observed": {
+            "ell": 824.681596,
+            "amplitude": 2521.9126
+          },
+          "predicted": {
+            "ell": 819.6877988249997,
+            "amplitude": 2459.428568216667
+          },
+          "residual": {
+            "delta_ell": -4.993797175000282,
+            "delta_amp_rel": -0.02477644617158148
+          }
+        }
+      ],
+      "ratios": {
+        "a2_a1_obs": 0.44420598199597333,
+        "a2_a1_pred": 0.43460702984388927,
+        "a3_a1_obs": 0.435304896614145,
+        "a3_a1_pred": 0.4227858947730745,
+        "a3_a1_abs_rel_error": 0.028759156945958653
+      },
+      "metrics": {
+        "max_abs_delta_ell": 4.993797175000282,
+        "max_abs_delta_amp_rel": 0.02477644617158148
+      },
+      "gate": {
+        "position_status": "pass",
+        "amplitude_status": "pass",
+        "ratio_status_a3_a1": "pass",
+        "overall_status": "pass"
+      },
+      "uplift_vs_baryon": {
+        "a3_a1_error_reduction": 0.35099119333867457,
+        "improves_a3_a1": true
+      }
+    },
+    {
+      "key": "pressure_ruler",
+      "label": "pressure+ruler",
+      "knobs": {
+        "pressure": 1.0,
+        "ruler": 1.0
+      },
+      "params": {
+        "l_acoustic": 299.7475342002819,
+        "phi": 0.24799846860133315,
+        "delta": 0.32634234324170264,
+        "silk_kappa": 5.8,
+        "ell_damping": 1738.535698361635
+      },
+      "peaks": [
+        {
+          "label": "ℓ1",
+          "n": 1,
+          "observed": {
+            "ell": 225.164945,
+            "amplitude": 5793.43954
+          },
+          "predicted": {
+            "ell": 225.41060475158628,
+            "amplitude": 5816.93645922731
+          },
+          "residual": {
+            "delta_ell": 0.24565975158628817,
+            "delta_amp_rel": 0.0040557805195131635
+          }
+        },
+        {
+          "label": "ℓ2",
+          "n": 2,
+          "observed": {
+            "ell": 524.78532,
+            "amplitude": 2573.4805
+          },
+          "predicted": {
+            "ell": 525.1581389518682,
+            "amplitude": 2527.931179694045
+          },
+          "residual": {
+            "delta_ell": 0.37281895186822567,
+            "delta_amp_rel": -0.017699500853398775
+          }
+        },
+        {
+          "label": "ℓ3",
+          "n": 3,
+          "observed": {
+            "ell": 824.681596,
+            "amplitude": 2521.9126
+          },
+          "predicted": {
+            "ell": 824.90567315215,
+            "amplitude": 2459.026275232015
+          },
+          "residual": {
+            "delta_ell": 0.22407715215001645,
+            "delta_amp_rel": -0.024935965174996633
+          }
+        }
+      ],
+      "ratios": {
+        "a2_a1_obs": 0.44420598199597333,
+        "a2_a1_pred": 0.43458119190627054,
+        "a3_a1_obs": 0.435304896614145,
+        "a3_a1_pred": 0.4227356259550167,
+        "a3_a1_abs_rel_error": 0.028874636506259543
+      },
+      "metrics": {
+        "max_abs_delta_ell": 0.37281895186822567,
+        "max_abs_delta_amp_rel": 0.024935965174996633
+      },
+      "gate": {
+        "position_status": "pass",
+        "amplitude_status": "pass",
+        "ratio_status_a3_a1": "pass",
+        "overall_status": "pass"
+      },
+      "uplift_vs_baryon": {
+        "a3_a1_error_reduction": 0.3508757137783737,
+        "improves_a3_a1": true
+      }
+    },
+    {
+      "key": "baryon_only",
+      "label": "baryon-only",
+      "knobs": {
+        "pressure": 0.0,
+        "ruler": 0.0
+      },
+      "params": {
+        "l_acoustic": 297.9597755469999,
+        "phi": 0.24899846860133315,
+        "delta": 0.44634234324170263,
+        "silk_kappa": 4.1,
+        "ell_damping": 1221.6350797426994
+      },
+      "peaks": [
+        {
+          "label": "ℓ1",
+          "n": 1,
+          "observed": {
+            "ell": 225.164945,
+            "amplitude": 5793.43954
+          },
+          "predicted": {
+            "ell": 223.76824773099997,
+            "amplitude": 5720.3650311674655
+          },
+          "residual": {
+            "delta_ell": -1.3966972690000148,
+            "delta_amp_rel": -0.012613320347610757
+          }
+        },
+        {
+          "label": "ℓ2",
+          "n": 2,
+          "observed": {
+            "ell": 524.78532,
+            "amplitude": 2573.4805
+          },
+          "predicted": {
+            "ell": 521.7280232779998,
+            "amplitude": 2046.7542790759317
+          },
+          "residual": {
+            "delta_ell": -3.05729672200016,
+            "delta_amp_rel": -0.2046746501184168
+          }
+        },
+        {
+          "label": "ℓ3",
+          "n": 3,
+          "observed": {
+            "ell": 824.681596,
+            "amplitude": 2521.9126
+          },
+          "predicted": {
+            "ell": 819.6877988249997,
+            "amplitude": 1544.485456744603
+          },
+          "residual": {
+            "delta_ell": -4.993797175000282,
+            "delta_amp_rel": -0.38757375781198644
+          }
+        }
+      ],
+      "ratios": {
+        "a2_a1_obs": 0.44420598199597333,
+        "a2_a1_pred": 0.35780134098508937,
+        "a3_a1_obs": 0.435304896614145,
+        "a3_a1_pred": 0.2699977096443074,
+        "a3_a1_abs_rel_error": 0.3797503502846332
+      },
+      "metrics": {
+        "max_abs_delta_ell": 4.993797175000282,
+        "max_abs_delta_amp_rel": 0.38757375781198644
+      },
+      "gate": {
+        "position_status": "pass",
+        "amplitude_status": "reject",
+        "ratio_status_a3_a1": "reject",
+        "overall_status": "reject"
+      },
+      "uplift_vs_baryon": {
+        "a3_a1_error_reduction": 0.0,
+        "improves_a3_a1": false
+      }
+    },
+    {
+      "key": "ruler",
+      "label": "ruler",
+      "knobs": {
+        "pressure": 0.0,
+        "ruler": 1.0
+      },
+      "params": {
+        "l_acoustic": 299.7475342002819,
+        "phi": 0.24799846860133315,
+        "delta": 0.44634234324170263,
+        "silk_kappa": 4.1,
+        "ell_damping": 1228.9648902211557
+      },
+      "peaks": [
+        {
+          "label": "ℓ1",
+          "n": 1,
+          "observed": {
+            "ell": 225.164945,
+            "amplitude": 5793.43954
+          },
+          "predicted": {
+            "ell": 225.41060475158628,
+            "amplitude": 5719.853589061165
+          },
+          "residual": {
+            "delta_ell": 0.24565975158628817,
+            "delta_amp_rel": -0.012701599875302283
+          }
+        },
+        {
+          "label": "ℓ2",
+          "n": 2,
+          "observed": {
+            "ell": 524.78532,
+            "amplitude": 2573.4805
+          },
+          "predicted": {
+            "ell": 525.1581389518682,
+            "amplitude": 2046.3278043875684
+          },
+          "residual": {
+            "delta_ell": 0.37281895186822567,
+            "delta_amp_rel": -0.20484036914693216
+          }
+        },
+        {
+          "label": "ℓ3",
+          "n": 3,
+          "observed": {
+            "ell": 824.681596,
+            "amplitude": 2521.9126
+          },
+          "predicted": {
+            "ell": 824.90567315215,
+            "amplitude": 1543.9799292512453
+          },
+          "residual": {
+            "delta_ell": 0.22407715215001645,
+            "delta_amp_rel": -0.3877742118219144
+          }
+        }
+      ],
+      "ratios": {
+        "a2_a1_obs": 0.44420598199597333,
+        "a2_a1_pred": 0.35775877345899776,
+        "a3_a1_obs": 0.435304896614145,
+        "a3_a1_pred": 0.2699334703608503,
+        "a3_a1_abs_rel_error": 0.3798979233626224
+      },
+      "metrics": {
+        "max_abs_delta_ell": 0.37281895186822567,
+        "max_abs_delta_amp_rel": 0.3877742118219144
+      },
+      "gate": {
+        "position_status": "pass",
+        "amplitude_status": "reject",
+        "ratio_status_a3_a1": "reject",
+        "overall_status": "reject"
+      },
+      "uplift_vs_baryon": {
+        "a3_a1_error_reduction": -0.00014757307798918262,
+        "improves_a3_a1": false
+      }
+    }
+  ],
+  "status_counts": {
+    "pass": 2,
+    "watch": 0,
+    "reject": 2
+  },
+  "key_checks": {
+    "baryon_baseline_is_not_pass": true,
+    "baryon_a3_a1_mismatch_confirmed": true,
+    "pressure_improves_a3_a1": true,
+    "pressure_keeps_positions_within_watch": true,
+    "pressure_status": "pass",
+    "pressure_ruler_status": "pass"
+  },
+  "overall_decision": "uplift_supported_by_p_corrections"
+}

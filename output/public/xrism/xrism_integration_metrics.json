@@ -1,0 +1,270 @@
+{
+  "generated_utc": "2026-02-13T07:50:32.929025+00:00",
+  "inputs": {
+    "bh_summary_csv": "output/private/xrism/xrism_bh_outflow_velocity_summary.csv",
+    "cluster_summary_csv": "output/private/xrism/xrism_cluster_redshift_turbulence_summary.csv",
+    "delta_constraints_json": "output/private/theory/delta_saturation_constraints.json",
+    "event_level_qc_summary_csv": "output/private/xrism/xrism_event_level_qc_summary.csv",
+    "event_level_qc_sweep_metrics_json": null,
+    "targets_catalog_csv": "output/private/xrism/xrism_targets_catalog.csv"
+  },
+  "outputs": {
+    "integration_metrics_json": "output/private/xrism/xrism_integration_metrics.json",
+    "resolve_summary_png": "output/private/xrism/xrism_resolve_summary.png"
+  },
+  "table1_connection": {
+    "policy": "XRISMは公開一次FITSからの直接再解析（distance-indicator independent）であり、採用はゲート（detected_obsids≥2 かつ sys/stat≤10）で判定する。現状は BH/AGN と銀河団の両方が adopted として固定する。"
+  },
+  "xrism": {
+    "bh": {
+      "best_detected_row": {
+        "beta": 0.091970741482132,
+        "beta_err_stat": 0.004359048596811722,
+        "beta_sigma_total": 0.004459731230687008,
+        "beta_sys": 0.0009422833865662759,
+        "beta_sys_event_level": null,
+        "beta_sys_sweep": 0.0009422833865662759,
+        "beta_sys_total": 0.0009422833865662759,
+        "detected": true,
+        "line_id": "FeXXV_HeA",
+        "obsid": "300047020",
+        "sys_over_stat": 0.21616721301420613,
+        "target_name": "NGC4151"
+      },
+      "beta_abs_best": 0.091970741482132,
+      "delta_connection": {
+        "delta_upper_from_gamma": 117.22263212301593,
+        "gamma_from_beta_abs_best": 1.0042563297569616,
+        "note": "XRISMのUFO/disk-windはγ~O(1)のため、既存の高γ観測（Phase 5.2）のδ上限を更新しない（接続形式のみ固定）。"
+      },
+      "event_level_qc": {
+        "coverage": 0.0,
+        "l1_norm_a_range": null,
+        "mean_shift_eV_event_minus_products_range": null,
+        "n_obsids_total": 4,
+        "n_obsids_with_qc": 0,
+        "note": "Fe-K帯域（5.5–7.5 keV）の products（PI） vs event_cl ヒストグラム差。pixel除外/GTIの手続き差の大きさを固定する目的。"
+      },
+      "excluded_detected_obsids_sysdom": [],
+      "inputs": {
+        "summary_csv": "output/private/xrism/xrism_bh_outflow_velocity_summary.csv"
+      },
+      "n_detected_rows": 8,
+      "n_obsids_detected": 4,
+      "n_obsids_detected_raw": 4,
+      "n_obsids_total": 4,
+      "obsids_detected": [
+        "300019010",
+        "300047020",
+        "300047040",
+        "300072010"
+      ],
+      "obsids_detected_raw": [
+        "300019010",
+        "300047020",
+        "300047040",
+        "300072010"
+      ],
+      "obsids_total": [
+        "300019010",
+        "300047020",
+        "300047040",
+        "300072010"
+      ],
+      "per_obsid_best": [
+        {
+          "beta": 0.040838450303744785,
+          "beta_err_stat": 0.004202625445845147,
+          "beta_sigma_total": 0.010775595652316753,
+          "beta_sys": 0.009922267937531348,
+          "beta_sys_event_level": null,
+          "beta_sys_sweep": 0.009922267937531348,
+          "beta_sys_total": 0.009922267937531348,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "300019010",
+          "sys_over_stat": 2.36096889084913,
+          "target_name": "CENTAURUS_A"
+        },
+        {
+          "beta": 0.091970741482132,
+          "beta_err_stat": 0.004359048596811722,
+          "beta_sigma_total": 0.004459731230687008,
+          "beta_sys": 0.0009422833865662759,
+          "beta_sys_event_level": null,
+          "beta_sys_sweep": 0.0009422833865662759,
+          "beta_sys_total": 0.0009422833865662759,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "300047020",
+          "sys_over_stat": 0.21616721301420613,
+          "target_name": "NGC4151"
+        },
+        {
+          "beta": 0.0450948217695585,
+          "beta_err_stat": 0.0011877646817279666,
+          "beta_sigma_total": 0.011728598275248294,
+          "beta_sys": 0.01166830032879669,
+          "beta_sys_event_level": null,
+          "beta_sys_sweep": 0.01166830032879669,
+          "beta_sys_total": 0.01166830032879669,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "300047040",
+          "sys_over_stat": 9.823747505121624,
+          "target_name": "NGC4151"
+        },
+        {
+          "beta": 0.0840254723484216,
+          "beta_err_stat": 0.0005135602342293752,
+          "beta_sigma_total": 0.004235352848264384,
+          "beta_sys": 0.004204101525310669,
+          "beta_sys_event_level": null,
+          "beta_sys_sweep": 0.004204101525310669,
+          "beta_sys_total": 0.004204101525310669,
+          "detected": true,
+          "line_id": "FeXXVI_LyA",
+          "obsid": "300072010",
+          "sys_over_stat": 8.186189749716798,
+          "target_name": "PDS456"
+        }
+      ],
+      "table1": {
+        "adopt_for_sigma_evaluable": true,
+        "gate": {
+          "min_detected_obsids": 2,
+          "note": "detected_obsids は sys/stat ゲート（≤require_sys_over_stat_leq）を満たす obsid 数を指す（高系統は excluded_detected_obsids_sysdom に列挙）。",
+          "require_sys_over_stat_leq": 10.0
+        },
+        "reasons": [],
+        "status": "adopted"
+      }
+    },
+    "cluster": {
+      "cross_checks": [
+        {
+          "delta_z": 0.0015992567616289408,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "000138000",
+          "target_name": "Centaurus_Cluster",
+          "z_opt": 0.0104,
+          "z_score": 0.6107241883035007,
+          "z_xray_sigma_total": 0.002618623582064817
+        },
+        {
+          "delta_z": 0.00037765510963286286,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "000156000",
+          "target_name": "Perseus_C1",
+          "z_opt": 0.0179,
+          "z_score": 0.4392563846247076,
+          "z_xray_sigma_total": 0.0008597600919461291
+        },
+        {
+          "delta_z": -0.0008398728185784361,
+          "detected": false,
+          "line_id": "FeXXV_HeA",
+          "obsid": "300073010",
+          "target_name": "COMA_CENTER",
+          "z_opt": 0.0231,
+          "z_score": -0.4114929105972311,
+          "z_xray_sigma_total": 0.00204103836773145
+        }
+      ],
+      "event_level_qc": {
+        "coverage": 0.0,
+        "l1_norm_a_range": null,
+        "mean_shift_eV_event_minus_products_range": null,
+        "n_obsids_total": 3,
+        "n_obsids_with_qc": 0,
+        "note": "Fe-K帯域（5.5–7.5 keV）の products（PI） vs event_cl ヒストグラム差。pixel除外/GTIの手続き差の大きさを固定する目的。"
+      },
+      "inputs": {
+        "summary_csv": "output/private/xrism/xrism_cluster_redshift_turbulence_summary.csv"
+      },
+      "n_detected_rows": 2,
+      "n_obsids_detected": 2,
+      "n_obsids_total": 3,
+      "obsids_detected": [
+        "000138000",
+        "000156000"
+      ],
+      "obsids_total": [
+        "000138000",
+        "000156000",
+        "300073010"
+      ],
+      "per_obsid_best": [
+        {
+          "delta_v_kms": 474.51020936446974,
+          "delta_z": 0.0015992567616289408,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "000138000",
+          "sigma_v_intr_kms": 2044.6406607924957,
+          "sigma_v_intr_sys_kms": 3075.528507437353,
+          "sys_over_stat": 1.6718601416407137,
+          "target_name": "Centaurus_Cluster",
+          "z_opt": 0.0104,
+          "z_xray": 0.01199925676162894,
+          "z_xray_err_stat": 0.0013441895911743343,
+          "z_xray_sigma_total": 0.002618623582064817,
+          "z_xray_sys": 0.0022472970002926957,
+          "z_xray_sys_event_level": null,
+          "z_xray_sys_sweep": 0.0022472970002926957,
+          "z_xray_sys_total": 0.0022472970002926957
+        },
+        {
+          "delta_v_kms": 111.22718694674862,
+          "delta_z": 0.00037765510963286286,
+          "detected": true,
+          "line_id": "FeXXV_HeA",
+          "obsid": "000156000",
+          "sigma_v_intr_kms": 140.0808506314661,
+          "sigma_v_intr_sys_kms": 30.634421698890034,
+          "sys_over_stat": 8.909753451028982,
+          "target_name": "Perseus_C1",
+          "z_opt": 0.0179,
+          "z_xray": 0.018277655109632862,
+          "z_xray_err_stat": 9.589440489100378e-05,
+          "z_xray_sigma_total": 0.0008597600919461291,
+          "z_xray_sys": 0.0008543955049119913,
+          "z_xray_sys_event_level": null,
+          "z_xray_sys_sweep": 0.0008543955049119913,
+          "z_xray_sys_total": 0.0008543955049119913
+        },
+        {
+          "delta_v_kms": -246.1025673824821,
+          "delta_z": -0.0008398728185784361,
+          "detected": false,
+          "line_id": "FeXXV_HeA",
+          "obsid": "300073010",
+          "sigma_v_intr_kms": 175.0702515216189,
+          "sigma_v_intr_sys_kms": 2249.317873500001,
+          "sys_over_stat": 7.553411293486325,
+          "target_name": "COMA_CENTER",
+          "z_opt": 0.0231,
+          "z_xray": 0.022260127181421563,
+          "z_xray_err_stat": 0.00026787674399587956,
+          "z_xray_sigma_total": 0.00204103836773145,
+          "z_xray_sys": 0.0020233832233608217,
+          "z_xray_sys_event_level": null,
+          "z_xray_sys_sweep": 0.0020233832233608217,
+          "z_xray_sys_total": 0.0020233832233608217
+        }
+      ],
+      "table1": {
+        "adopt_for_sigma_evaluable": true,
+        "gate": {
+          "min_detected_obsids": 2,
+          "require_sys_over_stat_leq": 10.0
+        },
+        "reasons": [],
+        "status": "adopted"
+      }
+    },
+    "event_level_qc_sweep": null
+  }
+}

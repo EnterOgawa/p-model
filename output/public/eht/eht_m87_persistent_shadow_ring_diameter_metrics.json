@@ -1,0 +1,32 @@
+{
+  "generated_utc": "2026-02-11T11:30:31.635923+00:00",
+  "input": "data/eht/eht_black_holes.json",
+  "target": "M87*",
+  "ring_measurements": [
+    {
+      "epoch": "2017",
+      "label": "2017（EHT M87* Paper I）",
+      "diameter_uas": 42.0,
+      "sigma_minus_uas": 3.0,
+      "sigma_plus_uas": 3.0,
+      "source_key": "eht_m87_paper1_2019"
+    },
+    {
+      "epoch": "2018",
+      "label": "2018（EHT M87* persistent shadow Paper I）",
+      "diameter_uas": 43.3,
+      "sigma_minus_uas": 3.1,
+      "sigma_plus_uas": 1.5,
+      "source_key": "eht_m87_persistent_paper1_2018_2024"
+    }
+  ],
+  "delta_2018_minus_2017_uas": 1.2999999999999972,
+  "delta_sigma_uas_avg_sym": 3.7802116342871597,
+  "delta_sigma_uas_max_sym": 4.313930922024598,
+  "delta_z_avg_sym": 0.34389608989316284,
+  "delta_z_max_sym": 0.30134928525695676,
+  "notes": [
+    "2018 ring diameter is compared against 2017 as an independent-epoch reproducibility check.",
+    "Asymmetric uncertainties are symmetrized either by average (avg_sym) or conservative max (max_sym) to form a simple z-score proxy."
+  ]
+}

@@ -10,8 +10,8 @@ PSA の `bc_mpo_more/document/` にある PDS4 Document（*.lblx / *.pdf）を
 - data/bepicolombo/psa_more/document/*.pdf（任意, --download-pdfs で取得済み想定）
 
 出力:
-- output/bepicolombo/more_document_catalog.json
-- output/bepicolombo/more_document_catalog.csv
+- output/private/bepicolombo/more_document_catalog.json
+- output/private/bepicolombo/more_document_catalog.csv
 """
 
 from __future__ import annotations

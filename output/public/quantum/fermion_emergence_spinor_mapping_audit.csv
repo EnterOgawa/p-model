@@ -1,0 +1,10 @@
+id,metric,value,threshold,operator,pass,gate_level,note
+prereq::action_el_gate,route_a_el_derivation_gate(pass=1),1.0,1.0,>=,True,hard,Step 8.7.9 の EL 導出ゲートが pass であること。
+prereq::closure_gate,lagrangian_noether_observable_closure(pass=1),1.0,1.0,>=,True,hard,Step 8.7.21.1 の閉包監査が pass であること。
+topology::fr_z2_sector,fr_z2_sector_available(pass=1),1.0,1.0,>=,True,hard,720度回転帰還に必要な FR Z2 セクター（pi4(M)=Z2）が存在すること。
+topology::topological_term_presence,topological_term_present(pass=1),1.0,1.0,>=,True,hard,半奇数スピンを与える位相項（Hopf/WZ/Chern系）が作用に明示されていること。
+spin::baseline_half_spin_mismatch_q1,abs(s_Q1 - nearest_half_integer),0.0,0.05,<=,True,hard,有効スピンが半奇数へ一致すること（Q=1）。
+spin::tunable_half_spin_feasibility_q1,best_mismatch_over_theta_sweep_q1,0.0,0.01,<=,True,watch,位相項係数θを可変にした場合の理論到達可能性（実装前 feasibility）。
+operator::first_order_spinor_operator,first_order_spinor_operator_present(pass=1),1.0,1.0,>=,True,hard,Dirac/Pauli 同型に必要な一次時間・一次空間のスピノル作用素が明示されること。
+dependency::external_spinor_field,external_spinor_dependency(flag<=0),0.0,0.0,<=,True,hard,スピノル場を外部導入せず、P場の欠陥自由度のみで閉じること。
+trace::action_level_derivation_traceability,action_derivation_token_ratio,1.0,0.6,>=,True,watch,作用レベル記述に欠陥集団座標→スピノル導出の痕跡トークンが十分存在すること。

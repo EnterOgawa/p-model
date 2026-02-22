@@ -1,0 +1,4 @@
+channel,epsilon_v2,epsilon_phi,epsilon_env,epsilon_max,epsilon_sum,velocity_m_per_s,spatial_scale_m,envelope_time_s,gate_metric,gate_threshold,gate_pass,note
+atom_gravimeter,5.526722590275279e-22,3.07605287934614e-19,1.3291771586688506e-26,3.07605287934614e-19,3.081579734854131e-19,0.007047815654124096,0.0028191262616496385,0.4,epsilon_max,1e-06,True,原子干渉計（recoil速度・アーム分離）を proxy として採用。
+cow_neutron,4.450600224214474e-11,3.2734109016594647e-18,4.670329084575076e-20,4.450600224214474e-11,4.450600556225893e-11,2000.0,0.03,1.4999999999999999e-05,epsilon_max,1e-06,True,COW 位相差（H/v0）で包絡時間を定義。
+optical_clock_leveling_proxy,0.0,4.357004101499244e-14,5.316708634675403e-27,4.357004101499244e-14,4.357004101499775e-14,0.0,399.308632407601,1.0,epsilon_max,1e-06,True,時計は運動項を 0 とし、重力差の proxy を監査。

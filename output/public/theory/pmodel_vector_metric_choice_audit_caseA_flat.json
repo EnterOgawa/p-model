@@ -1,0 +1,95 @@
+{
+  "generated_utc": "2026-02-21T06:45:01.513177+00:00",
+  "schema": "wavep.theory.pmodel_vector_metric_choice_audit.caseA.v1",
+  "title": "Step 8.7.32.8 case A: flat metric eta_{mu nu} baseline",
+  "step": "8.7.32.8.caseA",
+  "intent": "Fix flat-metric baseline using identical weak-field interfaces (Mercury coefficient, light-deflection gamma, linear PDE closure).",
+  "equations": {
+    "precession_coeff": "kappa_flat=(2-beta+2*gamma)/3",
+    "light_deflection_coeff": "kappa_light=(1+gamma)/2",
+    "flat_pde": "partial_mu F^{mu nu}=0 on eta_{mu nu}"
+  },
+  "inputs": {
+    "mercury_metrics_json": "C:/develop/waveP/output/private/mercury/mercury_precession_metrics.json",
+    "solar_metrics_json": "C:/develop/waveP/output/private/theory/solar_light_deflection_metrics.json",
+    "frozen_parameters_json": "C:/develop/waveP/output/private/theory/frozen_parameters.json",
+    "beta_flat": 1.0000105000000001,
+    "gamma_flat": 0.0,
+    "mercury_coeff_threshold": 0.05,
+    "z_reject": 3.0
+  },
+  "case_result": {
+    "case_id": "8.7.32.8.caseA",
+    "case_name": "flat_metric_eta",
+    "inputs": {
+      "beta_flat": 1.0000105000000001,
+      "gamma_flat": 0.0,
+      "mercury_observed_arcsec_century": 42.98,
+      "mercury_gr_like_arcsec_century": 42.99287868503234,
+      "solar_gamma_observed_best": 0.99983,
+      "solar_gamma_observed_sigma_best": 0.00026
+    },
+    "derived": {
+      "mercury_coeff_flat": 0.33332983333333327,
+      "mercury_coeff_observed": 0.9997004460872069,
+      "mercury_pred_flat_arcsec_century": 14.330809086602045,
+      "mercury_residual_arcsec_century": -28.649190913397952,
+      "mercury_rel_error": -0.6665702864913438,
+      "light_coeff_flat": 0.5,
+      "light_coeff_observed": 0.999915,
+      "light_coeff_diff": -0.499915,
+      "z_gamma": 3845.5000000000005
+    },
+    "summary": {
+      "overall_status": "reject",
+      "decision": "flat_metric_caseA_reject_baseline_fixed",
+      "hard_reject_n": 2,
+      "watch_n": 0,
+      "metric_choice_decision": "defer_case_b_required",
+      "rows": [
+        {
+          "gate_id": "metric_choice::caseA_flat_mercury_coeff",
+          "observable": "mercury_precession_coeff",
+          "case": "A_flat_eta",
+          "value": 0.33332983333333327,
+          "reference": 0.9997004460872069,
+          "residual": -0.6663706127538735,
+          "threshold": 0.05,
+          "comparator": "|value-reference|<=threshold",
+          "status": "reject",
+          "note": "kappa_flat=(2-beta+2gamma)/3 with gamma_flat=0"
+        },
+        {
+          "gate_id": "metric_choice::caseA_flat_light_deflection_gamma",
+          "observable": "ppn_gamma",
+          "case": "A_flat_eta",
+          "value": 0.0,
+          "reference": 0.99983,
+          "residual": -0.99983,
+          "threshold": 3.0,
+          "comparator": "|z|<=threshold",
+          "status": "reject",
+          "z_score": 3845.5000000000005,
+          "note": "gamma from best VLBI constraint row"
+        },
+        {
+          "gate_id": "metric_choice::caseA_flat_pde_closure",
+          "observable": "flat_linear_pde_closure",
+          "case": "A_flat_eta",
+          "value": 1.0,
+          "reference": 1.0,
+          "residual": 0.0,
+          "threshold": 0.0,
+          "comparator": "linear closure expected",
+          "status": "pass",
+          "note": "partial_mu F^{mu nu}=0 on eta_{mu nu}"
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/pmodel_vector_metric_choice_audit_caseA_flat.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/pmodel_vector_metric_choice_audit_caseA_flat.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_vector_metric_choice_audit_caseA_flat.png"
+  }
+}

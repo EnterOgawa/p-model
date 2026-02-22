@@ -1,0 +1,113 @@
+{
+  "generated_utc": "2026-02-16T16:52:22.544311+00:00",
+  "schema": "wavep.gw.polarization.network_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.3",
+  "inputs": {
+    "events": [
+      "GW200115_042309",
+      "GW200129_065458",
+      "GW200311_115853"
+    ],
+    "detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "detector_pairs": [
+      "H1-L1",
+      "H1-V1",
+      "L1-V1"
+    ],
+    "corr_use_min": 0.05,
+    "sky_samples": 5000,
+    "psi_samples": 36,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.1
+  },
+  "summary": {
+    "n_events_requested": 3,
+    "n_rows": 3,
+    "n_usable_events": 1,
+    "overall_status": "reject",
+    "overall_reason": "tensor_response_failed_for_some_events",
+    "scalar_only_mode_global_upper_bound_proxy": 0.3333333333333333
+  },
+  "rows": [
+    {
+      "event": "GW200115_042309",
+      "quality": "low_corr",
+      "usable_pair_count": 1,
+      "pair_names": "H1-L1",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 0,
+      "status": "inconclusive_insufficient_pairs",
+      "status_reason": "low_corr=H1-V1,L1-V1",
+      "scalar_overlap_fraction": NaN,
+      "tensor_mismatch_max": NaN,
+      "scalar_mismatch_max": NaN,
+      "ring_directions_used": 0
+    },
+    {
+      "event": "GW200129_065458",
+      "quality": "usable",
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 1,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.3333333333333333,
+      "tensor_mismatch_max": 0.6637221357607809,
+      "scalar_mismatch_max": 9.515953460314694,
+      "ring_directions_used": 10,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 0.0004534884306449063,
+          "scalar_mismatch": 0.020010700801642346
+        },
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.6637221357607809,
+          "scalar_mismatch": 7.295687978319137
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.22027472136159515,
+          "scalar_mismatch": 9.515953460314694
+        }
+      ]
+    },
+    {
+      "event": "GW200311_115853",
+      "quality": "missing",
+      "usable_pair_count": 0,
+      "pair_names": "",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 0,
+      "status": "inconclusive_insufficient_pairs",
+      "status_reason": "low_corr=H1-L1,H1-V1,L1-V1",
+      "scalar_overlap_fraction": NaN,
+      "tensor_mismatch_max": NaN,
+      "scalar_mismatch_max": NaN,
+      "ring_directions_used": 0
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit.png"
+    ]
+  }
+}

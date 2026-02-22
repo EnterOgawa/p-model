@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:46:45.872655+00:00",
+  "generated_utc": "2026-02-20T12:38:08.491517+00:00",
   "dataset_id": "nist_03_43_afterfixingModeLocking_s3600",
   "statistic": {
     "name": "CH J_prob (A1=0,B1=0)",
@@ -18,7 +18,7 @@
   "config": {
     "window_sweep_source": {
       "mode": "csv",
-      "path": "C:\\develop\\waveP\\output\\quantum\\nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv"
+      "path": "C:\\develop\\waveP\\output\\public\\quantum\\nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv"
     },
     "accidental_estimation": {
       "method": "time_shift",

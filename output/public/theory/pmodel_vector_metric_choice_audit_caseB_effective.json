@@ -1,0 +1,112 @@
+{
+  "generated_utc": "2026-02-21T06:57:56.001978+00:00",
+  "schema": "wavep.theory.pmodel_vector_metric_choice_audit.caseB.v2",
+  "title": "Step 8.7.32.8 case B: effective metric g_{mu nu}(P) baseline",
+  "step": "8.7.32.8.caseB",
+  "intent": "Fix effective-metric baseline using weak-field coefficients and nonlinear PDE closure gate.",
+  "equations": {
+    "precession_coeff": "kappa_effective=(2-beta+2*gamma_effective)/3",
+    "light_deflection_coeff": "kappa_light=(1+gamma_effective)/2",
+    "nonlinear_pde_gate": "formulation_complete && boundary_closure_pass && max_flux_rel_std<=threshold"
+  },
+  "inputs": {
+    "case_mode": "effective",
+    "mercury_metrics_json": "C:/develop/waveP/output/private/mercury/mercury_precession_metrics.json",
+    "solar_metrics_json": "C:/develop/waveP/output/private/theory/solar_light_deflection_metrics.json",
+    "frozen_parameters_json": "C:/develop/waveP/output/private/theory/frozen_parameters.json",
+    "strong_field_metrics_json": "C:/develop/waveP/output/public/theory/pmodel_rotating_bh_photon_ring_direct_audit.json",
+    "mercury_coeff_threshold": 0.05,
+    "z_reject": 3.0,
+    "flux_closure_threshold": 0.001
+  },
+  "case_result": {
+    "case_id": "8.7.32.8.caseB",
+    "case_name": "effective_metric_gmu_nu_P",
+    "inputs": {
+      "beta_model": 1.0000105000000001,
+      "gamma_model": 1.0000210000000003,
+      "mercury_observed_arcsec_century": 42.98,
+      "mercury_gr_like_arcsec_century": 42.99287868503234,
+      "mercury_coeff_observed": 0.9997004460872069,
+      "solar_gamma_observed_best": 0.99983,
+      "solar_gamma_observed_sigma_best": 0.00026,
+      "strong_field_json_loaded": true,
+      "flux_closure_threshold": 0.001
+    },
+    "derived": {
+      "mercury_coeff_model": 1.0000105000000001,
+      "mercury_coeff_observed": 0.9997004460872069,
+      "mercury_pred_model_arcsec_century": 42.99333011025853,
+      "mercury_residual_arcsec_century": 0.013330110258536365,
+      "mercury_rel_error": 0.00031014681848618814,
+      "light_gamma_model": 1.0000210000000003,
+      "light_gamma_observed": 0.99983,
+      "light_coeff_model": 1.0000105000000001,
+      "light_coeff_observed": 0.999915,
+      "z_gamma": -0.7346153846164396,
+      "pde_formulation_complete": true,
+      "boundary_closure_pass": true,
+      "max_flux_rel_std": 1.252657896949322e-16,
+      "flux_closure_pass": true,
+      "nonlinear_pde_closure_pass": true
+    },
+    "summary": {
+      "overall_status": "pass",
+      "decision": "effective_metric_caseB_baseline_fixed",
+      "hard_reject_n": 0,
+      "watch_n": 0,
+      "metric_choice_decision": "effective",
+      "rows": [
+        {
+          "gate_id": "metric_choice::caseB_effective_mercury_coeff",
+          "observable": "mercury_precession_coeff",
+          "case": "B_effective_metric",
+          "value": 1.0000105000000001,
+          "reference": 0.9997004460872069,
+          "residual": 0.0003100539127932622,
+          "threshold": 0.05,
+          "comparator": "|value-reference|<=threshold",
+          "status": "pass",
+          "note": "kappa_effective=(2-beta+2gamma_effective)/3"
+        },
+        {
+          "gate_id": "metric_choice::caseB_effective_light_deflection_gamma",
+          "observable": "ppn_gamma",
+          "case": "B_effective_metric",
+          "value": 1.0000210000000003,
+          "reference": 0.99983,
+          "residual": 0.00019100000000027428,
+          "threshold": 3.0,
+          "comparator": "|z|<=threshold",
+          "status": "pass",
+          "z_score": -0.7346153846164396,
+          "note": "gamma_effective from g_{mu nu}(P) weak-field mapping"
+        },
+        {
+          "gate_id": "metric_choice::caseB_effective_pde_closure",
+          "observable": "nonlinear_pde_closure",
+          "case": "B_effective_metric",
+          "value": 1.0,
+          "reference": 1.0,
+          "residual": 0.0,
+          "threshold": 0.001,
+          "comparator": "formulation&&boundary&&max_flux<=threshold",
+          "status": "pass",
+          "note": "from pmodel_rotating_bh_photon_ring_direct_audit.axisymmetric_pde_block"
+        }
+      ]
+    }
+  },
+  "case_comparison": {
+    "case_mode": "effective",
+    "case_a_status": "reject",
+    "case_b_status": "pass",
+    "reason": "caseB passes while caseA rejected"
+  },
+  "metric_choice_decision": "effective",
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/pmodel_vector_metric_choice_audit_caseB_effective.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/pmodel_vector_metric_choice_audit_caseB_effective.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_vector_metric_choice_audit_caseB_effective.png"
+  }
+}

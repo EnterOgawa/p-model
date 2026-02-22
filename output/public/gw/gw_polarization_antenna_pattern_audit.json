@@ -1,0 +1,139 @@
+{
+  "generated_utc": "2026-02-16T16:53:13.095702+00:00",
+  "schema": "wavep.gw.polarization.antenna_pattern_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.2",
+  "inputs": {
+    "events": [
+      "GW150914",
+      "GW151226",
+      "GW170104",
+      "GW200129_065458"
+    ],
+    "corr_use_min": 0.6,
+    "sky_samples": 3000,
+    "psi_samples": 36,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.2,
+    "detectors": [
+      "H1",
+      "L1"
+    ],
+    "detector_site_constants": {
+      "H1": {
+        "lat_deg": 46.4551466667,
+        "lon_deg": -119.4076571389,
+        "xarm_az_deg": 125.9994
+      },
+      "L1": {
+        "lat_deg": 30.5628943333,
+        "lon_deg": -90.7742403889,
+        "xarm_az_deg": 197.7165
+      },
+      "V1": {
+        "lat_deg": 43.6314144722,
+        "lon_deg": 10.5044966111,
+        "xarm_az_deg": 70.5674
+      }
+    },
+    "baseline_length_m": 3002053.472098804
+  },
+  "summary": {
+    "n_events_requested": 4,
+    "n_rows": 4,
+    "n_usable_events": 2,
+    "overall_status": "watch",
+    "overall_reason": "scalar_not_excluded_with_current_h1_l1_only_constraints",
+    "scalar_only_mode_global_upper_bound_proxy": 1.0,
+    "notes": [
+      "This audit uses H1/L1 amplitude-ratio and time-delay ring constraints.",
+      "With two-detector data, scalar-only exclusion can remain weak; global upper bound proxy=1 means not excluded."
+    ]
+  },
+  "rows": [
+    {
+      "event": "GW150914",
+      "slug": "gw150914",
+      "quality": "usable",
+      "status": "watch_scalar_not_excluded",
+      "status_reason": "tensor_and_scalar_overlap",
+      "best_lag_ms": -5.126953125,
+      "delay_h1_minus_l1_ms": 5.126953125,
+      "delay_tolerance_ms": 0.6103515000000002,
+      "abs_corr": 0.7494811798965588,
+      "obs_ratio_p16": 1.1920785243847691,
+      "obs_ratio_median": 1.4693133028600225,
+      "obs_ratio_p84": 1.8243826103830283,
+      "tensor_ratio_lo": 0.04161997773562027,
+      "tensor_ratio_hi": 4.508954242984585,
+      "scalar_ratio_lo": 0.005431453837771225,
+      "scalar_ratio_hi": 1336.978821905253,
+      "tensor_interval_overlap": true,
+      "scalar_interval_overlap": true,
+      "tensor_min_rel_mismatch": 2.148747120815642e-05,
+      "scalar_min_rel_mismatch": 0.002717230546909561,
+      "ring_directions_used": 181
+    },
+    {
+      "event": "GW151226",
+      "slug": "gw151226",
+      "quality": "low_corr",
+      "status": "inconclusive_low_corr",
+      "status_reason": "abs_corr_below_threshold",
+      "best_lag_ms": 0.9765625,
+      "delay_h1_minus_l1_ms": -0.9765625,
+      "delay_tolerance_ms": 1.3427735000000003,
+      "abs_corr": 0.5613668364243928,
+      "obs_ratio_p16": 0.29771316229219424,
+      "obs_ratio_median": 0.4102355167252238,
+      "obs_ratio_p84": 0.5762627105855872
+    },
+    {
+      "event": "GW170104",
+      "slug": "gw170104",
+      "quality": "low_corr",
+      "status": "inconclusive_low_corr",
+      "status_reason": "abs_corr_below_threshold",
+      "best_lag_ms": -4.638671875,
+      "delay_h1_minus_l1_ms": 4.638671875,
+      "delay_tolerance_ms": 2.8076175000000005,
+      "abs_corr": 0.4191087215601068,
+      "obs_ratio_p16": 0.6215452598899427,
+      "obs_ratio_median": 0.9856658135928777,
+      "obs_ratio_p84": 1.4187850790244612
+    },
+    {
+      "event": "GW200129_065458",
+      "slug": "gw200129_065458",
+      "quality": "usable",
+      "status": "watch_scalar_not_excluded",
+      "status_reason": "tensor_and_scalar_overlap",
+      "best_lag_ms": -5.37109375,
+      "delay_h1_minus_l1_ms": 5.37109375,
+      "delay_tolerance_ms": 7.080078500000001,
+      "abs_corr": 0.652984122097279,
+      "obs_ratio_p16": 0.8832048548158153,
+      "obs_ratio_median": 1.191722919981959,
+      "obs_ratio_p84": 1.5961783355448784,
+      "tensor_ratio_lo": 0.127296514911121,
+      "tensor_ratio_hi": 8.115696796958401,
+      "scalar_ratio_lo": 0.007895347885930281,
+      "scalar_ratio_hi": 149.05714489175375,
+      "tensor_interval_overlap": true,
+      "scalar_interval_overlap": true,
+      "tensor_min_rel_mismatch": 1.6995074406406947e-07,
+      "scalar_min_rel_mismatch": 1.615315113402523e-05,
+      "ring_directions_used": 1754
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_antenna_pattern_audit.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_antenna_pattern_audit.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_antenna_pattern_audit.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_antenna_pattern_audit.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_antenna_pattern_audit.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_antenna_pattern_audit.png"
+    ]
+  }
+}

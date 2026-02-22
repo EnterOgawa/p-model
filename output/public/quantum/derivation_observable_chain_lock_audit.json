@@ -1,0 +1,287 @@
+{
+  "generated_utc": "2026-02-19T10:41:13.496842+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.13",
+    "name": "Derivation-to-observable chain lock audit"
+  },
+  "intent": "Re-freeze one machine-readable decision for the derivation chain (EL/nonrel/Born A-B/bridge/shared/derivation-pack) with hard consistency gates.",
+  "inputs": {
+    "action_principle_el_derivation_audit_json": "output/public/quantum/action_principle_el_derivation_audit.json",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "output/public/quantum/nonrelativistic_reduction_schrodinger_mapping_audit.json",
+    "born_route_a_proxy_constraints_pack_json": "output/public/quantum/born_route_a_proxy_constraints_pack.json",
+    "quantum_connection_born_ab_gate_json": "output/public/quantum/quantum_connection_born_ab_gate.json",
+    "quantum_connection_bridge_table_json": "output/public/quantum/quantum_connection_bridge_table.json",
+    "quantum_connection_shared_kpi_json": "output/public/quantum/quantum_connection_shared_kpi.json",
+    "derivation_parameter_falsification_pack_json": "output/public/quantum/derivation_parameter_falsification_pack.json",
+    "bell_kwiat_delay_signature_watch_audit_json": "output/public/quantum/bell_kwiat_delay_signature_watch_audit.json",
+    "hom_noise_psd_watch_audit_json": "output/public/quantum/hom_noise_psd_watch_audit.json"
+  },
+  "input_hashes_sha256": {
+    "action_principle_el_derivation_audit_json": "9813f2117cedef3561594fafc113b06f12ea2ff12ec7fad11cec29af71b2529c",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "f2ee2d47d67c018435ca1f27d7cb1491a98a2165cb4e1deeb3476c84a9890fde",
+    "born_route_a_proxy_constraints_pack_json": "8630a1ef7280cea036690e14a125223822f610c5aa3f8a7932ae9dca859a0c34",
+    "quantum_connection_born_ab_gate_json": "43b2b268eedfebd499b64019ec4aa2b512e1e8babf2e3c322c2a5c291c38ac15",
+    "quantum_connection_bridge_table_json": "b613af195d09550a9dd9193dfece61b450305ca559503d8a79d6555eba68ffc1",
+    "quantum_connection_shared_kpi_json": "1cca1e8b34cc17d1042744105a16e1a14e7d08723246b67090fa7e5f3d3dcfc7",
+    "derivation_parameter_falsification_pack_json": "31354d1096af5dd3b382b8f0386644e97e436df440ec63ead8c95d66974cb1ba",
+    "bell_kwiat_delay_signature_watch_audit_json": "662fedf146dc2de16a2e3fcf3c75ef537f83e6a8d980e8435b6ff7c709678f5d",
+    "hom_noise_psd_watch_audit_json": "744f6711fa7c2a467d85ce2868b3b5869320a9d701af64e940b89bedaa19cc52"
+  },
+  "checks": [
+    {
+      "id": "action::status",
+      "metric": "route_a_el_derivation_gate",
+      "value": "pass",
+      "expected": "pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理→EL 導出の数値監査 status。"
+    },
+    {
+      "id": "action::criteria",
+      "metric": "all_action_criteria_pass",
+      "value": true,
+      "expected": true,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理監査の criteria が全て pass。"
+    },
+    {
+      "id": "action::fail_ids",
+      "metric": "fail_ids_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理監査の fail_ids が空。"
+    },
+    {
+      "id": "nonrel::status",
+      "metric": "nonrelativistic_reduction_gate",
+      "value": "pass",
+      "expected": "pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "2.6→2.5 非相対論極限の運用ゲート。"
+    },
+    {
+      "id": "nonrel::criteria",
+      "metric": "all_nonrel_criteria_pass",
+      "value": true,
+      "expected": true,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "非相対論監査の criteria が全て pass。"
+    },
+    {
+      "id": "nonrel::fail_channels",
+      "metric": "fail_channels_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "非相対論監査の fail_channels が空。"
+    },
+    {
+      "id": "born_pack::route_a_gate",
+      "metric": "route_a_gate",
+      "value": "A_continue",
+      "expected": "A_continue",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "Born route-A proxy の gate 判定。"
+    },
+    {
+      "id": "born_ab::route_transition",
+      "metric": "route_a_gate/transition",
+      "value": "A_continue/A_stay",
+      "expected": "A_continue/A_stay",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "quantum_connection_born_ab_gate",
+      "note": "横断A/B 判定の route と transition。"
+    },
+    {
+      "id": "born_ab::hard_lists",
+      "metric": "hard_fail_or_unknown_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "quantum_connection_born_ab_gate",
+      "note": "横断A/B 判定の hard fail/unknown が空。"
+    },
+    {
+      "id": "deriv_pack::route_transition",
+      "metric": "route_a_gate/transition",
+      "value": "A_continue/A_stay",
+      "expected": "A_continue/A_stay",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "derivation_parameter_falsification_pack",
+      "note": "導出由来パラメータ pack の最終判定。"
+    },
+    {
+      "id": "deriv_pack::hard_lists",
+      "metric": "hard_fail_or_unknown_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "derivation_parameter_falsification_pack",
+      "note": "導出由来パラメータ pack の hard fail/unknown が空。"
+    },
+    {
+      "id": "cross::route_consistency",
+      "metric": "born_ab_vs_deriv_route_transition",
+      "value": "A_continue/A_stay == A_continue/A_stay",
+      "expected": true,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "cross",
+      "note": "A/B横断判定と導出packの route/transition が一致。"
+    },
+    {
+      "id": "shared::overall_status",
+      "metric": "shared_kpi_overall",
+      "value": "pass",
+      "expected": "pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "quantum_connection_shared_kpi",
+      "note": "量子接続共通KPIの overall.status。"
+    },
+    {
+      "id": "bridge::overall_not_reject",
+      "metric": "bridge_overall_status",
+      "value": "watch",
+      "expected": "pass or watch",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "quantum_connection_bridge_table",
+      "note": "bridge table は reject でないこと（watch は許容）。"
+    },
+    {
+      "id": "watch::kwiat_nonhard_stability",
+      "metric": "kwiat_max_abs_z_any_margin_to_3sigma",
+      "value": 0.2745629738399318,
+      "expected": "> 0 (non-hard watch stability)",
+      "pass": true,
+      "gate_level": "soft",
+      "status": "pass",
+      "score": 1.0,
+      "source": "bell_kwiat_delay_signature_watch_audit",
+      "note": "Kwiat watch項目の非hard監視安定性（max_abs_z_any<3）。"
+    },
+    {
+      "id": "watch::hom_nonhard_stability",
+      "metric": "hom_detrended_ratio_margin_to_1",
+      "value": 0.3497738842037228,
+      "expected": "> 0 (non-hard watch stability)",
+      "pass": true,
+      "gate_level": "soft",
+      "status": "pass",
+      "score": 1.0,
+      "source": "hom_noise_psd_watch_audit",
+      "note": "HOM watch項目の非hard監視安定性（detrended_ratio_median<1）。"
+    }
+  ],
+  "decision": {
+    "route_a_gate": "A_continue",
+    "transition": "A_stay",
+    "overall_status": "watch",
+    "hard_fail_ids": [],
+    "watchlist": [
+      "hom_noise_psd_shape",
+      "kwiat2013_prl111_130406_05082013_15:delay_signature"
+    ],
+    "watch_convergence": {
+      "watch_n": 2,
+      "nonhard_stable_n": 2,
+      "nonhard_stable_watchlist": [
+        "hom_noise_psd_shape",
+        "kwiat2013_prl111_130406_05082013_15:delay_signature"
+      ],
+      "remaining_watch_n": 0,
+      "all_nonhard_watch_stable": true
+    },
+    "rule": "Reject if any hard consistency gate fails; otherwise A_stay and track watchlist."
+  },
+  "diagnostics": {
+    "source_route_a_gate": {
+      "born_pack": "A_continue",
+      "born_ab": "A_continue",
+      "derivation_pack": "A_continue"
+    },
+    "source_transition": {
+      "born_ab": "A_stay",
+      "derivation_pack": "A_stay"
+    },
+    "source_watchlist": {
+      "born_ab": [
+        "hom_noise_psd_shape"
+      ],
+      "derivation_pack": [
+        "hom_noise_psd_shape"
+      ],
+      "bridge_watch_rows": [
+        "hom_noise_psd_shape",
+        "kwiat2013_prl111_130406_05082013_15:delay_signature"
+      ]
+    },
+    "bridge_status": "watch",
+    "shared_status": "pass",
+    "watch_stability": {
+      "kwiat_delay_signature": {
+        "decision": "keep_watch_nonhard_gate",
+        "hard_gate_applicable": false,
+        "max_abs_z_any": 2.725437026160068,
+        "margin_to_hard_z3": 0.2745629738399318,
+        "stable_nonhard_watch": true
+      },
+      "hom_noise_psd_shape": {
+        "decision": "keep_watch_nonhard_gate",
+        "hard_gate_applicable": false,
+        "detrended_ratio_median": 0.6502261157962772,
+        "margin_to_ratio_threshold_1": 0.3497738842037228,
+        "stable_nonhard_watch": true
+      }
+    }
+  }
+}

@@ -1,10 +1,10 @@
 {
-  "generated_utc": "2026-02-11T02:47:15.310524+00:00",
+  "generated_utc": "2026-02-20T12:38:37.187006+00:00",
   "phase": 7,
   "step": "7.20.4",
   "inputs": {
     "minimal_additional_physics_csv": {
-      "path": "output/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv",
+      "path": "output/public/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv",
       "sha256": "4abdecbfd25b1ad943bdda3a1f655957a44ff6f47f63d4b6232d44ac603c6c13"
     },
     "beta2_extracted_json": {
@@ -166,10 +166,10 @@
     }
   ],
   "outputs": {
-    "summary_json": "output/quantum/nuclear_holdout_audit_summary.json",
-    "groups_csv": "output/quantum/nuclear_holdout_audit_groups.csv",
-    "outliers_csv": "output/quantum/nuclear_holdout_audit_outliers.csv",
-    "png": "output/quantum/nuclear_holdout_audit.png"
+    "summary_json": "output/public/quantum/nuclear_holdout_audit_summary.json",
+    "groups_csv": "output/public/quantum/nuclear_holdout_audit_groups.csv",
+    "outliers_csv": "output/public/quantum/nuclear_holdout_audit_outliers.csv",
+    "png": "output/public/quantum/nuclear_holdout_audit.png"
   },
   "notes": [
     "This audit is an operational holdout/segmentation check: it catalogs where residuals concentrate (magic/edges/extreme N/Z/deformed).",

@@ -1,0 +1,259 @@
+{
+  "generated_utc": "2026-02-16T18:09:00.036122+00:00",
+  "phase": {
+    "phase": 7,
+    "step": "7.21.2",
+    "name": "Bell-interference bridge table packaging"
+  },
+  "intent": "Unify window/offset sensitivity and phase/visibility sensitivity in one table with origin tags.",
+  "inputs": {
+    "part3_audit_summary_json": "output/public/summary/part3_audit_summary.json",
+    "born_route_a_proxy_constraints_pack_json": "output/public/quantum/born_route_a_proxy_constraints_pack.json",
+    "kwiat_delay_watch_audit_json": "output/public/quantum/bell_kwiat_delay_signature_watch_audit.json",
+    "hom_noise_watch_audit_json": "output/public/quantum/hom_noise_psd_watch_audit.json"
+  },
+  "thresholds": {
+    "selection_ratio_min": 1.0,
+    "delay_z_min": 3.0,
+    "phase_abs_z_max": 3.0,
+    "visibility_ratio_max": 1.0,
+    "overall_rule": "max(selection_status, physics_status)"
+  },
+  "rows": [
+    {
+      "id": "weihs1998_longdist_longdist1:selection_ratio",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "window half-width",
+      "metric": "ratio_sys_stat",
+      "value": 19.316744077961687,
+      "threshold": 1.0,
+      "operator": ">=",
+      "normalized_score": 0.051768558715901386,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Selection sweep幅 / 統計幅（σ）"
+    },
+    {
+      "id": "weihs1998_longdist_longdist1:delay_signature",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "time-tag delay signature",
+      "metric": "delay_z",
+      "value": 5.53541064134177,
+      "threshold": 3.0,
+      "operator": ">=",
+      "normalized_score": 0.5419652116853263,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Setting依存遅延の有意度（z）。fast-switch 系（Weihs/NIST）は hard gate、その他は watch 扱い。"
+    },
+    {
+      "id": "delft_hensen2015:selection_ratio",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "event-ready start offset",
+      "metric": "ratio_sys_stat",
+      "value": 3.6508938846257903,
+      "threshold": 1.0,
+      "operator": ">=",
+      "normalized_score": 0.2739055233051503,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Selection sweep幅 / 統計幅（σ）"
+    },
+    {
+      "id": "delft_hensen2016_srep30289:selection_ratio",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "event-ready start offset",
+      "metric": "ratio_sys_stat",
+      "value": 7.599442954268822,
+      "threshold": 1.0,
+      "operator": ">=",
+      "normalized_score": 0.13158859221889044,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Selection sweep幅 / 統計幅（σ）"
+    },
+    {
+      "id": "nist_03_43_afterfixingModeLocking_s3600:selection_ratio",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "window half-width",
+      "metric": "ratio_sys_stat",
+      "value": 654.1026883136847,
+      "threshold": 1.0,
+      "operator": ">=",
+      "normalized_score": 0.0015288119401833664,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Selection sweep幅 / 統計幅（σ）"
+    },
+    {
+      "id": "nist_03_43_afterfixingModeLocking_s3600:delay_signature",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "time-tag delay signature",
+      "metric": "delay_z",
+      "value": 43.90965148631052,
+      "threshold": 3.0,
+      "operator": ">=",
+      "normalized_score": 0.06832210911387657,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Setting依存遅延の有意度（z）。fast-switch 系（Weihs/NIST）は hard gate、その他は watch 扱い。"
+    },
+    {
+      "id": "kwiat2013_prl111_130406_05082013_15:selection_ratio",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "window half-width",
+      "metric": "ratio_sys_stat",
+      "value": 5.822553917580089,
+      "threshold": 1.0,
+      "operator": ">=",
+      "normalized_score": 0.17174594072554503,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Selection sweep幅 / 統計幅（σ）"
+    },
+    {
+      "id": "kwiat2013_prl111_130406_05082013_15:delay_signature",
+      "origin": "selection-driven",
+      "domain": "bell",
+      "observable": "time-tag delay signature",
+      "metric": "delay_z",
+      "value": 0.7214698844113343,
+      "threshold": 3.0,
+      "operator": ">=",
+      "normalized_score": 4.158177721371941,
+      "status": "watch",
+      "hard_gate": false,
+      "source": "part3_audit bell.dataset_gates",
+      "note": "Setting依存遅延の有意度（z）。fast-switch 系（Weihs/NIST）は hard gate、その他は watch 扱い。 watch監査: keep_watch_nonhard_gate.",
+      "watch_hard_gate_applicable": false,
+      "watch_max_abs_z_any": 2.725437026160068
+    },
+    {
+      "id": "phase_alpha_consistency",
+      "origin": "physics-driven",
+      "domain": "interference",
+      "observable": "phase",
+      "metric": "atom_recoil_alpha_abs_z",
+      "value": 0.5883354744951784,
+      "threshold": 3.0,
+      "operator": "<=",
+      "normalized_score": 0.19611182483172615,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "位相整合の最小ゲート（abs_z<=3）。"
+    },
+    {
+      "id": "phase_molecular_scaling",
+      "origin": "physics-driven",
+      "domain": "interference",
+      "observable": "phase",
+      "metric": "molecular_isotopic_scaling_zmax",
+      "value": 2.6385399704973964,
+      "threshold": 3.0,
+      "operator": "<=",
+      "normalized_score": 0.8795133234991321,
+      "status": "pass",
+      "hard_gate": true,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "分子スケーリング整合の最小ゲート（z<=3）。"
+    },
+    {
+      "id": "visibility_atom_precision_gap",
+      "origin": "physics-driven",
+      "domain": "interference",
+      "observable": "visibility",
+      "metric": "log10_atom_interferometer_current_over_required_ratio",
+      "value": 0.3338887327706417,
+      "threshold": 1.0,
+      "operator": "<=",
+      "normalized_score": 0.3338887327706417,
+      "status": "pass",
+      "hard_gate": false,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。"
+    },
+    {
+      "id": "hom_noise_psd_shape",
+      "origin": "physics-driven",
+      "domain": "interference",
+      "observable": "noise_psd_shape",
+      "metric": "lf_to_hf_ratio",
+      "value": 0.8405951115834224,
+      "threshold": 1.0,
+      "operator": ">=",
+      "normalized_score": 1.1896333754740827,
+      "status": "watch",
+      "hard_gate": false,
+      "source": "hom_noise_psd_watch_audit",
+      "note": "HOM noise PSD shape（低周波/高周波比）の帯域・drift感度監査。 watch監査: keep_watch_nonhard_gate.",
+      "watch_hard_gate_applicable": false,
+      "watch_median_ratio_detrended": 0.6502261157962772
+    }
+  ],
+  "overall": {
+    "status": "watch",
+    "severity": 1,
+    "selection_summary": {
+      "rows_n": 8,
+      "status": "watch",
+      "status_counts": {
+        "pass": 7,
+        "watch": 1,
+        "reject": 0
+      },
+      "normalized_score_median": 0.15166726647221773,
+      "normalized_score_max": 4.158177721371941
+    },
+    "physics_summary": {
+      "rows_n": 4,
+      "status": "watch",
+      "status_counts": {
+        "pass": 3,
+        "watch": 1,
+        "reject": 0
+      },
+      "normalized_score_median": 0.6067010281348869,
+      "normalized_score_max": 1.1896333754740827
+    }
+  },
+  "watch_audit": {
+    "kwiat_delay_signature": {
+      "baseline_max_abs_z": 0.7807728184619229,
+      "max_window_raw_abs_z": 2.725437026160068,
+      "max_window_tail_clipped_abs_z": 2.0830436408327344,
+      "max_offset_abs_z": 2.7214681040453135,
+      "max_accidental_policy_abs_z": 1.0842493622143299,
+      "max_abs_z_any": 2.725437026160068,
+      "hard_gate_applicable": false,
+      "decision": "keep_watch_nonhard_gate",
+      "decision_note": "window/offset/accidental-like sweeps stay below |z| threshold; keep as non-hard watch."
+    },
+    "hom_noise_psd_shape": {
+      "pairs_n": 16,
+      "raw_ratio_median": 0.6421894705605984,
+      "detrended_ratio_median": 0.6502261157962772,
+      "raw_ratio_pass_n": 5,
+      "detrended_ratio_pass_n": 5,
+      "raw_ratio_pass_fraction": 0.3125,
+      "detrended_ratio_pass_fraction": 0.3125,
+      "hard_gate_applicable": false,
+      "decision": "keep_watch_nonhard_gate",
+      "decision_note": "single-point ratio is band-sensitive; keep as non-hard watch diagnostic."
+    }
+  }
+}

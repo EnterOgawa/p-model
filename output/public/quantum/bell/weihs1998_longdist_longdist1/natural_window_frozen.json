@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:46:57.550112+00:00",
+  "generated_utc": "2026-02-20T12:38:19.991972+00:00",
   "dataset_id": "weihs1998_longdist_longdist1",
   "supported": true,
   "natural_window": {
@@ -19,7 +19,7 @@
     "rule": "abs(stat - frozen_stat) >= threshold_sigma * sigma_boot"
   },
   "sources": {
-    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance_bootstrap.json",
-    "window_sweep_metrics_json": "C:\\develop\\waveP\\output\\quantum\\bell\\weihs1998_longdist_longdist1\\window_sweep_metrics.json"
+    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\covariance_bootstrap.json",
+    "window_sweep_metrics_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\weihs1998_longdist_longdist1\\window_sweep_metrics.json"
   }
 }

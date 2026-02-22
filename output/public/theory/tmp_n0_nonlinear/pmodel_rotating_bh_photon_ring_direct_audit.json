@@ -1,0 +1,366 @@
+{
+  "axisymmetric_pde_block": {
+    "boundary_closure_pass": true,
+    "boundary_conditions": {
+      "axis": "θ=0,π: P_φ=0,  ∂_θP_0=0",
+      "equatorial_symmetry": "θ=π/2: ∂_θP_0=0 (minimal symmetric branch)",
+      "horizon_near": "r→r_H^+: P_0,P_φ finite,  radial flux finite",
+      "infinity": "r→∞: P_0/P_ref→1 + 1/r + λ_2/r^2,  P_φ→0"
+    },
+    "boundary_diagnostics": {
+      "asymptotic_pass": true,
+      "asymptotic_u_target": 0.024908333333333334,
+      "axis_regular_pass": true,
+      "boundary_closure_pass": true,
+      "flux_closure_pass": true,
+      "horizon_finite_pass": true,
+      "max_asymptotic_rel_error": 0.0,
+      "max_flux_rel_std": 1.252657896949322e-16,
+      "max_u_inner_abs": 0.5250558570665285,
+      "min_orbit_margin_rg": 0.020000000000000018,
+      "r_outer_rg": 40.0
+    },
+    "definitions": {
+      "active_components": "P_0(r,θ), P_φ(r,θ)",
+      "field_tensor": "F^{(P)}_{μν}=∂_μP_ν-∂_νP_μ",
+      "interaction": "L_int=g_P P_μ J_m^μ",
+      "stationary_axisymmetry": "∂_t=0, ∂_φ=0",
+      "vacuum_limit": "J^μ=0, m_P→0"
+    },
+    "enabled": true,
+    "euler_lagrange_system": {
+      "component_pdes": {
+        "P_0": "(1/r^2)∂_r(r^2∂_rP_0) + (1/(r^2 sinθ))∂_θ(sinθ∂_θP_0) = 0",
+        "P_φ": "(1/r^2)∂_r(r^2∂_rP_φ) + (1/(r^2 sinθ))∂_θ(sinθ∂_θP_φ) - P_φ/(r^2 sin^2θ) = 0"
+      },
+      "expanded_vacuum_form": "∇_μF^{μν}=0 (J^μ=0, m_P→0)",
+      "radial_vacuum_reduction_used": "d/dr[r^2(du/dr + 2η(du/dr)^3)] = 0,  u=ln(P_0/P_ref)",
+      "separation_system": {
+        "angular_ode_P0": "(1/sinθ)d/dθ(sinθ dΘ_ℓ^(0)/dθ) + ℓ(ℓ+1)Θ_ℓ^(0) = 0",
+        "angular_ode_Pphi": "(1/sinθ)d/dθ(sinθ dΘ_ℓ^(φ)/dθ) - Θ_ℓ^(φ)/sin^2θ + ℓ(ℓ+1)Θ_ℓ^(φ) = 0",
+        "ansatz": "P_0=R_ℓ^(0)(r)Θ_ℓ^(0)(θ), P_φ=R_ℓ^(φ)(r)Θ_ℓ^(φ)(θ)",
+        "radial_ode": "d/dr[r^2 dR_ℓ/dr] - ℓ(ℓ+1)R_ℓ = 0"
+      },
+      "solution_family": {
+        "P_0": "Σ_{ℓ=0}^∞ (A_ℓ r^ℓ + B_ℓ r^{-ℓ-1}) P_ℓ(cosθ)",
+        "P_φ": "Σ_{ℓ=1}^∞ (C_ℓ r^ℓ + D_ℓ r^{-ℓ-1}) P_ℓ^1(cosθ)",
+        "exterior_minimal_branch": "P_0/P_ref = 1 + a1/r + a2/r^2 + O(r^-3),  P_φ = (μ_drag sin^2θ)/r^2 + O(r^-3)",
+        "frame_dragging_scaling": "Ω_drag ~ (1/(r sinθ))∂_r(sinθ P_φ) ∝ r^-3"
+      },
+      "vector_form": "∂_μF^{μν}=0"
+    },
+    "formulation_complete": true,
+    "lagrangian_anchor": "L_total^vec = L_{P_μ}^{free} + L_matter + L_int + L_rot",
+    "parameter_snapshot": {
+      "beta_fixed": 1.0000105000000001,
+      "eta_nonlinear": 0.08,
+      "lambda2_best": -0.14666666666666667,
+      "omega_ang_epsilon": 0.18,
+      "zeta_best": 6.88
+    },
+    "projection_to_observables": {
+      "impact": "b_±(r)=exp(2βu)r/(1±Ω_P sin i)",
+      "omega_theta_model": "Ω_P(r,θ)=ζ a(1+ε sin^2θ)/(r^3+0.2a^2)",
+      "ring_metrics": "C_ring=b_+^min+b_-^min, D_pred=C_ring θ_unit, A_pred=|b_+^min-b_-^min|/C_ring"
+    }
+  },
+  "checks": [
+    {
+      "expected": ">=2",
+      "gate_level": "hard",
+      "id": "direct::input_objects",
+      "metric": "n_objects",
+      "note": "M87*/Sgr A* の2対象で同時監査する。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 2
+    },
+    {
+      "expected": "False",
+      "gate_level": "hard",
+      "id": "direct::kappa_independence",
+      "metric": "kappa_proxy_used",
+      "note": "目的関数に κ（ring/shadow比）を使わない。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": false
+    },
+    {
+      "expected": "nonlinear",
+      "gate_level": "hard",
+      "id": "direct::nonlinear_solver_enabled",
+      "metric": "vacuum_solver",
+      "note": "Step 8.7.27.28 では非線形真空ソルバを有効化する。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": "nonlinear"
+    },
+    {
+      "expected": "True",
+      "gate_level": "hard",
+      "id": "direct::axisymmetric_pde_formulation",
+      "metric": "axisymmetric_pde_formulation_complete",
+      "note": "L_{P_μ}^{free}+L_int を基点に定常軸対称PDE系を明示していること。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": true
+    },
+    {
+      "expected": "<=4.0",
+      "gate_level": "hard",
+      "id": "direct::fit_quality",
+      "metric": "chi2_dof",
+      "note": "direct observables（直径/非対称）の適合が watch 以上であること。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 0.3709918313508049
+    },
+    {
+      "expected": "<=3.0",
+      "gate_level": "hard",
+      "id": "direct::diameter_z_gate",
+      "metric": "max_abs_z_ring_diameter",
+      "note": "各対象の直径残差は 3σ 以内。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 0.5158011826433722
+    },
+    {
+      "expected": "<=3.0",
+      "gate_level": "hard",
+      "id": "direct::asymmetry_z_gate",
+      "metric": "max_abs_z_ring_asymmetry",
+      "note": "非対称観測がある対象（Sgr A*）で 3σ 以内。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 0.035565285536318644
+    },
+    {
+      "expected": ">0",
+      "gate_level": "hard",
+      "id": "direct::orbit_outside_horizon",
+      "metric": "min_orbit_margin_rg",
+      "note": "推定された光子リング半径が事象面外にあること。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 0.020000000000000018
+    },
+    {
+      "expected": ">=0.02",
+      "gate_level": "watch",
+      "id": "direct::orbit_margin_watch",
+      "metric": "min_orbit_margin_rg",
+      "note": "事象面からの余裕（運用マージン）を監視。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 0.020000000000000018
+    },
+    {
+      "expected": "<=0.10",
+      "gate_level": "watch",
+      "id": "direct::nonlinear_flux_closure",
+      "metric": "max_flux_rel_std",
+      "note": "非線形真空方程式の半径フラックス不変性（閉包）を監視する。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": 1.252657896949322e-16
+    },
+    {
+      "expected": "True",
+      "gate_level": "watch",
+      "id": "direct::axisymmetric_boundary_closure",
+      "metric": "axisymmetric_boundary_closure_pass",
+      "note": "軸上・無限遠・地平面近傍の境界条件セットが運用閾値で閉じること。",
+      "pass": true,
+      "score": 1.0,
+      "status": "pass",
+      "value": true
+    }
+  ],
+  "continuity": {
+    "legacy_strong_field_watch": {
+      "legacy_decision": "strong_field_higher_order_watch",
+      "legacy_delta_aic": null,
+      "legacy_kappa_ratio_watch_metric": null,
+      "legacy_overall_status": "watch",
+      "loaded": true,
+      "path": "output/public/theory/pmodel_strong_field_higher_order_audit.json"
+    },
+    "note": "This step adds kappa-independent direct observables; legacy 8.7.27 watch metrics (AIC/kappa) remain tracked in pmodel_strong_field_higher_order_audit."
+  },
+  "decision": {
+    "decision": "rotating_bh_direct_pass",
+    "hard_fail_ids": [],
+    "overall_status": "pass",
+    "rule": "Pass if all hard/watch gates pass.",
+    "watch_ids": []
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "Any hard check fails.",
+      "kappa_proxy_used is true.",
+      "max_abs_z_ring_diameter > 3 or (if constrained) max_abs_z_ring_asymmetry > 3."
+    ],
+    "watch_if": [
+      "Hard checks pass but orbit_margin_watch fails."
+    ]
+  },
+  "fit_summary": {
+    "chi2": 0.3709918313508049,
+    "chi2_dof": 0.3709918313508049,
+    "dof": 1,
+    "max_abs_z_ring_asymmetry": 0.035565285536318644,
+    "max_abs_z_ring_diameter": 0.5158011826433722,
+    "max_flux_rel_std": 1.252657896949322e-16,
+    "min_orbit_margin_rg": 0.020000000000000018,
+    "n_fit_parameters": 2,
+    "n_observables": 3
+  },
+  "generated_utc": "2026-02-21T13:32:57.178544+00:00",
+  "inputs": {
+    "legacy_strong_field_json": "output/public/theory/pmodel_strong_field_higher_order_audit.json",
+    "object_keys": [
+      "m87",
+      "sgra"
+    ],
+    "shadow_compare_json": "output/public/eht/eht_shadow_compare.json"
+  },
+  "intent": "Solve an axisymmetric P_mu-J^mu strong-field branch and evaluate direct ring observables (diameter/asymmetry) without kappa proxy dependence.",
+  "model": {
+    "equations": {
+      "direct_observables": "C_ring=b_+^min+b_-^min, D_pred=C_ring*theta_unit, A_pred=|b_+^min-b_-^min|/C_ring",
+      "frame_drag_term": "Omega_P(r)=zeta*a/(r^3+0.2*a^2)",
+      "impact_branches": "b_±(r)=exp(2β psi) r / (1 ± Omega_P(r,theta) sin(i))",
+      "scalar_potential": "psi(r)=1/r + lambda2/r^2"
+    },
+    "fit_grid": {
+      "lambda2_count": 121,
+      "lambda2_max": 0.2,
+      "lambda2_min": -0.2,
+      "zeta_count": 201,
+      "zeta_max": 8.0,
+      "zeta_min": 0.0
+    },
+    "fit_parameters": {
+      "beta_fixed": 1.0000105000000001,
+      "eta_nonlinear": 0.08,
+      "lambda2_best": -0.14666666666666667,
+      "omega_ang_epsilon": 0.18,
+      "zeta_best": 6.88
+    },
+    "kappa_proxy_used": false,
+    "objective_terms": [
+      "ring_diameter_obs_uas",
+      "ring_diameter_obs_sigma_uas",
+      "ring_brightness_asymmetry_min/max (if available)"
+    ],
+    "radial_grid": {
+      "n_points": 4500,
+      "r_horizon_margin_rg": 0.02,
+      "r_max_rg": 40.0
+    },
+    "vacuum_solver": "nonlinear"
+  },
+  "nonlinear_vacuum_block": {
+    "enabled": true,
+    "equation": "d/dr [ r^2(du/dr + 2*eta*(du/dr)^3 ) ] = 0,  u=ln(P/P0)",
+    "eta_nonlinear": 0.08,
+    "max_flux_rel_std": 1.252657896949322e-16,
+    "omega_ang_epsilon": 0.18,
+    "omega_theta_model": "Omega_P(r,theta)=zeta*a*(1+eps*sin^2(theta))/(r^3+0.2*a^2)",
+    "solver_diagnostics_by_object": {
+      "m87": {
+        "eta_nonlinear": 0.08,
+        "flux_const": -0.9926667278017254,
+        "flux_rel_std": 1.252657896949322e-16,
+        "solver": "nonlinear_vacuum",
+        "u_inner": 0.5250558570665285,
+        "u_outer": 0.024908333333333334
+      },
+      "sgra": {
+        "eta_nonlinear": 0.08,
+        "flux_const": -0.9926667278017254,
+        "flux_rel_std": 1.252657896949322e-16,
+        "solver": "nonlinear_vacuum",
+        "u_inner": 0.5250558570665285,
+        "u_outer": 0.024908333333333334
+      }
+    }
+  },
+  "object_rows": [
+    {
+      "a_star_mid": 0.4995,
+      "b_minus_rg": 5.925827426172423,
+      "b_plus_rg": 4.66632881342414,
+      "horizon_rg": 1.866313886533051,
+      "inc_deg_mid": 17.5,
+      "key": "m87",
+      "label": "M87*",
+      "omega_angle_gain": 1.0162763160139907,
+      "orbit_margin_minus_rg": 0.6468977044668935,
+      "orbit_margin_plus_rg": 0.020000000000000018,
+      "r_minus_rg": 2.5132115909999446,
+      "r_plus_rg": 1.886313886533051,
+      "ring_asymmetry_max": null,
+      "ring_asymmetry_min": null,
+      "ring_asymmetry_pred": 0.11890861353044536,
+      "ring_asymmetry_range_pass": null,
+      "ring_asymmetry_sigma": null,
+      "ring_asymmetry_target": null,
+      "ring_coeff_rg": 10.592156239596562,
+      "ring_diameter_obs_sigma_uas": 3.0,
+      "ring_diameter_obs_uas": 42.0,
+      "ring_diameter_pred_uas": 40.45259645206988,
+      "ring_diameter_residual_uas": -1.5474035479301165,
+      "z_ring_asymmetry": null,
+      "z_ring_diameter": -0.5158011826433722
+    },
+    {
+      "a_star_mid": 0.4995,
+      "b_minus_rg": 6.144167486587504,
+      "b_plus_rg": 4.334775062333212,
+      "horizon_rg": 1.866313886533051,
+      "inc_deg_mid": 27.5,
+      "key": "sgra",
+      "label": "Sgr A*",
+      "omega_angle_gain": 1.0383781207284057,
+      "orbit_margin_minus_rg": 0.8417442882876849,
+      "orbit_margin_plus_rg": 0.020000000000000018,
+      "r_minus_rg": 2.708058174820736,
+      "r_plus_rg": 1.886313886533051,
+      "ring_asymmetry_max": 0.3,
+      "ring_asymmetry_min": 0.04,
+      "ring_asymmetry_pred": 0.17266937153316592,
+      "ring_asymmetry_range_pass": true,
+      "ring_asymmetry_sigma": 0.07505553499465135,
+      "ring_asymmetry_target": 0.16999999999999998,
+      "ring_coeff_rg": 10.478942548920717,
+      "ring_diameter_obs_sigma_uas": 2.3,
+      "ring_diameter_obs_uas": 51.8,
+      "ring_diameter_pred_uas": 52.54057172017158,
+      "ring_diameter_residual_uas": 0.7405717201715802,
+      "z_ring_asymmetry": 0.035565285536318644,
+      "z_ring_diameter": 0.3219877044224262
+    }
+  ],
+  "outputs": {
+    "audit_csv": "output/public/theory/tmp_n0_nonlinear/pmodel_rotating_bh_photon_ring_direct_audit.csv",
+    "audit_json": "output/public/theory/tmp_n0_nonlinear/pmodel_rotating_bh_photon_ring_direct_audit.json",
+    "audit_png": "output/public/theory/tmp_n0_nonlinear/pmodel_rotating_bh_photon_ring_direct_audit.png"
+  },
+  "phase": {
+    "name": "rotating BH photon-ring direct observables audit",
+    "phase": 8,
+    "step": "8.7.27.28"
+  }
+}

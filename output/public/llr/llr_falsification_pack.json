@@ -1,40 +1,115 @@
 {
   "artifacts": {
     "copied": {
+      "llr_apol_pos_eop_feasibility_audit.csv": {
+        "bytes": 4061,
+        "path": "output/public/llr/llr_apol_pos_eop_feasibility_audit.csv",
+        "sha256": "232fef5f42d64e09213d671c069825e77dd9731f88a50b4f879618966efe859b"
+      },
+      "llr_apol_pos_eop_feasibility_audit.json": {
+        "bytes": 1477,
+        "path": "output/public/llr/llr_apol_pos_eop_feasibility_audit.json",
+        "sha256": "fd83a37c1ff62736f39c5e81f163e52ecbf875c75d9ad3ad15fbfddaa6ae0737"
+      },
+      "llr_apol_pos_eop_feasibility_audit.png": {
+        "bytes": 118147,
+        "path": "output/public/llr/llr_apol_pos_eop_feasibility_audit.png",
+        "sha256": "247b78ff6e146d556bc6a9e89dbfcd061aef3bf164a19c7a9083b10d22393886"
+      },
+      "llr_apol_primary_coord_merge_route.json": {
+        "bytes": 12947,
+        "path": "output/public/llr/llr_apol_primary_coord_merge_route.json",
+        "sha256": "92c4e35fb6e3fb83418e5d99a546772a6cea8f06210e4957884da5ea6a1171c7"
+      },
+      "llr_apol_primary_coord_route_audit.csv": {
+        "bytes": 134890,
+        "path": "output/public/llr/llr_apol_primary_coord_route_audit.csv",
+        "sha256": "f711bdf3aaf9c25377106cbf49fe66abb2b11bd115e994642f65f23b82556530"
+      },
+      "llr_apol_primary_coord_route_audit.json": {
+        "bytes": 41067,
+        "path": "output/public/llr/llr_apol_primary_coord_route_audit.json",
+        "sha256": "b353278385e92d7e4f5cdfdf4d48d7b3710e99cf8491455c138481d6a5d4e3ee"
+      },
+      "llr_apol_primary_coord_route_audit.png": {
+        "bytes": 130504,
+        "path": "output/public/llr/llr_apol_primary_coord_route_audit.png",
+        "sha256": "560cc2c2f634921ee24ff88787089b741c445ac7c0087bbc1ebe3c46592e17e5"
+      },
       "llr_batch_metrics.csv": {
-        "bytes": 5070,
+        "bytes": 5067,
         "path": "output/public/llr/llr_batch_metrics.csv",
-        "sha256": "fe181427aef4382d96aada4f5d323a22a2ccde20f1309ee0ff25eecd272ae275"
+        "sha256": "2255e789148b9cd713d935aa04ad6777635a193fb7ce6a2edac6822849f8fd8a"
       },
       "llr_batch_summary.json": {
-        "bytes": 3649,
+        "bytes": 4579,
         "path": "output/public/llr/llr_batch_summary.json",
-        "sha256": "47de70ef200e3f3d223a492973daf5b8f0509997b88b82926369c5b847da1907"
+        "sha256": "79d78dbe4ce7788dbbf236411af63dc3722a9e3b0b671608ae50f718c02d94e2"
+      },
+      "llr_operational_metrics_audit.csv": {
+        "bytes": 1176,
+        "path": "output/public/llr/llr_operational_metrics_audit.csv",
+        "sha256": "1177a0af8acd3fc6e04e32a178307fef87176153bc4721356286a2e91cc49f79"
+      },
+      "llr_operational_metrics_audit.json": {
+        "bytes": 9451,
+        "path": "output/public/llr/llr_operational_metrics_audit.json",
+        "sha256": "ebea91d9e9a175382fc9d7f73c0a8effa059f2093ae53fa477b10677fb990682"
+      },
+      "llr_operational_metrics_audit.png": {
+        "bytes": 92086,
+        "path": "output/public/llr/llr_operational_metrics_audit.png",
+        "sha256": "bedb51f3b1048179c2e34cbfb772ef29b6a1ae3260173f451a374973c0e5a01f"
+      },
+      "llr_operational_metrics_by_station.csv": {
+        "bytes": 1105,
+        "path": "output/public/llr/llr_operational_metrics_by_station.csv",
+        "sha256": "058b9a7c9c7a72f4656fbd55f38f26401bbdec4d11f39a50d64ea8fc3202b5a6"
+      },
+      "llr_operational_metrics_by_target.csv": {
+        "bytes": 1327,
+        "path": "output/public/llr/llr_operational_metrics_by_target.csv",
+        "sha256": "2ee33952ccae22cdb6921194513d6733f5b96d982cdc9d864268b0ea2377b742"
       },
       "llr_outliers_diagnosis_summary.json": {
         "bytes": 1320,
         "path": "output/public/llr/llr_outliers_diagnosis_summary.json",
-        "sha256": "c11324efa59d9116bcfd80e506cd527d64e6839d3edd53497c0dad14d2e616e9"
+        "sha256": "ba396c35caa85f8c3e55dcd491a7f6fcb775ddea46f6c1837c5c00fe75cf159e"
       },
       "llr_outliers_overview.png": {
-        "bytes": 139269,
+        "bytes": 139565,
         "path": "output/public/llr/llr_outliers_overview.png",
-        "sha256": "c4d78a43d5c8c5efd027b608564e04ba2763b9767b51b404a317bbdbba67d513"
+        "sha256": "af1178727df0ac059154e9c645828cba7c1a0ea3ca94e7bc9d939fdf8dd2fd38"
       },
       "llr_outliers_summary.json": {
         "bytes": 728,
         "path": "output/public/llr/llr_outliers_summary.json",
-        "sha256": "027e92b9490c1c8983845480c6b445fd62271b042743e7e0d7204554ed74c2d5"
+        "sha256": "6d9fce9c5d2297918bd380d6a6bc59021e95663e86f6cd487066d0f3b56a68d3"
       },
       "llr_outliers_time_tag_sensitivity.png": {
         "bytes": 74030,
         "path": "output/public/llr/llr_outliers_time_tag_sensitivity.png",
         "sha256": "6599abcee35391211b1d2f0aa487342eeae8217f74015104df0f6d8e078446c4"
       },
+      "llr_precision_reaudit.csv": {
+        "bytes": 3514,
+        "path": "output/public/llr/llr_precision_reaudit.csv",
+        "sha256": "19e831d9a5e829f696009b64ab2acc96c42012e67632592b48e231c793402cc5"
+      },
+      "llr_precision_reaudit.json": {
+        "bytes": 83063,
+        "path": "output/public/llr/llr_precision_reaudit.json",
+        "sha256": "5973b35984bd8771a5c0cce043cce19fecc9bb6ad4de64af7e155c0c174fcad2"
+      },
+      "llr_precision_reaudit.png": {
+        "bytes": 123153,
+        "path": "output/public/llr/llr_precision_reaudit.png",
+        "sha256": "19c8eb41b473b15f6146fb724d703bf74172f7ab4367be1faaec75e92796192b"
+      },
       "llr_residual_distribution.png": {
-        "bytes": 147937,
+        "bytes": 147647,
         "path": "output/public/llr/llr_residual_distribution.png",
-        "sha256": "dc4f495ebc8491d6a5b72a54fb3d8ca735168c241737d1ec281fae45493165ad"
+        "sha256": "7c3fa247cd88c49d96b0ba3b1ffd9d1906e70e1d0795443cd74a55de5566bb37"
       },
       "llr_rms_ablations_overall.png": {
         "bytes": 75231,
@@ -52,14 +127,14 @@
         "sha256": "3e7e0fe31b7dc01693822d6844b75a8444ddeb8229e66d0fac597516a004e3de"
       },
       "llr_station_coord_delta_pos_eop.png": {
-        "bytes": 71272,
+        "bytes": 73355,
         "path": "output/public/llr/llr_station_coord_delta_pos_eop.png",
-        "sha256": "fed1a9629b51a6845434822c78fea52f50515fbbdafdbb1e76e13b3e8cf83d1d"
+        "sha256": "1905e6b3acda1cb016167d90db89cbb12a083478918a2cec8f38746cc89958cf"
       },
       "llr_station_diagnostics.json": {
-        "bytes": 3255,
+        "bytes": 3256,
         "path": "output/public/llr/llr_station_diagnostics.json",
-        "sha256": "f15b6ca94a0a6a618dd4119d6dbd114a7280b824cfed1e272e6817ab112d309b"
+        "sha256": "20bfe5d04c5c18ff3ff97dbca9b59f6dbcf251091058f33d8da672cb850e9673"
       },
       "llr_tide_ablations_overall.png": {
         "bytes": 106750,
@@ -67,14 +142,29 @@
         "sha256": "0c74dca11f521310477ca439944319fc90c7116a3cb826ce0a5877705f9859ae"
       },
       "llr_time_tag_best_by_station.json": {
-        "bytes": 1067,
+        "bytes": 1065,
         "path": "output/public/llr/llr_time_tag_best_by_station.json",
-        "sha256": "2e32b0ccdc951be577dcfed5148cce8a84c75a161b1d8f2dab8718fa98ddd8e1"
+        "sha256": "04180910708f3fea39f0ccab1acb1acd8d95b6bbe6b3e3eeac70996b4cff1744"
+      },
+      "llr_time_tag_mode_auto_vs_tx_audit.json": {
+        "bytes": 3723,
+        "path": "output/public/llr/llr_time_tag_mode_auto_vs_tx_audit.json",
+        "sha256": "06a684c38876c682846907351b6bd4cf9fe7c57b939d506021a4ff71459917e2"
+      },
+      "llr_time_tag_mode_auto_vs_tx_audit.png": {
+        "bytes": 38874,
+        "path": "output/public/llr/llr_time_tag_mode_auto_vs_tx_audit.png",
+        "sha256": "d09c07581b5af2edb9e63b2fef291ee02ab7a07255a33e37b3c2478d34ad3857"
+      },
+      "llr_time_tag_mode_auto_vs_tx_diff.csv": {
+        "bytes": 22987,
+        "path": "output/public/llr/llr_time_tag_mode_auto_vs_tx_diff.csv",
+        "sha256": "ec996af8f81cb18770bcee5d43cbb4e988309ee37521d2613b25178b8774dd97"
       },
       "llr_time_tag_selection_by_station.png": {
-        "bytes": 73989,
+        "bytes": 74049,
         "path": "output/public/llr/llr_time_tag_selection_by_station.png",
-        "sha256": "536d5f6acfa68ba447fdb8a0aea8bc6d0352d678e1bc8135424156097f08c403"
+        "sha256": "4039cee3441840622c53662ffd4b55044034731275775f58e36fedb0a5f508b1"
       }
     },
     "dir": "output/public/llr"
@@ -82,24 +172,137 @@
   "criteria": [
     {
       "gate": true,
+      "id": "llr_operational_modern_within_inferred_floor",
+      "op": "<=",
+      "pass": true,
+      "rationale": "中央値RMSではなく、NP bin RMS重みの運用指標で採否を判定する。",
+      "threshold": 5.0623741009006995,
+      "title": "現代APOL（nglr1除外）の weighted RMS が推定model floor以内であること",
+      "unit": "ns",
+      "value": 4.999386409856197
+    },
+    {
+      "gate": true,
+      "id": "llr_operational_nglr1_not_artificially_improving",
+      "op": ">=",
+      "pass": true,
+      "rationale": "ターゲット混在で見かけ上の改善が出る場合を排除する。",
+      "threshold": 0.0,
+      "title": "nglr1混在が weighted RMS を人工的に下げていないこと",
+      "unit": "ns (all - exclude_nglr1)",
+      "value": 0.00017050215435343574
+    },
+    {
+      "gate": false,
       "id": "llr_shapiro_improves",
       "op": "<=",
       "pass": true,
-      "rationale": "Shapiro項の符号/係数が逆だと、RMS改善が消えるため、最小の反証条件として採用する。",
+      "rationale": "Shapiro項の符号/係数監査として保持（補助指標）。",
       "threshold": 0.95,
       "title": "Shapiro項を除去するとRMSが悪化すること（中央値）",
       "unit": "(tropo+tide)/(tropo+no_shapiro)",
       "value": 0.7664295376142947
+    },
+    {
+      "gate": false,
+      "id": "llr_precision_watch_freeze",
+      "op": "informational",
+      "pass": true,
+      "rationale": "coverage不足や未導入補正を運用上の監視理由として固定し、主ゲート（operational）と分離する。",
+      "threshold": "watch要因と解除条件が decision.precision_watch_release_conditions に記録されること",
+      "title": "LLR精度再監査のwatch要因をpack内で凍結し、解除条件を明示すること",
+      "unit": null,
+      "value": {
+        "overall_status": "watch",
+        "watch_checks": [
+          "iers_station_coord_unified",
+          "nglr1_coverage_gate"
+        ]
+      }
+    },
+    {
+      "gate": false,
+      "id": "llr_time_tag_auto_tx_equivalence",
+      "op": "==",
+      "pass": true,
+      "rationale": "運用モード由来の系統（auto選択）が tx 固定と差分ゼロであることを補助監査として固定する。",
+      "threshold": {
+        "changed_rows_over_tol": 0,
+        "decision": "equivalent"
+      },
+      "title": "time-tag auto と tx の full-batch 差分が許容内であること",
+      "unit": null,
+      "value": {
+        "changed_rows_over_tol": 0,
+        "decision": "equivalent",
+        "max_abs_delta_rms_ns": 0.0
+      }
     }
   ],
+  "decision": {
+    "apol_pos_eop_code_present_in_cache": false,
+    "apol_pos_eop_feasibility_status": "watch",
+    "apol_primary_coord_earthdata_auth_status": "enabled",
+    "apol_primary_coord_merge_route_resolved_source_group": null,
+    "apol_primary_coord_merge_route_status": "watch",
+    "apol_primary_coord_route_status": "watch",
+    "apol_primary_coord_xyz_available": false,
+    "apol_primary_coord_xyz_source_groups": {},
+    "overall_status": "pass",
+    "precision_reaudit_status": "watch",
+    "precision_reaudit_watch_checks": [
+      "iers_station_coord_unified",
+      "nglr1_coverage_gate"
+    ],
+    "precision_watch_reasons": [
+      "全局IERS統一は未達（pos+eop未対応局あり: APOL）。座標I/Fを継続点検。",
+      "NGLR-1 点数が不足。mm級判定は coverage 拡充待ち。",
+      "時系列の局座標/EOP・遅延補正をフルIERS準拠で全局統一していない。"
+    ],
+    "precision_watch_release_conditions": {
+      "apol_modern_operational_gate": "modern APOL ex-nglr1 weighted RMS が inferred floor 以内",
+      "iers_unified_modeling": "全局で局座標/EOP/遅延補正のIERS統一を適用した再監査を記録",
+      "nglr1_coverage_gate": "nglr1 点数が nglr1_min_points 以上",
+      "station_data_balance": "局偏在が dominance 閾値以内、または bias補正 gain > 0 を維持",
+      "summary_metric_semantics": "NP不確かさ復元 coverage が閾値以上"
+    },
+    "primary_gate_basis": "operational_weighted_metrics",
+    "primary_gate_ids": [
+      "llr_operational_modern_within_inferred_floor",
+      "llr_operational_nglr1_not_artificially_improving"
+    ],
+    "primary_gate_pass": true,
+    "support_gate_ids": [
+      "llr_shapiro_improves"
+    ],
+    "support_gate_pass": true,
+    "time_tag_mode_diff_changed_rows_over_tol": 0,
+    "time_tag_mode_diff_decision": "equivalent",
+    "time_tag_mode_diff_max_abs_delta_rms_ns": 0.0,
+    "time_tag_mode_diff_status": "pass"
+  },
   "domain": "llr",
-  "generated_utc": "2026-02-13T04:43:43.482781+00:00",
+  "generated_utc": "2026-02-19T08:57:46.214518+00:00",
   "inputs": {
+    "apol_pos_eop_feasibility": {
+      "apol_code_present_in_cache": false,
+      "decision": "watch",
+      "generated_utc": "2026-02-17T06:22:05.881109+00:00"
+    },
+    "apol_primary_coord_route": {
+      "apol_primary_earthdata_auth_status": "enabled",
+      "apol_primary_merge_route_resolved_source_group": null,
+      "apol_primary_merge_route_status": "watch",
+      "apol_primary_xyz_available": false,
+      "apol_primary_xyz_source_groups": {},
+      "decision": "watch",
+      "generated_utc": "2026-02-19T08:56:23.963979+00:00"
+    },
     "batch_summary": {
       "beta": 1.0,
-      "generated_utc": "2026-02-13T03:01:20.351067+00:00",
-      "n_files": 4626,
-      "n_points_total": 13132,
+      "generated_utc": "2026-02-19T01:03:37.070997+00:00",
+      "n_files": 4637,
+      "n_points_total": 13146,
       "outlier_gate": {
         "clip_min_ns": 100.0,
         "clip_sigma": 8.0
@@ -121,6 +324,11 @@
         "nglr1"
       ],
       "time_tag_mode": "auto"
+    },
+    "operational_metrics_audit": {
+      "exclude_target": "nglr1",
+      "generated_utc": "2026-02-17T05:05:31.272355+00:00",
+      "modern_start_year": 2023
     },
     "outliers_diagnosis_summary": {
       "by_cause_hint": {
@@ -158,6 +366,11 @@
         "n_best_mode_differs": 2
       }
     },
+    "precision_reaudit": {
+      "decision": "recheck_required",
+      "generated_utc": "2026-02-19T08:57:31.348810+00:00",
+      "overall_status": "watch"
+    },
     "time_tag_best_by_station": {
       "best_mode_by_station": {
         "APOL": "tx",
@@ -167,9 +380,16 @@
         "WETL": "tx"
       },
       "selection_metric": "weighted_rms_sr_ns (offset aligned per station×target)"
+    },
+    "time_tag_mode_diff_audit": {
+      "changed_rows_over_tol": 0,
+      "decision": "equivalent",
+      "generated_utc": "2026-02-17T11:45:24.365705+00:00",
+      "max_abs_delta_rms_ns": 0.0,
+      "status": "pass"
     }
   },
-  "intent": "Promote LLR batch audit outputs into tracked public artifacts and fix a minimal falsification gate.",
+  "intent": "Promote LLR batch audit outputs, keep operational weighted metrics as primary gate, freeze precision re-audit watch reasons, and include auto-vs-tx time-tag mode audit.",
   "metrics": {
     "median_rms_ns": {
       "station_reflector": 7.057968085544082,
@@ -177,10 +397,31 @@
       "station_reflector_tropo_no_shapiro": 5.681109349368453,
       "station_reflector_tropo_tide": 4.35417001177271
     },
+    "modern_subset_rms_ns": {
+      "all_modern_n": 3270,
+      "all_modern_rms_ns": 4.982726582628789,
+      "apol_modern_ex_nglr1_n": 596,
+      "apol_modern_ex_nglr1_rms_ns": 5.063018373232765,
+      "apol_modern_n": 634,
+      "apol_modern_rms_ns": 7.693520876992633,
+      "modern_start_year": 2023
+    },
+    "operational_metrics_ns": {
+      "all_weighted_rms": 2.218502683606913,
+      "exclude_nglr1_weighted_rms": 2.2183321814525594,
+      "modern_apol_ex_nglr1_model_floor": 5.0623741009006995,
+      "modern_apol_ex_nglr1_weighted_rms": 4.999386409856197,
+      "nglr1_mixing_delta_all_minus_excluded": 0.00017050215435343574
+    },
+    "point_weighted_rms_ns": {
+      "station_reflector": 8.98237486216411,
+      "station_reflector_tropo": 4.670221288193064,
+      "station_reflector_tropo_tide": 4.469974449424671
+    },
     "shapiro_rms_ratio": {
       "unit": "(tropo+tide)/(tropo+no_shapiro)",
       "value": 0.7664295376142947
     }
   },
-  "version": 1
+  "version": 4
 }

@@ -1,0 +1,104 @@
+{
+  "generated_utc": "2026-02-17T11:45:24.365705+00:00",
+  "decision": "equivalent",
+  "status": "pass",
+  "equivalent_tol_ns": 1e-09,
+  "auto": {
+    "dir": "output/private/llr/batch",
+    "time_tag_mode": "auto",
+    "mode_counts_by_station": {
+      "tx": 5
+    },
+    "n_groups": 20,
+    "n_points_total": 13146,
+    "point_weighted_rms_ns": {
+      "station_reflector": 10.388186266754532,
+      "station_reflector_tropo": 7.126934137004437,
+      "station_reflector_tropo_tide": 7.0026565031916155
+    },
+    "median_rms_ns": {
+      "geocenter_moon": 7316470.773153513,
+      "station_moon": 382561.6365346175,
+      "station_reflector": 7.6253440157400565,
+      "station_reflector_no_shapiro": 8.186593633851276,
+      "station_reflector_tropo": 4.682557536364783,
+      "station_reflector_tropo_station_tide": 4.555907666252702,
+      "station_reflector_tropo_moon_tide": 4.5478587526870955,
+      "station_reflector_tropo_tide_no_ocean": 4.430929652105897,
+      "station_reflector_tropo_tide": 4.42527814361425,
+      "station_reflector_tropo_no_shapiro": 5.696630109949697,
+      "station_reflector_tropo_earth_shapiro": 4.681572734141427,
+      "station_reflector_iau": 597.2662118955974
+    }
+  },
+  "tx": {
+    "dir": "output/private/llr/batch_tx_compare",
+    "time_tag_mode": "tx",
+    "n_groups": 20,
+    "n_points_total": 13146,
+    "point_weighted_rms_ns": {
+      "station_reflector": 10.388186266754532,
+      "station_reflector_tropo": 7.126934137004437,
+      "station_reflector_tropo_tide": 7.0026565031916155
+    },
+    "median_rms_ns": {
+      "geocenter_moon": 7316470.773153513,
+      "station_moon": 382561.6365346175,
+      "station_reflector": 7.6253440157400565,
+      "station_reflector_no_shapiro": 8.186593633851276,
+      "station_reflector_tropo": 4.682557536364783,
+      "station_reflector_tropo_station_tide": 4.555907666252702,
+      "station_reflector_tropo_moon_tide": 4.5478587526870955,
+      "station_reflector_tropo_tide_no_ocean": 4.430929652105897,
+      "station_reflector_tropo_tide": 4.42527814361425,
+      "station_reflector_tropo_no_shapiro": 5.696630109949697,
+      "station_reflector_tropo_earth_shapiro": 4.681572734141427,
+      "station_reflector_iau": 597.2662118955974
+    }
+  },
+  "metrics_diff": {
+    "matched_rows": 20,
+    "auto_only_rows": 0,
+    "tx_only_rows": 0,
+    "shared_metric_columns": [
+      "n",
+      "n_inlier",
+      "n_outlier",
+      "rms_gc_ns",
+      "rms_sm_ns",
+      "rms_sr_ns",
+      "rms_sr_no_shapiro_ns",
+      "rms_sr_tropo_ns",
+      "rms_sr_tropo_station_tide_ns",
+      "rms_sr_tropo_moon_tide_ns",
+      "rms_sr_tropo_tide_no_ocean_ns",
+      "rms_sr_tropo_tide_ns",
+      "rms_sr_tropo_no_shapiro_ns",
+      "rms_sr_tropo_earth_shapiro_ns",
+      "rms_sr_iau_ns",
+      "rms_sr_iau_no_shapiro_ns"
+    ],
+    "compared_cells": 320,
+    "max_abs_delta_rms_ns": 0.0,
+    "mean_abs_delta_rms_ns": 0.0,
+    "changed_rows_over_tol": 0
+  },
+  "median_rms_delta_ns": {
+    "geocenter_moon": 0.0,
+    "station_moon": 0.0,
+    "station_reflector": 0.0,
+    "station_reflector_iau": 0.0,
+    "station_reflector_no_shapiro": 0.0,
+    "station_reflector_tropo": 0.0,
+    "station_reflector_tropo_earth_shapiro": 0.0,
+    "station_reflector_tropo_moon_tide": 0.0,
+    "station_reflector_tropo_no_shapiro": 0.0,
+    "station_reflector_tropo_station_tide": 0.0,
+    "station_reflector_tropo_tide": 0.0,
+    "station_reflector_tropo_tide_no_ocean": 0.0
+  },
+  "artifacts": {
+    "diff_csv": "output/private/llr/llr_time_tag_mode_auto_vs_tx_diff.csv",
+    "audit_png": "output/private/llr/llr_time_tag_mode_auto_vs_tx_audit.png"
+  }
+}

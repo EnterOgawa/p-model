@@ -1,0 +1,325 @@
+{
+  "generated_utc": "2026-02-13T07:46:07.934196+00:00",
+  "domain": "cosmology",
+  "step": "16.4 (BAO catalog vs published multipoles cross-check)",
+  "inputs": {
+    "published_post": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_multipole_peakfit_metrics.json",
+    "published_pre": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_multipole_peakfit_pre_recon_metrics.json",
+    "catalog": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly_metrics.json",
+    "catalog_recon": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_grid_iso_metrics.json"
+  },
+  "notes": [
+    "Published の ε は公開 multipoles（ξ0, ξ2）に対する smooth+peak peakfit の結果。",
+    "Catalog の ε は Corrfunc（galaxy+random）で計算した ξ(s,μ) から ξℓ を積分して同じ peakfit を適用した結果（Phase A: screening）。",
+    "Catalog の誤差は diag paircount proxy に基づく粗い CI（Phase B で共分散・reconstruction を自前化して更新予定）。",
+    "Catalog recon は、銀河+randomから簡易reconstruction（grid; recon-mode=iso）を適用した ξℓ に同じ peakfit を適用した結果（公開post-reconとの距離感を確認するための入口）。"
+  ],
+  "results": {
+    "z_bins": [
+      1,
+      2,
+      3
+    ],
+    "z_eff_ref": [
+      0.38,
+      0.51,
+      0.61
+    ],
+    "published_post": {
+      "1": {
+        "label": "z=0.38 (bin1)",
+        "z_eff": 0.38,
+        "eps": 0.008000000000000049,
+        "err_lo": 0.01147697774268269,
+        "err_hi": 0.010697121094382707,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.003476977742682642,
+            0.018697121094382756
+          ],
+          "dataset": "ross_post"
+        }
+      },
+      "2": {
+        "label": "z=0.51 (bin2)",
+        "z_eff": 0.51,
+        "eps": -0.00199999999999996,
+        "err_lo": 0.009813204707899788,
+        "err_hi": 0.008789384114324,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.011813204707899748,
+            0.0067893841143240406
+          ],
+          "dataset": "ross_post"
+        }
+      },
+      "3": {
+        "label": "z=0.61 (bin3)",
+        "z_eff": 0.61,
+        "eps": -0.009999999999999967,
+        "err_lo": 0.008793026444808321,
+        "err_hi": 0.010026977632923697,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.01879302644480829,
+            2.697763292373043e-05
+          ],
+          "dataset": "ross_post"
+        }
+      }
+    },
+    "published_pre": {
+      "1": {
+        "label": "z=0.38 (bin1)",
+        "z_eff": 0.38,
+        "eps": 0.0020000000000000434,
+        "err_lo": 0.012869338022292972,
+        "err_hi": 0.013868130960603468,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.010869338022292929,
+            0.01586813096060351
+          ],
+          "dataset": "satpathy_pre"
+        }
+      },
+      "2": {
+        "label": "z=0.51 (bin2)",
+        "z_eff": 0.51,
+        "eps": -0.003999999999999962,
+        "err_lo": 0.010718399012769745,
+        "err_hi": 0.012316029612302637,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.014718399012769707,
+            0.008316029612302675
+          ],
+          "dataset": "satpathy_pre"
+        }
+      },
+      "3": {
+        "label": "z=0.61 (bin3)",
+        "z_eff": 0.61,
+        "eps": -0.011999999999999969,
+        "err_lo": 0.013442453673118221,
+        "err_hi": 0.013717944994913788,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.02544245367311819,
+            0.0017179449949138181
+          ],
+          "dataset": "satpathy_pre"
+        }
+      }
+    },
+    "catalog_lcdm": {
+      "1": {
+        "label": "cmasslowztot/combined/lcdm/b1",
+        "z_eff": 0.3835041757520107,
+        "eps": 0.026000000000000106,
+        "err_lo": 0.01419248278680674,
+        "err_hi": 0.016160483281004792,
+        "meta": {
+          "eps_ci_1sigma": [
+            0.011807517213193366,
+            0.0421604832810049
+          ],
+          "screening_status": "mixed",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b1.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b1_metrics.json"
+          }
+        }
+      },
+      "2": {
+        "label": "cmasslowztot/combined/lcdm/b2",
+        "z_eff": 0.5099048931318647,
+        "eps": -0.00399999999999992,
+        "err_lo": 0.013519081035234151,
+        "err_hi": 0.012627656340906228,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.01751908103523407,
+            0.008627656340906308
+          ],
+          "screening_status": "ok",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b2.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b2_metrics.json"
+          }
+        }
+      },
+      "3": {
+        "label": "cmasslowztot/combined/lcdm/b3",
+        "z_eff": 0.6061671375153759,
+        "eps": -0.019999999999999934,
+        "err_lo": 0.01307665408219913,
+        "err_hi": 0.01139410926506803,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.033076654082199064,
+            -0.008605890734931905
+          ],
+          "screening_status": "mixed",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b3.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b3_metrics.json"
+          }
+        }
+      }
+    },
+    "catalog_pbg": {
+      "1": {
+        "label": "cmasslowztot/combined/pbg/b1",
+        "z_eff": 0.3835041757520107,
+        "eps": 0.036000000000000115,
+        "err_lo": 0.014530116998197985,
+        "err_hi": 0.01483984489854305,
+        "meta": {
+          "eps_ci_1sigma": [
+            0.02146988300180213,
+            0.050839844898543166
+          ],
+          "screening_status": "ng",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_pbg_b1.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_pbg_b1_metrics.json"
+          }
+        }
+      },
+      "2": {
+        "label": "cmasslowztot/combined/pbg/b2",
+        "z_eff": 0.5099048931318647,
+        "eps": 0.026000000000000106,
+        "err_lo": 0.015345660753019439,
+        "err_hi": 0.014947296916206762,
+        "meta": {
+          "eps_ci_1sigma": [
+            0.010654339246980667,
+            0.04094729691620687
+          ],
+          "screening_status": "mixed",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_pbg_b2.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_pbg_b2_metrics.json"
+          }
+        }
+      },
+      "3": {
+        "label": "cmasslowztot/combined/pbg/b3",
+        "z_eff": 0.6061671375153759,
+        "eps": -0.005999999999999922,
+        "err_lo": 0.012358844537250769,
+        "err_hi": 0.013102105124132547,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.01835884453725069,
+            0.007102105124132624
+          ],
+          "screening_status": "ok",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_pbg_b3.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_pbg_b3_metrics.json"
+          }
+        }
+      }
+    },
+    "catalog_recon_lcdm": {
+      "1": {
+        "label": "cmasslowztot/combined/lcdm/b1",
+        "z_eff": 0.3835041757520107,
+        "eps": 0.012000000000000094,
+        "err_lo": 0.01169784194153073,
+        "err_hi": 0.01272203593312516,
+        "meta": {
+          "eps_ci_1sigma": [
+            0.00030215805846936294,
+            0.024722035933125254
+          ],
+          "screening_status": "ok",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b1__recon_grid_iso.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b1__recon_grid_iso_metrics.json"
+          }
+        }
+      },
+      "2": {
+        "label": "cmasslowztot/combined/lcdm/b2",
+        "z_eff": 0.5099048931318647,
+        "eps": -0.023999999999999938,
+        "err_lo": 0.011122935993429305,
+        "err_hi": 0.00966196222787314,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.03512293599342924,
+            -0.014338037772126798
+          ],
+          "screening_status": "ng",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b2__recon_grid_iso.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b2__recon_grid_iso_metrics.json"
+          }
+        }
+      },
+      "3": {
+        "label": "cmasslowztot/combined/lcdm/b3",
+        "z_eff": 0.6061671375153759,
+        "eps": -0.03599999999999995,
+        "err_lo": 0.011273169071423485,
+        "err_hi": 0.011946063694594954,
+        "meta": {
+          "eps_ci_1sigma": [
+            -0.04727316907142343,
+            -0.024053936305404994
+          ],
+          "screening_status": "ng",
+          "inputs": {
+            "npz": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b3__recon_grid_iso.npz",
+            "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_xi_from_catalogs_cmasslowztot_combined_lcdm_b3__recon_grid_iso_metrics.json"
+          }
+        }
+      }
+    }
+  },
+  "diagnostics": {
+    "delta_eps_lcdm_minus_published_post": {
+      "1": {
+        "eps_catalog_minus_published_post": 0.018000000000000058,
+        "sigma_combined_sym_1sigma": 0.01879490095976608,
+        "abs_sigma_sym": 0.9577065629945243
+      },
+      "2": {
+        "eps_catalog_minus_published_post": -0.00199999999999996,
+        "sigma_combined_sym_1sigma": 0.016044533230243734,
+        "abs_sigma_sym": 0.12465304981449922
+      },
+      "3": {
+        "eps_catalog_minus_published_post": -0.009999999999999967,
+        "sigma_combined_sym_1sigma": 0.015435436601241666,
+        "abs_sigma_sym": 0.6478598732474818
+      }
+    },
+    "delta_eps_lcdm_recon_minus_published_post": {
+      "1": {
+        "eps_catalog_recon_minus_published_post": 0.004000000000000045,
+        "sigma_combined_sym_1sigma": 0.016492582383067344,
+        "abs_sigma_sym": 0.2425332738738827
+      },
+      "2": {
+        "eps_catalog_recon_minus_published_post": -0.021999999999999978,
+        "sigma_combined_sym_1sigma": 0.013946937880397142,
+        "abs_sigma_sym": 1.577407183473705
+      },
+      "3": {
+        "eps_catalog_recon_minus_published_post": -0.02599999999999998,
+        "sigma_combined_sym_1sigma": 0.014944274185523314,
+        "abs_sigma_sym": 1.7397967728125916
+      }
+    }
+  },
+  "outputs": {
+    "png": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_catalog_vs_published_crosscheck.png",
+    "metrics_json": "C:\\develop\\waveP\\output\\private\\cosmology\\cosmology_bao_catalog_vs_published_crosscheck_metrics.json"
+  }
+}

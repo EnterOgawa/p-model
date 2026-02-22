@@ -65,6 +65,13 @@ def _safe_float(v: object) -> Optional[float]:
     return x if math.isfinite(x) else None
 
 
+def _safe_int(v: object) -> Optional[int]:
+    try:
+        return int(v)
+    except Exception:
+        return None
+
+
 def _gate_ok(
     max_abs_z: Optional[float],
     reduced_chi2: Optional[float],
@@ -89,11 +96,25 @@ def _all_true(values: Sequence[Optional[bool]]) -> Optional[bool]:
     return None
 
 
+def _falsification_status(
+    *, app_ok: Optional[bool], strict_ok: Optional[bool], holdout_ok: Optional[bool]
+) -> str:
+    if app_ok is False:
+        return "reject"
+    if strict_ok is False or holdout_ok is False:
+        return "reject"
+    if app_ok is True and strict_ok is True and holdout_ok is True:
+        return "ok"
+    return "inconclusive"
+
+
 def _minimax_gate_summary(
     split_summaries: Sequence[Dict[str, Any]],
     *,
     max_abs_z_le: float,
     reduced_chi2_le: Optional[float],
+    min_train_n: int,
+    min_test_n: int,
 ) -> Dict[str, Any]:
     splits_ordered = [str(sp.get("split") or "") for sp in split_summaries if sp.get("split") is not None]
     splits_ordered = [s for s in splits_ordered if s]
@@ -142,6 +163,8 @@ def _minimax_gate_summary(
         te_max = _safe_float(row.get("test_max_abs_z"))
         tr_chi2 = _safe_float(row.get("train_reduced_chi2"))
         te_chi2 = _safe_float(row.get("test_reduced_chi2"))
+        tr_n = _safe_int(row.get("train_n"))
+        te_n = _safe_int(row.get("test_n"))
         tr_ok = _gate_ok(tr_max, tr_chi2, max_abs_z_le=max_abs_z_le, reduced_chi2_le=reduced_chi2_le)
         te_ok = _gate_ok(te_max, te_chi2, max_abs_z_le=max_abs_z_le, reduced_chi2_le=reduced_chi2_le)
         train_ok_by_split.append(tr_ok)
@@ -151,6 +174,8 @@ def _minimax_gate_summary(
                 "split": sp_name,
                 "train_gate_ok": tr_ok,
                 "test_gate_ok": te_ok,
+                "train_n": tr_n,
+                "test_n": te_n,
                 "train_max_abs_z": tr_max,
                 "train_reduced_chi2": tr_chi2,
                 "test_max_abs_z": te_max,
@@ -158,11 +183,38 @@ def _minimax_gate_summary(
             }
         )
 
+    app_ok_by_split: List[Optional[bool]] = []
+    app_by_split: List[Dict[str, Any]] = []
+    for sp in per_split:
+        tr_n = _safe_int(sp.get("train_n"))
+        te_n = _safe_int(sp.get("test_n"))
+        ok = None
+        if tr_n is not None and te_n is not None:
+            ok = bool(tr_n >= int(min_train_n) and te_n >= int(min_test_n))
+        app_ok_by_split.append(ok)
+        app_by_split.append({"split": sp.get("split"), "train_n": tr_n, "test_n": te_n, "ok": ok})
+
+    applicability_ok = _all_true(app_ok_by_split)
+
     summary: Dict[str, Any] = {
         "criteria": {"max_abs_z_le": float(max_abs_z_le), "reduced_chi2_le": float(reduced_chi2_le) if reduced_chi2_le is not None else None},
         "recommended_model_by_minimax_test_max_abs_z": {"model_id": recommended_model_id},
         "strict_ok": _all_true(train_ok_by_split),
         "holdout_ok": _all_true(test_ok_by_split),
+        "applicability": {
+            "min_train_n": int(min_train_n),
+            "min_test_n": int(min_test_n),
+            "ok": applicability_ok,
+            "by_split": app_by_split,
+        },
+        "falsification": {
+            "reject_if_applicability_not_ok": True,
+            "reject_if_strict_not_ok": True,
+            "reject_if_holdout_not_ok": True,
+            "status": _falsification_status(
+                app_ok=applicability_ok, strict_ok=_all_true(train_ok_by_split), holdout_ok=_all_true(test_ok_by_split)
+            ),
+        },
         "by_split": per_split,
     }
 
@@ -183,6 +235,11 @@ def main() -> int:
             "dataset": "Si α(T)",
             "metrics_json": out_dir / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits_metrics.json",
             "repro": "python -B scripts/quantum/condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py",
+            "kpi_include": False,
+            "kpi_exclusion_reason": (
+                "Debye+Einstein baseline is retained as a diagnostic stress-test; "
+                "KPI gating uses the frozen DOS+γ(ω) basis model for this observable."
+            ),
         },
         {
             "dataset": "Si α(T) (DOS+γ(ω) basis)",
@@ -210,6 +267,641 @@ def main() -> int:
             "metrics_json": out_dir / "condensed_ofhc_copper_thermal_conductivity_holdout_splits_metrics.json",
             "repro": "python -B scripts/quantum/condensed_ofhc_copper_thermal_conductivity_holdout_splits.py",
         },
+        {
+            "dataset": "Si ρ(T) coeff",
+            "metrics_json": out_dir / "condensed_silicon_resistivity_temperature_coefficient_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/condensed_silicon_resistivity_temperature_coefficient_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody radiation",
+            "metrics_json": out_dir / "thermo_blackbody_radiation_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_radiation_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody flux",
+            "metrics_json": out_dir / "thermo_blackbody_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody mean photon energy",
+            "metrics_json": out_dir / "thermo_blackbody_mean_photon_energy_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_mean_photon_energy_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody peak wavelength",
+            "metrics_json": out_dir / "thermo_blackbody_peak_wavelength_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_peak_wavelength_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody peak frequency",
+            "metrics_json": out_dir / "thermo_blackbody_peak_frequency_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_peak_frequency_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody radiation pressure",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy-energy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_energy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_energy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy-pressure ratio",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_pressure_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_pressure_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy-entropy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_entropy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_entropy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz free-energy density",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_free_energy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_free_energy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz-entropy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_entropy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_entropy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz-energy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_energy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_energy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz-enthalpy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz-pressure ratio",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_pressure_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_pressure_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz free-energy flux",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_free_energy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_free_energy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy-momentum ratio",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_momentum_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_momentum_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz-momentum ratio",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_momentum_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_momentum_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum-energy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_energy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_energy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum-pressure ratio",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_pressure_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_pressure_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure-momentum ratio",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_momentum_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_momentum_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum-entropy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_entropy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_entropy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux per momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_per_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_per_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum per photon",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per photon",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per pressure",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per energy density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_energy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_energy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per entropy density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_entropy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_entropy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per energy density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_energy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_energy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per pressure",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per entropy density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_entropy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_entropy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux per photon density",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_per_photon_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_per_photon_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per photon density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_photon_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_photon_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per entropy density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_entropy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_entropy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon flux per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_flux_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_flux_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per pressure",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per energy density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_energy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_energy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per momentum density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_momentum_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_momentum_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity flux per photon density",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_per_photon_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_per_photon_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody photon density per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_photon_density_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_photon_density_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity per photon",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity-entropy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_entropy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_entropy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity-momentum ratio",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_momentum_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_momentum_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity-energy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_energy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_energy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity-pressure ratio",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_pressure_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_pressure_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody heat-capacity-enthalpy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_heat_capacity_enthalpy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_heat_capacity_enthalpy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy per photon",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody enthalpy per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_enthalpy_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_enthalpy_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per photon",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per heat-capacity density",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_heat_capacity_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_heat_capacity_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per heat-capacity flux",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_heat_capacity_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_heat_capacity_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per enthalpy flux",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_enthalpy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_enthalpy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per enthalpy density",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_enthalpy_density_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_enthalpy_density_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody Helmholtz per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_helmholtz_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_helmholtz_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per photon flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_photon_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_photon_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody flux per photon",
+            "metrics_json": out_dir / "thermo_blackbody_flux_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_flux_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy-energy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_energy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_energy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure-energy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_energy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_energy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy per pressure",
+            "metrics_json": out_dir / "thermo_blackbody_energy_per_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_per_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure-entropy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_entropy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_entropy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per pressure",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux per pressure",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_per_pressure_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_per_pressure_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody pressure-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_pressure_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_pressure_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody momentum-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_momentum_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_momentum_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_energy_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy-flux ratio",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy flux",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_flux_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_flux_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody energy-entropy ratio",
+            "metrics_json": out_dir / "thermo_blackbody_energy_entropy_ratio_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_energy_entropy_ratio_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody peak radiance",
+            "metrics_json": out_dir / "thermo_blackbody_peak_radiance_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_peak_radiance_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody entropy per photon",
+            "metrics_json": out_dir / "thermo_blackbody_entropy_per_photon_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_entropy_per_photon_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody peak νλ product",
+            "metrics_json": out_dir / "thermo_blackbody_peak_frequency_wavelength_product_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_peak_frequency_wavelength_product_holdout_splits.py",
+        },
+        {
+            "dataset": "Thermo blackbody peak ν/λ ratio",
+            "metrics_json": out_dir / "thermo_blackbody_peak_frequency_per_wavelength_holdout_splits_metrics.json",
+            "repro": "python -B scripts/quantum/thermo_blackbody_peak_frequency_per_wavelength_holdout_splits.py",
+        },
     ]
 
     rows_csv: List[Dict[str, Any]] = []
@@ -219,12 +911,24 @@ def main() -> int:
     # Operational threshold (align with other z-based audits).
     z_thr = 3.0
     reduced_chi2_thr = 9.0
+    min_train_n = 3
+    min_test_n = 3
 
     for inp in inputs:
         ds_name = str(inp.get("dataset") or "")
+        kpi_include = bool(inp.get("kpi_include", True))
+        kpi_exclusion_reason = str(inp.get("kpi_exclusion_reason") or "")
         in_metrics = Path(str(inp.get("metrics_json")))
         if not in_metrics.exists():
-            missing_inputs.append({"dataset": ds_name, "expected": _rel(in_metrics), "repro": str(inp.get("repro") or "")})
+            missing_inputs.append(
+                {
+                    "dataset": ds_name,
+                    "expected": _rel(in_metrics),
+                    "repro": str(inp.get("repro") or ""),
+                    "kpi_include": kpi_include,
+                    "kpi_exclusion_reason": kpi_exclusion_reason if (not kpi_include and kpi_exclusion_reason) else None,
+                }
+            )
             continue
 
         payload = json.loads(in_metrics.read_text(encoding="utf-8"))
@@ -237,6 +941,8 @@ def main() -> int:
                     "dataset": ds_name,
                     "expected": _rel(in_metrics),
                     "reason": "splits/holdout_splits missing/empty",
+                    "kpi_include": kpi_include,
+                    "kpi_exclusion_reason": kpi_exclusion_reason if (not kpi_include and kpi_exclusion_reason) else None,
                 }
             )
             continue
@@ -329,7 +1035,11 @@ def main() -> int:
                 )
 
             dataset_summary_extra["audit_gates"] = _minimax_gate_summary(
-                split_summaries, max_abs_z_le=z_thr, reduced_chi2_le=reduced_chi2_thr
+                split_summaries,
+                max_abs_z_le=z_thr,
+                reduced_chi2_le=reduced_chi2_thr,
+                min_train_n=min_train_n,
+                min_test_n=min_test_n,
             )
         else:
             # Alternative format: a single-model metrics JSON containing holdout_splits + falsification gates.
@@ -426,7 +1136,11 @@ def main() -> int:
                 )
 
             audit_gates = _minimax_gate_summary(
-                split_summaries, max_abs_z_le=z_thr0, reduced_chi2_le=reduced_chi2_thr0
+                split_summaries,
+                max_abs_z_le=z_thr0,
+                reduced_chi2_le=reduced_chi2_thr0,
+                min_train_n=min_train_n,
+                min_test_n=min_test_n,
             )
             if isinstance(dataset_summary_extra.get("falsification"), dict):
                 fals0 = dataset_summary_extra["falsification"]
@@ -436,14 +1150,24 @@ def main() -> int:
                 if isinstance(fals0.get("holdout_ok"), bool):
                     audit_gates["holdout_ok"] = bool(fals0["holdout_ok"])
                     audit_gates["holdout_ok_source"] = "metrics_falsification"
+                if isinstance(audit_gates.get("falsification"), dict):
+                    app_ok = (audit_gates.get("applicability") or {}).get("ok")
+                    audit_gates["falsification"]["status"] = _falsification_status(
+                        app_ok=app_ok,
+                        strict_ok=audit_gates.get("strict_ok"),
+                        holdout_ok=audit_gates.get("holdout_ok"),
+                    )
             dataset_summary_extra["audit_gates"] = audit_gates
 
         dataset_summary: Dict[str, Any] = {
             "dataset": ds_name,
             "inputs": {"holdout_metrics_json": {"path": _rel(in_metrics), "sha256": _sha256(in_metrics)}},
+            "kpi_include": kpi_include,
             "n_splits": int(len(split_summaries)),
             "splits": split_summaries,
         }
+        if (not kpi_include) and kpi_exclusion_reason:
+            dataset_summary["kpi_exclusion_reason"] = kpi_exclusion_reason
         dataset_summary.update(dataset_summary_extra)
         dataset_summaries.append(dataset_summary)
 
@@ -515,12 +1239,26 @@ def main() -> int:
             "z_outlier_abs_gt": z_thr,
             "max_abs_z_le": z_thr,
             "reduced_chi2_le": reduced_chi2_thr,
+            "applicability_min_train_n": min_train_n,
+            "applicability_min_test_n": min_test_n,
             "note": "Operational gates used to label holdout severity; not universal physics thresholds.",
         },
         "summary": {
             "datasets_n": int(len(dataset_summaries)),
             "datasets": dataset_summaries,
             "missing_inputs": missing_inputs,
+            "kpi_scope": {
+                "included_n": int(sum(1 for ds in dataset_summaries if bool(ds.get("kpi_include", True)))),
+                "excluded_n": int(sum(1 for ds in dataset_summaries if not bool(ds.get("kpi_include", True)))),
+                "excluded_datasets": [
+                    {
+                        "dataset": str(ds.get("dataset") or ""),
+                        "reason": str(ds.get("kpi_exclusion_reason") or ""),
+                    }
+                    for ds in dataset_summaries
+                    if not bool(ds.get("kpi_include", True))
+                ],
+            },
             "note": "This audit catalogs temperature-band sensitivity (procedure/systematic) rather than claiming a universally valid condensed-matter prediction model.",
         },
         "outputs": {"csv": _rel(out_csv), "json": _rel(out_json), "png": _rel(out_png) if out_png.exists() else None},
@@ -532,7 +1270,12 @@ def main() -> int:
             "domain": "quantum",
             "action": "condensed_holdout_audit",
             "outputs": [out_json, out_csv, out_png if out_png.exists() else None],
-            "params": {"max_abs_z_le": z_thr, "reduced_chi2_le": reduced_chi2_thr},
+            "params": {
+                "max_abs_z_le": z_thr,
+                "reduced_chi2_le": reduced_chi2_thr,
+                "applicability_min_train_n": min_train_n,
+                "applicability_min_test_n": min_test_n,
+            },
             "result": {"datasets_n": int(len(dataset_summaries)), "rows_n": int(len(rows_csv)), "missing_inputs_n": int(len(missing_inputs))},
         }
     )

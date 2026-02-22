@@ -1,13 +1,15 @@
 {
-  "generated_utc": "2026-02-13T03:01:20.351067+00:00",
+  "generated_utc": "2026-02-19T01:03:37.070997+00:00",
   "source_manifest": "data/llr/llr_edc_batch_manifest.json",
-  "n_files": 4626,
-  "n_points_total": 13132,
+  "n_files": 4637,
+  "n_points_total": 13146,
   "n_bad_tof_dropped": 6,
   "n_groups": 17,
   "beta": 1.0,
   "time_tag_mode": "auto",
   "station_coords_mode": "auto",
+  "station_override_json": null,
+  "station_override_input": null,
   "pos_eop_date_preferred": null,
   "pos_eop_max_days": 3650,
   "ocean_loading_mode": "auto",
@@ -33,7 +35,7 @@
     },
     "MDOL": {
       "harpos_site_id": "McDonald",
-      "harpos_dist_m": 0.14532033568698363,
+      "harpos_dist_m": 0.34124868919775386,
       "validity_radius_m": 3000.0,
       "warning_outside_validity": false
     },
@@ -68,6 +70,17 @@
       "dx_m": -0.4125941004604101,
       "dy_m": 0.4433673999737948,
       "dz_m": 0.3383137001655996
+    },
+    "MDOL": {
+      "station": "MDOL",
+      "pad_id": 7080,
+      "coord_source": "EDC pos+eop (SINEX)",
+      "pos_eop_yymmdd": "130818",
+      "pos_eop_ref_epoch_utc": "2013-08-15T12:00:00+00:00",
+      "delta_vs_slrlog_m": 0.2812307807890305,
+      "dx_m": -0.27780029992572963,
+      "dy_m": -0.043392300605773926,
+      "dz_m": 0.005903699900954962
     },
     "WETL": {
       "station": "WETL",
@@ -105,7 +118,7 @@
     "nglr1"
   ],
   "median_rms_ns": {
-    "geocenter_moon": 7303034.688880107,
+    "geocenter_moon": 7305782.072975977,
     "station_moon": 392909.02343563683,
     "station_reflector": 7.057968085544082,
     "station_reflector_no_shapiro": 7.584117062552238,
@@ -117,5 +130,19 @@
     "station_reflector_tropo_no_shapiro": 5.681109349368453,
     "station_reflector_tropo_earth_shapiro": 4.629765187401678,
     "station_reflector_iau": 589.807344532432
+  },
+  "point_weighted_rms_ns": {
+    "station_reflector": 8.98237486216411,
+    "station_reflector_tropo": 4.670221288193064,
+    "station_reflector_tropo_tide": 4.469974449424671
+  },
+  "modern_subset_rms_ns": {
+    "modern_start_year": 2023,
+    "all_modern_rms_ns": 4.982726582628789,
+    "all_modern_n": 3270,
+    "apol_modern_rms_ns": 7.693520876992633,
+    "apol_modern_n": 634,
+    "apol_modern_ex_nglr1_rms_ns": 5.063018373232765,
+    "apol_modern_ex_nglr1_n": 596
   }
 }

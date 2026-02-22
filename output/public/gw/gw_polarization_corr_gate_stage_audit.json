@@ -1,0 +1,208 @@
+{
+  "generated_utc": "2026-02-16T17:35:12.689247+00:00",
+  "schema": "wavep.gw.polarization.corr_gate_stage_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.4",
+  "inputs": {
+    "events": [
+      "GW200115_042309",
+      "GW200129_065458",
+      "GW200311_115853"
+    ],
+    "detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "corr_grid": [
+      0.05,
+      0.08,
+      0.1,
+      0.12,
+      0.15,
+      0.2,
+      0.25,
+      0.3
+    ],
+    "min_usable_events": 1,
+    "sky_samples": 5000,
+    "psi_samples": 36,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.1
+  },
+  "summary": {
+    "n_thresholds": 8,
+    "n_candidate_thresholds": 1,
+    "decision": "lock_corr_gate",
+    "decision_reason": "strictest_threshold_with_minimum_usable_events_and_stable_selection",
+    "locked_corr_use_min": 0.05,
+    "locked_events": [
+      "GW200129_065458"
+    ],
+    "selection_signature_stable_across_candidates": true,
+    "notes": [
+      "corr_use_min is staged to separate usable-vs-inconclusive network events.",
+      "Locked threshold is the strictest setting that keeps minimum usable events."
+    ]
+  },
+  "rows": [
+    {
+      "corr_use_min": 0.05,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0050",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0050.json",
+      "n_rows": 3,
+      "n_usable_events": 1,
+      "overall_status": "reject",
+      "overall_reason": "tensor_response_failed_for_some_events",
+      "usable_events": [
+        "GW200129_065458"
+      ],
+      "reject_events": [
+        "GW200129_065458"
+      ],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.08,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0080",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0080.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.1,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0100",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0100.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.12,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0120",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0120.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.15,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0150",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0150.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.2,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0200",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0200.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.25,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0250",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0250.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    },
+    {
+      "corr_use_min": 0.3,
+      "run_prefix": "gw_polarization_corr_gate_stage_audit_corr0300",
+      "network_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs/gw_polarization_corr_gate_stage_audit_corr0300.json",
+      "n_rows": 3,
+      "n_usable_events": 0,
+      "overall_status": "inconclusive",
+      "overall_reason": "no_usable_events",
+      "usable_events": [],
+      "reject_events": [],
+      "watch_events": [],
+      "pass_events": [],
+      "inconclusive_events": [
+        "GW200115_042309",
+        "GW200129_065458",
+        "GW200311_115853"
+      ]
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_audit.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_audit.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_audit.png",
+    "network_stage_runs_dir": "C:/develop/waveP/output/private/gw/gw_polarization_corr_gate_stage_runs",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_corr_gate_stage_audit.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_corr_gate_stage_audit.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_corr_gate_stage_audit.png"
+    ]
+  }
+}

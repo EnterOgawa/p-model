@@ -1,0 +1,65 @@
+{
+  "generated_utc": "2026-02-19T15:03:53.939957+00:00",
+  "phase": 8,
+  "step": "8.7.22",
+  "title": "Weak-interaction CKM first-row audit",
+  "source": {
+    "url": "https://pdg.lbl.gov/2024/reviews/rpp2024-rev-ckm-matrix.pdf",
+    "local_pdf": "data/quantum/sources/pdg_rpp2024_rev_ckm_matrix.pdf",
+    "sha256": "2e4dc8575ff12482a2b40c4f7ced7e4983a8d2f0748ca58d4809b088f3faf942"
+  },
+  "extraction": {
+    "vud_eq_12_7": {
+      "value": 0.97367,
+      "sigma": 0.00032
+    },
+    "vus_eq_12_8": {
+      "value": 0.22431,
+      "sigma": 0.00085
+    },
+    "vub_eq_12_12": {
+      "value": 0.00382,
+      "sigma": 0.0002
+    },
+    "first_row_reported": {
+      "value": 0.9984,
+      "sigma": 0.0007
+    }
+  },
+  "derived": {
+    "first_row_sum_from_elements": 0.9983628374000001,
+    "first_row_sigma_uncorrelated": 0.0007305662479573225,
+    "delta_ckm_reported": -0.0016000000000000458,
+    "abs_z_reported": 2.2857142857143513
+  },
+  "correlation_reassessment": {
+    "z_reported": 2.2857142857143513,
+    "z_uncorrelated_elements": 2.1900820144287763,
+    "sigma_required_for_watch_pass": 0.0008000000000000229,
+    "sigma_required_for_hard_pass": 0.0005333333333333486,
+    "sigma_gap_watch_minus_reported": 0.00010000000000002292,
+    "sigma_ratio_reported_to_uncorrelated": 0.9581608813125622,
+    "hard_to_pass_with_reported_sigma": true,
+    "watch_to_pass_with_reported_sigma": false,
+    "watch_to_pass_with_uncorrelated_sigma": false,
+    "watch_resolution_status": "watch_locked_by_current_primary_source_precision",
+    "watch_lock_reason": "reported first-row sigma is below watch-pass requirement; input precision update is required."
+  },
+  "gate": {
+    "hard_z_threshold": 3.0,
+    "watch_z_threshold": 2.0,
+    "hard_pass": true,
+    "watch_pass": false,
+    "status": "watch",
+    "rule": "hard if abs(z)<=3, watch if abs(z)<=2 (abs(z)>2 and <=3 => watch)"
+  },
+  "pmns_gate": {
+    "status": "not_evaluated",
+    "reason": "PMNS closure is out of scope in this CKM first-row pack."
+  },
+  "outputs": {
+    "summary_csv": "output/public/quantum/weak_interaction_ckm_first_row_audit_summary.csv",
+    "audit_json": "output/public/quantum/weak_interaction_ckm_first_row_audit.json",
+    "audit_png": "output/public/quantum/weak_interaction_ckm_first_row_audit.png"
+  }
+}

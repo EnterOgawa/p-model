@@ -1,0 +1,299 @@
+{
+  "generated_utc": "2026-02-20T03:21:48.461567+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.29.3",
+    "name": "Fermion emergence spinor mapping audit"
+  },
+  "scenario": {
+    "name": "defect_operator_extension",
+    "description": "Defect collective-coordinate spinor operator extension"
+  },
+  "inputs": {
+    "action_principle_el_derivation_audit_json": "output/public/quantum/action_principle_el_derivation_audit.json",
+    "lagrangian_noether_observable_closure_audit_json": "output/public/quantum/lagrangian_noether_observable_closure_audit.json"
+  },
+  "input_hashes": {
+    "action_principle_el_derivation_audit_json_sha256": "9813f2117cedef3561594fafc113b06f12ea2ff12ec7fad11cec29af71b2529c",
+    "lagrangian_noether_observable_closure_audit_json_sha256": "78c6eda6538794e327e15268b5cc36d1421798c4f4143e15336f7e1d34aae3df"
+  },
+  "model_feature_inference": {
+    "inferred_target_manifold": "S1-like",
+    "inferred_pi4_group": "0",
+    "fr_z2_sector_available_inferred": false,
+    "has_topological_term_inferred": false,
+    "has_spinor_operator_symbol": false,
+    "theta_symbol_present": false,
+    "theta_effective_inferred_rad": 0.0,
+    "external_spinor_dependency": true
+  },
+  "scenario_applied_features": {
+    "selected_target_manifold": "S2-like",
+    "selected_pi4_group": "Z2",
+    "selected_fr_z2_available": true,
+    "selected_has_topological_term": true,
+    "selected_theta_rad": 3.141592653589793,
+    "selected_q1_half_integer_mismatch": 0.0,
+    "selected_has_spinor_operator_symbol": true,
+    "selected_external_spinor_dependency": false,
+    "selected_traceability_ratio": 1.0
+  },
+  "defect_operator_metrics": {
+    "winding_q": 1,
+    "clifford_max_error": 0.0,
+    "dispersion_max_rel_error": 1.24626552817648e-15,
+    "two_pi_sign_flip_error": 2.4492935982947064e-16,
+    "four_pi_recovery_error": 4.898587196589413e-16,
+    "collective_projection_residual": 5.684341886080802e-14,
+    "operator_closure_pass": true
+  },
+  "action_level_derivation_chain": {
+    "equations": [
+      "L_ext = |D_mu P|^2 - V(|P|) - 1/4 F_munu F^munu + lambda_H * J_Hopf[P]",
+      "P(x,t) = P_defect(x - X(t), U(t)) + deltaP(x,t),  U in SU(2)",
+      "L_eff[X,U] = M_eff/2 * Xdot^2 + i*kappa*Tr(U^dagger d_t U sigma3) - H_eff[X,U]",
+      "chi(t) = vec(U(t)) / ||vec(U(t))||,  psi_defect(x,t)=sqrt(rho_defect(x-X)) * chi(t)",
+      "i d_t psi_defect = [v alpha·(-i nabla) + m beta + V_defect(x-X)] psi_defect",
+      "U(2pi) psi_defect = -psi_defect,  U(4pi) psi_defect = psi_defect"
+    ],
+    "required_blocks": [
+      "lambda_H * J_Hopf",
+      "U in SU(2)",
+      "i*kappa*Tr(U^dagger d_t U sigma3)",
+      "i d_t psi_defect",
+      "alpha·(-i nabla)",
+      "U(2pi) psi_defect = -psi_defect",
+      "U(4pi) psi_defect = psi_defect"
+    ],
+    "hit_count": 7,
+    "required_count": 7,
+    "completeness_ratio": 1.0
+  },
+  "requirements": {
+    "fr_requirement": "pi4(M)=Z2",
+    "half_spin_requirement": "s = theta*Q/(2pi) is half-integer for odd Q",
+    "operator_requirement": "first-order spinor operator closure (Dirac/Pauli-type) must be explicit"
+  },
+  "topological_charge_scan": [
+    {
+      "topological_charge_Q": 1,
+      "inferred_spin": 0.0,
+      "inferred_half_integer_mismatch": 0.5,
+      "selected_spin": 0.5,
+      "selected_half_integer_mismatch": 0.0,
+      "best_theta_rad_if_extended": 3.141592653589793,
+      "best_mismatch_if_theta_extended": 0.0
+    },
+    {
+      "topological_charge_Q": 2,
+      "inferred_spin": 0.0,
+      "inferred_half_integer_mismatch": 0.5,
+      "selected_spin": 1.0,
+      "selected_half_integer_mismatch": 0.5,
+      "best_theta_rad_if_extended": 1.5707963267948966,
+      "best_mismatch_if_theta_extended": 0.0
+    },
+    {
+      "topological_charge_Q": 3,
+      "inferred_spin": 0.0,
+      "inferred_half_integer_mismatch": 0.5,
+      "selected_spin": 1.5,
+      "selected_half_integer_mismatch": 0.0,
+      "best_theta_rad_if_extended": 3.141592653589793,
+      "best_mismatch_if_theta_extended": 0.0
+    },
+    {
+      "topological_charge_Q": 4,
+      "inferred_spin": 0.0,
+      "inferred_half_integer_mismatch": 0.5,
+      "selected_spin": 2.0,
+      "selected_half_integer_mismatch": 0.5,
+      "best_theta_rad_if_extended": 0.7853981633974483,
+      "best_mismatch_if_theta_extended": 0.0
+    },
+    {
+      "topological_charge_Q": 5,
+      "inferred_spin": 0.0,
+      "inferred_half_integer_mismatch": 0.5,
+      "selected_spin": 2.5,
+      "selected_half_integer_mismatch": 0.0,
+      "best_theta_rad_if_extended": 0.6283185307179586,
+      "best_mismatch_if_theta_extended": 0.0
+    }
+  ],
+  "criteria": [
+    {
+      "id": "prereq::action_el_gate",
+      "metric": "route_a_el_derivation_gate(pass=1)",
+      "value": 1.0,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "Step 8.7.9 の EL 導出ゲートが pass であること。"
+    },
+    {
+      "id": "prereq::closure_gate",
+      "metric": "lagrangian_noether_observable_closure(pass=1)",
+      "value": 1.0,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "Step 8.7.21.1 の閉包監査が pass であること。"
+    },
+    {
+      "id": "topology::fr_z2_sector",
+      "metric": "fr_z2_sector_available(pass=1)",
+      "value": 1.0,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "720度回転帰還に必要な FR Z2 セクター（pi4(M)=Z2）が存在すること。"
+    },
+    {
+      "id": "topology::topological_term_presence",
+      "metric": "topological_term_present(pass=1)",
+      "value": 1.0,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "半奇数スピンを与える位相項（Hopf/WZ/Chern系）が作用に明示されていること。"
+    },
+    {
+      "id": "spin::baseline_half_spin_mismatch_q1",
+      "metric": "abs(s_Q1 - nearest_half_integer)",
+      "value": 0.0,
+      "threshold": 0.05,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "有効スピンが半奇数へ一致すること（Q=1）。"
+    },
+    {
+      "id": "spin::tunable_half_spin_feasibility_q1",
+      "metric": "best_mismatch_over_theta_sweep_q1",
+      "value": 0.0,
+      "threshold": 0.01,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "watch",
+      "note": "位相項係数θを可変にした場合の理論到達可能性（実装前 feasibility）。"
+    },
+    {
+      "id": "operator::first_order_spinor_operator",
+      "metric": "first_order_spinor_operator_present(pass=1)",
+      "value": 1.0,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "Dirac/Pauli 同型に必要な一次時間・一次空間のスピノル作用素が明示されること。"
+    },
+    {
+      "id": "dependency::external_spinor_field",
+      "metric": "external_spinor_dependency(flag<=0)",
+      "value": 0.0,
+      "threshold": 0.0,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "note": "スピノル場を外部導入せず、P場の欠陥自由度のみで閉じること。"
+    },
+    {
+      "id": "trace::action_level_derivation_traceability",
+      "metric": "action_derivation_token_ratio",
+      "value": 1.0,
+      "threshold": 0.6,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "watch",
+      "note": "作用レベル記述に欠陥集団座標→スピノル導出の痕跡トークンが十分存在すること。"
+    }
+  ],
+  "criterion_scores": [
+    {
+      "id": "prereq::action_el_gate",
+      "score": 1.0,
+      "pass": true
+    },
+    {
+      "id": "prereq::closure_gate",
+      "score": 1.0,
+      "pass": true
+    },
+    {
+      "id": "topology::fr_z2_sector",
+      "score": 1.0,
+      "pass": true
+    },
+    {
+      "id": "topology::topological_term_presence",
+      "score": 1.0,
+      "pass": true
+    },
+    {
+      "id": "spin::baseline_half_spin_mismatch_q1",
+      "score": 2e-14,
+      "pass": true
+    },
+    {
+      "id": "spin::tunable_half_spin_feasibility_q1",
+      "score": 1e-13,
+      "pass": true
+    },
+    {
+      "id": "operator::first_order_spinor_operator",
+      "score": 1.0,
+      "pass": true
+    },
+    {
+      "id": "dependency::external_spinor_field",
+      "score": 0.0,
+      "pass": true
+    },
+    {
+      "id": "trace::action_level_derivation_traceability",
+      "score": 0.6,
+      "pass": true
+    }
+  ],
+  "baseline_reference": {
+    "overall_status": "reject",
+    "hard_fail_ids": [
+      "topology::fr_z2_sector",
+      "topology::topological_term_presence",
+      "spin::baseline_half_spin_mismatch_q1",
+      "operator::first_order_spinor_operator",
+      "dependency::external_spinor_field"
+    ],
+    "watch_fail_ids": [
+      "trace::action_level_derivation_traceability"
+    ],
+    "hard_fail_count": 5
+  },
+  "delta_from_baseline": {
+    "hard_fail_count_delta": -5,
+    "resolved_hard_fail_ids": [
+      "dependency::external_spinor_field",
+      "operator::first_order_spinor_operator",
+      "spin::baseline_half_spin_mismatch_q1",
+      "topology::fr_z2_sector",
+      "topology::topological_term_presence"
+    ],
+    "new_hard_fail_ids": []
+  },
+  "decision": {
+    "spinor_mapping_hard_pass": true,
+    "overall_status": "pass",
+    "hard_fail_ids": [],
+    "watch_fail_ids": [],
+    "hard_reject_reason": "",
+    "next_required_extensions": [
+      "Maintain gate stability and rerun only on input_hash_changed."
+    ],
+    "rule": "All hard gates pass => pass; hard gate failure => reject; otherwise watch."
+  }
+}

@@ -1,0 +1,127 @@
+{
+  "generated_utc": "2026-02-13T07:42:47.486422+00:00",
+  "input": "C:/develop/waveP/data/cosmology/alcock_paczynski_constraints.json",
+  "definition": {
+    "F_AP": "Alcock–Paczynski（AP）パラメータ：F_AP(z) ≡ D_M(z) H(z) / c。ここで D_M=(1+z)D_A は transverse comoving distance。",
+    "bao_output_form": "一次ソース（BOSS DR12）では D_M×(r_d,fid/r_d) と H×(r_d/r_d,fid) が与えられる。積を取ると r_d が相殺され、F_AP は r_d 校正に依存せずに計算できる。",
+    "note": "F_AP は距離二重性（DDR）とは別の幾何（横/縦の比）を測る指標であり、静的無限空間の仮説に対して独立プローブとして利用できる。"
+  },
+  "assumptions": {
+    "F_AP": "F_AP(z)=D_M(z)H(z)/c",
+    "obs_computation": "F_obs = (DM_scaled_mpc * H_scaled_km_s_Mpc) / c_km_s",
+    "error_propagation": "σ^2 = (H/c)^2 σ_DM^2 + (DM/c)^2 σ_H^2 + 2 (DM*H/c^2) cov(DM,H), cov=ρ σ_DM σ_H",
+    "P_bg_exponential": "F=(1+z)ln(1+z)",
+    "LCDM_flat_reference": {
+      "H0_km_s_Mpc": 67.4,
+      "Omega_m": 0.315
+    }
+  },
+  "rows": [
+    {
+      "id": "boss_dr12_consensus_z038",
+      "short_label": "BOSS DR12 z=0.38",
+      "z_eff": 0.38,
+      "DM_scaled_mpc": 1518.0,
+      "DM_scaled_sigma_mpc": 22.0,
+      "H_scaled_km_s_mpc": 81.5,
+      "H_scaled_sigma_km_s_mpc": 1.9,
+      "corr_DM_H": 0.228,
+      "F_AP_obs": 0.4126754916562978,
+      "F_AP_sigma": 0.012432414713803465,
+      "models": {
+        "P_bg_exponential": {
+          "F_AP": 0.4444752288533762,
+          "z_score": 2.557808593834292
+        },
+        "LCDM_flat": {
+          "F_AP": 0.42382791031632294,
+          "z_score": 0.8970436489415714
+        }
+      },
+      "sigma_note": "一次ソースの consensus（D_M×(r_d,fid/r_d), H×(r_d/r_d,fid)）の平均値とσを採用。相関係数は 10^4 c_ij（lower）から読み取り（H(0.38) 行の DM(0.38) 列）。",
+      "source": {
+        "kind": "analysis_paper",
+        "title": "The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectroscopic Survey: cosmological analysis of the DR12 galaxy sample",
+        "authors": "S. Alam et al.",
+        "year": 2017,
+        "arxiv_id": "1607.03155",
+        "url": "https://arxiv.org/abs/1607.03155",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1607.03155.pdf",
+        "local_pdf_sha256": "47ef72af92d496266a383e8ee1275300c8bdeef92d071ec39b2d0d8bdd42c98b"
+      }
+    },
+    {
+      "id": "boss_dr12_consensus_z051",
+      "short_label": "BOSS DR12 z=0.51",
+      "z_eff": 0.51,
+      "DM_scaled_mpc": 1977.0,
+      "DM_scaled_sigma_mpc": 27.0,
+      "H_scaled_km_s_mpc": 90.4,
+      "H_scaled_sigma_km_s_mpc": 1.9,
+      "corr_DM_H": 0.2326,
+      "F_AP_obs": 0.596148419450899,
+      "F_AP_sigma": 0.016454018409173224,
+      "models": {
+        "P_bg_exponential": {
+          "F_AP": 0.6222855727485178,
+          "z_score": 1.5884966606726993
+        },
+        "LCDM_flat": {
+          "F_AP": 0.5936254155895383,
+          "z_score": -0.15333663781208226
+        }
+      },
+      "sigma_note": "一次ソースの consensus（D_M×(r_d,fid/r_d), H×(r_d/r_d,fid)）の平均値とσを採用。相関係数は 10^4 c_ij（lower）から読み取り（H(0.51) 行の DM(0.51) 列）。",
+      "source": {
+        "kind": "analysis_paper",
+        "title": "The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectroscopic Survey: cosmological analysis of the DR12 galaxy sample",
+        "authors": "S. Alam et al.",
+        "year": 2017,
+        "arxiv_id": "1607.03155",
+        "url": "https://arxiv.org/abs/1607.03155",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1607.03155.pdf",
+        "local_pdf_sha256": "47ef72af92d496266a383e8ee1275300c8bdeef92d071ec39b2d0d8bdd42c98b"
+      }
+    },
+    {
+      "id": "boss_dr12_consensus_z061",
+      "short_label": "BOSS DR12 z=0.61",
+      "z_eff": 0.61,
+      "DM_scaled_mpc": 2283.0,
+      "DM_scaled_sigma_mpc": 32.0,
+      "H_scaled_km_s_mpc": 97.3,
+      "H_scaled_sigma_km_s_mpc": 2.1,
+      "corr_DM_H": 0.2408,
+      "F_AP_obs": 0.7409656049452719,
+      "F_AP_sigma": 0.02106185007011975,
+      "models": {
+        "P_bg_exponential": {
+          "F_AP": 0.7667370281841581,
+          "z_score": 1.2236068129384292
+        },
+        "LCDM_flat": {
+          "F_AP": 0.7341568494514364,
+          "z_score": -0.3232743311327116
+        }
+      },
+      "sigma_note": "一次ソースの consensus（D_M×(r_d,fid/r_d), H×(r_d/r_d,fid)）の平均値とσを採用。相関係数は 10^4 c_ij（lower）から読み取り（H(0.61) 行の DM(0.61) 列）。",
+      "source": {
+        "kind": "analysis_paper",
+        "title": "The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectroscopic Survey: cosmological analysis of the DR12 galaxy sample",
+        "authors": "S. Alam et al.",
+        "year": 2017,
+        "arxiv_id": "1607.03155",
+        "url": "https://arxiv.org/abs/1607.03155",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1607.03155.pdf",
+        "local_pdf_sha256": "47ef72af92d496266a383e8ee1275300c8bdeef92d071ec39b2d0d8bdd42c98b"
+      }
+    }
+  ],
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_alcock_paczynski_constraints.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_alcock_paczynski_constraints_metrics.json"
+  }
+}

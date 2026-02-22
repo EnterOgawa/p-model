@@ -1,0 +1,4 @@
+gate_id,observable,case,value,reference,residual,threshold,comparator,status,z_score,note
+metric_choice::caseB_effective_mercury_coeff,mercury_precession_coeff,B_effective_metric,1.0000105,0.9997004461,0.0003100539128,0.05,|value-reference|<=threshold,pass,,kappa_effective=(2-beta+2gamma_effective)/3
+metric_choice::caseB_effective_light_deflection_gamma,ppn_gamma,B_effective_metric,1.000021,0.99983,0.000191,3,|z|<=threshold,pass,-0.7346153846,gamma_effective from g_{mu nu}(P) weak-field mapping
+metric_choice::caseB_effective_pde_closure,nonlinear_pde_closure,B_effective_metric,1,1,0,0.001,formulation&&boundary&&max_flux<=threshold,pass,,from pmodel_rotating_bh_photon_ring_direct_audit.axisymmetric_pde_block

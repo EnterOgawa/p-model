@@ -1,0 +1,252 @@
+{
+  "generated_utc": "2026-02-17T05:05:31.272355+00:00",
+  "inputs": {
+    "points_csv": "output/private/llr/batch/llr_batch_points.csv",
+    "exclude_target": "nglr1",
+    "modern_start_year": 2023
+  },
+  "summary": [
+    {
+      "subset": "all",
+      "n_points": 13064,
+      "point_rms_ns": 4.375644977009524,
+      "weighted_rms_ns_bin_rms": 2.218502683606913,
+      "median_abs_z_np": 17.340035614092088,
+      "p90_abs_z_np": 50.81347667860416,
+      "p95_abs_z_np": 85.21020890770748,
+      "chi2_like_np": 213833.9905895683,
+      "median_abs_z_np_mean": 125.85568066888979,
+      "p95_abs_z_np_mean": 1021.5907551366529,
+      "model_floor_ns_for_chi2eq1": 4.368266281772879,
+      "median_np_bin_rms_ns": 0.1737
+    },
+    {
+      "subset": "exclude_nglr1",
+      "n_points": 13040,
+      "point_rms_ns": 4.281637974262467,
+      "weighted_rms_ns_bin_rms": 2.2183321814525594,
+      "median_abs_z_np": 17.295271956136546,
+      "p90_abs_z_np": 50.53932694832566,
+      "p95_abs_z_np": 83.54270416892811,
+      "chi2_like_np": 214194.22810133503,
+      "median_abs_z_np_mean": 125.61987182113685,
+      "p95_abs_z_np_mean": 1020.6915419814474,
+      "model_floor_ns_for_chi2eq1": 4.276244924599037,
+      "median_np_bin_rms_ns": 0.1737
+    },
+    {
+      "subset": "modern_2023_all",
+      "n_points": 619,
+      "point_rms_ns": 6.524424493699244,
+      "weighted_rms_ns_bin_rms": 5.219156492549252,
+      "median_abs_z_np": 22.606200433291644,
+      "p90_abs_z_np": 54.366862027805354,
+      "p95_abs_z_np": 91.04060712772777,
+      "chi2_like_np": 8002.552345992066,
+      "median_abs_z_np_mean": 201.93961167271502,
+      "p95_abs_z_np_mean": 1137.517655757117,
+      "model_floor_ns_for_chi2eq1": 6.506125986047015,
+      "median_np_bin_rms_ns": 0.1827
+    },
+    {
+      "subset": "modern_2023_exclude_nglr1",
+      "n_points": 595,
+      "point_rms_ns": 5.067213945607477,
+      "weighted_rms_ns_bin_rms": 4.999386409856197,
+      "median_abs_z_np": 22.066824038096673,
+      "p90_abs_z_np": 48.68458750012833,
+      "p95_abs_z_np": 69.5889566173112,
+      "chi2_like_np": 7595.06097724018,
+      "median_abs_z_np_mean": 194.39482841476502,
+      "p95_abs_z_np_mean": 1144.3300979681644,
+      "model_floor_ns_for_chi2eq1": 5.0623741009006995,
+      "median_np_bin_rms_ns": 0.1829
+    },
+    {
+      "subset": "modern_2023_apol_exclude_nglr1",
+      "n_points": 595,
+      "point_rms_ns": 5.067213945607477,
+      "weighted_rms_ns_bin_rms": 4.999386409856197,
+      "median_abs_z_np": 22.066824038096673,
+      "p90_abs_z_np": 48.68458750012833,
+      "p95_abs_z_np": 69.5889566173112,
+      "chi2_like_np": 7595.06097724018,
+      "median_abs_z_np_mean": 194.39482841476502,
+      "p95_abs_z_np_mean": 1144.3300979681644,
+      "model_floor_ns_for_chi2eq1": 5.0623741009006995,
+      "median_np_bin_rms_ns": 0.1829
+    }
+  ],
+  "by_station": [
+    {
+      "station": "APOL",
+      "n_points": 1416,
+      "point_rms_ns": 5.899338993904686,
+      "weighted_rms_ns_bin_rms": 5.256100219408827,
+      "median_abs_z_np": 47.36734613487859,
+      "p90_abs_z_np": 356.133584271524,
+      "p95_abs_z_np": 467.03778038101007,
+      "chi2_like_np": 37845.8662679687,
+      "median_abs_z_np_mean": 642.7055901569913,
+      "p95_abs_z_np_mean": 9255.600789726755,
+      "model_floor_ns_for_chi2eq1": 5.888133865536991,
+      "median_np_bin_rms_ns": 0.0657
+    },
+    {
+      "station": "GRSM",
+      "n_points": 10878,
+      "point_rms_ns": 4.18551837233033,
+      "weighted_rms_ns_bin_rms": 3.931861142198598,
+      "median_abs_z_np": 16.613048279842523,
+      "p90_abs_z_np": 41.43339643781483,
+      "p95_abs_z_np": 51.22162753245563,
+      "chi2_like_np": 680.1728071776489,
+      "median_abs_z_np_mean": 118.75428811511237,
+      "p95_abs_z_np_mean": 521.3222879407002,
+      "model_floor_ns_for_chi2eq1": 4.1800217800252515,
+      "median_np_bin_rms_ns": 0.178
+    },
+    {
+      "station": "MATM",
+      "n_points": 345,
+      "point_rms_ns": 3.522620635869545,
+      "weighted_rms_ns_bin_rms": 2.1986767412684878,
+      "median_abs_z_np": 4.249676839567925,
+      "p90_abs_z_np": 25.55995057493929,
+      "p95_abs_z_np": 4124.931803535978,
+      "chi2_like_np": 7918475.359366378,
+      "median_abs_z_np_mean": 21.998252590974484,
+      "p95_abs_z_np_mean": 16588.460260524425,
+      "model_floor_ns_for_chi2eq1": 3.5033899802502146,
+      "median_np_bin_rms_ns": 0.315
+    },
+    {
+      "station": "MDOL",
+      "n_points": 31,
+      "point_rms_ns": 11.33508777937953,
+      "weighted_rms_ns_bin_rms": 15.454453691484895,
+      "median_abs_z_np": 11.924282105776088,
+      "p90_abs_z_np": 49.956518601914915,
+      "p95_abs_z_np": 88.46379570653437,
+      "chi2_like_np": 7285.736873140755,
+      "median_abs_z_np_mean": 32.41156377160546,
+      "p95_abs_z_np_mean": 218.24429913246618,
+      "model_floor_ns_for_chi2eq1": 11.328342802565988,
+      "median_np_bin_rms_ns": 0.2703
+    },
+    {
+      "station": "WETL",
+      "n_points": 394,
+      "point_rms_ns": 2.2619878279958776,
+      "weighted_rms_ns_bin_rms": 2.9044740589220135,
+      "median_abs_z_np": 11.034101898800394,
+      "p90_abs_z_np": 45.19237128178732,
+      "p95_abs_z_np": 69.53681776613297,
+      "chi2_like_np": 1113.5274257104995,
+      "median_abs_z_np_mean": 81.08684174886159,
+      "p95_abs_z_np_mean": 359.3959795901949,
+      "model_floor_ns_for_chi2eq1": 2.259033036187274,
+      "median_np_bin_rms_ns": 0.133
+    }
+  ],
+  "by_target": [
+    {
+      "target": "apollo11",
+      "n_points": 2024,
+      "point_rms_ns": 4.383342179885041,
+      "weighted_rms_ns_bin_rms": 3.465439917847612,
+      "median_abs_z_np": 21.91497695110516,
+      "p90_abs_z_np": 57.275058751987416,
+      "p95_abs_z_np": 115.65067135195069,
+      "chi2_like_np": 129557.89353020165,
+      "median_abs_z_np_mean": 148.41227168310732,
+      "p95_abs_z_np_mean": 1297.0866949395509,
+      "model_floor_ns_for_chi2eq1": 4.380463344386712,
+      "median_np_bin_rms_ns": 0.1586
+    },
+    {
+      "target": "apollo14",
+      "n_points": 1733,
+      "point_rms_ns": 4.530646846100842,
+      "weighted_rms_ns_bin_rms": 5.308676577750567,
+      "median_abs_z_np": 23.239755071196104,
+      "p90_abs_z_np": 64.66868999646667,
+      "p95_abs_z_np": 140.3871787626903,
+      "chi2_like_np": 7566.949968072832,
+      "median_abs_z_np_mean": 168.81431944248666,
+      "p95_abs_z_np_mean": 1699.733136952421,
+      "model_floor_ns_for_chi2eq1": 4.527820441871897,
+      "median_np_bin_rms_ns": 0.155
+    },
+    {
+      "target": "apollo15",
+      "n_points": 5605,
+      "point_rms_ns": 4.564418386636271,
+      "weighted_rms_ns_bin_rms": 2.146281994346922,
+      "median_abs_z_np": 14.421997055003418,
+      "p90_abs_z_np": 43.757223583450475,
+      "p95_abs_z_np": 86.78192228032457,
+      "chi2_like_np": 447723.85128029203,
+      "median_abs_z_np_mean": 105.06154320099502,
+      "p95_abs_z_np_mean": 1241.5764818810985,
+      "model_floor_ns_for_chi2eq1": 4.5569092961689925,
+      "median_np_bin_rms_ns": 0.2385
+    },
+    {
+      "target": "luna17",
+      "n_points": 1905,
+      "point_rms_ns": 3.6311618045842518,
+      "weighted_rms_ns_bin_rms": 4.186082862361367,
+      "median_abs_z_np": 20.136162822618296,
+      "p90_abs_z_np": 49.68659206931361,
+      "p95_abs_z_np": 70.69009790088994,
+      "chi2_like_np": 3064.128245950549,
+      "median_abs_z_np_mean": 137.00187057961875,
+      "p95_abs_z_np_mean": 826.1555384261101,
+      "model_floor_ns_for_chi2eq1": 3.628297267424304,
+      "median_np_bin_rms_ns": 0.1326
+    },
+    {
+      "target": "luna21",
+      "n_points": 1773,
+      "point_rms_ns": 3.5782497117061767,
+      "weighted_rms_ns_bin_rms": 3.628493140432639,
+      "median_abs_z_np": 16.396149337655725,
+      "p90_abs_z_np": 45.30017982325624,
+      "p95_abs_z_np": 57.874530824065054,
+      "chi2_like_np": 1367.5594512341165,
+      "median_abs_z_np_mean": 126.50667842751474,
+      "p95_abs_z_np_mean": 702.6893862471455,
+      "model_floor_ns_for_chi2eq1": 3.574371622386943,
+      "median_np_bin_rms_ns": 0.1475
+    },
+    {
+      "target": "nglr1",
+      "n_points": 24,
+      "point_rms_ns": 21.478722176855154,
+      "weighted_rms_ns_bin_rms": 20.38779764389656,
+      "median_abs_z_np": 90.04724843363813,
+      "p90_abs_z_np": 166.86626861249326,
+      "p95_abs_z_np": 227.80134025195,
+      "chi2_like_np": 18104.942529632583,
+      "median_abs_z_np_mean": 441.17371273988095,
+      "p95_abs_z_np_mean": 1019.0307822867553,
+      "model_floor_ns_for_chi2eq1": 21.46637404116048,
+      "median_np_bin_rms_ns": 0.15819999999999998
+    }
+  ],
+  "interpretation": {
+    "operational_primary_metrics": [
+      "point_weighted_rms (NP bin RMS 重み)",
+      "normalized residual z = |residual| / NP_bin_rms",
+      "chi2_like over z"
+    ],
+    "not_primary_metric": "station×target の中央値RMS（代表図用には有効だが採否の主判定には不向き）"
+  },
+  "outputs": {
+    "summary_csv": "output/private/llr/llr_operational_metrics_audit.csv",
+    "by_station_csv": "output/private/llr/llr_operational_metrics_by_station.csv",
+    "by_target_csv": "output/private/llr/llr_operational_metrics_by_target.csv",
+    "plot_png": "output/private/llr/llr_operational_metrics_audit.png"
+  }
+}

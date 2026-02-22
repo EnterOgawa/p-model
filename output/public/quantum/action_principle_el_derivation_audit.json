@@ -1,0 +1,70 @@
+{
+  "generated_utc": "2026-02-16T16:06:25.968267+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.9",
+    "name": "Action-principle EL derivation audit"
+  },
+  "equations": {
+    "lagrangian_density": "L = |D_mu P|^2 - V(|P|) - (1/4) F_munu F^munu",
+    "covariant_derivative": "D_mu = partial_mu + i q A_mu",
+    "field_strength": "F_munu = partial_mu A_nu - partial_nu A_mu",
+    "el_for_P_conjugate": "D_mu D^mu P + dV/dP* = 0",
+    "el_for_A_nu": "partial_mu F^munu = j^nu,  j^nu = i q [P* D^nu P - (D^nu P)* P]",
+    "continuity": "partial_nu j^nu = 0 (from antisymmetry of F_munu and EL consistency)"
+  },
+  "assumptions": [
+    "場 P, A_mu は境界を含めて十分滑らか（最小で C1）",
+    "変分は境界で消える（境界項は 0）",
+    "高次導関数項は最小モデルでは採用しない"
+  ],
+  "numerical_audit": {
+    "grid_points": 1024,
+    "periodic_boundary": true,
+    "charge_q": 0.37,
+    "criteria": [
+      {
+        "id": "covariant_derivative_gauge_covariance",
+        "metric": "max_rel_error(D_mu P)",
+        "value": 2.2702936342993408e-13,
+        "threshold": 5e-08,
+        "operator": "<=",
+        "pass": true,
+        "note": "D_mu P のゲージ共変性（D_mu'P' = exp(iχ) D_mu P）を有限差分で監査。"
+      },
+      {
+        "id": "kinetic_density_gauge_invariance",
+        "metric": "max_rel_error(|D_mu P|^2)",
+        "value": 1.3428848075580854e-13,
+        "threshold": 5e-08,
+        "operator": "<=",
+        "pass": true,
+        "note": "運動項 |D_mu P|^2 のゲージ不変性を有限差分で監査。"
+      },
+      {
+        "id": "noether_current_gauge_invariance",
+        "metric": "max_rel_error(j_mu)",
+        "value": 6.967109216209619e-14,
+        "threshold": 5e-08,
+        "operator": "<=",
+        "pass": true,
+        "note": "Noether 電流 j_mu のゲージ不変性を有限差分で監査。"
+      },
+      {
+        "id": "noether_current_realness",
+        "metric": "max_abs_imag_over_real(j_spatial)",
+        "value": 0.0,
+        "threshold": 5e-10,
+        "operator": "<=",
+        "pass": true,
+        "note": "電流密度の実数性（数値誤差レベル）を確認。"
+      }
+    ],
+    "status": "pass",
+    "fail_ids": []
+  },
+  "decision": {
+    "route_a_el_derivation_gate": "pass",
+    "rule": "All invariance checks pass => pass; otherwise watch."
+  }
+}

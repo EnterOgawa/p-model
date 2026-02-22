@@ -1,0 +1,525 @@
+{
+  "generated_utc": "2026-02-16T18:01:41.449014+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.24",
+    "name": "Beta sensitivity audit"
+  },
+  "method": {
+    "type": "formula_re_evaluation_plus_full_rerun_followup_repro_check",
+    "note": "Evaluate beta sensitivity from fixed formulas/frozen outputs and, when heavy-rerun is enabled, recompute EHT/deuteron plus CMB/SPARC/Bell bridge cross-checks under beta overrides."
+  },
+  "inputs": {
+    "frozen_parameters_json": "output/private/theory/frozen_parameters.json",
+    "eht_shadow_compare_json": "output/public/eht/eht_shadow_compare.json",
+    "deuteron_metrics_json": "output/public/quantum/nuclear_binding_deuteron_metrics.json",
+    "cmb_metrics_json": "output/public/cosmology/cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
+    "sparc_metrics_json": "output/public/cosmology/sparc_rotation_curve_pmodel_audit_metrics.json",
+    "bell_bridge_json": "output/public/quantum/quantum_connection_bridge_table.json",
+    "quantum_connection_shared_kpi_json": "output/public/quantum/quantum_connection_shared_kpi.json"
+  },
+  "beta_cases": {
+    "beta_low": 1.0,
+    "beta_ref": 1.0000105000000001,
+    "beta_high": 1.000022
+  },
+  "threshold_policy": {
+    "eht": {
+      "pass_abs_threshold": 0.001,
+      "watch_abs_threshold": 0.015426049800427721,
+      "source": "delta_sigma_required_3sigma from eht_shadow_compare.json"
+    },
+    "gamma": {
+      "pass_abs_threshold": 2.3e-05,
+      "watch_abs_threshold": 6.9e-05,
+      "source": "frozen gamma sigma (or 2*beta_sigma fallback)"
+    },
+    "deuteron_B": {
+      "pass_abs_threshold": 7.919062410999653e-07,
+      "watch_abs_threshold": 3.959531205499827e-06,
+      "source": "nuclear_binding_deuteron_metrics.json B_MeV sigma"
+    },
+    "cmb_holdout_metrics": {
+      "pass_abs_threshold": 1e-06,
+      "watch_abs_threshold": 0.0001,
+      "source": "invariance threshold for heavy-rerun (CMB holdout gate metrics)"
+    },
+    "sparc_metrics": {
+      "pass_abs_threshold": 0.2885013750145193,
+      "watch_abs_threshold": 28.850137501451933,
+      "source": "invariance threshold for heavy-rerun (SPARC fit/comparison metrics)"
+    },
+    "bell_bridge_metrics": {
+      "pass_abs_threshold": 4.158177721371941e-06,
+      "watch_abs_threshold": 0.0004158177721371941,
+      "source": "invariance threshold for heavy-rerun (bridge selection/physics summaries)"
+    }
+  },
+  "indicators": {
+    "numeric": [
+      {
+        "indicator": "EHT delta_coeff_p_minus_GR",
+        "section": "Part II",
+        "unit": "dimensionless",
+        "case_low": 0.0462671635960652,
+        "case_ref": 0.046278149401283164,
+        "case_high": 0.04629018147366426,
+        "max_abs_delta_vs_ref": 1.203207238109627e-05,
+        "max_rel_delta_percent_vs_ref": 0.025999467430654552,
+        "pass_abs_threshold": 0.001,
+        "watch_abs_threshold": 0.015426049800427721,
+        "status": "pass",
+        "note": "formula re-evaluation: delta=(4eβ/(2sqrt27))-1"
+      },
+      {
+        "indicator": "PPN gamma_pmodel(β)",
+        "section": "Part II",
+        "unit": "dimensionless",
+        "case_low": 1.0,
+        "case_ref": 1.0000210000000003,
+        "case_high": 1.000044,
+        "max_abs_delta_vs_ref": 2.299999999966218e-05,
+        "max_rel_delta_percent_vs_ref": 0.002299951700980497,
+        "pass_abs_threshold": 2.3e-05,
+        "watch_abs_threshold": 6.9e-05,
+        "status": "pass",
+        "note": "derived from frozen beta: gamma=2β-1"
+      },
+      {
+        "indicator": "Deuteron binding B",
+        "section": "Part III",
+        "unit": "MeV",
+        "case_low": 2.22456634198942,
+        "case_ref": 2.22456634198942,
+        "case_high": 2.22456634198942,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 7.919062410999653e-07,
+        "watch_abs_threshold": 3.959531205499827e-06,
+        "status": "pass",
+        "note": "heavy rerun under beta overrides"
+      },
+      {
+        "indicator": "CMB holdout max|Δℓ| (ℓ4-ℓ6)",
+        "section": "Part II",
+        "unit": "multipole",
+        "case_low": 0.6762710000004972,
+        "case_ref": 0.6762710000004972,
+        "case_high": 0.6762710000004972,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 1e-06,
+        "watch_abs_threshold": 0.0001,
+        "status": "pass",
+        "note": "heavy rerun invariance check (CMB acoustic holdout gate metric)."
+      },
+      {
+        "indicator": "CMB holdout max|ΔA/A| (ℓ4-ℓ6)",
+        "section": "Part II",
+        "unit": "dimensionless",
+        "case_low": 0.32152427047244037,
+        "case_ref": 0.32152427047244037,
+        "case_high": 0.32152427047244037,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 1e-06,
+        "watch_abs_threshold": 0.0001,
+        "status": "pass",
+        "note": "heavy rerun invariance check (CMB amplitude holdout gate metric)."
+      },
+      {
+        "indicator": "SPARC chi2/dof (P-model)",
+        "section": "Part II",
+        "unit": "dimensionless",
+        "case_low": 21.34489488656301,
+        "case_ref": 21.34489488656301,
+        "case_high": 21.34489488656301,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 2.134489488656301e-05,
+        "watch_abs_threshold": 0.0021344894886563015,
+        "status": "pass",
+        "note": "heavy rerun invariance check (SPARC global fit quality)."
+      },
+      {
+        "indicator": "SPARC Δchi2 (baryon-pmodel)",
+        "section": "Part II",
+        "unit": "dimensionless",
+        "case_low": 288501.3750145193,
+        "case_ref": 288501.3750145193,
+        "case_high": 288501.3750145193,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 0.2885013750145193,
+        "watch_abs_threshold": 28.850137501451933,
+        "status": "pass",
+        "note": "heavy rerun invariance check (SPARC model-comparison metric)."
+      },
+      {
+        "indicator": "Bell bridge selection max score",
+        "section": "Part III",
+        "unit": "dimensionless",
+        "case_low": 4.158177721371941,
+        "case_ref": 4.158177721371941,
+        "case_high": 4.158177721371941,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 4.158177721371941e-06,
+        "watch_abs_threshold": 0.0004158177721371941,
+        "status": "pass",
+        "note": "heavy rerun invariance check (Bell bridge selection summary)."
+      },
+      {
+        "indicator": "Bell bridge physics max score",
+        "section": "Part III",
+        "unit": "dimensionless",
+        "case_low": 1.1896333754740827,
+        "case_ref": 1.1896333754740827,
+        "case_high": 1.1896333754740827,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": NaN,
+        "pass_abs_threshold": 1.1896333754740827e-06,
+        "watch_abs_threshold": 0.00011896333754740827,
+        "status": "pass",
+        "note": "heavy rerun invariance check (Bell bridge physics summary)."
+      },
+      {
+        "indicator": "Full-rerun reproducibility max|Δ(run2-run1)|",
+        "section": "Part II/III",
+        "unit": "dimensionless",
+        "case_low": 0.0,
+        "case_ref": 0.0,
+        "case_high": 0.0,
+        "max_abs_delta_vs_ref": 0.0,
+        "max_rel_delta_percent_vs_ref": null,
+        "pass_abs_threshold": 1e-12,
+        "watch_abs_threshold": 1e-09,
+        "status": "pass",
+        "note": "full-rerun follow-up: heavy rerun run2 vs run1 numeric reproducibility."
+      }
+    ],
+    "categorical": [
+      {
+        "indicator": "Quantum shared KPI overall status",
+        "section": "Part III",
+        "case_low": "pass",
+        "case_ref": "pass",
+        "case_high": "pass",
+        "status": "pass",
+        "note": "beta-independent aggregation in current pipeline (invariance by construction)."
+      },
+      {
+        "indicator": "CMB holdout overall status (extended)",
+        "section": "Part II",
+        "case_low": "pass",
+        "case_ref": "pass",
+        "case_high": "pass",
+        "status": "pass",
+        "note": "heavy rerun invariance check (CMB core/extended gate status)."
+      },
+      {
+        "indicator": "SPARC better model by chi2",
+        "section": "Part II",
+        "case_low": "pmodel_corrected",
+        "case_ref": "pmodel_corrected",
+        "case_high": "pmodel_corrected",
+        "status": "pass",
+        "note": "heavy rerun invariance check (model-selection label)."
+      },
+      {
+        "indicator": "Bell bridge overall status",
+        "section": "Part III",
+        "case_low": "watch",
+        "case_ref": "watch",
+        "case_high": "watch",
+        "status": "pass",
+        "note": "heavy rerun invariance check (selection/physics bridge gate status)."
+      },
+      {
+        "indicator": "Full-rerun categorical reproducibility",
+        "section": "Part II/III",
+        "case_low": "pass",
+        "case_ref": "pass",
+        "case_high": "pass",
+        "status": "pass",
+        "note": "full-rerun follow-up: status labels (CMB/SPARC/Bell bridge) run2 vs run1 consistency."
+      },
+      {
+        "indicator": "Full-rerun restore-state reproducibility",
+        "section": "Part II/III",
+        "case_low": "pass",
+        "case_ref": "pass",
+        "case_high": "pass",
+        "status": "pass",
+        "note": "full-rerun follow-up: frozen-parameter restore + ref-rerun consistency for run1/run2."
+      }
+    ]
+  },
+  "overall": {
+    "status": "pass",
+    "severity": 0,
+    "counts": {
+      "pass": 16,
+      "watch": 0,
+      "reject": 0
+    }
+  },
+  "heavy_rerun": {
+    "mode": "eht+nuclear+cmb+sparc+bell_bridge_rerun_under_beta_override",
+    "frozen_parameters_json": "output/private/theory/frozen_parameters.json",
+    "scripts": {
+      "eht_shadow_compare": "python -B scripts/eht/eht_shadow_compare.py",
+      "nuclear_binding_deuteron": "python -B scripts/quantum/nuclear_binding_deuteron.py",
+      "cmb_acoustic_peak_reconstruction": "python -B scripts/cosmology/cosmology_cmb_acoustic_peak_reconstruction.py",
+      "sparc_rotation_curve_pmodel_audit": "python -B scripts/cosmology/sparc_rotation_curve_pmodel_audit.py",
+      "quantum_connection_bridge_table": "python -B scripts/quantum/quantum_connection_bridge_table.py"
+    },
+    "cases": {
+      "beta_low": {
+        "beta": 1.0,
+        "eht_delta_coeff_p_minus_gr": 0.0462671635960652,
+        "deuteron_binding_B_MeV": 2.22456634198942,
+        "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+        "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+        "cmb_overall_extended_status": "pass",
+        "sparc_chi2_dof_pmodel": 21.34489488656301,
+        "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+        "sparc_better_model_by_chi2": "pmodel_corrected",
+        "bell_bridge_overall_status": "watch",
+        "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+        "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+      },
+      "beta_ref": {
+        "beta": 1.0000105000000001,
+        "eht_delta_coeff_p_minus_gr": 0.046278149401283164,
+        "deuteron_binding_B_MeV": 2.22456634198942,
+        "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+        "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+        "cmb_overall_extended_status": "pass",
+        "sparc_chi2_dof_pmodel": 21.34489488656301,
+        "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+        "sparc_better_model_by_chi2": "pmodel_corrected",
+        "bell_bridge_overall_status": "watch",
+        "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+        "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+      },
+      "beta_high": {
+        "beta": 1.000022,
+        "eht_delta_coeff_p_minus_gr": 0.04629018147366426,
+        "deuteron_binding_B_MeV": 2.22456634198942,
+        "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+        "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+        "cmb_overall_extended_status": "pass",
+        "sparc_chi2_dof_pmodel": 21.34489488656301,
+        "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+        "sparc_better_model_by_chi2": "pmodel_corrected",
+        "bell_bridge_overall_status": "watch",
+        "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+        "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+      }
+    },
+    "restore": {
+      "restored": true,
+      "rerun_ref_done": true
+    }
+  },
+  "full_rerun_followup": {
+    "mode": "full_rerun_followup",
+    "runs": {
+      "run1": {
+        "mode": "eht+nuclear+cmb+sparc+bell_bridge_rerun_under_beta_override",
+        "frozen_parameters_json": "output/private/theory/frozen_parameters.json",
+        "scripts": {
+          "eht_shadow_compare": "python -B scripts/eht/eht_shadow_compare.py",
+          "nuclear_binding_deuteron": "python -B scripts/quantum/nuclear_binding_deuteron.py",
+          "cmb_acoustic_peak_reconstruction": "python -B scripts/cosmology/cosmology_cmb_acoustic_peak_reconstruction.py",
+          "sparc_rotation_curve_pmodel_audit": "python -B scripts/cosmology/sparc_rotation_curve_pmodel_audit.py",
+          "quantum_connection_bridge_table": "python -B scripts/quantum/quantum_connection_bridge_table.py"
+        },
+        "cases": {
+          "beta_low": {
+            "beta": 1.0,
+            "eht_delta_coeff_p_minus_gr": 0.0462671635960652,
+            "deuteron_binding_B_MeV": 2.22456634198942,
+            "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+            "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+            "cmb_overall_extended_status": "pass",
+            "sparc_chi2_dof_pmodel": 21.34489488656301,
+            "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+            "sparc_better_model_by_chi2": "pmodel_corrected",
+            "bell_bridge_overall_status": "watch",
+            "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+            "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+          },
+          "beta_ref": {
+            "beta": 1.0000105000000001,
+            "eht_delta_coeff_p_minus_gr": 0.046278149401283164,
+            "deuteron_binding_B_MeV": 2.22456634198942,
+            "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+            "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+            "cmb_overall_extended_status": "pass",
+            "sparc_chi2_dof_pmodel": 21.34489488656301,
+            "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+            "sparc_better_model_by_chi2": "pmodel_corrected",
+            "bell_bridge_overall_status": "watch",
+            "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+            "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+          },
+          "beta_high": {
+            "beta": 1.000022,
+            "eht_delta_coeff_p_minus_gr": 0.04629018147366426,
+            "deuteron_binding_B_MeV": 2.22456634198942,
+            "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+            "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+            "cmb_overall_extended_status": "pass",
+            "sparc_chi2_dof_pmodel": 21.34489488656301,
+            "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+            "sparc_better_model_by_chi2": "pmodel_corrected",
+            "bell_bridge_overall_status": "watch",
+            "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+            "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+          }
+        },
+        "restore": {
+          "restored": true,
+          "rerun_ref_done": true
+        }
+      },
+      "run2": {
+        "mode": "eht+nuclear+cmb+sparc+bell_bridge_rerun_under_beta_override",
+        "frozen_parameters_json": "output/private/theory/frozen_parameters.json",
+        "scripts": {
+          "eht_shadow_compare": "python -B scripts/eht/eht_shadow_compare.py",
+          "nuclear_binding_deuteron": "python -B scripts/quantum/nuclear_binding_deuteron.py",
+          "cmb_acoustic_peak_reconstruction": "python -B scripts/cosmology/cosmology_cmb_acoustic_peak_reconstruction.py",
+          "sparc_rotation_curve_pmodel_audit": "python -B scripts/cosmology/sparc_rotation_curve_pmodel_audit.py",
+          "quantum_connection_bridge_table": "python -B scripts/quantum/quantum_connection_bridge_table.py"
+        },
+        "cases": {
+          "beta_low": {
+            "beta": 1.0,
+            "eht_delta_coeff_p_minus_gr": 0.0462671635960652,
+            "deuteron_binding_B_MeV": 2.22456634198942,
+            "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+            "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+            "cmb_overall_extended_status": "pass",
+            "sparc_chi2_dof_pmodel": 21.34489488656301,
+            "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+            "sparc_better_model_by_chi2": "pmodel_corrected",
+            "bell_bridge_overall_status": "watch",
+            "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+            "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+          },
+          "beta_ref": {
+            "beta": 1.0000105000000001,
+            "eht_delta_coeff_p_minus_gr": 0.046278149401283164,
+            "deuteron_binding_B_MeV": 2.22456634198942,
+            "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+            "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+            "cmb_overall_extended_status": "pass",
+            "sparc_chi2_dof_pmodel": 21.34489488656301,
+            "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+            "sparc_better_model_by_chi2": "pmodel_corrected",
+            "bell_bridge_overall_status": "watch",
+            "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+            "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+          },
+          "beta_high": {
+            "beta": 1.000022,
+            "eht_delta_coeff_p_minus_gr": 0.04629018147366426,
+            "deuteron_binding_B_MeV": 2.22456634198942,
+            "cmb_holdout46_max_abs_delta_ell": 0.6762710000004972,
+            "cmb_holdout46_max_abs_delta_amp_rel": 0.32152427047244037,
+            "cmb_overall_extended_status": "pass",
+            "sparc_chi2_dof_pmodel": 21.34489488656301,
+            "sparc_delta_chi2_baryon_minus_pmodel": 288501.3750145193,
+            "sparc_better_model_by_chi2": "pmodel_corrected",
+            "bell_bridge_overall_status": "watch",
+            "bell_bridge_selection_normalized_score_max": 4.158177721371941,
+            "bell_bridge_physics_normalized_score_max": 1.1896333754740827
+          }
+        },
+        "restore": {
+          "restored": true,
+          "rerun_ref_done": true
+        }
+      }
+    },
+    "comparison": {
+      "numeric": {
+        "keys": [
+          "eht_delta_coeff_p_minus_gr",
+          "deuteron_binding_B_MeV",
+          "cmb_holdout46_max_abs_delta_ell",
+          "cmb_holdout46_max_abs_delta_amp_rel",
+          "sparc_chi2_dof_pmodel",
+          "sparc_delta_chi2_baryon_minus_pmodel",
+          "bell_bridge_selection_normalized_score_max",
+          "bell_bridge_physics_normalized_score_max"
+        ],
+        "case_count": 3,
+        "max_abs_delta": 0.0,
+        "pass_abs_threshold": 1e-12,
+        "watch_abs_threshold": 1e-09,
+        "status": "pass",
+        "nonzero_mismatch_rows": [],
+        "per_metric_max_abs_delta": {
+          "beta_high::eht_delta_coeff_p_minus_gr": 0.0,
+          "beta_high::deuteron_binding_B_MeV": 0.0,
+          "beta_high::cmb_holdout46_max_abs_delta_ell": 0.0,
+          "beta_high::cmb_holdout46_max_abs_delta_amp_rel": 0.0,
+          "beta_high::sparc_chi2_dof_pmodel": 0.0,
+          "beta_high::sparc_delta_chi2_baryon_minus_pmodel": 0.0,
+          "beta_high::bell_bridge_selection_normalized_score_max": 0.0,
+          "beta_high::bell_bridge_physics_normalized_score_max": 0.0,
+          "beta_low::eht_delta_coeff_p_minus_gr": 0.0,
+          "beta_low::deuteron_binding_B_MeV": 0.0,
+          "beta_low::cmb_holdout46_max_abs_delta_ell": 0.0,
+          "beta_low::cmb_holdout46_max_abs_delta_amp_rel": 0.0,
+          "beta_low::sparc_chi2_dof_pmodel": 0.0,
+          "beta_low::sparc_delta_chi2_baryon_minus_pmodel": 0.0,
+          "beta_low::bell_bridge_selection_normalized_score_max": 0.0,
+          "beta_low::bell_bridge_physics_normalized_score_max": 0.0,
+          "beta_ref::eht_delta_coeff_p_minus_gr": 0.0,
+          "beta_ref::deuteron_binding_B_MeV": 0.0,
+          "beta_ref::cmb_holdout46_max_abs_delta_ell": 0.0,
+          "beta_ref::cmb_holdout46_max_abs_delta_amp_rel": 0.0,
+          "beta_ref::sparc_chi2_dof_pmodel": 0.0,
+          "beta_ref::sparc_delta_chi2_baryon_minus_pmodel": 0.0,
+          "beta_ref::bell_bridge_selection_normalized_score_max": 0.0,
+          "beta_ref::bell_bridge_physics_normalized_score_max": 0.0
+        }
+      },
+      "categorical": {
+        "keys": [
+          "cmb_overall_extended_status",
+          "sparc_better_model_by_chi2",
+          "bell_bridge_overall_status"
+        ],
+        "status": "pass",
+        "mismatch_rows": []
+      },
+      "restore": {
+        "status": "pass",
+        "run1": {
+          "restored": true,
+          "rerun_ref_done": true
+        },
+        "run2": {
+          "restored": true,
+          "rerun_ref_done": true
+        }
+      }
+    },
+    "overall": {
+      "status": "pass",
+      "severity": 0,
+      "rule": "pass when numeric/categorical/restore checks all pass; reject on restore failure or categorical mismatch."
+    }
+  },
+  "outputs": {
+    "json": "output/public/summary/beta_sensitivity_audit.json",
+    "csv": "output/public/summary/beta_sensitivity_audit.csv",
+    "png": "output/public/summary/beta_sensitivity_audit.png"
+  }
+}

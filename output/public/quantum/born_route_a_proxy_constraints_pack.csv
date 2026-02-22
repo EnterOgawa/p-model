@@ -1,0 +1,6 @@
+id,proxy,metric,value,threshold,operator,pass,gate,note
+phase_alpha_consistency,phase,atom_recoil_alpha_abs_z,0.5883354744951784,3.0,<=,True,True,位相整合の最小ゲート（abs_z<=3）。
+phase_molecular_scaling,phase,molecular_isotopic_scaling_zmax,2.6385399704973964,3.0,<=,True,True,分子スケーリング整合の最小ゲート（z<=3）。
+selection_delay_signature_fast,selection,min_fast_switching_delay_zmax,5.53541064134177,3.0,>=,True,True,fast-switch/time-tag 系で setting依存遅延 z が 3以上。
+selection_sweep_sensitivity_fast,selection,min_fast_switching_selection_ratio,19.316744077961687,1.0,>=,True,True,selection sweep の変動幅が統計幅1σ以上（ratio>=1）。
+visibility_atom_precision_gap,visibility,log10_atom_interferometer_current_over_required_ratio,0.3338887327706417,1.0,<=,True,False,可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。

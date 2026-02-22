@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T14:02:03.062717+00:00",
+  "generated_utc": "2026-02-16T15:07:48.885986+00:00",
   "phase": {
     "phase": 7,
     "step": "7.16.11",
@@ -13,7 +13,9 @@
   },
   "metrics": {
     "numeric_observed_rows": 1,
+    "numeric_target_rows": 1,
     "numeric_coverage_ratio": 0.16666666666666666,
+    "numeric_coverage_ratio_targeted": 1.0,
     "residual_audit": {
       "n_observed_rows": 1,
       "median_abs_residual_cycles": 0.0,

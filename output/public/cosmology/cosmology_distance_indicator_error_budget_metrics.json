@@ -1,0 +1,610 @@
+{
+  "generated_utc": "2026-02-13T07:44:20.689692+00:00",
+  "definition": {
+    "sn_error_proxy": "Pantheon lcparam の dmb（標準化後のm_B誤差）を、距離モジュラス誤差の代理として扱う（絶対等級の定数オフセットはDDRのz依存には影響しない）。",
+    "sn_binning": "z binごとに dmb の median と、逆分散重み付き平均の SEM=1/sqrt(sum(1/σ^2)) を算出（相関は無視）。",
+    "sn_systematics_cov": "Pantheon 公開の系統共分散（sys_full_long）を読み込み、全共分散 C_total = diag(dmb^2) + C_sys として SEM = 1/sqrt(1^T C_total^{-1} 1) を算出（bin平均の誤差の上限側の目安）。",
+    "bao_error_proxy": "BOSS DR12 consensus の D_M の相対誤差 σ(D_M)/D_M を等価Δμ=5 log10(1+σ/D) に変換。",
+    "bao_covariance": "BOSS DR12 BAO+FS（consensus）の reduced covariance c_ij（Table 8）から D_M の相関を取り出し、2点線形補間 D_M(z)=w D_Mi+(1-w) D_Mj の誤差伝播で σ(D_M(z)) を推定して等価Δμへ変換（目安）。",
+    "reach_required_delta_mu": "DDRの必要補正: Δμ(z)=5 log10((1+z)^{Δε_needed}) = 5 Δε_needed log10(1+z)。"
+  },
+  "inputs": {
+    "pantheon_lcparam": "C:/develop/waveP/data/cosmology/pantheon_lcparam_full_long.txt",
+    "pantheon_lcparam_sha256": "9d0e3d2d2b3b460fd2d1a474f2b69a4c22c67d3e15bb2f0efdefed1607ba29a1",
+    "pantheon_source_url": "https://raw.githubusercontent.com/dscolnic/Pantheon/master/lcparam_full_long.txt",
+    "pantheon_sys_cov": "C:/develop/waveP/data/cosmology/pantheon_sys_full_long.txt",
+    "pantheon_sys_cov_sha256": "0ec3388b984a708f27bcedf7171c8a3e74621aca73dabb41a21246e9ae3fb53d",
+    "pantheon_sys_cov_source_url": "https://raw.githubusercontent.com/dscolnic/Pantheon/master/sys_full_long.txt",
+    "boss_dr12_consensus": "C:/develop/waveP/data/cosmology/alcock_paczynski_constraints.json",
+    "boss_dr12_baofs_cov_cij": "C:/develop/waveP/data/cosmology/boss_dr12_baofs_consensus_reduced_covariance_cij.json",
+    "boss_dr12_baofs_cov_cij_sha256": "133d01c36d57acb603e3386ee14624e8f34ca715c33c0fc74b87a6f036c04e52",
+    "bao_r_drag_constraints": "C:/develop/waveP/data/cosmology/bao_sound_horizon_constraints.json",
+    "reach_metrics": "C:/develop/waveP/output/private/cosmology/cosmology_distance_indicator_reach_limit_metrics.json"
+  },
+  "reach_representatives": {
+    "representatives": {
+      "bao": {
+        "id": "martinelli2021_snIa_bao",
+        "short_label": "SNIa+BAO (2021)"
+      },
+      "no_bao": {
+        "id": "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical",
+        "short_label": "Clusters+SNIa (2012, non-iso)"
+      }
+    },
+    "reach": {
+      "bao": {
+        "label": "bao",
+        "id": "martinelli2021_snIa_bao",
+        "short_label": "SNIa+BAO (2021)",
+        "uses_bao": true,
+        "delta_eps_needed": 1.013,
+        "epsilon0_obs": 0.013,
+        "epsilon0_sigma": 0.029
+      },
+      "no_bao": {
+        "label": "no_bao",
+        "id": "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical",
+        "short_label": "Clusters+SNIa (2012, non-iso)",
+        "uses_bao": false,
+        "delta_eps_needed": 0.28688114778816154,
+        "epsilon0_obs": -0.7131188522118385,
+        "epsilon0_sigma": 0.2630344058337938
+      }
+    }
+  },
+  "sn_bins": [
+    {
+      "z_center": 0.05,
+      "z_lo": 0.0,
+      "z_hi": 0.1,
+      "n": 211,
+      "n_valid": 211,
+      "dmb_median": 0.13205,
+      "dmb_sem_weighted": 0.0090608877885434,
+      "dmb_median_total": 0.13347495083348035,
+      "dmb_sem_total_cov": 0.014060874002254716
+    },
+    {
+      "z_center": 0.15000000000000002,
+      "z_lo": 0.1,
+      "z_hi": 0.2,
+      "n": 200,
+      "n_valid": 200,
+      "dmb_median": 0.1162,
+      "dmb_sem_weighted": 0.008330707093980374,
+      "dmb_median_total": 0.11659459280548043,
+      "dmb_sem_total_cov": 0.0112525249333422
+    },
+    {
+      "z_center": 0.25,
+      "z_lo": 0.2,
+      "z_hi": 0.30000000000000004,
+      "n": 219,
+      "n_valid": 219,
+      "dmb_median": 0.141,
+      "dmb_sem_weighted": 0.009264973686869057,
+      "dmb_median_total": 0.14119612246800545,
+      "dmb_sem_total_cov": 0.011357774329122723
+    },
+    {
+      "z_center": 0.35000000000000003,
+      "z_lo": 0.30000000000000004,
+      "z_hi": 0.4,
+      "n": 136,
+      "n_valid": 136,
+      "dmb_median": 0.14065,
+      "dmb_sem_weighted": 0.01160838236740202,
+      "dmb_median_total": 0.1409295598320799,
+      "dmb_sem_total_cov": 0.012864719107741873
+    },
+    {
+      "z_center": 0.45,
+      "z_lo": 0.4,
+      "z_hi": 0.5,
+      "n": 66,
+      "n_valid": 66,
+      "dmb_median": 0.137725,
+      "dmb_sem_weighted": 0.01666480427872982,
+      "dmb_median_total": 0.13799805455396924,
+      "dmb_sem_total_cov": 0.01844391170180593
+    },
+    {
+      "z_center": 0.55,
+      "z_lo": 0.5,
+      "z_hi": 0.6000000000000001,
+      "n": 54,
+      "n_valid": 54,
+      "dmb_median": 0.13595,
+      "dmb_sem_weighted": 0.01842332391688437,
+      "dmb_median_total": 0.13655788605386782,
+      "dmb_sem_total_cov": 0.022097618563609638
+    },
+    {
+      "z_center": 0.6500000000000001,
+      "z_lo": 0.6000000000000001,
+      "z_hi": 0.7000000000000001,
+      "n": 38,
+      "n_valid": 38,
+      "dmb_median": 0.16162500000000002,
+      "dmb_sem_weighted": 0.025984653253607555,
+      "dmb_median_total": 0.16224902684448925,
+      "dmb_sem_total_cov": 0.029559049285994333
+    },
+    {
+      "z_center": 0.75,
+      "z_lo": 0.7000000000000001,
+      "z_hi": 0.8,
+      "n": 42,
+      "n_valid": 42,
+      "dmb_median": 0.174075,
+      "dmb_sem_weighted": 0.0258718154147395,
+      "dmb_median_total": 0.17482632079841717,
+      "dmb_sem_total_cov": 0.029772817473904024
+    },
+    {
+      "z_center": 0.8500000000000001,
+      "z_lo": 0.8,
+      "z_hi": 0.9,
+      "n": 33,
+      "n_valid": 33,
+      "dmb_median": 0.15285,
+      "dmb_sem_weighted": 0.026858910907457845,
+      "dmb_median_total": 0.15405159849868486,
+      "dmb_sem_total_cov": 0.0331313783655204
+    },
+    {
+      "z_center": 0.95,
+      "z_lo": 0.9,
+      "z_hi": 1.0,
+      "n": 26,
+      "n_valid": 26,
+      "dmb_median": 0.152675,
+      "dmb_sem_weighted": 0.02971055618597775,
+      "dmb_median_total": 0.15455022397133408,
+      "dmb_sem_total_cov": 0.037776230980665286
+    },
+    {
+      "z_center": 1.05,
+      "z_lo": 1.0,
+      "z_hi": 1.1,
+      "n": 6,
+      "n_valid": 6,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.1500000000000001,
+      "z_lo": 1.1,
+      "z_hi": 1.2000000000000002,
+      "n": 1,
+      "n_valid": 1,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.25,
+      "z_lo": 1.2000000000000002,
+      "z_hi": 1.3,
+      "n": 3,
+      "n_valid": 3,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.35,
+      "z_lo": 1.3,
+      "z_hi": 1.4000000000000001,
+      "n": 7,
+      "n_valid": 7,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.4500000000000002,
+      "z_lo": 1.4000000000000001,
+      "z_hi": 1.5,
+      "n": 0,
+      "n_valid": 0,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.55,
+      "z_lo": 1.5,
+      "z_hi": 1.6,
+      "n": 2,
+      "n_valid": 2,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.6500000000000001,
+      "z_lo": 1.6,
+      "z_hi": 1.7000000000000002,
+      "n": 1,
+      "n_valid": 1,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.75,
+      "z_lo": 1.7000000000000002,
+      "z_hi": 1.8,
+      "n": 0,
+      "n_valid": 0,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.85,
+      "z_lo": 1.8,
+      "z_hi": 1.9000000000000001,
+      "n": 1,
+      "n_valid": 1,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 1.9500000000000002,
+      "z_lo": 1.9000000000000001,
+      "z_hi": 2.0,
+      "n": 1,
+      "n_valid": 1,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 2.05,
+      "z_lo": 2.0,
+      "z_hi": 2.1,
+      "n": 0,
+      "n_valid": 0,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 2.1500000000000004,
+      "z_lo": 2.1,
+      "z_hi": 2.2,
+      "n": 0,
+      "n_valid": 0,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 2.25,
+      "z_lo": 2.2,
+      "z_hi": 2.3000000000000003,
+      "n": 1,
+      "n_valid": 1,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    },
+    {
+      "z_center": 2.3500000000000005,
+      "z_lo": 2.3000000000000003,
+      "z_hi": 2.4000000000000004,
+      "n": 0,
+      "n_valid": 0,
+      "dmb_median": null,
+      "dmb_sem_weighted": null,
+      "dmb_median_total": null,
+      "dmb_sem_total_cov": null
+    }
+  ],
+  "bao_points": [
+    {
+      "id": "boss_dr12_consensus_z038",
+      "short_label": "BOSS DR12 z=0.38",
+      "z_eff": 0.38,
+      "DM_scaled_mpc": 1518.0,
+      "DM_scaled_sigma_mpc": 22.0,
+      "frac_sigma": 0.014492753623188406,
+      "mu_sigma_mag_equiv": 0.03124474638500771,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectroscopic Survey: cosmological analysis of the DR12 galaxy sample",
+        "authors": "S. Alam et al.",
+        "year": 2017,
+        "arxiv_id": "1607.03155",
+        "url": "https://arxiv.org/abs/1607.03155",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1607.03155.pdf",
+        "local_pdf_sha256": "47ef72af92d496266a383e8ee1275300c8bdeef92d071ec39b2d0d8bdd42c98b"
+      }
+    },
+    {
+      "id": "boss_dr12_consensus_z051",
+      "short_label": "BOSS DR12 z=0.51",
+      "z_eff": 0.51,
+      "DM_scaled_mpc": 1977.0,
+      "DM_scaled_sigma_mpc": 27.0,
+      "frac_sigma": 0.013657056145675266,
+      "mu_sigma_mag_equiv": 0.029455239407679013,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectroscopic Survey: cosmological analysis of the DR12 galaxy sample",
+        "authors": "S. Alam et al.",
+        "year": 2017,
+        "arxiv_id": "1607.03155",
+        "url": "https://arxiv.org/abs/1607.03155",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1607.03155.pdf",
+        "local_pdf_sha256": "47ef72af92d496266a383e8ee1275300c8bdeef92d071ec39b2d0d8bdd42c98b"
+      }
+    },
+    {
+      "id": "boss_dr12_consensus_z061",
+      "short_label": "BOSS DR12 z=0.61",
+      "z_eff": 0.61,
+      "DM_scaled_mpc": 2283.0,
+      "DM_scaled_sigma_mpc": 32.0,
+      "frac_sigma": 0.01401664476565922,
+      "mu_sigma_mag_equiv": 0.030225419318683156,
+      "source": {
+        "kind": "analysis_paper",
+        "title": "The clustering of galaxies in the completed SDSS-III Baryon Oscillation Spectroscopic Survey: cosmological analysis of the DR12 galaxy sample",
+        "authors": "S. Alam et al.",
+        "year": 2017,
+        "arxiv_id": "1607.03155",
+        "url": "https://arxiv.org/abs/1607.03155",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_1607.03155.pdf",
+        "local_pdf_sha256": "47ef72af92d496266a383e8ee1275300c8bdeef92d071ec39b2d0d8bdd42c98b"
+      }
+    }
+  ],
+  "r_drag_budget": {
+    "id": "planck2018_rdrag_base_lcdm",
+    "short_label": "Planck r_drag (2018)",
+    "r_drag_mpc": 147.09,
+    "r_drag_sigma_mpc": 0.26,
+    "frac_sigma": 0.0017676252634441498,
+    "mu_sigma_mag_equiv": 0.003834961100516378,
+    "sigma_note": "一次ソース本文（派生パラメータ表）の記載「r_drag[Mpc]=147.09±0.26」を採用（データ組合せの列は一次ソース表に従う）。",
+    "source": {
+      "kind": "analysis_paper",
+      "title": "Planck 2018 results. VI. Cosmological parameters",
+      "authors": "Planck Collaboration",
+      "year": 2018,
+      "arxiv_id": "1807.06209",
+      "url": "https://arxiv.org/abs/1807.06209",
+      "retrieved_utc": "2026-01-09T00:00:00Z",
+      "local_pdf": "data/cosmology/sources/arxiv_1807.06209.pdf",
+      "local_pdf_sha256": "8e172730faf07c9f4ff3fdcc7043f76ed67df6f76066d47df30d693025b6ce77",
+      "note": "BAOの標準定規（音響地平線）r_drag の一次ソース値。"
+    }
+  },
+  "params": {
+    "z_max": 2.3,
+    "bin_width": 0.1,
+    "sn_min_points": 15,
+    "sigma_multipliers": [
+      1.0,
+      3.0
+    ]
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_distance_indicator_error_budget.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_distance_indicator_error_budget_metrics.json"
+  },
+  "summary": {
+    "coverage": {
+      "sn_min_points": 15,
+      "sn_max_z_with_budget": 0.95,
+      "bao_max_z": 0.61,
+      "bao_covariance_used": true
+    },
+    "bao_covariance": {
+      "dm_z_eff": [
+        0.38,
+        0.51,
+        0.61
+      ],
+      "dm_sigma_mpc": [
+        22.0,
+        27.0,
+        32.0
+      ],
+      "dm_corr": [
+        [
+          1.0,
+          0.497,
+          0.1991
+        ],
+        [
+          0.497,
+          1.0,
+          0.512
+        ],
+        [
+          0.1991,
+          0.512,
+          1.0
+        ]
+      ],
+      "dm_cov_mpc2": [
+        [
+          484.0,
+          295.218,
+          140.1664
+        ],
+        [
+          295.218,
+          729.0,
+          442.368
+        ],
+        [
+          140.1664,
+          442.368,
+          1024.0
+        ]
+      ],
+      "dm_match": [
+        {
+          "z_eff": 0.38,
+          "id": "DM_0p38",
+          "sigma": 22.0
+        },
+        {
+          "z_eff": 0.51,
+          "id": "DM_0p51",
+          "sigma": 27.0
+        },
+        {
+          "z_eff": 0.61,
+          "id": "DM_0p61",
+          "sigma": 32.0
+        }
+      ]
+    },
+    "z_refs": [
+      0.1,
+      0.5,
+      1.0,
+      2.0
+    ],
+    "budgets_at_z": [
+      {
+        "z": 0.1,
+        "sn_sem_mag": 0.008697624415476807,
+        "sn_sem_total_mag": 0.01266372619607764,
+        "sn_median_mag": 0.12416465804837365,
+        "sn_median_total_mag": 0.12507700791129356,
+        "bao_mu_mag_naive": 0.03124474638500771,
+        "bao_mu_mag_cov": 0.03124474638500771,
+        "r_drag_mu_mag": 0.003834961100516378,
+        "budget_opt_mag": 0.03265868603876501,
+        "budget_opt_total_mag": 0.03393097500036139,
+        "budget_cons_mag": 0.12809294832884238,
+        "budget_cons_total_mag": 0.12897751358801934,
+        "sn_extrapolated": false,
+        "bao_extrapolated": false
+      },
+      {
+        "z": 0.5,
+        "sn_sem_mag": 0.017555797339763087,
+        "sn_sem_total_mag": 0.02029514349375401,
+        "sn_median_mag": 0.1368256567973311,
+        "sn_median_total_mag": 0.1372683611729754,
+        "bao_mu_mag_naive": 0.029583709177848437,
+        "bao_mu_mag_cov": 0.028720067074921828,
+        "r_drag_mu_mag": 0.003834961100516378,
+        "budget_opt_mag": 0.03461370820349678,
+        "budget_opt_total_mag": 0.0353757265489,
+        "budget_cons_mag": 0.14003986265839818,
+        "budget_cons_total_mag": 0.1402930937663893,
+        "sn_extrapolated": false,
+        "bao_extrapolated": false
+      },
+      {
+        "z": 1.0,
+        "sn_sem_mag": 0.02971055618597775,
+        "sn_sem_total_mag": 0.037776230980665286,
+        "sn_median_mag": 0.152675,
+        "sn_median_total_mag": 0.15455022397133408,
+        "bao_mu_mag_naive": 0.030225419318683156,
+        "bao_mu_mag_cov": 0.030225419318683156,
+        "r_drag_mu_mag": 0.003834961100516378,
+        "budget_opt_mag": 0.04255584623189674,
+        "budget_opt_total_mag": 0.04853170640660881,
+        "budget_cons_mag": 0.15568538314380287,
+        "budget_cons_total_mag": 0.15752477465218678,
+        "sn_extrapolated": true,
+        "bao_extrapolated": true
+      },
+      {
+        "z": 2.0,
+        "sn_sem_mag": 0.02971055618597775,
+        "sn_sem_total_mag": 0.037776230980665286,
+        "sn_median_mag": 0.152675,
+        "sn_median_total_mag": 0.15455022397133408,
+        "bao_mu_mag_naive": 0.030225419318683156,
+        "bao_mu_mag_cov": 0.030225419318683156,
+        "r_drag_mu_mag": 0.003834961100516378,
+        "budget_opt_mag": 0.04255584623189674,
+        "budget_opt_total_mag": 0.04853170640660881,
+        "budget_cons_mag": 0.15568538314380287,
+        "budget_cons_total_mag": 0.15752477465218678,
+        "sn_extrapolated": true,
+        "bao_extrapolated": true
+      }
+    ],
+    "reach_limits": {
+      "opt": {
+        "bao": {
+          "1.0sigma": 0.0134278565471226,
+          "3.0sigma": 0.04412010008340283
+        },
+        "no_bao": {
+          "1.0sigma": 0.0537114261884904,
+          "3.0sigma": 0.16880733944954127
+        }
+      },
+      "cons": {
+        "bao": {
+          "1.0sigma": 0.06138448707256046,
+          "3.0sigma": 0.19566305254378646
+        },
+        "no_bao": {
+          "1.0sigma": 0.26088407005838193,
+          "3.0sigma": 1.1164303586321933
+        }
+      }
+    },
+    "reach_limits_total": {
+      "opt": {
+        "bao": {
+          "1.0sigma": 0.015346121768140115,
+          "3.0sigma": 0.04795663052543786
+        },
+        "no_bao": {
+          "1.0sigma": 0.055629691409507916,
+          "3.0sigma": 0.1745621351125938
+        }
+      },
+      "cons": {
+        "bao": {
+          "1.0sigma": 0.06138448707256046,
+          "3.0sigma": 0.19566305254378646
+        },
+        "no_bao": {
+          "1.0sigma": 0.26088407005838193,
+          "3.0sigma": 1.133694745621351
+        }
+      }
+    }
+  },
+  "notes": [
+    "これは“観測の不確かさ（目安）”であり、距離指標の定義（標準化/校正）の前提そのもの（静的無限空間での再導出）は別途の論点。",
+    "Pantheon の dmb は統計誤差＋標準化の残差（実装依存）を含むため、厳密な解析の共分散モデル（相関/サンプル定義）とは一致しない可能性がある。",
+    "BAO の共分散は BOSS DR12（Alam+2017）の Table 8（BAO+FS consensus）に基づく reduced covariance を使用。3点のため z 依存は単純補間の目安。"
+  ]
+}

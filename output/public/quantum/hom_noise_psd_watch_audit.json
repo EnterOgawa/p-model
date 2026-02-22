@@ -1,0 +1,186 @@
+{
+  "generated_utc": "2026-02-16T18:08:46.983979+00:00",
+  "schema": "wavep.quantum.hom_noise_psd_watch_audit.v1",
+  "inputs": {
+    "hom_squeezed_light_unified_audit_metrics_json": "C:/develop/waveP/output/public/quantum/hom_squeezed_light_unified_audit_metrics.json",
+    "psd_zip": "C:/develop/waveP/data/quantum/sources/zenodo_6371310/DataExfig3.zip",
+    "psd_csv_name": "DataExfig3b.csv"
+  },
+  "thresholds": {
+    "lf_to_hf_ratio_min": 1.0,
+    "trend_fit_band_hz": [
+      30000.0,
+      300000.0
+    ],
+    "pair_low_centers_hz": [
+      8000.0,
+      10000.0,
+      12000.0,
+      15000.0
+    ],
+    "pair_high_centers_hz": [
+      80000.0,
+      100000.0,
+      120000.0,
+      150000.0
+    ],
+    "band_median_low_hz": [
+      8000.0,
+      12000.0
+    ],
+    "band_median_high_hz": [
+      80000.0,
+      120000.0
+    ]
+  },
+  "baseline": {
+    "ratio_from_hom_unified_metric": 0.8405951115834224,
+    "ratio_interp_10k_over_100k": 0.8405951115834224,
+    "ratio_detrended_10k_over_100k": 0.8511146934332221,
+    "trend_slope_log10": 0.00540122806216282,
+    "trend_intercept_log10": -9.99158768159989,
+    "band_median_ratio_low8to12k_over_high80to120k": 1.025
+  },
+  "pair_sensitivity": [
+    {
+      "low_hz": 8000.0,
+      "high_hz": 80000.0,
+      "ratio_raw": 0.665768194070082,
+      "ratio_detrended": 0.6740999139599598,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 8000.0,
+      "high_hz": 100000.0,
+      "ratio_raw": 2.624867162592986,
+      "ratio_detrended": 2.6609210612012384,
+      "raw_ge_threshold": true,
+      "detrended_ge_threshold": true
+    },
+    {
+      "low_hz": 8000.0,
+      "high_hz": 120000.0,
+      "ratio_raw": 3.237221494102226,
+      "ratio_detrended": 3.284919660200382,
+      "raw_ge_threshold": true,
+      "detrended_ge_threshold": true
+    },
+    {
+      "low_hz": 8000.0,
+      "high_hz": 150000.0,
+      "ratio_raw": 1.0510638297872332,
+      "ratio_detrended": 1.0678367450728754,
+      "raw_ge_threshold": true,
+      "detrended_ge_threshold": true
+    },
+    {
+      "low_hz": 10000.0,
+      "high_hz": 80000.0,
+      "ratio_raw": 0.21320754716981183,
+      "ratio_detrended": 0.21561569412148843,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 10000.0,
+      "high_hz": 100000.0,
+      "ratio_raw": 0.8405951115834224,
+      "ratio_detrended": 0.8511146934332221,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 10000.0,
+      "high_hz": 120000.0,
+      "ratio_raw": 1.036697247706422,
+      "ratio_detrended": 1.0507051224894528,
+      "raw_ge_threshold": true,
+      "detrended_ge_threshold": true
+    },
+    {
+      "low_hz": 10000.0,
+      "high_hz": 150000.0,
+      "ratio_raw": 0.33659574468085096,
+      "ratio_detrended": 0.3415552445998307,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 12000.0,
+      "high_hz": 80000.0,
+      "ratio_raw": 0.12722371967655027,
+      "ratio_detrended": 0.12853405474123453,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 12000.0,
+      "high_hz": 100000.0,
+      "ratio_raw": 0.5015940488841665,
+      "ratio_detrended": 0.5073713351087286,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 12000.0,
+      "high_hz": 120000.0,
+      "ratio_raw": 0.6186107470511146,
+      "ratio_detrended": 0.6263523176325945,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 12000.0,
+      "high_hz": 150000.0,
+      "ratio_raw": 0.20085106382978735,
+      "ratio_detrended": 0.20360985634846296,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 15000.0,
+      "high_hz": 80000.0,
+      "ratio_raw": 0.24716981132075477,
+      "ratio_detrended": 0.24941473770079753,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 15000.0,
+      "high_hz": 100000.0,
+      "ratio_raw": 0.974495217853346,
+      "ratio_detrended": 0.9845319881786182,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    },
+    {
+      "low_hz": 15000.0,
+      "high_hz": 120000.0,
+      "ratio_raw": 1.2018348623853188,
+      "ratio_detrended": 1.2154094051193371,
+      "raw_ge_threshold": true,
+      "detrended_ge_threshold": true
+    },
+    {
+      "low_hz": 15000.0,
+      "high_hz": 150000.0,
+      "ratio_raw": 0.3902127659574459,
+      "ratio_detrended": 0.3950960624146354,
+      "raw_ge_threshold": false,
+      "detrended_ge_threshold": false
+    }
+  ],
+  "summary": {
+    "pairs_n": 16,
+    "raw_ratio_median": 0.6421894705605984,
+    "detrended_ratio_median": 0.6502261157962772,
+    "raw_ratio_pass_n": 5,
+    "detrended_ratio_pass_n": 5,
+    "raw_ratio_pass_fraction": 0.3125,
+    "detrended_ratio_pass_fraction": 0.3125,
+    "hard_gate_applicable": false,
+    "decision": "keep_watch_nonhard_gate",
+    "decision_note": "single-point ratio is band-sensitive; keep as non-hard watch diagnostic."
+  }
+}

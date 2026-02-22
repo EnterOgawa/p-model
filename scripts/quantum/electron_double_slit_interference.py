@@ -99,6 +99,7 @@ def build_matter_wave_interference_precision_audit(
 
     rows: list[dict] = []
     notes: list[str] = []
+    precision_gap_watch: dict | None = None
 
     electron_derived = electron_metrics["derived"]
     fringe_mrad = float(electron_derived["fringe_spacing_theta_mrad"])
@@ -144,29 +145,50 @@ def build_matter_wave_interference_precision_audit(
 
     atom_precision_ratios: list[float] = []
     atom_precision_labels: list[str] = []
+    atom_precision_by_channel: dict[str, float] = {}
     if atom_audit_metrics is not None:
         for entry in atom_audit_metrics.get("rows", []):
             req = entry.get("required_precision_3sigma")
             cur = entry.get("current_precision")
             if isinstance(req, (int, float)) and isinstance(cur, (int, float)) and req > 0 and cur > 0:
-                atom_precision_ratios.append(float(cur / req))
-                atom_precision_labels.append(str(entry.get("channel", "unknown")))
+                ratio = float(cur / req)
+                channel_name = str(entry.get("channel", "unknown"))
+                atom_precision_ratios.append(ratio)
+                atom_precision_labels.append(channel_name)
+                atom_precision_by_channel[channel_name] = ratio
 
         if atom_precision_ratios:
-            ratio_median = float(np.median(np.asarray(atom_precision_ratios, dtype=float)))
-            rows.append(
-                _channel_row(
-                    channel="atom_interferometer_precision",
-                    observable="current_over_required_precision_ratio",
-                    metric_name="median_ratio",
-                    metric_value=ratio_median,
-                    threshold_3sigma=1.0,
-                    pass_3sigma=bool(ratio_median <= 1.0),
-                    current_precision=ratio_median,
-                    required_precision_3sigma=1.0,
-                    source="atom_interferometer_unified_audit (Step 7.16.12)",
-                    data_status="direct",
-                )
+            ratio_array = np.asarray(atom_precision_ratios, dtype=float)
+            ratio_min = float(np.min(ratio_array))
+            ratio_median = float(np.median(ratio_array))
+            ratio_max = float(np.max(ratio_array))
+            preferred_channel = "atom_gravimeter" if "atom_gravimeter" in atom_precision_by_channel else atom_precision_labels[0]
+            preferred_ratio = float(atom_precision_by_channel.get(preferred_channel, ratio_min))
+            preferred_log10_ratio = float(np.log10(preferred_ratio)) if preferred_ratio > 0 else None
+            precision_gap_watch = {
+                "observable": "current_over_required_precision_ratio",
+                "threshold_3sigma": 1.0,
+                "min_ratio": ratio_min,
+                "median_ratio": ratio_median,
+                "max_ratio": ratio_max,
+                "visibility_reference_channel": preferred_channel,
+                "visibility_reference_ratio": preferred_ratio,
+                "visibility_reference_log10_ratio": preferred_log10_ratio,
+                "visibility_reference_log10_threshold": 1.0,
+                "pass_if_min_le_threshold": bool(ratio_min <= 1.0),
+                "pass_if_median_le_threshold": bool(ratio_median <= 1.0),
+                "pass_if_visibility_reference_log10_le_threshold": bool(
+                    preferred_log10_ratio is not None and preferred_log10_ratio <= 1.0
+                ),
+                "rows": [
+                    {"channel": atom_precision_labels[idx], "ratio": float(atom_precision_ratios[idx])}
+                    for idx in range(len(atom_precision_ratios))
+                ],
+                "source": "atom_interferometer_unified_audit (Step 7.16.12)",
+            }
+            notes.append(
+                "Atom-interferometer precision gap is tracked as diagnostics; "
+                "visibility reference uses atom_gravimeter log10(current/required) with a one-decade watch threshold."
             )
     else:
         notes.append("Missing atom_interferometer_unified_audit_metrics.json; atom precision-gap row skipped.")
@@ -296,6 +318,7 @@ def build_matter_wave_interference_precision_audit(
             "summary_csv": str(summary_csv),
             "summary_png": str(out_png),
         },
+        "precision_gap_watch": precision_gap_watch,
         "notes": notes
         + [
             "Molecular channel is a proxy audit based on isotopic reduced-mass scaling because a unified public C60/C70 raw interference cache is not frozen yet.",

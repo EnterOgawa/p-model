@@ -1,0 +1,188 @@
+{
+  "checks": [
+    {
+      "check_id": "lpath_scaling::pi0_positive",
+      "expected": ">0",
+      "hard_fail": false,
+      "metric": "Pi0_median",
+      "value": 5.539899618455155
+    },
+    {
+      "check_id": "lpath_scaling::density_monotonic",
+      "expected": "<1",
+      "hard_fail": false,
+      "metric": "L_path(2rho)/L_path(rho)",
+      "value": 0.5413914163798542
+    },
+    {
+      "check_id": "lpath_scaling::velocity_monotonic",
+      "expected": "<1",
+      "hard_fail": false,
+      "metric": "L_path(2v)/L_path(v)",
+      "value": 0.8673722396048438
+    },
+    {
+      "check_id": "lpath_scaling::temperature_branch_sign",
+      "expected": ">1 (Coulomb-like temp exponent)",
+      "hard_fail": false,
+      "metric": "L_path(2T)/L_path(T)",
+      "value": 2.2104334643701375
+    }
+  ],
+  "decision": {
+    "decision": "lpath_scaling_law_fixed",
+    "hard_reject_n": 0,
+    "overall_status": "pass",
+    "summary_lines": [
+      "overall_status=pass, decision=lpath_scaling_law_fixed, hard_reject_n=0",
+      "L_path(2rho)/L_path(rho)=0.541391",
+      "L_path(2v)/L_path(v)=0.867372",
+      "L_path(2T)/L_path(T)=2.210433"
+    ]
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "Pi0 <= 0 or non-finite.",
+      "L_path(2rho)/L_path(rho) >= 1.",
+      "L_path(2v)/L_path(v) >= 1."
+    ],
+    "watch_if": [
+      "L_path(2T)/L_path(T) <= 1 under Coulomb-like collisional branch."
+    ]
+  },
+  "generated_utc": "2026-02-21T14:54:18.432341+00:00",
+  "inputs": {
+    "source_tau_json": "output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+    "temp_power_collisional_branch": -1.5
+  },
+  "intent": "Derive universal L_path scaling law for collision offsets from L_int=g_P P_mu J^mu and predict density/velocity/temperature response without ad-hoc injection.",
+  "outputs": {
+    "private_csv": "output/private/cosmology/cosmology_lpath_scaling_law_prediction.csv",
+    "private_json": "output/private/cosmology/cosmology_lpath_scaling_law_prediction.json",
+    "private_png": "output/private/cosmology/cosmology_lpath_scaling_law_prediction.png",
+    "public_csv": "output/public/cosmology/cosmology_lpath_scaling_law_prediction.csv",
+    "public_json": "output/public/cosmology/cosmology_lpath_scaling_law_prediction.json",
+    "public_png": "output/public/cosmology/cosmology_lpath_scaling_law_prediction.png"
+  },
+  "phase": {
+    "name": "lpath scaling law prediction",
+    "phase": 8,
+    "step": "8.7.25.21"
+  },
+  "prediction_equations": {
+    "advective_branch": "Gamma_adv=v/L_corr",
+    "collisional_branch": "Gamma_coll=A_col * rho * T^{temp_power}",
+    "lpath_balance": "L_path=c_w*tau_free=c_w/(v/L_corr + A_col*rho*T^{temp_power})",
+    "memory_rate": "tau_free^{-1}=Gamma_path=(g_P^2/chi_P)∫_0^∞ <δJ_x(t)δJ_x(0)> dt",
+    "ratio_symbols": {
+      "Pi0": "A_col*rho0*T0^{temp_power}/(v0/L_corr)",
+      "r_T": "T/T0",
+      "r_rho": "rho/rho0",
+      "r_v": "v/v0"
+    },
+    "starting_lagrangian": "L_int = g_P P_mu J^mu",
+    "transport_split": "Gamma_path=Gamma_adv+Gamma_coll",
+    "universal_ratio": "L_path/L_path,0=(1+Pi0)/(r_v + Pi0*r_rho*r_T^{temp_power})"
+  },
+  "reference_state": {
+    "c_w_km_s": 5500.0,
+    "lpath_kpc": 180.0,
+    "pi0_from_tau_formula": "Pi0 = tau_int,0 / tau_free,0 - 1",
+    "pi0_mean": 5.539899618455155,
+    "pi0_median": 5.539899618455155,
+    "pi0_sample_count": 2,
+    "pi0_std": 0.0,
+    "tau_free_gyr": 0.03200047270930238,
+    "tau_int_gyr": 0.20927987926195124
+  },
+  "scenarios": [
+    {
+      "label": "baseline",
+      "lpath_pred_kpc": 180.0,
+      "lpath_ratio": 1.0,
+      "note": "reference state",
+      "rho_ratio": 1.0,
+      "scenario_id": "baseline",
+      "tau_free_pred_gyr": 0.03200047270930238,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0
+    },
+    {
+      "label": "density x2",
+      "lpath_pred_kpc": 97.45045494837376,
+      "lpath_ratio": 0.5413914163798542,
+      "note": "rho→2rho",
+      "rho_ratio": 2.0,
+      "scenario_id": "rho_x2",
+      "tau_free_pred_gyr": 0.017324781244914086,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0
+    },
+    {
+      "label": "density x0.5",
+      "lpath_pred_kpc": 312.25400625774375,
+      "lpath_ratio": 1.7347444792096876,
+      "note": "rho→0.5rho",
+      "rho_ratio": 0.5,
+      "scenario_id": "rho_x0_5",
+      "tau_free_pred_gyr": 0.05551264336456258,
+      "temp_ratio": 1.0,
+      "v_ratio": 1.0
+    },
+    {
+      "label": "speed x2",
+      "lpath_pred_kpc": 156.12700312887188,
+      "lpath_ratio": 0.8673722396048438,
+      "note": "v→2v",
+      "rho_ratio": 1.0,
+      "scenario_id": "v_x2",
+      "tau_free_pred_gyr": 0.02775632168228129,
+      "temp_ratio": 1.0,
+      "v_ratio": 2.0
+    },
+    {
+      "label": "speed x0.5",
+      "lpath_pred_kpc": 194.90090989674752,
+      "lpath_ratio": 1.0827828327597084,
+      "note": "v→0.5v",
+      "rho_ratio": 1.0,
+      "scenario_id": "v_x0_5",
+      "tau_free_pred_gyr": 0.03464956248982817,
+      "temp_ratio": 1.0,
+      "v_ratio": 0.5
+    },
+    {
+      "label": "temperature x2",
+      "lpath_pred_kpc": 397.87802358662475,
+      "lpath_ratio": 2.2104334643701375,
+      "note": "T→2T",
+      "rho_ratio": 1.0,
+      "scenario_id": "T_x2",
+      "tau_free_pred_gyr": 0.07073491575230531,
+      "temp_ratio": 2.0,
+      "v_ratio": 1.0
+    },
+    {
+      "label": "temperature x0.5",
+      "lpath_pred_kpc": 70.62017165912823,
+      "lpath_ratio": 0.3923342869951569,
+      "note": "T→0.5T",
+      "rho_ratio": 1.0,
+      "scenario_id": "T_x0_5",
+      "tau_free_pred_gyr": 0.012554882643912127,
+      "temp_ratio": 0.5,
+      "v_ratio": 1.0
+    },
+    {
+      "label": "rho,v,T all x2",
+      "lpath_pred_kpc": 198.93901179331237,
+      "lpath_ratio": 1.1052167321850688,
+      "note": "combined hot+dense+fast",
+      "rho_ratio": 2.0,
+      "scenario_id": "rho2_v2_T2",
+      "tau_free_pred_gyr": 0.035367457876152655,
+      "temp_ratio": 2.0,
+      "v_ratio": 2.0
+    }
+  ]
+}

@@ -1,0 +1,198 @@
+{
+  "generated_utc": "2026-02-22T08:15:28.161981+00:00",
+  "schema": "wavep.theory.pmodel_rotating_sphere_p_distribution_audit.v2",
+  "title": "Rotating-sphere P distribution audit (deltaP_rot branches; effective-metric bridge)",
+  "equations": {
+    "static": "P_static(r) = P0 * exp(-Phi(r)/c^2)",
+    "rotating_ansatz": "P_rot(r,theta) = P_static(r) * (1 + kappa_rot * (R/r)^3 * sin(theta)^2)",
+    "precession_mapping": "Omega_LT^(P) = kappa_rot * Omega_LT^(ref)",
+    "effective_metric_vacuum": "nabla^(g(P))_mu F_(P)^(mu nu) = 0"
+  },
+  "gate": {
+    "z_reject": 3.0,
+    "flux_closure_threshold": 0.001
+  },
+  "inputs": {
+    "gpb_data": "C:/develop/waveP/data/theory/gpb_scalar_limit_audit.json",
+    "frame_data": "C:/develop/waveP/data/theory/frame_dragging_experiments.json",
+    "metric_audit_json": "C:/develop/waveP/output/public/theory/pmodel_vector_metric_choice_audit_caseB_effective.json",
+    "strong_field_audit_json": "C:/develop/waveP/output/public/theory/pmodel_rotating_bh_photon_ring_direct_audit.json"
+  },
+  "calibration": {
+    "kappa_rot": 0.9903379213240999,
+    "kappa_sigma": 0.04824437090643169,
+    "fit_channels_n": 2,
+    "fit_method": "weighted_least_squares",
+    "status": "ok"
+  },
+  "effective_metric_bridge": {
+    "metric_choice_decision": "effective",
+    "case_status": "pass",
+    "case_a_status": "reject",
+    "case_b_status": "pass",
+    "gate_pass": true,
+    "status": "pass"
+  },
+  "boundary_bridge": {
+    "formulation_complete": true,
+    "boundary_closure_pass": true,
+    "max_flux_rel_std": 1.252657896949322e-16,
+    "flux_closure_threshold": 0.001,
+    "flux_closure_pass": true,
+    "gate_pass": true,
+    "status": "pass"
+  },
+  "branches": {
+    "static_iso": {
+      "assumption": "deltaP_rot = 0",
+      "summary": {
+        "frame_channels_n": 2,
+        "pass_n": 0,
+        "reject_n": 2,
+        "inconclusive_n": 0,
+        "max_abs_z": 19.799999999999997,
+        "z_reject": 3.0,
+        "status": "reject"
+      },
+      "rows": [
+        {
+          "branch": "static_iso",
+          "id": "gpb_geodetic_control",
+          "label": "GP-B geodetic (control)",
+          "kind": "control",
+          "experiment": "GP-B",
+          "observable": "geodetic_precession",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 6.6,
+          "observed_sigma": 0.018,
+          "reference_prediction": 6.6,
+          "pmodel_prediction": 6.6,
+          "residual": 0.0,
+          "z_score": 0.0,
+          "status": "pass",
+          "note": "GP-B geodetic precession representative value."
+        },
+        {
+          "branch": "static_iso",
+          "id": "gpb_frame_dragging",
+          "label": "GP-B frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "GP-B",
+          "observable": "frame_dragging",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 0.039,
+          "observed_sigma": 0.0072,
+          "reference_prediction": 0.0392,
+          "pmodel_prediction": 0.0,
+          "residual": 0.039,
+          "z_score": 5.416666666666667,
+          "status": "reject",
+          "note": "GP-B frame-dragging representative value; scalar-only limit predicts zero."
+        },
+        {
+          "branch": "static_iso",
+          "id": "lageos_frame_dragging",
+          "label": "LAGEOS frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "LAGEOS",
+          "observable": "frame_dragging",
+          "unit": "mu_ratio",
+          "value_domain": "ratio_to_gr",
+          "observed": 0.99,
+          "observed_sigma": 0.05,
+          "reference_prediction": 1.0,
+          "pmodel_prediction": 0.0,
+          "residual": 0.99,
+          "z_score": 19.799999999999997,
+          "status": "reject",
+          "note": "一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。"
+        }
+      ]
+    },
+    "vortex_gradient": {
+      "assumption": "deltaP_rot != 0",
+      "summary": {
+        "frame_channels_n": 2,
+        "pass_n": 2,
+        "reject_n": 0,
+        "inconclusive_n": 0,
+        "max_abs_z": 0.024826872791011315,
+        "z_reject": 3.0,
+        "status": "pass"
+      },
+      "rows": [
+        {
+          "branch": "vortex_gradient",
+          "id": "gpb_geodetic_control",
+          "label": "GP-B geodetic (control)",
+          "kind": "control",
+          "experiment": "GP-B",
+          "observable": "geodetic_precession",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 6.6,
+          "observed_sigma": 0.018,
+          "reference_prediction": 6.6,
+          "pmodel_prediction": 6.6,
+          "residual": 0.0,
+          "z_score": 0.0,
+          "status": "pass",
+          "note": "GP-B geodetic precession representative value."
+        },
+        {
+          "branch": "vortex_gradient",
+          "id": "gpb_frame_dragging",
+          "label": "GP-B frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "GP-B",
+          "observable": "frame_dragging",
+          "unit": "arcsec/yr",
+          "value_domain": "absolute",
+          "observed": 0.039,
+          "observed_sigma": 0.0072,
+          "reference_prediction": 0.0392,
+          "pmodel_prediction": 0.03882124651590472,
+          "residual": 0.00017875348409528147,
+          "z_score": 0.024826872791011315,
+          "status": "pass",
+          "note": "GP-B frame-dragging representative value; scalar-only limit predicts zero."
+        },
+        {
+          "branch": "vortex_gradient",
+          "id": "lageos_frame_dragging",
+          "label": "LAGEOS frame-dragging",
+          "kind": "frame_dragging",
+          "experiment": "LAGEOS",
+          "observable": "frame_dragging",
+          "unit": "mu_ratio",
+          "value_domain": "ratio_to_gr",
+          "observed": 0.99,
+          "observed_sigma": 0.05,
+          "reference_prediction": 1.0,
+          "pmodel_prediction": 0.9903379213240999,
+          "residual": -0.00033792132409993236,
+          "z_score": -0.006758426481998647,
+          "status": "pass",
+          "note": "一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "overall_status": "pass",
+    "decision": "deltaP_rot_required_under_effective_metric",
+    "static_status": "reject",
+    "vortex_status": "pass",
+    "frame_dragging_reject_static_n": 2,
+    "frame_dragging_reject_vortex_n": 0,
+    "metric_bridge_status": "pass",
+    "boundary_bridge_status": "pass"
+  },
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/pmodel_rotating_sphere_p_distribution_audit.png"
+  }
+}

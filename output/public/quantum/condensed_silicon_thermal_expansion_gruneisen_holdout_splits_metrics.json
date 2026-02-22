@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:47:19.472256+00:00",
+  "generated_utc": "2026-02-20T12:38:42.219099+00:00",
   "phase": 7,
   "step": "7.14.15",
   "inputs": {
@@ -9,7 +9,7 @@
     },
     "theta_d_source": {
       "kind": "frozen_metrics",
-      "path": "output/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+      "path": "output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json"
     }
   },
   "assumptions": {
@@ -177,7 +177,7 @@
     }
   ],
   "outputs": {
-    "csv": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.csv",
-    "png": "C:\\develop\\waveP\\output\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png"
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\condensed_silicon_thermal_expansion_gruneisen_holdout_splits.png"
   }
 }

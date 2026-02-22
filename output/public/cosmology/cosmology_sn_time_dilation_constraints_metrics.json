@@ -1,0 +1,146 @@
+{
+  "generated_utc": "2026-02-13T07:42:45.873187+00:00",
+  "input": "C:/develop/waveP/data/cosmology/sn_time_dilation_constraints.json",
+  "definition": {
+    "p_t": "時間伸長の指数：Δt_obs = (1+z)^(p_t) Δt_em。標準（宇宙膨張）は p_t=1。時間伸長なし（tired light等）は p_t=0。",
+    "aging_rate": "観測時間に対する“固有時間の進み”（aging rate）を g(z)=Δt_em/Δt_obs とすると、g(z)=(1+z)^(-p_t)。",
+    "blondin2008_mapping": "Blondin+2008 は aging rate を 1/(1+z)^b として fit しているため、b は本定義の p_t に一致する。"
+  },
+  "assumptions": {
+    "time_dilation": "Δt_obs=(1+z)^(p_t)Δt_em",
+    "aging_rate": "g(z)=Δt_em/Δt_obs=(1+z)^(-p_t)",
+    "benchmarks": {
+      "FRW": {
+        "p_t": 1.0
+      },
+      "tired_light": {
+        "p_t": 0.0
+      },
+      "DDR_fix_only": {
+        "p_t": 3.0,
+        "note": "p_e=1, opacity/evolutionなしでε0=0を満たすための目安"
+      }
+    },
+    "theory_branch_summary": {
+      "if_phase_rate_preserved": "可変時計 dτ/dt=P0/P と、自由伝播で座標位相進み dθ/dt が保存される仮定の下では、Δt_obs=(1+z)Δt_em（p_t=1）を要求する。",
+      "if_not_preserved": "dθ/dt 保存が崩れる場合は、同じ定義系のままでは赤方偏移写像（ν_obs/ν_em=P_obs/P_em）と両立せず、p_t は未確定（追加の伝播則が必要）。"
+    }
+  },
+  "rows": [
+    {
+      "id": "blondin2008_snIa_spectral_aging_all",
+      "short_label": "SNIa spectra (2008)",
+      "title": "Time dilation in Type Ia supernova spectra: aging rate exponent",
+      "p_t_obs": 0.97,
+      "p_t_sigma": 0.1,
+      "z_frw": 0.30000000000000027,
+      "z_tired_light": -9.7,
+      "z_ddr_fix_only": 20.3,
+      "benchmarks": {
+        "p_t_frw": 1.0,
+        "p_t_tired_light": 0.0,
+        "p_t_ddr_fix_only": 3.0
+      },
+      "sigma_note": "一次ソース本文の記述「b=0.97±0.10 for the entire sample」を採用（1σ）。",
+      "source": {
+        "kind": "analysis_paper",
+        "title": "Time Dilation in Type Ia Supernova Spectra at High Redshift",
+        "authors": "S. Blondin et al.",
+        "year": 2008,
+        "arxiv_id": "0804.3595",
+        "url": "https://arxiv.org/abs/0804.3595",
+        "retrieved_utc": "2026-01-09T00:00:00Z",
+        "local_pdf": "data/cosmology/sources/arxiv_0804.3595.pdf",
+        "local_pdf_sha256": "e9ecaa24d075fb6938d33dd3367db6d4ce30cc32c24626cf3e9d82f943c6b3eb",
+        "note": "一次ソースは aging rate を 1/(1+z)^b で fit し、b が 1（宇宙膨張の時間伸長）と整合、b=0（時間伸長なし）を排除する。"
+      },
+      "audit": {
+        "circularity_risk_main_fit": "low",
+        "pt_fit_all": {
+          "model": "g(z)=1/(1+z)^(p_t) (zero-point fixed at g(z=0)=1)",
+          "n_points": 35,
+          "p_t_fit": 0.9665000000000001,
+          "p_t_sigma_minus": 0.1024901140093829,
+          "p_t_sigma_plus": 0.10636859285840017,
+          "p_t_sigma_sym": 0.10442935343389154,
+          "chi2_min": 26.84642509406905,
+          "dof": 34,
+          "reduced_chi2": 0.7896007380608544,
+          "grid": {
+            "b_min": -0.5,
+            "b_max": 6.0,
+            "n": 13001
+          }
+        },
+        "refit_outputs": {
+          "png": "C:/develop/waveP/output/private/cosmology/cosmology_sn_time_dilation_pt_fit.png",
+          "json": "C:/develop/waveP/output/private/cosmology/cosmology_sn_time_dilation_pt_fit.json"
+        },
+        "refit_error": null
+      }
+    }
+  ],
+  "audit": {
+    "pt_refit": {
+      "all": {
+        "model": "g(z)=1/(1+z)^(p_t) (zero-point fixed at g(z=0)=1)",
+        "n_points": 35,
+        "p_t_fit": 0.9665000000000001,
+        "p_t_sigma_minus": 0.1024901140093829,
+        "p_t_sigma_plus": 0.10636859285840017,
+        "p_t_sigma_sym": 0.10442935343389154,
+        "chi2_min": 26.84642509406905,
+        "dof": 34,
+        "reduced_chi2": 0.7896007380608544,
+        "grid": {
+          "b_min": -0.5,
+          "b_max": 6.0,
+          "n": 13001
+        }
+      },
+      "highz": {
+        "model": "g(z)=1/(1+z)^(p_t) (zero-point fixed at g(z=0)=1)",
+        "n_points": 13,
+        "p_t_fit": 0.9505000000000001,
+        "p_t_sigma_minus": 0.10186832032159043,
+        "p_t_sigma_plus": 0.10596255013219968,
+        "p_t_sigma_sym": 0.10391543522689506,
+        "chi2_min": 3.4316321942196892,
+        "dof": 12,
+        "reduced_chi2": 0.28596934951830744,
+        "grid": {
+          "b_min": -0.5,
+          "b_max": 6.0,
+          "n": 13001
+        }
+      },
+      "lowz": {
+        "model": "g(z)=1/(1+z)^(p_t) (zero-point fixed at g(z=0)=1)",
+        "n_points": 22,
+        "p_t_fit": 3.2065,
+        "p_t_sigma_minus": 1.269549142716734,
+        "p_t_sigma_plus": 1.3073278575311527,
+        "p_t_sigma_sym": 1.2884385001239433,
+        "chi2_min": 20.206657528575782,
+        "dof": 21,
+        "reduced_chi2": 0.9622217870750372,
+        "grid": {
+          "b_min": -0.5,
+          "b_max": 6.0,
+          "n": 13001
+        }
+      }
+    },
+    "circularity_risk": "low",
+    "note": "本再fitは Table 3 の公表値 g=Δt_em/Δt_obs とその誤差を用い、p_t を自由パラメータとして推定する（p_t=1 を埋め込まない）。",
+    "refit_outputs": {
+      "png": "C:/develop/waveP/output/private/cosmology/cosmology_sn_time_dilation_pt_fit.png",
+      "json": "C:/develop/waveP/output/private/cosmology/cosmology_sn_time_dilation_pt_fit.json"
+    },
+    "refit_error": null
+  },
+  "outputs": {
+    "png": "C:/develop/waveP/output/private/cosmology/cosmology_sn_time_dilation_constraints.png",
+    "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_sn_time_dilation_constraints_metrics.json"
+  }
+}

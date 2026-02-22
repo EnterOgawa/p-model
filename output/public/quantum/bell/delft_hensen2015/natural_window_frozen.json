@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-11T02:46:58.640414+00:00",
+  "generated_utc": "2026-02-20T12:38:21.009074+00:00",
   "dataset_id": "delft_hensen2015",
   "supported": true,
   "natural_window": {
@@ -18,7 +18,7 @@
     "rule": "abs(stat - frozen_stat) >= threshold_sigma * sigma_boot"
   },
   "sources": {
-    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2015\\covariance_bootstrap.json",
-    "offset_sweep_metrics_json": "C:\\develop\\waveP\\output\\quantum\\bell\\delft_hensen2015\\offset_sweep_metrics.json"
+    "covariance_bootstrap_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\covariance_bootstrap.json",
+    "offset_sweep_metrics_json": "C:\\develop\\waveP\\output\\public\\quantum\\bell\\delft_hensen2015\\offset_sweep_metrics.json"
   }
 }

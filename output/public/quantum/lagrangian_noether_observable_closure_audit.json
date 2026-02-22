@@ -1,0 +1,252 @@
+{
+  "generated_utc": "2026-02-17T02:49:44.845006+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.21.1",
+    "name": "Lagrangian-Noether observable closure audit"
+  },
+  "intent": "Freeze one machine-readable closure decision for L_total -> EL -> observables with Noether constraints and nonrelativistic mapping.",
+  "inputs": {
+    "action_principle_el_derivation_audit_json": "output/public/quantum/action_principle_el_derivation_audit.json",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "output/public/quantum/nonrelativistic_reduction_schrodinger_mapping_audit.json",
+    "derivation_parameter_falsification_pack_json": "output/public/quantum/derivation_parameter_falsification_pack.json",
+    "derivation_observable_chain_lock_audit_json": "output/public/quantum/derivation_observable_chain_lock_audit.json"
+  },
+  "input_hashes_sha256": {
+    "action_principle_el_derivation_audit_json": "9813f2117cedef3561594fafc113b06f12ea2ff12ec7fad11cec29af71b2529c",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "f2ee2d47d67c018435ca1f27d7cb1491a98a2165cb4e1deeb3476c84a9890fde",
+    "derivation_parameter_falsification_pack_json": "31354d1096af5dd3b382b8f0386644e97e436df440ec63ead8c95d66974cb1ba",
+    "derivation_observable_chain_lock_audit_json": "15c71eb4b046675d5bc8d1529623495f32a157c9a049049b62065ff2ec8e0eac"
+  },
+  "assumptions": [
+    "Boundary variation is fixed to zero at the audit boundary.",
+    "No higher-derivative correction terms are allowed in the minimal route-A closure.",
+    "Observable mapping uses one fixed route per observable (no branch re-fit)."
+  ],
+  "checks": [
+    {
+      "id": "action::route_a_gate",
+      "metric": "route_a_el_derivation_gate",
+      "value": "pass",
+      "expected": "pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "EL 導出ゲートが pass。"
+    },
+    {
+      "id": "action::criteria_all_pass",
+      "metric": "all_action_criteria_pass",
+      "value": true,
+      "expected": true,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理監査 criteria が全て pass。"
+    },
+    {
+      "id": "action::required_equations",
+      "metric": "missing_equations_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "L_total→EL→Noether に必要な式キーが欠けていない。"
+    },
+    {
+      "id": "action::noether_gauge",
+      "metric": "noether_current_gauge_margin",
+      "value": 4.999993032890784e-08,
+      "expected": "> 0",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "Noether 電流のゲージ不変性マージン。"
+    },
+    {
+      "id": "action::noether_realness",
+      "metric": "noether_current_realness_margin",
+      "value": 5e-10,
+      "expected": "> 0",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "action_principle_el_derivation_audit",
+      "note": "Noether 電流の実数性マージン。"
+    },
+    {
+      "id": "nonrel::route_gate",
+      "metric": "nonrelativistic_reduction_gate",
+      "value": "pass",
+      "expected": "pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "非相対論写像ゲートが pass。"
+    },
+    {
+      "id": "nonrel::criteria_all_pass",
+      "metric": "all_nonrel_criteria_pass",
+      "value": true,
+      "expected": true,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "非相対論写像 criteria が全て pass。"
+    },
+    {
+      "id": "nonrel::required_channels",
+      "metric": "missing_nonrel_channels_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "観測写像に必要な channel が揃っている。"
+    },
+    {
+      "id": "deriv_pack::hard_fail_unknown",
+      "metric": "hard_fail_or_unknown_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "derivation_parameter_falsification_pack",
+      "note": "導出packの hard fail/unknown が空。"
+    },
+    {
+      "id": "deriv_pack::derivation_channel_pass",
+      "metric": "derivation_channel_pass_n/rows_n",
+      "value": "3/3",
+      "expected": "all pass",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "derivation_parameter_falsification_pack",
+      "note": "導出channel行が全件 pass。"
+    },
+    {
+      "id": "closure::observables_present",
+      "metric": "present_routes_n/required_n",
+      "value": "3/3",
+      "expected": "all present",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "3観測量の L_total→EL→観測 route が揃っている。"
+    },
+    {
+      "id": "closure::observables_unique",
+      "metric": "unique_routes_n/required_n",
+      "value": "3/3",
+      "expected": "all unique",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "lagrangian_noether_observable_closure_audit",
+      "note": "3観測量の route を一意（route_count=1）で固定。"
+    },
+    {
+      "id": "chain::hard_fail",
+      "metric": "hard_fail_ids_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "score": 1.0,
+      "source": "derivation_observable_chain_lock_audit",
+      "note": "導出チェーン全体で hard fail が無い。"
+    },
+    {
+      "id": "chain::watch_convergence",
+      "metric": "remaining_watch_n",
+      "value": 0,
+      "expected": 0,
+      "pass": true,
+      "gate_level": "watch",
+      "status": "pass",
+      "score": 1.0,
+      "source": "derivation_observable_chain_lock_audit",
+      "note": "non-hard watch が安定収束している。"
+    }
+  ],
+  "closure_matrix": [
+    {
+      "observable": "gravity_acceleration",
+      "route_id": "EL(P) + nonrel(cow_neutron)",
+      "required_keys": [
+        "el_for_P_conjugate",
+        "cow_neutron"
+      ],
+      "present": true,
+      "route_count": 1,
+      "unique_route": true
+    },
+    {
+      "observable": "clock_rate_mapping",
+      "route_id": "EL(P) + nonrel(optical_clock_leveling_proxy)",
+      "required_keys": [
+        "el_for_P_conjugate",
+        "optical_clock_leveling_proxy"
+      ],
+      "present": true,
+      "route_count": 1,
+      "unique_route": true
+    },
+    {
+      "observable": "optical_refractive_mapping",
+      "route_id": "EL(A_mu) + noether + nonrel(atom_gravimeter)",
+      "required_keys": [
+        "el_for_A_nu",
+        "noether_current_gauge_invariance",
+        "atom_gravimeter"
+      ],
+      "present": true,
+      "route_count": 1,
+      "unique_route": true
+    }
+  ],
+  "diagnostics": {
+    "missing_equations": [],
+    "missing_nonrel_channels": [],
+    "action_fail_ids": [],
+    "deriv_watchlist": [
+      "hom_noise_psd_shape"
+    ],
+    "chain_watchlist": [
+      "hom_noise_psd_shape",
+      "kwiat2013_prl111_130406_05082013_15:delay_signature"
+    ]
+  },
+  "decision": {
+    "overall_status": "pass",
+    "hard_fail_ids": [],
+    "watch_ids": [],
+    "route_a_gate": "A_continue",
+    "transition": "A_stay",
+    "rule": "Reject if any hard closure check fails; watch if only non-hard watch-convergence check fails; otherwise pass."
+  }
+}

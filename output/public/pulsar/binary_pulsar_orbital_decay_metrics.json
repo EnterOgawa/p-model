@@ -1,0 +1,114 @@
+{
+  "generated_utc": "2026-02-11T10:04:13.095512+00:00",
+  "inputs": {
+    "binary_pulsar_orbital_decay_json": "C:/develop/waveP/data/pulsar/binary_pulsar_orbital_decay.json"
+  },
+  "outputs": {
+    "binary_pulsar_orbital_decay_png": "C:/develop/waveP/output/pulsar/binary_pulsar_orbital_decay.png",
+    "binary_pulsar_orbital_decay_public_png": "C:/develop/waveP/output/pulsar/binary_pulsar_orbital_decay_public.png",
+    "binary_pulsar_orbital_decay_metrics_json": "C:/develop/waveP/output/pulsar/binary_pulsar_orbital_decay_metrics.json"
+  },
+  "metrics": [
+    {
+      "id": "psr_b1913p16",
+      "name": "PSR B1913+16（Hulse?Taylor）",
+      "R": 0.9982923910743859,
+      "R_paper": 0.9983,
+      "sigma_1": 0.0016,
+      "sigma_95": 0.003135942375264087,
+      "sigma_note": "1σ",
+      "delta": -0.001707608925614057,
+      "abs_delta": 0.001707608925614057,
+      "non_gr_fraction_upper_3sigma": 0.006507608925614057,
+      "non_gr_fraction_upper_95": 0.004843551300878143,
+      "derived": {
+        "Pb_days": 0.322997448918,
+        "e": 0.617134,
+        "m1_msun": 1.438,
+        "m2_msun": 1.39,
+        "pbdot_intrinsic": -2.398e-12,
+        "pbdot_intrinsic_sigma_1": 4e-15,
+        "pbdot_pred_quadrupole": -2.4021018505602508e-12,
+        "pbdot_pred_paper": -2.40263e-12,
+        "pbdot_pred_rel_error": -0.0002198213789676553
+      }
+    },
+    {
+      "id": "psr_j0737m3039ab",
+      "name": "PSR J0737?3039A/B（Double Pulsar）",
+      "R": 0.9999532154993932,
+      "R_paper": 1.0,
+      "sigma_1": 6.632774940020501e-05,
+      "sigma_95": 0.00013,
+      "sigma_note": "95% conf.",
+      "delta": -4.678450060680017e-05,
+      "abs_delta": 4.678450060680017e-05,
+      "non_gr_fraction_upper_3sigma": 0.0002457677488074152,
+      "non_gr_fraction_upper_95": 0.00017678450060680016,
+      "derived": {
+        "Pb_days": 0.1022515592973,
+        "e": 0.087777023,
+        "m1_msun": 1.338185,
+        "m2_msun": 1.248868,
+        "pbdot_intrinsic": -1.247752e-12,
+        "pbdot_intrinsic_sigma_1": 7.9e-17,
+        "pbdot_pred_quadrupole": -1.2478103781853953e-12,
+        "pbdot_pred_paper": -1.247782e-12,
+        "pbdot_pred_rel_error": 2.274290332399148e-05
+      }
+    },
+    {
+      "id": "psr_j1738p0333",
+      "name": "PSR J1738+0333（NS-WD）",
+      "R": 0.9431580411856818,
+      "R_paper": null,
+      "sigma_1": 0.11652917883375219,
+      "sigma_95": 0.22839299366218146,
+      "sigma_note": "1σ（Pdot_b,int の誤差から伝播）",
+      "delta": -0.056841958814318194,
+      "abs_delta": 0.056841958814318194,
+      "non_gr_fraction_upper_3sigma": 0.40642949531557476,
+      "non_gr_fraction_upper_95": 0.28523495247649966,
+      "derived": {
+        "Pb_days": 0.3547907398724,
+        "e": 3.4e-07,
+        "m1_msun": 1.46,
+        "m2_msun": 0.181,
+        "pbdot_intrinsic": -2.59e-14,
+        "pbdot_intrinsic_sigma_1": 3.2e-15,
+        "pbdot_pred_quadrupole": -2.7460933236003662e-14,
+        "pbdot_pred_paper": -2.77e-14,
+        "pbdot_pred_rel_error": -0.008630569097340769
+      }
+    },
+    {
+      "id": "psr_j0348p0432",
+      "name": "PSR J0348+0432（NS-WD）",
+      "R": 1.059880965135484,
+      "R_paper": null,
+      "sigma_1": 0.17368770368207126,
+      "sigma_95": 0.3404216437743246,
+      "sigma_note": "1σ（Pdot_b,int の誤差から伝播）",
+      "delta": 0.05988096513548391,
+      "abs_delta": 0.05988096513548391,
+      "non_gr_fraction_upper_3sigma": 0.5809440761816977,
+      "non_gr_fraction_upper_95": 0.4003026089098085,
+      "derived": {
+        "Pb_days": 0.102424062722,
+        "e": 2.36e-06,
+        "m1_msun": 2.01,
+        "m2_msun": 0.172,
+        "pbdot_intrinsic": -2.746e-13,
+        "pbdot_intrinsic_sigma_1": 4.5e-14,
+        "pbdot_pred_quadrupole": -2.5908569833113106e-13,
+        "pbdot_pred_paper": -2.58e-13,
+        "pbdot_pred_rel_error": 0.004208133066399398
+      }
+    }
+  ],
+  "notes": [
+    "R=1が（弱場・遠方の）四重極放射の予測と一致。",
+    "Phase 9 Step 9.2：一次ソースのPb,e,m,Pdot_b（補正後）から Pdot_b(Peters-Mathews) を再計算し、R を導出した。",
+    "『非GRの追加減衰（双極放射など）』は、|R−1| と誤差から上限（概算）として見積もる。"
+  ]
+}

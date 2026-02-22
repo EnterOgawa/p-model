@@ -10,8 +10,8 @@ ESA PSA に公開されている `bc_mpo_more` バンドルの「公開状況」
 - まず「公開されているか？」を一次ソース（PSA）で確認し、再現可能に残す。
 
 出力：
-- `output/bepicolombo/more_psa_status.json`
-- `output/bepicolombo/more_psa_status.png`
+- `output/private/bepicolombo/more_psa_status.json`
+- `output/private/bepicolombo/more_psa_status.png`
 
 キャッシュ：
 - `data/bepicolombo/psa_more/`（bundle xml / document など）
@@ -403,7 +403,7 @@ def main() -> None:
 
         if status_payload.get("errors"):
             lines.append("")
-            lines.append(f"注意: エラー {len(status_payload.get('errors') or [])} 件（details: output/bepicolombo/more_psa_status.json）")
+            lines.append(f"注意: エラー {len(status_payload.get('errors') or [])} 件（details: output/private/bepicolombo/more_psa_status.json）")
 
         ax.text(
             0.01,

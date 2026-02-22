@@ -1,0 +1,83 @@
+{
+  "generated_utc": "2026-02-22T08:15:27.465090+00:00",
+  "schema": "wavep.theory.frame_dragging_scalar_limit_combined_audit.v1",
+  "title": "Frame-dragging scalar-limit combined audit (GP-B + LAGEOS)",
+  "gate": {
+    "z_reject": 3.0
+  },
+  "inputs": {
+    "gpb_data": "C:/develop/waveP/data/theory/gpb_scalar_limit_audit.json",
+    "frame_data": "C:/develop/waveP/data/theory/frame_dragging_experiments.json"
+  },
+  "rows": [
+    {
+      "id": "gpb_geodetic_control",
+      "experiment": "GP-B",
+      "observable": "geodetic_precession",
+      "label": "GP-B geodetic (control)",
+      "value_domain": "absolute",
+      "unit": "arcsec/yr",
+      "observed": 6.6,
+      "observed_sigma": 0.018,
+      "pmodel_scalar_prediction": 6.6,
+      "reference_prediction": 6.6,
+      "residual_scalar": 0.0,
+      "z_scalar": 0.0,
+      "status": "pass",
+      "note": "GP-B geodetic precession representative value."
+    },
+    {
+      "id": "gpb_frame_dragging_scalar_limit",
+      "experiment": "GP-B",
+      "observable": "frame_dragging",
+      "label": "GP-B frame-dragging",
+      "value_domain": "absolute",
+      "unit": "arcsec/yr",
+      "observed": 0.039,
+      "observed_sigma": 0.0072,
+      "pmodel_scalar_prediction": 0.0,
+      "reference_prediction": 0.0392,
+      "residual_scalar": 0.039,
+      "z_scalar": 5.416666666666667,
+      "status": "reject",
+      "note": "GP-B frame-dragging representative value; scalar-only limit predicts zero."
+    },
+    {
+      "id": "lageos_frame_dragging_scalar_limit",
+      "experiment": "LAGEOS",
+      "observable": "frame_dragging",
+      "label": "LAGEOS frame-dragging",
+      "value_domain": "ratio_to_gr",
+      "unit": "mu_ratio",
+      "observed": 0.99,
+      "observed_sigma": 0.05,
+      "pmodel_scalar_prediction": 0.0,
+      "reference_prediction": 1.0,
+      "residual_scalar": 0.99,
+      "z_scalar": 19.799999999999997,
+      "status": "reject",
+      "note": "一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。"
+    }
+  ],
+  "summary": {
+    "channels_n": 3,
+    "frame_dragging_channels_n": 2,
+    "pass_n": 1,
+    "reject_n": 2,
+    "inconclusive_n": 0,
+    "frame_dragging_reject_n": 2,
+    "frame_dragging_reject_experiments": [
+      "GP-B",
+      "LAGEOS"
+    ],
+    "multi_experiment_reject_confirmed": true,
+    "gate_z_reject": 3.0,
+    "overall_status": "reject",
+    "decision": "scalar_limit_rejected_by_frame_dragging"
+  },
+  "outputs": {
+    "rows_json": "C:/develop/waveP/output/private/theory/frame_dragging_scalar_limit_combined_audit.json",
+    "rows_csv": "C:/develop/waveP/output/private/theory/frame_dragging_scalar_limit_combined_audit.csv",
+    "plot_png": "C:/develop/waveP/output/private/theory/frame_dragging_scalar_limit_combined_audit.png"
+  }
+}

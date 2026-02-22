@@ -1,0 +1,199 @@
+{
+  "decision": {
+    "decision": "effective_metric_nonlinear_pde_chain_fixed",
+    "hard_reject_n": 0,
+    "overall_status": "pass",
+    "watch_n": 0
+  },
+  "derived": {
+    "caseb": {
+      "boundary_closure_pass": true,
+      "decision": "effective_metric_caseB_baseline_fixed",
+      "max_flux_rel_std": 1.252657896949322e-16,
+      "metric_choice_decision": "effective",
+      "nonlinear_pde_closure_pass": true,
+      "overall_status": "pass"
+    },
+    "cross_consistency": {
+      "flux_abs_delta": 0.0,
+      "flux_consistent": true
+    },
+    "direct_axisymmetric": {
+      "boundary_closure_pass": true,
+      "formulation_complete": true,
+      "max_flux_rel_std": 1.252657896949322e-16
+    },
+    "document_completeness": {
+      "part1_2_7_4_ratio": 1.0,
+      "part2_4_16_ratio": 1.0,
+      "part4_12_ratio": 1.0
+    }
+  },
+  "document_checks": {
+    "part1_2_7_4": {
+      "approx_order": true,
+      "boundary_conditions": true,
+      "closure_gate": true,
+      "nonlinear_pde": true
+    },
+    "part2_4_16": {
+      "approx_order": true,
+      "boundary_conditions": true,
+      "closure_gate": true,
+      "nonlinear_pde": true
+    },
+    "part4_12": {
+      "artifact_links": true,
+      "script_link": true
+    }
+  },
+  "equations": {
+    "closure_gate": "boundary_closure_pass && nonlinear_pde_closure_pass && max_flux_rel_std<=1e-3",
+    "master_eq": "∇^{(g(P))}_μ F_{(P)}^{μν}=0,  F_{(P)}^{μν}=g^{μα}(P)g^{νβ}(P)(∂_αP_β-∂_βP_α)",
+    "nonlinear_order": "keep O(ε^2), drop O(ε^3) in e^{-2u} expansion"
+  },
+  "falsification_gate": {
+    "reject_if": [
+      "Any required derivation block is missing in Part I 2.7.4 / Part II 4.16 / Part IV 12.",
+      "caseB nonlinear_pde_closure_pass is false.",
+      "boundary_closure_pass is false in either caseB or direct axisymmetric audit.",
+      "abs(caseB.max_flux_rel_std - direct.max_flux_rel_std) > flux_consistency_tol."
+    ],
+    "watch_if": []
+  },
+  "generated_utc": "2026-02-21T12:35:09.874100+00:00",
+  "inputs": {
+    "caseb_json": "output/public/theory/pmodel_vector_metric_choice_audit_caseB_effective.json",
+    "direct_json": "output/public/theory/pmodel_rotating_bh_photon_ring_direct_audit.json",
+    "flux_consistency_tol": 1e-18,
+    "part1_md": "doc/paper/10_part1_core_theory.md",
+    "part2_md": "doc/paper/11_part2_astrophysics.md",
+    "part4_md": "doc/paper/13_part4_verification.md"
+  },
+  "intent": "Lock the derivation chain for nonlinear axisymmetric PDEs under g_{mu nu}(P) and synchronize Part I/II/IV notation.",
+  "outputs": {
+    "audit_csv": "output/public/theory/pmodel_effective_metric_nonlinear_pde_derivation_audit.csv",
+    "audit_json": "output/public/theory/pmodel_effective_metric_nonlinear_pde_derivation_audit.json",
+    "audit_png": "output/public/theory/pmodel_effective_metric_nonlinear_pde_derivation_audit.png"
+  },
+  "phase": {
+    "name": "effective-metric nonlinear PDE derivation audit",
+    "phase": 8,
+    "step": "8.7.32.10"
+  },
+  "rows": [
+    {
+      "check_id": "nonlinear_pde",
+      "doc_id": "part1_2_7_4",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "approx_order",
+      "doc_id": "part1_2_7_4",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "boundary_conditions",
+      "doc_id": "part1_2_7_4",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "closure_gate",
+      "doc_id": "part1_2_7_4",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "nonlinear_pde",
+      "doc_id": "part2_4_16",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "approx_order",
+      "doc_id": "part2_4_16",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "boundary_conditions",
+      "doc_id": "part2_4_16",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "closure_gate",
+      "doc_id": "part2_4_16",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "artifact_links",
+      "doc_id": "part4_12",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "script_link",
+      "doc_id": "part4_12",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "caseb_nonlinear_pde_closure_pass",
+      "doc_id": "cross",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "caseb_boundary_closure_pass",
+      "doc_id": "cross",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "direct_boundary_closure_pass",
+      "doc_id": "cross",
+      "reference": 1,
+      "residual": 0,
+      "status": "pass",
+      "value": 1
+    },
+    {
+      "check_id": "flux_value_consistency",
+      "doc_id": "cross",
+      "reference": 0.0,
+      "residual": 0.0,
+      "status": "pass",
+      "value": 0.0
+    }
+  ],
+  "schema": "wavep.theory.effective_metric_nonlinear_pde_derivation_audit.v1"
+}

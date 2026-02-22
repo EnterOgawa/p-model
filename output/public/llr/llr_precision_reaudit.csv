@@ -1,0 +1,22 @@
+type,id,status,value,note
+check,range_type_all_two_way,pass,"{""2"": 26220}",CRD range_type が two-way 以外を含むか。
+check,station_data_balance,pass,"{""dominant_station"": ""GRSM"", ""dominant_ratio"": 0.8291380625476735, ""bias_model_weighted_gain_ns"": 0.19946850996573984}",局偏在は残るが、station+target バイアス補正で weighted RMS が改善するかを併せて判定。
+check,iers_station_coord_unified,watch,"{""station_coords_mode"": ""auto"", ""n_stations_total"": 5, ""n_stations_pos_eop"": 4, ""pos_eop_share"": 0.8, ""stations_without_pos_eop"": [""APOL""]}",全局でIERS系（EDC pos+eop）を使った統一計算かを判定。
+check,apol_modern_operational_gate,pass,"{""weighted_rms_ns"": 4.999386409856197, ""bias_corrected_weighted_rms_ns"": 4.016926991244619}","APOL (modern, nglr1除外) を NP重みの運用指標で判定（中央値RMSは主判定に使わない）。"
+check,operational_systematic_correction_gain,pass,"{""global_weighted_gain_ns"": 0.0034787666238660364, ""global_model_floor_gain_ns"": 0.506711781414344, ""global_weighted_rms_before_ns"": 2.2186835015263084, ""global_weighted_rms_after_ns"": 2.2152047349024424, ""global_model_floor_before_ns"": 4.464027327791422, ""global_model_floor_after_ns"": 3.957315546377078, ""n_apol_corrected_points"": 1431, ""n_grsm_apollo_month_points"": 7673}",APOL target別tropo + GRSM Apollo月次補正の本線I/F改善量を監査。
+check,apol_modern_operational_gate_corrected,pass,"{""weighted_rms_ns_after"": 4.8195820801179, ""weighted_rms_ns_before"": 4.999386409856197, ""weighted_gain_ns"": 0.17980432973829696}",本線I/F補正適用後の modern APOL weighted 指標を判定。
+check,nglr1_coverage_gate,watch,"{""effective_points"": 40, ""metrics_points"": 38, ""coverage_points"": 40, ""source"": ""coverage_csv""}",NGLR-1 点数が mm級判定に十分か。
+check,summary_metric_semantics,pass,"{""median_group_rms_ns"": 4.35417001177271, ""np_sigma_coverage_ratio"": 0.9999235415551647}",中央値RMSは補助指標。主判定はNP重み運用指標（weighted RMS / z / χ²様）を採用。
+metric,median_group_rms_sr_tropo_tide_ns,,4.35417001177271,station×reflector RMS中央値
+metric,point_weighted_rms_sr_tropo_tide_ns,,4.469974449424671,点数重みRMS
+metric,apol_modern_ex_nglr1_rms_ns,,5.063018373232765,APOL modern (nglr1除外) RMS
+metric,apol_modern_ex_nglr1_weighted_rms_ns,,4.999386409856197,APOL modern (nglr1除外) weighted RMS
+metric,apol_modern_ex_nglr1_weighted_model_floor_ns_for_chi2eq1,,5.0623741009006995,APOL modern (nglr1除外) inferred model floor
+metric,operational_correction_global_weighted_gain_ns,,0.0034787666238660364,本線I/F補正の global weighted RMS 改善量
+metric,operational_correction_global_model_floor_gain_ns,,0.506711781414344,本線I/F補正の global model-floor 改善量
+metric,operational_correction_modern_apol_weighted_rms_ns_after,,4.8195820801179,本線I/F補正後の modern APOL weighted RMS
+metric,operational_correction_modern_apol_weighted_gain_ns,,0.17980432973829696,本線I/F補正の modern APOL weighted RMS 改善量
+metric,bias_model_global_weighted_gain_ns,,0.19946850996573984,station+target bias補正の weighted RMS 改善量
+metric,bias_model_modern_apol_target_weighted_gain_ns,,0.9824594186115787,modern APOL target-bias 補正の weighted RMS 改善量
+metric,nglr1_points,,38,nglr1 points total
+metric,nglr1_points_unique_coverage_csv,,40,nglr1 points total (coverage csv unique)

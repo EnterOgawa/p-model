@@ -1,0 +1,287 @@
+{
+  "decision": {
+    "note": "q_B is fixed by dominant-balance exponent matching and exact-solution-family asymptotics in the sourced background-wave ODE.",
+    "qB_asymptotic_pass": true,
+    "qB_asymptotic_value": 0.5,
+    "qB_exact_family_pass": true,
+    "qB_exact_family_tolerance": 0.001,
+    "qB_tolerance": 1e-12,
+    "status": "pass"
+  },
+  "derivation_chain": [
+    "L_total のスカラー弱場枝（u=ln(P/P_ref)）から、(1/c^2)ü-∇²u=(4πG/c^2)ρ_eff を採用する。",
+    "完全流体の有効源は ρ_eff=ρ+3p/c^2。初期宇宙の黒体放射では p=u_rad/3, ρ=u_rad/c^2 より ρ_eff=2u_rad/c^2。",
+    "空間一様背景（∇²u_bg=0）で ü_bg=(8πG/c^2)u_rad。",
+    "黒体式 u_rad=a_rad T^4 と T∝P_bg, P_bg=P_ref exp(u_bg-u_ref) を使うと ü_bg=Ω_B^2 exp[4(u_bg-u_B)]。",
+    "初期極限 t→0+ で u_bg=u_B-q_B ln(t/t_B)+O(1) を代入すると、左辺は t^-2、右辺は t^-4q_B で支配される。",
+    "優勢項一致条件 2=4q_B から q_B=1/2 が一意に定まる。",
+    "同じ結論は第一積分 (u̇_bg)^2-(Ω_B^2/2)exp[4(u_bg-u_B)]=C からも得られ、t→0+ では exp項が支配して u_bg=-1/2 ln t + O(1)。"
+  ],
+  "diagnostics": {
+    "asymptotic_limits_rule": {
+      "q<0.5": "scaled factor t^(2-4q) -> 0 as t->0+",
+      "q=0.5": "scaled factor finite nonzero (dominant-balance closure)",
+      "q>0.5": "scaled factor -> +∞ as t->0+"
+    },
+    "exact_solution_family_probe": {
+      "curves": [
+        {
+          "abs_q_eff_minus_half": 3.4139358007223564e-14,
+          "cbar": -0.2,
+          "delta_t_sec": 1e-06,
+          "q_eff": 0.49999999999996586
+        },
+        {
+          "abs_q_eff_minus_half": 3.414490912234669e-13,
+          "cbar": -0.2,
+          "delta_t_sec": 3.162277660168379e-06,
+          "q_eff": 0.49999999999965855
+        },
+        {
+          "abs_q_eff_minus_half": 3.414324378780975e-12,
+          "cbar": -0.2,
+          "delta_t_sec": 1e-05,
+          "q_eff": 0.4999999999965857
+        },
+        {
+          "abs_q_eff_minus_half": 3.414307725435606e-11,
+          "cbar": -0.2,
+          "delta_t_sec": 3.1622776601683795e-05,
+          "q_eff": 0.4999999999658569
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143055049895565e-10,
+          "cbar": -0.2,
+          "delta_t_sec": 0.0001,
+          "q_eff": 0.49999999965856945
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143055605007078e-09,
+          "cbar": -0.2,
+          "delta_t_sec": 0.00031622776601683794,
+          "q_eff": 0.49999999658569444
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143055882562834e-08,
+          "cbar": -0.2,
+          "delta_t_sec": 0.001,
+          "q_eff": 0.4999999658569441
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143060090308097e-07,
+          "cbar": -0.2,
+          "delta_t_sec": 0.0031622776601683794,
+          "q_eff": 0.4999996585693991
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143102059513986e-06,
+          "cbar": -0.2,
+          "delta_t_sec": 0.01,
+          "q_eff": 0.49999658568979405
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 1e-06,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 3.162277660168379e-06,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 1e-05,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 3.1622776601683795e-05,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 0.0001,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 0.00031622776601683794,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 0.001,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 0.0031622776601683794,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 0.0,
+          "cbar": 0.0,
+          "delta_t_sec": 0.01,
+          "q_eff": 0.5
+        },
+        {
+          "abs_q_eff_minus_half": 3.419486915845482e-14,
+          "cbar": 0.2,
+          "delta_t_sec": 1e-06,
+          "q_eff": 0.5000000000000342
+        },
+        {
+          "abs_q_eff_minus_half": 3.4150460237469815e-13,
+          "cbar": 0.2,
+          "delta_t_sec": 3.162277660168379e-06,
+          "q_eff": 0.5000000000003415
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143798899322064e-12,
+          "cbar": 0.2,
+          "delta_t_sec": 1e-05,
+          "q_eff": 0.5000000000034144
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143021743204827e-11,
+          "cbar": 0.2,
+          "delta_t_sec": 3.1622776601683795e-05,
+          "q_eff": 0.500000000034143
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143055049895565e-10,
+          "cbar": 0.2,
+          "delta_t_sec": 0.0001,
+          "q_eff": 0.5000000003414306
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143055049895565e-09,
+          "cbar": 0.2,
+          "delta_t_sec": 0.00031622776601683794,
+          "q_eff": 0.5000000034143055
+        },
+        {
+          "abs_q_eff_minus_half": 3.414305493887326e-08,
+          "cbar": 0.2,
+          "delta_t_sec": 0.001,
+          "q_eff": 0.5000000341430549
+        },
+        {
+          "abs_q_eff_minus_half": 3.414305076443469e-07,
+          "cbar": 0.2,
+          "delta_t_sec": 0.0031622776601683794,
+          "q_eff": 0.5000003414305076
+        },
+        {
+          "abs_q_eff_minus_half": 3.4143008800224806e-06,
+          "cbar": 0.2,
+          "delta_t_sec": 0.01,
+          "q_eff": 0.50000341430088
+        }
+      ],
+      "dt_probe_count": 9,
+      "dt_probe_max_sec": 0.01,
+      "dt_probe_min_sec": 1e-06,
+      "summary": [
+        {
+          "C0_per_s2": -0.051214583144057746,
+          "asymptotic_limit": "q_eff -> 1/2",
+          "cbar": -0.2,
+          "max_abs_q_eff_minus_half_on_probe": 3.4143102059513986e-06,
+          "q_eff_at_dt_max": 0.49999658568979405,
+          "q_eff_at_dt_min": 0.49999999999996586
+        },
+        {
+          "C0_per_s2": 0.0,
+          "asymptotic_limit": "q_eff -> 1/2",
+          "cbar": 0.0,
+          "max_abs_q_eff_minus_half_on_probe": 0.0,
+          "q_eff_at_dt_max": 0.5,
+          "q_eff_at_dt_min": 0.5
+        },
+        {
+          "C0_per_s2": 0.051214583144057746,
+          "asymptotic_limit": "q_eff -> 1/2",
+          "cbar": 0.2,
+          "max_abs_q_eff_minus_half_on_probe": 3.4143008800224806e-06,
+          "q_eff_at_dt_max": 0.50000341430088,
+          "q_eff_at_dt_min": 0.5000000000000342
+        }
+      ]
+    },
+    "omega_B_per_s": 0.5060364766697049,
+    "omega_B_sq_per_s2": 0.25607291572028873,
+    "q_scan": {
+      "abs_error": 0.0,
+      "best_q_from_exponent_match": 0.5,
+      "q_count": 601,
+      "q_max": 0.8,
+      "q_min": 0.2,
+      "target_q": 0.5
+    },
+    "sample_scaled_behavior": [
+      {
+        "asymptotic_behavior_t_to_0": "vanish_to_0",
+        "q_B": 0.4,
+        "scaled_factor_tmax": 1.0,
+        "scaled_factor_tmin": 0.0006309573444801943
+      },
+      {
+        "asymptotic_behavior_t_to_0": "finite_nonzero",
+        "q_B": 0.5,
+        "scaled_factor_tmax": 1.0,
+        "scaled_factor_tmin": 1.0
+      },
+      {
+        "asymptotic_behavior_t_to_0": "diverge_to_inf",
+        "q_B": 0.6,
+        "scaled_factor_tmax": 1.0,
+        "scaled_factor_tmin": 1584.8931924611109
+      }
+    ]
+  },
+  "equations": {
+    "asymptotic_ansatz": "u_bg(t)=u_B-q_B ln(t/t_B)+O(1), t→0+",
+    "background_wave_eq": "(1/c^2) d2u_bg/dt2 = (4πG/c^2) ρ_eff",
+    "dominant_balance": "t^-2 = t^(-4 q_B) => q_B = 1/2",
+    "effective_source_perfect_fluid": "ρ_eff = ρ + 3p/c^2",
+    "exact_reduction": "z=e^(-2(u_bg-u_B)) => (dz/dt)^2 = 2 Ω_B^2 + 4 C z^2",
+    "exact_solution_C_eq_0": "z=sqrt(2) Ω_B Δt, C=0",
+    "exact_solution_C_gt_0": "z=(Ω_B/sqrt(2C)) sinh(2 sqrt(C) Δt), C>0",
+    "exact_solution_C_lt_0": "z=(Ω_B/sqrt(-2C)) sin(2 sqrt(-C) Δt), C<0",
+    "first_integral": "(du_bg/dt)^2 - (Ω_B^2/2) exp(4(u_bg-u_B)) = C",
+    "first_integral_asymptotic": "u_bg(t) = -0.5 ln t + O(1) (cooling branch, t→0+)",
+    "ode_background": "d2u_bg/dt2 = Ω_B^2 * exp(4(u_bg-u_B)), Ω_B^2=(8πG/c^2)u_B",
+    "radiation_energy_density": "u_rad = a_rad T^4 = u_B * exp(4(u_bg-u_B))",
+    "radiation_substitution": "ρ_eff = 2 u_rad / c^2 (from p=u_rad/3, ρ=u_rad/c^2)",
+    "universal_asymptotic": "z = sqrt(2) Ω_B Δt + O(Δt^3) => u_bg = u_B - 1/2 ln Δt + O(Δt^2)"
+  },
+  "generated_utc": "2026-02-22T04:02:34.817386+00:00",
+  "inputs": {
+    "T_B_K": 11604518120.0,
+    "T_B_MeV": 1.0,
+    "constants": {
+      "G_SI": 6.6743e-11,
+      "a_rad_SI": 7.565733250033929e-16,
+      "c_m_per_s": 299792458.0,
+      "sigma_SB_SI": 5.670374419e-08
+    },
+    "equation_of_state": "p = u_rad / 3",
+    "scaling": "T ∝ P_bg, P_bg = P_ref * exp(u_bg-u_ref)",
+    "t_B_sec": 1.0
+  },
+  "phase": {
+    "name": "Background-P radiation asymptotic q_B derivation",
+    "phase": 8,
+    "step": "8.7.22.17"
+  }
+}

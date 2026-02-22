@@ -1,0 +1,150 @@
+{
+  "generated_utc": "2026-02-15T08:04:21.200989+00:00",
+  "phase": 7,
+  "step": "7.20.6",
+  "inputs": {
+    "blackbody_constants_extracted_values": {
+      "path": "C:\\develop\\waveP\\data\\quantum\\sources\\nist_codata_2022_blackbody_constants\\extracted_values.json",
+      "sha256": "ffe4c2234b9bf48c59898745bd5688a50a9f314e5e1eec63e172c24486032742"
+    }
+  },
+  "constants": {
+    "c_m_per_s": 299792458.0,
+    "h_J_s": 6.62607015e-34,
+    "kB_J_per_K": 1.380649e-23,
+    "radiation_constant_a": 7.565733250280007e-16,
+    "stefan_boltzmann_sigma": 5.6703744191844314e-08
+  },
+  "assumptions": {
+    "sign_convention": "h/M is positive for photon gas; model fit is applied to abs(h/M) and sign=+1 is fixed.",
+    "sigma_proxy": "1 ppm relative tolerance (operational, analytic baseline)",
+    "holdout_reduced_chi2_definition": {
+      "train": "sum(z^2)/max(1,n-params)",
+      "test": "sum(z^2)/max(1,n)  (no parameters are fit on the test split)"
+    }
+  },
+  "data_range_T_K": [
+    1.0,
+    10000.0
+  ],
+  "splits": [
+    {
+      "name": "A_low_to_high",
+      "train_T_K": [
+        1.0,
+        94.33732216299774
+      ],
+      "test_T_K": [
+        106.00258488068825,
+        10000.0
+      ],
+      "models": {
+        "powerlaw_abs_fit_2p": {
+          "params": {
+            "log10_abs_coeff": -7.749821974991665,
+            "exponent": 2.448004948800492e-15,
+            "sign": 1.0
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 2.0514079191315086e-10,
+            "rms_z": 1.217872822771093e-10,
+            "reduced_chi2": 1.5612781183625577e-20,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 4.1028158382630173e-10,
+            "rms_z": 3.157130705798749e-10,
+            "reduced_chi2": 9.967474293497307e-20,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "fixed_exponent_0_abs_fit": {
+          "params": {
+            "abs_coeff": 1.7790085077234777e-08,
+            "exponent": 0.0,
+            "sign": 1.0
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 3.3087224502121107e-12,
+            "rms_z": 2.0261704258777476e-12,
+            "reduced_chi2": 4.2106324048221666e-24,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 3.3087224502121107e-12,
+            "rms_z": 2.1570231355570794e-12,
+            "reduced_chi2": 4.652748807328494e-24,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "B_high_to_low",
+      "train_T_K": [
+        106.00258488068825,
+        10000.0
+      ],
+      "test_T_K": [
+        1.0,
+        94.33732216299774
+      ],
+      "models": {
+        "powerlaw_abs_fit_2p": {
+          "params": {
+            "log10_abs_coeff": -7.749821974991666,
+            "exponent": 7.494610136050572e-16,
+            "sign": 1.0
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 9.595295105615121e-11,
+            "rms_z": 6.666685739874023e-11,
+            "reduced_chi2": 4.6783893425515424e-21,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 3.308722450212111e-11,
+            "rms_z": 1.8008996667816545e-11,
+            "reduced_chi2": 3.243239609814274e-22,
+            "exceed_3sigma_n": 0
+          }
+        },
+        "fixed_exponent_0_abs_fit": {
+          "params": {
+            "abs_coeff": 1.7790085077234777e-08,
+            "exponent": 0.0,
+            "sign": 1.0
+          },
+          "train": {
+            "n": 40,
+            "max_abs_z": 3.3087224502121107e-12,
+            "rms_z": 2.1570231355570794e-12,
+            "reduced_chi2": 4.7720500587984555e-24,
+            "exceed_3sigma_n": 0
+          },
+          "test": {
+            "n": 40,
+            "max_abs_z": 3.3087224502121107e-12,
+            "rms_z": 2.0261704258777476e-12,
+            "reduced_chi2": 4.1053665947016124e-24,
+            "exceed_3sigma_n": 0
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "csv": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_flux_ratio_holdout_splits.csv",
+    "png": "C:\\develop\\waveP\\output\\public\\quantum\\thermo_blackbody_enthalpy_flux_ratio_holdout_splits.png"
+  },
+  "notes": [
+    "Analytic holdout for h/M = 16/(3c) based on blackbody enthalpy-density and energy-flux identities.",
+    "This is a procedural regression check, not an observational inference."
+  ]
+}

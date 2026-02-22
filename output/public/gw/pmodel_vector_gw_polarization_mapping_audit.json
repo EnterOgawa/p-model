@@ -1,0 +1,160 @@
+{
+  "generated_utc": "2026-02-21T05:04:25.378452+00:00",
+  "schema": "wavep.gw.pmodel_vector_gw_polarization_mapping_audit.v2",
+  "phase": 8,
+  "step": "8.7.32.3",
+  "inputs": {
+    "events": [
+      "GW150914"
+    ],
+    "detector_first": "H1",
+    "detector_second": "L1",
+    "corr_min": 0.6,
+    "sky_samples": 3000,
+    "psi_samples": 48,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.1,
+    "min_ring_directions": 16,
+    "tensor_equiv_ratio_max": 5.0,
+    "network_gate_enabled": true,
+    "network_events": [
+      "GW200129_065458",
+      "GW200224_222234",
+      "GW200115_042309",
+      "GW200311_115853"
+    ],
+    "network_detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "network_corr_use_min": 0.05,
+    "network_sky_samples": 5000,
+    "network_psi_samples": 36,
+    "network_cosi_samples": 41,
+    "network_response_floor_frac": 0.1,
+    "network_min_ring_directions": 8,
+    "network_geometry_relax_factor": 4.0,
+    "network_geometry_delay_floor_ms": 0.25,
+    "network_allow_pair_pruning": false,
+    "network_prefix": "gw_polarization_h1_l1_v1_network_audit_for_step87323"
+  },
+  "equations": {
+    "vector_transverse_polarizations": "e_x^V = n⊗p + p⊗n,  e_y^V = n⊗q + q⊗n",
+    "detector_response": "h_d = D_d : (h_x e_x^V + h_y e_y^V)",
+    "mapping_target": "vector branch must reproduce observed H1/L1 amplitude-ratio interval under causal delay ring",
+    "network_scalar_gate": "three-detector network (H1/L1/V1) checks scalar overlap reduction from pairwise degeneracy"
+  },
+  "summary": {
+    "n_events_requested": 1,
+    "n_rows": 1,
+    "n_usable_events": 1,
+    "n_pass_events": 0,
+    "n_watch_events": 1,
+    "n_reject_events": 0,
+    "overall_status": "watch",
+    "overall_reason": "pairwise_scalar_overlap_reduced_by_h1_l1_v1_network_gate_but_not_fully_excluded",
+    "hard_pass_condition": "corr_pass && lag_causal_pass && vector_overlap_pass && tensor_equiv_pass",
+    "failure_conditions": [
+      "low_corr",
+      "lag_outside_causal_baseline_bound",
+      "vector_ratio_interval_no_overlap",
+      "vector_tensor_equivalence_broken"
+    ],
+    "network_gate": {
+      "enabled": true,
+      "ran": true,
+      "status": "reject",
+      "reason": "tensor_response_failed_for_some_events",
+      "n_usable_events": 2,
+      "scalar_overlap_proxy_max": 0.5,
+      "scalar_overlap_proxy_median": 0.41666666666666663,
+      "scalar_reduction_pass": true,
+      "scalar_exclusion_pass": false,
+      "tensor_consistency_pass": false,
+      "json_path": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323.json",
+      "reject_factor_focus_summary": [
+        {
+          "pair": "H1-V1",
+          "n_rows": 2,
+          "n_reject_event_rows": 2,
+          "n_tensor_fail": 2,
+          "tensor_fail_rate": 1.0,
+          "scalar_overlap_rate": 0.0,
+          "mean_reject_tensor_mismatch_share": 0.8748301010155061,
+          "median_tensor_mismatch": 1.0846933130105474,
+          "median_scalar_mismatch": 10.786688721334489,
+          "median_abs_corr": 0.06701931303578793,
+          "median_abs_lag_over_tolerance": 8.75,
+          "median_obs_ratio_iqr_rel": 0.5393790099801516,
+          "bottleneck_rank": 1
+        },
+        {
+          "pair": "L1-V1",
+          "n_rows": 2,
+          "n_reject_event_rows": 2,
+          "n_tensor_fail": 2,
+          "tensor_fail_rate": 1.0,
+          "scalar_overlap_rate": 0.5,
+          "mean_reject_tensor_mismatch_share": 0.12491353160732863,
+          "median_tensor_mismatch": 0.11072079955055415,
+          "median_scalar_mismatch": 4.866119037805084,
+          "median_abs_corr": 0.08906206210699064,
+          "median_abs_lag_over_tolerance": 6.214285662040821,
+          "median_obs_ratio_iqr_rel": 0.5522872229298756,
+          "bottleneck_rank": 2
+        }
+      ],
+      "reject_factor_summary_json_path": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_for_step87323_reject_factor_decomposition.json",
+      "returncode": 0
+    }
+  },
+  "rows": [
+    {
+      "event": "GW150914",
+      "detector_pair": "H1-L1",
+      "quality": "usable",
+      "status": "watch_scalar_not_excluded_two_detector_degeneracy",
+      "status_reason": "all_hard_gates_passed;scalar_overlap_remains_for_two_detector_case",
+      "metrics_path": "C:/develop/waveP/output/public/gw/gw150914_h1_l1_amplitude_ratio_metrics.json",
+      "abs_corr": 0.7494811798965588,
+      "best_lag_ms_apply_to_first": -5.126953125,
+      "delay_obs_ms": 5.126953125,
+      "delay_tolerance_ms": 0.6103515000000002,
+      "ratio_obs_p16": 1.1920785243847691,
+      "ratio_obs_median": 1.4693133028600225,
+      "ratio_obs_p84": 1.8243826103830283,
+      "baseline_max_delay_ms": 10.013772501571085,
+      "ring_directions_used": 178,
+      "ring_directions_fraction": 0.059333333333333335,
+      "gate_corr_pass": 1,
+      "gate_lag_causal_pass": 1,
+      "gate_vector_overlap_pass": 1,
+      "gate_tensor_equiv_pass": 1,
+      "scalar_overlap_flag": 1,
+      "tensor_overlap_flag": 1,
+      "vector_overlap_flag": 1,
+      "tensor_ratio_lo": 0.05212039149718412,
+      "tensor_ratio_hi": 5.99412438701559,
+      "vector_ratio_lo": 0.25617292540193654,
+      "vector_ratio_hi": 10.18382184690007,
+      "scalar_ratio_lo": 0.0012225705975651704,
+      "scalar_ratio_hi": 558.0637950769736,
+      "tensor_min_rel_mismatch": 4.626826738571842e-05,
+      "vector_min_rel_mismatch": 2.7293385477482723e-06,
+      "scalar_min_rel_mismatch": 0.0032509887157923627,
+      "vector_tensor_equiv_ratio": 0.058989424998466856,
+      "hard_pass_flag": 1
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/pmodel_vector_gw_polarization_mapping_audit.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/pmodel_vector_gw_polarization_mapping_audit.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/pmodel_vector_gw_polarization_mapping_audit.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/pmodel_vector_gw_polarization_mapping_audit.json",
+      "C:/develop/waveP/output/public/gw/pmodel_vector_gw_polarization_mapping_audit.csv",
+      "C:/develop/waveP/output/public/gw/pmodel_vector_gw_polarization_mapping_audit.png"
+    ]
+  }
+}

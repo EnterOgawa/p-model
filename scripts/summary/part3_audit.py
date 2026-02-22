@@ -213,6 +213,7 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
     metrics_theory_diff = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
     zn_map = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_zn_residual_map.png"
     holdout_summary = out_dir / "nuclear_holdout_audit_summary.json"
+    cross_matrix_json = out_dir / "nuclear_condensed_cross_check_matrix.json"
 
     out: Dict[str, Any] = {
         "ok": False,
@@ -224,10 +225,12 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
         "artifacts": {
             "zn_residual_map_png": {"path": _rel(zn_map), "exists": zn_map.exists()},
             "holdout_audit_summary_json": {"path": _rel(holdout_summary), "exists": holdout_summary.exists()},
+            "nuclear_condensed_cross_check_matrix_json": {"path": _rel(cross_matrix_json), "exists": cross_matrix_json.exists()},
         },
         "thresholds": None,
         "baseline_models": [],
         "main_gate": None,
+        "cross_check_matrix_overall": None,
         "notes": [],
     }
 
@@ -289,7 +292,21 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
     if not holdout_summary.exists():
         out["notes"].append("missing nuclear holdout audit summary")
 
-    out["ok"] = bool(pack_path.exists()) and bool(metrics_minphys.exists()) and bool(main_gate.get("ok")) and bool(holdout_summary.exists())
+    if not cross_matrix_json.exists():
+        out["notes"].append("missing nuclear-condensed cross-check matrix summary")
+    else:
+        cm = _read_json(cross_matrix_json)
+        out["cross_check_matrix_overall"] = (
+            cm.get("overall") if isinstance(cm.get("overall"), dict) else {"status": None}
+        )
+
+    out["ok"] = (
+        bool(pack_path.exists())
+        and bool(metrics_minphys.exists())
+        and bool(main_gate.get("ok"))
+        and bool(holdout_summary.exists())
+        and bool(cross_matrix_json.exists())
+    )
     if not metrics_theory_diff.exists():
         out["notes"].append("missing theory-diff metrics (diff prediction density gate)")
     return out
@@ -304,6 +321,14 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             "condensed_falsification_pack_json": {"path": _rel(pack_path), "exists": pack_path.exists()},
             "condensed_holdout_audit_summary_json": {"path": _rel(holdout_summary), "exists": holdout_summary.exists()},
         },
+        "holdout_audit": {
+            "present": False,
+            "summary_json": None,
+            "summary_exists": False,
+            "summary_sha256_ok": None,
+            "summary_matches_expected": None,
+            "step": None,
+        },
         "tests": [],
         "summary": {"tests_total": 0, "tests_ok": 0, "tests_unknown": 0, "tests_failed": 0},
         "notes": [],
@@ -316,6 +341,34 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
 
     pack = _read_json(pack_path)
     tests = pack.get("tests") if isinstance(pack.get("tests"), list) else []
+    holdout_audit = pack.get("holdout_audit") if isinstance(pack.get("holdout_audit"), dict) else None
+    if holdout_audit is None:
+        out["notes"].append("missing holdout_audit in condensed falsification pack")
+    else:
+        summary_json = holdout_audit.get("summary_json")
+        summary_path = _path_from_any(root, str(summary_json)) if summary_json else None
+        summary_exists = bool(summary_path and summary_path.exists())
+        expected_sha = holdout_audit.get("summary_sha256")
+        sha_ok = None
+        if summary_exists and isinstance(expected_sha, str) and expected_sha:
+            sha_ok = (_sha256(summary_path) == expected_sha)
+        matches_expected = None
+        if summary_path:
+            matches_expected = summary_path.resolve() == holdout_summary.resolve()
+        out["holdout_audit"] = {
+            "present": True,
+            "summary_json": str(summary_json) if summary_json is not None else None,
+            "summary_exists": summary_exists,
+            "summary_sha256_ok": sha_ok,
+            "summary_matches_expected": matches_expected,
+            "step": holdout_audit.get("step"),
+        }
+        if not summary_exists:
+            out["notes"].append("holdout_audit summary_json missing")
+        if sha_ok is False:
+            out["notes"].append("holdout_audit summary sha256 mismatch")
+        if matches_expected is False:
+            out["notes"].append("holdout_audit summary_json path differs from expected condensed_holdout_audit_summary.json")
 
     def _key(t_k: float) -> str:
         # Some metrics store sampled keys like "298.15K".
@@ -528,7 +581,10 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
 
     out["tests"] = rows
     out["summary"] = {"tests_total": int(len(rows)), "tests_ok": int(ok_n), "tests_unknown": int(unknown_n), "tests_failed": int(failed_n)}
-    out["ok"] = (failed_n == 0) and (unknown_n == 0) and (len(rows) > 0) and bool(holdout_summary.exists())
+    holdout_ok = bool(out.get("holdout_audit", {}).get("present")) and bool(out.get("holdout_audit", {}).get("summary_exists"))
+    if out.get("holdout_audit", {}).get("summary_sha256_ok") is False:
+        holdout_ok = False
+    out["ok"] = (failed_n == 0) and (unknown_n == 0) and (len(rows) > 0) and holdout_ok
     return out
 
 
@@ -576,6 +632,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "nuclear_binding_energy_frequency_mapping_theory_diff.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "nuclear_holdout_audit.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "nuclear_condensed_cross_check_matrix.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "condensed_silicon_thermal_expansion_gruneisen_holdout_splits.py")],
             [
                 sys.executable,
@@ -599,6 +656,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "condensed_silicon_heat_capacity_holdout_splits.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "condensed_silicon_bulk_modulus_holdout_splits.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "condensed_ofhc_copper_thermal_conductivity_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_momentum_density_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_photon_flux_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_entropy_flux_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_enthalpy_flux_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_enthalpy_energy_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_enthalpy_pressure_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_enthalpy_entropy_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_helmholtz_free_energy_density_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_helmholtz_entropy_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_helmholtz_energy_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_helmholtz_enthalpy_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_helmholtz_pressure_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_pressure_entropy_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_pressure_flux_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_momentum_flux_ratio_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_helmholtz_free_energy_flux_holdout_splits.py")],
+            [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "thermo_blackbody_entropy_per_photon_holdout_splits.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "condensed_holdout_audit.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "condensed_falsification_pack.py")],
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "frozen_parameters_quantum.py")],

@@ -1,0 +1,4 @@
+channel,title,status,severity,kpi_primary_name,kpi_primary_value,kpi_primary_threshold,note
+bell,Bell cross-dataset connection,pass,0,selection_ratio_min,3.6508938846257903,1.0,delay gate fail in 1/3 datasets (time-tag subsets still tracked by delay_fast_min).
+interference,Matter-wave / interference connection,pass,0,fail_ratio,0.0,0.0,
+condensed_thermal_holdout,Condensed / thermal holdout connection,pass,0,reject_ratio,0.0,0.1,1 dataset(s) are excluded from KPI gating (diagnostic-only).

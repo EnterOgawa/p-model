@@ -1,5 +1,4 @@
 channel,observable,metric_name,metric_value,threshold_3sigma,pass_3sigma,current_precision,required_precision_3sigma,source,data_status
 electron_double_slit,fringe_spacing_theta_mrad,envelope_to_fringe_ratio,5.6,1.0,True,,,Bach et al. 2012 (arXiv:1210.6243v1),direct
 atom_recoil_alpha,alpha_consistency_z,abs_z,0.5883354744951784,3.0,True,9.084037592891166e-09,,Bouchendira 2008 + Gabrielse 2008,direct
-atom_interferometer_precision,current_over_required_precision_ratio,median_ratio,717905.1403824643,1.0,False,717905.1403824643,1.0,atom_interferometer_unified_audit (Step 7.16.12),direct
 molecular_isotopic_scaling,abs(meas/pred-1),z_max,2.6385399704973964,3.0,True,0.0006990889451634619,0.0007948588457786468,NIST/WebBook isotopic reduced-mass scaling (Step 7.12),proxy

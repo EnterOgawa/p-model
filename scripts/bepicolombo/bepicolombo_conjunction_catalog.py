@@ -13,10 +13,10 @@ BepiColombo（MPO）×地球の太陽会合（solar conjunction）イベント�
   - data/bepicolombo/kernels/psa/kernels_meta.json（selected_paths をロード）
 
 出力（固定）：
-  - output/bepicolombo/bepicolombo_conjunction_catalog.csv
-  - output/bepicolombo/bepicolombo_conjunction_catalog.json
-  - output/bepicolombo/bepicolombo_conjunction_catalog_summary.json
-  - output/bepicolombo/bepicolombo_conjunction_catalog.png
+  - output/private/bepicolombo/bepicolombo_conjunction_catalog.csv
+  - output/private/bepicolombo/bepicolombo_conjunction_catalog.json
+  - output/private/bepicolombo/bepicolombo_conjunction_catalog_summary.json
+  - output/private/bepicolombo/bepicolombo_conjunction_catalog.png
 """
 
 from __future__ import annotations

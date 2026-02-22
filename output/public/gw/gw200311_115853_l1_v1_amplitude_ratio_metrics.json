@@ -1,0 +1,130 @@
+{
+  "generated_utc": "2026-02-17T01:56:03.771450+00:00",
+  "schema": "wavep.gw.detector_pair_amplitude_ratio_audit.v1",
+  "event": {
+    "name": "GW200311_115853",
+    "slug": "gw200311_115853",
+    "gps_event": 1267963151.3,
+    "catalog": "GWTC-3-confident",
+    "version": "v1"
+  },
+  "inputs": {
+    "detector_first": "L1",
+    "detector_second": "V1",
+    "strain_first": "C:/develop/waveP/data/gw/gw200311_115853/L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+    "strain_second": "C:/develop/waveP/data/gw/gw200311_115853/V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+    "gps_start_first": 1267963136.0,
+    "gps_start_second": 1267963136.0,
+    "fs_first_hz": 4096.0,
+    "fs_second_hz": 4096.0,
+    "analysis_fs_hz": 4096.0,
+    "window_s": [
+      -0.12,
+      -0.01
+    ],
+    "preprocess": "whiten",
+    "bandpass_hz": [
+      30.0,
+      350.0
+    ],
+    "ratio_signal_percentile": 70.0,
+    "max_lag_ms": 10.0
+  },
+  "metrics": {
+    "best_lag_samples_apply_to_first": 22,
+    "best_lag_ms_apply_to_first": 5.37109375,
+    "best_corr": 0.12500468477462492,
+    "abs_best_corr": 0.12500468477462492,
+    "ratio": {
+      "median": 0.05436621559618412,
+      "p16": 0.047052162874038544,
+      "p84": 0.06936127859451009,
+      "q25": 0.04887428603894777,
+      "q75": 0.0637097193651009,
+      "iqr": 0.014835433326153134,
+      "iqr_over_median": 0.27287963974439555,
+      "p16_p84_halfspan_over_median": 0.20517444037466698,
+      "log_std": 0.19864621390034468,
+      "slope_per_s": -0.0871219356230336,
+      "slope_window_fraction": 0.16471022504670685,
+      "selected_points": 129,
+      "total_points": 428
+    }
+  },
+  "gate": {
+    "corr_min": 0.6,
+    "ratio_iqr_warn": 0.35,
+    "ratio_slope_window_frac_warn": 0.5,
+    "min_ratio_points": 80,
+    "status": "reject",
+    "status_reasons": [
+      "low_cross_correlation"
+    ]
+  },
+  "sources": {
+    "generated_utc": "2026-02-17T01:56:03.329280+00:00",
+    "source": "GWOSC (GWTC-3-confident / GW200311_115853 / v1)",
+    "urls": {
+      "event_json": "https://gwosc.org/eventapi/json/GWTC-3-confident/GW200311_115853/v1",
+      "L1_strain": "https://gwosc.org/eventapi/json/GWTC-3-confident/GW200311_115853/v1/L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+      "V1_strain": "https://gwosc.org/eventapi/json/GWTC-3-confident/GW200311_115853/v1/V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz"
+    },
+    "files": {
+      "event_json": {
+        "path": "C:/develop/waveP/data/gw/gw200311_115853/GW200311_115853_event.json",
+        "sha256": "102e0ac2e4eb809c9e65fcbe9dce3eee9fdff04fd5948edaa56ea533c9fc709d"
+      },
+      "L1": {
+        "path": "C:/develop/waveP/data/gw/gw200311_115853/L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+        "sha256": "d2bd6391985744fd1f5acd4e4c575ca0b2b3cf06944405ab0561906c1b730021"
+      },
+      "V1": {
+        "path": "C:/develop/waveP/data/gw/gw200311_115853/V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+        "sha256": "597b9201bf5e128e608d036ba05dfa745429d0ed6632510fc98b249b165e6985"
+      }
+    },
+    "selection": {
+      "event_key": "GW200311_115853-v1",
+      "event_common_name": "GW200311_115853",
+      "api_version": "v1",
+      "detectors_requested": [
+        "L1",
+        "V1"
+      ],
+      "prefer_duration_s": 32,
+      "prefer_sampling_rate_hz": 4096,
+      "selected": {
+        "L1": {
+          "detector": "L1",
+          "GPSstart": 1267963136,
+          "sampling_rate": 4096,
+          "duration": 32,
+          "format": "txt",
+          "url": "https://gwosc.org/eventapi/json/GWTC-3-confident/GW200311_115853/v1/L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+          "path": "C:/develop/waveP/data/gw/gw200311_115853/L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz"
+        },
+        "V1": {
+          "detector": "V1",
+          "GPSstart": 1267963136,
+          "sampling_rate": 4096,
+          "duration": 32,
+          "format": "txt",
+          "url": "https://gwosc.org/eventapi/json/GWTC-3-confident/GW200311_115853/v1/V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+          "path": "C:/develop/waveP/data/gw/gw200311_115853/V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz"
+        }
+      }
+    },
+    "note": "TXT.GZ はサンプル列（時間列は header の GPSstart とサンプルレートから再構成）。"
+  },
+  "outputs": {
+    "plot_png": "C:/develop/waveP/output/private/gw/gw200311_115853_l1_v1_amplitude_ratio.png",
+    "summary_csv": "C:/develop/waveP/output/private/gw/gw200311_115853_l1_v1_amplitude_ratio_summary.csv",
+    "lag_scan_csv": "C:/develop/waveP/output/private/gw/gw200311_115853_l1_v1_amplitude_ratio_lag_scan.csv",
+    "samples_csv": "C:/develop/waveP/output/private/gw/gw200311_115853_l1_v1_amplitude_ratio_samples.csv",
+    "metrics_json": "C:/develop/waveP/output/private/gw/gw200311_115853_l1_v1_amplitude_ratio_metrics.json"
+  },
+  "notes": {
+    "lag_definition": "positive lag means L1 is advanced by this lag for alignment against V1",
+    "consistency_definition": "high |corr| and stable envelope ratio across the chirp window"
+  }
+}

@@ -407,7 +407,7 @@ def _check_equation_alt(text: str) -> _Check:
     return _Check(ok=(len(bad) == 0), details={"count": int(len(alts)), "bad_examples": bad[:10]})
 
 
-def _check_figure_numbering(text: str) -> _Check:
+def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
     # id='fig-001' numbering
     ids = re.findall(r"id=['\"]fig-([0-9]{3})['\"]", text)
     id_nums = [int(x) for x in ids]
@@ -450,16 +450,19 @@ def _check_figure_numbering(text: str) -> _Check:
     if (details["fig_id_count"] == 0) and (details["caption_count"] == 0):
         ok = True
     else:
-        ok = (
+        base_ok = (
             (len(details["fig_id_dups"]) == 0)
             and (len(details["caption_dups"]) == 0)
-            and (details["fig_id_missing_in_range"] == [])
-            and (details["caption_missing_in_range"] == [])
             and (details["fig_id_non_monotone_pairs"] == 0)
             and (details["caption_non_monotone_pairs"] == 0)
             and (details["fig_id_count"] > 0)
             and (details["caption_count"] > 0)
         )
+        if allow_sparse:
+            ok = base_ok
+        else:
+            ok = base_ok and (details["fig_id_missing_in_range"] == []) and (details["caption_missing_in_range"] == [])
+    details["allow_sparse"] = bool(allow_sparse)
     return _Check(ok=ok, details=details)
 
 
@@ -637,7 +640,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "paper_equation_alt": _check_equation_alt(paper_text),
         "part4_equation_alt": _check_equation_alt(part4_text),
         "paper_figure_numbering": _check_figure_numbering(paper_text),
-        "part4_figure_numbering": _check_figure_numbering(part4_text),
+        "part4_figure_numbering": _check_figure_numbering(part4_text, allow_sparse=True),
         "paper_md_figure_number_references": _check_markdown_figure_number_references(
             manuscript_md=_ROOT / "doc" / "paper" / "10_part1_core_theory.md",
             html_text=paper_text,

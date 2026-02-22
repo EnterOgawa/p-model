@@ -1,0 +1,6 @@
+metric_id,value,threshold,operator,pass,gate_level,note
+route_b_holdout_p95_qbeta,6912.325724506914,3.0,<=,False,hard,holdout p95 abs(z_Qβ)
+route_b_holdout_p95_logft,10.044649762433085,3.0,<=,False,hard,holdout p95 abs(z_logft_proxy)
+route_b_overfit_gap_qbeta,3037.795997848355,1.0,<=,False,hard,overfit guard uses both Qβ and logft gaps
+closure_ckm_pmns_hard,1.0,1.0,>=,True,hard,combined CKM+PMNS hard gate
+closure_ckm_pmns_watch,0.0,1.0,>=,False,watch,combined CKM+PMNS watch gate

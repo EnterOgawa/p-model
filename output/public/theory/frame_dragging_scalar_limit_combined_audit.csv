@@ -1,0 +1,4 @@
+id,experiment,observable,label,value_domain,unit,observed,observed_sigma,pmodel_scalar_prediction,reference_prediction,residual_scalar,z_scalar,status,note
+gpb_geodetic_control,GP-B,geodetic_precession,GP-B geodetic (control),absolute,arcsec/yr,6.6,0.018,6.6,6.6,0,0,pass,GP-B geodetic precession representative value.
+gpb_frame_dragging_scalar_limit,GP-B,frame_dragging,GP-B frame-dragging,absolute,arcsec/yr,0.039,0.0072,0,0.0392,0.039,5.416667,reject,GP-B frame-dragging representative value; scalar-only limit predicts zero.
+lageos_frame_dragging_scalar_limit,LAGEOS,frame_dragging,LAGEOS frame-dragging,ratio_to_gr,mu_ratio,0.99,0.05,0,1,0.99,19.8,reject,一次ソースの要旨にある「99±5% of the value predicted by general relativity」を、μ=0.99±0.05（1σ相当の目安）として扱う。

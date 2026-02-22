@@ -1,0 +1,5 @@
+event,quality,available_pair_count,usable_pair_count,pair_names,pair_pruning_applied,dropped_pairs,geometry_mode,pair_tensor_overlap_count,pair_scalar_overlap_count,status,status_reason,scalar_overlap_fraction,tensor_mismatch_max,scalar_mismatch_max,ring_directions_used
+GW200115_042309,usable,3,2,H1-L1;L1-V1,1,H1-V1,strict,1,1,reject_tensor_response,at_least_one_pair_outside_tensor_range,0.5,0.1152789,3.238567,186
+GW200129_065458,usable,3,3,H1-L1;H1-V1;L1-V1,0,,strict,1,1,reject_tensor_response,at_least_one_pair_outside_tensor_range,0.3333333,0.3634493,9.0869849,100
+GW200224_222234,usable,3,2,H1-L1;H1-V1,1,L1-V1,strict,1,1,reject_tensor_response,at_least_one_pair_outside_tensor_range,0.5,0.0007711331,0.7956923,51
+GW200311_115853,usable,2,2,H1-V1;L1-V1,0,,relaxed,0,0,reject_tensor_response,at_least_one_pair_outside_tensor_range,0,6.5883401,20.7560048,28

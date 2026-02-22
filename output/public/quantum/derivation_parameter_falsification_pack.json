@@ -1,0 +1,358 @@
+{
+  "generated_utc": "2026-02-16T16:06:29.821008+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.11",
+    "name": "Derivation-parameter falsification packaging"
+  },
+  "intent": "Freeze derivation-driven free coefficients / boundary conditions as machine-auditable falsification gates mapped to Bell, interference, and condensed-thermal holdout channels.",
+  "inputs": {
+    "action_principle_el_derivation_audit_json": "output/public/quantum/action_principle_el_derivation_audit.json",
+    "nonrelativistic_reduction_schrodinger_mapping_audit_json": "output/public/quantum/nonrelativistic_reduction_schrodinger_mapping_audit.json",
+    "born_route_a_proxy_constraints_pack_json": "output/public/quantum/born_route_a_proxy_constraints_pack.json",
+    "quantum_connection_born_ab_gate_json": "output/public/quantum/quantum_connection_born_ab_gate.json",
+    "quantum_connection_shared_kpi_json": "output/public/quantum/quantum_connection_shared_kpi.json",
+    "condensed_holdout_audit_summary_json": "output/public/quantum/condensed_holdout_audit_summary.json"
+  },
+  "parameter_catalog": [
+    {
+      "parameter_id": "minimal_coupling_strength_proxy",
+      "type": "free_coefficient",
+      "frozen_value": 0.37,
+      "frozen_rule": "q is treated as environment-independent in the current route-A operational audit.",
+      "mapped_rows": [
+        "born::selection_sweep_sensitivity_fast",
+        "born::phase_alpha_consistency",
+        "born::phase_molecular_scaling"
+      ],
+      "mapped_channels": [
+        "bell",
+        "interference"
+      ]
+    },
+    {
+      "parameter_id": "event_window_boundary_condition",
+      "type": "boundary_condition",
+      "frozen_value": null,
+      "frozen_rule": "event-ready / window definition is fixed before route-A decision.",
+      "mapped_rows": [
+        "born::selection_delay_signature_fast"
+      ],
+      "mapped_channels": [
+        "bell"
+      ]
+    },
+    {
+      "parameter_id": "boundary_variation_and_regularization",
+      "type": "boundary_condition",
+      "frozen_value": "delta_fields_at_boundary = 0 (operational)",
+      "frozen_rule": "EL derivation audit enforces gauge covariance/invariance under fixed boundary conditions.",
+      "mapped_rows": [
+        "derivation::covariant_derivative_gauge_covariance",
+        "derivation::kinetic_density_gauge_invariance",
+        "derivation::noether_current_gauge_invariance"
+      ],
+      "mapped_channels": [
+        "derivation"
+      ]
+    },
+    {
+      "parameter_id": "nonrelativistic_epsilon_order",
+      "type": "approximation_order",
+      "frozen_value": 1e-06,
+      "frozen_rule": "max(epsilon_v2, epsilon_phi, epsilon_env) <= threshold for 2.6->2.5 reduction.",
+      "mapped_rows": [
+        "nonrel::cow_neutron",
+        "nonrel::atom_gravimeter",
+        "nonrel::optical_clock_leveling_proxy"
+      ],
+      "mapped_channels": [
+        "interference"
+      ]
+    },
+    {
+      "parameter_id": "higher_derivative_and_material_effective_terms",
+      "type": "boundary_condition",
+      "frozen_value": "effective correction terms are accepted only if holdout reject/inconclusive counts are zero",
+      "frozen_rule": "material/thermal channel remains watch until reject_n=inconclusive_n=0.",
+      "mapped_rows": [
+        "condensed::reject_count",
+        "condensed::inconclusive_count"
+      ],
+      "mapped_channels": [
+        "condensed_thermal_holdout"
+      ]
+    }
+  ],
+  "criteria": [
+    {
+      "id": "derivation::covariant_derivative_gauge_covariance",
+      "parameter_id": "boundary_variation_and_regularization",
+      "parameter_type": "boundary_condition",
+      "channel": "derivation",
+      "metric": "max_rel_error(D_mu P)",
+      "value": 2.2702936342993408e-13,
+      "threshold": 5e-08,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 4.540587268598681e-06,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理→EL 導出の境界条件/共変性監査。"
+    },
+    {
+      "id": "derivation::kinetic_density_gauge_invariance",
+      "parameter_id": "boundary_variation_and_regularization",
+      "parameter_type": "boundary_condition",
+      "channel": "derivation",
+      "metric": "max_rel_error(|D_mu P|^2)",
+      "value": 1.3428848075580854e-13,
+      "threshold": 5e-08,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 2.6857696151161708e-06,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理→EL 導出の境界条件/共変性監査。"
+    },
+    {
+      "id": "derivation::noether_current_gauge_invariance",
+      "parameter_id": "boundary_variation_and_regularization",
+      "parameter_type": "boundary_condition",
+      "channel": "derivation",
+      "metric": "max_rel_error(j_mu)",
+      "value": 6.967109216209619e-14,
+      "threshold": 5e-08,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 1.3934218432419238e-06,
+      "source": "action_principle_el_derivation_audit",
+      "note": "作用原理→EL 導出の境界条件/共変性監査。"
+    },
+    {
+      "id": "nonrel::cow_neutron",
+      "parameter_id": "nonrelativistic_epsilon_order",
+      "parameter_type": "approximation_order",
+      "channel": "interference",
+      "metric": "cow_neutron::epsilon_max",
+      "value": 4.450600224214474e-11,
+      "threshold": 1e-06,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 4.450600224214474e-05,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "2.6→2.5 の近似順序ゲート（max ε）。"
+    },
+    {
+      "id": "nonrel::atom_gravimeter",
+      "parameter_id": "nonrelativistic_epsilon_order",
+      "parameter_type": "approximation_order",
+      "channel": "interference",
+      "metric": "atom_gravimeter::epsilon_max",
+      "value": 3.07605287934614e-19,
+      "threshold": 1e-06,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 3.0760528793461404e-13,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "2.6→2.5 の近似順序ゲート（max ε）。"
+    },
+    {
+      "id": "nonrel::optical_clock_leveling_proxy",
+      "parameter_id": "nonrelativistic_epsilon_order",
+      "parameter_type": "approximation_order",
+      "channel": "interference",
+      "metric": "optical_clock_leveling_proxy::epsilon_max",
+      "value": 4.357004101499244e-14,
+      "threshold": 1e-06,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 4.357004101499244e-08,
+      "source": "nonrelativistic_reduction_schrodinger_mapping_audit",
+      "note": "2.6→2.5 の近似順序ゲート（max ε）。"
+    },
+    {
+      "id": "born::selection_delay_signature_fast",
+      "parameter_id": "event_window_boundary_condition",
+      "parameter_type": "free_coefficient",
+      "channel": "bell",
+      "metric": "min_fast_switching_delay_zmax",
+      "value": 5.53541064134177,
+      "threshold": 3.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 0.5419652116853263,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "fast-switch/time-tag 系で setting依存遅延 z が 3以上。"
+    },
+    {
+      "id": "born::selection_sweep_sensitivity_fast",
+      "parameter_id": "minimal_coupling_strength_proxy",
+      "parameter_type": "free_coefficient",
+      "channel": "bell",
+      "metric": "min_fast_switching_selection_ratio",
+      "value": 19.316744077961687,
+      "threshold": 1.0,
+      "operator": ">=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 0.051768558715901386,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "selection sweep の変動幅が統計幅1σ以上（ratio>=1）。"
+    },
+    {
+      "id": "born::phase_alpha_consistency",
+      "parameter_id": "minimal_coupling_strength_proxy",
+      "parameter_type": "free_coefficient",
+      "channel": "interference",
+      "metric": "atom_recoil_alpha_abs_z",
+      "value": 0.5883354744951784,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 0.19611182483172615,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "位相整合の最小ゲート（abs_z<=3）。"
+    },
+    {
+      "id": "born::phase_molecular_scaling",
+      "parameter_id": "minimal_coupling_strength_proxy",
+      "parameter_type": "free_coefficient",
+      "channel": "interference",
+      "metric": "molecular_isotopic_scaling_zmax",
+      "value": 2.6385399704973964,
+      "threshold": 3.0,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "hard",
+      "status": "pass",
+      "normalized_score": 0.8795133234991321,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "分子スケーリング整合の最小ゲート（z<=3）。"
+    },
+    {
+      "id": "born::visibility_atom_precision_gap",
+      "parameter_id": "visibility_resolution_budget",
+      "parameter_type": "free_coefficient",
+      "channel": "interference",
+      "metric": "log10_atom_interferometer_current_over_required_ratio",
+      "value": 0.3338887327706417,
+      "threshold": 1.0,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "soft",
+      "status": "pass",
+      "normalized_score": 0.3338887327706417,
+      "source": "born_route_a_proxy_constraints_pack",
+      "note": "可視度差分の決着力監視（log10正規化；1桁以内をwatch閾値）。未達でも即棄却には使わない。"
+    },
+    {
+      "id": "condensed::reject_count",
+      "parameter_id": "higher_derivative_and_material_effective_terms",
+      "parameter_type": "boundary_condition",
+      "channel": "condensed_thermal_holdout",
+      "metric": "holdout_reject_n",
+      "value": 0.0,
+      "threshold": 0.0,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "soft",
+      "status": "pass",
+      "normalized_score": null,
+      "source": "quantum_connection_shared_kpi/condensed_holdout_audit_summary",
+      "note": "物性/熱 holdout の reject 件数（0 へ収束が pass 条件）。"
+    },
+    {
+      "id": "condensed::inconclusive_count",
+      "parameter_id": "higher_derivative_and_material_effective_terms",
+      "parameter_type": "boundary_condition",
+      "channel": "condensed_thermal_holdout",
+      "metric": "holdout_inconclusive_n",
+      "value": 0.0,
+      "threshold": 0.0,
+      "operator": "<=",
+      "pass": true,
+      "gate_level": "soft",
+      "status": "pass",
+      "normalized_score": null,
+      "source": "quantum_connection_shared_kpi/condensed_holdout_audit_summary",
+      "note": "物性/熱 holdout の inconclusive 件数（0 が望ましい）。"
+    }
+  ],
+  "channel_summary": {
+    "derivation": {
+      "rows_n": 3,
+      "status_counts": {
+        "pass": 3,
+        "watch": 0,
+        "reject": 0,
+        "unknown": 0
+      },
+      "shared_kpi_status": null
+    },
+    "bell": {
+      "rows_n": 2,
+      "status_counts": {
+        "pass": 2,
+        "watch": 0,
+        "reject": 0,
+        "unknown": 0
+      },
+      "shared_kpi_status": "pass"
+    },
+    "interference": {
+      "rows_n": 6,
+      "status_counts": {
+        "pass": 6,
+        "watch": 0,
+        "reject": 0,
+        "unknown": 0
+      },
+      "shared_kpi_status": "pass"
+    },
+    "condensed_thermal_holdout": {
+      "rows_n": 2,
+      "status_counts": {
+        "pass": 2,
+        "watch": 0,
+        "reject": 0,
+        "unknown": 0
+      },
+      "shared_kpi_status": "pass"
+    }
+  },
+  "decision": {
+    "route_a_gate": "A_continue",
+    "transition": "A_stay",
+    "overall_status": "pass",
+    "hard_fail_ids": [],
+    "hard_unknown_ids": [],
+    "watchlist": [
+      "hom_noise_psd_shape"
+    ],
+    "rule": "A_to_B if any hard derivation gate fails/unknown; otherwise A_stay (watchlist tracked separately)."
+  },
+  "diagnostics": {
+    "source_route_a_gate_born_pack": "A_continue",
+    "source_route_a_gate_cross_channel": "A_continue",
+    "source_transition_cross_channel": "A_stay",
+    "shared_overall_status": "pass",
+    "condensed_reject_n": 0,
+    "condensed_inconclusive_n": 0
+  }
+}

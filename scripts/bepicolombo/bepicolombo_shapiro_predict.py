@@ -15,9 +15,9 @@ Shapiro 由来の y(t)（Cassini Eq(2) 近似）を P-model（β）で予測し�
   - kernels_meta.json の selected_paths を SPICE でロードして使用する
 
 出力（固定）：
-  - output/bepicolombo/bepicolombo_shapiro_geometry.csv
-  - output/bepicolombo/bepicolombo_shapiro_geometry_summary.json
-  - output/bepicolombo/bepicolombo_shapiro_geometry.png
+  - output/private/bepicolombo/bepicolombo_shapiro_geometry.csv
+  - output/private/bepicolombo/bepicolombo_shapiro_geometry_summary.json
+  - output/private/bepicolombo/bepicolombo_shapiro_geometry.png
 """
 
 from __future__ import annotations

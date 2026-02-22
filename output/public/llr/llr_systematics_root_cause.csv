@@ -1,0 +1,84 @@
+type,section,id,value,note
+metric,ablation_median_ns,station_reflector,7.057968085544082,
+metric,ablation_median_ns,station_reflector_tropo,4.63078261920914,
+metric,ablation_median_ns,station_reflector_tropo_tide,4.35417001177271,
+metric,ablation_median_ns,station_reflector_tropo_no_shapiro,5.681109349368453,
+metric,ablation_median_ns,station_reflector_tropo_earth_shapiro,4.629765187401678,
+metric,ablation_median_ns,station_reflector_tropo_tide_no_ocean,4.3595529438764,
+metric,ablation_weighted_ns,station_reflector,8.98237486216411,
+metric,ablation_weighted_ns,station_reflector_tropo,4.670221288193064,
+metric,ablation_weighted_ns,station_reflector_tropo_tide,4.469974449424671,
+metric,ablation_weighted_ns,station_reflector_tropo_no_shapiro,5.689274327681047,
+metric,ablation_weighted_ns,station_reflector_tropo_earth_shapiro,4.66952577310188,
+metric,ablation_weighted_ns,station_reflector_tropo_tide_no_ocean,4.473464898615992,
+metric,incremental_gain_median_ns,tropo_from_sr,2.427185466334942,
+metric,incremental_gain_median_ns,tide_from_tropo,0.2766126074364301,
+metric,incremental_gain_median_ns,shapiro_from_tropo_no_shapiro,1.0503267301593127,
+metric,incremental_gain_median_ns,earth_shapiro_from_tropo,0.0010174318074618327,
+metric,incremental_gain_median_ns,ocean_loading_from_tide_no_ocean,0.00538293210369023,
+metric,incremental_gain_weighted_ns,tropo_from_sr,4.312153573971047,
+metric,incremental_gain_weighted_ns,tide_from_tropo,0.20024683876839244,
+metric,incremental_gain_weighted_ns,shapiro_from_tropo_no_shapiro,1.019053039487983,
+metric,incremental_gain_weighted_ns,earth_shapiro_from_tropo,0.0006955150911833741,
+metric,incremental_gain_weighted_ns,ocean_loading_from_tide_no_ocean,0.003490449191320799,
+share,gain_share_median,tropo_from_sr,0.8976947982470455,
+share,gain_share_median,tide_from_tropo,0.10230520175295456,
+share,gain_share_weighted,tropo_from_sr,0.9556229898829337,
+share,gain_share_weighted,tide_from_tropo,0.044377010117066344,
+scenario,bottleneck_scenarios,current_group_weighted_rms_ns,4.469974449424671,
+scenario,bottleneck_scenarios,exclude_nglr1_group_weighted_rms_ns,4.281818990580428,
+scenario,bottleneck_scenarios,exclude_nglr1_gain_ns,0.18815545884424356,
+scenario,bottleneck_scenarios,apol_cap_to_grsm_median_rms_ns,4.168725499018368,
+scenario,bottleneck_scenarios,apol_cap_to_grsm_median_gain_ns,0.3012489504063032,
+scenario,bottleneck_scenarios,grsm_median_reference_ns,4.294917440730688,
+scenario,bottleneck_scenarios,bias_corrected_global_est_rms_ns,4.270505939458932,
+scenario,bottleneck_scenarios,bias_corrected_global_est_gain_ns,0.19946850996573984,
+scenario,excess_over_4ns,threshold_ns,4.0,
+scenario,excess_over_4ns,current_group_weighted_rms_ns,4.469974449424671,
+scenario,excess_over_4ns,current_group_weighted_excess_ns,0.46997444942467137,
+excess,ablation_median_excess_ns,station_reflector,3.057968085544082,
+excess,ablation_median_excess_ns,station_reflector_tropo,0.6307826192091399,
+excess,ablation_median_excess_ns,station_reflector_tropo_tide,0.3541700117727098,
+excess,ablation_median_excess_ns,station_reflector_tropo_no_shapiro,1.6811093493684526,
+excess,ablation_weighted_excess_ns,station_reflector,4.982374862164111,
+excess,ablation_weighted_excess_ns,station_reflector_tropo,0.6702212881930638,
+excess,ablation_weighted_excess_ns,station_reflector_tropo_tide,0.46997444942467137,
+excess,ablation_weighted_excess_ns,station_reflector_tropo_no_shapiro,1.689274327681047,
+excess_station,station_excess_share,APOL,0.5478253939238246,"{""n_points"": 1431, ""weighted_rms_ns"": 6.499845715551322}"
+excess_station,station_excess_share,GRSM,0.4007224878690839,"{""n_points"": 10887, ""weighted_rms_ns"": 4.185571142228706}"
+excess_station,station_excess_share,MDOL,0.051452118207091564,"{""n_points"": 31, ""weighted_rms_ns"": 11.392898651182891}"
+excess_station,station_excess_share,MATM,0.0,"{""n_points"": 345, ""weighted_rms_ns"": 3.522620635869545}"
+excess_station,station_excess_share,WETL,0.0,"{""n_points"": 394, ""weighted_rms_ns"": 2.261987827995877}"
+excess_target,target_excess_share,apollo15,0.4324188077491126,"{""n_points"": 5610, ""weighted_rms_ns"": 4.5651534865539265}"
+excess_target,target_excess_share,nglr1,0.31562915875105996,"{""n_points"": 38, ""weighted_rms_ns"": 24.196928165677654}"
+excess_target,target_excess_share,apollo14,0.11441751620351674,"{""n_points"": 1733, ""weighted_rms_ns"": 4.530646846100841}"
+excess_target,target_excess_share,apollo11,0.10636045789037177,"{""n_points"": 2026, ""weighted_rms_ns"": 4.383255769509842}"
+excess_target,target_excess_share,luna17,0.018441485416637645,"{""n_points"": 1907, ""weighted_rms_ns"": 3.6310264564869814}"
+excess_target,target_excess_share,luna21,0.012732573989301343,"{""n_points"": 1774, ""weighted_rms_ns"": 3.5772682568361502}"
+excess_group,top_group_excess_contributors,APOL/nglr1,0.31562915875105996,"{""n_points"": 38, ""rms_ns"": 24.196928165677654}"
+excess_group,top_group_excess_contributors,GRSM/apollo15,0.2753280724044234,"{""n_points"": 4476, ""rms_ns"": 4.496386275455791}"
+excess_group,top_group_excess_contributors,APOL/apollo15,0.10563861713759756,"{""n_points"": 637, ""rms_ns"": 5.231675599224521}"
+excess_group,top_group_excess_contributors,GRSM/apollo14,0.0639542928297254,"{""n_points"": 1482, ""rms_ns"": 4.35417001177271}"
+excess_group,top_group_excess_contributors,GRSM/apollo11,0.061440122634935077,"{""n_points"": 1722, ""rms_ns"": 4.294917440730688}"
+excess_group,top_group_excess_contributors,MDOL/apollo15,0.051452118207091564,"{""n_points"": 31, ""rms_ns"": 11.392898651182891}"
+excess_group,top_group_excess_contributors,APOL/apollo14,0.05046322337379134,"{""n_points"": 251, ""rms_ns"": 5.457528935490647}"
+excess_group,top_group_excess_contributors,APOL/apollo11,0.0449203352554367,"{""n_points"": 249, ""rms_ns"": 5.3262628051292085}"
+bottleneck,bottleneck_ranking,apol_profile_gap_cap_to_grsm_median,0.3012489504063032,APOL群をGRSM中央値レベルに抑えた場合の上限改善見積。
+bottleneck,bottleneck_ranking,global_station_target_bias_correction,0.19946850996573984,station+targetバイアス補正での改善見積。
+bottleneck,bottleneck_ranking,nglr1_group_exclusion_proxy,0.18815545884424356,nglr1群の高残差寄与を除いた場合の改善見積。
+station,station_breakdown,GRSM,4.185571142228706,"{""n_groups"": 5, ""n_points"": 10887, ""sse_share"": 0.7293471853389049}"
+station,station_breakdown,APOL,6.499845715551322,"{""n_groups"": 6, ""n_points"": 1431, ""sse_share"": 0.2311864425534702}"
+station,station_breakdown,MATM,3.522620635869545,"{""n_groups"": 2, ""n_points"": 345, ""sse_share"": 0.016370708565640327}"
+station,station_breakdown,MDOL,11.392898651182891,"{""n_groups"": 1, ""n_points"": 31, ""sse_share"": 0.015386746336471541}"
+station,station_breakdown,WETL,2.261987827995877,"{""n_groups"": 3, ""n_points"": 394, ""sse_share"": 0.007708917205512975}"
+target,target_breakdown,apollo15,4.5651534865539265,"{""n_groups"": 5, ""n_points"": 5610, ""sse_share"": 0.4470851664145114}"
+target,target_breakdown,apollo11,4.383255769509842,"{""n_groups"": 3, ""n_points"": 2026, ""sse_share"": 0.14885029495451815}"
+target,target_breakdown,apollo14,4.530646846100841,"{""n_groups"": 2, ""n_points"": 1733, ""sse_share"": 0.13603028796033517}"
+target,target_breakdown,luna17,3.6310264564869814,"{""n_groups"": 3, ""n_points"": 1907, ""sse_share"": 0.09614487783032094}"
+target,target_breakdown,luna21,3.5772682568361502,"{""n_groups"": 3, ""n_points"": 1774, ""sse_share"": 0.08681070144376161}"
+target,target_breakdown,nglr1,24.196928165677654,"{""n_groups"": 1, ""n_points"": 38, ""sse_share"": 0.08507867139655273}"
+cause,likely_root_causes,tropo_model_mismatch,1.0,"{""evidence"": {""gain_share_median"": 0.8976947982470455, ""gain_ns_median"": 2.427185466334942}, ""text"": ""残差改善の大半を対流圏補正が占めるため、主因候補は対流圏モデル差。""}"
+cause,likely_root_causes,coord_if_incomplete,2.0,"{""evidence"": {""stations_without_pos_eop"": [""APOL""]}, ""text"": ""全局で pos+eop 統一になっておらず、局座標I/F差が残差に寄与しうる。""}"
+cause,likely_root_causes,station_imbalance,2.0,"{""evidence"": {""dominant_station"": ""GRSM"", ""dominant_ratio"": 0.8291380625476735}, ""text"": ""局偏在が強く、残差評価が特定局の系統へ引き寄せられる。""}"
+cause,likely_root_causes,nglr1_sparse_high_residual,3.0,"{""evidence"": {""nglr1_n_points"": 38, ""nglr1_weighted_rms_ns"": 24.196928165677654, ""nglr1_sse_share"": 0.08507867139655273}, ""text"": ""nglr1 は点数が少ない一方で残差が高く、外れ群として全体評価を押し上げる。""}"
+cause,likely_root_causes,station_target_bias,3.0,"{""evidence"": {""global_bias_weighted_gain_ns"": 0.19946850996573984, ""modern_apol_target_bias_weighted_gain_ns"": 0.9824594186115787}, ""text"": ""局/ターゲット依存バイアス補正で weighted RMS が改善しており、運用系統が残っている。""}"

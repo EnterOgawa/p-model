@@ -1,0 +1,106 @@
+{
+  "generated_utc": "2026-02-16T16:06:26.569767+00:00",
+  "phase": {
+    "phase": 8,
+    "step": "8.7.10",
+    "name": "Nonrelativistic reduction (2.6 -> 2.5) audit"
+  },
+  "equations": {
+    "starting_point": "From EL (minimal action): D_mu D^mu P + dV/dP* = 0",
+    "phase_split": "P = exp(-i m c^2 t / hbar) * psi",
+    "reduction": "i hbar d_t psi = [(-i hbar nabla - q A)^2/(2m) + q A0 + m phi] psi - (hbar^2/(2m c^2)) (d_t + i(qA0+mphi)/hbar)^2 psi + O(c^-4)",
+    "schrodinger_limit": "Drop the c^-2 correction term under epsilon ordering, then recover Eq.(2.5.1)."
+  },
+  "approximation_order": {
+    "epsilon_v2": "(v/c)^2",
+    "epsilon_phi": "|phi|/c^2 (operational proxy: g*L/c^2)",
+    "epsilon_env": "|d_t^2 psi| / (omega0 |d_t psi|) ~ 1/(omega0*T_env)",
+    "gate": "max(epsilon_v2, epsilon_phi, epsilon_env) <= 1e-6",
+    "dropped_terms": [
+      "O(epsilon_v2^2)",
+      "O(epsilon_phi^2)",
+      "O(epsilon_v2 * epsilon_phi)",
+      "O(epsilon_env)"
+    ]
+  },
+  "inputs": {
+    "cow_phase_shift_metrics_json": "output/public/quantum/cow_phase_shift_metrics.json",
+    "atom_interferometer_gravimeter_phase_metrics_json": "output/public/quantum/atom_interferometer_gravimeter_phase_metrics.json",
+    "gravity_quantum_interference_delta_predictions_json": "output/public/quantum/gravity_quantum_interference_delta_predictions.json"
+  },
+  "channels": [
+    {
+      "channel": "cow_neutron",
+      "epsilon_v2": 4.450600224214474e-11,
+      "epsilon_phi": 3.2734109016594647e-18,
+      "epsilon_env": 4.670329084575076e-20,
+      "epsilon_max": 4.450600224214474e-11,
+      "epsilon_sum": 4.450600556225893e-11,
+      "mass_kg": 1.67492749804e-27,
+      "velocity_m_per_s": 2000.0,
+      "spatial_scale_m": 0.03,
+      "envelope_time_s": 1.4999999999999999e-05,
+      "note": "COW 位相差（H/v0）で包絡時間を定義。"
+    },
+    {
+      "channel": "atom_gravimeter",
+      "epsilon_v2": 5.526722590275279e-22,
+      "epsilon_phi": 3.07605287934614e-19,
+      "epsilon_env": 1.3291771586688506e-26,
+      "epsilon_max": 3.07605287934614e-19,
+      "epsilon_sum": 3.081579734854131e-19,
+      "mass_kg": 2.2069469514370953e-25,
+      "velocity_m_per_s": 0.007047815654124096,
+      "spatial_scale_m": 0.0028191262616496385,
+      "envelope_time_s": 0.4,
+      "note": "原子干渉計（recoil速度・アーム分離）を proxy として採用。"
+    },
+    {
+      "channel": "optical_clock_leveling_proxy",
+      "epsilon_v2": 0.0,
+      "epsilon_phi": 4.357004101499244e-14,
+      "epsilon_env": 5.316708634675403e-27,
+      "epsilon_max": 4.357004101499244e-14,
+      "epsilon_sum": 4.357004101499775e-14,
+      "mass_kg": 2.2069469514370953e-25,
+      "velocity_m_per_s": 0.0,
+      "spatial_scale_m": 399.308632407601,
+      "envelope_time_s": 1.0,
+      "note": "時計は運動項を 0 とし、重力差の proxy を監査。"
+    }
+  ],
+  "criteria": [
+    {
+      "channel": "cow_neutron",
+      "metric": "epsilon_max",
+      "value": 4.450600224214474e-11,
+      "threshold": 1e-06,
+      "operator": "<=",
+      "pass": true,
+      "note": "max(ε_v^2, ε_phi, ε_env) <= 1e-6 を非相対論近似の運用ゲートとして固定。"
+    },
+    {
+      "channel": "atom_gravimeter",
+      "metric": "epsilon_max",
+      "value": 3.07605287934614e-19,
+      "threshold": 1e-06,
+      "operator": "<=",
+      "pass": true,
+      "note": "max(ε_v^2, ε_phi, ε_env) <= 1e-6 を非相対論近似の運用ゲートとして固定。"
+    },
+    {
+      "channel": "optical_clock_leveling_proxy",
+      "metric": "epsilon_max",
+      "value": 4.357004101499244e-14,
+      "threshold": 1e-06,
+      "operator": "<=",
+      "pass": true,
+      "note": "max(ε_v^2, ε_phi, ε_env) <= 1e-6 を非相対論近似の運用ゲートとして固定。"
+    }
+  ],
+  "decision": {
+    "nonrelativistic_reduction_gate": "pass",
+    "fail_channels": [],
+    "rule": "All channel epsilon_max <= threshold => pass; otherwise watch."
+  }
+}

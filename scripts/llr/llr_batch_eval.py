@@ -94,6 +94,69 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_station_xyz_overrides(path: Path) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Any]]:
+    diag: Dict[str, Any] = {
+        "path": str(path),
+        "n_candidates": 0,
+        "n_loaded": 0,
+        "loaded_stations": [],
+    }
+    data = _read_json(path)
+    out: Dict[str, Dict[str, Any]] = {}
+
+    def _add(station: Any, rec: Any, default_source: str) -> None:
+        if not isinstance(rec, dict):
+            return
+        st = str(station or "").strip().upper()
+        if not st:
+            return
+        try:
+            x = float(rec["x_m"])
+            y = float(rec["y_m"])
+            z = float(rec["z_m"])
+        except Exception:
+            return
+        row: Dict[str, Any] = {"x_m": x, "y_m": y, "z_m": z}
+        for k in ("pos_eop_yymmdd", "pos_eop_ref_epoch_utc", "log_file", "log_date", "source_group"):
+            if rec.get(k) is not None:
+                row[k] = rec.get(k)
+        src = str(rec.get("coord_source") or default_source).strip()
+        if src:
+            row["coord_source"] = src
+        out[st] = row
+        diag["n_loaded"] = int(diag["n_loaded"]) + 1
+        diag["loaded_stations"].append(st)
+
+    if isinstance(data, dict):
+        route = data.get("deterministic_merge_route")
+        if isinstance(route, dict):
+            sel = route.get("selected_xyz")
+            if isinstance(sel, dict):
+                diag["n_candidates"] = int(diag["n_candidates"]) + 1
+                _add(sel.get("station") or "APOL", sel, default_source=f"merge_route:{path.name}")
+
+        sel0 = data.get("selected_xyz")
+        if isinstance(sel0, dict):
+            diag["n_candidates"] = int(diag["n_candidates"]) + 1
+            _add(sel0.get("station") or "APOL", sel0, default_source=f"selected_xyz:{path.name}")
+
+        stations = data.get("stations")
+        if isinstance(stations, dict):
+            for st, rec in stations.items():
+                diag["n_candidates"] = int(diag["n_candidates"]) + 1
+                _add(st, rec, default_source=f"stations:{path.name}")
+        else:
+            for st, rec in data.items():
+                if st in ("deterministic_merge_route", "selected_xyz", "target", "version", "status"):
+                    continue
+                if isinstance(rec, dict) and all(k in rec for k in ("x_m", "y_m", "z_m")):
+                    diag["n_candidates"] = int(diag["n_candidates"]) + 1
+                    _add(st, rec, default_source=f"mapping:{path.name}")
+
+    diag["loaded_stations"] = sorted(set(str(v) for v in diag["loaded_stations"]))
+    return out, diag
+
+
 def _quantize(dt: datetime) -> datetime:
     return llr._quantize_utc_for_horizons(dt)  # type: ignore[attr-defined]
 
@@ -1213,6 +1276,12 @@ def main() -> int:
         help="Station coordinate source: slrlog / pos_eop / auto (default: auto).",
     )
     ap.add_argument(
+        "--station-override-json",
+        type=str,
+        default="",
+        help="Optional JSON path for station XYZ override (e.g., APOL merge-route selected_xyz).",
+    )
+    ap.add_argument(
         "--pos-eop-date",
         type=str,
         default="",
@@ -1343,14 +1412,63 @@ def main() -> int:
     if station_coords_mode not in ("slrlog", "pos_eop", "auto"):
         print(f"[err] invalid --station-coords {station_coords_mode!r} (expected slrlog/pos_eop/auto)")
         return 2
+    station_override_json = str(getattr(args, "station_override_json", "") or "").strip()
     pos_eop_date = str(getattr(args, "pos_eop_date", "") or "").strip()
     pos_eop_max_days = int(getattr(args, "pos_eop_max_days", 3650) or 3650)
 
     station_xyz_override: Dict[str, Dict[str, Any]] = {}
     station_coord_summary: Dict[str, Dict[str, Any]] = {}
+    station_override_input: Optional[Dict[str, Any]] = None
+    if station_override_json:
+        station_override_path = Path(station_override_json)
+        if not station_override_path.is_absolute():
+            station_override_path = (root / station_override_path).resolve()
+        if not station_override_path.exists():
+            print(f"[err] missing --station-override-json: {station_override_path}")
+            return 2
+        try:
+            loaded_override, station_override_input = _load_station_xyz_overrides(station_override_path)
+        except Exception as e:
+            print(f"[err] failed to load --station-override-json: {e}")
+            return 2
+        if loaded_override:
+            station_xyz_override.update(loaded_override)
+            for st, xyz in loaded_override.items():
+                dx = dy = dz = dr = None
+                meta = llr._load_station_geodetic(root, st)  # type: ignore[attr-defined]
+                try:
+                    if (
+                        isinstance(meta, dict)
+                        and all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m"))
+                    ):
+                        dx = float(xyz["x_m"]) - float(meta["x_m"])
+                        dy = float(xyz["y_m"]) - float(meta["y_m"])
+                        dz = float(xyz["z_m"]) - float(meta["z_m"])
+                        dr = float(np.sqrt(dx * dx + dy * dy + dz * dz))
+                except Exception:
+                    pass
+                station_coord_summary[str(st)] = {
+                    "station": str(st),
+                    "pad_id": (meta.get("cdp_pad_id") if isinstance(meta, dict) else None),
+                    "coord_source": str(xyz.get("coord_source") or f"override:{station_override_path.name}"),
+                    "pos_eop_yymmdd": xyz.get("pos_eop_yymmdd"),
+                    "pos_eop_ref_epoch_utc": xyz.get("pos_eop_ref_epoch_utc"),
+                    "delta_vs_slrlog_m": dr,
+                    "dx_m": dx,
+                    "dy_m": dy,
+                    "dz_m": dz,
+                }
+            print(
+                f"[info] station override: loaded {len(loaded_override)} station(s) from {station_override_path.relative_to(root).as_posix()}"
+            )
+        else:
+            print(f"[warn] station override: no valid xyz rows in {station_override_path}")
+
     if station_coords_mode in ("auto", "pos_eop"):
         stations_all = sorted({s for s in all_df["station"].unique() if s and s.lower() not in ("na", "nan")})
         for st in stations_all:
+            if st in station_xyz_override:
+                continue
             meta = llr._load_station_geodetic(root, st)  # type: ignore[attr-defined]
             if not isinstance(meta, dict):
                 continue
@@ -1419,7 +1537,7 @@ def main() -> int:
             return 2
         if station_coords_mode == "auto":
             if station_xyz_override:
-                print(f"[info] station coords: using pos+eop for {len(station_xyz_override)} station(s)")
+                print(f"[info] station coords: using override/pos+eop for {len(station_xyz_override)} station(s)")
             else:
                 print("[info] station coords: pos+eop not available; using slrlog")
 
@@ -1794,7 +1912,11 @@ def main() -> int:
                     "y_m_pos_eop": y_pos,
                     "z_m_pos_eop": z_pos,
                     # actually used (auto/pos_eop modes)
+                    # Keep `station_coord_source_used` as canonical token for downstream audits.
                     "station_coord_source_used": ("pos_eop" if use_pos else "slrlog"),
+                    "station_coord_source_used_detail": (
+                        str(pos.get("coord_source") or "pos_eop") if use_pos and isinstance(pos, dict) else "slrlog"
+                    ),
                     "x_m_used": x_used,
                     "y_m_used": y_used,
                     "z_m_used": z_used,
@@ -2845,6 +2967,66 @@ def main() -> int:
         v = v[np.isfinite(v)]
         return float(np.median(v)) if len(v) else float("nan")
 
+    def _point_weighted_rms(col: str) -> float:
+        if col not in metrics_df.columns or "n" not in metrics_df.columns:
+            return float("nan")
+        rv = pd.to_numeric(metrics_df[col], errors="coerce").to_numpy(dtype=float)
+        nv = pd.to_numeric(metrics_df["n"], errors="coerce").to_numpy(dtype=float)
+        ok = np.isfinite(rv) & np.isfinite(nv) & (nv > 0)
+        if not np.any(ok):
+            return float("nan")
+        return float(np.sqrt(np.sum(nv[ok] * rv[ok] * rv[ok]) / np.sum(nv[ok])))
+
+    def _diag_rms(
+        *,
+        modern_start_year: int = 2023,
+    ) -> Dict[str, Any]:
+        try:
+            d = diag_df.copy()
+            d["epoch_utc"] = pd.to_datetime(d["epoch_utc"], utc=True, errors="coerce")
+            d["year"] = d["epoch_utc"].dt.year
+            d = d[d["inlier_best"] == True]  # noqa: E712
+            d["residual_sr_tropo_tide_ns"] = pd.to_numeric(d["residual_sr_tropo_tide_ns"], errors="coerce")
+            d = d[np.isfinite(d["residual_sr_tropo_tide_ns"])]
+            if d.empty:
+                return {
+                    "modern_start_year": int(modern_start_year),
+                    "all_modern_rms_ns": float("nan"),
+                    "all_modern_n": 0,
+                    "apol_modern_rms_ns": float("nan"),
+                    "apol_modern_n": 0,
+                    "apol_modern_ex_nglr1_rms_ns": float("nan"),
+                    "apol_modern_ex_nglr1_n": 0,
+                }
+
+            dm = d[d["year"] >= int(modern_start_year)].copy()
+            def _rms_of(sub: pd.DataFrame) -> float:
+                x = pd.to_numeric(sub["residual_sr_tropo_tide_ns"], errors="coerce").to_numpy(dtype=float)
+                x = x[np.isfinite(x)]
+                return float(np.sqrt(np.mean(x * x))) if len(x) else float("nan")
+
+            ap = dm[dm["station"].astype(str).str.upper() == "APOL"].copy()
+            ap_ex_ng = ap[ap["target"].astype(str).str.lower() != "nglr1"].copy()
+            return {
+                "modern_start_year": int(modern_start_year),
+                "all_modern_rms_ns": _rms_of(dm),
+                "all_modern_n": int(len(dm)),
+                "apol_modern_rms_ns": _rms_of(ap),
+                "apol_modern_n": int(len(ap)),
+                "apol_modern_ex_nglr1_rms_ns": _rms_of(ap_ex_ng),
+                "apol_modern_ex_nglr1_n": int(len(ap_ex_ng)),
+            }
+        except Exception:
+            return {
+                "modern_start_year": int(modern_start_year),
+                "all_modern_rms_ns": float("nan"),
+                "all_modern_n": 0,
+                "apol_modern_rms_ns": float("nan"),
+                "apol_modern_n": 0,
+                "apol_modern_ex_nglr1_rms_ns": float("nan"),
+                "apol_modern_ex_nglr1_n": 0,
+            }
+
     summary = {
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "source_manifest": str(manifest_path.relative_to(root)).replace("\\", "/"),
@@ -2855,6 +3037,8 @@ def main() -> int:
         "beta": beta,
         "time_tag_mode": str(mode),
         "station_coords_mode": station_coords_mode,
+        "station_override_json": (station_override_json or None),
+        "station_override_input": station_override_input,
         "pos_eop_date_preferred": pos_eop_date or None,
         "pos_eop_max_days": int(pos_eop_max_days),
         "ocean_loading_mode": ocean_loading_mode,
@@ -2883,6 +3067,12 @@ def main() -> int:
             "station_reflector_tropo_earth_shapiro": _median("rms_sr_tropo_earth_shapiro_ns"),
             "station_reflector_iau": _median("rms_sr_iau_ns"),
         },
+        "point_weighted_rms_ns": {
+            "station_reflector": _point_weighted_rms("rms_sr_ns"),
+            "station_reflector_tropo": _point_weighted_rms("rms_sr_tropo_ns"),
+            "station_reflector_tropo_tide": _point_weighted_rms("rms_sr_tropo_tide_ns"),
+        },
+        "modern_subset_rms_ns": _diag_rms(modern_start_year=2023),
     }
     summary_path = out_dir / "llr_batch_summary.json"
     summary_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

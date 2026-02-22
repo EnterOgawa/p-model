@@ -113,18 +113,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     bao_global_prior_survey_f = _load_required(
         _ROOT
         / "output"
+        / "private"
         / "cosmology"
         / "cosmology_distance_indicator_rederivation_bao_survey_global_prior_sigma_scan_metrics.json"
     )
     bao_global_prior_loo_f = _load_required(
         _ROOT
         / "output"
+        / "private"
         / "cosmology"
         / "cosmology_distance_indicator_rederivation_bao_survey_leave_one_out_global_prior_sigma_scan_metrics.json"
     )
     bao_sigma_scan = _load_required(
         _ROOT
         / "output"
+        / "private"
         / "cosmology"
         / "cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json"
     )

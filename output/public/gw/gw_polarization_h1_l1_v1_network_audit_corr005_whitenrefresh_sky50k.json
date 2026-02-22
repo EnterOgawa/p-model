@@ -1,0 +1,129 @@
+{
+  "generated_utc": "2026-02-17T01:56:58.861095+00:00",
+  "schema": "wavep.gw.polarization.network_audit.v1",
+  "phase": 8,
+  "step": "8.7.19.3",
+  "inputs": {
+    "events": [
+      "GW200115_042309",
+      "GW200129_065458",
+      "GW200311_115853"
+    ],
+    "detectors": [
+      "H1",
+      "L1",
+      "V1"
+    ],
+    "detector_pairs": [
+      "H1-L1",
+      "H1-V1",
+      "L1-V1"
+    ],
+    "corr_use_min": 0.05,
+    "sky_samples": 50000,
+    "psi_samples": 36,
+    "cosi_samples": 41,
+    "response_floor_frac": 0.1
+  },
+  "summary": {
+    "n_events_requested": 3,
+    "n_rows": 3,
+    "n_usable_events": 2,
+    "overall_status": "reject",
+    "overall_reason": "tensor_response_failed_for_some_events",
+    "scalar_only_mode_global_upper_bound_proxy": 0.3333333333333333
+  },
+  "rows": [
+    {
+      "event": "GW200115_042309",
+      "quality": "usable",
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 0,
+      "status": "inconclusive_geometry",
+      "status_reason": "insufficient_ring_directions",
+      "scalar_overlap_fraction": NaN,
+      "tensor_mismatch_max": NaN,
+      "scalar_mismatch_max": NaN,
+      "ring_directions_used": 0
+    },
+    {
+      "event": "GW200129_065458",
+      "quality": "usable",
+      "usable_pair_count": 3,
+      "pair_names": "H1-L1;H1-V1;L1-V1",
+      "pair_tensor_overlap_count": 1,
+      "pair_scalar_overlap_count": 1,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.3333333333333333,
+      "tensor_mismatch_max": 0.3634492755493789,
+      "scalar_mismatch_max": 9.086984895869248,
+      "ring_directions_used": 100,
+      "pair_results": [
+        {
+          "pair": "H1-L1",
+          "tensor_overlap": true,
+          "scalar_overlap": true,
+          "tensor_mismatch": 3.235235338403382e-05,
+          "scalar_mismatch": 0.0015515752534642773
+        },
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.3634492755493789,
+          "scalar_mismatch": 5.427221407968281
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 0.10295337912196523,
+          "scalar_mismatch": 9.086984895869248
+        }
+      ]
+    },
+    {
+      "event": "GW200311_115853",
+      "quality": "usable",
+      "usable_pair_count": 2,
+      "pair_names": "H1-V1;L1-V1",
+      "pair_tensor_overlap_count": 0,
+      "pair_scalar_overlap_count": 0,
+      "status": "reject_tensor_response",
+      "status_reason": "at_least_one_pair_outside_tensor_range",
+      "scalar_overlap_fraction": 0.0,
+      "tensor_mismatch_max": 6.588340115496816,
+      "scalar_mismatch_max": 20.756004788253538,
+      "ring_directions_used": 28,
+      "pair_results": [
+        {
+          "pair": "H1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 6.588340115496816,
+          "scalar_mismatch": 20.756004788253538
+        },
+        {
+          "pair": "L1-V1",
+          "tensor_overlap": false,
+          "scalar_overlap": false,
+          "tensor_mismatch": 1.4414277567993725,
+          "scalar_mismatch": 11.49943043553509
+        }
+      ]
+    }
+  ],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_corr005_whitenrefresh_sky50k.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_corr005_whitenrefresh_sky50k.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_h1_l1_v1_network_audit_corr005_whitenrefresh_sky50k.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_corr005_whitenrefresh_sky50k.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_corr005_whitenrefresh_sky50k.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_h1_l1_v1_network_audit_corr005_whitenrefresh_sky50k.png"
+    ]
+  }
+}
