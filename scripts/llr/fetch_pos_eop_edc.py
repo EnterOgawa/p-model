@@ -54,11 +54,13 @@ def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-fetch-pos-eop/1.0"})
     with urllib.request.urlopen(req, timeout=timeout_s) as r:
         b = r.read()
+
     return b.decode("utf-8", "replace")
 
 
 def _iter_hrefs(html: str) -> Iterable[str]:
     for href in re.findall(r'href=[\'"]([^\'"]+)[\'"]', html):
+        # 条件分岐: `href` を満たす経路を評価する。
         if href:
             yield href
 
@@ -68,11 +70,15 @@ def _list_files(year: int, yymmdd: str) -> list[str]:
     html = _fetch_text(url, timeout_s=60)
     files: list[str] = []
     for href in _iter_hrefs(html):
+        # 条件分岐: `not href.startswith(f"{POS_EOP_ROOT}/{year}/{yymmdd}/")` を満たす経路を評価する。
         if not href.startswith(f"{POS_EOP_ROOT}/{year}/{yymmdd}/"):
             continue
+
         name = href.rsplit("/", 1)[-1]
+        # 条件分岐: `name.lower().endswith(".snx.gz")` を満たす経路を評価する。
         if name.lower().endswith(".snx.gz"):
             files.append(name)
+
     return sorted(set(files))
 
 
@@ -94,14 +100,17 @@ _RE_FILE = re.compile(
 
 def _pick_latest(year: int, yymmdd: str, *, preferred_center: str = "nsgf") -> Picked:
     files = _list_files(year, yymmdd)
+    # 条件分岐: `not files` を満たす経路を評価する。
     if not files:
         raise FileNotFoundError(f"no .snx.gz found: {year}/{yymmdd}")
 
     cand: list[Picked] = []
     for fn in files:
         m = _RE_FILE.match(fn)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         center = str(m.group("center")).lower()
         ver = int(m.group("ver"))
         cand.append(
@@ -114,6 +123,8 @@ def _pick_latest(year: int, yymmdd: str, *, preferred_center: str = "nsgf") -> P
                 version=ver,
             )
         )
+
+    # 条件分岐: `not cand` を満たす経路を評価する。
 
     if not cand:
         # Fallback: take the lexicographically last file (best-effort)
@@ -142,14 +153,17 @@ def _dst_meta(repo_root: Path, year: int, yymmdd: str) -> Path:
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     print(f"[dl] {url}")
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-fetch-pos-eop/1.0"})
     with urllib.request.urlopen(req, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -157,12 +171,17 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
 def _parse_yyyymmdd(s: str) -> date:
     # Accept YYYYMMDD or YYMMDD
     s = str(s).strip()
+    # 条件分岐: `re.fullmatch(r"\d{8}", s)` を満たす経路を評価する。
     if re.fullmatch(r"\d{8}", s):
         return date(int(s[0:4]), int(s[4:6]), int(s[6:8]))
+
+    # 条件分岐: `re.fullmatch(r"\d{6}", s)` を満たす経路を評価する。
+
     if re.fullmatch(r"\d{6}", s):
         yy = int(s[0:2])
         yyyy = 2000 + yy if yy < 80 else 1900 + yy
         return date(yyyy, int(s[2:4]), int(s[4:6]))
+
     raise ValueError(f"invalid date format: {s!r} (expected YYYYMMDD or YYMMDD)")
 
 
@@ -171,24 +190,35 @@ def _yymmdd(d: date) -> str:
 
 
 def _collect_dates_from_points_csv(path: Path) -> list[date]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     dates: set[date] = set()
     with open(path, "r", encoding="utf-8", errors="replace", newline="") as f:
         r = csv.DictReader(f)
+        # 条件分岐: `"epoch_utc" not in (r.fieldnames or [])` を満たす経路を評価する。
         if "epoch_utc" not in (r.fieldnames or []):
             return []
+
         for row in r:
             v = (row.get("epoch_utc") or "").strip()
+            # 条件分岐: `not v` を満たす経路を評価する。
             if not v:
                 continue
+
             try:
                 dt = datetime.fromisoformat(v)
             except Exception:
                 continue
+
+            # 条件分岐: `dt.tzinfo is None` を満たす経路を評価する。
+
             if dt.tzinfo is None:
                 dt = dt.replace(tzinfo=timezone.utc)
+
             dates.add(dt.astimezone(timezone.utc).date())
+
     return sorted(dates)
 
 
@@ -198,10 +228,12 @@ def _collect_dates_from_np2(repo_root: Path) -> list[date]:
     from scripts.llr import llr_pmodel_overlay_horizons_noargs as llr  # lazy import
 
     edc = repo_root / "data" / "llr" / "edc"
+    # 条件分岐: `not edc.exists()` を満たす経路を評価する。
     if not edc.exists():
         return []
 
     np2_files = sorted(edc.glob("*/*/*.np2"))
+    # 条件分岐: `not np2_files` を満たす経路を評価する。
     if not np2_files:
         return []
 
@@ -209,19 +241,24 @@ def _collect_dates_from_np2(repo_root: Path) -> list[date]:
     for p in np2_files:
         try:
             df, _, _ = llr.parse_crd_npt11(p)  # type: ignore[attr-defined]
+            # 条件分岐: `"epoch_utc" in df.columns` を満たす経路を評価する。
             if "epoch_utc" in df.columns:
                 for t in df["epoch_utc"].dropna().tolist():
+                    # 条件分岐: `isinstance(t, datetime)` を満たす経路を評価する。
                     if isinstance(t, datetime):
                         dates.add(t.astimezone(timezone.utc).date())
         except Exception:
             # Best-effort: use filename tokens
             m = re.search(r"_(\d{8})\.np2$", p.name)
+            # 条件分岐: `m` を満たす経路を評価する。
             if m:
                 try:
                     dates.add(_parse_yyyymmdd(m.group(1)))
                 except Exception:
                     pass
+
             m2 = re.search(r"_(\d{6})\.np2$", p.name)
+            # 条件分岐: `m2` を満たす経路を評価する。
             if m2:
                 # Monthly file: take 15th as representative (will still help for coarse cache priming)
                 try:
@@ -229,6 +266,7 @@ def _collect_dates_from_np2(repo_root: Path) -> list[date]:
                     dates.add(dd)
                 except Exception:
                     pass
+
             continue
 
     return sorted(dates)
@@ -254,23 +292,30 @@ def main() -> int:
     date_from = _parse_yyyymmdd(args.date_from) if str(args.date_from).strip() else None
     date_to = _parse_yyyymmdd(args.date_to) if str(args.date_to).strip() else None
 
+    # 条件分岐: `(date_from is None) != (date_to is None)` を満たす経路を評価する。
     if (date_from is None) != (date_to is None):
         print("[err] --from and --to must be provided together (or both omitted).")
         return 2
 
     dates: list[date] = []
+    # 条件分岐: `date_from is not None and date_to is not None` を満たす経路を評価する。
     if date_from is not None and date_to is not None:
+        # 条件分岐: `date_to < date_from` を満たす経路を評価する。
         if date_to < date_from:
             print("[err] --to must be >= --from")
             return 2
+
         d = date_from
         while d <= date_to:
             dates.append(d)
             d = date.fromordinal(d.toordinal() + 1)
     else:
         dates = _collect_dates_from_points_csv(root / str(args.points_csv))
+        # 条件分岐: `not dates` を満たす経路を評価する。
         if not dates:
             dates = _collect_dates_from_np2(root)
+
+    # 条件分岐: `not dates` を満たす経路を評価する。
 
     if not dates:
         print("[err] no dates found (need output/private/llr/batch/llr_batch_points.csv or data/llr/edc/*.np2)")
@@ -285,13 +330,18 @@ def main() -> int:
         dst = _dst_snx(root, year, yymmdd)
         meta_path = _dst_meta(root, year, yymmdd)
 
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
+            # 条件分岐: `dst.exists()` を満たす経路を評価する。
             if dst.exists():
                 print(f"[ok] offline: {dst}")
                 continue
+
             print(f"[miss] offline: {dst}")
             failures += 1
             continue
+
+        # 条件分岐: `dst.exists() and meta_path.exists() and not args.force` を満たす経路を評価する。
 
         if dst.exists() and meta_path.exists() and not args.force:
             print(f"[skip] cached: {dst}")
@@ -328,10 +378,15 @@ def main() -> int:
         meta_path.parent.mkdir(parents=True, exist_ok=True)
         meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    # 条件分岐: `failures` を満たす経路を評価する。
+
     if failures:
         print(f"[err] failures: {failures}")
+
     return 1 if failures else 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

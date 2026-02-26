@@ -39,6 +39,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -60,8 +61,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -69,11 +72,15 @@ def _set_japanese_font() -> None:
 
 
 def _fmt(value: float, digits: int = 6) -> str:
+    # 条件分岐: `value == 0.0` を満たす経路を評価する。
     if value == 0.0:
         return "0"
+
     abs_value = abs(float(value))
+    # 条件分岐: `abs_value >= 1e4 or abs_value < 1e-3` を満たす経路を評価する。
     if abs_value >= 1e4 or abs_value < 1e-3:
         return f"{value:.{digits}g}"
+
     return f"{value:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -84,8 +91,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _quadrupole_velocity_gradient_summary(*, c_s_p: float = 1.0 / math.sqrt(3.0)) -> Dict[str, Any]:
     cs = float(c_s_p)
+    # 条件分岐: `not (cs > 0.0)` を満たす経路を評価する。
     if not (cs > 0.0):
         raise ValueError("c_s_p must be positive.")
+
     return {
         "continuity_real_space": "Theta' + (1/3) nabla·v_pb = 0",
         "continuity_fourier": "Theta_k' = -(k/3) v_pb,k",
@@ -183,8 +192,10 @@ class Feature:
 
 def _read_binned_spectrum(path: Path) -> Spectrum:
     arr = np.loadtxt(path)
+    # 条件分岐: `arr.ndim != 2 or arr.shape[1] < 5` を満たす経路を評価する。
     if arr.ndim != 2 or arr.shape[1] < 5:
         raise ValueError(f"unexpected spectrum format: {path}")
+
     ell = arr[:, 0].astype(float)
     dl = arr[:, 1].astype(float)
     err_lo = np.abs(arr[:, 2].astype(float))
@@ -196,24 +207,34 @@ def _read_binned_spectrum(path: Path) -> Spectrum:
 
 def _find_extremum(ell: np.ndarray, y: np.ndarray, lo: float, hi: float, *, kind: str) -> int:
     mask = (ell >= float(lo)) & (ell <= float(hi))
+    # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
     if not np.any(mask):
         raise ValueError(f"no bins in [{lo}, {hi}]")
+
     idxs = np.where(mask)[0]
     local = y[mask]
+    # 条件分岐: `kind == "max"` を満たす経路を評価する。
     if kind == "max":
         local_idx = int(np.argmax(local))
+    # 条件分岐: 前段条件が不成立で、`kind == "min"` を追加評価する。
     elif kind == "min":
         local_idx = int(np.argmin(local))
     else:
         raise ValueError(f"unknown extremum kind: {kind}")
+
     return int(idxs[local_idx])
 
 
 def _ell_half_width(ell: np.ndarray, index: int) -> float:
+    # 条件分岐: `index <= 0` を満たす経路を評価する。
     if index <= 0:
         return float(0.5 * abs(ell[1] - ell[0])) if ell.size >= 2 else 1.0
+
+    # 条件分岐: `index >= ell.size - 1` を満たす経路を評価する。
+
     if index >= ell.size - 1:
         return float(0.5 * abs(ell[-1] - ell[-2])) if ell.size >= 2 else 1.0
+
     return float(0.5 * abs(ell[index + 1] - ell[index - 1]))
 
 
@@ -283,6 +304,7 @@ def _detect_ee_peaks(ee: Spectrum, *, ell_a: float, phi: float, count: int, wind
                 ell_half_width=_ell_half_width(ee.ell, idx),
             )
         )
+
     return rows
 
 
@@ -305,18 +327,23 @@ def _detect_te_extrema(te: Spectrum, *, ell_a: float, phi: float, count: int, wi
                 ell_half_width=_ell_half_width(te.ell, idx),
             )
         )
+
     return rows
 
 
 def _fit_phase_offset(features: Sequence[Feature], *, ell_a: float, phi: float) -> Dict[str, float]:
+    # 条件分岐: `not features` を満たす経路を評価する。
     if not features:
         return {"delta_fit": float("nan"), "delta_sigma": float("nan")}
+
     implied = np.array([f.ell_obs / ell_a - float(f.mode) + phi for f in features], dtype=float)
     delta_fit = float(np.mean(implied))
+    # 条件分岐: `implied.size <= 1` を満たす経路を評価する。
     if implied.size <= 1:
         delta_sigma = float("nan")
     else:
         delta_sigma = float(np.std(implied, ddof=1) / math.sqrt(float(implied.size)))
+
     return {"delta_fit": delta_fit, "delta_sigma": delta_sigma}
 
 
@@ -331,8 +358,12 @@ def _phase_gate(
     te_max_abs_dell = float(max(abs(f.delta_ell) for f in te_features)) if te_features else float("nan")
     te_sign_alternation = True
     for row in te_features:
+        # 条件分岐: `row.kind == "max" and row.dl_bestfit <= 0.0` を満たす経路を評価する。
         if row.kind == "max" and row.dl_bestfit <= 0.0:
             te_sign_alternation = False
+
+        # 条件分岐: `row.kind == "min" and row.dl_bestfit >= 0.0` を満たす経路を評価する。
+
         if row.kind == "min" and row.dl_bestfit >= 0.0:
             te_sign_alternation = False
 
@@ -353,8 +384,10 @@ def _phase_gate(
 
     hard_gate_phase_shift = bool(cond_ee_phase and cond_te_phase and cond_te_sign)
     hard_fail = not hard_gate_phase_shift
+    # 条件分岐: `hard_fail` を満たす経路を評価する。
     if hard_fail:
         status = "reject"
+    # 条件分岐: 前段条件が不成立で、`cond_ee_ell and cond_te_ell` を追加評価する。
     elif cond_ee_ell and cond_te_ell:
         status = "pass"
     else:
@@ -414,6 +447,7 @@ def _plot(
     ax_tt.scatter([f.ell_obs for f in tt_features], [f.dl_bestfit for f in tt_features], color="#d62728", s=55, zorder=4, label="TT peaks (fit)")
     for f in tt_features:
         ax_tt.axvline(f.ell_pred, color="#d62728", linestyle="--", linewidth=1.0, alpha=0.5)
+
     ax_tt.set_xlim(120, 1100)
     ax_tt.set_xlabel("multipole ℓ")
     ax_tt.set_ylabel("D_ℓ [μK²]")
@@ -426,6 +460,7 @@ def _plot(
     ax_ee.scatter([f.ell_obs for f in ee_features], [f.dl_bestfit for f in ee_features], color="#2ca02c", s=55, zorder=4, label="EE peaks")
     for f in ee_features:
         ax_ee.axvline(f.ell_pred, color="#9467bd", linestyle="--", linewidth=1.0, alpha=0.65)
+
     ax_ee.set_xlim(220, 1250)
     ax_ee.set_xlabel("multipole ℓ")
     ax_ee.set_ylabel("D_ℓ [μK²]")
@@ -442,6 +477,7 @@ def _plot(
     ax_te.scatter([f.ell_obs for f in min_rows], [f.dl_bestfit for f in min_rows], color="#8c564b", s=52, marker="v", zorder=4, label="TE min")
     for f in te_features:
         ax_te.axvline(f.ell_pred, color="#17becf", linestyle="--", linewidth=1.0, alpha=0.65)
+
     ax_te.set_xlim(180, 1900)
     ax_te.set_xlabel("multipole ℓ")
     ax_te.set_ylabel("D_ℓ [μK²]")
@@ -530,6 +566,7 @@ def _copy_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str
         dst = public_dir / src.name
         shutil.copy2(src, dst)
         copied[src.name] = str(dst).replace("\\", "/")
+
     return copied
 
 
@@ -692,6 +729,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_fals, fals_payload)
 
     copied: Dict[str, str] = {}
+    # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
         copied = _copy_to_public([out_png, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
 
@@ -699,6 +737,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     print(f"[ok] fals: {out_fals}")
     print(f"[ok] csv : {out_csv}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] copied to public: {len(copied)} files")
 
@@ -728,8 +767,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

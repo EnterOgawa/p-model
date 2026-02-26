@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,6 +34,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -52,18 +54,24 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)
     except Exception:
         return None
@@ -71,34 +79,45 @@ def _safe_float(x: Any) -> Optional[float]:
 
 def _arxiv_id_from_url(url: str) -> str:
     s = (url or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return ""
 
     for key in ("arxiv.org/abs/", "arxiv.org/pdf/"):
         i = s.find(key)
+        # 条件分岐: `i < 0` を満たす経路を評価する。
         if i < 0:
             continue
+
         tail = s[i + len(key) :]
         tail = tail.split("?")[0].split("#")[0]
+        # 条件分岐: `key.endswith("/pdf/")` を満たす経路を評価する。
         if key.endswith("/pdf/"):
             tail = tail.split(".pdf")[0]
+
         return tail.strip("/").strip()
 
     return ""
 
 
 def _source_short(source: Any) -> str:
+    # 条件分岐: `not isinstance(source, dict)` を満たす経路を評価する。
     if not isinstance(source, dict):
         return ""
 
     arxiv = str(source.get("arxiv_id") or "").strip()
+    # 条件分岐: `not arxiv` を満たす経路を評価する。
     if not arxiv:
         url = str(source.get("url") or "").strip()
         arxiv = _arxiv_id_from_url(url)
+
+    # 条件分岐: `arxiv` を満たす経路を評価する。
+
     if arxiv:
         return f"arXiv:{arxiv}"
 
     doi = str(source.get("doi") or "").strip()
+    # 条件分岐: `doi` を満たす経路を評価する。
     if doi:
         return f"doi:{doi}"
 
@@ -107,12 +126,20 @@ def _source_short(source: Any) -> str:
 
 
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
+    # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
     if not math.isfinite(abs_z):
         return ("info", "#999999")
+
+    # 条件分岐: `abs_z < 3.0` を満たす経路を評価する。
+
     if abs_z < 3.0:
         return ("ok", "#2ca02c")
+
+    # 条件分岐: `abs_z < 5.0` を満たす経路を評価する。
+
     if abs_z < 5.0:
         return ("mixed", "#ffbf00")
+
     return ("ng", "#d62728")
 
 
@@ -124,17 +151,26 @@ def _select_ddr_representatives(rows: Sequence[Dict[str, Any]]) -> Dict[str, Opt
 
     for r in rows:
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `sig is None or not (sig > 0.0)` を満たす経路を評価する。
         if sig is None or not (sig > 0.0):
             continue
+
         uses_bao = bool(r.get("uses_bao", False))
+        # 条件分岐: `uses_bao and sig < best_bao_sig` を満たす経路を評価する。
         if uses_bao and sig < best_bao_sig:
             best_bao_sig = sig
             best_bao = dict(r)
+
+        # 条件分岐: `not uses_bao` を満たす経路を評価する。
+
         if not uses_bao:
             z_pbg = _safe_float(r.get("z_pbg_static"))
+            # 条件分岐: `z_pbg is None` を満たす経路を評価する。
             if z_pbg is None:
                 continue
+
             az = abs(float(z_pbg))
+            # 条件分岐: `az < best_no_bao_abs_z` を満たす経路を評価する。
             if az < best_no_bao_abs_z:
                 best_no_bao_abs_z = az
                 best_no_bao = dict(r)
@@ -181,12 +217,16 @@ def _plot_pack(rows: Sequence[PackRow], *, out_png: Path, cap_sigma: float) -> N
         ax.text(xline + 0.15, -0.6, txt, fontsize=9, color="#333333", alpha=0.8)
 
     for i, a in enumerate(abs_z):
+        # 条件分岐: `not math.isfinite(a)` を満たす経路を評価する。
         if not math.isfinite(a):
             continue
+
         shown = min(a, cap_sigma)
         text = f"{_fmt_float(a, digits=3)}σ"
+        # 条件分岐: `a > cap_sigma` を満たす経路を評価する。
         if a > cap_sigma:
             text = f">{_fmt_float(cap_sigma, digits=3)}σ（{_fmt_float(a, digits=3)}σ）"
+
         ax.text(
             shown + 0.2,
             float(i),
@@ -198,6 +238,7 @@ def _plot_pack(rows: Sequence[PackRow], *, out_png: Path, cap_sigma: float) -> N
         )
 
     # Right side: lightweight “assumption / dependency” table
+
     ax2.axis("off")
     ax2.set_title("前提と依存（例外規定の整理）", fontsize=12)
     header = ["検証", "距離指標依存", "注意（系統/前提）", "一次ソース"]
@@ -218,6 +259,7 @@ def _plot_pack(rows: Sequence[PackRow], *, out_png: Path, cap_sigma: float) -> N
     table.scale(1.0, 1.35)
     for (row_i, col_i), cell in table.get_celld().items():
         cell.set_edgecolor("#cccccc")
+        # 条件分岐: `row_i == 0` を満たす経路を評価する。
         if row_i == 0:
             cell.set_facecolor("#f0f0f0")
             cell.set_text_props(weight="bold", color="#222222")
@@ -256,10 +298,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     out_dir = Path(args.out_dir)
     cap_sigma = float(args.cap_sigma)
+    # 条件分岐: `not (cap_sigma > 0.0)` を満たす経路を評価する。
     if not (cap_sigma > 0.0):
         raise ValueError("--cap-sigma must be > 0")
 
     # Inputs (generated by other cosmology scripts in run_all).
+
     p_sn = out_dir / "cosmology_sn_time_dilation_constraints_metrics.json"
     p_cmb = out_dir / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
     p_ap = out_dir / "cosmology_alcock_paczynski_constraints_metrics.json"
@@ -291,18 +335,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     def ddr_note(kind: str) -> str:
         k = kind.lower()
         rep = reach_reps.get(k)
+        # 条件分岐: `not isinstance(rep, dict)` を満たす経路を評価する。
         if not isinstance(rep, dict):
             return "距離指標の前提に依存（補正量は解釈により非一意）"
+
         z1 = rep.get("z1_band_abs_delta_mu_mag") or {}
         dm1 = _safe_float(z1.get("central"))
         zlim02 = None
         for item in rep.get("reach_z_limit_by_budget_mag") or []:
+            # 条件分岐: `abs(float(item.get("budget_mag", 0.0)) - 0.2) < 1e-9` を満たす経路を評価する。
             if abs(float(item.get("budget_mag", 0.0)) - 0.2) < 1e-9:
                 zlim02 = _safe_float(item.get("z_limit"))
                 break
+
         parts = []
+        # 条件分岐: `dm1 is not None` を満たす経路を評価する。
         if dm1 is not None:
             parts.append(f"Δμ(z=1)≈{_fmt_float(abs(dm1), digits=3)} mag")
+
+        # 条件分岐: `zlim02 is not None` を満たす経路を評価する。
+
         if zlim02 is not None:
             parts.append(f"0.2 mag予算→z≈{_fmt_float(zlim02, digits=3)}")
 
@@ -310,19 +362,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             zlim_opt_total_3s = _safe_float(((err_env_opt_total.get(k) or {}).get("3.0sigma")) if isinstance(err_env_opt_total, dict) else None)
         except Exception:
             zlim_opt_total_3s = None
+
+        # 条件分岐: `zlim_opt_total_3s is not None` を満たす経路を評価する。
+
         if zlim_opt_total_3s is not None:
             extra = f"誤差予算(opt_total 3σ)→z≈{_fmt_float(zlim_opt_total_3s, digits=3)}"
+            # 条件分岐: `k == "no_bao" and isinstance(err_scan_best, dict) and err_scan_best` を満たす経路を評価する。
             if k == "no_bao" and isinstance(err_scan_best, dict) and err_scan_best:
                 bw = err_scan_best.get("bin_width")
                 nmin = err_scan_best.get("sn_min_points")
                 try:
+                    # 条件分岐: `bw is not None and nmin is not None` を満たす経路を評価する。
                     if bw is not None and nmin is not None:
                         extra += f"（最楽観: bin幅={_fmt_float(float(bw), digits=3)}; n≥{int(nmin)}）"
                 except Exception:
                     pass
+
             parts.append(extra)
+
+        # 条件分岐: `parts` を満たす経路を評価する。
+
         if parts:
             return " / ".join(parts)
+
         return "距離指標の前提に依存（補正量は解釈により非一意）"
 
     pack_rows: List[PackRow] = []
@@ -331,8 +393,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for key, label in [("bao", "DDR（SNIa+BAO 代表）"), ("no_bao", "DDR（クラスター+SNe 代表）")]:
         r = ddr_reps.get(key)
         z_pbg = _safe_float((r or {}).get("z_pbg_static"))
+        # 条件分岐: `z_pbg is None` を満たす経路を評価する。
         if z_pbg is None:
             continue
+
         pack_rows.append(
             PackRow(
                 label=label,
@@ -345,12 +409,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # AP: use max |z| across BOSS DR12 bins for the P_bg_exponential model.
+
     ap_z: List[float] = []
     for r in apm.get("rows") or []:
         mz = ((r.get("models") or {}).get("P_bg_exponential") or {}).get("z_score")
         z = _safe_float(mz)
+        # 条件分岐: `z is not None` を満たす経路を評価する。
         if z is not None:
             ap_z.append(float(z))
+
+    # 条件分岐: `ap_z` を満たす経路を評価する。
+
     if ap_z:
         ap_abs_max = max(abs(z) for z in ap_z)
         pack_rows.append(
@@ -365,9 +434,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # BAO: best-fit effective ruler evolution vs minimal (s_R=0).
+
     best_bao = ((bao.get("fit") or {}).get("best_fit") or {}) if isinstance(bao, dict) else {}
     s_r_bao = _safe_float(best_bao.get("s_R"))
     s_r_sigma = _safe_float(best_bao.get("s_R_sigma_1d"))
+    # 条件分岐: `s_r_bao is not None and s_r_sigma is not None and s_r_sigma > 0` を満たす経路を評価する。
     if s_r_bao is not None and s_r_sigma is not None and s_r_sigma > 0:
         z_sr0 = float(s_r_bao) / float(s_r_sigma)
         pack_rows.append(
@@ -382,7 +453,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # SN time dilation (distance-indicator independent): background-P predicts p_t=1 (same ratio as redshift).
+
     z_frw = _safe_float(sn_row.get("z_frw"))
+    # 条件分岐: `z_frw is not None` を満たす経路を評価する。
     if z_frw is not None:
         pack_rows.append(
             PackRow(
@@ -396,7 +469,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # CMB T(z) scaling (distance-indicator independent): background-P predicts standard scaling p_T=1 (β_T=0).
+
     z_std = _safe_float(cmb_row.get("z_std"))
+    # 条件分岐: `z_std is not None` を満たす経路を評価する。
     if z_std is not None:
         pack_rows.append(
             PackRow(
@@ -410,10 +485,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # Tolman surface brightness (evolution systematics).
+
     for r in tol.get("rows") or []:
         z_pbg = _safe_float(r.get("z_pbg_static"))
+        # 条件分岐: `z_pbg is None` を満たす経路を評価する。
         if z_pbg is None:
             continue
+
         band = str(r.get("short_label") or r.get("id") or "Tolman")
         pack_rows.append(
             PackRow(
@@ -492,6 +570,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

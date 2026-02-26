@@ -12,8 +12,10 @@ from typing import Any
 
 def _parse_float(text: str) -> float:
     s = str(text).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return float("nan")
+
     try:
         return float(s)
     except ValueError:
@@ -27,38 +29,49 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _median_abs(values: list[float]) -> float:
     finite = [abs(float(v)) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         w = csv.writer(f)
         w.writerow(headers)
@@ -69,21 +82,30 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def _weighted_mean(values: list[float], sigmas: list[float]) -> tuple[float, float]:
     weighted: list[tuple[float, float]] = []
     for value, sigma in zip(values, sigmas):
+        # 条件分岐: `math.isfinite(value) and math.isfinite(sigma) and sigma > 0.0` を満たす経路を評価する。
         if math.isfinite(value) and math.isfinite(sigma) and sigma > 0.0:
             weighted.append((value, sigma))
+
+    # 条件分岐: `weighted` を満たす経路を評価する。
+
     if weighted:
         ws = [1.0 / (sigma * sigma) for _, sigma in weighted]
         numerator = sum(w * value for w, (value, _) in zip(ws, weighted))
         denominator = sum(ws)
+        # 条件分岐: `denominator > 0.0` を満たす経路を評価する。
         if denominator > 0.0:
             return float(numerator / denominator), float(math.sqrt(1.0 / denominator))
 
     finite_values = [value for value in values if math.isfinite(value)]
+    # 条件分岐: `not finite_values` を満たす経路を評価する。
     if not finite_values:
         return float("nan"), float("nan")
+
     center = float(sum(finite_values) / float(len(finite_values)))
+    # 条件分岐: `len(finite_values) <= 1` を満たす経路を評価する。
     if len(finite_values) <= 1:
         return center, float("nan")
+
     variance = sum((x - center) ** 2 for x in finite_values) / float(len(finite_values) - 1)
     return center, float(math.sqrt(max(variance, 0.0)))
 
@@ -92,12 +114,18 @@ def _fit_radius_a13(*, a13: list[float], radii: list[float], weights: list[float
     s_xy = 0.0
     s_xx = 0.0
     for x, y, w in zip(a13, radii, weights):
+        # 条件分岐: `not (math.isfinite(x) and math.isfinite(y) and math.isfinite(w) and w > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(w) and w > 0.0):
             continue
+
         s_xy += w * x * y
         s_xx += w * x * x
+
+    # 条件分岐: `s_xx <= 0.0` を満たす経路を評価する。
+
     if s_xx <= 0.0:
         raise SystemExit("[fail] radius fit (A^(1/3)) is singular")
+
     return float(s_xy / s_xx)
 
 
@@ -115,37 +143,52 @@ def _fit_radius_a13_i(
     t1 = 0.0
     t2 = 0.0
     for x1, x2, y, w in zip(a13, i_asym, radii, weights):
+        # 条件分岐: `not (math.isfinite(x1) and math.isfinite(x2) and math.isfinite(y) and math.is...` を満たす経路を評価する。
         if not (math.isfinite(x1) and math.isfinite(x2) and math.isfinite(y) and math.isfinite(w) and w > 0.0):
             continue
+
         s11 += w * x1 * x1
         s22 += w * x2 * x2
         s12 += w * x1 * x2
         t1 += w * x1 * y
         t2 += w * x2 * y
+
     a11 = s11 + ridge
     a22 = s22 + ridge
     det = a11 * a22 - s12 * s12
+    # 条件分岐: `det == 0.0` を満たす経路を評価する。
     if det == 0.0:
         raise SystemExit("[fail] radius fit (A^(1/3)+I) is singular")
+
     r0 = (t1 * a22 - t2 * s12) / det
     r_i = (a11 * t2 - s12 * t1) / det
     return float(r0), float(r_i)
 
 
 def _j_from_radius(*, r_rms_fm: float, r_ref_fm: float, l_fm: float, j_ref_mev: float) -> float:
+    # 条件分岐: `not (math.isfinite(r_rms_fm) and math.isfinite(r_ref_fm) and math.isfinite(l_...` を満たす経路を評価する。
     if not (math.isfinite(r_rms_fm) and math.isfinite(r_ref_fm) and math.isfinite(l_fm) and math.isfinite(j_ref_mev) and l_fm > 0.0):
         return float("nan")
+
     r_sharp = math.sqrt(5.0 / 3.0) * r_rms_fm
     return float(j_ref_mev * math.exp((r_ref_fm - r_sharp) / l_fm))
 
 
 def _a_band(a: int) -> str:
+    # 条件分岐: `a <= 16` を満たす経路を評価する。
     if a <= 16:
         return "A_2_16"
+
+    # 条件分岐: `a <= 40` を満たす経路を評価する。
+
     if a <= 40:
         return "A_17_40"
+
+    # 条件分岐: `a <= 100` を満たす経路を評価する。
+
     if a <= 100:
         return "A_41_100"
+
     return "A_101_plus"
 
 
@@ -156,8 +199,12 @@ def main() -> None:
 
     ame_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"
     iaea_csv = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_csv.exists()` を満たす経路を評価する。
     if not ame_csv.exists():
         raise SystemExit(f"[fail] missing required input: {ame_csv}")
+
+    # 条件分岐: `not iaea_csv.exists()` を満たす経路を評価する。
+
     if not iaea_csv.exists():
         raise SystemExit(f"[fail] missing required input: {iaea_csv}")
 
@@ -172,15 +219,19 @@ def main() -> None:
             a = int(row["A"])
             ame_by_za[(z, a)] = row
             all_rows_for_j_consistency.append(row)
+            # 条件分岐: `not constants` を満たす経路を評価する。
             if not constants:
                 constants["L_fm"] = float(row["L_fm"])
                 constants["R_ref_fm"] = float(row["R_ref_fm"])
                 constants["J_ref_MeV"] = float(row["J_ref_MeV"])
 
+    # 条件分岐: `not ame_by_za` を満たす経路を評価する。
+
     if not ame_by_za:
         raise SystemExit("[fail] AME join map is empty")
 
     # Merge IAEA duplicates per (Z,A).
+
     iaea_groups: dict[tuple[int, int], list[dict[str, Any]]] = defaultdict(list)
     n_iaea_raw = 0
     with iaea_csv.open("r", encoding="utf-8", newline="") as f:
@@ -188,17 +239,24 @@ def main() -> None:
         for row in reader:
             z = int(float(row["z"]))
             a = int(float(row["a"]))
+            # 条件分岐: `z < 1 or a < 2` を満たす経路を評価する。
             if z < 1 or a < 2:
                 continue
+
             radius = _parse_float(row.get("radius_val", ""))
             sigma = _parse_float(row.get("radius_unc", ""))
             source_flag = "main"
+            # 条件分岐: `not math.isfinite(radius)` を満たす経路を評価する。
             if not math.isfinite(radius):
                 radius = _parse_float(row.get("radius_preliminary_val", ""))
                 sigma = _parse_float(row.get("radius_preliminary_unc", ""))
                 source_flag = "preliminary"
+
+            # 条件分岐: `not math.isfinite(radius)` を満たす経路を評価する。
+
             if not math.isfinite(radius):
                 continue
+
             n_iaea_raw += 1
             iaea_groups[(z, a)].append(
                 {
@@ -229,8 +287,10 @@ def main() -> None:
     joined_rows: list[dict[str, Any]] = []
     for (z, a), iaea in sorted(merged_iaea.items()):
         ame = ame_by_za.get((z, a))
+        # 条件分岐: `ame is None` を満たす経路を評価する。
         if ame is None:
             continue
+
         n = int(ame["N"])
         a13 = float(a ** (1.0 / 3.0))
         i_asym = float((n - z) / a)
@@ -266,6 +326,8 @@ def main() -> None:
                 "C_required": float(ame["C_required"]),
             }
         )
+
+    # 条件分岐: `len(joined_rows) < 50` を満たす経路を評価する。
 
     if len(joined_rows) < 50:
         raise SystemExit(f"[fail] too few joined charge-radius rows: {len(joined_rows)}")
@@ -327,6 +389,7 @@ def main() -> None:
         )
 
     # A-band summary.
+
     band_map: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for row in joined_rows:
         band_map[str(row["A_band"])].append(row)
@@ -347,6 +410,7 @@ def main() -> None:
         )
 
     # J_E(R_model) internal consistency over all nuclei.
+
     j_internal_rel_diffs: list[float] = []
     for row in all_rows_for_j_consistency:
         j_stored = float(row["J_E_MeV"])
@@ -355,10 +419,12 @@ def main() -> None:
         r_ref_fm = float(constants["R_ref_fm"])
         j_ref_mev = float(constants["J_ref_MeV"])
         j_calc = float(j_ref_mev * math.exp((r_ref_fm - r_model) / l_fm))
+        # 条件分岐: `j_stored != 0.0 and math.isfinite(j_stored)` を満たす経路を評価する。
         if j_stored != 0.0 and math.isfinite(j_stored):
             j_internal_rel_diffs.append((j_calc - j_stored) / j_stored)
 
     # Output CSVs.
+
     full_rows_sorted = sorted(joined_rows, key=lambda r: (int(r["A"]), int(r["Z"]), int(r["N"])))
     skin_proxy_top = sorted(skin_proxy_rows, key=lambda r: float(r["neutron_skin_proxy_fm"]), reverse=True)[:50]
 
@@ -488,6 +554,8 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] step=7.16.5 rows={len(full_rows_sorted)} metrics={out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

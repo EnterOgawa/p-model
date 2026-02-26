@@ -39,6 +39,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -63,6 +64,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -77,16 +79,22 @@ def _resolve_wsl_windows_path(p: str) -> Path:
     Resolve a path stored by WSL runs (e.g. /mnt/c/...) into a Windows path.
     """
     s = str(p).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return Path(s)
     # Only rewrite /mnt/<drive>/... when running on Windows.
     # When running inside WSL/Linux, keep the POSIX path as-is.
+
     if os.name != "nt":
         return Path(s)
+
+    # 条件分岐: `s.startswith("/mnt/") and len(s) >= 7 and s[5].isalpha() and s[6] == "/"` を満たす経路を評価する。
+
     if s.startswith("/mnt/") and len(s) >= 7 and s[5].isalpha() and s[6] == "/":
         drive = s[5].upper()
         rest = s[7:].replace("/", "\\")
         return Path(f"{drive}:\\{rest}")
+
     return Path(s)
 
 
@@ -97,14 +105,18 @@ def _iter_metrics_files() -> Iterable[Path]:
 
 def _sanitize_out_tag(tag: str) -> str:
     t = str(tag).strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return ""
+
     out: list[str] = []
     for ch in t:
+        # 条件分岐: `ch.isalnum() or ch in ("-", "_", ".")` を満たす経路を評価する。
         if ch.isalnum() or ch in ("-", "_", "."):
             out.append(ch)
         else:
             out.append("_")
+
     s = "".join(out).strip("._-")
     return s[:80]
 
@@ -118,6 +130,7 @@ def _estimator_spec_hash_from_params(params: Dict[str, Any]) -> str:
     remains usable without immediately re-running Corrfunc.
     """
     h = params.get("estimator_spec_hash", None)
+    # 条件分岐: `isinstance(h, str) and h.strip()` を満たす経路を評価する。
     if isinstance(h, str) and h.strip():
         return h.strip()
 
@@ -156,14 +169,25 @@ def _estimator_spec_hash_from_params(params: Dict[str, Any]) -> str:
 
 def _parse_zbin_id(z_bin: str) -> Optional[int]:
     zb = str(z_bin).strip().lower()
+    # 条件分岐: `not zb or zb == "none"` を満たす経路を評価する。
     if not zb or zb == "none":
         return None
+
+    # 条件分岐: `zb.startswith("b") and zb[1:].isdigit()` を満たす経路を評価する。
+
     if zb.startswith("b") and zb[1:].isdigit():
         return int(zb[1:])
+
+    # 条件分岐: `zb.startswith("zbin") and zb[4:].isdigit()` を満たす経路を評価する。
+
     if zb.startswith("zbin") and zb[4:].isdigit():
         return int(zb[4:])
+
+    # 条件分岐: `zb.isdigit()` を満たす経路を評価する。
+
     if zb.isdigit():
         return int(zb)
+
     return None
 
 
@@ -185,23 +209,33 @@ def _ross_cov_inv_for_s(
     - Caller supplies `s` already sliced to the fit range and aligned to that grid.
     """
     ross_dir = Path(ross_dir)
+    # 条件分岐: `not (ross_dir.exists() and ross_dir.is_dir())` を満たす経路を評価する。
     if not (ross_dir.exists() and ross_dir.is_dir()):
         raise FileNotFoundError(f"ross_dir not found: {ross_dir}")
+
+    # 条件分岐: `int(bincent) < 0 or int(bincent) > 4` を満たす経路を評価する。
+
     if int(bincent) < 0 or int(bincent) > 4:
         raise ValueError("--ross-bincent must be in 0..4")
+
+    # 条件分岐: `int(zbin) not in (1, 2, 3)` を満たす経路を評価する。
+
     if int(zbin) not in (1, 2, 3):
         raise ValueError(f"zbin must be 1..3 (got {zbin})")
 
     cov_path = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{int(zbin)}_covariance_monoquad_post_recon_bincent{int(bincent)}.dat"
+    # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
     if not cov_path.exists():
         raise FileNotFoundError(f"missing Ross covariance: {cov_path}")
 
     cov_full = _peakfit._read_cov(cov_path)
+    # 条件分岐: `cov_full.shape[0] != cov_full.shape[1] or (cov_full.shape[0] % 2) != 0` を満たす経路を評価する。
     if cov_full.shape[0] != cov_full.shape[1] or (cov_full.shape[0] % 2) != 0:
         raise ValueError(f"invalid Ross covariance shape: {cov_full.shape} from {cov_path}")
 
     n_all = int(cov_full.shape[0] // 2)
     s = np.asarray(s, dtype=float).reshape(-1)
+    # 条件分岐: `s.size == 0` を満たす経路を評価する。
     if s.size == 0:
         raise ValueError("empty s array for Ross covariance selection")
 
@@ -212,11 +246,19 @@ def _ross_cov_inv_for_s(
     for sv in s:
         t = (float(sv) - base) / bs
         it = int(round(t))
+        # 条件分岐: `abs(float(t) - float(it)) > 1e-6` を満たす経路を評価する。
         if abs(float(t) - float(it)) > 1e-6:
             raise ValueError(f"s value not aligned to Ross bins: s={sv} (bincent={bincent}, step={bs})")
+
+        # 条件分岐: `not (0 <= it < n_all)` を満たす経路を評価する。
+
         if not (0 <= it < n_all):
             raise ValueError(f"s index out of bounds for Ross covariance: s={sv} -> i={it} (n_all={n_all})")
+
         idx_mono.append(it)
+
+    # 条件分岐: `len(set(idx_mono)) != len(idx_mono)` を満たす経路を評価する。
+
     if len(set(idx_mono)) != len(idx_mono):
         raise ValueError("duplicate s bins detected while mapping to Ross covariance indices")
 
@@ -244,6 +286,7 @@ def _satpathy_cov_inv_for_s(
     - Our catalog-based ξℓ uses Corrfunc radial bins with edges [30,35,...,150] so bin centers are
       32.5, 37.5, ..., 147.5 (step 5). We assume Satpathy cov uses the same bin centers.
     """
+    # 条件分岐: `not (math.isfinite(float(s_step)) and abs(float(s_step) - 5.0) < 1e-9)` を満たす経路を評価する。
     if not (math.isfinite(float(s_step)) and abs(float(s_step) - 5.0) < 1e-9):
         raise ValueError(f"Satpathy cov requires s_step=5.0 (got {s_step})")
 
@@ -253,30 +296,43 @@ def _satpathy_cov_inv_for_s(
         else f"Satpathy_2016_COMBINEDDR12_Bin{int(zbin)}_CovarianceMatrix_pre_recon.txt"
     )
     cov_path = satpathy_dir / cov_name
+    # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
     if not cov_path.exists():
         raise FileNotFoundError(f"missing Satpathy covariance: {cov_path}")
 
     cov_full = _peakfit._read_satpathy_cov(cov_path)
+    # 条件分岐: `cov_full.shape[0] != cov_full.shape[1] or (cov_full.shape[0] % 2) != 0` を満たす経路を評価する。
     if cov_full.shape[0] != cov_full.shape[1] or (cov_full.shape[0] % 2) != 0:
         raise ValueError(f"invalid Satpathy covariance shape: {cov_full.shape} from {cov_path}")
+
     n_all = int(cov_full.shape[0] // 2)
 
     s = np.asarray(s, dtype=float).reshape(-1)
+    # 条件分岐: `s.size == 0` を満たす経路を評価する。
     if s.size == 0:
         raise ValueError("empty s array for Satpathy covariance selection")
 
     # Expected Satpathy bin-centers for 5 Mpc/h bins with edges [30,35,...,150].
+
     bs = float(s_step)
     s0 = 30.0 + 0.5 * bs  # 32.5
     idx: List[int] = []
     for sv in s:
         it = int(round((float(sv) - s0) / bs))
         expected = s0 + bs * float(it)
+        # 条件分岐: `abs(float(sv) - expected) > 1e-6` を満たす経路を評価する。
         if abs(float(sv) - expected) > 1e-6:
             raise ValueError(f"s not aligned to Satpathy cov grid: s={sv} (expected {expected})")
+
+        # 条件分岐: `it < 0 or it >= n_all` を満たす経路を評価する。
+
         if it < 0 or it >= n_all:
             raise ValueError(f"s index out of bounds for Satpathy covariance: s={sv} -> i={it} (n_all={n_all})")
+
         idx.append(it)
+
+    # 条件分岐: `len(set(idx)) != len(idx)` を満たす経路を評価する。
+
     if len(set(idx)) != len(idx):
         raise ValueError("duplicate s bins detected while mapping to Satpathy covariance indices")
 
@@ -326,14 +382,22 @@ def _load_cases(
             m = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             continue
+
         params = m.get("params", {}) or {}
+        # 条件分岐: `str(params.get("sample", "")) != str(sample)` を満たす経路を評価する。
         if str(params.get("sample", "")) != str(sample):
             continue
+
+        # 条件分岐: `str(params.get("caps", "")) != str(caps)` を満たす経路を評価する。
+
         if str(params.get("caps", "")) != str(caps):
             continue
+
         dist = str(params.get("distance_model", ""))
+        # 条件分岐: `dist not in set(dists)` を満たす経路を評価する。
         if dist not in set(dists):
             continue
+
         z_source = str(params.get("z_source", ""))
         los = str(params.get("los", ""))
         weight_scheme = str(params.get("weight_scheme", "boss_default") or "boss_default")
@@ -345,19 +409,27 @@ def _load_cases(
         coordinate_spec = params.get("coordinate_spec", {}) or {}
         z_cut = (params.get("z_cut", {}) or {}).get("bin", "none")
         z_bin = str(z_cut) if z_cut is not None else "none"
+        # 条件分岐: `require_zbin and (z_bin == "none")` を満たす経路を評価する。
         if require_zbin and (z_bin == "none"):
             continue
+
+        # 条件分岐: `(not require_zbin) and (z_bin != "none")` を満たす経路を評価する。
+
         if (not require_zbin) and (z_bin != "none"):
             # Avoid mixing z-binned files when the caller wants a single effective-z case.
             continue
 
         tag_in = params.get("out_tag", None)
+        # 条件分岐: `out_tag == "none"` を満たす経路を評価する。
         if out_tag == "none":
+            # 条件分岐: `tag_in not in (None, "", "null")` を満たす経路を評価する。
             if tag_in not in (None, "", "null"):
                 continue
+        # 条件分岐: 前段条件が不成立で、`out_tag == "any"` を追加評価する。
         elif out_tag == "any":
             pass
         else:
+            # 条件分岐: `str(tag_in) != str(out_tag)` を満たす経路を評価する。
             if str(tag_in) != str(out_tag):
                 continue
 
@@ -365,10 +437,15 @@ def _load_cases(
         outputs = m.get("outputs", {}) or {}
         npz_raw = outputs.get("npz", "")
         npz_path = _resolve_wsl_windows_path(str(npz_raw))
+        # 条件分岐: `not npz_path.is_absolute()` を満たす経路を評価する。
         if not npz_path.is_absolute():
             npz_path = (_ROOT / npz_path).resolve()
+
+        # 条件分岐: `not npz_path.exists()` を満たす経路を評価する。
+
         if not npz_path.exists():
             continue
+
         cases.append(
             CatalogCase(
                 sample=str(sample),
@@ -391,22 +468,35 @@ def _load_cases(
         )
 
     # Sort within each dist by z_eff, then z_bin.
+
     cases.sort(key=lambda c: (c.dist, c.z_eff, c.z_bin))
     return cases
 
 
 def _ensure_2d(x: np.ndarray, *, n0: int, n1: int, name: str) -> np.ndarray:
     x = np.asarray(x, dtype=float)
+    # 条件分岐: `x.size == 0` を満たす経路を評価する。
     if x.size == 0:
         return np.zeros((n0, n1), dtype=float)
+
+    # 条件分岐: `x.ndim == 2` を満たす経路を評価する。
+
     if x.ndim == 2:
+        # 条件分岐: `x.shape != (n0, n1)` を満たす経路を評価する。
         if x.shape != (n0, n1):
             raise ValueError(f"{name} shape mismatch: {x.shape} vs ({n0},{n1})")
+
         return x
+
+    # 条件分岐: `x.ndim == 1` を満たす経路を評価する。
+
     if x.ndim == 1:
+        # 条件分岐: `x.size != n0 * n1` を満たす経路を評価する。
         if x.size != n0 * n1:
             raise ValueError(f"{name} size mismatch: {x.size} vs {n0*n1}")
+
         return x.reshape(n0, n1)
+
     raise ValueError(f"{name} invalid ndim: {x.ndim}")
 
 
@@ -435,13 +525,17 @@ def _approx_var_from_paircounts(
     - Propagate to multipoles via μ integration.
     """
     mu_edges = np.asarray(mu_edges, dtype=float).reshape(-1)
+    # 条件分岐: `mu_edges.size < 2` を満たす経路を評価する。
     if mu_edges.size < 2:
         # Fallback: flat unit variance.
         n = int(np.asarray(s, dtype=float).size)
         return np.full(n, 1.0, dtype=float), np.full(n, 1.0, dtype=float)
+
     dmu = np.diff(mu_edges)
+    # 条件分岐: `np.any(dmu <= 0)` を満たす経路を評価する。
     if np.any(dmu <= 0):
         raise ValueError("mu_edges must be strictly increasing")
+
     mu_mid = 0.5 * (mu_edges[:-1] + mu_edges[1:])
 
     n0 = int(np.asarray(s, dtype=float).size)
@@ -451,12 +545,18 @@ def _approx_var_from_paircounts(
     rr = _ensure_2d(rr_w, n0=n0, n1=n1, name="rr_w")
 
     src = str(var_source)
+    # 条件分岐: `src == "auto"` を満たす経路を評価する。
     if src == "auto":
         src = "dd" if np.any(dd > 0) else "rr"
+
+    # 条件分岐: `src == "dd"` を満たす経路を評価する。
+
     if src == "dd":
         pairs = dd
+    # 条件分岐: 前段条件が不成立で、`src == "rr"` を追加評価する。
     elif src == "rr":
         pairs = rr
+    # 条件分岐: 前段条件が不成立で、`src == "dr"` を追加評価する。
     elif src == "dr":
         pairs = dr
     else:
@@ -474,8 +574,10 @@ def _approx_var_from_paircounts(
 
     # Emphasize quadrupole if requested (screening policy).
     qw = float(quad_weight)
+    # 条件分岐: `not (qw > 0.0 and math.isfinite(qw))` を満たす経路を評価する。
     if not (qw > 0.0 and math.isfinite(qw)):
         raise ValueError("--quad-weight must be > 0")
+
     var_xi2 = var_xi2 / (qw * qw)
 
     # Guard against zeros.
@@ -487,8 +589,10 @@ def _approx_var_from_paircounts(
 def _diag_cov_inv(var0: np.ndarray, var2: np.ndarray, *, eps: float = 1e-30) -> np.ndarray:
     var0 = np.asarray(var0, dtype=float).reshape(-1)
     var2 = np.asarray(var2, dtype=float).reshape(-1)
+    # 条件分岐: `var0.size != var2.size` を満たす経路を評価する。
     if var0.size != var2.size:
         raise ValueError("var0/var2 size mismatch")
+
     inv0 = 1.0 / np.maximum(var0, float(eps))
     inv2 = 1.0 / np.maximum(var2, float(eps))
     d = np.concatenate([inv0, inv2], axis=0)
@@ -503,11 +607,15 @@ def _cov_shrink_to_diag(cov: np.ndarray, *, lam: float) -> np.ndarray:
     λ=0 keeps C as-is, λ=1 makes it diagonal-only.
     """
     lam = float(lam)
+    # 条件分岐: `not (math.isfinite(lam) and 0.0 <= lam <= 1.0)` を満たす経路を評価する。
     if not (math.isfinite(lam) and 0.0 <= lam <= 1.0):
         raise ValueError("--cov-shrinkage must be within [0,1]")
+
     cov = np.asarray(cov, dtype=float)
+    # 条件分岐: `lam <= 0.0` を満たす経路を評価する。
     if lam <= 0.0:
         return cov
+
     d = np.diag(np.diag(cov))
     return (1.0 - lam) * cov + lam * d
 
@@ -542,19 +650,30 @@ def _cov_band_by_s_index(
     n_bins = int(n_bins)
     n_components = int(n_components)
     bw = int(bandwidth_bins)
+    # 条件分岐: `n_bins <= 0` を満たす経路を評価する。
     if n_bins <= 0:
         raise ValueError("n_bins must be > 0")
+
+    # 条件分岐: `n_components <= 0` を満たす経路を評価する。
+
     if n_components <= 0:
         raise ValueError("n_components must be > 0")
+
     expected = (2 * n_components * n_bins, 2 * n_components * n_bins)
+    # 条件分岐: `cov.shape != expected` を満たす経路を評価する。
     if cov.shape != expected:
         raise ValueError(f"invalid cov shape for banding: {cov.shape} (expected {expected})")
+
+    # 条件分岐: `bw < 0` を満たす経路を評価する。
+
     if bw < 0:
         return cov, {"keep_fraction": 1.0, "kept": float(cov.size), "zeroed": 0.0}
 
     bw_x = bw
+    # 条件分岐: `bandwidth_xi02_bins is not None` を満たす経路を評価する。
     if bandwidth_xi02_bins is not None:
         bw_x_raw = int(bandwidth_xi02_bins)
+        # 条件分岐: `bw_x_raw >= 0` を満たす経路を評価する。
         if bw_x_raw >= 0:
             bw_x = bw_x_raw
 
@@ -584,13 +703,20 @@ def _cov_zero_xi02_cross(
     cov = np.asarray(cov, dtype=float)
     n_bins = int(n_bins)
     n_components = int(n_components)
+    # 条件分岐: `n_bins <= 0` を満たす経路を評価する。
     if n_bins <= 0:
         raise ValueError("n_bins must be > 0")
+
+    # 条件分岐: `n_components <= 0` を満たす経路を評価する。
+
     if n_components <= 0:
         raise ValueError("n_components must be > 0")
+
     expected = (2 * n_components * n_bins, 2 * n_components * n_bins)
+    # 条件分岐: `cov.shape != expected` を満たす経路を評価する。
     if cov.shape != expected:
         raise ValueError(f"invalid cov shape for xi02 zeroing: {cov.shape} (expected {expected})")
+
     idx = np.arange(2 * n_components * n_bins, dtype=int)
     ell = (idx // n_bins) % 2  # 0: xi0, 1: xi2
     same_ell = ell[:, None] == ell[None, :]
@@ -615,9 +741,12 @@ def _ledoit_wolf_shrinkage_to_diag(y: np.ndarray) -> float:
     - Scaling of y (or jackknife vs sample covariance convention) does not affect λ.
     """
     y = np.asarray(y, dtype=float)
+    # 条件分岐: `y.ndim != 2` を満たす経路を評価する。
     if y.ndim != 2:
         raise ValueError("y must be 2D (n_samples, p)")
+
     n, p = int(y.shape[0]), int(y.shape[1])
+    # 条件分岐: `n < 2 or p < 2` を満たす経路を評価する。
     if n < 2 or p < 2:
         return 1.0
 
@@ -625,23 +754,28 @@ def _ledoit_wolf_shrinkage_to_diag(y: np.ndarray) -> float:
     finite_cols = np.all(np.isfinite(x), axis=0)
     x = x[:, finite_cols]
     n, p = int(x.shape[0]), int(x.shape[1])
+    # 条件分岐: `p < 2` を満たす経路を評価する。
     if p < 2:
         return 1.0
 
     # Second moment (not the unbiased covariance); scaling does not affect λ.
+
     s = (x.T @ x) / float(n)
 
     off = ~np.eye(p, dtype=bool)
     gamma = float(np.sum(np.square(s[off])))
+    # 条件分岐: `not (math.isfinite(gamma) and gamma > 0.0)` を満たす経路を評価する。
     if not (math.isfinite(gamma) and gamma > 0.0):
         return 1.0
 
     # E[||x x^T - S||_F^2] for off-diagonal only (estimated by sample mean).
+
     prod = x[:, :, None] * x[:, None, :]
     diff = prod - s[None, :, :]
     diff_flat = diff.reshape(n, p * p)
     off_flat = off.reshape(p * p)
     phi = float(np.mean(np.square(diff_flat[:, off_flat])))
+    # 条件分岐: `not math.isfinite(phi)` を満たす経路を評価する。
     if not math.isfinite(phi):
         return 1.0
 
@@ -657,15 +791,25 @@ def _status_from_abs_sigma(abs_sigma: float | None, *, ok_max: float, mixed_max:
     For ε screening:
       abs_sigma := |ε| / σ_ε,  where σ_ε is derived from the 1σ profile CI width.
     """
+    # 条件分岐: `abs_sigma is None` を満たす経路を評価する。
     if abs_sigma is None:
         return "info"
+
     a = float(abs_sigma)
+    # 条件分岐: `not math.isfinite(a)` を満たす経路を評価する。
     if not math.isfinite(a):
         return "info"
+
+    # 条件分岐: `a <= float(ok_max)` を満たす経路を評価する。
+
     if a <= float(ok_max):
         return "ok"
+
+    # 条件分岐: `a <= float(mixed_max)` を満たす経路を評価する。
+
     if a <= float(mixed_max):
         return "mixed"
+
     return "ng"
 
 
@@ -802,55 +946,85 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
     cov_path_override = str(getattr(args, "cov_path", "")).strip()
     cov_suffix_override = str(getattr(args, "cov_suffix", "")).strip()
+    # 条件分岐: `cov_path_override and cov_suffix_override` を満たす経路を評価する。
     if cov_path_override and cov_suffix_override:
         raise SystemExit("--cov-path and --cov-suffix are mutually exclusive")
+
+    # 条件分岐: `(cov_path_override or cov_suffix_override) and str(args.cov_source) not in {"...` を満たす経路を評価する。
+
     if (cov_path_override or cov_suffix_override) and str(args.cov_source) not in {"jackknife", "rascalc", "vac"}:
         raise SystemExit("--cov-path/--cov-suffix is only supported with --cov-source jackknife, rascalc, or vac")
 
     sample = str(args.sample)
     caps = str(args.caps)
     dists = [d.strip() for d in str(args.dists).split(",") if d.strip()]
+    # 条件分岐: `not dists` を満たす経路を評価する。
     if not dists:
         raise SystemExit("--dists must not be empty")
 
     cases = _load_cases(sample=sample, caps=caps, dists=dists, require_zbin=bool(args.require_zbin), out_tag=str(args.out_tag))
+    # 条件分岐: `not cases` を満たす経路を評価する。
     if not cases:
         raise SystemExit(f"no matching inputs for sample={sample}, caps={caps}, dists={dists}, require_zbin={args.require_zbin}")
 
     # Guard: coordinate-spec must be fixed across inputs to avoid mixing "theory vs coordinate" effects.
+
     z_sources = {str(c.z_source) for c in cases if str(c.z_source)}
     los_defs = {str(c.los) for c in cases if str(c.los)}
     weight_schemes = {str(c.weight_scheme) for c in cases if str(c.weight_scheme)}
     est_hashes = {str(c.estimator_spec_hash) for c in cases if str(c.estimator_spec_hash)}
     recon_modes = {str(c.recon_mode) for c in cases if str(c.recon_mode)}
+    # 条件分岐: `len(z_sources) != 1` を満たす経路を評価する。
     if len(z_sources) != 1:
         details = ", ".join(sorted(z_sources)) if z_sources else "(missing)"
         raise SystemExit(f"mixed z_source across inputs: {details}")
+
+    # 条件分岐: `len(los_defs) != 1` を満たす経路を評価する。
+
     if len(los_defs) != 1:
         details = ", ".join(sorted(los_defs)) if los_defs else "(missing)"
         raise SystemExit(f"mixed los across inputs: {details}")
+
+    # 条件分岐: `len(weight_schemes) != 1` を満たす経路を評価する。
+
     if len(weight_schemes) != 1:
         details = ", ".join(sorted(weight_schemes)) if weight_schemes else "(missing)"
         raise SystemExit(f"mixed weight_scheme across inputs: {details}")
+
+    # 条件分岐: `len(est_hashes) != 1` を満たす経路を評価する。
+
     if len(est_hashes) != 1:
         details = ", ".join(sorted(est_hashes)) if est_hashes else "(missing)"
         raise SystemExit(f"mixed estimator_spec across inputs (re-run xi-from-catalogs or filter inputs): {details}")
+
+    # 条件分岐: `len(recon_modes) != 1` を満たす経路を評価する。
+
     if len(recon_modes) != 1:
         details = ", ".join(sorted(recon_modes)) if recon_modes else "(missing)"
         raise SystemExit(f"mixed recon_mode across inputs (filter inputs): {details}")
 
     lcdm_cases = [c for c in cases if str(c.dist) == "lcdm"]
+    # 条件分岐: `lcdm_cases` を満たす経路を評価する。
     if lcdm_cases:
         base_omega_m = float(lcdm_cases[0].lcdm_omega_m)
         base_n_grid = int(lcdm_cases[0].lcdm_n_grid)
         base_z_grid_max = float(lcdm_cases[0].lcdm_z_grid_max)
+        # 条件分岐: `not (math.isfinite(base_omega_m) and math.isfinite(base_z_grid_max) and base_...` を満たす経路を評価する。
         if not (math.isfinite(base_omega_m) and math.isfinite(base_z_grid_max) and base_n_grid > 0):
             raise SystemExit("lcdm coordinate spec missing/invalid in inputs (run xi-from-catalogs with fixed --lcdm-*)")
+
         for c in lcdm_cases[1:]:
+            # 条件分岐: `(not math.isfinite(float(c.lcdm_omega_m))) or abs(float(c.lcdm_omega_m) - bas...` を満たす経路を評価する。
             if (not math.isfinite(float(c.lcdm_omega_m))) or abs(float(c.lcdm_omega_m) - base_omega_m) > 1e-12:
                 raise SystemExit("mixed lcdm_omega_m across inputs (fix by re-running xi-from-catalogs)")
+
+            # 条件分岐: `int(c.lcdm_n_grid) != base_n_grid` を満たす経路を評価する。
+
             if int(c.lcdm_n_grid) != base_n_grid:
                 raise SystemExit("mixed lcdm_n_grid across inputs (fix by re-running xi-from-catalogs)")
+
+            # 条件分岐: `(not math.isfinite(float(c.lcdm_z_grid_max))) or abs(float(c.lcdm_z_grid_max)...` を満たす経路を評価する。
+
             if (not math.isfinite(float(c.lcdm_z_grid_max))) or abs(float(c.lcdm_z_grid_max) - base_z_grid_max) > 1e-12:
                 raise SystemExit("mixed lcdm_z_grid_max across inputs (fix by re-running xi-from-catalogs)")
     else:
@@ -867,27 +1041,35 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     estimator_spec_common: Dict[str, Any] = {"estimator_spec_hash": next(iter(est_hashes)) if est_hashes else ""}
 
     mu_n = int(args.mu_n)
+    # 条件分岐: `mu_n < 20` を満たす経路を評価する。
     if mu_n < 20:
         raise SystemExit("--mu-n must be >= 20")
+
     mu, w = np.polynomial.legendre.leggauss(mu_n)
     sqrt1mu2 = np.sqrt(np.maximum(0.0, 1.0 - mu * mu))
     p2_fid = _peakfit._p2(mu)
 
     alpha_grid = np.arange(float(args.alpha_min), float(args.alpha_max) + 0.5 * float(args.alpha_step), float(args.alpha_step))
     eps_grid = np.arange(float(args.eps_min), float(args.eps_max) + 0.5 * float(args.eps_step), float(args.eps_step))
+    # 条件分岐: `alpha_grid.size < 5 or eps_grid.size < 5` を満たす経路を評価する。
     if alpha_grid.size < 5 or eps_grid.size < 5:
         raise SystemExit("grid too small; widen ranges or reduce steps")
 
     eps_rescan_factor = float(args.eps_rescan_factor)
     eps_rescan_max_expands = int(args.eps_rescan_max_expands)
+    # 条件分岐: `not (math.isfinite(eps_rescan_factor) and eps_rescan_factor > 1.0)` を満たす経路を評価する。
     if not (math.isfinite(eps_rescan_factor) and eps_rescan_factor > 1.0):
         raise SystemExit("--eps-rescan-factor must be > 1")
+
+    # 条件分岐: `eps_rescan_max_expands < 0` を満たす経路を評価する。
+
     if eps_rescan_max_expands < 0:
         raise SystemExit("--eps-rescan-max-expands must be >= 0")
 
     cov_shrinkage_raw = str(getattr(args, "cov_shrinkage", "") or "").strip().lower()
     cov_shrinkage_mode = "fixed"
     cov_shrinkage_fixed: float | None = None
+    # 条件分岐: `cov_shrinkage_raw in ("auto", "lw", "ledoit_wolf")` を満たす経路を評価する。
     if cov_shrinkage_raw in ("auto", "lw", "ledoit_wolf"):
         cov_shrinkage_mode = "ledoit_wolf_diag"
         cov_shrinkage_fixed = None
@@ -896,6 +1078,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cov_shrinkage_fixed = float(cov_shrinkage_raw)
         except Exception as e:
             raise SystemExit("--cov-shrinkage must be a float in [0,1] or 'auto'") from e
+
+        # 条件分岐: `not (math.isfinite(cov_shrinkage_fixed) and 0.0 <= cov_shrinkage_fixed <= 1.0)` を満たす経路を評価する。
+
         if not (math.isfinite(cov_shrinkage_fixed) and 0.0 <= cov_shrinkage_fixed <= 1.0):
             raise SystemExit("--cov-shrinkage must be within [0,1]")
 
@@ -904,13 +1089,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     r0 = float(args.r0)
     sigma = float(args.sigma)
     smooth_power_max = int(args.smooth_power_max)
+    # 条件分岐: `smooth_power_max < 0` を満たす経路を評価する。
     if smooth_power_max < 0:
         raise SystemExit("--smooth-power-max must be >= 0")
 
     cov_bandwidth_bins = int(args.cov_bandwidth_bins)
     cov_bandwidth_xi02_bins = int(args.cov_bandwidth_xi02_bins)
+    # 条件分岐: `cov_bandwidth_bins < -1` を満たす経路を評価する。
     if cov_bandwidth_bins < -1:
         raise SystemExit("--cov-bandwidth-bins must be >= -1")
+
+    # 条件分岐: `cov_bandwidth_xi02_bins < -1` を満たす経路を評価する。
+
     if cov_bandwidth_xi02_bins < -1:
         raise SystemExit("--cov-bandwidth-xi02-bins must be >= -1")
 
@@ -931,25 +1121,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             dr_w = np.asarray(z.get("dr_w", []), dtype=float)
             rr_w = np.asarray(z.get("rr_w", []), dtype=float)
 
+        # 条件分岐: `xi0_all.ndim == 1` を満たす経路を評価する。
+
         if xi0_all.ndim == 1:
             n_components = 1
             m_fit = (s_all >= r_min) & (s_all <= r_max) & np.isfinite(xi0_all) & np.isfinite(xi2_all)
+        # 条件分岐: 前段条件が不成立で、`xi0_all.ndim == 2` を追加評価する。
         elif xi0_all.ndim == 2:
+            # 条件分岐: `xi2_all.ndim != 2 or xi2_all.shape != xi0_all.shape` を満たす経路を評価する。
             if xi2_all.ndim != 2 or xi2_all.shape != xi0_all.shape:
                 raise SystemExit(f"invalid multi-component xi shapes: xi0={xi0_all.shape}, xi2={xi2_all.shape}")
+
+            # 条件分岐: `xi0_all.shape[1] != s_all.shape[0]` を満たす経路を評価する。
+
             if xi0_all.shape[1] != s_all.shape[0]:
                 raise SystemExit(f"invalid multi-component xi vs s: xi0={xi0_all.shape}, s={s_all.shape}")
+
             n_components = int(xi0_all.shape[0])
             finite = np.all(np.isfinite(xi0_all), axis=0) & np.all(np.isfinite(xi2_all), axis=0)
             m_fit = (s_all >= r_min) & (s_all <= r_max) & finite
+            # 条件分岐: `components.size and int(components.size) != n_components` を満たす経路を評価する。
             if components.size and int(components.size) != n_components:
                 raise SystemExit(f"components length mismatch: components={components.size}, n_components={n_components}")
         else:
             raise SystemExit(f"unsupported xi0 ndim: {xi0_all.ndim}")
 
+        # 条件分岐: `int(np.count_nonzero(m_fit)) < 10` を満たす経路を評価する。
+
         if int(np.count_nonzero(m_fit)) < 10:
             # Too few points to stabilize the linear parameters.
             continue
+
         s = s_all[m_fit]
         xi0 = xi0_all[m_fit] if n_components == 1 else xi0_all[:, m_fit]
         xi2 = xi2_all[m_fit] if n_components == 1 else xi2_all[:, m_fit]
@@ -971,12 +1173,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         except Exception:
             var0 = np.full(int(s.size), 1.0, dtype=float)
             var2 = np.full(int(s.size), 1.0, dtype=float)
+
         cov_source = str(args.cov_source)
         cov_source_actual = "diag_paircount_proxy"
         cov_inv = _diag_cov_inv(var0, var2)
+        # 条件分岐: `int(n_components) > 1` を満たす経路を評価する。
         if int(n_components) > 1:
             # Treat components as independent under the crude diagonal proxy.
             cov_inv = np.kron(np.eye(int(n_components), dtype=float), cov_inv)
+
         cov_inputs: Dict[str, Any] = {
             "type": cov_source_actual,
             "var_source": str(args.var_source),
@@ -990,23 +1195,32 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         use_ross = False
         use_satpathy = False
         use_vac = False
+        # 条件分岐: `cov_source == "jackknife"` を満たす経路を評価する。
         if cov_source == "jackknife":
             use_jackknife = True
+        # 条件分岐: 前段条件が不成立で、`cov_source == "rascalc"` を追加評価する。
         elif cov_source == "rascalc":
             use_rascalc = True
+        # 条件分岐: 前段条件が不成立で、`cov_source == "ross"` を追加評価する。
         elif cov_source == "ross":
             use_ross = True
+        # 条件分岐: 前段条件が不成立で、`cov_source == "satpathy"` を追加評価する。
         elif cov_source == "satpathy":
             use_satpathy = True
+        # 条件分岐: 前段条件が不成立で、`cov_source == "vac"` を追加評価する。
         elif cov_source == "vac":
             use_vac = True
+        # 条件分岐: 前段条件が不成立で、`cov_source == "auto"` を追加評価する。
         elif cov_source == "auto":
+            # 条件分岐: `case.sample == "cmasslowztot" and case.caps == "combined" and case.z_bin != "...` を満たす経路を評価する。
             if case.sample == "cmasslowztot" and case.caps == "combined" and case.z_bin != "none":
                 # Use Satpathy for pre-recon, Ross for post-recon.
                 if str(case.recon_mode) == "none":
                     use_satpathy = True
                 else:
                     use_ross = True
+
+        # 条件分岐: `use_vac` を満たす経路を評価する。
 
         if use_vac:
             # Per-case projected full covariance for multi-component inputs (DESI DR1 VAC lya-correlations).
@@ -1016,19 +1230,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if cov_path_override:
                 cov_path = Path(cov_path_override)
                 cov_path = cov_path if cov_path.is_absolute() else (_ROOT / cov_path).resolve()
+            # 条件分岐: 前段条件が不成立で、`cov_suffix_override` を追加評価する。
             elif cov_suffix_override:
                 cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__{cov_suffix_override}.npz")
             else:
                 cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__vac_cov.npz")
+
+            # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
+
             if not cov_path.exists():
                 raise SystemExit(
                     "vac covariance file not found. "
                     f"Expected: {cov_path} "
                     "(run scripts/cosmology/cosmology_bao_xi_from_desi_dr1_vac_lya_correlations.py)"
                 )
+
             with np.load(cov_path) as zc:
                 s_cov = np.asarray(zc["s"], dtype=float).reshape(-1)
                 cov_full = np.asarray(zc["cov"], dtype=float)
+
+            # 条件分岐: `s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e...` を満たす経路を評価する。
 
             if s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e-12):
                 raise SystemExit(
@@ -1044,13 +1265,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             for c in range(int(n_components)):
                 blocks.append(idx + (2 * c + 0) * n_all)
                 blocks.append(idx + (2 * c + 1) * n_all)
+
             sel = np.concatenate(blocks, axis=0)
             cov = cov_full[np.ix_(sel, sel)]
 
+            # 条件分岐: `bool(args.cov_zero_xi02)` を満たす経路を評価する。
             if bool(args.cov_zero_xi02):
                 cov = _cov_zero_xi02_cross(cov, n_bins=int(idx.size), n_components=int(n_components))
 
             banding_stats: Dict[str, float] | None = None
+            # 条件分岐: `cov_bandwidth_bins >= 0` を満たす経路を評価する。
             if cov_bandwidth_bins >= 0:
                 cov, banding_stats = _cov_band_by_s_index(
                     cov,
@@ -1062,6 +1286,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             cov_shrinkage_actual = cov_shrinkage_fixed
             shrinkage_note: str | None = None
+            # 条件分岐: `cov_shrinkage_actual is None` を満たす経路を評価する。
             if cov_shrinkage_actual is None:
                 cov_shrinkage_actual = 0.0
                 shrinkage_note = "auto requested, but vac cov has no y_jk; fallback to λ=0"
@@ -1083,10 +1308,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "xi02_zeroed": bool(args.cov_zero_xi02),
                 **({"shrinkage_note": str(shrinkage_note)} if shrinkage_note else {}),
             }
+            # 条件分岐: `cov_path_override` を満たす経路を評価する。
             if cov_path_override:
                 cov_inputs["cov_path_override"] = str(cov_path_override)
+
+            # 条件分岐: `cov_suffix_override` を満たす経路を評価する。
+
             if cov_suffix_override:
                 cov_inputs["cov_suffix_override"] = str(cov_suffix_override)
+
+        # 条件分岐: `use_jackknife` を満たす経路を評価する。
 
         if use_jackknife:
             # Per-case covariance estimated from the same catalogs via sky jackknife.
@@ -1096,20 +1327,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if cov_path_override:
                 cov_path = Path(cov_path_override)
                 cov_path = cov_path if cov_path.is_absolute() else (_ROOT / cov_path).resolve()
+            # 条件分岐: 前段条件が不成立で、`cov_suffix_override` を追加評価する。
             elif cov_suffix_override:
                 cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__{cov_suffix_override}.npz")
             else:
                 cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__jk_cov.npz")
+
+            # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
+
             if not cov_path.exists():
                 raise SystemExit(
                     "jackknife covariance file not found. "
                     f"Expected: {cov_path} "
                     "(run scripts/cosmology/cosmology_bao_xi_jackknife_cov_from_catalogs.py under WSL)"
                 )
+
             with np.load(cov_path) as zc:
                 s_cov = np.asarray(zc["s"], dtype=float).reshape(-1)
                 cov_full = np.asarray(zc["cov"], dtype=float)
                 y_jk = np.asarray(zc["y_jk"], dtype=float) if ("y_jk" in zc.files) else np.asarray([], dtype=float)
+
+            # 条件分岐: `s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e...` を満たす経路を評価する。
 
             if s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e-12):
                 raise SystemExit(
@@ -1121,6 +1359,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             idx = np.nonzero(m_fit)[0].astype(int, copy=False)
             p = int(2 * int(n_components) * n_all)
             cov_full = np.asarray(cov_full, dtype=float).reshape(p, p)
+            # 条件分岐: `int(n_components) == 1` を満たす経路を評価する。
             if int(n_components) == 1:
                 sel = np.concatenate([idx, idx + n_all], axis=0)
             else:
@@ -1128,12 +1367,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 for c in range(int(n_components)):
                     blocks.append(idx + (2 * c + 0) * n_all)
                     blocks.append(idx + (2 * c + 1) * n_all)
+
                 sel = np.concatenate(blocks, axis=0)
+
             cov = cov_full[np.ix_(sel, sel)]
+            # 条件分岐: `bool(args.cov_zero_xi02)` を満たす経路を評価する。
             if bool(args.cov_zero_xi02):
                 cov = _cov_zero_xi02_cross(cov, n_bins=int(idx.size), n_components=int(n_components))
 
             banding_stats: Dict[str, float] | None = None
+            # 条件分岐: `cov_bandwidth_bins >= 0` を満たす経路を評価する。
             if cov_bandwidth_bins >= 0:
                 cov, banding_stats = _cov_band_by_s_index(
                     cov,
@@ -1145,14 +1388,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             cov_shrinkage_actual = cov_shrinkage_fixed
             shrinkage_note: str | None = None
+            # 条件分岐: `cov_shrinkage_actual is None` を満たす経路を評価する。
             if cov_shrinkage_actual is None:
+                # 条件分岐: `y_jk.size == 0` を満たす経路を評価する。
                 if y_jk.size == 0:
                     cov_shrinkage_actual = 0.0
                     shrinkage_note = "auto requested, but y_jk missing in jk_cov; fallback to λ=0"
                 else:
                     y_jk = np.asarray(y_jk, dtype=float)
+                    # 条件分岐: `y_jk.ndim != 2 or int(y_jk.shape[1]) != p` を満たす経路を評価する。
                     if y_jk.ndim != 2 or int(y_jk.shape[1]) != p:
                         raise SystemExit(f"y_jk shape mismatch in jk_cov: got {y_jk.shape}, expected (*,{p})")
+
                     y_fit = y_jk[:, sel]
                     cov_shrinkage_actual = _ledoit_wolf_shrinkage_to_diag(y_fit)
 
@@ -1162,15 +1409,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             cov_source_actual = "jackknife"
             cov_metrics_path = cov_path.with_name(f"{cov_path.stem}_metrics.json")
+            # 条件分岐: `cov_metrics_path.exists()` を満たす経路を評価する。
             if cov_metrics_path.exists():
                 try:
                     cov_meta = json.loads(cov_metrics_path.read_text(encoding="utf-8"))
                     jk = (cov_meta.get("params", {}) or {}).get("jackknife", {}) or {}
                     jk_mode = str(jk.get("mode", "")).strip()
+                    # 条件分岐: `jk_mode` を満たす経路を評価する。
                     if jk_mode:
                         cov_source_actual = f"jackknife_{jk_mode}"
                 except Exception:
                     pass
+
             cov_inputs = {
                 "type": cov_source_actual,
                 "jk_cov": str(cov_path),
@@ -1183,10 +1433,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "xi02_zeroed": bool(args.cov_zero_xi02),
                 **({"shrinkage_note": str(shrinkage_note)} if shrinkage_note else {}),
             }
+            # 条件分岐: `cov_path_override` を満たす経路を評価する。
             if cov_path_override:
                 cov_inputs["cov_path_override"] = str(cov_path_override)
+
+            # 条件分岐: `cov_suffix_override` を満たす経路を評価する。
+
             if cov_suffix_override:
                 cov_inputs["cov_suffix_override"] = str(cov_suffix_override)
+
+        # 条件分岐: `use_rascalc` を満たす経路を評価する。
 
         if use_rascalc:
             # Per-case covariance estimated from the same catalogs via RascalC (legendre_projected).
@@ -1196,19 +1452,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if cov_path_override:
                 cov_path = Path(cov_path_override)
                 cov_path = cov_path if cov_path.is_absolute() else (_ROOT / cov_path).resolve()
+            # 条件分岐: 前段条件が不成立で、`cov_suffix_override` を追加評価する。
             elif cov_suffix_override:
                 cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__{cov_suffix_override}.npz")
             else:
                 cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__rascalc_cov.npz")
+
+            # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
+
             if not cov_path.exists():
                 raise SystemExit(
                     "RascalC covariance file not found. "
                     f"Expected: {cov_path} "
                     "(run scripts/cosmology/cosmology_bao_xi_rascalc_cov_from_catalogs.py under WSL)"
                 )
+
             with np.load(cov_path) as zc:
                 s_cov = np.asarray(zc["s"], dtype=float).reshape(-1)
                 cov_full = np.asarray(zc["cov"], dtype=float)
+
+            # 条件分岐: `s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e...` を満たす経路を評価する。
 
             if s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e-12):
                 raise SystemExit(
@@ -1220,6 +1483,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             idx = np.nonzero(m_fit)[0].astype(int, copy=False)
             p = int(2 * int(n_components) * n_all)
             cov_full = np.asarray(cov_full, dtype=float).reshape(p, p)
+            # 条件分岐: `int(n_components) == 1` を満たす経路を評価する。
             if int(n_components) == 1:
                 sel = np.concatenate([idx, idx + n_all], axis=0)
             else:
@@ -1227,12 +1491,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 for c in range(int(n_components)):
                     blocks.append(idx + (2 * c + 0) * n_all)
                     blocks.append(idx + (2 * c + 1) * n_all)
+
                 sel = np.concatenate(blocks, axis=0)
+
             cov = cov_full[np.ix_(sel, sel)]
+            # 条件分岐: `bool(args.cov_zero_xi02)` を満たす経路を評価する。
             if bool(args.cov_zero_xi02):
                 cov = _cov_zero_xi02_cross(cov, n_bins=int(idx.size), n_components=int(n_components))
 
             banding_stats = None
+            # 条件分岐: `cov_bandwidth_bins >= 0` を満たす経路を評価する。
             if cov_bandwidth_bins >= 0:
                 cov, banding_stats = _cov_band_by_s_index(
                     cov,
@@ -1244,6 +1512,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
             cov_shrinkage_actual = cov_shrinkage_fixed
             shrinkage_note: str | None = None
+            # 条件分岐: `cov_shrinkage_actual is None` を満たす経路を評価する。
             if cov_shrinkage_actual is None:
                 cov_shrinkage_actual = 0.0
                 shrinkage_note = "auto requested, but RascalC cov has no y_jk; fallback to λ=0"
@@ -1264,26 +1533,38 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "xi02_zeroed": bool(args.cov_zero_xi02),
                 **({"shrinkage_note": str(shrinkage_note)} if shrinkage_note else {}),
             }
+            # 条件分岐: `cov_path_override` を満たす経路を評価する。
             if cov_path_override:
                 cov_inputs["cov_path_override"] = str(cov_path_override)
+
+            # 条件分岐: `cov_suffix_override` を満たす経路を評価する。
+
             if cov_suffix_override:
                 cov_inputs["cov_suffix_override"] = str(cov_suffix_override)
 
+        # 条件分岐: `use_ross` を満たす経路を評価する。
+
         if use_ross:
             zbin_id = _parse_zbin_id(case.z_bin)
+            # 条件分岐: `zbin_id is None` を満たす経路を評価する。
             if zbin_id is None:
                 raise SystemExit(f"--cov-source {cov_source} requires z-binned inputs (got z_bin={case.z_bin})")
+
+            # 条件分岐: `not (case.sample == "cmasslowztot" and case.caps == "combined")` を満たす経路を評価する。
+
             if not (case.sample == "cmasslowztot" and case.caps == "combined"):
                 raise SystemExit(
                     f"--cov-source {cov_source} currently supports sample=cmasslowztot,caps=combined only (got {case.sample}/{case.caps})"
                 )
 
             s_step = float(np.median(np.diff(s_all))) if s_all.size >= 2 else float("nan")
+            # 条件分岐: `not (math.isfinite(s_step) and abs(s_step - 5.0) < 1e-9)` を満たす経路を評価する。
             if not (math.isfinite(s_step) and abs(s_step - 5.0) < 1e-9):
                 raise SystemExit(f"Ross cov requires s_step=5.0 (got {s_step}); re-run xi-from-catalogs with --s-step 5")
 
             cache_key = (int(zbin_id), int(args.ross_bincent), float(r_min), float(r_max), int(s.size))
             cached = ross_cache.get(cache_key)
+            # 条件分岐: `cached is None` を満たす経路を評価する。
             if cached is None:
                 cov_inv_ross, cov_path = _ross_cov_inv_for_s(
                     ross_dir=Path(str(args.ross_dir)),
@@ -1295,6 +1576,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
                 ross_cache[cache_key] = (cov_inv_ross, cov_path)
                 cached = (cov_inv_ross, cov_path)
+
             cov_inv, cov_path = cached
             cov_source_actual = "ross2016_mocks_fullcov"
             cov_inputs = {
@@ -1304,23 +1586,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "rcond": 1e-12,
             }
 
+        # 条件分岐: `use_satpathy` を満たす経路を評価する。
+
         if use_satpathy:
+            # 条件分岐: `str(case.recon_mode) != "none"` を満たす経路を評価する。
             if str(case.recon_mode) != "none":
                 raise SystemExit(f"Satpathy cov is pre-recon only (got recon_mode={case.recon_mode})")
+
             zbin_id = _parse_zbin_id(case.z_bin)
+            # 条件分岐: `zbin_id is None` を満たす経路を評価する。
             if zbin_id is None:
                 raise SystemExit(f"--cov-source {cov_source} requires z-binned inputs (got z_bin={case.z_bin})")
+
+            # 条件分岐: `not (case.sample == "cmasslowztot" and case.caps == "combined")` を満たす経路を評価する。
+
             if not (case.sample == "cmasslowztot" and case.caps == "combined"):
                 raise SystemExit(
                     f"--cov-source {cov_source} currently supports sample=cmasslowztot,caps=combined only (got {case.sample}/{case.caps})"
                 )
 
             s_step = float(np.median(np.diff(s_all))) if s_all.size >= 2 else float("nan")
+            # 条件分岐: `not (math.isfinite(s_step) and abs(s_step - 5.0) < 1e-9)` を満たす経路を評価する。
             if not (math.isfinite(s_step) and abs(s_step - 5.0) < 1e-9):
                 raise SystemExit(f"Satpathy cov requires s_step=5.0 (got {s_step}); re-run xi-from-catalogs with --s-step 5")
 
             cache_key = (int(zbin_id), float(r_min), float(r_max), int(s.size))
             cached = satpathy_cache.get(cache_key)
+            # 条件分岐: `cached is None` を満たす経路を評価する。
             if cached is None:
                 cov_inv_sat, cov_path = _satpathy_cov_inv_for_s(
                     satpathy_dir=Path(str(args.satpathy_dir)),
@@ -1331,6 +1623,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
                 satpathy_cache[cache_key] = (cov_inv_sat, cov_path)
                 cached = (cov_inv_sat, cov_path)
+
             cov_inv, cov_path = cached
             cov_source_actual = "satpathy2016_mocks_fullcov_prerecon"
             cov_inputs = {
@@ -1338,6 +1631,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "satpathy_cov": str(cov_path),
                 "rcond": 1e-12,
             }
+
+        # 条件分岐: `int(n_components) == 1` を満たす経路を評価する。
 
         if int(n_components) == 1:
             y = np.concatenate([xi0, xi2], axis=0)
@@ -1347,6 +1642,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             for c in range(int(n_components)):
                 y2[2 * c + 0, :] = np.asarray(xi0[c], dtype=float)
                 y2[2 * c + 1, :] = np.asarray(xi2[c], dtype=float)
+
             y = y2.reshape(-1)
 
         best_eps0 = _peakfit._scan_grid(
@@ -1408,12 +1704,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
 
             chi2_free = float(best_free["chi2"])
+            # 条件分岐: `cov_source_actual == "diag_paircount_proxy"` を満たす経路を評価する。
             if cov_source_actual == "diag_paircount_proxy":
                 # Inflate the diagonal covariance so that the best-fit reduced chi2 becomes ~1.
                 # This is a common screening trick to avoid over-confident CI when the error model is crude.
                 chi2_scale = (chi2_free / float(dof_free)) if (dof_free > 0) else 1.0
+                # 条件分岐: `not (math.isfinite(chi2_scale) and chi2_scale > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(chi2_scale) and chi2_scale > 0.0):
                     chi2_scale = 1.0
+
+                # 条件分岐: `chi2_scale < 1.0` を満たす経路を評価する。
+
                 if chi2_scale < 1.0:
                     chi2_scale = 1.0
             else:
@@ -1437,12 +1738,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             except Exception:
                 ci_clipped = True
 
+            # 条件分岐: `(not edge_hit) and (not ci_clipped)` を満たす経路を評価する。
+
             if (not edge_hit) and (not ci_clipped):
                 break
+
+            # 条件分岐: `expands_done >= eps_rescan_max_expands` を満たす経路を評価する。
+
             if expands_done >= eps_rescan_max_expands:
                 break
 
             # Widen eps range symmetrically around the current center to probe outside-of-bounds best-fit.
+
             width0 = float(eps_max_tmp - eps_min_tmp)
             center0 = 0.5 * float(eps_max_tmp + eps_min_tmp)
             width1 = width0 * float(eps_rescan_factor)
@@ -1456,6 +1763,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         n = int(s.size)
         res_free = np.asarray(best_free["residual"], dtype=float)
+        # 条件分岐: `int(n_components) == 1` を満たす経路を評価する。
         if int(n_components) == 1:
             chi2_0 = float(np.sum((res_free[:n] ** 2) * (1.0 / np.maximum(var0, 1e-30))))
             chi2_2 = float(np.sum((res_free[n:] ** 2) * (1.0 / np.maximum(var2, 1e-30))))
@@ -1463,6 +1771,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             res2 = res_free.reshape(2 * int(n_components), n)
             chi2_0 = float(np.sum((res2[0::2, :] ** 2) * (1.0 / np.maximum(var0[None, :], 1e-30))))
             chi2_2 = float(np.sum((res2[1::2, :] ** 2) * (1.0 / np.maximum(var2[None, :], 1e-30))))
+
         chi2_0_scaled = chi2_0 / float(chi2_scale)
         chi2_2_scaled = chi2_2 / float(chi2_scale)
 
@@ -1482,10 +1791,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         # Alpha profile CI (eps fixed 0).
         chi2_scale_eps0 = 1.0
+        # 条件分岐: `cov_source_actual == "diag_paircount_proxy"` を満たす経路を評価する。
         if cov_source_actual == "diag_paircount_proxy":
             chi2_scale_eps0 = (chi2_eps0 / float(dof_eps_fixed)) if (dof_eps_fixed > 0) else 1.0
+            # 条件分岐: `not (math.isfinite(chi2_scale_eps0) and chi2_scale_eps0 > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(chi2_scale_eps0) and chi2_scale_eps0 > 0.0):
                 chi2_scale_eps0 = 1.0
+
+            # 条件分岐: `chi2_scale_eps0 < 1.0` を満たす経路を評価する。
+
             if chi2_scale_eps0 < 1.0:
                 chi2_scale_eps0 = 1.0
 
@@ -1513,14 +1827,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         try:
             lo = float(eps_ci_1)
             hi = float(eps_ci_2)
+            # 条件分岐: `(not edge_hit) and (not ci_clipped)` を満たす経路を評価する。
             if (not edge_hit) and (not ci_clipped):
+                # 条件分岐: `math.isfinite(lo) and math.isfinite(hi) and (hi > lo)` を満たす経路を評価する。
                 if math.isfinite(lo) and math.isfinite(hi) and (hi > lo):
                     sigma_eps = 0.5 * (hi - lo)
+                    # 条件分岐: `sigma_eps > 0` を満たす経路を評価する。
                     if sigma_eps > 0:
                         abs_sigma = abs_eps / float(sigma_eps)
         except Exception:
             sigma_eps = None
             abs_sigma = None
+
+        # 条件分岐: `edge_hit or ci_clipped` を満たす経路を評価する。
 
         if edge_hit or ci_clipped:
             # When the best-fit or its CI is clipped by the scan boundary, do not pretend we have a precise σ.
@@ -1630,24 +1949,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
+    # 条件分岐: `not records` を満たす経路を評価する。
+
     if not records:
         raise SystemExit("no cases produced fit results (check r-range / inputs)")
 
     # Plot: eps(z) per dist.
+
     import matplotlib.pyplot as plt
 
     _set_japanese_font()
     out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     tag = f"{sample}_{caps}"
+    # 条件分岐: `bool(args.require_zbin)` を満たす経路を評価する。
     if bool(args.require_zbin):
         tag = f"{tag}_zbinonly"
+
     out_tag_label = _sanitize_out_tag(str(args.out_tag))
+    # 条件分岐: `str(args.out_tag) != "none"` を満たす経路を評価する。
     if str(args.out_tag) != "none":
         tag = f"{tag}__{out_tag_label or 'tag'}"
+
     output_suffix_label = _sanitize_out_tag(str(args.output_suffix).strip()) if str(args.output_suffix).strip() else ""
+    # 条件分岐: `output_suffix_label` を満たす経路を評価する。
     if output_suffix_label:
         tag = f"{tag}__{output_suffix_label}"
+
     out_png = out_dir / f"cosmology_bao_catalog_peakfit_{tag}.png"
     out_json = out_dir / f"cosmology_bao_catalog_peakfit_{tag}_metrics.json"
 
@@ -1658,6 +1986,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     by_dist: Dict[str, List[Dict[str, Any]]] = {}
     for r in records:
         by_dist.setdefault(str(r["dist"]), []).append(r)
+
     colors = {"lcdm": "#1f77b4", "pbg": "#ff7f0e"}
     markers = {"lcdm": "o", "pbg": "s"}
 
@@ -1670,8 +1999,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         hi = np.array([float(c[1]) if (c and c[1] is not None) else float("nan") for c in ci], dtype=float)
         yerr = np.vstack([np.maximum(0.0, eps - lo), np.maximum(0.0, hi - eps)])
         ok = np.isfinite(z) & np.isfinite(eps)
+        # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
         if not np.any(ok):
             continue
+
         ax.errorbar(
             z[ok],
             eps[ok],
@@ -1688,8 +2019,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         # Annotate z_bin (only when present) to disambiguate.
         for rr in xs_sorted:
             zb = str(rr.get("z_bin", "none"))
+            # 条件分岐: `zb == "none"` を満たす経路を評価する。
             if zb == "none":
                 continue
+
             ax.annotate(
                 zb,
                 (float(rr["z_eff"]), float(rr["fit"]["free"]["eps"])),
@@ -1774,6 +2107,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

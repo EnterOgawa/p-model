@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -86,11 +87,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_json = outdir / "weak_interaction_beta_decay_route_b_watch_monitor.json"
     out_csv = outdir / "weak_interaction_beta_decay_route_b_watch_monitor.csv"
 
+    # 条件分岐: `not audit_json.exists()` を満たす経路を評価する。
     if not audit_json.exists():
         raise SystemExit(f"[fail] audit json not found: {audit_json}")
 
     payload_audit = _read_json(audit_json)
     inputs = payload_audit.get("inputs") or {}
+    # 条件分岐: `not isinstance(inputs, dict) or not inputs` を満たす経路を評価する。
     if not isinstance(inputs, dict) or not inputs:
         raise SystemExit("[fail] audit json has no usable inputs block")
 
@@ -103,8 +106,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         exists = input_path.exists()
         current = _sha256_file(input_path) if exists else ""
         changed = (not exists) or (current != expected)
+        # 条件分岐: `changed` を満たす経路を評価する。
         if changed:
             changed_inputs.append(str(input_id))
+
         rows.append(
             {
                 "input_id": str(input_id),
@@ -150,6 +155,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_csv(out_csv, rows)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         public_outdir.mkdir(parents=True, exist_ok=True)
         for src in (out_json, out_csv):
@@ -182,11 +188,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     print(f"[ok] monitor json: {out_json}")
     print(f"[ok] monitor csv : {out_csv}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} -> {public_outdir}")
+
     print(f"[monitor] input_hash_changed={input_hash_changed} changed_inputs_n={len(changed_inputs_sorted)}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

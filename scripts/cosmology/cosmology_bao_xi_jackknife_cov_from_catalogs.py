@@ -45,6 +45,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -54,18 +55,25 @@ from scripts.summary import worklog  # noqa: E402
 
 def _infer_cap_label(path: Path, *, fallback: str) -> str:
     s = path.name.lower()
+    # 条件分岐: `"ngc" in s or "north" in s` を満たす経路を評価する。
     if "ngc" in s or "north" in s:
         return "north"
+
+    # 条件分岐: `"sgc" in s or "south" in s` を満たす経路を評価する。
+
     if "sgc" in s or "south" in s:
         return "south"
+
     return fallback
 
 
 def _ra_quantile_edges(ra_deg_all: np.ndarray, n_regions: int) -> np.ndarray:
     ra = np.asarray(ra_deg_all, dtype=float).reshape(-1)
     ra = ra[np.isfinite(ra)]
+    # 条件分岐: `ra.size < max(10, n_regions * 2)` を満たす経路を評価する。
     if ra.size < max(10, n_regions * 2):
         raise ValueError(f"too few RA samples for jackknife: n={ra.size}")
+
     ra = np.mod(ra, 360.0)
     ra_sorted = np.sort(ra)
     edges = np.empty(int(n_regions) + 1, dtype=float)
@@ -74,11 +82,14 @@ def _ra_quantile_edges(ra_deg_all: np.ndarray, n_regions: int) -> np.ndarray:
         idx = int(math.floor(float(i) * float(ra_sorted.size) / float(n_regions)))
         idx = min(max(idx, 0), int(ra_sorted.size - 1))
         edges[i] = float(ra_sorted[idx])
+
     edges[int(n_regions)] = 360.0
     # Ensure strict monotonicity to avoid empty bins due to repeated quantiles.
     for i in range(1, edges.size):
+        # 条件分岐: `not (edges[i] > edges[i - 1])` を満たす経路を評価する。
         if not (edges[i] > edges[i - 1]):
             edges[i] = min(360.0, float(edges[i - 1]) + 1e-6)
+
     return edges
 
 
@@ -93,8 +104,10 @@ def _assign_region_ra(ra_deg: np.ndarray, edges: np.ndarray) -> np.ndarray:
 def _quantile_edges(x: np.ndarray, n_regions: int) -> np.ndarray:
     v = np.asarray(x, dtype=float).reshape(-1)
     v = v[np.isfinite(v)]
+    # 条件分岐: `v.size < max(10, n_regions * 2)` を満たす経路を評価する。
     if v.size < max(10, n_regions * 2):
         raise ValueError(f"too few samples for quantiles: n={v.size}")
+
     v_sorted = np.sort(v)
     edges = np.empty(int(n_regions) + 1, dtype=float)
     edges[0] = float(v_sorted[0])
@@ -102,10 +115,13 @@ def _quantile_edges(x: np.ndarray, n_regions: int) -> np.ndarray:
         idx = int(math.floor(float(i) * float(v_sorted.size) / float(n_regions)))
         idx = min(max(idx, 0), int(v_sorted.size - 1))
         edges[i] = float(v_sorted[idx])
+
     edges[int(n_regions)] = float(v_sorted[-1])
     for i in range(1, edges.size):
+        # 条件分岐: `not (edges[i] > edges[i - 1])` を満たす経路を評価する。
         if not (edges[i] > edges[i - 1]):
             edges[i] = float(edges[i - 1]) + 1e-9
+
     return edges
 
 
@@ -121,33 +137,44 @@ def _choose_grid(n_regions: int) -> Tuple[int, int]:
     Choose (n_dec, n_ra) such that n_dec*n_ra = n_regions, preferring n_dec near sqrt(n_regions).
     """
     n = int(n_regions)
+    # 条件分岐: `n <= 0` を満たす経路を評価する。
     if n <= 0:
         raise ValueError("n_regions must be positive")
+
     root = math.sqrt(float(n))
     best = 1
     for d in range(1, n + 1):
+        # 条件分岐: `(n % d) != 0` を満たす経路を評価する。
         if (n % d) != 0:
             continue
+
+        # 条件分岐: `float(d) <= root` を満たす経路を評価する。
+
         if float(d) <= root:
             best = d
+
     return int(best), int(n // best)
 
 
 def _ra_shift_to_largest_gap(ra_deg_all: np.ndarray) -> float:
     ra = np.asarray(ra_deg_all, dtype=float).reshape(-1)
     ra = ra[np.isfinite(ra)]
+    # 条件分岐: `ra.size < 2` を満たす経路を評価する。
     if ra.size < 2:
         return 0.0
+
     ra = np.mod(ra, 360.0)
     ra_sorted = np.sort(ra)
     gaps = np.diff(ra_sorted)
     wrap_gap = float(ra_sorted[0] + 360.0 - ra_sorted[-1])
     gaps_all = np.concatenate([gaps, np.asarray([wrap_gap], dtype=float)], axis=0)
     k = int(np.argmax(gaps_all))
+    # 条件分岐: `k >= int(ra_sorted.size - 1)` を満たす経路を評価する。
     if k >= int(ra_sorted.size - 1):
         # Wrap gap is the largest: pick the minimum RA as the cut.
         return float(ra_sorted[0])
     # Cut at the start of the largest internal gap.
+
     return float(ra_sorted[k + 1])
 
 
@@ -169,8 +196,10 @@ def _weighted_totals(w_g: np.ndarray, w_r: np.ndarray) -> Dict[str, float]:
     dd_tot = sum_wg * sum_wg - sum_wg2
     rr_tot = sum_wr * sum_wr - sum_wr2
     dr_tot = sum_wg * sum_wr
+    # 条件分岐: `not (dd_tot > 0.0 and rr_tot > 0.0 and dr_tot > 0.0)` を満たす経路を評価する。
     if not (dd_tot > 0.0 and rr_tot > 0.0 and dr_tot > 0.0):
         raise ValueError("invalid total weights (non-positive)")
+
     return {
         "sum_w_gal": sum_wg,
         "sum_w2_gal": sum_wg2,
@@ -273,9 +302,13 @@ def _load_cap_inputs(
 
     mg = np.isfinite(z_g0) & (z_g0 > 0.0) & np.isfinite(w_g0)
     mr = np.isfinite(z_r0) & (z_r0 > 0.0) & np.isfinite(w_r0)
+    # 条件分岐: `z_min is not None` を満たす経路を評価する。
     if z_min is not None:
         mg = mg & (z_g0 >= float(z_min))
         mr = mr & (z_r0 >= float(z_min))
+
+    # 条件分岐: `z_max is not None` を満たす経路を評価する。
+
     if z_max is not None:
         mg = mg & (z_g0 < float(z_max))
         mr = mr & (z_r0 < float(z_max))
@@ -344,48 +377,65 @@ def main(argv: List[str] | None = None) -> int:
     ap.add_argument("--rcond", type=float, default=1e-12, help="rcond for pseudo-inverse (metrics only; default: 1e-12)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
     if os.name == "nt":
         raise SystemExit("Corrfunc is not supported on Windows; run this under WSL (Ubuntu-24.04) as per AGENTS.md.")
 
     metrics_path = _xi._resolve_manifest_path(str(args.xi_metrics_json))
+    # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
     if not metrics_path.exists():
         raise SystemExit(f"missing metrics json: {metrics_path}")
+
     base = json.loads(metrics_path.read_text(encoding="utf-8"))
 
     params = base.get("params", {}) or {}
     inputs = base.get("inputs", {}) or {}
     outputs = base.get("outputs", {}) or {}
+    # 条件分岐: `"npz" not in outputs` を満たす経路を評価する。
     if "npz" not in outputs:
         raise SystemExit("metrics json missing outputs.npz")
 
     xi_npz_path = _xi._resolve_manifest_path(str(outputs["npz"]))
+    # 条件分岐: `not xi_npz_path.exists()` を満たす経路を評価する。
     if not xi_npz_path.exists():
         raise SystemExit(f"missing xi npz (run xi-from-catalogs first): {xi_npz_path}")
 
     stem = xi_npz_path.stem
     prefix = "cosmology_bao_xi_from_catalogs_"
+    # 条件分岐: `not stem.startswith(prefix)` を満たす経路を評価する。
     if not stem.startswith(prefix):
         raise SystemExit(f"unexpected xi npz name: {xi_npz_path.name}")
+
     tag = stem[len(prefix) :]
 
     out_suffix = str(args.output_suffix).strip()
+    # 条件分岐: `not out_suffix` を満たす経路を評価する。
     if not out_suffix:
         raise SystemExit("--output-suffix must be non-empty")
+
     out_cov_npz = xi_npz_path.with_name(f"{prefix}{tag}__{out_suffix}.npz")
     out_cov_json = xi_npz_path.with_name(f"{prefix}{tag}__{out_suffix}_metrics.json")
 
     gal_list = inputs.get("galaxy_npz", [])
     rnd_list = inputs.get("random_npz", [])
+    # 条件分岐: `not (isinstance(gal_list, list) and isinstance(rnd_list, list) and gal_list a...` を満たす経路を評価する。
     if not (isinstance(gal_list, list) and isinstance(rnd_list, list) and gal_list and rnd_list):
         raise SystemExit("metrics json missing inputs.galaxy_npz/random_npz lists")
+
+    # 条件分岐: `len(gal_list) != len(rnd_list)` を満たす経路を評価する。
+
     if len(gal_list) != len(rnd_list):
         raise SystemExit("inputs.galaxy_npz/random_npz length mismatch")
 
     z_cut = params.get("z_cut", {}) or {}
     z_min = z_cut.get("z_min", None)
     z_max = z_cut.get("z_max", None)
+    # 条件分岐: `z_min is not None` を満たす経路を評価する。
     if z_min is not None:
         z_min = float(z_min)
+
+    # 条件分岐: `z_max is not None` を満たす経路を評価する。
+
     if z_max is not None:
         z_max = float(z_max)
 
@@ -393,12 +443,14 @@ def main(argv: List[str] | None = None) -> int:
     s_min = float(s_bins.get("min", 30.0))
     s_max = float(s_bins.get("max", 150.0))
     s_step = float(s_bins.get("step", 5.0))
+    # 条件分岐: `not (s_step > 0 and math.isfinite(s_step))` を満たす経路を評価する。
     if not (s_step > 0 and math.isfinite(s_step)):
         raise SystemExit("invalid s_step in metrics params")
 
     mu_bins = params.get("mu_bins", {}) or {}
     mu_max = float(mu_bins.get("mu_max", 1.0))
     nmu = int(mu_bins.get("nmu", 120))
+    # 条件分岐: `not (nmu > 0)` を満たす経路を評価する。
     if not (nmu > 0):
         raise SystemExit("invalid nmu in metrics params")
 
@@ -414,18 +466,25 @@ def main(argv: List[str] | None = None) -> int:
     s_bins_file, edges = _xi._make_s_bins_file(out_dir, s_min=s_min, s_max=s_max, s_step=s_step)
 
     n_jk = int(args.jk_n)
+    # 条件分岐: `n_jk < 3` を満たす経路を評価する。
     if n_jk < 3:
         raise SystemExit("--jk-n must be >= 3")
 
     # Load per-cap inputs (already z-filtered; distances computed).
+
     cap_inputs: List[Dict[str, Any]] = []
     for i, (gp, rp) in enumerate(zip(gal_list, rnd_list)):
         gpath = _xi._resolve_manifest_path(str(gp))
         rpath = _xi._resolve_manifest_path(str(rp))
+        # 条件分岐: `not gpath.exists()` を満たす経路を評価する。
         if not gpath.exists():
             raise SystemExit(f"missing galaxy npz: {gpath}")
+
+        # 条件分岐: `not rpath.exists()` を満たす経路を評価する。
+
         if not rpath.exists():
             raise SystemExit(f"missing random npz: {rpath}")
+
         cap = _infer_cap_label(gpath, fallback=f"cap{i}")
         pack = _load_cap_inputs(
             gal_npz=gpath,
@@ -444,6 +503,7 @@ def main(argv: List[str] | None = None) -> int:
 
     # Define deterministic jackknife regions based on the (z-cut) galaxy RA distribution.
     # Note: per-cap mode offsets region ids so that each jackknife region is contiguous within a cap.
+
     jk_mode = str(args.jk_mode)
     ra_edges: np.ndarray = np.zeros(0, dtype=float)
     ra_shift_deg: float | None = None
@@ -453,23 +513,29 @@ def main(argv: List[str] | None = None) -> int:
     ra_edges_by_cap_by_dec: Dict[str, List[np.ndarray]] = {}
     ra_shift_by_cap_by_dec: Dict[str, List[float]] = {}
     grid_meta: Dict[str, int] | None = None
+    # 条件分岐: `jk_mode == "ra_quantile"` を満たす経路を評価する。
     if jk_mode == "ra_quantile":
         ra_all = np.concatenate([np.asarray(p["gal"]["ra"], dtype=float).reshape(-1) for p in cap_inputs], axis=0)
         ra_edges = _ra_quantile_edges(ra_all, n_regions=n_jk)
         for p in cap_inputs:
             p["gal"]["jk_id"] = _assign_region_ra(p["gal"]["ra"], ra_edges)
             p["rnd"]["jk_id"] = _assign_region_ra(p["rnd"]["ra"], ra_edges)
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_quantile_unwrapped"` を追加評価する。
     elif jk_mode == "ra_quantile_unwrapped":
         ra_all = np.concatenate([np.asarray(p["gal"]["ra"], dtype=float).reshape(-1) for p in cap_inputs], axis=0)
         ra_edges, ra_shift_deg = _ra_quantile_edges_unwrapped(ra_all, n_regions=n_jk)
         for p in cap_inputs:
             p["gal"]["jk_id"] = _assign_region_ra(np.mod(np.asarray(p["gal"]["ra"], dtype=float) - float(ra_shift_deg), 360.0), ra_edges)
             p["rnd"]["jk_id"] = _assign_region_ra(np.mod(np.asarray(p["rnd"]["ra"], dtype=float) - float(ra_shift_deg), 360.0), ra_edges)
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_quantile_per_cap"` を追加評価する。
     elif jk_mode == "ra_quantile_per_cap":
         caps_sorted = sorted({str(p.get("cap", "")) for p in cap_inputs})
+        # 条件分岐: `not caps_sorted or any(not c for c in caps_sorted)` を満たす経路を評価する。
         if not caps_sorted or any(not c for c in caps_sorted):
             raise SystemExit("invalid cap labels for --jk-mode ra_quantile_per_cap")
+
         n_caps = int(len(caps_sorted))
+        # 条件分岐: `n_caps == 1` を満たす経路を評価する。
         if n_caps == 1:
             ra_all = np.concatenate([np.asarray(p["gal"]["ra"], dtype=float).reshape(-1) for p in cap_inputs], axis=0)
             ra_edges = _ra_quantile_edges(ra_all, n_regions=n_jk)
@@ -477,17 +543,21 @@ def main(argv: List[str] | None = None) -> int:
                 p["gal"]["jk_id"] = _assign_region_ra(p["gal"]["ra"], ra_edges)
                 p["rnd"]["jk_id"] = _assign_region_ra(p["rnd"]["ra"], ra_edges)
         else:
+            # 条件分岐: `(n_jk % n_caps) != 0` を満たす経路を評価する。
             if (n_jk % n_caps) != 0:
                 raise SystemExit(
                     f"--jk-n must be divisible by n_caps for ra_quantile_per_cap "
                     f"(jk_n={n_jk}, n_caps={n_caps}, caps={caps_sorted})"
                 )
+
             n_per_cap = int(n_jk // n_caps)
+            # 条件分岐: `n_per_cap < 3` を満たす経路を評価する。
             if n_per_cap < 3:
                 raise SystemExit(
                     f"--jk-n too small for ra_quantile_per_cap "
                     f"(need >= {3*n_caps}; got jk_n={n_jk}, n_caps={n_caps})"
                 )
+
             cap_to_idx = {cap: i for i, cap in enumerate(caps_sorted)}
             for cap in caps_sorted:
                 ra_cap = np.concatenate(
@@ -495,17 +565,22 @@ def main(argv: List[str] | None = None) -> int:
                     axis=0,
                 )
                 ra_edges_by_cap[cap] = _ra_quantile_edges(ra_cap, n_regions=n_per_cap)
+
             for p in cap_inputs:
                 cap = str(p.get("cap"))
                 offset = int(cap_to_idx[cap]) * int(n_per_cap)
                 edges_cap = ra_edges_by_cap[cap]
                 p["gal"]["jk_id"] = offset + _assign_region_ra(p["gal"]["ra"], edges_cap)
                 p["rnd"]["jk_id"] = offset + _assign_region_ra(p["rnd"]["ra"], edges_cap)
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_quantile_per_cap_unwrapped"` を追加評価する。
     elif jk_mode == "ra_quantile_per_cap_unwrapped":
         caps_sorted = sorted({str(p.get("cap", "")) for p in cap_inputs})
+        # 条件分岐: `not caps_sorted or any(not c for c in caps_sorted)` を満たす経路を評価する。
         if not caps_sorted or any(not c for c in caps_sorted):
             raise SystemExit("invalid cap labels for --jk-mode ra_quantile_per_cap_unwrapped")
+
         n_caps = int(len(caps_sorted))
+        # 条件分岐: `n_caps == 1` を満たす経路を評価する。
         if n_caps == 1:
             ra_all = np.concatenate([np.asarray(p["gal"]["ra"], dtype=float).reshape(-1) for p in cap_inputs], axis=0)
             ra_edges, ra_shift_deg = _ra_quantile_edges_unwrapped(ra_all, n_regions=n_jk)
@@ -517,17 +592,21 @@ def main(argv: List[str] | None = None) -> int:
                     np.mod(np.asarray(p["rnd"]["ra"], dtype=float) - float(ra_shift_deg), 360.0), ra_edges
                 )
         else:
+            # 条件分岐: `(n_jk % n_caps) != 0` を満たす経路を評価する。
             if (n_jk % n_caps) != 0:
                 raise SystemExit(
                     f"--jk-n must be divisible by n_caps for ra_quantile_per_cap_unwrapped "
                     f"(jk_n={n_jk}, n_caps={n_caps}, caps={caps_sorted})"
                 )
+
             n_per_cap = int(n_jk // n_caps)
+            # 条件分岐: `n_per_cap < 3` を満たす経路を評価する。
             if n_per_cap < 3:
                 raise SystemExit(
                     f"--jk-n too small for ra_quantile_per_cap_unwrapped "
                     f"(need >= {3*n_caps}; got jk_n={n_jk}, n_caps={n_caps})"
                 )
+
             cap_to_idx = {cap: i for i, cap in enumerate(caps_sorted)}
             for cap in caps_sorted:
                 ra_cap = np.concatenate(
@@ -537,6 +616,7 @@ def main(argv: List[str] | None = None) -> int:
                 edges_cap, shift_cap = _ra_quantile_edges_unwrapped(ra_cap, n_regions=n_per_cap)
                 ra_edges_by_cap[cap] = edges_cap
                 ra_shift_by_cap[cap] = float(shift_cap)
+
             for p in cap_inputs:
                 cap = str(p.get("cap"))
                 offset = int(cap_to_idx[cap]) * int(n_per_cap)
@@ -548,42 +628,63 @@ def main(argv: List[str] | None = None) -> int:
                 p["rnd"]["jk_id"] = offset + _assign_region_ra(
                     np.mod(np.asarray(p["rnd"]["ra"], dtype=float) - shift_cap, 360.0), edges_cap
                 )
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_dec_quantile_per_cap_unwrapped"` を追加評価する。
     elif jk_mode == "ra_dec_quantile_per_cap_unwrapped":
         caps_sorted = sorted({str(p.get("cap", "")) for p in cap_inputs})
+        # 条件分岐: `not caps_sorted or any(not c for c in caps_sorted)` を満たす経路を評価する。
         if not caps_sorted or any(not c for c in caps_sorted):
             raise SystemExit("invalid cap labels for --jk-mode ra_dec_quantile_per_cap_unwrapped")
+
         n_caps = int(len(caps_sorted))
+        # 条件分岐: `n_caps < 1` を満たす経路を評価する。
         if n_caps < 1:
             raise SystemExit("no caps found")
+
+        # 条件分岐: `(n_jk % n_caps) != 0` を満たす経路を評価する。
+
         if (n_jk % n_caps) != 0:
             raise SystemExit(
                 f"--jk-n must be divisible by n_caps for ra_dec_quantile_per_cap_unwrapped "
                 f"(jk_n={n_jk}, n_caps={n_caps}, caps={caps_sorted})"
             )
+
         n_per_cap = int(n_jk // n_caps)
+        # 条件分岐: `n_per_cap < 3` を満たす経路を評価する。
         if n_per_cap < 3:
             raise SystemExit(f"--jk-n too small per cap (jk_n={n_jk}, n_caps={n_caps})")
 
         n_dec = int(args.jk_dec_bands)
         n_ra = int(args.jk_ra_bins)
+        # 条件分岐: `n_dec <= 0 and n_ra <= 0` を満たす経路を評価する。
         if n_dec <= 0 and n_ra <= 0:
             n_dec, n_ra = _choose_grid(n_per_cap)
+        # 条件分岐: 前段条件が不成立で、`n_dec <= 0 and n_ra > 0` を追加評価する。
         elif n_dec <= 0 and n_ra > 0:
+            # 条件分岐: `(n_per_cap % n_ra) != 0` を満たす経路を評価する。
             if (n_per_cap % n_ra) != 0:
                 raise SystemExit(f"--jk-ra-bins must divide n_per_cap (n_per_cap={n_per_cap}, jk_ra_bins={n_ra})")
+
             n_dec = int(n_per_cap // n_ra)
+        # 条件分岐: 前段条件が不成立で、`n_dec > 0 and n_ra <= 0` を追加評価する。
         elif n_dec > 0 and n_ra <= 0:
+            # 条件分岐: `(n_per_cap % n_dec) != 0` を満たす経路を評価する。
             if (n_per_cap % n_dec) != 0:
                 raise SystemExit(f"--jk-dec-bands must divide n_per_cap (n_per_cap={n_per_cap}, jk_dec_bands={n_dec})")
+
             n_ra = int(n_per_cap // n_dec)
         else:
+            # 条件分岐: `int(n_dec * n_ra) != int(n_per_cap)` を満たす経路を評価する。
             if int(n_dec * n_ra) != int(n_per_cap):
                 raise SystemExit(
                     f"--jk-dec-bands * --jk-ra-bins must equal n_per_cap "
                     f"(n_per_cap={n_per_cap}, jk_dec_bands={n_dec}, jk_ra_bins={n_ra})"
                 )
+
+        # 条件分岐: `n_dec < 1 or n_ra < 1` を満たす経路を評価する。
+
         if n_dec < 1 or n_ra < 1:
             raise SystemExit(f"invalid grid (n_dec={n_dec}, n_ra={n_ra})")
+
         grid_meta = {"n_dec": int(n_dec), "n_ra": int(n_ra), "n_per_cap": int(n_per_cap), "n_caps": int(n_caps)}
 
         cap_to_idx = {cap: i for i, cap in enumerate(caps_sorted)}
@@ -614,8 +715,10 @@ def main(argv: List[str] | None = None) -> int:
             ra_shift_list: List[float] = []
             for j in range(int(n_dec)):
                 mg = gal_dec_id == int(j)
+                # 条件分岐: `not np.any(mg)` を満たす経路を評価する。
                 if not np.any(mg):
                     raise SystemExit(f"empty dec band in galaxies (cap={cap}, band={j}/{n_dec})")
+
                 edges_ra, shift_ra = _ra_quantile_edges_unwrapped(gal_ra[mg], n_regions=int(n_ra))
                 ra_edges_list.append(edges_ra)
                 ra_shift_list.append(float(shift_ra))
@@ -627,6 +730,7 @@ def main(argv: List[str] | None = None) -> int:
 
                 # Randoms in band.
                 mr = rnd_dec_id == int(j)
+                # 条件分岐: `np.any(mr)` を満たす経路を評価する。
                 if np.any(mr):
                     ra_r_shifted = np.mod(rnd_ra[mr] - float(shift_ra), 360.0)
                     ra_id_r = _assign_region_ra(ra_r_shifted, edges_ra)
@@ -681,6 +785,7 @@ def main(argv: List[str] | None = None) -> int:
             )
 
         # Combine caps in the same way as xi-from-catalogs (random weight rescale to align gal/rnd ratios).
+
         dd_w = sum(np.asarray(pp["counts"]["DD_w"], dtype=np.float64) for pp in per_cap)
         sum_w_gal_total = sum(float(pp["totals"]["sum_w_gal"]) for pp in per_cap)
         sum_w_rnd_total = sum(float(pp["totals"]["sum_w_rnd"]) for pp in per_cap)
@@ -725,7 +830,9 @@ def main(argv: List[str] | None = None) -> int:
     # Sanity: load s from the reference xi output (must match).
     with np.load(xi_npz_path) as z:
         s_ref = np.asarray(z["s"], dtype=np.float64).reshape(-1)
+
     s_here = np.asarray(out_xi["s"], dtype=np.float64).reshape(-1)
+    # 条件分岐: `s_ref.shape != s_here.shape or not np.allclose(s_ref, s_here, rtol=0.0, atol=...` を満たす経路を評価する。
     if s_ref.shape != s_here.shape or not np.allclose(s_ref, s_here, rtol=0.0, atol=1e-12):
         raise SystemExit("s bins mismatch vs reference xi output (tag mismatch or different binning)")
 
@@ -738,27 +845,44 @@ def main(argv: List[str] | None = None) -> int:
     )
 
     jk_meta: Dict[str, Any] = {"mode": str(jk_mode), "n_regions": int(n_jk)}
+    # 条件分岐: `grid_meta is not None` を満たす経路を評価する。
     if grid_meta is not None:
         jk_meta["grid"] = dict(grid_meta)
+
+    # 条件分岐: `jk_mode == "ra_quantile"` を満たす経路を評価する。
+
     if jk_mode == "ra_quantile":
         jk_meta["ra_edges_deg"] = ra_edges.tolist()
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_quantile_unwrapped"` を追加評価する。
     elif jk_mode == "ra_quantile_unwrapped":
         jk_meta["ra_edges_deg_shifted"] = ra_edges.tolist()
         jk_meta["ra_shift_deg"] = float(ra_shift_deg) if ra_shift_deg is not None else 0.0
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_quantile_per_cap"` を追加評価する。
     elif jk_mode == "ra_quantile_per_cap":
+        # 条件分岐: `ra_edges_by_cap` を満たす経路を評価する。
         if ra_edges_by_cap:
             jk_meta["ra_edges_by_cap_deg"] = {k: v.tolist() for k, v in ra_edges_by_cap.items()}
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_quantile_per_cap_unwrapped"` を追加評価する。
     elif jk_mode == "ra_quantile_per_cap_unwrapped":
+        # 条件分岐: `ra_edges_by_cap` を満たす経路を評価する。
         if ra_edges_by_cap:
             jk_meta["ra_edges_by_cap_deg_shifted"] = {k: v.tolist() for k, v in ra_edges_by_cap.items()}
             jk_meta["ra_shift_by_cap_deg"] = {k: float(v) for k, v in ra_shift_by_cap.items()}
+    # 条件分岐: 前段条件が不成立で、`jk_mode == "ra_dec_quantile_per_cap_unwrapped"` を追加評価する。
     elif jk_mode == "ra_dec_quantile_per_cap_unwrapped":
+        # 条件分岐: `dec_edges_by_cap` を満たす経路を評価する。
         if dec_edges_by_cap:
             jk_meta["dec_edges_by_cap_deg"] = {k: v.tolist() for k, v in dec_edges_by_cap.items()}
+
+        # 条件分岐: `ra_edges_by_cap_by_dec` を満たす経路を評価する。
+
         if ra_edges_by_cap_by_dec:
             jk_meta["ra_edges_by_cap_by_dec_deg_shifted"] = {
                 cap: [np.asarray(e, dtype=float).tolist() for e in edges_list] for cap, edges_list in ra_edges_by_cap_by_dec.items()
             }
+
+        # 条件分岐: `ra_shift_by_cap_by_dec` を満たす経路を評価する。
+
         if ra_shift_by_cap_by_dec:
             jk_meta["ra_shift_by_cap_by_dec_deg"] = {cap: [float(x) for x in xs] for cap, xs in ra_shift_by_cap_by_dec.items()}
 
@@ -810,6 +934,8 @@ def main(argv: List[str] | None = None) -> int:
     print(f"[ok] metrics : {out_cov_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -61,9 +62,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -71,11 +75,17 @@ def _collect_public_files(*, public_root: Path, exclude: List[Path]) -> List[Pat
     ex = {str(p.resolve()).lower() for p in exclude}
     files: List[Path] = []
     for p in public_root.rglob("*"):
+        # 条件分岐: `not p.is_file()` を満たす経路を評価する。
         if not p.is_file():
             continue
+
+        # 条件分岐: `str(p.resolve()).lower() in ex` を満たす経路を評価する。
+
         if str(p.resolve()).lower() in ex:
             continue
+
         files.append(p.resolve())
+
     files.sort(key=lambda x: _rel(x).lower())
     return files
 
@@ -83,11 +93,15 @@ def _collect_public_files(*, public_root: Path, exclude: List[Path]) -> List[Pat
 def _topic_from_rel(rel_path: str) -> str:
     rel_norm = rel_path.replace("\\", "/")
     prefix = "output/public/"
+    # 条件分岐: `not rel_norm.startswith(prefix)` を満たす経路を評価する。
     if not rel_norm.startswith(prefix):
         return "(unknown)"
+
     rem = rel_norm[len(prefix) :]
+    # 条件分岐: `"/" not in rem` を満たす経路を評価する。
     if "/" not in rem:
         return rem or "(root)"
+
     return rem.split("/", 1)[0]
 
 
@@ -124,14 +138,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     public_root = Path(str(args.public_root))
+    # 条件分岐: `not public_root.is_absolute()` を満たす経路を評価する。
     if not public_root.is_absolute():
         public_root = (_ROOT / public_root).resolve()
+
     out_json = Path(str(args.out_json))
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_csv = Path(str(args.out_topics_csv))
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
     if not out_csv.is_absolute():
         out_csv = (_ROOT / out_csv).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_csv.parent.mkdir(parents=True, exist_ok=True)
 
@@ -182,6 +202,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "sha256": _sha256(p) if (exists and compute_hash) else None,
         }
         required_core.append(item)
+        # 条件分岐: `not exists` を満たす経路を評価する。
         if not exists:
             missing_required_core.append(rel)
 
@@ -240,12 +261,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"- out_json: {out_json}")
     print(f"- out_topics_csv: {out_csv}")
     print(f"- file_count: {payload['summary']['file_count']}")
+    # 条件分岐: `payload["missing_required_core"]` を満たす経路を評価する。
     if payload["missing_required_core"]:
         print("[warn] missing required core files:")
         for rel in payload["missing_required_core"]:
             print(f"  - {rel}")
+
     return 0 if payload["ok"] else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

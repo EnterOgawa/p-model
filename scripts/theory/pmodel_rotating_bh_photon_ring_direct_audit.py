@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -78,13 +79,19 @@ def _build_axisymmetric_pde_block(
     asym_rel_errors: List[float] = []
     u_inner_abs: List[float] = []
     for diag in solver_diag_by_object.values():
+        # 条件分岐: `not isinstance(diag, dict)` を満たす経路を評価する。
         if not isinstance(diag, dict):
             continue
+
         u_outer = _to_float(diag.get("u_outer"))
         u_inner = _to_float(diag.get("u_inner"))
+        # 条件分岐: `u_outer is not None` を満たす経路を評価する。
         if u_outer is not None:
             rel = abs(float(u_outer) - asymptotic_target) / max(abs(asymptotic_target), 1.0e-12)
             asym_rel_errors.append(float(rel))
+
+        # 条件分岐: `u_inner is not None` を満たす経路を評価する。
+
         if u_inner is not None:
             u_inner_abs.append(abs(float(u_inner)))
 
@@ -179,8 +186,12 @@ def _to_float(v: Any) -> Optional[float]:
         x = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `not np.isfinite(x)` を満たす経路を評価する。
+
     if not np.isfinite(x):
         return None
+
     return x
 
 
@@ -204,26 +215,33 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
 
 def _find_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Path]:
     for p in paths:
+        # 条件分岐: `p.exists()` を満たす経路を評価する。
         if p.exists():
             return _read_json(p), p
+
     raise FileNotFoundError(f"no input found among: {[str(p) for p in paths]}")
 
 
 def _extract_objects(payload: Dict[str, Any], keys: Sequence[str]) -> Tuple[List[ObjectInput], float]:
     beta = _to_float((payload.get("pmodel") or {}).get("beta"))
+    # 条件分岐: `beta is None` を満たす経路を評価する。
     if beta is None:
         raise RuntimeError("missing pmodel.beta in shadow compare payload")
 
     rows = payload.get("rows")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         raise RuntimeError("missing rows in shadow compare payload")
 
     key_set = {str(k).strip().lower() for k in keys if str(k).strip()}
     out: List[ObjectInput] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         key = str(row.get("key") or "").strip().lower()
+        # 条件分岐: `key not in key_set` を満たす経路を評価する。
         if key not in key_set:
             continue
 
@@ -250,6 +268,7 @@ def _extract_objects(payload: Dict[str, Any], keys: Sequence[str]) -> Tuple[List
 
         asym_min = _to_float(row.get("ring_brightness_asymmetry_min"))
         asym_max = _to_float(row.get("ring_brightness_asymmetry_max"))
+        # 条件分岐: `asym_min is not None and asym_max is not None and asym_max < asym_min` を満たす経路を評価する。
         if asym_min is not None and asym_max is not None and asym_max < asym_min:
             asym_min, asym_max = asym_max, asym_min
 
@@ -268,8 +287,12 @@ def _extract_objects(payload: Dict[str, Any], keys: Sequence[str]) -> Tuple[List
                 asym_max=asym_max,
             )
         )
+
+    # 条件分岐: `len(out) < 2` を満たす経路を評価する。
+
     if len(out) < 2:
         raise RuntimeError("need >=2 objects with ring diameter and spin/inclination ranges")
+
     return out, float(beta)
 
 
@@ -301,19 +324,23 @@ def _build_object_grids(
                 "omega_base": float(a_star) / (r**3 + 0.2 * a_star * a_star + 1.0e-12),
             }
         )
+
     return grids
 
 
 def _solve_du_dr_cubic(q: np.ndarray, eta_nonlinear: float) -> np.ndarray:
     q_arr = np.asarray(q, dtype=float)
     eta = float(max(eta_nonlinear, 0.0))
+    # 条件分岐: `eta <= 0.0` を満たす経路を評価する。
     if eta <= 0.0:
         return q_arr.copy()
+
     p = q_arr.copy()
     for _ in range(8):
         f = 2.0 * eta * p * p * p + p - q_arr
         df = 6.0 * eta * p * p + 1.0
         p = p - f / np.maximum(df, 1.0e-12)
+
     return p
 
 
@@ -329,6 +356,7 @@ def _build_n_profile(
     inv_r = np.asarray(item["inv_r"], dtype=float)
     inv_r2 = np.asarray(item["inv_r2"], dtype=float)
 
+    # 条件分岐: `str(vacuum_solver) == "analytic"` を満たす経路を評価する。
     if str(vacuum_solver) == "analytic":
         psi = inv_r + lambda2 * inv_r2
         n = np.exp(2.0 * beta * psi)
@@ -390,6 +418,7 @@ def _evaluate_from_precomputed(
 
         den_plus = 1.0 + omega * sin_i
         den_minus = 1.0 - omega * sin_i
+        # 条件分岐: `np.any(den_plus <= 0.0) or np.any(den_minus <= 0.0)` を満たす経路を評価する。
         if np.any(den_plus <= 0.0) or np.any(den_minus <= 0.0):
             return [], float("inf")
 
@@ -411,6 +440,7 @@ def _evaluate_from_precomputed(
         asym_sigma = None
         asym_z = None
         asym_range_pass = None
+        # 条件分岐: `obj.asym_min is not None and obj.asym_max is not None and obj.asym_max > obj....` を満たす経路を評価する。
         if obj.asym_min is not None and obj.asym_max is not None and obj.asym_max > obj.asym_min:
             asym_target = 0.5 * (obj.asym_min + obj.asym_max)
             asym_sigma = (obj.asym_max - obj.asym_min) / math.sqrt(12.0)
@@ -447,6 +477,7 @@ def _evaluate_from_precomputed(
                 "ring_asymmetry_max": (None if obj.asym_max is None else float(obj.asym_max)),
             }
         )
+
     return rows, float(chi2)
 
 
@@ -487,6 +518,7 @@ def _fit_parameters(
             n_cache.append(n)
             obj: ObjectInput = item["object"]
             solver_diag_by_object[obj.key] = diag
+
         for zeta in zeta_grid:
             rows, chi2 = _evaluate_from_precomputed(
                 grids,
@@ -494,8 +526,12 @@ def _fit_parameters(
                 zeta_rot=float(zeta),
                 omega_ang_epsilon=float(omega_ang_epsilon),
             )
+            # 条件分岐: `not rows` を満たす経路を評価する。
             if not rows:
                 continue
+
+            # 条件分岐: `chi2 < best_chi2` を満たす経路を評価する。
+
             if chi2 < best_chi2:
                 best_chi2 = float(chi2)
                 best_lambda2 = float(lam2)
@@ -503,8 +539,11 @@ def _fit_parameters(
                 best_rows = rows
                 best_solver_diag = dict(solver_diag_by_object)
 
+    # 条件分岐: `not best_rows` を満たす経路を評価する。
+
     if not best_rows:
         raise RuntimeError("parameter search failed: no valid solution")
+
     return best_lambda2, best_zeta, best_chi2, best_rows, best_solver_diag
 
 
@@ -601,6 +640,7 @@ def _build_checks(
         max_abs_z_diameter <= 3.0,
         "各対象の直径残差は 3σ 以内。",
     )
+    # 条件分岐: `max_abs_z_asymmetry is not None` を満たす経路を評価する。
     if max_abs_z_asymmetry is not None:
         add(
             "direct::asymmetry_z_gate",
@@ -611,6 +651,7 @@ def _build_checks(
             max_abs_z_asymmetry <= 3.0,
             "非対称観測がある対象（Sgr A*）で 3σ 以内。",
         )
+
     add(
         "direct::orbit_outside_horizon",
         "min_orbit_margin_rg",
@@ -653,6 +694,7 @@ def _build_checks(
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(c.get("id")) for c in checks if str(c.get("gate_level")) == "hard" and not bool(c.get("pass"))]
     watch_ids = [str(c.get("id")) for c in checks if str(c.get("gate_level")) != "hard" and not bool(c.get("pass"))]
+    # 条件分岐: `hard_fail_ids` を満たす経路を評価する。
     if hard_fail_ids:
         return {
             "overall_status": "reject",
@@ -661,6 +703,9 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "watch_ids": watch_ids,
             "rule": "Reject if any hard gate fails.",
         }
+
+    # 条件分岐: `watch_ids` を満たす経路を評価する。
+
     if watch_ids:
         return {
             "overall_status": "watch",
@@ -669,6 +714,7 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "watch_ids": watch_ids,
             "rule": "Watch if hard gates pass and watch gates fail.",
         }
+
     return {
         "overall_status": "pass",
         "decision": "rotating_bh_direct_pass",
@@ -687,8 +733,10 @@ def _plot(
     zeta: float,
     grids: Sequence[Dict[str, Any]],
 ) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     path.parent.mkdir(parents=True, exist_ok=True)
 
     fig, axes = plt.subplots(1, 3, figsize=(16.8, 5.4), constrained_layout=True)
@@ -713,8 +761,10 @@ def _plot(
         obj: ObjectInput = item["object"]
         key = obj.key
         row = next((r for r in rows if str(r.get("key")) == key), None)
+        # 条件分岐: `row is None` を満たす経路を評価する。
         if row is None:
             continue
+
         r = item["r_rg"]
         psi = item["inv_r"] + lambda2 * item["inv_r2"]
         n = np.exp(2.0 * beta * psi)
@@ -728,6 +778,7 @@ def _plot(
         ax1.scatter([float(row["r_plus_rg"])], [float(row["b_plus_rg"])], s=24)
         ax1.scatter([float(row["r_minus_rg"])], [float(row["b_minus_rg"])], s=24, marker="x")
         ax1.axvline(float(item["horizon_rg"]), color="#6b7280", linestyle=":", linewidth=0.9)
+
     ax1.set_xlabel("radius r [r_g]")
     ax1.set_ylabel("impact scale b [r_g]")
     ax1.set_title("Direct impact minima from P_μ axisymmetric field")
@@ -740,8 +791,10 @@ def _plot(
     for i, row in enumerate(rows):
         a_min = _to_float(row.get("ring_asymmetry_min"))
         a_max = _to_float(row.get("ring_asymmetry_max"))
+        # 条件分岐: `a_min is not None and a_max is not None and a_max > a_min` を満たす経路を評価する。
         if a_min is not None and a_max is not None and a_max > a_min:
             ax2.axvspan(a_min, a_max, ymin=(i / max(len(rows), 1)), ymax=((i + 1) / max(len(rows), 1)), color="#f59e0b", alpha=0.18)
+
     ax2.set_yticks(y)
     ax2.set_yticklabels(labels)
     ax2.set_xlabel("ring asymmetry proxy")
@@ -894,17 +947,21 @@ def main() -> int:
 
     legacy_diag: Dict[str, Any] = {"loaded": False}
     legacy_path = args.legacy_strong_field_json
+    # 条件分岐: `legacy_path.exists()` を満たす経路を評価する。
     if legacy_path.exists():
         try:
             legacy = _read_json(legacy_path)
             model_summary = legacy.get("models", {}).get("comparison", {}) if isinstance(legacy.get("models"), dict) else {}
             checks_legacy = legacy.get("checks")
             kappa_ratio = None
+            # 条件分岐: `isinstance(checks_legacy, list)` を満たす経路を評価する。
             if isinstance(checks_legacy, list):
                 for ck in checks_legacy:
+                    # 条件分岐: `isinstance(ck, dict) and str(ck.get("id")) == "strong_field::eht_kappa_precis...` を満たす経路を評価する。
                     if isinstance(ck, dict) and str(ck.get("id")) == "strong_field::eht_kappa_precision":
                         kappa_ratio = _to_float(ck.get("value"))
                         break
+
             legacy_diag = {
                 "loaded": True,
                 "path": _rel(legacy_path),
@@ -1057,6 +1114,7 @@ def main() -> int:
     }
     _write_json(out_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -1101,6 +1159,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

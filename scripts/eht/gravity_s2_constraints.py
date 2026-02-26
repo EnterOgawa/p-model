@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -26,21 +27,28 @@ def _read_text(path: Path) -> str:
 
 
 def _extract_brace_block_from(text: str, start_index: int, start_token: str) -> Optional[str]:
+    # 条件分岐: `start_index < 0` を満たす経路を評価する。
     if start_index < 0:
         return None
+
     j = start_index + len(start_token)
     depth = 1
     out = []
     while j < len(text):
         ch = text[j]
+        # 条件分岐: `ch == "{"` を満たす経路を評価する。
         if ch == "{":
             depth += 1
+        # 条件分岐: 前段条件が不成立で、`ch == "}"` を追加評価する。
         elif ch == "}":
             depth -= 1
+            # 条件分岐: `depth == 0` を満たす経路を評価する。
             if depth == 0:
                 return "".join(out)
+
         out.append(ch)
         j += 1
+
     return None
 
 
@@ -48,11 +56,15 @@ def _extract_first_nonempty_brace_block(text: str, start_token: str, *, min_len:
     search_from = 0
     while True:
         i = text.find(start_token, search_from)
+        # 条件分岐: `i < 0` を満たす経路を評価する。
         if i < 0:
             return None
+
         block = _extract_brace_block_from(text, i, start_token)
+        # 条件分岐: `block is not None and len(block.strip()) >= min_len` を満たす経路を評価する。
         if block is not None and len(block.strip()) >= min_len:
             return block
+
         search_from = i + len(start_token)
 
 
@@ -90,18 +102,21 @@ class PrecessionConstraint:
 
 def _parse_redshift_2018(tex: str) -> Dict[str, Any]:
     abstract = _extract_first_nonempty_brace_block(tex, "\\abstract{")
+    # 条件分岐: `abstract is None` を満たす経路を評価する。
     if abstract is None:
         return {"ok": False, "reason": "abstract_not_found"}
 
     norm = _norm_tex(abstract)
 
     m = re.search(r"f=([0-9.]+)\\pm([0-9.]+)\|_\\mathrm\{stat\}\\pm([0-9.]+)\|_\\mathrm\{sys\}", norm)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return {"ok": False, "reason": "f_stat_sys_not_found", "abstract_snippet": abstract[:600]}
 
     f = _maybe_float(m.group(1))
     sigma_stat = _maybe_float(m.group(2))
     sigma_sys = _maybe_float(m.group(3))
+    # 条件分岐: `f is None or sigma_stat is None or sigma_sys is None` を満たす経路を評価する。
     if f is None or sigma_stat is None or sigma_sys is None:
         return {"ok": False, "reason": "f_parse_failed"}
 
@@ -110,11 +125,13 @@ def _parse_redshift_2018(tex: str) -> Dict[str, Any]:
     v_kms = None
 
     m_au_rs = re.search(r"pericentreat\$([0-9.]+)\\,\\mathrm\{AU\}.*?\{\\approx\}\\,?([0-9.]+)\$Schwarzschildradii", norm)  # noqa: E501
+    # 条件分岐: `m_au_rs` を満たす経路を評価する。
     if m_au_rs:
         pericenter_au = _maybe_float(m_au_rs.group(1))
         pericenter_rs = _maybe_float(m_au_rs.group(2))
 
     m_v = re.search(r"orbitalspeedof.*?([0-9.]+)\\,\\mathrm\{km/s\}", norm)
+    # 条件分岐: `m_v` を満たす経路を評価する。
     if m_v:
         v_kms = _maybe_float(m_v.group(1))
 
@@ -146,26 +163,31 @@ def _parse_redshift_2018(tex: str) -> Dict[str, Any]:
 
 def _parse_precession_2020(tex: str) -> Dict[str, Any]:
     abstract = _extract_first_nonempty_brace_block(tex, "\\abstract{")
+    # 条件分岐: `abstract is None` を満たす経路を評価する。
     if abstract is None:
         return {"ok": False, "reason": "abstract_not_found"}
 
     norm = _norm_tex(abstract)
     m = re.search(r"f_\\mathrm\{SP\}=([0-9.]+)\\pm([0-9.]+)", norm)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return {"ok": False, "reason": "f_sp_not_found", "abstract_snippet": abstract[:600]}
 
     f_sp = _maybe_float(m.group(1))
     sigma = _maybe_float(m.group(2))
+    # 条件分岐: `f_sp is None or sigma is None` を満たす経路を評価する。
     if f_sp is None or sigma is None:
         return {"ok": False, "reason": "f_sp_parse_failed"}
 
     delta_phi_arcmin = None
     m_phi = re.search(r"\\delta\\phi\\approx([0-9.]+)'", norm)
+    # 条件分岐: `m_phi` を満たす経路を評価する。
     if m_phi:
         delta_phi_arcmin = _maybe_float(m_phi.group(1))
 
     e = None
     m_e = re.search(r"e=([0-9.]+)", norm)
+    # 条件分岐: `m_e` を満たす経路を評価する。
     if m_e:
         e = _maybe_float(m_e.group(1))
 
@@ -191,6 +213,7 @@ def _parse_precession_2020(tex: str) -> Dict[str, Any]:
 
 
 def _estimate_discrimination_scale(*, r_peri_rs: Optional[float], v_peri_kms: Optional[float]) -> Dict[str, Any]:
+    # 条件分岐: `r_peri_rs is None or v_peri_kms is None` を満たす経路を評価する。
     if r_peri_rs is None or v_peri_kms is None:
         return {"ok": False, "reason": "missing_inputs"}
 
@@ -276,6 +299,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
 
     missing = [str(p) for p in (tex_2018_path, tex_2020_path) if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         payload["ok"] = False
         payload["reason"] = "missing_tex_sources"
@@ -295,6 +319,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     r_peri_rs = None
     v_peri_kms = None
+    # 条件分岐: `row_2018.get("ok") is True` を満たす経路を評価する。
     if row_2018.get("ok") is True:
         orbit = (row_2018.get("orbit_at_pericenter") or {})
         r_peri_rs = orbit.get("r_peri_schwarzschild_radii")
@@ -326,6 +351,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

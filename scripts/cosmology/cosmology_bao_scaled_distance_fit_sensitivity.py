@@ -41,6 +41,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -64,6 +65,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -83,26 +85,43 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `not math.isfinite(float(x))` を満たす経路を評価する。
+
     if not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
+    # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
     if not math.isfinite(abs_z):
         return ("na", "#999999")
+
+    # 条件分岐: `abs_z < 3.0` を満たす経路を評価する。
+
     if abs_z < 3.0:
         return ("ok", "#2ca02c")
+
+    # 条件分岐: `abs_z < 5.0` を満たす経路を評価する。
+
     if abs_z < 5.0:
         return ("mixed", "#ffbf00")
+
     return ("ng", "#d62728")
 
 
@@ -138,12 +157,20 @@ class GaussianConstraint:
     assumes_cddr: Optional[bool] = None
 
     def is_independent(self) -> bool:
+        # 条件分岐: `self.uses_bao is True` を満たす経路を評価する。
         if self.uses_bao is True:
             return False
+
+        # 条件分岐: `self.uses_cmb is True` を満たす経路を評価する。
+
         if self.uses_cmb is True:
             return False
+
+        # 条件分岐: `self.assumes_cddr is True` を満たす経路を評価する。
+
         if self.assumes_cddr is True:
             return False
+
         return True
 
 
@@ -163,9 +190,12 @@ def _load_bao_points(path: Path) -> List[BAOPoint]:
                 corr_dm_h=float(r.get("corr_DM_H", 0.0)),
             )
         )
+
     out = sorted(out, key=lambda x: float(x.z_eff))
+    # 条件分岐: `len(out) < 2` を満たす経路を評価する。
     if len(out) < 2:
         raise ValueError("need >=2 BAO points for s_R fit")
+
     return out
 
 
@@ -181,8 +211,12 @@ def _load_boss_corr_for_dm_h(
     src = _read_json(boss_cov_path)
     params = list(src.get("parameters") or [])
     cij_1e4 = np.array(src.get("cij_1e4"), dtype=float)
+    # 条件分岐: `cij_1e4.ndim != 2 or cij_1e4.shape[0] != cij_1e4.shape[1]` を満たす経路を評価する。
     if cij_1e4.ndim != 2 or cij_1e4.shape[0] != cij_1e4.shape[1]:
         raise ValueError(f"invalid cij_1e4 shape: {cij_1e4.shape}")
+
+    # 条件分岐: `len(params) != int(cij_1e4.shape[0])` を満たす経路を評価する。
+
     if len(params) != int(cij_1e4.shape[0]):
         raise ValueError("cij_1e4 size mismatch with parameters")
 
@@ -191,18 +225,27 @@ def _load_boss_corr_for_dm_h(
         best_d = float("inf")
         best_p = None
         for i, p in enumerate(params):
+            # 条件分岐: `str(p.get("kind") or "") != kind` を満たす経路を評価する。
             if str(p.get("kind") or "") != kind:
                 continue
+
             zz = p.get("z_eff")
+            # 条件分岐: `zz is None` を満たす経路を評価する。
             if zz is None:
                 continue
+
             d = abs(float(zz) - float(z))
+            # 条件分岐: `d < best_d` を満たす経路を評価する。
             if d < best_d:
                 best_d = d
                 best_i = int(i)
                 best_p = dict(p)
+
+        # 条件分岐: `best_i is None or best_p is None or best_d > float(z_tol)` を満たす経路を評価する。
+
         if best_i is None or best_p is None or best_d > float(z_tol):
             raise ValueError(f"cannot match kind={kind} z={z} (best_d={best_d})")
+
         return best_i, best_p
 
     indices: List[int] = []
@@ -220,9 +263,12 @@ def _load_boss_corr_for_dm_h(
 
 def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         raise ValueError("z must satisfy 1+z>0")
+
     B = float(B)
+    # 条件分岐: `not (B > 0.0)` を満たす経路を評価する。
     if not (B > 0.0):
         raise ValueError("B must be > 0")
 
@@ -232,15 +278,22 @@ def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
 
 
 def _bao_pred_vec(*, z_points: Sequence[float], s_R: float, B: float, use_dm: bool, use_h: bool) -> np.ndarray:
+    # 条件分岐: `not (use_dm or use_h)` を満たす経路を評価する。
     if not (use_dm or use_h):
         raise ValueError("use_dm/use_h must include at least one observable")
+
     vec: List[float] = []
     for z in z_points:
         dm_pred, h_pred = _bao_pred_dm_h(z=float(z), s_R=float(s_R), B=float(B))
+        # 条件分岐: `use_dm` を満たす経路を評価する。
         if use_dm:
             vec.append(float(dm_pred))
+
+        # 条件分岐: `use_h` を満たす経路を評価する。
+
         if use_h:
             vec.append(float(h_pred))
+
     return np.array(vec, dtype=float)
 
 
@@ -260,17 +313,24 @@ def _build_covariance(
     labels: List[str] = []
     sigmas: List[float] = []
     for z, r in zip(z_points, bao_points, strict=True):
+        # 条件分岐: `use_dm` を満たす経路を評価する。
         if use_dm:
             labels.append(f"DM({z:.2f})")
             sigmas.append(float(r.dm_sigma))
+
+        # 条件分岐: `use_h` を満たす経路を評価する。
+
         if use_h:
             labels.append(f"H({z:.2f})")
             sigmas.append(float(r.h_sigma))
 
     sig = np.array(sigmas, dtype=float)
+    # 条件分岐: `mode == "diag"` を満たす経路を評価する。
     if mode == "diag":
         cov = np.diag(np.maximum(1e-300, sig) ** 2)
         return cov, np.linalg.inv(cov), labels
+
+    # 条件分岐: `mode == "block"` を満たす経路を評価する。
 
     if mode == "block":
         # per-z 2x2 (or 1x1) blocks
@@ -278,6 +338,7 @@ def _build_covariance(
         cov = np.zeros((n, n), dtype=float)
         cursor = 0
         for r in bao_points:
+            # 条件分岐: `use_dm and use_h` を満たす経路を評価する。
             if use_dm and use_h:
                 a = float(r.dm_sigma) ** 2
                 d = float(r.h_sigma) ** 2
@@ -287,26 +348,34 @@ def _build_covariance(
                 cov[cursor + 0, cursor + 1] = cov12
                 cov[cursor + 1, cursor + 0] = cov12
                 cursor += 2
+            # 条件分岐: 前段条件が不成立で、`use_dm` を追加評価する。
             elif use_dm:
                 cov[cursor, cursor] = float(r.dm_sigma) ** 2
                 cursor += 1
             else:
                 cov[cursor, cursor] = float(r.h_sigma) ** 2
                 cursor += 1
+
         cov = 0.5 * (cov + cov.T)
         return cov, np.linalg.inv(cov), labels
 
+    # 条件分岐: `mode == "full"` を満たす経路を評価する。
+
     if mode == "full":
+        # 条件分岐: `boss_corr_dm_h is None` を満たす経路を評価する。
         if boss_corr_dm_h is None:
             raise ValueError("boss_corr_dm_h is required for full mode")
         # boss_corr_dm_h is for (DM,H) pairs; reduce if needed.
+
         corr = boss_corr_dm_h
+        # 条件分岐: `use_dm and use_h` を満たす経路を評価する。
         if use_dm and use_h:
             corr_use = corr
         else:
             # pick DM-only or H-only indices from the (DM,H) ordering.
             idx = list(range(0, corr.shape[0], 2)) if use_dm else list(range(1, corr.shape[0], 2))
             corr_use = corr[np.ix_(idx, idx)]
+
         cov = corr_use * np.outer(sig, sig)
         cov = 0.5 * (cov + cov.T)
         return cov, np.linalg.inv(cov), labels
@@ -329,10 +398,15 @@ def _fit_bao_s_r(
 
     y_obs_list: List[float] = []
     for r in bao_points:
+        # 条件分岐: `use_dm` を満たす経路を評価する。
         if use_dm:
             y_obs_list.append(float(r.dm))
+
+        # 条件分岐: `use_h` を満たす経路を評価する。
+
         if use_h:
             y_obs_list.append(float(r.h))
+
     y_obs = np.array(y_obs_list, dtype=float)
 
     def chi2(s_R: float, B: float) -> float:
@@ -353,11 +427,13 @@ def _fit_bao_s_r(
         return float(Bs2[j]), float(chi2_vals[j])
 
     # coarse scan
+
     s_grid0 = np.linspace(float(s_R_min), float(s_R_max), 301, dtype=float)
     prof0: List[Dict[str, float]] = []
     for s in s_grid0:
         b_best, chi_best = profile_B(float(s), n_grid=2001)
         prof0.append({"s_R": float(s), "B_best": float(b_best), "chi2": float(chi_best)})
+
     best0 = min(prof0, key=lambda x: (x["chi2"] if math.isfinite(x["chi2"]) else float("inf")))
 
     # refine scan
@@ -385,13 +461,16 @@ def _fit_bao_s_r(
     i_left = i_best
     while i_left > 0 and bool(ok[i_left]):
         i_left -= 1
+
     left = float(s_prof[i_left + 1]) if not bool(ok[i_left]) else float(s_prof[0])
 
     i_right = i_best
     while i_right < len(s_prof) - 1 and bool(ok[i_right]):
         i_right += 1
+
     right = float(s_prof[i_right - 1]) if not bool(ok[i_right]) else float(s_prof[-1])
 
+    # 条件分岐: `left == float(s_prof[0]) or right == float(s_prof[-1])` を満たす経路を評価する。
     if left == float(s_prof[0]) or right == float(s_prof[-1]):
         s_sig = float("nan")
         s_sig_asym = {"minus": float("nan"), "plus": float("nan")}
@@ -432,8 +511,12 @@ def _as_gaussian_list(
             sig = float(r[sigma_key])
         except Exception:
             continue
+
+        # 条件分岐: `not (sig > 0.0 and math.isfinite(sig))` を満たす経路を評価する。
+
         if not (sig > 0.0 and math.isfinite(sig)):
             continue
+
         out.append(
             GaussianConstraint(
                 id=str(r.get("id") or ""),
@@ -449,6 +532,7 @@ def _as_gaussian_list(
                 ),
             )
         )
+
     return out
 
 
@@ -465,6 +549,7 @@ def _load_ddr_constraints(path: Path) -> List[DDRConstraint]:
                 uses_bao=bool(r.get("uses_bao", False)),
             )
         )
+
     return out
 
 
@@ -475,8 +560,10 @@ def _load_fixed_pt_pe(
 ) -> Tuple[GaussianConstraint, GaussianConstraint]:
     pt_rows = _read_json(pt_path).get("constraints") or []
     pt_all = _as_gaussian_list(pt_rows, mean_key="p_t", sigma_key="p_t_sigma")
+    # 条件分岐: `not pt_all` を満たす経路を評価する。
     if not pt_all:
         raise ValueError("no p_t constraint found")
+
     p_t = pt_all[0]
 
     # Convert beta_T -> p_e=1-beta_T.
@@ -488,8 +575,12 @@ def _load_fixed_pt_pe(
             sig = float(r["beta_T_sigma"])
         except Exception:
             continue
+
+        # 条件分岐: `not (sig > 0.0 and math.isfinite(sig))` を満たす経路を評価する。
+
         if not (sig > 0.0 and math.isfinite(sig)):
             continue
+
         pe = GaussianConstraint(
             id=str(r.get("id") or ""),
             short_label=str(r.get("short_label") or r.get("id") or ""),
@@ -497,8 +588,12 @@ def _load_fixed_pt_pe(
             sigma=float(sig),
         )
         break
+
+    # 条件分岐: `pe is None` を満たす経路を評価する。
+
     if pe is None:
         raise ValueError("no CMB temperature scaling constraint found")
+
     return p_t, pe
 
 
@@ -583,6 +678,7 @@ def _wls_fit_candidate(
 
 
 def _choose_best(candidates: Sequence[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not candidates` を満たす経路を評価する。
     if not candidates:
         return None
 
@@ -605,6 +701,7 @@ def _evaluate_candidate_for_ddr(
 ) -> Optional[Dict[str, Any]]:
     opacity_use = [c for c in opacity_all if (c.is_independent() if independent_only else True)]
     candle_use = [c for c in candle_all if (c.is_independent() if independent_only else True)]
+    # 条件分岐: `not (opacity_use and candle_use)` を満たす経路を評価する。
     if not (opacity_use and candle_use):
         return None
 
@@ -627,6 +724,7 @@ def _evaluate_candidate_for_ddr(
                     "fit": fit,
                 }
             )
+
     return _choose_best(candidates)
 
 
@@ -667,11 +765,13 @@ def _plot(
         ax.text(float(s) + 0.02, float(i), f"{_fmt_float(s, digits=3)}±{_fmt_float(sig, digits=3)}", va="center")
 
     # B) Effect on candidate search (best_independent max|z|)
+
     ax = axes[1]
     ax.barh(y, maxz, color=colors, alpha=0.9)
     for xline, txt in [(1.0, "1σ"), (3.0, "3σ"), (5.0, "5σ")]:
         ax.axvline(xline, color="#333333", linewidth=1.0, alpha=0.2)
         ax.text(xline + 0.05, -0.7, txt, fontsize=9, color="#333333", alpha=0.8)
+
     ax.set_yticks(y)
     ax.set_yticklabels(mode_labels, fontsize=10)
     ax.invert_yaxis()
@@ -679,6 +779,7 @@ def _plot(
     ax.set_title("再導出候補探索への影響（BAO含むDDR）", fontsize=13)
     ax.grid(True, axis="x", linestyle="--", alpha=0.35)
     for i, v in enumerate(maxz):
+        # 条件分岐: `math.isfinite(float(v))` を満たす経路を評価する。
         if math.isfinite(float(v)):
             ax.text(float(v) + 0.08, float(i), f"{_fmt_float(float(v), digits=3)}σ", va="center", fontsize=9)
 
@@ -713,6 +814,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     pe_path = data_dir / "cmb_temperature_scaling_constraints.json"
 
     for p in (ap_path, boss_cov_path, ddr_path, opacity_path, candle_path, pt_path, pe_path):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing input: {p}")
 
@@ -757,8 +859,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
 
     # Candidate impact: evaluate for a single DDR (default: Martinelli2021).
+
     ddr_all = _load_ddr_constraints(ddr_path)
     ddr = next((d for d in ddr_all if d.id == str(args.ddr_id)), None)
+    # 条件分岐: `ddr is None` を満たす経路を評価する。
     if ddr is None:
         raise ValueError(f"ddr-id not found: {args.ddr_id}")
 
@@ -771,6 +875,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         best_fit = bf.get("best_fit") or {}
         sR_bao = float(best_fit.get("s_R", float("nan")))
         sR_sig = float(best_fit.get("s_R_sigma_1d", float("nan")))
+        # 条件分岐: `not (math.isfinite(sR_bao) and math.isfinite(sR_sig) and sR_sig > 0)` を満たす経路を評価する。
         if not (math.isfinite(sR_bao) and math.isfinite(sR_sig) and sR_sig > 0):
             candidate_by_mode[str(bf["mode"])] = {"ok": False, "reason": "invalid_bao_fit"}
             continue
@@ -785,6 +890,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             p_e=p_e,
             independent_only=True,
         )
+        # 条件分岐: `best_ind is None` を満たす経路を評価する。
         if best_ind is None:
             candidate_by_mode[str(bf["mode"])] = {"ok": False, "reason": "no_candidate"}
             continue
@@ -856,6 +962,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

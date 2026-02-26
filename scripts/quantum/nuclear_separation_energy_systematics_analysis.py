@@ -30,31 +30,40 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -65,12 +74,20 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def _edge_class(*, dist_min: int, dist_max: int, edge_width: int = EDGE_WIDTH) -> str:
     min_edge = dist_min <= edge_width
     max_edge = dist_max <= edge_width
+    # 条件分岐: `min_edge and max_edge` を満たす経路を評価する。
     if min_edge and max_edge:
         return "both_edges"
+
+    # 条件分岐: `min_edge` を満たす経路を評価する。
+
     if min_edge:
         return "min_edge"
+
+    # 条件分岐: `max_edge` を満たす経路を評価する。
+
     if max_edge:
         return "max_edge"
+
     return "interior"
 
 
@@ -85,8 +102,10 @@ def _read_per_nucleus_input(path: Path) -> dict[tuple[int, int], dict[str, Any]]
             b_obs = float(row["B_obs_MeV"])
             b_before = float(row["B_pred_before_MeV"])
             b_after = float(row["B_pred_after_MeV"])
+            # 条件分岐: `not (math.isfinite(b_obs) and math.isfinite(b_before))` を満たす経路を評価する。
             if not (math.isfinite(b_obs) and math.isfinite(b_before)):
                 continue
+
             out[(z, n)] = {
                 "Z": z,
                 "N": n,
@@ -98,6 +117,7 @@ def _read_per_nucleus_input(path: Path) -> dict[tuple[int, int], dict[str, Any]]
                 "B_pred_before_MeV": b_before,
                 "B_pred_after_MeV": b_after,
             }
+
     return out
 
 
@@ -113,24 +133,28 @@ def _compute_separation_rows(
 
     for z, n in sorted(by_zn.keys()):
         parent = by_zn[(z, n)]
+        # 条件分岐: `observable == "S_n"` を満たす経路を評価する。
         if observable == "S_n":
             ref = by_zn.get((z, n - 1))
             axis_values = n_by_z.get(z, [])
             axis_name = "N"
             axis_parent = n
             is_magic_axis = n in MAGIC_N
+        # 条件分岐: 前段条件が不成立で、`observable == "S_p"` を追加評価する。
         elif observable == "S_p":
             ref = by_zn.get((z - 1, n))
             axis_values = z_by_n.get(n, [])
             axis_name = "Z"
             axis_parent = z
             is_magic_axis = z in MAGIC_Z
+        # 条件分岐: 前段条件が不成立で、`observable == "S_2n"` を追加評価する。
         elif observable == "S_2n":
             ref = by_zn.get((z, n - 2))
             axis_values = n_by_z.get(z, [])
             axis_name = "N"
             axis_parent = n
             is_magic_axis = n in MAGIC_N
+        # 条件分岐: 前段条件が不成立で、`observable == "S_2p"` を追加評価する。
         elif observable == "S_2p":
             ref = by_zn.get((z - 2, n))
             axis_values = z_by_n.get(n, [])
@@ -140,8 +164,13 @@ def _compute_separation_rows(
         else:
             raise ValueError(f"unknown observable: {observable}")
 
+        # 条件分岐: `ref is None` を満たす経路を評価する。
+
         if ref is None:
             continue
+
+        # 条件分岐: `not axis_values` を満たす経路を評価する。
+
         if not axis_values:
             continue
 
@@ -149,6 +178,7 @@ def _compute_separation_rows(
         sep_before = float(parent["B_pred_before_MeV"] - ref["B_pred_before_MeV"])
         b_after_parent = float(parent["B_pred_after_MeV"])
         b_after_ref = float(ref["B_pred_after_MeV"])
+        # 条件分岐: `math.isfinite(b_after_parent) and math.isfinite(b_after_ref)` を満たす経路を評価する。
         if math.isfinite(b_after_parent) and math.isfinite(b_after_ref):
             sep_after = float(b_after_parent - b_after_ref)
             resid_after = float(sep_after - sep_obs)
@@ -218,12 +248,14 @@ def _build_magic_gap_rows(
         pred_before = float(left["pred_before"] - right["pred_before"])
         a_after = float(left["pred_after"])
         b_after = float(right["pred_after"])
+        # 条件分岐: `math.isfinite(a_after) and math.isfinite(b_after)` を満たす経路を評価する。
         if math.isfinite(a_after) and math.isfinite(b_after):
             pred_after = float(a_after - b_after)
             resid_after = float(pred_after - obs)
         else:
             pred_after = float("nan")
             resid_after = float("nan")
+
         resid_before = float(pred_before - obs)
         rows.append(
             {
@@ -247,6 +279,7 @@ def _build_magic_gap_rows(
         for n0 in MAGIC_N:
             left = sn.get((z, n0))
             right = sn.get((z, n0 + 1))
+            # 条件分岐: `left is not None and right is not None` を満たす経路を評価する。
             if left is not None and right is not None:
                 _append_gap(
                     gap_name="gap_n",
@@ -256,8 +289,10 @@ def _build_magic_gap_rows(
                     left=left,
                     right=right,
                 )
+
             left2 = s2n.get((z, n0))
             right2 = s2n.get((z, n0 + 2))
+            # 条件分岐: `left2 is not None and right2 is not None` を満たす経路を評価する。
             if left2 is not None and right2 is not None:
                 _append_gap(
                     gap_name="gap_2n",
@@ -274,6 +309,7 @@ def _build_magic_gap_rows(
         for z0 in MAGIC_Z:
             left = sp.get((z0, n))
             right = sp.get((z0 + 1, n))
+            # 条件分岐: `left is not None and right is not None` を満たす経路を評価する。
             if left is not None and right is not None:
                 _append_gap(
                     gap_name="gap_p",
@@ -283,8 +319,10 @@ def _build_magic_gap_rows(
                     left=left,
                     right=right,
                 )
+
             left2 = s2p.get((z0, n))
             right2 = s2p.get((z0 + 2, n))
+            # 条件分岐: `left2 is not None and right2 is not None` を満たす経路を評価する。
             if left2 is not None and right2 is not None:
                 _append_gap(
                     gap_name="gap_2p",
@@ -318,6 +356,7 @@ def _summarize_observables(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
         ]
         edge_med = _safe_median(edge_after)
         interior_med = _safe_median(interior_after)
+        # 条件分岐: `math.isfinite(edge_med) and math.isfinite(interior_med) and interior_med > 0.0` を満たす経路を評価する。
         if math.isfinite(edge_med) and math.isfinite(interior_med) and interior_med > 0.0:
             edge_ratio = float(edge_med / interior_med)
         else:
@@ -337,6 +376,7 @@ def _summarize_observables(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "edge_to_interior_ratio_after": edge_ratio,
             }
         )
+
     return out
 
 
@@ -359,6 +399,7 @@ def _summarize_edges(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     "median_abs_resid_after_MeV": _safe_median([abs(v) for v in after]),
                 }
             )
+
     return out
 
 
@@ -379,6 +420,7 @@ def _summarize_gaps(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 "median_abs_resid_after_MeV": _safe_median([abs(v) for v in after]),
             }
         )
+
     return out
 
 
@@ -425,6 +467,7 @@ def _build_figure(
         xs = [int(r["A_parent"]) for r in sub]
         ys = [float(r["resid_after_MeV"]) for r in sub]
         ax10.scatter(xs, ys, s=8.0, alpha=0.18, color=colors[obs], label=obs)
+
     ax10.set_xlabel("A")
     ax10.set_ylabel("residual after correction [MeV]")
     ax10.set_yscale("symlog", linthresh=1.0)
@@ -437,6 +480,7 @@ def _build_figure(
     ax11.bar(GAP_ORDER, gap_vals, color="#72b7b2", alpha=0.9)
     for idx, n in enumerate(gap_counts):
         ax11.text(idx, gap_vals[idx], f"n={n}", ha="center", va="bottom", fontsize=8)
+
     ax11.set_ylabel("median abs residual [MeV]")
     ax11.set_title("Magic-gap diagnostics (after correction)")
     ax11.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
@@ -453,6 +497,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_pairing_effect_systematics_per_nucleus.csv"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(
             f"[fail] missing required input: {in_csv}\n"
@@ -461,6 +506,7 @@ def main() -> None:
         )
 
     by_zn = _read_per_nucleus_input(in_csv)
+    # 条件分岐: `not by_zn` を満たす経路を評価する。
     if not by_zn:
         raise SystemExit(f"[fail] no usable rows in {in_csv}")
 
@@ -469,8 +515,10 @@ def main() -> None:
     for z, n in by_zn.keys():
         n_by_z[z].append(n)
         z_by_n[n].append(z)
+
     for z in list(n_by_z.keys()):
         n_by_z[z] = sorted(set(n_by_z[z]))
+
     for n in list(z_by_n.keys()):
         z_by_n[n] = sorted(set(z_by_n[n]))
 
@@ -485,6 +533,8 @@ def main() -> None:
         )
         sep_rows.extend(rows)
         sep_lookup[obs] = lookup
+
+    # 条件分岐: `not sep_rows` を満たす経路を評価する。
 
     if not sep_rows:
         raise SystemExit("[fail] no separation-energy rows produced")
@@ -587,6 +637,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

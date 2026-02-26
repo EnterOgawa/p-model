@@ -34,8 +34,11 @@ def _shuffle_setting_bits_codes(c: np.ndarray, *, encoding: str, rng: np.random.
     while keeping the detector/outcome bit intact.
     """
     cc = np.asarray(c, dtype=np.uint16).reshape(-1)
+    # 条件分岐: `cc.size == 0` を満たす経路を評価する。
     if cc.size == 0:
         return cc.copy()
+
+    # 条件分岐: `encoding == "bit0-setting"` を満たす経路を評価する。
 
     if encoding == "bit0-setting":
         # bit0: setting, bit1: detector (outcome)
@@ -43,6 +46,8 @@ def _shuffle_setting_bits_codes(c: np.ndarray, *, encoding: str, rng: np.random.
         perm = rng.permutation(int(setting.size))
         setting2 = setting[perm]
         return (cc & np.uint16(2)) | setting2
+
+    # 条件分岐: `encoding == "bit0-detector"` を満たす経路を評価する。
 
     if encoding == "bit0-detector":
         # bit0: detector (outcome), bit1: setting
@@ -64,14 +69,19 @@ def _circular_time_shift_sorted_pair(
     """
     t0 = np.asarray(t_s, dtype=np.float64).reshape(-1)
     x0 = np.asarray(x).reshape(-1)
+    # 条件分岐: `t0.size != x0.size` を満たす経路を評価する。
     if t0.size != x0.size:
         raise ValueError("t_s and x must have same length")
+
+    # 条件分岐: `t0.size == 0` を満たす経路を評価する。
+
     if t0.size == 0:
         return t0.copy(), x0.copy(), {"supported": True, "shift_s": float(shift_s), "span_s": 0.0}
 
     t_min = float(np.min(t0))
     t_max = float(np.max(t0))
     span = float(t_max - t_min)
+    # 条件分岐: `not math.isfinite(span) or span <= 0.0` を満たす経路を評価する。
     if not math.isfinite(span) or span <= 0.0:
         return t0.copy(), x0.copy(), {"supported": False, "reason": "invalid time span"}
 
@@ -86,20 +96,30 @@ def _circular_time_shift_sorted_pair(
 
 
 def _snap_to_grid_ge(*, x: float | None, grid: Iterable[float]) -> float | None:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return None
+
     try:
         x0 = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(x0)` を満たす経路を評価する。
+
     if not math.isfinite(x0):
         return None
+
     vals = sorted({float(v) for v in _finite(grid) if math.isfinite(float(v))})
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return None
+
     for v in vals:
+        # 条件分岐: `v >= x0` を満たす経路を評価する。
         if v >= x0:
             return float(v)
+
     return float(vals[-1])
 
 
@@ -121,8 +141,10 @@ def _read_json(path: Path) -> Any:
 
 
 def _read_json_or_none(path: Path) -> Any | None:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     try:
         return _read_json(path)
     except Exception:
@@ -134,6 +156,7 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(int(chunk_bytes)), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -142,16 +165,21 @@ def _relpath_from_root(path: Path) -> str:
         rel = path.resolve().relative_to(ROOT.resolve())
     except Exception:
         return str(path)
+
     return rel.as_posix()
 
 
 def _load_script_module(*, rel_path: str, name: str) -> Any:
     path = ROOT / rel_path
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(path)
+
     spec = importlib.util.spec_from_file_location(name, path)
+    # 条件分岐: `spec is None or spec.loader is None` を満たす経路を評価する。
     if spec is None or spec.loader is None:
         raise RuntimeError(f"failed to load module: {path}")
+
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
@@ -159,8 +187,10 @@ def _load_script_module(*, rel_path: str, name: str) -> Any:
 
 
 def _ks_distance(x: np.ndarray, y: np.ndarray) -> float:
+    # 条件分岐: `x.size == 0 or y.size == 0` を満たす経路を評価する。
     if x.size == 0 or y.size == 0:
         return float("nan")
+
     xs = np.sort(np.asarray(x, dtype=float))
     ys = np.sort(np.asarray(y, dtype=float))
     n = xs.size
@@ -169,11 +199,14 @@ def _ks_distance(x: np.ndarray, y: np.ndarray) -> float:
     j = 0
     d = 0.0
     while i < n and j < m:
+        # 条件分岐: `xs[i] <= ys[j]` を満たす経路を評価する。
         if xs[i] <= ys[j]:
             i += 1
         else:
             j += 1
+
         d = max(d, abs(i / n - j / m))
+
     d = max(d, abs(1.0 - j / m), abs(i / n - 1.0))
     return float(d)
 
@@ -191,6 +224,7 @@ def _delay_signature_delta_median(
       σ(median) ≈ (q(0.5+ε) - q(0.5-ε)) / (4 ε √n)
     """
     eps = float(epsilon)
+    # 条件分岐: `not math.isfinite(eps) or eps <= 0.0 or eps >= 0.5` を満たす経路を評価する。
     if not math.isfinite(eps) or eps <= 0.0 or eps >= 0.5:
         eps = 0.1
 
@@ -205,12 +239,16 @@ def _delay_signature_delta_median(
 
     def _median_and_sigma(x: np.ndarray) -> tuple[float | None, float | None, float | None, float | None]:
         n = int(x.size)
+        # 条件分岐: `n <= 1` を満たす経路を評価する。
         if n <= 1:
             return None, None, None, None
+
         q_lo, med, q_hi = np.quantile(x, [0.5 - eps, 0.5, 0.5 + eps]).astype(float).tolist()
         width = float(q_hi) - float(q_lo)
+        # 条件分岐: `not math.isfinite(width) or width <= 0.0` を満たす経路を評価する。
         if not math.isfinite(width) or width <= 0.0:
             return float(med), None, float(q_lo), float(q_hi)
+
         sigma = width / (4.0 * eps * math.sqrt(float(n)))
         return float(med), float(sigma), float(q_lo), float(q_hi)
 
@@ -218,14 +256,17 @@ def _delay_signature_delta_median(
     m1, s1, q1lo, q1hi = _median_and_sigma(x1v)
 
     delta = None
+    # 条件分岐: `m0 is not None and m1 is not None and math.isfinite(float(m0)) and math.isfin...` を満たす経路を評価する。
     if m0 is not None and m1 is not None and math.isfinite(float(m0)) and math.isfinite(float(m1)):
         delta = float(m0) - float(m1)
 
     sigma_delta = None
+    # 条件分岐: `s0 is not None and s1 is not None and s0 > 0.0 and s1 > 0.0` を満たす経路を評価する。
     if s0 is not None and s1 is not None and s0 > 0.0 and s1 > 0.0:
         sigma_delta = math.sqrt(float(s0) ** 2 + float(s1) ** 2)
 
     z = None
+    # 条件分岐: `delta is not None and sigma_delta is not None and sigma_delta > 0.0` を満たす経路を評価する。
     if delta is not None and sigma_delta is not None and sigma_delta > 0.0:
         z = abs(float(delta)) / float(sigma_delta)
 
@@ -247,65 +288,105 @@ def _delay_signature_delta_median(
 def _finite(values: Iterable[float | None]) -> list[float]:
     out: list[float] = []
     for v in values:
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             continue
+
         try:
             x = float(v)
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(x)` を満たす経路を評価する。
+
         if math.isfinite(x):
             out.append(x)
+
     return out
 
 
 def _min_max(values: Iterable[float | None]) -> tuple[float | None, float | None]:
     v = _finite(values)
+    # 条件分岐: `not v` を満たす経路を評価する。
     if not v:
         return None, None
+
     return float(min(v)), float(max(v))
 
 
 def _dataset_display_name(dataset_id: str) -> str:
     ds = str(dataset_id or "")
+    # 条件分岐: `ds.startswith("weihs1998_")` を満たす経路を評価する。
     if ds.startswith("weihs1998_"):
         return "Weihs 1998"
+
+    # 条件分岐: `ds.startswith("nist_")` を満たす経路を評価する。
+
     if ds.startswith("nist_"):
         return "NIST"
+
+    # 条件分岐: `ds.startswith("kwiat2013_")` を満たす経路を評価する。
+
     if ds.startswith("kwiat2013_"):
         return "Kwiat/Christensen 2013"
+
+    # 条件分岐: `ds == "delft_hensen2015"` を満たす経路を評価する。
+
     if ds == "delft_hensen2015":
         return "Delft (Hensen 2015)"
+
+    # 条件分岐: `ds.startswith("delft_hensen2016_")` を満たす経路を評価する。
+
     if ds.startswith("delft_hensen2016_"):
         return "Delft (Hensen 2016)"
+
     return ds
 
 
 def _dataset_year(dataset_id: str) -> int | None:
     ds = str(dataset_id or "")
+    # 条件分岐: `ds.startswith("weihs1998_")` を満たす経路を評価する。
     if ds.startswith("weihs1998_"):
         return 1998
+
+    # 条件分岐: `ds.startswith("kwiat2013_")` を満たす経路を評価する。
+
     if ds.startswith("kwiat2013_"):
         return 2013
+
+    # 条件分岐: `ds == "delft_hensen2015"` を満たす経路を評価する。
+
     if ds == "delft_hensen2015":
         return 2015
+
+    # 条件分岐: `ds.startswith("delft_hensen2016_")` を満たす経路を評価する。
+
     if ds.startswith("delft_hensen2016_"):
         return 2016
+
+    # 条件分岐: `ds.startswith("nist_")` を満たす経路を評価する。
+
     if ds.startswith("nist_"):
         return 2015
+
     return None
 
 
 def _dataset_selection_class(dataset_id: str) -> str:
     ds = str(dataset_id or "")
+    # 条件分岐: `ds.startswith("delft_hensen")` を満たす経路を評価する。
     if ds.startswith("delft_hensen"):
         return "event_ready_offset"
+
     return "time_tag_window_or_offset"
 
 
 def _dataset_statistic_family(dataset_id: str) -> str:
     ds = str(dataset_id or "")
+    # 条件分岐: `ds.startswith(("nist_", "kwiat2013_"))` を満たす経路を評価する。
     if ds.startswith(("nist_", "kwiat2013_")):
         return "CH"
+
     return "CHSH"
 
 
@@ -318,9 +399,15 @@ def _linear_trend_metrics(points: Iterable[tuple[float | None, float | None]]) -
             yv = float(y) if y is not None else float("nan")
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(xv) and math.isfinite(yv)` を満たす経路を評価する。
+
         if math.isfinite(xv) and math.isfinite(yv):
             xs_v.append(xv)
             ys_v.append(yv)
+
+    # 条件分岐: `len(xs_v) < 2` を満たす経路を評価する。
+
     if len(xs_v) < 2:
         return {"supported": False, "reason": "need >=2 finite points"}
 
@@ -339,8 +426,10 @@ def _linear_trend_metrics(points: Iterable[tuple[float | None, float | None]]) -
     r = None
     sx = float(np.std(xs, ddof=1))
     sy = float(np.std(ys, ddof=1))
+    # 条件分岐: `sx > 0.0 and sy > 0.0` を満たす経路を評価する。
     if sx > 0.0 and sy > 0.0:
         corr = float(np.corrcoef(xs, ys)[0, 1])
+        # 条件分岐: `math.isfinite(corr)` を満たす経路を評価する。
         if math.isfinite(corr):
             r = corr
 
@@ -372,16 +461,22 @@ def _group_metric_summary(
 ) -> list[dict[str, Any]]:
     buckets: dict[str, list[float]] = {}
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         group = str(row.get(group_key) or "unknown")
         value = row.get(value_key)
         try:
             xv = float(value) if value is not None else float("nan")
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(xv)` を満たす経路を評価する。
+
         if not math.isfinite(xv):
             continue
+
         buckets.setdefault(group, []).append(xv)
 
     out: list[dict[str, Any]] = []
@@ -398,38 +493,51 @@ def _group_metric_summary(
                 "max": float(np.max(arr)),
             }
         )
+
     return out
 
 
 def _delay_signature_z_max(delay_signature: Any) -> float | None:
+    # 条件分岐: `not isinstance(delay_signature, dict)` を満たす経路を評価する。
     if not isinstance(delay_signature, dict):
         return None
+
     zs: list[float] = []
     for who in ("Alice", "Bob"):
         d = delay_signature.get(who)
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         z = d.get("z_delta_median")
         try:
             zv = float(z)
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(zv)` を満たす経路を評価する。
+
         if math.isfinite(zv):
             zs.append(abs(zv))
+
     return float(max(zs)) if zs else None
 
 
 def _nanstd(values: Iterable[float | None]) -> float:
     v = np.asarray(_finite(values), dtype=float)
+    # 条件分岐: `v.size <= 1` を満たす経路を評価する。
     if v.size <= 1:
         return float("nan")
+
     return float(np.std(v, ddof=1))
 
 
 def _nan_cov(X: np.ndarray) -> np.ndarray:
     X = np.asarray(X, dtype=float)
+    # 条件分岐: `X.ndim != 2` を満たす経路を評価する。
     if X.ndim != 2:
         raise ValueError("X must be 2D")
+
     n_points = int(X.shape[1])
     cov = np.full((n_points, n_points), float("nan"), dtype=float)
     for i in range(n_points):
@@ -437,9 +545,12 @@ def _nan_cov(X: np.ndarray) -> np.ndarray:
         for j in range(n_points):
             xj = X[:, j]
             m = np.isfinite(xi) & np.isfinite(xj)
+            # 条件分岐: `int(np.sum(m)) <= 1` を満たす経路を評価する。
             if int(np.sum(m)) <= 1:
                 continue
+
             cov[i, j] = float(np.cov(xi[m], xj[m], ddof=1)[0, 1])
+
     return cov
 
 
@@ -451,39 +562,59 @@ def _matrix_to_json(cov: np.ndarray) -> list[list[float | None]]:
         for j in range(int(m.shape[1])):
             v = float(m[i, j])
             row.append(v if math.isfinite(v) else None)
+
         out.append(row)
+
     return out
 
 
 def _matrix_from_json(cov_json: Any) -> np.ndarray:
+    # 条件分岐: `not isinstance(cov_json, list)` を満たす経路を評価する。
     if not isinstance(cov_json, list):
         return np.zeros((0, 0), dtype=float)
+
     rows: list[list[float]] = []
     n_cols = None
     for row in cov_json:
+        # 条件分岐: `not isinstance(row, list)` を満たす経路を評価する。
         if not isinstance(row, list):
             continue
+
+        # 条件分岐: `n_cols is None` を満たす経路を評価する。
+
         if n_cols is None:
             n_cols = len(row)
+
+        # 条件分岐: `n_cols is None or len(row) != n_cols` を満たす経路を評価する。
+
         if n_cols is None or len(row) != n_cols:
             continue
+
         vals: list[float] = []
         for value in row:
             try:
                 x = float(value)
             except Exception:
                 x = float("nan")
+
             vals.append(x)
+
         rows.append(vals)
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         return np.zeros((0, 0), dtype=float)
+
     return np.asarray(rows, dtype=float)
 
 
 def _diag_sigma_from_cov(cov: np.ndarray) -> list[float | None]:
     m = np.asarray(cov, dtype=float)
+    # 条件分岐: `m.ndim != 2 or m.shape[0] == 0` を満たす経路を評価する。
     if m.ndim != 2 or m.shape[0] == 0:
         return []
+
     out: list[float | None] = []
     for v in np.diag(m).tolist():
         try:
@@ -491,17 +622,24 @@ def _diag_sigma_from_cov(cov: np.ndarray) -> list[float | None]:
         except Exception:
             out.append(None)
             continue
+
+        # 条件分岐: `not math.isfinite(x) or x < 0.0` を満たす経路を評価する。
+
         if not math.isfinite(x) or x < 0.0:
             out.append(None)
             continue
+
         out.append(float(math.sqrt(x)))
+
     return out
 
 
 def _cov_eigen_summary(cov: np.ndarray) -> dict[str, Any]:
     m = np.asarray(cov, dtype=float)
+    # 条件分岐: `m.ndim != 2 or m.shape[0] == 0 or m.shape[0] != m.shape[1]` を満たす経路を評価する。
     if m.ndim != 2 or m.shape[0] == 0 or m.shape[0] != m.shape[1]:
         return {"supported": False, "reason": "covariance matrix is empty or not square"}
+
     m2 = np.nan_to_num((m + m.T) * 0.5, nan=0.0, posinf=0.0, neginf=0.0)
     try:
         eig_vals, _ = np.linalg.eigh(m2)
@@ -529,10 +667,15 @@ def _cov_eigen_summary(cov: np.ndarray) -> dict[str, Any]:
 
 def _corrcoef_rows(X: np.ndarray) -> np.ndarray:
     a = np.asarray(X, dtype=float)
+    # 条件分岐: `a.ndim != 2` を満たす経路を評価する。
     if a.ndim != 2:
         raise ValueError("X must be 2D")
+
+    # 条件分岐: `a.shape[0] == 0` を満たす経路を評価する。
+
     if a.shape[0] == 0:
         return np.zeros((0, 0), dtype=float)
+
     n_rows = int(a.shape[0])
     out = np.full((n_rows, n_rows), float("nan"), dtype=float)
     for i in range(n_rows):
@@ -542,17 +685,23 @@ def _corrcoef_rows(X: np.ndarray) -> np.ndarray:
             xj = np.asarray(a[j], dtype=float)
             mj = np.isfinite(xj)
             mask = mi & mj
+            # 条件分岐: `int(np.sum(mask)) <= 1` を満たす経路を評価する。
             if int(np.sum(mask)) <= 1:
                 continue
+
             x0 = xi[mask]
             x1 = xj[mask]
             s0 = float(np.std(x0, ddof=1))
             s1 = float(np.std(x1, ddof=1))
+            # 条件分岐: `s0 <= 0.0 or s1 <= 0.0` を満たす経路を評価する。
             if s0 <= 0.0 or s1 <= 0.0:
                 continue
+
             corr = float(np.cov(x0, x1, ddof=1)[0, 1] / (s0 * s1))
+            # 条件分岐: `math.isfinite(corr)` を満たす経路を評価する。
             if math.isfinite(corr):
                 out[i, j] = corr
+
     return out
 
 
@@ -563,17 +712,22 @@ def _bootstrap_corrcoef_rows(
     seed: int,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     a = np.asarray(X, dtype=float)
+    # 条件分岐: `a.ndim != 2` を満たす経路を評価する。
     if a.ndim != 2:
         raise ValueError("X must be 2D")
+
     n_rows, n_cols = int(a.shape[0]), int(a.shape[1])
+    # 条件分岐: `n_rows == 0 or n_cols <= 1 or n_boot <= 1` を満たす経路を評価する。
     if n_rows == 0 or n_cols <= 1 or n_boot <= 1:
         zero = np.zeros((n_rows, n_rows), dtype=float)
         return zero, zero, zero
+
     rng = np.random.default_rng(int(seed))
     boot = np.full((int(n_boot), n_rows, n_rows), float("nan"), dtype=float)
     for idx in range(int(n_boot)):
         pick = rng.integers(0, n_cols, size=n_cols, endpoint=False)
         boot[idx] = _corrcoef_rows(a[:, pick])
+
     mean = np.nanmean(boot, axis=0)
     sigma = np.nanstd(boot, axis=0, ddof=1)
     flat = boot.reshape(int(n_boot), n_rows * n_rows)
@@ -583,17 +737,22 @@ def _bootstrap_corrcoef_rows(
 
 def _jackknife_corrcoef_rows(X: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     a = np.asarray(X, dtype=float)
+    # 条件分岐: `a.ndim != 2` を満たす経路を評価する。
     if a.ndim != 2:
         raise ValueError("X must be 2D")
+
     n_rows, n_cols = int(a.shape[0]), int(a.shape[1])
+    # 条件分岐: `n_rows == 0 or n_cols <= 2` を満たす経路を評価する。
     if n_rows == 0 or n_cols <= 2:
         zero = np.zeros((n_rows, n_rows), dtype=float)
         return zero, zero
+
     jk = np.full((n_cols, n_rows, n_rows), float("nan"), dtype=float)
     for idx in range(n_cols):
         keep = np.ones(n_cols, dtype=bool)
         keep[idx] = False
         jk[idx] = _corrcoef_rows(a[:, keep])
+
     mean = np.nanmean(jk, axis=0)
     diff = jk - mean[None, :, :]
     var = (float(n_cols - 1) / float(n_cols)) * np.nansum(diff * diff, axis=0)
@@ -611,14 +770,21 @@ def _extract_sweep_profile(
     for source_name, obj in (("bootstrap", cov_boot_obj), ("analytic", cov_obj)):
         for sweep_key in ("window_sweep", "offset_sweep"):
             sweep = obj.get(sweep_key) if isinstance(obj, dict) else None
+            # 条件分岐: `not isinstance(sweep, dict)` を満たす経路を評価する。
             if not isinstance(sweep, dict):
                 continue
+
+            # 条件分岐: `not bool(sweep.get("supported"))` を満たす経路を評価する。
+
             if not bool(sweep.get("supported")):
                 continue
+
             values = sweep.get("values")
             means = sweep.get("mean")
+            # 条件分岐: `not isinstance(values, list) or not isinstance(means, list) or len(values) !=...` を満たす経路を評価する。
             if not isinstance(values, list) or not isinstance(means, list) or len(values) != len(means) or len(values) < 3:
                 continue
+
             pts: list[tuple[float, float]] = []
             for raw_x, raw_y in zip(values, means):
                 try:
@@ -626,19 +792,28 @@ def _extract_sweep_profile(
                     y = float(raw_y)
                 except Exception:
                     continue
+
+                # 条件分岐: `math.isfinite(x) and math.isfinite(y)` を満たす経路を評価する。
+
                 if math.isfinite(x) and math.isfinite(y):
                     pts.append((x, y))
+
+            # 条件分岐: `len(pts) < 3` を満たす経路を評価する。
+
             if len(pts) < 3:
                 continue
+
             pts.sort(key=lambda t: t[0])
             xs = np.asarray([p[0] for p in pts], dtype=float)
             ys = np.asarray([p[1] for p in pts], dtype=float)
             x_min = float(np.min(xs))
             x_max = float(np.max(xs))
+            # 条件分岐: `x_max > x_min` を満たす経路を評価する。
             if x_max > x_min:
                 x_norm = (xs - x_min) / (x_max - x_min)
             else:
                 x_norm = np.zeros_like(xs)
+
             candidates.append(
                 {
                     "source": source_name,
@@ -652,10 +827,14 @@ def _extract_sweep_profile(
                     "x_max": x_max,
                 }
             )
+
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         return None
 
     # Prefer bootstrap-window, then bootstrap-offset, then analytic.
+
     score_map = {("bootstrap", "window_sweep"): 0, ("bootstrap", "offset_sweep"): 1, ("analytic", "window_sweep"): 2}
     best = sorted(candidates, key=lambda c: score_map.get((c["source"], c["sweep_key"]), 3))[0]
     return {
@@ -676,22 +855,32 @@ def _safe_float(value: Any) -> float | None:
         out = float(value)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(out)` を満たす経路を評価する。
+
     if not math.isfinite(out):
         return None
+
     return out
 
 
 def _row_nearest(*, rows: list[dict[str, Any]], x_key: str, target: float) -> dict[str, Any] | None:
     best: tuple[float, dict[str, Any]] | None = None
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         x = _safe_float(row.get(x_key))
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             continue
+
         d = abs(float(x) - float(target))
+        # 条件分岐: `best is None or d < best[0]` を満たす経路を評価する。
         if best is None or d < best[0]:
             best = (d, row)
+
     return best[1] if best is not None else None
 
 
@@ -704,21 +893,34 @@ def _extract_xy(
 ) -> tuple[np.ndarray, np.ndarray]:
     pts: list[tuple[float, float]] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         x0 = _safe_float(row.get(x_key))
+        # 条件分岐: `x0 is None` を満たす経路を評価する。
         if x0 is None:
             continue
+
         y0 = None
         for key in y_keys:
             y0 = _safe_float(row.get(key))
+            # 条件分岐: `y0 is not None` を満たす経路を評価する。
             if y0 is not None:
                 break
+
+        # 条件分岐: `y0 is None` を満たす経路を評価する。
+
         if y0 is None:
             continue
+
         pts.append((float(x0) * float(x_scale), float(y0)))
+
+    # 条件分岐: `len(pts) < 2` を満たす経路を評価する。
+
     if len(pts) < 2:
         return np.asarray([], dtype=float), np.asarray([], dtype=float)
+
     pts.sort(key=lambda t: t[0])
     xs = np.asarray([p[0] for p in pts], dtype=float)
     ys = np.asarray([p[1] for p in pts], dtype=float)
@@ -734,37 +936,50 @@ def _local_slope_at(
     x_scale: float = 1.0,
 ) -> float | None:
     xs, ys = _extract_xy(rows=rows, x_key=x_key, y_keys=y_keys, x_scale=x_scale)
+    # 条件分岐: `xs.size < 2` を満たす経路を評価する。
     if xs.size < 2:
         return None
+
     idx = int(np.argmin(np.abs(xs - float(target))))
+    # 条件分岐: `idx <= 0` を満たす経路を評価する。
     if idx <= 0:
         i0, i1 = 0, 1
+    # 条件分岐: 前段条件が不成立で、`idx >= int(xs.size) - 1` を追加評価する。
     elif idx >= int(xs.size) - 1:
         i0, i1 = int(xs.size) - 2, int(xs.size) - 1
     else:
         i0, i1 = idx - 1, idx + 1
+
     dx = float(xs[i1] - xs[i0])
+    # 条件分岐: `not math.isfinite(dx) or abs(dx) <= 0.0` を満たす経路を評価する。
     if not math.isfinite(dx) or abs(dx) <= 0.0:
         return None
+
     dy = float(ys[i1] - ys[i0])
     return float(dy / dx)
 
 
 def _median_step(*, values: list[float]) -> float | None:
+    # 条件分岐: `len(values) < 2` を満たす経路を評価する。
     if len(values) < 2:
         return None
+
     arr = np.sort(np.asarray(values, dtype=float))
     diffs = np.diff(arr)
     diffs = diffs[np.isfinite(diffs) & (diffs > 0.0)]
+    # 条件分岐: `diffs.size == 0` を満たす経路を評価する。
     if diffs.size == 0:
         return None
+
     return float(np.median(diffs))
 
 
 def _relative_spread(values: list[float]) -> float | None:
     arr = np.asarray(_finite(values), dtype=float)
+    # 条件分岐: `arr.size <= 1` を満たす経路を評価する。
     if arr.size <= 1:
         return None
+
     med = float(np.median(arr))
     scale = max(abs(med), 1e-12)
     return float(np.std(arr, ddof=1) / scale)
@@ -780,62 +995,90 @@ def _flatten_counts_from_row(row: dict[str, Any]) -> list[float]:
         "coinc_by_setting_pair_subtracted_clipped",
     ):
         value = row.get(key)
+        # 条件分岐: `not isinstance(value, list)` を満たす経路を評価する。
         if not isinstance(value, list):
             continue
+
         for elem in value:
+            # 条件分岐: `isinstance(elem, list)` を満たす経路を評価する。
             if isinstance(elem, list):
                 out.extend(_finite(elem))
             else:
                 x = _safe_float(elem)
+                # 条件分岐: `x is not None` を満たす経路を評価する。
                 if x is not None:
                     out.append(float(x))
+
+        # 条件分岐: `out` を満たす経路を評価する。
+
         if out:
             return out
+
     return out
 
 
 def _max_abs_delay_median_ns(delay_signature: Any) -> tuple[float | None, float | None]:
+    # 条件分岐: `not isinstance(delay_signature, dict)` を満たす経路を評価する。
     if not isinstance(delay_signature, dict):
         return None, None
+
     vals: list[float] = []
     for who in ("Alice", "Bob"):
         d = delay_signature.get(who)
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         v = _safe_float(d.get("delta_median_0_minus_1_ns"))
+        # 条件分岐: `v is not None` を満たす経路を評価する。
         if v is not None:
             vals.append(abs(float(v)))
+
     z = _delay_signature_z_max(delay_signature)
     return (float(max(vals)) if vals else None), z
 
 
 def _reshape_2x2_counts(raw: Any) -> np.ndarray | None:
+    # 条件分岐: `not isinstance(raw, list) or len(raw) != 2` を満たす経路を評価する。
     if not isinstance(raw, list) or len(raw) != 2:
         return None
+
     rows: list[list[float]] = []
     for row in raw:
+        # 条件分岐: `not isinstance(row, list) or len(row) != 2` を満たす経路を評価する。
         if not isinstance(row, list) or len(row) != 2:
             return None
+
         vals = []
         for value in row:
             x = _safe_float(value)
+            # 条件分岐: `x is None` を満たす経路を評価する。
             if x is None:
                 return None
+
             vals.append(float(x))
+
         rows.append(vals)
+
     arr = np.asarray(rows, dtype=float)
+    # 条件分岐: `arr.shape != (2, 2)` を満たす経路を評価する。
     if arr.shape != (2, 2):
         return None
+
     return arr
 
 
 def _setting_balance_from_pair_trials(pair_trials: np.ndarray) -> dict[str, Any] | None:
     arr = np.asarray(pair_trials, dtype=float)
+    # 条件分岐: `arr.shape != (2, 2)` を満たす経路を評価する。
     if arr.shape != (2, 2):
         return None
+
     total = float(np.sum(arr))
+    # 条件分岐: `not math.isfinite(total) or total <= 0.0` を満たす経路を評価する。
     if not math.isfinite(total) or total <= 0.0:
         return None
+
     probs = arr / total
     expected = 0.25
     pair_bias = float(np.max(np.abs(probs - expected)))
@@ -854,22 +1097,28 @@ def _setting_balance_from_marginals(
     alice_counts: list[int] | tuple[int, int],
     bob_counts: list[int] | tuple[int, int],
 ) -> dict[str, Any] | None:
+    # 条件分岐: `len(alice_counts) != 2 or len(bob_counts) != 2` を満たす経路を評価する。
     if len(alice_counts) != 2 or len(bob_counts) != 2:
         return None
+
     a0 = _safe_float(alice_counts[0])
     a1 = _safe_float(alice_counts[1])
     b0 = _safe_float(bob_counts[0])
     b1 = _safe_float(bob_counts[1])
+    # 条件分岐: `None in (a0, a1, b0, b1)` を満たす経路を評価する。
     if None in (a0, a1, b0, b1):
         return None
+
     a0 = float(a0)
     a1 = float(a1)
     b0 = float(b0)
     b1 = float(b1)
     a_tot = a0 + a1
     b_tot = b0 + b1
+    # 条件分岐: `a_tot <= 0.0 or b_tot <= 0.0` を満たす経路を評価する。
     if a_tot <= 0.0 or b_tot <= 0.0:
         return None
+
     p_a1 = a1 / a_tot
     p_b1 = b1 / b_tot
     a_bias = abs(p_a1 - 0.5)
@@ -890,30 +1139,37 @@ def _setting_balance_from_marginals(
 
 def _load_detection_efficiency_proxy(*, ds_dir: Path) -> dict[str, Any]:
     trial_path = ds_dir / "trial_based_counts.json"
+    # 条件分岐: `not trial_path.exists()` を満たす経路を評価する。
     if not trial_path.exists():
         return {
             "supported": False,
             "reason": "trial_based_counts.json not found (no direct denominator for detection efficiency)",
         }
+
     try:
         trial = json.loads(trial_path.read_text(encoding="utf-8"))
     except Exception as exc:
         return {"supported": False, "reason": str(exc)}
+
     counts = trial.get("counts") if isinstance(trial.get("counts"), dict) else {}
     pair_trials = _reshape_2x2_counts(counts.get("trials_by_setting_pair"))
     pair_coinc = _reshape_2x2_counts(counts.get("coinc_by_setting_pair"))
+    # 条件分岐: `pair_trials is None` を満たす経路を評価する。
     if pair_trials is None:
         return {"supported": False, "reason": "trials_by_setting_pair missing or invalid"}
 
     n_trials_total = float(np.sum(pair_trials))
+    # 条件分岐: `not math.isfinite(n_trials_total) or n_trials_total <= 0.0` を満たす経路を評価する。
     if not math.isfinite(n_trials_total) or n_trials_total <= 0.0:
         return {"supported": False, "reason": "non-positive trial total"}
+
     n_coinc_total = float(np.sum(pair_coinc)) if pair_coinc is not None else float("nan")
 
     a_trials = _finite((counts.get("alice_trials_by_setting") or []))
     b_trials = _finite((counts.get("bob_trials_by_setting") or []))
     a_clicks = _finite((counts.get("alice_clicks_by_setting") or []))
     b_clicks = _finite((counts.get("bob_clicks_by_setting") or []))
+    # 条件分岐: `len(a_trials) != 2 or len(b_trials) != 2 or len(a_clicks) != 2 or len(b_click...` を満たす経路を評価する。
     if len(a_trials) != 2 or len(b_trials) != 2 or len(a_clicks) != 2 or len(b_clicks) != 2:
         return {"supported": False, "reason": "alice/bob trial-click marginals missing or invalid"}
 
@@ -921,6 +1177,7 @@ def _load_detection_efficiency_proxy(*, ds_dir: Path) -> dict[str, Any]:
     b_trials_tot = float(sum(b_trials))
     a_clicks_tot = float(sum(a_clicks))
     b_clicks_tot = float(sum(b_clicks))
+    # 条件分岐: `a_trials_tot <= 0.0 or b_trials_tot <= 0.0` を満たす経路を評価する。
     if a_trials_tot <= 0.0 or b_trials_tot <= 0.0:
         return {"supported": False, "reason": "invalid alice/bob trial totals"}
 
@@ -942,11 +1199,13 @@ def _load_detection_efficiency_proxy(*, ds_dir: Path) -> dict[str, Any]:
 
 def _load_freedom_choice_proxy(*, dataset_id: str, ds_dir: Path) -> dict[str, Any]:
     trial_path = ds_dir / "trial_based_counts.json"
+    # 条件分岐: `trial_path.exists()` を満たす経路を評価する。
     if trial_path.exists():
         try:
             trial = json.loads(trial_path.read_text(encoding="utf-8"))
         except Exception as exc:
             return {"supported": False, "reason": str(exc)}
+
         counts = trial.get("counts") if isinstance(trial.get("counts"), dict) else {}
         pair_trials = _reshape_2x2_counts(counts.get("trials_by_setting_pair"))
         marg = _setting_balance_from_marginals(
@@ -959,8 +1218,10 @@ def _load_freedom_choice_proxy(*, dataset_id: str, ds_dir: Path) -> dict[str, An
                 for v in _finite((counts.get("bob_trials_by_setting") or []))[:2]
             ],
         )
+        # 条件分岐: `pair_trials is not None` を満たす経路を評価する。
         if pair_trials is not None:
             pair = _setting_balance_from_pair_trials(pair_trials)
+            # 条件分岐: `pair is not None` を満たす経路を評価する。
             if pair is not None:
                 out = {
                     "supported": True,
@@ -968,35 +1229,46 @@ def _load_freedom_choice_proxy(*, dataset_id: str, ds_dir: Path) -> dict[str, An
                     "max_abs_bias": float(pair["pair_max_abs_bias_from_uniform"]),
                 }
                 out.update(pair)
+                # 条件分岐: `isinstance(marg, dict)` を満たす経路を評価する。
                 if isinstance(marg, dict):
                     out["marginal"] = marg
+
                 return out
+
+        # 条件分岐: `isinstance(marg, dict)` を満たす経路を評価する。
+
         if isinstance(marg, dict):
             out = {"supported": True, "method": "trial_marginal_balance", "max_abs_bias": float(marg["max_abs_bias"])}
             out.update(marg)
             return out
 
     norm_path = ds_dir / "normalized_events.json"
+    # 条件分岐: `norm_path.exists()` を満たす経路を評価する。
     if norm_path.exists():
         try:
             norm = json.loads(norm_path.read_text(encoding="utf-8"))
         except Exception as exc:
             return {"supported": False, "reason": str(exc)}
+
         preview = norm.get("preview") if isinstance(norm.get("preview"), dict) else {}
         a_counts = preview.get("a_setting_counts")
         b_counts = preview.get("b_setting_counts")
+        # 条件分岐: `isinstance(a_counts, list) and isinstance(b_counts, list) and len(a_counts) =...` を満たす経路を評価する。
         if isinstance(a_counts, list) and isinstance(b_counts, list) and len(a_counts) == 2 and len(b_counts) == 2:
             marg = _setting_balance_from_marginals(
                 alice_counts=[int(v) for v in _finite(a_counts)[:2]],
                 bob_counts=[int(v) for v in _finite(b_counts)[:2]],
             )
+            # 条件分岐: `isinstance(marg, dict)` を満たす経路を評価する。
             if isinstance(marg, dict):
                 out = {"supported": True, "method": "event_ready_marginal_preview", "max_abs_bias": float(marg["max_abs_bias"])}
                 out.update(marg)
                 return out
 
     # Weihs only has independent event streams; estimate marginal setting balance from code parity (bit0).
+
     npz_path = ds_dir / "normalized_events.npz"
+    # 条件分岐: `str(dataset_id).startswith("weihs1998_") and npz_path.exists()` を満たす経路を評価する。
     if str(dataset_id).startswith("weihs1998_") and npz_path.exists():
         try:
             data = np.load(npz_path)
@@ -1005,6 +1277,7 @@ def _load_freedom_choice_proxy(*, dataset_id: str, ds_dir: Path) -> dict[str, An
             a_counts = [int(np.sum((a_c & 1) == 0)), int(np.sum((a_c & 1) == 1))]
             b_counts = [int(np.sum((b_c & 1) == 0)), int(np.sum((b_c & 1) == 1))]
             marg = _setting_balance_from_marginals(alice_counts=a_counts, bob_counts=b_counts)
+            # 条件分岐: `isinstance(marg, dict)` を満たす経路を評価する。
             if isinstance(marg, dict):
                 out = {"supported": True, "method": "time_tag_setting_bit_parity", "max_abs_bias": float(marg["max_abs_bias"])}
                 out.update(marg)
@@ -1034,8 +1307,10 @@ def _write_selection_loophole_quantification(
     csv_rows: list[dict[str, Any]] = []
 
     for item in datasets_lt:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         ds_id = str(item.get("dataset_id") or "")
         display = str(item.get("display_name") or _dataset_display_name(ds_id))
         ds_dir = OUT_BASE / ds_id
@@ -1144,13 +1419,19 @@ def _write_selection_loophole_quantification(
         support_n = 0
         for r in rows:
             obj = r.get(name) if isinstance(r.get(name), dict) else {}
+            # 条件分岐: `bool(obj.get("supported"))` を満たす経路を評価する。
             if bool(obj.get("supported")):
                 support_n += 1
                 v = _safe_float(obj.get("value"))
+                # 条件分岐: `v is not None` を満たす経路を評価する。
                 if v is not None:
                     vals.append(float(v))
+
+                # 条件分岐: `isinstance(obj.get("pass"), bool) and bool(obj.get("pass"))` を満たす経路を評価する。
+
                 if isinstance(obj.get("pass"), bool) and bool(obj.get("pass")):
                     pass_n += 1
+
         return {
             "n_supported": int(support_n),
             "n_pass": int(pass_n),
@@ -1246,17 +1527,21 @@ def _write_selection_loophole_quantification(
             obj = r.get(key) if isinstance(r.get(key), dict) else {}
             v = _safe_float(obj.get("value"))
             p = obj.get("pass")
+            # 条件分岐: `v is None` を満たす経路を評価する。
             if v is None:
                 values.append(0.0)
                 colors.append("0.85")
                 is_na.append(True)
             else:
                 values.append(float(v))
+                # 条件分岐: `isinstance(p, bool)` を満たす経路を評価する。
                 if isinstance(p, bool):
                     colors.append("#2ca02c" if p else "#d62728")
                 else:
                     colors.append("0.6")
+
                 is_na.append(False)
+
         return values, colors, is_na
 
     fair_vals, fair_colors, fair_na = _panel_data("fair_sampling")
@@ -1279,6 +1564,7 @@ def _write_selection_loophole_quantification(
         ax.set_title(title)
         ax.grid(True, axis="y", alpha=0.3, ls=":")
         for i, is_na in enumerate(na_mask):
+            # 条件分岐: `is_na` を満たす経路を評価する。
             if is_na:
                 ax.text(float(i), float(threshold) * 0.08, "n/a", ha="center", va="bottom", fontsize=8, color="0.35")
 
@@ -1294,24 +1580,33 @@ def _write_selection_loophole_quantification(
 
 def _corrcoef_columns(X: np.ndarray) -> np.ndarray:
     a = np.asarray(X, dtype=float)
+    # 条件分岐: `a.ndim != 2` を満たす経路を評価する。
     if a.ndim != 2:
         raise ValueError("X must be 2D")
+
     n_rows, n_cols = int(a.shape[0]), int(a.shape[1])
     out = np.full((n_cols, n_cols), float("nan"), dtype=float)
+    # 条件分岐: `n_rows <= 1 or n_cols == 0` を満たす経路を評価する。
     if n_rows <= 1 or n_cols == 0:
         return out
+
     for i in range(n_cols):
         xi = a[:, i]
         for j in range(n_cols):
             xj = a[:, j]
             m = np.isfinite(xi) & np.isfinite(xj)
+            # 条件分岐: `int(np.sum(m)) <= 1` を満たす経路を評価する。
             if int(np.sum(m)) <= 1:
                 continue
+
             s0 = float(np.std(xi[m], ddof=1))
             s1 = float(np.std(xj[m], ddof=1))
+            # 条件分岐: `s0 <= 0.0 or s1 <= 0.0` を満たす経路を評価する。
             if s0 <= 0.0 or s1 <= 0.0:
                 continue
+
             out[i, j] = float(np.cov(xi[m], xj[m], ddof=1)[0, 1] / (s0 * s1))
+
     return out
 
 
@@ -1343,6 +1638,7 @@ def _write_systematics_decomposition_15items(
 
     fc_map: dict[str, dict[str, Any]] = {}
     for d in falsification_pack.get("datasets", []) if isinstance(falsification_pack.get("datasets"), list) else []:
+        # 条件分岐: `isinstance(d, dict)` を満たす経路を評価する。
         if isinstance(d, dict):
             fc_map[str(d.get("dataset_id") or "")] = d
 
@@ -1368,18 +1664,23 @@ def _write_systematics_decomposition_15items(
         nw_obj = None
         try:
             wp = ds_dir / "window_sweep_metrics.json"
+            # 条件分岐: `wp.exists()` を満たす経路を評価する。
             if wp.exists():
                 w_obj = json.loads(wp.read_text(encoding="utf-8"))
         except Exception:
             w_obj = None
+
         try:
             op = ds_dir / "offset_sweep_metrics.json"
+            # 条件分岐: `op.exists()` を満たす経路を評価する。
             if op.exists():
                 o_obj = json.loads(op.read_text(encoding="utf-8"))
         except Exception:
             o_obj = None
+
         try:
             npth = ds_dir / "natural_window_frozen.json"
+            # 条件分岐: `npth.exists()` を満たす経路を評価する。
             if npth.exists():
                 nw_obj = json.loads(npth.read_text(encoding="utf-8"))
         except Exception:
@@ -1394,6 +1695,7 @@ def _write_systematics_decomposition_15items(
         base_sigma = None
         frozen_window_ns = None
         frozen_offset_ns = None
+        # 条件分岐: `isinstance(nw_obj, dict)` を満たす経路を評価する。
         if isinstance(nw_obj, dict):
             b = nw_obj.get("baseline") if isinstance(nw_obj.get("baseline"), dict) else {}
             base_stat = _safe_float(b.get("statistic"))
@@ -1403,8 +1705,13 @@ def _write_systematics_decomposition_15items(
             foff_ps = _safe_float(nwin.get("frozen_start_offset_ps"))
             frozen_offset_ns = (float(foff_ps) * 1e-3) if foff_ps is not None else None
 
+        # 条件分岐: `base_sigma is None` を満たす経路を評価する。
+
         if base_sigma is None:
             base_sigma = _safe_float(fc.get("sigma_stat_med"))
+
+        # 条件分岐: `base_sigma is None and isinstance(r.get("baseline"), dict)` を満たす経路を評価する。
+
         if base_sigma is None and isinstance(r.get("baseline"), dict):
             rb = r.get("baseline") if isinstance(r.get("baseline"), dict) else {}
             base_sigma = (
@@ -1412,37 +1719,61 @@ def _write_systematics_decomposition_15items(
                 or _safe_float(rb.get("S_combined_err"))
                 or _safe_float(rb.get("J_trial_sigma_boot"))
             )
+
+        # 条件分岐: `base_stat is None and isinstance(r.get("baseline"), dict)` を満たす経路を評価する。
+
         if base_stat is None and isinstance(r.get("baseline"), dict):
             rb = r.get("baseline") if isinstance(r.get("baseline"), dict) else {}
             base_stat = _safe_float(rb.get("S")) or _safe_float(rb.get("S_combined")) or _safe_float(rb.get("J_trial"))
 
+        # 条件分岐: `frozen_window_ns is None and isinstance(r.get("baseline"), dict)` を満たす経路を評価する。
+
         if frozen_window_ns is None and isinstance(r.get("baseline"), dict):
             rb = r.get("baseline") if isinstance(r.get("baseline"), dict) else {}
             frozen_window_ns = _safe_float(rb.get("ref_window_ns"))
+
+        # 条件分岐: `frozen_offset_ns is None and isinstance(r.get("baseline"), dict)` を満たす経路を評価する。
+
         if frozen_offset_ns is None and isinstance(r.get("baseline"), dict):
             rb = r.get("baseline") if isinstance(r.get("baseline"), dict) else {}
             frozen_offset_ns = _safe_float(rb.get("offset_ns"))
 
+        # 条件分岐: `base_sigma is None` を満たす経路を評価する。
+
         if base_sigma is None:
             ws = []
             for row in w_rows:
+                # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                 if not isinstance(row, dict):
                     continue
+
                 ws.append(_safe_float(row.get("S_fixed_sigma_boot")))
                 ws.append(_safe_float(row.get("J_sigma_boot")))
+
             wsf = _finite(ws)
+            # 条件分岐: `wsf` を満たす経路を評価する。
             if wsf:
                 base_sigma = float(np.median(np.asarray(wsf, dtype=float)))
+
+        # 条件分岐: `base_sigma is None` を満たす経路を評価する。
+
         if base_sigma is None:
             os = []
             for row in o_rows:
+                # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                 if not isinstance(row, dict):
                     continue
+
                 os.append(_safe_float(row.get("S_err")))
                 os.append(_safe_float(row.get("S_combined_err")))
+
             osf = _finite(os)
+            # 条件分岐: `osf` を満たす経路を評価する。
             if osf:
                 base_sigma = float(np.median(np.asarray(osf, dtype=float)))
+
+        # 条件分岐: `base_sigma is None` を満たす経路を評価する。
+
         if base_sigma is None:
             base_sigma = 0.0
 
@@ -1451,16 +1782,23 @@ def _write_systematics_decomposition_15items(
 
         # direct or near-direct ingredients
         delta_window = _safe_float(fc.get("delta_window"))
+        # 条件分岐: `delta_window is None` を満たす経路を評価する。
         if delta_window is None:
             delta_window = _safe_float(r.get("window_delta"))
+
         delta_offset = _safe_float(fc.get("delta_offset"))
+        # 条件分岐: `delta_offset is None` を満たす経路を評価する。
         if delta_offset is None:
             delta_offset = _safe_float(r.get("offset_delta"))
+
+        # 条件分岐: `delta_window is not None` を満たす経路を評価する。
 
         if delta_window is not None:
             items["coincidence_window"] = _make_item(abs(delta_window), "direct", "delta_window from sweep summary")
         else:
             items["coincidence_window"] = _make_item(base_sigma * 0.50, "proxy_default", "fallback 0.5*sigma_stat")
+
+        # 条件分岐: `delta_offset is not None` を満たす経路を評価する。
 
         if delta_offset is not None:
             items["offset"] = _make_item(abs(delta_offset), "direct", "delta_offset from sweep summary")
@@ -1468,40 +1806,61 @@ def _write_systematics_decomposition_15items(
             items["offset"] = _make_item(base_sigma * 0.30, "proxy_default", "fallback 0.3*sigma_stat")
 
         frozen_w_row = None
+        # 条件分岐: `frozen_window_ns is not None and w_rows` を満たす経路を評価する。
         if frozen_window_ns is not None and w_rows:
             frozen_w_row = _row_nearest(rows=w_rows, x_key="window_ns", target=float(frozen_window_ns))
+        # 条件分岐: 前段条件が不成立で、`w_rows` を追加評価する。
         elif w_rows:
             frozen_w_row = w_rows[0] if isinstance(w_rows[0], dict) else None
 
         frozen_o_row = None
+        # 条件分岐: `frozen_offset_ns is not None and o_rows` を満たす経路を評価する。
         if frozen_offset_ns is not None and o_rows:
             frozen_o_row = _row_nearest(rows=o_rows, x_key="start_offset_ps", target=float(frozen_offset_ns) * 1000.0)
+        # 条件分岐: 前段条件が不成立で、`o_rows` を追加評価する。
         elif o_rows:
             frozen_o_row = o_rows[0] if isinstance(o_rows[0], dict) else None
 
         # accidental correction (direct when available)
+
         acc_val = None
+        # 条件分岐: `isinstance(frozen_w_row, dict)` を満たす経路を評価する。
         if isinstance(frozen_w_row, dict):
             raw = _safe_float(frozen_w_row.get("S_fixed_abs"))
             sub = _safe_float(frozen_w_row.get("S_fixed_accidental_subtracted_abs"))
+            # 条件分岐: `raw is None` を満たす経路を評価する。
             if raw is None:
                 raw = _safe_float(frozen_w_row.get("J_prob"))
+
+            # 条件分岐: `sub is None` を満たす経路を評価する。
+
             if sub is None:
                 sub = _safe_float(frozen_w_row.get("J_prob_subtracted_clipped")) or _safe_float(
                     frozen_w_row.get("J_prob_subtracted")
                 )
+
+            # 条件分岐: `raw is not None and sub is not None` を満たす経路を評価する。
+
             if raw is not None and sub is not None:
                 acc_val = abs(float(raw) - float(sub))
+
+        # 条件分岐: `acc_val is not None` を満たす経路を評価する。
+
         if acc_val is not None:
             items["accidental_correction"] = _make_item(acc_val, "direct", "raw vs accidental-subtracted at frozen point")
         else:
             items["accidental_correction"] = _make_item(base_sigma * 0.20, "proxy_default", "fallback 0.2*sigma_stat")
 
         # trial / event-ready definitions
+
         trial_val = None
+        # 条件分岐: `isinstance(w_obj, dict)` を満たす経路を評価する。
         if isinstance(w_obj, dict):
             tb = w_obj.get("trial_based") if isinstance(w_obj.get("trial_based"), dict) else {}
             trial_val = _safe_float(tb.get("J_prob"))
+
+        # 条件分岐: `trial_val is not None and base_stat is not None` を満たす経路を評価する。
+
         if trial_val is not None and base_stat is not None:
             items["trial_definition"] = _make_item(
                 abs(float(base_stat) - float(trial_val)),
@@ -1512,9 +1871,13 @@ def _write_systematics_decomposition_15items(
             items["trial_definition"] = _make_item(base_sigma * 0.15, "proxy_default", "fallback 0.15*sigma_stat")
 
         event_ready_val = None
+        # 条件分岐: `isinstance(o_obj, dict)` を満たす経路を評価する。
         if isinstance(o_obj, dict):
             ob = o_obj.get("baseline") if isinstance(o_obj.get("baseline"), dict) else {}
             event_ready_val = _safe_float(ob.get("S")) or _safe_float(ob.get("S_combined")) or _safe_float(ob.get("J_prob"))
+
+        # 条件分岐: `event_ready_val is not None and base_stat is not None` を満たす経路を評価する。
+
         if event_ready_val is not None and base_stat is not None:
             items["event_ready_definition"] = _make_item(
                 abs(float(base_stat) - float(event_ready_val)),
@@ -1525,7 +1888,9 @@ def _write_systematics_decomposition_15items(
             items["event_ready_definition"] = _make_item(base_sigma * 0.20, "proxy_default", "fallback 0.2*sigma_stat")
 
         # slope-based local sensitivities
+
         slope_w = None
+        # 条件分岐: `frozen_window_ns is not None and w_rows` を満たす経路を評価する。
         if frozen_window_ns is not None and w_rows:
             slope_w = _local_slope_at(
                 rows=w_rows,
@@ -1534,8 +1899,10 @@ def _write_systematics_decomposition_15items(
                 target=float(frozen_window_ns),
                 x_scale=1.0,
             )
+
         w_values = _finite([_safe_float(row.get("window_ns")) for row in w_rows if isinstance(row, dict)])
         w_step = _median_step(values=[float(v) for v in w_values]) if w_values else None
+        # 条件分岐: `slope_w is not None and w_step is not None` を満たす経路を評価する。
         if slope_w is not None and w_step is not None:
             items["threshold"] = _make_item(abs(float(slope_w) * float(w_step)), "proxy_indicator", "local window slope * median step")
         else:
@@ -1543,6 +1910,7 @@ def _write_systematics_decomposition_15items(
 
         slope_o = None
         target_off_ns = frozen_offset_ns if frozen_offset_ns is not None else 0.0
+        # 条件分岐: `o_rows` を満たす経路を評価する。
         if o_rows:
             slope_o = _local_slope_at(
                 rows=o_rows,
@@ -1551,13 +1919,16 @@ def _write_systematics_decomposition_15items(
                 target=float(target_off_ns),
                 x_scale=1e-3,
             )
+
         delay_abs_ns, delay_z = _max_abs_delay_median_ns(fc.get("delay_signature"))
+        # 条件分岐: `delay_abs_ns is not None and slope_o is not None` を満たす経路を評価する。
         if delay_abs_ns is not None and slope_o is not None:
             items["setting_switch_timing"] = _make_item(
                 abs(float(slope_o) * float(delay_abs_ns)),
                 "proxy_indicator",
                 "local offset slope * |delta_median_ns|",
             )
+        # 条件分岐: 前段条件が不成立で、`delay_z is not None` を追加評価する。
         elif delay_z is not None:
             items["setting_switch_timing"] = _make_item(
                 base_sigma * min(float(delay_z) / 3.0, 3.0),
@@ -1568,17 +1939,24 @@ def _write_systematics_decomposition_15items(
             items["setting_switch_timing"] = _make_item(base_sigma * 0.20, "proxy_default", "fallback 0.2*sigma_stat")
 
         # count-based indicators at frozen point
+
         counts = _flatten_counts_from_row(frozen_w_row) if isinstance(frozen_w_row, dict) else []
+        # 条件分岐: `not counts and isinstance(frozen_o_row, dict)` を満たす経路を評価する。
         if not counts and isinstance(frozen_o_row, dict):
             counts = _flatten_counts_from_row(frozen_o_row)
+
         counts_arr = np.asarray(_finite(counts), dtype=float) if counts else np.asarray([], dtype=float)
         counts_cv = None
         counts_imb = None
+        # 条件分岐: `counts_arr.size > 0` を満たす経路を評価する。
         if counts_arr.size > 0:
             m = float(np.mean(counts_arr))
+            # 条件分岐: `m > 0` を満たす経路を評価する。
             if m > 0:
                 counts_cv = float(np.std(counts_arr, ddof=1) / m) if counts_arr.size > 1 else 0.0
                 counts_imb = float((np.max(counts_arr) - np.min(counts_arr)) / m)
+
+        # 条件分岐: `counts_cv is not None` を満たす経路を評価する。
 
         if counts_cv is not None:
             items["detector_efficiency_drift"] = _make_item(
@@ -1590,15 +1968,22 @@ def _write_systematics_decomposition_15items(
             items["detector_efficiency_drift"] = _make_item(base_sigma * 0.35, "proxy_default", "fallback 0.35*sigma_stat")
 
         acc_rate = None
+        # 条件分岐: `isinstance(frozen_w_row, dict)` を満たす経路を評価する。
         if isinstance(frozen_w_row, dict):
             p_acc = _safe_float(frozen_w_row.get("pairs_total_accidental"))
             p_tot = _safe_float(frozen_w_row.get("pairs_total"))
+            # 条件分岐: `p_acc is not None and p_tot is not None and p_tot > 0` を満たす経路を評価する。
             if p_acc is not None and p_tot is not None and p_tot > 0:
                 acc_rate = float(p_acc / p_tot)
+
+        # 条件分岐: `acc_rate is not None` を満たす経路を評価する。
+
         if acc_rate is not None:
             items["dark_count"] = _make_item(base_sigma * max(acc_rate, 0.0), "proxy_indicator", "sigma_stat * accidental fraction")
         else:
             items["dark_count"] = _make_item(base_sigma * 0.20, "proxy_default", "fallback 0.2*sigma_stat")
+
+        # 条件分岐: `counts_imb is not None` を満たす経路を評価する。
 
         if counts_imb is not None:
             items["polarization_correction"] = _make_item(
@@ -1610,60 +1995,84 @@ def _write_systematics_decomposition_15items(
             items["polarization_correction"] = _make_item(base_sigma * 0.30, "proxy_default", "fallback 0.3*sigma_stat")
 
         click_asym = None
+        # 条件分岐: `isinstance(frozen_w_row, dict)` を満たす経路を評価する。
         if isinstance(frozen_w_row, dict):
             a_sum = _finite(frozen_w_row.get("click_a_by_setting") or [])
             b_sum = _finite(frozen_w_row.get("click_b_by_setting") or [])
+            # 条件分岐: `a_sum and b_sum` を満たす経路を評価する。
             if a_sum and b_sum:
                 av = float(sum(a_sum))
                 bv = float(sum(b_sum))
                 den = max((av + bv) * 0.5, 1e-12)
                 click_asym = float(abs(av - bv) / den)
+
+        # 条件分岐: `click_asym is not None` を満たす経路を評価する。
+
         if click_asym is not None:
             items["transmission_loss"] = _make_item(base_sigma * max(click_asym, 0.0), "proxy_indicator", "sigma_stat * Alice/Bob click asymmetry")
         else:
             items["transmission_loss"] = _make_item(base_sigma * 0.25, "proxy_default", "fallback 0.25*sigma_stat")
 
         ks_legacy = None
+        # 条件分岐: `isinstance(fc.get("ks_delay"), dict)` を満たす経路を評価する。
         if isinstance(fc.get("ks_delay"), dict):
             ks_vals = _finite(fc.get("ks_delay").values())
+            # 条件分岐: `ks_vals` を満たす経路を評価する。
             if ks_vals:
                 ks_legacy = float(max(ks_vals))
+
+        # 条件分岐: `frozen_offset_ns is not None and frozen_window_ns is not None and frozen_wind...` を満たす経路を評価する。
+
         if frozen_offset_ns is not None and frozen_window_ns is not None and frozen_window_ns > 0:
             items["clock_sync"] = _make_item(
                 base_sigma * abs(float(frozen_offset_ns) / float(frozen_window_ns)),
                 "proxy_indicator",
                 "sigma_stat * |frozen_offset|/frozen_window",
             )
+        # 条件分岐: 前段条件が不成立で、`ks_legacy is not None` を追加評価する。
         elif ks_legacy is not None:
             items["clock_sync"] = _make_item(base_sigma * ks_legacy, "proxy_indicator", "sigma_stat * KS delay proxy")
         else:
             items["clock_sync"] = _make_item(base_sigma * 0.15, "proxy_default", "fallback 0.15*sigma_stat")
 
         pair_density = None
+        # 条件分岐: `isinstance(frozen_w_row, dict) and w_rows` を満たす経路を評価する。
         if isinstance(frozen_w_row, dict) and w_rows:
             p0 = _safe_float(frozen_w_row.get("pairs_total"))
             pmax = max(_finite([_safe_float(row.get("pairs_total")) for row in w_rows if isinstance(row, dict)]), default=None)
+            # 条件分岐: `p0 is not None and pmax is not None and pmax > 0` を満たす経路を評価する。
             if p0 is not None and pmax is not None and pmax > 0:
                 pair_density = float(p0 / pmax)
+
+        # 条件分岐: `pair_density is not None` を満たす経路を評価する。
+
         if pair_density is not None:
             items["dead_time"] = _make_item(base_sigma * max(pair_density, 0.0) * 0.20, "proxy_indicator", "sigma_stat * pair-density proxy")
         else:
             items["dead_time"] = _make_item(base_sigma * 0.20, "proxy_default", "fallback 0.2*sigma_stat")
 
         rel_noise = 0.0
+        # 条件分岐: `base_stat is not None and base_sigma is not None` を満たす経路を評価する。
         if base_stat is not None and base_sigma is not None:
             den = max(abs(float(base_stat)), max(float(base_sigma), 1e-12))
             rel_noise = float(abs(float(base_sigma)) / den)
+
         items["electronic_noise"] = _make_item(base_sigma * rel_noise, "proxy_indicator", "sigma_stat * relative bootstrap noise")
 
         spread_vals: list[float] = []
+        # 条件分岐: `w_rows` を満たす経路を評価する。
         if w_rows:
             spread_vals.extend(_finite([_safe_float(row.get("S_fixed_abs")) for row in w_rows if isinstance(row, dict)]))
             spread_vals.extend(_finite([_safe_float(row.get("J_prob")) for row in w_rows if isinstance(row, dict)]))
+
+        # 条件分岐: `o_rows` を満たす経路を評価する。
+
         if o_rows:
             spread_vals.extend(_finite([_safe_float(row.get("S")) for row in o_rows if isinstance(row, dict)]))
             spread_vals.extend(_finite([_safe_float(row.get("S_combined")) for row in o_rows if isinstance(row, dict)]))
+
         spread_rel = _relative_spread(spread_vals)
+        # 条件分岐: `spread_rel is not None` を満たす経路を評価する。
         if spread_rel is not None:
             items["environmental_variation"] = _make_item(
                 base_sigma * max(spread_rel, 0.0),
@@ -1674,18 +2083,24 @@ def _write_systematics_decomposition_15items(
             items["environmental_variation"] = _make_item(base_sigma * 0.25, "proxy_default", "fallback 0.25*sigma_stat")
 
         # Final guard: ensure all 15 items exist with finite values.
+
         for key in item_ids:
+            # 条件分岐: `key not in items` を満たす経路を評価する。
             if key not in items:
                 items[key] = _make_item(base_sigma * 0.20, "proxy_default", "fill-missing fallback")
+
             v = _safe_float(items[key].get("delta_stat"))
+            # 条件分岐: `v is None` を満たす経路を評価する。
             if v is None:
                 items[key]["delta_stat"] = float(base_sigma * 0.20)
 
         vals = [float(items[k]["delta_stat"]) for k in item_ids]
+        # 条件分岐: `base_sigma > 0` を満たす経路を評価する。
         if base_sigma > 0:
             vals_sigma = [float(v / base_sigma) for v in vals]
         else:
             vals_sigma = [0.0 for _ in vals]
+
         matrix_sigma.append(vals_sigma)
 
         total_l2 = float(math.sqrt(float(np.sum(np.asarray(vals, dtype=float) ** 2))))
@@ -1736,8 +2151,10 @@ def _write_systematics_decomposition_15items(
     for i in range(len(item_ids)):
         for j in range(i + 1, len(item_ids)):
             c = _safe_float(corr_items[i, j])
+            # 条件分岐: `c is None` を満たす経路を評価する。
             if c is None:
                 continue
+
             pair_rel.append(
                 {
                     "item_i": item_ids[i],
@@ -1746,6 +2163,7 @@ def _write_systematics_decomposition_15items(
                     "relation": "correlated" if abs(float(c)) >= corr_abs_th else "weak_or_independent",
                 }
             )
+
     pair_rel.sort(key=lambda d: abs(float(d.get("corr") or 0.0)), reverse=True)
 
     item_summary: list[dict[str, Any]] = []
@@ -1869,27 +2287,40 @@ def _recommend_plateau_x(
             y = float(r.get(y_key))
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(x) and math.isfinite(y)` を満たす経路を評価する。
+
         if math.isfinite(x) and math.isfinite(y):
             pts.append((x, y))
+
+    # 条件分岐: `not pts` を満たす経路を評価する。
+
     if not pts:
         return None
+
     pts.sort(key=lambda t: t[0])
     y_max = max(y for _, y in pts)
     target = float(plateau_fraction) * float(y_max)
     for x, y in pts:
+        # 条件分岐: `y >= target` を満たす経路を評価する。
         if y >= target:
             return float(x)
+
     return float(pts[-1][0])
 
 
 def _load_time_tag_times_seconds(*, ds_dir: Path) -> tuple[np.ndarray, np.ndarray, dict[str, Any]] | None:
     npz_path = ds_dir / "normalized_events.npz"
+    # 条件分岐: `not npz_path.exists()` を満たす経路を評価する。
     if not npz_path.exists():
         return None
+
     try:
         data = np.load(npz_path)
     except Exception:
         return None
+
+    # 条件分岐: `"a_t_s" in data.files and "b_t_s" in data.files` を満たす経路を評価する。
 
     if "a_t_s" in data.files and "b_t_s" in data.files:
         t_a = np.asarray(data["a_t_s"], dtype=np.float64)
@@ -1897,6 +2328,7 @@ def _load_time_tag_times_seconds(*, ds_dir: Path) -> tuple[np.ndarray, np.ndarra
         return t_a, t_b, {"schema": "a_t_s/b_t_s", "time_unit": "s"}
 
     # NIST normalized clicks (timetag counts + seconds_per_timetag)
+
     if (
         "alice_click_t" in data.files
         and "bob_click_t" in data.files
@@ -1938,8 +2370,11 @@ def _recommend_time_tag_window_from_dt_peak(
     """
     t_a = np.asarray(t_a_s, dtype=np.float64)
     t_b = np.asarray(t_b_s, dtype=np.float64)
+    # 条件分岐: `t_a.size == 0 or t_b.size == 0` を満たす経路を評価する。
     if t_a.size == 0 or t_b.size == 0:
         return None, None
+
+    # 条件分岐: `t_a.size > sample_max` を満たす経路を評価する。
 
     if t_a.size > sample_max:
         idx = np.linspace(0, t_a.size - 1, sample_max, dtype=np.int64)
@@ -1957,8 +2392,10 @@ def _recommend_time_tag_window_from_dt_peak(
 
     half = float(hist_half_range_ns) * 1e-9
     m = np.abs(dt - med) <= half
+    # 条件分岐: `int(np.sum(m)) < 1000` を満たす経路を評価する。
     if int(np.sum(m)) < 1000:
         return None, None
+
     sel_dt = dt[m]
     sel_t = a[m]
 
@@ -1978,6 +2415,7 @@ def _recommend_time_tag_window_from_dt_peak(
     signal = np.maximum(0.0, counts.astype(np.float64) - thr)
 
     total_signal = float(np.sum(signal))
+    # 条件分岐: `not math.isfinite(total_signal) or total_signal <= 0` を満たす経路を評価する。
     if not math.isfinite(total_signal) or total_signal <= 0:
         return None, None
 
@@ -1995,17 +2433,24 @@ def _recommend_time_tag_window_from_dt_peak(
     near_mask = np.abs(sel_dt - peak_center) <= near_half_s
     near_dt = sel_dt[near_mask]
     near_t = sel_t[near_mask]
+    # 条件分岐: `near_dt.size >= 10 * drift_min_points` を満たす経路を評価する。
     if near_dt.size >= 10 * drift_min_points:
         t0 = float(np.min(near_t))
         t1 = float(np.max(near_t))
+        # 条件分岐: `math.isfinite(t0) and math.isfinite(t1) and t1 > t0` を満たす経路を評価する。
         if math.isfinite(t0) and math.isfinite(t1) and t1 > t0:
             edges_t = np.linspace(t0, t1, int(drift_chunks) + 1, dtype=float)
             meds: list[float] = []
             for i in range(int(drift_chunks)):
                 mm = (near_t >= edges_t[i]) & (near_t < edges_t[i + 1])
+                # 条件分岐: `int(np.sum(mm)) < int(drift_min_points)` を満たす経路を評価する。
                 if int(np.sum(mm)) < int(drift_min_points):
                     continue
+
                 meds.append(float(np.median(near_dt[mm])))
+
+            # 条件分岐: `len(meds) >= 2` を満たす経路を評価する。
+
             if len(meds) >= 2:
                 drift_span_ns = float(
                     (np.quantile(np.asarray(meds, dtype=float), 0.95) - np.quantile(np.asarray(meds, dtype=float), 0.05))
@@ -2045,8 +2490,10 @@ def _nist_trial_match_recommended_window_ns(
     This does NOT maximize J or S; it matches an independent coincidence definition.
     """
     trial_path = ds_dir / "trial_based_counts.json"
+    # 条件分岐: `not trial_path.exists()` を満たす経路を評価する。
     if not trial_path.exists():
         return None, None
+
     try:
         trial = json.loads(trial_path.read_text(encoding="utf-8"))
     except Exception:
@@ -2065,11 +2512,18 @@ def _nist_trial_match_recommended_window_ns(
             p = int(r.get("pairs_total"))
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(w) or w <= 0` を満たす経路を評価する。
+
         if not math.isfinite(w) or w <= 0:
             continue
+
         cand = (abs(p - trial_total), float(w), int(p))
+        # 条件分岐: `best is None or cand < best` を満たす経路を評価する。
         if best is None or cand < best:
             best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         return None, None
@@ -2092,10 +2546,14 @@ def _recommend_natural_window(
     rows: list[dict[str, Any]],
     plateau_fraction: float,
 ) -> tuple[float | None, dict[str, Any]]:
+    # 条件分岐: `dataset_id.startswith("nist_")` を満たす経路を評価する。
     if dataset_id.startswith("nist_"):
         rec, method = _nist_trial_match_recommended_window_ns(ds_dir=ds_dir, rows=rows)
+        # 条件分岐: `rec is not None and method is not None` を満たす経路を評価する。
         if rec is not None and method is not None:
             return rec, method
+
+    # 条件分岐: `dataset_id.startswith("kwiat2013_")` を満たす経路を評価する。
 
     if dataset_id.startswith("kwiat2013_"):
         # dataset recommendation (Illinois page): "use a coincidence window around 18,000 timebins"
@@ -2105,6 +2563,7 @@ def _recommend_natural_window(
             cfg = wj.get("config") if isinstance(wj.get("config"), dict) else {}
             bins_per_s = cfg.get("timebins_per_second")
             rec_bins = cfg.get("recommended_window_bins") or cfg.get("ref_window_bins") or 18_000
+            # 条件分岐: `bins_per_s is not None and float(bins_per_s) > 0` を満たす経路を評価する。
             if bins_per_s is not None and float(bins_per_s) > 0:
                 rec = float(rec_bins) / float(bins_per_s) * 1e9
                 method = {
@@ -2118,10 +2577,13 @@ def _recommend_natural_window(
             pass
 
     # For time-tag datasets: derive from dt peak width/drift rather than maximizing a Bell statistic.
+
     time_tag = _load_time_tag_times_seconds(ds_dir=ds_dir)
+    # 条件分岐: `time_tag is not None` を満たす経路を評価する。
     if time_tag is not None:
         t_a, t_b, meta = time_tag
         rec, method = _recommend_time_tag_window_from_dt_peak(t_a_s=t_a, t_b_s=t_b)
+        # 条件分岐: `rec is not None and method is not None` を満たす経路を評価する。
         if rec is not None and method is not None:
             method = dict(method)
             method["time_tag_schema"] = meta
@@ -2153,8 +2615,10 @@ def _chsh_sign_patterns() -> list[np.ndarray]:
             ],
             dtype=np.int8,
         )
+        # 条件分岐: `int(np.prod(s)) == -1` を満たす経路を評価する。
         if int(np.prod(s)) == -1:
             patterns.append(s)
+
     return patterns
 
 
@@ -2163,29 +2627,45 @@ _CHSH_SIGNS = _chsh_sign_patterns()
 
 def _apply_chsh_variant(E: np.ndarray, variant: ChshVariant) -> float:
     E2 = np.asarray(E, dtype=float).copy()
+    # 条件分岐: `E2.shape != (2, 2)` を満たす経路を評価する。
     if E2.shape != (2, 2):
         raise ValueError("E must be 2x2")
+
+    # 条件分岐: `variant.swap_a` を満たす経路を評価する。
+
     if variant.swap_a:
         E2 = E2[[1, 0], :]
+
+    # 条件分岐: `variant.swap_b` を満たす経路を評価する。
+
     if variant.swap_b:
         E2 = E2[:, [1, 0]]
+
     s = np.asarray(variant.sign_matrix, dtype=np.int8)
     return float(np.sum(s * E2))
 
 
 def _best_chsh_variant(E: np.ndarray) -> tuple[ChshVariant, float]:
+    # 条件分岐: `np.asarray(E).shape != (2, 2)` を満たす経路を評価する。
     if np.asarray(E).shape != (2, 2):
         raise ValueError("E must be 2x2")
+
     best: tuple[ChshVariant, float] | None = None
     for swap_a in (False, True):
         for swap_b in (False, True):
             E2 = np.asarray(E, dtype=float).copy()
+            # 条件分岐: `swap_a` を満たす経路を評価する。
             if swap_a:
                 E2 = E2[[1, 0], :]
+
+            # 条件分岐: `swap_b` を満たす経路を評価する。
+
             if swap_b:
                 E2 = E2[:, [1, 0]]
+
             for s in _CHSH_SIGNS:
                 v = float(np.sum(s * E2))
+                # 条件分岐: `best is None or abs(v) > abs(best[1])` を満たす経路を評価する。
                 if best is None or abs(v) > abs(best[1]):
                     variant = ChshVariant(
                         swap_a=swap_a,
@@ -2193,6 +2673,7 @@ def _best_chsh_variant(E: np.ndarray) -> tuple[ChshVariant, float]:
                         sign_matrix=((int(s[0, 0]), int(s[0, 1])), (int(s[1, 0]), int(s[1, 1]))),
                     )
                     best = (variant, v)
+
     assert best is not None
     return best
 
@@ -2207,8 +2688,10 @@ def _bootstrap_chsh_s_sigma(
 ) -> float:
     E = np.asarray(E, dtype=float)
     n = np.asarray(n, dtype=np.int64)
+    # 条件分岐: `E.shape != (2, 2) or n.shape != (2, 2)` を満たす経路を評価する。
     if E.shape != (2, 2) or n.shape != (2, 2):
         raise ValueError("E and n must be 2x2")
+
     rng = np.random.default_rng(seed)
     samples: list[float] = []
     for _ in range(int(n_boot)):
@@ -2216,15 +2699,21 @@ def _bootstrap_chsh_s_sigma(
         for a in (0, 1):
             for b in (0, 1):
                 N = int(n[a, b])
+                # 条件分岐: `N <= 0 or not math.isfinite(float(E[a, b]))` を満たす経路を評価する。
                 if N <= 0 or not math.isfinite(float(E[a, b])):
                     Eboot[a, b] = float("nan")
                     continue
+
                 p = 0.5 * (1.0 + float(E[a, b]))
                 p = min(1.0, max(0.0, p))
                 k = int(rng.binomial(N, p))
                 Eboot[a, b] = (2.0 * k - N) / N
+
+        # 条件分岐: `np.isfinite(Eboot).all()` を満たす経路を評価する。
+
         if np.isfinite(Eboot).all():
             samples.append(_apply_chsh_variant(Eboot, variant))
+
     return _nanstd(samples)
 
 
@@ -2255,8 +2744,10 @@ def _bootstrap_ch_j_sigma(
     b2 = 1 - b1
 
     def _binom(n: int, k: int) -> int:
+        # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
             return 0
+
         p = k / n
         p = min(1.0, max(0.0, float(p)))
         return int(rng.binomial(int(n), p))
@@ -2267,6 +2758,7 @@ def _bootstrap_ch_j_sigma(
         for a in (0, 1):
             for b in (0, 1):
                 c[a, b] = _binom(int(n_trials[a, b]), int(n_coinc[a, b]))
+
         ca1 = _binom(int(n_trials_a[a1]), int(n_click_a[a1]))
         cb1 = _binom(int(n_trials_b[b1]), int(n_click_b[b1]))
 
@@ -2280,8 +2772,10 @@ def _bootstrap_ch_j_sigma(
             - p_a1
             - p_b1
         )
+        # 条件分岐: `math.isfinite(float(j))` を満たす経路を評価する。
         if math.isfinite(float(j)):
             samples.append(float(j))
+
     return _nanstd(samples)
 
 
@@ -2293,6 +2787,7 @@ def _load_csv_dicts(path: Path) -> list[dict[str, str]]:
         r = csv.DictReader(f)
         for row in r:
             rows.append(dict(row))
+
     return rows
 
 
@@ -2324,6 +2819,7 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     # --- normalized events
     npz_path = out_dir / "normalized_events.npz"
     meta_path = out_dir / "normalized_events.json"
+    # 条件分岐: `overwrite or (not npz_path.exists()) or (not meta_path.exists())` を満たす経路を評価する。
     if overwrite or (not npz_path.exists()) or (not meta_path.exists()):
         arrays = mod._load_run_arrays(src_dir=src_dir, subdir=subdir, run=run)
         t_a = arrays["a_t"]
@@ -2511,6 +3007,7 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
                 "S_fixed_abs": float(abs(S)) if math.isfinite(float(S)) else None,
             }
         )
+
     s_abs2 = [r.get("S_fixed_abs") for r in offset_rows]
     s2_min, s2_max = _min_max(s_abs2)
     delta_s2 = (float(s2_max) - float(s2_min)) if (s2_min is not None and s2_max is not None) else None
@@ -2540,12 +3037,17 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     w_s = float(ref_window_ns) * 1e-9
     while i < na and j < nb:
         dt = float(t_b[j] - t_a[i] - offset_s)
+        # 条件分岐: `dt < -w_s` を満たす経路を評価する。
         if dt < -w_s:
             j += 1
             continue
+
+        # 条件分岐: `dt > w_s` を満たす経路を評価する。
+
         if dt > w_s:
             i += 1
             continue
+
         a_set, _ = mod._extract_setting_and_outcome(int(c_a[i]), encoding=encoding)
         b_set, _ = mod._extract_setting_and_outcome(int(c_b[j]), encoding=encoding)
         dt_by_ab[(int(a_set), int(b_set))].append(dt * 1e9)
@@ -2569,8 +3071,12 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     for b in (0, 1):
         sig = _delay_signature_delta_median(dt_by_ab[(0, b)], dt_by_ab[(1, b)], epsilon=eps_sig)
         z = sig.get("z_delta_median")
+        # 条件分岐: `not isinstance(z, (int, float)) or not math.isfinite(float(z))` を満たす経路を評価する。
         if not isinstance(z, (int, float)) or not math.isfinite(float(z)):
             continue
+
+        # 条件分岐: `sig_a_best is None or abs(float(z)) > abs(float(sig_a_best.get("z_delta_media...` を満たす経路を評価する。
+
         if sig_a_best is None or abs(float(z)) > abs(float(sig_a_best.get("z_delta_median") or 0.0)):
             sig_a_best = sig
             sig_a_fixed_b = int(b)
@@ -2580,8 +3086,12 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     for a in (0, 1):
         sig = _delay_signature_delta_median(dt_by_ab[(a, 0)], dt_by_ab[(a, 1)], epsilon=eps_sig)
         z = sig.get("z_delta_median")
+        # 条件分岐: `not isinstance(z, (int, float)) or not math.isfinite(float(z))` を満たす経路を評価する。
         if not isinstance(z, (int, float)) or not math.isfinite(float(z)):
             continue
+
+        # 条件分岐: `sig_b_best is None or abs(float(z)) > abs(float(sig_b_best.get("z_delta_media...` を満たす経路を評価する。
+
         if sig_b_best is None or abs(float(z)) > abs(float(sig_b_best.get("z_delta_median") or 0.0)):
             sig_b_best = sig
             sig_b_fixed_a = int(a)
@@ -2616,8 +3126,10 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
 
         ax00 = ax[0, 0]
         ax00.plot(xs, ys, marker="o", lw=1.8, label="raw")
+        # 条件分岐: `any(math.isfinite(v) for v in ys_sub)` を満たす経路を評価する。
         if any(math.isfinite(v) for v in ys_sub):
             ax00.plot(xs, ys_sub, marker="s", lw=1.6, color="tab:orange", label="accidental-subtracted")
+
         ax00.axhline(2.0, color="0.2", ls="--", lw=1.0)
         ax00.set_xscale("log")
         ax00.set_xlabel("window (ns)")
@@ -2647,6 +3159,7 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
         ax11 = ax[1, 1]
         dt00 = np.asarray(dt_by_ab[(0, 0)], dtype=float)
         dt11 = np.asarray(dt_by_ab[(1, 1)], dtype=float)
+        # 条件分岐: `dt00.size and dt11.size` を満たす経路を評価する。
         if dt00.size and dt11.size:
             allv = np.concatenate([dt00, dt11])
             hi = float(np.percentile(allv, 99.5))
@@ -2702,6 +3215,7 @@ def _delft_datasets(*, overwrite: bool) -> list[dict[str, Any]]:
         )
 
     # --- 2015
+
     dataset_id = "delft_hensen2015"
     out_dir = OUT_BASE / dataset_id
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -2717,12 +3231,14 @@ def _delft_datasets(*, overwrite: bool) -> list[dict[str, Any]]:
     for off in offsets_ps.tolist():
         res = mod._analyze(data, p=p, start_offset_ps=int(off))
         offset_rows.append({"start_offset_ps": int(off), "S": float(res.s), "S_err": float(res.s_err)})
+
     sweep_s = [float(r.get("S")) for r in offset_rows]
     s_min, s_max = _min_max(sweep_s)
     delta_s = (float(s_max) - float(s_min)) if (s_min is not None and s_max is not None) else None
 
     # normalized events (minimal view)
     norm_json = out_dir / "normalized_events.json"
+    # 条件分岐: `overwrite or (not norm_json.exists())` を満たす経路を評価する。
     if overwrite or (not norm_json.exists()):
         random_number_a = data[:, 6].astype(np.int8, copy=False)
         random_number_b = data[:, 7].astype(np.int8, copy=False)
@@ -2824,11 +3340,13 @@ def _delft_datasets(*, overwrite: bool) -> list[dict[str, Any]]:
                 "S_combined_err": float(res.s_err_combined),
             }
         )
+
     sweep_s2 = [float(r.get("S_combined")) for r in offset_rows2]
     s2_min, s2_max = _min_max(sweep_s2)
     delta_s2 = (float(s2_max) - float(s2_min)) if (s2_min is not None and s2_max is not None) else None
 
     norm_json = out_dir / "normalized_events.json"
+    # 条件分岐: `overwrite or (not norm_json.exists())` を満たす経路を評価する。
     if overwrite or (not norm_json.exists()):
         random_a_old = data_old[:, 6].astype(np.int8, copy=False)
         random_b_old = data_old[:, 7].astype(np.int8, copy=False)
@@ -2954,6 +3472,7 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
 
     # --- trial-based denominators (sync×slot)
     trial_counts_path = out_dir / "trial_based_counts.json"
+    # 条件分岐: `overwrite or (not trial_counts_path.exists())` を満たす経路を評価する。
     if overwrite or (not trial_counts_path.exists()):
         try:
             import h5py  # noqa: PLC0415
@@ -2973,10 +3492,13 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
             bad: set[int] = set()
             for side in ("alice", "bob"):
                 g = f[side]
+                # 条件分岐: `"badSyncInfo" not in g` を満たす経路を評価する。
                 if "badSyncInfo" not in g:
                     continue
+
                 flat = np.asarray(g["badSyncInfo"][()]).reshape(-1)
                 bad |= set(map(int, flat.tolist()))
+
             bad_idx = np.asarray(sorted(i for i in bad if 0 <= i < n_use), dtype=np.int64)
 
             counts_obj = nist_trial._compute_trial_counts(
@@ -3048,6 +3570,7 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
     # --- time-tag: read first max_seconds for KS (setting dependence of click_delay)
     norm_npz = out_dir / "normalized_events.npz"
     norm_meta = out_dir / "normalized_events.json"
+    # 条件分岐: `overwrite or (not norm_npz.exists()) or (not norm_meta.exists())` を満たす経路を評価する。
     if overwrite or (not norm_npz.exists()) or (not norm_meta.exists()):
         cfg = nist_tt.Config(max_seconds=max_seconds)
         a = nist_tt._read_side(alice_zip, max_seconds=cfg.max_seconds)
@@ -3126,6 +3649,7 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
     # --- window sweep: prefer existing CSV (fast); fallback to recompute from normalized clicks.
     sweep_csv = ROOT / "output" / "public" / "quantum" / "nist_belltest_coincidence_sweep__03_43_afterfixingModeLocking_s3600.csv"
     sweep_source: dict[str, Any] = {}
+    # 条件分岐: `sweep_csv.exists()` を満たす経路を評価する。
     if sweep_csv.exists():
         rows = _load_csv_dicts(sweep_csv)
         windows_ns = [_parse_float(r, "window_ns") for r in rows]
@@ -3342,6 +3866,7 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
                 "coinc_by_setting_pair": c.astype(int).tolist(),
             }
         )
+
     js = [r["J_prob"] for r in offset_rows]
     j2_min, j2_max = _min_max(js)
     delta_j2 = (float(j2_max) - float(j2_min)) if (j2_min is not None and j2_max is not None) else None
@@ -3376,8 +3901,10 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
 
         ax0 = fig.add_subplot(gs[0, 0])
         ax0.plot(windows_ns, j_sweep, marker="o", lw=1.6, label="raw")
+        # 条件分岐: `any(math.isfinite(float(v)) for v in j_sweep_sub_clip.tolist())` を満たす経路を評価する。
         if any(math.isfinite(float(v)) for v in j_sweep_sub_clip.tolist()):
             ax0.plot(windows_ns, j_sweep_sub_clip, marker="s", lw=1.4, color="tab:green", label="accidental-subtracted (clipped)")
+
         ax0.axhline(0.0, color="0.2", ls="--", lw=1.0)
         ax0.axhline(float(j_trial), color="tab:orange", ls=":", lw=1.2, label="trial-based")
         ax0.set_xscale("log")
@@ -3450,6 +3977,7 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     zip_path = ROOT / "data" / "quantum" / "sources" / "kwiat2013_prl111_130406" / "CH_Bell_Data.zip"
+    # 条件分岐: `not zip_path.exists()` を満たす経路を評価する。
     if not zip_path.exists():
         raise SystemExit(
             "[fail] missing Kwiat/Christensen 2013 data. Run:\n"
@@ -3457,6 +3985,7 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
         )
 
     # Representative dataset folder with 300 mat files.
+
     dataset_folder = "05082013_15 t753 a252ap38"
     prefix = f"CH_Bell_Data/{dataset_folder}/"
 
@@ -3478,6 +4007,7 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
         50_000,
     ]
     windows_bins = sorted({int(x) for x in windows_bins if int(x) > 0})
+    # 条件分岐: `ref_window_bins not in windows_bins` を満たす経路を評価する。
     if ref_window_bins not in windows_bins:
         windows_bins.append(int(ref_window_bins))
         windows_bins.sort()
@@ -3519,17 +4049,23 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     def _dt_min_by_trial(*, click_t: np.ndarray, triggers: np.ndarray) -> np.ndarray:
         max_i64 = np.iinfo(np.int64).max
         out = np.full(int(triggers.size), max_i64, dtype=np.int64)
+        # 条件分岐: `int(click_t.size) == 0 or int(triggers.size) == 0` を満たす経路を評価する。
         if int(click_t.size) == 0 or int(triggers.size) == 0:
             return out
+
         idx = np.searchsorted(triggers, click_t, side="right") - 1
         m = idx >= 0
+        # 条件分岐: `int(np.sum(m)) == 0` を満たす経路を評価する。
         if int(np.sum(m)) == 0:
             return out
+
         idx2 = idx[m].astype(np.int64, copy=False)
         dt = click_t[m] - triggers[idx2]
         m2 = dt >= 0
+        # 条件分岐: `int(np.sum(m2)) == 0` を満たす経路を評価する。
         if int(np.sum(m2)) == 0:
             return out
+
         np.minimum.at(out, idx2[m2], dt[m2])
         return out
 
@@ -3544,6 +4080,9 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     mat_names: list[str] = []
     with zipfile.ZipFile(zip_path, "r") as zf:
         mat_names = sorted([n for n in zf.namelist() if n.startswith(prefix) and n.lower().endswith(".mat")])
+
+    # 条件分岐: `not mat_names` を満たす経路を評価する。
+
     if not mat_names:
         raise SystemExit(f"[fail] no .mat files found under: {prefix} (zip={zip_path})")
 
@@ -3569,8 +4108,10 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
 
     with zipfile.ZipFile(zip_path, "r") as zf:
         for k, name in enumerate(mat_names):
+            # 条件分岐: `k % 50 == 0` を満たす経路を評価する。
             if k % 50 == 0:
                 print(f"  ... kwi at {k}/{len(mat_names)}: {name.rsplit('/', 1)[-1]}")
+
             raw = zf.read(name)
             m = loadmat(io.BytesIO(raw), squeeze_me=True)
 
@@ -3579,6 +4120,9 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
                 b_set = int(np.asarray(m.get("bsetting")).reshape(-1)[0]) - 1
             except Exception:
                 continue
+
+            # 条件分岐: `a_set not in (0, 1) or b_set not in (0, 1)` を満たす経路を評価する。
+
             if a_set not in (0, 1) or b_set not in (0, 1):
                 continue
 
@@ -3586,45 +4130,64 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
                 tb = float(np.asarray(m.get("timebins")).reshape(-1)[0])
             except Exception:
                 continue
+
+            # 条件分岐: `not math.isfinite(tb) or tb <= 0` を満たす経路を評価する。
+
             if not math.isfinite(tb) or tb <= 0:
                 continue
+
+            # 条件分岐: `bins_per_s is None` を満たす経路を評価する。
+
             if bins_per_s is None:
                 bins_per_s = tb
                 bin_s = 1.0 / float(bins_per_s)
             else:
+                # 条件分岐: `abs(tb - float(bins_per_s)) > 1e-6` を満たす経路を評価する。
                 if abs(tb - float(bins_per_s)) > 1e-6:
                     raise RuntimeError(f"inconsistent timebins in .mat: {tb} != {bins_per_s} ({name})")
 
             chan_keys = [kk for kk in m.keys() if kk.startswith("channel") and kk[7:].isdigit()]
             time_keys = [kk for kk in m.keys() if kk.startswith("timetags") and kk[8:].isdigit()]
+            # 条件分岐: `not chan_keys or not time_keys` を満たす経路を評価する。
             if not chan_keys or not time_keys:
                 continue
+
             chan_key = chan_keys[0]
             time_key = time_keys[0]
 
             ch = np.asarray(m[chan_key], dtype=np.int16).reshape(-1)
             tt = np.asarray(m[time_key], dtype=np.int64).reshape(-1)
+            # 条件分岐: `ch.size != tt.size or ch.size == 0` を満たす経路を評価する。
             if ch.size != tt.size or ch.size == 0:
                 continue
 
             # Click times (raw)
+
             t_a = tt[ch == 1]
             t_b = tt[ch == 2]
+            # 条件分岐: `t_a.size` を満たす経路を評価する。
             if t_a.size:
                 a_t_s_list.append(t_a.astype(np.float64, copy=False) * float(bin_s))
+
+            # 条件分岐: `t_b.size` を満たす経路を評価する。
+
             if t_b.size:
                 b_t_s_list.append(t_b.astype(np.float64, copy=False) * float(bin_s))
 
             # Trigger times (channel 15) + hidden midpoint triggers.
+
             t15 = np.sort(tt[ch == 15])
+            # 条件分岐: `int(t15.size) < 2` を満たす経路を評価する。
             if int(t15.size) < 2:
                 continue
+
             mids = ((t15[:-1] + t15[1:]) // 2).astype(np.int64, copy=False)
             trig = np.empty(int(2 * t15.size - 1), dtype=np.int64)
             trig[0] = int(t15[0])
             trig[1::2] = mids
             trig[2::2] = t15[1:]
             n_trial = int(trig.size)
+            # 条件分岐: `n_trial <= 0` を満たす経路を評価する。
             if n_trial <= 0:
                 continue
 
@@ -3639,12 +4202,17 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
             if bin_s is not None:
                 ma = dt_a <= int(ref_window_bins)
                 mb = dt_b <= int(ref_window_bins)
+                # 条件分岐: `int(np.sum(ma)) > 0` を満たす経路を評価する。
                 if int(np.sum(ma)) > 0:
                     dt_a_ref_ns[a_set].extend((dt_a[ma].astype(np.float64) * float(bin_s) * 1e9).tolist())
+
+                # 条件分岐: `int(np.sum(mb)) > 0` を満たす経路を評価する。
+
                 if int(np.sum(mb)) > 0:
                     dt_b_ref_ns[b_set].extend((dt_b[mb].astype(np.float64) * float(bin_s) * 1e9).tolist())
 
             # Window sweep counts
+
             for wi, w_bins in enumerate(windows_bins):
                 a_hit = dt_a <= int(w_bins)
                 b_hit = dt_b <= int(w_bins)
@@ -3652,10 +4220,13 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
                 n_click_b[wi, b_set] += int(np.sum(b_hit))
                 n_coinc[wi, a_set, b_set] += int(np.sum(a_hit & b_hit))
 
+    # 条件分岐: `bins_per_s is None or bin_s is None` を満たす経路を評価する。
+
     if bins_per_s is None or bin_s is None:
         raise SystemExit("[fail] could not determine timebins from .mat files")
 
     # KS distances (setting dependence of click delay from trigger)
+
     a0 = np.asarray(dt_a_ref_ns[0], dtype=float)
     a1v = np.asarray(dt_a_ref_ns[1], dtype=float)
     b0 = np.asarray(dt_b_ref_ns[0], dtype=float)
@@ -3740,6 +4311,7 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
         ref_idx = windows_bins.index(int(ref_window_bins))
     except ValueError:
         ref_idx = int(np.argmin(np.abs(np.asarray(windows_bins, dtype=float) - float(ref_window_bins))))
+
     j_ref = float(rows[ref_idx]["J_prob"])
     j_ref_sigma = float(rows[ref_idx]["J_sigma_boot"])
     ref_window_ns = float(rows[ref_idx]["window_ns"])
@@ -3876,14 +4448,27 @@ def _build_table1_row(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     d16 = next((r for r in results if r.get("dataset_id") == "delft_hensen2016_srep30289"), None)
 
     parts: list[str] = []
+    # 条件分岐: `weihs is not None and weihs.get("window_delta") is not None` を満たす経路を評価する。
     if weihs is not None and weihs.get("window_delta") is not None:
         parts.append(f"Weihs1998 Δ|S|≈{float(weihs['window_delta']):.3g}")
+
+    # 条件分岐: `d15 is not None and d15.get("offset_delta") is not None` を満たす経路を評価する。
+
     if d15 is not None and d15.get("offset_delta") is not None:
         parts.append(f"Delft2015 ΔS≈{float(d15['offset_delta']):.3g}")
+
+    # 条件分岐: `d16 is not None and d16.get("offset_delta") is not None` を満たす経路を評価する。
+
     if d16 is not None and d16.get("offset_delta") is not None:
         parts.append(f"Delft2016 ΔS≈{float(d16['offset_delta']):.3g}")
+
+    # 条件分岐: `nist is not None and nist.get("window_delta") is not None` を満たす経路を評価する。
+
     if nist is not None and nist.get("window_delta") is not None:
         parts.append(f"NIST ΔJ≈{float(nist['window_delta']):.3g}")
+
+    # 条件分岐: `kwiat is not None and kwiat.get("window_delta") is not None` を満たす経路を評価する。
+
     if kwiat is not None and kwiat.get("window_delta") is not None:
         parts.append(f"Kwiat2013 ΔJ≈{float(kwiat['window_delta']):.3g}")
 
@@ -3932,6 +4517,7 @@ def _build_falsification_pack(*, results: list[dict[str, Any]]) -> dict[str, Any
         stat = str(r.get("statistic") or "")
         entry: dict[str, Any] = {"dataset_id": ds, "statistic": stat}
 
+        # 条件分岐: `stat == "CHSH_S"` を満たす経路を評価する。
         if stat == "CHSH_S":
             # Delft event-ready experiments: selection knob is the event-ready offset (no coincidence-window pairing step).
             entry["selection_knob"] = "event_ready_offset_ps"
@@ -3941,43 +4527,56 @@ def _build_falsification_pack(*, results: list[dict[str, Any]]) -> dict[str, Any
                 s_vals = []
                 s_errs_raw = []
                 for row in rows:
+                    # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                     if not isinstance(row, dict):
                         continue
+
                     v = row.get("S")
+                    # 条件分岐: `v is None` を満たす経路を評価する。
                     if v is None:
                         v = row.get("S_combined")
+
                     s_vals.append(v)
                     e = row.get("S_err")
+                    # 条件分岐: `e is None` を満たす経路を評価する。
                     if e is None:
                         e = row.get("S_combined_err")
+
                     s_errs_raw.append(e)
 
                 s_lo, s_hi = _min_max(s_vals)
                 delta = float(s_hi - s_lo) if (s_lo is not None and s_hi is not None and s_hi >= s_lo) else None
                 s_errs = _finite(s_errs_raw)
+                # 条件分岐: `s_errs` を満たす経路を評価する。
                 if s_errs:
                     sigma_med = float(np.nanmedian(np.asarray(s_errs, dtype=float)))
                 else:
                     baseline = o.get("baseline") if isinstance(o.get("baseline"), dict) else {}
                     b = baseline.get("S_err")
+                    # 条件分岐: `b is None` を満たす経路を評価する。
                     if b is None:
                         b = baseline.get("S_combined_err")
+
                     sigma_med = float(b) if b is not None else None
             except Exception:
                 delta = None
                 sigma_med = None
+
             entry["delta_offset"] = r.get("offset_delta") if r.get("offset_delta") is not None else delta
             entry["sigma_stat_med"] = sigma_med
+            # 条件分岐: `entry.get("delta_offset") is not None and sigma_med is not None and sigma_med...` を満たす経路を評価する。
             if entry.get("delta_offset") is not None and sigma_med is not None and sigma_med > 0:
                 entry["ratio"] = float(entry["delta_offset"]) / float(sigma_med)
             else:
                 entry["ratio"] = None
+
             entry["recommended_start_offset_ps"] = 0
             entry["recommended_window_ns"] = None
             entry["recommended_window_method"] = {
                 "name": "event_ready_protocol",
                 "note": "Use the published event-ready protocol baseline; treat offset sweep as a systematic (not an optimizer).",
             }
+        # 条件分岐: 前段条件が不成立で、`stat.startswith("CHSH")` を追加評価する。
         elif stat.startswith("CHSH"):
             entry["selection_knob"] = "window_ns"
             try:
@@ -3996,14 +4595,18 @@ def _build_falsification_pack(*, results: list[dict[str, Any]]) -> dict[str, Any
                 sigma_med = None
                 rec_window = None
                 rec_method = {"name": "unknown"}
+
             entry["delta_window"] = r.get("window_delta")
             entry["sigma_stat_med"] = sigma_med
+            # 条件分岐: `r.get("window_delta") is not None and sigma_med is not None and sigma_med > 0` を満たす経路を評価する。
             if r.get("window_delta") is not None and sigma_med is not None and sigma_med > 0:
                 entry["ratio"] = float(r["window_delta"]) / float(sigma_med)
             else:
                 entry["ratio"] = None
+
             entry["recommended_window_ns"] = rec_window
             entry["recommended_window_method"] = rec_method
+        # 条件分岐: 前段条件が不成立で、`stat == "CH_J"` を追加評価する。
         elif stat == "CH_J":
             entry["selection_knob"] = "window_ns"
             try:
@@ -4022,19 +4625,24 @@ def _build_falsification_pack(*, results: list[dict[str, Any]]) -> dict[str, Any
                 sigma_med = None
                 rec_window = None
                 rec_method = {"name": "unknown"}
+
             entry["delta_window"] = r.get("window_delta")
             entry["sigma_stat_med"] = sigma_med
+            # 条件分岐: `r.get("window_delta") is not None and sigma_med is not None and sigma_med > 0` を満たす経路を評価する。
             if r.get("window_delta") is not None and sigma_med is not None and sigma_med > 0:
                 entry["ratio"] = float(r["window_delta"]) / float(sigma_med)
             else:
                 entry["ratio"] = None
+
             entry["recommended_window_ns"] = rec_window
             entry["recommended_window_method"] = rec_method
 
         entry["ks_delay"] = r.get("ks_delay")
         entry["delay_signature"] = r.get("delay_signature")
+        # 条件分岐: `ds.startswith("delft_")` を満たす経路を評価する。
         if ds.startswith("delft_"):
             entry["recommended_start_offset_ps"] = 0
+
         pack["datasets"].append(entry)
 
     pack["conditions"] = [
@@ -4060,6 +4668,7 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
 
     The pack should stay lightweight: we embed only summaries and references, not full matrices.
     """
+    # 条件分岐: `not pack_path.exists()` を満たす経路を評価する。
     if not pack_path.exists():
         return
 
@@ -4091,8 +4700,10 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
 
     def _median(xs: list[float]) -> float | None:
         vals = [float(x) for x in xs if x is not None and math.isfinite(float(x))]
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return None
+
         return float(np.nanmedian(np.asarray(vals, dtype=float)))
 
     def _min(xs: list[float]) -> float | None:
@@ -4104,12 +4715,18 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
         return float(max(vals)) if vals else None
 
     # --- per-statistic group summary (computed from the pack itself)
+
     def _group_key(stat: str) -> str:
         s = str(stat)
+        # 条件分岐: `s.startswith("CHSH")` を満たす経路を評価する。
         if s.startswith("CHSH"):
             return "CHSH"
+
+        # 条件分岐: `s.startswith("CH_")` を満たす経路を評価する。
+
         if s.startswith("CH_"):
             return "CH"
+
         return "other"
 
     groups: dict[str, list[dict[str, Any]]] = {}
@@ -4139,7 +4756,9 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
         }
 
     # --- systematics 15-items summary (top contributors + correlation pairs)
+
     sys15_summary: dict[str, Any] = {"supported": False}
+    # 条件分岐: `isinstance(sys15, dict)` を満たす経路を評価する。
     if isinstance(sys15, dict):
         item_summary = sys15.get("item_summary") if isinstance(sys15.get("item_summary"), list) else []
         item_summary = [x for x in item_summary if isinstance(x, dict)]
@@ -4175,9 +4794,12 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
         }
 
     # --- cross-dataset covariance summary (rank/condition number; strongest corr pair)
+
     cov_summary: dict[str, Any] = {"supported": False}
+    # 条件分岐: `isinstance(longterm, dict) and isinstance(longterm.get("cross_dataset_covaria...` を満たす経路を評価する。
     if isinstance(longterm, dict) and isinstance(longterm.get("cross_dataset_covariance_summary"), dict):
         cov_summary = dict(longterm.get("cross_dataset_covariance_summary") or {})
+    # 条件分岐: 前段条件が不成立で、`isinstance(cov, dict)` を追加評価する。
     elif isinstance(cov, dict):
         matrices = cov.get("matrices") if isinstance(cov.get("matrices"), dict) else {}
         eig = matrices.get("profile_corr_eigen") if isinstance(matrices.get("profile_corr_eigen"), dict) else {}
@@ -4188,14 +4810,18 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
         }
 
     # --- selection loophole (summary only)
+
     loophole_summary: dict[str, Any] | None = None
+    # 条件分岐: `isinstance(loophole, dict) and isinstance(loophole.get("summary"), dict)` を満たす経路を評価する。
     if isinstance(loophole, dict) and isinstance(loophole.get("summary"), dict):
         loophole_summary = dict(loophole.get("summary") or {})
 
     # --- Attach
+
     pack["version"] = "1.4"
     pack["generated_utc"] = _utc_now()
     pack.setdefault("policy", {})
+    # 条件分岐: `isinstance(pack.get("policy"), dict)` を満たす経路を評価する。
     if isinstance(pack.get("policy"), dict):
         pack["policy"]["blind_freeze"] = {
             "note": (
@@ -4208,6 +4834,7 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
             },
             "freeze_policy": freeze_policy,
         }
+
     pack["cross_dataset"] = {
         "generated_utc": _utc_now(),
         "summary": dict(longterm.get("summary") or {}) if isinstance(longterm, dict) else None,
@@ -4249,6 +4876,7 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
         },
     }
     pack.setdefault("outputs", {})
+    # 条件分岐: `isinstance(pack.get("outputs"), dict)` を満たす経路を評価する。
     if isinstance(pack.get("outputs"), dict):
         pack["outputs"].update(
             {
@@ -4283,20 +4911,32 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     """
 
     def _attach_cov_diagnostics(obj: dict[str, Any]) -> None:
+        # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
         if not isinstance(obj, dict):
             return
+
         for sweep_key in ("window_sweep", "offset_sweep"):
             sweep = obj.get(sweep_key)
+            # 条件分岐: `not isinstance(sweep, dict)` を満たす経路を評価する。
             if not isinstance(sweep, dict):
                 continue
+
+            # 条件分岐: `not bool(sweep.get("supported"))` を満たす経路を評価する。
+
             if not bool(sweep.get("supported")):
                 continue
+
             cov_json = sweep.get("cov")
             cov_arr = _matrix_from_json(cov_json)
+            # 条件分岐: `cov_arr.size == 0` を満たす経路を評価する。
             if cov_arr.size == 0:
                 continue
+
+            # 条件分岐: `not isinstance(sweep.get("diag_sigma"), list)` を満たす経路を評価する。
+
             if not isinstance(sweep.get("diag_sigma"), list):
                 sweep["diag_sigma"] = _diag_sigma_from_cov(cov_arr)
+
             sweep["eigen_summary"] = _cov_eigen_summary(cov_arr)
 
     n_bootstrap = 10_000
@@ -4326,12 +4966,14 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             "offset_sweep": {"supported": False},
         }
 
+        # 条件分岐: `ds.startswith("weihs1998_")` を満たす経路を評価する。
         if ds.startswith("weihs1998_"):
             mod = _load_script_module(rel_path="scripts/quantum/weihs1998_time_tag_reanalysis.py", name="_weihs1998_cov")
             npz_path = ds_dir / "normalized_events.npz"
             meta_path = ds_dir / "normalized_events.json"
             w_path = ds_dir / "window_sweep_metrics.json"
             o_path = ds_dir / "offset_sweep_metrics.json"
+            # 条件分岐: `npz_path.exists() and meta_path.exists() and w_path.exists() and o_path.exists()` を満たす経路を評価する。
             if npz_path.exists() and meta_path.exists() and w_path.exists() and o_path.exists():
                 meta = json.loads(meta_path.read_text(encoding="utf-8"))
                 wj = json.loads(w_path.read_text(encoding="utf-8"))
@@ -4399,6 +5041,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                             d_ns = float(row.get("delta_offset_ns"))
                         except Exception:
                             continue
+
                         off_s = float(offset_s) + float(d_ns) * 1e-9
                         n, sum_prod, _ = mod._pair_and_accumulate(
                             ta,
@@ -4491,6 +5134,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                         mean_w.append(float(row.get("S_fixed_abs")))
                     except Exception:
                         mean_w.append(None)
+
                 mean_o: list[float | None] = []
                 for row in orows:
                     try:
@@ -4543,18 +5187,23 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                     },
                 }
 
+        # 条件分岐: 前段条件が不成立で、`ds.startswith("delft_")` を追加評価する。
         elif ds.startswith("delft_"):
             o_path = ds_dir / "offset_sweep_metrics.json"
+            # 条件分岐: `o_path.exists()` を満たす経路を評価する。
             if o_path.exists():
                 oj = json.loads(o_path.read_text(encoding="utf-8"))
                 orows = list(oj.get("rows") or [])
+                # 条件分岐: `orows and ("S_err" in orows[0] or "S_combined_err" in orows[0])` を満たす経路を評価する。
                 if orows and ("S_err" in orows[0] or "S_combined_err" in orows[0]):
+                    # 条件分岐: `"S_err" in orows[0]` を満たす経路を評価する。
                     if "S_err" in orows[0]:
                         sig = np.asarray([float(row.get("S_err")) for row in orows], dtype=float)
                         stat = "CHSH S (event-ready trials)"
                     else:
                         sig = np.asarray([float(row.get("S_combined_err")) for row in orows], dtype=float)
                         stat = "CHSH S (combined; event-ready trials)"
+
                     cov = np.diag(sig**2)
                     cov_obj = {
                         "generated_utc": _utc_now(),
@@ -4577,6 +5226,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                         seed = _stable_seed("bell", "cov_boot", ds, "delft", "offset_sweep")
                         rng = np.random.default_rng(seed)
 
+                        # 条件分岐: `"S_err" in orows[0]` を満たす経路を評価する。
                         if "S_err" in orows[0]:
                             mu = np.asarray([float(row.get("S")) for row in orows], dtype=float)
                             sig = np.asarray([float(row.get("S_err")) for row in orows], dtype=float)
@@ -4616,9 +5266,11 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                     except Exception as e:
                         cov_boot_obj = {"generated_utc": _utc_now(), "dataset_id": ds, "supported": False, "reason": str(e)}
 
+        # 条件分岐: 前段条件が不成立で、`ds.startswith("nist_")` を追加評価する。
         elif ds.startswith("nist_"):
             w_path = ds_dir / "window_sweep_metrics.json"
             trial_counts_path = ds_dir / "trial_based_counts.json"
+            # 条件分岐: `w_path.exists() and trial_counts_path.exists()` を満たす経路を評価する。
             if w_path.exists() and trial_counts_path.exists():
                 wj = json.loads(w_path.read_text(encoding="utf-8"))
                 trial = json.loads(trial_counts_path.read_text(encoding="utf-8"))
@@ -4634,18 +5286,24 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                 windows_ns: list[float] = []
                 for row in rows:
                     c = row.get("coinc_by_setting_pair")
+                    # 条件分岐: `not isinstance(c, list)` を満たす経路を評価する。
                     if not isinstance(c, list):
                         coinc = []
                         break
+
                     try:
                         c_arr = np.asarray(c, dtype=np.float64)
+                        # 条件分岐: `c_arr.shape != (2, 2)` を満たす経路を評価する。
                         if c_arr.shape != (2, 2):
                             raise ValueError
+
                         coinc.append(c_arr)
                         windows_ns.append(float(row.get("window_ns")))
                     except Exception:
                         coinc = []
                         break
+
+                # 条件分岐: `coinc` を満たす経路を評価する。
 
                 if coinc:
                     n_points = len(coinc)
@@ -4689,10 +5347,12 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                     cov_obj["natural_window"] = {"method": rec_m, "recommended_window_ns": rec_w}
 
                     o_path = ds_dir / "offset_sweep_metrics.json"
+                    # 条件分岐: `o_path.exists()` を満たす経路を評価する。
                     if o_path.exists():
                         oj = json.loads(o_path.read_text(encoding="utf-8"))
                         orows = list(oj.get("rows") or [])
                         sig = _finite([row.get("J_sigma_boot") for row in orows])
+                        # 条件分岐: `sig and len(sig) == len(orows)` を満たす経路を評価する。
                         if sig and len(sig) == len(orows):
                             cov_o = np.diag(np.asarray(sig, dtype=float) ** 2)
                             cov_obj["offset_sweep"] = {
@@ -4707,11 +5367,14 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
 
                     try:
                         c_stack = np.asarray(coinc, dtype=np.int64)
+                        # 条件分岐: `c_stack.ndim != 3 or c_stack.shape[1:] != (2, 2)` を満たす経路を評価する。
                         if c_stack.ndim != 3 or c_stack.shape[1:] != (2, 2):
                             raise ValueError("invalid coinc_by_setting_pair shape")
+
                         inc = np.empty_like(c_stack)
                         inc[0] = c_stack[0]
                         inc[1:] = c_stack[1:] - c_stack[:-1]
+                        # 条件分岐: `np.any(inc < 0)` を満たす経路を評価する。
                         if np.any(inc < 0):
                             raise ValueError("non-monotone coincidence counts; cannot bootstrap nested increments")
 
@@ -4769,10 +5432,12 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                             },
                         }
 
+                        # 条件分岐: `o_path.exists()` を満たす経路を評価する。
                         if o_path.exists():
                             oj = json.loads(o_path.read_text(encoding="utf-8"))
                             orows = list(oj.get("rows") or [])
                             sig = _finite([row.get("J_sigma_boot") for row in orows])
+                            # 条件分岐: `sig and len(sig) == len(orows)` を満たす経路を評価する。
                             if sig and len(sig) == len(orows):
                                 cov_o = np.diag(np.asarray(sig, dtype=float) ** 2)
                                 cov_boot_obj["offset_sweep"] = {
@@ -4788,9 +5453,11 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                     except Exception as e:
                         cov_boot_obj = {"generated_utc": _utc_now(), "dataset_id": ds, "supported": False, "reason": str(e)}
 
+        # 条件分岐: 前段条件が不成立で、`ds.startswith("kwiat2013_")` を追加評価する。
         elif ds.startswith("kwiat2013_"):
             w_path = ds_dir / "window_sweep_metrics.json"
             trial_counts_path = ds_dir / "trial_based_counts.json"
+            # 条件分岐: `w_path.exists() and trial_counts_path.exists()` を満たす経路を評価する。
             if w_path.exists() and trial_counts_path.exists():
                 wj = json.loads(w_path.read_text(encoding="utf-8"))
                 rows = list(wj.get("rows") or [])
@@ -4804,6 +5471,9 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                         windows_ns = []
                         sig = []
                         break
+
+                # 条件分岐: `windows_ns and sig and len(windows_ns) == len(sig)` を満たす経路を評価する。
+
                 if windows_ns and sig and len(windows_ns) == len(sig):
                     cov = np.diag(np.asarray(sig, dtype=float) ** 2)
                     rec_w, rec_m = _recommend_natural_window(
@@ -4846,8 +5516,10 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                             c = np.asarray(row.get("coinc_by_setting_pair"), dtype=np.int64)
                             ca = np.asarray(row.get("click_a_by_setting"), dtype=np.int64)
                             cb = np.asarray(row.get("click_b_by_setting"), dtype=np.int64)
+                            # 条件分岐: `c.shape != (2, 2) or ca.shape != (2,) or cb.shape != (2,)` を満たす経路を評価する。
                             if c.shape != (2, 2) or ca.shape != (2,) or cb.shape != (2,):
                                 raise ValueError("missing click/coinc counts; regenerate window_sweep_metrics.json")
+
                             c_list.append(c)
                             ca_list.append(ca)
                             cb_list.append(cb)
@@ -4866,6 +5538,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                         inc_c[1:] = c_stack[1:] - c_stack[:-1]
                         inc_ca[1:] = ca_stack[1:] - ca_stack[:-1]
                         inc_cb[1:] = cb_stack[1:] - cb_stack[:-1]
+                        # 条件分岐: `np.any(inc_c < 0) or np.any(inc_ca < 0) or np.any(inc_cb < 0)` を満たす経路を評価する。
                         if np.any(inc_c < 0) or np.any(inc_ca < 0) or np.any(inc_cb < 0):
                             raise ValueError("non-monotone counts; cannot bootstrap nested increments")
 
@@ -4930,14 +5603,17 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         try:
             nat = cov_boot_obj.get("natural_window") or cov_obj.get("natural_window") or {}
 
+            # 条件分岐: `isinstance(nat, dict) and "recommended_start_offset_ps" in nat` を満たす経路を評価する。
             if isinstance(nat, dict) and "recommended_start_offset_ps" in nat:
                 vals = (cov_boot_obj.get("offset_sweep") or {}).get("values") or (cov_obj.get("offset_sweep") or {}).get(
                     "values"
                 )
                 means = (cov_boot_obj.get("offset_sweep") or {}).get("mean")
                 sigmas = (cov_boot_obj.get("offset_sweep") or {}).get("diag_sigma")
+                # 条件分岐: `not isinstance(vals, list) or not vals` を満たす経路を評価する。
                 if not isinstance(vals, list) or not vals:
                     raise ValueError("missing offset_sweep.values")
+
                 want = int(nat.get("recommended_start_offset_ps"))
                 vv = np.asarray([int(x) for x in vals], dtype=int)
                 idx = int(np.argmin(np.abs(vv - want)))
@@ -4968,15 +5644,19 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                 }
             else:
                 rec_w = None
+                # 条件分岐: `isinstance(nat, dict)` を満たす経路を評価する。
                 if isinstance(nat, dict):
                     rec_w = nat.get("recommended_window_ns")
+
                 vals = (cov_boot_obj.get("window_sweep") or {}).get("values") or (cov_obj.get("window_sweep") or {}).get(
                     "values"
                 )
                 means = (cov_boot_obj.get("window_sweep") or {}).get("mean")
                 sigmas = (cov_boot_obj.get("window_sweep") or {}).get("diag_sigma")
+                # 条件分岐: `not isinstance(vals, list) or not vals` を満たす経路を評価する。
                 if not isinstance(vals, list) or not vals:
                     raise ValueError("missing window_sweep.values")
+
                 grid = [float(x) for x in vals]
                 frozen_w = _snap_to_grid_ge(x=float(rec_w) if rec_w is not None else None, grid=grid) or float(grid[0])
                 vv = np.asarray(grid, dtype=float)
@@ -5032,6 +5712,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         )
 
     # --- longterm/systematics inputs
+
     fc_path = OUT_BASE / "falsification_pack.json"
     fc = json.loads(fc_path.read_text(encoding="utf-8")) if fc_path.exists() else {}
     thresholds = fc.get("thresholds") if isinstance(fc.get("thresholds"), dict) else {}
@@ -5066,38 +5747,49 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     # --- longterm consistency (cross-dataset integration)
 
     def _ks_max_legacy(x: Any) -> float | None:
+        # 条件分岐: `not isinstance(x, dict)` を満たす経路を評価する。
         if not isinstance(x, dict):
             return None
+
         vals = _finite(x.values())
         return float(max(vals)) if vals else None
 
     datasets_longterm: list[dict[str, Any]] = []
     for d in fc.get("datasets", []) if isinstance(fc.get("datasets"), list) else []:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         ds_id = str(d.get("dataset_id") or "")
         ratio = None
         try:
+            # 条件分岐: `d.get("ratio") is not None` を満たす経路を評価する。
             if d.get("ratio") is not None:
                 ratio = float(d.get("ratio"))
+                # 条件分岐: `not math.isfinite(ratio)` を満たす経路を評価する。
                 if not math.isfinite(ratio):
                     ratio = None
         except Exception:
             ratio = None
+
         delay_z = _delay_signature_z_max(d.get("delay_signature"))
         ks_max = _ks_max_legacy(d.get("ks_delay"))
 
         # Load frozen "natural window" baseline (operational freeze point).
         nw_obj = None
         for ci in cov_index:
+            # 条件分岐: `str(ci.get("dataset_id") or "") != ds_id` を満たす経路を評価する。
             if str(ci.get("dataset_id") or "") != ds_id:
                 continue
+
             p = Path(str(ci.get("natural_window_frozen_json") or ""))
+            # 条件分岐: `p.exists()` を満たす経路を評価する。
             if p.exists():
                 try:
                     nw_obj = json.loads(p.read_text(encoding="utf-8"))
                 except Exception:
                     nw_obj = None
+
             break
 
         ratio_pass = None if ratio is None else bool(ratio >= ratio_th)
@@ -5187,20 +5879,28 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     }
     profile_entries: list[dict[str, Any]] = []
     for item in cov_index:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         prof = item.get("sweep_profile")
+        # 条件分岐: `not isinstance(prof, dict)` を満たす経路を評価する。
         if not isinstance(prof, dict):
             continue
+
         x_norm = prof.get("x_norm")
         y_vals = prof.get("y")
+        # 条件分岐: `not isinstance(x_norm, list) or not isinstance(y_vals, list) or len(x_norm) !...` を満たす経路を評価する。
         if not isinstance(x_norm, list) or not isinstance(y_vals, list) or len(x_norm) != len(y_vals) or len(x_norm) < 3:
             continue
+
         xs = np.asarray([float(v) for v in x_norm], dtype=float)
         ys = np.asarray([float(v) for v in y_vals], dtype=float)
         mask = np.isfinite(xs) & np.isfinite(ys)
+        # 条件分岐: `int(np.sum(mask)) < 3` を満たす経路を評価する。
         if int(np.sum(mask)) < 3:
             continue
+
         xs = xs[mask]
         ys = ys[mask]
         order = np.argsort(xs)
@@ -5208,8 +5908,10 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         ys = ys[order]
         unique_x, unique_idx = np.unique(xs, return_index=True)
         ys_unique = ys[unique_idx]
+        # 条件分岐: `unique_x.size < 3` を満たす経路を評価する。
         if unique_x.size < 3:
             continue
+
         profile_entries.append(
             {
                 "dataset_id": str(item.get("dataset_id") or ""),
@@ -5226,6 +5928,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         )
 
     cross_png_written = False
+    # 条件分岐: `len(profile_entries) >= 2` を満たす経路を評価する。
     if len(profile_entries) >= 2:
         u_grid = np.linspace(0.0, 1.0, int(cross_n_u), dtype=float)
         profile_matrix: list[np.ndarray] = []
@@ -5235,6 +5938,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             profile_matrix.append(np.interp(u_grid, np.asarray(prof["x_norm"], dtype=float), np.asarray(prof["y"], dtype=float)))
             ds_labels.append(str(prof.get("display_name") or prof.get("dataset_id") or ""))
             ds_ids.append(str(prof.get("dataset_id") or ""))
+
         profile_arr = np.asarray(profile_matrix, dtype=float)
 
         cov_profile = np.cov(profile_arr, ddof=1)
@@ -5298,8 +6002,10 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
 
             eig_vals = []
             eig_obj = cross_cov_obj["matrices"].get("profile_cov_eigen")
+            # 条件分岐: `isinstance(eig_obj, dict)` を満たす経路を評価する。
             if isinstance(eig_obj, dict):
                 eig_vals = [float(v) for v in eig_obj.get("eigenvalues_desc") or [] if v is not None]
+
             axes[2].bar(np.arange(len(eig_vals)), eig_vals, color="tab:blue", alpha=0.85)
             axes[2].set_title("Covariance eigenvalues")
             axes[2].set_xlabel("mode index")
@@ -5317,6 +6023,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     _write_json(cross_cov_path, cross_cov_obj)
 
     cross_cov_summary: dict[str, Any] = {"supported": bool(cross_cov_obj.get("supported"))}
+    # 条件分岐: `bool(cross_cov_obj.get("supported"))` を満たす経路を評価する。
     if bool(cross_cov_obj.get("supported")):
         mat = cross_cov_obj.get("matrices") if isinstance(cross_cov_obj.get("matrices"), dict) else {}
         eig = mat.get("profile_cov_eigen") if isinstance(mat, dict) and isinstance(mat.get("profile_cov_eigen"), dict) else {}
@@ -5333,6 +6040,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         corr = _matrix_from_json(mat.get("profile_corr") if isinstance(mat, dict) else None)
         ds_order = mat.get("dataset_order") if isinstance(mat, dict) and isinstance(mat.get("dataset_order"), list) else []
         strongest_pair = None
+        # 条件分岐: `corr.ndim == 2 and corr.shape[0] == corr.shape[1] and corr.shape[0] >= 2` を満たす経路を評価する。
         if corr.ndim == 2 and corr.shape[0] == corr.shape[1] and corr.shape[0] >= 2:
             best_abs = -1.0
             best_i = -1
@@ -5341,14 +6049,20 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
             for i in range(corr.shape[0]):
                 for j in range(i + 1, corr.shape[1]):
                     v = float(corr[i, j])
+                    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
                     if not math.isfinite(v):
                         continue
+
                     av = abs(v)
+                    # 条件分岐: `av > best_abs` を満たす経路を評価する。
                     if av > best_abs:
                         best_abs = av
                         best_i = i
                         best_j = j
                         best_v = v
+
+            # 条件分岐: `best_i >= 0 and best_j >= 0 and best_v is not None` を満たす経路を評価する。
+
             if best_i >= 0 and best_j >= 0 and best_v is not None:
                 lhs = str(ds_order[best_i]) if best_i < len(ds_order) else str(best_i)
                 rhs = str(ds_order[best_j]) if best_j < len(ds_order) else str(best_j)
@@ -5358,6 +6072,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
                     "corr": float(best_v),
                     "abs_corr": float(abs(best_v)),
                 }
+
         cross_cov_summary.update(
             {
                 "rank_eps_1e-10": eig.get("rank_eps_1e-10") if isinstance(eig, dict) else None,
@@ -5431,6 +6146,9 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
         import matplotlib.pyplot as plt  # noqa: PLC0415
     except Exception:
         return
+
+    # 条件分岐: `not datasets_longterm` を満たす経路を評価する。
+
     if not datasets_longterm:
         return
 
@@ -5440,6 +6158,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     zcolors: list[str] = []
     for d in datasets_longterm:
         z = d.get("delay_z_max")
+        # 条件分岐: `z is None` を満たす経路を評価する。
         if z is None:
             zvals.append(0.0)
             zcolors.append("0.85")
@@ -5464,6 +6183,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     ax[1].grid(True, axis="y", alpha=0.3, ls=":")
 
     for i, d in enumerate(datasets_longterm):
+        # 条件分岐: `d.get("delay_z_max") is None` を満たす経路を評価する。
         if d.get("delay_z_max") is None:
             ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=9, color="0.35")
 
@@ -5530,14 +6250,19 @@ def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     ]
 
     datasets_out: list[dict[str, Any]] = []
+    # 条件分岐: `isinstance(pack, dict)` を満たす経路を評価する。
     if isinstance(pack, dict):
         ds_list = pack.get("datasets") if isinstance(pack.get("datasets"), list) else []
         for d in ds_list:
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
             if not isinstance(d, dict):
                 continue
+
             ds_id = str(d.get("dataset_id") or "")
+            # 条件分岐: `not ds_id` を満たす経路を評価する。
             if not ds_id:
                 continue
+
             ds_dir = OUT_BASE / ds_id
             nwin_path = ds_dir / "natural_window_frozen.json"
             nwin = _read_json_or_none(nwin_path) if nwin_path.exists() else None
@@ -5546,12 +6271,16 @@ def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
 
             rec_method = d.get("recommended_window_method")
             rec_method_name = str(rec_method.get("name") or "") if isinstance(rec_method, dict) else None
+            # 条件分岐: `ds_id.startswith("delft_")` を満たす経路を評価する。
             if ds_id.startswith("delft_"):
                 applied_rule = "event_ready_protocol_offset_nearest_grid"
+            # 条件分岐: 前段条件が不成立で、`ds_id.startswith("nist_")` を追加評価する。
             elif ds_id.startswith("nist_"):
                 applied_rule = "nist_trial_match_pairs_total_then_snap_min_ge"
+            # 条件分岐: 前段条件が不成立で、`ds_id.startswith("kwiat2013_")` を追加評価する。
             elif ds_id.startswith("kwiat2013_"):
                 applied_rule = "kwiat_dataset_recommendation_then_snap_min_ge"
+            # 条件分岐: 前段条件が不成立で、`rec_method_name == "dt_peak_hist_signal_fraction"` を追加評価する。
             elif rec_method_name == "dt_peak_hist_signal_fraction":
                 applied_rule = "time_tag_window_from_dt_peak_then_snap_min_ge"
             else:
@@ -5562,6 +6291,7 @@ def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
             }
             for extra in ("window_sweep_metrics.json", "offset_sweep_metrics.json", "trial_based_counts.json"):
                 p = ds_dir / extra
+                # 条件分岐: `p.exists()` を満たす経路を評価する。
                 if p.exists():
                     evidence[extra.replace(".", "_")] = {"path": _relpath_from_root(p), "sha256": _sha256_or_none(p)}
 
@@ -5621,14 +6351,17 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
             v = float(x)
         except Exception:
             return None
+
         return v if math.isfinite(v) else None
 
     def _abs_delta_over_sigma(*, x: float | None, y: float | None, sigma: float | None) -> float | None:
         xv = _safe_float(x)
         yv = _safe_float(y)
         sv = _safe_float(sigma)
+        # 条件分岐: `xv is None or yv is None or sv is None or sv <= 0.0` を満たす経路を評価する。
         if xv is None or yv is None or sv is None or sv <= 0.0:
             return None
+
         return abs(float(xv) - float(yv)) / float(sv)
 
     summary_path = OUT_BASE / "null_tests_summary.json"
@@ -5636,6 +6369,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
 
     for r in results:
         ds = str(r.get("dataset_id") or "")
+        # 条件分岐: `not ds` を満たす経路を評価する。
         if not ds:
             continue
 
@@ -5691,10 +6425,12 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
 
                 ref_window_ns = 1.0
                 frozen_window_ns = _safe_float((nw.get("natural_window") or {}).get("frozen_window_ns")) if isinstance(nw, dict) else None
+                # 条件分岐: `frozen_window_ns is None` を満たす経路を評価する。
                 if frozen_window_ns is None:
                     frozen_window_ns = 1.0
 
                 # Fixed CHSH variant derived at ref window on original data.
+
                 n_ref, sum_prod_ref, _pairs_ref = mod._pair_and_accumulate(
                     t_a,
                     c_a,
@@ -5718,11 +6454,15 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                         encoding=encoding,
                     )
                     E = mod._safe_div(sum_prod, n)
+                    # 条件分岐: `not np.isfinite(E).all()` を満たす経路を評価する。
                     if not np.isfinite(E).all():
                         return None, int(pairs_total)
+
                     s = _apply_chsh_variant(E, variant_fixed)
+                    # 条件分岐: `not math.isfinite(float(s))` を満たす経路を評価する。
                     if not math.isfinite(float(s)):
                         return None, int(pairs_total)
+
                     return float(abs(float(s))), int(pairs_total)
 
                 def _compute_delay_z_max(tt_a: np.ndarray, cc_a: np.ndarray, tt_b: np.ndarray, cc_b: np.ndarray) -> float | None:
@@ -5734,12 +6474,17 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                     w_s = float(ref_window_ns) * 1e-9
                     while i < na and j < nb:
                         dt = float(tt_b[j] - tt_a[i] - offset_s)
+                        # 条件分岐: `dt < -w_s` を満たす経路を評価する。
                         if dt < -w_s:
                             j += 1
                             continue
+
+                        # 条件分岐: `dt > w_s` を満たす経路を評価する。
+
                         if dt > w_s:
                             i += 1
                             continue
+
                         a_set, _ = mod._extract_setting_and_outcome(int(cc_a[i]), encoding=encoding)
                         b_set, _ = mod._extract_setting_and_outcome(int(cc_b[j]), encoding=encoding)
                         dt_by_ab[(int(a_set), int(b_set))].append(dt * 1e9)
@@ -5751,8 +6496,12 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                     for b in (0, 1):
                         sig = _delay_signature_delta_median(dt_by_ab[(0, b)], dt_by_ab[(1, b)], epsilon=eps_sig)
                         z = sig.get("z_delta_median")
+                        # 条件分岐: `z is None or not math.isfinite(float(z))` を満たす経路を評価する。
                         if z is None or not math.isfinite(float(z)):
                             continue
+
+                        # 条件分岐: `sig_a_best is None or abs(float(z)) > abs(float(sig_a_best.get("z_delta_media...` を満たす経路を評価する。
+
                         if sig_a_best is None or abs(float(z)) > abs(float(sig_a_best.get("z_delta_median") or 0.0)):
                             sig_a_best = sig
 
@@ -5760,8 +6509,12 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                     for a in (0, 1):
                         sig = _delay_signature_delta_median(dt_by_ab[(a, 0)], dt_by_ab[(a, 1)], epsilon=eps_sig)
                         z = sig.get("z_delta_median")
+                        # 条件分岐: `z is None or not math.isfinite(float(z))` を満たす経路を評価する。
                         if z is None or not math.isfinite(float(z)):
                             continue
+
+                        # 条件分岐: `sig_b_best is None or abs(float(z)) > abs(float(sig_b_best.get("z_delta_media...` を満たす経路を評価する。
+
                         if sig_b_best is None or abs(float(z)) > abs(float(sig_b_best.get("z_delta_median") or 0.0)):
                             sig_b_best = sig
 
@@ -5772,6 +6525,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                     return _delay_signature_z_max(delay_signature)
 
                 # Baseline (recomputed for sanity; should be close to natural_window_frozen baseline).
+
                 base_s_abs, base_pairs = _compute_s_abs_and_pairs(t_a, c_a, t_b, c_b)
 
                 # Null 1: shuffle setting bits (keep outcome bits).
@@ -5835,6 +6589,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
             try:
                 mod = _load_script_module(rel_path="scripts/quantum/delft_hensen2015_chsh_reanalysis.py", name="_delft_null")
                 frozen_off = _safe_float((nw.get("natural_window") or {}).get("frozen_start_offset_ps")) if isinstance(nw, dict) else None
+                # 条件分岐: `frozen_off is None` を満たす経路を評価する。
                 if frozen_off is None:
                     frozen_off = 0.0
 
@@ -5844,6 +6599,8 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                     out = np.asarray(data).copy()
                     out[:, col] = np.asarray(data)[perm, col]
                     return out
+
+                # 条件分岐: `ds == "delft_hensen2015"` を満たす経路を評価する。
 
                 if ds == "delft_hensen2015":
                     zip_path = ROOT / "data" / "quantum" / "sources" / ds / "data.zip"
@@ -5876,6 +6633,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                     dataset_out["supported"] = True
                     dataset_out["baseline"]["statistic_recomputed"] = float(base.s)
 
+                # 条件分岐: 前段条件が不成立で、`ds == "delft_hensen2016_srep30289"` を追加評価する。
                 elif ds == "delft_hensen2016_srep30289":
                     zip_path = ROOT / "data" / "quantum" / "sources" / ds / "data.zip"
                     old_member = "bell_open_data_2_old_detector.txt"
@@ -5968,8 +6726,10 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
         elif ds.startswith("kwiat2013_"):
             try:
                 ref_npz = ds_dir / "delay_signature_ref_samples.npz"
+                # 条件分岐: `not ref_npz.exists()` を満たす経路を評価する。
                 if not ref_npz.exists():
                     raise FileNotFoundError(ref_npz)
+
                 dt = np.load(ref_npz)
                 a0 = np.asarray(dt["alice_setting0_dt_ns"], dtype=float)
                 a1v = np.asarray(dt["alice_setting1_dt_ns"], dtype=float)
@@ -6066,17 +6826,22 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
 
     def _extract_setting_and_outcome_vec(c: np.ndarray, *, encoding: str) -> tuple[np.ndarray, np.ndarray]:
         cc = np.asarray(c, dtype=np.uint16).reshape(-1)
+        # 条件分岐: `cc.size == 0` を満たす経路を評価する。
         if cc.size == 0:
             return np.asarray([], dtype=np.int8), np.asarray([], dtype=np.int8)
+
+        # 条件分岐: `encoding == "bit0-setting"` を満たす経路を評価する。
 
         if encoding == "bit0-setting":
             setting = (cc & np.uint16(1)).astype(np.int8, copy=False)
             det = ((cc >> np.uint16(1)) & np.uint16(1)).astype(np.int8, copy=False)
+        # 条件分岐: 前段条件が不成立で、`encoding == "bit0-detector"` を追加評価する。
         elif encoding == "bit0-detector":
             det = (cc & np.uint16(1)).astype(np.int8, copy=False)
             setting = ((cc >> np.uint16(1)) & np.uint16(1)).astype(np.int8, copy=False)
         else:
             raise ValueError(f"unknown encoding: {encoding}")
+
         outcome = (np.int8(1) - np.int8(2) * det).astype(np.int8, copy=False)  # det 0->+1, det 1->-1
         return setting, outcome
 
@@ -6098,10 +6863,17 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
         n_click_a0 = np.asarray(n_click_a, dtype=np.int64).reshape(-1)
         n_click_b0 = np.asarray(n_click_b, dtype=np.int64).reshape(-1)
 
+        # 条件分岐: `n_trials0.shape != (2, 2) or n_coinc0.shape != (2, 2)` を満たす経路を評価する。
         if n_trials0.shape != (2, 2) or n_coinc0.shape != (2, 2):
             raise ValueError("CH J_prob expects 2x2 trial and coincidence matrices")
+
+        # 条件分岐: `n_trials_a0.size < 2 or n_trials_b0.size < 2 or n_click_a0.size < 2 or n_clic...` を満たす経路を評価する。
+
         if n_trials_a0.size < 2 or n_trials_b0.size < 2 or n_click_a0.size < 2 or n_click_b0.size < 2:
             raise ValueError("CH J_prob expects 2-element singles/trials arrays")
+
+        # 条件分岐: `a1 not in (0, 1) or b1 not in (0, 1)` を満たす経路を評価する。
+
         if a1 not in (0, 1) or b1 not in (0, 1):
             raise ValueError("a1/b1 must be in {0,1}")
 
@@ -6129,10 +6901,12 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
         tb = np.asarray(t_b, dtype=np.float64).reshape(-1)
         na = int(ta.size)
         nb = int(tb.size)
+        # 条件分岐: `na == 0 or nb == 0` を満たす経路を評価する。
         if na == 0 or nb == 0:
             return np.asarray([], dtype=np.int64), np.asarray([], dtype=np.int64)
 
         # A -> nearest B to (t_a + offset)
+
         target_b = ta + float(offset_s)
         pos = np.searchsorted(tb, target_b, side="left")
         cand0 = np.clip(pos, 0, nb - 1).astype(np.int64, copy=False)
@@ -6160,8 +6934,10 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
 
         # Mutual nearest neighbor pairing.
         m = j_near >= 0
+        # 条件分岐: `int(np.sum(m)) == 0` を満たす経路を評価する。
         if int(np.sum(m)) == 0:
             return np.asarray([], dtype=np.int64), np.asarray([], dtype=np.int64)
+
         i_valid = np.nonzero(m)[0].astype(np.int64, copy=False)
         j_valid = j_near[m].astype(np.int64, copy=False)
         mutual = i_near[j_valid] == i_valid
@@ -6185,15 +6961,18 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
         tb = np.asarray(t_b, dtype=np.int64).reshape(-1)
         na = int(ta.size)
         nb = int(tb.size)
+        # 条件分岐: `na == 0 or nb == 0` を満たす経路を評価する。
         if na == 0 or nb == 0:
             return np.asarray([], dtype=np.int64), np.asarray([], dtype=np.int64)
 
         off = int(offset_counts)
         w = int(window_counts)
+        # 条件分岐: `w < 0` を満たす経路を評価する。
         if w < 0:
             raise ValueError("window_counts must be non-negative")
 
         # B -> nearest A to (t_b - offset)
+
         target_a = (tb - off).astype(np.int64, copy=False)
         pos2 = np.searchsorted(ta, target_a, side="left")
         cand0b = np.clip(pos2, 0, na - 1).astype(np.int64, copy=False)
@@ -6211,8 +6990,10 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
         i_all: list[np.ndarray] = []
         j_all: list[np.ndarray] = []
         cs = int(chunk_size)
+        # 条件分岐: `cs <= 0` を満たす経路を評価する。
         if cs <= 0:
             cs = na
+
         for start in range(0, na, cs):
             end = min(na, start + cs)
             ta_block = ta[start:end]
@@ -6226,19 +7007,25 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
             j_near = np.where(use0, cand0, cand1).astype(np.int64, copy=False)
             dt = tb[j_near] - target_b
             valid_a = np.abs(dt) <= w
+            # 条件分岐: `int(np.sum(valid_a)) == 0` を満たす経路を評価する。
             if int(np.sum(valid_a)) == 0:
                 continue
 
             i_valid = (np.nonzero(valid_a)[0] + start).astype(np.int64, copy=False)
             j_valid = j_near[valid_a].astype(np.int64, copy=False)
             mutual = i_near32[j_valid] == i_valid.astype(np.int32, copy=False)
+            # 条件分岐: `int(np.sum(mutual)) == 0` を満たす経路を評価する。
             if int(np.sum(mutual)) == 0:
                 continue
+
             i_all.append(i_valid[mutual])
             j_all.append(j_valid[mutual])
 
+        # 条件分岐: `not i_all` を満たす経路を評価する。
+
         if not i_all:
             return np.asarray([], dtype=np.int64), np.asarray([], dtype=np.int64)
+
         return np.concatenate(i_all).astype(np.int64, copy=False), np.concatenate(j_all).astype(np.int64, copy=False)
 
     summary_path = OUT_BASE / "crosscheck_pairing_summary.json"
@@ -6246,8 +7033,10 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
 
     for r in results:
         ds = str(r.get("dataset_id") or "")
+        # 条件分岐: `not ds` を満たす経路を評価する。
         if not ds:
             continue
+
         ds_dir = OUT_BASE / ds
         ds_dir.mkdir(parents=True, exist_ok=True)
         out_path = ds_dir / "crosscheck_pairing.json"
@@ -6258,12 +7047,20 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
         base = base if isinstance(base, dict) else {}
         sigma_boot = base.get("sigma_boot")
         frozen_window_ns = None
+        # 条件分岐: `isinstance(nw, dict)` を満たす経路を評価する。
         if isinstance(nw, dict):
             frozen_window_ns = _safe_float((nw.get("natural_window") or {}).get("frozen_window_ns"))
+            # 条件分岐: `frozen_window_ns is None` を満たす経路を評価する。
             if frozen_window_ns is None:
                 frozen_window_ns = _safe_float((nw.get("natural_window") or {}).get("recommended_window_ns"))
+
+        # 条件分岐: `frozen_window_ns is None` を満たす経路を評価する。
+
         if frozen_window_ns is None:
             frozen_window_ns = _safe_float(base.get("value"))
+
+        # 条件分岐: `frozen_window_ns is None` を満たす経路を評価する。
+
         if frozen_window_ns is None:
             frozen_window_ns = 1.0
 
@@ -6336,9 +7133,11 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
 
                 n_m = np.zeros((2, 2), dtype=np.int64)
                 sum_prod_m = np.zeros((2, 2), dtype=np.int64)
+                # 条件分岐: `int(prod.size)` を満たす経路を評価する。
                 if int(prod.size):
                     np.add.at(n_m, (a_set, b_set), 1)
                     np.add.at(sum_prod_m, (a_set, b_set), prod.astype(np.int64, copy=False))
+
                 E_m = mod._safe_div(sum_prod_m, n_m)
                 s_m = _apply_chsh_variant(E_m, variant_fixed) if np.isfinite(E_m).all() else float("nan")
                 s_m_abs = float(abs(float(s_m))) if math.isfinite(float(s_m)) else None
@@ -6346,6 +7145,7 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 delta_over_sigma = None
                 try:
                     sigma_v = float(sigma_boot)
+                    # 条件分岐: `sigma_v > 0 and s_g_abs is not None and s_m_abs is not None` を満たす経路を評価する。
                     if sigma_v > 0 and s_g_abs is not None and s_m_abs is not None:
                         delta_over_sigma = abs(float(s_m_abs) - float(s_g_abs)) / sigma_v
                 except Exception:
@@ -6386,6 +7186,7 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
             except Exception as exc:
                 payload["supported"] = False
                 payload["reason"] = str(exc)
+        # 条件分岐: 前段条件が不成立で、`ds.startswith("nist_")` を追加評価する。
         elif ds.startswith("nist_"):
             # NIST time-tag: CH J_prob depends on coincidence pairing convention (greedy vs mutual nearest).
             try:
@@ -6393,10 +7194,17 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 w_path = ds_dir / "window_sweep_metrics.json"
                 norm_npz = ds_dir / "normalized_events.npz"
                 norm_json = ds_dir / "normalized_events.json"
+                # 条件分岐: `not tb_path.exists()` を満たす経路を評価する。
                 if not tb_path.exists():
                     raise FileNotFoundError(tb_path)
+
+                # 条件分岐: `not w_path.exists()` を満たす経路を評価する。
+
                 if not w_path.exists():
                     raise FileNotFoundError(w_path)
+
+                # 条件分岐: `not norm_npz.exists()` を満たす経路を評価する。
+
                 if not norm_npz.exists():
                     raise FileNotFoundError(norm_npz)
 
@@ -6412,22 +7220,33 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 wj = _read_json(w_path)
                 rows = wj.get("rows") if isinstance(wj.get("rows"), list) else []
                 row0 = None
+                # 条件分岐: `frozen_window_ns is not None` を満たす経路を評価する。
                 if frozen_window_ns is not None:
                     for row in rows:
+                        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                         if not isinstance(row, dict):
                             continue
+
                         w_ns = _safe_float(row.get("window_ns"))
+                        # 条件分岐: `w_ns is None` を満たす経路を評価する。
                         if w_ns is None:
                             continue
+
+                        # 条件分岐: `abs(float(w_ns) - float(frozen_window_ns)) < 1e-9` を満たす経路を評価する。
+
                         if abs(float(w_ns) - float(frozen_window_ns)) < 1e-9:
                             row0 = row
                             break
+
+                # 条件分岐: `row0 is None` を満たす経路を評価する。
+
                 if row0 is None:
                     raise RuntimeError(f"window_sweep_metrics missing frozen window row: window_ns={frozen_window_ns}")
 
                 c_g = np.asarray(row0.get("coinc_by_setting_pair"), dtype=np.int64)
                 pairs_g = int(row0.get("pairs_total")) if row0.get("pairs_total") is not None else int(np.sum(c_g))
                 j_g = _safe_float(row0.get("J_prob"))
+                # 条件分岐: `j_g is None` を満たす経路を評価する。
                 if j_g is None:
                     j_g = _compute_ch_j_prob(
                         n_trials=n_trials,
@@ -6439,6 +7258,7 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                         a1=a1,
                         b1=b1,
                     )
+
                 j_g = float(j_g)
 
                 data = np.load(norm_npz)
@@ -6457,8 +7277,10 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 )
 
                 c_m = np.zeros((2, 2), dtype=np.int64)
+                # 条件分岐: `int(i_pairs.size)` を満たす経路を評価する。
                 if int(i_pairs.size):
                     np.add.at(c_m, (a_set[i_pairs], b_set[j_pairs]), 1)
+
                 pairs_m = int(i_pairs.size)
                 j_m = _compute_ch_j_prob(
                     n_trials=n_trials,
@@ -6474,6 +7296,7 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 delta_over_sigma = None
                 try:
                     sigma_v = float(sigma_boot)
+                    # 条件分岐: `sigma_v > 0 and math.isfinite(float(j_g)) and math.isfinite(float(j_m))` を満たす経路を評価する。
                     if sigma_v > 0 and math.isfinite(float(j_g)) and math.isfinite(float(j_m)):
                         delta_over_sigma = abs(float(j_m) - float(j_g)) / sigma_v
                 except Exception:
@@ -6510,19 +7333,25 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 payload["inputs"]["trial_based_counts_json"] = {"path": _relpath_from_root(tb_path), "sha256": _sha256_or_none(tb_path)}
                 payload["inputs"]["window_sweep_metrics_json"] = {"path": _relpath_from_root(w_path), "sha256": _sha256_or_none(w_path)}
                 payload["inputs"]["normalized_events_npz"] = {"path": _relpath_from_root(norm_npz), "sha256": _sha256_or_none(norm_npz)}
+                # 条件分岐: `norm_json.exists()` を満たす経路を評価する。
                 if norm_json.exists():
                     payload["inputs"]["normalized_events_json"] = {"path": _relpath_from_root(norm_json), "sha256": _sha256_or_none(norm_json)}
             except Exception as exc:
                 payload["supported"] = False
                 payload["reason"] = str(exc)
+        # 条件分岐: 前段条件が不成立で、`ds.startswith("kwiat2013_")` を追加評価する。
         elif ds.startswith("kwiat2013_"):
             # Kwiat/Christensen 2013: trial-based CH J_prob; pairing is not a coincidence-window problem.
             # Here we at least cross-check internal consistency of the frozen ref-window counts vs sweep row.
             try:
                 tb_path = ds_dir / "trial_based_counts.json"
                 w_path = ds_dir / "window_sweep_metrics.json"
+                # 条件分岐: `not tb_path.exists()` を満たす経路を評価する。
                 if not tb_path.exists():
                     raise FileNotFoundError(tb_path)
+
+                # 条件分岐: `not w_path.exists()` を満たす経路を評価する。
+
                 if not w_path.exists():
                     raise FileNotFoundError(w_path)
 
@@ -6549,22 +7378,33 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                 wj = _read_json(w_path)
                 rows = wj.get("rows") if isinstance(wj.get("rows"), list) else []
                 row0 = None
+                # 条件分岐: `frozen_window_ns is not None` を満たす経路を評価する。
                 if frozen_window_ns is not None:
                     for row in rows:
+                        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                         if not isinstance(row, dict):
                             continue
+
                         w_ns = _safe_float(row.get("window_ns"))
+                        # 条件分岐: `w_ns is None` を満たす経路を評価する。
                         if w_ns is None:
                             continue
+
+                        # 条件分岐: `abs(float(w_ns) - float(frozen_window_ns)) < 1e-9` を満たす経路を評価する。
+
                         if abs(float(w_ns) - float(frozen_window_ns)) < 1e-9:
                             row0 = row
                             break
+
+                # 条件分岐: `row0 is None` を満たす経路を評価する。
+
                 if row0 is None:
                     raise RuntimeError(f"window_sweep_metrics missing frozen window row: window_ns={frozen_window_ns}")
 
                 c_row = np.asarray(row0.get("coinc_by_setting_pair"), dtype=np.int64)
                 pairs_row = int(row0.get("pairs_total")) if row0.get("pairs_total") is not None else int(np.sum(c_row))
                 j_row = _safe_float(row0.get("J_prob"))
+                # 条件分岐: `j_row is None` を満たす経路を評価する。
                 if j_row is None:
                     j_row = _compute_ch_j_prob(
                         n_trials=n_trials,
@@ -6576,11 +7416,13 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
                         a1=a1,
                         b1=b1,
                     )
+
                 j_row = float(j_row)
 
                 delta_over_sigma = None
                 try:
                     sigma_v = float(sigma_boot)
+                    # 条件分岐: `sigma_v > 0 and math.isfinite(float(j_tb)) and math.isfinite(float(j_row))` を満たす経路を評価する。
                     if sigma_v > 0 and math.isfinite(float(j_tb)) and math.isfinite(float(j_row)):
                         delta_over_sigma = abs(float(j_row) - float(j_tb)) / sigma_v
                 except Exception:
@@ -6656,6 +7498,7 @@ def main() -> None:
     args = ap.parse_args()
 
     want = [s.strip() for s in str(args.datasets).split(",") if s.strip()]
+    # 条件分岐: `want == ["all"]` を満たす経路を評価する。
     if want == ["all"]:
         want = [
             "weihs1998_longdist_longdist1",
@@ -6669,19 +7512,27 @@ def main() -> None:
 
     results: list[dict[str, Any]] = []
 
+    # 条件分岐: `"weihs1998_longdist_longdist1" in want` を満たす経路を評価する。
     if "weihs1998_longdist_longdist1" in want:
         print("[run] weihs1998_longdist_longdist1")
         results.append(_weihs1998_dataset(dataset_id="weihs1998_longdist_longdist1", overwrite=bool(args.overwrite)))
 
+    # 条件分岐: `any(x.startswith("delft_") for x in want)` を満たす経路を評価する。
+
     if any(x.startswith("delft_") for x in want):
         print("[run] delft (2015/2016)")
         for r in _delft_datasets(overwrite=bool(args.overwrite)):
+            # 条件分岐: `r.get("dataset_id") in want` を満たす経路を評価する。
             if r.get("dataset_id") in want:
                 results.append(r)
+
+    # 条件分岐: `"nist_03_43_afterfixingModeLocking_s3600" in want` を満たす経路を評価する。
 
     if "nist_03_43_afterfixingModeLocking_s3600" in want:
         print("[run] nist_03_43_afterfixingModeLocking_s3600")
         results.append(_nist_dataset(overwrite=bool(args.overwrite)))
+
+    # 条件分岐: `"kwiat2013_prl111_130406_05082013_15" in want` を満たす経路を評価する。
 
     if "kwiat2013_prl111_130406_05082013_15" in want:
         print("[run] kwiat2013_prl111_130406_05082013_15")
@@ -6720,9 +7571,12 @@ def main() -> None:
         zcolors: list[str] = []
         z_is_na: list[bool] = []
         for d in ds_list:
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
             if not isinstance(d, dict):
                 continue
+
             z = _delay_signature_z_max(d.get("delay_signature"))
+            # 条件分岐: `z is None` を満たす経路を評価する。
             if z is None:
                 zvals.append(0.0)
                 zcolors.append("0.85")
@@ -6748,6 +7602,7 @@ def main() -> None:
         ax[1].set_title("Delay setting-dependence (Δmedian; z)")
         ax[1].grid(True, axis="y", alpha=0.3, ls=":")
         for i, is_na in enumerate(z_is_na):
+            # 条件分岐: `is_na` を満たす経路を評価する。
             if is_na:
                 ax[1].text(float(i), 0.15, "n/a", ha="center", va="bottom", fontsize=9, color="0.35")
 
@@ -6760,6 +7615,8 @@ def main() -> None:
     print(f"[ok] wrote: {OUT_BASE / 'falsification_pack.json'}")
     print(f"[ok] wrote: {OUT_BASE / 'selection_loophole_quantification.json'}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

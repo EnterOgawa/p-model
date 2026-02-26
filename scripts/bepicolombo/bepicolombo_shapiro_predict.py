@@ -40,6 +40,7 @@ except Exception as e:  # pragma: no cover
     raise SystemExit(f"[err] spiceypy is required: {e}")
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -87,8 +88,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -97,28 +100,36 @@ def _set_japanese_font() -> None:
 
 def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     meta_path = kernels_dir / "kernels_meta.json"
+    # 条件分岐: `not meta_path.exists()` を満たす経路を評価する。
     if not meta_path.exists():
         raise RuntimeError(
             f"Missing kernels meta: {meta_path}\n"
             "Run: python -B scripts/bepicolombo/fetch_spice_kernels_psa.py"
         )
+
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(meta, dict)` を満たす経路を評価する。
     if not isinstance(meta, dict):
         raise RuntimeError(f"Invalid kernels meta JSON: {meta_path}")
 
     selected = meta.get("selected_paths")
+    # 条件分岐: `not isinstance(selected, list) or not selected` を満たす経路を評価する。
     if not isinstance(selected, list) or not selected:
         raise RuntimeError(f"Missing selected_paths in: {meta_path}")
 
     # Reset kernel pool for reproducibility
+
     sp.kclear()
     loaded: List[str] = []
     for rel in selected:
         p = kernels_dir / str(rel)
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise RuntimeError(f"Missing kernel file: {p}")
+
         sp.furnsh(str(p))
         loaded.append(str(p))
+
     return {"meta_path": str(meta_path), "meta": meta, "loaded": loaded}
 
 
@@ -128,14 +139,17 @@ def _wn_intervals(window) -> List[Tuple[float, float]]:
     for i in range(n):
         a, b = sp.wnfetd(window, i)
         out.append((float(a), float(b)))
+
     return out
 
 
 def _spk_time_bounds(spk_path: Path, obj_id: int) -> Tuple[float, float]:
     cov = sp.spkcov(str(spk_path), int(obj_id))
     intervals = _wn_intervals(cov)
+    # 条件分岐: `not intervals` を満たす経路を評価する。
     if not intervals:
         raise RuntimeError(f"SPK coverage empty: {spk_path} (obj={obj_id})")
+
     return min(a for a, _ in intervals), max(b for _, b in intervals)
 
 
@@ -154,10 +168,12 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
     dv = vS_mps - vE_mps
 
     d2 = float(np.dot(dr, dr))
+    # 条件分岐: `d2 == 0.0` を満たす経路を評価する。
     if d2 == 0.0:
         return float("nan"), float("nan")
 
     # Closest point on the infinite line: w = rE + t*dr
+
     a = float(np.dot(rE_m, dr))  # rE·dr
     t_unclamped = -a / d2
 
@@ -166,19 +182,26 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
         w = rE_m
         wdot = vE_mps
         b = float(np.linalg.norm(w))
+        # 条件分岐: `b == 0.0` を満たす経路を評価する。
         if b == 0.0:
             return float("nan"), float("nan")
+
         return b, float(np.dot(w, wdot)) / b
+
+    # 条件分岐: `t_unclamped >= 1.0` を満たす経路を評価する。
 
     if t_unclamped >= 1.0:
         w = rS_m
         wdot = vS_mps
         b = float(np.linalg.norm(w))
+        # 条件分岐: `b == 0.0` を満たす経路を評価する。
         if b == 0.0:
             return float("nan"), float("nan")
+
         return b, float(np.dot(w, wdot)) / b
 
     # Interior case: differentiate b = |w| with w = rE + t*dr.
+
     t = float(t_unclamped)
     a_dot = float(np.dot(vE_mps, dr) + np.dot(rE_m, dv))  # d/dt (rE·dr)
     d2_dot = 2.0 * float(np.dot(dr, dv))  # d/dt (dr·dr)
@@ -187,8 +210,10 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
     w = rE_m + t * dr
     wdot = vE_mps + t * dv + t_dot * dr
     b = float(np.linalg.norm(w))
+    # 条件分岐: `b == 0.0` を満たす経路を評価する。
     if b == 0.0:
         return float("nan"), float("nan")
+
     bdot = float(np.dot(w, wdot)) / b
     return b, bdot
 
@@ -238,11 +263,17 @@ def _find_conjunction_center(
         rE, vE = _state_m("EARTH", float(et), observer="SUN")
         rS, vS = _state_m(target, float(et), observer="SUN")
         b, _ = _impact_b_and_bdot(rE, vE, rS, vS)
+        # 条件分岐: `math.isfinite(min_b_m) and min_b_m > 0.0 and b < min_b_m` を満たす経路を評価する。
         if math.isfinite(min_b_m) and min_b_m > 0.0 and b < min_b_m:
             b = float("nan")
+
         b_list.append(b)
+
+    # 条件分岐: `not np.isfinite(np.nanmin(np.array(b_list)))` を満たす経路を評価する。
+
     if not np.isfinite(np.nanmin(np.array(b_list))):
         raise RuntimeError("No valid conjunction candidates in coarse scan (min_b filter too strict?).")
+
     idx = int(np.nanargmin(np.array(b_list)))
     et0 = float(ets[idx])
 
@@ -255,11 +286,17 @@ def _find_conjunction_center(
         rE, vE = _state_m("EARTH", float(et), observer="SUN")
         rS, vS = _state_m(target, float(et), observer="SUN")
         b, _ = _impact_b_and_bdot(rE, vE, rS, vS)
+        # 条件分岐: `math.isfinite(min_b_m) and min_b_m > 0.0 and b < min_b_m` を満たす経路を評価する。
         if math.isfinite(min_b_m) and min_b_m > 0.0 and b < min_b_m:
             b = float("nan")
+
         b_list2.append(b)
+
+    # 条件分岐: `not np.isfinite(np.nanmin(np.array(b_list2)))` を満たす経路を評価する。
+
     if not np.isfinite(np.nanmin(np.array(b_list2))):
         raise RuntimeError("No valid conjunction candidates in refine scan (min_b filter too strict?).")
+
     idx2 = int(np.nanargmin(np.array(b_list2)))
     et_min = float(ets2[idx2])
     b_min = float(b_list2[idx2])
@@ -287,6 +324,7 @@ def _build_series(
         r2 = float(np.linalg.norm(rS))
         r1dot = float(np.dot(rE, vE) / r1)
         r2dot = float(np.dot(rS, vS) / r2)
+        # 条件分岐: `occulted` を満たす経路を評価する。
         if occulted:
             dt_rt = float("nan")
             y2 = float("nan")
@@ -295,6 +333,7 @@ def _build_series(
             dt_rt = _shapiro_dt_roundtrip(r1, r2, b, beta=beta)
             y2 = _y_eq2(b, bdot, beta=beta)
             yf = _y_full(r1, r1dot, r2, r2dot, b, bdot, beta=beta)
+
         t_utc = datetime.fromisoformat(sp.et2utc(float(et), "ISOC", 3)).replace(tzinfo=timezone.utc)
         t_days = (float(et) - float(et_center)) / 86400.0
         out.append(
@@ -314,6 +353,7 @@ def _build_series(
                 y_full=yf,
             )
         )
+
     return out
 
 
@@ -373,11 +413,14 @@ def _plot(path: Path, rows: List[SeriesRow], *, title: str, min_b_rsun: float) -
 
     axes[0].plot(xs, b_rsun, color="#1f77b4")
     axes[0].axvline(0.0, color="0.5", linestyle="--", linewidth=1.0)
+    # 条件分岐: `math.isfinite(min_b_rsun) and min_b_rsun > 0.0` を満たす経路を評価する。
     if math.isfinite(min_b_rsun) and min_b_rsun > 0.0:
         axes[0].axhline(min_b_rsun, color="0.4", linestyle=":", linewidth=1.0, label=f"閾値 b={min_b_rsun:g} R_sun")
+
     axes[0].set_ylabel("b / R_sun")
     axes[0].set_title("幾何：インパクトパラメータ b（太陽中心からの最短距離）")
     axes[0].grid(True, alpha=0.3)
+    # 条件分岐: `math.isfinite(min_b_rsun) and min_b_rsun > 0.0` を満たす経路を評価する。
     if math.isfinite(min_b_rsun) and min_b_rsun > 0.0:
         axes[0].legend(loc="best")
 
@@ -428,13 +471,18 @@ def main() -> int:
     meta: Dict[str, Any] = load_info["meta"]
 
     spk_rel = next((p for p in (meta.get("selected_paths") or []) if isinstance(p, str) and p.startswith("spk/") and "bc_mpo_fcp_" in p), None)
+    # 条件分岐: `not spk_rel` を満たす経路を評価する。
     if not spk_rel:
         raise RuntimeError("Could not find MPO SPK in kernels_meta.json selected_paths.")
+
     spk_path = kernels_dir / spk_rel
 
     obj_ids = list(sp.spkobj(str(spk_path)))
+    # 条件分岐: `not obj_ids` を満たす経路を評価する。
     if not obj_ids:
         raise RuntimeError(f"SPK has no objects: {spk_path}")
+
+    # 条件分岐: `args.target_id is not None` を満たす経路を評価する。
 
     if args.target_id is not None:
         target_id = int(args.target_id)
@@ -549,8 +597,11 @@ def main() -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -35,8 +36,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -53,11 +56,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -66,8 +73,12 @@ def _to_float(v: Any) -> Optional[float]:
         val = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(val) or math.isinf(val)` を満たす経路を評価する。
+
     if math.isnan(val) or math.isinf(val):
         return None
+
     return val
 
 
@@ -85,8 +96,10 @@ def _compute_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
         z_scalar = None
         status = "inconclusive"
 
+        # 条件分岐: `observed is not None and pred_scalar is not None` を満たす経路を評価する。
         if observed is not None and pred_scalar is not None:
             residual_scalar = observed - pred_scalar
+            # 条件分岐: `sigma is not None and sigma > 0` を満たす経路を評価する。
             if sigma is not None and sigma > 0:
                 z_scalar = residual_scalar / sigma
                 status = "reject" if abs(z_scalar) > z_gate else "pass"
@@ -106,6 +119,7 @@ def _compute_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "note": str(ch.get("note") or ""),
             }
         )
+
     return rows
 
 
@@ -119,8 +133,10 @@ def _build_summary(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     frame_status = str((by_id.get("frame_dragging") or {}).get("status") or "inconclusive")
 
     overall = "inconclusive"
+    # 条件分岐: `frame_status == "reject"` を満たす経路を評価する。
     if frame_status == "reject":
         overall = "reject"
+    # 条件分岐: 前段条件が不成立で、`n_reject == 0 and n_inconclusive == 0` を追加評価する。
     elif n_reject == 0 and n_inconclusive == 0:
         overall = "pass"
 
@@ -159,6 +175,7 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     ax1.bar(x - width / 2.0, obs, width=width, color="#1f77b4", alpha=0.9, label="observed (GP-B)")
     ax1.bar(x + width / 2.0, pred, width=width, color="#ff7f0e", alpha=0.9, label="P-model scalar")
     for i, (xi, yi, si) in enumerate(zip(x, obs, sig)):
+        # 条件分岐: `math.isfinite(float(yi)) and math.isfinite(float(si)) and float(si) > 0` を満たす経路を評価する。
         if math.isfinite(float(yi)) and math.isfinite(float(si)) and float(si) > 0:
             ax1.errorbar(
                 [xi - width / 2.0],
@@ -169,8 +186,14 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
                 elinewidth=1.5,
                 capsize=4,
             )
+
+        # 条件分岐: `math.isfinite(float(yi))` を満たす経路を評価する。
+
         if math.isfinite(float(yi)):
             ax1.text(xi - width / 2.0, yi, _fmt_float(float(yi), 4), ha="center", va="bottom", fontsize=9)
+
+        # 条件分岐: `math.isfinite(float(pred[i]))` を満たす経路を評価する。
+
         if math.isfinite(float(pred[i])):
             ax1.text(xi + width / 2.0, pred[i], _fmt_float(float(pred[i]), 4), ha="center", va="bottom", fontsize=9)
 
@@ -188,8 +211,10 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     ax2.axhline(3.0, color="#333333", linestyle="--", linewidth=1.1)
     ax2.axhline(-3.0, color="#333333", linestyle="--", linewidth=1.1)
     for xi, zi in zip(x, zvals):
+        # 条件分岐: `math.isfinite(float(zi))` を満たす経路を評価する。
         if math.isfinite(float(zi)):
             ax2.text(xi, zi, _fmt_float(float(zi), 3), ha="center", va="bottom", fontsize=9)
+
     ax2.set_xticks(x)
     ax2.set_xticklabels(labels, rotation=12, ha="right")
     ax2.set_ylabel("z = (obs - pred_scalar) / sigma_obs")
@@ -298,6 +323,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_csv(out_csv, rows)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
             dst = public_outdir / src.name
@@ -330,10 +356,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

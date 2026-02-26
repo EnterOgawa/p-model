@@ -32,6 +32,7 @@ except Exception as e:  # pragma: no cover
     raise RuntimeError("scipy is required for ringdown bandpass filtering") from e
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -61,8 +62,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -74,6 +77,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -88,13 +92,16 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-gw/1.0"})
     print(f"[dl] {url}")
     with urllib.request.urlopen(req, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -104,10 +111,12 @@ def _infer_zenodo_record_id_from_url(url: str) -> Optional[int]:
         parsed = urllib.parse.urlparse(str(url))
         parts = [p for p in parsed.path.split("/") if p]
         for i, p in enumerate(parts):
+            # 条件分岐: `p == "records" and i + 1 < len(parts)` を満たす経路を評価する。
             if p == "records" and i + 1 < len(parts):
                 return int(parts[i + 1])
     except Exception:
         return None
+
     return None
 
 
@@ -120,8 +129,10 @@ def _ensure_extracted(tar_path: Path, *, extract_dir: Path, members: Sequence[st
     with tarfile.open(tar_path, "r:gz") as tf:
         for name in members:
             out_path = extract_dir / name
+            # 条件分岐: `out_path.exists()` を満たす経路を評価する。
             if out_path.exists():
                 continue
+
             tf.extract(tf.getmember(name), path=extract_dir)
 
 
@@ -130,26 +141,42 @@ def _read_pandas_hdf_block0(path: Path) -> Dict[str, np.ndarray]:
         g = f["samples"]
         cols = [c.decode("utf-8") if isinstance(c, (bytes, bytearray)) else str(c) for c in g["block0_items"][...]]
         vals = np.asarray(g["block0_values"][...], dtype=np.float64)
+
+    # 条件分岐: `vals.ndim != 2 or vals.shape[1] != len(cols)` を満たす経路を評価する。
+
     if vals.ndim != 2 or vals.shape[1] != len(cols):
         raise ValueError("unexpected pandas HDF5 shape")
+
     return {name: vals[:, i] for i, name in enumerate(cols)}
 
 
 def _select_preferred_posterior(event_info: Dict[str, Any]) -> Optional[str]:
     params = event_info.get("parameters") or {}
+    # 条件分岐: `not isinstance(params, dict) or not params` を満たす経路を評価する。
     if not isinstance(params, dict) or not params:
         return None
+
     best: Optional[str] = None
     for _, rec in params.items():
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         data_url = str(rec.get("data_url") or "").strip()
+        # 条件分岐: `not data_url` を満たす経路を評価する。
         if not data_url:
             continue
+
+        # 条件分岐: `bool(rec.get("is_preferred"))` を満たす経路を評価する。
+
         if bool(rec.get("is_preferred")):
             return data_url
+
+        # 条件分岐: `best is None` を満たす経路を評価する。
+
         if best is None:
             best = data_url
+
     return best
 
 
@@ -165,82 +192,114 @@ def _summarize_1d(x: np.ndarray) -> Dict[str, Any]:
 
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
+    # 条件分岐: `not v` を満たす経路を評価する。
     if not v:
         return "v3"
+
+    # 条件分岐: `not v.lower().startswith("v")` を満たす経路を評価する。
+
     if not v.lower().startswith("v"):
         v = "v" + v
+
     return v
 
 
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
+    # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
     if not v or v == "auto":
         return ["v3", "v2", "v1"]
+
     return [_normalize_gwosc_version(version)]
 
 
 def _gwosc_catalog_url(catalog: str) -> str:
     cat = (catalog or "").strip()
+    # 条件分岐: `not cat` を満たす経路を評価する。
     if not cat:
         raise ValueError("catalog is required")
+
     return f"https://gwosc.org/eventapi/json/{cat}/"
 
 
 def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     cat = (catalog or "").strip()
+    # 条件分岐: `not cat` を満たす経路を評価する。
     if not cat:
         raise ValueError("catalog is required")
+
     ev = (event or "").strip()
+    # 条件分岐: `not ev` を満たす経路を評価する。
     if not ev:
         raise ValueError("event is required")
+
     v = _normalize_gwosc_version(version)
     return f"https://gwosc.org/eventapi/json/{cat}/{ev}/{v}"
 
 
 def _resolve_event_common_name(*, catalog: str, event: str) -> str:
     target = (event or "").strip()
+    # 条件分岐: `not target` を満たす経路を評価する。
     if not target:
         raise ValueError("event name is required")
+
+    # 条件分岐: `"_" in target` を満たす経路を評価する。
+
     if "_" in target:
         return target
 
     url = _gwosc_catalog_url(catalog)
     obj = json.loads(urllib.request.urlopen(url, timeout=60).read().decode("utf-8"))
     events = obj.get("events") or {}
+    # 条件分岐: `not isinstance(events, dict) or not events` を満たす経路を評価する。
     if not isinstance(events, dict) or not events:
         raise ValueError(f"invalid catalog payload: {catalog}")
 
     cand: List[Tuple[float, str]] = []
     for k, v in events.items():
+        # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
         if not isinstance(v, dict):
             continue
+
         common = str(v.get("commonName") or "").strip()
+        # 条件分岐: `not common` を満たす経路を評価する。
         if not common:
             continue
+
+        # 条件分岐: `common.startswith(target)` を満たす経路を評価する。
+
         if common.startswith(target):
             snr = v.get("network_matched_filter_snr")
             try:
                 snr_f = float(snr) if snr is not None else float("nan")
             except Exception:
                 snr_f = float("nan")
+
             cand.append((snr_f, common))
+        # 条件分岐: 前段条件が不成立で、`str(k).startswith(target)` を追加評価する。
         elif str(k).startswith(target):
             snr = v.get("network_matched_filter_snr")
             try:
                 snr_f = float(snr) if snr is not None else float("nan")
             except Exception:
                 snr_f = float("nan")
+
             common2 = common or str(k).split("-", 1)[0]
             cand.append((snr_f, common2))
+
+    # 条件分岐: `not cand` を満たす経路を評価する。
 
     if not cand:
         raise ValueError(f"event '{target}' not found in catalog '{catalog}'")
 
     # Prefer the highest network SNR when multiple matches exist.
+
     cand_sorted = sorted(cand, key=lambda t: (-(t[0] if math.isfinite(t[0]) else -1.0), t[1]))
     chosen = cand_sorted[0][1]
+    # 条件分岐: `len({c for _, c in cand}) > 1` を満たす経路を評価する。
     if len({c for _, c in cand}) > 1:
         print(f"[warn] multiple matches for '{target}', picked: {chosen}")
+
     return chosen
 
 
@@ -251,10 +310,13 @@ def _pick_hdf5_strain_entry(
     prefer_sampling_rate_hz: int,
 ) -> Optional[Dict[str, Any]]:
     det = (detector or "").strip()
+    # 条件分岐: `not det` を満たす経路を評価する。
     if not det:
         return None
+
     cand = [e for e in (strain_list or []) if isinstance(e, dict) and str(e.get("detector") or "") == det]
     cand = [e for e in cand if str(e.get("format") or "").strip().lower() == "hdf5" and str(e.get("url") or "").strip()]
+    # 条件分岐: `not cand` を満たす経路を評価する。
     if not cand:
         return None
 
@@ -265,12 +327,14 @@ def _pick_hdf5_strain_entry(
             return 0
 
     preferred = [e for e in cand if _int(e.get("sampling_rate")) == int(prefer_sampling_rate_hz)]
+    # 条件分岐: `preferred` を満たす経路を評価する。
     if preferred:
         # Prefer the shortest duration within the preferred sampling-rate bucket.
         preferred = sorted(preferred, key=lambda e: _int(e.get("duration")) or 10**9)
         return preferred[0]
 
     # Fallback: smallest sampling rate.
+
     return sorted(cand, key=lambda e: _int(e.get("sampling_rate")) or 10**9)[0]
 
 
@@ -291,7 +355,9 @@ def _download_event_and_strain(
 
     event_json_url = ""
     event_json_path = data_dir / f"{resolved_event}_event.json"
+    # 条件分岐: `offline` を満たす経路を評価する。
     if offline:
+        # 条件分岐: `not event_json_path.exists()` を満たす経路を評価する。
         if not event_json_path.exists():
             raise FileNotFoundError("offline and missing event JSON: " + str(event_json_path))
     else:
@@ -303,26 +369,36 @@ def _download_event_and_strain(
                 event_json_url = url_try
                 break
             except urllib.error.HTTPError as e:
+                # 条件分岐: `int(getattr(e, "code", 0) or 0) == 404 and len(_candidate_gwosc_versions(vers...` を満たす経路を評価する。
                 if int(getattr(e, "code", 0) or 0) == 404 and len(_candidate_gwosc_versions(version)) > 1:
                     last_404 = e
                     continue
+
                 raise
+
+        # 条件分岐: `event_json_url == "" and last_404 is not None` を満たす経路を評価する。
+
         if event_json_url == "" and last_404 is not None:
             raise last_404
 
     ev_obj = _read_json(event_json_path)
     events = ev_obj.get("events") or {}
+    # 条件分岐: `not isinstance(events, dict) or not events` を満たす経路を評価する。
     if not isinstance(events, dict) or not events:
         raise ValueError("invalid event JSON: missing 'events'")
     # The payload should contain exactly one event for this endpoint.
+
     event_key = next(iter(events.keys()))
     event_info = events[event_key]
+    # 条件分岐: `not isinstance(event_info, dict)` を満たす経路を評価する。
     if not isinstance(event_info, dict):
         raise ValueError("invalid event JSON: event is not an object")
 
     strain = event_info.get("strain") or []
+    # 条件分岐: `not isinstance(strain, list)` を満たす経路を評価する。
     if not isinstance(strain, list):
         strain = []
+
     strain_list = [e for e in strain if isinstance(e, dict)]
 
     selected: Dict[str, Dict[str, Any]] = {}
@@ -335,19 +411,26 @@ def _download_event_and_strain(
             detector=det,
             prefer_sampling_rate_hz=int(prefer_sampling_rate_hz),
         )
+        # 条件分岐: `not entry` を満たす経路を評価する。
         if not entry:
             continue
+
         url = str(entry.get("url") or "").strip()
+        # 条件分岐: `not url` を満たす経路を評価する。
         if not url:
             continue
+
         fname = Path(url.split("?", 1)[0].split("#", 1)[0]).name
         p = data_dir / fname
+        # 条件分岐: `offline` を満たす経路を評価する。
         if offline:
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(f"{det}:{fname}")
                 continue
         else:
             _download(url, p, force=force)
+
         strain_paths[det] = p
         strain_urls[det] = url
         selected[det] = {
@@ -359,6 +442,8 @@ def _download_event_and_strain(
             "url": url,
             "path": str(p).replace("\\", "/"),
         }
+
+    # 条件分岐: `offline and missing` を満たす経路を評価する。
 
     if offline and missing:
         raise FileNotFoundError("offline and missing strain files: " + ", ".join(missing))
@@ -426,8 +511,10 @@ def _bandpass(x: np.ndarray, fs_hz: float, low_hz: float, high_hz: float) -> np.
     nyq = 0.5 * fs_hz
     low = max(1e-6, float(low_hz) / nyq)
     high = min(0.999999, float(high_hz) / nyq)
+    # 条件分岐: `not (0.0 < low < high < 1.0)` を満たす経路を評価する。
     if not (0.0 < low < high < 1.0):
         raise ValueError(f"invalid bandpass: {low_hz}-{high_hz} Hz for fs={fs_hz} Hz")
+
     sos = butter(4, [low, high], btype="bandpass", output="sos")
     return sosfiltfilt(sos, x)
 
@@ -452,8 +539,10 @@ def _slice_strain_hdf5(
         i1 = int(round((t1 - xstart) / dt))
         i0 = max(0, min(n, i0))
         i1 = max(0, min(n, i1))
+        # 条件分岐: `i1 <= i0` を満たす経路を評価する。
         if i1 <= i0:
             raise ValueError("empty slice after bounds adjustment")
+
         x = np.asarray(ds[i0:i1], dtype=np.float64)
         return x, fs
 
@@ -465,8 +554,12 @@ def _fit_damped_sinusoid(
     f_grid_hz: np.ndarray,
     tau_grid_s: np.ndarray,
 ) -> Dict[str, Any]:
+    # 条件分岐: `len(t) != len(y)` を満たす経路を評価する。
     if len(t) != len(y):
         raise ValueError("t and y length mismatch")
+
+    # 条件分岐: `len(t) < 20` を満たす経路を評価する。
+
     if len(t) < 20:
         raise ValueError("too few samples for ringdown fit")
 
@@ -475,8 +568,10 @@ def _fit_damped_sinusoid(
     best: Optional[Dict[str, Any]] = None
 
     for tau in tau_grid_s:
+        # 条件分岐: `not (tau > 0)` を満たす経路を評価する。
         if not (tau > 0):
             continue
+
         env = np.exp(-t / float(tau))
         for f in f_grid_hz:
             w = 2.0 * math.pi * float(f)
@@ -487,6 +582,7 @@ def _fit_damped_sinusoid(
             yhat = a @ coeff
             resid = y0 - yhat
             sse = float(np.sum(resid**2))
+            # 条件分岐: `best is None or sse < float(best["sse"])` を満たす経路を評価する。
             if best is None or sse < float(best["sse"]):
                 a0 = float(coeff[0])
                 b0 = float(coeff[1])
@@ -506,15 +602,20 @@ def _fit_damped_sinusoid(
                     "n": int(len(t)),
                 }
 
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         raise RuntimeError("fit failed (no candidates)")
+
     return best
 
 
 def _summarize_variants(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     ok = [r for r in rows if r.get("ok")]
+    # 条件分岐: `not ok` を満たす経路を評価する。
     if not ok:
         return {"status": "no_ok_variants", "n_variants": len(rows)}
+
     f_vals = np.array([float(r["fit"]["f_hz"]) for r in ok], dtype=np.float64)
     tau_vals = np.array([float(r["fit"]["tau_s"]) for r in ok], dtype=np.float64)
     med_f = float(np.median(f_vals))
@@ -535,29 +636,42 @@ def _summarize_variants(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 def _parse_bandpass_list(spec: str) -> List[Tuple[float, float]]:
     out: List[Tuple[float, float]] = []
     s = (spec or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return out
+
     for part in s.split(","):
         p = part.strip()
+        # 条件分岐: `not p` を満たす経路を評価する。
         if not p:
             continue
+
+        # 条件分岐: `"-" not in p` を満たす経路を評価する。
+
         if "-" not in p:
             raise ValueError(f"invalid bandpass entry: {p}")
+
         lo_s, hi_s = p.split("-", 1)
         out.append((float(lo_s), float(hi_s)))
+
     return out
 
 
 def _parse_float_list(spec: str) -> List[float]:
     out: List[float] = []
     s = (spec or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return out
+
     for part in s.split(","):
         p = part.strip()
+        # 条件分岐: `not p` を満たす経路を評価する。
         if not p:
             continue
+
         out.append(float(p))
+
     return out
 
 
@@ -617,6 +731,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     info = fetch["event_info"]
     gps_event = float(info.get("GPS"))
 
+    # 条件分岐: `str(args.method) == "data_release"` を満たす経路を評価する。
     if str(args.method) == "data_release":
         preferred_url = _select_preferred_posterior(info) or ""
         record_id = _infer_zenodo_record_id_from_url(preferred_url)
@@ -629,7 +744,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             else "https://zenodo.org/api/records/16877102/files/GW250114_data_release.tar.gz/content"
         )
         tar_path = data_dir / tar_name
+        # 条件分岐: `bool(args.offline)` を満たす経路を評価する。
         if bool(args.offline):
+            # 条件分岐: `not tar_path.exists()` を満たす経路を評価する。
             if not tar_path.exists():
                 raise FileNotFoundError("offline and missing data release tar: " + str(tar_path))
         else:
@@ -663,6 +780,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         "tau_s": _summarize_1d(tau),
                     }
                 )
+
             return out_rows
 
         rows_220 = by_start(s220, f_key="f_220", g_key="g_220")
@@ -672,14 +790,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         t_ref_221 = 6.0
 
         def pick_ref(rows: List[Dict[str, Any]], t_ref: float) -> Dict[str, Any]:
+            # 条件分岐: `not rows` を満たす経路を評価する。
             if not rows:
                 return {"status": "no_rows"}
+
             chosen = min(rows, key=lambda r: abs(float(r["start_time_m"]) - float(t_ref)))
             return {"status": "ok", "t_ref_m": float(t_ref), "chosen": chosen}
 
         ref_220 = pick_ref(rows_220, t_ref_220)
         ref_221 = pick_ref(rows_221, t_ref_221)
 
+        # 条件分岐: `ref_220.get("status") != "ok"` を満たす経路を評価する。
         if ref_220.get("status") != "ok":
             raise RuntimeError("ringdown 220 data missing")
 
@@ -757,6 +878,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     bandpasses = _parse_bandpass_list(str(args.bandpass_list_hz))
     t0_list = _parse_float_list(str(args.t0_list_s))
+    # 条件分岐: `not bandpasses or not t0_list` を満たす経路を評価する。
     if not bandpasses or not t0_list:
         raise ValueError("bandpass/t0 list is empty")
 
@@ -783,21 +905,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             except Exception as e:
                 rows.append({"ok": False, "bandpass_hz": list(bp), "error": str(e)})
                 continue
+
             for t0 in t0_list:
                 t_start = float(t0)
                 t_end = t_start + fit_duration_s
                 m = (t_rel >= t_start) & (t_rel < t_end)
+                # 条件分岐: `not bool(np.any(m))` を満たす経路を評価する。
                 if not bool(np.any(m)):
                     rows.append({"ok": False, "bandpass_hz": list(bp), "start_s": t_start, "error": "empty_window"})
                     continue
+
                 y = x_f[m]
                 t_fit = t_rel[m] - t_start
 
                 fmin = max(20.0, float(bp[0]))
                 fmax = min(float(bp[1]), 0.45 * float(fs))
+                # 条件分岐: `fmax <= fmin + float(args.f_step_hz)` を満たす経路を評価する。
                 if fmax <= fmin + float(args.f_step_hz):
                     rows.append({"ok": False, "bandpass_hz": list(bp), "start_s": t_start, "error": "invalid_f_grid"})
                     continue
+
                 f_grid = np.arange(fmin, fmax + 0.5 * float(args.f_step_hz), float(args.f_step_hz), dtype=np.float64)
                 try:
                     fit = _fit_damped_sinusoid(t_fit, y, f_grid_hz=f_grid, tau_grid_s=tau_grid)
@@ -828,11 +955,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "variants": rows,
             "summary": summary,
         }
+        # 条件分岐: `summary.get("status") == "ok"` を満たす経路を評価する。
         if summary.get("status") == "ok":
             per_detector_best[det] = summary["best"]
 
     # Combined: use median over detectors for now (systematic floor = detector-to-detector scatter).
+
     comb: Dict[str, Any] = {"status": "no_detectors"}
+    # 条件分岐: `per_detector_best` を満たす経路を評価する。
     if per_detector_best:
         f_list = [float(v["fit"]["f_hz"]) for v in per_detector_best.values()]
         tau_list = [float(v["fit"]["tau_s"]) for v in per_detector_best.values()]
@@ -869,10 +999,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for ax, det in zip(axes, ["H1", "L1"]):
         rec = results.get(det) or {}
         summ = (rec.get("summary") or {}) if isinstance(rec, dict) else {}
+        # 条件分岐: `summ.get("status") != "ok"` を満たす経路を評価する。
         if summ.get("status") != "ok":
             ax.set_title(f"{det}: no fit")
             ax.axis("off")
             continue
+
         best = summ.get("best") or {}
         var = (best.get("variant") or {})
         fit = best.get("fit") or {}
@@ -927,6 +1059,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] png : {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

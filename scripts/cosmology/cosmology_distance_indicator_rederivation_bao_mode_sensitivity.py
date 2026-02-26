@@ -43,6 +43,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -67,8 +68,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -88,27 +91,42 @@ def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
     for tok in (s or "").split(","):
         tok = tok.strip()
+        # 条件分岐: `not tok` を満たす経路を評価する。
         if not tok:
             continue
+
         try:
             v = float(tok)
         except Exception:
             continue
+
+        # 条件分岐: `not (v > 0.0 and math.isfinite(v))` を満たす経路を評価する。
+
         if not (v > 0.0 and math.isfinite(v)):
             continue
+
         out.append(v)
+
     return sorted(set(out))
 
 
 def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
+    # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
     if not xs or len(xs) != len(ys):
         return None
+
+    # 条件分岐: `not math.isfinite(float(threshold))` を満たす経路を評価する。
+
     if not math.isfinite(float(threshold)):
         return None
+
     xs_f = [float(x) for x in xs]
     ys_f = [float(y) for y in ys]
+    # 条件分岐: `any((x <= 0.0 or not math.isfinite(x)) for x in xs_f)` を満たす経路を評価する。
     if any((x <= 0.0 or not math.isfinite(x)) for x in xs_f):
         return None
+
+    # 条件分岐: `math.isfinite(ys_f[0]) and ys_f[0] <= float(threshold)` を満たす経路を評価する。
 
     if math.isfinite(ys_f[0]) and ys_f[0] <= float(threshold):
         return xs_f[0]
@@ -116,12 +134,22 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
     for i in range(1, len(xs_f)):
         x0, x1 = xs_f[i - 1], xs_f[i]
         y0, y1 = ys_f[i - 1], ys_f[i]
+        # 条件分岐: `not (math.isfinite(y0) and math.isfinite(y1))` を満たす経路を評価する。
         if not (math.isfinite(y0) and math.isfinite(y1)):
             continue
+
+        # 条件分岐: `(y0 - threshold) == 0.0` を満たす経路を評価する。
+
         if (y0 - threshold) == 0.0:
             return x0
+
+        # 条件分岐: `(y0 - threshold) * (y1 - threshold) > 0.0` を満たす経路を評価する。
+
         if (y0 - threshold) * (y1 - threshold) > 0.0:
             continue
+
+        # 条件分岐: `y1 == y0` を満たす経路を評価する。
+
         if y1 == y0:
             return x1
 
@@ -130,6 +158,7 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
         lx1 = math.log10(x1)
         lx = lx0 + float(t) * (lx1 - lx0)
         return float(10.0**lx)
+
     return None
 
 
@@ -141,15 +170,25 @@ def _classify_cell(v: Optional[float]) -> int:
       2: ng (>3)
       3: na
     """
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return 3
+
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
+
     if not math.isfinite(float(v)):
         return 3
+
     v = float(v)
+    # 条件分岐: `v <= 1.0` を満たす経路を評価する。
     if v <= 1.0:
         return 0
+
+    # 条件分岐: `v <= 3.0` を満たす経路を評価する。
+
     if v <= 3.0:
         return 1
+
     return 2
 
 
@@ -196,13 +235,23 @@ def _evaluate_best_pair(
                     p_e=p_e,
                 )
                 v = float(fit.get("max_abs_z", float("nan")))
+                # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
                 if not math.isfinite(v):
                     valid = False
                     break
+
+                # 条件分岐: `v <= 1.0` を満たす経路を評価する。
+
                 if v <= 1.0:
                     ok_1 += 1
+
+                # 条件分岐: `v <= 3.0` を満たす経路を評価する。
+
                 if v <= 3.0:
                     ok_3 += 1
+
+                # 条件分岐: `v > worst_v` を満たす経路を評価する。
+
                 if v > worst_v:
                     worst_v = v
                     worst_row = {
@@ -211,6 +260,8 @@ def _evaluate_best_pair(
                         "max_abs_z": v,
                         "limiting_observation": str(fit.get("limiting_observation") or "na"),
                     }
+
+            # 条件分岐: `not valid or worst_v < 0.0` を満たす経路を評価する。
 
             if not valid or worst_v < 0.0:
                 continue
@@ -224,6 +275,7 @@ def _evaluate_best_pair(
                 "opacity": {"id": op.id, "short_label": op.short_label, "mean": op.mean, "sigma": op.sigma},
                 "candle": {"id": cd.id, "short_label": cd.short_label, "mean": cd.mean, "sigma": cd.sigma},
             }
+            # 条件分岐: `best is None or float(candidate["worst_max_abs_z"]) < float(best["worst_max_a...` を満たす経路を評価する。
             if best is None or float(candidate["worst_max_abs_z"]) < float(best["worst_max_abs_z"]):
                 best = candidate
 
@@ -280,8 +332,10 @@ def _plot_matrix(
     for i in range(n_rows):
         for j in range(n_cols):
             v = float(values[i, j])
+            # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
             if not math.isfinite(v):
                 continue
+
             cat = int(cats[i, j])
             txt_color = "#ffffff" if cat == 2 else "#111111"
             ax.text(
@@ -296,10 +350,14 @@ def _plot_matrix(
             )
 
     # highlight baseline column (block) if present
+
     try:
         j0 = list(mode_labels).index("block")
     except ValueError:
         j0 = None
+
+    # 条件分岐: `j0 is not None` を満たす経路を評価する。
+
     if j0 is not None:
         ax.add_patch(
             Rectangle(
@@ -361,12 +419,16 @@ def _plot_global_prior_sigma_scan_by_mode(
     for r in scan_results:
         a = r.get("estimated_f_1sigma_all_candidates")
         b = r.get("estimated_f_1sigma_independent_only")
+        # 条件分岐: `isinstance(a, (int, float)) and math.isfinite(float(a)) and float(a) > 0.0` を満たす経路を評価する。
         if isinstance(a, (int, float)) and math.isfinite(float(a)) and float(a) > 0.0:
             f_all.append(float(a))
             ann_all.append(f"{float(a):.2g}")
         else:
             f_all.append(float(max_f * 1.25))
             ann_all.append(f">{max_f:g}")
+
+        # 条件分岐: `isinstance(b, (int, float)) and math.isfinite(float(b)) and float(b) > 0.0` を満たす経路を評価する。
+
         if isinstance(b, (int, float)) and math.isfinite(float(b)) and float(b) > 0.0:
             f_ind.append(float(b))
             ann_ind.append(f"{float(b):.2g}")
@@ -394,6 +456,7 @@ def _plot_global_prior_sigma_scan_by_mode(
     # annotate
     for bar, txt in zip(bars1, ann_all):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.05, txt, ha="center", va="bottom", fontsize=9)
+
     for bar, txt in zip(bars2, ann_ind):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.05, txt, ha="center", va="bottom", fontsize=9)
 
@@ -417,8 +480,10 @@ def _extract_bao_modes(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     rows = metrics.get("bao_fit_sensitivity") if isinstance(metrics.get("bao_fit_sensitivity"), list) else []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         mode = str(r.get("mode") or "")
         bf = r.get("best_fit") if isinstance(r.get("best_fit"), dict) else {}
         try:
@@ -426,8 +491,12 @@ def _extract_bao_modes(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
             sig = float(bf["s_R_sigma_1d"])
         except Exception:
             continue
+
+        # 条件分岐: `not (sig > 0.0 and math.isfinite(sig) and math.isfinite(sR))` を満たす経路を評価する。
+
         if not (sig > 0.0 and math.isfinite(sig) and math.isfinite(sR)):
             continue
+
         out.append(
             {
                 "mode": mode,
@@ -436,6 +505,7 @@ def _extract_bao_modes(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "s_R_sigma": sig,
             }
         )
+
     return out
 
 
@@ -467,14 +537,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     in_pe = data_dir / "cmb_temperature_scaling_constraints.json"
 
     for p in (in_bao_modes, in_ddr, in_opacity, in_candle, in_pt, in_pe):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing input: {p}")
 
     bao_modes_raw = _extract_bao_modes(_read_json(in_bao_modes))
+    # 条件分岐: `not bao_modes_raw` を満たす経路を評価する。
     if not bao_modes_raw:
         raise ValueError("no BAO modes found in bao_scaled_distance_fit_sensitivity metrics")
 
     # deterministic order (prefer common modes first if present)
+
     preferred = ["block", "diag", "full", "full_dm_only", "full_h_only"]
     order = {m: i for i, m in enumerate(preferred)}
     bao_modes = sorted(bao_modes_raw, key=lambda r: (order.get(str(r["mode"]), 999), str(r["mode"])))
@@ -497,8 +570,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     candle_all = cand._as_gaussian_list(candle_rows, mean_key="s_L", sigma_key="s_L_sigma")
     pt_all = cand._as_gaussian_list(pt_rows, mean_key="p_t", sigma_key="p_t_sigma")
     pe_all_from_beta = cand._as_pT_constraints(pe_rows)
+    # 条件分岐: `not pt_all` を満たす経路を評価する。
     if not pt_all:
         raise ValueError("no SN time dilation constraint found")
+
+    # 条件分岐: `not pe_all_from_beta` を満たす経路を評価する。
+
     if not pe_all_from_beta:
         raise ValueError("no CMB temperature scaling constraint found")
 
@@ -534,23 +611,36 @@ def main(argv: Optional[List[str]] = None) -> int:
         worst: Optional[Tuple[float, str]] = None
         for i, row in enumerate(per_ddr):
             block = row.get("best_independent")
+            # 条件分岐: `not isinstance(block, dict)` を満たす経路を評価する。
             if not isinstance(block, dict):
                 continue
+
             fit = block.get("fit") if isinstance(block.get("fit"), dict) else {}
             v = fit.get("max_abs_z")
             try:
                 v_f = float(v)
             except Exception:
                 v_f = float("nan")
+
             vals[i, j] = v_f
+            # 条件分岐: `math.isfinite(v_f)` を満たす経路を評価する。
             if math.isfinite(v_f):
                 max_abs.append(v_f)
+                # 条件分岐: `v_f <= 1.0` を満たす経路を評価する。
                 if v_f <= 1.0:
                     ok_1 += 1
+
+                # 条件分岐: `v_f <= 3.0` を満たす経路を評価する。
+
                 if v_f <= 3.0:
                     ok_3 += 1
+
+                # 条件分岐: `worst is None or v_f > worst[0]` を満たす経路を評価する。
+
                 if worst is None or v_f > worst[0]:
                     worst = (v_f, str((row.get("ddr") or {}).get("short_label") or ""))
+
+        # 条件分岐: `max_abs` を満たす経路を評価する。
 
         if max_abs:
             import statistics
@@ -638,6 +728,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     scan_payload: Optional[Dict[str, Any]] = None
     scan_results: List[Dict[str, Any]] = []
 
+    # 条件分岐: `scan_scales` を満たす経路を評価する。
     if scan_scales:
         opacity_ind = [c for c in opacity_all if c.is_independent()]
         candle_ind = [c for c in candle_all if c.is_independent()]
@@ -720,6 +811,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         _write_json(out_scan_metrics, scan_payload)
 
     outputs_for_log = [out_png, out_metrics]
+    # 条件分岐: `scan_scales` を満たす経路を評価する。
     if scan_scales:
         outputs_for_log.extend([out_scan_png, out_scan_metrics])
 
@@ -737,11 +829,15 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_metrics}")
+    # 条件分岐: `scan_scales` を満たす経路を評価する。
     if scan_scales:
         print(f"[ok] png : {out_scan_png}")
         print(f"[ok] json: {out_scan_metrics}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

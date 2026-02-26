@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import html
 import io
 import os
 import re
@@ -29,10 +30,11 @@ from typing import List, Optional, Sequence, Tuple
 from urllib.parse import unquote, urlparse
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import worklog
+from scripts.summary import paper_html as _paper_html, worklog
 
 
 def _repo_root() -> Path:
@@ -57,16 +59,20 @@ def _choose_tmp_docx_path(target: Path) -> Path:
         return target.with_name(f"{target.stem}{tag}{target.suffix}")
 
     # Prefer a stable name first.
+
     for tag in ["__tmp", "__tmp2", "__tmp3", "__tmp4", f"__tmp_{int(time.time())}"]:
         cand = _candidate(tag)
+        # 条件分岐: `not cand.exists()` を満たす経路を評価する。
         if not cand.exists():
             return cand
+
         try:
             cand.unlink()
             return cand
         except Exception:
             continue
     # Last resort: PID-tagged path.
+
     return _candidate(f"__tmp_{os.getpid()}_{int(time.time())}")
 
 
@@ -75,10 +81,12 @@ def _promote_tmp_docx(tmp_path: Path, target_path: Path) -> Tuple[Path, str]:
     Try to replace target with tmp. If target is locked/open, keep tmp and return a warning message.
     """
     try:
+        # 条件分岐: `tmp_path.resolve() == target_path.resolve()` を満たす経路を評価する。
         if tmp_path.resolve() == target_path.resolve():
             return target_path, ""
     except Exception:
         pass
+
     try:
         tmp_path.replace(target_path)
         return target_path, ""
@@ -87,14 +95,17 @@ def _promote_tmp_docx(tmp_path: Path, target_path: Path) -> Tuple[Path, str]:
         # This makes "build_materials.bat" able to refresh the canonical filename even when the DOCX is open.
         try:
             updated, msg = _try_update_open_word_docx_from_tmp(target_path=target_path, tmp_path=tmp_path)
+            # 条件分岐: `updated` を満たす経路を評価する。
             if updated:
                 try:
                     tmp_path.unlink()
                 except Exception:
                     pass
+
                 return target_path, msg
         except Exception:
             pass
+
         return tmp_path, (
             f"Output DOCX is locked/open; wrote: {tmp_path} "
             f"(close it and re-run to overwrite: {target_path}) ({e})"
@@ -108,6 +119,7 @@ def _try_update_open_word_docx_from_tmp(*, target_path: Path, tmp_path: Path) ->
 
     Returns (updated, message).
     """
+    # 条件分岐: `os.name != "nt"` を満たす経路を評価する。
     if os.name != "nt":
         return False, "non-Windows platform"
 
@@ -139,24 +151,32 @@ def _try_update_open_word_docx_from_tmp(*, target_path: Path, tmp_path: Path) ->
             full = str(doc.FullName)
         except Exception:
             continue
+
         try:
             full_norm = str(Path(full).resolve()).lower()
         except Exception:
             full_norm = full.lower()
+
+        # 条件分岐: `full_norm == target_norm` を満たす経路を評価する。
+
         if full_norm == target_norm:
             target_doc = doc
             break
+
+    # 条件分岐: `target_doc is None` を満たす経路を評価する。
 
     if target_doc is None:
         return False, "target DOCX is not open in Word"
 
     try:
+        # 条件分岐: `bool(getattr(target_doc, "ReadOnly", False))` を満たす経路を評価する。
         if bool(getattr(target_doc, "ReadOnly", False)):
             return False, "target DOCX is open read-only in Word"
     except Exception:
         pass
 
     # Best-effort: suppress prompts during automation, but restore the user's setting.
+
     prev_alerts = None
     try:
         prev_alerts = getattr(word, "DisplayAlerts")
@@ -179,6 +199,7 @@ def _try_update_open_word_docx_from_tmp(*, target_path: Path, tmp_path: Path) ->
             rng.Delete()
         except Exception:
             pass
+
         try:
             target_doc.Range(0, 0).InsertFile(str(tmp_path))
         except Exception as e:
@@ -190,11 +211,14 @@ def _try_update_open_word_docx_from_tmp(*, target_path: Path, tmp_path: Path) ->
             return False, f"Save failed: {e}"
     finally:
         try:
+            # 条件分岐: `prev_screen is not None` を満たす経路を評価する。
             if prev_screen is not None:
                 setattr(word, "ScreenUpdating", prev_screen)
         except Exception:
             pass
+
         try:
+            # 条件分岐: `prev_alerts is not None` を満たす経路を評価する。
             if prev_alerts is not None:
                 setattr(word, "DisplayAlerts", prev_alerts)
         except Exception:
@@ -204,7 +228,10 @@ def _try_update_open_word_docx_from_tmp(*, target_path: Path, tmp_path: Path) ->
 
 
 _MATH_BLOCK_RE = re.compile(r"\$\$(.+?)\$\$", flags=re.DOTALL)
+_INLINE_MATH_RE = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)\$(?!\$)")
 _IMG_SRC_RE = re.compile(r'(<img\b[^>]*\bsrc\s*=\s*)(["\'])([^"\']+)\2', flags=re.IGNORECASE)
+_IMG_TAG_RE = re.compile(r"<img\b[^>]*>", flags=re.IGNORECASE | re.DOTALL)
+_ATTR_RE = re.compile(r'([A-Za-z_:][A-Za-z0-9_.:-]*)\s*=\s*(["\'])(.*?)\2', flags=re.DOTALL)
 _INTERNAL_BLOCK_RE = re.compile(
     r"<!--\s*INTERNAL_ONLY_START\s*-->.*?<!--\s*INTERNAL_ONLY_END\s*-->",
     flags=re.DOTALL,
@@ -213,28 +240,51 @@ _INTERNAL_BLOCK_RE = re.compile(
 
 def _mime_from_ext(ext: str) -> str:
     e = (ext or "").lower()
+    # 条件分岐: `e == ".png"` を満たす経路を評価する。
     if e == ".png":
         return "image/png"
+
+    # 条件分岐: `e in (".jpg", ".jpeg")` を満たす経路を評価する。
+
     if e in (".jpg", ".jpeg"):
         return "image/jpeg"
+
+    # 条件分岐: `e == ".gif"` を満たす経路を評価する。
+
     if e == ".gif":
         return "image/gif"
+
+    # 条件分岐: `e == ".bmp"` を満たす経路を評価する。
+
     if e == ".bmp":
         return "image/bmp"
+
+    # 条件分岐: `e == ".svg"` を満たす経路を評価する。
+
     if e == ".svg":
         return "image/svg+xml"
+
     return "application/octet-stream"
 
 
 def _resolve_local_image_path(html_path: Path, src: str) -> Optional[Path]:
     s = (src or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     s_low = s.lower()
+    # 条件分岐: `s_low.startswith("data:")` を満たす経路を評価する。
     if s_low.startswith("data:"):
         return None
+
+    # 条件分岐: `s_low.startswith("http:") or s_low.startswith("https:")` を満たす経路を評価する。
+
     if s_low.startswith("http:") or s_low.startswith("https:"):
         return None
+
+    # 条件分岐: `s_low.startswith("file:")` を満たす経路を評価する。
+
     if s_low.startswith("file:"):
         try:
             u = urlparse(s)
@@ -242,13 +292,16 @@ def _resolve_local_image_path(html_path: Path, src: str) -> Optional[Path]:
             # file:///C:/... comes through as /C:/...
             if p.startswith("/") and len(p) >= 3 and p[2] == ":":
                 p = p[1:]
+
             return Path(p)
         except Exception:
             return None
 
     p = unquote(s.split("?", 1)[0].split("#", 1)[0])
+    # 条件分岐: `not p` を満たす経路を評価する。
     if not p:
         return None
+
     try:
         return (html_path.parent / p).resolve()
     except Exception:
@@ -270,8 +323,10 @@ def _inline_local_images_for_word(html_path: Path) -> Tuple[Path, int, Optional[
         nonlocal n_inlined
         prefix, quote, src = m.group(1), m.group(2), m.group(3)
         img_path = _resolve_local_image_path(html_path, src)
+        # 条件分岐: `img_path is None or not img_path.exists() or not img_path.is_file()` を満たす経路を評価する。
         if img_path is None or not img_path.exists() or not img_path.is_file():
             return m.group(0)
+
         try:
             data = img_path.read_bytes()
         except Exception:
@@ -283,6 +338,7 @@ def _inline_local_images_for_word(html_path: Path) -> Tuple[Path, int, Optional[
         return f"{prefix}{quote}data:{mime};base64,{b64}{quote}"
 
     html2 = _IMG_SRC_RE.sub(_repl, html)
+    # 条件分岐: `n_inlined <= 0 or html2 == html` を満たす経路を評価する。
     if n_inlined <= 0 or html2 == html:
         return html_path, 0, None
 
@@ -311,9 +367,73 @@ def _extract_math_blocks(md_text: str) -> List[str]:
     out: List[str] = []
     for m in _MATH_BLOCK_RE.finditer(md_text):
         s = (m.group(1) or "").strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
         out.append(_normalize_latex(s))
+
+    return out
+
+
+def _extract_inline_math(md_text: str) -> List[str]:
+    out: List[str] = []
+
+    def _looks_like_inline_math(expr: str) -> bool:
+        s = (expr or "").strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
+        if not s:
+            return False
+
+        # 条件分岐: `re.fullmatch(r"[0-9]+(?:[.,][0-9]+)?%?", s)` を満たす経路を評価する。
+
+        if re.fullmatch(r"[0-9]+(?:[.,][0-9]+)?%?", s):
+            return False
+
+        return True
+
+    for m in _INLINE_MATH_RE.finditer(md_text):
+        s = (m.group(1) or "").strip()
+        # 条件分岐: `not _looks_like_inline_math(s)` を満たす経路を評価する。
+        if not _looks_like_inline_math(s):
+            continue
+
+        out.append(_normalize_latex(s))
+
+    return out
+
+
+def _extract_latex_from_html_images(*, html_path: Path, alt_text: str) -> List[str]:
+    out: List[str] = []
+    # 条件分岐: `not html_path.exists()` を満たす経路を評価する。
+    if not html_path.exists():
+        return out
+
+    try:
+        text = html_path.read_text(encoding="utf-8", errors="replace")
+    except Exception:
+        return out
+
+    for m in _IMG_TAG_RE.finditer(text):
+        tag = m.group(0)
+        attrs: dict[str, str] = {}
+        for am in _ATTR_RE.finditer(tag):
+            k = (am.group(1) or "").strip().lower()
+            v = html.unescape((am.group(3) or "").strip())
+            attrs[k] = v
+
+        # 条件分岐: `attrs.get("alt") != alt_text` を満たす経路を評価する。
+
+        if attrs.get("alt") != alt_text:
+            continue
+
+        latex = (attrs.get("data-latex") or "").strip()
+        # 条件分岐: `not latex` を満たす経路を評価する。
+        if not latex:
+            continue
+
+        out.append(_normalize_latex(latex))
+
     return out
 
 
@@ -330,8 +450,10 @@ def _default_mml2omml_xsl() -> Optional[Path]:
         Path(r"C:\Program Files (x86)\Microsoft Office\Office16\MML2OMML.XSL"),
     ]
     for p in candidates:
+        # 条件分岐: `p.exists()` を満たす経路を評価する。
         if p.exists():
             return p
+
     return None
 
 
@@ -342,6 +464,8 @@ def _replace_equation_images_with_word_equations(
     docx_path: Path,
     mml2omml_xsl: Optional[Path],
     alt_text: str,
+    equation_kind: str = "block",
+    html_source: Optional[Path] = None,
 ) -> Tuple[int, int]:
     """
     Post-process the generated DOCX:
@@ -355,6 +479,8 @@ def _replace_equation_images_with_word_equations(
     except Exception as e:
         raise RuntimeError(f"latex2mathml is required for native equations: {e}")
 
+    # 条件分岐: `not mml2omml_xsl or not mml2omml_xsl.exists()` を満たす経路を評価する。
+
     if not mml2omml_xsl or not mml2omml_xsl.exists():
         raise RuntimeError("MML2OMML.XSL not found (Microsoft Word/Office installation required).")
 
@@ -363,19 +489,37 @@ def _replace_equation_images_with_word_equations(
     except Exception as e:
         raise RuntimeError(f"lxml is required for native equations: {e}")
 
-    def _extract_blocks(paths: List[Path]) -> List[str]:
-        blocks: List[str] = []
+    kind = (equation_kind or "block").strip().lower()
+    # 条件分岐: `kind not in ("block", "inline")` を満たす経路を評価する。
+    if kind not in ("block", "inline"):
+        raise RuntimeError(f"unknown equation_kind: {equation_kind}")
+
+    def _extract_math(paths: List[Path]) -> List[str]:
+        items: List[str] = []
         for p in paths:
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 continue
+
             try:
                 t = p.read_text(encoding="utf-8", errors="replace")
             except Exception:
                 continue
-            # Match publish HTML generation: internal-only blocks are removed before equations are rendered.
+
             t = _strip_internal_blocks_for_publish(t)
-            blocks.extend(_extract_math_blocks(t))
-        return blocks
+            try:
+                t = _paper_html._normalize_markdown_for_tex_docx_parity(t)
+            except Exception:
+                pass
+
+            # 条件分岐: `kind == "inline"` を満たす経路を評価する。
+
+            if kind == "inline":
+                items.extend(_extract_inline_math(t))
+            else:
+                items.extend(_extract_math_blocks(t))
+
+        return items
 
     transform = etree.XSLT(etree.parse(str(mml2omml_xsl)))
 
@@ -389,14 +533,21 @@ def _replace_equation_images_with_word_equations(
         xml_bytes = zin.read("word/document.xml")
 
     doc = etree.fromstring(xml_bytes)
-    paras = doc.xpath(f'.//w:p[.//wp:docPr[@descr=\"{alt_text}\"]]', namespaces=ns)
-    n_found = len(paras)
+    # 条件分岐: `kind == "inline"` を満たす経路を評価する。
+    if kind == "inline":
+        targets = doc.xpath(f'.//w:r[w:drawing//wp:docPr[@descr=\"{alt_text}\"]]', namespaces=ns)
+    else:
+        targets = doc.xpath(f'.//w:p[.//wp:docPr[@descr=\"{alt_text}\"]]', namespaces=ns)
+
+    n_found = len(targets)
+    # 条件分岐: `n_found == 0` を満たす経路を評価する。
     if n_found == 0:
         return 0, 0
 
     # Build candidate markdown source sets (Part I/II/III/Part IV + legacy), and pick the one
     # whose LaTeX block count matches the DOCX equation-image count. This keeps the mapping stable
     # even when manuscripts are split/renamed.
+
     sources_md = root / "doc" / "paper" / "20_data_sources.md"
     refs_md = root / "doc" / "paper" / "30_references.md"
     candidates: List[Tuple[str, List[Path]]] = [
@@ -449,31 +600,58 @@ def _replace_equation_images_with_word_equations(
         ),
     ]
 
-    matches: List[Tuple[str, List[Path], List[str]]] = []
-    for label, paths in candidates:
-        blocks = _extract_blocks(paths)
-        if len(blocks) == n_found:
-            matches.append((label, paths, blocks))
+    html_latex_items: List[str] = []
+    # 条件分岐: `html_source is not None` を満たす経路を評価する。
+    if html_source is not None:
+        try:
+            html_latex_items = _extract_latex_from_html_images(html_path=html_source, alt_text=alt_text)
+        except Exception:
+            html_latex_items = []
+
+    # 条件分岐: `html_latex_items and len(html_latex_items) == n_found` を満たす経路を評価する。
+
+    if html_latex_items and len(html_latex_items) == n_found:
+        matches: List[Tuple[str, List[Path], List[str]]] = [("html_data_latex", [], html_latex_items)]
+    else:
+        matches = []
+
+    # 条件分岐: `not matches` を満たす経路を評価する。
+
+    if not matches:
+        for label, paths in candidates:
+            items = _extract_math(paths)
+            # 条件分岐: `len(items) == n_found` を満たす経路を評価する。
+            if len(items) == n_found:
+                matches.append((label, paths, items))
+
+    # 条件分岐: `not matches` を満たす経路を評価する。
 
     if not matches:
         # Provide a helpful diagnostic (counts per candidate).
         counts = []
+        # 条件分岐: `html_latex_items` を満たす経路を評価する。
+        if html_latex_items:
+            counts.append(f"html_data_latex={len(html_latex_items)}")
+
         for label, paths in candidates:
-            blocks = _extract_blocks(paths)
-            counts.append(f"{label}={len(blocks)}")
+            items = _extract_math(paths)
+            counts.append(f"{label}={len(items)}")
+
         raise RuntimeError(f"equation count mismatch: docx={n_found}, candidates: " + ", ".join(counts))
 
     # If multiple match (unlikely), prefer non-legacy.
-    matches.sort(key=lambda t: (t[0] == "legacy_manuscript", t[0]))
-    picked_label, picked_paths, latex_blocks = matches[0]
 
-    if n_found != len(latex_blocks):
+    matches.sort(key=lambda t: (t[0] == "legacy_manuscript", t[0]))
+    picked_label, picked_paths, latex_items = matches[0]
+
+    # 条件分岐: `n_found != len(latex_items)` を満たす経路を評価する。
+    if n_found != len(latex_items):
         raise RuntimeError(
-            f"equation count mismatch after pick ({picked_label}): docx={n_found}, latex_blocks={len(latex_blocks)}"
+            f"equation count mismatch after pick ({picked_label}): docx={n_found}, latex_items={len(latex_items)}"
         )
 
     n_replaced = 0
-    for para, latex in zip(paras, latex_blocks):
+    for target, latex in zip(targets, latex_items):
         try:
             mathml = convert(latex)
             omml_doc = transform(etree.fromstring(mathml.encode("utf-8")))
@@ -483,19 +661,40 @@ def _replace_equation_images_with_word_equations(
         except Exception:
             continue
 
-        # Keep paragraph properties; replace the drawing run with <m:oMathPara>.
-        ppr = None
-        for child in list(para):
-            if child.tag == f"{{{ns['w']}}}pPr":
-                ppr = child
-                break
-        for child in list(para):
-            if child is ppr:
+        # 条件分岐: `kind == "inline"` を満たす経路を評価する。
+
+        if kind == "inline":
+            run = target
+            parent = run.getparent()
+            # 条件分岐: `parent is None` を満たす経路を評価する。
+            if parent is None:
                 continue
-            para.remove(child)
-        omath_para = etree.Element(f"{{{ns['m']}}}oMathPara")
-        omath_para.append(omml_elem)
-        para.append(omath_para)
+
+            idx = parent.index(run)
+            new_run = etree.Element(f"{{{ns['w']}}}r")
+            new_run.append(omml_elem)
+            parent.remove(run)
+            parent.insert(idx, new_run)
+        else:
+            para = target
+            ppr = None
+            for child in list(para):
+                # 条件分岐: `child.tag == f"{{{ns['w']}}}pPr"` を満たす経路を評価する。
+                if child.tag == f"{{{ns['w']}}}pPr":
+                    ppr = child
+                    break
+
+            for child in list(para):
+                # 条件分岐: `child is ppr` を満たす経路を評価する。
+                if child is ppr:
+                    continue
+
+                para.remove(child)
+
+            omath_para = etree.Element(f"{{{ns['m']}}}oMathPara")
+            omath_para.append(omml_elem)
+            para.append(omath_para)
+
         n_replaced += 1
 
     new_xml = etree.tostring(doc, xml_declaration=True, encoding="UTF-8", standalone="yes")
@@ -505,14 +704,18 @@ def _replace_equation_images_with_word_equations(
         with zipfile.ZipFile(buf, "w") as zout:
             for item in zin.infolist():
                 data = zin.read(item.filename)
+                # 条件分岐: `item.filename == "word/document.xml"` を満たす経路を評価する。
                 if item.filename == "word/document.xml":
                     data = new_xml
+
                 zout.writestr(item, data)
+
     docx_path.write_bytes(buf.getvalue())
     return n_found, n_replaced
 
 
 def _try_start_word() -> Tuple[Optional[object], str]:
+    # 条件分岐: `os.name != "nt"` を満たす経路を評価する。
     if os.name != "nt":
         return None, "non-Windows platform"
 
@@ -531,11 +734,13 @@ def _try_start_word() -> Tuple[Optional[object], str]:
         setattr(word, "Visible", False)
     except Exception:
         pass
+
     try:
         # 0 = wdAlertsNone
         setattr(word, "DisplayAlerts", 0)
     except Exception:
         pass
+
     try:
         # Avoid normal.dotm save prompts.
         setattr(word.Options, "SaveNormalPrompt", False)
@@ -566,6 +771,7 @@ def _apply_page_margins(doc: object, *, margin_mm: float) -> None:
                 ps.Gutter = 0
             except Exception:
                 pass
+
             try:
                 ps.HeaderDistance = 0
                 ps.FooterDistance = 0
@@ -598,17 +804,23 @@ def _max_content_width_points(doc: object) -> Optional[float]:
         sec_count = int(doc.Sections.Count)
     except Exception:
         sec_count = 0
+
     widths: List[float] = []
     for i in range(1, sec_count + 1):
         try:
             ps = doc.Sections(i).PageSetup
             w = float(ps.PageWidth) - float(ps.LeftMargin) - float(ps.RightMargin)
+            # 条件分岐: `w > 0.0` を満たす経路を評価する。
             if w > 0.0:
                 widths.append(w)
         except Exception:
             continue
+
+    # 条件分岐: `not widths` を満たす経路を評価する。
+
     if not widths:
         return None
+
     return min(widths)
 
 
@@ -619,8 +831,10 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
         except Exception:
             return 0.0
         # Word sometimes uses extreme sentinel values for "undefined".
+
         if x <= 0.0 or abs(x) > 10000.0:
             return 0.0
+
         return x
 
     try:
@@ -630,6 +844,7 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
 
     # Leave a safety margin to avoid rounding/border overflow at the page edge.
     # (Word UI/print sometimes shows slight right-edge overflow when it's too tight.)
+
     safety_pt = 54.0
 
     for i in range(1, count + 1):
@@ -645,6 +860,7 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                 r = None
 
             # If the picture is inside a table, use the containing cell width as the frame.
+
             if r is not None:
                 in_table = False
                 try:
@@ -652,6 +868,9 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                     in_table = bool(r.Information(12))
                 except Exception:
                     in_table = False
+
+                # 条件分岐: `in_table` を満たす経路を評価する。
+
                 if in_table:
                     try:
                         cell = r.Cells(1)
@@ -660,14 +879,19 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                             cell_w -= float(cell.LeftPadding) + float(cell.RightPadding)
                         except Exception:
                             pass
+
+                        # 条件分岐: `cell_w > 0.0` を満たす経路を評価する。
+
                         if cell_w > 0.0:
                             avail = min(avail, cell_w)
                     except Exception:
                         pass
 
             # Account for paragraph indents (HTML import sometimes indents figure paragraphs).
+
             if r is not None:
                 try:
+                    # 条件分岐: `int(r.Paragraphs.Count) >= 1` を満たす経路を評価する。
                     if int(r.Paragraphs.Count) >= 1:
                         p = r.Paragraphs(1)
                         pf = p.Range.ParagraphFormat
@@ -678,12 +902,15 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                     pass
 
             avail = max(36.0, float(avail) - float(safety_pt))
+            # 条件分岐: `w <= avail` を満たす経路を評価する。
             if w <= avail:
                 continue
+
             try:
                 shp.LockAspectRatio = True
             except Exception:
                 pass
+
             shp.Width = float(avail)
         except Exception:
             continue
@@ -700,8 +927,12 @@ def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
             x = float(v)
         except Exception:
             return 0.0
+
+        # 条件分岐: `x <= 0.0 or abs(x) > 10000.0` を満たす経路を評価する。
+
         if x <= 0.0 or abs(x) > 10000.0:
             return 0.0
+
         return x
 
     try:
@@ -718,6 +949,7 @@ def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
             # Only touch picture-like shapes. (msoPicture=13, msoLinkedPicture=11)
             try:
                 t = int(shp.Type)
+                # 条件分岐: `t not in (11, 13)` を満たす経路を評価する。
                 if t not in (11, 13):
                     continue
             except Exception:
@@ -733,12 +965,16 @@ def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                 anchor = None
 
             # If the picture is anchored inside a table cell, use the cell width as the frame.
+
             if anchor is not None:
                 in_table = False
                 try:
                     in_table = bool(anchor.Information(12))  # wdWithInTable
                 except Exception:
                     in_table = False
+
+                # 条件分岐: `in_table` を満たす経路を評価する。
+
                 if in_table:
                     try:
                         cell = anchor.Cells(1)
@@ -747,13 +983,18 @@ def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                             cell_w -= float(cell.LeftPadding) + float(cell.RightPadding)
                         except Exception:
                             pass
+
+                        # 条件分岐: `cell_w > 0.0` を満たす経路を評価する。
+
                         if cell_w > 0.0:
                             avail = min(avail, cell_w)
                     except Exception:
                         pass
 
                 # Account for paragraph indents (HTML import sometimes indents figure paragraphs).
+
                 try:
+                    # 条件分岐: `int(anchor.Paragraphs.Count) >= 1` を満たす経路を評価する。
                     if int(anchor.Paragraphs.Count) >= 1:
                         p = anchor.Paragraphs(1)
                         pf = p.Range.ParagraphFormat
@@ -764,12 +1005,15 @@ def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
                     pass
 
             avail = max(36.0, float(avail) - float(safety_pt))
+            # 条件分岐: `w <= avail` を満たす経路を評価する。
             if w <= avail:
                 continue
+
             try:
                 shp.LockAspectRatio = True
             except Exception:
                 pass
+
             try:
                 shp.Width = float(avail)
             except Exception:
@@ -783,14 +1027,19 @@ def _table_width_points(table: object) -> Optional[float]:
         cols = int(table.Columns.Count)
     except Exception:
         return None
+
+    # 条件分岐: `cols <= 0` を満たす経路を評価する。
+
     if cols <= 0:
         return None
+
     total = 0.0
     for j in range(1, cols + 1):
         try:
             total += float(table.Columns(j).Width)
         except Exception:
             pass
+
     return total
 
 
@@ -802,6 +1051,7 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
 
     # Word may not update table geometry until the document is (re)paginated.
     # Without it, AutoFitBehavior can appear to succeed yet widths remain unchanged.
+
     def _repaginate() -> None:
         try:
             doc.Repaginate()
@@ -816,10 +1066,12 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
             pf.FirstLineIndent = 0
         except Exception:
             pass
+
         try:
             t.Rows.LeftIndent = 0
         except Exception:
             pass
+
         try:
             t.Rows.WrapAroundText = False
         except Exception:
@@ -868,10 +1120,12 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
             t.AutoFitBehavior(0)
         except Exception:
             pass
+
         try:
             t.AllowAutoFit = False
         except Exception:
             pass
+
         try:
             # Keep table within the frame (avoid edge overflow in UI/print due to rounding).
             # wdPreferredWidthPoints = 3
@@ -881,6 +1135,7 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
             pass
 
     # First pass: normalize and ask Word to auto-fit all tables to the window width.
+
     for i in range(1, count + 1):
         try:
             t = doc.Tables(i)
@@ -890,6 +1145,7 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
                 t.AllowAutoFit = True
             except Exception:
                 pass
+
             try:
                 # wdAutoFitWindow = 2 (fit to page width)
                 t.AutoFitBehavior(2)
@@ -906,14 +1162,20 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
         try:
             t = doc.Tables(i)
             w = _table_width_points(t)
+            # 条件分岐: `w is None or w <= target_w + 0.5` を満たす経路を評価する。
             if w is None or w <= target_w + 0.5:
                 continue
 
+            # 条件分岐: `w <= 0.0` を満たす経路を評価する。
+
             if w <= 0.0:
                 continue
+
             ratio = float(target_w) / float(w)
+            # 条件分岐: `ratio <= 0.0 or ratio >= 1.0` を満たす経路を評価する。
             if ratio <= 0.0 or ratio >= 1.0:
                 continue
+
             for j in range(1, int(t.Columns.Count) + 1):
                 try:
                     t.Columns(j).Width = float(t.Columns(j).Width) * ratio
@@ -944,6 +1206,9 @@ def _disable_table_borders(doc: object) -> int:
         count = int(doc.Tables.Count)
     except Exception:
         count = 0
+
+    # 条件分岐: `count <= 0` を満たす経路を評価する。
+
     if count <= 0:
         return 0
 
@@ -953,11 +1218,13 @@ def _disable_table_borders(doc: object) -> int:
             t = doc.Tables(i)
         except Exception:
             continue
+
         try:
             t.Borders.Enable = False
             n += 1
         except Exception:
             continue
+
     return n
 
 
@@ -975,8 +1242,10 @@ def _normalize_heading_style_sizes(doc: object) -> int:
     def _first_style(names: Sequence[str]) -> Optional[object]:
         for name in names:
             st = _get_style(name)
+            # 条件分岐: `st is not None` を満たす経路を評価する。
             if st is not None:
                 return st
+
         return None
 
     base_size: Optional[float]
@@ -984,6 +1253,9 @@ def _normalize_heading_style_sizes(doc: object) -> int:
         base_size = float(doc.Styles("Normal").Font.Size)
     except Exception:
         base_size = None
+
+    # 条件分岐: `base_size is not None and (not (base_size > 0.0) or base_size > 300.0)` を満たす経路を評価する。
+
     if base_size is not None and (not (base_size > 0.0) or base_size > 300.0):
         base_size = None
 
@@ -997,20 +1269,29 @@ def _normalize_heading_style_sizes(doc: object) -> int:
             x = float(val)
         except Exception:
             return None
+
+        # 条件分岐: `not (x > 0.0) or x > 300.0` を満たす経路を評価する。
+
         if not (x > 0.0) or x > 300.0:
             return None
+
         return x
 
     desired_h4: Optional[float] = None
+    # 条件分岐: `base_size is not None` を満たす経路を評価する。
     if base_size is not None:
         desired_h4 = base_size + 2.0
 
     h4_size: Optional[float] = None
+    # 条件分岐: `h4 is not None` を満たす経路を評価する。
     if h4 is not None:
         try:
             h4_size = _safe_size(h4.Font.Size)
         except Exception:
             h4_size = None
+
+        # 条件分岐: `desired_h4 is not None and (h4_size is None or h4_size < desired_h4 - 1e-9)` を満たす経路を評価する。
+
         if desired_h4 is not None and (h4_size is None or h4_size < desired_h4 - 1e-9):
             try:
                 h4.Font.Size = desired_h4
@@ -1020,18 +1301,26 @@ def _normalize_heading_style_sizes(doc: object) -> int:
                 pass
 
     desired_h5: Optional[float] = None
+    # 条件分岐: `h4_size is not None` を満たす経路を評価する。
     if h4_size is not None:
         desired_h5 = h4_size
+    # 条件分岐: 前段条件が不成立で、`desired_h4 is not None` を追加評価する。
     elif desired_h4 is not None:
         desired_h5 = desired_h4
+    # 条件分岐: 前段条件が不成立で、`base_size is not None` を追加評価する。
     elif base_size is not None:
         desired_h5 = base_size + 2.0
+
+    # 条件分岐: `h5 is not None and desired_h5 is not None` を満たす経路を評価する。
 
     if h5 is not None and desired_h5 is not None:
         try:
             h5_size = _safe_size(h5.Font.Size)
         except Exception:
             h5_size = None
+
+        # 条件分岐: `h5_size is None or h5_size < desired_h5 - 1e-9` を満たす経路を評価する。
+
         if h5_size is None or h5_size < desired_h5 - 1e-9:
             try:
                 h5.Font.Size = desired_h5
@@ -1050,6 +1339,9 @@ def _tighten_equation_paragraph_spacing(doc: object) -> int:
         count = int(doc.OMaths.Count)
     except Exception:
         count = 0
+
+    # 条件分岐: `count <= 0` を満たす経路を評価する。
+
     if count <= 0:
         return 0
 
@@ -1060,10 +1352,12 @@ def _tighten_equation_paragraph_spacing(doc: object) -> int:
             rng = om.Range
         except Exception:
             continue
+
         try:
             pcount = int(rng.Paragraphs.Count)
         except Exception:
             pcount = 0
+
         for j in range(1, pcount + 1):
             try:
                 p = rng.Paragraphs(j)
@@ -1094,8 +1388,10 @@ def _tighten_spacing_around_equations(doc: object) -> int:
 
     def _is_any_heading(style_name: str) -> bool:
         for level in (1, 2, 3, 4, 5, 6):
+            # 条件分岐: `_is_heading(style_name, level)` を満たす経路を評価する。
             if _is_heading(style_name, level):
                 return True
+
         return False
 
     touched = 0
@@ -1104,10 +1400,14 @@ def _tighten_spacing_around_equations(doc: object) -> int:
             p = paras(i)
         except Exception:
             continue
+
         try:
             has_math = int(p.Range.OMaths.Count) > 0
         except Exception:
             has_math = False
+
+        # 条件分岐: `not has_math` を満たす経路を評価する。
+
         if not has_math:
             continue
 
@@ -1122,11 +1422,13 @@ def _tighten_spacing_around_equations(doc: object) -> int:
             pass
 
         # Previous paragraph: reduce SpaceAfter so the equation doesn't look "detached".
+
         if i > 1:
             try:
                 prev = paras(i - 1)
                 prev_style = _style_name_local(prev)
                 prev_text = str(prev.Range.Text).replace("\r", "").replace("\n", "").strip()
+                # 条件分岐: `prev_text and (not _is_any_heading(prev_style))` を満たす経路を評価する。
                 if prev_text and (not _is_any_heading(prev_style)):
                     prev_pf = prev.Range.ParagraphFormat
                     prev_pf.SpaceAfter = 0
@@ -1135,11 +1437,13 @@ def _tighten_spacing_around_equations(doc: object) -> int:
                 pass
 
         # Next paragraph: reduce SpaceBefore for the same reason.
+
         if i < n:
             try:
                 nxt = paras(i + 1)
                 nxt_style = _style_name_local(nxt)
                 nxt_text = str(nxt.Range.Text).replace("\r", "").replace("\n", "").strip()
+                # 条件分岐: `nxt_text and (not _is_any_heading(nxt_style))` を満たす経路を評価する。
                 if nxt_text and (not _is_any_heading(nxt_style)):
                     nxt_pf = nxt.Range.ParagraphFormat
                     nxt_pf.SpaceBefore = 0
@@ -1157,6 +1461,7 @@ def _patch_docx_callout_punctuation(docx_path: Path) -> int:
     Word's HTML import may normalize fullwidth punctuation (e.g. "："→":") and we can't reliably
     prevent that via Word automation. Post-save XML patching is deterministic.
     """
+    # 条件分岐: `not docx_path.exists()` を満たす経路を評価する。
     if not docx_path.exists():
         return 0
 
@@ -1166,6 +1471,7 @@ def _patch_docx_callout_punctuation(docx_path: Path) -> int:
                 xml_bytes = zin.read("word/document.xml")
             except Exception:
                 return 0
+
             try:
                 xml = xml_bytes.decode("utf-8")
             except Exception:
@@ -1183,26 +1489,34 @@ def _patch_docx_callout_punctuation(docx_path: Path) -> int:
                 # Replace the first <w:t>:</w:t> that appears after each marker occurrence.
                 while True:
                     idx = text.find(marker, pos)
+                    # 条件分岐: `idx < 0` を満たす経路を評価する。
                     if idx < 0:
                         break
+
                     window_end = min(len(text), idx + 2000)
                     window = text[idx:window_end]
                     m = re.search(r"(<w:t[^>]*>)(:)(</w:t>)", window)
+                    # 条件分岐: `not m` を満たす経路を評価する。
                     if not m:
                         pos = idx + len(marker)
                         continue
                     # Replace only the ':' character (keep tag/attrs unchanged).
+
                     abs_start = idx + m.start(2)
                     abs_end = idx + m.end(2)
                     text = text[:abs_start] + "：" + text[abs_end:]
                     touched += 1
                     pos = idx + m.end(3)
+
                 return text, touched
 
             # Restore "：" after specific callout labels.
+
             for marker in ("要請（P内部）→帰結", "要請（自由波の応答）"):
                 xml, dn = _replace_colon_after_marker(xml, marker)
                 n += dn
+
+            # 条件分岐: `n <= 0` を満たす経路を評価する。
 
             if n <= 0:
                 return 0
@@ -1211,9 +1525,12 @@ def _patch_docx_callout_punctuation(docx_path: Path) -> int:
             with zipfile.ZipFile(buf, "w") as zout:
                 for info in zin.infolist():
                     data = zin.read(info.filename)
+                    # 条件分岐: `info.filename == "word/document.xml"` を満たす経路を評価する。
                     if info.filename == "word/document.xml":
                         data = xml.encode("utf-8")
+
                     zout.writestr(info, data)
+
             docx_path.write_bytes(buf.getvalue())
             return n
     except Exception:
@@ -1233,11 +1550,13 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
       while preserving intentional colors (e.g. table header shading, heatmap cells).
     - removes any <w:highlight .../> tags
     """
+    # 条件分岐: `not docx_path.exists()` を満たす経路を評価する。
     if not docx_path.exists():
         return 0
 
     # Only rewrite these typical "HTML import" gray backgrounds.
     # Keep other colors (e.g., header shading / metric heatmaps).
+
     unwanted_fills = {
         "FAFAFA",
         "F8F8F8",
@@ -1262,6 +1581,7 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
                     xml_bytes = zin.read(name)
                 except Exception:
                     continue
+
                 try:
                     xml = xml_bytes.decode("utf-8")
                 except Exception:
@@ -1270,9 +1590,11 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
                 def _repl_shd(m: re.Match[str]) -> str:
                     fill_raw = m.group(2) or ""
                     fill = fill_raw.strip().upper()
+                    # 条件分岐: `fill == "AUTO" or fill in unwanted_fills` を満たす経路を評価する。
                     if fill == "AUTO" or fill in unwanted_fills:
                         return m.group(1) + "FFFFFF" + m.group(3)
                     # Preserve intentional colors.
+
                     return m.group(0)
 
                 xml2, n1 = re.subn(
@@ -1283,9 +1605,12 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
                 )
                 xml2, n2 = re.subn(r"<w:highlight\b[^/>]*/>", "", xml2)
 
+                # 条件分岐: `xml2 != xml` を満たす経路を評価する。
                 if xml2 != xml:
                     patched[name] = xml2.encode("utf-8")
                     n_total += int(n1) + int(n2)
+
+            # 条件分岐: `n_total <= 0` を満たす経路を評価する。
 
             if n_total <= 0:
                 return 0
@@ -1294,8 +1619,10 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
             with zipfile.ZipFile(buf, "w") as zout:
                 for info in zin.infolist():
                     data = zin.read(info.filename)
+                    # 条件分岐: `info.filename in patched` を満たす経路を評価する。
                     if info.filename in patched:
                         data = patched[info.filename]
+
                     zout.writestr(info, data)
 
             docx_path.write_bytes(buf.getvalue())
@@ -1317,12 +1644,20 @@ def _style_name_local(paragraph: object) -> str:
 
 def _is_heading(style_name: str, level: int) -> bool:
     s = (style_name or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return False
+
+    # 条件分岐: `s == f"Heading {level}"` を満たす経路を評価する。
+
     if s == f"Heading {level}":
         return True
+
+    # 条件分岐: `s == f"見出し {level}"` を満たす経路を評価する。
+
     if s == f"見出し {level}":
         return True
+
     return s.endswith(f"見出し {level}")
 
 
@@ -1354,17 +1689,26 @@ def _apply_page_breaks_for_cards(doc: object) -> None:
     break_before: List[int] = []
 
     for idx, text, style in records:
+        # 条件分岐: `_is_heading(style, 2) and text == "目次"` を満たす経路を評価する。
         if _is_heading(style, 2) and text == "目次":
             toc_seen = True
+        # 条件分岐: 前段条件が不成立で、`toc_seen and _is_heading(style, 2) and text` を追加評価する。
         elif toc_seen and _is_heading(style, 2) and text:
             after_toc = True
 
+        # 条件分岐: `after_toc` を満たす経路を評価する。
+
         if after_toc:
+            # 条件分岐: `_is_heading(style, 2) and text` を満たす経路を評価する。
             if _is_heading(style, 2) and text:
                 break_before.append(idx)
+            # 条件分岐: 前段条件が不成立で、`_is_heading(style, 3) and text` を追加評価する。
             elif _is_heading(style, 3) and text:
+                # 条件分岐: `not _is_heading(prev_nonempty_style, 2)` を満たす経路を評価する。
                 if not _is_heading(prev_nonempty_style, 2):
                     break_before.append(idx)
+
+        # 条件分岐: `text` を満たす経路を評価する。
 
         if text:
             prev_nonempty_style = style
@@ -1389,6 +1733,7 @@ def _apply_page_breaks_for_headings(doc: object, *, levels: Sequence[int]) -> No
         return
 
     levels_norm = [int(x) for x in levels if int(x) >= 1]
+    # 条件分岐: `not levels_norm` を満たす経路を評価する。
     if not levels_norm:
         return
 
@@ -1407,22 +1752,42 @@ def _apply_page_breaks_for_headings(doc: object, *, levels: Sequence[int]) -> No
     after_toc = not has_toc
     break_before: List[int] = []
 
+    # Fallback targets for headings that may arrive with non-heading styles after HTML import.
+    # (kept narrow to avoid unintended breaks)
+    forced_prefixes = ("4.10.2 ", "4.10.3 ")
+
     for idx, text, style in records:
+        # 条件分岐: `not text` を満たす経路を評価する。
         if not text:
             continue
 
+        # 条件分岐: `has_toc` を満たす経路を評価する。
+
         if has_toc:
+            # 条件分岐: `_is_heading(style, 2) and text == "目次"` を満たす経路を評価する。
             if _is_heading(style, 2) and text == "目次":
                 toc_seen = True
                 after_toc = False
                 continue
+
+            # 条件分岐: `toc_seen and _is_heading(style, 2)` を満たす経路を評価する。
+
             if toc_seen and _is_heading(style, 2):
                 after_toc = True
+
+        # 条件分岐: `not after_toc` を満たす経路を評価する。
 
         if not after_toc:
             continue
 
+        # 条件分岐: `any(text.startswith(pref) for pref in forced_prefixes)` を満たす経路を評価する。
+
+        if any(text.startswith(pref) for pref in forced_prefixes):
+            break_before.append(idx)
+            continue
+
         for level in levels_norm:
+            # 条件分岐: `_is_heading(style, level)` を満たす経路を評価する。
             if _is_heading(style, level):
                 break_before.append(idx)
                 break
@@ -1445,6 +1810,7 @@ def _inlineize_picture_shapes(doc: object) -> int:
         count = int(doc.Shapes.Count)
     except Exception:
         return 0
+
     n = 0
     for i in range(count, 0, -1):
         try:
@@ -1452,10 +1818,12 @@ def _inlineize_picture_shapes(doc: object) -> int:
             try:
                 # msoPicture=13, msoLinkedPicture=11
                 t = int(shp.Type)
+                # 条件分岐: `t not in (11, 13)` を満たす経路を評価する。
                 if t not in (11, 13):
                     continue
             except Exception:
                 continue
+
             try:
                 shp.ConvertToInlineShape()
                 n += 1
@@ -1463,6 +1831,7 @@ def _inlineize_picture_shapes(doc: object) -> int:
                 continue
         except Exception:
             continue
+
     return n
 
 
@@ -1475,6 +1844,7 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
     一律で拡大する（後段の fit 処理でページ幅に収まるよう補正される）。
     """
     s = float(scale)
+    # 条件分岐: `not (s > 0.0) or abs(s - 1.0) < 1e-9` を満たす経路を評価する。
     if not (s > 0.0) or abs(s - 1.0) < 1e-9:
         return 0
 
@@ -1483,6 +1853,7 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
             t = str(v).strip()
         except Exception:
             return False
+
         return bool(t) and (alt_text in t)
 
     n = 0
@@ -1492,25 +1863,33 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
         count = int(doc.InlineShapes.Count)
     except Exception:
         count = 0
+
     for i in range(1, count + 1):
         try:
             shp = doc.InlineShapes(i)
             try:
+                # 条件分岐: `not _has_alt(getattr(shp, "AlternativeText", ""))` を満たす経路を評価する。
                 if not _has_alt(getattr(shp, "AlternativeText", "")):
                     continue
             except Exception:
                 continue
+
             try:
                 w = float(shp.Width)
                 h = float(shp.Height)
             except Exception:
                 continue
+
+            # 条件分岐: `w <= 0.0 or h <= 0.0` を満たす経路を評価する。
+
             if w <= 0.0 or h <= 0.0:
                 continue
+
             try:
                 shp.LockAspectRatio = True
             except Exception:
                 pass
+
             try:
                 shp.Width = w * s
                 shp.Height = h * s
@@ -1520,41 +1899,53 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
                     shp.Width = w * s
                 except Exception:
                     continue
+
             n += 1
         except Exception:
             continue
 
     # Floating Shapes（HTML 取り込みで稀に発生）
+
     try:
         count2 = int(doc.Shapes.Count)
     except Exception:
         count2 = 0
+
     for i in range(1, count2 + 1):
         try:
             shp = doc.Shapes(i)
             try:
                 # msoPicture=13, msoLinkedPicture=11
                 t = int(shp.Type)
+                # 条件分岐: `t not in (11, 13)` を満たす経路を評価する。
                 if t not in (11, 13):
                     continue
             except Exception:
                 continue
+
             try:
+                # 条件分岐: `not _has_alt(getattr(shp, "AlternativeText", ""))` を満たす経路を評価する。
                 if not _has_alt(getattr(shp, "AlternativeText", "")):
                     continue
             except Exception:
                 continue
+
             try:
                 w = float(shp.Width)
                 h = float(shp.Height)
             except Exception:
                 continue
+
+            # 条件分岐: `w <= 0.0 or h <= 0.0` を満たす経路を評価する。
+
             if w <= 0.0 or h <= 0.0:
                 continue
+
             try:
                 shp.LockAspectRatio = True
             except Exception:
                 pass
+
             try:
                 shp.Width = w * s
                 shp.Height = h * s
@@ -1563,6 +1954,7 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
                     shp.Width = w * s
                 except Exception:
                     continue
+
             n += 1
         except Exception:
             continue
@@ -1575,6 +1967,7 @@ def _scale_word_equations(doc: object, *, scale: float) -> int:
     Word のネイティブ数式（OMML）のフォントサイズを一律スケールする。
     """
     s = float(scale)
+    # 条件分岐: `not (s > 0.0) or abs(s - 1.0) < 1e-9` を満たす経路を評価する。
     if not (s > 0.0) or abs(s - 1.0) < 1e-9:
         return 0
 
@@ -1588,6 +1981,9 @@ def _scale_word_equations(doc: object, *, scale: float) -> int:
         base_size = float(doc.Styles("Normal").Font.Size)
     except Exception:
         base_size = None
+
+    # 条件分岐: `base_size is not None and (not (base_size > 0.0) or base_size > 300.0)` を満たす経路を評価する。
+
     if base_size is not None and (not (base_size > 0.0) or base_size > 300.0):
         base_size = None
 
@@ -1601,10 +1997,15 @@ def _scale_word_equations(doc: object, *, scale: float) -> int:
             except Exception:
                 size = -1.0
             # Guard against sentinel / invalid values.
+
             if (not (size > 0.0) or size > 300.0) and base_size is not None:
                 size = base_size
+
+            # 条件分岐: `not (size > 0.0) or size > 300.0` を満たす経路を評価する。
+
             if not (size > 0.0) or size > 300.0:
                 continue
+
             r.Font.Size = float(size) * s
             n += 1
         except Exception:
@@ -1632,8 +2033,12 @@ def _postprocess_docx(
         )
         _apply_page_orientation(doc, orientation=str(orientation))
         _apply_page_margins(doc, margin_mm=float(margin_mm))
+        # 条件分岐: `pagebreak_cards` を満たす経路を評価する。
         if pagebreak_cards:
             _apply_page_breaks_for_cards(doc)
+
+        # 条件分岐: `pagebreak_headings` を満たす経路を評価する。
+
         if pagebreak_headings:
             # Paper readability:
             # - Heading 2 = 章
@@ -1653,18 +2058,27 @@ def _postprocess_docx(
             pass
 
         # Reduce layout surprises: convert picture-like floating Shapes to InlineShapes.
+
         try:
             _inlineize_picture_shapes(doc)
         except Exception:
             pass
 
-        # Make publish "equation images" readable in Word.
+        # Keep equation image size close to HTML baseline in Word.
+        # (historical 3.0x scaling made inline equations too large)
+
         try:
-            _scale_equation_images(doc, alt_text="数式", scale=3.0)
+            _scale_equation_images(doc, alt_text="数式", scale=1.0)
+        except Exception:
+            pass
+
+        try:
+            _scale_equation_images(doc, alt_text="数式-inline", scale=1.0)
         except Exception:
             pass
 
         max_w = _max_content_width_points(doc)
+        # 条件分岐: `max_w is not None and max_w > 0.0` を満たす経路を評価する。
         if max_w is not None and max_w > 0.0:
             _fit_tables_to_page(doc, max_width_pt=float(max_w))
             _fit_inline_shapes_to_page(doc, max_width_pt=float(max_w))
@@ -1675,20 +2089,24 @@ def _postprocess_docx(
                 pass
 
         # Paper style: remove visible table borders.
+
         try:
             _disable_table_borders(doc)
         except Exception:
             pass
 
         # Make native Word equations readable.
+
         try:
             _scale_word_equations(doc, scale=1.5)
         except Exception:
             pass
+
         try:
             _tighten_equation_paragraph_spacing(doc)
         except Exception:
             pass
+
         try:
             _tighten_spacing_around_equations(doc)
         except Exception:
@@ -1699,6 +2117,7 @@ def _postprocess_docx(
         doc = None
     finally:
         try:
+            # 条件分岐: `doc is not None` を満たす経路を評価する。
             if doc is not None:
                 doc.Close(False)
         except Exception:
@@ -1736,21 +2155,29 @@ def _convert_html_to_docx(
         doc = None
     finally:
         try:
+            # 条件分岐: `doc is not None` を満たす経路を評価する。
             if doc is not None:
                 doc.Close(False)
         except Exception:
             pass
 
     # Word sometimes returns before the file is fully flushed. Poll a little.
+
     while True:
+        # 条件分岐: `docx_out.exists()` を満たす経路を評価する。
         if docx_out.exists():
             try:
+                # 条件分岐: `docx_out.stat().st_size > 0` を満たす経路を評価する。
                 if docx_out.stat().st_size > 0:
                     return
             except Exception:
                 pass
+
+        # 条件分岐: `(time.perf_counter() - started) > float(timeout_s)` を満たす経路を評価する。
+
         if (time.perf_counter() - started) > float(timeout_s):
             break
+
         time.sleep(0.1)
 
     raise RuntimeError("DOCX creation timed out (file not materialized)")
@@ -1794,10 +2221,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     html_in = Path(args.html_in)
     docx_out = Path(args.docx_out)
 
+    # 条件分岐: `not html_in.is_absolute()` を満たす経路を評価する。
     if not html_in.is_absolute():
         html_in = (root / html_in).resolve()
+
+    # 条件分岐: `not docx_out.is_absolute()` を満たす経路を評価する。
+
     if not docx_out.is_absolute():
         docx_out = (root / docx_out).resolve()
+
+    # 条件分岐: `not html_in.exists()` を満たす経路を評価する。
 
     if not html_in.exists():
         print(f"[err] input HTML not found: {html_in}", file=sys.stderr)
@@ -1807,6 +2240,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     docx_out = _choose_tmp_docx_path(docx_target)
 
     word, reason = _try_start_word()
+    # 条件分岐: `not word` を満たす経路を評価する。
     if not word:
         print(f"[warn] no supported Word backend for HTML→DOCX; skipping ({reason}).", file=sys.stderr)
         return 3
@@ -1825,28 +2259,48 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             word.Quit()
         except Exception:
             pass
+
+        # 条件分岐: `temp_html is not None` を満たす経路を評価する。
+
         if temp_html is not None:
             try:
                 temp_html.unlink()
             except Exception:
                 pass
 
+    # 条件分岐: `bool(args.paper_equations)` を満たす経路を評価する。
+
     if bool(args.paper_equations):
         try:
             xsl_path = Path(args.mml2omml_xsl) if args.mml2omml_xsl else _default_mml2omml_xsl()
-            equations_found, equations_replaced = _replace_equation_images_with_word_equations(
+            b_found, b_replaced = _replace_equation_images_with_word_equations(
                 root=root,
                 out_dir=docx_out.parent,
                 docx_path=docx_out,
                 mml2omml_xsl=xsl_path,
                 alt_text="数式",
+                equation_kind="block",
+                html_source=html_in,
             )
+            i_found, i_replaced = _replace_equation_images_with_word_equations(
+                root=root,
+                out_dir=docx_out.parent,
+                docx_path=docx_out,
+                mml2omml_xsl=xsl_path,
+                alt_text="数式-inline",
+                equation_kind="inline",
+                html_source=html_in,
+            )
+            equations_found = int(b_found) + int(i_found)
+            equations_replaced = int(b_replaced) + int(i_replaced)
         except Exception as e:
             equations_error = str(e)
             print(f"[warn] equation conversion skipped: {e}", file=sys.stderr)
 
     # Post-process in a fresh Word instance (AutoFit is more reliable after reopening).
+
     word2, reason2 = _try_start_word()
+    # 条件分岐: `not word2` を満たす経路を評価する。
     if not word2:
         print(f"[warn] cannot postprocess DOCX; leaving as-is ({reason2}).", file=sys.stderr)
     else:
@@ -1869,18 +2323,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 pass
 
     # Final deterministic patch (after Word postprocess/save).
+
     try:
         _patch_docx_callout_punctuation(docx_out)
     except Exception:
         pass
+
     try:
         _patch_docx_force_white_background(docx_out)
     except Exception:
         pass
 
     final_docx, promote_warn = _promote_tmp_docx(docx_out, docx_target)
+    # 条件分岐: `promote_warn` を満たす経路を評価する。
     if promote_warn:
         print(f"[warn] {promote_warn}", file=sys.stderr)
+
     docx_out = final_docx
 
     try:
@@ -1909,6 +2367,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] docx: {docx_out}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -38,6 +38,7 @@ def _sigma_path_nm_from_visibility(v: float, *, wavelength_nm: float) -> float:
     # V = exp(-σφ^2/2), σφ = 2π σL / λ.
     if v <= 0.0 or v >= 1.0:
         return float("nan")
+
     return float(wavelength_nm / (2.0 * math.pi) * math.sqrt(-2.0 * math.log(v)))
 
 
@@ -46,8 +47,10 @@ def _variance_ratio_from_db(db: float) -> float:
 
 
 def _read_psd_from_zip(zip_path: Path, *, csv_name: str) -> tuple[np.ndarray, np.ndarray]:
+    # 条件分岐: `not zip_path.exists()` を満たす経路を評価する。
     if not zip_path.exists():
         raise FileNotFoundError(zip_path)
+
     with zipfile.ZipFile(zip_path, "r") as z:
         with z.open(csv_name, "r") as f:
             header = f.readline()
@@ -56,16 +59,21 @@ def _read_psd_from_zip(zip_path: Path, *, csv_name: str) -> tuple[np.ndarray, np
             psd: list[float] = []
             for line in f:
                 s = line.decode("utf-8", "replace").strip()
+                # 条件分岐: `not s` を満たす経路を評価する。
                 if not s:
                     continue
+
                 parts = s.split(",")
+                # 条件分岐: `len(parts) != 2` を満たす経路を評価する。
                 if len(parts) != 2:
                     continue
+
                 try:
                     freq.append(float(parts[0]))
                     psd.append(float(parts[1]))
                 except ValueError:
                     continue
+
     return np.asarray(freq, dtype=float), np.asarray(psd, dtype=float)
 
 
@@ -74,11 +82,15 @@ def _conservative_sigma(plus: float, minus: float) -> float:
 
 
 def _interp_log_psd(freq_hz: np.ndarray, psd: np.ndarray, target_hz: float) -> float:
+    # 条件分岐: `target_hz <= 0` を満たす経路を評価する。
     if target_hz <= 0:
         return float("nan")
+
     mask = (freq_hz > 0) & (psd > 0)
+    # 条件分岐: `np.count_nonzero(mask) < 2` を満たす経路を評価する。
     if np.count_nonzero(mask) < 2:
         return float("nan")
+
     xf = np.log10(freq_hz[mask])
     yf = np.log10(psd[mask])
     xt = math.log10(target_hz)
@@ -118,6 +130,8 @@ def _build_hom_squeezed_light_audit(
                 "data_status": "direct",
             }
         )
+
+    # 条件分岐: `d_ns.size >= 2` を満たす経路を評価する。
 
     if d_ns.size >= 2:
         sigma_delta = math.sqrt(
@@ -241,8 +255,10 @@ def _build_hom_squeezed_light_audit(
     )
 
     ax3 = axes[1, 1]
+    # 条件分岐: `np.isfinite(psd_10k) and np.isfinite(psd_100k)` を満たす経路を評価する。
     if np.isfinite(psd_10k) and np.isfinite(psd_100k):
         ax3.bar(["PSD@10kHz", "PSD@100kHz"], [psd_10k, psd_100k], color=["#1f77b4", "#7f7f7f"])
+
     ax3.set_yscale("log")
     ax3.set_ylabel("PSD (arb.)")
     ax3.set_title("Noise PSD scale indicator")
@@ -491,6 +507,8 @@ def main() -> None:
     print(f"[ok] json: {unified_json}")
     print(f"[ok] png : {unified_png}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

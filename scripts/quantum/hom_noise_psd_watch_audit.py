@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -31,11 +32,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -54,8 +59,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -68,60 +75,80 @@ def _read_psd_from_zip(zip_path: Path, csv_name: str) -> Tuple[np.ndarray, np.nd
     with zipfile.ZipFile(zip_path, "r") as zf:
         with zf.open(csv_name, "r") as f:
             lines = f.read().decode("utf-8", "replace").splitlines()
+
     for line in lines[1:]:
+        # 条件分岐: `not line.strip()` を満たす経路を評価する。
         if not line.strip():
             continue
+
         parts = line.split(",")
+        # 条件分岐: `len(parts) != 2` を満たす経路を評価する。
         if len(parts) != 2:
             continue
+
         try:
             freq.append(float(parts[0]))
             psd.append(float(parts[1]))
         except Exception:
             continue
+
     return np.asarray(freq, dtype=float), np.asarray(psd, dtype=float)
 
 
 def _interp_log_psd(freq_hz: np.ndarray, psd: np.ndarray, target_hz: float) -> Optional[float]:
     mask = (freq_hz > 0) & (psd > 0)
+    # 条件分岐: `np.count_nonzero(mask) < 3 or target_hz <= 0` を満たす経路を評価する。
     if np.count_nonzero(mask) < 3 or target_hz <= 0:
         return None
+
     xf = np.log10(freq_hz[mask])
     yf = np.log10(psd[mask])
     xt = math.log10(float(target_hz))
     val = float(10.0 ** np.interp(xt, xf, yf))
+    # 条件分岐: `not math.isfinite(val) or val <= 0` を満たす経路を評価する。
     if not math.isfinite(val) or val <= 0:
         return None
+
     return val
 
 
 def _fit_loglog_trend(freq_hz: np.ndarray, psd: np.ndarray, fmin: float, fmax: float) -> Optional[Tuple[float, float]]:
     mask = (freq_hz >= fmin) & (freq_hz <= fmax) & (freq_hz > 0) & (psd > 0)
+    # 条件分岐: `np.count_nonzero(mask) < 10` を満たす経路を評価する。
     if np.count_nonzero(mask) < 10:
         return None
+
     x = np.log10(freq_hz[mask])
     y = np.log10(psd[mask])
     slope, intercept = np.polyfit(x, y, 1)
+    # 条件分岐: `not (math.isfinite(float(slope)) and math.isfinite(float(intercept)))` を満たす経路を評価する。
     if not (math.isfinite(float(slope)) and math.isfinite(float(intercept))):
         return None
+
     return float(slope), float(intercept)
 
 
 def _trend_value(target_hz: float, trend: Tuple[float, float]) -> Optional[float]:
+    # 条件分岐: `target_hz <= 0` を満たす経路を評価する。
     if target_hz <= 0:
         return None
+
     slope, intercept = trend
     y = slope * math.log10(float(target_hz)) + intercept
     v = float(10.0 ** y)
+    # 条件分岐: `not math.isfinite(v) or v <= 0` を満たす経路を評価する。
     if not math.isfinite(v) or v <= 0:
         return None
+
     return v
 
 
 def _band_median(freq_hz: np.ndarray, psd: np.ndarray, fmin: float, fmax: float) -> Optional[float]:
     mask = (freq_hz >= fmin) & (freq_hz <= fmax) & (psd > 0)
+    # 条件分岐: `np.count_nonzero(mask) < 3` を満たす経路を評価する。
     if np.count_nonzero(mask) < 3:
         return None
+
     val = float(np.median(psd[mask]))
     return val if math.isfinite(val) and val > 0 else None
 
@@ -142,9 +169,11 @@ def _run_audit(
 
     trend = _fit_loglog_trend(freq_hz, psd, 3.0e4, 3.0e5)
     detrended_ratio = None
+    # 条件分岐: `trend is not None and p10 is not None and p100 is not None` を満たす経路を評価する。
     if trend is not None and p10 is not None and p100 is not None:
         t10 = _trend_value(1.0e4, trend)
         t100 = _trend_value(1.0e5, trend)
+        # 条件分岐: `t10 is not None and t100 is not None and t10 > 0 and t100 > 0` を満たす経路を評価する。
         if t10 is not None and t100 is not None and t10 > 0 and t100 > 0:
             detrended_ratio = float((p10 / t10) / (p100 / t100))
 
@@ -157,11 +186,14 @@ def _run_audit(
             ph = _interp_log_psd(freq_hz, psd, high)
             ratio_raw = None if pl is None or ph is None or ph <= 0 else float(pl / ph)
             ratio_detrended = None
+            # 条件分岐: `trend is not None and pl is not None and ph is not None and ph > 0` を満たす経路を評価する。
             if trend is not None and pl is not None and ph is not None and ph > 0:
                 tl = _trend_value(low, trend)
                 th = _trend_value(high, trend)
+                # 条件分岐: `tl is not None and th is not None and tl > 0 and th > 0` を満たす経路を評価する。
                 if tl is not None and th is not None and tl > 0 and th > 0:
                     ratio_detrended = float((pl / tl) / (ph / th))
+
             pair_rows.append(
                 {
                     "low_hz": float(low),
@@ -190,6 +222,7 @@ def _run_audit(
 
     hard_gate_applicable = False
     decision = "keep_watch_nonhard_gate"
+    # 条件分岐: `baseline_ratio is not None and baseline_ratio >= ratio_threshold and det_med...` を満たす経路を評価する。
     if baseline_ratio is not None and baseline_ratio >= ratio_threshold and det_med is not None and det_med >= ratio_threshold:
         decision = "pass_after_drift_and_band_audit"
 
@@ -286,14 +319,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(12.6, 4.8), dpi=170)
 
     ax0 = axes[0]
+    # 条件分岐: `raw_ratio` を満たす経路を評価する。
     if raw_ratio:
         x = np.arange(len(raw_ratio), dtype=float)
         ax0.plot(x, raw_ratio, marker="o", linewidth=1.6, label="raw")
+        # 条件分岐: `len(det_ratio) == len(raw_ratio)` を満たす経路を評価する。
         if len(det_ratio) == len(raw_ratio):
             ax0.plot(x, det_ratio, marker="s", linewidth=1.4, label="detrended")
+
         labels = [f"{int(l/1000)}k/{int(h/1000)}k" for l, h in zip(raw_low, raw_high)]
         ax0.set_xticks(x)
         ax0.set_xticklabels(labels, rotation=70, ha="right", fontsize=8)
+
     ax0.axhline(thr, color="#333333", linestyle="--", linewidth=1.1)
     ax0.set_ylabel("PSD ratio (low/high)")
     ax0.set_title("Band-pair sensitivity sweep")
@@ -363,6 +400,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _plot(out_png, payload)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
             dst = public_outdir / src.name
@@ -394,10 +432,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

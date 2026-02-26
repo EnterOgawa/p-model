@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -40,34 +41,49 @@ def _to_float(v: Any) -> float:
         out = float(v)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
 def _as_bool(v: Any) -> Optional[bool]:
+    # 条件分岐: `isinstance(v, bool)` を満たす経路を評価する。
     if isinstance(v, bool):
         return v
+
     t = str(v).strip().lower()
+    # 条件分岐: `t in {"true", "1", "yes", "y"}` を満たす経路を評価する。
     if t in {"true", "1", "yes", "y"}:
         return True
+
+    # 条件分岐: `t in {"false", "0", "no", "n"}` を満たす経路を評価する。
+
     if t in {"false", "0", "no", "n"}:
         return False
+
     return None
 
 
 def _finite_quantile(values: List[float], q: float) -> float:
     arr = np.array([float(v) for v in values if math.isfinite(float(v))], dtype=float)
+    # 条件分岐: `arr.size == 0` を満たす経路を評価する。
     if arr.size == 0:
         return float("nan")
+
     qq = float(max(0.0, min(1.0, q)))
     return float(np.quantile(arr, qq))
 
 
 def _channel_sign(row: Dict[str, Any], fallback: float) -> float:
     channel = str(row.get("channel", "")).strip().lower()
+    # 条件分岐: `channel == "beta_minus"` を満たす経路を評価する。
     if channel == "beta_minus":
         return 1.0
+
+    # 条件分岐: `channel == "beta_plus"` を満たす経路を評価する。
+
     if channel == "beta_plus":
         return -1.0
+
     return 1.0 if fallback >= 0.0 else -1.0
 
 
@@ -82,8 +98,12 @@ def _hflavor_transform_value(
 ) -> float:
     q_after = _to_float(row.get("q_pred_after_MeV"))
     q_before = _to_float(row.get("q_pred_before_MeV"))
+    # 条件分岐: `not math.isfinite(q_after)` を満たす経路を評価する。
     if not math.isfinite(q_after):
         return float("nan")
+
+    # 条件分岐: `not math.isfinite(q_before)` を満たす経路を評価する。
+
     if not math.isfinite(q_before):
         q_before = q_after
 
@@ -92,6 +112,7 @@ def _hflavor_transform_value(
     q_sat = sat * math.tanh(q_mix / sat)
 
     pivot = max(0.0, float(branch_pivot_mev))
+    # 条件分岐: `abs(q_sat) < pivot` を満たす経路を評価する。
     if abs(q_sat) < pivot:
         q_sat = float(branch_gain) * q_sat
 
@@ -127,17 +148,24 @@ def _apply_hflavor_v1(
             branch_gain=branch_gain,
             sign_blend=sign_blend,
         )
+        # 条件分岐: `math.isfinite(q_before_map) and math.isfinite(q_after_map)` を満たす経路を評価する。
         if math.isfinite(q_before_map) and math.isfinite(q_after_map):
             n_transformed += 1
             delta_abs.append(abs(q_after_map - q_before_map))
             s_expect = _channel_sign(row, q_before_map)
+            # 条件分岐: `q_before_map != 0.0 and math.copysign(1.0, q_before_map) != math.copysign(1.0...` を満たす経路を評価する。
             if q_before_map != 0.0 and math.copysign(1.0, q_before_map) != math.copysign(1.0, s_expect):
                 n_sign_mismatch_before += 1
+
+            # 条件分岐: `q_after_map != 0.0 and math.copysign(1.0, q_after_map) != math.copysign(1.0,...` を満たす経路を評価する。
+
             if q_after_map != 0.0 and math.copysign(1.0, q_after_map) != math.copysign(1.0, s_expect):
                 n_sign_mismatch_after += 1
+
             row_new["q_pred_after_MeV"] = f"{q_after_map:.16g}"
             row_new["hflavor_q_pred_after_raw_MeV"] = f"{q_before_map:.16g}"
             row_new["hflavor_q_pred_after_v1_MeV"] = f"{q_after_map:.16g}"
+
         mapped_rows.append(row_new)
 
     mapping_meta = {
@@ -172,29 +200,47 @@ def _sigma_band_thresholds_from_rows(rows: List[Dict[str, Any]]) -> Tuple[float,
     ]
     s33 = _finite_quantile(sigma_vals, 0.33)
     s67 = _finite_quantile(sigma_vals, 0.67)
+    # 条件分岐: `not (math.isfinite(s33) and s33 > 0.0)` を満たす経路を評価する。
     if not (math.isfinite(s33) and s33 > 0.0):
         s33 = 1.0e-3
+
+    # 条件分岐: `not (math.isfinite(s67) and s67 > s33)` を満たす経路を評価する。
+
     if not (math.isfinite(s67) and s67 > s33):
         s67 = max(s33 * 10.0, 1.0e-2)
+
     return float(s33), float(s67)
 
 
 def _sigma_band_label(sig: float, s33: float, s67: float) -> str:
+    # 条件分岐: `not math.isfinite(sig) or sig <= 0.0` を満たす経路を評価する。
     if not math.isfinite(sig) or sig <= 0.0:
         return "sigma_unknown"
+
+    # 条件分岐: `sig <= s33` を満たす経路を評価する。
+
     if sig <= s33:
         return "sigma_low"
+
+    # 条件分岐: `sig <= s67` を満たす経路を評価する。
+
     if sig <= s67:
         return "sigma_mid"
+
     return "sigma_high"
 
 
 def _mode_tag_from_row(row: Dict[str, Any]) -> str:
     mode_consistent = _as_bool(row.get("mode_consistent"))
+    # 条件分岐: `mode_consistent is True` を満たす経路を評価する。
     if mode_consistent is True:
         return "mode_consistent"
+
+    # 条件分岐: `mode_consistent is False` を満たす経路を評価する。
+
     if mode_consistent is False:
         return "mode_inconsistent"
+
     return "mode_unknown"
 
 
@@ -241,56 +287,81 @@ def _apply_transition_class_local_correction(
         tclass = _transition_class_from_row(row, s33=s33, s67=s67)
         row_new["localcorr_transition_class"] = tclass
         q_before = _to_float(row.get("q_pred_after_MeV"))
+        # 条件分岐: `tclass in target_classes` を満たす経路を評価する。
         if tclass in target_classes:
             n_target_rows += 1
+            # 条件分岐: `math.isfinite(q_before)` を満たす経路を評価する。
             if math.isfinite(q_before):
                 gain_scale = _to_float(gain_scales.get(tclass, 1.0))
+                # 条件分岐: `not math.isfinite(gain_scale) or gain_scale <= 0.0` を満たす経路を評価する。
                 if not math.isfinite(gain_scale) or gain_scale <= 0.0:
                     gain_scale = 1.0
+
                 sat_scale = _to_float(sat_scales.get(tclass, 1.0))
+                # 条件分岐: `not math.isfinite(sat_scale) or sat_scale <= 0.0` を満たす経路を評価する。
                 if not math.isfinite(sat_scale) or sat_scale <= 0.0:
                     sat_scale = 1.0
+
                 blend_eff = float(alpha)
                 blend_prof = blend_profiles.get(tclass) if isinstance(blend_profiles.get(tclass), dict) else {}
+                # 条件分岐: `blend_prof` を満たす経路を評価する。
                 if blend_prof:
                     z_ref = _to_float(blend_prof.get("z_ref", 5.0))
+                    # 条件分岐: `not math.isfinite(z_ref) or z_ref <= 0.0` を満たす経路を評価する。
                     if not math.isfinite(z_ref) or z_ref <= 0.0:
                         z_ref = 5.0
+
                     min_scale = _to_float(blend_prof.get("min_scale", 1.0))
                     min_scale = max(0.0, min(1.0, min_scale)) if math.isfinite(min_scale) else 1.0
                     q_obs = _to_float(row.get("q_obs_MeV"))
                     q_sig = _to_float(row.get("q_obs_sigma_MeV"))
                     z_abs = float("nan")
+                    # 条件分岐: `math.isfinite(q_before) and math.isfinite(q_obs) and math.isfinite(q_sig) and...` を満たす経路を評価する。
                     if math.isfinite(q_before) and math.isfinite(q_obs) and math.isfinite(q_sig) and q_sig > 0.0:
                         z_abs = abs((q_before - q_obs) / q_sig)
+
+                    # 条件分岐: `math.isfinite(z_abs)` を満たす経路を評価する。
+
                     if math.isfinite(z_abs):
                         z_ratio = max(0.0, min(1.0, z_abs / float(z_ref)))
                         blend_scale = float(min_scale + (1.0 - min_scale) * z_ratio)
                         blend_eff = float(alpha * blend_scale)
                     else:
                         blend_eff = float(alpha * min_scale)
+
                 g_eff = float(g * gain_scale)
                 sat_eff = max(1.0e-9, float(sat * sat_scale))
                 q_sat = sat_eff * math.tanh(q_before / sat_eff)
                 q_target = g_eff * q_sat
                 q_blend = (1.0 - blend_eff) * q_before + blend_eff * q_target
                 sign_scale = _to_float(sign_scales.get(tclass, 1.0))
+                # 条件分岐: `not math.isfinite(sign_scale) or sign_scale < 0.0` を満たす経路を評価する。
                 if not math.isfinite(sign_scale) or sign_scale < 0.0:
                     sign_scale = 1.0
+
                 alpha_sign_eff = max(0.0, min(1.0, float(alpha_sign) * float(sign_scale)))
                 sgn = _channel_sign(row, q_blend)
                 q_sign = sgn * abs(q_blend)
                 q_after = (1.0 - alpha_sign_eff) * q_blend + alpha_sign_eff * q_sign
+                # 条件分岐: `q_before != 0.0 and math.copysign(1.0, q_before) != math.copysign(1.0, sgn)` を満たす経路を評価する。
                 if q_before != 0.0 and math.copysign(1.0, q_before) != math.copysign(1.0, sgn):
                     n_sign_mismatch_before += 1
+
+                # 条件分岐: `q_after != 0.0 and math.copysign(1.0, q_after) != math.copysign(1.0, sgn)` を満たす経路を評価する。
+
                 if q_after != 0.0 and math.copysign(1.0, q_after) != math.copysign(1.0, sgn):
                     n_sign_mismatch_after += 1
+
+                # 条件分岐: `q_after != q_before` を満たす経路を評価する。
+
                 if q_after != q_before:
                     n_changed += 1
                     delta_abs.append(abs(q_after - q_before))
+
                 row_new["q_pred_after_MeV"] = f"{q_after:.16g}"
                 row_new["localcorr_q_pred_before_MeV"] = f"{q_before:.16g}"
                 row_new["localcorr_q_pred_after_MeV"] = f"{q_after:.16g}"
+
         mapped_rows.append(row_new)
 
     meta = {
@@ -348,14 +419,20 @@ def _build_candidate_class_gain_scales(
     target_classes: List[str],
 ) -> Dict[str, float]:
     tlist = [str(x) for x in target_classes if str(x).strip()]
+    # 条件分岐: `not tlist` を満たす経路を評価する。
     if not tlist:
         return {}
+
     top_class = str(candidate.get("top_priority_class_targeted", "")).strip()
+    # 条件分岐: `top_class not in tlist` を満たす経路を評価する。
     if top_class not in tlist:
         top_class = tlist[0]
+
     boost = _to_float(candidate.get("top_class_gain_boost", 1.0))
+    # 条件分岐: `not math.isfinite(boost) or boost <= 0.0` を満たす経路を評価する。
     if not math.isfinite(boost) or boost <= 0.0:
         boost = 1.0
+
     scales = {str(tc): 1.0 for tc in tlist}
     scales[str(top_class)] = float(boost)
     return scales
@@ -367,15 +444,21 @@ def _build_candidate_class_sat_scales(
     target_classes: List[str],
 ) -> Dict[str, float]:
     tlist = [str(x) for x in target_classes if str(x).strip()]
+    # 条件分岐: `not tlist` を満たす経路を評価する。
     if not tlist:
         return {}
+
     sat_scale = _to_float(candidate.get("sigma_low_mode_inconsistent_sat_scale", 1.0))
+    # 条件分岐: `not math.isfinite(sat_scale) or sat_scale <= 0.0` を満たす経路を評価する。
     if not math.isfinite(sat_scale) or sat_scale <= 0.0:
         sat_scale = 1.0
+
     scales = {str(tc): 1.0 for tc in tlist}
     for tc in tlist:
+        # 条件分岐: `"|sigma_low|mode_inconsistent" in str(tc)` を満たす経路を評価する。
         if "|sigma_low|mode_inconsistent" in str(tc):
             scales[str(tc)] = float(sat_scale)
+
     return scales
 
 
@@ -385,23 +468,31 @@ def _build_candidate_class_blend_profiles(
     target_classes: List[str],
 ) -> Dict[str, Dict[str, float]]:
     tlist = [str(x) for x in target_classes if str(x).strip()]
+    # 条件分岐: `not tlist` を満たす経路を評価する。
     if not tlist:
         return {}
+
     z_ref = _to_float(candidate.get("sigma_low_mode_inconsistent_zref", 5.0))
+    # 条件分岐: `not math.isfinite(z_ref) or z_ref <= 0.0` を満たす経路を評価する。
     if not math.isfinite(z_ref) or z_ref <= 0.0:
         z_ref = 5.0
+
     min_scale = _to_float(candidate.get("sigma_low_mode_inconsistent_min_blend_scale", 1.0))
+    # 条件分岐: `not math.isfinite(min_scale)` を満たす経路を評価する。
     if not math.isfinite(min_scale):
         min_scale = 1.0
+
     min_scale = max(0.0, min(1.0, float(min_scale)))
 
     out: Dict[str, Dict[str, float]] = {}
     for tc in tlist:
+        # 条件分岐: `"|sigma_low|mode_inconsistent" in str(tc)` を満たす経路を評価する。
         if "|sigma_low|mode_inconsistent" in str(tc):
             out[str(tc)] = {
                 "z_ref": float(z_ref),
                 "min_scale": float(min_scale),
             }
+
     return out
 
 
@@ -411,47 +502,68 @@ def _build_candidate_class_sign_scales(
     target_classes: List[str],
 ) -> Dict[str, float]:
     tlist = [str(x) for x in target_classes if str(x).strip()]
+    # 条件分岐: `not tlist` を満たす経路を評価する。
     if not tlist:
         return {}
+
     sign_scale = _to_float(candidate.get("sigma_low_mode_inconsistent_sign_blend_scale", 1.0))
+    # 条件分岐: `not math.isfinite(sign_scale)` を満たす経路を評価する。
     if not math.isfinite(sign_scale):
         sign_scale = 1.0
+
     sign_scale = max(0.0, float(sign_scale))
     top_class = str(candidate.get("top_priority_class_targeted", "")).strip()
+    # 条件分岐: `top_class not in tlist` を満たす経路を評価する。
     if top_class not in tlist:
         top_class = tlist[0]
+
     top_sign_scale = _to_float(candidate.get("top_class_sign_blend_scale", 1.0))
+    # 条件分岐: `not math.isfinite(top_sign_scale)` を満たす経路を評価する。
     if not math.isfinite(top_sign_scale):
         top_sign_scale = 1.0
+
     top_sign_scale = max(0.0, float(top_sign_scale))
     scales: Dict[str, float] = {}
     for tc in tlist:
         scale = 1.0
+        # 条件分岐: `str(tc) == str(top_class)` を満たす経路を評価する。
         if str(tc) == str(top_class):
             scale *= float(top_sign_scale)
+
+        # 条件分岐: `"|sigma_low|mode_inconsistent" in str(tc)` を満たす経路を評価する。
+
         if "|sigma_low|mode_inconsistent" in str(tc):
             scale *= float(sign_scale)
+
         scales[str(tc)] = float(scale)
+
     return scales
 
 
 def _sha256(path: Path) -> Optional[str]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     h = hashlib.sha256()
     with path.open("rb") as f:
         while True:
             chunk = f.read(8 * 1024 * 1024)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _file_signature(path: Path) -> Dict[str, Any]:
     payload: Dict[str, Any] = {"path": _rel(path), "exists": bool(path.exists())}
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return payload
+
     stat = path.stat()
     payload["size_bytes"] = int(stat.st_size)
     payload["mtime_utc"] = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
@@ -465,8 +577,10 @@ def _load_rows(path: Path) -> List[Dict[str, Any]]:
 
 
 def _load_route_ab_transition(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {"exists": False}
+
     payload = json.loads(path.read_text(encoding="utf-8"))
     decision = payload.get("decision") if isinstance(payload.get("decision"), dict) else {}
     return {
@@ -507,28 +621,51 @@ def _evaluate_route_b(
     closure_watch = bool(_as_bool(closure_gate.get("watch_pass")) is True)
 
     hard_fail_ids: List[str] = []
+    # 条件分岐: `not gate_qbeta` を満たす経路を評価する。
     if not gate_qbeta:
         hard_fail_ids.append("route_b::holdout_qbeta_p95_gate")
+
+    # 条件分岐: `not gate_logft` を満たす経路を評価する。
+
     if not gate_logft:
         hard_fail_ids.append("route_b::holdout_logft_p95_gate")
+
+    # 条件分岐: `not overfit_pass` を満たす経路を評価する。
+
     if not overfit_pass:
         hard_fail_ids.append("route_b::overfit_guard_gate")
+
+    # 条件分岐: `not dof_equalized` を満たす経路を評価する。
+
     if not dof_equalized:
         hard_fail_ids.append("route_b::dof_equalization_gate")
+
+    # 条件分岐: `not closure_hard` を満たす経路を評価する。
+
     if not closure_hard:
         hard_fail_ids.append("closure::ckm_pmns_hard_gate")
 
     watch_fail_ids: List[str] = []
+    # 条件分岐: `not closure_watch` を満たす経路を評価する。
     if not closure_watch:
         watch_fail_ids.append("closure::ckm_pmns_watch_gate")
+
+    # 条件分岐: `not (math.isfinite(max_q) and max_q <= z_gate)` を満たす経路を評価する。
+
     if not (math.isfinite(max_q) and max_q <= z_gate):
         watch_fail_ids.append("route_b::max_qbeta_watch_gate")
+
+    # 条件分岐: `not (math.isfinite(max_logft) and max_logft <= z_gate)` を満たす経路を評価する。
+
     if not (math.isfinite(max_logft) and max_logft <= z_gate):
         watch_fail_ids.append("route_b::max_logft_watch_gate")
+
+    # 条件分岐: `hard_fail_ids` を満たす経路を評価する。
 
     if hard_fail_ids:
         overall_status = "reject"
         transition = "B_standalone_reject"
+    # 条件分岐: 前段条件が不成立で、`watch_fail_ids` を追加評価する。
     elif watch_fail_ids:
         overall_status = "watch"
         transition = "B_standalone_watch"
@@ -608,15 +745,19 @@ def _write_csv_rows(path: Path, rows: List[Dict[str, Any]], fieldnames: List[str
 
 
 def _safe_share(numer: int, denom: int) -> float:
+    # 条件分岐: `denom <= 0` を満たす経路を評価する。
     if denom <= 0:
         return float("nan")
+
     return float(float(numer) / float(denom))
 
 
 def _safe_max(values: List[float]) -> float:
     arr = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not arr` を満たす経路を評価する。
     if not arr:
         return float("nan")
+
     return float(max(arr))
 
 
@@ -638,10 +779,15 @@ def _aggregate_outlier_group(
     severity_log = (p95_log / float(z_gate)) if math.isfinite(p95_log) and z_gate > 0.0 else 0.0
     share_q = _safe_share(n_q_fail, total_q_fail)
     share_log = _safe_share(n_log_fail, total_logft_fail)
+    # 条件分岐: `not math.isfinite(share_q)` を満たす経路を評価する。
     if not math.isfinite(share_q):
         share_q = 0.0
+
+    # 条件分岐: `not math.isfinite(share_log)` を満たす経路を評価する。
+
     if not math.isfinite(share_log):
         share_log = 0.0
+
     priority_score = float((share_q * severity_q) + (0.35 * share_log * severity_log))
     return {
         "group_key": str(key),
@@ -676,8 +822,12 @@ def _build_route_b_outlier_decomposition(
     calibration = route_b_eval.get("calibration") if isinstance(route_b_eval.get("calibration"), dict) else {}
     a_offset = _to_float(calibration.get("a_offset_MeV"))
     b_scale = _to_float(calibration.get("b_scale"))
+    # 条件分岐: `not math.isfinite(a_offset)` を満たす経路を評価する。
     if not math.isfinite(a_offset):
         a_offset = 0.0
+
+    # 条件分岐: `not math.isfinite(b_scale)` を満たす経路を評価する。
+
     if not math.isfinite(b_scale):
         b_scale = 1.0
 
@@ -688,14 +838,18 @@ def _build_route_b_outlier_decomposition(
         q_obs = _to_float(row.get("q_obs_MeV"))
         q_sigma = _to_float(row.get("q_obs_sigma_MeV"))
         q_raw = _to_float(row.get("q_pred_after_MeV"))
+        # 条件分岐: `not (math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and ma...` を満たす経路を評価する。
         if not (math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.isfinite(q_raw)):
             continue
+
         q_pred_cal = float(a_offset + b_scale * q_raw)
         z_q = abs((q_pred_cal - q_obs) / q_sigma)
+        # 条件分岐: `q_obs > 0.0 and q_pred_cal > 0.0` を満たす経路を評価する。
         if q_obs > 0.0 and q_pred_cal > 0.0:
             z_logft = abs(5.0 * (math.log10(q_pred_cal) - math.log10(q_obs)))
         else:
             z_logft = float("nan")
+
         mode_tag = _mode_tag_from_row(row)
         channel = str(row.get("channel", "unknown") or "unknown")
         band = _sigma_band_label(q_sigma, s33, s67)
@@ -724,6 +878,7 @@ def _build_route_b_outlier_decomposition(
         groups: Dict[str, List[Dict[str, Any]]] = {}
         for r in rows_scored:
             groups.setdefault(str(key_fn(r)), []).append(r)
+
         out: List[Dict[str, Any]] = []
         for gk, grows in groups.items():
             agg = _aggregate_outlier_group(
@@ -735,9 +890,11 @@ def _build_route_b_outlier_decomposition(
             )
             agg["scope"] = scope
             out.append(agg)
+
         out.sort(key=lambda x: (float(x.get("priority_score", 0.0)), float(x.get("max_abs_z_qbeta", 0.0))), reverse=True)
         for idx, row in enumerate(out, start=1):
             row["rank"] = idx
+
         return out
 
     by_channel = summarize("channel", lambda r: r["channel"])
@@ -786,6 +943,7 @@ def _plot_outlier_decomposition(
     by_transition = decomposition.get("reduction_priority_order")
     by_channel = decomposition.get("by_channel")
     by_sigma = decomposition.get("by_sigma_band")
+    # 条件分岐: `not isinstance(by_transition, list) or not isinstance(by_channel, list) or no...` を満たす経路を評価する。
     if not isinstance(by_transition, list) or not isinstance(by_channel, list) or not isinstance(by_sigma, list):
         return
 
@@ -820,6 +978,7 @@ def _plot_outlier_decomposition(
     ax2.grid(True, axis="y", alpha=0.25, linestyle=":")
 
     top_rows = decomposition.get("top_outlier_rows")
+    # 条件分岐: `isinstance(top_rows, list) and top_rows` を満たす経路を評価する。
     if isinstance(top_rows, list) and top_rows:
         z_vals = [float(r.get("z_qbeta", float("nan"))) for r in top_rows]
         bands = [str(r.get("sigma_band", "")) for r in top_rows]
@@ -845,14 +1004,20 @@ def _parse_float_list_csv(text: str) -> List[float]:
     out: List[float] = []
     for token in str(text).split(","):
         token_s = token.strip()
+        # 条件分岐: `not token_s` を満たす経路を評価する。
         if not token_s:
             continue
+
         try:
             value = float(token_s)
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
+
         if math.isfinite(value):
             out.append(float(value))
+
     return out
 
 
@@ -860,13 +1025,17 @@ def _parse_int_list_csv(text: str) -> List[int]:
     out: List[int] = []
     for token in str(text).split(","):
         token_s = token.strip()
+        # 条件分岐: `not token_s` を満たす経路を評価する。
         if not token_s:
             continue
+
         try:
             value = int(token_s)
         except Exception:
             continue
+
         out.append(int(value))
+
     return out
 
 
@@ -875,12 +1044,18 @@ def _parse_str_list_csv(text: str) -> List[str]:
     seen: Set[str] = set()
     for token in str(text).split(","):
         token_s = token.strip()
+        # 条件分岐: `not token_s` を満たす経路を評価する。
         if not token_s:
             continue
+
+        # 条件分岐: `token_s in seen` を満たす経路を評価する。
+
         if token_s in seen:
             continue
+
         seen.add(token_s)
         out.append(token_s)
+
     return out
 
 
@@ -889,13 +1064,18 @@ def _parse_str_group_list(text: str) -> List[List[str]]:
     seen: Set[Tuple[str, ...]] = set()
     for group_raw in str(text).split(";"):
         keys = _parse_str_list_csv(group_raw)
+        # 条件分岐: `not keys` を満たす経路を評価する。
         if not keys:
             continue
+
         sig = tuple(str(x) for x in keys)
+        # 条件分岐: `sig in seen` を満たす経路を評価する。
         if sig in seen:
             continue
+
         seen.add(sig)
         out.append([str(x) for x in keys])
+
     return out
 
 
@@ -903,18 +1083,26 @@ def _parse_class_weight_map(text: str) -> Dict[str, float]:
     out: Dict[str, float] = {}
     for token in str(text).split(","):
         token_s = token.strip()
+        # 条件分岐: `not token_s or ":" not in token_s` を満たす経路を評価する。
         if not token_s or ":" not in token_s:
             continue
+
         key_raw, val_raw = token_s.rsplit(":", 1)
         key = str(key_raw).strip()
+        # 条件分岐: `not key` を満たす経路を評価する。
         if not key:
             continue
+
         try:
             value = float(str(val_raw).strip())
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
+
         if math.isfinite(value):
             out[key] = float(max(0.0, value))
+
     return out
 
 
@@ -923,9 +1111,12 @@ def _parse_class_int_map(text: str) -> Dict[str, int]:
     out: Dict[str, int] = {}
     for key, value in raw.items():
         v = _to_float(value)
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
         if not math.isfinite(v):
             continue
+
         out[str(key)] = int(max(0, int(round(v))))
+
     return out
 
 
@@ -934,9 +1125,12 @@ def _parse_class_nonneg_float_map(text: str) -> Dict[str, float]:
     out: Dict[str, float] = {}
     for key, value in raw.items():
         v = _to_float(value)
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
         if not math.isfinite(v):
             continue
+
         out[str(key)] = float(max(0.0, float(v)))
+
     return out
 
 
@@ -947,23 +1141,34 @@ def _pareto_front_indices(points: List[Tuple[float, float]]) -> List[int]:
         xi, yi = points[i]
         dominated = False
         for j in valid:
+            # 条件分岐: `i == j` を満たす経路を評価する。
             if i == j:
                 continue
+
             xj, yj = points[j]
+            # 条件分岐: `(xj <= xi and yj <= yi) and (xj < xi or yj < yi)` を満たす経路を評価する。
             if (xj <= xi and yj <= yi) and (xj < xi or yj < yi):
                 dominated = True
                 break
+
+        # 条件分岐: `not dominated` を満たす経路を評価する。
+
         if not dominated:
             front.append(i)
+
     return front
 
 
 def _safe_norm(value: float, min_v: float, max_v: float) -> float:
+    # 条件分岐: `not (math.isfinite(value) and math.isfinite(min_v) and math.isfinite(max_v))` を満たす経路を評価する。
     if not (math.isfinite(value) and math.isfinite(min_v) and math.isfinite(max_v)):
         return float("nan")
+
     span = max_v - min_v
+    # 条件分岐: `not math.isfinite(span) or span <= 0.0` を満たす経路を評価する。
     if not math.isfinite(span) or span <= 0.0:
         return 0.0
+
     return float((value - min_v) / span)
 
 
@@ -990,8 +1195,10 @@ def _build_hflavor_sweep(
         before_mix_values, sat_scale_multipliers, branch_pivot_values, branch_gain_values, sign_blend_values
     ):
         sat_scale = float(base_sat_scale_mev) * float(sat_mul)
+        # 条件分岐: `not math.isfinite(sat_scale) or sat_scale <= 0.0` を満たす経路を評価する。
         if not math.isfinite(sat_scale) or sat_scale <= 0.0:
             continue
+
         mapped_rows, mapping_meta = _apply_hflavor_v1(
             rows=rows,
             before_mix=float(before_mix),
@@ -1125,8 +1332,10 @@ def _plot_hflavor_sweep_pareto(
     out_png: Path,
 ) -> None:
     all_rows = sweep.get("all_candidates")
+    # 条件分岐: `not isinstance(all_rows, list) or not all_rows` を満たす経路を評価する。
     if not isinstance(all_rows, list) or not all_rows:
         return
+
     x_all = [float(r.get("holdout_p95_abs_z_qbeta", float("nan"))) for r in all_rows]
     y_all = [float(r.get("overfit_gap_qbeta", float("nan"))) for r in all_rows]
     pareto = sweep.get("pareto_front") if isinstance(sweep.get("pareto_front"), list) else []
@@ -1140,14 +1349,25 @@ def _plot_hflavor_sweep_pareto(
     ax0, ax1 = axes
 
     ax0.scatter(x_all, y_all, s=18, color="#9ecae1", alpha=0.85, label="grid candidates")
+    # 条件分岐: `x_pf and y_pf` を満たす経路を評価する。
     if x_pf and y_pf:
         ax0.scatter(x_pf, y_pf, s=34, color="#d62728", marker="D", label="pareto front")
+
+    # 条件分岐: `math.isfinite(x_rec) and math.isfinite(y_rec)` を満たす経路を評価する。
+
     if math.isfinite(x_rec) and math.isfinite(y_rec):
         ax0.scatter([x_rec], [y_rec], s=80, color="#2ca02c", marker="*", label="recommended")
+
+    # 条件分岐: `math.isfinite(baseline_holdout_p95) and math.isfinite(baseline_overfit_gap_q)` を満たす経路を評価する。
+
     if math.isfinite(baseline_holdout_p95) and math.isfinite(baseline_overfit_gap_q):
         ax0.scatter([baseline_holdout_p95], [baseline_overfit_gap_q], s=70, marker="x", color="#444444", label="baseline(8.7.31.1)")
+
+    # 条件分岐: `math.isfinite(current_holdout_p95) and math.isfinite(current_overfit_gap_q)` を満たす経路を評価する。
+
     if math.isfinite(current_holdout_p95) and math.isfinite(current_overfit_gap_q):
         ax0.scatter([current_holdout_p95], [current_overfit_gap_q], s=70, marker="P", color="#1f77b4", label="current(8.7.31.3)")
+
     ax0.set_xlabel("holdout p95 |z_Qβ|")
     ax0.set_ylabel("overfit gap qbeta")
     ax0.set_title("H_flavor(P) sweep Pareto plane")
@@ -1241,32 +1461,48 @@ def _build_local_correction_sweep(
         class_sat_scales: Dict[str, float] = {str(tc): 1.0 for tc in tlist}
         class_blend_profiles: Dict[str, Dict[str, float]] = {}
         class_sign_scales: Dict[str, float] = {str(tc): 1.0 for tc in tlist}
+        # 条件分岐: `top_priority_class` を満たす経路を評価する。
         if top_priority_class:
             boost = _to_float(top_class_gain_boost)
+            # 条件分岐: `not math.isfinite(boost) or boost <= 0.0` を満たす経路を評価する。
             if not math.isfinite(boost) or boost <= 0.0:
                 boost = 1.0
+
             class_gain_scales[top_priority_class] = float(boost)
             top_sign_scale = _to_float(top_class_sign_blend_scale)
+            # 条件分岐: `not math.isfinite(top_sign_scale)` を満たす経路を評価する。
             if not math.isfinite(top_sign_scale):
                 top_sign_scale = 1.0
+
             top_sign_scale = max(0.0, float(top_sign_scale))
             class_sign_scales[top_priority_class] = float(class_sign_scales.get(top_priority_class, 1.0)) * float(
                 top_sign_scale
             )
+
+        # 条件分岐: `sigma_low_mode_inconsistent_classes` を満たす経路を評価する。
+
         if sigma_low_mode_inconsistent_classes:
             sat_scale = _to_float(sigma_low_mode_inconsistent_sat_scale)
+            # 条件分岐: `not math.isfinite(sat_scale) or sat_scale <= 0.0` を満たす経路を評価する。
             if not math.isfinite(sat_scale) or sat_scale <= 0.0:
                 sat_scale = 1.0
+
             z_ref = _to_float(sigma_low_mode_inconsistent_zref)
+            # 条件分岐: `not math.isfinite(z_ref) or z_ref <= 0.0` を満たす経路を評価する。
             if not math.isfinite(z_ref) or z_ref <= 0.0:
                 z_ref = 5.0
+
             min_blend_scale = _to_float(sigma_low_mode_inconsistent_min_blend_scale)
+            # 条件分岐: `not math.isfinite(min_blend_scale)` を満たす経路を評価する。
             if not math.isfinite(min_blend_scale):
                 min_blend_scale = 1.0
+
             min_blend_scale = max(0.0, min(1.0, float(min_blend_scale)))
             sign_blend_scale = _to_float(sigma_low_mode_inconsistent_sign_blend_scale)
+            # 条件分岐: `not math.isfinite(sign_blend_scale)` を満たす経路を評価する。
             if not math.isfinite(sign_blend_scale):
                 sign_blend_scale = 1.0
+
             sign_blend_scale = max(0.0, float(sign_blend_scale))
             for tc in sigma_low_mode_inconsistent_classes:
                 class_sat_scales[str(tc)] = float(sat_scale)
@@ -1275,6 +1511,7 @@ def _build_local_correction_sweep(
                     "min_scale": float(min_blend_scale),
                 }
                 class_sign_scales[str(tc)] = float(class_sign_scales.get(str(tc), 1.0)) * float(sign_blend_scale)
+
         rows_corr, corr_meta = _apply_transition_class_local_correction(
             rows=rows,
             target_classes=tset,
@@ -1322,17 +1559,22 @@ def _build_local_correction_sweep(
         hold_logft = _to_float(hold.get("p95_abs_z_logft_proxy"))
         delta_logft = hold_logft - base_logft if math.isfinite(hold_logft) and math.isfinite(base_logft) else float("nan")
         pass_delta = True
+        # 条件分岐: `use_delta_constraint` を満たす経路を評価する。
         if use_delta_constraint:
             pass_delta = bool(math.isfinite(delta_logft) and delta_logft <= float(logft_max_delta_allowed))
+
         pass_abs = True
+        # 条件分岐: `use_abs_constraint` を満たす経路を評価する。
         if use_abs_constraint:
             pass_abs = bool(math.isfinite(hold_logft) and hold_logft <= float(logft_max_abs_allowed))
+
         n_qfail = int((decomp.get("counts") or {}).get("n_qbeta_gt3_holdout") or 0)
         top_qfail = int(top_priority.get("n_qbeta_gt3", 0))
         delta_n_qfail = int(n_qfail - base_n_qfail)
         delta_top_qfail = int(top_qfail - base_top_qfail)
         pass_qfail = True
         pass_top_qfail = True
+        # 条件分岐: `bool(use_qfail_guard)` を満たす経路を評価する。
         if bool(use_qfail_guard):
             pass_qfail = bool(delta_n_qfail <= int(qfail_max_delta_allowed))
             pass_top_qfail = bool(delta_top_qfail <= int(top_priority_qfail_max_delta_allowed))
@@ -1480,13 +1722,18 @@ def _build_local_correction_sweep(
     )
     for rank, row in enumerate(constrained_all, start=1):
         row["rank_constrained"] = rank
+
     for row in ranked:
+        # 条件分岐: `"rank_constrained" not in row` を満たす経路を評価する。
         if "rank_constrained" not in row:
             row["rank_constrained"] = ""
+
+    # 条件分岐: `constrained_all` を満たす経路を評価する。
 
     if constrained_all:
         recommended = constrained_all[0]
         selection_mode = "logft_qfail_constrained"
+    # 条件分岐: 前段条件が不成立で、`constrained_logft` を追加評価する。
     elif constrained_logft:
         recommended = constrained_logft[0]
         selection_mode = "fallback_logft_only"
@@ -1495,12 +1742,15 @@ def _build_local_correction_sweep(
         selection_mode = "fallback_unconstrained"
 
     recommended_unconstrained = ranked[0] if ranked else {}
+    # 条件分岐: `constrained_all` を満たす経路を評価する。
     if constrained_all:
         ranked_selected = constrained_all
+    # 条件分岐: 前段条件が不成立で、`constrained_logft` を追加評価する。
     elif constrained_logft:
         ranked_selected = constrained_logft
     else:
         ranked_selected = ranked
+
     front_rows = [c for c in candidates if bool(c.get("is_pareto_front"))]
     front_rows = sorted(
         front_rows,
@@ -1577,8 +1827,10 @@ def _plot_local_correction_sweep_pareto(
     out_png: Path,
 ) -> None:
     all_rows = sweep.get("all_candidates")
+    # 条件分岐: `not isinstance(all_rows, list) or not all_rows` を満たす経路を評価する。
     if not isinstance(all_rows, list) or not all_rows:
         return
+
     x_all = [float(r.get("holdout_p95_abs_z_qbeta", float("nan"))) for r in all_rows]
     y_all = [float(r.get("overfit_gap_qbeta", float("nan"))) for r in all_rows]
     pareto = sweep.get("pareto_front") if isinstance(sweep.get("pareto_front"), list) else []
@@ -1592,14 +1844,25 @@ def _plot_local_correction_sweep_pareto(
     ax0, ax1 = axes
 
     ax0.scatter(x_all, y_all, s=18, color="#c7c7c7", alpha=0.85, label="local-correction candidates")
+    # 条件分岐: `x_pf and y_pf` を満たす経路を評価する。
     if x_pf and y_pf:
         ax0.scatter(x_pf, y_pf, s=34, color="#d62728", marker="D", label="pareto front")
+
+    # 条件分岐: `math.isfinite(x_rec) and math.isfinite(y_rec)` を満たす経路を評価する。
+
     if math.isfinite(x_rec) and math.isfinite(y_rec):
         ax0.scatter([x_rec], [y_rec], s=90, color="#2ca02c", marker="*", label="recommended")
+
+    # 条件分岐: `math.isfinite(pre_local_holdout_p95) and math.isfinite(pre_local_overfit_gap_q)` を満たす経路を評価する。
+
     if math.isfinite(pre_local_holdout_p95) and math.isfinite(pre_local_overfit_gap_q):
         ax0.scatter([pre_local_holdout_p95], [pre_local_overfit_gap_q], s=70, marker="P", color="#1f77b4", label="pre-local")
+
+    # 条件分岐: `math.isfinite(final_holdout_p95) and math.isfinite(final_overfit_gap_q)` を満たす経路を評価する。
+
     if math.isfinite(final_holdout_p95) and math.isfinite(final_overfit_gap_q):
         ax0.scatter([final_holdout_p95], [final_overfit_gap_q], s=70, marker="X", color="#9467bd", label="final-selected")
+
     ax0.set_xlabel("holdout p95 |z_Qβ|")
     ax0.set_ylabel("overfit gap qbeta")
     ax0.set_title("Local correction sweep Pareto plane")
@@ -1689,6 +1952,8 @@ def _build_residue_robustness(
                 "overall_status": str(decision.get("overall_status", "")),
             }
         )
+
+    # 条件分岐: `not rows_out` を満たす経路を評価する。
 
     if not rows_out:
         return {
@@ -1809,6 +2074,7 @@ def _build_localcorr_residue_reweight(
 ) -> Dict[str, Any]:
     target_class_list = [str(x) for x in target_classes if str(x).strip()]
     tset = set(target_class_list)
+    # 条件分岐: `not rows_mapped or not tset` を満たす経路を評価する。
     if not rows_mapped or not tset:
         return {
             "status": "not_run",
@@ -1820,6 +2086,7 @@ def _build_localcorr_residue_reweight(
         }
 
     rows_in = [dict(r) for r in candidate_rows if isinstance(r, dict)]
+    # 条件分岐: `not rows_in` を満たす経路を評価する。
     if not rows_in:
         return {
             "status": "not_run",
@@ -1865,24 +2132,34 @@ def _build_localcorr_residue_reweight(
 
     def _row_class_key(row: Dict[str, Any]) -> str:
         class_key = str(row.get("top_priority_class_after", "")).strip()
+        # 条件分岐: `not class_key` を満たす経路を評価する。
         if not class_key:
             class_key = str(row.get("residue_class_key", "")).strip()
+
         return class_key or "__unknown__"
 
     def _effective_limit_int(row: Dict[str, Any], *, base_limit: int, by_key: Dict[str, int]) -> int:
+        # 条件分岐: `not bool(use_class_key_threshold_guard)` を満たす経路を評価する。
         if not bool(use_class_key_threshold_guard):
             return int(base_limit)
+
         class_key = _row_class_key(row)
+        # 条件分岐: `class_key in by_key` を満たす経路を評価する。
         if class_key in by_key:
             return int(max(0, int(by_key.get(class_key, base_limit))))
+
         return int(base_limit)
 
     def _effective_limit_float(row: Dict[str, Any], *, base_limit: float, by_key: Dict[str, float]) -> float:
+        # 条件分岐: `not bool(use_class_key_threshold_guard)` を満たす経路を評価する。
         if not bool(use_class_key_threshold_guard):
             return float(base_limit)
+
         class_key = _row_class_key(row)
+        # 条件分岐: `class_key in by_key` を満たす経路を評価する。
         if class_key in by_key:
             return float(max(0.0, _to_float(by_key.get(class_key, base_limit))))
+
         return float(base_limit)
 
     for cand in rows_in:
@@ -1913,8 +2190,10 @@ def _build_localcorr_residue_reweight(
             sigma_floor_mev=float(sigma_floor_mev),
             reference_residue=int(reference_residue),
         )
+        # 条件分岐: `str(residue_pack.get("status")) != "completed"` を満たす経路を評価する。
         if str(residue_pack.get("status")) != "completed":
             continue
+
         summary = residue_pack.get("summary") if isinstance(residue_pack.get("summary"), dict) else {}
         row = dict(cand)
         row["residue_n"] = int(summary.get("n_residues") or 0)
@@ -1985,6 +2264,8 @@ def _build_localcorr_residue_reweight(
         )
         eval_rows.append(row)
 
+    # 条件分岐: `not eval_rows` を満たす経路を評価する。
+
     if not eval_rows:
         return {
             "status": "not_run",
@@ -2038,8 +2319,10 @@ def _build_localcorr_residue_reweight(
 
     class_ranges: Dict[str, Dict[str, Tuple[float, float]]] = {}
     for class_key, rows_cls in class_groups.items():
+        # 条件分岐: `not rows_cls` を満たす経路を評価する。
         if not rows_cls:
             continue
+
         vals_top = [float(r.get("residue_max_pos_delta_top_priority_q_gt3", float("nan"))) for r in rows_cls]
         vals_logcnt = [float(r.get("residue_max_pos_delta_n_logft_gt3", float("nan"))) for r in rows_cls]
         vals_qfail = [float(r.get("residue_max_pos_delta_n_qbeta_gt3", float("nan"))) for r in rows_cls]
@@ -2101,6 +2384,7 @@ def _build_localcorr_residue_reweight(
         eff_weight_sum = float(
             eff_w_top + eff_w_logcnt + eff_w_logspread + eff_w_qfail + eff_w_qspread + eff_w_dq + eff_w_dgap
         )
+        # 条件分岐: `not math.isfinite(eff_weight_sum) or eff_weight_sum <= 0.0` を満たす経路を評価する。
         if not math.isfinite(eff_weight_sum) or eff_weight_sum <= 0.0:
             eff_w_top = float(weights["max_pos_delta_top_priority_q_gt3"])
             eff_w_logcnt = float(weights["max_pos_delta_n_logft_gt3"])
@@ -2112,6 +2396,7 @@ def _build_localcorr_residue_reweight(
             eff_weight_sum = float(
                 eff_w_top + eff_w_logcnt + eff_w_logspread + eff_w_qfail + eff_w_qspread + eff_w_dq + eff_w_dgap
             )
+
         eff_w_top /= eff_weight_sum
         eff_w_logcnt /= eff_weight_sum
         eff_w_logspread /= eff_weight_sum
@@ -2184,13 +2469,16 @@ def _build_localcorr_residue_reweight(
     refrozen_require_residue_logft_nonworsening = bool(require_residue_logft_nonworsening)
     refreeze_applied = False
     refreeze_source = "strict_guard"
+    # 条件分岐: `refreeze_enabled and not strict_root_guard_pass_rows` を満たす経路を評価する。
     if refreeze_enabled and not strict_root_guard_pass_rows:
         source_rows = [r for r in eval_rows if bool(r.get("qbeta_overfit_guard_pass"))]
+        # 条件分岐: `not source_rows` を満たす経路を評価する。
         if not source_rows:
             source_rows = list(eval_rows)
             refreeze_source = "all_candidates"
         else:
             refreeze_source = "qbeta_overfit_guard_pass"
+
         refrozen_logft_count_max_delta = int(
             min(int(max(0, int(r.get("delta_n_logft_gt3_holdout_vs_pre") or 0))) for r in source_rows)
         )
@@ -2262,16 +2550,21 @@ def _build_localcorr_residue_reweight(
         row["residue_top_priority_guard_pass_strict"] = strict_top_pass
         row["residue_overfit_guard_pass_strict"] = strict_overfit_pass
         row["residue_dual_guard_pass_strict"] = bool(strict_top_pass and strict_overfit_pass)
+        # 条件分岐: `bool(row["residue_dual_guard_pass_strict"])` を満たす経路を評価する。
         if bool(row["residue_dual_guard_pass_strict"]):
             strict_residue_dual_pass_rows.append(row)
 
+    # 条件分岐: `residue_dual_refreeze_enabled and not strict_residue_dual_pass_rows` を満たす経路を評価する。
+
     if residue_dual_refreeze_enabled and not strict_residue_dual_pass_rows:
         source_rows = [r for r in eval_rows if bool(r.get("qbeta_overfit_guard_pass"))]
+        # 条件分岐: `not source_rows` を満たす経路を評価する。
         if not source_rows:
             source_rows = list(eval_rows)
             residue_dual_refreeze_source = "all_candidates"
         else:
             residue_dual_refreeze_source = "qbeta_overfit_guard_pass"
+
         refrozen_residue_top_priority_max_delta = int(
             min(int(max(0, int(r.get("residue_max_pos_delta_top_priority_q_gt3") or 0))) for r in source_rows)
         )
@@ -2281,6 +2574,7 @@ def _build_localcorr_residue_reweight(
         residue_dual_refreeze_applied = True
 
     for row in eval_rows:
+        # 条件分岐: `residue_dual_guard_enabled` を満たす経路を評価する。
         if residue_dual_guard_enabled:
             top_limit_eff = _effective_limit_int(
                 row,
@@ -2305,6 +2599,7 @@ def _build_localcorr_residue_reweight(
             overfit_limit_eff = float(refrozen_residue_overfit_max_delta)
             top_pass = True
             overfit_pass = True
+
         row["residue_top_priority_max_delta_effective"] = int(top_limit_eff)
         row["residue_overfit_max_delta_effective"] = float(overfit_limit_eff)
         row["residue_top_priority_guard_pass"] = bool(top_pass)
@@ -2332,6 +2627,7 @@ def _build_localcorr_residue_reweight(
     residue_dual_retune_weight_top = max(0.0, float(residue_dual_retune_top_weight))
     residue_dual_retune_weight_overfit = max(0.0, float(residue_dual_retune_overfit_weight))
     weight_sum = residue_dual_retune_weight_top + residue_dual_retune_weight_overfit
+    # 条件分岐: `weight_sum <= 0.0` を満たす経路を評価する。
     if weight_sum <= 0.0:
         residue_dual_retune_weight_top = 0.5
         residue_dual_retune_weight_overfit = 0.5
@@ -2360,6 +2656,8 @@ def _build_localcorr_residue_reweight(
             residue_dual_retune_weight_top * n_top + residue_dual_retune_weight_overfit * n_overfit
         )
 
+    # 条件分岐: `residue_dual_retune_enabled and not combined_guard_pass_rows` を満たす経路を評価する。
+
     if residue_dual_retune_enabled and not combined_guard_pass_rows:
         source_rows = [
             r
@@ -2369,6 +2667,7 @@ def _build_localcorr_residue_reweight(
                 and (bool(r.get(root_guard_key)) if bool(use_logft_rootcause_guard) else True)
             )
         ]
+        # 条件分岐: `source_rows` を満たす経路を評価する。
         if source_rows:
             residue_dual_retune_source = "qbeta_overfit_and_root_guard_pass"
         else:
@@ -2377,11 +2676,15 @@ def _build_localcorr_residue_reweight(
                 for r in eval_rows
                 if (bool(r.get("qbeta_overfit_guard_pass")) if bool(use_qbeta_overfit_guard) else True)
             ]
+            # 条件分岐: `source_rows` を満たす経路を評価する。
             if source_rows:
                 residue_dual_retune_source = "qbeta_overfit_guard_pass"
             else:
                 source_rows = list(eval_rows)
                 residue_dual_retune_source = "all_candidates"
+
+        # 条件分岐: `source_rows` を満たす経路を評価する。
+
         if source_rows:
             anchor = sorted(
                 source_rows,
@@ -2416,6 +2719,8 @@ def _build_localcorr_residue_reweight(
                 refrozen_residue_overfit_max_delta = float(retuned_overfit)
                 residue_dual_retune_applied = True
 
+        # 条件分岐: `residue_dual_retune_applied` を満たす経路を評価する。
+
         if residue_dual_retune_applied:
             for row in eval_rows:
                 top_limit_eff = _effective_limit_int(
@@ -2441,6 +2746,7 @@ def _build_localcorr_residue_reweight(
                 row["residue_top_priority_guard_pass"] = bool(top_pass)
                 row["residue_overfit_guard_pass"] = bool(overfit_pass)
                 row["residue_dual_guard_pass"] = bool(top_pass and overfit_pass)
+
             residue_dual_guard_pass_rows = [r for r in eval_rows if bool(r.get("residue_dual_guard_pass"))]
             combined_guard_pass_rows = [
                 r
@@ -2466,6 +2772,7 @@ def _build_localcorr_residue_reweight(
         int(max(0, int(logft_rootcause_retune_max_residue_logft_count_delta_allowed))),
     )
 
+    # 条件分岐: `logft_rootcause_retune_enabled and len(combined_guard_pass_rows) < int(logft_...` を満たす経路を評価する。
     if logft_rootcause_retune_enabled and len(combined_guard_pass_rows) < int(logft_rootcause_retune_target_combined_pass_min):
         source_rows = [
             r
@@ -2475,6 +2782,7 @@ def _build_localcorr_residue_reweight(
                 and (bool(r.get("residue_dual_guard_pass")) if bool(residue_dual_guard_enabled) else True)
             )
         ]
+        # 条件分岐: `source_rows` を満たす経路を評価する。
         if source_rows:
             logft_rootcause_retune_source = "qbeta_overfit_and_residue_dual_guard_pass"
         else:
@@ -2483,11 +2791,15 @@ def _build_localcorr_residue_reweight(
                 for r in eval_rows
                 if (bool(r.get("qbeta_overfit_guard_pass")) if bool(use_qbeta_overfit_guard) else True)
             ]
+            # 条件分岐: `source_rows` を満たす経路を評価する。
             if source_rows:
                 logft_rootcause_retune_source = "qbeta_overfit_guard_pass"
             else:
                 source_rows = list(eval_rows)
                 logft_rootcause_retune_source = "all_candidates"
+
+        # 条件分岐: `source_rows` を満たす経路を評価する。
+
         if source_rows:
             target_n = int(logft_rootcause_retune_target_combined_pass_min)
             base_logft_limit = int(refrozen_logft_count_max_delta)
@@ -2530,8 +2842,10 @@ def _build_localcorr_residue_reweight(
                         else True
                     )
                     root_guard_ok = bool(logft_count_ok and residue_logft_count_ok and residue_nonworse_ok)
+                    # 条件分岐: `bool(q_guard_ok and dual_guard_ok and root_guard_ok)` を満たす経路を評価する。
                     if bool(q_guard_ok and dual_guard_ok and root_guard_ok):
                         combined_n += 1
+
                 candidate_choices.append(
                     {
                         "candidate_id": str(cand.get("candidate_id", "")),
@@ -2541,6 +2855,7 @@ def _build_localcorr_residue_reweight(
                         "residue_reweight_score": _to_float(cand.get("residue_reweight_score")),
                     }
                 )
+
             anchor_choice = sorted(
                 candidate_choices,
                 key=lambda c: (
@@ -2564,6 +2879,8 @@ def _build_localcorr_residue_reweight(
                 refrozen_logft_count_max_delta = int(retuned_logft_count_max_delta)
                 refrozen_residue_logft_count_max_delta = int(retuned_residue_logft_count_max_delta)
                 logft_rootcause_retune_applied = True
+
+        # 条件分岐: `logft_rootcause_retune_applied` を満たす経路を評価する。
 
         if logft_rootcause_retune_applied:
             for row in eval_rows:
@@ -2596,6 +2913,7 @@ def _build_localcorr_residue_reweight(
                     and bool(row.get("residue_logft_count_refrozen_pass"))
                     and bool(row.get("residue_logft_nonworsening_refrozen_pass"))
                 )
+
             root_guard_pass_rows = [r for r in eval_rows if bool(r.get(root_guard_key))]
             residue_dual_guard_pass_rows = [r for r in eval_rows if bool(r.get("residue_dual_guard_pass"))]
             combined_guard_pass_rows = [
@@ -2610,20 +2928,36 @@ def _build_localcorr_residue_reweight(
 
     has_combined = bool(combined_guard_pass_rows)
     mode_parts = ["logft_qfail_residue_reweighted"]
+    # 条件分岐: `bool(use_logft_rootcause_guard)` を満たす経路を評価する。
     if bool(use_logft_rootcause_guard):
         mode_parts.append("rootcause")
+        # 条件分岐: `refreeze_enabled` を満たす経路を評価する。
         if refreeze_enabled:
             mode_parts.append("refrozen")
+
+        # 条件分岐: `logft_rootcause_retune_enabled` を満たす経路を評価する。
+
         if logft_rootcause_retune_enabled:
             mode_parts.append("retuned" if logft_rootcause_retune_applied else "retune_ready")
+
+    # 条件分岐: `bool(use_qbeta_overfit_guard)` を満たす経路を評価する。
+
     if bool(use_qbeta_overfit_guard):
         mode_parts.append("qbeta_overfit")
+
+    # 条件分岐: `bool(residue_dual_guard_enabled)` を満たす経路を評価する。
+
     if bool(residue_dual_guard_enabled):
         mode_parts.append("residue_dual")
+        # 条件分岐: `residue_dual_refreeze_enabled` を満たす経路を評価する。
         if residue_dual_refreeze_enabled:
             mode_parts.append("refrozen")
+
+        # 条件分岐: `residue_dual_retune_enabled` を満たす経路を評価する。
+
         if residue_dual_retune_enabled:
             mode_parts.append("retuned" if residue_dual_retune_applied else "retune_ready")
+
     mode = "_".join(mode_parts) + ("_guarded" if has_combined else "_relaxed")
 
     def _tier(row: Dict[str, Any]) -> tuple[int, int, int, int]:
@@ -2823,6 +3157,7 @@ def _build_localcorr_residue_reweight_retune_grid(
 ) -> Dict[str, Any]:
     rows_in = [dict(r) for r in candidate_rows if isinstance(r, dict)]
     tclasses = [str(x) for x in target_classes if str(x).strip()]
+    # 条件分岐: `not rows_in or not tclasses` を満たす経路を評価する。
     if not rows_in or not tclasses:
         return {
             "status": "not_run",
@@ -2843,12 +3178,22 @@ def _build_localcorr_residue_reweight_retune_grid(
     )
     top_vals = sorted({max(0.0, float(v)) for v in class_top_weight_values if math.isfinite(float(v))})
     log_vals = sorted({max(0.0, float(v)) for v in class_logft_weight_values if math.isfinite(float(v))})
+    # 条件分岐: `not lc_vals` を満たす経路を評価する。
     if not lc_vals:
         lc_vals = [0]
+
+    # 条件分岐: `not rlc_vals` を満たす経路を評価する。
+
     if not rlc_vals:
         rlc_vals = [0]
+
+    # 条件分岐: `not top_vals` を満たす経路を評価する。
+
     if not top_vals:
         top_vals = [1.0]
+
+    # 条件分岐: `not log_vals` を満たす経路を評価する。
+
     if not log_vals:
         log_vals = [1.0]
 
@@ -2857,14 +3202,23 @@ def _build_localcorr_residue_reweight_retune_grid(
     target_keys: List[str] = []
     target_seen: Set[str] = set()
     for key in target_keys_raw:
+        # 条件分岐: `key not in target_scope` を満たす経路を評価する。
         if key not in target_scope:
             continue
+
+        # 条件分岐: `key in target_seen` を満たす経路を評価する。
+
         if key in target_seen:
             continue
+
         target_seen.add(key)
         target_keys.append(key)
+
+    # 条件分岐: `not target_keys` を満たす経路を評価する。
+
     if not target_keys:
         target_keys = [str(tclasses[0])]
+
     base_top_map = {str(k): float(max(0.0, _to_float(v))) for k, v in dict(base_class_top_priority_weight_by_key).items()}
     base_log_map = {str(k): float(max(0.0, _to_float(v))) for k, v in dict(base_class_logft_weight_by_key).items()}
 
@@ -2887,6 +3241,7 @@ def _build_localcorr_residue_reweight_retune_grid(
                     for target_key in target_keys:
                         class_top_map[str(target_key)] = float(max(0.0, top_w))
                         class_log_map[str(target_key)] = float(max(0.0, log_w))
+
                     rw_pack = _build_localcorr_residue_reweight(
                         rows_mapped=rows_mapped,
                         target_classes=tclasses,
@@ -2941,8 +3296,10 @@ def _build_localcorr_residue_reweight_retune_grid(
                         class_top_priority_weight_by_key=class_top_map,
                         class_logft_weight_by_key=class_log_map,
                     )
+                    # 条件分岐: `str(rw_pack.get("status")) != "completed"` を満たす経路を評価する。
                     if str(rw_pack.get("status")) != "completed":
                         continue
+
                     rw_policy = (
                         rw_pack.get("selection_policy")
                         if isinstance(rw_pack.get("selection_policy"), dict)
@@ -2972,12 +3329,15 @@ def _build_localcorr_residue_reweight_retune_grid(
                     cands = rw_pack.get("all_candidates") if isinstance(rw_pack.get("all_candidates"), list) else []
                     watch3_count = 0
                     for cand in cands:
+                        # 条件分岐: `not isinstance(cand, dict)` を満たす経路を評価する。
                         if not isinstance(cand, dict):
                             continue
+
                         if bool(cand.get("residue_all_top_priority_nonregression")) and bool(
                             cand.get("residue_all_logft_nonworsening")
                         ) and bool(cand.get("residue_all_logft_count_nonregression")):
                             watch3_count += 1
+
                     n_eval = int(rw_policy.get("n_candidates_evaluated") or 0)
                     watch3_ratio = (float(watch3_count) / float(n_eval)) if n_eval > 0 else 0.0
 
@@ -3020,11 +3380,14 @@ def _build_localcorr_residue_reweight_retune_grid(
                     )
                     row["_rank_key"] = rank_key
                     summary_rows.append(row)
+                    # 条件分岐: `best_key is None or rank_key < best_key` を満たす経路を評価する。
                     if best_key is None or rank_key < best_key:
                         best_key = rank_key
                         best_row = dict(row)
                         best_rw_pack = rw_pack
                         best_lock_pack = lock_pack
+
+    # 条件分岐: `not summary_rows` を満たす経路を評価する。
 
     if not summary_rows:
         return {
@@ -3042,6 +3405,9 @@ def _build_localcorr_residue_reweight_retune_grid(
     for idx, row in enumerate(summary_sorted, start=1):
         row["rank_retune"] = int(idx)
         row.pop("_rank_key", None)
+
+    # 条件分岐: `best_row` を満たす経路を評価する。
+
     if best_row:
         best_row.pop("_rank_key", None)
 
@@ -3121,6 +3487,7 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
 ) -> Dict[str, Any]:
     rows_in = [dict(r) for r in candidate_rows if isinstance(r, dict)]
     tclasses = [str(x) for x in target_classes if str(x).strip()]
+    # 条件分岐: `not rows_in or not tclasses` を満たす経路を評価する。
     if not rows_in or not tclasses:
         return {
             "status": "not_run",
@@ -3139,32 +3506,44 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
     normalized_defs: List[Dict[str, Any]] = []
     seen_defs: Set[Tuple[str, ...]] = set()
     for idx, strat in enumerate(strategy_definitions, start=1):
+        # 条件分岐: `not isinstance(strat, dict)` を満たす経路を評価する。
         if not isinstance(strat, dict):
             continue
+
         mode = str(strat.get("mode", "")).strip() or "custom"
         raw_keys = [str(x).strip() for x in (strat.get("target_class_keys") or []) if str(x).strip()]
         top_k = int(strat.get("target_top_k") or 0)
         keys: List[str] = []
+        # 条件分岐: `mode == "top_k"` を満たす経路を評価する。
         if mode == "top_k":
             k_eff = max(1, top_k)
             keys = [str(x) for x in tclasses[:k_eff]]
         else:
             keys = [str(x) for x in raw_keys if str(x) in class_scope]
+            # 条件分岐: `not keys and top_k > 0` を満たす経路を評価する。
             if not keys and top_k > 0:
                 keys = [str(x) for x in tclasses[: max(1, int(top_k))]]
+
         keys = [str(x) for x in keys if str(x).strip()]
+        # 条件分岐: `not keys` を満たす経路を評価する。
         if not keys:
             continue
+
         dedupe_key = (mode,) + tuple(keys)
+        # 条件分岐: `dedupe_key in seen_defs` を満たす経路を評価する。
         if dedupe_key in seen_defs:
             continue
+
         seen_defs.add(dedupe_key)
         label = str(strat.get("label", "")).strip()
+        # 条件分岐: `not label` を満たす経路を評価する。
         if not label:
+            # 条件分岐: `mode == "top_k"` を満たす経路を評価する。
             if mode == "top_k":
                 label = f"top_k={len(keys)}"
             else:
                 label = "explicit:" + ",".join(keys)
+
         normalized_defs.append(
             {
                 "strategy_id": f"strategy_{idx:02d}",
@@ -3174,6 +3553,8 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
                 "target_class_keys": [str(x) for x in keys],
             }
         )
+
+    # 条件分岐: `len(normalized_defs) <= 0` を満たす経路を評価する。
 
     if len(normalized_defs) <= 0:
         return {
@@ -3200,8 +3581,10 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
 
     for strat in normalized_defs:
         keys = [str(x) for x in (strat.get("target_class_keys") or []) if str(x).strip()]
+        # 条件分岐: `not keys` を満たす経路を評価する。
         if not keys:
             continue
+
         retune_pack = _build_localcorr_residue_reweight_retune_grid(
             rows_mapped=rows_mapped,
             target_classes=tclasses,
@@ -3258,8 +3641,10 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
             class_logft_weight_values=class_logft_weight_values,
             qbeta_count_recovery_policy=qbeta_count_recovery_policy,
         )
+        # 条件分岐: `str(retune_pack.get("status")) != "completed"` を満たす経路を評価する。
         if str(retune_pack.get("status")) != "completed":
             continue
+
         rec = retune_pack.get("recommended_candidate") if isinstance(retune_pack.get("recommended_candidate"), dict) else {}
         grid_spec = retune_pack.get("grid_spec") if isinstance(retune_pack.get("grid_spec"), dict) else {}
         row = {
@@ -3299,10 +3684,13 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
         )
         row["_rank_key"] = rank_key
         summary_rows.append(row)
+        # 条件分岐: `best_key is None or rank_key < best_key` を満たす経路を評価する。
         if best_key is None or rank_key < best_key:
             best_key = rank_key
             best_summary = dict(row)
             best_retune = retune_pack
+
+    # 条件分岐: `not summary_rows` を満たす経路を評価する。
 
     if not summary_rows:
         return {
@@ -3322,6 +3710,9 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
     for idx, row in enumerate(summary_sorted, start=1):
         row["rank_strategy"] = int(idx)
         row.pop("_rank_key", None)
+
+    # 条件分岐: `best_summary` を満たす経路を評価する。
+
     if best_summary:
         best_summary.pop("_rank_key", None)
 
@@ -3366,6 +3757,7 @@ def _build_candidate_stability_lock(
     qbeta_count_recovery_policy: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     rows = reweight_pack.get("all_candidates")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         return {
             "status": "not_run",
@@ -3425,16 +3817,20 @@ def _build_candidate_stability_lock(
     refrozen_residue_overfit_limit = _to_float(
         refreeze_policy.get("refrozen_residue_overfit_max_delta_allowed")
     )
+    # 条件分岐: `not math.isfinite(refrozen_residue_overfit_limit)` を満たす経路を評価する。
     if not math.isfinite(refrozen_residue_overfit_limit):
         refrozen_residue_overfit_limit = 0.0
+
     qbeta_recovery_policy = qbeta_count_recovery_policy if isinstance(qbeta_count_recovery_policy, dict) else {}
     qbeta_count_max_delta = int(qbeta_recovery_policy.get("qbeta_count_max_delta", 0) or 0)
     qbeta_count_recovery_enabled = bool(qbeta_recovery_policy.get("enabled", False))
     qbeta_count_recovery_logft_p95_max_delta = _to_float(
         qbeta_recovery_policy.get("logft_p95_max_delta", 0.0)
     )
+    # 条件分岐: `not math.isfinite(qbeta_count_recovery_logft_p95_max_delta)` を満たす経路を評価する。
     if not math.isfinite(qbeta_count_recovery_logft_p95_max_delta):
         qbeta_count_recovery_logft_p95_max_delta = 0.0
+
     qbeta_count_recovery_logft_count_max_delta = int(
         qbeta_recovery_policy.get("logft_count_max_delta", 0) or 0
     )
@@ -3444,12 +3840,15 @@ def _build_candidate_stability_lock(
     qbeta_count_recovery_residue_overfit_max_delta = _to_float(
         qbeta_recovery_policy.get("residue_overfit_max_delta", 0.0)
     )
+    # 条件分岐: `not math.isfinite(qbeta_count_recovery_residue_overfit_max_delta)` を満たす経路を評価する。
     if not math.isfinite(qbeta_count_recovery_residue_overfit_max_delta):
         qbeta_count_recovery_residue_overfit_max_delta = 0.0
 
     for row_in in rows:
+        # 条件分岐: `not isinstance(row_in, dict)` を満たす経路を評価する。
         if not isinstance(row_in, dict):
             continue
+
         row = dict(row_in)
         d_q = _to_float(row.get("holdout_p95_abs_z_qbeta")) - float(pre_local_holdout_p95_qbeta)
         d_l = _to_float(row.get("holdout_p95_abs_z_logft")) - float(pre_local_holdout_p95_logft)
@@ -3457,8 +3856,10 @@ def _build_candidate_stability_lock(
         d_n_q = int(row.get("n_qbeta_gt3_holdout") or 0) - int(pre_local_n_qbeta_gt3_holdout)
         d_n_log = int(row.get("n_logft_gt3_holdout") or 0) - int(pre_local_n_logft_gt3_holdout)
         residue_overfit_delta = max(0.0, _to_float(row.get("residue_max_pos_delta_overfit_gap_qbeta")))
+        # 条件分岐: `not math.isfinite(residue_overfit_delta)` を満たす経路を評価する。
         if not math.isfinite(residue_overfit_delta):
             residue_overfit_delta = 0.0 if bool(row.get("residue_all_overfit_nonworsening") is True) else float("inf")
+
         qbeta_count_guard_pass = bool(d_n_q <= int(qbeta_count_max_delta))
         qbeta_count_recovery_relax_active = bool(
             qbeta_count_recovery_enabled
@@ -3480,6 +3881,7 @@ def _build_candidate_stability_lock(
         residue_overfit_limit = (
             float(refrozen_residue_overfit_limit) if bool(use_residue_dual_guard) else 0.0
         )
+        # 条件分岐: `qbeta_count_recovery_relax_active` を満たす経路を評価する。
         if qbeta_count_recovery_relax_active:
             residue_overfit_limit = max(residue_overfit_limit, float(qbeta_count_recovery_residue_overfit_max_delta))
 
@@ -3512,6 +3914,7 @@ def _build_candidate_stability_lock(
             ),
         }
         for key, ok in gate_map.items():
+            # 条件分岐: `not ok` を満たす経路を評価する。
             if not ok:
                 fail_counter[key] = int(fail_counter.get(key, 0) + 1)
 
@@ -3548,6 +3951,8 @@ def _build_candidate_stability_lock(
         row["stability_violation_score"] = float(violation_score)
         row["stability_violation_count"] = int(sum(0 if ok else 1 for ok in gate_map.values()))
         evaluated.append(row)
+
+    # 条件分岐: `not evaluated` を満たす経路を評価する。
 
     if not evaluated:
         return {
@@ -3661,8 +4066,10 @@ def _build_candidate_stability_lock(
 
 def _plot_residue_robustness(*, residue_pack: Dict[str, Any], out_png: Path) -> None:
     rows = residue_pack.get("rows")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         return
+
     rows_sorted = sorted(rows, key=lambda r: int(r.get("residue", 0)))
     x = [int(r.get("residue", 0)) for r in rows_sorted]
     q = [_to_float(r.get("holdout_p95_abs_z_qbeta")) for r in rows_sorted]
@@ -3755,8 +4162,10 @@ def _plot(
     vals = [ckm_abs_z, pmns_abs_z]
     colors = ["#d62728" if math.isfinite(v) and math.isfinite(closure_watch_gate) and v > closure_watch_gate else "#2ca02c" for v in vals]
     ax2.bar([0, 1], vals, color=colors)
+    # 条件分岐: `math.isfinite(closure_watch_gate)` を満たす経路を評価する。
     if math.isfinite(closure_watch_gate):
         ax2.axhline(closure_watch_gate, color="#333333", linestyle="--", linewidth=1.1)
+
     ax2.set_xticks([0, 1], labels)
     ax2.set_ylabel("abs(z)")
     ax2.set_title("CKM/PMNS closure watch gate")
@@ -4315,12 +4724,17 @@ def main() -> None:
     parser.add_argument("--outdir", type=Path, default=ROOT / "output" / "public" / "quantum")
     args = parser.parse_args()
 
+    # 条件分岐: `not args.in_csv.exists()` を満たす経路を評価する。
     if not args.in_csv.exists():
         raise SystemExit(f"[fail] missing input csv: {args.in_csv}")
+
+    # 条件分岐: `not args.in_json.exists()` を満たす経路を評価する。
+
     if not args.in_json.exists():
         raise SystemExit(f"[fail] missing input json: {args.in_json}")
 
     rows = _load_rows(args.in_csv)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise SystemExit(f"[fail] empty input rows: {args.in_csv}")
 
@@ -4355,10 +4769,16 @@ def main() -> None:
         if math.isfinite(float(args.hflavor_branch_pivot_mev)) and float(args.hflavor_branch_pivot_mev) > 0.0
         else pivot_auto
     )
+    # 条件分岐: `not math.isfinite(sat_scale_mev) or sat_scale_mev <= 0.0` を満たす経路を評価する。
     if not math.isfinite(sat_scale_mev) or sat_scale_mev <= 0.0:
         sat_scale_mev = 10.0
+
+    # 条件分岐: `not math.isfinite(branch_pivot_mev) or branch_pivot_mev < 0.0` を満たす経路を評価する。
+
     if not math.isfinite(branch_pivot_mev) or branch_pivot_mev < 0.0:
         branch_pivot_mev = 2.0
+
+    # 条件分岐: `args.hflavor_mode == "hflavor_v1"` を満たす経路を評価する。
 
     if args.hflavor_mode == "hflavor_v1":
         mapped_rows, hflavor_mapping = _apply_hflavor_v1(
@@ -4396,6 +4816,7 @@ def main() -> None:
 
     route_eval = equalized_pack.get("route_evaluation") if isinstance(equalized_pack.get("route_evaluation"), dict) else {}
     route_b_eval_pre_local = route_eval.get("B_pmodel_proxy") if isinstance(route_eval.get("B_pmodel_proxy"), dict) else {}
+    # 条件分岐: `not route_b_eval_pre_local` を満たす経路を評価する。
     if not route_b_eval_pre_local:
         raise SystemExit("[fail] missing route-B evaluation from equalized pack")
 
@@ -4456,16 +4877,31 @@ def main() -> None:
     sweep_branch_pivot_values = _parse_float_list_csv(args.sweep_branch_pivot_values)
     sweep_branch_gain_values = _parse_float_list_csv(args.sweep_branch_gain_values)
     sweep_sign_blend_values = _parse_float_list_csv(args.sweep_sign_blend_values)
+    # 条件分岐: `not sweep_before_mix_values` を満たす経路を評価する。
     if not sweep_before_mix_values:
         sweep_before_mix_values = [0.8]
+
+    # 条件分岐: `not sweep_sat_scale_multipliers` を満たす経路を評価する。
+
     if not sweep_sat_scale_multipliers:
         sweep_sat_scale_multipliers = [1.0]
+
+    # 条件分岐: `not sweep_branch_pivot_values` を満たす経路を評価する。
+
     if not sweep_branch_pivot_values:
         sweep_branch_pivot_values = [float(branch_pivot_mev)]
+
+    # 条件分岐: `not sweep_branch_gain_values` を満たす経路を評価する。
+
     if not sweep_branch_gain_values:
         sweep_branch_gain_values = [float(args.hflavor_branch_gain)]
+
+    # 条件分岐: `not sweep_sign_blend_values` を満たす経路を評価する。
+
     if not sweep_sign_blend_values:
         sweep_sign_blend_values = [float(args.hflavor_sign_blend)]
+
+    # 条件分岐: `bool(args.run_hflavor_sweep) and args.hflavor_mode != "baseline"` を満たす経路を評価する。
 
     if bool(args.run_hflavor_sweep) and args.hflavor_mode != "baseline":
         hflavor_sweep = _build_hflavor_sweep(
@@ -4605,44 +5041,93 @@ def main() -> None:
     localcorr_residue_class_retune_target_keys_effective: List[str] = []
     for key in localcorr_residue_class_retune_target_class_keys:
         key_s = str(key).strip()
+        # 条件分岐: `key_s and key_s not in localcorr_residue_class_retune_target_keys_effective` を満たす経路を評価する。
         if key_s and key_s not in localcorr_residue_class_retune_target_keys_effective:
             localcorr_residue_class_retune_target_keys_effective.append(key_s)
+
+    # 条件分岐: `not localcorr_residue_class_retune_target_keys_effective` を満たす経路を評価する。
+
     if not localcorr_residue_class_retune_target_keys_effective:
         fallback_key = str(args.localcorr_residue_class_retune_target_class_key).strip()
+        # 条件分岐: `fallback_key` を満たす経路を評価する。
         if fallback_key:
             localcorr_residue_class_retune_target_keys_effective = [fallback_key]
+
+    # 条件分岐: `not localcorr_residue_class_retune_logft_count_max_delta_values` を満たす経路を評価する。
+
     if not localcorr_residue_class_retune_logft_count_max_delta_values:
         localcorr_residue_class_retune_logft_count_max_delta_values = [int(args.localcorr_logft_count_max_delta)]
+
+    # 条件分岐: `not localcorr_residue_class_retune_residue_logft_count_max_delta_values` を満たす経路を評価する。
+
     if not localcorr_residue_class_retune_residue_logft_count_max_delta_values:
         localcorr_residue_class_retune_residue_logft_count_max_delta_values = [
             int(args.localcorr_residue_logft_count_max_delta)
         ]
+
+    # 条件分岐: `not localcorr_residue_class_retune_top_weight_values` を満たす経路を評価する。
+
     if not localcorr_residue_class_retune_top_weight_values:
         localcorr_residue_class_retune_top_weight_values = [1.0]
+
+    # 条件分岐: `not localcorr_residue_class_retune_logft_weight_values` を満たす経路を評価する。
+
     if not localcorr_residue_class_retune_logft_weight_values:
         localcorr_residue_class_retune_logft_weight_values = [1.0]
+
+    # 条件分岐: `not localcorr_gain_values` を満たす経路を評価する。
+
     if not localcorr_gain_values:
         localcorr_gain_values = [0.8]
+
+    # 条件分岐: `not localcorr_sat_mev_values` を満たす経路を評価する。
+
     if not localcorr_sat_mev_values:
         localcorr_sat_mev_values = [5.0]
+
+    # 条件分岐: `not localcorr_blend_values` を満たす経路を評価する。
+
     if not localcorr_blend_values:
         localcorr_blend_values = [0.6]
+
+    # 条件分岐: `not localcorr_sign_blend_values` を満たす経路を評価する。
+
     if not localcorr_sign_blend_values:
         localcorr_sign_blend_values = [0.0]
+
+    # 条件分岐: `not localcorr_top_class_gain_boost_values` を満たす経路を評価する。
+
     if not localcorr_top_class_gain_boost_values:
         localcorr_top_class_gain_boost_values = [1.0]
+
+    # 条件分岐: `not localcorr_top_class_sign_blend_scale_values` を満たす経路を評価する。
+
     if not localcorr_top_class_sign_blend_scale_values:
         localcorr_top_class_sign_blend_scale_values = [1.0]
+
+    # 条件分岐: `not localcorr_sigma_low_mode_inconsistent_sat_scale_values` を満たす経路を評価する。
+
     if not localcorr_sigma_low_mode_inconsistent_sat_scale_values:
         localcorr_sigma_low_mode_inconsistent_sat_scale_values = [1.0]
+
+    # 条件分岐: `not localcorr_sigma_low_mode_inconsistent_zref_values` を満たす経路を評価する。
+
     if not localcorr_sigma_low_mode_inconsistent_zref_values:
         localcorr_sigma_low_mode_inconsistent_zref_values = [5.0]
+
+    # 条件分岐: `not localcorr_sigma_low_mode_inconsistent_min_blend_scale_values` を満たす経路を評価する。
+
     if not localcorr_sigma_low_mode_inconsistent_min_blend_scale_values:
         localcorr_sigma_low_mode_inconsistent_min_blend_scale_values = [1.0]
+
+    # 条件分岐: `not localcorr_sigma_low_mode_inconsistent_sign_blend_scale_values` を満たす経路を評価する。
+
     if not localcorr_sigma_low_mode_inconsistent_sign_blend_scale_values:
         localcorr_sigma_low_mode_inconsistent_sign_blend_scale_values = [1.0]
+
     residue_values = _parse_int_list_csv(args.residue_robustness_residues)
     modulo = max(1, int(args.holdout_hash_modulo))
+    # 条件分岐: `not residue_values` を満たす経路を評価する。
     if not residue_values:
         residue_values = list(range(modulo))
 
@@ -4820,6 +5305,7 @@ def main() -> None:
         "rows": [],
         "summary": {},
     }
+    # 条件分岐: `bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline"` を満たす経路を評価する。
     if bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline":
         top_n = max(1, int(args.localcorr_top_classes))
         pre_priority = (
@@ -4831,31 +5317,43 @@ def main() -> None:
         pre_top_qfail = int(pre_priority[0].get("n_qbeta_gt3", 0)) if pre_priority else 0
         target_classes = [str(r.get("group_key", "")) for r in pre_priority[:top_n] if str(r.get("group_key", "")).strip()]
         class_scope = {str(x) for x in target_classes}
+        # 条件分岐: `localcorr_residue_class_retune_target_class_keys` を満たす経路を評価する。
         if localcorr_residue_class_retune_target_class_keys:
             filtered_keys = [str(x) for x in localcorr_residue_class_retune_target_class_keys if str(x) in class_scope]
             localcorr_residue_class_retune_target_keys_effective = filtered_keys
+        # 条件分岐: 前段条件が不成立で、`int(localcorr_residue_class_retune_target_top_k) > 1` を追加評価する。
         elif int(localcorr_residue_class_retune_target_top_k) > 1:
             localcorr_residue_class_retune_target_keys_effective = [
                 str(x) for x in target_classes[: int(localcorr_residue_class_retune_target_top_k)] if str(x).strip()
             ]
         else:
             default_key = str(args.localcorr_residue_class_retune_target_class_key).strip()
+            # 条件分岐: `default_key in class_scope` を満たす経路を評価する。
             if default_key in class_scope:
                 localcorr_residue_class_retune_target_keys_effective = [default_key]
+            # 条件分岐: 前段条件が不成立で、`target_classes` を追加評価する。
             elif target_classes:
                 localcorr_residue_class_retune_target_keys_effective = [str(target_classes[0])]
+
+        # 条件分岐: `not localcorr_residue_class_retune_target_keys_effective and target_classes` を満たす経路を評価する。
+
         if not localcorr_residue_class_retune_target_keys_effective and target_classes:
             localcorr_residue_class_retune_target_keys_effective = [str(target_classes[0])]
+
         strategy_defs: List[Dict[str, Any]] = []
         strategy_seen: Set[Tuple[str, ...]] = set()
 
         def _append_strategy(mode: str, keys: List[str], top_k: int, label: str) -> None:
             keys_eff = [str(x) for x in keys if str(x).strip() and str(x) in class_scope]
+            # 条件分岐: `not keys_eff` を満たす経路を評価する。
             if not keys_eff:
                 return
+
             sig = (str(mode),) + tuple(keys_eff)
+            # 条件分岐: `sig in strategy_seen` を満たす経路を評価する。
             if sig in strategy_seen:
                 return
+
             strategy_seen.add(sig)
             strategy_defs.append(
                 {
@@ -4880,6 +5378,9 @@ def main() -> None:
                 int(k_eff),
                 f"top_k={int(k_eff)}",
             )
+
+        # 条件分岐: `localcorr_residue_class_retune_target_class_keys` を満たす経路を評価する。
+
         if localcorr_residue_class_retune_target_class_keys:
             _append_strategy(
                 "explicit",
@@ -4887,6 +5388,7 @@ def main() -> None:
                 len(localcorr_residue_class_retune_target_class_keys),
                 "explicit:target_class_keys",
             )
+
         for idx_group, group in enumerate(localcorr_residue_class_retune_target_class_keys_groups, start=1):
             _append_strategy(
                 "explicit",
@@ -4894,6 +5396,7 @@ def main() -> None:
                 len(group),
                 f"explicit_group_{idx_group}",
             )
+
         _append_strategy(
             "explicit",
             [str(x) for x in localcorr_residue_class_retune_target_keys_effective],
@@ -4984,6 +5487,7 @@ def main() -> None:
                 "rank_constrained",
             ],
         )
+        # 条件分岐: `bool(args.localcorr_constrained_select)` を満たす経路を評価する。
         if bool(args.localcorr_constrained_select):
             recommended_local = (
                 localcorr_sweep.get("recommended_candidate")
@@ -4998,17 +5502,25 @@ def main() -> None:
                 if isinstance(localcorr_sweep.get("recommended_candidate_unconstrained"), dict)
                 else {}
             )
+            # 条件分岐: `not recommended_local and isinstance(localcorr_sweep.get("recommended_candida...` を満たす経路を評価する。
             if not recommended_local and isinstance(localcorr_sweep.get("recommended_candidate"), dict):
                 recommended_local = localcorr_sweep.get("recommended_candidate")  # type: ignore[assignment]
+
             recommended_source = "unconstrained"
+
+        # 条件分岐: `bool(args.localcorr_residue_reweight)` を満たす経路を評価する。
 
         if bool(args.localcorr_residue_reweight):
             all_lc_rows = localcorr_sweep.get("all_candidates") if isinstance(localcorr_sweep.get("all_candidates"), list) else []
+            # 条件分岐: `bool(args.localcorr_constrained_select)` を満たす経路を評価する。
             if bool(args.localcorr_constrained_select):
                 rows_for_reweight = [r for r in all_lc_rows if isinstance(r, dict) and bool(r.get("all_constraints_pass"))]
+                # 条件分岐: `not rows_for_reweight` を満たす経路を評価する。
                 if not rows_for_reweight:
                     rows_for_reweight = [r for r in all_lc_rows if isinstance(r, dict) and bool(r.get("logft_constraint_pass"))]
+
                 target_rows_for_reweight = max(8, int(args.localcorr_residue_reweight_max_candidates))
+                # 条件分岐: `len(rows_for_reweight) < target_rows_for_reweight` を満たす経路を評価する。
                 if len(rows_for_reweight) < target_rows_for_reweight:
                     supplement_pool = [r for r in all_lc_rows if isinstance(r, dict)]
                     supplement_pool = sorted(
@@ -5022,14 +5534,18 @@ def main() -> None:
                     selected_ids = {str(r.get("candidate_id", "")) for r in rows_for_reweight}
                     for cand in supplement_pool:
                         cid = str(cand.get("candidate_id", ""))
+                        # 条件分岐: `cid in selected_ids` を満たす経路を評価する。
                         if cid in selected_ids:
                             continue
+
                         rows_for_reweight.append(cand)
                         selected_ids.add(cid)
+                        # 条件分岐: `len(rows_for_reweight) >= target_rows_for_reweight` を満たす経路を評価する。
                         if len(rows_for_reweight) >= target_rows_for_reweight:
                             break
             else:
                 rows_for_reweight = [r for r in all_lc_rows if isinstance(r, dict)]
+
             reweight_common_kwargs = {
                 "rows_mapped": mapped_rows,
                 "target_classes": target_classes,
@@ -5097,6 +5613,7 @@ def main() -> None:
                     args.stability_qbeta_count_recovery_residue_overfit_max_delta
                 ),
             }
+            # 条件分岐: `bool(args.localcorr_residue_class_retune_grid)` を満たす経路を評価する。
             if bool(args.localcorr_residue_class_retune_grid):
                 localcorr_residue_reweight_retune = _build_localcorr_residue_reweight_retune_grid(
                     **reweight_common_kwargs,
@@ -5147,6 +5664,7 @@ def main() -> None:
                         else {}
                     )
                     localcorr_residue_reweight["selection_policy"] = rw_policy_retuned
+                # 条件分岐: 前段条件が不成立で、`isinstance(localcorr_residue_reweight_retune, dict)` を追加評価する。
                 elif isinstance(localcorr_residue_reweight_retune, dict):
                     localcorr_residue_reweight_retune["applied_best"] = False
             else:
@@ -5178,6 +5696,9 @@ def main() -> None:
                     "all_candidates": [],
                     "applied_best": False,
                 }
+
+            # 条件分岐: `bool(args.localcorr_residue_class_retune_strategy_audit)` を満たす経路を評価する。
+
             if bool(args.localcorr_residue_class_retune_strategy_audit):
                 localcorr_residue_reweight_retune_strategy = _build_localcorr_residue_reweight_retune_strategy_audit(
                     **reweight_common_kwargs,
@@ -5222,6 +5743,7 @@ def main() -> None:
                         localcorr_residue_reweight_retune_strategy.get("strategy_count") or 0
                     )
                     localcorr_residue_reweight["selection_policy"] = rw_policy_retuned
+                # 条件分岐: 前段条件が不成立で、`isinstance(localcorr_residue_reweight_retune_strategy, dict)` を追加評価する。
                 elif isinstance(localcorr_residue_reweight_retune_strategy, dict):
                     localcorr_residue_reweight_retune_strategy["applied_best"] = False
             else:
@@ -5237,6 +5759,7 @@ def main() -> None:
                     "recommended_retune_grid_spec": {},
                     "applied_best": False,
                 }
+
             _write_csv_rows(
                 out_localcorr_reweight_retune_csv,
                 localcorr_residue_reweight_retune.get("all_candidates")
@@ -5403,12 +5926,15 @@ def main() -> None:
                 if isinstance(localcorr_residue_reweight.get("selection_policy"), dict)
                 else {}
             )
+            # 条件分岐: `rec_rw` を満たす経路を評価する。
             if rec_rw:
                 recommended_local = rec_rw
                 recommended_source = str(rw_policy.get("mode", "logft_qfail_residue_reweighted"))
                 localcorr_sweep["recommended_candidate"] = rec_rw
+                # 条件分岐: `isinstance(localcorr_residue_reweight.get("top_ranked_candidates"), list)` を満たす経路を評価する。
                 if isinstance(localcorr_residue_reweight.get("top_ranked_candidates"), list):
                     localcorr_sweep["top_ranked_candidates"] = localcorr_residue_reweight.get("top_ranked_candidates")
+
             policy = localcorr_sweep.get("selection_policy") if isinstance(localcorr_sweep.get("selection_policy"), dict) else {}
             policy["residue_reweight_enabled"] = True
             policy["residue_reweight_status"] = str(localcorr_residue_reweight.get("status", "not_run"))
@@ -5601,12 +6127,16 @@ def main() -> None:
                 if isinstance(localcorr_residue_reweight_retune_strategy.get("recommended_strategy"), dict)
                 else {}
             )
+            # 条件分岐: `rec_rw` を満たす経路を評価する。
             if rec_rw:
                 policy["mode"] = str(rw_policy.get("mode", policy.get("mode", "logft_qfail_residue_reweighted")))
+
             localcorr_sweep["selection_policy"] = policy
+
         localcorr_sweep["residue_reweight"] = localcorr_residue_reweight
         localcorr_sweep["residue_reweight_retune"] = localcorr_residue_reweight_retune
         localcorr_sweep["residue_reweight_retune_strategy"] = localcorr_residue_reweight_retune_strategy
+        # 条件分岐: `bool(args.run_candidate_stability_lock)` を満たす経路を評価する。
         if bool(args.run_candidate_stability_lock):
             rw_policy_for_lock = (
                 localcorr_residue_reweight.get("selection_policy")
@@ -5691,12 +6221,15 @@ def main() -> None:
                 else {}
             )
             lock_mode = str(candidate_stability_lock.get("mode", "not_run"))
+            # 条件分岐: `lock_rec and lock_mode == "stable_locked"` を満たす経路を評価する。
             if lock_rec and lock_mode == "stable_locked":
                 recommended_local = lock_rec
                 recommended_source = f"candidate_stability_lock::{lock_mode}"
                 localcorr_sweep["recommended_candidate"] = lock_rec
+                # 条件分岐: `isinstance(candidate_stability_lock.get("top_ranked_candidates"), list)` を満たす経路を評価する。
                 if isinstance(candidate_stability_lock.get("top_ranked_candidates"), list):
                     localcorr_sweep["top_ranked_candidates"] = candidate_stability_lock.get("top_ranked_candidates")
+
             policy = localcorr_sweep.get("selection_policy") if isinstance(localcorr_sweep.get("selection_policy"), dict) else {}
             policy["candidate_stability_lock_enabled"] = True
             policy["candidate_stability_lock_status"] = str(candidate_stability_lock.get("status", "not_run"))
@@ -5719,7 +6252,9 @@ def main() -> None:
                     "enabled": False,
                 },
             }
+
         localcorr_sweep["candidate_stability_lock"] = candidate_stability_lock
+        # 条件分岐: `recommended_local and target_classes` を満たす経路を評価する。
         if recommended_local and target_classes:
             final_class_gain_scales = _build_candidate_class_gain_scales(
                 candidate=recommended_local,
@@ -5763,6 +6298,7 @@ def main() -> None:
                 if isinstance(route_eval_local.get("B_pmodel_proxy"), dict)
                 else {}
             )
+            # 条件分岐: `route_b_eval_local` を満たす経路を評価する。
             if route_b_eval_local:
                 rows_for_residue_audit = final_rows
                 route_b_eval = route_b_eval_local
@@ -5830,6 +6366,8 @@ def main() -> None:
                 "target_classes": target_classes,
                 "selected_candidate_source": recommended_source,
             }
+
+    # 条件分岐: `bool(args.run_residue_robustness) and str(local_correction.get("status")) ==...` を満たす経路を評価する。
 
     if bool(args.run_residue_robustness) and str(local_correction.get("status")) == "applied":
         residue_robustness = _build_residue_robustness(
@@ -5974,6 +6512,7 @@ def main() -> None:
     )
     _plot_outlier_decomposition(decomposition=outlier_decomposition, out_png=out_decomp_png)
 
+    # 条件分岐: `args.hflavor_mode == "baseline"` を満たす経路を評価する。
     if args.hflavor_mode == "baseline":
         step_id = "8.7.31.1"
     elif (
@@ -6106,6 +6645,7 @@ def main() -> None:
             else 0
         )
         retune_target_class_n = 0
+        # 条件分岐: `isinstance(localcorr_residue_reweight_retune, dict)` を満たす経路を評価する。
         if isinstance(localcorr_residue_reweight_retune, dict):
             rec_retune_step = (
                 localcorr_residue_reweight_retune.get("recommended_candidate")
@@ -6113,12 +6653,14 @@ def main() -> None:
                 else {}
             )
             retune_target_class_n = int(rec_retune_step.get("n_target_classes") or 0)
+            # 条件分岐: `retune_target_class_n <= 0` を満たす経路を評価する。
             if retune_target_class_n <= 0:
                 retune_target_class_n = len(
                     localcorr_residue_reweight_retune.get("target_class_keys")
                     if isinstance(localcorr_residue_reweight_retune.get("target_class_keys"), list)
                     else []
                 )
+
         strategy_density_stage_stage2_completed = bool(
             retune_strategy_completed
             and retune_strategy_applied
@@ -6135,14 +6677,20 @@ def main() -> None:
         retune_strategy_top_k_max = 0
         retune_strategy_explicit_group_count = 0
         for row_strat in strategy_rows_step:
+            # 条件分岐: `not isinstance(row_strat, dict)` を満たす経路を評価する。
             if not isinstance(row_strat, dict):
                 continue
+
             target_top_k = int(row_strat.get("target_top_k") or 0)
+            # 条件分岐: `target_top_k > retune_strategy_top_k_max` を満たす経路を評価する。
             if target_top_k > retune_strategy_top_k_max:
                 retune_strategy_top_k_max = target_top_k
+
             mode_str = str(row_strat.get("strategy_mode", "")).strip().lower()
+            # 条件分岐: `mode_str != "top_k"` を満たす経路を評価する。
             if mode_str != "top_k":
                 retune_strategy_explicit_group_count += 1
+
         class_guard_key_union: Set[str] = set()
         class_guard_key_union.update(str(k) for k in localcorr_class_logft_count_max_delta_by_key.keys())
         class_guard_key_union.update(str(k) for k in localcorr_class_residue_logft_count_max_delta_by_key.keys())
@@ -6170,18 +6718,25 @@ def main() -> None:
             and int(n_localcorr_candidates) >= 32
             and int(args.localcorr_residue_reweight_max_candidates) >= 32
         )
+        # 条件分岐: `class_guard_retune_stage_completed` を満たす経路を評価する。
         if class_guard_retune_stage_completed:
             step_id = "8.7.31.33"
+        # 条件分岐: 前段条件が不成立で、`class_guard_stage_completed` を追加評価する。
         elif class_guard_stage_completed:
             step_id = "8.7.31.32"
+        # 条件分岐: 前段条件が不成立で、`strategy_density_stage_stage2_completed` を追加評価する。
         elif strategy_density_stage_stage2_completed:
             step_id = "8.7.31.31"
+        # 条件分岐: 前段条件が不成立で、`strategy_density_stage_completed` を追加評価する。
         elif strategy_density_stage_completed:
             step_id = "8.7.31.30"
+        # 条件分岐: 前段条件が不成立で、`retune_strategy_completed and retune_strategy_applied and int(retune_strategy...` を追加評価する。
         elif retune_strategy_completed and retune_strategy_applied and int(retune_strategy_count) >= 2:
             step_id = "8.7.31.29"
+        # 条件分岐: 前段条件が不成立で、`retune_grid_completed and retune_grid_applied and int(retune_target_class_n)...` を追加評価する。
         elif retune_grid_completed and retune_grid_applied and int(retune_target_class_n) >= 2:
             step_id = "8.7.31.28"
+        # 条件分岐: 前段条件が不成立で、`retune_grid_completed and retune_grid_applied` を追加評価する。
         elif retune_grid_completed and retune_grid_applied:
             step_id = "8.7.31.27"
         elif (
@@ -6420,8 +6975,10 @@ def main() -> None:
             and combined_pass_n > 0
         ):
             step_id = "8.7.31.16"
+        # 条件分岐: 前段条件が不成立で、`int(args.localcorr_top_classes) > 2 and bool(args.localcorr_residue_dual_guard)` を追加評価する。
         elif int(args.localcorr_top_classes) > 2 and bool(args.localcorr_residue_dual_guard):
             step_id = "8.7.31.15"
+        # 条件分岐: 前段条件が不成立で、`int(args.localcorr_top_classes) > 2` を追加評価する。
         elif int(args.localcorr_top_classes) > 2:
             step_id = "8.7.31.14"
         else:
@@ -6507,10 +7064,13 @@ def main() -> None:
         and bool(args.localcorr_use_qfail_guard)
     ):
         step_id = "8.7.31.7"
+    # 条件分岐: 前段条件が不成立で、`bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline" and bool(a...` を追加評価する。
     elif bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline" and bool(args.localcorr_constrained_select):
         step_id = "8.7.31.6"
+    # 条件分岐: 前段条件が不成立で、`bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline"` を追加評価する。
     elif bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline":
         step_id = "8.7.31.5"
+    # 条件分岐: 前段条件が不成立で、`bool(args.run_hflavor_sweep)` を追加評価する。
     elif bool(args.run_hflavor_sweep):
         step_id = "8.7.31.4"
     else:
@@ -6782,25 +7342,47 @@ def main() -> None:
     print(f"  {_rel(out_png)}")
     print(f"  {_rel(out_decomp_csv)}")
     print(f"  {_rel(out_decomp_png)}")
+    # 条件分岐: `bool(args.run_hflavor_sweep) and args.hflavor_mode != "baseline"` を満たす経路を評価する。
     if bool(args.run_hflavor_sweep) and args.hflavor_mode != "baseline":
         print(f"  {_rel(out_sweep_csv)}")
         print(f"  {_rel(out_sweep_png)}")
+
+    # 条件分岐: `bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline"` を満たす経路を評価する。
+
     if bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline":
         print(f"  {_rel(out_localcorr_csv)}")
+        # 条件分岐: `out_localcorr_png.exists()` を満たす経路を評価する。
         if out_localcorr_png.exists():
             print(f"  {_rel(out_localcorr_png)}")
+
+        # 条件分岐: `bool(args.localcorr_residue_reweight) and out_localcorr_reweight_csv.exists()` を満たす経路を評価する。
+
         if bool(args.localcorr_residue_reweight) and out_localcorr_reweight_csv.exists():
             print(f"  {_rel(out_localcorr_reweight_csv)}")
+
+        # 条件分岐: `bool(args.localcorr_residue_reweight) and out_localcorr_reweight_retune_csv.e...` を満たす経路を評価する。
+
         if bool(args.localcorr_residue_reweight) and out_localcorr_reweight_retune_csv.exists():
             print(f"  {_rel(out_localcorr_reweight_retune_csv)}")
+
+        # 条件分岐: `bool(args.localcorr_residue_reweight) and out_localcorr_reweight_retune_strat...` を満たす経路を評価する。
+
         if bool(args.localcorr_residue_reweight) and out_localcorr_reweight_retune_strategy_csv.exists():
             print(f"  {_rel(out_localcorr_reweight_retune_strategy_csv)}")
+
+        # 条件分岐: `bool(args.run_candidate_stability_lock) and out_stability_lock_csv.exists()` を満たす経路を評価する。
+
         if bool(args.run_candidate_stability_lock) and out_stability_lock_csv.exists():
             print(f"  {_rel(out_stability_lock_csv)}")
+
+    # 条件分岐: `bool(args.run_residue_robustness) and str(residue_robustness.get("status")) =...` を満たす経路を評価する。
+
     if bool(args.run_residue_robustness) and str(residue_robustness.get("status")) == "completed":
         print(f"  {_rel(out_residue_csv)}")
+        # 条件分岐: `out_residue_png.exists()` を満たす経路を評価する。
         if out_residue_png.exists():
             print(f"  {_rel(out_residue_png)}")
+
     print(f"[mode] hflavor_mode={args.hflavor_mode} step={step_id}")
     print(
         "[summary] transition={0} status={1} hard_fail={2} watch_fail={3}".format(
@@ -6824,6 +7406,7 @@ def main() -> None:
             int(top_priority.get("n_logft_gt3", 0)),
         )
     )
+    # 条件分岐: `bool(args.run_hflavor_sweep) and args.hflavor_mode != "baseline"` を満たす経路を評価する。
     if bool(args.run_hflavor_sweep) and args.hflavor_mode != "baseline":
         sweep_recommended = (
             hflavor_sweep.get("recommended_candidate") if isinstance(hflavor_sweep.get("recommended_candidate"), dict) else {}
@@ -6836,6 +7419,9 @@ def main() -> None:
                 len(hflavor_sweep.get("pareto_front") or []),
             )
         )
+
+    # 条件分岐: `bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline"` を満たす経路を評価する。
+
     if bool(args.run_localcorr_sweep) and args.hflavor_mode != "baseline":
         local_rec = (
             localcorr_sweep.get("recommended_candidate")
@@ -6880,6 +7466,7 @@ def main() -> None:
             if rw_retune_target_keys
             else str((rw_retune.get("target_class_key") or "n/a"))
         )
+        # 条件分岐: `bool(args.localcorr_residue_reweight)` を満たす経路を評価する。
         if bool(args.localcorr_residue_reweight):
             print(
                 "[localcorr-reweight] status={0} mode={1} n_eval={2} q_guard={3}/{4} root_guard={5}/{4} dual_guard={6}/{4} comb_guard={7}/{4} best={8} score={9:.6g}".format(
@@ -6960,6 +7547,7 @@ def main() -> None:
                     int(rw_retune_strategy_rec.get("stable_candidates_n") or 0),
                 )
             )
+
         lock = (
             localcorr_sweep.get("candidate_stability_lock")
             if isinstance(localcorr_sweep.get("candidate_stability_lock"), dict)
@@ -6967,6 +7555,7 @@ def main() -> None:
         )
         lock_policy = lock.get("selection_policy") if isinstance(lock.get("selection_policy"), dict) else {}
         lock_rec = lock.get("recommended_candidate") if isinstance(lock.get("recommended_candidate"), dict) else {}
+        # 条件分岐: `bool(args.run_candidate_stability_lock)` を満たす経路を評価する。
         if bool(args.run_candidate_stability_lock):
             print(
                 "[stability-lock] status={0} mode={1} stable={2}/{3} best={4} viol_score={5:.6g}".format(
@@ -6978,6 +7567,9 @@ def main() -> None:
                     _to_float(lock_rec.get("stability_violation_score")),
                 )
             )
+
+    # 条件分岐: `bool(args.run_residue_robustness) and str(residue_robustness.get("status")) =...` を満たす経路を評価する。
+
     if bool(args.run_residue_robustness) and str(residue_robustness.get("status")) == "completed":
         rsum = residue_robustness.get("summary") if isinstance(residue_robustness.get("summary"), dict) else {}
         print(
@@ -6991,6 +7583,8 @@ def main() -> None:
             )
         )
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

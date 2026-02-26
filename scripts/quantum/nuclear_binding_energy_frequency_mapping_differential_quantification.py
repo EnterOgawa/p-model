@@ -13,31 +13,46 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
 def _stats(vals: list[float]) -> dict[str, float]:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan"), "max": float("nan")}
+
     vs = sorted(vals)
     return {
         "n": float(len(vs)),
@@ -49,10 +64,15 @@ def _stats(vals: list[float]) -> dict[str, float]:
 
 
 def _a_group(a: int) -> str:
+    # 条件分岐: `a <= 40` を満たす経路を評価する。
     if a <= 40:
         return "light_A_le_40"
+
+    # 条件分岐: `a <= 120` を満たす経路を評価する。
+
     if a <= 120:
         return "mid_A_41_120"
+
     return "heavy_A_ge_121"
 
 
@@ -62,6 +82,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff.csv"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(
             "[fail] missing theory-diff CSV.\n"
@@ -98,6 +119,9 @@ def main() -> None:
                 delta_yuk = float(row["Delta_B_P_minus_Yukawa_MeV"])
             except Exception:
                 continue
+
+            # 条件分岐: `a <= 1 or not (math.isfinite(b_obs) and b_obs > 0)` を満たす経路を評価する。
+
             if a <= 1 or not (math.isfinite(b_obs) and b_obs > 0):
                 continue
 
@@ -114,15 +138,25 @@ def main() -> None:
             improve_yuk = (sigma_obs / req_yuk) if (math.isfinite(sigma_obs) and math.isfinite(req_yuk) and req_yuk > 0) else float("nan")
             a_grp = _a_group(a)
 
+            # 条件分岐: `math.isfinite(abs_semf)` を満たす経路を評価する。
             if math.isfinite(abs_semf):
                 abs_delta_semf_all.append(abs_semf)
                 by_group[a_grp]["abs_delta_semf"].append(abs_semf)
+
+            # 条件分岐: `math.isfinite(abs_yuk)` を満たす経路を評価する。
+
             if math.isfinite(abs_yuk):
                 abs_delta_yuk_all.append(abs_yuk)
                 by_group[a_grp]["abs_delta_yukawa"].append(abs_yuk)
+
+            # 条件分岐: `math.isfinite(req_rel_semf)` を満たす経路を評価する。
+
             if math.isfinite(req_rel_semf):
                 req_rel_semf_all.append(req_rel_semf)
                 by_group[a_grp]["req_rel_semf"].append(req_rel_semf)
+
+            # 条件分岐: `math.isfinite(req_rel_yuk)` を満たす経路を評価する。
+
             if math.isfinite(req_rel_yuk):
                 req_rel_yuk_all.append(req_rel_yuk)
                 by_group[a_grp]["req_rel_yukawa"].append(req_rel_yuk)
@@ -150,10 +184,13 @@ def main() -> None:
             }
             rows_out.append(rec)
 
+    # 条件分岐: `not rows_out` を満たす経路を評価する。
+
     if not rows_out:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {in_csv}")
 
     # Top list for reviewer-facing priorities.
+
     sorted_semf = sorted(
         [r for r in rows_out if r["abs_Delta_B_P_minus_SEMF_MeV"] != ""],
         key=lambda r: float(r["abs_Delta_B_P_minus_SEMF_MeV"]),
@@ -166,6 +203,7 @@ def main() -> None:
     )
     for rank, row in enumerate(sorted_semf[:20], start=1):
         top_rows.append({"rank": rank, "channel": "P_minus_SEMF", **row})
+
     for rank, row in enumerate(sorted_yuk[:20], start=1):
         top_rows.append({"rank": rank, "channel": "P_minus_Yukawa", **row})
 
@@ -176,6 +214,7 @@ def main() -> None:
         writer.writerows(rows_out)
 
     out_top = out_dir / "nuclear_binding_energy_frequency_mapping_differential_quantification_top20.csv"
+    # 条件分岐: `top_rows` を満たす経路を評価する。
     if top_rows:
         with out_top.open("w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(top_rows[0].keys()))
@@ -183,6 +222,7 @@ def main() -> None:
             writer.writerows(top_rows)
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     a_vals = [int(r["A"]) for r in rows_out]
@@ -293,10 +333,14 @@ def main() -> None:
     print("[ok] wrote:")
     print(f"  {out_png}")
     print(f"  {out_csv}")
+    # 条件分岐: `top_rows` を満たす経路を評価する。
     if top_rows:
         print(f"  {out_top}")
+
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

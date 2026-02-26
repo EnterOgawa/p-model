@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -35,8 +36,10 @@ def _set_japanese_font() -> None:
         ]
         available = {font.name for font in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -57,17 +60,25 @@ def _to_float(value: Any) -> Optional[float]:
         parsed = float(value)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(parsed) or math.isinf(parsed)` を満たす経路を評価する。
+
     if math.isnan(parsed) or math.isinf(parsed):
         return None
+
     return parsed
 
 
 def _fmt_float(value: float, digits: int = 6) -> str:
+    # 条件分岐: `value == 0.0` を満たす経路を評価する。
     if value == 0.0:
         return "0"
+
     abs_value = abs(value)
+    # 条件分岐: `abs_value >= 1e4 or abs_value < 1e-3` を満たす経路を評価する。
     if abs_value >= 1e4 or abs_value < 1e-3:
         return f"{value:.{digits}g}"
+
     return f"{value:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -78,16 +89,24 @@ def _status_bool(value: bool) -> str:
 def _load_common_inputs(mercury_payload: Dict[str, Any], solar_payload: Dict[str, Any]) -> Dict[str, float]:
     mercury_obs = _to_float(mercury_payload.get("reference_arcsec_century"))
     mercury_gr = _to_float(((mercury_payload.get("einstein_approx") or {}).get("arcsec_per_century")))
+    # 条件分岐: `mercury_obs is None` を満たす経路を評価する。
     if mercury_obs is None:
         raise SystemExit("mercury reference_arcsec_century missing")
+
+    # 条件分岐: `mercury_gr is None or mercury_gr <= 0.0` を満たす経路を評価する。
+
     if mercury_gr is None or mercury_gr <= 0.0:
         raise SystemExit("mercury einstein_approx.arcsec_per_century missing")
 
     solar_metrics = solar_payload.get("metrics") or {}
     gamma_obs_best = _to_float(solar_metrics.get("observed_gamma_best"))
     gamma_obs_sigma = _to_float(solar_metrics.get("observed_gamma_best_sigma"))
+    # 条件分岐: `gamma_obs_best is None` を満たす経路を評価する。
     if gamma_obs_best is None:
         raise SystemExit("solar observed_gamma_best missing")
+
+    # 条件分岐: `gamma_obs_sigma is None or gamma_obs_sigma <= 0.0` を満たす経路を評価する。
+
     if gamma_obs_sigma is None or gamma_obs_sigma <= 0.0:
         raise SystemExit("solar observed_gamma_best_sigma missing")
 
@@ -104,6 +123,7 @@ def _load_beta_from_sources(
     *, beta_override: Optional[float], frozen_path: Path, solar_payload: Dict[str, Any], fallback: float
 ) -> float:
     beta_value = _to_float(beta_override)
+    # 条件分岐: `beta_value is not None` を満たす経路を評価する。
     if beta_value is not None:
         return float(beta_value)
 
@@ -112,12 +132,17 @@ def _load_beta_from_sources(
         beta_value = _to_float(frozen_payload.get("beta"))
     except Exception:
         beta_value = None
+
+    # 条件分岐: `beta_value is not None` を満たす経路を評価する。
+
     if beta_value is not None:
         return float(beta_value)
 
     beta_value = _to_float(((solar_payload.get("metrics") or {}).get("beta")))
+    # 条件分岐: `beta_value is not None` を満たす経路を評価する。
     if beta_value is not None:
         return float(beta_value)
+
     return float(fallback)
 
 
@@ -127,12 +152,16 @@ def _row_summary(rows: Sequence[Dict[str, Any]]) -> Tuple[int, int, int]:
     pass_n = 0
     for row in rows:
         status = str(row.get("status") or "")
+        # 条件分岐: `status == "reject"` を満たす経路を評価する。
         if status == "reject":
             hard_reject += 1
+        # 条件分岐: 前段条件が不成立で、`status == "watch"` を追加評価する。
         elif status == "watch":
             watch_n += 1
+        # 条件分岐: 前段条件が不成立で、`status == "pass"` を追加評価する。
         elif status == "pass":
             pass_n += 1
+
     return hard_reject, watch_n, pass_n
 
 
@@ -352,16 +381,21 @@ def _build_case_b(
 
 
 def _load_case_a_summary(path: Path) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     try:
         payload = _read_json(path)
     except Exception:
         return None
+
     case_result = payload.get("case_result") or {}
     summary = case_result.get("summary")
+    # 条件分岐: `isinstance(summary, dict)` を満たす経路を評価する。
     if isinstance(summary, dict):
         return summary
+
     return None
 
 
@@ -371,6 +405,7 @@ def _resolve_metric_choice_decision(
     case_summary: Dict[str, Any],
     case_a_summary: Optional[Dict[str, Any]],
 ) -> Tuple[str, Dict[str, Any]]:
+    # 条件分岐: `case_mode == "flat"` を満たす経路を評価する。
     if case_mode == "flat":
         return "defer_case_b_required", {
             "case_mode": "flat",
@@ -381,6 +416,7 @@ def _resolve_metric_choice_decision(
 
     case_b_status = str(case_summary.get("overall_status") or "reject")
     case_a_status = str((case_a_summary or {}).get("overall_status") or "missing")
+    # 条件分岐: `case_a_status == "missing"` を満たす経路を評価する。
     if case_a_status == "missing":
         return "defer_case_a_missing", {
             "case_mode": "effective",
@@ -389,6 +425,8 @@ def _resolve_metric_choice_decision(
             "reason": "caseA baseline file missing",
         }
 
+    # 条件分岐: `case_b_status == "pass" and case_a_status == "reject"` を満たす経路を評価する。
+
     if case_b_status == "pass" and case_a_status == "reject":
         return "effective", {
             "case_mode": "effective",
@@ -396,6 +434,9 @@ def _resolve_metric_choice_decision(
             "case_b_status": case_b_status,
             "reason": "caseB passes while caseA rejected",
         }
+
+    # 条件分岐: `case_b_status == "pass" and case_a_status == "pass"` を満たす経路を評価する。
+
     if case_b_status == "pass" and case_a_status == "pass":
         return "defer_both_pass_need_tighter_gate", {
             "case_mode": "effective",
@@ -403,6 +444,9 @@ def _resolve_metric_choice_decision(
             "case_b_status": case_b_status,
             "reason": "both cases pass",
         }
+
+    # 条件分岐: `case_b_status == "reject" and case_a_status == "pass"` を満たす経路を評価する。
+
     if case_b_status == "reject" and case_a_status == "pass":
         return "flat", {
             "case_mode": "effective",
@@ -410,6 +454,9 @@ def _resolve_metric_choice_decision(
             "case_b_status": case_b_status,
             "reason": "caseA passes while caseB rejected",
         }
+
+    # 条件分岐: `case_b_status == "reject" and case_a_status == "reject"` を満たす経路を評価する。
+
     if case_b_status == "reject" and case_a_status == "reject":
         return "reject_both_cases", {
             "case_mode": "effective",
@@ -417,6 +464,7 @@ def _resolve_metric_choice_decision(
             "case_b_status": case_b_status,
             "reason": "both cases rejected",
         }
+
     return "defer", {
         "case_mode": "effective",
         "case_a_status": case_a_status,
@@ -559,6 +607,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     solar_payload = _read_json(Path(args.solar_metrics))
     common = _load_common_inputs(mercury_payload, solar_payload)
 
+    # 条件分岐: `args.case == "flat"` を満たす経路を評価する。
     if args.case == "flat":
         beta_model = _load_beta_from_sources(
             beta_override=args.beta_flat,
@@ -594,8 +643,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             fallback=1.0,
         )
         gamma_model = _to_float(args.gamma_effective)
+        # 条件分岐: `gamma_model is None` を満たす経路を評価する。
         if gamma_model is None:
             gamma_model = float(2.0 * beta_model - 1.0)
+
         strong_field_payload = _read_json(Path(args.strong_field_metrics))
         case_payload = _build_case_b(
             common=common,
@@ -664,6 +715,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_json, payload_out)
 
     public_copies: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for source in (out_json, out_csv, out_png):
             destination = public_outdir / source.name
@@ -709,14 +761,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `public_copies` を満たす経路を評価する。
     if public_copies:
         print(f"[ok] public copies: {len(public_copies)} files -> {public_outdir}")
+
     print(
         "[ok] overall_status="
         f"{summary.get('overall_status')} decision={summary.get('decision')} metric_choice={summary.get('metric_choice_decision')}"
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

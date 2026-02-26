@@ -33,6 +33,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -54,6 +55,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -74,8 +76,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _extract_label(block: Dict[str, Any], key: str) -> str:
     v = block.get(key)
+    # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
     if not isinstance(v, dict):
         return ""
+
     label = str(v.get("short_label") or v.get("id") or "").strip()
     return label
 
@@ -89,6 +93,7 @@ def _plot_counts(
     xlabel: str,
 ) -> None:
     labels = sorted(set(counts_any) | set(counts_ind), key=lambda k: (-counts_ind[k], -counts_any[k], k))
+    # 条件分岐: `not labels` を満たす経路を評価する。
     if not labels:
         ax.set_title(title)
         ax.text(0.5, 0.5, "no data", ha="center", va="center")
@@ -122,8 +127,12 @@ def _plot_counts(
     ax.set_title(title, pad=10)
 
     for yi, (a, b) in enumerate(zip(any_vals, ind_vals)):
+        # 条件分岐: `a > 0` を満たす経路を評価する。
         if a > 0:
             ax.text(a + 0.05, yi - h / 2, f"{int(a)}", va="center", ha="left", fontsize=9)
+
+        # 条件分岐: `b > 0` を満たす経路を評価する。
+
         if b > 0:
             ax.text(b + 0.05, yi + h / 2, f"{int(b)}", va="center", ha="left", fontsize=9)
 
@@ -151,8 +160,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     in_metrics = Path(args.in_metrics)
+    # 条件分岐: `not in_metrics.exists()` を満たす経路を評価する。
     if not in_metrics.exists():
         legacy = _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
+        # 条件分岐: `legacy.exists()` を満たす経路を評価する。
         if legacy.exists():
             in_metrics = legacy
         else:
@@ -167,6 +178,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     src = _read_json(in_metrics)
     per_ddr = ((src.get("results") or {}).get("per_ddr")) if isinstance(src.get("results"), dict) else None
+    # 条件分岐: `not isinstance(per_ddr, list) or not per_ddr` を満たす経路を評価する。
     if not isinstance(per_ddr, list) or not per_ddr:
         raise ValueError("invalid candidate_search metrics: results.per_ddr missing or empty")
 
@@ -176,8 +188,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     candle_ind = Counter()
 
     for item in per_ddr:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         best_any = item.get("best_any") if isinstance(item.get("best_any"), dict) else {}
         best_ind = item.get("best_independent") if isinstance(item.get("best_independent"), dict) else {}
 
@@ -186,12 +200,22 @@ def main(argv: Optional[List[str]] = None) -> int:
         ca_a = _extract_label(best_any, "candle")
         ca_i = _extract_label(best_ind, "candle")
 
+        # 条件分岐: `op_a` を満たす経路を評価する。
         if op_a:
             opacity_any[op_a] += 1
+
+        # 条件分岐: `op_i` を満たす経路を評価する。
+
         if op_i:
             opacity_ind[op_i] += 1
+
+        # 条件分岐: `ca_a` を満たす経路を評価する。
+
         if ca_a:
             candle_any[ca_a] += 1
+
+        # 条件分岐: `ca_i` を満たす経路を評価する。
+
         if ca_i:
             candle_ind[ca_i] += 1
 
@@ -265,6 +289,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

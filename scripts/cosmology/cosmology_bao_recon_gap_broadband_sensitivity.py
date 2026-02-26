@@ -30,6 +30,7 @@ from typing import Any
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,8 +45,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -71,16 +74,24 @@ def _parse_ross_xi_file(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]
     err_list: list[float] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         cols = t.split()
+        # 条件分岐: `len(cols) < 3` を満たす経路を評価する。
         if len(cols) < 3:
             continue
+
         s_list.append(float(cols[0]))
         xi_list.append(float(cols[1]))
         err_list.append(float(cols[2]))
+
+    # 条件分岐: `not s_list` を満たす経路を評価する。
+
     if not s_list:
         raise ValueError(f"no data rows found: {path}")
+
     s = np.asarray(s_list, dtype=np.float64)
     xi = np.asarray(xi_list, dtype=np.float64)
     err = np.asarray(err_list, dtype=np.float64)
@@ -95,10 +106,17 @@ def _fit_broadband_diff(*, s: np.ndarray, diff: np.ndarray, sigma: np.ndarray) -
     s = np.asarray(s, dtype=np.float64)
     diff = np.asarray(diff, dtype=np.float64)
     sigma = np.asarray(sigma, dtype=np.float64)
+    # 条件分岐: `s.ndim != 1` を満たす経路を評価する。
     if s.ndim != 1:
         raise ValueError("s must be 1D")
+
+    # 条件分岐: `diff.shape != s.shape or sigma.shape != s.shape` を満たす経路を評価する。
+
     if diff.shape != s.shape or sigma.shape != s.shape:
         raise ValueError("shape mismatch in fit inputs")
+
+    # 条件分岐: `np.any(~np.isfinite(s)) or np.any(s <= 0.0)` を満たす経路を評価する。
+
     if np.any(~np.isfinite(s)) or np.any(s <= 0.0):
         raise ValueError("invalid s (requires finite and >0)")
 
@@ -164,20 +182,29 @@ def main(argv: list[str] | None = None) -> int:
 
     bincent_min = int(args.bincent_min)
     bincent_max = int(args.bincent_max)
+    # 条件分岐: `bincent_min < 0 or bincent_max < bincent_min` を満たす経路を評価する。
     if bincent_min < 0 or bincent_max < bincent_min:
         raise SystemExit("--bincent-min/max invalid")
+
     bincents = list(range(bincent_min, bincent_max + 1))
 
     try:
         s_mins = [float(x.strip()) for x in str(args.s_mins).split(",") if x.strip()]
     except Exception as e:
         raise SystemExit(f"invalid --s-mins: {e}") from e
+
+    # 条件分岐: `not s_mins` を満たす経路を評価する。
+
     if not s_mins:
         raise SystemExit("--s-mins must not be empty")
+
     s_max = float(args.s_max)
+    # 条件分岐: `not (s_max > 0.0)` を満たす経路を評価する。
     if not (s_max > 0.0):
         raise SystemExit("--s-max must be >0")
+
     for sm in s_mins:
+        # 条件分岐: `not (0.0 < sm < s_max)` を満たす経路を評価する。
         if not (0.0 < sm < s_max):
             raise SystemExit(f"invalid s range: s_min={sm:g} s_max={s_max:g}")
 
@@ -190,8 +217,10 @@ def main(argv: list[str] | None = None) -> int:
     for zbin in zbins:
         b = zbin_to_b[zbin]
         cat_npz = _ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
+        # 条件分岐: `not cat_npz.exists()` を満たす経路を評価する。
         if not cat_npz.exists():
             raise SystemExit(f"missing catalog recon npz: {cat_npz}")
+
         used_inputs.append(str(cat_npz))
         with np.load(cat_npz, allow_pickle=True) as z:
             cat_curves[zbin] = {
@@ -210,8 +239,10 @@ def main(argv: list[str] | None = None) -> int:
                 ross_quad = ross_dir / (
                     f"Ross_2016_COMBINEDDR12_zbin{zbin}_correlation_function_quadrupole_post_recon_bincent{binc}.dat"
                 )
+                # 条件分岐: `not ross_quad.exists()` を満たす経路を評価する。
                 if not ross_quad.exists():
                     raise SystemExit(f"missing Ross file: {ross_quad}")
+
                 used_inputs.append(str(ross_quad))
                 s_r, xi2_r, sig_r = _parse_ross_xi_file(ross_quad)
 
@@ -219,10 +250,12 @@ def main(argv: list[str] | None = None) -> int:
                 s = s_r[m]
                 xi2_ross = xi2_r[m]
                 sig2 = sig_r[m]
+                # 条件分岐: `s.size < 8` を満たす経路を評価する。
                 if s.size < 8:
                     raise SystemExit(f"too few points after s-range cut: zbin={zbin} bincent={binc} n={s.size}")
 
                 # Interpolate catalog xi2 to Ross bin centers (bincent shifts).
+
                 s_cat = cat_curves[zbin]["s"]
                 xi2_cat = np.interp(s, s_cat, cat_curves[zbin]["xi2"])
 
@@ -248,6 +281,7 @@ def main(argv: list[str] | None = None) -> int:
                 results["per"][str(zbin)][key][str(binc)] = asdict(per_bincent[binc])
 
             # Summaries across bincent (min/median/max)
+
             results["summary"].setdefault(str(zbin), {})
             results["summary"][str(zbin)][key] = {
                 "rmse_s2_raw": _summarize_across_bincent([v.rmse_s2_raw for v in per_bincent.values()]),
@@ -258,12 +292,15 @@ def main(argv: list[str] | None = None) -> int:
             }
 
     # Plot: chi2/dof raw vs after across bincent, for each s_min.
+
     _set_japanese_font()
     import matplotlib.pyplot as plt  # noqa: E402
 
     fig, axes = plt.subplots(len(zbins), 1, figsize=(11.5, 8.5), sharex=True)
+    # 条件分岐: `len(zbins) == 1` を満たす経路を評価する。
     if len(zbins) == 1:
         axes = [axes]
+
     x = np.asarray(bincents, dtype=int)
 
     for ax, zbin in zip(axes, zbins):
@@ -283,6 +320,7 @@ def main(argv: list[str] | None = None) -> int:
 
     axes[-1].set_xlabel("Ross bincent（0..4）")
     axes[0].set_title("Ross post-recon ξ2 gap: broadband吸収の感度（bincent / s_min）")
+    # 条件分岐: `len(axes) > 0` を満たす経路を評価する。
     if len(axes) > 0:
         axes[0].legend(loc="upper right", fontsize=9)
 
@@ -330,6 +368,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

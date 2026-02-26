@@ -19,14 +19,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -35,8 +39,11 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=60) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -82,6 +89,7 @@ def main() -> None:
     json_url = "https://www.nndc.bnl.gov/be2/data/adopted-entries.json"
     files = [FileSpec(url=json_url, relpath="adopted-entries.json")]
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         for spec in files:
             _download(spec.url, src_dir / spec.relpath)
@@ -89,41 +97,53 @@ def main() -> None:
     missing: list[Path] = []
     for spec in files:
         p = src_dir / spec.relpath
+        # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
         if not p.exists() or p.stat().st_size == 0:
             missing.append(p)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
     raw_path = src_dir / "adopted-entries.json"
     raw = json.loads(raw_path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(raw, list) or not raw` を満たす経路を評価する。
     if not isinstance(raw, list) or not raw:
         raise SystemExit(f"[fail] invalid adopted-entries.json (expected non-empty list): {raw_path}")
 
     # Extract E(2+1) proxy: the transitionEnergy in the adopted entries (typically 2+->0+ in keV),
     # which equals E(2+1) for even-even nuclei with a 0+ ground state.
+
     best_e2: dict[tuple[int, int], dict[str, object]] = {}
     n_skipped_e2 = 0
     for entry in raw:
+        # 条件分岐: `not isinstance(entry, dict)` を満たす経路を評価する。
         if not isinstance(entry, dict):
             n_skipped_e2 += 1
             continue
+
         nuclide = entry.get("nuclide") if isinstance(entry.get("nuclide"), dict) else {}
         Z = int(nuclide.get("z", -1))
         N = int(nuclide.get("n", -1))
         A = int(nuclide.get("a", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             n_skipped_e2 += 1
             continue
 
         te = entry.get("transitionEnergy") if isinstance(entry.get("transitionEnergy"), dict) else None
+        # 条件分岐: `not isinstance(te, dict) or "value" not in te` を満たす経路を評価する。
         if not isinstance(te, dict) or "value" not in te:
             n_skipped_e2 += 1
             continue
+
         try:
             e_val = float(te.get("value"))
         except Exception:
             n_skipped_e2 += 1
             continue
+
         te_err = te.get("error")
         try:
             e_sigma = float(te_err) if te_err is not None else float("nan")
@@ -144,27 +164,36 @@ def main() -> None:
         }
 
         prev = best_e2.get(key)
+        # 条件分岐: `prev is None` を満たす経路を評価する。
         if prev is None:
             best_e2[key] = cand_e2
             continue
 
         r_prev = _rank_reference(str(prev.get("reference", "")))
         r_cand = _rank_reference(ref)
+        # 条件分岐: `r_cand != r_prev` を満たす経路を評価する。
         if r_cand != r_prev:
+            # 条件分岐: `r_cand > r_prev` を満たす経路を評価する。
             if r_cand > r_prev:
                 best_e2[key] = cand_e2
+
             continue
 
         t_prev = _rank_entry_type(str(prev.get("adoptedEntryType", "")))
         t_cand = _rank_entry_type(etype)
+        # 条件分岐: `t_cand != t_prev` を満たす経路を評価する。
         if t_cand != t_prev:
+            # 条件分岐: `t_cand > t_prev` を満たす経路を評価する。
             if t_cand > t_prev:
                 best_e2[key] = cand_e2
+
             continue
 
         s_prev = prev.get("e2plus_sigma_keV")
         s_cand = cand_e2.get("e2plus_sigma_keV")
+        # 条件分岐: `isinstance(s_prev, (int, float)) and isinstance(s_cand, (int, float))` を満たす経路を評価する。
         if isinstance(s_prev, (int, float)) and isinstance(s_cand, (int, float)):
+            # 条件分岐: `(s_cand == s_cand) and (s_prev == s_prev) and float(s_cand) < float(s_prev)` を満たす経路を評価する。
             if (s_cand == s_cand) and (s_prev == s_prev) and float(s_cand) < float(s_prev):
                 best_e2[key] = cand_e2
                 continue
@@ -173,29 +202,36 @@ def main() -> None:
     #   - higher reference rank (2016 > 2001)
     #   - higher adoptedEntryType rank (MODEL_INDEPENDENT > ...)
     #   - lower reported uncertainty (if tied)
+
     best: dict[tuple[int, int], dict[str, object]] = {}
     n_skipped = 0
     for entry in raw:
+        # 条件分岐: `not isinstance(entry, dict)` を満たす経路を評価する。
         if not isinstance(entry, dict):
             n_skipped += 1
             continue
+
         nuclide = entry.get("nuclide") if isinstance(entry.get("nuclide"), dict) else {}
         Z = int(nuclide.get("z", -1))
         N = int(nuclide.get("n", -1))
         A = int(nuclide.get("a", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             n_skipped += 1
             continue
 
         beta = entry.get("deformationParameter") if isinstance(entry.get("deformationParameter"), dict) else None
+        # 条件分岐: `not isinstance(beta, dict) or "value" not in beta` を満たす経路を評価する。
         if not isinstance(beta, dict) or "value" not in beta:
             n_skipped += 1
             continue
+
         try:
             beta_val = float(beta.get("value"))
         except Exception:
             n_skipped += 1
             continue
+
         beta_err = beta.get("error")
         try:
             beta_sigma = float(beta_err) if beta_err is not None else float("nan")
@@ -217,28 +253,38 @@ def main() -> None:
         }
 
         prev = best.get(key)
+        # 条件分岐: `prev is None` を満たす経路を評価する。
         if prev is None:
             best[key] = cand
             continue
 
         r_prev = _rank_reference(str(prev.get("reference", "")))
         r_cand = _rank_reference(ref)
+        # 条件分岐: `r_cand != r_prev` を満たす経路を評価する。
         if r_cand != r_prev:
+            # 条件分岐: `r_cand > r_prev` を満たす経路を評価する。
             if r_cand > r_prev:
                 best[key] = cand
+
             continue
 
         t_prev = _rank_entry_type(str(prev.get("adoptedEntryType", "")))
         t_cand = _rank_entry_type(etype)
+        # 条件分岐: `t_cand != t_prev` を満たす経路を評価する。
         if t_cand != t_prev:
+            # 条件分岐: `t_cand > t_prev` を満たす経路を評価する。
             if t_cand > t_prev:
                 best[key] = cand
+
             continue
 
         # Tie-breaker: smaller uncertainty wins (if both finite).
+
         s_prev = prev.get("beta2_sigma")
         s_cand = cand.get("beta2_sigma")
+        # 条件分岐: `isinstance(s_prev, (int, float)) and isinstance(s_cand, (int, float))` を満たす経路を評価する。
         if isinstance(s_prev, (int, float)) and isinstance(s_cand, (int, float)):
+            # 条件分岐: `(s_cand == s_cand) and (s_prev == s_prev) and float(s_cand) < float(s_prev)` を満たす経路を評価する。
             if (s_cand == s_cand) and (s_prev == s_prev) and float(s_cand) < float(s_prev):
                 best[key] = cand
                 continue
@@ -323,12 +369,15 @@ def main() -> None:
 
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item: dict[str, object] = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
+        # 条件分岐: `extra` を満たす経路を評価する。
         if extra:
             item.update(extra)
+
         manifest["files"].append(item)
 
     for spec in files:
         add_file(url=spec.url, path=src_dir / spec.relpath)
+
     add_file(url=None, path=out_extracted, extra={"derived_from": str(raw_path)})
     add_file(url=None, path=out_e2, extra={"derived_from": str(raw_path)})
 
@@ -338,6 +387,8 @@ def main() -> None:
     print(f"[ok] extracted: {out_e2}")
     print(f"[ok] manifest : {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

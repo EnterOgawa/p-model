@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,34 +45,50 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _pick_main_script(test: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     scripts = test.get("scripts") or []
+    # 条件分岐: `not isinstance(scripts, list)` を満たす経路を評価する。
     if not isinstance(scripts, list):
         return None
+
     for s in scripts:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         role = str(s.get("role") or "")
+        # 条件分岐: `role.startswith("main")` を満たす経路を評価する。
         if role.startswith("main"):
             return s
+
     for s in scripts:
+        # 条件分岐: `isinstance(s, dict)` を満たす経路を評価する。
         if isinstance(s, dict):
             return s
+
     return None
 
 
 def _paths_from_outputs(test: Dict[str, Any], *, limit: int = 8) -> List[str]:
     outs = test.get("outputs") or []
+    # 条件分岐: `not isinstance(outs, list)` を満たす経路を評価する。
     if not isinstance(outs, list):
         return []
+
     paths: List[str] = []
     for item in outs:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         p = item.get("path")
+        # 条件分岐: `not isinstance(p, str) or not p` を満たす経路を評価する。
         if not isinstance(p, str) or not p:
             continue
+
         paths.append(p)
+        # 条件分岐: `len(paths) >= limit` を満たす経路を評価する。
         if len(paths) >= limit:
             break
+
     return paths
 
 
@@ -109,29 +126,40 @@ def _knob(
     note: str = "",
 ) -> Dict[str, Any]:
     out: Dict[str, Any] = {"key": str(key), "type": str(knob_type), "apply": apply, "note": str(note)}
+    # 条件分岐: `values is not None` を満たす経路を評価する。
     if values is not None:
         out["values"] = values
+
+    # 条件分岐: `default is not None` を満たす経路を評価する。
+
     if default is not None:
         out["default"] = default
+
     return out
 
 
 def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
     tests = matrix.get("tests") or []
+    # 条件分岐: `not isinstance(tests, list) or not tests` を満たす経路を評価する。
     if not isinstance(tests, list) or not tests:
         raise ValueError("Invalid matrix: missing tests[]")
 
     test_by_id: Dict[str, Dict[str, Any]] = {}
     for t in tests:
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
+
         tid = t.get("id")
+        # 条件分岐: `isinstance(tid, str) and tid` を満たす経路を評価する。
         if isinstance(tid, str) and tid:
             test_by_id[tid] = t
 
     def _t(tid: str) -> Tuple[Dict[str, Any], Dict[str, Any], List[str]]:
+        # 条件分岐: `tid not in test_by_id` を満たす経路を評価する。
         if tid not in test_by_id:
             raise KeyError(f"Missing test id in matrix: {tid}")
+
         test = test_by_id[tid]
         main_script = _pick_main_script(test) or {}
         primary_outputs = _paths_from_outputs(test)
@@ -727,15 +755,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     matrix_path = Path(args.matrix)
+    # 条件分岐: `not matrix_path.is_absolute()` を満たす経路を評価する。
     if not matrix_path.is_absolute():
         matrix_path = (_ROOT / matrix_path).resolve()
+
+    # 条件分岐: `not matrix_path.exists()` を満たす経路を評価する。
+
     if not matrix_path.exists():
         print(f"[err] missing matrix: {matrix_path}")
         return 2
 
     out_path = Path(args.out)
+    # 条件分岐: `not out_path.is_absolute()` を満たす経路を評価する。
     if not out_path.is_absolute():
         out_path = (_ROOT / out_path).resolve()
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     matrix = _read_json(matrix_path)
@@ -753,6 +787,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

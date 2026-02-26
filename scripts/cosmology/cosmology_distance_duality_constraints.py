@@ -42,6 +42,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -63,6 +64,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -82,11 +84,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -95,8 +101,12 @@ def _safe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(v) or math.isinf(v)` を満たす経路を評価する。
+
     if math.isnan(v) or math.isinf(v):
         return None
+
     return v
 
 
@@ -140,12 +150,15 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
         sig = float(r.epsilon0_sigma)
         z_frw = None
         z_pbg = None
+        # 条件分岐: `sig > 0` を満たす経路を評価する。
         if sig > 0:
             z_frw = (eps_frw - float(r.epsilon0)) / sig
             z_pbg = (eps_pbg_static - float(r.epsilon0)) / sig
 
         # "Non-rejection" threshold (3σ): require sig >= |eps_model - eps_obs| / 3.
+
         sig_need_nonreject_pbg_3sigma = None
+        # 条件分岐: `sig > 0` を満たす経路を評価する。
         if sig > 0:
             sig_need_nonreject_pbg_3sigma = abs(eps_pbg_static - float(r.epsilon0)) / 3.0
 
@@ -155,6 +168,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
         #   ε0_eff = ε0_model + Δε
         # To match an observed ε0_obs, we need:
         #   Δε_needed = ε0_obs - ε0_model
+
         delta_eps_needed = float(r.epsilon0) - eps_pbg_static
         # Equivalent multiplicative correction on η(z): η_eff = η_model * (1+z)^(Δε_needed)
         # Report at z=1 as an intuition anchor (factor ~2 when Δε≈1).
@@ -176,6 +190,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
         alpha_opacity_powerlaw_needed = delta_eps_needed
 
         sigma_multiplier_nonreject = None
+        # 条件分岐: `sig > 0 and sig_need_nonreject_pbg_3sigma is not None` を満たす経路を評価する。
         if sig > 0 and sig_need_nonreject_pbg_3sigma is not None:
             sigma_multiplier_nonreject = float(sig_need_nonreject_pbg_3sigma) / sig
 
@@ -186,6 +201,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
         #   ruler physical size:  l_em = l_0 * (1+z)^(s_ruler)
         #   candle luminosity:    L_em = L_0 * (1+z)^(s_luminosity)
         # Then the required relation is: s_ruler - s_luminosity/2 = Δε_needed.
+
         s_ruler_needed_if_no_lum = delta_eps_needed
         s_lum_needed_if_no_ruler = -2.0 * delta_eps_needed
 
@@ -202,10 +218,12 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
         z_eta_frw_z1 = None
         eta_p_pred_pbg_static_z1 = 1.0
         eta_p_pred_frw_z1 = 1.0 + z_ref
+        # 条件分岐: `sig > 0` を満たす経路を評価する。
         if sig > 0:
             # Uncertainty propagation for a Gaussian ε0 (approximation):
             #   η^(P) = (1+z)^(1+ε0) => dη/dε = ln(1+z) * η
             eta_p_sigma_approx_z1 = abs(math.log(1.0 + z_ref)) * eta_p_obs_z1 * sig
+            # 条件分岐: `eta_p_sigma_approx_z1 > 0` を満たす経路を評価する。
             if eta_p_sigma_approx_z1 > 0:
                 z_eta_pbg_static_z1 = (eta_p_pred_pbg_static_z1 - eta_p_obs_z1) / eta_p_sigma_approx_z1
                 z_eta_frw_z1 = (eta_p_pred_frw_z1 - eta_p_obs_z1) / eta_p_sigma_approx_z1
@@ -257,6 +275,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
                 "source": r.source,
             }
         )
+
     return out
 
 
@@ -289,16 +308,26 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         eps = _safe_float(r.get("epsilon0_obs"))
         sig = _safe_float(r.get("epsilon0_sigma"))
         uses_bao = bool(r.get("uses_bao", False))
+        # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
         if eps is None or sig is None or sig <= 0:
             continue
+
+        # 条件分岐: `uses_bao and sig < best_bao_sig` を満たす経路を評価する。
+
         if uses_bao and sig < best_bao_sig:
             best_bao_sig = sig
             best_bao = r
+
+        # 条件分岐: `not uses_bao` を満たす経路を評価する。
+
         if not uses_bao:
             z_pbg = _safe_float(r.get("z_pbg_static"))
+            # 条件分岐: `z_pbg is None` を満たす経路を評価する。
             if z_pbg is None:
                 continue
+
             az = abs(float(z_pbg))
+            # 条件分岐: `az < best_no_bao_abs_z` を満たす経路を評価する。
             if az < best_no_bao_abs_z:
                 best_no_bao_abs_z = az
                 best_no_bao = r
@@ -307,12 +336,16 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         (best_bao, "#1f77b4", "観測制約（BAO含む, 1σ）"),
         (best_no_bao, "#ff7f0e", "観測制約（BAOなし, 1σ）"),
     ]:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         eps = _safe_float(r.get("epsilon0_obs"))
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
         if eps is None or sig is None or sig <= 0:
             continue
+
         eta_mid = one_p_z ** float(eps)
         eta_lo = one_p_z ** float(eps - sig)
         eta_hi = one_p_z ** float(eps + sig)
@@ -342,8 +375,10 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         (uses_bao, "o", "#1f77b4", "観測（BAO含む）"),
         (~uses_bao, "s", "#ff7f0e", "観測（BAOなし）"),
     ]:
+        # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
         if not np.any(mask):
             continue
+
         ax2.errorbar(
             eps_obs[mask],
             y[mask],
@@ -371,13 +406,16 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         extra_eta_z1 = _safe_float(r0.get("extra_eta_factor_needed_z1"))
         delta_mu = _safe_float(r0.get("delta_distance_modulus_mag_z1"))
         flux_dim = _safe_float(r0.get("flux_dimming_factor_needed_z1"))
+        # 条件分岐: `delta_eps is not None and extra_eta_z1 is not None` を満たす経路を評価する。
         if delta_eps is not None and extra_eta_z1 is not None:
             extra_txt = ""
+            # 条件分岐: `delta_mu is not None and flux_dim is not None` を満たす経路を評価する。
             if delta_mu is not None and flux_dim is not None:
                 extra_txt = (
                     f"（Δμ≈{_fmt_float(delta_mu, digits=2)} mag, "
                     f"追加減光≈1/{_fmt_float(flux_dim, digits=2)}）"
                 )
+
             fig.text(
                 0.5,
                 0.015,
@@ -389,6 +427,7 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
                 ha="center",
                 fontsize=10,
             )
+
     fig.text(
         0.5,
         0.005,
@@ -427,13 +466,17 @@ def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: fl
         (reps.get("bao"), "#1f77b4", "観測制約（BAO含む, 1σ）"),
         (reps.get("no_bao"), "#ff7f0e", "観測制約（BAOなし, 1σ）"),
     ]:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         eps = _safe_float(r.get("epsilon0_obs"))
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
         if eps is None or sig is None or sig <= 0:
             continue
         # η^(P)=(1+z)^(1+ε0)
+
         eta_mid = one_p_z ** float(1.0 + eps)
         eta_lo = one_p_z ** float(1.0 + eps - sig)
         eta_hi = one_p_z ** float(1.0 + eps + sig)
@@ -462,8 +505,10 @@ def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: fl
         (uses_bao, "o", "#1f77b4", "観測（BAO含む）"),
         (~uses_bao, "s", "#ff7f0e", "観測（BAOなし）"),
     ]:
+        # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
         if not np.any(mask):
             continue
+
         ax2.errorbar(
             p_obs[mask],
             y[mask],
@@ -504,21 +549,32 @@ def _select_representative(rows: Sequence[Dict[str, Any]]) -> Dict[str, Optional
     best_no_bao_abs_z = float("inf")
 
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         eps = _safe_float(r.get("epsilon0_obs"))
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
         if eps is None or sig is None or sig <= 0:
             continue
+
         uses_bao = bool(r.get("uses_bao", False))
+        # 条件分岐: `uses_bao and sig < best_bao_sig` を満たす経路を評価する。
         if uses_bao and sig < best_bao_sig:
             best_bao_sig = sig
             best_bao = r
+
+        # 条件分岐: `not uses_bao` を満たす経路を評価する。
+
         if not uses_bao:
             z_pbg = _safe_float(r.get("z_pbg_static"))
+            # 条件分岐: `z_pbg is None` を満たす経路を評価する。
             if z_pbg is None:
                 continue
+
             az = abs(float(z_pbg))
+            # 条件分岐: `az < best_no_bao_abs_z` を満たす経路を評価する。
             if az < best_no_bao_abs_z:
                 best_no_bao_abs_z = az
                 best_no_bao = r
@@ -528,19 +584,25 @@ def _select_representative(rows: Sequence[Dict[str, Any]]) -> Dict[str, Optional
 
 def _z_limit_for_budget_mag(*, delta_eps: float, budget_mag: float) -> Optional[float]:
     """Solve |Δμ(z)|=budget_mag for z, where Δμ(z)=5*Δε*log10(1+z)."""
+    # 条件分岐: `not (budget_mag > 0)` を満たす経路を評価する。
     if not (budget_mag > 0):
         return None
+
     a = abs(float(delta_eps))
+    # 条件分岐: `a == 0.0` を満たす経路を評価する。
     if a == 0.0:
         return float("inf")
+
     exponent = float(budget_mag) / (5.0 * a)
     return float(10.0**exponent - 1.0)
 
 
 def _reach_values_for_z(*, delta_eps: float, z: float) -> Dict[str, float]:
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         raise ValueError("z must satisfy 1+z>0")
+
     extra_dl = op ** float(delta_eps)
     # Distance modulus shift: Δμ = 5 log10(D_L_needed / D_L_static) = 5 log10(extra_dl).
     delta_mu = 5.0 * math.log10(extra_dl) if extra_dl > 0 else float("nan")
@@ -596,6 +658,7 @@ def _build_reach_metrics(
         out["reach_z_limit_by_budget_mag"].append({"budget_mag": float(b), "z_limit": z_lim})
 
     # Also include a quick "±1σ" sanity range at z=1.
+
     z1 = 1.0
     out["z1_band_abs_delta_mu_mag"] = {
         "z": z1,
@@ -628,8 +691,10 @@ def _plot_reach_limit(
     ]
     for key, color, label_prefix in styles:
         r = reps.get(key)
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         short = str(r.get("short_label") or r.get("id") or "")
         eps = float(r.get("epsilon0_obs", float("nan")))
         sig = float(r.get("epsilon0_sigma", float("nan")))
@@ -658,6 +723,7 @@ def _plot_reach_limit(
         ax2.plot(z, tau0, color=color, linewidth=2.0, label=label)
 
     # Reference budgets (purely illustrative; not a claim about actual systematics).
+
     for b in budgets_mag:
         ax1.axhline(float(b), color="#777777", linewidth=1.0, alpha=0.18)
 
@@ -715,14 +781,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     data_path = Path(args.data)
     z_max = float(args.z_max)
+    # 条件分岐: `not (z_max > 0.0)` を満たす経路を評価する。
     if not (z_max > 0.0):
         raise ValueError("--z-max must be > 0")
+
     reach_z_max = float(args.reach_z_max)
+    # 条件分岐: `not (reach_z_max > 0.0)` を満たす経路を評価する。
     if not (reach_z_max > 0.0):
         raise ValueError("--reach-z-max must be > 0")
 
     src = _read_json(data_path)
     constraints = [Constraint.from_json(c) for c in (src.get("constraints") or [])]
+    # 条件分岐: `not constraints` を満たす経路を評価する。
     if not constraints:
         raise SystemExit(f"no constraints found in: {data_path}")
 
@@ -872,14 +942,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     def _fmt_pm(x: Any, s: Any, *, digits: int = 3) -> str:
         vx = _safe_float(x)
         vs = _safe_float(s)
+        # 条件分岐: `vx is None or vs is None` を満たす経路を評価する。
         if vx is None or vs is None:
             return "n/a"
+
         return f"{vx:.{digits}f}±{vs:.{digits}f}"
 
     def _fmt_z(x: Any, *, digits: int = 2) -> str:
         vx = _safe_float(x)
+        # 条件分岐: `vx is None` を満たす経路を評価する。
         if vx is None:
             return "n/a"
+
         return f"{vx:+.{digits}f}"
 
     eta_rows = eta_p_payload.get("rows") if isinstance(eta_p_payload.get("rows"), list) else []
@@ -888,8 +962,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "|---|---:|---:|---:|---:|---:|---:|",
     ]
     for r in eta_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         short = str(r.get("short_label") or "").strip() or str(r.get("id") or "").strip()
         uses_bao = 1 if bool(r.get("uses_bao")) else 0
         eps = _fmt_pm(r.get("epsilon0_obs"), r.get("epsilon0_sigma"))
@@ -977,8 +1053,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # (P-model minimal predicts η=1/(1+z) ⇔ ε0=-1 in the common parameterization).
     target_id = "martinelli2021_snIa_bao"
     target_row = next((r for r in rows if isinstance(r, dict) and str(r.get("id") or "") == target_id), None)
+    # 条件分岐: `target_row is None` を満たす経路を評価する。
     if target_row is None:
         target_row = reps.get("bao") if isinstance(reps.get("bao"), dict) else None
+
+    # 条件分岐: `target_row is None and rows` を満たす経路を評価する。
+
     if target_row is None and rows:
         target_row = rows[0]
 
@@ -1122,6 +1202,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

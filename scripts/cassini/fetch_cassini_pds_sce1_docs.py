@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Iterable, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,17 +45,21 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, force: bool, timeout_s: int = 180) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-fetch-cassini-pds-sce1/1.0"})
     with urllib.request.urlopen(req, timeout=timeout_s) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
 
 
@@ -63,6 +68,7 @@ def _cors_for_doy(doy: int) -> int:
     # 157-160 => 0021, 161-164 => 0022, ... 185-186 => 0028
     if doy < 157 or doy > 186:
         raise ValueError(f"DOY out of supported range for SCE1 (157-186): {doy}")
+
     return 21 + ((doy - 157) // 4)
 
 
@@ -72,28 +78,45 @@ def _extract_dir_links(html: str, *, base_url: str) -> List[str]:
     out: List[str] = []
     for href in links:
         href = href.strip()
+        # 条件分岐: `not href or href.startswith("?")` を満たす経路を評価する。
         if not href or href.startswith("?"):
             continue
+
+        # 条件分岐: `href in ("../", "./")` を満たす経路を評価する。
+
         if href in ("../", "./"):
             continue
+
+        # 条件分岐: `href.startswith("http://") or href.startswith("https://")` を満たす経路を評価する。
+
         if href.startswith("http://") or href.startswith("https://"):
             # External assets (PDS app bar, etc.) are irrelevant.
             continue
+
+        # 条件分岐: `href.endswith("/")` を満たす経路を評価する。
+
         if href.endswith("/"):
             continue
         # Avoid query fragments etc.
+
         href = href.split("#", 1)[0].split("?", 1)[0]
+        # 条件分岐: `not href` を満たす経路を評価する。
         if not href:
             continue
+
         out.append(urllib.parse.urljoin(base_url, href))
     # Deduplicate, stable order
+
     seen = set()
     uniq: List[str] = []
     for u in out:
+        # 条件分岐: `u in seen` を満たす経路を評価する。
         if u in seen:
             continue
+
         seen.add(u)
         uniq.append(u)
+
     return uniq
 
 
@@ -121,6 +144,7 @@ def main() -> int:
 
     doy_start = int(args.doy_start)
     doy_stop = int(args.doy_stop)
+    # 条件分岐: `doy_stop < doy_start` を満たす経路を評価する。
     if doy_stop < doy_start:
         doy_start, doy_stop = doy_stop, doy_start
 
@@ -138,7 +162,9 @@ def main() -> int:
             rel = name
             url = f"{base_url}/cors_{cors:04d}/{name}"
             dst = cors_dir / rel
+            # 条件分岐: `args.offline` を満たす経路を評価する。
             if args.offline:
+                # 条件分岐: `not dst.exists()` を満たす経路を評価する。
                 if not dst.exists():
                     missing.append(str(dst))
             else:
@@ -154,12 +180,16 @@ def main() -> int:
                 )
 
         # document/ directory listing
+
         doc_dir_url = f"{base_url}/cors_{cors:04d}/document/"
         doc_dir_dst = cors_dir / "document"
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
+            # 条件分岐: `not doc_dir_dst.exists()` を満たす経路を評価する。
             if not doc_dir_dst.exists():
                 missing.append(str(doc_dir_dst))
             # do not attempt to validate each file here; they are small and optional per-volume.
+
             continue
 
         try:
@@ -173,8 +203,10 @@ def main() -> int:
         urls = _extract_dir_links(html, base_url=doc_dir_url)
         for file_url in urls:
             filename = file_url.rsplit("/", 1)[-1]
+            # 条件分岐: `not filename` を満たす経路を評価する。
             if not filename:
                 continue
+
             rel = Path("document") / filename
             dst = cors_dir / rel
             _download(file_url, dst, force=bool(args.force), timeout_s=180)
@@ -188,12 +220,18 @@ def main() -> int:
                 )
             )
 
+    # 条件分岐: `args.offline and missing` を満たす経路を評価する。
+
     if args.offline and missing:
         print("[err] offline and missing cached paths:")
         for p in missing[:80]:
             print("  -", p)
+
+        # 条件分岐: `len(missing) > 80` を満たす経路を評価する。
+
         if len(missing) > 80:
             print(f"  ... and {len(missing)-80} more")
+
         return 2
 
     manifest = {
@@ -207,6 +245,7 @@ def main() -> int:
     }
     man_path = out_root / "manifest_docs.json"
     man_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         print(f"[ok] offline cache verified: {man_path}")
     else:
@@ -227,6 +266,8 @@ def main() -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -23,24 +23,33 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
+
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req) as resp, out_path.open("wb") as f:
         f.write(resp.read())
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
     with out_path.open("rb") as f:
         head = f.read(5)
+
+    # 条件分岐: `head != b"%PDF-"` を満たす経路を評価する。
+
     if head != b"%PDF-":
         raise RuntimeError(f"[fail] downloaded file does not look like a PDF: {out_path} (head={head!r})")
 
@@ -51,31 +60,43 @@ def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float
       '1420.405 751 766 7(10)' -> (1420.4057517667, 1e-9)
     """
     ss = str(s).strip()
+    # 条件分岐: `not ss` を満たす経路を評価する。
     if not ss:
         return None, None
+
     ss = ss.replace(" ", "")
     m = re.fullmatch(r"([0-9]+(?:\.[0-9]+)?)(?:\((\d+)\))?", ss)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None, None
+
     val_str = m.group(1)
     unc_str = m.group(2)
     try:
         val = float(val_str)
     except Exception:
         return None, None
+
+    # 条件分岐: `not unc_str` を満たす経路を評価する。
+
     if not unc_str:
         return val, None
+
     decimals = 0
+    # 条件分岐: `"." in val_str` を満たす経路を評価する。
     if "." in val_str:
         decimals = len(val_str.split(".", 1)[1])
+
     try:
         unc = int(unc_str) * (10.0 ** (-decimals))
     except Exception:
         unc = None
+
     return val, unc
 
 
 def _extract_pdf_text(pdf_path: Path) -> str:
+    # 条件分岐: `not pdf_path.exists()` を満たす経路を評価する。
     if not pdf_path.exists():
         raise FileNotFoundError(str(pdf_path))
 
@@ -85,6 +106,7 @@ def _extract_pdf_text(pdf_path: Path) -> str:
     text = ""
     for page in reader.pages:
         text += "\n" + (page.extract_text() or "")
+
     text = text.replace("\u00a0", " ")
     text = re.sub(r"\s+", " ", text).strip()
     return text
@@ -110,13 +132,19 @@ def main(argv: list[str] | None = None) -> int:
     extracted_path = out_dir / "extracted_values.json"
     manifest_path = out_dir / "manifest.json"
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing: list[Path] = []
         for p in (raw_path, extracted_path, manifest_path):
+            # 条件分岐: `not p.exists() or p.stat().st_size <= 0` を満たす経路を評価する。
             if not p.exists() or p.stat().st_size <= 0:
                 missing.append(p)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return 0
 
@@ -127,6 +155,7 @@ def main(argv: list[str] | None = None) -> int:
     #   [1420.405 751 766 7(10) MHz]
     pat = re.compile(r"(1420\.\s*[0-9][0-9\s]{6,})\(\s*(\d+)\s*\)\s*MHz", re.I)
     m = pat.search(text)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise RuntimeError(f"[fail] could not find Hydrogen hyperfine (21 cm) frequency token in: {raw_path}")
 
@@ -134,6 +163,7 @@ def main(argv: list[str] | None = None) -> int:
     unc_digits = m.group(2).strip()
     token = f"{val_part}({unc_digits})"
     f_mhz, sigma_mhz = _parse_value_with_paren_unc(token)
+    # 条件分岐: `f_mhz is None or sigma_mhz is None` を満たす経路を評価する。
     if f_mhz is None or sigma_mhz is None:
         raise RuntimeError(f"[fail] could not parse value/uncertainty token: {token!r}")
 
@@ -179,6 +209,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] wrote: {manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

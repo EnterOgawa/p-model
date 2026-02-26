@@ -45,9 +45,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest().upper()
 
 
@@ -61,14 +64,17 @@ def _sanitize_token(s: str) -> str:
 
 def _download(url: str, out_path: Path, *, force: bool) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0 and not force` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0 and not force:
         print(f"[skip] exists: {out_path}")
         return
+
     tmp = out_path.with_suffix(out_path.suffix + ".part")
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     print(f"[dl] {url}")
     with urlopen(req, timeout=180) as resp, tmp.open("wb") as f:
         shutil.copyfileobj(resp, f, length=1024 * 1024)
+
     tmp.replace(out_path)
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
@@ -81,19 +87,28 @@ def _read_bz2_text(path: Path) -> str:
 def _parse_states_stats(text: str) -> dict[str, Any]:
     rows = []
     for line in text.splitlines():
+        # 条件分岐: `not line.strip()` を満たす経路を評価する。
         if not line.strip():
             continue
+
         parts = line.split()
+        # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
         if len(parts) < 2:
             continue
+
         try:
             state_id = int(parts[0])
             energy_cm_inv = float(parts[1])
         except Exception:
             continue
+
         rows.append((state_id, energy_cm_inv, len(parts)))
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         return {"n_states": 0}
+
     energies = [e for _, e, _ in rows]
     col_counts = sorted({c for _, _, c in rows})
     return {
@@ -112,20 +127,26 @@ def _parse_trans_stats(text: str) -> dict[str, Any]:
     nu_max = None
     a_max = None
     for line in text.splitlines():
+        # 条件分岐: `not line.strip()` を満たす経路を評価する。
         if not line.strip():
             continue
+
         parts = line.split()
+        # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
         if len(parts) < 4:
             continue
+
         try:
             A = float(parts[2])
             nu = float(parts[3])
         except Exception:
             continue
+
         n += 1
         nu_min = nu if nu_min is None else min(nu_min, nu)
         nu_max = nu if nu_max is None else max(nu_max, nu)
         a_max = A if a_max is None else max(a_max, A)
+
     return {
         "n_trans": n,
         "wavenumber_min_cm^-1": (None if nu_min is None else float(nu_min)),
@@ -216,6 +237,7 @@ def _write_extracted(
 
 def _offline_check(paths: list[Path]) -> None:
     missing = [p for p in paths if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
 
@@ -251,6 +273,7 @@ def main(argv: list[str] | None = None) -> int:
         extracted_path = out_dir / "extracted_values.json"
         manifest_path = out_dir / "manifest.json"
 
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
             _offline_check([states_path, trans_path, pf_path, extracted_path, manifest_path])
             continue
@@ -290,6 +313,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

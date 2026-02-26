@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -35,8 +36,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -48,8 +51,10 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _read_json_if_exists(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         return _read_json(path)
     except Exception:
@@ -62,11 +67,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -75,8 +84,12 @@ def _to_float(v: Any) -> Optional[float]:
         val = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(val) or math.isinf(val)` を満たす経路を評価する。
+
     if math.isnan(val) or math.isinf(val):
         return None
+
     return val
 
 
@@ -86,6 +99,7 @@ def _extract_inputs(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) 
 
     for ch in gpb_payload.get("channels") or []:
         cid = str(ch.get("id") or "")
+        # 条件分岐: `cid == "geodetic_precession"` を満たす経路を評価する。
         if cid == "geodetic_precession":
             geodetic_row = {
                 "id": "gpb_geodetic_control",
@@ -99,12 +113,15 @@ def _extract_inputs(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) 
                 "pmodel_scalar_prediction": _to_float(ch.get("pmodel_scalar_prediction")),
                 "note": str(ch.get("note") or ""),
             }
+        # 条件分岐: 前段条件が不成立で、`cid == "frame_dragging"` を追加評価する。
         elif cid == "frame_dragging":
             observed = _to_float(ch.get("observed"))
             sigma = _to_float(ch.get("observed_sigma"))
             ref = _to_float(ch.get("reference_prediction"))
+            # 条件分岐: `ref is None` を満たす経路を評価する。
             if ref is None:
                 ref = _to_float(ch.get("observed"))
+
             frame_rows.append(
                 {
                     "id": "gpb_frame_dragging",
@@ -122,18 +139,24 @@ def _extract_inputs(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) 
 
     for exp in frame_payload.get("experiments") or []:
         exp_id = str(exp.get("id") or "").lower()
+        # 条件分岐: `"lageos" not in exp_id` を満たす経路を評価する。
         if "lageos" not in exp_id:
             continue
+
         observed = _to_float(exp.get("mu"))
         sigma = _to_float(exp.get("mu_sigma"))
+        # 条件分岐: `observed is None` を満たす経路を評価する。
         if observed is None:
             obs_rate = _to_float(exp.get("omega_obs_mas_per_yr"))
             pred_rate = _to_float(exp.get("omega_pred_mas_per_yr"))
+            # 条件分岐: `obs_rate is not None and pred_rate is not None and abs(pred_rate) > 0` を満たす経路を評価する。
             if obs_rate is not None and pred_rate is not None and abs(pred_rate) > 0:
                 observed = abs(obs_rate) / abs(pred_rate)
                 sigma_rate = _to_float(exp.get("omega_obs_sigma_mas_per_yr"))
+                # 条件分岐: `sigma_rate is not None` を満たす経路を評価する。
                 if sigma_rate is not None:
                     sigma = abs(sigma_rate) / abs(pred_rate)
+
         frame_rows.append(
             {
                 "id": "lageos_frame_dragging",
@@ -150,8 +173,11 @@ def _extract_inputs(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) 
         )
         break
 
+    # 条件分岐: `not frame_rows` を満たす経路を評価する。
+
     if not frame_rows:
         raise SystemExit("no frame-dragging channels extracted from inputs")
+
     return geodetic_row, frame_rows
 
 
@@ -163,12 +189,16 @@ def _fit_kappa(frame_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         observed = _to_float(row.get("observed"))
         sigma = _to_float(row.get("observed_sigma"))
         ref = _to_float(row.get("reference_prediction"))
+        # 条件分岐: `observed is None or sigma is None or sigma <= 0.0 or ref is None` を満たす経路を評価する。
         if observed is None or sigma is None or sigma <= 0.0 or ref is None:
             continue
+
         weight = 1.0 / (sigma * sigma)
         num += observed * ref * weight
         den += (ref * ref) * weight
         used += 1
+
+    # 条件分岐: `used == 0 or den <= 0.0` を満たす経路を評価する。
 
     if used == 0 or den <= 0.0:
         return {
@@ -191,8 +221,10 @@ def _fit_kappa(frame_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def _score_status(z: Optional[float], z_reject: float) -> str:
+    # 条件分岐: `z is None` を満たす経路を評価する。
     if z is None:
         return "inconclusive"
+
     return "reject" if abs(z) > z_reject else "pass"
 
 
@@ -205,6 +237,7 @@ def _build_branch_rows(
 ) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
 
+    # 条件分岐: `geodetic_row` を満たす経路を評価する。
     if geodetic_row:
         observed = _to_float(geodetic_row.get("observed"))
         sigma = _to_float(geodetic_row.get("observed_sigma"))
@@ -236,6 +269,7 @@ def _build_branch_rows(
         observed = _to_float(row.get("observed"))
         sigma = _to_float(row.get("observed_sigma"))
         ref = _to_float(row.get("reference_prediction"))
+        # 条件分岐: `branch == "static_iso"` を満たす経路を評価する。
         if branch == "static_iso":
             pred = 0.0
         else:
@@ -263,6 +297,7 @@ def _build_branch_rows(
                 "note": str(row.get("note") or ""),
             }
         )
+
     return rows
 
 
@@ -275,10 +310,13 @@ def _branch_summary(rows: Sequence[Dict[str, Any]], z_reject: float) -> Dict[str
     max_abs_z = max(zvals) if zvals else None
 
     status = "inconclusive"
+    # 条件分岐: `reject_n > 0` を満たす経路を評価する。
     if reject_n > 0:
         status = "reject"
+    # 条件分岐: 前段条件が不成立で、`pass_n == len(frame) and len(frame) > 0` を追加評価する。
     elif pass_n == len(frame) and len(frame) > 0:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`pass_n > 0 and inconclusive_n > 0` を追加評価する。
     elif pass_n > 0 and inconclusive_n > 0:
         status = "watch"
 
@@ -309,6 +347,7 @@ def _extract_metric_bridge(metric_payload: Dict[str, Any]) -> Dict[str, Any]:
 
     gate_pass = metric_choice.lower() == "effective" and case_status.lower() == "pass"
     status = "pass" if gate_pass else "watch"
+    # 条件分岐: `not metric_choice` を満たす経路を評価する。
     if not metric_choice:
         status = "inconclusive"
 
@@ -336,6 +375,7 @@ def _extract_boundary_bridge(strong_payload: Dict[str, Any], flux_closure_thresh
     gate_pass = formulation_complete and boundary_closure_pass and flux_closure_pass
 
     status = "pass" if gate_pass else "watch"
+    # 条件分岐: `not axisymmetric` を満たす経路を評価する。
     if not axisymmetric:
         status = "inconclusive"
 
@@ -365,10 +405,12 @@ def _plot(
     theta = np.linspace(0.0, math.pi, 200)
     r_ratio = 1.5
     static_profile = np.ones_like(theta)
+    # 条件分岐: `kappa_rot is None` を満たす経路を評価する。
     if kappa_rot is None:
         rot_profile = np.ones_like(theta)
     else:
         rot_profile = 1.0 + kappa_rot * (r_ratio ** -3) * (np.sin(theta) ** 2)
+
     ax0.plot(theta * 180.0 / math.pi, static_profile, color="#444444", linestyle="--", label="δP_rot=0")
     ax0.plot(theta * 180.0 / math.pi, rot_profile, color="#1f77b4", linewidth=2.0, label="δP_rot≠0")
     ax0.set_xlabel("polar angle θ [deg]")
@@ -557,10 +599,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     rot_summary = _branch_summary(rot_rows, z_reject=float(args.z_reject))
 
     overall_decision = "inconclusive"
+    # 条件分岐: `static_summary.get("status") == "reject" and rot_summary.get("status") in {"p...` を満たす経路を評価する。
     if static_summary.get("status") == "reject" and rot_summary.get("status") in {"pass", "watch"}:
         overall_decision = "deltaP_rot_required_by_precession_data"
+    # 条件分岐: 前段条件が不成立で、`static_summary.get("status") == "reject" and rot_summary.get("status") == "re...` を追加評価する。
     elif static_summary.get("status") == "reject" and rot_summary.get("status") == "reject":
         overall_decision = "current_rotational_extension_rejected"
+    # 条件分岐: 前段条件が不成立で、`static_summary.get("status") == "pass" and rot_summary.get("status") == "pass"` を追加評価する。
     elif static_summary.get("status") == "pass" and rot_summary.get("status") == "pass":
         overall_decision = "both_branches_allowed_currently"
 
@@ -568,6 +613,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     boundary_bridge = _extract_boundary_bridge(strong_payload, flux_closure_threshold=float(args.flux_closure_threshold))
 
     overall_status = "watch"
+    # 条件分岐: `overall_decision == "current_rotational_extension_rejected"` を満たす経路を評価する。
     if overall_decision == "current_rotational_extension_rejected":
         overall_status = "reject"
     elif (
@@ -577,8 +623,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ):
         overall_status = "pass"
         overall_decision = "deltaP_rot_required_under_effective_metric"
+    # 条件分岐: 前段条件が不成立で、`overall_decision == "both_branches_allowed_currently"` を追加評価する。
     elif overall_decision == "both_branches_allowed_currently":
         overall_status = "watch"
+    # 条件分岐: 前段条件が不成立で、`overall_decision == "inconclusive"` を追加評価する。
     elif overall_decision == "inconclusive":
         overall_status = "inconclusive"
 
@@ -644,6 +692,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_csv(out_csv, all_rows)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
             dst = public_outdir / src.name
@@ -681,10 +730,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

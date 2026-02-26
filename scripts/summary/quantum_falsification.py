@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -51,41 +52,56 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(v: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)):
         return float(v)
+
     return None
 
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
+
     try:
         data = _read_json(p)
     except Exception:
         return {"path": _relpath(p), "exists": True, "parse_error": True}
+
     out: Dict[str, Any] = {"path": _relpath(p), "exists": True}
     for k in ("beta", "beta_sigma", "gamma_pmodel", "gamma_pmodel_sigma", "delta"):
+        # 条件分岐: `k in data` を満たす経路を評価する。
         if k in data:
             out[k] = data.get(k)
+
     policy = data.get("policy")
+    # 条件分岐: `isinstance(policy, dict)` を満たす経路を評価する。
     if isinstance(policy, dict):
         out["policy"] = {kk: policy.get(kk) for kk in ("fit_predict_separation", "beta_source", "delta_source", "note")}
+
     return out
 
 
 def _n_eff(n0: int, n1: int) -> Optional[float]:
+    # 条件分岐: `n0 <= 0 or n1 <= 0` を満たす経路を評価する。
     if n0 <= 0 or n1 <= 0:
         return None
+
     return float(n0) * float(n1) / float(n0 + n1)
 
 
 def _ks_z(ks: Optional[float], n0: int, n1: int) -> Optional[float]:
+    # 条件分岐: `ks is None or not math.isfinite(float(ks))` を満たす経路を評価する。
     if ks is None or not math.isfinite(float(ks)):
         return None
+
     ne = _n_eff(int(n0), int(n1))
+    # 条件分岐: `ne is None` を満たす経路を評価する。
     if ne is None:
         return None
+
     return float(ks) * math.sqrt(float(ne))
 
 
@@ -95,14 +111,21 @@ def _extract_ks_delay(entry: Dict[str, Any]) -> Tuple[Optional[float], Optional[
     Accepts keys: {"Alice","Bob"} or {"A","B"}.
     """
     ks = entry.get("ks_delay")
+    # 条件分岐: `not isinstance(ks, dict)` を満たす経路を評価する。
     if not isinstance(ks, dict):
         return (None, None)
+
     ks_a = _as_float(ks.get("Alice"))
     ks_b = _as_float(ks.get("Bob"))
+    # 条件分岐: `ks_a is None` を満たす経路を評価する。
     if ks_a is None:
         ks_a = _as_float(ks.get("A"))
+
+    # 条件分岐: `ks_b is None` を満たす経路を評価する。
+
     if ks_b is None:
         ks_b = _as_float(ks.get("B"))
+
     return (ks_a, ks_b)
 
 
@@ -111,8 +134,10 @@ def _extract_delay_signature(entry: Dict[str, Any]) -> Tuple[Optional[Dict[str, 
     Returns (method, alice_sig, bob_sig) if present.
     """
     sig = entry.get("delay_signature")
+    # 条件分岐: `not isinstance(sig, dict)` を満たす経路を評価する。
     if not isinstance(sig, dict):
         return (None, None, None)
+
     method = sig.get("method") if isinstance(sig.get("method"), dict) else None
     a = sig.get("Alice") if isinstance(sig.get("Alice"), dict) else None
     b = sig.get("Bob") if isinstance(sig.get("Bob"), dict) else None
@@ -160,16 +185,22 @@ def _estimate_atom_interferometer_beta_delta(
         if isinstance(atom_metrics.get("results"), dict)
         else None
     )
+    # 条件分岐: `isinstance(beta_dep, dict) and beta_dep.get("status") == "ok"` を満たす経路を評価する。
     if isinstance(beta_dep, dict) and beta_dep.get("status") == "ok":
         return beta_dep
 
     # Fallback (kept for robustness if the upstream metrics have not been regenerated):
     # conservative “absolute potential” scaling (upper-bound style; not a strict derivation).
+
     phi_ref = _as_float(
         ((atom_metrics.get("results") or {}) if isinstance(atom_metrics.get("results"), dict) else {}).get("phi_ref_rad")
     )
+    # 条件分岐: `phi_ref is None` を満たす経路を評価する。
     if phi_ref is None:
         return {"status": "missing_phi_ref_rad"}
+
+    # 条件分岐: `beta_frozen is None or not math.isfinite(float(beta_frozen))` を満たす経路を評価する。
+
     if beta_frozen is None or not math.isfinite(float(beta_frozen)):
         return {"status": "missing_beta_frozen"}
 
@@ -199,14 +230,17 @@ def _estimate_atom_interferometer_beta_delta(
 
 def _load_nist_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]:
     npz = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "normalized_events.npz"
+    # 条件分岐: `not npz.exists()` を満たす経路を評価する。
     if not npz.exists():
         return None
+
     try:
         with np.load(npz) as data:
             a_set = data["alice_click_setting"].astype(np.int64, copy=False)
             b_set = data["bob_click_setting"].astype(np.int64, copy=False)
     except Exception:
         return None
+
     ca = np.bincount(a_set, minlength=2)[:2].astype(int).tolist()
     cb = np.bincount(b_set, minlength=2)[:2].astype(int).tolist()
     return {"alice_clicks_by_setting": ca, "bob_clicks_by_setting": cb}
@@ -222,27 +256,36 @@ def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
     dataset_id example:
       nist_03_43_afterfixingModeLocking_s3600  -> out_tag=03_43_afterfixingModeLocking_s3600
     """
+    # 条件分岐: `not dataset_id.startswith("nist_")` を満たす経路を評価する。
     if not dataset_id.startswith("nist_"):
         return None
+
     out_tag = dataset_id[len("nist_") :]
     p = _ROOT / "output" / "public" / "quantum" / f"nist_belltest_time_tag_bias_metrics__{out_tag}.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         j = _read_json(p)
     except Exception:
         return None
+
     ds = j.get("delay_stats_ns")
+    # 条件分岐: `not isinstance(ds, dict)` を満たす経路を評価する。
     if not isinstance(ds, dict):
         return None
+
     a = ds.get("alice") if isinstance(ds.get("alice"), dict) else {}
     b = ds.get("bob") if isinstance(ds.get("bob"), dict) else {}
     a0 = _as_float(a.get("setting0_median"))
     a1 = _as_float(a.get("setting1_median"))
     b0 = _as_float(b.get("setting0_median"))
     b1 = _as_float(b.get("setting1_median"))
+    # 条件分岐: `(a0 is None or a1 is None) and (b0 is None or b1 is None)` を満たす経路を評価する。
     if (a0 is None or a1 is None) and (b0 is None or b1 is None):
         return None
+
     return {
         "source": _relpath(p),
         "by_side": {
@@ -262,53 +305,77 @@ def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
 
 def _load_trial_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]:
     p = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "trial_based_counts.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         j = _read_json(p)
     except Exception:
         return None
+
     counts = j.get("counts") if isinstance(j.get("counts"), dict) else {}
     a = counts.get("alice_clicks_by_setting")
     b = counts.get("bob_clicks_by_setting")
+    # 条件分岐: `isinstance(a, list) and isinstance(b, list) and len(a) >= 2 and len(b) >= 2` を満たす経路を評価する。
     if isinstance(a, list) and isinstance(b, list) and len(a) >= 2 and len(b) >= 2:
         try:
             return {"alice_clicks_by_setting": [int(a[0]), int(a[1])], "bob_clicks_by_setting": [int(b[0]), int(b[1])]}
         except Exception:
             return None
+
     return None
 
 
 def _load_weihs_pair_counts_at_ref_window(dataset_id: str) -> Optional[Dict[str, Any]]:
     p = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "window_sweep_metrics.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         wj = _read_json(p)
     except Exception:
         return None
+
     cfg = wj.get("config") if isinstance(wj.get("config"), dict) else {}
     ref_window = _as_float(cfg.get("ref_window_ns"))
+    # 条件分岐: `ref_window is None` を満たす経路を評価する。
     if ref_window is None:
         return None
+
     rows = wj.get("rows")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return None
+
     best = None
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         w = _as_float(r.get("window_ns"))
+        # 条件分岐: `w is None` を満たす経路を評価する。
         if w is None:
             continue
+
+        # 条件分岐: `abs(w - float(ref_window)) < 1e-12` を満たす経路を評価する。
+
         if abs(w - float(ref_window)) < 1e-12:
             best = r
             break
+
+    # 条件分岐: `not isinstance(best, dict)` を満たす経路を評価する。
+
     if not isinstance(best, dict):
         return None
+
     n_by = best.get("n_by_setting")
+    # 条件分岐: `not (isinstance(n_by, list) and len(n_by) == 2 and all(isinstance(x, list) an...` を満たす経路を評価する。
     if not (isinstance(n_by, list) and len(n_by) == 2 and all(isinstance(x, list) and len(x) == 2 for x in n_by)):
         return None
+
     try:
         n00 = int(n_by[0][0])
         n01 = int(n_by[0][1])
@@ -316,6 +383,7 @@ def _load_weihs_pair_counts_at_ref_window(dataset_id: str) -> Optional[Dict[str,
         n11 = int(n_by[1][1])
     except Exception:
         return None
+
     return {"ref_window_ns": float(ref_window), "pairs_by_setting_pair": [[n00, n01], [n10, n11]]}
 
 
@@ -385,12 +453,15 @@ def build_quantum_falsification(*, frozen: Dict[str, Any]) -> Dict[str, Any]:
     bell_rows: List[Dict[str, Any]] = []
     datasets = bell_pack.get("datasets") if isinstance(bell_pack.get("datasets"), list) else []
     for d in datasets:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         dataset_id = str(d.get("dataset_id") or "")
         method, sig_a, sig_b = _extract_delay_signature(d)
         z_a = _as_float(sig_a.get("z_delta_median")) if isinstance(sig_a, dict) else None
         z_b = _as_float(sig_b.get("z_delta_median")) if isinstance(sig_b, dict) else None
+        # 条件分岐: `z_a is None and z_b is None` を満たす経路を評価する。
         if z_a is None and z_b is None:
             continue
 
@@ -415,30 +486,43 @@ def build_quantum_falsification(*, frozen: Dict[str, Any]) -> Dict[str, Any]:
         )
 
     # Create a single criterion summarizing the “fast switching” decisiveness gate.
+
     min_z = None
     zs_all: List[float] = []
     for r in bell_rows:
         for k in ("delay_z_alice", "delay_z_bob"):
             v = r.get(k)
+            # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
             if isinstance(v, (int, float)) and math.isfinite(float(v)):
                 zs_all.append(float(v))
+
+    # 条件分岐: `zs_all` を満たす経路を評価する。
+
     if zs_all:
         min_z = min(zs_all)
 
     # Focus the “fast switching” decisiveness gate on datasets where rapid basis switching is a core feature.
     # (Operational classification by dataset id; can be refined when per-dataset metadata is added.)
+
     fast_ids = [r["dataset_id"] for r in bell_rows if str(r.get("dataset_id") or "").startswith(("weihs1998_", "nist_"))]
     zs_fast: List[float] = []
     for r in bell_rows:
+        # 条件分岐: `str(r.get("dataset_id") or "") not in set(fast_ids)` を満たす経路を評価する。
         if str(r.get("dataset_id") or "") not in set(fast_ids):
             continue
+
         z_candidates: List[float] = []
         for k in ("delay_z_alice", "delay_z_bob"):
             v = r.get(k)
+            # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
             if isinstance(v, (int, float)) and math.isfinite(float(v)):
                 z_candidates.append(float(v))
+
+        # 条件分岐: `z_candidates` を満たす経路を評価する。
+
         if z_candidates:
             zs_fast.append(max(z_candidates))
+
     min_z_fast = min(zs_fast) if zs_fast else None
 
     criteria.append(
@@ -511,8 +595,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     out_path = Path(args.out)
+    # 条件分岐: `not out_path.is_absolute()` を満たす経路を評価する。
     if not out_path.is_absolute():
         out_path = (_ROOT / out_path).resolve()
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     frozen = _try_load_frozen_parameters()
@@ -541,6 +627,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

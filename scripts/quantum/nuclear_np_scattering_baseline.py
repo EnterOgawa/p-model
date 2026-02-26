@@ -12,9 +12,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -24,15 +27,19 @@ def _load_json(path: Path) -> dict:
 
 def _get_value(d: dict, key: str) -> float:
     obj = d.get(key)
+    # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
     if isinstance(obj, dict) and "value" in obj:
         return float(obj["value"])
+
     raise KeyError(key)
 
 
 def _get_sigma(d: dict, key: str) -> float | None:
     obj = d.get(key)
+    # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
     if not isinstance(obj, dict):
         return None
+
     sigma = obj.get("sigma")
     return float(sigma) if isinstance(sigma, (int, float)) else None
 
@@ -45,6 +52,7 @@ def main() -> None:
     # Load np scattering parameter sets
     src_dir = root / "data" / "quantum" / "sources"
     extracted_path = src_dir / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             "[fail] missing extracted np scattering values.\n"
@@ -52,20 +60,25 @@ def main() -> None:
             "  python -B scripts/quantum/fetch_nuclear_np_scattering_sources.py\n"
             f"Expected: {extracted_path}"
         )
+
     extracted = _load_json(extracted_path)
     sets = extracted.get("parameter_sets", [])
+    # 条件分岐: `not isinstance(sets, list) or not sets` を満たす経路を評価する。
     if not isinstance(sets, list) or not sets:
         raise SystemExit(f"[fail] invalid extracted file: parameter_sets missing/empty: {extracted_path}")
 
     # Load CODATA masses for deuteron binding scale (Step 7.9.1 baseline).
+
     codata_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     codata_path = codata_dir / "extracted_values.json"
+    # 条件分岐: `not codata_path.exists()` を満たす経路を評価する。
     if not codata_path.exists():
         raise SystemExit(
             "[fail] missing CODATA baseline. Run:\n"
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {codata_path}"
         )
+
     codata = _load_json(codata_path).get("constants", {})
     mp = float(codata["mp"]["value_si"])
     mn = float(codata["mn"]["value_si"])
@@ -93,17 +106,23 @@ def main() -> None:
         #   r_t = 2 R (1 - R / a_t), with R = 1/alpha.
         if not (math.isfinite(r_deuteron_fm) and r_deuteron_fm > 0 and math.isfinite(a_t_fm) and a_t_fm != 0):
             return float("nan")
+
         r = float(r_deuteron_fm)
         return float(2.0 * r * (1.0 - (r / float(a_t_fm))))
 
     # Flatten sets
+
     rows: list[dict[str, object]] = []
     for s in sets:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         params = s.get("params")
+        # 条件分岐: `not isinstance(params, dict)` を満たす経路を評価する。
         if not isinstance(params, dict):
             continue
+
         row = {
             "eq_label": int(s.get("eq_label", -1)),
             "kind": str(s.get("kind", "")),
@@ -123,9 +142,11 @@ def main() -> None:
         rows.append(row)
 
     # Systematics proxy: GWU vs Nijmegen deltas (eq18 vs eq19).
+
     gwu = next((r for r in rows if r.get("eq_label") == 18), None)
     nij = next((r for r in rows if r.get("eq_label") == 19), None)
     sys_delta = None
+    # 条件分岐: `gwu and nij` を満たす経路を評価する。
     if gwu and nij:
         sys_delta = {
             "a_t_fm": float(gwu["a_t_fm"]) - float(nij["a_t_fm"]),
@@ -135,6 +156,7 @@ def main() -> None:
         }
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     fig = plt.figure(figsize=(13.6, 4.2), dpi=160)
@@ -153,10 +175,12 @@ def main() -> None:
         y = float(r["r_t_fm"])
         xerr = r.get("a_t_sigma_fm")
         yerr = r.get("r_t_sigma_fm")
+        # 条件分岐: `isinstance(xerr, (int, float)) and xerr` を満たす経路を評価する。
         if isinstance(xerr, (int, float)) and xerr:
             ax0.errorbar([x], [y], xerr=[xerr], yerr=[yerr] if yerr else None, fmt="o", capsize=4, label=label)
         else:
             ax0.plot([x], [y], marker="o", lw=0, label=label)
+
     ax0.set_xlabel("triplet scattering length a_t (fm)")
     ax0.set_ylabel("triplet effective range r_t (fm)")
     ax0.set_title("np triplet low-energy parameters")
@@ -181,10 +205,12 @@ def main() -> None:
         y = float(r["r_s_fm"])
         xerr = r.get("a_s_sigma_fm")
         yerr = r.get("r_s_sigma_fm")
+        # 条件分岐: `isinstance(xerr, (int, float)) and xerr` を満たす経路を評価する。
         if isinstance(xerr, (int, float)) and xerr:
             ax1.errorbar([x], [y], xerr=[xerr], yerr=[yerr] if yerr else None, fmt="o", capsize=4, label=label)
         else:
             ax1.plot([x], [y], marker="o", lw=0, label=label)
+
     ax1.set_xlabel("singlet scattering length a_s (fm)")
     ax1.set_ylabel("singlet effective range r_s (fm)")
     ax1.set_title("np singlet low-energy parameters")
@@ -251,6 +277,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

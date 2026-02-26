@@ -33,6 +33,7 @@ except Exception:  # pragma: no cover
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -120,8 +121,10 @@ def _norm_url(u: str) -> str:
     # Normalize: keep scheme+netloc+path, drop fragments.
     p = urlparse(u)
     path = p.path
+    # 条件分岐: `path.endswith("//")` を満たす経路を評価する。
     if path.endswith("//"):
         path = path.rstrip("/") + "/"
+
     return f"{p.scheme}://{p.netloc}{path}"
 
 
@@ -136,27 +139,35 @@ def _should_skip_dir(u: str) -> bool:
 
 def _is_candidate_file(name: str) -> bool:
     n = str(name).strip()
+    # 条件分岐: `not n or n in ("../", "./")` を満たす経路を評価する。
     if not n or n in ("../", "./"):
         return False
     # Extension allow-list (handle ".fits.gz" etc).
+
     lower = n.lower()
     ok_ext = any(lower.endswith(ext) for ext in _EXT_ALLOW)
+    # 条件分岐: `not ok_ext` を満たす経路を評価する。
     if not ok_ext:
         return False
+
     return bool(_CANDIDATE_NAME_RE.search(n))
 
 
 def _fetch_text(url: str, *, timeout_sec: int) -> str:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required (pip install requests)")
+
     r = _request_with_retries("GET", url, timeout_sec=timeout_sec)
     return r.text
 
 
 def _webdav_propfind(url: str, *, timeout_sec: int) -> str:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required (pip install requests)")
     # Minimal request body (some WebDAV servers require it).
+
     body = (
         '<?xml version="1.0" encoding="utf-8" ?>'
         '<D:propfind xmlns:D="DAV:">'
@@ -178,10 +189,13 @@ def _session() -> "requests.Session":
     # NOTE: requests is Optional; type ignore for mypy isn't used here.
     if requests is None:  # pragma: no cover
         raise RuntimeError("requests is required (pip install requests)")
+
     s = getattr(_session, "_s", None)
+    # 条件分岐: `s is None` を満たす経路を評価する。
     if s is None:
         s = requests.Session()
         setattr(_session, "_s", s)
+
     return s
 
 
@@ -208,9 +222,11 @@ def _request_with_retries(
                 headers=headers,
                 data=data,
             )
+            # 条件分岐: `r.status_code in _RETRY_STATUSES and attempt < int(retries)` を満たす経路を評価する。
             if r.status_code in _RETRY_STATUSES and attempt < int(retries):
                 # Respect Retry-After if present, else exponential backoff.
                 ra = r.headers.get("Retry-After")
+                # 条件分岐: `ra` を満たす経路を評価する。
                 if ra:
                     try:
                         wait_sec = float(ra)
@@ -218,15 +234,20 @@ def _request_with_retries(
                         wait_sec = float(retry_backoff_sec) * (2.0**attempt)
                 else:
                     wait_sec = float(retry_backoff_sec) * (2.0**attempt)
+
                 time.sleep(min(wait_sec, 60.0))
                 continue
+
             r.raise_for_status()
             return r
         except BaseException as e:
             last_err = e
+            # 条件分岐: `attempt >= int(retries)` を満たす経路を評価する。
             if attempt >= int(retries):
                 break
+
             time.sleep(min(float(retry_backoff_sec) * (2.0**attempt), 60.0))
+
     assert last_err is not None
     raise last_err
 
@@ -235,8 +256,10 @@ def _iter_hrefs(html: str) -> Iterable[str]:
     # Directory listing is usually <pre><a href="...">; a regex is enough.
     for m in _HREF_RE.finditer(html):
         href = str(m.group(1)).strip()
+        # 条件分岐: `not href` を満たす経路を評価する。
         if not href:
             continue
+
         yield href
 
 
@@ -249,25 +272,40 @@ def _iter_webdav_hrefs(xml_text: str) -> Iterable[str]:
         return
 
     # Namespaces vary; match by localname.
+
     def _local(tag: str) -> str:
         return tag.split("}", 1)[-1] if "}" in tag else tag
 
     for resp in root.iter():
+        # 条件分岐: `_local(resp.tag) != "response"` を満たす経路を評価する。
         if _local(resp.tag) != "response":
             continue
+
         href = None
         is_collection = False
         for child in resp:
+            # 条件分岐: `_local(child.tag) == "href" and child.text` を満たす経路を評価する。
             if _local(child.tag) == "href" and child.text:
                 href = child.text.strip()
+
+            # 条件分岐: `_local(child.tag) == "propstat"` を満たす経路を評価する。
+
             if _local(child.tag) == "propstat":
                 for pchild in child.iter():
+                    # 条件分岐: `_local(pchild.tag) == "collection"` を満たす経路を評価する。
                     if _local(pchild.tag) == "collection":
                         is_collection = True
+
+        # 条件分岐: `not href` を満たす経路を評価する。
+
         if not href:
             continue
+
+        # 条件分岐: `is_collection and not href.endswith("/")` を満たす経路を評価する。
+
         if is_collection and not href.endswith("/"):
             href = href + "/"
+
         yield href
 
 
@@ -292,12 +330,14 @@ def _iter_listing_hrefs(
             retry_backoff_sec=retry_backoff_sec,
         ).text
         hrefs = list(_iter_hrefs(html))
+        # 条件分岐: `hrefs` を満たす経路を評価する。
         if hrefs:
             return hrefs, "html"
     except Exception:
         pass
 
     # Fallback: WebDAV PROPFIND depth=1.
+
     try:
         xml_text = _request_with_retries(
             "PROPFIND",
@@ -314,6 +354,7 @@ def _iter_listing_hrefs(
             ),
         ).text
         hrefs = list(_iter_webdav_hrefs(xml_text))
+        # 条件分岐: `hrefs` を満たす経路を評価する。
         if hrefs:
             return hrefs, "webdav"
     except Exception:
@@ -340,22 +381,33 @@ def discover(
 
     for r in roots:
         u = _norm_url(str(r).strip())
+        # 条件分岐: `not _is_dir_url(u)` を満たす経路を評価する。
         if not _is_dir_url(u):
             u = u.rstrip("/") + "/"
+
         q.append((u, 0))
 
     while q:
+        # 条件分岐: `len(visited_dirs) >= int(max_dirs)` を満たす経路を評価する。
         if len(visited_dirs) >= int(max_dirs):
             break
+
         url, depth = q.popleft()
         url = _norm_url(url)
+        # 条件分岐: `url in seen` を満たす経路を評価する。
         if url in seen:
             continue
+
         seen.add(url)
+        # 条件分岐: `_should_skip_dir(url)` を満たす経路を評価する。
         if _should_skip_dir(url):
             continue
+
+        # 条件分岐: `depth > int(max_depth)` を満たす経路を評価する。
+
         if depth > int(max_depth):
             continue
+
         visited_dirs.append(url)
 
         hrefs, method = _iter_listing_hrefs(
@@ -365,41 +417,56 @@ def discover(
             retry_backoff_sec=float(retry_backoff_sec),
         )
         visited_dir_methods[url] = method
+        # 条件分岐: `not hrefs` を満たす経路を評価する。
         if not hrefs:
             continue
 
         # Cap file links, but keep all directory links so we don't miss deep structures.
+
         dir_hrefs: List[str] = []
         file_hrefs: List[str] = []
         for href in hrefs:
+            # 条件分岐: `href in ("../", "./")` を満たす経路を評価する。
             if href in ("../", "./"):
                 continue
+
             child = urljoin(url, href)
             child = _norm_url(child)
+            # 条件分岐: `_is_dir_url(child)` を満たす経路を評価する。
             if _is_dir_url(child):
                 dir_hrefs.append(href)
             else:
                 file_hrefs.append(href)
 
+        # 条件分岐: `max_links_per_dir > 0` を満たす経路を評価する。
+
         if max_links_per_dir > 0:
             file_hrefs = file_hrefs[: int(max_links_per_dir)]
+
         hrefs = dir_hrefs + file_hrefs
 
         for href in hrefs:
+            # 条件分岐: `href in ("../", "./")` を満たす経路を評価する。
             if href in ("../", "./"):
                 continue
+
             child = urljoin(url, href)
             child = _norm_url(child)
+            # 条件分岐: `_is_dir_url(child)` を満たす経路を評価する。
             if _is_dir_url(child):
                 q.append((child, depth + 1))
                 continue
             # File
+
             fname = Path(urlparse(child).path).name
+            # 条件分岐: `not _is_candidate_file(fname)` を満たす経路を評価する。
             if not _is_candidate_file(fname):
                 continue
+
             candidates.append(Candidate(url=child, filename=fname, source_dir=url))
 
     # Deduplicate candidates by URL
+
     uniq: Dict[str, Candidate] = {c.url: c for c in candidates}
     cand_sorted = sorted(uniq.values(), key=lambda c: c.url)
     meta = {
@@ -440,6 +507,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise SystemExit("requests is required to crawl remote listings. Install it in the Windows Python env.")
 
@@ -476,8 +544,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

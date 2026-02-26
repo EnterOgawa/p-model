@@ -39,6 +39,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -59,8 +60,12 @@ def _min_points_for_target(target: Any, default_min_points: int) -> int:
         t = str(target or "").strip().lower()
     except Exception:
         t = ""
+
+    # 条件分岐: `t == "nglr1"` を満たす経路を評価する。
+
     if t == "nglr1":
         return int(min(int(default_min_points), int(_NGLR1_MIN_POINTS_CAP)))
+
     return int(default_min_points)
 
 
@@ -85,6 +90,7 @@ def _save_placeholder_plot_png(path: Path, title: str, lines: List[str]) -> None
     for line in lines:
         ax.text(0.02, y, str(line), transform=ax.transAxes, fontsize=11, va="top")
         y -= 0.11
+
     plt.tight_layout(rect=[0, 0, 1, 0.92])
     plt.savefig(path, dpi=200)
     plt.close()
@@ -105,50 +111,69 @@ def _load_station_xyz_overrides(path: Path) -> Tuple[Dict[str, Dict[str, Any]], 
     out: Dict[str, Dict[str, Any]] = {}
 
     def _add(station: Any, rec: Any, default_source: str) -> None:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             return
+
         st = str(station or "").strip().upper()
+        # 条件分岐: `not st` を満たす経路を評価する。
         if not st:
             return
+
         try:
             x = float(rec["x_m"])
             y = float(rec["y_m"])
             z = float(rec["z_m"])
         except Exception:
             return
+
         row: Dict[str, Any] = {"x_m": x, "y_m": y, "z_m": z}
         for k in ("pos_eop_yymmdd", "pos_eop_ref_epoch_utc", "log_file", "log_date", "source_group"):
+            # 条件分岐: `rec.get(k) is not None` を満たす経路を評価する。
             if rec.get(k) is not None:
                 row[k] = rec.get(k)
+
         src = str(rec.get("coord_source") or default_source).strip()
+        # 条件分岐: `src` を満たす経路を評価する。
         if src:
             row["coord_source"] = src
+
         out[st] = row
         diag["n_loaded"] = int(diag["n_loaded"]) + 1
         diag["loaded_stations"].append(st)
 
+    # 条件分岐: `isinstance(data, dict)` を満たす経路を評価する。
+
     if isinstance(data, dict):
         route = data.get("deterministic_merge_route")
+        # 条件分岐: `isinstance(route, dict)` を満たす経路を評価する。
         if isinstance(route, dict):
             sel = route.get("selected_xyz")
+            # 条件分岐: `isinstance(sel, dict)` を満たす経路を評価する。
             if isinstance(sel, dict):
                 diag["n_candidates"] = int(diag["n_candidates"]) + 1
                 _add(sel.get("station") or "APOL", sel, default_source=f"merge_route:{path.name}")
 
         sel0 = data.get("selected_xyz")
+        # 条件分岐: `isinstance(sel0, dict)` を満たす経路を評価する。
         if isinstance(sel0, dict):
             diag["n_candidates"] = int(diag["n_candidates"]) + 1
             _add(sel0.get("station") or "APOL", sel0, default_source=f"selected_xyz:{path.name}")
 
         stations = data.get("stations")
+        # 条件分岐: `isinstance(stations, dict)` を満たす経路を評価する。
         if isinstance(stations, dict):
             for st, rec in stations.items():
                 diag["n_candidates"] = int(diag["n_candidates"]) + 1
                 _add(st, rec, default_source=f"stations:{path.name}")
         else:
             for st, rec in data.items():
+                # 条件分岐: `st in ("deterministic_merge_route", "selected_xyz", "target", "version", "sta...` を満たす経路を評価する。
                 if st in ("deterministic_merge_route", "selected_xyz", "target", "version", "status"):
                     continue
+
+                # 条件分岐: `isinstance(rec, dict) and all(k in rec for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
+
                 if isinstance(rec, dict) and all(k in rec for k in ("x_m", "y_m", "z_m")):
                     diag["n_candidates"] = int(diag["n_candidates"]) + 1
                     _add(st, rec, default_source=f"mapping:{path.name}")
@@ -177,14 +202,17 @@ def _build_tx_b_rx(tag_times: List[datetime], tof_s: np.ndarray, mode: str) -> T
     b_times: List[datetime] = []
     rx_times: List[datetime] = []
     for t_tag, tof in zip(tag_times, tof_s):
+        # 条件分岐: `mode == "tx"` を満たす経路を評価する。
         if mode == "tx":
             t_tx = t_tag
             t_b = t_tag + _sec(tof / 2.0)
             t_rx = t_tag + _sec(tof)
+        # 条件分岐: 前段条件が不成立で、`mode == "rx"` を追加評価する。
         elif mode == "rx":
             t_rx = t_tag
             t_b = t_tag - _sec(tof / 2.0)
             t_tx = t_tag - _sec(tof)
+        # 条件分岐: 前段条件が不成立で、`mode == "mid"` を追加評価する。
         elif mode == "mid":
             t_b = t_tag
             t_tx = t_tag - _sec(tof / 2.0)
@@ -195,6 +223,7 @@ def _build_tx_b_rx(tag_times: List[datetime], tof_s: np.ndarray, mode: str) -> T
         tx_times.append(_quantize(t_tx))
         b_times.append(_quantize(t_b))
         rx_times.append(_quantize(t_rx))
+
     return tx_times, b_times, rx_times
 
 
@@ -202,10 +231,13 @@ def _to_vec_map(vdf: pd.DataFrame) -> Dict[datetime, np.ndarray]:
     out: Dict[datetime, np.ndarray] = {}
     for r in vdf.itertuples(index=False):
         t = getattr(r, "epoch_utc")
+        # 条件分岐: `isinstance(t, pd.Timestamp)` を満たす経路を評価する。
         if isinstance(t, pd.Timestamp):
             t = t.to_pydatetime()
+
         t = _quantize(t)
         out[t] = np.array([getattr(r, "x_km"), getattr(r, "y_km"), getattr(r, "z_km")], dtype=float) * 1000.0
+
     return out
 
 
@@ -229,10 +261,12 @@ def _robust_inlier_mask_ns(delta_ns: np.ndarray, *, clip_sigma: float, clip_min_
     """
     x = np.asarray(delta_ns, dtype=float)
     ok = np.isfinite(x)
+    # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
     if not np.any(ok):
         return ok
 
     x0 = x[ok]
+    # 条件分岐: `len(x0) < 20` を満たす経路を評価する。
     if len(x0) < 20:
         # Too few points for robust stats; keep all finite.
         return ok
@@ -241,6 +275,7 @@ def _robust_inlier_mask_ns(delta_ns: np.ndarray, *, clip_sigma: float, clip_min_
     mad = float(np.median(np.abs(x0 - med)))
     sigma = 1.4826 * mad if np.isfinite(mad) else float("nan")
     thr = float(clip_min_ns)
+    # 条件分岐: `np.isfinite(sigma) and sigma > 0` を満たす経路を評価する。
     if np.isfinite(sigma) and sigma > 0:
         thr = max(thr, float(clip_sigma) * sigma)
 
@@ -263,6 +298,7 @@ def _offset_align_residual_ns(
     pred = np.asarray(pred_s, dtype=float)
     inl = np.asarray(inlier_mask, dtype=bool)
     inl = inl & np.isfinite(obs) & np.isfinite(pred)
+    # 条件分岐: `not np.any(inl)` を満たす経路を評価する。
     if not np.any(inl):
         return np.full_like(obs, np.nan, dtype=float)
 
@@ -289,6 +325,7 @@ def _offset_align_residual_all_ns(
     pred = np.asarray(pred_s, dtype=float)
     inl = np.asarray(inlier_mask, dtype=bool)
     inl = inl & np.isfinite(obs) & np.isfinite(pred)
+    # 条件分岐: `not np.any(inl)` を満たす経路を評価する。
     if not np.any(inl):
         return np.full_like(obs, np.nan, dtype=float)
 
@@ -312,17 +349,20 @@ def _filter_llr_rows_by_tof(
 
     ここでは「評価用に」妥当域 (tof_min_s, tof_max_s) のみ残す。
     """
+    # 条件分岐: `all_df.empty` を満たす経路を評価する。
     if all_df.empty:
         return all_df
 
     tof = pd.to_numeric(all_df.get("tof_obs_s"), errors="coerce").to_numpy(dtype=float)
     ok = np.isfinite(tof) & (tof > float(tof_min_s)) & (tof < float(tof_max_s))
+    # 条件分岐: `bool(np.all(ok))` を満たす経路を評価する。
     if bool(np.all(ok)):
         return all_df
 
     bad_df = all_df.loc[~ok].copy()
     keep_df = all_df.loc[ok].copy()
 
+    # 条件分岐: `emit_bad_rows_csv is not None` を満たす経路を評価する。
     if emit_bad_rows_csv is not None:
         try:
             emit_bad_rows_csv.parent.mkdir(parents=True, exist_ok=True)
@@ -414,37 +454,52 @@ def _compute_predictions_for_mode(
     # Station topocentric: station->Moon at tx/rx, per station (site log required)
     stations = sorted({s for s in all_df["station"].unique() if s and s.lower() not in ("na", "nan")})
     station_meta: Dict[str, Optional[Dict[str, Any]]] = {s: llr._load_station_geodetic(root, s) for s in stations}  # type: ignore[attr-defined]
+    # 条件分岐: `station_xyz_override` を満たす経路を評価する。
     if station_xyz_override:
         for st, override in station_xyz_override.items():
+            # 条件分岐: `st not in station_meta` を満たす経路を評価する。
             if st not in station_meta:
                 continue
+
             meta0 = station_meta.get(st)
+            # 条件分岐: `not isinstance(meta0, dict) or not isinstance(override, dict)` を満たす経路を評価する。
             if not isinstance(meta0, dict) or not isinstance(override, dict):
                 continue
+
+            # 条件分岐: `not all(k in override for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
+
             if not all(k in override for k in ("x_m", "y_m", "z_m")):
                 continue
+
             meta = dict(meta0)
             meta["x_m"] = float(override["x_m"])
             meta["y_m"] = float(override["y_m"])
             meta["z_m"] = float(override["z_m"])
+            # 条件分岐: `override.get("pos_eop_yymmdd")` を満たす経路を評価する。
             if override.get("pos_eop_yymmdd"):
                 meta["station_coord_source"] = "EDC pos+eop (SINEX)"
                 meta["pos_eop_yymmdd"] = str(override.get("pos_eop_yymmdd"))
+                # 条件分岐: `override.get("pos_eop_ref_epoch_utc")` を満たす経路を評価する。
                 if override.get("pos_eop_ref_epoch_utc"):
                     meta["pos_eop_ref_epoch_utc"] = str(override.get("pos_eop_ref_epoch_utc"))
             else:
                 meta["station_coord_source"] = "override"
+
             station_meta[st] = meta
 
     station_moon_map: Dict[str, Dict[datetime, np.ndarray]] = {}
     for st in stations:
         meta = station_meta.get(st) or None
+        # 条件分岐: `not meta` を満たす経路を評価する。
         if not meta:
             continue
+
         coord_type = "GEODETIC"
+        # 条件分岐: `all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
         if all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m")):
             lon_deg, lat_deg, h_m = llr.geodetic_from_ecef(float(meta["x_m"]), float(meta["y_m"]), float(meta["z_m"]))
             site_coord = f"{lon_deg:.10f},{lat_deg:.10f},{h_m/1000.0:.6f}"
+        # 条件分岐: 前段条件が不成立で、`all(k in meta for k in ("lat_deg", "lon_deg", "height_m"))` を追加評価する。
         elif all(k in meta for k in ("lat_deg", "lon_deg", "height_m")):
             site_coord = f"{float(meta['lon_deg']):.10f},{float(meta['lat_deg']):.10f},{float(meta['height_m'])/1000.0:.6f}"
         else:
@@ -454,8 +509,10 @@ def _compute_predictions_for_mode(
         st_tx = [tx_times[i] for i, ok in enumerate(st_mask) if ok]
         st_rx = [rx_times[i] for i, ok in enumerate(st_mask) if ok]
         times_sm = sorted({t.astimezone(timezone.utc) for t in (st_tx + st_rx)})
+        # 条件分岐: `not times_sm` を満たす経路を評価する。
         if not times_sm:
             continue
+
         moon_site = llr.fetch_vectors_chunked_cached(
             "301",
             "coord@399",
@@ -470,6 +527,7 @@ def _compute_predictions_for_mode(
         station_moon_map[st] = _to_vec_map(moon_site)
 
     # Vectorize core ephemerides lookups
+
     n = len(all_df)
     r_em_tx = np.stack([moon_map[t] for t in tx_times], axis=0)
     r_em_rx = np.stack([moon_map[t] for t in rx_times], axis=0)
@@ -485,18 +543,22 @@ def _compute_predictions_for_mode(
     stations_list = all_df["station"].tolist()
     for i, st in enumerate(stations_list):
         sm = station_moon_map.get(st)
+        # 条件分岐: `sm is None` を満たす経路を評価する。
         if sm is None:
             continue
+
         try:
             r_sm_tx = sm[tx_times[i]]
             r_sm_rx = sm[rx_times[i]]
         except KeyError:
             continue
+
         r_st_tx[i] = r_em_tx[i] - r_sm_tx
         r_st_rx[i] = r_em_rx[i] - r_sm_rx
         has_station[i] = True
 
     # Distances (geocenter / station->moon)
+
     r_moon_b = r_em_b
     up_gc = np.linalg.norm(r_moon_b, axis=1)
     down_gc = up_gc.copy()
@@ -518,12 +580,15 @@ def _compute_predictions_for_mode(
     targets_list = all_df["target"].tolist()
     for target in sorted(set(targets_list)):
         meta = refls.get(target)
+        # 条件分岐: `not isinstance(meta, dict) or not all(k in meta for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
         if not isinstance(meta, dict) or not all(k in meta for k in ("x_m", "y_m", "z_m")):
             continue
+
         pa = np.array([float(meta["x_m"]), float(meta["y_m"]), float(meta["z_m"])], dtype=float)
 
         # indices for this target
         idx = [i for i, t in enumerate(targets_list) if t == target]
+        # 条件分岐: `not idx` を満たす経路を評価する。
         if not idx:
             continue
 
@@ -532,14 +597,17 @@ def _compute_predictions_for_mode(
         for i in idx:
             t = b_times[i]
             mat_iau = rot_cache_iau.get(t)
+            # 条件分岐: `mat_iau is None` を満たす経路を評価する。
             if mat_iau is None:
                 mat_iau = llr.moon_pa_to_icrf_matrix(t)
                 rot_cache_iau[t] = mat_iau
 
             mat_sp = rot_cache_spice.get(t)
+            # 条件分岐: `mat_sp is None and t not in rot_cache_spice` を満たす経路を評価する。
             if mat_sp is None and t not in rot_cache_spice:
                 mat_sp = llr._moon_pa_de421_to_j2000_matrix(root, t)  # type: ignore[attr-defined]
                 rot_cache_spice[t] = mat_sp
+
             mat_sp_eff = mat_iau if mat_sp is None else mat_sp
 
             mats_spice.append(mat_sp_eff)
@@ -599,26 +667,34 @@ def _compute_predictions_for_mode(
 
     station_atmos: Dict[str, Dict[str, float]] = {}
     for st, meta in station_meta.items():
+        # 条件分岐: `not meta` を満たす経路を評価する。
         if not meta:
             continue
+
         try:
             lat_deg = float(meta.get("lat_deg")) if meta.get("lat_deg") is not None else float("nan")
             h_m = float(meta.get("height_m")) if meta.get("height_m") is not None else float("nan")
         except Exception:
             continue
+
+        # 条件分岐: `not (np.isfinite(lat_deg) and np.isfinite(h_m))` を満たす経路を評価する。
+
         if not (np.isfinite(lat_deg) and np.isfinite(h_m)):
             continue
+
         phi = float(np.deg2rad(lat_deg))
         # Standard atmosphere pressure at height (hPa), used as fallback
         try:
             P_std_hpa = float(1013.25 * (1.0 - 2.25577e-5 * h_m) ** 5.25588)
         except Exception:
             P_std_hpa = float("nan")
+
         station_atmos[str(st)] = {"phi_rad": phi, "h_m": float(h_m), "P_std_hpa": P_std_hpa}
 
     # Per-station fallback meteorology (derived from CRD record 20 when available).
     # Many stations have sparse meteo coverage; using station medians as fallback helps avoid
     # systematically skipping wet delay on points with missing temperature/humidity.
+
     try:
         stations_arr = all_df["station"].fillna("").astype(str).to_numpy(dtype=object)
     except Exception:
@@ -626,6 +702,7 @@ def _compute_predictions_for_mode(
 
     for st in list(station_atmos.keys()):
         mask = stations_arr == str(st)
+        # 条件分岐: `not bool(np.any(mask))` を満たす経路を評価する。
         if not bool(np.any(mask)):
             station_atmos[str(st)]["met_frac"] = 0.0
             station_atmos[str(st)]["P_med_hpa"] = float("nan")
@@ -652,8 +729,10 @@ def _compute_predictions_for_mode(
         # Saastamoinen hydrostatic zenith delay [m]
         h_km = height_m / 1000.0
         denom = 1.0 - 0.00266 * float(np.cos(2.0 * phi_rad)) - 0.00028 * h_km
+        # 条件分岐: `denom <= 0` を満たす経路を評価する。
         if denom <= 0:
             return float("nan")
+
         return float(0.0022768 * pressure_hpa / denom)
 
     def _sat_vapor_pressure_hpa(temp_k: float) -> float:
@@ -665,10 +744,17 @@ def _compute_predictions_for_mode(
         # Saastamoinen wet zenith delay [m]
         if not (np.isfinite(temp_k) and np.isfinite(rh_percent)):
             return 0.0
+
+        # 条件分岐: `temp_k < 150.0 or temp_k > 330.0` を満たす経路を評価する。
+
         if temp_k < 150.0 or temp_k > 330.0:
             return 0.0
+
+        # 条件分岐: `rh_percent < 0.0 or rh_percent > 100.0` を満たす経路を評価する。
+
         if rh_percent < 0.0 or rh_percent > 100.0:
             return 0.0
+
         e_hpa = (float(rh_percent) / 100.0) * _sat_vapor_pressure_hpa(float(temp_k))
         return float(0.002277 * (1255.0 / float(temp_k) + 0.05) * e_hpa)
 
@@ -708,16 +794,23 @@ def _compute_predictions_for_mode(
 
     def _interp_lat(abs_lat_rad: float, values: list[float]) -> float:
         x = float(abs_lat_rad)
+        # 条件分岐: `x <= _NMF_LAT_RAD[0]` を満たす経路を評価する。
         if x <= _NMF_LAT_RAD[0]:
             return float(values[0])
+
+        # 条件分岐: `x >= _NMF_LAT_RAD[-1]` を満たす経路を評価する。
+
         if x >= _NMF_LAT_RAD[-1]:
             return float(values[-1])
+
         for j in range(len(_NMF_LAT_RAD) - 1):
             x0 = _NMF_LAT_RAD[j]
             x1 = _NMF_LAT_RAD[j + 1]
+            # 条件分岐: `x0 <= x <= x1` を満たす経路を評価する。
             if x0 <= x <= x1:
                 w = (x - x0) / max(x1 - x0, 1e-15)
                 return float(values[j] * (1.0 - w) + values[j + 1] * w)
+
         return float(values[-1])
 
     def _marini_mapping_from_sin(sin_e: float, a: float, b: float, c: float) -> float:
@@ -758,6 +851,7 @@ def _compute_predictions_for_mode(
 
     # Solid Earth tide (simple, but includes horizontal component): driven by Moon+Sun.
     # Goal: reduce station-dependent systematic residuals at the ns level.
+
     GM_MOON = 4.9048695e12  # m^3/s^2
     R_E = 6378137.0  # m (WGS84)
     H2_EARTH = 0.6078
@@ -782,8 +876,10 @@ def _compute_predictions_for_mode(
         g_ref: float,
     ) -> np.ndarray:
         rb = float(np.linalg.norm(r_body))
+        # 条件分岐: `not np.isfinite(rb) or rb <= 0` を満たす経路を評価する。
         if not np.isfinite(rb) or rb <= 0:
             return np.zeros((3,), dtype=float)
+
         u_b = r_body / rb
         cospsi = float(np.dot(u_r, u_b))
         cospsi = max(min(cospsi, 1.0), -1.0)
@@ -802,42 +898,60 @@ def _compute_predictions_for_mode(
         return d
 
     for i, st in enumerate(stations_list):
+        # 条件分岐: `not (has_station[i] and has_reflector[i])` を満たす経路を評価する。
         if not (has_station[i] and has_reflector[i]):
             continue
+
+        # 条件分岐: `not (np.isfinite(up_sr[i]) and np.isfinite(down_sr[i]))` を満たす経路を評価する。
+
         if not (np.isfinite(up_sr[i]) and np.isfinite(down_sr[i])):
             continue
 
         meta_atm = station_atmos.get(str(st))
+        # 条件分岐: `not meta_atm` を満たす経路を評価する。
         if not meta_atm:
             continue
+
         phi = float(meta_atm["phi_rad"])
         h_m = float(meta_atm["h_m"])
 
         P = float(p_hpa[i]) if np.isfinite(p_hpa[i]) else float("nan")
+        # 条件分岐: `not (np.isfinite(P) and 100.0 <= P <= 1100.0)` を満たす経路を評価する。
         if not (np.isfinite(P) and 100.0 <= P <= 1100.0):
             P_med = float(meta_atm.get("P_med_hpa", float("nan")))
+            # 条件分岐: `np.isfinite(P_med) and 100.0 <= P_med <= 1100.0` を満たす経路を評価する。
             if np.isfinite(P_med) and 100.0 <= P_med <= 1100.0:
                 P = P_med
             else:
                 P = float(meta_atm.get("P_std_hpa", float("nan")))
+
+        # 条件分岐: `not np.isfinite(P)` を満たす経路を評価する。
+
         if not np.isfinite(P):
             continue
 
         # Wet delay requires temperature + humidity; if missing, fall back to station medians
         # when available (otherwise keep NaN so zwd becomes 0).
+
         T = float(t_k[i]) if np.isfinite(t_k[i]) else float("nan")
         RH = float(rh[i]) if np.isfinite(rh[i]) else float("nan")
+        # 条件分岐: `not np.isfinite(T)` を満たす経路を評価する。
         if not np.isfinite(T):
             T = float(meta_atm.get("T_med_k", float("nan")))
+
+        # 条件分岐: `not np.isfinite(RH)` を満たす経路を評価する。
+
         if not np.isfinite(RH):
             RH = float(meta_atm.get("RH_med_percent", float("nan")))
 
         zhd_m = _saast_zhd_m(P, phi, h_m)
         zwd_m = _saast_zwd_m(T, RH)
+        # 条件分岐: `not np.isfinite(zhd_m)` を満たす経路を評価する。
         if not np.isfinite(zhd_m):
             continue
 
         # Local zenith (radial)
+
         zen_tx = r_st_tx[i] / max(float(np.linalg.norm(r_st_tx[i])), 1e-9)
         zen_rx = r_st_rx[i] / max(float(np.linalg.norm(r_st_rx[i])), 1e-9)
         u_up = (r_refl_b[i] - r_st_tx[i]) / max(float(up_sr[i]), 1e-9)
@@ -857,6 +971,7 @@ def _compute_predictions_for_mode(
             pass
 
         # Niell mapping factors (hydrostatic + wet) for each leg
+
         mh_up, mw_up = _nmf_mapping_factors(sin_e=sin_el_up, lat_rad=phi, height_m=h_m, dt_utc=tx_times[i])
         mh_dn, mw_dn = _nmf_mapping_factors(sin_e=sin_el_dn, lat_rad=phi, height_m=h_m, dt_utc=rx_times[i])
         dt_tropo_two_way_s[i] = (zhd_m * (mh_up + mh_dn) + zwd_m * (mw_up + mw_dn)) / llr.C
@@ -902,6 +1017,7 @@ def _compute_predictions_for_mode(
             dt_station = 0.0
 
         # Moon body tide at reflector (Earth-driven; very simplified)
+
         try:
             r_refl_m = r_refl_b[i] - r_em_b[i]
             u_r_m = r_refl_m / max(float(np.linalg.norm(r_refl_m)), 1e-9)
@@ -920,9 +1036,12 @@ def _compute_predictions_for_mode(
             dt_moon = 0.0
 
         # Ocean loading (TOC harmonics; station displacement)
+
         dt_ocean = 0.0
+        # 条件分岐: `ocean_model is not None and ocean_site_by_station` を満たす経路を評価する。
         if ocean_model is not None and ocean_site_by_station:
             sid = ocean_site_by_station.get(str(st))
+            # 条件分岐: `sid` を満たす経路を評価する。
             if sid:
                 try:
                     up_tx_m, east_tx_m, north_tx_m = ol.displacement_uen_m(ocean_model, site_id=sid, dt_utc=tx_times[i])
@@ -933,14 +1052,18 @@ def _compute_predictions_for_mode(
                     # East is along increasing longitude (k × Up), North completes the triad.
                     k = np.array([0.0, 0.0, 1.0], dtype=float)
                     east_tx = np.cross(k, zen_tx)
+                    # 条件分岐: `float(np.linalg.norm(east_tx)) < 1e-12` を満たす経路を評価する。
                     if float(np.linalg.norm(east_tx)) < 1e-12:
                         east_tx = np.cross(np.array([0.0, 1.0, 0.0], dtype=float), zen_tx)
+
                     east_tx = east_tx / max(float(np.linalg.norm(east_tx)), 1e-12)
                     north_tx = np.cross(zen_tx, east_tx)
 
                     east_rx = np.cross(k, zen_rx)
+                    # 条件分岐: `float(np.linalg.norm(east_rx)) < 1e-12` を満たす経路を評価する。
                     if float(np.linalg.norm(east_rx)) < 1e-12:
                         east_rx = np.cross(np.array([0.0, 1.0, 0.0], dtype=float), zen_rx)
+
                     east_rx = east_rx / max(float(np.linalg.norm(east_rx)), 1e-12)
                     north_rx = np.cross(zen_rx, east_rx)
 
@@ -1018,12 +1141,14 @@ def _compute_group_metrics(
 ) -> pd.DataFrame:
     rows: List[Dict[str, Any]] = []
     groups = sorted({(s, t) for s, t in zip(all_df["station"].tolist(), all_df["target"].tolist())})
+    # 条件分岐: `max_groups and max_groups > 0` を満たす経路を評価する。
     if max_groups and max_groups > 0:
         groups = groups[: int(max_groups)]
 
     for st, target in groups:
         mask = (all_df["station"].to_numpy() == st) & (all_df["target"].to_numpy() == target)
         min_pts = _min_points_for_target(target, min_points)
+        # 条件分岐: `int(mask.sum()) < int(min_pts)` を満たす経路を評価する。
         if int(mask.sum()) < int(min_pts):
             continue
 
@@ -1049,6 +1174,7 @@ def _compute_group_metrics(
             delta_best_ns = (obs - sr_tropo_tide) * 1e9
         else:
             delta_best_ns = (obs - sm) * 1e9
+
         inlier = _robust_inlier_mask_ns(delta_best_ns, clip_sigma=float(clip_sigma), clip_min_ns=float(clip_min_ns))
         n_inlier = int(np.sum(inlier))
         n_finite = int(np.sum(np.isfinite(delta_best_ns)))
@@ -1076,6 +1202,7 @@ def _compute_group_metrics(
         res_sr_iau_nosh_ns = _offset_align_residual_ns(obs, sr_iau_nosh, inlier_mask=inlier) if has_refl_iau else np.full_like(res_gc_ns, np.nan)
 
         st_mode = None
+        # 条件分岐: `time_tag_mode_by_station is not None` を満たす経路を評価する。
         if time_tag_mode_by_station is not None:
             st_mode = time_tag_mode_by_station.get(st)
 
@@ -1128,17 +1255,23 @@ def _station_weighted_rms_sr_ns(
         for tgt in targets:
             mask = (st_arr == st) & (tgt_arr == tgt)
             min_pts = _min_points_for_target(tgt, min_points)
+            # 条件分岐: `int(mask.sum()) < int(min_pts)` を満たす経路を評価する。
             if int(mask.sum()) < int(min_pts):
                 continue
+
             obs = tof_obs_s[mask]
             sr = preds.tof_sr_raw_s[mask]
+            # 条件分岐: `not np.all(np.isfinite(sr))` を満たす経路を評価する。
             if not np.all(np.isfinite(sr)):
                 continue
+
             delta_ns = (obs - sr) * 1e9
             inlier = _robust_inlier_mask_ns(delta_ns, clip_sigma=float(clip_sigma), clip_min_ns=float(clip_min_ns))
             res_ns = _offset_align_residual_ns(obs, sr, inlier_mask=inlier)
             res_all.extend([float(x) for x in res_ns if np.isfinite(x)])
+
         out[st] = _rms_ns(np.array(res_all, dtype=float)) if res_all else float("nan")
+
     return out
 
 
@@ -1170,9 +1303,11 @@ def _pick_best_time_tag_by_station(
     for st in stations:
         items = [(m, rms_by_station_mode[st].get(m, float("nan"))) for m in sorted(preds_by_mode.keys())]
         items = [(m, v) for m, v in items if np.isfinite(v)]
+        # 条件分岐: `not items` を満たす経路を評価する。
         if not items:
             best[st] = "tx"
             continue
+
         best_mode, _ = min(items, key=lambda t: float(t[1]))
         best[st] = str(best_mode)
 
@@ -1193,20 +1328,26 @@ def _mix_predictions_by_station(
         out = np.full((n,), np.nan, dtype=float)
         for mode, preds in preds_by_mode.items():
             mask = chosen == mode
+            # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
             if not np.any(mask):
                 continue
+
             v = getattr(preds, field)
             out[mask] = v[mask]
+
         return out
 
     def _mix_bool(field: str) -> np.ndarray:
         outb = np.zeros((n,), dtype=bool)
         for mode, preds in preds_by_mode.items():
             mask = chosen == mode
+            # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
             if not np.any(mask):
                 continue
+
             v = getattr(preds, field)
             outb[mask] = v[mask]
+
         return outb
 
     return ModePrediction(
@@ -1303,19 +1444,26 @@ def main() -> int:
     args = ap.parse_args()
 
     out_dir = Path(str(args.out_dir))
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
     if not out_dir.is_absolute():
         out_dir = root / out_dir
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest_path = Path(str(args.manifest))
+    # 条件分岐: `not manifest_path.is_absolute()` を満たす経路を評価する。
     if not manifest_path.is_absolute():
         manifest_path = (root / manifest_path).resolve()
+
+    # 条件分岐: `not manifest_path.exists()` を満たす経路を評価する。
+
     if not manifest_path.exists():
         print(f"[err] missing manifest: {manifest_path}")
         return 2
 
     manifest = _read_json(manifest_path)
     file_recs = manifest.get("files") or []
+    # 条件分岐: `not isinstance(file_recs, list) or not file_recs` を満たす経路を評価する。
     if not isinstance(file_recs, list) or not file_recs:
         print(f"[err] empty files in manifest: {manifest_path}")
         return 2
@@ -1326,17 +1474,25 @@ def main() -> int:
     dfs: List[pd.DataFrame] = []
     for rec in file_recs:
         rel = rec.get("cached_path")
+        # 条件分岐: `not rel` を満たす経路を評価する。
         if not rel:
             continue
+
         p = root / Path(str(rel))
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         df = llr.parse_crd_npt11(p, assume_two_way_if_missing=True)
+        # 条件分岐: `df.empty` を満たす経路を評価する。
         if df.empty:
             continue
+
         df = df.copy()
         df["source_file"] = str(p.relative_to(root)).replace("\\", "/")
         dfs.append(df)
+
+    # 条件分岐: `not dfs` を満たす経路を評価する。
 
     if not dfs:
         print("[err] no inputs parsed (record 11 not found?)")
@@ -1355,14 +1511,17 @@ def main() -> int:
     all_df = _filter_llr_rows_by_tof(all_df, tof_min_s=1.0, tof_max_s=4.0, emit_bad_rows_csv=bad_tof_csv)
     n1 = int(len(all_df))
     n_bad_tof = int(n0 - n1)
+    # 条件分岐: `n_bad_tof` を満たす経路を評価する。
     if n_bad_tof:
         print(f"[warn] dropped invalid TOF rows: {n_bad_tof} (kept {n1}); see {bad_tof_csv}")
 
     # Deduplicate exact same NP rows (monthly vs daily files can overlap when include_daily=True).
+
     n1b = int(len(all_df))
     all_df = all_df.drop_duplicates(subset=["station", "target", "epoch_utc", "tof_obs_s"], keep="first").reset_index(drop=True)
     n1c = int(len(all_df))
     n_dup = int(n1b - n1c)
+    # 条件分岐: `n_dup` を満たす経路を評価する。
     if n_dup:
         print(f"[info] dropped exact-duplicate rows: {n_dup} (kept {n1c})")
 
@@ -1389,6 +1548,7 @@ def main() -> int:
                     "included_in_metrics": bool(n_pts >= min_pts),
                 }
             )
+
         coverage_df = pd.DataFrame(cov_rows).sort_values(["station", "target"]).reset_index(drop=True)
         coverage_path = out_dir / "llr_data_coverage.csv"
         coverage_df.to_csv(coverage_path, index=False)
@@ -1397,21 +1557,29 @@ def main() -> int:
         print(f"[warn] coverage summary failed: {e}")
 
     # Time-tag mode (CLI > env > default)
+
     mode_raw = str(args.time_tag_mode or "").strip().lower()
+    # 条件分岐: `not mode_raw` を満たす経路を評価する。
     if not mode_raw:
         mode_raw = _time_tag_mode_env() or "tx"
+
+    # 条件分岐: `mode_raw not in ("tx", "rx", "mid", "auto")` を満たす経路を評価する。
+
     if mode_raw not in ("tx", "rx", "mid", "auto"):
         print(f"[err] invalid --time-tag-mode {mode_raw!r} (expected tx/rx/mid/auto)")
         return 2
+
     mode: TimeTagMode = mode_raw  # type: ignore[assignment]
 
     tof_obs = all_df["tof_obs_s"].to_numpy(dtype=float)
 
     # Station coordinate source (slrlog vs pos+eop SINEX)
     station_coords_mode = str(getattr(args, "station_coords", "") or "").strip().lower()
+    # 条件分岐: `station_coords_mode not in ("slrlog", "pos_eop", "auto")` を満たす経路を評価する。
     if station_coords_mode not in ("slrlog", "pos_eop", "auto"):
         print(f"[err] invalid --station-coords {station_coords_mode!r} (expected slrlog/pos_eop/auto)")
         return 2
+
     station_override_json = str(getattr(args, "station_override_json", "") or "").strip()
     pos_eop_date = str(getattr(args, "pos_eop_date", "") or "").strip()
     pos_eop_max_days = int(getattr(args, "pos_eop_max_days", 3650) or 3650)
@@ -1419,18 +1587,27 @@ def main() -> int:
     station_xyz_override: Dict[str, Dict[str, Any]] = {}
     station_coord_summary: Dict[str, Dict[str, Any]] = {}
     station_override_input: Optional[Dict[str, Any]] = None
+    # 条件分岐: `station_override_json` を満たす経路を評価する。
     if station_override_json:
         station_override_path = Path(station_override_json)
+        # 条件分岐: `not station_override_path.is_absolute()` を満たす経路を評価する。
         if not station_override_path.is_absolute():
             station_override_path = (root / station_override_path).resolve()
+
+        # 条件分岐: `not station_override_path.exists()` を満たす経路を評価する。
+
         if not station_override_path.exists():
             print(f"[err] missing --station-override-json: {station_override_path}")
             return 2
+
         try:
             loaded_override, station_override_input = _load_station_xyz_overrides(station_override_path)
         except Exception as e:
             print(f"[err] failed to load --station-override-json: {e}")
             return 2
+
+        # 条件分岐: `loaded_override` を満たす経路を評価する。
+
         if loaded_override:
             station_xyz_override.update(loaded_override)
             for st, xyz in loaded_override.items():
@@ -1447,6 +1624,7 @@ def main() -> int:
                         dr = float(np.sqrt(dx * dx + dy * dy + dz * dz))
                 except Exception:
                     pass
+
                 station_coord_summary[str(st)] = {
                     "station": str(st),
                     "pad_id": (meta.get("cdp_pad_id") if isinstance(meta, dict) else None),
@@ -1458,39 +1636,57 @@ def main() -> int:
                     "dy_m": dy,
                     "dz_m": dz,
                 }
+
             print(
                 f"[info] station override: loaded {len(loaded_override)} station(s) from {station_override_path.relative_to(root).as_posix()}"
             )
         else:
             print(f"[warn] station override: no valid xyz rows in {station_override_path}")
 
+    # 条件分岐: `station_coords_mode in ("auto", "pos_eop")` を満たす経路を評価する。
+
     if station_coords_mode in ("auto", "pos_eop"):
         stations_all = sorted({s for s in all_df["station"].unique() if s and s.lower() not in ("na", "nan")})
         for st in stations_all:
+            # 条件分岐: `st in station_xyz_override` を満たす経路を評価する。
             if st in station_xyz_override:
                 continue
+
             meta = llr._load_station_geodetic(root, st)  # type: ignore[attr-defined]
+            # 条件分岐: `not isinstance(meta, dict)` を満たす経路を評価する。
             if not isinstance(meta, dict):
                 continue
+
             pad_id = meta.get("cdp_pad_id")
             try:
                 pad_id_i = int(pad_id) if pad_id is not None else None
             except Exception:
                 pad_id_i = None
+
+            # 条件分岐: `pad_id_i is None` を満たす経路を評価する。
+
             if pad_id_i is None:
                 continue
 
             st_epochs = all_df.loc[all_df["station"] == st, "epoch_utc"].dropna().tolist()
+            # 条件分岐: `not st_epochs` を満たす経路を評価する。
             if not st_epochs:
                 continue
+
             dts: List[datetime] = []
             for t in st_epochs:
+                # 条件分岐: `isinstance(t, pd.Timestamp)` を満たす経路を評価する。
                 if isinstance(t, pd.Timestamp):
                     dts.append(t.to_pydatetime())
+                # 条件分岐: 前段条件が不成立で、`isinstance(t, datetime)` を追加評価する。
                 elif isinstance(t, datetime):
                     dts.append(t)
+
+            # 条件分岐: `not dts` を満たす経路を評価する。
+
             if not dts:
                 continue
+
             dts = [dt.astimezone(timezone.utc) if dt.tzinfo else dt.replace(tzinfo=timezone.utc) for dt in dts]
             dts.sort()
             target_dt = dts[len(dts) // 2]
@@ -1503,8 +1699,12 @@ def main() -> int:
                 max_days=pos_eop_max_days,
                 preferred_yymmdd=pos_eop_date,
             )
+            # 条件分岐: `not isinstance(xyz, dict)` を満たす経路を評価する。
             if not isinstance(xyz, dict):
                 continue
+
+            # 条件分岐: `not all(k in xyz for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
+
             if not all(k in xyz for k in ("x_m", "y_m", "z_m")):
                 continue
 
@@ -1512,6 +1712,7 @@ def main() -> int:
 
             dx = dy = dz = dr = None
             try:
+                # 条件分岐: `all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
                 if all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m")):
                     dx = float(xyz["x_m"]) - float(meta["x_m"])
                     dy = float(xyz["y_m"]) - float(meta["y_m"])
@@ -1532,17 +1733,25 @@ def main() -> int:
                 "dz_m": dz,
             }
 
+        # 条件分岐: `station_coords_mode == "pos_eop" and not station_xyz_override` を満たす経路を評価する。
+
         if station_coords_mode == "pos_eop" and not station_xyz_override:
             print("[err] --station-coords=pos_eop but no cached pos+eop station coords matched. Run scripts/llr/fetch_pos_eop_edc.py first.")
             return 2
+
+        # 条件分岐: `station_coords_mode == "auto"` を満たす経路を評価する。
+
         if station_coords_mode == "auto":
+            # 条件分岐: `station_xyz_override` を満たす経路を評価する。
             if station_xyz_override:
                 print(f"[info] station coords: using override/pos+eop for {len(station_xyz_override)} station(s)")
             else:
                 print("[info] station coords: pos+eop not available; using slrlog")
 
     # Ocean loading (TOC harmonics; HARPOS via IMLS)
+
     ocean_loading_mode = str(getattr(args, "ocean_loading", "") or "auto").strip().lower()
+    # 条件分岐: `ocean_loading_mode not in ("auto", "on", "off")` を満たす経路を評価する。
     if ocean_loading_mode not in ("auto", "on", "off"):
         print(f"[err] invalid --ocean-loading {ocean_loading_mode!r} (expected auto/on/off)")
         return 2
@@ -1551,8 +1760,11 @@ def main() -> int:
     ocean_site_by_station: Dict[str, str] = {}
     ocean_site_info: Dict[str, Dict[str, Any]] = {}
     ocean_harpos_path = root / "data" / "llr" / "ocean_loading" / "toc_fes2014b_harmod.hps"
+    # 条件分岐: `ocean_loading_mode in ("auto", "on")` を満たす経路を評価する。
     if ocean_loading_mode in ("auto", "on"):
+        # 条件分岐: `not ocean_harpos_path.exists()` を満たす経路を評価する。
         if not ocean_harpos_path.exists():
+            # 条件分岐: `ocean_loading_mode == "on"` を満たす経路を評価する。
             if ocean_loading_mode == "on":
                 print("[err] --ocean-loading=on but HARPOS file is missing.")
                 print("      Run: python -B scripts/llr/fetch_ocean_loading_imls.py")
@@ -1563,6 +1775,7 @@ def main() -> int:
                 st_for_map = sorted({s for s in all_df["station"].unique() if s and s.lower() not in ("na", "nan")})
                 for st in st_for_map:
                     meta = llr._load_station_geodetic(root, st)  # type: ignore[attr-defined]
+                    # 条件分岐: `not isinstance(meta, dict)` を満たす経路を評価する。
                     if not isinstance(meta, dict):
                         continue
 
@@ -1572,14 +1785,17 @@ def main() -> int:
                         and all(k in station_xyz_override[st] for k in ("x_m", "y_m", "z_m"))
                     )
                     try:
+                        # 条件分岐: `use_pos` を満たす経路を評価する。
                         if use_pos:
                             x_m = float(station_xyz_override[st]["x_m"])
                             y_m = float(station_xyz_override[st]["y_m"])
                             z_m = float(station_xyz_override[st]["z_m"])
+                        # 条件分岐: 前段条件が不成立で、`all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m"))` を追加評価する。
                         elif all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m")):
                             x_m = float(meta["x_m"])
                             y_m = float(meta["y_m"])
                             z_m = float(meta["z_m"])
+                        # 条件分岐: 前段条件が不成立で、`all(meta.get(k) is not None for k in ("lat_deg", "lon_deg", "height_m"))` を追加評価する。
                         elif all(meta.get(k) is not None for k in ("lat_deg", "lon_deg", "height_m")):
                             v = llr.ecef_from_geodetic(float(meta["lat_deg"]), float(meta["lon_deg"]), float(meta["height_m"]))
                             x_m, y_m, z_m = float(v[0]), float(v[1]), float(v[2])
@@ -1589,8 +1805,10 @@ def main() -> int:
                         continue
 
                     sid, dist_m = ol.best_site_by_ecef(ocean_model, x_m=x_m, y_m=y_m, z_m=z_m)
+                    # 条件分岐: `not sid` を満たす経路を評価する。
                     if not sid:
                         continue
+
                     ocean_site_by_station[str(st)] = str(sid)
                     ocean_site_info[str(st)] = {
                         "harpos_site_id": str(sid),
@@ -1602,6 +1820,8 @@ def main() -> int:
                             and float(dist_m) > float(ocean_model.validity_radius_m)
                         ),
                     }
+
+                # 条件分岐: `ocean_site_by_station` を満たす経路を評価する。
 
                 if ocean_site_by_station:
                     print(
@@ -1618,50 +1838,71 @@ def main() -> int:
     rms_by_station_mode: Optional[Dict[str, Dict[str, float]]] = None
     preds_final: Optional[ModePrediction] = None
 
+    # 条件分岐: `mode == "auto"` を満たす経路を評価する。
     if mode == "auto":
         best_path = out_dir / "llr_time_tag_best_by_station.json"
 
         def _load_time_tag_best(path: Path) -> tuple[Optional[Dict[str, str]], Optional[Dict[str, Dict[str, float]]]]:
+            # 条件分岐: `not path.exists()` を満たす経路を評価する。
             if not path.exists():
                 return None, None
+
             try:
                 d = json.loads(path.read_text(encoding="utf-8"))
             except Exception:
                 return None, None
+
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
+
             if not isinstance(d, dict):
                 return None, None
+
             best = d.get("best_mode_by_station")
             rms = d.get("rms_by_station_and_mode_ns")
             best_out: Dict[str, str] = {}
+            # 条件分岐: `isinstance(best, dict)` を満たす経路を評価する。
             if isinstance(best, dict):
                 for k, v in best.items():
                     ks = str(k).strip().upper()
                     vs = str(v).strip().lower()
+                    # 条件分岐: `ks and vs in ("tx", "rx", "mid")` を満たす経路を評価する。
                     if ks and vs in ("tx", "rx", "mid"):
                         best_out[ks] = vs
+
             rms_out: Dict[str, Dict[str, float]] = {}
+            # 条件分岐: `isinstance(rms, dict)` を満たす経路を評価する。
             if isinstance(rms, dict):
                 for st, rec in rms.items():
                     st_s = str(st).strip().upper()
+                    # 条件分岐: `not st_s or not isinstance(rec, dict)` を満たす経路を評価する。
                     if not st_s or not isinstance(rec, dict):
                         continue
+
                     rec_out: Dict[str, float] = {}
                     for m, val in rec.items():
                         ms = str(m).strip().lower()
+                        # 条件分岐: `ms not in ("tx", "rx", "mid")` を満たす経路を評価する。
                         if ms not in ("tx", "rx", "mid"):
                             continue
+
                         try:
                             rec_out[ms] = float(val)
                         except Exception:
                             continue
+
+                    # 条件分岐: `rec_out` を満たす経路を評価する。
+
                     if rec_out:
                         rms_out[st_s] = rec_out
+
             return (best_out or None), (rms_out or None)
 
         # Offline replay should not fail due to missing "rx/mid" Horizons caches.
         # If a previous run already determined station-best time-tag modes, reuse it.
+
         if offline:
             cached_best, cached_rms = _load_time_tag_best(best_path)
+            # 条件分岐: `cached_best` を満たす経路を評価する。
             if cached_best:
                 best_by_station = cached_best
                 rms_by_station_mode = cached_rms
@@ -1674,9 +1915,12 @@ def main() -> int:
                     if str(s).strip()
                 }
                 for st in sorted(stations_in_batch):
+                    # 条件分岐: `st in ("NA", "NAN")` を満たす経路を評価する。
                     if st in ("NA", "NAN"):
                         continue
+
                     best_by_station.setdefault(st, "tx")
+
                 time_tag_mode_by_station = best_by_station
                 print(f"[info] offline: reuse time-tag selection from {best_path}")
 
@@ -1707,6 +1951,8 @@ def main() -> int:
                 print(f"[warn] offline: time-tag auto selection cache not found; falling back to tx (create {best_path} by running once online)")
                 mode = "tx"  # type: ignore[assignment]
 
+        # 条件分岐: `mode == "auto" and preds_final is None` を満たす経路を評価する。
+
         if mode == "auto" and preds_final is None:
             # --------------------------------------------
             # Phase 1 (selection): evaluate tx/rx/mid on a small, time-spread sample per station×target group
@@ -1720,8 +1966,12 @@ def main() -> int:
                 mask = (st_arr == st) & (tgt_arr == tgt)
                 idx = np.flatnonzero(mask)
                 min_pts = _min_points_for_target(tgt, min_points)
+                # 条件分岐: `len(idx) < int(min_pts)` を満たす経路を評価する。
                 if len(idx) < int(min_pts):
                     continue
+
+                # 条件分岐: `len(idx) <= sample_per_group` を満たす経路を評価する。
+
                 if len(idx) <= sample_per_group:
                     pick = idx
                 else:
@@ -1729,13 +1979,17 @@ def main() -> int:
                     pos = np.round(np.linspace(0, len(idx) - 1, sample_per_group)).astype(int)
                     pos = np.clip(pos, 0, len(idx) - 1)
                     pos = np.unique(pos)
+                    # 条件分岐: `len(pos) < sample_per_group` を満たす経路を評価する。
                     if len(pos) < sample_per_group:
                         remaining = np.setdiff1d(np.arange(len(idx)), pos, assume_unique=False)
                         need = int(sample_per_group - len(pos))
+                        # 条件分岐: `len(remaining) > 0 and need > 0` を満たす経路を評価する。
                         if len(remaining) > 0 and need > 0:
                             fill_pos = remaining[np.linspace(0, len(remaining) - 1, min(need, len(remaining)), dtype=int)]
                             pos = np.unique(np.concatenate([pos, fill_pos]))
+
                     pick = idx[np.sort(pos)]
+
                 sample_idx.extend([int(i) for i in pick])
 
             sample_idx = sorted(set(sample_idx))
@@ -1799,6 +2053,7 @@ def main() -> int:
             for j, mm in enumerate(mode_list):
                 vals = [float(rms_by_station_mode[st].get(mm, float("nan"))) for st in st_list]  # type: ignore[index]
                 plt.bar(x + (j - 1) * width, vals, width=width, label=f"{mm}")
+
             plt.xticks(x, st_list)
             plt.ylabel("残差RMS [ns]（観測局→反射器, 定数整列, 局内重み付き）")
             plt.title(f"{LLR_SHORT_NAME}：time-tag 最適化（局ごとに tx/rx/mid を選択）")
@@ -1836,6 +2091,8 @@ def main() -> int:
                 best_mode_by_station=best_by_station,
             )
 
+    # 条件分岐: `preds_final is None` を満たす経路を評価する。
+
     if preds_final is None:
         preds_final = _compute_predictions_for_mode(
             root=root,
@@ -1862,9 +2119,11 @@ def main() -> int:
         clip_sigma=clip_sigma,
         clip_min_ns=clip_min_ns,
     )
+    # 条件分岐: `metrics_df.empty` を満たす経路を評価する。
     if metrics_df.empty:
         print("[err] no groups met the criteria (try lowering --min-points)")
         return 2
+
     metrics_csv = out_dir / "llr_batch_metrics.csv"
     metrics_df.to_csv(metrics_csv, index=False)
 
@@ -1877,8 +2136,10 @@ def main() -> int:
             st_meta_out: Dict[str, Dict[str, Any]] = {}
             for st in sorted(set(all_df["station"].tolist())):
                 p = root / "data" / "llr" / "stations" / f"{str(st).lower()}.json"
+                # 条件分岐: `not p.exists()` を満たす経路を評価する。
                 if not p.exists():
                     continue
+
                 d = json.loads(p.read_text(encoding="utf-8"))
                 st_key = str(st)
                 pos = station_xyz_override.get(st_key)
@@ -1922,10 +2183,12 @@ def main() -> int:
                     "z_m_used": z_used,
                 }
                 extra = station_coord_summary.get(str(st))
+                # 条件分岐: `isinstance(extra, dict)` を満たす経路を評価する。
                 if isinstance(extra, dict):
                     st_meta_out[str(st)]["pos_eop_yymmdd"] = extra.get("pos_eop_yymmdd")
                     st_meta_out[str(st)]["pos_eop_ref_epoch_utc"] = extra.get("pos_eop_ref_epoch_utc")
                     st_meta_out[str(st)]["delta_vs_slrlog_m"] = extra.get("delta_vs_slrlog_m")
+
             (out_dir / "llr_station_metadata_used.json").write_text(
                 json.dumps(
                     {"generated_utc": datetime.now(timezone.utc).isoformat(), "stations": st_meta_out},
@@ -1938,6 +2201,7 @@ def main() -> int:
 
             # Plot: station coordinate delta (pos+eop vs slrlog), if available
             try:
+                # 条件分岐: `station_coord_summary` を満たす経路を評価する。
                 if station_coord_summary:
                     _set_japanese_font()
                     xs: List[str] = []
@@ -1945,10 +2209,15 @@ def main() -> int:
                     for st in sorted(station_coord_summary.keys()):
                         v = station_coord_summary.get(st, {})
                         dr = v.get("delta_vs_slrlog_m")
+                        # 条件分岐: `dr is None or not np.isfinite(float(dr))` を満たす経路を評価する。
                         if dr is None or not np.isfinite(float(dr)):
                             continue
+
                         xs.append(str(st))
                         ys.append(float(dr))
+
+                    # 条件分岐: `xs` を満たす経路を評価する。
+
                     if xs:
                         width_in = max(12.0, 0.6 * len(xs) + 4.0)
                         fig, ax = plt.subplots(figsize=(width_in, 6.0), dpi=200)
@@ -1959,6 +2228,7 @@ def main() -> int:
                         for label in ax.get_xticklabels():
                             label.set_rotation(45)
                             label.set_ha("right")
+
                         fig.tight_layout()
                         fig.savefig(out_dir / "llr_station_coord_delta_pos_eop.png", dpi=220, bbox_inches="tight")
                         plt.close(fig)
@@ -1987,8 +2257,10 @@ def main() -> int:
         for st, tgt in sorted({(s, t) for s, t in zip(st_arr.tolist(), tgt_arr.tolist())}):
             mask = (st_arr == st) & (tgt_arr == tgt)
             min_pts = _min_points_for_target(tgt, min_points)
+            # 条件分岐: `int(mask.sum()) < int(min_pts)` を満たす経路を評価する。
             if int(mask.sum()) < int(min_pts):
                 continue
+
             obs = tof_obs[mask]
             pred = preds_final.tof_sr_raw_s[mask]
             pred_tropo = preds_final.tof_sr_raw_tropo_s[mask]
@@ -2000,12 +2272,15 @@ def main() -> int:
             # Robust outlier gating per station×target, consistent with the group-metrics pipeline.
             # Use the "best" model (tropo+tide) as reference when available, else fall back.
             processed_best[mask] = True
+            # 条件分岐: `np.all(np.isfinite(pred_tropo_tide))` を満たす経路を評価する。
             if np.all(np.isfinite(pred_tropo_tide)):
                 delta_ref_ns = (obs - pred_tropo_tide) * 1e9
+            # 条件分岐: 前段条件が不成立で、`np.all(np.isfinite(pred_tropo))` を追加評価する。
             elif np.all(np.isfinite(pred_tropo)):
                 delta_ref_ns = (obs - pred_tropo) * 1e9
             else:
                 delta_ref_ns = (obs - pred) * 1e9
+
             delta_best_raw_ns[mask] = delta_ref_ns
             inlier = _robust_inlier_mask_ns(delta_ref_ns, clip_sigma=float(clip_sigma), clip_min_ns=float(clip_min_ns))
             inlier_best[mask] = inlier
@@ -2061,10 +2336,12 @@ def main() -> int:
 
         # Optional meteo columns (from CRD record 20 parsing)
         for c in ("pressure_hpa", "temp_k", "rh_percent", "met_source"):
+            # 条件分岐: `c in all_df.columns` を満たす経路を評価する。
             if c in all_df.columns:
                 diag_df[c] = all_df[c]
 
         # time-tag mode per point (auto selection keeps station-specific modes)
+
         if time_tag_mode_by_station:
             diag_df["time_tag_mode"] = [str(time_tag_mode_by_station.get(str(s), "tx")) for s in diag_df["station"].tolist()]
         else:
@@ -2072,6 +2349,7 @@ def main() -> int:
 
         # Center the raw delta (obs - model) by the inlier median per station×target.
         # This makes outliers interpretable on an absolute scale without the unknown constant offset.
+
         try:
             med_df = (
                 diag_df.loc[diag_df["inlier_best"] == True]  # noqa: E712
@@ -2087,12 +2365,14 @@ def main() -> int:
             diag_df["delta_best_centered_ns"] = np.nan
 
         # Emit per-point diagnostics (small enough for offline use; enables root-cause analysis).
+
         diag_points_csv = out_dir / "llr_batch_points.csv"
         diag_df.to_csv(diag_points_csv, index=False)
 
         # Emit outliers for manual review (helps isolate bad files / wrong time-tag / metadata issues).
         try:
             out_df = diag_df[diag_df["outlier_best"] == True].copy()  # noqa: E712
+            # 条件分岐: `not out_df.empty` を満たす経路を評価する。
             if not out_df.empty:
                 out_df = out_df.sort_values(
                     "delta_best_centered_ns",
@@ -2104,6 +2384,7 @@ def main() -> int:
             print(f"[warn] outlier emit failed: {e}")
 
         # Outlier summary + overview plot (for roadmap step 2: spike root-cause)
+
         outliers_csv = out_dir / "llr_outliers.csv"
         outliers_summary_path = out_dir / "llr_outliers_summary.json"
         outliers_plot = out_dir / "llr_outliers_overview.png"
@@ -2112,6 +2393,7 @@ def main() -> int:
             n_out = int(len(o))
             n_inl = int(np.sum(diag_df["inlier_best"].to_numpy(dtype=bool)))
             max_abs = float("nan")
+            # 条件分岐: `n_out` を満たす経路を評価する。
             if n_out:
                 a = np.abs(pd.to_numeric(o["delta_best_centered_ns"], errors="coerce").to_numpy(dtype=float))
                 a = a[np.isfinite(a)]
@@ -2147,46 +2429,58 @@ def main() -> int:
                 ax.grid(True, alpha=0.25)
 
             # (1) time vs |delta_centered|
+
             ax = axs[0, 0]
+            # 条件分岐: `n_out` を満たす経路を評価する。
             if n_out:
                 t = pd.to_datetime(o["epoch_utc"], utc=True, errors="coerce")
                 y = np.abs(pd.to_numeric(o["delta_best_centered_ns"], errors="coerce").to_numpy(dtype=float))
                 ok = np.isfinite(y) & t.notna().to_numpy(dtype=bool)
+                # 条件分岐: `np.any(ok)` を満たす経路を評価する。
                 if np.any(ok):
-                    ax.scatter(t[ok].dt.to_pydatetime(), y[ok], s=30, alpha=0.85)
+                    x_time = t[ok].dt.tz_convert(None).to_numpy(dtype="datetime64[ns]")
+                    ax.scatter(x_time, y[ok], s=30, alpha=0.85)
                     ax.set_yscale("log")
+
             ax.set_title("外れ値：時刻 vs |Δ|（中心化, log）")
             ax.set_ylabel("|Δ| [ns]（観測-モデル, 反射器ごと中央値で中心化）")
             ax.set_xlabel("UTC時刻")
 
             # (2) elevation vs |delta_centered|
             ax = axs[0, 1]
+            # 条件分岐: `n_out` を満たす経路を評価する。
             if n_out:
                 x = pd.to_numeric(o["elev_mean_deg"], errors="coerce").to_numpy(dtype=float)
                 y = np.abs(pd.to_numeric(o["delta_best_centered_ns"], errors="coerce").to_numpy(dtype=float))
                 ok = np.isfinite(x) & np.isfinite(y)
+                # 条件分岐: `np.any(ok)` を満たす経路を評価する。
                 if np.any(ok):
                     ax.scatter(x[ok], y[ok], s=30, alpha=0.85)
                     ax.set_yscale("log")
+
             ax.set_title("外れ値：平均仰角 vs |Δ|（中心化, log）")
             ax.set_xlabel("平均仰角 [deg]（上り/下りの平均）")
             ax.set_ylabel("|Δ| [ns]")
 
             # (3) counts by station
             ax = axs[1, 0]
+            # 条件分岐: `n_out` を満たす経路を評価する。
             if n_out:
                 vc = o["station"].value_counts()
                 ax.bar(vc.index.tolist(), vc.to_numpy(dtype=int))
+
             ax.set_title("外れ値：局別件数")
             ax.set_xlabel("観測局")
             ax.set_ylabel("件数")
 
             # (4) counts by month
             ax = axs[1, 1]
+            # 条件分岐: `n_out` を満たす経路を評価する。
             if n_out:
                 vc = o["year_month"].value_counts().sort_index()
                 ax.bar(vc.index.tolist(), vc.to_numpy(dtype=int))
                 ax.tick_params(axis="x", rotation=35)
+
             ax.set_title("外れ値：月別件数")
             ax.set_xlabel("年-月")
             ax.set_ylabel("件数")
@@ -2203,8 +2497,10 @@ def main() -> int:
             print(f"[warn] outlier summary/plot failed: {e}")
 
         # Diagnostics: outlier root-cause (time-tag sensitivity / clustering)
+
         try:
             o = diag_df.loc[diag_df["outlier_best"] == True].copy()  # noqa: E712
+            # 条件分岐: `o.empty` を満たす経路を評価する。
             if o.empty:
                 _save_placeholder_plot_png(
                     out_dir / "llr_outliers_time_tag_sensitivity.png",
@@ -2236,8 +2532,10 @@ def main() -> int:
 
                 def _cause_hint(row: pd.Series) -> str:
                     a = row.get("abs_delta_centered_ns")
+                    # 条件分岐: `a is None or not np.isfinite(float(a))` を満たす経路を評価する。
                     if a is None or not np.isfinite(float(a)):
                         return "不明（数値欠損）"
+
                     a = float(a)
                     elev = row.get("elev_mean_deg")
                     elev = float(elev) if elev is not None and np.isfinite(float(elev)) else float("nan")
@@ -2245,12 +2543,22 @@ def main() -> int:
                     # Heuristics (evidence-based categories; not a physical claim)
                     if a >= 1e5:
                         return "巨大スパイク（TOF異常/記録混入の可能性）"
+
+                    # 条件分岐: `n_cluster >= 2 and a >= 100.0` を満たす経路を評価する。
+
                     if n_cluster >= 2 and a >= 100.0:
                         return "局の系統オフセット段差（同月に複数）"
+
+                    # 条件分岐: `np.isfinite(elev) and elev < 20.0 and a >= 100.0` を満たす経路を評価する。
+
                     if np.isfinite(elev) and elev < 20.0 and a >= 100.0:
                         return "低仰角（対流圏/測距ノイズ疑い）"
+
+                    # 条件分岐: `a >= 500.0` を満たす経路を評価する。
+
                     if a >= 500.0:
                         return "中スパイク（単発）"
+
                     return "小スパイク（単発）"
 
                 o["cause_hint"] = o.apply(_cause_hint, axis=1)
@@ -2274,15 +2582,23 @@ def main() -> int:
                     refl_cat = _read_json(root / "data" / "llr" / "reflectors_de421_pa.json")
                     refls = refl_cat.get("reflectors") if isinstance(refl_cat, dict) else None
                     cand_targets: List[str] = []
+                    # 条件分岐: `isinstance(refls, dict)` を満たす経路を評価する。
                     if isinstance(refls, dict):
                         for k, meta in refls.items():
+                            # 条件分岐: `not k or not isinstance(meta, dict)` を満たす経路を評価する。
                             if not k or not isinstance(meta, dict):
                                 continue
+
+                            # 条件分岐: `all(kk in meta for kk in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
+
                             if all(kk in meta for kk in ("x_m", "y_m", "z_m")):
                                 cand_targets.append(str(k))
+
                     cand_targets = sorted(set(cand_targets))
                 except Exception:
                     cand_targets = []
+
+                # 条件分岐: `not cand_targets` を満たす経路を評価する。
 
                 if not cand_targets:
                     cand_targets = sorted(
@@ -2294,6 +2610,7 @@ def main() -> int:
                     )
 
                 # The current pipeline may use a station-specific mode for each point; keep it per-row.
+
                 if "time_tag_mode" in o.columns:
                     base["_mode"] = o["time_tag_mode"].astype(str).to_numpy(dtype=object)
                 else:
@@ -2303,12 +2620,16 @@ def main() -> int:
                 best_tgt_delta_raw_ns = np.full((len(base),), np.nan, dtype=float)
                 suspected_target_mixing = np.zeros((len(base),), dtype=bool)
 
+                # 条件分岐: `cand_targets and len(cand_targets) >= 2 and len(base)` を満たす経路を評価する。
                 if cand_targets and len(cand_targets) >= 2 and len(base):
                     for mm in sorted({str(x) for x in base["_mode"].tolist()}):
                         mask_mm = base["_mode"].astype(str) == str(mm)
+                        # 条件分岐: `not bool(np.any(mask_mm))` を満たす経路を評価する。
                         if not bool(np.any(mask_mm)):
                             continue
+
                         sub = base.loc[mask_mm].copy()
+                        # 条件分岐: `sub.empty` を満たす経路を評価する。
                         if sub.empty:
                             continue
 
@@ -2318,6 +2639,7 @@ def main() -> int:
                             tmp["target"] = str(tgt)
                             tmp["_cand_target"] = str(tgt)
                             reps.append(tmp)
+
                         test_df = pd.concat(reps, ignore_index=True)
                         tof_test = pd.to_numeric(test_df["tof_obs_s"], errors="coerce").to_numpy(dtype=float)
 
@@ -2341,6 +2663,7 @@ def main() -> int:
                                 # (2) if global offline is disabled, allow network to fill missing caches
                                 if offline:
                                     raise
+
                                 preds_tgt = _compute_predictions_for_mode(
                                     root=root,
                                     all_df=test_df.drop(columns=["_cand_target"], errors="ignore"),
@@ -2354,6 +2677,7 @@ def main() -> int:
                                     ocean_model=ocean_model,
                                     ocean_site_by_station=ocean_site_by_station or None,
                                 )
+
                             pred_test = preds_tgt.tof_sr_raw_tropo_tide_s
                             delta_test = (tof_test - pred_test) * 1e9
                         except Exception as e:
@@ -2364,12 +2688,16 @@ def main() -> int:
                         cands = test_df["_cand_target"].astype(str).to_numpy(dtype=object)
                         for key in sorted(set(keys.tolist())):
                             m = keys == int(key)
+                            # 条件分岐: `not bool(np.any(m))` を満たす経路を評価する。
                             if not bool(np.any(m)):
                                 continue
+
                             d = delta_test[m]
                             ok = np.isfinite(d)
+                            # 条件分岐: `not bool(np.any(ok))` を満たす経路を評価する。
                             if not bool(np.any(ok)):
                                 continue
+
                             d_ok = d[ok]
                             c_ok = cands[m][ok]
                             j = int(np.argmin(np.abs(d_ok)))
@@ -2388,6 +2716,7 @@ def main() -> int:
                     tgt_best = o.get("best_target_guess").astype(str).to_numpy(dtype=object)
                     mix_mask = (cur_abs >= 1e5) & np.isfinite(best_abs) & (best_abs <= 1e3) & (tgt_best != tgt_cur)
                     suspected_target_mixing[:] = mix_mask
+                    # 条件分岐: `bool(np.any(mix_mask))` を満たす経路を評価する。
                     if bool(np.any(mix_mask)):
                         o.loc[mix_mask, "cause_hint"] = [
                             f"巨大スパイク（ターゲット混入の可能性: 推定={tb}）" for tb in tgt_best[mix_mask].tolist()
@@ -2420,6 +2749,7 @@ def main() -> int:
                             # (2) if global offline is disabled, allow network to fill missing caches
                             if offline:
                                 raise
+
                             preds_mm = _compute_predictions_for_mode(
                                 root=root,
                                 all_df=base.drop(columns=["_key"]).copy(),
@@ -2445,16 +2775,20 @@ def main() -> int:
                         print(f"[warn] outlier time-tag sensitivity failed (mode={mm}): {e}")
 
                 # Pick the best mode per outlier
+
                 abs_mat = np.stack([pd.to_numeric(o[c], errors="coerce").to_numpy(dtype=float) for c in time_tag_cols], axis=1)
                 best_idx = np.full((len(o),), -1, dtype=int)
                 for i in range(len(o)):
                     row = abs_mat[i, :]
                     ok = np.isfinite(row)
+                    # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
                     if not np.any(ok):
                         continue
+
                     best_idx[i] = int(np.argmin(row[ok]))  # argmin over filtered array
                     # map back to original modes_try index
                     best_idx[i] = int(np.arange(len(row))[ok][best_idx[i]])
+
                 o["best_time_tag_mode"] = [modes_try[i] if i >= 0 else None for i in best_idx.tolist()]
                 o["best_abs_delta_centered_ns"] = [
                     float(abs_mat[i, j]) if j >= 0 and np.isfinite(abs_mat[i, j]) else float("nan") for i, j in enumerate(best_idx.tolist())
@@ -2467,6 +2801,7 @@ def main() -> int:
 
                 # Plot: time-tag sensitivity (abs centered delta)
                 try:
+                    # 条件分岐: `time_tag_cols and int(len(o)) > 0` を満たす経路を評価する。
                     if time_tag_cols and int(len(o)) > 0:
                         _set_japanese_font()
                         x = np.arange(len(o), dtype=float)
@@ -2476,6 +2811,7 @@ def main() -> int:
                         for j, mm in enumerate(modes_try):
                             y = pd.to_numeric(o[f"abs_delta_centered_{mm}_ns"], errors="coerce").to_numpy(dtype=float)
                             plt.bar(x + (j - 1) * width, y, width=width, label=f"{mm}", color=colors.get(mm))
+
                         plt.yscale("log")
                         plt.axhline(float(clip_min_ns), color="#333333", lw=1.1, alpha=0.6, linestyle="--", label=f"外れ値閾値 {clip_min_ns:.0f} ns")
                         plt.xticks(x, [str(i + 1) for i in range(len(o))])
@@ -2491,7 +2827,9 @@ def main() -> int:
                     print(f"[warn] outlier time-tag sensitivity plot failed: {e}")
 
                 # Plot: target mixing sensitivity (current target vs best alternative target)
+
                 try:
+                    # 条件分岐: `"best_target_delta_raw_ns" in o.columns and "delta_best_raw_ns" in o.columns...` を満たす経路を評価する。
                     if "best_target_delta_raw_ns" in o.columns and "delta_best_raw_ns" in o.columns and int(len(o)) > 0:
                         _set_japanese_font()
                         x = np.arange(len(o), dtype=float)
@@ -2518,27 +2856,35 @@ def main() -> int:
                     print(f"[warn] outlier target-mixing sensitivity plot failed: {e}")
 
                 # Summary JSON (for report)
+
                 try:
                     by_cause = o["cause_hint"].value_counts().to_dict()
 
                     # time-tag sensitivity summary
                     best_not_current = 0
                     computed_modes: list[str] = []
+                    # 条件分岐: `"best_time_tag_mode" in o.columns and "time_tag_mode" in o.columns` を満たす経路を評価する。
                     if "best_time_tag_mode" in o.columns and "time_tag_mode" in o.columns:
                         cur = o["time_tag_mode"].astype(str).to_numpy(dtype=object)
                         best = o["best_time_tag_mode"].astype(str).to_numpy(dtype=object)
                         for a, b in zip(cur.tolist(), best.tolist()):
+                            # 条件分岐: `b and b not in ("None", "nan", "NaN") and str(a).strip().lower() != str(b).st...` を満たす経路を評価する。
                             if b and b not in ("None", "nan", "NaN") and str(a).strip().lower() != str(b).strip().lower():
                                 best_not_current += 1
+
                         for mm in modes_try:
                             c = f"abs_delta_centered_{mm}_ns"
+                            # 条件分岐: `c in o.columns` を満たす経路を評価する。
                             if c in o.columns:
                                 y = pd.to_numeric(o[c], errors="coerce").to_numpy(dtype=float)
+                                # 条件分岐: `np.isfinite(y).any()` を満たす経路を評価する。
                                 if np.isfinite(y).any():
                                     computed_modes.append(mm)
 
                     # target mixing summary
+
                     n_target_mix = 0
+                    # 条件分岐: `"suspected_target_mixing" in o.columns` を満たす経路を評価する。
                     if "suspected_target_mixing" in o.columns:
                         try:
                             n_target_mix = int(np.sum(o["suspected_target_mixing"].to_numpy(dtype=bool)))
@@ -2589,6 +2935,7 @@ def main() -> int:
 
         # Plot: residual distribution (obs - model) to make "how different" clear for non-experts.
         # Use inliers only (robust-gated per station×target) and the offset-aligned residuals.
+
         try:
             inl = diag_df["inlier_best"].to_numpy(dtype=bool)
             res_sr = pd.to_numeric(diag_df.loc[inl, "residual_sr_ns"], errors="coerce").to_numpy(dtype=float)
@@ -2598,6 +2945,7 @@ def main() -> int:
             res_tropo = res_tropo[np.isfinite(res_tropo)]
             res_final = res_final[np.isfinite(res_final)]
 
+            # 条件分岐: `len(res_final) >= 100` を満たす経路を評価する。
             if len(res_final) >= 100:
                 def _rms(x: np.ndarray) -> float:
                     x = x[np.isfinite(x)]
@@ -2605,13 +2953,16 @@ def main() -> int:
 
                 def _ecdf_abs(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
                     x = np.abs(x[np.isfinite(x)])
+                    # 条件分岐: `not len(x)` を満たす経路を評価する。
                     if not len(x):
                         return np.array([]), np.array([])
+
                     xs = np.sort(x)
                     ys = np.arange(1, len(xs) + 1, dtype=float) / float(len(xs))
                     return xs, ys
 
                 # Range for histogram based on robust percentiles.
+
                 pool = np.concatenate([np.abs(res_sr), np.abs(res_tropo), np.abs(res_final)]) if len(res_tropo) else np.concatenate([np.abs(res_sr), np.abs(res_final)])
                 pool = pool[np.isfinite(pool)]
                 p99 = float(np.nanpercentile(pool, 99)) if len(pool) else 30.0
@@ -2624,10 +2975,13 @@ def main() -> int:
                     ax.grid(True, alpha=0.25)
 
                 # (1) signed residual histogram
+
                 ax = axs[0]
                 ax.hist(res_sr, bins=bins, alpha=0.35, label=f"SR（RMS={_rms(res_sr):.3f} ns）")
+                # 条件分岐: `len(res_tropo)` を満たす経路を評価する。
                 if len(res_tropo):
                     ax.hist(res_tropo, bins=bins, alpha=0.35, label=f"SR+Tropo（RMS={_rms(res_tropo):.3f} ns）")
+
                 ax.hist(res_final, bins=bins, alpha=0.55, label=f"SR+Tropo+Tide（RMS={_rms(res_final):.3f} ns）")
                 ax.axvline(0.0, color="#333333", lw=1.2, alpha=0.7)
                 ax.set_title("残差分布（観測−モデル）")
@@ -2638,17 +2992,26 @@ def main() -> int:
                 # (2) ECDF of |residual|
                 ax = axs[1]
                 xs, ys = _ecdf_abs(res_sr)
+                # 条件分岐: `len(xs)` を満たす経路を評価する。
                 if len(xs):
                     ax.plot(xs, ys, lw=2.0, label="SR")
+
+                # 条件分岐: `len(res_tropo)` を満たす経路を評価する。
+
                 if len(res_tropo):
                     xs, ys = _ecdf_abs(res_tropo)
+                    # 条件分岐: `len(xs)` を満たす経路を評価する。
                     if len(xs):
                         ax.plot(xs, ys, lw=2.0, label="SR+Tropo")
+
                 xs, ys = _ecdf_abs(res_final)
+                # 条件分岐: `len(xs)` を満たす経路を評価する。
                 if len(xs):
                     ax.plot(xs, ys, lw=2.4, label="SR+Tropo+Tide")
+
                 for q in (0.5, 0.9, 0.95):
                     ax.axhline(q, color="#666666", lw=0.8, alpha=0.35)
+
                 ax.set_xlim(0.0, lim)
                 ax.set_ylim(0.0, 1.0)
                 ax.set_title("|残差| の累積分布（小さいほど良い）")
@@ -2678,6 +3041,7 @@ def main() -> int:
             return float(np.mean(a)) if len(a) else float("nan")
 
         # Legacy monthly stats (base SR model) for continuity
+
         by_st_tgt_month = (
             diag_df.groupby(["station", "target", "year_month"], dropna=False)["residual_sr_ns"]
             .agg(n="count", mean_ns=_grp_mean, rms_ns=_grp_rms)
@@ -2700,9 +3064,13 @@ def main() -> int:
             sub = by_st_month_plot[by_st_month_plot["station"] == st].copy()
             sub["t"] = pd.to_datetime(sub["year_month"] + "-01", utc=True, errors="coerce")
             sub = sub.dropna(subset=["t"]).sort_values("t")
+            # 条件分岐: `sub.empty` を満たす経路を評価する。
             if sub.empty:
                 continue
-            plt.plot(np.array(sub["t"].dt.to_pydatetime()), sub["rms_ns"].to_numpy(dtype=float), marker="o", label=st)
+
+            x_time = sub["t"].dt.tz_convert(None).to_numpy(dtype="datetime64[ns]")
+            plt.plot(x_time, sub["rms_ns"].to_numpy(dtype=float), marker="o", label=st)
+
         plt.ylabel(f"残差RMS [ns]（観測局→反射器, 月ごと, 全反射器, 月内 n≥{monthly_min_n}）")
         plt.title(f"{LLR_SHORT_NAME}：局ごとの残差RMS（期間依存の確認, 月内 n≥{monthly_min_n} のみ表示）")
         plt.grid(True, alpha=0.3)
@@ -2718,20 +3086,25 @@ def main() -> int:
         try:
             diag_el = diag_df[np.isfinite(diag_df["residual_sr_tropo_tide_ns"])].copy()
             diag_el = diag_el[np.isfinite(diag_el["elev_mean_deg"])].copy()
+            # 条件分岐: `not diag_el.empty` を満たす経路を評価する。
             if not diag_el.empty:
                 # Paper figures may be generated from a subset manifest; keep a low threshold so
                 # per-station plots still exist even when n is modest.
                 min_points_el_plot = 30
                 for st in sorted(diag_el["station"].astype(str).unique().tolist()):
                     ssub = diag_el[diag_el["station"].astype(str) == str(st)].copy()
+                    # 条件分岐: `len(ssub) < min_points_el_plot` を満たす経路を評価する。
                     if len(ssub) < min_points_el_plot:
                         continue
+
                     _set_japanese_font()
                     plt.figure(figsize=(10.5, 5.2))
                     for tgt in sorted(ssub["target"].astype(str).unique().tolist()):
                         sub = ssub[ssub["target"].astype(str) == str(tgt)]
+                        # 条件分岐: `sub.empty` を満たす経路を評価する。
                         if sub.empty:
                             continue
+
                         plt.scatter(
                             sub["elev_mean_deg"].to_numpy(dtype=float),
                             sub["residual_sr_tropo_tide_ns"].to_numpy(dtype=float),
@@ -2740,15 +3113,18 @@ def main() -> int:
                             label=str(tgt),
                         )
                     # Add a binned median trend line for non-experts (reduces overplot confusion).
+
                     try:
                         x = ssub["elev_mean_deg"].to_numpy(dtype=float)
                         y = ssub["residual_sr_tropo_tide_ns"].to_numpy(dtype=float)
                         m = np.isfinite(x) & np.isfinite(y)
                         x = x[m]
                         y = y[m]
+                        # 条件分岐: `len(x) >= 200` を満たす経路を評価する。
                         if len(x) >= 200:
                             x_min = float(np.nanpercentile(x, 1))
                             x_max = float(np.nanpercentile(x, 99))
+                            # 条件分岐: `np.isfinite(x_min) and np.isfinite(x_max) and (x_max - x_min) > 10.0` を満たす経路を評価する。
                             if np.isfinite(x_min) and np.isfinite(x_max) and (x_max - x_min) > 10.0:
                                 bins = np.linspace(x_min, x_max, num=11)
                                 xc = 0.5 * (bins[:-1] + bins[1:])
@@ -2757,24 +3133,31 @@ def main() -> int:
                                 p75 = np.full((len(xc),), np.nan, dtype=float)
                                 for bi in range(len(xc)):
                                     mb = (x >= bins[bi]) & (x < bins[bi + 1])
+                                    # 条件分岐: `int(np.sum(mb)) < 50` を満たす経路を評価する。
                                     if int(np.sum(mb)) < 50:
                                         continue
+
                                     yy = y[mb]
                                     med[bi] = float(np.nanmedian(yy))
                                     p25[bi] = float(np.nanpercentile(yy, 25))
                                     p75[bi] = float(np.nanpercentile(yy, 75))
+
                                 ok = np.isfinite(med)
+                                # 条件分岐: `int(np.sum(ok)) >= 3` を満たす経路を評価する。
                                 if int(np.sum(ok)) >= 3:
                                     plt.fill_between(xc[ok], p25[ok], p75[ok], color="#111111", alpha=0.08, linewidth=0)
                                     plt.plot(xc[ok], med[ok], color="#111111", lw=2.0, marker="o", ms=4, label="全体中央値（仰角ビン）")
                     except Exception:
                         pass
+
                     y = ssub["residual_sr_tropo_tide_ns"].to_numpy(dtype=float)
                     y = y[np.isfinite(y)]
+                    # 条件分岐: `len(y)` を満たす経路を評価する。
                     if len(y):
                         p99 = float(np.percentile(np.abs(y), 99))
                         lim = max(30.0, min(200.0, p99 * 1.15))
                         plt.ylim(-lim, lim)
+
                     plt.axhline(0.0, color="#333333", lw=1.0, alpha=0.6)
                     plt.xlabel("平均仰角 [deg]（上り/下りの平均）")
                     plt.ylabel("残差 [ns]（SR+Tropo+Tide, 定数オフセット整列後）")
@@ -2782,18 +3165,22 @@ def main() -> int:
                     plt.grid(True, alpha=0.25)
                     plt.legend(ncols=3, fontsize=9)
                     plt.tight_layout()
+                    # 条件分岐: `str(st).upper() == "GRSM"` を満たす経路を評価する。
                     if str(st).upper() == "GRSM":
                         out_name = "llr_grsm_residual_vs_elevation.png"
                     else:
                         out_name = f"llr_{str(st).strip().lower()}_residual_vs_elevation.png"
+
                     plt.savefig(out_dir / out_name, dpi=200)
                     plt.close()
         except Exception as e:
             print(f"[warn] residual vs elevation plot failed: {e}")
 
         # Diagnostics: per-station correlation / worst months (for root-cause analysis)
+
         try:
             diag_ok = diag_df[np.isfinite(diag_df["residual_sr_tropo_tide_ns"])].copy()
+            # 条件分岐: `not diag_ok.empty` を満たす経路を評価する。
             if not diag_ok.empty:
                 diag_ok["epoch_utc"] = pd.to_datetime(diag_ok["epoch_utc"], utc=True, errors="coerce", format="mixed")
                 diag_ok = diag_ok.dropna(subset=["epoch_utc"])
@@ -2808,8 +3195,10 @@ def main() -> int:
                     x = a.to_numpy(dtype=float)
                     y = b.to_numpy(dtype=float)
                     m = np.isfinite(x) & np.isfinite(y)
+                    # 条件分岐: `int(np.sum(m)) < 3` を満たす経路を評価する。
                     if int(np.sum(m)) < 3:
                         return float("nan")
+
                     return float(np.corrcoef(x[m], y[m])[0, 1])
 
                 diag_ok["m_1_sin"] = 1.0 / np.maximum(
@@ -2820,9 +3209,11 @@ def main() -> int:
                 st_diag: Dict[str, Dict[str, Any]] = {}
                 for st in sorted(diag_ok["station"].astype(str).unique().tolist()):
                     ssub = diag_ok[diag_ok["station"].astype(str) == str(st)].copy()
+                    # 条件分岐: `ssub.empty` を満たす経路を評価する。
                     if ssub.empty:
                         continue
                     # Worst month×target (require a minimum sample size per cell)
+
                     by = (
                         ssub.groupby(["ym", "target"], dropna=False)["residual_sr_tropo_tide_ns"]
                         .agg(n="count", rms_ns=_rms_series_ns)
@@ -2862,6 +3253,7 @@ def main() -> int:
             print(f"[warn] station diagnostics failed: {e}")
 
         # Extended monthly stats (model variants)
+
         long_frames: List[pd.DataFrame] = []
         for model, col in [
             ("SR", "residual_sr_ns"),
@@ -2871,6 +3263,7 @@ def main() -> int:
             tmp = diag_df[["station", "target", "year_month", col]].rename(columns={col: "residual_ns"})
             tmp = tmp.assign(model=model)
             long_frames.append(tmp)
+
         diag_long = pd.concat(long_frames, ignore_index=True)
 
         by_st_month_model = (
@@ -2897,6 +3290,7 @@ def main() -> int:
         fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(12, 4.2 * nrows), squeeze=False)
         for ax in axes.flat:
             ax.grid(True, alpha=0.25)
+
         for idx, st in enumerate(stations_u):
             ax = axes[idx // ncols][idx % ncols]
             sub = by_st_month_model_plot[by_st_month_model_plot["station"] == st].copy()
@@ -2904,14 +3298,20 @@ def main() -> int:
             sub = sub.dropna(subset=["t"]).sort_values("t")
             for model in ["SR", "SR+Tropo", "SR+Tropo+Tide"]:
                 s2 = sub[sub["model"] == model].sort_values("t")
+                # 条件分岐: `s2.empty` を満たす経路を評価する。
                 if s2.empty:
                     continue
-                ax.plot(np.array(s2["t"].dt.to_pydatetime()), s2["rms_ns"].to_numpy(dtype=float), marker="o", label=model)
+
+                x_time = s2["t"].dt.tz_convert(None).to_numpy(dtype="datetime64[ns]")
+                ax.plot(x_time, s2["rms_ns"].to_numpy(dtype=float), marker="o", label=model)
+
             ax.set_title(str(st))
             ax.set_ylabel(f"残差RMS [ns]（月ごと, 全反射器, 定数整列, 月内 n≥{monthly_min_n}）")
             ax.legend(fontsize=9)
+
         for j in range(len(stations_u), nrows * ncols):
             axes[j // ncols][j % ncols].axis("off")
+
         fig.suptitle(f"{LLR_SHORT_NAME}：局ごとの残差RMS（期間依存 × モデル切り分け, 月内 n≥{monthly_min_n} のみ表示）", y=0.995)
         fig.tight_layout()
         p_diag1 = out_dir / "llr_rms_by_station_month_models.png"
@@ -2924,11 +3324,14 @@ def main() -> int:
             sub = sub[np.isfinite(sub["rms_ns"])].copy()
             sub["t"] = pd.to_datetime(sub["year_month"] + "-01", utc=True, errors="coerce")
             sub = sub.dropna(subset=["t"]).sort_values("t")
+            # 条件分岐: `not sub.empty` を満たす経路を評価する。
             if not sub.empty:
                 plt.figure(figsize=(12, 4.5))
                 for tgt in sorted(sub["target"].unique().tolist()):
                     s2 = sub[sub["target"] == tgt].sort_values("t")
-                    plt.plot(np.array(s2["t"].dt.to_pydatetime()), s2["rms_ns"].to_numpy(dtype=float), marker="o", label=tgt)
+                    x_time = s2["t"].dt.tz_convert(None).to_numpy(dtype="datetime64[ns]")
+                    plt.plot(x_time, s2["rms_ns"].to_numpy(dtype=float), marker="o", label=tgt)
+
                 plt.ylabel(f"残差RMS [ns]（月ごと, 定数整列, 月内 n≥{monthly_min_n}）")
                 plt.title(f"{LLR_SHORT_NAME}：GRSM 残差RMS（反射器別の期間依存, 月内 n≥{monthly_min_n} のみ表示）")
                 plt.grid(True, alpha=0.3)
@@ -2939,17 +3342,23 @@ def main() -> int:
                 plt.close()
 
         # Plot: GRSM model ablation by month (targets pooled)
+
         if "GRSM" in set(by_st_month_model["station"].tolist()):
             sub = by_st_month_model_plot[by_st_month_model_plot["station"] == "GRSM"].copy()
             sub["t"] = pd.to_datetime(sub["year_month"] + "-01", utc=True, errors="coerce")
             sub = sub.dropna(subset=["t"]).sort_values("t")
+            # 条件分岐: `not sub.empty` を満たす経路を評価する。
             if not sub.empty:
                 plt.figure(figsize=(12, 4.5))
                 for model in ["SR", "SR+Tropo", "SR+Tropo+Tide"]:
                     s2 = sub[sub["model"] == model].sort_values("t")
+                    # 条件分岐: `s2.empty` を満たす経路を評価する。
                     if s2.empty:
                         continue
-                    plt.plot(np.array(s2["t"].dt.to_pydatetime()), s2["rms_ns"].to_numpy(dtype=float), marker="o", label=model)
+
+                    x_time = s2["t"].dt.tz_convert(None).to_numpy(dtype="datetime64[ns]")
+                    plt.plot(x_time, s2["rms_ns"].to_numpy(dtype=float), marker="o", label=model)
+
                 plt.ylabel(f"残差RMS [ns]（月ごと, 全反射器, 定数整列, 月内 n≥{monthly_min_n}）")
                 plt.title(f"{LLR_SHORT_NAME}：GRSM 残差RMS（モデル切り分けで原因を見る, 月内 n≥{monthly_min_n} のみ表示）")
                 plt.grid(True, alpha=0.3)
@@ -2962,19 +3371,24 @@ def main() -> int:
         print(f"[warn] diagnostics failed: {e}")
 
     # Summary JSON
+
     def _median(col: str) -> float:
         v = metrics_df[col].to_numpy(dtype=float)
         v = v[np.isfinite(v)]
         return float(np.median(v)) if len(v) else float("nan")
 
     def _point_weighted_rms(col: str) -> float:
+        # 条件分岐: `col not in metrics_df.columns or "n" not in metrics_df.columns` を満たす経路を評価する。
         if col not in metrics_df.columns or "n" not in metrics_df.columns:
             return float("nan")
+
         rv = pd.to_numeric(metrics_df[col], errors="coerce").to_numpy(dtype=float)
         nv = pd.to_numeric(metrics_df["n"], errors="coerce").to_numpy(dtype=float)
         ok = np.isfinite(rv) & np.isfinite(nv) & (nv > 0)
+        # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
         if not np.any(ok):
             return float("nan")
+
         return float(np.sqrt(np.sum(nv[ok] * rv[ok] * rv[ok]) / np.sum(nv[ok])))
 
     def _diag_rms(
@@ -2988,6 +3402,7 @@ def main() -> int:
             d = d[d["inlier_best"] == True]  # noqa: E712
             d["residual_sr_tropo_tide_ns"] = pd.to_numeric(d["residual_sr_tropo_tide_ns"], errors="coerce")
             d = d[np.isfinite(d["residual_sr_tropo_tide_ns"])]
+            # 条件分岐: `d.empty` を満たす経路を評価する。
             if d.empty:
                 return {
                     "modern_start_year": int(modern_start_year),
@@ -3140,13 +3555,16 @@ def main() -> int:
     plt.bar(labels3, vals3)
     try:
         vmax = float(np.nanmax(np.array(vals3, dtype=float)))
+        # 条件分岐: `np.isfinite(vmax) and vmax > 0` を満たす経路を評価する。
         if np.isfinite(vmax) and vmax > 0:
             plt.ylim(0.0, vmax * 1.08)
             for i, v in enumerate(vals3):
+                # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
                 if np.isfinite(v):
                     plt.text(i, v + vmax * 0.03, f"{v:.3f} ns", ha="center", va="bottom", fontsize=9)
     except Exception:
         pass
+
     plt.ylabel("残差RMS [ns]（観測局→反射器, 定数整列後, 中央値）")
     plt.title(f"{LLR_SHORT_NAME}：重力遅延の寄与（ShapiroのON/OFF, 対流圏あり）")
     plt.grid(True, axis="y", alpha=0.3)
@@ -3169,13 +3587,16 @@ def main() -> int:
     plt.xticks(rotation=12, ha="right", fontsize=9)
     try:
         vmax = float(np.nanmax(np.array(vals5, dtype=float)))
+        # 条件分岐: `np.isfinite(vmax) and vmax > 0` を満たす経路を評価する。
         if np.isfinite(vmax) and vmax > 0:
             plt.ylim(0.0, vmax * 1.08)
             for i, v in enumerate(vals5):
+                # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
                 if np.isfinite(v):
                     plt.text(i, v + vmax * 0.03, f"{v:.3f} ns", ha="center", va="bottom", fontsize=9)
     except Exception:
         pass
+
     plt.ylabel("残差RMS [ns]（観測局→反射器, 定数整列後, 中央値）")
     plt.title(f"{LLR_SHORT_NAME}：潮汐の寄与（固体潮汐/海洋荷重/月体潮汐, 対流圏あり）")
     plt.grid(True, axis="y", alpha=0.3)
@@ -3239,8 +3660,11 @@ def main() -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -59,6 +60,7 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -71,11 +73,15 @@ def _artifact_record(path: Path) -> Dict[str, Any]:
 
 
 def _copy_file(src: Path, dst: Path, *, overwrite: bool) -> None:
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise FileNotFoundError(str(src))
+
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not overwrite` を満たす経路を評価する。
     if dst.exists() and not overwrite:
         return
+
     shutil.copy2(src, dst)
 
 
@@ -107,21 +113,36 @@ def _rewrite_paths(obj: Any) -> Any:
     )
 
     def _rw_str(s: str) -> str:
+        # 条件分岐: `"output/public/" in s` を満たす経路を評価する。
         if "output/public/" in s:
             return s
+
         out = s
         for a, b in replacements:
             out = out.replace(a, b)
+
         return out
+
+    # 条件分岐: `isinstance(obj, dict)` を満たす経路を評価する。
 
     if isinstance(obj, dict):
         return {k: _rewrite_paths(v) for k, v in obj.items()}
+
+    # 条件分岐: `isinstance(obj, list)` を満たす経路を評価する。
+
     if isinstance(obj, list):
         return [_rewrite_paths(v) for v in obj]
+
+    # 条件分岐: `isinstance(obj, tuple)` を満たす経路を評価する。
+
     if isinstance(obj, tuple):
         return tuple(_rewrite_paths(v) for v in obj)
+
+    # 条件分岐: `isinstance(obj, str)` を満たす経路を評価する。
+
     if isinstance(obj, str):
         return _rw_str(obj)
+
     return obj
 
 
@@ -139,62 +160,97 @@ def _sanitize_test_matrix(matrix: Dict[str, Any]) -> Dict[str, Any]:
     # Common frozen parameters path (ensure public).
     try:
         common = m.get("common")
+        # 条件分岐: `isinstance(common, dict)` を満たす経路を評価する。
         if isinstance(common, dict):
             fp = common.get("frozen_parameters")
+            # 条件分岐: `isinstance(fp, dict) and isinstance(fp.get("path"), str)` を満たす経路を評価する。
             if isinstance(fp, dict) and isinstance(fp.get("path"), str):
                 fp["path"] = fp["path"].replace("output/theory/", "output/public/theory/")
+
+            # 条件分岐: `isinstance(fp, dict) and isinstance(fp.get("policy"), dict)` を満たす経路を評価する。
+
             if isinstance(fp, dict) and isinstance(fp.get("policy"), dict):
                 pol = fp["policy"]
+                # 条件分岐: `isinstance(pol.get("delta_source"), str)` を満たす経路を評価する。
                 if isinstance(pol.get("delta_source"), str):
                     pol["delta_source"] = pol["delta_source"].replace("output/theory/", "output/public/theory/")
     except Exception:
         pass
 
     tests = m.get("tests")
+    # 条件分岐: `not isinstance(tests, list)` を満たす経路を評価する。
     if not isinstance(tests, list):
         return _rewrite_paths(m)
 
     for t in tests:
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
+
         tid = t.get("id")
 
         def _filter_items(items: Any) -> List[Dict[str, Any]]:
             out: List[Dict[str, Any]] = []
+            # 条件分岐: `not isinstance(items, list)` を満たす経路を評価する。
             if not isinstance(items, list):
                 return out
+
             for it in items:
+                # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
                 if not isinstance(it, dict):
                     continue
+
                 p = it.get("path")
+                # 条件分岐: `not isinstance(p, str)` を満たす経路を評価する。
                 if not isinstance(p, str):
                     continue
+
+                # 条件分岐: `p.startswith("doc/")` を満たす経路を評価する。
+
                 if p.startswith("doc/"):
                     continue
+
+                # 条件分岐: `p.startswith("output/viking/horizons_cache")` を満たす経路を評価する。
+
                 if p.startswith("output/viking/horizons_cache"):
                     continue
+
                 out.append(it)
+
             return out
+
+        # 条件分岐: `"inputs" in t` を満たす経路を評価する。
 
         if "inputs" in t:
             t["inputs"] = _filter_items(t.get("inputs"))
+
+        # 条件分岐: `"refs" in t` を満たす経路を評価する。
+
         if "refs" in t:
             t["refs"] = _filter_items(t.get("refs"))
 
         # Drop PPTX outputs.
+
         outs = t.get("outputs")
+        # 条件分岐: `isinstance(outs, list)` を満たす経路を評価する。
         if isinstance(outs, list):
             kept: List[Dict[str, Any]] = []
             for it in outs:
+                # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
                 if not isinstance(it, dict):
                     continue
+
                 p = it.get("path")
+                # 条件分岐: `isinstance(p, str) and p.lower().endswith(".pptx")` を満たす経路を評価する。
                 if isinstance(p, str) and p.lower().endswith(".pptx"):
                     continue
+
                 kept.append(it)
+
             t["outputs"] = kept
 
         # LLR: prefer the public pack as the citable entry.
+
         if tid == "llr_batch":
             t["outputs"] = [
                 {"path": "output/public/llr/llr_falsification_pack.json", "exists": True, "note": "public pack (citable)"},
@@ -218,6 +274,7 @@ def _copy_topic(
         dst = dst_dir / fname
         _copy_file(src, dst, overwrite=overwrite)
         copied[fname] = _artifact_record(dst)
+
     return copied
 
 
@@ -233,10 +290,12 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
     priv_falsification = priv_summary / "weak_field_falsification.json"
 
     for p in (priv_matrix, priv_templates, priv_consistency, priv_falsification):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing required input: {_rel(p)}")
 
     # Public output dirs
+
     out_public = _ROOT / "output" / "public"
     out_weak = out_public / "weak_field"
     out_weak.mkdir(parents=True, exist_ok=True)
@@ -317,6 +376,7 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
 
     # Public LLR pack (already published; reference as input)
     llr_pack = _ROOT / "output" / "public" / "llr" / "llr_falsification_pack.json"
+    # 条件分岐: `not llr_pack.exists()` を満たす経路を評価する。
     if not llr_pack.exists():
         warnings.append(f"missing public LLR pack (expected): {_rel(llr_pack)}")
         llr_pack_rec = None
@@ -324,6 +384,7 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
         llr_pack_rec = _artifact_record(llr_pack)
 
     # Build sanitized public summary JSONs
+
     priv_matrix_obj = _read_json(priv_matrix)
     pub_matrix_obj = _sanitize_test_matrix(priv_matrix_obj)
     pub_templates_obj = _rewrite_paths(_read_json(priv_templates))
@@ -355,8 +416,10 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
         warnings.append(f"missing weak_field_longterm_consistency.png (optional): {_rel(priv_consistency_png)}")
 
     # Read frozen parameter values from public artifact (for pack summary)
+
     frozen_pub = out_public / "theory" / "frozen_parameters.json"
     frozen_vals: Dict[str, Any] = {"path": _rel(frozen_pub), "exists": frozen_pub.exists()}
+    # 条件分岐: `frozen_pub.exists()` を満たす経路を評価する。
     if frozen_pub.exists():
         try:
             fz = _read_json(frozen_pub)
@@ -365,6 +428,7 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
             warnings.append(f"failed to parse frozen parameters: {_rel(frozen_pub)}")
 
     # Integrated public pack
+
     pack_path = out_weak / "weak_field_falsification_pack.json"
     pack: Dict[str, Any] = {
         "generated_utc": _utc_now(),
@@ -391,6 +455,7 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
 
     _write_json(pack_path, pack)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -423,8 +488,11 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] wrote: {_rel(pack_path)}")
     for w in warnings:
         print(f"[warn] {w}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -38,6 +38,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -62,8 +63,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -83,53 +86,82 @@ def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
     for tok in (s or "").split(","):
         tok = tok.strip()
+        # 条件分岐: `not tok` を満たす経路を評価する。
         if not tok:
             continue
+
         try:
             v = float(tok)
         except Exception:
             continue
+
+        # 条件分岐: `not (v > 0.0 and math.isfinite(v))` を満たす経路を評価する。
+
         if not (v > 0.0 and math.isfinite(v)):
             continue
+
         out.append(v)
     # deterministic: unique & sorted
+
     return sorted(set(out))
 
 
 def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
+    # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
     if not xs or len(xs) != len(ys):
         return None
+
+    # 条件分岐: `not math.isfinite(float(threshold))` を満たす経路を評価する。
+
     if not math.isfinite(float(threshold)):
         return None
+
     xs_f = [float(x) for x in xs]
     ys_f = [float(y) for y in ys]
+    # 条件分岐: `any((x <= 0.0 or not math.isfinite(x)) for x in xs_f)` を満たす経路を評価する。
     if any((x <= 0.0 or not math.isfinite(x)) for x in xs_f):
         return None
+
+    # 条件分岐: `any((not math.isfinite(y)) for y in ys_f)` を満たす経路を評価する。
+
     if any((not math.isfinite(y)) for y in ys_f):
         # still try, but skip invalid segments
         pass
 
     # already below at smallest f
+
     if math.isfinite(ys_f[0]) and ys_f[0] <= float(threshold):
         return xs_f[0]
 
     for i in range(1, len(xs_f)):
         x0, x1 = xs_f[i - 1], xs_f[i]
         y0, y1 = ys_f[i - 1], ys_f[i]
+        # 条件分岐: `not (math.isfinite(y0) and math.isfinite(y1))` を満たす経路を評価する。
         if not (math.isfinite(y0) and math.isfinite(y1)):
             continue
+
+        # 条件分岐: `(y0 - threshold) == 0.0` を満たす経路を評価する。
+
         if (y0 - threshold) == 0.0:
             return x0
+
+        # 条件分岐: `(y0 - threshold) * (y1 - threshold) > 0.0` を満たす経路を評価する。
+
         if (y0 - threshold) * (y1 - threshold) > 0.0:
             continue
+
+        # 条件分岐: `y1 == y0` を満たす経路を評価する。
+
         if y1 == y0:
             return x1
         # interpolate in log-x space
+
         t = (threshold - y0) / (y1 - y0)
         lx0 = math.log10(x0)
         lx1 = math.log10(x1)
         lx = lx0 + float(t) * (lx1 - lx0)
         return float(10.0**lx)
+
     return None
 
 
@@ -141,15 +173,25 @@ def _classify_cell(v: Optional[float]) -> int:
       2: ng (>3)
       3: na
     """
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return 3
+
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
+
     if not math.isfinite(float(v)):
         return 3
+
     v = float(v)
+    # 条件分岐: `v <= 1.0` を満たす経路を評価する。
     if v <= 1.0:
         return 0
+
+    # 条件分岐: `v <= 3.0` を満たす経路を評価する。
+
     if v <= 3.0:
         return 1
+
     return 2
 
 
@@ -195,8 +237,10 @@ def _plot_matrix(
     for i in range(n_rows):
         for j in range(n_cols):
             v = float(values[i, j])
+            # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
             if not math.isfinite(v):
                 continue
+
             cat = int(cats[i, j])
             txt_color = "#ffffff" if cat == 2 else "#111111"
             ax.text(
@@ -211,10 +255,14 @@ def _plot_matrix(
             )
 
     # highlight f=1 column if present
+
     try:
         j0 = list(scales).index(1.0)
     except ValueError:
         j0 = None
+
+    # 条件分岐: `j0 is not None` を満たす経路を評価する。
+
     if j0 is not None:
         ax.add_patch(
             Rectangle(
@@ -283,10 +331,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     in_bao_fit = out_dir / "cosmology_bao_scaled_distance_fit_metrics.json"
 
     for p in (in_ddr, in_opacity, in_candle, in_pt, in_pe, in_bao_fit):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing input: {p}")
 
     scales = _parse_scales(str(args.bao_sigma_scales))
+    # 条件分岐: `not scales` を満たす経路を評価する。
     if not scales:
         raise ValueError("--bao-sigma-scales must contain at least one positive float")
 
@@ -309,12 +359,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     candle_all = cand._as_gaussian_list(candle_rows, mean_key="s_L", sigma_key="s_L_sigma")
     pt_all = cand._as_gaussian_list(pt_rows, mean_key="p_t", sigma_key="p_t_sigma")
     pe_all_from_beta = cand._as_pT_constraints(pe_rows)
+    # 条件分岐: `not pt_all` を満たす経路を評価する。
     if not pt_all:
         raise ValueError("no SN time dilation constraint found")
+
+    # 条件分岐: `not pe_all_from_beta` を満たす経路を評価する。
+
     if not pe_all_from_beta:
         raise ValueError("no CMB temperature scaling constraint found")
 
     # Match candidate_search: use single constraints for p_t and p_e (first row).
+
     p_t = pt_all[0]
     p_e = pe_all_from_beta[0]
 
@@ -325,6 +380,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         raise ValueError("unexpected BAO fit metrics schema") from e
 
     # Compute series across scales.
+
     series_by_id: Dict[str, List[Dict[str, Any]]] = {d.id: [] for d in ddr}
     for f in scales:
         sigma_used = float(sR_bao_sigma_base * float(f))
@@ -343,6 +399,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         for row in per_ddr:
             ddr_id = str((row.get("ddr") or {}).get("id") or "")
             block = row.get("best_independent")
+            # 条件分岐: `not isinstance(block, dict)` を満たす経路を評価する。
             if not isinstance(block, dict):
                 series_by_id[ddr_id].append(
                     {
@@ -353,6 +410,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                     }
                 )
                 continue
+
             fit = block.get("fit") if isinstance(block.get("fit"), dict) else {}
             series_by_id[ddr_id].append(
                 {
@@ -369,6 +427,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
 
     # Build matrix for plot (rows are DDR order; cols are scale order).
+
     labels: List[str] = []
     vals = np.full((len(ddr), len(scales)), np.nan, dtype=float)
     rows_out: List[Dict[str, Any]] = []
@@ -420,25 +479,32 @@ def main(argv: Optional[List[str]] = None) -> int:
         ddr_meta = r.get("ddr") if isinstance(r.get("ddr"), dict) else {}
         ddr_id = str(ddr_meta.get("id") or "")
         ddr_label = str(ddr_meta.get("short_label") or ddr_id)
+        # 条件分岐: `th.get("f_max_abs_z_le_1") is not None` を満たす経路を評価する。
         if th.get("f_max_abs_z_le_1") is not None:
             reached_1s += 1
             try:
                 f1s.append((float(th["f_max_abs_z_le_1"]), ddr_id, ddr_label))
             except Exception:
                 pass
+
+        # 条件分岐: `th.get("f_max_abs_z_le_3") is not None` を満たす経路を評価する。
+
         if th.get("f_max_abs_z_le_3") is not None:
             reached_3s += 1
 
     f1s_sorted = sorted([x for x in f1s if x[0] > 0.0 and math.isfinite(x[0])], key=lambda t: t[0])
     f1_only = [x[0] for x in f1s_sorted]
     f1_stats: Dict[str, Any] = {}
+    # 条件分岐: `f1_only` を満たす経路を評価する。
     if f1_only:
         import statistics
 
         def _pct(p: float) -> float:
             p = float(p)
+            # 条件分岐: `not (0.0 <= p <= 1.0)` を満たす経路を評価する。
             if not (0.0 <= p <= 1.0):
                 return float("nan")
+
             idx = int(round(p * (len(f1_only) - 1)))
             return float(f1_only[max(0, min(len(f1_only) - 1, idx))])
 
@@ -521,6 +587,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_metrics}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

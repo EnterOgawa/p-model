@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -50,9 +51,11 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 def _sanitize_variant(s: str) -> str:
     s = str(s or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return ""
     # Keep filenames simple and stable across platforms.
+
     s = re.sub(r"[^0-9A-Za-z._-]+", "_", s)
     s = s.strip("._-")
     return s
@@ -62,25 +65,36 @@ def _parse_int_list(s: str) -> List[int]:
     out: List[int] = []
     for part in str(s or "").split(","):
         part = part.strip()
+        # 条件分岐: `not part` を満たす経路を評価する。
         if not part:
             continue
+
         out.append(int(part))
+
     return out
 
 
 def _maybe_float(x: object) -> Optional[float]:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return None
+
+    # 条件分岐: `isinstance(x, (int, float))` を満たす経路を評価する。
+
     if isinstance(x, (int, float)):
         v = float(x)
         return v if np.isfinite(v) else None
+
     s = str(x).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     try:
         v = float(s)
     except Exception:
         return None
+
     return v if np.isfinite(v) else None
 
 
@@ -94,32 +108,43 @@ def _align_counts_to_rmf(
     src_ch = np.asarray(src_channels, dtype=int)
     src_ct = np.asarray(src_counts, dtype=float)
     max_ch = int(np.max(ch)) if ch.size else -1
+    # 条件分岐: `max_ch < 0` を満たす経路を評価する。
     if max_ch < 0:
         return np.zeros(0, dtype=float)
+
     idx = -np.ones(max_ch + 1, dtype=int)
     ok = (ch >= 0) & (ch <= max_ch)
     idx[ch[ok]] = np.arange(int(ch.size), dtype=int)[ok]
     out = np.zeros(int(ch.size), dtype=float)
     m = (src_ch >= 0) & (src_ch <= max_ch)
+    # 条件分岐: `np.any(m)` を満たす経路を評価する。
     if np.any(m):
         ii = idx[src_ch[m]]
         ok2 = ii >= 0
+        # 条件分岐: `np.any(ok2)` を満たす経路を評価する。
         if np.any(ok2):
             out[ii[ok2]] = src_ct[m][ok2]
+
     return out
 
 
 def _read_obsids_from_catalog(path: Path) -> List[str]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     d = json.loads(path.read_text(encoding="utf-8"))
     obsids: List[str] = []
     for t in (d.get("targets") or []):
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
+
         o = str(t.get("obsid") or "").strip()
+        # 条件分岐: `len(o) == 9 and o.isdigit()` を満たす経路を評価する。
         if len(o) == 9 and o.isdigit():
             obsids.append(o)
+
     return sorted(set(obsids))
 
 
@@ -161,6 +186,7 @@ def _run_qc(
             "variant": v or None,
         }
 
+        # 条件分岐: `not products_dir.is_dir()` を満たす経路を評価する。
         if not products_dir.is_dir():
             rec["ok"] = False
             rec["reason"] = "missing products_dir"
@@ -183,15 +209,18 @@ def _run_qc(
         gti_start = None
         gti_stop = None
 
+        # 条件分岐: `event_ok` を満たす経路を評価する。
         if event_ok:
             try:
                 event_path = choose_event_file(event_dir)
+                # 条件分岐: `bool(apply_gti)` を満たす経路を評価する。
                 if bool(apply_gti):
                     # Prefer GTI embedded in the event file; fallback to auxil if available.
                     try:
                         gti_start, gti_stop = load_gti_intervals_from_event(event_path)
                         rec["gti"] = {"source": "event", "n": int(np.asarray(gti_start).size)}
                     except Exception as e_evt:
+                        # 条件分岐: `gti_path_auxil.exists()` を満たす経路を評価する。
                         if gti_path_auxil.exists():
                             try:
                                 gti_start, gti_stop = load_gti_intervals(gti_path_auxil)
@@ -265,7 +294,9 @@ def _run_qc(
             _write_json(out_dir / f"{obsid}__event_level_qc{suffix}.json", rec)
 
     # Summary CSV
+
     out_csv = out_dir / f"xrism_event_level_qc_summary{suffix}.csv"
+    # 条件分岐: `rows` を満たす経路を評価する。
     if rows:
         cols = [
             "obsid",
@@ -364,13 +395,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     obsids = [str(o).strip() for o in args.obsid if str(o).strip()]
+    # 条件分岐: `not obsids` を満たす経路を評価する。
     if not obsids:
         obsids = _read_obsids_from_catalog(Path(args.catalog))
+
+    # 条件分岐: `not obsids` を満たす経路を評価する。
+
     if not obsids:
         raise SystemExit("no obsid provided and catalog is empty/missing")
 
     fek_band = (float(args.fek_lo), float(args.fek_hi))
 
+    # 条件分岐: `bool(args.sweep_procedure)` を満たす経路を評価する。
     if bool(args.sweep_procedure):
         sweep_defs = [
             {"variant": "gti0_px0", "apply_gti": False, "pixel_exclude": []},
@@ -395,6 +431,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 rows = list(csv.DictReader(Path(res["summary_csv"]).open("r", encoding="utf-8", newline="")))
             except Exception:
                 rows = []
+
             sweep_results.append(
                 {
                     "variant": str(res.get("variant") or ""),
@@ -440,6 +477,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

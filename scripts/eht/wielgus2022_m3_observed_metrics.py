@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -41,8 +42,10 @@ _RE_FLOAT = re.compile(r"(?P<num>-?\d+(?:\.\d+)?)")
 def _parse_float_list(cell: str) -> List[float]:
     s = cell.strip()
     m = _RE_MULTICOL.search(s)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         s = m.group("content")
+
     s = s.replace("\\,", " ").replace("\\ ", " ").replace(",", " ")
     out: List[float] = []
     for mm in _RE_FLOAT.finditer(s):
@@ -50,6 +53,7 @@ def _parse_float_list(cell: str) -> List[float]:
             out.append(float(mm.group("num")))
         except Exception:
             continue
+
     return out
 
 
@@ -57,25 +61,37 @@ def _extract_sigma_mu_3h_table(*, s4_path: Path, lines: Sequence[str]) -> Dict[s
     label = "\\label{tab:sigma_mu_3h}"
     label_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             label_idx = i
             break
+
+    # 条件分岐: `label_idx is None` を満たす経路を評価する。
+
     if label_idx is None:
         return {"ok": False, "reason": "label_not_found", "label": label}
 
     begin_idx = None
     for j in range(label_idx, -1, -1):
+        # 条件分岐: `"\\begin{table}" in lines[j]` を満たす経路を評価する。
         if "\\begin{table}" in lines[j]:
             begin_idx = j
             break
+
+    # 条件分岐: `begin_idx is None` を満たす経路を評価する。
+
     if begin_idx is None:
         begin_idx = max(0, label_idx - 200)
 
     end_idx = None
     for j in range(label_idx, min(len(lines), label_idx + 200)):
+        # 条件分岐: `"\\end{table}" in lines[j]` を満たす経路を評価する。
         if "\\end{table}" in lines[j]:
             end_idx = j
             break
+
+    # 条件分岐: `end_idx is None` を満たす経路を評価する。
+
     if end_idx is None:
         end_idx = min(len(lines) - 1, label_idx + 200)
 
@@ -95,33 +111,45 @@ def _extract_sigma_mu_3h_table(*, s4_path: Path, lines: Sequence[str]) -> Dict[s
 
     for k, raw in enumerate(table_lines, start=begin_idx + 1):
         line = raw.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
 
         msec = section_pat.search(line)
+        # 条件分岐: `msec` を満たす経路を評価する。
         if msec:
             name = msec.group("name").strip()
+            # 条件分岐: `name.startswith("ALMA ")` を満たす経路を評価する。
             if name.startswith("ALMA "):
                 current_instrument = "ALMA"
                 current_pipeline = name.replace("ALMA", "").strip()
+            # 条件分岐: 前段条件が不成立で、`name == "SMA"` を追加評価する。
             elif name == "SMA":
                 current_instrument = "SMA"
                 current_pipeline = None
             else:
                 current_instrument = name
                 current_pipeline = None
+
             continue
+
+        # 条件分岐: `"&" not in line` を満たす経路を評価する。
 
         if "&" not in line:
             continue
+
+        # 条件分岐: `"\\hline" in line or line.startswith("Band")` を満たす経路を評価する。
+
         if "\\hline" in line or line.startswith("Band"):
             continue
 
         parts = [p.strip().rstrip("\\").strip() for p in line.split("&")]
+        # 条件分岐: `not parts` を満たす経路を評価する。
         if not parts:
             continue
 
         band = parts[0].split()[0] if parts[0] else ""
+        # 条件分岐: `not band or current_instrument is None` を満たす経路を評価する。
         if not band or current_instrument is None:
             continue
 
@@ -132,17 +160,21 @@ def _extract_sigma_mu_3h_table(*, s4_path: Path, lines: Sequence[str]) -> Dict[s
             "source": {"path": str(s4_path), "line": int(k), "raw": raw.rstrip("\n")},
         }
 
+        # 条件分岐: `current_instrument == "ALMA"` を満たす経路を評価する。
         if current_instrument == "ALMA":
             # Columns: Band, Apr6, Apr7 (multicolumn list), Apr11
             if len(parts) < 4:
                 continue
+
             out_row["apr6"] = _parse_float_list(parts[1])
             out_row["apr7"] = _parse_float_list(parts[2])
             out_row["apr11"] = _parse_float_list(parts[3])
+        # 条件分岐: 前段条件が不成立で、`current_instrument == "SMA"` を追加評価する。
         elif current_instrument == "SMA":
             # Columns: Band, Apr5, Apr6, Apr7, Apr10, Apr11
             if len(parts) < 6:
                 continue
+
             out_row["apr5"] = _parse_float_list(parts[1])
             out_row["apr6"] = _parse_float_list(parts[2])
             out_row["apr7"] = _parse_float_list(parts[3])
@@ -170,8 +202,10 @@ _RE_D3H = re.compile(
 def _extract_drw_predicted_sigma_mu_3h(*, s4_path: Path, lines: Sequence[str]) -> Dict[str, Any]:
     for i, raw in enumerate(lines, start=1):
         m = _RE_D3H.search(raw)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         return {
             "ok": True,
             "value": float(m.group("v")),
@@ -179,6 +213,7 @@ def _extract_drw_predicted_sigma_mu_3h(*, s4_path: Path, lines: Sequence[str]) -
             "minus": float(m.group("minus")),
             "source_anchor": _anchor(s4_path, line=i, label="wielgus2022_drw_pred_sigma_mu_3h", snippet=raw),
         }
+
     return {"ok": False, "reason": "pattern_not_found"}
 
 
@@ -187,8 +222,10 @@ _RE_PM3 = re.compile(r"\$\s*(?P<v>\d+(?:\.\d+)?)\^\{\+?(?P<plus>\d+(?:\.\d+)?)\}
 
 def _parse_pm3(cell: str) -> Optional[Tuple[float, float, float]]:
     m = _RE_PM3.search(cell.strip())
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     return float(m.group("v")), float(m.group("plus")), float(m.group("minus"))
 
 
@@ -203,26 +240,36 @@ def _extract_gpresults_tau(*, s5_path: Path, lines: Sequence[str]) -> Dict[str, 
 
     for i, raw in enumerate(lines, start=1):
         line = raw.strip()
+        # 条件分岐: `"&" not in line or "\\hline" in line` を満たす経路を評価する。
         if "&" not in line or "\\hline" in line:
             continue
         # Row name sits before first '&'
+
         name_cell = line.split("&", 1)[0].strip()
         name_clean = name_cell.replace("$^{a}$", "").replace("$^{b}$", "").strip()
         key = None
         for prefix, k in wanted.items():
+            # 条件分岐: `name_clean.startswith(prefix)` を満たす経路を評価する。
             if name_clean.startswith(prefix):
                 key = k
                 break
+
+        # 条件分岐: `key is None` を満たす経路を評価する。
+
         if key is None:
             continue
 
         parts = [p.strip().rstrip("\\").strip() for p in line.split("&")]
+        # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
         if len(parts) < 4:
             continue
+
         tau_cell = parts[3]
         pm = _parse_pm3(tau_cell)
+        # 条件分岐: `pm is None` を満たす経路を評価する。
         if pm is None:
             continue
+
         tau, plus, minus = pm
         out_rows[key] = {
             "tau_h": float(tau),
@@ -241,8 +288,10 @@ def _summary_stats(values: Sequence[float]) -> Dict[str, Any]:
     xs = [x for x in xs if x == x]  # drop NaN
     xs_sorted = sorted(xs)
     n = len(xs_sorted)
+    # 条件分岐: `n == 0` を満たす経路を評価する。
     if n == 0:
         return {"n": 0}
+
     med = xs_sorted[n // 2] if (n % 2 == 1) else 0.5 * (xs_sorted[n // 2 - 1] + xs_sorted[n // 2])
     mean = sum(xs_sorted) / n
     return {"n": n, "min": xs_sorted[0], "max": xs_sorted[-1], "mean": mean, "median": med}
@@ -267,20 +316,31 @@ _MONTHS = {
 def _parse_ymd(date_raw: str) -> Optional[str]:
     # Expected formats: "2005 June 4", "2017 October 11a", etc.
     tokens = date_raw.strip().split()
+    # 条件分岐: `len(tokens) < 3` を満たす経路を評価する。
     if len(tokens) < 3:
         return None
+
+    # 条件分岐: `not tokens[0].isdigit()` を満たす経路を評価する。
+
     if not tokens[0].isdigit():
         return None
+
     year = int(tokens[0])
     month = _MONTHS.get(tokens[1])
+    # 条件分岐: `month is None` を満たす経路を評価する。
     if month is None:
         return None
+
     m = re.match(r"(?P<day>\d+)", tokens[2])
+    # 条件分岐: `m is None` を満たす経路を評価する。
     if m is None:
         return None
+
     day = int(m.group("day"))
+    # 条件分岐: `not (1 <= day <= 31)` を満たす経路を評価する。
     if not (1 <= day <= 31):
         return None
+
     return f"{year:04d}-{month:02d}-{day:02d}"
 
 
@@ -293,8 +353,10 @@ _RE_CITET = re.compile(r"\\citet\{(?P<key>[^}]+)\}")
 
 def _normalize_reference(reference_raw: str) -> Dict[str, Any]:
     m = _RE_CITET.search(reference_raw)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return {"raw": reference_raw, "key": None}
+
     return {"raw": reference_raw, "key": m.group("key").strip()}
 
 
@@ -311,26 +373,39 @@ def _extract_detections_other_papers_table(*, s4_path: Path, lines: Sequence[str
     label = "\\label{tab:detections_other_papers}"
     label_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             label_idx = i
             break
+
+    # 条件分岐: `label_idx is None` を満たす経路を評価する。
+
     if label_idx is None:
         return {"ok": False, "reason": "label_not_found", "label": label}
 
     # Look for startdata/enddata around the label (deluxetable).
+
     start_idx = None
     for j in range(label_idx, min(len(lines), label_idx + 120)):
+        # 条件分岐: `"\\startdata" in lines[j]` を満たす経路を評価する。
         if "\\startdata" in lines[j]:
             start_idx = j
             break
+
+    # 条件分岐: `start_idx is None` を満たす経路を評価する。
+
     if start_idx is None:
         return {"ok": False, "reason": "startdata_not_found", "label": label}
 
     end_idx = None
     for j in range(start_idx, min(len(lines), start_idx + 800)):
+        # 条件分岐: `"\\enddata" in lines[j]` を満たす経路を評価する。
         if "\\enddata" in lines[j]:
             end_idx = j
             break
+
+    # 条件分岐: `end_idx is None` を満たす経路を評価する。
+
     if end_idx is None:
         return {"ok": False, "reason": "enddata_not_found", "label": label}
 
@@ -342,13 +417,22 @@ def _extract_detections_other_papers_table(*, s4_path: Path, lines: Sequence[str
 
     for lineno, raw in enumerate(lines[start_idx + 1 : end_idx], start=start_idx + 2):
         line = raw.strip()
+        # 条件分岐: `not line or line.startswith("%")` を満たす経路を評価する。
         if not line or line.startswith("%"):
             continue
+
+        # 条件分岐: `line.startswith("\\hline") or line.startswith("\\cline")` を満たす経路を評価する。
+
         if line.startswith("\\hline") or line.startswith("\\cline"):
             continue
+
+        # 条件分岐: `"&" not in line` を満たす経路を評価する。
+
         if "&" not in line:
             continue
+
         parts = [_clean_cell(p) for p in raw.split("&")]
+        # 条件分岐: `len(parts) < 8` を満たす経路を評価する。
         if len(parts) < 8:
             continue
 
@@ -358,8 +442,10 @@ def _extract_detections_other_papers_table(*, s4_path: Path, lines: Sequence[str
         dur_raw = parts[3]
         sigma_over_mu_raw = parts[6]
 
+        # 条件分岐: `ref_raw is None or array_raw is None` を満たす経路を評価する。
         if ref_raw is None or array_raw is None:
             continue
+
         cur_ref_raw = ref_raw
         cur_array_raw = array_raw
 
@@ -368,6 +454,7 @@ def _extract_detections_other_papers_table(*, s4_path: Path, lines: Sequence[str
             dur_h = float(dur_raw)
         except Exception:
             continue
+
         try:
             sigma_over_mu = float(sigma_over_mu_raw)
         except Exception:
@@ -403,12 +490,20 @@ def _paper5_historical_distribution_candidate(
     for r in rows:
         ymd = r.get("date_ymd")
         dur = r.get("duration_h")
+        # 条件分岐: `not isinstance(ymd, str) or not isinstance(dur, (int, float))` を満たす経路を評価する。
         if not isinstance(ymd, str) or not isinstance(dur, (int, float)):
             continue
+
+        # 条件分岐: `ymd > date_cutoff_ymd` を満たす経路を評価する。
+
         if ymd > date_cutoff_ymd:
             continue
+
+        # 条件分岐: `float(dur) < float(duration_h_min)` を満たす経路を評価する。
+
         if float(dur) < float(duration_h_min):
             continue
+
         selected.append(r)
 
     curves: List[Dict[str, Any]] = []
@@ -422,9 +517,12 @@ def _paper5_historical_distribution_candidate(
         dur = float(r["duration_h"])
         sigma_over_mu = float(r["sigma_over_mu"])
         k = int(math.floor(dur / float(deltaT_hours)))
+        # 条件分岐: `k <= 0` を満たす経路を評価する。
         if k <= 0:
             continue
+
         arr = str(r.get("array") or "")
+        # 条件分岐: `arr` を満たす経路を評価する。
         if arr:
             segments_by_array[arr] = int(segments_by_array.get(arr, 0) + k)
             curves_by_array[arr] = int(curves_by_array.get(arr, 0) + 1)
@@ -486,6 +584,7 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
     b = sorted(float(x) for x in sample_b if isinstance(x, (int, float)))
     n = len(a)
     m = len(b)
+    # 条件分岐: `n == 0 or m == 0` を満たす経路を評価する。
     if n == 0 or m == 0:
         return None
 
@@ -493,6 +592,7 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
     j = 0
     d = 0.0
     while i < n or j < m:
+        # 条件分岐: `j >= m or (i < n and a[i] <= b[j])` を満たす経路を評価する。
         if j >= m or (i < n and a[i] <= b[j]):
             t = a[i]
         else:
@@ -500,12 +600,14 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
 
         while i < n and a[i] <= t:
             i += 1
+
         while j < m and b[j] <= t:
             j += 1
 
         fa = i / n
         fb = j / m
         d = max(d, abs(fa - fb))
+
     return float(d)
 
 
@@ -513,50 +615,74 @@ def _ks_qks(lam: float, *, max_terms: int = 200) -> float:
     # Q_KS(λ) = 2 Σ_{k=1..∞} (-1)^{k-1} exp(-2 k^2 λ^2)
     if lam <= 0.0:
         return 1.0
+
     s = 0.0
     for k in range(1, max_terms + 1):
         term = math.exp(-2.0 * (k * k) * (lam * lam))
         s += (term if (k % 2 == 1) else -term)
+        # 条件分岐: `term < 1e-12` を満たす経路を評価する。
         if term < 1e-12:
             break
+
     q = 2.0 * s
+    # 条件分岐: `q < 0.0` を満たす経路を評価する。
     if q < 0.0:
         return 0.0
+
+    # 条件分岐: `q > 1.0` を満たす経路を評価する。
+
     if q > 1.0:
         return 1.0
+
     return float(q)
 
 
 def _ks_pvalue_2samp_asymptotic(sample_a: Sequence[float], sample_b: Sequence[float]) -> Optional[float]:
     d = _ks_two_sample_d(sample_a, sample_b)
+    # 条件分岐: `d is None` を満たす経路を評価する。
     if d is None:
         return None
+
     n = len([x for x in sample_a if isinstance(x, (int, float))])
     m = len([x for x in sample_b if isinstance(x, (int, float))])
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
         return None
+
     n_eff = (n * m) / (n + m)
+    # 条件分岐: `n_eff <= 0` を満たす経路を評価する。
     if n_eff <= 0:
         return None
+
     sq = math.sqrt(n_eff)
     lam = (sq + 0.12 + 0.11 / sq) * float(d)
     return _ks_qks(lam)
 
 
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
         return None
+
     c = None
+    # 条件分岐: `abs(alpha - 0.10) < 1e-12` を満たす経路を評価する。
     if abs(alpha - 0.10) < 1e-12:
         c = 1.22
+    # 条件分岐: 前段条件が不成立で、`abs(alpha - 0.05) < 1e-12` を追加評価する。
     elif abs(alpha - 0.05) < 1e-12:
         c = 1.36
+    # 条件分岐: 前段条件が不成立で、`abs(alpha - 0.01) < 1e-12` を追加評価する。
     elif abs(alpha - 0.01) < 1e-12:
         c = 1.63
+    # 条件分岐: 前段条件が不成立で、`abs(alpha - 0.001) < 1e-12` を追加評価する。
     elif abs(alpha - 0.001) < 1e-12:
         c = 1.95
+
+    # 条件分岐: `c is None` を満たす経路を評価する。
+
     if c is None:
         return None
+
     return float(c * math.sqrt((n + m) / (n * m)))
 
 
@@ -570,13 +696,16 @@ def _select_paper5_7samples_candidate(
     for r in rows:
         inst = r.get("instrument")
         band = r.get("band")
+        # 条件分岐: `not isinstance(inst, str) or not isinstance(band, str)` を満たす経路を評価する。
         if not isinstance(inst, str) or not isinstance(band, str):
             continue
+
         pipe = r.get("pipeline") if (r.get("pipeline") is None or isinstance(r.get("pipeline"), str)) else None
         idx[(inst, pipe, band)] = r
 
     alma_a1_hi = idx.get(("ALMA", "A1", "HI"))
     sma_hi = idx.get(("SMA", None, "HI"))
+    # 条件分岐: `not isinstance(alma_a1_hi, dict) or not isinstance(sma_hi, dict)` を満たす経路を評価する。
     if not isinstance(alma_a1_hi, dict) or not isinstance(sma_hi, dict):
         return {"ok": False, "reason": "required_rows_not_found"}
 
@@ -586,6 +715,7 @@ def _select_paper5_7samples_candidate(
     sma_apr5 = sma_hi.get("apr5")
     sma_apr10 = sma_hi.get("apr10")
 
+    # 条件分岐: `not all(isinstance(v, list) for v in (alma_apr6, alma_apr7, alma_apr11, sma_a...` を満たす経路を評価する。
     if not all(isinstance(v, list) for v in (alma_apr6, alma_apr7, alma_apr11, sma_apr5, sma_apr10)):
         return {"ok": False, "reason": "invalid_row_cells"}
 
@@ -665,6 +795,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
 
     missing = [str(p) for p in (s4_path, s5_path) if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         payload["ok"] = False
         payload["reason"] = "missing_inputs"
@@ -688,22 +819,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "gpresults_tau_hours": gp_tau,
     }
 
+    # 条件分岐: `bool(sigma_mu.get("ok"))` を満たす経路を評価する。
     if bool(sigma_mu.get("ok")):
         payload["derived"]["paper5_m3_2017_7sample_candidate"] = _select_paper5_7samples_candidate(sigma_mu, s4_path=s4_path)
     else:
         payload["derived"]["paper5_m3_2017_7sample_candidate"] = {"ok": False, "reason": "sigma_mu_table_not_ok"}
 
     # deltaT proxy (Paper V uses ΔT=3h); connect to tau to indicate scale.
+
     deltaT = 3.0
     tau_rows = (gp_tau.get("rows") or {}) if isinstance(gp_tau.get("rows"), dict) else {}
     ratios = {}
     for key, rr in tau_rows.items():
         tau = rr.get("tau_h")
+        # 条件分岐: `isinstance(tau, (int, float)) and tau > 0` を満たす経路を評価する。
         if isinstance(tau, (int, float)) and tau > 0:
             ratios[key] = float(deltaT / float(tau))
+
     payload["derived"]["deltaT_hours"] = deltaT
     payload["derived"]["deltaT_over_tau_by_row"] = ratios
 
+    # 条件分岐: `bool(detections_other.get("ok"))` を満たす経路を評価する。
     if bool(detections_other.get("ok")):
         # Candidate: pre-EHT historical record (cut at end of EHT 2017 campaign).
         payload["derived"]["paper5_m3_historical_distribution_candidate_pre_eht_2017_apr11"] = _paper5_historical_distribution_candidate(
@@ -739,6 +875,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         sel = payload["derived"]["paper5_m3_2017_7sample_candidate"] or {}
         hist_seg = hist.get("segments") if isinstance(hist, dict) else None
+        # 条件分岐: `isinstance(sel, dict) and bool(sel.get("ok")) and isinstance(hist_seg, list)` を満たす経路を評価する。
         if isinstance(sel, dict) and bool(sel.get("ok")) and isinstance(hist_seg, list):
             x7 = [float(s.get("sigma_over_mu_3h")) for s in (sel.get("samples") or []) if isinstance(s, dict) and isinstance(s.get("sigma_over_mu_3h"), (int, float))]
             yh = [float(s.get("sigma_over_mu_proxy_full_duration")) for s in hist_seg if isinstance(s, dict) and isinstance(s.get("sigma_over_mu_proxy_full_duration"), (int, float))]
@@ -757,6 +894,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
     except Exception:
         ks_block = {"ok": False, "reason": "exception"}
+
     payload["derived"]["paper5_m3_ks_sanity_2017_vs_historical_proxy"] = ks_block
 
     payload["ok"] = (
@@ -795,6 +933,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_path}")
     return 0 if bool(payload.get("ok")) else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

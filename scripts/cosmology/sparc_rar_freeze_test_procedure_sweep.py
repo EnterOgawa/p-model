@@ -33,6 +33,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -63,10 +64,15 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
+    # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step...` を満たす経路を評価する。
     if not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step > 0):
         raise ValueError("invalid grid params")
+
+    # 条件分岐: `stop < start` を満たす経路を評価する。
+
     if stop < start:
         raise ValueError("stop < start")
+
     n = int(math.floor((stop - start) / step + 0.5)) + 1
     vv = start + step * np.arange(n, dtype=float)
     vv = vv[(vv >= start - 1e-12) & (vv <= stop + 1e-12)]
@@ -85,31 +91,48 @@ def _parse_clipping_specs(specs: Sequence[str]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     for raw in specs:
         s = str(raw or "").strip().lower()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
+        # 条件分岐: `s in {"none", "off", "no"}` を満たす経路を評価する。
+
         if s in {"none", "off", "no"}:
             out.append({"method": "none", "k": None})
             continue
+
+        # 条件分岐: `s.startswith("mad")` を満たす経路を評価する。
+
         if s.startswith("mad"):
             k = 3.5
+            # 条件分岐: `":" in s` を満たす経路を評価する。
             if ":" in s:
                 _, tail = s.split(":", 1)
                 k = float(tail.strip())
+
+            # 条件分岐: `not (np.isfinite(k) and float(k) > 0)` を満たす経路を評価する。
+
             if not (np.isfinite(k) and float(k) > 0):
                 raise ValueError(f"invalid clipping spec: {raw}")
+
             out.append({"method": "mad", "k": float(k)})
             continue
+
         raise ValueError(f"unknown clipping spec: {raw}")
 
     # unique + stable order
+
     seen: set[Tuple[str, Optional[float]]] = set()
     uniq: List[Dict[str, Any]] = []
     for v in out:
         key = (str(v.get("method")), v.get("k") if v.get("k") is not None else None)
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
         uniq.append(v)
+
     return uniq
 
 
@@ -137,35 +160,53 @@ def _plot_heatmaps(
 
     sf = np.asarray(list(sigma_floor_list), dtype=float)
     lc = np.asarray(list(low_accel_cut_list), dtype=float)
+    # 条件分岐: `sf.size == 0 or lc.size == 0` を満たす経路を評価する。
     if sf.size == 0 or lc.size == 0:
         return
+
     sf = np.unique(sf[np.isfinite(sf)])
     lc = np.unique(lc[np.isfinite(lc)])
     mpg = [int(x) for x in mpg_list if int(x) > 0]
+    # 条件分岐: `sf.size == 0 or lc.size == 0 or not mpg` を満たす経路を評価する。
     if sf.size == 0 or lc.size == 0 or not mpg:
         return
 
     # index variants by params
+
     idx: Dict[Tuple[float, float, int], float] = {}
     for v in variants:
+        # 条件分岐: `not isinstance(v, dict) or v.get("status") != "ok"` を満たす経路を評価する。
         if not isinstance(v, dict) or v.get("status") != "ok":
             continue
+
         par = v.get("params", {}) if isinstance(v.get("params"), dict) else {}
         sfd = par.get("sigma_floor_dex")
         lac = par.get("low_accel_cut_log10_gbar")
         mpp = par.get("min_points_per_galaxy")
         clip = par.get("galaxy_clipping", {}) if isinstance(par.get("galaxy_clipping"), dict) else {}
+        # 条件分岐: `str(clip.get("method") or "") != str(plot_clipping.get("method") or "")` を満たす経路を評価する。
         if str(clip.get("method") or "") != str(plot_clipping.get("method") or ""):
             continue
+
+        # 条件分岐: `(clip.get("k") is None) != (plot_clipping.get("k") is None)` を満たす経路を評価する。
+
         if (clip.get("k") is None) != (plot_clipping.get("k") is None):
             continue
+
+        # 条件分岐: `clip.get("k") is not None and not np.isclose(float(clip.get("k")), float(plot...` を満たす経路を評価する。
+
         if clip.get("k") is not None and not np.isclose(float(clip.get("k")), float(plot_clipping.get("k"))):
             continue
+
+        # 条件分岐: `not (isinstance(sfd, (int, float)) and isinstance(lac, (int, float)) and isin...` を満たす経路を評価する。
+
         if not (isinstance(sfd, (int, float)) and isinstance(lac, (int, float)) and isinstance(mpp, int)):
             continue
+
         ss_g = v.get("sweep_summary_galaxy", {}) if isinstance(v.get("sweep_summary_galaxy"), dict) else {}
         m = ss_g.get(model_name, {}) if isinstance(ss_g.get(model_name), dict) else {}
         pr = m.get("pass_rate_abs_lt_threshold")
+        # 条件分岐: `isinstance(pr, (int, float)) and np.isfinite(pr)` を満たす経路を評価する。
         if isinstance(pr, (int, float)) and np.isfinite(pr):
             idx[(float(sfd), float(lac), int(mpp))] = float(pr)
 
@@ -176,6 +217,7 @@ def _plot_heatmaps(
         for i, lcv in enumerate(lc.tolist()):
             for j, sfv in enumerate(sf.tolist()):
                 m[i, j] = float(idx.get((float(sfv), float(lcv), int(mpp)), float("nan")))
+
         im = ax.imshow(m, origin="lower", aspect="auto", vmin=0.0, vmax=1.0, cmap="viridis")
         ax.set_xticks(np.arange(sf.size))
         ax.set_yticks(np.arange(lc.size))
@@ -187,13 +229,17 @@ def _plot_heatmaps(
         for i in range(lc.size):
             for j in range(sf.size):
                 v = m[i, j]
+                # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
                 if np.isfinite(v):
                     ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8, color="w" if v < 0.55 else "k")
+
         fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04).set_label("pass_rate(|z|<3) [galaxy-level]")
 
     spec = str(plot_clipping.get("method") or "none")
+    # 条件分岐: `plot_clipping.get("k") is not None` を満たす経路を評価する。
     if plot_clipping.get("k") is not None:
         spec = f"{spec}:{float(plot_clipping.get('k')):g}"
+
     fig.suptitle(f"SPARC freeze-test procedure sweep (candidate; galaxy-level pass_rate) [{spec}]")
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -245,9 +291,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rar_csv = Path(args.rar_csv)
+    # 条件分岐: `not rar_csv.exists()` を満たす経路を評価する。
     if not rar_csv.exists():
         raise SystemExit(f"missing rar csv: {rar_csv}")
+
     h0p_metrics = Path(args.h0p_metrics)
+    # 条件分岐: `not h0p_metrics.exists()` を満たす経路を評価する。
     if not h0p_metrics.exists():
         raise SystemExit(f"missing h0p metrics: {h0p_metrics}")
 
@@ -256,20 +305,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     mpg_list = sorted({int(x) for x in (args.min_points_per_galaxy or [])} or {2, 3, 5})
     mpg_list = [int(x) for x in mpg_list if int(x) > 0]
     clipping_list = _parse_clipping_specs(list(args.galaxy_clipping or []) or ["none", "mad:3.5"])
+    # 条件分岐: `not sigma_floor_list or not low_accel_cut_list or not mpg_list or not clippin...` を満たす経路を評価する。
     if not sigma_floor_list or not low_accel_cut_list or not mpg_list or not clipping_list:
         raise SystemExit("empty procedure grid")
 
     seeds = list(range(int(args.seed_start), int(args.seed_start) + int(max(args.seed_count, 1))))
     train_fracs = _parse_grid(float(args.train_frac_start), float(args.train_frac_stop), float(args.train_frac_step))
     split_list = _splits(seeds, train_fracs)
+    # 条件分岐: `not split_list` を満たす経路を評価する。
     if not split_list:
         raise SystemExit("no splits")
 
     pts = _read_points_from_csv(rar_csv)
+    # 条件分岐: `len(pts) < 100` を満たす経路を評価する。
     if len(pts) < 100:
         raise SystemExit(f"not enough points: {len(pts)}")
 
     # Speed: for the sweep we only need the fixed-kappa candidate (and baryons-only as a null).
+
     model_subset = ["baryons_only", "candidate_rar_pbg_a0_fixed_kappa"]
 
     variants: List[Dict[str, Any]] = []
@@ -294,11 +347,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             models=model_subset,
                         )
                         for m in run.get("models", []) if isinstance(run.get("models"), list) else []:
+                            # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
                             if not isinstance(m, dict):
                                 continue
+
                             name = str(m.get("name") or "")
                             te = (m.get("test") or {}).get("with_sigma_int") or {}
                             z_gal = ((te.get("low_accel_galaxy") or {}).get("z"))
+                            # 条件分岐: `isinstance(z_gal, (int, float)) and np.isfinite(z_gal)` を満たす経路を評価する。
                             if isinstance(z_gal, (int, float)) and np.isfinite(z_gal):
                                 by_model_galaxy.setdefault(name, []).append(float(z_gal))
 
@@ -318,16 +374,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     )
 
     # Envelope across variants: candidate pass_rate
+
     def _env_pass_rate(model: str) -> Dict[str, Any]:
         vv: List[float] = []
         for v in variants:
             ss = v.get("sweep_summary_galaxy", {}) if isinstance(v.get("sweep_summary_galaxy"), dict) else {}
             m = ss.get(model, {}) if isinstance(ss.get(model), dict) else {}
             pr = m.get("pass_rate_abs_lt_threshold")
+            # 条件分岐: `isinstance(pr, (int, float)) and np.isfinite(pr)` を満たす経路を評価する。
             if isinstance(pr, (int, float)) and np.isfinite(pr):
                 vv.append(float(pr))
+
+        # 条件分岐: `not vv` を満たす経路を評価する。
+
         if not vv:
             return {"status": "missing"}
+
         return {"status": "ok", "min": float(min(vv)), "max": float(max(vv)), "median": float(np.median(np.asarray(vv, dtype=float))), "n": int(len(vv))}
 
     env = {
@@ -342,11 +404,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ss = v.get("sweep_summary_galaxy", {}) if isinstance(v.get("sweep_summary_galaxy"), dict) else {}
         cand = ss.get("candidate_rar_pbg_a0_fixed_kappa", {}) if isinstance(ss.get("candidate_rar_pbg_a0_fixed_kappa"), dict) else {}
         pr = cand.get("pass_rate_abs_lt_threshold")
+        # 条件分岐: `not (isinstance(pr, (int, float)) and np.isfinite(pr))` を満たす経路を評価する。
         if not (isinstance(pr, (int, float)) and np.isfinite(pr)):
             continue
+
         row = {"params": v.get("params"), "pass_rate_abs_lt_threshold": float(pr), "median_z": cand.get("median")}
+        # 条件分岐: `worst is None or float(row["pass_rate_abs_lt_threshold"]) < float(worst["pass...` を満たす経路を評価する。
         if worst is None or float(row["pass_rate_abs_lt_threshold"]) < float(worst["pass_rate_abs_lt_threshold"]):
             worst = row
+
+        # 条件分岐: `best is None or float(row["pass_rate_abs_lt_threshold"]) > float(best["pass_r...` を満たす経路を評価する。
+
         if best is None or float(row["pass_rate_abs_lt_threshold"]) > float(best["pass_rate_abs_lt_threshold"]):
             best = row
 
@@ -390,6 +458,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         model_name="candidate_rar_pbg_a0_fixed_kappa",
     )
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -406,6 +475,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"metrics": _rel(out_path), "plot": _rel(out_png)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

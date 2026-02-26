@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -29,9 +30,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -47,25 +51,37 @@ def _percentile(sorted_vals: Sequence[float], p: float) -> float:
     Inclusive percentile with linear interpolation.
     p in [0,100].
     """
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * float(sorted_vals[i0]) + w * float(sorted_vals[i1]))
 
 
 def _safe_median(vals: Sequence[float]) -> float:
     s = sorted(float(v) for v in vals if math.isfinite(float(v)))
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return float("nan")
+
     return _percentile(s, 50.0)
 
 
@@ -82,12 +98,20 @@ def _is_truthy(v: object) -> bool:
 def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
     proton_edge = d_proton <= edge_width
     neutron_edge = d_neutron <= edge_width
+    # 条件分岐: `proton_edge and neutron_edge` を満たす経路を評価する。
     if proton_edge and neutron_edge:
         return "both_edges"
+
+    # 条件分岐: `proton_edge` を満たす経路を評価する。
+
     if proton_edge:
         return "proton_rich_edge"
+
+    # 条件分岐: `neutron_edge` を満たす経路を評価する。
+
     if neutron_edge:
         return "neutron_rich_edge"
+
     return "interior"
 
 
@@ -98,9 +122,11 @@ def _is_near_magic(*, z: int, n: int, width: int = 2) -> bool:
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         w = csv.writer(f)
         w.writerow(headers)
@@ -155,6 +181,7 @@ def main() -> int:
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"
     beta2_json = _ROOT / "data" / "quantum" / "sources" / "nndc_be2_adopted_entries" / "extracted_beta2.json"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(
             "[fail] missing input CSV.\n"
@@ -162,25 +189,35 @@ def main() -> int:
             "  python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_minimal_additional_physics.py\n"
             f"Expected: {in_csv}"
         )
+
+    # 条件分岐: `not beta2_json.exists()` を満たす経路を評価する。
+
     if not beta2_json.exists():
         raise SystemExit(f"[fail] missing beta2 extracted JSON: {beta2_json}")
 
     beta2_rows = json.loads(beta2_json.read_text(encoding="utf-8")).get("rows")
     beta2_map: Dict[Tuple[int, int], float] = {}
+    # 条件分岐: `isinstance(beta2_rows, list)` を満たす経路を評価する。
     if isinstance(beta2_rows, list):
         for r in beta2_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             try:
                 z = int(r["Z"])
                 n = int(r["N"])
                 b2 = float(r["beta2"])
             except Exception:
                 continue
+
+            # 条件分岐: `math.isfinite(b2)` を満たす経路を評価する。
+
             if math.isfinite(b2):
                 beta2_map[(z, n)] = float(b2)
 
     # First pass: read rows and compute log10 ratios.
+
     raw: List[Dict[str, Any]] = []
     log_all: List[float] = []
     by_z_nlist: Dict[int, List[int]] = {}
@@ -195,15 +232,22 @@ def main() -> int:
                 b_pred = float(row["B_pred_local_spacing_sat_MeV"])
             except Exception:
                 continue
+
+            # 条件分岐: `not (math.isfinite(b_obs) and b_obs > 0 and math.isfinite(b_pred) and b_pred...` を満たす経路を評価する。
+
             if not (math.isfinite(b_obs) and b_obs > 0 and math.isfinite(b_pred) and b_pred > 0):
                 continue
+
             lr = math.log10(b_pred / b_obs)
+            # 条件分岐: `not math.isfinite(lr)` を満たす経路を評価する。
             if not math.isfinite(lr):
                 continue
 
             raw.append({**row, "_Z": z, "_N": n, "_A": a, "_B_obs": b_obs, "_B_pred": b_pred, "_log10_ratio": lr})
             log_all.append(lr)
             by_z_nlist.setdefault(z, []).append(n)
+
+    # 条件分岐: `not raw` を満たす経路を評価する。
 
     if not raw:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {in_csv}")
@@ -212,6 +256,7 @@ def main() -> int:
         by_z_nlist[z] = sorted(set(by_z_nlist[z]))
 
     # Robust baseline (global).
+
     global_med = _safe_median(log_all)
     mad = _mad(log_all, center=global_med)
     robust_sigma = max(1.4826 * float(mad), 1.0e-12)
@@ -239,6 +284,7 @@ def main() -> int:
         is_near_magic = _is_near_magic(z=z, n=n, width=2)
 
         n_list = by_z_nlist.get(z) or []
+        # 条件分岐: `not n_list` を満たす経路を評価する。
         if not n_list:
             d_proton = 999999
             d_neutron = 999999
@@ -277,6 +323,7 @@ def main() -> int:
         )
 
     # Define groups (fixed).
+
     group_defs: List[Tuple[str, Callable[[NucleusRow], bool]]] = [
         ("all", lambda r: True),
         ("magic_any", lambda r: r.is_magic_any),
@@ -300,6 +347,7 @@ def main() -> int:
         groups_csv_rows.append(s)
 
     # Outliers CSV (full; sorted by abs_z desc).
+
     outlier_rows_sorted = sorted(rows, key=lambda rr: (float(rr.abs_z) if math.isfinite(rr.abs_z) else -1.0), reverse=True)
     outlier_csv_rows: List[Dict[str, Any]] = []
     for r in outlier_rows_sorted:
@@ -421,10 +469,14 @@ def main() -> int:
     print(f"- {out_summary}")
     print(f"- {out_groups_csv}")
     print(f"- {out_outliers_csv}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"- {out_png}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

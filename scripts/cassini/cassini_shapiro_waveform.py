@@ -41,6 +41,7 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
         raise
 
 def parse_vectors_csv(txt: str):
+    # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
     if "$$SOE" not in txt or "$$EOE" not in txt:
         raise RuntimeError("Missing $$SOE/$$EOE.\nFirst 1200 chars:\n" + txt[:1200])
 
@@ -49,12 +50,15 @@ def parse_vectors_csv(txt: str):
     rows=[]
     for line in block.splitlines():
         line=line.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
         parts=[p.strip() for p in line.split(",")]
         # Typical vectors CSV has at least: JD, Calendar, X, Y, Z, VX, VY, VZ
         if len(parts) < 8:
             continue
+
         cal = parts[1].replace("A.D.", "").strip()
         # Example: 2002-Jun-06 00:00:00.0000
         t = datetime.strptime(cal, "%Y-%b-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
@@ -62,6 +66,7 @@ def parse_vectors_csv(txt: str):
         x=float(parts[2]); y=float(parts[3]); z=float(parts[4])
         vx=float(parts[5]); vy=float(parts[6]); vz=float(parts[7])
         rows.append((t,x,y,z,vx,vy,vz))
+
     return rows
 
 def norm3(x,y,z):
@@ -82,12 +87,15 @@ def central_diff(vals, dt):
     n=len(vals)
     out=[0.0]*n
     for i in range(n):
+        # 条件分岐: `1 <= i <= n-2` を満たす経路を評価する。
         if 1 <= i <= n-2:
             out[i]=(vals[i+1]-vals[i-1])/(2*dt)
+        # 条件分岐: 前段条件が不成立で、`i==0` を追加評価する。
         elif i==0:
             out[i]=(vals[1]-vals[0])/dt
         else:
             out[i]=(vals[n-1]-vals[n-2])/dt
+
     return out
 
 def main():
@@ -127,6 +135,7 @@ def main():
     E = {t:(x,y,z) for (t,x,y,z,_,_,_) in earth}
     S = {t:(x,y,z) for (t,x,y,z,_,_,_) in cass}
     times = sorted(set(E.keys()) & set(S.keys()))
+    # 条件分岐: `len(times) < 100` を満たす経路を評価する。
     if len(times) < 100:
         raise RuntimeError(f"Too few common epochs: {len(times)}")
 
@@ -168,7 +177,10 @@ def main():
         for t,a,b2,bb,db,dtv,yv in zip(times, r1, r2, b, dbdt, delta_t, y):
             w.writerow([t.isoformat(), f"{a:.6e}", f"{b2:.6e}", f"{bb:.6e}",
                         f"{db:.6e}", f"{dtv:.12e}", f"{yv:.12e}"])
+
     print("Wrote:", out)
+
+# 条件分岐: `__name__=="__main__"` を満たす経路を評価する。
 
 if __name__=="__main__":
     main()

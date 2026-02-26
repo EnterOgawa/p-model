@@ -27,14 +27,20 @@ class PdgRow:
 
 def _safe_float(s: str) -> Optional[float]:
     t = s.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
     try:
         v = float(t.replace("D", "E"))
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return float(v)
 
 
@@ -42,19 +48,27 @@ def _parse_pdg_mcdata_mass_width(lines: Iterable[str]) -> Dict[int, PdgRow]:
     rows: Dict[int, PdgRow] = {}
     for raw in lines:
         line = raw.rstrip("\n")
+        # 条件分岐: `not line or line.startswith("*")` を満たす経路を評価する。
         if not line or line.startswith("*"):
             continue
+
+        # 条件分岐: `len(line) < 8` を満たす経路を評価する。
+
         if len(line) < 8:
             continue
 
         ids: List[int] = []
         for k in range(4):
             seg = line[k * 8 : (k + 1) * 8].strip()
+            # 条件分岐: `seg` を満たす経路を評価する。
             if seg:
                 try:
                     ids.append(int(seg))
                 except Exception:
                     pass
+
+        # 条件分岐: `not ids` を満たす経路を評価する。
+
         if not ids:
             continue
 
@@ -64,8 +78,10 @@ def _parse_pdg_mcdata_mass_width(lines: Iterable[str]) -> Dict[int, PdgRow]:
         name_field = line[107:128].strip() if len(line) >= 108 else ""
 
         pdg_id = ids[0]
+        # 条件分岐: `pdg_id in rows` を満たす経路を評価する。
         if pdg_id in rows:
             continue
+
         rows[pdg_id] = PdgRow(
             pdg_id=pdg_id,
             mass_gev=mass_gev,
@@ -73,18 +89,23 @@ def _parse_pdg_mcdata_mass_width(lines: Iterable[str]) -> Dict[int, PdgRow]:
             mass_err_minus_gev=mass_err_minus_gev,
             name_field=name_field,
         )
+
     return rows
 
 
 def _mev(x_gev: Optional[float]) -> Optional[float]:
+    # 条件分岐: `x_gev is None` を満たす経路を評価する。
     if x_gev is None:
         return None
+
     return float(x_gev) * 1e3
 
 
 def _compton_lambda_fm(mass_mev: Optional[float]) -> Optional[float]:
+    # 条件分岐: `mass_mev is None or mass_mev <= 0` を満たす経路を評価する。
     if mass_mev is None or mass_mev <= 0:
         return None
+
     return HBAR_C_MEV_FM / mass_mev
 
 
@@ -113,6 +134,7 @@ def main() -> None:
         if args.pdg_file
         else root / "data" / "quantum" / "sources" / "pdg_rpp_2024_mass_width" / "mass_width_2024.txt"
     )
+    # 条件分岐: `not pdg_path.exists()` を満たす経路を評価する。
     if not pdg_path.exists():
         raise SystemExit(
             "[fail] missing PDG file. Run:\n"
@@ -138,9 +160,11 @@ def main() -> None:
     missing_ids = []
     for label, pid in targets:
         r = rows.get(pid)
+        # 条件分岐: `r is None or r.mass_gev is None` を満たす経路を評価する。
         if r is None or r.mass_gev is None:
             missing_ids.append(pid)
             continue
+
         mass_mev = _mev(r.mass_gev)
         out_rows.append(
             {
@@ -153,6 +177,8 @@ def main() -> None:
                 "compton_lambda_fm": _compton_lambda_fm(mass_mev),
             }
         )
+
+    # 条件分岐: `missing_ids` を満たす経路を評価する。
 
     if missing_ids:
         raise SystemExit(f"[fail] missing PDG ids in file: {missing_ids}")
@@ -223,9 +249,12 @@ def main() -> None:
                 ]
             )
         )
+
     out_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"[ok] csv : {out_csv}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

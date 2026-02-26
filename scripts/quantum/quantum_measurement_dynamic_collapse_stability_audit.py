@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,8 +34,12 @@ def _parse_float_list(text: str) -> List[float]:
     out: List[float] = []
     for part in parts:
         out.append(float(part))
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError(f"empty numeric list: {text!r}")
+
     return out
 
 
@@ -43,20 +48,30 @@ def _parse_int_list(text: str) -> List[int]:
     out: List[int] = []
     for part in parts:
         out.append(int(part))
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError(f"empty integer list: {text!r}")
+
     return out
 
 
 def _fmt(v: float, digits: int = 7) -> str:
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
         return ""
+
     x = float(v)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -154,6 +169,7 @@ def _run_one(
         _safe_corr(final_pointer_matrix[:, channel_index], final_expect_z) for channel_index in range(n_pointer_channels)
     ]
     pointer_channel_abs_corr_mean = float(np.mean(np.abs(pointer_channel_z_correlations)))
+    # 条件分岐: `n_pointer_channels > 1` を満たす経路を評価する。
     if n_pointer_channels > 1:
         corr_matrix = np.corrcoef(final_pointer_matrix.T)
         finite_corr = np.nan_to_num(corr_matrix, nan=0.0, posinf=0.0, neginf=0.0)
@@ -178,14 +194,27 @@ def _run_one(
     tau50_ratio = float(tau50_s / tau50_reference_s) if math.isfinite(tau50_s) and tau50_reference_s > 0 else float("nan")
 
     gate_failures: List[str] = []
+    # 条件分岐: `collapse_fraction < min_collapse_fraction` を満たす経路を評価する。
     if collapse_fraction < min_collapse_fraction:
         gate_failures.append("collapse_fraction")
+
+    # 条件分岐: `pointer_consensus_fraction < min_pointer_consensus` を満たす経路を評価する。
+
     if pointer_consensus_fraction < min_pointer_consensus:
         gate_failures.append("pointer_consensus")
+
+    # 条件分岐: `branch_reversal_fraction > max_branch_reversal` を満たす経路を評価する。
+
     if branch_reversal_fraction > max_branch_reversal:
         gate_failures.append("branch_reversal")
+
+    # 条件分岐: `post_sign_consistency_median < min_post_sign_consistency` を満たす経路を評価する。
+
     if post_sign_consistency_median < min_post_sign_consistency:
         gate_failures.append("post_sign_consistency")
+
+    # 条件分岐: `(not math.isfinite(tau50_ratio)) or tau50_ratio < tau50_ratio_min or tau50_ra...` を満たす経路を評価する。
+
     if (not math.isfinite(tau50_ratio)) or tau50_ratio < tau50_ratio_min or tau50_ratio > tau50_ratio_max:
         gate_failures.append("tau50_ratio")
 
@@ -194,9 +223,11 @@ def _run_one(
         or (branch_reversal_fraction > reject_branch_reversal)
         or (post_sign_consistency_median < reject_post_sign_consistency)
     )
+    # 条件分岐: `hard_reject` を満たす経路を評価する。
     if hard_reject:
         status = "reject"
         decision = "hard_instability_detected"
+    # 条件分岐: 前段条件が不成立で、`not gate_failures` を追加評価する。
     elif not gate_failures:
         status = "pass"
         decision = "all_branch_gates_pass"
@@ -267,12 +298,15 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             values: List[Any] = []
             for h in headers:
                 v = row.get(h, "")
+                # 条件分岐: `isinstance(v, list)` を満たす経路を評価する。
                 if isinstance(v, list):
                     values.append(",".join(str(x) for x in v))
+                # 条件分岐: 前段条件が不成立で、`isinstance(v, float)` を追加評価する。
                 elif isinstance(v, float):
                     values.append(_fmt(v))
                 else:
                     values.append(v)
+
             writer.writerow(values)
 
 
@@ -280,9 +314,12 @@ def _status_counts(rows: List[Dict[str, Any]]) -> Dict[str, int]:
     out = {"pass": 0, "watch": 0, "reject": 0}
     for row in rows:
         s = str(row.get("status") or "").lower()
+        # 条件分岐: `s not in out` を満たす経路を評価する。
         if s not in out:
             continue
+
         out[s] += 1
+
     return out
 
 
@@ -378,8 +415,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     base_metrics_path = Path(str(args.base_metrics_json))
+    # 条件分岐: `not base_metrics_path.exists()` を満たす経路を評価する。
     if not base_metrics_path.exists():
         raise FileNotFoundError(f"missing base metrics json: {base_metrics_path}")
+
     base_metrics = json.loads(base_metrics_path.read_text(encoding="utf-8"))
 
     params = base_metrics.get("parameters", {})
@@ -403,6 +442,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     env_detune_rad_s_base = float(params.get("env_detune_rad_s", 0.65))
 
     tau50_reference_s = float(summary_ref.get("collapse_time_median_s", float("nan")))
+    # 条件分岐: `not math.isfinite(tau50_reference_s) or tau50_reference_s <= 0` を満たす経路を評価する。
     if not math.isfinite(tau50_reference_s) or tau50_reference_s <= 0:
         tau50_reference_s = 0.04
 
@@ -451,12 +491,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for fail_key in row.get("gate_failures", []):
             gate_fail_counts[fail_key] = int(gate_fail_counts.get(fail_key, 0)) + 1
 
+    # 条件分岐: `counts["reject"] > 0` を満たす経路を評価する。
+
     if counts["reject"] > 0:
         overall_status = "reject"
         decision = "stability_break_detected"
+    # 条件分岐: 前段条件が不成立で、`tau50_cv > float(args.max_tau50_cv)` を追加評価する。
     elif tau50_cv > float(args.max_tau50_cv):
         overall_status = "watch"
         decision = "tau50_spread_watch"
+    # 条件分岐: 前段条件が不成立で、`counts["watch"] > max(1, int(math.floor(0.25 * len(rows))))` を追加評価する。
     elif counts["watch"] > max(1, int(math.floor(0.25 * len(rows)))):
         overall_status = "watch"
         decision = "partial_gate_mismatch"
@@ -548,6 +592,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -570,6 +615,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

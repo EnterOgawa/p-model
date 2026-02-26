@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -32,6 +33,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
@@ -60,6 +62,8 @@ def _load_beta(root: Path) -> Tuple[float, str]:
         beta = float("nan")
         beta_source = "data/eht/eht_black_holes.json:pmodel.beta (read failed)"
 
+    # 条件分岐: `not (math.isfinite(beta) and beta > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(beta) and beta > 0):
         frozen_path = root / "output" / "private" / "theory" / "frozen_parameters.json"
         try:
@@ -70,9 +74,12 @@ def _load_beta(root: Path) -> Tuple[float, str]:
             beta = float("nan")
             beta_source = "output/private/theory/frozen_parameters.json:beta (read failed)"
 
+    # 条件分岐: `not (math.isfinite(beta) and beta > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(beta) and beta > 0):
         beta = 1.0
         beta_source = "default(beta=1.0)"
+
     return float(beta), beta_source
 
 
@@ -86,14 +93,25 @@ def _parse_object_constraints(o: Dict[str, Any]) -> Dict[str, Any]:
     i1 = o.get("kerr_inc_deg_max")
 
     out: Dict[str, Any] = {"key": key, "name": name}
+    # 条件分岐: `a0 is not None` を満たす経路を評価する。
     if a0 is not None:
         out["a_star_min"] = float(a0)
+
+    # 条件分岐: `a1 is not None` を満たす経路を評価する。
+
     if a1 is not None:
         out["a_star_max"] = float(a1)
+
+    # 条件分岐: `i0 is not None` を満たす経路を評価する。
+
     if i0 is not None:
         out["inc_deg_min"] = float(i0)
+
+    # 条件分岐: `i1 is not None` を満たす経路を評価する。
+
     if i1 is not None:
         out["inc_deg_max"] = float(i1)
+
     return out
 
 
@@ -111,22 +129,36 @@ def _finite_minmax_with_location(
     best_max: Optional[Tuple[float, float, float]] = None
 
     for i, inc in enumerate(inc_values):
+        # 条件分岐: `not (float(inc_min) <= float(inc) <= float(inc_max))` を満たす経路を評価する。
         if not (float(inc_min) <= float(inc) <= float(inc_max)):
             continue
+
         row = coeff_grid[i]
         for j, a in enumerate(a_values):
+            # 条件分岐: `not (float(a_min) <= float(a) <= float(a_max))` を満たす経路を評価する。
             if not (float(a_min) <= float(a) <= float(a_max)):
                 continue
+
             coeff = float(row[j])
+            # 条件分岐: `not (math.isfinite(coeff) and coeff > 0)` を満たす経路を評価する。
             if not (math.isfinite(coeff) and coeff > 0):
                 continue
+
+            # 条件分岐: `best_min is None or coeff < best_min[0]` を満たす経路を評価する。
+
             if best_min is None or coeff < best_min[0]:
                 best_min = (coeff, float(a), float(inc))
+
+            # 条件分岐: `best_max is None or coeff > best_max[0]` を満たす経路を評価する。
+
             if best_max is None or coeff > best_max[0]:
                 best_max = (coeff, float(a), float(inc))
 
+    # 条件分岐: `best_min is None or best_max is None` を満たす経路を評価する。
+
     if best_min is None or best_max is None:
         return {"coeff_min": None, "coeff_max": None}
+
     coeff_min, a_at_min, inc_at_min = best_min
     coeff_max, a_at_max, inc_at_max = best_max
     return {
@@ -160,15 +192,19 @@ def main() -> int:
     a_samples = max(2, int(args.a_samples))
     inc_min = float(args.inc_min)
     inc_max = float(args.inc_max)
+    # 条件分岐: `inc_max < inc_min` を満たす経路を評価する。
     if inc_max < inc_min:
         inc_min, inc_max = inc_max, inc_min
+
     inc_min = max(0.0, min(90.0, inc_min))
     inc_max = max(0.0, min(90.0, inc_max))
     inc_min_eff = max(5.0, inc_min)  # avoid inc=0 singularity in standard parameterization
     inc_max_eff = max(inc_min_eff, inc_max)
     inc_step = float(args.inc_step)
+    # 条件分岐: `inc_step <= 0` を満たす経路を評価する。
     if inc_step <= 0:
         inc_step = 5.0
+
     n_r = max(800, int(args.n_r))
 
     try:
@@ -179,6 +215,7 @@ def main() -> int:
 
     a_values = np.linspace(0.0, float(a_max), int(a_samples), dtype=float).tolist()
     inc_values = np.arange(float(inc_min_eff), float(inc_max_eff) + 1e-9, float(inc_step), dtype=float).tolist()
+    # 条件分岐: `not inc_values` を満たす経路を評価する。
     if not inc_values:
         inc_values = [float(inc_min_eff)]
 
@@ -209,28 +246,38 @@ def main() -> int:
             row: List[float] = []
             for st in row_stats:
                 row.append(float(_kerr_shadow_diameter_coeff_from_stats(st, method=m)))
+
             coeff_grids[m].append(row)
 
         # track definition spread per point
+
         for j, a in enumerate(a_values):
             vals: List[float] = []
             for m, _ in methods:
                 v = float(coeff_grids[m][-1][j])
+                # 条件分岐: `math.isfinite(v) and v > 0` を満たす経路を評価する。
                 if math.isfinite(v) and v > 0:
                     vals.append(v)
+
+            # 条件分岐: `len(vals) >= 2` を満たす経路を評価する。
+
             if len(vals) >= 2:
                 lo = min(vals)
                 hi = max(vals)
                 mid = 0.5 * (lo + hi)
+                # 条件分岐: `mid > 0` を満たす経路を評価する。
                 if mid > 0:
                     spread_rel = (hi - lo) / mid
                     spread_rel_samples.append(float(spread_rel))
+
+    # 条件分岐: `spread_rel_samples` を満たす経路を評価する。
 
     if spread_rel_samples:
         spread_rel_max = float(max(spread_rel_samples))
         spread_rel_median = float(np.median(np.array(spread_rel_samples, dtype=float)))
 
     # Global ranges
+
     ranges: Dict[str, Any] = {}
     env_min: Optional[Tuple[float, float, float, str]] = None
     env_max: Optional[Tuple[float, float, float, str]] = None
@@ -248,14 +295,20 @@ def main() -> int:
 
         cmin = mm.get("coeff_min")
         cmax = mm.get("coeff_max")
+        # 条件分岐: `cmin is not None` を満たす経路を評価する。
         if cmin is not None:
             a_at = float(mm.get("coeff_min_at", {}).get("a_star"))
             i_at = float(mm.get("coeff_min_at", {}).get("inc_deg"))
+            # 条件分岐: `env_min is None or float(cmin) < env_min[0]` を満たす経路を評価する。
             if env_min is None or float(cmin) < env_min[0]:
                 env_min = (float(cmin), a_at, i_at, m)
+
+        # 条件分岐: `cmax is not None` を満たす経路を評価する。
+
         if cmax is not None:
             a_at = float(mm.get("coeff_max_at", {}).get("a_star"))
             i_at = float(mm.get("coeff_max_at", {}).get("inc_deg"))
+            # 条件分岐: `env_max is None or float(cmax) > env_max[0]` を満たす経路を評価する。
             if env_max is None or float(cmax) > env_max[0]:
                 env_max = (float(cmax), a_at, i_at, m)
 
@@ -294,18 +347,23 @@ def main() -> int:
     overlays: List[Dict[str, Any]] = []
     for o in objects:
         c = _parse_object_constraints(o)
+        # 条件分岐: `not c.get("key")` を満たす経路を評価する。
         if not c.get("key"):
             continue
+
         a0 = float(c.get("a_star_min", 0.0))
         a1 = float(c.get("a_star_max", float(a_max)))
         i0 = float(c.get("inc_deg_min", float(inc_min_eff)))
         i1 = float(c.get("inc_deg_max", float(inc_max_eff)))
         a0 = max(0.0, min(float(a_max), a0))
         a1 = max(0.0, min(float(a_max), a1))
+        # 条件分岐: `a1 < a0` を満たす経路を評価する。
         if a1 < a0:
             a0, a1 = a1, a0
+
         i0 = max(float(inc_min_eff), min(float(inc_max_eff), i0))
         i1 = max(float(inc_min_eff), min(float(inc_max_eff), i1))
+        # 条件分岐: `i1 < i0` を満たす経路を評価する。
         if i1 < i0:
             i0, i1 = i1, i0
 
@@ -326,14 +384,20 @@ def main() -> int:
 
             cmin = mm.get("coeff_min")
             cmax = mm.get("coeff_max")
+            # 条件分岐: `cmin is not None` を満たす経路を評価する。
             if cmin is not None:
                 a_at = float(mm.get("coeff_min_at", {}).get("a_star"))
                 i_at = float(mm.get("coeff_min_at", {}).get("inc_deg"))
+                # 条件分岐: `env_min_obj is None or float(cmin) < env_min_obj[0]` を満たす経路を評価する。
                 if env_min_obj is None or float(cmin) < env_min_obj[0]:
                     env_min_obj = (float(cmin), a_at, i_at, m)
+
+            # 条件分岐: `cmax is not None` を満たす経路を評価する。
+
             if cmax is not None:
                 a_at = float(mm.get("coeff_max_at", {}).get("a_star"))
                 i_at = float(mm.get("coeff_max_at", {}).get("inc_deg"))
+                # 条件分岐: `env_max_obj is None or float(cmax) > env_max_obj[0]` を満たす経路を評価する。
                 if env_max_obj is None or float(cmax) > env_max_obj[0]:
                     env_max_obj = (float(cmax), a_at, i_at, m)
 
@@ -386,6 +450,7 @@ def main() -> int:
         )
 
     # Plot: global per-method coefficient ranges + envelope
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -400,12 +465,15 @@ def main() -> int:
     for m, label in methods:
         mm = ranges.get(m, {})
         rows_plot.append((m, label, mm.get("coeff_min"), mm.get("coeff_max")))
+
     rows_plot.append(("envelope", "envelope (all definitions)", envelope.get("coeff_min"), envelope.get("coeff_max")))
 
     y = list(range(len(rows_plot)))
     for yi, (_m, label, cmin, cmax) in enumerate(rows_plot):
+        # 条件分岐: `cmin is None or cmax is None` を満たす経路を評価する。
         if cmin is None or cmax is None:
             continue
+
         ax.hlines(yi, float(cmin), float(cmax), color="#1f77b4" if _m != "envelope" else "#d62728", linewidth=5.0)
         ax.plot([float(cmin), float(cmax)], [yi, yi], "o", color="#1f77b4" if _m != "envelope" else "#d62728", alpha=0.9)
         ax.text(float(cmax) + 0.02, yi, label, va="center", ha="left", fontsize=10)
@@ -492,6 +560,8 @@ def main() -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

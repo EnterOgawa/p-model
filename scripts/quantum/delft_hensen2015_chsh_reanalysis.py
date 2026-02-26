@@ -32,14 +32,18 @@ class Params:
 
 
 def _load_table_from_zip(zip_path: Path, *, member: str) -> tuple[np.ndarray, np.ndarray]:
+    # 条件分岐: `not zip_path.exists()` を満たす経路を評価する。
     if not zip_path.exists():
         raise FileNotFoundError(zip_path)
+
     with zipfile.ZipFile(zip_path, "r") as z:
         with z.open(member, "r") as f:
             ts = np.loadtxt(f, delimiter=",", skiprows=0, usecols=[0], dtype=np.datetime64)
+
     with zipfile.ZipFile(zip_path, "r") as z:
         with z.open(member, "r") as f:
             data = np.loadtxt(f, delimiter=",", skiprows=0, usecols=np.arange(1, 17), dtype=np.int64)
+
     return ts, data
 
 
@@ -133,11 +137,14 @@ def _analyze(data: np.ndarray, *, p: Params, start_offset_ps: int = 0) -> ChshRe
     for ii, (a, b) in enumerate(inputs_ab):
         for jj, (x, y) in enumerate(outputs_xy):
             corr[ii, jj] = int(np.sum(t_i & (a_i == a) & (b_i == b) & (x_i == x) & (y_i == y)))
+
         tot = float(np.sum(corr[ii, :]))
+        # 条件分岐: `tot <= 0.0` を満たす経路を評価する。
         if tot <= 0.0:
             e[ii] = float("nan")
             e_err[ii] = float("nan")
             continue
+
         e[ii] = float((corr[ii, 0] - corr[ii, 1] - corr[ii, 2] + corr[ii, 3]) / tot)
         e_err[ii] = float(np.sqrt((1.0 - e[ii] ** 2) / tot))
 
@@ -310,19 +317,24 @@ def _analyze_hensen2016(
         for ii, (aa, bb) in enumerate(inputs_ab):
             for jj, (xx, yy) in enumerate(outputs_xy):
                 corr[ii, jj] = int(np.sum((t == psi) & (a == aa) & (b == bb) & (x == xx) & (y == yy)))
+
             tot = float(np.sum(corr[ii, :]))
+            # 条件分岐: `tot <= 0.0` を満たす経路を評価する。
             if tot <= 0.0:
                 e[ii] = float("nan")
                 e_err[ii] = float("nan")
                 continue
+
             e[ii] = float((corr[ii, 0] - corr[ii, 1] - corr[ii, 2] + corr[ii, 3]) / tot)
             e_err[ii] = float(np.sqrt((1.0 - e[ii] ** 2) / tot))
 
         # CHSH S differs by psi (see example script).
+
         if psi == +1:
             s = float(e[0] + e[1] - e[2] + e[3])
         else:
             s = float(e[0] + e[1] + e[2] - e[3])
+
         s_err = float(np.sqrt(np.sum(e_err**2)))
         n_trials = int(np.sum(corr))
         return corr, e, e_err, s, s_err, n_trials
@@ -331,8 +343,10 @@ def _analyze_hensen2016(
     _, _, _, s_min, s_err_min, n_min = _corr_and_s(-1)
 
     n_tot = int(n_plus + n_min)
+    # 条件分岐: `n_tot <= 0` を満たす経路を評価する。
     if n_tot <= 0:
         raise RuntimeError("no valid trials in combined dataset")
+
     w_plus = float(n_plus) / float(n_tot)
     w_min = float(n_min) / float(n_tot)
     s_combined = float(w_plus * s_plus + w_min * s_min)
@@ -382,6 +396,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     profile = str(args.profile)
+    # 条件分岐: `profile == "hensen2015"` を満たす経路を評価する。
     if profile == "hensen2015":
         src_zip = args.zip or (root / "data" / "quantum" / "sources" / "delft_hensen2015" / "data.zip")
         out_tag = args.out_tag or "delft_hensen2015"
@@ -408,6 +423,7 @@ def main() -> None:
         lines = ["start_offset_ps,n_trials,S,S_err"]
         for off, n, s, se in zip(offsets.tolist(), n_vals.tolist(), s_vals.tolist(), s_errs.tolist()):
             lines.append(f"{int(round(off))},{int(n)},{s:.6f},{se:.6f}")
+
         out_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         import matplotlib.pyplot as plt
@@ -479,6 +495,8 @@ def main() -> None:
         print(f"[ok] json: {out_json}")
         return
 
+    # 条件分岐: `profile == "hensen2016_srep30289"` を満たす経路を評価する。
+
     if profile == "hensen2016_srep30289":
         src_zip = args.zip or (root / "data" / "quantum" / "sources" / "delft_hensen2016_srep30289" / "data.zip")
         out_tag = args.out_tag or "delft_hensen2016_srep30289"
@@ -506,6 +524,7 @@ def main() -> None:
         lines = ["start_offset_ps,n_trials_total,S_combined,S_err_combined"]
         for off, n, s, se in zip(offsets.tolist(), n_vals.tolist(), s_vals.tolist(), s_errs.tolist()):
             lines.append(f"{int(round(off))},{int(n)},{s:.6f},{se:.6f}")
+
         out_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         import matplotlib.pyplot as plt
@@ -588,6 +607,8 @@ def main() -> None:
 
     raise SystemExit(f"[fail] unknown profile: {profile}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

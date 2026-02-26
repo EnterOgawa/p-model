@@ -38,6 +38,7 @@ def casimir_pressure_parallel_plates_pa(a_m: float, *, h_j_s: float, c_m_s: floa
     # P = -π^2 ħ c / (240 a^4)
     if a_m <= 0:
         return float("nan")
+
     hbar = h_j_s / (2.0 * math.pi)
     return float(-(math.pi**2) * hbar * c_m_s / (240.0 * (a_m**4)))
 
@@ -48,6 +49,7 @@ def casimir_force_sphere_plate_n(a_m: float, *, radius_m: float, h_j_s: float, c
     # => F = -π^3 ħ c R / (360 a^3)
     if a_m <= 0 or radius_m <= 0:
         return float("nan")
+
     hbar = h_j_s / (2.0 * math.pi)
     return float(-(math.pi**3) * hbar * c_m_s * radius_m / (360.0 * (a_m**3)))
 
@@ -57,13 +59,17 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest().upper()
 
 
 def _extract_hydrogen_1s2s_frequency(*, pdf_path: Path) -> tuple[int, int, str]:
+    # 条件分岐: `not pdf_path.exists()` を満たす経路を評価する。
     if not pdf_path.exists():
         raise FileNotFoundError(str(pdf_path))
 
@@ -73,6 +79,7 @@ def _extract_hydrogen_1s2s_frequency(*, pdf_path: Path) -> tuple[int, int, str]:
     text = ""
     for page in reader.pages:
         text += "\n" + (page.extract_text() or "")
+
     text = text.replace("\u00a0", " ")
 
     # Example (Parthey et al. 2011; arXiv:1107.3101v1):
@@ -82,11 +89,13 @@ def _extract_hydrogen_1s2s_frequency(*, pdf_path: Path) -> tuple[int, int, str]:
         re.I,
     )
     m = pat.search(text)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise RuntimeError(f"[fail] could not extract 1S–2S frequency from PDF text: {pdf_path}")
 
     raw_val = m.group(1)
     val_digits = re.sub(r"\s+", "", raw_val).strip()
+    # 条件分岐: `not val_digits.isdigit()` を満たす経路を評価する。
     if not val_digits.isdigit():
         raise RuntimeError(f"[fail] invalid extracted digits: {val_digits!r}")
 
@@ -96,6 +105,7 @@ def _extract_hydrogen_1s2s_frequency(*, pdf_path: Path) -> tuple[int, int, str]:
 
 
 def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
+    # 条件分岐: `not pdf_path.exists()` を満たす経路を評価する。
     if not pdf_path.exists():
         raise FileNotFoundError(str(pdf_path))
 
@@ -105,6 +115,7 @@ def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
     text = ""
     for page in reader.pages:
         text += "\n" + (page.extract_text() or "")
+
     text = text.replace("\u00a0", " ")
 
     # Example:
@@ -115,6 +126,7 @@ def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
         re.I,
     )
     m = pat.search(text)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise RuntimeError(f"[fail] could not extract alpha^{-1} from PDF text: {pdf_path}")
 
@@ -126,8 +138,10 @@ def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
         raise RuntimeError(f"[fail] invalid extracted alpha^{-1}: {val_s!r}") from e
 
     decimals = 0
+    # 条件分岐: `"." in val_s` を満たす経路を評価する。
     if "." in val_s:
         decimals = len(val_s.split(".", 1)[1])
+
     unc_digits = m.group(2)
     try:
         unc_int = int(unc_digits)
@@ -160,6 +174,7 @@ def main() -> None:
     local_recoil_pdf = root / "data" / "quantum" / "sources" / "arxiv_0812.3139v1.pdf"
     local_g2_pdf = root / "data" / "quantum" / "sources" / "arxiv_0801.1134v2.pdf"
 
+    # 条件分岐: `not local_1s2s_pdf.exists()` を満たす経路を評価する。
     if not local_1s2s_pdf.exists():
         raise SystemExit(
             f"[fail] missing primary source PDF for H 1S–2S: {local_1s2s_pdf}\n"
@@ -243,10 +258,12 @@ def main() -> None:
     u_case = next((sc for sc in safety_cases if sc.get("Z") == 92), None)
     deltaE_grav_h_eV = None if not h_case else float(h_case.get("deltaE_eV_abs") or 0.0)
     ratio_sigma_to_grav_h = None
+    # 条件分岐: `deltaE_grav_h_eV and deltaE_grav_h_eV > 0` を満たす経路を評価する。
     if deltaE_grav_h_eV and deltaE_grav_h_eV > 0:
         ratio_sigma_to_grav_h = sigma_1s2s_e_ev / deltaE_grav_h_eV
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     fig = plt.figure(figsize=(14.8, 8.0), dpi=160)
@@ -320,14 +337,17 @@ def main() -> None:
         bbox={"boxstyle": "round,pad=0.25", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.85"},
     )
     try:
+        # 条件分岐: `h_case and u_case` を満たす経路を評価する。
         if h_case and u_case:
             extra = ""
+            # 条件分岐: `deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0` を満たす経路を評価する。
             if deltaE_grav_h_eV is not None and deltaE_grav_h_eV > 0:
                 extra = (
                     "\nH 1S–2S precision (Parthey+2011):\n"
                     f"σf={sigma_1s2s_hz} Hz ⇒ hσ≈{sigma_1s2s_e_ev:.2e} eV\n"
                     f"ratio (hσ / ΔE_grav(H))≈{ratio_sigma_to_grav_h:.1e}"
                 )
+
             ax2.text(
                 0.02,
                 0.02,
@@ -347,6 +367,7 @@ def main() -> None:
         pass
 
     # Panel D: alpha^{-1} (recoil vs electron g-2)
+
     ax3 = fig.add_subplot(gs[1, 1])
     labels = ["Recoil (Rb; 0812.3139)", "g-2 (e−; 0801.1134)"]
     y = np.array([alpha_inv_recoil, alpha_inv_g2], dtype=float)
@@ -537,6 +558,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

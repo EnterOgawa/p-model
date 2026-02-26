@@ -23,9 +23,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -70,25 +73,35 @@ def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
 
 
 def _debye_integrand(x: float) -> float:
+    # 条件分岐: `x <= 0.0` を満たす経路を評価する。
     if x <= 0.0:
         return 0.0
+
     em1 = math.expm1(x)
+    # 条件分岐: `em1 == 0.0` を満たす経路を評価する。
     if em1 == 0.0:
         return 0.0
+
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         n = 2
+
+    # 条件分岐: `n % 2 == 1` を満たす経路を評価する。
+
     if n % 2 == 1:
         n += 1
+
     h = (b - a) / n
     s = f(a) + f(b)
     for i in range(1, n):
         x = a + i * h
         s += (4.0 if (i % 2 == 1) else 2.0) * f(x)
+
     return s * (h / 3.0)
 
 
@@ -96,6 +109,7 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     """
     Debye heat capacity Cv for a monatomic solid, per mole.
     """
+    # 条件分岐: `t_k <= 0.0 or theta_d_k <= 0.0` を満たす経路を評価する。
     if t_k <= 0.0 or theta_d_k <= 0.0:
         return 0.0
 
@@ -111,18 +125,25 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    # 条件分岐: `not m.exists()` を満たす経路を評価する。
     if not m.exists():
         return None
+
     try:
         obj = _read_json(m)
     except Exception:
         return None
+
     fit = obj.get("fit") if isinstance(obj.get("fit"), dict) else None
+    # 条件分岐: `not isinstance(fit, dict)` を満たす経路を評価する。
     if not isinstance(fit, dict):
         return None
+
     v = fit.get("theta_D_K")
+    # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0:
         return float(v)
+
     return None
 
 
@@ -134,40 +155,58 @@ class CpPoint:
 
 def _load_janaf_cp_points(*, root: Path) -> list[CpPoint]:
     src = root / "data" / "quantum" / "sources" / "nist_janaf_silicon_si" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing: {src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_janaf_sources.py"
         )
+
     obj = _read_json(src)
     pts = obj.get("points")
+    # 条件分岐: `not isinstance(pts, list) or not pts` を満たす経路を評価する。
     if not isinstance(pts, list) or not pts:
         raise SystemExit(f"[fail] missing points list: {src}")
 
     out: list[CpPoint] = []
     for p in pts:
+        # 条件分岐: `not isinstance(p, dict)` を満たす経路を評価する。
         if not isinstance(p, dict):
             continue
+
+        # 条件分岐: `str(p.get("phase")) != "solid"` を満たす経路を評価する。
+
         if str(p.get("phase")) != "solid":
             continue
+
         t = p.get("T_K")
         cp = p.get("Cp_J_per_molK")
+        # 条件分岐: `not isinstance(t, (int, float)) or not isinstance(cp, (int, float))` を満たす経路を評価する。
         if not isinstance(t, (int, float)) or not isinstance(cp, (int, float)):
             continue
+
         out.append(CpPoint(t_k=float(t), cp=float(cp)))
 
     out = sorted(out, key=lambda x: x.t_k)
+    # 条件分岐: `len(out) < 8` を満たす経路を評価する。
     if len(out) < 8:
         raise SystemExit(f"[fail] too few solid Cp points: n={len(out)}")
+
     return out
 
 
 def _interp_linear(points: list[CpPoint], t: float) -> float:
+    # 条件分岐: `not points` を満たす経路を評価する。
     if not points:
         return float("nan")
+
     x = float(t)
+    # 条件分岐: `x <= float(points[0].t_k)` を満たす経路を評価する。
     if x <= float(points[0].t_k):
         return float(points[0].cp)
+
+    # 条件分岐: `x >= float(points[-1].t_k)` を満たす経路を評価する。
+
     if x >= float(points[-1].t_k):
         return float(points[-1].cp)
 
@@ -175,6 +214,7 @@ def _interp_linear(points: list[CpPoint], t: float) -> float:
     hi = len(points) - 1
     while hi - lo > 1:
         mid = (lo + hi) // 2
+        # 条件分岐: `float(points[mid].t_k) <= x` を満たす経路を評価する。
         if float(points[mid].t_k) <= x:
             lo = mid
         else:
@@ -186,42 +226,54 @@ def _interp_linear(points: list[CpPoint], t: float) -> float:
     x1 = float(p1.t_k)
     y0 = float(p0.cp)
     y1 = float(p1.cp)
+    # 条件分岐: `x1 == x0` を満たす経路を評価する。
     if x1 == x0:
         return y0
+
     w = (x - x0) / (x1 - x0)
     return float(y0 + (y1 - y0) * w)
 
 
 def _load_ioffe_bulk_modulus_model(*, root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing: {src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_elastic_constants_sources.py"
         )
+
     obj = _read_json(src)
 
     vals = obj.get("values")
+    # 条件分岐: `not isinstance(vals, dict)` を満たす経路を評価する。
     if not isinstance(vals, dict):
         raise SystemExit(f"[fail] invalid ioffe extracted_values.json: missing values dict: {src}")
+
     b_ref_1e11 = vals.get("bulk_modulus_from_C11_C12_1e11_dyn_cm2")
+    # 条件分岐: `not isinstance(b_ref_1e11, (int, float))` を満たす経路を評価する。
     if not isinstance(b_ref_1e11, (int, float)):
         raise SystemExit(f"[fail] invalid ioffe extracted_values.json: missing bulk modulus value: {src}")
 
     temp_dep = obj.get("temperature_dependence_linear")
+    # 条件分岐: `not isinstance(temp_dep, dict)` を満たす経路を評価する。
     if not isinstance(temp_dep, dict):
         raise SystemExit(f"[fail] invalid ioffe extracted_values.json: missing temperature_dependence_linear dict: {src}")
 
     tr = temp_dep.get("T_range_K")
+    # 条件分岐: `not isinstance(tr, dict)` を満たす経路を評価する。
     if not isinstance(tr, dict):
         raise SystemExit(f"[fail] invalid ioffe extracted_values.json: missing T_range_K dict: {src}")
+
     t_lin_min = tr.get("min")
     t_lin_max = tr.get("max")
+    # 条件分岐: `not isinstance(t_lin_min, (int, float)) or not isinstance(t_lin_max, (int, fl...` を満たす経路を評価する。
     if not isinstance(t_lin_min, (int, float)) or not isinstance(t_lin_max, (int, float)):
         raise SystemExit(f"[fail] invalid ioffe extracted_values.json: invalid T_range_K values: {src}")
 
     c11 = temp_dep.get("C11")
     c12 = temp_dep.get("C12")
+    # 条件分岐: `not isinstance(c11, dict) or not isinstance(c12, dict)` を満たす経路を評価する。
     if not isinstance(c11, dict) or not isinstance(c12, dict):
         raise SystemExit(f"[fail] invalid ioffe extracted_values.json: missing C11/C12 linear dicts: {src}")
 
@@ -230,6 +282,7 @@ def _load_ioffe_bulk_modulus_model(*, root: Path) -> dict[str, Any]:
     c12_a = c12.get("intercept_1e11_dyn_cm2")
     c12_b = c12.get("slope_1e11_dyn_cm2_per_K")
     for name, v in [("c11_a", c11_a), ("c11_b", c11_b), ("c12_a", c12_a), ("c12_b", c12_b)]:
+        # 条件分岐: `not isinstance(v, (int, float))` を満たす経路を評価する。
         if not isinstance(v, (int, float)):
             raise SystemExit(f"[fail] invalid ioffe extracted_values.json: {name} is missing: {src}")
 
@@ -260,6 +313,7 @@ def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
     t_lin_min = float(model["t_lin_min_K"])
     t_lin_max = float(model["t_lin_max_K"])
 
+    # 条件分岐: `t < t_lin_min` を満たす経路を評価する。
     if t < t_lin_min:
         b_1e11 = b_ref_1e11
     else:
@@ -277,28 +331,37 @@ def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
         b_at_min = b_lin(float(t_lin_min))
         offset = float(b_ref_1e11 - b_at_min)
         b_1e11 = float(b_lin(float(tt)) + offset)
+
     return float(b_1e11) * 1e10
 
 
 def _load_silicon_molar_volume_m3_per_mol(*, root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "nist_codata_2022_silicon_lattice" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing: {src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_lattice_sources.py"
         )
+
     obj = _read_json(src)
     constants = obj.get("constants")
+    # 条件分岐: `not isinstance(constants, dict)` を満たす経路を評価する。
     if not isinstance(constants, dict):
         raise SystemExit(f"[fail] invalid CODATA silicon lattice extracted_values.json: missing constants dict: {src}")
+
     asil = constants.get("asil")
+    # 条件分岐: `not isinstance(asil, dict)` を満たす経路を評価する。
     if not isinstance(asil, dict):
         raise SystemExit(f"[fail] invalid CODATA silicon lattice extracted_values.json: missing asil dict: {src}")
+
     a_m = asil.get("value_si")
+    # 条件分岐: `not isinstance(a_m, (int, float))` を満たす経路を評価する。
     if not isinstance(a_m, (int, float)):
         raise SystemExit(f"[fail] invalid CODATA silicon lattice extracted_values.json: missing asil.value_si: {src}")
 
     # Diamond-cubic conventional cell contains 8 atoms.
+
     n_a = 6.02214076e23  # exact (SI definition)
     v_m = n_a * (float(a_m) ** 3) / 8.0
     return {"path": str(src), "sha256": _sha256(src), "a_m": float(a_m), "V_m3_per_mol": float(v_m)}
@@ -311,6 +374,7 @@ def _infer_zero_crossing(
     prefer_neg_to_pos: bool = True,
     min_x: Optional[float] = None,
 ) -> Optional[dict[str, float]]:
+    # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
         return None
 
@@ -318,27 +382,39 @@ def _infer_zero_crossing(
     for i in range(len(xs) - 1):
         x0 = float(xs[i])
         x1 = float(xs[i + 1])
+        # 条件分岐: `min_x is not None and max(x0, x1) < float(min_x)` を満たす経路を評価する。
         if min_x is not None and max(x0, x1) < float(min_x):
             continue
 
         y0 = float(ys[i])
         y1 = float(ys[i + 1])
+        # 条件分岐: `y0 == 0.0` を満たす経路を評価する。
         if y0 == 0.0:
             candidates.append({"x0": x0, "x1": x0, "x_cross": x0})
             continue
+
+        # 条件分岐: `y1 == 0.0` を満たす経路を評価する。
+
         if y1 == 0.0:
             candidates.append({"x0": x1, "x1": x1, "x_cross": x1})
             continue
+
+        # 条件分岐: `(y0 < 0.0 and y1 > 0.0) or (y0 > 0.0 and y1 < 0.0)` を満たす経路を評価する。
 
         if (y0 < 0.0 and y1 > 0.0) or (y0 > 0.0 and y1 < 0.0):
             x_cross = x0 + (x1 - x0) * (-y0) / (y1 - y0)
             candidates.append({"x0": x0, "x1": x1, "x_cross": float(x_cross), "y0": y0, "y1": y1})
 
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         return None
 
+    # 条件分岐: `prefer_neg_to_pos` を満たす経路を評価する。
+
     if prefer_neg_to_pos:
         neg_to_pos = [c for c in candidates if float(c.get("y0", 0.0)) < 0.0 and float(c.get("y1", 0.0)) > 0.0]
+        # 条件分岐: `neg_to_pos` を満たす経路を評価する。
         if neg_to_pos:
             return max(neg_to_pos, key=lambda c: float(c["x_cross"]))
 
@@ -346,10 +422,15 @@ def _infer_zero_crossing(
 
 
 def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         return [float(lo)]
+
+    # 条件分岐: `lo <= 0.0 or hi <= 0.0` を満たす経路を評価する。
+
     if lo <= 0.0 or hi <= 0.0:
         raise ValueError("logspace requires positive lo/hi")
+
     l0 = math.log10(float(lo))
     l1 = math.log10(float(hi))
     return [10 ** (l0 + (l1 - l0) * i / (n - 1)) for i in range(n)]
@@ -377,61 +458,82 @@ def main() -> None:
 
     # Alpha(T) source (NIST TRC Cryogenics).
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
+    # 条件分岐: `not alpha_src.exists()` を満たす経路を評価する。
     if not alpha_src.exists():
         raise SystemExit(
             f"[fail] missing: {alpha_src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_thermal_expansion_sources.py"
         )
+
     alpha_extracted = _read_json(alpha_src)
     coeffs_obj = alpha_extracted.get("coefficients")
+    # 条件分岐: `not isinstance(coeffs_obj, dict)` を満たす経路を評価する。
     if not isinstance(coeffs_obj, dict):
         raise SystemExit(f"[fail] coefficients missing: {alpha_src}")
+
     coeffs = {str(k).lower(): float(v) for k, v in coeffs_obj.items()}
     missing = [k for k in "abcdefghijkl" if k not in coeffs]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"[fail] missing coefficients: {missing}")
 
     dr = alpha_extracted.get("data_range")
+    # 条件分岐: `not isinstance(dr, dict)` を満たす経路を評価する。
     if not isinstance(dr, dict):
         raise SystemExit(f"[fail] data_range missing: {alpha_src}")
+
     t_min = int(math.ceil(float(dr.get("t_min_k"))))
     t_max = int(math.floor(float(dr.get("t_max_k"))))
+    # 条件分岐: `not (0 < t_min < t_max)` を満たす経路を評価する。
     if not (0 < t_min < t_max):
         raise SystemExit(f"[fail] invalid data_range: {dr}")
 
     fe = alpha_extracted.get("fit_error_relative_to_data")
+    # 条件分岐: `not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinsta...` を満たす経路を評価する。
     if not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinstance(fe.get("ge"), dict):
         raise SystemExit(f"[fail] fit_error_relative_to_data missing: {alpha_src}")
+
     t_sigma_split = float(fe["lt"].get("t_k", 50.0))
     sigma_lt_1e8 = float(fe["lt"].get("sigma_1e_8_per_k", 0.03))
     sigma_ge_1e8 = float(fe["ge"].get("sigma_1e_8_per_k", 0.5))
 
     theta_d = _theta_d_from_existing_metrics(root)
+    # 条件分岐: `theta_d is None` を満たす経路を評価する。
     if theta_d is None:
         raise SystemExit("[fail] missing frozen theta_D. Expected condensed_silicon_heat_capacity_debye_baseline_metrics.json")
 
     # Cp proxy from JANAF (solid) with Debye extrapolation below 100 K.
+
     janaf_cp_points = _load_janaf_cp_points(root=root)
     cp_at_100 = None
     for p in janaf_cp_points:
+        # 条件分岐: `abs(float(p.t_k) - 100.0) < 1e-9` を満たす経路を評価する。
         if abs(float(p.t_k) - 100.0) < 1e-9:
             cp_at_100 = float(p.cp)
             break
+
+    # 条件分岐: `cp_at_100 is None` を満たす経路を評価する。
+
     if cp_at_100 is None:
         raise SystemExit("[fail] JANAF Cp(100 K) missing; expected a point at 100 K")
 
     cv_debye_100 = _debye_cv_molar(t_k=100.0, theta_d_k=float(theta_d))
+    # 条件分岐: `cv_debye_100 <= 0.0` を満たす経路を評価する。
     if cv_debye_100 <= 0.0:
         raise SystemExit("[fail] invalid Debye Cv at 100 K")
+
     scale_lowT = float(cp_at_100 / cv_debye_100)
 
     def cp_proxy(t: float) -> tuple[float, str]:
         x = float(t)
+        # 条件分岐: `x < 100.0` を満たす経路を評価する。
         if x < 100.0:
             return float(scale_lowT * _debye_cv_molar(t_k=x, theta_d_k=float(theta_d))), "debye_scaled"
+
         return float(_interp_linear(janaf_cp_points, x)), "janaf_interp"
 
     # Build grid.
+
     temps = [float(t) for t in range(t_min, t_max + 1)]
     alpha_obs_1e8 = [_alpha_1e8_per_k(t_k=t, coeffs=coeffs) for t in temps]
     alpha_obs = [float(a) * 1e-8 for a in alpha_obs_1e8]
@@ -446,9 +548,12 @@ def main() -> None:
         cp_kind.append(str(k))
 
     # Freeze the observed negative→positive sign-crossing T0 from alpha(T).
+
     zero = _infer_zero_crossing(temps, alpha_obs, prefer_neg_to_pos=True, min_x=50.0)
+    # 条件分岐: `zero is None` を満たす経路を評価する。
     if zero is None:
         raise SystemExit("[fail] could not infer negative→positive sign change temperature for alpha(T)")
+
     t0 = float(zero["x_cross"])
 
     use_bulk_modulus = bool(args.use_bulk_modulus)
@@ -461,6 +566,7 @@ def main() -> None:
     fit_min_k = 50.0
     fit_max_k = float(t_max)
     fit_idx = [i for i, t in enumerate(temps) if fit_min_k <= float(t) <= fit_max_k]
+    # 条件分岐: `len(fit_idx) < 100` を満たす経路を評価する。
     if len(fit_idx) < 100:
         raise SystemExit(f"[fail] not enough fit points: n={len(fit_idx)} in [{fit_min_k},{fit_max_k}] K")
 
@@ -473,11 +579,14 @@ def main() -> None:
         den = 0.0
         for i in fit_idx:
             sig = float(sigma_fit[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             w = 1.0 / (sig * sig)
             t = float(temps[i])
             base = math.tanh((t - t0) / float(delta)) * float(cp_vals[i])
+            # 条件分岐: `use_bulk_modulus` を満たす経路を評価する。
             if use_bulk_modulus:
                 assert b_model is not None
                 assert v_m is not None
@@ -485,23 +594,32 @@ def main() -> None:
                 x = float(base) * float(inv_bv)
             else:
                 x = float(base)
+
             y = float(alpha_obs[i])
             num += w * x * y
             den += w * x * x
+
+        # 条件分岐: `den <= 0.0` を満たす経路を評価する。
+
         if den <= 0.0:
             continue
+
         amp = float(num / den)
+        # 条件分岐: `not math.isfinite(amp)` を満たす経路を評価する。
         if not math.isfinite(amp):
             continue
 
         sse = 0.0
         for i in fit_idx:
             sig = float(sigma_fit[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             w = 1.0 / (sig * sig)
             t = float(temps[i])
             base = math.tanh((t - t0) / float(delta)) * float(cp_vals[i])
+            # 条件分岐: `use_bulk_modulus` を満たす経路を評価する。
             if use_bulk_modulus:
                 assert b_model is not None
                 assert v_m is not None
@@ -509,10 +627,16 @@ def main() -> None:
                 x = float(base) * float(inv_bv)
             else:
                 x = float(base)
+
             r = float(alpha_obs[i]) - amp * x
             sse += w * r * r
+
+        # 条件分岐: `best is None or sse < float(best["sse"])` を満たす経路を評価する。
+
         if best is None or sse < float(best["sse"]):
             best = {"delta_k": float(delta), "amp": float(amp), "sse": float(sse)}
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise SystemExit("[fail] ΔT scan failed")
@@ -526,6 +650,7 @@ def main() -> None:
         else "condensed_silicon_thermal_expansion_gruneisen_cp_proxy_gammaT_model"
     )
 
+    # 条件分岐: `use_bulk_modulus` を満たす経路を評価する。
     if use_bulk_modulus:
         assert b_model is not None
         assert v_m is not None
@@ -537,6 +662,7 @@ def main() -> None:
     else:
         a_eff_model = [amp_best * math.tanh((float(t) - t0) / delta_best) for t in temps]
         alpha_pred = [float(a) * float(cp) for a, cp in zip(a_eff_model, cp_vals)]
+
     alpha_pred_1e8 = [float(a) / 1e-8 for a in alpha_pred]
 
     residual = [float(ap - ao) for ap, ao in zip(alpha_pred, alpha_obs)]
@@ -550,14 +676,18 @@ def main() -> None:
     n_z_fit = 0
     for i in fit_idx:
         zi = float(z[i])
+        # 条件分岐: `math.isfinite(zi)` を満たす経路を評価する。
         if math.isfinite(zi):
             n_z_fit += 1
             sum_z2_fit += zi * zi
             max_abs_z_fit = max(max_abs_z_fit, abs(zi))
+            # 条件分岐: `abs(zi) > 3.0` を満たす経路を評価する。
             if abs(zi) > 3.0:
                 exceed_3sigma_fit += 1
+
         ao = float(alpha_obs[i])
         ap = float(alpha_pred[i])
+        # 条件分岐: `ao != 0.0 and ap != 0.0 and ((ao > 0.0) != (ap > 0.0))` を満たす経路を評価する。
         if ao != 0.0 and ap != 0.0 and ((ao > 0.0) != (ap > 0.0)):
             sign_mismatch_fit += 1
 
@@ -579,6 +709,7 @@ def main() -> None:
             "residual_1e-8_per_K",
             "z",
         ]
+        # 条件分岐: `use_bulk_modulus` を満たす経路を評価する。
         if use_bulk_modulus:
             fieldnames.insert(6, "B_GPa")
             fieldnames.insert(7, "gamma_model_dimensionless")
@@ -587,6 +718,7 @@ def main() -> None:
 
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
+        # 条件分岐: `use_bulk_modulus` を満たす経路を評価する。
         if use_bulk_modulus:
             assert b_model is not None
             assert v_m is not None
@@ -627,6 +759,7 @@ def main() -> None:
                 )
 
     # Figure
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
@@ -729,6 +862,7 @@ def main() -> None:
         encoding="utf-8",
     )
 
+    # 条件分岐: `use_bulk_modulus` を満たす経路を評価する。
     if use_bulk_modulus:
         print(
             f"[ok] delta_T_K={delta_best:.3g} gamma_inf={amp_best:.3g} max_abs_z={max_abs_z_fit:.3g} red_chi2={red_chi2:.3g} rejected={rejected}"
@@ -737,10 +871,13 @@ def main() -> None:
         print(
             f"[ok] delta_T_K={delta_best:.3g} A_inf={amp_best:.3g} max_abs_z={max_abs_z_fit:.3g} red_chi2={red_chi2:.3g} rejected={rejected}"
         )
+
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

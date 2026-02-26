@@ -76,6 +76,7 @@ def _clock_rate_gr_schwarzschild(*, x_dimless: float) -> float:
     #   dτ/dt = sqrt(1 - 2x)
     if x_dimless >= 0.5:
         return float("nan")
+
     return float(math.sqrt(1.0 - 2.0 * x_dimless))
 
 
@@ -107,12 +108,14 @@ def _redshift_between_radii(
     #   This avoids precision loss when δz is ~1e-27 (COW-scale height differences).
     # - In stronger fields, fall back to the exact (raw) difference.
     use_weak_series = (max(abs(x_low), abs(x_high)) < 1e-4) and (abs(z_gr) < 1e-6)
+    # 条件分岐: `use_weak_series and z_gr != 0.0` を満たす経路を評価する。
     if use_weak_series and z_gr != 0.0:
         rel = float(-(x_low + x_high))
         dz = float(rel * z_gr)
     else:
         dz = dz_raw
         rel = float(dz / z_gr) if z_gr != 0.0 else float("nan")
+
     return {
         "body": str(body_label),
         "x_low": x_low,
@@ -128,8 +131,10 @@ def _redshift_between_radii(
 
 
 def _required_precision_for_3sigma(*, delta_abs: float) -> Optional[float]:
+    # 条件分岐: `not math.isfinite(delta_abs) or delta_abs <= 0` を満たす経路を評価する。
     if not math.isfinite(delta_abs) or delta_abs <= 0:
         return None
+
     return float(delta_abs / 3.0)
 
 
@@ -140,8 +145,10 @@ def _atom_gyro_phase_rad(*, keff_1_per_m: float, v_transverse_m_per_s: float, om
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return
+
     fields = [
         "channel",
         "observable",
@@ -560,6 +567,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

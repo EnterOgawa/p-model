@@ -19,9 +19,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -31,11 +34,13 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _load_ioffe_elastic_constants(root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing: {src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_elastic_constants_sources.py"
         )
+
     obj = _read_json(src)
     return {"path": src, "sha256": _sha256(src), "data": obj}
 
@@ -47,10 +52,15 @@ def _bulk_modulus_GPa_from_1e11_dyn_cm2(x: float) -> float:
 
 def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_max: float) -> float:
     t = float(t_k)
+    # 条件分岐: `t < float(t_min)` を満たす経路を評価する。
     if t < float(t_min):
         t = float(t_min)
+
+    # 条件分岐: `t > float(t_max)` を満たす経路を評価する。
+
     if t > float(t_max):
         t = float(t_max)
+
     return float(intercept) + float(slope) * t
 
 
@@ -63,23 +73,28 @@ def main() -> None:
     obj = ioffe["data"]
 
     vals = obj.get("values", {})
+    # 条件分岐: `not isinstance(vals, dict)` を満たす経路を評価する。
     if not isinstance(vals, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing 'values' dict")
 
     b_ref_1e11 = float(vals.get("bulk_modulus_from_C11_C12_1e11_dyn_cm2"))
 
     temp_dep = obj.get("temperature_dependence_linear", {})
+    # 条件分岐: `not isinstance(temp_dep, dict)` を満たす経路を評価する。
     if not isinstance(temp_dep, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing 'temperature_dependence_linear' dict")
 
     tr = temp_dep.get("T_range_K", {})
+    # 条件分岐: `not isinstance(tr, dict)` を満たす経路を評価する。
     if not isinstance(tr, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing 'T_range_K' dict")
+
     t_lin_min = float(tr.get("min"))
     t_lin_max = float(tr.get("max"))
 
     c11 = temp_dep.get("C11", {})
     c12 = temp_dep.get("C12", {})
+    # 条件分岐: `not isinstance(c11, dict) or not isinstance(c12, dict)` を満たす経路を評価する。
     if not isinstance(c11, dict) or not isinstance(c12, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing C11/C12 linear dicts")
 
@@ -94,6 +109,7 @@ def main() -> None:
         return float((c11_t + 2.0 * c12_t) / 3.0)
 
     # Target range: Si α(T) NIST TRC fit is stated usable up to 600K.
+
     t_min = 0
     t_max = 600
     t_switch = float(t_lin_min)
@@ -106,6 +122,7 @@ def main() -> None:
     temps: list[float] = []
     b_gpa: list[float] = []
     for t in range(t_min, t_max + 1):
+        # 条件分岐: `float(t) < t_switch` を満たす経路を評価する。
         if float(t) < t_switch:
             b_1e11 = float(b_ref_1e11)
             kind = "const"
@@ -125,6 +142,7 @@ def main() -> None:
         )
 
     # Write CSV
+
     out_csv = out_dir / "condensed_silicon_bulk_modulus_baseline.csv"
     with out_csv.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["T_K", "B_1e11_dyn_cm2", "B_GPa", "model"])
@@ -133,6 +151,7 @@ def main() -> None:
             w.writerow(r)
 
     # Figure
+
     fig, ax = plt.subplots(1, 1, figsize=(10.2, 4.6))
     ax.plot(temps, b_gpa, color="#1f77b4", lw=2.0, label="B(T) reference")
     ax.axvline(t_switch, color="#999999", lw=1.0, ls="--", alpha=0.85, label=f"switch at {t_switch:.0f} K")
@@ -200,6 +219,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

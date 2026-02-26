@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -45,6 +46,7 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest().upper()
 
 
@@ -55,6 +57,7 @@ def _read_head(path: Path, n: int = 8) -> bytes:
 
 def _download(url: str, dst: Path, *, force: bool, max_bytes: int) -> Optional[str]:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and dst.stat().st_size > 0 and not force` を満たす経路を評価する。
     if dst.exists() and dst.stat().st_size > 0 and not force:
         return None
 
@@ -63,14 +66,19 @@ def _download(url: str, dst: Path, *, force: bool, max_bytes: int) -> Optional[s
     with urllib.request.urlopen(req, timeout=180) as r:
         total = r.headers.get("Content-Length")
         total_i = int(total) if total is not None and total.isdigit() else None
+        # 条件分岐: `total_i is not None and total_i > max_bytes` を満たす経路を評価する。
         if total_i is not None and total_i > max_bytes:
             raise RuntimeError(f"refusing to download large file: {total_i} bytes > max={max_bytes}: {url}")
+
         with tmp.open("wb") as f:
             shutil.copyfileobj(r, f, length=1024 * 1024)
+
+    # 条件分岐: `tmp.stat().st_size == 0` を満たす経路を評価する。
 
     if tmp.stat().st_size == 0:
         tmp.unlink(missing_ok=True)
         return "downloaded empty file"
+
     tmp.replace(dst)
     return None
 
@@ -78,14 +86,21 @@ def _download(url: str, dst: Path, *, force: bool, max_bytes: int) -> Optional[s
 def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for m in tf.getmembers():
+        # 条件分岐: `not isinstance(m.name, str)` を満たす経路を評価する。
         if not isinstance(m.name, str):
             continue
+
         p = Path(m.name)
+        # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
         if p.is_absolute():
             raise RuntimeError(f"unsafe tar member (absolute path): {m.name}")
+
+        # 条件分岐: `any(part in ("..", "") for part in p.parts)` を満たす経路を評価する。
+
         if any(part in ("..", "") for part in p.parts):
             raise RuntimeError(f"unsafe tar member (path traversal): {m.name}")
     # Python 3.14 will change tarfile extraction defaults; use an explicit filter when available.
+
     try:
         tf.extractall(out_dir, filter="data")  # type: ignore[call-arg]
     except TypeError:
@@ -93,30 +108,41 @@ def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
 
 
 def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
+    # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
     if out_dir.exists() and any(out_dir.iterdir()) and not force:
         return True
 
+    # 条件分岐: `force and out_dir.exists()` を満たす経路を評価する。
+
     if force and out_dir.exists():
         for p in out_dir.glob("*"):
+            # 条件分岐: `p.is_dir()` を満たす経路を評価する。
             if p.is_dir():
                 shutil.rmtree(p)
             else:
                 p.unlink(missing_ok=True)
 
     head = _read_head(tar_path, 5)
+    # 条件分岐: `head.startswith(b"%PDF")` を満たす経路を評価する。
     if head.startswith(b"%PDF"):
         return False
+
+    # 条件分岐: `not head.startswith(b"\x1f\x8b")` を満たす経路を評価する。
+
     if not head.startswith(b"\x1f\x8b"):
         return False
 
     with tarfile.open(tar_path, "r:gz") as tf:
         _safe_extractall(tf, out_dir)
+
     return True
 
 
 def _count_tex_files(dir_path: Path) -> Optional[int]:
+    # 条件分岐: `not (dir_path.exists() and dir_path.is_dir())` を満たす経路を評価する。
     if not (dir_path.exists() and dir_path.is_dir()):
         return None
+
     return sum(1 for _ in dir_path.rglob("*.tex"))
 
 
@@ -146,15 +172,19 @@ def main(argv: Optional[List[str]] = None) -> int:
         extract_dir = src_dir / f"arxiv_{arxiv_id}"
 
         notes: List[str] = []
+        # 条件分岐: `not args.offline` を満たす経路を評価する。
         if not args.offline:
             try:
                 err = _download(pdf_url, pdf_path, force=bool(args.force), max_bytes=max_bytes)
+                # 条件分岐: `err` を満たす経路を評価する。
                 if err:
                     notes.append(f"pdf: {err}")
             except Exception as e:
                 notes.append(f"pdf download failed: {e}")
+
             try:
                 err = _download(src_url, src_path, force=bool(args.force), max_bytes=max_bytes)
+                # 条件分岐: `err` を満たす経路を評価する。
                 if err:
                     notes.append(f"src: {err}")
             except Exception as e:
@@ -162,6 +192,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         extracted_ok = False
         try:
+            # 条件分岐: `src_path.exists() and src_path.stat().st_size > 0` を満たす経路を評価する。
             if src_path.exists() and src_path.stat().st_size > 0:
                 extracted_ok = _extract_src(src_path, extract_dir, force=bool(args.force))
         except Exception as e:
@@ -194,6 +225,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_manifest = src_dir / "sparc_primary_sources_manifest.json"
     out_manifest.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -216,6 +248,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] manifest: {out_manifest}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

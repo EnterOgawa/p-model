@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -55,6 +56,7 @@ _RE_DAT = re.compile(r"^(?P<sample>.+)_(?P<cap>NGC|SGC)_clustering\.dat\.fits$",
 def _parse_entry(path: Path) -> Optional[_Entry]:
     name = path.name
     m_ran = _RE_RAN.match(name)
+    # 条件分岐: `m_ran` を満たす経路を評価する。
     if m_ran:
         sample = str(m_ran.group("sample"))
         cap = str(m_ran.group("cap")).upper()
@@ -68,7 +70,9 @@ def _parse_entry(path: Path) -> Optional[_Entry]:
             kind="random",
             random_index=idx,
         )
+
     m_dat = _RE_DAT.match(name)
+    # 条件分岐: `m_dat` を満たす経路を評価する。
     if m_dat:
         sample = str(m_dat.group("sample"))
         cap = str(m_dat.group("cap")).upper()
@@ -81,6 +85,7 @@ def _parse_entry(path: Path) -> Optional[_Entry]:
             kind="data",
             random_index=None,
         )
+
     return None
 
 
@@ -120,16 +125,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     raw_dir = Path(str(args.raw_dir)).resolve()
+    # 条件分岐: `not raw_dir.exists()` を満たす経路を評価する。
     if not raw_dir.exists():
         raise SystemExit(f"raw dir not found: {raw_dir}")
+
+    # 条件分岐: `not raw_dir.is_dir()` を満たす経路を評価する。
+
     if not raw_dir.is_dir():
         raise SystemExit(f"raw dir is not a directory: {raw_dir}")
 
     out_dir = Path(str(args.out_dir)).resolve()
+    # 条件分岐: `out_dir.is_absolute()` を満たす経路を評価する。
     if out_dir.is_absolute():
         pass
     else:
         out_dir = (_ROOT / out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
     out_csv = out_dir / "desi_dr1_lss_raw_inventory.csv"
     out_json = out_dir / "desi_dr1_lss_raw_inventory_summary.json"
@@ -137,12 +148,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     entries: List[_Entry] = []
     ignored: List[str] = []
     for p in sorted(raw_dir.iterdir(), key=lambda x: x.name.lower()):
+        # 条件分岐: `not p.is_file()` を満たす経路を評価する。
         if not p.is_file():
             continue
+
         ent = _parse_entry(p)
+        # 条件分岐: `ent is None` を満たす経路を評価する。
         if ent is None:
             ignored.append(p.name)
             continue
+
         entries.append(ent)
 
     entries = sorted(entries, key=lambda e: (e.sample.lower(), e.cap, 0 if e.kind == "data" else 1, e.random_index or -1, e.file_name.lower()))
@@ -157,20 +172,24 @@ def main(argv: Optional[List[str]] = None) -> int:
         s["n_files"] += 1
         caps = s["caps"]
         cap_block = caps.setdefault(e.cap, {"cap": e.cap, "has_data": False, "random_indices": []})
+        # 条件分岐: `e.kind == "data"` を満たす経路を評価する。
         if e.kind == "data":
             s["n_data"] += 1
             cap_block["has_data"] = True
         else:
             s["n_random"] += 1
+            # 条件分岐: `e.random_index is not None` を満たす経路を評価する。
             if e.random_index is not None:
                 cap_block["random_indices"].append(int(e.random_index))
                 s["random_indices"].append(int(e.random_index))
 
     # normalize lists
+
     for s in by_sample.values():
         s["random_indices"] = sorted(set(int(x) for x in s["random_indices"]))
         for cap_block in s["caps"].values():
             cap_block["random_indices"] = sorted(set(int(x) for x in cap_block["random_indices"]))
+
         s["caps"] = {k: s["caps"][k] for k in sorted(s["caps"].keys())}
 
     payload: Dict[str, Any] = {
@@ -206,6 +225,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

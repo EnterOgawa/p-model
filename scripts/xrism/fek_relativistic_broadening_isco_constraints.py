@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -91,31 +92,44 @@ def _as_bool01(x: bool) -> str:
 
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     rows: List[Dict[str, str]] = []
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for r in reader:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             rows.append({str(k): (v or "").strip() for k, v in r.items() if k is not None})
+
     return rows
 
 
 def _maybe_float(x: object) -> Optional[float]:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return None
+
+    # 条件分岐: `isinstance(x, (int, float))` を満たす経路を評価する。
+
     if isinstance(x, (int, float)):
         v = float(x)
         return v if math.isfinite(v) else None
+
     s = str(x).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     try:
         v = float(s)
     except Exception:
         return None
+
     return v if math.isfinite(v) else None
 
 
@@ -151,9 +165,12 @@ def _compute_z_fields(
     rin = _maybe_float(r_in_rg)
     s = _maybe_float(r_in_rg_stat)
     u = _maybe_float(r_in_rg_sys)
+    # 条件分岐: `rin is None or s is None or u is None` を満たす経路を評価する。
     if rin is None or s is None or u is None:
         return {"delta_gr_rg": "", "z_gr": "", "delta_pmodel_rg": "", "z_pmodel": ""}
+
     sigma = math.sqrt(float(s) * float(s) + float(u) * float(u))
+    # 条件分岐: `not (sigma > 0.0 and math.isfinite(sigma))` を満たす経路を評価する。
     if not (sigma > 0.0 and math.isfinite(sigma)):
         return {"delta_gr_rg": "", "z_gr": "", "delta_pmodel_rg": "", "z_pmodel": ""}
 
@@ -168,6 +185,7 @@ def _compute_z_fields(
 
 
 def _extract_sys_components_from_detail_json(detail_json: str) -> Dict[str, str]:
+    # 条件分岐: `not detail_json` を満たす経路を評価する。
     if not detail_json:
         return {
             "sys_band_rg": "",
@@ -175,10 +193,13 @@ def _extract_sys_components_from_detail_json(detail_json: str) -> Dict[str, str]
             "sys_rebin_rg": "",
             "sys_region_rg": "",
         }
+
     try:
         p = Path(detail_json)
+        # 条件分岐: `not p.is_absolute()` を満たす経路を評価する。
         if not p.is_absolute():
             p = _ROOT / p
+
         obj = _read_json(p)
     except Exception:
         return {
@@ -190,6 +211,7 @@ def _extract_sys_components_from_detail_json(detail_json: str) -> Dict[str, str]
 
     sys_obj = obj.get("systematics", {}) if isinstance(obj, dict) else {}
     comps = sys_obj.get("components", {}) if isinstance(sys_obj, dict) else {}
+    # 条件分岐: `not isinstance(comps, dict)` を満たす経路を評価する。
     if not isinstance(comps, dict):
         return {
             "sys_band_rg": "",
@@ -201,12 +223,15 @@ def _extract_sys_components_from_detail_json(detail_json: str) -> Dict[str, str]
     out: Dict[str, str] = {}
     for k in ("band", "gain", "rebin", "region"):
         v = comps.get(k)
+        # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
         if isinstance(v, (int, float)) and math.isfinite(float(v)):
             out[f"sys_{k}_rg"] = f"{float(v):.6g}"
         else:
             out[f"sys_{k}_rg"] = ""
+
     for k in ("sys_band_rg", "sys_gain_rg", "sys_rebin_rg", "sys_region_rg"):
         out.setdefault(k, "")
+
     return out
 
 
@@ -215,22 +240,31 @@ def _load_cached_nustar_proxy_detail_json(detail_json: Path) -> Optional[Dict[st
         obj = _read_json(detail_json)
     except Exception:
         return None
+
+    # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
+
     if not isinstance(obj, dict):
         return None
 
     fit_default = obj.get("fit_default")
+    # 条件分岐: `not isinstance(fit_default, dict)` を満たす経路を評価する。
     if not isinstance(fit_default, dict):
         return None
+
+    # 条件分岐: `str(fit_default.get("status") or "").strip().lower() != "ok"` を満たす経路を評価する。
+
     if str(fit_default.get("status") or "").strip().lower() != "ok":
         return None
 
     sys_obj = obj.get("systematics")
+    # 条件分岐: `not isinstance(sys_obj, dict)` を満たす経路を評価する。
     if not isinstance(sys_obj, dict):
         return None
 
     r_in_rg = _maybe_float(fit_default.get("r_in_rg"))
     r_in_rg_stat = _maybe_float(fit_default.get("r_in_rg_stat"))
     r_in_rg_sys = _maybe_float(sys_obj.get("sys_total"))
+    # 条件分岐: `r_in_rg is None or r_in_rg_stat is None or r_in_rg_sys is None` を満たす経路を評価する。
     if r_in_rg is None or r_in_rg_stat is None or r_in_rg_sys is None:
         return None
 
@@ -258,15 +292,21 @@ def _load_cached_nustar_proxy_detail_json(detail_json: Path) -> Optional[Dict[st
 
 
 def _compute_error_fields(*, r_in_bound: str, r_in_rg_stat: str, r_in_rg_sys: str) -> Dict[str, str]:
+    # 条件分岐: `r_in_bound` を満たす経路を評価する。
     if r_in_bound:
         return {"sigma_total_rg": "", "sys_stat_ratio": ""}
+
     s = _maybe_float(r_in_rg_stat)
     u = _maybe_float(r_in_rg_sys)
+    # 条件分岐: `s is None or u is None` を満たす経路を評価する。
     if s is None or u is None:
         return {"sigma_total_rg": "", "sys_stat_ratio": ""}
+
     sigma_total = math.sqrt(float(s) * float(s) + float(u) * float(u))
+    # 条件分岐: `not (sigma_total > 0.0 and math.isfinite(sigma_total))` を満たす経路を評価する。
     if not (sigma_total > 0.0 and math.isfinite(sigma_total)):
         return {"sigma_total_rg": "", "sys_stat_ratio": ""}
+
     ratio = float(u) / float(s) if float(s) != 0.0 else float("nan")
     return {
         "sigma_total_rg": f"{sigma_total:.6g}",
@@ -275,11 +315,13 @@ def _compute_error_fields(*, r_in_bound: str, r_in_rg_stat: str, r_in_rg_sys: st
 
 
 def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         fig, ax = plt.subplots(1, 1, figsize=(10.0, 2.6))
         ax.axis("off")
@@ -311,27 +353,36 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
         obsid = str(r.get("obsid") or "").strip() or "?"
         instr = str(r.get("instrument_hint") or "").strip()
         label = f"{mission.upper()} {obsid}"
+        # 条件分岐: `instr` を満たす経路を評価する。
         if instr:
             label += f" ({instr})"
 
         rin = _maybe_float(r.get("r_in_rg"))
+        # 条件分岐: `rin is None` を満たす経路を評価する。
         if rin is None:
             continue
+
         s = _maybe_float(r.get("r_in_rg_stat")) or 0.0
         u = _maybe_float(r.get("r_in_rg_sys")) or 0.0
 
         note = str(r.get("note") or "")
         quality = str(r.get("proxy_quality") or "")
         bound = str(r.get("r_in_bound") or "").strip().lower()
+        # 条件分岐: `not bound` を満たす経路を評価する。
         if not bound:
             m = _RIN_BOUND_RE.search(note)
+            # 条件分岐: `m` を満たす経路を評価する。
             if m:
                 bound = str(m.group(1)).lower()
 
+        # 条件分岐: `quality == "no_broad_line"` を満たす経路を評価する。
+
         if quality == "no_broad_line":
             marker = "x"
+        # 条件分岐: 前段条件が不成立で、`bound == "upper"` を追加評価する。
         elif bound == "upper":
             marker = ">"
+        # 条件分岐: 前段条件が不成立で、`bound == "lower"` を追加評価する。
         elif bound == "lower":
             marker = "<"
         else:
@@ -343,6 +394,8 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
         sys_err.append(float(abs(u)))
         colors.append(col_map.get(mission, "#444444"))
         markers.append(marker)
+
+    # 条件分岐: `not xs` を満たす経路を評価する。
 
     if not xs:
         fig, ax = plt.subplots(1, 1, figsize=(10.0, 2.6))
@@ -364,10 +417,15 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
         total = math.sqrt(s * s + u * u)
         c = colors[i]
 
+        # 条件分岐: `total > 0` を満たす経路を評価する。
         if total > 0:
             ax.hlines(float(y[i]), rin - total, rin + total, color=c, alpha=0.22, linewidth=6.0, zorder=1)
+
+        # 条件分岐: `s > 0` を満たす経路を評価する。
+
         if s > 0:
             ax.hlines(float(y[i]), rin - s, rin + s, color=c, alpha=0.9, linewidth=1.8, zorder=2)
+
         ax.plot(rin, float(y[i]), marker=markers[i], color=c, markersize=8, zorder=3)
 
     ax.set_yticks(y)
@@ -414,15 +472,19 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
 
 def _detect_cache_xmm(cache_root: Path, *, obsid: str, rev: str) -> bool:
     p = cache_root / "xmm" / rev / obsid / "PPS"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return False
+
     return any(p.glob("*.FTZ")) or any(p.glob("*.HTM"))
 
 
 def _detect_cache_nustar(cache_root: Path, *, obsid: str) -> bool:
     p = cache_root / "nustar" / obsid / "event_cl"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return False
+
     return any(p.glob("*.evt.gz")) or any(p.glob("*.fits.gz")) or any(p.glob("*.gz"))
 
 
@@ -430,11 +492,14 @@ def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     kv: Dict[str, str] = {}
     for card in _iter_cards_from_header_bytes(header_bytes):
         key = card[:8].strip()
+        # 条件分岐: `not key or "=" not in card` を満たす経路を評価する。
         if not key or "=" not in card:
             continue
+
         rhs = card.split("=", 1)[1]
         rhs = rhs.split("/", 1)[0].strip()
         kv[key] = rhs
+
     return kv
 
 
@@ -443,6 +508,7 @@ def _fits_read_spectrum_header(path: Path) -> Dict[str, str]:
     with opener(path, "rb") as f:  # type: ignore[arg-type]
         _ = _read_header_blocks(f)  # primary
         hdr = _read_header_blocks(f)  # first ext (SPECTRUM for PPS)
+
     return _parse_header_kv(hdr)
 
 
@@ -451,6 +517,7 @@ def _fits_read_spectrum_counts(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     with opener(path, "rb") as f:  # type: ignore[arg-type]
         layout = read_first_bintable_layout(f)
         cols = read_bintable_columns(f, layout=layout, columns=["CHANNEL", "COUNTS"])
+
     ch = np.asarray(cols["CHANNEL"], dtype=float)
     counts = np.asarray(cols["COUNTS"], dtype=float)
     return ch, counts
@@ -458,8 +525,10 @@ def _fits_read_spectrum_counts(path: Path) -> Tuple[np.ndarray, np.ndarray]:
 
 def _parse_float(kv: Dict[str, str], key: str, default: float = float("nan")) -> float:
     v = kv.get(key)
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return float(default)
+
     s = str(v).strip().strip("'")
     try:
         return float(s)
@@ -469,8 +538,10 @@ def _parse_float(kv: Dict[str, str], key: str, default: float = float("nan")) ->
 
 def _parse_str(kv: Dict[str, str], key: str, default: str = "") -> str:
     v = kv.get(key)
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return default
+
     return str(v).strip().strip("'")
 
 
@@ -497,9 +568,12 @@ def _fits_read_event_pi(path: Path) -> np.ndarray:
         layout = read_first_bintable_layout(f)
         col_map = {str(c).upper(): str(c) for c in layout.columns}
         pi_key = col_map.get("PI")
+        # 条件分岐: `pi_key is None` を満たす経路を評価する。
         if pi_key is None:
             raise ValueError("PI column not found in event file")
+
         cols = read_bintable_columns(f, layout=layout, columns=[pi_key])
+
     pi = np.asarray(cols[pi_key], dtype=float)
     pi = pi[np.isfinite(pi)]
     pi = np.asarray(np.round(pi), dtype=int)
@@ -519,20 +593,27 @@ def _fits_read_event_columns(path: Path, columns: Sequence[str]) -> Dict[str, np
         resolved: List[str] = []
         for c in columns:
             key = col_map.get(str(c).upper())
+            # 条件分岐: `key is None` を満たす経路を評価する。
             if key is None:
                 raise ValueError(f"column not found in event file: {c!r}")
+
             resolved.append(key)
+
         cols = read_bintable_columns(f, layout=layout, columns=resolved)
     # return with requested names (upper-case keys)
+
     out: Dict[str, np.ndarray] = {}
     for c_req, c_real in zip(columns, resolved):
         out[str(c_req).upper()] = np.asarray(cols[c_real], dtype=float)
+
     return out
 
 
 def _accumulate_bincount(acc: np.ndarray, bc: np.ndarray) -> np.ndarray:
+    # 条件分岐: `bc.size > acc.size` を満たす経路を評価する。
     if bc.size > acc.size:
         acc = np.pad(acc, (0, int(bc.size - acc.size)), mode="constant")
+
     acc[: int(bc.size)] += bc.astype(float)
     return acc
 
@@ -548,11 +629,17 @@ def _nustar_det1_peak_center(
     This is an approximation to avoid external region/extraction tools (HEASoft).
     """
     dbg: Dict[str, Any] = {"method": "det1_hist_peak", "bin_size": int(bin_size), "det1_max": int(det1_max), "files": []}
+    # 条件分岐: `int(bin_size) <= 0` を満たす経路を評価する。
     if int(bin_size) <= 0:
         raise ValueError("bin_size must be > 0")
+
+    # 条件分岐: `int(det1_max) <= 0` を満たす経路を評価する。
+
     if int(det1_max) <= 0:
         raise ValueError("det1_max must be > 0")
+
     n_bins = int(det1_max) // int(bin_size) + 1
+    # 条件分岐: `n_bins < 4` を満たす経路を評価する。
     if n_bins < 4:
         n_bins = 4
 
@@ -571,9 +658,11 @@ def _nustar_det1_peak_center(
                 & (x < float(det1_max))
                 & (y < float(det1_max))
             )
+            # 条件分岐: `not np.any(m)` を満たす経路を評価する。
             if not np.any(m):
                 dbg["files"].append({"path": _rel(p), "n_rows": int(x.size), "n_used": 0})
                 continue
+
             xi = np.asarray(np.floor(x[m] / float(bin_size)), dtype=np.int64)
             yi = np.asarray(np.floor(y[m] / float(bin_size)), dtype=np.int64)
             xi = np.clip(xi, 0, n_bins - 1)
@@ -586,6 +675,8 @@ def _nustar_det1_peak_center(
         except Exception as e:
             dbg["files"].append({"path": _rel(p), "error": str(e)})
             continue
+
+    # 条件分岐: `int(np.sum(H)) <= 0` を満たす経路を評価する。
 
     if int(np.sum(H)) <= 0:
         dbg["status"] = "no_valid_events"
@@ -621,6 +712,7 @@ def _nustar_extract_net_spectrum_det1(
     r_src = float(src_radius)
     r_bi = float(bkg_inner)
     r_bo = float(bkg_outer)
+    # 条件分岐: `not (r_src > 0 and r_bi >= 0 and r_bo > r_bi)` を満たす経路を評価する。
     if not (r_src > 0 and r_bi >= 0 and r_bo > r_bi):
         raise ValueError("invalid radii for NuSTAR region extraction")
 
@@ -660,9 +752,11 @@ def _nustar_extract_net_spectrum_det1(
                 & (x0 < float(det1_max))
                 & (y0 < float(det1_max))
             )
+            # 条件分岐: `not np.any(m)` を満たす経路を評価する。
             if not np.any(m):
                 dbg["files"].append({"path": _rel(p), "n_rows": int(pi0.size), "n_valid": 0})
                 continue
+
             pi = np.asarray(np.round(pi0[m]), dtype=np.int64)
             x = np.asarray(x0[m], dtype=float)
             y = np.asarray(y0[m], dtype=float)
@@ -673,10 +767,14 @@ def _nustar_extract_net_spectrum_det1(
             m_src = d2 <= r2_src
             m_bkg = (d2 >= r2_bi) & (d2 <= r2_bo)
 
+            # 条件分岐: `np.any(m_src)` を満たす経路を評価する。
             if np.any(m_src):
                 bc = np.bincount(pi[m_src], minlength=int(np.max(pi[m_src])) + 1).astype(float)
                 src_counts = _accumulate_bincount(src_counts, bc)
                 n_src += int(np.count_nonzero(m_src))
+
+            # 条件分岐: `np.any(m_bkg)` を満たす経路を評価する。
+
             if np.any(m_bkg):
                 bc = np.bincount(pi[m_bkg], minlength=int(np.max(pi[m_bkg])) + 1).astype(float)
                 bkg_counts = _accumulate_bincount(bkg_counts, bc)
@@ -695,6 +793,8 @@ def _nustar_extract_net_spectrum_det1(
             dbg["files"].append({"path": _rel(p), "error": str(e)})
             continue
 
+    # 条件分岐: `src_counts.size < 10 or float(np.sum(src_counts)) <= 0` を満たす経路を評価する。
+
     if src_counts.size < 10 or float(np.sum(src_counts)) <= 0:
         dbg["status"] = "empty_source_counts"
         dbg["n_src_events"] = int(n_src)
@@ -703,6 +803,7 @@ def _nustar_extract_net_spectrum_det1(
         return None, dbg
 
     # Scale background by geometric area ratio (proxy).
+
     area_src = math.pi * r2_src
     area_bkg = math.pi * max((r2_bo - r2_bi), 1e-12)
     scale = float(area_src / area_bkg) if float(np.sum(bkg_counts)) > 0 else 0.0
@@ -710,6 +811,7 @@ def _nustar_extract_net_spectrum_det1(
     # align arrays
     if bkg_counts.size > src_counts.size:
         src_counts = np.pad(src_counts, (0, int(bkg_counts.size - src_counts.size)), mode="constant")
+    # 条件分岐: 前段条件が不成立で、`src_counts.size > bkg_counts.size` を追加評価する。
     elif src_counts.size > bkg_counts.size:
         bkg_counts = np.pad(bkg_counts, (0, int(src_counts.size - bkg_counts.size)), mode="constant")
 
@@ -745,17 +847,24 @@ def _parse_ds9_circle_region(path: Path) -> Optional[Tuple[float, float, float]]
         text = path.read_text(encoding="utf-8", errors="ignore")
     except Exception:
         return None
+
     m = _DS9_CIRCLE_RE.search(text.replace("\n", " ").strip())
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     try:
         x = float(m.group("x"))
         y = float(m.group("y"))
         r = float(m.group("r"))
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(x) and math.isfinite(y) and math.isfinite(r) and r > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(x) and math.isfinite(y) and math.isfinite(r) and r > 0):
         return None
+
     return float(x), float(y), float(r)
 
 
@@ -778,6 +887,7 @@ def _nustar_extract_net_spectrum_xy_circle(
     r_src = float(src_radius)
     r_bi = float(bkg_inner)
     r_bo = float(bkg_outer)
+    # 条件分岐: `not (r_src > 0 and r_bi >= 0 and r_bo > r_bi)` を満たす経路を評価する。
     if not (r_src > 0 and r_bi >= 0 and r_bo > r_bi):
         raise ValueError("invalid radii for NuSTAR XY region extraction")
 
@@ -807,9 +917,11 @@ def _nustar_extract_net_spectrum_xy_circle(
             x0 = cols["X"]
             y0 = cols["Y"]
             m = np.isfinite(pi0) & np.isfinite(x0) & np.isfinite(y0) & (pi0 >= 0.0) & (x0 >= 0.0) & (y0 >= 0.0)
+            # 条件分岐: `not np.any(m)` を満たす経路を評価する。
             if not np.any(m):
                 dbg["files"].append({"path": _rel(p), "n_rows": int(pi0.size), "n_valid": 0})
                 continue
+
             pi = np.asarray(np.round(pi0[m]), dtype=np.int64)
             x = np.asarray(x0[m], dtype=float)
             y = np.asarray(y0[m], dtype=float)
@@ -820,10 +932,14 @@ def _nustar_extract_net_spectrum_xy_circle(
             m_src = d2 <= r2_src
             m_bkg = (d2 >= r2_bi) & (d2 <= r2_bo)
 
+            # 条件分岐: `np.any(m_src)` を満たす経路を評価する。
             if np.any(m_src):
                 bc = np.bincount(pi[m_src], minlength=int(np.max(pi[m_src])) + 1).astype(float)
                 src_counts = _accumulate_bincount(src_counts, bc)
                 n_src += int(np.count_nonzero(m_src))
+
+            # 条件分岐: `np.any(m_bkg)` を満たす経路を評価する。
+
             if np.any(m_bkg):
                 bc = np.bincount(pi[m_bkg], minlength=int(np.max(pi[m_bkg])) + 1).astype(float)
                 bkg_counts = _accumulate_bincount(bkg_counts, bc)
@@ -842,6 +958,8 @@ def _nustar_extract_net_spectrum_xy_circle(
             dbg["files"].append({"path": _rel(p), "error": str(e)})
             continue
 
+    # 条件分岐: `src_counts.size < 10 or float(np.sum(src_counts)) <= 0` を満たす経路を評価する。
+
     if src_counts.size < 10 or float(np.sum(src_counts)) <= 0:
         dbg["status"] = "empty_source_counts"
         dbg["n_src_events"] = int(n_src)
@@ -853,8 +971,10 @@ def _nustar_extract_net_spectrum_xy_circle(
     area_bkg = math.pi * max((r2_bo - r2_bi), 1e-12)
     scale = float(area_src / area_bkg) if float(np.sum(bkg_counts)) > 0 else 0.0
 
+    # 条件分岐: `bkg_counts.size > src_counts.size` を満たす経路を評価する。
     if bkg_counts.size > src_counts.size:
         src_counts = np.pad(src_counts, (0, int(bkg_counts.size - src_counts.size)), mode="constant")
+    # 条件分岐: 前段条件が不成立で、`src_counts.size > bkg_counts.size` を追加評価する。
     elif src_counts.size > bkg_counts.size:
         bkg_counts = np.pad(bkg_counts, (0, int(src_counts.size - bkg_counts.size)), mode="constant")
 
@@ -885,10 +1005,15 @@ def _rebin_min_counts(
     y = np.asarray(net_counts, dtype=float)
     v = np.asarray(var_counts, dtype=float)
     s = np.asarray(src_counts, dtype=float)
+    # 条件分岐: `e.size != y.size or e.size != v.size or e.size != s.size` を満たす経路を評価する。
     if e.size != y.size or e.size != v.size or e.size != s.size:
         raise ValueError("shape mismatch in rebin")
+
+    # 条件分岐: `min_counts <= 1` を満たす経路を評価する。
+
     if min_counts <= 1:
         return e, y, v
+
     out_e: List[float] = []
     out_y: List[float] = []
     out_v: List[float] = []
@@ -903,16 +1028,21 @@ def _rebin_min_counts(
         acc_v += float(v[i])
         acc_s += float(max(s[i], 0.0))
         acc_n += 1
+        # 条件分岐: `acc_s >= float(min_counts)` を満たす経路を評価する。
         if acc_s >= float(min_counts):
             out_e.append(acc_e / float(acc_n))
             out_y.append(acc_y)
             out_v.append(max(acc_v, 1.0))
             acc_e = acc_y = acc_v = acc_s = 0.0
             acc_n = 0
+
+    # 条件分岐: `acc_n > 0` を満たす経路を評価する。
+
     if acc_n > 0:
         out_e.append(acc_e / float(acc_n))
         out_y.append(acc_y)
         out_v.append(max(acc_v, 1.0))
+
     return np.asarray(out_e, dtype=float), np.asarray(out_y, dtype=float), np.asarray(out_v, dtype=float)
 
 
@@ -932,8 +1062,12 @@ def _rebin_min_counts_groups(
     y = np.asarray(net_counts, dtype=float)
     v = np.asarray(var_counts, dtype=float)
     s = np.asarray(src_counts, dtype=float)
+    # 条件分岐: `e.size != y.size or e.size != v.size or e.size != s.size` を満たす経路を評価する。
     if e.size != y.size or e.size != v.size or e.size != s.size:
         raise ValueError("shape mismatch in rebin")
+
+    # 条件分岐: `min_counts <= 1` を満たす経路を評価する。
+
     if min_counts <= 1:
         starts = np.arange(int(e.size), dtype=np.int64)
         return e, y, v, starts
@@ -956,6 +1090,7 @@ def _rebin_min_counts_groups(
         acc_v += float(v[i])
         acc_s += float(max(s[i], 0.0))
         acc_n += 1
+        # 条件分岐: `acc_s >= float(min_counts)` を満たす経路を評価する。
         if acc_s >= float(min_counts):
             out_starts.append(int(start))
             out_e.append(acc_e / float(acc_n))
@@ -964,6 +1099,8 @@ def _rebin_min_counts_groups(
             start = int(i) + 1
             acc_e = acc_y = acc_v = acc_s = 0.0
             acc_n = 0
+
+    # 条件分岐: `acc_n > 0` を満たす経路を評価する。
 
     if acc_n > 0:
         out_starts.append(int(start))
@@ -998,8 +1135,12 @@ def _rebin_min_counts_weighted(
     v = np.asarray(var_counts, dtype=float)
     w = np.asarray(weight, dtype=float)
     s = np.asarray(src_counts, dtype=float)
+    # 条件分岐: `e.size != y.size or e.size != v.size or e.size != w.size or e.size != s.size` を満たす経路を評価する。
     if e.size != y.size or e.size != v.size or e.size != w.size or e.size != s.size:
         raise ValueError("shape mismatch in weighted rebin")
+
+    # 条件分岐: `min_counts <= 1` を満たす経路を評価する。
+
     if min_counts <= 1:
         ww = np.clip(w, 1e-30, None)
         return e, (y / ww), (v / (ww**2))
@@ -1021,12 +1162,15 @@ def _rebin_min_counts_weighted(
         acc_y += float(y[i])
         acc_v += float(v[i])
         acc_s += float(max(s[i], 0.0))
+        # 条件分岐: `acc_s >= float(min_counts)` を満たす経路を評価する。
         if acc_s >= float(min_counts):
             ww = float(max(acc_w, 1e-30))
             out_e.append(acc_e_w / ww)
             out_y.append(acc_y / ww)
             out_v.append(max(acc_v, 1.0) / (ww**2))
             acc_w = acc_e_w = acc_y = acc_v = acc_s = 0.0
+
+    # 条件分岐: `acc_w > 0.0` を満たす経路を評価する。
 
     if acc_w > 0.0:
         ww = float(max(acc_w, 1e-30))
@@ -1050,9 +1194,11 @@ def _diskline_profile_grid(
     n_phi: int = 200,
 ) -> np.ndarray:
     e = np.asarray(energy, dtype=float)
+    # 条件分岐: `e.size < 10` を満たす経路を評価する。
     if e.size < 10:
         raise ValueError("energy grid too small")
     # build bin edges from midpoints (assume roughly uniform; fallback to nearest-neighbor edges)
+
     edges = np.empty(e.size + 1, dtype=float)
     edges[1:-1] = 0.5 * (e[:-1] + e[1:])
     edges[0] = e[0] - (edges[1] - e[0])
@@ -1092,6 +1238,7 @@ def _diskline_profile_grid(
 
         hist, _ = np.histogram(ee_flat, bins=edges, weights=w)
         h = np.asarray(hist, dtype=float)
+        # 条件分岐: `sigma_instr_keV > 0` を満たす経路を評価する。
         if sigma_instr_keV > 0:
             # Gaussian smoothing in energy bins
             # approximate sigma in bins using local step
@@ -1104,8 +1251,10 @@ def _diskline_profile_grid(
             h = np.convolve(h, ker, mode="same")
 
         s = float(np.sum(h))
+        # 条件分岐: `s > 0` を満たす経路を評価する。
         if s > 0:
             h = h / s
+
         prof[i, :] = h
 
     return prof
@@ -1113,10 +1262,15 @@ def _diskline_profile_grid(
 
 def _interp_profile(r_in: float, r_grid: np.ndarray, prof_grid: np.ndarray) -> np.ndarray:
     rg = np.asarray(r_grid, dtype=float)
+    # 条件分岐: `r_in <= float(rg[0])` を満たす経路を評価する。
     if r_in <= float(rg[0]):
         return np.asarray(prof_grid[0], dtype=float)
+
+    # 条件分岐: `r_in >= float(rg[-1])` を満たす経路を評価する。
+
     if r_in >= float(rg[-1]):
         return np.asarray(prof_grid[-1], dtype=float)
+
     j = int(np.searchsorted(rg, float(r_in), side="right")) - 1
     j = max(0, min(j, int(rg.size) - 2))
     r0 = float(rg[j])
@@ -1135,23 +1289,30 @@ def _fit_powerlaw_only_proxy(
     min_counts: int,
     gain_shift: float,
 ) -> Dict[str, Any]:
+    # 条件分岐: `least_squares is None` を満たす経路を評価する。
     if least_squares is None:
         raise RuntimeError("scipy is required for fitting (scipy.optimize.least_squares)")
+
     e = np.asarray(energy_keV, dtype=float) * (1.0 + float(gain_shift))
     y = np.asarray(net_counts, dtype=float)
     v = np.asarray(var_counts, dtype=float)
     w = np.asarray(weight, dtype=float) if weight is not None else None
     m_band = (e >= float(band_keV[0])) & (e <= float(band_keV[1])) & np.isfinite(e) & np.isfinite(y) & np.isfinite(v)
+    # 条件分岐: `not np.any(m_band)` を満たす経路を評価する。
     if not np.any(m_band):
         raise RuntimeError("empty band after filtering")
+
     e = e[m_band]
     y = y[m_band]
     v = np.clip(v[m_band], 1.0, None)
+    # 条件分岐: `w is not None` を満たす経路を評価する。
     if w is not None:
         w = np.clip(w[m_band], 0.0, None)
 
     # Rebin for stability (match diskline proxy).
+
     src_proxy = np.clip(y + np.sqrt(v), 0.0, None)  # not exact, but monotone proxy
+    # 条件分岐: `w is None` を満たす経路を評価する。
     if w is None:
         e, y, v = _rebin_min_counts(e, y, v, src_proxy, min_counts=int(min_counts))
         sigma = np.sqrt(np.clip(v, 1.0, None))
@@ -1160,6 +1321,7 @@ def _fit_powerlaw_only_proxy(
         sigma = np.sqrt(np.clip(v, 1e-30, None))
 
     # Initial guess from log-linear regression.
+
     ee = e
     y_floor = 1.0 if w is None else 1e-30
     yy = np.clip(y, float(y_floor), None)
@@ -1216,33 +1378,44 @@ def _fit_powerlaw_plus_diskline_proxy(
     r_out_rg: float = 400.0,
     sigma_instr_keV: float = 0.07,
 ) -> Dict[str, Any]:
+    # 条件分岐: `least_squares is None` を満たす経路を評価する。
     if least_squares is None:
         raise RuntimeError("scipy is required for fitting (scipy.optimize.least_squares)")
+
     e = np.asarray(energy_keV, dtype=float) * (1.0 + float(gain_shift))
     y = np.asarray(net_counts, dtype=float)
     v = np.asarray(var_counts, dtype=float)
     w = np.asarray(weight, dtype=float) if weight is not None else None
     m_band = (e >= float(band_keV[0])) & (e <= float(band_keV[1])) & np.isfinite(e) & np.isfinite(y) & np.isfinite(v)
+    # 条件分岐: `not np.any(m_band)` を満たす経路を評価する。
     if not np.any(m_band):
         raise RuntimeError("empty band after filtering")
+
     e = e[m_band]
     y = y[m_band]
     v = np.clip(v[m_band], 1.0, None)
+    # 条件分岐: `w is not None` を満たす経路を評価する。
     if w is not None:
         w = np.clip(w[m_band], 0.0, None)
 
     # Rebin for stability
+
     src_proxy = np.clip(y + np.sqrt(v), 0.0, None)  # not exact, but monotone proxy
+    # 条件分岐: `w is None` を満たす経路を評価する。
     if w is None:
         e, y, v = _rebin_min_counts(e, y, v, src_proxy, min_counts=min_counts)
     else:
         e, y, v = _rebin_min_counts_weighted(e, y, v, w, src_proxy, min_counts=min_counts)
+
+    # 条件分岐: `w is None` を満たす経路を評価する。
+
     if w is None:
         sigma = np.sqrt(np.clip(v, 1.0, None))
     else:
         sigma = np.sqrt(np.clip(v, 1e-30, None))
 
     # Diskline profile precompute (r_in grid in rg)
+
     r_grid = np.unique(np.concatenate([np.linspace(2.5, 10.0, 16), np.linspace(10.0, 50.0, 21)]))
     prof_grid = _diskline_profile_grid(
         energy=e,
@@ -1257,8 +1430,10 @@ def _fit_powerlaw_plus_diskline_proxy(
     # Initial continuum guess (fit powerlaw to two side bands).
     # If weight is provided, y is already normalized by weight (flux-proxy space).
     cont_mask = ((e >= float(band_keV[0])) & (e <= 5.0)) | ((e >= 7.0) & (e <= float(band_keV[1])))
+    # 条件分岐: `np.count_nonzero(cont_mask) < 10` を満たす経路を評価する。
     if np.count_nonzero(cont_mask) < 10:
         cont_mask = np.ones_like(e, dtype=bool)
+
     ee = e[cont_mask]
     y_floor = 1.0 if w is None else 1e-30
     yy = np.clip(y[cont_mask], float(y_floor), None)
@@ -1273,6 +1448,7 @@ def _fit_powerlaw_plus_diskline_proxy(
     except Exception:
         pass
     # Line amplitude rough guess from residual around 6–7 keV
+
     m_line = (e >= 5.5) & (e <= 7.5)
     cont0 = A0 * (np.clip(e, 1e-3, None) ** (-g0))
     line0 = float(np.sum(np.clip(y[m_line] - cont0[m_line], 0.0, None)))
@@ -1292,6 +1468,7 @@ def _fit_powerlaw_plus_diskline_proxy(
         return (y - _model(params)) / sigma
 
     # Multi-start on r_in to reduce local-minimum/boundary sticking in proxy fits.
+
     r_in_inits = [3.0, 4.5, 6.0, 10.0, 20.0, 40.0]
     best_res = None
     best_chi2 = float("inf")
@@ -1302,14 +1479,18 @@ def _fit_powerlaw_plus_diskline_proxy(
             res0 = least_squares(_resid, x0=x0, bounds=(lo, hi), max_nfev=500)
         except Exception:
             continue
+
         p0 = np.asarray(res0.x, dtype=float)
         yhat0 = _model(p0)
         chi20 = float(np.sum(((y - yhat0) / sigma) ** 2))
         dof0 = int(max(int(y.size) - int(p0.size), 1))
+        # 条件分岐: `chi20 < best_chi2` を満たす経路を評価する。
         if chi20 < best_chi2:
             best_chi2 = chi20
             best_res = res0
             best_dof = dof0
+
+    # 条件分岐: `best_res is None` を満たす経路を評価する。
 
     if best_res is None:
         raise RuntimeError("least_squares failed for all initializations")
@@ -1333,8 +1514,10 @@ def _fit_powerlaw_plus_diskline_proxy(
 
     r_in = float(p[3])
     r_in_bound = ""
+    # 条件分岐: `abs(r_in - float(lo[3])) < 1e-6` を満たす経路を評価する。
     if abs(r_in - float(lo[3])) < 1e-6:
         r_in_bound = "lower"
+    # 条件分岐: 前段条件が不成立で、`abs(r_in - float(hi[3])) < 1e-6` を追加評価する。
     elif abs(r_in - float(hi[3])) < 1e-6:
         r_in_bound = "upper"
 
@@ -1362,14 +1545,20 @@ def _fit_powerlaw_only_rmf(
     Forward-fold fit in channel space (continuum only):
       model(E) --(ARF×exposure)--> photons/bin --(RMF)--> counts/channel.
     """
+    # 条件分岐: `least_squares is None or sp is None` を満たす経路を評価する。
     if least_squares is None or sp is None:
         raise RuntimeError("scipy is required for RMF folding fit")
+
+    # 条件分岐: `not instruments` を満たす経路を評価する。
+
     if not instruments:
         raise ValueError("no instruments")
 
     rmf0 = instruments[0].get("rmf")
+    # 条件分岐: `not isinstance(rmf0, _OgipRmf)` を満たす経路を評価する。
     if not isinstance(rmf0, _OgipRmf):
         raise ValueError("rmf missing for instrument 0")
+
     detchans = int(rmf0.detchans)
 
     src_sum = np.zeros(detchans, dtype=float)
@@ -1377,13 +1566,17 @@ def _fit_powerlaw_only_rmf(
     var_sum = np.zeros(detchans, dtype=float)
     for inst in instruments:
         rmf = inst.get("rmf")
+        # 条件分岐: `not isinstance(rmf, _OgipRmf) or int(rmf.detchans) != detchans` を満たす経路を評価する。
         if not isinstance(rmf, _OgipRmf) or int(rmf.detchans) != detchans:
             raise ValueError("inconsistent RMF/detchans across instruments")
+
         src = np.asarray(inst.get("src_counts"), dtype=float)
         net = np.asarray(inst.get("net_counts"), dtype=float)
         var = np.asarray(inst.get("var_counts"), dtype=float)
+        # 条件分岐: `src.size != detchans or net.size != detchans or var.size != detchans` を満たす経路を評価する。
         if src.size != detchans or net.size != detchans or var.size != detchans:
             raise ValueError("spectrum arrays must have length detchans")
+
         src_sum += np.clip(src, 0.0, None)
         net_sum += net
         var_sum += np.clip(var, 0.0, None)
@@ -1396,6 +1589,7 @@ def _fit_powerlaw_only_rmf(
         & np.isfinite(net_sum)
         & np.isfinite(var_sum)
     )
+    # 条件分岐: `not np.any(m_band)` を満たす経路を評価する。
     if not np.any(m_band):
         raise RuntimeError("empty band after filtering")
 
@@ -1421,9 +1615,14 @@ def _fit_powerlaw_only_rmf(
         arf_a = np.asarray(inst.get("arf_area"), dtype=float)
         area = _interp_arf_area(e_model, arf_e_mid=arf_e, arf_area=arf_a)
         area_band = float(np.nanmedian(area[m_thr])) if np.any(m_thr) else float(np.nanmedian(area))
+        # 条件分岐: `not math.isfinite(area_band) or area_band <= 0` を満たす経路を評価する。
         if not math.isfinite(area_band) or area_band <= 0:
             area_band = 1.0
+
         thr += max(exp, 0.0) * area_band
+
+    # 条件分岐: `not (thr > 0.0) or not math.isfinite(thr)` を満たす経路を評価する。
+
     if not (thr > 0.0) or not math.isfinite(thr):
         thr = 1.0
 
@@ -1448,8 +1647,10 @@ def _fit_powerlaw_only_rmf(
             pred_ch += np.asarray(rmf.rsp.dot(counts_bin)).reshape(-1)
 
         pred_sel = pred_ch[m_band]
+        # 条件分岐: `starts.size <= 0` を満たす経路を評価する。
         if starts.size <= 0:
             return pred_sel
+
         out = np.add.reduceat(pred_sel, starts)
         return np.asarray(out[: int(y_reb.size)], dtype=float)
 
@@ -1491,14 +1692,20 @@ def _fit_powerlaw_plus_diskline_rmf(
     Forward-fold fit in channel space:
       model(E) --(ARF×exposure)--> photons/bin --(RMF)--> counts/channel.
     """
+    # 条件分岐: `least_squares is None or sp is None` を満たす経路を評価する。
     if least_squares is None or sp is None:
         raise RuntimeError("scipy is required for RMF folding fit")
+
+    # 条件分岐: `not instruments` を満たす経路を評価する。
+
     if not instruments:
         raise ValueError("no instruments")
 
     rmf0 = instruments[0].get("rmf")
+    # 条件分岐: `not isinstance(rmf0, _OgipRmf)` を満たす経路を評価する。
     if not isinstance(rmf0, _OgipRmf):
         raise ValueError("rmf missing for instrument 0")
+
     detchans = int(rmf0.detchans)
 
     # Combine observed spectra (MOS1+MOS2) in channel space.
@@ -1507,18 +1714,23 @@ def _fit_powerlaw_plus_diskline_rmf(
     var_sum = np.zeros(detchans, dtype=float)
     for inst in instruments:
         rmf = inst.get("rmf")
+        # 条件分岐: `not isinstance(rmf, _OgipRmf) or int(rmf.detchans) != detchans` を満たす経路を評価する。
         if not isinstance(rmf, _OgipRmf) or int(rmf.detchans) != detchans:
             raise ValueError("inconsistent RMF/detchans across instruments")
+
         src = np.asarray(inst.get("src_counts"), dtype=float)
         net = np.asarray(inst.get("net_counts"), dtype=float)
         var = np.asarray(inst.get("var_counts"), dtype=float)
+        # 条件分岐: `src.size != detchans or net.size != detchans or var.size != detchans` を満たす経路を評価する。
         if src.size != detchans or net.size != detchans or var.size != detchans:
             raise ValueError("spectrum arrays must have length detchans")
+
         src_sum += np.clip(src, 0.0, None)
         net_sum += net
         var_sum += np.clip(var, 0.0, None)
 
     # Channel energies for band selection / rebin.
+
     e_chan = np.asarray(rmf0.chan_e_mid, dtype=float) * (1.0 + float(gain_shift))
     m_band = (
         (e_chan >= float(band_keV[0]))
@@ -1527,6 +1739,7 @@ def _fit_powerlaw_plus_diskline_rmf(
         & np.isfinite(net_sum)
         & np.isfinite(var_sum)
     )
+    # 条件分岐: `not np.any(m_band)` を満たす経路を評価する。
     if not np.any(m_band):
         raise RuntimeError("empty band after filtering")
 
@@ -1568,9 +1781,14 @@ def _fit_powerlaw_plus_diskline_rmf(
         arf_a = np.asarray(inst.get("arf_area"), dtype=float)
         area = _interp_arf_area(e_model, arf_e_mid=arf_e, arf_area=arf_a)
         area_band = float(np.nanmedian(area[m_thr])) if np.any(m_thr) else float(np.nanmedian(area))
+        # 条件分岐: `not math.isfinite(area_band) or area_band <= 0` を満たす経路を評価する。
         if not math.isfinite(area_band) or area_band <= 0:
             area_band = 1.0
+
         thr += max(exp, 0.0) * area_band
+
+    # 条件分岐: `not (thr > 0.0) or not math.isfinite(thr)` を満たす経路を評価する。
+
     if not (thr > 0.0) or not math.isfinite(thr):
         thr = 1.0
 
@@ -1599,8 +1817,10 @@ def _fit_powerlaw_plus_diskline_rmf(
             pred_ch += np.asarray(rmf.rsp.dot(counts_bin)).reshape(-1)
 
         pred_sel = pred_ch[m_band]
+        # 条件分岐: `starts.size <= 0` を満たす経路を評価する。
         if starts.size <= 0:
             return pred_sel
+
         out = np.add.reduceat(pred_sel, starts)
         return np.asarray(out[: int(y_reb.size)], dtype=float)
 
@@ -1617,14 +1837,18 @@ def _fit_powerlaw_plus_diskline_rmf(
             res0 = least_squares(_resid, x0=x0, bounds=(lo, hi), max_nfev=220)
         except Exception:
             continue
+
         p0 = np.asarray(res0.x, dtype=float)
         yhat0 = _predict(p0)
         chi20 = float(np.sum(((y_reb - yhat0) / sigma) ** 2))
         dof0 = int(max(int(y_reb.size) - int(p0.size), 1))
+        # 条件分岐: `chi20 < best_chi2` を満たす経路を評価する。
         if chi20 < best_chi2:
             best_chi2 = chi20
             best_res = res0
             best_dof = dof0
+
+    # 条件分岐: `best_res is None` を満たす経路を評価する。
 
     if best_res is None:
         raise RuntimeError("least_squares failed for all initializations")
@@ -1647,8 +1871,10 @@ def _fit_powerlaw_plus_diskline_rmf(
 
     r_in = float(p[3])
     r_in_bound = ""
+    # 条件分岐: `abs(r_in - float(lo[3])) < 1e-6` を満たす経路を評価する。
     if abs(r_in - float(lo[3])) < 1e-6:
         r_in_bound = "lower"
+    # 条件分岐: 前段条件が不成立で、`abs(r_in - float(hi[3])) < 1e-6` を追加評価する。
     elif abs(r_in - float(hi[3])) < 1e-6:
         r_in_bound = "upper"
 
@@ -1676,6 +1902,7 @@ def _choose_xmm_target_spectra(
     pattern = f"P{obsid}{inst_tag}U002SRSPEC*.FTZ"
     cands = sorted(pps_dir.glob(pattern))
     debug: Dict[str, Any] = {"pattern": pattern, "n_candidates": int(len(cands)), "candidates": []}
+    # 条件分岐: `not cands` を満たす経路を評価する。
     if not cands:
         return None, debug
 
@@ -1690,12 +1917,14 @@ def _choose_xmm_target_spectra(
             m = (e >= float(band_keV[0])) & (e <= float(band_keV[1]))
             score = float(np.sum(np.clip(src_counts[m], 0.0, None)))
             debug["candidates"].append({"path": _rel(p), "score_counts": score})
+            # 条件分岐: `score > best_score` を満たす経路を評価する。
             if score > best_score:
                 best_score = score
                 best = p
         except Exception as e:
             debug["candidates"].append({"path": _rel(p), "error": str(e)})
             continue
+
     debug["best"] = {"path": _rel(best) if best else None, "score_counts": best_score}
     return best, debug
 
@@ -1711,9 +1940,11 @@ def _load_xmm_net_spectrum(spec_path: Path) -> Dict[str, Any]:
     has_bkg = bool(bkg_path is not None and bkg_path.exists())
     bkg_counts = np.zeros_like(src_counts, dtype=float)
     scale = 0.0
+    # 条件分岐: `has_bkg and bkg_path is not None` を満たす経路を評価する。
     if has_bkg and bkg_path is not None:
         hdr_b = _fits_read_spectrum_header(bkg_path)
         ch_b, bkg_counts = _fits_read_spectrum_counts(bkg_path)
+        # 条件分岐: `ch_b.size == ch.size and float(np.max(np.abs(ch_b - ch))) < 1e-6` を満たす経路を評価する。
         if ch_b.size == ch.size and float(np.max(np.abs(ch_b - ch))) < 1e-6:
             exp_s = float(_parse_float(hdr, "EXPOSURE", default=1.0) or 1.0)
             exp_b = float(_parse_float(hdr_b, "EXPOSURE", default=1.0) or 1.0)
@@ -1759,6 +1990,7 @@ def _fits_read_arf(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     with opener(path, "rb") as f:  # type: ignore[arg-type]
         layout = read_first_bintable_layout(f)
         cols = read_bintable_columns(f, layout=layout, columns=["ENERG_LO", "ENERG_HI", "SPECRESP"])
+
     lo = np.asarray(cols["ENERG_LO"], dtype=float)
     hi = np.asarray(cols["ENERG_HI"], dtype=float)
     a = np.asarray(cols["SPECRESP"], dtype=float)
@@ -1792,13 +2024,16 @@ _TFORM_CODE_RE = re.compile(r"^\s*(?P<rep>\d*)(?P<code>[A-Z]|[PQ][A-Z])\s*$")
 
 def _parse_int(kv: Dict[str, str], key: str, default: int = 0) -> int:
     v = _parse_float(kv, key, default=float(default))
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
         return int(default)
+
     return int(float(v))
 
 
 def _fits_hdu_data_size_bytes(kv: Dict[str, str]) -> int:
     xt = _parse_str(kv, "XTENSION", default="").upper()
+    # 条件分岐: `"BINTABLE" in xt` を満たす経路を評価する。
     if "BINTABLE" in xt:
         naxis1 = _parse_int(kv, "NAXIS1", default=0)
         naxis2 = _parse_int(kv, "NAXIS2", default=0)
@@ -1806,18 +2041,26 @@ def _fits_hdu_data_size_bytes(kv: Dict[str, str]) -> int:
         return int(naxis1) * int(naxis2) + int(pcount)
 
     # Primary HDU or IMAGE extension (not expected for RMF, but keep minimal support).
+
     naxis = _parse_int(kv, "NAXIS", default=0)
+    # 条件分岐: `naxis <= 0` を満たす経路を評価する。
     if naxis <= 0:
         return 0
+
     bitpix = abs(_parse_int(kv, "BITPIX", default=0))
+    # 条件分岐: `bitpix <= 0` を満たす経路を評価する。
     if bitpix <= 0:
         return 0
+
     bytes_per = int(bitpix) // 8
+    # 条件分岐: `bytes_per <= 0` を満たす経路を評価する。
     if bytes_per <= 0:
         return 0
+
     n = 1
     for i in range(1, int(naxis) + 1):
         n *= max(_parse_int(kv, f"NAXIS{i}", default=0), 0)
+
     return int(n) * int(bytes_per)
 
 
@@ -1829,17 +2072,25 @@ def _fits_skip_padded(stream: io.BytesIO, n_bytes: int) -> None:
 
 def _tform_spec(tform: str) -> Dict[str, Any]:
     s = str(tform or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         raise ValueError("empty TFORM")
     # Strip maxlen, e.g. "1PI(43)" -> "1PI"
+
     s = s.split("(", 1)[0].strip()
     m = _TFORM_CODE_RE.match(s)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"unsupported TFORM: {tform!r}")
+
     rep = int(m.group("rep") or "1")
     code = str(m.group("code") or "").strip().upper()
+    # 条件分岐: `rep < 1` を満たす経路を評価する。
     if rep < 1:
         raise ValueError(f"invalid TFORM repeat: {tform!r}")
+
+    # 条件分岐: `len(code) == 2 and code[0] in {"P", "Q"}` を満たす経路を評価する。
+
     if len(code) == 2 and code[0] in {"P", "Q"}:
         kind = code[0]
         base = code[1]
@@ -1850,54 +2101,89 @@ def _tform_spec(tform: str) -> Dict[str, Any]:
             "base": base,
             "row_width": rep * (8 if kind == "P" else 16),
         }
+
     base = code
+    # 条件分岐: `base == "A"` を満たす経路を評価する。
     if base == "A":
         width = rep
+    # 条件分岐: 前段条件が不成立で、`base == "I"` を追加評価する。
     elif base == "I":
         width = 2 * rep
+    # 条件分岐: 前段条件が不成立で、`base == "J"` を追加評価する。
     elif base == "J":
         width = 4 * rep
+    # 条件分岐: 前段条件が不成立で、`base == "K"` を追加評価する。
     elif base == "K":
         width = 8 * rep
+    # 条件分岐: 前段条件が不成立で、`base == "E"` を追加評価する。
     elif base == "E":
         width = 4 * rep
+    # 条件分岐: 前段条件が不成立で、`base == "D"` を追加評価する。
     elif base == "D":
         width = 8 * rep
+    # 条件分岐: 前段条件が不成立で、`base == "B"` を追加評価する。
     elif base == "B":
         width = 1 * rep
+    # 条件分岐: 前段条件が不成立で、`base == "L"` を追加評価する。
     elif base == "L":
         width = 1 * rep
     else:
         raise ValueError(f"unsupported TFORM base code: {base!r} (tform={tform!r})")
+
     return {"repeat": rep, "is_var": False, "base": base, "row_width": int(width)}
 
 
 def _tform_numpy_dtype(base: str, *, repeat: int) -> np.dtype:
     b = str(base or "").strip().upper()
     rep = int(repeat)
+    # 条件分岐: `b == "A"` を満たす経路を評価する。
     if b == "A":
         return np.dtype(f"S{rep}")
+
+    # 条件分岐: `b == "I"` を満たす経路を評価する。
+
     if b == "I":
         return np.dtype(">i2")
+
+    # 条件分岐: `b == "J"` を満たす経路を評価する。
+
     if b == "J":
         return np.dtype(">i4")
+
+    # 条件分岐: `b == "K"` を満たす経路を評価する。
+
     if b == "K":
         return np.dtype(">i8")
+
+    # 条件分岐: `b == "E"` を満たす経路を評価する。
+
     if b == "E":
         return np.dtype(">f4")
+
+    # 条件分岐: `b == "D"` を満たす経路を評価する。
+
     if b == "D":
         return np.dtype(">f8")
+
+    # 条件分岐: `b == "B"` を満たす経路を評価する。
+
     if b == "B":
         return np.dtype("u1")
+
+    # 条件分岐: `b == "L"` を満たす経路を評価する。
+
     if b == "L":
         return np.dtype("S1")
+
     raise ValueError(f"unsupported base dtype: {base!r}")
 
 
 def _fits_parse_bintable_layout(kv: Dict[str, str], *, row_bytes: int) -> Tuple[Dict[str, int], Dict[str, str], Dict[str, Dict[str, Any]]]:
     tfields = _parse_int(kv, "TFIELDS", default=0)
+    # 条件分岐: `tfields <= 0` を満たす経路を評価する。
     if tfields <= 0:
         raise ValueError("TFIELDS missing/invalid")
+
     offsets: Dict[str, int] = {}
     tforms: Dict[str, str] = {}
     specs: Dict[str, Dict[str, Any]] = {}
@@ -1905,15 +2191,21 @@ def _fits_parse_bintable_layout(kv: Dict[str, str], *, row_bytes: int) -> Tuple[
     for i in range(1, int(tfields) + 1):
         name = _parse_str(kv, f"TTYPE{i}", default="").strip()
         tform = _parse_str(kv, f"TFORM{i}", default="")
+        # 条件分岐: `not name or not tform` を満たす経路を評価する。
         if not name or not tform:
             raise ValueError(f"missing TTYPE/TFORM for field {i}")
+
         spec = _tform_spec(tform)
         offsets[name] = int(off)
         tforms[name] = str(tform)
         specs[name] = spec
         off += int(spec["row_width"])
+
+    # 条件分岐: `int(off) != int(row_bytes)` を満たす経路を評価する。
+
     if int(off) != int(row_bytes):
         raise ValueError(f"row size mismatch: sum(TFORM widths)={off} != NAXIS1={row_bytes}")
+
     return offsets, tforms, specs
 
 
@@ -1931,9 +2223,11 @@ def _fits_find_bintable(buf: bytes, *, extname: str) -> Tuple[Dict[str, str], in
             hdr = _read_header_blocks(s)
         except EOFError as e:
             raise KeyError(f"FITS extension not found: {want}") from e
+
         kv = _parse_header_kv(hdr)
         data_offset = int(s.tell())
         xt = _parse_str(kv, "XTENSION", default="").upper()
+        # 条件分岐: `"BINTABLE" in xt` を満たす経路を評価する。
         if "BINTABLE" in xt:
             name = _parse_str(kv, "EXTNAME", default="").strip().upper()
             row_bytes = _parse_int(kv, "NAXIS1", default=0)
@@ -1942,6 +2236,7 @@ def _fits_find_bintable(buf: bytes, *, extname: str) -> Tuple[Dict[str, str], in
             theap_default = int(row_bytes) * int(n_rows)
             theap = _parse_int(kv, "THEAP", default=theap_default)
             offsets, tforms, specs = _fits_parse_bintable_layout(kv, row_bytes=row_bytes)
+            # 条件分岐: `name == want` を満たす経路を評価する。
             if name == want:
                 return kv, data_offset, row_bytes, n_rows, pcount, theap, offsets, tforms, specs
 
@@ -1949,8 +2244,10 @@ def _fits_find_bintable(buf: bytes, *, extname: str) -> Tuple[Dict[str, str], in
 
 
 def _rmf_load_ogip(path: Path) -> _OgipRmf:
+    # 条件分岐: `sp is None` を満たす経路を評価する。
     if sp is None:
         raise RuntimeError("scipy.sparse is required for RMF folding")
+
     buf = path.read_bytes()
 
     kv_e, off_e, row_e, n_e, _p_e, _t_e, offsets_e, tforms_e, specs_e = _fits_find_bintable(buf, extname="EBOUNDS")
@@ -1959,8 +2256,10 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
     # EBOUNDS: CHANNEL, E_MIN, E_MAX
     need_e = ["CHANNEL", "E_MIN", "E_MAX"]
     for c in need_e:
+        # 条件分岐: `c not in offsets_e` を満たす経路を評価する。
         if c not in offsets_e:
             raise KeyError(f"EBOUNDS column not found: {c}")
+
     main_e = memoryview(buf)[int(off_e) : int(off_e) + int(row_e) * int(n_e)]
     dt_e = np.dtype(
         {
@@ -1981,25 +2280,40 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
     e_mid_chan = 0.5 * (e_min + e_max)
 
     detchans = _parse_int(kv_e, "DETCHANS", default=int(chan.max() + 1 if chan.size else 0))
+    # 条件分岐: `detchans <= 0` を満たす経路を評価する。
     if detchans <= 0:
         detchans = int(chan.size)
 
     # MATRIX: ENERG_LO/HI, N_GRP, F_CHAN, N_CHAN, MATRIX
+
     need_m = ["ENERG_LO", "ENERG_HI", "N_GRP", "F_CHAN", "N_CHAN", "MATRIX"]
     for c in need_m:
+        # 条件分岐: `c not in offsets_m` を満たす経路を評価する。
         if c not in offsets_m:
             raise KeyError(f"MATRIX column not found: {c}")
+
+    # 条件分岐: `any(bool(specs_m[c].get("is_var")) for c in ["ENERG_LO", "ENERG_HI", "N_GRP"])` を満たす経路を評価する。
+
     if any(bool(specs_m[c].get("is_var")) for c in ["ENERG_LO", "ENERG_HI", "N_GRP"]):
         raise ValueError("unexpected varlen scalar in MATRIX")
+
     f_is_var = bool(specs_m["F_CHAN"].get("is_var"))
     n_is_var = bool(specs_m["N_CHAN"].get("is_var"))
     m_is_var = bool(specs_m["MATRIX"].get("is_var"))
+    # 条件分岐: `not m_is_var or str(specs_m["MATRIX"].get("var_kind")) != "P"` を満たす経路を評価する。
     if not m_is_var or str(specs_m["MATRIX"].get("var_kind")) != "P":
         raise ValueError("MATRIX must be a 'P' varlen array for RMF")
+
+    # 条件分岐: `f_is_var != n_is_var` を満たす経路を評価する。
+
     if f_is_var != n_is_var:
         raise ValueError("mixed scalar/varlen layout for F_CHAN vs N_CHAN")
+
+    # 条件分岐: `f_is_var and any(str(specs_m[c].get("var_kind")) != "P" for c in ["F_CHAN", "...` を満たす経路を評価する。
+
     if f_is_var and any(str(specs_m[c].get("var_kind")) != "P" for c in ["F_CHAN", "N_CHAN"]):
         raise ValueError("only 'P' varlen arrays are supported for F_CHAN/N_CHAN")
+
     if (not f_is_var) and (
         int(specs_m["F_CHAN"].get("repeat") or 1) != 1 or int(specs_m["N_CHAN"].get("repeat") or 1) != 1
     ):
@@ -2017,6 +2331,7 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
         _tform_numpy_dtype(specs_m["N_GRP"]["base"], repeat=int(specs_m["N_GRP"]["repeat"])),
     ]
     offs_m: List[int] = [int(offsets_m["ENERG_LO"]), int(offsets_m["ENERG_HI"]), int(offsets_m["N_GRP"])]
+    # 条件分岐: `f_is_var` を満たす経路を評価する。
     if f_is_var:
         names_m.extend(["F_DESC", "N_DESC"])
         fmts_m.extend([(np.dtype(">u4"), (2,)), (np.dtype(">u4"), (2,))])
@@ -2030,6 +2345,7 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
             ]
         )
         offs_m.extend([int(offsets_m["F_CHAN"]), int(offsets_m["N_CHAN"])])
+
     names_m.append("M_DESC")
     fmts_m.append((np.dtype(">u4"), (2,)))
     offs_m.append(int(offsets_m["MATRIX"]))
@@ -2061,35 +2377,50 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
 
     for i in range(int(n_m)):
         ng = int(n_grp[i]) if i < n_grp.size else 0
+        # 条件分岐: `ng <= 0` を満たす経路を評価する。
         if ng <= 0:
             continue
 
         nr, off_r = int(m_desc[i, 0]), int(m_desc[i, 1])
+        # 条件分岐: `nr <= 0` を満たす経路を評価する。
         if nr <= 0:
             continue
 
         r0 = int(off_r)
+        # 条件分岐: `r0 < 0` を満たす経路を評価する。
         if r0 < 0:
             continue
+
+        # 条件分岐: `r0 + nr * r_size > heap.nbytes` を満たす経路を評価する。
+
         if r0 + nr * r_size > heap.nbytes:
             continue
 
         resp = np.frombuffer(heap[r0 : r0 + nr * r_size], dtype=dt_r, count=nr).astype(np.float64, copy=False)
 
+        # 条件分岐: `f_is_var` を満たす経路を評価する。
         if f_is_var:
             assert f_desc is not None and n_desc is not None
             nf, off_f = int(f_desc[i, 0]), int(f_desc[i, 1])
             nn, off_n = int(n_desc[i, 0]), int(n_desc[i, 1])
+            # 条件分岐: `nf <= 0 or nn <= 0` を満たす経路を評価する。
             if nf <= 0 or nn <= 0:
                 continue
+
             f0 = int(off_f)
             n0 = int(off_n)
+            # 条件分岐: `f0 < 0 or n0 < 0` を満たす経路を評価する。
             if f0 < 0 or n0 < 0:
                 continue
+
+            # 条件分岐: `f0 + nf * f_size > heap.nbytes or n0 + nn * n_size > heap.nbytes` を満たす経路を評価する。
+
             if f0 + nf * f_size > heap.nbytes or n0 + nn * n_size > heap.nbytes:
                 continue
+
             f_chan = np.frombuffer(heap[f0 : f0 + nf * f_size], dtype=dt_f, count=nf).astype(np.int64, copy=False)
             n_chan = np.frombuffer(heap[n0 : n0 + nn * n_size], dtype=dt_n, count=nn).astype(np.int64, copy=False)
+            # 条件分岐: `f_chan.size < ng or n_chan.size < ng` を満たす経路を評価する。
             if f_chan.size < ng or n_chan.size < ng:
                 continue
 
@@ -2097,23 +2428,39 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
             for g in range(int(ng)):
                 start = int(f_chan[g])
                 length = int(n_chan[g])
+                # 条件分岐: `length <= 0` を満たす経路を評価する。
                 if length <= 0:
                     continue
+
+                # 条件分岐: `pos + length > resp.size` を満たす経路を評価する。
+
                 if pos + length > resp.size:
                     break
+
+                # 条件分岐: `start < 0` を満たす経路を評価する。
+
                 if start < 0:
                     pos += length
                     continue
+
                 end = start + length
+                # 条件分岐: `start >= detchans` を満たす経路を評価する。
                 if start >= detchans:
                     pos += length
                     continue
+
+                # 条件分岐: `end > detchans` を満たす経路を評価する。
+
                 if end > detchans:
                     length = int(max(detchans - start, 0))
                     end = start + length
+
+                # 条件分岐: `length <= 0` を満たす経路を評価する。
+
                 if length <= 0:
                     pos += int(n_chan[g])
                     continue
+
                 vals = resp[pos : pos + length]
                 idx = np.arange(int(start), int(end), dtype=np.int64)
                 rows_list.append(idx)
@@ -2125,24 +2472,37 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
             # Some canned RMFs use N_GRP=1 with scalar F_CHAN/N_CHAN.
             if int(ng) != 1:
                 continue
+
             start = int(f_scalar[i])
             length = int(n_scalar[i])
+            # 条件分岐: `length <= 0 or start < 0` を満たす経路を評価する。
             if length <= 0 or start < 0:
                 continue
+
             length = int(min(length, resp.size))
             end = start + length
+            # 条件分岐: `start >= detchans` を満たす経路を評価する。
             if start >= detchans:
                 continue
+
+            # 条件分岐: `end > detchans` を満たす経路を評価する。
+
             if end > detchans:
                 length = int(max(detchans - start, 0))
                 end = start + length
+
+            # 条件分岐: `length <= 0` を満たす経路を評価する。
+
             if length <= 0:
                 continue
+
             vals = resp[:length]
             idx = np.arange(int(start), int(end), dtype=np.int64)
             rows_list.append(idx)
             cols_list.append(np.full(int(idx.size), int(i), dtype=np.int64))
             data_list.append(np.asarray(vals, dtype=np.float64))
+
+    # 条件分岐: `rows_list` を満たす経路を評価する。
 
     if rows_list:
         rows = np.concatenate(rows_list).astype(np.int64, copy=False)
@@ -2177,8 +2537,10 @@ _RMF_CACHE: Dict[str, _OgipRmf] = {}
 
 def _rmf_cached(path: Path) -> _OgipRmf:
     key = str(path.resolve())
+    # 条件分岐: `key in _RMF_CACHE` を満たす経路を評価する。
     if key in _RMF_CACHE:
         return _RMF_CACHE[key]
+
     rmf = _rmf_load_ogip(path)
     _RMF_CACHE[key] = rmf
     return rmf
@@ -2186,14 +2548,21 @@ def _rmf_cached(path: Path) -> _OgipRmf:
 
 def _xmm_local_rmf_path(respfile: str) -> Optional[Path]:
     name = str(respfile or "").strip().strip("'")
+    # 条件分岐: `not name` を満たす経路を評価する。
     if not name:
         return None
+
     low = name.lower()
     base = _ROOT / "data" / "xrism" / "xmm_epic_responses"
+    # 条件分岐: `low.startswith(("m1_", "m2_", "m11_", "m21_"))` を満たす経路を評価する。
     if low.startswith(("m1_", "m2_", "m11_", "m21_")):
         return base / "MOS" / name
+
+    # 条件分岐: `low.startswith(("epn_", "pn_", "pnu_", "p11_", "p21_"))` を満たす経路を評価する。
+
     if low.startswith(("epn_", "pn_", "pnu_", "p11_", "p21_")):
         return base / "PN" / name
+
     return None
 
 
@@ -2217,20 +2586,35 @@ def _rebin_spectrum_to_detchans(
     var = np.asarray(var_counts, dtype=float)
     n = int(src.size)
     d = int(detchans)
+    # 条件分岐: `n != int(net.size) or n != int(var.size) or n != int(ch.size)` を満たす経路を評価する。
     if n != int(net.size) or n != int(var.size) or n != int(ch.size):
         raise ValueError("shape mismatch in spectrum arrays")
+
+    # 条件分岐: `d <= 0` を満たす経路を評価する。
+
     if d <= 0:
         raise ValueError("invalid detchans")
+
+    # 条件分岐: `n == d` を満たす経路を評価する。
+
     if n == d:
         return src, net, var, {"status": "no_rebin", "factor": 1}
+
+    # 条件分岐: `n % d != 0` を満たす経路を評価する。
+
     if n % d != 0:
         raise ValueError(f"cannot rebin spectrum: n={n} not divisible by detchans={d}")
+
     factor = int(n // d)
 
     order = np.argsort(ch)
     ch2 = ch[order]
+    # 条件分岐: `not np.all(np.isfinite(ch2))` を満たす経路を評価する。
     if not np.all(np.isfinite(ch2)):
         raise ValueError("non-finite channel values")
+
+    # 条件分岐: `float(np.max(np.abs(ch2 - np.arange(n, dtype=float)))) > 1e-6` を満たす経路を評価する。
+
     if float(np.max(np.abs(ch2 - np.arange(n, dtype=float)))) > 1e-6:
         raise ValueError("unexpected CHANNEL numbering (expected 0..N-1)")
 
@@ -2249,8 +2633,10 @@ def _interp_arf_area(energy_keV: np.ndarray, *, arf_e_mid: np.ndarray, arf_area:
     e = np.asarray(energy_keV, dtype=float)
     x = np.asarray(arf_e_mid, dtype=float)
     y = np.asarray(arf_area, dtype=float)
+    # 条件分岐: `x.size < 2 or y.size != x.size` を満たす経路を評価する。
     if x.size < 2 or y.size != x.size:
         return np.ones_like(e, dtype=float)
+
     order = np.argsort(x)
     x = x[order]
     y = y[order]
@@ -2262,6 +2648,7 @@ def _fit_xmm_obsid_diskline(
 ) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
     pps_dir = cache_root / "xmm" / rev / obsid / "PPS"
     debug: Dict[str, Any] = {"obsid": obsid, "rev": rev, "pps_dir": _rel(pps_dir)}
+    # 条件分岐: `not pps_dir.exists()` を満たす経路を評価する。
     if not pps_dir.exists():
         return None, {"status": "missing_pps", **debug}
 
@@ -2270,16 +2657,20 @@ def _fit_xmm_obsid_diskline(
     m2_path, dbg_m2 = _choose_xmm_target_spectra(pps_dir, obsid=obsid, inst_tag="M2", band_keV=band_default)
     debug["select_m1"] = dbg_m1
     debug["select_m2"] = dbg_m2
+    # 条件分岐: `m1_path is None and m2_path is None` を満たす経路を評価する。
     if m1_path is None and m2_path is None:
         return None, {"status": "no_spectra", **debug}
 
     specs: List[Dict[str, Any]] = []
     for p in [m1_path, m2_path]:
+        # 条件分岐: `p is None` を満たす経路を評価する。
         if p is None:
             continue
+
         specs.append(_load_xmm_net_spectrum(p))
 
     # Prefer RMF/ARF forward-folding if canned RMF is available locally.
+
     rmf_instruments: List[Dict[str, Any]] = []
     rmf_sources: List[Dict[str, Any]] = []
     rmf_errors: List[Dict[str, Any]] = []
@@ -2290,6 +2681,7 @@ def _fit_xmm_obsid_diskline(
             spec_path = (_ROOT / Path(spec_rel)).resolve() if spec_rel else None
             respfile = str(hdr.get("RESPFILE") or "").strip()
             rmf_path = _xmm_local_rmf_path(respfile)
+            # 条件分岐: `rmf_path is None or not rmf_path.exists()` を満たす経路を評価する。
             if rmf_path is None or not rmf_path.exists():
                 rmf_errors.append(
                     {
@@ -2300,10 +2692,12 @@ def _fit_xmm_obsid_diskline(
                     }
                 )
                 continue
+
             rmf = _rmf_cached(rmf_path)
 
             ancr = str(hdr.get("ANCRFILE") or "").strip()
             arf_path = (spec_path.parent / ancr) if spec_path is not None and ancr else None
+            # 条件分岐: `arf_path is None or not arf_path.exists()` を満たす経路を評価する。
             if arf_path is None or not arf_path.exists():
                 rmf_errors.append(
                     {
@@ -2315,6 +2709,7 @@ def _fit_xmm_obsid_diskline(
                     }
                 )
                 continue
+
             arf_e, arf_a = _fits_read_arf(arf_path)
 
             exp = float(hdr.get("EXPOSURE", 0.0) or 0.0)
@@ -2343,6 +2738,7 @@ def _fit_xmm_obsid_diskline(
                     }
                 )
                 continue
+
             rmf_instruments.append(
                 {
                     "rmf": rmf,
@@ -2375,6 +2771,7 @@ def _fit_xmm_obsid_diskline(
     debug["rmf_sources"] = rmf_sources
     debug["rmf_errors"] = rmf_errors
 
+    # 条件分岐: `rmf_instruments` を満たす経路を評価する。
     if rmf_instruments:
         try:
             fit0_rmf = _fit_powerlaw_plus_diskline_rmf(
@@ -2398,6 +2795,7 @@ def _fit_xmm_obsid_diskline(
                 )
                 chi2_cont = float(cont_fit_rmf.get("fit", {}).get("chi2", float("nan")))
                 chi2_full = float(fit0_rmf.get("fit", {}).get("chi2", float("nan")))
+                # 条件分岐: `np.isfinite(chi2_cont) and np.isfinite(chi2_full)` を満たす経路を評価する。
                 if np.isfinite(chi2_cont) and np.isfinite(chi2_full):
                     delta_chi2 = float(chi2_cont - chi2_full)
                     line_detected = bool(delta_chi2 >= float(delta_chi2_threshold))
@@ -2405,6 +2803,7 @@ def _fit_xmm_obsid_diskline(
                 debug["line_detection_error"] = str(ex)
 
             # Simple S/N proxy in the fitted band (channel space).
+
             net_counts_band_pos = float("nan")
             var_counts_band = float("nan")
             snr_band_proxy = float("nan")
@@ -2417,6 +2816,9 @@ def _fit_xmm_obsid_diskline(
                 for inst in rmf_instruments:
                     net_sum += np.asarray(inst.get("net_counts"), dtype=float)
                     var_sum += np.asarray(inst.get("var_counts"), dtype=float)
+
+                # 条件分岐: `np.any(m_band)` を満たす経路を評価する。
+
                 if np.any(m_band):
                     net_counts_band_pos = float(np.sum(np.clip(net_sum[m_band], 0.0, None)))
                     var_counts_band = float(np.sum(np.clip(var_sum[m_band], 0.0, None)))
@@ -2428,14 +2830,18 @@ def _fit_xmm_obsid_diskline(
             r_in_stat0 = float(fit0_rmf.get("r_in_rg_stat", float("nan")))
             isco_constrained_proxy = bool(line_detected and (not r_in_bound0) and np.isfinite(r_in_stat0))
             proxy_quality = "ok"
+            # 条件分岐: `not line_detected` を満たす経路を評価する。
             if not line_detected:
                 proxy_quality = "no_broad_line"
+            # 条件分岐: 前段条件が不成立で、`r_in_bound0` を追加評価する。
             elif r_in_bound0:
                 proxy_quality = f"r_in_bound:{r_in_bound0}"
+            # 条件分岐: 前段条件が不成立で、`not np.isfinite(r_in_stat0)` を追加評価する。
             elif not np.isfinite(r_in_stat0):
                 proxy_quality = "no_cov"
 
             # Systematics sweep (band / gain / rebin) in RMF-folded space.
+
             sys_band = [(2.5, 10.0), (3.0, 10.0), (4.0, 10.0)]
             sys_gain = [-1e-3, 0.0, 1e-3]
             sys_rebin = [25, 50, 100]
@@ -2459,6 +2865,7 @@ def _fit_xmm_obsid_diskline(
                                 "gain_shift": float(g),
                                 "error": str(ex),
                             }
+
                         variants_rmf.append(r)
 
             r0 = float(fit0_rmf.get("r_in_rg", float("nan")))
@@ -2466,12 +2873,17 @@ def _fit_xmm_obsid_diskline(
             def _sys_component(selector: Iterable[Dict[str, Any]]) -> float:
                 vals = []
                 for it in selector:
+                    # 条件分岐: `it.get("status") != "ok"` を満たす経路を評価する。
                     if it.get("status") != "ok":
                         continue
+
                     vals.append(float(it.get("r_in_rg", float("nan"))))
+
                 vals = [v for v in vals if np.isfinite(v)]
+                # 条件分岐: `not vals or not np.isfinite(r0)` を満たす経路を評価する。
                 if not vals or not np.isfinite(r0):
                     return float("nan")
+
                 return float(max(abs(v - r0) for v in vals))
 
             sys_band_val = _sys_component([v for v in variants_rmf if v.get("min_counts") == 50 and v.get("gain_shift") == 0.0])
@@ -2531,18 +2943,22 @@ def _fit_xmm_obsid_diskline(
             debug["rmf_fit_error"] = str(ex)
 
     # Combine by summing counts/vars (energy grids should match)
+
     e = np.asarray(specs[0]["energy_keV"], dtype=float)
     net = np.zeros_like(e, dtype=float)
     var = np.zeros_like(e, dtype=float)
     src = np.zeros_like(e, dtype=float)
     for s in specs:
+        # 条件分岐: `np.asarray(s["energy_keV"]).shape != e.shape or float(np.max(np.abs(np.asarra...` を満たす経路を評価する。
         if np.asarray(s["energy_keV"]).shape != e.shape or float(np.max(np.abs(np.asarray(s["energy_keV"]) - e))) > 1e-9:
             return None, {"status": "energy_grid_mismatch", **debug}
+
         net += np.asarray(s["net_counts"], dtype=float)
         var += np.asarray(s["var_counts"], dtype=float)
         src += np.asarray(s["src_counts"], dtype=float)
 
     # Default fit
+
     w_sum = np.zeros_like(e, dtype=float)
     weight_sources: List[Dict[str, Any]] = []
     for sp in specs:
@@ -2551,6 +2967,7 @@ def _fit_xmm_obsid_diskline(
             ancr = str(sp.get("header", {}).get("ANCRFILE") or "").strip()
             respfile = str(sp.get("header", {}).get("RESPFILE") or "").strip()
             arf_path = (pps_dir / ancr) if ancr else None
+            # 条件分岐: `arf_path is not None and arf_path.exists()` を満たす経路を評価する。
             if arf_path is not None and arf_path.exists():
                 arf_e, arf_a = _fits_read_arf(arf_path)
                 area = _interp_arf_area(e, arf_e_mid=arf_e, arf_area=arf_a)
@@ -2600,6 +3017,7 @@ def _fit_xmm_obsid_diskline(
         )
         chi2_cont = float(cont_fit_proxy.get("fit", {}).get("chi2", float("nan")))
         chi2_full = float(fit0.get("fit", {}).get("chi2", float("nan")))
+        # 条件分岐: `np.isfinite(chi2_cont) and np.isfinite(chi2_full)` を満たす経路を評価する。
         if np.isfinite(chi2_cont) and np.isfinite(chi2_full):
             delta_chi2 = float(chi2_cont - chi2_full)
             line_detected = bool(delta_chi2 >= float(delta_chi2_threshold))
@@ -2615,14 +3033,18 @@ def _fit_xmm_obsid_diskline(
     r_in_stat0 = float(fit0.get("r_in_rg_stat", float("nan")))
     isco_constrained_proxy = bool(line_detected and (not r_in_bound0) and np.isfinite(r_in_stat0))
     proxy_quality = "ok"
+    # 条件分岐: `not line_detected` を満たす経路を評価する。
     if not line_detected:
         proxy_quality = "no_broad_line"
+    # 条件分岐: 前段条件が不成立で、`r_in_bound0` を追加評価する。
     elif r_in_bound0:
         proxy_quality = f"r_in_bound:{r_in_bound0}"
+    # 条件分岐: 前段条件が不成立で、`not np.isfinite(r_in_stat0)` を追加評価する。
     elif not np.isfinite(r_in_stat0):
         proxy_quality = "no_cov"
 
     # Systematics sweep (band / gain / rebin)
+
     sys_band = [(2.5, 10.0), (3.0, 10.0), (4.0, 10.0)]
     sys_gain = [-1e-3, 0.0, 1e-3]
     sys_rebin = [25, 50, 100]
@@ -2643,6 +3065,7 @@ def _fit_xmm_obsid_diskline(
                     )
                 except Exception as ex:
                     r = {"status": "fail", "band_keV": [float(b[0]), float(b[1])], "min_counts": int(mc), "gain_shift": float(g), "error": str(ex)}
+
                 variants.append(r)
 
     r0 = float(fit0.get("r_in_rg", float("nan")))
@@ -2650,12 +3073,17 @@ def _fit_xmm_obsid_diskline(
     def _sys_component(selector: Iterable[Dict[str, Any]]) -> float:
         vals = []
         for it in selector:
+            # 条件分岐: `it.get("status") != "ok"` を満たす経路を評価する。
             if it.get("status") != "ok":
                 continue
+
             vals.append(float(it.get("r_in_rg", float("nan"))))
+
         vals = [v for v in vals if np.isfinite(v)]
+        # 条件分岐: `not vals or not np.isfinite(r0)` を満たす経路を評価する。
         if not vals or not np.isfinite(r0):
             return float("nan")
+
         return float(max(abs(v - r0) for v in vals))
 
     sys_band_val = _sys_component([v for v in variants if v.get("min_counts") == 50 and v.get("gain_shift") == 0.0])
@@ -2728,18 +3156,25 @@ def _fit_nustar_obsid_proxy(
 ) -> Tuple[Optional[Dict[str, Any]], Dict[str, Any]]:
     event_dir = cache_root / "nustar" / obsid / "event_cl"
     debug: Dict[str, Any] = {"event_dir": _rel(event_dir), "files": [], "region_mode": str(region_mode)}
+    # 条件分岐: `not event_dir.exists()` を満たす経路を評価する。
     if not event_dir.exists():
         return None, {"status": "missing_event_dir", **debug}
 
     # Use all cleaned event files for A/B modules under event_cl.
+
     cands = sorted(event_dir.glob(f"nu{obsid}[AB]*_cl.evt*"))
+    # 条件分岐: `not cands` を満たす経路を評価する。
     if not cands:
         # Some archives may not use ".evt" suffix; allow ".fits" too as a fallback.
         cands = sorted(event_dir.glob(f"nu{obsid}[AB]*_cl*.fits*"))
+
+    # 条件分岐: `not cands` を満たす経路を評価する。
+
     if not cands:
         return None, {"status": "no_event_files", **debug}
 
     requested_mode = str(region_mode).strip().lower()
+    # 条件分岐: `requested_mode not in {"none", "auto_det1", "src_reg"}` を満たす経路を評価する。
     if requested_mode not in {"none", "auto_det1", "src_reg"}:
         raise ValueError("invalid region_mode for NuSTAR (expected: none|auto_det1|src_reg)")
 
@@ -2753,17 +3188,23 @@ def _fit_nustar_obsid_proxy(
             try:
                 pi = _fits_read_event_pi(p)
                 n_events0 += int(pi.size)
+                # 条件分岐: `pi.size == 0` を満たす経路を評価する。
                 if pi.size == 0:
                     files0.append({"path": _rel(p), "n_events": 0})
                     continue
+
                 c = np.bincount(pi, minlength=int(np.max(pi)) + 1).astype(float)
                 counts0 = _accumulate_bincount(counts0, c)
                 files0.append({"path": _rel(p), "n_events": int(pi.size), "max_pi": int(np.max(pi))})
             except Exception as e:
                 files0.append({"path": _rel(p), "error": str(e)})
                 continue
+
+        # 条件分岐: `counts0.size < 10 or float(np.sum(counts0)) <= 0` を満たす経路を評価する。
+
         if counts0.size < 10 or float(np.sum(counts0)) <= 0:
             raise RuntimeError(f"empty_counts (n_events={n_events0})")
+
         ch0 = np.arange(int(counts0.size), dtype=float)
         e0 = _energy_from_nustar_pi(ch0)
         y0 = np.asarray(counts0, dtype=float)
@@ -2776,8 +3217,10 @@ def _fit_nustar_obsid_proxy(
         spec_dbg0: Dict[str, Any] = {}
         center, cdbg = _nustar_det1_peak_center(cands, bin_size=int(det1_bin_size), det1_max=int(det1_max))
         spec_dbg0["center_det1"] = cdbg
+        # 条件分岐: `center is None` を満たす経路を評価する。
         if center is None:
             raise RuntimeError("center_not_found")
+
         spec, sdbg = _nustar_extract_net_spectrum_det1(
             cands,
             center_det1=(float(center[0]), float(center[1])),
@@ -2787,8 +3230,10 @@ def _fit_nustar_obsid_proxy(
             det1_max=int(det1_max),
         )
         spec_dbg0["spectrum"] = sdbg
+        # 条件分岐: `spec is None` を満たす経路を評価する。
         if spec is None:
             raise RuntimeError("spectrum_extract_failed")
+
         counts0 = np.asarray(spec["net_counts"], dtype=float)
         var0 = np.asarray(spec["var_counts"], dtype=float)
         ch0 = np.arange(int(counts0.size), dtype=float)
@@ -2802,6 +3247,7 @@ def _fit_nustar_obsid_proxy(
         """
         reg_files = sorted(event_dir.glob(f"nu{obsid}[AB]*_src.reg"))
         reg_dbg: Dict[str, Any] = {"mode": "src_reg", "region_files": [_rel(p) for p in reg_files], "regions": {}, "modules": []}
+        # 条件分岐: `not reg_files` を満たす経路を評価する。
         if not reg_files:
             raise RuntimeError("no_src_reg_files")
 
@@ -2810,11 +3256,15 @@ def _fit_nustar_obsid_proxy(
             m = re.search(rf"nu{re.escape(obsid)}(?P<mod>[AB])", p.name)
             mod = str(m.group("mod")) if m else ""
             circ = _parse_ds9_circle_region(p)
+            # 条件分岐: `circ is None` を満たす経路を評価する。
             if circ is None:
                 reg_dbg["regions"][mod or p.name] = {"path": _rel(p), "status": "parse_failed"}
                 continue
+
             regions[mod] = circ
             reg_dbg["regions"][mod] = {"path": _rel(p), "center_xy": [float(circ[0]), float(circ[1])], "src_radius": float(circ[2])}
+
+        # 条件分岐: `not regions` を満たす経路を評価する。
 
         if not regions:
             raise RuntimeError("no_parseable_src_reg")
@@ -2824,8 +3274,10 @@ def _fit_nustar_obsid_proxy(
         used_any = False
         for mod in ["A", "B"]:
             files_mod = [p for p in cands if f"nu{obsid}{mod}" in p.name]
+            # 条件分岐: `not files_mod` を満たす経路を評価する。
             if not files_mod:
                 continue
+
             cx, cy, r_src = regions.get(mod) or next(iter(regions.values()))
             bkg_inner0 = 3.0 * float(r_src)
             bkg_outer0 = 6.0 * float(r_src)
@@ -2837,11 +3289,15 @@ def _fit_nustar_obsid_proxy(
                 bkg_outer=float(bkg_outer0),
             )
             reg_dbg["modules"].append({"module": mod, "n_event_files": int(len(files_mod)), "region_xy": [float(cx), float(cy)], "src_radius": float(r_src), "bkg_inner": float(bkg_inner0), "bkg_outer": float(bkg_outer0), "spectrum": sdbg})
+            # 条件分岐: `spec is None` を満たす経路を評価する。
             if spec is None:
                 continue
+
             used_any = True
             net_sum = _accumulate_bincount(net_sum, np.asarray(spec["net_counts"], dtype=float))
             var_sum = _accumulate_bincount(var_sum, np.asarray(spec["var_counts"], dtype=float))
+
+        # 条件分岐: `not used_any or net_sum.size < 10 or float(np.sum(np.clip(net_sum, 0.0, None)...` を満たす経路を評価する。
 
         if not used_any or net_sum.size < 10 or float(np.sum(np.clip(net_sum, 0.0, None))) <= 0:
             raise RuntimeError("empty_net_counts_src_reg")
@@ -2856,16 +3312,21 @@ def _fit_nustar_obsid_proxy(
     region_info: Dict[str, Any] = {}
     min_counts0 = 25
 
+    # 条件分岐: `requested_mode == "src_reg"` を満たす経路を評価する。
     if requested_mode == "src_reg":
         attempt_modes = ["src_reg", "auto_det1", "none"]
+    # 条件分岐: 前段条件が不成立で、`requested_mode == "auto_det1"` を追加評価する。
     elif requested_mode == "auto_det1":
         attempt_modes = ["auto_det1", "src_reg", "none"]
     else:
         attempt_modes = ["none"]
+
     for mode in attempt_modes:
         try:
+            # 条件分岐: `mode == "src_reg"` を満たす経路を評価する。
             if mode == "src_reg":
                 e, y, v, region_info = _build_spectrum_src_reg()
+            # 条件分岐: 前段条件が不成立で、`mode == "auto_det1"` を追加評価する。
             elif mode == "auto_det1":
                 e, y, v, region_info = _build_spectrum_auto_det1()
             else:
@@ -2877,8 +3338,12 @@ def _fit_nustar_obsid_proxy(
         m_band = (e >= float(band_default[0])) & (e <= float(band_default[1])) & np.isfinite(e) & np.isfinite(v)
         band_proxy = float(np.sum(np.clip(v[m_band], 0.0, None))) if np.any(m_band) else float(np.sum(np.clip(v, 0.0, None)))
         min_counts0 = 25
+        # 条件分岐: `band_proxy < 5000.0` を満たす経路を評価する。
         if band_proxy < 5000.0:
             min_counts0 = 10
+
+        # 条件分岐: `band_proxy < 1000.0` を満たす経路を評価する。
+
         if band_proxy < 1000.0:
             min_counts0 = 5
 
@@ -2901,11 +3366,13 @@ def _fit_nustar_obsid_proxy(
             continue
 
     debug["fit_attempts"] = fit_attempts
+    # 条件分岐: `fit0 is None or e is None or y is None or v is None` を満たす経路を評価する。
     if fit0 is None or e is None or y is None or v is None:
         return None, {"status": "fit_failed", **debug}
 
     # Proxy "broad line detected?" check: compare continuum-only vs continuum+diskline.
     # This is used to freeze the handling of low-S/N obsids (no broad line -> no ISCO constraint).
+
     delta_chi2 = float("nan")
     line_detected = False
     delta_chi2_threshold = 9.0
@@ -2921,6 +3388,7 @@ def _fit_nustar_obsid_proxy(
         )
         chi2_cont = float(cont_fit.get("fit", {}).get("chi2", float("nan")))
         chi2_full = float(fit0.get("fit", {}).get("chi2", float("nan")))
+        # 条件分岐: `np.isfinite(chi2_cont) and np.isfinite(chi2_full)` を満たす経路を評価する。
         if np.isfinite(chi2_cont) and np.isfinite(chi2_full):
             delta_chi2 = float(chi2_cont - chi2_full)
             line_detected = bool(delta_chi2 >= float(delta_chi2_threshold))
@@ -2936,10 +3404,13 @@ def _fit_nustar_obsid_proxy(
     r_in_stat0 = float(fit0.get("r_in_rg_stat", float("nan")))
     isco_constrained_proxy = bool(line_detected and (not r_in_bound0) and np.isfinite(r_in_stat0))
     proxy_quality = "ok"
+    # 条件分岐: `not line_detected` を満たす経路を評価する。
     if not line_detected:
         proxy_quality = "no_broad_line"
+    # 条件分岐: 前段条件が不成立で、`r_in_bound0` を追加評価する。
     elif r_in_bound0:
         proxy_quality = f"r_in_bound:{r_in_bound0}"
+    # 条件分岐: 前段条件が不成立で、`not np.isfinite(r_in_stat0)` を追加評価する。
     elif not np.isfinite(r_in_stat0):
         proxy_quality = "no_cov"
 
@@ -2970,6 +3441,7 @@ def _fit_nustar_obsid_proxy(
                         "gain_shift": float(g),
                         "error": str(ex),
                     }
+
                 variants.append(r)
 
     r0 = float(fit0.get("r_in_rg", float("nan")))
@@ -2977,12 +3449,17 @@ def _fit_nustar_obsid_proxy(
     def _sys_component(selector: Iterable[Dict[str, Any]]) -> float:
         vals = []
         for it in selector:
+            # 条件分岐: `it.get("status") != "ok"` を満たす経路を評価する。
             if it.get("status") != "ok":
                 continue
+
             vals.append(float(it.get("r_in_rg", float("nan"))))
+
         vals = [v for v in vals if np.isfinite(v)]
+        # 条件分岐: `not vals or not np.isfinite(r0)` を満たす経路を評価する。
         if not vals or not np.isfinite(r0):
             return float("nan")
+
         return float(max(abs(v - r0) for v in vals))
 
     sys_band_val = _sys_component([v for v in variants if v.get("min_counts") == int(min_counts0) and v.get("gain_shift") == 0.0])
@@ -2997,16 +3474,21 @@ def _fit_nustar_obsid_proxy(
     try:
         effective_mode = str(debug.get("region_mode_effective") or requested_mode or "").strip().lower()
         alt_modes: List[str] = []
+        # 条件分岐: `effective_mode == "src_reg"` を満たす経路を評価する。
         if effective_mode == "src_reg":
             alt_modes = ["auto_det1"]
+        # 条件分岐: 前段条件が不成立で、`effective_mode == "auto_det1"` を追加評価する。
         elif effective_mode == "auto_det1":
             alt_modes = ["src_reg"]
+
         for alt in alt_modes:
             try:
+                # 条件分岐: `alt == "src_reg"` を満たす経路を評価する。
                 if alt == "src_reg":
                     e_alt, y_alt, v_alt, info_alt = _build_spectrum_src_reg()
                 else:
                     e_alt, y_alt, v_alt, info_alt = _build_spectrum_auto_det1()
+
                 fit_alt = _fit_powerlaw_plus_diskline_proxy(
                     energy_keV=e_alt,
                     net_counts=y_alt,
@@ -3020,9 +3502,13 @@ def _fit_nustar_obsid_proxy(
                 region_variants.append({"mode": alt, "r_in_rg": r_alt, "fit": fit_alt, "region": info_alt})
             except Exception as ex:
                 region_variants.append({"mode": alt, "status": "fail", "error": str(ex)})
+
+        # 条件分岐: `np.isfinite(r0)` を満たす経路を評価する。
+
         if np.isfinite(r0):
             vals = [float(v.get("r_in_rg", float("nan"))) for v in region_variants if v.get("status") != "fail"]
             vals = [v for v in vals if np.isfinite(v)]
+            # 条件分岐: `vals` を満たす経路を評価する。
             if vals:
                 sys_region_val = float(max(abs(v - r0) for v in vals))
     except Exception:
@@ -3198,6 +3684,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_csv = out_dir / "fek_relativistic_broadening_isco_constraints.csv"
     out_png = out_dir / "fek_relativistic_broadening_isco_constraints.png"
 
+    # 条件分岐: `bool(args.plot_only)` を満たす経路を評価する。
     if bool(args.plot_only):
         rows = _read_csv_rows(out_csv)
         _plot_isco_constraints(rows, out_png=out_png)
@@ -3206,6 +3693,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     targets = _read_json(targets_path)
     target_items = targets.get("targets", [])
+    # 条件分岐: `not isinstance(target_items, list) or not target_items` を満たす経路を評価する。
     if not isinstance(target_items, list) or not target_items:
         raise RuntimeError(f"no targets in {targets_path}")
 
@@ -3226,16 +3714,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     r_isco_pmodel_rg = _isco_pmodel_exponential_metric_rg()
 
     for t in target_items:
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
+
         target_name = str(t.get("target_name") or "")
         target_type = str(t.get("target_type") or "")
 
         xmm_list = t.get("xmm", [])
+        # 条件分岐: `isinstance(xmm_list, list)` を満たす経路を評価する。
         if isinstance(xmm_list, list):
             for d in xmm_list:
+                # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
                 if not isinstance(d, dict):
                     continue
+
                 obsid = str(d.get("obsid") or "")
                 rev = str(d.get("rev") or "rev0")
                 cached = _detect_cache_xmm(cache_root, obsid=obsid, rev=rev)
@@ -3245,6 +3738,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 # Prefer XSPEC/pyXspec forward-fold fit results if they exist.
                 # (They are produced by scripts/xrism/fek_relativistic_broadening_reflection_fit.py)
                 xspec_result_path = out_dir / f"xmm_{obsid}__fek_broad_line_reflection_xspec.json"
+                # 条件分岐: `xspec_result_path.exists()` を満たす経路を評価する。
                 if xspec_result_path.exists():
                     xspec_obj = _read_json(xspec_result_path)
                     xspec_status = str(xspec_obj.get("status") or "").strip().lower()
@@ -3257,6 +3751,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         "error": str(xspec_obj.get("error") or ""),
                         "xspec_available": bool(xspec_obj.get("xspec_available")) if "xspec_available" in xspec_obj else None,
                     }
+                    # 条件分岐: `xspec_status == "ok"` を満たす経路を評価する。
                     if xspec_status == "ok":
                         xspec_ok += 1
                         fit_res = {
@@ -3276,19 +3771,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             "proxy_region_mode": "",
                             "detail_json": _rel(xspec_result_path),
                         }
+                    # 条件分岐: 前段条件が不成立で、`xspec_status.startswith("blocked")` を追加評価する。
                     elif xspec_status.startswith("blocked"):
                         xspec_blocked += 1
+                    # 条件分岐: 前段条件が不成立で、`xspec_status == "dry_run"` を追加評価する。
                     elif xspec_status == "dry_run":
                         xspec_dry_run += 1
+                    # 条件分岐: 前段条件が不成立で、`xspec_status == "fail"` を追加評価する。
                     elif xspec_status == "fail":
                         xspec_fail += 1
 
+                # 条件分岐: `cached` を満たす経路を評価する。
+
                 if cached:
                     try:
+                        # 条件分岐: `fit_res is None` を満たす経路を評価する。
                         if fit_res is None:
                             fit_res, _ = _fit_xmm_obsid_diskline(cache_root, obsid=obsid, rev=rev, out_dir=out_dir)
                     except Exception as e:
                         fit_res = {"status": "fail", "error": str(e)}
+
                 n_total += 1
                 n_cached += int(cached)
                 status = "not_computed"
@@ -3304,21 +3806,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 proxy_snr_band = ""
                 proxy_isco_constrained = ""
                 proxy_region_mode = ""
+                # 条件分岐: `fit_res is not None` を満たす経路を評価する。
                 if fit_res is not None:
+                    # 条件分岐: `fit_res.get("status") == "ok"` を満たす経路を評価する。
                     if fit_res.get("status") == "ok":
                         method_tag = str(fit_res.get("method_tag") or "").strip() or "proxy_diskline_v1"
                         status = method_tag
                         bound = str(fit_res.get("r_in_bound") or "")
                         r_in_bound = bound
+                        # 条件分岐: `method_tag.startswith("xspec_")` を満たす経路を評価する。
                         if method_tag.startswith("xspec_"):
                             method_label = "XSPEC forward-fold fit"
+                        # 条件分岐: 前段条件が不成立で、`method_tag.startswith("rmf_")` を追加評価する。
                         elif method_tag.startswith("rmf_"):
                             method_label = "RMF-folded fit"
                         else:
                             method_label = "proxy fit (no RMF)"
+
                         note = f"XMM PPS {method_label}: detail={fit_res.get('detail_json','')}"
+                        # 条件分岐: `bound` を満たす経路を評価する。
                         if bound:
                             note += f"; r_in_bound={bound}"
+
                         r_in = f"{float(fit_res.get('r_in_rg', float('nan'))):.6g}"
                         r_stat = f"{float(fit_res.get('r_in_rg_stat', float('nan'))):.6g}"
                         r_sys = f"{float(fit_res.get('r_in_rg_sys', float('nan'))):.6g}"
@@ -3333,6 +3842,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     else:
                         status = "failed"
                         note = f"XMM fit failed: {fit_res.get('error','')}"
+
                 z_fields = (
                     _compute_z_fields(
                         r_in_rg=r_in,
@@ -3372,19 +3882,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 row.update(err_fields)
                 row.update(sys_comps)
                 rows.append(row)
+                # 条件分岐: `fit_res is not None and isinstance(fit_res, dict)` を満たす経路を評価する。
                 if fit_res is not None and isinstance(fit_res, dict):
                     rec: Dict[str, Any] = {"mission": "xmm", "obsid": obsid, "rev": rev, "fit": fit_res}
+                    # 条件分岐: `xspec_meta` を満たす経路を評価する。
                     if xspec_meta:
                         rec["xspec"] = xspec_meta
+
                     per_obsid_detail.append(rec)
+                # 条件分岐: 前段条件が不成立で、`xspec_meta` を追加評価する。
                 elif xspec_meta:
                     per_obsid_detail.append({"mission": "xmm", "obsid": obsid, "rev": rev, "xspec": xspec_meta})
 
         nustar_list = t.get("nustar", [])
+        # 条件分岐: `isinstance(nustar_list, list)` を満たす経路を評価する。
         if isinstance(nustar_list, list):
             for d in nustar_list:
+                # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
                 if not isinstance(d, dict):
                     continue
+
                 obsid = str(d.get("obsid") or "")
                 cached = _detect_cache_nustar(cache_root, obsid=obsid)
                 fit_res: Optional[Dict[str, Any]] = None
@@ -3393,11 +3910,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 n_cached += int(cached)
                 status = "not_computed"
                 note = "event_cl cache + reflection fit pending"
+                # 条件分岐: `cached` を満たす経路を評価する。
                 if cached:
                     try:
                         cached_detail_json = out_dir / f"nustar_{obsid}__fek_broad_line_proxy_diskline.json"
+                        # 条件分岐: `not bool(args.force_recompute_proxy) and cached_detail_json.exists()` を満たす経路を評価する。
                         if not bool(args.force_recompute_proxy) and cached_detail_json.exists():
                             cached_fit = _load_cached_nustar_proxy_detail_json(cached_detail_json)
+                            # 条件分岐: `isinstance(cached_fit, dict)` を満たす経路を評価する。
                             if isinstance(cached_fit, dict):
                                 fit_res = cached_fit
                                 debug = {"reused_detail_json": _rel(cached_detail_json)}
@@ -3427,6 +3947,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             )
                     except Exception as e:
                         fit_res = {"status": "fail", "error": str(e)}
+
                 r_in = ""
                 r_stat = ""
                 r_sys = ""
@@ -3438,14 +3959,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 proxy_snr_band = ""
                 proxy_isco_constrained = ""
                 proxy_region_mode = ""
+                # 条件分岐: `fit_res is not None` を満たす経路を評価する。
                 if fit_res is not None:
+                    # 条件分岐: `fit_res.get("status") == "ok"` を満たす経路を評価する。
                     if fit_res.get("status") == "ok":
                         status = "proxy_diskline_v1"
                         bound = str(fit_res.get("r_in_bound") or "")
                         r_in_bound = bound
                         note = f"NuSTAR event_cl proxy fit (no RMF): detail={fit_res.get('detail_json','')}"
+                        # 条件分岐: `bound` を満たす経路を評価する。
                         if bound:
                             note += f"; r_in_bound={bound}"
+
                         r_in = f"{float(fit_res.get('r_in_rg', float('nan'))):.6g}"
                         r_stat = f"{float(fit_res.get('r_in_rg_stat', float('nan'))):.6g}"
                         r_sys = f"{float(fit_res.get('r_in_rg_sys', float('nan'))):.6g}"
@@ -3460,6 +3985,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     else:
                         status = "failed"
                         note = f"proxy fit failed: {fit_res.get('error','')}"
+
                 z_fields = (
                     _compute_z_fields(
                         r_in_rg=r_in,
@@ -3499,6 +4025,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 row.update(err_fields)
                 row.update(sys_comps)
                 rows.append(row)
+                # 条件分岐: `fit_res is not None and isinstance(fit_res, dict)` を満たす経路を評価する。
                 if fit_res is not None and isinstance(fit_res, dict):
                     per_obsid_detail.append({"mission": "nustar", "obsid": obsid, "fit": fit_res, "debug": debug})
 
@@ -3617,6 +4144,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"csv": _rel(out_csv), "n_rows": len(rows)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

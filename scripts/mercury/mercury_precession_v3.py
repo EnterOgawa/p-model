@@ -7,6 +7,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -38,6 +39,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -80,6 +82,7 @@ _perihelion_event.direction = 1.0  # type: ignore[attr-defined]
 
 
 def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
+    # 条件分岐: `model not in ("pmodel", "newton")` を満たす経路を評価する。
     if model not in ("pmodel", "newton"):
         raise ValueError(f"Unknown model: {model}")
 
@@ -90,6 +93,7 @@ def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
     t_end = float(num_orbits) * float(T_orb)
     max_step = T_orb / 100.0  # safety: do not skip event crossings
 
+    # 条件分岐: `model == "pmodel"` を満たす経路を評価する。
     if model == "pmodel":
         f = deriv_gr
         f_args = (G, M_SUN, c_val)
@@ -109,6 +113,7 @@ def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
         args=f_args,
     )
 
+    # 条件分岐: `not sol.t_events or len(sol.t_events[0]) == 0` を満たす経路を評価する。
     if not sol.t_events or len(sol.t_events[0]) == 0:
         raise RuntimeError("Perihelion events not detected.")
 
@@ -120,6 +125,7 @@ def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
     t_ev = t_ev[keep]
     y_ev = y_ev[keep]
 
+    # 条件分岐: `len(t_ev) == 0` を満たす経路を評価する。
     if len(t_ev) == 0:
         raise RuntimeError("Perihelion events only at t=0; simulation window too short?")
 
@@ -284,6 +290,7 @@ def main():
         f.write("orbit,shift_arcsec_pmodel,shift_arcsec_newton\n")
         for i in range(min(len(p_ph["orbit_nums"]), len(n_ph["orbit_nums"]))):
             f.write(f"{int(p_ph['orbit_nums'][i])},{p_ph['shift_arcsec'][i]:.10f},{n_ph['shift_arcsec'][i]:.10f}\n")
+
     print(f"CSV saved to {csv_path}")
 
     metrics = {
@@ -336,6 +343,8 @@ def main():
         )
     except Exception:
         pass
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

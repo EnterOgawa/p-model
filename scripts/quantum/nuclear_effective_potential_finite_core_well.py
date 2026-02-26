@@ -12,9 +12,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -25,6 +28,7 @@ def _load_json(path: Path) -> dict:
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -32,15 +36,19 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {extracted}"
         )
+
     payload = _load_json(extracted)
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted np scattering values.\n"
@@ -48,40 +56,54 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_np_scattering_sources.py\n"
             f"Expected: {extracted}"
         )
+
     j = _load_json(extracted)
     sets = j.get("parameter_sets")
+    # 条件分岐: `not isinstance(sets, list) or not sets` を満たす経路を評価する。
     if not isinstance(sets, list) or not sets:
         raise SystemExit(f"[fail] invalid extracted file: parameter_sets missing/empty: {extracted}")
+
     out: dict[int, dict[str, object]] = {}
     for s in sets:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         try:
             eq = int(s.get("eq_label"))
         except Exception:
             continue
+
         params = s.get("params")
+        # 条件分岐: `isinstance(params, dict)` を満たす経路を評価する。
         if isinstance(params, dict):
             out[eq] = params
+
     return out
 
 
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
+    # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
     if isinstance(obj, dict) and "value" in obj:
         return float(obj["value"])
+
     raise KeyError(key)
 
 
 def _cot(x: float) -> float:
+    # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
         return (1.0 / x) - (x / 3.0)
+
     return math.cos(x) / math.sin(x)
 
 
 def _coth(x: float) -> float:
+    # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
         return (1.0 / x) + (x / 3.0)
+
     return math.cosh(x) / math.sinh(x)
 
 
@@ -93,23 +115,35 @@ def _y_core(
 
     Region I potential: V(r)=+Vc for 0<=r<Rc.
     """
+    # 条件分岐: `rc_fm <= 0.0` を満たす経路を評価する。
     if rc_fm <= 0.0:
         return float("inf")
+
+    # 条件分岐: `not (mu_mev > 0 and hbarc_mev_fm > 0 and math.isfinite(vc_mev) and vc_mev >= 0)` を満たす経路を評価する。
+
     if not (mu_mev > 0 and hbarc_mev_fm > 0 and math.isfinite(vc_mev) and vc_mev >= 0):
         return float("nan")
+
+    # 条件分岐: `vc_mev == e_mev` を満たす経路を評価する。
 
     if vc_mev == e_mev:
         return 1.0 / rc_fm
 
+    # 条件分岐: `e_mev < vc_mev` を満たす経路を評価する。
+
     if e_mev < vc_mev:
         alpha = math.sqrt(max(0.0, 2.0 * mu_mev * (vc_mev - e_mev))) / hbarc_mev_fm
+        # 条件分岐: `alpha == 0.0` を満たす経路を評価する。
         if alpha == 0.0:
             return 1.0 / rc_fm
+
         return float(alpha * _coth(alpha * rc_fm))
 
     p = math.sqrt(max(0.0, 2.0 * mu_mev * (e_mev - vc_mev))) / hbarc_mev_fm
+    # 条件分岐: `p == 0.0` を満たす経路を評価する。
     if p == 0.0:
         return 1.0 / rc_fm
+
     return float(p * _cot(p * rc_fm))
 
 
@@ -117,22 +151,32 @@ def _y_after_well(*, y_in: float, q_fm1: float, l_fm: float) -> float:
     """
     Propagate log-derivative y=u'/u across a constant potential region of length L (s-wave).
     """
+    # 条件分岐: `not (math.isfinite(q_fm1) and q_fm1 >= 0 and math.isfinite(l_fm) and l_fm >= 0)` を満たす経路を評価する。
     if not (math.isfinite(q_fm1) and q_fm1 >= 0 and math.isfinite(l_fm) and l_fm >= 0):
         return float("nan")
+
+    # 条件分岐: `l_fm == 0.0` を満たす経路を評価する。
 
     if l_fm == 0.0:
         return float(y_in)
 
     # Hard boundary u(0)=0 corresponds to y_in -> +∞.
+
     if math.isinf(y_in):
+        # 条件分岐: `q_fm1 == 0.0` を満たす経路を評価する。
         if q_fm1 == 0.0:
             return float(1.0 / l_fm)
+
         return float(q_fm1 * _cot(q_fm1 * l_fm))
+
+    # 条件分岐: `q_fm1 == 0.0` を満たす経路を評価する。
 
     if q_fm1 == 0.0:
         denom = 1.0 + (y_in * l_fm)
+        # 条件分岐: `denom == 0.0` を満たす経路を評価する。
         if denom == 0.0:
             return float("nan")
+
         return float(y_in / denom)
 
     ql = q_fm1 * l_fm
@@ -140,8 +184,10 @@ def _y_after_well(*, y_in: float, q_fm1: float, l_fm: float) -> float:
     c = math.cos(ql)
 
     denom = c + (y_in / q_fm1) * s
+    # 条件分岐: `abs(denom) < 1e-18` を満たす経路を評価する。
     if abs(denom) < 1e-18:
         return float("nan")
+
     num = (-q_fm1 * s) + (y_in * c)
     return float(num / denom)
 
@@ -152,18 +198,23 @@ def _solve_bound_x(
     """
     Solve for x = q L in the bound-state condition at energy E=-B.
     """
+    # 条件分岐: `not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(l_fm) and l...` を満たす経路を評価する。
     if not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(l_fm) and l_fm > 0):
         raise ValueError("invalid kappa or L")
 
     def f(x: float) -> float:
         k2 = x / l_fm
+        # 条件分岐: `not math.isfinite(y_c_fm1)` を満たす経路を評価する。
         if not math.isfinite(y_c_fm1):
             y_r = k2 / math.tan(x)
             return y_r + kappa_fm1
+
         num = (y_c_fm1 * k2 * math.cos(x)) - ((k2 * k2) * math.sin(x))
         den = (y_c_fm1 * math.sin(x)) + (k2 * math.cos(x))
+        # 条件分岐: `abs(den) < 1e-18` を満たす経路を評価する。
         if abs(den) < 1e-18:
             return float("nan")
+
         return (num / den) + kappa_fm1
 
     lo = (math.pi / 2.0) + 1e-7
@@ -177,47 +228,68 @@ def _solve_bound_x(
     brackets: list[tuple[float, float, float]] = []
     for x in x_grid:
         fx = f(x)
+        # 条件分岐: `not math.isfinite(fx)` を満たす経路を評価する。
         if not math.isfinite(fx):
             prev_x = None
             prev_f = None
             continue
+
+        # 条件分岐: `prev_x is not None and prev_f is not None` を満たす経路を評価する。
+
         if prev_x is not None and prev_f is not None:
+            # 条件分岐: `fx == 0 or (fx > 0) != (prev_f > 0)` を満たす経路を評価する。
             if fx == 0 or (fx > 0) != (prev_f > 0):
                 mid = 0.5 * (prev_x + x)
                 brackets.append((prev_x, x, float(mid)))
+
         prev_x = x
         prev_f = fx
+
+    # 条件分岐: `not brackets` を満たす経路を評価する。
 
     if not brackets:
         raise ValueError("no bound-state bracket found for x=qL")
 
     # Pick the smallest-x bracket (ground branch) and reject deep branches that
     # would correspond to additional nodes (excited-like solutions) in this ansatz.
+
     brackets.sort(key=lambda t: t[2])
     lo, hi, mid = brackets[0]
+    # 条件分岐: `mid > x_max` を満たす経路を評価する。
     if mid > x_max:
         raise ValueError(f"bound-state root too deep in x=qL (mid={mid:.3f} > {x_max:.3f}); reject branch")
+
     flo = f(lo)
     fhi = f(hi)
+    # 条件分岐: `not (math.isfinite(flo) and math.isfinite(fhi) and (flo == 0 or (flo > 0) !=...` を満たす経路を評価する。
     if not (math.isfinite(flo) and math.isfinite(fhi) and (flo == 0 or (flo > 0) != (fhi > 0))):
         raise ValueError("invalid bound-state bracket after selection")
 
     for _ in range(60):
         mid = 0.5 * (lo + hi)
         fmid = f(mid)
+        # 条件分岐: `not math.isfinite(fmid)` を満たす経路を評価する。
         if not math.isfinite(fmid):
             mid = math.nextafter(mid, lo)
             fmid = f(mid)
+            # 条件分岐: `not math.isfinite(fmid)` を満たす経路を評価する。
             if not math.isfinite(fmid):
                 break
+
+        # 条件分岐: `fmid == 0 or (hi - lo) < 1e-14` を満たす経路を評価する。
+
         if fmid == 0 or (hi - lo) < 1e-14:
             return float(mid)
+
+        # 条件分岐: `(fmid > 0) == (flo > 0)` を満たす経路を評価する。
+
         if (fmid > 0) == (flo > 0):
             lo = mid
             flo = fmid
         else:
             hi = mid
             fhi = fmid
+
     return float(0.5 * (lo + hi))
 
 
@@ -233,6 +305,7 @@ def _triplet_depth_from_b(
     """
     Determine V0_t from the bound-state condition at energy -B.
     """
+    # 条件分岐: `not (mu_mev > 0 and b_mev > 0 and l_fm > 0 and vc_mev >= 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
     if not (mu_mev > 0 and b_mev > 0 and l_fm > 0 and vc_mev >= 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid inputs")
 
@@ -257,6 +330,7 @@ def _scattering_length_zero_energy(
     Exact k->0 s-wave scattering length via log-derivative matching:
       a = R - 1/y_R.
     """
+    # 条件分岐: `not (l_fm >= 0 and rc_fm >= 0 and vc_mev >= 0 and v0_mev >= 0 and mu_mev > 0...` を満たす経路を評価する。
     if not (l_fm >= 0 and rc_fm >= 0 and vc_mev >= 0 and v0_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         return float("nan")
 
@@ -264,8 +338,10 @@ def _scattering_length_zero_energy(
     y_c = _y_core(e_mev=0.0, vc_mev=vc_mev, rc_fm=rc_fm, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
     q0 = math.sqrt(2.0 * mu_mev * v0_mev) / hbarc_mev_fm if v0_mev > 0 else 0.0
     y_r = _y_after_well(y_in=y_c, q_fm1=q0, l_fm=l_fm)
+    # 条件分岐: `not math.isfinite(y_r) or abs(y_r) < 1e-18` を満たす経路を評価する。
     if not math.isfinite(y_r) or abs(y_r) < 1e-18:
         return float("nan")
+
     return float(r_out - (1.0 / y_r))
 
 
@@ -282,8 +358,12 @@ def _phase_shift(
     """
     s-wave phase shift δ for the finite repulsive core + attractive well.
     """
+    # 条件分岐: `k_fm1 == 0.0` を満たす経路を評価する。
     if k_fm1 == 0.0:
         return 0.0
+
+    # 条件分岐: `not (k_fm1 > 0 and l_fm >= 0 and rc_fm >= 0 and vc_mev >= 0 and v0_mev >= 0 a...` を満たす経路を評価する。
+
     if not (k_fm1 > 0 and l_fm >= 0 and rc_fm >= 0 and vc_mev >= 0 and v0_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         return float("nan")
 
@@ -293,8 +373,11 @@ def _phase_shift(
     y_c = _y_core(e_mev=e_mev, vc_mev=vc_mev, rc_fm=rc_fm, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
     q = math.sqrt(2.0 * mu_mev * (e_mev + v0_mev)) / hbarc_mev_fm if (e_mev + v0_mev) > 0 else 0.0
     y_r = _y_after_well(y_in=y_c, q_fm1=q, l_fm=l_fm)
+    # 条件分岐: `not math.isfinite(y_r)` を満たす経路を評価する。
     if not math.isfinite(y_r):
         return float("nan")
+
+    # 条件分岐: `abs(y_r) < 1e-18` を満たす経路を評価する。
 
     if abs(y_r) < 1e-18:
         delta = (math.pi / 2.0) - (k_fm1 * r_out)
@@ -303,8 +386,10 @@ def _phase_shift(
 
     while delta > math.pi / 2.0:
         delta -= math.pi
+
     while delta < -math.pi / 2.0:
         delta += math.pi
+
     return float(delta)
 
 
@@ -313,13 +398,19 @@ def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
 
     for col in range(3):
         pivot = max(range(col, 3), key=lambda r: abs(m[r][col]))
+        # 条件分岐: `abs(m[pivot][col]) < 1e-18` を満たす経路を評価する。
         if abs(m[pivot][col]) < 1e-18:
             raise ValueError("singular matrix")
+
+        # 条件分岐: `pivot != col` を満たす経路を評価する。
+
         if pivot != col:
             m[col], m[pivot] = m[pivot], m[col]
+
         piv = m[col][col]
         for j in range(col, 4):
             m[col][j] /= piv
+
         for r in range(col + 1, 3):
             fac = m[r][col]
             for j in range(col, 4):
@@ -328,6 +419,7 @@ def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
     x = [0.0, 0.0, 0.0]
     for r in reversed(range(3)):
         x[r] = m[r][3] - sum(m[r][c] * x[c] for c in range(r + 1, 3))
+
     return x
 
 
@@ -357,19 +449,27 @@ def _fit_kcot_ere(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
         t = math.tan(delta)
+        # 条件分岐: `abs(t) < 1e-15` を満たす経路を評価する。
         if abs(t) < 1e-15:
             continue
+
         y = k / t
         k2 = k * k
+        # 条件分岐: `not (math.isfinite(y) and math.isfinite(k2))` を満たす経路を評価する。
         if not (math.isfinite(y) and math.isfinite(k2)):
             continue
+
         k2s.append(k2)
         k4s.append(k2 * k2)
         ys.append(y)
         points.append({"k_fm1": float(k), "kcot_fm1": float(y), "delta_rad": float(delta)})
+
+    # 条件分岐: `len(ys) < 10` を満たす経路を評価する。
 
     if len(ys) < 10:
         raise ValueError("insufficient points for ERE fit")
@@ -419,6 +519,7 @@ def _solve_l_for_triplet_a(
     For fixed (Rc, Vc) and fixed B (thus V0 determined by the bound condition),
     solve L such that a(L)=a_target.
     """
+    # 条件分岐: `not (l_min_fm > 0 and l_max_fm > l_min_fm)` を満たす経路を評価する。
     if not (l_min_fm > 0 and l_max_fm > l_min_fm):
         raise ValueError("invalid L range")
 
@@ -433,8 +534,10 @@ def _solve_l_for_triplet_a(
     cache: dict[float, tuple[float, float]] = {}
 
     def f_of_l(l: float) -> float:
+        # 条件分岐: `l in cache` を満たす経路を評価する。
         if l in cache:
             return cache[l][0]
+
         try:
             v0 = _triplet_depth_from_b(
                 b_mev=b_mev, rc_fm=rc_fm, l_fm=l, vc_mev=vc_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
@@ -446,18 +549,23 @@ def _solve_l_for_triplet_a(
         except Exception:
             cache[l] = (float("nan"), float("nan"))
             return float("nan")
+
         cache[l] = (float(f), float(v0))
         return float(f)
 
     def v0_of_l(l: float) -> float:
+        # 条件分岐: `l in cache` を満たす経路を評価する。
         if l in cache:
             return cache[l][1]
+
         _ = f_of_l(l)
         return cache[l][1]
 
     # Try to bracket around a nuclear-ish scale near L~2 fm, expanding outward.
+
     l0 = min(max(2.0, l_min_fm), l_max_fm)
     f0 = f_of_l(l0)
+    # 条件分岐: `math.isfinite(f0) and abs(f0) < 1e-12` を満たす経路を評価する。
     if math.isfinite(f0) and abs(f0) < 1e-12:
         return float(l0), float(v0_of_l(l0))
 
@@ -468,12 +576,19 @@ def _solve_l_for_triplet_a(
         hi = min(l_max_fm, l0 + step)
         f_lo = f_of_l(lo)
         f_hi = f_of_l(hi)
+        # 条件分岐: `math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
         if math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0)):
             bracket = (lo, hi)
             break
+
+        # 条件分岐: `lo == l_min_fm and hi == l_max_fm` を満たす経路を評価する。
+
         if lo == l_min_fm and hi == l_max_fm:
             break
+
         step *= 1.6
+
+    # 条件分岐: `bracket is None` を満たす経路を評価する。
 
     if bracket is None:
         # Fallback: coarse scan for a sign change, then take the bracket closest to L~2 fm.
@@ -484,32 +599,47 @@ def _solve_l_for_triplet_a(
         brackets: list[tuple[float, float, float]] = []
         for l in l_grid:
             fl = f_of_l(l)
+            # 条件分岐: `not math.isfinite(fl) or abs(fl) > 1e6` を満たす経路を評価する。
             if not math.isfinite(fl) or abs(fl) > 1e6:
                 prev_l = None
                 prev_f = None
                 continue
+
+            # 条件分岐: `prev_l is not None and prev_f is not None` を満たす経路を評価する。
+
             if prev_l is not None and prev_f is not None:
+                # 条件分岐: `(fl > 0) != (prev_f > 0)` を満たす経路を評価する。
                 if (fl > 0) != (prev_f > 0):
                     mid = 0.5 * (prev_l + l)
                     brackets.append((prev_l, l, abs(mid - 2.0)))
+
             prev_l = l
             prev_f = fl
+
+        # 条件分岐: `not brackets` を満たす経路を評価する。
+
         if not brackets:
             raise ValueError("no sign-change bracket found for L (a_target)")
+
         brackets.sort(key=lambda t: t[2])
         bracket = (brackets[0][0], brackets[0][1])
 
     lo, hi = bracket
     f_lo = f_of_l(lo)
     f_hi = f_of_l(hi)
+    # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
     if not ((f_lo > 0) != (f_hi > 0)):
         raise ValueError("invalid L bracket")
 
     for _ in range(55):
         mid = 0.5 * (lo + hi)
         f_mid = f_of_l(mid)
+        # 条件分岐: `f_mid == 0 or (hi - lo) < 1e-12` を満たす経路を評価する。
         if f_mid == 0 or (hi - lo) < 1e-12:
             return float(mid), float(v0_of_l(mid))
+
+        # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
         if (f_mid > 0) == (f_lo > 0):
             lo = mid
             f_lo = f_mid
@@ -541,8 +671,10 @@ def _solve_triplet_geometry_for_vc(
     cache: dict[float, dict[str, object]] = {}
 
     def eval_rc(rc: float) -> dict[str, object]:
+        # 条件分岐: `rc in cache` を満たす経路を評価する。
         if rc in cache:
             return cache[rc]
+
         l, v0 = _solve_l_for_triplet_a(
             rc_fm=rc, vc_mev=vc_mev, b_mev=b_mev, a_target_fm=a_t_fm, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
         )
@@ -556,8 +688,10 @@ def _solve_triplet_geometry_for_vc(
         return float(s["ere"]["r_eff_fm"]) - r_t_fm
 
     # Adaptive bracket search around Rc~0.4 fm.
+
     rc0 = min(max(0.4, rc_min), rc_max)
     g0 = g_of_rc(rc0)
+    # 条件分岐: `math.isfinite(g0) and abs(g0) < 1e-10` を満たす経路を評価する。
     if math.isfinite(g0) and abs(g0) < 1e-10:
         s = eval_rc(rc0)
         s["r_t_fit_minus_target_fm"] = float(g0)
@@ -575,17 +709,27 @@ def _solve_triplet_geometry_for_vc(
             evaluated.append((lo, float(g_lo)))
         except Exception:
             g_lo = float("nan")
+
         try:
             g_hi = g_of_rc(hi)
             evaluated.append((hi, float(g_hi)))
         except Exception:
             g_hi = float("nan")
+
+        # 条件分岐: `math.isfinite(g_lo) and math.isfinite(g_hi) and ((g_lo > 0) != (g_hi > 0))` を満たす経路を評価する。
+
         if math.isfinite(g_lo) and math.isfinite(g_hi) and ((g_lo > 0) != (g_hi > 0)):
             bracket = (lo, hi)
             break
+
+        # 条件分岐: `lo == rc_min and hi == rc_max` を満たす経路を評価する。
+
         if lo == rc_min and hi == rc_max:
             break
+
         step *= 1.6
+
+    # 条件分岐: `bracket is None` を満たす経路を評価する。
 
     if bracket is None:
         # Fallback: coarse scan for a bracket.
@@ -600,19 +744,30 @@ def _solve_triplet_geometry_for_vc(
                 prev_rc = None
                 prev_g = None
                 continue
+
             evaluated.append((rc, float(gg)))
+            # 条件分岐: `not math.isfinite(gg) or abs(gg) > 1e3` を満たす経路を評価する。
             if not math.isfinite(gg) or abs(gg) > 1e3:
                 prev_rc = None
                 prev_g = None
                 continue
+
+            # 条件分岐: `prev_rc is not None and prev_g is not None and ((gg > 0) != (prev_g > 0))` を満たす経路を評価する。
+
             if prev_rc is not None and prev_g is not None and ((gg > 0) != (prev_g > 0)):
                 mid = 0.5 * (prev_rc + rc)
                 brackets.append((prev_rc, rc, abs(mid - 0.4)))
+
             prev_rc = rc
             prev_g = float(gg)
+
+        # 条件分岐: `brackets` を満たす経路を評価する。
+
         if brackets:
             brackets.sort(key=lambda t: t[2])
             bracket = (brackets[0][0], brackets[0][1])
+
+    # 条件分岐: `bracket is None` を満たす経路を評価する。
 
     if bracket is None:
         best_rc, best_g = min(evaluated, key=lambda t: abs(t[1]) if math.isfinite(t[1]) else float("inf"))
@@ -624,6 +779,7 @@ def _solve_triplet_geometry_for_vc(
     rc_lo, rc_hi = bracket
     g_lo = g_of_rc(rc_lo)
     g_hi = g_of_rc(rc_hi)
+    # 条件分岐: `not ((g_lo > 0) != (g_hi > 0))` を満たす経路を評価する。
     if not ((g_lo > 0) != (g_hi > 0)):
         best_rc, best_g = min(evaluated, key=lambda t: abs(t[1]) if math.isfinite(t[1]) else float("inf"))
         s = eval_rc(best_rc)
@@ -634,10 +790,14 @@ def _solve_triplet_geometry_for_vc(
     for _ in range(38):
         rc_mid = 0.5 * (rc_lo + rc_hi)
         g_mid = g_of_rc(rc_mid)
+        # 条件分岐: `g_mid == 0 or (rc_hi - rc_lo) < 1e-10` を満たす経路を評価する。
         if g_mid == 0 or (rc_hi - rc_lo) < 1e-10:
             rc_lo = rc_mid
             g_lo = g_mid
             break
+
+        # 条件分岐: `(g_mid > 0) == (g_lo > 0)` を満たす経路を評価する。
+
         if (g_mid > 0) == (g_lo > 0):
             rc_lo = rc_mid
             g_lo = g_mid
@@ -664,14 +824,17 @@ def _solve_vc_for_triplet(
     Fit Vc such that after fitting (Rc,L) to (a_t,r_t) with B-bound V0,
     the triplet shape parameter v2 matches the target.
     """
+    # 条件分岐: `not math.isfinite(v2t_target_fm3)` を満たす経路を評価する。
     if not math.isfinite(v2t_target_fm3):
         raise ValueError("invalid v2 target")
 
     cache: dict[float, dict[str, object]] = {}
 
     def eval_vc(vc: float) -> dict[str, object]:
+        # 条件分岐: `vc in cache` を満たす経路を評価する。
         if vc in cache:
             return cache[vc]
+
         geo = _solve_triplet_geometry_for_vc(
             vc_mev=vc, b_mev=b_mev, a_t_fm=a_t_fm, r_t_fm=r_t_fm, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
         )
@@ -690,9 +853,15 @@ def _solve_vc_for_triplet(
             hv = h(vc)
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(hv) or abs(hv) > 10.0` を満たす経路を評価する。
+
         if not math.isfinite(hv) or abs(hv) > 10.0:
             continue
+
         vals.append((float(vc), float(hv)))
+
+    # 条件分岐: `len(vals) < 2` を満たす経路を評価する。
 
     if len(vals) < 2:
         geo = eval_vc(400.0)
@@ -704,8 +873,11 @@ def _solve_vc_for_triplet(
     vals.sort(key=lambda t: t[0])
     brackets: list[tuple[float, float]] = []
     for (v0, f0), (v1, f1) in zip(vals[:-1], vals[1:]):
+        # 条件分岐: `(f0 > 0) != (f1 > 0)` を満たす経路を評価する。
         if (f0 > 0) != (f1 > 0):
             brackets.append((v0, v1))
+
+    # 条件分岐: `not brackets` を満たす経路を評価する。
 
     if not brackets:
         best_vc, best_h = min(vals, key=lambda t: abs(t[1]))
@@ -718,6 +890,7 @@ def _solve_vc_for_triplet(
     lo, hi = brackets[0]  # prefer smallest-mid by candidate ordering
     f_lo = h(lo)
     f_hi = h(hi)
+    # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
     if not ((f_lo > 0) != (f_hi > 0)):
         best_vc, best_h = min(vals, key=lambda t: abs(t[1]))
         geo = eval_vc(best_vc)
@@ -729,9 +902,13 @@ def _solve_vc_for_triplet(
     for _ in range(26):
         mid = 0.5 * (lo + hi)
         f_mid = h(mid)
+        # 条件分岐: `f_mid == 0 or (hi - lo) < 1e-4` を満たす経路を評価する。
         if f_mid == 0 or (hi - lo) < 1e-4:
             lo = mid
             break
+
+        # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
         if (f_mid > 0) == (f_lo > 0):
             lo = mid
             f_lo = f_mid
@@ -759,6 +936,7 @@ def _solve_singlet_depth_from_a(
     """
     With geometry (Rc,L,Vc) fixed, solve V0_s such that the singlet scattering length a_s matches.
     """
+    # 条件分岐: `not math.isfinite(a_s_target_fm) or a_s_target_fm == 0` を満たす経路を評価する。
     if not math.isfinite(a_s_target_fm) or a_s_target_fm == 0:
         raise ValueError("invalid a_s target")
 
@@ -781,45 +959,69 @@ def _solve_singlet_depth_from_a(
 
     for v in v_grid:
         fv = f(v)
+        # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
         if not math.isfinite(fv):
             prev_v = None
             prev_f = None
             continue
+
+        # 条件分岐: `abs(fv) < 1e6` を満たす経路を評価する。
+
         if abs(fv) < 1e6:
+            # 条件分岐: `best_abs is None or abs(fv) < best_abs` を満たす経路を評価する。
             if best_abs is None or abs(fv) < best_abs:
                 best_abs = abs(fv)
                 best_v = v
+
+        # 条件分岐: `prev_v is not None and prev_f is not None` を満たす経路を評価する。
+
         if prev_v is not None and prev_f is not None:
+            # 条件分岐: `fv == 0 or (fv > 0) != (prev_f > 0)` を満たす経路を評価する。
             if fv == 0 or (fv > 0) != (prev_f > 0):
                 mid = 0.5 * (prev_v + v)
                 brackets.append((prev_v, v, mid))
+
         prev_v = v
         prev_f = fv
+
+    # 条件分岐: `brackets` を満たす経路を評価する。
 
     if brackets:
         brackets.sort(key=lambda t: t[2])
         lo, hi, _ = brackets[0]
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
         if not ((f_lo > 0) != (f_hi > 0)):
+            # 条件分岐: `best_v is None` を満たす経路を評価する。
             if best_v is None:
                 raise ValueError("no usable bracket for singlet V0")
+
             return float(best_v)
+
         for _ in range(90):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `f_mid == 0 or (hi - lo) < 1e-9` を満たす経路を評価する。
             if f_mid == 0 or (hi - lo) < 1e-9:
                 return float(mid)
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
             else:
                 hi = mid
                 f_hi = f_mid
+
         return float(0.5 * (lo + hi))
+
+    # 条件分岐: `best_v is None` を満たす経路を評価する。
 
     if best_v is None:
         raise ValueError("no solution for singlet V0_s (a_s)")
+
     return float(best_v)
 
 
@@ -834,6 +1036,7 @@ def main() -> None:
 
     consts = _load_nist_codata_constants(root=root)
     for k in ("mp", "mn", "md"):
+        # 条件分岐: `k not in consts` を満たす経路を評価する。
         if k not in consts:
             raise SystemExit(f"[fail] missing constant {k!r} in extracted_values.json")
 
@@ -851,6 +1054,7 @@ def main() -> None:
     np_sets = _load_np_scattering_sets(root=root)
     eq18 = np_sets.get(18)
     eq19 = np_sets.get(19)
+    # 条件分岐: `not (isinstance(eq18, dict) and isinstance(eq19, dict))` を満たす経路を評価する。
     if not (isinstance(eq18, dict) and isinstance(eq19, dict)):
         raise SystemExit("[fail] missing eq18/eq19 in extracted np scattering JSON")
 
@@ -991,10 +1195,15 @@ def main() -> None:
         r_plot = [i * 0.02 for i in range(0, 501)]  # 0..10 fm
 
         def v_profile(rr: float, *, v0: float) -> float:
+            # 条件分岐: `rr < rc` を満たす経路を評価する。
             if rr < rc:
                 return min(vc, 200.0)
+
+            # 条件分岐: `rr < rout` を満たす経路を評価する。
+
             if rr < rout:
                 return -v0
+
             return 0.0
 
         vt = [v_profile(rr, v0=v0t) for rr in r_plot]
@@ -1150,6 +1359,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

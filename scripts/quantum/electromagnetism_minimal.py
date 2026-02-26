@@ -226,5 +226,7 @@ def main() -> None:
     print(f"Wrote: {out_json}")
 
 
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
+
 if __name__ == "__main__":
     main()

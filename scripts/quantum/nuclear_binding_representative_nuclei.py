@@ -13,15 +13,19 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _load_ame2020_mass_table(*, root: Path, src_dirname: str) -> list[dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted AME2020 table.\n"
@@ -29,19 +33,31 @@ def _load_ame2020_mass_table(*, root: Path, src_dirname: str) -> list[dict[str, 
             f"  python -B scripts/quantum/fetch_ame2020_mass_table_sources.py --out-dirname {src_dirname}\n"
             f"Expected: {extracted}"
         )
+
     payload = json.loads(extracted.read_text(encoding="utf-8"))
     rows = payload.get("rows")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         raise SystemExit(f"[fail] invalid extracted_values.json: rows is not a list: {extracted}")
+
     out: list[dict[str, object]] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
+        # 条件分岐: `not all(k in r for k in ("Z", "A", "binding_keV_per_A"))` を満たす経路を評価する。
+
         if not all(k in r for k in ("Z", "A", "binding_keV_per_A")):
             continue
+
         out.append(r)
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {extracted}")
+
     return out
 
 
@@ -50,6 +66,7 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     csv_path = src_dir / "charge_radii.csv"
+    # 条件分岐: `not csv_path.exists()` を満たす経路を評価する。
     if not csv_path.exists():
         raise SystemExit(
             "[fail] missing cached IAEA charge_radii.csv.\n"
@@ -67,16 +84,23 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
                 a = int(row["a"])
             except Exception:
                 continue
+
             rv = str(row.get("radius_val", "")).strip()
             ru = str(row.get("radius_unc", "")).strip()
+            # 条件分岐: `not rv or not ru` を満たす経路を評価する。
             if not rv or not ru:
                 continue
+
             try:
                 out[(z, a)] = {"radius_fm": float(rv), "radius_sigma_fm": float(ru)}
             except Exception:
                 continue
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] parsed 0 charge radii rows from: {csv_path}")
+
     return out
 
 
@@ -94,6 +118,7 @@ def main() -> None:
             a = int(r["A"])
         except Exception:
             continue
+
         ame_map[(z, a)] = r
 
     iaea_src_dirname = "iaea_charge_radii"
@@ -120,18 +145,23 @@ def main() -> None:
         a = int(nuc["A"])
         n = a - z
         ame = ame_map.get((z, a))
+        # 条件分岐: `not isinstance(ame, dict)` を満たす経路を評価する。
         if not isinstance(ame, dict):
             raise SystemExit(f"[fail] AME2020 row not found: Z={z} A={a}")
+
         bea_kev = ame.get("binding_keV_per_A")
         bea_sigma_kev = ame.get("binding_sigma_keV_per_A")
+        # 条件分岐: `not isinstance(bea_kev, (int, float)) or not math.isfinite(float(bea_kev))` を満たす経路を評価する。
         if not isinstance(bea_kev, (int, float)) or not math.isfinite(float(bea_kev)):
             raise SystemExit(f"[fail] missing/invalid binding_keV_per_A for Z={z} A={a}")
+
         bea_mev = float(bea_kev) / 1000.0
         bea_sigma_mev = float(bea_sigma_kev) / 1000.0 if isinstance(bea_sigma_kev, (int, float)) else None
         b_mev = bea_mev * a
         b_sigma_mev = (bea_sigma_mev * a) if (bea_sigma_mev is not None) else None
 
         rr = radii_map.get((z, a))
+        # 条件分岐: `rr is None` を満たす経路を評価する。
         if rr is None:
             raise SystemExit(f"[fail] charge radius not found in IAEA CSV: Z={z} A={a}")
 
@@ -152,6 +182,7 @@ def main() -> None:
         )
 
     # Plot
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -200,6 +231,7 @@ def main() -> None:
     ax.text(0.0, 1.0, txt, va="top", family="monospace", fontsize=9)
 
     for i, (a, y, lab) in enumerate(zip(a_vals, bea_vals, labels, strict=True)):
+        # 条件分岐: `i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10)` を満たす経路を評価する。
         if i in (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10):
             axes[0][1].annotate(lab, (a, y), textcoords="offset points", xytext=(5, 4), fontsize=8)
 
@@ -246,6 +278,7 @@ def main() -> None:
             )
 
     # Traceability
+
     ame_dir = root / "data" / "quantum" / "sources" / ame_src_dirname
     ame_manifest = ame_dir / "manifest.json"
     ame_extracted = ame_dir / "extracted_values.json"
@@ -301,6 +334,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -35,8 +36,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -57,43 +60,65 @@ def _to_float(v: Any) -> Optional[float]:
         val = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(val) or math.isinf(val)` を満たす経路を評価する。
+
     if math.isnan(val) or math.isinf(val):
         return None
+
     return val
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _extract_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     for row in payload.get("metrics") or []:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         derived = row.get("derived") if isinstance(row.get("derived"), dict) else {}
         m1 = _to_float(derived.get("m1_msun"))
         m2 = _to_float(derived.get("m2_msun"))
+        # 条件分岐: `m1 is None or m2 is None or m1 <= 0.0 or m2 <= 0.0` を満たす経路を評価する。
         if m1 is None or m2 is None or m1 <= 0.0 or m2 <= 0.0:
             continue
+
         delta = _to_float(row.get("delta"))
         sigma_1 = _to_float(row.get("sigma_1"))
         sigma_95 = _to_float(row.get("sigma_95"))
         upper_95 = _to_float(row.get("non_gr_fraction_upper_95"))
+        # 条件分岐: `upper_95 is None and delta is not None and sigma_95 is not None` を満たす経路を評価する。
         if upper_95 is None and delta is not None and sigma_95 is not None:
             upper_95 = abs(delta) + sigma_95
+
+        # 条件分岐: `upper_95 is None and delta is not None and sigma_1 is not None` を満たす経路を評価する。
+
         if upper_95 is None and delta is not None and sigma_1 is not None:
             upper_95 = abs(delta) + 1.96 * sigma_1
+
+        # 条件分岐: `upper_95 is None` を満たす経路を評価する。
+
         if upper_95 is None:
             upper_95 = float("nan")
+
         z = None
+        # 条件分岐: `delta is not None and sigma_1 is not None and sigma_1 > 0.0` を満たす経路を評価する。
         if delta is not None and sigma_1 is not None and sigma_1 > 0.0:
             z = delta / sigma_1
+
         out.append(
             {
                 "id": str(row.get("id") or ""),
@@ -107,8 +132,12 @@ def _extract_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
                 "non_gr_fraction_upper_95": upper_95,
             }
         )
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit("no usable binary rows found in input metrics")
+
     return out
 
 
@@ -134,8 +163,10 @@ def _build_audit_rows(
         dipole_counterfactual = _dipole_norm(m1, m2, eta0, eta0 * (1.0 + epsilon_counterfactual))
         upper_95 = _to_float(row.get("non_gr_fraction_upper_95"))
         eps_lim = None
+        # 条件分岐: `upper_95 is not None and upper_95 > 0.0` を満たす経路を評価する。
         if upper_95 is not None and upper_95 > 0.0:
             eps_lim = math.sqrt(upper_95)
+
         out.append(
             {
                 **row,
@@ -145,6 +176,7 @@ def _build_audit_rows(
                 "epsilon_limit_95": eps_lim,
             }
         )
+
     return out
 
 
@@ -327,8 +359,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     in_json = Path(args.in_json)
+    # 条件分岐: `not in_json.exists()` を満たす経路を評価する。
     if not in_json.exists():
         in_json = Path(args.in_json_fallback)
+
+    # 条件分岐: `not in_json.exists()` を満たす経路を評価する。
+
     if not in_json.exists():
         raise SystemExit(f"input not found: {args.in_json} (fallback: {args.in_json_fallback})")
 
@@ -389,6 +425,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_json, payload_out)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
             dst = public_outdir / src.name
@@ -424,11 +461,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     print(f"[ok] overall_status={summary.get('overall_status')} decision={summary.get('decision')}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

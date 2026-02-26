@@ -33,6 +33,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -47,8 +48,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -69,11 +72,17 @@ def _ratio_r2_over_r0(*, counts: np.ndarray, mu_edges: np.ndarray) -> np.ndarray
     """
     counts = np.asarray(counts, dtype=np.float64)
     mu_edges = np.asarray(mu_edges, dtype=np.float64)
+    # 条件分岐: `counts.ndim != 2` を満たす経路を評価する。
     if counts.ndim != 2:
         raise ValueError("counts must be 2D (nbins,nmu)")
+
+    # 条件分岐: `mu_edges.ndim != 1 or mu_edges.size < 2` を満たす経路を評価する。
+
     if mu_edges.ndim != 1 or mu_edges.size < 2:
         raise ValueError("mu_edges must be 1D (nmu+1)")
+
     nmu = int(mu_edges.size - 1)
+    # 条件分岐: `counts.shape[1] != nmu` を満たす経路を評価する。
     if counts.shape[1] != nmu:
         raise ValueError(f"nmu mismatch: counts={counts.shape[1]} mu_edges={nmu}")
 
@@ -82,6 +91,7 @@ def _ratio_r2_over_r0(*, counts: np.ndarray, mu_edges: np.ndarray) -> np.ndarray
     r2 = 5.0 * np.sum(counts * _l2(mu_mid)[None, :], axis=1)
     with np.errstate(divide="ignore", invalid="ignore"):
         out = r2 / r0
+
     return np.where(np.isfinite(out), out, np.nan)
 
 
@@ -95,9 +105,12 @@ def _load_window_series(path: Path, *, key: str) -> WindowSeries:
     with np.load(path) as z:
         s = np.asarray(z["s"], dtype=np.float64)
         mu_edges = np.asarray(z["mu_edges"], dtype=np.float64)
+        # 条件分岐: `key not in z.files` を満たす経路を評価する。
         if key not in z.files:
             raise KeyError(f"missing {key} in npz: {path}")
+
         counts = np.asarray(z[key], dtype=np.float64)
+
     return WindowSeries(s=s, r2_over_r0=_ratio_r2_over_r0(counts=counts, mu_edges=mu_edges))
 
 
@@ -105,8 +118,10 @@ def _safe_max_abs_in_range(s: np.ndarray, y: np.ndarray, *, s_min: float, s_max:
     s = np.asarray(s, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
     m = (s >= float(s_min)) & (s <= float(s_max)) & np.isfinite(y)
+    # 条件分岐: `not np.any(m)` を満たす経路を評価する。
     if not np.any(m):
         return float("nan")
+
     return float(np.nanmax(np.abs(y[m])))
 
 
@@ -119,8 +134,10 @@ def _path_for(
     suffix: str,
 ) -> Path:
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}"
+    # 条件分岐: `suffix` を満たす経路を評価する。
     if suffix:
         base = f"{base}{suffix}"
+
     return _ROOT / "output" / "private" / "cosmology" / f"{base}.npz"
 
 
@@ -164,12 +181,16 @@ def main(argv: Optional[list[str]] = None) -> int:
         loaded[zbin] = {}
         for suf in suffixes:
             suf_norm = suf
+            # 条件分岐: `suf_norm and not suf_norm.startswith("__")` を満たす経路を評価する。
             if suf_norm and not suf_norm.startswith("__"):
                 suf_norm = "__" + suf_norm
+
             p = _path_for(sample=sample, caps=caps, dist=dist, zbin=zbin, suffix=suf_norm)
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(str(p))
                 continue
+
             try:
                 rr = _load_window_series(p, key="rr_w")
                 series: Dict[str, WindowSeries] = {"RR0": rr}
@@ -179,21 +200,26 @@ def main(argv: Optional[list[str]] = None) -> int:
                     series["SS"] = ss
                 except Exception:
                     pass
+
                 loaded[zbin][suf_norm or ""] = {"path": str(p), **series}  # type: ignore[dict-item]
             except Exception:
                 missing.append(str(p))
 
     # If nothing loaded, skip gracefully (run_all optional).
+
     any_loaded = any(bool(loaded[z]) for z in zbins)
+    # 条件分岐: `not any_loaded` を満たす経路を評価する。
     if not any_loaded:
         print("[skip] cosmology_bao_catalog_window_multipoles: no input npz found")
         return 0
 
     # Plot
+
     _set_japanese_font()
     import matplotlib.pyplot as plt  # noqa: E402
 
     fig, axes = plt.subplots(len(zbins), 2, figsize=(12, 8), sharex=True, sharey=True)
+    # 条件分岐: `len(zbins) == 1` を満たす経路を評価する。
     if len(zbins) == 1:
         axes = np.asarray([axes])
 
@@ -215,6 +241,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             label = suf.lstrip("_") if suf else "pre"
             rr: WindowSeries = payload["RR0"]  # type: ignore[assignment]
             ax_rr.plot(rr.s, rr.r2_over_r0, color=c, linewidth=1.5, alpha=0.9, label=label)
+            # 条件分岐: `"SS" in payload` を満たす経路を評価する。
             if "SS" in payload:
                 ss: WindowSeries = payload["SS"]  # type: ignore[assignment]
                 ax_ss.plot(ss.s, ss.r2_over_r0, color=c, linewidth=1.5, alpha=0.9, label=label)
@@ -224,9 +251,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         ax_rr.grid(True, alpha=0.3)
         ax_ss.grid(True, alpha=0.3)
 
+        # 条件分岐: `i == len(zbins) - 1` を満たす経路を評価する。
         if i == len(zbins) - 1:
             ax_rr.set_xlabel("s [Mpc/h]")
             ax_ss.set_xlabel("s [Mpc/h]")
+
         ax_rr.set_ylabel("ratio (ℓ=2 / ℓ=0)")
 
     axes[0, 0].legend(fontsize=8, loc="upper right", framealpha=0.9)
@@ -262,6 +291,7 @@ def main(argv: Optional[list[str]] = None) -> int:
                     )
                 },
             }
+            # 条件分岐: `"SS" in payload` を満たす経路を評価する。
             if "SS" in payload:
                 ss: WindowSeries = payload["SS"]  # type: ignore[assignment]
                 entry["ss"] = {
@@ -269,8 +299,11 @@ def main(argv: Optional[list[str]] = None) -> int:
                         ss.s, ss.r2_over_r0, s_min=float(args.s_min), s_max=float(args.s_max)
                     )
                 }
+
             out_z[suf or "pre"] = entry
+
         metrics["results"][zbin] = out_z
+
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     worklog.append_event(
@@ -289,6 +322,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

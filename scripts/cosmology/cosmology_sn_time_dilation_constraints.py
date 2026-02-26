@@ -44,6 +44,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -65,6 +66,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -84,11 +86,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -125,10 +131,15 @@ class AgingRatePoint:
 
     @property
     def sample(self) -> str:
+        # 条件分岐: `self.z < 0.04` を満たす経路を評価する。
         if self.z < 0.04:
             return "lowz"
+
+        # 条件分岐: `self.z > 0.2` を満たす経路を評価する。
+
         if self.z > 0.2:
             return "highz"
+
         return "midz"
 
 
@@ -144,6 +155,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
 
     for r in rows:
         sig = float(r.p_t_sigma)
+        # 条件分岐: `not (sig > 0.0)` を満たす経路を評価する。
         if not (sig > 0.0):
             raise ValueError(f"p_t_sigma must be >0: {r.id}")
 
@@ -192,10 +204,12 @@ def _extract_blondin2008_table3(pdf_path: Path) -> Dict[str, Any]:
     """
     text = _extract_text_from_pdf(pdf_path)
     i0 = text.find("TABLE 3")
+    # 条件分岐: `i0 < 0` を満たす経路を評価する。
     if i0 < 0:
         raise ValueError("TABLE 3 not found in PDF text")
 
     i1 = text.find("TABLE 4", i0)
+    # 条件分岐: `i1 < 0` を満たす経路を評価する。
     if i1 < 0:
         # Fallback: table end not found; take a conservative tail window.
         i1 = min(len(text), i0 + 12000)
@@ -222,10 +236,13 @@ def _extract_blondin2008_table3(pdf_path: Path) -> Dict[str, Any]:
             )
         )
 
+    # 条件分岐: `not points` を満たす経路を評価する。
+
     if not points:
         raise ValueError("no rows parsed from Blondin+2008 Table 3 block")
 
     # Sanity: extracted inv_1pz should match 1/(1+z)
+
     diffs = [abs(p.inv_1pz - 1.0 / (1.0 + p.z)) for p in points]
     sanity = {
         "n_points": int(len(points)),
@@ -242,6 +259,7 @@ def _extract_blondin2008_table3(pdf_path: Path) -> Dict[str, Any]:
 
 
 def _fit_pt_from_aging_rates(points: Sequence[AgingRatePoint]) -> Dict[str, Any]:
+    # 条件分岐: `not points` を満たす経路を評価する。
     if not points:
         raise ValueError("no points to fit")
 
@@ -249,6 +267,7 @@ def _fit_pt_from_aging_rates(points: Sequence[AgingRatePoint]) -> Dict[str, Any]
     g = np.array([p.aging_rate for p in points], dtype=float)
     sig = np.array([p.sigma for p in points], dtype=float)
 
+    # 条件分岐: `np.any(sig <= 0.0)` を満たす経路を評価する。
     if np.any(sig <= 0.0):
         raise ValueError("sigma must be > 0")
 
@@ -275,24 +294,33 @@ def _fit_pt_from_aging_rates(points: Sequence[AgingRatePoint]) -> Dict[str, Any]
     i = i_best
     while i > 0 and float(chi2[i]) <= target:
         i -= 1
+
+    # 条件分岐: `i < i_best` を満たす経路を評価する。
+
     if i < i_best:
         x0, y0 = float(b_grid[i]), float(chi2[i])
         x1, y1 = float(b_grid[i + 1]), float(chi2[i + 1])
+        # 条件分岐: `y1 != y0` を満たす経路を評価する。
         if y1 != y0:
             b_lo = x0 + (target - y0) * (x1 - x0) / (y1 - y0)
 
     i = i_best
     while i < n_grid - 1 and float(chi2[i]) <= target:
         i += 1
+
+    # 条件分岐: `i > i_best` を満たす経路を評価する。
+
     if i > i_best:
         x0, y0 = float(b_grid[i - 1]), float(chi2[i - 1])
         x1, y1 = float(b_grid[i]), float(chi2[i])
+        # 条件分岐: `y1 != y0` を満たす経路を評価する。
         if y1 != y0:
             b_hi = x0 + (target - y0) * (x1 - x0) / (y1 - y0)
 
     sig_minus = None if b_lo is None else float(b_best - b_lo)
     sig_plus = None if b_hi is None else float(b_hi - b_best)
     sig_sym = None
+    # 条件分岐: `sig_minus is not None and sig_plus is not None` を満たす経路を評価する。
     if sig_minus is not None and sig_plus is not None:
         sig_sym = 0.5 * (sig_minus + sig_plus)
 
@@ -336,6 +364,7 @@ def _plot_pt_fit(
     y_fit = x ** (-p_fit)
     y_fit_lo = None
     y_fit_hi = None
+    # 条件分岐: `p_sig is not None` を満たす経路を評価する。
     if p_sig is not None:
         y_fit_lo = x ** (-(p_fit - p_sig))
         y_fit_hi = x ** (-(p_fit + p_sig))
@@ -349,8 +378,10 @@ def _plot_pt_fit(
     colors = {"lowz": "#1f77b4", "highz": "#ff7f0e", "midz": "#7f7f7f"}
     for key in ("lowz", "highz", "midz"):
         idx = [i for i, s in enumerate(sample) if s == key]
+        # 条件分岐: `not idx` を満たす経路を評価する。
         if not idx:
             continue
+
         ax1.errorbar(
             one_pz[idx],
             g[idx],
@@ -366,6 +397,7 @@ def _plot_pt_fit(
     ax1.plot(x, y_frw, color="#2ca02c", linewidth=2.0, label="FRW: p_t=1")
     ax1.plot(x, y_tired, color="#d62728", linewidth=2.0, linestyle="--", label="no dilation: p_t=0")
     ax1.plot(x, y_fit, color="#111111", linewidth=2.0, label=f"fit (all): p_t={p_fit:.2f}")
+    # 条件分岐: `y_fit_lo is not None and y_fit_hi is not None` を満たす経路を評価する。
     if y_fit_lo is not None and y_fit_hi is not None:
         ax1.fill_between(x, y_fit_hi, y_fit_lo, color="#111111", alpha=0.10, label="fit ±1σ (approx)")
 
@@ -507,6 +539,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     data_path = Path(args.data)
     src = _read_json(data_path)
     constraints = [Constraint.from_json(c) for c in (src.get("constraints") or [])]
+    # 条件分岐: `not constraints` を満たす経路を評価する。
     if not constraints:
         raise SystemExit(f"no constraints found in: {data_path}")
 
@@ -525,13 +558,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     blondin_constraint: Optional[Constraint] = None
     for c in constraints:
         src_meta = c.source or {}
+        # 条件分岐: `str(src_meta.get("arxiv_id") or "") == "0804.3595" or c.id.startswith("blondi...` を満たす経路を評価する。
         if str(src_meta.get("arxiv_id") or "") == "0804.3595" or c.id.startswith("blondin2008"):
             blondin_constraint = c
             break
 
+    # 条件分岐: `blondin_constraint is not None` を満たす経路を評価する。
+
     if blondin_constraint is not None:
         local_pdf = blondin_constraint.source.get("local_pdf")
         pdf_path = (_ROOT / local_pdf) if local_pdf else None
+        # 条件分岐: `pdf_path is not None and pdf_path.exists()` を満たす経路を評価する。
         if pdf_path is not None and pdf_path.exists():
             try:
                 table = _extract_blondin2008_table3(pdf_path)
@@ -628,6 +665,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Attach audit to the relevant row for convenience.
     if pt_fit_payload is not None:
         for r in payload["rows"]:
+            # 条件分岐: `str(r.get("id")) == str(pt_fit_payload.get("source_constraint_id"))` を満たす経路を評価する。
             if str(r.get("id")) == str(pt_fit_payload.get("source_constraint_id")):
                 r["audit"] = {
                     "circularity_risk_main_fit": (pt_fit_payload.get("audit") or {}).get("circularity_risk_main_fit"),
@@ -636,10 +674,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "refit_error": pt_fit_payload.get("error"),
                 }
                 break
+
     _write_json(out_json, payload)
 
     print(f"[ok] png : {png_path}")
     print(f"[ok] json: {out_json}")
+    # 条件分岐: `pt_fit_png is not None and pt_fit_json is not None` を満たす経路を評価する。
     if pt_fit_png is not None and pt_fit_json is not None:
         print(f"[ok] pt-fit png : {pt_fit_png}")
         print(f"[ok] pt-fit json: {pt_fit_json}")
@@ -671,6 +711,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -25,9 +25,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -40,12 +43,15 @@ def _sanitize_token(s: str) -> str:
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
+
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req) as resp, out_path.open("wb") as f:
         f.write(resp.read())
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -59,16 +65,21 @@ class _HTMLTableParser(HTMLParser):
         self._cur_cell_parts: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        # 条件分岐: `tag.lower() == "tr"` を満たす経路を評価する。
         if tag.lower() == "tr":
             self._in_tr = True
             self._cur_row = []
             return
+
+        # 条件分岐: `tag.lower() in ("td", "th") and self._in_tr` を満たす経路を評価する。
+
         if tag.lower() in ("td", "th") and self._in_tr:
             self._in_cell = True
             self._cur_cell_parts = []
 
     def handle_endtag(self, tag: str) -> None:
         t = tag.lower()
+        # 条件分岐: `t in ("td", "th") and self._in_tr and self._in_cell` を満たす経路を評価する。
         if t in ("td", "th") and self._in_tr and self._in_cell:
             txt = "".join(self._cur_cell_parts)
             txt = txt.replace("\u00a0", " ")  # &nbsp;
@@ -77,24 +88,34 @@ class _HTMLTableParser(HTMLParser):
             self._cur_cell_parts = []
             self._in_cell = False
             return
+
+        # 条件分岐: `t == "tr" and self._in_tr` を満たす経路を評価する。
+
         if t == "tr" and self._in_tr:
+            # 条件分岐: `self._cur_row` を満たす経路を評価する。
             if self._cur_row:
                 self.rows.append(self._cur_row)
+
             self._cur_row = []
             self._in_tr = False
 
     def handle_data(self, data: str) -> None:
+        # 条件分岐: `self._in_tr and self._in_cell` を満たす経路を評価する。
         if self._in_tr and self._in_cell:
             self._cur_cell_parts.append(data)
 
 
 def _safe_float_from_cell(s: str) -> Optional[float]:
     ss = str(s).strip()
+    # 条件分岐: `not ss` を満たす経路を評価する。
     if not ss:
         return None
+
     m = re.search(r"[-+]?\d+(?:\.\d+)?", ss)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     try:
         return float(m.group(0))
     except Exception:
@@ -119,8 +140,10 @@ class DiatomicConstants:
 
     @classmethod
     def from_row(cls, row: list[str]) -> "DiatomicConstants":
+        # 条件分岐: `len(row) < 13` を満たす経路を評価する。
         if len(row) < 13:
             raise ValueError(f"expected 13 columns; got {len(row)}")
+
         return cls(
             state=row[0].strip(),
             Te_cm_inv=_safe_float_from_cell(row[1]),
@@ -140,27 +163,38 @@ class DiatomicConstants:
 
 def _extract_first_diatomic_table(html: str) -> str:
     m = re.search(r'<table class="small data"><caption[^>]*>\s*Diatomic constants', html, re.IGNORECASE)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError("Diatomic constants table not found in HTML")
+
     start = m.start()
     end = html.find("</table>", start)
+    # 条件分岐: `end < 0` を満たす経路を評価する。
     if end < 0:
         raise ValueError("Diatomic constants table end </table> not found")
+
     return html[start : end + len("</table>")]
 
 
 def _pick_ground_state(rows: list[list[str]]) -> DiatomicConstants:
     # Prefer: State starts with "X" and Te==0 (ground electronic state).
     for r in rows:
+        # 条件分岐: `len(r) < 13` を満たす経路を評価する。
         if len(r) < 13:
             continue
+
         state = (r[0] or "").strip()
+        # 条件分岐: `not state.startswith("X")` を満たす経路を評価する。
         if not state.startswith("X"):
             continue
+
         te = _safe_float_from_cell(r[1] or "")
+        # 条件分岐: `te is None or abs(te) > 1e-12` を満たす経路を評価する。
         if te is None or abs(te) > 1e-12:
             continue
+
         return DiatomicConstants.from_row(r)
+
     raise ValueError("ground state row not found (expected State='X ...' and Te=0)")
 
 
@@ -195,13 +229,19 @@ def main(argv: list[str] | None = None) -> int:
     extracted_path = out_dir / "extracted_values.json"
     manifest_path = out_dir / "manifest.json"
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing: list[Path] = []
         for p in (raw_path, extracted_path, manifest_path):
+            # 条件分岐: `not p.exists() or p.stat().st_size <= 0` を満たす経路を評価する。
             if not p.exists() or p.stat().st_size <= 0:
                 missing.append(p)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return 0
 
@@ -301,6 +341,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] manifest: {manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

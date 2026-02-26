@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,17 +34,29 @@ def _get_atomic_fail_unknown(row: Dict[str, Any]) -> Tuple[Set[str], Set[str]]:
     failed: Set[str] = set()
     unknown: Set[str] = set()
     for k, v in pass_fail.items():
+        # 条件分岐: `k in {"All", "EHT", "non_EHT"}` を満たす経路を評価する。
         if k in {"All", "EHT", "non_EHT"}:
             continue
+
+        # 条件分岐: `v in {"Fail", "FAIL", "fail"}` を満たす経路を評価する。
+
         if v in {"Fail", "FAIL", "fail"}:
             failed.add(str(k))
             continue
+
+        # 条件分岐: `v in {"Pass", "PASS", "pass"}` を満たす経路を評価する。
+
         if v in {"Pass", "PASS", "pass"}:
             continue
+
+        # 条件分岐: `v in {"--", None, ""}` を満たす経路を評価する。
+
         if v in {"--", None, ""}:
             unknown.add(str(k))
             continue
+
         unknown.add(str(k))
+
     return failed, unknown
 
 
@@ -67,10 +80,15 @@ def _compute_pass_stats(
         failed, unknown = _get_atomic_fail_unknown(row)
         failed = failed - relax
         unknown = unknown - relax
+        # 条件分岐: `unknown` を満たす経路を評価する。
         if unknown:
             unknown_rows_n += 1
+
+        # 条件分岐: `not failed and not unknown` を満たす経路を評価する。
+
         if not failed and not unknown:
             pass_n += 1
+
     return {
         "rows_n": rows_n,
         "pass_n": pass_n,
@@ -83,6 +101,7 @@ def _collect_rows_by_table(metrics: Dict[str, Any]) -> Dict[str, List[Dict[str, 
     out: Dict[str, List[Dict[str, Any]]] = {}
     for table_key, _, row in _iter_rows(metrics):
         out.setdefault(table_key, []).append(row)
+
     return out
 
 
@@ -91,9 +110,12 @@ def _atomic_keys_in_rows(rows: List[Dict[str, Any]]) -> List[str]:
     for row in rows:
         pf = row.get("pass_fail") or {}
         for k in pf.keys():
+            # 条件分岐: `k in {"All", "EHT", "non_EHT"}` を満たす経路を評価する。
             if k in {"All", "EHT", "non_EHT"}:
                 continue
+
             keys.add(str(k))
+
     return sorted(keys)
 
 
@@ -123,6 +145,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json), "png": str(out_png)},
     }
 
+    # 条件分岐: `not in_metrics.exists()` を満たす経路を評価する。
     if not in_metrics.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_metrics_json"
@@ -160,6 +183,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         st = _compute_pass_stats(all_rows, relax={k})
         st["relax"] = [k]
         relax_single.append(st)
+
     relax_single_sorted = sorted(relax_single, key=lambda x: (x.get("pass_n") or 0), reverse=True)
     derived["global"]["relax_single_ranked"] = relax_single_sorted[:15]
 
@@ -168,10 +192,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for name, relax in scenarios.items():
             dtab["scenarios"][name] = _compute_pass_stats(rows, relax=relax)
             dtab["scenarios"][name]["relax"] = sorted(relax)
+
         derived["by_table"][table_key] = dtab
 
     payload["derived"] = derived
 
+    # 条件分岐: `not bool(args.no_plot)` を満たす経路を評価する。
     if not bool(args.no_plot):
         try:
             import matplotlib
@@ -192,6 +218,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.tick_params(axis="x", labelrotation=15)
             for i, v in enumerate(vals):
                 ax.text(i, v, f"{v:.3f}", ha="center", va="bottom", fontsize=9)
+
             fig.tight_layout()
             fig.savefig(out_png, dpi=160)
             plt.close(fig)
@@ -222,10 +249,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pass
 
     print(f"[ok] json: {out_json}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] png : {out_png}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

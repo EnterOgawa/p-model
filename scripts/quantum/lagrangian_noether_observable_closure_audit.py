@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -48,42 +49,63 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _sha256(path: Path) -> Optional[str]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     h = hashlib.sha256()
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _all_true(rows: Any) -> Optional[bool]:
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         return None
+
     flags: List[bool] = []
     for row in rows:
+        # 条件分岐: `isinstance(row, dict)` を満たす経路を評価する。
         if isinstance(row, dict):
             p = row.get("pass")
+            # 条件分岐: `isinstance(p, bool)` を満たす経路を評価する。
             if isinstance(p, bool):
                 flags.append(p)
+
+    # 条件分岐: `not flags` を満たす経路を評価する。
+
     if not flags:
         return None
+
     return all(flags)
 
 
 def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
+    # 条件分岐: `passed is True` を満たす経路を評価する。
     if passed is True:
         return "pass"
+
+    # 条件分岐: `passed is None` を満たす経路を評価する。
+
     if passed is None:
         return "unknown"
+
+    # 条件分岐: `gate_level == "hard"` を満たす経路を評価する。
+
     if gate_level == "hard":
         return "reject"
+
     return "watch"
 
 
@@ -115,14 +137,20 @@ class CheckRow:
 
 def _get_action_noether(criteria: Any) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
+    # 条件分岐: `not isinstance(criteria, list)` を満たす経路を評価する。
     if not isinstance(criteria, list):
         return out
+
     for row in criteria:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         rid = str(row.get("id") or "")
+        # 条件分岐: `rid` を満たす経路を評価する。
         if rid:
             out[rid] = row
+
     return out
 
 
@@ -461,16 +489,21 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in checks:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         labels.append(str(row.get("id") or ""))
         score = row.get("score")
         scores.append(float(score) if isinstance(score, (int, float)) else math.nan)
         status = str(row.get("status") or "")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "watch"` を追加評価する。
         elif status == "watch":
             colors.append("#eab308")
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             colors.append("#dc2626")
         else:
@@ -479,8 +512,10 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     obs_labels: List[str] = []
     obs_values: List[float] = []
     for row in matrix:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         obs_labels.append(str(row.get("observable") or ""))
         present = bool(row.get("present"))
         unique = bool(row.get("unique_route"))
@@ -575,24 +610,33 @@ def main(argv: Optional[List[str]] = None) -> int:
         ("out-csv", out_csv),
         ("out-png", out_png),
     ]:
+        # 条件分岐: `not path.is_absolute()` を満たす経路を評価する。
         if not path.is_absolute():
             resolved = (ROOT / path).resolve()
+            # 条件分岐: `name == "action-json"` を満たす経路を評価する。
             if name == "action-json":
                 action_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "nonrel-json"` を追加評価する。
             elif name == "nonrel-json":
                 nonrel_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "deriv-pack-json"` を追加評価する。
             elif name == "deriv-pack-json":
                 deriv_pack_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "chain-lock-json"` を追加評価する。
             elif name == "chain-lock-json":
                 chain_lock_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "out-json"` を追加評価する。
             elif name == "out-json":
                 out_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "out-csv"` を追加評価する。
             elif name == "out-csv":
                 out_csv = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "out-png"` を追加評価する。
             elif name == "out-png":
                 out_png = resolved
 
     for p in [action_json, nonrel_json, deriv_pack_json, chain_lock_json]:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             print(f"[error] missing input: {_rel(p)}")
             return 2
@@ -639,6 +683,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

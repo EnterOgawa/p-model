@@ -37,19 +37,24 @@ def phase_rad(*, keff: float, g_m_per_s2: float, T_s: float) -> float:
 
 
 def _as_float(v: object) -> float | None:
+    # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)):
         return float(v)
+
     return None
 
 
 def _try_load_beta_frozen(root: Path) -> float | None:
     p = root / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         j = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
         return None
+
     beta = _as_float(j.get("beta"))
     return beta
 
@@ -118,6 +123,7 @@ def main() -> None:
     earth_x = float(-phi_earth_m2_s2 / (c_m_per_s**2))
 
     beta_models: dict = {"status": "missing_beta_frozen"} if delta_beta_vs_gr is None else {"status": "ok"}
+    # 条件分岐: `delta_beta_vs_gr is not None` を満たす経路を評価する。
     if delta_beta_vs_gr is not None:
         d_beta = float(delta_beta_vs_gr)
         H_m = 0.5 * cfg.g_m_per_s2 * (cfg.T_s**2)
@@ -201,6 +207,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

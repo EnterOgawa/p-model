@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Sequence
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -82,6 +83,7 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
 
 def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float, tau0_gyr: float, pi0: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         path.write_bytes(b"")
         return
@@ -140,14 +142,18 @@ def _ratio_lpath(pi0: float, rho_ratio: float, v_ratio: float, temp_ratio: float
     v_r = max(float(v_ratio), 1.0e-12)
     t_r = max(float(temp_ratio), 1.0e-12)
     denom = v_r + pi0 * rho_r * (t_r ** temp_power)
+    # 条件分岐: `not math.isfinite(denom) or denom <= 0.0` を満たす経路を評価する。
     if not math.isfinite(denom) or denom <= 0.0:
         return float("nan")
+
     return float((1.0 + pi0) / denom)
 
 
 def _load_reference(input_json: Path) -> Dict[str, Any]:
+    # 条件分岐: `not input_json.exists()` を満たす経路を評価する。
     if not input_json.exists():
         raise FileNotFoundError(f"missing input JSON: {input_json}")
+
     src = json.loads(input_json.read_text(encoding="utf-8"))
     tau_block = src.get("tau_origin_block", {})
     comp = tau_block.get("derived_components_gyr", {})
@@ -165,17 +171,31 @@ def _load_reference(input_json: Path) -> Dict[str, Any]:
             ti = float(row.get("tau_int_gyr", float("nan")))
         except Exception:
             continue
+
+        # 条件分岐: `(not math.isfinite(tf)) or (not math.isfinite(ti)) or tf <= 0.0 or ti <= 0.0` を満たす経路を評価する。
+
         if (not math.isfinite(tf)) or (not math.isfinite(ti)) or tf <= 0.0 or ti <= 0.0:
             continue
+
         pi_values.append(max(ti / tf - 1.0, 0.0))
+
+    # 条件分岐: `not pi_values and math.isfinite(tau_free) and math.isfinite(tau_int) and tau_...` を満たす経路を評価する。
 
     if not pi_values and math.isfinite(tau_free) and math.isfinite(tau_int) and tau_free > 0.0 and tau_int > 0.0:
         pi_values = [max(tau_int / tau_free - 1.0, 0.0)]
 
+    # 条件分岐: `(not math.isfinite(tau_free)) or tau_free <= 0.0` を満たす経路を評価する。
+
     if (not math.isfinite(tau_free)) or tau_free <= 0.0:
         raise RuntimeError("invalid tau_free in input JSON")
+
+    # 条件分岐: `(not math.isfinite(c_w)) or c_w <= 0.0` を満たす経路を評価する。
+
     if (not math.isfinite(c_w)) or c_w <= 0.0:
         raise RuntimeError("invalid p_wave_speed_km_s in input JSON")
+
+    # 条件分岐: `not pi_values` を満たす経路を評価する。
+
     if not pi_values:
         raise RuntimeError("unable to derive Pi0 from tau data")
 
@@ -410,6 +430,7 @@ def main() -> int:
     _write_json(out_private_json, payload)
     _write_json(out_public_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -439,6 +460,8 @@ def main() -> int:
     print(f"[out] {out_public_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

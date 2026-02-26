@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 import sys
 
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -32,18 +33,28 @@ def _rel(path: Path) -> str:
 
 
 def _z_score(*, pred: float | None, obs: float, sigma: float) -> float | None:
+    # 条件分岐: `pred is None or not math.isfinite(pred) or sigma <= 0.0` を満たす経路を評価する。
     if pred is None or not math.isfinite(pred) or sigma <= 0.0:
         return None
+
     return float((pred - obs) / sigma)
 
 
 def _gate_status(*, z_abs: float | None, hard: float, watch: float) -> str:
+    # 条件分岐: `z_abs is None` を満たす経路を評価する。
     if z_abs is None:
         return "watch"
+
+    # 条件分岐: `z_abs <= watch` を満たす経路を評価する。
+
     if z_abs <= watch:
         return "pass"
+
+    # 条件分岐: `z_abs <= hard` を満たす経路を評価する。
+
     if z_abs <= hard:
         return "watch"
+
     return "reject"
 
 
@@ -53,8 +64,10 @@ def _plot_gate(path: Path, rows: list[dict[str, Any]], hard: float, watch: float
     colors = []
     for r in rows:
         s = str(r["status"])
+        # 条件分岐: `s == "pass"` を満たす経路を評価する。
         if s == "pass":
             colors.append("#2ca02c")
+        # 条件分岐: 前段条件が不成立で、`s == "reject"` を追加評価する。
         elif s == "reject":
             colors.append("#d62728")
         else:
@@ -71,8 +84,10 @@ def _plot_gate(path: Path, rows: list[dict[str, Any]], hard: float, watch: float
     ax.grid(True, axis="y", ls=":", lw=0.6, alpha=0.6)
     ax.legend(loc="upper right", fontsize=8)
     for idx, row in enumerate(rows):
+        # 条件分岐: `row["z_abs"] is None` を満たす経路を評価する。
         if row["z_abs"] is None:
             ax.text(idx, 0.05, "N/A", ha="center", va="bottom", fontsize=8, color="#444444")
+
     fig.tight_layout()
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
@@ -153,6 +168,7 @@ def main() -> int:
         * xi_scale ** float(args.he3he4_xi_exp)
     )
     li7_diagnostics: dict[str, Any] = {}
+    # 条件分岐: `str(args.li7_model) == "be7_branch"` を満たす経路を評価する。
     if str(args.li7_model) == "be7_branch":
         be7_prod = (
             float(args.be7_prod_base)
@@ -250,8 +266,10 @@ def main() -> int:
         )
 
     statuses = [str(r["status"]) for r in rows]
+    # 条件分岐: `any(s == "reject" for s in statuses)` を満たす経路を評価する。
     if any(s == "reject" for s in statuses):
         overall_status = "reject"
+    # 条件分岐: 前段条件が不成立で、`any(s == "watch" for s in statuses)` を追加評価する。
     elif any(s == "watch" for s in statuses):
         overall_status = "watch"
     else:
@@ -360,6 +378,8 @@ def main() -> int:
     print(f"[info] overall_status={overall_status}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

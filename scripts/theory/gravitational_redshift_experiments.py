@@ -27,6 +27,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -76,8 +77,10 @@ def compute(experiments: Sequence[Experiment]) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     for e in experiments:
         z = None
+        # 条件分岐: `e.sigma > 0` を満たす経路を評価する。
         if e.sigma > 0:
             z = e.epsilon / e.sigma
+
         rows.append(
             {
                 "id": e.id,
@@ -90,6 +93,7 @@ def compute(experiments: Sequence[Experiment]) -> List[Dict[str, Any]]:
                 "source": e.source,
             }
         )
+
     return rows
 
 
@@ -183,6 +187,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     src = _read_json(data_path)
     experiments = [Experiment.from_json(e) for e in (src.get("experiments") or [])]
+    # 条件分岐: `not experiments` を満たす経路を評価する。
     if not experiments:
         raise SystemExit(f"no experiments found in: {data_path}")
 
@@ -211,6 +216,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] csv  : {out_csv}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

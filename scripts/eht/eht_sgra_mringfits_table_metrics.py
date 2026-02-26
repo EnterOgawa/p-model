@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -34,8 +35,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _find_block(text: str, needle: str, *, window: int = 900) -> Optional[str]:
     i = text.find(needle)
+    # 条件分岐: `i < 0` を満たす経路を評価する。
     if i < 0:
         return None
+
     a = max(0, i - 120)
     b = min(len(text), i + window)
     return text[a:b]
@@ -44,8 +47,10 @@ def _find_block(text: str, needle: str, *, window: int = 900) -> Optional[str]:
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
+    # 条件分岐: `x.size == 0` を満たす経路を評価する。
     if x.size == 0:
         return {"n": 0}
+
     return {
         "n": int(x.size),
         "mean": float(np.mean(x)),
@@ -77,26 +82,39 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MringFitRow]:
 
     start_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             start_idx = i
             break
+
+    # 条件分岐: `start_idx is None` を満たす経路を評価する。
+
     if start_idx is None:
         return []
 
     # Find \startdata after label.
+
     startdata_idx = None
     for j in range(start_idx, len(lines)):
+        # 条件分岐: `"\\startdata" in lines[j]` を満たす経路を評価する。
         if "\\startdata" in lines[j]:
             startdata_idx = j
             break
+
+    # 条件分岐: `startdata_idx is None` を満たす経路を評価する。
+
     if startdata_idx is None:
         return []
 
     enddata_idx = None
     for j in range(startdata_idx, len(lines)):
+        # 条件分岐: `"\\enddata" in lines[j]` を満たす経路を評価する。
         if "\\enddata" in lines[j]:
             enddata_idx = j
             break
+
+    # 条件分岐: `enddata_idx is None` を満たす経路を評価する。
+
     if enddata_idx is None:
         enddata_idx = len(lines)
 
@@ -104,8 +122,10 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MringFitRow]:
     for off, raw in enumerate(lines[startdata_idx:enddata_idx], start=0):
         lineno = (startdata_idx + 1) + off
         m = _RE_ROW.match(raw)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         rows.append(
             MringFitRow(
                 scan=int(m.group("scan")),
@@ -116,6 +136,7 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MringFitRow]:
                 source_anchor={"path": str(source_path), "line": int(lineno), "label": "tab:mringfits"},
             )
         )
+
     return rows
 
 
@@ -143,6 +164,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -167,6 +189,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for r in rows
     ]
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         payload["ok"] = False
         payload["reason"] = "no_rows_parsed"
@@ -202,6 +225,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

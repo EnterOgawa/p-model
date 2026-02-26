@@ -48,6 +48,7 @@ def _simulate_wave_packet(cfg: DemoConfig) -> dict:
     u1[-1] = 0.0
 
     snapshots: dict[int, np.ndarray] = {}
+    # 条件分岐: `0 in cfg.snapshot_steps` を満たす経路を評価する。
     if 0 in cfg.snapshot_steps:
         snapshots[0] = u0.copy()
 
@@ -63,6 +64,7 @@ def _simulate_wave_packet(cfg: DemoConfig) -> dict:
         u_next[0] = 0.0
         u_next[-1] = 0.0
 
+        # 条件分岐: `step in cfg.snapshot_steps` を満たす経路を評価する。
         if step in cfg.snapshot_steps:
             snapshots[step] = u_next.copy()
 
@@ -89,6 +91,7 @@ def _plot(cfg: DemoConfig, sim: dict, *, out_png: Path) -> None:
     for n in (1, 2, 3):
         y = np.sin(n * np.pi * x / L)
         ax.plot(x, y, label=f"mode n={n} (λ={2*L/n:.3g})")
+
     ax.set_title("Reflection (boundary) → discrete eigenmodes")
     ax.set_xlabel("x")
     ax.set_ylabel("u_n(x) (arb.)")
@@ -103,6 +106,7 @@ def _plot(cfg: DemoConfig, sim: dict, *, out_png: Path) -> None:
     for step in steps_sorted:
         t = step * sim["dt"]
         ax.plot(x, snapshots[step], label=f"t={t:.3f}")
+
     ax.set_title("Wave packet reflects at boundaries (Dirichlet)")
     ax.set_xlabel("x")
     ax.set_ylabel("u(x,t) (arb.)")
@@ -160,6 +164,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -24,9 +24,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(int(chunk_bytes))
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -36,11 +39,13 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _load_ioffe_elastic_constants(root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing: {src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_elastic_constants_sources.py"
         )
+
     obj = _read_json(src)
     return {"path": src, "sha256": _sha256(src), "data": obj}
 
@@ -52,10 +57,15 @@ def _bulk_modulus_GPa_from_1e11_dyn_cm2(x: float) -> float:
 
 def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_max: float) -> float:
     t = float(t_k)
+    # 条件分岐: `t < float(t_min)` を満たす経路を評価する。
     if t < float(t_min):
         t = float(t_min)
+
+    # 条件分岐: `t > float(t_max)` を満たす経路を評価する。
+
     if t > float(t_max):
         t = float(t_max)
+
     return float(intercept) + float(slope) * t
 
 
@@ -74,11 +84,13 @@ def _metrics_for_idx(
     is_train: bool,
 ) -> dict[str, float | int]:
     ii = np.asarray(idx, dtype=np.int64).reshape(-1)
+    # 条件分岐: `ii.size == 0` を満たす経路を評価する。
     if ii.size == 0:
         return {"n": 0, "max_abs_z": float("nan"), "rms_z": float("nan"), "reduced_chi2": float("nan"), "exceed_3sigma_n": 0}
 
     z = (y_pred[ii] - y_obs[ii]) / np.maximum(1e-30, sigma[ii])
     z = z[np.isfinite(z)]
+    # 条件分岐: `z.size == 0` を満たす経路を評価する。
     if z.size == 0:
         return {"n": 0, "max_abs_z": float("nan"), "rms_z": float("nan"), "reduced_chi2": float("nan"), "exceed_3sigma_n": 0}
 
@@ -122,6 +134,7 @@ def _fit_linear(*, x: np.ndarray, y: np.ndarray, sigma: np.ndarray, idx: np.ndar
         beta = np.linalg.solve(A, b)
     except Exception:
         beta, *_ = np.linalg.lstsq(A, b, rcond=None)
+
     a = float(beta[0])
     slope = float(beta[1])
     return a, slope
@@ -134,23 +147,28 @@ def _idx_in_range(temps_k: np.ndarray, *, t0: float, t1: float) -> np.ndarray:
 
 def _ref_curve_from_ioffe(*, t_k: np.ndarray, obj: dict[str, Any]) -> np.ndarray:
     vals = obj.get("values", {})
+    # 条件分岐: `not isinstance(vals, dict)` を満たす経路を評価する。
     if not isinstance(vals, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing 'values' dict")
 
     b_ref_1e11 = float(vals.get("bulk_modulus_from_C11_C12_1e11_dyn_cm2"))
 
     temp_dep = obj.get("temperature_dependence_linear", {})
+    # 条件分岐: `not isinstance(temp_dep, dict)` を満たす経路を評価する。
     if not isinstance(temp_dep, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing 'temperature_dependence_linear' dict")
 
     tr = temp_dep.get("T_range_K", {})
+    # 条件分岐: `not isinstance(tr, dict)` を満たす経路を評価する。
     if not isinstance(tr, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing 'T_range_K' dict")
+
     t_lin_min = float(tr.get("min"))
     t_lin_max = float(tr.get("max"))
 
     c11 = temp_dep.get("C11", {})
     c12 = temp_dep.get("C12", {})
+    # 条件分岐: `not isinstance(c11, dict) or not isinstance(c12, dict)` を満たす経路を評価する。
     if not isinstance(c11, dict) or not isinstance(c12, dict):
         raise SystemExit("[fail] invalid extracted_values.json: missing C11/C12 linear dicts")
 
@@ -165,16 +183,20 @@ def _ref_curve_from_ioffe(*, t_k: np.ndarray, obj: dict[str, Any]) -> np.ndarray
         return float((c11_t + 2.0 * c12_t) / 3.0)
 
     # Keep the same "switch" policy as the baseline: below t_lin_min hold B constant at B_ref.
+
     t_switch = float(t_lin_min)
     b_offset_1e11 = float(b_ref_1e11 - float(b_lin_1e11(t_switch)))
 
     out: list[float] = []
     for t in np.asarray(t_k, dtype=float).reshape(-1).tolist():
+        # 条件分岐: `float(t) < float(t_switch)` を満たす経路を評価する。
         if float(t) < float(t_switch):
             b_1e11 = float(b_ref_1e11)
         else:
             b_1e11 = float(b_lin_1e11(float(t))) + float(b_offset_1e11)
+
         out.append(_bulk_modulus_GPa_from_1e11_dyn_cm2(float(b_1e11)))
+
     return np.asarray(out, dtype=float)
 
 
@@ -287,6 +309,7 @@ def main() -> None:
             w.writerow(r)
 
     # Plot: holdout severity (test max abs z) for each split and model.
+
     categories: list[str] = []
     y_frozen: list[float] = []
     y_const: list[float] = []
@@ -356,6 +379,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

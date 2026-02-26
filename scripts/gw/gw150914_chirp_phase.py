@@ -27,6 +27,7 @@ except Exception:  # pragma: no cover
     _NP_RANK_WARNING = getattr(np, "RankWarning", Warning)
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -56,8 +57,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -69,35 +72,46 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-gw/1.0"})
     print(f"[dl] {url}")
     with urllib.request.urlopen(req, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
+    # 条件分岐: `not v` を満たす経路を評価する。
     if not v:
         return "v3"
+
+    # 条件分岐: `not v.lower().startswith("v")` を満たす経路を評価する。
+
     if not v.lower().startswith("v"):
         v = "v" + v
+
     return v
 
 
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
+    # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
     if not v or v == "auto":
         return ["v3", "v2", "v1"]
+
     return [_normalize_gwosc_version(version)]
 
 
@@ -110,6 +124,7 @@ def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
 
 def _pick_event_from_eventapi_json(obj: Dict[str, Any], *, event: str) -> Tuple[str, Dict[str, Any]]:
     events = obj.get("events") or {}
+    # 条件分岐: `not isinstance(events, dict) or not events` を満たす経路を評価する。
     if not isinstance(events, dict) or not events:
         raise ValueError("invalid event JSON: missing 'events'")
 
@@ -121,18 +136,25 @@ def _pick_event_from_eventapi_json(obj: Dict[str, Any], *, event: str) -> Tuple[
         return target, events[target]
 
     # Prefer commonName match (GW150914-v3 is a typical key).
+
     for k, v in events.items():
+        # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
         if not isinstance(v, dict):
             continue
+
         common = str(v.get("commonName") or "").strip()
+        # 条件分岐: `common and common.lower() == target_low` を満たす経路を評価する。
         if common and common.lower() == target_low:
             return str(k), v
 
     # Fallback: the first event in the payload.
+
     k0 = next(iter(events.keys()))
     v0 = events[k0]
+    # 条件分岐: `not isinstance(v0, dict)` を満たす経路を評価する。
     if not isinstance(v0, dict):
         raise ValueError("invalid event JSON: first event is not an object")
+
     return str(k0), v0
 
 
@@ -144,15 +166,18 @@ def _pick_strain_entry(
     prefer_sampling_rate_hz: int,
 ) -> Optional[Dict[str, Any]]:
     det = (detector or "").strip()
+    # 条件分岐: `not det` を満たす経路を評価する。
     if not det:
         return None
 
     cand = [e for e in (strain_list or []) if isinstance(e, dict) and str(e.get("detector") or "") == det]
     cand = [e for e in cand if str(e.get("format") or "").strip().lower() == "txt" and str(e.get("url") or "").strip()]
+    # 条件分岐: `not cand` を満たす経路を評価する。
     if not cand:
         return None
 
     # Prefer the usual 32s snippet for quick checks.
+
     def _int(x: Any) -> int:
         try:
             return int(x)
@@ -160,14 +185,17 @@ def _pick_strain_entry(
             return 0
 
     cand_d = [e for e in cand if _int(e.get("duration")) == int(prefer_duration_s)]
+    # 条件分岐: `not cand_d` を満たす経路を評価する。
     if not cand_d:
         cand_d = sorted(cand, key=lambda e: (_int(e.get("duration")) or 10**9, _int(e.get("sampling_rate")) or 10**9))[:1]
 
     cand_sr = [e for e in cand_d if _int(e.get("sampling_rate")) == int(prefer_sampling_rate_hz)]
+    # 条件分岐: `cand_sr` を満たす経路を評価する。
     if cand_sr:
         return cand_sr[0]
 
     # Fallback: smallest sampling rate among the chosen duration bucket.
+
     return sorted(cand_d, key=lambda e: _int(e.get("sampling_rate")) or 10**9)[0]
 
 
@@ -187,6 +215,7 @@ def _fetch_inputs(
     Cache event JSON + strain TXT.GZ data from GWOSC.
     """
     event_name = (event or "").strip()
+    # 条件分岐: `not event_name` を満たす経路を評価する。
     if not event_name:
         raise ValueError("event name is required")
 
@@ -195,7 +224,9 @@ def _fetch_inputs(
     data_dir.mkdir(parents=True, exist_ok=True)
     event_json_url = ""
     v_used = ""
+    # 条件分岐: `offline` を満たす経路を評価する。
     if offline:
+        # 条件分岐: `not event_json_path.exists()` を満たす経路を評価する。
         if not event_json_path.exists():
             raise FileNotFoundError("offline and missing: event_json")
     else:
@@ -208,9 +239,11 @@ def _fetch_inputs(
                 v_used = v_try
                 break
             except urllib.error.HTTPError as e:
+                # 条件分岐: `int(getattr(e, "code", 0) or 0) == 404 and len(_candidate_gwosc_versions(vers...` を満たす経路を評価する。
                 if int(getattr(e, "code", 0) or 0) == 404 and len(_candidate_gwosc_versions(version)) > 1:
                     last_404 = e
                     continue
+
                 raise
         else:
             raise last_404 or RuntimeError("failed to fetch event JSON (all candidate versions failed)")
@@ -218,15 +251,25 @@ def _fetch_inputs(
     ev_obj = json.loads(event_json_path.read_text(encoding="utf-8"))
     event_key, event_info = _pick_event_from_eventapi_json(ev_obj, event=event_name)
     v_from_json = event_info.get("version")
+    # 条件分岐: `v_from_json is not None` を満たす経路を評価する。
     if v_from_json is not None:
         v_used = _normalize_gwosc_version(str(v_from_json))
+
+    # 条件分岐: `not v_used` を満たす経路を評価する。
+
     if not v_used:
         v_used = _candidate_gwosc_versions(version)[0]
+
+    # 条件分岐: `not event_json_url` を満たす経路を評価する。
+
     if not event_json_url:
         event_json_url = _gwosc_event_json_url(catalog=catalog, event=event_name, version=v_used)
+
     strain = event_info.get("strain") or []
+    # 条件分岐: `not isinstance(strain, list)` を満たす経路を評価する。
     if not isinstance(strain, list):
         strain = []
+
     strain_list = [e for e in strain if isinstance(e, dict)]
 
     selected: Dict[str, Dict[str, Any]] = {}
@@ -241,14 +284,20 @@ def _fetch_inputs(
             prefer_duration_s=int(prefer_duration_s),
             prefer_sampling_rate_hz=int(prefer_sampling_rate_hz),
         )
+        # 条件分岐: `not entry` を満たす経路を評価する。
         if not entry:
             continue
+
         url = str(entry.get("url") or "").strip()
+        # 条件分岐: `not url` を満たす経路を評価する。
         if not url:
             continue
+
         fname = Path(url.split("?", 1)[0].split("#", 1)[0]).name
         p = data_dir / fname
+        # 条件分岐: `offline` を満たす経路を評価する。
         if offline:
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(f"{det}:{fname}")
                 continue
@@ -266,6 +315,8 @@ def _fetch_inputs(
             "url": url,
             "path": str(p).replace("\\", "/"),
         }
+
+    # 条件分岐: `offline and missing` を満たす経路を評価する。
 
     if offline and missing:
         raise FileNotFoundError("offline and missing strain files: " + ", ".join(missing))
@@ -305,45 +356,67 @@ def _parse_gwosc_txt_gz(path: Path) -> Tuple[float, float, np.ndarray]:
     with gzip.open(path, "rt", encoding="utf-8", errors="replace") as f:
         for _ in range(12):
             line = f.readline()
+            # 条件分岐: `not line` を満たす経路を評価する。
             if not line:
                 break
+
+            # 条件分岐: `not line.startswith("#")` を満たす経路を評価する。
+
             if not line.startswith("#"):
                 break
+
             header_lines.append(line.strip())
 
     for ln in header_lines:
+        # 条件分岐: `"samples per second" in ln` を満たす経路を評価する。
         if "samples per second" in ln:
             parts = ln.split()
             for i, tok in enumerate(parts):
+                # 条件分岐: `tok.isdigit()` を満たす経路を評価する。
                 if tok.isdigit():
                     fs = float(tok)
                     break
+
+        # 条件分岐: `"starting GPS" in ln` を満たす経路を評価する。
+
         if "starting GPS" in ln:
             # "# starting GPS 1126259447 duration 32"
             parts = ln.replace("#", "").split()
             for i, tok in enumerate(parts):
+                # 条件分岐: `tok == "GPS" and i + 1 < len(parts)` を満たす経路を評価する。
                 if tok == "GPS" and i + 1 < len(parts):
                     try:
                         gps_start = float(parts[i + 1])
                     except Exception:
                         pass
+
                     break
+
+    # 条件分岐: `not math.isfinite(fs) or fs <= 0` を満たす経路を評価する。
 
     if not math.isfinite(fs) or fs <= 0:
         raise ValueError(f"failed to parse fs from header: {path}")
+
+    # 条件分岐: `not math.isfinite(gps_start)` を満たす経路を評価する。
+
     if not math.isfinite(gps_start):
         # Fallback: parse from filename "...-GPSSTART-DURATION.txt.gz"
         toks = path.name.split("-")
+        # 条件分岐: `len(toks) >= 3` を満たす経路を評価する。
         if len(toks) >= 3:
             try:
                 gps_start = float(toks[-3])
             except Exception:
                 pass
+
+    # 条件分岐: `not math.isfinite(gps_start)` を満たす経路を評価する。
+
     if not math.isfinite(gps_start):
         raise ValueError(f"failed to parse GPSstart from header/filename: {path}")
 
     with gzip.open(path, "rt", encoding="utf-8", errors="replace") as f:
         strain = np.loadtxt(f, comments="#", dtype=np.float64)
+
     return gps_start, fs, strain
 
 
@@ -351,8 +424,10 @@ def _bandpass(x: np.ndarray, fs: float, *, f_lo: float, f_hi: float, order: int 
     nyq = 0.5 * fs
     lo = float(f_lo) / nyq
     hi = float(f_hi) / nyq
+    # 条件分岐: `not (0 < lo < hi < 1)` を満たす経路を評価する。
     if not (0 < lo < hi < 1):
         raise ValueError(f"invalid bandpass: {f_lo}-{f_hi} Hz (fs={fs})")
+
     b, a = butter(order, [lo, hi], btype="band")
     return filtfilt(b, a, x)
 
@@ -372,14 +447,20 @@ def _whiten_fft(
     - Divide FFT by sqrt(PSD).
     - Zero out frequencies outside [f_lo, f_hi].
     """
+    # 条件分岐: `x.size < 4` を満たす経路を評価する。
     if x.size < 4:
         return x.copy()
+
+    # 条件分岐: `not (math.isfinite(fs) and fs > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(fs) and fs > 0):
         raise ValueError("invalid fs")
 
     nperseg = int(welch_nperseg)
+    # 条件分岐: `nperseg <= 0` を満たす経路を評価する。
     if nperseg <= 0:
         nperseg = 4096
+
     nperseg = min(nperseg, int(x.size))
 
     f_psd, pxx = welch(x, fs=float(fs), nperseg=nperseg)
@@ -394,6 +475,7 @@ def _whiten_fft(
 
     lo = float(f_lo)
     hi = float(f_hi)
+    # 条件分岐: `not (math.isfinite(lo) and math.isfinite(hi) and 0.0 < lo < hi)` を満たす経路を評価する。
     if not (math.isfinite(lo) and math.isfinite(hi) and 0.0 < lo < hi):
         raise ValueError(f"invalid band: {f_lo}-{f_hi}")
 
@@ -424,12 +506,22 @@ def _extract_frequency_track_stft_guided(
       - 四重極チャープ則の f_pred(t; Mc) に沿う信号が最大になる Mc を粗探索
       - 得られた Mc に沿って、各時刻ビンで ±delta の範囲の最大点を f(t) として抽出
     """
+    # 条件分岐: `nperseg <= 0` を満たす経路を評価する。
     if nperseg <= 0:
         raise ValueError("nperseg must be positive")
+
+    # 条件分岐: `noverlap < 0 or noverlap >= nperseg` を満たす経路を評価する。
+
     if noverlap < 0 or noverlap >= nperseg:
         raise ValueError("noverlap must be in [0, nperseg)")
+
+    # 条件分岐: `mc_steps < 5` を満たす経路を評価する。
+
     if mc_steps < 5:
         mc_steps = 5
+
+    # 条件分岐: `not (mc_max_msun > mc_min_msun > 0)` を満たす経路を評価する。
+
     if not (mc_max_msun > mc_min_msun > 0):
         raise ValueError("invalid chirp-mass range")
 
@@ -449,6 +541,7 @@ def _extract_frequency_track_stft_guided(
 
     time_mask = (t_stft >= float(t_window[0])) & (t_stft <= float(t_window[1]))
     freq_mask = (f >= float(f_range[0])) & (f <= float(f_range[1]))
+    # 条件分岐: `(not np.any(time_mask)) or (not np.any(freq_mask))` を満たす経路を評価する。
     if (not np.any(time_mask)) or (not np.any(freq_mask)):
         return np.array([], dtype=np.float64), np.array([], dtype=np.float64), {"ok": 0.0, "reason": "empty_window"}
 
@@ -469,11 +562,13 @@ def _extract_frequency_track_stft_guided(
     dt = -t_sub  # since tc~0
     dt = np.asarray(dt, dtype=np.float64)
     valid_t = np.isfinite(dt) & (dt > 0)
+    # 条件分岐: `not np.any(valid_t)` を満たす経路を評価する。
     if not np.any(valid_t):
         return np.array([], dtype=np.float64), np.array([], dtype=np.float64), {"ok": 0.0, "reason": "nonpositive_dt"}
 
     mc_grid = np.linspace(float(mc_min_msun), float(mc_max_msun), int(mc_steps), dtype=np.float64)
     delta = float(delta_hz)
+    # 条件分岐: `not (math.isfinite(delta) and delta > 0)` を満たす経路を評価する。
     if not (math.isfinite(delta) and delta > 0):
         delta = 25.0
 
@@ -486,14 +581,19 @@ def _extract_frequency_track_stft_guided(
 
         score = 0.0
         for j, fp in enumerate(f_pred):
+            # 条件分岐: `not math.isfinite(fp)` を満たす経路を評価する。
             if not math.isfinite(fp):
                 continue
+
             lo = fp - delta
             hi = fp + delta
             idx = np.where((f_sub >= lo) & (f_sub <= hi))[0]
+            # 条件分岐: `idx.size == 0` を満たす経路を評価する。
             if idx.size == 0:
                 continue
+
             score += float(np.max(mag_n[idx, int(j)]))
+
         scores[int(i)] = float(score)
 
     best_i = int(np.nanargmax(scores)) if np.any(np.isfinite(scores)) else 0
@@ -508,13 +608,17 @@ def _extract_frequency_track_stft_guided(
     f_sel = np.full_like(t_sub, np.nan, dtype=np.float64)
     a_sel = np.full_like(t_sub, np.nan, dtype=np.float64)
     for j, fp in enumerate(f_pred):
+        # 条件分岐: `not math.isfinite(fp)` を満たす経路を評価する。
         if not math.isfinite(fp):
             continue
+
         lo = fp - delta
         hi = fp + delta
         idx = np.where((f_sub >= lo) & (f_sub <= hi))[0]
+        # 条件分岐: `idx.size == 0` を満たす経路を評価する。
         if idx.size == 0:
             continue
+
         local = mag_n[idx, int(j)]
         k_local = int(np.nanargmax(local))
         k = int(idx[k_local])
@@ -522,11 +626,13 @@ def _extract_frequency_track_stft_guided(
         a_sel[int(j)] = float(local[k_local])
 
     keep = np.isfinite(f_sel) & np.isfinite(t_sub)
+    # 条件分岐: `np.any(keep)` を満たす経路を評価する。
     if np.any(keep):
         # Optional amplitude percentile cut on the guided ridge (keep enough points for fit).
         try:
             cut = float(np.percentile(a_sel[keep], float(amp_percentile)))
             keep2 = keep & (a_sel >= cut)
+            # 条件分岐: `int(np.sum(keep2)) >= 10` を満たす経路を評価する。
             if int(np.sum(keep2)) >= 10:
                 keep = keep2
         except Exception:
@@ -565,6 +671,7 @@ def _extract_instantaneous_frequency(
     mask &= np.isfinite(f_inst)
     mask &= (f_inst >= float(f_range[0])) & (f_inst <= float(f_range[1]))
 
+    # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
     if not np.any(mask):
         return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
@@ -592,8 +699,12 @@ def _extract_frequency_track_stft(
 
     This is usually more stable than Hilbert instantaneous frequency on noisy data.
     """
+    # 条件分岐: `nperseg <= 0` を満たす経路を評価する。
     if nperseg <= 0:
         raise ValueError("nperseg must be positive")
+
+    # 条件分岐: `noverlap < 0 or noverlap >= nperseg` を満たす経路を評価する。
+
     if noverlap < 0 or noverlap >= nperseg:
         raise ValueError("noverlap must be in [0, nperseg)")
 
@@ -613,6 +724,7 @@ def _extract_frequency_track_stft(
 
     time_mask = (t_stft >= float(t_window[0])) & (t_stft <= float(t_window[1]))
     freq_mask = (f >= float(f_range[0])) & (f <= float(f_range[1]))
+    # 条件分岐: `(not np.any(time_mask)) or (not np.any(freq_mask))` を満たす経路を評価する。
     if (not np.any(time_mask)) or (not np.any(freq_mask)):
         return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
@@ -620,11 +732,13 @@ def _extract_frequency_track_stft(
     mag_tf = mag[np.ix_(freq_mask, time_mask)]  # [freq, time]
     max_mag = np.max(mag_tf, axis=0)
     finite = np.isfinite(max_mag)
+    # 条件分岐: `not np.any(finite)` を満たす経路を評価する。
     if not np.any(finite):
         return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
     amp_cut = np.percentile(max_mag[finite], float(amp_percentile))
     keep_local = np.where(max_mag >= amp_cut)[0]
+    # 条件分岐: `keep_local.size == 0` を満たす経路を評価する。
     if keep_local.size == 0:
         keep_local = np.argsort(max_mag)[-min(10, max_mag.size) :]
 
@@ -634,15 +748,21 @@ def _extract_frequency_track_stft(
     t_sub = t_stft[time_mask]
     for j in keep_local:
         col = mag_tf[:, int(j)]
+        # 条件分岐: `col.size == 0` を満たす経路を評価する。
         if col.size == 0:
             continue
+
         k = int(np.nanargmax(col))
         f_peak = float(f_sub[k])
         t_peak = float(t_sub[int(j)])
+        # 条件分岐: `not (math.isfinite(f_peak) and math.isfinite(t_peak))` を満たす経路を評価する。
         if not (math.isfinite(f_peak) and math.isfinite(t_peak)):
             continue
+
         f_sel.append(f_peak)
         t_sel.append(t_peak)
+
+    # 条件分岐: `not t_sel` を満たす経路を評価する。
 
     if not t_sel:
         return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
@@ -658,12 +778,14 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
     Fit t = tc - A * f^{-8/3} and derive chirp mass from A.
     """
     min_points = 10
+    # 条件分岐: `len(t) < min_points` を満たす経路を評価する。
     if len(t) < min_points:
         return {"ok": 0.0, "reason": "n_track_too_short", "n_total": float(len(t))}, np.zeros(len(t), dtype=bool)
 
     x_all = np.power(f, -8.0 / 3.0)
     y_all = t
     base = np.isfinite(x_all) & np.isfinite(y_all) & (f > 0)
+    # 条件分岐: `int(np.sum(base)) < min_points` を満たす経路を評価する。
     if int(np.sum(base)) < min_points:
         return {
             "ok": 0.0,
@@ -679,16 +801,20 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", _NP_RANK_WARNING)
             m1, b1 = np.polyfit(x1, y1, 1)
+
         had_warn = any(getattr(ww, "category", None) is not None and issubclass(ww.category, _NP_RANK_WARNING) for ww in w)
         return float(m1), float(b1), bool(had_warn)
 
     # Robust inlier selection: iteratively reject outliers in (t, f^{-8/3}) linear space.
+
     inliers = np.ones(len(x), dtype=bool)
     sigma_s = float("nan")
     rank_warn = False
     for _ in range(3):
+        # 条件分岐: `int(np.sum(inliers)) < min_points` を満たす経路を評価する。
         if int(np.sum(inliers)) < min_points:
             break
+
         m, b, w1 = _polyfit1(x[inliers], y[inliers])
         rank_warn = rank_warn or w1
         y_hat = m * x + b
@@ -698,15 +824,23 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
         mad = float(np.median(np.abs(resid[inliers] - med)))
         sigma = 1.4826 * mad if mad > 0 else float(np.std(resid[inliers]))
         sigma_s = float(sigma)
+        # 条件分岐: `not (math.isfinite(sigma_s) and sigma_s > 0)` を満たす経路を評価する。
         if not (math.isfinite(sigma_s) and sigma_s > 0):
             break
 
         new_inliers = np.abs(resid - med) <= (3.5 * sigma_s)
+        # 条件分岐: `int(np.sum(new_inliers)) < min_points` を満たす経路を評価する。
         if int(np.sum(new_inliers)) < min_points:
             break
+
+        # 条件分岐: `bool(np.all(new_inliers == inliers))` を満たす経路を評価する。
+
         if bool(np.all(new_inliers == inliers)):
             break
+
         inliers = new_inliers
+
+    # 条件分岐: `int(np.sum(inliers)) < min_points` を満たす経路を評価する。
 
     if int(np.sum(inliers)) < min_points:
         return {
@@ -719,6 +853,7 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
         }, np.zeros(len(t), dtype=bool)
 
     # Linear fit (final): y = m x + b  (m ~ -A, b ~ tc)
+
     m, b, w2 = _polyfit1(x[inliers], y[inliers])
     rank_warn = rank_warn or w2
     y_hat = m * x + b
@@ -741,8 +876,10 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
     M_sun = 1.988409870698051e30
 
     mc_kg = float("nan")
+    # 条件分岐: `A > 0 and math.isfinite(A)` を満たす経路を評価する。
     if A > 0 and math.isfinite(A):
         denom = A * (256.0 / 5.0) * (math.pi ** (8.0 / 3.0))
+        # 条件分岐: `denom > 0` を満たす経路を評価する。
         if denom > 0:
             gm_over_c3 = denom ** (-3.0 / 5.0)
             mc_kg = (c**3 / G) * gm_over_c3
@@ -752,12 +889,14 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
     # Secondary goodness-of-fit in f-space (for visualization quality).
     # Only meaningful when A>0 (so f(t) is real for t<tc).
     r2_f = float("nan")
+    # 条件分岐: `A > 0 and math.isfinite(A)` を満たす経路を評価する。
     if A > 0 and math.isfinite(A):
         dt = tc - y_in
         f_hat = np.full_like(y_in, np.nan, dtype=np.float64)
         mask = dt > 0
         f_hat[mask] = np.power(A / dt[mask], 3.0 / 8.0)
         finite_hat = np.isfinite(f_hat)
+        # 条件分岐: `np.any(finite_hat)` を満たす経路を評価する。
         if np.any(finite_hat):
             f_in = f[base][inliers]
             ss_res_f = float(np.sum((f_in[finite_hat] - f_hat[finite_hat]) ** 2))
@@ -771,12 +910,17 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
     # Require physically meaningful A (A>0) and a finite chirp mass.
     if not math.isfinite(A):
         reason = "A_nonfinite"
+    # 条件分岐: 前段条件が不成立で、`not (A > 0)` を追加評価する。
     elif not (A > 0):
         reason = "A_nonpositive"
+    # 条件分岐: 前段条件が不成立で、`not math.isfinite(mc_msun)` を追加評価する。
     elif not math.isfinite(mc_msun):
         reason = "mc_nonfinite"
     else:
         reason = "unknown"
+
+    # 条件分岐: `reason != "unknown"` を満たす経路を評価する。
+
     if reason != "unknown":
         return {
             "ok": 0.0,
@@ -821,6 +965,7 @@ def _repair_track_monotonic(t: np.ndarray, f: np.ndarray, *, max_points: int = 2
     mask = np.isfinite(t0) & np.isfinite(f0) & (f0 > 0)
     t0 = t0[mask]
     f0 = f0[mask]
+    # 条件分岐: `t0.size == 0` を満たす経路を評価する。
     if t0.size == 0:
         return t0, f0
 
@@ -828,6 +973,7 @@ def _repair_track_monotonic(t: np.ndarray, f: np.ndarray, *, max_points: int = 2
     t1 = t0[order]
     f1 = f0[order]
 
+    # 条件分岐: `int(max_points) > 0 and t1.size > int(max_points)` を満たす経路を評価する。
     if int(max_points) > 0 and t1.size > int(max_points):
         step = int(math.ceil(float(t1.size) / float(max_points)))
         t_ds: List[float] = []
@@ -836,18 +982,22 @@ def _repair_track_monotonic(t: np.ndarray, f: np.ndarray, *, max_points: int = 2
             j = min(int(t1.size), i + int(step))
             t_ds.append(float(np.median(t1[i:j])))
             f_ds.append(float(np.median(f1[i:j])))
+
         t1 = np.asarray(t_ds, dtype=np.float64)
         f1 = np.asarray(f_ds, dtype=np.float64)
 
     # Enforce inspiral chirp direction: f should be non-decreasing with time.
+
     f1 = np.maximum.accumulate(f1)
     mask2 = np.isfinite(t1) & np.isfinite(f1) & (f1 > 0)
     return t1[mask2], f1[mask2]
 
 
 def _fit_summary(fit: Dict[str, Any]) -> Dict[str, Any]:
+    # 条件分岐: `not isinstance(fit, dict)` を満たす経路を評価する。
     if not isinstance(fit, dict):
         return {}
+
     keys = [
         "ok",
         "reason",
@@ -865,8 +1015,10 @@ def _fit_summary(fit: Dict[str, Any]) -> Dict[str, Any]:
     ]
     out: Dict[str, Any] = {}
     for k in keys:
+        # 条件分岐: `k in fit` を満たす経路を評価する。
         if k in fit:
             out[k] = fit.get(k)
+
     return out
 
 
@@ -874,6 +1026,7 @@ def _predict_f_from_fit(t: np.ndarray, *, tc: float, A: float) -> np.ndarray:
     # From t = tc - A f^{-8/3} => f = (A/(tc-t))^{3/8}
     if not (math.isfinite(A) and A > 0):
         return np.full_like(t, np.nan, dtype=np.float64)
+
     dt = tc - t
     out = np.full_like(t, np.nan, dtype=np.float64)
     mask = dt > 0
@@ -894,6 +1047,7 @@ def _render(
     nrows = len(results)
     fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12.4, 3.9 * nrows), dpi=140)
     axes = np.asarray(axes)
+    # 条件分岐: `axes.ndim == 1` を満たす経路を評価する。
     if axes.ndim == 1:
         axes = axes.reshape((1, 2))
 
@@ -903,8 +1057,10 @@ def _render(
         f_sel = np.asarray(r.get("f_sel"), dtype=np.float64)
 
         inlier_mask = np.asarray(r.get("inlier_mask"), dtype=bool)
+        # 条件分岐: `inlier_mask.size != t_sel.size` を満たす経路を評価する。
         if inlier_mask.size != t_sel.size:
             inlier_mask = np.ones(t_sel.size, dtype=bool)
+
         outlier_mask = ~inlier_mask
 
         fit = r.get("fit") or {}
@@ -921,6 +1077,7 @@ def _render(
                 color="#888",
                 label=f"{det}: 除外点",
             )
+
         ax_f.scatter(t_sel[inlier_mask], f_sel[inlier_mask], s=14, alpha=0.8, label=f"{det}: 抽出 f(t)")
 
         t_line = np.linspace(float(np.min(t_sel)), float(np.max(t_sel)), 600)
@@ -954,10 +1111,13 @@ def _render(
         x_out = x_all[outlier_mask]
         y_out = t_sel[outlier_mask]
 
+        # 条件分岐: `np.any(outlier_mask)` を満たす経路を評価する。
         if np.any(outlier_mask):
             ax_lin.scatter(x_out, y_out, s=12, alpha=0.25, color="#888", label="除外点")
+
         ax_lin.scatter(x_in, y_in, s=14, alpha=0.8, label="採用点")
 
+        # 条件分岐: `math.isfinite(A)` を満たす経路を評価する。
         if math.isfinite(A):
             x0 = float(np.min(x_in))
             x1 = float(np.max(x_in))
@@ -973,6 +1133,7 @@ def _render(
 
     fig.suptitle(title, y=0.99)
 
+    # 条件分岐: `note_lines` を満たす経路を評価する。
     if note_lines:
         fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.2, color="#333")
 
@@ -1006,6 +1167,7 @@ def _render_public(
         t_sel = np.asarray(r.get("t_sel"), dtype=np.float64)
         f_sel = np.asarray(r.get("f_sel"), dtype=np.float64)
         inlier_mask = np.asarray(r.get("inlier_mask"), dtype=bool)
+        # 条件分岐: `inlier_mask.size != t_sel.size` を満たす経路を評価する。
         if inlier_mask.size != t_sel.size:
             inlier_mask = np.ones(t_sel.size, dtype=bool)
 
@@ -1013,6 +1175,7 @@ def _render_public(
         tc = float(fit.get("tc_s", 0.0))
         A = float(fit.get("A_s", float("nan")))
 
+        # 条件分岐: `t_sel.size` を満たす経路を評価する。
         if t_sel.size:
             ax.scatter(
                 t_sel[inlier_mask],
@@ -1023,8 +1186,11 @@ def _render_public(
                 label=f"{det}: 観測から抽出した周波数（採用点）",
             )
 
+        # 条件分岐: `t_sel.size and math.isfinite(A) and A > 0` を満たす経路を評価する。
+
         if t_sel.size and math.isfinite(A) and A > 0:
             t_in = t_sel[inlier_mask]
+            # 条件分岐: `t_in.size` を満たす経路を評価する。
             if t_in.size:
                 t0 = float(np.min(t_in))
                 t1 = float(np.max(t_in))
@@ -1039,6 +1205,7 @@ def _render_public(
     ax.grid(True, alpha=0.25)
     ax.legend(loc="lower right", fontsize=9.5)
 
+    # 条件分岐: `note_lines` を満たす経路を評価する。
     if note_lines:
         fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.0, color="#333")
 
@@ -1069,6 +1236,7 @@ def _fit_waveform_template_from_chirp(
     t0_req, t1_req = float(t_window[0]), float(t_window[1])
     window_req = [t0_req, t1_req]
 
+    # 条件分岐: `not (math.isfinite(tc) and math.isfinite(A) and A > 0)` を満たす経路を評価する。
     if not (math.isfinite(tc) and math.isfinite(A) and A > 0):
         return {
             "ok": 0.0,
@@ -1081,11 +1249,14 @@ def _fit_waveform_template_from_chirp(
 
     def _select_window(_t0: float, _t1: float) -> Tuple[np.ndarray, np.ndarray]:
         m = (t >= _t0) & (t <= _t1)
+        # 条件分岐: `not np.any(m)` を満たす経路を評価する。
         if not np.any(m):
             return np.asarray([], dtype=np.float64), np.asarray([], dtype=np.float64)
+
         return np.asarray(t[m], dtype=np.float64), np.asarray(xf[m], dtype=np.float64)
 
     t_win, x_win = _select_window(t0, t1)
+    # 条件分岐: `t_win.size == 0` を満たす経路を評価する。
     if t_win.size == 0:
         return {
             "ok": 0.0,
@@ -1095,6 +1266,7 @@ def _fit_waveform_template_from_chirp(
 
     dt = float(tc) - t_win
     mask_pos = dt > 0
+    # 条件分岐: `not np.any(mask_pos)` を満たす経路を評価する。
     if not np.any(mask_pos):
         # If the requested window is entirely after t_c, shift it earlier (same duration) so it ends at t_c-ε.
         dur = float(t1_req) - float(t0_req)
@@ -1102,20 +1274,24 @@ def _fit_waveform_template_from_chirp(
         t1 = min(float(t1_req), float(tc) - float(eps))
         t0 = float(t1) - float(dur)
         t_win, x_win = _select_window(t0, t1)
+        # 条件分岐: `t_win.size == 0` を満たす経路を評価する。
         if t_win.size == 0:
             return {
                 "ok": 0.0,
                 "reason": "tc_before_window",
                 "fit": {"tc_s": tc, "A_s": A, "window_s": [t0, t1], "window_s_requested": window_req},
             }
+
         dt = float(tc) - t_win
         mask_pos = dt > 0
+        # 条件分岐: `not np.any(mask_pos)` を満たす経路を評価する。
         if not np.any(mask_pos):
             return {
                 "ok": 0.0,
                 "reason": "tc_before_window",
                 "fit": {"tc_s": tc, "A_s": A, "window_s": [t0, t1], "window_s_requested": window_req},
             }
+
         auto_shifted = True
 
     n_window = int(t_win.size)
@@ -1127,6 +1303,7 @@ def _fit_waveform_template_from_chirp(
 
     n = int(t_win.size)
     dur_s = float(np.max(t_win) - np.min(t_win)) if n >= 2 else 0.0
+    # 条件分岐: `n < min_match_samples or dur_s < min_match_duration_s` を満たす経路を評価する。
     if n < min_match_samples or dur_s < min_match_duration_s:
         return {
             "ok": 0.0,
@@ -1213,12 +1390,14 @@ def _render_waveform_compare(
     nrows = len(results)
     fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12.4, 3.6 * nrows), dpi=140)
     axes = np.asarray(axes)
+    # 条件分岐: `axes.ndim == 1` を満たす経路を評価する。
     if axes.ndim == 1:
         axes = axes.reshape((1, 2))
 
     for (ax_w, ax_r), r in zip(axes, results):
         det = str(r.get("detector") or "")
         wf = r.get("waveform_fit") or {}
+        # 条件分岐: `not isinstance(wf, dict) or not wf.get("ok")` を満たす経路を評価する。
         if not isinstance(wf, dict) or not wf.get("ok"):
             ax_w.set_title(f"{det}: 波形比較（失敗）")
             reason = str(wf.get("reason") or "") if isinstance(wf, dict) else ""
@@ -1267,6 +1446,7 @@ def _render_waveform_compare(
 
     fig.suptitle(title, y=0.99)
 
+    # 条件分岐: `note_lines` を満たす経路を評価する。
     if note_lines:
         fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.2, color="#333")
 
@@ -1288,6 +1468,7 @@ def _render_waveform_compare_public(
     nrows = len(results)
     fig, axes = plt.subplots(nrows=nrows, ncols=1, figsize=(10.8, 3.6 * nrows), dpi=150)
     axes = np.asarray(axes)
+    # 条件分岐: `axes.ndim == 0` を満たす経路を評価する。
     if axes.ndim == 0:
         axes = axes.reshape((1,))
 
@@ -1296,11 +1477,14 @@ def _render_waveform_compare_public(
     for ax, r in zip(axes, results):
         det = str(r.get("detector") or "")
         wf = r.get("waveform_fit") or {}
+        # 条件分岐: `not isinstance(wf, dict) or not wf.get("ok")` を満たす経路を評価する。
         if not isinstance(wf, dict) or not wf.get("ok"):
             ax.set_title(f"{det}: 波形比較（失敗）")
             reason = str(wf.get("reason") or "") if isinstance(wf, dict) else ""
+            # 条件分岐: `reason` を満たす経路を評価する。
             if reason:
                 ax.text(0.02, 0.95, f"失敗: {reason}", transform=ax.transAxes, ha="left", va="top", fontsize=10)
+
             ax.axis("off")
             continue
 
@@ -1324,8 +1508,10 @@ def _render_waveform_compare_public(
         ax.legend(loc="lower right", fontsize=9.5)
 
     fig.suptitle(title, y=0.99)
+    # 条件分岐: `note_lines` を満たす経路を評価する。
     if note_lines:
         fig.text(0.01, 0.01, "\n".join(note_lines), ha="left", va="bottom", fontsize=9.0, color="#333")
+
     fig.tight_layout(rect=[0, 0.04, 1, 0.96])
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, bbox_inches="tight")
@@ -1413,6 +1599,7 @@ def main() -> int:
     out_json = Path(args.out_json) if args.out_json else default_json
 
     detectors = [d.strip() for d in str(args.detectors).split(",") if d.strip()]
+    # 条件分岐: `not detectors` を満たす経路を評価する。
     if not detectors:
         detectors = ["H1", "L1"]
 
@@ -1433,8 +1620,10 @@ def main() -> int:
         return 2
 
     # Event time (GPS)
+
     event_info = fetch.get("event_info") or {}
     gps_event = float(event_info.get("GPS") or float("nan"))
+    # 条件分岐: `not math.isfinite(gps_event)` を満たす経路を評価する。
     if not math.isfinite(gps_event):
         print("[err] event GPS not found in event JSON; abort")
         return 2
@@ -1443,21 +1632,31 @@ def main() -> int:
     fr = tuple(float(x.strip()) for x in str(args.track_frange).split(","))
     w0 = tuple(float(x.strip()) for x in str(args.wave_window).split(","))
     wave_frange: Optional[Tuple[float, float]] = None
+    # 条件分岐: `args.wave_frange is not None and str(args.wave_frange).strip()` を満たす経路を評価する。
     if args.wave_frange is not None and str(args.wave_frange).strip():
         try:
             frw = [float(x.strip()) for x in str(args.wave_frange).split(",")]
         except Exception as e:
             print(f"[err] invalid --wave-frange: {e}")
             return 2
+
+        # 条件分岐: `len(frw) != 2` を満たす経路を評価する。
+
         if len(frw) != 2:
             print("[err] invalid --wave-frange: expected 2 comma-separated floats (e.g. 70,300)")
             return 2
+
         flo, fhi = float(frw[0]), float(frw[1])
+        # 条件分岐: `not (math.isfinite(flo) and math.isfinite(fhi) and flo > 0 and fhi > 0)` を満たす経路を評価する。
         if not (math.isfinite(flo) and math.isfinite(fhi) and flo > 0 and fhi > 0):
             print("[err] invalid --wave-frange: f must be finite and >0")
             return 2
+
+        # 条件分岐: `flo > fhi` を満たす経路を評価する。
+
         if flo > fhi:
             flo, fhi = fhi, flo
+
         wave_frange = (flo, fhi)
 
     results: List[Dict[str, Any]] = []
@@ -1475,6 +1674,7 @@ def main() -> int:
         stft_guided: bool,
     ) -> Tuple[np.ndarray, np.ndarray, Dict[str, Any], np.ndarray]:
         guided_meta: Dict[str, Any] = {}
+        # 条件分岐: `method == "hilbert"` を満たす経路を評価する。
         if method == "hilbert":
             t_sel, f_sel = _extract_instantaneous_frequency(
                 t,
@@ -1485,6 +1685,7 @@ def main() -> int:
                 amp_percentile=float(amp_percentile),
             )
         else:
+            # 条件分岐: `bool(stft_guided)` を満たす経路を評価する。
             if bool(stft_guided):
                 t_sel, f_sel, guided_meta = _extract_frequency_track_stft_guided(
                     t,
@@ -1511,40 +1712,52 @@ def main() -> int:
                     nperseg=int(args.stft_nperseg),
                     noverlap=int(args.stft_noverlap),
                 )
+
         fit, inlier_mask = _fit_chirp_mass_from_track(t_sel, f_sel)
 
+        # 条件分岐: `guided_meta and isinstance(fit, dict)` を満たす経路を評価する。
         if guided_meta and isinstance(fit, dict):
             fit = dict(fit)
             fit["guided"] = guided_meta
 
         # If the raw track yields an unphysical fit (A<=0 etc.), try a monotonic repair (Hilbert tracks are noisy).
+
         reason = str((fit or {}).get("reason") or "").strip()
+        # 条件分岐: `(not (fit or {}).get("ok")) and reason in {"A_nonpositive", "mc_nonfinite"} a...` を満たす経路を評価する。
         if (not (fit or {}).get("ok")) and reason in {"A_nonpositive", "mc_nonfinite"} and int(len(t_sel)) >= 10:
             t_rep, f_rep = _repair_track_monotonic(t_sel, f_sel)
+            # 条件分岐: `int(len(t_rep)) >= 10` を満たす経路を評価する。
             if int(len(t_rep)) >= 10:
                 fit2, inlier2 = _fit_chirp_mass_from_track(t_rep, f_rep)
+                # 条件分岐: `(fit2 or {}).get("ok")` を満たす経路を評価する。
                 if (fit2 or {}).get("ok"):
                     fit2 = dict(fit2)
                     fit2["repair"] = {"kind": "monotonic_median", "n_before": int(len(t_sel)), "n_after": int(len(t_rep))}
+                    # 条件分岐: `guided_meta` を満たす経路を評価する。
                     if guided_meta:
                         fit2["guided"] = guided_meta
+
                     return t_rep, f_rep, fit2, inlier2
 
         return t_sel, f_sel, fit, inlier_mask
 
     method_requested = str(args.method).lower().strip()
+    # 条件分岐: `method_requested not in {"stft", "hilbert"}` を満たす経路を評価する。
     if method_requested not in {"stft", "hilbert"}:
         method_requested = "stft"
 
     strain_paths = (fetch.get("paths") or {}).get("strain") or {}
+    # 条件分岐: `not isinstance(strain_paths, dict)` を満たす経路を評価する。
     if not isinstance(strain_paths, dict):
         strain_paths = {}
 
     for det_label in detectors:
         p0 = strain_paths.get(det_label)
+        # 条件分岐: `not p0` を満たす経路を評価する。
         if not p0:
             skipped.append({"detector": det_label, "reason": "strain_not_available"})
             continue
+
         p = Path(p0)
         gps_start, fs, strain = _parse_gwosc_txt_gz(p)
 
@@ -1555,9 +1768,13 @@ def main() -> int:
 
         def _get_xf(kind: str) -> Tuple[str, np.ndarray]:
             k = (kind or "").strip().lower() or "bandpass"
+            # 条件分岐: `k in preprocess_cache` を満たす経路を評価する。
             if k in preprocess_cache:
                 label = "whiten+bandpass" if k == "whiten" else "bandpass"
                 return label, preprocess_cache[k]
+
+            # 条件分岐: `k == "whiten"` を満たす経路を評価する。
+
             if k == "whiten":
                 xf0 = _whiten_fft(
                     x,
@@ -1568,16 +1785,22 @@ def main() -> int:
                 )
                 preprocess_cache[k] = xf0
                 return "whiten+bandpass", xf0
+
             xf0 = _bandpass(x, fs, f_lo=float(args.f_lo), f_hi=float(args.f_hi), order=4)
             preprocess_cache[k] = xf0
             return "bandpass", xf0
 
         def _expand_window(window: Tuple[float, float]) -> Tuple[float, float]:
             start, end = float(window[0]), float(window[1])
+            # 条件分岐: `not (math.isfinite(start) and math.isfinite(end) and start < end)` を満たす経路を評価する。
             if not (math.isfinite(start) and math.isfinite(end) and start < end):
                 return window
+
+            # 条件分岐: `start <= -2.0` を満たす経路を評価する。
+
             if start <= -2.0:
                 return window
+
             new_start = min(start * 3.0, -0.6)
             new_start = max(new_start, -2.0)
             return (float(new_start), float(end))
@@ -1612,8 +1835,10 @@ def main() -> int:
                 stft_guided=stft_guided,
             )
             method_used_label = method
+            # 条件分岐: `method_used_label == "stft" and bool(stft_guided)` を満たす経路を評価する。
             if method_used_label == "stft" and bool(stft_guided):
                 method_used_label = "stft_guided"
+
             attempts.append(
                 {
                     "label": label,
@@ -1628,6 +1853,7 @@ def main() -> int:
                     "fit": _fit_summary(fit),
                 }
             )
+            # 条件分岐: `(fit or {}).get("ok")` を満たす経路を評価する。
             if (fit or {}).get("ok"):
                 picked = {
                     "detector": det_label,
@@ -1651,9 +1877,11 @@ def main() -> int:
                     },
                 }
                 return picked
+
             return None
 
         # Attempt 1: requested method (profile default)
+
         _try_one(
             method=method_requested,
             preprocess_kind=base_pre,
@@ -1666,6 +1894,7 @@ def main() -> int:
 
         # Attempt 2: alternate method (same preprocessing/window)
         method_alt = "hilbert" if method_requested == "stft" else "stft"
+        # 条件分岐: `picked is None` を満たす経路を評価する。
         if picked is None:
             _try_one(
                 method=method_alt,
@@ -1678,6 +1907,7 @@ def main() -> int:
             )
 
         # Attempt 3: relaxed fallback (detector weaknesses, esp. V1): whiten + longer window + lower percentile.
+
         if picked is None:
             relaxed_window = _expand_window(t0)
             relaxed_fr = (float(fr[0]), float(max(fr[1], 350.0)))
@@ -1692,14 +1922,18 @@ def main() -> int:
                 label="relaxed_whiten_hilbert",
             )
 
+        # 条件分岐: `picked is None` を満たす経路を評価する。
+
         if picked is None:
             primary_fit = attempts[0].get("fit") if attempts else {}
             alt_fit = attempts[1].get("fit") if len(attempts) >= 2 else {}
             reasons: List[str] = []
             for a in attempts:
                 r = str(((a.get("fit") or {}).get("reason") or "")).strip()
+                # 条件分岐: `r and r not in reasons` を満たす経路を評価する。
                 if r and r not in reasons:
                     reasons.append(r)
+
             subreason = " / ".join(reasons[:3]) if reasons else ""
             skipped.append(
                 {
@@ -1716,14 +1950,18 @@ def main() -> int:
                 }
             )
             msg = f"[warn] fit failed: {det_label} (primary={method_requested}; alt={method_alt})"
+            # 条件分岐: `subreason` を満たす経路を評価する。
             if subreason:
                 msg += f" subreason={subreason}"
+
             print(msg)
             continue
 
         assert picked is not None
         picked["fit_attempts"] = attempts
         results.append(picked)
+
+    # 条件分岐: `not results` を満たす経路を評価する。
 
     if not results:
         print("[err] no valid detector tracks; abort")
@@ -1737,8 +1975,10 @@ def main() -> int:
         f"前処理: {preprocesses or 'bandpass'} {args.f_lo:g}–{args.f_hi:g} Hz + 周波数トラック抽出（Hilbert / STFT）",
         f"fit: t = t_c − A f^(−8/3)（四重極チャープ則, Newton近似）を {t0[0]:g}〜{t0[1]:g} s に当てはめ",
     ]
+    # 条件分岐: `methods` を満たす経路を評価する。
     if methods:
         note_lines.append(f"抽出法: {methods}")
+
     note_lines.append("注: ここでの M_c はデータからの簡易推定（厳密なパラメータ推定ではない）。")
     _render(results, out_png=out_png, title=title, note_lines=note_lines, event_name=event_name)
 
@@ -1758,25 +1998,30 @@ def main() -> int:
         tc = float(fit.get("tc_s", float("nan")))
         A = float(fit.get("A_s", float("nan")))
         t_window = w0
+        # 条件分岐: `wave_frange is not None and math.isfinite(tc) and math.isfinite(A) and A > 0` を満たす経路を評価する。
         if wave_frange is not None and math.isfinite(tc) and math.isfinite(A) and A > 0:
             flo, fhi = wave_frange
             try:
                 tw0 = _t_from_f(flo, tc=tc, A=A)
                 tw1 = _t_from_f(fhi, tc=tc, A=A)
+                # 条件分岐: `math.isfinite(tw0) and math.isfinite(tw1)` を満たす経路を評価する。
                 if math.isfinite(tw0) and math.isfinite(tw1):
                     t_window = (min(float(tw0), float(tw1)), max(float(tw0), float(tw1)))
             except Exception:
                 pass
 
         wf = _fit_waveform_template_from_chirp(t=r["t"], xf=r["xf"], tc=tc, A=A, t_window=t_window)
+        # 条件分岐: `wave_frange is not None and isinstance(wf, dict)` を満たす経路を評価する。
         if wave_frange is not None and isinstance(wf, dict):
             try:
                 ffit = wf.get("fit") if isinstance(wf.get("fit"), dict) else None
+                # 条件分岐: `ffit is not None` を満たす経路を評価する。
                 if ffit is not None:
                     ffit["window_frange_hz"] = [float(wave_frange[0]), float(wave_frange[1])]
                     ffit["window_policy"] = "frange"
             except Exception:
                 pass
+
         r["waveform_fit"] = wf
 
     wave_title = f"{event_name}：波形（前処理後）と単純モデル（四重極）テンプレートの比較"
@@ -1784,8 +2029,10 @@ def main() -> int:
         "観測: GWOSC公開 strain（H1/L1）を前処理（bandpass/whiten+bandpass）した波形",
         "モデル: 四重極チャープ則から作る簡易テンプレート（振幅/位相は窓内で最小二乗）",
     ]
+    # 条件分岐: `wave_frange is not None` を満たす経路を評価する。
     if wave_frange is not None:
         wave_notes.append(f"match窓: 周波数帯 {wave_frange[0]:g}..{wave_frange[1]:g} Hz を t=t_c−A f^(−8/3) で時刻窓に変換")
+
     _render_waveform_compare(results, out_png=out_wave_png, title=wave_title, note_lines=wave_notes)
 
     wave_public_title = f"{event_name}：観測波形と単純モデル（四重極）の重ね合わせ（窓内）"
@@ -1793,8 +2040,10 @@ def main() -> int:
         "観測: 前処理後の波形（H1/L1）",
         "線: 単純モデル（四重極）を窓内で最も合うように調整",
     ]
+    # 条件分岐: `wave_frange is not None` を満たす経路を評価する。
     if wave_frange is not None:
         wave_public_notes.append(f"match窓: {wave_frange[0]:g}..{wave_frange[1]:g} Hz に対応する時刻範囲")
+
     _render_waveform_compare_public(results, out_png=out_wave_png_public, title=wave_public_title, note_lines=wave_public_notes)
 
     event_json_path = Path((fetch.get("paths") or {}).get("event_json") or "")
@@ -1905,6 +2154,8 @@ def main() -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

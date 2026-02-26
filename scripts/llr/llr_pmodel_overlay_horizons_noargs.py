@@ -96,8 +96,10 @@ def _parse_yymmdd_to_date(yymmdd: str) -> Optional[datetime]:
     Returns None if invalid.
     """
     s = str(yymmdd).strip()
+    # 条件分岐: `not re.fullmatch(r"\d{6}", s)` を満たす経路を評価する。
     if not re.fullmatch(r"\d{6}", s):
         return None
+
     yy = int(s[0:2])
     yyyy = 2000 + yy if yy < 80 else 1900 + yy
     mm = int(s[2:4])
@@ -110,42 +112,58 @@ def _parse_yymmdd_to_date(yymmdd: str) -> Optional[datetime]:
 
 def _pos_eop_snx_path(repo_root: Path, yymmdd: str) -> Path:
     dt = _parse_yymmdd_to_date(yymmdd)
+    # 条件分岐: `dt is None` を満たす経路を評価する。
     if dt is None:
         raise ValueError(f"invalid yymmdd: {yymmdd!r}")
+
     year = dt.year
     return repo_root / POS_EOP_SNX_DIR_REL / str(year) / str(yymmdd) / f"pos_eop_{yymmdd}.snx.gz"
 
 
 def _iter_cached_pos_eop_yymmdd(repo_root: Path) -> List[str]:
     root = repo_root / POS_EOP_SNX_DIR_REL
+    # 条件分岐: `not root.exists()` を満たす経路を評価する。
     if not root.exists():
         return []
+
     yymmdd: set[str] = set()
     for p in root.glob("*/*/pos_eop_*.snx.gz"):
         m = re.search(r"pos_eop_(\d{6})\.snx\.gz$", p.name, re.IGNORECASE)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             yymmdd.add(m.group(1))
+
     return sorted(yymmdd)
 
 
 def _nearest_pos_eop_yymmdd(repo_root: Path, target_dt: datetime, *, max_days: int = 45) -> Optional[str]:
+    # 条件分岐: `target_dt.tzinfo is None` を満たす経路を評価する。
     if target_dt.tzinfo is None:
         target_dt = target_dt.replace(tzinfo=timezone.utc)
+
     target_dt = target_dt.astimezone(timezone.utc)
     yymmdd_all = _iter_cached_pos_eop_yymmdd(repo_root)
+    # 条件分岐: `not yymmdd_all` を満たす経路を評価する。
     if not yymmdd_all:
         return None
 
     best: Optional[tuple[int, str]] = None
     for y in yymmdd_all:
         d0 = _parse_yymmdd_to_date(y)
+        # 条件分岐: `d0 is None` を満たす経路を評価する。
         if d0 is None:
             continue
+
         days = abs((d0.date() - target_dt.date()).days)
+        # 条件分岐: `days > int(max_days)` を満たす経路を評価する。
         if days > int(max_days):
             continue
+
+        # 条件分岐: `best is None or days < best[0]` を満たす経路を評価する。
+
         if best is None or days < best[0]:
             best = (days, y)
+
     return best[1] if best else None
 
 
@@ -162,38 +180,52 @@ def _nearest_pos_eop_yymmdd_for_code(
     This is a fallback for cases where the globally-nearest pos+eop day exists but does not
     include the requested station in SOLUTION/ESTIMATE.
     """
+    # 条件分岐: `target_dt.tzinfo is None` を満たす経路を評価する。
     if target_dt.tzinfo is None:
         target_dt = target_dt.replace(tzinfo=timezone.utc)
+
     target_dt = target_dt.astimezone(timezone.utc)
 
     yymmdd_all = _iter_cached_pos_eop_yymmdd(repo_root)
+    # 条件分岐: `not yymmdd_all` を満たす経路を評価する。
     if not yymmdd_all:
         return None
 
     candidates: List[tuple[int, str]] = []
     for y in yymmdd_all:
         d0 = _parse_yymmdd_to_date(y)
+        # 条件分岐: `d0 is None` を満たす経路を評価する。
         if d0 is None:
             continue
+
         days = abs((d0.date() - target_dt.date()).days)
+        # 条件分岐: `days > int(max_days)` を満たす経路を評価する。
         if days > int(max_days):
             continue
+
         candidates.append((days, y))
 
     # Sort by nearest first, and for ties prefer newer dates.
+
     candidates.sort(key=lambda x: (x[0], -int(x[1])))
 
     for _, y in candidates:
         snx_path = _pos_eop_snx_path(repo_root, y)
+        # 条件分岐: `not snx_path.exists()` を満たす経路を評価する。
         if not snx_path.exists():
             continue
+
         parsed = parse_pos_eop_snx_gz(snx_path)
         stations = parsed.get("stations") if isinstance(parsed, dict) else None
+        # 条件分岐: `not isinstance(stations, dict)` を満たす経路を評価する。
         if not isinstance(stations, dict):
             continue
+
         rec = stations.get(code_key)
+        # 条件分岐: `isinstance(rec, dict) and all(k in rec for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
         if isinstance(rec, dict) and all(k in rec for k in ("x_m", "y_m", "z_m")):
             return y
+
     return None
 
 
@@ -201,8 +233,10 @@ def _sinex_epoch_to_utc(epoch: str) -> Optional[datetime]:
     # YY:DOY:SSSSS (seconds of day) -> UTC
     s = str(epoch).strip()
     m = re.fullmatch(r"(\d{2}):(\d{3}):([0-9.]+)", s)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     yy = int(m.group(1))
     yyyy = 2000 + yy if yy < 80 else 1900 + yy
     doy = int(m.group(2))
@@ -219,6 +253,7 @@ def parse_pos_eop_snx_gz(path: Path) -> Dict[str, Any]:
       - stations: { "<CODE>": {"x_m","y_m","z_m","std_x_m","std_y_m","std_z_m","ref_epoch_utc"} }
       - eop: { "XPO":[...], "YPO":[...], "LOD":[...] } (best-effort; not required by current LLR model)
     """
+    # 条件分岐: `path in _POS_EOP_PARSED_CACHE` を満たす経路を評価する。
     if path in _POS_EOP_PARSED_CACHE:
         return _POS_EOP_PARSED_CACHE[path]
 
@@ -229,19 +264,31 @@ def parse_pos_eop_snx_gz(path: Path) -> Dict[str, Any]:
         in_est = False
         for raw in f:
             line = raw.rstrip("\n")
+            # 条件分岐: `line.startswith("+SOLUTION/ESTIMATE")` を満たす経路を評価する。
             if line.startswith("+SOLUTION/ESTIMATE"):
                 in_est = True
                 continue
+
+            # 条件分岐: `in_est and line.startswith("-SOLUTION/ESTIMATE")` を満たす経路を評価する。
+
             if in_est and line.startswith("-SOLUTION/ESTIMATE"):
                 break
+
+            # 条件分岐: `not in_est` を満たす経路を評価する。
+
             if not in_est:
                 continue
+
+            # 条件分岐: `not line.strip() or line.startswith("*")` を満たす経路を評価する。
+
             if not line.strip() or line.startswith("*"):
                 continue
+
             parts = line.split()
             # Expected: index, type, code, pt, soln, ref_epoch, unit, S, value, std
             if len(parts) < 10:
                 continue
+
             typ = parts[1].strip().upper()
             code = parts[2].strip()
             ref_epoch = parts[5].strip()
@@ -253,20 +300,30 @@ def parse_pos_eop_snx_gz(path: Path) -> Dict[str, Any]:
 
             ref_dt = _sinex_epoch_to_utc(ref_epoch)
 
+            # 条件分岐: `typ in ("STAX", "STAY", "STAZ")` を満たす経路を評価する。
             if typ in ("STAX", "STAY", "STAZ"):
                 rec = stations.setdefault(code, {})
+                # 条件分岐: `typ == "STAX"` を満たす経路を評価する。
                 if typ == "STAX":
                     rec["x_m"] = float(value)
                     rec["std_x_m"] = float(std)
+                # 条件分岐: 前段条件が不成立で、`typ == "STAY"` を追加評価する。
                 elif typ == "STAY":
                     rec["y_m"] = float(value)
                     rec["std_y_m"] = float(std)
+                # 条件分岐: 前段条件が不成立で、`typ == "STAZ"` を追加評価する。
                 elif typ == "STAZ":
                     rec["z_m"] = float(value)
                     rec["std_z_m"] = float(std)
+
+                # 条件分岐: `ref_dt is not None` を満たす経路を評価する。
+
                 if ref_dt is not None:
                     rec["ref_epoch_utc"] = ref_dt.isoformat()
+
                 continue
+
+            # 条件分岐: `typ in eop` を満たす経路を評価する。
 
             if typ in eop:
                 item = {
@@ -302,36 +359,46 @@ def load_station_xyz_from_pos_eop(
       {"x_m","y_m","z_m","std_x_m","std_y_m","std_z_m","pos_eop_yymmdd","pos_eop_ref_epoch_utc"}
     or None if unavailable.
     """
+    # 条件分岐: `pad_id is None` を満たす経路を評価する。
     if pad_id is None:
         return None
 
     code_key = str(int(pad_id))
     yymmdd = str(preferred_yymmdd).strip()
+    # 条件分岐: `yymmdd` を満たす経路を評価する。
     if yymmdd:
+        # 条件分岐: `not re.fullmatch(r"\d{6}", yymmdd)` を満たす経路を評価する。
         if not re.fullmatch(r"\d{6}", yymmdd):
             # Accept YYYYMMDD too
             if re.fullmatch(r"\d{8}", yymmdd):
                 yymmdd = yymmdd[2:]
             else:
                 return None
+
         snx_path = _pos_eop_snx_path(repo_root, yymmdd)
+        # 条件分岐: `not snx_path.exists()` を満たす経路を評価する。
         if not snx_path.exists():
             return None
     else:
         nearest = _nearest_pos_eop_yymmdd(repo_root, target_dt, max_days=int(max_days))
+        # 条件分岐: `not nearest` を満たす経路を評価する。
         if not nearest:
             return None
+
         yymmdd = nearest
         snx_path = _pos_eop_snx_path(repo_root, yymmdd)
+        # 条件分岐: `not snx_path.exists()` を満たす経路を評価する。
         if not snx_path.exists():
             return None
 
     parsed = parse_pos_eop_snx_gz(snx_path)
     stations = parsed.get("stations") if isinstance(parsed, dict) else None
+    # 条件分岐: `not isinstance(stations, dict)` を満たす経路を評価する。
     if not isinstance(stations, dict):
         return None
 
     rec = stations.get(code_key)
+    # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
     if not isinstance(rec, dict):
         # Fallback: nearest cached day that actually includes this station code.
         y2 = _nearest_pos_eop_yymmdd_for_code(
@@ -340,20 +407,29 @@ def load_station_xyz_from_pos_eop(
             code_key=code_key,
             max_days=int(max_days),
         )
+        # 条件分岐: `not y2` を満たす経路を評価する。
         if not y2:
             # Some stations are absent in pos+eop products.
             return None
+
         yymmdd = y2
         snx_path = _pos_eop_snx_path(repo_root, yymmdd)
+        # 条件分岐: `not snx_path.exists()` を満たす経路を評価する。
         if not snx_path.exists():
             return None
+
         parsed = parse_pos_eop_snx_gz(snx_path)
         stations = parsed.get("stations") if isinstance(parsed, dict) else None
+        # 条件分岐: `not isinstance(stations, dict)` を満たす経路を評価する。
         if not isinstance(stations, dict):
             return None
+
         rec = stations.get(code_key)
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             return None
+
+    # 条件分岐: `not all(k in rec for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
 
     if not all(k in rec for k in ("x_m", "y_m", "z_m")):
         return None
@@ -387,6 +463,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -399,6 +476,7 @@ def _set_japanese_font() -> None:
 # ============================================================
 # SPICE (NAIF) helper for high-accuracy lunar orientation (DE421)
 # ============================================================
+
 _SPICE_CTX: Optional[Dict[str, Any]] = None
 
 
@@ -413,6 +491,7 @@ def _try_load_spice(repo_root: Path) -> Optional[Any]:
       - moon_pa_de421_1900-2050.bpc
     """
     global _SPICE_CTX
+    # 条件分岐: `_SPICE_CTX is not None` を満たす経路を評価する。
     if _SPICE_CTX is not None:
         return _SPICE_CTX.get("spice")
 
@@ -430,6 +509,7 @@ def _try_load_spice(repo_root: Path) -> Optional[Any]:
         "moon_pck": kdir / "moon_pa_de421_1900-2050.bpc",
     }
     missing = [str(p) for p in required.values() if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         _SPICE_CTX = {"spice": None, "status": "missing_kernels", "missing": missing}
         return None
@@ -452,10 +532,12 @@ def _moon_pa_de421_to_j2000_matrix(repo_root: Path, dt_utc: datetime) -> Optiona
     Returns None if SPICE kernels are unavailable.
     """
     sp = _try_load_spice(repo_root)
+    # 条件分岐: `sp is None` を満たす経路を評価する。
     if sp is None:
         return None
 
     # SPICE expects UTC string; leap seconds kernel handles UTC->ET.
+
     t = dt_utc.astimezone(timezone.utc)
     et = sp.str2et(t.strftime("%Y-%m-%dT%H:%M:%S.%f"))
     mat = sp.pxform("MOON_PA_DE421", "J2000", et)
@@ -465,12 +547,14 @@ def _moon_pa_de421_to_j2000_matrix(repo_root: Path, dt_utc: datetime) -> Optiona
 # ============================================================
 # SSL context helper (proxy/self-signed CA handling)
 # ============================================================
+
 def _make_ssl_context() -> ssl.SSLContext:
     """
     - HORIZONS_INSECURE=1 なら検証無効（最終手段）
     - HORIZONS_CA_BUNDLE / SSL_CERT_FILE / REQUESTS_CA_BUNDLE があればそれをcafileとして利用
     - それ以外はデフォルトのCAを利用
     """
+    # 条件分岐: `os.environ.get("HORIZONS_INSECURE", "").strip() == "1"` を満たす経路を評価する。
     if os.environ.get("HORIZONS_INSECURE", "").strip() == "1":
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
@@ -483,6 +567,7 @@ def _make_ssl_context() -> ssl.SSLContext:
         or os.environ.get("REQUESTS_CA_BUNDLE")
     )
 
+    # 条件分岐: `cafile` を満たす経路を評価する。
     if cafile:
         return ssl.create_default_context(cafile=cafile)
 
@@ -492,27 +577,36 @@ def _make_ssl_context() -> ssl.SSLContext:
 # ============================================================
 # Station geometry (WGS84 + GMST; simplified ECEF->ECI)
 # ============================================================
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _load_station_geodetic(repo_root: Path, station_code: Optional[str]) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not station_code` を満たす経路を評価する。
     if not station_code:
         return None
+
     p = repo_root / "data" / "llr" / "stations" / f"{station_code.lower()}.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         meta = _read_json(p)
     except Exception:
         return None
 
     # Best-effort: enrich with geocentric XYZ from the cached site log if missing in JSON.
+
     try:
+        # 条件分岐: `isinstance(meta, dict) and not all(meta.get(k) is not None for k in ("x_m", "...` を満たす経路を評価する。
         if isinstance(meta, dict) and not all(meta.get(k) is not None for k in ("x_m", "y_m", "z_m")):
             log_name = str(meta.get("log_filename") or "").strip()
+            # 条件分岐: `log_name` を満たす経路を評価する。
             if log_name:
                 log_path = repo_root / "data" / "llr" / "stations" / log_name
+                # 条件分岐: `log_path.exists()` を満たす経路を評価する。
                 if log_path.exists():
                     txt = log_path.read_text(encoding="utf-8", errors="replace")
                     import re
@@ -520,6 +614,7 @@ def _load_station_geodetic(repo_root: Path, station_code: Optional[str]) -> Opti
                     mx = re.search(r"X coordinate\s*\[m\]\s*:\s*([0-9.+-]+)", txt, re.IGNORECASE)
                     my = re.search(r"Y coordinate\s*\[m\]\s*:\s*([0-9.+-]+)", txt, re.IGNORECASE)
                     mz = re.search(r"Z coordinate\s*\[m\]\s*:\s*([0-9.+-]+)", txt, re.IGNORECASE)
+                    # 条件分岐: `mx and my and mz` を満たす経路を評価する。
                     if mx and my and mz:
                         meta = dict(meta)
                         meta["x_m"] = float(mx.group(1))
@@ -532,8 +627,10 @@ def _load_station_geodetic(repo_root: Path, station_code: Optional[str]) -> Opti
 
 
 def _norm_key(s: Optional[str]) -> str:
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return ""
+
     return re.sub(r"[^a-z0-9]+", "", str(s).strip().lower())
 
 
@@ -543,21 +640,27 @@ def _load_reflector_pa(repo_root: Path, target_name: Optional[str]) -> Optional[
     Returns dict with x_m/y_m/z_m, or None if not found.
     """
     p = repo_root / REFLECTOR_CATALOG_REL
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         cat = _read_json(p)
     except Exception:
         return None
+
     refs = (cat.get("reflectors") or {}) if isinstance(cat, dict) else {}
+    # 条件分岐: `not isinstance(refs, dict)` を満たす経路を評価する。
     if not isinstance(refs, dict):
         return None
 
     key = _norm_key(target_name)
+    # 条件分岐: `key in refs and isinstance(refs[key], dict)` を満たす経路を評価する。
     if key in refs and isinstance(refs[key], dict):
         return refs[key]
 
     # common aliases
+
     aliases = {
         "apollo11": ["ap11", "a11"],
         "apollo14": ["ap14", "a14"],
@@ -566,9 +669,11 @@ def _load_reflector_pa(repo_root: Path, target_name: Optional[str]) -> Optional[
         "luna21": ["lunokhod2", "lk2", "luno21"],
     }
     for canon, al in aliases.items():
+        # 条件分岐: `key == canon or key in al` を満たす経路を評価する。
         if key == canon or key in al:
             v = refs.get(canon)
             return v if isinstance(v, dict) else None
+
     return None
 
 
@@ -608,12 +713,14 @@ def geodetic_from_ecef(x_m: float, y_m: float, z_m: float) -> tuple[float, float
 
     lon = math.atan2(y, x)
     p = math.hypot(x, y)
+    # 条件分岐: `p < 1e-9` を満たす経路を評価する。
     if p < 1e-9:
         lat = math.copysign(math.pi / 2.0, z)
         h = abs(z) - a * math.sqrt(1.0 - e2)
         return (math.degrees(lon), math.degrees(lat), float(h))
 
     # Initial guess
+
     lat = math.atan2(z, p * (1.0 - e2))
     h = 0.0
     for _ in range(8):
@@ -635,9 +742,11 @@ def _julian_date_utc(dt: datetime) -> float:
     mm = dt.minute
     ss = dt.second + dt.microsecond / 1e6
 
+    # 条件分岐: `m <= 2` を満たす経路を評価する。
     if m <= 2:
         y -= 1
         m += 12
+
     A = y // 100
     B = 2 - A + (A // 4)
     day = d + (hh + (mm + ss / 60.0) / 60.0) / 24.0
@@ -674,6 +783,7 @@ def ecef_to_eci_zrot(ecef_m: np.ndarray, times_utc: List[datetime]) -> np.ndarra
 # ============================================================
 # Moon orientation (IAU 2000-style, simplified) for reflector transform
 # ============================================================
+
 def _moon_iau_alpha_delta_w_rad(dt_utc: datetime) -> tuple[float, float, float]:
     """
     IAU 2000-style Moon orientation angles (approx):
@@ -691,6 +801,7 @@ def _moon_iau_alpha_delta_w_rad(dt_utc: datetime) -> tuple[float, float, float]:
         return math.radians(x)
 
     # Fundamental arguments (deg), IAU 2000 report style
+
     E1 = _deg(125.045 - 0.0529921 * d)
     E2 = _deg(250.089 - 0.1059842 * d)
     E3 = _deg(260.008 + 13.0120009 * d)
@@ -772,6 +883,7 @@ def moon_pa_to_icrf_matrix(dt_utc: datetime) -> np.ndarray:
     k = np.array([0.0, 0.0, 1.0], dtype=float)
     n = np.cross(k, z)
     n_norm = float(np.linalg.norm(n))
+    # 条件分岐: `n_norm < 1e-12` を満たす経路を評価する。
     if n_norm < 1e-12:
         n = np.array([1.0, 0.0, 0.0], dtype=float)
     else:
@@ -792,9 +904,12 @@ def moon_pa_to_icrf_matrix(dt_utc: datetime) -> np.ndarray:
 # ============================================================
 # CRD minimal reader (H2/H3/H4 + 11)
 # ============================================================
+
 def _open_text(path: Path) -> io.TextIOBase:
+    # 条件分岐: `path.suffix.lower() == ".gz"` を満たす経路を評価する。
     if path.suffix.lower() == ".gz":
         return io.TextIOWrapper(gzip.open(path, "rb"), encoding="utf-8", errors="replace")
+
     return path.open("r", encoding="utf-8", errors="replace")
 
 
@@ -807,8 +922,10 @@ def _is_na(tok: str) -> bool:
 
 
 def _to_int(tok: str) -> Optional[int]:
+    # 条件分岐: `tok is None or _is_na(tok)` を満たす経路を評価する。
     if tok is None or _is_na(tok):
         return None
+
     try:
         return int(tok)
     except ValueError:
@@ -816,8 +933,10 @@ def _to_int(tok: str) -> Optional[int]:
 
 
 def _to_float(tok: str) -> Optional[float]:
+    # 条件分岐: `tok is None or _is_na(tok)` を満たす経路を評価する。
     if tok is None or _is_na(tok):
         return None
+
     try:
         return float(tok)
     except ValueError:
@@ -844,18 +963,22 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
     with _open_text(path) as f:
         for lineno, raw in enumerate(f, start=1):
             line = raw.strip()
+            # 条件分岐: `not line` を満たす経路を評価する。
             if not line:
                 continue
 
             rt = _rtype(line)
             toks = line.split()
 
+            # 条件分岐: `rt == "H2" and len(toks) >= 2 and not _is_na(toks[1])` を満たす経路を評価する。
             if rt == "H2" and len(toks) >= 2 and not _is_na(toks[1]):
                 ctx.station = toks[1]
 
+            # 条件分岐: 前段条件が不成立で、`rt == "H3" and len(toks) >= 2 and not _is_na(toks[1])` を追加評価する。
             elif rt == "H3" and len(toks) >= 2 and not _is_na(toks[1]):
                 ctx.target = toks[1]
 
+            # 条件分岐: 前段条件が不成立で、`rt == "H4"` を追加評価する。
             elif rt == "H4":
                 # H4 ... start Y M D h m s ... end Y M D h m s ... range_type ...
                 def _dt_at(i: int) -> Optional[datetime]:
@@ -864,11 +987,16 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
                         hh = _to_int(toks[i+3]); mm = _to_int(toks[i+4]); ss = _to_int(toks[i+5])
                     except Exception:
                         return None
+
+                    # 条件分岐: `None in (y, mo, d, hh, mm, ss)` を満たす経路を評価する。
+
                     if None in (y, mo, d, hh, mm, ss):
                         return None
+
                     return datetime(y, mo, d, hh, mm, ss, tzinfo=timezone.utc)
 
                 start = _dt_at(2)
+                # 条件分岐: `start` を満たす経路を評価する。
                 if start:
                     ctx.session_day_utc = datetime(start.year, start.month, start.day, tzinfo=timezone.utc)
 
@@ -877,16 +1005,22 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
                 if len(toks) >= 21:
                     rt_val = _to_int(toks[20])
                 # fallback: 末尾から2つ目
+
                 if rt_val is None and len(toks) >= 2:
                     rt_val = _to_int(toks[-2])
 
+                # 条件分岐: `rt_val is None and assume_two_way_if_missing` を満たす経路を評価する。
+
                 if rt_val is None and assume_two_way_if_missing:
                     rt_val = 2
+
                 ctx.range_type = rt_val
 
+            # 条件分岐: 前段条件が不成立で、`rt == "11"` を追加評価する。
             elif rt == "11":
                 sod = _to_float(toks[1]) if len(toks) > 1 else None
                 tof = _to_float(toks[2]) if len(toks) > 2 else None
+                # 条件分岐: `ctx.session_day_utc is not None and sod is not None` を満たす経路を評価する。
                 if ctx.session_day_utc is not None and sod is not None:
                     epoch = ctx.session_day_utc + timedelta(seconds=float(sod))
                 else:
@@ -909,11 +1043,14 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
                 }
                 rows.append(row)
 
+            # 条件分岐: 前段条件が不成立で、`rt == "20"` を追加評価する。
             elif rt == "20":
                 # Meteorological record: "20  SOD  pressure[hPa]  temperature[K]  humidity[%]  source"
                 sod20 = _to_float(toks[1]) if len(toks) > 1 else None
+                # 条件分岐: `ctx.session_day_utc is None or sod20 is None` を満たす経路を評価する。
                 if ctx.session_day_utc is None or sod20 is None:
                     continue
+
                 epoch20 = ctx.session_day_utc + timedelta(seconds=float(sod20))
                 met_rows.append(
                     {
@@ -930,6 +1067,7 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
                 )
 
     df = pd.DataFrame(rows)
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         return df
 
@@ -990,10 +1128,12 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
                 ("rh_percent", "rh_percent_met"),
                 ("met_source", "met_source_met"),
             ]:
+                # 条件分岐: `b in merged.columns` を満たす経路を評価する。
                 if b in merged.columns:
                     # Fill only where missing on the NP side.
                     merged[a] = merged[a].where(merged[a].notna(), merged[b])
                     merged = merged.drop(columns=[b])
+
             df = merged.drop(columns=[c for c in ("_st_key", "_tgt_key") if c in merged.columns])
         except Exception:
             # Keep parser robust even if meteo merge fails.
@@ -1006,6 +1146,7 @@ def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.Da
 # ============================================================
 # Horizons API helper
 # ============================================================
+
 _VEC_EPOCH_LINE_RE = re.compile(
     r"^\s*\d+\.\d+\s*=\s*A\.D\.\s*(?P<cal>\d{4}-[A-Za-z]{3}-\d{2}\s+\d{2}:\d{2}:\d{2}\.\d+)\s+(?P<tz>[A-Za-z~]+)\s*$"
 )
@@ -1031,23 +1172,29 @@ def _horizons_get_text(params: Dict[str, str]) -> str:
                 body = e.read().decode("utf-8", errors="replace")
             except Exception:
                 body = ""
+
             msg = f"Horizons HTTP {code if code is not None else '??'}: {getattr(e, 'reason', '')}"
+            # 条件分岐: `body` を満たす経路を評価する。
             if body:
                 msg += "\n" + body[:2000]
 
             # Transient errors: retry with exponential backoff.
+
             if code in (429, 502, 503, 504) and attempt < max_tries:
                 wait_s = backoff_s * (2 ** (attempt - 1))
                 print(f"[warn] Horizons HTTP {code}; retrying in {wait_s:.1f}s ({attempt}/{max_tries})")
                 time.sleep(wait_s)
                 continue
+
             raise RuntimeError(msg) from e
         except Exception as e:
+            # 条件分岐: `attempt < max_tries` を満たす経路を評価する。
             if attempt < max_tries:
                 wait_s = backoff_s * (2 ** (attempt - 1))
                 print(f"[warn] Horizons request failed ({type(e).__name__}); retrying in {wait_s:.1f}s ({attempt}/{max_tries})")
                 time.sleep(wait_s)
                 continue
+
             raise
 
 
@@ -1059,9 +1206,11 @@ def _quantize_utc_for_horizons(dt: datetime) -> datetime:
     q = int(HORIZONS_TIME_QUANTUM_US)
     us = dt.microsecond
     us_round = int(round(us / q)) * q
+    # 条件分岐: `us_round >= 1_000_000` を満たす経路を評価する。
     if us_round >= 1_000_000:
         dt = dt + timedelta(seconds=1)
         us_round = 0
+
     return dt.replace(microsecond=us_round)
 
 
@@ -1076,6 +1225,7 @@ def _format_tlist(times_utc: List[datetime]) -> str:
     items = []
     for t in times_utc:
         items.append("'" + _format_calendar_utc(t) + "'")
+
     return ",".join(items)
 
 
@@ -1109,32 +1259,46 @@ def fetch_vectors(
         "TLIST": _format_tlist(times_utc),
         "OBJ_DATA": "'NO'",
     }
+    # 条件分岐: `coord_type` を満たす経路を評価する。
     if coord_type:
         params["COORD_TYPE"] = coord_type if coord_type.startswith("'") else f"'{coord_type}'"
+
+    # 条件分岐: `site_coord` を満たす経路を評価する。
+
     if site_coord:
         params["SITE_COORD"] = site_coord if site_coord.startswith("'") else f"'{site_coord}'"
+
     txt = _horizons_get_text(params)
 
     in_block = False
     cur_epoch: Optional[datetime] = None
     rows = []
     for line in txt.splitlines():
+        # 条件分岐: `"$$SOE" in line` を満たす経路を評価する。
         if "$$SOE" in line:
             in_block = True
             cur_epoch = None
             continue
+
+        # 条件分岐: `"$$EOE" in line` を満たす経路を評価する。
+
         if "$$EOE" in line:
             break
+
+        # 条件分岐: `not in_block` を満たす経路を評価する。
+
         if not in_block:
             continue
 
         m_epoch = _VEC_EPOCH_LINE_RE.match(line)
+        # 条件分岐: `m_epoch` を満たす経路を評価する。
         if m_epoch:
             cal = m_epoch.group("cal")
             cur_epoch = datetime.strptime(cal, "%Y-%b-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
             continue
 
         m_xyz = _VEC_XYZ_LINE_RE.match(line)
+        # 条件分岐: `m_xyz and cur_epoch is not None` を満たす経路を評価する。
         if m_xyz and cur_epoch is not None:
             rows.append((cur_epoch, float(m_xyz.group("x")), float(m_xyz.group("y")), float(m_xyz.group("z"))))
             cur_epoch = None
@@ -1159,8 +1323,10 @@ def fetch_vectors_chunked(
     while i < len(times_utc):
         sub = times_utc[i : i + chunk]
         n_sub = int(len(sub))
+        # 条件分岐: `n_sub <= 0` を満たす経路を評価する。
         if n_sub <= 0:
             break
+
         try:
             dfs.append(
                 fetch_vectors(
@@ -1177,6 +1343,7 @@ def fetch_vectors_chunked(
             # Retry with smaller chunks (helps with transient 5xx or long-query issues).
             if n_sub <= 1:
                 raise
+
             new_chunk = max(1, n_sub // 2)
             print(f"[warn] Horizons chunk failed (n={n_sub}); splitting to chunk={new_chunk}: {e}")
             dfs.append(
@@ -1200,12 +1367,14 @@ def fetch_vectors_chunked(
 # ============================================================
 # Horizons cache (offline replay)
 # ============================================================
+
 def _times_fingerprint(times_utc: List[datetime]) -> str:
     h = hashlib.sha256()
     for t in times_utc:
         t = _quantize_utc_for_horizons(t)
         h.update(t.isoformat().encode("utf-8"))
         h.update(b"\n")
+
     return h.hexdigest()[:16]
 
 
@@ -1239,21 +1408,32 @@ def fetch_vectors_chunked_cached(
     csv_path = cache_dir / f"horizons_vectors_{command}_{req_key}.csv"
     meta_path = cache_dir / f"horizons_vectors_{command}_{req_key}.json"
 
+    # 条件分岐: `csv_path.exists() and meta_path.exists()` を満たす経路を評価する。
     if csv_path.exists() and meta_path.exists():
         print(f"[cache] Using {csv_path}")
         df = _read_cache_csv(csv_path)
+        # 条件分岐: `len(df) >= len(times_utc)` を満たす経路を評価する。
         if len(df) >= len(times_utc):
             return df
+
         msg = f"[cache] Cache {csv_path} has {len(df)} rows, expected {len(times_utc)}; treating as invalid."
+        # 条件分岐: `offline` を満たす経路を評価する。
         if offline:
             raise RuntimeError(msg)
+
         print(msg)
+
+    # 条件分岐: `csv_path.exists() and not meta_path.exists()` を満たす経路を評価する。
 
     if csv_path.exists() and not meta_path.exists():
         msg = f"[cache] Found {csv_path} but missing {meta_path}; treating as invalid."
+        # 条件分岐: `offline` を満たす経路を評価する。
         if offline:
             raise RuntimeError(msg)
+
         print(msg)
+
+    # 条件分岐: `offline` を満たす経路を評価する。
 
     if offline:
         # Try to reuse an existing cache that contains a superset of requested times.
@@ -1265,16 +1445,34 @@ def fetch_vectors_chunked_cached(
                 m = json.loads(meta.read_text(encoding="utf-8"))
             except Exception:
                 continue
+
+            # 条件分岐: `str(m.get("command")) != str(command)` を満たす経路を評価する。
+
             if str(m.get("command")) != str(command):
                 continue
+
+            # 条件分岐: `str(m.get("center")) != str(center)` を満たす経路を評価する。
+
             if str(m.get("center")) != str(center):
                 continue
+
+            # 条件分岐: `str(m.get("ref_system", "ICRF")) != str(ref_system)` を満たす経路を評価する。
+
             if str(m.get("ref_system", "ICRF")) != str(ref_system):
                 continue
+
+            # 条件分岐: `str(m.get("ref_plane", "FRAME")) != str(ref_plane)` を満たす経路を評価する。
+
             if str(m.get("ref_plane", "FRAME")) != str(ref_plane):
                 continue
+
+            # 条件分岐: `(m.get("coord_type") or None) != (coord_type or None)` を満たす経路を評価する。
+
             if (m.get("coord_type") or None) != (coord_type or None):
                 continue
+
+            # 条件分岐: `(m.get("site_coord") or None) != (site_coord or None)` を満たす経路を評価する。
+
             if (m.get("site_coord") or None) != (site_coord or None):
                 continue
 
@@ -1283,18 +1481,27 @@ def fetch_vectors_chunked_cached(
                 t1 = datetime.fromisoformat(str(m.get("times_max_utc"))).astimezone(timezone.utc)
             except Exception:
                 continue
+
+            # 条件分岐: `not times_req` を満たす経路を評価する。
+
             if not times_req:
                 continue
+
+            # 条件分岐: `min(times_req) < t0 or max(times_req) > t1` を満たす経路を評価する。
+
             if min(times_req) < t0 or max(times_req) > t1:
                 continue
 
             n_times = m.get("n_times")
             csv = meta.with_suffix(".csv")
+            # 条件分岐: `not csv.exists()` を満たす経路を評価する。
             if not csv.exists():
                 continue
+
             candidates.append((int(n_times) if isinstance(n_times, int) else None, csv))
 
         # Prefer smaller caches first (faster load), but require full coverage of requested times.
+
         candidates.sort(key=lambda t: (t[0] is None, t[0] or 0, str(t[1])))
         for n_times, csv in candidates:
             df_all = _read_cache_csv(csv)
@@ -1303,6 +1510,7 @@ def fetch_vectors_chunked_cached(
             df_all = df_all.assign(epoch_q=epoch_q)
             lut = {t: i for i, t in enumerate(df_all["epoch_q"].tolist())}
             idx = [lut.get(t) for t in times_req]
+            # 条件分岐: `all(i is not None for i in idx)` を満たす経路を評価する。
             if all(i is not None for i in idx):
                 df_out = df_all.iloc[idx].drop(columns=["epoch_q"]).reset_index(drop=True)
                 extra = f", n_times={n_times}" if n_times is not None else ""
@@ -1353,6 +1561,7 @@ def fetch_vectors_chunked_cached(
 # ============================================================
 # Physics: Shapiro delay (Sun) for endpoints Earth<->Moon
 # ============================================================
+
 def shapiro_oneway_sun(mu: float, r1_m: np.ndarray, r2_m: np.ndarray, R12_m: np.ndarray, coeff: float) -> np.ndarray:
     """
     One-way Shapiro delay due to Sun.
@@ -1370,6 +1579,7 @@ def shapiro_oneway_sun(mu: float, r1_m: np.ndarray, r2_m: np.ndarray, R12_m: np.
 # ============================================================
 # Auto-pick input file
 # ============================================================
+
 def pick_input_file(search_root: Path) -> Path:
     # Prefer a deterministic "primary" file if present (used by run_all/public dashboard).
     for cand in [
@@ -1381,6 +1591,7 @@ def pick_input_file(search_root: Path) -> Path:
         "llr_primary.crd.gz",
     ]:
         p = search_root / cand
+        # 条件分岐: `p.exists()` を満たす経路を評価する。
         if p.exists():
             return p
 
@@ -1393,12 +1604,15 @@ def pick_input_file(search_root: Path) -> Path:
     found: List[Path] = []
     for pat in patterns:
         found.extend(search_root.rglob(pat) if SEARCH_RECURSIVE else search_root.glob(pat))
+
     found = sorted(set(found))
 
+    # 条件分岐: `found` を満たす経路を評価する。
     if found:
         return found[0]
 
     demo = search_root / "demo_llr_like.crd"
+    # 条件分岐: `demo.exists()` を満たす経路を評価する。
     if demo.exists():
         return demo
 
@@ -1408,10 +1622,12 @@ def pick_input_file(search_root: Path) -> Path:
 # ============================================================
 # Main pipeline
 # ============================================================
+
 def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path]:
     outdir.mkdir(parents=True, exist_ok=True)
 
     df = parse_crd_npt11(crd_path, assume_two_way_if_missing=ASSUME_TWO_WAY_IF_MISSING)
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         raise RuntimeError(f"No record 11 found in CRD file: {crd_path}")
 
@@ -1419,16 +1635,22 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
 
     # If the file contains multiple stations/targets, pick the most common pair for a clean overlay plot.
     df = df.dropna(subset=["epoch_utc", "tof_obs_s"]).reset_index(drop=True)
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         raise RuntimeError(f"No usable record 11 rows (missing epoch/tof): {crd_path}")
 
     n_total = int(len(df))
+    # 条件分岐: `"station" in df.columns` を満たす経路を評価する。
     if "station" in df.columns:
         df["station"] = df["station"].astype(str).str.strip().str.upper()
+
+    # 条件分岐: `"target" in df.columns` を満たす経路を評価する。
+
     if "target" in df.columns:
         df["target"] = df["target"].astype(str).str.strip().str.lower()
 
     station_code = None
+    # 条件分岐: `"station" in df.columns and df["station"].notna().any()` を満たす経路を評価する。
     if "station" in df.columns and df["station"].notna().any():
         try:
             station_code = str(df["station"].value_counts().index[0])
@@ -1436,20 +1658,26 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
             station_code = None
 
     target_name = None
+    # 条件分岐: `"target" in df.columns and df["target"].notna().any()` を満たす経路を評価する。
     if "target" in df.columns and df["target"].notna().any():
         try:
             target_name = str(df["target"].value_counts().index[0])
         except Exception:
             target_name = None
 
+    # 条件分岐: `station_code and target_name and ("station" in df.columns) and ("target" in d...` を満たす経路を評価する。
+
     if station_code and target_name and ("station" in df.columns) and ("target" in df.columns):
         df = df[(df["station"] == station_code) & (df["target"] == target_name)].copy().reset_index(drop=True)
+    # 条件分岐: 前段条件が不成立で、`station_code and ("station" in df.columns)` を追加評価する。
     elif station_code and ("station" in df.columns):
         df = df[df["station"] == station_code].copy().reset_index(drop=True)
+    # 条件分岐: 前段条件が不成立で、`target_name and ("target" in df.columns)` を追加評価する。
     elif target_name and ("target" in df.columns):
         df = df[df["target"] == target_name].copy().reset_index(drop=True)
 
     n_used = int(len(df))
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         raise RuntimeError(f"Selection produced empty dataset (station={station_code}, target={target_name}): {crd_path}")
 
@@ -1461,23 +1689,31 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     #
     # 強制する場合は環境変数で指定:
     #   LLR_TIME_TAG=tx|rx|mid|auto
+
     requested = os.environ.get("LLR_TIME_TAG", "").strip().lower() or "auto"
 
     def _load_time_tag_best_by_station(repo_root: Path) -> Optional[Dict[str, str]]:
         p = repo_root / "output" / "private" / "llr" / "batch" / "llr_time_tag_best_by_station.json"
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             return None
+
         try:
             d = json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return None
+
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
+
         if not isinstance(d, dict):
             return None
         # Current format (preferred):
         #   {"best_mode_by_station": {"APOL":"tx", ...}, ...}
         # Legacy/compat:
         #   {"APOL":"tx", ...}
+
         mapping = d.get("best_mode_by_station") if isinstance(d.get("best_mode_by_station"), dict) else d
+        # 条件分岐: `not isinstance(mapping, dict)` を満たす経路を評価する。
         if not isinstance(mapping, dict):
             return None
 
@@ -1485,27 +1721,35 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         for k, v in mapping.items():
             ks = str(k).strip().upper()
             vs = str(v).strip().lower()
+            # 条件分岐: `ks and vs in ("tx", "rx", "mid")` を満たす経路を評価する。
             if ks and vs in ("tx", "rx", "mid"):
                 out[ks] = vs
+
         return out or None
+
+    # 条件分岐: `requested == "auto"` を満たす経路を評価する。
 
     if requested == "auto":
         best = _load_time_tag_best_by_station(repo)
+        # 条件分岐: `best and station_code and str(station_code).strip().upper() in best` を満たす経路を評価する。
         if best and station_code and str(station_code).strip().upper() in best:
             time_tag_mode = best[str(station_code).strip().upper()]
             print(f"[info] LLR_TIME_TAG=auto → {station_code} は {time_tag_mode} を使用")
         else:
             time_tag_mode = "tx"
+            # 条件分岐: `not best` を満たす経路を評価する。
             if not best:
                 print("[info] LLR_TIME_TAG=auto だが best_by_station が無いので tx を使用（先に llr_batch_eval.py を実行してください）")
             else:
                 print("[info] LLR_TIME_TAG=auto だが station が未解決なので tx を使用")
+    # 条件分岐: 前段条件が不成立で、`requested in ("tx", "rx", "mid")` を追加評価する。
     elif requested in ("tx", "rx", "mid"):
         time_tag_mode = requested
     else:
         raise ValueError(f"Invalid LLR_TIME_TAG={requested!r} (expected tx/rx/mid/auto)")
 
     # Convert to python datetimes (avoid pandas FutureWarning drift)
+
     tag_times = [t.to_pydatetime() for t in df["epoch_utc"].tolist()]
     obs = df["tof_obs_s"].to_numpy(dtype=float)
 
@@ -1516,14 +1760,17 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     bounce_times: List[datetime] = []
     rx_times: List[datetime] = []
     for t_tag, tof_s in zip(tag_times, obs):
+        # 条件分岐: `time_tag_mode == "tx"` を満たす経路を評価する。
         if time_tag_mode == "tx":
             t_tx = t_tag
             t_b = t_tag + _sec(tof_s / 2.0)
             t_rx = t_tag + _sec(tof_s)
+        # 条件分岐: 前段条件が不成立で、`time_tag_mode == "rx"` を追加評価する。
         elif time_tag_mode == "rx":
             t_rx = t_tag
             t_b = t_tag - _sec(tof_s / 2.0)
             t_tx = t_tag - _sec(tof_s)
+        # 条件分岐: 前段条件が不成立で、`time_tag_mode == "mid"` を追加評価する。
         elif time_tag_mode == "mid":
             t_b = t_tag
             t_tx = t_tag - _sec(tof_s / 2.0)
@@ -1537,16 +1784,21 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
 
     st_meta = _load_station_geodetic(repo, station_code)
     station_available = bool(st_meta and all(k in st_meta for k in ("lat_deg", "lon_deg", "height_m")))
+    # 条件分岐: `not station_available` を満たす経路を評価する。
     if not station_available:
         print("[warn] station geodetic not found; using Earth center (run scripts/llr/fetch_station_edc.py).")
 
     refl_meta = _load_reflector_pa(repo, target_name)
     refl_pa_m = None
+    # 条件分岐: `refl_meta and all(k in refl_meta for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
     if refl_meta and all(k in refl_meta for k in ("x_m", "y_m", "z_m")):
         try:
             refl_pa_m = np.array([float(refl_meta["x_m"]), float(refl_meta["y_m"]), float(refl_meta["z_m"])], dtype=float)
         except Exception:
             refl_pa_m = None
+
+    # 条件分岐: `refl_pa_m is None and target_name` を満たす経路を評価する。
+
     if refl_pa_m is None and target_name:
         print(f"[warn] reflector coords not found for target={target_name} (expected {REFLECTOR_CATALOG_REL}). Using Moon center.")
 
@@ -1557,6 +1809,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         return sorted({t.astimezone(timezone.utc) for t in times})
 
     # Ephemerides needed: Earth->Moon(301) and Earth->Sun(10) at tx/bounce/rx
+
     times_all = _unique_sorted(tx_times + bounce_times + rx_times)
     moon_all = fetch_vectors_chunked_cached("301", "500@399", times_all, chunk=chunk, cache_dir=cache_dir, offline=offline, ref_plane="FRAME")
     sun_all = fetch_vectors_chunked_cached("10", "500@399", times_all, chunk=chunk, cache_dir=cache_dir, offline=offline, ref_plane="FRAME")
@@ -1565,9 +1818,12 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         out_map: Dict[datetime, np.ndarray] = {}
         for r in vdf.itertuples(index=False):
             t = getattr(r, "epoch_utc")
+            # 条件分岐: `isinstance(t, pd.Timestamp)` を満たす経路を評価する。
             if isinstance(t, pd.Timestamp):
                 t = t.to_pydatetime()
+
             out_map[_quantize_utc_for_horizons(t)] = np.array([getattr(r, "x_km"), getattr(r, "y_km"), getattr(r, "z_km")], dtype=float) * 1000.0
+
         return out_map
 
     moon_map = _to_map(moon_all)
@@ -1577,13 +1833,16 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     station_site_coord = None
     station_coord_type = None
     moon_site_map: Dict[datetime, np.ndarray] = {}
+    # 条件分岐: `station_available and st_meta is not None` を満たす経路を評価する。
     if station_available and st_meta is not None:
         station_coord_type = "GEODETIC"
+        # 条件分岐: `all(st_meta.get(k) is not None for k in ("x_m", "y_m", "z_m"))` を満たす経路を評価する。
         if all(st_meta.get(k) is not None for k in ("x_m", "y_m", "z_m")):
             lon_deg, lat_deg, h_m = geodetic_from_ecef(float(st_meta["x_m"]), float(st_meta["y_m"]), float(st_meta["z_m"]))
             station_site_coord = f"{lon_deg:.10f},{lat_deg:.10f},{h_m/1000.0:.6f}"
         else:
             station_site_coord = f"{float(st_meta['lon_deg']):.10f},{float(st_meta['lat_deg']):.10f},{float(st_meta['height_m'])/1000.0:.6f}"
+
         times_sm = _unique_sorted(tx_times + rx_times)
         moon_site = fetch_vectors_chunked_cached(
             "301",
@@ -1599,6 +1858,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         moon_site_map = _to_map(moon_site)
 
     # Build per-observation vectors (meters)
+
     r_em_tx = np.stack([moon_map[t] for t in tx_times], axis=0)
     r_em_rx = np.stack([moon_map[t] for t in rx_times], axis=0)
     r_em_b = np.stack([moon_map[t] for t in bounce_times], axis=0)
@@ -1607,6 +1867,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     r_es_rx = np.stack([sun_map[t] for t in rx_times], axis=0)
     r_es_b = np.stack([sun_map[t] for t in bounce_times], axis=0)
 
+    # 条件分岐: `station_available` を満たす経路を評価する。
     if station_available:
         r_sm_tx = np.stack([moon_site_map[t] for t in tx_times], axis=0)
         r_sm_rx = np.stack([moon_site_map[t] for t in rx_times], axis=0)
@@ -1619,6 +1880,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         r_st_rx = np.zeros_like(r_em_rx)
 
     # Target at bounce time (Moon center)
+
     r_moon_b = r_em_b
 
     # Geometric distances (one-way) for each model
@@ -1633,17 +1895,21 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     r_refl_b = None
     up_sr = None
     down_sr = None
+    # 条件分岐: `use_reflector and refl_pa_m is not None` を満たす経路を評価する。
     if use_reflector and refl_pa_m is not None:
         mats: List[np.ndarray] = []
         moon_rot_model = None
         for t in bounce_times:
             mat = _moon_pa_de421_to_j2000_matrix(repo, t)
+            # 条件分岐: `mat is None` を満たす経路を評価する。
             if mat is None:
                 mat = moon_pa_to_icrf_matrix(t)
                 moon_rot_model = moon_rot_model or "iau_approx"
             else:
                 moon_rot_model = moon_rot_model or "spice:MOON_PA_DE421"
+
             mats.append(mat)
+
         rot = np.stack(mats, axis=0)  # (n,3,3)
         refl_icrf = rot @ refl_pa_m  # (n,3)
         r_refl_b = r_em_b + refl_icrf
@@ -1653,6 +1919,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         moon_rot_model = "moon_center_only"
 
     # Two-way geometric TOF
+
     tof_geo_gc_s = (up_gc + down_gc) / C
     tof_geo_sm_s = (up_sm + down_sm) / C
     tof_geo_sr_s = (up_sr + down_sr) / C if (up_sr is not None and down_sr is not None) else None
@@ -1676,6 +1943,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
 
     dt_two_sr = None
     tof_sr_raw_s = None
+    # 条件分岐: `use_reflector and (r_refl_b is not None) and (tof_geo_sr_s is not None) and (...` を満たす経路を評価する。
     if use_reflector and (r_refl_b is not None) and (tof_geo_sr_s is not None) and (up_sr is not None) and (down_sr is not None):
         r2_sr_m = np.linalg.norm(r_es_b - r_refl_b, axis=1)
         dt_up_sr = shapiro_oneway_sun(GM_SUN, r1_sm_tx, r2_sr_m, up_sr, coeff=coeff)
@@ -1684,6 +1952,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         tof_sr_raw_s = tof_geo_sr_s + dt_two_sr
 
     # Fit constant offset to align model to observation
+
     k_gc = float(np.mean(obs - tof_gc_raw_s))
     k_sm = float(np.mean(obs - tof_sm_raw_s))
     tof_gc_s = tof_gc_raw_s + k_gc
@@ -1691,6 +1960,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
 
     k_sr = None
     tof_sr_s = None
+    # 条件分岐: `tof_sr_raw_s is not None` を満たす経路を評価する。
     if tof_sr_raw_s is not None:
         k_sr = float(np.mean(obs - tof_sr_raw_s))
         tof_sr_s = tof_sr_raw_s + k_sr
@@ -1766,8 +2036,10 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     plt.figure(figsize=(10, 4.8))
     plt.plot(t, y_obs, marker="o", label="観測 TOF（平均除去）")
     plt.plot(t, y_moon, marker="o", label=f"月中心モデル（局あり, β={beta:g}, 定数オフセット整列, 平均除去）")
+    # 条件分岐: `use_reflector and y_refl is not None` を満たす経路を評価する。
     if use_reflector and y_refl is not None:
         plt.plot(t, y_refl, marker="o", label=f"反射器モデル（局+月回転, β={beta:g}, 定数オフセット整列, 平均除去）")
+
     plt.xlabel("UTC時刻")
     plt.ylabel("往復TOF偏差 [ns]")
     plt.title(f"{LLR_SHORT_NAME}（CRD Normal Point）：観測 vs モデル（太陽Shapiro含む）")
@@ -1798,10 +2070,12 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
             arr = np.asarray(series, dtype=float)
         except Exception:
             return float("nan")
+
         arr = arr[np.isfinite(arr)]
         return float(np.sqrt(np.mean(arr ** 2))) if len(arr) else float("nan")
 
     # Compare residuals: geocenter vs station->moon vs station->reflector (if available)
+
     res_gc_ns = (out["tof_obs_s"] - out["tof_geocenter_aligned_s"]) * 1e9
     res_sm_ns = (out["tof_obs_s"] - out["tof_station_moon_aligned_s"]) * 1e9
     rms_gc = _rms_ns(res_gc_ns)
@@ -1809,6 +2083,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
 
     rms_sr = float("nan")
     res_sr_ns = None
+    # 条件分岐: `use_reflector` を満たす経路を評価する。
     if use_reflector:
         res_sr_ns = (out["tof_obs_s"] - out["tof_station_reflector_aligned_s"]) * 1e9
         rms_sr = _rms_ns(res_sr_ns)
@@ -1816,8 +2091,10 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     plt.figure(figsize=(10, 4.8))
     plt.plot(t, res_gc_ns, marker="o", label=f"地球中心→月中心（RMS={rms_gc:.3g} ns）")
     plt.plot(t, res_sm_ns, marker="o", label=f"観測局→月中心（RMS={rms_sm:.3g} ns）")
+    # 条件分岐: `use_reflector and res_sr_ns is not None` を満たす経路を評価する。
     if use_reflector and res_sr_ns is not None:
         plt.plot(t, res_sr_ns, marker="o", label=f"観測局→反射器（RMS={rms_sr:.3g} ns）")
+
     plt.axhline(0, linewidth=1)
     plt.xlabel("UTC時刻")
     plt.ylabel("残差 [ns]（定数オフセット整列後）")
@@ -1881,6 +2158,8 @@ def main() -> None:
     print("[ok] overlay:", paths["overlay"])
     print("[ok] resid :", paths["residual"])
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

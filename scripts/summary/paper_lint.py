@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Iterable, List, Sequence, Set, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -41,12 +42,17 @@ def _read_text(path: Path) -> str:
 
 def _resolve_output_path(root: Path, rel: str) -> Path:
     rel_norm = rel.replace("\\", "/")
+    # 条件分岐: `not rel_norm.startswith("output/")` を満たす経路を評価する。
     if not rel_norm.startswith("output/"):
         return root / Path(rel)
 
     parts = Path(rel_norm).parts
+    # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
     if len(parts) < 2:
         return root / Path(rel_norm)
+
+    # 条件分岐: `parts[1] in ("private", "public")` を満たす経路を評価する。
+
     if parts[1] in ("private", "public"):
         return root / Path(rel_norm)
 
@@ -55,16 +61,27 @@ def _resolve_output_path(root: Path, rel: str) -> Path:
     cand_private = (root / "output" / "private" / topic / tail).resolve()
     cand_public = (root / "output" / "public" / topic / tail).resolve()
 
+    # 条件分岐: `topic == "quantum"` を満たす経路を評価する。
     if topic == "quantum":
+        # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
         if cand_public.exists():
             return cand_public
+
+        # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
         if cand_private.exists():
             return cand_private
 
+    # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
     if cand_private.exists():
         return cand_private
+
+    # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
+
     if cand_public.exists():
         return cand_public
+
     return root / Path(rel_norm)
 
 _REF_KEY_RE = re.compile(r"^\s*-\s+\[([A-Za-z][A-Za-z0-9_-]{0,40})\]")
@@ -86,17 +103,23 @@ def _extract_reference_keys(ref_md: str) -> List[str]:
     keys: List[str] = []
     for line in ref_md.splitlines():
         m = _REF_KEY_RE.match(line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         keys.append(m.group(1))
     # de-dup preserving order
+
     seen: Set[str] = set()
     uniq: List[str] = []
     for key in keys:
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
         uniq.append(key)
+
     return uniq
 
 
@@ -115,8 +138,10 @@ def _extract_fig_index_pngs(fig_index_md: str) -> List[Tuple[str, str]]:
     found: List[Tuple[str, str]] = []
     for line in fig_index_md.splitlines():
         m = _FIG_INDEX_PNG_RE.search(line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         rel = m.group(1)
         caption = (m.group(2) or m.group(3) or "").strip()
         found.append((rel, caption))
@@ -125,10 +150,13 @@ def _extract_fig_index_pngs(fig_index_md: str) -> List[Tuple[str, str]]:
     uniq: List[Tuple[str, str]] = []
     for rel, caption in found:
         key = rel.lower()
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
         uniq.append((rel, caption))
+
     return uniq
 
 
@@ -139,22 +167,37 @@ def _extract_delta_units(md_text: str) -> List[Tuple[str, str]]:
 def _count_falsification_lines(block_text: str) -> int:
     lines = block_text.splitlines()
     for idx, line in enumerate(lines):
+        # 条件分岐: `line.strip().startswith("**反証条件**")` を満たす経路を評価する。
         if line.strip().startswith("**反証条件**"):
             count = 0
             for next_line in lines[idx + 1 :]:
                 text = next_line.strip()
+                # 条件分岐: `not text` を満たす経路を評価する。
                 if not text:
+                    # 条件分岐: `count > 0` を満たす経路を評価する。
                     if count > 0:
                         break
+
                     continue
+
+                # 条件分岐: `text.startswith("**")` を満たす経路を評価する。
+
                 if text.startswith("**"):
                     break
+
+                # 条件分岐: `text.startswith("- ")` を満たす経路を評価する。
+
                 if text.startswith("- "):
                     count += 1
                     continue
+
+                # 条件分岐: `count > 0` を満たす経路を評価する。
+
                 if count > 0:
                     break
+
             return count
+
     return 0
 
 
@@ -162,9 +205,12 @@ def _extract_heading_numbers(md_text: str) -> Set[str]:
     nums: Set[str] = set()
     for line in md_text.splitlines():
         m = _HEADING_NUM_RE.match(line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         nums.add(m.group(1))
+
     return nums
 
 
@@ -174,11 +220,17 @@ def _find_unresolved_section_refs(md_text: str) -> List[str]:
     for lineno, line in enumerate(md_text.splitlines(), start=1):
         for m in _SECTION_REF_RE.finditer(line):
             ref_num = m.group(1)
+            # 条件分岐: `ref_num in heading_nums` を満たす経路を評価する。
             if ref_num in heading_nums:
                 continue
+
+            # 条件分岐: `_CROSS_PART_HINT_RE.search(line)` を満たす経路を評価する。
+
             if _CROSS_PART_HINT_RE.search(line):
                 continue
+
             findings.append(f"line {lineno}: {ref_num}節 (not found in manuscript headings)")
+
     return findings
 
 
@@ -208,68 +260,88 @@ def _lint(
 
     ref_md = _read_text(references_path)
     ref_keys = set(_extract_reference_keys(ref_md))
+    # 条件分岐: `not ref_keys` を満たす経路を評価する。
     if not ref_keys:
         warnings.append("no reference keys found in references (expected '- [KEY]' bullets)")
 
     used_keys: Set[str] = set()
     used_pngs: Set[str] = set()
     for md_path in manuscript_paths:
+        # 条件分岐: `not md_path.exists()` を満たす経路を評価する。
         if not md_path.exists():
             errors.append(f"missing manuscript file: {md_path}")
             continue
+
         md_text = _read_text(md_path)
         used_keys |= _extract_used_citations(md_text)
         used_pngs |= _extract_png_refs(md_text)
         unresolved_section_refs = _find_unresolved_section_refs(md_text)
+        # 条件分岐: `unresolved_section_refs` を満たす経路を評価する。
         if unresolved_section_refs:
             rel_md = str(md_path.relative_to(root)).replace("\\", "/")
             for entry in unresolved_section_refs:
                 warnings.append(f"unresolved section reference: {rel_md} {entry}")
+
         unfixed_lines: List[int] = []
         for lineno, line in enumerate(md_text.splitlines(), start=1):
+            # 条件分岐: `_UNFIXED_GH_MAIN_RE.search(line)` を満たす経路を評価する。
             if _UNFIXED_GH_MAIN_RE.search(line):
                 unfixed_lines.append(lineno)
+
+        # 条件分岐: `unfixed_lines` を満たす経路を評価する。
+
         if unfixed_lines:
             rel_md = str(md_path.relative_to(root)).replace("\\", "/")
             head = ", ".join(str(n) for n in unfixed_lines[:5])
+            # 条件分岐: `len(unfixed_lines) > 5` を満たす経路を評価する。
             if len(unfixed_lines) > 5:
                 head += ", ..."
+
             warnings.append(
                 f"unfixed GitHub main link found (use release/tag snapshot): {rel_md} lines {head}"
             )
 
         # --- Delta-unit guard (Step 8.7.1)
+
         delta_units = _extract_delta_units(md_text)
         for unit_id, unit_body in delta_units:
             table_count = len(_MD_TABLE_SEP_RE.findall(unit_body))
+            # 条件分岐: `table_count != 1` を満たす経路を評価する。
             if table_count != 1:
                 warnings.append(
                     f"delta-unit '{unit_id}' should contain exactly 1 markdown table (separator lines={table_count})"
                 )
+
             png_count = len(_PNG_CODE_RE.findall(unit_body))
+            # 条件分岐: `png_count != 1` を満たす経路を評価する。
             if png_count != 1:
                 warnings.append(
                     f"delta-unit '{unit_id}' should contain exactly 1 figure reference (png refs={png_count})"
                 )
+
             fals_lines = _count_falsification_lines(unit_body)
+            # 条件分岐: `fals_lines != 3` を満たす経路を評価する。
             if fals_lines != 3:
                 warnings.append(
                     f"delta-unit '{unit_id}' should contain exactly 3 falsification lines (found={fals_lines})"
                 )
 
     missing_keys = sorted(used_keys - ref_keys)
+    # 条件分岐: `missing_keys` を満たす経路を評価する。
     if missing_keys:
         errors.append(
             "missing citation keys in references: " + ", ".join(f"[{k}]" for k in missing_keys)
         )
 
     # --- Figures index
+
     if not figures_index_path.exists():
         errors.append(f"missing figures index: {figures_index_path}")
         return _LintResult(errors=errors, warnings=warnings)
 
     fig_idx_md = _read_text(figures_index_path)
     fig_items = _extract_fig_index_pngs(fig_idx_md)
+    # 条件分岐: `not fig_items` を満たす経路を評価する。
     if not fig_items:
         warnings.append("no PNG entries found in figures index (expected backticked output/...png)")
 
@@ -278,17 +350,24 @@ def _lint(
         # The index may contain optional/planned figures that are not generated in a minimal build.
         if rel not in used_pngs:
             continue
+
         png_path = _resolve_output_path(root, rel)
+        # 条件分岐: `not png_path.exists()` を満たす経路を評価する。
         if not png_path.exists():
             warnings.append(f"missing figure file referenced by manuscript (listed in index): {rel}")
             continue
+
+        # 条件分岐: `not caption` を満たす経路を評価する。
+
         if not caption:
             warnings.append(f"no caption in figures index (referenced): {rel}")
 
     # --- Manuscript png refs must be in the figures index for stable (図N) linking
+
     idx_pngs = {rel for rel, _ in fig_items}
 
     missing_pngs = sorted(used_pngs - idx_pngs)
+    # 条件分岐: `missing_pngs` を満たす経路を評価する。
     if missing_pngs:
         warnings.append(
             "png referenced in manuscript but not listed in figures index (図番号リンクが不安定): "
@@ -300,8 +379,10 @@ def _lint(
 
 def _print_block(title: str, items: Iterable[str]) -> None:
     items_list = list(items)
+    # 条件分岐: `not items_list` を満たす経路を評価する。
     if not items_list:
         return
+
     print(f"\n[{title}]")
     for item in items_list:
         print(f"- {item}")
@@ -342,6 +423,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     root = _repo_root()
 
     manuscript_paths = [root / Path(p) for p in (args.manuscript or [])]
+    # 条件分岐: `not manuscript_paths` を満たす経路を評価する。
     if not manuscript_paths:
         manuscript_paths = [root / "doc" / "paper" / "10_manuscript.md"]
 
@@ -366,8 +448,11 @@ def main(argv: Sequence[str] | None = None) -> int:
     _print_block("warnings", result.warnings)
 
     exit_code = 0
+    # 条件分岐: `result.errors or (args.strict and result.warnings)` を満たす経路を評価する。
     if result.errors or (args.strict and result.warnings):
         exit_code = 1
+
+    # 条件分岐: `not args.no_log` を満たす経路を評価する。
 
     if not args.no_log:
         try:
@@ -388,6 +473,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     return exit_code
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

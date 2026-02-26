@@ -14,6 +14,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -43,8 +44,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -65,20 +68,31 @@ def _format_num(x: Any, *, digits: int = 4) -> str:
         v = float(x)
     except Exception:
         return "" if x is None else str(x)
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return ""
+
+    # 条件分岐: `v == 0.0` を満たす経路を評価する。
+
     if v == 0.0:
         return "0"
+
     av = abs(v)
+    # 条件分岐: `av < 1e-3 or av >= 1e5` を満たす経路を評価する。
     if av < 1e-3 or av >= 1e5:
         return f"{v:.{digits}g}"
+
     return f"{v:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _load_decisive_falsification(root: Path) -> Dict[str, Any]:
     path = root / "output" / "private" / "summary" / "decisive_falsification.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         j = _read_json(path)
         return j if isinstance(j, dict) else {}
@@ -88,17 +102,23 @@ def _load_decisive_falsification(root: Path) -> Dict[str, Any]:
 
 def _load_eht_paper5_m3_rescue_metrics(root: Path) -> Dict[str, Any]:
     path = root / "output" / "private" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         j = _read_json(path)
     except Exception:
         return {}
+
+    # 条件分岐: `not isinstance(j, dict)` を満たす経路を評価する。
+
     if not isinstance(j, dict):
         return {}
 
     m3 = ((j.get("derived") or {}).get("m3") or {})
     ks = (m3.get("historical_distribution_values_ks") or {})
+    # 条件分岐: `not (isinstance(ks, dict) and bool(ks.get("ok")))` を満たす経路を評価する。
     if not (isinstance(ks, dict) and bool(ks.get("ok"))):
         return {}
 
@@ -134,8 +154,10 @@ def _extract_eht_candidates(fals: Dict[str, Any], *, paper5_m3_rescue: Optional[
     rows = eht.get("rows") if isinstance(eht.get("rows"), list) else []
     out: List[Dict[str, Any]] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         name = str(r.get("name") or r.get("key") or "EHT")
 
         kappa_systematics_source = str(r.get("kappa_systematics_source") or "")
@@ -143,10 +165,13 @@ def _extract_eht_candidates(fals: Dict[str, Any], *, paper5_m3_rescue: Optional[
         kappa_obs_sigma = float(r.get("kappa_obs_sigma", float("nan")))
         kappa_sigma_assumed_kerr = float(r.get("kappa_sigma_assumed_kerr", float("nan")))
         kappa_sigma_systematics_now = float("nan")
+        # 条件分岐: `kappa_systematics_source == "budget" and math.isfinite(kappa_budget_sigma)` を満たす経路を評価する。
         if kappa_systematics_source == "budget" and math.isfinite(kappa_budget_sigma):
             kappa_sigma_systematics_now = kappa_budget_sigma
+        # 条件分岐: 前段条件が不成立で、`kappa_systematics_source == "obs" and math.isfinite(kappa_obs_sigma)` を追加評価する。
         elif kappa_systematics_source == "obs" and math.isfinite(kappa_obs_sigma):
             kappa_sigma_systematics_now = kappa_obs_sigma
+        # 条件分岐: 前段条件が不成立で、`kappa_systematics_source == "kerr" and math.isfinite(kappa_sigma_assumed_kerr)` を追加評価する。
         elif kappa_systematics_source == "kerr" and math.isfinite(kappa_sigma_assumed_kerr):
             kappa_sigma_systematics_now = kappa_sigma_assumed_kerr
 
@@ -201,6 +226,7 @@ def _extract_eht_candidates(fals: Dict[str, Any], *, paper5_m3_rescue: Optional[
                 else None,
             }
         )
+
     return out
 
 
@@ -215,19 +241,25 @@ def _extract_delta_candidate(fals: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     tightest_delta_upper = float("nan")
     tightest_label = ""
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         g = float(r.get("gamma_obs", float("nan")))
+        # 条件分岐: `math.isfinite(g)` を満たす経路を評価する。
         if math.isfinite(g):
             gamma_obs_max = max(gamma_obs_max, g) if math.isfinite(gamma_obs_max) else g
 
         du = float(r.get("delta_upper_from_gamma", float("nan")))
+        # 条件分岐: `math.isfinite(du) and du > 0` を満たす経路を評価する。
         if math.isfinite(du) and du > 0:
+            # 条件分岐: `(not math.isfinite(tightest_delta_upper)) or (du < tightest_delta_upper)` を満たす経路を評価する。
             if (not math.isfinite(tightest_delta_upper)) or (du < tightest_delta_upper):
                 tightest_delta_upper = du
                 tightest_label = str(r.get("label") or r.get("key") or "")
 
     gap_gamma = float("nan")
+    # 条件分岐: `math.isfinite(gamma_needed) and gamma_needed > 0 and math.isfinite(gamma_obs_...` を満たす経路を評価する。
     if math.isfinite(gamma_needed) and gamma_needed > 0 and math.isfinite(gamma_obs_max) and gamma_obs_max > 0:
         gap_gamma = gamma_needed / gamma_obs_max
 
@@ -249,6 +281,7 @@ def _extract_delta_candidate(fals: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
 def _extract_s2_candidate(root: Path) -> Optional[Dict[str, Any]]:
     path = root / "output" / "private" / "eht" / "gravity_s2_pmodel_projection.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
 
@@ -256,6 +289,8 @@ def _extract_s2_candidate(root: Path) -> Optional[Dict[str, Any]]:
         j = _read_json(path)
     except Exception:
         return None
+
+    # 条件分岐: `not isinstance(j, dict) or not bool(j.get("ok"))` を満たす経路を評価する。
 
     if not isinstance(j, dict) or not bool(j.get("ok")):
         return None
@@ -313,14 +348,17 @@ def _render_table(candidates: List[Dict[str, Any]], *, out_png: Path) -> None:
         now = ""
         gap = ""
 
+        # 条件分岐: `topic.startswith("EHT")` を満たす経路を評価する。
         if topic.startswith("EHT"):
             sigma_need = c.get("sigma_needed_3sigma_uas")
+            # 条件分岐: `math.isfinite(float(sigma_need or float("nan")))` を満たす経路を評価する。
             if math.isfinite(float(sigma_need or float("nan"))):
                 need = f"σ_obs(shadow) ≤ {_format_num(sigma_need, digits=3)} μas"
             else:
                 # For cases like M87*, mass/distance uncertainty (θ_unit) dominates → discrimination is n/a.
                 now_pct = c.get("theta_unit_rel_sigma_now_pct")
                 need_pct = c.get("theta_unit_rel_sigma_needed_pct")
+                # 条件分岐: `math.isfinite(float(now_pct or float("nan"))) and math.isfinite(float(need_pc...` を満たす経路を評価する。
                 if math.isfinite(float(now_pct or float("nan"))) and math.isfinite(float(need_pct or float("nan"))):
                     need = (
                         f"n/a（θ_unit={_format_num(now_pct, digits=2)}% > 要求={_format_num(need_pct, digits=2)}%）"
@@ -329,42 +367,70 @@ def _render_table(candidates: List[Dict[str, Any]], *, out_png: Path) -> None:
                     need = "n/a"
 
             kappa_req0 = c.get("kappa_sigma_required_3sigma_if_ring_sigma_zero")
+            # 条件分岐: `math.isfinite(float(kappa_req0 or float("nan"))) and float(kappa_req0) > 0` を満たす経路を評価する。
             if math.isfinite(float(kappa_req0 or float("nan"))) and float(kappa_req0) > 0:
                 need += f" / κσ ≤ {_format_num(float(kappa_req0) * 100, digits=2)}%（ringσ→0）"
+
             now_sigma = c.get("sigma_now_uas")
             now_sigma_k = c.get("sigma_now_with_kappa_uas")
             now_sigma_ks = c.get("sigma_now_with_kappa_scattering_uas")
+            # 条件分岐: `math.isfinite(float(now_sigma or float("nan")))` を満たす経路を評価する。
             if math.isfinite(float(now_sigma or float("nan"))):
                 now = f"σ_obs ≈ {_format_num(now_sigma, digits=3)} μas"
+
+            # 条件分岐: `math.isfinite(float(now_sigma_k or float("nan")))` を満たす経路を評価する。
+
             if math.isfinite(float(now_sigma_k or float("nan"))):
                 now += f"（参考:+κ={_format_num(now_sigma_k, digits=3)}）"
+
+            # 条件分岐: `math.isfinite(float(now_sigma_ks or float("nan")))` を満たす経路を評価する。
+
             if math.isfinite(float(now_sigma_ks or float("nan"))):
                 now += f"（参考:+κ+散乱={_format_num(now_sigma_ks, digits=3)}）"
+
             kappa_now = c.get("kappa_sigma_systematics_now")
+            # 条件分岐: `math.isfinite(float(kappa_now or float('nan')))` を満たす経路を評価する。
             if math.isfinite(float(kappa_now or float('nan'))):
                 now += f" / κσ≈{_format_num(float(kappa_now) * 100, digits=2)}%"
+
             g = c.get("gap_factor_now_over_needed_with_kappa")
+            # 条件分岐: `not math.isfinite(float(g or float("nan")))` を満たす経路を評価する。
             if not math.isfinite(float(g or float("nan"))):
                 g = c.get("gap_factor_now_over_needed")
+
             g2 = c.get("gap_factor_now_over_needed_with_kappa_scattering")
+            # 条件分岐: `math.isfinite(float(g or float("nan")))` を満たす経路を評価する。
             if math.isfinite(float(g or float("nan"))):
                 gap = f"{_format_num(g, digits=3)}×"
+
+            # 条件分岐: `not gap and math.isfinite(float(g2 or float("nan")))` を満たす経路を評価する。
+
             if not gap and math.isfinite(float(g2 or float("nan"))):
                 gap = f"{_format_num(g2, digits=3)}×"
+        # 条件分岐: 前段条件が不成立で、`topic.startswith("S2")` を追加評価する。
         elif topic.startswith("S2"):
             s_need = c.get("sigma_f_needed_3sigma")
             s_now = c.get("sigma_f_now")
             g = c.get("gap_sigma_f_now_over_needed")
+            # 条件分岐: `math.isfinite(float(s_need or float("nan")))` を満たす経路を評価する。
             if math.isfinite(float(s_need or float("nan"))):
                 need = f"σ(f) ≤ {_format_num(s_need, digits=2)}"
+
+            # 条件分岐: `math.isfinite(float(s_now or float("nan")))` を満たす経路を評価する。
+
             if math.isfinite(float(s_now or float("nan"))):
                 now = f"σ(f)_now ≈ {_format_num(s_now, digits=2)}"
+
+            # 条件分岐: `math.isfinite(float(g or float("nan")))` を満たす経路を評価する。
+
             if math.isfinite(float(g or float("nan"))):
                 gap = f"{_format_num(g, digits=2)}×"
+        # 条件分岐: 前段条件が不成立で、`topic.startswith("速度飽和")` を追加評価する。
         elif topic.startswith("速度飽和"):
             need = f"γ ≳ {_format_num(c.get('gamma_needed_to_probe_delta_adopted'), digits=2)}"
             now = f"γ_max(既知) ≈ {_format_num(c.get('gamma_obs_max_in_sources'), digits=2)}"
             g = c.get("gap_gamma_needed_over_obs")
+            # 条件分岐: `math.isfinite(float(g or float("nan")))` を満たす経路を評価する。
             if math.isfinite(float(g or float("nan"))):
                 gap = f"{_format_num(g, digits=2)}×"
 
@@ -385,9 +451,11 @@ def _render_table(candidates: List[Dict[str, Any]], *, out_png: Path) -> None:
     col_widths = [0.17, 0.10, 0.34, 0.16, 0.18, 0.07, 0.10]
     for i, w in enumerate(col_widths):
         for (r, c), cell in table.get_celld().items():
+            # 条件分岐: `c == i` を満たす経路を評価する。
             if c == i:
                 cell.set_width(w)
             # header row
+
             if r == 0:
                 cell.set_facecolor("#f1f1f1")
                 cell.set_text_props(weight="bold")
@@ -405,10 +473,12 @@ def _build_payload(root: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     candidates.extend(_extract_eht_candidates(fals, paper5_m3_rescue=paper5_m3_rescue))
 
     delta = _extract_delta_candidate(fals)
+    # 条件分岐: `isinstance(delta, dict)` を満たす経路を評価する。
     if isinstance(delta, dict):
         candidates.append(delta)
 
     s2 = _extract_s2_candidate(root)
+    # 条件分岐: `isinstance(s2, dict)` を満たす経路を評価する。
     if isinstance(s2, dict):
         candidates.append(s2)
 
@@ -473,6 +543,8 @@ def main() -> int:
     print(f"Wrote: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -34,15 +35,20 @@ def _utc_now() -> str:
 
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     rows: List[Dict[str, str]] = []
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for r in reader:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             rows.append({str(k): (v or "").strip() for k, v in r.items() if k is not None})
+
     return rows
 
 
@@ -61,13 +67,18 @@ def _load_target_catalog_json(path: Path) -> List[Dict[str, Any]]:
         j = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return []
+
     targets = j.get("targets")
+    # 条件分岐: `not isinstance(targets, list)` を満たす経路を評価する。
     if not isinstance(targets, list):
         return []
+
     out: List[Dict[str, Any]] = []
     for t in targets:
+        # 条件分岐: `isinstance(t, dict)` を満たす経路を評価する。
         if isinstance(t, dict):
             out.append(t)
+
     return out
 
 
@@ -78,14 +89,25 @@ def _default_comment(t: Dict[str, Any]) -> str:
     refs = t.get("arxiv_refs") if isinstance(t.get("arxiv_refs"), list) else []
     notes = str(t.get("notes") or "").strip()
     parts: List[str] = []
+    # 条件分岐: `role` を満たす経路を評価する。
     if role:
         parts.append(f"role={role}")
+
+    # 条件分岐: `lines` を満たす経路を評価する。
+
     if lines:
         parts.append("lines=" + "/".join(str(x) for x in lines if str(x)))
+
+    # 条件分岐: `refs` を満たす経路を評価する。
+
     if refs:
         parts.append("refs=" + ",".join(str(x) for x in refs if str(x)))
+
+    # 条件分岐: `notes` を満たす経路を評価する。
+
     if notes:
         parts.append(notes)
+
     s = "; ".join(parts)
     return f"{obj}: {s}".strip(": ").strip()
 
@@ -100,12 +122,15 @@ def update_targets_csv(*, catalog_json: Path, targets_csv: Path, overwrite: bool
 
     for t in json_targets:
         obsid = str(t.get("obsid") or "").strip()
+        # 条件分岐: `not obsid` を満たす経路を評価する。
         if not obsid:
             continue
+
         existing = by_obsid.get(obsid)
 
         z_opt = t.get("z_opt")
         z_sys = ""
+        # 条件分岐: `isinstance(z_opt, (int, float))` を満たす経路を評価する。
         if isinstance(z_opt, (int, float)):
             z_sys = f"{float(z_opt):.8g}"
 
@@ -119,32 +144,50 @@ def update_targets_csv(*, catalog_json: Path, targets_csv: Path, overwrite: bool
             "remote_cat_hint": obsid[0] if obsid and obsid[0].isdigit() else "",
         }
 
+        # 条件分岐: `existing is None` を満たす経路を評価する。
         if existing is None:
             by_obsid[obsid] = new_row
             n_added += 1
             continue
+
+        # 条件分岐: `not overwrite` を満たす経路を評価する。
 
         if not overwrite:
             # Fill only missing essentials.
             if not (existing.get("role") or "").strip() and new_row["role"]:
                 existing["role"] = new_row["role"]
                 n_updated += 1
+
+            # 条件分岐: `not (existing.get("z_sys") or "").strip() and new_row["z_sys"]` を満たす経路を評価する。
+
             if not (existing.get("z_sys") or "").strip() and new_row["z_sys"]:
                 existing["z_sys"] = new_row["z_sys"]
                 n_updated += 1
+
+            # 条件分岐: `not (existing.get("target_name") or "").strip() and new_row["target_name"]` を満たす経路を評価する。
+
             if not (existing.get("target_name") or "").strip() and new_row["target_name"]:
                 existing["target_name"] = new_row["target_name"]
                 n_updated += 1
+
+            # 条件分岐: `not (existing.get("remote_cat_hint") or "").strip() and new_row["remote_cat_h...` を満たす経路を評価する。
+
             if not (existing.get("remote_cat_hint") or "").strip() and new_row["remote_cat_hint"]:
                 existing["remote_cat_hint"] = new_row["remote_cat_hint"]
                 n_updated += 1
+
             continue
 
         # Overwrite mode: update core columns but keep comment if user wrote something non-empty.
+
         for k in ("target_name", "role", "z_sys", "remote_cat_hint"):
+            # 条件分岐: `(existing.get(k) or "").strip() != (new_row.get(k) or "").strip()` を満たす経路を評価する。
             if (existing.get(k) or "").strip() != (new_row.get(k) or "").strip():
                 existing[k] = new_row.get(k) or ""
                 n_updated += 1
+
+        # 条件分岐: `not (existing.get("comment") or "").strip()` を満たす経路を評価する。
+
         if not (existing.get("comment") or "").strip():
             existing["comment"] = new_row["comment"]
 
@@ -185,6 +228,8 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     print(f"[ok] added={result['metrics']['n_added']} updated={result['metrics']['n_updated']} total={result['metrics']['n_total']}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

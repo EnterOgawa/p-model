@@ -26,19 +26,25 @@ def _coherence_abs(psi: np.ndarray) -> float:
 
 def _safe_norm(psi: np.ndarray) -> np.ndarray:
     norm = float(np.linalg.norm(psi))
+    # 条件分岐: `not np.isfinite(norm) or norm < 1e-30` を満たす経路を評価する。
     if not np.isfinite(norm) or norm < 1e-30:
         return np.array([1.0 / math.sqrt(2.0), 1.0 / math.sqrt(2.0)], dtype=np.complex128)
+
     return psi / norm
 
 
 def _safe_corr(x: np.ndarray, y: np.ndarray) -> float:
     x_std = float(np.std(x))
     y_std = float(np.std(y))
+    # 条件分岐: `(not np.isfinite(x_std)) or (not np.isfinite(y_std)) or x_std < 1e-15 or y_st...` を満たす経路を評価する。
     if (not np.isfinite(x_std)) or (not np.isfinite(y_std)) or x_std < 1e-15 or y_std < 1e-15:
         return 0.0
+
     value = float(np.corrcoef(x, y)[0, 1])
+    # 条件分岐: `not np.isfinite(value)` を満たす経路を評価する。
     if not np.isfinite(value):
         return 0.0
+
     return value
 
 
@@ -113,16 +119,19 @@ def _simulate_trajectory(
         pointer_hist[step, :] = pointer
         env_hist[step] = env_state
 
+        # 条件分岐: `not np.isfinite(collapse_time_s) and abs(z_new) >= collapse_threshold_abs_z` を満たす経路を評価する。
         if not np.isfinite(collapse_time_s) and abs(z_new) >= collapse_threshold_abs_z:
             collapse_time_s = step * dt_s
             collapse_state = 1 if z_new >= 0.0 else -1
             collapse_step = int(step)
 
     target_sign = 1 if z_hist[-1] >= 0.0 else -1
+    # 条件分岐: `collapse_step >= 0` を満たす経路を評価する。
     if collapse_step >= 0:
         post_z = z_hist[collapse_step:]
     else:
         post_z = z_hist[int(0.8 * n_steps) :]
+
     post_sign = np.sign(post_z)
     post_sign = np.where(post_sign == 0, target_sign, post_sign)
     post_abs_z = np.abs(post_z)
@@ -243,6 +252,7 @@ def main() -> None:
     post_sign_consistency_median = float(np.median(post_sign_consistency_values))
     post_abs_z_mean_median = float(np.median(post_abs_z_mean_values))
 
+    # 条件分岐: `n_pointer_channels > 1` を満たす経路を評価する。
     if n_pointer_channels > 1:
         corr_matrix = np.corrcoef(final_pointer_matrix.T)
         finite_corr = np.nan_to_num(corr_matrix, nan=0.0, posinf=0.0, neginf=0.0)
@@ -294,6 +304,7 @@ def main() -> None:
             }
             for channel_index in range(n_pointer_channels):
                 row[f"final_pointer_ch{channel_index}"] = float(traj["final_pointer_channels"][channel_index])
+
             writer.writerow(row)
 
     fig, axes = plt.subplots(2, 2, figsize=(13.5, 9.2), dpi=160)
@@ -302,6 +313,7 @@ def main() -> None:
     sample_ids = np.linspace(0, n_trajectories - 1, sample_count, dtype=int)
     for traj_id in sample_ids:
         axes[0, 0].plot(times_s, trajectories[traj_id]["z_hist"], lw=1.1, alpha=0.85)
+
     axes[0, 0].axhline(collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
     axes[0, 0].axhline(-collapse_threshold_abs_z, color="black", ls="--", lw=1.0, alpha=0.7)
     axes[0, 0].set_title("State collapse trajectory: expectation z(t)")
@@ -320,6 +332,7 @@ def main() -> None:
             alpha=0.9,
             label=f"channel {channel_index}",
         )
+
     axes[0, 1].plot(
         times_s,
         np.mean(sample_pointer_hist, axis=1),
@@ -334,13 +347,16 @@ def main() -> None:
     axes[0, 1].legend(loc="best", fontsize=8)
     axes[0, 1].grid(ls=":", alpha=0.35)
 
+    # 条件分岐: `collapsed_n > 0` を満たす経路を評価する。
     if collapsed_n > 0:
         axes[1, 0].hist(collapse_times[collapsed_mask], bins=24, color="#4c78a8", alpha=0.85)
+        # 条件分岐: `np.isfinite(collapse_time_median_s)` を満たす経路を評価する。
         if np.isfinite(collapse_time_median_s):
             axes[1, 0].axvline(collapse_time_median_s, color="black", ls="--", lw=1.0, label="median")
             axes[1, 0].legend(loc="upper right", fontsize=9)
     else:
         axes[1, 0].text(0.5, 0.5, "no collapse event in this run", ha="center", va="center", transform=axes[1, 0].transAxes)
+
     axes[1, 0].set_title("Collapse-time distribution")
     axes[1, 0].set_xlabel("collapse time [s]")
     axes[1, 0].set_ylabel("count")
@@ -444,6 +460,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

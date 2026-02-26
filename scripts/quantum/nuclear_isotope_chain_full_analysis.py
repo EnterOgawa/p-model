@@ -20,31 +20,40 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -55,12 +64,20 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
     proton_edge = d_proton <= edge_width
     neutron_edge = d_neutron <= edge_width
+    # 条件分岐: `proton_edge and neutron_edge` を満たす経路を評価する。
     if proton_edge and neutron_edge:
         return "both_edges"
+
+    # 条件分岐: `proton_edge` を満たす経路を評価する。
+
     if proton_edge:
         return "proton_rich_edge"
+
+    # 条件分岐: `neutron_edge` を満たす経路を評価する。
+
     if neutron_edge:
         return "neutron_rich_edge"
+
     return "interior"
 
 
@@ -72,8 +89,12 @@ def main() -> None:
     all_nuclei_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"
     pairing_csv = out_dir / "nuclear_pairing_effect_systematics_per_nucleus.csv"
 
+    # 条件分岐: `not all_nuclei_csv.exists()` を満たす経路を評価する。
     if not all_nuclei_csv.exists():
         raise SystemExit(f"[fail] missing required input: {all_nuclei_csv}")
+
+    # 条件分岐: `not pairing_csv.exists()` を満たす経路を評価する。
+
     if not pairing_csv.exists():
         raise SystemExit(
             f"[fail] missing required input: {pairing_csv}\n"
@@ -82,6 +103,7 @@ def main() -> None:
         )
 
     # Base map from Step 7.16.1.
+
     by_zn: dict[tuple[int, int], dict[str, Any]] = {}
     with all_nuclei_csv.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -91,8 +113,10 @@ def main() -> None:
             a = int(row["A"])
             b_obs = float(row["B_obs_MeV"])
             b_pred_before = float(row["B_pred_collective_MeV"])
+            # 条件分岐: `not (math.isfinite(b_obs) and math.isfinite(b_pred_before))` を満たす経路を評価する。
             if not (math.isfinite(b_obs) and math.isfinite(b_pred_before)):
                 continue
+
             by_zn[(z, n)] = {
                 "Z": z,
                 "N": n,
@@ -102,10 +126,13 @@ def main() -> None:
                 "B_pred_before_MeV": b_pred_before,
             }
 
+    # 条件分岐: `not by_zn` を満たす経路を評価する。
+
     if not by_zn:
         raise SystemExit(f"[fail] no usable nuclei rows: {all_nuclei_csv}")
 
     # Pairing-corrected predictions from Step 7.16.3.
+
     b_pred_after_map: dict[tuple[int, int], float] = {}
     with pairing_csv.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -113,12 +140,14 @@ def main() -> None:
             z = int(row["Z"])
             n = int(row["N"])
             val = float(row["B_pred_after_MeV"])
+            # 条件分岐: `math.isfinite(val)` を満たす経路を評価する。
             if math.isfinite(val):
                 b_pred_after_map[(z, n)] = val
 
     by_z_nlist: dict[int, list[int]] = defaultdict(list)
     for z, n in by_zn.keys():
         by_z_nlist[z].append(n)
+
     for z in list(by_z_nlist.keys()):
         by_z_nlist[z] = sorted(set(by_z_nlist[z]))
 
@@ -130,18 +159,22 @@ def main() -> None:
         for n in n_list:
             parent = by_zn.get((z, n))
             prev = by_zn.get((z, n - 1))
+            # 条件分岐: `parent is None or prev is None` を満たす経路を評価する。
             if parent is None or prev is None:
                 continue
+
             sn_obs = float(parent["B_obs_MeV"] - prev["B_obs_MeV"])
             sn_pred_before = float(parent["B_pred_before_MeV"] - prev["B_pred_before_MeV"])
             b_after_parent = b_pred_after_map.get((z, n), float("nan"))
             b_after_prev = b_pred_after_map.get((z, n - 1), float("nan"))
+            # 条件分岐: `math.isfinite(b_after_parent) and math.isfinite(b_after_prev)` を満たす経路を評価する。
             if math.isfinite(b_after_parent) and math.isfinite(b_after_prev):
                 sn_pred_after = float(b_after_parent - b_after_prev)
                 resid_after = float(sn_pred_after - sn_obs)
             else:
                 sn_pred_after = float("nan")
                 resid_after = float("nan")
+
             resid_before = float(sn_pred_before - sn_obs)
 
             d_proton = int(n - n_min)
@@ -166,6 +199,8 @@ def main() -> None:
                 "abs_resid_after_MeV": abs(resid_after) if math.isfinite(resid_after) else float("nan"),
             }
             rows.append(row)
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
 
     if not rows:
         raise SystemExit("[fail] no S_n rows produced")
@@ -247,6 +282,7 @@ def main() -> None:
         }
 
     # Figures.
+
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(2, 2, figsize=(14.0, 9.0), dpi=160)
@@ -327,10 +363,12 @@ def main() -> None:
     for idx, z in enumerate(REPRESENTATIVE_Z):
         ax = axes_flat[idx]
         sub = [r for r in rows if int(r["Z"]) == z]
+        # 条件分岐: `not sub` を満たす経路を評価する。
         if not sub:
             ax.text(0.5, 0.5, f"Z={z}: no data", ha="center", va="center", transform=ax.transAxes)
             ax.set_axis_off()
             continue
+
         sub = sorted(sub, key=lambda r: int(r["N_parent"]))
         xs = [int(r["N_parent"]) for r in sub]
         y_obs = [float(r["S_n_obs_MeV"]) for r in sub]
@@ -344,6 +382,7 @@ def main() -> None:
         ax.set_xlabel("N")
         ax.set_ylabel("S_n [MeV]")
         ax.grid(True, ls=":", lw=0.6, alpha=0.6)
+        # 条件分岐: `idx == 0` を満たす経路を評価する。
         if idx == 0:
             ax.legend(loc="best", fontsize=7)
 
@@ -418,6 +457,8 @@ def main() -> None:
     print(f"  {out_rep_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

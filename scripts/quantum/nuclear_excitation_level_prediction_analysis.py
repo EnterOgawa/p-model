@@ -18,6 +18,7 @@ def _parse_float(value: object) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
@@ -28,38 +29,49 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _median_abs(values: list[float]) -> float:
     finite = [abs(float(v)) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -73,25 +85,37 @@ def _solve_linear_system(matrix: list[list[float]], rhs: list[float]) -> list[fl
     b = rhs[:]
     for i in range(n):
         pivot_row = max(range(i, n), key=lambda r: abs(a[r][i]))
+        # 条件分岐: `abs(a[pivot_row][i]) < 1.0e-15` を満たす経路を評価する。
         if abs(a[pivot_row][i]) < 1.0e-15:
             raise SystemExit("[fail] singular system in weighted linear fit")
+
+        # 条件分岐: `pivot_row != i` を満たす経路を評価する。
+
         if pivot_row != i:
             a[i], a[pivot_row] = a[pivot_row], a[i]
             b[i], b[pivot_row] = b[pivot_row], b[i]
+
         pivot = a[i][i]
         inv_pivot = 1.0 / pivot
         for j in range(i, n):
             a[i][j] *= inv_pivot
+
         b[i] *= inv_pivot
         for r in range(n):
+            # 条件分岐: `r == i` を満たす経路を評価する。
             if r == i:
                 continue
+
             factor = a[r][i]
+            # 条件分岐: `factor == 0.0` を満たす経路を評価する。
             if factor == 0.0:
                 continue
+
             for c in range(i, n):
                 a[r][c] -= factor * a[i][c]
+
             b[r] -= factor * b[i]
+
     return b
 
 
@@ -102,26 +126,36 @@ def _weighted_linear_fit(
     ws: list[float],
     ridge: float = 1.0e-10,
 ) -> list[float]:
+    # 条件分岐: `not xs or not ys or not ws` を満たす経路を評価する。
     if not xs or not ys or not ws:
         raise SystemExit("[fail] empty data in weighted linear fit")
+
     p = len(xs[0])
     xtwx = [[0.0 for _ in range(p)] for _ in range(p)]
     xtwy = [0.0 for _ in range(p)]
     for x, y, w in zip(xs, ys, ws):
+        # 条件分岐: `not (math.isfinite(y) and math.isfinite(w) and w > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(y) and math.isfinite(w) and w > 0.0):
             continue
+
         for i in range(p):
             xi = float(x[i])
+            # 条件分岐: `not math.isfinite(xi)` を満たす経路を評価する。
             if not math.isfinite(xi):
                 continue
+
             xtwy[i] += w * xi * y
             for j in range(p):
                 xj = float(x[j])
+                # 条件分岐: `not math.isfinite(xj)` を満たす経路を評価する。
                 if not math.isfinite(xj):
                     continue
+
                 xtwx[i][j] += w * xi * xj
+
     for i in range(p):
         xtwx[i][i] += ridge
+
     return _solve_linear_system(xtwx, xtwy)
 
 
@@ -130,20 +164,33 @@ def _dot(x: list[float], beta: list[float]) -> float:
 
 
 def _a_band(a: int) -> str:
+    # 条件分岐: `a <= 40` を満たす経路を評価する。
     if a <= 40:
         return "A_2_40"
+
+    # 条件分岐: `a <= 100` を満たす経路を評価する。
+
     if a <= 100:
         return "A_41_100"
+
     return "A_101_plus"
 
 
 def _r42_class(value: float) -> str:
+    # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
     if not math.isfinite(value):
         return "unknown"
+
+    # 条件分岐: `value < 2.0` を満たす経路を評価する。
+
     if value < 2.0:
         return "vibrational_like"
+
+    # 条件分岐: `value < 2.8` を満たす経路を評価する。
+
     if value < 2.8:
         return "transitional"
+
     return "rotational_like"
 
 
@@ -154,8 +201,12 @@ def main() -> None:
 
     spec_json = root / "data" / "quantum" / "sources" / "nndc_nudat3_primary_secondary" / "extracted_spectroscopy.json"
     ame_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"
+    # 条件分岐: `not spec_json.exists()` を満たす経路を評価する。
     if not spec_json.exists():
         raise SystemExit(f"[fail] missing required input: {spec_json}")
+
+    # 条件分岐: `not ame_csv.exists()` を満たす経路を評価する。
+
     if not ame_csv.exists():
         raise SystemExit(f"[fail] missing required input: {ame_csv}")
 
@@ -168,25 +219,32 @@ def main() -> None:
 
     payload = json.loads(spec_json.read_text(encoding="utf-8"))
     rows_in = payload.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list)` を満たす経路を評価する。
     if not isinstance(rows_in, list):
         raise SystemExit("[fail] invalid extracted_spectroscopy.json format")
 
     joined: list[dict[str, Any]] = []
     for item in rows_in:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         z = int(item["Z"])
         a = int(item["A"])
         n = int(item["N"])
         ame = ame_by_za.get((z, a))
+        # 条件分岐: `ame is None` を満たす経路を評価する。
         if ame is None:
             continue
+
         i_asym = float((n - z) / a)
         log_a = float(math.log(float(a)))
         j_e = float(ame["J_E_MeV"])
         c_req = float(ame["C_required"])
+        # 条件分岐: `not (math.isfinite(j_e) and j_e > 0.0 and math.isfinite(c_req) and c_req > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(j_e) and j_e > 0.0 and math.isfinite(c_req) and c_req > 0.0):
             continue
+
         row: dict[str, Any] = {
             "Z": z,
             "N": n,
@@ -214,10 +272,14 @@ def main() -> None:
         n_levels = 0
         for energy_key in ENERGY_KEYS:
             value = float(row[f"{energy_key}_obs_MeV"])
+            # 条件分岐: `math.isfinite(value) and value > 0.0` を満たす経路を評価する。
             if math.isfinite(value) and value > 0.0:
                 n_levels += 1
+
         row["n_observed_levels"] = n_levels
         joined.append(row)
+
+    # 条件分岐: `len(joined) < 100` を満たす経路を評価する。
 
     if len(joined) < 100:
         raise SystemExit(f"[fail] insufficient spectroscopy-join rows: n={len(joined)}")
@@ -233,34 +295,46 @@ def main() -> None:
         ws: list[float] = []
         for feature, row in zip(features, joined):
             obs = float(row[f"{energy_key}_obs_MeV"])
+            # 条件分岐: `not (math.isfinite(obs) and obs > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(obs) and obs > 0.0):
                 continue
+
             sigma = float(row.get(f"{energy_key}_sigma_obs_MeV", float("nan")))
+            # 条件分岐: `math.isfinite(sigma) and sigma > 0.0` を満たす経路を評価する。
             if math.isfinite(sigma) and sigma > 0.0:
                 weight = 1.0 / (sigma * sigma)
             else:
                 weight = 1.0
+
             xs.append(feature)
             ys.append(float(math.log(obs)))
             ws.append(float(weight))
+
+        # 条件分岐: `len(xs) < 20` を満たす経路を評価する。
+
         if len(xs) < 20:
             continue
+
         beta_by_energy[energy_key] = _weighted_linear_fit(xs=xs, ys=ys, ws=ws)
         fit_counts[energy_key] = len(xs)
 
     # Fit R4/2 proxy class model.
+
     r42_xs: list[list[float]] = []
     r42_ys: list[float] = []
     r42_ws: list[float] = []
     for row in joined:
         obs = float(row["r42_obs"])
+        # 条件分岐: `not (math.isfinite(obs) and obs > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(obs) and obs > 0.0):
             continue
+
         sigma = float(row.get("r42_sigma_obs", float("nan")))
         w = 1.0 / (sigma * sigma) if (math.isfinite(sigma) and sigma > 0.0) else 1.0
         r42_xs.append([1.0, float(row["logA"]), float(row["I_asym"]), 1.0 if bool(row["is_magic_any"]) else 0.0])
         r42_ys.append(obs)
         r42_ws.append(float(w))
+
     beta_r42 = _weighted_linear_fit(xs=r42_xs, ys=r42_ys, ws=r42_ws) if len(r42_xs) >= 20 else [float("nan")] * 4
 
     # Predict and summarize.
@@ -268,15 +342,21 @@ def main() -> None:
     full_rows: list[dict[str, Any]] = []
     observables_for_summary: list[str] = []
     for energy_key in ENERGY_KEYS:
+        # 条件分岐: `energy_key in beta_by_energy` を満たす経路を評価する。
         if energy_key in beta_by_energy:
             observables_for_summary.append(energy_key)
+
+    # 条件分岐: `len(r42_xs) >= 20` を満たす経路を評価する。
+
     if len(r42_xs) >= 20:
         observables_for_summary.append("r42")
 
     def _mad_sigma(values: list[float]) -> float:
         finite = [float(v) for v in values if math.isfinite(float(v))]
+        # 条件分岐: `len(finite) < 3` を満たす経路を評価する。
         if len(finite) < 3:
             return float("nan")
+
         center = _safe_median(finite)
         mad = _safe_median([abs(v - center) for v in finite])
         sigma = 1.4826 * mad
@@ -287,13 +367,16 @@ def main() -> None:
         for energy_key in ENERGY_KEYS:
             beta = beta_by_energy.get(energy_key)
             obs = float(row[f"{energy_key}_obs_MeV"])
+            # 条件分岐: `beta is None` を満たす経路を評価する。
             if beta is None:
                 out[f"{energy_key}_pred_MeV"] = float("nan")
                 out[f"{energy_key}_log10_ratio"] = float("nan")
                 out[f"{energy_key}_z_obs"] = float("nan")
                 continue
+
             pred = float(math.exp(_dot(feature, beta)))
             out[f"{energy_key}_pred_MeV"] = pred
+            # 条件分岐: `math.isfinite(obs) and obs > 0.0` を満たす経路を評価する。
             if math.isfinite(obs) and obs > 0.0:
                 out[f"{energy_key}_log10_ratio"] = float(math.log10(pred / obs))
                 sigma = float(row.get(f"{energy_key}_sigma_obs_MeV", float("nan")))
@@ -302,10 +385,14 @@ def main() -> None:
                 out[f"{energy_key}_log10_ratio"] = float("nan")
                 out[f"{energy_key}_z_obs"] = float("nan")
 
+        # 条件分岐: `len(r42_xs) >= 20` を満たす経路を評価する。
+
         if len(r42_xs) >= 20:
             r42_pred = _dot([1.0, float(row["logA"]), float(row["I_asym"]), 1.0 if bool(row["is_magic_any"]) else 0.0], beta_r42)
+            # 条件分岐: `r42_pred < 0.2` を満たす経路を評価する。
             if r42_pred < 0.2:
                 r42_pred = 0.2
+
             out["r42_pred"] = float(r42_pred)
             r42_obs = float(row["r42_obs"])
             r42_sigma = float(row["r42_sigma_obs"])
@@ -321,15 +408,18 @@ def main() -> None:
             out["r42_class_obs"] = "unknown"
             out["r42_class_pred"] = "unknown"
             out["r42_class_match"] = False
+
         full_rows.append(out)
 
     # Robust z normalization for stable falsification-style summaries.
+
     for energy_key in ENERGY_KEYS:
         ratios = [float(r[f"{energy_key}_log10_ratio"]) for r in full_rows if math.isfinite(float(r[f"{energy_key}_log10_ratio"]))]
         center = _safe_median(ratios)
         sigma = _mad_sigma(ratios)
         for row in full_rows:
             val = float(row[f"{energy_key}_log10_ratio"])
+            # 条件分岐: `math.isfinite(val) and math.isfinite(center) and math.isfinite(sigma) and sig...` を満たす経路を評価する。
             if math.isfinite(val) and math.isfinite(center) and math.isfinite(sigma) and sigma > 0.0:
                 row[f"{energy_key}_z_robust"] = float((val - center) / sigma)
             else:
@@ -340,6 +430,7 @@ def main() -> None:
     r42_sigma_robust = _mad_sigma(r42_resid_all)
     for row in full_rows:
         val = float(row["r42_resid"])
+        # 条件分岐: `math.isfinite(val) and math.isfinite(r42_center) and math.isfinite(r42_sigma_...` を満たす経路を評価する。
         if math.isfinite(val) and math.isfinite(r42_center) and math.isfinite(r42_sigma_robust) and r42_sigma_robust > 0.0:
             row["r42_z_robust"] = float((val - r42_center) / r42_sigma_robust)
         else:
@@ -362,8 +453,11 @@ def main() -> None:
         }
 
     for key in ENERGY_KEYS:
+        # 条件分岐: `key in beta_by_energy` を満たす経路を評価する。
         if key in beta_by_energy:
             summary_rows.append(summarize_energy(key))
+
+    # 条件分岐: `len(r42_xs) >= 20` を満たす経路を評価する。
 
     if len(r42_xs) >= 20:
         sub = [r for r in full_rows if math.isfinite(float(r["r42_pred"])) and math.isfinite(float(r["r42_obs"])) and float(r["r42_obs"]) > 0.0]
@@ -386,6 +480,7 @@ def main() -> None:
         )
 
     # Level density proxy summary.
+
     density_rows: list[dict[str, Any]] = []
     by_band: dict[str, list[int]] = defaultdict(list)
     by_magic: dict[str, list[int]] = defaultdict(list)
@@ -393,6 +488,7 @@ def main() -> None:
         n_levels = int(row["n_observed_levels"])
         by_band[str(row["A_band"])].append(n_levels)
         by_magic["magic_any" if bool(row["is_magic_any"]) else "nonmagic"].append(n_levels)
+
     for band in ("A_2_40", "A_41_100", "A_101_plus"):
         vals = by_band.get(band, [])
         density_rows.append(
@@ -404,6 +500,7 @@ def main() -> None:
                 "rms_n_observed_levels": _rms([float(v) for v in vals]),
             }
         )
+
     for tag in ("magic_any", "nonmagic"):
         vals = by_magic.get(tag, [])
         density_rows.append(
@@ -417,6 +514,7 @@ def main() -> None:
         )
 
     # Representative nuclei table.
+
     representatives = {(8, 16), (20, 40), (28, 56), (50, 132), (82, 208)}
     rep_rows = [r for r in full_rows if (int(r["Z"]), int(r["A"])) in representatives]
     rep_rows = sorted(rep_rows, key=lambda r: (int(r["A"]), int(r["Z"])))
@@ -438,6 +536,7 @@ def main() -> None:
     ax10, ax11 = axes[1, 0], axes[1, 1]
 
     e2_rows = [r for r in full_rows if math.isfinite(float(r["e2plus_obs_MeV"])) and math.isfinite(float(r["e2plus_pred_MeV"]))]
+    # 条件分岐: `e2_rows` を満たす経路を評価する。
     if e2_rows:
         obs = [float(r["e2plus_obs_MeV"]) for r in e2_rows]
         pred = [float(r["e2plus_pred_MeV"]) for r in e2_rows]
@@ -445,6 +544,7 @@ def main() -> None:
         lo = min(min(obs), min(pred))
         hi = max(max(obs), max(pred))
         ax00.plot([lo, hi], [lo, hi], color="k", ls="--", lw=1.1)
+
     ax00.set_xlabel("E2+ observed [MeV]")
     ax00.set_ylabel("E2+ predicted [MeV]")
     ax00.set_title("Low-lying E2+ prediction (ENSDF-derived)")
@@ -452,16 +552,23 @@ def main() -> None:
 
     e4_rows = [r for r in full_rows if math.isfinite(float(r["e4plus_obs_MeV"])) and math.isfinite(float(r["e4plus_pred_MeV"]))]
     e3_rows = [r for r in full_rows if math.isfinite(float(r["e3minus_obs_MeV"])) and math.isfinite(float(r["e3minus_pred_MeV"]))]
+    # 条件分岐: `e4_rows` を満たす経路を評価する。
     if e4_rows:
         ax01.scatter([float(r["e4plus_obs_MeV"]) for r in e4_rows], [float(r["e4plus_pred_MeV"]) for r in e4_rows], s=11.0, alpha=0.35, label="E4+")
+
+    # 条件分岐: `e3_rows` を満たす経路を評価する。
+
     if e3_rows:
         ax01.scatter([float(r["e3minus_obs_MeV"]) for r in e3_rows], [float(r["e3minus_pred_MeV"]) for r in e3_rows], s=11.0, alpha=0.35, label="E3-")
+
     combined_obs = [float(r["e4plus_obs_MeV"]) for r in e4_rows] + [float(r["e3minus_obs_MeV"]) for r in e3_rows]
     combined_pred = [float(r["e4plus_pred_MeV"]) for r in e4_rows] + [float(r["e3minus_pred_MeV"]) for r in e3_rows]
+    # 条件分岐: `combined_obs` を満たす経路を評価する。
     if combined_obs:
         lo = min(min(combined_obs), min(combined_pred))
         hi = max(max(combined_obs), max(combined_pred))
         ax01.plot([lo, hi], [lo, hi], color="k", ls="--", lw=1.1)
+
     ax01.set_xlabel("Excitation observed [MeV]")
     ax01.set_ylabel("Excitation predicted [MeV]")
     ax01.set_title("E4+ and E3- prediction")
@@ -476,11 +583,13 @@ def main() -> None:
     ax10.grid(True, ls=":", lw=0.6, alpha=0.6)
 
     r42_rows = [r for r in full_rows if math.isfinite(float(r["r42_obs"])) and math.isfinite(float(r["r42_pred"]))]
+    # 条件分岐: `r42_rows` を満たす経路を評価する。
     if r42_rows:
         ax11.scatter([float(r["r42_obs"]) for r in r42_rows], [float(r["r42_pred"]) for r in r42_rows], s=10.0, alpha=0.35, c="#f58518")
         lo = min(min(float(r["r42_obs"]) for r in r42_rows), min(float(r["r42_pred"]) for r in r42_rows))
         hi = max(max(float(r["r42_obs"]) for r in r42_rows), max(float(r["r42_pred"]) for r in r42_rows))
         ax11.plot([lo, hi], [lo, hi], color="k", ls="--", lw=1.1)
+
     ax11.set_xlabel("R4/2 observed")
     ax11.set_ylabel("R4/2 predicted")
     ax11.set_title("Collectivity class proxy (R4/2)")
@@ -535,6 +644,8 @@ def main() -> None:
     out_json.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] step=7.16.6 rows={len(full_rows)} metrics={out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

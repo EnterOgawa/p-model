@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,8 +34,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 def _find_first(lines: Sequence[str], pattern: re.Pattern[str]) -> Optional[Tuple[int, re.Match[str]]]:
     for i, line in enumerate(lines, start=1):
         m = pattern.search(line)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             return (i, m)
+
     return None
 
 
@@ -48,6 +51,7 @@ def _maybe_float(x: str) -> Optional[float]:
 
 def _anchor_snippet(line: str, match: Optional[re.Match[str]] = None, *, max_len: int = 240) -> str:
     s = line.rstrip("\n")
+    # 条件分岐: `match is None` を満たす経路を評価する。
     if match is None:
         return s.strip()[:max_len]
 
@@ -69,21 +73,35 @@ def _ks_c_alpha(alpha: float) -> Optional[float]:
     # Standard 2-sample KS asymptotic constants (commonly tabulated).
     if abs(alpha - 0.10) < 1e-12:
         return 1.22
+
+    # 条件分岐: `abs(alpha - 0.05) < 1e-12` を満たす経路を評価する。
+
     if abs(alpha - 0.05) < 1e-12:
         return 1.36
+
+    # 条件分岐: `abs(alpha - 0.01) < 1e-12` を満たす経路を評価する。
+
     if abs(alpha - 0.01) < 1e-12:
         return 1.63
+
+    # 条件分岐: `abs(alpha - 0.001) < 1e-12` を満たす経路を評価する。
+
     if abs(alpha - 0.001) < 1e-12:
         return 1.95
+
     return None
 
 
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
         return None
+
     c = _ks_c_alpha(alpha)
+    # 条件分岐: `c is None` を満たす経路を評価する。
     if c is None:
         return None
+
     return float(c * math.sqrt((n + m) / (n * m)))
 
 
@@ -98,6 +116,7 @@ def _parse_nir_constraint(observations_tex: Path) -> Dict[str, Any]:
 
     out: Dict[str, Any] = {"ok": True, "observed_median_mJy": None, "observed_sigma_mJy": None, "threshold_mJy": None}
 
+    # 条件分岐: `obs_m is None` を満たす経路を評価する。
     if obs_m is None:
         out["ok"] = False
         out["missing"] = (out.get("missing") or []) + ["observed_median_line_not_found"]
@@ -115,6 +134,8 @@ def _parse_nir_constraint(observations_tex: Path) -> Dict[str, Any]:
             match=m,
         )
 
+    # 条件分岐: `thr_m is None` を満たす経路を評価する。
+
     if thr_m is None:
         out["ok"] = False
         out["missing"] = (out.get("missing") or []) + ["threshold_line_not_found"]
@@ -131,8 +152,10 @@ def _parse_nir_constraint(observations_tex: Path) -> Dict[str, Any]:
         )
 
     # Policy statement (reject if median exceeds threshold) exists nearby; keep a short anchor.
+
     policy_pat = re.compile(r"reject the model if its\s*median\s*2\.2\\um\s*flux density exceeds threshold", re.IGNORECASE)
     pol_m = _find_first(lines, policy_pat)
+    # 条件分岐: `pol_m is not None` を満たす経路を評価する。
     if pol_m is not None:
         lineno, _ = pol_m
         out["reject_policy_anchor"] = _get_anchor(
@@ -157,10 +180,12 @@ def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
     out: Dict[str, Any] = {"ok": True}
 
     dt_m = _find_first(lines, dt_pat)
+    # 条件分岐: `dt_m is None` を満たす経路を評価する。
     if dt_m is None:
         # Fallback: infer from the "3-hour modulation index" phrase if present.
         dt_fallback_pat = re.compile(r"using the\s+([0-9.]+)-hour\s+\{\\em\s+modulation index\}", re.IGNORECASE)
         dt_fb_m = _find_first(lines, dt_fallback_pat)
+        # 条件分岐: `dt_fb_m is None` を満たす経路を評価する。
         if dt_fb_m is None:
             out["ok"] = False
             out["missing"] = (out.get("missing") or []) + ["deltaT_hours_not_found"]
@@ -178,12 +203,14 @@ def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
         )
 
     tg_m = _find_first(lines, tg_pat)
+    # 条件分岐: `tg_m is not None` を満たす経路を評価する。
     if tg_m is not None:
         lineno, m = tg_m
         out["deltaT_tg_approx"] = _maybe_float(m.group(1))
         out["deltaT_tg_anchor"] = _get_anchor(observations_tex, lineno, label="m3_deltaT_tg", snippet=lines[lineno - 1], match=m)
 
     ks_m = _find_first(lines, ks_pat)
+    # 条件分岐: `ks_m is None` を満たす経路を評価する。
     if ks_m is None:
         out["ok"] = False
         out["missing"] = (out.get("missing") or []) + ["ks_reject_threshold_not_found"]
@@ -193,6 +220,7 @@ def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
         out["ks_anchor"] = _get_anchor(observations_tex, lineno, label="m3_ks_p_threshold", snippet=lines[lineno - 1], match=m)
 
     samp_m = _find_first(lines, samp_pat)
+    # 条件分岐: `samp_m is not None` を満たす経路を評価する。
     if samp_m is not None:
         lineno, m = samp_m
         out["observed_samples_2017_n"] = int(m.group(1))
@@ -202,6 +230,7 @@ def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
         )
 
     model_samp_m = _find_first(lines, model_samp_pat)
+    # 条件分岐: `model_samp_m is not None` を満たす経路を評価する。
     if model_samp_m is not None:
         lineno, m = model_samp_m
         out["model_samples_fiducial_n"] = [int(m.group(1)), int(m.group(2))]
@@ -211,8 +240,10 @@ def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
         )
 
     # Definition line (mi = sigma/mu)
+
     def_pat = re.compile(r"\\mi\{3\}.*?\\mi\{\\Delta T\}\s*\\equiv\s*\\sigma_", re.IGNORECASE)
     def_m = _find_first(lines, def_pat)
+    # 条件分岐: `def_m is not None` を満たす経路を評価する。
     if def_m is not None:
         lineno, _ = def_m
         out["definition_anchor"] = _get_anchor(observations_tex, lineno, label="m3_definition", snippet=lines[lineno - 1])
@@ -229,6 +260,7 @@ def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dic
     # 1/(1+f_ext) factor
     fac_pat = re.compile(r"factor of\s*\$1/\(1\s*\+\s*f_\\mathrm\{ext\}\)\$")
     fac_m = _find_first(disc_lines, fac_pat)
+    # 条件分岐: `fac_m is not None` を満たす経路を評価する。
     if fac_m is not None:
         lineno, _ = fac_m
         out["extended_flux_suppression_factor"] = "1/(1+f_ext)"
@@ -237,8 +269,10 @@ def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dic
         )
 
     # "A reduction of ~30% in the compact flux"
+
     comp_pat = re.compile(r"reduction of\s*\$?\\sim\s*30\\%\$?\s*in the compact flux", re.IGNORECASE)
     comp_m = _find_first(disc_lines, comp_pat)
+    # 条件分岐: `comp_m is not None` を満たす経路を評価する。
     if comp_m is not None:
         lineno, m = comp_m
         out["compact_flux_change_fraction"] = 0.30
@@ -247,8 +281,10 @@ def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dic
         )
 
     # "a 15% change in model density normalization"
+
     dens_pat = re.compile(r"a\s*\$?([0-9.]+)\\%\$?\s*change in model density normalization", re.IGNORECASE)
     dens_m = _find_first(disc_lines, dens_pat)
+    # 条件分岐: `dens_m is not None` を満たす経路を評価する。
     if dens_m is not None:
         lineno, m = dens_m
         out["density_normalization_change_percent"] = _maybe_float(m.group(1))
@@ -257,8 +293,10 @@ def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dic
         )
 
     # "~ 30% in mi3 is sufficient ..."
+
     m3_pat = re.compile(r"30\\%\s+in\s+\\mi\{3\}", re.IGNORECASE)
     m3_m = _find_first(disc_lines, m3_pat)
+    # 条件分岐: `m3_m is not None` を満たす経路を評価する。
     if m3_m is not None:
         lineno, m = m3_m
         out["m3_change_fraction_sufficient_to_flip_models"] = 0.30
@@ -267,8 +305,10 @@ def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dic
         )
 
     # "reduce mi3 by 30%" (conclusions)
+
     conc_pat = re.compile(r"reduce\s+\\mi\{3\}\s+by\s+30\\%", re.IGNORECASE)
     conc_m = _find_first(conc_lines, conc_pat)
+    # 条件分岐: `conc_m is not None` を満たす経路を評価する。
     if conc_m is not None:
         lineno, m = conc_m
         out["m3_reduction_fraction_stated_in_conclusions"] = 0.30
@@ -316,6 +356,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
 
     missing_files = [str(p) for p in (observations_tex, discussion_tex, conclusions_tex) if not p.exists()]
+    # 条件分岐: `missing_files` を満たす経路を評価する。
     if missing_files:
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -349,6 +390,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         }
 
     # If suppression factor is 1/(1+f_ext), compute f_ext for a 30% suppression (factor 0.7).
+
     if sens.get("extended_flux_suppression_factor") and sens.get("m3_change_fraction_sufficient_to_flip_models") == 0.30:
         factor = 0.70
         derived["f_ext_for_m3_factor_0p70"] = float((1.0 / factor) - 1.0)
@@ -363,16 +405,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ]
 
     # If "compact flux change fraction" is present, compute density normalization factor assuming F ~ rho^2.
+
     cf = sens.get("compact_flux_change_fraction")
+    # 条件分岐: `isinstance(cf, (int, float)) and 0.0 < float(cf) < 1.0` を満たす経路を評価する。
     if isinstance(cf, (int, float)) and 0.0 < float(cf) < 1.0:
         flux_factor = float(1.0 - float(cf))
         derived["density_normalization_factor_if_F230_propto_rho2"] = float(math.sqrt(flux_factor))
         derived["density_normalization_change_percent_if_F230_propto_rho2"] = float(100.0 * (math.sqrt(flux_factor) - 1.0))
 
     # KS-test "power" proxy: D_crit depends on sample sizes (n_obs, n_model).
+
     obs_n = m3.get("observed_samples_historical_n") or m3.get("observed_samples_2017_n")
     fid = m3.get("model_samples_fiducial_n")
     exp = m3.get("model_samples_exploratory_n")
+    # 条件分岐: `isinstance(obs_n, int) and obs_n > 0 and (isinstance(fid, list) or isinstance...` を満たす経路を評価する。
     if isinstance(obs_n, int) and obs_n > 0 and (isinstance(fid, list) or isinstance(exp, int)):
         alpha = float(m3.get("ks_reject_if_p_lt") or 0.01)
         derived["m3_ks_two_sample_dcrit_approx"] = {
@@ -388,6 +434,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     payload["derived"] = derived
 
+    # 条件分岐: `not bool(args.no_plot)` を満たす経路を評価する。
     if not bool(args.no_plot):
         try:
             import matplotlib
@@ -407,10 +454,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.set_title("2.2 μm median flux (GRAVITY)")
             ax.set_xlabel("mJy")
             ax.set_yticks([])
+            # 条件分岐: `isinstance(med, (int, float)) and isinstance(sig, (int, float))` を満たす経路を評価する。
             if isinstance(med, (int, float)) and isinstance(sig, (int, float)):
                 ax.errorbar([float(med)], [0], xerr=[float(sig)], fmt="o", color="black", capsize=4, label="observed median ±1σ")
+
+            # 条件分岐: `isinstance(thr, (int, float))` を満たす経路を評価する。
+
             if isinstance(thr, (int, float)):
                 ax.axvline(float(thr), color="tab:red", linestyle="--", label="threshold")
+
             ax.legend(loc="lower right", fontsize=8)
 
             # (2) KS D_crit vs model sample size
@@ -420,16 +472,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.set_ylabel("D_crit (approx)")
             n_obs = m3.get("observed_samples_historical_n")
             alpha = float(m3.get("ks_reject_if_p_lt") or 0.01)
+            # 条件分岐: `isinstance(n_obs, int) and n_obs > 0` を満たす経路を評価する。
             if isinstance(n_obs, int) and n_obs > 0:
                 ms = [9, 18, 28]
                 ds = [_ks_two_sample_dcrit(alpha, n_obs, m) for m in ms]
                 ax.plot(ms, ds, marker="o")
                 for m, d in zip(ms, ds):
+                    # 条件分岐: `d is not None` を満たす経路を評価する。
                     if d is not None:
                         ax.text(m, d, f"{d:.3f}", ha="center", va="bottom", fontsize=8)
+
                 ax.set_xticks(ms)
 
             # (3) Extended flux fraction mapping
+
             ax = axes[2]
             ax.set_title("Extended flux suppression mapping")
             ax.set_xlabel("suppression factor s = mi_obs/mi_true")
@@ -470,6 +526,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

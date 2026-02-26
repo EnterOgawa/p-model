@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -45,6 +46,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -62,14 +64,20 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 def _chirp_mass_solar(m1_solar: float, m2_solar: float) -> float:
     m1 = float(m1_solar)
     m2 = float(m2_solar)
+    # 条件分岐: `m1 <= 0 or m2 <= 0` を満たす経路を評価する。
     if m1 <= 0 or m2 <= 0:
         raise ValueError("m1,m2 must be positive")
+
     return (m1 * m2) ** (3.0 / 5.0) / (m1 + m2) ** (1.0 / 5.0)
 
 
 def _pbdot_quadrupole_s_per_s(mc_solar: float, pb_s: float, e: float) -> float:
+    # 条件分岐: `pb_s <= 0` を満たす経路を評価する。
     if pb_s <= 0:
         raise ValueError("pb_s must be positive")
+
+    # 条件分岐: `not (0.0 <= e < 1.0)` を満たす経路を評価する。
+
     if not (0.0 <= e < 1.0):
         raise ValueError("eccentricity e must satisfy 0<=e<1")
 
@@ -84,8 +92,10 @@ def _pbdot_quadrupole_s_per_s(mc_solar: float, pb_s: float, e: float) -> float:
 
 
 def _ttc_quadrupole_s(mc_solar: float, f_hz: float) -> float:
+    # 条件分岐: `f_hz <= 0` を満たす経路を評価する。
     if f_hz <= 0:
         raise ValueError("f_hz must be positive")
+
     mc_kg = float(mc_solar) * _M_SUN
     tau = (_G * mc_kg) / (_C**3)
     return (5.0 / 256.0) * (tau ** (-5.0 / 3.0)) * ((math.pi * float(f_hz)) ** (-8.0 / 3.0))
@@ -211,6 +221,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

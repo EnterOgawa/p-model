@@ -42,6 +42,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -106,10 +107,12 @@ class WindowKernel:
         n_out = int(k_out.size)
         n_in = int(self.k_in.size)
         n_s = int(self.s.size)
+        # 条件分岐: `n_out == 0 or n_in == 0 or n_s == 0` を満たす経路を評価する。
         if n_out == 0 or n_in == 0 or n_s == 0:
             return np.zeros((0, 0), dtype=float)
 
         # Pℓ(k_out) = 4π (-i)^ℓ ∫ s^2 ξℓ(s) jℓ(k s) ds.
+
         x = k_out[:, None] * self.s[None, :]
         j0 = _sph_j0(x)
         j2 = _sph_j2(x)
@@ -158,6 +161,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -173,10 +177,15 @@ _NUM_LINE = re.compile(r"^[-+]?\d+\.\d+")
 def _trap_weights(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     n = int(x.size)
+    # 条件分岐: `n == 0` を満たす経路を評価する。
     if n == 0:
         return np.zeros((0,), dtype=float)
+
+    # 条件分岐: `n == 1` を満たす経路を評価する。
+
     if n == 1:
         return np.zeros((1,), dtype=float)
+
     w = np.zeros_like(x, dtype=float)
     w[1:-1] = 0.5 * (x[2:] - x[:-2])
     w[0] = 0.5 * (x[1] - x[0])
@@ -188,12 +197,17 @@ def _sph_j0(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     out = np.empty_like(x, dtype=float)
     small = np.abs(x) < 1e-5
+    # 条件分岐: `np.any(small)` を満たす経路を評価する。
     if np.any(small):
         x2 = x[small] * x[small]
         out[small] = 1.0 - x2 / 6.0 + (x2 * x2) / 120.0
+
+    # 条件分岐: `np.any(~small)` を満たす経路を評価する。
+
     if np.any(~small):
         xs = x[~small]
         out[~small] = np.sin(xs) / xs
+
     return out
 
 
@@ -201,22 +215,29 @@ def _sph_j2(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     out = np.empty_like(x, dtype=float)
     small = np.abs(x) < 1e-4
+    # 条件分岐: `np.any(small)` を満たす経路を評価する。
     if np.any(small):
         x2 = x[small] * x[small]
         out[small] = x2 / 15.0 - (x2 * x2) / 210.0 + (x2 * x2 * x2) / 7560.0
+
+    # 条件分岐: `np.any(~small)` を満たす経路を評価する。
+
     if np.any(~small):
         xs = x[~small]
         xs2 = xs * xs
         sinx = np.sin(xs)
         cosx = np.cos(xs)
         out[~small] = (sinx * (3.0 - xs2) - 3.0 * xs * cosx) / (xs2 * xs)
+
     return out
 
 
 def _legendre_p(l: int, x: np.ndarray) -> np.ndarray:
     l = int(l)
+    # 条件分岐: `l < 0` を満たす経路を評価する。
     if l < 0:
         raise ValueError("l must be >=0")
+
     coeff = np.zeros((l + 1,), dtype=float)
     coeff[l] = 1.0
     return np.polynomial.legendre.legval(np.asarray(x, dtype=float), coeff)
@@ -246,6 +267,7 @@ def _window_coupling_coeffs() -> Dict[Tuple[int, int, int], float]:
                 pL = p[L]
                 integral = float(np.sum(w_q * pn * pe * pL))
                 out[(n, ell, L)] = 0.5 * float(2 * n + 1) * integral
+
     return out
 
 
@@ -257,16 +279,24 @@ def _read_pk_table(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     sig: List[float] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#") or t.startswith("###")` を満たす経路を評価する。
         if not t or t.startswith("#") or t.startswith("###"):
             continue
+
+        # 条件分岐: `not _NUM_LINE.match(t)` を満たす経路を評価する。
+
         if not _NUM_LINE.match(t):
             continue
+
         parts = t.split()
+        # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
         if len(parts) < 4:
             continue
+
         k.append(float(parts[0]))
         pk.append(float(parts[2]))
         sig.append(float(parts[3]))
+
     return np.asarray(k, dtype=float), np.asarray(pk, dtype=float), np.asarray(sig, dtype=float)
 
 
@@ -279,15 +309,25 @@ def _read_window_rr(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.
     rr8: List[float] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#") or t.startswith("###")` を満たす経路を評価する。
         if not t or t.startswith("#") or t.startswith("###"):
             continue
+
         parts = t.split()
+        # 条件分岐: `not parts` を満たす経路を評価する。
         if not parts:
             continue
+
+        # 条件分岐: `parts[0] == "s"` を満たす経路を評価する。
+
         if parts[0] == "s":
             continue
+
+        # 条件分岐: `len(parts) < 7` を満たす経路を評価する。
+
         if len(parts) < 7:
             continue
+
         try:
             ss = float(parts[0])
             r0 = float(parts[2])
@@ -297,12 +337,14 @@ def _read_window_rr(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.
             r8 = float(parts[6])
         except Exception:
             continue
+
         s.append(ss)
         rr0.append(r0)
         rr2.append(r2)
         rr4.append(r4)
         rr6.append(r6)
         rr8.append(r8)
+
     return (
         np.asarray(s, dtype=float),
         np.asarray(rr0, dtype=float),
@@ -322,16 +364,20 @@ def _build_window_kernel(
     s_max: float,
 ) -> WindowKernel:
     path = data_dir / f"Beutleretal_window_z{int(zbin)}_{str(region).upper()}.dat"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"window file not found: {path}")
 
     s, rr0, rr2, rr4, rr6, rr8 = _read_window_rr(path)
+    # 条件分岐: `s.size == 0` を満たす経路を評価する。
     if s.size == 0:
         raise ValueError(f"empty window file: {path}")
 
     mask = (rr0 > 0.0) & np.isfinite(rr0) & np.isfinite(s) & (s <= float(s_max))
+    # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
     if not np.any(mask):
         raise ValueError(f"no usable window rows after filtering (s_max={s_max}): {path}")
+
     s = np.asarray(s[mask], dtype=float)
     rr0 = np.asarray(rr0[mask], dtype=float)
     rr2 = np.asarray(rr2[mask], dtype=float)
@@ -347,6 +393,7 @@ def _build_window_kernel(
 
     # Hankel: ξℓ(s) = i^ℓ/(2π^2) ∫ k^2 Pℓ(k) jℓ(k s) dk
     k_in = np.asarray(k_in, dtype=float)
+    # 条件分岐: `k_in.ndim != 1 or k_in.size < 8` を満たす経路を評価する。
     if k_in.ndim != 1 or k_in.size < 8:
         raise ValueError("k_in must be 1D with enough points")
 
@@ -365,9 +412,12 @@ def _build_window_kernel(
         out = np.zeros_like(s, dtype=float)
         for L in (0, 2, 4, 6, 8):
             c = float(_WINDOW_COEFFS[(int(n), int(ell), int(L))])
+            # 条件分岐: `c == 0.0` を満たす経路を評価する。
             if c == 0.0:
                 continue
+
             out += c * wL[L]
+
         return out
 
     m00 = mix(0, 0)
@@ -393,6 +443,7 @@ def _build_window_kernel(
     except Exception:
         c0 = np.linalg.pinv(d0)
         c2 = np.linalg.pinv(d2)
+
     return WindowKernel(
         k_in=k_in,
         s=s,
@@ -411,11 +462,15 @@ def _read_cov_index_to_k(path: Path) -> Dict[int, float]:
     idx_to_k: Dict[int, float] = {}
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#") or t.startswith("###")` を満たす経路を評価する。
         if not t or t.startswith("#") or t.startswith("###"):
             continue
+
         parts = t.split()
+        # 条件分岐: `len(parts) < 5` を満たす経路を評価する。
         if len(parts) < 5:
             continue
+
         try:
             i = int(parts[0])
             j = int(parts[1])
@@ -424,10 +479,17 @@ def _read_cov_index_to_k(path: Path) -> Dict[int, float]:
             float(parts[4])
         except Exception:
             continue
+
+        # 条件分岐: `i not in idx_to_k` を満たす経路を評価する。
+
         if i not in idx_to_k:
             idx_to_k[i] = ki
+
+        # 条件分岐: `j not in idx_to_k` を満たす経路を評価する。
+
         if j not in idx_to_k:
             idx_to_k[j] = kj
+
     return idx_to_k
 
 
@@ -439,41 +501,55 @@ def _match_indices_for_k(*, k_data: np.ndarray, idx_to_k: Dict[int, float], tol:
     for k in k_data:
         hits = [idx for idx, kk in idx_to_k.items() if abs(float(kk) - float(k)) <= float(tol)]
         hits = sorted(set(hits))
+        # 条件分岐: `len(hits) < 2` を満たす経路を評価する。
         if len(hits) < 2:
             raise ValueError(f"covariance does not contain two indices for k={k:.6g} (hits={hits})")
         # Heuristic: smaller index -> monopole, larger -> quadrupole.
+
         idx0.append(int(hits[0]))
         idx2.append(int(hits[-1]))
+
     return idx0, idx2
 
 
 def _read_cov_submatrix(
     *, cov_path: Path, idx0: List[int], idx2: List[int], n: int
 ) -> np.ndarray:
+    # 条件分岐: `len(idx0) != n or len(idx2) != n` を満たす経路を評価する。
     if len(idx0) != n or len(idx2) != n:
         raise ValueError("idx size mismatch")
+
     full_idx = [*idx0, *idx2]
     pos = {int(ix): i for i, ix in enumerate(full_idx)}
     cov = np.zeros((2 * n, 2 * n), dtype=float)
     for line in cov_path.read_text(encoding="utf-8", errors="replace").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#") or t.startswith("###")` を満たす経路を評価する。
         if not t or t.startswith("#") or t.startswith("###"):
             continue
+
         parts = t.split()
+        # 条件分岐: `len(parts) < 5` を満たす経路を評価する。
         if len(parts) < 5:
             continue
+
         try:
             i = int(parts[0])
             j = int(parts[1])
             cij = float(parts[4])
         except Exception:
             continue
+
+        # 条件分岐: `i not in pos or j not in pos` を満たす経路を評価する。
+
         if i not in pos or j not in pos:
             continue
+
         ii = int(pos[i])
         jj = int(pos[j])
         cov[ii, jj] = cij
         cov[jj, ii] = cij
+
     cov = 0.5 * (cov + cov.T)
     return cov
 
@@ -485,17 +561,24 @@ def _p2(mu: np.ndarray) -> np.ndarray:
 
 def _f_ap_pbg_exponential(z: float) -> float:
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         return float("nan")
+
     return float(op * math.log(op))
 
 
 def _f_ap_lcdm_flat(z: float, *, omega_m: float, n_grid: int = 4000) -> float:
     z = float(z)
+    # 条件分岐: `z < 0` を満たす経路を評価する。
     if z < 0:
         return float("nan")
+
+    # 条件分岐: `not (0.0 < float(omega_m) < 1.0)` を満たす経路を評価する。
+
     if not (0.0 < float(omega_m) < 1.0):
         return float("nan")
+
     z_grid = np.linspace(0.0, z, int(n_grid), dtype=float)
     one_p = 1.0 + z_grid
     ez_grid = np.sqrt(float(omega_m) * one_p**3 + (1.0 - float(omega_m)))
@@ -504,13 +587,16 @@ def _f_ap_lcdm_flat(z: float, *, omega_m: float, n_grid: int = 4000) -> float:
         integral = float(np.trapezoid(integrand, z_grid))
     except AttributeError:
         integral = float(np.trapz(integrand, z_grid))
+
     ez = float(math.sqrt(float(omega_m) * (1.0 + z) ** 3 + (1.0 - float(omega_m))))
     return float(ez * integral)
 
 
 def _eps_from_f_ap_ratio(*, f_ap_model: float, f_ap_fid: float) -> float:
+    # 条件分岐: `not (math.isfinite(f_ap_model) and math.isfinite(f_ap_fid) and f_ap_model > 0...` を満たす経路を評価する。
     if not (math.isfinite(f_ap_model) and math.isfinite(f_ap_fid) and f_ap_model > 0.0 and f_ap_fid > 0.0):
         return float("nan")
+
     ratio = float(f_ap_fid / f_ap_model)  # alpha_parallel/alpha_perp
     return float(ratio ** (1.0 / 3.0) - 1.0)
 
@@ -545,25 +631,31 @@ def _design_matrix(
     """
     k_fid = np.asarray(k_fid, dtype=float)
     n = int(k_fid.size)
+    # 条件分岐: `n == 0` を満たす経路を評価する。
     if n == 0:
         return np.zeros((0, 0), dtype=float)
 
     one_p_eps = 1.0 + float(eps)
+    # 条件分岐: `not (one_p_eps > 0.0 and math.isfinite(one_p_eps))` を満たす経路を評価する。
     if not (one_p_eps > 0.0 and math.isfinite(one_p_eps)):
         raise ValueError("invalid eps (requires 1+eps>0)")
 
     alpha = float(alpha)
+    # 条件分岐: `not (alpha > 0.0 and math.isfinite(alpha))` を満たす経路を評価する。
     if not (alpha > 0.0 and math.isfinite(alpha)):
         raise ValueError("invalid alpha")
 
     # Parameterization: alpha = (α⊥^2 α∥)^(1/3), 1+eps = (α∥/α⊥)^(1/3)
+
     alpha_perp = alpha / one_p_eps
     alpha_par = alpha * (one_p_eps**2)
 
     # k_true = k_fid * sqrt((mu/α∥)^2 + ((1-mu^2)^(1/2)/α⊥)^2)
     t = np.sqrt((mu / alpha_par) ** 2 + (sqrt1mu2 / alpha_perp) ** 2)
+    # 条件分岐: `np.any(t <= 0.0)` を満たす経路を評価する。
     if np.any(t <= 0.0):
         raise ValueError("invalid AP warp (t<=0)")
+
     mu_true = (mu / alpha_par) / t
     p2_true = _p2(mu_true)
 
@@ -614,6 +706,7 @@ def _design_matrix(
         mtx[n:, kk] = i20
         mtx[:n, kk + 4] = i02
         mtx[n:, kk + 4] = i22
+
     return mtx
 
 
@@ -624,6 +717,7 @@ def _gls_fit(*, y: np.ndarray, mtx: np.ndarray, cov_inv: np.ndarray) -> Dict[str
         x = np.linalg.solve(a, b)
     except np.linalg.LinAlgError:
         x = np.linalg.lstsq(a, b, rcond=None)[0]
+
     y_pred = mtx @ x
     r = y - y_pred
     chi2 = float(r.T @ cov_inv @ r)
@@ -654,6 +748,7 @@ def _scan_grid_joint(
             for ds in datasets:
                 try:
                     wop = window_ops.get(str(ds.region)) if window_ops else None
+                    # 条件分岐: `wop is None` を満たす経路を評価する。
                     if wop is None:
                         mtx = _design_matrix(
                             ds.k,
@@ -682,25 +777,43 @@ def _scan_grid_joint(
                 except Exception:
                     ok = False
                     break
+
                 fit = _gls_fit(y=ds.y, mtx=mtx, cov_inv=ds.cov_inv)
                 chi2_total += float(fit["chi2"])
                 per_region[ds.region] = {"x": fit["x"], "chi2": float(fit["chi2"])}
+
+            # 条件分岐: `not ok` を満たす経路を評価する。
+
             if not ok:
                 continue
+
+            # 条件分岐: `chi2_total < float(best["chi2"])` を満たす経路を評価する。
+
             if chi2_total < float(best["chi2"]):
                 best = {"alpha": float(alpha), "eps": float(eps), "chi2": float(chi2_total), "per_region": per_region}
+
+            # 条件分岐: `return_eps_profile` を満たす経路を評価する。
+
             if return_eps_profile:
                 eps_key = float(eps)
+                # 条件分岐: `float(chi2_total) < float(profile_eps[eps_key]["chi2"])` を満たす経路を評価する。
                 if float(chi2_total) < float(profile_eps[eps_key]["chi2"]):
                     profile_eps[eps_key] = {"chi2": float(chi2_total), "alpha": float(alpha)}
+
+    # 条件分岐: `not math.isfinite(float(best.get("chi2", float("inf"))))` を満たす経路を評価する。
+
     if not math.isfinite(float(best.get("chi2", float("inf")))):
         raise RuntimeError("grid search failed (no finite chi2)")
+
+    # 条件分岐: `return_eps_profile` を満たす経路を評価する。
+
     if return_eps_profile:
         eps_sorted = sorted(profile_eps.keys())
         best["eps_profile"] = [
             {"eps": float(eps), "chi2": float(profile_eps[eps]["chi2"]), "alpha": float(profile_eps[eps]["alpha"])}
             for eps in eps_sorted
         ]
+
     return best
 
 
@@ -712,21 +825,28 @@ def _profile_ci(
 ) -> Tuple[Optional[float], Optional[float]]:
     x = np.asarray(x, dtype=float)
     chi2 = np.asarray(chi2, dtype=float)
+    # 条件分岐: `x.size == 0 or chi2.size != x.size` を満たす経路を評価する。
     if x.size == 0 or chi2.size != x.size:
         return None, None
+
+    # 条件分岐: `not np.all(np.isfinite(chi2))` を満たす経路を評価する。
+
     if not np.all(np.isfinite(chi2)):
         return None, None
+
     i0 = int(np.nanargmin(chi2))
     chi2_min = float(chi2[i0])
     target = chi2_min + float(delta)
     d = chi2 - target
     inside = d <= 0.0
+    # 条件分岐: `not bool(np.any(inside))` を満たす経路を評価する。
     if not bool(np.any(inside)):
         return None, None
 
     left = i0
     while left - 1 >= 0 and bool(inside[left - 1]):
         left -= 1
+
     right = i0
     while right + 1 < int(x.size) and bool(inside[right + 1]):
         right += 1
@@ -736,27 +856,37 @@ def _profile_ci(
         x1 = float(x[i_in])
         d0 = float(d[i_out])
         d1 = float(d[i_in])
+        # 条件分岐: `not (math.isfinite(d0) and math.isfinite(d1))` を満たす経路を評価する。
         if not (math.isfinite(d0) and math.isfinite(d1)):
             return None
+
+        # 条件分岐: `d0 == d1` を満たす経路を評価する。
+
         if d0 == d1:
             return None
+
         t = (0.0 - d0) / (d1 - d0)
         return x0 + t * (x1 - x0)
 
     lo: Optional[float]
     hi: Optional[float]
 
+    # 条件分岐: `left == 0` を満たす経路を評価する。
     if left == 0:
         lo = float(x[0])
     else:
         lo = interp_cross(left - 1, left)
+        # 条件分岐: `lo is None` を満たす経路を評価する。
         if lo is None:
             lo = float(x[left])
+
+    # 条件分岐: `right == int(x.size) - 1` を満たす経路を評価する。
 
     if right == int(x.size) - 1:
         hi = float(x[-1])
     else:
         hi = interp_cross(right + 1, right)
+        # 条件分岐: `hi is None` を満たす経路を評価する。
         if hi is None:
             hi = float(x[right])
 
@@ -814,19 +944,26 @@ def _load_dataset(
         ),
         None,
     )
+    # 条件分岐: `cov_path is None` を満たす経路を評価する。
     if cov_path is None:
         raise FileNotFoundError(f"cov file not found for z{zbin.zbin} {region} {recon} in {data_dir}")
 
     k0, p0, _sig0_diag = _read_pk_table(p0_path)
     k2, p2, _sig2_diag = _read_pk_table(p2_path)
+    # 条件分岐: `k0.size != k2.size` を満たす経路を評価する。
     if k0.size != k2.size:
         raise ValueError(f"k bins mismatch between monopole/quadrupole: {p0_path} vs {p2_path}")
+
+    # 条件分岐: `np.max(np.abs(k0 - k2)) > 5e-4` を満たす経路を評価する。
+
     if np.max(np.abs(k0 - k2)) > 5e-4:
         raise ValueError(f"k bins differ too much between monopole/quadrupole: {p0_path} vs {p2_path}")
 
     mask = (k0 >= float(k_min)) & (k0 <= float(k_max))
+    # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
     if not np.any(mask):
         raise ValueError(f"no k bins in range [{k_min},{k_max}] for {p0_path}")
+
     k = np.asarray(k0[mask], dtype=float)
     p0 = np.asarray(p0[mask], dtype=float)
     p2 = np.asarray(p2[mask], dtype=float)
@@ -840,6 +977,7 @@ def _load_dataset(
         cov_inv = np.linalg.inv(cov)
     except np.linalg.LinAlgError:
         cov_inv = np.linalg.pinv(cov, rcond=1e-12)
+
     cov_inv = 0.5 * (cov_inv + cov_inv.T)
 
     n = int(k.size)
@@ -889,30 +1027,39 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     recon = str(args.recon)
+    # 条件分岐: `str(args.data_dir).strip()` を満たす経路を評価する。
     if str(args.data_dir).strip():
         data_dir = Path(str(args.data_dir))
     else:
         data_dir = _ROOT / "data" / "cosmology" / "beutler_2016_combineddr12_bao_powspec"
+
+    # 条件分岐: `not data_dir.exists()` を満たす経路を評価する。
+
     if not data_dir.exists():
         raise SystemExit(f"data dir not found: {data_dir}")
 
     z_bins = [int(x.strip()) for x in str(args.z_bins).split(",") if x.strip()]
     z_meta = [z for z in _ZBINS if z.zbin in z_bins]
+    # 条件分岐: `not z_meta` を満たす経路を評価する。
     if not z_meta:
         raise SystemExit("no valid z bins selected")
 
     regions = [x.strip().upper() for x in str(args.regions).split(",") if x.strip()]
+    # 条件分岐: `not regions` を満たす経路を評価する。
     if not regions:
         raise SystemExit("no regions selected")
 
     k_min = float(args.k_min)
     k_max = float(args.k_max)
+    # 条件分岐: `not (k_max > k_min)` を満たす経路を評価する。
     if not (k_max > k_min):
         raise SystemExit("--k-max must be > --k-min")
 
     mu_n = int(args.mu_n)
+    # 条件分岐: `mu_n < 20` を満たす経路を評価する。
     if mu_n < 20:
         raise SystemExit("--mu-n must be >= 20")
+
     mu, w = np.polynomial.legendre.leggauss(mu_n)
     mu = np.asarray(mu, dtype=float)
     w = np.asarray(w, dtype=float)
@@ -921,11 +1068,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     alpha_grid = np.arange(float(args.alpha_min), float(args.alpha_max) + 0.5 * float(args.alpha_step), float(args.alpha_step), dtype=float)
     eps_grid = np.arange(float(args.eps_min), float(args.eps_max) + 0.5 * float(args.eps_step), float(args.eps_step), dtype=float)
+    # 条件分岐: `alpha_grid.size < 3 or eps_grid.size < 3` を満たす経路を評価する。
     if alpha_grid.size < 3 or eps_grid.size < 3:
         raise SystemExit("grid too small; adjust alpha/eps ranges or steps")
 
     k0_peak = float(args.k0)
     sigma_k = float(args.sigma_k)
+    # 条件分岐: `not (sigma_k > 0.0)` を満たす経路を評価する。
     if not (sigma_k > 0.0):
         raise SystemExit("--sigma-k must be > 0")
 
@@ -936,19 +1085,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     window_s_max = float(args.window_s_max)
     window_k_in_max = float(args.window_k_in_max)
     window_k_in_step = float(args.window_k_in_step)
+    # 条件分岐: `use_window` を満たす経路を評価する。
     if use_window:
+        # 条件分岐: `not (window_s_max > 0.0 and math.isfinite(window_s_max))` を満たす経路を評価する。
         if not (window_s_max > 0.0 and math.isfinite(window_s_max)):
             raise SystemExit("--window-s-max must be > 0")
+
+        # 条件分岐: `not (window_k_in_max > 0.0 and math.isfinite(window_k_in_max))` を満たす経路を評価する。
+
         if not (window_k_in_max > 0.0 and math.isfinite(window_k_in_max)):
             raise SystemExit("--window-k-in-max must be > 0")
+
+        # 条件分岐: `not (window_k_in_step > 0.0 and math.isfinite(window_k_in_step))` を満たす経路を評価する。
+
         if not (window_k_in_step > 0.0 and math.isfinite(window_k_in_step)):
             raise SystemExit("--window-k-in-step must be > 0")
+
         k_in = np.arange(
             0.0,
             float(window_k_in_max) + 0.5 * float(window_k_in_step),
             float(window_k_in_step),
             dtype=float,
         )
+        # 条件分岐: `k_in.size < 32` を満たす経路を評価する。
         if k_in.size < 32:
             raise SystemExit("window k_in grid too small; increase --window-k-in-max or decrease --window-k-in-step")
     else:
@@ -970,6 +1129,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             for region in regions
         ]
         window_ops: Optional[Dict[str, WindowOp]] = None
+        # 条件分岐: `use_window` を満たす経路を評価する。
         if use_window:
             window_ops = {}
             for ds in datasets:
@@ -982,6 +1142,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
                 k_mat = ker.matrix_for_k_out(ds.k)
                 window_ops[str(ds.region)] = WindowOp(kernel=ker, k_data=ds.k, k_mat=k_mat)
+
         y_size = int(sum(ds.y.size for ds in datasets))
         n_regions = int(len(datasets))
         dof_free = int(y_size - (8 * n_regions + 2))
@@ -1089,10 +1250,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for ds in datasets:
             k_grid = np.linspace(float(np.min(ds.k)), float(np.max(ds.k)), 300, dtype=float)
             x_lin = np.asarray(best_free["per_region"][ds.region]["x"], dtype=float)
+            # 条件分岐: `use_window` を満たす経路を評価する。
             if use_window:
                 wop = window_ops.get(str(ds.region)) if window_ops else None
+                # 条件分岐: `wop is None` を満たす経路を評価する。
                 if wop is None:
                     raise RuntimeError("window_ops missing for region in plot")
+
                 mtx_u = _design_matrix(
                     wop.kernel.k_in,
                     alpha=float(best_free["alpha"]),
@@ -1123,6 +1287,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     p2_fid=p2_fid,
                     sqrt1mu2=sqrt1mu2,
                 )
+
             n = int(ds.k.size)
             per_region_pack.append(
                 {
@@ -1137,6 +1302,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "p2_fit": p2_fit,
                 }
             )
+
         curves_for_plot.append(
             {
                 "zbin": zb.zbin,
@@ -1158,8 +1324,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir = _ROOT / "output" / "private" / "cosmology"
     out_dir.mkdir(parents=True, exist_ok=True)
     suffix = "" if recon == "postrecon" else "_pre_recon"
+    # 条件分岐: `use_window` を満たす経路を評価する。
     if use_window:
         suffix += "_window"
+
     out_png = out_dir / f"cosmology_bao_pk_multipole_peakfit{suffix}.png"
     out_json = out_dir / f"cosmology_bao_pk_multipole_peakfit{suffix}_metrics.json"
 
@@ -1168,6 +1336,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(len(curves_for_plot), 2, figsize=(16, 4.8 * len(curves_for_plot)), sharex=True)
+    # 条件分岐: `len(curves_for_plot) == 1` を満たす経路を評価する。
     if len(curves_for_plot) == 1:
         axes = np.array(axes).reshape(1, 2)
 
@@ -1243,18 +1412,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     for ax in axes[-1, :]:
         ax.set_xlabel("k [h/Mpc]（fid）", fontsize=11)
+
+    # 条件分岐: `len(curves_for_plot) > 0` を満たす経路を評価する。
+
     if len(curves_for_plot) > 0:
         axes[0, 0].legend(fontsize=9, loc="upper right")
         axes[0, 1].legend(fontsize=9, loc="upper right")
 
     title = "宇宙論（BAO一次統計）：BOSS DR12 P(k) multipoles（ℓ=0,2）のピークfit（smooth+peak）"
+    # 条件分岐: `use_window` を満たす経路を評価する。
     if use_window:
         title += "（窓関数込み）"
+
     fig.suptitle(title, fontsize=14)
+    # 条件分岐: `use_window` を満たす経路を評価する。
     if use_window:
         note = "注：窓関数（RR multipoles; Beutler window）でモデルを畳み込み。テンプレート/RSD/full-shape 等の詳細は次工程で扱う。"
     else:
         note = "注：P(k)はBAO解析の一次統計の一部であり、窓関数/再構成/テンプレート等の詳細は次工程（P(k) full fit）で扱う。"
+
     fig.text(0.5, 0.01, note, ha="center", fontsize=10)
     plt.tight_layout(rect=(0.0, 0.03, 1.0, 0.94))
     fig.savefig(out_png, dpi=200)
@@ -1302,10 +1478,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     try:
         event_type = "cosmology_bao_pk_multipole_peakfit"
+        # 条件分岐: `recon != "postrecon"` を満たす経路を評価する。
         if recon != "postrecon":
             event_type += "_pre_recon"
+
+        # 条件分岐: `use_window` を満たす経路を評価する。
+
         if use_window:
             event_type += "_window"
+
         worklog.append_event(
             {
                 "event_type": event_type,
@@ -1320,6 +1501,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

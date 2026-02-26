@@ -36,6 +36,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -57,6 +58,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -76,16 +78,25 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `not math.isfinite(float(x))` を満たす経路を評価する。
+
     if not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -97,14 +108,23 @@ def _find_value_at_z(values_at_z: List[Dict[str, Any]], z: float) -> Optional[Di
             zz = float(v.get("z"))
         except Exception:
             continue
+
         d = abs(zz - float(z))
+        # 条件分岐: `d < best_d` を満たす経路を評価する。
         if d < best_d:
             best_d = d
             best = dict(v)
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         return None
+
+    # 条件分岐: `best_d > 1e-6` を満たす経路を評価する。
+
     if best_d > 1e-6:
         return None
+
     return best
 
 
@@ -139,26 +159,39 @@ def _plot_figure(
 
     scan_no_bao_note = ""
     try:
+        # 条件分岐: `isinstance(scan_best, dict)` を満たす経路を評価する。
         if isinstance(scan_best, dict):
             bw = scan_best.get("bin_width")
             nmin = scan_best.get("sn_min_points")
             focus = scan_best.get("focus")
             bits: List[str] = []
+            # 条件分岐: `isinstance(focus, str) and focus.strip()` を満たす経路を評価する。
             if isinstance(focus, str) and focus.strip():
                 # Keep only the dataset label (avoid long/garbled suffixes in some environments).
                 label = focus.strip().split(" / ")[0].strip()
+                # 条件分岐: `label` を満たす経路を評価する。
                 if label:
                     bits.append(label)
+
+            # 条件分岐: `bw is not None` を満たす経路を評価する。
+
             if bw is not None:
                 bits.append(f"bin幅={_fmt_float(float(bw), digits=3)}")
+
+            # 条件分岐: `nmin is not None` を満たす経路を評価する。
+
             if nmin is not None:
                 bits.append(f"n≥{int(nmin)}")
+
+            # 条件分岐: `bits` を満たす経路を評価する。
+
             if bits:
                 scan_no_bao_note = "（最楽観スキャン: " + "; ".join(bits) + "）"
     except Exception:
         scan_no_bao_note = ""
 
     # Prepare curves
+
     z = np.linspace(0.0, 2.3, 240)
     dmu_bao = _compute_delta_mu_curve(delta_eps_bao, z)
     dmu_no = _compute_delta_mu_curve(delta_eps_no_bao, z)
@@ -270,6 +303,7 @@ def _plot_figure(
     table.scale(1.0, 1.35)
     for (r, c), cell in table.get_celld().items():
         cell.set_edgecolor("#cccccc")
+        # 条件分岐: `r == 0` を満たす経路を評価する。
         if r == 0:
             cell.set_facecolor("#f0f0f0")
             cell.set_text_props(weight="bold", color="#222222")
@@ -358,10 +392,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     in_plaus = _ROOT / "output" / "private" / "cosmology" / "cosmology_reconnection_plausibility_metrics.json"
 
+    # 条件分岐: `not in_reach.exists()` を満たす経路を評価する。
     if not in_reach.exists():
         raise FileNotFoundError(f"missing input: {in_reach}")
+
+    # 条件分岐: `not in_sens.exists()` を満たす経路を評価する。
+
     if not in_sens.exists():
         raise FileNotFoundError(f"missing input: {in_sens}")
+
+    # 条件分岐: `not in_plaus.exists()` を満たす経路を評価する。
+
     if not in_plaus.exists():
         raise FileNotFoundError(f"missing input: {in_plaus}")
 
@@ -370,18 +411,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     plaus_all = _read_json(in_plaus)
 
     reach = dict(reach_all.get("reach") or {})
+    # 条件分岐: `not (isinstance(reach, dict) and "bao" in reach and "no_bao" in reach)` を満たす経路を評価する。
     if not (isinstance(reach, dict) and "bao" in reach and "no_bao" in reach):
         raise ValueError("unexpected reach metrics schema (need reach.bao/no_bao)")
 
     envelope = dict((sens_all.get("envelope") or {}).get("opt_total") or {})
+    # 条件分岐: `not (isinstance(envelope, dict) and "bao" in envelope and "no_bao" in envelope)` を満たす経路を評価する。
     if not (isinstance(envelope, dict) and "bao" in envelope and "no_bao" in envelope):
         raise ValueError("unexpected sensitivity metrics schema (need envelope.opt_total.bao/no_bao)")
 
     scan_best: Optional[Dict[str, Any]] = None
     try:
         scan = sens_all.get("scan")
+        # 条件分岐: `isinstance(scan, dict)` を満たす経路を評価する。
         if isinstance(scan, dict):
             best = scan.get("best")
+            # 条件分岐: `isinstance(best, dict)` を満たす経路を評価する。
             if isinstance(best, dict):
                 scan_best = dict(best)
                 scan_best["focus"] = scan.get("focus")
@@ -389,6 +434,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         scan_best = None
 
     plaus_metrics = dict(plaus_all.get("metrics") or {})
+    # 条件分岐: `"required_single_mechanism" not in plaus_metrics or "z_scores" not in plaus_m...` を満たす経路を評価する。
     if "required_single_mechanism" not in plaus_metrics or "z_scores" not in plaus_metrics:
         raise ValueError("unexpected plausibility metrics schema (need metrics.required_single_mechanism / z_scores)")
 
@@ -521,6 +567,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[OK] wrote: {out_metrics}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

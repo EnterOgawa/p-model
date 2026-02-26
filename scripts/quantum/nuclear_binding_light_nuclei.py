@@ -13,15 +13,19 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _load_nist_codata_constants(*, root: Path, src_dirname: str) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -29,16 +33,20 @@ def _load_nist_codata_constants(*, root: Path, src_dirname: str) -> dict[str, di
             f"  python -B scripts/quantum/fetch_nuclear_binding_sources.py --out-dirname {src_dirname} --include-light-nuclei\n"
             f"Expected: {extracted}"
         )
+
     payload = json.loads(extracted.read_text(encoding="utf-8"))
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
 def _load_iaea_charge_radii_a3(*, root: Path, src_dirname: str) -> dict[str, dict[str, float]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted charge radii (A=3).\n"
@@ -46,15 +54,19 @@ def _load_iaea_charge_radii_a3(*, root: Path, src_dirname: str) -> dict[str, dic
             f"  python -B scripts/quantum/fetch_nuclear_charge_radii_sources.py --out-dirname {src_dirname}\n"
             f"Expected: {extracted}"
         )
+
     payload = json.loads(extracted.read_text(encoding="utf-8"))
     radii = payload.get("radii")
+    # 条件分岐: `not isinstance(radii, dict)` を満たす経路を評価する。
     if not isinstance(radii, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: radii is not a dict: {extracted}")
 
     def unpack(key: str) -> dict[str, float]:
         item = radii.get(key)
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             raise SystemExit(f"[fail] missing radii entry {key!r}: {extracted}")
+
         return {"value_fm": float(item["radius_fm"]), "sigma_fm": float(item["radius_sigma_fm"])}
 
     return {"t": unpack("t"), "h": unpack("h")}
@@ -87,6 +99,7 @@ def main() -> None:
 
     need = ["mp", "mn", "md", "mt", "mh", "mal", "rp", "rd", "ral"]
     for k in need:
+        # 条件分岐: `k not in consts` を満たす経路を評価する。
         if k not in consts:
             raise SystemExit(f"[fail] missing constant {k!r} in extracted_values.json ({src_dirname})")
 
@@ -170,6 +183,7 @@ def main() -> None:
         }
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     fig = plt.figure(figsize=(12.8, 7.2), dpi=160)
@@ -267,6 +281,7 @@ def main() -> None:
             )
 
     # Sources and traceability
+
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     manifest = src_dir / "manifest.json"
     extracted = src_dir / "extracted_values.json"
@@ -339,6 +354,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

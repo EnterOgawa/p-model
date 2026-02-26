@@ -14,6 +14,7 @@ from threading import Lock
 from typing import Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -40,30 +41,42 @@ def _has_cache(root: Path, pattern: str) -> bool:
 
 def _load_gw_event_list(root: Path) -> List[Dict[str, object]]:
     path = root / "data" / "gw" / "event_list.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     try:
         obj = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return []
+
     events = obj.get("events")
+    # 条件分岐: `not isinstance(events, list)` を満たす経路を評価する。
     if not isinstance(events, list):
         return []
+
     profiles = obj.get("profiles")
+    # 条件分岐: `not isinstance(profiles, dict)` を満たす経路を評価する。
     if not isinstance(profiles, dict):
         profiles = {}
+
     out: List[Dict[str, object]] = []
     for e in events:
+        # 条件分岐: `not isinstance(e, dict)` を満たす経路を評価する。
         if not isinstance(e, dict):
             continue
+
         name = str(e.get("name") or "").strip()
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
         slug = str(e.get("slug") or name.lower()).strip() or name.lower()
         argv: List[str] = []
 
         # v1: explicit argv list on the event.
         ev_argv = e.get("argv")
+        # 条件分岐: `isinstance(ev_argv, list) and any(str(x).strip() for x in ev_argv)` を満たす経路を評価する。
         if isinstance(ev_argv, list) and any(str(x).strip() for x in ev_argv):
             argv = [str(x) for x in ev_argv if str(x).strip()]
         else:
@@ -71,19 +84,25 @@ def _load_gw_event_list(root: Path) -> List[Dict[str, object]]:
             prof_name = str(e.get("profile") or "").strip()
             prof = profiles.get(prof_name) if prof_name else None
             prof_argv = prof.get("argv") if isinstance(prof, dict) else None
+            # 条件分岐: `isinstance(prof_argv, list)` を満たす経路を評価する。
             if isinstance(prof_argv, list):
                 argv.extend([str(x) for x in prof_argv if str(x).strip()])
 
             catalog = str(e.get("catalog") or "").strip()
+            # 条件分岐: `catalog` を満たす経路を評価する。
             if catalog:
                 argv += ["--catalog", catalog]
+
             detectors = str(e.get("detectors") or "").strip()
+            # 条件分岐: `detectors` を満たす経路を評価する。
             if detectors:
                 argv += ["--detectors", detectors]
 
             extra = e.get("extra_argv")
+            # 条件分岐: `isinstance(extra, list)` を満たす経路を評価する。
             if isinstance(extra, list):
                 argv.extend([str(x) for x in extra if str(x).strip()])
+
         out.append(
             {
                 "name": name,
@@ -92,12 +111,14 @@ def _load_gw_event_list(root: Path) -> List[Dict[str, object]]:
                 "optional": bool(e.get("optional", True)),
             }
         )
+
     return out
 
 
 def _build_gw_tasks(*, root: Path, py: str, offline: bool, cwd: Path) -> List[Task]:
     script = root / "scripts" / "gw" / "gw150914_chirp_phase.py"
     events = _load_gw_event_list(root)
+    # 条件分岐: `not events` を満たす経路を評価する。
     if not events:
         # Fallback (kept minimal; primary source is data/gw/event_list.json).
         events = [
@@ -324,12 +345,17 @@ def main() -> int:
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["PYTHONUTF8"] = "1"
     env["HORIZONS_OFFLINE"] = "1" if offline else "0"
+    # 条件分岐: `args.horizons_insecure` を満たす経路を評価する。
     if args.horizons_insecure:
         env["HORIZONS_INSECURE"] = "1"
+
+    # 条件分岐: `args.horizons_ca_bundle` を満たす経路を評価する。
+
     if args.horizons_ca_bundle:
         env["HORIZONS_CA_BUNDLE"] = args.horizons_ca_bundle
 
     # When running multiple tasks concurrently, avoid CPU oversubscription from BLAS/OpenMP defaults.
+
     if jobs > 1:
         for k in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
             env.setdefault(k, "1")
@@ -346,11 +372,13 @@ def main() -> int:
     cassini_manifest_tdf = cassini_pds_root / "manifest_tdf.json"
 
     cassini_tdf_band = ""
+    # 条件分岐: `cassini_manifest_tdf.exists()` を満たす経路を評価する。
     if cassini_manifest_tdf.exists():
         try:
             cassini_tdf_band = str(json.loads(cassini_manifest_tdf.read_text(encoding="utf-8")).get("band") or "")
         except Exception:
             cassini_tdf_band = ""
+
     cassini_need_tdf_both = (not cassini_manifest_tdf.exists()) or (cassini_tdf_band.lower() != "both")
 
     report_task = Task(
@@ -1743,13 +1771,20 @@ def main() -> int:
         ),
     ]
 
+    # 条件分岐: `include_blocked` を満たす経路を評価する。
     if include_blocked:
         tasks.extend(blocked_tasks)
 
+    # 条件分岐: `(not offline) and (bool(args.llr_update_edc_batch) or (not llr_manifest.exist...` を満たす経路を評価する。
+
     if (not offline) and (bool(args.llr_update_edc_batch) or (not llr_manifest.exists())):
         llr_fetch_args = [py, "-B", str(root / "scripts" / "llr" / "fetch_llr_edc_batch.py")]
+        # 条件分岐: `str(args.llr_years).strip()` を満たす経路を評価する。
         if str(args.llr_years).strip():
             llr_fetch_args += ["--years", str(args.llr_years).strip()]
+
+        # 条件分岐: `bool(args.llr_include_daily)` を満たす経路を評価する。
+
         if bool(args.llr_include_daily):
             llr_fetch_args += ["--include-daily"]
 
@@ -1766,11 +1801,14 @@ def main() -> int:
 
     # Cassini (PDS primary cache): fetch once when caches are missing or incomplete (large files; avoid re-hashing every run).
     # Note: Cassini plasma correction uses Ka+X; therefore we prefer TDF band=both.
+
     if not offline and (not cassini_manifest_odf.exists() or cassini_need_tdf_both):
         try:
             cassini_overlay_idx = next(i for i, t in enumerate(tasks) if t.key == "cassini_fig2_overlay")
         except StopIteration:
             cassini_overlay_idx = len(tasks)
+
+        # 条件分岐: `not cassini_manifest_odf.exists()` を満たす経路を評価する。
 
         if not cassini_manifest_odf.exists():
             tasks.insert(
@@ -1788,6 +1826,8 @@ def main() -> int:
                 ),
             )
             cassini_overlay_idx += 1
+
+        # 条件分岐: `cassini_need_tdf_both` を満たす経路を評価する。
 
         if cassini_need_tdf_both:
             tasks.insert(
@@ -1824,19 +1864,26 @@ def main() -> int:
     failures = 0
 
     def _skip_record(t: Task) -> Optional[Dict[str, object]]:
+        # 条件分岐: `offline and t.requires_cache_globs` を満たす経路を評価する。
         if offline and t.requires_cache_globs:
             missing = [p for p in t.requires_cache_globs if not _has_cache(root, p)]
+            # 条件分岐: `missing` を満たす経路を評価する。
             if missing:
                 return {
                     "key": t.key,
                     "skipped": True,
                     "reason": f"offline mode and cache missing: {', '.join(missing)}",
                 }
+
+        # 条件分岐: `offline and t.requires_network and not t.requires_cache_globs` を満たす経路を評価する。
+
         if offline and t.requires_network and not t.requires_cache_globs:
             return {"key": t.key, "skipped": True, "reason": "offline mode"}
+
         return None
 
     # Final aggregation tasks must run after all topic tasks finish.
+
     final_task_keys = {
         "theory_freeze_parameters",
         "decisive_falsification",
@@ -1848,10 +1895,13 @@ def main() -> int:
         "paper_html",
     }
 
+    # 条件分岐: `jobs <= 1` を満たす経路を評価する。
     if jobs <= 1:
         for task in tasks:
+            # 条件分岐: `task.key == "llr_quicklook"` を満たす経路を評価する。
             if task.key == "llr_quicklook":
                 llr_input = llr_primary if llr_primary.exists() else llr_demo
+                # 条件分岐: `len(task.argv) >= 4 and task.argv[3] != str(llr_input)` を満たす経路を評価する。
                 if len(task.argv) >= 4 and task.argv[3] != str(llr_input):
                     task = Task(
                         key=task.key,
@@ -1863,6 +1913,7 @@ def main() -> int:
                     )
 
             rec0 = _skip_record(task)
+            # 条件分岐: `rec0 is not None` を満たす経路を評価する。
             if rec0 is not None:
                 run_info["tasks"].append(rec0)
                 print(f"[skip] {task.key}: {rec0['reason']}")
@@ -1871,7 +1922,9 @@ def main() -> int:
             print(f"\n=== Running: {task.key} ===")
             rec = _run_task(task, env=env, log_dir=log_dir)
             run_info["tasks"].append(rec)
+            # 条件分岐: `not rec.get("ok", False)` を満たす経路を評価する。
             if not rec.get("ok", False):
+                # 条件分岐: `task.optional` を満たす経路を評価する。
                 if task.optional:
                     print(f"[warn] {task.key} failed (optional). See log: {rec['log']}")
                 else:
@@ -1888,16 +1941,20 @@ def main() -> int:
         groups: Dict[str, List[int]] = {}
         final_indices: List[int] = []
         for i, t in enumerate(tasks):
+            # 条件分岐: `t.key in final_task_keys` を満たす経路を評価する。
             if t.key in final_task_keys:
                 final_indices.append(i)
                 continue
+
             groups.setdefault(_group_name(t.key), []).append(i)
 
         def _run_group(group: str, indices: List[int]) -> None:
             for i in indices:
                 t = tasks[i]
+                # 条件分岐: `t.key == "llr_quicklook"` を満たす経路を評価する。
                 if t.key == "llr_quicklook":
                     llr_input = llr_primary if llr_primary.exists() else llr_demo
+                    # 条件分岐: `len(t.argv) >= 4 and t.argv[3] != str(llr_input)` を満たす経路を評価する。
                     if len(t.argv) >= 4 and t.argv[3] != str(llr_input):
                         t = Task(
                             key=t.key,
@@ -1909,16 +1966,19 @@ def main() -> int:
                         )
 
                 rec0 = _skip_record(t)
+                # 条件分岐: `rec0 is not None` を満たす経路を評価する。
                 if rec0 is not None:
                     task_records[i] = rec0
                     with print_lock:
                         print(f"[skip] {t.key}: {rec0['reason']}")
+
                     continue
 
                 with print_lock:
                     print(f"\n=== Running: {t.key} (group={group}) ===")
 
                 try:
+                    # 条件分岐: `t.requires_network` を満たす経路を評価する。
                     if t.requires_network:
                         with net_lock:
                             rec = _run_task_quiet(t, env=env, log_dir=log_dir)
@@ -1935,9 +1995,12 @@ def main() -> int:
                         "ok": False,
                         "tail": f"internal error: {e}",
                     }
+
                 task_records[i] = rec
+                # 条件分岐: `not rec.get("ok", False)` を満たす経路を評価する。
                 if not rec.get("ok", False):
                     with print_lock:
+                        # 条件分岐: `t.optional` を満たす経路を評価する。
                         if t.optional:
                             print(f"[warn] {t.key} failed (optional). See log: {rec['log']}")
                         else:
@@ -1949,9 +2012,11 @@ def main() -> int:
                 fut.result()
 
         # Run final aggregation tasks serially (needs outputs from all groups).
+
         for i in final_indices:
             t = tasks[i]
             rec0 = _skip_record(t)
+            # 条件分岐: `rec0 is not None` を満たす経路を評価する。
             if rec0 is not None:
                 task_records[i] = rec0
                 print(f"[skip] {t.key}: {rec0['reason']}")
@@ -1962,12 +2027,16 @@ def main() -> int:
             task_records[i] = rec
 
         # Compact into run_info (preserve original order)
+
         ordered: List[Dict[str, object]] = []
         for i, t in enumerate(tasks):
             rec = task_records[i]
+            # 条件分岐: `rec is None` を満たす経路を評価する。
             if rec is None:
                 rec = {"key": t.key, "skipped": True, "reason": "not executed (internal scheduling error)"}
+
             ordered.append(rec)
+
         run_info["tasks"] = ordered
         failures = sum(
             1
@@ -1986,11 +2055,13 @@ def main() -> int:
     rec = _run_task(report_task, env=env, log_dir=log_dir)
     run_info["tasks"].append(rec)
     status_path.write_text(json.dumps(run_info, ensure_ascii=False, indent=2), encoding="utf-8")
+    # 条件分岐: `not rec.get("ok", False)` を満たす経路を評価する。
     if not rec.get("ok", False):
         print(f"[err] {report_task.key} failed. See log: {rec['log']}")
         failures += 1
 
     # Refresh once more so the report can also include the summary_report task result.
+
     print(f"\n=== Refreshing: {report_task.key} ===")
     _run_task(report_task, env=env, log_dir=log_dir)
 
@@ -2057,11 +2128,15 @@ def main() -> int:
         # html_to_docx.py returns:
         #   0: ok, 3: skipped (no Word backend), otherwise: error.
         rc = int(rec.get("returncode") or 0)
+        # 条件分岐: `rc == 3` を満たす経路を評価する。
         if rc == 3:
             rec["skipped"] = True
             rec["reason"] = "no supported Word backend found"
+
         run_info["tasks"].append(rec)
+        # 条件分岐: `not rec.get("ok", False)` を満たす経路を評価する。
         if not rec.get("ok", False):
+            # 条件分岐: `rc == 3` を満たす経路を評価する。
             if rc == 3:
                 print(f"[warn] {task.key} skipped (no Word). See log: {rec['log']}")
             else:
@@ -2069,6 +2144,7 @@ def main() -> int:
                 failures += 1
 
     # Persist once more so the report (and readers) can see DOCX task results.
+
     status_path.write_text(json.dumps(run_info, ensure_ascii=False, indent=2), encoding="utf-8")
 
     # Append machine-readable work history (JSONL)
@@ -2101,10 +2177,13 @@ def main() -> int:
     except Exception:
         pass
 
+    # 条件分岐: `args.open` を満たす経路を評価する。
+
     if args.open:
         # Canonical output is the public-friendly report (single entry point).
         public_html = out_summary / "pmodel_public_report.html"
         legacy_html = out_summary / "pmodel_report.html"
+        # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
         if os.name == "nt":
             try:
                 os.startfile(str(public_html if public_html.exists() else legacy_html))  # type: ignore[attr-defined]
@@ -2115,6 +2194,8 @@ def main() -> int:
 
     return 1 if failures else 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

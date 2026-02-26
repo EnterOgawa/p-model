@@ -33,6 +33,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -60,6 +61,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -83,32 +85,43 @@ def _load_json(path: Path) -> Any:
 def _sigma_from_ci(ci: Any) -> float:
     try:
         lo, hi = float(ci[0]), float(ci[1])
+        # 条件分岐: `math.isfinite(lo) and math.isfinite(hi)` を満たす経路を評価する。
         if math.isfinite(lo) and math.isfinite(hi):
             return 0.5 * abs(hi - lo)
     except Exception:
         pass
+
     return float("nan")
 
 
 def _extract_dv_over_rd_from_y1data_row(r: Dict[str, Any]) -> tuple[float, float, float]:
     dv = r.get("dv_over_rd")
+    # 条件分岐: `not isinstance(dv, dict)` を満たす経路を評価する。
     if not isinstance(dv, dict):
         raise ValueError("row does not contain dv_over_rd (expected for DV-only tracers)")
+
     mu = dv.get("mean")
     sig = dv.get("sigma")
+    # 条件分岐: `mu is None or sig is None` を満たす経路を評価する。
     if mu is None or sig is None:
         raise ValueError("dv_over_rd missing mean/sigma")
+
     return float(r["z_eff"]), float(mu), float(sig)
 
 
 def _dv_over_rd_fid_lcdm(z_eff: float, *, omega_m: float, n_grid: int, rd_mpc_over_h: float) -> float:
     z = float(z_eff)
+    # 条件分岐: `not (z > 0.0 and math.isfinite(z))` を満たす経路を評価する。
     if not (z > 0.0 and math.isfinite(z)):
         return float("nan")
+
+    # 条件分岐: `not (0.0 < float(omega_m) < 1.0)` を満たす経路を評価する。
+
     if not (0.0 < float(omega_m) < 1.0):
         return float("nan")
 
     # E(z)
+
     ez = float(math.sqrt(float(omega_m) * (1.0 + z) ** 3 + (1.0 - float(omega_m))))
     dh = float(_C_OVER_100_MPC_OVER_H / ez)  # D_H=c/H in Mpc/h (flat LCDM)
 
@@ -121,6 +134,7 @@ def _dv_over_rd_fid_lcdm(z_eff: float, *, omega_m: float, n_grid: int, rd_mpc_ov
         integral = float(np.trapezoid(integrand, z_grid))
     except AttributeError:
         integral = float(np.trapz(integrand, z_grid))
+
     dm = float(_C_OVER_100_MPC_OVER_H * integral)
 
     dv = float((z * dm * dm * dh) ** (1.0 / 3.0))
@@ -129,6 +143,7 @@ def _dv_over_rd_fid_lcdm(z_eff: float, *, omega_m: float, n_grid: int, rd_mpc_ov
 
 def _dv_over_rd_fid_pbg(z_eff: float, *, rd_mpc_over_h: float) -> float:
     z = float(z_eff)
+    # 条件分岐: `not (z > 0.0 and math.isfinite(z))` を満たす経路を評価する。
     if not (z > 0.0 and math.isfinite(z)):
         return float("nan")
 
@@ -153,20 +168,33 @@ def _extract_peakfit_alpha(
     best: Optional[Dict[str, Any]] = None
     best_dz = float("inf")
     for p in points:
+        # 条件分岐: `str(p.get("dist")) != dist` を満たす経路を評価する。
         if str(p.get("dist")) != dist:
             continue
+
         try:
             z_eff = float(p.get("z_eff", float("nan")))
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(z_eff)` を満たす経路を評価する。
+
         if not math.isfinite(z_eff):
             continue
+
         dz = abs(z_eff - float(z_target))
+        # 条件分岐: `dz > float(z_tol)` を満たす経路を評価する。
         if dz > float(z_tol):
             continue
+
+        # 条件分岐: `dz < best_dz` を満たす経路を評価する。
+
         if dz < best_dz:
             best = p
             best_dz = dz
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         return None
 
@@ -199,37 +227,52 @@ def main(argv: List[str] | None = None) -> int:
 
     peakfit_path = Path(str(args.peakfit_metrics_json))
     y1_path = Path(str(args.y1data_json))
+    # 条件分岐: `not peakfit_path.exists()` を満たす経路を評価する。
     if not peakfit_path.exists():
         raise SystemExit(f"missing peakfit metrics: {peakfit_path}")
+
+    # 条件分岐: `not y1_path.exists()` を満たす経路を評価する。
+
     if not y1_path.exists():
         raise SystemExit(f"missing y1data json: {y1_path}")
 
     peakfit = _load_json(peakfit_path)
     points = peakfit.get("results")
+    # 条件分岐: `not isinstance(points, list)` を満たす経路を評価する。
     if not isinstance(points, list):
         raise SystemExit("peakfit metrics has invalid 'results' (expected list)")
 
     # Template BAO scale as rd_fid proxy (Mpc/h).
+
     r0_vals = []
     for p in points:
         tp = p.get("template_peak") or {}
+        # 条件分岐: `isinstance(tp, dict) and ("r0_mpc_h" in tp)` を満たす経路を評価する。
         if isinstance(tp, dict) and ("r0_mpc_h" in tp):
             r0_vals.append(float(tp["r0_mpc_h"]))
+
+    # 条件分岐: `not r0_vals or not all(math.isfinite(x) for x in r0_vals)` を満たす経路を評価する。
+
     if not r0_vals or not all(math.isfinite(x) for x in r0_vals):
         raise SystemExit("peakfit metrics missing template_peak.r0_mpc_h")
+
     rd_fid = float(np.median(np.array(r0_vals, dtype=float)))
 
     tracers = [t.strip() for t in str(args.tracers).split(",") if t.strip()]
+    # 条件分岐: `not tracers` を満たす経路を評価する。
     if not tracers:
         raise SystemExit("--tracers must not be empty")
 
     y1 = _load_json(y1_path)
     rows = y1.get("rows")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         raise SystemExit("y1data json invalid (expected rows=list)")
+
     y1_by_tracer = {str(r.get("tracer")): r for r in rows if isinstance(r, dict)}
 
     missing = [t for t in tracers if t not in y1_by_tracer]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"y1data missing tracers: {missing}")
 
@@ -248,6 +291,7 @@ def main(argv: List[str] | None = None) -> int:
             rd_mpc_over_h=rd_fid,
         )
         dv_fid_pbg = _dv_over_rd_fid_pbg(z_eff, rd_mpc_over_h=rd_fid)
+        # 条件分岐: `not (math.isfinite(dv_fid_lcdm) and dv_fid_lcdm > 0.0 and math.isfinite(dv_fi...` を満たす経路を評価する。
         if not (math.isfinite(dv_fid_lcdm) and dv_fid_lcdm > 0.0 and math.isfinite(dv_fid_pbg) and dv_fid_pbg > 0.0):
             raise SystemExit("invalid fid DV/rd (check fid params)")
 
@@ -275,8 +319,10 @@ def main(argv: List[str] | None = None) -> int:
             z_tol=float(args.z_tol),
             mode=str(args.fit_mode),
         )
+        # 条件分岐: `fit_lcdm is None or fit_pbg is None` を満たす経路を評価する。
         if fit_lcdm is None or fit_pbg is None:
             raise SystemExit(f"peakfit metrics missing lcdm/pbg points near z_eff={z_eff:.3f} for tracer {tracer}")
+
         fit[tracer] = {"lcdm": fit_lcdm, "pbg": fit_pbg}
 
         deltas[tracer] = {}
@@ -392,6 +438,8 @@ def main(argv: List[str] | None = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

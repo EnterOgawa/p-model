@@ -12,15 +12,19 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -28,10 +32,13 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {extracted}"
         )
+
     payload = json.loads(extracted.read_text(encoding="utf-8"))
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
@@ -43,6 +50,7 @@ def main() -> None:
     consts = _load_nist_codata_constants(root=root)
     need = ["mp", "mn", "md", "rd"]
     for k in need:
+        # 条件分岐: `k not in consts` を満たす経路を評価する。
         if k not in consts:
             raise SystemExit(f"[fail] missing constant {k!r} in extracted_values.json")
 
@@ -200,6 +208,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

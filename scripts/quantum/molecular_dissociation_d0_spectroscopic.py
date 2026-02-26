@@ -40,6 +40,7 @@ def main() -> None:
         / "molecular_dissociation_d0_spectroscopic"
         / "extracted_values.json"
     )
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing D0 cache: {src}\n"
@@ -48,19 +49,26 @@ def main() -> None:
 
     j = _read_json(src)
     sources = j.get("sources")
+    # 条件分岐: `not isinstance(sources, list) or not sources` を満たす経路を評価する。
     if not isinstance(sources, list) or not sources:
         raise SystemExit(f"[fail] invalid sources in: {src}")
 
     rows: list[dict[str, Any]] = []
     for rec in sources:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         mol = str(rec.get("molecule") or "").strip()
+        # 条件分岐: `not mol` を満たす経路を評価する。
         if not mol:
             continue
+
         d0 = rec.get("d0_cm^-1")
+        # 条件分岐: `not isinstance(d0, (int, float))` を満たす経路を評価する。
         if not isinstance(d0, (int, float)):
             continue
+
         unc = rec.get("d0_unc_cm^-1")
         unc_f = None if unc is None else float(unc)
         n = rec.get("rotational_N")
@@ -80,6 +88,7 @@ def main() -> None:
         )
 
     # Stable ordering.
+
     order = {"H2": 0, "HD": 1, "D2": 2}
     rows.sort(key=lambda r: order.get(str(r["molecule"]), 99))
 
@@ -90,8 +99,10 @@ def main() -> None:
     for r in rows:
         lab = str(r["molecule"])
         n = r.get("rotational_N")
+        # 条件分岐: `n is not None` を満たす経路を評価する。
         if n is not None:
             lab = f"{lab} (N={n})"
+
         labels.append(lab)
         y.append(float(r["d0_eV"]))
         yerr.append(0.0 if r["d0_unc_eV"] is None else float(r["d0_unc_eV"]))
@@ -143,6 +154,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

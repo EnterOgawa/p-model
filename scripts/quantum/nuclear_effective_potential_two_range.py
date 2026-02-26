@@ -14,9 +14,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -27,6 +30,7 @@ def _load_json(path: Path) -> dict:
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -34,15 +38,19 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {extracted}"
         )
+
     payload = _load_json(extracted)
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted np scattering values.\n"
@@ -50,21 +58,29 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_np_scattering_sources.py\n"
             f"Expected: {extracted}"
         )
+
     j = _load_json(extracted)
     sets = j.get("parameter_sets")
+    # 条件分岐: `not isinstance(sets, list) or not sets` を満たす経路を評価する。
     if not isinstance(sets, list) or not sets:
         raise SystemExit(f"[fail] invalid extracted file: parameter_sets missing/empty: {extracted}")
+
     out: dict[int, dict[str, object]] = {}
     for s in sets:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         try:
             eq = int(s.get("eq_label"))
         except Exception:
             continue
+
         params = s.get("params")
+        # 条件分岐: `isinstance(params, dict)` を満たす経路を評価する。
         if isinstance(params, dict):
             out[eq] = params
+
     return out
 
 
@@ -74,6 +90,7 @@ def _load_pion_range_scale(*, root: Path) -> dict[str, object]:
     (Phase 7 / Step 7.13.1 output).
     """
     metrics = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    # 条件分岐: `not metrics.exists()` を満たす経路を評価する。
     if not metrics.exists():
         raise SystemExit(
             "[fail] missing hadron baseline metrics (needed for λπ range constraint).\n"
@@ -81,24 +98,40 @@ def _load_pion_range_scale(*, root: Path) -> dict[str, object]:
             "  python -B scripts/quantum/qcd_hadron_masses_baseline.py\n"
             f"Expected: {metrics}"
         )
+
     j = _load_json(metrics)
     rows = j.get("rows")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         raise SystemExit(f"[fail] invalid hadron baseline metrics: rows missing: {metrics}")
 
     lam_pm = None
     lam_0 = None
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
+        # 条件分岐: `r.get("label") == "π±"` を満たす経路を評価する。
+
         if r.get("label") == "π±":
             lam_pm = r.get("compton_lambda_fm")
+
+        # 条件分岐: `r.get("label") == "π0"` を満たす経路を評価する。
+
         if r.get("label") == "π0":
             lam_0 = r.get("compton_lambda_fm")
+
+    # 条件分岐: `not (isinstance(lam_pm, (int, float)) and math.isfinite(float(lam_pm)))` を満たす経路を評価する。
+
     if not (isinstance(lam_pm, (int, float)) and math.isfinite(float(lam_pm))):
         raise SystemExit(f"[fail] π± compton_lambda_fm missing/invalid in: {metrics}")
+
+    # 条件分岐: `not (isinstance(lam_0, (int, float)) and math.isfinite(float(lam_0)))` を満たす経路を評価する。
+
     if not (isinstance(lam_0, (int, float)) and math.isfinite(float(lam_0))):
         raise SystemExit(f"[fail] π0 compton_lambda_fm missing/invalid in: {metrics}")
+
     pdg_src = j.get("pdg_source") if isinstance(j.get("pdg_source"), dict) else {}
     return {
         "lambda_pi_pm_fm": float(lam_pm),
@@ -111,20 +144,26 @@ def _load_pion_range_scale(*, root: Path) -> dict[str, object]:
 
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
+    # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
     if isinstance(obj, dict) and "value" in obj:
         return float(obj["value"])
+
     raise KeyError(key)
 
 
 def _cot(x: float) -> float:
+    # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
         return (1.0 / x) - (x / 3.0)
+
     return math.cos(x) / math.sin(x)
 
 
 def _coth(x: float) -> float:
+    # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
         return (1.0 / x) + (x / 3.0)
+
     return math.cosh(x) / math.sinh(x)
 
 
@@ -146,11 +185,17 @@ def _region_q(*, e_mev: float, vdepth_mev: float, mu_mev: float, hbarc_mev_fm: f
         and vdepth_mev >= 0
     ):
         return ("zero", float("nan"))
+
     s = e_mev + vdepth_mev
+    # 条件分岐: `s > 0` を満たす経路を評価する。
     if s > 0:
         return ("osc", math.sqrt(2.0 * mu_mev * s) / hbarc_mev_fm)
+
+    # 条件分岐: `s < 0` を満たす経路を評価する。
+
     if s < 0:
         return ("evan", math.sqrt(2.0 * mu_mev * (-s)) / hbarc_mev_fm)
+
     return ("zero", 0.0)
 
 
@@ -174,11 +219,17 @@ def _region_q_potential(
         and math.isfinite(potential_mev)
     ):
         return ("zero", float("nan"))
+
     s = e_mev - potential_mev
+    # 条件分岐: `s > 0` を満たす経路を評価する。
     if s > 0:
         return ("osc", math.sqrt(2.0 * mu_mev * s) / hbarc_mev_fm)
+
+    # 条件分岐: `s < 0` を満たす経路を評価する。
+
     if s < 0:
         return ("evan", math.sqrt(2.0 * mu_mev * (-s)) / hbarc_mev_fm)
+
     return ("zero", 0.0)
 
 
@@ -186,40 +237,62 @@ def _propagate_y(*, y_in: float, mode: str, q: float, l_fm: float) -> float:
     """
     Propagate log-derivative y=u'/u across a constant-potential segment of length L.
     """
+    # 条件分岐: `not (math.isfinite(l_fm) and l_fm >= 0)` を満たす経路を評価する。
     if not (math.isfinite(l_fm) and l_fm >= 0):
         return float("nan")
+
+    # 条件分岐: `l_fm == 0.0` を満たす経路を評価する。
+
     if l_fm == 0.0:
         return float(y_in)
 
+    # 条件分岐: `mode == "zero" or q == 0.0` を満たす経路を評価する。
+
     if mode == "zero" or q == 0.0:
+        # 条件分岐: `math.isinf(y_in)` を満たす経路を評価する。
         if math.isinf(y_in):
             return float(1.0 / l_fm)
+
         denom = 1.0 + (y_in * l_fm)
+        # 条件分岐: `denom == 0.0` を満たす経路を評価する。
         if denom == 0.0:
             return float("nan")
+
         return float(y_in / denom)
+
+    # 条件分岐: `mode == "osc"` を満たす経路を評価する。
 
     if mode == "osc":
         ql = q * l_fm
+        # 条件分岐: `math.isinf(y_in)` を満たす経路を評価する。
         if math.isinf(y_in):
             return float(q * _cot(ql))
+
         s = math.sin(ql)
         c = math.cos(ql)
         denom = c + (y_in / q) * s
+        # 条件分岐: `abs(denom) < 1e-18` を満たす経路を評価する。
         if abs(denom) < 1e-18:
             return float("nan")
+
         num = (-q * s) + (y_in * c)
         return float(num / denom)
 
+    # 条件分岐: `mode == "evan"` を満たす経路を評価する。
+
     if mode == "evan":
         al = q * l_fm
+        # 条件分岐: `math.isinf(y_in)` を満たす経路を評価する。
         if math.isinf(y_in):
             return float(q * _coth(al))
+
         s = math.sinh(al)
         c = math.cosh(al)
         denom = c + (y_in / q) * s
+        # 条件分岐: `abs(denom) < 1e-18` を満たす経路を評価する。
         if abs(denom) < 1e-18:
             return float("nan")
+
         num = (q * s) + (y_in * c)
         return float(num / denom)
 
@@ -236,8 +309,10 @@ def _y_at_r2(
     mu_mev: float,
     hbarc_mev_fm: float,
 ) -> float:
+    # 条件分岐: `not (0 < r1_fm < r2_fm and v1_mev >= 0 and v2_mev >= 0)` を満たす経路を評価する。
     if not (0 < r1_fm < r2_fm and v1_mev >= 0 and v2_mev >= 0):
         return float("nan")
+
     y: float = float("inf")  # regular at r=0
 
     m1, q1 = _region_q(e_mev=e_mev, vdepth_mev=v1_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
@@ -274,6 +349,7 @@ def _y_at_r2_signed_two_range(
         and hbarc_mev_fm > 0
     ):
         return float("nan")
+
     y: float = float("inf")  # regular at r=0
 
     m1, q1 = _region_q_potential(e_mev=e_mev, potential_mev=-v1_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
@@ -294,18 +370,27 @@ def _y_at_r_end_segments(
       (repulsive positive, attractive negative). The exterior region beyond the last segment
       is assumed to be free (V=0).
     """
+    # 条件分岐: `not (math.isfinite(e_mev) and mu_mev > 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(e_mev) and mu_mev > 0 and hbarc_mev_fm > 0):
         return float("nan")
+
     y: float = float("inf")
     for l_fm, pot_mev in segments:
+        # 条件分岐: `not (math.isfinite(l_fm) and l_fm >= 0 and math.isfinite(pot_mev))` を満たす経路を評価する。
         if not (math.isfinite(l_fm) and l_fm >= 0 and math.isfinite(pot_mev)):
             return float("nan")
+
+        # 条件分岐: `l_fm == 0.0` を満たす経路を評価する。
+
         if l_fm == 0.0:
             continue
+
         mode, q = _region_q_potential(e_mev=e_mev, potential_mev=float(pot_mev), mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
         y = _propagate_y(y_in=y, mode=mode, q=q, l_fm=float(l_fm))
+        # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(y):
             return float("nan")
+
     return float(y)
 
 
@@ -328,8 +413,10 @@ def _y_at_r2_repulsive_core_two_range(
       V=-V2 (R1<=r<R2),
       V=0   (r>R2).
     """
+    # 条件分岐: `not (0 <= rc_fm < r1_fm < r2_fm and vc_mev >= 0 and v1_mev >= 0 and v2_mev >= 0)` を満たす経路を評価する。
     if not (0 <= rc_fm < r1_fm < r2_fm and vc_mev >= 0 and v1_mev >= 0 and v2_mev >= 0):
         return float("nan")
+
     y: float = float("inf")  # regular at r=0
 
     # Repulsive core: V=+Vc.
@@ -338,6 +425,7 @@ def _y_at_r2_repulsive_core_two_range(
         y = _propagate_y(y_in=y, mode=m0, q=q0, l_fm=rc_fm)
 
     # Inner attractive well: V=-V1.
+
     m1, q1 = _region_q_potential(e_mev=e_mev, potential_mev=-v1_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
     y = _propagate_y(y_in=y, mode=m1, q=q1, l_fm=(r1_fm - rc_fm))
 
@@ -364,6 +452,7 @@ def _solve_v1_from_b(
     We scan V1>=max(V2,B) and take the first sign-change bracket (minimal V1),
     rejecting very deep roots with q1*R1 > pi to avoid excited-branch jumps.
     """
+    # 条件分岐: `not (b_mev > 0 and 0 < r1_fm < r2_fm and v2_mev >= 0 and mu_mev > 0 and hbarc...` を満たす経路を評価する。
     if not (b_mev > 0 and 0 < r1_fm < r2_fm and v2_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid inputs")
 
@@ -387,48 +476,70 @@ def _solve_v1_from_b(
     vals: list[tuple[float, float]] = []
     for v in v_grid:
         fv = f(v)
+        # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
         if not math.isfinite(fv):
             continue
+
         vals.append((v, fv))
+
+    # 条件分岐: `len(vals) < 6` を満たす経路を評価する。
+
     if len(vals) < 6:
         raise ValueError("no valid bound-state samples for V1 scan")
 
     bracket: tuple[float, float] | None = None
     for (v0, f0), (v1, f1) in zip(vals[:-1], vals[1:]):
+        # 条件分岐: `f0 == 0` を満たす経路を評価する。
         if f0 == 0:
             bracket = (v0, v0)
             break
+
+        # 条件分岐: `(f0 > 0) != (f1 > 0)` を満たす経路を評価する。
+
         if (f0 > 0) != (f1 > 0):
             mid = 0.5 * (v0 + v1)
             m1, q1 = _region_q(e_mev=-b_mev, vdepth_mev=mid, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
             x1 = q1 * r1_fm if (m1 == "osc" and math.isfinite(q1)) else 0.0
+            # 条件分岐: `m1 == "osc" and x1 > (math.pi * 0.999)` を満たす経路を評価する。
             if m1 == "osc" and x1 > (math.pi * 0.999):
                 continue
+
             bracket = (v0, v1)
             break
+
+    # 条件分岐: `bracket is None` を満たす経路を評価する。
+
     if bracket is None:
         raise ValueError("no sign-change bracket for bound-state V1 within scan range")
 
     lo, hi = bracket
+    # 条件分岐: `lo == hi` を満たす経路を評価する。
     if lo == hi:
         v1_star = lo
     else:
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
         if not ((f_lo > 0) != (f_hi > 0)):
             raise ValueError("invalid V1 bracket")
+
         for _ in range(70):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `f_mid == 0 or (hi - lo) < 1e-10` を満たす経路を評価する。
             if f_mid == 0 or (hi - lo) < 1e-10:
                 lo = mid
                 break
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
             else:
                 hi = mid
                 f_hi = f_mid
+
         v1_star = 0.5 * (lo + hi)
 
     return {"V1_MeV": float(v1_star), "kappa_fm1": float(kappa)}
@@ -456,11 +567,17 @@ def _solve_v1_from_b_segments(
     We scan V1 and take the first bracket (minimal V1), rejecting deep roots with
     q1*L1 > pi to avoid excited-branch jumps.
     """
+    # 条件分岐: `not (b_mev > 0 and math.isfinite(first_len_fm) and first_len_fm > 0 and mu_me...` を満たす経路を評価する。
     if not (b_mev > 0 and math.isfinite(first_len_fm) and first_len_fm > 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid inputs")
+
+    # 条件分岐: `not segments_after_first` を満たす経路を評価する。
+
     if not segments_after_first:
         raise ValueError("need segments_after_first")
+
     for l_fm, pot_mev in segments_after_first:
+        # 条件分岐: `not (math.isfinite(l_fm) and l_fm >= 0 and math.isfinite(pot_mev))` を満たす経路を評価する。
         if not (math.isfinite(l_fm) and l_fm >= 0 and math.isfinite(pot_mev)):
             raise ValueError("invalid segments_after_first")
 
@@ -470,19 +587,24 @@ def _solve_v1_from_b_segments(
     v1_min = b_mev + 1e-6
 
     def f(v1_mev: float) -> float:
+        # 条件分岐: `not (math.isfinite(v1_mev) and v1_mev > b_mev)` を満たす経路を評価する。
         if not (math.isfinite(v1_mev) and v1_mev > b_mev):
             return float("nan")
         # Reject excited-branch roots: ensure the first segment stays on the ground branch.
+
         mode1, q1 = _region_q_potential(
             e_mev=-b_mev, potential_mev=-float(v1_mev), mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
         )
+        # 条件分岐: `not (mode1 == "osc" and math.isfinite(q1) and (q1 * first_len_fm) < (math.pi...` を満たす経路を評価する。
         if not (mode1 == "osc" and math.isfinite(q1) and (q1 * first_len_fm) < (math.pi * 0.999)):
             return float("nan")
 
         segs = [(float(first_len_fm), -float(v1_mev))] + [(float(l), float(p)) for l, p in segments_after_first]
         y = _y_at_r_end_segments(e_mev=-b_mev, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+        # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(y):
             return float("nan")
+
         return float(y + kappa)
 
     n_scan = 160
@@ -490,54 +612,79 @@ def _solve_v1_from_b_segments(
     vals: list[tuple[float, float]] = []
     for v in v_grid:
         fv = f(v)
+        # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
         if not math.isfinite(fv):
             continue
+
         vals.append((v, fv))
+
+    # 条件分岐: `len(vals) < 6` を満たす経路を評価する。
+
     if len(vals) < 6:
         raise ValueError("no valid bound-state samples for V1 scan (segments)")
 
     bracket: tuple[float, float] | None = None
     for (v0, f0), (v1, f1) in zip(vals[:-1], vals[1:]):
+        # 条件分岐: `f0 == 0.0` を満たす経路を評価する。
         if f0 == 0.0:
             bracket = (v0, v0)
             break
+
+        # 条件分岐: `(f0 > 0) != (f1 > 0)` を満たす経路を評価する。
+
         if (f0 > 0) != (f1 > 0):
             bracket = (v0, v1)
             break
+
+    # 条件分岐: `bracket is None` を満たす経路を評価する。
+
     if bracket is None:
         raise ValueError("no sign-change bracket for bound-state V1 within scan range (segments)")
 
     lo, hi = bracket
+    # 条件分岐: `lo == hi` を満たす経路を評価する。
     if lo == hi:
         v1_star = lo
     else:
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
         if not ((f_lo > 0) != (f_hi > 0)):
             raise ValueError("invalid V1 bracket (segments)")
+
         for _ in range(80):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `not math.isfinite(f_mid)` を満たす経路を評価する。
             if not math.isfinite(f_mid):
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 fa = f(mid_a)
                 fb = f(mid_b)
+                # 条件分岐: `math.isfinite(fa)` を満たす経路を評価する。
                 if math.isfinite(fa):
                     mid, f_mid = mid_a, fa
+                # 条件分岐: 前段条件が不成立で、`math.isfinite(fb)` を追加評価する。
                 elif math.isfinite(fb):
                     mid, f_mid = mid_b, fb
                 else:
                     break
+
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-10` を満たす経路を評価する。
+
             if f_mid == 0.0 or (hi - lo) < 1e-10:
                 lo = mid
                 break
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
             else:
                 hi = mid
                 f_hi = f_mid
+
         v1_star = 0.5 * (lo + hi)
 
     return {"V1_MeV": float(v1_star), "kappa_fm1": float(kappa)}
@@ -594,46 +741,68 @@ def _solve_v1_from_b_repulsive_core_two_range(
         # Avoid excited-branch jumps by staying in the ground-like interval.
         if v > b_mev:
             q = math.sqrt(2.0 * mu_mev * (v - b_mev)) / hbarc_mev_fm
+            # 条件分岐: `math.isfinite(q) and q * max(1e-6, (r1_fm - rc_fm)) > (math.pi * 0.999)` を満たす経路を評価する。
             if math.isfinite(q) and q * max(1e-6, (r1_fm - rc_fm)) > (math.pi * 0.999):
                 continue
+
         fv = f(v)
+        # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
         if not math.isfinite(fv):
             continue
+
         vals.append((v, fv))
+
+    # 条件分岐: `len(vals) < 8` を満たす経路を評価する。
+
     if len(vals) < 8:
         raise ValueError("no valid bound-state samples for V1 scan")
 
     bracket: tuple[float, float] | None = None
     for (v0, f0), (v1, f1) in zip(vals[:-1], vals[1:]):
+        # 条件分岐: `f0 == 0.0` を満たす経路を評価する。
         if f0 == 0.0:
             bracket = (v0, v0)
             break
+
+        # 条件分岐: `(f0 > 0) != (f1 > 0)` を満たす経路を評価する。
+
         if (f0 > 0) != (f1 > 0):
             bracket = (v0, v1)
             break
+
+    # 条件分岐: `bracket is None` を満たす経路を評価する。
+
     if bracket is None:
         raise ValueError("no sign-change bracket for bound-state V1 within scan range")
 
     lo, hi = bracket
+    # 条件分岐: `lo == hi` を満たす経路を評価する。
     if lo == hi:
         v1_star = lo
     else:
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
         if not ((f_lo > 0) != (f_hi > 0)):
             raise ValueError("invalid V1 bracket")
+
         for _ in range(80):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-10` を満たす経路を評価する。
             if f_mid == 0.0 or (hi - lo) < 1e-10:
                 lo = mid
                 break
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
             else:
                 hi = mid
                 f_hi = f_mid
+
         v1_star = 0.5 * (lo + hi)
 
     return {"V1_MeV": float(v1_star), "kappa_fm1": float(kappa)}
@@ -651,8 +820,10 @@ def _scattering_length_exact(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
     if not math.isfinite(y) or abs(y) < 1e-18:
         return float("nan")
+
     return float(r2_fm - (1.0 / y))
 
 
@@ -668,8 +839,10 @@ def _scattering_length_exact_signed_two_range(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
     if not math.isfinite(y) or abs(y) < 1e-18:
         return float("nan")
+
     return float(r2_fm - (1.0 / y))
 
 
@@ -677,8 +850,10 @@ def _scattering_length_exact_segments(
     *, r_end_fm: float, segments: list[tuple[float, float]], mu_mev: float, hbarc_mev_fm: float
 ) -> float:
     y = _y_at_r_end_segments(e_mev=0.0, segments=segments, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+    # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
     if not math.isfinite(y) or abs(y) < 1e-18:
         return float("nan")
+
     return float(r_end_fm - (1.0 / y))
 
 
@@ -704,18 +879,25 @@ def _scattering_length_exact_repulsive_core_two_range(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
     if not math.isfinite(y) or abs(y) < 1e-18:
         return float("nan")
+
     return float(r2_fm - (1.0 / y))
 
 
 def _phase_shift(
     *, k_fm1: float, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
 ) -> float:
+    # 条件分岐: `k_fm1 == 0.0` を満たす経路を評価する。
     if k_fm1 == 0.0:
         return 0.0
+
+    # 条件分岐: `not (k_fm1 > 0 and 0 < r1_fm < r2_fm and v1_mev >= 0 and v2_mev >= 0 and mu_m...` を満たす経路を評価する。
+
     if not (k_fm1 > 0 and 0 < r1_fm < r2_fm and v1_mev >= 0 and v2_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         return float("nan")
+
     e_mev = (hbarc_mev_fm**2) * (k_fm1**2) / (2.0 * mu_mev)
     y = _y_at_r2(
         e_mev=e_mev,
@@ -726,24 +908,33 @@ def _phase_shift(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
     if not math.isfinite(y):
         return float("nan")
+
+    # 条件分岐: `abs(y) < 1e-18` を満たす経路を評価する。
+
     if abs(y) < 1e-18:
         delta = (math.pi / 2.0) - (k_fm1 * r2_fm)
     else:
         delta = math.atan(k_fm1 / y) - (k_fm1 * r2_fm)
+
     while delta > math.pi / 2.0:
         delta -= math.pi
+
     while delta < -math.pi / 2.0:
         delta += math.pi
+
     return float(delta)
 
 
 def _phase_shift_signed_two_range(
     *, k_fm1: float, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
 ) -> float:
+    # 条件分岐: `k_fm1 == 0.0` を満たす経路を評価する。
     if k_fm1 == 0.0:
         return 0.0
+
     if not (
         k_fm1 > 0
         and 0 < r1_fm < r2_fm
@@ -753,6 +944,7 @@ def _phase_shift_signed_two_range(
         and hbarc_mev_fm > 0
     ):
         return float("nan")
+
     e_mev = (hbarc_mev_fm**2) * (k_fm1**2) / (2.0 * mu_mev)
     y = _y_at_r2_signed_two_range(
         e_mev=e_mev,
@@ -763,16 +955,23 @@ def _phase_shift_signed_two_range(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
     if not math.isfinite(y):
         return float("nan")
+
+    # 条件分岐: `abs(y) < 1e-18` を満たす経路を評価する。
+
     if abs(y) < 1e-18:
         delta = (math.pi / 2.0) - (k_fm1 * r2_fm)
     else:
         delta = math.atan(k_fm1 / y) - (k_fm1 * r2_fm)
+
     while delta > math.pi / 2.0:
         delta -= math.pi
+
     while delta < -math.pi / 2.0:
         delta += math.pi
+
     return float(delta)
 
 
@@ -784,22 +983,34 @@ def _phase_shift_segments(
     mu_mev: float,
     hbarc_mev_fm: float,
 ) -> float:
+    # 条件分岐: `k_fm1 == 0.0` を満たす経路を評価する。
     if k_fm1 == 0.0:
         return 0.0
+
+    # 条件分岐: `not (k_fm1 > 0 and math.isfinite(r_end_fm) and r_end_fm > 0 and mu_mev > 0 an...` を満たす経路を評価する。
+
     if not (k_fm1 > 0 and math.isfinite(r_end_fm) and r_end_fm > 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         return float("nan")
+
     e_mev = (hbarc_mev_fm**2) * (k_fm1**2) / (2.0 * mu_mev)
     y = _y_at_r_end_segments(e_mev=e_mev, segments=segments, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+    # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
     if not math.isfinite(y):
         return float("nan")
+
+    # 条件分岐: `abs(y) < 1e-18` を満たす経路を評価する。
+
     if abs(y) < 1e-18:
         delta = (math.pi / 2.0) - (k_fm1 * r_end_fm)
     else:
         delta = math.atan(k_fm1 / y) - (k_fm1 * r_end_fm)
+
     while delta > math.pi / 2.0:
         delta -= math.pi
+
     while delta < -math.pi / 2.0:
         delta += math.pi
+
     return float(delta)
 
 
@@ -815,8 +1026,10 @@ def _phase_shift_repulsive_core_two_range(
     mu_mev: float,
     hbarc_mev_fm: float,
 ) -> float:
+    # 条件分岐: `k_fm1 == 0.0` を満たす経路を評価する。
     if k_fm1 == 0.0:
         return 0.0
+
     if not (
         k_fm1 > 0
         and 0 <= rc_fm < r1_fm < r2_fm
@@ -827,6 +1040,7 @@ def _phase_shift_repulsive_core_two_range(
         and hbarc_mev_fm > 0
     ):
         return float("nan")
+
     e_mev = (hbarc_mev_fm**2) * (k_fm1**2) / (2.0 * mu_mev)
     y = _y_at_r2_repulsive_core_two_range(
         e_mev=e_mev,
@@ -839,16 +1053,23 @@ def _phase_shift_repulsive_core_two_range(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
     if not math.isfinite(y):
         return float("nan")
+
+    # 条件分岐: `abs(y) < 1e-18` を満たす経路を評価する。
+
     if abs(y) < 1e-18:
         delta = (math.pi / 2.0) - (k_fm1 * r2_fm)
     else:
         delta = math.atan(k_fm1 / y) - (k_fm1 * r2_fm)
+
     while delta > math.pi / 2.0:
         delta -= math.pi
+
     while delta < -math.pi / 2.0:
         delta += math.pi
+
     return float(delta)
 
 
@@ -856,20 +1077,28 @@ def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
     m = [row[:] + [rhs] for row, rhs in zip(a, b)]
     for col in range(3):
         pivot = max(range(col, 3), key=lambda r: abs(m[r][col]))
+        # 条件分岐: `abs(m[pivot][col]) < 1e-18` を満たす経路を評価する。
         if abs(m[pivot][col]) < 1e-18:
             raise ValueError("singular matrix")
+
+        # 条件分岐: `pivot != col` を満たす経路を評価する。
+
         if pivot != col:
             m[col], m[pivot] = m[pivot], m[col]
+
         piv = m[col][col]
         for j in range(col, 4):
             m[col][j] /= piv
+
         for r in range(col + 1, 3):
             fac = m[r][col]
             for j in range(col, 4):
                 m[r][j] -= fac * m[col][j]
+
     x = [0.0, 0.0, 0.0]
     for r in reversed(range(3)):
         x[r] = m[r][3] - sum(m[r][c] * x[c] for c in range(r + 1, 3))
+
     return x
 
 
@@ -891,21 +1120,31 @@ def _fit_kcot_ere(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
         t = math.tan(delta)
+        # 条件分岐: `abs(t) < 1e-15` を満たす経路を評価する。
         if abs(t) < 1e-15:
             continue
+
         y = k / t
         k2 = k * k
+        # 条件分岐: `not (math.isfinite(y) and math.isfinite(k2))` を満たす経路を評価する。
         if not (math.isfinite(y) and math.isfinite(k2)):
             continue
+
         k2s.append(k2)
         k4s.append(k2 * k2)
         ys.append(y)
         points.append({"k_fm1": float(k), "kcot_fm1": float(y), "delta_rad": float(delta)})
+
+    # 条件分岐: `len(ys) < 10` を満たす経路を評価する。
+
     if len(ys) < 10:
         raise ValueError("insufficient points for ERE fit")
+
     s00 = float(len(ys))
     s01 = float(sum(k2s))
     s02 = float(sum(k4s))
@@ -950,21 +1189,31 @@ def _fit_kcot_ere_signed_two_range(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
         t = math.tan(delta)
+        # 条件分岐: `abs(t) < 1e-15` を満たす経路を評価する。
         if abs(t) < 1e-15:
             continue
+
         y = k / t
         k2 = k * k
+        # 条件分岐: `not (math.isfinite(y) and math.isfinite(k2))` を満たす経路を評価する。
         if not (math.isfinite(y) and math.isfinite(k2)):
             continue
+
         k2s.append(k2)
         k4s.append(k2 * k2)
         ys.append(y)
         points.append({"k_fm1": float(k), "kcot_fm1": float(y), "delta_rad": float(delta)})
+
+    # 条件分岐: `len(ys) < 10` を満たす経路を評価する。
+
     if len(ys) < 10:
         raise ValueError("insufficient points for ERE fit")
+
     s00 = float(len(ys))
     s01 = float(sum(k2s))
     s02 = float(sum(k4s))
@@ -1011,21 +1260,31 @@ def _fit_kcot_ere_segments(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
         t = math.tan(delta)
+        # 条件分岐: `abs(t) < 1e-15` を満たす経路を評価する。
         if abs(t) < 1e-15:
             continue
+
         y = k / t
         k2 = k * k
+        # 条件分岐: `not (math.isfinite(y) and math.isfinite(k2))` を満たす経路を評価する。
         if not (math.isfinite(y) and math.isfinite(k2)):
             continue
+
         k2s.append(k2)
         k4s.append(k2 * k2)
         ys.append(y)
         points.append({"k_fm1": float(k), "kcot_fm1": float(y), "delta_rad": float(delta)})
+
+    # 条件分岐: `len(ys) < 10` を満たす経路を評価する。
+
     if len(ys) < 10:
         raise ValueError("insufficient points for ERE fit")
+
     s00 = float(len(ys))
     s01 = float(sum(k2s))
     s02 = float(sum(k4s))
@@ -1080,21 +1339,31 @@ def _fit_kcot_ere_repulsive_core_two_range(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
         t = math.tan(delta)
+        # 条件分岐: `abs(t) < 1e-15` を満たす経路を評価する。
         if abs(t) < 1e-15:
             continue
+
         y = k / t
         k2 = k * k
+        # 条件分岐: `not (math.isfinite(y) and math.isfinite(k2))` を満たす経路を評価する。
         if not (math.isfinite(y) and math.isfinite(k2)):
             continue
+
         k2s.append(k2)
         k4s.append(k2 * k2)
         ys.append(y)
         points.append({"k_fm1": float(k), "kcot_fm1": float(y), "delta_rad": float(delta)})
+
+    # 条件分岐: `len(ys) < 10` を満たす経路を評価する。
+
     if len(ys) < 10:
         raise ValueError("insufficient points for ERE fit")
+
     s00 = float(len(ys))
     s01 = float(sum(k2s))
     s02 = float(sum(k4s))
@@ -1131,8 +1400,10 @@ def _eval_triplet_candidate(
     mu_mev: float,
     hbarc_mev_fm: float,
 ) -> dict[str, object] | None:
+    # 条件分岐: `not (0.05 < r1_fm < r2_fm < 6.0 and v2_mev >= 0)` を満たす経路を評価する。
     if not (0.05 < r1_fm < r2_fm < 6.0 and v2_mev >= 0):
         return None
+
     try:
         v1 = _solve_v1_from_b(
             b_mev=b_mev, r1_fm=r1_fm, r2_fm=r2_fm, v2_mev=v2_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
@@ -1140,12 +1411,15 @@ def _eval_triplet_candidate(
     except Exception:
         return None
 
+    # 条件分岐: `not (math.isfinite(v1) and v1 >= v2_mev)` を満たす経路を評価する。
+
     if not (math.isfinite(v1) and v1 >= v2_mev):
         return None
 
     a_exact = _scattering_length_exact(
         r1_fm=r1_fm, r2_fm=r2_fm, v1_mev=v1, v2_mev=v2_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
     )
+    # 条件分岐: `not math.isfinite(a_exact)` を満たす経路を評価する。
     if not math.isfinite(a_exact):
         return None
 
@@ -1156,6 +1430,7 @@ def _eval_triplet_candidate(
 
     r_eff = float(ere["r_eff_fm"])
     v2 = float(ere["v2_fm3"])
+    # 条件分岐: `not (math.isfinite(r_eff) and math.isfinite(v2))` を満たす経路を評価する。
     if not (math.isfinite(r_eff) and math.isfinite(v2)):
         return None
 
@@ -1187,11 +1462,15 @@ def _yukawa_tail_avg_factor(*, length_fm: float, lambda_pi_fm: float) -> float:
 
     Returns a number in (0,1] for L>0.
     """
+    # 条件分岐: `not (math.isfinite(length_fm) and length_fm > 0 and math.isfinite(lambda_pi_f...` を満たす経路を評価する。
     if not (math.isfinite(length_fm) and length_fm > 0 and math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         return float("nan")
+
     x = float(length_fm) / float(lambda_pi_fm)
+    # 条件分岐: `x <= 0` を満たす経路を評価する。
     if x <= 0:
         return float("nan")
+
     return float((1.0 / x) * (1.0 - math.exp(-x)))
 
 
@@ -1222,28 +1501,43 @@ def _barrier_tail_config(
 
     This makes (Lb*(+Vb) + Lt*(-Vt))/L3_total = -V3_mean.
     """
+    # 条件分岐: `not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         raise ValueError("invalid lambda_pi_fm")
+
+    # 条件分岐: `not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0):
         raise ValueError("invalid tail_len_over_lambda")
+
+    # 条件分岐: `not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0):
         raise ValueError("invalid barrier_len_fraction")
+
+    # 条件分岐: `not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0):
         raise ValueError("invalid barrier_height_factor")
 
     l3_total_fm = float(tail_len_over_lambda) * float(lambda_pi_fm)
+    # 条件分岐: `not (math.isfinite(l3_total_fm) and l3_total_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(l3_total_fm) and l3_total_fm > 0):
         raise ValueError("invalid L3_total")
+
     lb_fm = float(barrier_len_fraction) * float(l3_total_fm)
     lt_fm = float(l3_total_fm) - float(lb_fm)
+    # 条件分岐: `not (math.isfinite(lb_fm) and math.isfinite(lt_fm) and lb_fm > 0 and lt_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lb_fm) and math.isfinite(lt_fm) and lb_fm > 0 and lt_fm > 0):
         raise ValueError("invalid barrier/tail split")
 
     tail_factor = _yukawa_tail_avg_factor(length_fm=l3_total_fm, lambda_pi_fm=lambda_pi_fm)
+    # 条件分岐: `not (math.isfinite(tail_factor) and 0 < tail_factor <= 1.0)` を満たす経路を評価する。
     if not (math.isfinite(tail_factor) and 0 < tail_factor <= 1.0):
         raise ValueError("invalid tail_factor")
 
     # Linear coefficients in V2: V3_mean=tail_factor*V2, Vb=barrier_coeff*V2, Vt=tail_depth_coeff*V2.
+
     barrier_coeff = float(tail_factor) * float(barrier_height_factor)
     tail_depth_coeff = float(tail_factor) * float((l3_total_fm + lb_fm * float(barrier_height_factor)) / lt_fm)
 
@@ -1288,26 +1582,43 @@ def _barrier_tail_config_free_depth(
     Note: mean-preserving corresponds to:
       tail_depth_factor = (L3_total + Lb*barrier_height_factor) / Lt.
     """
+    # 条件分岐: `not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         raise ValueError("invalid lambda_pi_fm")
+
+    # 条件分岐: `not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0):
         raise ValueError("invalid tail_len_over_lambda")
+
+    # 条件分岐: `not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0):
         raise ValueError("invalid barrier_len_fraction")
+
+    # 条件分岐: `not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0):
         raise ValueError("invalid barrier_height_factor")
+
+    # 条件分岐: `not (math.isfinite(tail_depth_factor) and tail_depth_factor >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_depth_factor) and tail_depth_factor >= 0.0):
         raise ValueError("invalid tail_depth_factor")
 
     l3_total_fm = float(tail_len_over_lambda) * float(lambda_pi_fm)
+    # 条件分岐: `not (math.isfinite(l3_total_fm) and l3_total_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(l3_total_fm) and l3_total_fm > 0):
         raise ValueError("invalid L3_total")
+
     lb_fm = float(barrier_len_fraction) * float(l3_total_fm)
     lt_fm = float(l3_total_fm) - float(lb_fm)
+    # 条件分岐: `not (math.isfinite(lb_fm) and math.isfinite(lt_fm) and lb_fm > 0 and lt_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lb_fm) and math.isfinite(lt_fm) and lb_fm > 0 and lt_fm > 0):
         raise ValueError("invalid barrier/tail split")
 
     tail_factor = _yukawa_tail_avg_factor(length_fm=l3_total_fm, lambda_pi_fm=lambda_pi_fm)
+    # 条件分岐: `not (math.isfinite(tail_factor) and 0 < tail_factor <= 1.0)` を満たす経路を評価する。
     if not (math.isfinite(tail_factor) and 0 < tail_factor <= 1.0):
         raise ValueError("invalid tail_factor")
 
@@ -1352,22 +1663,32 @@ def _eval_triplet_candidate_three_range_tail(
              -V3   (R2<=r<R3),  with V3 = <exp tail> * V2,  R3 = R2 + L3, L3 = tail_len_over_lambda * λπ,
              0      (r>R3).
     """
+    # 条件分岐: `not (0.05 < r1_fm < r2_fm < 6.5 and v2_mev >= 0 and math.isfinite(lambda_pi_f...` を満たす経路を評価する。
     if not (0.05 < r1_fm < r2_fm < 6.5 and v2_mev >= 0 and math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         return None
+
+    # 条件分岐: `not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0):
         return None
 
     l3_fm = float(tail_len_over_lambda) * float(lambda_pi_fm)
+    # 条件分岐: `not (math.isfinite(l3_fm) and l3_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(l3_fm) and l3_fm > 0):
         return None
+
     r3_fm = float(r2_fm) + float(l3_fm)
+    # 条件分岐: `not (r3_fm > r2_fm and r3_fm < 10.0)` を満たす経路を評価する。
     if not (r3_fm > r2_fm and r3_fm < 10.0):
         return None
 
     tail_factor = _yukawa_tail_avg_factor(length_fm=l3_fm, lambda_pi_fm=lambda_pi_fm)
+    # 条件分岐: `not (math.isfinite(tail_factor) and 0 < tail_factor <= 1.0)` を満たす経路を評価する。
     if not (math.isfinite(tail_factor) and 0 < tail_factor <= 1.0):
         return None
+
     v3_mev = float(v2_mev) * float(tail_factor)
+    # 条件分岐: `not (math.isfinite(v3_mev) and v3_mev >= 0)` を満たす経路を評価する。
     if not (math.isfinite(v3_mev) and v3_mev >= 0):
         return None
 
@@ -1385,20 +1706,27 @@ def _eval_triplet_candidate_three_range_tail(
         )["V1_MeV"]
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(v1) and v1 > b_mev and v1 >= v2_mev)` を満たす経路を評価する。
+
     if not (math.isfinite(v1) and v1 > b_mev and v1 >= v2_mev):
         return None
 
     segs = [(float(r1_fm), -float(v1))] + seg_after
 
     a_exact = _scattering_length_exact_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+    # 条件分岐: `not math.isfinite(a_exact)` を満たす経路を評価する。
     if not math.isfinite(a_exact):
         return None
+
     try:
         ere = _fit_kcot_ere_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
     except Exception:
         return None
+
     r_eff = float(ere["r_eff_fm"])
     v2_shape = float(ere["v2_fm3"])
+    # 条件分岐: `not (math.isfinite(r_eff) and math.isfinite(v2_shape))` を満たす経路を評価する。
     if not (math.isfinite(r_eff) and math.isfinite(v2_shape)):
         return None
 
@@ -1452,6 +1780,7 @@ def _eval_triplet_candidate_three_range_barrier_tail(
       Vb = barrier_height_factor * V3_mean,
       Vt chosen so that the length-weighted mean over [R2,R3] equals -V3_mean.
     """
+    # 条件分岐: `not (0.05 < r1_fm < r2_fm < 6.5 and v2_mev >= 0 and math.isfinite(lambda_pi_f...` を満たす経路を評価する。
     if not (0.05 < r1_fm < r2_fm < 6.5 and v2_mev >= 0 and math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         return None
 
@@ -1474,14 +1803,19 @@ def _eval_triplet_candidate_three_range_barrier_tail(
 
     r3_fm = float(r2_fm) + float(l3_total_fm)
     rb_fm = float(r2_fm) + float(lb_fm)
+    # 条件分岐: `not (r3_fm > rb_fm > r2_fm and r3_fm < 10.0)` を満たす経路を評価する。
     if not (r3_fm > rb_fm > r2_fm and r3_fm < 10.0):
         return None
 
     v3_mean_mev = float(v2_mev) * float(tail_factor)
     v3_barrier_mev = float(v2_mev) * float(barrier_coeff)
     v3_tail_mev = float(v2_mev) * float(tail_depth_coeff)
+    # 条件分岐: `not (math.isfinite(v3_mean_mev) and math.isfinite(v3_barrier_mev) and math.is...` を満たす経路を評価する。
     if not (math.isfinite(v3_mean_mev) and math.isfinite(v3_barrier_mev) and math.isfinite(v3_tail_mev)):
         return None
+
+    # 条件分岐: `not (v3_mean_mev >= 0 and v3_barrier_mev >= 0 and v3_tail_mev >= 0)` を満たす経路を評価する。
+
     if not (v3_mean_mev >= 0 and v3_barrier_mev >= 0 and v3_tail_mev >= 0):
         return None
 
@@ -1500,20 +1834,27 @@ def _eval_triplet_candidate_three_range_barrier_tail(
         )["V1_MeV"]
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(v1) and v1 > b_mev and v1 >= v2_mev)` を満たす経路を評価する。
+
     if not (math.isfinite(v1) and v1 > b_mev and v1 >= v2_mev):
         return None
 
     segs = [(float(r1_fm), -float(v1))] + seg_after
 
     a_exact = _scattering_length_exact_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+    # 条件分岐: `not math.isfinite(a_exact)` を満たす経路を評価する。
     if not math.isfinite(a_exact):
         return None
+
     try:
         ere = _fit_kcot_ere_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
     except Exception:
         return None
+
     r_eff = float(ere["r_eff_fm"])
     v2_shape = float(ere["v2_fm3"])
+    # 条件分岐: `not (math.isfinite(r_eff) and math.isfinite(v2_shape))` を満たす経路を評価する。
     if not (math.isfinite(r_eff) and math.isfinite(v2_shape)):
         return None
 
@@ -1594,14 +1935,19 @@ def _eval_triplet_candidate_three_range_barrier_tail_free_depth(
 
     r3_fm = float(r2_fm) + float(l3_total_fm)
     rb_fm = float(r2_fm) + float(lb_fm)
+    # 条件分岐: `not (r3_fm > rb_fm > r2_fm and r3_fm < 10.0)` を満たす経路を評価する。
     if not (r3_fm > rb_fm > r2_fm and r3_fm < 10.0):
         return None
 
     v3_mean_mev = float(v2_mev) * float(tail_factor)
     v3_barrier_mev = float(v2_mev) * float(barrier_coeff)
     v3_tail_mev = float(v2_mev) * float(tail_depth_coeff)
+    # 条件分岐: `not (math.isfinite(v3_mean_mev) and math.isfinite(v3_barrier_mev) and math.is...` を満たす経路を評価する。
     if not (math.isfinite(v3_mean_mev) and math.isfinite(v3_barrier_mev) and math.isfinite(v3_tail_mev)):
         return None
+
+    # 条件分岐: `not (v3_mean_mev >= 0 and v3_barrier_mev >= 0 and v3_tail_mev >= 0)` を満たす経路を評価する。
+
     if not (v3_mean_mev >= 0 and v3_barrier_mev >= 0 and v3_tail_mev >= 0):
         return None
 
@@ -1620,20 +1966,27 @@ def _eval_triplet_candidate_three_range_barrier_tail_free_depth(
         )["V1_MeV"]
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(v1) and v1 > b_mev and v1 >= v2_mev)` を満たす経路を評価する。
+
     if not (math.isfinite(v1) and v1 > b_mev and v1 >= v2_mev):
         return None
 
     segs = [(float(r1_fm), -float(v1))] + seg_after
 
     a_exact = _scattering_length_exact_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+    # 条件分岐: `not math.isfinite(a_exact)` を満たす経路を評価する。
     if not math.isfinite(a_exact):
         return None
+
     try:
         ere = _fit_kcot_ere_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
     except Exception:
         return None
+
     r_eff = float(ere["r_eff_fm"])
     v2_shape = float(ere["v2_fm3"])
+    # 条件分岐: `not (math.isfinite(r_eff) and math.isfinite(v2_shape))` を満たす経路を評価する。
     if not (math.isfinite(r_eff) and math.isfinite(v2_shape)):
         return None
 
@@ -1682,6 +2035,7 @@ def _eval_triplet_candidate_repulsive_core_fixed_geometry(
     # Keep a non-zero core so that step 7.9.8 is not degenerate with step 7.9.6/7.9.7.
     if not (0.05 <= rc_fm < (r1_fm - 0.02) and 0.05 < r1_fm < r2_fm < 6.0 and vc_mev >= 0 and v2_mev >= 0):
         return None
+
     try:
         v1 = _solve_v1_from_b_repulsive_core_two_range(
             b_mev=b_mev,
@@ -1696,6 +2050,8 @@ def _eval_triplet_candidate_repulsive_core_fixed_geometry(
     except Exception:
         return None
 
+    # 条件分岐: `not (math.isfinite(v1) and v1 >= v2_mev)` を満たす経路を評価する。
+
     if not (math.isfinite(v1) and v1 >= v2_mev):
         return None
 
@@ -1709,6 +2065,7 @@ def _eval_triplet_candidate_repulsive_core_fixed_geometry(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `not math.isfinite(a_exact)` を満たす経路を評価する。
     if not math.isfinite(a_exact):
         return None
 
@@ -1728,6 +2085,7 @@ def _eval_triplet_candidate_repulsive_core_fixed_geometry(
 
     r_eff = float(ere["r_eff_fm"])
     v2 = float(ere["v2_fm3"])
+    # 条件分岐: `not (math.isfinite(r_eff) and math.isfinite(v2))` を満たす経路を評価する。
     if not (math.isfinite(r_eff) and math.isfinite(v2)):
         return None
 
@@ -1767,6 +2125,7 @@ def _fit_triplet_repulsive_core_fixed_geometry(
     """
     rc_min = 0.05
     rc_max = min(max(rc_min + 0.02, r1_fm - 0.05), 0.9 * r1_fm)
+    # 条件分岐: `not (rc_max > rc_min and r1_fm > 0.1 and r2_fm > r1_fm)` を満たす経路を評価する。
     if not (rc_max > rc_min and r1_fm > 0.1 and r2_fm > r1_fm):
         raise ValueError("invalid geometry for core fit")
 
@@ -1793,15 +2152,22 @@ def _fit_triplet_repulsive_core_fixed_geometry(
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+                # 条件分岐: `cand is None` を満たす経路を評価する。
                 if cand is None:
                     continue
+
+                # 条件分岐: `best is None or float(cand["score"]) < float(best["score"])` を満たす経路を評価する。
+
                 if best is None or float(cand["score"]) < float(best["score"]):
                     best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise ValueError("no valid candidates in grid scan")
 
     # Local refinement (coordinate descent).
+
     rc = float(best["rc_fm"])
     vc = float(best["vc_mev"])
     v2 = float(best["v2_mev"])
@@ -1832,18 +2198,26 @@ def _fit_triplet_repulsive_core_fixed_geometry(
                 mu_mev=mu_mev,
                 hbarc_mev_fm=hbarc_mev_fm,
             )
+            # 条件分岐: `cand is None` を満たす経路を評価する。
             if cand is None:
                 continue
+
+            # 条件分岐: `float(cand["score"]) + 1e-12 < float(best["score"])` を満たす経路を評価する。
+
             if float(cand["score"]) + 1e-12 < float(best["score"]):
                 best = cand
                 rc = float(best["rc_fm"])
                 vc = float(best["vc_mev"])
                 v2 = float(best["v2_mev"])
                 improved = True
+
+        # 条件分岐: `not improved` を満たす経路を評価する。
+
         if not improved:
             step_rc *= 0.6
             step_vc *= 0.6
             step_v2 *= 0.6
+            # 条件分岐: `step_rc < 0.003 and step_vc < 5.0 and step_v2 < 0.2` を満たす経路を評価する。
             if step_rc < 0.003 and step_vc < 5.0 and step_v2 < 0.2:
                 break
 
@@ -1876,8 +2250,10 @@ def _fit_triplet_two_range(
     best: dict[str, object] | None = None
     for r1 in r1_grid:
         for r2 in r2_grid_all:
+            # 条件分岐: `r2 <= r1 + 0.25` を満たす経路を評価する。
             if r2 <= r1 + 0.25:
                 continue
+
             for v2 in v2_grid:
                 cand = _eval_triplet_candidate(
                     b_mev=b_mev,
@@ -1888,10 +2264,16 @@ def _fit_triplet_two_range(
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+                # 条件分岐: `cand is None` を満たす経路を評価する。
                 if cand is None:
                     continue
+
+                # 条件分岐: `best is None or float(cand["score"]) < float(best["score"])` を満たす経路を評価する。
+
                 if best is None or float(cand["score"]) < float(best["score"]):
                     best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise ValueError("no valid two-range candidate found in coarse grid")
@@ -1921,18 +2303,26 @@ def _fit_triplet_two_range(
                 mu_mev=mu_mev,
                 hbarc_mev_fm=hbarc_mev_fm,
             )
+            # 条件分岐: `cand is None` を満たす経路を評価する。
             if cand is None:
                 continue
+
+            # 条件分岐: `float(cand["score"]) + 1e-12 < float(best["score"])` を満たす経路を評価する。
+
             if float(cand["score"]) + 1e-12 < float(best["score"]):
                 best = cand
                 r1 = float(best["r1_fm"])
                 r2 = float(best["r2_fm"])
                 v2 = float(best["v2_mev"])
                 improved = True
+
+        # 条件分岐: `not improved` を満たす経路を評価する。
+
         if not improved:
             step_r1 *= 0.6
             step_r2 *= 0.6
             step_v2 *= 0.6
+            # 条件分岐: `step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35` を満たす経路を評価する。
             if step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35:
                 break
 
@@ -1956,10 +2346,17 @@ def _fit_triplet_two_range_pion_constrained(
       R1 = O(λπ),  R2 = O(λπ),
     by searching only within specified ratio ranges.
     """
+    # 条件分岐: `not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         raise ValueError("invalid lambda_pi_fm")
+
+    # 条件分岐: `not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min)` を満たす経路を評価する。
+
     if not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min):
         raise ValueError("invalid R1/λπ bounds")
+
+    # 条件分岐: `not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min)` を満たす経路を評価する。
+
     if not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min):
         raise ValueError("invalid R2/λπ bounds")
 
@@ -1975,8 +2372,10 @@ def _fit_triplet_two_range_pion_constrained(
     best: dict[str, object] | None = None
     for r1 in r1_grid:
         for r2 in r2_grid_all:
+            # 条件分岐: `r2 <= r1 + 0.25` を満たす経路を評価する。
             if r2 <= r1 + 0.25:
                 continue
+
             for v2 in v2_grid:
                 cand = _eval_triplet_candidate(
                     b_mev=b_mev,
@@ -1987,10 +2386,16 @@ def _fit_triplet_two_range_pion_constrained(
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+                # 条件分岐: `cand is None` を満たす経路を評価する。
                 if cand is None:
                     continue
+
+                # 条件分岐: `best is None or float(cand["score"]) < float(best["score"])` を満たす経路を評価する。
+
                 if best is None or float(cand["score"]) < float(best["score"]):
                     best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise ValueError("no valid two-range candidate found under λπ constraints")
@@ -2024,18 +2429,26 @@ def _fit_triplet_two_range_pion_constrained(
                 mu_mev=mu_mev,
                 hbarc_mev_fm=hbarc_mev_fm,
             )
+            # 条件分岐: `cand is None` を満たす経路を評価する。
             if cand is None:
                 continue
+
+            # 条件分岐: `float(cand["score"]) + 1e-12 < float(best["score"])` を満たす経路を評価する。
+
             if float(cand["score"]) + 1e-12 < float(best["score"]):
                 best = cand
                 r1 = float(best["r1_fm"])
                 r2 = float(best["r2_fm"])
                 v2 = float(best["v2_mev"])
                 improved = True
+
+        # 条件分岐: `not improved` を満たす経路を評価する。
+
         if not improved:
             step_r1 *= 0.6
             step_r2 *= 0.6
             step_v2 *= 0.6
+            # 条件分岐: `step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35` を満たす経路を評価する。
             if step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35:
                 break
 
@@ -2071,12 +2484,22 @@ def _fit_triplet_three_range_tail_pion_constrained(
       R3 = R2 + (tail_len_over_lambda * λπ),
       V3 = <exp tail mean> * V2.
     """
+    # 条件分岐: `not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         raise ValueError("invalid lambda_pi_fm")
+
+    # 条件分岐: `not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0):
         raise ValueError("invalid tail_len_over_lambda")
+
+    # 条件分岐: `not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min)` を満たす経路を評価する。
+
     if not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min):
         raise ValueError("invalid R1/λπ bounds")
+
+    # 条件分岐: `not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min)` を満たす経路を評価する。
+
     if not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min):
         raise ValueError("invalid R2/λπ bounds")
 
@@ -2092,8 +2515,10 @@ def _fit_triplet_three_range_tail_pion_constrained(
     best: dict[str, object] | None = None
     for r1 in r1_grid:
         for r2 in r2_grid_all:
+            # 条件分岐: `r2 <= r1 + 0.25` を満たす経路を評価する。
             if r2 <= r1 + 0.25:
                 continue
+
             for v2 in v2_grid:
                 cand = _eval_triplet_candidate_three_range_tail(
                     b_mev=b_mev,
@@ -2106,10 +2531,16 @@ def _fit_triplet_three_range_tail_pion_constrained(
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+                # 条件分岐: `cand is None` を満たす経路を評価する。
                 if cand is None:
                     continue
+
+                # 条件分岐: `best is None or float(cand["score"]) < float(best["score"])` を満たす経路を評価する。
+
                 if best is None or float(cand["score"]) < float(best["score"]):
                     best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise ValueError("no valid three-range candidate found under λπ constraints")
@@ -2145,18 +2576,26 @@ def _fit_triplet_three_range_tail_pion_constrained(
                 mu_mev=mu_mev,
                 hbarc_mev_fm=hbarc_mev_fm,
             )
+            # 条件分岐: `cand is None` を満たす経路を評価する。
             if cand is None:
                 continue
+
+            # 条件分岐: `float(cand["score"]) + 1e-12 < float(best["score"])` を満たす経路を評価する。
+
             if float(cand["score"]) + 1e-12 < float(best["score"]):
                 best = cand
                 r1 = float(best["r1_fm"])
                 r2 = float(best["r2_fm"])
                 v2 = float(best["v2_mev"])
                 improved = True
+
+        # 条件分岐: `not improved` を満たす経路を評価する。
+
         if not improved:
             step_r1 *= 0.6
             step_r2 *= 0.6
             step_v2 *= 0.6
+            # 条件分岐: `step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35` を満たす経路を評価する。
             if step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35:
                 break
 
@@ -2195,16 +2634,32 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained(
     Yukawa tail region (R2..R3) is split into a repulsive barrier + compensating attractive tail, while
     preserving the original mean tail value (so we do not introduce an independent "tail strength" parameter).
     """
+    # 条件分岐: `not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         raise ValueError("invalid lambda_pi_fm")
+
+    # 条件分岐: `not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0):
         raise ValueError("invalid tail_len_over_lambda")
+
+    # 条件分岐: `not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0):
         raise ValueError("invalid barrier_len_fraction")
+
+    # 条件分岐: `not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0):
         raise ValueError("invalid barrier_height_factor")
+
+    # 条件分岐: `not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min)` を満たす経路を評価する。
+
     if not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min):
         raise ValueError("invalid R1/λπ bounds")
+
+    # 条件分岐: `not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min)` を満たす経路を評価する。
+
     if not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min):
         raise ValueError("invalid R2/λπ bounds")
 
@@ -2220,8 +2675,10 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained(
     best: dict[str, object] | None = None
     for r1 in r1_grid:
         for r2 in r2_grid_all:
+            # 条件分岐: `r2 <= r1 + 0.25` を満たす経路を評価する。
             if r2 <= r1 + 0.25:
                 continue
+
             for v2 in v2_grid:
                 cand = _eval_triplet_candidate_three_range_barrier_tail(
                     b_mev=b_mev,
@@ -2236,10 +2693,16 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained(
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+                # 条件分岐: `cand is None` を満たす経路を評価する。
                 if cand is None:
                     continue
+
+                # 条件分岐: `best is None or float(cand["score"]) < float(best["score"])` を満たす経路を評価する。
+
                 if best is None or float(cand["score"]) < float(best["score"]):
                     best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise ValueError("no valid barrier+tail three-range candidate found under λπ constraints")
@@ -2277,18 +2740,26 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained(
                 mu_mev=mu_mev,
                 hbarc_mev_fm=hbarc_mev_fm,
             )
+            # 条件分岐: `cand is None` を満たす経路を評価する。
             if cand is None:
                 continue
+
+            # 条件分岐: `float(cand["score"]) + 1e-12 < float(best["score"])` を満たす経路を評価する。
+
             if float(cand["score"]) + 1e-12 < float(best["score"]):
                 best = cand
                 r1 = float(best["r1_fm"])
                 r2 = float(best["r2_fm"])
                 v2 = float(best["v2_mev"])
                 improved = True
+
+        # 条件分岐: `not improved` を満たす経路を評価する。
+
         if not improved:
             step_r1 *= 0.6
             step_r2 *= 0.6
             step_v2 *= 0.6
+            # 条件分岐: `step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35` を満たす経路を評価する。
             if step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35:
                 break
 
@@ -2330,18 +2801,37 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
     Same search structure as _fit_triplet_three_range_barrier_tail_pion_constrained(), but the barrier+tail split
     does *not* enforce the mean-preserving rule. Instead, the tail depth factor is specified independently.
     """
+    # 条件分岐: `not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(lambda_pi_fm) and lambda_pi_fm > 0):
         raise ValueError("invalid lambda_pi_fm")
+
+    # 条件分岐: `not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_len_over_lambda) and tail_len_over_lambda > 0):
         raise ValueError("invalid tail_len_over_lambda")
+
+    # 条件分岐: `not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_len_fraction) and 0.0 < barrier_len_fraction < 1.0):
         raise ValueError("invalid barrier_len_fraction")
+
+    # 条件分岐: `not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(barrier_height_factor) and barrier_height_factor >= 0.0):
         raise ValueError("invalid barrier_height_factor")
+
+    # 条件分岐: `not (math.isfinite(tail_depth_factor) and tail_depth_factor >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(tail_depth_factor) and tail_depth_factor >= 0.0):
         raise ValueError("invalid tail_depth_factor")
+
+    # 条件分岐: `not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min)` を満たす経路を評価する。
+
     if not (r1_over_lambda_min > 0 and r1_over_lambda_max > r1_over_lambda_min):
         raise ValueError("invalid R1/λπ bounds")
+
+    # 条件分岐: `not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min)` を満たす経路を評価する。
+
     if not (r2_over_lambda_min > 0 and r2_over_lambda_max > r2_over_lambda_min):
         raise ValueError("invalid R2/λπ bounds")
 
@@ -2357,8 +2847,10 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
     best: dict[str, object] | None = None
     for r1 in r1_grid:
         for r2 in r2_grid_all:
+            # 条件分岐: `r2 <= r1 + 0.25` を満たす経路を評価する。
             if r2 <= r1 + 0.25:
                 continue
+
             for v2 in v2_grid:
                 cand = _eval_triplet_candidate_three_range_barrier_tail_free_depth(
                     b_mev=b_mev,
@@ -2374,10 +2866,16 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+                # 条件分岐: `cand is None` を満たす経路を評価する。
                 if cand is None:
                     continue
+
+                # 条件分岐: `best is None or float(cand["score"]) < float(best["score"])` を満たす経路を評価する。
+
                 if best is None or float(cand["score"]) < float(best["score"]):
                     best = cand
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise ValueError("no valid barrier+tail (free tail depth) candidate found under λπ constraints")
@@ -2416,18 +2914,26 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
                 mu_mev=mu_mev,
                 hbarc_mev_fm=hbarc_mev_fm,
             )
+            # 条件分岐: `cand is None` を満たす経路を評価する。
             if cand is None:
                 continue
+
+            # 条件分岐: `float(cand["score"]) + 1e-12 < float(best["score"])` を満たす経路を評価する。
+
             if float(cand["score"]) + 1e-12 < float(best["score"]):
                 best = cand
                 r1 = float(best["r1_fm"])
                 r2 = float(best["r2_fm"])
                 v2 = float(best["v2_mev"])
                 improved = True
+
+        # 条件分岐: `not improved` を満たす経路を評価する。
+
         if not improved:
             step_r1 *= 0.6
             step_r2 *= 0.6
             step_v2 *= 0.6
+            # 条件分岐: `step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35` を満たす経路を評価する。
             if step_r1 < 0.004 and step_r2 < 0.004 and step_v2 < 0.35:
                 break
 
@@ -2463,6 +2969,7 @@ def _fit_lambda_for_singlet(
       V1_s = λ V1_t,  V2_s = λ V2_t
     matches the singlet scattering length a_s at k->0.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0):
         raise ValueError("invalid a_s target")
 
@@ -2488,45 +2995,66 @@ def _fit_lambda_for_singlet(
     brackets: list[tuple[float, float, float]] = []
     for lam in grid:
         fl = f(lam)
+        # 条件分岐: `not math.isfinite(fl)` を満たす経路を評価する。
         if not math.isfinite(fl):
             prev_lam = None
             prev_f = None
             continue
+
+        # 条件分岐: `best_abs is None or abs(fl) < best_abs` を満たす経路を評価する。
+
         if best_abs is None or abs(fl) < best_abs:
             best_abs = abs(fl)
             best_lam = lam
+
+        # 条件分岐: `prev_lam is not None and prev_f is not None` を満たす経路を評価する。
+
         if prev_lam is not None and prev_f is not None:
+            # 条件分岐: `fl == 0 or (fl > 0) != (prev_f > 0)` を満たす経路を評価する。
             if fl == 0 or (fl > 0) != (prev_f > 0):
                 mid = 0.5 * (prev_lam + lam)
                 brackets.append((prev_lam, lam, abs(mid - 0.9)))
+
         prev_lam = lam
         prev_f = fl
 
+    # 条件分岐: `not brackets` を満たす経路を評価する。
+
     if not brackets:
+        # 条件分岐: `best_lam is None` を満たす経路を評価する。
         if best_lam is None:
             raise ValueError("no usable λ samples")
+
         return {"lambda": float(best_lam), "note": "no sign-change; using best |Δa_s| grid point"}
 
     brackets.sort(key=lambda t: t[2])
     lo, hi, _ = brackets[0]
     f_lo = f(lo)
     f_hi = f(hi)
+    # 条件分岐: `not ((f_lo > 0) != (f_hi > 0))` を満たす経路を評価する。
     if not ((f_lo > 0) != (f_hi > 0)):
+        # 条件分岐: `best_lam is None` を満たす経路を評価する。
         if best_lam is None:
             raise ValueError("invalid λ bracket and no fallback")
+
         return {"lambda": float(best_lam), "note": "invalid bracket; using best |Δa_s| grid point"}
 
     for _ in range(80):
         mid = 0.5 * (lo + hi)
         f_mid = f(mid)
+        # 条件分岐: `f_mid == 0 or (hi - lo) < 1e-10` を満たす経路を評価する。
         if f_mid == 0 or (hi - lo) < 1e-10:
             return {"lambda": float(mid), "note": "bisection solve on λ"}
+
+        # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
         if (f_mid > 0) == (f_lo > 0):
             lo = mid
             f_lo = f_mid
         else:
             hi = mid
             f_hi = f_mid
+
     return {"lambda": float(0.5 * (lo + hi)), "note": "bisection solve on λ (max iter)"}
 
 
@@ -2548,14 +3076,20 @@ def _fit_v2s_for_singlet(
         a = R2 - 1/y  =>  y_target = 1/(R2 - a_target)
     and find V2_s such that y(V2_s) = y_target.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0):
         raise ValueError("invalid a_s target")
+
+    # 条件分岐: `not (0 < r1_fm < r2_fm and v1_s_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
+
     if not (0 < r1_fm < r2_fm and v1_s_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for singlet fit")
 
     denom = r2_fm - a_s_target_fm
+    # 条件分岐: `not (math.isfinite(denom) and abs(denom) > 1e-12)` を満たす経路を評価する。
     if not (math.isfinite(denom) and abs(denom) > 1e-12):
         raise ValueError("invalid a_s target for y_target")
+
     y_target = 1.0 / denom
 
     a_abs_max = 1e6
@@ -2570,11 +3104,15 @@ def _fit_v2s_for_singlet(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
         if not math.isfinite(y) or abs(y) < 1e-18:
             return float("nan")
+
         a = r2_fm - (1.0 / y)
+        # 条件分岐: `not math.isfinite(a) or abs(a) > a_abs_max` を満たす経路を評価する。
         if not math.isfinite(a) or abs(a) > a_abs_max:
             return float("nan")
+
         return float(y - y_target)
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
@@ -2588,23 +3126,36 @@ def _fit_v2s_for_singlet(
 
         for v2 in grid:
             fv = f(v2)
+            # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
             if not math.isfinite(fv):
                 prev_v2 = None
                 prev_f = None
                 continue
+
+            # 条件分岐: `best_abs is None or abs(fv) < best_abs` を満たす経路を評価する。
+
             if best_abs is None or abs(fv) < best_abs:
                 best_abs = abs(fv)
                 best_v2 = v2
+
+            # 条件分岐: `prev_v2 is not None and prev_f is not None` を満たす経路を評価する。
+
             if prev_v2 is not None and prev_f is not None:
+                # 条件分岐: `fv == 0.0 or (fv > 0) != (prev_f > 0)` を満たす経路を評価する。
                 if fv == 0.0 or (fv > 0) != (prev_f > 0):
                     mid = 0.5 * (prev_v2 + v2)
                     brackets.append((prev_v2, v2, abs(mid - v2_hint_mev)))
+
             prev_v2 = v2
             prev_f = fv
 
+        # 条件分岐: `not brackets` を満たす経路を評価する。
+
         if not brackets:
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"no usable V2_s samples ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -2617,9 +3168,12 @@ def _fit_v2s_for_singlet(
         lo, hi, _ = brackets[0]
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0)))` を満たす経路を評価する。
         if not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0))):
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"invalid V2_s bracket and no fallback ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -2631,17 +3185,23 @@ def _fit_v2s_for_singlet(
         for _ in range(90):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `not math.isfinite(f_mid)` を満たす経路を評価する。
             if not math.isfinite(f_mid):
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 fa = f(mid_a)
                 fb = f(mid_b)
+                # 条件分岐: `math.isfinite(fa)` を満たす経路を評価する。
                 if math.isfinite(fa):
                     mid, f_mid = mid_a, fa
+                # 条件分岐: 前段条件が不成立で、`math.isfinite(fb)` を追加評価する。
                 elif math.isfinite(fb):
                     mid, f_mid = mid_b, fb
                 else:
                     break
+
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-9` を満たす経路を評価する。
+
             if f_mid == 0.0 or (hi - lo) < 1e-9:
                 return {
                     "V2_s_MeV": float(mid),
@@ -2650,6 +3210,9 @@ def _fit_v2s_for_singlet(
                     "scan": {"v2_min": float(v2_min), "v2_max": float(v2_max), "n_scan": int(n_scan)},
                     "y_target_fm1": float(y_target),
                 }
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
@@ -2657,8 +3220,11 @@ def _fit_v2s_for_singlet(
                 hi = mid
                 f_hi = f_mid
 
+        # 条件分岐: `best_v2 is None` を満たす経路を評価する。
+
         if best_v2 is None:
             raise ValueError(f"bisection failed and no fallback ({tag})")
+
         return {
             "V2_s_MeV": float(best_v2),
             "method": "grid_best",
@@ -2668,6 +3234,7 @@ def _fit_v2s_for_singlet(
         }
 
     # First pass: enforce V2_s <= V1_s (keeps the intended two-step profile).
+
     strict_max = min(float(v1_s_mev), 500.0)
     fit = scan_and_solve(v2_min=0.0, v2_max=strict_max, tag="strict (V2<=V1)")
     v2_s = float(fit["V2_s_MeV"])
@@ -2679,11 +3246,13 @@ def _fit_v2s_for_singlet(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.ge...` を満たす経路を評価する。
     if math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.get("method")) == "bisection":
         fit["a_s_exact_fm"] = float(a_check)
         return fit
 
     # Second pass: allow V2_s > V1_s if needed to hit the target a_s.
+
     relaxed = scan_and_solve(v2_min=0.0, v2_max=500.0, tag="relaxed (allow V2>V1)")
     v2_s2 = float(relaxed["V2_s_MeV"])
     a_check2 = _scattering_length_exact(
@@ -2695,8 +3264,10 @@ def _fit_v2s_for_singlet(
         hbarc_mev_fm=hbarc_mev_fm,
     )
     relaxed["a_s_exact_fm"] = float(a_check2) if math.isfinite(a_check2) else float("nan")
+    # 条件分岐: `v2_s2 > float(v1_s_mev) + 1e-9` を満たす経路を評価する。
     if v2_s2 > float(v1_s_mev) + 1e-9:
         relaxed["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return relaxed
 
 
@@ -2713,14 +3284,20 @@ def _fit_v2s_for_singlet_signed_two_range(
     """
     Same as _fit_v2s_for_singlet(), but allows signed V2_s (outer barrier when V2_s<0).
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0):
         raise ValueError("invalid a_s target")
+
+    # 条件分岐: `not (0 < r1_fm < r2_fm and math.isfinite(v1_s_mev) and mu_mev > 0 and hbarc_m...` を満たす経路を評価する。
+
     if not (0 < r1_fm < r2_fm and math.isfinite(v1_s_mev) and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for singlet fit")
 
     denom = r2_fm - a_s_target_fm
+    # 条件分岐: `not (math.isfinite(denom) and abs(denom) > 1e-12)` を満たす経路を評価する。
     if not (math.isfinite(denom) and abs(denom) > 1e-12):
         raise ValueError("invalid a_s target for y_target")
+
     y_target = 1.0 / denom
 
     a_abs_max = 1e6
@@ -2735,11 +3312,15 @@ def _fit_v2s_for_singlet_signed_two_range(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
         if not math.isfinite(y) or abs(y) < 1e-18:
             return float("nan")
+
         a = r2_fm - (1.0 / y)
+        # 条件分岐: `not math.isfinite(a) or abs(a) > a_abs_max` を満たす経路を評価する。
         if not math.isfinite(a) or abs(a) > a_abs_max:
             return float("nan")
+
         return float(y - y_target)
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
@@ -2753,23 +3334,36 @@ def _fit_v2s_for_singlet_signed_two_range(
 
         for v2 in grid:
             fv = f(v2)
+            # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
             if not math.isfinite(fv):
                 prev_v2 = None
                 prev_f = None
                 continue
+
+            # 条件分岐: `best_abs is None or abs(fv) < best_abs` を満たす経路を評価する。
+
             if best_abs is None or abs(fv) < best_abs:
                 best_abs = abs(fv)
                 best_v2 = v2
+
+            # 条件分岐: `prev_v2 is not None and prev_f is not None` を満たす経路を評価する。
+
             if prev_v2 is not None and prev_f is not None:
+                # 条件分岐: `fv == 0.0 or (fv > 0) != (prev_f > 0)` を満たす経路を評価する。
                 if fv == 0.0 or (fv > 0) != (prev_f > 0):
                     mid = 0.5 * (prev_v2 + v2)
                     brackets.append((prev_v2, v2, abs(mid), abs(mid - v2_hint_mev)))
+
             prev_v2 = v2
             prev_f = fv
 
+        # 条件分岐: `not brackets` を満たす経路を評価する。
+
         if not brackets:
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"no usable V2_s samples ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -2782,9 +3376,12 @@ def _fit_v2s_for_singlet_signed_two_range(
         lo, hi, _, _ = brackets[0]
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0)))` を満たす経路を評価する。
         if not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0))):
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"invalid V2_s bracket and no fallback ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -2796,17 +3393,23 @@ def _fit_v2s_for_singlet_signed_two_range(
         for _ in range(100):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `not math.isfinite(f_mid)` を満たす経路を評価する。
             if not math.isfinite(f_mid):
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 fa = f(mid_a)
                 fb = f(mid_b)
+                # 条件分岐: `math.isfinite(fa)` を満たす経路を評価する。
                 if math.isfinite(fa):
                     mid, f_mid = mid_a, fa
+                # 条件分岐: 前段条件が不成立で、`math.isfinite(fb)` を追加評価する。
                 elif math.isfinite(fb):
                     mid, f_mid = mid_b, fb
                 else:
                     break
+
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-9` を満たす経路を評価する。
+
             if f_mid == 0.0 or (hi - lo) < 1e-9:
                 return {
                     "V2_s_MeV": float(mid),
@@ -2815,6 +3418,9 @@ def _fit_v2s_for_singlet_signed_two_range(
                     "scan": {"v2_min": float(v2_min), "v2_max": float(v2_max), "n_scan": int(n_scan)},
                     "y_target_fm1": float(y_target),
                 }
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
@@ -2822,8 +3428,11 @@ def _fit_v2s_for_singlet_signed_two_range(
                 hi = mid
                 f_hi = f_mid
 
+        # 条件分岐: `best_v2 is None` を満たす経路を評価する。
+
         if best_v2 is None:
             raise ValueError(f"bisection failed and no fallback ({tag})")
+
         return {
             "V2_s_MeV": float(best_v2),
             "method": "grid_best",
@@ -2833,6 +3442,7 @@ def _fit_v2s_for_singlet_signed_two_range(
         }
 
     # First pass: keep |V2_s| <= V1_s as a minimal "shape" bound.
+
     strict_max = min(500.0, abs(float(v1_s_mev)))
     fit = scan_and_solve(v2_min=-strict_max, v2_max=+strict_max, tag="bounded (|V2|<=V1)")
     v2_s = float(fit["V2_s_MeV"])
@@ -2844,11 +3454,13 @@ def _fit_v2s_for_singlet_signed_two_range(
         mu_mev=mu_mev,
         hbarc_mev_fm=hbarc_mev_fm,
     )
+    # 条件分岐: `math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.ge...` を満たす経路を評価する。
     if math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.get("method")) == "bisection":
         fit["a_s_exact_fm"] = float(a_check)
         return fit
 
     # Second pass: widen if needed.
+
     relaxed = scan_and_solve(v2_min=-700.0, v2_max=700.0, tag="wide (allow barrier)")
     v2_s2 = float(relaxed["V2_s_MeV"])
     a_check2 = _scattering_length_exact_signed_two_range(
@@ -2860,10 +3472,13 @@ def _fit_v2s_for_singlet_signed_two_range(
         hbarc_mev_fm=hbarc_mev_fm,
     )
     relaxed["a_s_exact_fm"] = float(a_check2) if math.isfinite(a_check2) else float("nan")
+    # 条件分岐: `v2_s2 < -1e-12` を満たす経路を評価する。
     if v2_s2 < -1e-12:
         relaxed["note_profile"] = "V2_s < 0 (outer repulsive barrier)."
+    # 条件分岐: 前段条件が不成立で、`v2_s2 > float(v1_s_mev) + 1e-9` を追加評価する。
     elif v2_s2 > float(v1_s_mev) + 1e-9:
         relaxed["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return relaxed
 
 
@@ -2890,8 +3505,10 @@ def _fit_v2s_for_singlet_three_range_tail(
 
     This keeps the singlet fit degrees at 2: (V1_s,V2_s) for (a_s,r_s), leaving v2s as a prediction.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0):
         raise ValueError("invalid a_s target")
+
     if not (
         0 < r1_fm < r2_fm
         and math.isfinite(tail_len_fm)
@@ -2904,8 +3521,10 @@ def _fit_v2s_for_singlet_three_range_tail(
 
     r3_fm = float(r2_fm) + float(tail_len_fm)
     denom = r3_fm - a_s_target_fm
+    # 条件分岐: `not (math.isfinite(denom) and abs(denom) > 1e-12)` を満たす経路を評価する。
     if not (math.isfinite(denom) and abs(denom) > 1e-12):
         raise ValueError("invalid a_s target for y_target")
+
     y_target = 1.0 / denom
 
     a_abs_max = 1e6
@@ -2917,11 +3536,15 @@ def _fit_v2s_for_singlet_three_range_tail(
             (float(tail_len_fm), -float(v3_tail_mev)),
         ]
         y = _y_at_r_end_segments(e_mev=0.0, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+        # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
         if not math.isfinite(y) or abs(y) < 1e-18:
             return float("nan")
+
         a = r3_fm - (1.0 / y)
+        # 条件分岐: `not math.isfinite(a) or abs(a) > a_abs_max` を満たす経路を評価する。
         if not math.isfinite(a) or abs(a) > a_abs_max:
             return float("nan")
+
         return float(y - y_target)
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
@@ -2935,23 +3558,36 @@ def _fit_v2s_for_singlet_three_range_tail(
 
         for v2 in grid:
             fv = f(v2)
+            # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
             if not math.isfinite(fv):
                 prev_v2 = None
                 prev_f = None
                 continue
+
+            # 条件分岐: `best_abs is None or abs(fv) < best_abs` を満たす経路を評価する。
+
             if best_abs is None or abs(fv) < best_abs:
                 best_abs = abs(fv)
                 best_v2 = v2
+
+            # 条件分岐: `prev_v2 is not None and prev_f is not None` を満たす経路を評価する。
+
             if prev_v2 is not None and prev_f is not None:
+                # 条件分岐: `fv == 0.0 or (fv > 0) != (prev_f > 0)` を満たす経路を評価する。
                 if fv == 0.0 or (fv > 0) != (prev_f > 0):
                     mid = 0.5 * (prev_v2 + v2)
                     brackets.append((prev_v2, v2, abs(mid), abs(mid - v2_hint_mev)))
+
             prev_v2 = v2
             prev_f = fv
 
+        # 条件分岐: `not brackets` を満たす経路を評価する。
+
         if not brackets:
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"no usable V2_s samples ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -2964,9 +3600,12 @@ def _fit_v2s_for_singlet_three_range_tail(
         lo, hi, _, _ = brackets[0]
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0)))` を満たす経路を評価する。
         if not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0))):
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"invalid V2_s bracket and no fallback ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -2978,17 +3617,23 @@ def _fit_v2s_for_singlet_three_range_tail(
         for _ in range(120):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `not math.isfinite(f_mid)` を満たす経路を評価する。
             if not math.isfinite(f_mid):
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 fa = f(mid_a)
                 fb = f(mid_b)
+                # 条件分岐: `math.isfinite(fa)` を満たす経路を評価する。
                 if math.isfinite(fa):
                     mid, f_mid = mid_a, fa
+                # 条件分岐: 前段条件が不成立で、`math.isfinite(fb)` を追加評価する。
                 elif math.isfinite(fb):
                     mid, f_mid = mid_b, fb
                 else:
                     break
+
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-9` を満たす経路を評価する。
+
             if f_mid == 0.0 or (hi - lo) < 1e-9:
                 return {
                     "V2_s_MeV": float(mid),
@@ -2997,6 +3642,9 @@ def _fit_v2s_for_singlet_three_range_tail(
                     "scan": {"v2_min": float(v2_min), "v2_max": float(v2_max), "n_scan": int(n_scan)},
                     "y_target_fm1": float(y_target),
                 }
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
@@ -3004,8 +3652,11 @@ def _fit_v2s_for_singlet_three_range_tail(
                 hi = mid
                 f_hi = f_mid
 
+        # 条件分岐: `best_v2 is None` を満たす経路を評価する。
+
         if best_v2 is None:
             raise ValueError(f"bisection failed and no fallback ({tag})")
+
         return {
             "V2_s_MeV": float(best_v2),
             "method": "grid_best",
@@ -3013,6 +3664,8 @@ def _fit_v2s_for_singlet_three_range_tail(
             "scan": {"v2_min": float(v2_min), "v2_max": float(v2_max), "n_scan": int(n_scan)},
             "y_target_fm1": float(y_target),
         }
+
+    # 条件分岐: `allow_signed_v2` を満たす経路を評価する。
 
     if allow_signed_v2:
         strict_max = min(700.0, max(50.0, abs(float(v1_s_mev))))
@@ -3030,6 +3683,7 @@ def _fit_v2s_for_singlet_three_range_tail(
     a_check = _scattering_length_exact_segments(
         r_end_fm=r3_fm, segments=segs_chk, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
     )
+    # 条件分岐: `math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.ge...` を満たす経路を評価する。
     if math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.get("method")) == "bisection":
         fit["a_s_exact_fm"] = float(a_check)
         return fit
@@ -3049,10 +3703,13 @@ def _fit_v2s_for_singlet_three_range_tail(
         r_end_fm=r3_fm, segments=segs_chk2, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
     )
     relaxed["a_s_exact_fm"] = float(a_check2) if math.isfinite(a_check2) else float("nan")
+    # 条件分岐: `allow_signed_v2 and v2_s2 < -1e-12` を満たす経路を評価する。
     if allow_signed_v2 and v2_s2 < -1e-12:
         relaxed["note_profile"] = "V2_s < 0 (outer repulsive barrier)."
+    # 条件分岐: 前段条件が不成立で、`(not allow_signed_v2) and v2_s2 > float(v1_s_mev) + 1e-9` を追加評価する。
     elif (not allow_signed_v2) and v2_s2 > float(v1_s_mev) + 1e-9:
         relaxed["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return relaxed
 
 
@@ -3079,11 +3736,17 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
     with barrier/tail parameters determined from V2_s via cfg (mean-preserving rule).
     This keeps the singlet fit degrees at 2: (V1_s,V2_s) for (a_s,r_s), leaving v2s as a prediction.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0):
         raise ValueError("invalid a_s target")
+
+    # 条件分岐: `not (0 < r1_fm < r2_fm and math.isfinite(v1_s_mev) and mu_mev > 0 and hbarc_m...` を満たす経路を評価する。
+
     if not (0 < r1_fm < r2_fm and math.isfinite(v1_s_mev) and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for barrier+tail singlet V2 fit")
+
     for k in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+        # 条件分岐: `k not in cfg or not math.isfinite(float(cfg[k]))` を満たす経路を評価する。
         if k not in cfg or not math.isfinite(float(cfg[k])):
             raise ValueError(f"invalid cfg missing {k}")
 
@@ -3095,19 +3758,25 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
 
     r3_fm = float(r2_fm) + float(l3_total_fm)
     denom = r3_fm - a_s_target_fm
+    # 条件分岐: `not (math.isfinite(denom) and abs(denom) > 1e-12)` を満たす経路を評価する。
     if not (math.isfinite(denom) and abs(denom) > 1e-12):
         raise ValueError("invalid a_s target for y_target")
+
     y_target = 1.0 / denom
 
     a_abs_max = 1e6
 
     def f(v2_s: float) -> float:
+        # 条件分岐: `not (math.isfinite(v2_s) and v2_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v2_s) and v2_s >= 0):
             return float("nan")
+
         vb = float(v2_s) * float(barrier_coeff)
         vt = float(v2_s) * float(tail_depth_coeff)
+        # 条件分岐: `not (math.isfinite(vb) and math.isfinite(vt) and vb >= 0 and vt >= 0)` を満たす経路を評価する。
         if not (math.isfinite(vb) and math.isfinite(vt) and vb >= 0 and vt >= 0):
             return float("nan")
+
         segs = [
             (float(r1_fm), -float(v1_s_mev)),
             (float(r2_fm - r1_fm), -float(v2_s)),
@@ -3115,11 +3784,15 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
             (float(lt_fm), -float(vt)),
         ]
         y = _y_at_r_end_segments(e_mev=0.0, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+        # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
         if not math.isfinite(y) or abs(y) < 1e-18:
             return float("nan")
+
         a = r3_fm - (1.0 / y)
+        # 条件分岐: `not math.isfinite(a) or abs(a) > a_abs_max` を満たす経路を評価する。
         if not math.isfinite(a) or abs(a) > a_abs_max:
             return float("nan")
+
         return float(y - y_target)
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
@@ -3133,23 +3806,36 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
 
         for v2 in grid:
             fv = f(v2)
+            # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
             if not math.isfinite(fv):
                 prev_v2 = None
                 prev_f = None
                 continue
+
+            # 条件分岐: `best_abs is None or abs(fv) < best_abs` を満たす経路を評価する。
+
             if best_abs is None or abs(fv) < best_abs:
                 best_abs = abs(fv)
                 best_v2 = v2
+
+            # 条件分岐: `prev_v2 is not None and prev_f is not None` を満たす経路を評価する。
+
             if prev_v2 is not None and prev_f is not None:
+                # 条件分岐: `fv == 0.0 or (fv > 0) != (prev_f > 0)` を満たす経路を評価する。
                 if fv == 0.0 or (fv > 0) != (prev_f > 0):
                     mid = 0.5 * (prev_v2 + v2)
                     brackets.append((prev_v2, v2, abs(mid), abs(mid - v2_hint_mev)))
+
             prev_v2 = v2
             prev_f = fv
 
+        # 条件分岐: `not brackets` を満たす経路を評価する。
+
         if not brackets:
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"no usable V2_s samples ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -3162,9 +3848,12 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
         lo, hi, _, _ = brackets[0]
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0)))` を満たす経路を評価する。
         if not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0))):
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"invalid V2_s bracket and no fallback ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "method": "grid_best",
@@ -3176,17 +3865,23 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
         for _ in range(90):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `not math.isfinite(f_mid)` を満たす経路を評価する。
             if not math.isfinite(f_mid):
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 fa = f(mid_a)
                 fb = f(mid_b)
+                # 条件分岐: `math.isfinite(fa)` を満たす経路を評価する。
                 if math.isfinite(fa):
                     mid, f_mid = mid_a, fa
+                # 条件分岐: 前段条件が不成立で、`math.isfinite(fb)` を追加評価する。
                 elif math.isfinite(fb):
                     mid, f_mid = mid_b, fb
                 else:
                     break
+
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-9` を満たす経路を評価する。
+
             if f_mid == 0.0 or (hi - lo) < 1e-9:
                 return {
                     "V2_s_MeV": float(mid),
@@ -3195,6 +3890,9 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
                     "scan": {"v2_min": float(v2_min), "v2_max": float(v2_max), "n_scan": int(n_scan)},
                     "y_target_fm1": float(y_target),
                 }
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
@@ -3202,8 +3900,11 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
                 hi = mid
                 f_hi = f_mid
 
+        # 条件分岐: `best_v2 is None` を満たす経路を評価する。
+
         if best_v2 is None:
             raise ValueError(f"bisection failed and no fallback ({tag})")
+
         return {
             "V2_s_MeV": float(best_v2),
             "method": "grid_best",
@@ -3227,6 +3928,7 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
     a_check = _scattering_length_exact_segments(
         r_end_fm=r3_fm, segments=segs_chk, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
     )
+    # 条件分岐: `math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.ge...` を満たす経路を評価する。
     if math.isfinite(a_check) and abs(a_check - a_s_target_fm) < 0.05 and str(fit.get("method")) == "bisection":
         fit["a_s_exact_fm"] = float(a_check)
         return fit
@@ -3245,8 +3947,10 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
         r_end_fm=r3_fm, segments=segs_chk2, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
     )
     relaxed["a_s_exact_fm"] = float(a_check2) if math.isfinite(a_check2) else float("nan")
+    # 条件分岐: `v2_s2 > float(v1_s_mev) + 1e-9` を満たす経路を評価する。
     if v2_s2 > float(v1_s_mev) + 1e-9:
         relaxed["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return relaxed
 
 
@@ -3273,8 +3977,12 @@ def _fit_v1v2_for_singlet_by_a_and_r(
       - Prefer solutions with V2_s <= V1_s (keeps the intended 2-step profile).
       - Among them, choose the shallowest solution (minimal V1_s), with triplet-proximity only as a weak tie-breaker.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm))` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm)):
         raise ValueError("invalid singlet targets")
+
+    # 条件分岐: `not (0 < r1_fm < r2_fm and mu_mev > 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
+
     if not (0 < r1_fm < r2_fm and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for singlet fit")
 
@@ -3287,8 +3995,10 @@ def _fit_v1v2_for_singlet_by_a_and_r(
     max_iter = 70
 
     def eval_v1(v1_s: float) -> dict[str, object] | None:
+        # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
             return None
+
         try:
             v2_fit = (
                 _fit_v2s_for_singlet_signed_two_range(
@@ -3315,8 +4025,12 @@ def _fit_v1v2_for_singlet_by_a_and_r(
             return None
 
         v2_s = float(v2_fit.get("V2_s_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(v2_s)` を満たす経路を評価する。
         if not math.isfinite(v2_s):
             return None
+
+        # 条件分岐: `not allow_signed_v2 and v2_s < 0` を満たす経路を評価する。
+
         if not allow_signed_v2 and v2_s < 0:
             return None
 
@@ -3342,9 +4056,13 @@ def _fit_v1v2_for_singlet_by_a_and_r(
             )
         except Exception:
             return None
+
+        # 条件分岐: `not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a)` を満たす経路を評価する。
+
         if not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a):
             # Discard candidates that do not actually match the a_s target.
             return None
+
         try:
             ere = (
                 _fit_kcot_ere_signed_two_range(
@@ -3369,6 +4087,7 @@ def _fit_v1v2_for_singlet_by_a_and_r(
             return None
 
         r_eff = float(ere.get("r_eff_fm", float("nan")))
+        # 条件分岐: `not math.isfinite(r_eff)` を満たす経路を評価する。
         if not math.isfinite(r_eff):
             return None
 
@@ -3382,6 +4101,7 @@ def _fit_v1v2_for_singlet_by_a_and_r(
         }
 
     # Scan V1_s to find sign-change brackets for g(V1)=r_eff(V1)-r_target.
+
     n_scan = 260
     v1_grid = [v1_lo + (v1_hi - v1_lo) * i / (n_scan - 1) for i in range(n_scan)]
     pts: list[dict[str, object]] = []
@@ -3390,19 +4110,28 @@ def _fit_v1v2_for_singlet_by_a_and_r(
 
     for v1 in v1_grid:
         e = eval_v1(v1)
+        # 条件分岐: `e is None` を満たす経路を評価する。
         if e is None:
             continue
+
         g = float(e["g_r_fm"])
+        # 条件分岐: `not math.isfinite(g)` を満たす経路を評価する。
         if not math.isfinite(g):
             continue
+
         pts.append(e)
+        # 条件分岐: `best_abs is None or abs(g) < best_abs` を満たす経路を評価する。
         if best_abs is None or abs(g) < best_abs:
             best_abs = abs(g)
             best = e
 
+    # 条件分岐: `len(pts) < 2` を満たす経路を評価する。
+
     if len(pts) < 2:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no usable V1_s samples")
+
         best = dict(best)
         best.update({"fit_method": "grid_best", "note_fit": "insufficient valid samples for bracketing"})
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
@@ -3412,30 +4141,43 @@ def _fit_v1v2_for_singlet_by_a_and_r(
     for a, b in zip(pts[:-1], pts[1:]):
         ga = float(a["g_r_fm"])
         gb = float(b["g_r_fm"])
+        # 条件分岐: `ga == 0.0 or (ga > 0) != (gb > 0)` を満たす経路を評価する。
         if ga == 0.0 or (ga > 0) != (gb > 0):
             mid = 0.5 * (float(a["V1_s_MeV"]) + float(b["V1_s_MeV"]))
             brackets.append((a, b, float(mid)))
 
+    # 条件分岐: `not brackets` を満たす経路を評価する。
+
     if not brackets:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no V1_s sign-change bracket and no fallback")
+
         best = dict(best)
         best.update({"fit_method": "grid_best", "note_fit": "no sign-change bracket; using best |Δr_s| grid point"})
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
         return best
 
     # Solve each bracket and pick the most "natural" one.
+
     def penalty(sol: dict[str, object]) -> float:
         v1 = float(sol["V1_s_MeV"])
         v2 = float(sol["V2_s_MeV"])
         p = v1
+        # 条件分岐: `(not allow_signed_v2) and v2 > v1 + 1e-9` を満たす経路を評価する。
         if (not allow_signed_v2) and v2 > v1 + 1e-9:
             p += 1e6
+
+        # 条件分岐: `allow_signed_v2` を満たす経路を評価する。
+
         if allow_signed_v2:
             p += 0.05 * abs(v2)
+
         p += 1e-3 * abs(v1 - float(v1_hint_mev))
+        # 条件分岐: `allow_signed_v2` を満たす経路を評価する。
         if allow_signed_v2:
             p += 1e-3 * abs(v2 - float(v2_hint_mev))
+
         return float(p)
 
     best_sol: dict[str, object] | None = None
@@ -3447,6 +4189,7 @@ def _fit_v1v2_for_singlet_by_a_and_r(
         hi = float(hi_e["V1_s_MeV"])
         g_lo = float(lo_e["g_r_fm"])
         g_hi = float(hi_e["g_r_fm"])
+        # 条件分岐: `not ((g_lo > 0) != (g_hi > 0))` を満たす経路を評価する。
         if not ((g_lo > 0) != (g_hi > 0)):
             continue
 
@@ -3456,19 +4199,26 @@ def _fit_v1v2_for_singlet_by_a_and_r(
         for _ in range(max_iter):
             mid = 0.5 * (lo + hi)
             sol_mid = eval_v1(mid)
+            # 条件分岐: `sol_mid is None` を満たす経路を評価する。
             if sol_mid is None:
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 sol_a = eval_v1(mid_a)
                 sol_b = eval_v1(mid_b)
                 sol_mid = sol_a if sol_a is not None else sol_b
+                # 条件分岐: `sol_mid is None` を満たす経路を評価する。
                 if sol_mid is None:
                     break
+
                 mid = float(sol_mid["V1_s_MeV"])
 
             g_mid = float(sol_mid["g_r_fm"])
+            # 条件分岐: `not math.isfinite(g_mid)` を満たす経路を評価する。
             if not math.isfinite(g_mid):
                 break
+
+            # 条件分岐: `abs(g_mid) < tol_r or (hi - lo) < 1e-6` を満たす経路を評価する。
+
             if abs(g_mid) < tol_r or (hi - lo) < 1e-6:
                 cand_sol = dict(sol_mid)
                 cand_sol.update(
@@ -3477,6 +4227,9 @@ def _fit_v1v2_for_singlet_by_a_and_r(
                 cand_sol["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
                 cand_sol["bisection"] = {"tol_a_fm": float(tol_a), "tol_r_fm": float(tol_r), "max_iter": int(max_iter)}
                 break
+
+            # 条件分岐: `(g_mid > 0) == (g_lo > 0)` を満たす経路を評価する。
+
             if (g_mid > 0) == (g_lo > 0):
                 lo = mid
                 g_lo = g_mid
@@ -3485,6 +4238,8 @@ def _fit_v1v2_for_singlet_by_a_and_r(
                 hi = mid
                 g_hi = g_mid
                 sol_hi = sol_mid
+
+        # 条件分岐: `cand_sol is None` を満たす経路を評価する。
 
         if cand_sol is None:
             # Fall back to whichever endpoint is closer in |g|.
@@ -3495,23 +4250,31 @@ def _fit_v1v2_for_singlet_by_a_and_r(
             cand_sol["bisection"] = {"tol_a_fm": float(tol_a), "tol_r_fm": float(tol_r), "max_iter": int(max_iter)}
 
         pen = penalty(cand_sol)
+        # 条件分岐: `best_pen is None or pen < best_pen` を満たす経路を評価する。
         if best_pen is None or pen < best_pen:
             best_pen = pen
             best_sol = cand_sol
 
+    # 条件分岐: `best_sol is None` を満たす経路を評価する。
+
     if best_sol is None:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("failed to solve V1_s root and no fallback")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "root solve failed; using best |Δr_s| grid point"})
         best_sol["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
 
     v1_final = float(best_sol["V1_s_MeV"])
     v2_final = float(best_sol["V2_s_MeV"])
+    # 条件分岐: `allow_signed_v2 and v2_final < -1e-12` を満たす経路を評価する。
     if allow_signed_v2 and v2_final < -1e-12:
         best_sol["note_profile"] = "V2_s < 0 (outer repulsive barrier)."
+    # 条件分岐: 前段条件が不成立で、`v2_final > v1_final + 1e-9` を追加評価する。
     elif v2_final > v1_final + 1e-9:
         best_sol["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return best_sol
 
 
@@ -3533,8 +4296,12 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
     Fit (V1_s,V2_s) to match singlet (a_s,r_s) on the 3-range tail ansatz, with a fixed tail segment
     (V3_tail,L3) shared from the triplet fit.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm))` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm)):
         raise ValueError("invalid singlet targets")
+
+    # 条件分岐: `not (0 < r1_fm < r2_fm and math.isfinite(tail_len_fm) and tail_len_fm > 0 and...` を満たす経路を評価する。
+
     if not (0 < r1_fm < r2_fm and math.isfinite(tail_len_fm) and tail_len_fm > 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for 3-range singlet fit")
 
@@ -3549,8 +4316,10 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
     r3_fm = float(r2_fm) + float(tail_len_fm)
 
     def eval_v1(v1_s: float) -> dict[str, object] | None:
+        # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
             return None
+
         try:
             v2_fit = _fit_v2s_for_singlet_three_range_tail(
                 a_s_target_fm=a_s_target_fm,
@@ -3568,8 +4337,12 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
             return None
 
         v2_s = float(v2_fit.get("V2_s_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(v2_s)` を満たす経路を評価する。
         if not math.isfinite(v2_s):
             return None
+
+        # 条件分岐: `not allow_signed_v2 and v2_s < 0` を満たす経路を評価する。
+
         if not allow_signed_v2 and v2_s < 0:
             return None
 
@@ -3584,13 +4357,19 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
             )
         except Exception:
             return None
+
+        # 条件分岐: `not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a)` を満たす経路を評価する。
+
         if not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a):
             return None
+
         try:
             ere = _fit_kcot_ere_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
         except Exception:
             return None
+
         r_eff = float(ere.get("r_eff_fm", float("nan")))
+        # 条件分岐: `not math.isfinite(r_eff)` を満たす経路を評価する。
         if not math.isfinite(r_eff):
             return None
 
@@ -3605,6 +4384,7 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
         }
 
     # Scan V1_s to find sign-change brackets for g(V1)=r_eff(V1)-r_target.
+
     n_scan = 260
     v1_grid = [v1_lo + (v1_hi - v1_lo) * i / (n_scan - 1) for i in range(n_scan)]
     pts: list[dict[str, object]] = []
@@ -3613,19 +4393,28 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
 
     for v1 in v1_grid:
         e = eval_v1(v1)
+        # 条件分岐: `e is None` を満たす経路を評価する。
         if e is None:
             continue
+
         g = float(e["g_r_fm"])
+        # 条件分岐: `not math.isfinite(g)` を満たす経路を評価する。
         if not math.isfinite(g):
             continue
+
         pts.append(e)
+        # 条件分岐: `best_abs is None or abs(g) < best_abs` を満たす経路を評価する。
         if best_abs is None or abs(g) < best_abs:
             best_abs = abs(g)
             best = e
 
+    # 条件分岐: `len(pts) < 2` を満たす経路を評価する。
+
     if len(pts) < 2:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no usable V1_s samples (3-range tail)")
+
         best = dict(best)
         best.update({"fit_method": "grid_best", "note_fit": "insufficient valid samples for bracketing (3-range tail)"})
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
@@ -3636,13 +4425,18 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
     for a, b in zip(pts[:-1], pts[1:]):
         ga = float(a["g_r_fm"])
         gb = float(b["g_r_fm"])
+        # 条件分岐: `ga == 0.0 or (ga > 0) != (gb > 0)` を満たす経路を評価する。
         if ga == 0.0 or (ga > 0) != (gb > 0):
             mid = 0.5 * (float(a["V1_s_MeV"]) + float(b["V1_s_MeV"]))
             brackets.append((a, b, float(mid)))
 
+    # 条件分岐: `not brackets` を満たす経路を評価する。
+
     if not brackets:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no V1_s sign-change bracket and no fallback (3-range tail)")
+
         best = dict(best)
         best.update({"fit_method": "grid_best", "note_fit": "no sign-change bracket; using best |Δr_s| (3-range tail)"})
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
@@ -3653,11 +4447,14 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
         v1 = float(sol["V1_s_MeV"])
         v2 = float(sol["V2_s_MeV"])
         p = v1
+        # 条件分岐: `allow_signed_v2` を満たす経路を評価する。
         if allow_signed_v2:
             p += 0.05 * abs(v2)
         else:
+            # 条件分岐: `v2 > v1 + 1e-9` を満たす経路を評価する。
             if v2 > v1 + 1e-9:
                 p += 1e6
+
         p += 1e-3 * abs(v1 - float(v1_hint_mev))
         p += 1e-3 * abs(v2 - float(v2_hint_mev))
         return float(p)
@@ -3671,6 +4468,7 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
         hi = float(hi_e["V1_s_MeV"])
         g_lo = float(lo_e["g_r_fm"])
         g_hi = float(hi_e["g_r_fm"])
+        # 条件分岐: `not ((g_lo > 0) != (g_hi > 0))` を満たす経路を評価する。
         if not ((g_lo > 0) != (g_hi > 0)):
             continue
 
@@ -3680,25 +4478,35 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
         for _ in range(max_iter):
             mid = 0.5 * (lo + hi)
             sol_mid = eval_v1(mid)
+            # 条件分岐: `sol_mid is None` を満たす経路を評価する。
             if sol_mid is None:
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 sol_a = eval_v1(mid_a)
                 sol_b = eval_v1(mid_b)
                 sol_mid = sol_a if sol_a is not None else sol_b
+                # 条件分岐: `sol_mid is None` を満たす経路を評価する。
                 if sol_mid is None:
                     break
+
                 mid = float(sol_mid["V1_s_MeV"])
 
             g_mid = float(sol_mid["g_r_fm"])
+            # 条件分岐: `not math.isfinite(g_mid)` を満たす経路を評価する。
             if not math.isfinite(g_mid):
                 break
+
+            # 条件分岐: `abs(g_mid) < tol_r or (hi - lo) < 1e-6` を満たす経路を評価する。
+
             if abs(g_mid) < tol_r or (hi - lo) < 1e-6:
                 cand_sol = dict(sol_mid)
                 cand_sol.update({"fit_method": "bisection", "note_fit": "solve V1_s by r_s (3-range tail); V2_s(a_s) inner solve"})
                 cand_sol["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
                 cand_sol["bisection"] = {"tol_a_fm": float(tol_a), "tol_r_fm": float(tol_r), "max_iter": int(max_iter)}
                 break
+
+            # 条件分岐: `(g_mid > 0) == (g_lo > 0)` を満たす経路を評価する。
+
             if (g_mid > 0) == (g_lo > 0):
                 lo = mid
                 g_lo = g_mid
@@ -3708,6 +4516,8 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
                 g_hi = g_mid
                 sol_hi = sol_mid
 
+        # 条件分岐: `cand_sol is None` を満たす経路を評価する。
+
         if cand_sol is None:
             cand = sol_lo if abs(float(sol_lo["g_r_fm"])) < abs(float(sol_hi["g_r_fm"])) else sol_hi
             cand_sol = dict(cand)
@@ -3716,21 +4526,28 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
             cand_sol["bisection"] = {"tol_a_fm": float(tol_a), "tol_r_fm": float(tol_r), "max_iter": int(max_iter)}
 
         pen = penalty(cand_sol)
+        # 条件分岐: `best_pen is None or pen < best_pen` を満たす経路を評価する。
         if best_pen is None or pen < best_pen:
             best_pen = pen
             best_sol = cand_sol
 
+    # 条件分岐: `best_sol is None` を満たす経路を評価する。
+
     if best_sol is None:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("failed to solve V1_s root and no fallback (3-range tail)")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "root solve failed; using best |Δr_s| grid point (3-range tail)"})
         best_sol["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
 
     best_sol["tail"] = {"R3_fm": float(r3_fm), "L3_fm": float(tail_len_fm), "V3_tail_MeV": float(v3_tail_mev)}
     v2_final = float(best_sol["V2_s_MeV"])
+    # 条件分岐: `allow_signed_v2 and v2_final < -1e-12` を満たす経路を評価する。
     if allow_signed_v2 and v2_final < -1e-12:
         best_sol["note_profile"] = "V2_s < 0 (outer repulsive barrier)."
+
     return best_sol
 
 
@@ -3750,11 +4567,17 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     Step 7.13.5: Fit (V1_s,V2_s) to match singlet (a_s,r_s) under the barrier+tail split of the
     Yukawa tail coarse-graining region beyond R2.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm))` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm)):
         raise ValueError("invalid singlet targets")
+
+    # 条件分岐: `not (0 < r1_fm < r2_fm and mu_mev > 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
+
     if not (0 < r1_fm < r2_fm and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for barrier+tail singlet fit")
+
     for k in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+        # 条件分岐: `k not in cfg or not math.isfinite(float(cfg[k]))` を満たす経路を評価する。
         if k not in cfg or not math.isfinite(float(cfg[k])):
             raise ValueError(f"invalid cfg missing {k}")
 
@@ -3774,8 +4597,10 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     tol_r = 2e-3  # fm
 
     def eval_v1(v1_s: float) -> dict[str, object] | None:
+        # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
             return None
+
         try:
             v2_fit = _fit_v2s_for_singlet_three_range_barrier_tail(
                 a_s_target_fm=a_s_target_fm,
@@ -3791,11 +4616,13 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
             return None
 
         v2_s = float(v2_fit.get("V2_s_MeV", float("nan")))
+        # 条件分岐: `not (math.isfinite(v2_s) and v2_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v2_s) and v2_s >= 0):
             return None
 
         vb = float(v2_s) * float(barrier_coeff)
         vt = float(v2_s) * float(tail_depth_coeff)
+        # 条件分岐: `not (math.isfinite(vb) and math.isfinite(vt) and vb >= 0 and vt >= 0)` を満たす経路を評価する。
         if not (math.isfinite(vb) and math.isfinite(vt) and vb >= 0 and vt >= 0):
             return None
 
@@ -3811,6 +4638,9 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
             )
         except Exception:
             return None
+
+        # 条件分岐: `not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a)` を満たす経路を評価する。
+
         if not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a):
             return None
 
@@ -3818,7 +4648,9 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
             ere = _fit_kcot_ere_segments(r_end_fm=r3_fm, segments=segs, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
         except Exception:
             return None
+
         r_eff = float(ere.get("r_eff_fm", float("nan")))
+        # 条件分岐: `not math.isfinite(r_eff)` を満たす経路を評価する。
         if not math.isfinite(r_eff):
             return None
 
@@ -3834,6 +4666,7 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
         }
 
     # Scan V1_s to find sign-change brackets for g(V1)=r_eff(V1)-r_target.
+
     n_scan = 260
     v1_grid = [v1_lo + (v1_hi - v1_lo) * i / (n_scan - 1) for i in range(n_scan)]
     pts: list[dict[str, object]] = []
@@ -3842,19 +4675,28 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
 
     for v1 in v1_grid:
         e = eval_v1(v1)
+        # 条件分岐: `e is None` を満たす経路を評価する。
         if e is None:
             continue
+
         g = float(e["g_r_fm"])
+        # 条件分岐: `not math.isfinite(g)` を満たす経路を評価する。
         if not math.isfinite(g):
             continue
+
         pts.append(e)
+        # 条件分岐: `best_abs is None or abs(g) < best_abs` を満たす経路を評価する。
         if best_abs is None or abs(g) < best_abs:
             best_abs = abs(g)
             best = e
 
+    # 条件分岐: `len(pts) < 3` を満たす経路を評価する。
+
     if len(pts) < 3:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no usable V1_s samples (barrier+tail)")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "insufficient points; using best |Δr_s| grid point"})
         best_sol["barrier_tail"] = dict(cfg)
@@ -3864,25 +4706,34 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     for a, b in zip(pts[:-1], pts[1:]):
         g0 = float(a["g_r_fm"])
         g1 = float(b["g_r_fm"])
+        # 条件分岐: `(g0 > 0) != (g1 > 0)` を満たす経路を評価する。
         if (g0 > 0) != (g1 > 0):
             brackets.append((float(a["V1_s_MeV"]), float(b["V1_s_MeV"])))
 
+    # 条件分岐: `not brackets` を満たす経路を評価する。
+
     if not brackets:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no sign-change bracket and no fallback (barrier+tail)")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "no sign-change; using best |Δr_s| grid point"})
         best_sol["barrier_tail"] = dict(cfg)
         return best_sol
 
     # Prefer bracket closest to v1_hint (ties to the shallow branch).
+
     brackets.sort(key=lambda t: abs(0.5 * (t[0] + t[1]) - float(v1_hint_mev)))
     lo, hi = brackets[0]
     f_lo_e = eval_v1(lo)
     f_hi_e = eval_v1(hi)
+    # 条件分岐: `f_lo_e is None or f_hi_e is None` を満たす経路を評価する。
     if f_lo_e is None or f_hi_e is None:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("invalid bracket and no fallback (barrier+tail)")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "invalid bracket; using best |Δr_s| grid point"})
         best_sol["barrier_tail"] = dict(cfg)
@@ -3890,9 +4741,12 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
 
     g_lo = float(f_lo_e["g_r_fm"])
     g_hi = float(f_hi_e["g_r_fm"])
+    # 条件分岐: `not ((g_lo > 0) != (g_hi > 0))` を満たす経路を評価する。
     if not ((g_lo > 0) != (g_hi > 0)):
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("degenerate bracket and no fallback (barrier+tail)")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "degenerate bracket; using best |Δr_s| grid point"})
         best_sol["barrier_tail"] = dict(cfg)
@@ -3904,28 +4758,40 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     for _ in range(max_iter):
         mid = 0.5 * (lo + hi)
         sol_mid = eval_v1(mid)
+        # 条件分岐: `sol_mid is None` を満たす経路を評価する。
         if sol_mid is None:
             mid_a = (2.0 * lo + hi) / 3.0
             mid_b = (lo + 2.0 * hi) / 3.0
             sol_a = eval_v1(mid_a)
             sol_b = eval_v1(mid_b)
             sol_mid = sol_a if sol_a is not None else sol_b
+            # 条件分岐: `sol_mid is None` を満たす経路を評価する。
             if sol_mid is None:
                 break
+
             mid = float(sol_mid["V1_s_MeV"])
 
         g_mid = float(sol_mid["g_r_fm"])
+        # 条件分岐: `not math.isfinite(g_mid)` を満たす経路を評価する。
         if not math.isfinite(g_mid):
             break
+
+        # 条件分岐: `abs(g_mid) < tol_r or (hi - lo) < 1e-6` を満たす経路を評価する。
+
         if abs(g_mid) < tol_r or (hi - lo) < 1e-6:
             best_sol = dict(sol_mid)
             best_sol.update({"fit_method": "bisection", "note_fit": "solve V1_s by r_s (bisection) with barrier+tail"})
             best_sol["barrier_tail"] = dict(cfg)
             v1_final = float(best_sol["V1_s_MeV"])
             v2_final = float(best_sol["V2_s_MeV"])
+            # 条件分岐: `v2_final > v1_final + 1e-9` を満たす経路を評価する。
             if v2_final > v1_final + 1e-9:
                 best_sol["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
             return best_sol
+
+        # 条件分岐: `(g_mid > 0) == (g_lo > 0)` を満たす経路を評価する。
+
         if (g_mid > 0) == (g_lo > 0):
             lo = mid
             g_lo = g_mid
@@ -3936,14 +4802,17 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
             sol_hi = sol_mid
 
     # Fallback: choose better endpoint.
+
     cand = sol_lo if abs(float(sol_lo["g_r_fm"])) < abs(float(sol_hi["g_r_fm"])) else sol_hi
     best_sol = dict(cand)
     best_sol.update({"fit_method": "bracket_best", "note_fit": "bisection did not converge; using best endpoint (barrier+tail)"})
     best_sol["barrier_tail"] = dict(cfg)
     v1_final = float(best_sol["V1_s_MeV"])
     v2_final = float(best_sol["V2_s_MeV"])
+    # 条件分岐: `v2_final > v1_final + 1e-9` を満たす経路を評価する。
     if v2_final > v1_final + 1e-9:
         best_sol["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return best_sol
 
 
@@ -3963,14 +4832,20 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
     Fit V2_s so that the singlet scattering length matches a_s at k->0,
     on the repulsive-core + two-range geometry, with fixed (Rc,Vc,R1,R2,V1_s).
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0.0):
         raise ValueError("invalid a_s target")
+
+    # 条件分岐: `not (0.0 <= rc_fm < r1_fm < r2_fm and vc_mev >= 0 and v1_s_mev >= 0 and mu_me...` を満たす経路を評価する。
+
     if not (0.0 <= rc_fm < r1_fm < r2_fm and vc_mev >= 0 and v1_s_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for singlet fit")
 
     denom = r2_fm - a_s_target_fm
+    # 条件分岐: `not (math.isfinite(denom) and abs(denom) > 1e-12)` を満たす経路を評価する。
     if not (math.isfinite(denom) and abs(denom) > 1e-12):
         raise ValueError("invalid a_s target for y_target")
+
     y_target = 1.0 / denom
 
     a_abs_max = 1e6
@@ -3987,11 +4862,15 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
             mu_mev=mu_mev,
             hbarc_mev_fm=hbarc_mev_fm,
         )
+        # 条件分岐: `not math.isfinite(y) or abs(y) < 1e-18` を満たす経路を評価する。
         if not math.isfinite(y) or abs(y) < 1e-18:
             return float("nan")
+
         a = r2_fm - (1.0 / y)
+        # 条件分岐: `not math.isfinite(a) or abs(a) > a_abs_max` を満たす経路を評価する。
         if not math.isfinite(a) or abs(a) > a_abs_max:
             return float("nan")
+
         return float(y - y_target)
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
@@ -4005,23 +4884,36 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
 
         for v2 in grid:
             fv = f(v2)
+            # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
             if not math.isfinite(fv):
                 prev_v2 = None
                 prev_f = None
                 continue
+
+            # 条件分岐: `best_abs is None or abs(fv) < best_abs` を満たす経路を評価する。
+
             if best_abs is None or abs(fv) < best_abs:
                 best_abs = abs(fv)
                 best_v2 = v2
+
+            # 条件分岐: `prev_v2 is not None and prev_f is not None` を満たす経路を評価する。
+
             if prev_v2 is not None and prev_f is not None:
+                # 条件分岐: `fv == 0.0 or (fv > 0) != (prev_f > 0)` を満たす経路を評価する。
                 if fv == 0.0 or (fv > 0) != (prev_f > 0):
                     mid = 0.5 * (prev_v2 + v2)
                     brackets.append((prev_v2, v2, abs(mid - v2_hint_mev)))
+
             prev_v2 = v2
             prev_f = fv
 
+        # 条件分岐: `not brackets` を満たす経路を評価する。
+
         if not brackets:
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"no usable V2_s samples ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "fit_method": "grid_best",
@@ -4034,9 +4926,12 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
         lo, hi, _ = brackets[0]
         f_lo = f(lo)
         f_hi = f(hi)
+        # 条件分岐: `not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0)))` を満たす経路を評価する。
         if not (math.isfinite(f_lo) and math.isfinite(f_hi) and ((f_lo > 0) != (f_hi > 0))):
+            # 条件分岐: `best_v2 is None` を満たす経路を評価する。
             if best_v2 is None:
                 raise ValueError(f"invalid V2_s bracket and no fallback ({tag})")
+
             return {
                 "V2_s_MeV": float(best_v2),
                 "fit_method": "grid_best",
@@ -4048,17 +4943,23 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
         for _ in range(90):
             mid = 0.5 * (lo + hi)
             f_mid = f(mid)
+            # 条件分岐: `not math.isfinite(f_mid)` を満たす経路を評価する。
             if not math.isfinite(f_mid):
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 fa = f(mid_a)
                 fb = f(mid_b)
+                # 条件分岐: `math.isfinite(fa)` を満たす経路を評価する。
                 if math.isfinite(fa):
                     mid, f_mid = mid_a, fa
+                # 条件分岐: 前段条件が不成立で、`math.isfinite(fb)` を追加評価する。
                 elif math.isfinite(fb):
                     mid, f_mid = mid_b, fb
                 else:
                     break
+
+            # 条件分岐: `f_mid == 0.0 or (hi - lo) < 1e-9` を満たす経路を評価する。
+
             if f_mid == 0.0 or (hi - lo) < 1e-9:
                 return {
                     "V2_s_MeV": float(mid),
@@ -4067,6 +4968,9 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
                     "scan": {"v2_min": float(v2_min), "v2_max": float(v2_max), "n_scan": int(n_scan)},
                     "y_target_fm1": float(y_target),
                 }
+
+            # 条件分岐: `(f_mid > 0) == (f_lo > 0)` を満たす経路を評価する。
+
             if (f_mid > 0) == (f_lo > 0):
                 lo = mid
                 f_lo = f_mid
@@ -4074,8 +4978,11 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
                 hi = mid
                 f_hi = f_mid
 
+        # 条件分岐: `best_v2 is None` を満たす経路を評価する。
+
         if best_v2 is None:
             raise ValueError(f"bisection failed and no fallback ({tag})")
+
         return {
             "V2_s_MeV": float(best_v2),
             "fit_method": "grid_best",
@@ -4105,8 +5012,12 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
     """
     Fit (V1_s, V2_s) to match singlet (a_s, r_s) under the repulsive-core + two-range geometry.
     """
+    # 条件分岐: `not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm))` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and math.isfinite(r_s_target_fm)):
         raise ValueError("invalid singlet targets")
+
+    # 条件分岐: `not (0.0 <= rc_fm < r1_fm < r2_fm and vc_mev >= 0 and mu_mev > 0 and hbarc_me...` を満たす経路を評価する。
+
     if not (0.0 <= rc_fm < r1_fm < r2_fm and vc_mev >= 0 and mu_mev > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid geometry/params for singlet fit")
 
@@ -4117,8 +5028,10 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
     max_iter = 70
 
     def eval_v1(v1_s: float) -> dict[str, object] | None:
+        # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
             return None
+
         try:
             v2_fit = _fit_v2s_for_singlet_repulsive_core_two_range(
                 a_s_target_fm=a_s_target_fm,
@@ -4133,9 +5046,12 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
             )
         except Exception:
             return None
+
         v2_s = float(v2_fit.get("V2_s_MeV", float("nan")))
+        # 条件分岐: `not (math.isfinite(v2_s) and v2_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v2_s) and v2_s >= 0):
             return None
+
         try:
             a_exact = _scattering_length_exact_repulsive_core_two_range(
                 rc_fm=rc_fm,
@@ -4149,8 +5065,12 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
             )
         except Exception:
             return None
+
+        # 条件分岐: `not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a)` を満たす経路を評価する。
+
         if not (math.isfinite(a_exact) and abs(a_exact - a_s_target_fm) <= tol_a):
             return None
+
         try:
             ere = _fit_kcot_ere_repulsive_core_two_range(
                 rc_fm=rc_fm,
@@ -4164,9 +5084,12 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
             )
         except Exception:
             return None
+
         r_eff = float(ere.get("r_eff_fm", float("nan")))
+        # 条件分岐: `not math.isfinite(r_eff)` を満たす経路を評価する。
         if not math.isfinite(r_eff):
             return None
+
         return {
             "V1_s_MeV": float(v1_s),
             "V2_s_MeV": float(v2_s),
@@ -4183,19 +5106,28 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
     best_abs = None
     for v1 in v1_grid:
         e = eval_v1(v1)
+        # 条件分岐: `e is None` を満たす経路を評価する。
         if e is None:
             continue
+
         g = float(e["g_r_fm"])
+        # 条件分岐: `not math.isfinite(g)` を満たす経路を評価する。
         if not math.isfinite(g):
             continue
+
         pts.append(e)
+        # 条件分岐: `best_abs is None or abs(g) < best_abs` を満たす経路を評価する。
         if best_abs is None or abs(g) < best_abs:
             best_abs = abs(g)
             best = e
 
+    # 条件分岐: `len(pts) < 2` を満たす経路を評価する。
+
     if len(pts) < 2:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no usable V1_s samples")
+
         best = dict(best)
         best.update({"fit_method": "grid_best", "note_fit": "insufficient valid samples for bracketing"})
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
@@ -4205,13 +5137,18 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
     for a, b in zip(pts[:-1], pts[1:]):
         ga = float(a["g_r_fm"])
         gb = float(b["g_r_fm"])
+        # 条件分岐: `ga == 0.0 or (ga > 0) != (gb > 0)` を満たす経路を評価する。
         if ga == 0.0 or (ga > 0) != (gb > 0):
             mid = 0.5 * (float(a["V1_s_MeV"]) + float(b["V1_s_MeV"]))
             brackets.append((a, b, float(mid)))
 
+    # 条件分岐: `not brackets` を満たす経路を評価する。
+
     if not brackets:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("no V1_s sign-change bracket and no fallback")
+
         best = dict(best)
         best.update({"fit_method": "grid_best", "note_fit": "no sign-change bracket; using best |Δr_s| grid point"})
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
@@ -4221,8 +5158,10 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
         v1 = float(sol["V1_s_MeV"])
         v2 = float(sol["V2_s_MeV"])
         p = v1
+        # 条件分岐: `v2 > v1 + 1e-9` を満たす経路を評価する。
         if v2 > v1 + 1e-9:
             p += 1e6
+
         p += 1e-3 * abs(v1 - float(v1_hint_mev))
         return float(p)
 
@@ -4235,6 +5174,7 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
         hi = float(hi_e["V1_s_MeV"])
         g_lo = float(lo_e["g_r_fm"])
         g_hi = float(hi_e["g_r_fm"])
+        # 条件分岐: `not ((g_lo > 0) != (g_hi > 0))` を満たす経路を評価する。
         if not ((g_lo > 0) != (g_hi > 0)):
             continue
 
@@ -4244,19 +5184,26 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
         for _ in range(max_iter):
             mid = 0.5 * (lo + hi)
             sol_mid = eval_v1(mid)
+            # 条件分岐: `sol_mid is None` を満たす経路を評価する。
             if sol_mid is None:
                 mid_a = (2.0 * lo + hi) / 3.0
                 mid_b = (lo + 2.0 * hi) / 3.0
                 sol_a = eval_v1(mid_a)
                 sol_b = eval_v1(mid_b)
                 sol_mid = sol_a if sol_a is not None else sol_b
+                # 条件分岐: `sol_mid is None` を満たす経路を評価する。
                 if sol_mid is None:
                     break
+
                 mid = float(sol_mid["V1_s_MeV"])
 
             g_mid = float(sol_mid["g_r_fm"])
+            # 条件分岐: `not math.isfinite(g_mid)` を満たす経路を評価する。
             if not math.isfinite(g_mid):
                 break
+
+            # 条件分岐: `abs(g_mid) < tol_r or (hi - lo) < 1e-6` を満たす経路を評価する。
+
             if abs(g_mid) < tol_r or (hi - lo) < 1e-6:
                 cand_sol = dict(sol_mid)
                 cand_sol.update(
@@ -4265,6 +5212,9 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
                 cand_sol["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
                 cand_sol["bisection"] = {"tol_a_fm": float(tol_a), "tol_r_fm": float(tol_r), "max_iter": int(max_iter)}
                 break
+
+            # 条件分岐: `(g_mid > 0) == (g_lo > 0)` を満たす経路を評価する。
+
             if (g_mid > 0) == (g_lo > 0):
                 lo = mid
                 g_lo = g_mid
@@ -4274,6 +5224,8 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
                 g_hi = g_mid
                 sol_hi = sol_mid
 
+        # 条件分岐: `cand_sol is None` を満たす経路を評価する。
+
         if cand_sol is None:
             cand = sol_lo if abs(float(sol_lo["g_r_fm"])) < abs(float(sol_hi["g_r_fm"])) else sol_hi
             cand_sol = dict(cand)
@@ -4282,21 +5234,28 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
             cand_sol["bisection"] = {"tol_a_fm": float(tol_a), "tol_r_fm": float(tol_r), "max_iter": int(max_iter)}
 
         pen = penalty(cand_sol)
+        # 条件分岐: `best_pen is None or pen < best_pen` を満たす経路を評価する。
         if best_pen is None or pen < best_pen:
             best_pen = pen
             best_sol = cand_sol
 
+    # 条件分岐: `best_sol is None` を満たす経路を評価する。
+
     if best_sol is None:
+        # 条件分岐: `best is None` を満たす経路を評価する。
         if best is None:
             raise ValueError("failed to solve V1_s root and no fallback")
+
         best_sol = dict(best)
         best_sol.update({"fit_method": "grid_best", "note_fit": "root solve failed; using best |Δr_s| grid point"})
         best_sol["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
 
     v1_final = float(best_sol["V1_s_MeV"])
     v2_final = float(best_sol["V2_s_MeV"])
+    # 条件分岐: `v2_final > v1_final + 1e-9` を満たす経路を評価する。
     if v2_final > v1_final + 1e-9:
         best_sol["note_profile"] = "V2_s > V1_s (outer well deeper than inner); indicates this ansatz may be unnatural for singlet."
+
     return best_sol
 
 
@@ -4337,8 +5296,10 @@ def main(argv: list[str] | None = None) -> None:
 
     consts = _load_nist_codata_constants(root=root)
     for k in ("mp", "mn", "md"):
+        # 条件分岐: `k not in consts` を満たす経路を評価する。
         if k not in consts:
             raise SystemExit(f"[fail] missing constant {k!r} in extracted_values.json")
+
     mp = float(consts["mp"]["value_si"])
     mn = float(consts["mn"]["value_si"])
     md = float(consts["md"]["value_si"])
@@ -4353,6 +5314,7 @@ def main(argv: list[str] | None = None) -> None:
     np_sets = _load_np_scattering_sets(root=root)
     eq18 = np_sets.get(18)
     eq19 = np_sets.get(19)
+    # 条件分岐: `not (isinstance(eq18, dict) and isinstance(eq19, dict))` を満たす経路を評価する。
     if not (isinstance(eq18, dict) and isinstance(eq19, dict)):
         raise SystemExit("[fail] missing eq18/eq19 in extracted np scattering JSON")
 
@@ -4425,7 +5387,9 @@ def main(argv: list[str] | None = None) -> None:
     barrier_tail_channel_split_kq_singlet_r2_scan: dict[str, object] | None = None
     triplet_barrier_len_fraction_best: float | None = None
     barrier_tail_channel_split_kq_triplet_barrier_fraction_scan: dict[str, object] | None = None
+    # 条件分岐: `step == "7.13.6"` を満たす経路を評価する。
     if step == "7.13.6":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.6")
 
@@ -4464,8 +5428,10 @@ def main(argv: list[str] | None = None) -> None:
                     v2t = float(base_fit_t["v2_mev"])
 
                     cfg_any = base_fit_t.get("barrier_tail_config", {})
+                    # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
                     if not isinstance(cfg_any, dict):
                         raise ValueError("missing barrier_tail_config")
+
                     cfg = {str(kk): float(vv) for kk, vv in cfg_any.items() if math.isfinite(float(vv))}
 
                     sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -4482,10 +5448,13 @@ def main(argv: list[str] | None = None) -> None:
                     v1s = float(sing_fit["V1_s_MeV"])
                     v2s = float(sing_fit["V2_s_MeV"])
                     ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                    # 条件分岐: `ere_s is None` を満たす経路を評価する。
                     if ere_s is None:
                         for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                            # 条件分岐: `req not in cfg` を満たす経路を評価する。
                             if req not in cfg:
                                 raise ValueError(f"missing {req} in barrier_tail_config")
+
                         vb = float(v2s) * float(cfg["barrier_coeff"])
                         vt = float(v2s) * float(cfg["tail_depth_coeff"])
                         segs_s = [
@@ -4501,6 +5470,7 @@ def main(argv: list[str] | None = None) -> None:
                             mu_mev=mu_mev,
                             hbarc_mev_fm=hbarc_mev_fm,
                         )
+
                     v2s_pred_fm3 = float(ere_s["v2_fm3"])
                     within = bool(v2s_env_scan["min"] <= v2s_pred_fm3 <= v2s_env_scan["max"]) if math.isfinite(v2s_pred_fm3) else False
                     preds.append(v2s_pred_fm3)
@@ -4518,14 +5488,18 @@ def main(argv: list[str] | None = None) -> None:
 
             dists: list[float] = []
             for v in preds:
+                # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
                 if not math.isfinite(v):
                     dists.append(float("inf"))
+                # 条件分岐: 前段条件が不成立で、`v < float(v2s_env_scan["min"])` を追加評価する。
                 elif v < float(v2s_env_scan["min"]):
                     dists.append(float(v2s_env_scan["min"]) - float(v))
+                # 条件分岐: 前段条件が不成立で、`v > float(v2s_env_scan["max"])` を追加評価する。
                 elif v > float(v2s_env_scan["max"]):
                     dists.append(float(v) - float(v2s_env_scan["max"]))
                 else:
                     dists.append(0.0)
+
             within_all = bool(all(dd == 0.0 for dd in dists)) if all(math.isfinite(dd) for dd in dists) else False
             max_dist = float(max(dists)) if dists else float("nan")
 
@@ -4539,12 +5513,16 @@ def main(argv: list[str] | None = None) -> None:
             )
 
             rank = (0 if within_all else 1, max_dist if math.isfinite(max_dist) else float("inf"), abs(float(k) - 1.0))
+            # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
             if best_rank is None or rank < best_rank:
                 best_rank = rank
                 best_k = float(k)
 
+        # 条件分岐: `best_k is None` を満たす経路を評価する。
+
         if best_k is None:
             raise SystemExit("[fail] barrier_height_factor scan produced no candidates")
+
         barrier_height_factor_best = float(best_k)
         barrier_height_factor_scan = {
             "k_grid": [float(k) for k in k_grid],
@@ -4558,7 +5536,10 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.7"` を満たす経路を評価する。
+
     if step == "7.13.7":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.7")
 
@@ -4621,8 +5602,10 @@ def main(argv: list[str] | None = None) -> None:
                     v2t = float(base_fit_t["v2_mev"])
 
                     cfg_any = base_fit_t.get("barrier_tail_config", {})
+                    # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
                     if not isinstance(cfg_any, dict):
                         raise ValueError("missing barrier_tail_config")
+
                     cfg = {str(kk): float(vv) for kk, vv in cfg_any.items() if math.isfinite(float(vv))}
 
                     sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -4639,10 +5622,13 @@ def main(argv: list[str] | None = None) -> None:
                     v1s = float(sing_fit["V1_s_MeV"])
                     v2s = float(sing_fit["V2_s_MeV"])
                     ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                    # 条件分岐: `ere_s is None` を満たす経路を評価する。
                     if ere_s is None:
                         for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                            # 条件分岐: `req not in cfg` を満たす経路を評価する。
                             if req not in cfg:
                                 raise ValueError(f"missing {req} in barrier_tail_config")
+
                         vb = float(v2s) * float(cfg["barrier_coeff"])
                         vt = float(v2s) * float(cfg["tail_depth_coeff"])
                         segs_s = [
@@ -4658,6 +5644,7 @@ def main(argv: list[str] | None = None) -> None:
                             mu_mev=mu_mev,
                             hbarc_mev_fm=hbarc_mev_fm,
                         )
+
                     v2s_pred_fm3 = float(ere_s["v2_fm3"])
                     within = bool(v2s_env_scan["min"] <= v2s_pred_fm3 <= v2s_env_scan["max"]) if math.isfinite(v2s_pred_fm3) else False
                     preds.append(v2s_pred_fm3)
@@ -4675,14 +5662,18 @@ def main(argv: list[str] | None = None) -> None:
 
             dists: list[float] = []
             for v in preds:
+                # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
                 if not math.isfinite(v):
                     dists.append(float("inf"))
+                # 条件分岐: 前段条件が不成立で、`v < float(v2s_env_scan["min"])` を追加評価する。
                 elif v < float(v2s_env_scan["min"]):
                     dists.append(float(v2s_env_scan["min"]) - float(v))
+                # 条件分岐: 前段条件が不成立で、`v > float(v2s_env_scan["max"])` を追加評価する。
                 elif v > float(v2s_env_scan["max"]):
                     dists.append(float(v) - float(v2s_env_scan["max"]))
                 else:
                     dists.append(0.0)
+
             within_all = bool(all(dd == 0.0 for dd in dists)) if all(math.isfinite(dd) for dd in dists) else False
             max_dist = float(max(dists)) if dists else float("nan")
 
@@ -4696,12 +5687,16 @@ def main(argv: list[str] | None = None) -> None:
             )
 
             rank = (0 if within_all else 1, max_dist if math.isfinite(max_dist) else float("inf"), abs(float(q) - float(tail_depth_factor_mean_preserving)))
+            # 条件分岐: `best_rank_q is None or rank < best_rank_q` を満たす経路を評価する。
             if best_rank_q is None or rank < best_rank_q:
                 best_rank_q = rank
                 best_q = float(q)
 
+        # 条件分岐: `best_q is None` を満たす経路を評価する。
+
         if best_q is None:
             raise SystemExit("[fail] tail_depth_factor scan produced no candidates")
+
         tail_depth_factor_best = float(best_q)
         tail_depth_factor_scan = {
             "q_grid": [float(q) for q in q_grid],
@@ -4717,7 +5712,10 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.8"` を満たす経路を評価する。
+
     if step == "7.13.8":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8")
 
@@ -4762,8 +5760,10 @@ def main(argv: list[str] | None = None) -> None:
                         v2t = float(base_fit_t["v2_mev"])
 
                         cfg_any = base_fit_t.get("barrier_tail_config", {})
+                        # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
                         if not isinstance(cfg_any, dict):
                             raise ValueError("missing barrier_tail_config")
+
                         cfg = {str(kk): float(vv) for kk, vv in cfg_any.items() if math.isfinite(float(vv))}
 
                         sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -4778,12 +5778,15 @@ def main(argv: list[str] | None = None) -> None:
                             hbarc_mev_fm=hbarc_mev_fm,
                         )
                         ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                        # 条件分岐: `ere_s is None` を満たす経路を評価する。
                         if ere_s is None:
                             v1s = float(sing_fit["V1_s_MeV"])
                             v2s = float(sing_fit["V2_s_MeV"])
                             for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                                # 条件分岐: `req not in cfg` を満たす経路を評価する。
                                 if req not in cfg:
                                     raise ValueError(f"missing {req} in barrier_tail_config")
+
                             vb = float(v2s) * float(cfg["barrier_coeff"])
                             vt = float(v2s) * float(cfg["tail_depth_coeff"])
                             segs_s = [
@@ -4799,6 +5802,7 @@ def main(argv: list[str] | None = None) -> None:
                                 mu_mev=mu_mev,
                                 hbarc_mev_fm=hbarc_mev_fm,
                             )
+
                         v2s_pred_fm3 = float(ere_s["v2_fm3"])
                         within = bool(v2s_env_scan["min"] <= v2s_pred_fm3 <= v2s_env_scan["max"]) if math.isfinite(v2s_pred_fm3) else False
                         preds.append(v2s_pred_fm3)
@@ -4818,14 +5822,18 @@ def main(argv: list[str] | None = None) -> None:
 
                 dists: list[float] = []
                 for v in preds:
+                    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
                     if not math.isfinite(v):
                         dists.append(float("inf"))
+                    # 条件分岐: 前段条件が不成立で、`v < float(v2s_env_scan["min"])` を追加評価する。
                     elif v < float(v2s_env_scan["min"]):
                         dists.append(float(v2s_env_scan["min"]) - float(v))
+                    # 条件分岐: 前段条件が不成立で、`v > float(v2s_env_scan["max"])` を追加評価する。
                     elif v > float(v2s_env_scan["max"]):
                         dists.append(float(v) - float(v2s_env_scan["max"]))
                     else:
                         dists.append(0.0)
+
                 within_all = bool(all(dd == 0.0 for dd in dists)) if all(math.isfinite(dd) for dd in dists) else False
                 max_dist = float(max(dists)) if dists else float("nan")
 
@@ -4847,13 +5855,17 @@ def main(argv: list[str] | None = None) -> None:
                     abs(float(q) - float(q_mp)),
                     abs(float(k) - 1.0),
                 )
+                # 条件分岐: `best_rank_kq is None or rank < best_rank_kq` を満たす経路を評価する。
                 if best_rank_kq is None or rank < best_rank_kq:
                     best_rank_kq = rank
                     best_k_kq = float(k)
                     best_q_kq = float(q)
 
+        # 条件分岐: `best_k_kq is None or best_q_kq is None` を満たす経路を評価する。
+
         if best_k_kq is None or best_q_kq is None:
             raise SystemExit("[fail] (k,q) scan produced no candidates")
+
         barrier_height_factor_kq_best = float(best_k_kq)
         tail_depth_factor_kq_best = float(best_q_kq)
         barrier_tail_kq_scan = {
@@ -4870,7 +5882,10 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.8.1"` を満たす経路を評価する。
+
     if step == "7.13.8.1":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.1")
 
@@ -4882,16 +5897,21 @@ def main(argv: list[str] | None = None) -> None:
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
         def dist_to_env(x: float, env: dict[str, float]) -> float:
+            # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
                 return float("inf")
+
             lo = float(env["min"])
             hi = float(env["max"])
+            # 条件分岐: `lo <= x <= hi` を満たす経路を評価する。
             if lo <= x <= hi:
                 return 0.0
+
             return float(min(abs(x - lo), abs(x - hi)))
 
         # Extended global 2-DOF scan: (k,q) under fixed (tail_len_over_lambda, barrier_len_fraction),
         # now requiring *both* triplet v2t and singlet v2s to be compatible with the analysis-dependent envelope.
+
         k_grid = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
         q_grid = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4]
 
@@ -4933,8 +5953,10 @@ def main(argv: list[str] | None = None) -> None:
                         v2t = float(base_fit_t["v2_mev"])
 
                         cfg_any = base_fit_t.get("barrier_tail_config", {})
+                        # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
                         if not isinstance(cfg_any, dict):
                             raise ValueError("missing barrier_tail_config")
+
                         cfg = {str(kk): float(vv) for kk, vv in cfg_any.items() if math.isfinite(float(vv))}
 
                         sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -4949,12 +5971,15 @@ def main(argv: list[str] | None = None) -> None:
                             hbarc_mev_fm=hbarc_mev_fm,
                         )
                         ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                        # 条件分岐: `ere_s is None` を満たす経路を評価する。
                         if ere_s is None:
                             v1s = float(sing_fit["V1_s_MeV"])
                             v2s = float(sing_fit["V2_s_MeV"])
                             for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                                # 条件分岐: `req not in cfg` を満たす経路を評価する。
                                 if req not in cfg:
                                     raise ValueError(f"missing {req} in barrier_tail_config")
+
                             vb = float(v2s) * float(cfg["barrier_coeff"])
                             vt = float(v2s) * float(cfg["tail_depth_coeff"])
                             segs_s = [
@@ -4970,6 +5995,7 @@ def main(argv: list[str] | None = None) -> None:
                                 mu_mev=mu_mev,
                                 hbarc_mev_fm=hbarc_mev_fm,
                             )
+
                         v2s_pred_fm3 = float(ere_s["v2_fm3"])
                         r_s_fit_fm = float(ere_s["r_eff_fm"])
                     except Exception as e:
@@ -5040,13 +6066,17 @@ def main(argv: list[str] | None = None) -> None:
                     float(k),
                     float(q),
                 )
+                # 条件分岐: `best_rank_kq is None or rank < best_rank_kq` を満たす経路を評価する。
                 if best_rank_kq is None or rank < best_rank_kq:
                     best_rank_kq = rank
                     best_k_kq = float(k)
                     best_q_kq = float(q)
 
+        # 条件分岐: `best_k_kq is None or best_q_kq is None` を満たす経路を評価する。
+
         if best_k_kq is None or best_q_kq is None:
             raise SystemExit("[fail] extended (k,q) scan produced no candidates")
+
         barrier_height_factor_kq_best = float(best_k_kq)
         tail_depth_factor_kq_best = float(best_q_kq)
         barrier_tail_kq_scan = {
@@ -5068,7 +6098,10 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.8.2"` を満たす経路を評価する。
+
     if step == "7.13.8.2":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.2")
 
@@ -5080,18 +6113,23 @@ def main(argv: list[str] | None = None) -> None:
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
         def dist_to_env(x: float, env: dict[str, float]) -> float:
+            # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
                 return float("inf")
+
             lo = float(env["min"])
             hi = float(env["max"])
+            # 条件分岐: `lo <= x <= hi` を満たす経路を評価する。
             if lo <= x <= hi:
                 return 0.0
+
             return float(min(abs(x - lo), abs(x - hi)))
 
         # Channel-split scan: allow separate (k,q) for triplet and singlet outer structure.
         # Keep (tail_len_over_lambda, barrier_len_fraction) fixed to avoid hidden DOF.
         # Keep the scan grid intentionally modest: we want a reproducible "next-minimal" cut
         # that runs in a reasonable time on Windows while still covering the known tension points.
+
         k_t_grid = [3.0, 3.5, 4.0]
         q_t_grid = [1.2, 1.3, 1.4]
         k_s_grid = [0.5, 1.0, 1.5, 2.0]
@@ -5129,6 +6167,7 @@ def main(argv: list[str] | None = None) -> None:
 
                             tkey = (float(k_t), float(q_t), eq_label)
                             tfit = triplet_cache.get(tkey)
+                            # 条件分岐: `tfit is None` を満たす経路を評価する。
                             if tfit is None:
                                 try:
                                     base_fit_t = _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
@@ -5153,6 +6192,7 @@ def main(argv: list[str] | None = None) -> None:
                                 if isinstance(tfit, dict) and isinstance(tfit.get("error"), str) and str(tfit.get("error"))
                                 else None
                             )
+                            # 条件分岐: `t_err is not None` を満たす経路を評価する。
                             if t_err is not None:
                                 per_ds.append(
                                     {
@@ -5191,6 +6231,7 @@ def main(argv: list[str] | None = None) -> None:
                             )
                             outside_count += int(not ok_ar) + int(not ok_v2t)
 
+                            # 条件分岐: `math.isfinite(da_t) and math.isfinite(dr_t)` を満たす経路を評価する。
                             if math.isfinite(da_t) and math.isfinite(dr_t):
                                 triplet_pen = max(abs(float(da_t)) / float(tol_a_fm), abs(float(dr_t)) / float(tol_r_fm))
                                 max_triplet_pen = max(float(max_triplet_pen), float(triplet_pen))
@@ -5219,8 +6260,10 @@ def main(argv: list[str] | None = None) -> None:
                                     barrier_height_factor=float(k_s),
                                     tail_depth_factor=float(q_s),
                                 )
+                                # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
                                 if not isinstance(cfg_any, dict):
                                     raise ValueError("invalid barrier_tail_config (singlet)")
+
                                 cfg = {str(kk): float(vv) for kk, vv in cfg_any.items() if math.isfinite(float(vv))}
 
                                 sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -5237,10 +6280,13 @@ def main(argv: list[str] | None = None) -> None:
                                 v1s = float(sing_fit["V1_s_MeV"])
                                 v2s = float(sing_fit["V2_s_MeV"])
                                 ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                                # 条件分岐: `ere_s is None` を満たす経路を評価する。
                                 if ere_s is None:
                                     for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                                        # 条件分岐: `req not in cfg` を満たす経路を評価する。
                                         if req not in cfg:
                                             raise ValueError(f"missing {req} in barrier_tail_config")
+
                                     vb = float(v2s) * float(cfg["barrier_coeff"])
                                     vt = float(v2s) * float(cfg["tail_depth_coeff"])
                                     segs_s = [
@@ -5328,6 +6374,7 @@ def main(argv: list[str] | None = None) -> None:
                                 "per_dataset": per_ds,
                             }
                         )
+                        # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
                         if best_rank is None or rank < best_rank:
                             best_rank = rank
                             best_k_t = float(k_t)
@@ -5335,8 +6382,11 @@ def main(argv: list[str] | None = None) -> None:
                             best_k_s = float(k_s)
                             best_q_s = float(q_s)
 
+        # 条件分岐: `best_k_t is None or best_q_t is None or best_k_s is None or best_q_s is None` を満たす経路を評価する。
+
         if best_k_t is None or best_q_t is None or best_k_s is None or best_q_s is None:
             raise SystemExit("[fail] channel-split (k,q) scan produced no candidates")
+
         barrier_height_factor_kq_t_best = float(best_k_t)
         tail_depth_factor_kq_t_best = float(best_q_t)
         barrier_height_factor_kq_s_best = float(best_k_s)
@@ -5365,13 +6415,18 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.8.3"` を満たす経路を評価する。
+
     if step == "7.13.8.3":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.3")
 
         # This step builds on the fixed output of Step 7.13.8.2 (channel-split kq selection),
         # then scans a single additional DOF: the singlet inner boundary R1_s / λπ.
+
         prev_metrics = out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_metrics.json"
+        # 条件分岐: `not prev_metrics.exists()` を満たす経路を評価する。
         if not prev_metrics.exists():
             raise SystemExit(
                 "[fail] missing Step 7.13.8.2 fixed output needed for Step 7.13.8.3.\n"
@@ -5379,11 +6434,15 @@ def main(argv: list[str] | None = None) -> None:
                 "  python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.2\n"
                 f"Expected: {prev_metrics}"
             )
+
         prev = _load_json(prev_metrics)
         prev_scan = prev.get("barrier_tail_channel_split_kq_scan")
+        # 条件分岐: `not isinstance(prev_scan, dict)` を満たす経路を評価する。
         if not isinstance(prev_scan, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.2 metrics: missing barrier_tail_channel_split_kq_scan: {prev_metrics}")
+
         prev_sel = prev_scan.get("selected")
+        # 条件分岐: `not isinstance(prev_sel, dict)` を満たす経路を評価する。
         if not isinstance(prev_sel, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.2 metrics: missing selected: {prev_metrics}")
 
@@ -5404,6 +6463,7 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit(f"[fail] invalid 7.13.8.2 selected (k_t,q_t,k_s,q_s) in: {prev_metrics}")
 
         # Make the selected channel-split parameters available downstream (plot/CSV/metrics).
+
         barrier_height_factor_kq_t_best = float(k_t_sel)
         tail_depth_factor_kq_t_best = float(q_t_sel)
         barrier_height_factor_kq_s_best = float(k_s_sel)
@@ -5417,12 +6477,16 @@ def main(argv: list[str] | None = None) -> None:
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
         def dist_to_env(x: float, env: dict[str, float]) -> float:
+            # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
                 return float("inf")
+
             lo = float(env["min"])
             hi = float(env["max"])
+            # 条件分岐: `lo <= x <= hi` を満たす経路を評価する。
             if lo <= x <= hi:
                 return 0.0
+
             return float(min(abs(x - lo), abs(x - hi)))
 
         tol_a_fm = 0.2
@@ -5448,6 +6512,7 @@ def main(argv: list[str] | None = None) -> None:
             triplet_fit_by_eq[eq_label] = base_fit_t
 
         # Precompute singlet barrier+tail config once (depends only on fixed (k_s,q_s) selection).
+
         cfg_any = _barrier_tail_config_free_depth(
             lambda_pi_fm=float(lambda_pi_pm_fm),
             tail_len_over_lambda=1.0,
@@ -5455,8 +6520,10 @@ def main(argv: list[str] | None = None) -> None:
             barrier_height_factor=float(k_s_sel),
             tail_depth_factor=float(q_s_sel),
         )
+        # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
         if not isinstance(cfg_any, dict):
             raise SystemExit("[fail] invalid barrier_tail_config for step 7.13.8.3")
+
         cfg = {str(k): float(v) for k, v in cfg_any.items() if math.isfinite(float(v))}
 
         # Scan only the singlet inner boundary ratio (global): R1_s = (R1_s/λπ)·λπ.
@@ -5501,6 +6568,7 @@ def main(argv: list[str] | None = None) -> None:
                 )
                 outside_count += int(not ok_ar) + int(not ok_v2t)
 
+                # 条件分岐: `math.isfinite(da_t) and math.isfinite(dr_t)` を満たす経路を評価する。
                 if math.isfinite(da_t) and math.isfinite(dr_t):
                     triplet_pen = max(abs(float(da_t)) / float(tol_a_fm), abs(float(dr_t)) / float(tol_r_fm))
                     max_triplet_pen = max(float(max_triplet_pen), float(triplet_pen))
@@ -5523,6 +6591,7 @@ def main(argv: list[str] | None = None) -> None:
                     v2_hint = float(tfit["v2_mev"])
 
                     r2_s_fm = float(r2_t_fm)
+                    # 条件分岐: `not (0.0 < r1_s_fm < r2_s_fm - 0.25)` を満たす経路を評価する。
                     if not (0.0 < r1_s_fm < r2_s_fm - 0.25):
                         raise ValueError("invalid singlet geometry (R1_s,R2_s)")
 
@@ -5545,10 +6614,13 @@ def main(argv: list[str] | None = None) -> None:
                     v1s = float(sing_fit["V1_s_MeV"])
                     v2s = float(sing_fit["V2_s_MeV"])
                     ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                    # 条件分岐: `ere_s is None` を満たす経路を評価する。
                     if ere_s is None:
                         for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                            # 条件分岐: `req not in cfg` を満たす経路を評価する。
                             if req not in cfg:
                                 raise ValueError(f"missing cfg[{req}] for ERE recompute")
+
                         r3_end = float(r2_s_fm) + float(cfg["L3_total_fm"])
                         vb_s = float(v2s) * float(cfg["barrier_coeff"])
                         vt_s = float(v2s) * float(cfg["tail_depth_coeff"])
@@ -5633,12 +6705,16 @@ def main(argv: list[str] | None = None) -> None:
                     "per_dataset": per_ds,
                 }
             )
+            # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
             if best_rank is None or rank < best_rank:
                 best_rank = rank
                 best_r1_over = float(r1_over)
 
+        # 条件分岐: `best_r1_over is None` を満たす経路を評価する。
+
         if best_r1_over is None:
             raise SystemExit("[fail] singlet R1/λπ scan produced no candidates")
+
         singlet_r1_over_lambda_pi_best = float(best_r1_over)
         barrier_tail_channel_split_kq_singlet_r1_scan = {
             "source_step": "7.13.8.2",
@@ -5659,7 +6735,10 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.8.4"` を満たす経路を評価する。
+
     if step == "7.13.8.4":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.4")
 
@@ -5667,7 +6746,9 @@ def main(argv: list[str] | None = None) -> None:
         # - Step 7.13.8.2 (frozen channel-split (k_t,q_t)/(k_s,q_s))
         # - Step 7.13.8.3 (singlet R1_s/λπ scan); here we freeze a deterministic R1_s/λπ choice
         #   that best matches r_s across datasets, then scan one additional DOF: singlet R2_s/λπ.
+
         prev_kq_metrics = out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_metrics.json"
+        # 条件分岐: `not prev_kq_metrics.exists()` を満たす経路を評価する。
         if not prev_kq_metrics.exists():
             raise SystemExit(
                 "[fail] missing Step 7.13.8.2 fixed output needed for Step 7.13.8.4.\n"
@@ -5675,11 +6756,15 @@ def main(argv: list[str] | None = None) -> None:
                 "  python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.2\n"
                 f"Expected: {prev_kq_metrics}"
             )
+
         prev_kq = _load_json(prev_kq_metrics)
         prev_kq_scan = prev_kq.get("barrier_tail_channel_split_kq_scan")
+        # 条件分岐: `not isinstance(prev_kq_scan, dict)` を満たす経路を評価する。
         if not isinstance(prev_kq_scan, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.2 metrics: missing barrier_tail_channel_split_kq_scan: {prev_kq_metrics}")
+
         prev_kq_sel = prev_kq_scan.get("selected")
+        # 条件分岐: `not isinstance(prev_kq_sel, dict)` を満たす経路を評価する。
         if not isinstance(prev_kq_sel, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.2 metrics: missing selected: {prev_kq_metrics}")
 
@@ -5700,12 +6785,14 @@ def main(argv: list[str] | None = None) -> None:
             raise SystemExit(f"[fail] invalid 7.13.8.2 selected (k_t,q_t,k_s,q_s) in: {prev_kq_metrics}")
 
         # Make the selected channel-split parameters available downstream (plot/CSV/metrics).
+
         barrier_height_factor_kq_t_best = float(k_t_sel)
         tail_depth_factor_kq_t_best = float(q_t_sel)
         barrier_height_factor_kq_s_best = float(k_s_sel)
         tail_depth_factor_kq_s_best = float(q_s_sel)
 
         prev_r1_metrics = out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r1_scan_metrics.json"
+        # 条件分岐: `not prev_r1_metrics.exists()` を満たす経路を評価する。
         if not prev_r1_metrics.exists():
             raise SystemExit(
                 "[fail] missing Step 7.13.8.3 fixed output needed for Step 7.13.8.4.\n"
@@ -5713,28 +6800,43 @@ def main(argv: list[str] | None = None) -> None:
                 "  python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.3\n"
                 f"Expected: {prev_r1_metrics}"
             )
+
         prev_r1 = _load_json(prev_r1_metrics)
         prev_r1_scan = prev_r1.get("barrier_tail_channel_split_kq_singlet_r1_scan")
+        # 条件分岐: `not isinstance(prev_r1_scan, dict)` を満たす経路を評価する。
         if not isinstance(prev_r1_scan, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.3 metrics: missing barrier_tail_channel_split_kq_singlet_r1_scan: {prev_r1_metrics}")
+
         prev_r1_rows = prev_r1_scan.get("rows")
+        # 条件分岐: `not isinstance(prev_r1_rows, list)` を満たす経路を評価する。
         if not isinstance(prev_r1_rows, list):
             raise SystemExit(f"[fail] invalid 7.13.8.3 metrics: missing rows: {prev_r1_metrics}")
 
         # Freeze R1_s/λπ by a deterministic rule:
         # Prefer any R1_s/λπ that makes r_s(fit) within the observed envelope for all datasets.
         # If multiple exist, tie-break by minimal max_dist(v2s), then minimal max |Δr_s|.
+
         def _row_ok_rs_all(row: dict[str, object]) -> bool:
             per_ds = row.get("per_dataset")
+            # 条件分岐: `not isinstance(per_ds, list) or len(per_ds) == 0` を満たす経路を評価する。
             if not isinstance(per_ds, list) or len(per_ds) == 0:
                 return False
+
             for pd in per_ds:
+                # 条件分岐: `not isinstance(pd, dict)` を満たす経路を評価する。
                 if not isinstance(pd, dict):
                     return False
+
+                # 条件分岐: `pd.get("error") is not None` を満たす経路を評価する。
+
                 if pd.get("error") is not None:
                     return False
+
+                # 条件分岐: `not bool(pd.get("within_r_s_envelope"))` を満たす経路を評価する。
+
                 if not bool(pd.get("within_r_s_envelope")):
                     return False
+
             return True
 
         def _r1_row_key(row: dict[str, object]) -> tuple[float, float, float]:
@@ -5746,6 +6848,7 @@ def main(argv: list[str] | None = None) -> None:
         r1_candidates: list[dict[str, object]] = [
             row for row in prev_r1_rows if isinstance(row, dict) and "r1_s_over_lambda_pi_pm" in row and _row_ok_rs_all(row)
         ]
+        # 条件分岐: `r1_candidates` を満たす経路を評価する。
         if r1_candidates:
             best_r1_row = min(r1_candidates, key=_r1_row_key)
         else:
@@ -5759,8 +6862,10 @@ def main(argv: list[str] | None = None) -> None:
             )
 
         r1_over_fixed = float(best_r1_row.get("r1_s_over_lambda_pi_pm", float("nan")))
+        # 条件分岐: `not math.isfinite(r1_over_fixed)` を満たす経路を評価する。
         if not math.isfinite(r1_over_fixed):
             raise SystemExit("[fail] could not determine fixed R1_s/λπ from 7.13.8.3 scan")
+
         singlet_r1_over_lambda_pi_best = float(r1_over_fixed)
         r1_s_fm_fixed = float(r1_over_fixed) * float(lambda_pi_pm_fm)
 
@@ -5772,12 +6877,16 @@ def main(argv: list[str] | None = None) -> None:
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
         def dist_to_env(x: float, env: dict[str, float]) -> float:
+            # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
                 return float("inf")
+
             lo = float(env["min"])
             hi = float(env["max"])
+            # 条件分岐: `lo <= x <= hi` を満たす経路を評価する。
             if lo <= x <= hi:
                 return 0.0
+
             return float(min(abs(x - lo), abs(x - hi)))
 
         tol_a_fm = 0.2
@@ -5803,6 +6912,7 @@ def main(argv: list[str] | None = None) -> None:
             triplet_fit_by_eq[eq_label] = base_fit_t
 
         # Precompute singlet barrier+tail config once (depends only on fixed (k_s,q_s) selection).
+
         cfg_any = _barrier_tail_config_free_depth(
             lambda_pi_fm=float(lambda_pi_pm_fm),
             tail_len_over_lambda=1.0,
@@ -5810,8 +6920,10 @@ def main(argv: list[str] | None = None) -> None:
             barrier_height_factor=float(k_s_sel),
             tail_depth_factor=float(q_s_sel),
         )
+        # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
         if not isinstance(cfg_any, dict):
             raise SystemExit("[fail] invalid barrier_tail_config for step 7.13.8.4")
+
         cfg = {str(k): float(v) for k, v in cfg_any.items() if math.isfinite(float(v))}
 
         # Scan only the singlet outer boundary ratio (global): R2_s = (R2_s/λπ)·λπ.
@@ -5856,6 +6968,7 @@ def main(argv: list[str] | None = None) -> None:
                 )
                 outside_count += int(not ok_ar) + int(not ok_v2t)
 
+                # 条件分岐: `math.isfinite(da_t) and math.isfinite(dr_t)` を満たす経路を評価する。
                 if math.isfinite(da_t) and math.isfinite(dr_t):
                     triplet_pen = max(abs(float(da_t)) / float(tol_a_fm), abs(float(dr_t)) / float(tol_r_fm))
                     max_triplet_pen = max(float(max_triplet_pen), float(triplet_pen))
@@ -5876,6 +6989,7 @@ def main(argv: list[str] | None = None) -> None:
                     v1_hint = float(tfit["v1_mev"])
                     v2_hint = float(tfit["v2_mev"])
 
+                    # 条件分岐: `not (0.0 < r1_s_fm_fixed < r2_s_fm - 0.25)` を満たす経路を評価する。
                     if not (0.0 < r1_s_fm_fixed < r2_s_fm - 0.25):
                         raise ValueError("invalid singlet geometry (R1_s,R2_s)")
 
@@ -5898,10 +7012,13 @@ def main(argv: list[str] | None = None) -> None:
                     v1s = float(sing_fit["V1_s_MeV"])
                     v2s = float(sing_fit["V2_s_MeV"])
                     ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+                    # 条件分岐: `ere_s is None` を満たす経路を評価する。
                     if ere_s is None:
                         for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                            # 条件分岐: `req not in cfg` を満たす経路を評価する。
                             if req not in cfg:
                                 raise ValueError(f"missing cfg[{req}] for ERE recompute")
+
                         r3_end = float(r2_s_fm) + float(cfg["L3_total_fm"])
                         vb_s = float(v2s) * float(cfg["barrier_coeff"])
                         vt_s = float(v2s) * float(cfg["tail_depth_coeff"])
@@ -5915,8 +7032,11 @@ def main(argv: list[str] | None = None) -> None:
                             r_end_fm=r3_end, segments=segs_s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
                         )
 
+                    # 条件分岐: `not isinstance(ere_s, dict)` を満たす経路を評価する。
+
                     if not isinstance(ere_s, dict):
                         raise ValueError("missing ERE for singlet fit")
+
                     v2s_pred_fm3 = float(ere_s.get("v2_fm3", float("nan")))
                     r_s_fit_fm = float(ere_s.get("r_eff_fm", float("nan")))
                     dr_s = float(r_s_fit_fm) - float(sing["r_s_fm"])
@@ -5985,12 +7105,16 @@ def main(argv: list[str] | None = None) -> None:
                     "per_dataset": per_ds,
                 }
             )
+            # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
             if best_rank is None or rank < best_rank:
                 best_rank = rank
                 best_r2_over = float(r2_over)
 
+        # 条件分岐: `best_r2_over is None` を満たす経路を評価する。
+
         if best_r2_over is None:
             raise SystemExit("[fail] singlet R2/λπ scan produced no candidates")
+
         singlet_r2_over_lambda_pi_best = float(best_r2_over)
         barrier_tail_channel_split_kq_singlet_r2_scan = {
             "source_step": "7.13.8.2",
@@ -6018,14 +7142,19 @@ def main(argv: list[str] | None = None) -> None:
             },
         }
 
+    # 条件分岐: `step == "7.13.8.5"` を満たす経路を評価する。
+
     if step == "7.13.8.5":
+        # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
         if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
             raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.5")
 
         # Build on Step 7.13.8.4 (singlet geometry split succeeded). Here we freeze the singlet
         # geometry (R1_s/λπ, R2_s/λπ) and the singlet (k_s,q_s), and scan one additional geometric DOF
         # for the triplet: the barrier/tail split fraction beyond R2, plus a small re-scan of k_t.
+
         prev_r2_metrics = out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_channel_split_kq_scan_singlet_r2_scan_metrics.json"
+        # 条件分岐: `not prev_r2_metrics.exists()` を満たす経路を評価する。
         if not prev_r2_metrics.exists():
             raise SystemExit(
                 "[fail] missing Step 7.13.8.4 fixed output needed for Step 7.13.8.5.\n"
@@ -6033,13 +7162,17 @@ def main(argv: list[str] | None = None) -> None:
                 "  python -B scripts/quantum/nuclear_effective_potential_two_range.py --step 7.13.8.4\n"
                 f"Expected: {prev_r2_metrics}"
             )
+
         prev_r2 = _load_json(prev_r2_metrics)
         prev_r2_scan = prev_r2.get("barrier_tail_channel_split_kq_singlet_r2_scan")
+        # 条件分岐: `not isinstance(prev_r2_scan, dict)` を満たす経路を評価する。
         if not isinstance(prev_r2_scan, dict):
             raise SystemExit(
                 f"[fail] invalid 7.13.8.4 metrics: missing barrier_tail_channel_split_kq_singlet_r2_scan: {prev_r2_metrics}"
             )
+
         prev_sel_kq = prev_r2_scan.get("selected_channel_split_kq")
+        # 条件分岐: `not isinstance(prev_sel_kq, dict)` を満たす経路を評価する。
         if not isinstance(prev_sel_kq, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.4 metrics: missing selected_channel_split_kq: {prev_r2_metrics}")
 
@@ -6054,13 +7187,17 @@ def main(argv: list[str] | None = None) -> None:
 
         r1_over_fixed = float(prev_r2_scan.get("r1_s_over_lambda_pi_pm_fixed", float("nan")))
         prev_r2_sel = prev_r2_scan.get("selected")
+        # 条件分岐: `not isinstance(prev_r2_sel, dict)` を満たす経路を評価する。
         if not isinstance(prev_r2_sel, dict):
             raise SystemExit(f"[fail] invalid 7.13.8.4 metrics: missing selected: {prev_r2_metrics}")
+
         r2_over_fixed = float(prev_r2_sel.get("r2_s_over_lambda_pi_pm", float("nan")))
+        # 条件分岐: `not (math.isfinite(r1_over_fixed) and math.isfinite(r2_over_fixed))` を満たす経路を評価する。
         if not (math.isfinite(r1_over_fixed) and math.isfinite(r2_over_fixed)):
             raise SystemExit(f"[fail] invalid 7.13.8.4 singlet geometry in: {prev_r2_metrics}")
 
         # Freeze singlet geometry and (k_s,q_s) from 7.13.8.4.
+
         singlet_r1_over_lambda_pi_best = float(r1_over_fixed)
         singlet_r2_over_lambda_pi_best = float(r2_over_fixed)
         barrier_height_factor_kq_s_best = float(k_s_sel)
@@ -6077,22 +7214,29 @@ def main(argv: list[str] | None = None) -> None:
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
         def dist_to_env(x: float, env: dict[str, float]) -> float:
+            # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
                 return float("inf")
+
             lo = float(env["min"])
             hi = float(env["max"])
+            # 条件分岐: `lo <= x <= hi` を満たす経路を評価する。
             if lo <= x <= hi:
                 return 0.0
+
             return float(min(abs(x - lo), abs(x - hi)))
 
         def margin_to_env(x: float, env: dict[str, float]) -> float:
             # Positive only when inside; otherwise negative (by distance).
             if not math.isfinite(x):
                 return float("-inf")
+
             lo = float(env["min"])
             hi = float(env["max"])
+            # 条件分岐: `lo <= x <= hi` を満たす経路を評価する。
             if lo <= x <= hi:
                 return float(min(x - lo, hi - x))
+
             return -dist_to_env(x, env)
 
         tol_a_fm = 0.2
@@ -6108,8 +7252,10 @@ def main(argv: list[str] | None = None) -> None:
             barrier_height_factor=float(barrier_height_factor_kq_s_best),
             tail_depth_factor=float(tail_depth_factor_kq_s_best),
         )
+        # 条件分岐: `not isinstance(cfg_s_any, dict)` を満たす経路を評価する。
         if not isinstance(cfg_s_any, dict):
             raise SystemExit("[fail] invalid barrier_tail_config for step 7.13.8.5")
+
         cfg_s = {str(k): float(v) for k, v in cfg_s_any.items() if math.isfinite(float(v))}
 
         singlet_fixed_by_eq: dict[int, dict[str, float]] = {}
@@ -6128,6 +7274,7 @@ def main(argv: list[str] | None = None) -> None:
                 hbarc_mev_fm=hbarc_mev_fm,
             )
             ere_s = sfit.get("ere") if isinstance(sfit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 vb = float(sfit["V2_s_MeV"]) * float(cfg_s["barrier_coeff"])
                 vt = float(sfit["V2_s_MeV"]) * float(cfg_s["tail_depth_coeff"])
@@ -6139,12 +7286,14 @@ def main(argv: list[str] | None = None) -> None:
                 ]
                 r3_end = float(r2_s_fm_fixed) + float(cfg_s["L3_total_fm"])
                 ere_s = _fit_kcot_ere_segments(r_end_fm=r3_end, segments=segs_s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+
             singlet_fixed_by_eq[eq_label] = {
                 "r_s_fit_fm": float(ere_s["r_eff_fm"]),
                 "v2s_pred_fm3": float(ere_s["v2_fm3"]),
             }
 
         # Scan: triplet barrier/tail split fraction and a small grid on k_t (q_t fixed from 7.13.8.4).
+
         barrier_len_fraction_grid = [0.1, 0.15, 0.2, 0.25, 0.3]
         k_t_grid = [0.0, 0.5, 1.0, 2.0, float(k_t_prev)]
 
@@ -6200,6 +7349,7 @@ def main(argv: list[str] | None = None) -> None:
                     max_dist_v2t = max(float(max_dist_v2t), float(dist_v2t))
                     min_margin_v2t = min(float(min_margin_v2t), float(margin_to_env(float(v2t_fit), v2t_env_scan)))
 
+                    # 条件分岐: `math.isfinite(da_t) and math.isfinite(dr_t)` を満たす経路を評価する。
                     if math.isfinite(da_t) and math.isfinite(dr_t):
                         triplet_pen = max(abs(float(da_t)) / float(tol_a_fm), abs(float(dr_t)) / float(tol_r_fm))
                         max_triplet_pen = max(float(max_triplet_pen), float(triplet_pen))
@@ -6207,6 +7357,7 @@ def main(argv: list[str] | None = None) -> None:
                         max_triplet_pen = float("inf")
 
                     # Frozen singlet check (from 7.13.8.4).
+
                     sf = singlet_fixed_by_eq.get(eq_label, {})
                     r_s_fit = float(sf.get("r_s_fit_fm", float("nan")))
                     v2s_pred = float(sf.get("v2s_pred_fm3", float("nan")))
@@ -6268,10 +7419,13 @@ def main(argv: list[str] | None = None) -> None:
                         "per_dataset": per_ds,
                     }
                 )
+                # 条件分岐: `best_rank is None or rank < best_rank` を満たす経路を評価する。
                 if best_rank is None or rank < best_rank:
                     best_rank = rank
                     best_frac = float(frac)
                     best_k = float(k_t)
+
+        # 条件分岐: `best_frac is None or best_k is None` を満たす経路を評価する。
 
         if best_frac is None or best_k is None:
             raise SystemExit("[fail] triplet barrier fraction scan produced no candidates")
@@ -6325,6 +7479,7 @@ def main(argv: list[str] | None = None) -> None:
         trip = d["triplet"]
         sing = d["singlet"]
 
+        # 条件分岐: `step in ("7.13.5", "7.13.6")` を満たす経路を評価する。
         if step in ("7.13.5", "7.13.6"):
             base_fit_t = _fit_triplet_three_range_barrier_tail_pion_constrained(
                 b_mev=b_mev,
@@ -6336,6 +7491,7 @@ def main(argv: list[str] | None = None) -> None:
                 barrier_len_fraction=0.5,
                 barrier_height_factor=(float(barrier_height_factor_best) if step == "7.13.6" else 1.0),
             )
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.7"` を追加評価する。
         elif step == "7.13.7":
             base_fit_t = _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
                 b_mev=b_mev,
@@ -6348,21 +7504,31 @@ def main(argv: list[str] | None = None) -> None:
                 barrier_height_factor=2.0,
                 tail_depth_factor=float(tail_depth_factor_best) if tail_depth_factor_best is not None else 4.0,
             )
+        # 条件分岐: 前段条件が不成立で、`step in ("7.13.8", "7.13.8.1", "7.13.8.2", "7.13.8.3", "7.13.8.4", "7.13.8.5")` を追加評価する。
         elif step in ("7.13.8", "7.13.8.1", "7.13.8.2", "7.13.8.3", "7.13.8.4", "7.13.8.5"):
+            # 条件分岐: `step in ("7.13.8.2", "7.13.8.3", "7.13.8.4", "7.13.8.5")` を満たす経路を評価する。
             if step in ("7.13.8.2", "7.13.8.3", "7.13.8.4", "7.13.8.5"):
+                # 条件分岐: `barrier_height_factor_kq_t_best is None or tail_depth_factor_kq_t_best is None` を満たす経路を評価する。
                 if barrier_height_factor_kq_t_best is None or tail_depth_factor_kq_t_best is None:
                     raise SystemExit("[fail] missing selected (k_t,q_t) for step 7.13.8.2/7.13.8.4/7.13.8.5")
+
                 k_use = float(barrier_height_factor_kq_t_best)
                 q_use = float(tail_depth_factor_kq_t_best)
             else:
                 k_use = float(barrier_height_factor_kq_best) if barrier_height_factor_kq_best is not None else 2.0
                 q_use = float(tail_depth_factor_kq_best) if tail_depth_factor_kq_best is not None else 0.7
+
+            # 条件分岐: `step == "7.13.8.5"` を満たす経路を評価する。
+
             if step == "7.13.8.5":
+                # 条件分岐: `triplet_barrier_len_fraction_best is None or not math.isfinite(triplet_barrie...` を満たす経路を評価する。
                 if triplet_barrier_len_fraction_best is None or not math.isfinite(triplet_barrier_len_fraction_best):
                     raise SystemExit("[fail] missing selected barrier_len_fraction_t for step 7.13.8.5")
+
                 barrier_len_fraction_use = float(triplet_barrier_len_fraction_best)
             else:
                 barrier_len_fraction_use = 0.5
+
             base_fit_t = _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
                 b_mev=b_mev,
                 targets=trip,
@@ -6374,6 +7540,7 @@ def main(argv: list[str] | None = None) -> None:
                 barrier_height_factor=float(k_use),
                 tail_depth_factor=float(q_use),
             )
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
             base_fit_t = _fit_triplet_three_range_tail_pion_constrained(
                 b_mev=b_mev,
@@ -6383,6 +7550,7 @@ def main(argv: list[str] | None = None) -> None:
                 lambda_pi_fm=float(lambda_pi_pm_fm),
                 tail_len_over_lambda=1.0,
             )
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.3"` を追加評価する。
         elif step == "7.13.3":
             base_fit_t = _fit_triplet_two_range_pion_constrained(
                 b_mev=b_mev,
@@ -6393,6 +7561,7 @@ def main(argv: list[str] | None = None) -> None:
             )
         else:
             base_fit_t = _fit_triplet_two_range(b_mev=b_mev, targets=trip, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+
         r1 = float(base_fit_t["r1_fm"])
         r2 = float(base_fit_t["r2_fm"])
         r3 = (
@@ -6413,6 +7582,7 @@ def main(argv: list[str] | None = None) -> None:
             else r2
         )
 
+        # 条件分岐: `step == "7.9.8"` を満たす経路を評価する。
         if step == "7.9.8":
             fit_t = _fit_triplet_repulsive_core_fixed_geometry(
                 b_mev=b_mev,
@@ -6440,6 +7610,8 @@ def main(argv: list[str] | None = None) -> None:
             ere_t = fit_t["ere"]
             v3 = float(fit_t.get("v3_mev", 0.0)) if step == "7.13.4" else 0.0
 
+        # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
+
         if step == "7.9.6":
             sing_fit: dict[str, object] = _fit_v2s_for_singlet(
                 a_s_target_fm=float(sing["a_s_fm"]),
@@ -6460,11 +7632,14 @@ def main(argv: list[str] | None = None) -> None:
                 r1_fm=r1, r2_fm=r2, v1_mev=v1s, v2_mev=v2s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
             )
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 ere_s = _fit_kcot_ere(
                     r1_fm=r1, r2_fm=r2, v1_mev=v1s, v2_mev=v2s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
                 )
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step == "7.9.7"` を追加評価する。
         elif step == "7.9.7":
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r(
                 a_s_target_fm=float(sing["a_s_fm"]),
@@ -6486,11 +7661,14 @@ def main(argv: list[str] | None = None) -> None:
                 r1_fm=r1, r2_fm=r2, v1_mev=v1s, v2_mev=v2s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
             )
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 ere_s = _fit_kcot_ere(
                     r1_fm=r1, r2_fm=r2, v1_mev=v1s, v2_mev=v2s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
                 )
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.3"` を追加評価する。
         elif step == "7.13.3":
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r(
                 a_s_target_fm=float(sing["a_s_fm"]),
@@ -6513,16 +7691,24 @@ def main(argv: list[str] | None = None) -> None:
                 r1_fm=r1, r2_fm=r2, v1_mev=v1s, v2_mev=v2s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
             )
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 ere_s = _fit_kcot_ere_signed_two_range(
                     r1_fm=r1, r2_fm=r2, v1_mev=v1s, v2_mev=v2s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
                 )
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.8.2"` を追加評価する。
         elif step == "7.13.8.2":
+            # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
             if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
                 raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.2")
+
+            # 条件分岐: `barrier_height_factor_kq_s_best is None or tail_depth_factor_kq_s_best is None` を満たす経路を評価する。
+
             if barrier_height_factor_kq_s_best is None or tail_depth_factor_kq_s_best is None:
                 raise SystemExit("[fail] missing selected (k_s,q_s) for step 7.13.8.2")
+
             cfg_any = _barrier_tail_config_free_depth(
                 lambda_pi_fm=float(lambda_pi_pm_fm),
                 tail_len_over_lambda=1.0,
@@ -6530,8 +7716,10 @@ def main(argv: list[str] | None = None) -> None:
                 barrier_height_factor=float(barrier_height_factor_kq_s_best),
                 tail_depth_factor=float(tail_depth_factor_kq_s_best),
             )
+            # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
             if not isinstance(cfg_any, dict):
                 raise SystemExit("[fail] invalid barrier_tail_config for step 7.13.8.2")
+
             cfg = {str(k): float(v) for k, v in cfg_any.items() if math.isfinite(float(v))}
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
                 a_s_target_fm=float(sing["a_s_fm"]),
@@ -6552,10 +7740,13 @@ def main(argv: list[str] | None = None) -> None:
             pred_targets = ["v2s"]
             a_s_exact = float(sing_fit.get("a_s_exact_fm", float("nan")))
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                    # 条件分岐: `req not in cfg` を満たす経路を評価する。
                     if req not in cfg:
                         raise SystemExit(f"[fail] missing {req} in barrier_tail_config")
+
                 vb = float(v2s) * float(cfg["barrier_coeff"])
                 vt = float(v2s) * float(cfg["tail_depth_coeff"])
                 segs_s = [
@@ -6567,8 +7758,10 @@ def main(argv: list[str] | None = None) -> None:
                 r3_end = float(r2) + float(cfg["L3_total_fm"])
                 ere_s = _fit_kcot_ere_segments(r_end_fm=r3_end, segments=segs_s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
             # Store explicit barrier/tail heights for plotting/output.
+
             if isinstance(ere_s, dict):
                 try:
+                    # 条件分岐: `"Vb_s_MeV" not in sing_fit or "Vt_s_MeV" not in sing_fit` を満たす経路を評価する。
                     if "Vb_s_MeV" not in sing_fit or "Vt_s_MeV" not in sing_fit:
                         vb = float(v2s) * float(cfg["barrier_coeff"])
                         vt = float(v2s) * float(cfg["tail_depth_coeff"])
@@ -6576,17 +7769,27 @@ def main(argv: list[str] | None = None) -> None:
                         sing_fit["Vt_s_MeV"] = float(vt)
                 except Exception:
                     pass
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.8.3"` を追加評価する。
         elif step == "7.13.8.3":
+            # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
             if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
                 raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.3")
+
+            # 条件分岐: `barrier_height_factor_kq_s_best is None or tail_depth_factor_kq_s_best is None` を満たす経路を評価する。
+
             if barrier_height_factor_kq_s_best is None or tail_depth_factor_kq_s_best is None:
                 raise SystemExit("[fail] missing selected (k_s,q_s) for step 7.13.8.3")
+
+            # 条件分岐: `singlet_r1_over_lambda_pi_best is None or not math.isfinite(singlet_r1_over_l...` を満たす経路を評価する。
+
             if singlet_r1_over_lambda_pi_best is None or not math.isfinite(singlet_r1_over_lambda_pi_best):
                 raise SystemExit("[fail] missing selected R1_s/λπ for step 7.13.8.3")
 
             r1_s = float(singlet_r1_over_lambda_pi_best) * float(lambda_pi_pm_fm)
             r2_s = float(r2)
+            # 条件分岐: `not (0.0 < r1_s < r2_s - 0.25)` を満たす経路を評価する。
             if not (0.0 < r1_s < r2_s - 0.25):
                 raise SystemExit("[fail] invalid singlet geometry for step 7.13.8.3 (R1_s >= R2-0.25)")
 
@@ -6597,8 +7800,10 @@ def main(argv: list[str] | None = None) -> None:
                 barrier_height_factor=float(barrier_height_factor_kq_s_best),
                 tail_depth_factor=float(tail_depth_factor_kq_s_best),
             )
+            # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
             if not isinstance(cfg_any, dict):
                 raise SystemExit("[fail] invalid barrier_tail_config for step 7.13.8.3")
+
             cfg = {str(k): float(v) for k, v in cfg_any.items() if math.isfinite(float(v))}
 
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -6620,10 +7825,13 @@ def main(argv: list[str] | None = None) -> None:
             pred_targets = ["v2s"]
             a_s_exact = float(sing_fit.get("a_s_exact_fm", float("nan")))
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                    # 条件分岐: `req not in cfg` を満たす経路を評価する。
                     if req not in cfg:
                         raise SystemExit(f"[fail] missing {req} in barrier_tail_config")
+
                 vb = float(v2s) * float(cfg["barrier_coeff"])
                 vt = float(v2s) * float(cfg["tail_depth_coeff"])
                 segs_s = [
@@ -6636,6 +7844,7 @@ def main(argv: list[str] | None = None) -> None:
                 ere_s = _fit_kcot_ere_segments(r_end_fm=r3_end, segments=segs_s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
 
             # Store explicit barrier/tail heights and the singlet geometry for plotting/output.
+
             try:
                 vb = float(v2s) * float(cfg["barrier_coeff"])
                 vt = float(v2s) * float(cfg["tail_depth_coeff"])
@@ -6652,19 +7861,32 @@ def main(argv: list[str] | None = None) -> None:
                 }
             except Exception:
                 pass
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step in ("7.13.8.4", "7.13.8.5")` を追加評価する。
         elif step in ("7.13.8.4", "7.13.8.5"):
+            # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
             if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
                 raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.8.4/7.13.8.5")
+
+            # 条件分岐: `barrier_height_factor_kq_s_best is None or tail_depth_factor_kq_s_best is None` を満たす経路を評価する。
+
             if barrier_height_factor_kq_s_best is None or tail_depth_factor_kq_s_best is None:
                 raise SystemExit("[fail] missing selected (k_s,q_s) for step 7.13.8.4/7.13.8.5")
+
+            # 条件分岐: `singlet_r1_over_lambda_pi_best is None or not math.isfinite(singlet_r1_over_l...` を満たす経路を評価する。
+
             if singlet_r1_over_lambda_pi_best is None or not math.isfinite(singlet_r1_over_lambda_pi_best):
                 raise SystemExit("[fail] missing fixed R1_s/λπ for step 7.13.8.4/7.13.8.5")
+
+            # 条件分岐: `singlet_r2_over_lambda_pi_best is None or not math.isfinite(singlet_r2_over_l...` を満たす経路を評価する。
+
             if singlet_r2_over_lambda_pi_best is None or not math.isfinite(singlet_r2_over_lambda_pi_best):
                 raise SystemExit("[fail] missing selected R2_s/λπ for step 7.13.8.4/7.13.8.5")
 
             r1_s = float(singlet_r1_over_lambda_pi_best) * float(lambda_pi_pm_fm)
             r2_s = float(singlet_r2_over_lambda_pi_best) * float(lambda_pi_pm_fm)
+            # 条件分岐: `not (0.0 < r1_s < r2_s - 0.25)` を満たす経路を評価する。
             if not (0.0 < r1_s < r2_s - 0.25):
                 raise SystemExit("[fail] invalid singlet geometry for step 7.13.8.4 (R1_s >= R2_s-0.25)")
 
@@ -6675,8 +7897,10 @@ def main(argv: list[str] | None = None) -> None:
                 barrier_height_factor=float(barrier_height_factor_kq_s_best),
                 tail_depth_factor=float(tail_depth_factor_kq_s_best),
             )
+            # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
             if not isinstance(cfg_any, dict):
                 raise SystemExit("[fail] invalid barrier_tail_config for step 7.13.8.4")
+
             cfg = {str(k): float(v) for k, v in cfg_any.items() if math.isfinite(float(v))}
 
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
@@ -6698,10 +7922,13 @@ def main(argv: list[str] | None = None) -> None:
             pred_targets = ["v2s"]
             a_s_exact = float(sing_fit.get("a_s_exact_fm", float("nan")))
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                    # 条件分岐: `req not in cfg` を満たす経路を評価する。
                     if req not in cfg:
                         raise SystemExit(f"[fail] missing {req} in barrier_tail_config")
+
                 vb = float(v2s) * float(cfg["barrier_coeff"])
                 vt = float(v2s) * float(cfg["tail_depth_coeff"])
                 segs_s = [
@@ -6714,6 +7941,7 @@ def main(argv: list[str] | None = None) -> None:
                 ere_s = _fit_kcot_ere_segments(r_end_fm=r3_end, segments=segs_s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
 
             # Store explicit barrier/tail heights and the singlet geometry for plotting/output.
+
             try:
                 vb = float(v2s) * float(cfg["barrier_coeff"])
                 vt = float(v2s) * float(cfg["tail_depth_coeff"])
@@ -6731,13 +7959,19 @@ def main(argv: list[str] | None = None) -> None:
                 }
             except Exception:
                 pass
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step in ("7.13.5", "7.13.6", "7.13.7", "7.13.8", "7.13.8.1")` を追加評価する。
         elif step in ("7.13.5", "7.13.6", "7.13.7", "7.13.8", "7.13.8.1"):
+            # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
             if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
                 raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.5/7.13.6/7.13.7/7.13.8")
+
             cfg_any = base_fit_t.get("barrier_tail_config", {})
+            # 条件分岐: `not isinstance(cfg_any, dict)` を満たす経路を評価する。
             if not isinstance(cfg_any, dict):
                 raise SystemExit("[fail] missing barrier_tail_config for step 7.13.5/7.13.6/7.13.7/7.13.8")
+
             cfg = {str(k): float(v) for k, v in cfg_any.items() if math.isfinite(float(v))}
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
                 a_s_target_fm=float(sing["a_s_fm"]),
@@ -6758,10 +7992,13 @@ def main(argv: list[str] | None = None) -> None:
             pred_targets = ["v2s"]
             a_s_exact = float(sing_fit.get("a_s_exact_fm", float("nan")))
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 for req in ("L3_total_fm", "Lb_fm", "Lt_fm", "barrier_coeff", "tail_depth_coeff"):
+                    # 条件分岐: `req not in cfg` を満たす経路を評価する。
                     if req not in cfg:
                         raise SystemExit(f"[fail] missing {req} in barrier_tail_config")
+
                 vb = float(v2s) * float(cfg["barrier_coeff"])
                 vt = float(v2s) * float(cfg["tail_depth_coeff"])
                 segs_s = [
@@ -6772,10 +8009,14 @@ def main(argv: list[str] | None = None) -> None:
                 ]
                 r3_end = float(r2) + float(cfg["L3_total_fm"])
                 ere_s = _fit_kcot_ere_segments(r_end_fm=r3_end, segments=segs_s, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm)
+
             v3s = 0.0
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
+            # 条件分岐: `lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm)` を満たす経路を評価する。
             if lambda_pi_pm_fm is None or not math.isfinite(lambda_pi_pm_fm):
                 raise SystemExit("[fail] missing lambda_pi_pm_fm for step 7.13.4")
+
             tail_len_fm = float(lambda_pi_pm_fm)  # minimal operational choice: L3 = λπ
             sing_fit = _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
                 a_s_target_fm=float(sing["a_s_fm"]),
@@ -6799,6 +8040,7 @@ def main(argv: list[str] | None = None) -> None:
             pred_targets = ["v2s"]
             a_s_exact = float(sing_fit.get("a_s_exact_fm", float("nan")))
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 segs_s = [
                     (float(r1), -float(v1s)),
@@ -6836,6 +8078,7 @@ def main(argv: list[str] | None = None) -> None:
                 hbarc_mev_fm=hbarc_mev_fm,
             )
             ere_s = sing_fit.get("ere") if isinstance(sing_fit.get("ere"), dict) else None
+            # 条件分岐: `ere_s is None` を満たす経路を評価する。
             if ere_s is None:
                 ere_s = _fit_kcot_ere_repulsive_core_two_range(
                     rc_fm=rc,
@@ -6847,6 +8090,7 @@ def main(argv: list[str] | None = None) -> None:
                     mu_mev=mu_mev,
                     hbarc_mev_fm=hbarc_mev_fm,
                 )
+
             v3s = 0.0
 
         cmp_triplet = {
@@ -6854,6 +8098,7 @@ def main(argv: list[str] | None = None) -> None:
             "r_t_fit_minus_obs_fm": float(float(ere_t["r_eff_fm"]) - float(trip["r_t_fm"])),
             "v2t_fit_minus_obs_fm3": float(float(ere_t["v2_fm3"]) - float(trip["v2t_fm3"])),
         }
+        # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
             cmp_singlet = {
                 "a_s_fit_minus_obs_fm": float(a_s_exact - float(sing["a_s_fm"])),
@@ -7127,12 +8372,14 @@ def main(argv: list[str] | None = None) -> None:
     for row, r in enumerate(results):
         label = str(r["label"])
         geo = r["fit_triplet"]["geometry"]
+        # 条件分岐: `step == "7.9.8"` を満たす経路を評価する。
         if step == "7.9.8":
             rc = float(geo["Rc_fm"])
             vc = float(geo["Vc_MeV"])
         else:
             rc = 0.0
             vc = 0.0
+
         r1 = float(geo["R1_fm"])
         r2 = float(geo["R2_fm"])
         r3 = float(geo.get("R3_fm", r2))
@@ -7227,8 +8474,10 @@ def main(argv: list[str] | None = None) -> None:
         r_plot = [i * 0.02 for i in range(0, 501)]  # 0..10 fm
 
         sing_geo = r.get("fit_singlet", {}).get("geometry", {})
+        # 条件分岐: `not isinstance(sing_geo, dict)` を満たす経路を評価する。
         if not isinstance(sing_geo, dict):
             sing_geo = {}
+
         r1_s = float(sing_geo.get("R1_fm", r1))
         r2_s = float(sing_geo.get("R2_fm", r2))
         rb_s_geo = float(sing_geo.get("Rb_fm", rb))
@@ -7237,14 +8486,25 @@ def main(argv: list[str] | None = None) -> None:
         def v_profile(
             rr: float, *, vc_mev: float, rc_fm: float, r1_fm: float, r2_fm: float, r3_fm: float, v1: float, v2: float, v3: float
         ) -> float:
+            # 条件分岐: `rr < rc_fm` を満たす経路を評価する。
             if rr < rc_fm:
                 return vc_mev
+
+            # 条件分岐: `rr < r1_fm` を満たす経路を評価する。
+
             if rr < r1_fm:
                 return -v1
+
+            # 条件分岐: `rr < r2_fm` を満たす経路を評価する。
+
             if rr < r2_fm:
                 return -v2
+
+            # 条件分岐: `rr < r3_fm` を満たす経路を評価する。
+
             if rr < r3_fm:
                 return -v3
+
             return 0.0
 
         def v_profile_barrier_tail(
@@ -7261,16 +8521,30 @@ def main(argv: list[str] | None = None) -> None:
             vb: float,
             vt: float,
         ) -> float:
+            # 条件分岐: `rr < rc_fm` を満たす経路を評価する。
             if rr < rc_fm:
                 return vc_mev
+
+            # 条件分岐: `rr < r1_fm` を満たす経路を評価する。
+
             if rr < r1_fm:
                 return -v1
+
+            # 条件分岐: `rr < r2_fm` を満たす経路を評価する。
+
             if rr < r2_fm:
                 return -v2
+
+            # 条件分岐: `rr < rb_fm` を満たす経路を評価する。
+
             if rr < rb_fm:
                 return +vb
+
+            # 条件分岐: `rr < r3_fm` を満たす経路を評価する。
+
             if rr < r3_fm:
                 return -vt
+
             return 0.0
 
         if step in (
@@ -7309,9 +8583,12 @@ def main(argv: list[str] | None = None) -> None:
         else:
             vt = [v_profile(rr, vc_mev=vc, rc_fm=rc, r1_fm=r1, r2_fm=r2, r3_fm=r3, v1=v1t, v2=v2t, v3=v3t) for rr in r_plot]
             vs = [v_profile(rr, vc_mev=vc, rc_fm=rc, r1_fm=r1_s, r2_fm=r2_s, r3_fm=r3, v1=v1s, v2=v2s, v3=v3s) for rr in r_plot]
+
         ax0.plot(r_plot, vt, lw=2.0, color="tab:blue", label="triplet (fit B,a_t,r_t,v2t)")
+        # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
             ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (share V1; fit V2 by a_s)")
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.3"` を追加評価する。
         elif step == "7.13.3":
             ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2(signed) by a_s,r_s)")
         elif step in (
@@ -7326,18 +8603,27 @@ def main(argv: list[str] | None = None) -> None:
             "7.13.8.5",
         ):
             ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2>=0 by a_s,r_s; barrier+tail)")
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
             ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2(signed) by a_s,r_s; shared tail)")
         else:
             ax0.plot(r_plot, vs, lw=2.0, color="tab:orange", label="singlet (fit V1,V2 by a_s,r_s)")
+
+        # 条件分岐: `step == "7.9.8" and rc > 0.0` を満たす経路を評価する。
+
         if step == "7.9.8" and rc > 0.0:
             ax0.axvline(rc, color="0.35", lw=1.0, ls="--")
+
         ax0.axvline(r1, color="0.35", lw=1.0, ls=":")
+        # 条件分岐: `step in ("7.13.8.3", "7.13.8.4", "7.13.8.5") and math.isfinite(r1_s) and abs(...` を満たす経路を評価する。
         if step in ("7.13.8.3", "7.13.8.4", "7.13.8.5") and math.isfinite(r1_s) and abs(r1_s - r1) > 1e-6:
             ax0.axvline(r1_s, color="tab:orange", lw=1.0, ls="--")
+
         ax0.axvline(r2, color="0.35", lw=1.0, ls=":")
+        # 条件分岐: `step in ("7.13.8.4", "7.13.8.5") and math.isfinite(r2_s) and abs(r2_s - r2) >...` を満たす経路を評価する。
         if step in ("7.13.8.4", "7.13.8.5") and math.isfinite(r2_s) and abs(r2_s - r2) > 1e-6:
             ax0.axvline(r2_s, color="tab:orange", lw=1.0, ls="--")
+
         if (
             step
             in (
@@ -7354,10 +8640,17 @@ def main(argv: list[str] | None = None) -> None:
             and rb > r2 + 1e-9
         ):
             ax0.axvline(rb, color="0.35", lw=1.0, ls=":")
+
+        # 条件分岐: `step in ("7.13.8.4", "7.13.8.5") and math.isfinite(rb_s_geo) and abs(rb_s_geo...` を満たす経路を評価する。
+
         if step in ("7.13.8.4", "7.13.8.5") and math.isfinite(rb_s_geo) and abs(rb_s_geo - rb) > 1e-6:
             ax0.axvline(rb_s_geo, color="tab:orange", lw=1.0, ls="--")
+
+        # 条件分岐: `step in ("7.13.8.4", "7.13.8.5") and math.isfinite(r3_s_geo) and abs(r3_s_geo...` を満たす経路を評価する。
+
         if step in ("7.13.8.4", "7.13.8.5") and math.isfinite(r3_s_geo) and abs(r3_s_geo - r3) > 1e-6:
             ax0.axvline(r3_s_geo, color="tab:orange", lw=1.0, ls="--")
+
         if (
             step
             in (
@@ -7375,34 +8668,46 @@ def main(argv: list[str] | None = None) -> None:
             and r3 > r2 + 1e-9
         ):
             ax0.axvline(r3, color="0.35", lw=1.0, ls=":")
+
         if (
             step in ("7.13.3", "7.13.4", "7.13.5", "7.13.6", "7.13.7", "7.13.8", "7.13.8.1", "7.13.8.2", "7.13.8.3", "7.13.8.4", "7.13.8.5")
             and lambda_pi_pm_fm is not None
             and math.isfinite(lambda_pi_pm_fm)
         ):
             ax0.axvline(float(lambda_pi_pm_fm), color="tab:green", lw=1.1, ls="--")
+
         ax0.set_xlabel("r (fm)")
         ax0.set_ylabel("V(r) (MeV)")
+        # 条件分岐: `step == "7.13.3"` を満たす経路を評価する。
         if step == "7.13.3":
             title = f"{label}: 2-range (λπ constrained; signed V2_s)"
+        # 条件分岐: 前段条件が不成立で、`step in ("7.13.5", "7.13.6")` を追加評価する。
         elif step in ("7.13.5", "7.13.6"):
             title = f"{label}: 3-range (λπ constrained; barrier+tail split)"
+        # 条件分岐: 前段条件が不成立で、`step in ("7.13.7", "7.13.8", "7.13.8.1")` を追加評価する。
         elif step in ("7.13.7", "7.13.8", "7.13.8.1"):
             title = f"{label}: 3-range (λπ constrained; barrier+tail split; free tail depth)"
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.8.2"` を追加評価する。
         elif step == "7.13.8.2":
             title = f"{label}: 3-range (λπ constrained; barrier+tail split; channel-split)"
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.8.3"` を追加評価する。
         elif step == "7.13.8.3":
             title = f"{label}: 3-range (λπ constrained; barrier+tail split; channel-split + singlet R1_s scan)"
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.8.4"` を追加評価する。
         elif step == "7.13.8.4":
             title = f"{label}: 3-range (λπ constrained; barrier+tail split; channel-split + singlet R2_s scan)"
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.8.5"` を追加評価する。
         elif step == "7.13.8.5":
             title = f"{label}: 3-range (λπ constrained; barrier+tail split; triplet barrier-fraction scan)"
+        # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
         elif step == "7.13.4":
             title = f"{label}: 3-range (λπ constrained; shared tail)"
+        # 条件分岐: 前段条件が不成立で、`step == "7.9.8"` を追加評価する。
         elif step == "7.9.8":
             title = f"{label}: repulsive core + two-range well"
         else:
             title = f"{label}: two-range well (shared geometry)"
+
         ax0.set_title(title)
         ax0.grid(True, ls=":", lw=0.6, alpha=0.6)
         ax0.legend(frameon=True, fontsize=8, loc="lower right")
@@ -7481,6 +8786,7 @@ def main(argv: list[str] | None = None) -> None:
         ax2 = fig.add_subplot(gs[row, 2])
         dt = r["comparison"]["triplet"]
         ds = r["comparison"]["singlet"]
+        # 条件分岐: `step == "7.9.6"` を満たす経路を評価する。
         if step == "7.9.6":
             names = ["v2t(fit)", "r_s(pred)", "v2s(pred)"]
             deltas = [
@@ -7495,6 +8801,7 @@ def main(argv: list[str] | None = None) -> None:
                 float(ds["r_s_fit_minus_obs_fm"]),
                 float(ds["v2s_pred_minus_obs_fm3"]),
             ]
+
         ax2.axhline(0.0, color="0.3", lw=1.0)
         ax2.bar(range(len(names)), deltas, color=["tab:blue", "tab:orange", "tab:orange"], alpha=0.85)
         ax2.set_xticks(range(len(names)))
@@ -7552,6 +8859,7 @@ def main(argv: list[str] | None = None) -> None:
     plt.close(fig)
 
     out_csv: Path | None = None
+    # 条件分岐: `step == "7.13.3"` を満たす経路を評価する。
     if step == "7.13.3":
         out_csv = out_dir / "nuclear_effective_potential_pion_constrained_signed_v2.csv"
         with out_csv.open("w", newline="", encoding="utf-8") as f:
@@ -7600,6 +8908,7 @@ def main(argv: list[str] | None = None) -> None:
                         int(within),
                     ]
                 )
+    # 条件分岐: 前段条件が不成立で、`step == "7.13.4"` を追加評価する。
     elif step == "7.13.4":
         out_csv = out_dir / "nuclear_effective_potential_pion_constrained_three_range_tail.csv"
         with out_csv.open("w", newline="", encoding="utf-8") as f:
@@ -7663,6 +8972,7 @@ def main(argv: list[str] | None = None) -> None:
                         int(within),
                     ]
                 )
+    # 条件分岐: 前段条件が不成立で、`step == "7.13.8.2"` を追加評価する。
     elif step == "7.13.8.2":
         if (
             barrier_height_factor_kq_t_best is None
@@ -7777,6 +9087,7 @@ def main(argv: list[str] | None = None) -> None:
                         int(within_rs),
                     ]
                 )
+    # 条件分岐: 前段条件が不成立で、`step == "7.13.8.3"` を追加評価する。
     elif step == "7.13.8.3":
         if (
             barrier_height_factor_kq_t_best is None
@@ -7833,6 +9144,7 @@ def main(argv: list[str] | None = None) -> None:
             for r in results:
                 geo_t = r["fit_triplet"]["geometry"]
                 geo_s = r.get("fit_singlet", {}).get("geometry", {})
+                # 条件分岐: `not isinstance(geo_s, dict)` を満たす経路を評価する。
                 if not isinstance(geo_s, dict):
                     geo_s = {}
 
@@ -7903,6 +9215,7 @@ def main(argv: list[str] | None = None) -> None:
                         int(within_rs),
                     ]
                 )
+    # 条件分岐: 前段条件が不成立で、`step in ("7.13.8.4", "7.13.8.5")` を追加評価する。
     elif step in ("7.13.8.4", "7.13.8.5"):
         if (
             barrier_height_factor_kq_t_best is None
@@ -7913,6 +9226,9 @@ def main(argv: list[str] | None = None) -> None:
             or singlet_r2_over_lambda_pi_best is None
         ):
             raise SystemExit("[fail] missing selected params for step 7.13.8.4/7.13.8.5 (k_t,q_t,k_s,q_s,R1_s/λπ,R2_s/λπ)")
+
+        # 条件分岐: `step == "7.13.8.5" and (triplet_barrier_len_fraction_best is None or not math...` を満たす経路を評価する。
+
         if step == "7.13.8.5" and (triplet_barrier_len_fraction_best is None or not math.isfinite(triplet_barrier_len_fraction_best)):
             raise SystemExit("[fail] missing selected barrier_len_fraction_t for step 7.13.8.5")
 
@@ -7968,6 +9284,7 @@ def main(argv: list[str] | None = None) -> None:
             for r in results:
                 geo_t = r["fit_triplet"]["geometry"]
                 geo_s = r.get("fit_singlet", {}).get("geometry", {})
+                # 条件分岐: `not isinstance(geo_s, dict)` を満たす経路を評価する。
                 if not isinstance(geo_s, dict):
                     geo_s = {}
 
@@ -8042,6 +9359,7 @@ def main(argv: list[str] | None = None) -> None:
                         int(within_rs),
                     ]
                 )
+    # 条件分岐: 前段条件が不成立で、`step in ("7.13.5", "7.13.6", "7.13.7", "7.13.8", "7.13.8.1")` を追加評価する。
     elif step in ("7.13.5", "7.13.6", "7.13.7", "7.13.8", "7.13.8.1"):
         out_csv_by_step = {
             "7.13.5": out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail.csv",
@@ -8399,22 +9717,47 @@ def main(argv: list[str] | None = None) -> None:
         "outputs": {"png": str(out_png)},
     }
 
+    # 条件分岐: `out_csv is not None` を満たす経路を評価する。
     if out_csv is not None:
         metrics["outputs"]["csv"] = str(out_csv)
+
+    # 条件分岐: `pion_scale is not None` を満たす経路を評価する。
+
     if pion_scale is not None:
         metrics["pion_range_scale"] = pion_scale
+
+    # 条件分岐: `barrier_height_factor_scan is not None` を満たす経路を評価する。
+
     if barrier_height_factor_scan is not None:
         metrics["barrier_height_factor_scan"] = barrier_height_factor_scan
+
+    # 条件分岐: `tail_depth_factor_scan is not None` を満たす経路を評価する。
+
     if tail_depth_factor_scan is not None:
         metrics["tail_depth_factor_scan"] = tail_depth_factor_scan
+
+    # 条件分岐: `barrier_tail_kq_scan is not None` を満たす経路を評価する。
+
     if barrier_tail_kq_scan is not None:
         metrics["barrier_tail_kq_scan"] = barrier_tail_kq_scan
+
+    # 条件分岐: `barrier_tail_channel_split_kq_scan is not None` を満たす経路を評価する。
+
     if barrier_tail_channel_split_kq_scan is not None:
         metrics["barrier_tail_channel_split_kq_scan"] = barrier_tail_channel_split_kq_scan
+
+    # 条件分岐: `barrier_tail_channel_split_kq_singlet_r1_scan is not None` を満たす経路を評価する。
+
     if barrier_tail_channel_split_kq_singlet_r1_scan is not None:
         metrics["barrier_tail_channel_split_kq_singlet_r1_scan"] = barrier_tail_channel_split_kq_singlet_r1_scan
+
+    # 条件分岐: `barrier_tail_channel_split_kq_singlet_r2_scan is not None` を満たす経路を評価する。
+
     if barrier_tail_channel_split_kq_singlet_r2_scan is not None:
         metrics["barrier_tail_channel_split_kq_singlet_r2_scan"] = barrier_tail_channel_split_kq_singlet_r2_scan
+
+    # 条件分岐: `barrier_tail_channel_split_kq_triplet_barrier_fraction_scan is not None` を満たす経路を評価する。
+
     if barrier_tail_channel_split_kq_triplet_barrier_fraction_scan is not None:
         metrics["barrier_tail_channel_split_kq_triplet_barrier_fraction_scan"] = (
             barrier_tail_channel_split_kq_triplet_barrier_fraction_scan
@@ -8442,6 +9785,7 @@ def main(argv: list[str] | None = None) -> None:
     # Canonical alias (stable path) for downstream A-dependence / paper tables.
     # This avoids hard-coding long, step-specific filenames in other scripts.
     canonical_json: Path | None = None
+    # 条件分岐: `step == "7.13.8.5"` を満たす経路を評価する。
     if step == "7.13.8.5":
         canonical_json = out_dir / "nuclear_effective_potential_canonical_metrics.json"
         canonical_metrics = dict(metrics)
@@ -8455,12 +9799,17 @@ def main(argv: list[str] | None = None) -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    # 条件分岐: `out_csv is not None` を満たす経路を評価する。
     if out_csv is not None:
         print(f"  {out_csv}")
+
     print(f"  {out_json}")
+    # 条件分岐: `canonical_json is not None` を満たす経路を評価する。
     if canonical_json is not None:
         print(f"  {canonical_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -50,8 +51,10 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -60,26 +63,43 @@ def _to_float(v: Any) -> Optional[float]:
         val = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(val) or math.isinf(val)` を満たす経路を評価する。
+
     if math.isnan(val) or math.isinf(val):
         return None
+
     return val
 
 
 def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
+    # 条件分岐: `passed is True` を満たす経路を評価する。
     if passed is True:
         return "pass"
+
+    # 条件分岐: `passed is None` を満たす経路を評価する。
+
     if passed is None:
         return "unknown"
+
+    # 条件分岐: `gate_level == "hard"` を満たす経路を評価する。
+
     if gate_level == "hard":
         return "reject"
+
     return "watch"
 
 
 def _score_from_status(status: str) -> float:
+    # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
         return 1.0
+
+    # 条件分岐: `status == "watch"` を満たす経路を評価する。
+
     if status == "watch":
         return 0.5
+
     return 0.0
 
 
@@ -87,21 +107,27 @@ def _pick_frame_rows(rot_payload: Dict[str, Any], branch_name: str) -> List[Dict
     branches = rot_payload.get("branches") if isinstance(rot_payload.get("branches"), dict) else {}
     branch = branches.get(branch_name) if isinstance(branches, dict) else {}
     rows = branch.get("rows") if isinstance(branch, dict) else []
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return []
+
     return [r for r in rows if isinstance(r, dict) and str(r.get("kind") or "") == "frame_dragging"]
 
 
 def _derive_prior_from_channels(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     for preferred_id in DEFAULT_PRIOR_SOURCE_IDS:
         for row in rows:
+            # 条件分岐: `str(row.get("id") or "") != preferred_id` を満たす経路を評価する。
             if str(row.get("id") or "") != preferred_id:
                 continue
+
             observed = _to_float(row.get("observed"))
             sigma = _to_float(row.get("observed_sigma"))
             ref = _to_float(row.get("reference_prediction"))
+            # 条件分岐: `observed is None or sigma is None or sigma <= 0.0 or ref is None or abs(ref)...` を満たす経路を評価する。
             if observed is None or sigma is None or sigma <= 0.0 or ref is None or abs(ref) <= 0.0:
                 continue
+
             lambda_mean = observed / ref - 1.0
             lambda_sigma = abs(sigma / ref)
             return {
@@ -120,8 +146,10 @@ def _derive_prior_from_channels(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         sigma = _to_float(row.get("observed_sigma"))
         ref = _to_float(row.get("reference_prediction"))
         rid = str(row.get("id") or "")
+        # 条件分岐: `observed is None or sigma is None or sigma <= 0.0 or ref is None or abs(ref)...` を満たす経路を評価する。
         if observed is None or sigma is None or sigma <= 0.0 or ref is None or abs(ref) <= 0.0 or not rid:
             continue
+
         lambda_mean = observed / ref - 1.0
         lambda_sigma = abs(sigma / ref)
         return {
@@ -148,6 +176,7 @@ def _derive_prior_from_channels(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def _load_prior(prior_json: Path, channel_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
+    # 条件分岐: `not prior_json.exists()` を満たす経路を評価する。
     if not prior_json.exists():
         fallback = _derive_prior_from_channels(channel_rows)
         fallback["loaded_from"] = None
@@ -155,6 +184,7 @@ def _load_prior(prior_json: Path, channel_rows: List[Dict[str, Any]]) -> Dict[st
 
     payload = _read_json(prior_json)
     prior_obj = payload.get("lambda_rot_prior") if isinstance(payload.get("lambda_rot_prior"), dict) else payload
+    # 条件分岐: `not isinstance(prior_obj, dict)` を満たす経路を評価する。
     if not isinstance(prior_obj, dict):
         prior_obj = {}
 
@@ -170,20 +200,26 @@ def _load_prior(prior_json: Path, channel_rows: List[Dict[str, Any]]) -> Dict[st
     )
 
     kappa_mean = _to_float(prior_obj.get("kappa_rot_mean"))
+    # 条件分岐: `kappa_mean is None and lambda_mean is not None` を満たす経路を評価する。
     if kappa_mean is None and lambda_mean is not None:
         kappa_mean = 1.0 + lambda_mean
 
     kappa_sigma = _to_float(prior_obj.get("kappa_rot_sigma"))
+    # 条件分岐: `kappa_sigma is None` を満たす経路を評価する。
     if kappa_sigma is None:
         kappa_sigma = lambda_sigma
 
     source_ids_raw = prior_obj.get("source_channel_ids")
     source_ids: List[str] = []
+    # 条件分岐: `isinstance(source_ids_raw, list)` を満たす経路を評価する。
     if isinstance(source_ids_raw, list):
         for item in source_ids_raw:
             sid = str(item or "").strip()
+            # 条件分岐: `sid` を満たす経路を評価する。
             if sid:
                 source_ids.append(sid)
+
+    # 条件分岐: `not source_ids` を満たす経路を評価する。
 
     if not source_ids:
         source_ids = list(DEFAULT_PRIOR_SOURCE_IDS)
@@ -220,8 +256,10 @@ def _build_channel_rows(
         ref = _to_float(rv.get("reference_prediction"))
         pred_vortex_fit = _to_float(rv.get("pmodel_prediction"))
         pred_lrot_prior = None
+        # 条件分岐: `lambda_rot_prior is not None and ref is not None` を満たす経路を評価する。
         if lambda_rot_prior is not None and ref is not None:
             pred_lrot_prior = (1.0 + lambda_rot_prior) * ref
+
         residual_lrot_prior = None if observed is None or pred_lrot_prior is None else observed - pred_lrot_prior
         z_lrot_prior = None if residual_lrot_prior is None or sigma is None or sigma <= 0 else residual_lrot_prior / sigma
         is_prior_source = cid in prior_source_ids
@@ -247,6 +285,7 @@ def _build_channel_rows(
                 "gate_role": "prior_source" if is_prior_source else "holdout_prediction",
             }
         )
+
     return rows
 
 
@@ -277,8 +316,12 @@ def build_payload(
         if isinstance(rot.get("branches"), dict)
         else {}
     )
+    # 条件分岐: `not isinstance(static_summary, dict)` を満たす経路を評価する。
     if not isinstance(static_summary, dict):
         static_summary = {}
+
+    # 条件分岐: `not isinstance(vortex_summary, dict)` を満たす経路を評価する。
+
     if not isinstance(vortex_summary, dict):
         vortex_summary = {}
 
@@ -304,9 +347,12 @@ def build_payload(
     for row in channel_rows:
         pred_lrot = _to_float(row.get("pred_lrot_prior"))
         pred_vortex = _to_float(row.get("pred_vortex_fit"))
+        # 条件分岐: `pred_lrot is None or pred_vortex is None` を満たす経路を評価する。
         if pred_lrot is None or pred_vortex is None:
             continue
+
         fit_vs_prior_diffs.append(abs(pred_lrot - pred_vortex))
+
     max_fit_vs_prior_delta = max(fit_vs_prior_diffs) if fit_vs_prior_diffs else None
 
     prior_source_rows = [r for r in channel_rows if bool(r.get("is_prior_source"))]
@@ -316,12 +362,16 @@ def build_payload(
     z_reject = 3.0
     for row in holdout_rows:
         z = _to_float(row.get("z_lrot_prior"))
+        # 条件分岐: `z is None` を満たす経路を評価する。
         if z is None:
             continue
+
         abs_z = abs(z)
         holdout_z_abs.append(abs_z)
+        # 条件分岐: `abs_z > z_reject` を満たす経路を評価する。
         if abs_z > z_reject:
             holdout_reject_n += 1
+
     holdout_max_abs_z = max(holdout_z_abs) if holdout_z_abs else None
 
     checks: List[Dict[str, Any]] = []
@@ -455,11 +505,15 @@ def build_payload(
         "最小拡張の範囲（過大結合回避）の運用監視。",
     )
     combined_sigma = None
+    # 条件分岐: `lambda_sigma_prior is not None and lambda_sigma_fit_legacy is not None` を満たす経路を評価する。
     if lambda_sigma_prior is not None and lambda_sigma_fit_legacy is not None:
         combined_sigma = math.sqrt(lambda_sigma_prior * lambda_sigma_prior + lambda_sigma_fit_legacy * lambda_sigma_fit_legacy)
+
     prior_fit_delta = None
+    # 条件分岐: `lambda_rot_prior is not None and lambda_rot_fit_legacy is not None` を満たす経路を評価する。
     if lambda_rot_prior is not None and lambda_rot_fit_legacy is not None:
         prior_fit_delta = lambda_rot_prior - lambda_rot_fit_legacy
+
     add_check(
         "l_rot::prior_vs_legacy_watch",
         "abs(lambda_prior - lambda_fit_legacy)",
@@ -485,9 +539,11 @@ def build_payload(
 
     hard_fail_ids = [str(c["id"]) for c in checks if c.get("gate_level") == "hard" and c.get("pass") is not True]
     watch_ids = [str(c["id"]) for c in checks if c.get("gate_level") == "watch" and c.get("pass") is not True]
+    # 条件分岐: `hard_fail_ids` を満たす経路を評価する。
     if hard_fail_ids:
         overall_status = "reject"
         decision = "l_rot_closure_rejected"
+    # 条件分岐: 前段条件が不成立で、`watch_ids` を追加評価する。
     elif watch_ids:
         overall_status = "watch"
         decision = "l_rot_closure_watch"
@@ -610,21 +666,31 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
 
     fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(15.0, 4.8), dpi=180)
 
+    # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
     if lambda_rot is not None:
         err = 0.0 if lambda_sigma is None else float(lambda_sigma)
         ax0.errorbar([0.0], [lambda_rot], yerr=[err], fmt="o", color="#1f77b4", capsize=5, label="prior")
+
+    # 条件分岐: `lambda_rot_legacy is not None` を満たす経路を評価する。
+
     if lambda_rot_legacy is not None:
         err_legacy = 0.0 if lambda_sigma_legacy is None else float(lambda_sigma_legacy)
         ax0.errorbar([0.25], [lambda_rot_legacy], yerr=[err_legacy], fmt="s", color="#ff7f0e", capsize=5, label="legacy fit")
+
     ax0.axhline(0.0, linestyle="--", color="#6b7280", linewidth=1.0)
     ax0.set_xlim(-0.4, 0.65)
     ax0.set_xticks([0.0, 0.25], ["prior", "legacy"])
     ax0.set_ylabel("coupling value")
     ax0.set_title("L_rot coupling freeze")
+    # 条件分岐: `kappa_rot is not None` を満たす経路を評価する。
     if kappa_rot is not None:
         ax0.text(0.02, 0.92, f"kappa_rot={kappa_rot:.6f}", transform=ax0.transAxes, fontsize=9)
+
+    # 条件分岐: `lambda_rot is not None` を満たす経路を評価する。
+
     if lambda_rot is not None:
         ax0.text(0.02, 0.84, f"lambda_rot={lambda_rot:.6f}", transform=ax0.transAxes, fontsize=9)
+
     ax0.grid(axis="y", alpha=0.25, linestyle=":")
 
     x = np.arange(len(labels), dtype=float)
@@ -644,17 +710,23 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     check_scores = [float(c.get("score") or 0.0) for c in checks if isinstance(c, dict)]
     check_colors: List[str] = []
     for c in checks:
+        # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
         if not isinstance(c, dict):
             continue
+
         st = str(c.get("status") or "")
+        # 条件分岐: `st == "pass"` を満たす経路を評価する。
         if st == "pass":
             check_colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`st == "watch"` を追加評価する。
         elif st == "watch":
             check_colors.append("#eab308")
+        # 条件分岐: 前段条件が不成立で、`st == "reject"` を追加評価する。
         elif st == "reject":
             check_colors.append("#dc2626")
         else:
             check_colors.append("#94a3b8")
+
     y = np.arange(len(check_labels), dtype=float)
     ax2.barh(y, check_scores, color=check_colors)
     ax2.axvline(1.0, linestyle="--", color="#6b7280", linewidth=1.0)
@@ -731,6 +803,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         ("closure-json", closure_json),
         ("drift-json", drift_json),
     ]:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             print(f"[error] missing input ({name}): {_rel(path)}")
             return 2
@@ -789,6 +862,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0 if str(decision.get("overall_status") or "") in {"pass", "watch"} else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

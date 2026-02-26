@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -50,22 +51,36 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         number = float(value)
+        # 条件分岐: `math.isfinite(number)` を満たす経路を評価する。
         if math.isfinite(number):
             return number
+
     return None
 
 
 def _resample(series: np.ndarray, n_points: int) -> np.ndarray:
+    # 条件分岐: `series.ndim != 1` を満たす経路を評価する。
     if series.ndim != 1:
         series = series.ravel()
+
+    # 条件分岐: `series.size == 0` を満たす経路を評価する。
+
     if series.size == 0:
         raise ValueError("empty series cannot be resampled")
+
+    # 条件分岐: `n_points <= 1` を満たす経路を評価する。
+
     if n_points <= 1:
         return np.array([float(series[0])], dtype=float)
+
+    # 条件分岐: `series.size == 1` を満たす経路を評価する。
+
     if series.size == 1:
         return np.full((n_points,), float(series[0]), dtype=float)
+
     x_old = np.linspace(0.0, 1.0, series.size)
     x_new = np.linspace(0.0, 1.0, n_points)
     return np.interp(x_new, x_old, series).astype(float)
@@ -77,8 +92,10 @@ def _safe_log1p(series: np.ndarray) -> np.ndarray:
 
 
 def _eigen_summary(matrix: np.ndarray, labels: List[str]) -> Dict[str, Any]:
+    # 条件分岐: `matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1] or matrix.shape[0] == 0` を満たす経路を評価する。
     if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1] or matrix.shape[0] == 0:
         return {"supported": False, "reason": "matrix must be non-empty square"}
+
     eigenvalues, eigenvectors = np.linalg.eigh(matrix)
     order = np.argsort(eigenvalues)[::-1]
     eigenvalues = eigenvalues[order]
@@ -101,8 +118,10 @@ def _eigen_summary(matrix: np.ndarray, labels: List[str]) -> Dict[str, Any]:
 def _extract_bell_series(cross_cov: Dict[str, Any]) -> np.ndarray:
     matrices = cross_cov.get("matrices") if isinstance(cross_cov.get("matrices"), dict) else {}
     profile_cov = np.array(matrices.get("profile_cov") or [], dtype=float)
+    # 条件分岐: `profile_cov.ndim != 2 or profile_cov.shape[0] != profile_cov.shape[1] or prof...` を満たす経路を評価する。
     if profile_cov.ndim != 2 or profile_cov.shape[0] != profile_cov.shape[1] or profile_cov.shape[0] == 0:
         raise ValueError("bell cross_dataset profile_cov is missing or invalid")
+
     sigma = np.sqrt(np.clip(np.diag(profile_cov), a_min=0.0, a_max=None))
     return sigma.astype(float)
 
@@ -111,17 +130,27 @@ def _extract_interference_series(born_ab: Dict[str, Any]) -> np.ndarray:
     criteria = born_ab.get("criteria") if isinstance(born_ab.get("criteria"), list) else []
     values: List[float] = []
     for row in criteria:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         channel = str(row.get("channel") or "")
+        # 条件分岐: `channel == "bell_selection"` を満たす経路を評価する。
         if channel == "bell_selection":
             continue
+
         score = _as_float(row.get("normalized_score"))
+        # 条件分岐: `score is None` を満たす経路を評価する。
         if score is None:
             continue
+
         values.append(score)
+
+    # 条件分岐: `not values` を満たす経路を評価する。
+
     if not values:
         raise ValueError("interference criteria not found in born_ab gate payload")
+
     return np.array(values, dtype=float)
 
 
@@ -130,8 +159,10 @@ def _extract_condensed_series(condensed: Dict[str, Any]) -> np.ndarray:
     datasets = summary.get("datasets") if isinstance(summary.get("datasets"), list) else []
     values: List[float] = []
     for item in datasets:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         gates = item.get("audit_gates") if isinstance(item.get("audit_gates"), dict) else {}
         model = (
             gates.get("recommended_model_by_minimax_test_max_abs_z")
@@ -139,11 +170,17 @@ def _extract_condensed_series(condensed: Dict[str, Any]) -> np.ndarray:
             else {}
         )
         worst = _as_float(model.get("worst_test_max_abs_z"))
+        # 条件分岐: `worst is None` を満たす経路を評価する。
         if worst is None:
             continue
+
         values.append(worst / 3.0)
+
+    # 条件分岐: `not values` を満たす経路を評価する。
+
     if not values:
         raise ValueError("condensed holdout summary lacks usable worst_test_max_abs_z values")
+
     return np.array(values, dtype=float)
 
 
@@ -184,10 +221,13 @@ def build_payload(
 
     status_by_channel: Dict[str, str] = {}
     for entry in shared_kpi.get("channels") if isinstance(shared_kpi.get("channels"), list) else []:
+        # 条件分岐: `not isinstance(entry, dict)` を満たす経路を評価する。
         if not isinstance(entry, dict):
             continue
+
         key = str(entry.get("channel") or "")
         status = str(entry.get("status") or "")
+        # 条件分岐: `key` を満たす経路を評価する。
         if key:
             status_by_channel[key] = status
 
@@ -219,8 +259,10 @@ def build_payload(
         )
 
     dominant_mode = cov_eigen.get("dominant_mode") if isinstance(cov_eigen, dict) else {}
+    # 条件分岐: `not isinstance(dominant_mode, dict)` を満たす経路を評価する。
     if not isinstance(dominant_mode, dict):
         dominant_mode = {}
+
     dominant_channel = str(dominant_mode.get("dominant_channel") or "")
     dominant_reason = {
         "bell": "Bell cross-dataset covariance block",
@@ -384,8 +426,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     def _resolve(path_text: str) -> Path:
         path = Path(path_text)
+        # 条件分岐: `path.is_absolute()` を満たす経路を評価する。
         if path.is_absolute():
             return path.resolve()
+
         return (ROOT / path).resolve()
 
     input_paths = {
@@ -395,6 +439,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         "shared_kpi": _resolve(args.shared_kpi),
     }
     for key, input_path in input_paths.items():
+        # 条件分岐: `not input_path.exists()` を満たす経路を評価する。
         if not input_path.exists():
             raise FileNotFoundError(f"required input not found ({key}): {_rel(input_path)}")
 
@@ -442,6 +487,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

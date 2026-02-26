@@ -24,14 +24,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -40,8 +44,11 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -72,18 +79,24 @@ def _parse_thermal_conductivity_table(*, html: str) -> dict[str, Any]:
       log10 k = (a + c*T^0.5 + e*T + g*T^1.5 + i*T^2) / (1 + b*T^0.5 + d*T + f*T^1.5 + h*T^2)
     """
     tables = _extract_tables(html, class_name="properties")
+    # 条件分岐: `not tables` を満たす経路を評価する。
     if not tables:
         raise ValueError("missing table class='properties'")
 
     tbl = None
     for t in tables:
+        # 条件分岐: `"Thermal Conductivity" in t and "RRR" in t` を満たす経路を評価する。
         if "Thermal Conductivity" in t and "RRR" in t:
             tbl = t
             break
+
+    # 条件分岐: `tbl is None` を満たす経路を評価する。
+
     if tbl is None:
         raise ValueError("missing Thermal Conductivity table")
 
     rows = re.findall(r"<tr[^>]*>.*?</tr>", tbl, flags=re.IGNORECASE | re.DOTALL)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise ValueError("no <tr> rows found in Thermal Conductivity table")
 
@@ -95,43 +108,60 @@ def _parse_thermal_conductivity_table(*, html: str) -> dict[str, Any]:
 
     def _ensure_rrrs(ncols: int) -> None:
         nonlocal rrrs
+        # 条件分岐: `rrrs` を満たす経路を評価する。
         if rrrs:
             return
+
         raise ValueError(f"RRR header not parsed (ncols={ncols})")
 
     for row in rows:
         cells = re.findall(r"<t[dh][^>]*>(.*?)</t[dh]>", row, flags=re.IGNORECASE | re.DOTALL)
+        # 条件分岐: `not cells` を満たす経路を評価する。
         if not cells:
             continue
+
         t0 = _cell_text(cells[0])
+        # 条件分岐: `not t0` を満たす経路を評価する。
         if not t0:
             continue
 
         # Header row: contains "RRR = <n>" cells.
+
         if ("Thermal Conductivity" in t0) or ("Thermal Conductivity" in _cell_text(" ".join(cells[:2]))):
             # Parse RRR values from the full row cells.
             for c in cells[1:]:
                 m = re.search(r"RRR\s*=\s*([0-9]+)", _cell_text(c), flags=re.IGNORECASE)
+                # 条件分岐: `m` を満たす経路を評価する。
                 if m:
                     rrrs.append(int(m.group(1)))
+
+            # 条件分岐: `not rrrs` を満たす経路を評価する。
+
             if not rrrs:
                 raise ValueError("could not parse RRR values from header row")
+
             for r in rrrs:
                 coeffs_by_rrr[r] = {}
                 ranges_by_rrr[r] = {}
+
             continue
+
+        # 条件分岐: `t0.upper() == "UNITS"` を満たす経路を評価する。
 
         if t0.upper() == "UNITS":
             _ensure_rrrs(len(cells) - 1)
             col_units: list[str] = []
             for c in cells[1 : 1 + len(rrrs)]:
                 col_units.append(_cell_text(c))
+
             col_units = [u for u in col_units if u]
+            # 条件分岐: `col_units and len(set(col_units)) == 1` を満たす経路を評価する。
             if col_units and len(set(col_units)) == 1:
                 units = col_units[0]
             else:
                 # Keep the first non-empty unit, but record the raw list for inspection.
                 units = col_units[0] if col_units else ""
+
             continue
 
         key = t0.strip().lower()
@@ -141,52 +171,81 @@ def _parse_thermal_conductivity_table(*, html: str) -> dict[str, Any]:
             _ensure_rrrs(len(cells) - 1)
             for r, c in zip(rrrs, cells[1 : 1 + len(rrrs)]):
                 s = _cell_text(c)
+                # 条件分岐: `not re.fullmatch(r"[-+]?\d+(?:\.\d*)?(?:[Ee][-+]?\d+)?", s)` を満たす経路を評価する。
                 if not re.fullmatch(r"[-+]?\d+(?:\.\d*)?(?:[Ee][-+]?\d+)?", s):
                     raise ValueError(f"invalid numeric coefficient {key} for RRR={r}: {s!r}")
+
                 coeffs_by_rrr[int(r)][key] = float(s)
+
             continue
 
         # Ranges: "low range" / "high range" rows.
+
         if "low range" in key:
             _ensure_rrrs(len(cells) - 1)
             for r, c in zip(rrrs, cells[1 : 1 + len(rrrs)]):
                 s = _cell_text(c)
                 m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*K", s, flags=re.IGNORECASE)
+                # 条件分岐: `not m` を満たす経路を評価する。
                 if not m:
                     raise ValueError(f"invalid low-range cell for RRR={r}: {s!r}")
+
                 ranges_by_rrr[int(r)]["t_min_k"] = float(m.group(1))
+
             continue
+
+        # 条件分岐: `"high" in key and "range" in key` を満たす経路を評価する。
 
         if "high" in key and "range" in key:
             _ensure_rrrs(len(cells) - 1)
             for r, c in zip(rrrs, cells[1 : 1 + len(rrrs)]):
                 s = _cell_text(c)
                 m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*K", s, flags=re.IGNORECASE)
+                # 条件分岐: `not m` を満たす経路を評価する。
                 if not m:
                     raise ValueError(f"invalid high-range cell for RRR={r}: {s!r}")
+
                 ranges_by_rrr[int(r)]["t_max_k"] = float(m.group(1))
+
             continue
+
+        # 条件分岐: `"curve fit" in key and "error" in key` を満たす経路を評価する。
 
         if "curve fit" in key and "error" in key:
             _ensure_rrrs(len(cells) - 1)
             for r, c in zip(rrrs, cells[1 : 1 + len(rrrs)]):
                 s = _cell_text(c)
+                # 条件分岐: `not re.fullmatch(r"[-+]?\d+(?:\.\d*)?", s)` を満たす経路を評価する。
                 if not re.fullmatch(r"[-+]?\d+(?:\.\d*)?", s):
                     raise ValueError(f"invalid fit error cell for RRR={r}: {s!r}")
+
                 fit_error_by_rrr[int(r)] = float(s)
+
             continue
+
+    # 条件分岐: `not rrrs` を満たす経路を評価する。
 
     if not rrrs:
         raise ValueError("missing RRR values")
+
+    # 条件分岐: `units is None` を満たす経路を評価する。
+
     if units is None:
         raise ValueError("missing UNITS row")
 
     for r in rrrs:
         missing = [k for k in "abcdefghi" if k not in coeffs_by_rrr[r]]
+        # 条件分岐: `missing` を満たす経路を評価する。
         if missing:
             raise ValueError(f"missing coefficients for RRR={r}: {missing}")
+
+        # 条件分岐: `"t_min_k" not in ranges_by_rrr[r] or "t_max_k" not in ranges_by_rrr[r]` を満たす経路を評価する。
+
         if "t_min_k" not in ranges_by_rrr[r] or "t_max_k" not in ranges_by_rrr[r]:
             raise ValueError(f"missing range for RRR={r}: {ranges_by_rrr[r]}")
+
+        # 条件分岐: `r not in fit_error_by_rrr` を満たす経路を評価する。
+
         if r not in fit_error_by_rrr:
             raise ValueError(f"missing fit error % for RRR={r}")
 
@@ -234,8 +293,11 @@ def main() -> None:
     url = "https://trc.nist.gov/cryogenics/materials/OFHC%20Copper/OFHC_Copper_rev1.htm"
     html_path = src_dir / "OFHC_Copper_rev1.htm"
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         _download(url, html_path)
+
+    # 条件分岐: `not html_path.exists() or html_path.stat().st_size == 0` を満たす経路を評価する。
 
     if not html_path.exists() or html_path.stat().st_size == 0:
         raise SystemExit(f"[fail] missing file: {html_path}")
@@ -276,6 +338,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_extracted}")
     print(f"[ok] wrote: {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

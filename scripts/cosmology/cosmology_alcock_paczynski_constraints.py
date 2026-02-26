@@ -41,6 +41,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -65,6 +66,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -84,13 +86,20 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -152,12 +161,17 @@ def _f_ap_lcdm_flat(
     omega_m: float,
 ) -> np.ndarray:
     z = np.asarray(z, dtype=float)
+    # 条件分岐: `np.any(z < 0)` を満たす経路を評価する。
     if np.any(z < 0):
         raise ValueError("z must be >=0")
+
+    # 条件分岐: `not (0.0 < omega_m < 1.0)` を満たす経路を評価する。
+
     if not (0.0 < omega_m < 1.0):
         raise ValueError("omega_m must be in (0,1)")
 
     # Compute D_M(z) for a grid by integrating 1/E(z).
+
     z_grid = np.linspace(0.0, float(np.max(z)), 2000)
     one_p = 1.0 + z_grid
     E = np.sqrt(omega_m * one_p**3 + (1.0 - omega_m))
@@ -217,6 +231,7 @@ def compute(
                 "source": r.source,
             }
         )
+
     return out
 
 
@@ -318,10 +333,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     data_path = Path(args.data)
     src = _read_json(data_path)
     rows = [Constraint.from_json(c) for c in (src.get("constraints") or [])]
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise SystemExit(f"no constraints found in: {data_path}")
 
     # Sort by z for plot aesthetics
+
     rows = sorted(rows, key=lambda r: r.z_eff)
 
     h0_lcdm = float(args.lcdm_h0)
@@ -369,6 +386,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

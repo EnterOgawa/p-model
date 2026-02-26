@@ -27,10 +27,12 @@ def _pick_font_family(candidates: list[str]) -> Optional[str]:
 
         available = {f.name for f in font_manager.fontManager.ttflist}
         for c in candidates:
+            # 条件分岐: `c in available` を満たす経路を評価する。
             if c in available:
                 return c
     except Exception:
         return None
+
     return None
 
 
@@ -51,8 +53,10 @@ def main() -> None:
         "DejaVu Sans",
     ]
     chosen_font = _pick_font_family(font_candidates)
+    # 条件分岐: `chosen_font` を満たす経路を評価する。
     if chosen_font:
         plt.rcParams["font.family"] = chosen_font
+
     plt.rcParams["axes.unicode_minus"] = False
 
     col_labels = ["観点", "参照枠（GR）", "P-model"]
@@ -82,16 +86,20 @@ def main() -> None:
     for (r, c), cell in tbl.get_celld().items():
         cell.set_edgecolor("0.35")
         cell.set_linewidth(0.8)
+        # 条件分岐: `r == 0` を満たす経路を評価する。
         if r == 0:
             cell.set_facecolor("#f1f1f1")
             cell.set_text_props(weight="bold", color="0.15")
         else:
             cell.set_facecolor("#ffffff" if (r % 2 == 1) else "#fbfbfb")
         # Column widths (approx)
+
         if c == 0:
             cell.set_width(0.24)
+        # 条件分岐: 前段条件が不成立で、`c == 1` を追加評価する。
         elif c == 1:
             cell.set_width(0.37)
+        # 条件分岐: 前段条件が不成立で、`c == 2` を追加評価する。
         elif c == 2:
             cell.set_width(0.37)
 
@@ -132,6 +140,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

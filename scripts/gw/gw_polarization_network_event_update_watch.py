@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -34,18 +35,26 @@ def _safe_float(v: Any) -> float:
         x = float(v)
     except Exception:
         return float("nan")
+
     return x
 
 
 def _fmt(v: Any, digits: int = 6) -> str:
     x = _safe_float(v)
+    # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
     if not math.isfinite(x):
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -60,9 +69,11 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         path.write_text("", encoding="utf-8")
         return
+
     fields = list(rows[0].keys())
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
@@ -83,32 +94,44 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
 def _parse_detectors(raw: Any) -> Set[str]:
     text = str(raw or "").strip()
+    # 条件分岐: `not text` を満たす経路を評価する。
     if not text:
         return set()
+
     for sep in [";", "/", "|", " "]:
         text = text.replace(sep, ",")
+
     out = {token.strip().upper() for token in text.split(",") if token.strip()}
     return out
 
 
 def _inventory_for_slug(slug: str, max_files: int = 128) -> Dict[str, Any]:
     folder = _ROOT / "data" / "gw" / str(slug)
+    # 条件分岐: `not folder.exists() or not folder.is_dir()` を満たす経路を評価する。
     if not folder.exists() or not folder.is_dir():
         return {"exists": False, "n_files": 0, "files": []}
+
     files: List[Dict[str, Any]] = []
     for idx, fp in enumerate(sorted(folder.rglob("*"))):
+        # 条件分岐: `not fp.is_file()` を満たす経路を評価する。
         if not fp.is_file():
             continue
+
+        # 条件分岐: `len(files) >= max_files` を満たす経路を評価する。
+
         if len(files) >= max_files:
             break
+
         files.append(
             {
                 "relpath": str(fp.relative_to(folder)).replace("\\", "/"),
                 "size": int(fp.stat().st_size),
             }
         )
+        # 条件分岐: `idx >= max_files * 2` を満たす経路を評価する。
         if idx >= max_files * 2:
             break
+
     total_files = int(sum(1 for fp in folder.rglob("*") if fp.is_file()))
     return {
         "exists": True,
@@ -119,24 +142,34 @@ def _inventory_for_slug(slug: str, max_files: int = 128) -> Dict[str, Any]:
 
 
 def _load_three_detector_events(event_list_path: Path) -> List[Dict[str, Any]]:
+    # 条件分岐: `not event_list_path.exists()` を満たす経路を評価する。
     if not event_list_path.exists():
         return []
+
     root = _read_json(event_list_path)
     rows = root.get("events")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return []
+
     out: List[Dict[str, Any]] = []
     required = {"H1", "L1", "V1"}
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         name = str(row.get("name") or "").strip()
         slug = str(row.get("slug") or "").strip()
+        # 条件分岐: `not (name and slug)` を満たす経路を評価する。
         if not (name and slug):
             continue
+
         detectors = _parse_detectors(row.get("detectors"))
+        # 条件分岐: `not required.issubset(detectors)` を満たす経路を評価する。
         if not required.issubset(detectors):
             continue
+
         meta = row.get("meta") if isinstance(row.get("meta"), dict) else {}
         event = {
             "name": name,
@@ -151,6 +184,7 @@ def _load_three_detector_events(event_list_path: Path) -> List[Dict[str, Any]]:
             "inventory": _inventory_for_slug(slug),
         }
         out.append(event)
+
     out.sort(key=lambda r: (-_safe_float(r.get("network_snr")), str(r.get("name", ""))))
     return out
 
@@ -185,12 +219,15 @@ def _input_signature(events: List[Dict[str, Any]], event_list_path: Path) -> Dic
 
 
 def _load_state(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         obj = _read_json(path)
     except Exception:
         return {}
+
     return obj if isinstance(obj, dict) else {}
 
 
@@ -219,6 +256,7 @@ def _run_coverage_expansion(
     coverage_prefix: str,
 ) -> Dict[str, Any]:
     coverage_script = _ROOT / "scripts" / "gw" / "gw_polarization_network_coverage_expansion_audit.py"
+    # 条件分岐: `not coverage_script.exists()` を満たす経路を評価する。
     if not coverage_script.exists():
         return {
             "ok": False,
@@ -229,6 +267,7 @@ def _run_coverage_expansion(
         }
 
     event_names = [str(e.get("name", "")).strip() for e in events if str(e.get("name", "")).strip()]
+    # 条件分岐: `len(event_names) < 2` を満たす経路を評価する。
     if len(event_names) < 2:
         return {
             "ok": False,
@@ -237,6 +276,8 @@ def _run_coverage_expansion(
             "stdout_tail": "",
             "stderr_tail": f"n_three_detector_events={len(event_names)}",
         }
+
+    # 条件分岐: `anchor_event not in event_names` を満たす経路を評価する。
 
     if anchor_event not in event_names:
         anchor = event_names[0]
@@ -260,6 +301,7 @@ def _run_coverage_expansion(
     ]
     proc = subprocess.run(cmd, cwd=str(_ROOT), capture_output=True, text=True, check=False)
     coverage_json = outdir / f"{coverage_prefix}.json"
+    # 条件分岐: `proc.returncode != 0 or not coverage_json.exists()` を満たす経路を評価する。
     if proc.returncode != 0 or not coverage_json.exists():
         return {
             "ok": False,
@@ -268,6 +310,7 @@ def _run_coverage_expansion(
             "stdout_tail": str(proc.stdout or "")[-2000:],
             "stderr_tail": str(proc.stderr or "")[-2000:],
         }
+
     payload = _read_json(coverage_json)
     metrics = _extract_coverage_metrics(payload)
     return {
@@ -315,8 +358,10 @@ def _plot_summary(row: Dict[str, Any], out_png: Path) -> None:
     x1 = np.arange(len(labels1), dtype=float)
     colors = ["#9aa0a6", "#4c78a8", "#9aa0a6", "#f2c744"]
     for idx, val in enumerate(vals1):
+        # 条件分岐: `idx >= 2 and not math.isfinite(float(val))` を満たす経路を評価する。
         if idx >= 2 and not math.isfinite(float(val)):
             colors[idx] = "#c7c7c7"
+
     ax1.bar(x1, vals1, color=colors, alpha=0.9)
     ax1.axhline(0.5, color="#f2c744", linestyle=":", linewidth=1.2, label="watch boundary (best_u2)")
     ax1.set_xticks(x1)
@@ -369,12 +414,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     prev_counter = int(prev_state.get("event_counter", 0))
     prev_metrics = prev_state.get("last_coverage_metrics") if isinstance(prev_state.get("last_coverage_metrics"), dict) else {}
 
+    # 条件分岐: `bool(args.force_rerun)` を満たす経路を評価する。
     if bool(args.force_rerun):
         update_event_type = "forced_rerun"
         update_event_detected = bool(digest != prev_digest)
+    # 条件分岐: 前段条件が不成立で、`not prev_digest` を追加評価する。
     elif not prev_digest:
         update_event_type = "initial_lock"
         update_event_detected = True
+    # 条件分岐: 前段条件が不成立で、`digest != prev_digest` を追加評価する。
     elif digest != prev_digest:
         update_event_type = "hash_changed"
         update_event_detected = True
@@ -387,6 +435,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     coverage_run: Dict[str, Any] = {}
     curr_metrics: Dict[str, Any] = {}
+    # 条件分岐: `rerun_triggered` を満たす経路を評価する。
     if rerun_triggered:
         coverage_run = _run_coverage_expansion(
             events=events,
@@ -395,12 +444,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             public_outdir=public_outdir,
             coverage_prefix=str(args.coverage_prefix),
         )
+        # 条件分岐: `bool(coverage_run.get("ok"))` を満たす経路を評価する。
         if bool(coverage_run.get("ok")):
             curr_metrics = coverage_run.get("coverage_metrics") if isinstance(coverage_run.get("coverage_metrics"), dict) else {}
     else:
         existing_coverage = outdir / f"{args.coverage_prefix}.json"
+        # 条件分岐: `existing_coverage.exists()` を満たす経路を評価する。
         if existing_coverage.exists():
             curr_metrics = _extract_coverage_metrics(_read_json(existing_coverage))
+
+    # 条件分岐: `not curr_metrics and prev_metrics` を満たす経路を評価する。
 
     if not curr_metrics and prev_metrics:
         curr_metrics = dict(prev_metrics)
@@ -425,20 +478,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     coverage_ok = bool(not rerun_triggered or coverage_run.get("ok"))
     coverage_status = str(curr_metrics.get("overall_status", "watch"))
+    # 条件分岐: `not coverage_status` を満たす経路を評価する。
     if not coverage_status:
         coverage_status = "watch"
+
+    # 条件分岐: `rerun_triggered and not coverage_ok` を満たす経路を評価する。
+
     if rerun_triggered and not coverage_ok:
         overall_status = "watch"
         decision = "coverage_rerun_failed"
         next_action = "fix_coverage_rerun_failure_then_repeat_step_8_7_19_10"
+    # 条件分岐: 前段条件が不成立で、`update_event_type == "no_change"` を追加評価する。
     elif update_event_type == "no_change":
         overall_status = coverage_status
         decision = "no_change_hold"
         next_action = "wait_for_three_detector_input_hash_change_then_rerun_step_8_7_19_10"
+    # 条件分岐: 前段条件が不成立で、`update_event_type == "initial_lock"` を追加評価する。
     elif update_event_type == "initial_lock":
         overall_status = coverage_status
         decision = "initial_lock_rerun"
         next_action = "wait_for_three_detector_input_hash_change_then_rerun_step_8_7_19_10"
+    # 条件分岐: 前段条件が不成立で、`improvement_detected` を追加評価する。
     elif improvement_detected:
         overall_status = coverage_status
         decision = "hash_update_rerun_improved"
@@ -611,6 +671,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     _write_json(out_json, payload)
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -663,6 +724,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] state: {state_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

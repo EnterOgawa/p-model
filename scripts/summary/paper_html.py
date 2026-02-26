@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -61,12 +62,17 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     output/private/<topic>/... (or output/public for quantum) when needed.
     """
     rel_norm = rel.replace("\\", "/")
+    # 条件分岐: `not rel_norm.startswith("output/")` を満たす経路を評価する。
     if not rel_norm.startswith("output/"):
         return root / Path(rel)
 
     parts = Path(rel_norm).parts
+    # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
     if len(parts) < 2:
         return root / Path(rel_norm)
+
+    # 条件分岐: `parts[1] in ("private", "public")` を満たす経路を評価する。
+
     if parts[1] in ("private", "public"):
         return root / Path(rel_norm)
 
@@ -75,16 +81,27 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     cand_public = (root / "output" / "public" / topic / tail).resolve()
     cand_private = (root / "output" / "private" / topic / tail).resolve()
 
+    # 条件分岐: `topic == "quantum"` を満たす経路を評価する。
     if topic == "quantum":
+        # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
         if cand_public.exists():
             return cand_public
+
+        # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
         if cand_private.exists():
             return cand_private
 
+    # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
     if cand_private.exists():
         return cand_private
+
+    # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
+
     if cand_public.exists():
         return cand_public
+
     return root / Path(rel_norm)
 
 def _iso_utc_now() -> str:
@@ -96,6 +113,7 @@ def _rel_url(from_dir: Path, target: Path) -> str:
         rel = os.path.relpath(target, start=from_dir)
     except ValueError:
         rel = str(target)
+
     return rel.replace("\\", "/")
 
 
@@ -161,25 +179,32 @@ def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir
         q = m.group("q")
         url = m.group("url")
 
+        # 条件分岐: `not url` を満たす経路を評価する。
         if not url:
             return m.group(0)
 
         # External / non-file URLs
+
         if url.startswith(("http://", "https://", "data:", "mailto:", "javascript:", "#")):
             return m.group(0)
 
         norm = url.replace("\\", "/")
+        # 条件分岐: `norm.startswith(("./", "../"))` を満たす経路を評価する。
         if norm.startswith(("./", "../")):
             return m.group(0)
 
         # Split off query / fragment suffix (rare for local files, but keep safe).
+
         base = norm
         suffix = ""
         for sep in ("#", "?"):
+            # 条件分岐: `sep in base` を満たす経路を評価する。
             if sep in base:
                 base, tail = base.split(sep, 1)
                 suffix = sep + tail
                 break
+
+        # 条件分岐: `not re.match(r"^(output|doc|data|scripts)/", base)` を満たす経路を評価する。
 
         if not re.match(r"^(output|doc|data|scripts)/", base):
             return m.group(0)
@@ -196,10 +221,17 @@ def _clamp(x: float, lo: float, hi: float) -> float:
         xf = float(x)
     except Exception:
         return lo
+
+    # 条件分岐: `xf < lo` を満たす経路を評価する。
+
     if xf < lo:
         return lo
+
+    # 条件分岐: `xf > hi` を満たす経路を評価する。
+
     if xf > hi:
         return hi
+
     return xf
 
 
@@ -220,14 +252,19 @@ def _hsl_to_hex(h: float, s: float, l: float) -> str:
     m = l - c / 2.0
 
     r1 = g1 = b1 = 0.0
+    # 条件分岐: `0.0 <= h < 60.0` を満たす経路を評価する。
     if 0.0 <= h < 60.0:
         r1, g1, b1 = c, x, 0.0
+    # 条件分岐: 前段条件が不成立で、`60.0 <= h < 120.0` を追加評価する。
     elif 60.0 <= h < 120.0:
         r1, g1, b1 = x, c, 0.0
+    # 条件分岐: 前段条件が不成立で、`120.0 <= h < 180.0` を追加評価する。
     elif 120.0 <= h < 180.0:
         r1, g1, b1 = 0.0, c, x
+    # 条件分岐: 前段条件が不成立で、`180.0 <= h < 240.0` を追加評価する。
     elif 180.0 <= h < 240.0:
         r1, g1, b1 = 0.0, x, c
+    # 条件分岐: 前段条件が不成立で、`240.0 <= h < 300.0` を追加評価する。
     elif 240.0 <= h < 300.0:
         r1, g1, b1 = x, 0.0, c
     else:
@@ -265,8 +302,10 @@ def _strip_internal_source_tokens(text: str) -> str:
     These are useful for repo debugging but are not meaningful to third-party readers.
     """
     s = (text or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return ""
+
     s = _INTERNAL_SOURCE_TOKEN_RE.sub("", s)
     # cleanup: repeated separators/spaces after removal
     s = re.sub(r"\s{2,}", " ", s).strip()
@@ -279,14 +318,17 @@ def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: 
     Return a normalized discrepancy score in [0,3] (smaller is better) for Part II Table 1.
     """
     text = (metric_public or "").strip() or (metric_fallback or "").strip()
+    # 条件分岐: `not text` を満たす経路を評価する。
     if not text:
         return 1.5
 
     # Special-case: Viking is a coarse literature-range sanity check.
+
     if "文献代表レンジ(200" in text and "μs" in text and "内" in text:
         return 0.5
 
     sigma_m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*σ", text)
+    # 条件分岐: `sigma_m` を満たす経路を評価する。
     if sigma_m:
         try:
             abs_sigma = abs(float(sigma_m.group(1)))
@@ -295,61 +337,93 @@ def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: 
             pass
 
     corr_m = re.search(r"corr\s*=\s*([0-9]+(?:\.[0-9]+)?)", text, flags=re.IGNORECASE)
+    # 条件分岐: `corr_m` を満たす経路を評価する。
     if corr_m:
         try:
             corr = float(corr_m.group(1))
         except Exception:
             corr = None
+
+        # 条件分岐: `corr is not None` を満たす経路を評価する。
+
         if corr is not None:
             # 1.00 => 0, 0.95 => 1, 0.90 => 2, 0.70 => 3 (clip)
             if corr >= 0.95:
                 return _clamp((1.0 - corr) / (1.0 - 0.95), 0.0, 1.0)
+
+            # 条件分岐: `corr >= 0.90` を満たす経路を評価する。
+
             if corr >= 0.90:
                 return 1.0 + _clamp((0.95 - corr) / (0.95 - 0.90), 0.0, 1.0)
+
             return 2.0 + _clamp((0.90 - corr) / (0.90 - 0.70), 0.0, 1.0)
 
     # Use best detector's R^2 as a coarse agreement metric.
+
     r2_vals: List[float] = []
     for m in re.finditer(r"R\^2\s*=\s*([0-9]+(?:\.[0-9]+)?)", metric_fallback or ""):
         try:
             r2_vals.append(float(m.group(1)))
         except Exception:
             continue
+
+    # 条件分岐: `r2_vals` を満たす経路を評価する。
+
     if r2_vals:
         best = max(r2_vals)
         # 1.00 => 0, 0.90 => 1, 0.60 => 2, 0.00 => 3 (clip)
         if best >= 0.90:
             return _clamp((1.0 - best) / (1.0 - 0.90), 0.0, 1.0)
+
+        # 条件分岐: `best >= 0.60` を満たす経路を評価する。
+
         if best >= 0.60:
             return 1.0 + _clamp((0.90 - best) / (0.90 - 0.60), 0.0, 1.0)
+
         return 2.0 + _clamp((0.60 - best) / 0.60, 0.0, 1.0)
 
     pct_m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*%", text)
+    # 条件分岐: `pct_m` を満たす経路を評価する。
     if pct_m:
         try:
             abs_pct = abs(float(pct_m.group(1)))
         except Exception:
             abs_pct = None
+
+        # 条件分岐: `abs_pct is not None` を満たす経路を評価する。
+
         if abs_pct is not None:
             # 0.0% => 0, 0.1% => 1, 1.0% => 2, 5.0% => 3 (clip)
             if abs_pct <= 0.1:
                 return _clamp(abs_pct / 0.1, 0.0, 1.0)
+
+            # 条件分岐: `abs_pct <= 1.0` を満たす経路を評価する。
+
             if abs_pct <= 1.0:
                 return 1.0 + _clamp((abs_pct - 0.1) / (1.0 - 0.1), 0.0, 1.0)
+
             return 2.0 + _clamp((abs_pct - 1.0) / (5.0 - 1.0), 0.0, 1.0)
 
     meter_m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*m[（(]", text)
+    # 条件分岐: `meter_m` を満たす経路を評価する。
     if meter_m:
         try:
             meters = float(meter_m.group(1))
         except Exception:
             meters = None
+
+        # 条件分岐: `meters is not None` を満たす経路を評価する。
+
         if meters is not None:
             # 0m => 0, 1m => 1, 2m => 2, 5m => 3 (clip)
             if meters <= 1.0:
                 return _clamp(meters / 1.0, 0.0, 1.0)
+
+            # 条件分岐: `meters <= 2.0` を満たす経路を評価する。
+
             if meters <= 2.0:
                 return 1.0 + _clamp((meters - 1.0) / 1.0, 0.0, 1.0)
+
             return 2.0 + _clamp((meters - 2.0) / 3.0, 0.0, 1.0)
 
     return 1.5
@@ -367,10 +441,12 @@ def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, 
       yellow for "entrance/target/constraint")
     """
     text = (metric_public or "").strip() or (metric_fallback or "").strip()
+    # 条件分岐: `not text` を満たす経路を評価する。
     if not text:
         text = ""
 
     sigma_m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*σ", text)
+    # 条件分岐: `sigma_m` を満たす経路を評価する。
     if sigma_m:
         try:
             abs_sigma = abs(float(sigma_m.group(1)))
@@ -379,7 +455,9 @@ def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, 
             pass
 
     # Accept "z=..." when it represents a z-score (not cosmological redshift in this Part).
+
     z_m = re.search(r"\bz\s*=\s*([+-]?[0-9]+(?:\.[0-9]+)?)\b", text)
+    # 条件分岐: `z_m` を満たす経路を評価する。
     if z_m:
         try:
             abs_z = abs(float(z_m.group(1)))
@@ -388,21 +466,31 @@ def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, 
             pass
 
     # Procedure sensitivity (e.g., "Δ|S|≈...").
+
     delta_vals: List[float] = []
     for m in re.finditer(r"Δ[^0-9+\-]*([+-]?[0-9]+(?:\.[0-9]+)?)", text):
         try:
             delta_vals.append(abs(float(m.group(1))))
         except Exception:
             continue
+
+    # 条件分岐: `delta_vals` を満たす経路を評価する。
+
     if delta_vals:
         # Roughly: 0.33 -> 1, 0.66 -> 2, 1.0 -> 3 (clip)
         return _clamp(max(delta_vals) / 0.33, 0.0, 3.0)
 
     # Coarse categorical fallback (keep "N/A" from looking identical to "mismatch").
+
     pm = (pmodel or "").strip()
+    # 条件分岐: `pm` を満たす経路を評価する。
     if pm:
+        # 条件分岐: `any(k in pm for k in ("同", "同スケール", "弱場写像", "整合", "ε=0"))` を満たす経路を評価する。
         if any(k in pm for k in ("同", "同スケール", "弱場写像", "整合", "ε=0")):
             return 0.5
+
+        # 条件分岐: `any(k in pm for k in ("入口", "基準値", "ターゲット", "固定", "再導出", "必要条件", "制約"))` を満たす経路を評価する。
+
         if any(k in pm for k in ("入口", "基準値", "ターゲット", "固定", "再導出", "必要条件", "制約")):
             return 1.5
 
@@ -431,12 +519,15 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
     parts.append("<thead><tr>")
     for h in headers:
         parts.append(f"<th>{html.escape(h)}</th>")
+
     parts.append("</tr></thead>")
     parts.append("<tbody>")
 
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         topic = str(r.get("topic") or "")
         observable = str(r.get("observable") or "")
         data = str(r.get("data") or "")
@@ -449,12 +540,14 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
         metric_display = _strip_internal_source_tokens(metric_public or metric)
 
         score_norm: Optional[float]
+        # 条件分岐: `profile == "part3_quantum"` を満たす経路を評価する。
         if profile == "part3_quantum":
             score_norm = _table1_metric_score_norm_quantum(metric_public, metric, pmodel)
         else:
             score_norm = _table1_metric_score_norm_astrophysics(metric_public, metric)
 
         style = ""
+        # 条件分岐: `score_norm is not None` を満たす経路を評価する。
         if score_norm is not None:
             bg = _score_to_bg_hex(score_norm)
             style = f" style='background-color:{html.escape(bg)}'"
@@ -471,11 +564,13 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
 
     parts.append("</tbody></table></div>")
 
+    # 条件分岐: `notes` を満たす経路を評価する。
     if notes:
         parts.append("<h4>注記</h4>")
         parts.append("<ul>")
         for nline in notes:
             parts.append(f"<li>{html.escape(str(nline))}</li>")
+
         parts.append("</ul>")
 
     return "\n".join(parts)
@@ -485,15 +580,19 @@ def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
     """
     Insert Table 1 right after "4.1 Table 1（検証サマリ）" heading inside the manuscript HTML.
     """
+    # 条件分岐: `not body_html or not insert_html` を満たす経路を評価する。
     if not body_html or not insert_html:
         return body_html
+
     pat = re.compile(
         r'(<h3[^>]*id=\"section-4-1\"[^>]*>.*?Table 1（検証サマリ）.*?</h3>)',
         flags=re.S,
     )
     m = pat.search(body_html)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return body_html
+
     return body_html[: m.end(1)] + "\n" + insert_html + "\n" + body_html[m.end(1) :]
 
 
@@ -502,15 +601,20 @@ def _inject_pagebreak_before_heading_ids(body_html: str, *, heading_ids: Sequenc
     Insert explicit page-break markers before selected heading ids.
     Used to keep DOCX pagination deterministic for specific subsections.
     """
+    # 条件分岐: `not body_html` を満たす経路を評価する。
     if not body_html:
         return body_html
+
     ids = [str(x).strip() for x in heading_ids if str(x).strip()]
+    # 条件分岐: `not ids` を満たす経路を評価する。
     if not ids:
         return body_html
+
     out = body_html
     for hid in ids:
         pat = re.compile(rf'(<h[2-5][^>]*id="{re.escape(hid)}"[^>]*>)', flags=re.S)
         out = pat.sub(r"<div class='pb-before'></div>\n\1", out, count=1)
+
     return out
 
 
@@ -521,6 +625,7 @@ def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple
     This is intended to stabilize intra-doc navigation (especially for numbered Japanese headings).
     """
 
+    # 条件分岐: `not body_html` を満たす経路を評価する。
     if not body_html:
         return body_html, toc_html
 
@@ -537,30 +642,40 @@ def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple
         old_id = m.group(2)
         text = _heading_text(m.group(4))
         num = _HEADING_NUM_PREFIX_RE.match(text)
+        # 条件分岐: `not num` を満たす経路を評価する。
         if not num:
             continue
+
         nums = [g for g in num.groups() if g is not None]
+        # 条件分岐: `not nums` を満たす経路を評価する。
         if not nums:
             continue
+
         base = "section-" + "-".join(nums)
         new_id = base
         k = 2
         while new_id in used_new:
             new_id = f"{base}-{k}"
             k += 1
+
         mapping[old_id] = new_id
         used_new.add(new_id)
+
+    # 条件分岐: `not mapping` を満たす経路を評価する。
 
     if not mapping:
         return body_html, toc_html
 
     def _replace(s: str) -> str:
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             return s
+
         for old, new in mapping.items():
             s = s.replace(f'id="{old}"', f'id="{new}"')
             s = s.replace(f'href="#{old}"', f'href="#{new}"')
             s = s.replace(f"href='#{old}'", f"href='#{new}'")
+
         return s
 
     return _replace(body_html), _replace(toc_html)
@@ -581,21 +696,30 @@ def _linkify_repo_paths(
     def _candidate(s: str) -> Optional[str]:
         s = html.unescape(s).strip()
         s = s.replace("\\", "/")
+        # 条件分岐: `s.startswith(("output/", "doc/", "scripts/", "data/"))` を満たす経路を評価する。
         if s.startswith(("output/", "doc/", "scripts/", "data/")):
             return s
+
         return None
 
     def repl(m: re.Match[str]) -> str:
         raw = m.group(1)
         cand = _candidate(raw)
+        # 条件分岐: `not cand` を満たす経路を評価する。
         if not cand:
             return m.group(0)
+
+        # 条件分岐: `" " in cand or "\n" in cand or "\r" in cand` を満たす経路を評価する。
+
         if " " in cand or "\n" in cand or "\r" in cand:
             return m.group(0)
+
         target = _resolve_repo_asset(cand, root=root)
+        # 条件分岐: `not target.exists()` を満たす経路を評価する。
         if not target.exists():
             return m.group(0)
         # Stable figures: link to the in-page anchor (図番号) rather than opening the raw image.
+
         if fig_anchor_map and cand.endswith(".png") and cand in fig_anchor_map:
             anchor, label = fig_anchor_map[cand]
             return (
@@ -619,17 +743,23 @@ def _extract_reference_keys(md_text: str) -> List[str]:
     keys: List[str] = []
     for line in md_text.splitlines():
         m = _REF_KEY_RE.match(line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         keys.append(m.group(1))
     # de-dup preserving order
+
     seen: set[str] = set()
     uniq: List[str] = []
     for k in keys:
+        # 条件分岐: `k in seen` を満たす経路を評価する。
         if k in seen:
             continue
+
         seen.add(k)
         uniq.append(k)
+
     return uniq
 
 
@@ -643,6 +773,7 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
     This is used to tailor "データ出典（一次ソース）" / "参考文献" per Part, so Part II/III
     don't ship the full project-wide lists in publish output.
     """
+    # 条件分岐: `not keep_keys` を満たす経路を評価する。
     if not keep_keys:
         return md_text
 
@@ -655,18 +786,23 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
 
     def _flush() -> None:
         nonlocal cur_lines, cur_keys
+        # 条件分岐: `not cur_lines` を満たす経路を評価する。
         if not cur_lines:
             return
+
         sections.append((cur_lines, cur_keys))
         cur_lines = []
         cur_keys = set()
 
     for line in lines:
+        # 条件分岐: `_H2_SECTION_RE.match(line)` を満たす経路を評価する。
         if _H2_SECTION_RE.match(line):
             _flush()
             cur_lines = [line]
             cur_keys = set()
             continue
+
+        # 条件分岐: `not cur_lines` を満たす経路を評価する。
 
         if not cur_lines:
             preamble.append(line)
@@ -674,6 +810,7 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
 
         cur_lines.append(line)
         m = _REF_KEY_RE.match(line)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             cur_keys.add(m.group(1))
 
@@ -681,9 +818,12 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
 
     out: List[str] = list(preamble)
     for sec_lines, sec_keys in sections:
+        # 条件分岐: `sec_keys & keep_keys` を満たす経路を評価する。
         if sec_keys & keep_keys:
+            # 条件分岐: `out and out[-1].strip()` を満たす経路を評価する。
             if out and out[-1].strip():
                 out.append("")
+
             out.extend(sec_lines)
 
     return "\n".join(out).rstrip() + "\n"
@@ -704,9 +844,11 @@ def _inject_reference_anchors(md_text: str) -> str:
         return f"{indent}- <a id='ref-{key}'></a>[{key}]"
 
     # Preserve indentation (nested bullets are common).
+
     out_lines: List[str] = []
     for line in md_text.splitlines():
         out_lines.append(line_re.sub(repl, line))
+
     return "\n".join(out_lines)
 
 
@@ -715,14 +857,18 @@ def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
     Convert "[Will2014]" into links to "#ref-Will2014" when the key exists in References.
     Avoid touching content inside <code>...</code>.
     """
+    # 条件分岐: `not ref_keys` を満たす経路を評価する。
     if not ref_keys:
         return rendered_html
+
     ref_set = set(ref_keys)
 
     def repl(m: re.Match[str]) -> str:
         key = m.group(1)
+        # 条件分岐: `key not in ref_set` を満たす経路を評価する。
         if key not in ref_set:
             return m.group(0)
+
         safe_key = html.escape(key)
         return f"<a href='#ref-{safe_key}'>[{safe_key}]</a>"
 
@@ -733,6 +879,7 @@ def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
         parts.append(_CITE_RE.sub(repl, before))
         parts.append(cm.group(0))
         last = cm.end()
+
     parts.append(_CITE_RE.sub(repl, rendered_html[last:]))
     return "".join(parts)
 
@@ -746,8 +893,10 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
       - `output/foo/bar.png` (desc)
     """
     idx = root / "doc" / "paper" / "01_figures_index.md"
+    # 条件分岐: `not idx.exists()` を満たす経路を評価する。
     if not idx.exists():
         return []
+
     text = _read_text(idx)
     found: List[FigureItem] = []
     current_section = ""
@@ -758,8 +907,10 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
 
         These IDs are useful in internal notes but should not leak into publish output.
         """
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             return s
+
         s = re.sub(r"（\s*Step\s+[0-9][0-9.\-]{0,40}\s*）", "", s)
         s = re.sub(r"\(\s*Step\s+[0-9][0-9.\-]{0,40}\s*\)", "", s)
         s = re.sub(r"\bStep\s+[0-9][0-9.\-]{0,40}\b", "", s)
@@ -769,30 +920,40 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
 
     for line in text.splitlines():
         h = re.match(r"^\s*##\s+(.+?)\s*$", line)
+        # 条件分岐: `h` を満たす経路を評価する。
         if h:
             current_section = h.group(1).strip()
             continue
         # Captions may themselves contain parentheses (e.g. "...（inlierのみ）"),
         # so avoid patterns that stop at the first closing bracket.
+
         m = re.search(r"`(output/[^`]+?\.png)`\s*(?:（(.{0,200})）|\((.{0,200})\))?", line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         rel = m.group(1)
         caption = _strip_internal_step_refs((m.group(2) or m.group(3) or "").strip())
         p = _resolve_repo_asset(rel, root=root)
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         found.append(FigureItem(section=current_section, rel=rel, path=p, caption=caption))
 
     # de-dup while preserving order (keep first caption)
+
     uniq: List[FigureItem] = []
     seen: set[str] = set()
     for fig in found:
         key = fig.rel.lower()
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
         uniq.append(fig)
+
     return uniq
 
 
@@ -807,6 +968,7 @@ def _build_fig_anchor_map(figs: List[FigureItem], *, root: Path) -> FigureAnchor
         fig_id = f"fig-{fig_no:03d}"
         fig_label = f"図{fig_no}"
         fig_map[fig.rel] = (f"#{fig_id}", fig_label)
+
     return fig_map
 
 
@@ -821,12 +983,18 @@ def _extract_output_png_relpaths_in_order(md_text: str) -> List[str]:
     seen: set[str] = set()
     for m in _PNG_REL_RE.finditer(md_text or ""):
         rel = (m.group(1) or "").strip().replace("\\", "/")
+        # 条件分岐: `not rel` を満たす経路を評価する。
         if not rel:
             continue
+
+        # 条件分岐: `rel in seen` を満たす経路を評価する。
+
         if rel in seen:
             continue
+
         seen.add(rel)
         out.append(rel)
+
     return out
 
 
@@ -845,28 +1013,38 @@ def _reorder_figs_by_reference_order(
     """
     by_rel: Dict[str, FigureItem] = {}
     for fig in figs:
+        # 条件分岐: `fig.rel in by_rel` を満たす経路を評価する。
         if fig.rel in by_rel:
             continue
+
         by_rel[fig.rel] = fig
 
     ordered: List[FigureItem] = []
     used: set[str] = set()
 
     for rel in reference_relpaths:
+        # 条件分岐: `rel in used` を満たす経路を評価する。
         if rel in used:
             continue
+
+        # 条件分岐: `rel in by_rel` を満たす経路を評価する。
+
         if rel in by_rel:
             ordered.append(by_rel[rel])
             used.add(rel)
             continue
+
         p = _resolve_repo_asset(rel, root=root)
+        # 条件分岐: `p.exists() and p.is_file()` を満たす経路を評価する。
         if p.exists() and p.is_file():
             ordered.append(FigureItem(section="", rel=rel, path=p, caption=""))
             used.add(rel)
 
     for fig in figs:
+        # 条件分岐: `fig.rel in used` を満たす経路を評価する。
         if fig.rel in used:
             continue
+
         ordered.append(fig)
         used.add(fig.rel)
 
@@ -883,8 +1061,10 @@ def _strip_internal_blocks(md_text: str, *, mode: str) -> str:
     """
     publish モードでは、Markdown中の “内部向けブロック” を紙面から除外する。
     """
+    # 条件分岐: `mode != "publish"` を満たす経路を評価する。
     if mode != "publish":
         return md_text
+
     return _INTERNAL_BLOCK_RE.sub("", md_text)
 
 
@@ -910,31 +1090,43 @@ def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
 
     def repl_inline_code(match: re.Match[str]) -> str:
         payload = (match.group(1) or "").strip()
+        # 条件分岐: `not payload` を満たす経路を評価する。
         if not payload:
             return make_token(match.group(0))
+
+        # 条件分岐: `_paper_latex._PUNCT_ONLY_RE.fullmatch(payload)` を満たす経路を評価する。
+
         if _paper_latex._PUNCT_ONLY_RE.fullmatch(payload):
             return make_token(match.group(0))
+
+        # 条件分岐: `_CJK_CHAR_RE.search(payload) and not _paper_latex._looks_like_artifact_code(p...` を満たす経路を評価する。
+
         if _CJK_CHAR_RE.search(payload) and not _paper_latex._looks_like_artifact_code(payload):
             return make_token(match.group(0))
+
         if (
             _paper_latex._looks_like_physics_equation_code(payload)
             or _paper_latex._looks_like_physics_symbol_code(payload)
             or _paper_latex._looks_like_math_code(payload)
         ):
             return make_token("$" + _paper_latex._normalize_inline_math_payload(payload) + "$")
+
         return make_token(match.group(0))
 
     normalized = re.sub(r"`([^`]+)`", repl_inline_code, text)
 
     def repl_inline_math(match: re.Match[str]) -> str:
         payload = (match.group(1) or "").strip()
+        # 条件分岐: `not payload` を満たす経路を評価する。
         if not payload:
             return match.group(0)
+
         if _paper_latex._looks_like_artifact_code(payload) and not (
             _paper_latex._looks_like_physics_equation_code(payload)
             or _paper_latex._looks_like_physics_symbol_code(payload)
         ):
             return make_token(match.group(0))
+
         return make_token("$" + _paper_latex._normalize_inline_math_payload(payload) + "$")
 
     normalized = _INLINE_MATH_PARITY_RE.sub(repl_inline_math, normalized)
@@ -943,11 +1135,16 @@ def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
     for _ in range(len(token_map) + 1):
         changed = False
         for key, rendered in token_map.items():
+            # 条件分岐: `key in normalized` を満たす経路を評価する。
             if key in normalized:
                 normalized = normalized.replace(key, rendered)
                 changed = True
+
+        # 条件分岐: `not changed` を満たす経路を評価する。
+
         if not changed:
             break
+
     return normalized
 
 
@@ -964,29 +1161,40 @@ def _normalize_markdown_for_tex_docx_parity(md_text: str) -> str:
 
     for line in lines:
         stripped = line.strip()
+        # 条件分岐: `stripped.startswith("```")` を満たす経路を評価する。
         if stripped.startswith("```"):
             in_code_fence = not in_code_fence
             out_lines.append(line)
             continue
+
+        # 条件分岐: `in_code_fence` を満たす経路を評価する。
+
         if in_code_fence:
             out_lines.append(line)
             continue
 
         parts = line.split("$$")
+        # 条件分岐: `len(parts) == 1` を満たす経路を評価する。
         if len(parts) == 1:
+            # 条件分岐: `in_math_block` を満たす経路を評価する。
             if in_math_block:
                 out_lines.append(line)
             else:
                 out_lines.append(_normalize_inline_markdown_segment_for_parity(line))
+
             continue
 
         cur_in_math = in_math_block
         rewritten_parts: List[str] = []
         for idx, part in enumerate(parts):
+            # 条件分岐: `cur_in_math` を満たす経路を評価する。
             if cur_in_math:
                 rewritten_parts.append(part)
             else:
                 rewritten_parts.append(_normalize_inline_markdown_segment_for_parity(part))
+
+            # 条件分岐: `idx != len(parts) - 1` を満たす経路を評価する。
+
             if idx != len(parts) - 1:
                 cur_in_math = not cur_in_math
 
@@ -1035,9 +1243,12 @@ def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> P
         body = re.sub(r"\\\\+", " ; ", body)
         body = body.replace("&", " , ")
         body = re.sub(r"\s+", " ", body).strip(" ;,")
+        # 条件分岐: `env == "pmatrix"` を満たす経路を評価する。
         if env == "pmatrix":
             return rf"\left({body}\right)"
+
         return rf"\left[{body}\right]"
+
     latex_norm = re.sub(
         r"\\begin\{(bmatrix|pmatrix|matrix|array)\}(?:\{[^{}]*\})?(.*?)\\end\{\1\}",
         _matrix_env_repl,
@@ -1059,6 +1270,7 @@ def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> P
         latex_norm = re.sub(rf"\\{macro}\s*\{{([^{{}}]+)\}}", r"{\1}", latex_norm)
         latex_norm = re.sub(rf"\\{macro}\s+([A-Za-z])", r"{\1}", latex_norm)
         latex_norm = re.sub(rf"\\{macro}(?=\\[A-Za-z]+)", "", latex_norm)
+
     latex_norm = " ".join(latex_norm.split())
 
     # NOTE: Rendering parameters must be part of the cache key, otherwise changing
@@ -1071,6 +1283,7 @@ def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> P
 
     key = hashlib.sha1(f"{style_version}\n{latex_norm}".encode("utf-8")).hexdigest()[:12]
     out = eq_dir / f"eq_{key}.png"
+    # 条件分岐: `out.exists()` を満たす経路を評価する。
     if out.exists():
         return out
 
@@ -1116,6 +1329,7 @@ def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> P
         buf = io.BytesIO()
         fig.savefig(buf, format="png", bbox_inches="tight", pad_inches=pad_inches, facecolor="white")
         plt.close(fig)
+
     out.write_bytes(buf.getvalue())
     return out
 
@@ -1130,6 +1344,7 @@ def _replace_math_blocks_with_images(
     """
     $$ ... $$ のブロック数式と $ ... $ のインライン数式を “数式画像” に置換する（publishモードのみ）。
     """
+    # 条件分岐: `mode != "publish"` を満たす経路を評価する。
     if mode != "publish":
         return md_text
 
@@ -1137,14 +1352,18 @@ def _replace_math_blocks_with_images(
 
     def repl(m: re.Match[str]) -> str:
         latex = m.group(1).strip()
+        # 条件分岐: `not latex` を満たす経路を評価する。
         if not latex:
             return ""
+
         png_path = _render_equation_png(latex=latex, eq_dir=eq_dir, inline=False)
+        # 条件分岐: `embed_images` を満たす経路を評価する。
         if embed_images:
             src = _data_uri_png(_read_bytes(png_path))
         else:
             src = _rel_url(out_dir, png_path)
         # LaTeX のバックスラッシュ表記（例: `\\gamma`）は本文外の属性でも目立つため、publish では汎用の代替文言にする。
+
         alt = "数式"
         latex_attr = html.escape(latex, quote=True)
         return (
@@ -1157,25 +1376,32 @@ def _replace_math_blocks_with_images(
 
     def _looks_like_inline_math(expr: str) -> bool:
         s = (expr or "").strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             return False
         # Avoid replacing plain currency-like values (e.g., "$5", "$12.3%").
+
         if re.fullmatch(r"[0-9]+(?:[.,][0-9]+)?%?", s):
             return False
         # Treat almost all remaining `$...$` as math.
         # This intentionally includes simple variables such as `$e$`, `$R$`, `$m1$`
         # so TeX-like markers never leak into Word as raw text.
+
         return True
 
     def repl_inline(m: re.Match[str]) -> str:
         latex = (m.group(1) or "").strip()
+        # 条件分岐: `not _looks_like_inline_math(latex)` を満たす経路を評価する。
         if not _looks_like_inline_math(latex):
             return m.group(0)
+
         png_path = _render_equation_png(latex=latex, eq_dir=eq_dir, inline=True)
+        # 条件分岐: `embed_images` を満たす経路を評価する。
         if embed_images:
             src = _data_uri_png(_read_bytes(png_path))
         else:
             src = _rel_url(out_dir, png_path)
+
         latex_attr = html.escape(latex, quote=True)
         return (
             "<span class='equation-inline'>"
@@ -1205,11 +1431,15 @@ def _inline_png_code_snippets(
 
     これにより、紙面からファイルパス文字列を除去できる。
     """
+    # 条件分岐: `mode != "publish"` を満たす経路を評価する。
     if mode != "publish":
         return _rewrite_repo_relative_asset_urls(rendered_html, root=root, out_dir=out_dir)
 
+    # 条件分岐: `fig_map is None` を満たす経路を評価する。
+
     if fig_map is None:
         fig_map = {}
+        # 条件分岐: `figs` を満たす経路を評価する。
         if figs:
             fig_no = 0
             for fig in figs:
@@ -1223,23 +1453,33 @@ def _inline_png_code_snippets(
                     "path": fig.path,
                 }
 
+    # 条件分岐: `inlined is None` を満たす経路を評価する。
+
     if inlined is None:
         inlined = set()
+
+    # 条件分岐: `img_cache is None` を満たす経路を評価する。
+
     if img_cache is None:
         img_cache = {}
 
     def _candidate(s: str) -> Optional[str]:
         s = html.unescape(s).strip().replace("\\", "/")
+        # 条件分岐: `s.startswith("output/") and s.endswith(".png")` を満たす経路を評価する。
         if s.startswith("output/") and s.endswith(".png"):
             return s
+
         return None
 
     def repl(m: re.Match[str]) -> str:
         raw = m.group(1)
         cand = _candidate(raw)
+        # 条件分岐: `not cand` を満たす経路を評価する。
         if not cand:
             return m.group(0)
+
         info = fig_map.get(cand)
+        # 条件分岐: `not info` を満たす経路を評価する。
         if not info:
             return m.group(0)
 
@@ -1254,15 +1494,19 @@ def _inline_png_code_snippets(
 
         inlined.add(cand)
 
+        # 条件分岐: `embed_images` を満たす経路を評価する。
         if embed_images:
             cache_key = str(p).lower()
+            # 条件分岐: `cache_key not in img_cache` を満たす経路を評価する。
             if cache_key not in img_cache:
                 img_cache[cache_key] = _data_uri_png(_read_bytes(p))
+
             src = img_cache[cache_key]
         else:
             src = _rel_url(out_dir, p)
 
         cap = html.escape(caption) if caption else ""
+        # 条件分岐: `cap` を満たす経路を評価する。
         if cap:
             figcap = f"<figcaption><strong>{html.escape(fig_label)}:</strong> {cap}</figcaption>"
         else:
@@ -1362,6 +1606,7 @@ def _render_html(
     parts.append(f"<span class='badge'>{html.escape(header_badge)}</span>")
     parts.append(f"<span class='muted'>生成（UTC）: {html.escape(_iso_utc_now())}</span>")
     parts.append("</div>")
+    # 条件分岐: `mode != "publish"` を満たす経路を評価する。
     if mode != "publish":
         parts.append("<ul>")
         parts.append("<li>一般向け統一レポート: <a href='pmodel_public_report.html'><code>output/private/summary/pmodel_public_report.html</code></a></li>")
@@ -1371,6 +1616,7 @@ def _render_html(
             "</li>"
         )
         parts.append("</ul>")
+
     parts.append("</div>")
 
     # TOC
@@ -1385,9 +1631,12 @@ def _render_html(
             continue
 
         parts.append(f"<li><a href='#{html.escape(sid)}'>{html.escape(stitle)}</a>")
+        # 条件分岐: `toc_mode == "global_only" and sid == "manuscript" and toc_html` を満たす経路を評価する。
         if toc_mode == "global_only" and sid == "manuscript" and toc_html:
             parts.append(f"{toc_html}")
+
         parts.append("</li>")
+
     parts.append("</ul>")
 
     for sec in sections:
@@ -1399,11 +1648,14 @@ def _render_html(
 
         parts.append(f"<div class='card' id='{html.escape(sid)}'>")
         parts.append("<div class='meta'>")
+        # 条件分岐: `badge` を満たす経路を評価する。
         if badge:
             parts.append(f"<span class='badge'>{html.escape(badge)}</span>")
+
         parts.append(f"<h2 style='border:none;margin:0'>{html.escape(stitle)}</h2>")
         parts.append("</div>")
 
+        # 条件分岐: `toc_html and toc_mode != "global_only"` を満たす経路を評価する。
         if toc_html and toc_mode != "global_only":
             parts.append("<details>")
             parts.append("<summary class='muted'>この章の目次</summary>")
@@ -1458,15 +1710,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     profile = str(args.profile)
     embed_images = (mode == "publish") and (not bool(args.no_embed_images))
 
+    # 条件分岐: `args.manuscript` を満たす経路を評価する。
     if args.manuscript:
         manuscript_md = (root / Path(str(args.manuscript))).resolve()
     else:
+        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
         if profile == "paper":
             manuscript_md = root / "doc" / "paper" / "10_part1_core_theory.md"
+        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
         elif profile == "part2_astrophysics":
             manuscript_md = root / "doc" / "paper" / "11_part2_astrophysics.md"
+        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
         elif profile == "part3_quantum":
             manuscript_md = root / "doc" / "paper" / "12_part3_quantum.md"
+        # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
         elif profile == "part4_verification":
             manuscript_md = root / "doc" / "paper" / "13_part4_verification.md"
 
@@ -1481,6 +1738,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     refs_md = root / "doc" / "paper" / "30_references.md"
 
     ref_keys: List[str] = []
+    # 条件分岐: `refs_md.exists()` を満たす経路を評価する。
     if refs_md.exists():
         try:
             ref_keys = _extract_reference_keys(_read_text(refs_md))
@@ -1490,6 +1748,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Figure numbering policy:
     # Assign "図1, 図2, ..." in the first-reference order (reading order) so numbers are ascending in the manuscript.
     # Captions are taken from doc/paper/01_figures_index.md when available.
+
     include_table1 = profile in {"part2_astrophysics", "part3_quantum"}
     include_definitions = profile == "paper"
     include_uncertainty = False
@@ -1503,21 +1762,35 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Used to tailor "データ出典/参考文献" per Part in publish mode.
     used_cite_keys: set[str] = set()
     cite_scan_paths: List[Path] = []
+    # 条件分岐: `include_table1` を満たす経路を評価する。
     if include_table1:
         cite_scan_paths.append(table1_md)
+
+    # 条件分岐: `include_definitions` を満たす経路を評価する。
+
     if include_definitions:
         cite_scan_paths.append(definitions_md)
+
+    # 条件分岐: `include_uncertainty` を満たす経路を評価する。
+
     if include_uncertainty:
         cite_scan_paths.append(uncertainty_md)
+
     cite_scan_paths.append(manuscript_md)
+    # 条件分岐: `include_quantum_appendix_a` を満たす経路を評価する。
     if include_quantum_appendix_a:
         cite_scan_paths.append(quantum_appendix_a_md)
+
+    # 条件分岐: `include_llr_appendix` を満たす経路を評価する。
+
     if include_llr_appendix:
         cite_scan_paths.append(llr_appendix_md)
 
     for p in cite_scan_paths:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         try:
             t = _read_text(p)
             t = _strip_internal_blocks(t, mode=mode)
@@ -1526,29 +1799,43 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             continue
 
     scan_paths: List[Path] = [table1_md] if include_table1 else []
+    # 条件分岐: `include_definitions` を満たす経路を評価する。
     if include_definitions:
         scan_paths.append(definitions_md)
+
+    # 条件分岐: `include_uncertainty` を満たす経路を評価する。
+
     if include_uncertainty:
         scan_paths.append(uncertainty_md)
+
     scan_paths.append(manuscript_md)
+    # 条件分岐: `include_quantum_appendix_a` を満たす経路を評価する。
     if include_quantum_appendix_a:
         scan_paths.append(quantum_appendix_a_md)
+
+    # 条件分岐: `include_llr_appendix` を満たす経路を評価する。
+
     if include_llr_appendix:
         scan_paths.append(llr_appendix_md)
+
     scan_paths += [sources_md, refs_md]
     scan_texts: List[str] = []
     for p in scan_paths:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         try:
             t = _read_text(p)
             t = _strip_internal_blocks(t, mode=mode)
             scan_texts.append(t)
         except Exception:
             continue
+
     reference_relpaths = _extract_output_png_relpaths_in_order("\n".join(scan_texts))
 
     figs_idx = _extract_png_paths_from_figures_index(root)
+    # 条件分岐: `figs_idx` を満たす経路を評価する。
     if figs_idx:
         figs = _reorder_figs_by_reference_order(figs_idx, root=root, reference_relpaths=reference_relpaths)
     else:
@@ -1556,10 +1843,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         figs = []
         seen_rel: set[str] = set()
         for rel in reference_relpaths:
+            # 条件分岐: `rel in seen_rel` を満たす経路を評価する。
             if rel in seen_rel:
                 continue
+
             seen_rel.add(rel)
             p = _resolve_repo_asset(rel, root=root)
+            # 条件分岐: `p.exists() and p.is_file()` を満たす経路を評価する。
             if p.exists() and p.is_file():
                 figs.append(FigureItem(section="", rel=rel, path=p, caption=""))
 
@@ -1568,6 +1858,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     publish_fig_map: Optional[Dict[str, Dict[str, Any]]] = None
     publish_inlined: Optional[set[str]] = None
     publish_img_cache: Optional[Dict[str, str]] = None
+    # 条件分岐: `mode == "publish" and figs` を満たす経路を評価する。
     if mode == "publish" and figs:
         publish_fig_map = {}
         fig_no = 0
@@ -1581,6 +1872,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "caption": fig.caption or "",
                 "path": fig.path,
             }
+
         publish_inlined = set()
         publish_img_cache = {}
 
@@ -1598,12 +1890,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             uncertainty_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
         body, toc = _markdown_to_html(uncertainty_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
+        # 条件分岐: `standardize_numbered_anchors` を満たす経路を評価する。
+
         if standardize_numbered_anchors:
             body, toc = _standardize_numbered_heading_ids(body_html=body, toc_html=toc)
+
+        # 条件分岐: `enable_citation_links` を満たす経路を評価する。
+
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1617,6 +1917,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         sections.append({"id": "uncertainty", "title": "不確かさ（統計＋系統）", "badge": "付録", "body_html": body, "toc_html": toc})
 
+    # 条件分岐: `manuscript_md.exists()` を満たす経路を評価する。
+
     if manuscript_md.exists():
         manuscript_text = _read_text(manuscript_md)
         manuscript_text = _strip_internal_blocks(manuscript_text, mode=mode)
@@ -1625,23 +1927,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             manuscript_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
         body, toc = _markdown_to_html(manuscript_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
+        # 条件分岐: `standardize_numbered_anchors` を満たす経路を評価する。
+
         if standardize_numbered_anchors:
             body, toc = _standardize_numbered_heading_ids(body_html=body, toc_html=toc)
+
+        # 条件分岐: `enable_citation_links` を満たす経路を評価する。
+
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
 
+        # 条件分岐: `include_table1 and table1_md.exists()` を満たす経路を評価する。
+
         if include_table1 and table1_md.exists():
             table1_json = table1_md.with_suffix(".json")
+            # 条件分岐: `table1_json.exists()` を満たす経路を評価する。
             if table1_json.exists():
                 table1_html = _render_table1_html_from_json(table1_json, profile=profile)
                 body = _inject_table1_after_h3(body, insert_html=table1_html)
+
+        # 条件分岐: `profile == "part3_quantum"` を満たす経路を評価する。
+
         if profile == "part3_quantum":
             body = _inject_pagebreak_before_heading_ids(
                 body,
                 heading_ids=("section-4-10-2", "section-4-10-3"),
             )
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1665,18 +1981,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
+    # 条件分岐: `include_quantum_appendix_a and quantum_appendix_a_md.exists()` を満たす経路を評価する。
+
     if include_quantum_appendix_a and quantum_appendix_a_md.exists():
         appendix_text = _read_text(quantum_appendix_a_md)
         appendix_text = _strip_internal_blocks(appendix_text, mode=mode)
         appendix_text = _normalize_markdown_for_tex_docx_parity(appendix_text)
         appendix_text = _replace_math_blocks_with_images(appendix_text, out_dir=out_dir, mode=mode, embed_images=embed_images)
         body, toc = _markdown_to_html(appendix_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
+        # 条件分岐: `standardize_numbered_anchors` を満たす経路を評価する。
+
         if standardize_numbered_anchors:
             body, toc = _standardize_numbered_heading_ids(body_html=body, toc_html=toc)
+
+        # 条件分岐: `enable_citation_links` を満たす経路を評価する。
+
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1698,6 +2024,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
+    # 条件分岐: `include_definitions and definitions_md.exists()` を満たす経路を評価する。
+
     if include_definitions and definitions_md.exists():
         definitions_text = _read_text(definitions_md)
         definitions_text = _strip_internal_blocks(definitions_text, mode=mode)
@@ -1706,12 +2034,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             definitions_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
         body, toc = _markdown_to_html(definitions_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
+        # 条件分岐: `standardize_numbered_anchors` を満たす経路を評価する。
+
         if standardize_numbered_anchors:
             body, toc = _standardize_numbered_heading_ids(body_html=body, toc_html=toc)
+
+        # 条件分岐: `enable_citation_links` を満たす経路を評価する。
+
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1725,18 +2061,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         sections.append({"id": "definitions", "title": "記号・定義", "badge": "付録", "body_html": body, "toc_html": toc})
 
+    # 条件分岐: `include_llr_appendix and llr_appendix_md.exists()` を満たす経路を評価する。
+
     if include_llr_appendix and llr_appendix_md.exists():
         llr_text = _read_text(llr_appendix_md)
         llr_text = _strip_internal_blocks(llr_text, mode=mode)
         llr_text = _normalize_markdown_for_tex_docx_parity(llr_text)
         llr_text = _replace_math_blocks_with_images(llr_text, out_dir=out_dir, mode=mode, embed_images=embed_images)
         body, toc = _markdown_to_html(llr_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
+        # 条件分岐: `standardize_numbered_anchors` を満たす経路を評価する。
+
         if standardize_numbered_anchors:
             body, toc = _standardize_numbered_heading_ids(body_html=body, toc_html=toc)
+
+        # 条件分岐: `enable_citation_links` を満たす経路を評価する。
+
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1751,12 +2097,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         sections.append({"id": "llr_appendix", "title": "付録：LLR 全グラフ", "badge": "付録", "body_html": body, "toc_html": toc})
 
     # Figures (fixed paths) – show as an appendix gallery for paper reading.
+
     if figs and mode != "publish":
         fig_parts: List[str] = []
         fig_parts.append("<p class='muted'>固定パス（doc/paper/01_figures_index.md）から .png を抽出して一覧表示します。</p>")
         fig_no = 0
         current_section = None
         for fig in figs:
+            # 条件分岐: `fig.section and fig.section != current_section` を満たす経路を評価する。
             if fig.section and fig.section != current_section:
                 current_section = fig.section
                 fig_parts.append(f"<h3>{html.escape(current_section)}</h3>")
@@ -1768,6 +2116,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             fig_parts.append(f"<figure id='{html.escape(fig_id)}'>")
             cap = html.escape(fig.caption) if fig.caption else ""
             path_code = html.escape(fig.rel)
+            # 条件分岐: `cap` を満たす経路を評価する。
             if cap:
                 fig_parts.append(
                     f"<figcaption><strong>{html.escape(fig_label)}: {cap}</strong>"
@@ -1775,26 +2124,40 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 )
             else:
                 fig_parts.append(f"<figcaption><strong>{html.escape(fig_label)}</strong> <span class='muted'><code>{path_code}</code></span></figcaption>")
+
             fig_parts.append(f"<a href='{html.escape(rel)}'><img src='{html.escape(rel)}' loading='lazy'></a>")
             fig_parts.append("</figure>")
+
         sections.append({"id": "figures", "title": "図表（固定パス一覧）", "badge": "付録", "body_html": "\n".join(fig_parts), "toc_html": ""})
+
+    # 条件分岐: `sources_md.exists()` を満たす経路を評価する。
 
     if sources_md.exists():
         sources_text = _read_text(sources_md)
         sources_text = _strip_internal_blocks(sources_text, mode=mode)
         sources_text = _normalize_markdown_for_tex_docx_parity(sources_text)
+        # 条件分岐: `mode == "publish"` を満たす経路を評価する。
         if mode == "publish":
             sources_text = _filter_md_h2_sections_by_ref_keys(sources_text, keep_keys=used_cite_keys)
+
         sources_text = _replace_math_blocks_with_images(
             sources_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
         body, toc = _markdown_to_html(sources_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
+        # 条件分岐: `standardize_numbered_anchors` を満たす経路を評価する。
+
         if standardize_numbered_anchors:
             body, toc = _standardize_numbered_heading_ids(body_html=body, toc_html=toc)
+
+        # 条件分岐: `enable_citation_links` を満たす経路を評価する。
+
         if enable_citation_links:
             body = _linkify_citations(body, ref_keys=ref_keys)
+
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1808,43 +2171,59 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
         sections.append({"id": "sources", "title": "データ出典（一次ソース）", "badge": "付録", "body_html": body, "toc_html": toc})
 
+    # 条件分岐: `refs_md.exists()` を満たす経路を評価する。
+
     if refs_md.exists():
         refs_text = _read_text(refs_md)
         refs_text = _strip_internal_blocks(refs_text, mode=mode)
         refs_text = _normalize_markdown_for_tex_docx_parity(refs_text)
+        # 条件分岐: `mode == "publish"` を満たす経路を評価する。
         if mode == "publish":
             refs_text = _filter_md_h2_sections_by_ref_keys(refs_text, keep_keys=used_cite_keys)
+
         refs_text = _inject_reference_anchors(refs_text)
         refs_text = _replace_math_blocks_with_images(
             refs_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
         body, toc = _markdown_to_html(refs_text)
+        # 条件分岐: `mode != "publish"` を満たす経路を評価する。
         if mode != "publish":
             body = _linkify_repo_paths(body, root=root, out_dir=out_dir, fig_anchor_map=fig_anchor_map)
+
         sections.append({"id": "references", "title": "参考文献", "badge": "付録", "body_html": body, "toc_html": toc})
+
+    # 条件分岐: `args.out_name` を満たす経路を評価する。
 
     if args.out_name:
         out_name = str(args.out_name)
     else:
+        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
         if profile == "paper":
             out_name = "pmodel_paper.html"
+        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
         elif profile == "part2_astrophysics":
             out_name = "pmodel_paper_part2_astrophysics.html"
+        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
         elif profile == "part3_quantum":
             out_name = "pmodel_paper_part3_quantum.html"
+        # 条件分岐: 前段条件が不成立で、`profile == "part4_verification"` を追加評価する。
         elif profile == "part4_verification":
             out_name = "pmodel_paper_part4_verification.html"
         else:  # pragma: no cover (guarded by argparse choices)
             raise ValueError(f"unknown profile: {profile}")
 
+    # 条件分岐: `profile == "part4_verification"` を満たす経路を評価する。
+
     if profile == "part4_verification":
         title = "P-model Part IV（検証資料）"
         subtitle = "検証方法と公開成果物への参照先（GitHub）"
         header_badge = "Part IV"
+    # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
     elif profile == "part2_astrophysics":
         title = "P-model Part II（宇宙物理編）"
         subtitle = "応用検証：宇宙物理（公開体裁）"
         header_badge = "Part II"
+    # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
     elif profile == "part3_quantum":
         title = "P-model Part III（量子物理編）"
         subtitle = "応用検証：量子物理（公開体裁）"
@@ -1884,6 +2263,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except Exception:
         pass
 
+    # 条件分岐: `args.open and os.name == "nt"` を満たす経路を評価する。
+
     if args.open and os.name == "nt":
         try:
             os.startfile(str(html_path))  # type: ignore[attr-defined]
@@ -1892,6 +2273,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

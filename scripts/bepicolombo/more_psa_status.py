@@ -34,6 +34,7 @@ from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -53,9 +54,12 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(1024 * 1024)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -72,6 +76,7 @@ def _http_status(url: str, *, timeout_sec: float) -> Tuple[Optional[int], Option
 
 def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and dst.stat().st_size > 0` を満たす経路を評価する。
     if dst.exists() and dst.stat().st_size > 0:
         return {
             "url": url,
@@ -84,6 +89,7 @@ def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     req = Request(url, method="GET")
     with urlopen(req, timeout=timeout_sec) as resp:
         data = resp.read()
+
     dst.write_bytes(data)
     return {
         "url": url,
@@ -95,9 +101,12 @@ def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
 
 def _fetch_cached_html(url: str, cache_path: Path, *, offline: bool, timeout_sec: float) -> Tuple[Optional[str], Optional[str]]:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `offline` を満たす経路を評価する。
     if offline:
+        # 条件分岐: `not cache_path.exists()` を満たす経路を評価する。
         if not cache_path.exists():
             return None, f"offline mode: cache missing: {cache_path}"
+
         try:
             return cache_path.read_bytes().decode("utf-8", errors="replace"), None
         except Exception as e:
@@ -117,39 +126,59 @@ def _parse_apache_index_entries(html_text: str, *, include_dirs: bool, include_f
     """
     rows: List[Dict[str, str]] = []
     for ln in html_text.splitlines():
+        # 条件分岐: `"<a href=" not in ln` を満たす経路を評価する。
         if "<a href=" not in ln:
             continue
+
         m = re.search(r'href="([^"]+)"', ln)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         href = m.group(1)
+        # 条件分岐: `href.startswith("?") or href.startswith("/")` を満たす経路を評価する。
         if href.startswith("?") or href.startswith("/"):
             continue
+
+        # 条件分岐: `href in ("../",)` を満たす経路を評価する。
+
         if href in ("../",):
             continue
+
+        # 条件分岐: `"Parent Directory" in ln` を満たす経路を評価する。
+
         if "Parent Directory" in ln:
             continue
 
         is_dir = href.endswith("/")
+        # 条件分岐: `is_dir and not include_dirs` を満たす経路を評価する。
         if is_dir and not include_dirs:
             continue
+
+        # 条件分岐: `(not is_dir) and not include_files` を満たす経路を評価する。
+
         if (not is_dir) and not include_files:
             continue
 
         # Try to capture modified/size columns (best-effort).
+
         m2 = re.search(r"</a></td><td[^>]*>([^<]+)</td><td[^>]*>([^<]+)</td>", ln)
         last_modified = (m2.group(1).strip() if m2 else "").replace("\xa0", " ")
         size = (m2.group(2).strip() if m2 else "").replace("\xa0", " ")
         rows.append({"name": href, "is_dir": "1" if is_dir else "0", "last_modified": last_modified, "size": size})
     # De-dup while preserving order.
+
     seen: set[str] = set()
     out: List[Dict[str, str]] = []
     for r in rows:
         n = r.get("name") or ""
+        # 条件分岐: `not n or n in seen` を満たす経路を評価する。
         if not n or n in seen:
             continue
+
         seen.add(n)
         out.append(r)
+
     return out
 
 
@@ -231,14 +260,18 @@ def main() -> None:
     # Load previous meta if present (offline-friendly).
     cache_meta_path = data_dir / "fetch_meta.json"
     prev_meta: Dict[str, Any] = {}
+    # 条件分岐: `cache_meta_path.exists()` を満たす経路を評価する。
     if cache_meta_path.exists():
         try:
             prev_meta = json.loads(cache_meta_path.read_text(encoding="utf-8"))
         except Exception:
             prev_meta = {}
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
+
     if args.offline:
         meta["note"] = "offline mode; network was not used"
+        # 条件分岐: `prev_meta` を満たす経路を評価する。
         if prev_meta:
             meta["expected"] = prev_meta.get("expected") or {}
             meta["listing"] = prev_meta.get("listing") or {}
@@ -250,6 +283,7 @@ def main() -> None:
         for d in expected_dirs:
             st, err = _http_status(urljoin(base_url, d), timeout_sec=float(args.timeout_sec))
             exp[d] = {"status": st, "error": err}
+
         meta["expected"] = exp
 
         # Always fetch the bundle XML (small).
@@ -259,19 +293,24 @@ def main() -> None:
             meta.setdefault("errors", []).append({"stage": "download_bundle", "error": str(e)})
 
         # Document listing + selective downloads.
+
         try:
             html_text, html_err = _fetch_cached_html(
                 doc_url, data_dir / "document_index.html", offline=False, timeout_sec=float(args.timeout_sec)
             )
+            # 条件分岐: `html_err` を満たす経路を評価する。
             if html_err:
                 raise RuntimeError(html_err)
+
             doc_rows = _parse_apache_index_entries(html_text or "", include_dirs=False, include_files=True)
 
             docs: List[Dict[str, Any]] = []
             for r in doc_rows:
                 name = str(r.get("name") or "")
+                # 条件分岐: `not name` を満たす経路を評価する。
                 if not name:
                     continue
+
                 is_pdf = name.lower().endswith(".pdf")
                 will_download = (not is_pdf) or bool(args.download_pdfs)
                 doc_entry: Dict[str, Any] = {
@@ -281,6 +320,7 @@ def main() -> None:
                     "downloaded": False,
                     "path": None,
                 }
+                # 条件分岐: `will_download` を満たす経路を評価する。
                 if will_download:
                     try:
                         dl = _download(urljoin(doc_url, name), data_dir / "document" / name, timeout_sec=float(args.timeout_sec))
@@ -288,12 +328,15 @@ def main() -> None:
                         doc_entry["path"] = str((data_dir / "document" / name).resolve())
                     except Exception as e:
                         doc_entry["error"] = str(e)
+
                 docs.append(doc_entry)
+
             meta["documents"] = docs
         except Exception as e:
             meta.setdefault("errors", []).append({"stage": "list_or_download_docs", "error": str(e)})
 
         # Parent/base listing (what is present on PSA today)
+
         try:
             parent_html, parent_err = _fetch_cached_html(
                 parent_url, data_dir / "parent_index.html", offline=False, timeout_sec=float(args.timeout_sec)
@@ -303,12 +346,15 @@ def main() -> None:
             )
 
             listing: Dict[str, Any] = {}
+            # 条件分岐: `parent_err` を満たす経路を評価する。
             if parent_err:
                 listing["parent_error"] = parent_err
             else:
                 parent_entries = _parse_apache_index_entries(parent_html or "", include_dirs=True, include_files=True)
                 listing["parent_url"] = parent_url
                 listing["parent_entries"] = parent_entries
+
+            # 条件分岐: `base_err` を満たす経路を評価する。
 
             if base_err:
                 listing["base_error"] = base_err
@@ -322,6 +368,7 @@ def main() -> None:
             meta.setdefault("errors", []).append({"stage": "list_base_parent", "error": str(e)})
 
     # Persist cache meta (for offline re-run).
+
     data_dir.mkdir(parents=True, exist_ok=True)
     cache_meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -357,20 +404,24 @@ def main() -> None:
         lines.append("BepiColombo（MORE）: ESA PSA 公開状況（一次ソース確認）")
         lines.append(f"確認時刻(UTC): {status_payload.get('generated_utc')}")
         lines.append(f"対象: {base_url}")
+        # 条件分岐: `status_payload.get("offline")` を満たす経路を評価する。
         if status_payload.get("offline"):
             lines.append("モード: offline（ネットワーク未使用）")
 
         exp = status_payload.get("expected") or {}
+        # 条件分岐: `exp` を満たす経路を評価する。
         if exp:
             lines.append("")
             lines.append("公開ディレクトリ（HTTPステータス）:")
             for d in expected_dirs:
                 v = exp.get(d) or {}
                 st = v.get("status")
+                # 条件分岐: `st is None` を満たす経路を評価する。
                 if st is None:
                     s = "unknown"
                 else:
                     s = str(st)
+
                 ok = "OK" if str(st) == "200" else "NG"
                 lines.append(f"  - {d:<18} : {ok} ({s})")
         else:
@@ -383,23 +434,32 @@ def main() -> None:
         )
 
         listing = status_payload.get("listing") or {}
+        # 条件分岐: `isinstance(listing, dict)` を満たす経路を評価する。
         if isinstance(listing, dict):
             base_entries = listing.get("base_entries") if isinstance(listing.get("base_entries"), list) else []
             parent_entries = listing.get("parent_entries") if isinstance(listing.get("parent_entries"), list) else []
+            # 条件分岐: `base_entries` を満たす経路を評価する。
             if base_entries:
                 dirs = [e.get("name") for e in base_entries if isinstance(e, dict) and e.get("is_dir") == "1"]
                 files = [e.get("name") for e in base_entries if isinstance(e, dict) and e.get("is_dir") == "0"]
                 lines.append("")
                 lines.append(f"bc_mpo_more/ 直下: dir={len(dirs)}, file={len(files)}")
+                # 条件分岐: `files` を満たす経路を評価する。
                 if files:
                     show = ", ".join(str(x) for x in files[:3])
                     lines.append(f"  files例: {show}{' …' if len(files) > 3 else ''}")
+
+            # 条件分岐: `parent_entries` を満たす経路を評価する。
+
             if parent_entries:
                 dirs = [e.get("name") for e in parent_entries if isinstance(e, dict) and e.get("is_dir") == "1"]
+                # 条件分岐: `dirs` を満たす経路を評価する。
                 if dirs:
                     show = ", ".join(str(x) for x in dirs[:6])
                     lines.append("")
                     lines.append(f"PSA BepiColombo/ 直下 dir例: {show}{' …' if len(dirs) > 6 else ''}")
+
+        # 条件分岐: `status_payload.get("errors")` を満たす経路を評価する。
 
         if status_payload.get("errors"):
             lines.append("")
@@ -422,6 +482,7 @@ def main() -> None:
         meta.setdefault("errors", []).append({"stage": "plot", "error": str(e)})
 
     # Worklog
+
     try:
         worklog.append_event(
             {
@@ -442,6 +503,8 @@ def main() -> None:
     print("Wrote:", status_out)
     print("Wrote:", out_dir / "more_psa_status.png")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

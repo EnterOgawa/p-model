@@ -38,6 +38,7 @@ import numpy as np
 import pandas as pd
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -59,6 +60,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -82,24 +84,34 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)
     except Exception:
         return None
@@ -107,8 +119,10 @@ def _safe_float(x: Any) -> Optional[float]:
 
 def _load_pantheon_lcparam(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, sep=r"\s+", engine="python")
+    # 条件分岐: `"#name" in df.columns` を満たす経路を評価する。
     if "#name" in df.columns:
         df = df.rename(columns={"#name": "name"})
+
     return df
 
 
@@ -120,8 +134,10 @@ def _load_pantheon_sys_cov(path: Path) -> np.ndarray:
       - First line: N
       - Then N*N floats, typically one per line (variance/covariance in mag^2).
     """
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(str(path))
+
     first = path.read_text(encoding="utf-8", errors="replace").splitlines()[0].strip()
     try:
         n = int(first)
@@ -129,8 +145,10 @@ def _load_pantheon_sys_cov(path: Path) -> np.ndarray:
         raise ValueError(f"Invalid first line for Pantheon sys covariance (expected N int): {first!r}") from e
 
     data = np.loadtxt(path, dtype=float, skiprows=1)
+    # 条件分岐: `data.size != int(n) * int(n)` を満たす経路を評価する。
     if data.size != int(n) * int(n):
         raise ValueError(f"Pantheon sys covariance size mismatch: got {data.size}, expected {n*n}")
+
     return data.reshape((n, n))
 
 
@@ -144,16 +162,23 @@ def _cov_sem_weighted(cov: np.ndarray) -> Optional[float]:
         n = int(cov.shape[0])
     except Exception:
         return None
+
+    # 条件分岐: `n <= 0 or cov.shape != (n, n)` を満たす経路を評価する。
+
     if n <= 0 or cov.shape != (n, n):
         return None
+
     ones = np.ones(n, dtype=float)
     try:
         x = np.linalg.solve(cov, ones)
     except Exception:
         return None
+
     denom = float(ones @ x)
+    # 条件分岐: `not (denom > 0.0) or not math.isfinite(denom)` を満たす経路を評価する。
     if not (denom > 0.0) or not math.isfinite(denom):
         return None
+
     v = math.sqrt(1.0 / denom)
     return v if math.isfinite(v) else None
 
@@ -166,6 +191,7 @@ def _compute_sn_binned_budget(
     min_points: int,
     sys_cov: Optional[np.ndarray],
 ) -> List[Dict[str, Any]]:
+    # 条件分岐: `"zcmb" not in df.columns or "dmb" not in df.columns` を満たす経路を評価する。
     if "zcmb" not in df.columns or "dmb" not in df.columns:
         raise ValueError("Pantheon lcparam must contain columns: zcmb, dmb")
 
@@ -178,6 +204,7 @@ def _compute_sn_binned_budget(
 
         sub = sub0[np.isfinite(sub0["dmb"]) & (sub0["dmb"] > 0)].copy()
         n = int(len(sub))
+        # 条件分岐: `n < int(min_points)` を満たす経路を評価する。
         if n < int(min_points):
             out.append(
                 {
@@ -203,6 +230,7 @@ def _compute_sn_binned_budget(
 
         dmb_median_total: Optional[float] = None
         sem_total_cov: Optional[float] = None
+        # 条件分岐: `sys_cov is not None` を満たす経路を評価する。
         if sys_cov is not None:
             try:
                 cov_sys = sys_cov[np.ix_(idx, idx)].astype(float, copy=False)
@@ -211,6 +239,7 @@ def _compute_sn_binned_budget(
 
                 diag_total = np.diag(cov_total)
                 diag_total = diag_total[np.isfinite(diag_total) & (diag_total >= 0.0)]
+                # 条件分岐: `diag_total.size` を満たす経路を評価する。
                 if diag_total.size:
                     dmb_median_total = float(np.nanmedian(np.sqrt(diag_total)))
             except Exception:
@@ -230,6 +259,7 @@ def _compute_sn_binned_budget(
                 "dmb_sem_total_cov": sem_total_cov,
             }
         )
+
     return out
 
 
@@ -241,8 +271,10 @@ def _bao_mu_sigma_mag_from_boss_ap(path: Path) -> List[Dict[str, Any]]:
         z = _safe_float(r.get("z_eff"))
         dm = _safe_float(r.get("DM_scaled_mpc"))
         sig = _safe_float(r.get("DM_scaled_sigma_mpc"))
+        # 条件分岐: `z is None or dm is None or sig is None or not (dm > 0) or not (sig > 0)` を満たす経路を評価する。
         if z is None or dm is None or sig is None or not (dm > 0) or not (sig > 0):
             continue
+
         frac = float(sig) / float(dm)
         mu = 5.0 * math.log10(1.0 + frac)
         out.append(
@@ -257,6 +289,7 @@ def _bao_mu_sigma_mag_from_boss_ap(path: Path) -> List[Dict[str, Any]]:
                 "source": r.get("source") or {},
             }
         )
+
     out.sort(key=lambda x: x["z_eff"])
     return out
 
@@ -264,15 +297,19 @@ def _bao_mu_sigma_mag_from_boss_ap(path: Path) -> List[Dict[str, Any]]:
 def _r_drag_mu_sigma_mag(path: Path) -> Optional[Dict[str, Any]]:
     src = _read_json(path)
     rows = src.get("constraints") or []
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return None
     # pick the smallest sigma as "primary"
+
     rows = sorted(rows, key=lambda r: float(r.get("r_drag_sigma_mpc", float("inf"))))
     r = rows[0]
     val = _safe_float(r.get("r_drag_mpc"))
     sig = _safe_float(r.get("r_drag_sigma_mpc"))
+    # 条件分岐: `val is None or sig is None or not (val > 0) or not (sig > 0)` を満たす経路を評価する。
     if val is None or sig is None or not (val > 0) or not (sig > 0):
         return None
+
     frac = float(sig) / float(val)
     mu = 5.0 * math.log10(1.0 + frac)
     return {
@@ -291,15 +328,25 @@ def _load_boss_baofs_reduced_cov_cij(path: Path) -> Dict[str, Any]:
     src = _read_json(path)
     params = src.get("parameters") or []
     cij = src.get("cij_1e4")
+    # 条件分岐: `not isinstance(params, list) or not params` を満たす経路を評価する。
     if not isinstance(params, list) or not params:
         raise ValueError("BOSS reduced covariance JSON must contain non-empty 'parameters' list")
+
+    # 条件分岐: `not isinstance(cij, list) or not cij` を満たす経路を評価する。
+
     if not isinstance(cij, list) or not cij:
         raise ValueError("BOSS reduced covariance JSON must contain 'cij_1e4' matrix")
+
     mat = np.array(cij, dtype=float)
+    # 条件分岐: `mat.ndim != 2 or mat.shape[0] != mat.shape[1]` を満たす経路を評価する。
     if mat.ndim != 2 or mat.shape[0] != mat.shape[1]:
         raise ValueError(f"Invalid 'cij_1e4' shape: {mat.shape}")
+
+    # 条件分岐: `mat.shape[0] != len(params)` を満たす経路を評価する。
+
     if mat.shape[0] != len(params):
         raise ValueError(f"'cij_1e4' size {mat.shape[0]} does not match parameters {len(params)}")
+
     return {"raw": src, "parameters": params, "cij_1e4": mat}
 
 
@@ -307,8 +354,10 @@ def _match_boss_dm_indices(
     boss_params: List[Dict[str, Any]], bao_points: List[Dict[str, Any]], *, z_tol: float = 5e-4
 ) -> Tuple[List[int], List[Dict[str, Any]]]:
     dm_params = [(i, p) for i, p in enumerate(boss_params) if str(p.get("kind") or "") == "DM_scaled_mpc"]
+    # 条件分岐: `not dm_params` を満たす経路を評価する。
     if not dm_params:
         raise ValueError("BOSS reduced covariance JSON has no DM_scaled_mpc parameters")
+
     out_idx: List[int] = []
     out_param: List[Dict[str, Any]] = []
     for bp in bao_points:
@@ -317,16 +366,24 @@ def _match_boss_dm_indices(
         best_d = float("inf")
         for i, p in dm_params:
             zz = _safe_float(p.get("z_eff"))
+            # 条件分岐: `zz is None` を満たす経路を評価する。
             if zz is None:
                 continue
+
             d = abs(float(zz) - float(z))
+            # 条件分岐: `d < best_d` を満たす経路を評価する。
             if d < best_d:
                 best_d = d
                 best = (i, p)
+
+        # 条件分岐: `best is None or best_d > float(z_tol)` を満たす経路を評価する。
+
         if best is None or best_d > float(z_tol):
             raise ValueError(f"Cannot match BAO z={z} to BOSS DM parameter (best_d={best_d})")
+
         out_idx.append(int(best[0]))
         out_param.append(dict(best[1]))
+
     return out_idx, out_param
 
 
@@ -343,8 +400,12 @@ def _bao_mu_sigma_mag_from_dm_cov_interpolated(
     We use piecewise-linear interpolation for D_M(z), and propagate variance using the
     covariance of the two adjacent anchor points (weights 2-point only).
     """
+    # 条件分岐: `z_grid.ndim != 1` を満たす経路を評価する。
     if z_grid.ndim != 1:
         raise ValueError("z_grid must be 1D")
+
+    # 条件分岐: `z_points.size < 2` を満たす経路を評価する。
+
     if z_points.size < 2:
         # fallback: constant uncertainty from the single point
         dm0 = float(dm_points[0])
@@ -353,6 +414,7 @@ def _bao_mu_sigma_mag_from_dm_cov_interpolated(
         return np.full_like(z_grid, 5.0 * np.log10(1.0 + frac), dtype=float)
 
     # Sort by z.
+
     order = np.argsort(z_points)
     z_pts = z_points[order]
     dm_pts = dm_points[order]
@@ -377,11 +439,15 @@ def _bao_mu_sigma_mag_from_dm_cov_interpolated(
     for i in range(len(z_pts) - 1):
         z1 = float(z_pts[i])
         z2 = float(z_pts[i + 1])
+        # 条件分岐: `not (z2 > z1)` を満たす経路を評価する。
         if not (z2 > z1):
             continue
+
         mask = (z_grid > z1) & (z_grid < z2)
+        # 条件分岐: `not mask.any()` を満たす経路を評価する。
         if not mask.any():
             continue
+
         t = (z_grid[mask] - z1) / (z2 - z1)
         dm_i = float(dm_pts[i])
         dm_j = float(dm_pts[i + 1])
@@ -407,8 +473,10 @@ def _load_reach_representatives(reach_metrics_path: Path) -> Dict[str, Any]:
 
     def extract(key: str) -> Optional[Dict[str, Any]]:
         rr = reach.get(key)
+        # 条件分岐: `not isinstance(rr, dict)` を満たす経路を評価する。
         if not isinstance(rr, dict):
             return None
+
         return {
             "label": str(key),
             "id": str(rr.get("id") or ""),
@@ -430,12 +498,16 @@ def _load_reach_representatives(reach_metrics_path: Path) -> Dict[str, Any]:
 
 
 def _interp_on_grid(x: np.ndarray, y: np.ndarray, x_grid: np.ndarray) -> np.ndarray:
+    # 条件分岐: `x.size == 0 or y.size == 0` を満たす経路を評価する。
     if x.size == 0 or y.size == 0:
         return np.full_like(x_grid, np.nan, dtype=float)
     # Fill NaNs by nearest-neighbor on available points.
+
     mask = np.isfinite(x) & np.isfinite(y)
+    # 条件分岐: `not mask.any()` を満たす経路を評価する。
     if not mask.any():
         return np.full_like(x_grid, np.nan, dtype=float)
+
     xs = x[mask]
     ys = y[mask]
     order = np.argsort(xs)
@@ -452,18 +524,24 @@ def _required_delta_mu_mag(delta_eps_needed: float, z: np.ndarray) -> np.ndarray
 
 def _z_limit(required: np.ndarray, budget: np.ndarray, z: np.ndarray, *, sigma_multiplier: float) -> Optional[float]:
     ok = np.isfinite(required) & np.isfinite(budget) & (budget >= 0.0) & (z >= 0.0)
+    # 条件分岐: `not ok.any()` を満たす経路を評価する。
     if not ok.any():
         return None
+
     rr = required[ok]
     bb = budget[ok] * float(sigma_multiplier)
     zz = z[ok]
     # Find first index where required exceeds budget.
     exceed = rr > bb
+    # 条件分岐: `not exceed.any()` を満たす経路を評価する。
     if not exceed.any():
         return float(zz[-1])
+
     idx = int(np.argmax(exceed))
+    # 条件分岐: `idx <= 0` を満たす経路を評価する。
     if idx <= 0:
         return float(zz[0])
+
     return float(zz[idx - 1])
 
 
@@ -524,6 +602,7 @@ def _plot(
     boss_dm_corr = None
     boss_dm_sigmas = None
     boss_dm_match = []
+    # 条件分岐: `boss_baofs_cov is not None and bao_z.size` を満たす経路を評価する。
     if boss_baofs_cov is not None and bao_z.size:
         try:
             boss_params = list(boss_baofs_cov["parameters"])
@@ -554,6 +633,7 @@ def _plot(
 
     # Combined budgets (quadrature; observational uncertainty proxy).
     # Lower bound: stat-only (SNe) + naive BAO interpolation.
+
     budget_opt = np.sqrt(np.maximum(0.0, sn_sem_grid) ** 2 + np.maximum(0.0, bao_mu_grid_naive) ** 2 + rdrag_mu**2)
     budget_cons = np.sqrt(np.maximum(0.0, sn_med_grid) ** 2 + np.maximum(0.0, bao_mu_grid_naive) ** 2 + rdrag_mu**2)
     # Upper bound: stat+sys (SNe) + BAO covariance-interpolated curve.
@@ -575,8 +655,10 @@ def _plot(
     limits: Dict[str, Any] = {"opt": {}, "cons": {}}
     limits_total: Dict[str, Any] = {"opt": {}, "cons": {}}
     for label, dm_req in [("bao", dm_req_bao), ("no_bao", dm_req_no)]:
+        # 条件分岐: `dm_req is None` を満たす経路を評価する。
         if dm_req is None:
             continue
+
         limits["opt"][label] = {}
         limits["cons"][label] = {}
         limits_total["opt"][label] = {}
@@ -597,6 +679,7 @@ def _plot(
 
     # Left: observational budget components.
     ax1.plot(sn_z, sn_sem, color="#2ca02c", linewidth=2.0, label="SNe Ia: bin平均の誤差（SEM; stat; Pantheon）")
+    # 条件分岐: `np.isfinite(sn_sem_total).any()` を満たす経路を評価する。
     if np.isfinite(sn_sem_total).any():
         ax1.plot(
             sn_z,
@@ -607,13 +690,17 @@ def _plot(
             alpha=0.9,
             label="SNe Ia: bin平均の誤差（SEM; stat+sys共分散; Pantheon）",
         )
+
     ax1.scatter(sn_z, sn_med, color="#1f77b4", s=18, alpha=0.75, label="SNe Ia: 1点の誤差（median dmb; Pantheon）")
+    # 条件分岐: `bao_z.size` を満たす経路を評価する。
     if bao_z.size:
         ax1.plot(bao_z, bao_mu, color="#9467bd", marker="s", linewidth=1.8, label="BAO: 距離の誤差（BOSS DR12; D_M）")
+        # 条件分岐: `boss_dm_cov is not None and np.isfinite(bao_mu_grid_cov).any()` を満たす経路を評価する。
         if boss_dm_cov is not None and np.isfinite(bao_mu_grid_cov).any():
             zmin = float(np.nanmin(bao_z))
             zmax_ = float(np.nanmax(bao_z))
             msk = (z_grid >= zmin) & (z_grid <= zmax_)
+            # 条件分岐: `msk.any()` を満たす経路を評価する。
             if msk.any():
                 ax1.plot(
                     z_grid[msk],
@@ -624,6 +711,9 @@ def _plot(
                     alpha=0.65,
                     label="BAO: 共分散を用いた補間（目安）",
                 )
+
+    # 条件分岐: `isinstance(r_drag_budget, dict)` を満たす経路を評価する。
+
     if isinstance(r_drag_budget, dict):
         ax1.axhline(rdrag_mu, color="#777777", linestyle="--", linewidth=1.2, alpha=0.7, label="r_drag校正（Planck; 1σ）")
 
@@ -638,29 +728,40 @@ def _plot(
     # Right: required correction vs budgets.
     if dm_req_bao is not None and rep_bao:
         ax2.plot(z_grid, dm_req_bao, color="#1f77b4", linewidth=2.2, label=f"必要補正 |Δμ|（DDR; {rep_bao.get('short_label','')})")
+
+    # 条件分岐: `dm_req_no is not None and rep_no` を満たす経路を評価する。
+
     if dm_req_no is not None and rep_no:
         ax2.plot(z_grid, dm_req_no, color="#ff7f0e", linewidth=2.2, label=f"必要補正 |Δμ|（DDR; {rep_no.get('short_label','')})")
 
     # Error-budget band: stat-only → stat+sys covariance (Pantheon) for bin-mean SEM case.
+
     if np.isfinite(budget_opt_total).any():
         for m in sigma_multipliers:
             lo = float(m) * budget_opt
             hi = float(m) * budget_opt_total
+            # 条件分岐: `not (np.isfinite(lo).any() and np.isfinite(hi).any())` を満たす経路を評価する。
             if not (np.isfinite(lo).any() and np.isfinite(hi).any()):
                 continue
             # Ensure lo<=hi elementwise for fill.
+
             y1 = np.minimum(lo, hi)
             y2 = np.maximum(lo, hi)
             a = 0.14 if float(m) == 1.0 else 0.06
             label = None
+            # 条件分岐: `float(m) == 1.0` を満たす経路を評価する。
             if float(m) == 1.0:
                 label = "誤差予算（SEM⊕BAO; 1σ; stat-only↔stat+sys+BAO共分散）"
+            # 条件分岐: 前段条件が不成立で、`float(m) == 3.0` を追加評価する。
             elif float(m) == 3.0:
                 label = "誤差予算（SEM⊕BAO; 3σ; stat-only↔stat+sys+BAO共分散）"
+
             ax2.fill_between(z_grid, y1, y2, color="#000000", alpha=a, label=label)
 
     # Conservative line (single-point proxy).
+
     ax2.plot(z_grid, budget_cons, color="#444444", linewidth=2.0, alpha=0.9, label="誤差予算（median dmb⊕BAO; 1σ）")
+    # 条件分岐: `np.isfinite(budget_cons_total).any()` を満たす経路を評価する。
     if np.isfinite(budget_cons_total).any():
         ax2.plot(
             z_grid,
@@ -672,6 +773,8 @@ def _plot(
             label="誤差予算（median dmb⊕BAO; 1σ; +sys(対角)）",
         )
 
+    # 条件分岐: `bao_z.size` を満たす経路を評価する。
+
     if bao_z.size:
         ax2.axvline(float(np.nanmax(bao_z)), color="#333333", linewidth=1.2, alpha=0.25)
         ax2.text(
@@ -682,6 +785,8 @@ def _plot(
             color="#333333",
             alpha=0.8,
         )
+
+    # 条件分岐: `sn_max_z is not None` を満たす経路を評価する。
 
     if sn_max_z is not None:
         ax2.axvline(float(sn_max_z), color="#2ca02c", linewidth=1.2, alpha=0.18)
@@ -719,8 +824,10 @@ def _plot(
     # Summary values at z_ref.
     z_refs = [0.1, 0.5, 1.0, 2.0]
     def sample(arr: np.ndarray, zref: float) -> Optional[float]:
+        # 条件分岐: `not (0.0 <= zref <= float(z_max))` を満たす経路を評価する。
         if not (0.0 <= zref <= float(z_max)):
             return None
+
         idx = int(np.argmin(np.abs(z_grid - float(zref))))
         v = float(arr[idx])
         return v if math.isfinite(v) else None
@@ -836,21 +943,31 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     z_max = float(args.z_max)
+    # 条件分岐: `not (z_max > 0.0)` を満たす経路を評価する。
     if not (z_max > 0.0):
         raise ValueError("--z-max must be > 0")
+
     bin_width = float(args.bin_width)
+    # 条件分岐: `not (bin_width > 0.0)` を満たす経路を評価する。
     if not (bin_width > 0.0):
         raise ValueError("--bin-width must be > 0")
+
     sn_min_points = int(args.sn_min_points)
+    # 条件分岐: `sn_min_points < 1` を満たす経路を評価する。
     if sn_min_points < 1:
         raise ValueError("--sn-min-points must be >= 1")
 
     sigma_multipliers: List[float] = []
     for part in str(args.sigma_multipliers).split(","):
         part = part.strip()
+        # 条件分岐: `not part` を満たす経路を評価する。
         if not part:
             continue
+
         sigma_multipliers.append(float(part))
+
+    # 条件分岐: `not sigma_multipliers` を満たす経路を評価する。
+
     if not sigma_multipliers:
         sigma_multipliers = [1.0, 3.0]
 
@@ -863,8 +980,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     df = _load_pantheon_lcparam(pantheon_path)
     sys_cov: Optional[np.ndarray] = None
+    # 条件分岐: `pantheon_sys_path.exists()` を満たす経路を評価する。
     if pantheon_sys_path.exists():
         sys_cov = _load_pantheon_sys_cov(pantheon_sys_path)
+        # 条件分岐: `sys_cov.shape[0] != int(len(df))` を満たす経路を評価する。
         if sys_cov.shape[0] != int(len(df)):
             raise ValueError(f"Pantheon sys covariance N={sys_cov.shape[0]} does not match lcparam rows={len(df)}")
 
@@ -878,6 +997,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     bao_points = _bao_mu_sigma_mag_from_boss_ap(boss_path)
     rdrag_budget = _r_drag_mu_sigma_mag(rdrag_path)
     boss_cov: Optional[Dict[str, Any]] = None
+    # 条件分岐: `boss_cov_path.exists()` を満たす経路を評価する。
     if boss_cov_path.exists():
         try:
             boss_cov = _load_boss_baofs_reduced_cov_cij(boss_cov_path)
@@ -885,6 +1005,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             boss_cov = None
 
     reach_reps: Dict[str, Any] = {"reach": {}}
+    # 条件分岐: `reach_path.exists()` を満たす経路を評価する。
     if reach_path.exists():
         reach_reps = _load_reach_representatives(reach_path)
 
@@ -978,6 +1099,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

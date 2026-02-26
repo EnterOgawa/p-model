@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -36,6 +37,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -53,6 +55,7 @@ def _gamma_max(delta: float) -> float:
     # gamma_max = sqrt((1+δ)/δ)  (≈ 1/sqrt(δ) when δ<<1)
     if not (math.isfinite(delta) and delta > 0):
         return float("nan")
+
     return math.sqrt((1.0 + float(delta)) / float(delta))
 
 
@@ -61,14 +64,20 @@ def _delta_upper_for_gamma(gamma_obs: float) -> float:
     # => (1+δ)/δ >= gamma^2  -> 1/δ + 1 >= gamma^2 -> δ <= 1/(gamma^2 - 1)
     if not (math.isfinite(gamma_obs) and gamma_obs > 1.0):
         return float("nan")
+
     return 1.0 / (float(gamma_obs) * float(gamma_obs) - 1.0)
 
 
 def _fmt_sci(x: float, *, digits: int = 2) -> str:
+    # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
     if not math.isfinite(x):
         return "n/a"
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     return f"{x:.{digits}e}"
 
 
@@ -115,6 +124,7 @@ def main() -> int:
     out_dir = Path(args.outdir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not in_path.exists()` を満たす経路を評価する。
     if not in_path.exists():
         print(f"[err] missing input: {in_path}")
         return 2
@@ -125,6 +135,7 @@ def main() -> int:
 
     objs = ref.get("examples") or []
     examples = [_parse_example(o) for o in objs if isinstance(o, dict)]
+    # 条件分岐: `not examples` を満たす経路を評価する。
     if not examples:
         print("[err] no examples in input json")
         return 2
@@ -157,11 +168,13 @@ def main() -> int:
         )
 
     # Save CSV (no pandas dependency)
+
     csv_path = out_dir / "delta_saturation_constraints.csv"
     header = list(rows[0].keys())
     lines = [",".join(header)]
     for r in rows:
         lines.append(",".join(str(r.get(k, "")) for k in header))
+
     csv_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Save JSON
@@ -207,9 +220,11 @@ def main() -> int:
 
         # Left: gamma
         ax0.bar(x, log_gamma, color="#1f77b4", alpha=0.9)
+        # 条件分岐: `math.isfinite(log_gamma_max)` を満たす経路を評価する。
         if math.isfinite(log_gamma_max):
             ax0.axhline(log_gamma_max, color="#d62728", linestyle="--", linewidth=2.0, label=f"γ_max（δ={_fmt_sci(delta_adopted)}）")
             ax0.legend(loc="upper left")
+
         ax0.set_xticks(x)
         ax0.set_xticklabels(labels, rotation=20, ha="right")
         ax0.set_ylabel("log10 γ（概算）")
@@ -220,10 +235,13 @@ def main() -> int:
             ax0.text(i, log_gamma[i] + 0.1, _fmt_sci(g, digits=1), ha="center", va="bottom", fontsize=9)
 
         # Right: delta upper bounds
+
         ax1.bar(x, log_delta_upper, color="#2ca02c", alpha=0.9)
+        # 条件分岐: `math.isfinite(log_delta_adopted)` を満たす経路を評価する。
         if math.isfinite(log_delta_adopted):
             ax1.axhline(log_delta_adopted, color="#d62728", linestyle="--", linewidth=2.0, label=f"採用δ={_fmt_sci(delta_adopted)}")
             ax1.legend(loc="lower left")
+
         ax1.set_xticks(x)
         ax1.set_xticklabels(labels, rotation=20, ha="right")
         ax1.set_ylabel("log10 δ上限（δ < 1/(γ^2-1)）")
@@ -232,6 +250,8 @@ def main() -> int:
 
         for i, d in enumerate(delta_uppers):
             ax1.text(i, log_delta_upper[i] + 0.5, _fmt_sci(d, digits=1), ha="center", va="bottom", fontsize=9)
+
+        # 条件分岐: `math.isfinite(log_gamma_max) and math.isfinite(log_delta_adopted)` を満たす経路を評価する。
 
         if math.isfinite(log_gamma_max) and math.isfinite(log_delta_adopted):
             fig.suptitle("速度項の飽和 δ：既存観測との整合（P-model 差分予測）")
@@ -269,10 +289,14 @@ def main() -> int:
 
     print(f"[ok] csv : {csv_path}")
     print(f"[ok] json: {json_path}")
+    # 条件分岐: `isinstance(png_path, Path)` を満たす経路を評価する。
     if isinstance(png_path, Path):
         print(f"[ok] png : {png_path}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

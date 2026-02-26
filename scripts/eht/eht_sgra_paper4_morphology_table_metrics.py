@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -39,8 +40,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _find_block(text: str, needle: str, *, window: int = 1600) -> Optional[str]:
     i = text.find(needle)
+    # 条件分岐: `i < 0` を満たす経路を評価する。
     if i < 0:
         return None
+
     a = max(0, i - 200)
     b = min(len(text), i + window)
     return text[a:b]
@@ -49,8 +52,10 @@ def _find_block(text: str, needle: str, *, window: int = 1600) -> Optional[str]:
 def _unwrap_multirow_cell(s: str) -> str:
     s = str(s).strip()
     m = re.match(r"^\\multirow\{[^}]+\}\{[^}]+\}\{(.+)\}$", s)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         return m.group(1).strip()
+
     return s
 
 
@@ -68,21 +73,32 @@ def _parse_subsup_pm(s: str) -> Optional[Tuple[float, float, float]]:
     Parse "x_{-a}^{+b}" into (x, a, b). Returns None if not parseable.
     """
     raw = str(s).strip()
+    # 条件分岐: `not raw` を満たす経路を評価する。
     if not raw:
         return None
+
+    # 条件分岐: `"\\ldots" in raw or raw == "..." or raw == r"\dots"` を満たす経路を評価する。
+
     if "\\ldots" in raw or raw == "..." or raw == r"\dots":
         return None
+
     m = re.search(r"(?P<mid>-?\d+(?:\.\d+)?)_\{-(?P<minus>\d+(?:\.\d+)?)\}\^\{\+(?P<plus>\d+(?:\.\d+)?)\}", raw)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     try:
         mid = float(m.group("mid"))
         minus = float(m.group("minus"))
         plus = float(m.group("plus"))
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(mid) and math.isfinite(minus) and math.isfinite(plus))` を満たす経路を評価する。
+
     if not (math.isfinite(mid) and math.isfinite(minus) and math.isfinite(plus)):
         return None
+
     return (mid, abs(minus), abs(plus))
 
 
@@ -93,8 +109,10 @@ def _sym_sigma(minus: float, plus: float) -> float:
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
+    # 条件分岐: `x.size == 0` を満たす経路を評価する。
     if x.size == 0:
         return {"n": 0}
+
     return {
         "n": int(x.size),
         "mean": float(np.mean(x)),
@@ -122,25 +140,37 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MorphRow]:
 
     label_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             label_idx = i
             break
+
+    # 条件分岐: `label_idx is None` を満たす経路を評価する。
+
     if label_idx is None:
         return []
 
     startdata_idx = None
     for j in range(label_idx, len(lines)):
+        # 条件分岐: `"\\startdata" in lines[j]` を満たす経路を評価する。
         if "\\startdata" in lines[j]:
             startdata_idx = j
             break
+
+    # 条件分岐: `startdata_idx is None` を満たす経路を評価する。
+
     if startdata_idx is None:
         return []
 
     enddata_idx = None
     for j in range(startdata_idx, len(lines)):
+        # 条件分岐: `"\\enddata" in lines[j]` を満たす経路を評価する。
         if "\\enddata" in lines[j]:
             enddata_idx = j
             break
+
+    # 条件分岐: `enddata_idx is None` を満たす経路を評価する。
+
     if enddata_idx is None:
         enddata_idx = len(lines)
 
@@ -151,23 +181,38 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MorphRow]:
     for off, raw in enumerate(lines[startdata_idx + 1 : enddata_idx], start=0):
         lineno = (startdata_idx + 2) + off  # 1-based
         s = raw.strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
+        # 条件分岐: `s.startswith("\\cline") or s.startswith("\\hline")` を満たす経路を評価する。
+
         if s.startswith("\\cline") or s.startswith("\\hline"):
             continue
+
+        # 条件分岐: `"\\\\" not in s` を満たす経路を評価する。
+
         if "\\\\" not in s:
             continue
+
         s = s.replace("\\\\", "").strip()
         parts = [p.strip() for p in s.split("&")]
+        # 条件分岐: `len(parts) < 15` を満たす経路を評価する。
         if len(parts) < 15:
             continue
 
         a0 = _tex_to_plain(_unwrap_multirow_cell(parts[0]))
+        # 条件分岐: `a0` を満たす経路を評価する。
         if a0:
             cur_class = a0
+
         s0 = _tex_to_plain(_unwrap_multirow_cell(parts[1]))
+        # 条件分岐: `s0` を満たす経路を評価する。
         if s0:
             cur_software = s0
+
+        # 条件分岐: `not cur_class or not cur_software` を満たす経路を評価する。
+
         if not cur_class or not cur_software:
             continue
 
@@ -229,6 +274,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -258,6 +304,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for r in rows
     ]
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         payload["ok"] = False
         payload["reason"] = "no_rows_parsed"
@@ -266,10 +313,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     ring_ref_uas: Optional[float] = None
+    # 条件分岐: `shadow_path.exists()` を満たす経路を評価する。
     if shadow_path.exists():
         try:
             shadow = _read_json(shadow_path)
             for r in shadow.get("rows") or []:
+                # 条件分岐: `isinstance(r, dict) and r.get("key") == "sgra"` を満たす経路を評価する。
                 if isinstance(r, dict) and r.get("key") == "sgra":
                     ring_ref_uas = float(r.get("ring_diameter_obs_uas"))
                     break
@@ -280,9 +329,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         out: List[float] = []
         for r in values:
             x = r.hops_d if pipeline == "hops" else r.casa_d
+            # 条件分岐: `x is None` を満たす経路を評価する。
             if x is None:
                 continue
+
             out.append(float(x[0]))
+
         return out
 
     imaging = _select_rows(rows, analysis_class="Imaging")
@@ -312,6 +364,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Convenience proxies (relative to the ring diameter used in eht_shadow_compare, if available).
     if ring_ref_uas is not None and math.isfinite(ring_ref_uas) and ring_ref_uas > 0:
         s = derived["imaging"]["hops_dhat_uas_summary"].get("std")
+        # 条件分岐: `isinstance(s, (int, float)) and math.isfinite(float(s))` を満たす経路を評価する。
         if isinstance(s, (int, float)) and math.isfinite(float(s)):
             derived["kappa_sigma_proxy_paper4_morphology_hops_imaging_dhat_std"] = float(s) / float(ring_ref_uas)
 
@@ -334,6 +387,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

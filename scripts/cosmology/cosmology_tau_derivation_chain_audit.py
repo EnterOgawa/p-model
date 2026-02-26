@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -69,8 +70,12 @@ def _f(value: Any, default: float = float("nan")) -> float:
         out = float(value)
     except Exception:
         return float(default)
+
+    # 条件分岐: `not math.isfinite(out)` を満たす経路を評価する。
+
     if not math.isfinite(out):
         return float(default)
+
     return float(out)
 
 
@@ -93,9 +98,11 @@ def _render_png(
     summary_lines: List[str],
 ) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         path.write_bytes(b"")
         return
+
     fig, axes = plt.subplots(1, 2, figsize=(12.0, 4.8), dpi=150)
 
     labels = ["tau_free", "tau_int", "tau_damp", "tau_eff", "tau_eff_harm", "tau_from_kernel"]
@@ -159,8 +166,10 @@ def main() -> int:
     parser.add_argument("--epsilon-slow-threshold", type=float, default=0.25)
     args = parser.parse_args()
 
+    # 条件分岐: `not args.input_json.exists()` を満たす経路を評価する。
     if not args.input_json.exists():
         raise FileNotFoundError(f"missing input JSON: {args.input_json}")
+
     src = json.loads(args.input_json.read_text(encoding="utf-8"))
     tau_block = src.get("tau_origin_block", {})
     fit_block = src.get("fit", {})
@@ -288,9 +297,11 @@ def main() -> int:
     ]
 
     hard_fail_n = sum(1 for c in checks if bool(c.get("hard_fail")))
+    # 条件分岐: `hard_fail_n > 0` を満たす経路を評価する。
     if hard_fail_n > 0:
         status = "reject"
         decision = "tau_derivation_chain_incomplete"
+    # 条件分岐: 前段条件が不成立で、`tau_recon_err > 0.10` を追加評価する。
     elif tau_recon_err > 0.10:
         status = "watch"
         decision = "tau_derivation_chain_fixed_but_reconstruction_margin_watch"
@@ -436,6 +447,7 @@ def main() -> int:
     }
     _write_json(args.out_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -474,6 +486,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

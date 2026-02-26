@@ -36,6 +36,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -57,6 +58,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -76,11 +78,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -122,6 +128,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
 
     for r in rows:
         sig = float(r.beta_T_sigma)
+        # 条件分岐: `not (sig > 0.0)` を満たす経路を評価する。
         if not (sig > 0.0):
             raise ValueError(f"beta_T_sigma must be >0: {r.id}")
 
@@ -242,6 +249,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     data_path = Path(args.data)
     src = _read_json(data_path)
     constraints = [Constraint.from_json(c) for c in (src.get("constraints") or [])]
+    # 条件分岐: `not constraints` を満たす経路を評価する。
     if not constraints:
         raise SystemExit(f"no constraints found in: {data_path}")
 
@@ -288,6 +296,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

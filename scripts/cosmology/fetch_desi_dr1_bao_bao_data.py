@@ -40,6 +40,7 @@ except Exception:  # pragma: no cover
     requests = None
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -93,8 +94,10 @@ def _now_utc() -> str:
 
 
 def _fetch_text(url: str, *, timeout_sec: int) -> str:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required (pip install requests)")
+
     r = requests.get(url, timeout=timeout_sec)
     r.raise_for_status()
     return r.text
@@ -112,26 +115,36 @@ def _parse_mean(text: str) -> Tuple[Optional[float], List[float], List[str], Lis
     vals: List[float] = []
     for line in text.splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         parts = re.split(r"\s+", t)
+        # 条件分岐: `len(parts) < 3` を満たす経路を評価する。
         if len(parts) < 3:
             continue
+
         z = float(parts[0])
         v = float(parts[1])
         q = str(parts[2]).strip()
         z_vals.append(z)
         vals.append(v)
         qs.append(q)
+
+    # 条件分岐: `not qs` を満たす経路を評価する。
+
     if not qs:
         raise ValueError("failed to parse mean file (no rows)")
     # Some files (e.g. desi_2024_gaussian_bao_ALL_*) include multiple z points.
+
     z0 = float(z_vals[0])
     z_eff: Optional[float] = z0
     for z in z_vals[1:]:
+        # 条件分岐: `abs(float(z) - z0) > 1e-9` を満たす経路を評価する。
         if abs(float(z) - z0) > 1e-9:
             z_eff = None
             break
+
     return z_eff, z_vals, qs, vals
 
 
@@ -139,15 +152,23 @@ def _parse_cov(text: str) -> List[List[float]]:
     rows: List[List[float]] = []
     for line in text.splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         parts = re.split(r"\s+", t)
         rows.append([float(x) for x in parts if x])
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise ValueError("failed to parse cov file (no rows)")
+
     n = len(rows)
+    # 条件分岐: `any(len(r) != n for r in rows)` を満たす経路を評価する。
     if any(len(r) != n for r in rows):
         raise ValueError(f"cov is not square: {[len(r) for r in rows]}")
+
     return rows
 
 
@@ -156,8 +177,10 @@ def _load_dataset(name: str, mean_path: Path, cov_path: Path) -> BaoDataset:
     cov_text = cov_path.read_text(encoding="utf-8", errors="replace")
     z_eff, z_vals, qs, vals = _parse_mean(mean_text)
     cov = _parse_cov(cov_text)
+    # 条件分岐: `len(vals) != len(cov)` を満たす経路を評価する。
     if len(vals) != len(cov):
         raise ValueError(f"mean/cov size mismatch for {name}: len(mean)={len(vals)} len(cov)={len(cov)}")
+
     return BaoDataset(
         name=name,
         mean_path=mean_path,
@@ -194,10 +217,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     ap.add_argument("--no-network", action="store_true", help="Do not fetch; only parse existing cached files.")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
+    # 条件分岐: `requests is None and not bool(args.no_network)` を満たす経路を評価する。
     if requests is None and not bool(args.no_network):
         raise SystemExit("requests is required to fetch from GitHub (pip install requests)")
 
     raw_base = str(args.raw_base).strip()
+    # 条件分岐: `not raw_base.endswith("/")` を満たす経路を評価する。
     if not raw_base.endswith("/"):
         raw_base += "/"
 
@@ -208,26 +233,36 @@ def main(argv: Optional[List[str]] = None) -> int:
     fetched: Dict[str, str] = {}
     for fn in FILES:
         dst = out_raw_dir / fn
+        # 条件分岐: `dst.exists()` を満たす経路を評価する。
         if dst.exists():
             continue
+
+        # 条件分岐: `bool(args.no_network)` を満たす経路を評価する。
+
         if bool(args.no_network):
             raise SystemExit(f"missing cached file (no-network): {dst}")
+
         url = raw_base + fn
         txt = _fetch_text(url, timeout_sec=int(args.timeout_sec))
         dst.write_text(txt, encoding="utf-8")
         fetched[fn] = url
 
     # Pair up mean/cov datasets
+
     datasets: List[BaoDataset] = []
     for fn in FILES:
+        # 条件分岐: `not fn.endswith("_mean.txt")` を満たす経路を評価する。
         if not fn.endswith("_mean.txt"):
             continue
+
         base = fn[: -len("_mean.txt")]
         cov_fn = base + "_cov.txt"
         mean_path = out_raw_dir / fn
         cov_path = out_raw_dir / cov_fn
+        # 条件分岐: `not mean_path.exists() or not cov_path.exists()` を満たす経路を評価する。
         if not mean_path.exists() or not cov_path.exists():
             raise SystemExit(f"missing mean/cov pair: {mean_path} / {cov_path}")
+
         datasets.append(_load_dataset(base, mean_path, cov_path))
 
     out_json = Path(str(args.out_json)).resolve()
@@ -274,8 +309,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

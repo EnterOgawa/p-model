@@ -35,6 +35,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import matplotlib.pyplot as plt
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -56,6 +57,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -77,26 +79,43 @@ def _write_json(path: Path, data: Dict[str, Any]) -> None:
 
 
 def _sigma_from_err(err_lo: float, err_hi: float) -> Optional[float]:
+    # 条件分岐: `not isinstance(err_lo, (int, float)) or not isinstance(err_hi, (int, float))` を満たす経路を評価する。
     if not isinstance(err_lo, (int, float)) or not isinstance(err_hi, (int, float)):
         return None
+
+    # 条件分岐: `not (math.isfinite(float(err_lo)) and math.isfinite(float(err_hi)))` を満たす経路を評価する。
+
     if not (math.isfinite(float(err_lo)) and math.isfinite(float(err_hi))):
         return None
+
     s = (abs(float(err_lo)) + abs(float(err_hi))) / 2.0
+    # 条件分岐: `s <= 0` を満たす経路を評価する。
     if s <= 0:
         return None
+
     return s
 
 
 def _combine_sigma(s1: Optional[float], s2: Optional[float]) -> Optional[float]:
+    # 条件分岐: `s1 is None and s2 is None` を満たす経路を評価する。
     if s1 is None and s2 is None:
         return None
+
+    # 条件分岐: `s1 is None` を満たす経路を評価する。
+
     if s1 is None:
         return s2
+
+    # 条件分岐: `s2 is None` を満たす経路を評価する。
+
     if s2 is None:
         return s1
+
     s = math.sqrt(float(s1) ** 2 + float(s2) ** 2)
+    # 条件分岐: `not math.isfinite(s) or s <= 0` を満たす経路を評価する。
     if not math.isfinite(s) or s <= 0:
         return None
+
     return s
 
 
@@ -114,22 +133,42 @@ def _max_delta_init() -> MaxDelta:
 def _max_delta_update(cur: MaxDelta, *, abs_sigma: Optional[float], abs_delta_eps: Optional[float], where: Dict[str, Any]) -> MaxDelta:
     # Prefer abs_sigma as the primary ordering; fall back to abs_delta_eps.
     if cur.abs_sigma is None and abs_sigma is None:
+        # 条件分岐: `cur.abs_delta_eps is None and abs_delta_eps is None` を満たす経路を評価する。
         if cur.abs_delta_eps is None and abs_delta_eps is None:
             return cur
+
+        # 条件分岐: `cur.abs_delta_eps is None` を満たす経路を評価する。
+
         if cur.abs_delta_eps is None:
             return MaxDelta(abs_sigma=None, abs_delta_eps=abs_delta_eps, where=where)
+
+        # 条件分岐: `abs_delta_eps is None` を満たす経路を評価する。
+
         if abs_delta_eps is None:
             return cur
+
+        # 条件分岐: `abs_delta_eps > cur.abs_delta_eps` を満たす経路を評価する。
+
         if abs_delta_eps > cur.abs_delta_eps:
             return MaxDelta(abs_sigma=None, abs_delta_eps=abs_delta_eps, where=where)
+
         return cur
+
+    # 条件分岐: `cur.abs_sigma is None` を満たす経路を評価する。
 
     if cur.abs_sigma is None:
         return MaxDelta(abs_sigma=abs_sigma, abs_delta_eps=abs_delta_eps, where=where)
+
+    # 条件分岐: `abs_sigma is None` を満たす経路を評価する。
+
     if abs_sigma is None:
         return cur
+
+    # 条件分岐: `abs_sigma > cur.abs_sigma` を満たす経路を評価する。
+
     if abs_sigma > cur.abs_sigma:
         return MaxDelta(abs_sigma=abs_sigma, abs_delta_eps=abs_delta_eps, where=where)
+
     return cur
 
 
@@ -141,6 +180,7 @@ def _summarize_eps_map_sensitivity(
     skip_keys: Iterable[str],
 ) -> Dict[str, Any]:
     eps_map = metrics.get("results", {}).get("eps", {})
+    # 条件分岐: `not isinstance(eps_map, dict) or baseline_key not in eps_map` を満たす経路を評価する。
     if not isinstance(eps_map, dict) or baseline_key not in eps_map:
         return {
             "name": name,
@@ -158,8 +198,10 @@ def _summarize_eps_map_sensitivity(
         v = eps_map.get(variant_key, {})
         rows: List[Dict[str, Any]] = []
         for zbin_str, b_entry in baseline.items():
+            # 条件分岐: `zbin_str not in v` を満たす経路を評価する。
             if zbin_str not in v:
                 continue
+
             v_entry = v.get(zbin_str, {})
 
             b_eps = float(b_entry.get("eps"))
@@ -212,6 +254,7 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
     base_tag = metrics.get("inputs", {}).get("base_out_tag")
     variant_tags = metrics.get("inputs", {}).get("variant_out_tags", [])
     points = metrics.get("points", [])
+    # 条件分岐: `not isinstance(base_tag, str) or not isinstance(variant_tags, list) or not is...` を満たす経路を評価する。
     if not isinstance(base_tag, str) or not isinstance(variant_tags, list) or not isinstance(points, list):
         return {"name": "DESI coordinate spec sensitivity", "status": "missing", "note": "unexpected schema"}
 
@@ -219,6 +262,7 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
         return (str(p.get("dist")), float(p.get("z_min")), float(p.get("z_max")), str(p.get("out_tag")))
 
     # Index by (dist,zmin,zmax,out_tag) to allow direct matching.
+
     idx: Dict[Tuple[str, float, float, str], Dict[str, Any]] = {}
     for p in points:
         try:
@@ -227,10 +271,13 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
             continue
 
     # Base points by (dist,zmin,zmax)
+
     base_points: Dict[Tuple[str, float, float], Dict[str, Any]] = {}
     for p in points:
+        # 条件分岐: `p.get("out_tag") != base_tag` を満たす経路を評価する。
         if p.get("out_tag") != base_tag:
             continue
+
         try:
             base_points[(str(p.get("dist")), float(p.get("z_min")), float(p.get("z_max")))] = p
         except Exception:
@@ -244,6 +291,7 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
         for k_base, b in base_points.items():
             dist, zmin, zmax = k_base
             v = idx.get((dist, zmin, zmax, str(vtag)))
+            # 条件分岐: `v is None` を満たす経路を評価する。
             if v is None:
                 continue
 
@@ -293,6 +341,7 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
 
 def _summarize_peakfit_settings_sensitivity(metrics: Dict[str, Any]) -> Dict[str, Any]:
     scenarios = metrics.get("results", [])
+    # 条件分岐: `not isinstance(scenarios, list)` を満たす経路を評価する。
     if not isinstance(scenarios, list):
         return {"name": "DESI peakfit settings sensitivity", "status": "missing", "note": "unexpected schema"}
 
@@ -301,14 +350,22 @@ def _summarize_peakfit_settings_sensitivity(metrics: Dict[str, Any]) -> Dict[str
     scenario_by_id: Dict[str, Dict[str, Any]] = {}
     for s in scenarios:
         sid = s.get("scenario", {}).get("id")
+        # 条件分岐: `isinstance(sid, str)` を満たす経路を評価する。
         if isinstance(sid, str):
             scenario_by_id[sid] = s
+
+        # 条件分岐: `sid == base_scenario_id` を満たす経路を評価する。
+
         if sid == base_scenario_id:
             base_case = s
+
+    # 条件分岐: `base_case is None and scenarios` を満たす経路を評価する。
 
     if base_case is None and scenarios:
         base_case = scenarios[0]
         base_scenario_id = str(base_case.get("scenario", {}).get("id", "base?"))
+
+    # 条件分岐: `base_case is None` を満たす経路を評価する。
 
     if base_case is None:
         return {"name": "DESI peakfit settings sensitivity", "status": "missing", "note": "no scenarios"}
@@ -324,18 +381,27 @@ def _summarize_peakfit_settings_sensitivity(metrics: Dict[str, Any]) -> Dict[str
     by_variant: Dict[str, Any] = {}
 
     for sid, s in scenario_by_id.items():
+        # 条件分岐: `sid == base_scenario_id` を満たす経路を評価する。
         if sid == base_scenario_id:
             continue
+
         rows: List[Dict[str, Any]] = []
         for k, b in base_rows.items():
             dist, zr_key = k
             match: Optional[Dict[str, Any]] = None
             for r in s.get("results", []):
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
+                # 条件分岐: `bkey(r) == k` を満たす経路を評価する。
+
                 if bkey(r) == k:
                     match = r
                     break
+
+            # 条件分岐: `match is None` を満たす経路を評価する。
+
             if match is None:
                 continue
 
@@ -402,8 +468,11 @@ def _plot_max_sigmas(studies: List[Dict[str, Any]], out_png: Path) -> Optional[s
     for s in studies:
         md = s.get("max_delta", {})
         v = md.get("abs_sigma")
+        # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
         if isinstance(v, (int, float)) and math.isfinite(float(v)):
             rows.append((str(s.get("name")), float(v)))
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
 
     if not rows:
         return None
@@ -486,6 +555,7 @@ def main() -> None:
 
     # BOSS: weight scheme
     ws_path = Path(args.weight_scheme_metrics).resolve()
+    # 条件分岐: `ws_path.exists()` を満たす経路を評価する。
     if ws_path.exists():
         inputs["weight_scheme_metrics"] = str(ws_path)
         ws = _read_json(ws_path)
@@ -501,7 +571,9 @@ def main() -> None:
         studies.append({"name": "BOSS weight scheme sensitivity", "status": "missing", "path": str(ws_path)})
 
     # BOSS: random sampling
+
     rm_path = Path(args.random_max_rows_metrics).resolve()
+    # 条件分岐: `rm_path.exists()` を満たす経路を評価する。
     if rm_path.exists():
         inputs["random_max_rows_metrics"] = str(rm_path)
         rm = _read_json(rm_path)
@@ -517,7 +589,9 @@ def main() -> None:
         studies.append({"name": "BOSS random sampling sensitivity", "status": "missing", "path": str(rm_path)})
 
     # DESI: peakfit settings
+
     ps_path = Path(args.desi_peakfit_settings_metrics).resolve()
+    # 条件分岐: `ps_path.exists()` を満たす経路を評価する。
     if ps_path.exists():
         inputs["desi_peakfit_settings_metrics"] = str(ps_path)
         ps = _read_json(ps_path)
@@ -526,7 +600,9 @@ def main() -> None:
         studies.append({"name": "DESI peakfit settings sensitivity", "status": "missing", "path": str(ps_path)})
 
     # DESI: coordinate spec
+
     cs_path = Path(args.desi_coordinate_spec_metrics).resolve()
+    # 条件分岐: `cs_path.exists()` を満たす経路を評価する。
     if cs_path.exists():
         inputs["desi_coordinate_spec_metrics"] = str(cs_path)
         cs = _read_json(cs_path)
@@ -535,7 +611,9 @@ def main() -> None:
         studies.append({"name": "DESI coordinate spec sensitivity", "status": "missing", "path": str(cs_path)})
 
     # DESI: promotion gate
+
     promo_path = Path(args.desi_promotion_check).resolve()
+    # 条件分岐: `promo_path.exists()` を満たす経路を評価する。
     if promo_path.exists():
         inputs["desi_promotion_check"] = str(promo_path)
         promo = _read_json(promo_path)
@@ -562,6 +640,7 @@ def main() -> None:
 
     _write_json(out_json, ledger)
     png_written = _plot_max_sigmas([s for s in studies if isinstance(s, dict)], out_png)
+    # 条件分岐: `png_written is None` を満たす経路を評価する。
     if png_written is None:
         ledger["outputs"]["png"] = None
         _write_json(out_json, ledger)
@@ -576,6 +655,8 @@ def main() -> None:
         }
     )
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

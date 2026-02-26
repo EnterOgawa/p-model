@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -28,6 +29,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
@@ -55,16 +57,21 @@ def _resolve_phase4_coeff_ratio(
         root / "output" / "private" / "theory" / "pmodel_effective_metric_n0_source_solution_audit.json",
     ]
     for path in candidates:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         try:
             payload = _read_json(path)
             budget = payload.get("ring_coefficient_budget")
+            # 条件分岐: `not isinstance(budget, dict)` を満たす経路を評価する。
             if not isinstance(budget, dict):
                 continue
+
             for key in ("core_plus_n0_gap_pct", "core_plus_n0_closed_gap_pct"):
                 pct = budget.get(key)
                 pct_v = float(pct)
+                # 条件分岐: `math.isfinite(pct_v)` を満たす経路を評価する。
                 if math.isfinite(pct_v):
                     return (
                         1.0 + (pct_v / 100.0),
@@ -74,6 +81,7 @@ def _resolve_phase4_coeff_ratio(
                     )
         except Exception:
             continue
+
     return (
         coeff_ratio_baseline,
         diff_baseline,
@@ -93,11 +101,13 @@ def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 250
       derived from spherical photon orbits, then mirror the upper half to close the curve.
     """
 
+    # 条件分岐: `not (math.isfinite(a_star) and math.isfinite(inc_deg))` を満たす経路を評価する。
     if not (math.isfinite(a_star) and math.isfinite(inc_deg)):
         return {"width": float("nan"), "height": float("nan"), "area": float("nan"), "perimeter": float("nan")}
 
     coeff_schw = 2.0 * math.sqrt(27.0)
     a = float(a_star)
+    # 条件分岐: `abs(a) < 1e-12` を満たす経路を評価する。
     if abs(a) < 1e-12:
         r0 = 0.5 * coeff_schw
         return {
@@ -112,8 +122,10 @@ def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 250
     inc = math.radians(float(inc_deg))
     sin_inc = math.sin(inc)
     cos_inc = math.cos(inc)
+    # 条件分岐: `abs(sin_inc) < 1e-9` を満たす経路を評価する。
     if abs(sin_inc) < 1e-9:
         sin_inc = 1e-9
+
     cot_inc = cos_inc / sin_inc
 
     M = 1.0
@@ -121,28 +133,35 @@ def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 250
     r_ret = 2.0 * (1.0 + math.cos((2.0 / 3.0) * math.acos(a)))  # retrograde equatorial photon orbit radius
     r_min = min(r_pro, r_ret) + 1e-6
     r_max = max(r_pro, r_ret) - 1e-6
+    # 条件分岐: `not (math.isfinite(r_min) and math.isfinite(r_max)) or r_max <= r_min` を満たす経路を評価する。
     if not (math.isfinite(r_min) and math.isfinite(r_max)) or r_max <= r_min:
         r_min = 1.0 + 1e-3
         r_max = 12.0
+
     r = np.linspace(r_min, r_max, int(n_r))
 
     xi = (r**2 * (r - 3.0 * M) + (a**2) * (r + M)) / (a * (M - r))
     eta = (r**3 * (4.0 * (a**2) * M - r * (r - 3.0 * M) ** 2)) / ((a**2) * (M - r) ** 2)
 
     mask = eta >= 0
+    # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
     if not np.any(mask):
         return {"width": float("nan"), "height": float("nan"), "area": float("nan"), "perimeter": float("nan")}
+
     xi = xi[mask]
     eta = eta[mask]
 
     alpha = -xi / sin_inc
     beta2 = eta + (a**2) * (cos_inc**2) - (xi**2) * (cot_inc**2)
     mask2 = beta2 >= 0
+    # 条件分岐: `not np.any(mask2)` を満たす経路を評価する。
     if not np.any(mask2):
         return {"width": float("nan"), "height": float("nan"), "area": float("nan"), "perimeter": float("nan")}
+
     alpha = alpha[mask2]
     beta = np.sqrt(beta2[mask2])
 
+    # 条件分岐: `alpha.size < 3` を満たす経路を評価する。
     if alpha.size < 3:
         return {"width": float("nan"), "height": float("nan"), "area": float("nan"), "perimeter": float("nan")}
 
@@ -155,10 +174,12 @@ def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 250
     finite = np.isfinite(x) & np.isfinite(y)
     x = x[finite]
     y = y[finite]
+    # 条件分岐: `x.size < 3` を満たす経路を評価する。
     if x.size < 3:
         return {"width": float(width), "height": float(height), "area": float("nan"), "perimeter": float("nan")}
 
     # Shoelace area and polygon perimeter.
+
     x2 = np.concatenate([x, x[:1]])
     y2 = np.concatenate([y, y[:1]])
     area = 0.5 * abs(float(np.sum(x2[:-1] * y2[1:] - x2[1:] * y2[:-1])))
@@ -175,14 +196,25 @@ def _kerr_shadow_diameter_coeff_from_stats(stats: Dict[str, float], *, method: s
     area = float(stats.get("area", float("nan")))
     perimeter = float(stats.get("perimeter", float("nan")))
 
+    # 条件分岐: `str(method) == "avg_wh"` を満たす経路を評価する。
     if str(method) == "avg_wh":
         return 0.5 * (width + height) if (math.isfinite(width) and math.isfinite(height)) else float("nan")
+
+    # 条件分岐: `str(method) == "geom_mean_wh"` を満たす経路を評価する。
+
     if str(method) == "geom_mean_wh":
         return math.sqrt(width * height) if (math.isfinite(width) and math.isfinite(height) and width > 0 and height > 0) else float("nan")
+
+    # 条件分岐: `str(method) == "area_eq"` を満たす経路を評価する。
+
     if str(method) == "area_eq":
         return (2.0 * math.sqrt(area / math.pi)) if (math.isfinite(area) and area > 0) else float("nan")
+
+    # 条件分岐: `str(method) == "perimeter_eq"` を満たす経路を評価する。
+
     if str(method) == "perimeter_eq":
         return (perimeter / math.pi) if (math.isfinite(perimeter) and perimeter > 0) else float("nan")
+
     return float("nan")
 
 
@@ -206,6 +238,7 @@ def _kerr_shadow_diameter_coeff_effective(
 
     coeff_schw = 2.0 * math.sqrt(27.0)
     a = float(a_star)
+    # 条件分岐: `math.isfinite(a) and abs(a) < 1e-12` を満たす経路を評価する。
     if math.isfinite(a) and abs(a) < 1e-12:
         return float(coeff_schw)
 
@@ -252,21 +285,32 @@ def _kerr_shadow_coeff_range(
 
     a0 = float(a_star_min)
     a1 = float(a_star_max)
+    # 条件分岐: `not (math.isfinite(a0) and math.isfinite(a1))` を満たす経路を評価する。
     if not (math.isfinite(a0) and math.isfinite(a1)):
         a0, a1 = 0.0, 0.999
+
+    # 条件分岐: `a0 > a1` を満たす経路を評価する。
+
     if a0 > a1:
         a0, a1 = a1, a0
+
     a0 = max(0.0, min(0.999, a0))
     a1 = max(0.0, min(0.999, a1))
+    # 条件分岐: `a1 < a0` を満たす経路を評価する。
     if a1 < a0:
         a0, a1 = a1, a0
 
     i0 = float(inc_deg_min)
     i1 = float(inc_deg_max)
+    # 条件分岐: `not (math.isfinite(i0) and math.isfinite(i1))` を満たす経路を評価する。
     if not (math.isfinite(i0) and math.isfinite(i1)):
         i0, i1 = 5.0, 90.0
+
+    # 条件分岐: `i0 > i1` を満たす経路を評価する。
+
     if i0 > i1:
         i0, i1 = i1, i0
+
     i0 = max(0.0, min(90.0, i0))
     i1 = max(0.0, min(90.0, i1))
     # avoid exactly 0° where α=-ξ/sin(inc) is singular; include near-pole via 5°.
@@ -283,20 +327,26 @@ def _kerr_shadow_coeff_range(
     coeffs: List[Tuple[float, float, float]] = []  # (coeff, a, inc)
 
     inc_list = np.arange(float(i0_eff), float(i1_eff) + 1e-9, float(inc_step_deg))
+    # 条件分岐: `inc_list.size <= 0` を満たす経路を評価する。
     if inc_list.size <= 0:
         inc_list = np.array([float(i0_eff)], dtype=float)
 
     a_n = max(2, int(a_samples))
     a_list = np.linspace(float(a0), float(a1), a_n)
     for a in a_list:
+        # 条件分岐: `abs(float(a)) < 1e-12` を満たす経路を評価する。
         if abs(float(a)) < 1e-12:
             # Schwarzschild: independent of inclination
             coeffs.append((coeff_schw, 0.0, float(inc_list[0])))
             continue
+
         for inc in inc_list:
             coeff = _kerr_shadow_diameter_coeff_effective(float(a), float(inc), method=str(method))
+            # 条件分岐: `math.isfinite(coeff) and coeff > 0` を満たす経路を評価する。
             if math.isfinite(coeff) and coeff > 0:
                 coeffs.append((float(coeff), float(a), float(inc)))
+
+    # 条件分岐: `not coeffs` を満たす経路を評価する。
 
     if not coeffs:
         return {
@@ -337,19 +387,29 @@ def _kerr_shadow_coeff_range_definition_envelope(
 
     a0 = float(a_star_min)
     a1 = float(a_star_max)
+    # 条件分岐: `not (math.isfinite(a0) and math.isfinite(a1))` を満たす経路を評価する。
     if not (math.isfinite(a0) and math.isfinite(a1)):
         a0, a1 = 0.0, 0.999
+
+    # 条件分岐: `a0 > a1` を満たす経路を評価する。
+
     if a0 > a1:
         a0, a1 = a1, a0
+
     a0 = max(0.0, min(0.999, a0))
     a1 = max(0.0, min(0.999, a1))
 
     i0 = float(inc_deg_min)
     i1 = float(inc_deg_max)
+    # 条件分岐: `not (math.isfinite(i0) and math.isfinite(i1))` を満たす経路を評価する。
     if not (math.isfinite(i0) and math.isfinite(i1)):
         i0, i1 = 5.0, 90.0
+
+    # 条件分岐: `i0 > i1` を満たす経路を評価する。
+
     if i0 > i1:
         i0, i1 = i1, i0
+
     i0 = max(0.0, min(90.0, i0))
     i1 = max(0.0, min(90.0, i1))
     i0_eff = max(5.0, i0)
@@ -358,6 +418,7 @@ def _kerr_shadow_coeff_range_definition_envelope(
     coeff_schw = 2.0 * math.sqrt(27.0)
 
     inc_list = np.arange(float(i0_eff), float(i1_eff) + 1e-9, float(inc_step_deg))
+    # 条件分岐: `inc_list.size <= 0` を満たす経路を評価する。
     if inc_list.size <= 0:
         inc_list = np.array([float(i0_eff)], dtype=float)
 
@@ -371,6 +432,7 @@ def _kerr_shadow_coeff_range_definition_envelope(
         "perimeter_eq": "perimeter-equivalent circle",
     }
     methods_used = [str(m) for m in methods if str(m).strip()]
+    # 条件分岐: `not methods_used` を満たす経路を評価する。
     if not methods_used:
         methods_used = ["avg_wh"]
 
@@ -384,19 +446,28 @@ def _kerr_shadow_coeff_range_definition_envelope(
             coeffs_here: List[float] = []
             for m in methods_used:
                 coeff = _kerr_shadow_diameter_coeff_from_stats(stats, method=str(m))
+                # 条件分岐: `math.isfinite(coeff) and coeff > 0` を満たす経路を評価する。
                 if math.isfinite(coeff) and coeff > 0:
                     coeffs_here.append(float(coeff))
+                    # 条件分岐: `env_min is None or coeff < env_min[0]` を満たす経路を評価する。
                     if env_min is None or coeff < env_min[0]:
                         env_min = (float(coeff), float(a), float(inc), str(m))
+
+                    # 条件分岐: `env_max is None or coeff > env_max[0]` を満たす経路を評価する。
+
                     if env_max is None or coeff > env_max[0]:
                         env_max = (float(coeff), float(a), float(inc), str(m))
+
+            # 条件分岐: `len(coeffs_here) >= 2` を満たす経路を評価する。
 
             if len(coeffs_here) >= 2:
                 lo = min(coeffs_here)
                 hi = max(coeffs_here)
                 mid = 0.5 * (lo + hi)
+                # 条件分岐: `math.isfinite(mid) and mid > 0` を満たす経路を評価する。
                 if math.isfinite(mid) and mid > 0:
                     spread_rel = (hi - lo) / mid
+                    # 条件分岐: `(not math.isfinite(spread_rel_max)) or spread_rel > spread_rel_max` を満たす経路を評価する。
                     if (not math.isfinite(spread_rel_max)) or spread_rel > spread_rel_max:
                         spread_rel_max = float(spread_rel)
 
@@ -475,6 +546,7 @@ def _parse_bh(o: Dict[str, Any]) -> BH:
     if "distance_kpc" in o:
         distance_m = float(o["distance_kpc"]) * 1e3 * 3.085677581491367e16  # kpc->m
         distance_m_sigma = float(o.get("distance_kpc_sigma") or 0.0) * 1e3 * 3.085677581491367e16
+    # 条件分岐: 前段条件が不成立で、`"distance_mpc" in o` を追加評価する。
     elif "distance_mpc" in o:
         distance_m = float(o["distance_mpc"]) * 1e6 * 3.085677581491367e16  # Mpc->m
         distance_m_sigma = float(o.get("distance_mpc_sigma") or 0.0) * 1e6 * 3.085677581491367e16
@@ -599,10 +671,15 @@ def _parse_bh(o: Dict[str, Any]) -> BH:
 
 def _prop_sigma_ratio(m: float, dm: float, d: float, dd: float) -> float:
     eps = 0.0
+    # 条件分岐: `m > 0 and dm > 0` を満たす経路を評価する。
     if m > 0 and dm > 0:
         eps += (dm / m) ** 2
+
+    # 条件分岐: `d > 0 and dd > 0` を満たす経路を評価する。
+
     if d > 0 and dd > 0:
         eps += (dd / d) ** 2
+
     return math.sqrt(eps)
 
 
@@ -632,9 +709,12 @@ def _sigma_needed_for_discrimination(
         and float(n_sigma) > 0
     ):
         return float("nan")
+
     a2 = (abs(float(diff)) / float(n_sigma)) ** 2 - float(sigma_pred_a) ** 2 - float(sigma_pred_b) ** 2
+    # 条件分岐: `a2 <= 0` を満たす経路を評価する。
     if a2 <= 0:
         return float("nan")
+
     return math.sqrt(a2 / 2.0)
 
 
@@ -644,6 +724,7 @@ def main() -> int:
     out_dir = root / "output" / "private" / "eht"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not in_path.exists()` を満たす経路を評価する。
     if not in_path.exists():
         print(f"[err] missing input: {in_path}")
         return 2
@@ -651,6 +732,7 @@ def main() -> int:
     ref = _read_json(in_path)
     beta = float(((ref.get("pmodel") or {}).get("beta")) or float("nan"))
     beta_source = "data/eht/eht_black_holes.json:pmodel.beta"
+    # 条件分岐: `not (math.isfinite(beta) and beta > 0)` を満たす経路を評価する。
     if not (math.isfinite(beta) and beta > 0):
         frozen_path = root / "output" / "private" / "theory" / "frozen_parameters.json"
         try:
@@ -659,17 +741,22 @@ def main() -> int:
             beta_source = "output/private/theory/frozen_parameters.json:beta"
         except Exception:
             beta = float("nan")
+
+    # 条件分岐: `not (math.isfinite(beta) and beta > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(beta) and beta > 0):
         beta = 1.0
         beta_source = "default(beta=1.0)"
 
     objects = ref.get("objects") or []
     bhs = [_parse_bh(o) for o in objects if isinstance(o, dict)]
+    # 条件分岐: `not bhs` を満たす経路を評価する。
     if not bhs:
         print("[err] no objects in eht_black_holes.json")
         return 2
 
     # constants
+
     G = 6.67430e-11
     c = 299792458.0
     M_sun = 1.98847e30
@@ -869,10 +956,15 @@ def main() -> int:
         # Introduce κ such that: ring_diameter ≈ κ * shadow_diameter. Here we *infer* κ from public values.
         def _sigma_ratio(a0: float, da0: float, b0: float, db0: float) -> float:
             eps2 = 0.0
+            # 条件分岐: `a0 > 0 and da0 > 0` を満たす経路を評価する。
             if a0 > 0 and da0 > 0:
                 eps2 += (da0 / a0) ** 2
+
+            # 条件分岐: `b0 > 0 and db0 > 0` を満たす経路を評価する。
+
             if b0 > 0 and db0 > 0:
                 eps2 += (db0 / b0) ** 2
+
             return math.sqrt(eps2)
 
         kappa_p = (obs / theta_p_uas) if theta_p_uas != 0 else float("nan")
@@ -942,10 +1034,12 @@ def main() -> int:
             and obs_sigma >= 0
         ):
             rem2 = float(sigma_obs_needed_3sigma_uas) ** 2 - float(obs_sigma) ** 2
+            # 条件分岐: `rem2 > 0` を満たす経路を評価する。
             if rem2 > 0:
                 kappa_sigma_required_3sigma_if_ring_sigma_current = math.sqrt(rem2) / obs
 
         # Reference κ systematic scale from Kerr coefficient range (uniform-in-range approximation).
+
         kappa_sigma_assumed_kerr = (
             (kappa_gr_kerr_high - kappa_gr_kerr_low) / math.sqrt(12.0)
             if (math.isfinite(kappa_gr_kerr_low) and math.isfinite(kappa_gr_kerr_high) and kappa_gr_kerr_high > kappa_gr_kerr_low)
@@ -1199,11 +1293,13 @@ def main() -> int:
         )
 
     # Save CSV
+
     csv_path = out_dir / "eht_shadow_compare.csv"
     header = list(rows[0].keys())
     lines = [",".join(header)]
     for r in rows:
         lines.append(",".join(str(r.get(k, "")) for k in header))
+
     csv_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Save JSON
@@ -1305,6 +1401,7 @@ def main() -> int:
 
         shadow_obs = [float(r.get("shadow_diameter_obs_uas", float("nan"))) for r in rows]
         shadow_obs_sig = [float(r.get("shadow_diameter_obs_uas_sigma", float("nan"))) for r in rows]
+        # 条件分岐: `any(math.isfinite(v) for v in shadow_obs)` を満たす経路を評価する。
         if any(math.isfinite(v) for v in shadow_obs):
             ax.errorbar(
                 [i + width * 1.55 for i in x],
@@ -1317,10 +1414,13 @@ def main() -> int:
             )
 
         # Clarify: ring vs inferred d_sh (central value); error bars can overlap (esp. Sgr A*).
+
         for i in range(len(rows)):
             so = float(shadow_obs[i]) if i < len(shadow_obs) else float("nan")
+            # 条件分岐: `not (math.isfinite(so) and math.isfinite(obs[i]))` を満たす経路を評価する。
             if not (math.isfinite(so) and math.isfinite(obs[i])):
                 continue
+
             dr = float(obs[i]) - float(so)
             ax.text(
                 i + width * 1.25,
@@ -1347,8 +1447,10 @@ def main() -> int:
         # Keep the remaining labels (model predictions) in their original order.
         order: List[int] = []
         for w in want:
+            # 条件分岐: `w in labels` を満たす経路を評価する。
             if w in labels:
                 order.append(labels.index(w))
+
         order += [i for i in range(len(labels)) if i not in order]
         ax.legend([handles[i] for i in order], [labels[i] for i in order], loc="lower right")
 
@@ -1358,12 +1460,17 @@ def main() -> int:
             ksig = float(row.get("kappa_ring_over_shadow_fit_pmodel_sigma", float("nan")))
             kobs = float(row.get("kappa_ring_over_shadow_obs", float("nan")))
             kobs_sig = float(row.get("kappa_ring_over_shadow_obs_sigma", float("nan")))
+            # 条件分岐: `math.isfinite(kfit) and math.isfinite(ksig)` を満たす経路を評価する。
             if math.isfinite(kfit) and math.isfinite(ksig):
                 txt = f"κ_fit={kfit:.3f}±{ksig:.3f}"
             else:
                 txt = "κ_fit=n/a"
+
+            # 条件分岐: `math.isfinite(kobs) and math.isfinite(kobs_sig)` を満たす経路を評価する。
+
             if math.isfinite(kobs) and math.isfinite(kobs_sig):
                 txt = f"{txt}\nκ_ref(d_sh)={kobs:.3f}±{kobs_sig:.3f}"
+
             ax.text(i, max(pval[i], gval[i], obs[i]) + 1.0, txt, ha="center", va="bottom", fontsize=9)
 
         fig.tight_layout()
@@ -1375,6 +1482,7 @@ def main() -> int:
         png_path = None
 
     # Differential prediction (Phase 4)
+
     diff_public_png_path: Optional[Path] = None
     try:
         import matplotlib.pyplot as plt
@@ -1400,6 +1508,7 @@ def main() -> int:
         sigma_need_plot: List[float] = []
         nan_idx: List[int] = []
         for i, v in enumerate(sigma_need):
+            # 条件分岐: `math.isfinite(v) and v > 0` を満たす経路を評価する。
             if math.isfinite(v) and v > 0:
                 sigma_need_plot.append(v)
             else:
@@ -1410,12 +1519,14 @@ def main() -> int:
         for i in nan_idx:
             ax1.bar(i, 0.0, color="#2ca02c", alpha=0.25, hatch="///", edgecolor="#2ca02c")
             ax1.text(i, max(sigma_need_plot) * 0.05 if sigma_need_plot else 0.1, "n/a", ha="center", va="bottom", fontsize=9)
+
         ax1.set_xticks(x)
         ax1.set_xticklabels(names)
         ax1.set_ylabel("必要な観測誤差（1σ）[μas]")
         ax1.set_title("3σで判別するための必要精度（目安）")
         ax1.grid(True, alpha=0.25, axis="y")
 
+        # 条件分岐: `math.isfinite(coeff_ratio_p_over_gr)` を満たす経路を評価する。
         if math.isfinite(coeff_ratio_p_over_gr):
             fig2.suptitle(
                 f"EHT：P-model と GR の差分予測（係数比 {coeff_ratio_p_over_gr:.4f}、差 {((coeff_ratio_p_over_gr-1)*100):.2f}%）"
@@ -1435,6 +1546,7 @@ def main() -> int:
         diff_public_png_path = None
 
     # Systematics / sensitivity (public-friendly)
+
     sys_png_path: Optional[Path] = None
     sys_public_png_path: Optional[Path] = None
     try:
@@ -1452,6 +1564,7 @@ def main() -> int:
 
         kmin = kerr_range_full.get("coeff_min") if isinstance(kerr_range_full, dict) else None
         kmax = kerr_range_full.get("coeff_max") if isinstance(kerr_range_full, dict) else None
+        # 条件分岐: `isinstance(kmin, (int, float)) and isinstance(kmax, (int, float)) and math.is...` を満たす経路を評価する。
         if isinstance(kmin, (int, float)) and isinstance(kmax, (int, float)) and math.isfinite(kmin) and math.isfinite(kmax):
             ax0.fill_between(beta_grid, float(kmin), float(kmax), color="#9aa0a6", alpha=0.18, label="GR（Kerr 参考レンジ）")
 
@@ -1462,6 +1575,7 @@ def main() -> int:
         ax0.grid(True, alpha=0.25)
         ax0.legend(loc="upper left")
 
+        # 条件分岐: `math.isfinite(coeff_ratio_p_over_gr)` を満たす経路を評価する。
         if math.isfinite(coeff_ratio_p_over_gr):
             ax0.text(
                 0.805,
@@ -1474,6 +1588,7 @@ def main() -> int:
             )
 
         # Right: κ inference (ring ≈ κ * shadow)
+
         names = [r["name"] for r in rows]
         x = np.arange(len(names), dtype=float)
         width = 0.34
@@ -1494,6 +1609,7 @@ def main() -> int:
 
         # Reference κ derived from inferred shadow diameter d_sh, if available.
         ko_mask = np.isfinite(ko) & np.isfinite(kos) & (kos > 0)
+        # 条件分岐: `bool(np.any(ko_mask))` を満たす経路を評価する。
         if bool(np.any(ko_mask)):
             ax1.errorbar(
                 x[ko_mask],
@@ -1508,7 +1624,9 @@ def main() -> int:
             )
 
         # Kerr coefficient range → κ range indicator (coefficient systematic only; does not include obs/mass-distance σ).
+
         for i in range(len(names)):
+            # 条件分岐: `math.isfinite(float(kg_lo[i])) and math.isfinite(float(kg_hi[i]))` を満たす経路を評価する。
             if math.isfinite(float(kg_lo[i])) and math.isfinite(float(kg_hi[i])):
                 ax1.vlines(
                     float(x[i] + width / 2),
@@ -1518,6 +1636,7 @@ def main() -> int:
                     alpha=0.45,
                     linewidth=3.0,
                 )
+
         ax1.axhline(1.0, color="#333333", linewidth=1.0)
 
         ax1.set_xticks(x)
@@ -1540,6 +1659,7 @@ def main() -> int:
         sys_public_png_path = None
 
     # Ring morphology (primary-source ranges, if available)
+
     ring_png_path: Optional[Path] = None
     ring_public_png_path: Optional[Path] = None
     try:
@@ -1564,22 +1684,31 @@ def main() -> int:
         for i in range(len(names)):
             v0 = float(w_min[i])
             v1 = float(w_max[i])
+            # 条件分岐: `math.isfinite(v0) and math.isfinite(v1) and v1 >= v0` を満たす経路を評価する。
             if math.isfinite(v0) and math.isfinite(v1) and v1 >= v0:
                 mid = 0.5 * (v0 + v1)
                 err = 0.5 * (v1 - v0)
                 ax0.errorbar(float(x[i]), mid, yerr=err, fmt="o", capsize=4, color="#1f77b4")
                 continue
+
+            # 条件分岐: `math.isfinite(v1) and not math.isfinite(v0)` を満たす経路を評価する。
+
             if math.isfinite(v1) and not math.isfinite(v0):
                 any_w_lim_hi = True
                 ax0.scatter(float(x[i]), v1, marker="v", color="#1f77b4", zorder=3)
                 ax0.text(float(x[i]), v1 + 0.02, f"≤{v1:g}", ha="center", va="bottom", fontsize=9, color="#1f77b4")
                 continue
+
+            # 条件分岐: `math.isfinite(v0) and not math.isfinite(v1)` を満たす経路を評価する。
+
             if math.isfinite(v0) and not math.isfinite(v1):
                 any_w_lim_lo = True
                 ax0.scatter(float(x[i]), v0, marker="^", color="#1f77b4", zorder=3)
                 ax0.text(float(x[i]), v0 + 0.02, f"≥{v0:g}", ha="center", va="bottom", fontsize=9, color="#1f77b4")
                 continue
+
             ax0.text(float(x[i]), 0.02, "n/a", ha="center", va="bottom", fontsize=9, color="#666666")
+
         ax0.set_xticks(x)
         ax0.set_xticklabels(names)
         ax0.set_xlabel("ターゲット")
@@ -1587,40 +1716,58 @@ def main() -> int:
         ax0.set_title("リングの幅（fractional width）")
         ax0.set_ylim(0.0, 0.65)
         ax0.grid(True, alpha=0.25, axis="y")
+        # 条件分岐: `any_w_lim_hi or any_w_lim_lo` を満たす経路を評価する。
         if any_w_lim_hi or any_w_lim_lo:
             handles = []
             labels = []
+            # 条件分岐: `any_w_lim_hi` を満たす経路を評価する。
             if any_w_lim_hi:
                 handles.append(ax0.scatter([], [], marker="v", color="#1f77b4"))
                 labels.append("上限（≤）")
+
+            # 条件分岐: `any_w_lim_lo` を満たす経路を評価する。
+
             if any_w_lim_lo:
                 handles.append(ax0.scatter([], [], marker="^", color="#1f77b4"))
                 labels.append("下限（≥）")
+
+            # 条件分岐: `handles` を満たす経路を評価する。
+
             if handles:
                 ax0.legend(handles, labels, loc="upper right")
 
         # Asymmetry: range or one-sided limit.
+
         any_a_lim_hi = False
         any_a_lim_lo = False
         for i in range(len(names)):
             v0 = float(a_min[i])
             v1 = float(a_max[i])
+            # 条件分岐: `math.isfinite(v0) and math.isfinite(v1) and v1 >= v0` を満たす経路を評価する。
             if math.isfinite(v0) and math.isfinite(v1) and v1 >= v0:
                 mid = 0.5 * (v0 + v1)
                 err = 0.5 * (v1 - v0)
                 ax1.errorbar(float(x[i]), mid, yerr=err, fmt="o", capsize=4, color="#ff7f0e")
                 continue
+
+            # 条件分岐: `math.isfinite(v1) and not math.isfinite(v0)` を満たす経路を評価する。
+
             if math.isfinite(v1) and not math.isfinite(v0):
                 any_a_lim_hi = True
                 ax1.scatter(float(x[i]), v1, marker="v", color="#ff7f0e", zorder=3)
                 ax1.text(float(x[i]), v1 + 0.01, f"≤{v1:g}", ha="center", va="bottom", fontsize=9, color="#ff7f0e")
                 continue
+
+            # 条件分岐: `math.isfinite(v0) and not math.isfinite(v1)` を満たす経路を評価する。
+
             if math.isfinite(v0) and not math.isfinite(v1):
                 any_a_lim_lo = True
                 ax1.scatter(float(x[i]), v0, marker="^", color="#ff7f0e", zorder=3)
                 ax1.text(float(x[i]), v0 + 0.01, f"≥{v0:g}", ha="center", va="bottom", fontsize=9, color="#ff7f0e")
                 continue
+
             ax1.text(float(x[i]), 0.01, "n/a", ha="center", va="bottom", fontsize=9, color="#666666")
+
         ax1.set_xticks(x)
         ax1.set_xticklabels(names)
         ax1.set_xlabel("ターゲット")
@@ -1628,15 +1775,23 @@ def main() -> int:
         ax1.set_title("リングの非対称性（brightness asymmetry）")
         ax1.set_ylim(0.0, 0.35)
         ax1.grid(True, alpha=0.25, axis="y")
+        # 条件分岐: `any_a_lim_hi or any_a_lim_lo` を満たす経路を評価する。
         if any_a_lim_hi or any_a_lim_lo:
             handles = []
             labels = []
+            # 条件分岐: `any_a_lim_hi` を満たす経路を評価する。
             if any_a_lim_hi:
                 handles.append(ax1.scatter([], [], marker="v", color="#ff7f0e"))
                 labels.append("上限（≤）")
+
+            # 条件分岐: `any_a_lim_lo` を満たす経路を評価する。
+
             if any_a_lim_lo:
                 handles.append(ax1.scatter([], [], marker="^", color="#ff7f0e"))
                 labels.append("下限（≥）")
+
+            # 条件分岐: `handles` を満たす経路を評価する。
+
             if handles:
                 ax1.legend(handles, labels, loc="upper right")
 
@@ -1653,6 +1808,7 @@ def main() -> int:
         ring_public_png_path = None
 
     # Scattering budget (scale comparison): ring diameter / width vs scattering kernel.
+
     scat_png_path: Optional[Path] = None
     scat_public_png_path: Optional[Path] = None
     try:
@@ -1689,6 +1845,7 @@ def main() -> int:
         ax0.errorbar(x, ring, yerr=np.where(np.isfinite(ring_s) & (ring_s > 0), ring_s, 0.0), fmt="o", capsize=4, color="#1f77b4", label="リング直径（観測）")
 
         a_ok = np.isfinite(sca)
+        # 条件分岐: `bool(np.any(a_ok))` を満たす経路を評価する。
         if bool(np.any(a_ok)):
             ax0.errorbar(
                 x[a_ok] + 0.06,
@@ -1699,7 +1856,9 @@ def main() -> int:
                 color="#d62728",
                 label="散乱カーネルFWHM（長軸, 230 GHz）",
             )
+
         b_ok = np.isfinite(scb)
+        # 条件分岐: `bool(np.any(b_ok))` を満たす経路を評価する。
         if bool(np.any(b_ok)):
             ax0.errorbar(
                 x[b_ok] + 0.06,
@@ -1712,8 +1871,12 @@ def main() -> int:
             )
 
         for i, name in enumerate(names):
+            # 条件分岐: `not name` を満たす経路を評価する。
             if not name:
                 continue
+
+            # 条件分岐: `not (math.isfinite(ring[i]) and ring[i] > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(ring[i]) and ring[i] > 0):
                 ax0.text(float(x[i]), 0.5, "n/a", ha="center", va="bottom", fontsize=9, color="#666666")
 
@@ -1731,24 +1894,33 @@ def main() -> int:
         for i in range(len(names)):
             v0 = float(w_abs_min[i])
             v1 = float(w_abs_max[i])
+            # 条件分岐: `math.isfinite(v0) and math.isfinite(v1) and v1 >= v0` を満たす経路を評価する。
             if math.isfinite(v0) and math.isfinite(v1) and v1 >= v0:
                 mid = 0.5 * (v0 + v1)
                 err = 0.5 * (v1 - v0)
                 ax1.errorbar(float(x[i]), mid, yerr=err, fmt="o", capsize=4, color="#1f77b4", label=None)
                 continue
+
+            # 条件分岐: `math.isfinite(v1) and not math.isfinite(v0)` を満たす経路を評価する。
+
             if math.isfinite(v1) and not math.isfinite(v0):
                 any_w_lim_hi = True
                 ax1.scatter(float(x[i]), v1, marker="v", color="#1f77b4", zorder=3)
                 ax1.text(float(x[i]), v1 + 0.8, f"≤{v1:.1f}", ha="center", va="bottom", fontsize=9, color="#1f77b4")
                 continue
+
+            # 条件分岐: `math.isfinite(v0) and not math.isfinite(v1)` を満たす経路を評価する。
+
             if math.isfinite(v0) and not math.isfinite(v1):
                 any_w_lim_lo = True
                 ax1.scatter(float(x[i]), v0, marker="^", color="#1f77b4", zorder=3)
                 ax1.text(float(x[i]), v0 + 0.8, f"≥{v0:.1f}", ha="center", va="bottom", fontsize=9, color="#1f77b4")
                 continue
+
             ax1.text(float(x[i]), 0.6, "n/a", ha="center", va="bottom", fontsize=9, color="#666666")
 
         # Overlay scattering kernel axes for scale comparison.
+
         if bool(np.any(a_ok)):
             ax1.errorbar(
                 x[a_ok] + 0.06,
@@ -1759,6 +1931,9 @@ def main() -> int:
                 color="#d62728",
                 label="散乱（長軸）",
             )
+
+        # 条件分岐: `bool(np.any(b_ok))` を満たす経路を評価する。
+
         if bool(np.any(b_ok)):
             ax1.errorbar(
                 x[b_ok] + 0.06,
@@ -1777,15 +1952,23 @@ def main() -> int:
         ax1.set_title("形状スケール：リング幅（W/d→µas）と散乱blur（参考）")
         ax1.grid(True, alpha=0.25, axis="y")
 
+        # 条件分岐: `any_w_lim_hi or any_w_lim_lo` を満たす経路を評価する。
         if any_w_lim_hi or any_w_lim_lo:
             handles = []
             labels = []
+            # 条件分岐: `any_w_lim_hi` を満たす経路を評価する。
             if any_w_lim_hi:
                 handles.append(ax1.scatter([], [], marker="v", color="#1f77b4"))
                 labels.append("幅の上限（≤）")
+
+            # 条件分岐: `any_w_lim_lo` を満たす経路を評価する。
+
             if any_w_lim_lo:
                 handles.append(ax1.scatter([], [], marker="^", color="#1f77b4"))
                 labels.append("幅の下限（≥）")
+
+            # 条件分岐: `handles` を満たす経路を評価する。
+
             if handles:
                 ax1.legend(handles, labels, loc="upper left")
 
@@ -1802,6 +1985,7 @@ def main() -> int:
         scat_public_png_path = None
 
     # Refractive scattering (Zhu 2018): compare distortion scale vs required precision.
+
     refr_png_path: Optional[Path] = None
     refr_public_png_path: Optional[Path] = None
     refr_metrics_json_path: Optional[Path] = None
@@ -1851,6 +2035,7 @@ def main() -> int:
         ax.scatter(x + 0.06, need_s, marker="D", color="#2ca02c", label="3σ判別に必要なσ_obs（理想）")
 
         k_ok = np.isfinite(kernel_s)
+        # 条件分岐: `bool(np.any(k_ok))` を満たす経路を評価する。
         if bool(np.any(k_ok)):
             ax.scatter(
                 x[k_ok],
@@ -1860,6 +2045,8 @@ def main() -> int:
                 label="散乱カーネル係数の不確かさ（1σ, 長軸/短軸）",
                 zorder=3,
             )
+
+        # 条件分岐: `bool(np.any(w_ok))` を満たす経路を評価する。
 
         if bool(np.any(w_ok)):
             ax.errorbar(
@@ -1873,6 +2060,8 @@ def main() -> int:
                 label="屈折散乱 wander（min–max, Zhu 2018; 230 GHz）",
             )
 
+        # 条件分岐: `bool(np.any(d_ok))` を満たす経路を評価する。
+
         if bool(np.any(d_ok)):
             ax.errorbar(
                 x[d_ok],
@@ -1884,6 +2073,8 @@ def main() -> int:
                 alpha=0.95,
                 label="屈折散乱 distortion（min–max, Zhu 2018; 230 GHz）",
             )
+
+        # 条件分岐: `bool(np.any(a_ok))` を満たす経路を評価する。
 
         if bool(np.any(a_ok)):
             ax.errorbar(
@@ -1919,6 +2110,7 @@ def main() -> int:
                 )
             )
         )
+        # 条件分岐: `math.isfinite(ymax) and ymax > 0` を満たす経路を評価する。
         if math.isfinite(ymax) and ymax > 0:
             ax.set_ylim(0.0, max(1.2 * ymax, 1.0))
 
@@ -1931,8 +2123,10 @@ def main() -> int:
 
         # Save metrics (for reproducible decision-making / gating).
         def _ratio(a: float, b: float) -> Optional[float]:
+            # 条件分岐: `not (math.isfinite(a) and math.isfinite(b)) or b == 0` を満たす経路を評価する。
             if not (math.isfinite(a) and math.isfinite(b)) or b == 0:
                 return None
+
             return a / b
 
         out_rows: List[Dict[str, Any]] = []
@@ -1987,6 +2181,7 @@ def main() -> int:
         refr_metrics_json_path = None
 
     # Z-score summary (how well each model matches the observed ring diameter under κ=1).
+
     z_png_path: Optional[Path] = None
     z_public_png_path: Optional[Path] = None
     try:
@@ -2029,6 +2224,7 @@ def main() -> int:
         z_public_png_path = None
 
     # Public: κ (ring/shadow) inferred from obs vs model shadow.
+
     kappa_png_path: Optional[Path] = None
     try:
         import matplotlib.pyplot as plt
@@ -2060,6 +2256,7 @@ def main() -> int:
             label="κ_fit（観測リング ÷ P-modelシャドウ）",
         )
 
+        # 条件分岐: `np.any(np.isfinite(kobs))` を満たす経路を評価する。
         if np.any(np.isfinite(kobs)):
             ax.errorbar(
                 x + 0.06,
@@ -2073,11 +2270,15 @@ def main() -> int:
             )
 
         for xi, v, sig in zip(x, kfit, kfit_sig):
+            # 条件分岐: `not (math.isfinite(v) and v > 0)` を満たす経路を評価する。
             if not (math.isfinite(v) and v > 0):
                 continue
+
             txt = f"{v:.3f}"
+            # 条件分岐: `math.isfinite(sig) and sig > 0` を満たす経路を評価する。
             if math.isfinite(sig) and sig > 0:
                 txt += f"±{sig:.3f}"
+
             ax.text(float(xi), float(v) + 0.02, txt, ha="center", va="bottom", fontsize=9.5, color="#111")
 
         ax.set_xticks(x)
@@ -2089,6 +2290,7 @@ def main() -> int:
         ax.legend(loc="upper right")
 
         finite = [float(v) for v in kfit.tolist() if math.isfinite(float(v))]
+        # 条件分岐: `finite` を満たす経路を評価する。
         if finite:
             lo = min(finite)
             hi = max(finite)
@@ -2107,6 +2309,7 @@ def main() -> int:
         kappa_public_png_path = None
 
     # κ precision requirements (3σ separation) vs current κ/ring uncertainties.
+
     kappa_req_png_path: Optional[Path] = None
     kappa_req_public_png_path: Optional[Path] = None
     try:
@@ -2132,14 +2335,18 @@ def main() -> int:
         for i, r in enumerate(rows):
             kobs = float(r.get("kappa_ring_over_shadow_obs", float("nan")))
             kobs_sig = float(r.get("kappa_ring_over_shadow_obs_sigma", float("nan")))
+            # 条件分岐: `math.isfinite(kobs) and kobs > 0 and math.isfinite(kobs_sig) and kobs_sig >= 0` を満たす経路を評価する。
             if math.isfinite(kobs) and kobs > 0 and math.isfinite(kobs_sig) and kobs_sig >= 0:
                 ksig_pct[i] = 100.0 * (kobs_sig / kobs)
                 continue
+
             klo = float(r.get("kappa_gr_kerr_coeff_range_low", float("nan")))
             khi = float(r.get("kappa_gr_kerr_coeff_range_high", float("nan")))
+            # 条件分岐: `math.isfinite(klo) and math.isfinite(khi) and khi > klo` を満たす経路を評価する。
             if math.isfinite(klo) and math.isfinite(khi) and khi > klo:
                 kmean = 0.5 * (klo + khi)
                 ksig = (khi - klo) / math.sqrt(12.0)
+                # 条件分岐: `math.isfinite(kmean) and kmean > 0` を満たす経路を評価する。
                 if math.isfinite(kmean) and kmean > 0:
                     ksig_pct[i] = 100.0 * (ksig / kmean)
 
@@ -2147,6 +2354,7 @@ def main() -> int:
 
         ax.bar(x, kreq_pct, color="#1f77b4", alpha=0.25, label="必要 κ精度（1σ, ringσ→0 の最良ケース）")
         ax.plot(x, ring_sig_pct, "o", color="#ff7f0e", alpha=0.95, label="現状 ring σ/diameter（%）")
+        # 条件分岐: `np.any(np.isfinite(ksig_pct))` を満たす経路を評価する。
         if np.any(np.isfinite(ksig_pct)):
             ax.plot(x + 0.06, ksig_pct, "D", color="#111111", alpha=0.9, label="現状 κσ/κ（一次ソース/参考）")
 
@@ -2162,6 +2370,7 @@ def main() -> int:
         ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
 
         finite = [float(v) for v in np.concatenate([kreq_pct, ring_sig_pct, ksig_pct]) if math.isfinite(float(v))]
+        # 条件分岐: `finite` を満たす経路を評価する。
         if finite:
             hi = max(finite)
             ax.set_ylim(0.0, max(5.0, 1.15 * hi))
@@ -2178,6 +2387,7 @@ def main() -> int:
         kappa_req_public_png_path = None
 
     # Reference: δ (Schwarzschild shadow deviation) precision required to see the coeff-level difference (model-dependent quantity).
+
     delta_req_png_path: Optional[Path] = None
     delta_req_public_png_path: Optional[Path] = None
     try:
@@ -2204,14 +2414,23 @@ def main() -> int:
 
         fig9, ax = plt.subplots(1, 1, figsize=(12.8, 4.9))
         req_label = "必要 δ精度（1σ, 係数差の3σ判別; 参考）"
+        # 条件分岐: `math.isfinite(coeff_diff_pct_phase4)` を満たす経路を評価する。
         if math.isfinite(coeff_diff_pct_phase4):
             req_label = f"必要 δ精度（1σ, 係数差{coeff_diff_pct_phase4:.4f}%の3σ判別; 参考）"
+
         ax.bar(x, req_pct, color="#1f77b4", alpha=0.25, label=req_label)
 
+        # 条件分岐: `np.any(np.isfinite(vlti_pct))` を満たす経路を評価する。
         if np.any(np.isfinite(vlti_pct)):
             ax.plot(x, vlti_pct, "o", color="#ff7f0e", alpha=0.95, label="現状 δσ（VLTI; 一次ソース）")
+
+        # 条件分岐: `np.any(np.isfinite(keck_pct))` を満たす経路を評価する。
+
         if np.any(np.isfinite(keck_pct)):
             ax.plot(x + 0.06, keck_pct, "D", color="#111111", alpha=0.9, label="現状 δσ（Keck; 一次ソース）")
+
+        # 条件分岐: `np.any(np.isfinite(kerr_pct))` を満たす経路を評価する。
+
         if np.any(np.isfinite(kerr_pct)):
             ax.plot(x - 0.06, kerr_pct, "s", color="#9aa0a6", alpha=0.9, label="Kerrレンジ由来の δ系統（uniform仮定; 参考）")
 
@@ -2227,6 +2446,7 @@ def main() -> int:
         ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
 
         finite = [float(v) for v in np.concatenate([req_pct, vlti_pct, keck_pct, kerr_pct]) if math.isfinite(float(v))]
+        # 条件分岐: `finite` を満たす経路を評価する。
         if finite:
             ax.set_ylim(0.0, max(5.0, 1.15 * max(finite)))
 
@@ -2242,6 +2462,7 @@ def main() -> int:
         delta_req_public_png_path = None
 
     # κ tradeoff: allowed κσ vs ringσ for 3σ discrimination (under κ≈1 error propagation).
+
     kappa_trade_png_path: Optional[Path] = None
     kappa_trade_public_png_path: Optional[Path] = None
     try:
@@ -2251,10 +2472,12 @@ def main() -> int:
         _set_japanese_font()
 
         n = len(rows)
+        # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
             raise RuntimeError("no rows")
 
         fig8, axes = plt.subplots(1, n, figsize=(5.6 * n, 4.9), sharey=True)
+        # 条件分岐: `n == 1` を満たす経路を評価する。
         if n == 1:
             axes = [axes]
 
@@ -2278,18 +2501,24 @@ def main() -> int:
             khi_f = float(r.get("kappa_gr_kerr_coeff_range_high_full", float("nan")))
 
             kerr_rel_pct = float("nan")
+            # 条件分岐: `math.isfinite(klo) and math.isfinite(khi) and khi > klo` を満たす経路を評価する。
             if math.isfinite(klo) and math.isfinite(khi) and khi > klo:
                 kmean = 0.5 * (klo + khi)
                 ksig = (khi - klo) / math.sqrt(12.0)
+                # 条件分岐: `math.isfinite(kmean) and kmean > 0` を満たす経路を評価する。
                 if math.isfinite(kmean) and kmean > 0:
                     kerr_rel_pct = 100.0 * (ksig / kmean)
 
             kerr_rel_pct_full = float("nan")
+            # 条件分岐: `math.isfinite(klo_f) and math.isfinite(khi_f) and khi_f > klo_f` を満たす経路を評価する。
             if math.isfinite(klo_f) and math.isfinite(khi_f) and khi_f > klo_f:
                 kmean_f = 0.5 * (klo_f + khi_f)
                 ksig_f = (khi_f - klo_f) / math.sqrt(12.0)
+                # 条件分岐: `math.isfinite(kmean_f) and kmean_f > 0` を満たす経路を評価する。
                 if math.isfinite(kmean_f) and kmean_f > 0:
                     kerr_rel_pct_full = 100.0 * (ksig_f / kmean_f)
+
+            # 条件分岐: `math.isfinite(sigma_need) and sigma_need > 0 and math.isfinite(ring) and ring...` を満たす経路を評価する。
 
             if math.isfinite(sigma_need) and sigma_need > 0 and math.isfinite(ring) and ring > 0:
                 ring_sigma_grid = np.linspace(0.0, float(sigma_need), 200)
@@ -2304,14 +2533,22 @@ def main() -> int:
                     ax.axhline(v, color=c0, linestyle="--", linewidth=1.0, alpha=0.55)
             else:
                 msg = "3σ判別: n/a"
+                # 条件分岐: `math.isfinite(theta_rel) and math.isfinite(theta_rel_req) and theta_rel_req > 0` を満たす経路を評価する。
                 if math.isfinite(theta_rel) and math.isfinite(theta_rel_req) and theta_rel_req > 0:
                     msg += f"（θ_unit相対誤差={theta_rel*100:.1f}% > 要求={theta_rel_req*100:.1f}%）"
+
                 ax.text(0.02, 0.95, msg, transform=ax.transAxes, ha="left", va="top", fontsize=10, color="#444")
+
+            # 条件分岐: `math.isfinite(ring_rel_now_pct)` を満たす経路を評価する。
 
             if math.isfinite(ring_rel_now_pct):
                 ax.axvline(ring_rel_now_pct, color="#ff7f0e", linestyle="--", linewidth=1.0, alpha=0.55, label="現状 ring σ/diameter")
+                # 条件分岐: `math.isfinite(kerr_rel_pct)` を満たす経路を評価する。
                 if math.isfinite(kerr_rel_pct):
                     ax.plot(ring_rel_now_pct, kerr_rel_pct, "D", color="#111111", alpha=0.9, label="参考: Kerr κ系統（constrained）")
+
+                # 条件分岐: `math.isfinite(kerr_rel_pct_full)` を満たす経路を評価する。
+
                 if math.isfinite(kerr_rel_pct_full):
                     ax.plot(ring_rel_now_pct, kerr_rel_pct_full, "s", color="#7f7f7f", alpha=0.9, label="参考: Kerr κ系統（full）")
 
@@ -2320,10 +2557,15 @@ def main() -> int:
             ax.grid(True, alpha=0.25)
 
             x_max = 0.0
+            # 条件分岐: `math.isfinite(ring_rel_now_pct)` を満たす経路を評価する。
             if math.isfinite(ring_rel_now_pct):
                 x_max = max(x_max, float(ring_rel_now_pct))
+
+            # 条件分岐: `math.isfinite(sigma_need) and sigma_need > 0 and math.isfinite(ring) and ring...` を満たす経路を評価する。
+
             if math.isfinite(sigma_need) and sigma_need > 0 and math.isfinite(ring) and ring > 0:
                 x_max = max(x_max, float(100.0 * sigma_need / ring))
+
             ax.set_xlim(0.0, max(5.0, 1.15 * x_max))
 
         axes[0].set_ylabel("許容 κ の相対誤差（1σ, %）")
@@ -2334,9 +2576,13 @@ def main() -> int:
         for ax in axes:
             h, l = ax.get_legend_handles_labels()
             for hh, ll in zip(h, l, strict=False):
+                # 条件分岐: `ll not in labels` を満たす経路を評価する。
                 if ll not in labels:
                     handles.append(hh)
                     labels.append(ll)
+
+        # 条件分岐: `handles` を満たす経路を評価する。
+
         if handles:
             fig8.legend(handles, labels, loc="lower center", ncol=min(3, len(labels)), bbox_to_anchor=(0.5, 0.02))
 
@@ -2431,52 +2677,119 @@ def main() -> int:
 
     print(f"[ok] csv : {csv_path}")
     print(f"[ok] json: {json_path}")
+    # 条件分岐: `isinstance(png_path, Path)` を満たす経路を評価する。
     if isinstance(png_path, Path):
         print(f"[ok] png : {png_path}")
+
+    # 条件分岐: `isinstance(diff_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(diff_png_path, Path):
         print(f"[ok] png : {diff_png_path}")
+
+    # 条件分岐: `isinstance(diff_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(diff_public_png_path, Path):
         print(f"[ok] png : {diff_public_png_path}")
+
+    # 条件分岐: `isinstance(sys_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(sys_png_path, Path):
         print(f"[ok] png : {sys_png_path}")
+
+    # 条件分岐: `isinstance(sys_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(sys_public_png_path, Path):
         print(f"[ok] png : {sys_public_png_path}")
+
+    # 条件分岐: `isinstance(ring_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(ring_png_path, Path):
         print(f"[ok] png : {ring_png_path}")
+
+    # 条件分岐: `isinstance(ring_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(ring_public_png_path, Path):
         print(f"[ok] png : {ring_public_png_path}")
+
+    # 条件分岐: `isinstance(scat_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(scat_png_path, Path):
         print(f"[ok] png : {scat_png_path}")
+
+    # 条件分岐: `isinstance(scat_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(scat_public_png_path, Path):
         print(f"[ok] png : {scat_public_png_path}")
+
+    # 条件分岐: `isinstance(refr_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(refr_png_path, Path):
         print(f"[ok] png : {refr_png_path}")
+
+    # 条件分岐: `isinstance(refr_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(refr_public_png_path, Path):
         print(f"[ok] png : {refr_public_png_path}")
+
+    # 条件分岐: `isinstance(refr_metrics_json_path, Path)` を満たす経路を評価する。
+
     if isinstance(refr_metrics_json_path, Path):
         print(f"[ok] json: {refr_metrics_json_path}")
+
+    # 条件分岐: `isinstance(z_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(z_png_path, Path):
         print(f"[ok] png : {z_png_path}")
+
+    # 条件分岐: `isinstance(z_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(z_public_png_path, Path):
         print(f"[ok] png : {z_public_png_path}")
+
+    # 条件分岐: `isinstance(kappa_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(kappa_png_path, Path):
         print(f"[ok] png : {kappa_png_path}")
+
+    # 条件分岐: `isinstance(kappa_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(kappa_public_png_path, Path):
         print(f"[ok] png : {kappa_public_png_path}")
+
+    # 条件分岐: `isinstance(kappa_req_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(kappa_req_png_path, Path):
         print(f"[ok] png : {kappa_req_png_path}")
+
+    # 条件分岐: `isinstance(kappa_req_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(kappa_req_public_png_path, Path):
         print(f"[ok] png : {kappa_req_public_png_path}")
+
+    # 条件分岐: `isinstance(delta_req_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(delta_req_png_path, Path):
         print(f"[ok] png : {delta_req_png_path}")
+
+    # 条件分岐: `isinstance(delta_req_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(delta_req_public_png_path, Path):
         print(f"[ok] png : {delta_req_public_png_path}")
+
+    # 条件分岐: `isinstance(kappa_trade_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(kappa_trade_png_path, Path):
         print(f"[ok] png : {kappa_trade_png_path}")
+
+    # 条件分岐: `isinstance(kappa_trade_public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(kappa_trade_public_png_path, Path):
         print(f"[ok] png : {kappa_trade_public_png_path}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

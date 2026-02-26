@@ -32,12 +32,15 @@ def _parse_utc_iso(s: str) -> datetime:
     # Expect "+00:00" style. Guard for robustness.
     if s.endswith("Z"):
         s = s[:-1] + "+00:00"
+
     return datetime.fromisoformat(s).astimezone(timezone.utc)
 
 
 def _fmt_utc(dt: datetime | None) -> str | None:
+    # 条件分岐: `dt is None` を満たす経路を評価する。
     if dt is None:
         return None
+
     return dt.astimezone(timezone.utc).isoformat()
 
 
@@ -61,6 +64,7 @@ def _summarize_manifest(manifest_path: Path) -> TargetReleaseRow:
     generated_utc = obj.get("generated_utc")
 
     obs = obj.get("obs", []) or []
+    # 条件分岐: `not isinstance(obs, list)` を満たす経路を評価する。
     if not isinstance(obs, list):
         obs = []
 
@@ -72,16 +76,22 @@ def _summarize_manifest(manifest_path: Path) -> TargetReleaseRow:
     release_times_all: list[datetime] = []
     release_times_unreleased: list[datetime] = []
     for o in obs:
+        # 条件分岐: `not isinstance(o, dict)` を満たす経路を評価する。
         if not isinstance(o, dict):
             continue
+
         t = o.get("t_obs_release_utc")
+        # 条件分岐: `not t` を満たす経路を評価する。
         if not t:
             continue
+
         try:
             dt = _parse_utc_iso(str(t))
         except Exception:
             continue
+
         release_times_all.append(dt)
+        # 条件分岐: `o.get("is_released") is False` を満たす経路を評価する。
         if o.get("is_released") is False:
             release_times_unreleased.append(dt)
 
@@ -116,20 +126,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     data_dir = Path(args.data_dir)
+    # 条件分岐: `not data_dir.is_absolute()` を満たす経路を評価する。
     if not data_dir.is_absolute():
         data_dir = (ROOT / data_dir).resolve()
+
     out_dir = Path(args.out_dir)
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
     if not out_dir.is_absolute():
         out_dir = (ROOT / out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     manifest_paths: list[Path] = []
     for child in sorted(data_dir.iterdir()):
+        # 条件分岐: `not child.is_dir()` を満たす経路を評価する。
         if not child.is_dir():
             continue
+
+        # 条件分岐: `child.name.startswith("_") or child.name.startswith(".")` を満たす経路を評価する。
+
         if child.name.startswith("_") or child.name.startswith("."):
             continue
+
         mp = child / "manifest.json"
+        # 条件分岐: `mp.exists()` を満たす経路を評価する。
         if mp.exists():
             manifest_paths.append(mp)
 
@@ -141,12 +161,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     blocked_pretty = []
     for r in blocked:
         days_left = None
+        # 条件分岐: `r.next_release_utc` を満たす経路を評価する。
         if r.next_release_utc:
             try:
                 dt = _parse_utc_iso(r.next_release_utc)
                 days_left = (dt - now_utc).total_seconds() / 86400.0
             except Exception:
                 days_left = None
+
         blocked_pretty.append(
             {
                 "target": r.target_name,
@@ -206,17 +228,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     print(f"[ok] wrote: {out_json}")
     print(f"[ok] wrote: {out_csv}")
+    # 条件分岐: `blocked` を満たす経路を評価する。
     if blocked:
         print("[info] blocked targets (unreleased observations):")
         for b in blocked_pretty:
+            # 条件分岐: `b["days_until_release"] is None` を満たす経路を評価する。
             if b["days_until_release"] is None:
                 print(f"  - {b['target']} ({b['next_release_utc']})")
             else:
                 print(f"  - {b['target']} ({b['next_release_utc']}; in {b['days_until_release']:.1f} days)")
     else:
         print("[info] no blocked targets found.")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

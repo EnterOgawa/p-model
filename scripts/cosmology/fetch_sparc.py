@@ -32,6 +32,7 @@ except Exception:  # pragma: no cover - optional dependency for offline/local ru
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -69,13 +70,17 @@ def _sha256_file(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required for online fetch")
+
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         return {"status": "skipped_exists", "path": _rel(dst), "bytes": int(dst.stat().st_size), "sha256": _sha256_file(dst), "url": url}
 
@@ -85,17 +90,22 @@ def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
     n = 0
     tmp = dst.with_suffix(dst.suffix + ".part")
     try:
+        # 条件分岐: `tmp.exists()` を満たす経路を評価する。
         if tmp.exists():
             tmp.unlink()
     except Exception:
         pass
+
     with tmp.open("wb") as f:
         for chunk in r.iter_content(chunk_size=1024 * 1024):
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 continue
+
             f.write(chunk)
             h.update(chunk)
             n += len(chunk)
+
     tmp.replace(dst)
     return {"status": "downloaded", "path": _rel(dst), "bytes": int(n), "sha256": h.hexdigest(), "url": url}
 
@@ -115,6 +125,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     base_url = str(args.base_url).strip()
+    # 条件分岐: `not base_url.endswith("/")` を満たす経路を評価する。
     if not base_url.endswith("/"):
         base_url += "/"
 
@@ -128,8 +139,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ]
     files = [str(x).strip() for x in (args.file or []) if str(x).strip()] or default_files
 
+    # 条件分岐: `args.offline and args.download_missing` を満たす経路を評価する。
     if args.offline and args.download_missing:
         p.error("--offline and --download-missing cannot be used together")
+
+    # 条件分岐: `not args.offline and requests is None` を満たす経路を評価する。
+
     if not args.offline and requests is None:
         raise RuntimeError("requests is required for online fetch")
 
@@ -158,20 +173,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     for name in files:
         url = base_url + name
         dst = raw_dir / name
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
+            # 条件分岐: `not dst.exists()` を満たす経路を評価する。
             if not dst.exists():
                 run["results"]["skipped"].append({"status": "skipped_missing", "path": _rel(dst), "url": url})
                 continue
+
             res = {"status": "skipped_exists", "path": _rel(dst), "bytes": int(dst.stat().st_size), "sha256": _sha256_file(dst), "url": url}
         else:
+            # 条件分岐: `not args.download_missing and not dst.exists()` を満たす経路を評価する。
             if not args.download_missing and not dst.exists():
                 run["results"]["skipped"].append({"status": "skipped_missing", "path": _rel(dst), "url": url})
                 continue
+
             try:
                 res = _download(url, dst=dst, force=bool(args.force))
             except Exception as e:
                 run["results"]["errors"].append({"status": "error", "path": _rel(dst), "url": url, "error": str(e)})
                 continue
+
+        # 条件分岐: `res["status"] == "downloaded"` を満たす経路を評価する。
 
         if res["status"] == "downloaded":
             run["results"]["downloaded"].append(res)
@@ -213,6 +235,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"manifest": _rel(out_manifest), "raw_dir": _rel(raw_dir)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

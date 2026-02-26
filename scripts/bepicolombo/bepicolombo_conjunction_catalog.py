@@ -39,6 +39,7 @@ except Exception as e:  # pragma: no cover
     raise SystemExit(f"[err] spiceypy is required: {e}")
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -81,8 +82,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -95,29 +98,36 @@ def _wn_intervals(window) -> List[Tuple[float, float]]:
     for i in range(n):
         a, b = sp.wnfetd(window, i)
         out.append((float(a), float(b)))
+
     return out
 
 
 def _spk_time_bounds(spk_path: Path, obj_id: int) -> Tuple[float, float]:
     cov = sp.spkcov(str(spk_path), int(obj_id))
     intervals = _wn_intervals(cov)
+    # 条件分岐: `not intervals` を満たす経路を評価する。
     if not intervals:
         raise RuntimeError(f"SPK coverage empty: {spk_path} (obj={obj_id})")
+
     return min(a for a, _ in intervals), max(b for _, b in intervals)
 
 
 def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     meta_path = kernels_dir / "kernels_meta.json"
+    # 条件分岐: `not meta_path.exists()` を満たす経路を評価する。
     if not meta_path.exists():
         raise RuntimeError(
             f"Missing kernels meta: {meta_path}\n"
             "Run: python -B scripts/bepicolombo/fetch_spice_kernels_psa.py"
         )
+
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(meta, dict)` を満たす経路を評価する。
     if not isinstance(meta, dict):
         raise RuntimeError(f"Invalid kernels meta JSON: {meta_path}")
 
     selected = meta.get("selected_paths")
+    # 条件分岐: `not isinstance(selected, list) or not selected` を満たす経路を評価する。
     if not isinstance(selected, list) or not selected:
         raise RuntimeError(f"Missing selected_paths in: {meta_path}")
 
@@ -125,10 +135,13 @@ def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     loaded: List[str] = []
     for rel in selected:
         p = kernels_dir / str(rel)
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise RuntimeError(f"Missing kernel file: {p}")
+
         sp.furnsh(str(p))
         loaded.append(str(p))
+
     return {"meta_path": str(meta_path), "meta": meta, "loaded": loaded}
 
 
@@ -148,26 +161,34 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
     dv = vS_mps - vE_mps
 
     d2 = float(np.dot(dr, dr))
+    # 条件分岐: `d2 == 0.0` を満たす経路を評価する。
     if d2 == 0.0:
         return float("nan"), float("nan")
 
     a = float(np.dot(rE_m, dr))
     t_unclamped = -a / d2
 
+    # 条件分岐: `t_unclamped <= 0.0` を満たす経路を評価する。
     if t_unclamped <= 0.0:
         w = rE_m
         wdot = vE_mps
         b = float(np.linalg.norm(w))
+        # 条件分岐: `b == 0.0` を満たす経路を評価する。
         if b == 0.0:
             return float("nan"), float("nan")
+
         return b, float(np.dot(w, wdot)) / b
+
+    # 条件分岐: `t_unclamped >= 1.0` を満たす経路を評価する。
 
     if t_unclamped >= 1.0:
         w = rS_m
         wdot = vS_mps
         b = float(np.linalg.norm(w))
+        # 条件分岐: `b == 0.0` を満たす経路を評価する。
         if b == 0.0:
             return float("nan"), float("nan")
+
         return b, float(np.dot(w, wdot)) / b
 
     t = float(t_unclamped)
@@ -178,8 +199,10 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
     w = rE_m + t * dr
     wdot = vE_mps + t * dv + t_dot * dr
     b = float(np.linalg.norm(w))
+    # 条件分岐: `b == 0.0` を満たす経路を評価する。
     if b == 0.0:
         return float("nan"), float("nan")
+
     bdot = float(np.dot(w, wdot)) / b
     return b, bdot
 
@@ -199,14 +222,21 @@ def _local_minima_indices(y: np.ndarray) -> List[int]:
     n = int(len(y))
     for i in range(1, n - 1):
         yi = float(y[i])
+        # 条件分岐: `not math.isfinite(yi)` を満たす経路を評価する。
         if not math.isfinite(yi):
             continue
+
         yp = float(y[i - 1])
         yn = float(y[i + 1])
+        # 条件分岐: `not (math.isfinite(yp) and math.isfinite(yn))` を満たす経路を評価する。
         if not (math.isfinite(yp) and math.isfinite(yn)):
             continue
+
+        # 条件分岐: `yi <= yp and yi <= yn` を満たす経路を評価する。
+
         if yi <= yp and yi <= yn:
             idx.append(i)
+
     return idx
 
 
@@ -215,15 +245,21 @@ def _select_event_guesses(ets: np.ndarray, b_m: np.ndarray, *, max_b_m: float, m
     cands: List[Tuple[float, float]] = []
     for i in mins:
         bi = float(b_m[i])
+        # 条件分岐: `not math.isfinite(bi)` を満たす経路を評価する。
         if not math.isfinite(bi):
             continue
+
+        # 条件分岐: `bi > float(max_b_m)` を満たす経路を評価する。
+
         if bi > float(max_b_m):
             continue
+
         cands.append((float(ets[i]), bi))
 
     cands.sort(key=lambda x: x[1])
     picked: List[Tuple[float, float]] = []
     for et, b in cands:
+        # 条件分岐: `all(abs(et - et2) > float(merge_window_s) for et2, _ in picked)` を満たす経路を評価する。
         if all(abs(et - et2) > float(merge_window_s) for et2, _ in picked):
             picked.append((et, b))
 
@@ -252,23 +288,34 @@ def _refine_event(
 
         r1 = float(np.linalg.norm(rE))
         r2 = float(np.linalg.norm(rS))
+        # 条件分岐: `r1 == 0.0 or r2 == 0.0` を満たす経路を評価する。
         if r1 == 0.0 or r2 == 0.0:
             continue
 
         b, bdot = _impact_b_and_bdot(rE, vE, rS, vS)
+        # 条件分岐: `not math.isfinite(b)` を満たす経路を評価する。
         if not math.isfinite(b):
             continue
+
+        # 条件分岐: `best_raw is None or b < best_raw[0]` を満たす経路を評価する。
 
         if best_raw is None or b < best_raw[0]:
             best_raw = (float(b), float(et))
 
+        # 条件分岐: `b >= float(min_b_m)` を満たす経路を評価する。
+
         if b >= float(min_b_m):
+            # 条件分岐: `best_nonocc is None or b < best_nonocc[0]` を満たす経路を評価する。
             if best_nonocc is None or b < best_nonocc[0]:
                 best_nonocc = (float(b), float(et), r1, r2)
+
             y = _y_eq2(float(b), float(bdot), beta=float(beta))
             y_abs = abs(float(y))
+            # 条件分岐: `y_peak is None or y_abs > abs(float(y_peak))` を満たす経路を評価する。
             if y_peak is None or y_abs > abs(float(y_peak)):
                 y_peak = float(y)
+
+    # 条件分岐: `best_raw is None` を満たす経路を評価する。
 
     if best_raw is None:
         raise RuntimeError("No valid b in refine window.")
@@ -280,6 +327,7 @@ def _refine_event(
     t_non: Optional[datetime] = None
     b_non_rsun: Optional[float] = None
     dt_us: Optional[float] = None
+    # 条件分岐: `best_nonocc is not None` を満たす経路を評価する。
     if best_nonocc is not None:
         b_non, et_non, r1_non, r2_non = best_nonocc
         t_non = datetime.fromisoformat(sp.et2utc(float(et_non), "ISOC", 3)).replace(tzinfo=timezone.utc)
@@ -420,16 +468,23 @@ def main() -> int:
     # Determine MPO SPK (prefer the one selected in kernels_meta.json for reproducibility)
     spk_path: Optional[Path] = None
     sel = meta.get("selected_paths") if isinstance(meta, dict) else None
+    # 条件分岐: `isinstance(sel, list)` を満たす経路を評価する。
     if isinstance(sel, list):
         spk_rel = next((p for p in sel if isinstance(p, str) and p.startswith("spk/") and "bc_mpo_fcp_" in p), None)
+        # 条件分岐: `spk_rel` を満たす経路を評価する。
         if spk_rel:
             spk_path = kernels_dir / str(spk_rel)
 
+    # 条件分岐: `spk_path is None` を満たす経路を評価する。
+
     if spk_path is None:
         for p in sorted((kernels_dir / "spk").glob("*.bsp")):
+            # 条件分岐: `"bc_mpo" in p.name.lower()` を満たす経路を評価する。
             if "bc_mpo" in p.name.lower():
                 spk_path = p
                 break
+
+    # 条件分岐: `spk_path is None or not spk_path.exists()` を満たす経路を評価する。
 
     if spk_path is None or not spk_path.exists():
         raise RuntimeError("Could not find MPO SPK (bc_mpo_fcp_*.bsp). Re-run fetch_spice_kernels_psa.py.")
@@ -587,11 +642,15 @@ def main() -> int:
     print(f"[ok] wrote: {summary_path}")
     print(f"[ok] wrote: {png_path}")
     print(f"n_events: {len(events)} (usable={len(usable)})")
+    # 条件分岐: `usable` を満たす経路を評価する。
     if usable:
         print(f"min b (non-occulted) [R_sun]: {b_min:.6f}")
         print(f"max dt_roundtrip [us]: {dt_max:.3f}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

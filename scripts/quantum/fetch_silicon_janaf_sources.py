@@ -23,29 +23,40 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
+
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
+
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
 def _as_float(s: str) -> Optional[float]:
     ss = str(s).strip()
+    # 条件分岐: `not ss or ss.upper() == "N/A"` を満たす経路を評価する。
     if not ss or ss.upper() == "N/A":
         return None
+
     try:
         return float(ss)
     except Exception:
@@ -54,6 +65,7 @@ def _as_float(s: str) -> Optional[float]:
 
 def _parse_janaf_txt(txt: str) -> dict[str, Any]:
     lines = [ln.rstrip("\n") for ln in txt.splitlines() if ln.strip()]
+    # 条件分岐: `not lines` を満たす経路を評価する。
     if not lines:
         raise ValueError("empty JANAF txt")
 
@@ -63,9 +75,13 @@ def _parse_janaf_txt(txt: str) -> dict[str, Any]:
     # but contains a transition marker line "CRYSTAL <--> LIQUID".
     header_idx = None
     for i, ln in enumerate(lines):
+        # 条件分岐: `ln.startswith("T(") or ln.startswith("T(K)")` を満たす経路を評価する。
         if ln.startswith("T(") or ln.startswith("T(K)"):
             header_idx = i
             break
+
+    # 条件分岐: `header_idx is None` を満たす経路を評価する。
+
     if header_idx is None:
         raise ValueError("header line not found (expected T(K) ...)")
 
@@ -74,6 +90,7 @@ def _parse_janaf_txt(txt: str) -> dict[str, Any]:
 
     t_melt_k: float | None = None
     for ln in data_lines:
+        # 条件分岐: `"CRYSTAL" in ln.upper() and "LIQUID" in ln.upper()` を満たす経路を評価する。
         if "CRYSTAL" in ln.upper() and "LIQUID" in ln.upper():
             f0 = ln.split("\t", 1)[0]
             t_melt_k = _as_float(f0)
@@ -82,10 +99,12 @@ def _parse_janaf_txt(txt: str) -> dict[str, Any]:
     points: list[dict[str, Any]] = []
     for raw in data_lines:
         fields = [f.strip() for f in raw.split("\t")]
+        # 条件分岐: `not fields` を満たす経路を評価する。
         if not fields:
             continue
 
         t_k = _as_float(fields[0])
+        # 条件分岐: `t_k is None` を満たす経路を評価する。
         if t_k is None:
             continue
 
@@ -96,18 +115,23 @@ def _parse_janaf_txt(txt: str) -> dict[str, Any]:
         marker = "\t".join(fields[5:]).strip() if len(fields) > 5 else ""
         marker = marker or None
 
+        # 条件分岐: `cp is None` を満たす経路を評価する。
         if cp is None:
             continue
 
         phase = "unknown"
         phase_code = "?"
+        # 条件分岐: `marker and "TRANSITION" in marker.upper()` を満たす経路を評価する。
         if marker and "TRANSITION" in marker.upper():
             phase = "transition"
             phase_code = "trans"
+        # 条件分岐: 前段条件が不成立で、`t_melt_k is not None` を追加評価する。
         elif t_melt_k is not None:
+            # 条件分岐: `marker and ("CRYSTAL" in marker.upper() and "LIQUID" in marker.upper())` を満たす経路を評価する。
             if marker and ("CRYSTAL" in marker.upper() and "LIQUID" in marker.upper()):
                 phase = "solid"
                 phase_code = "cr"
+            # 条件分岐: 前段条件が不成立で、`float(t_k) > float(t_melt_k) + 1e-9` を追加評価する。
             elif float(t_k) > float(t_melt_k) + 1e-9:
                 phase = "liquid"
                 phase_code = "l"
@@ -127,6 +151,8 @@ def _parse_janaf_txt(txt: str) -> dict[str, Any]:
                 "marker": marker,
             }
         )
+
+    # 条件分岐: `not points` を満たす経路を評価する。
 
     if not points:
         raise ValueError("no data points parsed from JANAF txt")
@@ -164,9 +190,12 @@ def main(argv: list[str] | None = None) -> int:
     out_html = out_dir / "nist_janaf_Si-004.html"
     out_txt = out_dir / "nist_janaf_Si-004.txt"
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         _download(url_html, out_html)
         _download(url_txt, out_txt)
+
+    # 条件分岐: `not out_txt.exists() or out_txt.stat().st_size == 0` を満たす経路を評価する。
 
     if not out_txt.exists() or out_txt.stat().st_size == 0:
         raise SystemExit(f"[fail] missing txt: {out_txt}")
@@ -201,6 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     out_extracted.write_text(json.dumps(extracted, ensure_ascii=False, indent=2), encoding="utf-8")
 
     files = []
+    # 条件分岐: `out_html.exists()` を満たす経路を評価する。
     if out_html.exists():
         files.append(
             {
@@ -210,6 +240,7 @@ def main(argv: list[str] | None = None) -> int:
                 "sha256": _sha256(out_html).upper(),
             }
         )
+
     files.append(
         {
             "url": url_txt,
@@ -232,6 +263,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] wrote: {out_manifest}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

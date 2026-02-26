@@ -46,6 +46,7 @@ except Exception:  # pragma: no cover - optional dependency for offline/local ru
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -90,12 +91,15 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return None
+
     try:
         return path.relative_to(_ROOT).as_posix()
     except Exception:
@@ -103,17 +107,22 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
 
 
 def _download_file(url: str, dst: Path) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to download remote files. Install it or place files under data/.../raw/")
+
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(dst.suffix + ".part")
     with requests.get(url, stream=True, timeout=_REQ_TIMEOUT) as r:
         r.raise_for_status()
         with tmp.open("wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024):
+                # 条件分岐: `not chunk` を満たす経路を評価する。
                 if not chunk:
                     continue
+
                 f.write(chunk)
+
     tmp.replace(dst)
     return {"bytes": dst.stat().st_size, "sha256": _sha256(dst)}
 
@@ -124,14 +133,17 @@ def _extract_remote_fits_to_npz(
     want_cols: list[str],
     max_rows: Optional[int],
 ) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to stream remote files. Install it or place files under data/.../raw/")
+
     out_npz.parent.mkdir(parents=True, exist_ok=True)
     with requests.get(url, stream=True, timeout=_REQ_TIMEOUT) as r:
         r.raise_for_status()
         f = r.raw
         layout = read_first_bintable_layout(f)
         cols = read_bintable_columns(f, layout=layout, columns=want_cols, max_rows=max_rows)
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -160,10 +172,13 @@ def _reservoir_sample_from_chunks(
 
     (Copied/adapted from `fetch_boss_dr12v5_lss.py` to keep the eBOSS fetch self-contained.)
     """
+    # 条件分岐: `int(sample_rows) <= 0` を満たす経路を評価する。
     if int(sample_rows) <= 0:
         raise ValueError("sample_rows must be > 0")
+
     rng = np.random.default_rng(int(seed))
 
+    # 条件分岐: `total_rows is not None and int(total_rows) > 0` を満たす経路を評価する。
     if total_rows is not None and int(total_rows) > 0:
         k = int(sample_rows)
         margin = int(max(0.0, 5.0 * float(np.sqrt(float(k)))))
@@ -175,24 +190,33 @@ def _reservoir_sample_from_chunks(
         scanned = 0
 
         for chunk in chunks:
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 continue
+
             n = int(next(iter(chunk.values())).shape[0])
+            # 条件分岐: `n <= 0` を満たす経路を評価する。
             if n <= 0:
                 continue
+
             scanned += n
             keys = rng.random(n, dtype=np.float64)
             m = keys < p
+            # 条件分岐: `not np.any(m)` を満たす経路を評価する。
             if not np.any(m):
                 continue
+
             buf_keys.append(keys[m])
             for c in want_cols:
                 buf_cols[c].append(np.asarray(chunk[c], dtype=np.float64)[m])
+
+        # 条件分岐: `not buf_keys` を満たす経路を評価する。
 
         if not buf_keys:
             return ({c: np.zeros(0, dtype=np.float64) for c in want_cols}, scanned)
 
         keys_all = np.concatenate(buf_keys)
+        # 条件分岐: `int(keys_all.size) < k` を満たす経路を評価する。
         if int(keys_all.size) < k:
             cols_out = {c: np.concatenate(buf_cols[c]) if buf_cols[c] else np.zeros(0, dtype=np.float64) for c in want_cols}
             return (cols_out, scanned)
@@ -202,6 +226,7 @@ def _reservoir_sample_from_chunks(
         for c in want_cols:
             vals = np.concatenate(buf_cols[c])
             cols_out[c] = np.asarray(vals[idx], dtype=np.float64)
+
         return (cols_out, scanned)
 
     res_keys: np.ndarray | None = None
@@ -209,15 +234,21 @@ def _reservoir_sample_from_chunks(
     scanned = 0
 
     for chunk in chunks:
+        # 条件分岐: `not chunk` を満たす経路を評価する。
         if not chunk:
             continue
+
         n = int(next(iter(chunk.values())).shape[0])
+        # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
             continue
+
         scanned += n
         keys = rng.random(n, dtype=np.float64)
 
+        # 条件分岐: `res_keys is None` を満たす経路を評価する。
         if res_keys is None:
+            # 条件分岐: `n <= int(sample_rows)` を満たす経路を評価する。
             if n <= int(sample_rows):
                 res_keys = keys
                 res_cols = {c: np.asarray(chunk[c], dtype=np.float64) for c in want_cols}
@@ -231,6 +262,7 @@ def _reservoir_sample_from_chunks(
 
         k = int(sample_rows)
         n_res = int(res_keys.shape[0])
+        # 条件分岐: `n_res < k` を満たす経路を評価する。
         if n_res < k:
             keys_comb = np.concatenate([res_keys, keys])
             keep_n = min(k, int(keys_comb.size))
@@ -255,6 +287,7 @@ def _reservoir_sample_from_chunks(
 
         thresh = float(np.max(res_keys))
         cand = keys < thresh
+        # 条件分岐: `not np.any(cand)` を満たす経路を評価する。
         if not np.any(cand):
             continue
 
@@ -279,8 +312,11 @@ def _reservoir_sample_from_chunks(
         res_keys = res_keys_new
         res_cols = res_cols_new
 
+    # 条件分岐: `res_keys is None` を満たす経路を評価する。
+
     if res_keys is None:
         return ({c: np.zeros(0, dtype=np.float64) for c in want_cols}, scanned)
+
     return (res_cols, scanned)
 
 
@@ -295,6 +331,7 @@ def _extract_local_fits_to_npz(
     with fits_path.open("rb") as f:
         layout = read_first_bintable_layout(f)
         cols = read_bintable_columns(f, layout=layout, columns=want_cols, max_rows=max_rows)
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -308,25 +345,32 @@ def _extract_local_fits_to_npz(
 
 def _npz_rows(npz_path: Path) -> int:
     with np.load(npz_path) as z:
+        # 条件分岐: `"RA" in z` を満たす経路を評価する。
         if "RA" in z:
             return int(np.asarray(z["RA"]).size)
+
         for name in z.files:
             return int(np.asarray(z[name]).size)
+
     raise ValueError(f"npz has no arrays: {npz_path}")
 
 
 def _read_layout_local(fits_path: Path) -> Dict[str, int]:
     with fits_path.open("rb") as f:
         layout = read_first_bintable_layout(f)
+
     return {"rows_total": int(layout.n_rows), "row_bytes": int(layout.row_bytes)}
 
 
 def _read_layout_remote(url: str) -> Dict[str, int]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to read remote FITS layout. Install it or use local raw FITS.")
+
     with requests.get(url, stream=True, timeout=_REQ_TIMEOUT) as r:
         r.raise_for_status()
         layout = read_first_bintable_layout(r.raw)
+
     return {"rows_total": int(layout.n_rows), "row_bytes": int(layout.row_bytes)}
 
 
@@ -353,6 +397,7 @@ def _extract_local_fits_to_npz_reservoir(
             seed=int(seed),
             total_rows=int(layout.n_rows) if scan_max_rows is None else int(scan_max_rows),
         )
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -415,6 +460,7 @@ def main(argv: list[str] | None = None) -> int:
     ext_dir.mkdir(parents=True, exist_ok=True)
 
     caps_req = str(args.caps)
+    # 条件分岐: `caps_req == "combined"` を満たす経路を評価する。
     if caps_req == "combined":
         caps = ["north", "south"]
     else:
@@ -423,15 +469,18 @@ def main(argv: list[str] | None = None) -> int:
     want_gal_cols = ["RA", "DEC", "Z", "WEIGHT_FKP", "WEIGHT_CP", "WEIGHT_NOZ", "WEIGHT_SYSTOT"]
     want_rnd_cols = ["RA", "DEC", "Z", "WEIGHT_FKP"]
 
+    # 条件分岐: `bool(args.print_needed_files)` を満たす経路を評価する。
     if bool(args.print_needed_files):
         for cap in caps:
             files = _SAMPLE_FILES[sample][cap]
             for k in ("galaxy", "random"):
                 name = files[k]
                 print(f"{cap}\t{k}\t{name}\t{base_url}{name}")
+
         return 0
 
     now = datetime.now(timezone.utc).isoformat()
+    # 条件分岐: `manifest_path.exists()` を満たす経路を評価する。
     if manifest_path.exists():
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -439,6 +488,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest = _build_manifest_skeleton(generated_utc=now, base_url=base_url)
     else:
         manifest = _build_manifest_skeleton(generated_utc=now, base_url=base_url)
+
     manifest["last_run_utc"] = now
     manifest["source_base_url"] = base_url
 
@@ -459,18 +509,24 @@ def main(argv: list[str] | None = None) -> int:
         # Extract galaxy (full).
         gal_npz = ext_dir / f"{gal_name}.npz"
         gal_raw_meta: Dict[str, Any] = {"raw_path": None, "raw_bytes": None, "raw_sha256": None}
+        # 条件分岐: `gal_raw.exists()` を満たす経路を評価する。
         if gal_raw.exists():
             gal_raw_meta = {"raw_path": _relpath(gal_raw), "raw_bytes": int(gal_raw.stat().st_size), "raw_sha256": _sha256(gal_raw)}
+        # 条件分岐: 前段条件が不成立で、`download_galaxy_raw` を追加評価する。
         elif download_galaxy_raw:
             print(f"[download] {gal_url} -> {gal_raw}")
             dmeta = _download_file(gal_url, gal_raw)
             print(f"  done: {dmeta.get('bytes')} bytes")
             gal_raw_meta = {"raw_path": _relpath(gal_raw), "raw_bytes": int(gal_raw.stat().st_size), "raw_sha256": _sha256(gal_raw)}
 
+        # 条件分岐: `not gal_npz.exists()` を満たす経路を評価する。
+
         if not gal_npz.exists():
+            # 条件分岐: `gal_raw.exists()` を満たす経路を評価する。
             if gal_raw.exists():
                 print(f"[extract] {gal_raw.name} -> {gal_npz.name}")
                 gal_extract = _extract_local_fits_to_npz(gal_raw, out_npz=gal_npz, want_cols=want_gal_cols, max_rows=None)
+            # 条件分岐: 前段条件が不成立で、`stream_missing` を追加評価する。
             elif stream_missing:
                 print(f"[stream] {gal_url} -> {gal_npz.name}")
                 gal_extract = _extract_remote_fits_to_npz(gal_url, out_npz=gal_npz, want_cols=want_gal_cols, max_rows=None)
@@ -482,6 +538,7 @@ def main(argv: list[str] | None = None) -> int:
                 layout = _read_layout_local(gal_raw) if gal_raw.exists() else _read_layout_remote(gal_url)
             except Exception:
                 layout = {"rows_total": rows_saved, "row_bytes": None}
+
             gal_extract = {
                 "rows_total": int(layout["rows_total"]) if layout.get("rows_total") is not None else None,
                 "rows_saved": int(rows_saved),
@@ -493,25 +550,34 @@ def main(argv: list[str] | None = None) -> int:
             }
 
         # Extract random (prefix or reservoir).
+
         rnd_sampling = str(args.random_sampling)
         scan_max_rows = int(args.random_scan_max_rows)
         scan_max_rows_eff: Optional[int] = None if scan_max_rows <= 0 else scan_max_rows
+        # 条件分岐: `rnd_sampling == "prefix_rows"` を満たす経路を評価する。
         if rnd_sampling == "prefix_rows":
             rnd_npz = ext_dir / f"{rnd_name}.prefix_{int(args.random_max_rows)}.npz"
+        # 条件分岐: 前段条件が不成立で、`rnd_sampling == "reservoir"` を追加評価する。
         elif rnd_sampling == "reservoir":
             rnd_npz = ext_dir / f"{rnd_name}.reservoir_{int(args.random_max_rows)}_seed{int(args.sampling_seed)}.npz"
         else:
             raise SystemExit(f"invalid --random-sampling: {rnd_sampling}")
 
         rnd_raw_meta: Dict[str, Any] = {"raw_path": None, "raw_bytes": None, "raw_sha256": None}
+        # 条件分岐: `rnd_raw.exists()` を満たす経路を評価する。
         if rnd_raw.exists():
             rnd_raw_meta = {"raw_path": _relpath(rnd_raw), "raw_bytes": int(rnd_raw.stat().st_size), "raw_sha256": _sha256(rnd_raw)}
 
+        # 条件分岐: `not rnd_npz.exists()` を満たす経路を評価する。
+
         if not rnd_npz.exists():
+            # 条件分岐: `rnd_sampling == "prefix_rows"` を満たす経路を評価する。
             if rnd_sampling == "prefix_rows":
+                # 条件分岐: `rnd_raw.exists()` を満たす経路を評価する。
                 if rnd_raw.exists():
                     print(f"[extract] {rnd_raw.name} (prefix {int(args.random_max_rows):,}) -> {rnd_npz.name}")
                     rnd_extract = _extract_local_fits_to_npz(rnd_raw, out_npz=rnd_npz, want_cols=want_rnd_cols, max_rows=int(args.random_max_rows))
+                # 条件分岐: 前段条件が不成立で、`download_missing` を追加評価する。
                 elif download_missing:
                     print(f"[download] {rnd_url} -> {rnd_raw}")
                     dmeta = _download_file(rnd_url, rnd_raw)
@@ -519,16 +585,20 @@ def main(argv: list[str] | None = None) -> int:
                     rnd_raw_meta = {"raw_path": _relpath(rnd_raw), "raw_bytes": int(rnd_raw.stat().st_size), "raw_sha256": _sha256(rnd_raw)}
                     print(f"[extract] {rnd_raw.name} (prefix {int(args.random_max_rows):,}) -> {rnd_npz.name}")
                     rnd_extract = _extract_local_fits_to_npz(rnd_raw, out_npz=rnd_npz, want_cols=want_rnd_cols, max_rows=int(args.random_max_rows))
+                # 条件分岐: 前段条件が不成立で、`stream_missing` を追加評価する。
                 elif stream_missing:
                     print(f"[stream] {rnd_url} (prefix {int(args.random_max_rows):,}) -> {rnd_npz.name}")
                     rnd_extract = _extract_remote_fits_to_npz(rnd_url, out_npz=rnd_npz, want_cols=want_rnd_cols, max_rows=int(args.random_max_rows))
                 else:
                     raise SystemExit(f"missing random file: {rnd_raw} (download it or pass --download-missing/--stream-missing)")
             else:
+                # 条件分岐: `rnd_raw.exists()` を満たす経路を評価する。
                 if rnd_raw.exists():
                     msg = f"[extract] {rnd_raw.name} (reservoir {int(args.random_max_rows):,}, seed={int(args.sampling_seed)})"
+                    # 条件分岐: `scan_max_rows_eff is not None` を満たす経路を評価する。
                     if scan_max_rows_eff is not None:
                         msg += f", scan_max_rows={scan_max_rows_eff:,}"
+
                     print(f"{msg} -> {rnd_npz.name}")
                     rnd_extract = _extract_local_fits_to_npz_reservoir(
                         rnd_raw,
@@ -539,14 +609,17 @@ def main(argv: list[str] | None = None) -> int:
                         chunk_rows=int(args.chunk_rows),
                         scan_max_rows=scan_max_rows_eff,
                     )
+                # 条件分岐: 前段条件が不成立で、`download_missing` を追加評価する。
                 elif download_missing:
                     print(f"[download] {rnd_url} -> {rnd_raw}")
                     dmeta = _download_file(rnd_url, rnd_raw)
                     print(f"  done: {dmeta.get('bytes')} bytes")
                     rnd_raw_meta = {"raw_path": _relpath(rnd_raw), "raw_bytes": int(rnd_raw.stat().st_size), "raw_sha256": _sha256(rnd_raw)}
                     msg = f"[extract] {rnd_raw.name} (reservoir {int(args.random_max_rows):,}, seed={int(args.sampling_seed)})"
+                    # 条件分岐: `scan_max_rows_eff is not None` を満たす経路を評価する。
                     if scan_max_rows_eff is not None:
                         msg += f", scan_max_rows={scan_max_rows_eff:,}"
+
                     print(f"{msg} -> {rnd_npz.name}")
                     rnd_extract = _extract_local_fits_to_npz_reservoir(
                         rnd_raw,
@@ -557,10 +630,13 @@ def main(argv: list[str] | None = None) -> int:
                         chunk_rows=int(args.chunk_rows),
                         scan_max_rows=scan_max_rows_eff,
                     )
+                # 条件分岐: 前段条件が不成立で、`stream_missing` を追加評価する。
                 elif stream_missing:
                     print(f"[stream] {rnd_url} (reservoir {int(args.random_max_rows):,}, seed={int(args.sampling_seed)}) -> {rnd_npz.name}")
+                    # 条件分岐: `requests is None` を満たす経路を評価する。
                     if requests is None:
                         raise RuntimeError("requests is required to stream remote files")
+
                     with requests.get(rnd_url, stream=True, timeout=_REQ_TIMEOUT) as r:
                         r.raise_for_status()
                         f = r.raw
@@ -579,6 +655,7 @@ def main(argv: list[str] | None = None) -> int:
                             seed=int(args.sampling_seed),
                             total_rows=int(layout.n_rows) if scan_max_rows_eff is None else int(scan_max_rows_eff),
                         )
+
                     np.savez_compressed(rnd_npz, **cols)
                     rnd_extract = {
                         "rows_total": int(layout.n_rows),
@@ -606,11 +683,14 @@ def main(argv: list[str] | None = None) -> int:
 
             rows_total = layout.get("rows_total")
             row_bytes = layout.get("row_bytes")
+            # 条件分岐: `rnd_sampling == "reservoir"` を満たす経路を評価する。
             if rnd_sampling == "reservoir":
+                # 条件分岐: `scan_max_rows_eff is None` を満たす経路を評価する。
                 if scan_max_rows_eff is None:
                     rows_scanned = int(rows_total) if rows_total is not None else None
                 else:
                     rows_scanned = int(min(int(scan_max_rows_eff), int(rows_total))) if rows_total is not None else int(scan_max_rows_eff)
+
                 rnd_extract = {
                     "rows_total": int(rows_total) if rows_total is not None else None,
                     "rows_scanned": rows_scanned,
@@ -683,9 +763,12 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Exception:
         pass
+
     print(f"[ok] wrote: {manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

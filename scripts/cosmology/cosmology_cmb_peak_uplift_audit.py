@@ -29,6 +29,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -43,11 +44,15 @@ from scripts.summary import worklog  # noqa: E402
 
 
 def _fmt(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(float(x))
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -63,23 +68,34 @@ def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> 
         dst = public_dir / p.name
         shutil.copy2(p, dst)
         copied[p.name] = str(dst).replace("\\", "/")
+
     return copied
 
 
 def _grade(value: float, pass_limit: float, watch_limit: float) -> str:
     v = abs(float(value))
+    # 条件分岐: `v <= float(pass_limit)` を満たす経路を評価する。
     if v <= float(pass_limit):
         return "pass"
+
+    # 条件分岐: `v <= float(watch_limit)` を満たす経路を評価する。
+
     if v <= float(watch_limit):
         return "watch"
+
     return "reject"
 
 
 def _merge_status(parts: Sequence[str]) -> str:
+    # 条件分岐: `any(s == "reject" for s in parts)` を満たす経路を評価する。
     if any(s == "reject" for s in parts):
         return "reject"
+
+    # 条件分岐: `all(s == "pass" for s in parts)` を満たす経路を評価する。
+
     if all(s == "pass" for s in parts):
         return "pass"
+
     return "watch"
 
 
@@ -185,6 +201,7 @@ def _plot(out_png: Path, obs3: Sequence[Any], rows: Sequence[Dict[str, Any]], de
         pred_amp = [float(v["predicted"]["amplitude"]) for v in r["peaks"]]
         color = status_color.get(r["gate"]["overall_status"], "#777777")
         ax1.plot(n, pred_amp, marker="o", linewidth=1.6, alpha=0.95, color=color, label=f"{r['label']} ({r['gate']['overall_status']})")
+
     ax1.set_xlabel("peak index n")
     ax1.set_ylabel("peak amplitude A_n [μK²]")
     ax1.set_title("Planck TT first three peaks: amplitude comparison")
@@ -207,6 +224,7 @@ def _plot(out_png: Path, obs3: Sequence[Any], rows: Sequence[Dict[str, Any]], de
     for i, r in enumerate(rows):
         err = float(r["ratios"]["a3_a1_abs_rel_error"]) * 100.0
         ax2.text(i, ratios[i], f"{err:.1f}%", ha="center", va="bottom", fontsize=8)
+
     ax2.set_xticks(x)
     ax2.set_xticklabels(model_labels, rotation=15)
     ax2.set_ylabel("A3/A1")
@@ -312,6 +330,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         and key_checks["pressure_ruler_status"] == "pass"
     ):
         decision = "uplift_supported_by_p_corrections"
+    # 条件分岐: 前段条件が不成立で、`key_checks["pressure_improves_a3_a1"]` を追加評価する。
     elif key_checks["pressure_improves_a3_a1"]:
         decision = "uplift_partially_supported_watch"
     else:
@@ -386,14 +405,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _plot(out_png=out_png, obs3=obs3, rows=rows_sorted, decision=decision)
 
     copied: Dict[str, str] = {}
+    # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
         copied = _copy_outputs_to_public([out_json, out_csv, out_png], pub_dir)
 
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] png : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] copied to public: {len(copied)} files")
+
     print(
         "[summary] decision="
         f"{decision}, statuses="
@@ -427,8 +449,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -38,6 +38,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -52,19 +53,25 @@ def _relpath(p: Path) -> str:
 
 
 def _load_manifest(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"manifest not found: {path}")
+
     obj = json.loads(path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
     if not isinstance(obj, dict):
         raise ValueError("manifest must be a JSON object")
+
     return obj
 
 
 def _require_item(manifest: Dict[str, Any], *, sample: str, cap: str) -> Dict[str, Any]:
     key = f"{str(sample).strip()}:{str(cap).strip()}"
     it = (manifest.get("items") or {}).get(key)
+    # 条件分岐: `not isinstance(it, dict) or "galaxy" not in it or "random" not in it` を満たす経路を評価する。
     if not isinstance(it, dict) or "galaxy" not in it or "random" not in it:
         raise KeyError(f"missing item {key} (galaxy/random) in manifest")
+
     return it
 
 
@@ -74,29 +81,41 @@ def _load_npz(path: Path) -> Dict[str, np.ndarray]:
 
 
 def _concat_npz_dicts(dicts: List[Dict[str, np.ndarray]]) -> Dict[str, np.ndarray]:
+    # 条件分岐: `not dicts` を満たす経路を評価する。
     if not dicts:
         return {}
+
     keys = list(dicts[0].keys())
+    # 条件分岐: `not keys` を満たす経路を評価する。
     if not keys:
         return {}
+
     for d in dicts[1:]:
+        # 条件分岐: `list(d.keys()) != keys` を満たす経路を評価する。
         if list(d.keys()) != keys:
             raise ValueError("npz keys mismatch across inputs (ensure same extracted columns)")
+
     out: Dict[str, np.ndarray] = {}
     for k in keys:
         out[k] = np.concatenate([np.asarray(d[k]) for d in dicts], axis=0)
+
     return out
 
 
 def _downsample_rows(
     arrs: Dict[str, np.ndarray], *, target_rows: int | None, seed: int, shuffle: bool
 ) -> Tuple[Dict[str, np.ndarray], Dict[str, Any]]:
+    # 条件分岐: `not arrs` を満たす経路を評価する。
     if not arrs:
         return arrs, {"target_rows": target_rows, "selected_rows": 0}
+
     n = int(next(iter(arrs.values())).shape[0])
     for k, v in arrs.items():
+        # 条件分岐: `int(np.asarray(v).shape[0]) != n` を満たす経路を評価する。
         if int(np.asarray(v).shape[0]) != n:
             raise ValueError(f"array length mismatch in npz: key={k} n={np.asarray(v).shape[0]} vs {n}")
+
+    # 条件分岐: `target_rows is None or int(target_rows) >= n` を満たす経路を評価する。
 
     if target_rows is None or int(target_rows) >= n:
         sel = np.arange(n, dtype=np.int64)
@@ -106,6 +125,7 @@ def _downsample_rows(
         sel.sort()
 
     out = {k: np.asarray(v)[sel] for k, v in arrs.items()}
+    # 条件分岐: `shuffle and sel.size > 0` を満たす経路を評価する。
     if shuffle and sel.size > 0:
         rng2 = np.random.default_rng(int(seed) + 17_000_000)
         perm = np.arange(int(sel.size), dtype=np.int64)
@@ -196,37 +216,51 @@ def main(argv: List[str] | None = None) -> int:
     base_manifest = _load_manifest(in_manifest_path)
 
     in_dir_map: Dict[str, Path] = {}
+    # 条件分岐: `str(args.in_data_dir_map).strip()` を満たす経路を評価する。
     if str(args.in_data_dir_map).strip():
         for part in str(args.in_data_dir_map).split(","):
             p = part.strip()
+            # 条件分岐: `not p` を満たす経路を評価する。
             if not p:
                 continue
+
+            # 条件分岐: `"=" not in p` を満たす経路を評価する。
+
             if "=" not in p:
                 raise SystemExit(f"invalid --in-data-dir-map entry (expected sample=dir): {p!r}")
+
             s_key, s_dir = p.split("=", 1)
             s_key = str(s_key).strip().lower()
+            # 条件分岐: `not s_key` を満たす経路を評価する。
             if not s_key:
                 raise SystemExit(f"invalid --in-data-dir-map entry (empty sample): {p!r}")
+
             d = (_ROOT / Path(str(s_dir).strip())).resolve() if not Path(str(s_dir).strip()).is_absolute() else Path(str(s_dir).strip())
             in_dir_map[s_key] = d
 
     manifest_by_dir: Dict[Path, Dict[str, Any]] = {in_dir: base_manifest}
     for d in in_dir_map.values():
+        # 条件分岐: `d not in manifest_by_dir` を満たす経路を評価する。
         if d not in manifest_by_dir:
             manifest_by_dir[d] = _load_manifest(d / "manifest.json")
 
     samples = [s.strip().lower() for s in str(args.samples).split(",") if s.strip()]
+    # 条件分岐: `not samples` を満たす経路を評価する。
     if not samples:
         raise SystemExit("--samples must not be empty")
+
     out_sample = str(args.out_sample).strip().lower()
+    # 条件分岐: `not out_sample` を満たす経路を評価する。
     if not out_sample:
         raise SystemExit("--out-sample must not be empty")
 
     random_kind = str(args.random_kind).strip()
     random_rescale = str(args.random_rescale).strip()
     target_random_rows = int(args.target_random_rows)
+    # 条件分岐: `target_random_rows <= 0` を満たす経路を評価する。
     if target_random_rows <= 0:
         target_random_rows = 0
+
     shuffle_rows = not bool(args.no_shuffle)
 
     items_out: Dict[str, Any] = {}
@@ -241,15 +275,22 @@ def main(argv: List[str] | None = None) -> int:
             d_eff = in_dir_map.get(s_l, in_dir)
             m_eff = manifest_by_dir[d_eff]
             it = _require_item(m_eff, sample=s, cap=cap)
+            # 条件分岐: `str((it.get("random") or {}).get("kind", "")).strip() != random_kind` を満たす経路を評価する。
             if str((it.get("random") or {}).get("kind", "")).strip() != random_kind:
                 got = str((it.get("random") or {}).get("kind", "")).strip()
                 raise SystemExit(f"random kind mismatch for {s}:{cap}: expected {random_kind!r} but got {got!r}")
+
             gal_npz = (_ROOT / Path(str(it["galaxy"]["npz_path"]))).resolve()
             rnd_npz = (_ROOT / Path(str(it["random"]["npz_path"]))).resolve()
+            # 条件分岐: `not gal_npz.exists()` を満たす経路を評価する。
             if not gal_npz.exists():
                 raise SystemExit(f"missing galaxy npz: {gal_npz}")
+
+            # 条件分岐: `not rnd_npz.exists()` を満たす経路を評価する。
+
             if not rnd_npz.exists():
                 raise SystemExit(f"missing random npz: {rnd_npz}")
+
             gal_by_sample[s_l] = _load_npz(gal_npz)
             rnd_by_sample[s_l] = _load_npz(rnd_npz)
             in_paths["by_sample"][s_l] = {
@@ -260,7 +301,9 @@ def main(argv: List[str] | None = None) -> int:
             }
 
         # Optional: rescale per-sample random weights (constant per sample+cap).
+
         rescale_meta: Dict[str, Any] | None = None
+        # 条件分岐: `random_rescale == "match_combined_total" and len(samples) >= 2` を満たす経路を評価する。
         if random_rescale == "match_combined_total" and len(samples) >= 2:
             sum_wg: Dict[str, float] = {}
             sum_wr: Dict[str, float] = {}
@@ -272,17 +315,22 @@ def main(argv: List[str] | None = None) -> int:
                 sum_wr[s_l] = float(np.sum(wr))
 
             denom = float(sum(sum_wg.values()))
+            # 条件分岐: `not (denom > 0.0)` を満たす経路を評価する。
             if not (denom > 0.0):
                 raise SystemExit(f"invalid sum_wg total for cap={cap}")
+
             c_cap = float(sum(sum_wr.values())) / denom
             factors: Dict[str, float] = {}
             for s in samples:
                 s_l = str(s).strip().lower()
+                # 条件分岐: `not (sum_wr[s_l] > 0.0)` を満たす経路を評価する。
                 if not (sum_wr[s_l] > 0.0):
                     raise SystemExit(f"invalid sum_wr for cap={cap} sample={s_l}")
+
                 a = float(c_cap) * float(sum_wg[s_l]) / float(sum_wr[s_l])
                 factors[s_l] = a
                 rnd_by_sample[s_l]["WEIGHT"] = np.asarray(rnd_by_sample[s_l]["WEIGHT"], dtype=np.float64) * float(a)
+
             rescale_meta = {
                 "mode": random_rescale,
                 "weight_definition": "desi_default (WEIGHT_FKP*WEIGHT)",
@@ -377,6 +425,8 @@ def main(argv: List[str] | None = None) -> int:
     print(f"[ok] wrote: {out_manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

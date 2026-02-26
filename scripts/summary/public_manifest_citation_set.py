@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -50,9 +51,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -70,48 +74,68 @@ def _git(*args: str) -> Tuple[int, str]:
         )
     except Exception:
         return (1, "")
+
     return (int(proc.returncode), (proc.stdout or "").strip())
 
 
 def _head_short() -> str:
     rc, out = _git("rev-parse", "--short", "HEAD")
+    # 条件分岐: `rc != 0 or not out` を満たす経路を評価する。
     if rc != 0 or not out:
         return "no-git"
+
     return out
 
 
 def _tag_exists(tag: str) -> bool:
+    # 条件分岐: `not tag or tag == "(none)"` を満たす経路を評価する。
     if not tag or tag == "(none)":
         return False
+
     rc, _ = _git("rev-parse", "-q", "--verify", f"refs/tags/{tag}")
     return rc == 0
 
 
 def _latest_tag() -> str:
     rc, out = _git("tag", "--sort=-creatordate")
+    # 条件分岐: `rc != 0` を満たす経路を評価する。
     if rc != 0:
         return ""
+
     tags = [line.strip() for line in out.splitlines() if line.strip()]
     return tags[0] if tags else ""
 
 
 def _origin_url() -> str:
     rc, out = _git("remote", "get-url", "origin")
+    # 条件分岐: `rc != 0` を満たす経路を評価する。
     if rc != 0:
         return ""
+
     return out.strip()
 
 
 def _origin_web_base(origin: str) -> str:
     s = origin.strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return ""
+
+    # 条件分岐: `s.startswith("git@github.com:")` を満たす経路を評価する。
+
     if s.startswith("git@github.com:"):
         s = "https://github.com/" + s.split(":", 1)[1]
+
+    # 条件分岐: `s.startswith("ssh://git@github.com/")` を満たす経路を評価する。
+
     if s.startswith("ssh://git@github.com/"):
         s = "https://github.com/" + s.split("ssh://git@github.com/", 1)[1]
+
+    # 条件分岐: `s.endswith(".git")` を満たす経路を評価する。
+
     if s.endswith(".git"):
         s = s[:-4]
+
     return s.rstrip("/")
 
 
@@ -197,33 +221,50 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     continuity_json = Path(str(args.continuity_json))
+    # 条件分岐: `not continuity_json.is_absolute()` を満たす経路を評価する。
     if not continuity_json.is_absolute():
         continuity_json = (_ROOT / continuity_json).resolve()
+
     manifest_json = Path(str(args.manifest_json))
+    # 条件分岐: `not manifest_json.is_absolute()` を満たす経路を評価する。
     if not manifest_json.is_absolute():
         manifest_json = (_ROOT / manifest_json).resolve()
+
     topics_csv = Path(str(args.topics_csv))
+    # 条件分岐: `not topics_csv.is_absolute()` を満たす経路を評価する。
     if not topics_csv.is_absolute():
         topics_csv = (_ROOT / topics_csv).resolve()
+
     release_manifest_json = Path(str(args.release_manifest_json))
+    # 条件分岐: `not release_manifest_json.is_absolute()` を満たす経路を評価する。
     if not release_manifest_json.is_absolute():
         release_manifest_json = (_ROOT / release_manifest_json).resolve()
+
     out_json = Path(str(args.out_json))
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_csv = Path(str(args.out_csv))
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
     if not out_csv.is_absolute():
         out_csv = (_ROOT / out_csv).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_csv.parent.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not bool(args.skip_refresh_continuity)` を満たす経路を評価する。
     if not bool(args.skip_refresh_continuity):
         rc = public_outputs_manifest_continuity.main([])
+        # 条件分岐: `rc != 0` を満たす経路を評価する。
         if rc != 0:
             raise SystemExit(rc)
 
+    # 条件分岐: `not continuity_json.exists()` を満たす経路を評価する。
+
     if not continuity_json.exists():
         raise SystemExit(f"[fail] missing continuity JSON: {continuity_json}")
+
     continuity = _read_json(continuity_json)
     manifest = _read_json(manifest_json) if manifest_json.exists() else {}
     release_manifest = _read_json(release_manifest_json) if release_manifest_json.exists() else {}
@@ -249,6 +290,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         _artifact(out_csv, kind="public_manifest_citation_set_csv"),
         _artifact(release_manifest_json, kind="release_manifest_json", generated_utc=release_manifest.get("generated_utc")),
     ]
+    # 条件分岐: `snapshot_rel` を満たす経路を評価する。
     if snapshot_rel:
         artifacts.append(_artifact(snapshot_path, kind="public_manifest_snapshot_json"))
 
@@ -259,8 +301,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     manifest_ok = bool(manifest.get("ok", False))
     required_core_regressions = int(continuity_deltas.get("required_core_missing_regression_count") or 0)
 
+    # 条件分岐: `manifest_ok and continuity_ok and continuity_status == "pass_tree_stable" and...` を満たす経路を評価する。
     if manifest_ok and continuity_ok and continuity_status == "pass_tree_stable" and required_core_regressions == 0:
         decision = "ready_for_release_citation_lock"
+    # 条件分岐: 前段条件が不成立で、`manifest_ok and continuity_ok and required_core_regressions == 0` を追加評価する。
     elif manifest_ok and continuity_ok and required_core_regressions == 0:
         decision = "watch_before_release_tree_changed"
     else:
@@ -328,16 +372,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     csv_rows: List[Dict[str, Any]] = []
     for row in artifacts:
+        # 条件分岐: `row.get("kind") == "public_manifest_citation_set_csv"` を満たす経路を評価する。
         if row.get("kind") == "public_manifest_citation_set_csv":
             row = dict(row)
             row["exists"] = True
             row["size_bytes"] = None
             row["sha256"] = None
+
         csv_rows.append(row)
+
     _write_csv(out_csv, csv_rows)
 
     csv_art = _artifact(out_csv, kind="public_manifest_citation_set_csv")
     for row in artifacts:
+        # 条件分岐: `row.get("kind") == "public_manifest_citation_set_csv"` を満たす経路を評価する。
         if row.get("kind") == "public_manifest_citation_set_csv":
             row["exists"] = csv_art["exists"]
             row["size_bytes"] = csv_art["size_bytes"]
@@ -362,6 +410,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"- out_csv: {out_csv}")
     return 0 if decision != "reject_not_ready_for_release" else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

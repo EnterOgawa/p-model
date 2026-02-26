@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 import sys
 
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -33,10 +34,15 @@ def _rel(path: Path) -> str:
 
 
 def _gate_status(*, z_abs: float, hard: float, watch: float) -> str:
+    # 条件分岐: `z_abs <= watch` を満たす経路を評価する。
     if z_abs <= watch:
         return "pass"
+
+    # 条件分岐: `z_abs <= hard` を満たす経路を評価する。
+
     if z_abs <= hard:
         return "watch"
+
     return "reject"
 
 
@@ -253,8 +259,10 @@ def main() -> int:
                 z = (pred["li7h_pred"] - float(args.li7h_obs)) / float(args.li7h_sigma)
                 z_abs = abs(z)
                 status = _gate_status(z_abs=z_abs, hard=float(args.hard_z_threshold), watch=float(args.watch_z_threshold))
+                # 条件分岐: `status == "pass"` を満たす経路を評価する。
                 if status == "pass":
                     pass_count += 1
+
                 rows.append(
                     {
                         "q_b": float(q_b),
@@ -274,11 +282,13 @@ def main() -> int:
                         "survival_factor": float(pred["survival"]),
                     }
                 )
+
             pass_rate_map[q_idx, eta_idx] = pass_count / float(len(tnuc_values))
 
     status_counts = {"pass": 0, "watch": 0, "reject": 0}
     for row in rows:
         status_counts[str(row["status"])] += 1
+
     total_points = len(rows)
     z_abs_values = np.array([float(r["z_abs"]) for r in rows], dtype=float)
 
@@ -316,13 +326,18 @@ def main() -> int:
     reject_rows = [r for r in rows if str(r["status"]) == "reject"]
 
     def _bounds(data: list[dict[str, Any]], key: str) -> dict[str, float] | None:
+        # 条件分岐: `not data` を満たす経路を評価する。
         if not data:
             return None
+
         values = [float(d[key]) for d in data]
         return {"min": float(min(values)), "max": float(max(values))}
 
+    # 条件分岐: `center_status == "pass"` を満たす経路を評価する。
+
     if center_status == "pass":
         overall_status = "pass"
+    # 条件分岐: 前段条件が不成立で、`center_status == "watch"` を追加評価する。
     elif center_status == "watch":
         overall_status = "watch"
     else:
@@ -504,6 +519,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

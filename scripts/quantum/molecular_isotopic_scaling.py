@@ -19,8 +19,10 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _as_float(x: object) -> float | None:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)  # type: ignore[arg-type]
     except Exception:
         return None
@@ -32,25 +34,34 @@ def _reduced_mass(m1: float, m2: float) -> float:
 
 def _load_nist_h_isotope_masses_u(root: Path) -> tuple[dict[str, float], dict[str, Any]] | None:
     path = root / "data" / "quantum" / "sources" / "nist_isotopic_compositions_h" / "extracted_values.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     j = _read_json(path)
     isotopes = j.get("isotopes")
+    # 条件分岐: `not isinstance(isotopes, list)` を満たす経路を評価する。
     if not isinstance(isotopes, list):
         return None
 
     masses: dict[str, float] = {}
     for iso in isotopes:
+        # 条件分岐: `not isinstance(iso, dict)` を満たす経路を評価する。
         if not isinstance(iso, dict):
             continue
+
         sym = iso.get("symbol")
         a = iso.get("mass_number")
         m_u = iso.get("relative_atomic_mass_u")
+        # 条件分岐: `not isinstance(sym, str) or not isinstance(a, int)` を満たす経路を評価する。
         if not isinstance(sym, str) or not isinstance(a, int):
             continue
+
         m = _as_float(m_u)
+        # 条件分岐: `m is None` を満たす経路を評価する。
         if m is None:
             continue
+
         masses[f"{sym}{a}"] = m
 
     meta = {
@@ -71,8 +82,10 @@ def main() -> None:
     # Prefer primary-source-backed isotope masses (NIST). Fallback to mass-number approximation.
     mass_model: dict[str, Any] = {"kind": "mass_number_approx", "note": "Fallback: H=1, D=2 (dimensionless)."}
     m = _load_nist_h_isotope_masses_u(root)
+    # 条件分岐: `m is not None` を満たす経路を評価する。
     if m is not None:
         masses_u, meta = m
+        # 条件分岐: `"H1" in masses_u and "D2" in masses_u` を満たす経路を評価する。
         if "H1" in masses_u and "D2" in masses_u:
             mass_model = {
                 "kind": "nist_relative_atomic_mass_u",
@@ -82,9 +95,11 @@ def main() -> None:
             }
 
     def _get_mass(symbol_a: str) -> float:
+        # 条件分岐: `mass_model["kind"] == "nist_relative_atomic_mass_u"` を満たす経路を評価する。
         if mass_model["kind"] == "nist_relative_atomic_mass_u":
             return float(mass_model["masses_u"][symbol_a])
         # mass-number approximation
+
         return {"H1": 1.0, "D2": 2.0}[symbol_a]
 
     species = [
@@ -96,14 +111,19 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     for s in species:
         path = out_dir / f"molecular_{s['slug']}_baseline_metrics.json"
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             raise SystemExit(f"[fail] missing baseline metrics: {path}\nRun molecular_h2_baseline.py first.")
+
         j = _read_json(path)
         consts = j.get("constants")
+        # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
         if not isinstance(consts, dict):
             raise SystemExit(f"[fail] constants missing in: {path}")
+
         omega_e = _as_float(consts.get("omega_e_cm^-1"))
         be = _as_float(consts.get("B_e_cm^-1"))
+        # 条件分岐: `omega_e is None or be is None` を満たす経路を評価する。
         if omega_e is None or be is None:
             raise SystemExit(f"[fail] missing ωe or Be in: {path}")
 
@@ -123,6 +143,7 @@ def main() -> None:
         )
 
     # Use H2 as reference for reduced-mass scaling.
+
     ref = next(r for r in rows if r["slug"] == "h2")
     mu_ref = float(ref["mu"])
     omega_ref = float(ref["omega_e_cm^-1"])
@@ -138,6 +159,7 @@ def main() -> None:
         r["B_e_ratio_meas_over_pred"] = float(r["B_e_cm^-1"]) / be_pred
 
     # ---- Figure ----
+
     labels = [r["label"] for r in rows]
     x = list(range(len(labels)))
     omega_ratios = [r["omega_e_ratio_meas_over_pred"] for r in rows]
@@ -200,6 +222,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

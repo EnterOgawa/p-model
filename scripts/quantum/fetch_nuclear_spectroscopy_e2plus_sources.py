@@ -15,18 +15,25 @@ class FileSpec:
 
 
 def _parse_energy_to_keV(obj: object) -> tuple[float, float | None] | None:
+    # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
     if not isinstance(obj, dict):
         return None
+
     val_raw = obj.get("value")
+    # 条件分岐: `val_raw is None` を満たす経路を評価する。
     if val_raw is None:
         return None
+
     try:
         e_val = float(val_raw)
     except Exception:
         return None
+
     unit = str(obj.get("unit", "")).strip().lower()
+    # 条件分岐: `unit in {"kev", ""}` を満たす経路を評価する。
     if unit in {"kev", ""}:
         e_keV = float(e_val)
+    # 条件分岐: 前段条件が不成立で、`unit == "mev"` を追加評価する。
     elif unit == "mev":
         e_keV = float(e_val) * 1000.0
     else:
@@ -37,24 +44,31 @@ def _parse_energy_to_keV(obj: object) -> tuple[float, float | None] | None:
         e_sigma = float(sigma_raw) if sigma_raw is not None else None
     except Exception:
         e_sigma = None
+
     return float(e_keV), (float(e_sigma) if e_sigma is not None else None)
 
 
 def _parse_dimensionless(obj: object) -> tuple[float, float | None] | None:
+    # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
     if not isinstance(obj, dict):
         return None
+
     val_raw = obj.get("value")
+    # 条件分岐: `val_raw is None` を満たす経路を評価する。
     if val_raw is None:
         return None
+
     try:
         v = float(val_raw)
     except Exception:
         return None
+
     sigma_raw = obj.get("uncertainty")
     try:
         s = float(sigma_raw) if sigma_raw is not None else None
     except Exception:
         s = None
+
     return float(v), (float(s) if s is not None else None)
 
 
@@ -63,14 +77,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -79,8 +97,11 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=120) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -112,6 +133,7 @@ def main() -> None:
         FileSpec(url=secondary_url, relpath="secondary.json"),
     ]
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         for spec in files:
             _download(spec.url, src_dir / spec.relpath)
@@ -119,8 +141,12 @@ def main() -> None:
     missing: list[Path] = []
     for spec in files:
         p = src_dir / spec.relpath
+        # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
         if not p.exists() or p.stat().st_size == 0:
             missing.append(p)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
@@ -129,18 +155,25 @@ def main() -> None:
 
     primary = json.loads(primary_path.read_text(encoding="utf-8"))
     secondary = json.loads(secondary_path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(primary, dict) or not primary` を満たす経路を評価する。
     if not isinstance(primary, dict) or not primary:
         raise SystemExit(f"[fail] invalid primary.json (expected non-empty object): {primary_path}")
+
+    # 条件分岐: `not isinstance(secondary, dict) or not secondary` を満たす経路を評価する。
+
     if not isinstance(secondary, dict) or not secondary:
         raise SystemExit(f"[fail] invalid secondary.json (expected non-empty object): {secondary_path}")
 
     # key -> (Z, N, A, name)
+
     meta_by_key: dict[str, tuple[int, int, int, str]] = {}
     n_skipped_primary = 0
     for key, v in primary.items():
+        # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
         if not isinstance(v, dict):
             n_skipped_primary += 1
             continue
+
         try:
             Z = int(v.get("z", -1))
             N = int(v.get("n", -1))
@@ -148,9 +181,13 @@ def main() -> None:
         except Exception:
             n_skipped_primary += 1
             continue
+
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
+
         if Z < 1 or N < 0 or A < 2:
             n_skipped_primary += 1
             continue
+
         name = str(v.get("name") or v.get("label") or key)
         meta_by_key[str(key)] = (int(Z), int(N), int(A), name)
 
@@ -161,8 +198,10 @@ def main() -> None:
     n_bad_value = 0
 
     for key, v in secondary.items():
+        # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
         if not isinstance(v, dict):
             continue
+
         ese = v.get("excitedStateEnergies") if isinstance(v.get("excitedStateEnergies"), dict) else {}
 
         e2 = _parse_energy_to_keV(ese.get("firstTwoPlusEnergy"))
@@ -170,15 +209,21 @@ def main() -> None:
         e3m = _parse_energy_to_keV(ese.get("firstThreeMinusEnergy"))
         r42 = _parse_dimensionless(ese.get("firstFourPlusOverFirstTwoPlusEnergy"))
 
+        # 条件分岐: `e2 is None` を満たす経路を評価する。
         if e2 is None:
             n_missing_e2 += 1
+
+        # 条件分岐: `e2 is None and e4 is None and e3m is None and r42 is None` を満たす経路を評価する。
+
         if e2 is None and e4 is None and e3m is None and r42 is None:
             continue
 
         meta = meta_by_key.get(str(key))
+        # 条件分岐: `meta is None` を満たす経路を評価する。
         if meta is None:
             n_missing_meta += 1
             continue
+
         Z, N, A, name = meta
         row: dict[str, object] = {
             "key": str(key),
@@ -187,22 +232,33 @@ def main() -> None:
             "N": int(N),
             "A": int(A),
         }
+        # 条件分岐: `e2 is not None` を満たす経路を評価する。
         if e2 is not None:
             e2_keV, e2_sig = e2
             row["e2plus_keV"] = float(e2_keV)
             row["e2plus_sigma_keV"] = float(e2_sig) if e2_sig is not None else None
+
+        # 条件分岐: `e4 is not None` を満たす経路を評価する。
+
         if e4 is not None:
             e4_keV, e4_sig = e4
             row["e4plus_keV"] = float(e4_keV)
             row["e4plus_sigma_keV"] = float(e4_sig) if e4_sig is not None else None
+
+        # 条件分岐: `e3m is not None` を満たす経路を評価する。
+
         if e3m is not None:
             e3_keV, e3_sig = e3m
             row["e3minus_keV"] = float(e3_keV)
             row["e3minus_sigma_keV"] = float(e3_sig) if e3_sig is not None else None
+
+        # 条件分岐: `r42 is not None` を満たす経路を評価する。
+
         if r42 is not None:
             r_val, r_sig = r42
             row["r42"] = float(r_val)
             row["r42_sigma"] = float(r_sig) if r_sig is not None else None
+
         rows.append(
             row
         )
@@ -315,12 +371,15 @@ def main() -> None:
 
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item: dict[str, object] = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
+        # 条件分岐: `extra` を満たす経路を評価する。
         if extra:
             item.update(extra)
+
         manifest["files"].append(item)
 
     for spec in files:
         add_file(url=spec.url, path=src_dir / spec.relpath)
+
     add_file(url=None, path=out_e2, extra={"derived_from": [str(primary_path), str(secondary_path)]})
     add_file(url=None, path=out_multi, extra={"derived_from": [str(primary_path), str(secondary_path)]})
 
@@ -330,6 +389,8 @@ def main() -> None:
     print(f"[ok] extracted: {out_multi}")
     print(f"[ok] manifest : {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Set
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -80,15 +81,20 @@ _BUNDLE_SPECS: Dict[str, _BundleSpec] = {
 
 def _load_or_build_manifest(*, compute_hash: bool) -> Dict[str, Any]:
     manifest_path = _ROOT / "output" / "private" / "summary" / "release_manifest.json"
+    # 条件分岐: `(not manifest_path.exists()) or (manifest_path.stat().st_size <= 10)` を満たす経路を評価する。
     if (not manifest_path.exists()) or (manifest_path.stat().st_size <= 10):
         argv = [] if compute_hash else ["--no-hash"]
         rc = release_manifest.main(argv)
+        # 条件分岐: `rc != 0` を満たす経路を評価する。
         if rc != 0:
             raise RuntimeError("release_manifest failed")
+
     payload = _read_json(manifest_path)
+    # 条件分岐: `not payload.get("ok", False)` を満たす経路を評価する。
     if not payload.get("ok", False):
         missing = payload.get("missing_required") or []
         raise RuntimeError(f"release_manifest ok=false (missing_required={missing})")
+
     return payload
 
 
@@ -97,41 +103,62 @@ def _manifest_group_paths(payload: Dict[str, Any], group: str) -> List[Path]:
     items = files.get(group) or []
     out: List[Path] = []
     for it in items:
+        # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
         if not isinstance(it, dict):
             continue
+
         rel = str(it.get("path") or "")
+        # 条件分岐: `not rel` を満たす経路を評価する。
         if not rel:
             continue
+
+        # 条件分岐: `it.get("exists") is False` を満たす経路を評価する。
+
         if it.get("exists") is False:
             continue
+
         out.append((_ROOT / rel).resolve())
+
     return out
 
 
 def _iter_repo_files(root: Path, *, base: Path, patterns: Sequence[str]) -> Iterable[Path]:
     for pat in patterns:
         for p in base.rglob(pat):
+            # 条件分岐: `p.is_file()` を満たす経路を評価する。
             if p.is_file():
                 yield p
 
 
 def _collect_files(spec: _BundleSpec, payload: Dict[str, Any]) -> List[Path]:
     files: List[Path] = []
+    # 条件分岐: `spec.include_docs` を満たす経路を評価する。
     if spec.include_docs:
         # release_manifest uses "local_docs" as the group key.
         # Keep a fallback for older manifests.
         files += _manifest_group_paths(payload, "local_docs") or _manifest_group_paths(payload, "docs")
+
+    # 条件分岐: `spec.include_entrypoints` を満たす経路を評価する。
+
     if spec.include_entrypoints:
         files += _manifest_group_paths(payload, "entrypoints")
+
+    # 条件分岐: `spec.include_publish_outputs` を満たす経路を評価する。
+
     if spec.include_publish_outputs:
         files += _manifest_group_paths(payload, "publish_outputs")
 
+    # 条件分岐: `spec.include_public_outputs` を満たす経路を評価する。
+
     if spec.include_public_outputs:
         public_dir = _ROOT / "output" / "public"
+        # 条件分岐: `public_dir.exists()` を満たす経路を評価する。
         if public_dir.exists():
             public_files = [p for p in public_dir.rglob("*") if p.is_file()]
             public_files.sort(key=lambda p: _rel(p).lower())
             files += public_files
+
+    # 条件分岐: `spec.include_scripts_tree` を満たす経路を評価する。
 
     if spec.include_scripts_tree:
         scripts_dir = _ROOT / "scripts"
@@ -145,25 +172,31 @@ def _collect_files(spec: _BundleSpec, payload: Dict[str, Any]) -> List[Path]:
         )
 
     # De-dup while keeping stable order.
+
     seen: Set[str] = set()
     uniq: List[Path] = []
     for p in files:
         key = str(p.resolve()).lower()
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
         uniq.append(p)
+
     return uniq
 
 
 def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path], payload: Dict[str, Any]) -> None:
     out_zip.parent.mkdir(parents=True, exist_ok=True)
     tmp = out_zip.with_suffix(out_zip.suffix + ".tmp")
+    # 条件分岐: `tmp.exists()` を満たす経路を評価する。
     if tmp.exists():
         tmp.unlink()
 
     manifest_path = (_ROOT / "output" / "private" / "summary" / "release_manifest.json").resolve()
     file_set = {str(p.resolve()).lower() for p in files}
+    # 条件分岐: `manifest_path.exists() and (str(manifest_path).lower() not in file_set)` を満たす経路を評価する。
     if manifest_path.exists() and (str(manifest_path).lower() not in file_set):
         files = list(files) + [manifest_path]
 
@@ -175,8 +208,10 @@ def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path]
             sz = int(st.st_size)
         except Exception:
             sz = 0
+
         total_size += sz
         sizes.append({"path": _rel(p), "size_bytes": sz})
+
     sizes_sorted = sorted(sizes, key=lambda x: int(x.get("size_bytes") or 0), reverse=True)
 
     meta = {
@@ -199,12 +234,17 @@ def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path]
         zf.writestr("BUNDLE_INFO.json", json.dumps(meta, ensure_ascii=False, indent=2) + "\n")
         for p in files:
             arc = _rel(p)
+            # 条件分岐: `not arc` を満たす経路を評価する。
             if not arc:
                 continue
+
             zf.write(p, arcname=arc)
+
+    # 条件分岐: `out_zip.exists()` を満たす経路を評価する。
 
     if out_zip.exists():
         out_zip.unlink()
+
     tmp.replace(out_zip)
 
 
@@ -226,6 +266,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         if args.out_zip
         else (_ROOT / "output" / "private" / "summary" / f"pmodel_release_bundle_{spec.name}.zip")
     )
+    # 条件分岐: `not out_zip.is_absolute()` を満たす経路を評価する。
     if not out_zip.is_absolute():
         out_zip = (_ROOT / out_zip).resolve()
 
@@ -252,10 +293,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"- mode: {spec.name}")
     print(f"- out : {out_zip}")
     print(f"- files: {len(files)}")
+    # 条件分岐: `zip_size is not None` を満たす経路を評価する。
     if zip_size is not None:
         print(f"- zip_size_bytes: {zip_size}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

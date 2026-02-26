@@ -50,6 +50,7 @@ from typing import Any, Dict, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -87,8 +88,10 @@ def _set_japanese_font() -> None:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
 
+        # 条件分岐: `os.name != "nt"` を満たす経路を評価する。
         if os.name != "nt":
             win_font_dir = Path("/mnt/c/Windows/Fonts")
+            # 条件分岐: `win_font_dir.exists()` を満たす経路を評価する。
             if win_font_dir.exists():
                 # Prefer fonts that are commonly present on Windows installations.
                 # (Use addfont so the family name becomes selectable by rcParams.)
@@ -105,6 +108,7 @@ def _set_japanese_font() -> None:
                     "msmincho.ttc",
                 ]:
                     fp = win_font_dir / fname
+                    # 条件分岐: `fp.exists()` を満たす経路を評価する。
                     if fp.exists():
                         try:
                             fm.fontManager.addfont(str(fp))
@@ -121,6 +125,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -138,12 +143,18 @@ def _comoving_distance_lcdm_mpc_over_h(
       D_M = (c/100) * ∫_0^z dz'/E(z'),  E(z)=sqrt(Ωm(1+z)^3 + 1-Ωm)
     """
     z = np.asarray(z, dtype=float)
+    # 条件分岐: `np.any(z < 0)` を満たす経路を評価する。
     if np.any(z < 0):
         raise ValueError("z must be >= 0")
+
+    # 条件分岐: `not (0.0 < float(omega_m) < 1.0)` を満たす経路を評価する。
+
     if not (0.0 < float(omega_m) < 1.0):
         raise ValueError("omega_m must be in (0,1)")
+
     z_max_in = float(np.max(z)) if z.size else 0.0
     z_max = float(z_grid_max) if (z_grid_max is not None) else z_max_in
+    # 条件分岐: `z_max < z_max_in` を満たす経路を評価する。
     if z_max < z_max_in:
         raise ValueError(f"z_grid_max ({z_max:g}) must be >= max(z) ({z_max_in:g})")
 
@@ -164,8 +175,10 @@ def _comoving_distance_pbg_static_mpc_over_h(z: np.ndarray) -> np.ndarray:
     """
     z = np.asarray(z, dtype=float)
     op = 1.0 + z
+    # 条件分岐: `np.any(op <= 0.0)` を満たす経路を評価する。
     if np.any(op <= 0.0):
         raise ValueError("requires 1+z > 0")
+
     return (_C_OVER_100 * np.log(op)).astype(np.float64, copy=False)
 
 
@@ -188,6 +201,7 @@ def _z_cmb_dipole_from_obs_z(
     z_obs = np.asarray(z_obs, dtype=np.float64)
     ra = np.deg2rad(np.asarray(ra_deg, dtype=np.float64))
     dec = np.deg2rad(np.asarray(dec_deg, dtype=np.float64))
+    # 条件分岐: `ra.shape != z_obs.shape or dec.shape != z_obs.shape` を満たす経路を評価する。
     if ra.shape != z_obs.shape or dec.shape != z_obs.shape:
         raise ValueError("shape mismatch: z_obs, RA, DEC must have same shape")
 
@@ -225,28 +239,36 @@ def _select_redshift(cols: Dict[str, np.ndarray], *, z_source: str) -> tuple[np.
     - Other modes (cmb/cosmic) are supported only if the column exists.
     """
     z_source = str(z_source)
+    # 条件分岐: `z_source not in _Z_SOURCE_TO_COLUMN_CANDIDATES` を満たす経路を評価する。
     if z_source not in _Z_SOURCE_TO_COLUMN_CANDIDATES:
         raise ValueError(f"invalid z_source: {z_source} (expected one of {sorted(_Z_SOURCE_TO_COLUMN_CANDIDATES)})")
 
     tried = list(_Z_SOURCE_TO_COLUMN_CANDIDATES[z_source])
     for col in tried:
+        # 条件分岐: `col in cols` を満たす経路を評価する。
         if col in cols:
             z = np.asarray(cols[col], dtype=np.float64)
             return z, {"source": z_source, "column": col, "candidates": tried}
 
     # Fallback: if the catalog does not provide an explicit Z_CMB column,
     # approximate it from observed Z and sky position (RA/DEC).
+
     if z_source == "cmb":
         # Base (observed) redshift column.
         base_tried = list(_Z_SOURCE_TO_COLUMN_CANDIDATES["obs"])
         base_col = next((c for c in base_tried if c in cols), None)
+        # 条件分岐: `base_col is None` を満たす経路を評価する。
         if base_col is None:
             raise KeyError(
                 f"z_source=cmb requires one of columns {tried} (preferred) or {base_tried} (fallback), "
                 f"but available keys are {sorted(cols.keys())[:20]}..."
             )
+
+        # 条件分岐: `"RA" not in cols or "DEC" not in cols` を満たす経路を評価する。
+
         if "RA" not in cols or "DEC" not in cols:
             raise KeyError("z_source=cmb fallback requires RA/DEC columns")
+
         z_obs = np.asarray(cols[base_col], dtype=np.float64)
         z_cmb, meta = _z_cmb_dipole_from_obs_z(z_obs, ra_deg=np.asarray(cols["RA"]), dec_deg=np.asarray(cols["DEC"]))
         return z_cmb, {
@@ -255,6 +277,7 @@ def _select_redshift(cols: Dict[str, np.ndarray], *, z_source: str) -> tuple[np.
             "candidates": tried,
             "computed": {"from": {"source": "obs", "column": base_col, "candidates": base_tried}, **meta},
         }
+
     raise KeyError(
         f"z_source={z_source} requires one of columns {tried}, but available keys are {sorted(cols.keys())[:20]}..."
     )
@@ -272,6 +295,7 @@ def _comoving_distance_mpc_over_h(
     Unified distance-mapping interface (z -> D_M) for swapping models.
     """
     model = str(model)
+    # 条件分岐: `model == "lcdm"` を満たす経路を評価する。
     if model == "lcdm":
         z_grid_max = float(lcdm_z_grid_max) if (lcdm_z_grid_max is not None) else (float(np.max(z)) if z.size else 0.0)
         dm = _comoving_distance_lcdm_mpc_over_h(
@@ -291,16 +315,21 @@ def _comoving_distance_mpc_over_h(
             "params": {"Omega_m": float(lcdm_omega_m)},
         }
         return dm, meta
+
+    # 条件分岐: `model == "pbg"` を満たす経路を評価する。
+
     if model == "pbg":
         dm = _comoving_distance_pbg_static_mpc_over_h(z)
         meta = {"model": "pbg", "dm_definition": "D_M=(c/100) ln(1+z)", "integrator": {"method": "analytic"}, "params": {}}
         return dm, meta
+
     raise ValueError(f"invalid distance model: {model}")
 
 
 def _ones_like_any(cols: Dict[str, np.ndarray]) -> np.ndarray:
     for v in cols.values():
         return np.ones(int(np.asarray(v).shape[0]), dtype=np.float64)
+
     return np.ones(0, dtype=np.float64)
 
 
@@ -315,6 +344,7 @@ def _weights_galaxy(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
       - none:         w = 1
     """
     scheme = str(scheme)
+    # 条件分岐: `scheme == "boss_default"` を満たす経路を評価する。
     if scheme == "boss_default":
         w_fkp = np.asarray(cols["WEIGHT_FKP"], dtype=np.float64)
         w_cp = np.asarray(cols["WEIGHT_CP"], dtype=np.float64)
@@ -327,6 +357,9 @@ def _weights_galaxy(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
             "columns": ["WEIGHT_FKP", "WEIGHT_SYSTOT", "WEIGHT_CP", "WEIGHT_NOZ"],
         }
         return w, meta
+
+    # 条件分岐: `scheme == "desi_default"` を満たす経路を評価する。
+
     if scheme == "desi_default":
         w_fkp = np.asarray(cols["WEIGHT_FKP"], dtype=np.float64)
         w_base = np.asarray(cols["WEIGHT"], dtype=np.float64)
@@ -337,14 +370,21 @@ def _weights_galaxy(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
             "columns": ["WEIGHT_FKP", "WEIGHT"],
         }
         return w, meta
+
+    # 条件分岐: `scheme == "fkp_only"` を満たす経路を評価する。
+
     if scheme == "fkp_only":
         w = np.asarray(cols["WEIGHT_FKP"], dtype=np.float64)
         meta = {"scheme": scheme, "definition": "w=WEIGHT_FKP", "columns": ["WEIGHT_FKP"]}
         return w, meta
+
+    # 条件分岐: `scheme == "none"` を満たす経路を評価する。
+
     if scheme == "none":
         w = _ones_like_any(cols)
         meta = {"scheme": scheme, "definition": "w=1", "columns": []}
         return w, meta
+
     raise ValueError(f"invalid weight scheme: {scheme} (expected boss_default/desi_default/fkp_only/none)")
 
 
@@ -359,6 +399,7 @@ def _weights_random(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
       - none:         w = 1
     """
     scheme = str(scheme)
+    # 条件分岐: `scheme == "desi_default"` を満たす経路を評価する。
     if scheme == "desi_default":
         w_fkp = np.asarray(cols["WEIGHT_FKP"], dtype=np.float64)
         w_base = np.asarray(cols["WEIGHT"], dtype=np.float64)
@@ -369,14 +410,21 @@ def _weights_random(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
             "columns": ["WEIGHT_FKP", "WEIGHT"],
         }
         return w, meta
+
+    # 条件分岐: `scheme in ("boss_default", "fkp_only")` を満たす経路を評価する。
+
     if scheme in ("boss_default", "fkp_only"):
         w = np.asarray(cols["WEIGHT_FKP"], dtype=np.float64)
         meta = {"scheme": scheme, "definition": "w=WEIGHT_FKP", "columns": ["WEIGHT_FKP"]}
         return w, meta
+
+    # 条件分岐: `scheme == "none"` を満たす経路を評価する。
+
     if scheme == "none":
         w = _ones_like_any(cols)
         meta = {"scheme": scheme, "definition": "w=1", "columns": []}
         return w, meta
+
     raise ValueError(f"invalid weight scheme: {scheme} (expected boss_default/desi_default/fkp_only/none)")
 
 
@@ -398,9 +446,13 @@ def _weights_galaxy_recon(
     """
     scheme = str(scheme)
     pair_weight_scheme = str(pair_weight_scheme)
+    # 条件分岐: `scheme == "same"` を満たす経路を評価する。
     if scheme == "same":
         w, meta = _weights_galaxy(cols, scheme=pair_weight_scheme)
         return w, {"scheme": scheme, "resolved_scheme": pair_weight_scheme, "resolved": meta}
+
+    # 条件分岐: `scheme == "boss_recon"` を満たす経路を評価する。
+
     if scheme == "boss_recon":
         w_cp = np.asarray(cols["WEIGHT_CP"], dtype=np.float64)
         w_noz = np.asarray(cols["WEIGHT_NOZ"], dtype=np.float64)
@@ -412,6 +464,7 @@ def _weights_galaxy_recon(
             "columns": ["WEIGHT_SYSTOT", "WEIGHT_CP", "WEIGHT_NOZ"],
         }
         return w, meta
+
     raise ValueError(f"invalid recon weight scheme: {scheme} (expected same/boss_recon)")
 
 
@@ -427,13 +480,18 @@ def _weights_random_recon(
     """
     scheme = str(scheme)
     pair_weight_scheme = str(pair_weight_scheme)
+    # 条件分岐: `scheme == "same"` を満たす経路を評価する。
     if scheme == "same":
         w, meta = _weights_random(cols, scheme=pair_weight_scheme)
         return w, {"scheme": scheme, "resolved_scheme": pair_weight_scheme, "resolved": meta}
+
+    # 条件分岐: `scheme == "boss_recon"` を満たす経路を評価する。
+
     if scheme == "boss_recon":
         w = _ones_like_any(cols)
         meta = {"scheme": scheme, "definition": "w=1", "columns": []}
         return w, meta
+
     raise ValueError(f"invalid recon weight scheme: {scheme} (expected same/boss_recon)")
 
 
@@ -444,9 +502,12 @@ def _load_npz(path: Path) -> Dict[str, np.ndarray]:
 
 def _sector_keys(cols: Dict[str, np.ndarray], *, sector_key: str) -> np.ndarray | None:
     sector_key = str(sector_key).strip().lower()
+    # 条件分岐: `sector_key == "isect"` を満たす経路を評価する。
     if sector_key == "isect":
+        # 条件分岐: `"ISECT" not in cols` を満たす経路を評価する。
         if "ISECT" not in cols:
             return None
+
         isect = np.asarray(cols["ISECT"])
         m = np.isfinite(isect)
         is_i = isect.astype(np.int64, copy=False)
@@ -454,13 +515,19 @@ def _sector_keys(cols: Dict[str, np.ndarray], *, sector_key: str) -> np.ndarray 
         out[m] = is_i[m]
         return out
 
+    # 条件分岐: `sector_key == "ipoly_isect"` を満たす経路を評価する。
+
     if sector_key == "ipoly_isect":
+        # 条件分岐: `"IPOLY" not in cols or "ISECT" not in cols` を満たす経路を評価する。
         if "IPOLY" not in cols or "ISECT" not in cols:
             return None
+
         ip = np.asarray(cols["IPOLY"])
         isect = np.asarray(cols["ISECT"])
+        # 条件分岐: `ip.shape != isect.shape` を満たす経路を評価する。
         if ip.shape != isect.shape:
             raise ValueError("IPOLY/ISECT shape mismatch")
+
         m = np.isfinite(ip) & np.isfinite(isect)
         ip_i = ip.astype(np.int64, copy=False)
         is_i = isect.astype(np.int64, copy=False)
@@ -479,18 +546,22 @@ def _resolve_manifest_path(p: str) -> Path:
       C:\\...  -> /mnt/c/...
     """
     p = str(p).strip()
+    # 条件分岐: `not p` を満たす経路を評価する。
     if not p:
         raise ValueError("empty path in manifest")
 
     # Legacy: Windows absolute path in a WSL run.
+
     if os.name != "nt" and _WIN_ABS_RE.match(p):
         drive = p[0].lower()
         rest = p[2:].lstrip("\\/").replace("\\", "/")
         return Path(f"/mnt/{drive}/{rest}")
 
     path = Path(p)
+    # 条件分岐: `path.is_absolute()` を満たす経路を評価する。
     if path.is_absolute():
         return path
+
     return _ROOT / path
 
 
@@ -502,8 +573,10 @@ def _growth_rate_lcdm(omega_m0: float, z: float) -> float:
     z = float(z)
     op = 1.0 + z
     ez2 = float(omega_m0) * op**3 + (1.0 - float(omega_m0))
+    # 条件分岐: `ez2 <= 0` を満たす経路を評価する。
     if ez2 <= 0:
         return float("nan")
+
     omz = float(omega_m0) * op**3 / ez2
     return float(omz**0.55)
 
@@ -537,13 +610,22 @@ def _build_recon_box(
     xyz_all: np.ndarray, *, ngrid: int, pad_fraction: float, box_shape: str
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray, dict[str, Any]]:
     xyz_all = np.asarray(xyz_all, dtype=np.float64)
+    # 条件分岐: `xyz_all.ndim != 2 or xyz_all.shape[1] != 3` を満たす経路を評価する。
     if xyz_all.ndim != 2 or xyz_all.shape[1] != 3:
         raise ValueError("xyz_all must be (N,3)")
+
+    # 条件分岐: `not (int(ngrid) >= 16)` を満たす経路を評価する。
+
     if not (int(ngrid) >= 16):
         raise ValueError("--recon-grid must be >= 16")
+
+    # 条件分岐: `not (float(pad_fraction) >= 0.0)` を満たす経路を評価する。
+
     if not (float(pad_fraction) >= 0.0):
         raise ValueError("--recon-pad-fraction must be >= 0")
+
     box_shape = str(box_shape)
+    # 条件分岐: `box_shape not in ("rect", "cube")` を満たす経路を評価する。
     if box_shape not in ("rect", "cube"):
         raise ValueError("--recon-box-shape must be rect/cube")
 
@@ -552,6 +634,7 @@ def _build_recon_box(
     span = mx - mn
     # Guard against degenerate axes.
     span = np.where(span > 0.0, span, 1.0)
+    # 条件分岐: `box_shape == "cube"` を満たす経路を評価する。
     if box_shape == "cube":
         side = float(np.max(span))
         side = side if side > 0.0 else 1.0
@@ -563,6 +646,7 @@ def _build_recon_box(
         pad = float(pad_fraction) * span
         origin = mn - pad
         box = span + 2.0 * pad
+
     cell = box / float(int(ngrid))
     meta = {
         "origin_mpc_over_h": origin.tolist(),
@@ -590,9 +674,12 @@ def _pca_rotation_matrix(xyz_all: np.ndarray) -> tuple[np.ndarray, dict[str, Any
       effective grid resolution along the longest axis without changing physics.
     """
     xyz_all = np.asarray(xyz_all, dtype=np.float64)
+    # 条件分岐: `xyz_all.ndim != 2 or xyz_all.shape[1] != 3` を満たす経路を評価する。
     if xyz_all.ndim != 2 or xyz_all.shape[1] != 3:
         raise ValueError("xyz_all must be (N,3)")
+
     n = int(xyz_all.shape[0])
+    # 条件分岐: `n < 3` を満たす経路を評価する。
     if n < 3:
         r = np.eye(3, dtype=np.float64)
         return r, {"name": "pca", "method": "degenerate_n<3", "n": n, "matrix": r.tolist(), "det": 1.0}
@@ -605,8 +692,12 @@ def _pca_rotation_matrix(xyz_all: np.ndarray) -> tuple[np.ndarray, dict[str, Any
     eigvals = eigvals[idx]
     eigvecs = eigvecs[:, idx]
     det = float(np.linalg.det(eigvecs))
+    # 条件分岐: `not np.isfinite(det)` を満たす経路を評価する。
     if not np.isfinite(det):
         det = 0.0
+
+    # 条件分岐: `det < 0.0` を満たす経路を評価する。
+
     if det < 0.0:
         # Enforce right-handed rotation.
         eigvecs[:, 2] *= -1.0
@@ -630,10 +721,15 @@ def _histogram3d_weighted(
 ) -> np.ndarray:
     xyz = np.asarray(xyz, dtype=np.float64)
     w = np.asarray(w, dtype=np.float64)
+    # 条件分岐: `xyz.ndim != 2 or xyz.shape[1] != 3` を満たす経路を評価する。
     if xyz.ndim != 2 or xyz.shape[1] != 3:
         raise ValueError("xyz must be (N,3)")
+
+    # 条件分岐: `w.shape[0] != xyz.shape[0]` を満たす経路を評価する。
+
     if w.shape[0] != xyz.shape[0]:
         raise ValueError("weights shape mismatch")
+
     origin = np.asarray(origin, dtype=np.float64).reshape(3)
     box = np.asarray(box, dtype=np.float64).reshape(3)
 
@@ -655,19 +751,28 @@ def _histogram3d_weighted_cic(
     """
     xyz = np.asarray(xyz, dtype=np.float64)
     w = np.asarray(w, dtype=np.float64)
+    # 条件分岐: `xyz.ndim != 2 or xyz.shape[1] != 3` を満たす経路を評価する。
     if xyz.ndim != 2 or xyz.shape[1] != 3:
         raise ValueError("xyz must be (N,3)")
+
+    # 条件分岐: `w.shape[0] != xyz.shape[0]` を満たす経路を評価する。
+
     if w.shape[0] != xyz.shape[0]:
         raise ValueError("weights shape mismatch")
+
     origin = np.asarray(origin, dtype=np.float64).reshape(3)
     cell = np.asarray(cell, dtype=np.float64).reshape(3)
+    # 条件分岐: `np.any(cell <= 0.0)` を満たす経路を評価する。
     if np.any(cell <= 0.0):
         raise ValueError("cell must be > 0")
+
     n = int(ngrid)
+    # 条件分岐: `not (n >= 16)` を満たす経路を評価する。
     if not (n >= 16):
         raise ValueError("ngrid must be >= 16")
 
     # Treat grid values as cell-centered (i+0.5). Convert to that coordinate system.
+
     g = (xyz - origin[None, :]) / cell[None, :] - 0.5
     i0 = np.floor(g).astype(np.int64)
     frac = (g - i0).astype(np.float64, copy=False)
@@ -685,8 +790,10 @@ def _histogram3d_weighted_cic(
 
     def _add(ix: np.ndarray, iy: np.ndarray, iz: np.ndarray, ww: np.ndarray) -> None:
         m = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n) & (iz >= 0) & (iz < n) & np.isfinite(ww)
+        # 条件分岐: `not np.any(m)` を満たす経路を評価する。
         if not np.any(m):
             return
+
         np.add.at(out, (ix[m], iy[m], iz[m]), ww[m].astype(np.float32, copy=False))
 
     base = w.astype(np.float64, copy=False)
@@ -727,23 +834,37 @@ def _recon_displacement_grid_ngp(
     - NGP assignment/interpolation is used for simplicity (Phase B baseline).
     """
     delta = np.asarray(delta, dtype=np.float32)
+    # 条件分岐: `delta.ndim != 3 or delta.shape[0] != delta.shape[1] or delta.shape[1] != delt...` を満たす経路を評価する。
     if delta.ndim != 3 or delta.shape[0] != delta.shape[1] or delta.shape[1] != delta.shape[2]:
         raise ValueError("delta must be cubic (ngrid,ngrid,ngrid)")
+
     n = int(delta.shape[0])
+    # 条件分岐: `not (n >= 16)` を満たす経路を評価する。
     if not (n >= 16):
         raise ValueError("ngrid must be >= 16")
+
     cell = np.asarray(cell, dtype=np.float64).reshape(3)
+    # 条件分岐: `np.any(cell <= 0.0)` を満たす経路を評価する。
     if np.any(cell <= 0.0):
         raise ValueError("cell must be > 0")
+
+    # 条件分岐: `not (float(smoothing_mpc_over_h) > 0.0)` を満たす経路を評価する。
+
     if not (float(smoothing_mpc_over_h) > 0.0):
         raise ValueError("--recon-smoothing must be > 0")
+
+    # 条件分岐: `not (float(bias) > 0.0)` を満たす経路を評価する。
+
     if not (float(bias) > 0.0):
         raise ValueError("--recon-bias must be > 0")
+
     psi_k_sign = int(psi_k_sign)
+    # 条件分岐: `psi_k_sign not in (-1, 1)` を満たす経路を評価する。
     if psi_k_sign not in (-1, 1):
         raise ValueError("psi_k_sign must be -1 or +1")
 
     # FFT of overdensity field.
+
     delta_k = np.fft.rfftn(delta)
 
     twopi = 2.0 * math.pi
@@ -763,11 +884,14 @@ def _recon_displacement_grid_ngp(
         and (los_unit is not None)
     )
 
+    # 条件分岐: `do_rsd` を満たす経路を評価する。
     if do_rsd:
         los = np.asarray(los_unit, dtype=np.float64).reshape(3)
         los_norm = float(np.linalg.norm(los))
+        # 条件分岐: `not (np.isfinite(los_norm) and (los_norm > 0.0))` を満たす経路を評価する。
         if not (np.isfinite(los_norm) and (los_norm > 0.0)):
             raise ValueError("invalid los_unit for recon")
+
         los = los / los_norm
         # Global-LOS (plane-parallel) approximation:
         # Two common plane-parallel (global LOS) approximations are supported:
@@ -786,22 +910,27 @@ def _recon_displacement_grid_ngp(
         )
         with np.errstate(divide="ignore", invalid="ignore"):
             mu2 = (kn * kn) / k2
+
         mu2 = np.where(np.isfinite(mu2), mu2, 0.0)
         rsd_denom_model = str(rsd_denom_model)
         beta: float | None = None
+        # 条件分岐: `rsd_denom_model == "kaiser_beta"` を満たす経路を評価する。
         if rsd_denom_model == "kaiser_beta":
             beta = float(f_eff) / float(bias)
             denom_rsd = (1.0 + beta * mu2).astype(np.float64, copy=False)
+        # 条件分岐: 前段条件が不成立で、`rsd_denom_model == "padmanabhan_pp"` を追加評価する。
         elif rsd_denom_model == "padmanabhan_pp":
             denom_rsd = (1.0 + float(f_eff) * mu2).astype(np.float64, copy=False)
         else:
             raise ValueError(f"invalid rsd_denom_model: {rsd_denom_model}")
         # (k=0) mode is already nulled by k2=inf; keep denom finite to avoid 0/0.
+
         denom_rsd[0, 0, 0] = 1.0
         delta_k_sm = (delta_k * smooth) / (float(bias) * k2 * denom_rsd)
     else:
         delta_k_sm = (delta_k * smooth) / (float(bias) * k2)
     # Ψ_i(k) = (sign) i k_i δ(k) / k^2
+
     axes = (0, 1, 2)
     sign = float(psi_k_sign)
     psi_x = np.fft.irfftn((sign * 1j) * kx[:, None, None] * delta_k_sm, s=delta.shape, axes=axes).astype(
@@ -830,12 +959,15 @@ def _recon_displacement_grid_ngp(
         "assignment": "ngp",
         "dtype": "float32",
     }
+    # 条件分岐: `do_rsd` を満たす経路を評価する。
     if do_rsd:
         meta["rsd_solver"]["los_unit"] = [float(x) for x in los.tolist()]
         meta["rsd_solver"]["denom_model"] = str(rsd_denom_model)
+        # 条件分岐: `rsd_denom_model == "kaiser_beta"` を満たす経路を評価する。
         if rsd_denom_model == "kaiser_beta":
             # Only defined for the Kaiser-inversion branch.
             meta["rsd_solver"]["beta"] = float(beta) if (beta is not None) else None
+
     return psi_x, psi_y, psi_z, meta
 
 
@@ -846,8 +978,10 @@ def _sample_grid_ngp(
     origin = np.asarray(origin, dtype=np.float64).reshape(3)
     cell = np.asarray(cell, dtype=np.float64).reshape(3)
     n = int(psi_x.shape[0])
+    # 条件分岐: `xyz.ndim != 2 or xyz.shape[1] != 3` を満たす経路を評価する。
     if xyz.ndim != 2 or xyz.shape[1] != 3:
         raise ValueError("xyz must be (N,3)")
+
     idx = np.floor((xyz - origin[None, :]) / cell[None, :]).astype(np.int64)
     idx = np.clip(idx, 0, n - 1)
     ix = idx[:, 0]
@@ -869,12 +1003,17 @@ def _sample_grid_cic(
     origin = np.asarray(origin, dtype=np.float64).reshape(3)
     cell = np.asarray(cell, dtype=np.float64).reshape(3)
     n = int(psi_x.shape[0])
+    # 条件分岐: `xyz.ndim != 2 or xyz.shape[1] != 3` を満たす経路を評価する。
     if xyz.ndim != 2 or xyz.shape[1] != 3:
         raise ValueError("xyz must be (N,3)")
+
+    # 条件分岐: `np.any(cell <= 0.0)` を満たす経路を評価する。
+
     if np.any(cell <= 0.0):
         raise ValueError("cell must be > 0")
 
     # Treat grid values as cell-centered (i+0.5). Convert to that coordinate system.
+
     g = (xyz - origin[None, :]) / cell[None, :] - 0.5
     i0 = np.floor(g).astype(np.int64)
     frac = (g - i0).astype(np.float64, copy=False)
@@ -894,8 +1033,10 @@ def _sample_grid_cic(
 
     def _acc(ix: np.ndarray, iy: np.ndarray, iz: np.ndarray, ww: np.ndarray) -> None:
         m = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n) & (iz >= 0) & (iz < n) & np.isfinite(ww)
+        # 条件分岐: `not np.any(m)` を満たす経路を評価する。
         if not np.any(m):
             return
+
         wv = ww[m].astype(np.float64, copy=False)
         dx[m] += wv * np.asarray(psi_x[ix[m], iy[m], iz[m]], dtype=np.float64)
         dy[m] += wv * np.asarray(psi_y[ix[m], iy[m], iz[m]], dtype=np.float64)
@@ -946,34 +1087,49 @@ def _apply_reconstruction_grid(
     Returns updated (ra,dec,dist) for galaxies and randoms, and reconstruction metadata.
     """
     recon_mode = str(recon_mode)
+    # 条件分岐: `recon_mode not in ("ani", "iso")` を満たす経路を評価する。
     if recon_mode not in ("ani", "iso"):
         raise ValueError("--recon-mode must be ani/iso")
+
     recon_rsd_solver = str(recon_rsd_solver)
+    # 条件分岐: `recon_rsd_solver not in ("global_constant", "padmanabhan_pp", "none")` を満たす経路を評価する。
     if recon_rsd_solver not in ("global_constant", "padmanabhan_pp", "none"):
         raise ValueError("--recon-rsd-solver must be global_constant/padmanabhan_pp/none")
+
     recon_los_shift = str(recon_los_shift)
+    # 条件分岐: `recon_los_shift not in ("global_mean_direction", "radial")` を満たす経路を評価する。
     if recon_los_shift not in ("global_mean_direction", "radial"):
         raise ValueError("--recon-los-shift must be global_mean_direction/radial")
+
     recon_rsd_shift = float(recon_rsd_shift)
+    # 条件分岐: `not np.isfinite(recon_rsd_shift)` を満たす経路を評価する。
     if not np.isfinite(recon_rsd_shift):
         raise ValueError("--recon-rsd-shift must be finite")
+
     recon_assignment = str(recon_assignment)
+    # 条件分岐: `recon_assignment not in ("ngp", "cic")` を満たす経路を評価する。
     if recon_assignment not in ("ngp", "cic"):
         raise ValueError("--recon-assignment must be ngp/cic")
+
     recon_psi_k_sign = int(recon_psi_k_sign)
+    # 条件分岐: `recon_psi_k_sign not in (-1, 1)` を満たす経路を評価する。
     if recon_psi_k_sign not in (-1, 1):
         raise ValueError("--recon-psi-k-sign must be -1 or +1")
+
     recon_box_frame = str(recon_box_frame)
+    # 条件分岐: `recon_box_frame not in ("raw", "pca")` を満たす経路を評価する。
     if recon_box_frame not in ("raw", "pca"):
         raise ValueError("--recon-box-frame must be raw/pca")
 
     # Convert to Cartesian.
+
     xyz_g0 = _radec_to_xyz_mpc_over_h(ra_g, dec_g, d_g)
     xyz_r0 = _radec_to_xyz_mpc_over_h(ra_r, dec_r, d_r)
     xyz_all0 = np.concatenate([xyz_g0, xyz_r0], axis=0)
 
     rot: np.ndarray | None = None
     frame_meta: dict[str, Any] = {"name": "raw"}
+    # 条件分岐: `recon_box_frame == "pca"` を満たす経路を評価する。
     if recon_box_frame == "pca":
         rot, frame_meta = _pca_rotation_matrix(xyz_all0)
         xyz_g = xyz_g0 @ rot
@@ -991,6 +1147,7 @@ def _apply_reconstruction_grid(
         box_shape=str(recon_box_shape),
     )
 
+    # 条件分岐: `recon_assignment == "cic"` を満たす経路を評価する。
     if recon_assignment == "cic":
         gal_grid = _histogram3d_weighted_cic(xyz_g, w_g, origin=origin, cell=cell, ngrid=int(recon_grid))
         rnd_grid = _histogram3d_weighted_cic(xyz_r, w_r, origin=origin, cell=cell, ngrid=int(recon_grid))
@@ -1009,16 +1166,24 @@ def _apply_reconstruction_grid(
     # which can explode delta=(n-expected)/expected and yield unphysical displacements.
     # We therefore define an expected floor based on a fraction of the median expected in nonzero cells.
     expected_nonzero = expected[expected > 0.0]
+    # 条件分岐: `expected_nonzero.size == 0` を満たす経路を評価する。
     if expected_nonzero.size == 0:
         raise ValueError("recon expected grid is entirely zero (check random catalog / footprint)")
+
+    # 条件分岐: `recon_mask_expected_frac is None` を満たす経路を評価する。
+
     if recon_mask_expected_frac is None:
         # Empirically, CIC tends to create many "tiny expected" cells. Using a stronger floor (>= median)
         # keeps the effective mask closer to the NGP case (~few % of cells) and avoids delta blow-up.
         recon_mask_expected_frac_eff = 1.5 if (recon_assignment == "cic") else 0.0
     else:
         recon_mask_expected_frac_eff = float(recon_mask_expected_frac)
+
+    # 条件分岐: `not (recon_mask_expected_frac_eff >= 0.0)` を満たす経路を評価する。
+
     if not (recon_mask_expected_frac_eff >= 0.0):
         raise ValueError("--recon-mask-expected-frac must be >= 0")
+
     expected_median_nonzero = float(np.median(expected_nonzero))
     expected_floor = float(recon_mask_expected_frac_eff) * expected_median_nonzero
 
@@ -1034,17 +1199,23 @@ def _apply_reconstruction_grid(
     need_global_los = (recon_mode == "ani") and (
         (recon_rsd_solver in ("global_constant", "padmanabhan_pp")) or (recon_los_shift == "global_mean_direction")
     )
+    # 条件分岐: `need_global_los` を満たす経路を評価する。
     if need_global_los:
         # Use a global LOS direction (plane-parallel) as an approximation for wide-angle surveys.
         # This is used either by the optional RSD-aware solver, or by the global-LOS shift term.
         v = np.sum(np.asarray(xyz_g, dtype=np.float64) * np.asarray(w_g, dtype=np.float64)[:, None], axis=0)
         v_norm = float(np.linalg.norm(v))
+        # 条件分岐: `not (np.isfinite(v_norm) and (v_norm > 0.0))` を満たす経路を評価する。
         if not (np.isfinite(v_norm) and (v_norm > 0.0)):
             v = np.mean(np.asarray(xyz_g, dtype=np.float64), axis=0)
             v_norm = float(np.linalg.norm(v))
+
+        # 条件分岐: `not (np.isfinite(v_norm) and (v_norm > 0.0))` を満たす経路を評価する。
+
         if not (np.isfinite(v_norm) and (v_norm > 0.0)):
             v = np.array([0.0, 0.0, 1.0], dtype=np.float64)
             v_norm = 1.0
+
         los_unit = (v / v_norm).astype(np.float64, copy=False)
 
     psi_x, psi_y, psi_z, psi_meta = _recon_displacement_grid_ngp(
@@ -1063,6 +1234,9 @@ def _apply_reconstruction_grid(
         psi_meta["assignment"] = recon_assignment
     except Exception:
         pass
+
+    # 条件分岐: `recon_assignment == "cic"` を満たす経路を評価する。
+
     if recon_assignment == "cic":
         psi_g = _sample_grid_cic(psi_x, psi_y, psi_z, xyz=xyz_g, origin=origin, cell=cell)
         psi_r = _sample_grid_cic(psi_x, psi_y, psi_z, xyz=xyz_r, origin=origin, cell=cell)
@@ -1072,8 +1246,10 @@ def _apply_reconstruction_grid(
 
     def _psi_stats(psi: np.ndarray) -> dict[str, Any]:
         mag = np.linalg.norm(np.asarray(psi, dtype=np.float64), axis=1)
+        # 条件分岐: `mag.size == 0` を満たす経路を評価する。
         if mag.size == 0:
             return {"n": 0}
+
         return {
             "n": int(mag.size),
             "mean_mpc_over_h": float(np.mean(mag)),
@@ -1083,7 +1259,9 @@ def _apply_reconstruction_grid(
         }
 
     # RSD correction term (optional): Ψ_s = Ψ + f (Ψ·rhat) rhat.
+
     if recon_mode == "ani":
+        # 条件分岐: `recon_los_shift == "global_mean_direction"` を満たす経路を評価する。
         if recon_los_shift == "global_mean_direction":
             assert los_unit is not None
             proj = np.sum(psi_g * los_unit[None, :], axis=1)
@@ -1100,6 +1278,7 @@ def _apply_reconstruction_grid(
 
     xyz_g_rec_rot = xyz_g - psi_g_eff
     xyz_r_rec_rot = xyz_r - psi_r
+    # 条件分岐: `rot is not None` を満たす経路を評価する。
     if rot is not None:
         xyz_g_rec = xyz_g_rec_rot @ rot.T
         xyz_r_rec = xyz_r_rec_rot @ rot.T
@@ -1189,6 +1368,7 @@ def _apply_reconstruction_mw_multigrid(
       Use `--mw-random-rsd` to enable the alternative behavior.
     """
     recon_mode = str(recon_mode)
+    # 条件分岐: `recon_mode not in ("ani", "iso")` を満たす経路を評価する。
     if recon_mode not in ("ani", "iso"):
         raise ValueError("--recon-mode must be ani/iso")
 
@@ -1197,10 +1377,12 @@ def _apply_reconstruction_mw_multigrid(
         np.sum(np.asarray(z_g, dtype=np.float64) * np.asarray(w_g, dtype=np.float64)) / max(1e-30, sum_wg)
     )
 
+    # 条件分岐: `recon_mode == "iso"` を満たす経路を評価する。
     if recon_mode == "iso":
         f_eff = 0.0
         f_source_eff = "forced_zero_iso"
     else:
+        # 条件分岐: `recon_f is None` を満たす経路を評価する。
         if recon_f is None:
             f_eff = float(_growth_rate_lcdm(float(omega_m), float(z_eff)))
             f_source_eff = "lcdm_omega_m(z_eff)^0.55"
@@ -1274,17 +1456,25 @@ def _coordinate_spec_signature(coord: Dict[str, Any]) -> Dict[str, Any]:
         out = dict(coord)
 
     rec = out.get("reconstruction", None)
+    # 条件分岐: `isinstance(rec, dict)` を満たす経路を評価する。
     if isinstance(rec, dict):
         meta = rec.get("meta", None)
+        # 条件分岐: `isinstance(meta, dict)` を満たす経路を評価する。
         if isinstance(meta, dict):
             # Keep only the stable spec (and notes); drop runtime-derived fields (box, alpha, etc).
             meta2: Dict[str, Any] = {}
+            # 条件分岐: `"spec" in meta` を満たす経路を評価する。
             if "spec" in meta:
                 meta2["spec"] = meta.get("spec")
+
+            # 条件分岐: `"notes" in meta` を満たす経路を評価する。
+
             if "notes" in meta:
                 meta2["notes"] = meta.get("notes")
+
             rec["meta"] = meta2
             out["reconstruction"] = rec
+
     return out
 
 
@@ -1302,13 +1492,16 @@ def _estimator_spec_signature(spec: Dict[str, Any]) -> Dict[str, Any]:
         out = dict(spec)
 
     comb = out.get("combine_caps", None)
+    # 条件分岐: `isinstance(comb, dict)` を満たす経路を評価する。
     if isinstance(comb, dict):
         # Drop runtime-derived per-cap scaling values; keep only the policy.
         if "random_weight_rescale" in comb and isinstance(comb.get("random_weight_rescale"), dict):
             rwr = dict(comb.get("random_weight_rescale") or {})
             rwr.pop("runtime_by_cap", None)
             comb["random_weight_rescale"] = rwr
+
         out["combine_caps"] = comb
+
     return out
 
 
@@ -1317,38 +1510,53 @@ def _combine_coordinate_spec_by_cap(cap_packs: list[Dict[str, Any]]) -> Dict[str
     Combine per-cap coordinate_spec into a single dict for the combined output.
     Keeps a stable signature and attaches runtime reconstruction metadata per cap (if available).
     """
+    # 条件分岐: `not cap_packs` を満たす経路を評価する。
     if not cap_packs:
         return {}
+
     base_raw = cap_packs[0].get("coordinate_spec", {}) or {}
     base = _coordinate_spec_signature(base_raw)
     rec = base.get("reconstruction", None)
+    # 条件分岐: `isinstance(rec, dict) and rec.get("enabled", False)` を満たす経路を評価する。
     if isinstance(rec, dict) and rec.get("enabled", False):
         by_cap: list[dict[str, Any]] = []
         for p in cap_packs:
             cap = str(p.get("cap", ""))
             meta = (p.get("coordinate_spec", {}) or {}).get("reconstruction", {}).get("meta", None)
             runtime = meta.get("runtime") if isinstance(meta, dict) else None
+            # 条件分岐: `runtime is not None` を満たす経路を評価する。
             if runtime is not None:
                 by_cap.append({"cap": cap, "runtime": runtime})
+
         meta2 = rec.get("meta", None)
+        # 条件分岐: `not isinstance(meta2, dict)` を満たす経路を評価する。
         if not isinstance(meta2, dict):
             meta2 = {}
+
         meta2["runtime_by_cap"] = by_cap
         rec["meta"] = meta2
         base["reconstruction"] = rec
+
     return base
 
 
 def _make_s_bins_file(out_dir: Path, *, s_min: float, s_max: float, s_step: float) -> Tuple[Path, np.ndarray]:
     edges = np.arange(float(s_min), float(s_max) + 0.5 * float(s_step), float(s_step), dtype=float)
+    # 条件分岐: `edges.size < 2` を満たす経路を評価する。
     if edges.size < 2:
         raise ValueError("invalid s bins")
+
+    # 条件分岐: `edges[0] <= 0` を満たす経路を評価する。
+
     if edges[0] <= 0:
         raise ValueError("s_min must be > 0 (Corrfunc requirement)")
+
     path = out_dir / f"bao_s_bins_{s_min:g}_{s_max:g}_step{s_step:g}.txt"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         lines = [f"{edges[i]:.6g} {edges[i+1]:.6g}\n" for i in range(edges.size - 1)]
         path.write_text("".join(lines), encoding="utf-8")
+
     return path, edges
 
 
@@ -1381,10 +1589,12 @@ def _corrfunc_paircounts_smu(
     # - DESI branch (cosmodesi/Corrfunc@desi): DDsmu_mocks(autocorr, nthreads, binfile, mumax, nmubins, X1, Y1, Z1, ..., los_type='midpoint')
     #
     # We support both here so the repo remains reproducible across environments.
+
     import inspect
 
     params = inspect.signature(DDsmu_mocks).parameters
     uses_sky_api = ("RA1" in params) or ("DEC1" in params) or ("CZ1" in params) or ("cosmology" in params)
+    # 条件分岐: `uses_sky_api` を満たす経路を評価する。
     if uses_sky_api:
         res = DDsmu_mocks(
             autocorr,
@@ -1410,11 +1620,15 @@ def _corrfunc_paircounts_smu(
 
     # DESI-branch (cartesian positions; symmetric mu binning). We fold -mu/+mu into |mu| bins
     # so downstream computations keep the historical (0<=mu<=mu_max) interface.
+
     xyz1 = _radec_to_xyz_mpc_over_h(ra1, dec1, dist1)
     xyz2 = None
+    # 条件分岐: `(ra2 is not None) and (dec2 is not None) and (dist2 is not None)` を満たす経路を評価する。
     if (ra2 is not None) and (dec2 is not None) and (dist2 is not None):
         xyz2 = _radec_to_xyz_mpc_over_h(ra2, dec2, dist2)
+
     nmubins_full = int(2 * int(nmu))
+    # 条件分岐: `nmubins_full <= 0` を満たす経路を評価する。
     if nmubins_full <= 0:
         raise ValueError("nmu must be >= 1")
 
@@ -1443,6 +1657,7 @@ def _corrfunc_paircounts_smu(
         wcounts_full = wcounts_full.reshape(-1, nmubins_full)
     except Exception as e:
         raise ValueError(f"unexpected Corrfunc output shape: size={wcounts_full.size}, nmubins_full={nmubins_full}") from e
+
     half = int(nmubins_full // 2)
     wcounts_pos = wcounts_full[:, half:] + wcounts_full[:, :half][:, ::-1]
     return wcounts_pos.reshape(-1)
@@ -1478,6 +1693,8 @@ def _pycorr_paircounts_smu_ls(
             "Install it in the WSL venv (.venv_wsl)."
         ) from e
 
+    # 条件分岐: `int(nmu) <= 0` を満たす経路を評価する。
+
     if int(nmu) <= 0:
         raise ValueError("nmu must be >= 1")
 
@@ -1504,10 +1721,17 @@ def _pycorr_paircounts_smu_ls(
     dr_full = np.asarray(cf.D1R2.wcounts, dtype=np.float64)
     rr_full = np.asarray(cf.R1R2.wcounts, dtype=np.float64)
 
+    # 条件分岐: `dd_full.shape != dr_full.shape or dd_full.shape != rr_full.shape` を満たす経路を評価する。
     if dd_full.shape != dr_full.shape or dd_full.shape != rr_full.shape:
         raise ValueError(f"pycorr unexpected count shapes: DD={dd_full.shape}, DR={dr_full.shape}, RR={rr_full.shape}")
+
+    # 条件分岐: `dd_full.ndim != 2` を満たす経路を評価する。
+
     if dd_full.ndim != 2:
         raise ValueError(f"pycorr expected 2D counts (s,mu), got shape={dd_full.shape}")
+
+    # 条件分岐: `dd_full.shape[1] != int(2 * int(nmu))` を満たす経路を評価する。
+
     if dd_full.shape[1] != int(2 * int(nmu)):
         raise ValueError(f"pycorr mu-bin mismatch: got={dd_full.shape[1]}, expected={2*int(nmu)}")
 
@@ -1563,12 +1787,18 @@ def _xi_multipoles_from_catalogs(
     mw_force_rebuild: bool,
 ) -> Dict[str, Any]:
     los = str(los)
+    # 条件分岐: `los != "midpoint"` を満たす経路を評価する。
     if los != "midpoint":
         raise ValueError("only --los midpoint is supported (Corrfunc uses pairwise-midpoint LOS definition)")
+
     recon = str(recon)
     paircounts_backend = str(paircounts_backend)
+    # 条件分岐: `paircounts_backend not in ("corrfunc", "pycorr")` を満たす経路を評価する。
     if paircounts_backend not in ("corrfunc", "pycorr"):
         raise ValueError("--paircounts-backend must be corrfunc/pycorr")
+
+    # 条件分岐: `paircounts_backend == "pycorr" and recon != "none"` を満たす経路を評価する。
+
     if paircounts_backend == "pycorr" and recon != "none":
         raise ValueError("--paircounts-backend pycorr currently supports --recon none only")
 
@@ -1578,6 +1808,7 @@ def _xi_multipoles_from_catalogs(
     w_g, w_meta_g = _weights_galaxy(gal, scheme=str(weight_scheme))
     w_g_recon_full: np.ndarray | None = None
     w_meta_g_recon: dict[str, Any] | None = None
+    # 条件分岐: `recon != "none"` を満たす経路を評価する。
     if recon != "none":
         w_g_recon_full, w_meta_g_recon = _weights_galaxy_recon(
             gal, scheme=str(recon_weight_scheme), pair_weight_scheme=str(weight_scheme)
@@ -1589,12 +1820,14 @@ def _xi_multipoles_from_catalogs(
     w_r, w_meta_r = _weights_random(rnd, scheme=str(weight_scheme))
     w_r_recon_full: np.ndarray | None = None
     w_meta_r_recon: dict[str, Any] | None = None
+    # 条件分岐: `recon != "none"` を満たす経路を評価する。
     if recon != "none":
         w_r_recon_full, w_meta_r_recon = _weights_random_recon(
             rnd, scheme=str(recon_weight_scheme), pair_weight_scheme=str(weight_scheme)
         )
 
     # Guard: some catalogs can contain tiny negative z (e.g. placeholder/rounding).
+
     m_g0 = np.isfinite(z_g) & (z_g > 0.0)
     m_r0 = np.isfinite(z_r) & (z_r > 0.0)
 
@@ -1604,38 +1837,53 @@ def _xi_multipoles_from_catalogs(
         z_min_recon_eff = z_min
         z_max_recon_eff = z_max
     else:
+        # 条件分岐: `(recon_z_min is not None) and (z_min is not None) and (float(recon_z_min) > f...` を満たす経路を評価する。
         if (recon_z_min is not None) and (z_min is not None) and (float(recon_z_min) > float(z_min)):
             raise ValueError("--recon-z-min must be <= measurement z_min (or omit --recon-z-min)")
+
+        # 条件分岐: `(recon_z_max is not None) and (z_max is not None) and (float(recon_z_max) < f...` を満たす経路を評価する。
+
         if (recon_z_max is not None) and (z_max is not None) and (float(recon_z_max) < float(z_max)):
             raise ValueError("--recon-z-max must be >= measurement z_max (or omit --recon-z-max)")
+
         z_min_recon_eff = z_min if (recon_z_min is None) else float(recon_z_min)
         z_max_recon_eff = z_max if (recon_z_max is None) else float(recon_z_max)
 
     # Recon selection (possibly wider). We keep it half-open [z_min, z_max) to match the bin-tiling convention.
+
     m_g_recon = m_g0
     m_r_recon = m_r0
+    # 条件分岐: `z_min_recon_eff is not None` を満たす経路を評価する。
     if z_min_recon_eff is not None:
         m_g_recon = m_g_recon & (z_g >= float(z_min_recon_eff))
         m_r_recon = m_r_recon & (z_r >= float(z_min_recon_eff))
+
+    # 条件分岐: `z_max_recon_eff is not None` を満たす経路を評価する。
+
     if z_max_recon_eff is not None:
         m_g_recon = m_g_recon & (z_g < float(z_max_recon_eff))
         m_r_recon = m_r_recon & (z_r < float(z_max_recon_eff))
 
     # Recon inputs (possibly wider z-range)
+
     ra_g_rec, dec_g_rec, z_g_rec, w_g_rec = ra_g[m_g_recon], dec_g[m_g_recon], z_g[m_g_recon], w_g[m_g_recon]
     ra_r_rec, dec_r_rec, z_r_rec, w_r_rec = ra_r[m_r_recon], dec_r[m_r_recon], z_r[m_r_recon], w_r[m_r_recon]
     w_g_recon: np.ndarray | None = None
     w_r_recon: np.ndarray | None = None
+    # 条件分岐: `recon != "none"` を満たす経路を評価する。
     if recon != "none":
         assert w_g_recon_full is not None and w_r_recon_full is not None
         w_g_recon = w_g_recon_full[m_g_recon]
         w_r_recon = w_r_recon_full[m_r_recon]
 
     # Match galaxy/random footprint for the recon inputs (to stabilize recon on subsampled catalogs).
+
     sector_meta: Dict[str, Any] = {"enabled": False}
+    # 条件分岐: `match_sectors` を満たす経路を評価する。
     if match_sectors:
         kg = _sector_keys(gal, sector_key=sector_key)
         kr = _sector_keys(rnd, sector_key=sector_key)
+        # 条件分岐: `kg is not None and kr is not None` を満たす経路を評価する。
         if kg is not None and kr is not None:
             kg = kg[m_g_recon]
             kr = kr[m_r_recon]
@@ -1644,6 +1892,7 @@ def _xi_multipoles_from_catalogs(
             ug = np.unique(kg[valid_g])
             ur = np.unique(kr[valid_r])
             common = np.intersect1d(ug, ur, assume_unique=True)
+            # 条件分岐: `common.size > 0` を満たす経路を評価する。
             if common.size > 0:
                 keep_g = valid_g & np.isin(kg, common)
                 keep_r = valid_r & np.isin(kr, common)
@@ -1659,10 +1908,12 @@ def _xi_multipoles_from_catalogs(
                     z_r_rec[keep_r],
                     w_r_rec[keep_r],
                 )
+                # 条件分岐: `recon != "none"` を満たす経路を評価する。
                 if recon != "none":
                     assert w_g_recon is not None and w_r_recon is not None
                     w_g_recon = w_g_recon[keep_g]
                     w_r_recon = w_r_recon[keep_r]
+
                 sector_meta = {
                     "enabled": True,
                     "sector_key": str(sector_key),
@@ -1674,11 +1925,16 @@ def _xi_multipoles_from_catalogs(
                 }
 
     # Measurement selection is applied after the recon selection (measurement ⊂ recon by construction).
+
     m_g = np.isfinite(z_g_rec)
     m_r = np.isfinite(z_r_rec)
+    # 条件分岐: `z_min is not None` を満たす経路を評価する。
     if z_min is not None:
         m_g = m_g & (z_g_rec >= float(z_min))
         m_r = m_r & (z_r_rec >= float(z_min))
+
+    # 条件分岐: `z_max is not None` を満たす経路を評価する。
+
     if z_max is not None:
         m_g = m_g & (z_g_rec < float(z_max))
         m_r = m_r & (z_r_rec < float(z_max))
@@ -1706,11 +1962,18 @@ def _xi_multipoles_from_catalogs(
     # Keep an unshifted copy of randoms for the reconstruction estimator denominator (RR0).
     # NOTE: We intentionally keep views (not deep copies) to avoid memory spikes for large random catalogs.
     ra_r0, dec_r0, d_r0 = ra_r, dec_r, d_r
+    # 条件分岐: `recon != "none"` を満たす経路を評価する。
     if recon != "none":
+        # 条件分岐: `recon not in ("grid", "mw_multigrid")` を満たす経路を評価する。
         if recon not in ("grid", "mw_multigrid"):
             raise ValueError("--recon must be none/grid/mw_multigrid")
+
+        # 条件分岐: `w_g_recon is None or w_r_recon is None` を満たす経路を評価する。
+
         if w_g_recon is None or w_r_recon is None:
             raise ValueError("recon enabled but recon weights are missing (internal error)")
+
+        # 条件分岐: `recon == "grid"` を満たす経路を評価する。
 
         if recon == "grid":
             (ra_g2, dec_g2, d_g2), (ra_r2, dec_r2, d_r2), recon_meta = _apply_reconstruction_grid(
@@ -1741,8 +2004,10 @@ def _xi_multipoles_from_catalogs(
                 recon_box_frame=str(recon_box_frame),
             )
         else:
+            # 条件分岐: `int(recon_grid) != 512` を満たす経路を評価する。
             if int(recon_grid) != 512:
                 raise ValueError("mw_multigrid recon requires --recon-grid 512 (upstream grid is fixed)")
+
             (ra_g2, dec_g2, d_g2), (ra_r2, dec_r2, d_r2), recon_meta = _apply_reconstruction_mw_multigrid(
                 ra_g=ra_g_rec,
                 dec_g=dec_g_rec,
@@ -1767,10 +2032,12 @@ def _xi_multipoles_from_catalogs(
             )
 
         # Slice reconstructed positions to the measurement bin.
+
         ra_g, dec_g, d_g = ra_g2[m_g], dec_g2[m_g], d_g2[m_g]
         ra_r, dec_r, d_r = ra_r2[m_r], dec_r2[m_r], d_r2[m_r]
         ra_r0, dec_r0, d_r0 = ra_r_rec[m_r], dec_r_rec[m_r], d_r_rec[m_r]
 
+        # 条件分岐: `recon_meta is not None` を満たす経路を評価する。
         if recon_meta is not None:
             try:
                 recon_meta = dict(recon_meta)
@@ -1791,6 +2058,7 @@ def _xi_multipoles_from_catalogs(
                 pass
 
     xi_estimator: Dict[str, Any]
+    # 条件分岐: `recon == "none"` を満たす経路を評価する。
     if recon == "none":
         xi_estimator = {
             "name": "landy_szalay",
@@ -1846,8 +2114,10 @@ def _xi_multipoles_from_catalogs(
     # - recon=none: standard LS using (galaxy, random)
     # - recon!=none: recon estimator using (displaced galaxy, shifted random, unshifted random)
     if paircounts_backend == "pycorr":
+        # 条件分岐: `recon != "none"` を満たす経路を評価する。
         if recon != "none":
             raise ValueError("--paircounts-backend pycorr currently supports --recon none only")
+
         out_counts = _pycorr_paircounts_smu_ls(
             ra_g=ra_g,
             dec_g=dec_g,
@@ -1879,11 +2149,16 @@ def _xi_multipoles_from_catalogs(
             nthreads=nthreads,
             autocorr=1,
         )
+
     ss_w: np.ndarray | None = None
+    # 条件分岐: `recon == "none"` を満たす経路を評価する。
     if recon == "none":
+        # 条件分岐: `paircounts_backend == "pycorr"` を満たす経路を評価する。
         if paircounts_backend == "pycorr":
+            # 条件分岐: `"DR_w" not in out_counts or "RR_w" not in out_counts` を満たす経路を評価する。
             if "DR_w" not in out_counts or "RR_w" not in out_counts:
                 raise ValueError("internal error: missing DR_w/RR_w from pycorr counts")
+
             dr_w = np.asarray(out_counts["DR_w"], dtype=np.float64)
             rr_w = np.asarray(out_counts["RR_w"], dtype=np.float64)
         else:
@@ -1970,6 +2245,7 @@ def _xi_multipoles_from_catalogs(
     dd_w = dd_w.reshape(nb, int(nmu))
     dr_w = dr_w.reshape(nb, int(nmu))
     rr_w = rr_w.reshape(nb, int(nmu))
+    # 条件分岐: `ss_w is not None` を満たす経路を評価する。
     if ss_w is not None:
         ss_w = ss_w.reshape(nb, int(nmu))
 
@@ -1984,23 +2260,31 @@ def _xi_multipoles_from_catalogs(
     rr_tot = (sum_wr * sum_wr - sum_wr2)
     dr_tot = sum_wg * sum_wr
     ss_tot: float | None = None
+    # 条件分岐: `recon != "none"` を満たす経路を評価する。
     if recon != "none":
         ss_tot = rr_tot
+
+    # 条件分岐: `not (dd_tot > 0 and rr_tot > 0 and dr_tot > 0)` を満たす経路を評価する。
+
     if not (dd_tot > 0 and rr_tot > 0 and dr_tot > 0):
         raise ValueError("invalid total weights (non-positive)")
 
     ddn = dd_w / dd_tot
     drn = dr_w / dr_tot
     rrn = rr_w / rr_tot
+    # 条件分岐: `recon == "none"` を満たす経路を評価する。
     if recon == "none":
         with np.errstate(divide="ignore", invalid="ignore"):
             xi = (ddn - 2.0 * drn + rrn) / rrn
     else:
+        # 条件分岐: `ss_w is None or ss_tot is None` を満たす経路を評価する。
         if ss_w is None or ss_tot is None:
             raise ValueError("internal error: recon enabled but SS counts missing")
+
         ssn = ss_w / float(ss_tot)
         with np.errstate(divide="ignore", invalid="ignore"):
             xi = (ddn - 2.0 * drn + ssn) / rrn
+
     xi = np.where(np.isfinite(xi), xi, 0.0)
 
     mu_edges = np.linspace(0.0, float(mu_max), int(nmu) + 1, dtype=float)
@@ -2065,6 +2349,7 @@ def _xi_multipoles_from_paircounts(
 
     with np.errstate(divide="ignore", invalid="ignore"):
         xi = (ddn - 2.0 * drn + rrn) / rrn
+
     xi = np.where(np.isfinite(xi), xi, 0.0)
 
     mu_edges = np.linspace(0.0, float(mu_max), int(nmu) + 1, dtype=float)
@@ -2122,6 +2407,7 @@ def _xi_multipoles_from_recon_paircounts(
 
     with np.errstate(divide="ignore", invalid="ignore"):
         xi = (ddn - 2.0 * dsn + ssn) / rr0n
+
     xi = np.where(np.isfinite(xi), xi, 0.0)
 
     mu_edges = np.linspace(0.0, float(mu_max), int(nmu) + 1, dtype=float)
@@ -2158,8 +2444,12 @@ def _estimate_bao_peak_s2_xi(
     """
     s = np.asarray(s, dtype=np.float64)
     xi = np.asarray(xi, dtype=np.float64)
+    # 条件分岐: `s.shape != xi.shape` を満たす経路を評価する。
     if s.shape != xi.shape:
         raise ValueError("s/xi shape mismatch")
+
+    # 条件分岐: `int(fit_deg) < 1` を満たす経路を評価する。
+
     if int(fit_deg) < 1:
         raise ValueError("fit_deg must be >= 1")
 
@@ -2169,23 +2459,29 @@ def _estimate_bao_peak_s2_xi(
     w0, w1 = (float(search_range[0]), float(search_range[1]))
 
     m_fit = (s >= s0) & (s <= s1) & ~((s >= e0) & (s <= e1)) & np.isfinite(y)
+    # 条件分岐: `int(np.count_nonzero(m_fit)) < (int(fit_deg) + 2)` を満たす経路を評価する。
     if int(np.count_nonzero(m_fit)) < (int(fit_deg) + 2):
         raise ValueError("insufficient points for broadband fit")
+
     coef = np.polyfit(s[m_fit], y[m_fit], deg=int(fit_deg))
     y_smooth = np.polyval(coef, s)
     y_res = y - y_smooth
 
     m_win = (s >= w0) & (s <= w1) & np.isfinite(y_res)
+    # 条件分岐: `not np.any(m_win)` を満たす経路を評価する。
     if not np.any(m_win):
         raise ValueError("no points in search window")
 
     idx_win = np.where(m_win)[0]
+    # 条件分岐: `idx_win.size == 0` を満たす経路を評価する。
     if idx_win.size == 0:
         raise ValueError("no points in search window")
 
     # Prefer a true local maximum within the window to avoid edge-picking when
     # the residual is monotonic/noisy (common for low S/N wedges).
+
     cand_mask = np.zeros_like(m_win, dtype=bool)
+    # 条件分岐: `s.size >= 3` を満たす経路を評価する。
     if s.size >= 3:
         cand_mask[1:-1] = (
             m_win[1:-1]
@@ -2197,25 +2493,31 @@ def _estimate_bao_peak_s2_xi(
             & (y_res[1:-1] >= y_res[:-2])
             & (y_res[1:-1] > y_res[2:])
         )
+
     cand_idxs = np.where(cand_mask)[0]
+    # 条件分岐: `cand_idxs.size > 0` を満たす経路を評価する。
     if cand_idxs.size > 0:
         idx = int(cand_idxs[np.argmax(y_res[cand_idxs])])
         idx_choice = "local_max"
     else:
         idx = int(idx_win[np.argmax(y_res[idx_win])])
         idx_choice = "global_max"
+
     is_window_edge = bool((idx == int(idx_win[0])) or (idx == int(idx_win[-1])))
 
     # Optional quadratic interpolation when interior point is available.
     s_peak = float(s[idx])
     y_res_peak = float(y_res[idx])
+    # 条件分岐: `0 < idx < int(s.size) - 1 and np.all(np.isfinite(y_res[idx - 1 : idx + 2]))` を満たす経路を評価する。
     if 0 < idx < int(s.size) - 1 and np.all(np.isfinite(y_res[idx - 1 : idx + 2])):
         x = s[idx - 1 : idx + 2]
         yy = y_res[idx - 1 : idx + 2]
         try:
             a, b, c = np.polyfit(x, yy, deg=2)
+            # 条件分岐: `float(a) < 0.0` を満たす経路を評価する。
             if float(a) < 0.0:
                 s_star = -float(b) / (2.0 * float(a))
+                # 条件分岐: `float(x[0]) <= s_star <= float(x[-1])` を満たす経路を評価する。
                 if float(x[0]) <= s_star <= float(x[-1]):
                     s_peak = float(s_star)
                     y_res_peak = float(np.polyval([a, b, c], s_star))
@@ -2279,8 +2581,12 @@ def _estimate_bao_feature_s2_xi(
     """
     s = np.asarray(s, dtype=np.float64)
     xi = np.asarray(xi, dtype=np.float64)
+    # 条件分岐: `s.shape != xi.shape` を満たす経路を評価する。
     if s.shape != xi.shape:
         raise ValueError("s/xi shape mismatch")
+
+    # 条件分岐: `int(fit_deg) < 1` を満たす経路を評価する。
+
     if int(fit_deg) < 1:
         raise ValueError("fit_deg must be >= 1")
 
@@ -2290,36 +2596,48 @@ def _estimate_bao_feature_s2_xi(
     w0, w1 = (float(search_range[0]), float(search_range[1]))
 
     m_fit = (s >= s0) & (s <= s1) & ~((s >= e0) & (s <= e1)) & np.isfinite(y)
+    # 条件分岐: `int(np.count_nonzero(m_fit)) < (int(fit_deg) + 2)` を満たす経路を評価する。
     if int(np.count_nonzero(m_fit)) < (int(fit_deg) + 2):
         raise ValueError("insufficient points for broadband fit")
+
     coef = np.polyfit(s[m_fit], y[m_fit], deg=int(fit_deg))
     y_smooth = np.polyval(coef, s)
     y_res = y - y_smooth
 
     m_win = (s >= w0) & (s <= w1) & np.isfinite(y_res)
+    # 条件分岐: `not np.any(m_win)` を満たす経路を評価する。
     if not np.any(m_win):
         raise ValueError("no points in search window")
+
     win_idx = np.where(m_win)[0]
 
     def _refine(idx: int, *, want_max: bool) -> tuple[float, float]:
         s_star = float(s[idx])
         y_star = float(y_res[idx])
+        # 条件分岐: `not (0 < idx < int(s.size) - 1)` を満たす経路を評価する。
         if not (0 < idx < int(s.size) - 1):
             return s_star, y_star
+
+        # 条件分岐: `not np.all(np.isfinite(y_res[idx - 1 : idx + 2]))` を満たす経路を評価する。
+
         if not np.all(np.isfinite(y_res[idx - 1 : idx + 2])):
             return s_star, y_star
+
         x = s[idx - 1 : idx + 2]
         yy = y_res[idx - 1 : idx + 2]
         try:
             a, b, c = np.polyfit(x, yy, deg=2)
             a = float(a)
             b = float(b)
+            # 条件分岐: `(want_max and a < 0.0) or ((not want_max) and a > 0.0)` を満たす経路を評価する。
             if (want_max and a < 0.0) or ((not want_max) and a > 0.0):
                 s_hat = -b / (2.0 * a)
+                # 条件分岐: `float(x[0]) <= s_hat <= float(x[-1])` を満たす経路を評価する。
                 if float(x[0]) <= s_hat <= float(x[-1]):
                     return float(s_hat), float(np.polyval([a, b, c], s_hat))
         except Exception:
             pass
+
         return s_star, y_star
 
     idx_max = int(win_idx[int(np.argmax(y_res[m_win]))])
@@ -2362,8 +2680,10 @@ def _p2_antiderivative(mu: float) -> float:
 def _p2_avg(mu0: float, mu1: float) -> float:
     mu0 = float(mu0)
     mu1 = float(mu1)
+    # 条件分岐: `not (mu1 > mu0)` を満たす経路を評価する。
     if not (mu1 > mu0):
         raise ValueError("invalid mu range")
+
     return (_p2_antiderivative(mu1) - _p2_antiderivative(mu0)) / (mu1 - mu0)
 
 
@@ -2383,28 +2703,42 @@ def _float_token(x: float) -> str:
 
 
 def _zcut_tag(*, z_bin: str, z_min: float | None, z_max: float | None) -> str:
+    # 条件分岐: `z_min is None and z_max is None` を満たす経路を評価する。
     if z_min is None and z_max is None:
         return ""
+
+    # 条件分岐: `z_bin != "none"` を満たす経路を評価する。
+
     if z_bin != "none":
         return z_bin
+
     parts: list[str] = []
+    # 条件分岐: `z_min is not None` を満たす経路を評価する。
     if z_min is not None:
         parts.append(f"zmin{_float_token(z_min)}")
+
+    # 条件分岐: `z_max is not None` を満たす経路を評価する。
+
     if z_max is not None:
         parts.append(f"zmax{_float_token(z_max)}")
+
     return "_".join(parts)
 
 
 def _sanitize_out_tag(tag: str) -> str:
     t = str(tag).strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return ""
+
     out: list[str] = []
     for ch in t:
+        # 条件分岐: `ch.isalnum() or ch in ("-", "_", ".")` を満たす経路を評価する。
         if ch.isalnum() or ch in ("-", "_", "."):
             out.append(ch)
         else:
             out.append("_")
+
     s = "".join(out).strip("._-")
     return s[:80]
 
@@ -2419,12 +2753,20 @@ def _append_out_tag(tag: str, suffix: str) -> str:
     """
     tag = _sanitize_out_tag(tag)
     suffix = _sanitize_out_tag(suffix)
+    # 条件分岐: `not suffix` を満たす経路を評価する。
     if not suffix:
         return tag
+
+    # 条件分岐: `not tag` を満たす経路を評価する。
+
     if not tag:
         return suffix
+
+    # 条件分岐: `suffix in tag` を満たす経路を評価する。
+
     if suffix in tag:
         return tag
+
     return _sanitize_out_tag(f"{tag}_{suffix}")
 
 
@@ -2436,6 +2778,7 @@ def _reconfigure_stdio_best_effort() -> None:
     """
     try:
         for s in (sys.stdout, sys.stderr):
+            # 条件分岐: `hasattr(s, "reconfigure")` を満たす経路を評価する。
             if hasattr(s, "reconfigure"):
                 s.reconfigure(errors="backslashreplace")
     except Exception:
@@ -2633,11 +2976,13 @@ def main(argv: list[str] | None = None) -> int:
 
     data_dir = _resolve_manifest_path(str(args.data_dir))
     manifest_path = data_dir / "manifest.json"
+    # 条件分岐: `not manifest_path.exists()` を満たす経路を評価する。
     if not manifest_path.exists():
         raise SystemExit(
             f"manifest not found: {manifest_path} "
             f"(run the corresponding fetch_* script first; e.g., fetch_boss_dr12v5_lss.py)"
         )
+
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
 
     sample = str(args.sample)
@@ -2679,144 +3024,253 @@ def main(argv: list[str] | None = None) -> int:
     z_min = args.z_min
     z_max = args.z_max
 
+    # 条件分岐: `weight_scheme != "boss_default" and not out_tag` を満たす経路を評価する。
     if weight_scheme != "boss_default" and not out_tag:
         # Avoid overwriting the default outputs when running sensitivity variants.
         out_tag = _sanitize_out_tag(f"w_{weight_scheme}")
 
+    # 条件分岐: `recon != "none" and recon_weight_scheme != "same"` を満たす経路を評価する。
+
     if recon != "none" and recon_weight_scheme != "same":
         suffix = _sanitize_out_tag(f"rw_{recon_weight_scheme}")
+        # 条件分岐: `not out_tag` を満たす経路を評価する。
         if not out_tag:
             out_tag = suffix
+        # 条件分岐: 前段条件が不成立で、`suffix not in out_tag` を追加評価する。
         elif suffix not in out_tag:
             out_tag = _sanitize_out_tag(f"{out_tag}_{suffix}")
+
+    # 条件分岐: `recon != "none" and ((recon_z_min is not None) or (recon_z_max is not None))` を満たす経路を評価する。
 
     if recon != "none" and ((recon_z_min is not None) or (recon_z_max is not None)):
         ztag = _zcut_tag(z_bin="none", z_min=recon_z_min, z_max=recon_z_max)
         suffix = _sanitize_out_tag(f"rz_{ztag}")
+        # 条件分岐: `suffix and suffix not in out_tag` を満たす経路を評価する。
         if suffix and suffix not in out_tag:
             out_tag = _sanitize_out_tag(f"{out_tag}_{suffix}") if out_tag else suffix
 
+    # 条件分岐: `match_sectors_arg != "auto"` を満たす経路を評価する。
+
     if match_sectors_arg != "auto":
         out_tag = _append_out_tag(out_tag, f"ms_{match_sectors_arg}")
+
+    # 条件分岐: `str(sector_key) != str(ap.get_default("sector_key"))` を満たす経路を評価する。
+
     if str(sector_key) != str(ap.get_default("sector_key")):
         out_tag = _append_out_tag(out_tag, f"sk_{sector_key}")
 
+    # 条件分岐: `recon != "none"` を満たす経路を評価する。
+
     if recon != "none":
+        # 条件分岐: `recon_grid < 16` を満たす経路を評価する。
         if recon_grid < 16:
             raise SystemExit("--recon-grid must be >= 16")
+
+        # 条件分岐: `not (recon_smoothing > 0.0)` を満たす経路を評価する。
+
         if not (recon_smoothing > 0.0):
             raise SystemExit("--recon-smoothing must be > 0")
+
+        # 条件分岐: `recon_assignment not in ("ngp", "cic")` を満たす経路を評価する。
+
         if recon_assignment not in ("ngp", "cic"):
             raise SystemExit("--recon-assignment must be ngp/cic")
+
+        # 条件分岐: `not (recon_bias > 0.0)` を満たす経路を評価する。
+
         if not (recon_bias > 0.0):
             raise SystemExit("--recon-bias must be > 0")
+
+        # 条件分岐: `recon_psi_k_sign not in (-1, 1)` を満たす経路を評価する。
+
         if recon_psi_k_sign not in (-1, 1):
             raise SystemExit("--recon-psi-k-sign must be -1 or +1")
+
+        # 条件分岐: `not (recon_pad_fraction >= 0.0)` を満たす経路を評価する。
+
         if not (recon_pad_fraction >= 0.0):
             raise SystemExit("--recon-pad-fraction must be >= 0")
+
+        # 条件分岐: `not np.isfinite(recon_rsd_shift)` を満たす経路を評価する。
+
         if not np.isfinite(recon_rsd_shift):
             raise SystemExit("--recon-rsd-shift must be finite")
+
+        # 条件分岐: `(recon_mask_expected_frac is not None) and (not np.isfinite(float(recon_mask_...` を満たす経路を評価する。
+
         if (recon_mask_expected_frac is not None) and (not np.isfinite(float(recon_mask_expected_frac))):
             raise SystemExit("--recon-mask-expected-frac must be finite when provided")
+
+        # 条件分岐: `(recon_mask_expected_frac is not None) and (float(recon_mask_expected_frac) <...` を満たす経路を評価する。
+
         if (recon_mask_expected_frac is not None) and (float(recon_mask_expected_frac) < 0.0):
             raise SystemExit("--recon-mask-expected-frac must be >= 0")
 
+        # 条件分岐: `recon == "mw_multigrid"` を満たす経路を評価する。
+
         if recon == "mw_multigrid":
+            # 条件分岐: `int(recon_grid) != 512` を満たす経路を評価する。
             if int(recon_grid) != 512:
                 raise SystemExit("mw_multigrid recon requires --recon-grid 512 (upstream grid is fixed)")
             # Guard: options that are meaningful only for the in-repo grid recon should stay at defaults
             # to avoid mixing "backend differences" with "option differences" in discussions.
+
             if str(recon_assignment) != str(ap.get_default("recon_assignment")):
                 raise SystemExit("mw_multigrid recon does not use --recon-assignment (keep default)")
+
+            # 条件分岐: `int(recon_psi_k_sign) != int(ap.get_default("recon_psi_k_sign"))` を満たす経路を評価する。
+
             if int(recon_psi_k_sign) != int(ap.get_default("recon_psi_k_sign")):
                 raise SystemExit("mw_multigrid recon does not use --recon-psi-k-sign (keep default)")
+
+            # 条件分岐: `not math.isclose(float(recon_pad_fraction), float(ap.get_default("recon_pad_f...` を満たす経路を評価する。
+
             if not math.isclose(float(recon_pad_fraction), float(ap.get_default("recon_pad_fraction")), rel_tol=0.0, abs_tol=1e-12):
                 raise SystemExit("mw_multigrid recon does not use --recon-pad-fraction (keep default)")
+
+            # 条件分岐: `recon_mask_expected_frac is not None` を満たす経路を評価する。
+
             if recon_mask_expected_frac is not None:
                 raise SystemExit("mw_multigrid recon does not use --recon-mask-expected-frac (omit)")
+
+            # 条件分岐: `str(recon_box_shape) != str(ap.get_default("recon_box_shape"))` を満たす経路を評価する。
+
             if str(recon_box_shape) != str(ap.get_default("recon_box_shape")):
                 raise SystemExit("mw_multigrid recon does not use --recon-box-shape (keep default)")
+
+            # 条件分岐: `str(recon_box_frame) != str(ap.get_default("recon_box_frame"))` を満たす経路を評価する。
+
             if str(recon_box_frame) != str(ap.get_default("recon_box_frame")):
                 raise SystemExit("mw_multigrid recon does not use --recon-box-frame (keep default)")
+
+            # 条件分岐: `str(recon_rsd_solver) != str(ap.get_default("recon_rsd_solver"))` を満たす経路を評価する。
+
             if str(recon_rsd_solver) != str(ap.get_default("recon_rsd_solver")):
                 raise SystemExit("mw_multigrid recon does not use --recon-rsd-solver (keep default)")
+
+            # 条件分岐: `str(recon_los_shift) != str(ap.get_default("recon_los_shift"))` を満たす経路を評価する。
+
             if str(recon_los_shift) != str(ap.get_default("recon_los_shift")):
                 raise SystemExit("mw_multigrid recon does not use --recon-los-shift (keep default)")
+
+            # 条件分岐: `not math.isclose(float(recon_rsd_shift), float(ap.get_default("recon_rsd_shif...` を満たす経路を評価する。
+
             if not math.isclose(float(recon_rsd_shift), float(ap.get_default("recon_rsd_shift")), rel_tol=0.0, abs_tol=1e-12):
                 raise SystemExit("mw_multigrid recon does not use --recon-rsd-shift (keep default)")
 
         # Auto-tag non-default recon parameters so that recon scans do not overwrite each other
         # when the user forgets to specify `--out-tag`.
+
         default_recon_grid = int(ap.get_default("recon_grid"))
+        # 条件分岐: `int(recon_grid) != default_recon_grid` を満たす経路を評価する。
         if int(recon_grid) != default_recon_grid:
             out_tag = _append_out_tag(out_tag, f"g{int(recon_grid)}")
 
         default_recon_smoothing = float(ap.get_default("recon_smoothing"))
+        # 条件分岐: `not math.isclose(float(recon_smoothing), default_recon_smoothing, rel_tol=0.0...` を満たす経路を評価する。
         if not math.isclose(float(recon_smoothing), default_recon_smoothing, rel_tol=0.0, abs_tol=1e-12):
             out_tag = _append_out_tag(out_tag, f"s{_float_token(float(recon_smoothing))}")
 
         default_recon_bias = float(ap.get_default("recon_bias"))
+        # 条件分岐: `not math.isclose(float(recon_bias), default_recon_bias, rel_tol=0.0, abs_tol=...` を満たす経路を評価する。
         if not math.isclose(float(recon_bias), default_recon_bias, rel_tol=0.0, abs_tol=1e-12):
             out_tag = _append_out_tag(out_tag, f"bias{_float_token(float(recon_bias))}")
 
         default_recon_psi = int(ap.get_default("recon_psi_k_sign"))
+        # 条件分岐: `int(recon_psi_k_sign) != default_recon_psi` を満たす経路を評価する。
         if int(recon_psi_k_sign) != default_recon_psi:
             out_tag = _append_out_tag(out_tag, "psi_pos" if int(recon_psi_k_sign) > 0 else "psi_neg")
 
+        # 条件分岐: `recon_mode == "ani"` を満たす経路を評価する。
+
         if recon_mode == "ani":
+            # 条件分岐: `recon_f is not None` を満たす経路を評価する。
             if recon_f is not None:
                 out_tag = _append_out_tag(out_tag, f"f{_float_token(float(recon_f))}")
 
             default_rsd_solver = str(ap.get_default("recon_rsd_solver"))
+            # 条件分岐: `str(recon_rsd_solver) != default_rsd_solver` を満たす経路を評価する。
             if str(recon_rsd_solver) != default_rsd_solver:
                 out_tag = _append_out_tag(out_tag, "solvernone" if str(recon_rsd_solver) == "none" else f"solver{recon_rsd_solver}")
 
             default_los_shift = str(ap.get_default("recon_los_shift"))
+            # 条件分岐: `str(recon_los_shift) != default_los_shift` を満たす経路を評価する。
             if str(recon_los_shift) != default_los_shift:
                 out_tag = _append_out_tag(out_tag, "radial" if str(recon_los_shift) == "radial" else str(recon_los_shift))
 
             default_rsd_shift = float(ap.get_default("recon_rsd_shift"))
+            # 条件分岐: `not math.isclose(float(recon_rsd_shift), default_rsd_shift, rel_tol=0.0, abs_...` を満たす経路を評価する。
             if not math.isclose(float(recon_rsd_shift), default_rsd_shift, rel_tol=0.0, abs_tol=1e-12):
                 out_tag = _append_out_tag(out_tag, f"rsdshift{_float_token(float(recon_rsd_shift))}")
 
         default_pad_fraction = float(ap.get_default("recon_pad_fraction"))
+        # 条件分岐: `not math.isclose(float(recon_pad_fraction), default_pad_fraction, rel_tol=0.0...` を満たす経路を評価する。
         if not math.isclose(float(recon_pad_fraction), default_pad_fraction, rel_tol=0.0, abs_tol=1e-12):
             out_tag = _append_out_tag(out_tag, f"pad{_float_token(float(recon_pad_fraction))}")
+
+        # 条件分岐: `recon_mask_expected_frac is not None` を満たす経路を評価する。
 
         if recon_mask_expected_frac is not None:
             out_tag = _append_out_tag(out_tag, f"maskexp{_float_token(float(recon_mask_expected_frac))}")
 
+        # 条件分岐: `recon_box_shape not in ("rect", "cube")` を満たす経路を評価する。
+
         if recon_box_shape not in ("rect", "cube"):
             raise SystemExit("--recon-box-shape must be rect/cube")
+
+        # 条件分岐: `recon_box_shape != "rect"` を満たす経路を評価する。
+
         if recon_box_shape != "rect":
             suffix = _sanitize_out_tag(f"box_{recon_box_shape}")
+            # 条件分岐: `suffix not in out_tag` を満たす経路を評価する。
             if suffix not in out_tag:
                 out_tag = _sanitize_out_tag(f"{out_tag}_{suffix}") if out_tag else suffix
+
+        # 条件分岐: `recon_box_frame not in ("raw", "pca")` を満たす経路を評価する。
+
         if recon_box_frame not in ("raw", "pca"):
             raise SystemExit("--recon-box-frame must be raw/pca")
+
+        # 条件分岐: `recon_box_frame != "raw"` を満たす経路を評価する。
+
         if recon_box_frame != "raw":
             suffix = _sanitize_out_tag(f"frame_{recon_box_frame}")
+            # 条件分岐: `suffix not in out_tag` を満たす経路を評価する。
             if suffix not in out_tag:
                 out_tag = _sanitize_out_tag(f"{out_tag}_{suffix}") if out_tag else suffix
+
+        # 条件分岐: `recon_assignment != "ngp"` を満たす経路を評価する。
+
         if recon_assignment != "ngp":
             suffix = _sanitize_out_tag(f"assign_{recon_assignment}")
+            # 条件分岐: `suffix not in out_tag` を満たす経路を評価する。
             if suffix not in out_tag:
                 out_tag = _sanitize_out_tag(f"{out_tag}_{suffix}") if out_tag else suffix
         # Ensure iso/ani recon outputs are distinct by default.
         # (If a user wants multiple variants, they can still add `--out-tag` and we will prefix it.)
+
         recon_tag = _sanitize_out_tag(
             f"recon_{recon}_{recon_mode}" + ("_mwrndrsd" if (recon == "mw_multigrid" and mw_random_rsd) else "")
         )
+        # 条件分岐: `out_tag.startswith(recon_tag)` を満たす経路を評価する。
         if out_tag.startswith(recon_tag):
             out_tag = out_tag
         else:
             out_tag = _sanitize_out_tag(f"{recon_tag}_{out_tag}") if out_tag else recon_tag
 
+    # 条件分岐: `dist == "lcdm"` を満たす経路を評価する。
+
     if dist == "lcdm":
+        # 条件分岐: `not (lcdm_n_grid >= 10)` を満たす経路を評価する。
         if not (lcdm_n_grid >= 10):
             raise SystemExit("--lcdm-n-grid must be >= 10")
+
+        # 条件分岐: `not (lcdm_z_grid_max > 0.0)` を満たす経路を評価する。
+
         if not (lcdm_z_grid_max > 0.0):
             raise SystemExit("--lcdm-z-grid-max must be > 0")
+
+    # 条件分岐: `z_bin != "none"` を満たす経路を評価する。
 
     if z_bin != "none":
         z_map = {
@@ -2825,10 +3279,17 @@ def main(argv: list[str] | None = None) -> int:
             "b3": (0.5, 0.75),
         }
         zb_min, zb_max = z_map[z_bin]
+        # 条件分岐: `z_min is None` を満たす経路を評価する。
         if z_min is None:
             z_min = zb_min
+
+        # 条件分岐: `z_max is None` を満たす経路を評価する。
+
         if z_max is None:
             z_max = zb_max
+
+    # 条件分岐: `(z_min is not None) and (z_max is not None) and not (float(z_min) < float(z_m...` を満たす経路を評価する。
+
     if (z_min is not None) and (z_max is not None) and not (float(z_min) < float(z_max)):
         raise SystemExit("--z-min must be < --z-max when both are provided")
 
@@ -2839,8 +3300,12 @@ def main(argv: list[str] | None = None) -> int:
     for cap in caps_to_use:
         key = f"{sample}:{cap}"
         it = manifest.get("items", {}).get(key, {})
+        # 条件分岐: `"galaxy" not in it or "random" not in it` を満たす経路を評価する。
         if "galaxy" not in it or "random" not in it:
             raise SystemExit(f"missing galaxy/random for {key} in manifest (run fetch)")
+
+        # 条件分岐: `str(it.get("random", {}).get("kind", "")).strip() != random_kind` を満たす経路を評価する。
+
         if str(it.get("random", {}).get("kind", "")).strip() != random_kind:
             mk = str(it.get("random", {}).get("kind", "")).strip()
             raise SystemExit(
@@ -2848,12 +3313,16 @@ def main(argv: list[str] | None = None) -> int:
                 f"but manifest has {mk!r}. "
                 f"Either pass --random-kind {mk}, or re-run fetch to extract {random_kind}."
             )
+
         gal_paths.append(_resolve_manifest_path(it["galaxy"]["npz_path"]))
         rnd_paths.append(_resolve_manifest_path(it["random"]["npz_path"]))
         sampling_methods.append(str(it.get("random", {}).get("extract", {}).get("sampling", {}).get("method", "")))
 
+    # 条件分岐: `match_sectors_arg == "on"` を満たす経路を評価する。
+
     if match_sectors_arg == "on":
         match_sectors = True
+    # 条件分岐: 前段条件が不成立で、`match_sectors_arg == "off"` を追加評価する。
     elif match_sectors_arg == "off":
         match_sectors = False
     else:
@@ -2862,6 +3331,7 @@ def main(argv: list[str] | None = None) -> int:
         match_sectors = (not m) or any(s != "full" for s in m)
 
     # If f is not explicitly provided, fix it across NGC/SGC to avoid mixing definitions.
+
     if recon != "none" and recon_f is None and caps == "combined":
         try:
             num = 0.0
@@ -2871,14 +3341,22 @@ def main(argv: list[str] | None = None) -> int:
                 z_tmp, _ = _select_redshift(gal_tmp, z_source=z_source)
                 w_tmp, _ = _weights_galaxy(gal_tmp, scheme=weight_scheme)
                 m0 = np.isfinite(z_tmp) & (z_tmp > 0.0) & np.isfinite(w_tmp)
+                # 条件分岐: `z_min is not None` を満たす経路を評価する。
                 if z_min is not None:
                     m0 = m0 & (z_tmp >= float(z_min))
+
+                # 条件分岐: `z_max is not None` を満たす経路を評価する。
+
                 if z_max is not None:
                     m0 = m0 & (z_tmp < float(z_max))
+
                 z_use = np.asarray(z_tmp[m0], dtype=np.float64)
                 w_use = np.asarray(w_tmp[m0], dtype=np.float64)
                 num += float(np.sum(z_use * w_use))
                 den += float(np.sum(w_use))
+
+            # 条件分岐: `den > 0.0` を満たす経路を評価する。
+
             if den > 0.0:
                 z_eff_all = num / den
                 recon_f = float(_growth_rate_lcdm(float(omega_m), float(z_eff_all)))
@@ -2891,6 +3369,7 @@ def main(argv: list[str] | None = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     s_bins_file, edges = _make_s_bins_file(out_dir, s_min=float(args.s_min), s_max=float(args.s_max), s_step=float(args.s_step))
 
+    # 条件分岐: `caps != "combined"` を満たす経路を評価する。
     if caps != "combined":
         gal = _load_npz(gal_paths[0])
         rnd = _load_npz(rnd_paths[0])
@@ -2988,14 +3467,17 @@ def main(argv: list[str] | None = None) -> int:
             cap_packs.append(cap_pack)
 
         # Coordinate spec must match across caps; allow per-cap runtime details (e.g. recon box) to differ.
+
         coord0_sig = _coordinate_spec_signature(cap_packs[0].get("coordinate_spec", {}))
         for p in cap_packs[1:]:
+            # 条件分岐: `json.dumps(coord0_sig, sort_keys=True) != json.dumps(_coordinate_spec_signatu...` を満たす経路を評価する。
             if json.dumps(coord0_sig, sort_keys=True) != json.dumps(_coordinate_spec_signature(p.get("coordinate_spec", {})), sort_keys=True):
                 raise SystemExit(
                     "coordinate_spec mismatch across caps (check --z-source/--los/--sector-key/--match-sectors/--lcdm-*/--recon-*/--recon-weight-scheme)"
                 )
 
         # Combine by summing paircounts & normalizations per cap (robust for disconnected caps and subsampling).
+
         dd_w = sum(p["counts"]["DD_w"] for p in cap_packs)
 
         # If random density differs across caps due to subsampling, LS can be biased when aggregating.
@@ -3023,15 +3505,22 @@ def main(argv: list[str] | None = None) -> int:
             dr_tot = dr_tot + float(f) * float(p["totals"]["dr_tot"])
             rr_tot = rr_tot + float(f * f) * float(p["totals"]["rr_tot"])
             sum_w2_rnd_scaled = sum_w2_rnd_scaled + float(f * f) * float(p["totals"]["sum_w2_rnd"])
+            # 条件分岐: `ss_w is not None and ss_tot is not None` を満たす経路を評価する。
             if ss_w is not None and ss_tot is not None:
+                # 条件分岐: `"SS_w" not in p.get("counts", {})` を満たす経路を評価する。
                 if "SS_w" not in p.get("counts", {}):
                     raise SystemExit("recon enabled but missing SS_w in per-cap pack (re-run xi-from-catalogs)")
+
+                # 条件分岐: `"ss_tot" not in p.get("totals", {})` を満たす経路を評価する。
+
                 if "ss_tot" not in p.get("totals", {}):
                     raise SystemExit("recon enabled but missing ss_tot in per-cap totals (re-run xi-from-catalogs)")
+
                 ss_w = ss_w + float(f * f) * p["counts"]["SS_w"]
                 ss_tot = ss_tot + float(f * f) * float(p["totals"]["ss_tot"])
 
         dd_tot = sum(float(p["totals"]["dd_tot"]) for p in cap_packs)
+        # 条件分岐: `recon == "none"` を満たす経路を評価する。
         if recon == "none":
             out_xi = _xi_multipoles_from_paircounts(
                 dd_w=dd_w,
@@ -3045,8 +3534,10 @@ def main(argv: list[str] | None = None) -> int:
                 rr_tot=rr_tot,
             )
         else:
+            # 条件分岐: `ss_w is None or ss_tot is None` を満たす経路を評価する。
             if ss_w is None or ss_tot is None:
                 raise SystemExit("internal error: recon enabled but SS counts missing")
+
             out_xi = _xi_multipoles_from_recon_paircounts(
                 dd_w=dd_w,
                 ds_w=dr_w,
@@ -3103,10 +3594,15 @@ def main(argv: list[str] | None = None) -> int:
 
     tag = f"{sample}_{caps}_{dist}"
     ztag = _zcut_tag(z_bin=z_bin, z_min=z_min, z_max=z_max)
+    # 条件分岐: `ztag` を満たす経路を評価する。
     if ztag:
         tag = f"{tag}_{ztag}"
+
+    # 条件分岐: `out_tag` を満たす経路を評価する。
+
     if out_tag:
         tag = f"{tag}__{out_tag}"
+
     out_npz = out_dir / f"cosmology_bao_xi_from_catalogs_{tag}.npz"
 
     bao_peak = _estimate_bao_peak_s2_xi0(s=pack["s"], xi0=pack["xi0"])
@@ -3126,8 +3622,12 @@ def main(argv: list[str] | None = None) -> int:
     try:
         mu_max = float(args.mu_max)
         mu_split = float(args.mu_split)
+        # 条件分岐: `not (0.0 < mu_split < mu_max)` を満たす経路を評価する。
         if not (0.0 < mu_split < mu_max):
             raise ValueError("--mu-split must satisfy 0 < mu_split < mu_max")
+
+        # 条件分岐: `abs(mu_max - 1.0) > 1e-6` を満たす経路を評価する。
+
         if abs(mu_max - 1.0) > 1e-6:
             # The wedge approximation assumes standard multipoles defined over μ∈[0,1].
             # Keep disabled to avoid misinterpretation when μ is truncated.
@@ -3138,20 +3638,28 @@ def main(argv: list[str] | None = None) -> int:
             # Prefer direct μ-integration from the full xi(s, μ) grid.
             xi_mu = pack.get("xi_mu", None)
             mu_edges = pack.get("mu_edges", None)
+            # 条件分岐: `(xi_mu is not None) and (mu_edges is not None)` を満たす経路を評価する。
             if (xi_mu is not None) and (mu_edges is not None):
                 xi_mu_arr = np.asarray(xi_mu, dtype=np.float64)
                 mu_edges_arr = np.asarray(mu_edges, dtype=np.float64).reshape(-1)
+                # 条件分岐: `mu_edges_arr.size < 2` を満たす経路を評価する。
                 if mu_edges_arr.size < 2:
                     raise ValueError("invalid mu_edges")
+
                 mu_mid = 0.5 * (mu_edges_arr[:-1] + mu_edges_arr[1:])
                 dmu = float(mu_edges_arr[1] - mu_edges_arr[0])
+                # 条件分岐: `not np.allclose(np.diff(mu_edges_arr), dmu, rtol=0, atol=1e-12)` を満たす経路を評価する。
                 if not np.allclose(np.diff(mu_edges_arr), dmu, rtol=0, atol=1e-12):
                     raise ValueError("non-uniform mu_edges (unexpected)")
+
+                # 条件分岐: `xi_mu_arr.shape != (s_arr.size, mu_mid.size)` を満たす経路を評価する。
+
                 if xi_mu_arr.shape != (s_arr.size, mu_mid.size):
                     raise ValueError(f"xi_mu shape mismatch: {xi_mu_arr.shape} vs (nbins,nmu)=({s_arr.size},{mu_mid.size})")
 
                 m_t = (mu_mid >= 0.0) & (mu_mid < mu_split)
                 m_r = (mu_mid >= mu_split) & (mu_mid <= mu_max)
+                # 条件分岐: `not (np.any(m_t) and np.any(m_r))` を満たす経路を評価する。
                 if not (np.any(m_t) and np.any(m_r)):
                     raise ValueError("empty wedge mask")
 
@@ -3188,8 +3696,10 @@ def main(argv: list[str] | None = None) -> int:
             def _peak_near_edge(peak: Dict[str, Any]) -> bool:
                 try:
                     w0, w1 = peak.get("search_range", [None, None])
+                    # 条件分岐: `(w0 is None) or (w1 is None)` を満たす経路を評価する。
                     if (w0 is None) or (w1 is None):
                         return True
+
                     w0 = float(w0)
                     w1 = float(w1)
                     s_pk = float(peak.get("s_peak"))
@@ -3198,14 +3708,25 @@ def main(argv: list[str] | None = None) -> int:
                     return True
 
             wedge_flags: list[str] = []
+            # 条件分岐: `_peak_near_edge(peak_t)` を満たす経路を評価する。
             if _peak_near_edge(peak_t):
                 wedge_flags.append("transverse_peak_near_edge")
+
+            # 条件分岐: `_peak_near_edge(peak_r)` を満たす経路を評価する。
+
             if _peak_near_edge(peak_r):
                 wedge_flags.append("radial_peak_near_edge")
+
+            # 条件分岐: `bool(peak_t.get("is_window_edge", False))` を満たす経路を評価する。
+
             if bool(peak_t.get("is_window_edge", False)):
                 wedge_flags.append("transverse_peak_at_window_edge")
+
+            # 条件分岐: `bool(peak_r.get("is_window_edge", False))` を満たす経路を評価する。
+
             if bool(peak_r.get("is_window_edge", False)):
                 wedge_flags.append("radial_peak_at_window_edge")
+
             reliable = len(wedge_flags) == 0
 
             bao_wedges = {
@@ -3225,6 +3746,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Save outputs.
     # Keep backward compatible keys (s/xi0/xi2) and add optional diagnostic arrays for downstream fits.
+
     save_kwargs: Dict[str, Any] = {
         "s": np.asarray(pack["s"], dtype=float),
         "xi0": np.asarray(pack["xi0"], dtype=float),
@@ -3246,9 +3768,11 @@ def main(argv: list[str] | None = None) -> int:
         "rr_tot": float(pack.get("totals", {}).get("rr_tot", float("nan"))),
         "ss_tot": float(pack.get("totals", {}).get("ss_tot", float("nan"))),
     }
+    # 条件分岐: `bao_wedges.get("enabled", False) and (xi_wedge_transverse is not None) and (x...` を満たす経路を評価する。
     if bao_wedges.get("enabled", False) and (xi_wedge_transverse is not None) and (xi_wedge_radial is not None):
         save_kwargs["xi_wedge_transverse"] = xi_wedge_transverse
         save_kwargs["xi_wedge_radial"] = xi_wedge_radial
+
     np.savez_compressed(out_npz, **save_kwargs)
 
     coord_sig = _coordinate_spec_signature(pack.get("coordinate_spec", {}) or {})
@@ -3392,6 +3916,7 @@ def main(argv: list[str] | None = None) -> int:
 
     def _random_sampling_desc(path: Path) -> str:
         name = str(path.name)
+        # 条件分岐: `".prefix_" in name` を満たす経路を評価する。
         if ".prefix_" in name:
             try:
                 token = name.split(".prefix_", 1)[1].split(".npz", 1)[0]
@@ -3399,6 +3924,9 @@ def main(argv: list[str] | None = None) -> int:
                 return f"prefix_rows（先頭{n:,}行）"
             except Exception:
                 return "prefix_rows"
+
+        # 条件分岐: `".reservoir_" in name` を満たす経路を評価する。
+
         if ".reservoir_" in name:
             try:
                 token = name.split(".reservoir_", 1)[1].split(".npz", 1)[0]
@@ -3407,27 +3935,36 @@ def main(argv: list[str] | None = None) -> int:
                 n = int(parts[0])
                 seed = None
                 for p in parts[1:]:
+                    # 条件分岐: `p.startswith("seed")` を満たす経路を評価する。
                     if p.startswith("seed"):
                         try:
                             seed = int(p[4:])
                         except Exception:
                             seed = None
+
                         break
+
+                # 条件分岐: `seed is None` を満たす経路を評価する。
+
                 if seed is None:
                     return f"reservoir（{n:,}行）"
+
                 return f"reservoir（{n:,}行; seed={seed}）"
             except Exception:
                 return "reservoir"
+
         return "full（全量）"
 
     random_descs = sorted({_random_sampling_desc(p) for p in rnd_paths})
     random_desc = " / ".join(random_descs) if random_descs else "unknown"
+    # 条件分岐: `any(d.startswith("prefix_rows") for d in random_descs)` を満たす経路を評価する。
     if any(d.startswith("prefix_rows") for d in random_descs):
         metrics["notes"].append(f"random catalog は fetch 時点で {random_desc} を使用（厳密な一様サンプルではない可能性）。")
     else:
         metrics["notes"].append(f"random catalog は fetch 時点で {random_desc} を使用。")
 
     sectors_enabled = bool((metrics.get("sectors") or {}).get("enabled"))
+    # 条件分岐: `sectors_enabled` を満たす経路を評価する。
     if sectors_enabled:
         metrics["notes"].append("入力が部分抽出の場合、IPOLY/ISECT で共通セクタにそろえてから ξ を計算する（--match-sectors）。")
     else:
@@ -3462,8 +3999,10 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Exception:
         pass
+
     try:
         wedges = metrics.get("derived", {}).get("bao_wedges", {})
+        # 条件分岐: `isinstance(wedges, dict) and wedges.get("enabled", False)` を満たす経路を評価する。
         if isinstance(wedges, dict) and wedges.get("enabled", False):
             s_t = float(wedges.get("transverse", {}).get("peak", {}).get("s_peak"))
             s_r = float(wedges.get("radial", {}).get("peak", {}).get("s_peak"))
@@ -3487,6 +4026,7 @@ def main(argv: list[str] | None = None) -> int:
             )
     except Exception:
         pass
+
     try:
         bf2 = metrics.get("derived", {}).get("bao_feature_xi2", {})
         s2 = float(bf2.get("s_abs"))
@@ -3505,6 +4045,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Exception:
         pass
+
     ax1.set_xlabel("s [Mpc/h]")
     ax2.set_xlabel("s [Mpc/h]")
     ax1.set_ylabel("s² ξ0")
@@ -3549,8 +4090,11 @@ def main(argv: list[str] | None = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

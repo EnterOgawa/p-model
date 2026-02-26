@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -28,6 +29,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest().upper()
 
 
@@ -38,6 +40,7 @@ def _read_head(path: Path, n: int = 8) -> bytes:
 
 def _download(url: str, dst: Path, *, force: bool, user_agent: str) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
@@ -47,6 +50,7 @@ def _download(url: str, dst: Path, *, force: bool, user_agent: str) -> None:
     req = urllib.request.Request(url, headers={"User-Agent": user_agent})
     with urllib.request.urlopen(req, timeout=240) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -54,32 +58,47 @@ def _download(url: str, dst: Path, *, force: bool, user_agent: str) -> None:
 def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for m in tf.getmembers():
+        # 条件分岐: `not isinstance(m.name, str)` を満たす経路を評価する。
         if not isinstance(m.name, str):
             continue
+
         p = Path(m.name)
+        # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
         if p.is_absolute():
             raise RuntimeError(f"unsafe tar member (absolute path): {m.name}")
+
+        # 条件分岐: `any(part in ("..", "") for part in p.parts)` を満たす経路を評価する。
+
         if any(part in ("..", "") for part in p.parts):
             raise RuntimeError(f"unsafe tar member (path traversal): {m.name}")
+
     tf.extractall(out_dir)
 
 
 def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
+    # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
     if out_dir.exists() and any(out_dir.iterdir()) and not force:
         print(f"[skip] extracted: {out_dir}")
         return True
 
+    # 条件分岐: `force and out_dir.exists()` を満たす経路を評価する。
+
     if force and out_dir.exists():
         for p in out_dir.glob("*"):
+            # 条件分岐: `p.is_dir()` を満たす経路を評価する。
             if p.is_dir():
                 shutil.rmtree(p)
             else:
                 p.unlink(missing_ok=True)
 
     head = _read_head(tar_path, 5)
+    # 条件分岐: `head.startswith(b"%PDF")` を満たす経路を評価する。
     if head.startswith(b"%PDF"):
         print(f"[warn] e-print looks like PDF (not tar.gz): {tar_path.name} (skipping extract)")
         return False
+
+    # 条件分岐: `not head.startswith(b"\x1f\x8b")` を満たす経路を評価する。
+
     if not head.startswith(b"\x1f\x8b"):
         print(f"[warn] e-print is not gzip (skipping extract): {tar_path.name}")
         return False
@@ -87,6 +106,7 @@ def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
     try:
         with tarfile.open(tar_path, "r:gz") as tf:
             _safe_extractall(tf, out_dir)
+
         print(f"[ok] extracted: {out_dir}")
         return True
     except tarfile.ReadError as e:
@@ -95,8 +115,10 @@ def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
 
 
 def _count_files(dir_path: Path, suffix: str) -> Optional[int]:
+    # 条件分岐: `not (dir_path.exists() and dir_path.is_dir())` を満たす経路を評価する。
     if not (dir_path.exists() and dir_path.is_dir()):
         return None
+
     return sum(1 for _ in dir_path.rglob(f"*{suffix}"))
 
 
@@ -140,11 +162,13 @@ def _add_row_for_arxiv(
     extract_dir = sources_dir / f"arxiv_{safe_id}"
 
     notes: List[str] = []
+    # 条件分岐: `not offline` を満たす経路を評価する。
     if not offline:
         try:
             _download(pdf_url, pdf_path, force=force, user_agent=user_agent)
         except Exception as e:
             notes.append(f"pdf download failed: {e}")
+
         try:
             _download(src_url, src_path, force=force, user_agent=user_agent)
         except Exception as e:
@@ -152,6 +176,7 @@ def _add_row_for_arxiv(
 
     extracted_ok = False
     try:
+        # 条件分岐: `src_path.exists()` を満たす経路を評価する。
         if src_path.exists():
             extracted_ok = _extract_src(src_path, extract_dir, force=force)
     except Exception as e:
@@ -191,11 +216,13 @@ def _add_row_for_marrone2006_thesis(
     ps_gz_path = sources_dir / "marrone2006_thesis_dpm_thesis.ps.gz"
 
     notes: List[str] = []
+    # 条件分岐: `not offline` を満たす経路を評価する。
     if not offline:
         try:
             _download(url_pdf, pdf_path, force=force, user_agent=user_agent)
         except Exception as e:
             notes.append(f"pdf download failed: {e}")
+
         try:
             _download(url_ps_gz, ps_gz_path, force=force, user_agent=user_agent)
         except Exception as e:
@@ -265,11 +292,15 @@ def main() -> int:
     try:
         files_with_sha256 = 0
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             for k, v in r.items():
+                # 条件分岐: `isinstance(k, str) and k.endswith("_sha256") and isinstance(v, str) and v` を満たす経路を評価する。
                 if isinstance(k, str) and k.endswith("_sha256") and isinstance(v, str) and v:
                     files_with_sha256 += 1
+
         worklog.append_event(
             {
                 "ts_utc": manifest["generated_utc"],
@@ -294,6 +325,8 @@ def main() -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

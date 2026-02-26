@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -24,24 +27,36 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     Inclusive percentile with linear interpolation.
     p in [0,100].
     """
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
 def _stats(vals: list[float]) -> dict[str, float]:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan")}
+
     vs = sorted(vals)
     return {
         "n": float(len(vs)),
@@ -62,6 +77,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(
             "[fail] missing frozen all-nuclei residual CSV.\n"
@@ -73,6 +89,7 @@ def main() -> None:
     # Local spacing proxy derived from uniform-sphere density:
     #   V/A = (4π/3) r0^3  ⇒  ρ = 3/(4π r0^3)
     #   spacing scale d ≡ ρ^{-1/3} = (4π/3)^{1/3} r0
+
     spacing_factor = (4.0 * math.pi / 3.0) ** (1.0 / 3.0)
 
     rows_out: list[dict[str, object]] = []
@@ -90,10 +107,12 @@ def main() -> None:
             try:
                 a = int(row["A"])
                 b_obs = float(row["B_obs_MeV"])
+                # 条件分岐: `not math.isfinite(b_obs) or b_obs <= 0` を満たす経路を評価する。
                 if not math.isfinite(b_obs) or b_obs <= 0:
                     continue
 
                 ratio_global = float(row["ratio_collective"])
+                # 条件分岐: `not math.isfinite(ratio_global) or ratio_global <= 0` を満たす経路を評価する。
                 if not math.isfinite(ratio_global) or ratio_global <= 0:
                     continue
 
@@ -102,8 +121,12 @@ def main() -> None:
                 r_ref = float(row["R_ref_fm"])
                 j_ref = float(row["J_ref_MeV"])
                 c_collective = float(row["C_collective"])
+                # 条件分岐: `not all(math.isfinite(x) for x in (r_model, l_range, r_ref, j_ref, c_collecti...` を満たす経路を評価する。
                 if not all(math.isfinite(x) for x in (r_model, l_range, r_ref, j_ref, c_collective)):
                     continue
+
+                # 条件分岐: `a <= 1 or l_range <= 0 or j_ref <= 0 or c_collective <= 0` を満たす経路を評価する。
+
                 if a <= 1 or l_range <= 0 or j_ref <= 0 or c_collective <= 0:
                     continue
 
@@ -113,6 +136,7 @@ def main() -> None:
                 j_e_local = j_ref * math.exp((r_ref - d) / l_range)
                 b_pred_local = 2.0 * c_collective * j_e_local
                 ratio_local = b_pred_local / b_obs
+                # 条件分岐: `not math.isfinite(ratio_local) or ratio_local <= 0` を満たす経路を評価する。
                 if not math.isfinite(ratio_local) or ratio_local <= 0:
                     continue
             except Exception:
@@ -124,13 +148,18 @@ def main() -> None:
 
             ratio_global_all.append(ratio_global)
             ratio_local_all.append(ratio_local)
+            # 条件分岐: `radius_source == "measured_r_rms" or radius_source == "tail_scale_anchor"` を満たす経路を評価する。
             if radius_source == "measured_r_rms" or radius_source == "tail_scale_anchor":
                 ratio_local_measured.append(ratio_local)
             else:
                 ratio_local_radius_law.append(ratio_local)
 
+            # 条件分岐: `parity in ratio_local_by_parity` を満たす経路を評価する。
+
             if parity in ratio_local_by_parity:
                 ratio_local_by_parity[parity].append(ratio_local)
+
+            # 条件分岐: `is_magic_any` を満たす経路を評価する。
 
             if is_magic_any:
                 ratio_local_magic_any.append(ratio_local)
@@ -148,6 +177,8 @@ def main() -> None:
                     "Delta_B_local_spacing_MeV": f"{(b_pred_local - b_obs):.6f}",
                 }
             )
+
+    # 条件分岐: `not ratio_local_all` を満たす経路を評価する。
 
     if not ratio_local_all:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {in_csv}")
@@ -277,6 +308,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

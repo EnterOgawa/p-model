@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -28,6 +29,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
@@ -47,12 +49,20 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 def _sigma_sym(sigma_minus: float, sigma_plus: float, *, mode: str) -> float:
     sm = float(sigma_minus)
     sp = float(sigma_plus)
+    # 条件分岐: `not (math.isfinite(sm) and math.isfinite(sp) and sm >= 0 and sp >= 0)` を満たす経路を評価する。
     if not (math.isfinite(sm) and math.isfinite(sp) and sm >= 0 and sp >= 0):
         return float("nan")
+
+    # 条件分岐: `mode == "avg"` を満たす経路を評価する。
+
     if mode == "avg":
         return 0.5 * (sm + sp)
+
+    # 条件分岐: `mode == "max"` を満たす経路を評価する。
+
     if mode == "max":
         return max(sm, sp)
+
     return float("nan")
 
 
@@ -70,35 +80,51 @@ def _extract_m87_ring_measurements(eht: Dict[str, Any]) -> List[RingMeasurement]
     objects = eht.get("objects") if isinstance(eht.get("objects"), list) else []
     m87 = None
     for o in objects:
+        # 条件分岐: `not isinstance(o, dict)` を満たす経路を評価する。
         if not isinstance(o, dict):
             continue
+
+        # 条件分岐: `str(o.get("key") or "").strip() == "m87"` を満たす経路を評価する。
+
         if str(o.get("key") or "").strip() == "m87":
             m87 = o
             break
+
+    # 条件分岐: `not isinstance(m87, dict)` を満たす経路を評価する。
+
     if not isinstance(m87, dict):
         raise RuntimeError("data/eht/eht_black_holes.json: object key=m87 not found")
 
     ms = m87.get("ring_measurements")
+    # 条件分岐: `not isinstance(ms, list) or not ms` を満たす経路を評価する。
     if not isinstance(ms, list) or not ms:
         raise RuntimeError("data/eht/eht_black_holes.json: m87.ring_measurements is missing/empty")
 
     out: List[RingMeasurement] = []
     for item in ms:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         epoch = str(item.get("epoch") or "").strip()
         label = str(item.get("label") or "").strip() or epoch
         source_key = str(item.get("source_key") or "").strip()
+        # 条件分岐: `not (epoch and source_key)` を満たす経路を評価する。
         if not (epoch and source_key):
             continue
 
         d = float(item.get("diameter_uas", float("nan")))
         sm = float(item.get("sigma_minus_uas", float("nan")))
         sp = float(item.get("sigma_plus_uas", float("nan")))
+        # 条件分岐: `not (math.isfinite(d) and math.isfinite(sm) and math.isfinite(sp))` を満たす経路を評価する。
         if not (math.isfinite(d) and math.isfinite(sm) and math.isfinite(sp)):
             continue
+
+        # 条件分岐: `sm < 0 or sp < 0` を満たす経路を評価する。
+
         if sm < 0 or sp < 0:
             continue
+
         out.append(
             RingMeasurement(
                 epoch=epoch,
@@ -110,15 +136,20 @@ def _extract_m87_ring_measurements(eht: Dict[str, Any]) -> List[RingMeasurement]
             )
         )
 
+    # 条件分岐: `len(out) < 2` を満たす経路を評価する。
+
     if len(out) < 2:
         raise RuntimeError("m87.ring_measurements: expected >=2 valid entries")
+
     return out
 
 
 def _find_epoch(measurements: List[RingMeasurement], epoch: str) -> RingMeasurement:
     for m in measurements:
+        # 条件分岐: `m.epoch == epoch` を満たす経路を評価する。
         if m.epoch == epoch:
             return m
+
     raise RuntimeError(f"missing measurement for epoch={epoch!r}")
 
 
@@ -260,12 +291,19 @@ def main() -> int:
         pass
 
     print(f"[ok] json: {out_json}")
+    # 条件分岐: `isinstance(png_path, Path)` を満たす経路を評価する。
     if isinstance(png_path, Path):
         print(f"[ok] png : {png_path}")
+
+    # 条件分岐: `isinstance(public_png_path, Path)` を満たす経路を評価する。
+
     if isinstance(public_png_path, Path):
         print(f"[ok] png : {public_png_path}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

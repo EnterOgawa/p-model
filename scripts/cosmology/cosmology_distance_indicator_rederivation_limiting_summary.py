@@ -29,6 +29,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -50,6 +51,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -70,23 +72,35 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
         if not math.isfinite(v):
             return None
+
         return v
     except Exception:
         return None
 
 
 def _classify_sigma(abs_z: Optional[float]) -> str:
+    # 条件分岐: `abs_z is None or not math.isfinite(float(abs_z))` を満たす経路を評価する。
     if abs_z is None or not math.isfinite(float(abs_z)):
         return "na"
+
+    # 条件分岐: `abs_z < 3.0` を満たす経路を評価する。
+
     if abs_z < 3.0:
         return "ok"
+
+    # 条件分岐: `abs_z < 5.0` を満たす経路を評価する。
+
     if abs_z < 5.0:
         return "mixed"
+
     return "ng"
 
 
@@ -96,9 +110,12 @@ def _extract_fit(per_ddr: Dict[str, Any], key: str) -> Tuple[Optional[float], st
       (max_abs_z, limiting_observation, chi2_dof, chi2)
     """
     block = per_ddr.get(key)
+    # 条件分岐: `not isinstance(block, dict)` を満たす経路を評価する。
     if not isinstance(block, dict):
         return (None, "na", None, None)
+
     fit = block.get("fit")
+    # 条件分岐: `not isinstance(fit, dict)` を満たす経路を評価する。
     if not isinstance(fit, dict):
         return (None, "na", None, None)
 
@@ -111,17 +128,22 @@ def _extract_fit(per_ddr: Dict[str, Any], key: str) -> Tuple[Optional[float], st
 
 def _extract_choice(per_ddr: Dict[str, Any], key: str) -> Dict[str, Any]:
     block = per_ddr.get(key)
+    # 条件分岐: `not isinstance(block, dict)` を満たす経路を評価する。
     if not isinstance(block, dict):
         return {}
+
     out: Dict[str, Any] = {}
     for k in ("opacity", "candle"):
         v = block.get(k)
+        # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
         if not isinstance(v, dict):
             continue
+
         out[k] = {
             "id": str(v.get("id") or ""),
             "short_label": str(v.get("short_label") or v.get("id") or ""),
         }
+
     return out
 
 
@@ -163,14 +185,20 @@ def _limiting_palette() -> Tuple[List[str], Dict[str, str], Dict[str, str]]:
 
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None or not math.isfinite(float(x))` を満たす経路を評価する。
     if x is None or not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -197,8 +225,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     in_metrics = Path(args.in_metrics)
+    # 条件分岐: `not in_metrics.exists()` を満たす経路を評価する。
     if not in_metrics.exists():
         legacy = _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
+        # 条件分岐: `legacy.exists()` を満たす経路を評価する。
         if legacy.exists():
             in_metrics = legacy
         else:
@@ -213,6 +243,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     src = _read_json(in_metrics)
     per_ddr = ((src.get("results") or {}).get("per_ddr")) if isinstance(src.get("results"), dict) else None
+    # 条件分岐: `not isinstance(per_ddr, list) or not per_ddr` を満たす経路を評価する。
     if not isinstance(per_ddr, list) or not per_ddr:
         raise ValueError("invalid candidate_search metrics: results.per_ddr missing or empty")
 
@@ -231,13 +262,17 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     items: List[Dict[str, Any]] = []
     for item in per_ddr:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         ddr = item.get("ddr")
+        # 条件分岐: `not isinstance(ddr, dict)` を満たす経路を評価する。
         if not isinstance(ddr, dict):
             continue
 
         label = str(ddr.get("short_label") or ddr.get("id") or "").strip()
+        # 条件分岐: `not label` を満たす経路を評価する。
         if not label:
             continue
 
@@ -252,8 +287,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         for scenario_key, choice in (("best_any", choice_any), ("best_independent", choice_ind)):
             op = (choice.get("opacity") or {}).get("short_label") or (choice.get("opacity") or {}).get("id") or ""
             ca = (choice.get("candle") or {}).get("short_label") or (choice.get("candle") or {}).get("id") or ""
+            # 条件分岐: `op` を満たす経路を評価する。
             if op:
                 chosen_opacity[scenario_key][str(op)] += 1
+
+            # 条件分岐: `ca` を満たす経路を評価する。
+
             if ca:
                 chosen_candle[scenario_key][str(ca)] += 1
 
@@ -300,9 +339,12 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
 
     # Sort by best_independent max|z| ascending (then label) for readability.
+
     def _z_for_sort(v: Optional[float]) -> float:
+        # 条件分岐: `v is None or not math.isfinite(float(v))` を満たす経路を評価する。
         if v is None or not math.isfinite(float(v)):
             return float("inf")
+
         return float(v)
 
     sort_keys = sorted(
@@ -328,9 +370,12 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     max_z = 0.0
     for v in (vals_any + vals_ind):
+        # 条件分岐: `v is not None and math.isfinite(float(v))` を満たす経路を評価する。
         if v is not None and math.isfinite(float(v)):
             max_z = max(max_z, float(v))
+
     x_max = max(1.5, max_z * 1.10 + 0.25)
+    # 条件分岐: `x_max < 6.0` を満たす経路を評価する。
     if x_max < 6.0:
         x_max = 6.0
 
@@ -338,8 +383,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # Bars
     def _color_for(lim: str) -> str:
+        # 条件分岐: `lim in colors` を満たす経路を評価する。
         if lim in colors:
             return colors[lim]
+
         return colors["na"]
 
     bars_any = ax.barh(
@@ -365,8 +412,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     # Annotate
     for bars, vals, lims in ((bars_any, vals_any, lim_any), (bars_ind, vals_ind, lim_ind)):
         for b, v, lim in zip(bars, vals, lims):
+            # 条件分岐: `v is None or not math.isfinite(float(v))` を満たす経路を評価する。
             if v is None or not math.isfinite(float(v)):
                 continue
+
             x = float(v)
             ax.text(
                 x + x_max * 0.01,
@@ -379,6 +428,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             )
 
     # Reference lines (σ guide)
+
     for x0, label in ((1.0, "1σ"), (3.0, "3σ"), (5.0, "5σ")):
         ax.axvline(x0, color="#999999", lw=1.0, ls="--")
         ax.text(x0, -0.9, label, ha="center", va="bottom", fontsize=9, color="#666666")
@@ -407,6 +457,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     limiting_handles = []
     for k in ordered_labels:
         limiting_handles.append(Patch(facecolor=colors[k], edgecolor="#333333", label=k))
+
     ax.legend(handles=limiting_handles, title="limiting（支配する拘束）", loc="upper right", frameon=True)
 
     fig.tight_layout()
@@ -458,6 +509,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_metrics}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -71,24 +71,34 @@ _EARTHDATA_AUTH_CONTEXT: Dict[str, Any] = {"enabled": False}
 def _first_non_empty_env(keys: Tuple[str, ...]) -> Tuple[Optional[str], Optional[str]]:
     for key in keys:
         value = str(os.environ.get(key, "")).strip()
+        # 条件分岐: `value` を満たす経路を評価する。
         if value:
             return value, key
+
     return None, None
 
 
 def _mask_user(user: Optional[str]) -> Optional[str]:
+    # 条件分岐: `user is None` を満たす経路を評価する。
     if user is None:
         return None
+
     s = str(user).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
+    # 条件分岐: `len(s) <= 2` を満たす経路を評価する。
+
     if len(s) <= 2:
         return "*" * len(s)
+
     return f"{s[:2]}***"
 
 
 def _read_earthdata_netrc(netrc_path: Optional[str]) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     candidates: List[Path] = []
+    # 条件分岐: `netrc_path` を満たす経路を評価する。
     if netrc_path:
         candidates.append(Path(netrc_path).expanduser())
     else:
@@ -96,19 +106,27 @@ def _read_earthdata_netrc(netrc_path: Optional[str]) -> Tuple[Optional[str], Opt
         candidates.append(Path.home() / "_netrc")
 
     for p in candidates:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         try:
             auth = netrc.netrc(str(p)).authenticators(EARTHDATA_HOST)
         except Exception as e:
             return None, None, None, f"netrc_parse_error({p}): {e}"
+
+        # 条件分岐: `not auth` を満たす経路を評価する。
+
         if not auth:
             continue
+
         login, _account, password = auth
         user = str(login or "").strip() if login is not None else ""
         pw = str(password or "").strip() if password is not None else ""
+        # 条件分岐: `user and pw` を満たす経路を評価する。
         if user and pw:
             return user, pw, str(p), None
+
     return None, None, None, None
 
 
@@ -129,6 +147,7 @@ def _configure_earthdata_auth(
         "netrc_path": str(Path(netrc_path).expanduser()) if netrc_path else None,
     }
     mode_l = str(mode or "auto").strip().lower()
+    # 条件分岐: `mode_l == "off"` を満たす経路を評価する。
     if mode_l == "off":
         diag["status"] = "disabled"
         diag["error"] = "earthdata_auth_disabled_by_option"
@@ -139,30 +158,42 @@ def _configure_earthdata_auth(
     pw = str(password or "").strip()
     source = None
     chosen_netrc_path: Optional[str] = str(Path(netrc_path).expanduser()) if netrc_path else None
+    # 条件分岐: `user and pw` を満たす経路を評価する。
     if user and pw:
         source = "cli"
     else:
         env_user, env_user_key = _first_non_empty_env(EARTHDATA_USER_ENV_KEYS)
         env_pass, env_pass_key = _first_non_empty_env(EARTHDATA_PASS_ENV_KEYS)
+        # 条件分岐: `env_user and env_pass` を満たす経路を評価する。
         if env_user and env_pass:
             user = env_user
             pw = env_pass
             source = f"env:{env_user_key}+{env_pass_key}"
 
+    # 条件分岐: `not source` を満たす経路を評価する。
+
     if not source:
         n_user, n_pw, n_path, n_err = _read_earthdata_netrc(netrc_path=netrc_path)
+        # 条件分岐: `n_err` を満たす経路を評価する。
         if n_err:
             diag["error"] = n_err
+
+        # 条件分岐: `n_user and n_pw` を満たす経路を評価する。
+
         if n_user and n_pw:
             user = n_user
             pw = n_pw
             chosen_netrc_path = n_path
             source = f"netrc:{n_path}"
 
+    # 条件分岐: `not source` を満たす経路を評価する。
+
     if not source:
         diag["status"] = "error" if mode_l == "force" else "disabled"
+        # 条件分岐: `not diag.get("error")` を満たす経路を評価する。
         if not diag.get("error"):
             diag["error"] = "earthdata_credentials_not_found"
+
         _EARTHDATA_AUTH_CONTEXT = {"enabled": False, "reason": str(diag.get("error") or "credentials_not_found")}
         return diag
 
@@ -212,6 +243,7 @@ def _fetch_text_direct(url: str, timeout_s: int) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-llr-apol-route-audit/1.0"})
     with opener.open(req, timeout=timeout_s) as response:
         data = response.read()
+
     return data.decode("utf-8", "replace")
 
 
@@ -232,35 +264,45 @@ def _is_cddis_archive_url(url: str) -> bool:
 
 def _prepare_earthdata_curl_context() -> Dict[str, Any]:
     ctx = _EARTHDATA_AUTH_CONTEXT
+    # 条件分岐: `not bool(ctx.get("enabled"))` を満たす経路を評価する。
     if not bool(ctx.get("enabled")):
         raise RuntimeError("earthdata_auth_not_enabled")
 
     curl_path = str(ctx.get("curl_path") or "").strip()
+    # 条件分岐: `not curl_path` を満たす経路を評価する。
     if not curl_path:
         curl_path = str(shutil.which("curl.exe") or shutil.which("curl") or "").strip()
+        # 条件分岐: `not curl_path` を満たす経路を評価する。
         if not curl_path:
             raise RuntimeError("curl_not_found")
+
         ctx["curl_path"] = curl_path
 
     netrc_path = str(ctx.get("curl_netrc_path") or "").strip()
+    # 条件分岐: `not netrc_path` を満たす経路を評価する。
     if not netrc_path:
         configured_netrc = str(ctx.get("netrc_path") or "").strip()
+        # 条件分岐: `configured_netrc and Path(configured_netrc).exists()` を満たす経路を評価する。
         if configured_netrc and Path(configured_netrc).exists():
             netrc_path = configured_netrc
         else:
             user = str(ctx.get("user") or "").strip()
             pw = str(ctx.get("password") or "").strip()
+            # 条件分岐: `not user or not pw` を満たす経路を評価する。
             if not user or not pw:
                 raise RuntimeError("earthdata_credentials_missing_for_curl")
+
             tmp_netrc = Path(tempfile.gettempdir()) / f"wavep_earthdata_{os.getpid()}.netrc"
             tmp_netrc.write_text(
                 f"machine {EARTHDATA_HOST}\nlogin {user}\npassword {pw}\n",
                 encoding="utf-8",
             )
             netrc_path = str(tmp_netrc)
+
         ctx["curl_netrc_path"] = netrc_path
 
     cookie_path = str(ctx.get("curl_cookie_path") or "").strip()
+    # 条件分岐: `not cookie_path` を満たす経路を評価する。
     if not cookie_path:
         cookie_path = str(Path(tempfile.gettempdir()) / f"wavep_earthdata_{os.getpid()}.cookies")
         ctx["curl_cookie_path"] = cookie_path
@@ -286,12 +328,16 @@ def _fetch_bytes_with_earthdata_curl(url: str, timeout_s: int) -> Tuple[bytes, D
         str(url),
     ]
     proc = subprocess.run(cmd, capture_output=True, check=False)
+    # 条件分岐: `proc.returncode != 0` を満たす経路を評価する。
     if proc.returncode != 0:
         stderr = proc.stderr.decode("utf-8", "replace") if proc.stderr else ""
         raise RuntimeError(f"curl_exit_{proc.returncode}: {stderr[:240]}")
+
     data = bytes(proc.stdout or b"")
+    # 条件分岐: `not data` を満たす経路を評価する。
     if not data:
         raise RuntimeError("curl_empty_body")
+
     ctx["curl_fetch_used"] = True
     return data, {
         "content_type": "",
@@ -301,11 +347,13 @@ def _fetch_bytes_with_earthdata_curl(url: str, timeout_s: int) -> Tuple[bytes, D
 
 
 def _fetch_bytes(url: str, timeout_s: int) -> Tuple[bytes, Dict[str, Any]]:
+    # 条件分岐: `_is_cddis_archive_url(url) and bool(_EARTHDATA_AUTH_CONTEXT.get("enabled"))` を満たす経路を評価する。
     if _is_cddis_archive_url(url) and bool(_EARTHDATA_AUTH_CONTEXT.get("enabled")):
         try:
             return _fetch_bytes_with_earthdata_curl(url=url, timeout_s=timeout_s)
         except Exception as e:
             _EARTHDATA_AUTH_CONTEXT["curl_last_error"] = str(e)
+
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-llr-apol-route-audit/1.0"})
     with urllib.request.urlopen(req, timeout=timeout_s) as r:
         data = r.read()
@@ -322,8 +370,10 @@ def _iter_hrefs(html: str) -> List[str]:
 
 def _yymmdd_to_yyyymmdd(yymmdd: str) -> Optional[str]:
     s = str(yymmdd or "").strip()
+    # 条件分岐: `not re.fullmatch(r"\d{6}", s)` を満たす経路を評価する。
     if not re.fullmatch(r"\d{6}", s):
         return None
+
     yy = int(s[:2])
     yyyy = 2000 + yy if yy < 80 else 1900 + yy
     return f"{yyyy:04d}{s[2:]}"
@@ -331,22 +381,29 @@ def _yymmdd_to_yyyymmdd(yymmdd: str) -> Optional[str]:
 
 def _date_age_days_from_yyyymmdd(yyyymmdd: Optional[str]) -> Optional[int]:
     s = str(yyyymmdd or "").strip()
+    # 条件分岐: `not re.fullmatch(r"\d{8}", s)` を満たす経路を評価する。
     if not re.fullmatch(r"\d{8}", s):
         return None
+
     try:
         dt = datetime.strptime(s, "%Y%m%d").replace(tzinfo=timezone.utc)
     except Exception:
         return None
+
     delta = datetime.now(timezone.utc) - dt
     return int(delta.days)
 
 
 def _extract_float(text: str) -> Optional[float]:
+    # 条件分岐: `text is None` を満たす経路を評価する。
     if text is None:
         return None
+
     m = re.search(r"[-+]?\d+(?:\.\d+)?(?:[Ee][-+]?\d+)?", str(text))
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     try:
         return float(m.group(0))
     except Exception:
@@ -354,16 +411,25 @@ def _extract_float(text: str) -> Optional[float]:
 
 
 def _extract_signed_angle(text: str, pos_letter: str, neg_letter: str) -> Optional[float]:
+    # 条件分岐: `text is None` を満たす経路を評価する。
     if text is None:
         return None
+
     value = _extract_float(text)
+    # 条件分岐: `value is None` を満たす経路を評価する。
     if value is None:
         return None
+
     t = str(text).upper()
+    # 条件分岐: `neg_letter.upper() in t` を満たす経路を評価する。
     if neg_letter.upper() in t:
         return -abs(value)
+
+    # 条件分岐: `pos_letter.upper() in t` を満たす経路を評価する。
+
     if pos_letter.upper() in t:
         return abs(value)
+
     return value
 
 
@@ -380,27 +446,48 @@ def _parse_apol_site_log(text: str) -> Dict[str, Any]:
 
     for line in text.splitlines():
         line_s = line.strip()
+        # 条件分岐: `not line_s` を満たす経路を評価する。
         if not line_s:
             continue
+
+        # 条件分岐: `"Date Prepared" in line_s and rec.get("date_prepared") is None` を満たす経路を評価する。
 
         if "Date Prepared" in line_s and rec.get("date_prepared") is None:
             rec["date_prepared"] = line_s.split(":", 1)[1].strip() if ":" in line_s else None
             continue
+
+        # 条件分岐: `"X coordinate" in line_s` を満たす経路を評価する。
+
         if "X coordinate" in line_s:
             rec["x_m"] = _extract_float(line_s.split(":", 1)[1] if ":" in line_s else line_s)
             continue
+
+        # 条件分岐: `"Y coordinate" in line_s` を満たす経路を評価する。
+
         if "Y coordinate" in line_s:
             rec["y_m"] = _extract_float(line_s.split(":", 1)[1] if ":" in line_s else line_s)
             continue
+
+        # 条件分岐: `"Z coordinate" in line_s` を満たす経路を評価する。
+
         if "Z coordinate" in line_s:
             rec["z_m"] = _extract_float(line_s.split(":", 1)[1] if ":" in line_s else line_s)
             continue
+
+        # 条件分岐: `"Latitude" in line_s and "[deg]" in line_s` を満たす経路を評価する。
+
         if "Latitude" in line_s and "[deg]" in line_s:
             rec["lat_deg"] = _extract_signed_angle(line_s.split(":", 1)[1] if ":" in line_s else line_s, "N", "S")
             continue
+
+        # 条件分岐: `"Longitude" in line_s and "[deg]" in line_s` を満たす経路を評価する。
+
         if "Longitude" in line_s and "[deg]" in line_s:
             rec["lon_deg"] = _extract_signed_angle(line_s.split(":", 1)[1] if ":" in line_s else line_s, "E", "W")
             continue
+
+        # 条件分岐: `"Elevation" in line_s and "[m]" in line_s` を満たす経路を評価する。
+
         if "Elevation" in line_s and "[m]" in line_s:
             rec["height_m"] = _extract_float(line_s.split(":", 1)[1] if ":" in line_s else line_s)
             continue
@@ -430,6 +517,7 @@ def _scan_local_logs() -> List[Dict[str, Any]]:
                 **parsed,
             }
         )
+
     return rows
 
 
@@ -439,14 +527,19 @@ def _list_remote_apol_logs(timeout_s: int) -> List[Tuple[str, str]]:
     seen: set[str] = set()
     for href in _iter_hrefs(html):
         m = re.search(r"/pub/slr/slrlog/apol_(\d{8})\.log$", href, flags=re.IGNORECASE)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         ymd = m.group(1)
+        # 条件分岐: `ymd in seen` を満たす経路を評価する。
         if ymd in seen:
             continue
+
         seen.add(ymd)
         url = f"{EDC_BASE}{href}" if href.startswith("/") else href
         rows.append((ymd, url))
+
     rows.sort(reverse=True)
     return rows
 
@@ -491,6 +584,7 @@ def _scan_remote_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any
                     "fetch_error": str(e),
                 }
             )
+
     return remote_rows, None, n_total
 
 
@@ -500,14 +594,19 @@ def _list_remote_apol_oldlog_logs(timeout_s: int) -> List[Tuple[str, str]]:
     seen: set[str] = set()
     for href in _iter_hrefs(html):
         m = re.search(r"/pub/slr/slrlog/oldlog/apol_(\d{8})\.log$", href, flags=re.IGNORECASE)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         ymd = m.group(1)
+        # 条件分岐: `ymd in seen` を満たす経路を評価する。
         if ymd in seen:
             continue
+
         seen.add(ymd)
         url = f"{EDC_BASE}{href}" if href.startswith("/") else href
         rows.append((ymd, url))
+
     rows.sort(reverse=True)
     return rows
 
@@ -552,6 +651,7 @@ def _scan_remote_oldlog_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[s
                     "fetch_error": str(e),
                 }
             )
+
     return remote_rows, None, n_total
 
 
@@ -561,14 +661,19 @@ def _list_remote_apol_hst_logs(timeout_s: int) -> List[Tuple[str, str]]:
     seen: set[str] = set()
     for href in _iter_hrefs(html):
         m = re.search(r"/pub/slr/slrhst/apol_hst_(\d{8})\.log$", href, flags=re.IGNORECASE)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         ymd = m.group(1)
+        # 条件分岐: `ymd in seen` を満たす経路を評価する。
         if ymd in seen:
             continue
+
         seen.add(ymd)
         url = f"{EDC_BASE}{href}" if href.startswith("/") else href
         rows.append((ymd, url))
+
     rows.sort(reverse=True)
     return rows
 
@@ -632,6 +737,7 @@ def _scan_slrhst_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any
                     "fetch_error": str(e),
                 }
             )
+
     return rows, None, n_total
 
 
@@ -641,26 +747,38 @@ def _list_cddis_apol_logs(index_url: str, timeout_s: int, kind: str) -> List[Tup
     seen: set[str] = set()
     for href in _iter_hrefs(html):
         h = str(href or "").strip()
+        # 条件分岐: `not h` を満たす経路を評価する。
         if not h:
             continue
+
         file_name = Path(h).name.strip()
+        # 条件分岐: `kind == "slrlog"` を満たす経路を評価する。
         if kind == "slrlog":
             m = re.fullmatch(r"(apol_(\d{8})\.log)", file_name, flags=re.IGNORECASE)
+        # 条件分岐: 前段条件が不成立で、`kind == "oldlog"` を追加評価する。
         elif kind == "oldlog":
             m = re.fullmatch(r"(apol_(\d{8})\.log)", file_name, flags=re.IGNORECASE)
+        # 条件分岐: 前段条件が不成立で、`kind == "slrhst"` を追加評価する。
         elif kind == "slrhst":
             m = re.fullmatch(r"(apol_hst_(\d{8})\.log)", file_name, flags=re.IGNORECASE)
         else:
             m = None
+
+        # 条件分岐: `not m` を満たす経路を評価する。
+
         if not m:
             continue
+
         fname = str(m.group(1))
         ymd = str(m.group(2))
         key = f"{kind}:{fname.lower()}"
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
         rows.append((ymd, f"{index_url.rstrip('/')}/{fname}"))
+
     rows.sort(reverse=True)
     return rows
 
@@ -691,12 +809,14 @@ def _scan_cddis_site_logs(
     except Exception as e:
         current_logs = []
         diag["errors"].append(f"cddis_slrlog_list_error: {e}")
+
     try:
         old_logs = _list_cddis_apol_logs(CDDIS_SLRLOG_OLDLOG_LIST, timeout_s=timeout_s, kind="oldlog")
         diag["n_oldlog_total"] = int(len(old_logs))
     except Exception as e:
         old_logs = []
         diag["errors"].append(f"cddis_oldlog_list_error: {e}")
+
     try:
         hst_logs = _list_cddis_apol_logs(CDDIS_SLRHST_LIST, timeout_s=timeout_s, kind="slrhst")
         diag["n_slrhst_total"] = int(len(hst_logs))
@@ -726,10 +846,15 @@ def _scan_cddis_site_logs(
             rec.update(parsed)
         except Exception as e:
             rec["fetch_error"] = str(e)
+
         rows.append(rec)
         diag["n_current_scanned"] = int(diag["n_current_scanned"]) + 1
+        # 条件分岐: `bool(rec.get("has_xyz"))` を満たす経路を評価する。
         if bool(rec.get("has_xyz")):
             diag["n_logs_with_xyz"] = int(diag["n_logs_with_xyz"]) + 1
+
+        # 条件分岐: `bool(rec.get("has_geodetic"))` を満たす経路を評価する。
+
         if bool(rec.get("has_geodetic")):
             diag["n_logs_with_geodetic"] = int(diag["n_logs_with_geodetic"]) + 1
 
@@ -755,10 +880,15 @@ def _scan_cddis_site_logs(
             rec.update(parsed)
         except Exception as e:
             rec["fetch_error"] = str(e)
+
         rows.append(rec)
         diag["n_oldlog_scanned"] = int(diag["n_oldlog_scanned"]) + 1
+        # 条件分岐: `bool(rec.get("has_xyz"))` を満たす経路を評価する。
         if bool(rec.get("has_xyz")):
             diag["n_logs_with_xyz"] = int(diag["n_logs_with_xyz"]) + 1
+
+        # 条件分岐: `bool(rec.get("has_geodetic"))` を満たす経路を評価する。
+
         if bool(rec.get("has_geodetic")):
             diag["n_logs_with_geodetic"] = int(diag["n_logs_with_geodetic"]) + 1
 
@@ -785,10 +915,15 @@ def _scan_cddis_site_logs(
             rec["has_geodetic"] = bool(parsed_hst.get("has_geodetic"))
         except Exception as e:
             rec["fetch_error"] = str(e)
+
         rows.append(rec)
         diag["n_slrhst_scanned"] = int(diag["n_slrhst_scanned"]) + 1
+        # 条件分岐: `bool(rec.get("has_xyz"))` を満たす経路を評価する。
         if bool(rec.get("has_xyz")):
             diag["n_logs_with_xyz"] = int(diag["n_logs_with_xyz"]) + 1
+
+        # 条件分岐: `bool(rec.get("has_geodetic"))` を満たす経路を評価する。
+
         if bool(rec.get("has_geodetic")):
             diag["n_logs_with_geodetic"] = int(diag["n_logs_with_geodetic"]) + 1
 
@@ -801,29 +936,40 @@ def _list_cddis_dir_entries(index_url: str, timeout_s: int) -> List[str]:
         seen_local: set[str] = set()
         for href in _iter_hrefs(html_text):
             name = Path(str(href or "").strip()).name.strip()
+            # 条件分岐: `not name or name in ("..", ".", "index.html")` を満たす経路を評価する。
             if not name or name in ("..", ".", "index.html"):
                 continue
+
             key = name.lower()
+            # 条件分岐: `key in seen_local` を満たす経路を評価する。
             if key in seen_local:
                 continue
+
             seen_local.add(key)
             entries_local.append(name)
+
         return entries_local
 
     html = _fetch_text(index_url, timeout_s=timeout_s)
     entries = _extract_entries(html)
+    # 条件分岐: `entries` を満たす経路を評価する。
     if entries:
         return entries
+
+    # 条件分岐: `_is_cddis_archive_url(index_url)` を満たす経路を評価する。
 
     if _is_cddis_archive_url(index_url):
         try:
             fallback_html = _fetch_text_direct(index_url, timeout_s=timeout_s)
+            # 条件分岐: `not _looks_like_earthdata_login_html(fallback_html)` を満たす経路を評価する。
             if not _looks_like_earthdata_login_html(fallback_html):
                 fallback_entries = _extract_entries(fallback_html)
+                # 条件分岐: `fallback_entries` を満たす経路を評価する。
                 if fallback_entries:
                     return fallback_entries
         except Exception:
             pass
+
     return entries
 
 
@@ -854,11 +1000,15 @@ def _scan_cddis_llr_crd_headers(
 
     def _date_key(fname: str) -> str:
         m = re.search(r"_(\d{8})\.", str(fname), flags=re.IGNORECASE)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             return str(m.group(1))
+
         m = re.search(r"_(\d{6})\.", str(fname), flags=re.IGNORECASE)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             return f"{str(m.group(1))}01"
+
         return "00000000"
 
     for source_name, root_url in roots:
@@ -869,6 +1019,7 @@ def _scan_cddis_llr_crd_headers(
             except Exception as e:
                 diag["errors"].append(f"{source_name}:{target}:list_year_error={e}")
                 continue
+
             year_names = sorted(
                 [v for v in years if re.fullmatch(r"\d{4}", str(v))],
                 reverse=True,
@@ -880,18 +1031,24 @@ def _scan_cddis_llr_crd_headers(
                 except Exception as e:
                     diag["errors"].append(f"{source_name}:{target}:{year}:list_file_error={e}")
                     continue
+
                 for fname in names:
                     fname_l = str(fname).lower()
+                    # 条件分岐: `source_name == "npt"` を満たす経路を評価する。
                     if source_name == "npt":
+                        # 条件分岐: `not fname_l.endswith(".npt")` を満たす経路を評価する。
                         if not fname_l.endswith(".npt"):
                             continue
                     else:
+                        # 条件分岐: `not (fname_l.endswith(".frd") or fname_l.endswith(".frd.gz"))` を満たす経路を評価する。
                         if not (fname_l.endswith(".frd") or fname_l.endswith(".frd.gz")):
                             continue
+
                     candidate_files.append((source_name, target, str(year), f"{year_url}{fname}"))
 
     candidate_files = sorted(candidate_files, key=lambda v: (_date_key(v[3]), v[0], v[1], v[3]), reverse=True)
     diag["n_candidate_files"] = int(len(candidate_files))
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         candidate_files = candidate_files[: int(max_files)]
 
@@ -917,24 +1074,36 @@ def _scan_cddis_llr_crd_headers(
         try:
             data, _meta = _fetch_bytes(url, timeout_s=timeout_s)
             text = _decode_possible_snx(data, url=url)
+            # 条件分岐: `re.search(r"(?mi)^\s*h2\s+APOL\b", text)` を満たす経路を評価する。
             if re.search(r"(?mi)^\s*h2\s+APOL\b", text):
                 diag["n_with_h2_apol"] = int(diag["n_with_h2_apol"]) + 1
+
+            # 条件分岐: `re.search(rf"(?mi)^\s*h2\s+APOL\s+{re.escape(str(apol_code))}\b", text)` を満たす経路を評価する。
+
             if re.search(rf"(?mi)^\s*h2\s+APOL\s+{re.escape(str(apol_code))}\b", text):
                 diag["n_with_pad_code"] = int(diag["n_with_pad_code"]) + 1
+
+            # 条件分岐: `re.search(r"(?mi)\bX coordinate\b|\bY coordinate\b|\bZ coordinate\b|\bITRF\b"...` を満たす経路を評価する。
+
             if re.search(r"(?mi)\bX coordinate\b|\bY coordinate\b|\bZ coordinate\b|\bITRF\b", text):
                 rec["has_xyz"] = True
                 diag["n_with_xyz_marker"] = int(diag["n_with_xyz_marker"]) + 1
+
+            # 条件分岐: `re.search(r"(?mi)\bLatitude\b|\bLongitude\b|\bElevation\b", text)` を満たす経路を評価する。
+
             if re.search(r"(?mi)\bLatitude\b|\bLongitude\b|\bElevation\b", text):
                 rec["has_geodetic"] = True
                 diag["n_with_geodetic_marker"] = int(diag["n_with_geodetic_marker"]) + 1
         except Exception as e:
             rec["fetch_error"] = str(e)
             diag["n_fetch_error"] = int(diag["n_fetch_error"]) + 1
+
         rows.append(rec)
         diag["n_files_scanned"] = int(diag["n_files_scanned"]) + 1
         src_count_key = f"{source_name}:{target}"
         diag["source_counts"][src_count_key] = int(diag["source_counts"].get(src_count_key) or 0) + 1
         samples = diag.get("sample_urls")
+        # 条件分岐: `isinstance(samples, list) and len(samples) < 20` を満たす経路を評価する。
         if isinstance(samples, list) and len(samples) < 20:
             samples.append(url)
 
@@ -967,15 +1136,19 @@ def _pick_latest_cddis_pos_eop_files(file_names: List[str]) -> List[Tuple[str, s
     latest_by_center: Dict[str, Tuple[str, str, int, str]] = {}
     for name in file_names:
         m = re.fullmatch(r"([a-z0-9]+)\.pos\+eop\.(\d{6})\.v(\d+)\.snx\.gz", str(name).strip(), flags=re.IGNORECASE)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         center = str(m.group(1)).lower()
         yymmdd = str(m.group(2))
         ver = int(m.group(3))
         rec = (center, yymmdd, ver, str(name).strip())
         prev = latest_by_center.get(center)
+        # 条件分岐: `prev is None or ver > int(prev[2])` を満たす経路を評価する。
         if prev is None or ver > int(prev[2]):
             latest_by_center[center] = rec
+
     out = list(latest_by_center.values())
     out.sort(key=lambda v: (str(v[1]), int(v[2]), str(v[0])), reverse=True)
     return out
@@ -1037,14 +1210,17 @@ def _scan_cddis_products_pos_eop_daily(
         except Exception as e:
             diag["errors"].append(f"{year}:list_day_error={e}")
             continue
+
         days = sorted([str(v) for v in day_names if re.fullmatch(r"\d{6}", str(v))], reverse=True)
         for day in days:
             candidate_days.append((year, day, f"{year_url}{day}/"))
 
     candidate_days.sort(key=lambda v: f"{v[0]}{v[1]}", reverse=True)
     diag["n_day_dirs_total"] = int(len(candidate_days))
+    # 条件分岐: `int(max_days) > 0` を満たす経路を評価する。
     if int(max_days) > 0:
         candidate_days = candidate_days[: int(max_days)]
+
     diag["n_day_dirs_scanned"] = int(len(candidate_days))
 
     for year, day, day_url in candidate_days:
@@ -1053,6 +1229,7 @@ def _scan_cddis_products_pos_eop_daily(
         except Exception as e:
             diag["errors"].append(f"{year}/{day}:list_file_error={e}")
             continue
+
         latest_files = _pick_latest_cddis_pos_eop_files(file_names)
         diag["n_candidate_files"] = int(diag["n_candidate_files"]) + int(len(latest_files))
 
@@ -1096,6 +1273,7 @@ def _scan_cddis_products_pos_eop_daily(
                 diag["n_xyz_match"] = int(diag["n_xyz_match"]) + xyz_match_n
                 xyz_candidates = parsed.get("xyz_candidates")
                 cand0 = xyz_candidates[0] if isinstance(xyz_candidates, list) and xyz_candidates else None
+                # 条件分岐: `isinstance(cand0, dict)` を満たす経路を評価する。
                 if isinstance(cand0, dict):
                     rec["x_m"] = float(cand0.get("stax_m")) if cand0.get("stax_m") is not None else None
                     rec["y_m"] = float(cand0.get("stay_m")) if cand0.get("stay_m") is not None else None
@@ -1104,6 +1282,7 @@ def _scan_cddis_products_pos_eop_daily(
             except Exception as e:
                 rec["fetch_error"] = str(e)
                 diag["n_fetch_error"] = int(diag["n_fetch_error"]) + 1
+
             rows.append(rec)
             diag["n_files_scanned"] = int(diag["n_files_scanned"]) + 1
 
@@ -1140,21 +1319,31 @@ def _pick_cddis_ilrsac_ops_files(
     center_hint_u = str(center_hint or "").strip().lower()
     for raw_name in file_names:
         name = str(raw_name or "").strip()
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
         m = re.fullmatch(r"([a-z0-9]+)\.pos\+eop\.(\d{6})(?:\.v(\d+))?\.snx(?:\.(?:gz|z))?", name, flags=re.IGNORECASE)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             m = re.fullmatch(r"([a-z0-9]+)\.(\d{6})(?:\.v(\d+))?\.snx(?:\.(?:gz|z))?", name, flags=re.IGNORECASE)
+
+        # 条件分岐: `not m` を満たす経路を評価する。
+
         if not m:
             continue
+
         center = str(m.group(1)).lower()
+        # 条件分岐: `center_hint_u and center != center_hint_u` を満たす経路を評価する。
         if center_hint_u and center != center_hint_u:
             continue
+
         yymmdd = str(m.group(2))
         ver = int(m.group(3) or 1)
         key = (center, yymmdd)
         rec = (center, yymmdd, ver, name)
         prev = latest_by_center_day.get(key)
+        # 条件分岐: `prev is None or int(prev[2]) < ver` を満たす経路を評価する。
         if prev is None or int(prev[2]) < ver:
             latest_by_center_day[key] = rec
 
@@ -1165,8 +1354,10 @@ def _pick_cddis_ilrsac_ops_files(
 
 def _pick_cddis_ilrsac_pos_eop_files(file_names: List[str], max_files: int) -> List[Tuple[str, str, int, str]]:
     out = _pick_cddis_ilrsac_ops_files(file_names, center_hint=None)
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         out = out[: int(max_files)]
+
     return out
 
 
@@ -1261,6 +1452,7 @@ def _scan_cddis_ilrsac_ops_pos_eop(
     diag["n_dir_entries"] = int(len(entries))
     flat_candidates = _pick_cddis_ilrsac_ops_files(entries, center_hint=None)
     diag["n_candidate_files_flat"] = int(len(flat_candidates))
+    # 条件分岐: `flat_candidates` を満たす経路を評価する。
     if flat_candidates:
         diag["flat_route_latest_yymmdd"] = str(flat_candidates[0][1])
 
@@ -1285,13 +1477,17 @@ def _scan_cddis_ilrsac_ops_pos_eop(
             except Exception as e:
                 diag["errors"].append(f"center_list_error:{center}={e}")
                 continue
+
             diag["n_center_dirs_scanned"] = int(diag["n_center_dirs_scanned"]) + 1
             center_pick = _pick_cddis_ilrsac_ops_files(center_entries, center_hint=center)
             center_candidates_flat.extend(center_pick)
+
         diag["n_candidate_files_center_route"] = int(len(center_candidates_flat))
+        # 条件分岐: `center_candidates_flat` を満たす経路を評価する。
         if center_candidates_flat:
             center_candidates_flat.sort(key=lambda v: (str(v[1]), int(v[2]), str(v[0])), reverse=True)
             diag["center_route_latest_yymmdd"] = str(center_candidates_flat[0][1])
+
         for center, yymmdd, ver, fname in center_candidates_flat:
             center_url = f"{CDDIS_ILRSAC_PRODUCTS_OPS_ROOT.rstrip('/')}/{center}/"
             file_url = f"{center_url}{fname}"
@@ -1304,18 +1500,23 @@ def _scan_cddis_ilrsac_ops_pos_eop(
         url = f"{CDDIS_ILRSAC_PRODUCTS_OPS_POS_EOP_ROOT.rstrip('/')}/{fname}"
         key = (str(center), str(yymmdd))
         merged[key] = (str(center), str(yymmdd), int(ver), str(fname), str(url), "flat_pos+eop")
+
     for center, yymmdd, ver, fname, url, route_name in center_candidates:
         key = (str(center), str(yymmdd))
         prev = merged.get(key)
+        # 条件分岐: `prev is None or int(prev[2]) < int(ver)` を満たす経路を評価する。
         if prev is None or int(prev[2]) < int(ver):
             merged[key] = (str(center), str(yymmdd), int(ver), str(fname), str(url), str(route_name))
 
     candidates = list(merged.values())
     candidates.sort(key=lambda v: (str(v[1]), int(v[2]), str(v[0])), reverse=True)
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         candidates = candidates[: int(max_files)]
+
     diag["n_candidate_files"] = int(len(candidates))
     diag["candidate_files"] = [f"{str(v[5])}:{str(v[3])}" for v in candidates]
+    # 条件分岐: `candidates` を満たす経路を評価する。
     if candidates:
         latest_yymmdd = str(candidates[0][1])
         latest_yyyymmdd = _yymmdd_to_yyyymmdd(latest_yymmdd)
@@ -1365,6 +1566,7 @@ def _scan_cddis_ilrsac_ops_pos_eop(
             diag["n_xyz_match"] = int(diag.get("n_xyz_match") or 0) + xyz_match_n
             xyz_candidates = parsed.get("xyz_candidates")
             cand0 = xyz_candidates[0] if isinstance(xyz_candidates, list) and xyz_candidates else None
+            # 条件分岐: `isinstance(cand0, dict)` を満たす経路を評価する。
             if isinstance(cand0, dict):
                 rec["x_m"] = float(cand0.get("stax_m")) if cand0.get("stax_m") is not None else None
                 rec["y_m"] = float(cand0.get("stay_m")) if cand0.get("stay_m") is not None else None
@@ -1374,6 +1576,7 @@ def _scan_cddis_ilrsac_ops_pos_eop(
             rec["fetch_error"] = str(e)
             diag["n_fetch_error"] = int(diag.get("n_fetch_error") or 0) + 1
             diag["errors"].append(f"{fname}: {e}")
+
         rows.append(rec)
         diag["n_files_scanned"] = int(diag.get("n_files_scanned") or 0) + 1
 
@@ -1402,21 +1605,31 @@ def _scan_cddis_ilrsac_ops_pos_eop(
 
 def _extract_date_key_from_resource_name(name: str) -> str:
     text = str(name or "").strip()
+    # 条件分岐: `not text` を満たす経路を評価する。
     if not text:
         return "00000000"
+
     m = re.search(r"(20\d{2})[._-]?(\d{2})[._-]?(\d{2})", text)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         return f"{m.group(1)}{m.group(2)}{m.group(3)}"
+
     m = re.search(r"\.(\d{6})\.", text)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         ymd = _yymmdd_to_yyyymmdd(str(m.group(1)))
+        # 条件分岐: `ymd` を満たす経路を評価する。
         if ymd:
             return ymd
+
     m = re.search(r"_(\d{6})_", text)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         ymd = _yymmdd_to_yyyymmdd(str(m.group(1)))
+        # 条件分岐: `ymd` を満たす経路を評価する。
         if ymd:
             return ymd
+
     return "00000000"
 
 
@@ -1424,24 +1637,36 @@ def _pick_cddis_resource_sinex_files(file_names: List[str], max_files: int) -> L
     candidates: List[Tuple[str, str, str]] = []
     for raw_name in file_names:
         name = str(raw_name or "").strip()
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
         name_u = name.upper()
+        # 条件分岐: `not (name_u.endswith(".SNX") or name_u.endswith(".SNX.GZ"))` を満たす経路を評価する。
         if not (name_u.endswith(".SNX") or name_u.endswith(".SNX.GZ")):
             continue
+
         kind = None
+        # 条件分岐: `"ILRS_DATA_HANDLING_FILE" in name_u` を満たす経路を評価する。
         if "ILRS_DATA_HANDLING_FILE" in name_u:
             kind = "ilrs_dhf"
+        # 条件分岐: 前段条件が不成立で、`re.search(r"SLRF\d{4}_POS\+VEL", name_u)` を追加評価する。
         elif re.search(r"SLRF\d{4}_POS\+VEL", name_u):
             kind = "slrf_posvel"
+
+        # 条件分岐: `not kind` を満たす経路を評価する。
+
         if not kind:
             continue
+
         date_key = _extract_date_key_from_resource_name(name)
         candidates.append((kind, date_key, name))
 
     candidates.sort(key=lambda v: (str(v[1]), str(v[0]), str(v[2])), reverse=True)
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         candidates = candidates[: int(max_files)]
+
     return candidates
 
 
@@ -1542,6 +1767,7 @@ def _scan_cddis_resource_coordinate_sinex(
             rec["cddis_resource_alias_candidate_xyz_n"] = alias_candidate_xyz_n
             rec["cddis_resource_xyz_keys"] = ",".join([str(v) for v in (parsed.get("xyz_keys") or [])])
 
+            # 条件分岐: `isinstance(cand0, dict)` を満たす経路を評価する。
             if isinstance(cand0, dict):
                 rec["x_m"] = float(cand0.get("stax_m")) if cand0.get("stax_m") is not None else None
                 rec["y_m"] = float(cand0.get("stay_m")) if cand0.get("stay_m") is not None else None
@@ -1589,33 +1815,49 @@ def _pick_cddis_ac_descriptor_files(file_names: List[str], max_files: int) -> Li
     seen: set[str] = set()
     for raw_name in file_names:
         name = str(raw_name or "").strip()
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
         name_l = name.lower()
+        # 条件分岐: `name_l in seen` を満たす経路を評価する。
         if name_l in seen:
             continue
+
+        # 条件分岐: `name_l in ("md5sums", "sha512sums", "archive")` を満たす経路を評価する。
+
         if name_l in ("md5sums", "sha512sums", "archive"):
             continue
+
+        # 条件分岐: `name_l.endswith(".dsc")` を満たす経路を評価する。
+
         if name_l.endswith(".dsc"):
             kind = "dsc"
+        # 条件分岐: 前段条件が不成立で、`name_l.endswith(".txt") and "qc" in name_l` を追加評価する。
         elif name_l.endswith(".txt") and "qc" in name_l:
             kind = "qc_txt"
         else:
             continue
+
         date_key = "00000000"
         m_date8 = re.search(r"(\d{8})", name_l)
+        # 条件分岐: `m_date8` を満たす経路を評価する。
         if m_date8:
             date_key = str(m_date8.group(1))
         else:
             m_date6 = re.search(r"(\d{6})", name_l)
+            # 条件分岐: `m_date6` を満たす経路を評価する。
             if m_date6:
                 date_key = _yymmdd_to_yyyymmdd(str(m_date6.group(1))) or "00000000"
+
         seen.add(name_l)
         candidates.append((kind, date_key, name))
 
     candidates.sort(key=lambda v: (str(v[1]), str(v[0]), str(v[2])), reverse=True)
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         candidates = candidates[: int(max_files)]
+
     return candidates
 
 
@@ -1661,6 +1903,7 @@ def _scan_cddis_ac_coordinate_descriptors(
         except Exception as e:
             diag["errors"].append(f"{root_kind}:list_error={e}")
             continue
+
         diag["n_dir_entries"] = int(diag.get("n_dir_entries") or 0) + int(len(entries))
         picked = _pick_cddis_ac_descriptor_files(entries, max_files=0)
         for kind, date_key, fname in picked:
@@ -1672,13 +1915,18 @@ def _scan_cddis_ac_coordinate_descriptors(
     for root_kind, root_url, kind, date_key, fname in candidates_all:
         url = f"{root_url.rstrip('/')}/{fname}"
         key = str(url).lower()
+        # 条件分岐: `key in dedup_url` を満たす経路を評価する。
         if key in dedup_url:
             continue
+
         dedup_url.add(key)
         candidates.append((root_kind, root_url, kind, date_key, fname))
 
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
+
     if int(max_files) > 0:
         candidates = candidates[: int(max_files)]
+
     diag["n_candidate_files"] = int(len(candidates))
     diag["candidate_files"] = [f"{v[0]}:{v[4]}" for v in candidates]
 
@@ -1712,12 +1960,21 @@ def _scan_cddis_ac_coordinate_descriptors(
             rec["cddis_ac_code_hit"] = code_hit
             rec["cddis_ac_domes_hit"] = domes_hit
             rec["cddis_ac_alias_hit"] = str(alias_hit or "")
+            # 条件分岐: `code_hit` を満たす経路を評価する。
             if code_hit:
                 diag["n_code_hit"] = int(diag.get("n_code_hit") or 0) + 1
+
+            # 条件分岐: `domes_hit` を満たす経路を評価する。
+
             if domes_hit:
                 diag["n_domes_hit"] = int(diag.get("n_domes_hit") or 0) + 1
+
+            # 条件分岐: `alias_hit` を満たす経路を評価する。
+
             if alias_hit:
                 diag["n_alias_hit"] = int(diag.get("n_alias_hit") or 0) + 1
+
+            # 条件分岐: `"+SITE/ID" in text and "+SOLUTION/ESTIMATE" in text` を満たす経路を評価する。
 
             if "+SITE/ID" in text and "+SOLUTION/ESTIMATE" in text:
                 diag["n_sinex_like_files"] = int(diag.get("n_sinex_like_files") or 0) + 1
@@ -1737,6 +1994,7 @@ def _scan_cddis_ac_coordinate_descriptors(
                 diag["n_xyz_match"] = int(diag.get("n_xyz_match") or 0) + xyz_match_n
                 xyz_candidates = parsed.get("xyz_candidates")
                 cand0 = xyz_candidates[0] if isinstance(xyz_candidates, list) and xyz_candidates else None
+                # 条件分岐: `isinstance(cand0, dict)` を満たす経路を評価する。
                 if isinstance(cand0, dict):
                     rec["x_m"] = float(cand0.get("stax_m")) if cand0.get("stax_m") is not None else None
                     rec["y_m"] = float(cand0.get("stay_m")) if cand0.get("stay_m") is not None else None
@@ -1746,6 +2004,7 @@ def _scan_cddis_ac_coordinate_descriptors(
             rec["fetch_error"] = str(e)
             diag["n_fetch_error"] = int(diag.get("n_fetch_error") or 0) + 1
             diag["errors"].append(f"{root_kind}:{fname}: {e}")
+
         rows.append(rec)
         diag["n_files_scanned"] = int(diag.get("n_files_scanned") or 0) + 1
 
@@ -1777,8 +2036,10 @@ def _scan_cddis_ac_coordinate_descriptors(
 
 def _parse_slrocc_asof_yyyymmdd(text: str) -> Optional[str]:
     m = re.search(r"\bas of\s+(\d{1,2}-[A-Za-z]{3}-\d{4})\b", str(text or ""), flags=re.IGNORECASE)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     try:
         dt = datetime.strptime(str(m.group(1)), "%d-%b-%Y")
         return dt.strftime("%Y%m%d")
@@ -1788,8 +2049,10 @@ def _parse_slrocc_asof_yyyymmdd(text: str) -> Optional[str]:
 
 def _parse_slrocc_pipe_columns(line: str) -> List[str]:
     raw = str(line or "").strip()
+    # 条件分岐: `"|" not in raw` を満たす経路を評価する。
     if "|" not in raw:
         return []
+
     cols = [v.strip() for v in raw.strip("|").split("|")]
     return cols
 
@@ -1836,9 +2099,12 @@ def _scan_cddis_slrocc_coordinate_catalog(
         )
         return rows, diag
 
+    # 条件分岐: `_looks_like_earthdata_login_html(text)` を満たす経路を評価する。
+
     if _looks_like_earthdata_login_html(text):
         try:
             fallback_text = _fetch_text_direct(CDDIS_SLROCC_SLRCOOR_TXT, timeout_s=timeout_s)
+            # 条件分岐: `not _looks_like_earthdata_login_html(fallback_text)` を満たす経路を評価する。
             if not _looks_like_earthdata_login_html(fallback_text):
                 text = fallback_text
             else:
@@ -1853,11 +2119,15 @@ def _scan_cddis_slrocc_coordinate_catalog(
 
     for line in str(text).splitlines():
         cols = _parse_slrocc_pipe_columns(line)
+        # 条件分岐: `len(cols) < 15` を満たす経路を評価する。
         if len(cols) < 15:
             continue
+
         sta = str(cols[0] or "").strip()
+        # 条件分岐: `not re.fullmatch(r"\d{4}", sta)` を満たす経路を評価する。
         if not re.fullmatch(r"\d{4}", sta):
             continue
+
         diag["n_table_rows"] = int(diag["n_table_rows"]) + 1
         site_name = str(cols[1] or "").strip()
         occ_sys = str(cols[2] or "").strip()
@@ -1889,10 +2159,14 @@ def _scan_cddis_slrocc_coordinate_catalog(
         has_xyz = bool(x_m is not None and y_m is not None and z_m is not None)
         has_geodetic = bool(lat_deg is not None and lon_deg is not None and height_m is not None)
         diag["n_apol_rows"] = int(diag["n_apol_rows"]) + 1
+        # 条件分岐: `has_xyz` を満たす経路を評価する。
         if has_xyz:
             diag["n_apol_rows_with_xyz"] = int(diag["n_apol_rows_with_xyz"]) + 1
         else:
             diag["n_apol_rows_xyz_null"] = int(diag["n_apol_rows_xyz_null"]) + 1
+
+        # 条件分岐: `has_geodetic` を満たす経路を評価する。
+
         if has_geodetic:
             diag["n_apol_rows_with_geodetic"] = int(diag["n_apol_rows_with_geodetic"]) + 1
 
@@ -1985,9 +2259,12 @@ def _scan_cddis_slrocc_occupation_catalog(
         )
         return rows, diag
 
+    # 条件分岐: `_looks_like_earthdata_login_html(text)` を満たす経路を評価する。
+
     if _looks_like_earthdata_login_html(text):
         try:
             fallback_text = _fetch_text_direct(CDDIS_SLROCC_OCC_TXT, timeout_s=timeout_s)
+            # 条件分岐: `not _looks_like_earthdata_login_html(fallback_text)` を満たす経路を評価する。
             if not _looks_like_earthdata_login_html(fallback_text):
                 text = fallback_text
             else:
@@ -2002,11 +2279,15 @@ def _scan_cddis_slrocc_occupation_catalog(
 
     for line in str(text).splitlines():
         cols = _parse_slrocc_pipe_columns(line)
+        # 条件分岐: `len(cols) < 11` を満たす経路を評価する。
         if len(cols) < 11:
             continue
+
         sta = str(cols[0] or "").strip()
+        # 条件分岐: `not re.fullmatch(r"\d{4}", sta)` を満たす経路を評価する。
         if not re.fullmatch(r"\d{4}", sta):
             continue
+
         diag["n_table_rows"] = int(diag["n_table_rows"]) + 1
         site_name = str(cols[1] or "").strip()
         occ_sys = str(cols[2] or "").strip()
@@ -2027,6 +2308,7 @@ def _scan_cddis_slrocc_occupation_catalog(
 
         diag["n_apol_rows"] = int(diag["n_apol_rows"]) + 1
         diag["n_apol_rows_xyz_null"] = int(diag["n_apol_rows_xyz_null"]) + 1
+        # 条件分岐: `domes` を満たす経路を評価する。
         if domes:
             diag["n_apol_rows_with_domes"] = int(diag["n_apol_rows_with_domes"]) + 1
 
@@ -2125,9 +2407,12 @@ def _scan_cddis_slrocc_calibration_catalog(
         )
         return rows, diag
 
+    # 条件分岐: `_looks_like_earthdata_login_html(text)` を満たす経路を評価する。
+
     if _looks_like_earthdata_login_html(text):
         try:
             fallback_text = _fetch_text_direct(CDDIS_SLROCC_SLRCAL_TXT, timeout_s=timeout_s)
+            # 条件分岐: `not _looks_like_earthdata_login_html(fallback_text)` を満たす経路を評価する。
             if not _looks_like_earthdata_login_html(fallback_text):
                 text = fallback_text
             else:
@@ -2142,11 +2427,15 @@ def _scan_cddis_slrocc_calibration_catalog(
 
     for line in str(text).splitlines():
         cols = _parse_slrocc_pipe_columns(line)
+        # 条件分岐: `len(cols) < 12` を満たす経路を評価する。
         if len(cols) < 12:
             continue
+
         sta = str(cols[0] or "").strip()
+        # 条件分岐: `not re.fullmatch(r"\d{4}", sta)` を満たす経路を評価する。
         if not re.fullmatch(r"\d{4}", sta):
             continue
+
         diag["n_table_rows"] = int(diag["n_table_rows"]) + 1
 
         site_name = str(cols[1] or "").strip()
@@ -2173,6 +2462,7 @@ def _scan_cddis_slrocc_calibration_catalog(
         diag["n_apol_rows"] = int(diag["n_apol_rows"]) + 1
         diag["n_apol_rows_xyz_null"] = int(diag["n_apol_rows_xyz_null"]) + 1
         cal_target_u = str(cal_target).upper()
+        # 条件分岐: `cal_target and cal_target_u not in ("NULL", "NONE", "N/A", "-")` を満たす経路を評価する。
         if cal_target and cal_target_u not in ("NULL", "NONE", "N/A", "-"):
             diag["n_apol_rows_with_cal_target"] = int(diag["n_apol_rows_with_cal_target"]) + 1
 
@@ -2232,8 +2522,10 @@ def _scan_cddis_slrocc_calibration_catalog(
 
 
 def _looks_like_ecef_xyz(x_m: Optional[float], y_m: Optional[float], z_m: Optional[float]) -> bool:
+    # 条件分岐: `x_m is None or y_m is None or z_m is None` を満たす経路を評価する。
     if x_m is None or y_m is None or z_m is None:
         return False
+
     try:
         return bool(abs(float(x_m)) > 1.0e5 and abs(float(y_m)) > 1.0e5 and abs(float(z_m)) > 1.0e5)
     except Exception:
@@ -2281,9 +2573,12 @@ def _scan_cddis_slrocc_spl_coordinate_catalog(
         )
         return rows, diag
 
+    # 条件分岐: `_looks_like_earthdata_login_html(text)` を満たす経路を評価する。
+
     if _looks_like_earthdata_login_html(text):
         try:
             fallback_text = _fetch_text_direct(CDDIS_SLROCC_SLRCOOR_SPL, timeout_s=timeout_s)
+            # 条件分岐: `not _looks_like_earthdata_login_html(fallback_text)` を満たす経路を評価する。
             if not _looks_like_earthdata_login_html(fallback_text):
                 text = fallback_text
             else:
@@ -2296,16 +2591,21 @@ def _scan_cddis_slrocc_spl_coordinate_catalog(
 
     for line in str(text).splitlines():
         m = re.match(r"^\s*(\d{4})\s+([A-Za-z].*)$", str(line))
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         sta = str(m.group(1) or "").strip()
         body = str(m.group(2) or "").strip()
+        # 条件分岐: `not sta` を満たす経路を評価する。
         if not sta:
             continue
+
         diag["n_table_rows"] = int(diag["n_table_rows"]) + 1
 
         desc_u = f"{sta} {body}".upper()
         alias_hit = _match_alias_in_desc(desc_u=desc_u, alias_tokens=alias_tokens)
+        # 条件分岐: `not (str(sta).upper() == apol_code_u or bool(alias_hit))` を満たす経路を評価する。
         if not (str(sta).upper() == apol_code_u or bool(alias_hit)):
             continue
 
@@ -2313,11 +2613,13 @@ def _scan_cddis_slrocc_spl_coordinate_catalog(
         y_m: Optional[float] = None
         z_m: Optional[float] = None
         float_tokens = re.findall(r"[-+]?\d+(?:\.\d+)?(?:[Ee][-+]?\d+)?", body)
+        # 条件分岐: `len(float_tokens) >= 3` を満たす経路を評価する。
         if len(float_tokens) >= 3:
             try:
                 cand_x = float(float_tokens[-3])
                 cand_y = float(float_tokens[-2])
                 cand_z = float(float_tokens[-1])
+                # 条件分岐: `_looks_like_ecef_xyz(cand_x, cand_y, cand_z)` を満たす経路を評価する。
                 if _looks_like_ecef_xyz(cand_x, cand_y, cand_z):
                     x_m = cand_x
                     y_m = cand_y
@@ -2328,10 +2630,14 @@ def _scan_cddis_slrocc_spl_coordinate_catalog(
         has_xyz = bool(_looks_like_ecef_xyz(x_m, y_m, z_m))
         has_geodetic = False
         diag["n_apol_rows"] = int(diag["n_apol_rows"]) + 1
+        # 条件分岐: `has_xyz` を満たす経路を評価する。
         if has_xyz:
             diag["n_apol_rows_with_xyz"] = int(diag["n_apol_rows_with_xyz"]) + 1
         else:
             diag["n_apol_rows_xyz_null"] = int(diag["n_apol_rows_xyz_null"]) + 1
+
+        # 条件分岐: `has_geodetic` を満たす経路を評価する。
+
         if has_geodetic:
             diag["n_apol_rows_with_geodetic"] = int(diag["n_apol_rows_with_geodetic"]) + 1
 
@@ -2420,9 +2726,12 @@ def _scan_cddis_slrocc_calibration_spl_catalog(
         )
         return rows, diag
 
+    # 条件分岐: `_looks_like_earthdata_login_html(text)` を満たす経路を評価する。
+
     if _looks_like_earthdata_login_html(text):
         try:
             fallback_text = _fetch_text_direct(CDDIS_SLROCC_SLRCAL_SPL, timeout_s=timeout_s)
+            # 条件分岐: `not _looks_like_earthdata_login_html(fallback_text)` を満たす経路を評価する。
             if not _looks_like_earthdata_login_html(fallback_text):
                 text = fallback_text
             else:
@@ -2435,16 +2744,21 @@ def _scan_cddis_slrocc_calibration_spl_catalog(
 
     for line in str(text).splitlines():
         m = re.match(r"^\s*(\d{4})\s+([A-Za-z].*)$", str(line))
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         sta = str(m.group(1) or "").strip()
         body = str(m.group(2) or "").strip()
+        # 条件分岐: `not sta` を満たす経路を評価する。
         if not sta:
             continue
+
         diag["n_table_rows"] = int(diag["n_table_rows"]) + 1
 
         desc_u = f"{sta} {body}".upper()
         alias_hit = _match_alias_in_desc(desc_u=desc_u, alias_tokens=alias_tokens)
+        # 条件分岐: `not (str(sta).upper() == apol_code_u or bool(alias_hit))` を満たす経路を評価する。
         if not (str(sta).upper() == apol_code_u or bool(alias_hit)):
             continue
 
@@ -2452,11 +2766,13 @@ def _scan_cddis_slrocc_calibration_spl_catalog(
         y_m: Optional[float] = None
         z_m: Optional[float] = None
         float_tokens = re.findall(r"[-+]?\d+(?:\.\d+)?(?:[Ee][-+]?\d+)?", body)
+        # 条件分岐: `len(float_tokens) >= 3` を満たす経路を評価する。
         if len(float_tokens) >= 3:
             try:
                 cand_x = float(float_tokens[-3])
                 cand_y = float(float_tokens[-2])
                 cand_z = float(float_tokens[-1])
+                # 条件分岐: `_looks_like_ecef_xyz(cand_x, cand_y, cand_z)` を満たす経路を評価する。
                 if _looks_like_ecef_xyz(cand_x, cand_y, cand_z):
                     x_m = cand_x
                     y_m = cand_y
@@ -2467,10 +2783,14 @@ def _scan_cddis_slrocc_calibration_spl_catalog(
         has_xyz = bool(_looks_like_ecef_xyz(x_m, y_m, z_m))
         has_geodetic = False
         diag["n_apol_rows"] = int(diag["n_apol_rows"]) + 1
+        # 条件分岐: `has_xyz` を満たす経路を評価する。
         if has_xyz:
             diag["n_apol_rows_with_xyz"] = int(diag["n_apol_rows_with_xyz"]) + 1
         else:
             diag["n_apol_rows_xyz_null"] = int(diag["n_apol_rows_xyz_null"]) + 1
+
+        # 条件分岐: `has_geodetic` を満たす経路を評価する。
+
         if has_geodetic:
             diag["n_apol_rows_with_geodetic"] = int(diag["n_apol_rows_with_geodetic"]) + 1
 
@@ -2541,8 +2861,10 @@ def _pick_cddis_slrocc_daily_coordinate_files(
 
     years = sorted([str(v) for v in root_entries if re.fullmatch(r"\d{4}", str(v))], reverse=True)
     diag["n_year_dirs"] = int(len(years))
+    # 条件分岐: `int(max_years) > 0` を満たす経路を評価する。
     if int(max_years) > 0:
         years = years[: int(max_years)]
+
     diag["n_year_dirs_scanned"] = int(len(years))
 
     for year in years:
@@ -2552,11 +2874,14 @@ def _pick_cddis_slrocc_daily_coordinate_files(
         except Exception as e:
             diag["errors"].append(f"{year}:list_file_error={e}")
             continue
+
         for fname in file_names:
             name = str(fname).strip()
             m = re.fullmatch(r"slrcoor\.(\d{6})", name, flags=re.IGNORECASE)
+            # 条件分岐: `not m` を満たす経路を評価する。
             if not m:
                 continue
+
             yymmdd = str(m.group(1))
             log_date = _yymmdd_to_yyyymmdd(yymmdd) or "00000000"
             url = f"{year_url}{name}"
@@ -2564,8 +2889,10 @@ def _pick_cddis_slrocc_daily_coordinate_files(
 
     candidates.sort(key=lambda v: (str(v[0]), str(v[2])), reverse=True)
     diag["n_candidate_files_total"] = int(len(candidates))
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         candidates = candidates[: int(max_files)]
+
     diag["n_candidate_files_selected"] = int(len(candidates))
     diag["candidate_files"] = [f"{v[3]}/{v[2]}" for v in candidates[:64]]
     return candidates, diag
@@ -2604,8 +2931,12 @@ def _scan_cddis_slrocc_daily_coordinate_catalog(
     diag["n_year_dirs_scanned"] = int(pick_diag.get("n_year_dirs_scanned") or 0)
     diag["n_candidate_files"] = int(pick_diag.get("n_candidate_files_selected") or 0)
     diag["candidate_files"] = list(pick_diag.get("candidate_files") or [])
+    # 条件分岐: `pick_diag.get("errors")` を満たす経路を評価する。
     if pick_diag.get("errors"):
         diag["errors"].extend([str(v) for v in (pick_diag.get("errors") or []) if str(v)])
+
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         rows.append(
             {
@@ -2666,11 +2997,15 @@ def _scan_cddis_slrocc_daily_coordinate_catalog(
         file_apol_xyz_null_rows = 0
         for line in str(text).splitlines():
             cols = _parse_slrocc_pipe_columns(line)
+            # 条件分岐: `len(cols) < 15` を満たす経路を評価する。
             if len(cols) < 15:
                 continue
+
             sta = str(cols[0] or "").strip()
+            # 条件分岐: `not re.fullmatch(r"\d{4}", sta)` を満たす経路を評価する。
             if not re.fullmatch(r"\d{4}", sta):
                 continue
+
             file_table_rows += 1
             site_name = str(cols[1] or "").strip()
             occ_sys = str(cols[2] or "").strip()
@@ -2702,10 +3037,14 @@ def _scan_cddis_slrocc_daily_coordinate_catalog(
 
             has_xyz = bool(x_m is not None and y_m is not None and z_m is not None)
             has_geodetic = bool(lat_deg is not None and lon_deg is not None and height_m is not None)
+            # 条件分岐: `has_xyz` を満たす経路を評価する。
             if has_xyz:
                 file_apol_xyz_rows += 1
             else:
                 file_apol_xyz_null_rows += 1
+
+            # 条件分岐: `has_geodetic` を満たす経路を評価する。
+
             if has_geodetic:
                 file_apol_geod_rows += 1
 
@@ -2766,8 +3105,10 @@ def _extract_urls(text: str) -> List[str]:
     urls: List[str] = []
     for raw in re.findall(r"https?://\S+", str(text or "")):
         url = raw.strip().rstrip(").,;\"'`>")
+        # 条件分岐: `url and url not in urls` を満たす経路を評価する。
         if url and url not in urls:
             urls.append(url)
+
     return urls
 
 
@@ -2789,11 +3130,15 @@ def _collect_ilrs_primary_product_urls(timeout_s: int, max_notices: int) -> Tupl
 
     candidates: List[Tuple[int, int, str]] = []
     for line in str(index_text).splitlines():
+        # 条件分岐: `not any(k in line.lower() for k in ("data handling file", "slrf2020", "eccent...` を満たす経路を評価する。
         if not any(k in line.lower() for k in ("data handling file", "slrf2020", "eccentricity file")):
             continue
+
         m = re.match(r"\s*(\d+)\s*\|\s*(\d{4})-\d{2}-\d{2}\s*\|", line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         notice_id = int(m.group(1))
         year = int(m.group(2))
         candidates.append((notice_id, year, line))
@@ -2809,30 +3154,42 @@ def _collect_ilrs_primary_product_urls(timeout_s: int, max_notices: int) -> Tupl
         except Exception as e:
             diag["notice_fetch_errors"].append(f"{notice_id}:{e}")
             continue
+
         for u in _extract_urls(text):
             ul = u.lower()
             if ("ilrs.gsfc.nasa.gov/docs/" in ul and ("ilrs_data_handling_file" in ul or "slrf2020_pos+vel" in ul)) or (
                 "cddis.nasa.gov/archive/slr/slrecc/" in ul and "slrecc" in ul
             ):
+                # 条件分岐: `u not in urls` を満たす経路を評価する。
                 if u not in urls:
                     urls.append(u)
 
         cddis_slrecc_base = None
         for u in _extract_urls(text):
             ul = u.lower()
+            # 条件分岐: `"cddis.nasa.gov/archive/slr/slrecc/" in ul` を満たす経路を評価する。
             if "cddis.nasa.gov/archive/slr/slrecc/" in ul:
                 cddis_slrecc_base = u.rstrip(" /")
                 break
+
+        # 条件分岐: `cddis_slrecc_base` を満たす経路を評価する。
+
         if cddis_slrecc_base:
+            # 条件分岐: `not cddis_slrecc_base.endswith("/")` を満たす経路を評価する。
             if not cddis_slrecc_base.endswith("/"):
                 cddis_slrecc_base = f"{cddis_slrecc_base}/"
+
             for fname in re.findall(r"\b(slrecc\.\d{6}\.ILRS\.(?:xyz|une)\.snx(?:\.gz)?)\b", text, flags=re.IGNORECASE):
                 cand = f"{cddis_slrecc_base}{fname}"
+                # 条件分岐: `cand not in urls` を満たす経路を評価する。
                 if cand not in urls:
                     urls.append(cand)
 
+    # 条件分岐: `not urls` を満たす経路を評価する。
+
     if not urls:
         urls = list(ILRS_PRIMARY_PRODUCT_FALLBACK_URLS)
+
     diag["urls_from_notice"] = urls
     return urls, diag
 
@@ -2847,9 +3204,12 @@ def _decode_unix_compress_z(data: bytes) -> bytes:
 
     commands: List[List[str]] = []
     uncompress_path = shutil.which("uncompress")
+    # 条件分岐: `uncompress_path` を満たす経路を評価する。
     if uncompress_path:
         commands.append([uncompress_path, "-c"])
+
     wsl_path = shutil.which("wsl.exe") or shutil.which("wsl")
+    # 条件分岐: `wsl_path` を満たす経路を評価する。
     if wsl_path:
         commands.append([wsl_path, "--", "bash", "-lc", "uncompress -c"])
 
@@ -2867,25 +3227,33 @@ def _decode_unix_compress_z(data: bytes) -> bytes:
         except Exception as e:
             last_error = f"spawn_error({cmd[0]}): {e}"
             continue
+
+        # 条件分岐: `int(proc.returncode) == 0 and bool(proc.stdout)` を満たす経路を評価する。
+
         if int(proc.returncode) == 0 and bool(proc.stdout):
             return bytes(proc.stdout)
+
         stderr_text = proc.stderr.decode("utf-8", "replace").strip()
         last_error = f"decoder_rc={proc.returncode}; stderr={stderr_text[:240]}"
+
     raise RuntimeError(f"unix_compress_decode_failed: {last_error}")
 
 
 def _decode_possible_snx(data: bytes, url: str) -> str:
     blob = data
+    # 条件分岐: `str(url).lower().endswith(".gz")` を満たす経路を評価する。
     if str(url).lower().endswith(".gz"):
         try:
             blob = gzip.decompress(blob)
         except Exception:
             blob = data
+    # 条件分岐: 前段条件が不成立で、`str(url).lower().endswith(".z")` を追加評価する。
     elif str(url).lower().endswith(".z"):
         try:
             blob = _decode_unix_compress_z(blob)
         except Exception:
             blob = data
+
     try:
         return blob.decode("utf-8", "replace")
     except Exception:
@@ -2940,12 +3308,18 @@ def _scan_ilrs_primary_products(
             "has_geodetic": False,
         }
         is_slrecc = "cddis.nasa.gov/archive/slr/slrecc/" in str(url).lower() and "slrecc" in str(url).lower()
+        # 条件分岐: `is_slrecc` を満たす経路を評価する。
         if is_slrecc:
             diag["n_slrecc_urls"] = int(diag["n_slrecc_urls"]) + 1
+            # 条件分岐: `".ilrs.xyz.snx" in str(url).lower()` を満たす経路を評価する。
             if ".ilrs.xyz.snx" in str(url).lower():
                 diag["n_slrecc_xyz_urls"] = int(diag["n_slrecc_xyz_urls"]) + 1
+
+            # 条件分岐: `".ilrs.une.snx" in str(url).lower()` を満たす経路を評価する。
+
             if ".ilrs.une.snx" in str(url).lower():
                 diag["n_slrecc_une_urls"] = int(diag["n_slrecc_une_urls"]) + 1
+
         diag["n_urls_scanned"] = int(diag["n_urls_scanned"]) + 1
         try:
             data, meta = _fetch_bytes(url, timeout_s=timeout_s)
@@ -2956,14 +3330,19 @@ def _scan_ilrs_primary_products(
             continue
 
         diag["n_fetch_ok"] = int(diag["n_fetch_ok"]) + 1
+        # 条件分岐: `is_slrecc` を満たす経路を評価する。
         if is_slrecc:
             diag["n_slrecc_fetch_ok"] = int(diag["n_slrecc_fetch_ok"]) + 1
+
         text_head = data[:1024].decode("utf-8", "replace")
         login_blocked = "Earthdata Login" in text_head or "urs.earthdata.nasa.gov" in text_head
+        # 条件分岐: `login_blocked` を満たす経路を評価する。
         if login_blocked:
             diag["n_login_blocked"] = int(diag["n_login_blocked"]) + 1
+            # 条件分岐: `is_slrecc` を満たす経路を評価する。
             if is_slrecc:
                 diag["n_slrecc_login_blocked"] = int(diag["n_slrecc_login_blocked"]) + 1
+
             rec["fetch_error"] = "earthdata_login_required"
             rec["content_type"] = meta.get("content_type")
             rows.append(rec)
@@ -3009,20 +3388,30 @@ def _scan_ilrs_primary_products(
             [str(v.get("key") or "") for v in alias_candidates if isinstance(v, dict) and str(v.get("key") or "")]
         )
         rec["ilrs_content_type"] = str(meta.get("content_type") or "")
+        # 条件分岐: `isinstance(cand0, dict)` を満たす経路を評価する。
         if isinstance(cand0, dict):
             rec["x_m"] = float(cand0.get("stax_m"))
             rec["y_m"] = float(cand0.get("stay_m"))
             rec["z_m"] = float(cand0.get("staz_m"))
             rec["ilrs_xyz_key_selected"] = str(cand0.get("key") or "")
             rec["ilrs_xyz_match_by_selected"] = str(cand0.get("match_by") or "")
+
+        # 条件分岐: `alias_candidate_n > 0` を満たす経路を評価する。
+
         if alias_candidate_n > 0:
             examples = diag.get("alias_candidate_examples")
+            # 条件分岐: `isinstance(examples, list)` を満たす経路を評価する。
             if isinstance(examples, list):
                 for candidate in alias_candidates[:5]:
+                    # 条件分岐: `len(examples) >= 15` を満たす経路を評価する。
                     if len(examples) >= 15:
                         break
+
+                    # 条件分岐: `not isinstance(candidate, dict)` を満たす経路を評価する。
+
                     if not isinstance(candidate, dict):
                         continue
+
                     examples.append(
                         {
                             "url": url,
@@ -3034,6 +3423,7 @@ def _scan_ilrs_primary_products(
                             "candidate_by": str(candidate.get("candidate_by") or ""),
                         }
                     )
+
         rows.append(rec)
         diag["url_summary"].append(
             {
@@ -3057,37 +3447,49 @@ def _pick_cddis_slrecc_catalog_files(file_names: List[str], max_files: int) -> L
     seen: set[str] = set()
     for raw_name in file_names:
         name = str(raw_name or "").strip()
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
         name_l = name.lower()
+        # 条件分岐: `name_l in seen` を満たす経路を評価する。
         if name_l in seen:
             continue
+
         kind = None
         date_key = "00000000"
 
         m_slrecc = re.fullmatch(r"slrecc\.(\d{6})\.ilrs\.(xyz|une)\.snx(?:\.gz)?", name_l)
+        # 条件分岐: `m_slrecc` を満たす経路を評価する。
         if m_slrecc:
             ymd = _yymmdd_to_yyyymmdd(str(m_slrecc.group(1))) or "00000000"
             kind = f"slrecc_{str(m_slrecc.group(2))}"
             date_key = ymd
         else:
             m_ecc = re.fullmatch(r"ecc_(xyz|une)(?:_(\d{6}))?\.snx(?:\.gz)?", name_l)
+            # 条件分岐: `m_ecc` を満たす経路を評価する。
             if m_ecc:
                 kind = f"ecc_{str(m_ecc.group(1))}"
                 y6 = str(m_ecc.group(2) or "").strip()
+                # 条件分岐: `y6` を満たす経路を評価する。
                 if y6:
                     date_key = _yymmdd_to_yyyymmdd(y6) or "00000000"
                 else:
                     date_key = "99999999"
 
+        # 条件分岐: `not kind` を満たす経路を評価する。
+
         if not kind:
             continue
+
         seen.add(name_l)
         candidates.append((kind, date_key, name))
 
     candidates.sort(key=lambda v: (str(v[1]), str(v[0]), str(v[2])), reverse=True)
+    # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
     if int(max_files) > 0:
         candidates = candidates[: int(max_files)]
+
     return candidates
 
 
@@ -3187,6 +3589,7 @@ def _scan_cddis_slrecc_catalog(
             rec["cddis_slrecc_alias_candidate_xyz_n"] = alias_candidate_xyz_n
             rec["cddis_slrecc_xyz_keys"] = ",".join([str(v) for v in (parsed.get("xyz_keys") or [])])
 
+            # 条件分岐: `isinstance(cand0, dict)` を満たす経路を評価する。
             if isinstance(cand0, dict):
                 rec["x_m"] = float(cand0.get("stax_m")) if cand0.get("stax_m") is not None else None
                 rec["y_m"] = float(cand0.get("stay_m")) if cand0.get("stay_m") is not None else None
@@ -3202,6 +3605,7 @@ def _scan_cddis_slrecc_catalog(
             rec["fetch_error"] = str(e)
             diag["n_fetch_error"] = int(diag["n_fetch_error"]) + 1
             diag["errors"].append(f"{fname}: {e}")
+
         rows.append(rec)
         diag["n_files_scanned"] = int(diag["n_files_scanned"]) + 1
 
@@ -3239,16 +3643,20 @@ def _list_repro_center_files(center: str, timeout_s: int) -> List[Tuple[str, int
     )
     for href in _iter_hrefs(html):
         m = pat.search(href)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         yymmdd = str(m.group(1))
         ver = int(m.group(2))
         u = f"{EDC_BASE}{href}" if href.startswith("/") else href
         rows.append((yymmdd, ver, u))
+
     return rows
 
 
 def _pick_repro_latest(rows: List[Tuple[str, int, str]]) -> Optional[Tuple[str, int, str]]:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return None
 
@@ -3264,12 +3672,18 @@ def _normalize_alias_tokens(alias_tokens: Optional[List[str]]) -> List[str]:
     seen: set[str] = set()
     for raw in (alias_tokens or []) + ["APOL", "APOLLO", "APACHE POINT"]:
         token = re.sub(r"\s+", " ", str(raw or "").strip().upper())
+        # 条件分岐: `len(token) < 4` を満たす経路を評価する。
         if len(token) < 4:
             continue
+
+        # 条件分岐: `token in seen` を満たす経路を評価する。
+
         if token in seen:
             continue
+
         seen.add(token)
         tokens.append(token)
+
     tokens.sort(key=lambda v: (-len(v), v))
     return tokens
 
@@ -3278,8 +3692,10 @@ def _build_apol_alias_tokens(apol_meta: Dict[str, Any]) -> List[str]:
     seeds: List[str] = []
     for key in ("station", "site_name", "name"):
         value = str(apol_meta.get(key) or "").strip()
+        # 条件分岐: `value` を満たす経路を評価する。
         if value:
             seeds.append(value)
+
     seeds.extend(
         [
             "APOL",
@@ -3296,13 +3712,20 @@ def _match_alias_in_desc(desc_u: str, alias_tokens: List[str]) -> Optional[str]:
     compact_desc = re.sub(r"[^A-Z0-9]+", "", str(desc_u or ""))
     for token in alias_tokens:
         token_u = str(token or "").upper().strip()
+        # 条件分岐: `not token_u` を満たす経路を評価する。
         if not token_u:
             continue
+
+        # 条件分岐: `token_u in desc_u` を満たす経路を評価する。
+
         if token_u in desc_u:
             return token_u
+
         compact_tok = re.sub(r"[^A-Z0-9]+", "", token_u)
+        # 条件分岐: `compact_tok and compact_tok in compact_desc` を満たす経路を評価する。
         if compact_tok and compact_tok in compact_desc:
             return token_u
+
     return None
 
 
@@ -3321,6 +3744,7 @@ def _parse_sinex_apol_match(
     apol_domes_u = str(apol_domes or "").upper().strip()
     domes_prefix = ""
     m_domes = re.match(r"^(\d{5})", apol_domes_u)
+    # 条件分岐: `m_domes` を満たす経路を評価する。
     if m_domes:
         domes_prefix = str(m_domes.group(1))
 
@@ -3334,45 +3758,71 @@ def _parse_sinex_apol_match(
     in_est = False
     for raw in text.splitlines():
         line = raw.rstrip("\n")
+        # 条件分岐: `line.startswith("+SITE/ID")` を満たす経路を評価する。
         if line.startswith("+SITE/ID"):
             in_site = True
             continue
+
+        # 条件分岐: `in_site and line.startswith("-SITE/ID")` を満たす経路を評価する。
+
         if in_site and line.startswith("-SITE/ID"):
             in_site = False
             continue
+
+        # 条件分岐: `line.startswith("+SOLUTION/ESTIMATE")` を満たす経路を評価する。
+
         if line.startswith("+SOLUTION/ESTIMATE"):
             in_est = True
             continue
+
+        # 条件分岐: `in_est and line.startswith("-SOLUTION/ESTIMATE")` を満たす経路を評価する。
+
         if in_est and line.startswith("-SOLUTION/ESTIMATE"):
             in_est = False
             continue
 
+        # 条件分岐: `in_site` を満たす経路を評価する。
+
         if in_site:
             s = line.strip()
+            # 条件分岐: `not s or s.startswith("*")` を満たす経路を評価する。
             if not s or s.startswith("*"):
                 continue
+
             parts = s.split()
+            # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
             if len(parts) < 4:
                 continue
+
             code = str(parts[0]).strip()
             pt = str(parts[1]).strip()
             domes = str(parts[2]).strip()
             cdp_sod = ""
             cdp_pad = ""
+            # 条件分岐: `parts` を満たす経路を評価する。
             if parts:
                 tail = str(parts[-1]).strip().upper()
+                # 条件分岐: `re.fullmatch(r"[0-9A-Z\-]{4,16}", tail)` を満たす経路を評価する。
                 if re.fullmatch(r"[0-9A-Z\-]{4,16}", tail):
                     cdp_sod = tail
                     m_pad = re.match(r"^(\d{4})", cdp_sod)
+                    # 条件分岐: `m_pad` を満たす経路を評価する。
                     if m_pad:
                         cdp_pad = str(m_pad.group(1))
+
             desc_tokens: List[str] = []
+            # 条件分岐: `len(parts) >= 13` を満たす経路を評価する。
             if len(parts) >= 13:
                 desc_tokens = parts[4:-8]
+
+            # 条件分岐: `not desc_tokens and len(parts) >= 5` を満たす経路を評価する。
+
             if not desc_tokens and len(parts) >= 5:
                 desc_tokens = parts[4:]
+                # 条件分岐: `cdp_sod and desc_tokens and str(desc_tokens[-1]).upper() == cdp_sod` を満たす経路を評価する。
                 if cdp_sod and desc_tokens and str(desc_tokens[-1]).upper() == cdp_sod:
                     desc_tokens = desc_tokens[:-1]
+
             desc = " ".join(desc_tokens).strip()
             site_rows.append(
                 {
@@ -3386,28 +3836,41 @@ def _parse_sinex_apol_match(
             )
             continue
 
+        # 条件分岐: `in_est` を満たす経路を評価する。
+
         if in_est:
             s = line.strip()
+            # 条件分岐: `not s or s.startswith("*")` を満たす経路を評価する。
             if not s or s.startswith("*"):
                 continue
+
             parts = s.split()
+            # 条件分岐: `len(parts) < 10` を満たす経路を評価する。
             if len(parts) < 10:
                 continue
+
             typ = str(parts[1]).strip().upper()
+            # 条件分岐: `typ not in ("STAX", "STAY", "STAZ")` を満たす経路を評価する。
             if typ not in ("STAX", "STAY", "STAZ"):
                 continue
+
             code = str(parts[2]).strip()
             pt = str(parts[3]).strip()
             est_types.setdefault((code, pt), set()).add(typ)
             val: Optional[float] = None
             for idx in (8, 9, len(parts) - 2, len(parts) - 1):
+                # 条件分岐: `idx < 0 or idx >= len(parts)` を満たす経路を評価する。
                 if idx < 0 or idx >= len(parts):
                     continue
+
                 try:
                     val = float(str(parts[idx]))
                     break
                 except Exception:
                     continue
+
+            # 条件分岐: `val is not None` を満たす経路を評価する。
+
             if val is not None:
                 est_values.setdefault((code, pt), {})[typ] = float(val)
 
@@ -3423,22 +3886,40 @@ def _parse_sinex_apol_match(
         cdp_sod_u = str(rec.get("cdp_sod") or "").upper()
         alias_hit = _match_alias_in_desc(desc_u=desc_u, alias_tokens=alias_tokens_norm)
 
+        # 条件分岐: `code_u == apol_code_u` を満たす経路を評価する。
         if code_u == apol_code_u:
             by.append("code")
             alias_by.append("code_exact")
+
+        # 条件分岐: `domes_u == apol_domes_u` を満たす経路を評価する。
+
         if domes_u == apol_domes_u:
             by.append("domes")
             alias_by.append("domes_exact")
+
+        # 条件分岐: `cdp_pad_u == apol_code_u` を満たす経路を評価する。
+
         if cdp_pad_u == apol_code_u:
             by.append("cdp_pad")
             alias_by.append("cdp_pad_exact")
+
+        # 条件分岐: `alias_hit` を満たす経路を評価する。
+
         if alias_hit:
             by.append(f"name:{alias_hit}")
             alias_by.append(f"name:{alias_hit}")
+
+        # 条件分岐: `domes_prefix and domes_u.startswith(domes_prefix)` を満たす経路を評価する。
+
         if domes_prefix and domes_u.startswith(domes_prefix):
             alias_by.append(f"domes_prefix:{domes_prefix}")
+
+        # 条件分岐: `cdp_sod_u.startswith(apol_code_u)` を満たす経路を評価する。
+
         if cdp_sod_u.startswith(apol_code_u):
             alias_by.append(f"cdp_sod_prefix:{apol_code_u}")
+
+        # 条件分岐: `by` を満たす経路を評価する。
 
         if by:
             apol_site_matches.append(
@@ -3451,6 +3932,9 @@ def _parse_sinex_apol_match(
                     "match_by": ",".join(by),
                 }
             )
+
+        # 条件分岐: `alias_by` を満たす経路を評価する。
+
         if alias_by:
             alias_candidates.append(
                 {
@@ -3469,11 +3953,14 @@ def _parse_sinex_apol_match(
     for rec in apol_site_matches:
         code = str(rec.get("code") or "")
         pt = str(rec.get("pt") or "")
+        # 条件分岐: `{"STAX", "STAY", "STAZ"}.issubset(est_types.get((code, pt), set())) and (code...` を満たす経路を評価する。
         if {"STAX", "STAY", "STAZ"}.issubset(est_types.get((code, pt), set())) and (code, pt) in est_values:
             vals = est_values.get((code, pt), {})
             tri = _triplet(vals)
+            # 条件分岐: `tri is None` を満たす経路を評価する。
             if tri is None:
                 continue
+
             xyz_candidates.append(
                 {
                     "key": f"{code}:{pt}",
@@ -3490,11 +3977,14 @@ def _parse_sinex_apol_match(
             )
         else:
             for (code2, pt2), types in est_types.items():
+                # 条件分岐: `code2 == code and {"STAX", "STAY", "STAZ"}.issubset(types) and (code2, pt2) i...` を満たす経路を評価する。
                 if code2 == code and {"STAX", "STAY", "STAZ"}.issubset(types) and (code2, pt2) in est_values:
                     vals = est_values.get((code2, pt2), {})
                     tri = _triplet(vals)
+                    # 条件分岐: `tri is None` を満たす経路を評価する。
                     if tri is None:
                         continue
+
                     xyz_candidates.append(
                         {
                             "key": f"{code2}:{pt2}",
@@ -3511,6 +4001,8 @@ def _parse_sinex_apol_match(
                     )
                     break
 
+    # 条件分岐: `not xyz_candidates` を満たす経路を評価する。
+
     if not xyz_candidates:
         for (code2, pt2), types in est_types.items():
             if (
@@ -3520,8 +4012,10 @@ def _parse_sinex_apol_match(
             ):
                 vals = est_values.get((code2, pt2), {})
                 tri = _triplet(vals)
+                # 条件分岐: `tri is None` を満たす経路を評価する。
                 if tri is None:
                     continue
+
                 xyz_candidates.append(
                     {
                         "key": f"{code2}:{pt2}",
@@ -3540,15 +4034,19 @@ def _parse_sinex_apol_match(
     xyz_by_key: Dict[str, Dict[str, Any]] = {}
     for rec in xyz_candidates:
         key = str(rec.get("key") or "")
+        # 条件分岐: `key and key not in xyz_by_key` を満たす経路を評価する。
         if key and key not in xyz_by_key:
             xyz_by_key[key] = rec
+
     xyz_candidates = [xyz_by_key[k] for k in sorted(xyz_by_key.keys())]
     xyz_keys = [str(v.get("key") or "") for v in xyz_candidates if str(v.get("key") or "")]
     alias_by_key: Dict[str, Dict[str, str]] = {}
     for rec in alias_candidates:
         key = str(rec.get("key") or "")
+        # 条件分岐: `key and key not in alias_by_key` を満たす経路を評価する。
         if key and key not in alias_by_key:
             alias_by_key[key] = rec
+
     alias_candidates = [alias_by_key[k] for k in sorted(alias_by_key.keys())]
     xyz_keys_set = set(xyz_keys)
     alias_xyz_count = sum(1 for rec in alias_candidates if str(rec.get("key") or "") in xyz_keys_set)
@@ -3632,19 +4130,26 @@ def _build_deterministic_merge_route(
 
     resolved_source_group = None
     xyz_rows = df[df["has_xyz"] == True].copy()
+    # 条件分岐: `len(xyz_rows) > 0` を満たす経路を評価する。
     if len(xyz_rows) > 0:
         for group in priorities:
+            # 条件分岐: `int(grp_xyz.get(group, 0)) > 0` を満たす経路を評価する。
             if int(grp_xyz.get(group, 0)) > 0:
                 resolved_source_group = group
                 break
+
+        # 条件分岐: `not resolved_source_group` を満たす経路を評価する。
+
         if not resolved_source_group:
             cand = sorted({str(v) for v in xyz_rows.get("source_group", pd.Series(dtype=object)).tolist() if str(v)})
             resolved_source_group = cand[0] if cand else None
 
     selected_record: Optional[Dict[str, Any]] = None
     selected_xyz: Optional[Dict[str, Any]] = None
+    # 条件分岐: `resolved_source_group` を満たす経路を評価する。
     if resolved_source_group:
         rows = xyz_rows[xyz_rows["source_group"] == resolved_source_group].copy()
+        # 条件分岐: `len(rows) > 0` を満たす経路を評価する。
         if len(rows) > 0:
             rows["log_date_sort"] = rows["log_date"].apply(lambda v: str(v) if re.fullmatch(r"\d{8}", str(v or "")) else "00000000")
             rows = rows.sort_values(["log_date_sort", "source"], ascending=[False, True])
@@ -3669,8 +4174,12 @@ def _build_deterministic_merge_route(
                     "log_file": str(top.get("log_file") or ""),
                     "log_date": str(top.get("log_date") or "") or None,
                 }
+                # 条件分岐: `str(top.get("pos_eop_yymmdd") or "")` を満たす経路を評価する。
                 if str(top.get("pos_eop_yymmdd") or ""):
                     selected_xyz["pos_eop_yymmdd"] = str(top.get("pos_eop_yymmdd"))
+
+                # 条件分岐: `str(top.get("pos_eop_ref_epoch_utc") or "")` を満たす経路を評価する。
+
                 if str(top.get("pos_eop_ref_epoch_utc") or ""):
                     selected_xyz["pos_eop_ref_epoch_utc"] = str(top.get("pos_eop_ref_epoch_utc"))
             except Exception:
@@ -3682,12 +4191,16 @@ def _build_deterministic_merge_route(
         count_xyz = int(grp_xyz.get(group, 0))
         count_geod = int(grp_geod.get(group, 0))
         status = "not_scanned"
+        # 条件分岐: `resolved_source_group == group` を満たす経路を評価する。
         if resolved_source_group == group:
             status = "selected"
+        # 条件分岐: 前段条件が不成立で、`count_xyz > 0` を追加評価する。
         elif count_xyz > 0:
             status = "candidate_xyz"
+        # 条件分岐: 前段条件が不成立で、`count_all > 0` を追加評価する。
         elif count_all > 0:
             status = "scanned_no_xyz"
+
         detail = {
             "order": int(idx),
             "source_group": group,
@@ -3702,6 +4215,7 @@ def _build_deterministic_merge_route(
             ),
             "xyz_rule": "STAX/STAY/STAZ triplet available for same (code,pt)",
         }
+        # 条件分岐: `group == "ilrs_primary_products"` を満たす経路を評価する。
         if group == "ilrs_primary_products":
             detail["earthdata_auth_status"] = str(earthdata_auth_diag.get("status") or "unknown")
             detail["n_slrecc_urls"] = int(ilrs_diag.get("n_slrecc_urls") or 0)
@@ -3709,54 +4223,117 @@ def _build_deterministic_merge_route(
             detail["n_site_rows_scanned"] = int(ilrs_diag.get("n_site_rows_scanned") or 0)
             detail["n_alias_candidate"] = int(ilrs_diag.get("n_alias_candidate") or 0)
             detail["n_alias_candidate_with_xyz"] = int(ilrs_diag.get("n_alias_candidate_with_xyz") or 0)
+
         route_steps.append(detail)
 
     blocked_reasons: List[str] = []
+    # 条件分岐: `not resolved_source_group` を満たす経路を評価する。
     if not resolved_source_group:
+        # 条件分岐: `int(ilrs_diag.get("n_slrecc_login_blocked") or 0) > 0` を満たす経路を評価する。
         if int(ilrs_diag.get("n_slrecc_login_blocked") or 0) > 0:
             blocked_reasons.append("CDDIS slrecc の一部が Earthdata 認証未通過で取得不可。")
+
+        # 条件分岐: `int(ilrs_diag.get("n_site_rows_scanned") or 0) > 0 and int(ilrs_diag.get("n_a...` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_site_rows_scanned") or 0) > 0 and int(ilrs_diag.get("n_alias_candidate") or 0) == 0:
             blocked_reasons.append(
                 "ILRS primary SITE/ID で APOL alias（code/DOMES/CDP-SOD/name）の候補が 0 件。"
             )
+
+        # 条件分岐: `int(ilrs_diag.get("n_alias_candidate") or 0) > 0 and int(ilrs_diag.get("n_xyz...` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_alias_candidate") or 0) > 0 and int(ilrs_diag.get("n_xyz_match") or 0) == 0:
             blocked_reasons.append(
                 "ILRS primary SITE/ID で APOL alias 候補は検出したが、STAX/STAY/STAZ triplet は未確認。"
             )
+
+        # 条件分岐: `int(ilrs_diag.get("n_urls_scanned") or 0) > 0 and int(ilrs_diag.get("n_xyz_ma...` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_urls_scanned") or 0) > 0 and int(ilrs_diag.get("n_xyz_match") or 0) == 0:
             blocked_reasons.append("ILRS primary products（取得済み分）で APOL 7045 の XYZ triplet が未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrecc_catalog", 0)) > 0 and int(grp_xyz.get("cddis...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrecc_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrecc_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrecc catalog（ecc_xyz/ecc_une/slrecc ILRS xyz/une）でも APOL 一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_resource_sinex", 0)) > 0 and int(grp_xyz.get("cddis...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_resource_sinex", 0)) > 0 and int(grp_xyz.get("cddis_resource_sinex", 0)) == 0:
             blocked_reasons.append("CDDIS resource（ILRS Data Handling File / SLRF POS+VEL）でも APOL 一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_ac_catalog", 0)) > 0 and int(grp_xyz.get("cddis_ac_...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_ac_catalog", 0)) > 0 and int(grp_xyz.get("cddis_ac_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS products/ac（AC descriptor/QC）でも APOL 一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrocc_daily_catalog", 0)) > 0 and int(grp_xyz.get(...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrocc_daily_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrocc_daily_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrocc 日次slrcoor（YYYY/slrcoor.YYMMDD）でも APOL 7045 行の X/Y/Z 列は NULL。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrocc_spl_catalog", 0)) > 0 and int(grp_xyz.get("c...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrocc_spl_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrocc_spl_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrocc（slrcoor.spl）でも APOL 7045 の一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrocc_occupation_catalog", 0)) > 0 and int(grp_xyz...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrocc_occupation_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrocc_occupation_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrocc（slrocc.txt）でも APOL 7045 occupation 行はあるが XYZ 列は未提供。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrocc_calibration_catalog", 0)) > 0 and int(grp_xy...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrocc_calibration_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrocc_calibration_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrocc（slrcal.txt）でも APOL 7045 calibration 行はあるが XYZ 列は未提供。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrocc_calibration_spl_catalog", 0)) > 0 and int(gr...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrocc_calibration_spl_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrocc_calibration_spl_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrocc（slrcal.spl）でも APOL 7045 calibration 行は未掲載または XYZ 未提供。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrlog", 0)) > 0 and int(grp_xyz.get("cddis_slrlog"...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrlog", 0)) > 0 and int(grp_xyz.get("cddis_slrlog", 0)) == 0:
             blocked_reasons.append("CDDIS site-log（apol_*.log）でも APOL の XYZ は空欄。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrlog_oldlog", 0)) > 0 and int(grp_xyz.get("cddis_...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrlog_oldlog", 0)) > 0 and int(grp_xyz.get("cddis_slrlog_oldlog", 0)) == 0:
             blocked_reasons.append("CDDIS oldlog（apol_*.log）でも APOL の XYZ は空欄。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrhst_history", 0)) > 0 and int(grp_xyz.get("cddis...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrhst_history", 0)) > 0 and int(grp_xyz.get("cddis_slrhst_history", 0)) == 0:
             blocked_reasons.append("CDDIS station-history（apol_hst_*.log）でも APOL 一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_llr_crd", 0)) > 0 and int(grp_xyz.get("cddis_llr_cr...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_llr_crd", 0)) > 0 and int(grp_xyz.get("cddis_llr_crd", 0)) == 0:
             blocked_reasons.append("CDDIS LLR CRD（npt/fr）ヘッダにも APOL 一次XYZ記載は未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_pos_eop_daily", 0)) > 0 and int(grp_xyz.get("cddis_...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_pos_eop_daily", 0)) > 0 and int(grp_xyz.get("cddis_pos_eop_daily", 0)) == 0:
             blocked_reasons.append("CDDIS products/pos+eop（日次）でも APOL 一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_ilrsac_pos_eop", 0)) > 0 and int(grp_xyz.get("cddis...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_ilrsac_pos_eop", 0)) > 0 and int(grp_xyz.get("cddis_ilrsac_pos_eop", 0)) == 0:
             blocked_reasons.append("CDDIS ILRSAC ops pos+eop（.snx.Z）でも APOL 一次XYZは未確認。")
+
+        # 条件分岐: `int(grp_counts.get("cddis_slrocc_coordinate_catalog", 0)) > 0 and int(grp_xyz...` を満たす経路を評価する。
+
         if int(grp_counts.get("cddis_slrocc_coordinate_catalog", 0)) > 0 and int(grp_xyz.get("cddis_slrocc_coordinate_catalog", 0)) == 0:
             blocked_reasons.append("CDDIS slrocc（slrcoor.txt）の APOL 7045 行でも XYZ 列は NULL。")
+
+        # 条件分岐: `int(grp_xyz.get("repro2020", 0)) == 0 and int(grp_counts.get("repro2020", 0))...` を満たす経路を評価する。
+
         if int(grp_xyz.get("repro2020", 0)) == 0 and int(grp_counts.get("repro2020", 0)) > 0:
             blocked_reasons.append("REPRO2020（8 AC）でも APOL 一次XYZが未確認。")
+
+        # 条件分岐: `not blocked_reasons` を満たす経路を評価する。
+
         if not blocked_reasons:
             blocked_reasons.append("優先ソースで APOL 一次XYZが未確認。")
 
@@ -3813,6 +4390,7 @@ def _scan_repro_sources(
             continue
 
         latest = _pick_repro_latest(cand)
+        # 条件分岐: `latest is None` を満たす経路を評価する。
         if latest is None:
             rows.append(
                 {
@@ -3837,6 +4415,7 @@ def _scan_repro_sources(
                 urllib.request.Request(url, headers={"User-Agent": "waveP-llr-apol-route-audit/1.0"}),
                 timeout=timeout_s,
             ).read()
+            # 条件分岐: `raw.startswith(b"\x1f\x8b")` を満たす経路を評価する。
             if raw.startswith(b"\x1f\x8b"):
                 text = gzip.decompress(raw).decode("utf-8", "replace")
             else:
@@ -3918,6 +4497,7 @@ def _scan_llr_crd_header_sources(
         "latest_entry_date": None,
         "errors": [],
     }
+    # 条件分岐: `not LLR_EDC_MANIFEST_PATH.exists()` を満たす経路を評価する。
     if not LLR_EDC_MANIFEST_PATH.exists():
         diag["errors"] = ["manifest_missing"]
         return rows, diag
@@ -3929,6 +4509,7 @@ def _scan_llr_crd_header_sources(
         return rows, diag
 
     files = manifest.get("files")
+    # 条件分岐: `not isinstance(files, list)` を満たす経路を評価する。
     if not isinstance(files, list):
         diag["errors"] = ["manifest_files_not_list"]
         return rows, diag
@@ -3936,26 +4517,37 @@ def _scan_llr_crd_header_sources(
     def _entry_date(v: Dict[str, Any]) -> str:
         name = str(v.get("filename") or "")
         m = re.search(r"_(\d{8})\.", name)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             return m.group(1)
+
         m = re.search(r"_(\d{6})\.", name)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             return f"{m.group(1)}01"
+
         return "00000000"
 
     diag["n_manifest_files_total"] = int(len(files))
     apol_entries: List[Dict[str, Any]] = []
     for rec in files:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         st = rec.get("stations")
+        # 条件分岐: `not isinstance(st, list)` を満たす経路を評価する。
         if not isinstance(st, list):
             continue
+
+        # 条件分岐: `any(str(s).upper() == "APOL" for s in st)` を満たす経路を評価する。
+
         if any(str(s).upper() == "APOL" for s in st):
             apol_entries.append(rec)
 
     apol_entries = sorted(apol_entries, key=_entry_date, reverse=True)
     diag["n_apol_entries"] = int(len(apol_entries))
+    # 条件分岐: `apol_entries` を満たす経路を評価する。
     if apol_entries:
         latest = _entry_date(apol_entries[0])
         diag["latest_entry_date"] = latest if latest != "00000000" else None
@@ -3963,12 +4555,16 @@ def _scan_llr_crd_header_sources(
     scan_entries = apol_entries[: max(0, int(max_files))] if int(max_files) > 0 else apol_entries
     for rec in scan_entries:
         rel = str(rec.get("cached_path") or "").strip()
+        # 条件分岐: `not rel` を満たす経路を評価する。
         if not rel:
             continue
+
         path = ROOT / rel
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             diag["n_missing_cached_files"] = int(diag["n_missing_cached_files"]) + 1
             continue
+
         try:
             text = path.read_text(encoding="utf-8", errors="replace")
         except Exception:
@@ -3976,12 +4572,22 @@ def _scan_llr_crd_header_sources(
             continue
 
         diag["n_files_scanned"] = int(diag["n_files_scanned"]) + 1
+        # 条件分岐: `re.search(r"(?mi)^\s*h2\s+APOL\b", text)` を満たす経路を評価する。
         if re.search(r"(?mi)^\s*h2\s+APOL\b", text):
             diag["n_with_h2_apol"] = int(diag["n_with_h2_apol"]) + 1
+
+        # 条件分岐: `re.search(rf"(?mi)^\s*h2\s+APOL\s+{re.escape(str(apol_code))}\b", text)` を満たす経路を評価する。
+
         if re.search(rf"(?mi)^\s*h2\s+APOL\s+{re.escape(str(apol_code))}\b", text):
             diag["n_with_pad_code"] = int(diag["n_with_pad_code"]) + 1
+
+        # 条件分岐: `re.search(r"(?mi)\bX coordinate\b|\bY coordinate\b|\bZ coordinate\b|\bITRF\b"...` を満たす経路を評価する。
+
         if re.search(r"(?mi)\bX coordinate\b|\bY coordinate\b|\bZ coordinate\b|\bITRF\b", text):
             diag["n_with_xyz_marker"] = int(diag["n_with_xyz_marker"]) + 1
+
+        # 条件分岐: `re.search(r"(?mi)\bLatitude\b|\bLongitude\b|\bElevation\b", text)` を満たす経路を評価する。
+
         if re.search(r"(?mi)\bLatitude\b|\bLongitude\b|\bElevation\b", text):
             diag["n_with_geodetic_marker"] = int(diag["n_with_geodetic_marker"]) + 1
 
@@ -4120,6 +4726,7 @@ def main() -> int:
     args = ap.parse_args()
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `not APOL_META_PATH.exists()` を満たす経路を評価する。
     if not APOL_META_PATH.exists():
         raise FileNotFoundError(f"missing APOL metadata: {APOL_META_PATH}")
 
@@ -4128,6 +4735,7 @@ def main() -> int:
     apol_domes = str(apol_meta.get("domes_id") or apol_meta.get("domes") or "49447S001")
     apol_alias_tokens = _build_apol_alias_tokens(apol_meta)
     earthdata_auth_diag: Dict[str, Any]
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         earthdata_auth_diag = {
             "mode": str(args.earthdata_auth_mode),
@@ -4149,6 +4757,7 @@ def main() -> int:
     remote_rows: List[Dict[str, Any]] = []
     remote_error: Optional[str] = None
     remote_total = 0
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         remote_rows, remote_error, remote_total = _scan_remote_logs(
             max_logs=int(args.max_remote_logs),
@@ -4158,6 +4767,7 @@ def main() -> int:
     oldlog_rows: List[Dict[str, Any]] = []
     oldlog_error: Optional[str] = None
     oldlog_total = 0
+    # 条件分岐: `not args.offline and int(args.max_oldlog_logs) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_oldlog_logs) > 0:
         oldlog_rows, oldlog_error, oldlog_total = _scan_remote_oldlog_logs(
             max_logs=int(args.max_oldlog_logs),
@@ -4167,6 +4777,7 @@ def main() -> int:
     slrhst_rows: List[Dict[str, Any]] = []
     slrhst_error: Optional[str] = None
     slrhst_total = 0
+    # 条件分岐: `not args.offline and int(args.max_slrhst_logs) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_slrhst_logs) > 0:
         slrhst_rows, slrhst_error, slrhst_total = _scan_slrhst_logs(
             max_logs=int(args.max_slrhst_logs),
@@ -4185,6 +4796,7 @@ def main() -> int:
         "n_logs_with_geodetic": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         cddis_rows, cddis_diag = _scan_cddis_site_logs(
             max_remote_logs=int(args.max_remote_logs),
@@ -4206,6 +4818,7 @@ def main() -> int:
         "errors": ["offline_mode_skip"] if args.offline else [],
         "sample_urls": [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_crd_files) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_crd_files) > 0:
         cddis_llr_crd_rows, cddis_llr_crd_diag = _scan_cddis_llr_crd_headers(
             apol_code=apol_code,
@@ -4226,6 +4839,7 @@ def main() -> int:
         "n_xyz_match": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_pos_eop_days) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_pos_eop_days) > 0:
         cddis_pos_eop_rows, cddis_pos_eop_diag = _scan_cddis_products_pos_eop_daily(
             apol_code=apol_code,
@@ -4247,6 +4861,7 @@ def main() -> int:
         "errors": ["offline_mode_skip"] if args.offline else [],
         "candidate_files": [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_ilrsac_files) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_ilrsac_files) > 0:
         cddis_ilrsac_rows, cddis_ilrsac_diag = _scan_cddis_ilrsac_ops_pos_eop(
             apol_code=apol_code,
@@ -4271,6 +4886,7 @@ def main() -> int:
         "errors": ["offline_mode_skip"] if args.offline else [],
         "candidate_files": [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_slrecc_files) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_slrecc_files) > 0:
         cddis_slrecc_rows, cddis_slrecc_diag = _scan_cddis_slrecc_catalog(
             apol_code=apol_code,
@@ -4295,6 +4911,7 @@ def main() -> int:
         "errors": ["offline_mode_skip"] if args.offline else [],
         "candidate_files": [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_resource_files) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_resource_files) > 0:
         cddis_resource_rows, cddis_resource_diag = _scan_cddis_resource_coordinate_sinex(
             apol_code=apol_code,
@@ -4322,6 +4939,7 @@ def main() -> int:
         "errors": ["offline_mode_skip"] if args.offline else [],
         "candidate_files": [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_ac_files) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_ac_files) > 0:
         cddis_ac_rows, cddis_ac_diag = _scan_cddis_ac_coordinate_descriptors(
             apol_code=apol_code,
@@ -4342,6 +4960,7 @@ def main() -> int:
         "n_apol_rows_xyz_null": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         cddis_slrocc_rows, cddis_slrocc_diag = _scan_cddis_slrocc_coordinate_catalog(
             apol_code=apol_code,
@@ -4359,6 +4978,7 @@ def main() -> int:
         "n_apol_rows_xyz_null": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         cddis_slrocc_spl_rows, cddis_slrocc_spl_diag = _scan_cddis_slrocc_spl_coordinate_catalog(
             apol_code=apol_code,
@@ -4378,6 +4998,7 @@ def main() -> int:
         "n_apol_rows_with_domes": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         cddis_slrocc_occ_rows, cddis_slrocc_occ_diag = _scan_cddis_slrocc_occupation_catalog(
             apol_code=apol_code,
@@ -4397,6 +5018,7 @@ def main() -> int:
         "n_apol_rows_with_cal_target": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         cddis_slrocc_cal_rows, cddis_slrocc_cal_diag = _scan_cddis_slrocc_calibration_catalog(
             apol_code=apol_code,
@@ -4414,6 +5036,7 @@ def main() -> int:
         "n_apol_rows_xyz_null": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         cddis_slrocc_cal_spl_rows, cddis_slrocc_cal_spl_diag = _scan_cddis_slrocc_calibration_spl_catalog(
             apol_code=apol_code,
@@ -4437,6 +5060,7 @@ def main() -> int:
         "errors": ["offline_mode_skip"] if args.offline else [],
         "candidate_files": [],
     }
+    # 条件分岐: `not args.offline and int(args.max_cddis_slrocc_files) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_cddis_slrocc_files) > 0:
         cddis_slrocc_daily_rows, cddis_slrocc_daily_diag = _scan_cddis_slrocc_daily_coordinate_catalog(
             apol_code=apol_code,
@@ -4469,6 +5093,7 @@ def main() -> int:
             "urls_from_notice": [],
         },
     }
+    # 条件分岐: `not args.offline and int(args.max_ilrs_slrmail_notices) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_ilrs_slrmail_notices) > 0:
         ilrs_rows, ilrs_diag = _scan_ilrs_primary_products(
             apol_code=apol_code,
@@ -4486,6 +5111,7 @@ def main() -> int:
         "n_xyz_match": 0,
         "errors": ["offline_mode_skip"] if args.offline else [],
     }
+    # 条件分岐: `not args.offline and int(args.max_repro_centers) > 0` を満たす経路を評価する。
     if not args.offline and int(args.max_repro_centers) > 0:
         repro_rows, repro_diag = _scan_repro_sources(
             apol_code=apol_code,
@@ -4521,6 +5147,7 @@ def main() -> int:
         + ilrs_rows
         + crd_rows
     )
+    # 条件分岐: `not all_rows` を満たす経路を評価する。
     if not all_rows:
         all_rows = [
             {
@@ -4541,12 +5168,22 @@ def main() -> int:
         ]
 
     df = pd.DataFrame(all_rows)
+    # 条件分岐: `"log_date" not in df.columns` を満たす経路を評価する。
     if "log_date" not in df.columns:
         df["log_date"] = None
+
+    # 条件分岐: `"source_group" not in df.columns` を満たす経路を評価する。
+
     if "source_group" not in df.columns:
         df["source_group"] = df["source"]
+
+    # 条件分岐: `"has_xyz" not in df.columns` を満たす経路を評価する。
+
     if "has_xyz" not in df.columns:
         df["has_xyz"] = False
+
+    # 条件分岐: `"has_geodetic" not in df.columns` を満たす経路を評価する。
+
     if "has_geodetic" not in df.columns:
         df["has_geodetic"] = False
 
@@ -4566,8 +5203,10 @@ def main() -> int:
         vals: List[str] = []
         for v in rows.get("log_date", pd.Series(dtype=object)).tolist():
             s = str(v) if v is not None else ""
+            # 条件分岐: `re.fullmatch(r"\d{8}", s)` を満たす経路を評価する。
             if re.fullmatch(r"\d{8}", s):
                 vals.append(s)
+
         return max(vals) if vals else None
 
     latest_xyz = _latest_log_date(xyz_rows)
@@ -4578,6 +5217,7 @@ def main() -> int:
     repro_site_match_n = int(repro_diag.get("n_site_match") or 0)
     repro_xyz_match_n = int(repro_diag.get("n_xyz_match") or 0)
 
+    # 条件分岐: `has_primary_xyz` を満たす経路を評価する。
     if has_primary_xyz:
         xyz_sources = sorted({str(v) for v in xyz_rows.get("source_group", pd.Series(dtype=object)).tolist() if str(v)})
         decision = "pass"
@@ -4588,75 +5228,152 @@ def main() -> int:
             "APOL X/Y/Z を station override に実装し、pos+eop運用との差分監査を実行する。",
             "適用epoch/velocityの整合を確認して iers_station_coord_unified の解除判定を実施する。",
         ]
+    # 条件分岐: 前段条件が不成立で、`has_geodetic_only` を追加評価する。
     elif has_geodetic_only:
         decision = "watch"
         reasons = [
             "APOL site-log は緯度/経度/標高のみで、X/Y/Z（ITRF）が未記載。",
             f"pos+eopキャッシュ側にも pad code {apol_code} が無く、一次座標の統一が未達。",
         ]
+        # 条件分岐: `repro_site_match_n > 0 and repro_xyz_match_n == 0` を満たす経路を評価する。
         if repro_site_match_n > 0 and repro_xyz_match_n == 0:
             reasons.append(
                 "REPRO2020 では APOL 識別子一致は見つかるが、STAX/STAY/STAZ の三成分が揃う一次XYZは確認できない。"
             )
+
+        # 条件分岐: `oldlog_total > 0` を満たす経路を評価する。
+
         if oldlog_total > 0:
             reasons.append("APOL oldlog（slrlog/oldlog）でも一次XYZの記載は確認できない。")
+
+        # 条件分岐: `slrhst_total > 0` を満たす経路を評価する。
+
         if slrhst_total > 0:
             reasons.append("APOL station-history（slrhst）でも一次XYZの記載は確認できない。")
+
+        # 条件分岐: `int(cddis_diag.get("n_current_scanned") or 0) > 0 and int(cddis_diag.get("n_l...` を満たす経路を評価する。
+
         if int(cddis_diag.get("n_current_scanned") or 0) > 0 and int(cddis_diag.get("n_logs_with_xyz") or 0) == 0:
             reasons.append("CDDIS site-log（apol_*.log）でも一次XYZは未記載（X/Y/Z空欄）。")
+
+        # 条件分岐: `int(cddis_diag.get("n_oldlog_scanned") or 0) > 0 and int(cddis_diag.get("n_lo...` を満たす経路を評価する。
+
         if int(cddis_diag.get("n_oldlog_scanned") or 0) > 0 and int(cddis_diag.get("n_logs_with_xyz") or 0) == 0:
             reasons.append("CDDIS oldlog（apol_*.log）でも一次XYZは未記載（X/Y/Z空欄）。")
+
+        # 条件分岐: `int(cddis_diag.get("n_slrhst_scanned") or 0) > 0 and int(cddis_diag.get("n_lo...` を満たす経路を評価する。
+
         if int(cddis_diag.get("n_slrhst_scanned") or 0) > 0 and int(cddis_diag.get("n_logs_with_xyz") or 0) == 0:
             reasons.append("CDDIS station-history（apol_hst_*.log）でも一次XYZは未確認。")
+
+        # 条件分岐: `int(cddis_llr_crd_diag.get("n_files_scanned") or 0) > 0 and int(cddis_llr_crd...` を満たす経路を評価する。
+
         if int(cddis_llr_crd_diag.get("n_files_scanned") or 0) > 0 and int(cddis_llr_crd_diag.get("n_with_xyz_marker") or 0) == 0:
             reasons.append("CDDIS LLR CRD（npt/fr）ヘッダにも APOL 一次XYZ記載は確認できない。")
+
+        # 条件分岐: `int(cddis_pos_eop_diag.get("n_files_scanned") or 0) > 0 and int(cddis_pos_eop...` を満たす経路を評価する。
+
         if int(cddis_pos_eop_diag.get("n_files_scanned") or 0) > 0 and int(cddis_pos_eop_diag.get("n_xyz_match") or 0) == 0:
             reasons.append("CDDIS products/pos+eop（日次）でも APOL 一次XYZは確認できない。")
+
+        # 条件分岐: `int(cddis_ilrsac_diag.get("n_files_scanned") or 0) > 0 and int(cddis_ilrsac_d...` を満たす経路を評価する。
+
         if int(cddis_ilrsac_diag.get("n_files_scanned") or 0) > 0 and int(cddis_ilrsac_diag.get("n_xyz_match") or 0) == 0:
             reasons.append("CDDIS ILRSAC ops pos+eop（.snx.Z）でも APOL 一次XYZは確認できない。")
+
         ilrsac_latest_yyyymmdd = str(cddis_ilrsac_diag.get("latest_candidate_yyyymmdd") or "").strip()
         ilrsac_latest_age_days = cddis_ilrsac_diag.get("latest_candidate_age_days")
+        # 条件分岐: `bool(cddis_ilrsac_diag.get("stale_archive_route")) and ilrsac_latest_yyyymmdd` を満たす経路を評価する。
         if bool(cddis_ilrsac_diag.get("stale_archive_route")) and ilrsac_latest_yyyymmdd:
             reasons.append(
                 f"CDDIS ILRSAC ops archive の最新候補は {ilrsac_latest_yyyymmdd}（約{int(ilrsac_latest_age_days or 0)}日前）で、"
                 "現代座標統一の主経路には使えないため低優先監視へ降格。"
             )
+
+        # 条件分岐: `int(cddis_slrecc_diag.get("n_files_scanned") or 0) > 0 and int(cddis_slrecc_d...` を満たす経路を評価する。
+
         if int(cddis_slrecc_diag.get("n_files_scanned") or 0) > 0 and int(cddis_slrecc_diag.get("n_xyz_match") or 0) == 0:
             reasons.append("CDDIS slrecc catalog（ecc_xyz/ecc_une/slrecc ILRS xyz/une）でも APOL 一次XYZは確認できない。")
+
+        # 条件分岐: `int(cddis_resource_diag.get("n_files_scanned") or 0) > 0 and int(cddis_resour...` を満たす経路を評価する。
+
         if int(cddis_resource_diag.get("n_files_scanned") or 0) > 0 and int(cddis_resource_diag.get("n_xyz_match") or 0) == 0:
             reasons.append("CDDIS products/resource（ILRS_DHF/SLRF_POS+VEL）でも APOL 一次XYZは確認できない。")
+
+        # 条件分岐: `int(cddis_ac_diag.get("n_files_scanned") or 0) > 0 and int(cddis_ac_diag.get(...` を満たす経路を評価する。
+
         if int(cddis_ac_diag.get("n_files_scanned") or 0) > 0 and int(cddis_ac_diag.get("n_xyz_match") or 0) == 0:
             reasons.append("CDDIS products/ac（AC descriptor/QC）でも APOL 一次XYZは確認できない。")
+
+        # 条件分岐: `int(cddis_slrocc_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_diag....` を満たす経路を評価する。
+
         if int(cddis_slrocc_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_diag.get("n_apol_rows_with_xyz") or 0) == 0:
             reasons.append("CDDIS slrocc（slrcoor.txt）でも APOL 7045 行の X/Y/Z 列は NULL。")
+
+        # 条件分岐: `int(cddis_slrocc_spl_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_s...` を満たす経路を評価する。
+
         if int(cddis_slrocc_spl_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_spl_diag.get("n_apol_rows_with_xyz") or 0) == 0:
             reasons.append("CDDIS slrocc（slrcoor.spl）でも APOL 7045 行の X/Y/Z 列は NULL。")
+
+        # 条件分岐: `int(cddis_slrocc_spl_diag.get("n_apol_rows") or 0) == 0 and int(cddis_slrocc_...` を満たす経路を評価する。
+
         if int(cddis_slrocc_spl_diag.get("n_apol_rows") or 0) == 0 and int(cddis_slrocc_spl_diag.get("n_table_rows") or 0) > 0:
             reasons.append("CDDIS slrocc（slrcoor.spl）でも APOL 7045 行自体が未掲載。")
+
+        # 条件分岐: `int(cddis_slrocc_occ_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_o...` を満たす経路を評価する。
+
         if int(cddis_slrocc_occ_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_occ_diag.get("n_apol_rows_with_xyz") or 0) == 0:
             reasons.append("CDDIS slrocc（slrocc.txt）でも APOL 7045 occupation 行はあるが XYZ 列は未提供。")
+
+        # 条件分岐: `int(cddis_slrocc_cal_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_c...` を満たす経路を評価する。
+
         if int(cddis_slrocc_cal_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_cal_diag.get("n_apol_rows_with_xyz") or 0) == 0:
             reasons.append("CDDIS slrocc（slrcal.txt）でも APOL 7045 calibration 行はあるが XYZ 列は未提供。")
+
+        # 条件分岐: `int(cddis_slrocc_cal_spl_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slro...` を満たす経路を評価する。
+
         if int(cddis_slrocc_cal_spl_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_cal_spl_diag.get("n_apol_rows_with_xyz") or 0) == 0:
             reasons.append("CDDIS slrocc（slrcal.spl）でも APOL 7045 calibration 行はあるが XYZ 列は未提供。")
+
+        # 条件分岐: `int(cddis_slrocc_cal_spl_diag.get("n_apol_rows") or 0) == 0 and int(cddis_slr...` を満たす経路を評価する。
+
         if int(cddis_slrocc_cal_spl_diag.get("n_apol_rows") or 0) == 0 and int(cddis_slrocc_cal_spl_diag.get("n_table_rows") or 0) > 0:
             reasons.append("CDDIS slrocc（slrcal.spl）でも APOL 7045 calibration 行自体が未掲載。")
+
+        # 条件分岐: `int(cddis_slrocc_daily_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc...` を満たす経路を評価する。
+
         if int(cddis_slrocc_daily_diag.get("n_apol_rows") or 0) > 0 and int(cddis_slrocc_daily_diag.get("n_apol_rows_with_xyz") or 0) == 0:
             reasons.append("CDDIS slrocc 日次slrcoor（YYYY/slrcoor.YYMMDD）でも APOL 7045 行の X/Y/Z 列は NULL。")
+
+        # 条件分岐: `int(ilrs_diag.get("n_urls_scanned") or 0) > 0 and int(ilrs_diag.get("n_xyz_ma...` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_urls_scanned") or 0) > 0 and int(ilrs_diag.get("n_xyz_match") or 0) == 0:
             reasons.append("ILRS primary products（DHF/SLRF/ecc notice経由）でも APOL 一次XYZは確認できない。")
+
+        # 条件分岐: `int(ilrs_diag.get("n_site_rows_scanned") or 0) > 0 and int(ilrs_diag.get("n_a...` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_site_rows_scanned") or 0) > 0 and int(ilrs_diag.get("n_alias_candidate") or 0) == 0:
             reasons.append(
                 "ILRS primary SITE/ID の alias 照合（code/DOMES/CDP-SOD/name）で APOL 候補が 0 件。"
             )
+
+        # 条件分岐: `int(ilrs_diag.get("n_alias_candidate") or 0) > 0 and int(ilrs_diag.get("n_ali...` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_alias_candidate") or 0) > 0 and int(ilrs_diag.get("n_alias_candidate_with_xyz") or 0) == 0:
             reasons.append("ILRS primary SITE/ID に APOL alias 候補はあるが、対応する STAX/STAY/STAZ が未確認。")
+
+        # 条件分岐: `int(ilrs_diag.get("n_slrecc_login_blocked") or 0) > 0` を満たす経路を評価する。
+
         if int(ilrs_diag.get("n_slrecc_login_blocked") or 0) > 0:
             reasons.append(
                 f"CDDIS slrecc は Earthdata 認証未通過（login_blocked={int(ilrs_diag.get('n_slrecc_login_blocked') or 0)}）で、一次XYZの最終確認に未到達。"
             )
+
+        # 条件分岐: `int(crd_diag.get("n_files_scanned") or 0) > 0 and int(crd_diag.get("n_with_xy...` を満たす経路を評価する。
+
         if int(crd_diag.get("n_files_scanned") or 0) > 0 and int(crd_diag.get("n_with_xyz_marker") or 0) == 0:
             reasons.append("APOL-tag付きLLR CRDヘッダ（h2 APOL 7045）にも一次XYZ記載は確認できない。")
+
         next_actions = [
             "APOLの一次座標（ITRF XYZ）を含む公開ソースを追加取得する。",
             "ILRSAC ops archive は低優先の監視対象とし、CDDIS products/pos+eop（日次）と一次ソース更新を優先する。",
@@ -4692,12 +5409,15 @@ def main() -> int:
     ilrsac_coverage_complete = bool(
         ilrsac_candidate_n > 0 and ilrsac_scanned_n >= ilrsac_candidate_n and ilrsac_fetch_error_n == 0
     )
+    # 条件分岐: `str(decision) == "pass"` を満たす経路を評価する。
     if str(decision) == "pass":
         watch_lock_status = "not_applicable_pass"
+    # 条件分岐: 前段条件が不成立で、`bool(ilrsac_coverage_complete) and str(merge_route.get("status") or "") == "w...` を追加評価する。
     elif bool(ilrsac_coverage_complete) and str(merge_route.get("status") or "") == "watch":
         watch_lock_status = "fixed_watch"
     else:
         watch_lock_status = "pending_reaudit"
+
     watch_lock_basis = [
         f"decision={decision}",
         f"merge_route_status={str(merge_route.get('status') or '')}",
@@ -4964,6 +5684,8 @@ def main() -> int:
     print(f"[ok] {OUT_MERGE_JSON.relative_to(ROOT)}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,29 +34,45 @@ def _ks_c_alpha(alpha: float) -> Optional[float]:
     # Standard 2-sample KS asymptotic constants.
     if abs(alpha - 0.10) < 1e-12:
         return 1.22
+
+    # 条件分岐: `abs(alpha - 0.05) < 1e-12` を満たす経路を評価する。
+
     if abs(alpha - 0.05) < 1e-12:
         return 1.36
+
+    # 条件分岐: `abs(alpha - 0.01) < 1e-12` を満たす経路を評価する。
+
     if abs(alpha - 0.01) < 1e-12:
         return 1.63
+
+    # 条件分岐: `abs(alpha - 0.001) < 1e-12` を満たす経路を評価する。
+
     if abs(alpha - 0.001) < 1e-12:
         return 1.95
+
     return None
 
 
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
         return None
+
     c = _ks_c_alpha(alpha)
+    # 条件分岐: `c is None` を満たす経路を評価する。
     if c is None:
         return None
+
     return float(c * math.sqrt((n + m) / (n * m)))
 
 
 def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Optional[float]:
     a = [float(x) for x in sample_a if isinstance(x, (int, float))]
     b = [float(x) for x in sample_b if isinstance(x, (int, float))]
+    # 条件分岐: `not a or not b` を満たす経路を評価する。
     if not a or not b:
         return None
+
     a.sort()
     b.sort()
     n = len(a)
@@ -70,30 +87,38 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
     while i < n and j < m:
         va = a[i]
         vb = b[j]
+        # 条件分岐: `va < vb` を満たす経路を評価する。
         if va < vb:
             v = va
             while i < n and a[i] == v:
                 i += 1
+
             cdf_a = i / n
+        # 条件分岐: 前段条件が不成立で、`vb < va` を追加評価する。
         elif vb < va:
             v = vb
             while j < m and b[j] == v:
                 j += 1
+
             cdf_b = j / m
         else:
             v = va
             while i < n and a[i] == v:
                 i += 1
+
             while j < m and b[j] == v:
                 j += 1
+
             cdf_a = i / n
             cdf_b = j / m
+
         d = max(d, abs(cdf_a - cdf_b))
 
     while i < n:
         v = a[i]
         while i < n and a[i] == v:
             i += 1
+
         cdf_a = i / n
         d = max(d, abs(cdf_a - cdf_b))
 
@@ -101,6 +126,7 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
         v = b[j]
         while j < m and b[j] == v:
             j += 1
+
         cdf_b = j / m
         d = max(d, abs(cdf_a - cdf_b))
 
@@ -111,13 +137,22 @@ def _ks_two_sample_p_asymptotic(d: float, n: int, m: int) -> Optional[float]:
     # Reference: standard asymptotic KS distribution (same functional form as scipy.stats.ks_2samp(mode="asymp")).
     if not isinstance(d, (int, float)) or d < 0:
         return None
+
+    # 条件分岐: `float(d) <= 0.0` を満たす経路を評価する。
+
     if float(d) <= 0.0:
         return 1.0
+
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
+
     if n <= 0 or m <= 0:
         return None
+
     ne = (n * m) / (n + m)
+    # 条件分岐: `ne <= 0` を満たす経路を評価する。
     if ne <= 0:
         return None
+
     en = math.sqrt(ne)
     lam = (en + 0.12 + 0.11 / en) * float(d)
 
@@ -125,13 +160,20 @@ def _ks_two_sample_p_asymptotic(d: float, n: int, m: int) -> Optional[float]:
     for j in range(1, 101):
         term = ((-1.0) ** (j - 1)) * math.exp(-2.0 * (lam**2) * (j**2))
         s += term
+        # 条件分岐: `abs(term) < 1e-12` を満たす経路を評価する。
         if abs(term) < 1e-12:
             break
+
     p = 2.0 * s
+    # 条件分岐: `p < 0.0` を満たす経路を評価する。
     if p < 0.0:
         p = 0.0
+
+    # 条件分岐: `p > 1.0` を満たす経路を評価する。
+
     if p > 1.0:
         p = 1.0
+
     return float(p)
 
 
@@ -139,6 +181,9 @@ def _ks_solve_d_for_p_asymptotic(alpha: float, n: int, m: int) -> Optional[float
     # Solve p_asymptotic(d) = alpha for d in [0, 1] via bisection.
     if not isinstance(alpha, (int, float)) or alpha <= 0.0 or alpha >= 1.0:
         return None
+
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
+
     if n <= 0 or m <= 0:
         return None
 
@@ -146,22 +191,34 @@ def _ks_solve_d_for_p_asymptotic(alpha: float, n: int, m: int) -> Optional[float
     hi = 1.0
     plo = _ks_two_sample_p_asymptotic(lo, n, m)
     phi = _ks_two_sample_p_asymptotic(hi, n, m)
+    # 条件分岐: `plo is None or phi is None` を満たす経路を評価する。
     if plo is None or phi is None:
         return None
+
+    # 条件分岐: `plo < alpha` を満たす経路を評価する。
+
     if plo < alpha:
         return lo
+
+    # 条件分岐: `phi > alpha` を満たす経路を評価する。
+
     if phi > alpha:
         return hi
 
     for _ in range(64):
         mid = 0.5 * (lo + hi)
         pmid = _ks_two_sample_p_asymptotic(mid, n, m)
+        # 条件分岐: `pmid is None` を満たす経路を評価する。
         if pmid is None:
             return None
+
+        # 条件分岐: `pmid > alpha` を満たす経路を評価する。
+
         if pmid > alpha:
             lo = mid
         else:
             hi = mid
+
     return float(hi)
 
 
@@ -171,6 +228,7 @@ def _near_passing_rows(pass_fraction_metrics: Dict[str, Any]) -> List[Dict[str, 
     for k in ("fail_one_thermal", "fail_one_nonthermal", "fail_none"):
         block = near.get(k) or {}
         out.extend(block.get("rows") or [])
+
     return out
 
 
@@ -179,8 +237,10 @@ def _count_relax_pass(rows: List[Dict[str, Any]], relax: Sequence[str]) -> int:
     n = 0
     for r in rows:
         failed = set(r.get("failed_constraints_norm") or [])
+        # 条件分岐: `failed and failed.issubset(relax_set)` を満たす経路を評価する。
         if failed and failed.issubset(relax_set):
             n += 1
+
     return n
 
 
@@ -190,8 +250,10 @@ def _extract_near_combo_counts(pass_fraction_metrics: Dict[str, Any]) -> Dict[st
         .get("near_passing", {})
         .get("combined_summary", {})
     )
+    # 条件分岐: `not combined` を満たす経路を評価する。
     if not combined:
         return {}
+
     return combined
 
 
@@ -261,6 +323,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
 
     missing = [str(p) for p in (key_path, pf_path, sweep_path) if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         payload["ok"] = False
         payload["reason"] = "missing_inputs"
@@ -273,6 +336,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     pf = _read_json(pf_path)
     sweep = _read_json(sweep_path)
     gravity: Optional[Dict[str, Any]] = None
+    # 条件分岐: `gravity_path is not None and gravity_path.exists()` を満たす経路を評価する。
     if gravity_path is not None and gravity_path.exists():
         try:
             gravity = _read_json(gravity_path)
@@ -280,6 +344,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             gravity = None
 
     wielgus: Optional[Dict[str, Any]] = None
+    # 条件分岐: `wielgus_path is not None and wielgus_path.exists()` を満たす経路を評価する。
     if wielgus_path is not None and wielgus_path.exists():
         try:
             wielgus = _read_json(wielgus_path)
@@ -287,6 +352,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             wielgus = None
 
     m3_hist_vals: Optional[Dict[str, Any]] = None
+    # 条件分岐: `m3_hist_vals_path is not None and m3_hist_vals_path.exists()` を満たす経路を評価する。
     if m3_hist_vals_path is not None and m3_hist_vals_path.exists():
         try:
             m3_hist_vals = _read_json(m3_hist_vals_path)
@@ -302,6 +368,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     sig = nir.get("observed_sigma_mJy")
     thr = nir.get("threshold_mJy")
     nir_out: Dict[str, Any] = {"ok": True}
+    # 条件分岐: `isinstance(med, (int, float)) and isinstance(sig, (int, float)) and sig > 0 a...` を満たす経路を評価する。
     if isinstance(med, (int, float)) and isinstance(sig, (int, float)) and sig > 0 and isinstance(thr, (int, float)):
         med = float(med)
         sig = float(sig)
@@ -325,8 +392,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 },
             }
         )
+        # 条件分岐: `isinstance(gravity, dict)` を満たす経路を評価する。
         if isinstance(gravity, dict):
             by_year = (gravity.get("derived") or {}).get("percentiles_avg_by_year") or {}
+            # 条件分岐: `isinstance(by_year, dict)` を満たす経路を評価する。
             if isinstance(by_year, dict):
                 nir_out["gravity2020_percentiles_avg_by_year"] = {
                     "2017": by_year.get("2017"),
@@ -337,8 +406,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 # Derived convenience ratios (ignore struck-out cells).
                 try:
                     p5_all = ((by_year.get("2017-2019") or {}).get("p5") or {})
+                    # 条件分岐: `isinstance(p5_all, dict) and not bool(p5_all.get("struck_out"))` を満たす経路を評価する。
                     if isinstance(p5_all, dict) and not bool(p5_all.get("struck_out")):
                         p5_val = p5_all.get("value_mJy")
+                        # 条件分岐: `isinstance(p5_val, (int, float)) and p5_val > 0` を満たす経路を評価する。
                         if isinstance(p5_val, (int, float)) and p5_val > 0:
                             nir_out["threshold_over_gravity2020_p5_all"] = float(thr / float(p5_val))
                 except Exception:
@@ -348,21 +419,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         nir_out["reason"] = "missing_or_invalid_nir_numbers"
 
     # --- M3 (KS-test) sample-size dependence proxy ---
+
     alpha = float(m3.get("ks_reject_if_p_lt") or 0.01)
     n_hist = m3.get("observed_samples_historical_n")
     n_2017 = m3.get("observed_samples_2017_n")
     n_model_exp = m3.get("model_samples_exploratory_n")
     n_model_fid = m3.get("model_samples_fiducial_n") or []
     n_model_list = []
+    # 条件分岐: `isinstance(n_model_exp, int)` を満たす経路を評価する。
     if isinstance(n_model_exp, int):
         n_model_list.append(int(n_model_exp))
+
+    # 条件分岐: `isinstance(n_model_fid, list)` を満たす経路を評価する。
+
     if isinstance(n_model_fid, list):
         for x in n_model_fid:
+            # 条件分岐: `isinstance(x, int)` を満たす経路を評価する。
             if isinstance(x, int):
                 n_model_list.append(int(x))
+
     n_model_list = sorted({n for n in n_model_list if n > 0})
 
     m3_out: Dict[str, Any] = {"ok": True, "alpha": alpha, "c_alpha": _ks_c_alpha(alpha)}
+    # 条件分岐: `isinstance(n_hist, int) and isinstance(n_2017, int) and n_hist > 0 and n_2017...` を満たす経路を評価する。
     if isinstance(n_hist, int) and isinstance(n_2017, int) and n_hist > 0 and n_2017 > 0 and n_model_list:
         d_hist = {f"n_model={m}": _ks_two_sample_dcrit(alpha, int(n_hist), int(m)) for m in n_model_list}
         d_2017 = {f"n_model={m}": _ks_two_sample_dcrit(alpha, int(n_2017), int(m)) for m in n_model_list}
@@ -371,6 +450,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             a = d_2017.get(f"n_model={m}")
             b = d_hist.get(f"n_model={m}")
             ratio[f"n_model={m}"] = (float(a) / float(b)) if (a is not None and b not in (None, 0.0)) else None
+
         m3_out.update(
             {
                 "observed_samples_historical_n": int(n_hist),
@@ -386,10 +466,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         m3_out["reason"] = "missing_or_invalid_m3_sample_sizes"
 
     # Optional: attach observed (sigma/mu)_3h table values and DRW tau context (Wielgus+2022).
+
     if isinstance(wielgus, dict):
         w_der = wielgus.get("derived") or {}
         w_ex = wielgus.get("extracted") or {}
         w_sel = w_der.get("paper5_m3_2017_7sample_candidate") if isinstance(w_der, dict) else None
+        # 条件分岐: `isinstance(w_sel, dict) and bool(w_sel.get("ok"))` を満たす経路を評価する。
         if isinstance(w_sel, dict) and bool(w_sel.get("ok")):
             m3_out["wielgus2022_paper5_2017_7sample_candidate"] = {
                 "samples_n": w_sel.get("samples_n"),
@@ -399,10 +481,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "samples": w_sel.get("samples"),
                 "note": w_sel.get("note"),
             }
+
         w_ks = w_der.get("paper5_m3_ks_sanity_2017_vs_historical_proxy") if isinstance(w_der, dict) else None
+        # 条件分岐: `isinstance(w_ks, dict) and bool(w_ks.get("ok"))` を満たす経路を評価する。
         if isinstance(w_ks, dict) and bool(w_ks.get("ok")):
             m3_out["wielgus2022_paper5_m3_ks_sanity_2017_vs_historical_proxy"] = w_ks
+
         w_hist = w_der.get("paper5_m3_historical_distribution_candidate_pre_eht_2017_apr11") if isinstance(w_der, dict) else None
+        # 条件分岐: `isinstance(w_hist, dict) and bool(w_hist.get("ok"))` を満たす経路を評価する。
         if isinstance(w_hist, dict) and bool(w_hist.get("ok")):
             m3_out["wielgus2022_paper5_historical_distribution_candidate_pre_eht_2017_apr11"] = {
                 "deltaT_hours": w_hist.get("deltaT_hours"),
@@ -417,7 +503,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "proxy_sigma_over_mu_summary": w_hist.get("proxy_sigma_over_mu_summary"),
                 "note": w_hist.get("note"),
             }
+
         w_hist_all = w_der.get("paper5_m3_historical_distribution_candidate_2017_inclusive") if isinstance(w_der, dict) else None
+        # 条件分岐: `isinstance(w_hist_all, dict) and bool(w_hist_all.get("ok"))` を満たす経路を評価する。
         if isinstance(w_hist_all, dict) and bool(w_hist_all.get("ok")):
             m3_out["wielgus2022_paper5_historical_distribution_candidate_2017_inclusive"] = {
                 "date_cutoff_ymd": w_hist_all.get("date_cutoff_ymd"),
@@ -427,6 +515,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
 
         # Sensitivity of KS strength to "effective n" assumptions for the historical distribution.
+
         if m3_out.get("ok") and isinstance(n_hist, int) and n_hist > 0 and n_model_list:
             scenarios: Dict[str, Any] = {}
             scenarios["paper5_stated_historical_n"] = {
@@ -434,11 +523,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "ks_dcrit_vs_model_n": {f"n_model={m}": _ks_two_sample_dcrit(alpha, int(n_hist), int(m)) for m in n_model_list},
             }
 
+            # 条件分岐: `isinstance(w_hist, dict) and bool(w_hist.get("ok"))` を満たす経路を評価する。
             if isinstance(w_hist, dict) and bool(w_hist.get("ok")):
                 n_seg = w_hist.get("segments_n")
                 n_curves = w_hist.get("curves_n")
                 seg_by = w_hist.get("segments_by_array") if isinstance(w_hist.get("segments_by_array"), dict) else {}
                 n_sma_carma = None
+                # 条件分岐: `isinstance(seg_by, dict)` を満たす経路を評価する。
                 if isinstance(seg_by, dict):
                     try:
                         n_sma_carma = int((seg_by.get("SMA") or 0) + (seg_by.get("CARMA") or 0))
@@ -446,8 +537,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         n_sma_carma = None
 
                 def _add(name: str, n_obs: Any) -> None:
+                    # 条件分岐: `not isinstance(n_obs, int) or n_obs <= 0` を満たす経路を評価する。
                     if not isinstance(n_obs, int) or n_obs <= 0:
                         return
+
                     scenarios[name] = {
                         "n_obs": int(n_obs),
                         "ks_dcrit_vs_model_n": {f"n_model={m}": _ks_two_sample_dcrit(alpha, int(n_obs), int(m)) for m in n_model_list},
@@ -457,8 +550,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 _add("wielgus2022_pre_eht_curves_n", int(n_curves) if isinstance(n_curves, int) else None)
                 _add("wielgus2022_pre_eht_sma_carma_segments_n", n_sma_carma)
 
+            # 条件分岐: `isinstance(w_hist_all, dict) and bool(w_hist_all.get("ok"))` を満たす経路を評価する。
+
             if isinstance(w_hist_all, dict) and bool(w_hist_all.get("ok")):
                 n_all = w_hist_all.get("segments_n")
+                # 条件分岐: `isinstance(n_all, int) and n_all > 0` を満たす経路を評価する。
                 if isinstance(n_all, int) and n_all > 0:
                     scenarios["wielgus2022_2017_inclusive_segments_n"] = {
                         "n_obs": int(n_all),
@@ -472,10 +568,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "model_samples_candidates": n_model_list,
                 "scenarios": scenarios,
             }
+
+        # 条件分岐: `isinstance(w_der, dict) and isinstance(w_der.get("deltaT_over_tau_by_row"), d...` を満たす経路を評価する。
+
         if isinstance(w_der, dict) and isinstance(w_der.get("deltaT_over_tau_by_row"), dict):
             m3_out["wielgus2022_deltaT_over_tau_by_row"] = w_der.get("deltaT_over_tau_by_row")
+
+        # 条件分岐: `isinstance(w_ex, dict)` を満たす経路を評価する。
+
         if isinstance(w_ex, dict):
             drw = w_ex.get("drw_predicted_sigma_over_mu_3h")
+            # 条件分岐: `isinstance(drw, dict) and bool(drw.get("ok"))` を満たす経路を評価する。
             if isinstance(drw, dict) and bool(drw.get("ok")):
                 m3_out["wielgus2022_drw_predicted_sigma_over_mu_3h"] = {
                     "value": drw.get("value"),
@@ -485,12 +588,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 }
 
     # Optional: integrate reconstructed historical mi3 values (full reconstruction) to quantify "margin" vs p=alpha.
+
     if isinstance(m3_hist_vals, dict) and bool(m3_hist_vals.get("ok")):
         data_block = m3_hist_vals.get("data") or {}
         sample_2017 = data_block.get("sample_2017_7")
         hist_values = data_block.get("historical_mi3_values")
+        # 条件分岐: `isinstance(sample_2017, list) and isinstance(hist_values, list)` を満たす経路を評価する。
         if isinstance(sample_2017, list) and isinstance(hist_values, list):
             d_obs = _ks_two_sample_d(sample_2017, hist_values)
+            # 条件分岐: `d_obs is not None` を満たす経路を評価する。
             if d_obs is not None:
                 n7 = len([x for x in sample_2017 if isinstance(x, (int, float))])
                 nh = len([x for x in hist_values if isinstance(x, (int, float))])
@@ -529,6 +635,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
                     g = int(_math.gcd(int(n7), int(nh)))
                     lcm = int(int(n7) * int(nh) / g) if g > 0 else None
+                    # 条件分岐: `isinstance(lcm, int) and lcm > 0` を満たす経路を評価する。
                     if isinstance(lcm, int) and lcm > 0:
                         d_step = 1.0 / float(lcm)
                         hist_ks["d_discreteness"] = {
@@ -543,6 +650,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     pass
 
                 # Identify where (t,i,j) the max D is achieved to derive a concrete "one-step flip" condition.
+
                 try:
                     s = sorted(float(x) for x in sample_2017 if isinstance(x, (int, float)))
                     h = sorted(float(x) for x in hist_values if isinstance(x, (int, float)))
@@ -556,16 +664,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     for t in combined:
                         while i < len(s) and s[i] <= t:
                             i += 1
+
                         while j < len(h) and h[j] <= t:
                             j += 1
+
                         d_here = abs((i / len(s)) - (j / len(h))) if (len(s) > 0 and len(h) > 0) else None
+                        # 条件分岐: `d_here is None` を満たす経路を評価する。
                         if d_here is None:
                             continue
+
+                        # 条件分岐: `d_here > best_d + 1e-15` を満たす経路を評価する。
+
                         if d_here > best_d + 1e-15:
                             best_d = float(d_here)
                             best_t = float(t)
                             best_i = int(i)
                             best_j = int(j)
+
+                    # 条件分岐: `best_t is not None and best_i is not None and best_j is not None and best_d >...` を満たす経路を評価する。
+
                     if best_t is not None and best_i is not None and best_j is not None and best_d >= 0.0:
                         hist_ks["d_argmax"] = {
                             "t": float(best_t),
@@ -582,9 +699,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         if 0 < best_j < len(h):
                             v_le = float(h[best_j - 1])
                             v_gt = float(h[best_j])
+                            # 条件分岐: `v_le > 0 and v_gt > 0` を満たす経路を評価する。
                             if v_le > 0 and v_gt > 0:
                                 scale_up = float(best_t / v_le) if v_le != 0.0 else None
                                 scale_down = float(best_t / v_gt) if v_gt != 0.0 else None
+                                # 条件分岐: `isinstance(scale_up, float) and isinstance(scale_down, float)` を満たす経路を評価する。
                                 if isinstance(scale_up, float) and isinstance(scale_down, float):
                                     eps = 1e-9
                                     scaled_up = [float(x) * float(scale_up * (1.0 + eps)) for x in h]
@@ -616,33 +735,43 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     pass
 
                 # Sensitivity: interpret correlations as reduced effective n_hist (keep D fixed; recompute p/dcrit).
+
                 scenarios_eff_n = {}
                 eff_scen = (m3_out.get("wielgus2022_historical_distribution_effective_n_sensitivity") or {}).get(
                     "scenarios"
                 )
+                # 条件分岐: `isinstance(eff_scen, dict)` を満たす経路を評価する。
                 if isinstance(eff_scen, dict):
                     for name, block in eff_scen.items():
                         n_eff = (block or {}).get("n_obs") if isinstance(block, dict) else None
+                        # 条件分岐: `not isinstance(n_eff, int) or n_eff <= 0` を満たす経路を評価する。
                         if not isinstance(n_eff, int) or n_eff <= 0:
                             continue
+
                         scenarios_eff_n[name] = {
                             "n_historical_effective": int(n_eff),
                             "p_asymptotic": _ks_two_sample_p_asymptotic(d_obs, n7, int(n_eff)),
                             "dcrit_asymptotic": _ks_two_sample_dcrit(alpha, n7, int(n_eff)),
                         }
+
+                # 条件分岐: `scenarios_eff_n` を満たす経路を評価する。
+
                 if scenarios_eff_n:
                     hist_ks["effective_n_scenarios"] = scenarios_eff_n
                     hist_ks["effective_n_note"] = "Keep D fixed at the reconstructed value; recompute p/dcrit as if historical sample size were n_eff."
 
                 # Digitization/scale sensitivity checks (deterministic): rounding and global scaling of historical mi3.
+
                 digitize_checks: Dict[str, Any] = {}
 
                 round_rows = []
                 for dec in (3, 2, 1):
                     hist_round = [round(float(x), int(dec)) for x in hist_values if isinstance(x, (int, float))]
                     d_r = _ks_two_sample_d(sample_2017, hist_round)
+                    # 条件分岐: `d_r is None` を満たす経路を評価する。
                     if d_r is None:
                         continue
+
                     p_r = _ks_two_sample_p_asymptotic(d_r, n7, len(hist_round))
                     round_rows.append(
                         {
@@ -653,6 +782,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             "p_minus_alpha": (float(p_r) - float(alpha)) if p_r is not None else None,
                         }
                     )
+
+                # 条件分岐: `round_rows` を満たす経路を評価する。
+
                 if round_rows:
                     digitize_checks["round_historical"] = round_rows
 
@@ -660,8 +792,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 for f in (0.9, 0.95, 1.0, 1.05, 1.1):
                     hist_scaled = [float(x) * float(f) for x in hist_values if isinstance(x, (int, float))]
                     d_s = _ks_two_sample_d(sample_2017, hist_scaled)
+                    # 条件分岐: `d_s is None` を満たす経路を評価する。
                     if d_s is None:
                         continue
+
                     p_s = _ks_two_sample_p_asymptotic(d_s, n7, len(hist_scaled))
                     scale_rows.append(
                         {
@@ -672,8 +806,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             "p_minus_alpha": (float(p_s) - float(alpha)) if p_s is not None else None,
                         }
                     )
+
+                # 条件分岐: `scale_rows` を満たす経路を評価する。
+
                 if scale_rows:
                     digitize_checks["scale_historical"] = scale_rows
+
+                # 条件分岐: `digitize_checks` を満たす経路を評価する。
 
                 if digitize_checks:
                     hist_ks["digitize_sensitivity_checks"] = digitize_checks
@@ -682,10 +821,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 m3_out["historical_distribution_values_ks"] = hist_ks
 
     # Extended flux mapping (from Paper V text): mi_obs = mi_true / (1+f_ext)
+
     ext_out: Dict[str, Any] = {"ok": True}
+    # 条件分岐: `sens.get("extended_flux_suppression_factor") == "1/(1+f_ext)"` を満たす経路を評価する。
     if sens.get("extended_flux_suppression_factor") == "1/(1+f_ext)":
         # Provide a compact set of mappings; if key-metrics already has a list, reuse that.
         derived_list = (key.get("derived") or {}).get("m3_suppression_factor_s_to_f_ext")
+        # 条件分岐: `isinstance(derived_list, list) and derived_list` を満たす経路を評価する。
         if isinstance(derived_list, list) and derived_list:
             ext_out["m3_suppression_factor_s_to_f_ext"] = derived_list
         else:
@@ -699,6 +841,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 for s in ss
             ]
         # Highlight the frequently mentioned ~30% scale (s=0.7).
+
         s = 0.7
         ext_out["for_s=0.70"] = {
             "suppression_factor_s": s,
@@ -710,6 +853,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ext_out["reason"] = "extended_flux_factor_not_found_in_inputs"
 
     # --- Near-passing salvage counts (directly from near_passing tables) ---
+
     near_rows = _near_passing_rows(pf)
     near_combined = _extract_near_combo_counts(pf)
     near_out: Dict[str, Any] = {
@@ -744,6 +888,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
     }
 
+    # 条件分岐: `not bool(args.no_plot)` を満たす経路を評価する。
     if not bool(args.no_plot):
         try:
             import matplotlib
@@ -760,6 +905,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.set_title("2.2 μm median flux threshold (obs vs threshold)")
             ax.set_xlabel("mJy")
             ax.set_yticks([])
+            # 条件分岐: `nir_out.get("ok")` を満たす経路を評価する。
             if nir_out.get("ok"):
                 med = float(nir_out["observed_median_mJy"])
                 sig = float(nir_out["observed_sigma_mJy"])
@@ -768,25 +914,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ax.axvline(thr, color="tab:red", linestyle="--", label="threshold (1.0 mJy)")
                 # Context from GRAVITY 2020 percentiles (Table 1): p86/p95 (2017) and p5 (2017-2019 avg).
                 gby = nir_out.get("gravity2020_percentiles_avg_by_year") if isinstance(nir_out.get("gravity2020_percentiles_avg_by_year"), dict) else None
+                # 条件分岐: `isinstance(gby, dict)` を満たす経路を評価する。
                 if isinstance(gby, dict):
                     p86 = (((gby.get("2017") or {}).get("p86")) or {})
                     p95 = (((gby.get("2017") or {}).get("p95")) or {})
                     p5_all = (((gby.get("2017-2019") or {}).get("p5")) or {})
+                    # 条件分岐: `isinstance(p86, dict) and isinstance(p86.get("value_mJy"), (int, float))` を満たす経路を評価する。
                     if isinstance(p86, dict) and isinstance(p86.get("value_mJy"), (int, float)):
                         ax.axvline(float(p86["value_mJy"]), color="#666666", linestyle="-.", linewidth=1, label="GRAVITY20 p86 (2017)")
+
+                    # 条件分岐: `isinstance(p95, dict) and isinstance(p95.get("value_mJy"), (int, float))` を満たす経路を評価する。
+
                     if isinstance(p95, dict) and isinstance(p95.get("value_mJy"), (int, float)):
                         ax.axvline(float(p95["value_mJy"]), color="#999999", linestyle="-.", linewidth=1, label="GRAVITY20 p95 (2017)")
+
+                    # 条件分岐: `isinstance(p5_all, dict) and (not bool(p5_all.get("struck_out"))) and isinsta...` を満たす経路を評価する。
+
                     if isinstance(p5_all, dict) and (not bool(p5_all.get("struck_out"))) and isinstance(p5_all.get("value_mJy"), (int, float)):
                         ax.axvline(float(p5_all["value_mJy"]), color="#bbbbbb", linestyle=":", linewidth=1, label="GRAVITY20 p5 (2017-2019 avg)")
+
                 for k, col in [(1, "#777777"), (2, "#999999"), (3, "#bbbbbb")]:
                     ax.axvline(med + k * sig, color=col, linestyle=":", linewidth=1)
+
                 ax.legend(loc="lower right", fontsize=8)
 
             # (B) M3 KS Dcrit sensitivity to sample size
+
             ax = axes[0, 1]
             ax.set_title("M3 KS-test tolerance (proxy; D_crit)")
             ax.set_xlabel("model samples (n_model)")
             ax.set_ylabel("D_crit (approx)")
+            # 条件分岐: `m3_out.get("ok")` を満たす経路を評価する。
             if m3_out.get("ok"):
                 ms = [int(x) for x in m3_out.get("model_samples_candidates") or []]
                 dh = [m3_out["ks_dcrit_hist_vs_model_n"].get(f"n_model={m}") for m in ms]
@@ -794,10 +952,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ax.plot(ms, dh, marker="o", label=f"obs n={m3_out['observed_samples_historical_n']}")
                 ax.plot(ms, d7, marker="o", label=f"obs n={m3_out['observed_samples_2017_n']}")
                 ks_vals = m3_out.get("historical_distribution_values_ks")
+                # 条件分岐: `isinstance(ks_vals, dict) and bool(ks_vals.get("ok"))` を満たす経路を評価する。
                 if isinstance(ks_vals, dict) and bool(ks_vals.get("ok")):
                     d = ks_vals.get("d")
                     p = ks_vals.get("p_asymptotic")
                     a = ks_vals.get("alpha")
+                    # 条件分岐: `isinstance(d, (int, float)) and isinstance(p, (int, float)) and isinstance(a,...` を満たす経路を評価する。
                     if isinstance(d, (int, float)) and isinstance(p, (int, float)) and isinstance(a, (int, float)):
                         ax.text(
                             0.02,
@@ -809,9 +969,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             fontsize=8,
                             bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "none"},
                         )
+
                 ax.legend(fontsize=8)
 
             # (C) near-passing salvage counts
+
             ax = axes[1, 0]
             ax.set_title("Near-passing (45 rows): salvage counts")
             labels = ["relax M3", "relax F_2um", "relax both"]
@@ -825,6 +987,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.set_ylim(0, max(vals) * 1.25 + 1)
             for i, v in enumerate(vals):
                 ax.text(i, v, str(v), ha="center", va="bottom", fontsize=9)
+
             ax.tick_params(axis="x", labelrotation=15)
 
             # (D) global sweep
@@ -841,6 +1004,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ax.set_ylim(0, max(vals) * 1.25 + 1)
             for i, v in enumerate(vals):
                 ax.text(i, v, str(v), ha="center", va="bottom", fontsize=9)
+
             ax.tick_params(axis="x", labelrotation=15)
 
             fig.tight_layout()
@@ -871,10 +1035,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pass
 
     print(f"[ok] json: {out_json}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] png : {out_png}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

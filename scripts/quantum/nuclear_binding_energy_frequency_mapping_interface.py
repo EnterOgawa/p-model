@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -29,6 +32,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     light_metrics_path = root / "output" / "public" / "quantum" / "nuclear_binding_light_nuclei_metrics.json"
+    # 条件分岐: `not light_metrics_path.exists()` を満たす経路を評価する。
     if not light_metrics_path.exists():
         raise SystemExit(
             "[fail] missing light-nuclei binding baseline metrics.\n"
@@ -36,13 +40,16 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_light_nuclei.py\n"
             f"Expected: {light_metrics_path}"
         )
+
     light = _load_json(light_metrics_path)
 
     derived = light.get("derived")
+    # 条件分岐: `not isinstance(derived, dict) or not derived` を満たす経路を評価する。
     if not isinstance(derived, dict) or not derived:
         raise SystemExit(f"[fail] invalid light nuclei metrics: derived missing/empty: {light_metrics_path}")
 
     # Exact SI constants:
+
     c = 299_792_458.0
     e_charge = 1.602_176_634e-19
     h = 6.626_070_15e-34
@@ -51,6 +58,7 @@ def main() -> None:
     codata = light.get("constants_from_nist_codata", {})
     mp = float(codata.get("mp_kg", {}).get("value"))
     mn = float(codata.get("mn_kg", {}).get("value"))
+    # 条件分岐: `not (math.isfinite(mp) and mp > 0 and math.isfinite(mn) and mn > 0)` を満たす経路を評価する。
     if not (math.isfinite(mp) and mp > 0 and math.isfinite(mn) and mn > 0):
         raise SystemExit("[fail] missing mp/mn in nuclear_binding_light_nuclei_metrics.json constants_from_nist_codata")
 
@@ -63,11 +71,14 @@ def main() -> None:
 
     rows: list[dict[str, object]] = []
     for key, item in derived.items():
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         A = int(item.get("A", -1))
         Z = int(item.get("Z", -1))
         N = int(item.get("N", -1))
+        # 条件分岐: `A < 1 or Z < 0 or N < 0` を満たす経路を評価する。
         if A < 1 or Z < 0 or N < 0:
             continue
 
@@ -193,6 +204,7 @@ def main() -> None:
             )
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     labels = [f"{r['label']} (A={int(r['A'])})" for r in rows]
@@ -269,6 +281,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

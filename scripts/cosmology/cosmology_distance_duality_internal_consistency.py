@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -32,6 +33,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -52,13 +54,19 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return v
 
 
@@ -67,16 +75,30 @@ def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     label = str(row.get("short_label") or row.get("id") or "")
     rid = str(row.get("id") or "")
 
+    # 条件分岐: `uses_bao` を満たす経路を評価する。
     if uses_bao:
         return ("SNIa+BAO", "#1f77b4")
+
+    # 条件分岐: `"H(z)" in label or "snIa_hz" in rid` を満たす経路を評価する。
+
     if "H(z)" in label or "snIa_hz" in rid:
         return ("SNIa+H(z)", "#9467bd")
+
+    # 条件分岐: `label.startswith("Clusters") or "Clusters" in label or "clusters" in rid` を満たす経路を評価する。
+
     if label.startswith("Clusters") or "Clusters" in label or "clusters" in rid:
         return ("Clusters+SNIa", "#2ca02c")
+
+    # 条件分岐: `"SGL" in label or "sgl" in rid` を満たす経路を評価する。
+
     if "SGL" in label or "sgl" in rid:
         return ("SGL+SNIa+GRB", "#ff7f0e")
+
+    # 条件分岐: `"radio" in label or "radio" in rid` を満たす経路を評価する。
+
     if "radio" in label or "radio" in rid:
         return ("SNe+radio", "#8c564b")
+
     return ("other", "#7f7f7f")
 
 
@@ -85,26 +107,39 @@ def _pairwise_abs_z_matrix(eps: np.ndarray, sigma: np.ndarray) -> np.ndarray:
     m = np.zeros((n, n), dtype=float)
     for i in range(n):
         for j in range(n):
+            # 条件分岐: `i == j` を満たす経路を評価する。
             if i == j:
                 m[i, j] = 0.0
                 continue
+
             denom = math.sqrt(float(sigma[i]) ** 2 + float(sigma[j]) ** 2)
+            # 条件分岐: `denom <= 0` を満たす経路を評価する。
             if denom <= 0:
                 m[i, j] = float("nan")
                 continue
+
             m[i, j] = abs(float(eps[i]) - float(eps[j])) / denom
+
     return m
 
 
 def _epsilon0_from_eta0(eta0: float, z_ref: float, *, nonlinear: bool) -> Optional[float]:
+    # 条件分岐: `z_ref <= 0` を満たす経路を評価する。
     if z_ref <= 0:
         return None
+
+    # 条件分岐: `nonlinear` を満たす経路を評価する。
+
     if nonlinear:
         eta = 1.0 + eta0 * z_ref / (1.0 + z_ref)
     else:
         eta = 1.0 + eta0 * z_ref
+
+    # 条件分岐: `eta <= 0` を満たす経路を評価する。
+
     if eta <= 0:
         return None
+
     return math.log(eta) / math.log(1.0 + z_ref)
 
 
@@ -113,8 +148,10 @@ def _epsilon0_sigma_from_eta0(
 ) -> Optional[float]:
     lo = _epsilon0_from_eta0(eta0 - eta0_sigma, z_ref, nonlinear=nonlinear)
     hi = _epsilon0_from_eta0(eta0 + eta0_sigma, z_ref, nonlinear=nonlinear)
+    # 条件分岐: `lo is None or hi is None` を満たす経路を評価する。
     if lo is None or hi is None:
         return None
+
     return abs(hi - lo) / 2.0
 
 
@@ -127,11 +164,14 @@ def _anchor_sensitivity(
     out: List[Dict[str, Any]] = []
     for c in constraints:
         rp = c.get("raw_parameterization")
+        # 条件分岐: `not isinstance(rp, dict)` を満たす経路を評価する。
         if not isinstance(rp, dict):
             continue
+
         eta0 = _safe_float(rp.get("eta0"))
         eta0_sigma = _safe_float(rp.get("eta0_sigma"))
         form = str(rp.get("form") or "")
+        # 条件分岐: `eta0 is None or eta0_sigma is None` を満たす経路を評価する。
         if eta0 is None or eta0_sigma is None:
             continue
 
@@ -143,11 +183,13 @@ def _anchor_sensitivity(
         for z_ref in z_refs:
             eps = _epsilon0_from_eta0(float(eta0), float(z_ref), nonlinear=nonlinear)
             sig = _epsilon0_sigma_from_eta0(float(eta0), float(eta0_sigma), float(z_ref), nonlinear=nonlinear)
+            # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
             if eps is None or sig is None or sig <= 0:
                 eps_list.append(None)
                 sig_list.append(None)
                 absz_list.append(None)
                 continue
+
             absz = abs((float(eps) - float(epsilon0_pred_pbg_static)) / float(sig))
             eps_list.append(float(eps))
             sig_list.append(float(sig))
@@ -167,6 +209,7 @@ def _anchor_sensitivity(
                 "abs_z_pbg_static_at_z_ref": absz_list,
             }
         )
+
     return out
 
 
@@ -199,23 +242,30 @@ def main(argv: Optional[List[str]] = None) -> int:
     _set_japanese_font()
 
     metrics_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
     if not metrics_path.exists():
         raise FileNotFoundError(
             f"missing required metrics: {metrics_path} (run scripts/summary/run_all.py --offline first)"
         )
+
     ddr = _read_json(metrics_path)
     rows_in = ddr.get("rows") or []
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise ValueError("invalid DDR metrics (rows missing): cosmology_distance_duality_constraints_metrics.json")
 
     rows: List[Dict[str, Any]] = []
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         eps = _safe_float(r.get("epsilon0_obs"))
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
         if eps is None or sig is None or sig <= 0:
             continue
+
         cat, cat_color = _category(r)
         rows.append(
             {
@@ -229,6 +279,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "source": dict(r.get("source") or {}),
             }
         )
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
 
     if not rows:
         raise ValueError("no usable DDR rows found (epsilon0_obs/epsilon0_sigma missing)")
@@ -248,8 +300,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     for i in range(n):
         for j in range(i + 1, n):
             zij = float(m_absz[i, j])
+            # 条件分岐: `not math.isfinite(zij)` を満たす経路を評価する。
             if not math.isfinite(zij):
                 continue
+
             pairs.append(
                 {
                     "abs_z": zij,
@@ -261,6 +315,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                     "label_j": labels[j],
                 }
             )
+
     pairs.sort(key=lambda x: float(x["abs_z"]), reverse=True)
     top_pairs = pairs[: min(10, len(pairs))]
 
@@ -275,6 +330,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "median_abs_z_vs_others": (float(np.median(row_vals)) if row_vals else None),
             }
         )
+
     per_source.sort(key=lambda x: float(x["max_abs_z_vs_others"] or -1.0), reverse=True)
 
     # Anchor sensitivity (for entries that originate from η0 parameterizations)
@@ -322,6 +378,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     lines.append("  z_ij = (ε_i−ε_j) / sqrt(σ_i^2+σ_j^2)")
     lines.append("  |z| が大きいほど相互に矛盾")
     lines.append("")
+    # 条件分岐: `top_pairs` を満たす経路を評価する。
     if top_pairs:
         mx = top_pairs[0]
         lines.append("最大ペア:")
@@ -357,8 +414,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     for item in anchor:
         zref = item.get("z_refs") or []
         absz = item.get("abs_z_pbg_static_at_z_ref") or []
+        # 条件分岐: `not isinstance(zref, list) or not isinstance(absz, list) or len(zref) != len(...` を満たす経路を評価する。
         if not isinstance(zref, list) or not isinstance(absz, list) or len(zref) != len(absz):
             continue
+
         ys = [float(v) if v is not None and math.isfinite(float(v)) else float("nan") for v in absz]
         xs = [float(v) for v in zref]
         target = ax_non if bool(item.get("nonlinear", False)) else ax_lin
@@ -433,6 +492,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

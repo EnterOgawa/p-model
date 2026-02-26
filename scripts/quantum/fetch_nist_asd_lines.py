@@ -35,9 +35,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -51,20 +54,25 @@ def _sanitize_token(s: str) -> str:
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
+
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req) as resp, out_path.open("wb") as f:
         f.write(resp.read())
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
 def _read_tsv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     txt = path.read_text(encoding="utf-8", errors="replace")
     rows_raw = list(csv.reader(txt.splitlines(), delimiter="\t", quotechar='"'))
+    # 条件分岐: `not rows_raw` を満たす経路を評価する。
     if not rows_raw:
         raise ValueError(f"empty TSV: {path}")
+
     header = [h.strip() for h in rows_raw[0]]
     # NIST often leaves a trailing empty column due to final '\t'
     while header and header[-1] == "":
@@ -75,21 +83,33 @@ def _read_tsv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
         row = list(r)
         while row and row[-1] == "":
             row.pop()
+
+        # 条件分岐: `not row` を満たす経路を評価する。
+
         if not row:
             continue
+
+        # 条件分岐: `len(row) < len(header)` を満たす経路を評価する。
+
         if len(row) < len(header):
             row += [""] * (len(header) - len(row))
+
         rec = {header[i]: (row[i].strip() if i < len(row) else "") for i in range(len(header))}
         rows.append(rec)
+
     return header, rows
 
 
 def _as_float(s: str | None) -> float | None:
+    # 条件分岐: `s is None` を満たす経路を評価する。
     if s is None:
         return None
+
     ss = str(s).strip()
+    # 条件分岐: `not ss` を満たす経路を評価する。
     if not ss:
         return None
+
     try:
         return float(ss)
     except Exception:
@@ -97,9 +117,11 @@ def _as_float(s: str | None) -> float | None:
 
 
 def _derive_lambda_from_obs_nu_A(nu_invA: float) -> float | None:
+    # 条件分岐: `nu_invA == 0.0` を満たす経路を評価する。
     if nu_invA == 0.0:
         return None
     # NIST "obs_nu(A)" values are negative in this output; wavelength is positive.
+
     return -1.0 / nu_invA
 
 
@@ -107,13 +129,20 @@ def _pick_line_for_target(rows: list[dict[str, str]], target: TargetLine) -> dic
     candidates: list[dict[str, Any]] = []
     for r in rows:
         nu = _as_float(r.get("obs_nu(A)"))
+        # 条件分岐: `nu is None` を満たす経路を評価する。
         if nu is None:
             continue
+
         lam = _derive_lambda_from_obs_nu_A(nu)
+        # 条件分岐: `lam is None` を満たす経路を評価する。
         if lam is None:
             continue
+
+        # 条件分岐: `abs(lam - target.approx_lambda_vac_A) > target.window_A` を満たす経路を評価する。
+
         if abs(lam - target.approx_lambda_vac_A) > target.window_A:
             continue
+
         aki = _as_float(r.get("Aki(s^-1)"))
         unc_nu = _as_float(r.get("unc_obs_nu"))
         candidates.append(
@@ -131,17 +160,22 @@ def _pick_line_for_target(rows: list[dict[str, str]], target: TargetLine) -> dic
             }
         )
 
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         return None
 
     # Prefer the most intense/standard E1 line when available (max Aki).
+
     if target.prefer_max_Aki:
         with_aki = [c for c in candidates if c.get("Aki_s^-1") is not None]
+        # 条件分岐: `with_aki` を満たす経路を評価する。
         if with_aki:
             best = max(with_aki, key=lambda c: float(c["Aki_s^-1"]))  # type: ignore[arg-type]
             return best
 
     # Fallback: closest wavelength.
+
     return min(candidates, key=lambda c: abs(float(c["delta_A"])))
 
 
@@ -193,31 +227,46 @@ def main(argv: list[str] | None = None) -> int:
         "format": str(int(args.format)),
         "show_obs_wl": "1",
     }
+    # 条件分岐: `not args.no_ritz` を満たす経路を評価する。
     if not args.no_ritz:
         q["show_calc_wl"] = "1"
+
+    # 条件分岐: `not args.no_unc` を満たす経路を評価する。
+
     if not args.no_unc:
         q["unc_out"] = "1"
 
     url = "https://physics.nist.gov/cgi-bin/ASD/lines1.pl?" + urlencode(q)
     ext = {0: "html", 2: "csv", 3: "tsv"}[int(args.format)]
     file_name = f"nist_asd_lines__{spectra_token}__format{int(args.format)}__obs"
+    # 条件分岐: `not args.no_ritz` を満たす経路を評価する。
     if not args.no_ritz:
         file_name += "_ritz"
+
+    # 条件分岐: `not args.no_unc` を満たす経路を評価する。
+
     if not args.no_unc:
         file_name += "_unc"
+
     file_name += f".{ext}"
 
     raw_path = src_dir / file_name
     extracted_path = src_dir / "extracted_values.json"
     manifest_path = src_dir / "manifest.json"
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing: list[Path] = []
         for p in (raw_path, extracted_path, manifest_path):
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(p)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return 0
 
@@ -249,7 +298,9 @@ def main(argv: list[str] | None = None) -> int:
 
     # Default baseline targets (Hydrogen; vacuum wavelengths in Å).
     # For other spectra, this selection may be empty until extended.
+
     targets: list[TargetLine] = []
+    # 条件分岐: `spectra.strip().lower() in ("h i", "h 1", "h1", "hydrogen i", "hydrogen 1")` を満たす経路を評価する。
     if spectra.strip().lower() in ("h i", "h 1", "h1", "hydrogen i", "hydrogen 1"):
         targets = [
             TargetLine(id="H_I_Lyα", approx_lambda_vac_A=1215.67, window_A=1.0),
@@ -257,6 +308,7 @@ def main(argv: list[str] | None = None) -> int:
             TargetLine(id="H_I_Hβ", approx_lambda_vac_A=4862.68, window_A=3.0),
             TargetLine(id="H_I_Hγ", approx_lambda_vac_A=4341.69, window_A=3.0),
         ]
+    # 条件分岐: 前段条件が不成立で、`spectra.strip().lower() in ("he i", "he 1", "he1", "helium i", "helium 1")` を追加評価する。
     elif spectra.strip().lower() in ("he i", "he 1", "he1", "helium i", "helium 1"):
         # Neutral helium (multi-electron minimal baseline; visible lines; vacuum wavelengths in Å).
         targets = [
@@ -269,12 +321,15 @@ def main(argv: list[str] | None = None) -> int:
         selected: list[dict[str, Any]] = []
         for t in targets:
             best = _pick_line_for_target(rows, t)
+            # 条件分岐: `best is None` を満たす経路を評価する。
             if best is None:
                 continue
+
             lam_A = float(best["lambda_vac_A"])
             nu = float(best["nu_obs_invA"])
             unc_nu = best.get("nu_obs_unc_invA")
             lam_unc_A = None
+            # 条件分岐: `unc_nu is not None and nu != 0.0` を満たす経路を評価する。
             if unc_nu is not None and nu != 0.0:
                 lam_unc_A = abs(float(unc_nu)) / (nu * nu)
 
@@ -327,6 +382,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] manifest: {manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

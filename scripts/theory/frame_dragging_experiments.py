@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -35,6 +36,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -54,11 +56,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -82,8 +88,12 @@ class Experiment:
                 vv = float(v)
             except Exception:
                 return None
+
+            # 条件分岐: `math.isnan(vv) or math.isinf(vv)` を満たす経路を評価する。
+
             if math.isnan(vv) or math.isinf(vv):
                 return None
+
             return vv
 
         return Experiment(
@@ -108,14 +118,18 @@ def compute(experiments: Sequence[Experiment]) -> List[Dict[str, Any]]:
 
         # Prefer explicit μ. If absent, compute μ from drift rates (absolute values).
         if mu is None:
+            # 条件分岐: `e.omega_pred_mas_per_yr is not None and e.omega_obs_mas_per_yr is not None` を満たす経路を評価する。
             if e.omega_pred_mas_per_yr is not None and e.omega_obs_mas_per_yr is not None:
                 denom = abs(float(e.omega_pred_mas_per_yr))
+                # 条件分岐: `denom > 0` を満たす経路を評価する。
                 if denom > 0:
                     mu = abs(float(e.omega_obs_mas_per_yr)) / denom
+                    # 条件分岐: `e.omega_obs_sigma_mas_per_yr is not None` を満たす経路を評価する。
                     if e.omega_obs_sigma_mas_per_yr is not None:
                         sig = abs(float(e.omega_obs_sigma_mas_per_yr)) / denom
 
         z = None
+        # 条件分岐: `mu is not None and sig is not None and sig > 0` を満たす経路を評価する。
         if mu is not None and sig is not None and sig > 0:
             z = (mu - 1.0) / sig
 
@@ -139,6 +153,7 @@ def compute(experiments: Sequence[Experiment]) -> List[Dict[str, Any]]:
                 "source": e.source,
             }
         )
+
     return rows
 
 
@@ -166,11 +181,15 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
     )
 
     for xi, mu, sig in zip(x, y, yerr):
+        # 条件分岐: `not math.isfinite(float(mu))` を満たす経路を評価する。
         if not math.isfinite(float(mu)):
             continue
+
         txt = f"{mu:.3f}"
+        # 条件分岐: `math.isfinite(float(sig)) and float(sig) > 0` を満たす経路を評価する。
         if math.isfinite(float(sig)) and float(sig) > 0:
             txt += f"±{sig:.3f}"
+
         ax.text(float(xi), float(mu) + 0.03, txt, ha="center", va="bottom", fontsize=9.5, color="#111111")
 
     ax.set_xticks(x)
@@ -182,12 +201,15 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path) -> None:
 
     finite_y = [float(v) for v in y.tolist() if math.isfinite(float(v))]
     finite_err = [float(v) for v in yerr.tolist() if math.isfinite(float(v)) and float(v) > 0]
+    # 条件分岐: `finite_y` を満たす経路を評価する。
     if finite_y:
         lo = min(finite_y)
         hi = max(finite_y)
         pad = max(0.15, 0.8 * (hi - lo))
+        # 条件分岐: `finite_err` を満たす経路を評価する。
         if finite_err:
             pad = max(pad, 2.0 * max(finite_err))
+
         ax.set_ylim(min(0.0, lo - pad), max(2.0, hi + pad))
 
     fig.tight_layout()
@@ -216,8 +238,10 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
         )
         for r in rows:
             src = r.get("source") or {}
+            # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
             if not isinstance(src, dict):
                 src = {}
+
             mu = r.get("mu")
             sig = r.get("mu_sigma")
             z = r.get("z_score")
@@ -265,6 +289,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     src = _read_json(data_path)
     experiments = [Experiment.from_json(e) for e in (src.get("experiments") or [])]
+    # 条件分岐: `not experiments` を満たす経路を評価する。
     if not experiments:
         raise SystemExit(f"no experiments found in: {data_path}")
 
@@ -305,6 +330,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] csv  : {out_csv}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,8 +34,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _find_snippet(text: str, needle: str, *, window: int = 700) -> Optional[str]:
     i = text.find(needle)
+    # 条件分岐: `i < 0` を満たす経路を評価する。
     if i < 0:
         return None
+
     a = max(0, i - 120)
     b = min(len(text), i + window)
     return text[a:b]
@@ -45,8 +48,10 @@ def _mid(lo: float, hi: float) -> float:
 
 
 def _sigma_var(u_gly: float, *, a: float, b: float, c: float, u0_gly: float) -> float:
+    # 条件分岐: `u_gly <= 0 or u0_gly <= 0` を満たす経路を評価する。
     if u_gly <= 0 or u0_gly <= 0:
         return float("nan")
+
     p = b + c
     num = 1.0 + (4.0 / u0_gly) ** p
     den = 1.0 + (u_gly / u0_gly) ** p
@@ -57,21 +62,30 @@ def _sigma_var(u_gly: float, *, a: float, b: float, c: float, u0_gly: float) -> 
 def _max_sigma_var_in_range(
     *, u_min: float, u_max: float, step: float, a: float, b: float, c: float, u0_gly: float
 ) -> Dict[str, Any]:
+    # 条件分岐: `step <= 0` を満たす経路を評価する。
     if step <= 0:
         raise ValueError("step must be positive")
+
     n = int(round((u_max - u_min) / step)) + 1
     best_u = None
     best = None
     for i in range(max(0, n)):
         u = u_min + i * step
+        # 条件分岐: `u > u_max + 1e-12` を満たす経路を評価する。
         if u > u_max + 1e-12:
             break
+
         v = _sigma_var(u, a=a, b=b, c=c, u0_gly=u0_gly)
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
         if not math.isfinite(v):
             continue
+
+        # 条件分岐: `best is None or v > best` を満たす経路を評価する。
+
         if best is None or v > best:
             best = v
             best_u = u
+
     return {"u_min_gly": u_min, "u_max_gly": u_max, "step_gly": step, "max": best, "u_at_max_gly": best_u}
 
 
@@ -89,8 +103,10 @@ _RE_RANGE = re.compile(r"\$\[\s*(?P<lo>-?\d+(?:\.\d+)?)\s*,\s*(?P<hi>-?\d+(?:\.\
 
 def _parse_range_cell(cell: str) -> Optional[Tuple[float, float]]:
     m = _RE_RANGE.search(cell.strip())
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     lo = float(m.group("lo"))
     hi = float(m.group("hi"))
     return (lo, hi) if lo <= hi else (hi, lo)
@@ -102,14 +118,19 @@ def _parse_premodeling_table(tex: str, *, source_path: Path) -> List[Premodeling
 
     start_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             start_idx = i
             break
+
+    # 条件分岐: `start_idx is None` を満たす経路を評価する。
+
     if start_idx is None:
         return []
 
     end_idx = None
     for j in range(start_idx, len(lines)):
+        # 条件分岐: `lines[j].strip().startswith("\\end{deluxetable}")` を満たす経路を評価する。
         if lines[j].strip().startswith("\\end{deluxetable}"):
             end_idx = j
             break
@@ -121,27 +142,41 @@ def _parse_premodeling_table(tex: str, *, source_path: Path) -> List[Premodeling
     for off, raw in enumerate(block_lines):
         lineno = block_start_lineno + off
         line = raw.strip()
+        # 条件分岐: `not line or "&" not in line` を満たす経路を評価する。
         if not line or "&" not in line:
             continue
+
+        # 条件分岐: `line.startswith("\\") and ("\\startdata" in line or "\\enddata" in line or "\...` を満たす経路を評価する。
+
         if line.startswith("\\") and ("\\startdata" in line or "\\enddata" in line or "\\hline" in line):
             continue
+
+        # 条件分岐: `line.startswith("\\colhead") or line.startswith("\\tablehead") or line.starts...` を満たす経路を評価する。
+
         if line.startswith("\\colhead") or line.startswith("\\tablehead") or line.startswith("\\tablecaption"):
             continue
+
+        # 条件分岐: `line.startswith("\\tablenotetext") or line.startswith("\\begin{deluxetable}")...` を満たす経路を評価する。
+
         if line.startswith("\\tablenotetext") or line.startswith("\\begin{deluxetable}") or line.startswith("\\end{deluxetable}"):
             continue
 
         # Normalize.
+
         parts = [p.strip().rstrip("\\").strip() for p in line.split("&")]
+        # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
         if len(parts) < 4:
             continue
 
         src = parts[0]
+        # 条件分岐: `src == "\\hline"` を満たす経路を評価する。
         if src == "\\hline":
             continue
 
         a_rng = _parse_range_cell(parts[1])
         b_rng = _parse_range_cell(parts[2])
         u0_rng = _parse_range_cell(parts[3])
+        # 条件分岐: `a_rng is None or b_rng is None or u0_rng is None` を満たす経路を評価する。
         if a_rng is None or b_rng is None or u0_rng is None:
             continue
 
@@ -154,6 +189,7 @@ def _parse_premodeling_table(tex: str, *, source_path: Path) -> List[Premodeling
                 source_anchor={"path": str(source_path), "line": int(lineno), "label": "tab:premodeling"},
             )
         )
+
     return rows
 
 
@@ -181,6 +217,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -209,9 +246,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Find Sgr A* row.
     sgra_row = None
     for r in rows:
+        # 条件分岐: `r.source.strip() in {"\\sgra", "SgrA", "Sgr A*", "SgrA*"}` を満たす経路を評価する。
         if r.source.strip() in {"\\sgra", "SgrA", "Sgr A*", "SgrA*"}:
             sgra_row = r
             break
+
+    # 条件分岐: `sgra_row is None` を満たす経路を評価する。
+
     if sgra_row is None:
         payload["ok"] = False
         payload["reason"] = "sgra_row_not_found"
@@ -293,6 +334,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

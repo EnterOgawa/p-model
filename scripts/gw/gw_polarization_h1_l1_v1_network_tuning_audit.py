@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,8 +45,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -57,22 +60,35 @@ def _safe_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out
 
 
 def _fmt(value: Any, digits: int = 7) -> str:
+    # 条件分岐: `isinstance(value, (int, np.integer))` を満たす経路を評価する。
     if isinstance(value, (int, np.integer)):
         return str(int(value))
+
+    # 条件分岐: `not isinstance(value, (float, np.floating))` を満たす経路を評価する。
+
     if not isinstance(value, (float, np.floating)):
         return str(value)
+
     x = float(value)
+    # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
     if not math.isfinite(x):
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -80,9 +96,12 @@ def _parse_float_grid(text: str) -> List[float]:
     out: List[float] = []
     for token in str(text).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         out.append(float(token))
+
     return out
 
 
@@ -90,9 +109,12 @@ def _parse_int_grid(text: str) -> List[int]:
     out: List[int] = []
     for token in str(text).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         out.append(int(token))
+
     return out
 
 
@@ -101,37 +123,65 @@ def _parse_bool_grid(text: str) -> List[bool]:
     out: List[bool] = []
     for token in str(text).split(","):
         token = token.strip().lower()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
+        # 条件分岐: `token not in mapping` を満たす経路を評価する。
+
         if token not in mapping:
             raise ValueError(f"invalid bool token in grid: {token}")
+
         out.append(bool(mapping[token]))
+
     return out
 
 
 def _status_rank(status: str) -> int:
     s = str(status or "")
+    # 条件分岐: `s == "pass"` を満たす経路を評価する。
     if s == "pass":
         return 3
+
+    # 条件分岐: `s == "watch"` を満たす経路を評価する。
+
     if s == "watch":
         return 2
+
+    # 条件分岐: `s == "reject"` を満たす経路を評価する。
+
     if s == "reject":
         return 1
+
+    # 条件分岐: `s == "inconclusive"` を満たす経路を評価する。
+
     if s == "inconclusive":
         return 0
+
     return -1
 
 
 def _status_bucket(status: str) -> str:
     s = str(status or "")
+    # 条件分岐: `s.startswith("pass")` を満たす経路を評価する。
     if s.startswith("pass"):
         return "pass"
+
+    # 条件分岐: `s.startswith("watch")` を満たす経路を評価する。
+
     if s.startswith("watch"):
         return "watch"
+
+    # 条件分岐: `s.startswith("reject")` を満たす経路を評価する。
+
     if s.startswith("reject"):
         return "reject"
+
+    # 条件分岐: `s.startswith("inconclusive")` を満たす経路を評価する。
+
     if s.startswith("inconclusive"):
         return "inconclusive"
+
     return "other"
 
 
@@ -168,15 +218,18 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             vals: List[Any] = []
             for key in headers:
                 val = row.get(key, "")
+                # 条件分岐: `isinstance(val, float)` を満たす経路を評価する。
                 if isinstance(val, float):
                     vals.append(_fmt(val))
                 else:
                     vals.append(val)
+
             w.writerow(vals)
 
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         fig, ax = plt.subplots(1, 1, figsize=(10.0, 5.0))
         ax.text(0.5, 0.5, "No tuning rows", ha="center", va="center", fontsize=14)
@@ -242,6 +295,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     min_ring_grid = _parse_int_grid(str(args.min_ring_grid))
     relax_grid = _parse_float_grid(str(args.relax_grid))
     prune_grid = _parse_bool_grid(str(args.pair_pruning_grid))
+    # 条件分岐: `not corr_grid or not floor_grid or not min_ring_grid or not relax_grid or not...` を満たす経路を評価する。
     if not corr_grid or not floor_grid or not min_ring_grid or not relax_grid or not prune_grid:
         print("[err] tuning grids must not be empty")
         return 2
@@ -251,6 +305,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     outdir.mkdir(parents=True, exist_ok=True)
     public_outdir.mkdir(parents=True, exist_ok=True)
     network_script = _ROOT / "scripts" / "gw" / "gw_polarization_h1_l1_v1_network_audit.py"
+    # 条件分岐: `not network_script.exists()` を満たす経路を評価する。
     if not network_script.exists():
         print(f"[err] missing script: {network_script}")
         return 2
@@ -296,6 +351,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "--prefix",
             trial_id,
         ]
+        # 条件分岐: `bool(allow_prune)` を満たす経路を評価する。
         if bool(allow_prune):
             cmd.append("--allow-pair-pruning")
 
@@ -305,6 +361,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         n_usable = 0
         n_pruned = 0
         scalar_proxy = float("nan")
+        # 条件分岐: `proc.returncode == 0 and trial_json.exists()` を満たす経路を評価する。
         if proc.returncode == 0 and trial_json.exists():
             try:
                 payload = json.loads(trial_json.read_text(encoding="utf-8"))
@@ -337,11 +394,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
+        # 条件分岐: `not bool(args.keep_trial_artifacts)` を満たす経路を評価する。
         if not bool(args.keep_trial_artifacts):
             for path in [trial_json, trial_csv, trial_png]:
+                # 条件分岐: `path.exists()` を満たす経路を評価する。
                 if path.exists():
                     path.unlink()
+
             for dst in [public_outdir / f"{trial_id}.json", public_outdir / f"{trial_id}.csv", public_outdir / f"{trial_id}.png"]:
+                # 条件分岐: `dst.exists()` を満たす経路を評価する。
                 if dst.exists():
                     dst.unlink()
 
@@ -421,6 +482,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -449,6 +511,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             prune=int(bool(best.get("allow_pair_pruning", False))),
         )
     )
+    # 条件分岐: `best_scalar` を満たす経路を評価する。
     if best_scalar:
         print(
             "[ok] best(scalar-any) status={status} usable={usable} scalar={scalar} cfg=(corr={corr}, floor={floor}, min_ring={mr}, relax={relax}, prune={prune})".format(
@@ -462,6 +525,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 prune=int(bool(best_scalar.get("allow_pair_pruning", False))),
             )
         )
+
+    # 条件分岐: `best_scalar_u2` を満たす経路を評価する。
+
     if best_scalar_u2:
         print(
             "[ok] best(scalar usable>=2) status={status} usable={usable} scalar={scalar} cfg=(corr={corr}, floor={floor}, min_ring={mr}, relax={relax}, prune={prune})".format(
@@ -475,11 +541,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 prune=int(bool(best_scalar_u2.get("allow_pair_pruning", False))),
             )
         )
+
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] png : {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

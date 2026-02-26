@@ -65,6 +65,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -89,6 +90,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -112,17 +114,25 @@ def _safe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(v) or math.isinf(v)` を満たす経路を評価する。
+
     if math.isnan(v) or math.isinf(v):
         return None
+
     return v
 
 
 def _optional_bool(j: Dict[str, Any], key: str) -> Optional[bool]:
+    # 条件分岐: `key not in j` を満たす経路を評価する。
     if key not in j:
         return None
+
     v = j.get(key)
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return None
+
     return bool(v)
 
 
@@ -133,8 +143,10 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
 
     This captures category-level model spread as a systematic-width proxy (σ_cat).
     """
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         j = _read_json(path)
     except Exception:
@@ -143,31 +155,41 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         r_id = str(r.get("id") or "")
+        # 条件分岐: `not r_id` を満たす経路を評価する。
         if not r_id:
             continue
+
         sigma_total = _safe_float(r.get("sigma_total"))
+        # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
         if sigma_total is None or not (sigma_total > 0.0):
             continue
+
         out[r_id] = {
             "sigma_total": float(sigma_total),
             "sigma_sys_category": _safe_float(r.get("sigma_sys_category")),
             "category": str(r.get("category") or "") or None,
         }
+
     return out
 
 
 def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> DDRConstraint:
+    # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
         return replace(ddr, sigma_policy="raw")
 
     row = envelope.get(ddr.id)
+    # 条件分岐: `not row` を満たす経路を評価する。
     if not row:
         return replace(ddr, sigma_policy="raw")
 
     sigma_total = _safe_float(row.get("sigma_total"))
+    # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
     if sigma_total is None or not (sigma_total > 0.0):
         return replace(ddr, sigma_policy="raw")
 
@@ -181,13 +203,20 @@ def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[s
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -362,20 +391,30 @@ class BAOAnisotropyConstraint:
 
 
 def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise ValueError("empty constraint list")
+
     best = None
     best_sig = float("inf")
     for r in rows:
         sig = _safe_float(getattr(r, sigma_field, None))
+        # 条件分岐: `sig is None or sig <= 0` を満たす経路を評価する。
         if sig is None or sig <= 0:
             continue
+
+        # 条件分岐: `sig < best_sig` を満たす経路を評価する。
+
         if sig < best_sig:
             best_sig = sig
             best = r
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         # Fall back to first element (even if sigma is missing) to avoid hard failure.
         return rows[0]
+
     return best
 
 
@@ -445,16 +484,30 @@ def _required_s_r(
     # Linear in variables => gaussian propagation.
     s_r = float(eps0 - alpha - (p_e + p_t - s_L) / 2.0 + 2.0)
     var = 0.0
+    # 条件分岐: `eps0_sigma > 0` を満たす経路を評価する。
     if eps0_sigma > 0:
         var += float(eps0_sigma) ** 2
+
+    # 条件分岐: `alpha_sigma > 0` を満たす経路を評価する。
+
     if alpha_sigma > 0:
         var += float(alpha_sigma) ** 2
+
+    # 条件分岐: `s_L_sigma > 0` を満たす経路を評価する。
+
     if s_L_sigma > 0:
         var += (0.5 * float(s_L_sigma)) ** 2
+
+    # 条件分岐: `p_e_sigma > 0` を満たす経路を評価する。
+
     if p_e_sigma > 0:
         var += (0.5 * float(p_e_sigma)) ** 2
+
+    # 条件分岐: `p_t_sigma > 0` を満たす経路を評価する。
+
     if p_t_sigma > 0:
         var += (0.5 * float(p_t_sigma)) ** 2
+
     sig = float(math.sqrt(var)) if var > 0 else float("nan")
     return s_r, sig
 
@@ -489,9 +542,12 @@ def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
     Here we absorb the unknown overall factor H0*(r_d0/r_d,fid) into a single parameter B [km/s/Mpc].
     """
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         raise ValueError("z must satisfy 1+z>0")
+
     B = float(B)
+    # 条件分岐: `not (B > 0.0)` を満たす経路を評価する。
     if not (B > 0.0):
         raise ValueError("B must be > 0")
 
@@ -513,6 +569,7 @@ def _chi2_bao_dm_h(rows: Sequence[BAOAnisotropyConstraint], *, s_R: float, B: fl
         a = sig_dm * sig_dm
         d = sig_h * sig_h
         det = a * d - cov * cov
+        # 条件分岐: `not (det > 0.0)` を満たす経路を評価する。
         if not (det > 0.0):
             return float("nan")
 
@@ -520,6 +577,7 @@ def _chi2_bao_dm_h(rows: Sequence[BAOAnisotropyConstraint], *, s_R: float, B: fl
         inv22 = a / det
         inv12 = -cov / det
         chi2 += inv11 * d_dm * d_dm + 2.0 * inv12 * d_dm * d_h + inv22 * d_h * d_h
+
     return float(chi2)
 
 
@@ -533,6 +591,7 @@ def _fit_bao_B_for_sR(
 ) -> Tuple[float, float]:
     Bs = np.linspace(float(B_min), float(B_max), int(n_grid), dtype=float)
     chi = np.array([_chi2_bao_dm_h(rows, s_R=float(s_R), B=float(b)) for b in Bs], dtype=float)
+    # 条件分岐: `not np.any(np.isfinite(chi))` を満たす経路を評価する。
     if not np.any(np.isfinite(chi)):
         return float("nan"), float("nan")
 
@@ -560,6 +619,7 @@ def _fit_bao_ruler_evolution(
     for s in s_grid0:
         b, c2 = _fit_bao_B_for_sR(rows, s_R=float(s))
         prof0.append({"s_R": float(s), "B_best": float(b), "chi2": float(c2)})
+
     best0 = min(prof0, key=lambda x: (x["chi2"] if math.isfinite(x["chi2"]) else float("inf")))
 
     # 2) Refine around the best coarse point.
@@ -580,6 +640,7 @@ def _fit_bao_ruler_evolution(
     target = chi2_min + 1.0
     s_prof = np.array([float(r["s_R"]) for r in prof], dtype=float)
     chi_prof = np.array([float(r["chi2"]) for r in prof], dtype=float)
+    # 条件分岐: `not np.any(np.isfinite(chi_prof))` を満たす経路を評価する。
     if not np.any(np.isfinite(chi_prof)):
         s_sig = float("nan")
         s_sig_asym = {"minus": float("nan"), "plus": float("nan")}
@@ -591,11 +652,13 @@ def _fit_bao_ruler_evolution(
         i_left = i_best
         while i_left > 0 and bool(ok[i_left]):
             i_left -= 1
+
         left = float(s_prof[i_left + 1]) if not bool(ok[i_left]) else float(s_prof[0])
 
         i_right = i_best
         while i_right < len(s_prof) - 1 and bool(ok[i_right]):
             i_right += 1
+
         right = float(s_prof[i_right - 1]) if not bool(ok[i_right]) else float(s_prof[-1])
 
         # If the interval hits the scan boundary, treat as undetermined in this resolution.
@@ -733,6 +796,7 @@ def _compute_rows_out(
         )
 
         z_no_evo = None
+        # 条件分岐: `s_sig > 0 and math.isfinite(s_sig)` を満たす経路を評価する。
         if s_sig > 0 and math.isfinite(s_sig):
             z_no_evo = (s_r - 0.0) / s_sig
 
@@ -790,6 +854,7 @@ def _compute_rows_out(
                 },
             }
         )
+
     return rows_out
 
 
@@ -823,10 +888,12 @@ def _write_variant_outputs(
     suffix = str(variant_suffix)
     out_png = out_dir / f"cosmology_reconnection_required_ruler_evolution{suffix}.png"
     ddr_sigma_note = ""
+    # 条件分岐: `str(ddr_sigma_policy_meta.get("policy") or "") == "category_sys"` を満たす経路を評価する。
     if str(ddr_sigma_policy_meta.get("policy") or "") == "category_sys":
         ddr_sigma_note = "DDR σ: σ_total=√(σ_obs^2+σ_cat^2) を使用"
     else:
         ddr_sigma_note = "DDR σ: 観測σ（raw）を使用"
+
     _plot(
         rows_out,
         out_png=out_png,
@@ -865,17 +932,23 @@ def _write_variant_outputs(
     z_sR_req_vs_bao = None
     best_match_any: Optional[Dict[str, Any]] = None
     best_match_no_bao: Optional[Dict[str, Any]] = None
+    # 条件分岐: `math.isfinite(s_R_bao) and math.isfinite(s_R_bao_sig) and s_R_bao_sig > 0` を満たす経路を評価する。
     if math.isfinite(s_R_bao) and math.isfinite(s_R_bao_sig) and s_R_bao_sig > 0:
         for r in rows_out:
             s_r = _safe_float(r.get("s_R_required"))
             s_sig = _safe_float(r.get("s_R_sigma"))
+            # 条件分岐: `s_r is None or s_sig is None or not (math.isfinite(s_r) and math.isfinite(s_s...` を満たす経路を評価する。
             if s_r is None or s_sig is None or not (math.isfinite(s_r) and math.isfinite(s_sig)) or s_sig <= 0:
                 continue
+
             denom = math.sqrt(s_sig**2 + s_R_bao_sig**2)
+            # 条件分岐: `not (denom > 0)` を満たす経路を評価する。
             if not (denom > 0):
                 continue
+
             z = (float(s_r) - s_R_bao) / denom
             r["z_score_sR_required_vs_bao"] = float(z)
+            # 条件分岐: `best_match_any is None or abs(z) < abs(float(best_match_any.get("z_score") or...` を満たす経路を評価する。
             if best_match_any is None or abs(z) < abs(float(best_match_any.get("z_score") or float("inf"))):
                 best_match_any = {
                     "id": str(r.get("id") or ""),
@@ -885,7 +958,11 @@ def _write_variant_outputs(
                     "s_R_sigma": float(s_sig),
                     "z_score": float(z),
                 }
+
+            # 条件分岐: `not bool(r.get("uses_bao", False))` を満たす経路を評価する。
+
             if not bool(r.get("uses_bao", False)):
+                # 条件分岐: `best_match_no_bao is None or abs(z) < abs(float(best_match_no_bao.get("z_scor...` を満たす経路を評価する。
                 if best_match_no_bao is None or abs(z) < abs(float(best_match_no_bao.get("z_score") or float("inf"))):
                     best_match_no_bao = {
                         "id": str(r.get("id") or ""),
@@ -896,8 +973,11 @@ def _write_variant_outputs(
                         "z_score": float(z),
                     }
 
+    # 条件分岐: `math.isfinite(s_R_req) and math.isfinite(s_R_req_sig) and math.isfinite(s_R_b...` を満たす経路を評価する。
+
     if math.isfinite(s_R_req) and math.isfinite(s_R_req_sig) and math.isfinite(s_R_bao) and math.isfinite(s_R_bao_sig):
         denom = math.sqrt(s_R_req_sig**2 + s_R_bao_sig**2)
+        # 条件分岐: `denom > 0` を満たす経路を評価する。
         if denom > 0:
             z_sR_req_vs_bao = (s_R_req - s_R_bao) / denom
 
@@ -1065,6 +1145,7 @@ def _write_variant_outputs(
             "z_score_required_vs_bao": z_sR_req_vs_bao,
         },
     }
+
 def _plot(
     rows: Sequence[Dict[str, Any]],
     *,
@@ -1237,13 +1318,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     td_primary: Optional[TimeDilationConstraint] = None
     tz_primary: Optional[CMBTemperatureConstraint] = None
+    # 条件分岐: `bool(args.use_independent_probes)` を満たす経路を評価する。
     if bool(args.use_independent_probes):
         td_raw = _read_json(sn_td_path)
         tz_raw = _read_json(cmb_t_path)
         td_rows = [TimeDilationConstraint.from_json(x) for x in (td_raw.get("constraints") or []) if isinstance(x, dict)]
         tz_rows = [CMBTemperatureConstraint.from_json(x) for x in (tz_raw.get("constraints") or []) if isinstance(x, dict)]
+        # 条件分岐: `not td_rows` を満たす経路を評価する。
         if not td_rows:
             raise ValueError("No SN time dilation constraints in input (use-independent-probes)")
+
+        # 条件分岐: `not tz_rows` を満たす経路を評価する。
+
         if not tz_rows:
             raise ValueError("No CMB temperature constraints in input (use-independent-probes)")
 
@@ -1271,12 +1357,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     op_rows = [OpacityConstraint.from_json(x) for x in (opacity_raw.get("constraints") or []) if isinstance(x, dict)]
     candle_rows = [CandleEvoConstraint.from_json(x) for x in (candle_raw.get("constraints") or []) if isinstance(x, dict)]
     bao_rows = [BAOAnisotropyConstraint.from_json(x) for x in (bao_raw.get("constraints") or []) if isinstance(x, dict)]
+    # 条件分岐: `not ddr_rows` を満たす経路を評価する。
     if not ddr_rows:
         raise ValueError("No DDR constraints in input")
+
+    # 条件分岐: `not op_rows` を満たす経路を評価する。
+
     if not op_rows:
         raise ValueError("No opacity constraints in input")
+
+    # 条件分岐: `not candle_rows` を満たす経路を評価する。
+
     if not candle_rows:
         raise ValueError("No SN evolution constraints in input")
+
+    # 条件分岐: `not bao_rows` を満たす経路を評価する。
+
     if not bao_rows:
         raise ValueError("No BAO constraints in input")
 
@@ -1415,6 +1511,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

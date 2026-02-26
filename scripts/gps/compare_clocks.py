@@ -15,6 +15,7 @@ OMEGA_E = 7.292115e-5  # rad/s (Earth rotation, approximate)
 
 # Repo paths
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -89,20 +90,26 @@ def inertial_speed_from_sp3_ecef(
 ) -> list[float]:
     # SP3 positions are ECEF-like. Differentiate in the rotating frame then add ω×r to approximate inertial velocity.
     n = len(times)
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         return [0.0 for _ in range(n)]
 
     v_rot = []
     for i in range(n):
+        # 条件分岐: `i == 0` を満たす経路を評価する。
         if i == 0:
             dt = (times[i + 1] - times[i]).total_seconds()
             dr = _sub(positions_xyz_m[i + 1], positions_xyz_m[i])
+        # 条件分岐: 前段条件が不成立で、`i == n - 1` を追加評価する。
         elif i == n - 1:
             dt = (times[i] - times[i - 1]).total_seconds()
             dr = _sub(positions_xyz_m[i], positions_xyz_m[i - 1])
         else:
             dt = (times[i + 1] - times[i - 1]).total_seconds()
             dr = _sub(positions_xyz_m[i + 1], positions_xyz_m[i - 1])
+
+        # 条件分岐: `dt <= 0` を満たす経路を評価する。
+
         if dt <= 0:
             v_rot.append((0.0, 0.0, 0.0))
         else:
@@ -114,6 +121,7 @@ def inertial_speed_from_sp3_ecef(
         wxr = (-omega_e_rad_s * y, omega_e_rad_s * x, 0.0)
         v_inert = _add(v_rot[i], wxr)
         speeds.append(_norm(v_inert))
+
     return speeds
 
 
@@ -121,22 +129,27 @@ def dt_rel_from_radius_series(tsec: list[float], r_m: list[float]) -> list[float
     # Standard GNSS relativistic correction term (eccentricity effect):
     #   dt_rel(t) = -2 (r·v) / c^2 = -2 r (dr/dt) / c^2
     n = len(r_m)
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         return [0.0 for _ in range(n)]
 
     out: list[float] = []
     for i in range(n):
+        # 条件分岐: `i == 0` を満たす経路を評価する。
         if i == 0:
             dt = tsec[i + 1] - tsec[i]
             dr = r_m[i + 1] - r_m[i]
+        # 条件分岐: 前段条件が不成立で、`i == n - 1` を追加評価する。
         elif i == n - 1:
             dt = tsec[i] - tsec[i - 1]
             dr = r_m[i] - r_m[i - 1]
         else:
             dt = tsec[i + 1] - tsec[i - 1]
             dr = r_m[i + 1] - r_m[i - 1]
+
         drdt = (dr / dt) if dt != 0.0 else 0.0
         out.append((-2.0 * r_m[i] * drdt) / (C * C))
+
     return out
 
 # =============================
@@ -161,6 +174,7 @@ def load_igs_clk(filepath):
             
             if prn not in data: data[prn] = {}
             data[prn][t] = clk_bias
+
     return data
 
 def load_igs_sp3(filepath):
@@ -169,11 +183,13 @@ def load_igs_sp3(filepath):
     with open(filepath, "r") as f:
         current_time = None
         for line in f:
+            # 条件分岐: `line.startswith("* ")` を満たす経路を評価する。
             if line.startswith("* "):
                 parts = line.split()
                 y, m, d, hh, mm = map(int, parts[1:6])
                 ss = float(parts[6])
                 current_time = time_to_utc(y, m, d, hh, mm, ss)
+            # 条件分岐: 前段条件が不成立で、`line.startswith("PG") and current_time` を追加評価する。
             elif line.startswith("PG") and current_time:
                 prn = line[1:4]
                 try:
@@ -184,6 +200,7 @@ def load_igs_sp3(filepath):
                     data[prn][current_time] = (x, y, z)
                 except:
                     continue
+
     return data
 
 def load_brdc(filepath):
@@ -201,20 +218,24 @@ def load_brdc(filepath):
         try:
             # 簡易チェック: 1文字目がGか
             sys_id = line[0]
+            # 条件分岐: `sys_id != 'G'` を満たす経路を評価する。
             if sys_id != 'G':
                 continue
             
             # ★ここが最重要修正★
             # "00-6.123" のように数字とマイナスがくっついている箇所にスペースを入れる
             # ただし "E-05" のような指数表記は壊さない（数字の直後のマイナスのみ対象）
+
             line_fixed = re.sub(r'(\d)-', r'\1 -', line)
             
             parts = line_fixed.replace("D", "E").split()
             
+            # 条件分岐: `len(parts) < 8` を満たす経路を評価する。
             if len(parts) < 8:
                 continue
                 
             # PRN取得
+
             prn = parts[0] # "G01"
             
             # 時刻パース
@@ -247,9 +268,11 @@ def get_brdc_clk(prn, t, nav_db):
     min_dt = 1e9
     for nav in nav_db[prn]:
         dt = abs((t - nav["toc"]).total_seconds())
+        # 条件分岐: `dt < min_dt` を満たす経路を評価する。
         if dt < min_dt:
             min_dt = dt
             best_nav = nav
+
     if best_nav is None: return None
     
     dt_t = (t - best_nav["toc"]).total_seconds()
@@ -259,6 +282,7 @@ def get_brdc_clk(prn, t, nav_db):
 # =============================
 # Main Process
 # =============================
+
 def main():
     ap = argparse.ArgumentParser(description="GPS: IGS clock vs BRDC vs P-model（観測比較）")
     ap.add_argument("--delta", type=float, default=0.0, help="速度飽和 δ0（拡張仮説; default: 0.0=disabled）")
@@ -300,6 +324,7 @@ def main():
     for sat in sats:
         try:
             times = sorted(list(set(clk_all[sat].keys()) & set(sp3_all[sat].keys())))
+            # 条件分岐: `len(times) < 10` を満たす経路を評価する。
             if len(times) < 10:
                 print(f"Skipping {sat}: Not enough data")
                 continue
@@ -344,15 +369,18 @@ def main():
             pmodel_clk = [0.0]
             for i in range(1, len(t_clk)):
                 dt = (t_clk[i] - t_clk[i - 1]).total_seconds()
+                # 条件分岐: `dt <= 0` を満たす経路を評価する。
                 if dt <= 0:
                     pmodel_clk.append(pmodel_clk[-1])
                     continue
+
                 u0 = rate_rel[i - 1] - 1.0
                 u1 = rate_rel[i] - 1.0
                 pmodel_clk.append(pmodel_clk[-1] + 0.5 * (u0 + u1) * dt)
 
             # IGS CLK is aligned using broadcast ephemerides (where the eccentricity-related relativistic correction
             # is treated as a separate term). Therefore compare the "clock term" with dt_rel removed.
+
             dt_rel = dt_rel_from_radius_series(x, r_list)
             pmodel_clk_no_rel = [pc - dtr for pc, dtr in zip(pmodel_clk, dt_rel)]
 
@@ -394,6 +422,8 @@ def main():
             print(f"Error processing {sat}: {e}")
             continue
 
+    # 条件分岐: `results_summary` を満たす経路を評価する。
+
     if results_summary:
         import csv
         with open(OUTPUT_SUMMARY, "wt", encoding="utf-8", newline="") as f:
@@ -409,6 +439,7 @@ def main():
             )
             writer.writeheader()
             writer.writerows(results_summary)
+
         print("Batch Completed.")
 
         try:
@@ -428,6 +459,8 @@ def main():
             )
         except Exception:
             pass
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

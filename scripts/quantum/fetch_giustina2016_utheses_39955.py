@@ -31,9 +31,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -64,9 +67,12 @@ def _fetch_with_retries(url: str, *, timeout_s: int = 60, attempts: int = 4, sle
             return _http_get_bytes(url, timeout_s=timeout_s)
         except (HTTPError, URLError, TimeoutError) as e:
             last_err = e
+            # 条件分岐: `i >= attempts` を満たす経路を評価する。
             if i >= attempts:
                 break
+
             time.sleep(sleep_s * i)
+
     raise RuntimeError(f"fetch failed after {attempts} attempts: {url} ({type(last_err).__name__}: {last_err})")
 
 
@@ -94,8 +100,10 @@ def _extract_phaidra_info(obj: dict[str, Any]) -> dict[str, Any]:
 def _extract_phaidra_jsonld_summary(obj: dict[str, Any]) -> dict[str, Any]:
     md = obj.get("metadata") if isinstance(obj.get("metadata"), dict) else {}
     jsonld = md.get("JSON-LD") if isinstance(md.get("JSON-LD"), dict) else {}
+    # 条件分岐: `not jsonld` を満たす経路を評価する。
     if not jsonld:
         return {}
+
     return {
         "ebucore:filename": jsonld.get("ebucore:filename"),
         "ebucore:hasMimeType": jsonld.get("ebucore:hasMimeType"),
@@ -139,14 +147,18 @@ def main() -> None:
     snapshots: dict[str, Any] = {}
     for spec in specs:
         out_path = src_dir / spec.out_name
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
+            # 条件分岐: `not out_path.exists()` を満たす経路を評価する。
             if not out_path.exists():
                 raise SystemExit(f"[fail] missing cached snapshot (offline): {out_path}")
         else:
+            # 条件分岐: `args.refresh or (not out_path.exists()) or out_path.stat().st_size == 0` を満たす経路を評価する。
             if args.refresh or (not out_path.exists()) or out_path.stat().st_size == 0:
                 b = _fetch_with_retries(spec.url, timeout_s=90, attempts=4)
                 out_path.parent.mkdir(parents=True, exist_ok=True)
                 out_path.write_bytes(b)
+
         obj = _read_json(out_path)
         snapshots[spec.name] = obj
         retrieved.append(
@@ -164,6 +176,7 @@ def main() -> None:
 
     thesis_doc_pid_raw = utheses_doc.get("thesis_doc_pid")
     thesis_doc_pid = thesis_doc_pid_raw.strip() if isinstance(thesis_doc_pid_raw, str) else None
+    # 条件分岐: `thesis_doc_pid` を満たす経路を評価する。
     if thesis_doc_pid:
         pid_tok = _safe_pid_token(thesis_doc_pid)
         thesis_spec = SourceSpec(
@@ -172,14 +185,18 @@ def main() -> None:
             out_name=f"phaidra_{pid_tok}_metadata.json",
         )
         out_path = src_dir / thesis_spec.out_name
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
+            # 条件分岐: `not out_path.exists()` を満たす経路を評価する。
             if not out_path.exists():
                 raise SystemExit(f"[fail] missing cached snapshot (offline): {out_path}")
         else:
+            # 条件分岐: `args.refresh or (not out_path.exists()) or out_path.stat().st_size == 0` を満たす経路を評価する。
             if args.refresh or (not out_path.exists()) or out_path.stat().st_size == 0:
                 b = _fetch_with_retries(thesis_spec.url, timeout_s=90, attempts=4)
                 out_path.parent.mkdir(parents=True, exist_ok=True)
                 out_path.write_bytes(b)
+
         obj = _read_json(out_path)
         snapshots[thesis_spec.name] = obj
         retrieved.append(
@@ -242,6 +259,7 @@ def main() -> None:
         "source_snapshots": retrieved,
     }
 
+    # 条件分岐: `thesis_doc_pid` を満たす経路を評価する。
     if thesis_doc_pid:
         pid_tok = _safe_pid_token(thesis_doc_pid)
         api_metadata = f"https://phaidra.univie.ac.at/api/object/{thesis_doc_pid}/metadata"
@@ -250,6 +268,7 @@ def main() -> None:
 
         meta_summary: dict[str, Any] = {}
         meta_obj = snapshots.get(f"phaidra_object_metadata_{pid_tok}")
+        # 条件分岐: `isinstance(meta_obj, dict)` を満たす経路を評価する。
         if isinstance(meta_obj, dict):
             meta_summary = _extract_phaidra_jsonld_summary(meta_obj)
 
@@ -287,6 +306,8 @@ def main() -> None:
     print(f"  - {out_dir / 'giustina2016_utheses_probe.json'}")
     print(f"  - {src_dir / 'manifest.json'}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

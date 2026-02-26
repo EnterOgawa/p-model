@@ -22,13 +22,16 @@ def _cellref_to_rowcol(cellref: str) -> tuple[int, int]:
     col = ""
     row = ""
     for ch in cellref:
+        # 条件分岐: `ch.isalpha()` を満たす経路を評価する。
         if ch.isalpha():
             col += ch
         else:
             row += ch
+
     c = 0
     for ch in col.upper():
         c = c * 26 + (ord(ch) - 64)
+
     return int(row), c
 
 
@@ -39,9 +42,12 @@ def _load_shared_strings(z: zipfile.ZipFile) -> List[str]:
         # shared strings can contain multiple <t> (with formatting). Concatenate.
         parts = []
         for t in si.findall(".//m:t", _NS_MAIN):
+            # 条件分岐: `t.text` を満たす経路を評価する。
             if t.text:
                 parts.append(t.text)
+
         out.append("".join(parts))
+
     return out
 
 
@@ -50,13 +56,18 @@ def _sheet_cells(z: zipfile.ZipFile, *, sheet_xml: str, shared_strings: List[str
     cells: Dict[tuple[int, int], str] = {}
     for c in root.findall(".//m:c", _NS_MAIN):
         cellref = c.attrib.get("r")
+        # 条件分岐: `not cellref` を満たす経路を評価する。
         if not cellref:
             continue
+
         v = c.find("m:v", _NS_MAIN)
+        # 条件分岐: `v is None or v.text is None` を満たす経路を評価する。
         if v is None or v.text is None:
             continue
+
         raw = v.text
         t = c.attrib.get("t")
+        # 条件分岐: `t == "s"` を満たす経路を評価する。
         if t == "s":
             try:
                 val = shared_strings[int(raw)]
@@ -64,14 +75,18 @@ def _sheet_cells(z: zipfile.ZipFile, *, sheet_xml: str, shared_strings: List[str
                 val = ""
         else:
             val = raw
+
         r, col = _cellref_to_rowcol(cellref)
         cells[(r, col)] = val
+
     return cells
 
 
 def _load_sessions_by_country(xlsx_path: Path) -> List[CountrySessions]:
+    # 条件分岐: `not xlsx_path.exists()` を満たす経路を評価する。
     if not xlsx_path.exists():
         raise FileNotFoundError(xlsx_path)
+
     with zipfile.ZipFile(xlsx_path, "r") as z:
         shared = _load_shared_strings(z)
         # In the published file, Panel(a)SessionsByCountry is sheet2.xml.
@@ -82,17 +97,25 @@ def _load_sessions_by_country(xlsx_path: Path) -> List[CountrySessions]:
     while True:
         country = (cells.get((row, 1)) or "").strip()
         sessions_s = (cells.get((row, 2)) or "").strip()
+        # 条件分岐: `not country and not sessions_s` を満たす経路を評価する。
         if not country and not sessions_s:
             break
+
+        # 条件分岐: `country and sessions_s` を満たす経路を評価する。
+
         if country and sessions_s:
             try:
                 sessions = int(float(sessions_s))
             except Exception:
                 sessions = 0
+
             out.append(CountrySessions(country=country, sessions=sessions))
+
         row += 1
+        # 条件分岐: `row > 100_000` を満たす経路を評価する。
         if row > 100_000:
             break
+
     return out
 
 
@@ -125,6 +148,7 @@ def main() -> None:
     for r in rows_sorted:
         country = r.country.replace('"', '""')
         lines.append(f"\"{country}\",{int(r.sessions)}")
+
     out_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     # Plot (top N)
@@ -163,6 +187,8 @@ def main() -> None:
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

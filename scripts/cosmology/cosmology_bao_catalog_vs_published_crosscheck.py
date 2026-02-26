@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -53,6 +54,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -76,8 +78,10 @@ def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
 
 def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     lo, hi = _ci_asym_err(eps, ci_1sigma)
+    # 条件分岐: `not np.isfinite(lo) or not np.isfinite(hi)` を満たす経路を評価する。
     if not np.isfinite(lo) or not np.isfinite(hi):
         return float("nan")
+
     return float(0.5 * (lo + hi))
 
 
@@ -110,17 +114,26 @@ def _extract_published_eps(metrics: Dict[str, Any]) -> Dict[int, EpsPoint]:
             )
         except Exception:
             continue
+
     return out
 
 
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
+    # 条件分岐: `z == "b1"` を満たす経路を評価する。
     if z == "b1":
         return 1
+
+    # 条件分岐: `z == "b2"` を満たす経路を評価する。
+
     if z == "b2":
         return 2
+
+    # 条件分岐: `z == "b3"` を満たす経路を評価する。
+
     if z == "b3":
         return 3
+
     return None
 
 
@@ -130,8 +143,10 @@ def _extract_catalog_eps(metrics: Dict[str, Any]) -> Dict[Tuple[str, int], EpsPo
         try:
             dist = str(r.get("dist"))
             z_int = _zbin_label_to_int(str(r.get("z_bin")))
+            # 条件分岐: `z_int is None` を満たす経路を評価する。
             if z_int is None:
                 continue
+
             z_eff = float(r.get("z_eff"))
             eps = float(r["fit"]["free"]["eps"])
             ci = r["fit"]["free"].get("eps_ci_1sigma")
@@ -141,6 +156,7 @@ def _extract_catalog_eps(metrics: Dict[str, Any]) -> Dict[Tuple[str, int], EpsPo
                 status = str(r.get("screening", {}).get("status"))
             except Exception:
                 status = None
+
             out[(dist, z_int)] = EpsPoint(
                 label=f"{r.get('sample','')}/{r.get('caps','')}/{dist}/{r.get('z_bin','')}",
                 z_eff=z_eff,
@@ -155,6 +171,7 @@ def _extract_catalog_eps(metrics: Dict[str, Any]) -> Dict[Tuple[str, int], EpsPo
             )
         except Exception:
             continue
+
     return out
 
 
@@ -227,16 +244,19 @@ def main(argv: list[str] | None = None) -> int:
     out_json = (_ROOT / str(args.out_json)).resolve()
 
     missing = [p for p in [published_post_path, published_pre_path, catalog_path] if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         print("[skip] missing inputs:")
         for p in missing:
             print(f"  - {p}")
+
         return 0
 
     pub_post = _load_json(published_post_path)
     pub_pre = _load_json(published_pre_path)
     cat = _load_json(catalog_path)
     cat_recon: Dict[str, Any] | None = None
+    # 条件分岐: `catalog_recon_path.exists()` を満たす経路を評価する。
     if catalog_recon_path.exists():
         try:
             cat_recon = _load_json(catalog_recon_path)
@@ -281,6 +301,7 @@ def main(argv: list[str] | None = None) -> int:
     _errorbar(ax0, x=z_ref, y=y_post, err_lo=lo_post, err_hi=hi_post, label="Ross 2016（post-recon）", color="#1f77b4", marker="o", x_offset=-0.004)
     _errorbar(ax0, x=z_ref, y=y_pre, err_lo=lo_pre, err_hi=hi_pre, label="Satpathy 2016（pre-recon）", color="#9467bd", marker="s", x_offset=0.000)
     _errorbar(ax0, x=z_ref, y=y_cat_lcdm, err_lo=lo_cat_lcdm, err_hi=hi_cat_lcdm, label="catalog再計算（lcdm）", color="#ff7f0e", marker="^", x_offset=+0.004)
+    # 条件分岐: `np.any(np.isfinite(y_cat_lcdm_rec))` を満たす経路を評価する。
     if np.any(np.isfinite(y_cat_lcdm_rec)):
         _errorbar(
             ax0,
@@ -347,10 +368,15 @@ def main(argv: list[str] | None = None) -> int:
     # Simple delta diagnostics (symmetrized 1σ).
     deltas: Dict[str, Any] = {}
     for z in z_bins:
+        # 条件分岐: `z not in pub_post_eps` を満たす経路を評価する。
         if z not in pub_post_eps:
             continue
+
+        # 条件分岐: `("lcdm", z) not in cat_eps` を満たす経路を評価する。
+
         if ("lcdm", z) not in cat_eps:
             continue
+
         p = pub_post_eps[z]
         c = cat_eps[("lcdm", z)]
         sigma = np.sqrt(_sym_sigma_from_ci(p.eps, p.meta.get("eps_ci_1sigma")) ** 2 + _sym_sigma_from_ci(c.eps, c.meta.get("eps_ci_1sigma")) ** 2)
@@ -359,14 +385,20 @@ def main(argv: list[str] | None = None) -> int:
             "sigma_combined_sym_1sigma": float(sigma) if np.isfinite(sigma) else None,
             "abs_sigma_sym": float(abs(c.eps - p.eps) / sigma) if np.isfinite(sigma) and sigma > 0 else None,
         }
+
     payload["diagnostics"]["delta_eps_lcdm_minus_published_post"] = deltas
 
     deltas_recon: Dict[str, Any] = {}
     for z in z_bins:
+        # 条件分岐: `z not in pub_post_eps` を満たす経路を評価する。
         if z not in pub_post_eps:
             continue
+
+        # 条件分岐: `("lcdm", z) not in cat_recon_eps` を満たす経路を評価する。
+
         if ("lcdm", z) not in cat_recon_eps:
             continue
+
         p = pub_post_eps[z]
         c = cat_recon_eps[("lcdm", z)]
         sigma = np.sqrt(_sym_sigma_from_ci(p.eps, p.meta.get("eps_ci_1sigma")) ** 2 + _sym_sigma_from_ci(c.eps, c.meta.get("eps_ci_1sigma")) ** 2)
@@ -375,6 +407,7 @@ def main(argv: list[str] | None = None) -> int:
             "sigma_combined_sym_1sigma": float(sigma) if np.isfinite(sigma) else None,
             "abs_sigma_sym": float(abs(c.eps - p.eps) / sigma) if np.isfinite(sigma) and sigma > 0 else None,
         }
+
     payload["diagnostics"]["delta_eps_lcdm_recon_minus_published_post"] = deltas_recon
 
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -400,6 +433,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

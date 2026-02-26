@@ -177,6 +177,7 @@ def _hv_sweep_rows(*, cfg: Config, m_n: float) -> list[dict[str, float]]:
                     "phi_cycles": float(phi_rad / (2.0 * math.pi)),
                 }
             )
+
     return rows
 
 
@@ -305,14 +306,17 @@ def main() -> None:
     ax2.set_ylabel("count")
     ax2.tick_params(axis="x", rotation=16)
 
+    # 条件分岐: `observed_rows` を満たす経路を評価する。
     if observed_rows:
         pred = np.asarray([float(r["phase_pred_cycles"]) for r in observed_rows], dtype=float)
         obs = np.asarray([float(r["phase_obs_cycles"]) for r in observed_rows], dtype=float)
         lo = min(float(np.min(pred)), float(np.min(obs)))
         hi = max(float(np.max(pred)), float(np.max(obs)))
+        # 条件分岐: `math.isclose(lo, hi)` を満たす経路を評価する。
         if math.isclose(lo, hi):
             lo -= 0.5
             hi += 0.5
+
         ax3.scatter(pred, obs, color="#d62728", s=42)
         ax3.plot([lo, hi], [lo, hi], ls="--", color="0.3", lw=1.0)
         ax3.set_xlim(lo, hi)
@@ -349,6 +353,7 @@ def main() -> None:
     fig2.savefig(out_complete_png, bbox_inches="tight")
     plt.close(fig2)
 
+    # 条件分岐: `observed_rows` を満たす経路を評価する。
     if observed_rows:
         residual_abs_cycles = [abs(float(r["phase_residual_cycles"])) for r in observed_rows]
         residual_abs_frac = [abs(float(r["phase_residual_fraction"])) for r in observed_rows]
@@ -470,6 +475,8 @@ def main() -> None:
     print(f"[ok] png : {out_complete_png}")
     print(f"[ok] json: {out_complete_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -59,17 +59,22 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _try_load_h_1s2s_fractional_sigma(root: Path) -> Optional[float]:
     p = root / "output" / "public" / "quantum" / "qed_vacuum_precision_metrics.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return None
+
     try:
         data = _read_json(p)
     except Exception:
         return None
+
     frac = ((data.get("hydrogen_1s2s") or {}) if isinstance(data.get("hydrogen_1s2s"), dict) else {}).get(
         "fractional_sigma"
     )
+    # 条件分岐: `isinstance(frac, (int, float)) and math.isfinite(float(frac)) and float(frac)...` を満たす経路を評価する。
     if isinstance(frac, (int, float)) and math.isfinite(float(frac)) and float(frac) > 0:
         return float(frac)
+
     return None
 
 
@@ -104,6 +109,7 @@ def main() -> None:
 
     alpha_src_manifest = root / "data" / "quantum" / "sources" / "alpha_variation_manifest.json"
     alpha_sources: Dict[str, Any] = {"manifest": _relpath(root, alpha_src_manifest)}
+    # 条件分岐: `alpha_src_manifest.exists()` を満たす経路を評価する。
     if alpha_src_manifest.exists():
         try:
             alpha_sources["manifest_data"] = _read_json(alpha_src_manifest)
@@ -112,10 +118,12 @@ def main() -> None:
 
     orbit = _sun_potential_delta_u_earth_orbit(cfg)
     delta_u_orbit = float(orbit["delta_u_lnP_over_1"])
+    # 条件分岐: `not (delta_u_orbit > 0)` を満たす経路を評価する。
     if not (delta_u_orbit > 0):
         raise RuntimeError("unexpected delta_u_orbit <= 0")
 
     # --- Constraint 1: Rosenband (clock drift) interpreted against annual solar potential modulation ---
+
     a_dot = float(cfg.rosenband_alpha_dot_over_alpha_per_year)
     sigma_a_dot = float(cfg.rosenband_sigma_alpha_dot_over_alpha_per_year)
 
@@ -264,6 +272,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

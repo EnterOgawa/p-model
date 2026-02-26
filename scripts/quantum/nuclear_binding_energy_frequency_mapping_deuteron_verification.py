@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -35,16 +38,19 @@ def _solve_kappa_from_ere(*, a_fm: float, r_fm: float) -> dict[str, float]:
 
     There are two roots; the physical deuteron corresponds to the smaller κ.
     """
+    # 条件分岐: `not (a_fm > 0 and r_fm > 0)` を満たす経路を評価する。
     if not (a_fm > 0 and r_fm > 0):
         raise ValueError("a_fm and r_fm must be positive")
 
     disc = 1.0 - 2.0 * r_fm / a_fm
+    # 条件分岐: `disc <= 0.0` を満たす経路を評価する。
     if disc <= 0.0:
         raise ValueError(f"ERE discriminant <= 0: 1-2r/a = {disc}")
 
     s = math.sqrt(disc)
     kappa_small = (1.0 - s) / r_fm
     kappa_large = (1.0 + s) / r_fm
+    # 条件分岐: `not (kappa_small > 0 and kappa_large > 0)` を満たす経路を評価する。
     if not (kappa_small > 0 and kappa_large > 0):
         raise ValueError("invalid roots (non-positive)")
 
@@ -63,6 +69,7 @@ def main() -> None:
 
     # Inputs fixed by earlier steps.
     deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    # 条件分岐: `not deut_path.exists()` を満たす経路を評価する。
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -70,9 +77,11 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_deuteron.py\n"
             f"Expected: {deut_path}"
         )
+
     deut = _load_json(deut_path)
 
     np_path = root / "output" / "public" / "quantum" / "nuclear_np_scattering_baseline_metrics.json"
+    # 条件分岐: `not np_path.exists()` を満たす経路を評価する。
     if not np_path.exists():
         raise SystemExit(
             "[fail] missing np scattering baseline metrics.\n"
@@ -80,6 +89,7 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_np_scattering_baseline.py\n"
             f"Expected: {np_path}"
         )
+
     np_scatt = _load_json(np_path)
 
     # Constants (treat as exact here; consistent with other nuclear scripts).
@@ -95,32 +105,41 @@ def main() -> None:
     )
     b_obs_mev = float(b_mev_obj.get("value", float("nan")))
     sigma_b_obs_mev = float(b_mev_obj.get("sigma", float("nan")))
+    # 条件分岐: `not (math.isfinite(b_obs_mev) and b_obs_mev > 0 and math.isfinite(sigma_b_obs...` を満たす経路を評価する。
     if not (math.isfinite(b_obs_mev) and b_obs_mev > 0 and math.isfinite(sigma_b_obs_mev) and sigma_b_obs_mev >= 0):
         raise SystemExit("[fail] invalid/missing B_obs in nuclear_binding_deuteron_metrics.json derived.binding_energy.B_MeV")
 
     # Reduced mass (from CODATA mp,mn already fixed in deuteron baseline metrics).
+
     mu_kg = float(deut.get("derived", {}).get("reduced_mass_kg", float("nan")))
+    # 条件分岐: `not (math.isfinite(mu_kg) and mu_kg > 0)` を満たす経路を評価する。
     if not (math.isfinite(mu_kg) and mu_kg > 0):
         raise SystemExit("[fail] invalid/missing reduced_mass_kg in nuclear_binding_deuteron_metrics.json derived.reduced_mass_kg")
+
     mu_c2_mev = (mu_kg * (c**2)) / (e_charge * 1e6)
 
     # Extract Eq.(18) and Eq.(19) (systematics proxy: analysis-dependent phase-shift sets).
     sets = np_scatt.get("np_low_energy_parameter_sets", [])
+    # 条件分岐: `not isinstance(sets, list) or not sets` を満たす経路を評価する。
     if not isinstance(sets, list) or not sets:
         raise SystemExit("[fail] invalid np scattering metrics: np_low_energy_parameter_sets missing/empty")
 
     by_eq: dict[int, dict[str, object]] = {}
     for s in sets:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         try:
             eq = int(s.get("eq_label"))
         except Exception:
             continue
+
         by_eq[eq] = s
 
     need_eqs = [18, 19]
     missing = [eq for eq in need_eqs if eq not in by_eq]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"[fail] missing required eq sets in np metrics: {missing}")
 
@@ -133,6 +152,7 @@ def main() -> None:
         v2t = s.get("v2t_fm3", None)
         v2t_val = float(v2t) if isinstance(v2t, (int, float)) else float("nan")
 
+        # 条件分岐: `not (math.isfinite(a_t) and a_t > 0 and math.isfinite(r_t) and r_t > 0)` を満たす経路を評価する。
         if not (math.isfinite(a_t) and a_t > 0 and math.isfinite(r_t) and r_t > 0):
             raise SystemExit(f"[fail] invalid a_t/r_t for eq{eq}: a_t={a_t}, r_t={r_t}")
 
@@ -208,6 +228,7 @@ def main() -> None:
             )
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     x = [0, 1, 2]
@@ -326,6 +347,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

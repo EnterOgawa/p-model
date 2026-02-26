@@ -47,12 +47,17 @@ def _read_text(path: Path) -> str:
 
 def _resolve_output_path(root: Path, rel: str) -> Path:
     rel_norm = rel.replace("\\", "/")
+    # 条件分岐: `not rel_norm.startswith("output/")` を満たす経路を評価する。
     if not rel_norm.startswith("output/"):
         return root / Path(rel)
 
     parts = Path(rel_norm).parts
+    # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
     if len(parts) < 2:
         return root / Path(rel_norm)
+
+    # 条件分岐: `parts[1] in ("private", "public")` を満たす経路を評価する。
+
     if parts[1] in ("private", "public"):
         return root / Path(rel_norm)
 
@@ -61,16 +66,27 @@ def _resolve_output_path(root: Path, rel: str) -> Path:
     cand_private = (root / "output" / "private" / topic / tail).resolve()
     cand_public = (root / "output" / "public" / topic / tail).resolve()
 
+    # 条件分岐: `topic == "quantum"` を満たす経路を評価する。
     if topic == "quantum":
+        # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
         if cand_public.exists():
             return cand_public
+
+        # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
         if cand_private.exists():
             return cand_private
 
+    # 条件分岐: `cand_private.exists()` を満たす経路を評価する。
+
     if cand_private.exists():
         return cand_private
+
+    # 条件分岐: `cand_public.exists()` を満たす経路を評価する。
+
     if cand_public.exists():
         return cand_public
+
     return root / Path(rel_norm)
 
 def _extract_result_figure_paths(manuscript_text: str) -> List[str]:
@@ -94,20 +110,30 @@ def _extract_result_figure_paths(manuscript_text: str) -> List[str]:
 
 
 def _as_float01(img: np.ndarray) -> np.ndarray:
+    # 条件分岐: `img.dtype.kind == "f"` を満たす経路を評価する。
     if img.dtype.kind == "f":
         x = img.astype(np.float32, copy=False)
+        # 条件分岐: `x.max() > 1.5` を満たす経路を評価する。
         if x.max() > 1.5:  # defensive: some readers may return 0..255 floats
             x = x / 255.0
+
         return np.clip(x, 0.0, 1.0)
+
+    # 条件分岐: `img.dtype.kind in ("u", "i")` を満たす経路を評価する。
+
     if img.dtype.kind in ("u", "i"):
         x = img.astype(np.float32, copy=False)
+        # 条件分岐: `x.max() > 1.5` を満たす経路を評価する。
         if x.max() > 1.5:
             x = x / 255.0
+
         return np.clip(x, 0.0, 1.0)
+
     return img.astype(np.float32, copy=False)
 
 
 def _median_bg_rgb(img01: np.ndarray) -> np.ndarray:
+    # 条件分岐: `img01.ndim == 2` を満たす経路を評価する。
     if img01.ndim == 2:
         v = float(np.median([img01[0, 0], img01[0, -1], img01[-1, 0], img01[-1, -1]]))
         return np.array([v, v, v], dtype=np.float32)
@@ -118,6 +144,7 @@ def _median_bg_rgb(img01: np.ndarray) -> np.ndarray:
 
 
 def _nonbg_mask(img01: np.ndarray, *, tol: float) -> np.ndarray:
+    # 条件分岐: `img01.ndim == 2` を満たす経路を評価する。
     if img01.ndim == 2:
         bg = float(np.median([img01[0, 0], img01[0, -1], img01[-1, 0], img01[-1, -1]]))
         return np.abs(img01 - bg) > tol
@@ -136,15 +163,19 @@ def _edge_nonbg_fraction(mask: np.ndarray, *, border_px: int) -> float:
     border[:, :b] = True
     border[:, -b:] = True
     denom = int(border.sum())
+    # 条件分岐: `denom <= 0` を満たす経路を評価する。
     if denom <= 0:
         return 0.0
+
     return float((mask & border).sum()) / float(denom)
 
 
 def _bbox_margins(mask: np.ndarray) -> Optional[Dict[str, int]]:
     ys, xs = np.where(mask)
+    # 条件分岐: `xs.size == 0` を満たす経路を評価する。
     if xs.size == 0:
         return None
+
     x0, x1 = int(xs.min()), int(xs.max())
     y0, y1 = int(ys.min()), int(ys.max())
     h, w = mask.shape
@@ -198,6 +229,7 @@ def audit_figures(
     missing: List[str] = []
     for rel in paths:
         full = _resolve_output_path(root, rel)
+        # 条件分岐: `not full.exists()` を満たす経路を評価する。
         if not full.exists():
             missing.append(rel)
             audits.append(FigureAudit(path=rel, exists=False, notes="missing"))
@@ -211,13 +243,18 @@ def audit_figures(
         frac = _edge_nonbg_fraction(mask, border_px=border_px)
         margins = _bbox_margins(mask)
         touch = None
+        # 条件分岐: `margins is not None` を満たす経路を評価する。
         if margins is not None:
             touch = any(int(v) <= int(edge_touch_margin_px) for v in margins.values())
 
         min_ok = (w is not None and h is not None and (w >= min_width_px and h >= min_height_px))
         note_parts: List[str] = []
+        # 条件分岐: `not min_ok` を満たす経路を評価する。
         if not min_ok:
             note_parts.append(f"small(<{min_width_px}x{min_height_px})")
+
+        # 条件分岐: `touch` を満たす経路を評価する。
+
         if touch:
             note_parts.append("edge_touch")
 
@@ -338,10 +375,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {json_path}")
     print(f"[ok] csv : {csv_path}")
 
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         print(f"[warn] missing figures: {len(missing)}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

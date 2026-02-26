@@ -42,6 +42,7 @@ def _read_text(path: Path) -> str:
 def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     with urllib.request.urlopen(url, timeout=timeout_s) as r:
         b = r.read()
+
     return b.decode("utf-8", "replace")
 
 
@@ -62,20 +63,29 @@ def _detect_station_from_primary(root: Path) -> Optional[str]:
         data_dir / "demo_llr_like.crd",
     ]
     for p in candidates:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         try:
             txt = _read_text(p)
         except Exception:
             continue
+
         for line in txt.splitlines():
             line = line.strip()
+            # 条件分岐: `not line` を満たす経路を評価する。
             if not line:
                 continue
+
+            # 条件分岐: `line.lower().startswith("h2")` を満たす経路を評価する。
+
             if line.lower().startswith("h2"):
                 toks = line.split()
+                # 条件分岐: `len(toks) >= 2` を満たす経路を評価する。
                 if len(toks) >= 2:
                     return toks[1].strip()
+
     return None
 
 
@@ -95,9 +105,13 @@ def _pick_latest_log(station: str) -> PickedLog:
     hits: list[tuple[str, str]] = []
     for h in hrefs:
         m = pat.match(h)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         hits.append((m.group(1), h))
+
+    # 条件分岐: `not hits` を満たす経路を評価する。
 
     if not hits:
         raise FileNotFoundError(f"No site log found for station={station} at {LIST_URL}")
@@ -108,13 +122,16 @@ def _pick_latest_log(station: str) -> PickedLog:
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     print(f"[dl] {url}")
     with urllib.request.urlopen(url, timeout=120) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -129,14 +146,17 @@ def _parse_coords(txt: str) -> dict:
     lat_m = re.search(r"Latitude\s*\[deg\]\s*:\s*([0-9.]+)\s*([NS])", txt, re.IGNORECASE)
     lon_m = re.search(r"Longitude\s*\[deg\]\s*:\s*([0-9.]+)\s*([EW])", txt, re.IGNORECASE)
     ele_m = re.search(r"Elevation\s*\[m\]\s*:\s*([0-9.]+)", txt, re.IGNORECASE)
+    # 条件分岐: `not (lat_m and lon_m and ele_m)` を満たす経路を評価する。
     if not (lat_m and lon_m and ele_m):
         raise ValueError("Failed to parse Latitude/Longitude/Elevation from site log.")
 
     lat = float(lat_m.group(1))
+    # 条件分岐: `lat_m.group(2).upper() == "S"` を満たす経路を評価する。
     if lat_m.group(2).upper() == "S":
         lat = -lat
 
     lon = float(lon_m.group(1))
+    # 条件分岐: `lon_m.group(2).upper() == "W"` を満たす経路を評価する。
     if lon_m.group(2).upper() == "W":
         lon = -lon
 
@@ -176,21 +196,29 @@ def main() -> int:
     args = ap.parse_args()
 
     station = (args.station or "").strip().upper()
+    # 条件分岐: `not station` を満たす経路を評価する。
     if not station:
         station = _detect_station_from_primary(root) or ""
         station = station.strip().upper()
+
+    # 条件分岐: `not station` を満たす経路を評価する。
 
     if not station:
         print("[err] station not specified and could not be detected from data/llr/llr_primary.*")
         return 2
 
     json_path = out_dir / f"{station.lower()}.json"
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
+        # 条件分岐: `json_path.exists()` を満たす経路を評価する。
         if json_path.exists():
             print(f"[ok] offline: {json_path}")
             return 0
+
         print(f"[err] offline and missing: {json_path}")
         return 2
+
+    # 条件分岐: `json_path.exists() and not args.force` を満たす経路を評価する。
 
     if json_path.exists() and not args.force:
         print(f"[skip] exists: {json_path} (use --force to refresh)")
@@ -213,6 +241,8 @@ def main() -> int:
     print(f"[ok] json: {json_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

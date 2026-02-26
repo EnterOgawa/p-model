@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -49,43 +50,61 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         v = float(value)
+        # 条件分岐: `math.isfinite(v)` を満たす経路を評価する。
         if math.isfinite(v):
             return v
+
     return None
 
 
 def _check_value(payload: Dict[str, Any], check_id: str) -> Any:
     rows = payload.get("checks")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return None
+
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `str(row.get("id") or "") == check_id` を満たす経路を評価する。
+
         if str(row.get("id") or "") == check_id:
             return row.get("value")
+
     return None
 
 
 def _count_check_rows(payload: Dict[str, Any]) -> Tuple[int, int]:
     rows = payload.get("checks")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return 0, 0
+
     total = 0
     passed = 0
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         total += 1
+        # 条件分岐: `row.get("pass") is True` を満たす経路を評価する。
         if row.get("pass") is True:
             passed += 1
+
     return total, passed
 
 
@@ -96,25 +115,43 @@ def _margin_ratio_status(
     pass_ratio: float,
     watch_ratio: float,
 ) -> Tuple[str, Optional[float]]:
+    # 条件分岐: `current_margin is None` を満たす経路を評価する。
     if current_margin is None:
         return "reject", None
+
+    # 条件分岐: `not math.isfinite(float(current_margin))` を満たす経路を評価する。
+
     if not math.isfinite(float(current_margin)):
         return "reject", None
+
+    # 条件分岐: `baseline_margin <= 0.0` を満たす経路を評価する。
+
     if baseline_margin <= 0.0:
         return "reject", None
+
     ratio = float(current_margin) / float(baseline_margin)
+    # 条件分岐: `ratio >= pass_ratio` を満たす経路を評価する。
     if ratio >= pass_ratio:
         return "pass", ratio
+
+    # 条件分岐: `ratio >= watch_ratio` を満たす経路を評価する。
+
     if ratio >= watch_ratio:
         return "watch", ratio
+
     return "reject", ratio
 
 
 def _score_from_status(status: str) -> float:
+    # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
         return 1.0
+
+    # 条件分岐: `status == "watch"` を満たす経路を評価する。
+
     if status == "watch":
         return 0.5
+
     return 0.0
 
 
@@ -306,8 +343,10 @@ def build_payload(
     watch_row_ids = [str(r["id"]) for r in rows if r.get("status") == "watch"]
     drift_reject_row_ids = [str(r["id"]) for r in rows if r.get("gate_level") == "watch" and r.get("status") == "reject"]
 
+    # 条件分岐: `hard_fail_row_ids` を満たす経路を評価する。
     if hard_fail_row_ids:
         overall_status = "reject"
+    # 条件分岐: 前段条件が不成立で、`watch_row_ids or drift_reject_row_ids` を追加評価する。
     elif watch_row_ids or drift_reject_row_ids:
         overall_status = "watch"
     else:
@@ -392,14 +431,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in checks:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         ids.append(str(row.get("id") or ""))
         score = row.get("score")
         scores.append(float(score) if isinstance(score, (int, float)) else math.nan)
         status = str(row.get("status") or "")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "watch"` を追加評価する。
         elif status == "watch":
             colors.append("#eab308")
         else:
@@ -413,11 +456,15 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
         "realness": None,
     }
     for row in checks:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         rid = str(row.get("id") or "")
+        # 条件分岐: `rid == "closure_drift::noether_gauge_margin_ratio"` を満たす経路を評価する。
         if rid == "closure_drift::noether_gauge_margin_ratio":
             ratio_map["gauge"] = _as_float(row.get("value"))
+        # 条件分岐: 前段条件が不成立で、`rid == "closure_drift::noether_realness_margin_ratio"` を追加評価する。
         elif rid == "closure_drift::noether_realness_margin_ratio":
             ratio_map["realness"] = _as_float(row.get("value"))
 
@@ -508,6 +555,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # 条件分岐: `args.pass_ratio <= 0.0 or args.watch_ratio <= 0.0 or args.watch_ratio >= args...` を満たす経路を評価する。
     if args.pass_ratio <= 0.0 or args.watch_ratio <= 0.0 or args.watch_ratio >= args.pass_ratio:
         print("[error] threshold rule violated: require pass-ratio > watch-ratio > 0")
         return 2
@@ -523,16 +571,23 @@ def main(argv: Optional[List[str]] = None) -> int:
         ("out-csv", out_csv),
         ("out-png", out_png),
     ]:
+        # 条件分岐: `not path.is_absolute()` を満たす経路を評価する。
         if not path.is_absolute():
             resolved = (ROOT / path).resolve()
+            # 条件分岐: `name == "closure-json"` を満たす経路を評価する。
             if name == "closure-json":
                 closure_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "out-json"` を追加評価する。
             elif name == "out-json":
                 out_json = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "out-csv"` を追加評価する。
             elif name == "out-csv":
                 out_csv = resolved
+            # 条件分岐: 前段条件が不成立で、`name == "out-png"` を追加評価する。
             elif name == "out-png":
                 out_png = resolved
+
+    # 条件分岐: `not closure_json.exists()` を満たす経路を評価する。
 
     if not closure_json.exists():
         print(f"[error] missing input: {_rel(closure_json)}")
@@ -587,6 +642,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

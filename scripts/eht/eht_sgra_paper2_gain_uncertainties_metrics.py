@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -45,13 +46,18 @@ def _find_two_floats(
 ) -> Optional[Tuple[int, float, float, str]]:
     for i, raw in enumerate(lines, start=1):
         m = pattern.search(raw)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         a = float(m.group(1))
         b = float(m.group(2))
+        # 条件分岐: `not (math.isfinite(a) and math.isfinite(b))` を満たす経路を評価する。
         if not (math.isfinite(a) and math.isfinite(b)):
             continue
+
         return (i, a, b, raw.strip())
+
     return None
 
 
@@ -81,6 +87,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -96,6 +103,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "delta_g_alma_smt": bool(found_alma_smt),
         "delta_g_lmt_tot": bool(found_lmt_tot),
     }
+    # 条件分岐: `not (found_alma_smt and found_lmt_tot)` を満たす経路を評価する。
     if not (found_alma_smt and found_lmt_tot):
         payload["ok"] = False
         payload["reason"] = "required_value_not_found"
@@ -153,6 +161,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

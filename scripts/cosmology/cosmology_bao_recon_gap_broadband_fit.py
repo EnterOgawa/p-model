@@ -33,6 +33,7 @@ from typing import Any, Dict
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -47,8 +48,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -62,17 +65,25 @@ def _parse_ross_xi_file(path: Path) -> dict[float, tuple[float, float]]:
     out: dict[float, tuple[float, float]] = {}
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         cols = t.split()
+        # 条件分岐: `len(cols) < 3` を満たす経路を評価する。
         if len(cols) < 3:
             continue
+
         s = float(cols[0])
         xi = float(cols[1])
         err = float(cols[2])
         out[s] = (xi, err)
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError(f"no data rows found: {path}")
+
     return out
 
 
@@ -89,14 +100,22 @@ def _fit_broadband_diff(
     s = np.asarray(s, dtype=np.float64)
     diff = np.asarray(diff, dtype=np.float64)
     sigma = np.asarray(sigma, dtype=np.float64)
+    # 条件分岐: `s.ndim != 1` を満たす経路を評価する。
     if s.ndim != 1:
         raise ValueError("s must be 1D")
+
+    # 条件分岐: `diff.shape != s.shape or sigma.shape != s.shape` を満たす経路を評価する。
+
     if diff.shape != s.shape or sigma.shape != s.shape:
         raise ValueError("shape mismatch in fit inputs")
+
+    # 条件分岐: `np.any(~np.isfinite(s)) or np.any(s <= 0.0)` を満たす経路を評価する。
+
     if np.any(~np.isfinite(s)) or np.any(s <= 0.0):
         raise ValueError("invalid s (requires finite and >0)")
 
     # Guard against zeros; Ross err should be >0 but be defensive.
+
     sigma_eff = np.where(np.isfinite(sigma) & (sigma > 0.0), sigma, np.nanmedian(sigma[sigma > 0.0]))
     w = 1.0 / (sigma_eff * sigma_eff)
     sw = np.sqrt(w)
@@ -154,6 +173,7 @@ def main(argv: list[str] | None = None) -> int:
 
     s_min = float(args.s_min)
     s_max = float(args.s_max)
+    # 条件分岐: `not (0.0 < s_min < s_max)` を満たす経路を評価する。
     if not (0.0 < s_min < s_max):
         raise SystemExit("--s-min must be >0 and < --s-max")
 
@@ -164,6 +184,7 @@ def main(argv: list[str] | None = None) -> int:
     import matplotlib.pyplot as plt  # noqa: E402
 
     fig, axes = plt.subplots(len(zbins), 1, figsize=(11.5, 8.5), sharex=True)
+    # 条件分岐: `len(zbins) == 1` を満たす経路を評価する。
     if len(zbins) == 1:
         axes = [axes]
 
@@ -174,29 +195,36 @@ def main(argv: list[str] | None = None) -> int:
     for ax, zbin in zip(axes, zbins):
         b = zbin_to_b[zbin]
         cat_npz = _ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
+        # 条件分岐: `not cat_npz.exists()` を満たす経路を評価する。
         if not cat_npz.exists():
             raise SystemExit(f"missing catalog recon npz: {cat_npz}")
+
         used_inputs.append(cat_npz)
 
         with np.load(cat_npz, allow_pickle=True) as z:
             s = np.asarray(z["s"], dtype=np.float64)
             xi2_cat = np.asarray(z["xi2"], dtype=np.float64)
+
         m = (s >= s_min) & (s <= s_max)
         s = s[m]
         xi2_cat = xi2_cat[m]
 
         ross_quad = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zbin}_correlation_function_quadrupole_post_recon_bincent{int(args.bincent)}.dat"
+        # 条件分岐: `not ross_quad.exists()` を満たす経路を評価する。
         if not ross_quad.exists():
             raise SystemExit(f"missing Ross file: {ross_quad}")
+
         used_inputs.append(ross_quad)
 
         ross_map = _parse_ross_xi_file(ross_quad)
         xi2_ross = np.empty_like(s)
         sig2 = np.empty_like(s)
         for i, sv in enumerate(s.tolist()):
+            # 条件分岐: `sv not in ross_map` を満たす経路を評価する。
             if sv not in ross_map:
                 # Ross is on 5 Mpc/h bins; this should match exactly. Be strict to avoid silent shifts.
                 raise SystemExit(f"Ross quadrupole missing s={sv:g} (expected exact match)")
+
             xi2_ross[i] = float(ross_map[sv][0])
             sig2[i] = float(ross_map[sv][1])
 
@@ -297,6 +325,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

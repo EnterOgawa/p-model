@@ -50,6 +50,7 @@ def required_sigma_y_for_visibility(*, vis: float, omega0_rad_s: float, t_s: np.
     # V = exp(-(omega σ_y t)^2/2) -> σ_y = sqrt(-2 ln V) / (omega t)
     if not (0.0 < vis < 1.0):
         raise ValueError(f"vis must be in (0,1): {vis}")
+
     k = math.sqrt(-2.0 * math.log(vis))
     return (k / (omega0_rad_s * t_s)).astype(float)
 
@@ -89,6 +90,7 @@ def main() -> None:
         )
 
     # Panel B: σ_y needed to see contrast loss at given interrogation time
+
     t_noise = np.logspace(math.log10(cfg.t_noise_min_s), math.log10(cfg.t_noise_max_s), cfg.n_t_noise)
     sigma_y_req = []
     for vis in cfg.vis_targets:
@@ -101,6 +103,7 @@ def main() -> None:
         )
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(1, 2, figsize=(13.6, 5.4), dpi=150)
@@ -116,6 +119,7 @@ def main() -> None:
             lw=2.0,
             label=f"σz={sigma_z_mm:.1f} mm  (gσz/c²≈{sigma_y:.1e},  V=0.5 at {t_half:.0f}s)",
         )
+
     ax.set_xscale("log")
     ax.set_ylim(-0.02, 1.02)
     ax.set_xlabel("interrogation time T (s)")
@@ -131,6 +135,7 @@ def main() -> None:
         col = colors.get(vis, None) or "#333333"
         ax.plot(t_noise, row["sr"], lw=2.0, color=col, label=f"Sr clock (V={vis:.1f})")
         ax.plot(t_noise, row["cs"], lw=2.0, color=col, ls="--", label=f"Cs clock (V={vis:.1f})")
+
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.set_xlabel("interrogation time T (s)")
@@ -217,6 +222,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

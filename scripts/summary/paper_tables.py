@@ -31,6 +31,7 @@ import sys
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -56,25 +57,36 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _fmt_sci(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
     return f"{x:.{digits}e}"
 
 
 def _fmt_pct(x: Optional[float], *, digits: int = 2) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
     return f"{x * 100.0:.{digits}f}".rstrip("0").rstrip(".") + "%"
 
 
@@ -83,15 +95,21 @@ def _safe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(v) or math.isinf(v)` を満たす経路を評価する。
+
     if math.isnan(v) or math.isinf(v):
         return None
+
     return v
 
 
 def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
     for path in paths:
+        # 条件分岐: `path.exists()` を満たす経路を評価する。
         if path.exists():
             return path
+
     return None
 
 
@@ -172,25 +190,32 @@ def _write_markdown(path: Path, *, title: str, rows: Sequence[TableRow], notes: 
             )
             + " |"
         )
+
+    # 条件分岐: `notes` を満たす経路を評価する。
+
     if notes:
         lines.append("")
         lines.append("## 注記")
         for n in notes:
             lines.append(f"- {n}")
+
     lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def _load_llr_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "llr" / "batch" / "llr_batch_summary.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     n = int(j.get("n_points_total") or 0) or None
     median = j.get("median_rms_ns") or {}
     best = median.get("station_reflector_tropo_tide")
     best_f = float(best) if best is not None else None
     metric_public = ""
+    # 条件分岐: `best_f is not None` を満たす経路を評価する。
     if best_f is not None:
         # LLR is round-trip TOF; convert ns -> range meters (c*dt/2).
         range_m = (_C_M_PER_S * (best_f * 1e-9)) / 2.0
@@ -211,6 +236,7 @@ def _load_llr_rows(root: Path) -> List[TableRow]:
 
     # Optional: include NGLR-1 (new reflector target) if available in metrics CSV.
     metrics_path = _OUT_PRIVATE / "llr" / "batch" / "llr_batch_metrics.csv"
+    # 条件分岐: `metrics_path.exists()` を満たす経路を評価する。
     if metrics_path.exists():
         import statistics
 
@@ -220,23 +246,30 @@ def _load_llr_rows(root: Path) -> List[TableRow]:
         with open(metrics_path, "r", encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
             for r in reader:
+                # 条件分岐: `(r.get("target") or "").strip().lower() != "nglr1"` を満たす経路を評価する。
                 if (r.get("target") or "").strip().lower() != "nglr1":
                     continue
+
                 stations.add((r.get("station") or "").strip())
                 try:
                     n_total += int(float(r.get("n") or 0))
                 except Exception:
                     pass
+
                 v = _safe_float(r.get("rms_sr_tropo_tide_ns"))
+                # 条件分岐: `v is not None` を満たす経路を評価する。
                 if v is not None:
                     rms_list.append(v)
 
         rms_med = None
+        # 条件分岐: `rms_list` を満たす経路を評価する。
         if rms_list:
             try:
                 rms_med = float(statistics.median(rms_list))
             except Exception:
                 rms_med = None
+
+        # 条件分岐: `rms_med is not None` を満たす経路を評価する。
 
         if rms_med is not None:
             range_m = (_C_M_PER_S * (rms_med * 1e-9)) / 2.0
@@ -260,8 +293,10 @@ def _load_llr_rows(root: Path) -> List[TableRow]:
 
 def _load_cassini_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "cassini" / "cassini_fig2_metrics.csv"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     rows: List[Dict[str, str]] = []
     with open(path, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -270,11 +305,17 @@ def _load_cassini_rows(root: Path) -> List[TableRow]:
 
     pick = None
     for r in rows:
+        # 条件分岐: `r.get("window") == "-10 to +10 days"` を満たす経路を評価する。
         if r.get("window") == "-10 to +10 days":
             pick = r
             break
+
+    # 条件分岐: `pick is None and rows` を満たす経路を評価する。
+
     if pick is None and rows:
         pick = rows[0]
+
+    # 条件分岐: `pick is None` を満たす経路を評価する。
 
     if pick is None:
         return []
@@ -284,6 +325,7 @@ def _load_cassini_rows(root: Path) -> List[TableRow]:
     corr = float(pick.get("corr") or "nan")
 
     metric_public = ""
+    # 条件分岐: `corr == corr` を満たす経路を評価する。
     if corr == corr:
         metric_public = f"形状の一致度: corr={_fmt_float(corr, digits=3)}（1に近いほど一致）"
 
@@ -303,6 +345,7 @@ def _load_cassini_rows(root: Path) -> List[TableRow]:
 
 def _load_viking_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "viking" / "viking_shapiro_result.csv"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
 
@@ -314,14 +357,17 @@ def _load_viking_rows(root: Path) -> List[TableRow]:
         for r in reader:
             n += 1
             us = float(r["shapiro_delay_us"])
+            # 条件分岐: `max_us is None or us > max_us` を満たす経路を評価する。
             if max_us is None or us > max_us:
                 max_us = us
                 max_t = r["time_utc"]
 
     metric_public = ""
+    # 条件分岐: `max_us is not None` を満たす経路を評価する。
     if max_us is not None:
         # Rough literature peak range (public-friendly check).
         lo, hi = 200.0, 250.0
+        # 条件分岐: `lo <= max_us <= hi` を満たす経路を評価する。
         if lo <= max_us <= hi:
             metric_public = "文献代表レンジ(200–250 μs)内（目安）"
         else:
@@ -344,18 +390,22 @@ def _load_viking_rows(root: Path) -> List[TableRow]:
 
 def _load_mercury_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "mercury" / "mercury_precession_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     ref = float(j.get("reference_arcsec_century"))
     p = float(j["simulation_physical"]["pmodel"]["arcsec_per_century"])
     diff = p - ref
     metric_public = ""
+    # 条件分岐: `ref != 0.0` を満たす経路を評価する。
     if ref != 0.0:
         metric_public = (
             f"代表値との差: {_fmt_float(abs(diff), digits=6)} ″/世紀（{_fmt_pct(abs(diff) / abs(ref), digits=2)}）"
             "（小さいほど良い）"
         )
+
     return [
         TableRow(
             topic="Mercury（近日点移動）",
@@ -372,22 +422,28 @@ def _load_mercury_rows(root: Path) -> List[TableRow]:
 
 def _load_gps_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "gps" / "gps_compare_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     m = j.get("metrics") or {}
     n_sats = int(float(m.get("n_sats") or 0)) or None
     brdc_med = float(m.get("brdc_rms_ns_median"))
     p_med = float(m.get("pmodel_rms_ns_median"))
     metric_public = ""
+    # 条件分岐: `brdc_med > 0.0 and p_med >= 0.0` を満たす経路を評価する。
     if brdc_med > 0.0 and p_med >= 0.0:
         ratio = p_med / brdc_med
+        # 条件分岐: `ratio < 1.0` を満たす経路を評価する。
         if ratio < 1.0:
             metric_public = f"RMSが小さいほど良い。P-modelはBRDCより{_fmt_pct(1.0 - ratio, digits=1)}小さい（中央値）"
+        # 条件分岐: 前段条件が不成立で、`ratio > 1.0` を追加評価する。
         elif ratio > 1.0:
             metric_public = f"RMSが小さいほど良い。P-modelはBRDCより{_fmt_pct(ratio - 1.0, digits=1)}大きい（中央値）"
         else:
             metric_public = "RMSが小さいほど良い。P-modelとBRDCは同程度（中央値）"
+
     return [
         TableRow(
             topic="GPS（衛星時計）",
@@ -409,10 +465,13 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
     Source: output/private/theory/solar_light_deflection_metrics.json (fixed-name artifact).
     """
     path = _OUT_PRIVATE / "theory" / "solar_light_deflection_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     m = j.get("metrics") or {}
+    # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
     if not isinstance(m, dict):
         return []
 
@@ -423,6 +482,7 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
         n_meas = None
 
     label = str(m.get("observed_best_label") or m.get("observed_best_id") or "")
+    # 条件分岐: `not label` を満たす経路を評価する。
     if not label:
         label = "VLBI（代表）"
 
@@ -451,22 +511,27 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
         z = None
 
     obs_txt = ""
+    # 条件分岐: `gamma_obs is not None and gamma_sig is not None` を満たす経路を評価する。
     if gamma_obs is not None and gamma_sig is not None:
         obs_txt = f"γ={_fmt_float(gamma_obs, digits=6)}±{_fmt_float(gamma_sig, digits=6)}"
 
     pm_txt = ""
+    # 条件分岐: `gamma_pred is not None` を満たす経路を評価する。
     if gamma_pred is not None:
         pm_txt = f"γ={_fmt_float(gamma_pred, digits=6)}"
+        # 条件分岐: `beta is not None` を満たす経路を評価する。
         if beta is not None:
             pm_txt += f"（β={_fmt_float(beta, digits=6)}）"
 
     metric_parts: List[str] = []
+    # 条件分岐: `z is not None` を満たす経路を評価する。
     if z is not None:
         metric_parts.append(f"z={_fmt_float(z, digits=3)}")
 
     alpha_obs = m.get("observed_alpha_arcsec_limb_best")
     alpha_sig = m.get("observed_alpha_sigma_arcsec_limb_best")
     try:
+        # 条件分岐: `alpha_obs is not None and alpha_sig is not None` を満たす経路を評価する。
         if alpha_obs is not None and alpha_sig is not None:
             metric_parts.append(
                 f"太陽縁α={_fmt_float(float(alpha_obs), digits=7)}±{_fmt_float(float(alpha_sig), digits=7)} ″"
@@ -475,6 +540,7 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
         pass
 
     metric_public = ""
+    # 条件分岐: `z is not None` を満たす経路を評価する。
     if z is not None:
         metric_public = f"観測との差: {_fmt_float(abs(float(z)), digits=2)}σ（0に近いほど一致）"
 
@@ -494,8 +560,10 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
 
 def _load_eht_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "eht" / "eht_shadow_compare.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
 
     # NOTE:
@@ -520,17 +588,22 @@ def _load_eht_rows(root: Path) -> List[TableRow]:
         k_fit_sig = float(r.get("kappa_ring_over_shadow_fit_pmodel_sigma") or float("nan"))
 
         coeff_txt = ""
+        # 条件分岐: `coeff_diff_pct is not None` を満たす経路を評価する。
         if coeff_diff_pct is not None:
             s = _fmt_float(coeff_diff_pct, digits=3)
+            # 条件分岐: `coeff_diff_pct > 0 and not s.startswith("-")` を満たす経路を評価する。
             if coeff_diff_pct > 0 and not s.startswith("-"):
                 s = "+" + s
+
             coeff_txt = f"係数差(P/GR)={s}%"
 
         z_txt = ""
+        # 条件分岐: `z_p == z_p` を満たす経路を評価する。
         if z_p == z_p:  # not NaN
             z_txt = f"z(P, κ=1)={_fmt_float(z_p, digits=3)}"
 
         k_txt = ""
+        # 条件分岐: `k_fit == k_fit and k_fit_sig == k_fit_sig` を満たす経路を評価する。
         if k_fit == k_fit and k_fit_sig == k_fit_sig:
             k_txt = f"κ_fit={_fmt_float(k_fit, digits=3)}±{_fmt_float(k_fit_sig, digits=3)}"
 
@@ -538,8 +611,10 @@ def _load_eht_rows(root: Path) -> List[TableRow]:
         metric = " / ".join(metric_parts) if metric_parts else ""
 
         metric_public = "κ（リング/影比）など系統が支配的（指標は目安）"
+        # 条件分岐: `z_p == z_p` を満たす経路を評価する。
         if z_p == z_p:
             metric_public = f"κ=1仮定の差: {_fmt_float(abs(z_p), digits=2)}σ（0に近いほど一致）"
+        # 条件分岐: 前段条件が不成立で、`k_fit == k_fit and k_fit_sig == k_fit_sig` を追加評価する。
         elif k_fit == k_fit and k_fit_sig == k_fit_sig:
             metric_public = f"κ_fitが1付近なら整合（κ_fit={_fmt_float(k_fit, digits=2)}）"
 
@@ -555,15 +630,19 @@ def _load_eht_rows(root: Path) -> List[TableRow]:
                 metric_public=metric_public,
             )
         )
+
     return out
 
 
 def _load_pulsar_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     metrics = j.get("metrics") or []
+    # 条件分岐: `not isinstance(metrics, list)` を満たす経路を評価する。
     if not isinstance(metrics, list):
         return []
 
@@ -571,45 +650,60 @@ def _load_pulsar_rows(root: Path) -> List[TableRow]:
     bound_parts: List[str] = []
     z_abs_list: List[float] = []
     for m in metrics:
+        # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
         if not isinstance(m, dict):
             continue
+
         name = str(m.get("name") or m.get("id") or "")
         name = name.replace("（", "(").replace("）", ")").replace("−", "-")
 
         r = _safe_float(m.get("R"))
+        # 条件分岐: `r is None` を満たす経路を評価する。
         if r is None:
             continue
 
         sigma_note = str(m.get("sigma_note") or "")
+        # 条件分岐: `"95" in sigma_note` を満たす経路を評価する。
         if "95" in sigma_note:
             err = _safe_float(m.get("sigma_95"))
+            # 条件分岐: `err is None` を満たす経路を評価する。
             if err is None:
                 s1 = _safe_float(m.get("sigma_1"))
                 err = 1.959963984540054 * s1 if s1 is not None else None
+
             conf = "95%"
         else:
             err = _safe_float(m.get("sigma_1"))
             conf = "1σ"
 
+        # 条件分岐: `err is not None` を満たす経路を評価する。
+
         if err is not None:
             ref_parts.append(f"{name}: {r:.6f}±{_fmt_float(err, digits=6)} ({conf})")
+            # 条件分岐: `conf == "1σ" and err > 0` を満たす経路を評価する。
             if conf == "1σ" and err > 0:
                 z_abs_list.append(abs(r - 1.0) / err)
         else:
             ref_parts.append(f"{name}: {r:.6f}")
 
         upper_3s = _safe_float(m.get("non_gr_fraction_upper_3sigma"))
+        # 条件分岐: `upper_3s is not None` を満たす経路を評価する。
         if upper_3s is not None:
             bound_parts.append(f"{name}: <{_fmt_float(upper_3s * 100.0, digits=3)}%")
 
     reference = "; ".join(ref_parts) if ref_parts else ""
     metric = ""
+    # 条件分岐: `bound_parts` を満たす経路を評価する。
     if bound_parts:
         metric = "追加放射上限（概算, 3σ）: " + "; ".join(bound_parts)
 
     metric_public = "Rが1に近いほど一致（四重極放射の支持が強い）"
+    # 条件分岐: `z_abs_list` を満たす経路を評価する。
     if z_abs_list:
         metric_public = f"R=1からのずれ: 最大 {_fmt_float(max(z_abs_list), digits=2)}σ（小さいほど良い）"
+
+    # 条件分岐: `bound_parts` を満たす経路を評価する。
+
     if bound_parts:
         metric_public += " / 余分な放射はシステム依存（概算）"
 
@@ -630,24 +724,34 @@ def _load_pulsar_rows(root: Path) -> List[TableRow]:
 def _load_gw_rows(root: Path) -> List[TableRow]:
     def _load_event_pairs() -> List[Tuple[str, str]]:
         path = root / "data" / "gw" / "event_list.json"
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             return []
+
         try:
             obj = _read_json(path)
         except Exception:
             return []
+
         evs = obj.get("events")
+        # 条件分岐: `not isinstance(evs, list)` を満たす経路を評価する。
         if not isinstance(evs, list):
             return []
+
         out: List[Tuple[str, str]] = []
         for e in evs:
+            # 条件分岐: `not isinstance(e, dict)` を満たす経路を評価する。
             if not isinstance(e, dict):
                 continue
+
             name = str(e.get("name") or "").strip()
+            # 条件分岐: `not name` を満たす経路を評価する。
             if not name:
                 continue
+
             slug = str(e.get("slug") or name.lower()).strip() or name.lower()
             out.append((name, slug))
+
         return out
 
     events = _load_event_pairs() or [
@@ -661,10 +765,13 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
     for name, slug in events:
         path = _OUT_PRIVATE / "gw" / f"{slug}_chirp_phase_metrics.json"
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         j = _read_json(path)
         dets = j.get("detectors") or []
+        # 条件分岐: `not isinstance(dets, list)` を満たす経路を評価する。
         if not isinstance(dets, list):
             continue
 
@@ -681,92 +788,145 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
         ww_param: Optional[Tuple[float, float]] = None
         wave_policy = ""
         wfrange = ""
+        # 条件分岐: `isinstance(params, dict)` を満たす経路を評価する。
         if isinstance(params, dict):
             wave_policy = str(params.get("wave_window_policy") or "")
             tw = params.get("track_window_s")
+            # 条件分岐: `isinstance(tw, list) and len(tw) == 2` を満たす経路を評価する。
             if isinstance(tw, list) and len(tw) == 2:
                 win = f"window={_fmt_float(_safe_float(tw[0]), digits=3)}..{_fmt_float(_safe_float(tw[1]), digits=3)} s"
+
             wf = params.get("wave_frange_hz")
+            # 条件分岐: `isinstance(wf, list) and len(wf) == 2` を満たす経路を評価する。
             if isinstance(wf, list) and len(wf) == 2:
                 flo = _safe_float(wf[0])
                 fhi = _safe_float(wf[1])
+                # 条件分岐: `flo is not None and fhi is not None` を満たす経路を評価する。
                 if flo is not None and fhi is not None:
                     wfrange = f"wave_f={_fmt_float(flo, digits=1)}..{_fmt_float(fhi, digits=1)} Hz"
+
             ww = params.get("wave_window_s")
+            # 条件分岐: `wave_policy != "frange" and isinstance(ww, list) and len(ww) == 2` を満たす経路を評価する。
             if wave_policy != "frange" and isinstance(ww, list) and len(ww) == 2:
                 w0p = _safe_float(ww[0])
                 w1p = _safe_float(ww[1])
+                # 条件分岐: `w0p is not None and w1p is not None` を満たす経路を評価する。
                 if w0p is not None and w1p is not None:
                     ww_param = (float(w0p), float(w1p))
+
                 wwin = f"wave={_fmt_float(_safe_float(ww[0]), digits=3)}..{_fmt_float(_safe_float(ww[1]), digits=3)} s"
 
         for d in dets:
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
             if not isinstance(d, dict):
                 continue
+
             det = str(d.get("detector") or "")
             n_track = int(d.get("n_track") or 0)
             n_track_total += n_track
             fit = d.get("fit") or {}
+            # 条件分岐: `isinstance(fit, dict)` を満たす経路を評価する。
             if isinstance(fit, dict):
                 r2 = _safe_float(fit.get("r2"))
             else:
                 r2 = None
+
+            # 条件分岐: `r2 is not None` を満たす経路を評価する。
+
             if r2 is not None:
                 r2_parts.append(f"{det}: R^2={_fmt_float(r2, digits=4)}")
 
             wf = d.get("waveform_fit") or {}
             match_txt = ""
             overlap = _safe_float(wf.get("overlap")) if isinstance(wf, dict) else None
+            # 条件分岐: `overlap is not None` を満たす経路を評価する。
             if overlap is not None:
                 match_txt = f"match={_fmt_float(overlap, digits=3)}"
+            # 条件分岐: 前段条件が不成立で、`isinstance(wf, dict)` を追加評価する。
             elif isinstance(wf, dict):
                 reason = str(wf.get("reason") or "").strip()
+                # 条件分岐: `reason` を満たす経路を評価する。
                 if reason:
                     match_omitted = True
+                    # 条件分岐: `reason == "match_window_too_short"` を満たす経路を評価する。
                     if reason == "match_window_too_short":
                         n_window = int(_safe_float(wf.get("n_window")) or 0)
                         match_txt = f"match=省略（短窓 n={n_window}）" if n_window else "match=省略（短窓）"
                     else:
                         match_txt = f"match=省略（{reason}）"
+
+            # 条件分岐: `match_txt` を満たす経路を評価する。
+
             if match_txt:
                 match_parts.append(f"{det}: {match_txt}")
+
+            # 条件分岐: `isinstance(wf, dict)` を満たす経路を評価する。
+
             if isinstance(wf, dict):
                 w = wf.get("window_s")
+                # 条件分岐: `isinstance(w, list) and len(w) == 2` を満たす経路を評価する。
                 if isinstance(w, list) and len(w) == 2:
                     w0 = _safe_float(w[0])
                     w1 = _safe_float(w[1])
+                    # 条件分岐: `w0 is not None and w1 is not None` を満たす経路を評価する。
                     if w0 is not None and w1 is not None:
                         det_wave_parts.append(
                             f"{det}: wave={_fmt_float(w0, digits=3)}..{_fmt_float(w1, digits=3)} s"
                         )
+                        # 条件分岐: `ww_param is not None` を満たす経路を評価する。
                         if ww_param is not None:
+                            # 条件分岐: `abs(w0 - ww_param[0]) > 1e-9 or abs(w1 - ww_param[1]) > 1e-9` を満たす経路を評価する。
                             if abs(w0 - ww_param[0]) > 1e-9 or abs(w1 - ww_param[1]) > 1e-9:
                                 det_wave_override = True
+
+                # 条件分岐: `bool(wf.get("window_auto_shifted"))` を満たす経路を評価する。
+
                 if bool(wf.get("window_auto_shifted")):
                     det_wave_override = True
 
         metric_parts = []
+        # 条件分岐: `r2_parts` を満たす経路を評価する。
         if r2_parts:
             metric_parts.append(", ".join(r2_parts))
+
+        # 条件分岐: `match_parts` を満たす経路を評価する。
+
         if match_parts:
             metric_parts.append(", ".join(match_parts))
+
+        # 条件分岐: `wfrange` を満たす経路を評価する。
+
         if wfrange:
             metric_parts.append(wfrange)
+
+        # 条件分岐: `win` を満たす経路を評価する。
+
         if win:
             metric_parts.append(win)
+
+        # 条件分岐: `wave_policy == "frange" and det_wave_parts` を満たす経路を評価する。
+
         if wave_policy == "frange" and det_wave_parts:
             metric_parts.append(", ".join(det_wave_parts))
+        # 条件分岐: 前段条件が不成立で、`det_wave_override and det_wave_parts` を追加評価する。
         elif det_wave_override and det_wave_parts:
             metric_parts.append(", ".join(det_wave_parts))
+        # 条件分岐: 前段条件が不成立で、`wwin` を追加評価する。
         elif wwin:
             metric_parts.append(wwin)
+
         metric = " / ".join(metric_parts)
 
         metric_public = ""
+        # 条件分岐: `r2_parts or match_parts` を満たす経路を評価する。
         if r2_parts or match_parts:
             metric_public = "R^2 はchirp則の整合性、matchは波形テンプレートとの近さ（いずれも粗い指標）"
+            # 条件分岐: `wfrange` を満たす経路を評価する。
             if wfrange:
                 metric_public += f" / match窓={wfrange.replace('wave_f=', '')}"
+
+            # 条件分岐: `match_omitted` を満たす経路を評価する。
+
             if match_omitted:
                 metric_public += " / 短窓などでmatchを省略する場合あり"
 
@@ -782,6 +942,7 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
                 metric_public=metric_public,
             )
         )
+
     return out
 
 
@@ -807,12 +968,14 @@ def _load_gw250114_rows(root: Path) -> List[TableRow]:
             root / "output" / "gw" / "gw250114_imr_consistency.json",
         ]
     )
+    # 条件分岐: `area_path is None and qnm_path is None and imr_path is None` を満たす経路を評価する。
     if area_path is None and qnm_path is None and imr_path is None:
         return []
 
     area_sigma = None
     first_time_ge5 = None
     n_combined = None
+    # 条件分岐: `area_path is not None` を満たす経路を評価する。
     if area_path is not None:
         try:
             ja = _read_json(area_path)
@@ -827,6 +990,7 @@ def _load_gw250114_rows(root: Path) -> List[TableRow]:
 
     qnm_f_hz = None
     qnm_tau_s = None
+    # 条件分岐: `qnm_path is not None` を満たす経路を評価する。
     if qnm_path is not None:
         try:
             jq = _read_json(qnm_path)
@@ -842,6 +1006,7 @@ def _load_gw250114_rows(root: Path) -> List[TableRow]:
     z_mass = None
     z_spin = None
     p_imr = None
+    # 条件分岐: `imr_path is not None` を満たす経路を評価する。
     if imr_path is not None:
         try:
             ji = _read_json(imr_path)
@@ -855,28 +1020,55 @@ def _load_gw250114_rows(root: Path) -> List[TableRow]:
             p_imr = None
 
     metric_parts: List[str] = []
+    # 条件分岐: `area_sigma is not None` を満たす経路を評価する。
     if area_sigma is not None:
         metric_parts.append(f"面積定理(合成): {_fmt_float(area_sigma, digits=3)}σ")
+
+    # 条件分岐: `first_time_ge5 is not None` を満たす経路を評価する。
+
     if first_time_ge5 is not None:
         metric_parts.append(f"first σ≥5 at t_ref={_fmt_float(first_time_ge5, digits=1)}M")
+
+    # 条件分岐: `qnm_f_hz is not None` を満たす経路を評価する。
+
     if qnm_f_hz is not None:
         metric_parts.append(f"QNM(220): f={_fmt_float(qnm_f_hz, digits=3)} Hz")
+
+    # 条件分岐: `qnm_tau_s is not None` を満たす経路を評価する。
+
     if qnm_tau_s is not None:
         metric_parts.append(f"τ={_fmt_float(qnm_tau_s, digits=6)} s")
+
+    # 条件分岐: `z_mass is not None` を満たす経路を評価する。
+
     if z_mass is not None:
         metric_parts.append(f"IMR mass z={_fmt_float(z_mass, digits=3)}")
+
+    # 条件分岐: `z_spin is not None` を満たす経路を評価する。
+
     if z_spin is not None:
         metric_parts.append(f"IMR spin z={_fmt_float(z_spin, digits=3)}")
+
+    # 条件分岐: `p_imr is not None` を満たす経路を評価する。
+
     if p_imr is not None:
         metric_parts.append(f"IMR p={_fmt_float(p_imr, digits=3)}")
 
     metric_public_parts: List[str] = []
+    # 条件分岐: `area_sigma is not None` を満たす経路を評価する。
     if area_sigma is not None:
         metric_public_parts.append(f"面積定理有意度={_fmt_float(area_sigma, digits=2)}σ")
+
+    # 条件分岐: `z_mass is not None or z_spin is not None` を満たす経路を評価する。
+
     if z_mass is not None or z_spin is not None:
         zvals = [abs(v) for v in (z_mass, z_spin) if v is not None]
+        # 条件分岐: `zvals` を満たす経路を評価する。
         if zvals:
             metric_public_parts.append(f"IMR整合 max|z|={_fmt_float(max(zvals), digits=2)}")
+
+    # 条件分岐: `p_imr is not None` を満たす経路を評価する。
+
     if p_imr is not None:
         metric_public_parts.append(f"IMR整合 p={_fmt_float(p_imr, digits=3)}")
 
@@ -896,14 +1088,18 @@ def _load_gw250114_rows(root: Path) -> List[TableRow]:
 
 def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "theory" / "gravitational_redshift_experiments.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     rows = j.get("rows") or []
     out: List[TableRow] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         label = str(r.get("short_label") or r.get("id") or "")
         eps = float(r.get("epsilon") or 0.0)
         sig = float(r.get("sigma") or 0.0)
@@ -911,13 +1107,17 @@ def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
         z_txt = "" if z is None else f"{float(z):+.2f}"
 
         src = r.get("source") or {}
+        # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
         if not isinstance(src, dict):
             src = {}
+
         doi = str(src.get("doi") or "")
         year = str(src.get("year") or "")
         src_txt = doi
+        # 条件分岐: `year and doi` を満たす経路を評価する。
         if year and doi:
             src_txt = f"{year}, {doi}"
+        # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
         elif year and not src_txt:
             src_txt = year
 
@@ -926,6 +1126,7 @@ def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
         metric = " / ".join(metric_parts)
 
         metric_public = ""
+        # 条件分岐: `sig > 0` を満たす経路を評価する。
         if sig > 0:
             metric_public = f"観測との差: {_fmt_float(abs(eps) / sig, digits=2)}σ（0に近いほど一致）"
 
@@ -941,31 +1142,47 @@ def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
                 metric_public=metric_public,
             )
         )
+
     return out
 
 
 def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     rows = j.get("rows") or []
     best = None
     best_sig = None
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `sig is None or sig <= 0` を満たす経路を評価する。
         if sig is None or sig <= 0:
             continue
+
+        # 条件分岐: `best is None or best_sig is None or sig < best_sig` を満たす経路を評価する。
+
         if best is None or best_sig is None or sig < best_sig:
             best = r
             best_sig = sig
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         for r in rows:
+            # 条件分岐: `isinstance(r, dict)` を満たす経路を評価する。
             if isinstance(r, dict):
                 best = r
                 break
+
+    # 条件分岐: `best is None or not isinstance(best, dict)` を満たす経路を評価する。
+
     if best is None or not isinstance(best, dict):
         return []
 
@@ -992,100 +1209,164 @@ def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
     sigma_cat = None
     min_no_bao_abs_z = None
     min_no_bao_abs_z_sys = None
+    # 条件分岐: `sys_path.exists()` を満たす経路を評価する。
     if sys_path.exists():
         try:
             sj = _read_json(sys_path)
             srows = sj.get("rows") if isinstance(sj.get("rows"), list) else []
             for sr in srows:
+                # 条件分岐: `not isinstance(sr, dict)` を満たす経路を評価する。
                 if not isinstance(sr, dict):
                     continue
+
+                # 条件分岐: `r_id and str(sr.get("id") or "") == r_id` を満たす経路を評価する。
+
                 if r_id and str(sr.get("id") or "") == r_id:
                     z_pbg_sys = _safe_float(sr.get("abs_z_with_category_sys"))
                     sigma_cat = _safe_float(sr.get("sigma_sys_category"))
                     break
+
             for sr in srows:
+                # 条件分岐: `not isinstance(sr, dict)` を満たす経路を評価する。
                 if not isinstance(sr, dict):
                     continue
+
+                # 条件分岐: `bool(sr.get("uses_bao", False))` を満たす経路を評価する。
+
                 if bool(sr.get("uses_bao", False)):
                     continue
+
                 z_raw = _safe_float(sr.get("abs_z_raw"))
                 z_sys = _safe_float(sr.get("abs_z_with_category_sys"))
+                # 条件分岐: `z_raw is not None and (min_no_bao_abs_z is None or z_raw < min_no_bao_abs_z)` を満たす経路を評価する。
                 if z_raw is not None and (min_no_bao_abs_z is None or z_raw < min_no_bao_abs_z):
                     min_no_bao_abs_z = z_raw
+
+                # 条件分岐: `z_sys is not None and (min_no_bao_abs_z_sys is None or z_sys < min_no_bao_abs...` を満たす経路を評価する。
+
                 if z_sys is not None and (min_no_bao_abs_z_sys is None or z_sys < min_no_bao_abs_z_sys):
                     min_no_bao_abs_z_sys = z_sys
         except Exception:
             pass
 
     src = r.get("source") or {}
+    # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
     if not isinstance(src, dict):
         src = {}
+
     doi = str(src.get("doi") or "")
     year = str(src.get("year") or "")
     src_txt = doi
+    # 条件分岐: `year and doi` を満たす経路を評価する。
     if year and doi:
         src_txt = f"{year}, {doi}"
+    # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
     elif year and not src_txt:
         src_txt = year
 
     obs_txt = ""
+    # 条件分岐: `eta_p_obs_z1 is not None and eta_p_sig_z1 is not None` を満たす経路を評価する。
     if eta_p_obs_z1 is not None and eta_p_sig_z1 is not None:
         obs_txt = f"η^(P)(z=1)={_fmt_float(eta_p_obs_z1, digits=3)}±{_fmt_float(eta_p_sig_z1, digits=3)}"
+    # 条件分岐: 前段条件が不成立で、`eta_p_obs_z1 is not None` を追加評価する。
     elif eta_p_obs_z1 is not None:
         obs_txt = f"η^(P)(z=1)={_fmt_float(eta_p_obs_z1, digits=3)}"
+    # 条件分岐: 前段条件が不成立で、`eps_obs is not None and sig is not None` を追加評価する。
     elif eps_obs is not None and sig is not None:
         obs_txt = f"ε0={_fmt_float(eps_obs, digits=3)}±{_fmt_float(sig, digits=3)}"
+    # 条件分岐: 前段条件が不成立で、`eps_obs is not None` を追加評価する。
     elif eps_obs is not None:
         obs_txt = f"ε0={_fmt_float(eps_obs, digits=3)}"
 
     metric_parts: List[str] = []
+    # 条件分岐: `z_frw is not None` を満たす経路を評価する。
     if z_frw is not None:
         metric_parts.append(f"Z_eps(FRW)={_fmt_float(z_frw, digits=3)}")
+
+    # 条件分岐: `z_pbg is not None` を満たす経路を評価する。
+
     if z_pbg is not None:
         metric_parts.append(f"Z_eps(Pbg_static)={_fmt_float(z_pbg, digits=2)}")
+
+    # 条件分岐: `z_pbg_sys is not None` を満たす経路を評価する。
+
     if z_pbg_sys is not None:
         metric_parts.append(f"Z_eps_sys={_fmt_float(z_pbg_sys, digits=2)}")
+        # 条件分岐: `sigma_cat is not None` を満たす経路を評価する。
         if sigma_cat is not None:
             metric_parts.append(f"σ_cat={_fmt_float(sigma_cat, digits=3)}")
+
+    # 条件分岐: `p_obs is not None and p_sig is not None` を満たす経路を評価する。
+
     if p_obs is not None and p_sig is not None:
         metric_parts.append(f"p={_fmt_float(p_obs, digits=3)}±{_fmt_float(p_sig, digits=3)}")
+
+    # 条件分岐: `z_eta_frw is not None` を満たす経路を評価する。
+
     if z_eta_frw is not None:
         metric_parts.append(f"Z_eta(FRW)={_fmt_float(z_eta_frw, digits=3)}")
+
+    # 条件分岐: `z_eta_pbg is not None` を満たす経路を評価する。
+
     if z_eta_pbg is not None:
         metric_parts.append(f"Z_eta(Pbg_static)={_fmt_float(z_eta_pbg, digits=2)}")
+
+    # 条件分岐: `delta_eps is not None` を満たす経路を評価する。
+
     if delta_eps is not None:
         metric_parts.append(f"Δε_needed={_fmt_float(delta_eps, digits=3)}")
+
+    # 条件分岐: `min_no_bao_abs_z is not None` を満たす経路を評価する。
+
     if min_no_bao_abs_z is not None:
+        # 条件分岐: `min_no_bao_abs_z_sys is not None` を満たす経路を評価する。
         if min_no_bao_abs_z_sys is not None:
             metric_parts.append(
                 f"no-BAO最小abs(z)={_fmt_float(min_no_bao_abs_z, digits=2)}→{_fmt_float(min_no_bao_abs_z_sys, digits=2)}"
             )
         else:
             metric_parts.append(f"no-BAO最小abs(z)={_fmt_float(min_no_bao_abs_z, digits=2)}")
+
+    # 条件分岐: `src_txt` を満たす経路を評価する。
+
     if src_txt:
         metric_parts.append(src_txt)
 
     metric_public = ""
+    # 条件分岐: `z_eta_pbg is not None` を満たす経路を評価する。
     if z_eta_pbg is not None:
         metric_public = f"η^(P)(z=1)の差: {_fmt_float(abs(z_eta_pbg), digits=1)}σ（距離推定I/F監査を前提）"
+        # 条件分岐: `z_pbg is not None` を満たす経路を評価する。
         if z_pbg is not None:
             metric_public += f" / 公表ε0での差: {_fmt_float(abs(z_pbg), digits=1)}σ"
+            # 条件分岐: `z_pbg_sys is not None` を満たす経路を評価する。
             if z_pbg_sys is not None:
                 metric_public += f"（σ_cat込み: {_fmt_float(abs(z_pbg_sys), digits=1)}σ）"
+
+        # 条件分岐: `delta_eps is not None and extra_eta_z1 is not None` を満たす経路を評価する。
+
         if delta_eps is not None and extra_eta_z1 is not None:
             metric_public += f" / 整合にはz=1でD_L×{_fmt_float(extra_eta_z1, digits=2)}（Δε={_fmt_float(delta_eps, digits=3)}）"
+            # 条件分岐: `delta_mu_z1 is not None` を満たす経路を評価する。
             if delta_mu_z1 is not None:
                 metric_public += f"（Δμ={_fmt_float(delta_mu_z1, digits=2)} mag"
+                # 条件分岐: `tau_z1 is not None` を満たす経路を評価する。
                 if tau_z1 is not None:
                     metric_public += f", τ={_fmt_float(tau_z1, digits=2)}"
+
                 metric_public += "）"
+
+        # 条件分岐: `min_no_bao_abs_z is not None` を満たす経路を評価する。
+
         if min_no_bao_abs_z is not None:
+            # 条件分岐: `min_no_bao_abs_z_sys is not None` を満たす経路を評価する。
             if min_no_bao_abs_z_sys is not None:
                 metric_public += (
                     f" / no-BAO最小abs(z)={_fmt_float(min_no_bao_abs_z, digits=2)}→{_fmt_float(min_no_bao_abs_z_sys, digits=2)}"
                 )
             else:
                 metric_public += f" / no-BAO最小abs(z)={_fmt_float(min_no_bao_abs_z, digits=2)}"
+    # 条件分岐: 前段条件が不成立で、`z_pbg is not None` を追加評価する。
     elif z_pbg is not None:
         metric_public = f"公表ε0での差: {_fmt_float(abs(z_pbg), digits=1)}σ（距離推定I/F監査を前提）"
 
@@ -1105,12 +1386,15 @@ def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
 
 def _load_cosmology_tolman_surface_brightness_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     rows = j.get("rows") or []
     out: List[TableRow] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
 
@@ -1122,35 +1406,53 @@ def _load_cosmology_tolman_surface_brightness_rows(root: Path) -> List[TableRow]
         evol_pbg = _safe_float(r.get("evolution_exponent_needed_pbg_static"))
 
         src = r.get("source") or {}
+        # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
         if not isinstance(src, dict):
             src = {}
+
         doi = str(src.get("doi") or "")
         year = str(src.get("year") or "")
         src_txt = doi
+        # 条件分岐: `year and doi` を満たす経路を評価する。
         if year and doi:
             src_txt = f"{year}, {doi}"
+        # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
         elif year and not src_txt:
             src_txt = year
 
         obs_txt = ""
+        # 条件分岐: `n_obs is not None and sig is not None` を満たす経路を評価する。
         if n_obs is not None and sig is not None:
             obs_txt = f"n={_fmt_float(n_obs, digits=3)}±{_fmt_float(sig, digits=3)}"
+        # 条件分岐: 前段条件が不成立で、`n_obs is not None` を追加評価する。
         elif n_obs is not None:
             obs_txt = f"n={_fmt_float(n_obs, digits=3)}"
 
         metric_parts: List[str] = []
+        # 条件分岐: `z_frw is not None` を満たす経路を評価する。
         if z_frw is not None:
             metric_parts.append(f"z(FRW)={_fmt_float(z_frw, digits=2)}")
+
+        # 条件分岐: `z_pbg is not None` を満たす経路を評価する。
+
         if z_pbg is not None:
             metric_parts.append(f"z(Pbg_static)={_fmt_float(z_pbg, digits=2)}")
+
+        # 条件分岐: `evol_pbg is not None` を満たす経路を評価する。
+
         if evol_pbg is not None:
             metric_parts.append(f"evol_needed(Pbg)={_fmt_float(evol_pbg, digits=2)}")
+
+        # 条件分岐: `src_txt` を満たす経路を評価する。
+
         if src_txt:
             metric_parts.append(src_txt)
 
         metric_public = "進化（系統）が支配的（指標は目安）"
+        # 条件分岐: `z_pbg is not None` を満たす経路を評価する。
         if z_pbg is not None:
             metric_public = f"背景P（静的, n=2）との差: {_fmt_float(abs(z_pbg), digits=1)}σ（大きいほど不一致）"
+            # 条件分岐: `evol_pbg is not None and evol_pbg < 0` を満たす経路を評価する。
             if evol_pbg is not None and evol_pbg < 0:
                 metric_public += " / 整合には進化補正が逆符号"
 
@@ -1166,23 +1468,37 @@ def _load_cosmology_tolman_surface_brightness_rows(root: Path) -> List[TableRow]
                 metric_public=metric_public,
             )
         )
+
     return out
 
 
 def _fmt_source_short(source: Any) -> str:
+    # 条件分岐: `not isinstance(source, dict)` を満たす経路を評価する。
     if not isinstance(source, dict):
         return ""
+
     year = str(source.get("year") or "").strip()
     doi = str(source.get("doi") or "").strip()
     arxiv = str(source.get("arxiv_id") or "").strip()
+    # 条件分岐: `doi and year` を満たす経路を評価する。
     if doi and year:
         return f"{year}, {doi}"
+
+    # 条件分岐: `doi` を満たす経路を評価する。
+
     if doi:
         return doi
+
+    # 条件分岐: `arxiv and year` を満たす経路を評価する。
+
     if arxiv and year:
         return f"{year}, arXiv:{arxiv}"
+
+    # 条件分岐: `arxiv` を満たす経路を評価する。
+
     if arxiv:
         return f"arXiv:{arxiv}"
+
     return year
 
 
@@ -1191,6 +1507,7 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
 
     # SN time dilation (spectral aging): compare to background-P minimal prediction p_t=1.
     p_sn = _OUT_PRIVATE / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json"
+    # 条件分岐: `p_sn.exists()` を満たす経路を評価する。
     if p_sn.exists():
         try:
             j = _read_json(p_sn)
@@ -1202,13 +1519,16 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
             src_txt = _fmt_source_short(r.get("source"))
 
             obs_txt = ""
+            # 条件分岐: `pt is not None and pts is not None` を満たす経路を評価する。
             if pt is not None and pts is not None:
                 obs_txt = f"p_t={_fmt_float(pt, digits=3)}±{_fmt_float(pts, digits=3)}"
+            # 条件分岐: 前段条件が不成立で、`pt is not None` を追加評価する。
             elif pt is not None:
                 obs_txt = f"p_t={_fmt_float(pt, digits=3)}"
 
             metric = " / ".join([p for p in (f"z={_fmt_float(z, digits=3)}" if z is not None else "", src_txt) if p])
             metric_public = ""
+            # 条件分岐: `z is not None` を満たす経路を評価する。
             if z is not None:
                 metric_public = f"観測との差: {_fmt_float(abs(z), digits=2)}σ（0に近いほど一致）"
 
@@ -1228,7 +1548,9 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
             pass
 
     # CMB temperature scaling: compare to background-P minimal prediction p_T=1 (β_T=0).
+
     p_tz = _OUT_PRIVATE / "cosmology" / "cosmology_cmb_temperature_scaling_constraints_metrics.json"
+    # 条件分岐: `p_tz.exists()` を満たす経路を評価する。
     if p_tz.exists():
         try:
             j = _read_json(p_tz)
@@ -1240,13 +1562,16 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
             src_txt = _fmt_source_short(r.get("source"))
 
             obs_txt = ""
+            # 条件分岐: `pt is not None and pts is not None` を満たす経路を評価する。
             if pt is not None and pts is not None:
                 obs_txt = f"p_T={_fmt_float(pt, digits=3)}±{_fmt_float(pts, digits=3)}"
+            # 条件分岐: 前段条件が不成立で、`pt is not None` を追加評価する。
             elif pt is not None:
                 obs_txt = f"p_T={_fmt_float(pt, digits=3)}"
 
             metric = " / ".join([p for p in (f"z={_fmt_float(z, digits=3)}" if z is not None else "", src_txt) if p])
             metric_public = ""
+            # 条件分岐: `z is not None` を満たす経路を評価する。
             if z is not None:
                 metric_public = f"観測との差: {_fmt_float(abs(z), digits=2)}σ（0に近いほど一致）"
 
@@ -1276,12 +1601,15 @@ def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
     the reproducible entry point and the current 'release wait' blocker.
     """
     path = _OUT_PRIVATE / "cosmology" / "jwst_spectra_integration_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     try:
         j = _read_json(path)
     except Exception:
         return []
+
     jw = j.get("jwst_mast") if isinstance(j.get("jwst_mast"), dict) else {}
     t1 = j.get("table1") if isinstance(j.get("table1"), dict) else {}
 
@@ -1298,23 +1626,34 @@ def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
 
     metric_parts: List[str] = []
     metric_public_parts: List[str] = []
+    # 条件分岐: `targets_n > 0` を満たす経路を評価する。
     if targets_n > 0:
         metric_parts.append(f"targets={targets_n}")
         metric_public_parts.append(f"targets={targets_n}")
+
     metric_parts.append(f"x1d_qc_ok={qc_ok}/{targets_n}" if targets_n else f"x1d_qc_ok={qc_ok}")
     metric_parts.append(f"z_candidates={z_ok}/{targets_n}" if targets_n else f"z_candidates={z_ok}")
     metric_parts.append(f"z_confirmed={zc_ok}/{targets_n}" if targets_n else f"z_confirmed={zc_ok}")
     metric_public_parts.append(f"x1d_qc_ok={qc_ok}/{targets_n}" if targets_n else f"x1d_qc_ok={qc_ok}")
     metric_public_parts.append(f"z_confirmed={zc_ok}/{targets_n}" if targets_n else f"z_confirmed={zc_ok}")
+    # 条件分岐: `blocked > 0` を満たす経路を評価する。
     if blocked > 0:
         btxt = f"release_wait={blocked}"
+        # 条件分岐: `next_rel` を満たす経路を評価する。
         if next_rel:
             btxt += f"; next_release={next_rel}"
+
         metric_parts.append(btxt)
         metric_public_parts.append(btxt)
+
+    # 条件分岐: `status and status != "adopted"` を満たす経路を評価する。
+
     if status and status != "adopted":
         metric_parts.append(f"Table1={status}")
         metric_public_parts.append(f"Table1={status}")
+
+    # 条件分岐: `reason_txt` を満たす経路を評価する。
+
     if reason_txt:
         metric_parts.append(f"reason={reason_txt}")
 
@@ -1341,6 +1680,7 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
       in `output/private/xrism/xrism_integration_metrics.json`.
     """
     path = _OUT_PRIVATE / "xrism" / "xrism_integration_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
 
@@ -1360,6 +1700,7 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
         n_total = int(bh.get("n_obsids_total") or 0)
     except Exception:
         n_total = 0
+
     try:
         n_det = int(bh.get("n_obsids_detected") or 0)
     except Exception:
@@ -1377,20 +1718,36 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
 
     bh_metric_parts: List[str] = []
     bh_metric_public_parts: List[str] = []
+    # 条件分岐: `n_total > 0` を満たす経路を評価する。
     if n_total > 0:
         bh_metric_parts.append(f"detected_obsids={n_det}/{n_total}")
         bh_metric_public_parts.append(f"detected_obsids={n_det}/{n_total}")
+
+    # 条件分岐: `beta is not None` を満たす経路を評価する。
+
     if beta is not None:
         bh_metric_parts.append(f"|β|_best≈{_fmt_float(abs(beta), digits=3)}")
         bh_metric_public_parts.append(f"|β|_best≈{_fmt_float(abs(beta), digits=3)}")
+
+    # 条件分岐: `beta_sig is not None` を満たす経路を評価する。
+
     if beta_sig is not None:
         bh_metric_parts.append(f"σ_total≈{_fmt_float(beta_sig, digits=3)}")
+
+    # 条件分岐: `ratio is not None` を満たす経路を評価する。
+
     if ratio is not None:
         bh_metric_parts.append(f"sys/stat≈{_fmt_float(ratio, digits=2)}")
         bh_metric_public_parts.append(f"sys/stat≈{_fmt_float(ratio, digits=2)}")
+
+    # 条件分岐: `bh_status and bh_status != "adopted"` を満たす経路を評価する。
+
     if bh_status and bh_status != "adopted":
         bh_metric_parts.append(f"Table1={bh_status}")
         bh_metric_public_parts.append(f"Table1={bh_status}")
+
+    # 条件分岐: `bh_reason_txt` を満たす経路を評価する。
+
     if bh_reason_txt:
         bh_metric_parts.append(f"reason={bh_reason_txt}")
 
@@ -1412,6 +1769,7 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
         n_total = int(cl.get("n_obsids_total") or 0)
     except Exception:
         n_total = 0
+
     try:
         n_det = int(cl.get("n_obsids_detected") or 0)
     except Exception:
@@ -1431,20 +1789,36 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
 
     cl_metric_parts: List[str] = []
     cl_metric_public_parts: List[str] = []
+    # 条件分岐: `n_total > 0` を満たす経路を評価する。
     if n_total > 0:
         cl_metric_parts.append(f"detected_obsids={n_det}/{n_total}")
         cl_metric_public_parts.append(f"detected_obsids={n_det}/{n_total}")
+
+    # 条件分岐: `dv is not None` を満たす経路を評価する。
+
     if dv is not None:
         cl_metric_parts.append(f"Δv(opt−X)≈{_fmt_float(dv, digits=1)} km/s")
         cl_metric_public_parts.append(f"Δv(opt−X)≈{_fmt_float(dv, digits=1)} km/s")
+
+    # 条件分岐: `zsig is not None` を満たす経路を評価する。
+
     if zsig is not None:
         cl_metric_parts.append(f"σ_z_total≈{_fmt_sci(zsig, digits=2)}")
+
+    # 条件分岐: `ratio is not None` を満たす経路を評価する。
+
     if ratio is not None:
         cl_metric_parts.append(f"sys/stat≈{_fmt_float(ratio, digits=2)}")
         cl_metric_public_parts.append(f"sys/stat≈{_fmt_float(ratio, digits=2)}")
+
+    # 条件分岐: `cl_status and cl_status != "adopted"` を満たす経路を評価する。
+
     if cl_status and cl_status != "adopted":
         cl_metric_parts.append(f"Table1={cl_status}")
         cl_metric_public_parts.append(f"Table1={cl_status}")
+
+    # 条件分岐: `cl_reason_txt` を満たす経路を評価する。
+
     if cl_reason_txt:
         cl_metric_parts.append(f"reason={cl_reason_txt}")
 
@@ -1477,12 +1851,16 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
         out: Dict[Tuple[str, str], Dict[str, Any]] = {}
         rows = payload.get("results") if isinstance(payload.get("results"), list) else []
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             dist = str(r.get("dist") or "")
             z_bin = str(r.get("z_bin") or "")
+            # 条件分岐: `dist not in ("lcdm", "pbg") or not z_bin` を満たす経路を評価する。
             if dist not in ("lcdm", "pbg") or not z_bin:
                 continue
+
             sc = (r.get("screening") or {}) if isinstance(r.get("screening"), dict) else {}
             fit = (r.get("fit") or {}) if isinstance(r.get("fit"), dict) else {}
             free = (fit.get("free") or {}) if isinstance(fit.get("free"), dict) else {}
@@ -1493,18 +1871,25 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 "abs_sigma": _safe_float(sc.get("abs_sigma")),
                 "abs_sigma_is_lower_bound": bool(sc.get("abs_sigma_is_lower_bound")),
             }
+
         return out
 
     def _fmt_pm(eps: Any, sig: Any) -> str:
         e = _safe_float(eps)
         s = _safe_float(sig)
+        # 条件分岐: `e is None` を満たす経路を評価する。
         if e is None:
             return "ε=?"
+
+        # 条件分岐: `s is None or s <= 0` を満たす経路を評価する。
+
         if s is None or s <= 0:
             return f"ε={_fmt_float(e, digits=3)}"
+
         return f"ε={_fmt_float(e, digits=3)}±{_fmt_float(s, digits=3)}"
 
     # Phase 4.5B decisive: BOSS DR12v5 (CMASSLOWZTOT; z-bins) with MW multigrid recon + Ross cov.
+
     path = _first_existing(
         [
             _OUT_PRIVATE
@@ -1519,14 +1904,19 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
             / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_mw_multigrid_ani_mw_rw_boss_recon_rz_zmin0p2_zmax0p75_g512_bias1p85_f0p757_metrics.json",
         ]
     )
+    # 条件分岐: `path is not None and path.exists()` を満たす経路を評価する。
     if path is not None and path.exists():
         try:
             j = _read_json(path)
         except Exception:
             j = None
+
+        # 条件分岐: `j is not None` を満たす経路を評価する。
+
         if j is not None:
             by = _collect_peakfit_results(j)
             zbins = [z for z in ("b1", "b2", "b3") if ("pbg", z) in by]
+            # 条件分岐: `zbins` を満たす経路を評価する。
             if zbins:
                 worst_zbin = max(zbins, key=lambda z: float(by[("pbg", z)].get("abs_sigma") or -1.0))
                 w = by[("pbg", worst_zbin)]
@@ -1542,20 +1932,34 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 sig_l = w_l.get("sigma_eps")
 
                 metric_parts: List[str] = []
+                # 条件分岐: `z_eff is not None` を満たす経路を評価する。
                 if z_eff is not None:
                     metric_parts.append(f"z_eff={_fmt_float(z_eff, digits=3)}")
+
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
+
                 if abs_sigma_p is not None:
                     metric_parts.append(
                         f"pbg({worst_zbin}): |z|={'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=2)}σ"
                     )
+
+                # 条件分岐: `eps_p is not None` を満たす経路を評価する。
+
                 if eps_p is not None:
                     metric_parts.append(f"pbg({worst_zbin}): {_fmt_pm(eps_p, sig_p)}")
+
+                # 条件分岐: `eps_l is not None` を満たす経路を評価する。
+
                 if eps_l is not None:
                     metric_parts.append(f"lcdm({worst_zbin}): {_fmt_pm(eps_l, sig_l)}")
+
+                # 条件分岐: `eps_p is not None and eps_l is not None` を満たす経路を評価する。
+
                 if eps_p is not None and eps_l is not None:
                     metric_parts.append(f"Δε(pbg−lcdm)={_fmt_float(float(eps_p) - float(eps_l), digits=3)}")
 
                 # Pre-recon cross-check (Satpathy 2016 covariance).
+
                 prerecon_path = _first_existing(
                     [
                         _OUT_PRIVATE
@@ -1570,11 +1974,13 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                         / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json",
                     ]
                 )
+                # 条件分岐: `prerecon_path is not None and prerecon_path.exists()` を満たす経路を評価する。
                 if prerecon_path is not None and prerecon_path.exists():
                     try:
                         jp = _read_json(prerecon_path)
                         by_p = _collect_peakfit_results(jp)
                         zbins_p = [z for z in ("b1", "b2", "b3") if ("pbg", z) in by_p]
+                        # 条件分岐: `zbins_p` を満たす経路を評価する。
                         if zbins_p:
                             worst_p = max(zbins_p, key=lambda z: float(by_p[("pbg", z)].get("abs_sigma") or -1.0))
                             wp = by_p[("pbg", worst_p)]
@@ -1586,15 +1992,28 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                             lb_p_p = bool(wp.get("abs_sigma_is_lower_bound"))
                             eps_l_p = wl.get("eps")
                             sig_l_p = wl.get("sigma_eps")
+                            # 条件分岐: `abs_sigma_p_p is not None` を満たす経路を評価する。
                             if abs_sigma_p_p is not None:
                                 msg = f"pre-recon(Satpathy cov) pbg({worst_p}): |z|={'≥' if lb_p_p else ''}{_fmt_float(abs(abs_sigma_p_p), digits=2)}σ"
                                 metric_parts.append(msg)
+
+                            # 条件分岐: `z_eff_p is not None` を満たす経路を評価する。
+
                             if z_eff_p is not None:
                                 metric_parts.append(f"pre-recon z_eff={_fmt_float(z_eff_p, digits=3)}")
+
+                            # 条件分岐: `eps_p_p is not None` を満たす経路を評価する。
+
                             if eps_p_p is not None:
                                 metric_parts.append(f"pre-recon pbg({worst_p}): {_fmt_pm(eps_p_p, sig_p_p)}")
+
+                            # 条件分岐: `eps_l_p is not None` を満たす経路を評価する。
+
                             if eps_l_p is not None:
                                 metric_parts.append(f"pre-recon lcdm({worst_p}): {_fmt_pm(eps_l_p, sig_l_p)}")
+
+                            # 条件分岐: `eps_p_p is not None and eps_l_p is not None` を満たす経路を評価する。
+
                             if eps_p_p is not None and eps_l_p is not None:
                                 metric_parts.append(
                                     f"pre-recon Δε(pbg−lcdm)={_fmt_float(float(eps_p_p) - float(eps_l_p), digits=3)}"
@@ -1603,30 +2022,43 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                         pass
 
                 # Cross-check: P(k) multipoles peakfit (Beutler et al.; window-convolved).
+
                 pk_post_path = _OUT_PRIVATE / "cosmology" / "cosmology_bao_pk_multipole_peakfit_window_metrics.json"
+                # 条件分岐: `pk_post_path.exists()` を満たす経路を評価する。
                 if pk_post_path.exists():
                     try:
                         jk = _read_json(pk_post_path)
                         rows_k = jk.get("results") if isinstance(jk.get("results"), list) else []
                         pk_items: List[Tuple[float, int, float, float]] = []
                         for r in rows_k:
+                            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                             if not isinstance(r, dict):
                                 continue
+
                             zbin_k = int(_safe_float(r.get("zbin")) or 0)
                             fit_k = (r.get("fit") or {}) if isinstance(r.get("fit"), dict) else {}
                             free_k = (fit_k.get("free") or {}) if isinstance(fit_k.get("free"), dict) else {}
                             eps_k = _safe_float(free_k.get("eps"))
                             ci = free_k.get("eps_ci_1sigma")
+                            # 条件分岐: `eps_k is None or not (isinstance(ci, list) and len(ci) == 2)` を満たす経路を評価する。
                             if eps_k is None or not (isinstance(ci, list) and len(ci) == 2):
                                 continue
+
                             lo = _safe_float(ci[0])
                             hi = _safe_float(ci[1])
+                            # 条件分岐: `lo is None or hi is None` を満たす経路を評価する。
                             if lo is None or hi is None:
                                 continue
+
                             sig_k = (float(hi) - float(lo)) / 2.0
+                            # 条件分岐: `not (sig_k > 0.0)` を満たす経路を評価する。
                             if not (sig_k > 0.0):
                                 continue
+
                             pk_items.append((abs(float(eps_k)) / float(sig_k), zbin_k, float(eps_k), float(sig_k)))
+
+                        # 条件分岐: `pk_items` を満たす経路を評価する。
+
                         if pk_items:
                             abs_sigma_k, zbin_k, eps_k, sig_k = max(pk_items, key=lambda t: float(t[0]))
                             metric_parts.append(
@@ -1636,6 +2068,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                         pass
 
                 metric_public = ""
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
                 if abs_sigma_p is not None:
                     metric_public = f"幾何の歪み（ε）: {'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=1)}σ（0に近いほど一致）"
 
@@ -1653,14 +2086,20 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 )
 
     # Phase 4.5B.21 extension: eBOSS DR16 LRGpCMASS (recon) screening (diag cov).
+
     eboss_path = _OUT_PRIVATE / "cosmology" / "cosmology_bao_catalog_peakfit_lrgpcmass_rec_combined_metrics.json"
+    # 条件分岐: `eboss_path.exists()` を満たす経路を評価する。
     if eboss_path.exists():
         try:
             je = _read_json(eboss_path)
         except Exception:
             je = None
+
+        # 条件分岐: `je is not None` を満たす経路を評価する。
+
         if je is not None:
             by = _collect_peakfit_results(je)
+            # 条件分岐: `("pbg", "none") in by` を満たす経路を評価する。
             if ("pbg", "none") in by:
                 w = by[("pbg", "none")]
                 w_l = by.get(("lcdm", "none")) or {}
@@ -1673,18 +2112,32 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 sig_l = w_l.get("sigma_eps")
 
                 metric_parts: List[str] = []
+                # 条件分岐: `z_eff is not None` を満たす経路を評価する。
                 if z_eff is not None:
                     metric_parts.append(f"z_eff={_fmt_float(z_eff, digits=3)}")
+
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
+
                 if abs_sigma_p is not None:
                     metric_parts.append(f"pbg: |z|={'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=2)}σ")
+
+                # 条件分岐: `eps_p is not None` を満たす経路を評価する。
+
                 if eps_p is not None:
                     metric_parts.append(f"pbg: {_fmt_pm(eps_p, sig_p)}")
+
+                # 条件分岐: `eps_l is not None` を満たす経路を評価する。
+
                 if eps_l is not None:
                     metric_parts.append(f"lcdm: {_fmt_pm(eps_l, sig_l)}")
+
+                # 条件分岐: `eps_p is not None and eps_l is not None` を満たす経路を評価する。
+
                 if eps_p is not None and eps_l is not None:
                     metric_parts.append(f"Δε(pbg−lcdm)={_fmt_float(float(eps_p) - float(eps_l), digits=3)}")
 
                 metric_public = ""
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
                 if abs_sigma_p is not None:
                     metric_public = f"幾何の歪み（ε）: {'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=1)}σ（0に近いほど一致）"
 
@@ -1706,14 +2159,20 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 )
 
     # Phase 4.5B.21.4 extension: eBOSS DR16 QSO (z~1.5) screening (diag cov).
+
     eboss_qso_path = _OUT_PRIVATE / "cosmology" / "cosmology_bao_catalog_peakfit_qso_combined_metrics.json"
+    # 条件分岐: `eboss_qso_path.exists()` を満たす経路を評価する。
     if eboss_qso_path.exists():
         try:
             jq = _read_json(eboss_qso_path)
         except Exception:
             jq = None
+
+        # 条件分岐: `jq is not None` を満たす経路を評価する。
+
         if jq is not None:
             by = _collect_peakfit_results(jq)
+            # 条件分岐: `("pbg", "none") in by` を満たす経路を評価する。
             if ("pbg", "none") in by:
                 w = by[("pbg", "none")]
                 eps_p = w.get("eps")
@@ -1727,18 +2186,32 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 sig_l = wl.get("sigma_eps")
 
                 metric_parts = []
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
                 if abs_sigma_p is not None:
                     metric_parts.append(f"pbg: |z|={'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=2)}σ")
+
+                # 条件分岐: `z_eff is not None` を満たす経路を評価する。
+
                 if z_eff is not None:
                     metric_parts.append(f"z_eff={_fmt_float(z_eff, digits=3)}")
+
+                # 条件分岐: `eps_p is not None` を満たす経路を評価する。
+
                 if eps_p is not None:
                     metric_parts.append(f"pbg: {_fmt_pm(eps_p, sig_p)}")
+
+                # 条件分岐: `eps_l is not None` を満たす経路を評価する。
+
                 if eps_l is not None:
                     metric_parts.append(f"lcdm: {_fmt_pm(eps_l, sig_l)}")
+
+                # 条件分岐: `eps_p is not None and eps_l is not None` を満たす経路を評価する。
+
                 if eps_p is not None and eps_l is not None:
                     metric_parts.append(f"Δε(pbg−lcdm)={_fmt_float(float(eps_p) - float(eps_l), digits=3)}")
 
                 metric_public = ""
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
                 if abs_sigma_p is not None:
                     metric_public = f"幾何の歪み（ε）: {'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=1)}σ（0に近いほど一致）"
 
@@ -1761,6 +2234,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
 
     # Phase 4.5B.21.4.4 extension: DESI DR1 LRG (catalog-based; dv=[xi0,xi2] + cov; LRG1/LRG2 bins).
     # Prefer the "primary product" pipeline outputs (RascalC/jackknife) when available.
+
     desi_candidates = [
         _OUT_PRIVATE
         / "cosmology"
@@ -1814,24 +2288,35 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
         / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins__jk_cov_both_metrics.json",
     ]
     desi_path = next((p for p in desi_candidates if p.exists()), None)
+    # 条件分岐: `desi_path is not None` を満たす経路を評価する。
     if desi_path is not None:
         try:
             jd = _read_json(desi_path)
         except Exception:
             jd = None
+
+        # 条件分岐: `jd is not None` を満たす経路を評価する。
+
         if jd is not None:
             rows = jd.get("results") if isinstance(jd.get("results"), list) else []
 
             def _collect_by_dist(dist: str) -> List[Dict[str, Any]]:
                 out: List[Dict[str, Any]] = []
                 for r in rows:
+                    # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                     if not isinstance(r, dict):
                         continue
+
+                    # 条件分岐: `str(r.get("dist") or "") != dist` を満たす経路を評価する。
+
                     if str(r.get("dist") or "") != dist:
                         continue
+
                     z_eff = _safe_float(r.get("z_eff"))
+                    # 条件分岐: `z_eff is None` を満たす経路を評価する。
                     if z_eff is None:
                         continue
+
                     sc = (r.get("screening") or {}) if isinstance(r.get("screening"), dict) else {}
                     fit = (r.get("fit") or {}) if isinstance(r.get("fit"), dict) else {}
                     free = (fit.get("free") or {}) if isinstance(fit.get("free"), dict) else {}
@@ -1844,11 +2329,13 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                             "abs_sigma_is_lower_bound": bool(sc.get("abs_sigma_is_lower_bound")),
                         }
                     )
+
                 out.sort(key=lambda d: float(d.get("z_eff") or 0.0))
                 return out
 
             pts_p = _collect_by_dist("pbg")
             pts_l = _collect_by_dist("lcdm")
+            # 条件分岐: `pts_p` を満たす経路を評価する。
             if pts_p:
                 worst_p = max(pts_p, key=lambda d: float(d.get("abs_sigma") or -1.0))
                 abs_sigma_p = worst_p.get("abs_sigma")
@@ -1859,32 +2346,46 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                 metric_parts: List[str] = []
                 for p in pts_p:
                     z_eff = p.get("z_eff")
+                    # 条件分岐: `z_eff is None` を満たす経路を評価する。
                     if z_eff is None:
                         continue
+
                     label = "LRG1" if float(z_eff) < 0.6 else "LRG2"
                     msg_parts: List[str] = [f"{label}: z_eff={_fmt_float(z_eff, digits=3)}"]
+                    # 条件分岐: `p.get("eps") is not None` を満たす経路を評価する。
                     if p.get("eps") is not None:
                         msg_parts.append(f"pbg: {_fmt_pm(p.get('eps'), p.get('sigma_eps'))}")
+
+                    # 条件分岐: `p.get("abs_sigma") is not None` を満たす経路を評価する。
+
                     if p.get("abs_sigma") is not None:
                         msg_parts.append(
                             f"|z|={'≥' if p.get('abs_sigma_is_lower_bound') else ''}{_fmt_float(abs(float(p['abs_sigma'])), digits=2)}σ"
                         )
+
                     wl = min(pts_l, key=lambda q: abs(float(q.get("z_eff") or 0.0) - float(z_eff))) if pts_l else None
+                    # 条件分岐: `wl and wl.get("eps") is not None` を満たす経路を評価する。
                     if wl and wl.get("eps") is not None:
                         msg_parts.append(f"lcdm: {_fmt_pm(wl.get('eps'), wl.get('sigma_eps'))}")
+                        # 条件分岐: `p.get("eps") is not None and wl.get("eps") is not None` を満たす経路を評価する。
                         if p.get("eps") is not None and wl.get("eps") is not None:
                             metric_parts.append(
                                 " / ".join(msg_parts)
                                 + f" / Δε(pbg−lcdm)={_fmt_float(float(p['eps']) - float(wl['eps']), digits=3)}"
                             )
                             continue
+
                     metric_parts.append(" / ".join(msg_parts))
+
                 cov_label = "jackknife（sky; dv+cov）"
+                # 条件分岐: `"__rascalc_cov" in desi_path.name` を満たす経路を評価する。
                 if "__rascalc_cov" in desi_path.name:
                     cov_label = "RascalC（legendre_projected; dv+cov）"
+
                 metric_parts.append(f"cov={cov_label}")
 
                 metric_public = ""
+                # 条件分岐: `abs_sigma_p is not None` を満たす経路を評価する。
                 if abs_sigma_p is not None:
                     metric_public = (
                         f"幾何の歪み（ε）: max|z|={'≥' if lb_p else ''}{_fmt_float(abs(abs_sigma_p), digits=1)}σ"
@@ -1919,8 +2420,10 @@ def _load_cosmology_cmb_polarization_phase_rows(root: Path) -> List[TableRow]:
             root / "output" / "cosmology" / "cosmology_cmb_polarization_phase_audit_metrics.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -1940,19 +2443,32 @@ def _load_cosmology_cmb_polarization_phase_rows(root: Path) -> List[TableRow]:
     overall = str(gate.get("overall_status") or "")
 
     metric_parts: List[str] = []
+    # 条件分岐: `delta_ee is not None` を満たす経路を評価する。
     if delta_ee is not None:
         metric_parts.append(f"Δϕ_EE={_fmt_float(delta_ee, digits=3)}")
+
+    # 条件分岐: `delta_te is not None` を満たす経路を評価する。
+
     if delta_te is not None:
         metric_parts.append(f"Δϕ_TE={_fmt_float(delta_te, digits=3)}")
+
+    # 条件分岐: `abs_ee is not None` を満たす経路を評価する。
+
     if abs_ee is not None:
         metric_parts.append(f"|Δϕ_EE−0.5|={_fmt_float(abs_ee, digits=3)}")
+
+    # 条件分岐: `abs_te is not None` を満たす経路を評価する。
+
     if abs_te is not None:
         metric_parts.append(f"|Δϕ_TE−0.25|={_fmt_float(abs_te, digits=3)}")
+
     metric_parts.append(f"hard_gate={'pass' if hard_pass else 'fail'}")
+    # 条件分岐: `overall` を満たす経路を評価する。
     if overall:
         metric_parts.append(f"overall={overall}")
 
     metric_public = ""
+    # 条件分岐: `abs_ee is not None and abs_te is not None` を満たす経路を評価する。
     if abs_ee is not None and abs_te is not None:
         metric_public = (
             f"位相ズレ判定: {'pass' if hard_pass else 'fail'}"
@@ -1981,8 +2497,10 @@ def _load_cosmology_fsigma8_growth_rows(root: Path) -> List[TableRow]:
             root / "output" / "cosmology" / "cosmology_fsigma8_growth_mapping_metrics.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -2000,20 +2518,35 @@ def _load_cosmology_fsigma8_growth_rows(root: Path) -> List[TableRow]:
     n_pts = int(_safe_float((j.get("inputs") or {}).get("n_rsd_points")) or 0) if isinstance(j.get("inputs"), dict) else 0
 
     metric_parts: List[str] = []
+    # 条件分岐: `chi2 is not None and dof > 0` を満たす経路を評価する。
     if chi2 is not None and dof > 0:
         metric_parts.append(f"delay: χ²/dof={_fmt_float(chi2, digits=3)}/{dof}")
+
+    # 条件分岐: `chi2_dof is not None` を満たす経路を評価する。
+
     if chi2_dof is not None:
         metric_parts.append(f"χ²/ν={_fmt_float(chi2_dof, digits=3)}")
+
+    # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
+
     if max_abs_z is not None:
         metric_parts.append(f"max|z|={_fmt_float(max_abs_z, digits=3)}")
+
+    # 条件分岐: `tau_eff is not None` を満たす経路を評価する。
+
     if tau_eff is not None:
         metric_parts.append(f"τ_eff={_fmt_float(tau_eff, digits=4)} Gyr")
+
+    # 条件分岐: `overall` を満たす経路を評価する。
+
     if overall:
         metric_parts.append(f"overall={overall}")
 
     metric_public = ""
+    # 条件分岐: `chi2 is not None and dof > 0` を満たす経路を評価する。
     if chi2 is not None and dof > 0:
         metric_public = f"fσ8整合: χ²/dof={_fmt_float(chi2, digits=3)}/{dof}"
+        # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
         if max_abs_z is not None:
             metric_public += f"（max|z|={_fmt_float(max_abs_z, digits=3)}）"
 
@@ -2039,8 +2572,10 @@ def _load_cosmology_cmb_acoustic_peak_rows(root: Path) -> List[TableRow]:
             root / "output" / "cosmology" / "cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -2069,23 +2604,42 @@ def _load_cosmology_cmb_acoustic_peak_rows(root: Path) -> List[TableRow]:
     a3_obs = _safe_float(dm_free.get("a3_over_a1_observed"))
 
     metric_parts: List[str] = []
+    # 条件分岐: `first3_ell is not None` を満たす経路を評価する。
     if first3_ell is not None:
         metric_parts.append(f"first3 max|Δℓ|={_fmt_float(first3_ell, digits=3)}")
+
+    # 条件分岐: `first3_amp is not None` を満たす経路を評価する。
+
     if first3_amp is not None:
         metric_parts.append(f"first3 max|ΔA/A|={_fmt_float(first3_amp, digits=3)}")
+
+    # 条件分岐: `ext46_ell is not None` を満たす経路を評価する。
+
     if ext46_ell is not None:
         metric_parts.append(f"holdout4-6 max|Δℓ|={_fmt_float(ext46_ell, digits=3)}")
+
+    # 条件分岐: `ext46_amp is not None` を満たす経路を評価する。
+
     if ext46_amp is not None:
         metric_parts.append(f"holdout4-6 max|ΔA/A|={_fmt_float(ext46_amp, digits=3)}")
+
     metric_parts.append(f"dm-free第3ピーク減衰={'pass' if theorem_pass else 'fail'}")
+    # 条件分岐: `a3_pred is not None and a3_obs is not None` を満たす経路を評価する。
     if a3_pred is not None and a3_obs is not None:
         metric_parts.append(f"A3/A1(pred/obs)={_fmt_float(a3_pred, digits=3)}/{_fmt_float(a3_obs, digits=3)}")
+
+    # 条件分岐: `isinstance(overall, dict) and overall.get("status")` を満たす経路を評価する。
+
     if isinstance(overall, dict) and overall.get("status"):
         metric_parts.append(f"core={str(overall.get('status'))}")
+
+    # 条件分岐: `isinstance(overall_ext, dict) and overall_ext.get("status")` を満たす経路を評価する。
+
     if isinstance(overall_ext, dict) and overall_ext.get("status"):
         metric_parts.append(f"extended={str(overall_ext.get('status'))}")
 
     metric_public = ""
+    # 条件分岐: `first3_ell is not None and ext46_ell is not None` を満たす経路を評価する。
     if first3_ell is not None and ext46_ell is not None:
         metric_public = (
             f"逆同定+holdout整合: first3 max|Δℓ|={_fmt_float(first3_ell, digits=2)}, "
@@ -2116,8 +2670,10 @@ def _load_sparc_rotation_rows(root: Path) -> List[TableRow]:
             root / "output" / "cosmology" / "sparc_rotation_curve_pmodel_audit_metrics.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -2140,22 +2696,36 @@ def _load_sparc_rotation_rows(root: Path) -> List[TableRow]:
     upsilon = _safe_float(pm.get("upsilon_best"))
 
     metric_parts: List[str] = []
+    # 条件分岐: `delta_chi2 is not None` を満たす経路を評価する。
     if delta_chi2 is not None:
         metric_parts.append(f"Δχ²(baryon−P)={_fmt_float(delta_chi2, digits=2)}")
+
+    # 条件分岐: `ratio is not None` を満たす経路を評価する。
+
     if ratio is not None:
         metric_parts.append(f"χ²/ν比(P/baryon)={_fmt_float(ratio, digits=3)}")
+
+    # 条件分岐: `pm_chi2_dof is not None and baryon_chi2_dof is not None` を満たす経路を評価する。
+
     if pm_chi2_dof is not None and baryon_chi2_dof is not None:
         metric_parts.append(
             f"χ²/ν: P={_fmt_float(pm_chi2_dof, digits=3)}, baryon={_fmt_float(baryon_chi2_dof, digits=3)}"
         )
+
+    # 条件分岐: `median_pm is not None and median_b is not None` を満たす経路を評価する。
+
     if median_pm is not None and median_b is not None:
         metric_parts.append(
             f"銀河別中央値 χ²/ν: P={_fmt_float(median_pm, digits=3)}, baryon={_fmt_float(median_b, digits=3)}"
         )
+
+    # 条件分岐: `upsilon is not None` を満たす経路を評価する。
+
     if upsilon is not None:
         metric_parts.append(f"single-Υ best={_fmt_float(upsilon, digits=3)}")
 
     metric_public = ""
+    # 条件分岐: `delta_chi2 is not None and pm_chi2_dof is not None` を満たす経路を評価する。
     if delta_chi2 is not None and pm_chi2_dof is not None:
         metric_public = (
             f"single-Υで説明力向上: Δχ²={_fmt_float(delta_chi2, digits=1)}, "
@@ -2184,8 +2754,10 @@ def _load_bbn_rows(root: Path) -> List[TableRow]:
             root / "output" / "quantum" / "bbn_he4_watch_convergence_audit_metrics.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -2207,31 +2779,53 @@ def _load_bbn_rows(root: Path) -> List[TableRow]:
     q_b = None
     params = j.get("uncertainty_parameters") if isinstance(j.get("uncertainty_parameters"), list) else []
     for p in params:
+        # 条件分岐: `not isinstance(p, dict)` を満たす経路を評価する。
         if not isinstance(p, dict):
             continue
+
+        # 条件分岐: `str(p.get("name") or "") == "q_b"` を満たす経路を評価する。
+
         if str(p.get("name") or "") == "q_b":
             q_b = _safe_float(p.get("mu"))
             break
 
     metric_parts: List[str] = []
+    # 条件分岐: `y_pred is not None and y_obs is not None and y_sig is not None` を満たす経路を評価する。
     if y_pred is not None and y_obs is not None and y_sig is not None:
         metric_parts.append(
             f"Yp(pred/obs)={_fmt_float(y_pred, digits=4)}/{_fmt_float(y_obs, digits=4)}±{_fmt_float(y_sig, digits=4)}"
         )
+
+    # 条件分岐: `z_lin is not None` を満たす経路を評価する。
+
     if z_lin is not None:
         metric_parts.append(f"|z|_linear={_fmt_float(z_lin, digits=3)}")
+
+    # 条件分岐: `z_mc is not None` を満たす経路を評価する。
+
     if z_mc is not None:
         metric_parts.append(f"|z|_MC={_fmt_float(z_mc, digits=3)}")
+
+    # 条件分岐: `q_b is not None` を満たす経路を評価する。
+
     if q_b is not None:
         metric_parts.append(f"q_B={_fmt_float(q_b, digits=3)}")
+
+    # 条件分岐: `overall` を満たす経路を評価する。
+
     if overall:
         metric_parts.append(f"overall={overall}")
+
+    # 条件分岐: `criterion` を満たす経路を評価する。
+
     if criterion:
         metric_parts.append(f"criterion={criterion}")
 
     metric_public = ""
+    # 条件分岐: `y_pred is not None and y_obs is not None` を満たす経路を評価する。
     if y_pred is not None and y_obs is not None:
         metric_public = f"Yp整合: pred={_fmt_float(y_pred, digits=4)}, obs={_fmt_float(y_obs, digits=4)}"
+        # 条件分岐: `z_lin is not None` を満たす経路を評価する。
         if z_lin is not None:
             metric_public += f" / |z|={_fmt_float(z_lin, digits=2)}"
 
@@ -2263,8 +2857,10 @@ def _load_background_metric_choice_rows(root: Path) -> List[TableRow]:
                 root / "output" / "theory" / relpath,
             ]
         )
+        # 条件分岐: `path is None` を満たす経路を評価する。
         if path is None:
             continue
+
         try:
             j = _read_json(path)
         except Exception:
@@ -2281,18 +2877,32 @@ def _load_background_metric_choice_rows(root: Path) -> List[TableRow]:
         nonlinear = bool(derived.get("nonlinear_pde_closure_pass")) if "nonlinear_pde_closure_pass" in derived else None
 
         metric_parts: List[str] = []
+        # 条件分岐: `z_gamma is not None` を満たす経路を評価する。
         if z_gamma is not None:
             metric_parts.append(f"γ gate z={_fmt_float(z_gamma, digits=3)}")
+
+        # 条件分岐: `mercury_rel is not None` を満たす経路を評価する。
+
         if mercury_rel is not None:
             metric_parts.append(f"Mercury係数残差={_fmt_float(mercury_rel, digits=6)}")
+
+        # 条件分岐: `nonlinear is not None` を満たす経路を評価する。
+
         if nonlinear is not None:
             metric_parts.append(f"nonlinear_pde_closure={'pass' if nonlinear else 'fail'}")
+
+        # 条件分岐: `decision` を満たす経路を評価する。
+
         if decision:
             metric_parts.append(f"decision={decision}")
+
+        # 条件分岐: `overall` を満たす経路を評価する。
+
         if overall:
             metric_parts.append(f"overall={overall}")
 
         metric_public = ""
+        # 条件分岐: `case_label == "caseB"` を満たす経路を評価する。
         if case_label == "caseB":
             metric_public = "有効計量 g_{μν}(P) を採用（weak-field + 非線形PDE closure）"
         else:
@@ -2310,6 +2920,7 @@ def _load_background_metric_choice_rows(root: Path) -> List[TableRow]:
                 metric_public=metric_public,
             )
         )
+
     return out
 
 
@@ -2321,8 +2932,10 @@ def _load_gw_polarization_rows(root: Path) -> List[TableRow]:
             root / "output" / "gw" / "pmodel_vector_gw_polarization_mapping_audit.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -2338,14 +2951,27 @@ def _load_gw_polarization_rows(root: Path) -> List[TableRow]:
     scalar_red = bool(network.get("scalar_reduction_pass")) if "scalar_reduction_pass" in network else None
 
     metric_parts: List[str] = []
+    # 条件分岐: `overall` を満たす経路を評価する。
     if overall:
         metric_parts.append(f"overall={overall}")
+
+    # 条件分岐: `scalar_red is not None` を満たす経路を評価する。
+
     if scalar_red is not None:
         metric_parts.append(f"scalar_reduction={'pass' if scalar_red else 'fail'}")
+
+    # 条件分岐: `scalar_excl is not None` を満たす経路を評価する。
+
     if scalar_excl is not None:
         metric_parts.append(f"scalar_exclusion={'pass' if scalar_excl else 'fail'}")
+
+    # 条件分岐: `tensor_pass is not None` を満たす経路を評価する。
+
     if tensor_pass is not None:
         metric_parts.append(f"tensor_consistency={'pass' if tensor_pass else 'fail'}")
+
+    # 条件分岐: `reason` を満たす経路を評価する。
+
     if reason:
         metric_parts.append(f"reason={reason}")
 
@@ -2379,6 +3005,7 @@ def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
             root / "output" / "cosmology" / "cosmology_cluster_collision_p_peak_offset_audit.json",
         ]
     )
+    # 条件分岐: `deriv_path is None and audit_path is None` を満たす経路を評価する。
     if deriv_path is None and audit_path is None:
         return []
 
@@ -2388,6 +3015,7 @@ def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
     xi_mode = ""
     deriv_status = ""
     n_obs = None
+    # 条件分岐: `deriv_path is not None` を満たす経路を評価する。
     if deriv_path is not None:
         try:
             jd = _read_json(deriv_path)
@@ -2404,6 +3032,7 @@ def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
     chi2_dof_audit = None
     max_abs_z_lens = None
     audit_status = ""
+    # 条件分岐: `audit_path is not None` を満たす経路を評価する。
     if audit_path is not None:
         try:
             ja = _read_json(audit_path)
@@ -2415,26 +3044,52 @@ def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
             chi2_dof_audit = None
 
     metric_parts: List[str] = []
+    # 条件分岐: `chi2_dof is not None` を満たす経路を評価する。
     if chi2_dof is not None:
         metric_parts.append(f"導出系: χ²/ν={_fmt_float(chi2_dof, digits=3)}")
+
+    # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
+
     if max_abs_z is not None:
         metric_parts.append(f"導出系 max|z|={_fmt_float(max_abs_z, digits=3)}")
+
+    # 条件分岐: `chi2_dof_audit is not None` を満たす経路を評価する。
+
     if chi2_dof_audit is not None:
         metric_parts.append(f"オフセット監査: χ²/ν={_fmt_float(chi2_dof_audit, digits=3)}")
+
+    # 条件分岐: `max_abs_z_lens is not None` を満たす経路を評価する。
+
     if max_abs_z_lens is not None:
         metric_parts.append(f"レンズ重心 max|z|={_fmt_float(max_abs_z_lens, digits=3)}")
+
+    # 条件分岐: `ad_hoc_n is not None` を満たす経路を評価する。
+
     if ad_hoc_n is not None:
         metric_parts.append(f"ad_hoc={ad_hoc_n}")
+
+    # 条件分岐: `xi_mode` を満たす経路を評価する。
+
     if xi_mode:
         metric_parts.append(f"xi_mode={xi_mode}")
+
+    # 条件分岐: `deriv_status` を満たす経路を評価する。
+
     if deriv_status:
         metric_parts.append(f"derivation={deriv_status}")
+
+    # 条件分岐: `audit_status` を満たす経路を評価する。
+
     if audit_status:
         metric_parts.append(f"audit={audit_status}")
 
     metric_public = ""
+    # 条件分岐: `chi2_dof is not None` を満たす経路を評価する。
     if chi2_dof is not None:
         metric_public = f"Bullet系オフセット（導出）: χ²/ν={_fmt_float(chi2_dof, digits=3)}"
+
+    # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
+
     if max_abs_z is not None:
         metric_public += f" / max|z|={_fmt_float(max_abs_z, digits=3)}"
 
@@ -2460,8 +3115,10 @@ def _load_strong_field_higher_order_rows(root: Path) -> List[TableRow]:
             root / "output" / "theory" / "pmodel_strong_field_higher_order_audit.json",
         ]
     )
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return []
+
     try:
         j = _read_json(path)
     except Exception:
@@ -2477,20 +3134,35 @@ def _load_strong_field_higher_order_rows(root: Path) -> List[TableRow]:
     decision = str((j.get("decision") or {}).get("overall_status") or "")
 
     metric_parts: List[str] = []
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
     if delta_aic is not None:
         metric_parts.append(f"ΔAIC(fit−baseline)={_fmt_float(delta_aic, digits=3)}")
+
+    # 条件分岐: `lam is not None and lam_sig is not None and lam_sig > 0` を満たす経路を評価する。
+
     if lam is not None and lam_sig is not None and lam_sig > 0:
         metric_parts.append(f"λ_H={_fmt_float(lam, digits=6)}±{_fmt_float(lam_sig, digits=6)}")
+    # 条件分岐: 前段条件が不成立で、`lam is not None` を追加評価する。
     elif lam is not None:
         metric_parts.append(f"λ_H={_fmt_float(lam, digits=6)}")
+
+    # 条件分岐: `chi2_dof is not None` を満たす経路を評価する。
+
     if chi2_dof is not None:
         metric_parts.append(f"χ²/ν={_fmt_float(chi2_dof, digits=3)}")
+
+    # 条件分岐: `decision` を満たす経路を評価する。
+
     if decision:
         metric_parts.append(f"overall={decision}")
 
     metric_public = ""
+    # 条件分岐: `delta_aic is not None` を満たす経路を評価する。
     if delta_aic is not None:
         metric_public = f"強場高次項の同時拘束: ΔAIC={_fmt_float(delta_aic, digits=3)}"
+
+    # 条件分岐: `decision` を満たす経路を評価する。
+
     if decision:
         metric_public += f"（{decision}）"
 
@@ -2517,33 +3189,45 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
     """
     try:
         manifest: Path
+        # 条件分岐: `sample in ("lrgpcmass_rec", "qso")` を満たす経路を評価する。
         if sample in ("lrgpcmass_rec", "qso"):
             manifest = root / "data" / "cosmology" / "eboss_dr16_lss" / "manifest.json"
+        # 条件分岐: 前段条件が不成立で、`sample in ("lrg",)` を追加評価する。
         elif sample in ("lrg",):
             # Prefer the multi-random reservoir when present (primary-product; Step 4.5B.21.4.4.6).
             cand_res = root / "data" / "cosmology" / "desi_dr1_lss_reservoir_r0to17_mix" / "manifest.json"
             cand_full = root / "data" / "cosmology" / "desi_dr1_lss_full_r0" / "manifest.json"
+            # 条件分岐: `cand_res.exists()` を満たす経路を評価する。
             if cand_res.exists():
                 manifest = cand_res
+            # 条件分岐: 前段条件が不成立で、`cand_full.exists()` を追加評価する。
             elif cand_full.exists():
                 manifest = cand_full
             else:
                 manifest = root / "data" / "cosmology" / "desi_dr1_lss" / "manifest.json"
         else:
             return "random=?"
+
+        # 条件分岐: `not manifest.exists()` を満たす経路を評価する。
+
         if not manifest.exists():
             return "random=?"
+
         j = _read_json(manifest)
         items = j.get("items") or {}
         caps_to_use = ["north", "south"] if caps == "combined" else [caps]
 
         def _desc_from_name(name: str) -> str:
+            # 条件分岐: `".prefix_" in name` を満たす経路を評価する。
             if ".prefix_" in name:
                 try:
                     n = int(name.split(".prefix_", 1)[1].split(".npz", 1)[0])
                     return f"prefix random={n//1000000}M" if (n % 1_000_000 == 0) else f"prefix random={n:,}"
                 except Exception:
                     return "prefix random=?"
+
+            # 条件分岐: `".reservoir_" in name` を満たす経路を評価する。
+
             if ".reservoir_" in name:
                 try:
                     token = name.split(".reservoir_", 1)[1].split(".npz", 1)[0]
@@ -2551,6 +3235,7 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
                     return f"reservoir random={n//1000000}M" if (n % 1_000_000 == 0) else f"reservoir random={n:,}"
                 except Exception:
                     return "reservoir random=?"
+
             return "full random"
 
         descs: List[str] = []
@@ -2558,14 +3243,22 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
             it = items.get(f"{sample}:{cap}") or {}
             rnd = it.get("random") or {}
             npz = rnd.get("npz_path")
+            # 条件分岐: `not npz` を満たす経路を評価する。
             if not npz:
                 continue
+
             descs.append(_desc_from_name(Path(str(npz)).name))
+
         descs = sorted(set([d for d in descs if d]))
+        # 条件分岐: `not descs` を満たす経路を評価する。
         if not descs:
             return "random=?"
+
+        # 条件分岐: `len(descs) == 1` を満たす経路を評価する。
+
         if len(descs) == 1:
             return descs[0]
+
         return " / ".join(descs)
     except Exception:
         return "random=?"
@@ -2580,44 +3273,57 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
             root / "output" / "theory" / "frame_dragging_experiments.json",
         ]
     )
+    # 条件分岐: `path is not None` を満たす経路を評価する。
     if path is not None:
         j = _read_json(path)
         rows = j.get("rows") or []
     else:
         rows = []
+
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         label = str(r.get("short_label") or r.get("id") or "")
         mu = _safe_float(r.get("mu"))
         sig = _safe_float(r.get("mu_sigma"))
         z = _safe_float(r.get("z_score"))
 
         src = r.get("source") or {}
+        # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
         if not isinstance(src, dict):
             src = {}
+
         doi = str(src.get("doi") or "")
         year = str(src.get("year") or "")
         src_txt = doi
+        # 条件分岐: `year and doi` を満たす経路を評価する。
         if year and doi:
             src_txt = f"{year}, {doi}"
+        # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
         elif year and not src_txt:
             src_txt = year
 
         obs_txt = ""
+        # 条件分岐: `mu is not None and sig is not None` を満たす経路を評価する。
         if mu is not None and sig is not None:
             obs_txt = f"μ={_fmt_float(mu, digits=4)}±{_fmt_float(sig, digits=4)}"
+        # 条件分岐: 前段条件が不成立で、`mu is not None` を追加評価する。
         elif mu is not None:
             obs_txt = f"μ={_fmt_float(mu, digits=4)}"
 
         metric_parts: List[str] = []
+        # 条件分岐: `z is not None` を満たす経路を評価する。
         if z is not None:
             metric_parts.append(f"z={_fmt_float(z, digits=3)}")
 
         omega_pred = _safe_float(r.get("omega_pred_mas_per_yr"))
         omega_obs = _safe_float(r.get("omega_obs_mas_per_yr"))
         omega_sig = _safe_float(r.get("omega_obs_sigma_mas_per_yr"))
+        # 条件分岐: `omega_pred is not None and omega_obs is not None` を満たす経路を評価する。
         if omega_pred is not None and omega_obs is not None:
+            # 条件分岐: `omega_sig is not None` を満たす経路を評価する。
             if omega_sig is not None:
                 metric_parts.append(
                     f"|Ω|={_fmt_float(abs(omega_obs), digits=3)}±{_fmt_float(abs(omega_sig), digits=3)} mas/yr（予測 {_fmt_float(abs(omega_pred), digits=3)}）"
@@ -2627,10 +3333,13 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
                     f"|Ω|={_fmt_float(abs(omega_obs), digits=3)} mas/yr（予測 {_fmt_float(abs(omega_pred), digits=3)}）"
                 )
 
+        # 条件分岐: `src_txt` を満たす経路を評価する。
+
         if src_txt:
             metric_parts.append(src_txt)
 
         metric_public = ""
+        # 条件分岐: `mu is not None and sig is not None and sig > 0` を満たす経路を評価する。
         if mu is not None and sig is not None and sig > 0:
             metric_public = f"観測との差: {_fmt_float(abs(mu - 1.0) / sig, digits=2)}σ（1に近いほど一致）"
 
@@ -2654,6 +3363,7 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
             root / "output" / "theory" / "frame_dragging_scalar_limit_combined_audit.json",
         ]
     )
+    # 条件分岐: `scalar_audit_path is not None` を満たす経路を評価する。
     if scalar_audit_path is not None:
         try:
             js = _read_json(scalar_audit_path)
@@ -2664,13 +3374,18 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
             z_gate = _safe_float(gate.get("z_reject"))
             z_by_exp: Dict[str, float] = {}
             for rr in rows_scalar:
+                # 条件分岐: `not isinstance(rr, dict)` を満たす経路を評価する。
                 if not isinstance(rr, dict):
                     continue
+
                 observable = str(rr.get("observable") or "")
+                # 条件分岐: `observable != "frame_dragging"` を満たす経路を評価する。
                 if observable != "frame_dragging":
                     continue
+
                 exp = str(rr.get("experiment") or rr.get("label") or rr.get("id") or "")
                 z_scalar = _safe_float(rr.get("z_scalar"))
+                # 条件分岐: `exp and z_scalar is not None` を満たす経路を評価する。
                 if exp and z_scalar is not None:
                     z_by_exp[exp] = z_scalar
 
@@ -2683,31 +3398,57 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
             z_lageos = z_by_exp.get("LAGEOS")
 
             reference_parts: List[str] = []
+            # 条件分岐: `z_gp is not None` を満たす経路を評価する。
             if z_gp is not None:
                 reference_parts.append(f"GP-B z={_fmt_float(z_gp, digits=2)}")
+
+            # 条件分岐: `z_lageos is not None` を満たす経路を評価する。
+
             if z_lageos is not None:
                 reference_parts.append(f"LAGEOS z={_fmt_float(z_lageos, digits=2)}")
+
+            # 条件分岐: `z_gate is not None` を満たす経路を評価する。
+
             if z_gate is not None:
                 reference_parts.append(f"reject if abs(z)>{_fmt_float(z_gate, digits=1)}")
 
             metric_parts: List[str] = []
+            # 条件分岐: `z_gp is not None or z_lageos is not None` を満たす経路を評価する。
             if z_gp is not None or z_lageos is not None:
                 zz: List[str] = []
+                # 条件分岐: `z_gp is not None` を満たす経路を評価する。
                 if z_gp is not None:
                     zz.append(f"GP-B z_scalar={_fmt_float(z_gp, digits=3)}")
+
+                # 条件分岐: `z_lageos is not None` を満たす経路を評価する。
+
                 if z_lageos is not None:
                     zz.append(f"LAGEOS z_scalar={_fmt_float(z_lageos, digits=3)}")
+
                 metric_parts.append(" / ".join(zz))
+
+            # 条件分岐: `n_channels > 0` を満たす経路を評価する。
+
             if n_channels > 0:
                 metric_parts.append(f"frame-dragging reject={n_reject}/{n_channels}")
+
+            # 条件分岐: `z_gate is not None` を満たす経路を評価する。
+
             if z_gate is not None:
                 metric_parts.append(f"gate=abs(z)>{_fmt_float(z_gate, digits=1)}")
+
+            # 条件分岐: `decision` を満たす経路を評価する。
+
             if decision:
                 metric_parts.append(f"decision={decision}")
+
+            # 条件分岐: `overall` を満たす経路を評価する。
+
             if overall:
                 metric_parts.append(f"overall={overall}")
 
             metric_public = "純スカラー極限は棄却（GP-B/LAGEOS の両方で frame-dragging が reject）"
+            # 条件分岐: `z_gp is not None and z_lageos is not None` を満たす経路を評価する。
             if z_gp is not None and z_lageos is not None:
                 metric_public += (
                     f" / GP-B z={_fmt_float(z_gp, digits=2)}, "
@@ -2728,13 +3469,16 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
             )
         except Exception:
             pass
+
     return out
 
 
 def _load_delta_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "theory" / "delta_saturation_constraints.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     delta = float(j["delta_adopted"])
     gamma_max = float(j["gamma_max_for_delta_adopted"])
@@ -2743,15 +3487,18 @@ def _load_delta_rows(root: Path) -> List[TableRow]:
     strictest_label = None
     for r in j.get("rows") or []:
         du = float(r["delta_upper_from_gamma"])
+        # 条件分岐: `strictest is None or du < strictest` を満たす経路を評価する。
         if strictest is None or du < strictest:
             strictest = du
             strictest_label = str(r.get("label") or r.get("key") or "")
 
     metric = ""
+    # 条件分岐: `strictest is not None` を満たす経路を評価する。
     if strictest is not None:
         metric = f"観測からの上限（最も厳しい例）: δ < {_fmt_sci(strictest, digits=2)}（{strictest_label}）"
 
     metric_public = "δが小さいほど γ_max が大きくなり、SR（発散）に近い"
+    # 条件分岐: `strictest is not None` を満たす経路を評価する。
     if strictest is not None:
         metric_public += f" / 観測上限: δ<{_fmt_sci(strictest, digits=2)}"
 
@@ -2771,14 +3518,17 @@ def _load_delta_rows(root: Path) -> List[TableRow]:
 
 def _load_quantum_bell_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "bell" / "table1_row.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     n = j.get("n")
     try:
         n_i = int(n) if n is not None else None
     except Exception:
         n_i = None
+
     return [
         TableRow(
             topic=str(j.get("topic") or "Bell（公開一次データ）"),
@@ -2798,6 +3548,7 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
 
     # COW (neutron interferometry) — magnitude/scaling check.
     path_cow = _OUT_PUBLIC / "quantum" / "cow_phase_shift_metrics.json"
+    # 条件分岐: `path_cow.exists()` を満たす経路を評価する。
     if path_cow.exists():
         j = _read_json(path_cow)
         res = j.get("results") or {}
@@ -2806,12 +3557,20 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         h_m = _safe_float((cfg.get("H_m") if isinstance(cfg, dict) else None))
         v0 = _safe_float((cfg.get("v0_m_per_s") if isinstance(cfg, dict) else None))
         parts: List[str] = []
+        # 条件分岐: `phi0_cycles is not None` を満たす経路を評価する。
         if phi0_cycles is not None:
             parts.append(f"|Δφ|≈{_fmt_float(abs(phi0_cycles), digits=3)} cycles")
+
+        # 条件分岐: `h_m is not None` を満たす経路を評価する。
+
         if h_m is not None:
             parts.append(f"H={_fmt_float(h_m * 100.0, digits=3)} cm")
+
+        # 条件分岐: `v0 is not None` を満たす経路を評価する。
+
         if v0 is not None:
             parts.append(f"v0={_fmt_float(v0, digits=4)} m/s")
+
         parts.append(f"source={path_cow.name}")
         rows.append(
             TableRow(
@@ -2826,7 +3585,9 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         )
 
     # Atom interferometer gravimeter — magnitude/scaling check.
+
     path_ai = _OUT_PUBLIC / "quantum" / "atom_interferometer_gravimeter_phase_metrics.json"
+    # 条件分岐: `path_ai.exists()` を満たす経路を評価する。
     if path_ai.exists():
         j = _read_json(path_ai)
         res = j.get("results") or {}
@@ -2834,10 +3595,15 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         phi_ref = _safe_float((res.get("phi_ref_rad") if isinstance(res, dict) else None))
         t_s = _safe_float((cfg.get("T_s") if isinstance(cfg, dict) else None))
         parts = []
+        # 条件分岐: `phi_ref is not None` を満たす経路を評価する。
         if phi_ref is not None:
             parts.append(f"φ≈{_fmt_sci(phi_ref, digits=2)} rad")
+
+        # 条件分岐: `t_s is not None` を満たす経路を評価する。
+
         if t_s is not None:
             parts.append(f"T={_fmt_float(t_s, digits=3)} s")
+
         parts.append(f"source={path_ai.name}")
         rows.append(
             TableRow(
@@ -2852,7 +3618,9 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         )
 
     # Optical clock chronometric leveling — consistency check vs geodesy.
+
     path_clock = _OUT_PUBLIC / "quantum" / "optical_clock_chronometric_leveling_metrics.json"
+    # 条件分岐: `path_clock.exists()` を満たす経路を評価する。
     if path_clock.exists():
         j = _read_json(path_clock)
         d = j.get("derived") or {}
@@ -2860,10 +3628,15 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
         eps = _safe_float((d.get("epsilon") if isinstance(d, dict) else None))
         eps_sig = _safe_float((d.get("sigma_epsilon") if isinstance(d, dict) else None))
         parts = []
+        # 条件分岐: `z is not None` を満たす経路を評価する。
         if z is not None:
             parts.append(f"z={_fmt_float(z, digits=3)}")
+
+        # 条件分岐: `eps is not None and eps_sig is not None` を満たす経路を評価する。
+
         if eps is not None and eps_sig is not None:
             parts.append(f"ε={_fmt_sci(eps, digits=2)}±{_fmt_sci(eps_sig, digits=2)}")
+
         parts.append(f"source={path_clock.name}")
         rows.append(
             TableRow(
@@ -2884,16 +3657,22 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
     rows: List[TableRow] = []
 
     path_ds = _OUT_PUBLIC / "quantum" / "electron_double_slit_interference_metrics.json"
+    # 条件分岐: `path_ds.exists()` を満たす経路を評価する。
     if path_ds.exists():
         j = _read_json(path_ds)
         d = j.get("derived") or {}
         lam_pm = _safe_float((d.get("electron_wavelength_pm") if isinstance(d, dict) else None))
         fringe_mrad = _safe_float((d.get("fringe_spacing_theta_mrad") if isinstance(d, dict) else None))
         parts: List[str] = []
+        # 条件分岐: `lam_pm is not None` を満たす経路を評価する。
         if lam_pm is not None:
             parts.append(f"λ={_fmt_float(lam_pm, digits=3)} pm")
+
+        # 条件分岐: `fringe_mrad is not None` を満たす経路を評価する。
+
         if fringe_mrad is not None:
             parts.append(f"縞間隔={_fmt_float(fringe_mrad, digits=3)} mrad")
+
         parts.append(f"source={path_ds.name}")
         rows.append(
             TableRow(
@@ -2908,6 +3687,7 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
         )
 
     path_alpha = _OUT_PUBLIC / "quantum" / "de_broglie_precision_alpha_consistency_metrics.json"
+    # 条件分岐: `path_alpha.exists()` を満たす経路を評価する。
     if path_alpha.exists():
         j = _read_json(path_alpha)
         d = j.get("derived") or {}
@@ -2915,10 +3695,15 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
         eps_mu = _safe_float((d.get("epsilon_mc_mean") if isinstance(d, dict) else None))
         eps_sig = _safe_float((d.get("epsilon_mc_sigma") if isinstance(d, dict) else None))
         parts = []
+        # 条件分岐: `z is not None` を満たす経路を評価する。
         if z is not None:
             parts.append(f"z={_fmt_float(z, digits=3)}")
+
+        # 条件分岐: `eps_mu is not None and eps_sig is not None` を満たす経路を評価する。
+
         if eps_mu is not None and eps_sig is not None:
             parts.append(f"ε={_fmt_sci(eps_mu, digits=2)}±{_fmt_sci(eps_sig, digits=2)}（解釈パラメータ）")
+
         parts.append(f"source={path_alpha.name}")
         rows.append(
             TableRow(
@@ -2937,26 +3722,35 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
 
 def _load_quantum_decoherence_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "gravity_induced_decoherence_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     derived = j.get("derived") or {}
     ensemble = derived.get("ensemble") if isinstance(derived, dict) else None
     t_parts: List[str] = []
+    # 条件分岐: `isinstance(ensemble, list)` を満たす経路を評価する。
     if isinstance(ensemble, list):
         # Expect a small list: sigma_z_m, t_half_s.
         for item in ensemble:
+            # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
             if not isinstance(item, dict):
                 continue
+
             sz = _safe_float(item.get("sigma_z_m"))
             th = _safe_float(item.get("t_half_s"))
+            # 条件分岐: `sz is None or th is None` を満たす経路を評価する。
             if sz is None or th is None:
                 continue
+
             t_parts.append(f"{_fmt_float(sz * 1e3, digits=3)} mm→{_fmt_sci(th, digits=2)} s")
 
     metric = ""
+    # 条件分岐: `t_parts` を満たす経路を評価する。
     if t_parts:
         metric = f"V=0.5: σz→t1/2 = {' / '.join(t_parts)}"
+
     metric = (metric + " / " if metric else "") + f"source={path.name}"
 
     return [
@@ -2974,8 +3768,10 @@ def _load_quantum_decoherence_rows(root: Path) -> List[TableRow]:
 
 def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "photon_quantum_interference_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
 
     spi = j.get("single_photon_interference") or {}
@@ -2986,14 +3782,18 @@ def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
     eta = _safe_float(sq.get("eta_lower_if_perfect_intrinsic") if isinstance(sq, dict) else None)
 
     parts: List[str] = []
+    # 条件分岐: `sigma_l_nm is not None` を満たす経路を評価する。
     if sigma_l_nm is not None:
         parts.append(f"単一光子: σL≈{_fmt_float(sigma_l_nm, digits=3)} nm")
+
+    # 条件分岐: `isinstance(hom, dict)` を満たす経路を評価する。
 
     if isinstance(hom, dict):
         v = hom.get("visibility")
         ep = hom.get("visibility_err_plus")
         em = hom.get("visibility_err_minus")
         d_ns = hom.get("d_ns")
+        # 条件分岐: `isinstance(v, list) and isinstance(ep, list) and isinstance(em, list) and isi...` を満たす経路を評価する。
         if isinstance(v, list) and isinstance(ep, list) and isinstance(em, list) and isinstance(d_ns, list):
             vv: List[str] = []
             for di, vi, epi, emi in zip(d_ns, v, ep, em):
@@ -3001,20 +3801,30 @@ def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
                 vi_f = _safe_float(vi)
                 epi_f = _safe_float(epi)
                 emi_f = _safe_float(emi)
+                # 条件分岐: `di_f is None or vi_f is None` を満たす経路を評価する。
                 if di_f is None or vi_f is None:
                     continue
+
+                # 条件分岐: `epi_f is not None and emi_f is not None` を満たす経路を評価する。
+
                 if epi_f is not None and emi_f is not None:
                     vv.append(
                         f"D={_fmt_float(di_f, digits=3)} ns: V={_fmt_float(vi_f, digits=4)}(+{_fmt_float(epi_f, digits=4)}/-{_fmt_float(emi_f, digits=4)})"
                     )
+                # 条件分岐: 前段条件が不成立で、`epi_f is not None` を追加評価する。
                 elif epi_f is not None:
                     vv.append(
                         f"D={_fmt_float(di_f, digits=3)} ns: V={_fmt_float(vi_f, digits=4)}±{_fmt_float(epi_f, digits=4)}"
                     )
                 else:
                     vv.append(f"D={_fmt_float(di_f, digits=3)} ns: V={_fmt_float(vi_f, digits=4)}")
+
+            # 条件分岐: `vv` を満たす経路を評価する。
+
             if vv:
                 parts.append("HOM: " + "; ".join(vv))
+
+    # 条件分岐: `eta is not None` を満たす経路を評価する。
 
     if eta is not None:
         parts.append(f"スクイーズド（10 dB）: η≥{_fmt_float(eta, digits=3)}（loss-only）")
@@ -3036,8 +3846,10 @@ def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
 
 def _load_quantum_qed_vacuum_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "qed_vacuum_precision_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
 
     casimir = j.get("casimir") or {}
@@ -3046,52 +3858,70 @@ def _load_quantum_qed_vacuum_rows(root: Path) -> List[TableRow]:
 
     sources = j.get("sources") if isinstance(j.get("sources"), list) else []
     rel_prec = None
+    # 条件分岐: `isinstance(sources, list)` を満たす経路を評価する。
     if isinstance(sources, list):
         for s in sources:
+            # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
             if not isinstance(s, dict):
                 continue
+
             av = s.get("abstract_value") if isinstance(s.get("abstract_value"), dict) else None
+            # 条件分岐: `isinstance(av, dict)` を満たす経路を評価する。
             if isinstance(av, dict):
                 rp = _safe_float(av.get("relative_precision_at_closest_separation"))
+                # 条件分岐: `rp is not None` を満たす経路を評価する。
                 if rp is not None:
                     rel_prec = rp
                     break
 
     parts: List[str] = []
+    # 条件分岐: `rel_prec is not None` を満たす経路を評価する。
     if rel_prec is not None:
         parts.append(f"Casimir: closestで相対精度~{_fmt_pct(rel_prec, digits=2)}")
+
+    # 条件分岐: `diameter_um is not None` を満たす経路を評価する。
+
     if diameter_um is not None:
         parts.append(f"sphere diam={_fmt_float(diameter_um, digits=4)} μm")
+
     parts.append("Lamb: Z^4/Z^6 スケーリング固定（入口）")
 
     h_1s2s = j.get("hydrogen_1s2s") if isinstance(j.get("hydrogen_1s2s"), dict) else None
+    # 条件分岐: `isinstance(h_1s2s, dict)` を満たす経路を評価する。
     if isinstance(h_1s2s, dict):
         f_raw = h_1s2s.get("f_hz")
         try:
             f_hz_int = int(f_raw)
         except Exception:
             f_hz_int = None
+
         sigma_hz = None
         try:
             sigma_hz = int(h_1s2s.get("sigma_hz"))
         except Exception:
             sigma_hz = None
+
         frac = _safe_float(h_1s2s.get("fractional_sigma"))
+        # 条件分岐: `f_hz_int is not None and sigma_hz is not None` を満たす経路を評価する。
         if f_hz_int is not None and sigma_hz is not None:
             frac_s = "" if frac is None else f"（{frac:.2e}）"
             parts.append(f"H 1S–2S: f={f_hz_int:,} Hz (σ={sigma_hz} Hz){frac_s}")
 
     alpha_prec = j.get("alpha_precision") if isinstance(j.get("alpha_precision"), dict) else None
+    # 条件分岐: `isinstance(alpha_prec, dict)` を満たす経路を評価する。
     if isinstance(alpha_prec, dict):
         derived = alpha_prec.get("derived") if isinstance(alpha_prec.get("derived"), dict) else None
+        # 条件分岐: `isinstance(derived, dict)` を満たす経路を評価する。
         if isinstance(derived, dict):
             delta = _safe_float(derived.get("delta_alpha_inv"))
             sigma = _safe_float(derived.get("sigma_delta_alpha_inv"))
             z = _safe_float(derived.get("z_score"))
             eps = _safe_float(derived.get("epsilon_required"))
+            # 条件分岐: `delta is not None and sigma is not None and z is not None` を満たす経路を評価する。
             if delta is not None and sigma is not None and z is not None:
                 extra = "" if eps is None else f", ε≈{eps*1e9:+.2f} ppb"
                 parts.append(f"α^-1: Δ={delta:+.3e}±{sigma:.3e} (z={z:+.2f}{extra})")
+
     parts.append(f"source={path.name}")
 
     return [
@@ -3111,54 +3941,75 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
 
     def build_row(*, path: Path, observable: str, data: str, name_map: Dict[str, str]) -> TableRow | None:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             return None
+
         j = _read_json(path)
         rows = j.get("lines") if isinstance(j.get("lines"), list) else []
+        # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
         if not isinstance(rows, list) or not rows:
             return None
 
         parts: List[str] = []
         n_lines = 0
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             line_id = str(r.get("id") or "")
             nm = _safe_float(r.get("lambda_vac_nm"))
+            # 条件分岐: `nm is None` を満たす経路を評価する。
             if nm is None:
                 continue
+
             label = name_map.get(line_id, line_id)
             parts.append(f"{label}={_fmt_float(nm, digits=3)} nm")
             n_lines += 1
 
         multiplets = j.get("multiplets") if isinstance(j.get("multiplets"), list) else []
+        # 条件分岐: `isinstance(multiplets, list) and multiplets` を満たす経路を評価する。
         if isinstance(multiplets, list) and multiplets:
             # Keep the table concise: include only the most visible Balmer fine-structure multiplets.
             include = {"Hα", "Hβ"}
             for m in multiplets:
+                # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
                 if not isinstance(m, dict):
                     continue
+
                 mid = str(m.get("id") or "")
                 label = name_map.get(mid, mid)
+                # 条件分岐: `label not in include` を満たす経路を評価する。
                 if label not in include:
                     continue
+
                 n_raw = m.get("n_components")
                 try:
                     n_comp = int(n_raw)
                 except Exception:
                     continue
+
+                # 条件分岐: `n_comp < 2` を満たす経路を評価する。
+
                 if n_comp < 2:
                     continue
+
                 mn = _safe_float(m.get("lambda_min_nm"))
                 mx = _safe_float(m.get("lambda_max_nm"))
+                # 条件分岐: `mn is None or mx is None` を満たす経路を評価する。
                 if mn is None or mx is None:
                     continue
+
                 parts.append(
                     f"{label} multiplet={_fmt_float(mn, digits=3)}–{_fmt_float(mx, digits=3)} nm (N={n_comp})"
                 )
 
+        # 条件分岐: `not parts` を満たす経路を評価する。
+
         if not parts:
             return None
+
         parts.append(f"source={path.name}")
 
         return TableRow(
@@ -3182,28 +4033,45 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
             "H_I_Hγ": "Hγ",
         },
     )
+    # 条件分岐: `row_h is not None` を満たす経路を評価する。
     if row_h is not None:
         out.append(row_h)
 
     # Hydrogen ground-state hyperfine (21 cm) benchmark.
+
     path_hf = _OUT_PUBLIC / "quantum" / "atomic_hydrogen_hyperfine_baseline_metrics.json"
+    # 条件分岐: `path_hf.exists()` を満たす経路を評価する。
     if path_hf.exists():
         j_hf = _read_json(path_hf)
         hf = j_hf.get("hyperfine") if isinstance(j_hf.get("hyperfine"), dict) else None
+        # 条件分岐: `isinstance(hf, dict)` を満たす経路を評価する。
         if isinstance(hf, dict):
             f_mhz = _safe_float(hf.get("frequency_mhz"))
             sigma_hz = _safe_float(hf.get("sigma_hz"))
             frac = _safe_float(hf.get("fractional_sigma"))
             wl_cm = _safe_float(hf.get("wavelength_cm"))
             parts: List[str] = []
+            # 条件分岐: `f_mhz is not None` を満たす経路を評価する。
             if f_mhz is not None:
                 parts.append(f"f={f_mhz:.10f} MHz")
+
+            # 条件分岐: `sigma_hz is not None` を満たす経路を評価する。
+
             if sigma_hz is not None:
                 parts.append(f"σ={_fmt_sci(sigma_hz, digits=3)} Hz")
+
+            # 条件分岐: `frac is not None` を満たす経路を評価する。
+
             if frac is not None:
                 parts.append(f"frac={_fmt_sci(frac, digits=2)}")
+
+            # 条件分岐: `wl_cm is not None` を満たす経路を評価する。
+
             if wl_cm is not None:
                 parts.append(f"λ={_fmt_float(wl_cm, digits=6)} cm")
+
+            # 条件分岐: `parts` を満たす経路を評価する。
+
             if parts:
                 parts.append(f"source={path_hf.name}")
                 out.append(
@@ -3229,15 +4097,19 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
             "He_I_668.00nm": "668.000",
         },
     )
+    # 条件分岐: `row_he is not None` を満たす経路を評価する。
     if row_he is not None:
         out.append(row_he)
 
     def add_diatomic_row(*, slug: str, label: str) -> None:
         path = _OUT_PUBLIC / "quantum" / f"molecular_{slug}_baseline_metrics.json"
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             return
+
         j = _read_json(path)
         consts = j.get("constants") if isinstance(j.get("constants"), dict) else {}
+        # 条件分岐: `not isinstance(consts, dict) or not consts` を満たす経路を評価する。
         if not isinstance(consts, dict) or not consts:
             return
 
@@ -3250,33 +4122,55 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
 
         d0_e_ev = None
         derived = j.get("derived") if isinstance(j.get("derived"), dict) else None
+        # 条件分岐: `isinstance(derived, dict)` を満たす経路を評価する。
         if isinstance(derived, dict):
             morse = derived.get("morse") if isinstance(derived.get("morse"), dict) else None
+            # 条件分岐: `isinstance(morse, dict)` を満たす経路を評価する。
             if isinstance(morse, dict):
                 d0_e_ev = _safe_float(morse.get("D0_eV"))
 
         parts: List[str] = []
         n_consts = 0
+        # 条件分岐: `omega_e is not None` を満たす経路を評価する。
         if omega_e is not None:
             parts.append(f"ωe={_fmt_float(omega_e, digits=6)} cm^-1")
             n_consts += 1
+
+        # 条件分岐: `omega_exe is not None` を満たす経路を評価する。
+
         if omega_exe is not None:
             parts.append(f"ωexe={_fmt_float(omega_exe, digits=6)} cm^-1")
             n_consts += 1
+
+        # 条件分岐: `be is not None` を満たす経路を評価する。
+
         if be is not None:
             parts.append(f"Be={_fmt_float(be, digits=7)} cm^-1")
             n_consts += 1
+
+        # 条件分岐: `alpha_e is not None` を満たす経路を評価する。
+
         if alpha_e is not None:
             parts.append(f"αe={_fmt_float(alpha_e, digits=7)} cm^-1")
             n_consts += 1
+
+        # 条件分岐: `de is not None` を満たす経路を評価する。
+
         if de is not None:
             parts.append(f"D(dist)={_fmt_float(de, digits=7)} cm^-1")
             n_consts += 1
+
+        # 条件分岐: `re_a is not None` を満たす経路を評価する。
+
         if re_a is not None:
             parts.append(f"re={_fmt_float(re_a, digits=6)} Å")
             n_consts += 1
+
+        # 条件分岐: `d0_e_ev is not None` を満たす経路を評価する。
+
         if d0_e_ev is not None:
             parts.append(f"D0(Morse,derived)≈{_fmt_float(d0_e_ev, digits=4)} eV")
+
         parts.append(f"source={path.name}")
 
         out.append(
@@ -3297,19 +4191,27 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
 
     # Dissociation enthalpy (298 K) from thermochemistry (independent baseline vs spectroscopic constants).
     path_diss = _OUT_PUBLIC / "quantum" / "molecular_dissociation_thermochemistry_metrics.json"
+    # 条件分岐: `path_diss.exists()` を満たす経路を評価する。
     if path_diss.exists():
         j = _read_json(path_diss)
         rows = j.get("rows") if isinstance(j.get("rows"), list) else []
         parts: List[str] = []
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             sp = str(r.get("species") or "")
             ev = _safe_float(r.get("dissociation_eV_298K"))
             kj = _safe_float(r.get("dissociation_kj_per_mol_298K"))
+            # 条件分岐: `not sp or ev is None or kj is None` を満たす経路を評価する。
             if not sp or ev is None or kj is None:
                 continue
+
             parts.append(f"{sp}={_fmt_float(ev, digits=4)} eV ({_fmt_float(kj, digits=2)} kJ/mol)")
+
+        # 条件分岐: `parts` を満たす経路を評価する。
+
         if parts:
             parts.append(f"source={path_diss.name}")
             out.append(
@@ -3325,28 +4227,40 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
             )
 
     # Spectroscopic dissociation energy D0 (0 K; independent baseline vs 298 K thermochemistry).
+
     path_d0 = _OUT_PUBLIC / "quantum" / "molecular_dissociation_d0_spectroscopic_metrics.json"
+    # 条件分岐: `path_d0.exists()` を満たす経路を評価する。
     if path_d0.exists():
         j = _read_json(path_d0)
         rows = j.get("rows") if isinstance(j.get("rows"), list) else []
         parts: List[str] = []
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             sp = str(r.get("molecule") or "")
             ev = _safe_float(r.get("d0_eV"))
             cm = _safe_float(r.get("d0_cm^-1"))
             n = r.get("rotational_N")
             n_i = None
+            # 条件分岐: `n is not None` を満たす経路を評価する。
             if n is not None:
                 try:
                     n_i = int(n)
                 except Exception:
                     n_i = None
+
+            # 条件分岐: `not sp or ev is None or cm is None` を満たす経路を評価する。
+
             if not sp or ev is None or cm is None:
                 continue
+
             tag = sp if n_i is None else f"{sp}(N={n_i})"
             parts.append(f"{tag}={_fmt_float(ev, digits=4)} eV ({_fmt_float(cm, digits=6)} cm^-1)")
+
+        # 条件分岐: `parts` を満たす経路を評価する。
+
         if parts:
             parts.append(f"source={path_d0.name}")
             out.append(
@@ -3362,7 +4276,9 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
             )
 
     # Molecular line lists: representative transitions (selected objectively as top-N by Einstein A).
+
     path_exomol = _OUT_PUBLIC / "quantum" / "molecular_transitions_exomol_baseline_metrics.json"
+    # 条件分岐: `path_exomol.exists()` を満たす経路を評価する。
     if path_exomol.exists():
         j = _read_json(path_exomol)
         datasets = j.get("datasets") if isinstance(j.get("datasets"), list) else []
@@ -3371,58 +4287,85 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
         parts: List[str] = []
         n_total = 0
         for ds in datasets:
+            # 条件分岐: `not isinstance(ds, dict)` を満たす経路を評価する。
             if not isinstance(ds, dict):
                 continue
+
             mol = str(ds.get("molecule") or "")
             tag = str(ds.get("dataset_tag") or "")
             top_n = ds.get("top_n")
             a_max = _safe_float(ds.get("A_max_s^-1"))
             nu_rng = ds.get("wavenumber_range_cm^-1")
+            # 条件分岐: `not mol or not tag` を満たす経路を評価する。
             if not mol or not tag:
                 continue
+
             try:
                 top_n_i = int(top_n)
             except Exception:
                 top_n_i = None
+
             n_total += (0 if top_n_i is None else top_n_i)
             nu_rng_str = None
+            # 条件分岐: `isinstance(nu_rng, list) and len(nu_rng) == 2` を満たす経路を評価する。
             if isinstance(nu_rng, list) and len(nu_rng) == 2:
                 n0 = _safe_float(nu_rng[0])
                 n1 = _safe_float(nu_rng[1])
+                # 条件分岐: `n0 is not None and n1 is not None` を満たす経路を評価する。
                 if n0 is not None and n1 is not None:
                     nu_rng_str = f"{_fmt_float(n0, digits=6)}–{_fmt_float(n1, digits=6)} cm^-1"
+
             seg = f"{mol}({tag}): top{top_n_i}" if top_n_i is not None else f"{mol}({tag})"
+            # 条件分岐: `a_max is not None` を満たす経路を評価する。
             if a_max is not None:
                 seg += f", A_max={_fmt_sci(a_max, digits=4)} s^-1"
+
+            # 条件分岐: `nu_rng_str` を満たす経路を評価する。
+
             if nu_rng_str:
                 seg += f", ν̃={nu_rng_str}"
+
             parts.append(seg)
 
         # Include a single representative transition per molecule (rank=1).
+
         rep_by_mol: dict[str, str] = {}
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             mol = str(r.get("molecule") or "")
             rank = r.get("rank_by_A_desc")
+            # 条件分岐: `not mol` を満たす経路を評価する。
             if not mol:
                 continue
+
             try:
                 rank_i = int(rank)
             except Exception:
                 continue
+
+            # 条件分岐: `rank_i != 1` を満たす経路を評価する。
+
             if rank_i != 1:
                 continue
+
             nu = _safe_float(r.get("wavenumber_cm^-1"))
             A = _safe_float(r.get("A_s^-1"))
             label = str(r.get("transition_label") or "")
+            # 条件分岐: `nu is None or A is None or not label` を満たす経路を評価する。
             if nu is None or A is None or not label:
                 continue
+
             rep_by_mol[mol] = f"{mol} #1: {label} (ν̃={_fmt_float(nu, digits=3)} cm^-1, A={_fmt_sci(A, digits=4)} s^-1)"
 
         rep_parts = [rep_by_mol[k] for k in sorted(rep_by_mol.keys())]
+        # 条件分岐: `rep_parts` を満たす経路を評価する。
         if rep_parts:
             parts.extend(rep_parts)
+
+        # 条件分岐: `parts` を満たす経路を評価する。
 
         if parts:
             parts.append(f"source={path_exomol.name}")
@@ -3477,30 +4420,41 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     path_wave_interface = _OUT_PUBLIC / "quantum" / "nuclear_binding_energy_frequency_mapping_interface_metrics.json"
     path_wave_all_nuclei = _OUT_PUBLIC / "quantum" / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei_metrics.json"
     prefer_canonical = False
+    # 条件分岐: `path_canonical.exists()` を満たす経路を評価する。
     if path_canonical.exists():
         try:
             j_can = _read_json(path_canonical)
         except Exception:
             j_can = {}
+
         within = j_can.get("falsification", {}).get("within_envelope")
+        # 条件分岐: `isinstance(within, dict) and within.get("r_s") is True and within.get("v2s")...` を満たす経路を評価する。
         if isinstance(within, dict) and within.get("r_s") is True and within.get("v2s") is True:
             prefer_canonical = True
+
     prefer_barrier_tail_channel_split_triplet_barrier_fraction = False
+    # 条件分岐: `path_barrier_tail_channel_split_triplet_barrier_fraction.exists()` を満たす経路を評価する。
     if path_barrier_tail_channel_split_triplet_barrier_fraction.exists():
         try:
             j_candidate = _read_json(path_barrier_tail_channel_split_triplet_barrier_fraction)
         except Exception:
             j_candidate = {}
+
         within = j_candidate.get("falsification", {}).get("within_envelope")
+        # 条件分岐: `isinstance(within, dict) and within.get("r_s") is True and within.get("v2s")...` を満たす経路を評価する。
         if isinstance(within, dict) and within.get("r_s") is True and within.get("v2s") is True:
             prefer_barrier_tail_channel_split_triplet_barrier_fraction = True
+
     prefer_barrier_tail_kq_v2t = False
+    # 条件分岐: `path_barrier_tail_kq_v2t.exists()` を満たす経路を評価する。
     if path_barrier_tail_kq_v2t.exists():
         try:
             j_v2t = _read_json(path_barrier_tail_kq_v2t)
         except Exception:
             j_v2t = {}
+
         within = j_v2t.get("falsification", {}).get("within_envelope")
+        # 条件分岐: `isinstance(within, dict) and within.get("r_s") is True` を満たす経路を評価する。
         if isinstance(within, dict) and within.get("r_s") is True:
             prefer_barrier_tail_kq_v2t = True
 
@@ -3533,6 +4487,7 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
             )
         )
     )
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
 
@@ -3540,19 +4495,24 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
 
     b_mev = None
     consts = j.get("constants") if isinstance(j.get("constants"), dict) else None
+    # 条件分岐: `isinstance(consts, dict)` を満たす経路を評価する。
     if isinstance(consts, dict):
         b_mev = _safe_float(consts.get("B_MeV"))
 
     parts: List[str] = []
+    # 条件分岐: `b_mev is not None` を満たす経路を評価する。
     if b_mev is not None:
         parts.append(f"B≈{_fmt_float(b_mev, digits=6)} MeV")
 
     def _append_barrier_tail_rows() -> tuple[Optional[bool], Optional[bool], Optional[bool]]:
         rows = j.get("results_by_dataset")
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("label") or "")
 
                 ft = r.get("fit_triplet") if isinstance(r.get("fit_triplet"), dict) else {}
@@ -3593,21 +4553,40 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
                 dv2s = _safe_float(cmp_s.get("v2s_pred_minus_obs_fm3"))
 
                 s = label
+                # 条件分岐: `r1 is not None and r2 is not None` を満たす経路を評価する。
                 if r1 is not None and r2 is not None:
                     s += f": R1≈{_fmt_float(r1, digits=3)} fm, R2≈{_fmt_float(r2, digits=3)} fm"
+                    # 条件分岐: `rb is not None and r3 is not None` を満たす経路を評価する。
                     if rb is not None and r3 is not None:
                         s += f", Rb≈{_fmt_float(rb, digits=3)} fm, R3≈{_fmt_float(r3, digits=3)} fm"
+
                 delta_terms: List[str] = []
+                # 条件分岐: `at is not None and dat is not None` を満たす経路を評価する。
                 if at is not None and dat is not None:
                     delta_terms.append(f"Δa_t≈{_fmt_float(dat, digits=4)} fm")
+
+                # 条件分岐: `rt is not None and drt is not None` を満たす経路を評価する。
+
                 if rt is not None and drt is not None:
                     delta_terms.append(f"Δr_t≈{_fmt_float(drt, digits=4)} fm")
+
+                # 条件分岐: `v2t is not None and dv2t is not None` を満たす経路を評価する。
+
                 if v2t is not None and dv2t is not None:
                     delta_terms.append(f"Δv2t≈{_fmt_float(dv2t, digits=3)} fm^3")
+
+                # 条件分岐: `rs is not None and drs is not None` を満たす経路を評価する。
+
                 if rs is not None and drs is not None:
                     delta_terms.append(f"Δr_s≈{_fmt_float(drs, digits=4)} fm")
+
+                # 条件分岐: `v2s is not None and dv2s is not None` を満たす経路を評価する。
+
                 if v2s is not None and dv2s is not None:
                     delta_terms.append(f"Δv2s≈{_fmt_float(dv2s, digits=3)} fm^3")
+
+                # 条件分岐: `delta_terms` を満たす経路を評価する。
+
                 if delta_terms:
                     s += ", " + ", ".join(delta_terms)
 
@@ -3617,6 +4596,7 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
         rs_ok = None
         v2s_ok = None
         v2t_ok = None
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             rs_obs: List[float] = []
             rs_fit: List[float] = []
@@ -3625,8 +4605,10 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
             v2t_obs: List[float] = []
             v2t_fit: List[float] = []
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 inp = r.get("inputs") if isinstance(r.get("inputs"), dict) else {}
                 inp_t = inp.get("triplet") if isinstance(inp.get("triplet"), dict) else {}
                 inp_s = inp.get("singlet") if isinstance(inp.get("singlet"), dict) else {}
@@ -3637,30 +4619,41 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
 
                 rs_o = _safe_float(inp_s.get("r_s_fm"))
                 rs_f = _safe_float(ere_s.get("r_eff_fm"))
+                # 条件分岐: `rs_o is not None and rs_f is not None` を満たす経路を評価する。
                 if rs_o is not None and rs_f is not None:
                     rs_obs.append(rs_o)
                     rs_fit.append(rs_f)
 
                 v2s_o = _safe_float(inp_s.get("v2s_fm3"))
                 v2s_p = _safe_float(ere_s.get("v2_fm3"))
+                # 条件分岐: `v2s_o is not None and v2s_p is not None` を満たす経路を評価する。
                 if v2s_o is not None and v2s_p is not None:
                     v2s_obs.append(v2s_o)
                     v2s_pred.append(v2s_p)
 
                 v2t_o = _safe_float(inp_t.get("v2t_fm3"))
                 v2t_f = _safe_float(ere_t.get("v2_fm3"))
+                # 条件分岐: `v2t_o is not None and v2t_f is not None` を満たす経路を評価する。
                 if v2t_o is not None and v2t_f is not None:
                     v2t_obs.append(v2t_o)
                     v2t_fit.append(v2t_f)
+
+            # 条件分岐: `rs_obs and len(rs_fit) == len(rs_obs)` を満たす経路を評価する。
 
             if rs_obs and len(rs_fit) == len(rs_obs):
                 rs_min = min(rs_obs)
                 rs_max = max(rs_obs)
                 rs_ok = all(rs_min <= x <= rs_max for x in rs_fit)
+
+            # 条件分岐: `v2s_obs and len(v2s_pred) == len(v2s_obs)` を満たす経路を評価する。
+
             if v2s_obs and len(v2s_pred) == len(v2s_obs):
                 v2s_min = min(v2s_obs)
                 v2s_max = max(v2s_obs)
                 v2s_ok = all(v2s_min <= x <= v2s_max for x in v2s_pred)
+
+            # 条件分岐: `v2t_obs and len(v2t_fit) == len(v2t_obs)` を満たす経路を評価する。
+
             if v2t_obs and len(v2t_fit) == len(v2t_obs):
                 v2t_min = min(v2t_obs)
                 v2t_max = max(v2t_obs)
@@ -3674,33 +4667,43 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     ):
         scan = j.get("barrier_tail_channel_split_kq_triplet_barrier_fraction_scan", {})
         frozen_geo = scan.get("frozen_singlet_geometry_from_7_13_8_4", {})
+        # 条件分岐: `isinstance(frozen_geo, dict)` を満たす経路を評価する。
         if isinstance(frozen_geo, dict):
             r1s = _safe_float(frozen_geo.get("r1_s_over_lambda_pi_pm_fixed"))
             r2s = _safe_float(frozen_geo.get("r2_s_over_lambda_pi_pm_fixed"))
+            # 条件分岐: `r1s is not None and r2s is not None` を満たす経路を評価する。
             if r1s is not None and r2s is not None:
                 parts.append(f"R1_s/λπ={_fmt_float(r1s, digits=3)}, R2_s/λπ={_fmt_float(r2s, digits=3)}")
 
         frozen_kq = scan.get("selected_channel_split_kq_from_7_13_8_4", {})
+        # 条件分岐: `isinstance(frozen_kq, dict)` を満たす経路を評価する。
         if isinstance(frozen_kq, dict):
             ks = _safe_float(frozen_kq.get("k_s"))
             qs = _safe_float(frozen_kq.get("q_s"))
             qt = _safe_float(frozen_kq.get("q_t_fixed"))
             kt_prev = _safe_float(frozen_kq.get("k_t_prev"))
+            # 条件分岐: `ks is not None and qs is not None` を満たす経路を評価する。
             if ks is not None and qs is not None:
                 parts.append(f"(k_s,q_s)=({_fmt_float(ks, digits=3)}, {_fmt_float(qs, digits=3)})")
+
+            # 条件分岐: `kt_prev is not None and qt is not None` を満たす経路を評価する。
+
             if kt_prev is not None and qt is not None:
                 parts.append(f"(k_t_prev,q_t)=({_fmt_float(kt_prev, digits=3)}, {_fmt_float(qt, digits=3)})")
 
         sel = scan.get("selected", {})
+        # 条件分岐: `isinstance(sel, dict)` を満たす経路を評価する。
         if isinstance(sel, dict):
             frac_t = _safe_float(sel.get("barrier_len_fraction_t"))
             kt = _safe_float(sel.get("k_t"))
+            # 条件分岐: `frac_t is not None and kt is not None` を満たす経路を評価する。
             if frac_t is not None and kt is not None:
                 parts.append(f"triplet_scan: barrier_len_fraction_t={_fmt_float(frac_t, digits=3)}, k_t={_fmt_float(kt, digits=3)}")
 
         tol = scan.get("policy", {}).get("triplet_ar_tolerance", {})
         tol_a = _safe_float(tol.get("tol_a_fm")) if isinstance(tol, dict) else None
         tol_r = _safe_float(tol.get("tol_r_fm")) if isinstance(tol, dict) else None
+        # 条件分岐: `tol_a is not None and tol_r is not None` を満たす経路を評価する。
         if tol_a is not None and tol_r is not None:
             parts.append(f"triplet_tol: |Δa_t|≤{_fmt_float(tol_a, digits=3)} fm, |Δr_t|≤{_fmt_float(tol_r, digits=3)} fm")
 
@@ -3713,23 +4716,32 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
         parts.append(f"envelope_ok(v2t)={v2t_s}")
 
         triplet_tol_ok = None
+        # 条件分岐: `tol_a is not None and tol_r is not None` を満たす経路を評価する。
         if tol_a is not None and tol_r is not None:
             rows = j.get("results_by_dataset")
+            # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
             if isinstance(rows, list):
                 ok_all = True
                 for r in rows:
+                    # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                     if not isinstance(r, dict):
                         continue
+
                     cmp_ = r.get("comparison") if isinstance(r.get("comparison"), dict) else {}
                     cmp_t = cmp_.get("triplet") if isinstance(cmp_.get("triplet"), dict) else {}
                     da = _safe_float(cmp_t.get("a_t_fit_minus_obs_fm"))
                     dr = _safe_float(cmp_t.get("r_t_fit_minus_obs_fm"))
+                    # 条件分岐: `da is None or dr is None` を満たす経路を評価する。
                     if da is None or dr is None:
                         ok_all = False
                         break
+
+                    # 条件分岐: `abs(da) > tol_a or abs(dr) > tol_r` を満たす経路を評価する。
+
                     if abs(da) > tol_a or abs(dr) > tol_r:
                         ok_all = False
                         break
+
                 triplet_tol_ok = ok_all
 
         triplet_tol_s = "?" if not isinstance(triplet_tol_ok, bool) else ("yes" if triplet_tol_ok else "no")
@@ -3743,11 +4755,13 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
         barrier_sel = j.get("barrier_tail_kq_scan", {}).get("selected", {})
         k = _safe_float(barrier_sel.get("k")) if isinstance(barrier_sel, dict) else None
         q = _safe_float(barrier_sel.get("q")) if isinstance(barrier_sel, dict) else None
+        # 条件分岐: `k is not None and q is not None` を満たす経路を評価する。
         if k is not None and q is not None:
             parts.append(f"(k,q)=({ _fmt_float(k, digits=3) }, { _fmt_float(q, digits=3) })")
 
         pion_scale = j.get("pion_range_scale", {})
         lambda_pi = _safe_float(pion_scale.get("lambda_pi_pm_fm")) if isinstance(pion_scale, dict) else None
+        # 条件分岐: `lambda_pi is not None` を満たす経路を評価する。
         if lambda_pi is not None:
             parts.append(f"λπ≈{_fmt_float(lambda_pi, digits=4)} fm")
 
@@ -3766,10 +4780,13 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
         "nuclear_effective_potential_two_range_fit_as_rs_metrics.json",
     ):
         rows = j.get("results_by_dataset")
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("label") or "")
 
                 ft = r.get("fit_triplet") if isinstance(r.get("fit_triplet"), dict) else {}
@@ -3800,46 +4817,75 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
                 dv2s = _safe_float(cmp_s.get("v2s_pred_minus_obs_fm3"))
 
                 s = label
+                # 条件分岐: `rc is not None` を満たす経路を評価する。
                 if rc is not None:
                     s += f": Rc≈{_fmt_float(rc, digits=3)} fm"
+                    # 条件分岐: `vc is not None` を満たす経路を評価する。
                     if vc is not None:
                         s += f", Vc≈{_fmt_float(vc, digits=1)} MeV"
+
+                    # 条件分岐: `r1 is not None and r2 is not None` を満たす経路を評価する。
+
                     if r1 is not None and r2 is not None:
                         s += f", R1≈{_fmt_float(r1, digits=3)} fm, R2≈{_fmt_float(r2, digits=3)} fm"
+                # 条件分岐: 前段条件が不成立で、`r1 is not None and r2 is not None` を追加評価する。
                 elif r1 is not None and r2 is not None:
                     s += f": R1≈{_fmt_float(r1, digits=3)} fm, R2≈{_fmt_float(r2, digits=3)} fm"
+
+                # 条件分岐: `v1t is not None and v2t_mev is not None` を満たす経路を評価する。
+
                 if v1t is not None and v2t_mev is not None:
                     s += f", V1t≈{_fmt_float(v1t, digits=1)} MeV, V2t≈{_fmt_float(v2t_mev, digits=1)} MeV"
+
+                # 条件分岐: `v1s_mev is not None and v2s_mev is not None` を満たす経路を評価する。
+
                 if v1s_mev is not None and v2s_mev is not None:
                     s += f", V1s≈{_fmt_float(v1s_mev, digits=1)} MeV, V2s≈{_fmt_float(v2s_mev, digits=3)} MeV"
+
+                # 条件分岐: `v2t is not None and dv2t is not None` を満たす経路を評価する。
+
                 if v2t is not None and dv2t is not None:
                     s += f", v2t≈{_fmt_float(v2t, digits=3)} (Δ≈{_fmt_float(dv2t, digits=3)})"
+
+                # 条件分岐: `rs is not None and drs is not None` を満たす経路を評価する。
+
                 if rs is not None and drs is not None:
                     s += f", r_s(fit)≈{_fmt_float(rs, digits=4)} (Δ≈{_fmt_float(drs, digits=4)})"
+
+                # 条件分岐: `v2s is not None and dv2s is not None` を満たす経路を評価する。
+
                 if v2s is not None and dv2s is not None:
                     s += f", v2s(pred)≈{_fmt_float(v2s, digits=3)} (Δ≈{_fmt_float(dv2s, digits=3)})"
+
                 parts.append(s.strip(" :"))
 
         within = j.get("falsification", {}).get("within_envelope")
         rs_ok = None
         v2s_ok = None
+        # 条件分岐: `isinstance(within, dict)` を満たす経路を評価する。
         if isinstance(within, dict):
             rs_ok = within.get("r_s")
             v2s_ok = within.get("v2s")
+
         rs_s = "?" if not isinstance(rs_ok, bool) else ("yes" if rs_ok else "no")
         v2s_s = "?" if not isinstance(v2s_ok, bool) else ("yes" if v2s_ok else "no")
         parts.append(f"envelope_ok(r_s)={rs_s}")
         parts.append(f"envelope_ok(v2s)={v2s_s}")
+        # 条件分岐: `path.name == "nuclear_effective_potential_repulsive_core_two_range_metrics.json"` を満たす経路を評価する。
         if path.name == "nuclear_effective_potential_repulsive_core_two_range_metrics.json":
             pmodel = "u-profile → V(r)（repulsive core + two-range; fit triplet targets, fit singlet a_s,r_s, predict v2s）"
         else:
             pmodel = "u-profile → V(r)（two-range; fit triplet targets, fit singlet a_s,r_s, predict v2s）"
+    # 条件分岐: 前段条件が不成立で、`path.name == "nuclear_effective_potential_two_range_metrics.json"` を追加評価する。
     elif path.name == "nuclear_effective_potential_two_range_metrics.json":
         rows = j.get("results_by_dataset")
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("label") or "")
 
                 ft = r.get("fit_triplet") if isinstance(r.get("fit_triplet"), dict) else {}
@@ -3867,37 +4913,60 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
                 dv2s = _safe_float(cmp_s.get("v2s_pred_minus_obs_fm3"))
 
                 s = label
+                # 条件分岐: `r1 is not None and r2 is not None` を満たす経路を評価する。
                 if r1 is not None and r2 is not None:
                     s += f": R1≈{_fmt_float(r1, digits=3)} fm, R2≈{_fmt_float(r2, digits=3)} fm"
+
+                # 条件分岐: `v1t is not None and v2t_mev is not None` を満たす経路を評価する。
+
                 if v1t is not None and v2t_mev is not None:
                     s += f", V1t≈{_fmt_float(v1t, digits=1)} MeV, V2t≈{_fmt_float(v2t_mev, digits=1)} MeV"
+
+                # 条件分岐: `v2s_mev is not None` を満たす経路を評価する。
+
                 if v2s_mev is not None:
                     s += f", V2s≈{_fmt_float(v2s_mev, digits=3)} MeV"
+
+                # 条件分岐: `v2t is not None and dv2t is not None` を満たす経路を評価する。
+
                 if v2t is not None and dv2t is not None:
                     s += f", v2t≈{_fmt_float(v2t, digits=3)} (Δ≈{_fmt_float(dv2t, digits=3)})"
+
+                # 条件分岐: `rs is not None and drs is not None` を満たす経路を評価する。
+
                 if rs is not None and drs is not None:
                     s += f", r_s(pred)≈{_fmt_float(rs, digits=4)} (Δ≈{_fmt_float(drs, digits=4)})"
+
+                # 条件分岐: `v2s is not None and dv2s is not None` を満たす経路を評価する。
+
                 if v2s is not None and dv2s is not None:
                     s += f", v2s(pred)≈{_fmt_float(v2s, digits=3)} (Δ≈{_fmt_float(dv2s, digits=3)})"
+
                 parts.append(s.strip(" :"))
 
         within = j.get("falsification", {}).get("within_envelope")
         rs_ok = None
         v2s_ok = None
+        # 条件分岐: `isinstance(within, dict)` を満たす経路を評価する。
         if isinstance(within, dict):
             rs_ok = within.get("r_s")
             v2s_ok = within.get("v2s")
+
         rs_s = "?" if not isinstance(rs_ok, bool) else ("yes" if rs_ok else "no")
         v2s_s = "?" if not isinstance(v2s_ok, bool) else ("yes" if v2s_ok else "no")
         parts.append(f"envelope_ok(r_s)={rs_s}")
         parts.append(f"envelope_ok(v2s)={v2s_s}")
         pmodel = "u-profile → V(r)（two-range; fit triplet targets, fit singlet a_s, predict singlet）"
+    # 条件分岐: 前段条件が不成立で、`path.name == "nuclear_effective_potential_finite_core_well_metrics.json"` を追加評価する。
     elif path.name == "nuclear_effective_potential_finite_core_well_metrics.json":
         rows = j.get("results_by_dataset")
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("label") or "")
 
                 ft = r.get("fit_triplet") if isinstance(r.get("fit_triplet"), dict) else {}
@@ -3925,39 +4994,65 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
                 dv2s = _safe_float(cmp_s.get("v2s_pred_minus_obs_fm3"))
 
                 s = label
+                # 条件分岐: `rc is not None and rout is not None` を満たす経路を評価する。
                 if rc is not None and rout is not None:
                     s += f": Rc≈{_fmt_float(rc, digits=3)} fm, R≈{_fmt_float(rout, digits=3)} fm"
+
+                # 条件分岐: `vc is not None` を満たす経路を評価する。
+
                 if vc is not None:
                     s += f", Vc≈{_fmt_float(vc, digits=1)} MeV"
+
+                # 条件分岐: `v0t is not None` を満たす経路を評価する。
+
                 if v0t is not None:
                     s += f", V0t≈{_fmt_float(v0t, digits=3)} MeV"
+
+                # 条件分岐: `v0s is not None` を満たす経路を評価する。
+
                 if v0s is not None:
                     s += f", V0s≈{_fmt_float(v0s, digits=3)} MeV"
+
+                # 条件分岐: `v2t is not None and dv2t is not None` を満たす経路を評価する。
+
                 if v2t is not None and dv2t is not None:
                     s += f", v2t≈{_fmt_float(v2t, digits=3)} (Δ≈{_fmt_float(dv2t, digits=3)})"
+
+                # 条件分岐: `rs is not None and drs is not None` を満たす経路を評価する。
+
                 if rs is not None and drs is not None:
                     s += f", r_s(pred)≈{_fmt_float(rs, digits=4)} (Δ≈{_fmt_float(drs, digits=4)})"
+
+                # 条件分岐: `v2s is not None and dv2s is not None` を満たす経路を評価する。
+
                 if v2s is not None and dv2s is not None:
                     s += f", v2s(pred)≈{_fmt_float(v2s, digits=3)} (Δ≈{_fmt_float(dv2s, digits=3)})"
+
                 parts.append(s.strip(" :"))
 
         within = j.get("falsification", {}).get("within_envelope")
         rs_ok = None
         v2s_ok = None
+        # 条件分岐: `isinstance(within, dict)` を満たす経路を評価する。
         if isinstance(within, dict):
             rs_ok = within.get("r_s")
             v2s_ok = within.get("v2s")
+
         rs_s = "?" if not isinstance(rs_ok, bool) else ("yes" if rs_ok else "no")
         v2s_s = "?" if not isinstance(v2s_ok, bool) else ("yes" if v2s_ok else "no")
         parts.append(f"envelope_ok(r_s)={rs_s}")
         parts.append(f"envelope_ok(v2s)={v2s_s}")
         pmodel = "u-profile → V(r)（finite core+well; fit triplet targets, predict singlet）"
+    # 条件分岐: 前段条件が不成立で、`path.name == "nuclear_effective_potential_core_well_metrics.json"` を追加評価する。
     elif path.name == "nuclear_effective_potential_core_well_metrics.json":
         rows = j.get("results_by_dataset")
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("label") or "")
                 ft = r.get("fit_triplet") if isinstance(r.get("fit_triplet"), dict) else {}
                 geo = ft.get("geometry") if isinstance(ft.get("geometry"), dict) else {}
@@ -3980,26 +5075,45 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
                 dv2s = _safe_float(cmp_s.get("v2s_pred_minus_obs_fm3"))
 
                 s = label
+                # 条件分岐: `rc is not None and rout is not None` を満たす経路を評価する。
                 if rc is not None and rout is not None:
                     s += f": Rc≈{_fmt_float(rc, digits=3)} fm, R≈{_fmt_float(rout, digits=3)} fm"
+
+                # 条件分岐: `v0t is not None` を満たす経路を評価する。
+
                 if v0t is not None:
                     s += f", V0t≈{_fmt_float(v0t, digits=3)} MeV"
+
+                # 条件分岐: `v0s is not None` を満たす経路を評価する。
+
                 if v0s is not None:
                     s += f", V0s≈{_fmt_float(v0s, digits=3)} MeV"
+
+                # 条件分岐: `v2t is not None and dv2t is not None` を満たす経路を評価する。
+
                 if v2t is not None and dv2t is not None:
                     s += f", v2t(pred)≈{_fmt_float(v2t, digits=3)} (Δ≈{_fmt_float(dv2t, digits=3)})"
+
+                # 条件分岐: `rs is not None and drs is not None` を満たす経路を評価する。
+
                 if rs is not None and drs is not None:
                     s += f", r_s(pred)≈{_fmt_float(rs, digits=4)} (Δ≈{_fmt_float(drs, digits=4)})"
+
+                # 条件分岐: `v2s is not None and dv2s is not None` を満たす経路を評価する。
+
                 if v2s is not None and dv2s is not None:
                     s += f", v2s(pred)≈{_fmt_float(v2s, digits=3)} (Δ≈{_fmt_float(dv2s, digits=3)})"
+
                 parts.append(s.strip(" :"))
 
         within = j.get("falsification", {}).get("within_envelope")
         v2t_ok = None
         v2s_ok = None
+        # 条件分岐: `isinstance(within, dict)` を満たす経路を評価する。
         if isinstance(within, dict):
             v2t_ok = within.get("v2t")
             v2s_ok = within.get("v2s")
+
         v2t_s = "?" if not isinstance(v2t_ok, bool) else ("yes" if v2t_ok else "no")
         v2s_s = "?" if not isinstance(v2s_ok, bool) else ("yes" if v2s_ok else "no")
         parts.append(f"envelope_ok(v2t)={v2t_s}")
@@ -4008,11 +5122,15 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     else:
         # Step 7.9.3 fallback (square well).
         fits = j.get("fits")
+        # 条件分岐: `not isinstance(fits, list) or not fits` を満たす経路を評価する。
         if not isinstance(fits, list) or not fits:
             return []
+
         for f in fits:
+            # 条件分岐: `not isinstance(f, dict)` を満たす経路を評価する。
             if not isinstance(f, dict):
                 continue
+
             label = str(f.get("label") or "")
             fsw = f.get("fit_square_well") if isinstance(f.get("fit_square_well"), dict) else {}
             ere = f.get("ere_from_phase_shift") if isinstance(f.get("ere_from_phase_shift"), dict) else {}
@@ -4022,63 +5140,90 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
             r_eff = _safe_float(ere.get("r_eff_fm"))
             dr = _safe_float(cmp_.get("r_eff_minus_observed_fm"))
             s = label
+            # 条件分岐: `r_fm is not None and v0_mev is not None` を満たす経路を評価する。
             if r_fm is not None and v0_mev is not None:
                 s += f": R≈{_fmt_float(r_fm, digits=3)} fm, V0≈{_fmt_float(v0_mev, digits=3)} MeV"
+
+            # 条件分岐: `r_eff is not None and dr is not None` を満たす経路を評価する。
+
             if r_eff is not None and dr is not None:
                 s += f", r_t(pred)≈{_fmt_float(r_eff, digits=4)} (Δ≈{_fmt_float(dr, digits=4)})"
+
             parts.append(s.strip(" :"))
+
         within = j.get("falsification", {}).get("predicted_within_envelope")
         within_s = "?" if not isinstance(within, bool) else ("yes" if within else "no")
         parts.append(f"envelope_ok={within_s}")
         pmodel = "u-profile → V(r)（square well; fit B,a_t）"
+
+    # 条件分岐: `path_falsification_pack.exists()` を満たす経路を評価する。
 
     if path_falsification_pack.exists():
         try:
             j_pack = _read_json(path_falsification_pack)
         except Exception:
             j_pack = {}
+
         channels = j_pack.get("differential_channels") if isinstance(j_pack.get("differential_channels"), list) else []
         channel_summaries: List[str] = []
         for c in channels:
+            # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
             if not isinstance(c, dict):
                 continue
+
             label = str(c.get("channel_id") or "").strip()
             abs_stats = c.get("abs_delta_mev_stats") if isinstance(c.get("abs_delta_mev_stats"), dict) else {}
             rel_stats = c.get("required_relative_sigma_3sigma") if isinstance(c.get("required_relative_sigma_3sigma"), dict) else {}
             med_abs = _safe_float(abs_stats.get("median"))
             med_rel = _safe_float(rel_stats.get("median"))
+            # 条件分岐: `label and med_abs is not None and med_rel is not None` を満たす経路を評価する。
             if label and med_abs is not None and med_rel is not None:
                 channel_summaries.append(
                     f"{label}: median abs(ΔB)≈{_fmt_float(med_abs, digits=2)} MeV, median σ_req,rel≈{_fmt_float(100.0 * med_rel, digits=2)}%"
                 )
+
+        # 条件分岐: `channel_summaries` を満たす経路を評価する。
+
         if channel_summaries:
             parts.append(" / ".join(channel_summaries))
+
+    # 条件分岐: `path_wave_interface.exists()` を満たす経路を評価する。
 
     if path_wave_interface.exists():
         try:
             j_if = _read_json(path_wave_interface)
         except Exception:
             j_if = {}
+
         rows_if = j_if.get("rows") if isinstance(j_if.get("rows"), list) else []
         row_d = None
         for rr in rows_if:
+            # 条件分岐: `isinstance(rr, dict) and str(rr.get("label") or "").strip().lower() == "deute...` を満たす経路を評価する。
             if isinstance(rr, dict) and str(rr.get("label") or "").strip().lower() == "deuteron":
                 row_d = rr
                 break
+
+        # 条件分岐: `isinstance(row_d, dict)` を満たす経路を評価する。
+
         if isinstance(row_d, dict):
             be = _safe_float(row_d.get("B_MeV"))
             dmm = _safe_float(row_d.get("Delta_omega_over_omega0_per_nucleon"))
+            # 条件分岐: `be is not None and dmm is not None` を満たす経路を評価する。
             if be is not None and dmm is not None:
                 parts.append(
                     f"wave-I/F(deuteron): B≈{_fmt_float(be, digits=6)} MeV, Δm/m=Δω/ω≈{_fmt_float(dmm, digits=6)}"
                 )
+
         parts.append("wave-I/F mapping: B=ħΔω, Δm=ħΔω/c^2")
+
+    # 条件分岐: `path_wave_all_nuclei.exists()` を満たす経路を評価する。
 
     if path_wave_all_nuclei.exists():
         try:
             j_all = _read_json(path_wave_all_nuclei)
         except Exception:
             j_all = {}
+
         stats = j_all.get("stats") if isinstance(j_all.get("stats"), dict) else {}
         cr_all = stats.get("collective_ratio_all") if isinstance(stats.get("collective_ratio_all"), dict) else {}
         n_all_f = _safe_float(cr_all.get("n"))
@@ -4086,34 +5231,48 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
         med_all = _safe_float(cr_all.get("median"))
         p16_all = _safe_float(cr_all.get("p16"))
         p84_all = _safe_float(cr_all.get("p84"))
+        # 条件分岐: `n_all is not None and med_all is not None and p16_all is not None and p84_all...` を満たす経路を評価する。
         if n_all is not None and med_all is not None and p16_all is not None and p84_all is not None:
             parts.append(
                 f"AME2020(all): N={n_all}, median(B_pred/B_obs)≈{_fmt_float(med_all, digits=3)}, p16–p84≈{_fmt_float(p16_all, digits=3)}–{_fmt_float(p84_all, digits=3)}"
             )
+
+    # 条件分岐: `path_falsification_pack.exists()` を満たす経路を評価する。
 
     if path_falsification_pack.exists():
         try:
             j_pack = _read_json(path_falsification_pack)
         except Exception:
             j_pack = {}
+
         models = j_pack.get("models") if isinstance(j_pack.get("models"), list) else []
         model_summaries: List[str] = []
         for mm in models:
+            # 条件分岐: `not isinstance(mm, dict)` を満たす経路を評価する。
             if not isinstance(mm, dict):
                 continue
+
             model_id = str(mm.get("model_id") or "")
             z_med = _safe_float(mm.get("z_median"))
             z_dmed = _safe_float(mm.get("z_delta_median"))
+            # 条件分岐: `z_med is None or z_dmed is None` を満たす経路を評価する。
             if z_med is None or z_dmed is None:
                 continue
+
+            # 条件分岐: `"local_spacing" in model_id` を満たす経路を評価する。
+
             if "local_spacing" in model_id:
                 model_summaries.append(
                     f"local-spacing: z_median≈{_fmt_float(z_med, digits=2)}, z_ΔA≈{_fmt_float(z_dmed, digits=2)}"
                 )
+            # 条件分岐: 前段条件が不成立で、`"global_R" in model_id` を追加評価する。
             elif "global_R" in model_id:
                 model_summaries.append(
                     f"global-R: z_median≈{_fmt_float(z_med, digits=2)}, z_ΔA≈{_fmt_float(z_dmed, digits=2)}"
                 )
+
+        # 条件分岐: `model_summaries` を満たす経路を評価する。
+
         if model_summaries:
             parts.append("falsification: " + " / ".join(model_summaries))
 
@@ -4231,18 +5390,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     rows_quantum = build_table1_quantum_rows(root)
     frozen_note = "βの既定値は 1.0（PPN: (1+γ)=2β）とする。"
     frozen_path = _OUT_PRIVATE / "theory" / "frozen_parameters.json"
+    # 条件分岐: `frozen_path.exists()` を満たす経路を評価する。
     if frozen_path.exists():
         try:
             fj = _read_json(frozen_path)
             beta = _safe_float(fj.get("beta"))
             beta_sig = _safe_float(fj.get("beta_sigma"))
+            # 条件分岐: `beta is not None` を満たす経路を評価する。
             if beta is not None:
                 frozen_note = f"βは Cassini 2003 の PPN γ から凍結し、β={_fmt_float(beta, digits=7)}"
+                # 条件分岐: `beta_sig is not None` を満たす経路を評価する。
                 if beta_sig is not None:
                     frozen_note += f"±{_fmt_float(beta_sig, digits=3)}"
+
                 frozen_note += " を以後固定する（PPN: (1+γ)=2β）。"
         except Exception:
             pass
+
     notes = [
         "本表は、各テーマで固定した最終集計値から集計し、再計算は行わない。",
         frozen_note,
@@ -4321,6 +5485,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"Wrote: {md_path_q}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

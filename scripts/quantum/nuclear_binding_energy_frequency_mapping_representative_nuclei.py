@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -28,14 +31,19 @@ def _require_float(obj: object, *, path: Path, key_path: str) -> float:
         v = float(obj)
     except Exception as e:
         raise SystemExit(f"[fail] invalid float at {key_path} in {path}: {e}") from e
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         raise SystemExit(f"[fail] non-finite float at {key_path} in {path}")
+
     return v
 
 
 def _load_ame2020_mass_table(*, root: Path, src_dirname: str) -> dict[tuple[int, int], dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted AME2020 table.\n"
@@ -43,22 +51,32 @@ def _load_ame2020_mass_table(*, root: Path, src_dirname: str) -> dict[tuple[int,
             f"  python -B scripts/quantum/fetch_ame2020_mass_table_sources.py --out-dirname {src_dirname}\n"
             f"Expected: {extracted}"
         )
+
     payload = json.loads(extracted.read_text(encoding="utf-8"))
     rows = payload.get("rows")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         raise SystemExit(f"[fail] invalid extracted_values.json: rows missing/empty: {extracted}")
+
     out: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             z = int(r["Z"])
             a = int(r["A"])
         except Exception:
             continue
+
         out[(z, a)] = r
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {extracted}")
+
     return out
 
 
@@ -67,6 +85,7 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     csv_path = src_dir / "charge_radii.csv"
+    # 条件分岐: `not csv_path.exists()` を満たす経路を評価する。
     if not csv_path.exists():
         raise SystemExit(
             "[fail] missing cached IAEA charge_radii.csv.\n"
@@ -84,16 +103,23 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
                 a = int(row["a"])
             except Exception:
                 continue
+
             rv = str(row.get("radius_val", "")).strip()
             ru = str(row.get("radius_unc", "")).strip()
+            # 条件分岐: `not rv or not ru` を満たす経路を評価する。
             if not rv or not ru:
                 continue
+
             try:
                 out[(z, a)] = {"r_rms_fm": float(rv), "sigma_r_rms_fm": float(ru)}
             except Exception:
                 continue
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] parsed 0 charge radii rows from: {csv_path}")
+
     return out
 
 
@@ -103,6 +129,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    # 条件分岐: `not deut_path.exists()` を満たす経路を評価する。
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -110,9 +137,11 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_deuteron.py\n"
             f"Expected: {deut_path}"
         )
+
     deut = _load_json(deut_path)
 
     two_body_path = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
+    # 条件分岐: `not two_body_path.exists()` を満たす経路を評価する。
     if not two_body_path.exists():
         raise SystemExit(
             "[fail] missing deuteron two-body mapping metrics.\n"
@@ -120,6 +149,7 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_deuteron_two_body.py\n"
             f"Expected: {two_body_path}"
         )
+
     two_body = _load_json(two_body_path)
 
     ame_src_dirname = "iaea_amdc_ame2020_mass_1_mas20"
@@ -135,11 +165,14 @@ def main() -> None:
         key_path="derived.binding_energy.B_MeV.value",
     )
     r_ref = _require_float(deut.get("derived", {}).get("inv_kappa_fm"), path=deut_path, key_path="derived.inv_kappa_fm")
+    # 条件分岐: `not (b_d > 0 and r_ref > 0)` を満たす経路を評価する。
     if not (b_d > 0 and r_ref > 0):
         raise SystemExit("[fail] invalid deuteron anchor (B_d or R_ref non-positive)")
+
     j_ref_mev = 0.5 * b_d
 
     l_range = _require_float(two_body.get("derived", {}).get("lambda_pi_pm_fm"), path=two_body_path, key_path="derived.lambda_pi_pm_fm")
+    # 条件分岐: `not (l_range > 0)` を満たす経路を評価する。
     if not (l_range > 0):
         raise SystemExit("[fail] invalid range scale L (non-positive)")
 
@@ -164,16 +197,20 @@ def main() -> None:
         n = a - z
 
         ame = ame_map.get((z, a))
+        # 条件分岐: `not isinstance(ame, dict)` を満たす経路を評価する。
         if not isinstance(ame, dict):
             raise SystemExit(f"[fail] AME2020 row not found: Z={z} A={a}")
+
         bea_kev = float(ame["binding_keV_per_A"])
         bea_sigma_kev = float(ame.get("binding_sigma_keV_per_A", 0.0))
         b_obs = (bea_kev / 1000.0) * float(a)
         sigma_b_obs = (bea_sigma_kev / 1000.0) * float(a)
 
         rr = radii_map.get((z, a))
+        # 条件分岐: `rr is None` を満たす経路を評価する。
         if rr is None:
             raise SystemExit(f"[fail] charge radius not found in IAEA CSV: Z={z} A={a}")
+
         r_rms = float(rr["r_rms_fm"])
         sigma_r_rms = float(rr["sigma_r_rms_fm"])
 
@@ -221,10 +258,13 @@ def main() -> None:
 
         for m in methods:
             c_kind = str(m["c_kind"])
+            # 条件分岐: `c_kind == "A_minus_1"` を満たす経路を評価する。
             if c_kind == "A_minus_1":
                 c_factor = a - 1
+            # 条件分岐: 前段条件が不成立で、`c_kind == "Z_times_N"` を追加評価する。
             elif c_kind == "Z_times_N":
                 c_factor = z * n
+            # 条件分岐: 前段条件が不成立で、`c_kind == "A_choose_2"` を追加評価する。
             elif c_kind == "A_choose_2":
                 c_factor = a * (a - 1) // 2
             else:
@@ -265,6 +305,7 @@ def main() -> None:
             )
 
     # CSV (freeze)
+
     out_csv = out_dir / "nuclear_binding_energy_frequency_mapping_representative_nuclei.csv"
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -321,6 +362,7 @@ def main() -> None:
             )
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     # Baseline method for B/A comparison
@@ -362,6 +404,7 @@ def main() -> None:
     for m in method_names:
         ratios = [float(base_rows[(k, m)]["ratio_B_pred_over_obs"]) for k in keys]
         ax1.bar([v + offsets[m] for v in x], ratios, width=bar_w, color=colors.get(m, "tab:blue"), alpha=0.85, label=m)
+
     ax1.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
@@ -438,6 +481,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

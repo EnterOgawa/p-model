@@ -48,9 +48,12 @@ def _fetch_json_retry(url: str, *, timeout_s: int | None = None, attempts: int |
             return _fetch_json(url, timeout_s=int(timeout_s))
         except (HTTPError, URLError, TimeoutError) as e:
             last_err = e
+            # 条件分岐: `i >= attempts` を満たす経路を評価する。
             if i >= attempts:
                 break
+
             time.sleep(sleep_s * i)
+
     raise RuntimeError(f"fetch failed after {attempts} attempts: {url} ({type(last_err).__name__}: {last_err})")
 
 
@@ -63,9 +66,12 @@ def _fetch_text_retry(url: str, *, timeout_s: int | None = None, attempts: int |
             return _fetch_text(url, timeout_s=int(timeout_s))
         except (HTTPError, URLError, TimeoutError) as e:
             last_err = e
+            # 条件分岐: `i >= attempts` を満たす経路を評価する。
             if i >= attempts:
                 break
+
             time.sleep(sleep_s * i)
+
     raise RuntimeError(f"fetch failed after {attempts} attempts: {url} ({type(last_err).__name__}: {last_err})")
 
 
@@ -82,8 +88,10 @@ def _zenodo_search(*, q: str, size: int = 10) -> dict[str, Any]:
     items = hits.get("hits") if isinstance(hits.get("hits"), list) else []
     out_items: list[dict[str, Any]] = []
     for it in items:
+        # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
         if not isinstance(it, dict):
             continue
+
         md = it.get("metadata") if isinstance(it.get("metadata"), dict) else {}
         files = it.get("files") if isinstance(it.get("files"), list) else []
         out_items.append(
@@ -98,6 +106,7 @@ def _zenodo_search(*, q: str, size: int = 10) -> dict[str, Any]:
                 "files_names": [f.get("key") for f in files if isinstance(f, dict) and f.get("key")] if files else [],
             }
         )
+
     return {"platform": "zenodo", "q": q, "url": url, "total": total, "items": out_items}
 
 
@@ -110,8 +119,10 @@ def _osf_search(*, q: str, size: int = 10) -> dict[str, Any]:
     data = obj.get("data") if isinstance(obj.get("data"), list) else []
     items: list[dict[str, Any]] = []
     for d in data:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         attrs = d.get("attributes") if isinstance(d.get("attributes"), dict) else {}
         links = d.get("links") if isinstance(d.get("links"), dict) else {}
         items.append(
@@ -123,6 +134,7 @@ def _osf_search(*, q: str, size: int = 10) -> dict[str, Any]:
                 "url": attrs.get("absolute_url") or links.get("html"),
             }
         )
+
     return {"platform": "osf", "q": q, "url": url, "total": total, "items": items}
 
 
@@ -134,8 +146,10 @@ def _datacite_search(*, q: str, size: int = 10) -> dict[str, Any]:
     data = obj.get("data") if isinstance(obj.get("data"), list) else []
     items: list[dict[str, Any]] = []
     for d in data:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         attrs = d.get("attributes") if isinstance(d.get("attributes"), dict) else {}
         items.append(
             {
@@ -147,6 +161,7 @@ def _datacite_search(*, q: str, size: int = 10) -> dict[str, Any]:
                 "url": attrs.get("url"),
             }
         )
+
     return {"platform": "datacite", "q": q, "url": url, "total": total, "items": items}
 
 
@@ -158,8 +173,10 @@ def _crossref_search(*, q: str, size: int = 10) -> dict[str, Any]:
     data = msg.get("items") if isinstance(msg.get("items"), list) else []
     items: list[dict[str, Any]] = []
     for d in data:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         title = d.get("title")
         title0 = title[0] if isinstance(title, list) and title else title
         items.append(
@@ -173,6 +190,7 @@ def _crossref_search(*, q: str, size: int = 10) -> dict[str, Any]:
                 "link": d.get("link"),
             }
         )
+
     return {"platform": "crossref", "q": q, "url": url, "total": total, "items": items}
 
 
@@ -184,13 +202,16 @@ def _openalex_search(*, q: str, size: int = 10) -> dict[str, Any]:
     except Exception:
         url = f"https://api.openalex.org/works?search={quote(q)}&per_page={int(size)}"
         obj = _fetch_json_retry(url)
+
     meta = obj.get("meta") if isinstance(obj.get("meta"), dict) else {}
     total = meta.get("count")
     data = obj.get("results") if isinstance(obj.get("results"), list) else []
     items: list[dict[str, Any]] = []
     for d in data:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         items.append(
             {
                 "id": d.get("id"),
@@ -202,6 +223,7 @@ def _openalex_search(*, q: str, size: int = 10) -> dict[str, Any]:
                 "open_access": d.get("open_access"),
             }
         )
+
     return {"platform": "openalex", "q": q, "url": url, "total": total, "items": items}
 
 
@@ -210,10 +232,13 @@ def _figshare_search(*, q: str, size: int = 10) -> dict[str, Any]:
     url = f"https://api.figshare.com/v2/articles?search_for={quote(q)}&page_size={int(size)}&page=1"
     data = _fetch_json_retry(url)
     items: list[dict[str, Any]] = []
+    # 条件分岐: `isinstance(data, list)` を満たす経路を評価する。
     if isinstance(data, list):
         for d in data:
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
             if not isinstance(d, dict):
                 continue
+
             items.append(
                 {
                     "id": d.get("id"),
@@ -226,6 +251,7 @@ def _figshare_search(*, q: str, size: int = 10) -> dict[str, Any]:
                     "url_public_api": d.get("url_public_api"),
                 }
             )
+
     return {"platform": "figshare", "q": q, "url": url, "total": None, "items": items}
 
 
@@ -238,8 +264,10 @@ def _harvard_dataverse_search(*, q: str, size: int = 10) -> dict[str, Any]:
     items0 = data.get("items") if isinstance(data.get("items"), list) else []
     items: list[dict[str, Any]] = []
     for d in items0:
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         items.append(
             {
                 "name": d.get("name"),
@@ -251,6 +279,7 @@ def _harvard_dataverse_search(*, q: str, size: int = 10) -> dict[str, Any]:
                 "authors": d.get("authors"),
             }
         )
+
     return {"platform": "dataverse_harvard", "q": q, "url": url, "total": total, "items": items}
 
 
@@ -275,14 +304,20 @@ def _ddg_unwrap_redirect(url: str) -> str:
     #   //duckduckgo.com/l/?uddg=<urlencoded>&rut=<...>
     # We prefer to store the underlying target URL (uddg) for reproducibility.
     u = unescape(url.strip())
+    # 条件分岐: `u.startswith("//")` を満たす経路を評価する。
     if u.startswith("//"):
         u = "https:" + u
+
     parsed = urlparse(u)
+    # 条件分岐: `"duckduckgo.com" not in parsed.netloc.lower()` を満たす経路を評価する。
     if "duckduckgo.com" not in parsed.netloc.lower():
         return u
+
     qs = parse_qs(parsed.query)
+    # 条件分岐: `"uddg" in qs and qs["uddg"]` を満たす経路を評価する。
     if "uddg" in qs and qs["uddg"]:
         return unquote(qs["uddg"][0])
+
     return u
 
 
@@ -295,37 +330,57 @@ def _duckduckgo_html_search(*, q: str, size: int = 10) -> dict[str, Any]:
         return re.sub(r"<[^>]+>", "", s).strip()
 
     # Extract result links and titles.
+
     raw = re.findall(r'<a\s+rel="nofollow"\s+class="result__a"\s+href="([^"]+)">(.*?)</a>', html, flags=re.S)
     filter_keys = ["giustina", "bell", "zeilinger", "physrevlett", "1511.03190", "loophole"]
     items: list[dict[str, Any]] = []
     for href, raw_title in raw[: int(size) * 6]:
         target = _ddg_unwrap_redirect(href)
+        # 条件分岐: `not target or _is_piracy_url(target)` を満たす経路を評価する。
         if not target or _is_piracy_url(target):
             continue
+
         title = strip_tags(unescape(raw_title))
         hay = f"{title} {target}".lower()
+        # 条件分岐: `not any(k in hay for k in filter_keys)` を満たす経路を評価する。
         if not any(k in hay for k in filter_keys):
             continue
+
         items.append({"title": title, "url": target})
+        # 条件分岐: `len(items) >= int(size)` を満たす経路を評価する。
         if len(items) >= int(size):
             break
+
     return {"platform": "duckduckgo_html", "q": q, "url": url, "total": None, "items": items}
 
 
 def _to_text(v: Any) -> str:
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return ""
+
+    # 条件分岐: `isinstance(v, (str, int, float))` を満たす経路を評価する。
+
     if isinstance(v, (str, int, float)):
         return str(v)
+
+    # 条件分岐: `isinstance(v, list)` を満たす経路を評価する。
+
     if isinstance(v, list):
         return " ".join(_to_text(x) for x in v[:5])
+
+    # 条件分岐: `isinstance(v, dict)` を満たす経路を評価する。
+
     if isinstance(v, dict):
         # Keep it shallow; avoid dumping huge JSON into the matcher.
         parts: list[str] = []
         for k in ("title", "doi", "url", "URL", "global_id", "id"):
+            # 条件分岐: `k in v` を満たす経路を評価する。
             if k in v:
                 parts.append(_to_text(v.get(k)))
+
         return " ".join(p for p in parts if p)
+
     return str(v)
 
 
@@ -342,11 +397,16 @@ def _is_plausible_item(item: dict[str, Any]) -> bool:
     # 250401 is too generic as a bare token (it appears in many unrelated DOIs). Keep the matcher strict.
     if "10.1103/physrevlett.115.250401" in hay or "physrevlett.115.250401" in hay:
         return True
+
+    # 条件分岐: `"1511.03190" in hay` を満たす経路を評価する。
+
     if "1511.03190" in hay:
         return True
     # Name-based fallback: require author + context words to avoid "vienna" false positives.
+
     if "giustina" in hay and ("bell" in hay or "loophole" in hay or "zeilinger" in hay):
         return True
+
     return False
 
 
@@ -367,11 +427,16 @@ def _looks_like_dataset_url(url: str) -> bool:
     u = url.lower()
     # File-like direct links
     exts = [".zip", ".tar", ".tar.gz", ".tgz", ".csv", ".json", ".jsonl", ".txt", ".dat", ".h5", ".fits"]
+    # 条件分岐: `any(u.endswith(ext) for ext in exts)` を満たす経路を評価する。
     if any(u.endswith(ext) for ext in exts):
         return True
+
+    # 条件分岐: `any(ext in u for ext in exts) and ("download" in u or "files" in u or "attach...` を満たす経路を評価する。
+
     if any(ext in u for ext in exts) and ("download" in u or "files" in u or "attachment" in u):
         return True
     # Repository-like landing pages
+
     repos = [
         "zenodo.org/record",
         "zenodo.org/records",
@@ -444,6 +509,7 @@ def main() -> None:
                 print(f"  - {name}: error={type(e).__name__}: {e}")
 
     # Best-effort web search (DDG HTML).
+
     for q in ddg_queries:
         print(f"[run] q(ddg)={q}")
         try:
@@ -455,12 +521,17 @@ def main() -> None:
             print(f"  - duckduckgo_html: error={type(e).__name__}: {e}")
 
     # Collect a short list of plausible hits (strict heuristic).
+
     plausible: list[dict[str, Any]] = []
     for r in results:
         items = r.get("items") if isinstance(r.get("items"), list) else []
         for it in items:
+            # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
             if not isinstance(it, dict):
                 continue
+
+            # 条件分岐: `_is_plausible_item(it)` を満たす経路を評価する。
+
             if _is_plausible_item(it):
                 plausible.append({"platform": r.get("platform"), "q": r.get("q"), **it})
 
@@ -507,6 +578,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_path}")
     print(f"[info] out_sha256: {_stable_sha256_text(json.dumps(out, ensure_ascii=False))}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

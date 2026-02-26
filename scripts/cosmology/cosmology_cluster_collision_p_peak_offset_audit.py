@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -101,48 +102,64 @@ def _sha256_file(path: Path) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(1024 * 1024)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest().upper()
 
 
 def _file_signature(path: Path) -> Dict[str, Any]:
     payload: Dict[str, Any] = {"exists": bool(path.exists()), "path": _rel(path)}
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return payload
+
     try:
         stat = path.stat()
         payload["size_bytes"] = int(stat.st_size)
         payload["mtime_utc"] = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
     except Exception:
         pass
+
     try:
         payload["sha256"] = _sha256_file(path)
     except Exception:
         pass
+
     return payload
 
 
 def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
     diagnostics = payload.get("diagnostics")
+    # 条件分岐: `not isinstance(diagnostics, dict)` を満たす経路を評価する。
     if not isinstance(diagnostics, dict):
         return {}
+
     watchpack = diagnostics.get("primary_map_update_watchpack")
+    # 条件分岐: `not isinstance(watchpack, dict)` を満たす経路を評価する。
     if not isinstance(watchpack, dict):
         return {}
+
     return watchpack
 
 
 def _set_japanese_font() -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
@@ -150,8 +167,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -175,6 +194,7 @@ def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], st
         "rows_source_mode_not_primary": [],
         "mode_decision_reason": "fallback_embedded_proxy",
     }
+    # 条件分岐: `csv_path.exists()` を満たす経路を評価する。
     if csv_path.exists():
         rows: List[CollisionObs] = []
         n_rows_with_primary_refs = 0
@@ -199,6 +219,7 @@ def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], st
                     sigma_kpc = float(row.get("lens_gas_offset_kpc_sigma", "nan"))
                 except Exception:
                     continue
+
                 if (
                     not cluster_id
                     or not np.isfinite(offset_kpc)
@@ -207,6 +228,7 @@ def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], st
                     or offset_kpc == 0.0
                 ):
                     continue
+
                 rows.append(
                     CollisionObs(
                         cluster_id=cluster_id,
@@ -218,14 +240,21 @@ def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], st
                 lens_ref = str(row.get(PRIMARY_REFERENCE_COLUMNS[0], "")).strip()
                 xray_ref = str(row.get(PRIMARY_REFERENCE_COLUMNS[1], "")).strip()
                 source_mode_flag = str(row.get(PRIMARY_MODE_COLUMN, "")).strip().lower()
+                # 条件分岐: `lens_ref and xray_ref` を満たす経路を評価する。
                 if lens_ref and xray_ref:
                     n_rows_with_primary_refs += 1
                 else:
                     rows_missing_primary_refs.append(cluster_id)
+
+                # 条件分岐: `source_mode_flag == PRIMARY_MODE_VALUE` を満たす経路を評価する。
+
                 if source_mode_flag == PRIMARY_MODE_VALUE:
                     n_rows_mode_primary += 1
                 else:
                     rows_source_mode_not_primary.append(cluster_id)
+
+        # 条件分岐: `rows` を満たす経路を評価する。
+
         if rows:
             n_valid = len(rows)
             source_diag["n_valid_rows"] = int(n_valid)
@@ -241,25 +270,32 @@ def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], st
                 and n_rows_with_primary_refs == n_valid
                 and n_rows_mode_primary == n_valid
             )
+            # 条件分岐: `all_rows_primary` を満たす経路を評価する。
             if all_rows_primary:
                 mode = "primary_map_registered"
                 source_diag["mode_decision_reason"] = "all_rows_have_primary_registration_fields"
+            # 条件分岐: 前段条件が不成立で、`not has_primary_cols` を追加評価する。
             elif not has_primary_cols:
                 mode = "proxy_table_csv"
                 source_diag["mode_decision_reason"] = "missing_primary_reference_columns"
+            # 条件分岐: 前段条件が不成立で、`not has_mode_col` を追加評価する。
             elif not has_mode_col:
                 mode = "proxy_table_csv"
                 source_diag["mode_decision_reason"] = "missing_primary_mode_column"
+            # 条件分岐: 前段条件が不成立で、`n_rows_with_primary_refs < n_valid` を追加評価する。
             elif n_rows_with_primary_refs < n_valid:
                 mode = "proxy_table_csv"
                 source_diag["mode_decision_reason"] = "rows_missing_primary_map_refs"
+            # 条件分岐: 前段条件が不成立で、`n_rows_mode_primary < n_valid` を追加評価する。
             elif n_rows_mode_primary < n_valid:
                 mode = "proxy_table_csv"
                 source_diag["mode_decision_reason"] = "rows_not_marked_primary_map_registered"
             else:
                 mode = "proxy_table_csv"
                 source_diag["mode_decision_reason"] = "proxy_rows_or_partial_primary_fields"
+
             return rows, mode, notes, source_diag
+
         notes.append("Input CSV exists but no valid rows were found; fallback proxy table is used.")
 
     fallback = [
@@ -276,6 +312,7 @@ def _derive_primary_registration_readiness(source_diag: Dict[str, Any]) -> Dict[
     n_valid_rows = int(source_diag.get("n_valid_rows", 0) or 0)
     missing_columns_raw = source_diag.get("primary_reference_columns_missing")
     missing_columns: List[str] = list(missing_columns_raw) if isinstance(missing_columns_raw, list) else []
+    # 条件分岐: `not bool(source_diag.get("primary_mode_column_present")) and PRIMARY_MODE_COL...` を満たす経路を評価する。
     if not bool(source_diag.get("primary_mode_column_present")) and PRIMARY_MODE_COLUMN not in missing_columns:
         missing_columns.append(PRIMARY_MODE_COLUMN)
 
@@ -284,24 +321,32 @@ def _derive_primary_registration_readiness(source_diag: Dict[str, Any]) -> Dict[
     rows_mode_not_primary_raw = source_diag.get("rows_source_mode_not_primary")
     rows_mode_not_primary = list(rows_mode_not_primary_raw) if isinstance(rows_mode_not_primary_raw, list) else []
 
+    # 条件分岐: `n_valid_rows <= 0` を満たす経路を評価する。
     if n_valid_rows <= 0:
         decision_reason = "no_valid_rows"
+    # 条件分岐: 前段条件が不成立で、`len(missing_columns) > 0` を追加評価する。
     elif len(missing_columns) > 0:
         decision_reason = "missing_required_columns"
+    # 条件分岐: 前段条件が不成立で、`len(rows_missing_refs) > 0` を追加評価する。
     elif len(rows_missing_refs) > 0:
         decision_reason = "rows_missing_primary_refs"
+    # 条件分岐: 前段条件が不成立で、`len(rows_mode_not_primary) > 0` を追加評価する。
     elif len(rows_mode_not_primary) > 0:
         decision_reason = "rows_not_marked_primary_map_registered"
     else:
         decision_reason = "ready"
 
     ready = decision_reason == "ready"
+    # 条件分岐: `decision_reason == "missing_required_columns"` を満たす経路を評価する。
     if decision_reason == "missing_required_columns":
         next_action = "add_required_primary_columns_then_rerun_step_8_7_25"
+    # 条件分岐: 前段条件が不成立で、`decision_reason == "rows_missing_primary_refs"` を追加評価する。
     elif decision_reason == "rows_missing_primary_refs":
         next_action = "fill_lens_map_ref_and_xray_map_ref_for_all_rows_then_rerun_step_8_7_25"
+    # 条件分岐: 前段条件が不成立で、`decision_reason == "rows_not_marked_primary_map_registered"` を追加評価する。
     elif decision_reason == "rows_not_marked_primary_map_registered":
         next_action = "set_source_mode_primary_map_registered_for_all_rows_then_rerun_step_8_7_25"
+    # 条件分岐: 前段条件が不成立で、`decision_reason == "no_valid_rows"` を追加評価する。
     elif decision_reason == "no_valid_rows":
         next_action = "populate_valid_cluster_rows_then_rerun_step_8_7_25"
     else:
@@ -325,14 +370,17 @@ def _build_primary_registration_checklist(
     observations: Sequence[CollisionObs],
 ) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     rows_by_cluster: Dict[str, Dict[str, str]] = {}
+    # 条件分岐: `input_csv.exists()` を満たす経路を評価する。
     if input_csv.exists():
         try:
             with input_csv.open("r", encoding="utf-8", newline="") as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     cluster_id = str(row.get("cluster_id", "")).strip()
+                    # 条件分岐: `not cluster_id` を満たす経路を評価する。
                     if not cluster_id:
                         continue
+
                     rows_by_cluster[cluster_id] = {str(k): str(v) for k, v in row.items()}
         except Exception:
             rows_by_cluster = {}
@@ -346,20 +394,28 @@ def _build_primary_registration_checklist(
         source_mode = str(row.get(PRIMARY_MODE_COLUMN, "")).strip()
 
         missing_fields: List[str] = []
+        # 条件分岐: `not lens_ref` を満たす経路を評価する。
         if not lens_ref:
             missing_fields.append(PRIMARY_REFERENCE_COLUMNS[0])
+
+        # 条件分岐: `not xray_ref` を満たす経路を評価する。
+
         if not xray_ref:
             missing_fields.append(PRIMARY_REFERENCE_COLUMNS[1])
+
         mode_ok = source_mode.lower() == PRIMARY_MODE_VALUE
         row_present = bool(row)
         ready = row_present and len(missing_fields) == 0 and mode_ok
 
+        # 条件分岐: `not row_present` を満たす経路を評価する。
         if not row_present:
             action = "add_cluster_row_with_primary_refs_and_source_mode"
             status = "missing_row"
+        # 条件分岐: 前段条件が不成立で、`len(missing_fields) > 0` を追加評価する。
         elif len(missing_fields) > 0:
             action = "fill_missing_primary_refs"
             status = "pending"
+        # 条件分岐: 前段条件が不成立で、`not mode_ok` を追加評価する。
         elif not mode_ok:
             action = "set_source_mode_primary_map_registered"
             status = "pending"
@@ -435,7 +491,9 @@ def _derive_primary_map_update_watchpack(
     current_size = current_signature.get("size_bytes")
     previous_size = previous_signature.get("size_bytes")
     metadata_changed_without_hash = False
+    # 条件分岐: `current_exists and previous_exists and not hash_changed` を満たす経路を評価する。
     if current_exists and previous_exists and not hash_changed:
+        # 条件分岐: `(current_mtime and previous_mtime and current_mtime != previous_mtime) or (cu...` を満たす経路を評価する。
         if (current_mtime and previous_mtime and current_mtime != previous_mtime) or (current_size != previous_size):
             metadata_changed_without_hash = True
 
@@ -447,12 +505,16 @@ def _derive_primary_map_update_watchpack(
     transitioned_to_primary = (not previous_gate_ready) and gate_ready_now
     baseline_initialized_now = current_exists and not previous_exists
 
+    # 条件分岐: `transitioned_to_primary` を満たす経路を評価する。
     if transitioned_to_primary:
         update_event_type = "source_mode_transition_to_primary"
+    # 条件分岐: 前段条件が不成立で、`hash_changed` を追加評価する。
     elif hash_changed:
         update_event_type = "input_hash_changed"
+    # 条件分岐: 前段条件が不成立で、`baseline_initialized_now` を追加評価する。
     elif baseline_initialized_now:
         update_event_type = "baseline_initialized"
+    # 条件分岐: 前段条件が不成立で、`metadata_changed_without_hash` を追加評価する。
     elif metadata_changed_without_hash:
         update_event_type = "metadata_changed_hash_same"
     else:
@@ -467,6 +529,7 @@ def _derive_primary_map_update_watchpack(
         if isinstance(primary_readiness.get("next_action"), str)
         else ""
     )
+    # 条件分岐: `not next_action` を満たす経路を評価する。
     if not next_action:
         next_action = (
             "run_step_8_7_25_primary_map_recheck_now"
@@ -534,8 +597,10 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _load_sparc_anchor(paths: Sequence[Path]) -> Tuple[Dict[str, Any], str]:
     for path in paths:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         payload = _read_json(path)
         pmodel_fixed = payload.get("pmodel_fixed") if isinstance(payload.get("pmodel_fixed"), dict) else {}
         fit_results = payload.get("fit_results") if isinstance(payload.get("fit_results"), dict) else {}
@@ -553,6 +618,7 @@ def _load_sparc_anchor(paths: Sequence[Path]) -> Tuple[Dict[str, Any], str]:
             "chi2_dof_ratio_pmodel_over_baryon": chi2_ratio,
             "source": _rel(path),
         }, "sparc_anchor"
+
     return {
         "a0_m_s2": 1.0e-10,
         "upsilon_pmodel_best": 0.55,
@@ -612,6 +678,7 @@ def _evaluate_model(
 
         z_pgas.append(float(z_gas))
         z_plens.append(float(z_lens))
+        # 条件分岐: `np.sign(pred_delta_x_p_gas) == np.sign(obs_offset)` を満たす経路を評価する。
         if np.sign(pred_delta_x_p_gas) == np.sign(obs_offset):
             sign_ok += 1
 
@@ -655,16 +722,23 @@ def _evaluate_model(
 
 
 def _status_from_gate(passed: bool, gate_level: str) -> str:
+    # 条件分岐: `passed` を満たす経路を評価する。
     if passed:
         return "pass"
+
     return "reject" if gate_level == "hard" else "watch"
 
 
 def _score_from_status(status: str) -> float:
+    # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
         return 1.0
+
+    # 条件分岐: `status == "watch"` を満たす経路を評価する。
+
     if status == "watch":
         return 0.5
+
     return 0.0
 
 
@@ -757,15 +831,18 @@ def _build_checks(
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(row["id"]) for row in checks if row.get("gate_level") == "hard" and row.get("pass") is not True]
     watch_ids = [str(row["id"]) for row in checks if row.get("gate_level") == "watch" and row.get("pass") is not True]
+    # 条件分岐: `hard_fail_ids` を満たす経路を評価する。
     if hard_fail_ids:
         status = "reject"
         decision = "cluster_collision_p_peak_rejected"
+    # 条件分岐: 前段条件が不成立で、`watch_ids` を追加評価する。
     elif watch_ids:
         status = "watch"
         decision = "cluster_collision_p_peak_watch"
     else:
         status = "pass"
         decision = "cluster_collision_p_peak_pass"
+
     return {
         "overall_status": status,
         "decision": decision,
@@ -795,8 +872,10 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
 
 
 def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequence[Dict[str, Any]], rows_pmodel: Sequence[Dict[str, Any]], alpha_p: float) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     _set_japanese_font()
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -1019,6 +1098,7 @@ def main() -> int:
     }
     _write_json(json_path, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -1063,6 +1143,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

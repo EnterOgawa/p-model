@@ -52,6 +52,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -78,8 +79,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -102,6 +105,7 @@ def _copy_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str
         dst = public_dir / src.name
         shutil.copy2(src, dst)
         copied[src.name] = str(dst).replace("\\", "/")
+
     return copied
 
 
@@ -142,8 +146,10 @@ def _load_boss_rsd_points(path: Path) -> List[RSDPoint]:
     for row in params:
         kind = str(row.get("kind", "")).strip()
         z = float(row.get("z_eff"))
+        # 条件分岐: `kind == "H_scaled_km_s_mpc"` を満たす経路を評価する。
         if kind == "H_scaled_km_s_mpc":
             h_map[z] = float(row.get("mean"))
+        # 条件分岐: 前段条件が不成立で、`kind == "f_sigma8"` を追加評価する。
         elif kind == "f_sigma8":
             fs8_map[z] = (float(row.get("mean")), float(row.get("sigma")))
 
@@ -161,8 +167,12 @@ def _load_boss_rsd_points(path: Path) -> List[RSDPoint]:
                 fs8_sigma=float(max(sig, 1.0e-9)),
             )
         )
+
+    # 条件分岐: `len(points) < 3` を満たす経路を評価する。
+
     if len(points) < 3:
         raise RuntimeError(f"insufficient RSD points for fσ8 mapping: {len(points)}")
+
     return points
 
 
@@ -171,10 +181,15 @@ def _load_tau_eff_seconds(path: Path) -> float:
     tau_block = dict(raw.get("tau_origin_block", {}))
     components = dict(tau_block.get("derived_components_gyr", {}))
     tau_eff_gyr = float(components.get("tau_eff", float("nan")))
+    # 条件分岐: `(not math.isfinite(tau_eff_gyr)) or tau_eff_gyr <= 0.0` を満たす経路を評価する。
     if (not math.isfinite(tau_eff_gyr)) or tau_eff_gyr <= 0.0:
         tau_eff_gyr = float(components.get("tau_eff_harmonic", float("nan")))
+
+    # 条件分岐: `(not math.isfinite(tau_eff_gyr)) or tau_eff_gyr <= 0.0` を満たす経路を評価する。
+
     if (not math.isfinite(tau_eff_gyr)) or tau_eff_gyr <= 0.0:
         raise RuntimeError("tau_eff not found in tau derivation JSON")
+
     return float(tau_eff_gyr * GIGAYEAR_S)
 
 
@@ -321,6 +336,7 @@ def _evaluate_branch(
 
     anchor_idx = int(np.argmin(np.abs(z_desc - float(anchor_z))))
     f_anchor = float(f_desc[anchor_idx])
+    # 条件分岐: `(not math.isfinite(f_anchor)) or abs(f_anchor) < 1.0e-9` を満たす経路を評価する。
     if (not math.isfinite(f_anchor)) or abs(f_anchor) < 1.0e-9:
         raise RuntimeError(f"invalid f(anchor) for branch={branch}, mu_ref={mu_ref}")
 
@@ -334,6 +350,7 @@ def _evaluate_branch(
         p = next(pp for pp in points if abs(pp.z - float(z)) < 1.0e-12)
         dz = float((fs8_desc[i] - p.fs8_obs) / p.fs8_sigma)
         chi2 += dz * dz
+
     dof = max(len(points) - 1, 1)  # sigma8 anchor removes one dof
 
     return BranchResult(
@@ -378,10 +395,17 @@ def _fit_mu_ref(
             )
         except Exception:
             continue
+
+        # 条件分岐: `best is None or result.chi2 < best.chi2` を満たす経路を評価する。
+
         if best is None or result.chi2 < best.chi2:
             best = result
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         raise RuntimeError(f"unable to fit mu_ref for branch={branch}")
+
     return best
 
 
@@ -581,10 +605,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     instant_max_abs_z = max(abs(float(r["z_score"])) for r in instant_rows) if instant_rows else float("nan")
     friction_present = all(float(r["Gamma_eff_over_H_eff"]) > 0.0 for r in delay_rows)
 
+    # 条件分岐: `(not math.isfinite(delay_max_abs_z)) or (not friction_present)` を満たす経路を評価する。
     if (not math.isfinite(delay_max_abs_z)) or (not friction_present):
         overall_status = "reject"
+    # 条件分岐: 前段条件が不成立で、`delay_max_abs_z <= 2.5 and delay.chi2 <= instant.chi2 + 0.25` を追加評価する。
     elif delay_max_abs_z <= 2.5 and delay.chi2 <= instant.chi2 + 0.25:
         overall_status = "pass"
+    # 条件分岐: 前段条件が不成立で、`delay_max_abs_z <= 4.0` を追加評価する。
     elif delay_max_abs_z <= 4.0:
         overall_status = "watch"
     else:
@@ -676,6 +703,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_fals, fals_pack)
 
     copied: Dict[str, str] = {}
+    # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
         copied = _copy_to_public([out_png, out_json, out_fals, out_csv], Path(args.public_dir).resolve())
 
@@ -683,6 +711,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     print(f"[ok] fals: {out_fals}")
     print(f"[ok] csv : {out_csv}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] copied to public: {len(copied)} files")
 
@@ -714,8 +743,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

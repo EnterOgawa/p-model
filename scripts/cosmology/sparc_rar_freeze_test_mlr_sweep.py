@@ -37,6 +37,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -69,10 +70,15 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
+    # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step...` を満たす経路を評価する。
     if not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step > 0):
         raise ValueError("invalid grid params")
+
+    # 条件分岐: `stop < start` を満たす経路を評価する。
+
     if stop < start:
         raise ValueError("stop < start")
+
     n = int(math.floor((stop - start) / step + 0.5)) + 1
     vv = start + step * np.arange(n, dtype=float)
     vv = vv[(vv >= start - 1e-12) & (vv <= stop + 1e-12)]
@@ -104,8 +110,10 @@ def _read_raw_rows(rar_csv: Path) -> List[_RawRow]:
         r = csv.DictReader(f)
         for row in r:
             gal = str(row.get("galaxy") or "").strip()
+            # 条件分岐: `not gal` を満たす経路を評価する。
             if not gal:
                 continue
+
             try:
                 rr_kpc = float(row.get("r_kpc") or "nan")
                 vgas = float(row.get("vgas_km_s") or "nan")
@@ -115,8 +123,12 @@ def _read_raw_rows(rar_csv: Path) -> List[_RawRow]:
                 sg_obs = float(row.get("g_obs_sigma_m_s2") or "nan")
             except Exception:
                 continue
+
+            # 条件分岐: `not (np.isfinite(rr_kpc) and rr_kpc > 0 and np.isfinite(vgas) and np.isfinite...` を満たす経路を評価する。
+
             if not (np.isfinite(rr_kpc) and rr_kpc > 0 and np.isfinite(vgas) and np.isfinite(vdisk) and np.isfinite(vbul) and np.isfinite(g_obs) and g_obs > 0):
                 continue
+
             rows.append(
                 _RawRow(
                     galaxy=gal,
@@ -128,6 +140,7 @@ def _read_raw_rows(rar_csv: Path) -> List[_RawRow]:
                     g_obs_sigma_m_s2=float(sg_obs),
                 )
             )
+
     return rows
 
 
@@ -139,15 +152,19 @@ def _points_for_upsilon(rows: Sequence[_RawRow], *, upsilon_disk: float, upsilon
     pts: List[Point] = []
     for r in rows:
         rr_m = float(r.r_kpc) * KPC_TO_M
+        # 条件分岐: `not np.isfinite(rr_m) or rr_m <= 0` を満たす経路を評価する。
         if not np.isfinite(rr_m) or rr_m <= 0:
             continue
+
         vgas = float(r.vgas_km_s) * KM_TO_M
         vdisk = float(r.vdisk_km_s) * KM_TO_M * f_disk
         vbul = float(r.vbul_km_s) * KM_TO_M * f_bul
         vbar2 = vgas * vgas + vdisk * vdisk + vbul * vbul
         g_bar = vbar2 / rr_m
+        # 条件分岐: `not (np.isfinite(g_bar) and g_bar > 0)` を満たす経路を評価する。
         if not (np.isfinite(g_bar) and g_bar > 0):
             continue
+
         pts.append(
             Point(
                 galaxy=str(r.galaxy),
@@ -156,6 +173,7 @@ def _points_for_upsilon(rows: Sequence[_RawRow], *, upsilon_disk: float, upsilon
                 sg_obs=float(r.g_obs_sigma_m_s2),
             )
         )
+
     return pts
 
 
@@ -180,6 +198,7 @@ def _plot_heatmap(
     ub = ub[np.isfinite(ub)]
     ud = np.unique(ud)
     ub = np.unique(ub)
+    # 条件分岐: `ud.size == 0 or ub.size == 0` を満たす経路を評価する。
     if ud.size == 0 or ub.size == 0:
         return
 
@@ -204,10 +223,12 @@ def _plot_heatmap(
     for i in range(ud.size):
         for j in range(ub.size):
             v = m[i, j]
+            # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
             if np.isfinite(v):
                 ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=8, color="w" if v < 0.55 else "k")
 
     # mark reference (default) cell if present
+
     try:
         i_ref = int(np.where(np.isclose(ud, float(ref_ud)))[0][0])
         j_ref = int(np.where(np.isclose(ub, float(ref_ub)))[0][0])
@@ -252,26 +273,33 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rar_csv = Path(args.rar_csv)
+    # 条件分岐: `not rar_csv.exists()` を満たす経路を評価する。
     if not rar_csv.exists():
         raise SystemExit(f"missing rar csv: {rar_csv}")
+
     h0p_metrics = Path(args.h0p_metrics)
+    # 条件分岐: `not h0p_metrics.exists()` を満たす経路を評価する。
     if not h0p_metrics.exists():
         raise SystemExit(f"missing h0p metrics: {h0p_metrics}")
 
     # Prior (canonical): SPARC/RAR analyses commonly adopt Υ≈0.5 (disk) and Υ≈0.7 (bulge) at 3.6μm.
     # Default is a tight grid around these values to match the fixed-output robustness gate.
+
     ud_list = _unique_sorted([float(x) for x in (args.upsilon_disk or [])] or [0.45, 0.5, 0.55])
     ub_list = _unique_sorted([float(x) for x in (args.upsilon_bulge or [])] or [0.65, 0.7, 0.75])
+    # 条件分岐: `not ud_list or not ub_list` を満たす経路を評価する。
     if not ud_list or not ub_list:
         raise SystemExit("empty upsilon grid")
 
     seeds = list(range(int(args.seed_start), int(args.seed_start) + int(max(args.seed_count, 1))))
     train_fracs = _parse_grid(float(args.train_frac_start), float(args.train_frac_stop), float(args.train_frac_step))
     split_list = _splits(seeds, train_fracs)
+    # 条件分岐: `not split_list` を満たす経路を評価する。
     if not split_list:
         raise SystemExit("no splits")
 
     rows = _read_raw_rows(rar_csv)
+    # 条件分岐: `len(rows) < 100` を満たす経路を評価する。
     if len(rows) < 100:
         raise SystemExit(f"not enough rows: {len(rows)}")
 
@@ -283,6 +311,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for ub in ub_list:
             pts = _points_for_upsilon(rows, upsilon_disk=float(ud), upsilon_bulge=float(ub))
             galaxies = sorted({p.galaxy for p in pts})
+            # 条件分岐: `len(pts) < 100 or len(galaxies) < 50` を満たす経路を評価する。
             if len(pts) < 100 or len(galaxies) < 50:
                 variants.append(
                     {
@@ -308,14 +337,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     low_accel_cut_log10_gbar=float(args.low_accel_cut),
                 )
                 for m in run.get("models", []) if isinstance(run.get("models"), list) else []:
+                    # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
                     if not isinstance(m, dict):
                         continue
+
                     name = str(m.get("name") or "")
                     te = (m.get("test") or {}).get("with_sigma_int") or {}
                     z = ((te.get("low_accel") or {}).get("z"))
+                    # 条件分岐: `isinstance(z, (int, float)) and np.isfinite(z)` を満たす経路を評価する。
                     if isinstance(z, (int, float)) and np.isfinite(z):
                         by_model_point.setdefault(name, []).append(float(z))
+
                     z_gal = ((te.get("low_accel_galaxy") or {}).get("z"))
+                    # 条件分岐: `isinstance(z_gal, (int, float)) and np.isfinite(z_gal)` を満たす経路を評価する。
                     if isinstance(z_gal, (int, float)) and np.isfinite(z_gal):
                         by_model_galaxy.setdefault(name, []).append(float(z_gal))
 
@@ -325,6 +359,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             # Candidate pass_rate for plotting/robustness
             cand = sweep_summary_galaxy.get("candidate_rar_pbg_a0_fixed_kappa") or {}
             pr = cand.get("pass_rate_abs_lt_threshold")
+            # 条件分岐: `isinstance(pr, (int, float)) and np.isfinite(pr)` を満たす経路を評価する。
             if isinstance(pr, (int, float)) and np.isfinite(pr):
                 cand_grid[(float(ud), float(ub))] = float(pr)
 
@@ -340,18 +375,26 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
 
     # envelope across variants (galaxy-level pass_rate)
+
     def _envelope_pass_rate(model: str) -> Dict[str, Any]:
         vv: List[float] = []
         for v in variants:
+            # 条件分岐: `v.get("status") != "ok"` を満たす経路を評価する。
             if v.get("status") != "ok":
                 continue
+
             ss_g = v.get("sweep_summary_galaxy") if isinstance(v.get("sweep_summary_galaxy"), dict) else {}
             m = ss_g.get(model) if isinstance(ss_g.get(model), dict) else {}
             pr = m.get("pass_rate_abs_lt_threshold")
+            # 条件分岐: `isinstance(pr, (int, float)) and np.isfinite(pr)` を満たす経路を評価する。
             if isinstance(pr, (int, float)) and np.isfinite(pr):
                 vv.append(float(pr))
+
+        # 条件分岐: `not vv` を満たす経路を評価する。
+
         if not vv:
             return {"status": "missing"}
+
         return {"status": "ok", "min": float(min(vv)), "max": float(max(vv)), "median": float(np.median(np.asarray(vv, dtype=float))), "n": int(len(vv))}
 
     env = {
@@ -364,23 +407,30 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Robustness rule (explicit): require min pass_rate >= 0.95 across the M/L grid.
     cand_env = env.get("candidate_rar_pbg_a0_fixed_kappa") if isinstance(env.get("candidate_rar_pbg_a0_fixed_kappa"), dict) else {}
     robust_adopted = None
+    # 条件分岐: `cand_env.get("status") == "ok"` を満たす経路を評価する。
     if cand_env.get("status") == "ok":
         robust_adopted = bool(float(cand_env.get("min")) >= 0.95)
 
     def _grid_pass_rate(model: str) -> Dict[Tuple[float, float], float]:
         grid: Dict[Tuple[float, float], float] = {}
         for v in variants:
+            # 条件分岐: `not isinstance(v, dict) or v.get("status") != "ok"` を満たす経路を評価する。
             if not isinstance(v, dict) or v.get("status") != "ok":
                 continue
+
             ud = v.get("upsilon_disk")
             ub = v.get("upsilon_bulge")
+            # 条件分岐: `not (isinstance(ud, (int, float)) and isinstance(ub, (int, float)) and np.isf...` を満たす経路を評価する。
             if not (isinstance(ud, (int, float)) and isinstance(ub, (int, float)) and np.isfinite(ud) and np.isfinite(ub)):
                 continue
+
             ss_g = v.get("sweep_summary_galaxy") if isinstance(v.get("sweep_summary_galaxy"), dict) else {}
             m = ss_g.get(model) if isinstance(ss_g.get(model), dict) else {}
             pr = m.get("pass_rate_abs_lt_threshold")
+            # 条件分岐: `isinstance(pr, (int, float)) and np.isfinite(pr)` を満たす経路を評価する。
             if isinstance(pr, (int, float)) and np.isfinite(pr):
                 grid[(float(ud), float(ub))] = float(pr)
+
         return grid
 
     def _marginal_by_disk(*, grid: Dict[Tuple[float, float], float]) -> List[Dict[str, Any]]:
@@ -389,11 +439,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             vv: List[float] = []
             for ub in ub_list:
                 pr = grid.get((float(ud), float(ub)))
+                # 条件分岐: `pr is not None and np.isfinite(pr)` を満たす経路を評価する。
                 if pr is not None and np.isfinite(pr):
                     vv.append(float(pr))
+
+            # 条件分岐: `not vv` を満たす経路を評価する。
+
             if not vv:
                 rows.append({"upsilon_disk": float(ud), "status": "missing"})
                 continue
+
             rows.append(
                 {
                     "upsilon_disk": float(ud),
@@ -404,6 +459,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "median": float(np.median(np.asarray(vv, dtype=float))),
                 }
             )
+
         return rows
 
     def _marginal_by_bulge(*, grid: Dict[Tuple[float, float], float]) -> List[Dict[str, Any]]:
@@ -412,11 +468,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             vv: List[float] = []
             for ud in ud_list:
                 pr = grid.get((float(ud), float(ub)))
+                # 条件分岐: `pr is not None and np.isfinite(pr)` を満たす経路を評価する。
                 if pr is not None and np.isfinite(pr):
                     vv.append(float(pr))
+
+            # 条件分岐: `not vv` を満たす経路を評価する。
+
             if not vv:
                 rows.append({"upsilon_bulge": float(ub), "status": "missing"})
                 continue
+
             rows.append(
                 {
                     "upsilon_bulge": float(ub),
@@ -427,6 +488,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "median": float(np.median(np.asarray(vv, dtype=float))),
                 }
             )
+
         return rows
 
     marginal: Dict[str, Any] = {"pass_rate_abs_lt_threshold_galaxy": {}}
@@ -468,6 +530,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_path, payload)
 
     out_png = Path(args.out_png)
+    # 条件分岐: `cand_grid` を満たす経路を評価する。
     if cand_grid:
         _plot_heatmap(
             out_png=out_png,
@@ -478,6 +541,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             ref_ud=0.5,
             ref_ub=0.7,
         )
+
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
 
     if worklog is not None:
         try:
@@ -495,6 +560,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"metrics": _rel(out_path), "plot": _rel(out_png)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

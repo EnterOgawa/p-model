@@ -35,37 +35,46 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest().upper()
 
 
 def _download(url: str, out_path: Path, *, force: bool) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0 and not force` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0 and not force:
         print(f"[skip] exists: {out_path}")
         return
+
     tmp = out_path.with_suffix(out_path.suffix + ".part")
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     print(f"[dl] {url}")
     with urlopen(req, timeout=180) as resp, tmp.open("wb") as f:
         shutil.copyfileobj(resp, f, length=1024 * 1024)
+
     tmp.replace(out_path)
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
 def _extract_pre_block(html: str) -> str:
     m = re.search(r"<pre>\s*(.*?)\s*</pre>", html, flags=re.IGNORECASE | re.DOTALL)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError("missing <pre>...</pre> block")
     # Normalize line endings and strip trailing spaces to keep cache stable.
+
     text = m.group(1)
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     lines = [ln.rstrip() for ln in text.splitlines()]
     # Drop leading empty lines.
     while lines and not lines[0].strip():
         lines.pop(0)
+
     return "\n".join(lines).strip() + "\n"
 
 
@@ -89,21 +98,26 @@ def _parse_pre_stats(pre_text: str) -> dict[str, Any]:
     nu_max = None
     for line in pre_text.splitlines():
         parts = line.split()
+        # 条件分岐: `len(parts) < 7` を満たす経路を評価する。
         if len(parts) < 7:
             continue
+
         vu = _safe_float(parts[0])
         ju = _safe_float(parts[1])
         vl = _safe_float(parts[2])
         jl = _safe_float(parts[3])
         a = _safe_float(parts[4].replace("D", "E"))
         nu = _safe_float(parts[5])
+        # 条件分岐: `None in (vu, ju, vl, jl, a, nu)` を満たす経路を評価する。
         if None in (vu, ju, vl, jl, a, nu):
             continue
+
         n_rows += 1
         a_min = a if a_min is None else min(a_min, a)
         a_max = a if a_max is None else max(a_max, a)
         nu_min = nu if nu_min is None else min(nu_min, nu)
         nu_max = nu if nu_max is None else max(nu_max, nu)
+
     return {
         "n_rows": n_rows,
         "A_min_s^-1": (None if a_min is None else float(a_min)),
@@ -181,10 +195,14 @@ def main(argv: list[str] | None = None) -> int:
         raw_html_paths.append(out_dir / f"molat_d2_view_data__{spec.file_id}.html")
         pre_txt_paths.append(out_dir / f"molat_d2_lines__{spec.file_id}.txt")
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
+
     if args.offline:
         missing = [p for p in [*raw_html_paths, *pre_txt_paths, extracted_path, manifest_path] if not p.exists() or p.stat().st_size <= 0]
+        # 条件分岐: `missing` を満たす経路を評価する。
         if missing:
             raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return 0
 
@@ -237,6 +255,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] wrote: {manifest_file}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

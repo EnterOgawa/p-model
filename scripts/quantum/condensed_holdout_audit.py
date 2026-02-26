@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -25,9 +26,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -41,9 +45,11 @@ def _rel(path: Path) -> str:
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         w = csv.writer(f)
         w.writerow(headers)
@@ -52,8 +58,10 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
 
 def _fmt_range(r: Sequence[float]) -> str:
+    # 条件分岐: `len(r) != 2` を満たす経路を評価する。
     if len(r) != 2:
         return ""
+
     return f"{float(r[0]):g}-{float(r[1]):g}K"
 
 
@@ -62,6 +70,7 @@ def _safe_float(v: object) -> Optional[float]:
         x = float(v)
     except Exception:
         return None
+
     return x if math.isfinite(x) else None
 
 
@@ -79,32 +88,53 @@ def _gate_ok(
     max_abs_z_le: float,
     reduced_chi2_le: Optional[float],
 ) -> Optional[bool]:
+    # 条件分岐: `max_abs_z is None` を満たす経路を評価する。
     if max_abs_z is None:
         return None
+
+    # 条件分岐: `max_abs_z > max_abs_z_le` を満たす経路を評価する。
+
     if max_abs_z > max_abs_z_le:
         return False
+
+    # 条件分岐: `reduced_chi2_le is None or reduced_chi2 is None` を満たす経路を評価する。
+
     if reduced_chi2_le is None or reduced_chi2 is None:
         return True
+
     return bool(reduced_chi2 <= reduced_chi2_le)
 
 
 def _all_true(values: Sequence[Optional[bool]]) -> Optional[bool]:
+    # 条件分岐: `any(v is False for v in values)` を満たす経路を評価する。
     if any(v is False for v in values):
         return False
+
+    # 条件分岐: `values and all(v is True for v in values)` を満たす経路を評価する。
+
     if values and all(v is True for v in values):
         return True
+
     return None
 
 
 def _falsification_status(
     *, app_ok: Optional[bool], strict_ok: Optional[bool], holdout_ok: Optional[bool]
 ) -> str:
+    # 条件分岐: `app_ok is False` を満たす経路を評価する。
     if app_ok is False:
         return "reject"
+
+    # 条件分岐: `strict_ok is False or holdout_ok is False` を満たす経路を評価する。
+
     if strict_ok is False or holdout_ok is False:
         return "reject"
+
+    # 条件分岐: `app_ok is True and strict_ok is True and holdout_ok is True` を満たす経路を評価する。
+
     if app_ok is True and strict_ok is True and holdout_ok is True:
         return "ok"
+
     return "inconclusive"
 
 
@@ -123,22 +153,33 @@ def _minimax_gate_summary(
     model_to_split_rows: Dict[str, Dict[str, Dict[str, Any]]] = {}
     for sp in split_summaries:
         sp_name = str(sp.get("split") or "")
+        # 条件分岐: `not sp_name` を満たす経路を評価する。
         if not sp_name:
             continue
+
         for row in sp.get("models", []) if isinstance(sp.get("models"), list) else []:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
+            # 条件分岐: `row.get("supported") is not True` を満たす経路を評価する。
+
             if row.get("supported") is not True:
                 continue
+
             mid = str(row.get("model_id") or "")
+            # 条件分岐: `not mid` を満たす経路を評価する。
             if not mid:
                 continue
+
             model_to_split_rows.setdefault(mid, {})[sp_name] = row
 
     candidates: List[Tuple[float, float, float, str]] = []
     for mid, by_split in model_to_split_rows.items():
+        # 条件分岐: `len(by_split) != n_splits` を満たす経路を評価する。
         if len(by_split) != n_splits:
             continue
+
         worst_test_max = max(
             float(v) if v is not None else float("inf") for v in (_safe_float(by_split[s].get("test_max_abs_z")) for s in splits_ordered)
         )
@@ -189,8 +230,10 @@ def _minimax_gate_summary(
         tr_n = _safe_int(sp.get("train_n"))
         te_n = _safe_int(sp.get("test_n"))
         ok = None
+        # 条件分岐: `tr_n is not None and te_n is not None` を満たす経路を評価する。
         if tr_n is not None and te_n is not None:
             ok = bool(tr_n >= int(min_train_n) and te_n >= int(min_test_n))
+
         app_ok_by_split.append(ok)
         app_by_split.append({"split": sp.get("split"), "train_n": tr_n, "test_n": te_n, "ok": ok})
 
@@ -218,11 +261,13 @@ def _minimax_gate_summary(
         "by_split": per_split,
     }
 
+    # 条件分岐: `recommended_model_id` を満たす経路を評価する。
     if recommended_model_id:
         worst_test_max = max((float(v) if v is not None else float("inf")) for v in (r.get("test_max_abs_z") for r in per_split))
         summary["recommended_model_by_minimax_test_max_abs_z"]["worst_test_max_abs_z"] = (
             float(worst_test_max) if math.isfinite(float(worst_test_max)) else None
         )
+
     return summary
 
 
@@ -919,6 +964,7 @@ def main() -> int:
         kpi_include = bool(inp.get("kpi_include", True))
         kpi_exclusion_reason = str(inp.get("kpi_exclusion_reason") or "")
         in_metrics = Path(str(inp.get("metrics_json")))
+        # 条件分岐: `not in_metrics.exists()` を満たす経路を評価する。
         if not in_metrics.exists():
             missing_inputs.append(
                 {
@@ -935,6 +981,7 @@ def main() -> int:
         splits = payload.get("splits")
         holdout_splits = payload.get("holdout_splits")
 
+        # 条件分岐: `(not isinstance(splits, list) or not splits) and (not isinstance(holdout_spli...` を満たす経路を評価する。
         if (not isinstance(splits, list) or not splits) and (not isinstance(holdout_splits, list) or not holdout_splits):
             missing_inputs.append(
                 {
@@ -949,10 +996,13 @@ def main() -> int:
 
         split_summaries: List[Dict[str, Any]] = []
         dataset_summary_extra: Dict[str, Any] = {}
+        # 条件分岐: `isinstance(splits, list) and splits` を満たす経路を評価する。
         if isinstance(splits, list) and splits:
             for sp in splits:
+                # 条件分岐: `not isinstance(sp, dict)` を満たす経路を評価する。
                 if not isinstance(sp, dict):
                     continue
+
                 sp_name = str(sp.get("name", ""))
                 train_r = sp.get("train_T_K") if isinstance(sp.get("train_T_K"), list) else []
                 test_r = sp.get("test_T_K") if isinstance(sp.get("test_T_K"), list) else []
@@ -963,8 +1013,10 @@ def main() -> int:
 
                 model_rows: List[Dict[str, Any]] = []
                 for mid, m in models.items():
+                    # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
                     if not isinstance(m, dict):
                         continue
+
                     supported = (m.get("supported") is not False)
                     train = m.get("train") if isinstance(m.get("train"), dict) else {}
                     test = m.get("test") if isinstance(m.get("test"), dict) else {}
@@ -1018,7 +1070,9 @@ def main() -> int:
                     rows_csv.append(row)
                     model_rows.append(row)
 
+                    # 条件分岐: `supported and test_max is not None` を満たす経路を評価する。
                     if supported and test_max is not None:
+                        # 条件分岐: `best_test_max_abs_z is None or float(test_max) < float(best_test_max_abs_z)` を満たす経路を評価する。
                         if best_test_max_abs_z is None or float(test_max) < float(best_test_max_abs_z):
                             best_test_max_abs_z = float(test_max)
                             best_model = str(mid)
@@ -1050,6 +1104,7 @@ def main() -> int:
             model_id = "model"
             try:
                 params0 = holdout_splits[0].get("params") if isinstance(holdout_splits[0], dict) else {}
+                # 条件分岐: `isinstance(params0, dict) and isinstance(params0.get("gamma_omega_model"), st...` を満たす経路を評価する。
                 if isinstance(params0, dict) and isinstance(params0.get("gamma_omega_model"), str) and params0.get("gamma_omega_model"):
                     model_id = f"gamma_omega:{params0.get('gamma_omega_model')}"
             except Exception:
@@ -1066,12 +1121,15 @@ def main() -> int:
                 "holdout_ok": (bool(holdout_ok) if isinstance(holdout_ok, bool) else None),
                 "strict_criteria": strict_criteria or None,
             }
+            # 条件分岐: `isinstance(payload.get("model"), dict) and payload.get("model", {}).get("name")` を満たす経路を評価する。
             if isinstance(payload.get("model"), dict) and payload.get("model", {}).get("name"):
                 dataset_summary_extra["model"] = {"name": str(payload.get("model", {}).get("name"))}
 
             for sp in holdout_splits:
+                # 条件分岐: `not isinstance(sp, dict)` を満たす経路を評価する。
                 if not isinstance(sp, dict):
                     continue
+
                 sp_name = str(sp.get("name", ""))
                 train_r = sp.get("train_T_K") if isinstance(sp.get("train_T_K"), list) else []
                 test_r = sp.get("test_T_K") if isinstance(sp.get("test_T_K"), list) else []
@@ -1142,14 +1200,22 @@ def main() -> int:
                 min_train_n=min_train_n,
                 min_test_n=min_test_n,
             )
+            # 条件分岐: `isinstance(dataset_summary_extra.get("falsification"), dict)` を満たす経路を評価する。
             if isinstance(dataset_summary_extra.get("falsification"), dict):
                 fals0 = dataset_summary_extra["falsification"]
+                # 条件分岐: `isinstance(fals0.get("strict_ok"), bool)` を満たす経路を評価する。
                 if isinstance(fals0.get("strict_ok"), bool):
                     audit_gates["strict_ok"] = bool(fals0["strict_ok"])
                     audit_gates["strict_ok_source"] = "metrics_falsification"
+
+                # 条件分岐: `isinstance(fals0.get("holdout_ok"), bool)` を満たす経路を評価する。
+
                 if isinstance(fals0.get("holdout_ok"), bool):
                     audit_gates["holdout_ok"] = bool(fals0["holdout_ok"])
                     audit_gates["holdout_ok_source"] = "metrics_falsification"
+
+                # 条件分岐: `isinstance(audit_gates.get("falsification"), dict)` を満たす経路を評価する。
+
                 if isinstance(audit_gates.get("falsification"), dict):
                     app_ok = (audit_gates.get("applicability") or {}).get("ok")
                     audit_gates["falsification"]["status"] = _falsification_status(
@@ -1157,6 +1223,7 @@ def main() -> int:
                         strict_ok=audit_gates.get("strict_ok"),
                         holdout_ok=audit_gates.get("holdout_ok"),
                     )
+
             dataset_summary_extra["audit_gates"] = audit_gates
 
         dataset_summary: Dict[str, Any] = {
@@ -1166,8 +1233,10 @@ def main() -> int:
             "n_splits": int(len(split_summaries)),
             "splits": split_summaries,
         }
+        # 条件分岐: `(not kpi_include) and kpi_exclusion_reason` を満たす経路を評価する。
         if (not kpi_include) and kpi_exclusion_reason:
             dataset_summary["kpi_exclusion_reason"] = kpi_exclusion_reason
+
         dataset_summary.update(dataset_summary_extra)
         dataset_summaries.append(dataset_summary)
 
@@ -1181,6 +1250,7 @@ def main() -> int:
     try:
         import matplotlib.pyplot as plt
 
+        # 条件分岐: `dataset_summaries` を満たす経路を評価する。
         if dataset_summaries:
             fig_h = 3.2 * max(1, len(dataset_summaries))
             fig, axes = plt.subplots(len(dataset_summaries), 1, figsize=(12.8, fig_h), dpi=160, squeeze=False)
@@ -1189,6 +1259,7 @@ def main() -> int:
                 ds_rows = [r for r in rows_csv if r.get("dataset") == ds_name]
                 splits_unique = sorted({str(r.get("split", "")) for r in ds_rows if r.get("split")})
                 models_unique = sorted({str(r.get("model_id", "")) for r in ds_rows if r.get("model_id")})
+                # 条件分岐: `not splits_unique or not models_unique or len(models_unique) > 8 or len(split...` を満たす経路を評価する。
                 if not splits_unique or not models_unique or len(models_unique) > 8 or len(splits_unique) > 12:
                     ax.axis("off")
                     continue
@@ -1201,6 +1272,7 @@ def main() -> int:
                         vals = [r for r in ds_rows if r.get("split") == sp and r.get("model_id") == mid]
                         v = vals[0].get("test_max_abs_z") if vals else None
                         ys.append(float(v) if isinstance(v, (int, float)) else float("nan"))
+
                     xs = [x + (j - (len(models_unique) - 1) / 2) * width for x in x0]
                     ax.bar(xs, ys, width=width, label=mid, alpha=0.85)
 
@@ -1283,10 +1355,14 @@ def main() -> int:
     print("[ok] wrote:")
     print(f"- {out_json}")
     print(f"- {out_csv}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"- {out_png}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

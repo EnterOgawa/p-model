@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -54,8 +55,10 @@ def _parse_lblx(lblx_path: Path) -> Dict[str, Any]:
 
     keywords: List[str] = []
     for kw in root.findall("p:Identification_Area/p:Citation_Information/p:keyword", namespaces=ns):
+        # 条件分岐: `kw.text` を満たす経路を評価する。
         if kw.text:
             s = str(kw.text).strip()
+            # 条件分岐: `s` を満たす経路を評価する。
             if s:
                 keywords.append(s)
 
@@ -160,6 +163,8 @@ def main() -> None:
     print("Wrote:", json_path)
     print("Wrote:", csv_path)
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

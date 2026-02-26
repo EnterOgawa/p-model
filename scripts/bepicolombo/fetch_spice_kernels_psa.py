@@ -36,6 +36,7 @@ from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -61,11 +62,13 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, force: bool, timeout_sec: float) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and dst.stat().st_size > 0 and not force` を満たす経路を評価する。
     if dst.exists() and dst.stat().st_size > 0 and not force:
         return {"url": url, "path": str(dst), "downloaded": False, "bytes": int(dst.stat().st_size), "sha256": _sha256(dst)}
 
@@ -73,6 +76,7 @@ def _download(url: str, dst: Path, *, force: bool, timeout_sec: float) -> Dict[s
     req = Request(url, method="GET")
     with urlopen(req, timeout=timeout_sec) as r, tmp.open("wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     return {"url": url, "path": str(dst), "downloaded": True, "bytes": int(dst.stat().st_size), "sha256": _sha256(dst)}
 
@@ -81,32 +85,49 @@ def _fetch_text(url: str, *, timeout_sec: float) -> str:
     req = Request(url, method="GET")
     with urlopen(req, timeout=timeout_sec) as r:
         b = r.read()
+
     return b.decode("utf-8", errors="replace")
 
 
 def _parse_apache_index_filenames(html_text: str) -> List[str]:
     out: List[str] = []
     for ln in html_text.splitlines():
+        # 条件分岐: `"<a href=" not in ln` を満たす経路を評価する。
         if "<a href=" not in ln:
             continue
+
         m = re.search(r'href="([^"]+)"', ln)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         href = m.group(1)
+        # 条件分岐: `href.startswith("?") or href.startswith("/") or href in ("../",)` を満たす経路を評価する。
         if href.startswith("?") or href.startswith("/") or href in ("../",):
             continue
+
+        # 条件分岐: `href.endswith("/")` を満たす経路を評価する。
+
         if href.endswith("/"):
             continue
+
+        # 条件分岐: `"Parent Directory" in ln` を満たす経路を評価する。
+
         if "Parent Directory" in ln:
             continue
+
         out.append(href)
+
     seen: set[str] = set()
     uniq: List[str] = []
     for n in out:
+        # 条件分岐: `n in seen` を満たす経路を評価する。
         if n in seen:
             continue
+
         seen.add(n)
         uniq.append(n)
+
     return uniq
 
 
@@ -116,12 +137,16 @@ def _pick_latest_meta_kernel(names: Iterable[str]) -> Tuple[Optional[str], Optio
     pat = re.compile(r"^bc_v(\d+)\.tm$")
     for n in names:
         m = pat.match(n)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         v = int(m.group(1))
+        # 条件分岐: `best_v is None or v > best_v` を満たす経路を評価する。
         if best_v is None or v > best_v:
             best_v = v
             best_name = n
+
     return best_name, best_v
 
 
@@ -135,17 +160,23 @@ def _extract_kernel_paths_from_meta(meta_text: str) -> List[str]:
     # In regex, `$` is special, so escape it as `\$` (do NOT match a literal backslash).
     for m in re.finditer(r"'\$KERNELS/([^']+)'", meta_text):
         p = m.group(1).strip()
+        # 条件分岐: `not p or p.startswith("../") or p.startswith("/") or p.endswith("/")` を満たす経路を評価する。
         if not p or p.startswith("../") or p.startswith("/") or p.endswith("/"):
             continue
+
         paths.append(p)
     # stable unique
+
     seen: set[str] = set()
     out: List[str] = []
     for p in paths:
+        # 条件分岐: `p in seen` を満たす経路を評価する。
         if p in seen:
             continue
+
         seen.add(p)
         out.append(p)
+
     return out
 
 
@@ -160,12 +191,20 @@ def _select_minimal_kernel_paths(meta_paths: List[str]) -> List[str]:
 
     # If multiple, keep the last one (meta-kernel order: most recent coverage last).
     out: List[str] = []
+    # 条件分岐: `lsk` を満たす経路を評価する。
     if lsk:
         out.append(lsk[-1])
+
+    # 条件分岐: `de_spk` を満たす経路を評価する。
+
     if de_spk:
         out.append(de_spk[-1])
+
+    # 条件分岐: `mpo_spk` を満たす経路を評価する。
+
     if mpo_spk:
         out.append(mpo_spk[-1])
+
     return out
 
 
@@ -196,28 +235,38 @@ def main() -> int:
     base_url = str(args.base_url).rstrip("/") + "/"
     mk_url = urljoin(base_url, "mk/")
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
+        # 条件分岐: `not meta_path.exists()` を満たす経路を評価する。
         if not meta_path.exists():
             print(f"[err] offline mode: missing meta: {meta_path}")
             return 2
+
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         expected = meta.get("expected_files") if isinstance(meta, dict) else None
+        # 条件分岐: `not isinstance(expected, list) or not expected` を満たす経路を評価する。
         if not isinstance(expected, list) or not expected:
             print(f"[err] offline mode: meta missing expected_files: {meta_path}")
             return 2
+
         missing = [p for p in expected if not (out_dir / p).exists()]
+        # 条件分岐: `missing` を満たす経路を評価する。
         if missing:
             print("[err] offline and missing kernels:")
             for m in missing:
                 print("  -", m)
+
             return 2
+
         print(f"[ok] offline: {out_dir} ({len(expected)} files)")
         return 0
 
     # Pick latest meta-kernel
+
     mk_index = _fetch_text(mk_url, timeout_sec=float(args.timeout_sec))
     mk_names = _parse_apache_index_filenames(mk_index)
     mk_name, mk_v = _pick_latest_meta_kernel(mk_names)
+    # 条件分岐: `not mk_name or mk_v is None` を満たす経路を評価する。
     if not mk_name or mk_v is None:
         raise RuntimeError(f"Failed to find bc_v###.tm in: {mk_url}")
 
@@ -227,6 +276,7 @@ def main() -> int:
     mk_text = mk_local.read_text(encoding="utf-8", errors="replace")
 
     meta_kernel_paths = _extract_kernel_paths_from_meta(mk_text)
+    # 条件分岐: `args.kernel_set == "minimal"` を満たす経路を評価する。
     if args.kernel_set == "minimal":
         selected_paths = _select_minimal_kernel_paths(meta_kernel_paths)
     else:
@@ -277,8 +327,11 @@ def main() -> int:
         )
     except Exception:
         pass
+
     return 0 if not errors else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

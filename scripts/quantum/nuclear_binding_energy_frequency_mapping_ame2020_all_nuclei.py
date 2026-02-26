@@ -14,9 +14,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -29,17 +32,27 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     Inclusive percentile with linear interpolation.
     p in [0,100].
     """
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
@@ -49,20 +62,27 @@ def _require_float(obj: object, *, path: Path, key_path: str) -> float:
         v = float(obj)
     except Exception as e:
         raise SystemExit(f"[fail] invalid float at {key_path} in {path}: {e}") from e
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         raise SystemExit(f"[fail] non-finite float at {key_path} in {path}")
+
     return v
 
 
 def _safe_div(numerator: float, denominator: float) -> float:
+    # 条件分岐: `denominator == 0.0` を満たす経路を評価する。
     if denominator == 0.0:
         return float("nan")
+
     return numerator / denominator
 
 
 def _load_ame2020_rows(*, root: Path, src_dirname: str) -> list[dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted AME2020 table.\n"
@@ -70,19 +90,31 @@ def _load_ame2020_rows(*, root: Path, src_dirname: str) -> list[dict[str, object
             f"  python -B scripts/quantum/fetch_ame2020_mass_table_sources.py --out-dirname {src_dirname}\n"
             f"Expected: {extracted}"
         )
+
     payload = json.loads(extracted.read_text(encoding="utf-8"))
     rows = payload.get("rows")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         raise SystemExit(f"[fail] invalid extracted_values.json: rows missing/empty: {extracted}")
+
     out: list[dict[str, object]] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
+        # 条件分岐: `not all(k in r for k in ("Z", "A", "binding_keV_per_A"))` を満たす経路を評価する。
+
         if not all(k in r for k in ("Z", "A", "binding_keV_per_A")):
             continue
+
         out.append(r)
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] parsed 0 usable AME rows from: {extracted}")
+
     return out
 
 
@@ -91,6 +123,7 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     csv_path = src_dir / "charge_radii.csv"
+    # 条件分岐: `not csv_path.exists()` を満たす経路を評価する。
     if not csv_path.exists():
         raise SystemExit(
             "[fail] missing cached IAEA charge_radii.csv.\n"
@@ -108,16 +141,23 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
                 a = int(row["a"])
             except Exception:
                 continue
+
             rv = str(row.get("radius_val", "")).strip()
             ru = str(row.get("radius_unc", "")).strip()
+            # 条件分岐: `not rv or not ru` を満たす経路を評価する。
             if not rv or not ru:
                 continue
+
             try:
                 out[(z, a)] = {"r_rms_fm": float(rv), "sigma_r_rms_fm": float(ru)}
             except Exception:
                 continue
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] parsed 0 charge radii rows from: {csv_path}")
+
     return out
 
 
@@ -157,6 +197,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Frozen anchors from earlier steps.
     deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    # 条件分岐: `not deut_path.exists()` を満たす経路を評価する。
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -164,9 +205,11 @@ def main(argv: list[str] | None = None) -> int:
             "  python -B scripts/quantum/nuclear_binding_deuteron.py\n"
             f"Expected: {deut_path}"
         )
+
     deut = _load_json(deut_path)
 
     two_body_path = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
+    # 条件分岐: `not two_body_path.exists()` を満たす経路を評価する。
     if not two_body_path.exists():
         raise SystemExit(
             "[fail] missing deuteron two-body mapping metrics.\n"
@@ -174,6 +217,7 @@ def main(argv: list[str] | None = None) -> int:
             "  python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_deuteron_two_body.py\n"
             f"Expected: {two_body_path}"
         )
+
     two_body = _load_json(two_body_path)
 
     b_d = _require_float(
@@ -182,15 +226,19 @@ def main(argv: list[str] | None = None) -> int:
         key_path="derived.binding_energy.B_MeV.value",
     )
     r_ref = _require_float(deut.get("derived", {}).get("inv_kappa_fm"), path=deut_path, key_path="derived.inv_kappa_fm")
+    # 条件分岐: `not (b_d > 0 and r_ref > 0)` を満たす経路を評価する。
     if not (b_d > 0 and r_ref > 0):
         raise SystemExit("[fail] invalid deuteron anchor (B_d or R_ref non-positive)")
+
     j_ref_mev = 0.5 * b_d
 
     l_range = _require_float(two_body.get("derived", {}).get("lambda_pi_pm_fm"), path=two_body_path, key_path="derived.lambda_pi_pm_fm")
+    # 条件分岐: `not (l_range > 0)` を満たす経路を評価する。
     if not (l_range > 0):
         raise SystemExit("[fail] invalid range scale L (non-positive)")
 
     # Primary datasets for all-nuclei run.
+
     ame_src_dirname = "iaea_amdc_ame2020_mass_1_mas20"
     ame_rows = _load_ame2020_rows(root=root, src_dirname=ame_src_dirname)
 
@@ -201,13 +249,19 @@ def main(argv: list[str] | None = None) -> int:
     #   R_uniform = r0 * A^(1/3)  with r0 fixed as median over measured radii (A>=4).
     r0_list: list[float] = []
     for (z, a), rr in radii_map.items():
+        # 条件分岐: `a < 4` を満たす経路を評価する。
         if a < 4:
             continue
+
         r_rms = float(rr["r_rms_fm"])
         r_uniform = math.sqrt(5.0 / 3.0) * r_rms
         r0_list.append(r_uniform / (a ** (1.0 / 3.0)))
+
+    # 条件分岐: `not r0_list` を満たす経路を評価する。
+
     if not r0_list:
         raise SystemExit("[fail] cannot compute r0 median from radii_map (no A>=4 entries)")
+
     r0_list.sort()
     r0_med = _percentile(r0_list, 50.0)
     r0_p10 = _percentile(r0_list, 10.0)
@@ -231,8 +285,10 @@ def main(argv: list[str] | None = None) -> int:
         return a * (a - 1) // 2
 
     subset_keep: set[tuple[int, int]] | None = None
+    # 条件分岐: `subset != "all"` を満たす経路を評価する。
     if subset != "all":
         radii_keys = set(radii_map.keys())
+        # 条件分岐: `subset == "measured_radii"` を満たす経路を評価する。
         if subset == "measured_radii":
             subset_keep = radii_keys
             subset_desc = "Nuclei with measured charge radii (r_rms) in IAEA charge_radii.csv."
@@ -245,12 +301,17 @@ def main(argv: list[str] | None = None) -> int:
                     for dn in (-1, 0, 1):
                         z1 = int(z0 + dz)
                         n1 = int(n0 + dn)
+                        # 条件分岐: `z1 <= 0 or n1 < 0` を満たす経路を評価する。
                         if z1 <= 0 or n1 < 0:
                             continue
+
                         a1 = int(z1 + n1)
+                        # 条件分岐: `a1 < 2` を満たす経路を評価する。
                         if a1 < 2:
                             continue
+
                         subset_keep.add((z1, a1))
+
             subset_desc = "Measured-radii nuclei plus (ΔZ,ΔN)<=1 neighborhood (stable-like gate)."
 
         print(f"[info] subset={subset} keep_keys={len(subset_keep)} (pre-filter); ame_rows={len(ame_rows)}")
@@ -271,10 +332,17 @@ def main(argv: list[str] | None = None) -> int:
             n = int(r.get("N", a - z))
         except Exception:
             continue
+
+        # 条件分岐: `a < 2` を満たす経路を評価する。
+
         if a < 2:
             continue
+
+        # 条件分岐: `subset_keep is not None and (z, a) not in subset_keep` を満たす経路を評価する。
+
         if subset_keep is not None and (z, a) not in subset_keep:
             continue
+
         sym = str(r.get("symbol", "")).strip()
 
         bea_kev = float(r["binding_keV_per_A"])
@@ -283,6 +351,7 @@ def main(argv: list[str] | None = None) -> int:
         sigma_b_obs = (bea_sigma_kev / 1000.0) * float(a)
 
         rr = radii_map.get((z, a))
+        # 条件分岐: `(z, a) == (1, 2)` を満たす経路を評価する。
         if (z, a) == (1, 2):
             # anchor definition
             r_model = r_ref
@@ -290,6 +359,7 @@ def main(argv: list[str] | None = None) -> int:
             radius_source = "tail_scale_anchor"
             r_rms = float("nan")
             sigma_r_rms = float("nan")
+        # 条件分岐: 前段条件が不成立で、`rr is not None` を追加評価する。
         elif rr is not None:
             r_rms = float(rr["r_rms_fm"])
             sigma_r_rms = float(rr["sigma_r_rms_fm"])
@@ -329,12 +399,19 @@ def main(argv: list[str] | None = None) -> int:
         # Stats (baseline collective)
         if math.isfinite(ratio0) and ratio0 > 0:
             ratios_collective.append(ratio0)
+            # 条件分岐: `radius_source == "measured_r_rms"` を満たす経路を評価する。
             if radius_source == "measured_r_rms":
                 ratios_collective_measured.append(ratio0)
             else:
                 ratios_collective_model.append(ratio0)
+
+            # 条件分岐: `pclass in ratios_by_parity` を満たす経路を評価する。
+
             if pclass in ratios_by_parity:
                 ratios_by_parity[pclass].append(ratio0)
+
+            # 条件分岐: `is_magic_any` を満たす経路を評価する。
+
             if is_magic_any:
                 ratios_magic_any.append(ratio0)
             else:
@@ -383,6 +460,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     # Stable sort (A then Z)
+
     out_rows.sort(key=lambda x: (int(x["A"]), int(x["Z"]), int(x["N"])))
 
     # Robust residual diagnostics for all nuclei.
@@ -391,8 +469,10 @@ def main(argv: list[str] | None = None) -> int:
         for r in out_rows
         if math.isfinite(float(r["ratio_collective"])) and float(r["ratio_collective"]) > 0.0
     ]
+    # 条件分岐: `not log_ratio_vals` を満たす経路を評価する。
     if not log_ratio_vals:
         raise SystemExit(f"[fail] no usable nuclei selected (subset={subset}).")
+
     sorted_log_ratio_vals = sorted(log_ratio_vals)
     global_log_ratio_median = _percentile(sorted_log_ratio_vals, 50.0)
     abs_dev = sorted(abs(v - global_log_ratio_median) for v in sorted_log_ratio_vals)
@@ -401,6 +481,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for row in out_rows:
         ratio0 = float(row["ratio_collective"])
+        # 条件分岐: `math.isfinite(ratio0) and ratio0 > 0.0` を満たす経路を評価する。
         if math.isfinite(ratio0) and ratio0 > 0.0:
             log_ratio = math.log10(ratio0)
             z_robust = _safe_div(log_ratio - global_log_ratio_median, robust_sigma_log_ratio)
@@ -413,8 +494,10 @@ def main(argv: list[str] | None = None) -> int:
             row["is_outlier_robust_abs_z_gt3"] = False
 
     def robust_stats(vals: list[float]) -> dict[str, float]:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan")}
+
         s = sorted(vals)
         return {
             "n": float(len(s)),
@@ -453,9 +536,11 @@ def main(argv: list[str] | None = None) -> int:
         log_band = [float(r["log10_ratio_collective"]) for r in rows_band if math.isfinite(float(r["log10_ratio_collective"]))]
         robust = robust_stats(ratios_band)
         sigma_log = float("nan")
+        # 条件分岐: `len(log_band) >= 2` を満たす経路を評価する。
         if len(log_band) >= 2:
             mean_log = sum(log_band) / float(len(log_band))
             sigma_log = math.sqrt(sum((v - mean_log) ** 2 for v in log_band) / float(len(log_band) - 1))
+
         outlier_count = sum(1 for r in rows_band if bool(r["is_outlier_robust_abs_z_gt3"]))
         a_band_stats.append(
             {
@@ -471,6 +556,7 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     # CSV
+
     out_csv = out_dir / f"{out_stem}.csv"
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -481,6 +567,7 @@ def main(argv: list[str] | None = None) -> int:
     out_a_band_csv = out_dir / f"{out_stem}_a_band_stats.csv"
     with out_a_band_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
+        # 条件分岐: `a_band_stats` を満たす経路を評価する。
         if a_band_stats:
             headers = list(a_band_stats[0].keys())
             w.writerow(headers)
@@ -488,6 +575,7 @@ def main(argv: list[str] | None = None) -> int:
                 w.writerow([row[h] for h in headers])
 
     # Plot
+
     import matplotlib.pyplot as plt
     from matplotlib.colors import TwoSlopeNorm
 
@@ -518,6 +606,7 @@ def main(argv: list[str] | None = None) -> int:
         xs = [int(r["A"]) for r in out_rows if r["parity"] == p and math.isfinite(float(r["ratio_collective"])) and float(r["ratio_collective"]) > 0]
         ys = [float(r["ratio_collective"]) for r in out_rows if r["parity"] == p and math.isfinite(float(r["ratio_collective"])) and float(r["ratio_collective"]) > 0]
         ax0.scatter(xs, ys, s=8, alpha=0.35, color=color_map[p], label=p)
+
     ax0.axhline(1.0, color="0.2", lw=1.2, ls="--")
     ax0.set_yscale("log")
     ax0.set_xlabel("A")
@@ -575,8 +664,10 @@ def main(argv: list[str] | None = None) -> int:
     ax3.grid(True, which="both", axis="y", ls=":", lw=0.6, alpha=0.6)
 
     suptitle = "Phase 7 / Step 7.13.17.7: AME2020 all-nuclei residuals (Δω→B.E. mapping I/F preview)"
+    # 条件分岐: `subset != "all"` を満たす経路を評価する。
     if subset != "all":
         suptitle = f"Phase 7 / Step 7.18.5 (gate): AME2020 subset residuals ({subset}; Δω→B.E. mapping)"
+
     fig.suptitle(suptitle, y=1.02)
     fig.subplots_adjust(left=0.07, right=0.98, top=0.90, bottom=0.12, wspace=0.28, hspace=0.30)
 
@@ -590,6 +681,7 @@ def main(argv: list[str] | None = None) -> int:
     n_vals = [int(r["N"]) for r in zn_rows]
     c_vals = [float(r["log10_ratio_collective"]) for r in zn_rows]
     c_abs_max = max(abs(v) for v in c_vals) if c_vals else 1.0
+    # 条件分岐: `c_abs_max <= 0.0` を満たす経路を評価する。
     if c_abs_max <= 0.0:
         c_abs_max = 1.0
 
@@ -610,10 +702,12 @@ def main(argv: list[str] | None = None) -> int:
     # Magic overlays.
     for mz in sorted(magic_z):
         ax_zn.axvline(mz, color="0.25", lw=0.8, ls=":", alpha=0.4)
+
     for mn in sorted(magic_n):
         ax_zn.axhline(mn, color="0.25", lw=0.8, ls=":", alpha=0.35)
 
     # Beta-stability proxy line.
+
     max_a = max(int(r["A"]) for r in out_rows)
     a_curve = list(range(2, max_a + 1))
     z_beta = [a / (1.98 + 0.0155 * (a ** (2.0 / 3.0))) for a in a_curve]
@@ -624,6 +718,7 @@ def main(argv: list[str] | None = None) -> int:
     z_to_n: dict[int, list[int]] = {}
     for r in out_rows:
         z_to_n.setdefault(int(r["Z"]), []).append(int(r["N"]))
+
     z_sorted = sorted(z_to_n.keys())
     n_min = [min(z_to_n[z]) for z in z_sorted]
     n_max = [max(z_to_n[z]) for z in z_sorted]
@@ -663,6 +758,7 @@ def main(argv: list[str] | None = None) -> int:
         "AME2020 σ(B/A) is extremely small; error bars here are dominated by model systematics and radius proxies, so the main diagnostics are ratio distributions and grouped medians.",
         "The Z-N residual map overlays magic numbers, a beta-stability proxy line, and AME envelope edges (proton-rich/neutron-rich) as operational dripline proxies.",
     ]
+    # 条件分岐: `subset != "all"` を満たす経路を評価する。
     if subset != "all":
         notes[0] = (
             "This is a subset gate run (Step 7.18.5) to validate end-to-end regeneration with fixed outputs "
@@ -720,6 +816,7 @@ def main(argv: list[str] | None = None) -> int:
         },
         "notes": notes,
     }
+    # 条件分岐: `subset != "all"` を満たす経路を評価する。
     if subset != "all":
         metrics_payload["base_step"] = {"step": "7.13.17.7", "extended_step": "7.16.1"}
         metrics_payload["subset"] = {
@@ -739,6 +836,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

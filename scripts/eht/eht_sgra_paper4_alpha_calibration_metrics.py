@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -39,8 +40,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _find_block(text: str, needle: str, *, window: int = 1100) -> Optional[str]:
     i = text.find(needle)
+    # 条件分岐: `i < 0` を満たす経路を評価する。
     if i < 0:
         return None
+
     a = max(0, i - 160)
     b = min(len(text), i + window)
     return text[a:b]
@@ -49,8 +52,10 @@ def _find_block(text: str, needle: str, *, window: int = 1100) -> Optional[str]:
 def _unwrap_multirow_cell(s: str) -> str:
     s = str(s).strip()
     m = re.match(r"^\\multirow\{[^}]+\}\{[^}]+\}\{(.+)\}$", s)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         return m.group(1).strip()
+
     return s
 
 
@@ -67,20 +72,31 @@ def _parse_pm_tuple(s: str) -> Optional[Tuple[float, float]]:
     Parse (+x, -y) into (x, y) with both positive floats.
     """
     raw = str(s).strip()
+    # 条件分岐: `not raw` を満たす経路を評価する。
     if not raw:
         return None
+
+    # 条件分岐: `raw.startswith("(") and raw.endswith(")")` を満たす経路を評価する。
+
     if raw.startswith("(") and raw.endswith(")"):
         raw = raw[1:-1].strip()
+
     parts = [p.strip() for p in raw.split(",")]
+    # 条件分岐: `len(parts) != 2` を満たす経路を評価する。
     if len(parts) != 2:
         return None
+
     try:
         plus = float(parts[0].replace("+", "").strip())
         minus = float(parts[1].replace("-", "").replace("+", "").strip())
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(plus) and math.isfinite(minus))` を満たす経路を評価する。
+
     if not (math.isfinite(plus) and math.isfinite(minus)):
         return None
+
     return (abs(plus), abs(minus))
 
 
@@ -106,25 +122,37 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
 
     label_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             label_idx = i
             break
+
+    # 条件分岐: `label_idx is None` を満たす経路を評価する。
+
     if label_idx is None:
         return []
 
     startdata_idx = None
     for j in range(label_idx, len(lines)):
+        # 条件分岐: `"\\startdata" in lines[j]` を満たす経路を評価する。
         if "\\startdata" in lines[j]:
             startdata_idx = j
             break
+
+    # 条件分岐: `startdata_idx is None` を満たす経路を評価する。
+
     if startdata_idx is None:
         return []
 
     enddata_idx = None
     for j in range(startdata_idx, len(lines)):
+        # 条件分岐: `"\\enddata" in lines[j]` を満たす経路を評価する。
         if "\\enddata" in lines[j]:
             enddata_idx = j
             break
+
+    # 条件分岐: `enddata_idx is None` を満たす経路を評価する。
+
     if enddata_idx is None:
         enddata_idx = len(lines)
 
@@ -137,18 +165,27 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
     def _flush_row(row_text: str, *, lineno: int) -> None:
         nonlocal cur_class, rows
         t = str(row_text).strip()
+        # 条件分岐: `not t` を満たす経路を評価する。
         if not t:
             return
+
         t = t.replace("\\\\", "").strip()
+        # 条件分岐: `not t or t.startswith("\\hline") or t.startswith("\\cline")` を満たす経路を評価する。
         if not t or t.startswith("\\hline") or t.startswith("\\cline"):
             return
+
         parts = [p.strip() for p in t.split("&")]
+        # 条件分岐: `len(parts) < 6` を満たす経路を評価する。
         if len(parts) < 6:
             return
 
         cell0 = _unwrap_multirow_cell(parts[0])
+        # 条件分岐: `cell0` を満たす経路を評価する。
         if cell0:
             cur_class = _tex_to_plain(cell0)
+
+        # 条件分岐: `not cur_class` を満たす経路を評価する。
+
         if not cur_class:
             return
 
@@ -160,8 +197,10 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
             alpha = float(_tex_to_plain(parts[3]))
         except Exception:
             return
+
         stat_pm = _parse_pm_tuple(parts[4])
         tot_pm = _parse_pm_tuple(parts[5])
+        # 条件分岐: `stat_pm is None or tot_pm is None` を満たす経路を評価する。
         if stat_pm is None or tot_pm is None:
             return
 
@@ -181,15 +220,25 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
     for off, raw in enumerate(lines[startdata_idx + 1 : enddata_idx], start=0):
         lineno = (startdata_idx + 2) + off  # 1-based lineno for this raw line
         s = raw.strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
+        # 条件分岐: `s.startswith("\\hline") or s.startswith("\\cline")` を満たす経路を評価する。
+
         if s.startswith("\\hline") or s.startswith("\\cline"):
             continue
+
+        # 条件分岐: `buf_start_lineno is None` を満たす経路を評価する。
+
         if buf_start_lineno is None:
             buf_start_lineno = int(lineno)
+
         buf = (buf + " " + s).strip()
+        # 条件分岐: `"\\\\" not in s` を満たす経路を評価する。
         if "\\\\" not in s:
             continue
+
         _flush_row(buf, lineno=int(buf_start_lineno))
         buf = ""
         buf_start_lineno = None
@@ -200,8 +249,10 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
+    # 条件分岐: `x.size == 0` を満たす経路を評価する。
     if x.size == 0:
         return {"n": 0}
+
     return {
         "n": int(x.size),
         "mean": float(np.mean(x)),
@@ -244,6 +295,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -270,6 +322,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for r in rows
     ]
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         payload["ok"] = False
         payload["reason"] = "no_rows_parsed"
@@ -279,6 +332,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     coeff_gr = None
     coeff_p = None
+    # 条件分岐: `shadow_path.exists()` を満たす経路を評価する。
     if shadow_path.exists():
         try:
             shadow = _read_json(shadow_path)
@@ -301,12 +355,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ],
     }
 
+    # 条件分岐: `coeff_gr is not None and math.isfinite(coeff_gr) and coeff_gr > 0` を満たす経路を評価する。
     if coeff_gr is not None and math.isfinite(coeff_gr) and coeff_gr > 0:
         sig_kappa_tot_sym = [float(s) / float(coeff_gr) for s in sig_tot_sym]
         derived["kappa_sigma_proxy_gr_from_alpha_tot_sym_min"] = float(np.min(sig_kappa_tot_sym))
         derived["kappa_sigma_proxy_gr_from_alpha_tot_sym_median"] = float(np.median(sig_kappa_tot_sym))
         derived["kappa_sigma_proxy_gr_from_alpha_tot_sym_max"] = float(np.max(sig_kappa_tot_sym))
         derived["shadow_coeff_gr"] = float(coeff_gr)
+
+    # 条件分岐: `coeff_p is not None and math.isfinite(coeff_p) and coeff_p > 0` を満たす経路を評価する。
+
     if coeff_p is not None and math.isfinite(coeff_p) and coeff_p > 0:
         sig_kappa_tot_sym_p = [float(s) / float(coeff_p) for s in sig_tot_sym]
         derived["kappa_sigma_proxy_p_from_alpha_tot_sym_min"] = float(np.min(sig_kappa_tot_sym_p))
@@ -334,6 +392,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

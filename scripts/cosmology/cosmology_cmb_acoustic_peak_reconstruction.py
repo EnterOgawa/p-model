@@ -46,6 +46,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -67,8 +68,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -76,11 +79,15 @@ def _set_japanese_font() -> None:
 
 
 def _fmt(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(float(x))
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -101,8 +108,10 @@ class Peak:
 
 def _acoustic_solution_summary(*, c_s_p: float = 1.0 / math.sqrt(3.0)) -> Dict[str, Any]:
     cs = float(c_s_p)
+    # 条件分岐: `not (cs > 0.0)` を満たす経路を評価する。
     if not (cs > 0.0):
         raise ValueError("c_s_p must be positive.")
+
     return {
         "assumptions": [
             "static-space branch (no FRW expansion friction)",
@@ -136,8 +145,10 @@ def _rk4_acoustic_cosine_validation(*, k_mode: float, c_s_p: float, s_end: float
     cs = float(c_s_p)
     smax = float(s_end)
     n = int(n_steps)
+    # 条件分岐: `not (k > 0.0 and cs > 0.0 and smax > 0.0 and n >= 50)` を満たす経路を評価する。
     if not (k > 0.0 and cs > 0.0 and smax > 0.0 and n >= 50):
         raise ValueError("invalid acoustic validation parameters.")
+
     omega = cs * k
     omega_sq = omega * omega
     s = np.linspace(0.0, smax, n, dtype=float)
@@ -177,8 +188,10 @@ def _rk4_acoustic_cosine_validation(*, k_mode: float, c_s_p: float, s_end: float
 
 def _read_planck_tt(path: Path) -> Dict[str, np.ndarray]:
     arr = np.loadtxt(path)
+    # 条件分岐: `arr.ndim != 2 or arr.shape[1] < 5` を満たす経路を評価する。
     if arr.ndim != 2 or arr.shape[1] < 5:
         raise ValueError(f"unexpected Planck TT format: {path}")
+
     ell = arr[:, 0].astype(float)
     dl = arr[:, 1].astype(float)
     err_lo = arr[:, 2].astype(float)
@@ -190,8 +203,10 @@ def _read_planck_tt(path: Path) -> Dict[str, np.ndarray]:
 
 def _find_peak(ell: np.ndarray, y: np.ndarray, lo: float, hi: float, *, mode: str = "max") -> Peak:
     m = (ell >= float(lo)) & (ell <= float(hi))
+    # 条件分岐: `not np.any(m)` を満たす経路を評価する。
     if not np.any(m):
         raise ValueError(f"no data in range [{lo}, {hi}]")
+
     idxs = np.where(m)[0]
     local = y[m]
     j = int(np.argmax(local) if mode == "max" else np.argmin(local))
@@ -222,9 +237,11 @@ def _extract_observed_peaks(ell: np.ndarray, dl: np.ndarray) -> Tuple[List[Peak]
     for label, n, lo, hi in fit_peak_ranges:
         p = _find_peak(ell, dl, lo, hi, mode="max")
         fit_peaks.append(Peak(label=label, n=n, ell_min=lo, ell_max=hi, ell=p.ell, amplitude=p.amplitude))
+
     for label, n, lo, hi in holdout_peak_ranges:
         p = _find_peak(ell, dl, lo, hi, mode="max")
         holdout_peaks.append(Peak(label=label, n=n, ell_min=lo, ell_max=hi, ell=p.ell, amplitude=p.amplitude))
+
     return fit_peaks, holdout_peaks
 
 
@@ -235,20 +252,26 @@ def _silk_damping_factor(n: int, l_acoustic: float, phi: float, silk_kappa: floa
 
 
 def _fit_modal_params(obs: Sequence[Peak], *, silk_kappa: float) -> Dict[str, float]:
+    # 条件分岐: `len(obs) != 3` を満たす経路を評価する。
     if len(obs) != 3:
         raise ValueError("need exactly 3 observed peaks")
+
     n = np.array([float(p.n) for p in obs], dtype=float)
     ell = np.array([float(p.ell) for p in obs], dtype=float)
     amp = np.array([float(p.amplitude) for p in obs], dtype=float)
+    # 条件分岐: `np.any(amp <= 0.0)` を満たす経路を評価する。
     if np.any(amp <= 0.0):
         raise ValueError("observed peak amplitudes must be > 0")
 
     # ℓ_n = ℓ_A n + b,  φ = -b/ℓ_A
+
     mat = np.column_stack([n, np.ones_like(n)])
     slope, intercept = np.linalg.lstsq(mat, ell, rcond=None)[0]
     l_acoustic = float(slope)
+    # 条件分岐: `not (l_acoustic > 0.0)` を満たす経路を評価する。
     if not (l_acoustic > 0.0):
         raise ValueError("invalid acoustic scale")
+
     phi = float(-intercept / l_acoustic)
 
     # A_n = A0 exp(-δ(n-1)) [1 + (-1)^(n+1) R] D_n
@@ -260,15 +283,21 @@ def _fit_modal_params(obs: Sequence[Peak], *, silk_kappa: float) -> Dict[str, fl
     ratio_21 = a2 / a1
     ratio_31 = a3 / a1
     ratio_31_corr = ratio_31 / max(d3 / max(d1, 1e-12), 1e-12)
+    # 条件分岐: `ratio_31_corr <= 0.0` を満たす経路を評価する。
     if ratio_31_corr <= 0.0:
         raise ValueError("invalid ratio A3/A1")
+
     delta = float(-0.5 * math.log(ratio_31_corr))
     q = float(ratio_21 * math.exp(delta) * (d1 / max(d2, 1e-12)))
+    # 条件分岐: `abs(1.0 + q) < 1e-12` を満たす経路を評価する。
     if abs(1.0 + q) < 1e-12:
         raise ValueError("unstable baryon-loading inversion")
+
     r_baryon = float((1.0 - q) / (1.0 + q))
+    # 条件分岐: `abs(1.0 + r_baryon) < 1e-12` を満たす経路を評価する。
     if abs(1.0 + r_baryon) < 1e-12:
         raise ValueError("invalid R close to -1")
+
     a0 = float(a1 / ((1.0 + r_baryon) * d1))
 
     return {
@@ -290,6 +319,7 @@ def _first_principles_closure(
     obs3: Sequence[Peak],
     params: Dict[str, float],
 ) -> Dict[str, Any]:
+    # 条件分岐: `len(obs3) < 3` を満たす経路を評価する。
     if len(obs3) < 3:
         raise ValueError("first-principles closure requires at least three peaks (ℓ1..ℓ3).")
 
@@ -299,8 +329,12 @@ def _first_principles_closure(
     phi = float(params["phi"])
     silk_kappa = float(params["silk_kappa"])
 
+    # 条件分岐: `not (-0.99 < r_baryon < 1.0)` を満たす経路を評価する。
     if not (-0.99 < r_baryon < 1.0):
         raise ValueError("r_baryon must be in (-0.99, 1.0) for the closure model.")
+
+    # 条件分岐: `not (delta > 0.0)` を満たす経路を評価する。
+
     if not (delta > 0.0):
         raise ValueError("delta must be positive for damping closure.")
 
@@ -308,6 +342,7 @@ def _first_principles_closure(
     #   (1) baryon-loaded acoustic speed  c_s,P^2/c^2 = 1/[3(1+R_P)]
     #   (2) potential-well loading        R_P = u_Psi / (c_s,P^2/c^2),  u_Psi=|Psi_P|/c^2
     # -> u_Psi = R_P / [3(1+R_P)] and R_P = 3u_Psi/(1-3u_Psi)
+
     u_psi = float(r_baryon / (3.0 * (1.0 + r_baryon)))
     r_from_u = float((3.0 * u_psi) / max(1.0 - 3.0 * u_psi, 1.0e-12))
     cs_over_c_sq = float(1.0 / (3.0 * (1.0 + r_from_u)))
@@ -394,6 +429,7 @@ def _build_envelope_curve(ell: np.ndarray, series: Sequence[Dict[str, float]], *
         amp_n = max(float(m["amplitude"]), 0.0)
         sigma_n = sigma1 * math.sqrt(float(n)) * (1.0 + 0.06 * float(n - 1))
         y += amp_n * np.exp(-0.5 * ((ell - ell_n) / sigma_n) ** 2)
+
     return y
 
 
@@ -423,8 +459,10 @@ def _falsification_gate(
     holdout_by_n: Dict[int, Peak] = {int(p.n): p for p in holdouts}
     pred_holdout_by_n: Dict[int, Dict[str, float]] = {int(p["n"]): p for p in pred_holdouts}
 
+    # 条件分岐: `4 not in holdout_by_n or 4 not in pred_holdout_by_n` を満たす経路を評価する。
     if 4 not in holdout_by_n or 4 not in pred_holdout_by_n:
         raise ValueError("holdout n=4 is required for the core falsification gate")
+
     obs4 = holdout_by_n[4]
     pred4 = pred_holdout_by_n[4]
     d4_ell = float(pred4["ell"] - obs4.ell)
@@ -453,8 +491,10 @@ def _falsification_gate(
     for n in [4, 5, 6]:
         o = holdout_by_n.get(n)
         p = pred_holdout_by_n.get(n)
+        # 条件分岐: `o is None or p is None` を満たす経路を評価する。
         if o is None or p is None:
             continue
+
         d_ell = float(p["ell"] - o.ell)
         d_amp_rel = float(p["amplitude"] / o.amplitude - 1.0)
         abs_dell_4to6.append(abs(d_ell))
@@ -475,8 +515,10 @@ def _falsification_gate(
         (max_abs_dell_4to6 <= thresholds["extended46_max_abs_delta_ell"])
         and (max_abs_damp_rel_4to6 <= thresholds["extended46_max_abs_delta_amp_rel"])
     )
+    # 条件分岐: `not core_pass` を満たす経路を評価する。
     if not core_pass:
         overall_extended_status = "reject"
+    # 条件分岐: 前段条件が不成立で、`pass_extended_4to6` を追加評価する。
     elif pass_extended_4to6:
         overall_extended_status = "pass"
     else:
@@ -608,6 +650,7 @@ def _write_peak_csv(
             d_ell = float(p["ell"] - o.ell)
             d_amp_rel = float(p["amplitude"] / o.amplitude - 1.0)
             w.writerow([o.label, o.n, f"{o.ell:.8f}", f"{o.amplitude:.8f}", f"{float(p['ell']):.8f}", f"{float(p['amplitude']):.8f}", f"{d_ell:.8f}", f"{d_amp_rel:.8f}"])
+
         for o, p in zip(holdouts, pred_holdouts):
             d_ell = float(p["ell"] - o.ell)
             d_amp_rel = float(p["amplitude"] / o.amplitude - 1.0)
@@ -632,6 +675,7 @@ def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> 
         dst = public_dir / p.name
         shutil.copy2(p, dst)
         copied[p.name] = str(dst).replace("\\", "/")
+
     return copied
 
 
@@ -790,6 +834,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_fals, fals_payload)
 
     copied: Dict[str, str] = {}
+    # 条件分岐: `not bool(args.skip_public_copy)` を満たす経路を評価する。
     if not bool(args.skip_public_copy):
         copied = _copy_outputs_to_public([out_png, out_metrics, out_fals, out_csv], pub_dir)
 
@@ -797,6 +842,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_metrics}")
     print(f"[ok] fals: {out_fals}")
     print(f"[ok] csv : {out_csv}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] copied to public: {len(copied)} files")
 
@@ -831,8 +877,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -23,14 +23,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -39,15 +43,20 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
 def _extract_first_float(html: str, *, pattern: str, label: str) -> float:
     m = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"missing {label}")
+
     return float(m.group(1))
 
 
@@ -62,8 +71,10 @@ def _extract_linear_cij(html: str, *, ij: str) -> dict[str, float]:
         html,
         flags=re.IGNORECASE | re.DOTALL,
     )
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"missing linear C{ij}(T) formula")
+
     intercept = float(m.group(1))
     coef = float(m.group(2))
     exp = int(m.group(3))
@@ -93,8 +104,10 @@ def _extract_phonon_frequencies(html: str) -> dict[str, Any]:
         html,
         flags=re.IGNORECASE | re.DOTALL,
     )
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError("missing phonon frequencies table")
+
     table = m.group(1)
 
     rows: list[dict[str, Any]] = []
@@ -119,6 +132,7 @@ def _extract_phonon_frequencies(html: str) -> dict[str, Any]:
         mode = None
         point = None
         mm = re.match(r"ν_([^()]+)\(([^)]+)\)", label)
+        # 条件分岐: `mm` を満たす経路を評価する。
         if mm:
             mode = mm.group(1)
             point = mm.group(2)
@@ -135,6 +149,8 @@ def _extract_phonon_frequencies(html: str) -> dict[str, Any]:
                 "remarks": remarks if remarks else None,
             }
         )
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
 
     if not rows:
         raise ValueError("phonon frequencies table parsed but no rows found")
@@ -181,8 +197,10 @@ def _parse_mechanic_html(html: str) -> dict[str, Any]:
     )
 
     m_range = re.search(r"For\s*([0-9.]+)\s*K\s*&lt;\s*T\s*&lt;\s*([0-9.]+)\s*K", txt, flags=re.IGNORECASE)
+    # 条件分岐: `not m_range` を満たす経路を評価する。
     if not m_range:
         raise ValueError("missing temperature range header for linear Cij(T)")
+
     t_min = float(m_range.group(1))
     t_max = float(m_range.group(2))
 
@@ -247,14 +265,19 @@ def main() -> None:
     page_path = src_dir / "ioffe_mechanic.html"
     ref_path = src_dir / "ioffe_reference.html"
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         _download(url_page, page_path)
         _download(url_ref, ref_path)
 
     missing: list[Path] = []
     for p in [page_path, ref_path]:
+        # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
         if not p.exists() or p.stat().st_size == 0:
             missing.append(p)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
@@ -308,6 +331,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_extracted}")
     print(f"[ok] wrote: {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

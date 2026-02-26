@@ -18,11 +18,13 @@ def _repo_root() -> Path:
 
 
 _ROOT = _repo_root()
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 # Reuse the same implementation as Step 7.14.3 so that the holdout test
 # remains comparable and does not fork physics code.
+
 from scripts.quantum.condensed_silicon_heat_capacity_debye_baseline import (  # noqa: E402
     _debye_cv_molar,
     _golden_section_minimize,
@@ -34,9 +36,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(int(chunk_bytes))
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -71,20 +76,31 @@ def _load_webbook_shomate_solid(*, path: Path) -> dict[str, Any]:
 
     Expected schema: {"shomate":[{"phase":"solid","t_min_k":...,"t_max_k":...,"coeffs":{A..H}}...]}
     """
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(str(path))
+
     payload = _read_json(path)
     blocks = payload.get("shomate")
+    # 条件分岐: `not isinstance(blocks, list)` を満たす経路を評価する。
     if not isinstance(blocks, list):
         raise RuntimeError(f"invalid schema (missing shomate list): {path}")
+
     for b in blocks:
+        # 条件分岐: `not isinstance(b, dict)` を満たす経路を評価する。
         if not isinstance(b, dict):
             continue
+
+        # 条件分岐: `str(b.get("phase")) != "solid"` を満たす経路を評価する。
+
         if str(b.get("phase")) != "solid":
             continue
+
         coeffs = b.get("coeffs")
+        # 条件分岐: `not isinstance(coeffs, dict) or not all(k in coeffs for k in ["A", "B", "C",...` を満たす経路を評価する。
         if not isinstance(coeffs, dict) or not all(k in coeffs for k in ["A", "B", "C", "D", "E"]):
             continue
+
         return {
             "phase": "solid",
             "t_min_k": float(b.get("t_min_k")),
@@ -93,6 +109,7 @@ def _load_webbook_shomate_solid(*, path: Path) -> dict[str, Any]:
             "reference": b.get("reference"),
             "comment": b.get("comment"),
         }
+
     raise RuntimeError(f"solid Shomate block not found: {path}")
 
 
@@ -113,9 +130,11 @@ def _cp_frozen_hybrid_debye_shomate(
     t_max = float(shomate_solid.get("t_max_k"))
     coeffs = shomate_solid.get("coeffs") if isinstance(shomate_solid.get("coeffs"), dict) else {}
 
+    # 条件分岐: `t > 0.0 and t_min <= t <= t_max and all(k in coeffs for k in ["A", "B", "C",...` を満たす経路を評価する。
     if t > 0.0 and t_min <= t <= t_max and all(k in coeffs for k in ["A", "B", "C", "D", "E"]):
         ae = {k: float(coeffs[k]) for k in ["A", "B", "C", "D", "E"]}
         return float(_cp_shomate(coeffs=ae, t_k=t))
+
     return float(_debye_cv_molar(t_k=t, theta_d_k=float(theta_d_k)))
 
 
@@ -138,16 +157,20 @@ def _fit_theta_d_minimax_max_abs_z(
         th = float(theta)
         for i in train_idx:
             sig = float(sigma[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             pred = _cp_frozen_hybrid_debye_shomate(
                 t_k=float(temps_k[i]),
                 theta_d_k=th,
                 shomate_solid=shomate_solid,
             )
             z = (float(pred) - float(cp_obs[i])) / sig
+            # 条件分岐: `math.isfinite(z)` を満たす経路を評価する。
             if math.isfinite(z):
                 worst = max(worst, abs(z))
+
         return float(worst)
 
     grid = np.linspace(float(theta_min_k), float(theta_max_k), 201, dtype=float)
@@ -176,14 +199,19 @@ def _metrics_for_idx(
     exceed_3sigma = 0
     for i in idx:
         sig = float(sigma[i])
+        # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
         if sig <= 0.0:
             continue
+
         z = (float(cp_pred[i]) - float(cp_obs[i])) / sig
+        # 条件分岐: `not math.isfinite(z)` を満たす経路を評価する。
         if not math.isfinite(z):
             continue
+
         n += 1
         sum_z2 += z * z
         max_abs_z = max(max_abs_z, abs(z))
+        # 条件分岐: `abs(z) > 3.0` を満たす経路を評価する。
         if abs(z) > 3.0:
             exceed_3sigma += 1
 
@@ -210,11 +238,14 @@ def _fit_theta_d(
         s = 0.0
         for i in train_idx:
             sig = float(sigma[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             w = 1.0 / (sig * sig)
             r = float(cp_obs[i]) - _debye_cv_molar(t_k=float(temps_k[i]), theta_d_k=float(theta))
             s += w * r * r
+
         return float(s)
 
     theta0, _ = _golden_section_minimize(sse, 200.0, 1200.0, tol=1e-6)
@@ -233,15 +264,21 @@ def _fit_shomate_coeffs(
     w = []
     for i in train_idx:
         t_k = float(temps_k[i])
+        # 条件分岐: `t_k <= 0.0` を満たす経路を評価する。
         if t_k <= 0.0:
             continue
+
         sig = float(sigma[i])
+        # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
         if sig <= 0.0:
             continue
+
         t = t_k / 1000.0
         rows.append([1.0, t, t * t, t * t * t, 1.0 / (t * t)])
         y.append(float(cp_obs[i]))
         w.append(1.0 / (sig * sig))
+
+    # 条件分岐: `len(rows) < 6` を満たす経路を評価する。
 
     if len(rows) < 6:
         raise RuntimeError(f"not enough points to fit Shomate (need >=6, got {len(rows)})")
@@ -263,6 +300,7 @@ def main() -> None:
 
     src_dir = _ROOT / "data" / "quantum" / "sources" / "nist_janaf_silicon_si"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -271,15 +309,18 @@ def main() -> None:
 
     webbook_dir = _ROOT / "data" / "quantum" / "sources" / "nist_webbook_condensed_silicon_si"
     webbook_extracted = webbook_dir / "extracted_values.json"
+    # 条件分岐: `not webbook_extracted.exists()` を満たす経路を評価する。
     if not webbook_extracted.exists():
         raise SystemExit(
             f"[fail] missing: {webbook_extracted}\n"
             "Run: python -B scripts/quantum/fetch_silicon_condensed_thermochemistry_sources.py"
         )
+
     shomate_solid = _load_webbook_shomate_solid(path=webbook_extracted)
 
     extracted = _read_json(extracted_path)
     points = extracted.get("points")
+    # 条件分岐: `not isinstance(points, list) or not points` を満たす経路を評価する。
     if not isinstance(points, list) or not points:
         raise SystemExit(f"[fail] points missing/empty: {extracted_path}")
 
@@ -291,6 +332,7 @@ def main() -> None:
         and isinstance(p.get("T_K"), (int, float))
         and isinstance(p.get("Cp_J_per_molK"), (int, float))
     ]
+    # 条件分岐: `not solid` を満たす経路を評価する。
     if not solid:
         raise SystemExit(f"[fail] no solid-phase points found in: {extracted_path}")
 
@@ -304,6 +346,7 @@ def main() -> None:
 
     # Frozen hybrid baseline (Debye low-T + WebBook Shomate high-T):
     # Fit θ_D once on the low-T band to align with strict |z|<=3 gating, then keep it fixed.
+
     theta_d_hybrid = _fit_theta_d_minimax_max_abs_z(
         temps_k=temps_k,
         cp_obs=cp_obs,
@@ -383,7 +426,9 @@ def main() -> None:
             models["shomate_5p_fit"] = {"supported": False, "reason": str(exc)}
 
         # Flatten rows for CSV.
+
         for mid, m in models.items():
+            # 条件分岐: `not isinstance(m, dict) or m.get("supported") is False` を満たす経路を評価する。
             if not isinstance(m, dict) or m.get("supported") is False:
                 rows_out.append(
                     {
@@ -398,6 +443,7 @@ def main() -> None:
                     }
                 )
                 continue
+
             tr = m.get("train") if isinstance(m.get("train"), dict) else {}
             te = m.get("test") if isinstance(m.get("test"), dict) else {}
             params = m.get("params") if isinstance(m.get("params"), dict) else {}
@@ -464,6 +510,7 @@ def main() -> None:
             w.writerow(r)
 
     # Plot: holdout severity (test max abs z) for each split and model.
+
     categories: list[str] = []
     y_debye: list[float] = []
     y_shomate: list[float] = []
@@ -478,12 +525,20 @@ def main() -> None:
         v0 = None
         v1 = None
         v2 = None
+        # 条件分岐: `isinstance(m0, dict) and isinstance(m0.get("test"), dict)` を満たす経路を評価する。
         if isinstance(m0, dict) and isinstance(m0.get("test"), dict):
             v0 = m0["test"].get("max_abs_z")
+
+        # 条件分岐: `isinstance(m1, dict) and isinstance(m1.get("test"), dict)` を満たす経路を評価する。
+
         if isinstance(m1, dict) and isinstance(m1.get("test"), dict):
             v1 = m1["test"].get("max_abs_z")
+
+        # 条件分岐: `isinstance(m2, dict) and isinstance(m2.get("test"), dict)` を満たす経路を評価する。
+
         if isinstance(m2, dict) and isinstance(m2.get("test"), dict):
             v2 = m2["test"].get("max_abs_z")
+
         y_hybrid.append(float(v0) if isinstance(v0, (int, float)) else float("nan"))
         y_debye.append(float(v1) if isinstance(v1, (int, float)) else float("nan"))
         y_shomate.append(float(v2) if isinstance(v2, (int, float)) else float("nan"))
@@ -563,6 +618,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

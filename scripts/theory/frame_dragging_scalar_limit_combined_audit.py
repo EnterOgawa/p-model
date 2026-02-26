@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -35,8 +36,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -53,11 +56,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -66,8 +73,12 @@ def _to_float(v: Any) -> Optional[float]:
         val = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(val) or math.isinf(val)` を満たす経路を評価する。
+
     if math.isnan(val) or math.isinf(val):
         return None
+
     return val
 
 
@@ -79,10 +90,14 @@ def _build_rows(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any], z_ga
     frame_dragging = None
     for ch in gpb_channels:
         cid = str(ch.get("id") or "")
+        # 条件分岐: `cid == "geodetic_precession"` を満たす経路を評価する。
         if cid == "geodetic_precession":
             geodetic = ch
+        # 条件分岐: 前段条件が不成立で、`cid == "frame_dragging"` を追加評価する。
         elif cid == "frame_dragging":
             frame_dragging = ch
+
+    # 条件分岐: `geodetic is not None` を満たす経路を評価する。
 
     if geodetic is not None:
         observed = _to_float(geodetic.get("observed"))
@@ -91,11 +106,14 @@ def _build_rows(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any], z_ga
         residual = None
         z_scalar = None
         status = "inconclusive"
+        # 条件分岐: `observed is not None and pred_scalar is not None` を満たす経路を評価する。
         if observed is not None and pred_scalar is not None:
             residual = observed - pred_scalar
+            # 条件分岐: `sigma is not None and sigma > 0` を満たす経路を評価する。
             if sigma is not None and sigma > 0:
                 z_scalar = residual / sigma
                 status = "reject" if abs(z_scalar) > z_gate else "pass"
+
         rows.append(
             {
                 "id": "gpb_geodetic_control",
@@ -115,6 +133,8 @@ def _build_rows(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any], z_ga
             }
         )
 
+    # 条件分岐: `frame_dragging is not None` を満たす経路を評価する。
+
     if frame_dragging is not None:
         observed = _to_float(frame_dragging.get("observed"))
         sigma = _to_float(frame_dragging.get("observed_sigma"))
@@ -122,11 +142,14 @@ def _build_rows(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any], z_ga
         residual = None
         z_scalar = None
         status = "inconclusive"
+        # 条件分岐: `observed is not None and pred_scalar is not None` を満たす経路を評価する。
         if observed is not None and pred_scalar is not None:
             residual = observed - pred_scalar
+            # 条件分岐: `sigma is not None and sigma > 0` を満たす経路を評価する。
             if sigma is not None and sigma > 0:
                 z_scalar = residual / sigma
                 status = "reject" if abs(z_scalar) > z_gate else "pass"
+
         rows.append(
             {
                 "id": "gpb_frame_dragging_scalar_limit",
@@ -149,16 +172,21 @@ def _build_rows(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any], z_ga
     experiments = frame_payload.get("experiments") or []
     for exp in experiments:
         exp_id = str(exp.get("id") or "")
+        # 条件分岐: `"lageos" not in exp_id.lower()` を満たす経路を評価する。
         if "lageos" not in exp_id.lower():
             continue
+
         observed_mu = _to_float(exp.get("mu"))
         sigma_mu = _to_float(exp.get("mu_sigma"))
+        # 条件分岐: `observed_mu is None` を満たす経路を評価する。
         if observed_mu is None:
             obs_rate = _to_float(exp.get("omega_obs_mas_per_yr"))
             pred_rate = _to_float(exp.get("omega_pred_mas_per_yr"))
+            # 条件分岐: `obs_rate is not None and pred_rate is not None and abs(pred_rate) > 0` を満たす経路を評価する。
             if obs_rate is not None and pred_rate is not None and abs(pred_rate) > 0:
                 observed_mu = abs(obs_rate) / abs(pred_rate)
                 sigma_rate = _to_float(exp.get("omega_obs_sigma_mas_per_yr"))
+                # 条件分岐: `sigma_rate is not None and abs(pred_rate) > 0` を満たす経路を評価する。
                 if sigma_rate is not None and abs(pred_rate) > 0:
                     sigma_mu = abs(sigma_rate) / abs(pred_rate)
 
@@ -166,8 +194,10 @@ def _build_rows(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any], z_ga
         residual = None
         z_scalar = None
         status = "inconclusive"
+        # 条件分岐: `observed_mu is not None` を満たす経路を評価する。
         if observed_mu is not None:
             residual = observed_mu - pred_scalar
+            # 条件分岐: `sigma_mu is not None and sigma_mu > 0` を満たす経路を評価する。
             if sigma_mu is not None and sigma_mu > 0:
                 z_scalar = residual / sigma_mu
                 status = "reject" if abs(z_scalar) > z_gate else "pass"
@@ -205,8 +235,10 @@ def _build_summary(rows: Sequence[Dict[str, Any]], z_gate: float) -> Dict[str, A
     frame_reject_experiments = sorted({str(r.get("experiment") or "") for r in frame_reject_rows})
 
     overall = "inconclusive"
+    # 条件分岐: `frame_reject_rows` を満たす経路を評価する。
     if frame_reject_rows:
         overall = "reject"
+    # 条件分岐: 前段条件が不成立で、`frame_rows and all(r.get("status") == "pass" for r in frame_rows)` を追加評価する。
     elif frame_rows and all(r.get("status") == "pass" for r in frame_rows):
         overall = "pass"
 
@@ -237,10 +269,13 @@ def _plot(rows: Sequence[Dict[str, Any]], z_gate: float, out_png: Path) -> None:
     x = np.arange(len(rows), dtype=float)
     colors = []
     for r, z in zip(rows, zvals):
+        # 条件分岐: `r.get("status") == "reject"` を満たす経路を評価する。
         if r.get("status") == "reject":
             colors.append("#d62728")
+        # 条件分岐: 前段条件が不成立で、`r.get("status") == "pass"` を追加評価する。
         elif r.get("status") == "pass":
             colors.append("#2ca02c")
+        # 条件分岐: 前段条件が不成立で、`math.isfinite(float(z))` を追加評価する。
         elif math.isfinite(float(z)):
             colors.append("#bcbd22")
         else:
@@ -254,6 +289,7 @@ def _plot(rows: Sequence[Dict[str, Any]], z_gate: float, out_png: Path) -> None:
     ax.axvline(0.0, color="#666666", linestyle="-", linewidth=0.9, alpha=0.8)
 
     for yi, zi in zip(x, zvals):
+        # 条件分岐: `math.isfinite(float(zi))` を満たす経路を評価する。
         if math.isfinite(float(zi)):
             pad = 0.1 if zi >= 0 else -0.1
             ha = "left" if zi >= 0 else "right"
@@ -345,6 +381,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     gpb_payload = _read_json(gpb_data)
     frame_payload = _read_json(frame_data)
     rows = _build_rows(gpb_payload, frame_payload, z_gate=float(args.z_reject))
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise SystemExit("no rows generated")
 
@@ -377,6 +414,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_csv(out_csv, rows)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
             dst = public_outdir / src.name
@@ -410,10 +448,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

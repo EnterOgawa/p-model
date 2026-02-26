@@ -50,6 +50,7 @@ except Exception:  # pragma: no cover
     plt = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -82,12 +83,15 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return None
+
     try:
         return path.relative_to(_ROOT).as_posix()
     except Exception:
@@ -98,13 +102,16 @@ def _slugify(s: str) -> str:
     s = (s or "").strip().lower()
     out = []
     for ch in s:
+        # 条件分岐: `ch.isalnum()` を満たす経路を評価する。
         if ch.isalnum():
             out.append(ch)
         else:
             out.append("_")
+
     slug = "".join(out).strip("_")
     while "__" in slug:
         slug = slug.replace("__", "_")
+
     return slug or "target"
 
 
@@ -113,6 +120,7 @@ def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
         obj = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return None
+
     return obj if isinstance(obj, dict) else None
 
 
@@ -120,6 +128,7 @@ def _summarize_z_estimate(z: Dict[str, Any], out_json: Path) -> Dict[str, Any]:
     best_in = z.get("best") if isinstance(z.get("best"), dict) else {}
     best: Dict[str, Any] = {}
     for k in ("z", "score", "n_matches", "z_mean_from_matches", "z_std_from_matches"):
+        # 条件分岐: `k in best_in and best_in.get(k) is not None` を満たす経路を評価する。
         if k in best_in and best_in.get(k) is not None:
             best[k] = best_in.get(k)
 
@@ -149,26 +158,36 @@ def _summarize_z_confirmed(z: Dict[str, Any], out_json: Path) -> Dict[str, Any]:
 
 
 def _load_z_estimate_summary(out_json: Path) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not out_json.exists()` を満たす経路を評価する。
     if not out_json.exists():
         return None
+
     obj = _try_read_json(out_json)
+    # 条件分岐: `obj is None` を満たす経路を評価する。
     if obj is None:
         return None
+
     return _summarize_z_estimate(obj, out_json)
 
 
 def _load_z_confirmed_summary(out_json: Path) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not out_json.exists()` を満たす経路を評価する。
     if not out_json.exists():
         return None
+
     obj = _try_read_json(out_json)
+    # 条件分岐: `obj is None` を満たす経路を評価する。
     if obj is None:
         return None
+
     return _summarize_z_confirmed(obj, out_json)
 
 
 def _mast_invoke(request_obj: Dict[str, Any]) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required for online MAST queries. Install it or run with --offline.")
+
     r = requests.post(_INVOKE_URL, data={"request": json.dumps(request_obj)}, timeout=_REQ_TIMEOUT)
     r.raise_for_status()
     try:
@@ -178,8 +197,10 @@ def _mast_invoke(request_obj: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _mast_download(uri: str, dst: Path) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to download MAST products. Install it or place files under data/.../raw/")
+
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(dst.suffix + ".part")
     try:
@@ -191,24 +212,36 @@ def _mast_download(uri: str, dst: Path) -> Dict[str, Any]:
                     "status_code": int(r.status_code),
                     "reason": "unauthorized (likely proprietary period)",
                 }
+
+            # 条件分岐: `int(r.status_code) == 404` を満たす経路を評価する。
+
             if int(r.status_code) == 404:
                 return {"ok": False, "status_code": 404, "reason": "not_found"}
+
+            # 条件分岐: `int(r.status_code) >= 500` を満たす経路を評価する。
+
             if int(r.status_code) >= 500:
                 return {"ok": False, "status_code": int(r.status_code), "reason": f"http_{int(r.status_code)}"}
+
             r.raise_for_status()
             with tmp.open("wb") as f:
                 for chunk in r.iter_content(chunk_size=1024 * 1024):
+                    # 条件分岐: `not chunk` を満たす経路を評価する。
                     if not chunk:
                         continue
+
                     f.write(chunk)
+
         tmp.replace(dst)
         return {"ok": True, "bytes": int(dst.stat().st_size), "sha256": _sha256(dst)}
     except Exception as e:
         try:
+            # 条件分岐: `tmp.exists()` を満たす経路を評価する。
             if tmp.exists():
                 tmp.unlink()
         except Exception:
             pass
+
         return {"ok": False, "status_code": None, "reason": f"exception: {type(e).__name__}: {e}"}
 
 
@@ -222,10 +255,13 @@ def _query_jwst_obs_by_target(
         {"paramName": "obs_collection", "values": [obs_collection]},
         {"paramName": "target_name", "values": [target_name]},
     ]
+    # 条件分岐: `extra_filters` を満たす経路を評価する。
     if extra_filters:
         for f in extra_filters:
+            # 条件分岐: `isinstance(f, dict) and f.get("paramName") and f.get("values")` を満たす経路を評価する。
             if isinstance(f, dict) and f.get("paramName") and f.get("values"):
                 filters.append(f)
+
     req = {
         "service": "Mast.Caom.Filtered",
         "params": {
@@ -280,8 +316,10 @@ def _query_jwst_obs_by_box(
         {"paramName": "s_ra", "values": [{"min": ra_min, "max": ra_max}]},
         {"paramName": "s_dec", "values": [{"min": dec_min, "max": dec_max}]},
     ]
+    # 条件分岐: `extra_filters` を満たす経路を評価する。
     if extra_filters:
         for f in extra_filters:
+            # 条件分岐: `isinstance(f, dict) and f.get("paramName") and f.get("values")` を満たす経路を評価する。
             if isinstance(f, dict) and f.get("paramName") and f.get("values"):
                 filters.append(f)
 
@@ -325,8 +363,12 @@ def _read_target_config(path: Path) -> Dict[str, Any]:
         obj = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
+    # 条件分岐: `isinstance(obj, dict)` を満たす経路を評価する。
+
     if isinstance(obj, dict):
         return obj
+
     return {}
 
 
@@ -346,15 +388,22 @@ def _query_jwst_obs_with_fallback(
     Returns (rows, query_info) where query_info is stored in manifest.json for traceability.
     """
     names: List[str] = []
+    # 条件分岐: `cfg and isinstance(cfg, dict)` を満たす経路を評価する。
     if cfg and isinstance(cfg, dict):
         mt = cfg.get("mast_target_name")
+        # 条件分岐: `isinstance(mt, str) and mt.strip()` を満たす経路を評価する。
         if isinstance(mt, str) and mt.strip():
             names.append(mt.strip())
+
         aliases = cfg.get("aliases")
+        # 条件分岐: `isinstance(aliases, list)` を満たす経路を評価する。
         if isinstance(aliases, list):
             for a in aliases:
+                # 条件分岐: `isinstance(a, str) and a.strip()` を満たす経路を評価する。
                 if isinstance(a, str) and a.strip():
                     names.append(a.strip())
+
+    # 条件分岐: `target_name not in names` を満たす経路を評価する。
 
     if target_name not in names:
         names.insert(0, target_name)
@@ -362,18 +411,23 @@ def _query_jwst_obs_with_fallback(
     seen: set[str] = set()
     names_u: List[str] = []
     for n in names:
+        # 条件分岐: `n in seen` を満たす経路を評価する。
         if n in seen:
             continue
+
         seen.add(n)
         names_u.append(n)
 
     extra_filters: List[Dict[str, Any]] = []
+    # 条件分岐: `cfg and isinstance(cfg, dict)` を満たす経路を評価する。
     if cfg and isinstance(cfg, dict):
         ef = cfg.get("extra_filters")
+        # 条件分岐: `isinstance(ef, list)` を満たす経路を評価する。
         if isinstance(ef, list):
             extra_filters = [f for f in ef if isinstance(f, dict)]
 
     # Name-based query: try all names and union observations (some targets use multiple MAST target_name values).
+
     rows_union: List[Dict[str, Any]] = []
     per_name: List[Dict[str, Any]] = []
     for n in names_u:
@@ -385,24 +439,36 @@ def _query_jwst_obs_with_fallback(
         except Exception as e:
             per_name.append({"target_name": n, "ok": False, "reason": f"exception: {e}"})
             continue
+
         for r in rows:
+            # 条件分岐: `isinstance(r, dict)` を満たす経路を評価する。
             if isinstance(r, dict):
                 rows_union.append(r)
 
     # De-duplicate by obsid (fallback to obs_id string).
+
     uniq: Dict[str, Dict[str, Any]] = {}
     for r in rows_union:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         key = None
+        # 条件分岐: `r.get("obsid") is not None` を満たす経路を評価する。
         if r.get("obsid") is not None:
             key = f"obsid:{r.get('obsid')}"
+        # 条件分岐: 前段条件が不成立で、`r.get("obs_id")` を追加評価する。
         elif r.get("obs_id"):
             key = f"obs_id:{r.get('obs_id')}"
         else:
             continue
+
+        # 条件分岐: `key not in uniq` を満たす経路を評価する。
+
         if key not in uniq:
             uniq[key] = r
+
+    # 条件分岐: `uniq` を満たす経路を評価する。
 
     if uniq:
         return (
@@ -416,17 +482,22 @@ def _query_jwst_obs_with_fallback(
         )
 
     # Position-based fallback (optional).
+
     if cfg and isinstance(cfg, dict):
         pos = cfg.get("position")
+        # 条件分岐: `isinstance(pos, dict)` を満たす経路を評価する。
         if isinstance(pos, dict):
             ra = pos.get("ra_deg")
             dec = pos.get("dec_deg")
             rad = pos.get("radius_deg", 0.02)
+            # 条件分岐: `isinstance(ra, (int, float)) and isinstance(dec, (int, float)) and isinstance...` を満たす経路を評価する。
             if isinstance(ra, (int, float)) and isinstance(dec, (int, float)) and isinstance(rad, (int, float)) and float(rad) > 0:
                 extra_filters: List[Dict[str, Any]] = []
                 ef = cfg.get("extra_filters")
+                # 条件分岐: `isinstance(ef, list)` を満たす経路を評価する。
                 if isinstance(ef, list):
                     extra_filters = [f for f in ef if isinstance(f, dict)]
+
                 try:
                     rows = _query_jwst_obs_by_box(
                         ra_deg=float(ra),
@@ -437,8 +508,12 @@ def _query_jwst_obs_with_fallback(
                     )
                 except Exception as e:
                     return [], {"method": "position_box", "position": pos, "ok": False, "reason": f"exception: {e}"}
+
+                # 条件分岐: `rows` を満たす経路を評価する。
+
                 if rows:
                     return rows, {"method": "position_box", "position": pos, "ok": True, "n_obs": int(len(rows))}
+
                 return [], {"method": "position_box", "position": pos, "ok": False, "reason": "no_obs_found"}
 
     return [], {"method": "target_name", "target_name": target_name, "ok": False, "reason": "no_obs_found"}
@@ -466,11 +541,16 @@ def _select_x1d_products(rows: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any
         sub = str(r.get("productSubGroupDescription") or "")
         ptype = str(r.get("productType") or "")
         fn_l = fn.lower()
+        # 条件分岐: `fn_l.endswith(".fits") and (fn_l.endswith("_x1d.fits") or sub.upper() == "X1D")` を満たす経路を評価する。
         if fn_l.endswith(".fits") and (fn_l.endswith("_x1d.fits") or sub.upper() == "X1D"):
             x1d_fits.append(r)
             continue
+
+        # 条件分岐: `fn_l.endswith("_x1d.png") and ptype.upper() == "PREVIEW"` を満たす経路を評価する。
+
         if fn_l.endswith("_x1d.png") and ptype.upper() == "PREVIEW":
             previews.append(r)
+
     return x1d_fits, previews
 
 
@@ -478,9 +558,12 @@ def _read_x1d_spectrum(fits_path: Path) -> Dict[str, np.ndarray]:
     with fits_path.open("rb") as f:
         layout = read_first_bintable_layout(f)
         want = [c for c in ["WAVELENGTH", "FLUX", "FLUX_ERROR", "SURF_BRIGHT", "SB_ERROR"] if c in layout.columns]
+        # 条件分岐: `"WAVELENGTH" not in want` を満たす経路を評価する。
         if "WAVELENGTH" not in want:
             raise ValueError(f"x1d missing WAVELENGTH column: {fits_path}")
+
         cols = read_bintable_columns(f, layout=layout, columns=want, max_rows=None)
+
     return cols
 
 
@@ -505,8 +588,10 @@ _REST_LINES_UM: List[Tuple[str, float]] = [
 
 def _moving_average(y: np.ndarray, win: int) -> np.ndarray:
     win_i = int(win)
+    # 条件分岐: `win_i <= 1` を満たす経路を評価する。
     if win_i <= 1:
         return np.asarray(y, dtype=np.float64)
+
     k = np.ones(win_i, dtype=np.float64) / float(win_i)
     return np.convolve(np.asarray(y, dtype=np.float64), k, mode="same")
 
@@ -514,12 +599,16 @@ def _moving_average(y: np.ndarray, win: int) -> np.ndarray:
 def _robust_sigma(y: np.ndarray) -> float:
     yv = np.asarray(y, dtype=np.float64)
     yv = yv[np.isfinite(yv)]
+    # 条件分岐: `yv.size <= 8` を満たす経路を評価する。
     if yv.size <= 8:
         return float(np.nanstd(yv)) if yv.size else float("nan")
+
     med = float(np.nanmedian(yv))
     mad = float(np.nanmedian(np.abs(yv - med)))
+    # 条件分岐: `not np.isfinite(mad) or mad <= 0` を満たす経路を評価する。
     if not np.isfinite(mad) or mad <= 0:
         return float(np.nanstd(yv))
+
     return 1.4826 * mad
 
 
@@ -535,9 +624,13 @@ def _detect_emission_peaks(
     w = np.asarray(w_um, dtype=np.float64)
     yv = np.asarray(y, dtype=np.float64)
     m = np.isfinite(w) & np.isfinite(yv)
+    # 条件分岐: `yerr is not None` を満たす経路を評価する。
     if yerr is not None:
         ev = np.asarray(yerr, dtype=np.float64)
         m = m & np.isfinite(ev) & (ev > 0)
+
+    # 条件分岐: `int(m.sum()) <= 10` を満たす経路を評価する。
+
     if int(m.sum()) <= 10:
         return {"ok": False, "reason": "too_few_points"}
 
@@ -556,11 +649,15 @@ def _detect_emission_peaks(
     # local maxima
     if y_hp.size < 3:
         return {"ok": False, "reason": "too_few_points"}
+
     core = (y_hp[1:-1] > y_hp[:-2]) & (y_hp[1:-1] >= y_hp[2:]) & np.isfinite(snr[1:-1])
     core = core & (snr[1:-1] >= float(snr_threshold)) & (y_hp[1:-1] > 0)
+    # 条件分岐: `snr_fluxerr is not None and float(snr_threshold_fluxerr) > 0` を満たす経路を評価する。
     if snr_fluxerr is not None and float(snr_threshold_fluxerr) > 0:
         core = core & (snr_fluxerr[1:-1] >= float(snr_threshold_fluxerr))
+
     idx = np.where(core)[0] + 1
+    # 条件分岐: `idx.size <= 0` を満たす経路を評価する。
     if idx.size <= 0:
         return {
             "ok": True,
@@ -609,6 +706,7 @@ def _score_redshift_candidates(
     tol_abs_um: float = 0.004,
     top_n: int = 12,
 ) -> Dict[str, Any]:
+    # 条件分岐: `not peaks` を満たす経路を評価する。
     if not peaks:
         return {"ok": False, "reason": "no_peaks"}
 
@@ -618,33 +716,49 @@ def _score_redshift_candidates(
     def nearest_peak_candidates(pred_um: float) -> List[int]:
         j = int(np.searchsorted(peak_w, pred_um))
         candidates: List[int] = []
+        # 条件分岐: `0 <= j < peak_w.size` を満たす経路を評価する。
         if 0 <= j < peak_w.size:
             candidates.append(j)
+
+        # 条件分岐: `0 <= j - 1 < peak_w.size` を満たす経路を評価する。
+
         if 0 <= j - 1 < peak_w.size:
             candidates.append(j - 1)
+
+        # 条件分岐: `0 <= j + 1 < peak_w.size` を満たす経路を評価する。
+
         if 0 <= j + 1 < peak_w.size:
             candidates.append(j + 1)
         # sort by distance and keep unique indices
+
         uniq: List[int] = []
         for k in sorted(set(candidates), key=lambda kk: abs(float(peak_w[kk]) - float(pred_um))):
             d = abs(float(peak_w[k]) - float(pred_um))
             tol = max(float(tol_abs_um), float(tol_rel) * float(pred_um))
+            # 条件分岐: `d <= tol` を満たす経路を評価する。
             if d <= tol:
                 uniq.append(int(k))
+
         return uniq
 
     # Build candidate set from (peak, rest_line) pairs.
+
     cand_map: Dict[str, Dict[str, Any]] = {}
     for i in range(int(peak_w.size)):
         wobs = float(peak_w[i])
         for name, lam0 in _REST_LINES_UM:
+            # 条件分岐: `lam0 <= 0` を満たす経路を評価する。
             if lam0 <= 0:
                 continue
+
             z = wobs / float(lam0) - 1.0
+            # 条件分岐: `not (float(z_min) <= z <= float(z_max))` を満たす経路を評価する。
             if not (float(z_min) <= z <= float(z_max)):
                 continue
+
             key = f"{z:.5f}"
             rec = cand_map.get(key)
+            # 条件分岐: `rec is None` を満たす経路を評価する。
             if rec is None:
                 rec = {"z": float(z), "seed": {"peak_w_um": wobs, "line": name, "line_um": float(lam0)}}
                 cand_map[key] = rec
@@ -657,16 +771,24 @@ def _score_redshift_candidates(
         used_peaks: set[int] = set()
         for name, lam0 in _REST_LINES_UM:
             pred = float(lam0) * (1.0 + z)
+            # 条件分岐: `pred < float(w_min_um) or pred > float(w_max_um)` を満たす経路を評価する。
             if pred < float(w_min_um) or pred > float(w_max_um):
                 continue
+
             j = None
             for cand in nearest_peak_candidates(pred):
+                # 条件分岐: `int(cand) in used_peaks` を満たす経路を評価する。
                 if int(cand) in used_peaks:
                     continue
+
                 j = int(cand)
                 break
+
+            # 条件分岐: `j is None` を満たす経路を評価する。
+
             if j is None:
                 continue
+
             used_peaks.add(int(j))
             d = float(peak_w[j]) - pred
             sn = float(peak_snr[j])
@@ -681,9 +803,12 @@ def _score_redshift_candidates(
                 }
             )
             score += max(0.0, sn)
+
         matches = sorted(matches, key=lambda r: abs(float(r["delta_um"])))
+        # 条件分岐: `not matches` を満たす経路を評価する。
         if not matches:
             continue
+
         z_vals = [float(m["peak_um"]) / float(m["line_um"]) - 1.0 for m in matches]
         z_mean = float(np.mean(z_vals))
         z_std = float(np.std(z_vals, ddof=1)) if len(z_vals) >= 2 else 0.0
@@ -697,6 +822,8 @@ def _score_redshift_candidates(
                 "matches": matches,
             }
         )
+
+    # 条件分岐: `not candidates` を満たす経路を評価する。
 
     if not candidates:
         return {"ok": False, "reason": "no_candidates_scored"}
@@ -723,25 +850,35 @@ def _plot_target_z_diagnostic(
     best: Optional[Dict[str, Any]],
     out_png: Path,
 ) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return {"ok": False, "reason": "matplotlib not available"}
+
     try:
         cols = _read_x1d_spectrum(spectrum_path)
         w = cols["WAVELENGTH"]
         y = cols.get("FLUX")
+        # 条件分岐: `y is None` を満たす経路を評価する。
         if y is None:
             y = cols.get("SURF_BRIGHT")
+
+        # 条件分岐: `y is None` を満たす経路を評価する。
+
         if y is None:
             return {"ok": False, "reason": "missing FLUX/SURF_BRIGHT"}
+
         yerr = cols.get("FLUX_ERROR")
+        # 条件分岐: `yerr is None` を満たす経路を評価する。
         if yerr is None:
             yerr = cols.get("SB_ERROR")
     except Exception as e:
         return {"ok": False, "reason": f"failed to read spectrum: {e}"}
 
     m = np.isfinite(w) & np.isfinite(y)
+    # 条件分岐: `yerr is not None` を満たす経路を評価する。
     if yerr is not None:
         m = m & np.isfinite(yerr)
+
     w = np.asarray(w[m], dtype=np.float64)
     y = np.asarray(y[m], dtype=np.float64)
     yerr_v = np.asarray(yerr[m], dtype=np.float64) if yerr is not None else None
@@ -773,7 +910,9 @@ def _plot_target_z_diagnostic(
         ax1.plot([x], [0.0], marker="x", color="#cc0000", ms=6, mew=1.2)
 
     # Best z predicted lines (matched only)
+
     title = f"JWST x1d z diagnostic : {target_slug}"
+    # 条件分岐: `best is not None` を満たす経路を評価する。
     if best is not None:
         z = float(best.get("z_mean_from_matches") or best.get("z") or float("nan"))
         title += f" (best z≈{z:.3f}; matches={int(best.get('n_matches') or 0)})"
@@ -782,6 +921,7 @@ def _plot_target_z_diagnostic(
             line = str(mm.get("line") or "")
             ax0.axvline(x, color="#1f77b4", lw=0.9, alpha=0.55)
             ax1.axvline(x, color="#1f77b4", lw=0.9, alpha=0.55)
+            # 条件分岐: `line` を満たす経路を評価する。
             if line:
                 ax0.text(x, float(np.nanmax(y)), line, rotation=90, va="top", ha="right", fontsize=7, alpha=0.7)
 
@@ -822,6 +962,7 @@ def _estimate_target_redshift(
         "plot": None,
     }
 
+    # 条件分岐: `not x1d_paths` を満たす経路を評価する。
     if not x1d_paths:
         rec["reason"] = "no_local_x1d"
         out_json.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -835,6 +976,7 @@ def _estimate_target_redshift(
     #
     # New heuristic: prefer spectra that actually yield redshift candidates (score ok),
     # and only then use peaks/SNR/span as tiebreakers. Still prefers non-"mirimage" when possible.
+
     tried: List[Dict[str, Any]] = []
     cand: List[Dict[str, Any]] = []
     for p in x1d_paths:
@@ -843,11 +985,17 @@ def _estimate_target_redshift(
             cols = _read_x1d_spectrum(p)
             w = cols["WAVELENGTH"]
             y = cols.get("FLUX")
+            # 条件分岐: `y is None` を満たす経路を評価する。
             if y is None:
                 y = cols.get("SURF_BRIGHT")
+
+            # 条件分岐: `y is None` を満たす経路を評価する。
+
             if y is None:
                 continue
+
             yerr = cols.get("FLUX_ERROR")
+            # 条件分岐: `yerr is None` を満たす経路を評価する。
             if yerr is None:
                 yerr = cols.get("SB_ERROR")
 
@@ -859,12 +1007,15 @@ def _estimate_target_redshift(
                 snr_threshold_fluxerr=float(snr_threshold_fluxerr),
                 max_peaks=20,
             )
+            # 条件分岐: `not bool(peaks_tmp.get("ok"))` を満たす経路を評価する。
             if not bool(peaks_tmp.get("ok")):
                 continue
 
             m = np.isfinite(w) & np.isfinite(y)
+            # 条件分岐: `int(m.sum()) <= 10` を満たす経路を評価する。
             if int(m.sum()) <= 10:
                 continue
+
             wv = np.asarray(w[m], dtype=np.float64)
             span = float(np.nanmax(wv) - np.nanmin(wv))
 
@@ -878,6 +1029,7 @@ def _estimate_target_redshift(
             best_score = 0.0
             best_z = None
             score_reason = None
+            # 条件分岐: `peaks_list` を満たす経路を評価する。
             if peaks_list:
                 score_tmp = _score_redshift_candidates(
                     peaks_list,
@@ -887,13 +1039,18 @@ def _estimate_target_redshift(
                     z_max=float(z_max),
                 )
                 score_ok = bool(score_tmp.get("ok"))
+                # 条件分岐: `score_ok` を満たす経路を評価する。
                 if score_ok:
                     best = score_tmp.get("best") or {}
                     best_n_matches = int(best.get("n_matches") or 0)
                     best_score = float(best.get("score") or 0.0)
                     z_show = best.get("z_mean_from_matches")
+                    # 条件分岐: `z_show is None` を満たす経路を評価する。
                     if z_show is None:
                         z_show = best.get("z")
+
+                    # 条件分岐: `z_show is not None` を満たす経路を評価する。
+
                     if z_show is not None:
                         best_z = float(z_show)
                 else:
@@ -931,6 +1088,8 @@ def _estimate_target_redshift(
         except Exception:
             continue
 
+    # 条件分岐: `not cand` を満たす経路を評価する。
+
     if not cand:
         rec["reason"] = "no_readable_x1d"
         out_json.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -938,9 +1097,12 @@ def _estimate_target_redshift(
 
     def _pick_best(pool: List[Dict[str, Any]], *, prefer_non_mirimage: bool) -> Optional[Dict[str, Any]]:
         src = pool
+        # 条件分岐: `prefer_non_mirimage` を満たす経路を評価する。
         if prefer_non_mirimage:
             src = [c for c in pool if bool(c.get("not_mirimage"))]
+
         src_scored = [c for c in src if bool(c.get("score_ok"))]
+        # 条件分岐: `src_scored` を満たす経路を評価する。
         if src_scored:
             return max(
                 src_scored,
@@ -953,13 +1115,18 @@ def _estimate_target_redshift(
                     str(c.get("name") or ""),
                 ),
             )
+
         return None
 
     picked = _pick_best(cand, prefer_non_mirimage=True)
     picked_reason = "non_mirimage_scored"
+    # 条件分岐: `picked is None` を満たす経路を評価する。
     if picked is None:
         picked = _pick_best(cand, prefer_non_mirimage=False)
         picked_reason = "any_scored"
+
+    # 条件分岐: `picked is None` を満たす経路を評価する。
+
     if picked is None:
         # Fall back to the previous peak-based heuristic (keeps behavior stable when scoring fails everywhere).
         picked = max(
@@ -1003,9 +1170,12 @@ def _estimate_target_redshift(
     cols = _read_x1d_spectrum(best_path)
     w = cols["WAVELENGTH"]
     y = cols.get("FLUX")
+    # 条件分岐: `y is None` を満たす経路を評価する。
     if y is None:
         y = cols.get("SURF_BRIGHT")
+
     yerr = cols.get("FLUX_ERROR")
+    # 条件分岐: `yerr is None` を満たす経路を評価する。
     if yerr is None:
         yerr = cols.get("SB_ERROR")
 
@@ -1022,10 +1192,12 @@ def _estimate_target_redshift(
     rec["peaks"] = peaks_rec
 
     peaks: List[Dict[str, Any]] = []
+    # 条件分岐: `not bool(peaks_rec.get("ok"))` を満たす経路を評価する。
     if not bool(peaks_rec.get("ok")):
         rec["reason"] = str(peaks_rec.get("reason") or "peak_detection_failed")
     else:
         peaks = list(peaks_rec.get("peaks") or [])
+        # 条件分岐: `not peaks` を満たす経路を評価する。
         if not peaks:
             rec["reason"] = "no_peaks_over_threshold"
         else:
@@ -1036,6 +1208,7 @@ def _estimate_target_redshift(
                 z_min=float(z_min),
                 z_max=float(z_max),
             )
+            # 条件分岐: `not bool(score_rec.get("ok"))` を満たす経路を評価する。
             if not bool(score_rec.get("ok")):
                 rec["reason"] = str(score_rec.get("reason") or "scoring_failed")
             else:
@@ -1045,6 +1218,7 @@ def _estimate_target_redshift(
                 rec["score_params"] = score_rec.get("params")
 
     # CSV: small view (write even when ok=false so paper references stay stable)
+
     try:
         lines = ["rank,z,score,n_matches,z_mean_from_matches,z_std_from_matches,matched_lines"]
         for rank, c in enumerate(rec.get("top") or [], start=1):
@@ -1062,6 +1236,7 @@ def _estimate_target_redshift(
                     ]
                 )
             )
+
         out_csv.parent.mkdir(parents=True, exist_ok=True)
         out_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
         rec["csv"] = _relpath(out_csv)
@@ -1076,6 +1251,7 @@ def _estimate_target_redshift(
             best=rec.get("best"),
             out_png=out_png,
         )
+        # 条件分岐: `plot is not None` を満たす経路を評価する。
         if plot is not None:
             rec["plot"] = plot
     except Exception:
@@ -1091,11 +1267,15 @@ def _read_json(path: Path) -> Any:
 
 def _rest_um_from_name(line: str) -> Optional[float]:
     n = str(line or "").strip()
+    # 条件分岐: `not n` を満たす経路を評価する。
     if not n:
         return None
+
     for name, lam0 in _REST_LINES_UM:
+        # 条件分岐: `str(name) == n` を満たす経路を評価する。
         if str(name) == n:
             return float(lam0)
+
     return None
 
 
@@ -1115,9 +1295,13 @@ def _measure_line_centroid(
     yv = np.asarray(y, dtype=np.float64)
     m = np.isfinite(w) & np.isfinite(yv)
     ev = None
+    # 条件分岐: `yerr is not None` を満たす経路を評価する。
     if yerr is not None:
         ev = np.asarray(yerr, dtype=np.float64)
         m = m & np.isfinite(ev) & (ev > 0)
+
+    # 条件分岐: `int(m.sum()) <= 10` を満たす経路を評価する。
+
     if int(m.sum()) <= 10:
         return {"ok": False, "reason": "too_few_points"}
 
@@ -1128,6 +1312,7 @@ def _measure_line_centroid(
     c = float(center_hint_um)
     half = float(window_um) / 2.0
     win = (w >= (c - half)) & (w <= (c + half))
+    # 条件分岐: `int(win.sum()) < 7` を満たす経路を評価する。
     if int(win.sum()) < 7:
         return {"ok": False, "reason": "too_few_points_in_window"}
 
@@ -1139,6 +1324,7 @@ def _measure_line_centroid(
     order = np.argsort(ww)
     ww = ww[order]
     yy = yy[order]
+    # 条件分岐: `ee is not None` を満たす経路を評価する。
     if ee is not None:
         ee = ee[order]
 
@@ -1147,36 +1333,50 @@ def _measure_line_centroid(
     def _trimmed_median(y_local: np.ndarray) -> Optional[float]:
         y_use = np.asarray(y_local, dtype=np.float64)
         y_use = y_use[np.isfinite(y_use)]
+        # 条件分岐: `y_use.size <= 0` を満たす経路を評価する。
         if y_use.size <= 0:
             return None
         # Robust baseline: drop the most extreme 20% on each side (keeps continuum for narrow lines).
+
         y_sorted = np.sort(y_use)
         k = int(np.floor(0.2 * float(y_sorted.size)))
+        # 条件分岐: `y_sorted.size >= 10 and (y_sorted.size - 2 * k) >= 3 and k > 0` を満たす経路を評価する。
         if y_sorted.size >= 10 and (y_sorted.size - 2 * k) >= 3 and k > 0:
             y_sorted = y_sorted[k:-k]
+
         return float(np.nanmedian(y_sorted))
 
     def _centroid_from_local_window(yy_local: np.ndarray, ee_local: Optional[np.ndarray]) -> Optional[Dict[str, Any]]:
         base_local = _trimmed_median(yy_local)
+        # 条件分岐: `base_local is None or not np.isfinite(base_local)` を満たす経路を評価する。
         if base_local is None or not np.isfinite(base_local):
             return None
+
         resid_local = np.asarray(yy_local, dtype=np.float64) - float(base_local)
+        # 条件分岐: `is_abs` を満たす経路を評価する。
         if is_abs:
             prof_use_local = np.clip(-resid_local, 0.0, None)
         else:
             prof_use_local = np.clip(resid_local, 0.0, None)
+
+        # 条件分岐: `not np.isfinite(prof_use_local).any() or float(np.nanmax(prof_use_local)) <= 0` を満たす経路を評価する。
+
         if not np.isfinite(prof_use_local).any() or float(np.nanmax(prof_use_local)) <= 0:
             return None
 
         # Choose the peak closest to the provided hint (Gaussian prior).
+
         if prior_sigma_um is not None and float(prior_sigma_um) > 0:
             prior_sigma = float(prior_sigma_um)
         else:
             prior_sigma = max(float(window_um) / 6.0, 1e-6)
+
         weight = np.exp(-0.5 * ((ww - float(center_hint_um)) / prior_sigma) ** 2)
         score = np.where(np.isfinite(prof_use_local), prof_use_local, 0.0) * weight
+        # 条件分岐: `not np.isfinite(score).any() or float(np.nanmax(score)) <= 0` を満たす経路を評価する。
         if not np.isfinite(score).any() or float(np.nanmax(score)) <= 0:
             return None
+
         i_peak = int(np.nanargmax(score))
         # Guard: do not "snap" to a far-away stronger peak when the hint is meant
         # to select between nearby candidates (e.g., close doublets).
@@ -1184,9 +1384,12 @@ def _measure_line_centroid(
         # The user can widen prior_sigma_um when the hint itself is uncertain.
         if float(np.abs(ww[i_peak] - float(center_hint_um))) > 3.0 * float(prior_sigma):
             return None
+
         amp_peak = float(score[i_peak])
+        # 条件分岐: `not np.isfinite(amp_peak) or amp_peak <= 0` を満たす経路を評価する。
         if not np.isfinite(amp_peak) or amp_peak <= 0:
             return None
+
         thr_peak = 0.5 * amp_peak
 
         # Use a contiguous region around the selected peak to avoid mixing multiple peaks.
@@ -1195,29 +1398,37 @@ def _measure_line_centroid(
         left = i_peak
         while left - 1 >= 0 and float(score[left - 1]) >= thr_peak:
             left -= 1
+
         right = i_peak
         while right + 1 < score.size and float(score[right + 1]) >= thr_peak:
             right += 1
+
         w_sel_local = ww[left : right + 1]
         p_sel_local = prof_use_local[left : right + 1]
         s = float(np.sum(p_sel_local))
+        # 条件分岐: `not np.isfinite(s) or s <= 0` を満たす経路を評価する。
         if not np.isfinite(s) or s <= 0:
             return None
+
         centroid_local = float(np.sum(w_sel_local * p_sel_local) / s)
 
         # A conservative systematics floor in wavelength (cannot beat sampling).
         step_local = float(np.nanmedian(np.abs(np.diff(w_sel_local)))) if w_sel_local.size >= 3 else float("nan")
+        # 条件分岐: `not np.isfinite(step_local) or step_local <= 0` を満たす経路を評価する。
         if not np.isfinite(step_local) or step_local <= 0:
             step_local = float(np.nanmedian(np.abs(np.diff(ww)))) if ww.size >= 3 else float("nan")
+
         sys_floor_local = 0.5 * step_local if np.isfinite(step_local) and step_local > 0 else None
 
         peak_um = float(ww[i_peak])
         peak_hp = float(resid_local[i_peak])
         peak_snr_fluxerr = None
         snr_int = None
+        # 条件分岐: `ee_local is not None and np.isfinite(float(ee_local[i_peak])) and float(ee_lo...` を満たす経路を評価する。
         if ee_local is not None and np.isfinite(float(ee_local[i_peak])) and float(ee_local[i_peak]) > 0:
             peak_snr_fluxerr = float(peak_hp / float(ee_local[i_peak]))
             den = float(np.sqrt(np.sum(np.asarray(ee_local[left : right + 1], dtype=np.float64) ** 2)))
+            # 条件分岐: `np.isfinite(den) and den > 0` を満たす経路を評価する。
             if np.isfinite(den) and den > 0:
                 snr_int = float(np.sum(np.asarray(p_sel_local, dtype=np.float64)) / den)
 
@@ -1234,6 +1445,7 @@ def _measure_line_centroid(
         }
 
     base = _centroid_from_local_window(yy, ee)
+    # 条件分岐: `base is None` を満たす経路を評価する。
     if base is None:
         return {"ok": False, "reason": "no_signal_over_baseline"}
 
@@ -1243,6 +1455,7 @@ def _measure_line_centroid(
 
     # Bootstrap statistical uncertainty (if FLUX_ERROR exists).
     stat_sigma = None
+    # 条件分岐: `ev is not None and int(bootstrap_n) > 0` を満たす経路を評価する。
     if ev is not None and int(bootstrap_n) > 0:
         rng = np.random.default_rng(int(seed))
         cents: List[float] = []
@@ -1250,9 +1463,14 @@ def _measure_line_centroid(
             noise = rng.normal(0.0, ee)
             yb = yy + noise
             b = _centroid_from_local_window(yb, ee)
+            # 条件分岐: `b is None` を満たす経路を評価する。
             if b is None:
                 continue
+
             cents.append(float(b["centroid_um"]))
+
+        # 条件分岐: `len(cents) >= 16` を満たす経路を評価する。
+
         if len(cents) >= 16:
             stat_sigma = float(np.nanstd(np.asarray(cents, dtype=np.float64)))
 
@@ -1314,6 +1532,7 @@ def _confirm_target_redshift(
         "plot_summary": None,
     }
 
+    # 条件分岐: `not line_id_path.exists()` を満たす経路を評価する。
     if not line_id_path.exists():
         rec["reason"] = "no_line_id"
         out_json.parent.mkdir(parents=True, exist_ok=True)
@@ -1321,6 +1540,7 @@ def _confirm_target_redshift(
         return rec
 
     cfg = _read_json(line_id_path)
+    # 条件分岐: `not isinstance(cfg, dict)` を満たす経路を評価する。
     if not isinstance(cfg, dict):
         rec["reason"] = "invalid_line_id_format"
         out_json.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -1332,42 +1552,58 @@ def _confirm_target_redshift(
     sys_extra_um = params.get("sigma_sys_um")
     sys_extra_um_f = float(sys_extra_um) if sys_extra_um is not None else None
     min_ok_spectra_raw = params.get("min_ok_spectra")
+    # 条件分岐: `min_ok_spectra_raw is None` を満たす経路を評価する。
     if min_ok_spectra_raw is None:
         min_ok_spectra_raw = params.get("min_ok_spectra_for_z")
+
     try:
         min_ok_spectra = int(min_ok_spectra_raw) if min_ok_spectra_raw is not None else 1
     except Exception:
         min_ok_spectra = 1
+
     min_ok_spectra = int(max(1, min_ok_spectra))
     max_z_pull_raw = params.get("max_z_pull")
+    # 条件分岐: `max_z_pull_raw is None` を満たす経路を評価する。
     if max_z_pull_raw is None:
         max_z_pull_raw = params.get("max_z_sigma_pull")
+
     try:
         max_z_pull = float(max_z_pull_raw) if max_z_pull_raw is not None else None
     except Exception:
         max_z_pull = None
+
+    # 条件分岐: `max_z_pull is not None and (not np.isfinite(max_z_pull) or float(max_z_pull)...` を満たす経路を評価する。
+
     if max_z_pull is not None and (not np.isfinite(max_z_pull) or float(max_z_pull) <= 0):
         max_z_pull = None
 
     lines_cfg = cfg.get("lines") if isinstance(cfg.get("lines"), list) else []
+    # 条件分岐: `not lines_cfg` を満たす経路を評価する。
     if not lines_cfg:
         rec["reason"] = "no_lines_selected"
         out_json.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return rec
 
     # spectra (multi-spectrum cross-check). Backward compatible: accept {"spectrum":{...}}.
+
     spec_entries = cfg.get("spectra") if isinstance(cfg.get("spectra"), list) else None
     spec_paths_s: List[str] = []
+    # 条件分岐: `spec_entries` を満たす経路を評価する。
     if spec_entries:
         for s in spec_entries:
+            # 条件分岐: `isinstance(s, str)` を満たす経路を評価する。
             if isinstance(s, str):
                 spec_paths_s.append(s)
+            # 条件分岐: 前段条件が不成立で、`isinstance(s, dict) and s.get("path")` を追加評価する。
             elif isinstance(s, dict) and s.get("path"):
                 spec_paths_s.append(str(s.get("path")))
     else:
         spec = cfg.get("spectrum") if isinstance(cfg.get("spectrum"), dict) else {}
+        # 条件分岐: `spec.get("path")` を満たす経路を評価する。
         if spec.get("path"):
             spec_paths_s.append(str(spec.get("path")))
+
+    # 条件分岐: `not spec_paths_s` を満たす経路を評価する。
 
     if not spec_paths_s:
         rec["reason"] = "missing_spectrum_path"
@@ -1378,12 +1614,19 @@ def _confirm_target_redshift(
     missing_specs: List[str] = []
     for s in spec_paths_s:
         p = Path(str(s))
+        # 条件分岐: `not p.is_absolute()` を満たす経路を評価する。
         if not p.is_absolute():
             p = (_ROOT / p).resolve()
+
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
+
         if not p.exists():
             missing_specs.append(str(s))
             continue
+
         spec_paths.append(p)
+
+    # 条件分岐: `not spec_paths` を満たす経路を評価する。
 
     if not spec_paths:
         rec["reason"] = "spectrum_not_found"
@@ -1411,11 +1654,17 @@ def _confirm_target_redshift(
             cols = _read_x1d_spectrum(sp)
             w = cols["WAVELENGTH"]
             y = cols.get("FLUX")
+            # 条件分岐: `y is None` を満たす経路を評価する。
             if y is None:
                 y = cols.get("SURF_BRIGHT")
+
             yerr = cols.get("FLUX_ERROR")
+            # 条件分岐: `yerr is None` を満たす経路を評価する。
             if yerr is None:
                 yerr = cols.get("SB_ERROR")
+
+            # 条件分岐: `y is None` を満たす経路を評価する。
+
             if y is None:
                 spec_rec["ok"] = False
                 spec_rec["reason"] = "spectrum_missing_flux"
@@ -1428,45 +1677,60 @@ def _confirm_target_redshift(
             continue
 
         for it in lines_cfg:
+            # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
             if not isinstance(it, dict):
                 continue
+
             use_raw = it.get("use", True)
+            # 条件分岐: `isinstance(use_raw, bool)` を満たす経路を評価する。
             if isinstance(use_raw, bool):
                 use_flag = bool(use_raw)
+            # 条件分岐: 前段条件が不成立で、`use_raw is None` を追加評価する。
             elif use_raw is None:
                 use_flag = True
+            # 条件分岐: 前段条件が不成立で、`isinstance(use_raw, (int, float))` を追加評価する。
             elif isinstance(use_raw, (int, float)):
                 use_flag = bool(use_raw)
+            # 条件分岐: 前段条件が不成立で、`isinstance(use_raw, str)` を追加評価する。
             elif isinstance(use_raw, str):
                 use_flag = str(use_raw).strip().lower() not in ("0", "false", "no", "off")
             else:
                 use_flag = True
+
             line_name = str(it.get("line") or "").strip()
             rest_um = it.get("rest_um")
+            # 条件分岐: `rest_um is None` を満たす経路を評価する。
             if rest_um is None:
                 rest_um = _rest_um_from_name(line_name)
+
             try:
                 rest_um_f = float(rest_um)
             except Exception:
                 continue
+
             obs_hint = it.get("obs_um")
+            # 条件分岐: `obs_hint is None` を満たす経路を評価する。
             if obs_hint is None:
                 continue
+
             try:
                 obs_hint_f = float(obs_hint)
             except Exception:
                 continue
+
             win_um = it.get("window_um") or params.get("window_um_default") or 0.2
             try:
                 win_um_f = float(win_um)
             except Exception:
                 win_um_f = 0.2
+
             kind = str(it.get("kind") or params.get("kind") or "emission")
             prior_sigma_um = it.get("prior_sigma_um")
             try:
                 prior_sigma_um_f = float(prior_sigma_um) if prior_sigma_um is not None else None
             except Exception:
                 prior_sigma_um_f = None
+
             meas = _measure_line_centroid(
                 w,
                 y,
@@ -1478,6 +1742,7 @@ def _confirm_target_redshift(
                 seed=seed,
                 prior_sigma_um=prior_sigma_um_f,
             )
+            # 条件分岐: `not bool(meas.get("ok"))` を満たす経路を評価する。
             if not bool(meas.get("ok")):
                 r = {
                     "spectrum": _relpath(sp),
@@ -1491,13 +1756,17 @@ def _confirm_target_redshift(
                 used.append(r)
                 spec_rec["lines"].append(r)
                 continue
+
             obs_um = float(meas["centroid_um"])
             obs_stat = meas.get("centroid_stat_sigma_um")
             obs_sys_floor = meas.get("centroid_sys_floor_um")
+            # 条件分岐: `sys_extra_um_f is not None and obs_sys_floor is not None` を満たす経路を評価する。
             if sys_extra_um_f is not None and obs_sys_floor is not None:
                 obs_sys = float(max(float(obs_sys_floor), float(sys_extra_um_f)))
+            # 条件分岐: 前段条件が不成立で、`sys_extra_um_f is not None` を追加評価する。
             elif sys_extra_um_f is not None:
                 obs_sys = float(sys_extra_um_f)
+            # 条件分岐: 前段条件が不成立で、`obs_sys_floor is not None` を追加評価する。
             elif obs_sys_floor is not None:
                 obs_sys = float(obs_sys_floor)
             else:
@@ -1512,36 +1781,56 @@ def _confirm_target_redshift(
             # values but mark ok=false so it won't be used in z combination.
             reject_reason = None
             min_snr_int = it.get("min_snr_integrated_proxy")
+            # 条件分岐: `min_snr_int is None` を満たす経路を評価する。
             if min_snr_int is None:
                 min_snr_int = it.get("min_snr_integrated")
+
+            # 条件分岐: `min_snr_int is None` を満たす経路を評価する。
+
             if min_snr_int is None:
                 min_snr_int = it.get("min_snr_int")
+
+            # 条件分岐: `min_snr_int is not None` を満たす経路を評価する。
+
             if min_snr_int is not None:
                 try:
                     thr = float(min_snr_int)
                 except Exception:
                     thr = None
+
+                # 条件分岐: `thr is not None and thr > 0` を満たす経路を評価する。
+
                 if thr is not None and thr > 0:
                     snr_val = meas.get("snr_integrated_proxy")
                     try:
                         snr_f = float(snr_val) if snr_val is not None else None
                     except Exception:
                         snr_f = None
+
+                    # 条件分岐: `snr_f is None or not np.isfinite(snr_f) or float(snr_f) < float(thr)` を満たす経路を評価する。
+
                     if snr_f is None or not np.isfinite(snr_f) or float(snr_f) < float(thr):
                         reject_reason = f"below_snr_integrated_proxy:{float(thr):g}"
 
             min_peak_snr = it.get("min_peak_snr_fluxerr")
+            # 条件分岐: `reject_reason is None and min_peak_snr is not None` を満たす経路を評価する。
             if reject_reason is None and min_peak_snr is not None:
                 try:
                     thr = float(min_peak_snr)
                 except Exception:
                     thr = None
+
+                # 条件分岐: `thr is not None and thr > 0` を満たす経路を評価する。
+
                 if thr is not None and thr > 0:
                     snr_val = meas.get("peak_snr_fluxerr")
                     try:
                         snr_f = float(snr_val) if snr_val is not None else None
                     except Exception:
                         snr_f = None
+
+                    # 条件分岐: `snr_f is None or not np.isfinite(snr_f) or float(snr_f) < float(thr)` を満たす経路を評価する。
+
                     if snr_f is None or not np.isfinite(snr_f) or float(snr_f) < float(thr):
                         reject_reason = f"below_peak_snr_fluxerr:{float(thr):g}"
 
@@ -1568,6 +1857,7 @@ def _confirm_target_redshift(
 
     rec["lines"] = used
     rec["spectra"] = spectra_recs
+    # 条件分岐: `max_z_pull is not None` を満たす経路を評価する。
     if max_z_pull is not None:
         # Optional outlier clipping (reproducible, data-driven) to avoid combining
         # an obviously inconsistent line measurement into the final z.
@@ -1579,6 +1869,7 @@ def _confirm_target_redshift(
             and bool(r.get("use", True))
             and isinstance(r.get("z"), (int, float))
         ]
+        # 条件分岐: `len(cand) >= 3` を満たす経路を評価する。
         if len(cand) >= 3:
             z_c = np.array([float(r["z"]) for r in cand], dtype=np.float64)
             zstat_c = np.array([float(r.get("z_stat_sigma") or np.nan) for r in cand], dtype=np.float64)
@@ -1590,6 +1881,7 @@ def _confirm_target_redshift(
             var_tot_c = np.where(stat_ok_c & ~sys_ok_c, (zstat_c**2), var_tot_c)
             var_tot_c = np.where(~stat_ok_c & sys_ok_c, (zsys_c**2), var_tot_c)
             w_tot_c = np.where(np.isfinite(var_tot_c) & (var_tot_c > 0), 1.0 / var_tot_c, 0.0)
+            # 条件分岐: `float(np.sum(w_tot_c)) > 0` を満たす経路を評価する。
             if float(np.sum(w_tot_c)) > 0:
                 z0 = float(np.sum(w_tot_c * z_c) / np.sum(w_tot_c))
             else:
@@ -1598,19 +1890,28 @@ def _confirm_target_redshift(
             rej_n = 0
             for r, z, st, sy in zip(cand, z_c, zstat_c, zsys_c):
                 var = np.nan
+                # 条件分岐: `np.isfinite(st) and st > 0 and np.isfinite(sy) and sy > 0` を満たす経路を評価する。
                 if np.isfinite(st) and st > 0 and np.isfinite(sy) and sy > 0:
                     var = float(st**2 + sy**2)
+                # 条件分岐: 前段条件が不成立で、`np.isfinite(st) and st > 0` を追加評価する。
                 elif np.isfinite(st) and st > 0:
                     var = float(st**2)
+                # 条件分岐: 前段条件が不成立で、`np.isfinite(sy) and sy > 0` を追加評価する。
                 elif np.isfinite(sy) and sy > 0:
                     var = float(sy**2)
+
+                # 条件分岐: `not np.isfinite(var) or float(var) <= 0` を満たす経路を評価する。
+
                 if not np.isfinite(var) or float(var) <= 0:
                     continue
+
                 pull = float(np.abs(float(z) - float(z0)) / float(np.sqrt(var)))
+                # 条件分岐: `np.isfinite(pull) and float(pull) > float(max_z_pull)` を満たす経路を評価する。
                 if np.isfinite(pull) and float(pull) > float(max_z_pull):
                     r["ok"] = False
                     r["reason"] = f"outlier_z_pull:{pull:.3f} > {float(max_z_pull):g}"
                     rej_n += 1
+
             rec["outlier_clipping"] = {
                 "max_z_pull": float(max_z_pull),
                 "z_preclip": float(z0),
@@ -1625,6 +1926,7 @@ def _confirm_target_redshift(
         and bool(r.get("use", True))
         and isinstance(r.get("z"), (int, float))
     ]
+    # 条件分岐: `len(ok_lines) <= 0` を満たす経路を評価する。
     if len(ok_lines) <= 0:
         rec["reason"] = "no_ok_lines"
         out_json.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -1649,6 +1951,7 @@ def _confirm_target_redshift(
     var_tot = np.where(stat_ok & ~sys_ok, (z_stat_vals**2), var_tot)
     var_tot = np.where(~stat_ok & sys_ok, (z_sys_vals**2), var_tot)
     w_tot = np.where(np.isfinite(var_tot) & (var_tot > 0), 1.0 / var_tot, 0.0)
+    # 条件分岐: `float(np.sum(w_tot)) > 0` を満たす経路を評価する。
     if float(np.sum(w_tot)) > 0:
         z_mean = float(np.sum(w_tot * z_vals) / np.sum(w_tot))
     else:
@@ -1658,18 +1961,23 @@ def _confirm_target_redshift(
     z_stat_sigma = float(np.sqrt(1.0 / np.sum(w_stat))) if float(np.sum(w_stat)) > 0 else None
 
     z_sys_sigma = float(np.nanmax(z_sys_vals)) if np.isfinite(z_sys_vals).any() else None
+    # 条件分岐: `z_stat_sigma is not None and z_sys_sigma is not None` を満たす経路を評価する。
     if z_stat_sigma is not None and z_sys_sigma is not None:
         z_total_sigma = float(np.sqrt(float(z_stat_sigma) ** 2 + float(z_sys_sigma) ** 2))
+    # 条件分岐: 前段条件が不成立で、`z_stat_sigma is not None` を追加評価する。
     elif z_stat_sigma is not None:
         z_total_sigma = float(z_stat_sigma)
+    # 条件分岐: 前段条件が不成立で、`z_sys_sigma is not None` を追加評価する。
     elif z_sys_sigma is not None:
         z_total_sigma = float(z_sys_sigma)
     else:
         z_total_sigma = None
 
     # Consistency check (use stat+sys if available, else skip).
+
     var = (z_stat_vals**2) + (z_sys_vals**2)
     ok_var = np.isfinite(var) & (var > 0)
+    # 条件分岐: `int(ok_var.sum()) >= 2` を満たす経路を評価する。
     if int(ok_var.sum()) >= 2:
         chi2 = float(np.sum(((z_vals[ok_var] - z_mean) ** 2) / var[ok_var]))
         dof = int(ok_var.sum()) - 1
@@ -1678,6 +1986,7 @@ def _confirm_target_redshift(
     # If the per-spectrum scatter is larger than the stated (stat+sys) uncertainties,
     # inflate the total uncertainty by the Birge ratio sqrt(chi2/dof). This provides a
     # conservative, reproducible systematic envelope without relying on manual pruning.
+
     chi2_dof = rec.get("chi2_dof")
     if (
         z_total_sigma is not None
@@ -1689,13 +1998,18 @@ def _confirm_target_redshift(
             birge = float(np.sqrt(float(chi2_dof)))
         except Exception:
             birge = None
+
+        # 条件分岐: `birge is not None and np.isfinite(birge) and birge > 1.0` を満たす経路を評価する。
+
         if birge is not None and np.isfinite(birge) and birge > 1.0:
             z_total_sigma_raw = float(z_total_sigma)
             z_total_sigma = float(z_total_sigma_raw * birge)
+            # 条件分岐: `z_stat_sigma is not None and np.isfinite(float(z_stat_sigma)) and float(z_sta...` を満たす経路を評価する。
             if z_stat_sigma is not None and np.isfinite(float(z_stat_sigma)) and float(z_stat_sigma) >= 0:
                 z_sys_sigma = float(np.sqrt(max(0.0, float(z_total_sigma) ** 2 - float(z_stat_sigma) ** 2)))
             else:
                 z_sys_sigma = float(z_total_sigma)
+
             rec["uncertainty_inflation"] = {
                 "method": "birge_ratio",
                 "chi2_dof": float(chi2_dof),
@@ -1710,15 +2024,18 @@ def _confirm_target_redshift(
     rec["z_stat_sigma"] = z_stat_sigma
     rec["z_sys_sigma"] = z_sys_sigma
     rec["z_total_sigma"] = z_total_sigma
+    # 条件分岐: `int(len(ok_spectra)) < int(min_ok_spectra)` を満たす経路を評価する。
     if int(len(ok_spectra)) < int(min_ok_spectra):
         rec["ok"] = False
         rec["reason"] = f"insufficient_ok_spectra:{int(min_ok_spectra)} got:{int(len(ok_spectra))}"
 
     # Per-line summary (combine across spectra)
+
     by_line: Dict[str, List[Dict[str, Any]]] = {}
     for r in ok_lines:
         key = f"{r.get('line')}@{float(r.get('rest_um') or 0.0):.6f}"
         by_line.setdefault(key, []).append(r)
+
     line_summary: List[Dict[str, Any]] = []
     for key, grp in sorted(by_line.items(), key=lambda kv: kv[0]):
         z_g = np.array([float(rr["z"]) for rr in grp], dtype=np.float64)
@@ -1731,6 +2048,7 @@ def _confirm_target_redshift(
         var_tot_g = np.where(stat_ok_g & ~sys_ok_g, (zstat_g**2), var_tot_g)
         var_tot_g = np.where(~stat_ok_g & sys_ok_g, (zsys_g**2), var_tot_g)
         w_tot_g = np.where(np.isfinite(var_tot_g) & (var_tot_g > 0), 1.0 / var_tot_g, 0.0)
+        # 条件分岐: `float(np.sum(w_tot_g)) > 0` を満たす経路を評価する。
         if float(np.sum(w_tot_g)) > 0:
             z_m = float(np.sum(w_tot_g * z_g) / np.sum(w_tot_g))
         else:
@@ -1752,6 +2070,7 @@ def _confirm_target_redshift(
                 "z_total_sigma": z_tot,
             }
         )
+
     rec["lines_summary"] = line_summary
 
     # CSV (per-line)
@@ -1775,6 +2094,7 @@ def _confirm_target_redshift(
                     ]
                 )
             )
+
         out_csv.parent.mkdir(parents=True, exist_ok=True)
         out_csv.write_text("\n".join(rows) + "\n", encoding="utf-8")
         rec["csv"] = _relpath(out_csv)
@@ -1782,14 +2102,17 @@ def _confirm_target_redshift(
         rec["csv"] = None
 
     # Plot
+
     if plt is not None and spec_paths:
         try:
             # Choose the best spectrum for the plot (max ok lines, then max integrated SNR proxy).
             best_spec = spec_paths[0]
             best_key = None
             for sr in spectra_recs:
+                # 条件分岐: `not isinstance(sr, dict) or not sr.get("spectrum")` を満たす経路を評価する。
                 if not isinstance(sr, dict) or not sr.get("spectrum"):
                     continue
+
                 ok_ls = [
                     rr
                     for rr in (sr.get("lines") or [])
@@ -1800,15 +2123,18 @@ def _confirm_target_redshift(
                     sum(float((rr.get("meas") or {}).get("snr_integrated_proxy") or 0.0) for rr in ok_ls if isinstance(rr.get("meas"), dict))
                 )
                 key = (n_ok, snr_sum)
+                # 条件分岐: `best_key is None or key > best_key` を満たす経路を評価する。
                 if best_key is None or key > best_key:
                     best_key = key
                     best_spec = Path(str(sr["spectrum"]))
+                    # 条件分岐: `not best_spec.is_absolute()` を満たす経路を評価する。
                     if not best_spec.is_absolute():
                         best_spec = (_ROOT / best_spec).resolve()
 
             cols = _read_x1d_spectrum(best_spec)
             w = cols["WAVELENGTH"]
             y = cols.get("FLUX")
+            # 条件分岐: `y is None` を満たす経路を評価する。
             if y is None:
                 y = cols.get("SURF_BRIGHT")
 
@@ -1819,13 +2145,17 @@ def _confirm_target_redshift(
             ax.set_xlabel("wavelength [µm]")
             ax.set_ylabel("flux (raw units)")
             for r in ok_lines:
+                # 条件分岐: `str(r.get("spectrum") or "") != _relpath(best_spec)` を満たす経路を評価する。
                 if str(r.get("spectrum") or "") != _relpath(best_spec):
                     continue
+
                 x = float(r.get("obs_um") or 0.0)
                 lab = str(r.get("line") or "")
                 ax.axvline(x, color="#cc0000", lw=0.9, alpha=0.6)
+                # 条件分岐: `lab` を満たす経路を評価する。
                 if lab:
                     ax.text(x, float(np.nanmax(y[m])), lab, rotation=90, va="top", ha="right", fontsize=7, alpha=0.8)
+
             ax.grid(True, alpha=0.25)
             out_png.parent.mkdir(parents=True, exist_ok=True)
             fig.tight_layout()
@@ -1836,6 +2166,7 @@ def _confirm_target_redshift(
             rec["plot"] = {"ok": False, "reason": "plot_failed"}
 
     # Plot summary (z per spectrum)
+
     if plt is not None and len(spectra_recs) >= 2:
         try:
             out_png2 = out_dir / f"jwst_spectra__{target_slug}__z_confirmed_summary.png"
@@ -1853,21 +2184,26 @@ def _confirm_target_redshift(
                     and bool(rr.get("use", True))
                     and isinstance(rr.get("z"), (int, float))
                 ]
+                # 条件分岐: `not ok_ls` を満たす経路を評価する。
                 if not ok_ls:
                     z_spec.append(float("nan"))
                     zerr_spec.append(float("nan"))
                     continue
+
                 zv = np.array([float(rr["z"]) for rr in ok_ls], dtype=np.float64)
                 zsv = np.array([float(rr.get("z_stat_sigma") or np.nan) for rr in ok_ls], dtype=np.float64)
                 wv = np.where(np.isfinite(zsv) & (zsv > 0), 1.0 / (zsv**2), 0.0)
+                # 条件分岐: `float(np.sum(wv)) > 0` を満たす経路を評価する。
                 if float(np.sum(wv)) > 0:
                     zm = float(np.sum(wv * zv) / np.sum(wv))
                     ze = float(np.sqrt(1.0 / np.sum(wv)))
                 else:
                     zm = float(np.nanmedian(zv))
                     ze = float("nan")
+
                 z_spec.append(zm)
                 zerr_spec.append(ze)
+
             xs = np.arange(len(names), dtype=np.float64)
             fig, ax = plt.subplots(figsize=(12.8, 6.0), dpi=200)
             ax.errorbar(xs, z_spec, yerr=zerr_spec, fmt="o", color="#1f77b4", ecolor="#1f77b4", elinewidth=1.0, capsize=3)
@@ -1892,8 +2228,12 @@ def _confirm_target_redshift(
 
 
 def _plot_target_qc(target_slug: str, *, x1d_paths: List[Path], out_png: Path) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return {"ok": False, "reason": "matplotlib not available"}
+
+    # 条件分岐: `not x1d_paths` を満たす経路を評価する。
+
     if not x1d_paths:
         return None
 
@@ -1904,17 +2244,26 @@ def _plot_target_qc(target_slug: str, *, x1d_paths: List[Path], out_png: Path) -
             cols = _read_x1d_spectrum(p)
             w = cols["WAVELENGTH"]
             y = cols.get("FLUX")
+            # 条件分岐: `y is None` を満たす経路を評価する。
             if y is None:
                 y = cols.get("SURF_BRIGHT")
+
+            # 条件分岐: `y is None` を満たす経路を評価する。
+
             if y is None:
                 continue
+
             m = np.isfinite(w) & np.isfinite(y)
+            # 条件分岐: `int(m.sum()) <= 3` を満たす経路を評価する。
             if int(m.sum()) <= 3:
                 continue
+
             ax.plot(w[m], y[m], lw=0.8, alpha=0.7, label=p.name)
             n_ok += 1
         except Exception:
             continue
+
+    # 条件分岐: `n_ok <= 0` を満たす経路を評価する。
 
     if n_ok <= 0:
         plt.close(fig)
@@ -1924,8 +2273,10 @@ def _plot_target_qc(target_slug: str, *, x1d_paths: List[Path], out_png: Path) -
     ax.set_xlabel("wavelength [µm]")
     ax.set_ylabel("flux (raw units)")
     ax.grid(True, alpha=0.3)
+    # 条件分岐: `n_ok <= 8` を満たす経路を評価する。
     if n_ok <= 8:
         ax.legend(fontsize=7, loc="best")
+
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.tight_layout()
     fig.savefig(out_png, dpi=160)
@@ -1934,6 +2285,7 @@ def _plot_target_qc(target_slug: str, *, x1d_paths: List[Path], out_png: Path) -
 
 
 def _scan_local_x1d_fits(raw_dir: Path) -> List[Path]:
+    # 条件分岐: `not raw_dir.exists()` を満たす経路を評価する。
     if not raw_dir.exists():
         return []
 
@@ -1952,14 +2304,19 @@ def _scan_local_x1d_fits(raw_dir: Path) -> List[Path]:
     out: List[Path] = []
     for p in sorted(set(found)):
         try:
+            # 条件分岐: `not p.is_file()` を満たす経路を評価する。
             if not p.is_file():
                 continue
         except Exception:
             continue
+
         nm = p.name.lower()
+        # 条件分岐: `not (nm.endswith(".fits") or nm.endswith(".fits.gz") or nm.endswith(".fits.fz"))` を満たす経路を評価する。
         if not (nm.endswith(".fits") or nm.endswith(".fits.gz") or nm.endswith(".fits.fz")):
             continue
+
         out.append(p)
+
     return out
 
 
@@ -2005,25 +2362,35 @@ def main(argv: Optional[List[str]] = None) -> int:
     target_cfg_map: Dict[str, Any] = _read_target_config(config_path) if config_path.exists() else {}
 
     targets_raw = str(args.targets).strip()
+    # 条件分岐: `not targets_raw or targets_raw.upper() in {"ALL", "AUTO"}` を満たす経路を評価する。
     if not targets_raw or targets_raw.upper() in {"ALL", "AUTO"}:
+        # 条件分岐: `target_cfg_map` を満たす経路を評価する。
         if target_cfg_map:
             targets = sorted(target_cfg_map.keys())
         else:
             targets = ["GN-z11", "JADES-GS-z14-0", "LID-568", "GLASS-z12"]
     else:
         targets = [t.strip() for t in targets_raw.split(",") if t.strip()]
+        # 条件分岐: `any(t.upper() in {"ALL", "AUTO"} for t in targets)` を満たす経路を評価する。
         if any(t.upper() in {"ALL", "AUTO"} for t in targets):
+            # 条件分岐: `target_cfg_map` を満たす経路を評価する。
             if target_cfg_map:
                 cfg_targets = sorted(target_cfg_map.keys())
             else:
                 cfg_targets = ["GN-z11", "JADES-GS-z14-0", "LID-568", "GLASS-z12"]
+
             expanded: List[str] = []
             for t in targets:
+                # 条件分岐: `t.upper() in {"ALL", "AUTO"}` を満たす経路を評価する。
                 if t.upper() in {"ALL", "AUTO"}:
                     expanded.extend(cfg_targets)
                 else:
                     expanded.append(t)
+
             targets = list(dict.fromkeys(expanded))
+
+    # 条件分岐: `not targets` を満たす経路を評価する。
+
     if not targets:
         raise SystemExit("--targets is empty")
 
@@ -2075,9 +2442,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         }
 
         obs_rows: List[Dict[str, Any]] = []
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
             cache_ok = False
             cache_reason: Optional[str] = None
+            # 条件分岐: `manifest_path.exists()` を満たす経路を評価する。
             if manifest_path.exists():
                 try:
                     item["cache_manifest"] = _relpath(manifest_path)
@@ -2086,20 +2455,32 @@ def main(argv: Optional[List[str]] = None) -> int:
                     obs_rows = list(cached.get("obs") or [])
                     # Preserve cached results so --offline does not wipe derived states.
                     item["downloads"] = list(cached.get("downloads") or [])
+                    # 条件分岐: `isinstance(cached.get("qc"), dict)` を満たす経路を評価する。
                     if isinstance(cached.get("qc"), dict):
                         item["qc"] = cached.get("qc")
+
+                    # 条件分岐: `isinstance(cached.get("line_id"), dict)` を満たす経路を評価する。
+
                     if isinstance(cached.get("line_id"), dict):
                         item["line_id"] = cached.get("line_id")
+
+                    # 条件分岐: `isinstance(cached.get("z_estimate"), dict)` を満たす経路を評価する。
+
                     if isinstance(cached.get("z_estimate"), dict):
                         item["z_estimate"] = _summarize_z_estimate(cached.get("z_estimate") or {}, z_est_out_json)
+
+                    # 条件分岐: `isinstance(cached.get("z_confirmed"), dict)` を満たす経路を評価する。
+
                     if isinstance(cached.get("z_confirmed"), dict):
                         item["z_confirmed"] = _summarize_z_confirmed(cached.get("z_confirmed") or {}, z_conf_out_json)
+
                     cache_ok = True
                 except Exception:
                     obs_rows = []
                     cache_reason = "cache_read_failed"
             else:
                 cache_reason = "no_cache_manifest"
+
             item["query"] = {"method": "offline_cache", "ok": cache_ok, "reason": cache_reason}
         else:
             cfg = target_cfg_map.get(target) if isinstance(target_cfg_map, dict) else None
@@ -2108,10 +2489,16 @@ def main(argv: Optional[List[str]] = None) -> int:
 
         # If derived outputs already exist, keep lightweight summaries in the manifest.
         # This avoids recomputation for dashboards/scoreboards while keeping manifests small.
+
         if item.get("z_estimate") is None:
             item["z_estimate"] = _load_z_estimate_summary(z_est_out_json)
+
+        # 条件分岐: `item.get("z_confirmed") is None` を満たす経路を評価する。
+
         if item.get("z_confirmed") is None:
             item["z_confirmed"] = _load_z_confirmed_summary(z_conf_out_json)
+
+        # 条件分岐: `int(args.max_obs) > 0` を満たす経路を評価する。
 
         if int(args.max_obs) > 0:
             obs_rows = obs_rows[: int(args.max_obs)]
@@ -2119,17 +2506,21 @@ def main(argv: Optional[List[str]] = None) -> int:
         x1d_local: List[Path] = []
         for obs in obs_rows:
             obsid = obs.get("obsid")
+            # 条件分岐: `obsid is None` を満たす経路を評価する。
             if obsid is None:
                 continue
+
             try:
                 obsid_int = int(obsid)
             except Exception:
                 continue
+
             obs_rec: Dict[str, Any] = dict(obs)
             obs_rec["obsid"] = obsid_int
             obs_rec["t_obs_release_utc"] = None
             obs_rec["is_released"] = None
             try:
+                # 条件分岐: `obs_rec.get("t_obs_release") is not None` を満たす経路を評価する。
                 if obs_rec.get("t_obs_release") is not None:
                     t_rel = float(obs_rec["t_obs_release"])
                     obs_rec["t_obs_release_utc"] = _mjd_to_utc_iso(t_rel)
@@ -2140,6 +2531,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
             x1d_fits_min: List[Dict[str, Any]] = []
             previews_min: List[Dict[str, Any]] = []
+            # 条件分岐: `args.offline` を満たす経路を評価する。
             if args.offline:
                 # Keep cached product lists when available so offline QC can find local files.
                 x1d_fits_min = list(obs_rec.get("x1d_fits") or [])
@@ -2169,101 +2561,148 @@ def main(argv: Optional[List[str]] = None) -> int:
                 obs_rec["x1d_fits"] = x1d_fits_min
                 obs_rec["x1d_previews"] = previews_min
 
+            # 条件分岐: `"x1d_fits_n" not in obs_rec` を満たす経路を評価する。
+
             if "x1d_fits_n" not in obs_rec:
                 obs_rec["x1d_fits_n"] = int(len(x1d_fits_min))
+
+            # 条件分岐: `"x1d_preview_n" not in obs_rec` を満たす経路を評価する。
+
             if "x1d_preview_n" not in obs_rec:
                 obs_rec["x1d_preview_n"] = int(len(previews_min))
+
+            # 条件分岐: `"x1d_fits" not in obs_rec` を満たす経路を評価する。
+
             if "x1d_fits" not in obs_rec:
                 obs_rec["x1d_fits"] = x1d_fits_min
+
+            # 条件分岐: `"x1d_previews" not in obs_rec` を満たす経路を評価する。
+
             if "x1d_previews" not in obs_rec:
                 obs_rec["x1d_previews"] = previews_min
+
             item["obs"].append(obs_rec)
 
+            # 条件分岐: `args.offline or not bool(args.download_missing)` を満たす経路を評価する。
             if args.offline or not bool(args.download_missing):
                 # collect existing local x1d for QC
                 for r in obs_rec.get("x1d_fits") or []:
                     fn = str(r.get("productFilename") or "")
+                    # 条件分岐: `not fn` を満たす経路を評価する。
                     if not fn:
                         continue
+
                     pth = raw_dir / fn
+                    # 条件分岐: `pth.exists()` を満たす経路を評価する。
                     if pth.exists():
                         x1d_local.append(pth)
+
                 continue
 
             # If the product release date is in the future, do not spam download attempts.
+
             if obs_rec.get("is_released") is False:
                 obs_rec["download_blocked_reason"] = "not_released_yet"
                 continue
 
             # download x1d FITS (and optionally PNG previews)
+
             for r in x1d_fits:
                 fn = str(r.get("productFilename") or "")
                 uri = str(r.get("dataURI") or "")
+                # 条件分岐: `not fn or not uri` を満たす経路を評価する。
                 if not fn or not uri:
                     continue
+
                 dst = raw_dir / fn
+                # 条件分岐: `dst.exists()` を満たす経路を評価する。
                 if dst.exists():
                     x1d_local.append(dst)
                     continue
+
                 dl = _mast_download(uri, dst)
                 dl_rec = {"productFilename": fn, "dataURI": uri, "dst": _relpath(dst)} | dl
                 item["downloads"].append(dl_rec)
+                # 条件分岐: `dl.get("ok")` を満たす経路を評価する。
                 if dl.get("ok"):
                     x1d_local.append(dst)
+
+            # 条件分岐: `bool(args.include_previews)` を満たす経路を評価する。
 
             if bool(args.include_previews):
                 for r in previews:
                     fn = str(r.get("productFilename") or "")
                     uri = str(r.get("dataURI") or "")
+                    # 条件分岐: `not fn or not uri` を満たす経路を評価する。
                     if not fn or not uri:
                         continue
+
                     dst = raw_dir / fn
+                    # 条件分岐: `dst.exists()` を満たす経路を評価する。
                     if dst.exists():
                         continue
+
                     dl = _mast_download(uri, dst)
                     dl_rec = {"productFilename": fn, "dataURI": uri, "dst": _relpath(dst)} | dl
                     item["downloads"].append(dl_rec)
 
         # persist per-target manifest
+
         manifest_path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+        # 条件分岐: `args.offline and not x1d_local` を満たす経路を評価する。
         if args.offline and not x1d_local:
             # In offline mode, cached manifests may not include the full x1d product list even if files exist
             # in data/.../raw/. Fall back to scanning the raw directory so QC/z-estimate are reproducible.
             x1d_local = _scan_local_x1d_fits(raw_dir)
 
         # QC plot (only from local x1d fits)
+
         qc_png = out_dir / f"jwst_spectra__{slug}__x1d_qc.png"
         qc = _plot_target_qc(slug, x1d_paths=sorted(set(x1d_local)), out_png=qc_png)
+        # 条件分岐: `qc is not None` を満たす経路を評価する。
         if qc is not None:
             item["qc"] = qc
             # refresh manifest with qc result
             manifest_path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
         # Manual line-ID template (Step 4.6.5)
+
         line_id_path = tdir / "line_id.json"
+        # 条件分岐: `bool(getattr(args, "init_line_id", False)) and not line_id_path.exists()` を満たす経路を評価する。
         if bool(getattr(args, "init_line_id", False)) and not line_id_path.exists():
             try:
                 best_path: Optional[Path] = None
                 best_key: Optional[Tuple[int, int, str]] = None  # (calib_level, not_mirimage, filename)
                 for obs_rec in item.get("obs") or []:
+                    # 条件分岐: `not isinstance(obs_rec, dict)` を満たす経路を評価する。
                     if not isinstance(obs_rec, dict):
                         continue
+
                     for r in obs_rec.get("x1d_fits") or []:
+                        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                         if not isinstance(r, dict):
                             continue
+
                         fn = str(r.get("productFilename") or "")
+                        # 条件分岐: `not fn` を満たす経路を評価する。
                         if not fn:
                             continue
+
                         try:
                             calib = int(r.get("calib_level")) if r.get("calib_level") is not None else -1
                         except Exception:
                             calib = -1
+
                         not_mir = 0 if "mirimage" in fn.lower() else 1
                         key = (calib, not_mir, fn)
                         pth = raw_dir / fn
+                        # 条件分岐: `not pth.exists()` を満たす経路を評価する。
                         if not pth.exists():
                             continue
+
+                        # 条件分岐: `best_key is None or key > best_key` を満たす経路を評価する。
+
                         if best_key is None or key > best_key:
                             best_key = key
                             best_path = pth
@@ -2300,11 +2739,14 @@ def main(argv: Optional[List[str]] = None) -> int:
             except Exception:
                 pass
 
+        # 条件分岐: `line_id_path.exists()` を満たす経路を評価する。
+
         if line_id_path.exists():
             item["line_id"] = {"path": _relpath(line_id_path)}
             manifest_path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
         # Redshift candidates (Step 4.6.3; offline from cached x1d)
+
         if bool(getattr(args, "estimate_z", False)):
             try:
                 z_est = _estimate_target_redshift(
@@ -2323,6 +2765,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 manifest_path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
         # Confirmed z (manual line ID; Step 4.6.5)
+
         if bool(getattr(args, "confirm_z", False)):
             try:
                 z_conf = _confirm_target_redshift(slug, target_dir=tdir, out_dir=out_dir)
@@ -2333,11 +2776,14 @@ def main(argv: Optional[List[str]] = None) -> int:
                 manifest_path.write_text(json.dumps(item, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
         z_est_summary = None
+        # 条件分岐: `isinstance(item.get("z_estimate"), dict)` を満たす経路を評価する。
         if isinstance(item.get("z_estimate"), dict):
             z_est_summary = _summarize_z_estimate(item.get("z_estimate") or {}, z_est_out_json)
         else:
             z_est_summary = _load_z_estimate_summary(z_est_out_json)
+
         z_conf_summary = None
+        # 条件分岐: `isinstance(item.get("z_confirmed"), dict)` を満たす経路を評価する。
         if isinstance(item.get("z_confirmed"), dict):
             z_conf_summary = _summarize_z_confirmed(item.get("z_confirmed") or {}, z_conf_out_json)
         else:
@@ -2352,6 +2798,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         }
 
     # Write aggregated manifest (small) for quick inspection.
+
     manifest_all_path = base_dir / "manifest_all.json"
 
     # When running on a subset of targets, do not clobber previous entries.
@@ -2360,10 +2807,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             prev = json.loads(manifest_all_path.read_text(encoding="utf-8"))
             prev_items = prev.get("items") if isinstance(prev, dict) else None
+            # 条件分岐: `isinstance(prev_items, dict)` を満たす経路を評価する。
             if isinstance(prev_items, dict):
                 cur_items = manifest_all.get("items")
+                # 条件分岐: `isinstance(cur_items, dict)` を満たす経路を評価する。
                 if isinstance(cur_items, dict):
                     for k, v in prev_items.items():
+                        # 条件分岐: `k not in cur_items` を満たす経路を評価する。
                         if k not in cur_items:
                             cur_items[k] = v
         except Exception:
@@ -2400,6 +2850,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] wrote: {_relpath(manifest_all_path)}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

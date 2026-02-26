@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -52,6 +53,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -102,8 +104,10 @@ def _repo_root() -> Path:
 
 def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
     path = root / "output" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None, "output/theory/frozen_parameters.json (missing)"
+
     try:
         j = json.loads(path.read_text(encoding="utf-8"))
         beta = float(j["beta"])
@@ -115,8 +119,10 @@ def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
 def _extract_bits(v: int, total_bits: int, start_bit: int, bits: int) -> int:
     # PDS3 MSB_BIT_STRING: START_BIT is 1-based from MSB.
     shift = total_bits - (start_bit + bits - 1)
+    # 条件分岐: `shift < 0` を満たす経路を評価する。
     if shift < 0:
         raise ValueError("Invalid bit range")
+
     return (v >> shift) & ((1 << bits) - 1)
 
 
@@ -124,8 +130,10 @@ def _signed36_from_sign4_low32(sign4: int, low32: int) -> int:
     # Assemble a 36-bit two's complement signed integer from a 4-bit sign extension and 32-bit payload.
     # This matches the "SIGN BITS ... (artifact of 36-bit binary definitions)" pattern used in DSN formats.
     v = ((int(sign4) & 0xF) << 32) | (int(low32) & 0xFFFFFFFF)
+    # 条件分岐: `v & (1 << 35)` を満たす経路を評価する。
     if v & (1 << 35):
         v -= 1 << 36
+
     return int(v)
 
 
@@ -134,14 +142,18 @@ def _bin_time_series_mean(
     *,
     bin_seconds: int,
 ) -> List[Dict[str, float]]:
+    # 条件分岐: `bin_seconds <= 0` を満たす経路を評価する。
     if bin_seconds <= 0:
         raise ValueError("bin_seconds must be > 0")
 
     # Integer binning on seconds from t_ref (t_days is already relative to b_min time).
+
     acc: Dict[int, Tuple[float, int]] = {}
     for t_days, y in pairs:
+        # 条件分岐: `not math.isfinite(t_days) or not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(t_days) or not math.isfinite(y):
             continue
+
         sec = int(round(t_days * 86400.0))
         key = sec // int(bin_seconds)
         s, n = acc.get(key, (0.0, 0))
@@ -150,10 +162,13 @@ def _bin_time_series_mean(
     out: List[Dict[str, float]] = []
     for key in sorted(acc):
         s, n = acc[key]
+        # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
             continue
+
         t_days_bin = (key * int(bin_seconds)) / 86400.0
         out.append({"t_days": float(t_days_bin), "y_mean": float(s / n), "n": float(n)})
+
     return out
 
 
@@ -164,22 +179,30 @@ def _bin_time_series(
     stat: str,
 ) -> List[Dict[str, float]]:
     stat_norm = str(stat).strip().lower()
+    # 条件分岐: `stat_norm in ("mean", "avg", "average")` を満たす経路を評価する。
     if stat_norm in ("mean", "avg", "average"):
         return _bin_time_series_mean(pairs, bin_seconds=bin_seconds)
+
+    # 条件分岐: `stat_norm not in ("median",)` を満たす経路を評価する。
+
     if stat_norm not in ("median",):
         raise ValueError(f"Unknown bin stat: {stat} (expected: mean|median)")
 
     # Median is more robust to outliers; bins are small (order 10^2-10^3),
     # so collecting per-bin values is acceptable here.
+
     import statistics
 
+    # 条件分岐: `bin_seconds <= 0` を満たす経路を評価する。
     if bin_seconds <= 0:
         raise ValueError("bin_seconds must be > 0")
 
     acc: Dict[int, List[float]] = {}
     for t_days, y in pairs:
+        # 条件分岐: `not math.isfinite(t_days) or not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(t_days) or not math.isfinite(y):
             continue
+
         sec = int(round(t_days * 86400.0))
         key = sec // int(bin_seconds)
         acc.setdefault(key, []).append(float(y))
@@ -187,10 +210,13 @@ def _bin_time_series(
     out: List[Dict[str, float]] = []
     for key in sorted(acc):
         ys = acc[key]
+        # 条件分岐: `not ys` を満たす経路を評価する。
         if not ys:
             continue
+
         t_days_bin = (key * int(bin_seconds)) / 86400.0
         out.append({"t_days": float(t_days_bin), "y_mean": float(statistics.median(ys)), "n": float(len(ys))})
+
     return out
 
 
@@ -210,6 +236,7 @@ def _detrend_polynomial(
 
     Returns (updated_series, info_dict).
     """
+    # 条件分岐: `poly_order < 0` を満たす経路を評価する。
     if poly_order < 0:
         raise ValueError("poly_order must be >= 0")
 
@@ -223,6 +250,7 @@ def _detrend_polynomial(
     ys = np.array([float(r["y_mean"]) for r in series], dtype=float)
     mask = np.abs(xs) >= float(exclude_inner_days)
     n_fit = int(mask.sum())
+    # 条件分岐: `n_fit < (poly_order + 1)` を満たす経路を評価する。
     if n_fit < (poly_order + 1):
         return list(series), {
             "detrend": "skipped",
@@ -265,6 +293,7 @@ def _filter_bins_by_min_count(series: Sequence[Dict[str, float]], *, min_count: 
     - Cassini plots are intended to show the smooth conjunction signature; we prefer stable bins.
     """
     k = int(min_count)
+    # 条件分岐: `k <= 0` を満たす経路を評価する。
     if k <= 0:
         return list(series)
 
@@ -275,9 +304,14 @@ def _filter_bins_by_min_count(series: Sequence[Dict[str, float]], *, min_count: 
             n_i = int(round(float(n))) if n is not None else 0
         except Exception:
             n_i = 0
+
+        # 条件分岐: `n_i < k` を満たす経路を評価する。
+
         if n_i < k:
             continue
+
         out.append(dict(r))
+
     return out
 
 
@@ -286,17 +320,23 @@ def _parse_odf3c_span(lbl_text: str) -> Tuple[int, int]:
     #   ^ODF3C_TABLE = ("C32...ODF",6)
     #   OBJECT = ODF3C_TABLE ... ROWS = 91863
     m_ptr = re.search(r"^\^ODF3C_TABLE\s*=\s*\(\"[^\"]+\"\s*,\s*(\d+)\s*\)", lbl_text, flags=re.MULTILINE)
+    # 条件分岐: `not m_ptr` を満たす経路を評価する。
     if not m_ptr:
         raise RuntimeError("Failed to locate ^ODF3C_TABLE pointer in .LBL")
+
     start_record_1 = int(m_ptr.group(1))
 
     m_rows = re.search(r"OBJECT\s*=\s*ODF3C_TABLE.*?^\s*ROWS\s*=\s*(\d+)\s*$", lbl_text, flags=re.DOTALL | re.MULTILINE)
+    # 条件分岐: `not m_rows` を満たす経路を評価する。
     if not m_rows:
         raise RuntimeError("Failed to locate ODF3C_TABLE ROWS in .LBL")
+
     rows = int(m_rows.group(1))
 
+    # 条件分岐: `start_record_1 <= 0 or rows <= 0` を満たす経路を評価する。
     if start_record_1 <= 0 or rows <= 0:
         raise RuntimeError("Invalid ODF3C span in .LBL")
+
     return start_record_1, rows
 
 
@@ -308,6 +348,9 @@ def _iter_cached_odf_files(pds_root: Path, *, doy_start: int, doy_stop: int) -> 
             doy = int(odf.parents[1].name.split("_", 1)[1])
         except Exception:
             continue
+
+        # 条件分岐: `doy_start <= doy <= doy_stop` を満たす経路を評価する。
+
         if doy_start <= doy <= doy_stop:
             yield cors, doy, odf
 
@@ -328,6 +371,7 @@ def load_odf_doppler_observations(
     - Converts Doppler residual [Hz] to fractional frequency y [-] using a nominal carrier frequency.
     """
 
+    # 条件分岐: `want_downlink_band_id is not None and want_downlink_band_id not in CARRIER_HZ...` を満たす経路を評価する。
     if want_downlink_band_id is not None and want_downlink_band_id not in CARRIER_HZ_BY_DOWNLINK_BAND_ID:
         raise ValueError(f"Unsupported downlink band id: {want_downlink_band_id}")
 
@@ -336,10 +380,14 @@ def load_odf_doppler_observations(
 
     for cors, doy, odf_path in _iter_cached_odf_files(pds_root, doy_start=doy_start, doy_stop=doy_stop):
         lbl_path = odf_path.with_suffix(".lbl")
+        # 条件分岐: `not lbl_path.exists()` を満たす経路を評価する。
         if not lbl_path.exists():
             # Mirror stores lowercase; try uppercase as a fallback.
             alt = odf_path.with_suffix(".LBL")
             lbl_path = alt if alt.exists() else lbl_path
+
+        # 条件分岐: `not lbl_path.exists()` を満たす経路を評価する。
+
         if not lbl_path.exists():
             print(f"[warn] missing label for ODF: {odf_path}")
             continue
@@ -351,12 +399,14 @@ def load_odf_doppler_observations(
         b = odf_path.read_bytes()
         n_records = len(b) // ODF_REC_BYTES
         end_idx = min(n_records, start_idx + n_rows)
+        # 条件分岐: `start_idx < 0 or start_idx >= n_records` を満たす経路を評価する。
         if start_idx < 0 or start_idx >= n_records:
             print(f"[warn] invalid ODF3C span for {odf_path} (records={n_records}, start={start_idx})")
             continue
 
         for i in range(start_idx, end_idx):
             rec = b[i * ODF_REC_BYTES : (i + 1) * ODF_REC_BYTES]
+            # 条件分岐: `len(rec) != ODF_REC_BYTES` を満たす経路を評価する。
             if len(rec) != ODF_REC_BYTES:
                 continue
 
@@ -375,17 +425,27 @@ def load_odf_doppler_observations(
             station_rx = _extract_bits(items619, 96, 4, 7)
             station_tx = _extract_bits(items619, 96, 11, 7)
             is_bad = _extract_bits(items619, 96, 32, 1) != 0
+            # 条件分岐: `is_bad` を満たす経路を評価する。
             if is_bad:
                 continue
 
+            # 条件分岐: `want_data_type_id is not None and data_type_id != int(want_data_type_id)` を満たす経路を評価する。
+
             if want_data_type_id is not None and data_type_id != int(want_data_type_id):
                 continue
+
+            # 条件分岐: `want_downlink_band_id is not None and downlink_band_id != int(want_downlink_b...` を満たす経路を評価する。
+
             if want_downlink_band_id is not None and downlink_band_id != int(want_downlink_band_id):
                 continue
+
+            # 条件分岐: `stations_set is not None and station_rx not in stations_set` を満たす経路を評価する。
+
             if stations_set is not None and station_rx not in stations_set:
                 continue
 
             carrier_hz = CARRIER_HZ_BY_DOWNLINK_BAND_ID.get(downlink_band_id)
+            # 条件分岐: `not carrier_hz` を満たす経路を評価する。
             if not carrier_hz:
                 continue
 
@@ -405,8 +465,10 @@ def load_odf_doppler_observations(
             )
 
     obs.sort(key=lambda r: r.time_utc)
+    # 条件分岐: `not obs` を満たす経路を評価する。
     if not obs:
         raise RuntimeError("No ODF Doppler observations found in the requested cache/range.")
+
     return obs
 
 
@@ -438,17 +500,23 @@ class TdfObs:
 def _parse_tdf5_span(lbl_text: str) -> Tuple[int, int]:
     # ^TDF5_TABLE = ("...TDF",3)
     m_ptr = re.search(r"^\^TDF5_TABLE\s*=\s*\(\"[^\"]+\"\s*,\s*(\d+)\s*\)", lbl_text, flags=re.MULTILINE)
+    # 条件分岐: `not m_ptr` を満たす経路を評価する。
     if not m_ptr:
         raise RuntimeError("Failed to locate ^TDF5_TABLE pointer in .LBL")
+
     start_record_1 = int(m_ptr.group(1))
 
     m_rows = re.search(r"OBJECT\s*=\s*TDF5_TABLE.*?^\s*ROWS\s*=\s*(\d+)\s*$", lbl_text, flags=re.DOTALL | re.MULTILINE)
+    # 条件分岐: `not m_rows` を満たす経路を評価する。
     if not m_rows:
         raise RuntimeError("Failed to locate TDF5_TABLE ROWS in .LBL")
+
     rows = int(m_rows.group(1))
 
+    # 条件分岐: `start_record_1 <= 0 or rows <= 0` を満たす経路を評価する。
     if start_record_1 <= 0 or rows <= 0:
         raise RuntimeError("Invalid TDF5 span in .LBL")
+
     return start_record_1, rows
 
 
@@ -459,6 +527,9 @@ def _iter_cached_tdf_files(pds_root: Path, *, doy_start: int, doy_stop: int) -> 
             doy = int(tdf.parents[1].name.split("_", 1)[1])
         except Exception:
             continue
+
+        # 条件分岐: `doy_start <= doy <= doy_stop` を満たす経路を評価する。
+
         if doy_start <= doy <= doy_stop:
             yield cors, doy, tdf
 
@@ -502,9 +573,13 @@ def load_tdf_doppler_pseudoresiduals(
 
     for cors, doy, tdf_path in _iter_cached_tdf_files(pds_root, doy_start=doy_start, doy_stop=doy_stop):
         lbl_path = tdf_path.with_suffix(".lbl")
+        # 条件分岐: `not lbl_path.exists()` を満たす経路を評価する。
         if not lbl_path.exists():
             alt = tdf_path.with_suffix(".LBL")
             lbl_path = alt if alt.exists() else lbl_path
+
+        # 条件分岐: `not lbl_path.exists()` を満たす経路を評価する。
+
         if not lbl_path.exists():
             print(f"[warn] missing label for TDF: {tdf_path}")
             continue
@@ -517,11 +592,13 @@ def load_tdf_doppler_pseudoresiduals(
         rec_bytes = TDF_REC_BYTES
         n_records = len(b) // rec_bytes
         end_idx = min(n_records, start_idx + n_rows)
+        # 条件分岐: `start_idx < 0 or start_idx >= n_records` を満たす経路を評価する。
         if start_idx < 0 or start_idx >= n_records:
             print(f"[warn] invalid TDF5 span for {tdf_path} (records={n_records}, start={start_idx})")
             continue
 
         # Column layout (SFOC-NAV-2-25 format): fixed offsets.
+
         dt_block_off = 9  # START_BYTE=10, BYTES=9
         dt_block_len = 9
         dtype1_off = 18  # START_BYTE=19, BYTES=4
@@ -535,16 +612,19 @@ def load_tdf_doppler_pseudoresiduals(
         doppler_pr_byte_off = radiometric_off + ((TDF5_DOPPLER_PR_VALUE_START_BIT - 1) // 8)  # 0-based
         sign_byte_off = radiometric_off + ((TDF5_DOPPLER_PR_SIGN_BITS_START_BIT - 1) // 8)  # 0-based
         sign_bit_in_byte = (TDF5_DOPPLER_PR_SIGN_BITS_START_BIT - 1) % 8  # MSB-based bit index in byte
+        # 条件分岐: `sign_bit_in_byte != 4` を満たす経路を評価する。
         if sign_bit_in_byte != 4:
             # With current TDF5 labels this should be the low nibble; keep a safe fallback.
             sign_byte_off = -1
 
         for i in range(start_idx, end_idx):
             rec = b[i * rec_bytes : (i + 1) * rec_bytes]
+            # 条件分岐: `len(rec) != rec_bytes` を満たす経路を評価する。
             if len(rec) != rec_bytes:
                 continue
 
             # Parse time tag (year/doy/h/m/s) from DATE-TIME BLOCK.
+
             dt_bits = int.from_bytes(rec[dt_block_off : dt_block_off + dt_block_len], "big", signed=False)
             year_mod = _extract_bits(dt_bits, 72, 1, 12)
             doy_v = _extract_bits(dt_bits, 72, 13, 16)
@@ -552,8 +632,10 @@ def load_tdf_doppler_pseudoresiduals(
             minute = _extract_bits(dt_bits, 72, 37, 8)
             second = _extract_bits(dt_bits, 72, 45, 8)
             year = 1900 + int(year_mod)
+            # 条件分岐: `doy_v <= 0 or doy_v > 366` を満たす経路を評価する。
             if doy_v <= 0 or doy_v > 366:
                 continue
+
             t_utc = (
                 datetime(year, 1, 1, tzinfo=timezone.utc)
                 + timedelta(days=int(doy_v) - 1, hours=int(hour), minutes=int(minute), seconds=int(second))
@@ -567,19 +649,35 @@ def load_tdf_doppler_pseudoresiduals(
             ground_mode = _extract_bits(dtype1, 32, 29, 4)
             sample_interval_cs = struct.unpack(">I", rec[sample_interval_off : sample_interval_off + 4])[0]
 
+            # 条件分岐: `want_downlink_band_id is not None and downlink_band_id != int(want_downlink_b...` を満たす経路を評価する。
             if want_downlink_band_id is not None and downlink_band_id != int(want_downlink_band_id):
                 continue
+
+            # 条件分岐: `want_sample_data_type_id is not None and sample_data_type_id != int(want_samp...` を満たす経路を評価する。
+
             if want_sample_data_type_id is not None and sample_data_type_id != int(want_sample_data_type_id):
                 continue
+
+            # 条件分岐: `want_doppler_channel_count is not None and doppler_channel_count != int(want_...` を満たす経路を評価する。
+
             if want_doppler_channel_count is not None and doppler_channel_count != int(want_doppler_channel_count):
                 continue
+
+            # 条件分岐: `want_ground_mode is not None and ground_mode != int(want_ground_mode)` を満たす経路を評価する。
+
             if want_ground_mode is not None and ground_mode != int(want_ground_mode):
                 continue
+
+            # 条件分岐: `stations_set is not None and station_id not in stations_set` を満たす経路を評価する。
+
             if stations_set is not None and station_id not in stations_set:
                 continue
 
+            # 条件分岐: `downlink_band_id not in CARRIER_HZ_BY_DOWNLINK_BAND_ID` を満たす経路を評価する。
+
             if downlink_band_id not in CARRIER_HZ_BY_DOWNLINK_BAND_ID:
                 continue
+
             carrier_hz = CARRIER_HZ_BY_DOWNLINK_BAND_ID[int(downlink_band_id)]
 
             # DOPPLER BLOCK quality flags (Column 19, Items 84-89)
@@ -592,27 +690,38 @@ def load_tdf_doppler_pseudoresiduals(
 
             doppler_noise_u = _extract_bits(doppler_block_bits, 56, 21, 18)
             doppler_noise_s = int(doppler_noise_u)
+            # 条件分岐: `doppler_noise_s & (1 << 17)` を満たす経路を評価する。
             if doppler_noise_s & (1 << 17):
                 doppler_noise_s -= 1 << 18
 
             rss_u = _extract_bits(doppler_block_bits, 56, 39, 18)
             rss_s = int(rss_u)
+            # 条件分岐: `rss_s & (1 << 17)` を満たす経路を評価する。
             if rss_s & (1 << 17):
                 rss_s -= 1 << 18
+
+            # 条件分岐: `exclude_rss_sentinel and int(rss_s) == -2560` を満たす経路を評価する。
 
             if exclude_rss_sentinel and int(rss_s) == -2560:
                 continue
 
+            # 条件分岐: `require_pr_tolerance and int(doppler_pr_tol) != 0` を満たす経路を評価する。
+
             if require_pr_tolerance and int(doppler_pr_tol) != 0:
                 continue
+
+            # 条件分岐: `exclude_slipped_cycles and int(total_slipped_cycles) > 0` を満たす経路を評価する。
+
             if exclude_slipped_cycles and int(total_slipped_cycles) > 0:
                 continue
 
             # Doppler pseudo-residual:
             # - Often stored as a legacy 36-bit quantity split into (Item 73 sign bits, Item 74 low bits).
             # - fixed_point_frac_bits allows interpreting pr_signed36 as fixed-point mHz.
+
             if doppler_pr_byte_off + 4 > len(rec):
                 continue
+
             pr_low32_u = struct.unpack(">I", rec[doppler_pr_byte_off : doppler_pr_byte_off + 4])[0]
             pr_sign4 = int(rec[sign_byte_off] & 0x0F) if sign_byte_off >= 0 else 0
             pr_signed36 = _signed36_from_sign4_low32(pr_sign4, pr_low32_u)
@@ -623,14 +732,18 @@ def load_tdf_doppler_pseudoresiduals(
                 continue
 
             frac_bits = int(fixed_point_frac_bits) if fixed_point_frac_bits is not None else 0
+            # 条件分岐: `frac_bits < 0 or frac_bits > 30` を満たす経路を評価する。
             if frac_bits < 0 or frac_bits > 30:
                 raise ValueError(f"fixed_point_frac_bits out of range: {fixed_point_frac_bits}")
 
             pr_mhz = float(pr_signed36) / float(2**frac_bits)
             pr_hz = pr_mhz * 1e-3
+            # 条件分岐: `max_abs_pr_hz is not None and math.isfinite(float(max_abs_pr_hz)) and float(m...` を満たす経路を評価する。
             if max_abs_pr_hz is not None and math.isfinite(float(max_abs_pr_hz)) and float(max_abs_pr_hz) >= 0.0:
+                # 条件分岐: `abs(float(pr_hz)) > float(max_abs_pr_hz)` を満たす経路を評価する。
                 if abs(float(pr_hz)) > float(max_abs_pr_hz):
                     continue
+
             y = float(y_sign) * (pr_hz / carrier_hz)
 
             # STATUS BLOCK 1: Item 22 (frequency level indicator, DCO vs Sky)
@@ -675,8 +788,10 @@ def load_tdf_doppler_pseudoresiduals(
             )
 
     out.sort(key=lambda r: r.time_utc)
+    # 条件分岐: `not out` を満たす経路を評価する。
     if not out:
         raise RuntimeError("No TDF Doppler pseudo-residuals found in the requested cache/range.")
+
     return out
 
 
@@ -698,6 +813,7 @@ def _choose_best_common_ground_mode(
     for o in obs_a:
         gm = int(o.ground_mode)
         counts_a[gm] = counts_a.get(gm, 0) + 1
+
     for o in obs_b:
         gm = int(o.ground_mode)
         counts_b[gm] = counts_b.get(gm, 0) + 1
@@ -705,17 +821,23 @@ def _choose_best_common_ground_mode(
     best: Optional[int] = None
     best_score = (-1, -1)
     for gm in set(counts_a).intersection(counts_b):
+        # 条件分岐: `fixed_ground_mode is not None and gm != int(fixed_ground_mode)` を満たす経路を評価する。
         if fixed_ground_mode is not None and gm != int(fixed_ground_mode):
             continue
+
         na = counts_a[gm]
         nb = counts_b[gm]
         score = (min(na, nb), na + nb)
+        # 条件分岐: `score > best_score` を満たす経路を評価する。
         if score > best_score:
             best_score = score
             best = gm
 
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         return None
+
     return int(best)
 
 
@@ -730,8 +852,11 @@ def _auto_filter_tdf_obs_by_mode(
     pair within this dataset and filter to it. Returns (filtered, effective_gm, effective_cc).
     """
 
+    # 条件分岐: `not obs` を満たす経路を評価する。
     if not obs:
         return [], None, None
+
+    # 条件分岐: `want_ground_mode is not None and want_doppler_channel_count is not None` を満たす経路を評価する。
 
     if want_ground_mode is not None and want_doppler_channel_count is not None:
         gm = int(want_ground_mode)
@@ -740,25 +865,37 @@ def _auto_filter_tdf_obs_by_mode(
         return filtered, gm, cc
 
     # Count (gm,cc)
+
     counts: Dict[Tuple[int, int], int] = {}
     for o in obs:
         k = (int(o.ground_mode), int(o.doppler_channel_count))
         counts[k] = counts.get(k, 0) + 1
 
     # Apply partial constraints if provided.
+
     best: Optional[Tuple[int, int]] = None
     best_n = -1
     for (gm, cc), n in counts.items():
+        # 条件分岐: `want_ground_mode is not None and gm != int(want_ground_mode)` を満たす経路を評価する。
         if want_ground_mode is not None and gm != int(want_ground_mode):
             continue
+
+        # 条件分岐: `want_doppler_channel_count is not None and cc != int(want_doppler_channel_count)` を満たす経路を評価する。
+
         if want_doppler_channel_count is not None and cc != int(want_doppler_channel_count):
             continue
+
+        # 条件分岐: `n > best_n` を満たす経路を評価する。
+
         if n > best_n:
             best_n = n
             best = (gm, cc)
 
+    # 条件分岐: `best is None` を満たす経路を評価する。
+
     if best is None:
         return list(obs), None, None
+
     gm, cc = int(best[0]), int(best[1])
     filtered = [o for o in obs if int(o.ground_mode) == gm and int(o.doppler_channel_count) == cc]
     return filtered, gm, cc
@@ -767,8 +904,10 @@ def _auto_filter_tdf_obs_by_mode(
 def parse_dt_utc(s: str) -> datetime:
     # The input should be ISO-8601 with UTC offset.
     dt = datetime.fromisoformat(s)
+    # 条件分岐: `dt.tzinfo is None` を満たす経路を評価する。
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc)
+
     return dt.astimezone(timezone.utc)
 
 
@@ -788,8 +927,12 @@ def load_model_rows(path: Path) -> List[ModelRow]:
                     r2dot_mps=float(r["r2dot_mps"]),
                 )
             )
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise RuntimeError(f"Model CSV is empty: {path}")
+
     return rows
 
 
@@ -827,33 +970,49 @@ def build_model_series(
     t_ref = find_bmin_time(rows)
     xs: List[float] = []
     ys: List[float] = []
+    # 条件分岐: `mode not in {"eq2", "full"}` を満たす経路を評価する。
     if mode not in {"eq2", "full"}:
         raise ValueError(f"Unknown mode: {mode}")
+
     for r in rows:
         xs.append(t_days_from_ref(r.t, t_ref))
+        # 条件分岐: `mode == "eq2"` を満たす経路を評価する。
         if mode == "eq2":
             ys.append(y_eq2_from_geometry(r, beta=beta))
         else:
             ys.append(y_full_from_geometry(r, beta=beta))
+
     return xs, ys
 
 
 def interp_linear(xs: Sequence[float], ys: Sequence[float], x: float) -> Optional[float]:
+    # 条件分岐: `not xs` を満たす経路を評価する。
     if not xs:
         return None
+
+    # 条件分岐: `x < xs[0] or x > xs[-1]` を満たす経路を評価する。
+
     if x < xs[0] or x > xs[-1]:
         return None
+
     i = bisect_left(xs, x)
+    # 条件分岐: `i <= 0` を満たす経路を評価する。
     if i <= 0:
         return ys[0]
+
+    # 条件分岐: `i >= len(xs)` を満たす経路を評価する。
+
     if i >= len(xs):
         return ys[-1]
+
     x0 = xs[i - 1]
     x1 = xs[i]
     y0 = ys[i - 1]
     y1 = ys[i]
+    # 条件分岐: `x1 == x0` を満たす経路を評価する。
     if x1 == x0:
         return y0
+
     u = (x - x0) / (x1 - x0)
     return y0 + (y1 - y0) * u
 
@@ -864,8 +1023,12 @@ def load_digitized_points(path: Path) -> List[Tuple[float, float]]:
         out: List[Tuple[float, float]] = []
         for r in reader:
             out.append((float(r["t_days"]), float(r["y_digit"])))
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise RuntimeError(f"Digitized CSV is empty: {path}")
+
     out.sort(key=lambda p: p[0])
     return out
 
@@ -880,40 +1043,56 @@ def match_points(
     points: List[Point] = []
     for t_days, y_obs in observed:
         y_model = interp_linear(model_t_days, model_y, t_days)
+        # 条件分岐: `y_model is None` を満たす経路を評価する。
         if y_model is None:
             continue
+
         points.append(Point(t_days=t_days, y_obs=y_obs, y_model=y_model))
+
+    # 条件分岐: `not points` を満たす経路を評価する。
+
     if not points:
         raise RuntimeError("No overlapping points between observed data and model.")
+
+    # 条件分岐: `align_offset` を満たす経路を評価する。
 
     if align_offset:
         # Align by a constant offset (same convention as LLR): y_model <- y_model + k
         k = sum((p.y_obs - p.y_model) for p in points) / len(points)
         points = [Point(t_days=p.t_days, y_obs=p.y_obs, y_model=p.y_model + k) for p in points]
+
     return points
 
 
 def rmse(values: Sequence[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return math.nan
+
     return math.sqrt(sum(v * v for v in values) / len(values))
 
 
 def mae(values: Sequence[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return math.nan
+
     return sum(abs(v) for v in values) / len(values)
 
 
 def pearson_corr(xs: Sequence[float], ys: Sequence[float]) -> float:
+    # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
         return math.nan
+
     mx = sum(xs) / len(xs)
     my = sum(ys) / len(ys)
     vx = sum((x - mx) ** 2 for x in xs)
     vy = sum((y - my) ** 2 for y in ys)
+    # 条件分岐: `vx == 0.0 or vy == 0.0` を満たす経路を評価する。
     if vx == 0.0 or vy == 0.0:
         return math.nan
+
     cov = sum((x - mx) * (y - my) for x, y in zip(xs, ys))
     return cov / math.sqrt(vx * vy)
 
@@ -927,8 +1106,10 @@ def write_points_csv(path: Path, points: Sequence[Point]) -> None:
 
 
 def compute_window(points: Sequence[Point], window_days: Optional[float]) -> List[Point]:
+    # 条件分岐: `window_days is None` を満たす経路を評価する。
     if window_days is None:
         return list(points)
+
     return [p for p in points if abs(p.t_days) <= window_days]
 
 
@@ -1091,10 +1272,12 @@ def run_beta_sweep(
     best_idx = min(range(len(betas)), key=lambda i: rmse_10[i])
     best_beta = betas[best_idx]
 
+    # 条件分岐: `out_png is None` を満たす経路を評価する。
     if out_png is None:
         return best_beta, rmse_10
 
     # Plot sweep if matplotlib exists
+
     try:
         import matplotlib.pyplot as plt  # type: ignore
     except Exception as e:
@@ -1329,11 +1512,13 @@ def main() -> None:
     out_dir = root / "output" / "cassini"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `args.beta is not None` を満たす経路を評価する。
     if args.beta is not None:
         beta = float(args.beta)
         beta_source = "cli"
     else:
         beta, beta_source = _try_load_frozen_beta(root)
+        # 条件分岐: `beta is None` を満たす経路を評価する。
         if beta is None:
             beta = 1.0
             beta_source = "default_beta_1"
@@ -1375,14 +1560,17 @@ def main() -> None:
     generated_pds_series = False
     recon_tag = "（疑似残差+参照Shapiro復元）" if tdf_reconstruct_shapiro else ""
 
+    # 条件分岐: `args.source == "digitized"` を満たす経路を評価する。
     if args.source == "digitized":
         digitized_csv = (root / args.digitized_csv).resolve()
         digitized = load_digitized_points(digitized_csv)
         observed_pairs = list(digitized)
         obs_label = "観測（論文図をデジタイズ）"
         effective_source = "digitized"
+    # 条件分岐: 前段条件が不成立で、`args.source == "pds_odf_raw"` を追加評価する。
     elif args.source == "pds_odf_raw":
         pds_root = root / "data" / "cassini" / "pds_sce1"
+        # 条件分岐: `not pds_root.exists()` を満たす経路を評価する。
         if not pds_root.exists():
             print("[warn] PDS cache not found. Falling back to digitized points.")
             digitized_csv = (root / args.digitized_csv).resolve()
@@ -1408,6 +1596,7 @@ def main() -> None:
                 observed_pairs.append((t_days_from_ref(r.time_utc, t_ref), float(r.y)))
 
             # Persist extracted observation for traceability (still output/, because it's generated).
+
             obs_out = out_dir / "cassini_sce1_odf_observed_raw.csv"
             with obs_out.open("w", newline="", encoding="utf-8") as f:
                 w = csv.writer(f)
@@ -1440,12 +1629,15 @@ def main() -> None:
                             r.source_file,
                         ]
                     )
+
             print("Wrote:", obs_out)
             obs_label = "観測（一次データ: PDS ODF, raw Doppler）"
             effective_source = "pds_odf_raw"
+    # 条件分岐: 前段条件が不成立で、`args.source == "pds_tdf_raw"` を追加評価する。
     elif args.source == "pds_tdf_raw":
         # Debug: TDF pseudo-residuals without smoothing/detrend.
         pds_root = root / "data" / "cassini" / "pds_sce1"
+        # 条件分岐: `not pds_root.exists()` を満たす経路を評価する。
         if not pds_root.exists():
             print("[warn] PDS cache not found. Falling back to digitized points.")
             digitized_csv = (root / args.digitized_csv).resolve()
@@ -1540,12 +1732,14 @@ def main() -> None:
                             r.source_file,
                         ]
                     )
+
             print("Wrote:", obs_out)
             obs_label = "観測（一次データ: PDS TDF, Doppler疑似残差・生）"
             effective_source = "pds_tdf_raw"
     else:
         # Primary: TDF pseudo-residuals -> binning + detrend to make a paper-like small y(t).
         pds_root = root / "data" / "cassini" / "pds_sce1"
+        # 条件分岐: `not pds_root.exists()` を満たす経路を評価する。
         if not pds_root.exists():
             print("[warn] PDS cache not found. Falling back to digitized points.")
             digitized_csv = (root / args.digitized_csv).resolve()
@@ -1572,10 +1766,12 @@ def main() -> None:
             detrended: List[Dict[str, float]] = []
             detrend_info: Dict[str, object] = {}
 
+            # 条件分岐: `use_plasma` を満たす経路を評価する。
             if use_plasma:
                 f_ka = float(CARRIER_HZ_BY_DOWNLINK_BAND_ID[3])
                 f_x = float(CARRIER_HZ_BY_DOWNLINK_BAND_ID[2])
                 denom = (f_ka**2) - (f_x**2)
+                # 条件分岐: `denom == 0.0` を満たす経路を評価する。
                 if denom == 0.0:
                     use_plasma = False
                     tdf_plasma_fallback_reason = "invalid_carrier_denominator"
@@ -1602,6 +1798,7 @@ def main() -> None:
                     )
                     tdf_obs_ka = [r for r in tdf_obs_all if int(r.downlink_band_id) == 3]
                     tdf_obs_x = [r for r in tdf_obs_all if int(r.downlink_band_id) == 2]
+                    # 条件分岐: `(not tdf_obs_ka) or (not tdf_obs_x)` を満たす経路を評価する。
                     if (not tdf_obs_ka) or (not tdf_obs_x):
                         use_plasma = False
                         tdf_plasma_fallback_reason = "missing_ka_or_x_records"
@@ -1611,6 +1808,7 @@ def main() -> None:
                         stations_ka = {int(r.station_id) for r in tdf_obs_ka}
                         stations_x = {int(r.station_id) for r in tdf_obs_x}
                         common_stations = stations_ka.intersection(stations_x)
+                        # 条件分岐: `not common_stations` を満たす経路を評価する。
                         if not common_stations:
                             use_plasma = False
                             tdf_plasma_fallback_reason = "no_common_stations_between_ka_and_x"
@@ -1618,6 +1816,8 @@ def main() -> None:
                             tdf_plasma_common_station_ids = sorted(int(s) for s in common_stations)
                             tdf_obs_ka = [r for r in tdf_obs_ka if int(r.station_id) in common_stations]
                             tdf_obs_x = [r for r in tdf_obs_x if int(r.station_id) in common_stations]
+
+                        # 条件分岐: `use_plasma` を満たす経路を評価する。
 
                         if use_plasma:
                             # Restrict to a consistent ground tracking mode first.
@@ -1627,6 +1827,7 @@ def main() -> None:
                                 tdf_obs_x,
                                 fixed_ground_mode=want_ground_mode,
                             )
+                            # 条件分岐: `gm_eff is None` を満たす経路を評価する。
                             if gm_eff is None:
                                 use_plasma = False
                                 tdf_plasma_fallback_reason = "no_common_ground_mode"
@@ -1647,14 +1848,22 @@ def main() -> None:
                                     want_ground_mode=int(gm_eff),
                                     want_doppler_channel_count=want_doppler_channel_count,
                                 )
+                                # 条件分岐: `cc_ka_eff is not None` を満たす経路を評価する。
                                 if cc_ka_eff is not None:
                                     tdf_effective_doppler_channel_count_by_band[3] = int(cc_ka_eff)
+
+                                # 条件分岐: `cc_x_eff is not None` を満たす経路を評価する。
+
                                 if cc_x_eff is not None:
                                     tdf_effective_doppler_channel_count_by_band[2] = int(cc_x_eff)
+
+                                # 条件分岐: `(not tdf_obs_ka) or (not tdf_obs_x)` を満たす経路を評価する。
 
                                 if (not tdf_obs_ka) or (not tdf_obs_x):
                                     use_plasma = False
                                     tdf_plasma_fallback_reason = "no_records_after_ground_mode_filter"
+
+                        # 条件分岐: `not use_plasma` を満たす経路を評価する。
 
                         if not use_plasma:
                             # Skip the rest of plasma processing; fallback is handled below.
@@ -1664,8 +1873,10 @@ def main() -> None:
                             raw_pairs_x: List[Tuple[float, float]] = []
                             for r in tdf_obs_ka:
                                 raw_pairs_ka.append((t_days_from_ref(r.time_utc, t_ref), float(r.y)))
+
                             for r in tdf_obs_x:
                                 raw_pairs_x.append((t_days_from_ref(r.time_utc, t_ref), float(r.y)))
+
                             raw_pairs_ka.sort(key=lambda p: p[0])
                             raw_pairs_x.sort(key=lambda p: p[0])
 
@@ -1677,6 +1888,7 @@ def main() -> None:
                             by_t_x = {float(r["t_days"]): r for r in binned_x}
                             common_t = sorted(set(by_t_ka).intersection(by_t_x))
                             merged_t = sorted(set(by_t_ka).union(by_t_x))
+                            # 条件分岐: `not common_t` を満たす経路を評価する。
                             if not common_t:
                                 use_plasma = False
                                 tdf_plasma_fallback_reason = "no_common_bins"
@@ -1758,11 +1970,13 @@ def main() -> None:
                                         n_x = int(round(float(rx.get("n", 0.0)))) if rx is not None else 0
 
                                         y_gr: Optional[float] = None
+                                        # 条件分岐: `(rka is not None) and (rx is not None)` を満たす経路を評価する。
                                         if (rka is not None) and (rx is not None):
                                             y_gr = float((y_ka * (f_ka**2) - y_x * (f_x**2)) / denom)
                                             y_used = float(y_gr)
                                             n_used = min(n_ka, n_x) if (n_ka > 0 and n_x > 0) else max(n_ka, n_x)
                                             mode = "dual"
+                                        # 条件分岐: 前段条件が不成立で、`rka is not None` を追加評価する。
                                         elif rka is not None:
                                             y_used = float(y_ka)
                                             n_used = int(n_ka)
@@ -1793,6 +2007,7 @@ def main() -> None:
                                 print("Wrote:", merged_binned_out)
 
                                 chosen_mode = str(getattr(args, "tdf_plasma_fill_mode", "dual")).strip().lower()
+                                # 条件分岐: `chosen_mode not in ("dual", "merged")` を満たす経路を評価する。
                                 if chosen_mode not in ("dual", "merged"):
                                     chosen_mode = "dual"
 
@@ -1808,20 +2023,28 @@ def main() -> None:
                                 tdf_plasma_used = True
                                 tdf_effective_downlink_bands = [2, 3]
                                 tdf_obs_for_extract = sorted([*tdf_obs_ka, *tdf_obs_x], key=lambda r: r.time_utc)
+                                # 条件分岐: `chosen_mode == "dual"` を満たす経路を評価する。
                                 if chosen_mode == "dual":
                                     obs_label = f"観測（一次データ: PDS TDF（Ka+Xプラズマ補正、共通ビンのみ{recon_tag}）→ 平滑化＋デトレンド）"
                                 else:
                                     obs_label = f"観測（一次データ: PDS TDF（Ka+Xプラズマ補正、欠測は単独バンド{recon_tag}）→ 平滑化＋デトレンド）"
+
                                 effective_source = "pds_tdf_processed_plasma"
 
+            # 条件分岐: `not tdf_plasma_used` を満たす経路を評価する。
+
             if not tdf_plasma_used:
+                # 条件分岐: `bool(tdf_plasma_requested) and not use_plasma` を満たす経路を評価する。
                 if bool(tdf_plasma_requested) and not use_plasma:
                     # Plasma correction requested but not possible in current cache/run.
                     if tdf_plasma_fallback_reason is None:
+                        # 条件分岐: `not has_ka or not has_x` を満たす経路を評価する。
                         if not has_ka or not has_x:
                             tdf_plasma_fallback_reason = "missing_ka_or_x_files"
                         else:
                             tdf_plasma_fallback_reason = "plasma_correction_disabled_or_failed"
+
+                # 条件分岐: `want_downlink_band_id is None` を満たす経路を評価する。
 
                 if want_downlink_band_id is None:
                     # "any" is ambiguous for processed pipelines; keep deterministic behavior.
@@ -1849,17 +2072,23 @@ def main() -> None:
                     want_ground_mode=want_ground_mode,
                     want_doppler_channel_count=want_doppler_channel_count,
                 )
+                # 条件分岐: `gm_eff is not None` を満たす経路を評価する。
                 if gm_eff is not None:
                     tdf_effective_ground_mode = int(gm_eff)
+
+                # 条件分岐: `cc_eff is not None` を満たす経路を評価する。
+
                 if cc_eff is not None:
                     tdf_effective_doppler_channel_count = int(cc_eff)
                     tdf_effective_doppler_channel_count_by_band[int(want_downlink_band_id)] = int(cc_eff)
+
                 tdf_obs_for_extract = list(tdf_obs)
                 tdf_effective_downlink_bands = [int(want_downlink_band_id)]
 
                 raw_pairs: List[Tuple[float, float]] = []
                 for r in tdf_obs:
                     raw_pairs.append((t_days_from_ref(r.time_utc, t_ref), float(r.y)))
+
                 raw_pairs.sort(key=lambda p: p[0])
 
                 binned = _bin_time_series(raw_pairs, bin_seconds=int(args.tdf_bin_seconds), stat=str(args.tdf_bin_stat))
@@ -1928,11 +2157,13 @@ def main() -> None:
                             r.source_file,
                         ]
                     )
+
             print("Wrote:", obs_out)
 
             proc_out = out_dir / "cassini_sce1_tdf_paperlike.csv"
             ref_model_t_days: Optional[List[float]] = None
             ref_model_y: Optional[List[float]] = None
+            # 条件分岐: `tdf_reconstruct_shapiro` を満たす経路を評価する。
             if tdf_reconstruct_shapiro:
                 ref_model_t_days, ref_model_y = build_model_series(rows, beta=tdf_reconstruct_beta, mode=args.model)
 
@@ -1946,6 +2177,7 @@ def main() -> None:
                 )
                 y_ref_f = float(y_ref) if (y_ref is not None and math.isfinite(float(y_ref))) else math.nan
                 r["y_model_ref"] = y_ref_f
+                # 条件分岐: `tdf_reconstruct_shapiro and math.isfinite(y_ref_f)` を満たす経路を評価する。
                 if tdf_reconstruct_shapiro and math.isfinite(y_ref_f):
                     r["y_reconstructed"] = y_resid + y_ref_f
                 else:
@@ -1966,6 +2198,7 @@ def main() -> None:
                             f"{float(r.get('y_reconstructed', r.get('y_detrended', r.get('y_mean', 0.0)))):.15e}",
                         ]
                     )
+
             print("Wrote:", proc_out)
             print("[info] detrend:", detrend_info)
 
@@ -1974,6 +2207,7 @@ def main() -> None:
                 for r in detrended
             ]
             generated_pds_series = True
+            # 条件分岐: `not tdf_effective_downlink_bands` を満たす経路を評価する。
             if not tdf_effective_downlink_bands:
                 # Keep a safe fallback for metadata even if something went wrong above.
                 tdf_effective_downlink_bands = [3]
@@ -1999,8 +2233,10 @@ def main() -> None:
                 for t_days, y_d in digitized:
                     # Align digitized curve (paper) to our b_min time definition by shifting the time axis.
                     y_p = interp_linear(obs_t, obs_y, float(t_days) + float(shift_days))
+                    # 条件分岐: `y_p is None` を満たす経路を評価する。
                     if y_p is None:
                         continue
+
                     diffs.append(float(y_p - y_d))
                     ys_dig.append(float(y_d))
                     ys_pds.append(float(y_p))
@@ -2012,6 +2248,7 @@ def main() -> None:
                 }
 
             # (1) raw, no-shift comparison
+
             m0 = _metrics_for_shift(0.0)
             n0 = int(round(float(m0.get("n", 0.0))))
             # Avoid picking a shift that only matches a much smaller subset of points (edge artifacts).
@@ -2024,19 +2261,27 @@ def main() -> None:
             for i in range(-200, 201):  # -10..+10 days in 0.05-day steps
                 shift = i * 0.05
                 m = _metrics_for_shift(float(shift))
+                # 条件分岐: `int(round(float(m.get("n", 0.0)))) < n_min` を満たす経路を評価する。
                 if int(round(float(m.get("n", 0.0)))) < n_min:
                     continue
+
                 r = float(m.get("rmse", math.nan))
+                # 条件分岐: `not math.isfinite(r)` を満たす経路を評価する。
                 if not math.isfinite(r):
                     continue
+
+                # 条件分岐: `(not math.isfinite(best_rmse)) or r < best_rmse` を満たす経路を評価する。
+
                 if (not math.isfinite(best_rmse)) or r < best_rmse:
                     best_rmse = float(r)
                     best = dict(m)
                     best_shift_days = float(shift)
+                # 条件分岐: 前段条件が不成立で、`r == best_rmse` を追加評価する。
                 elif r == best_rmse:
                     # Tie-breaker: larger correlation (prefer same-shape alignment)
                     c = float(m.get("corr", math.nan))
                     cb = float(best.get("corr", math.nan))
+                    # 条件分岐: `math.isfinite(c) and (not math.isfinite(cb) or c > cb)` を満たす経路を評価する。
                     if math.isfinite(c) and (not math.isfinite(cb) or c > cb):
                         best = dict(m)
                         best_shift_days = float(shift)
@@ -2070,8 +2315,10 @@ def main() -> None:
                         int(round(float(m0.get('n', 0.0)))),
                     ]
                 )
+
             print("Wrote:", m_out)
 
+            # 条件分岐: `not args.no_plots` を満たす経路を評価する。
             if not args.no_plots:
                 try:
                     import matplotlib.pyplot as plt  # type: ignore
@@ -2111,6 +2358,7 @@ def main() -> None:
 
     best_beta_by_rmse10: Optional[float] = None
     best_beta_zoom = None
+    # 条件分岐: `not args.no_sweep` を満たす経路を評価する。
     if not args.no_sweep:
         sweep_csv = out_dir / "cassini_beta_sweep_rmse.csv"
         sweep_png = None if args.no_plots else (out_dir / "cassini_beta_sweep_rmse.png")
@@ -2126,12 +2374,18 @@ def main() -> None:
             align_offset=align_offset,
         )
         print("Wrote:", sweep_csv)
+        # 条件分岐: `sweep_png is not None` を満たす経路を評価する。
         if sweep_png is not None:
             print("Wrote:", sweep_png)
+
+        # 条件分岐: `best_beta is not None` を満たす経路を評価する。
+
         if best_beta is not None:
             best_beta_by_rmse10 = float(best_beta)
             _, best_model_y = build_model_series(rows, beta=best_beta, mode=args.model)
             best_beta_zoom = (best_beta, best_model_y)
+
+    # 条件分岐: `not args.no_plots` を満たす経路を評価する。
 
     if not args.no_plots:
         try_plot(
@@ -2145,6 +2399,7 @@ def main() -> None:
         )
 
     # Persist run metadata so the summary report can accurately label the observation source.
+
     try:
         cassini_pds_root = root / "data" / "cassini" / "pds_sce1"
         meta = {
@@ -2309,6 +2564,8 @@ def main() -> None:
     except Exception:
         pass
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

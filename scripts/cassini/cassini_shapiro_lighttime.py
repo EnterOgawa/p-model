@@ -38,19 +38,24 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
         return resp.read().decode("utf-8", errors="ignore")
 
 def parse_vectors_csv(txt: str):
+    # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
     if "$$SOE" not in txt or "$$EOE" not in txt:
         raise RuntimeError("Missing $$SOE/$$EOE in HORIZONS response")
+
     block = txt.split("$$SOE")[1].split("$$EOE")[0].strip()
     rows=[]
     for line in block.splitlines():
         parts=[p.strip() for p in line.strip().split(",")]
+        # 条件分岐: `len(parts) < 8` を満たす経路を評価する。
         if len(parts) < 8:
             continue
+
         cal = parts[1].replace("A.D.", "").strip()
         t = datetime.strptime(cal, "%Y-%b-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
         x=float(parts[2])*1000.0; y=float(parts[3])*1000.0; z=float(parts[4])*1000.0
         vx=float(parts[5])*1000.0; vy=float(parts[6])*1000.0; vz=float(parts[7])*1000.0
         rows.append((t, (x,y,z), (vx,vy,vz)))
+
     return rows
 
 def dot(a,b): return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]
@@ -108,9 +113,12 @@ def solve_downlink_time(tR, earth_tab, cass_tab, gamma=1.0, iters=8):
         R = norm(sub(rR, rB))
         dtS = shapiro_oneway(norm(rR), norm(rB), R, gamma=gamma)
         tB_new = tR - timedelta(seconds=(R/C + dtS))
+        # 条件分岐: `abs((tB_new - tB).total_seconds()) < 1e-6` を満たす経路を評価する。
         if abs((tB_new - tB).total_seconds()) < 1e-6:
             break
+
         tB = tB_new
+
     return tB
 
 def solve_uplink_time(tB, earth_tab, cass_tab, gamma=1.0, iters=8):
@@ -122,9 +130,12 @@ def solve_uplink_time(tB, earth_tab, cass_tab, gamma=1.0, iters=8):
         R = norm(sub(rB, rT))
         dtS = shapiro_oneway(norm(rT), norm(rB), R, gamma=gamma)
         tT_new = tB - timedelta(seconds=(R/C + dtS))
+        # 条件分岐: `abs((tT_new - tT).total_seconds()) < 1e-6` を満たす経路を評価する。
         if abs((tT_new - tT).total_seconds()) < 1e-6:
             break
+
         tT = tT_new
+
     return tT
 
 def main():
@@ -191,21 +202,26 @@ def main():
             U = math.sqrt(u[0]**2+u[1]**2+u[2]**2)
             D = norm(sub(b,a))
             return U/D
+
         b_up = b_line(rT, rB)
         b_dn = b_line(rB, rR)
         b_list.append(min(b_up, b_dn))
 
     # y(t) ≈ d(dt2)/dtR using central diff (1-minute)
+
     y=[]
     for i in range(len(times)):
+        # 条件分岐: `1 <= i <= len(times)-2` を満たす経路を評価する。
         if 1 <= i <= len(times)-2:
             y.append(-(dt2_list[i+1]-dt2_list[i-1])/(120.0))
+        # 条件分岐: 前段条件が不成立で、`i==0` を追加評価する。
         elif i==0:
             y.append(-(dt2_list[1]-dt2_list[0])/(60.0))
         else:
             y.append(-(dt2_list[-1]-dt2_list[-2])/(60.0))
 
     # summarize
+
     idx_bmin = min(range(len(b_list)), key=lambda i: b_list[i])
     idx_ypeak = max(range(len(y)), key=lambda i: abs(y[i]))
 
@@ -220,7 +236,10 @@ def main():
         w.writerow(["time_recv_utc","b_minleg_m","dt2_s","y_frac"])
         for tR, bb, dt2, yy in zip(times, b_list, dt2_list, y):
             w.writerow([tR.isoformat(), f"{bb:.6e}", f"{dt2:.12e}", f"{yy:.12e}"])
+
     print("Wrote:", out)
+
+# 条件分岐: `__name__=="__main__"` を満たす経路を評価する。
 
 if __name__=="__main__":
     main()

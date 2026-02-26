@@ -25,6 +25,7 @@ from typing import Any
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -68,20 +69,31 @@ def _parse_float_list(raw: str) -> list[float]:
     values: list[float] = []
     for token in str(raw).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         values.append(float(token))
+
     return values
 
 
 def _q_eff_exact(delta_t: float, c_val: float) -> float:
+    # 条件分岐: `delta_t <= 0.0` を満たす経路を評価する。
     if delta_t <= 0.0:
         raise ValueError("delta_t must be positive.")
+
+    # 条件分岐: `abs(c_val) <= 1.0e-30` を満たす経路を評価する。
+
     if abs(c_val) <= 1.0e-30:
         return 0.5
+
+    # 条件分岐: `c_val > 0.0` を満たす経路を評価する。
+
     if c_val > 0.0:
         x = 2.0 * math.sqrt(c_val) * delta_t
         return delta_t * math.sqrt(c_val) / math.tanh(x)
+
     x = 2.0 * math.sqrt(-c_val) * delta_t
     return delta_t * math.sqrt(-c_val) / math.tan(x)
 
@@ -113,8 +125,10 @@ def _build_payload(args: argparse.Namespace) -> tuple[dict[str, Any], list[dict[
 
     t_min = float(args.t_min_sec)
     t_max = float(args.t_max_sec)
+    # 条件分岐: `not (t_min > 0.0 and t_max > t_min)` を満たす経路を評価する。
     if not (t_min > 0.0 and t_max > t_min):
         raise ValueError("Require 0 < t_min < t_max for asymptotic diagnostic.")
+
     t_axis = np.geomspace(t_min, t_max, int(args.t_count))
 
     q_samples = [float(v) for v in args.q_samples.split(",") if str(v).strip()]
@@ -137,8 +151,10 @@ def _build_payload(args: argparse.Namespace) -> tuple[dict[str, Any], list[dict[
         )
 
     cbar_samples = _parse_float_list(args.cbar_samples)
+    # 条件分岐: `not cbar_samples` を満たす経路を評価する。
     if not cbar_samples:
         cbar_samples = [-0.2, 0.0, 0.2]
+
     dt_probe = np.geomspace(float(args.dt_probe_min_sec), float(args.dt_probe_max_sec), int(args.dt_probe_count))
     exact_rows: list[dict[str, Any]] = []
     exact_curve_rows: list[dict[str, Any]] = []
@@ -156,6 +172,7 @@ def _build_payload(args: argparse.Namespace) -> tuple[dict[str, Any], list[dict[
                     "abs_q_eff_minus_half": float(abs(q_eff - 0.5)),
                 }
             )
+
         exact_rows.append(
             {
                 "cbar": float(cbar),
@@ -264,12 +281,15 @@ def _build_payload(args: argparse.Namespace) -> tuple[dict[str, Any], list[dict[
                 "closure_flag": "pass" if abs(float(q_val) - 0.5) <= 1.0e-12 else "mismatch",
             }
         )
+
     return payload, csv_rows
 
 
 def _plot(path: Path, payload: dict[str, Any]) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     diag = payload.get("diagnostics") if isinstance(payload.get("diagnostics"), dict) else {}
     q_scan = diag.get("q_scan") if isinstance(diag.get("q_scan"), dict) else {}
     q_min = float(q_scan.get("q_min", 0.2))
@@ -302,6 +322,7 @@ def _plot(path: Path, payload: dict[str, Any]) -> None:
     for q in q_samples:
         scale = np.power(t_axis, 2.0 - 4.0 * q)
         ax.loglog(t_axis, scale, lw=1.6, label=f"q_B={q:.1f}")
+
     ax.set_xlabel("t / t_B")
     ax.set_ylabel("scaled source factor: (t/t_B)^(2-4 q_B)")
     ax.set_title("t -> 0+ asymptotic behavior")
@@ -311,17 +332,21 @@ def _plot(path: Path, payload: dict[str, Any]) -> None:
     ax = axes[2]
     curve_by_cbar: dict[float, list[tuple[float, float]]] = {}
     for row in exact_curves:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         cbar = float(row.get("cbar", 0.0))
         dt_val = float(row.get("delta_t_sec", 0.0))
         q_eff = float(row.get("q_eff", 0.5))
         curve_by_cbar.setdefault(cbar, []).append((dt_val, q_eff))
+
     for cbar, rows in sorted(curve_by_cbar.items(), key=lambda item: item[0]):
         rows_sorted = sorted(rows, key=lambda item: item[0])
         xs = [item[0] for item in rows_sorted]
         ys = [item[1] for item in rows_sorted]
         ax.semilogx(xs, ys, lw=1.6, label=f"C/Ω²={cbar:+.2f}")
+
     ax.axhline(0.5, color="#d62728", lw=1.2, ls="--", label="q_eff=0.5")
     ax.set_xlabel("Δt [s]")
     ax.set_ylabel("q_eff(Δt) = -Δt du_bg/dt")
@@ -357,8 +382,10 @@ def main() -> int:
     args = parser.parse_args()
 
     out_dir = args.outdir
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
     if not out_dir.is_absolute():
         out_dir = (ROOT / out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     out_json = out_dir / "pmodel_pbg_radiation_qb_asymptotic_audit.json"
@@ -378,6 +405,7 @@ def main() -> int:
     print(f"[ok] wrote: {_rel(out_csv)}")
     print(f"[ok] wrote: {_rel(out_png)}")
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -394,8 +422,11 @@ def main() -> int:
             )
         except Exception:
             pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

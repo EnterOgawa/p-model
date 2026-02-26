@@ -30,6 +30,7 @@ from typing import Any, Dict, Optional
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,8 +45,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -53,8 +56,10 @@ def _set_japanese_font() -> None:
 
 
 def _parse_utc(s: Any) -> Optional[datetime]:
+    # 条件分岐: `s is None` を満たす経路を評価する。
     if s is None:
         return None
+
     try:
         return datetime.fromisoformat(str(s).replace("Z", "+00:00"))
     except Exception:
@@ -63,26 +68,39 @@ def _parse_utc(s: Any) -> Optional[datetime]:
 
 def _norm_variant_name(s: str) -> str:
     s = str(s).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return "no_recon"
+
     while s.startswith("_"):
         s = s[1:]
+
     return s
 
 
 def _color_for_rmse(v: float) -> str:
+    # 条件分岐: `not np.isfinite(v)` を満たす経路を評価する。
     if not np.isfinite(v):
         return "#cccccc"
+
+    # 条件分岐: `v <= 20.0` を満たす経路を評価する。
+
     if v <= 20.0:
         return "#2ca02c"  # green
+
+    # 条件分岐: `v <= 40.0` を満たす経路を評価する。
+
     if v <= 40.0:
         return "#ffcc00"  # yellow
+
     return "#d62728"  # red
 
 
 def _as_float_or_nan(v: Any) -> float:
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return float("nan")
+
     try:
         return float(v)
     except Exception:
@@ -117,6 +135,7 @@ def main(argv: list[str] | None = None) -> int:
     out_json.parent.mkdir(parents=True, exist_ok=True)
 
     paths = sorted(metrics_dir.glob("cosmology_bao_catalog_vs_published_multipoles_overlay*metrics.json"))
+    # 条件分岐: `not paths` を満たす経路を評価する。
     if not paths:
         raise SystemExit(f"no overlay metrics found under: {metrics_dir}")
 
@@ -126,18 +145,23 @@ def main(argv: list[str] | None = None) -> int:
             j = json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             continue
+
         inputs = j.get("inputs", {}) if isinstance(j.get("inputs", {}), dict) else {}
         variant = _norm_variant_name(inputs.get("catalog_recon_suffix", ""))
         recon_estimator = str(inputs.get("catalog_recon_estimator", "stored")).strip() or "stored"
+        # 条件分岐: `recon_estimator != "stored"` を満たす経路を評価する。
         if recon_estimator != "stored":
             variant = f"{variant}__{recon_estimator}"
+
         gen = _parse_utc(j.get("generated_utc"))
         prev = by_variant.get(variant)
         prev_gen = _parse_utc(prev.get("generated_utc")) if isinstance(prev, dict) else None
+        # 条件分岐: `(prev is None) or ((gen is not None) and ((prev_gen is None) or (gen > prev_g...` を満たす経路を評価する。
         if (prev is None) or ((gen is not None) and ((prev_gen is None) or (gen > prev_gen))):
             by_variant[variant] = {"path": str(p), **j}
 
     # Collect arrays: per-variant, per-zbin RMSE(s^2 xi2) vs Ross post-recon for recon output.
+
     zbins = [1, 2, 3]
     variants = sorted(by_variant.keys())
     rmse = np.full((len(variants), len(zbins)), np.nan, dtype=float)
@@ -149,13 +173,16 @@ def main(argv: list[str] | None = None) -> int:
         results = j.get("results", {})
         for k, zbin in enumerate(zbins):
             r = results.get(str(zbin), {}) if isinstance(results, dict) else {}
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             rmse[i, k] = _as_float_or_nan(r.get("rmse_s2_xi2_ross_post_recon__catalog_recon"))
             rmse0[i, k] = _as_float_or_nan(r.get("rmse_s2_xi0_ross_post_recon__catalog_recon"))
             chi2dof[i, k] = _as_float_or_nan(r.get("chi2_dof_xi0_xi2_ross_post_recon__catalog_recon"))
 
     # Sort by median RMSE over available zbins (lower is better).
+
     score = np.nanmedian(rmse, axis=1)
     order = np.argsort(np.where(np.isfinite(score), score, np.inf))
     variants = [variants[i] for i in order.tolist()]
@@ -170,6 +197,7 @@ def main(argv: list[str] | None = None) -> int:
     fig_h = 2.2 * len(zbins) + 1.0
     fig_w = max(10.0, 0.45 * len(variants))
     fig, axes = plt.subplots(len(zbins), 1, figsize=(fig_w, fig_h), sharex=True)
+    # 条件分岐: `len(zbins) == 1` を満たす経路を評価する。
     if len(zbins) == 1:
         axes = [axes]
 
@@ -183,12 +211,15 @@ def main(argv: list[str] | None = None) -> int:
         ax.set_ylim(bottom=0.0)
         # Annotate missing values
         for xi, yi in zip(x, y):
+            # 条件分岐: `not np.isfinite(yi)` を満たす経路を評価する。
             if not np.isfinite(yi):
                 ax.text(xi, 0.5, "NA", ha="center", va="bottom", fontsize=7, rotation=90)
         # Baseline guide line (if present)
+
         if "recon_grid_iso" in variants:
             b = variants.index("recon_grid_iso")
             base = y[b]
+            # 条件分岐: `np.isfinite(base)` を満たす経路を評価する。
             if np.isfinite(base):
                 ax.axhline(base, color="#666666", linestyle="--", linewidth=1.0)
                 ax.text(
@@ -244,6 +275,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

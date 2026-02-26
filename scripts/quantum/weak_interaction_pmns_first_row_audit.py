@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -35,9 +36,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as handle:
         while True:
             block = handle.read(chunk_bytes)
+            # 条件分岐: `not block` を満たす経路を評価する。
             if not block:
                 break
+
             digest.update(block)
+
     return digest.hexdigest()
 
 
@@ -50,8 +54,10 @@ def _rel(path: Path) -> str:
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(handle)
         writer.writerow(headers)
@@ -61,8 +67,10 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def _ensure_pdf(*, url: str, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `path.exists()` を満たす経路を評価する。
     if path.exists():
         return
+
     urllib.request.urlretrieve(url, path)
 
 
@@ -80,13 +88,18 @@ def _normalize_text(text: str) -> str:
 
 def _extract_matrix_ranges(text: str, *, marker: str, end_marker: str | None) -> list[dict[str, Any]]:
     start = text.find(marker)
+    # 条件分岐: `start < 0` を満たす経路を評価する。
     if start < 0:
         raise SystemExit(f"[fail] cannot locate marker in PMNS source: {marker}")
+
     end = text.find(end_marker, start + len(marker)) if end_marker else -1
+    # 条件分岐: `end < 0` を満たす経路を評価する。
     if end < 0:
         end = len(text)
+
     section = text[start:end]
     pairs = re.findall(r"([0-9]\.[0-9]+)\s*->\s*([0-9]\.[0-9]+)", section)
+    # 条件分岐: `len(pairs) != 9` を満たす経路を評価する。
     if len(pairs) != 9:
         raise SystemExit(f"[fail] expected 9 PMNS range pairs at marker {marker}, found {len(pairs)}")
 
@@ -109,6 +122,7 @@ def _extract_matrix_ranges(text: str, *, marker: str, end_marker: str | None) ->
                 }
             )
             idx += 1
+
     return out
 
 
@@ -173,6 +187,7 @@ def _build_plot(
     ax0.errorbar(x, centers, yerr=[3.0 * v for v in sigma], fmt="o", capsize=5.0, color="#4c78a8", label="center ±3σ proxy")
     for idx in range(3):
         ax0.hlines(y=[lows[idx], highs[idx]], xmin=idx - 0.22, xmax=idx + 0.22, color="#f58518", lw=2.0, alpha=0.9)
+
     ax0.set_xticks(x, labels)
     ax0.set_ylabel("PMNS first-row element magnitude")
     ax0.set_title(f"NuFIT v5.2 3σ ranges ({selected_label})")
@@ -264,8 +279,10 @@ def main() -> None:
     abs_z = float(selected_derived["abs_z_center_proxy"])
     hard_pass = bool(math.isfinite(abs_z) and abs_z <= float(args.hard_z_threshold))
     watch_pass = bool(math.isfinite(abs_z) and abs_z <= float(args.watch_z_threshold))
+    # 条件分岐: `hard_pass and watch_pass` を満たす経路を評価する。
     if hard_pass and watch_pass:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`hard_pass` を追加評価する。
     elif hard_pass:
         status = "watch"
     else:
@@ -300,6 +317,7 @@ def main() -> None:
             "status": status if label == str(args.dataset) else "reference_only",
         }
         summary_rows.append(row_entry)
+
     _write_csv(out_csv, summary_rows)
 
     _build_plot(
@@ -368,6 +386,8 @@ def main() -> None:
     print(f"  {out_json}")
     print(f"  {out_png}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

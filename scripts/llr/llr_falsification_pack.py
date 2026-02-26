@@ -31,6 +31,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -60,15 +61,20 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _copy_file(src: Path, dst: Path, *, overwrite: bool) -> None:
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise FileNotFoundError(str(src))
+
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not overwrite` を満たす経路を評価する。
     if dst.exists() and not overwrite:
         return
+
     shutil.copy2(src, dst)
 
 
@@ -85,6 +91,7 @@ def _as_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
     return v if v == v else None
 
 
@@ -105,26 +112,36 @@ def _build_pack(
     rms_tide = _as_float(med.get("station_reflector_tropo_tide") if isinstance(med, dict) else None)
     rms_no_shapiro = _as_float(med.get("station_reflector_tropo_no_shapiro") if isinstance(med, dict) else None)
     ratio = None
+    # 条件分岐: `rms_tide is not None and rms_no_shapiro not in (None, 0.0)` を満たす経路を評価する。
     if rms_tide is not None and rms_no_shapiro not in (None, 0.0):
         ratio = rms_tide / float(rms_no_shapiro)
 
     # Legacy support gate: Shapiro term should improve the median RMS.
+
     shapiro_threshold = 0.95
     shapiro_pass = None if ratio is None else (ratio <= shapiro_threshold)
 
     op_summary = []
+    # 条件分岐: `isinstance(operational_metrics, dict)` を満たす経路を評価する。
     if isinstance(operational_metrics, dict):
         v = operational_metrics.get("summary")
+        # 条件分岐: `isinstance(v, list)` を満たす経路を評価する。
         if isinstance(v, list):
             op_summary = v
 
     def _op_metric(subset: str, key: str) -> Optional[float]:
         for row in op_summary:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
+            # 条件分岐: `str(row.get("subset", "")) != subset` を満たす経路を評価する。
+
             if str(row.get("subset", "")) != subset:
                 continue
+
             return _as_float(row.get(key))
+
         return None
 
     op_all_wrms = _op_metric("all", "weighted_rms_ns_bin_rms")
@@ -133,11 +150,14 @@ def _build_pack(
     op_modern_floor = _op_metric("modern_2023_apol_exclude_nglr1", "model_floor_ns_for_chi2eq1")
 
     nglr1_delta = None
+    # 条件分岐: `op_all_wrms is not None and op_ex_nglr1_wrms is not None` を満たす経路を評価する。
     if op_all_wrms is not None and op_ex_nglr1_wrms is not None:
         nglr1_delta = float(op_all_wrms - op_ex_nglr1_wrms)
+
     nglr1_pass = None if nglr1_delta is None else (nglr1_delta >= 0.0)
 
     modern_floor_pass = None
+    # 条件分岐: `op_modern_wrms is not None and op_modern_floor is not None` を満たす経路を評価する。
     if op_modern_wrms is not None and op_modern_floor is not None:
         modern_floor_pass = bool(op_modern_wrms <= op_modern_floor)
 
@@ -145,27 +165,38 @@ def _build_pack(
     precision_decision = None
     precision_watch_checks: List[str] = []
     precision_watch_reasons: List[str] = []
+    # 条件分岐: `isinstance(precision_reaudit, dict)` を満たす経路を評価する。
     if isinstance(precision_reaudit, dict):
         precision_status = str(precision_reaudit.get("overall_status") or "unknown")
         precision_decision = precision_reaudit.get("decision")
         checks = precision_reaudit.get("checks")
+        # 条件分岐: `isinstance(checks, list)` を満たす経路を評価する。
         if isinstance(checks, list):
             for c in checks:
+                # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
                 if not isinstance(c, dict):
                     continue
+
+                # 条件分岐: `str(c.get("status") or "").lower() == "watch"` を満たす経路を評価する。
+
                 if str(c.get("status") or "").lower() == "watch":
                     cid = str(c.get("id") or "").strip()
+                    # 条件分岐: `cid` を満たす経路を評価する。
                     if cid:
                         precision_watch_checks.append(cid)
+
         reasons = precision_reaudit.get("likely_missing_or_next_items")
+        # 条件分岐: `isinstance(reasons, list)` を満たす経路を評価する。
         if isinstance(reasons, list):
             precision_watch_reasons = [str(v) for v in reasons if str(v).strip()]
 
     apol_feasibility_decision = "unknown"
     apol_code_present = None
+    # 条件分岐: `isinstance(apol_pos_eop_feasibility, dict)` を満たす経路を評価する。
     if isinstance(apol_pos_eop_feasibility, dict):
         apol_feasibility_decision = str(apol_pos_eop_feasibility.get("decision") or "unknown")
         metrics = apol_pos_eop_feasibility.get("metrics")
+        # 条件分岐: `isinstance(metrics, dict)` を満たす経路を評価する。
         if isinstance(metrics, dict):
             v = metrics.get("apol_code_present_in_cache")
             apol_code_present = bool(v) if v is not None else None
@@ -176,19 +207,25 @@ def _build_pack(
     apol_primary_merge_route_status: Optional[str] = None
     apol_primary_merge_route_resolved_source_group: Optional[str] = None
     apol_primary_earthdata_auth_status: Optional[str] = None
+    # 条件分岐: `isinstance(apol_primary_coord_route, dict)` を満たす経路を評価する。
     if isinstance(apol_primary_coord_route, dict):
         apol_primary_route_decision = str(apol_primary_coord_route.get("decision") or "unknown")
         metrics = apol_primary_coord_route.get("metrics")
+        # 条件分岐: `isinstance(metrics, dict)` を満たす経路を評価する。
         if isinstance(metrics, dict):
             xyz_any = metrics.get("apol_xyz_available_any_source")
+            # 条件分岐: `xyz_any is None` を満たす経路を評価する。
             if xyz_any is None:
                 n_xyz = _as_float(metrics.get("n_logs_with_xyz"))
                 apol_primary_xyz_available = bool(n_xyz is not None and n_xyz > 0.0)
             else:
                 apol_primary_xyz_available = bool(xyz_any)
+
             group_counts = metrics.get("source_group_xyz_counts")
+            # 条件分岐: `isinstance(group_counts, dict)` を満たす経路を評価する。
             if isinstance(group_counts, dict):
                 apol_primary_xyz_source_groups = group_counts
+
             apol_primary_merge_route_status = (
                 str(metrics.get("apol_deterministic_merge_route_status"))
                 if metrics.get("apol_deterministic_merge_route_status") is not None
@@ -199,19 +236,32 @@ def _build_pack(
                 if metrics.get("apol_deterministic_merge_route_resolved_source_group") is not None
                 else None
             )
+
         route = apol_primary_coord_route.get("deterministic_merge_route")
+        # 条件分岐: `isinstance(route, dict)` を満たす経路を評価する。
         if isinstance(route, dict):
+            # 条件分岐: `apol_primary_merge_route_status is None and route.get("status") is not None` を満たす経路を評価する。
             if apol_primary_merge_route_status is None and route.get("status") is not None:
                 apol_primary_merge_route_status = str(route.get("status"))
+
+            # 条件分岐: `apol_primary_merge_route_resolved_source_group is None and route.get("resolve...` を満たす経路を評価する。
+
             if apol_primary_merge_route_resolved_source_group is None and route.get("resolved_source_group") is not None:
                 apol_primary_merge_route_resolved_source_group = str(route.get("resolved_source_group"))
+
             auth = route.get("earthdata_auth")
+            # 条件分岐: `isinstance(auth, dict) and auth.get("status") is not None` を満たす経路を評価する。
             if isinstance(auth, dict) and auth.get("status") is not None:
                 apol_primary_earthdata_auth_status = str(auth.get("status"))
+
+        # 条件分岐: `apol_primary_earthdata_auth_status is None` を満たす経路を評価する。
+
         if apol_primary_earthdata_auth_status is None:
             inputs = apol_primary_coord_route.get("inputs")
+            # 条件分岐: `isinstance(inputs, dict)` を満たす経路を評価する。
             if isinstance(inputs, dict):
                 auth = inputs.get("earthdata_auth")
+                # 条件分岐: `isinstance(auth, dict) and auth.get("status") is not None` を満たす経路を評価する。
                 if isinstance(auth, dict) and auth.get("status") is not None:
                     apol_primary_earthdata_auth_status = str(auth.get("status"))
 
@@ -219,15 +269,23 @@ def _build_pack(
     time_tag_mode_diff_decision: Optional[str] = None
     time_tag_mode_diff_max_abs: Optional[float] = None
     time_tag_mode_diff_changed_rows: Optional[int] = None
+    # 条件分岐: `isinstance(time_tag_mode_diff_audit, dict)` を満たす経路を評価する。
     if isinstance(time_tag_mode_diff_audit, dict):
+        # 条件分岐: `time_tag_mode_diff_audit.get("status") is not None` を満たす経路を評価する。
         if time_tag_mode_diff_audit.get("status") is not None:
             time_tag_mode_diff_status = str(time_tag_mode_diff_audit.get("status"))
+
+        # 条件分岐: `time_tag_mode_diff_audit.get("decision") is not None` を満たす経路を評価する。
+
         if time_tag_mode_diff_audit.get("decision") is not None:
             time_tag_mode_diff_decision = str(time_tag_mode_diff_audit.get("decision"))
+
         metrics_diff = time_tag_mode_diff_audit.get("metrics_diff")
+        # 条件分岐: `isinstance(metrics_diff, dict)` を満たす経路を評価する。
         if isinstance(metrics_diff, dict):
             time_tag_mode_diff_max_abs = _as_float(metrics_diff.get("max_abs_delta_rms_ns"))
             try:
+                # 条件分岐: `metrics_diff.get("changed_rows_over_tol") is not None` を満たす経路を評価する。
                 if metrics_diff.get("changed_rows_over_tol") is not None:
                     time_tag_mode_diff_changed_rows = int(metrics_diff.get("changed_rows_over_tol"))
             except Exception:
@@ -475,6 +533,7 @@ def run(
         "llr_outliers_diagnosis_summary.json": in_dir / "llr_outliers_diagnosis_summary.json",
     }
     for name, path in required.items():
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             raise FileNotFoundError(f"missing required input: {name} ({_rel(path)})")
 
@@ -483,6 +542,7 @@ def run(
     outliers_diag = _read_json(required["llr_outliers_diagnosis_summary.json"])
     operational_metrics_path = operational_dir / "llr_operational_metrics_audit.json"
     operational_metrics: Optional[Dict[str, Any]] = None
+    # 条件分岐: `operational_metrics_path.exists()` を満たす経路を評価する。
     if operational_metrics_path.exists():
         operational_metrics = _read_json(operational_metrics_path)
     else:
@@ -490,6 +550,7 @@ def run(
 
     precision_reaudit_path = precision_dir / "llr_precision_reaudit.json"
     precision_reaudit: Optional[Dict[str, Any]] = None
+    # 条件分岐: `precision_reaudit_path.exists()` を満たす経路を評価する。
     if precision_reaudit_path.exists():
         precision_reaudit = _read_json(precision_reaudit_path)
     else:
@@ -497,6 +558,7 @@ def run(
 
     apol_pos_eop_feasibility_path = operational_dir / "llr_apol_pos_eop_feasibility_audit.json"
     apol_pos_eop_feasibility: Optional[Dict[str, Any]] = None
+    # 条件分岐: `apol_pos_eop_feasibility_path.exists()` を満たす経路を評価する。
     if apol_pos_eop_feasibility_path.exists():
         apol_pos_eop_feasibility = _read_json(apol_pos_eop_feasibility_path)
     else:
@@ -504,6 +566,7 @@ def run(
 
     apol_primary_coord_route_path = operational_dir / "llr_apol_primary_coord_route_audit.json"
     apol_primary_coord_route: Optional[Dict[str, Any]] = None
+    # 条件分岐: `apol_primary_coord_route_path.exists()` を満たす経路を評価する。
     if apol_primary_coord_route_path.exists():
         apol_primary_coord_route = _read_json(apol_primary_coord_route_path)
     else:
@@ -511,12 +574,14 @@ def run(
 
     time_tag_mode_diff_path = precision_dir / "llr_time_tag_mode_auto_vs_tx_audit.json"
     time_tag_mode_diff_audit: Optional[Dict[str, Any]] = None
+    # 条件分岐: `time_tag_mode_diff_path.exists()` を満たす経路を評価する。
     if time_tag_mode_diff_path.exists():
         time_tag_mode_diff_audit = _read_json(time_tag_mode_diff_path)
     else:
         warnings.append(f"missing optional input: {_rel(time_tag_mode_diff_path)}")
 
     # Copy a minimal set of artifacts used as audit evidence.
+
     out_dir.mkdir(parents=True, exist_ok=True)
     copy_specs: List[Tuple[Path, Path]] = []
 
@@ -530,6 +595,7 @@ def run(
         "llr_station_diagnostics.json",
     ):
         src = in_dir / fname
+        # 条件分岐: `src.exists()` を満たす経路を評価する。
         if src.exists():
             copy_specs.append((src, out_dir / fname))
         else:
@@ -543,6 +609,7 @@ def run(
         "llr_operational_metrics_audit.png",
     ):
         src = operational_dir / fname
+        # 条件分岐: `src.exists()` を満たす経路を評価する。
         if src.exists():
             copy_specs.append((src, out_dir / fname))
         else:
@@ -557,6 +624,7 @@ def run(
         "llr_time_tag_mode_auto_vs_tx_audit.png",
     ):
         src = precision_dir / fname
+        # 条件分岐: `src.exists()` を満たす経路を評価する。
         if src.exists():
             copy_specs.append((src, out_dir / fname))
         else:
@@ -572,12 +640,14 @@ def run(
         "llr_apol_primary_coord_merge_route.json",
     ):
         src = operational_dir / fname
+        # 条件分岐: `src.exists()` を満たす経路を評価する。
         if src.exists():
             copy_specs.append((src, out_dir / fname))
         else:
             warnings.append(f"missing optional APOL feasibility artifact: {_rel(src)}")
 
     # Key figures (keep small; omit the huge per-point CSV)
+
     for fname in (
         "llr_residual_distribution.png",
         "llr_rms_improvement_overall.png",
@@ -590,6 +660,7 @@ def run(
         "llr_station_coord_delta_pos_eop.png",
     ):
         src = in_dir / fname
+        # 条件分岐: `src.exists()` を満たす経路を評価する。
         if src.exists():
             copy_specs.append((src, out_dir / fname))
         else:
@@ -617,6 +688,7 @@ def run(
         json.dumps(pack, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
     )
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -666,15 +738,22 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     in_dir = Path(str(args.in_dir))
+    # 条件分岐: `not in_dir.is_absolute()` を満たす経路を評価する。
     if not in_dir.is_absolute():
         in_dir = _ROOT / in_dir
+
     out_dir = Path(str(args.out_dir))
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
     if not out_dir.is_absolute():
         out_dir = _ROOT / out_dir
+
     operational_dir = Path(str(args.operational_dir))
+    # 条件分岐: `not operational_dir.is_absolute()` を満たす経路を評価する。
     if not operational_dir.is_absolute():
         operational_dir = _ROOT / operational_dir
+
     precision_dir = Path(str(args.precision_dir))
+    # 条件分岐: `not precision_dir.is_absolute()` を満たす経路を評価する。
     if not precision_dir.is_absolute():
         precision_dir = _ROOT / precision_dir
 
@@ -692,9 +771,12 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     for w in warnings:
         print(f"[warn] {w}", file=sys.stderr)
+
     print(f"[ok] wrote: {_rel(pack_path)}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

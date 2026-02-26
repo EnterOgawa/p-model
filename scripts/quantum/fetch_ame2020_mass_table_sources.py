@@ -19,14 +19,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -35,8 +39,11 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -49,9 +56,11 @@ def _parse_int(s: str) -> int | None:
 
 def _parse_float(s: str) -> float | None:
     t = s.strip()
+    # 条件分岐: `not t or t == "*" or "*" in t` を満たす経路を評価する。
     if not t or t == "*" or "*" in t:
         return None
     # AME uses '#' as "estimated" marker in place of decimal point (or near values).
+
     t = t.replace("#", "")
     try:
         return float(t)
@@ -68,19 +77,26 @@ def _iter_rows_mass_1_mas20(text: str) -> list[dict[str, object]]:
     """
     rows: list[dict[str, object]] = []
     for ln in text.splitlines():
+        # 条件分岐: `not ln` を満たす経路を評価する。
         if not ln:
             continue
         # Some lines in the distributed text file may omit trailing spaces.
         # Pad to the expected fixed-width length so slice-based parsing is stable.
+
         if len(ln) < 80:
             continue
+
+        # 条件分岐: `len(ln) < 135` を満たす経路を評価する。
+
         if len(ln) < 135:
             ln = ln.ljust(135)
 
         # Data lines should have parseable N/Z/A fields in fixed positions.
+
         n = _parse_int(ln[4:9])
         z = _parse_int(ln[9:14])
         a = _parse_int(ln[14:19])
+        # 条件分岐: `n is None or z is None or a is None` を満たす経路を評価する。
         if n is None or z is None or a is None:
             continue
 
@@ -105,6 +121,7 @@ def _iter_rows_mass_1_mas20(text: str) -> list[dict[str, object]]:
                 "raw_line": ln,
             }
         )
+
     return rows
 
 
@@ -130,6 +147,7 @@ def main() -> None:
     url = "https://www-nds.iaea.org/amdc/ame2020/mass_1.mas20.txt"
     files = [FileSpec(url=url, relpath="mass_1.mas20.txt")]
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         for spec in files:
             _download(spec.url, src_dir / spec.relpath)
@@ -137,18 +155,24 @@ def main() -> None:
     missing: list[Path] = []
     for spec in files:
         p = src_dir / spec.relpath
+        # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
         if not p.exists() or p.stat().st_size == 0:
             missing.append(p)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
     mass_path = src_dir / "mass_1.mas20.txt"
     text = mass_path.read_text(encoding="utf-8", errors="replace")
     rows = _iter_rows_mass_1_mas20(text)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise SystemExit(f"[fail] parsed 0 rows from: {mass_path}")
 
     # Representative nuclei used in Step 7.13.11+ (A-dependence baseline).
+
     selected = [
         {"key": "d", "Z": 1, "A": 2, "label": "deuteron (H-2)"},
         {"key": "t", "Z": 1, "A": 3, "label": "triton (H-3)"},
@@ -227,13 +251,16 @@ def main() -> None:
 
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
+        # 条件分岐: `extra` を満たす経路を評価する。
         if extra:
             item.update(extra)
+
         assert isinstance(manifest["files"], list)
         manifest["files"].append(item)
 
     for spec in files:
         add_file(url=spec.url, path=src_dir / spec.relpath)
+
     add_file(url=None, path=out_extracted, extra={"derived_from": str(mass_path)})
 
     out_manifest = src_dir / "manifest.json"
@@ -241,6 +268,8 @@ def main() -> None:
     print(f"[ok] extracted: {out_extracted}")
     print(f"[ok] manifest : {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

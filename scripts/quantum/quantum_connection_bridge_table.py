@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -53,42 +54,71 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         number = float(value)
+        # 条件分岐: `math.isfinite(number)` を満たす経路を評価する。
         if math.isfinite(number):
             return number
+
     return None
 
 
 def _normalized_score(value: Optional[float], threshold: Optional[float], operator: str) -> Optional[float]:
+    # 条件分岐: `value is None or threshold is None or threshold == 0.0` を満たす経路を評価する。
     if value is None or threshold is None or threshold == 0.0:
         return None
+
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
+
     if operator == "<=":
         return float(value) / float(threshold)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
+        # 条件分岐: `value == 0.0` を満たす経路を評価する。
         if value == 0.0:
             return math.inf
+
         return float(threshold) / float(value)
+
     return None
 
 
 def _pass_value(value: Optional[float], threshold: Optional[float], operator: str) -> Optional[bool]:
+    # 条件分岐: `value is None or threshold is None` を満たす経路を評価する。
     if value is None or threshold is None:
         return None
+
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
+
     if operator == "<=":
         return bool(value <= threshold)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
         return bool(value >= threshold)
+
     return None
 
 
 def _row_status(*, passed: Optional[bool], hard_gate: bool) -> str:
+    # 条件分岐: `passed is True` を満たす経路を評価する。
     if passed is True:
         return "pass"
+
+    # 条件分岐: `passed is False and hard_gate` を満たす経路を評価する。
+
     if passed is False and hard_gate:
         return "reject"
+
+    # 条件分岐: `passed is False and not hard_gate` を満たす経路を評価する。
+
     if passed is False and not hard_gate:
         return "watch"
+
     return "watch"
 
 
@@ -98,13 +128,17 @@ def _group_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     scores: List[float] = []
     for row in rows:
         status = str(row.get("status") or "watch")
+        # 条件分岐: `status not in counts` を満たす経路を評価する。
         if status not in counts:
             status = "watch"
+
         counts[status] += 1
         severities.append(SEVERITY.get(status, 1))
         score = _as_float(row.get("normalized_score"))
+        # 条件分岐: `score is not None` を満たす経路を評価する。
         if score is not None:
             scores.append(score)
+
     severity = max(severities) if severities else 1
     return {
         "rows_n": len(rows),
@@ -116,10 +150,15 @@ def _group_summary(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def _format_knob(knob: str) -> str:
+    # 条件分岐: `knob == "window_ns"` を満たす経路を評価する。
     if knob == "window_ns":
         return "window half-width"
+
+    # 条件分岐: `knob == "event_ready_offset_ps"` を満たす経路を評価する。
+
     if knob == "event_ready_offset_ps":
         return "event-ready start offset"
+
     return knob
 
 
@@ -138,8 +177,12 @@ def build_payload(
     born = _read_json(born_proxy_json)
     kwiat_watch_audit: Dict[str, Any] = {}
     hom_noise_watch_audit: Dict[str, Any] = {}
+    # 条件分岐: `kwiat_watch_audit_json is not None and kwiat_watch_audit_json.exists()` を満たす経路を評価する。
     if kwiat_watch_audit_json is not None and kwiat_watch_audit_json.exists():
         kwiat_watch_audit = _read_json(kwiat_watch_audit_json)
+
+    # 条件分岐: `hom_noise_watch_audit_json is not None and hom_noise_watch_audit_json.exists()` を満たす経路を評価する。
+
     if hom_noise_watch_audit_json is not None and hom_noise_watch_audit_json.exists():
         hom_noise_watch_audit = _read_json(hom_noise_watch_audit_json)
 
@@ -152,8 +195,10 @@ def build_payload(
     )
     dataset_gates = bell_gate.get("dataset_gates") if isinstance(bell_gate.get("dataset_gates"), list) else []
     for gate in dataset_gates:
+        # 条件分岐: `not isinstance(gate, dict)` を満たす経路を評価する。
         if not isinstance(gate, dict):
             continue
+
         dataset_id = str(gate.get("dataset_id") or "")
         knob = str(gate.get("selection_knob") or "")
 
@@ -180,6 +225,7 @@ def build_payload(
         )
 
         delay = _as_float(gate.get("delay_z"))
+        # 条件分岐: `delay is not None` を満たす経路を評価する。
         if delay is not None:
             delay_thr = 3.0
             delay_op = ">="
@@ -187,17 +233,25 @@ def build_payload(
             delay_hard_gate = _is_fast_switching_delay_hard_gate(dataset_id)
             delay_note = "Setting依存遅延の有意度（z）。fast-switch 系（Weihs/NIST）は hard gate、その他は watch 扱い。"
             extra = {}
+            # 条件分岐: `"kwiat2013_" in dataset_id and isinstance(kwiat_watch_audit, dict)` を満たす経路を評価する。
             if "kwiat2013_" in dataset_id and isinstance(kwiat_watch_audit, dict):
                 kw_summary = kwiat_watch_audit.get("summary") if isinstance(kwiat_watch_audit.get("summary"), dict) else {}
                 kw_decision = str(kw_summary.get("decision") or "")
                 kw_hard = kw_summary.get("hard_gate_applicable")
+                # 条件分岐: `kw_decision` を満たす経路を評価する。
                 if kw_decision:
                     delay_note += f" watch監査: {kw_decision}."
+
+                # 条件分岐: `isinstance(kw_hard, bool)` を満たす経路を評価する。
+
                 if isinstance(kw_hard, bool):
                     extra["watch_hard_gate_applicable"] = kw_hard
+
                 max_any = _as_float(kw_summary.get("max_abs_z_any"))
+                # 条件分岐: `max_any is not None` を満たす経路を評価する。
                 if max_any is not None:
                     extra["watch_max_abs_z_any"] = max_any
+
             rows.append(
                 {
                     "id": f"{dataset_id}:delay_signature",
@@ -219,11 +273,15 @@ def build_payload(
 
     criteria = born.get("criteria") if isinstance(born.get("criteria"), list) else []
     for criterion in criteria:
+        # 条件分岐: `not isinstance(criterion, dict)` を満たす経路を評価する。
         if not isinstance(criterion, dict):
             continue
+
         proxy = str(criterion.get("proxy") or "")
+        # 条件分岐: `proxy not in ("phase", "visibility")` を満たす経路を評価する。
         if proxy not in ("phase", "visibility"):
             continue
+
         value = _as_float(criterion.get("value"))
         threshold = _as_float(criterion.get("threshold"))
         operator = str(criterion.get("operator") or "")
@@ -247,6 +305,8 @@ def build_payload(
             }
         )
 
+    # 条件分岐: `isinstance(hom_noise_watch_audit, dict) and hom_noise_watch_audit` を満たす経路を評価する。
+
     if isinstance(hom_noise_watch_audit, dict) and hom_noise_watch_audit:
         baseline = hom_noise_watch_audit.get("baseline") if isinstance(hom_noise_watch_audit.get("baseline"), dict) else {}
         summary = hom_noise_watch_audit.get("summary") if isinstance(hom_noise_watch_audit.get("summary"), dict) else {}
@@ -260,8 +320,10 @@ def build_payload(
         ratio_pass = _pass_value(ratio_value, ratio_thr, ">=")
         decision = str(summary.get("decision") or "")
         note = "HOM noise PSD shape（低周波/高周波比）の帯域・drift感度監査。"
+        # 条件分岐: `decision` を満たす経路を評価する。
         if decision:
             note += f" watch監査: {decision}."
+
         rows.append(
             {
                 "id": "hom_noise_psd_shape",
@@ -361,12 +423,16 @@ def _plot(path: Path, rows: List[Dict[str, Any]], overall_status: str) -> None:
     colors = []
     for row in rows:
         score = _as_float(row.get("normalized_score"))
+        # 条件分岐: `score is None` を満たす経路を評価する。
         if score is None:
             score = math.nan
+
         scores.append(score)
         status = str(row.get("status") or "watch")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             colors.append("#e03131")
         else:
@@ -435,6 +501,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_png = Path(args.out_png).resolve() if Path(args.out_png).is_absolute() else (ROOT / args.out_png).resolve()
 
     for input_path in [part3_audit_path, born_proxy_path]:
+        # 条件分岐: `not input_path.exists()` を満たす経路を評価する。
         if not input_path.exists():
             raise FileNotFoundError(f"required input not found: {_rel(input_path)}")
 
@@ -475,6 +542,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

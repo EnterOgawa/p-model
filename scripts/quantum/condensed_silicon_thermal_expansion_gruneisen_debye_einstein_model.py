@@ -22,9 +22,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -69,25 +72,35 @@ def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
 
 
 def _debye_integrand(x: float) -> float:
+    # 条件分岐: `x <= 0.0` を満たす経路を評価する。
     if x <= 0.0:
         return 0.0
+
     em1 = math.expm1(x)
+    # 条件分岐: `em1 == 0.0` を満たす経路を評価する。
     if em1 == 0.0:
         return 0.0
+
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         n = 2
+
+    # 条件分岐: `n % 2 == 1` を満たす経路を評価する。
+
     if n % 2 == 1:
         n += 1
+
     h = (b - a) / n
     s = f(a) + f(b)
     for i in range(1, n):
         x = a + i * h
         s += (4.0 if (i % 2 == 1) else 2.0) * f(x)
+
     return s * (h / 3.0)
 
 
@@ -95,6 +108,7 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     """
     Debye heat capacity Cv for a monatomic solid, per mole.
     """
+    # 条件分岐: `t_k <= 0.0 or theta_d_k <= 0.0` を満たす経路を評価する。
     if t_k <= 0.0 or theta_d_k <= 0.0:
         return 0.0
 
@@ -113,6 +127,7 @@ def _einstein_cv_molar(*, t_k: float, theta_e_k: float, dof: float = 3.0) -> flo
     Einstein heat capacity Cv for an oscillator branch, per mole.
     dof=3 corresponds to 3 modes per atom (normalization).
     """
+    # 条件分岐: `t_k <= 0.0 or theta_e_k <= 0.0` を満たす経路を評価する。
     if t_k <= 0.0 or theta_e_k <= 0.0:
         return 0.0
 
@@ -121,27 +136,37 @@ def _einstein_cv_molar(*, t_k: float, theta_e_k: float, dof: float = 3.0) -> flo
     # Avoid overflow in exp for x >> 1.
     if x > 700.0:
         return 0.0
+
     ex = math.exp(x)
     denom = ex - 1.0
+    # 条件分岐: `denom == 0.0` を満たす経路を評価する。
     if denom == 0.0:
         return 0.0
+
     return float(dof) * r * (x * x) * ex / (denom * denom)
 
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    # 条件分岐: `not m.exists()` を満たす経路を評価する。
     if not m.exists():
         return None
+
     try:
         obj = _read_json(m)
     except Exception:
         return None
+
     fit = obj.get("fit") if isinstance(obj.get("fit"), dict) else None
+    # 条件分岐: `not isinstance(fit, dict)` を満たす経路を評価する。
     if not isinstance(fit, dict):
         return None
+
     v = fit.get("theta_D_K")
+    # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0:
         return float(v)
+
     return None
 
 
@@ -160,8 +185,12 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
     fc = f(c)
     fd = f(d)
     for _ in range(max_iter):
+        # 条件分岐: `abs(b - a) <= tol * (abs(c) + abs(d) + 1.0)` を満たす経路を評価する。
         if abs(b - a) <= tol * (abs(c) + abs(d) + 1.0):
             break
+
+        # 条件分岐: `fc < fd` を満たす経路を評価する。
+
         if fc < fd:
             b, d, fd = d, c, fc
             c = b - gr * (b - a)
@@ -170,19 +199,23 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
             a, c, fc = c, d, fd
             d = a + gr * (b - a)
             fd = f(d)
+
     x = (a + b) / 2.0
     return x, f(x)
 
 
 def _fit_theta_d_from_janaf(root: Path) -> tuple[float, list[DebyeFitPoint]]:
     src = root / "data" / "quantum" / "sources" / "nist_janaf_silicon_si" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing: {src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_janaf_sources.py"
         )
+
     obj = _read_json(src)
     points = obj.get("points")
+    # 条件分岐: `not isinstance(points, list) or not points` を満たす経路を評価する。
     if not isinstance(points, list) or not points:
         raise SystemExit(f"[fail] points missing/empty: {src}")
 
@@ -194,6 +227,7 @@ def _fit_theta_d_from_janaf(root: Path) -> tuple[float, list[DebyeFitPoint]]:
         and isinstance(p.get("T_K"), (int, float))
         and isinstance(p.get("Cp_J_per_molK"), (int, float))
     ]
+    # 条件分岐: `not solid` を満たす経路を評価する。
     if not solid:
         raise SystemExit(f"[fail] no solid-phase points found in: {src}")
 
@@ -202,6 +236,7 @@ def _fit_theta_d_from_janaf(root: Path) -> tuple[float, list[DebyeFitPoint]]:
         for p in solid
         if 100.0 <= float(p["T_K"]) <= 300.0
     ]
+    # 条件分岐: `len(fit_points) < 4` を満たす経路を評価する。
     if len(fit_points) < 4:
         raise SystemExit(f"[fail] not enough fit points in 100–300 K range: n={len(fit_points)}")
 
@@ -221,6 +256,7 @@ def _infer_zero_crossing(
     prefer_neg_to_pos: bool = True,
     min_x: Optional[float] = None,
 ) -> Optional[dict[str, float]]:
+    # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
         return None
 
@@ -228,28 +264,39 @@ def _infer_zero_crossing(
     for i in range(len(xs) - 1):
         x0 = float(xs[i])
         x1 = float(xs[i + 1])
+        # 条件分岐: `min_x is not None and max(x0, x1) < float(min_x)` を満たす経路を評価する。
         if min_x is not None and max(x0, x1) < float(min_x):
             continue
 
         y0 = float(ys[i])
         y1 = float(ys[i + 1])
+        # 条件分岐: `y0 == 0.0` を満たす経路を評価する。
         if y0 == 0.0:
             candidates.append({"x0": x0, "x1": x0, "x_cross": x0})
             continue
+
+        # 条件分岐: `y1 == 0.0` を満たす経路を評価する。
+
         if y1 == 0.0:
             candidates.append({"x0": x1, "x1": x1, "x_cross": x1})
             continue
 
         # Detect sign changes.
+
         if (y0 < 0.0 and y1 > 0.0) or (y0 > 0.0 and y1 < 0.0):
             x_cross = x0 + (x1 - x0) * (-y0) / (y1 - y0)
             candidates.append({"x0": x0, "x1": x1, "x_cross": float(x_cross), "y0": y0, "y1": y1})
 
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         return None
 
+    # 条件分岐: `prefer_neg_to_pos` を満たす経路を評価する。
+
     if prefer_neg_to_pos:
         neg_to_pos = [c for c in candidates if float(c.get("y0", 0.0)) < 0.0 and float(c.get("y1", 0.0)) > 0.0]
+        # 条件分岐: `neg_to_pos` を満たす経路を評価する。
         if neg_to_pos:
             return max(neg_to_pos, key=lambda c: float(c["x_cross"]))
 
@@ -257,10 +304,15 @@ def _infer_zero_crossing(
 
 
 def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         return [float(lo)]
+
+    # 条件分岐: `lo <= 0.0 or hi <= 0.0` を満たす経路を評価する。
+
     if lo <= 0.0 or hi <= 0.0:
         raise ValueError("logspace requires positive lo/hi")
+
     l0 = math.log10(float(lo))
     l1 = math.log10(float(hi))
     return [10 ** (l0 + (l1 - l0) * i / (n - 1)) for i in range(n)]
@@ -268,12 +320,16 @@ def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
 
 def _solve_2x2(*, a11: float, a12: float, a22: float, b1: float, b2: float) -> Optional[tuple[float, float]]:
     det = float(a11) * float(a22) - float(a12) * float(a12)
+    # 条件分岐: `not math.isfinite(det) or abs(det) <= 1e-30` を満たす経路を評価する。
     if not math.isfinite(det) or abs(det) <= 1e-30:
         return None
+
     x1 = (float(b1) * float(a22) - float(b2) * float(a12)) / det
     x2 = (float(b2) * float(a11) - float(b1) * float(a12)) / det
+    # 条件分岐: `not (math.isfinite(x1) and math.isfinite(x2))` を満たす経路を評価する。
     if not (math.isfinite(x1) and math.isfinite(x2)):
         return None
+
     return float(x1), float(x2)
 
 
@@ -301,35 +357,50 @@ def _solve_3x3(
         best = abs(m[col][col])
         for r in range(col + 1, 3):
             v = abs(m[r][col])
+            # 条件分岐: `v > best` を満たす経路を評価する。
             if v > best:
                 best = v
                 pivot = r
+
+        # 条件分岐: `not math.isfinite(best) or best <= 1e-30` を満たす経路を評価する。
+
         if not math.isfinite(best) or best <= 1e-30:
             return None
+
+        # 条件分岐: `pivot != col` を満たす経路を評価する。
+
         if pivot != col:
             m[col], m[pivot] = m[pivot], m[col]
 
         pv = m[col][col]
+        # 条件分岐: `not math.isfinite(pv) or abs(pv) <= 1e-30` を満たす経路を評価する。
         if not math.isfinite(pv) or abs(pv) <= 1e-30:
             return None
+
         inv = 1.0 / pv
         for j in range(col, 4):
             m[col][j] *= inv
 
         for r in range(3):
+            # 条件分岐: `r == col` を満たす経路を評価する。
             if r == col:
                 continue
+
             factor = m[r][col]
+            # 条件分岐: `factor == 0.0` を満たす経路を評価する。
             if factor == 0.0:
                 continue
+
             for j in range(col, 4):
                 m[r][j] -= factor * m[col][j]
 
     x1 = float(m[0][3])
     x2 = float(m[1][3])
     x3 = float(m[2][3])
+    # 条件分岐: `not (math.isfinite(x1) and math.isfinite(x2) and math.isfinite(x3))` を満たす経路を評価する。
     if not (math.isfinite(x1) and math.isfinite(x2) and math.isfinite(x3)):
         return None
+
     return x1, x2, x3
 
 
@@ -354,31 +425,41 @@ def main(argv: Optional[list[str]] = None) -> None:
 
     # Alpha(T) source (NIST TRC Cryogenics).
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
+    # 条件分岐: `not alpha_src.exists()` を満たす経路を評価する。
     if not alpha_src.exists():
         raise SystemExit(
             f"[fail] missing: {alpha_src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_thermal_expansion_sources.py"
         )
+
     alpha_extracted = _read_json(alpha_src)
     coeffs_obj = alpha_extracted.get("coefficients")
+    # 条件分岐: `not isinstance(coeffs_obj, dict)` を満たす経路を評価する。
     if not isinstance(coeffs_obj, dict):
         raise SystemExit(f"[fail] coefficients missing: {alpha_src}")
+
     coeffs = {str(k).lower(): float(v) for k, v in coeffs_obj.items()}
     missing = [k for k in "abcdefghijkl" if k not in coeffs]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"[fail] missing coefficients: {missing}")
 
     dr = alpha_extracted.get("data_range")
+    # 条件分岐: `not isinstance(dr, dict)` を満たす経路を評価する。
     if not isinstance(dr, dict):
         raise SystemExit(f"[fail] data_range missing: {alpha_src}")
+
     t_min = int(math.ceil(float(dr.get("t_min_k"))))
     t_max = int(math.floor(float(dr.get("t_max_k"))))
+    # 条件分岐: `not (0 < t_min < t_max)` を満たす経路を評価する。
     if not (0 < t_min < t_max):
         raise SystemExit(f"[fail] invalid data_range: {dr}")
 
     fe = alpha_extracted.get("fit_error_relative_to_data")
+    # 条件分岐: `not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinsta...` を満たす経路を評価する。
     if not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinstance(fe.get("ge"), dict):
         raise SystemExit(f"[fail] fit_error_relative_to_data missing: {alpha_src}")
+
     t_sigma_split = float(fe["lt"].get("t_k", 50.0))
     sigma_lt_1e8 = float(fe["lt"].get("sigma_1e_8_per_k", 0.03))
     sigma_ge_1e8 = float(fe["ge"].get("sigma_1e_8_per_k", 0.5))
@@ -386,12 +467,14 @@ def main(argv: Optional[list[str]] = None) -> None:
     # Theta_D: prefer the frozen baseline if present; otherwise refit from JANAF (reproducible fallback).
     theta_from_metrics = _theta_d_from_existing_metrics(root)
     theta_fit_points: list[DebyeFitPoint] = []
+    # 条件分岐: `theta_from_metrics is not None` を満たす経路を評価する。
     if theta_from_metrics is not None:
         theta_d = float(theta_from_metrics)
     else:
         theta_d, theta_fit_points = _fit_theta_d_from_janaf(root)
 
     # Prepare grid.
+
     temps = [float(t) for t in range(t_min, t_max + 1)]
     alpha_obs_1e8 = [_alpha_1e8_per_k(t_k=t, coeffs=coeffs) for t in temps]
     alpha_obs = [float(a) * 1e-8 for a in alpha_obs_1e8]  # 1/K
@@ -404,6 +487,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     fit_min_k = 50.0
     fit_max_k = float(t_max)
     fit_idx = [i for i, t in enumerate(temps) if fit_min_k <= float(t) <= fit_max_k]
+    # 条件分岐: `len(fit_idx) < 100` を満たす経路を評価する。
     if len(fit_idx) < 100:
         raise SystemExit(f"[fail] not enough fit points: n={len(fit_idx)} in [{fit_min_k},{fit_max_k}] K")
 
@@ -417,6 +501,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     theta_scan_meta: dict[str, object]
     model_name: str
 
+    # 条件分岐: `int(args.einstein_branches) == 1` を満たす経路を評価する。
     if int(args.einstein_branches) == 1:
         # Debye + Einstein (optical) mixture:
         #   alpha(T) ≈ A_D * Cv_D(T; theta_D) + A_E * Cv_E(T; theta_E)
@@ -435,8 +520,10 @@ def main(argv: Optional[list[str]] = None) -> None:
             b2 = 0.0
             for i in fit_idx:
                 sig = float(sigma_fit[i])
+                # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
                 if sig <= 0.0:
                     continue
+
                 w = 1.0 / (sig * sig)
                 x1 = float(cv_d[i])
                 x2 = float(cv_e[i])
@@ -448,22 +535,30 @@ def main(argv: Optional[list[str]] = None) -> None:
                 b2 += w * x2 * y
 
             sol = _solve_2x2(a11=s11, a12=s12, a22=s22, b1=b1, b2=b2)
+            # 条件分岐: `sol is None` を満たす経路を評価する。
             if sol is None:
                 continue
+
             a_d, a_e = sol
 
             sse = 0.0
             for i in fit_idx:
                 sig = float(sigma_fit[i])
+                # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
                 if sig <= 0.0:
                     continue
+
                 w = 1.0 / (sig * sig)
                 pred = float(a_d) * float(cv_d[i]) + float(a_e) * float(cv_e[i])
                 r = float(alpha_obs[i]) - pred
                 sse += w * r * r
 
+            # 条件分岐: `best is None or float(sse) < float(best["sse"])` を満たす経路を評価する。
+
             if best is None or float(sse) < float(best["sse"]):
                 best = {"theta_e_k": float(theta_e), "a_d": float(a_d), "a_e": float(a_e), "sse": float(sse)}
+
+        # 条件分岐: `best is None` を満たす経路を評価する。
 
         if best is None:
             raise SystemExit("[fail] theta_E scan failed")
@@ -514,8 +609,10 @@ def main(argv: Optional[list[str]] = None) -> None:
                 b3 = 0.0
                 for i in fit_idx:
                     sig = float(sigma_fit[i])
+                    # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
                     if sig <= 0.0:
                         continue
+
                     w = 1.0 / (sig * sig)
                     x1 = float(cv_d[i])
                     x2 = float(cv_e1[i])
@@ -532,19 +629,25 @@ def main(argv: Optional[list[str]] = None) -> None:
                     b3 += w * x3 * y
 
                 sol3 = _solve_3x3(a11=s11, a12=s12, a13=s13, a22=s22, a23=s23, a33=s33, b1=b1, b2=b2, b3=b3)
+                # 条件分岐: `sol3 is None` を満たす経路を評価する。
                 if sol3 is None:
                     continue
+
                 a_d, a_e1, a_e2 = sol3
 
                 sse = 0.0
                 for i in fit_idx:
                     sig = float(sigma_fit[i])
+                    # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
                     if sig <= 0.0:
                         continue
+
                     w = 1.0 / (sig * sig)
                     pred = float(a_d) * float(cv_d[i]) + float(a_e1) * float(cv_e1[i]) + float(a_e2) * float(cv_e2[i])
                     r = float(alpha_obs[i]) - pred
                     sse += w * r * r
+
+                # 条件分岐: `best3 is None or float(sse) < float(best3["sse"])` を満たす経路を評価する。
 
                 if best3 is None or float(sse) < float(best3["sse"]):
                     best3 = {
@@ -557,6 +660,8 @@ def main(argv: Optional[list[str]] = None) -> None:
                         "j1": float(j1),
                         "j2": float(j2),
                     }
+
+        # 条件分岐: `best3 is None` を満たす経路を評価する。
 
         if best3 is None:
             raise SystemExit("[fail] theta_E1/theta_E2 scan failed")
@@ -603,8 +708,12 @@ def main(argv: Optional[list[str]] = None) -> None:
     for i in fit_idx:
         ao = float(alpha_obs[i])
         ap = float(alpha_pred[i])
+        # 条件分岐: `ao == 0.0 or ap == 0.0` を満たす経路を評価する。
         if ao == 0.0 or ap == 0.0:
             continue
+
+        # 条件分岐: `(ao > 0.0) != (ap > 0.0)` を満たす経路を評価する。
+
         if (ao > 0.0) != (ap > 0.0):
             sign_mismatch_fit += 1
 
@@ -614,11 +723,14 @@ def main(argv: Optional[list[str]] = None) -> None:
     n_z_fit = 0
     for i in fit_idx:
         z = float(z_score[i])
+        # 条件分岐: `not math.isfinite(z)` を満たす経路を評価する。
         if not math.isfinite(z):
             continue
+
         n_z_fit += 1
         sum_z2_fit += z * z
         max_abs_z_fit = max(max_abs_z_fit, abs(z))
+        # 条件分岐: `abs(z) > 3.0` を満たす経路を評価する。
         if abs(z) > 3.0:
             exceed_3sigma_fit += 1
 
@@ -634,6 +746,7 @@ def main(argv: Optional[list[str]] = None) -> None:
     # CSV
     out_csv = out_dir / f"{out_tag}.csv"
     with out_csv.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `int(args.einstein_branches) == 1` を満たす経路を評価する。
         if int(args.einstein_branches) == 1:
             fieldnames = [
                 "T_K",
@@ -665,6 +778,7 @@ def main(argv: Optional[list[str]] = None) -> None:
 
         w = csv.DictWriter(f, fieldnames=fieldnames)
         w.writeheader()
+        # 条件分岐: `int(args.einstein_branches) == 1` を満たす経路を評価する。
         if int(args.einstein_branches) == 1:
             for t, ao, ap, s1e8, cd, ce, ad, ae, r1e8, z in zip(
                 temps,
@@ -693,8 +807,10 @@ def main(argv: Optional[list[str]] = None) -> None:
                     }
                 )
         else:
+            # 条件分岐: `cv_e2_best is None or contrib_e2_1e8 is None` を満たす経路を評価する。
             if cv_e2_best is None or contrib_e2_1e8 is None:
                 raise SystemExit("[fail] internal: missing Einstein2 arrays")
+
             for t, ao, ap, s1e8, cd, ce1, ce2, ad, ae1, ae2, r1e8, z in zip(
                 temps,
                 alpha_obs_1e8,
@@ -727,6 +843,7 @@ def main(argv: Optional[list[str]] = None) -> None:
                 )
 
     # Figure
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
@@ -752,12 +869,18 @@ def main(argv: Optional[list[str]] = None) -> None:
         alpha=0.7,
         label=("Einstein contrib" if int(args.einstein_branches) == 1 else "Einstein1 contrib"),
     )
+    # 条件分岐: `int(args.einstein_branches) == 2 and contrib_e2_1e8 is not None` を満たす経路を評価する。
     if int(args.einstein_branches) == 2 and contrib_e2_1e8 is not None:
         ax1.plot(temps, contrib_e2_1e8, color="#2ca02c", lw=1.2, ls="--", alpha=0.7, label="Einstein2 contrib")
+
     ax1.axhline(0.0, color="#666666", lw=1.0, alpha=0.6)
 
+    # 条件分岐: `zero_obs is not None` を満たす経路を評価する。
     if zero_obs is not None:
         ax1.axvline(float(zero_obs["x_cross"]), color="#999999", lw=1.0, ls=":", alpha=0.7)
+
+    # 条件分岐: `zero_pred is not None` を満たす経路を評価する。
+
     if zero_pred is not None:
         ax1.axvline(float(zero_pred["x_cross"]), color="#999999", lw=1.0, ls="--", alpha=0.7)
 
@@ -870,6 +993,8 @@ def main(argv: Optional[list[str]] = None) -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

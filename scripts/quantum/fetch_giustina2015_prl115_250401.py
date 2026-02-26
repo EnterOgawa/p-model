@@ -23,19 +23,24 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path, *, headers: dict[str, str] | None = None) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
 
     req_headers = {"User-Agent": "waveP/quantum-fetch"}
+    # 条件分岐: `headers` を満たす経路を評価する。
     if headers:
         req_headers.update(headers)
 
@@ -46,15 +51,21 @@ def _download(url: str, out_path: Path, *, headers: dict[str, str] | None = None
         done = 0
         while True:
             chunk = resp.read(8 * 1024 * 1024)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             f.write(chunk)
             done += len(chunk)
+            # 条件分岐: `total_i and done and done % (128 * 1024 * 1024) < len(chunk)` を満たす経路を評価する。
             if total_i and done and done % (128 * 1024 * 1024) < len(chunk):
                 print(f"  ... {done/total_i:.1%} ({done}/{total_i} bytes)")
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -63,8 +74,10 @@ def _safe_extract_tar(tar_path: Path, out_dir: Path) -> None:
     with tarfile.open(tar_path, "r:*") as tf:
         for member in tf.getmembers():
             member_name = member.name.replace("\\", "/")
+            # 条件分岐: `member_name.startswith("/") or ".." in member_name.split("/")` を満たす経路を評価する。
             if member_name.startswith("/") or ".." in member_name.split("/"):
                 raise RuntimeError(f"unsafe tar member path: {member.name}")
+
         tf.extractall(out_dir)
 
 
@@ -91,6 +104,7 @@ def _maybe_fetch_aps_supplemental(*, base_dir: Path, url: str) -> dict[str, obje
         with urlopen(req, timeout=30) as resp:
             html = resp.read().decode("utf-8", errors="replace")
     except Exception as e:
+        # 条件分岐: `isinstance(e, HTTPError)` を満たす経路を評価する。
         if isinstance(e, HTTPError):
             status["http_status"] = int(getattr(e, "code", 0) or 0)
             try:
@@ -100,42 +114,58 @@ def _maybe_fetch_aps_supplemental(*, base_dir: Path, url: str) -> dict[str, obje
 
             # APS supplemental is protected by Cloudflare in some environments.
             # Typical symptom: HTTP 403 + response header `cf-mitigated: challenge`.
+
             try:
                 hdr = getattr(e, "headers", None)
                 cf = hdr.get("cf-mitigated") if hdr is not None else None
                 status["blocked_by_cloudflare"] = bool(int(status["http_status"]) == 403 and cf == "challenge")
             except Exception:
                 pass
+
         status["errors"].append(f"{type(e).__name__}: {e}")
         return status
 
     # Naive href scraping is enough here; do not pull an HTML dependency.
+
     hrefs = re.findall(r'href=[\"\\\']([^\"\\\']+)[\"\\\']', html, flags=re.IGNORECASE)
     # Keep only likely downloadable assets.
     keep_ext = (".zip", ".pdf", ".csv", ".txt", ".dat", ".json", ".tar.gz", ".tgz")
     links: list[str] = []
     for href in hrefs:
         h = href.strip()
+        # 条件分岐: `not h` を満たす経路を評価する。
         if not h:
             continue
+
+        # 条件分岐: `not h.lower().endswith(keep_ext)` を満たす経路を評価する。
+
         if not h.lower().endswith(keep_ext):
             continue
+
+        # 条件分岐: `h.startswith("//")` を満たす経路を評価する。
+
         if h.startswith("//"):
             h = "https:" + h
+        # 条件分岐: 前段条件が不成立で、`h.startswith("/")` を追加評価する。
         elif h.startswith("/"):
             h = "https://link.aps.org" + h
+        # 条件分岐: 前段条件が不成立で、`not (h.startswith("http://") or h.startswith("https://"))` を追加評価する。
         elif not (h.startswith("http://") or h.startswith("https://")):
             # Relative to the landing URL.
             base = url.rsplit("/", 1)[0]
             h = base + "/" + h
+
         links.append(h)
 
     # De-dup while preserving order.
+
     seen: set[str] = set()
     uniq: list[str] = []
     for u in links:
+        # 条件分岐: `u in seen` を満たす経路を評価する。
         if u in seen:
             continue
+
         seen.add(u)
         uniq.append(u)
 
@@ -143,9 +173,11 @@ def _maybe_fetch_aps_supplemental(*, base_dir: Path, url: str) -> dict[str, obje
         name = file_url.split("/")[-1].split("?")[0]
         name = _safe_filename(name)
         dst = out_dir / name
+        # 条件分岐: `dst.exists() and dst.stat().st_size > 0` を満たす経路を評価する。
         if dst.exists() and dst.stat().st_size > 0:
             status["skipped"] = int(status["skipped"]) + 1
             continue
+
         try:
             _download(file_url, dst, headers={"User-Agent": "Mozilla/5.0 (waveP/quantum-fetch)"})
             status["downloaded"] = int(status["downloaded"]) + 1
@@ -205,37 +237,55 @@ def main() -> None:
     missing: list[Path] = []
     for spec in files:
         path = src_dir / spec.relpath
+        # 条件分岐: `not args.offline` を満たす経路を評価する。
         if not args.offline:
             _download(spec.url, path, headers=spec.headers)
+
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
+
         if not path.exists():
             missing.append(path)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
 
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
     # Extract arXiv source if needed (to obtain supplemental PDF offline).
+
     arxiv_src_tar = src_dir / f"arxiv_{arxiv_id}_src.tar.gz"
     extract_dir = src_dir / "arxiv_src"
+    # 条件分岐: `not expected_supp.exists()` を満たす経路を評価する。
     if not expected_supp.exists():
+        # 条件分岐: `not arxiv_src_tar.exists()` を満たす経路を評価する。
         if not arxiv_src_tar.exists():
             raise SystemExit(f"[fail] missing arXiv source tarball: {arxiv_src_tar}")
+
         print(f"[info] extracting: {arxiv_src_tar} -> {extract_dir}")
         _safe_extract_tar(arxiv_src_tar, extract_dir)
+        # 条件分岐: `not expected_supp.exists()` を満たす経路を評価する。
         if not expected_supp.exists():
             raise SystemExit(f"[fail] expected supplemental PDF not found after extract: {expected_supp}")
+
         print(f"[ok] extracted: {expected_supp}")
     else:
         print(f"[skip] extracted exists: {expected_supp}")
 
     # Basic type sanity checks.
+
     pdf_path = src_dir / "aps_fulltext.pdf"
+    # 条件分岐: `pdf_path.exists()` を満たす経路を評価する。
     if pdf_path.exists():
         with pdf_path.open("rb") as f:
+            # 条件分岐: `f.read(5) != b"%PDF-"` を満たす経路を評価する。
             if f.read(5) != b"%PDF-":
                 raise RuntimeError(f"APS fulltext is not a PDF: {pdf_path}")
+
     bag_path = src_dir / "aps_article_bag.zip"
+    # 条件分岐: `bag_path.exists()` を満たす経路を評価する。
     if bag_path.exists():
         with bag_path.open("rb") as f:
+            # 条件分岐: `f.read(2) != b"PK"` を満たす経路を評価する。
             if f.read(2) != b"PK":
                 raise RuntimeError(f"APS bag is not a zip: {bag_path}")
 
@@ -259,8 +309,10 @@ def main() -> None:
             "bytes": int(path.stat().st_size),
             "sha256": _sha256(path),
         }
+        # 条件分岐: `extra` を満たす経路を評価する。
         if extra:
             item.update(extra)
+
         manifest["files"].append(item)
 
     for spec in files:
@@ -273,11 +325,14 @@ def main() -> None:
     )
 
     aps_supp_status: dict[str, object] | None = None
+    # 条件分岐: `args.include_aps_supplemental and (not args.offline)` を満たす経路を評価する。
     if args.include_aps_supplemental and (not args.offline):
         print(f"[info] trying APS supplemental: {aps_supp_url}")
         aps_supp_status = _maybe_fetch_aps_supplemental(base_dir=src_dir, url=aps_supp_url)
+        # 条件分岐: `not aps_supp_status.get("ok")` を満たす経路を評価する。
         if not aps_supp_status.get("ok"):
             print(f"[warn] APS supplemental fetch failed: {aps_supp_status.get('errors')}")
+            # 条件分岐: `aps_supp_status.get("blocked_by_cloudflare")` を満たす経路を評価する。
             if aps_supp_status.get("blocked_by_cloudflare"):
                 print(
                     "[hint] APS supplemental is protected by Cloudflare in this environment.\n"
@@ -287,10 +342,17 @@ def main() -> None:
                     "       python -B scripts/quantum/fetch_giustina2015_prl115_250401.py --offline\n"
                     "       to (re)write manifest.json including those files."
                 )
+
+    # 条件分岐: `(src_dir / "aps_supplemental").exists()` を満たす経路を評価する。
+
     if (src_dir / "aps_supplemental").exists():
         for p in sorted((src_dir / "aps_supplemental").glob("*")):
+            # 条件分岐: `p.is_file() and p.stat().st_size > 0` を満たす経路を評価する。
             if p.is_file() and p.stat().st_size > 0:
                 add_file(url=None, path=p, extra={"group": "aps_supplemental"})
+
+    # 条件分岐: `aps_supp_status is not None` を満たす経路を評価する。
+
     if aps_supp_status is not None:
         manifest["aps_supplemental_attempt"] = aps_supp_status
 
@@ -298,6 +360,8 @@ def main() -> None:
     out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] manifest: {out}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

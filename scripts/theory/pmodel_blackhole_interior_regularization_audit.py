@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -50,11 +51,15 @@ def _rel(path: Path) -> str:
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1.0e4 or ax < 1.0e-3` を満たす経路を評価する。
     if ax >= 1.0e4 or ax < 1.0e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -78,8 +83,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -247,18 +254,24 @@ def _overall_decision(baseline: Dict[str, Any]) -> Dict[str, Any]:
     central_finite = bool(baseline.get("central_quantity_finite"))
     stability = bool((baseline.get("numerical_stability") or {}).get("pass"))
     event_horizon_formed = bool(baseline.get("event_horizon_formed"))
+    # 条件分岐: `central_finite and stability` を満たす経路を評価する。
     if central_finite and stability:
         status = "pass"
         decision = "interior_regularized"
     else:
         status = "reject"
         decision = "interior_breakdown"
+
+    # 条件分岐: `not central_finite` を満たす経路を評価する。
+
     if not central_finite:
         reason = "central_quantity_not_finite"
+    # 条件分岐: 前段条件が不成立で、`not stability` を追加評価する。
     elif not stability:
         reason = "numerical_stability_fail"
     else:
         reason = "none"
+
     return {
         "overall_status": status,
         "decision": decision,
@@ -422,18 +435,37 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # 条件分岐: `args.mass_msun <= 0.0` を満たす経路を評価する。
     if args.mass_msun <= 0.0:
         raise SystemExit("--mass-msun must be > 0")
+
+    # 条件分岐: `args.core_radius_rs_frac <= 0.0` を満たす経路を評価する。
+
     if args.core_radius_rs_frac <= 0.0:
         raise SystemExit("--core-radius-rs-frac must be > 0")
+
+    # 条件分岐: `args.scan_c_min <= 0.0 or args.scan_c_max <= 0.0 or args.scan_c_max <= args.s...` を満たす経路を評価する。
+
     if args.scan_c_min <= 0.0 or args.scan_c_max <= 0.0 or args.scan_c_max <= args.scan_c_min:
         raise SystemExit("scan compactness bounds must satisfy 0 < min < max")
+
+    # 条件分岐: `args.scan_c_points < 8` を満たす経路を評価する。
+
     if args.scan_c_points < 8:
         raise SystemExit("--scan-c-points must be >= 8")
+
+    # 条件分岐: `args.x_min <= 0.0 or args.x_max <= args.x_min` を満たす経路を評価する。
+
     if args.x_min <= 0.0 or args.x_max <= args.x_min:
         raise SystemExit("integration range must satisfy 0 < x_min < x_max")
+
+    # 条件分岐: `args.grid_points < 512` を満たす経路を評価する。
+
     if args.grid_points < 512:
         raise SystemExit("--grid-points must be >= 512")
+
+    # 条件分岐: `args.horizon_gtt_eps <= 0.0 or args.horizon_gtt_eps >= 1.0` を満たす経路を評価する。
+
     if args.horizon_gtt_eps <= 0.0 or args.horizon_gtt_eps >= 1.0:
         raise SystemExit("--horizon-gtt-eps must be in (0,1)")
 
@@ -571,6 +603,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

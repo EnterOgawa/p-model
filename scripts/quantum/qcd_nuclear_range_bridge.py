@@ -22,8 +22,12 @@ def _safe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return float(v)
 
 
@@ -45,6 +49,7 @@ def _load_pion_lambdas(*, root: Path) -> Dict[str, float]:
       {'lambda_pi_pm_fm': ..., 'lambda_pi0_fm': ..., 'lambda_pi_avg_fm': ...}
     """
     qcd = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    # 条件分岐: `not qcd.exists()` を満たす経路を評価する。
     if not qcd.exists():
         raise SystemExit(
             "[fail] missing hadron baseline metrics.\n"
@@ -52,23 +57,36 @@ def _load_pion_lambdas(*, root: Path) -> Dict[str, float]:
             "  python -B scripts/quantum/qcd_hadron_masses_baseline.py\n"
             f"Expected: {qcd}"
         )
+
     rows = _read_json(qcd).get("rows", [])
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         raise SystemExit(f"[fail] invalid hadron baseline metrics: rows is not list: {qcd}")
 
     lam_pm = None
     lam_0 = None
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         label = str(r.get("label", ""))
         lam = _safe_float(r.get("compton_lambda_fm"))
+        # 条件分岐: `lam is None` を満たす経路を評価する。
         if lam is None:
             continue
+
+        # 条件分岐: `label == "π±"` を満たす経路を評価する。
+
         if label == "π±":
             lam_pm = lam
+
+        # 条件分岐: `label == "π0"` を満たす経路を評価する。
+
         if label == "π0":
             lam_0 = lam
+
+    # 条件分岐: `lam_pm is None or lam_0 is None` を満たす経路を評価する。
 
     if lam_pm is None or lam_0 is None:
         raise SystemExit("[fail] pion lambdas missing from hadron baseline metrics (expected π± and π0)")
@@ -83,26 +101,33 @@ def _load_pion_lambdas(*, root: Path) -> Dict[str, float]:
 def _extract_points(metrics: Dict[str, Any]) -> List[NuclearPoint]:
     step = str(metrics.get("step") or "")
     rows = metrics.get("results_by_dataset")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return []
 
     out: List[NuclearPoint] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         label = str(row.get("label") or "")
         eq_label = None
         try:
+            # 条件分岐: `row.get("eq_label") is not None` を満たす経路を評価する。
             if row.get("eq_label") is not None:
                 eq_label = int(row.get("eq_label"))
         except Exception:
             eq_label = None
 
         # Geometry (triplet fit)
+
         geom: Dict[str, Any] = {}
         ft = row.get("fit_triplet")
+        # 条件分岐: `isinstance(ft, dict)` を満たす経路を評価する。
         if isinstance(ft, dict):
             geom = ft.get("geometry") if isinstance(ft.get("geometry"), dict) else {}
+
         r1 = _safe_float(geom.get("R1_fm"))
         r2 = _safe_float(geom.get("R2_fm"))
         rc = _safe_float(geom.get("Rc_fm"))
@@ -110,15 +135,19 @@ def _extract_points(metrics: Dict[str, Any]) -> List[NuclearPoint]:
         # Singlet v2 (obs/pred)
         v2s_obs = None
         inputs = row.get("inputs")
+        # 条件分岐: `isinstance(inputs, dict)` を満たす経路を評価する。
         if isinstance(inputs, dict):
             sing = inputs.get("singlet")
+            # 条件分岐: `isinstance(sing, dict)` を満たす経路を評価する。
             if isinstance(sing, dict):
                 v2s_obs = _safe_float(sing.get("v2s_fm3"))
 
         v2s_pred = None
         fs = row.get("fit_singlet")
+        # 条件分岐: `isinstance(fs, dict)` を満たす経路を評価する。
         if isinstance(fs, dict):
             ere = fs.get("ere")
+            # 条件分岐: `isinstance(ere, dict)` を満たす経路を評価する。
             if isinstance(ere, dict):
                 v2s_pred = _safe_float(ere.get("v2_fm3"))
 
@@ -134,6 +163,7 @@ def _extract_points(metrics: Dict[str, Any]) -> List[NuclearPoint]:
                 v2s_pred_fm3=v2s_pred,
             )
         )
+
     return out
 
 
@@ -166,6 +196,7 @@ def main() -> None:
         root / "output" / "public" / "quantum" / "nuclear_effective_potential_repulsive_core_two_range_metrics.json",
     ]
     missing = [p for p in in_files if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(
             "[fail] missing nuclear metrics. Run Step 7.9 scripts first:\n"
@@ -180,10 +211,12 @@ def main() -> None:
         points.extend(_extract_points(_read_json(p)))
 
     points = [pt for pt in points if pt.r2_fm is not None and pt.v2s_obs_fm3 is not None and pt.v2s_pred_fm3 is not None]
+    # 条件分岐: `not points` を満たす経路を評価する。
     if not points:
         raise SystemExit("[fail] no valid points extracted from nuclear metrics")
 
     # Observed envelope (analysis-dependent proxy) across datasets.
+
     v2s_obs = [pt.v2s_obs_fm3 for pt in points if pt.v2s_obs_fm3 is not None]
     v2s_obs_min = float(min(v2s_obs)) if v2s_obs else float("nan")
     v2s_obs_max = float(max(v2s_obs)) if v2s_obs else float("nan")
@@ -211,8 +244,10 @@ def main() -> None:
     xs = list(range(len(labels)))
     ax.plot(xs, r2_ratio, marker="o", lw=1.8, label="R2 / λπ±")
     ax.plot(xs, r1_ratio, marker="s", lw=1.6, label="R1 / λπ±")
+    # 条件分岐: `any(v > 0 for v in rc_ratio)` を満たす経路を評価する。
     if any(v > 0 for v in rc_ratio):
         ax.plot(xs, rc_ratio, marker="^", lw=1.2, label="Rc / λπ±")
+
     ax.axhline(1.0, color="0.35", ls="--", lw=1.0, label="λπ± scale")
     ax.axhline(2.0, color="0.55", ls=":", lw=1.0, label="2×λπ±")
     ax.set_xticks(xs)
@@ -315,9 +350,12 @@ def main() -> None:
                 ]
             )
         )
+
     out_csv.write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(f"[ok] csv : {out_csv}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

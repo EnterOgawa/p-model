@@ -43,15 +43,19 @@ def _cm_inv_to_ev(cm_inv: float) -> float:
 
 
 def _cm_inv_to_um(cm_inv: float) -> float:
+    # 条件分岐: `cm_inv == 0.0` を満たす経路を評価する。
     if cm_inv == 0.0:
         return math.inf
+
     return 1e4 / cm_inv
 
 
 def _safe_float(x: object) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)  # type: ignore[arg-type]
     except Exception:
         return None
@@ -63,8 +67,10 @@ def _parse_state_row(parts: list[str]) -> dict[str, Any] | None:
       H2/RACPPK:  i, E, g, J, v
       HD/ADJSAAM: i, E, g, J, lifetime, v, parity
     """
+    # 条件分岐: `len(parts) < 5` を満たす経路を評価する。
     if len(parts) < 5:
         return None
+
     try:
         state_id = int(parts[0])
         energy_cm = float(parts[1])
@@ -73,23 +79,34 @@ def _parse_state_row(parts: list[str]) -> dict[str, Any] | None:
     except Exception:
         return None
 
+    # 条件分岐: `len(parts) == 5` を満たす経路を評価する。
+
     if len(parts) == 5:
         v = int(float(parts[4]))
         return {"id": state_id, "E_cm^-1": energy_cm, "g": g, "J": j, "v": v, "parity": None, "lifetime_s": None}
 
     # >= 7 columns (HD dataset)
+
     v = None
     parity = None
     lifetime_s = None
+    # 条件分岐: `len(parts) >= 6` を満たす経路を評価する。
     if len(parts) >= 6:
         try:
             v = int(float(parts[5]))
         except Exception:
             v = None
+
+    # 条件分岐: `len(parts) >= 7` を満たす経路を評価する。
+
     if len(parts) >= 7:
         parity = parts[6].strip() or None
+
+    # 条件分岐: `len(parts) >= 5` を満たす経路を評価する。
+
     if len(parts) >= 5:
         lt = parts[4].strip()
+        # 条件分岐: `lt.lower() != "inf" and lt != ""` を満たす経路を評価する。
         if lt.lower() != "inf" and lt != "":
             try:
                 lifetime_s = float(lt)
@@ -104,11 +121,17 @@ def _load_states_map(states_bz2: Path) -> dict[int, dict[str, Any]]:
     for line in _read_bz2_lines(states_bz2):
         parts = line.split()
         rec = _parse_state_row(parts)
+        # 条件分岐: `rec is None` を満たす経路を評価する。
         if rec is None:
             continue
+
         states[int(rec["id"])] = rec
+
+    # 条件分岐: `not states` を満たす経路を評価する。
+
     if not states:
         raise SystemExit(f"[fail] no states parsed: {states_bz2}")
+
     return states
 
 
@@ -116,8 +139,10 @@ def _load_transitions(trans_bz2: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for line in _read_bz2_lines(trans_bz2):
         parts = line.split()
+        # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
         if len(parts) < 4:
             continue
+
         try:
             upper = int(parts[0])
             lower = int(parts[1])
@@ -125,9 +150,14 @@ def _load_transitions(trans_bz2: Path) -> list[dict[str, Any]]:
             nu_cm = float(parts[3])
         except Exception:
             continue
+
         rows.append({"upper": upper, "lower": lower, "A_s^-1": A, "wavenumber_cm^-1": nu_cm})
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit(f"[fail] no transitions parsed: {trans_bz2}")
+
     return rows
 
 
@@ -136,10 +166,15 @@ def _transition_label(*, upper: dict[str, Any], lower: dict[str, Any]) -> str:
         v = s.get("v")
         j = s.get("J")
         p = s.get("parity")
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             return f"J={j}"
+
+        # 条件分岐: `p is None` を満たす経路を評価する。
+
         if p is None:
             return f"v={v},J={j}"
+
         return f"v={v},J={j},{p}"
 
     return f"{fmt_state(upper)} → {fmt_state(lower)}"
@@ -155,17 +190,23 @@ def _load_molat_d2_transitions(*, source_dir: Path) -> tuple[list[dict[str, Any]
     files = extracted.get("files") if isinstance(extracted.get("files"), list) else []
     rows: list[dict[str, Any]] = []
     for f in files:
+        # 条件分岐: `not isinstance(f, dict)` を満たす経路を評価する。
         if not isinstance(f, dict):
             continue
+
         upper_state = str(f.get("upper_state_label") or "").strip() or "?"
         pre_file = f.get("pre_text_file")
+        # 条件分岐: `not pre_file` を満たす経路を評価する。
         if not pre_file:
             continue
+
         pre_path = source_dir / str(pre_file)
         for line in _read_text_lines(pre_path):
             parts = line.split()
+            # 条件分岐: `len(parts) < 7` を満たす経路を評価する。
             if len(parts) < 7:
                 continue
+
             try:
                 vu = int(float(parts[0]))
                 ju = int(float(parts[1]))
@@ -175,6 +216,7 @@ def _load_molat_d2_transitions(*, source_dir: Path) -> tuple[list[dict[str, Any]
                 nu_cm = float(parts[5])
             except Exception:
                 continue
+
             rows.append(
                 {
                     "upper_state": upper_state,
@@ -186,8 +228,12 @@ def _load_molat_d2_transitions(*, source_dir: Path) -> tuple[list[dict[str, Any]
                     "wavenumber_cm^-1": nu_cm,
                 }
             )
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit(f"[fail] no MOLAT D2 transitions parsed: {source_dir}")
+
     return rows, extracted_path
 
 
@@ -197,6 +243,7 @@ def main() -> None:
     args = ap.parse_args()
 
     top_n = int(args.top_n)
+    # 条件分岐: `top_n <= 0` を満たす経路を評価する。
     if top_n <= 0:
         raise SystemExit("[fail] --top-n must be >= 1")
 
@@ -224,6 +271,7 @@ def main() -> None:
     ]
 
     molat_dir = root / "data" / "quantum" / "sources" / "molat_d2_fuv_emission_arlsj1999"
+    # 条件分岐: `(molat_dir / "extracted_values.json").exists()` を満たす経路を評価する。
     if (molat_dir / "extracted_values.json").exists():
         datasets.append(
             {
@@ -244,10 +292,12 @@ def main() -> None:
         kind = str(ds.get("kind") or "")
         src_dir = root / "data" / "quantum" / "sources" / str(ds["slug"])
 
+        # 条件分岐: `kind == "molat_d2_fuv"` を満たす経路を評価する。
         if kind == "molat_d2_fuv":
             molat_rows, extracted_path = _load_molat_d2_transitions(source_dir=src_dir)
             molat_sorted = sorted(molat_rows, key=lambda r: float(r["A_s^-1"]), reverse=True)
             selected = molat_sorted[:top_n]
+            # 条件分岐: `not selected` を満たす経路を評価する。
             if not selected:
                 raise SystemExit(f"[fail] empty MOLAT selection for: {src_dir}")
 
@@ -301,6 +351,7 @@ def main() -> None:
             continue
 
         extracted_path = src_dir / "extracted_values.json"
+        # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
         if not extracted_path.exists():
             raise SystemExit(
                 f"[fail] missing ExoMol cache: {extracted_path}\n"
@@ -311,6 +362,7 @@ def main() -> None:
         states_bz2 = src_dir / f"{prefix}.states.bz2"
         trans_bz2 = src_dir / f"{prefix}.trans.bz2"
         pf_path = src_dir / f"{prefix}.pf"
+        # 条件分岐: `not (states_bz2.exists() and trans_bz2.exists() and pf_path.exists())` を満たす経路を評価する。
         if not (states_bz2.exists() and trans_bz2.exists() and pf_path.exists()):
             raise SystemExit(f"[fail] missing raw ExoMol files under: {src_dir}")
 
@@ -330,8 +382,10 @@ def main() -> None:
         for rank, r in enumerate(selected, start=1):
             upper = states.get(int(r["upper"]))
             lower = states.get(int(r["lower"]))
+            # 条件分岐: `upper is None or lower is None` を満たす経路を評価する。
             if upper is None or lower is None:
                 raise SystemExit(f"[fail] state id missing in map (upper={r['upper']} lower={r['lower']}) for {ds['label']}")
+
             nu_cm = float(r["wavenumber_cm^-1"])
             A = float(r["A_s^-1"])
             rows_all.append(
@@ -372,6 +426,7 @@ def main() -> None:
         )
 
     # ---- Figure (text table, stable & readable in paper) ----
+
     n_panels = max(1, len(per_dataset))
     ncols = 2 if n_panels > 1 else 1
     nrows = int(math.ceil(n_panels / ncols))
@@ -429,6 +484,7 @@ def main() -> None:
                 color="#222222",
             )
             y -= dy
+            # 条件分岐: `y < 0.18` を満たす経路を評価する。
             if y < 0.18:
                 break
 
@@ -499,6 +555,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_csv}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

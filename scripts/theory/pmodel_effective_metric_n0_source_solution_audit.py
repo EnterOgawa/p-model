@@ -25,6 +25,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -55,6 +56,7 @@ def _to_float(v: Any, default: float = float("nan")) -> float:
         out = float(v)
     except Exception:
         return float(default)
+
     return float(out) if np.isfinite(out) else float(default)
 
 
@@ -76,6 +78,7 @@ def _cumtrapz_forward(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     out = np.zeros_like(y, dtype=float)
     for i in range(1, y.size):
         out[i] = out[i - 1] + 0.5 * float(y[i] + y[i - 1]) * float(x[i] - x[i - 1])
+
     return out
 
 
@@ -94,13 +97,16 @@ def _spherical_average_theta(field_rt: np.ndarray, theta: np.ndarray) -> np.ndar
 def _solve_du_dr_cubic(q: np.ndarray, eta_nonlinear: float) -> np.ndarray:
     q_arr = np.asarray(q, dtype=float)
     eta = float(max(eta_nonlinear, 0.0))
+    # 条件分岐: `eta <= 0.0` を満たす経路を評価する。
     if eta <= 0.0:
         return q_arr.copy()
+
     p = q_arr.copy()
     for _ in range(8):
         f = 2.0 * eta * p * p * p + p - q_arr
         df = 6.0 * eta * p * p + 1.0
         p = p - f / np.maximum(df, 1.0e-12)
+
     return p
 
 
@@ -118,6 +124,7 @@ def _solve_u_base_radial(*, r: np.ndarray, lambda2: float, eta_nonlinear: float)
         dr = float(r[i] - r[i + 1])
         du_mid = 0.5 * float(du[i] + du[i + 1])
         u[i] = u[i + 1] + dr * du_mid
+
     return u, du
 
 
@@ -204,15 +211,19 @@ def _ring_coeff_from_u(
         a_star = _to_float(row.get("a_star_mid"), float("nan"))
         inc_deg = _to_float(row.get("inc_deg_mid"), float("nan"))
         key = str(row.get("key", "")).strip() or "obj"
+        # 条件分岐: `not np.isfinite(a_star) or not np.isfinite(inc_deg)` を満たす経路を評価する。
         if not np.isfinite(a_star) or not np.isfinite(inc_deg):
             continue
+
         sin_i = math.sin(math.radians(float(inc_deg)))
         gain = 1.0 + float(omega_eps) * (sin_i * sin_i)
         omega = float(zeta) * float(a_star) * gain / np.maximum(r**3 + 0.2 * a_star * a_star, 1.0e-12)
         den_p = 1.0 + omega * sin_i
         den_m = 1.0 - omega * sin_i
+        # 条件分岐: `np.any(den_p <= 0.0) or np.any(den_m <= 0.0)` を満たす経路を評価する。
         if np.any(den_p <= 0.0) or np.any(den_m <= 0.0):
             continue
+
         b_plus = n_r * r / den_p
         b_minus = n_r * r / den_m
         i_plus = int(np.argmin(b_plus))
@@ -231,6 +242,7 @@ def _ring_coeff_from_u(
                 "ring_coeff_rg": coeff,
             }
         )
+
     mean_coeff = float(np.mean(coeffs)) if coeffs else float("nan")
     return out_rows, mean_coeff
 
@@ -247,8 +259,10 @@ def _plot(
     summary: Dict[str, float],
     out_png: Path,
 ) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     fig, axes = plt.subplots(1, 3, figsize=(15.0, 4.8), dpi=180)
     fig.suptitle("Step 8.7.32.11: explicit N0^(2) terms and strong-field solution")
 
@@ -395,6 +409,7 @@ def main() -> int:
                 "d_deltaP0_dr": float(ddelta_dr[idx]),
             }
         )
+
     _write_csv(
         out_csv,
         residual_rows,
@@ -516,6 +531,7 @@ def main() -> int:
     }
     _write_json(out_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -547,6 +563,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

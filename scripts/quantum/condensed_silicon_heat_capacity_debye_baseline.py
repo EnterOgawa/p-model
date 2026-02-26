@@ -21,9 +21,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -42,33 +45,45 @@ def _cp_shomate(*, coeffs: dict[str, float], t_k: float) -> float:
 
 
 def _debye_integrand(x: float) -> float:
+    # 条件分岐: `x <= 0.0` を満たす経路を評価する。
     if x <= 0.0:
         return 0.0
+
     em1 = math.expm1(x)
+    # 条件分岐: `em1 == 0.0` を満たす経路を評価する。
     if em1 == 0.0:
         return 0.0
+
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         n = 2
+
+    # 条件分岐: `n % 2 == 1` を満たす経路を評価する。
+
     if n % 2 == 1:
         n += 1
+
     h = (b - a) / n
     s = f(a) + f(b)
     for i in range(1, n):
         x = a + i * h
         s += (4.0 if (i % 2 == 1) else 2.0) * f(x)
+
     return s * (h / 3.0)
 
 
 def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
+    # 条件分岐: `t_k <= 0.0 or theta_d_k <= 0.0` を満たす経路を評価する。
     if t_k <= 0.0 or theta_d_k <= 0.0:
         return 0.0
 
     # Molar gas constant.
+
     r = 8.314462618
     y = theta_d_k / t_k
 
@@ -88,8 +103,12 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
     fc = f(c)
     fd = f(d)
     for _ in range(max_iter):
+        # 条件分岐: `abs(b - a) <= tol * (abs(c) + abs(d) + 1.0)` を満たす経路を評価する。
         if abs(b - a) <= tol * (abs(c) + abs(d) + 1.0):
             break
+
+        # 条件分岐: `fc < fd` を満たす経路を評価する。
+
         if fc < fd:
             b, d, fd = d, c, fc
             c = b - gr * (b - a)
@@ -98,6 +117,7 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
             a, c, fc = c, d, fd
             d = a + gr * (b - a)
             fd = f(d)
+
     x = (a + b) / 2.0
     return x, f(x)
 
@@ -117,6 +137,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_janaf_silicon_si"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -125,6 +146,7 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     points = extracted.get("points")
+    # 条件分岐: `not isinstance(points, list) or not points` を満たす経路を評価する。
     if not isinstance(points, list) or not points:
         raise SystemExit(f"[fail] points missing/empty: {extracted_path}")
 
@@ -136,15 +158,18 @@ def main() -> None:
         and isinstance(p.get("T_K"), (int, float))
         and isinstance(p.get("Cp_J_per_molK"), (int, float))
     ]
+    # 条件分岐: `not solid` を満たす経路を評価する。
     if not solid:
         raise SystemExit(f"[fail] no solid-phase points found in: {extracted_path}")
 
     # Fit range: JANAF provides discrete points; keep a "low-to-mid" range where Debye is meaningful.
+
     fit_points = [
         (float(p["T_K"]), float(p["Cp_J_per_molK"]))
         for p in solid
         if 100.0 <= float(p["T_K"]) <= 300.0
     ]
+    # 条件分岐: `len(fit_points) < 4` を満たす経路を評価する。
     if len(fit_points) < 4:
         raise SystemExit(f"[fail] not enough fit points in 100–300 K range: n={len(fit_points)}")
 
@@ -173,6 +198,7 @@ def main() -> None:
         cp_m = _debye_cv_molar(t_k=r.t_k, theta_d_k=theta0 - dtheta)
         dcp_dtheta = (cp_p - cp_m) / (2.0 * dtheta)
         derivs.append(dcp_dtheta)
+
     denom = sum(d * d for d in derivs)
     sigma_theta = math.sqrt((rmse**2) / denom) if denom > 0 else None
 
@@ -180,20 +206,29 @@ def main() -> None:
     shomate_src = root / "data" / "quantum" / "sources" / "nist_webbook_condensed_silicon_si" / "extracted_values.json"
     shomate_cross: list[dict[str, Any]] = []
     shomate_blocks = None
+    # 条件分岐: `shomate_src.exists()` を満たす経路を評価する。
     if shomate_src.exists():
         sh = _read_json(shomate_src)
         sh_list = sh.get("shomate")
+        # 条件分岐: `isinstance(sh_list, list)` を満たす経路を評価する。
         if isinstance(sh_list, list):
             shomate_blocks = sh_list
 
     shomate_solid_coeffs: Optional[dict[str, float]] = None
+    # 条件分岐: `isinstance(shomate_blocks, list)` を満たす経路を評価する。
     if isinstance(shomate_blocks, list):
         for b in shomate_blocks:
+            # 条件分岐: `not isinstance(b, dict)` を満たす経路を評価する。
             if not isinstance(b, dict):
                 continue
+
+            # 条件分岐: `str(b.get("phase")) != "solid"` を満たす経路を評価する。
+
             if str(b.get("phase")) != "solid":
                 continue
+
             coeffs = b.get("coeffs")
+            # 条件分岐: `isinstance(coeffs, dict) and all(k in coeffs for k in ["A", "B", "C", "D", "E"])` を満たす経路を評価する。
             if isinstance(coeffs, dict) and all(k in coeffs for k in ["A", "B", "C", "D", "E"]):
                 shomate_solid_coeffs = {k: float(coeffs[k]) for k in coeffs.keys()}
                 break
@@ -201,12 +236,20 @@ def main() -> None:
     for t in [298.15, 300.0]:
         cp_j = None
         for tt, cp in fit_points:
+            # 条件分岐: `abs(tt - t) < 1e-6` を満たす経路を評価する。
             if abs(tt - t) < 1e-6:
                 cp_j = cp
+
+        # 条件分岐: `cp_j is None` を満たす経路を評価する。
+
         if cp_j is None:
             continue
+
+        # 条件分岐: `shomate_solid_coeffs is None` を満たす経路を評価する。
+
         if shomate_solid_coeffs is None:
             continue
+
         cp_s = _cp_shomate(coeffs=shomate_solid_coeffs, t_k=t)
         shomate_cross.append(
             {
@@ -218,6 +261,7 @@ def main() -> None:
         )
 
     # CSV (fit range points).
+
     out_csv = out_dir / "condensed_silicon_heat_capacity_debye_baseline.csv"
     with out_csv.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["T_K", "Cp_obs_J_per_molK", "Cp_debye_J_per_molK", "residual_J_per_molK"])
@@ -233,6 +277,7 @@ def main() -> None:
             )
 
     # Plot: low temperature domain + overlap with Shomate near 300 K.
+
     xs_curve = [float(t) for t in range(0, 351, 2)]
     ys_curve = [_debye_cv_molar(t_k=t, theta_d_k=theta0) for t in xs_curve]
 
@@ -240,6 +285,7 @@ def main() -> None:
     plt.plot(xs_curve, ys_curve, color="#1f77b4", label=f"Debye fit (θ_D≈{theta0:.1f} K)")
     plt.scatter([r.t_k for r in fit_rows], [r.cp_obs for r in fit_rows], color="#000000", s=24, label="JANAF Cp° (fit points)")
 
+    # 条件分岐: `shomate_solid_coeffs is not None` を満たす経路を評価する。
     if shomate_solid_coeffs is not None:
         xs_s = [298 + i for i in range(0, 53, 2)]
         ys_s = [_cp_shomate(coeffs=shomate_solid_coeffs, t_k=float(t)) for t in xs_s]
@@ -256,6 +302,7 @@ def main() -> None:
     plt.close()
 
     reject_abs_k = None
+    # 条件分岐: `sigma_theta is not None and math.isfinite(float(sigma_theta))` を満たす経路を評価する。
     if sigma_theta is not None and math.isfinite(float(sigma_theta)):
         reject_abs_k = float(max(3.0 * sigma_theta, 5.0))
 
@@ -311,6 +358,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

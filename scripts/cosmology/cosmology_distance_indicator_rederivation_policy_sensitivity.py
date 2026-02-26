@@ -35,6 +35,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -57,6 +58,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -77,35 +79,53 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
         if not math.isfinite(v):
             return None
+
         return v
     except Exception:
         return None
 
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None or not math.isfinite(float(x))` を満たす経路を評価する。
     if x is None or not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _classify_color(abs_z: Optional[float]) -> str:
+    # 条件分岐: `abs_z is None or not math.isfinite(float(abs_z))` を満たす経路を評価する。
     if abs_z is None or not math.isfinite(float(abs_z)):
         return "#cccccc"
+
+    # 条件分岐: `abs_z < 3.0` を満たす経路を評価する。
+
     if abs_z < 3.0:
         return "#2ca02c"
+
+    # 条件分岐: `abs_z < 5.0` を満たす経路を評価する。
+
     if abs_z < 5.0:
         return "#ffbf00"
+
     return "#d62728"
 
 
@@ -132,14 +152,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     in_metrics = Path(args.candidate_metrics)
+    # 条件分岐: `not in_metrics.exists()` を満たす経路を評価する。
     if not in_metrics.exists():
         legacy = _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
+        # 条件分岐: `legacy.exists()` を満たす経路を評価する。
         if legacy.exists():
             in_metrics = legacy
         else:
             raise FileNotFoundError(
                 f"missing required metrics: {in_metrics} (run scripts/summary/run_all.py --offline first)"
             )
+
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -159,6 +182,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     in_bao_fit = _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_scaled_distance_fit_metrics.json"
 
     for p in (in_ddr, in_opacity, in_candle, in_pt, in_pe, in_bao_fit):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing input: {p}")
 
@@ -170,6 +194,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     bao_fit = _read_json(in_bao_fit)
 
     env = {}
+    # 条件分岐: `policy == "category_sys"` を満たす経路を評価する。
     if policy == "category_sys":
         env_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_systematics_envelope_metrics.json"
         env = cs._load_ddr_systematics_envelope(env_path) if env_path.exists() else {}
@@ -181,8 +206,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     candle_all = cs._as_gaussian_list(candle_rows, mean_key="s_L", sigma_key="s_L_sigma")
     pt_all = cs._as_gaussian_list(pt_rows, mean_key="p_t", sigma_key="p_t_sigma")
     pe_all_from_beta = cs._as_pT_constraints(pe_rows)
+    # 条件分岐: `not pt_all` を満たす経路を評価する。
     if not pt_all:
         raise ValueError("no SN time dilation constraint found")
+
+    # 条件分岐: `not pe_all_from_beta` を満たす経路を評価する。
+
     if not pe_all_from_beta:
         raise ValueError("no CMB temperature scaling constraint found")
 
@@ -196,14 +225,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         raise ValueError("unexpected BAO fit metrics schema") from e
 
     # Match the sigma_scale used by candidate_search metrics (soft constraint).
+
     sigma_used = _safe_float(((cand.get("fixed_constraints") or {}).get("bao_s_R") or {}).get("sigma_used"))
+    # 条件分岐: `sigma_used is None` を満たす経路を評価する。
     if sigma_used is None:
         sigma_used = sR_bao_sigma
 
     opacity_ind = [c for c in opacity_all if c.is_independent()]
     candle_ind = [c for c in candle_all if c.is_independent()]
+    # 条件分岐: `not opacity_ind` を満たす経路を評価する。
     if not opacity_ind:
         raise ValueError("no independent opacity candidates found")
+
+    # 条件分岐: `not candle_ind` を満たす経路を評価する。
+
     if not candle_ind:
         raise ValueError("no independent candle candidates found")
 
@@ -212,19 +247,26 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # Pull scan(best_independent) from candidate_search metrics to ensure consistency.
     per_ddr_metrics = ((cand.get("results") or {}).get("per_ddr")) if isinstance(cand.get("results"), dict) else None
+    # 条件分岐: `not isinstance(per_ddr_metrics, list) or not per_ddr_metrics` を満たす経路を評価する。
     if not isinstance(per_ddr_metrics, list) or not per_ddr_metrics:
         raise ValueError("invalid candidate_search metrics: results.per_ddr missing or empty")
 
     scan_by_id: Dict[str, Dict[str, Any]] = {}
     for r in per_ddr_metrics:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         d = r.get("ddr")
+        # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
         if not isinstance(d, dict):
             continue
+
         r_id = str(d.get("id") or "")
+        # 条件分岐: `not r_id` を満たす経路を評価する。
         if not r_id:
             continue
+
         scan_by_id[r_id] = r.get("best_independent") if isinstance(r.get("best_independent"), dict) else {}
 
     rows_out: List[Dict[str, Any]] = []
@@ -253,6 +295,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         tight_lim = str(tight_fit.get("limiting_observation") or "na")
 
         label = str(d.short_label or d.id)
+        # 条件分岐: `bool(d.uses_bao)` を満たす経路を評価する。
         if bool(d.uses_bao):
             label = f"{label}（BAO含む）"
 
@@ -292,6 +335,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
 
     # Sort by scan(best_independent) max|z| ascending for readability.
+
     def _z_sort(v: float) -> float:
         return v if math.isfinite(v) else float("inf")
 
@@ -343,8 +387,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     x_max = 0.0
     for v in scan_vals + tight_vals:
+        # 条件分岐: `math.isfinite(v)` を満たす経路を評価する。
         if math.isfinite(v):
             x_max = max(x_max, float(v))
+
     x_max = max(6.0, x_max * 1.15 + 0.25)
     ax.set_xlim(0.0, x_max)
     ax.set_xlabel("max|z|（DDR + BAO(s_R) + α + s_L + p_t + p_e の同時整合; WLS）")
@@ -415,6 +461,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

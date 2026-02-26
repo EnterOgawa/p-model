@@ -33,6 +33,7 @@ from typing import Any, Dict, Optional
 from urllib.request import Request, urlopen
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -73,6 +74,7 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -82,6 +84,7 @@ def _download(url: str, out_path: Path, *, timeout_s: int = 120) -> Dict[str, An
     with urlopen(req, timeout=timeout_s) as resp:
         headers = {k.lower(): v for k, v in (resp.headers.items() if resp.headers else [])}
         body = resp.read()
+
     out_path.write_bytes(body)
     return {
         "url": url,
@@ -101,25 +104,35 @@ def _extract_tar(tar_gz: Path, out_dir: Path) -> Dict[str, Any]:
     with tarfile.open(tar_gz, mode="r:gz") as tf:
         for m in tf.getmembers():
             name = str(m.name).replace("\\", "/")
+            # 条件分岐: `not name or name.endswith("/")` を満たす経路を評価する。
             if not name or name.endswith("/"):
                 skipped += 1
                 continue
+
             base = name.split("/")[-1]
+            # 条件分岐: `base.startswith("._") or base == ".DS_Store"` を満たす経路を評価する。
             if base.startswith("._") or base == ".DS_Store":
                 skipped += 1
                 continue
+
+            # 条件分岐: `base not in _KEEP_FILES` を満たす経路を評価する。
+
             if base not in _KEEP_FILES:
                 skipped += 1
                 continue
+
             src = tf.extractfile(m)
+            # 条件分岐: `src is None` を満たす経路を評価する。
             if src is None:
                 skipped += 1
                 continue
+
             dest = out_dir / base
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_bytes(src.read())
             extracted += 1
             kept += 1
+
     return {"files_extracted": extracted, "files_kept": kept, "files_skipped": skipped}
 
 
@@ -145,11 +158,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     tar_cache = data_dir / "sources" / "Beutler_etal_DR12COMBINED_BAO_powspec.tar.gz"
     meta_path = out_dir / "_download_meta.json"
 
+    # 条件分岐: `out_dir.exists() and _looks_ready(out_dir) and not bool(args.force)` を満たす経路を評価する。
     if out_dir.exists() and _looks_ready(out_dir) and not bool(args.force):
         print(f"[skip] already present: {out_dir}")
         return 0
+
+    # 条件分岐: `out_dir.exists() and bool(args.force)` を満たす経路を評価する。
+
     if out_dir.exists() and bool(args.force):
         for p in out_dir.glob("*"):
+            # 条件分岐: `p.name in _KEEP_FILES or p.name == "_download_meta.json"` を満たす経路を評価する。
             if p.name in _KEEP_FILES or p.name == "_download_meta.json":
                 try:
                     p.unlink()
@@ -189,8 +207,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

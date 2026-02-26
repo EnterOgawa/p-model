@@ -28,6 +28,7 @@ def _set_japanese_font() -> None:
     ]
     installed = {f.name for f in mpl.font_manager.fontManager.ttflist}
     chosen = [name for name in candidates if name in installed]
+    # 条件分岐: `chosen` を満たす経路を評価する。
     if chosen:
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
@@ -35,10 +36,15 @@ def _set_japanese_font() -> None:
 
 def _out_tag_suffix(out_tag: str) -> str:
     t = str(out_tag).strip()
+    # 条件分岐: `(not t) or (t == "none")` を満たす経路を評価する。
     if (not t) or (t == "none"):
         return ""
+
+    # 条件分岐: `t == "any"` を満たす経路を評価する。
+
     if t == "any":
         return "__any"
+
     return f"__{t}"
 
 
@@ -48,10 +54,12 @@ def _load_json(path: Path) -> dict[str, Any]:
 
 def _select_metrics_file(*, root: Path, sample: str, caps: str, out_tag: str) -> Path | None:
     out_dir = root / "output" / "private" / "cosmology"
+    # 条件分岐: `out_tag == "any"` を満たす経路を評価する。
     if out_tag == "any":
         pattern = f"cosmology_bao_catalog_peakfit_{sample}_{caps}*_metrics.json"
         files = sorted(out_dir.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
         return files[0] if files else None
+
     suffix = _out_tag_suffix(out_tag)
     name = f"cosmology_bao_catalog_peakfit_{sample}_{caps}{suffix}_metrics.json"
     path = out_dir / name
@@ -90,32 +98,53 @@ def _iter_points_from_metrics(*, metrics_path: Path) -> Iterable[PeakfitPoint]:
 
 def _caps_label(caps: str) -> str:
     caps = str(caps)
+    # 条件分岐: `caps == "combined"` を満たす経路を評価する。
     if caps == "combined":
         return "combined"
+
+    # 条件分岐: `caps == "north"` を満たす経路を評価する。
+
     if caps == "north":
         return "NGC"
+
+    # 条件分岐: `caps == "south"` を満たす経路を評価する。
+
     if caps == "south":
         return "SGC"
+
     return caps
 
 
 def _status_color(status: str) -> str:
     status = str(status)
+    # 条件分岐: `status == "ok"` を満たす経路を評価する。
     if status == "ok":
         return "#2ca02c"
+
+    # 条件分岐: `status == "mixed"` を満たす経路を評価する。
+
     if status == "mixed":
         return "#ffbf00"
+
+    # 条件分岐: `status == "ng"` を満たす経路を評価する。
+
     if status == "ng":
         return "#d62728"
+
     return "#7f7f7f"
 
 
 def _dist_style(dist: str) -> tuple[str, str]:
     dist = str(dist)
+    # 条件分岐: `dist == "lcdm"` を満たす経路を評価する。
     if dist == "lcdm":
         return "#1f77b4", "o"
+
+    # 条件分岐: `dist == "pbg"` を満たす経路を評価する。
+
     if dist == "pbg":
         return "#ff7f0e", "s"
+
     return "#7f7f7f", "D"
 
 
@@ -142,13 +171,18 @@ def main(argv: list[str] | None = None) -> int:
     for sample in samples:
         for caps in caps_list:
             mp = _select_metrics_file(root=root, sample=sample, caps=caps, out_tag=out_tag)
+            # 条件分岐: `mp is None` を満たす経路を評価する。
             if mp is None:
                 missing.append(f"{sample}/{caps}")
                 continue
+
             input_files.append(mp.as_posix())
             for p in _iter_points_from_metrics(metrics_path=mp):
+                # 条件分岐: `p.dist in dists` を満たす経路を評価する。
                 if p.dist in dists:
                     points.append(p)
+
+    # 条件分岐: `not points` を満たす経路を評価する。
 
     if not points:
         raise SystemExit(f"no peakfit inputs found (out_tag={out_tag!r}; missing={missing})")
@@ -161,6 +195,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         import numpy as np
 
+        # 条件分岐: `isinstance(axes, np.ndarray)` を満たす経路を評価する。
         if isinstance(axes, np.ndarray):
             axes_list = list(axes.reshape(-1))
         else:
@@ -173,6 +208,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for ax, sample in zip(axes_list, samples):
         sub = [p for p in points if p.sample == sample]
+        # 条件分岐: `not sub` を満たす経路を評価する。
         if not sub:
             ax.set_axis_off()
             ax.set_title(f"{sample} (no data)")
@@ -181,8 +217,10 @@ def main(argv: list[str] | None = None) -> int:
         x_map = {c: i for i, c in enumerate(caps_order)}
         for dist in dist_order:
             dist_points = [p for p in sub if p.dist == dist and p.caps in x_map]
+            # 条件分岐: `not dist_points` を満たす経路を評価する。
             if not dist_points:
                 continue
+
             dist_points = sorted(dist_points, key=lambda p: x_map[p.caps])
             xs = [x_map[p.caps] for p in dist_points]
             ys = [p.eps for p in dist_points]
@@ -237,6 +275,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         handles.append(h)
         labels.append(dist)
+
     fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0, frameon=True)
 
     fig.text(
@@ -288,6 +327,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

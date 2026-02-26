@@ -13,31 +13,46 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
 def _stats(vals: list[float]) -> dict[str, float]:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan")}
+
     vs = sorted(vals)
     return {
         "n": float(len(vs)),
@@ -48,12 +63,15 @@ def _stats(vals: list[float]) -> dict[str, float]:
 
 
 def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
+    # 条件分岐: `not (math.isfinite(p16) and math.isfinite(p84))` を満たす経路を評価する。
     if not (math.isfinite(p16) and math.isfinite(p84)):
         return float("nan")
+
     return 0.5 * (p84 - p16)
 
 
 def _load_thresholds(*, json_path: Path) -> dict[str, object]:
+    # 条件分岐: `not json_path.exists()` を満たす経路を評価する。
     if not json_path.exists():
         return {
             "z_median_abs_max": 3.0,
@@ -62,20 +80,31 @@ def _load_thresholds(*, json_path: Path) -> dict[str, object]:
             "a_high_bin": [250, 300],
             "note": "Default thresholds when falsification pack is missing.",
         }
+
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     thresholds = payload.get("thresholds")
+    # 条件分岐: `not isinstance(thresholds, dict)` を満たす経路を評価する。
     if not isinstance(thresholds, dict):
         raise SystemExit(f"[fail] invalid thresholds in: {json_path}")
+
     return thresholds
 
 
 def _pairing_term(*, a: int, z: int, n: int, a_p: float) -> float:
+    # 条件分岐: `a <= 1` を満たす経路を評価する。
     if a <= 1:
         return 0.0
+
+    # 条件分岐: `(z % 2 == 0) and (n % 2 == 0)` を満たす経路を評価する。
+
     if (z % 2 == 0) and (n % 2 == 0):
         return +a_p / math.sqrt(float(a))
+
+    # 条件分岐: `(z % 2 == 1) and (n % 2 == 1)` を満たす経路を評価する。
+
     if (z % 2 == 1) and (n % 2 == 1):
         return -a_p / math.sqrt(float(a))
+
     return 0.0
 
 
@@ -84,8 +113,10 @@ def _binding_energy_semf_ref(*, a: int, z: int, n: int) -> float:
     Fixed-coefficient SEMF reference (no fitting in this repository step).
     Coefficients are textbook-scale constants used as a stable comparator.
     """
+    # 条件分岐: `a <= 1` を満たす経路を評価する。
     if a <= 1:
         return float("nan")
+
     a_f = float(a)
     a13 = a_f ** (1.0 / 3.0)
     a23 = a13 * a13
@@ -108,6 +139,7 @@ def _binding_energy_semf_ref(*, a: int, z: int, n: int) -> float:
 
 
 def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds: dict[str, object], abs_residuals: list[float]) -> dict[str, object]:
+    # 条件分岐: `not pairs` を満たす経路を評価する。
     if not pairs:
         return {
             "model_id": model_id,
@@ -133,12 +165,18 @@ def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds:
     log10r_high: list[float] = []
 
     for a, ratio in pairs:
+        # 条件分岐: `not (math.isfinite(ratio) and ratio > 0)` を満たす経路を評価する。
         if not (math.isfinite(ratio) and ratio > 0):
             continue
+
         val = math.log10(ratio)
         log10r_all.append(val)
+        # 条件分岐: `low_lo <= a < low_hi` を満たす経路を評価する。
         if low_lo <= a < low_hi:
             log10r_low.append(val)
+
+        # 条件分岐: `high_lo <= a < high_hi` を満たす経路を評価する。
+
         if high_lo <= a < high_hi:
             log10r_high.append(val)
 
@@ -174,14 +212,19 @@ def _top_abs_delta(rows: list[dict[str, object]], *, key: str, top_n: int = 12) 
             delta = float(row[key])
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(delta)` を満たす経路を評価する。
+
         if math.isfinite(delta):
             usable.append({**row, "_abs_delta": abs(delta)})
+
     usable.sort(key=lambda r: float(r["_abs_delta"]), reverse=True)
     out: list[dict[str, object]] = []
     for row in usable[:top_n]:
         item = dict(row)
         item.pop("_abs_delta", None)
         out.append(item)
+
     return out
 
 
@@ -191,6 +234,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_minimal_additional_physics.csv"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(
             "[fail] missing minimal additional physics CSV.\n"
@@ -222,6 +266,9 @@ def main() -> None:
                 ratio_yukawa = float(row["ratio_collective"])
             except Exception:
                 continue
+
+            # 条件分岐: `a <= 1 or not (math.isfinite(b_obs) and b_obs > 0)` を満たす経路を評価する。
+
             if a <= 1 or not (math.isfinite(b_obs) and b_obs > 0):
                 continue
 
@@ -233,12 +280,19 @@ def main() -> None:
             delta_p_minus_y = b_pred_p - b_pred_y if (math.isfinite(b_pred_p) and math.isfinite(b_pred_y)) else float("nan")
             delta_p_minus_semf = b_pred_p - b_pred_semf if (math.isfinite(b_pred_p) and math.isfinite(b_pred_semf)) else float("nan")
 
+            # 条件分岐: `math.isfinite(ratio_pmodel) and ratio_pmodel > 0` を満たす経路を評価する。
             if math.isfinite(ratio_pmodel) and ratio_pmodel > 0:
                 pairs_pmodel.append((a, ratio_pmodel))
                 abs_resid_pmodel.append(abs(b_pred_p - b_obs))
+
+            # 条件分岐: `math.isfinite(ratio_yukawa) and ratio_yukawa > 0` を満たす経路を評価する。
+
             if math.isfinite(ratio_yukawa) and ratio_yukawa > 0:
                 pairs_yukawa_proxy.append((a, ratio_yukawa))
                 abs_resid_yukawa.append(abs(b_pred_y - b_obs))
+
+            # 条件分岐: `math.isfinite(ratio_semf) and ratio_semf > 0` を満たす経路を評価する。
+
             if math.isfinite(ratio_semf) and ratio_semf > 0:
                 pairs_semf_ref.append((a, ratio_semf))
                 abs_resid_semf.append(abs(b_pred_semf - b_obs))
@@ -258,6 +312,8 @@ def main() -> None:
                     "Delta_Bfrac_P_minus_SEMF": f"{(delta_p_minus_semf / b_obs):.6f}" if math.isfinite(delta_p_minus_semf) else "",
                 }
             )
+
+    # 条件分岐: `not rows_out` を満たす経路を評価する。
 
     if not rows_out:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {in_csv}")
@@ -292,6 +348,7 @@ def main() -> None:
         writer.writerows(rows_out)
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     a_vals_p = [a for a, _ in pairs_pmodel]
@@ -357,10 +414,14 @@ def main() -> None:
             dv_y = float(row["Delta_B_P_minus_Yukawa_MeV"])
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(dv_semf) and math.isfinite(dv_y)` を満たす経路を評価する。
+
         if math.isfinite(dv_semf) and math.isfinite(dv_y):
             a_plot.append(a)
             d_semf.append(dv_semf)
             d_y.append(dv_y)
+
     ax3.scatter(a_plot, d_semf, s=8, alpha=0.2, color="tab:red", label="P-model - SEMF")
     ax3.scatter(a_plot, d_y, s=8, alpha=0.2, color="tab:cyan", label="P-model - Yukawa proxy")
     ax3.axhline(0.0, color="0.2", lw=1.2)
@@ -423,6 +484,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

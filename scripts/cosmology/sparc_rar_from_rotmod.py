@@ -37,6 +37,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -87,20 +88,30 @@ def _parse_rotmod_text(lines: Iterable[str]) -> Tuple[Optional[float], List[Rotm
     rows: List[RotmodRow] = []
     for raw in lines:
         s = raw.strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
         m = _DIST_RE.match(s)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             try:
                 dist_mpc = float(m.group("d"))
             except Exception:
                 dist_mpc = None
+
             continue
+
+        # 条件分岐: `s.startswith("#")` を満たす経路を評価する。
+
         if s.startswith("#"):
             continue
+
         parts = s.split()
+        # 条件分岐: `len(parts) < 6` を満たす経路を評価する。
         if len(parts) < 6:
             continue
+
         try:
             # Rad Vobs errV Vgas Vdisk Vbul [SBdisk SBbul]
             r = float(parts[0])
@@ -113,6 +124,7 @@ def _parse_rotmod_text(lines: Iterable[str]) -> Tuple[Optional[float], List[Rotm
             sbb = float(parts[7]) if len(parts) > 7 else float("nan")
         except Exception:
             continue
+
         rows.append(
             RotmodRow(
                 r_kpc=r,
@@ -125,6 +137,7 @@ def _parse_rotmod_text(lines: Iterable[str]) -> Tuple[Optional[float], List[Rotm
                 sbbul_l_pc2=sbb,
             )
         )
+
     return dist_mpc, rows
 
 
@@ -143,8 +156,10 @@ def _compute_accel_points(
     f_bul = math.sqrt(sb)
     for r in rows:
         rr_m = float(r.r_kpc) * KPC_TO_M
+        # 条件分岐: `not np.isfinite(rr_m) or rr_m <= 0` を満たす経路を評価する。
         if not np.isfinite(rr_m) or rr_m <= 0:
             continue
+
         vobs = float(r.vobs_km_s) * KM_TO_M
         evobs = float(r.evobs_km_s) * KM_TO_M
         vgas = float(r.vgas_km_s) * KM_TO_M
@@ -173,15 +188,19 @@ def _compute_accel_points(
                 "g_bar_m_s2": float(g_bar),
             }
         )
+
     return out
 
 
 def _plot_scatter(out_png: Path, points: Sequence[Dict[str, Any]]) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     g_bar = np.asarray([float(p["g_bar_m_s2"]) for p in points], dtype=float)
     g_obs = np.asarray([float(p["g_obs_m_s2"]) for p in points], dtype=float)
     m = np.isfinite(g_bar) & np.isfinite(g_obs) & (g_bar > 0) & (g_obs > 0)
+    # 条件分岐: `np.count_nonzero(m) < 10` を満たす経路を評価する。
     if np.count_nonzero(m) < 10:
         return
 
@@ -216,6 +235,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rotmod_zip = Path(args.rotmod_zip)
+    # 条件分岐: `not rotmod_zip.exists()` を満たす経路を評価する。
     if not rotmod_zip.exists():
         raise FileNotFoundError(f"missing Rotmod zip: {rotmod_zip}")
 
@@ -278,6 +298,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     x = np.log10(np.asarray([float(p["g_bar_m_s2"]) for p in points], dtype=float)[m]) if np.any(m) else np.asarray([], dtype=float)
     y = np.log10(np.asarray([float(p["g_obs_m_s2"]) for p in points], dtype=float)[m]) if np.any(m) else np.asarray([], dtype=float)
     fit: Dict[str, Any] = {"status": "not_enough_points"}
+    # 条件分岐: `x.size >= 10` を満たす経路を評価する。
     if x.size >= 10:
         slope, intercept = np.polyfit(x, y, deg=1)
         yhat = intercept + slope * x
@@ -333,6 +354,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"csv": _rel(out_csv), "n_points": len(points)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

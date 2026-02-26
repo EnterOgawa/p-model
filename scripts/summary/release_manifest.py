@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -52,9 +53,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -68,8 +72,10 @@ class _FileInfo:
 
 
 def _file_info(path: Path, *, compute_hash: bool) -> _FileInfo:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return _FileInfo(path=_rel(path), exists=False, size_bytes=None, mtime_utc=None, sha256=None)
+
     st = path.stat()
     mtime = datetime.fromtimestamp(st.st_mtime, tz=timezone.utc).isoformat()
     digest = _sha256(path) if compute_hash else None
@@ -155,8 +161,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     out_json = Path(str(args.out_json))
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
 
     groups = _default_manifest_paths()
@@ -170,6 +178,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         pass
 
     # Build public-output tree manifest/hash (Step 8.7.16 core artifact).
+
     try:
         po_args: List[str] = [
             "--out-json",
@@ -177,14 +186,17 @@ def main(argv: Sequence[str] | None = None) -> int:
             "--out-topics-csv",
             str(_ROOT / "output" / "public" / "summary" / "public_outputs_manifest_topics.csv"),
         ]
+        # 条件分岐: `not compute_hash` を満たす経路を評価する。
         if not compute_hash:
             po_args.append("--no-hash")
+
         public_outputs_manifest.main(po_args)
     except Exception:
         # Best-effort only; manifest will report missing files if generation failed.
         pass
 
     # Build continuity report against the latest snapshot (Step 8.7.16 follow-up).
+
     try:
         po_cont_args: List[str] = [
             "--manifest-json",
@@ -233,8 +245,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         for p in paths:
             info = _file_info(p, compute_hash=compute_hash)
             items.append(info.__dict__)
+            # 条件分岐: `(group_name in {"entrypoints", "publish_outputs"}) and (not info.exists)` を満たす経路を評価する。
             if (group_name in {"entrypoints", "publish_outputs"}) and (not info.exists):
                 missing_required.append(info.path)
+
         files[group_name] = items
 
     payload: Dict[str, Any] = {
@@ -277,12 +291,16 @@ def main(argv: Sequence[str] | None = None) -> int:
     print("release_manifest:")
     print(f"- ok: {payload['ok']}")
     print(f"- out: {out_json}")
+    # 条件分岐: `payload["missing_required"]` を満たす経路を評価する。
     if payload["missing_required"]:
         print("[warn] missing required:")
         for p in payload["missing_required"][:40]:
             print(f"  - {p}")
+
     return 0 if payload["ok"] else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

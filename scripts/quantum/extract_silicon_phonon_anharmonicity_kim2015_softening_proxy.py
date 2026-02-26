@@ -34,20 +34,25 @@ def _extract_pdf_text(pdf_path: Path) -> str:
     chunks: list[str] = []
     for p in reader.pages:
         chunks.append(p.extract_text() or "")
+
     return _normalize_text("\n".join(chunks))
 
 
 def _extract_first_float(text: str, *, pattern: str, label: str) -> float:
     m = re.search(pattern, text, flags=re.IGNORECASE)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"missing {label}")
+
     return float(m.group(1))
 
 
 def _extract_first_two_floats(text: str, *, pattern: str, label: str) -> tuple[float, float]:
     m = re.search(pattern, text, flags=re.IGNORECASE)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"missing {label}")
+
     return (float(m.group(1)), float(m.group(2)))
 
 
@@ -76,8 +81,12 @@ def main() -> None:
     extracted_json = src_dir / "extracted_values.json"
     pdf_path = src_dir / str(args.pdf_name)
 
+    # 条件分岐: `not (extracted_json.exists() and extracted_json.stat().st_size > 0)` を満たす経路を評価する。
     if not (extracted_json.exists() and extracted_json.stat().st_size > 0):
         raise SystemExit(f"[fail] missing: {extracted_json}")
+
+    # 条件分岐: `not (pdf_path.exists() and pdf_path.stat().st_size > 0)` を満たす経路を評価する。
+
     if not (pdf_path.exists() and pdf_path.stat().st_size > 0):
         raise SystemExit(f"[fail] missing: {pdf_path}")
 
@@ -115,11 +124,13 @@ def main() -> None:
     # The table lists an isothermal mean ~0.98 (no uncertainty reported in the accepted manuscript cache).
     gamma_isothermal: float | None = None
     m_gi = re.search(r"\s\u03b3\u0304P\s*([0-9.]+)\s*-", text)
+    # 条件分岐: `m_gi` を満たす経路を評価する。
     if m_gi:
         gamma_isothermal = float(m_gi.group(1))
 
     # Build a minimal proxy: assume linear-in-T fractional shift anchored at T_min.
     # This matches the abstract's (100K→1500K) statement and is used only as a frozen constraint candidate.
+
     proxy = {
         "kind": "linear_fractional_energy_shift",
         "t_ref_K": float(t_min_k),
@@ -158,6 +169,8 @@ def main() -> None:
         f"gamma_isobaric={gamma_isobaric:.3f}+/-{gamma_isobaric_pm:.3f}"
     )
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

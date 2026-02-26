@@ -54,44 +54,55 @@ def _parse_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _pearson(xs: list[float], ys: list[float]) -> float:
     paired = [(float(x), float(y)) for x, y in zip(xs, ys) if math.isfinite(float(x)) and math.isfinite(float(y))]
+    # 条件分岐: `len(paired) < 3` を満たす経路を評価する。
     if len(paired) < 3:
         return float("nan")
+
     xvals = [p[0] for p in paired]
     yvals = [p[1] for p in paired]
     mx = sum(xvals) / float(len(xvals))
     my = sum(yvals) / float(len(yvals))
     vx = sum((x - mx) ** 2 for x in xvals)
     vy = sum((y - my) ** 2 for y in yvals)
+    # 条件分岐: `vx <= 0.0 or vy <= 0.0` を満たす経路を評価する。
     if vx <= 0.0 or vy <= 0.0:
         return float("nan")
+
     cov = sum((x - mx) * (y - my) for x, y in paired)
     return float(cov / math.sqrt(vx * vy))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -106,40 +117,57 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _parse_halflife_seconds(level: dict[str, Any]) -> float:
     half = level.get("halflife")
+    # 条件分岐: `not isinstance(half, dict)` を満たす経路を評価する。
     if not isinstance(half, dict):
         return float("nan")
+
     value = _parse_float(half.get("value"))
     unit = str(half.get("unit", "")).strip().lower()
+    # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
     if not math.isfinite(value):
         return float("nan")
+
     scale = TIME_SCALE_TO_S.get(unit)
+    # 条件分岐: `scale is None` を満たす経路を評価する。
     if scale is None:
         return float("nan")
+
     return float(value * scale)
 
 
 def _extract_observed_modes(level: dict[str, Any]) -> list[str]:
     decay_modes = level.get("decayModes")
+    # 条件分岐: `not isinstance(decay_modes, dict)` を満たす経路を評価する。
     if not isinstance(decay_modes, dict):
         return []
+
     observed = decay_modes.get("observed")
+    # 条件分岐: `not isinstance(observed, list)` を満たす経路を評価する。
     if not isinstance(observed, list):
         return []
+
     out: list[str] = []
     for item in observed:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         mode = str(item.get("mode", "")).strip()
+        # 条件分岐: `mode` を満たす経路を評価する。
         if mode:
             out.append(mode)
+
     return out
 
 
@@ -152,18 +180,24 @@ def _mode_flags(observed_modes: list[str]) -> tuple[bool, bool]:
 
 def _read_primary(path: Path) -> dict[str, dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(payload, dict)` を満たす経路を評価する。
     if not isinstance(payload, dict):
         raise SystemExit(f"[fail] invalid primary json: {path}")
+
     out: dict[str, dict[str, Any]] = {}
     for key, item in payload.items():
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         z = int(item.get("z", -1))
         n = int(item.get("n", -1))
         a = int(item.get("a", -1))
         levels = item.get("levels")
+        # 条件分岐: `not (z >= 1 and n >= 0 and a >= 2 and isinstance(levels, list) and levels)` を満たす経路を評価する。
         if not (z >= 1 and n >= 0 and a >= 2 and isinstance(levels, list) and levels):
             continue
+
         level0 = levels[0] if isinstance(levels[0], dict) else {}
         observed_modes = _extract_observed_modes(level0)
         has_bm, has_bp = _mode_flags(observed_modes)
@@ -177,32 +211,43 @@ def _read_primary(path: Path) -> dict[str, dict[str, Any]]:
             "has_beta_minus_mode": has_bm,
             "has_beta_plus_mode": has_bp,
         }
+
     return out
 
 
 def _read_secondary_q(path: Path) -> dict[str, dict[str, float]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(payload, dict)` を満たす経路を評価する。
     if not isinstance(payload, dict):
         raise SystemExit(f"[fail] invalid secondary json: {path}")
+
     out: dict[str, dict[str, float]] = {}
     for key, item in payload.items():
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         qvals = item.get("qValues")
+        # 条件分岐: `not isinstance(qvals, dict)` を満たす経路を評価する。
         if not isinstance(qvals, dict):
             continue
+
         q_entry: dict[str, float] = {}
         for ch, qkey in CHANNEL_TO_QKEY.items():
             raw = qvals.get(qkey)
+            # 条件分岐: `not isinstance(raw, dict)` を満たす経路を評価する。
             if not isinstance(raw, dict):
                 q_entry[f"{ch}_obs_MeV"] = float("nan")
                 q_entry[f"{ch}_obs_sigma_MeV"] = float("nan")
                 continue
+
             val_keV = _parse_float(raw.get("value"))
             sig_keV = _parse_float(raw.get("uncertainty"))
             q_entry[f"{ch}_obs_MeV"] = float(val_keV / 1000.0) if math.isfinite(val_keV) else float("nan")
             q_entry[f"{ch}_obs_sigma_MeV"] = float(sig_keV / 1000.0) if math.isfinite(sig_keV) else float("nan")
+
         out[str(key)] = q_entry
+
     return out
 
 
@@ -217,14 +262,20 @@ def _read_binding(path: Path) -> dict[tuple[int, int], dict[str, float]]:
                 "B_pred_before_MeV": _parse_float(row.get("B_pred_before_MeV")),
                 "B_pred_after_MeV": _parse_float(row.get("B_pred_after_MeV")),
             }
+
     return out
 
 
 def _q_pred_from_binding(*, channel: str, b_parent: float, b_daughter: float) -> float:
+    # 条件分岐: `channel == "beta_minus"` を満たす経路を評価する。
     if channel == "beta_minus":
         return float(Q_CONST_BETA_MINUS_MEV + b_daughter - b_parent)
+
+    # 条件分岐: `channel == "beta_plus"` を満たす経路を評価する。
+
     if channel == "beta_plus":
         return float(Q_CONST_BETA_PLUS_MEV + b_daughter - b_parent)
+
     raise ValueError(f"unsupported channel: {channel}")
 
 
@@ -243,11 +294,14 @@ def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, d
         xs = [float(r["q_obs_MeV"]) for r in sub]
         ys = [float(r["q_pred_after_MeV"]) for r in sub]
         ax00.scatter(xs, ys, s=10.0, alpha=0.25, color=colors[channel], label=f"{labels[channel]} (n={len(sub)})")
+
     all_q = [float(r["q_obs_MeV"]) for r in rows if math.isfinite(float(r["q_obs_MeV"]))]
+    # 条件分岐: `all_q` を満たす経路を評価する。
     if all_q:
         q_min = float(min(all_q))
         q_max = float(max(all_q))
         ax00.plot([q_min, q_max], [q_min, q_max], color="#444444", lw=1.0, ls="--")
+
     ax00.set_xlabel("Q_obs [MeV]")
     ax00.set_ylabel("Q_pred_after [MeV]")
     ax00.set_title("Q-value prediction vs observed")
@@ -260,8 +314,10 @@ def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, d
             for r in rows
             if str(r["channel"]) == channel and math.isfinite(float(r["resid_after_MeV"]))
         ]
+        # 条件分岐: `vals` を満たす経路を評価する。
         if vals:
             ax01.hist(vals, bins=80, alpha=0.45, label=labels[channel], color=colors[channel])
+
     ax01.axvline(0.0, color="#444444", lw=1.0)
     ax01.set_xlabel("Q_pred_after - Q_obs [MeV]")
     ax01.set_ylabel("count")
@@ -280,6 +336,7 @@ def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, d
         xs = [float(r["log10_q_obs"]) for r in sub]
         ys = [float(r["log10_half_life_s"]) for r in sub]
         ax10.scatter(xs, ys, s=10.0, alpha=0.25, color=colors[channel], label=f"{labels[channel]} (n={len(sub)})")
+
     ax10.set_xlabel("log10(Q_obs / MeV)")
     ax10.set_ylabel("log10(half-life / s)")
     ax10.set_title("Half-life correlation")
@@ -296,6 +353,7 @@ def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, d
         vals.append(float(stats.get("mode_false_positive_rate", float("nan"))))
         bars.append(f"{channel}:fn")
         vals.append(float(stats.get("mode_false_negative_rate", float("nan"))))
+
     ax11.bar(bars, vals, color=["#54a24b", "#e45756", "#72b7b2"] * 2)
     ax11.set_ylim(0.0, 1.0)
     ax11.set_ylabel("fraction")
@@ -318,6 +376,7 @@ def main() -> None:
     in_secondary_json = root / "data" / "quantum" / "sources" / "nndc_nudat3_primary_secondary" / "secondary.json"
 
     for p in (in_binding_csv, in_primary_json, in_secondary_json):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise SystemExit(f"[fail] missing required input: {p}")
 
@@ -328,20 +387,26 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     for key, meta in primary_by_key.items():
         qmeta = secondary_q_by_key.get(key)
+        # 条件分岐: `qmeta is None` を満たす経路を評価する。
         if qmeta is None:
             continue
+
         z = int(meta["Z"])
         n = int(meta["N"])
         a = int(meta["A"])
         parent = binding_by_zn.get((z, n))
+        # 条件分岐: `parent is None` を満たす経路を評価する。
         if parent is None:
             continue
 
         for channel in CHANNELS:
             q_obs = float(qmeta.get(f"{channel}_obs_MeV", float("nan")))
             q_sigma = float(qmeta.get(f"{channel}_obs_sigma_MeV", float("nan")))
+            # 条件分岐: `not math.isfinite(q_obs)` を満たす経路を評価する。
             if not math.isfinite(q_obs):
                 continue
+
+            # 条件分岐: `channel == "beta_minus"` を満たす経路を評価する。
 
             if channel == "beta_minus":
                 zd, nd = z + 1, n - 1
@@ -351,6 +416,7 @@ def main() -> None:
                 observed_flag = bool(meta["has_beta_plus_mode"])
 
             daughter = binding_by_zn.get((zd, nd))
+            # 条件分岐: `daughter is None` を満たす経路を評価する。
             if daughter is None:
                 continue
 
@@ -407,6 +473,8 @@ def main() -> None:
                 }
             )
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit("[fail] no beta-decay rows produced")
 
@@ -416,8 +484,10 @@ def main() -> None:
     summary_by_channel: dict[str, dict[str, Any]] = {}
     for channel in CHANNELS:
         sub = [r for r in rows if str(r["channel"]) == channel]
+        # 条件分岐: `not sub` を満たす経路を評価する。
         if not sub:
             continue
+
         resid_before = [float(r["resid_before_MeV"]) for r in sub]
         resid_after = [float(r["resid_after_MeV"]) for r in sub]
         z_after = [float(r["z_resid_after"]) for r in sub if math.isfinite(float(r["z_resid_after"]))]
@@ -462,8 +532,10 @@ def main() -> None:
     representative_rows: list[dict[str, Any]] = []
     for channel in CHANNELS:
         sub = [r for r in rows if str(r["channel"]) == channel and math.isfinite(float(r["abs_resid_after_MeV"]))]
+        # 条件分岐: `not sub` を満たす経路を評価する。
         if not sub:
             continue
+
         ordered = sorted(sub, key=lambda r: float(r["abs_resid_after_MeV"]))
         best = ordered[:12]
         worst = ordered[-12:]
@@ -485,6 +557,7 @@ def main() -> None:
                     "z_resid_after": row["z_resid_after"],
                 }
             )
+
         for idx, row in enumerate(reversed(worst), start=1):
             representative_rows.append(
                 {
@@ -567,6 +640,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

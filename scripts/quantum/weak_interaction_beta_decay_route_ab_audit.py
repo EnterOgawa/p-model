@@ -14,6 +14,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -55,17 +56,25 @@ def _parse_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
 def _parse_bool(value: Any) -> bool | None:
+    # 条件分岐: `isinstance(value, bool)` を満たす経路を評価する。
     if isinstance(value, bool):
         return value
+
     text = str(value).strip().lower()
+    # 条件分岐: `text in {"true", "1", "yes", "y"}` を満たす経路を評価する。
     if text in {"true", "1", "yes", "y"}:
         return True
+
+    # 条件分岐: `text in {"false", "0", "no", "n"}` を満たす経路を評価する。
+
     if text in {"false", "0", "no", "n"}:
         return False
+
     return None
 
 
@@ -75,31 +84,46 @@ def _parse_mode_channel_flags(observed_modes: list[dict[str, Any]]) -> tuple[boo
     branch_beta_minus = 0.0
     branch_beta_plus = 0.0
     for mode_entry in observed_modes:
+        # 条件分岐: `not isinstance(mode_entry, dict)` を満たす経路を評価する。
         if not isinstance(mode_entry, dict):
             continue
+
         mode_text = str(mode_entry.get("mode", "")).strip().upper()
         value = _parse_float(mode_entry.get("value"))
+        # 条件分岐: `"B-" in mode_text` を満たす経路を評価する。
         if "B-" in mode_text:
             has_beta_minus = True
+            # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
             if math.isfinite(value):
                 branch_beta_minus += float(value)
+
+        # 条件分岐: `("EC" in mode_text) or ("B+" in mode_text)` を満たす経路を評価する。
+
         if ("EC" in mode_text) or ("B+" in mode_text):
             has_beta_plus = True
+            # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
             if math.isfinite(value):
                 branch_beta_plus += float(value)
+
     return has_beta_minus, has_beta_plus, float(branch_beta_minus), float(branch_beta_plus)
 
 
 def _load_nudat_primary_modes(path: Path) -> dict[str, dict[str, Any]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     payload = json.loads(path.read_text(encoding="utf-8"))
+    # 条件分岐: `not isinstance(payload, dict)` を満たす経路を評価する。
     if not isinstance(payload, dict):
         return {}
+
     out: dict[str, dict[str, Any]] = {}
     for key, item in payload.items():
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         levels = item.get("levels")
         level0 = levels[0] if isinstance(levels, list) and levels and isinstance(levels[0], dict) else {}
         decay_modes = level0.get("decayModes") if isinstance(level0, dict) else None
@@ -114,6 +138,7 @@ def _load_nudat_primary_modes(path: Path) -> dict[str, dict[str, Any]]:
             "branch_beta_minus_percent": branch_bm if branch_bm > 0.0 else float("nan"),
             "branch_beta_plus_percent": branch_bp if branch_bp > 0.0 else float("nan"),
         }
+
     return out
 
 
@@ -124,44 +149,60 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _file_signature(path: Path | None) -> dict[str, Any]:
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return {"exists": False, "path": None}
+
     payload: dict[str, Any] = {"exists": bool(path.exists()), "path": _rel(path)}
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return payload
+
     try:
         stat = path.stat()
         payload["size_bytes"] = int(stat.st_size)
         payload["mtime_utc"] = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
     except Exception:
         pass
+
     try:
         payload["sha256"] = str(_sha256(path)).strip().upper()
     except Exception:
         payload["sha256"] = None
+
     return payload
 
 
 def _load_previous_ckm_watchpack(path: Path) -> dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
     diagnostics = payload.get("diagnostics")
+    # 条件分岐: `not isinstance(diagnostics, dict)` を満たす経路を評価する。
     if not isinstance(diagnostics, dict):
         return {}
+
     watchpack = diagnostics.get("ckm_primary_update_watchpack")
+    # 条件分岐: `not isinstance(watchpack, dict)` を満たす経路を評価する。
     if not isinstance(watchpack, dict):
         return {}
+
     return watchpack
 
 
@@ -187,6 +228,7 @@ def _derive_ckm_primary_update_watchpack(
     curr_size = _parse_float(current_input_signature.get("size_bytes"))
     prev_size = _parse_float(previous_signature.get("size_bytes"))
     metadata_changed_without_hash_change = False
+    # 条件分岐: `curr_exists and prev_exists and (not hash_changed)` を満たす経路を評価する。
     if curr_exists and prev_exists and (not hash_changed):
         if (curr_mtime and prev_mtime and curr_mtime != prev_mtime) or (
             math.isfinite(curr_size) and math.isfinite(prev_size) and curr_size != prev_size
@@ -195,10 +237,13 @@ def _derive_ckm_primary_update_watchpack(
 
     baseline_initialized_now = curr_exists and (not prev_exists)
     update_event_detected = hash_changed
+    # 条件分岐: `baseline_initialized_now` を満たす経路を評価する。
     if baseline_initialized_now:
         update_event_type = "baseline_initialized"
+    # 条件分岐: 前段条件が不成立で、`hash_changed` を追加評価する。
     elif hash_changed:
         update_event_type = "input_hash_changed"
+    # 条件分岐: 前段条件が不成立で、`metadata_changed_without_hash_change` を追加評価する。
     elif metadata_changed_without_hash_change:
         update_event_type = "metadata_changed_hash_same"
     else:
@@ -209,10 +254,13 @@ def _derive_ckm_primary_update_watchpack(
 
     closure_status = str(closure_gate.get("status") or "not_evaluated")
     watch_locked = bool(closure_gate.get("watch_locked_by_current_primary_source"))
+    # 条件分岐: `update_event_detected` を満たす経路を評価する。
     if update_event_detected:
         next_action = "run_ckm_pmns_closure_recheck_now"
+    # 条件分岐: 前段条件が不成立で、`closure_status == "watch" and watch_locked` を追加評価する。
     elif closure_status == "watch" and watch_locked:
         next_action = "wait_for_ckm_primary_input_hash_change_then_rerun_step_8_7_22"
+    # 条件分岐: 前段条件が不成立で、`closure_status == "watch"` を追加評価する。
     elif closure_status == "watch":
         next_action = "keep_watch_and_rerun_on_input_update"
     else:
@@ -238,8 +286,10 @@ def _derive_ckm_primary_update_watchpack(
 
 
 def _percentile(values: list[float], p: float) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     s = sorted(float(v) for v in values)
     idx = int(round((len(s) - 1) * p))
     idx = max(0, min(len(s) - 1, idx))
@@ -247,33 +297,43 @@ def _percentile(values: list[float], p: float) -> float:
 
 
 def _median(values: list[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     s = sorted(float(v) for v in values)
     n = len(s)
     mid = n // 2
+    # 条件分岐: `n % 2 == 1` を満たす経路を評価する。
     if n % 2 == 1:
         return float(s[mid])
+
     return float((s[mid - 1] + s[mid]) / 2.0)
 
 
 def _safe_max(values: list[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     return float(max(values))
 
 
 def _safe_frac_le(values: list[float], threshold: float) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     return float(sum(1 for v in values if float(v) <= threshold) / float(len(values)))
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -309,18 +369,23 @@ def _route_channel_summary(
         q_obs = _parse_float(row.get("q_obs_MeV"))
         q_sigma = _parse_float(row.get("q_obs_sigma_MeV"))
         q_pred = _parse_float(row.get(route.q_column))
+        # 条件分岐: `math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.is...` を満たす経路を評価する。
         if math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.isfinite(q_pred):
             z_q = abs((q_pred - q_obs) / q_sigma)
             abs_z_q.append(float(z_q))
             n_q_rows += 1
+            # 条件分岐: `z_q > z_gate` を満たす経路を評価する。
             if z_q > z_gate:
                 n_gate_q_fail += 1
+
+        # 条件分岐: `math.isfinite(q_obs) and math.isfinite(q_pred) and q_obs > 0.0 and q_pred > 0...` を満たす経路を評価する。
 
         if math.isfinite(q_obs) and math.isfinite(q_pred) and q_obs > 0.0 and q_pred > 0.0 and logft_sigma_proxy > 0.0:
             delta_logft_proxy = 5.0 * (math.log10(q_pred) - math.log10(q_obs))
             z_logft = abs(delta_logft_proxy / logft_sigma_proxy)
             abs_z_logft.append(float(z_logft))
             n_logft_rows += 1
+            # 条件分岐: `z_logft > z_gate` を満たす経路を評価する。
             if z_logft > z_gate:
                 n_gate_logft_fail += 1
 
@@ -367,10 +432,13 @@ def _decision(all_rows: list[dict[str, Any]]) -> dict[str, Any]:
     route_a_hard = bool(route_a and bool(route_a.get("hard_pass")))
     route_b_hard = bool(route_b and bool(route_b.get("hard_pass")))
 
+    # 条件分岐: `route_a_hard and (not route_b_hard)` を満たす経路を評価する。
     if route_a_hard and (not route_b_hard):
         transition = "A_stay_B_reject"
+    # 条件分岐: 前段条件が不成立で、`route_a_hard and route_b_hard` を追加評価する。
     elif route_a_hard and route_b_hard:
         transition = "A_and_B_supported"
+    # 条件分岐: 前段条件が不成立で、`(not route_a_hard) and route_b_hard` を追加評価する。
     elif (not route_a_hard) and route_b_hard:
         transition = "A_reject_B_continue"
     else:
@@ -386,8 +454,10 @@ def _decision(all_rows: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _deterministic_holdout_flag(*, nuclide_key: str, modulo: int, residue: int) -> bool:
+    # 条件分岐: `modulo <= 1` を満たす経路を評価する。
     if modulo <= 1:
         return False
+
     import hashlib
 
     digest = hashlib.sha256(str(nuclide_key).encode("utf-8")).hexdigest()
@@ -406,14 +476,21 @@ def _split_rows_by_holdout(
     nuclide_bucket: dict[str, bool] = {}
     for row in rows:
         nuclide_key = str(row.get("nuclide_key", "")).strip().lower()
+        # 条件分岐: `not nuclide_key` を満たす経路を評価する。
         if not nuclide_key:
             nuclide_key = f"fallback::{str(row.get('nuclide_name', '')).strip().lower()}"
+
+        # 条件分岐: `nuclide_key not in nuclide_bucket` を満たす経路を評価する。
+
         if nuclide_key not in nuclide_bucket:
             nuclide_bucket[nuclide_key] = _deterministic_holdout_flag(
                 nuclide_key=nuclide_key,
                 modulo=modulo,
                 residue=residue,
             )
+
+        # 条件分岐: `nuclide_bucket[nuclide_key]` を満たす経路を評価する。
+
         if nuclide_bucket[nuclide_key]:
             holdout_rows.append(row)
         else:
@@ -451,8 +528,10 @@ def _fit_weighted_linear_q(
         q_obs = _parse_float(row.get("q_obs_MeV"))
         q_sigma = _parse_float(row.get("q_obs_sigma_MeV"))
         q_raw = _parse_float(row.get(route.q_column))
+        # 条件分岐: `not (math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and ma...` を満たす経路を評価する。
         if not (math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.isfinite(q_raw)):
             continue
+
         sigma_eff = max(float(q_sigma), float(sigma_floor))
         w = 1.0 / (sigma_eff * sigma_eff)
         sum_w += w
@@ -461,7 +540,9 @@ def _fit_weighted_linear_q(
         sum_wxx += w * q_raw * q_raw
         sum_wxy += w * q_raw * q_obs
         n_fit += 1
+
     denom = (sum_w * sum_wxx) - (sum_wx * sum_wx)
+    # 条件分岐: `n_fit < 3 or (not math.isfinite(denom)) or abs(denom) < 1.0e-24` を満たす経路を評価する。
     if n_fit < 3 or (not math.isfinite(denom)) or abs(denom) < 1.0e-24:
         return {
             "status": "identity_fallback",
@@ -472,6 +553,7 @@ def _fit_weighted_linear_q(
             "sigma_floor_MeV": float(sigma_floor),
             "reason": "insufficient_rows_or_singular_fit",
         }
+
     b_scale = ((sum_w * sum_wxy) - (sum_wx * sum_wy)) / denom
     a_offset = (sum_wy - b_scale * sum_wx) / sum_w
     return {
@@ -496,8 +578,12 @@ def _route_metrics_calibrated(
     use_rows = rows if channel == "all" else [r for r in rows if str(r.get("channel", "")) == channel]
     a_offset = _parse_float(calibration.get("a_offset_MeV"))
     b_scale = _parse_float(calibration.get("b_scale"))
+    # 条件分岐: `not math.isfinite(a_offset)` を満たす経路を評価する。
     if not math.isfinite(a_offset):
         a_offset = 0.0
+
+    # 条件分岐: `not math.isfinite(b_scale)` を満たす経路を評価する。
+
     if not math.isfinite(b_scale):
         b_scale = 1.0
 
@@ -513,20 +599,26 @@ def _route_metrics_calibrated(
         q_obs = _parse_float(row.get("q_obs_MeV"))
         q_sigma = _parse_float(row.get("q_obs_sigma_MeV"))
         q_raw = _parse_float(row.get(route.q_column))
+        # 条件分岐: `math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.is...` を満たす経路を評価する。
         if math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.isfinite(q_raw):
             q_pred = float(a_offset + b_scale * q_raw)
             z_q = abs((q_pred - q_obs) / q_sigma)
             abs_z_q.append(float(z_q))
             chi2_q += float(z_q * z_q)
             n_q_rows += 1
+            # 条件分岐: `z_q > z_gate` を満たす経路を評価する。
             if z_q > z_gate:
                 n_gate_q_fail += 1
+
+            # 条件分岐: `math.isfinite(q_obs) and q_obs > 0.0 and q_pred > 0.0 and logft_sigma_proxy >...` を満たす経路を評価する。
+
             if math.isfinite(q_obs) and q_obs > 0.0 and q_pred > 0.0 and logft_sigma_proxy > 0.0:
                 delta_logft_proxy = 5.0 * (math.log10(q_pred) - math.log10(q_obs))
                 z_logft = abs(delta_logft_proxy / logft_sigma_proxy)
                 abs_z_logft.append(float(z_logft))
                 chi2_logft += float(z_logft * z_logft)
                 n_logft_rows += 1
+                # 条件分岐: `z_logft > z_gate` を満たす経路を評価する。
                 if z_logft > z_gate:
                     n_gate_logft_fail += 1
 
@@ -574,13 +666,17 @@ def _aic_like(
     n_obs: int,
     k_params: int,
 ) -> dict[str, Any]:
+    # 条件分岐: `not (math.isfinite(chi2) and n_obs > 0 and k_params >= 0)` を満たす経路を評価する。
     if not (math.isfinite(chi2) and n_obs > 0 and k_params >= 0):
         return {"aic_chi2": float("nan"), "aicc_chi2": float("nan"), "bic_chi2": float("nan")}
+
     aic = float(chi2 + (2.0 * k_params))
+    # 条件分岐: `n_obs > (k_params + 1)` を満たす経路を評価する。
     if n_obs > (k_params + 1):
         aicc = float(aic + (2.0 * k_params * (k_params + 1)) / float(n_obs - k_params - 1))
     else:
         aicc = float("inf")
+
     bic = float(chi2 + k_params * math.log(float(n_obs)))
     return {"aic_chi2": aic, "aicc_chi2": aicc, "bic_chi2": bic}
 
@@ -600,6 +696,7 @@ def _equalized_route_audit(
         modulo=holdout_hash_modulo,
         residue=holdout_hash_residue,
     )
+    # 条件分岐: `not holdout_rows` を満たす経路を評価する。
     if not holdout_rows:
         holdout_rows = train_rows[-max(1, len(train_rows) // 10) :]
         train_rows = train_rows[: max(1, len(train_rows) - len(holdout_rows))]
@@ -684,10 +781,13 @@ def _equalized_route_audit(
     route_b = route_eval.get("B_pmodel_proxy", {})
     route_a_hard = bool(route_a.get("hard_pass"))
     route_b_hard = bool(route_b.get("hard_pass"))
+    # 条件分岐: `route_a_hard and (not route_b_hard)` を満たす経路を評価する。
     if route_a_hard and (not route_b_hard):
         transition = "A_stay_B_reject"
+    # 条件分岐: 前段条件が不成立で、`route_a_hard and route_b_hard` を追加評価する。
     elif route_a_hard and route_b_hard:
         transition = "A_and_B_supported"
+    # 条件分岐: 前段条件が不成立で、`(not route_a_hard) and route_b_hard` を追加評価する。
     elif (not route_a_hard) and route_b_hard:
         transition = "A_reject_B_continue"
     else:
@@ -817,12 +917,14 @@ def _build_figure(
 
 
 def _load_ckm_gate(path: Path) -> dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {
             "status": "not_evaluated",
             "reason": "CKM audit json is missing.",
             "source": {"path": _rel(path)},
         }
+
     payload = json.loads(path.read_text(encoding="utf-8"))
     gate = payload.get("gate") if isinstance(payload.get("gate"), dict) else {}
     status = str(gate.get("status") or "not_evaluated")
@@ -845,27 +947,33 @@ def _load_ckm_gate(path: Path) -> dict[str, Any]:
         else None,
     }
     pmns_gate = payload.get("pmns_gate") if isinstance(payload.get("pmns_gate"), dict) else {}
+    # 条件分岐: `pmns_gate` を満たす経路を評価する。
     if pmns_gate:
         out["pmns_gate"] = pmns_gate
+
     correlation_reassessment = (
         payload.get("correlation_reassessment")
         if isinstance(payload.get("correlation_reassessment"), dict)
         else {}
     )
+    # 条件分岐: `correlation_reassessment` を満たす経路を評価する。
     if correlation_reassessment:
         out["correlation_reassessment"] = correlation_reassessment
         out["watch_resolution_status"] = str(correlation_reassessment.get("watch_resolution_status") or "")
         out["watch_lock_reason"] = str(correlation_reassessment.get("watch_lock_reason") or "")
+
     return out
 
 
 def _load_pmns_gate(path: Path) -> dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {
             "status": "not_evaluated",
             "reason": "PMNS audit json is missing.",
             "source": {"path": _rel(path)},
         }
+
     payload = json.loads(path.read_text(encoding="utf-8"))
     gate = payload.get("gate") if isinstance(payload.get("gate"), dict) else {}
     derived = payload.get("derived") if isinstance(payload.get("derived"), dict) else {}
@@ -900,6 +1008,7 @@ def _combine_closure_gates(*, ckm_gate: dict[str, Any], pmns_gate: dict[str, Any
     pmns_watch = pmns_gate.get("watch_pass")
     ckm_ready = isinstance(ckm_hard, bool)
     pmns_ready = isinstance(pmns_hard, bool)
+    # 条件分岐: `not (ckm_ready and pmns_ready)` を満たす経路を評価する。
     if not (ckm_ready and pmns_ready):
         return {
             "status": "not_evaluated",
@@ -907,20 +1016,30 @@ def _combine_closure_gates(*, ckm_gate: dict[str, Any], pmns_gate: dict[str, Any
             "watch_pass": False,
             "rule": "combined closure requires both CKM and PMNS hard/watch gates.",
         }
+
     hard_pass = bool(ckm_hard and pmns_hard)
     watch_pass = bool(isinstance(ckm_watch, bool) and isinstance(pmns_watch, bool) and ckm_watch and pmns_watch)
+    # 条件分岐: `hard_pass and watch_pass` を満たす経路を評価する。
     if hard_pass and watch_pass:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`hard_pass` を追加評価する。
     elif hard_pass:
         status = "watch"
     else:
         status = "reject"
+
     watch_gap_reasons: list[str] = []
+    # 条件分岐: `hard_pass and not watch_pass` を満たす経路を評価する。
     if hard_pass and not watch_pass:
+        # 条件分岐: `isinstance(ckm_watch, bool) and (not ckm_watch)` を満たす経路を評価する。
         if isinstance(ckm_watch, bool) and (not ckm_watch):
             watch_gap_reasons.append(str(ckm_gate.get("watch_resolution_status") or "ckm_watch_fail"))
+
+        # 条件分岐: `isinstance(pmns_watch, bool) and (not pmns_watch)` を満たす経路を評価する。
+
         if isinstance(pmns_watch, bool) and (not pmns_watch):
             watch_gap_reasons.append("pmns_watch_fail")
+
     watch_locked_by_current_primary_source = bool(
         "watch_locked_by_current_primary_source_precision" in watch_gap_reasons
     )
@@ -950,12 +1069,16 @@ def _route_a_watch_outliers(
         q_obs = _parse_float(row.get("q_obs_MeV"))
         q_sigma = _parse_float(row.get("q_obs_sigma_MeV"))
         q_pred_a = _parse_float(row.get("q_obs_from_binding_MeV"))
+        # 条件分岐: `not (math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and ma...` を満たす経路を評価する。
         if not (math.isfinite(q_obs) and math.isfinite(q_sigma) and q_sigma > 0.0 and math.isfinite(q_pred_a)):
             continue
+
         delta_q = float(q_pred_a - q_obs)
         abs_z = abs(delta_q / q_sigma)
+        # 条件分岐: `abs_z <= z_gate` を満たす経路を評価する。
         if abs_z <= z_gate:
             continue
+
         observed_decay_has_channel = _parse_bool(row.get("observed_decay_has_channel"))
         legacy_predicted_q_positive = _parse_bool(row.get("predicted_q_positive"))
         legacy_mode_consistent = _parse_bool(row.get("mode_consistent"))
@@ -965,21 +1088,28 @@ def _route_a_watch_outliers(
             if observed_decay_has_channel is not None
             else None
         )
+        # 条件分岐: `observed_decay_has_channel is False or route_a_mode_consistent is False` を満たす経路を評価する。
         if observed_decay_has_channel is False or route_a_mode_consistent is False:
             cause_tag = "mode_or_definition_watch"
+        # 条件分岐: 前段条件が不成立で、`abs(delta_q) <= 0.2 and q_sigma <= 0.05` を追加評価する。
         elif abs(delta_q) <= 0.2 and q_sigma <= 0.05:
             cause_tag = "high_precision_small_offset_watch"
         else:
             cause_tag = "residual_watch"
+
+        # 条件分岐: `legacy_mode_consistent is False and route_a_mode_consistent is True` を満たす経路を評価する。
+
         if legacy_mode_consistent is False and route_a_mode_consistent is True:
             review_action = "relabel_route_a_mode_consistent_keep_watch"
             review_reason = "legacy mode_consistent used q_pred_after sign; Route-A audit now uses q_route_a sign."
+        # 条件分岐: 前段条件が不成立で、`legacy_mode_consistent is False and route_a_mode_consistent is False` を追加評価する。
         elif legacy_mode_consistent is False and route_a_mode_consistent is False:
             review_action = "keep_mode_definition_watch"
             review_reason = "Route-A sign and observed branch both indicate a transition-definition mismatch."
         else:
             review_action = "keep"
             review_reason = "No relabel required."
+
         nuclide_key = str(row.get("nuclide_key", ""))
         pmode = primary_modes.get(nuclide_key, {})
         observed_modes = pmode.get("observed_modes")
@@ -1016,6 +1146,7 @@ def _route_a_watch_outliers(
                 "review_reason": review_reason,
             }
         )
+
     return sorted(out, key=lambda row: float(row.get("abs_z_qbeta", 0.0)), reverse=True)
 
 
@@ -1047,10 +1178,12 @@ def _build_route_a_watch_outlier_figure(
     fig, axes = plt.subplots(1, 2, figsize=(13.8, 5.4), dpi=170)
     ax0, ax1 = axes
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         for ax in (ax0, ax1):
             ax.axis("off")
             ax.text(0.5, 0.5, "No Route-A watch outliers", ha="center", va="center", fontsize=11)
+
         fig.suptitle("Weak-interaction beta-decay Route-A watch outliers")
         fig.tight_layout()
         fig.savefig(out_png, bbox_inches="tight")
@@ -1078,6 +1211,7 @@ def _build_route_a_watch_outlier_figure(
         marker = "o" if str(row.get("channel", "")) == "beta_minus" else "s"
         ax1.scatter(sigmas[idx], deltas[idx], s=70.0, marker=marker, color=colors[idx], alpha=0.9)
         ax1.annotate(str(row.get("nuclide_name", "")), (sigmas[idx], deltas[idx]), textcoords="offset points", xytext=(4, 4), fontsize=8)
+
     ax1.set_xlabel("Q_obs sigma [MeV]")
     ax1.set_ylabel("abs(delta Q) [MeV]")
     ax1.set_title("Outlier scale: sigma vs abs(delta Q)")
@@ -1176,13 +1310,20 @@ def main() -> None:
     out_json = out_dir / "weak_interaction_beta_decay_route_ab_audit.json"
     previous_ckm_watchpack = _load_previous_ckm_watchpack(out_json)
 
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(f"[fail] missing input csv: {in_csv}")
+
+    # 条件分岐: `not in_json.exists()` を満たす経路を評価する。
+
     if not in_json.exists():
         raise SystemExit(f"[fail] missing input json: {in_json}")
 
     with in_csv.open("r", encoding="utf-8", newline="") as f:
         rows = list(csv.DictReader(f))
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit(f"[fail] input csv has no rows: {in_csv}")
 
@@ -1389,6 +1530,8 @@ def main() -> None:
     print(f"  {out_watch_json}")
     print(f"  {out_watch_png}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

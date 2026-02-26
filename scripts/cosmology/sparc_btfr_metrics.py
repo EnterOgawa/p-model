@@ -32,6 +32,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -87,20 +88,31 @@ def _iter_rows(path: Path) -> Iterable[BtfrRow]:
     # Data lines have 19 tokens: Name + 18 numeric fields.
     for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
         s = raw.strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
+        # 条件分岐: `s.startswith(("Title:", "Authors:", "Table:", "Byte", "Note", "====", "---"))` を満たす経路を評価する。
+
         if s.startswith(("Title:", "Authors:", "Table:", "Byte", "Note", "====", "---")):
             continue
+
+        # 条件分岐: `not (s[0].isalnum() or s[0] in ("_", "+", "-"))` を満たす経路を評価する。
+
         if not (s[0].isalnum() or s[0] in ("_", "+", "-")):
             continue
+
         parts = s.split()
+        # 条件分岐: `len(parts) != 19` を満たす経路を評価する。
         if len(parts) != 19:
             continue
+
         try:
             name = parts[0]
             nums = [float(x) for x in parts[1:]]
         except Exception:
             continue
+
         yield BtfrRow(
             name=name,
             log_mb=nums[0],
@@ -125,12 +137,17 @@ def _iter_rows(path: Path) -> Iterable[BtfrRow]:
 
 
 def _fit_logmb_vs_logv(x: np.ndarray, y: np.ndarray, *, w: Optional[np.ndarray]) -> Dict[str, Any]:
+    # 条件分岐: `x.size < 10` を満たす経路を評価する。
     if x.size < 10:
         return {"status": "not_enough_points", "n_used": int(x.size)}
+
+    # 条件分岐: `w is None` を満たす経路を評価する。
+
     if w is None:
         slope, intercept = np.polyfit(x, y, deg=1)
     else:
         slope, intercept = np.polyfit(x, y, deg=1, w=w)
+
     yhat = intercept + slope * x
     resid = y - yhat
     return {
@@ -150,16 +167,22 @@ def _fit_logmb_vs_logv(x: np.ndarray, y: np.ndarray, *, w: Optional[np.ndarray])
 
 
 def _plot(out_png: Path, *, x: np.ndarray, y: np.ndarray, fit: Dict[str, Any], xlabel: str) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
+    # 条件分岐: `x.size < 10` を満たす経路を評価する。
+
     if x.size < 10:
         return
+
     plt.figure(figsize=(7, 5))
     plt.scatter(x, y, s=10, alpha=0.55, edgecolors="none")
     plt.xlabel(xlabel)
     plt.ylabel("log10 M_b [Msun]")
     plt.title("SPARC BTFR (Lelli+2019)")
     plt.grid(True, alpha=0.3)
+    # 条件分岐: `fit.get("status") == "ok"` を満たす経路を評価する。
     if fit.get("status") == "ok":
         slope = float(fit["slope"])
         intercept = float(fit["intercept"])
@@ -167,6 +190,7 @@ def _plot(out_png: Path, *, x: np.ndarray, y: np.ndarray, fit: Dict[str, Any], x
         yy = intercept + slope * xx
         plt.plot(xx, yy, color="black", lw=1.5, label=f"slope={slope:.3g}, rms={float(fit['rms_residual_dex']):.3g} dex")
         plt.legend(loc="best", frameon=True)
+
     out_png.parent.mkdir(parents=True, exist_ok=True)
     plt.tight_layout()
     plt.savefig(out_png, dpi=170)
@@ -180,18 +204,25 @@ def _extract_xy(rows: Sequence[BtfrRow], *, velocity_key: str) -> Tuple[np.ndarr
     vw: List[float] = []
     for r in rows:
         v = getattr(r, velocity_key)
+        # 条件分岐: `not np.isfinite(v) or v <= 0.0` を満たす経路を評価する。
         if not np.isfinite(v) or v <= 0.0:
             continue
+
+        # 条件分岐: `not np.isfinite(r.log_mb)` を満たす経路を評価する。
+
         if not np.isfinite(r.log_mb):
             continue
+
         x = math.log10(float(v))
         y = float(r.log_mb)
         vx.append(x)
         vy.append(y)
+        # 条件分岐: `np.isfinite(r.e_log_mb) and r.e_log_mb > 0` を満たす経路を評価する。
         if np.isfinite(r.e_log_mb) and r.e_log_mb > 0:
             vw.append(1.0 / float(r.e_log_mb))
         else:
             vw.append(1.0)
+
     return np.asarray(vx, dtype=float), np.asarray(vy, dtype=float), np.asarray(vw, dtype=float)
 
 
@@ -210,6 +241,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     btfr_path = Path(args.btfr_mrt)
+    # 条件分岐: `not btfr_path.exists()` を満たす経路を評価する。
     if not btfr_path.exists():
         raise FileNotFoundError(f"missing BTFR mrt: {btfr_path}")
 
@@ -236,8 +268,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         fit_unweighted = _fit_logmb_vs_logv(x, y, w=None)
         fit_weighted = _fit_logmb_vs_logv(x, y, w=w)
         fits[key] = {"label": label, "unweighted": fit_unweighted, "weighted": fit_weighted, "n_used": int(x.size)}
+        # 条件分岐: `key == primary_key` を満たす経路を評価する。
         if key == primary_key:
             primary_xy = (x, y, w)
+            # 条件分岐: `fit_weighted.get("status") == "ok"` を満たす経路を評価する。
             if fit_weighted.get("status") == "ok":
                 primary_scatter = float(fit_weighted["rms_residual_dex"])
 
@@ -268,6 +302,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"metrics": _rel(out_metrics), "n_rows": len(rows)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

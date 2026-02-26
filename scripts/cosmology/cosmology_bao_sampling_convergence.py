@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -49,11 +50,17 @@ def _parse_int_list(s: str) -> List[int]:
     out: List[int] = []
     for tok in str(s).split(","):
         t = tok.strip()
+        # 条件分岐: `not t` を満たす経路を評価する。
         if not t:
             continue
+
         out.append(int(float(t)))
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError("empty list")
+
     return out
 
 
@@ -68,10 +75,15 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _metrics_path(*, sample: str, caps: str, dist: str, ztag: str, out_tag: str) -> Path:
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}"
+    # 条件分岐: `ztag` を満たす経路を評価する。
     if ztag:
         base = f"{base}_{ztag}"
+
+    # 条件分岐: `out_tag` を満たす経路を評価する。
+
     if out_tag:
         base = f"{base}__{out_tag}"
+
     return _ROOT / "output" / "private" / "cosmology" / f"{base}_metrics.json"
 
 
@@ -85,11 +97,15 @@ def _extract_key_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
 
     kept = {}
     for item in by_cap:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         cap = str(item.get("cap", ""))
+        # 条件分岐: `not cap` を満たす経路を評価する。
         if not cap:
             continue
+
         kept[cap] = {
             "kept_frac_gal": item.get("kept_frac_gal"),
             "kept_frac_rnd": item.get("kept_frac_rnd"),
@@ -154,6 +170,7 @@ def main(argv: list[str] | None = None) -> int:
         for random_max_rows in rows_list:
             out_tag = f"conv_rnd{random_sampling}_{random_max_rows}_gal{galaxy_sampling}_{galaxy_max_rows}"
 
+            # 条件分岐: `args.run` を満たす経路を評価する。
             if args.run:
                 # 1) fetch (updates manifest to point to the desired extracted npz variants)
                 fetch_cmd = [
@@ -178,8 +195,10 @@ def main(argv: list[str] | None = None) -> int:
                     "--chunk-rows",
                     str(int(args.chunk_rows)),
                 ]
+                # 条件分岐: `int(args.random_scan_max_rows) > 0` を満たす経路を評価する。
                 if int(args.random_scan_max_rows) > 0:
                     fetch_cmd += ["--random-scan-max-rows", str(int(args.random_scan_max_rows))]
+
                 _run_cmd(fetch_cmd)
 
                 # 2) xi (writes output/private/cosmology/cosmology_bao_xi_from_catalogs_...__out_tag_*.json)
@@ -210,9 +229,11 @@ def main(argv: list[str] | None = None) -> int:
                 _run_cmd(xi_cmd)
 
             mpath = _metrics_path(sample=sample, caps=caps, dist=dist, ztag=ztag, out_tag=out_tag)
+            # 条件分岐: `not mpath.exists()` を満たす経路を評価する。
             if not mpath.exists():
                 print(f"[warn] metrics not found (skip): {mpath}")
                 continue
+
             d = _read_json(mpath)
             run_results.append(RunResult(random_max_rows=int(random_max_rows), out_tag=out_tag, metrics_json=mpath, metrics=d))
     finally:
@@ -220,10 +241,13 @@ def main(argv: list[str] | None = None) -> int:
         if manifest_backup and manifest_path.exists():
             manifest_path.write_text(manifest_backup, encoding="utf-8")
 
+    # 条件分岐: `not run_results` を満たす経路を評価する。
+
     if not run_results:
         raise SystemExit("no metrics collected (did you run with --run or provide existing outputs?)")
 
     # Summarize
+
     rows = []
     for r in run_results:
         rows.append(
@@ -234,6 +258,7 @@ def main(argv: list[str] | None = None) -> int:
                 **_extract_key_metrics(r.metrics),
             }
         )
+
     rows = sorted(rows, key=lambda x: int(x["random_max_rows"]))
 
     out_dir = _ROOT / "output" / "private" / "cosmology"
@@ -253,11 +278,14 @@ def main(argv: list[str] | None = None) -> int:
         vals = []
         for rr in rows:
             kept = rr.get("kept_by_cap", {})
+            # 条件分岐: `not isinstance(kept, dict)` を満たす経路を評価する。
             if not isinstance(kept, dict):
                 vals.append(float("nan"))
                 continue
+
             v = kept.get(key, {}).get("kept_frac_rnd") if isinstance(kept.get(key, {}), dict) else None
             vals.append(float(v) if v is not None else float("nan"))
+
         return np.asarray(vals, dtype=float)
 
     kept_n = _cap_series("north")
@@ -296,6 +324,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for ax in axs.reshape(-1):
         ax.set_xscale("log")
+
     fig.suptitle(f"BAO sampling convergence: sample={sample}, caps={caps}, dist={dist}, random={random_sampling}/{random_kind}", fontsize=13)
     fig.tight_layout(rect=(0.0, 0.02, 1.0, 0.94))
     fig.savefig(out_png, dpi=200)
@@ -338,6 +367,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

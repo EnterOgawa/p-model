@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -51,6 +52,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -74,8 +76,10 @@ def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
 
 def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     lo, hi = _ci_asym_err(eps, ci_1sigma)
+    # 条件分岐: `not np.isfinite(lo) or not np.isfinite(hi)` を満たす経路を評価する。
     if not np.isfinite(lo) or not np.isfinite(hi):
         return float("nan")
+
     return float(0.5 * (lo + hi))
 
 
@@ -91,12 +95,20 @@ class EpsPoint:
 
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
+    # 条件分岐: `z == "b1"` を満たす経路を評価する。
     if z == "b1":
         return 1
+
+    # 条件分岐: `z == "b2"` を満たす経路を評価する。
+
     if z == "b2":
         return 2
+
+    # 条件分岐: `z == "b3"` を満たす経路を評価する。
+
     if z == "b3":
         return 3
+
     return None
 
 
@@ -104,11 +116,15 @@ def _extract_catalog_eps_peakfit(metrics: Dict[str, Any], *, dist: str) -> Dict[
     out: Dict[int, EpsPoint] = {}
     for r in metrics.get("results", []):
         try:
+            # 条件分岐: `str(r.get("dist")) != str(dist)` を満たす経路を評価する。
             if str(r.get("dist")) != str(dist):
                 continue
+
             z_int = _zbin_label_to_int(str(r.get("z_bin")))
+            # 条件分岐: `z_int is None` を満たす経路を評価する。
             if z_int is None:
                 continue
+
             z_eff = float(r.get("z_eff"))
             eps = float(r["fit"]["free"]["eps"])
             ci = r["fit"]["free"].get("eps_ci_1sigma")
@@ -128,6 +144,7 @@ def _extract_catalog_eps_peakfit(metrics: Dict[str, Any], *, dist: str) -> Dict[
             )
         except Exception:
             continue
+
     return out
 
 
@@ -150,6 +167,7 @@ def _extract_published_eps(metrics: Dict[str, Any]) -> Dict[int, EpsPoint]:
             )
         except Exception:
             continue
+
     return out
 
 
@@ -222,10 +240,12 @@ def main(argv: list[str] | None = None) -> int:
     out_json = (_ROOT / str(args.out_json)).resolve()
 
     missing = [p for p in [p_pub, p_boss, p_fkp, p_none] if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         print("[skip] missing inputs:")
         for p in missing:
             print(f"  - {p}")
+
         return 0
 
     pub = _extract_published_eps(_load_json(p_pub))
@@ -269,10 +289,12 @@ def main(argv: list[str] | None = None) -> int:
         y = []
         yerr = []
         for z in z_bins:
+            # 条件分岐: `z not in pub or z not in points` を満たす経路を評価する。
             if z not in pub or z not in points:
                 y.append(float("nan"))
                 yerr.append(float("nan"))
                 continue
+
             p = pub[z]
             c = points[z]
             d = float(c.eps - p.eps)
@@ -281,6 +303,7 @@ def main(argv: list[str] | None = None) -> int:
             )
             y.append(d)
             yerr.append(sigma)
+
         y = np.asarray(y, dtype=float)
         yerr = np.asarray(yerr, dtype=float)
         ok = np.isfinite(z_ref) & np.isfinite(y) & np.isfinite(yerr) & (yerr > 0)
@@ -356,6 +379,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

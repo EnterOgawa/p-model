@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -66,8 +67,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -76,19 +79,26 @@ def _set_japanese_font() -> None:
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
+
     try:
         data = _read_json(p)
     except Exception:
         return {"path": _relpath(p), "exists": True, "parse_error": True}
+
     out: Dict[str, Any] = {"path": _relpath(p), "exists": True}
     for k in ("beta", "beta_sigma", "gamma_pmodel", "gamma_pmodel_sigma", "delta"):
+        # 条件分岐: `k in data` を満たす経路を評価する。
         if k in data:
             out[k] = data.get(k)
+
     policy = data.get("policy")
+    # 条件分岐: `isinstance(policy, dict)` を満たす経路を評価する。
     if isinstance(policy, dict):
         out["policy"] = {kk: policy.get(kk) for kk in ("fit_predict_separation", "beta_source", "delta_source", "note")}
+
     return out
 
 
@@ -98,18 +108,24 @@ def _load_cassini_metrics(csv_path: Path) -> Dict[str, Dict[str, float]]:
         reader = csv.DictReader(f)
         for r in reader:
             window = str(r.get("window") or "").strip()
+            # 条件分岐: `not window` を満たす経路を評価する。
             if not window:
                 continue
+
             out: Dict[str, float] = {}
             for k in ("n", "rmse", "mae", "corr", "max_obs", "min_obs", "max_model", "min_model"):
                 v = r.get(k)
+                # 条件分岐: `v is None or str(v).strip() == ""` を満たす経路を評価する。
                 if v is None or str(v).strip() == "":
                     continue
+
                 try:
                     out[k] = float(v)
                 except Exception:
                     continue
+
             rows[window] = out
+
     return rows
 
 
@@ -129,15 +145,26 @@ def _load_mercury_metrics(json_path: Path) -> Dict[str, Any]:
     sim = (((d.get("simulation_physical") or {}).get("pmodel") or {}).get("arcsec_per_century"))
     ein = (((d.get("einstein_approx") or {}).get("arcsec_per_century")))
     out: Dict[str, Any] = {}
+    # 条件分岐: `isinstance(ref, (int, float))` を満たす経路を評価する。
     if isinstance(ref, (int, float)):
         out["reference_arcsec_century"] = float(ref)
+
+    # 条件分岐: `isinstance(sim, (int, float))` を満たす経路を評価する。
+
     if isinstance(sim, (int, float)):
         out["pmodel_arcsec_century"] = float(sim)
+
+    # 条件分岐: `isinstance(ein, (int, float))` を満たす経路を評価する。
+
     if isinstance(ein, (int, float)):
         out["einstein_arcsec_century"] = float(ein)
+
+    # 条件分岐: `"reference_arcsec_century" in out and "pmodel_arcsec_century" in out` を満たす経路を評価する。
+
     if "reference_arcsec_century" in out and "pmodel_arcsec_century" in out:
         out["pmodel_minus_ref_arcsec_century"] = out["pmodel_arcsec_century"] - out["reference_arcsec_century"]
         out["pmodel_minus_ref_percent"] = 100.0 * out["pmodel_minus_ref_arcsec_century"] / out["reference_arcsec_century"]
+
     return out
 
 
@@ -150,20 +177,27 @@ def _load_viking_series(csv_path: Path) -> Dict[str, Any]:
         for r in reader:
             t = str(r.get("time_utc") or "").strip()
             v = r.get("shapiro_delay_us")
+            # 条件分岐: `v is None or str(v).strip() == ""` を満たす経路を評価する。
             if v is None or str(v).strip() == "":
                 continue
+
             try:
                 us = float(v)
             except Exception:
                 continue
+
             n += 1
+            # 条件分岐: `(max_us is None) or (us > max_us)` を満たす経路を評価する。
             if (max_us is None) or (us > max_us):
                 max_us = us
                 max_time = t or None
+
     out: Dict[str, Any] = {"n": int(n)}
+    # 条件分岐: `max_us is not None` を満たす経路を評価する。
     if max_us is not None:
         out["max_delay_us"] = float(max_us)
         out["max_time_utc"] = max_time
+
     return out
 
 
@@ -190,13 +224,19 @@ def _run(cmd: List[str], *, cwd: Path, timeout_s: float, log_path: Path) -> Dict
     elapsed = time.perf_counter() - t0
     with open(log_path, "a", encoding="utf-8") as logf:
         logf.write(f"returncode: {proc.returncode}\n")
+        # 条件分岐: `proc.stdout` を満たす経路を評価する。
         if proc.stdout:
             logf.write("--- stdout ---\n")
             logf.write(proc.stdout[:20000] + ("\n...[truncated]\n" if len(proc.stdout) > 20000 else ""))
+
+        # 条件分岐: `proc.stderr` を満たす経路を評価する。
+
         if proc.stderr:
             logf.write("--- stderr ---\n")
             logf.write(proc.stderr[:20000] + ("\n...[truncated]\n" if len(proc.stderr) > 20000 else ""))
+
         logf.write(f"--- run end (elapsed_s={elapsed:.3f}) ---\n")
+
     return {"ok": proc.returncode == 0, "returncode": proc.returncode, "elapsed_s": elapsed}
 
 
@@ -229,6 +269,7 @@ def collect(
     run_log = out_dir / "weak_field_longterm_consistency_run.log"
 
     rerun_status: Dict[str, Any] = {}
+    # 条件分岐: `rerun` を満たす経路を評価する。
     if rerun:
         planned: List[Tuple[str, List[str]]] = [
             (
@@ -268,9 +309,11 @@ def collect(
             ),
         ]
         for test_id, cmd in planned:
+            # 条件分岐: `tests_filter and test_id not in tests_filter` を満たす経路を評価する。
             if tests_filter and test_id not in tests_filter:
                 rerun_status[test_id] = {"skipped": True, "reason": "filtered"}
                 continue
+
             rerun_status[test_id] = _run(cmd, cwd=_ROOT, timeout_s=timeout_s, log_path=run_log)
 
     results: Dict[str, Any] = {}
@@ -278,7 +321,10 @@ def collect(
     def _want(test_id: str) -> bool:
         return (tests_filter is None) or (test_id in tests_filter)
 
+    # 条件分岐: `_want("cassini_sce1_doppler")` を満たす経路を評価する。
+
     if _want("cassini_sce1_doppler"):
+        # 条件分岐: `cassini_metrics_csv.exists()` を満たす経路を評価する。
         if cassini_metrics_csv.exists():
             rows = _load_cassini_metrics(cassini_metrics_csv)
             focus = rows.get("-10 to +10 days") or rows.get("all (available points)") or {}
@@ -291,14 +337,19 @@ def collect(
         else:
             results["cassini_sce1_doppler"] = {"status": "missing", "source": {"cassini_fig2_metrics_csv": _relpath(cassini_metrics_csv)}}
 
+    # 条件分岐: `_want("gps_satellite_clock")` を満たす経路を評価する。
+
     if _want("gps_satellite_clock"):
+        # 条件分岐: `gps_metrics_json.exists()` を満たす経路を評価する。
         if gps_metrics_json.exists():
             m = _load_gps_metrics(gps_metrics_json)
             brdc = m.get("brdc_rms_ns_median")
             pmod = m.get("pmodel_rms_ns_median")
             ratio = None
+            # 条件分岐: `isinstance(brdc, (int, float)) and isinstance(pmod, (int, float)) and float(b...` を満たす経路を評価する。
             if isinstance(brdc, (int, float)) and isinstance(pmod, (int, float)) and float(brdc) != 0.0:
                 ratio = float(pmod) / float(brdc)
+
             results["gps_satellite_clock"] = {
                 "status": "ok",
                 "source": {"gps_compare_metrics_json": _relpath(gps_metrics_json)},
@@ -308,14 +359,19 @@ def collect(
         else:
             results["gps_satellite_clock"] = {"status": "missing", "source": {"gps_compare_metrics_json": _relpath(gps_metrics_json)}}
 
+    # 条件分岐: `_want("llr_batch")` を満たす経路を評価する。
+
     if _want("llr_batch"):
+        # 条件分岐: `llr_summary_json.exists()` を満たす経路を評価する。
         if llr_summary_json.exists():
             m = _load_llr_summary(llr_summary_json)
             tide = m.get("station_reflector_tropo_tide")
             nosh = m.get("station_reflector_tropo_no_shapiro")
             ratio = None
+            # 条件分岐: `isinstance(tide, (int, float)) and isinstance(nosh, (int, float)) and float(n...` を満たす経路を評価する。
             if isinstance(tide, (int, float)) and isinstance(nosh, (int, float)) and float(nosh) != 0.0:
                 ratio = float(tide) / float(nosh)
+
             results["llr_batch"] = {
                 "status": "ok",
                 "source": {"llr_batch_summary_json": _relpath(llr_summary_json)},
@@ -325,7 +381,10 @@ def collect(
         else:
             results["llr_batch"] = {"status": "missing", "source": {"llr_batch_summary_json": _relpath(llr_summary_json)}}
 
+    # 条件分岐: `_want("mercury_perihelion_precession")` を満たす経路を評価する。
+
     if _want("mercury_perihelion_precession"):
+        # 条件分岐: `mercury_metrics_json.exists()` を満たす経路を評価する。
         if mercury_metrics_json.exists():
             m = _load_mercury_metrics(mercury_metrics_json)
             results["mercury_perihelion_precession"] = {
@@ -339,7 +398,10 @@ def collect(
                 "source": {"mercury_precession_metrics_json": _relpath(mercury_metrics_json)},
             }
 
+    # 条件分岐: `_want("viking_shapiro_peak")` を満たす経路を評価する。
+
     if _want("viking_shapiro_peak"):
+        # 条件分岐: `viking_series_csv.exists()` を満たす経路を評価する。
         if viking_series_csv.exists():
             m = _load_viking_series(viking_series_csv)
             results["viking_shapiro_peak"] = {
@@ -384,17 +446,24 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
     # 1) Cassini
     ax = axes[0]
     cass = res.get("cassini_sce1_doppler") or {}
+    # 条件分岐: `cass.get("status") == "ok"` を満たす経路を評価する。
     if cass.get("status") == "ok":
         windows = cass.get("windows") or {}
         xs: List[str] = []
         ys: List[float] = []
         for key in ["all (available points)", "-10 to +10 days", "-3 to +3 days"]:
+            # 条件分岐: `key not in windows` を満たす経路を評価する。
             if key not in windows:
                 continue
+
             rmse = (windows.get(key) or {}).get("rmse")
+            # 条件分岐: `isinstance(rmse, (int, float))` を満たす経路を評価する。
             if isinstance(rmse, (int, float)):
                 xs.append(key.replace("all (available points)", "all").replace("-10 to +10 days", "±10d").replace("-3 to +3 days", "±3d"))
                 ys.append(float(rmse) * 1e11)
+
+        # 条件分岐: `xs` を満たす経路を評価する。
+
         if xs:
             ax.bar(xs, ys)
             ax.set_ylabel("RMSE [×1e-11]")
@@ -407,8 +476,10 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax.set_title("Cassini SCE1")
 
     # 2) GPS
+
     ax = axes[1]
     gps = res.get("gps_satellite_clock") or {}
+    # 条件分岐: `gps.get("status") == "ok"` を満たす経路を評価する。
     if gps.get("status") == "ok":
         m = gps.get("metrics") or {}
         brdc_med = m.get("brdc_rms_ns_median")
@@ -420,6 +491,7 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         width = 0.35
         b = [float(brdc_med), float(brdc_max)] if isinstance(brdc_med, (int, float)) and isinstance(brdc_max, (int, float)) else None
         p = [float(pmod_med), float(pmod_max)] if isinstance(pmod_med, (int, float)) and isinstance(pmod_max, (int, float)) else None
+        # 条件分岐: `b and p` を満たす経路を評価する。
         if b and p:
             ax.bar([xi - width / 2 for xi in x], b, width, label="BRDC")
             ax.bar([xi + width / 2 for xi in x], p, width, label="P-model")
@@ -435,8 +507,10 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax.set_title("GPS")
 
     # 3) LLR
+
     ax = axes[2]
     llr = res.get("llr_batch") or {}
+    # 条件分岐: `llr.get("status") == "ok"` を満たす経路を評価する。
     if llr.get("status") == "ok":
         m = llr.get("median_rms_ns") or {}
         keys = [
@@ -448,9 +522,13 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         ys: List[float] = []
         for label, k in keys:
             v = m.get(k)
+            # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
             if isinstance(v, (int, float)) and math.isfinite(float(v)):
                 xs.append(label)
                 ys.append(float(v))
+
+        # 条件分岐: `xs` を満たす経路を評価する。
+
         if xs:
             ax.bar(xs, ys)
             ax.set_yscale("log")
@@ -464,8 +542,10 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax.set_title("LLR")
 
     # 4) Mercury
+
     ax = axes[3]
     mer = res.get("mercury_perihelion_precession") or {}
+    # 条件分岐: `mer.get("status") == "ok"` を満たす経路を評価する。
     if mer.get("status") == "ok":
         m = mer.get("metrics") or {}
         ref = m.get("reference_arcsec_century")
@@ -474,9 +554,13 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         xs: List[str] = []
         ys: List[float] = []
         for label, v in [("ref", ref), ("Einstein", ein), ("P-model", pmod)]:
+            # 条件分岐: `isinstance(v, (int, float))` を満たす経路を評価する。
             if isinstance(v, (int, float)):
                 xs.append(label)
                 ys.append(float(v))
+
+        # 条件分岐: `xs` を満たす経路を評価する。
+
         if xs:
             ax.bar(xs, ys)
             ax.set_ylabel("arcsec/century")
@@ -489,11 +573,14 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax.set_title("Mercury")
 
     # 5) Viking
+
     ax = axes[4]
     vik = res.get("viking_shapiro_peak") or {}
+    # 条件分岐: `vik.get("status") == "ok"` を満たす経路を評価する。
     if vik.get("status") == "ok":
         series = vik.get("series") or {}
         vmax = series.get("max_delay_us")
+        # 条件分岐: `isinstance(vmax, (int, float))` を満たす経路を評価する。
         if isinstance(vmax, (int, float)):
             ax.bar(["max delay"], [float(vmax)])
             ax.set_ylabel("μs")
@@ -506,6 +593,7 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
         ax.set_title("Viking")
 
     # 6) Notes / status
+
     ax = axes[5]
     ax.axis("off")
     gen = payload.get("generated_utc")
@@ -565,19 +653,29 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     matrix_path = Path(args.matrix)
+    # 条件分岐: `not matrix_path.is_absolute()` を満たす経路を評価する。
     if not matrix_path.is_absolute():
         matrix_path = (_ROOT / matrix_path).resolve()
+
     templates_path = Path(args.templates)
+    # 条件分岐: `not templates_path.is_absolute()` を満たす経路を評価する。
     if not templates_path.is_absolute():
         templates_path = (_ROOT / templates_path).resolve()
+
+    # 条件分岐: `not matrix_path.exists()` を満たす経路を評価する。
+
     if not matrix_path.exists():
         print(f"[err] missing matrix: {matrix_path}")
         return 2
+
+    # 条件分岐: `not templates_path.exists()` を満たす経路を評価する。
+
     if not templates_path.exists():
         print(f"[err] missing templates: {templates_path}")
         return 2
 
     tests_filter = None
+    # 条件分岐: `str(args.tests).strip()` を満たす経路を評価する。
     if str(args.tests).strip():
         tests_filter = [s.strip() for s in str(args.tests).split(",") if s.strip()]
 
@@ -590,11 +688,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
 
     out_json = Path(args.out_json)
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_png = Path(args.out_png)
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
     if not out_png.is_absolute():
         out_png = (_ROOT / out_png).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
     out_png.parent.mkdir(parents=True, exist_ok=True)
 
@@ -615,6 +717,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -20,14 +20,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -36,17 +40,25 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
 def _find_unique_row(rows: list[dict[str, str]], *, z: int, n: int, a: int) -> dict[str, str]:
     matches = [r for r in rows if int(r["z"]) == z and int(r["n"]) == n and int(r["a"]) == a]
+    # 条件分岐: `not matches` を満たす経路を評価する。
     if not matches:
         raise ValueError(f"row not found: z={z} n={n} a={a}")
+
+    # 条件分岐: `len(matches) != 1` を満たす経路を評価する。
+
     if len(matches) != 1:
         raise ValueError(f"row not unique: z={z} n={n} a={a} (n_matches={len(matches)})")
+
     return matches[0]
 
 
@@ -74,6 +86,7 @@ def main() -> None:
     doi = "10.1016/j.adt.2011.12.006"
 
     files = [FileSpec(url=csv_url, relpath="charge_radii.csv")]
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         for spec in files:
             _download(spec.url, src_dir / spec.relpath)
@@ -81,8 +94,12 @@ def main() -> None:
     missing: list[Path] = []
     for spec in files:
         p = src_dir / spec.relpath
+        # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
         if not p.exists() or p.stat().st_size == 0:
             missing.append(p)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
@@ -94,14 +111,17 @@ def main() -> None:
     # Extract A=3 radii:
     #   tritium (H-3): Z=1, N=2, A=3
     #   helion  (He-3): Z=2, N=1, A=3
+
     row_t = _find_unique_row(rows, z=1, n=2, a=3)
     row_h = _find_unique_row(rows, z=2, n=1, a=3)
 
     def pack(row: dict[str, str], *, key: str) -> dict[str, object]:
         radius_val = row.get("radius_val", "").strip()
         radius_unc = row.get("radius_unc", "").strip()
+        # 条件分岐: `not radius_val or not radius_unc` を満たす経路を評価する。
         if not radius_val or not radius_unc:
             raise ValueError(f"missing radius fields for key={key}: {row}")
+
         return {
             "key": key,
             "Z": int(row["z"]),
@@ -147,12 +167,15 @@ def main() -> None:
 
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
+        # 条件分岐: `extra` を満たす経路を評価する。
         if extra:
             item.update(extra)
+
         manifest["files"].append(item)
 
     for spec in files:
         add_file(url=spec.url, path=src_dir / spec.relpath)
+
     add_file(url=None, path=out_extracted, extra={"derived_from": str(csv_path)})
 
     out_manifest = src_dir / "manifest.json"
@@ -160,6 +183,8 @@ def main() -> None:
     print(f"[ok] extracted: {out_extracted}")
     print(f"[ok] manifest : {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -32,55 +33,90 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
+    # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
         return None
+
     c = None
+    # 条件分岐: `abs(alpha - 0.10) < 1e-12` を満たす経路を評価する。
     if abs(alpha - 0.10) < 1e-12:
         c = 1.22
+    # 条件分岐: 前段条件が不成立で、`abs(alpha - 0.05) < 1e-12` を追加評価する。
     elif abs(alpha - 0.05) < 1e-12:
         c = 1.36
+    # 条件分岐: 前段条件が不成立で、`abs(alpha - 0.01) < 1e-12` を追加評価する。
     elif abs(alpha - 0.01) < 1e-12:
         c = 1.63
+    # 条件分岐: 前段条件が不成立で、`abs(alpha - 0.001) < 1e-12` を追加評価する。
     elif abs(alpha - 0.001) < 1e-12:
         c = 1.95
+
+    # 条件分岐: `c is None` を満たす経路を評価する。
+
     if c is None:
         return None
+
     return float(c * math.sqrt((n + m) / (n * m)))
 
 
 def _autocorr(x: np.ndarray, lag: int) -> Optional[float]:
+    # 条件分岐: `lag <= 0` を満たす経路を評価する。
     if lag <= 0:
         return 1.0
+
+    # 条件分岐: `x.size <= lag + 2` を満たす経路を評価する。
+
     if x.size <= lag + 2:
         return None
+
     a = x[:-lag]
     b = x[lag:]
+    # 条件分岐: `a.size < 3 or b.size < 3` を満たす経路を評価する。
     if a.size < 3 or b.size < 3:
         return None
+
+    # 条件分岐: `not (np.isfinite(a).all() and np.isfinite(b).all())` を満たす経路を評価する。
+
     if not (np.isfinite(a).all() and np.isfinite(b).all()):
         return None
+
     sa = float(np.std(a))
     sb = float(np.std(b))
+    # 条件分岐: `sa <= 0.0 or sb <= 0.0` を満たす経路を評価する。
     if sa <= 0.0 or sb <= 0.0:
         return None
+
     return float(np.corrcoef(a, b)[0, 1])
 
 
 def _effective_n_from_rhos(n: int, rhos: Dict[str, Any]) -> Optional[float]:
+    # 条件分岐: `n <= 0` を満たす経路を評価する。
     if n <= 0:
         return None
+
     vals = []
     for k, v in rhos.items():
+        # 条件分岐: `not k.startswith("lag=")` を満たす経路を評価する。
         if not k.startswith("lag="):
             continue
+
+        # 条件分岐: `not isinstance(v, (int, float))` を満たす経路を評価する。
+
         if not isinstance(v, (int, float)):
             continue
+
         vals.append(float(v))
+
+    # 条件分岐: `not vals` を満たす経路を評価する。
+
     if not vals:
         return None
+
     denom = 1.0 + 2.0 * sum(vals)
+    # 条件分岐: `denom <= 0` を満たす経路を評価する。
     if denom <= 0:
         return None
+
     return float(n / denom)
 
 
@@ -130,6 +166,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_path), "png": str(out_png)},
     }
 
+    # 条件分岐: `not w_path.exists()` を満たす経路を評価する。
     if not w_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_inputs"
@@ -142,8 +179,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     gp = ((wielgus.get("extracted") or {}).get("gpresults_tau_hours") or {}).get("rows") or {}
     row = gp.get(args.tau_row) if isinstance(gp, dict) else None
     tau_h = None
+    # 条件分岐: `isinstance(row, dict) and isinstance(row.get("tau_h"), (int, float))` を満たす経路を評価する。
     if isinstance(row, dict) and isinstance(row.get("tau_h"), (int, float)):
         tau_h = float(row["tau_h"])
+
+    # 条件分岐: `not (isinstance(tau_h, float) and tau_h > 0)` を満たす経路を評価する。
+
     if not (isinstance(tau_h, float) and tau_h > 0):
         payload["ok"] = False
         payload["reason"] = "tau_not_found"
@@ -154,6 +195,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     deltaT_h = float(args.deltaT_hours)
     dt_s = float(args.dt_seconds)
+    # 条件分岐: `deltaT_h <= 0 or dt_s <= 0` を満たす経路を評価する。
     if deltaT_h <= 0 or dt_s <= 0:
         payload["ok"] = False
         payload["reason"] = "invalid_params"
@@ -161,6 +203,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
 
     steps_per_window = int(round((deltaT_h * 3600.0) / dt_s))
+    # 条件分岐: `steps_per_window < 5` を満たす経路を評価する。
     if steps_per_window < 5:
         payload["ok"] = False
         payload["reason"] = "deltaT_too_short_for_dt"
@@ -169,6 +212,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
 
     total_windows = int(args.num_windows) + int(args.burnin_windows)
+    # 条件分岐: `total_windows < 50` を満たす経路を評価する。
     if total_windows < 50:
         payload["ok"] = False
         payload["reason"] = "too_few_windows"
@@ -191,6 +235,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     mu = float(args.mu)
     frac = float(args.frac)
+    # 条件分岐: `not math.isfinite(mu) or mu <= 0.0 or not math.isfinite(frac) or frac <= 0.0` を満たす経路を評価する。
     if not math.isfinite(mu) or mu <= 0.0 or not math.isfinite(frac) or frac <= 0.0:
         payload["ok"] = False
         payload["reason"] = "invalid_mu_or_frac"
@@ -203,9 +248,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     w_std = np.std(flux, axis=1, ddof=0)
     with np.errstate(divide="ignore", invalid="ignore"):
         mi = w_std / w_mean
+
     mi = mi[int(args.burnin_windows) :]
     mi = mi[np.isfinite(mi)]
 
+    # 条件分岐: `mi.size < 200` を満たす経路を評価する。
     if mi.size < 200:
         payload["ok"] = False
         payload["reason"] = "insufficient_finite_windows"
@@ -227,8 +274,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ("n_obs=eff42", int(round(eff_n_42)) if isinstance(eff_n_42, float) else None),
         ("n_obs=30", 30),
     ]:
+        # 条件分岐: `not isinstance(n_obs, int) or n_obs <= 0` を満たす経路を評価する。
         if not isinstance(n_obs, int) or n_obs <= 0:
             continue
+
         dcrit[n_obs_name] = {f"n_model={m}": _ks_two_sample_dcrit(0.01, n_obs, m) for m in (9, 18, 28)}
 
     payload["derived"] = {
@@ -246,6 +295,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "ks_dcrit_alpha_0p01_examples": dcrit,
     }
 
+    # 条件分岐: `not bool(args.no_plot)` を満たす経路を評価する。
     if not bool(args.no_plot):
         try:
             import matplotlib
@@ -258,16 +308,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             xs = []
             ys = []
             for k, v in rhos.items():
+                # 条件分岐: `not k.startswith("lag=")` を満たす経路を評価する。
                 if not k.startswith("lag="):
                     continue
+
                 try:
                     lag = int(k.split("=", 1)[1])
                 except Exception:
                     continue
+
+                # 条件分岐: `not isinstance(v, (int, float))` を満たす経路を評価する。
+
                 if not isinstance(v, (int, float)):
                     continue
+
                 xs.append(lag)
                 ys.append(float(v))
+
             xs, ys = zip(*sorted(zip(xs, ys))) if xs else ([], [])
             ax.axhline(0.0, color="#999999", linewidth=1)
             ax.plot(xs, ys, marker="o")
@@ -304,10 +361,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pass
 
     print(f"[ok] json: {out_path}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] png : {out_png}")
+
     return 0 if bool(payload.get("ok")) else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

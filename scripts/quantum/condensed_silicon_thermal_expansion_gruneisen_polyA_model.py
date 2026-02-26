@@ -21,9 +21,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -68,25 +71,35 @@ def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
 
 
 def _debye_integrand(x: float) -> float:
+    # 条件分岐: `x <= 0.0` を満たす経路を評価する。
     if x <= 0.0:
         return 0.0
+
     em1 = math.expm1(x)
+    # 条件分岐: `em1 == 0.0` を満たす経路を評価する。
     if em1 == 0.0:
         return 0.0
+
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         n = 2
+
+    # 条件分岐: `n % 2 == 1` を満たす経路を評価する。
+
     if n % 2 == 1:
         n += 1
+
     h = (b - a) / n
     s = f(a) + f(b)
     for i in range(1, n):
         x = a + i * h
         s += (4.0 if (i % 2 == 1) else 2.0) * f(x)
+
     return s * (h / 3.0)
 
 
@@ -94,6 +107,7 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     """
     Debye heat capacity Cv for a monatomic solid, per mole.
     """
+    # 条件分岐: `t_k <= 0.0 or theta_d_k <= 0.0` を満たす経路を評価する。
     if t_k <= 0.0 or theta_d_k <= 0.0:
         return 0.0
 
@@ -109,18 +123,25 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
+    # 条件分岐: `not m.exists()` を満たす経路を評価する。
     if not m.exists():
         return None
+
     try:
         obj = _read_json(m)
     except Exception:
         return None
+
     fit = obj.get("fit") if isinstance(obj.get("fit"), dict) else None
+    # 条件分岐: `not isinstance(fit, dict)` を満たす経路を評価する。
     if not isinstance(fit, dict):
         return None
+
     v = fit.get("theta_D_K")
+    # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0:
         return float(v)
+
     return None
 
 
@@ -137,10 +158,12 @@ class FitResult:
 
 def _solve_linear(a: list[list[float]], b: list[float]) -> Optional[list[float]]:
     n = len(a)
+    # 条件分岐: `n == 0 or any(len(row) != n for row in a) or len(b) != n` を満たす経路を評価する。
     if n == 0 or any(len(row) != n for row in a) or len(b) != n:
         return None
 
     # Augmented matrix.
+
     m = [row[:] + [float(bb)] for row, bb in zip(a, b)]
 
     # Gaussian elimination with partial pivoting.
@@ -149,11 +172,18 @@ def _solve_linear(a: list[list[float]], b: list[float]) -> Optional[list[float]]
         pivot_abs = abs(float(m[col][col]))
         for r in range(col + 1, n):
             v = abs(float(m[r][col]))
+            # 条件分岐: `v > pivot_abs` を満たす経路を評価する。
             if v > pivot_abs:
                 pivot = r
                 pivot_abs = v
+
+        # 条件分岐: `pivot_abs <= 1e-30 or not math.isfinite(pivot_abs)` を満たす経路を評価する。
+
         if pivot_abs <= 1e-30 or not math.isfinite(pivot_abs):
             return None
+
+        # 条件分岐: `pivot != col` を満たす経路を評価する。
+
         if pivot != col:
             m[col], m[pivot] = m[pivot], m[col]
 
@@ -163,17 +193,23 @@ def _solve_linear(a: list[list[float]], b: list[float]) -> Optional[list[float]]
             m[col][c] = float(m[col][c]) * inv
 
         for r in range(n):
+            # 条件分岐: `r == col` を満たす経路を評価する。
             if r == col:
                 continue
+
             factor = float(m[r][col])
+            # 条件分岐: `factor == 0.0` を満たす経路を評価する。
             if factor == 0.0:
                 continue
+
             for c in range(col, n + 1):
                 m[r][c] = float(m[r][c]) - factor * float(m[col][c])
 
     x = [float(m[i][n]) for i in range(n)]
+    # 条件分岐: `not all(math.isfinite(v) for v in x)` を満たす経路を評価する。
     if not all(math.isfinite(v) for v in x):
         return None
+
     return x
 
 
@@ -196,8 +232,10 @@ def _fit_poly_a_eff(
 
     for i in fit_idx:
         sig = float(sigma[i])
+        # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
         if sig <= 0.0:
             continue
+
         w = 1.0 / (sig * sig)
         t = float(temps[i])
         cvi = float(cv[i])
@@ -218,6 +256,7 @@ def _poly_eval(coeffs: list[float], t: float) -> float:
     for c in coeffs:
         s += float(c) * tp
         tp *= float(t)
+
     return float(s)
 
 
@@ -227,38 +266,50 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
+    # 条件分岐: `not alpha_src.exists()` を満たす経路を評価する。
     if not alpha_src.exists():
         raise SystemExit(
             f"[fail] missing: {alpha_src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_thermal_expansion_sources.py"
         )
+
     alpha_extracted = _read_json(alpha_src)
     coeffs_obj = alpha_extracted.get("coefficients")
+    # 条件分岐: `not isinstance(coeffs_obj, dict)` を満たす経路を評価する。
     if not isinstance(coeffs_obj, dict):
         raise SystemExit(f"[fail] coefficients missing: {alpha_src}")
+
     coeffs = {str(k).lower(): float(v) for k, v in coeffs_obj.items()}
     missing = [k for k in "abcdefghijkl" if k not in coeffs]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"[fail] missing coefficients: {missing}")
 
     dr = alpha_extracted.get("data_range")
+    # 条件分岐: `not isinstance(dr, dict)` を満たす経路を評価する。
     if not isinstance(dr, dict):
         raise SystemExit(f"[fail] data_range missing: {alpha_src}")
+
     t_min = int(math.ceil(float(dr.get("t_min_k"))))
     t_max = int(math.floor(float(dr.get("t_max_k"))))
+    # 条件分岐: `not (0 < t_min < t_max)` を満たす経路を評価する。
     if not (0 < t_min < t_max):
         raise SystemExit(f"[fail] invalid data_range: {dr}")
 
     fe = alpha_extracted.get("fit_error_relative_to_data")
+    # 条件分岐: `not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinsta...` を満たす経路を評価する。
     if not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinstance(fe.get("ge"), dict):
         raise SystemExit(f"[fail] fit_error_relative_to_data missing: {alpha_src}")
+
     t_sigma_split = float(fe["lt"].get("t_k", 50.0))
     sigma_lt_1e8 = float(fe["lt"].get("sigma_1e_8_per_k", 0.03))
     sigma_ge_1e8 = float(fe["ge"].get("sigma_1e_8_per_k", 0.5))
 
     theta_from_metrics = _theta_d_from_existing_metrics(root)
+    # 条件分岐: `theta_from_metrics is None` を満たす経路を評価する。
     if theta_from_metrics is None:
         raise SystemExit("[fail] missing frozen θ_D. Expected output/public/quantum/condensed_silicon_heat_capacity_debye_baseline_metrics.json")
+
     theta_d = float(theta_from_metrics)
 
     temps = [float(t) for t in range(t_min, t_max + 1)]
@@ -271,10 +322,12 @@ def main() -> None:
     fit_min_k = 50.0
     fit_max_k = float(t_max)
     fit_idx = [i for i, t in enumerate(temps) if fit_min_k <= float(t) <= fit_max_k]
+    # 条件分岐: `len(fit_idx) < 100` を満たす経路を評価する。
     if len(fit_idx) < 100:
         raise SystemExit(f"[fail] not enough fit points: n={len(fit_idx)} in [{fit_min_k},{fit_max_k}] K")
 
     # Scan polynomial degrees (keep minimal DOF).
+
     degrees = [0, 1, 2, 3]
     results: list[FitResult] = []
     coeffs_by_deg: dict[int, list[float]] = {}
@@ -288,8 +341,10 @@ def main() -> None:
             sigma=sigma,
             fit_idx=fit_idx,
         )
+        # 条件分岐: `coeffs_fit is None` を満たす経路を評価する。
         if coeffs_fit is None:
             continue
+
         coeffs_by_deg[int(deg)] = [float(x) for x in coeffs_fit]
 
         alpha_pred = [_poly_eval(coeffs_fit, float(t)) * float(c) for t, c in zip(temps, cv)]
@@ -301,18 +356,24 @@ def main() -> None:
         n_fit = 0
         for i in fit_idx:
             sig = float(sigma[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             r = float(alpha_pred[i]) - float(alpha_obs[i])
             z = r / sig
+            # 条件分岐: `math.isfinite(z)` を満たす経路を評価する。
             if math.isfinite(z):
                 n_fit += 1
                 chi2 += z * z
                 max_abs_z = max(max_abs_z, abs(z))
+                # 条件分岐: `abs(z) > 3.0` を満たす経路を評価する。
                 if abs(z) > 3.0:
                     exceed_3sigma += 1
+
             ao = float(alpha_obs[i])
             ap = float(alpha_pred[i])
+            # 条件分岐: `ao != 0.0 and ap != 0.0 and ((ao > 0.0) != (ap > 0.0))` を満たす経路を評価する。
             if ao != 0.0 and ap != 0.0 and ((ao > 0.0) != (ap > 0.0)):
                 sign_mismatch += 1
 
@@ -330,14 +391,18 @@ def main() -> None:
             )
         )
 
+    # 条件分岐: `not results` を満たす経路を評価する。
+
     if not results:
         raise SystemExit("[fail] no successful polynomial fits")
 
     # Choose minimal degree that passes strict criteria; otherwise choose the smallest reduced chi2.
+
     def _passes(r: FitResult) -> bool:
         return (r.sign_mismatch_n == 0) and (r.max_abs_z < 3.0) and (r.reduced_chi2 < 2.0)
 
     passed = [r for r in results if _passes(r)]
+    # 条件分岐: `passed` を満たす経路を評価する。
     if passed:
         best = sorted(passed, key=lambda r: r.degree)[0]
         adopted = True
@@ -389,6 +454,7 @@ def main() -> None:
             )
 
     # Figure
+
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10.5, 7.0), sharex=True, gridspec_kw={"height_ratios": [2, 1]})
 
     ax1.plot(temps, alpha_obs_1e8, color="#d62728", lw=2.0, label="NIST TRC fit (obs) α(T)")
@@ -487,6 +553,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -23,6 +23,7 @@ def _parse_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
@@ -33,17 +34,22 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -60,52 +66,73 @@ def _write_matrix_csv(path: Path, labels: list[str], matrix: list[list[float]]) 
 
 
 def _percentile(values: list[float], q: float) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     ordered = sorted(float(v) for v in values if math.isfinite(float(v)))
+    # 条件分岐: `not ordered` を満たす経路を評価する。
     if not ordered:
         return float("nan")
+
+    # 条件分岐: `q <= 0.0` を満たす経路を評価する。
+
     if q <= 0.0:
         return ordered[0]
+
+    # 条件分岐: `q >= 1.0` を満たす経路を評価する。
+
     if q >= 1.0:
         return ordered[-1]
+
     pos = q * (len(ordered) - 1)
     lo = int(math.floor(pos))
     hi = int(math.ceil(pos))
+    # 条件分岐: `lo == hi` を満たす経路を評価する。
     if lo == hi:
         return ordered[lo]
+
     frac = pos - lo
     return float(ordered[lo] * (1.0 - frac) + ordered[hi] * frac)
 
 
 def _mean(values: list[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     return float(sum(values) / float(len(values)))
 
 
 def _variance(values: list[float], mean_value: float | None = None) -> float:
+    # 条件分岐: `len(values) < 2` を満たす経路を評価する。
     if len(values) < 2:
         return float("nan")
+
     m = mean_value if mean_value is not None else _mean(values)
     return float(sum((float(v) - m) ** 2 for v in values) / float(len(values) - 1))
 
 
 def _covariance(xs: list[float], ys: list[float], mx: float | None = None, my: float | None = None) -> float:
+    # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
         return float("nan")
+
     mean_x = mx if mx is not None else _mean(xs)
     mean_y = my if my is not None else _mean(ys)
     acc = 0.0
     for x, y in zip(xs, ys):
         acc += (float(x) - mean_x) * (float(y) - mean_y)
+
     return float(acc / float(len(xs) - 1))
 
 
 def _moments(r0: list[float], c_n: list[float], c_p: list[float]) -> dict[str, float]:
     n = len(r0)
+    # 条件分岐: `n == 0` を満たす経路を評価する。
     if n == 0:
         raise SystemExit("[fail] empty moments input")
+
     inv_n = 1.0 / float(n)
     a = sum(v * v for v in r0) * inv_n
     b = 2.0 * sum(rv * cn for rv, cn in zip(r0, c_n)) * inv_n
@@ -130,14 +157,18 @@ def _rms_from_moments(m: dict[str, float], *, k_n: float, k_p: float, extra_var:
 
 
 def _dr_dk_n(m: dict[str, float], *, k_n: float, k_p: float, rms: float) -> float:
+    # 条件分岐: `rms <= 0.0` を満たす経路を評価する。
     if rms <= 0.0:
         return 0.0
+
     return float((float(m["b"]) + 2.0 * float(m["d"]) * k_n + float(m["f"]) * k_p) / (2.0 * rms))
 
 
 def _dr_dk_p(m: dict[str, float], *, k_n: float, k_p: float, rms: float) -> float:
+    # 条件分岐: `rms <= 0.0` を満たす経路を評価する。
     if rms <= 0.0:
         return 0.0
+
     return float((float(m["c"]) + 2.0 * float(m["e"]) * k_p + float(m["f"]) * k_n) / (2.0 * rms))
 
 
@@ -151,18 +182,23 @@ def _fit_pairing_parameters(
     by_a: dict[int, list[float]] = defaultdict(list)
     for a, r in zip(a_values, residuals_before):
         by_a[int(a)].append(float(r))
+
     med_by_a = {a: _percentile(vals, 0.5) for a, vals in by_a.items()}
 
     x1: list[float] = []
     x2: list[float] = []
     y: list[float] = []
     for a, r, dn, dp in zip(a_values, residuals_before, delta_n, delta_p):
+        # 条件分岐: `not (math.isfinite(dn) and math.isfinite(dp))` を満たす経路を評価する。
         if not (math.isfinite(dn) and math.isfinite(dp)):
             continue
+
         center = med_by_a.get(int(a), 0.0)
         x1.append(float(dn))
         x2.append(float(dp))
         y.append(float(r - center))
+
+    # 条件分岐: `len(x1) < 16` を満たす経路を評価する。
 
     if len(x1) < 16:
         raise SystemExit("[fail] insufficient fit rows for k_n/k_p covariance")
@@ -174,6 +210,7 @@ def _fit_pairing_parameters(
     sy2 = sum(vx * vy for vx, vy in zip(x2, y))
 
     det = s11 * s22 - s12 * s12
+    # 条件分岐: `abs(det) < 1.0e-12` を満たす経路を評価する。
     if abs(det) < 1.0e-12:
         raise SystemExit("[fail] singular normal equation in k_n/k_p fit")
 
@@ -184,6 +221,7 @@ def _fit_pairing_parameters(
     for xx1, xx2, yy in zip(x1, x2, y):
         diff = yy - (k_n * xx1 + k_p * xx2)
         sse += diff * diff
+
     dof = max(len(x1) - 2, 1)
     sigma2 = sse / float(dof)
 
@@ -214,8 +252,12 @@ def _read_pairing_per_nucleus(path: Path) -> dict[str, Any]:
             }
             rows.append(item)
             by_zn[(z, n)] = item
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit(f"[fail] empty input: {path}")
+
     return {"rows": rows, "by_zn": by_zn}
 
 
@@ -232,23 +274,32 @@ def _build_separation_moments(
             z = int(row["Z_parent"])
             n = int(row["N_parent"])
             obs = str(row["observable"])
+            # 条件分岐: `obs == "S_n"` を満たす経路を評価する。
             if obs == "S_n":
                 key_ref = (z, n - 1)
+            # 条件分岐: 前段条件が不成立で、`obs == "S_p"` を追加評価する。
             elif obs == "S_p":
                 key_ref = (z - 1, n)
+            # 条件分岐: 前段条件が不成立で、`obs == "S_2n"` を追加評価する。
             elif obs == "S_2n":
                 key_ref = (z, n - 2)
+            # 条件分岐: 前段条件が不成立で、`obs == "S_2p"` を追加評価する。
             elif obs == "S_2p":
                 key_ref = (z - 2, n)
             else:
                 continue
+
             parent = pairing_by_zn.get((z, n))
             ref = pairing_by_zn.get(key_ref)
+            # 条件分岐: `parent is None or ref is None` を満たす経路を評価する。
             if parent is None or ref is None:
                 continue
+
             resid = _parse_float(row["resid_before_MeV"])
+            # 条件分岐: `not math.isfinite(resid)` を満たす経路を評価する。
             if not math.isfinite(resid):
                 continue
+
             dn_parent = parent["delta_n_3pt_MeV"]
             dn_ref = ref["delta_n_3pt_MeV"]
             dp_parent = parent["delta_p_3pt_MeV"]
@@ -258,8 +309,12 @@ def _build_separation_moments(
             r0.append(float(resid))
             c_n.append(float(dn))
             c_p.append(float(dp))
+
+    # 条件分岐: `not r0` を満たす経路を評価する。
+
     if not r0:
         raise SystemExit(f"[fail] no usable separation rows: {separation_csv}")
+
     return _moments(r0, c_n, c_p)
 
 
@@ -275,19 +330,25 @@ def _build_q_moments(
     with q_csv.open("r", encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
             channel = str(row["channel"])
+            # 条件分岐: `channel not in by_channel` を満たす経路を評価する。
             if channel not in by_channel:
                 continue
+
             z = int(row["Z"])
             n = int(row["N"])
             zd = int(row["daughter_Z"])
             nd = int(row["daughter_N"])
             parent = pairing_by_zn.get((z, n))
             daughter = pairing_by_zn.get((zd, nd))
+            # 条件分岐: `parent is None or daughter is None` を満たす経路を評価する。
             if parent is None or daughter is None:
                 continue
+
             resid = _parse_float(row["resid_before_MeV"])
+            # 条件分岐: `not math.isfinite(resid)` を満たす経路を評価する。
             if not math.isfinite(resid):
                 continue
+
             dn_parent = parent["delta_n_3pt_MeV"]
             dn_daughter = daughter["delta_n_3pt_MeV"]
             dp_parent = parent["delta_p_3pt_MeV"]
@@ -295,8 +356,10 @@ def _build_q_moments(
             dn = (dn_daughter if math.isfinite(dn_daughter) else 0.0) - (dn_parent if math.isfinite(dn_parent) else 0.0)
             dp = (dp_daughter if math.isfinite(dp_daughter) else 0.0) - (dp_parent if math.isfinite(dp_parent) else 0.0)
             sigma = _parse_float(row["q_obs_sigma_MeV"])
+            # 条件分岐: `not math.isfinite(sigma) or sigma <= 0.0` を満たす経路を評価する。
             if not math.isfinite(sigma) or sigma <= 0.0:
                 sigma = float("nan")
+
             bucket = by_channel[channel]
             bucket["r0"].append(float(resid))
             bucket["c_n"].append(float(dn))
@@ -305,8 +368,10 @@ def _build_q_moments(
 
     out: dict[str, dict[str, float]] = {}
     for channel, data in by_channel.items():
+        # 条件分岐: `not data["r0"]` を満たす経路を評価する。
         if not data["r0"]:
             raise SystemExit(f"[fail] no usable q rows for channel={channel}")
+
         finite_sigma = [v for v in data["sigma"] if math.isfinite(v) and v > 0.0]
         sigma_fallback = _percentile(finite_sigma, 0.5) if finite_sigma else 0.0
         sigma_sq_mean = _mean([(v if math.isfinite(v) and v > 0.0 else sigma_fallback) ** 2 for v in data["sigma"]])
@@ -314,6 +379,7 @@ def _build_q_moments(
             **_moments(data["r0"], data["c_n"], data["c_p"]),
             "sigma_sq_mean": float(sigma_sq_mean if math.isfinite(sigma_sq_mean) else 0.0),
         }
+
     return out
 
 
@@ -323,13 +389,19 @@ def _build_beta2_moments(beta2_csv: Path) -> dict[str, float]:
     with beta2_csv.open("r", encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
             resid = _parse_float(row["beta2_resid"])
+            # 条件分岐: `not math.isfinite(resid)` を満たす経路を評価する。
             if not math.isfinite(resid):
                 continue
+
             sigma = _parse_float(row["beta2_sigma"])
             residuals.append(float(resid))
             sigmas.append(float(sigma) if (math.isfinite(sigma) and sigma > 0.0) else float("nan"))
+
+    # 条件分岐: `not residuals` を満たす経路を評価する。
+
     if not residuals:
         raise SystemExit(f"[fail] no usable beta2 residual rows: {beta2_csv}")
+
     finite_sigma = [v for v in sigmas if math.isfinite(v) and v > 0.0]
     sigma_fallback = _percentile(finite_sigma, 0.5) if finite_sigma else 0.0
     sigma_sq_mean = _mean([(v if math.isfinite(v) and v > 0.0 else sigma_fallback) ** 2 for v in sigmas])
@@ -395,11 +467,13 @@ def _build_figure(
     by_output: dict[str, dict[str, float]] = defaultdict(dict)
     for row in contribution_rows:
         by_output[str(row["output"])][str(row["source"])] = float(row["pct_of_mc_var_abs"])
+
     bottoms = [0.0 for _ in names]
     for source in source_order:
         values = [by_output.get(name, {}).get(source, 0.0) for name in names]
         ax10.bar(names, values, bottom=bottoms, color=source_colors[source], alpha=0.9, label=source)
         bottoms = [b + v for b, v in zip(bottoms, values)]
+
     ax10.set_ylabel("abs contribution [% of MC var]")
     ax10.set_title("Dominant source decomposition")
     ax10.tick_params(axis="x", rotation=25)
@@ -429,6 +503,7 @@ def main() -> None:
     in_beta2_csv = out_dir / "nuclear_deformation_parameter_prediction_full.csv"
 
     for p in (in_pairing_csv, in_separation_csv, in_q_csv, in_beta2_csv):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise SystemExit(f"[fail] missing input: {p}")
 
@@ -464,13 +539,17 @@ def main() -> None:
         [0.0, 0.0, 0.0, SIGMA_ALPHA_BETA2**2],
     ]
 
+    # 条件分岐: `var_k_n <= 0.0 or var_k_p <= 0.0` を満たす経路を評価する。
     if var_k_n <= 0.0 or var_k_p <= 0.0:
         raise SystemExit("[fail] non-positive variance for k_n/k_p")
+
     l11 = math.sqrt(var_k_n)
     l21 = cov_k_nk_p / l11
     l22_sq = var_k_p - l21 * l21
+    # 条件分岐: `l22_sq <= 0.0` を満たす経路を評価する。
     if l22_sq <= 0.0:
         l22_sq = 1.0e-15
+
     l22 = math.sqrt(l22_sq)
 
     rng = random.Random(RNG_SEED)
@@ -567,6 +646,7 @@ def main() -> None:
         row: list[float] = []
         for nj in output_names:
             row.append(_covariance(samples_outputs[ni], samples_outputs[nj], output_means[ni], output_means[nj]))
+
         output_cov_matrix.append(row)
 
     contribution_rows: list[dict[str, Any]] = []
@@ -574,6 +654,7 @@ def main() -> None:
     var_alpha_q = SIGMA_ALPHA_Q**2
     var_alpha_beta2 = SIGMA_ALPHA_BETA2**2
     for name in output_names:
+        # 条件分岐: `name == "be_rms_MeV"` を満たす経路を評価する。
         if name == "be_rms_MeV":
             m = moments_be
             rms0 = _rms_from_moments(m, k_n=k_n_mean, k_p=k_p_mean, extra_var=0.0)
@@ -581,6 +662,7 @@ def main() -> None:
             d_kp = _dr_dk_p(m, k_n=k_n_mean, k_p=k_p_mean, rms=rms0)
             d_aq = 0.0
             d_ab = 0.0
+        # 条件分岐: 前段条件が不成立で、`name == "sep_rms_MeV"` を追加評価する。
         elif name == "sep_rms_MeV":
             m = moments_sep
             rms0 = _rms_from_moments(m, k_n=k_n_mean, k_p=k_p_mean, extra_var=0.0)
@@ -588,6 +670,7 @@ def main() -> None:
             d_kp = _dr_dk_p(m, k_n=k_n_mean, k_p=k_p_mean, rms=rms0)
             d_aq = 0.0
             d_ab = 0.0
+        # 条件分岐: 前段条件が不成立で、`name == "q_beta_minus_rms_MeV"` を追加評価する。
         elif name == "q_beta_minus_rms_MeV":
             m = moments_q["beta_minus"]
             rms0 = _rms_from_moments(m, k_n=k_n_mean, k_p=k_p_mean, extra_var=q_minus_sigma_sq)
@@ -595,6 +678,7 @@ def main() -> None:
             d_kp = _dr_dk_p(m, k_n=k_n_mean, k_p=k_p_mean, rms=rms0)
             d_aq = (1.0 * q_minus_sigma_sq / rms0) if rms0 > 0.0 else 0.0
             d_ab = 0.0
+        # 条件分岐: 前段条件が不成立で、`name == "q_beta_plus_rms_MeV"` を追加評価する。
         elif name == "q_beta_plus_rms_MeV":
             m = moments_q["beta_plus"]
             rms0 = _rms_from_moments(m, k_n=k_n_mean, k_p=k_p_mean, extra_var=q_plus_sigma_sq)
@@ -636,6 +720,7 @@ def main() -> None:
                     "pct_of_abs_sum": (100.0 * abs(val) / v_abs_total) if v_abs_total > 0.0 else float("nan"),
                 }
             )
+
         dominant_source = max(parts.items(), key=lambda kv: abs(kv[1]))[0]
         dominant_rows.append(
             {
@@ -736,6 +821,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

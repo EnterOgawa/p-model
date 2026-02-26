@@ -50,6 +50,7 @@ except Exception:  # pragma: no cover
     sparse = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -92,6 +93,7 @@ def _sha256_file(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -102,17 +104,24 @@ def _p2(mu: np.ndarray) -> np.ndarray:
 
 def _fmt_tag(x: float) -> str:
     s = f"{float(x):.6g}".rstrip("0").rstrip(".")
+    # 条件分岐: `s == ""` を満たす経路を評価する。
     if s == "":
         s = "0"
+
     return s.replace("-", "m").replace(".", "p")
 
 
 def _dm_lcdm_dimless(z: float, *, omega_m: float, n_grid: int) -> float:
     z = float(z)
+    # 条件分岐: `z < 0` を満たす経路を評価する。
     if z < 0:
         return float("nan")
+
+    # 条件分岐: `not (0.0 < float(omega_m) < 1.0)` を満たす経路を評価する。
+
     if not (0.0 < float(omega_m) < 1.0):
         return float("nan")
+
     z_grid = np.linspace(0.0, z, int(n_grid), dtype=float)
     one_p = 1.0 + z_grid
     ez_grid = np.sqrt(float(omega_m) * one_p**3 + (1.0 - float(omega_m)))
@@ -121,28 +130,35 @@ def _dm_lcdm_dimless(z: float, *, omega_m: float, n_grid: int) -> float:
         integral = float(np.trapezoid(integrand, z_grid))
     except AttributeError:
         integral = float(np.trapz(integrand, z_grid))
+
     return float(integral)
 
 
 def _dh_lcdm_dimless(z: float, *, omega_m: float) -> float:
     z = float(z)
+    # 条件分岐: `z < 0` を満たす経路を評価する。
     if z < 0:
         return float("nan")
+
     ez = float(math.sqrt(float(omega_m) * (1.0 + z) ** 3 + (1.0 - float(omega_m))))
     return float(1.0 / ez) if ez > 0 else float("nan")
 
 
 def _dm_pbg_dimless(z: float) -> float:
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         return float("nan")
+
     return float(math.log(op))
 
 
 def _dh_pbg_dimless(z: float) -> float:
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         return float("nan")
+
     return float(1.0 / op)
 
 
@@ -155,11 +171,14 @@ def _read_omegam_from_cf_header(path: Path) -> float:
         chunks: List[bytes] = []
         while True:
             block = f.read(BLOCK)
+            # 条件分岐: `len(block) != BLOCK` を満たす経路を評価する。
             if len(block) != BLOCK:
                 raise EOFError("unexpected EOF while reading FITS header")
+
             chunks.append(block)
             for i in range(0, BLOCK, CARD):
                 card = block[i : i + CARD].decode("ascii", errors="ignore")
+                # 条件分岐: `card.startswith("END")` を満たす経路を評価する。
                 if card.startswith("END"):
                     return b"".join(chunks)
 
@@ -170,18 +189,28 @@ def _read_omegam_from_cf_header(path: Path) -> float:
     with path.open("rb") as f:
         _ = read_header_blocks(f)
         h1 = read_header_blocks(f)
+
     for card in iter_cards(h1):
+        # 条件分岐: `card.startswith("END")` を満たす経路を評価する。
         if card.startswith("END"):
             break
+
+        # 条件分岐: `card[:8].strip() != "OMEGAM"` を満たす経路を評価する。
+
         if card[:8].strip() != "OMEGAM":
             continue
+
+        # 条件分岐: `"=" not in card` を満たす経路を評価する。
+
         if "=" not in card:
             continue
+
         rhs = card.split("=", 1)[1].split("/", 1)[0].strip()
         try:
             return float(rhs)
         except Exception:
             return float("nan")
+
     return float("nan")
 
 
@@ -200,20 +229,27 @@ def _load_components(*, raw_dir: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarr
     off = 0
     for comp in _COMPONENTS:
         path = raw_dir / comp.file
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             raise SystemExit(f"missing VAC cf file: {path}")
+
         with path.open("rb") as f:
             layout = read_first_bintable_layout(f)
+            # 条件分岐: `int(layout.n_rows) != int(comp.n_rows)` を満たす経路を評価する。
             if int(layout.n_rows) != int(comp.n_rows):
                 raise SystemExit(f"unexpected NAXIS2 for {path.name}: {layout.n_rows} (expected {comp.n_rows})")
+
             cols = read_bintable_columns(f, layout=layout, columns=["DA", "RP", "RT", "Z", "NB"], max_rows=None)
+
         da = np.asarray(cols["DA"], dtype=float).reshape(-1)
         rp = np.asarray(cols["RP"], dtype=float).reshape(-1)
         rt = np.asarray(cols["RT"], dtype=float).reshape(-1)
         z = np.asarray(cols["Z"], dtype=float).reshape(-1)
         nb = np.asarray(cols["NB"], dtype=float).reshape(-1)
+        # 条件分岐: `not (da.size == rp.size == rt.size == z.size == nb.size == int(comp.n_rows))` を満たす経路を評価する。
         if not (da.size == rp.size == rt.size == z.size == nb.size == int(comp.n_rows)):
             raise SystemExit(f"size mismatch in {path.name}")
+
         da_all.append(da)
         rp_all.append(rp)
         rt_all.append(rt)
@@ -222,6 +258,7 @@ def _load_components(*, raw_dir: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarr
         keys.append(comp.key)
         offsets.append(int(off))
         off += int(comp.n_rows)
+
     return (
         np.concatenate(da_all),
         np.concatenate(rp_all),
@@ -239,13 +276,17 @@ def _covariance_submatrix(
     sel_idx: np.ndarray,
     chunk_rows: int,
 ) -> np.ndarray:
+    # 条件分岐: `sparse is None` を満たす経路を評価する。
     if sparse is None:  # pragma: no cover
         raise SystemExit("scipy is required for this script (scipy.sparse)")
+
     sel_idx = np.asarray(sel_idx, dtype=np.int32).reshape(-1)
+    # 条件分岐: `sel_idx.size == 0` を満たす経路を評価する。
     if sel_idx.size == 0:
         raise ValueError("empty sel_idx")
 
     # Build row mapping for fast filtering (full matrix is 15000x15000).
+
     n_total = int(np.max(sel_idx)) + 1
     sel_pos = np.full(n_total, -1, dtype=np.int32)
     for j, i in enumerate(sel_idx.tolist()):
@@ -258,13 +299,22 @@ def _covariance_submatrix(
         layout = read_first_bintable_layout(f)
         n_rows = int(layout.n_rows)
         row_bytes = int(layout.row_bytes)
+        # 条件分岐: `n_rows <= 0 or row_bytes <= 0` を満たす経路を評価する。
         if n_rows <= 0 or row_bytes <= 0:
             raise SystemExit(f"invalid covariance layout: n_rows={n_rows} row_bytes={row_bytes}")
+
+        # 条件分岐: `row_bytes % 8 != 0` を満たす経路を評価する。
+
         if row_bytes % 8 != 0:
             raise SystemExit(f"unexpected covariance row_bytes (not multiple of 8): {row_bytes}")
+
         n_cols = int(row_bytes // 8)
+        # 条件分岐: `n_rows != n_cols` を満たす経路を評価する。
         if n_rows != n_cols:
             raise SystemExit(f"expected square covariance (n_rows={n_rows}, n_cols={n_cols})")
+
+        # 条件分岐: `n_cols <= int(np.max(sel_idx))` を満たす経路を評価する。
+
         if n_cols <= int(np.max(sel_idx)):
             raise SystemExit(f"sel_idx out of bounds for covariance: max(sel_idx)={int(np.max(sel_idx))} >= {n_cols}")
 
@@ -272,8 +322,10 @@ def _covariance_submatrix(
         while i0 < n_rows:
             n_chunk = min(int(chunk_rows), n_rows - i0)
             b = f.read(n_chunk * row_bytes)
+            # 条件分岐: `len(b) != n_chunk * row_bytes` を満たす経路を評価する。
             if len(b) != n_chunk * row_bytes:
                 raise EOFError("unexpected EOF while reading covariance table")
+
             arr = np.frombuffer(b, dtype=">f8", count=n_chunk * n_cols).reshape(n_chunk, n_cols)
             arr = np.asarray(arr, dtype=np.float64)
 
@@ -281,13 +333,18 @@ def _covariance_submatrix(
             # Avoid out-of-bounds indexing: only consult sel_pos for in-range rows.
             in_bounds = rows < int(sel_pos.size)
             m = np.zeros(rows.shape, dtype=bool)
+            # 条件分岐: `bool(np.any(in_bounds))` を満たす経路を評価する。
             if bool(np.any(in_bounds)):
                 m[in_bounds] = sel_pos[rows[in_bounds]] >= 0
+
+            # 条件分岐: `bool(np.any(m))` を満たす経路を評価する。
+
             if bool(np.any(m)):
                 src_rows = np.nonzero(m)[0].astype(np.int32, copy=False)
                 dst_rows = sel_pos[rows[m]].astype(np.int32, copy=False)
                 block = arr[src_rows][:, sel_idx]
                 cov_sel[dst_rows, :] = block
+
             i0 += n_chunk
 
     cov_sel = 0.5 * (cov_sel + cov_sel.T)
@@ -309,18 +366,22 @@ def _fit_multipoles_and_T(
     project_mode: str,
     nmu: int,
 ) -> Tuple[np.ndarray, np.ndarray, "sparse.csr_matrix", np.ndarray]:
+    # 条件分岐: `sparse is None` を満たす経路を評価する。
     if sparse is None:  # pragma: no cover
         raise SystemExit("scipy is required for this script (scipy.sparse)")
+
     rp = np.asarray(rp, dtype=float).reshape(-1)
     rt = np.asarray(rt, dtype=float).reshape(-1)
     da = np.asarray(da, dtype=float).reshape(-1)
     nb = np.asarray(nb, dtype=float).reshape(-1)
+    # 条件分岐: `not (rp.size == rt.size == da.size == nb.size)` を満たす経路を評価する。
     if not (rp.size == rt.size == da.size == nb.size):
         raise ValueError("rp/rt/da/nb size mismatch")
 
     n_total = int(rp.size)
     n_comp = int(len(keys))
     n_s = int(np.asarray(s_centers, dtype=float).size)
+    # 条件分岐: `n_comp <= 0 or n_s <= 0` を満たす経路を評価する。
     if n_comp <= 0 or n_s <= 0:
         raise ValueError("invalid n_comp/n_s")
 
@@ -329,11 +390,17 @@ def _fit_multipoles_and_T(
     p2 = _p2(mu)
 
     mode = str(project_mode).strip().lower()
+    # 条件分岐: `mode not in {"wls", "mu_bin"}` を満たす経路を評価する。
     if mode not in {"wls", "mu_bin"}:
         raise ValueError("project_mode must be 'wls' or 'mu_bin'")
+
     nmu = int(nmu)
+    # 条件分岐: `mode == "mu_bin" and nmu < 4` を満たす経路を評価する。
     if mode == "mu_bin" and nmu < 4:
         raise ValueError("nmu must be >= 4 for project_mode=mu_bin")
+
+    # 条件分岐: `mode == "mu_bin"` を満たす経路を評価する。
+
     if mode == "mu_bin":
         mu_abs = np.abs(mu)
         mu_abs = np.clip(mu_abs, 0.0, 1.0)
@@ -343,6 +410,7 @@ def _fit_multipoles_and_T(
         dmu = float(1.0 / float(nmu))
 
     # Output arrays.
+
     xi0 = np.full((n_comp, n_s), float("nan"), dtype=float)
     xi2 = np.full((n_comp, n_s), float("nan"), dtype=float)
     weight_sums = np.zeros((n_comp, n_s), dtype=float)
@@ -357,8 +425,10 @@ def _fit_multipoles_and_T(
         g_idx = off + np.arange(n_rows_c, dtype=np.int32)
         # Only bins that are present in sel_pos (union selection) can be used.
         ok = (g_idx < int(sel_pos.size)) & (sel_pos[g_idx] >= 0)
+        # 条件分岐: `not bool(np.any(ok))` を満たす経路を評価する。
         if not bool(np.any(ok)):
             raise ValueError(f"no selected points for component {keys[c]}")
+
         g_idx_ok = g_idx[ok]
 
         # Local views for speed.
@@ -372,24 +442,32 @@ def _fit_multipoles_and_T(
         for k in range(n_s):
             lo = float(s_edges[k])
             hi = float(s_edges[k + 1])
+            # 条件分岐: `k < n_s - 1` を満たす経路を評価する。
             if k < n_s - 1:
                 m_bin = (s_c >= lo) & (s_c < hi)
             else:
                 m_bin = (s_c >= lo) & (s_c <= hi)
+
+            # 条件分岐: `int(np.count_nonzero(m_bin)) < 3` を満たす経路を評価する。
+
             if int(np.count_nonzero(m_bin)) < 3:
                 continue
 
             y = da_c[m_bin]
             cols_k = col_c[m_bin].astype(np.int32, copy=False)
 
+            # 条件分岐: `str(weight_mode) == "nb"` を満たす経路を評価する。
             if str(weight_mode) == "nb":
                 w = np.maximum(nb_c[m_bin], 0.0)
+            # 条件分岐: 前段条件が不成立で、`str(weight_mode) == "uniform"` を追加評価する。
             elif str(weight_mode) == "uniform":
                 w = np.ones_like(y)
             else:
                 raise ValueError("weight_mode must be 'nb' or 'uniform'")
+
             weight_sums[c, k] = float(np.sum(w))
 
+            # 条件分岐: `mode == "wls"` を満たす経路を評価する。
             if mode == "wls":
                 p2v = p2_c[m_bin]
                 # Normalize weights to improve conditioning.
@@ -409,6 +487,7 @@ def _fit_multipoles_and_T(
                     x = np.linalg.solve(A, b)
                 except np.linalg.LinAlgError:
                     x = np.linalg.lstsq(A, b, rcond=None)[0]
+
                 xi0[c, k] = float(x[0])
                 xi2[c, k] = float(x[1])
 
@@ -418,6 +497,7 @@ def _fit_multipoles_and_T(
                 except np.linalg.LinAlgError:
                     invA = np.linalg.pinv(A, rcond=1e-12)
                 # M^T W is 2xK: [w*1, w*P2]
+
                 mw0 = w * m0
                 mw2 = w * p2v
                 coeff0 = invA[0, 0] * mw0 + invA[0, 1] * mw2
@@ -436,6 +516,7 @@ def _fit_multipoles_and_T(
                 xi2[c, k] = float(np.sum(coeff2 * y))
 
             # Output row indices (component-major blocks).
+
             row0 = int((2 * c + 0) * n_s + k)
             row2 = int((2 * c + 1) * n_s + k)
             rows.extend([row0] * int(cols_k.size))
@@ -470,12 +551,18 @@ def _combine_components(
     xi2 = np.asarray(xi2, dtype=float)
     cov_m = np.asarray(cov_m, dtype=float)
     weight_sums = np.asarray(weight_sums, dtype=float)
+    # 条件分岐: `xi0.ndim != 2 or xi2.ndim != 2` を満たす経路を評価する。
     if xi0.ndim != 2 or xi2.ndim != 2:
         raise ValueError("xi0/xi2 must be 2D [n_comp,n_s]")
+
+    # 条件分岐: `xi0.shape != xi2.shape or xi0.shape != weight_sums.shape` を満たす経路を評価する。
+
     if xi0.shape != xi2.shape or xi0.shape != weight_sums.shape:
         raise ValueError("xi0/xi2/weight_sums shape mismatch")
+
     n_comp, n_s = xi0.shape
     p = int(2 * n_comp * n_s)
+    # 条件分岐: `cov_m.shape != (p, p)` を満たす経路を評価する。
     if cov_m.shape != (p, p):
         raise ValueError(f"cov_m shape mismatch: {cov_m.shape} (expected {(p, p)})")
 
@@ -483,9 +570,11 @@ def _combine_components(
     w = np.where(np.isfinite(w) & (w > 0.0), w, 0.0)
     w_tot = np.sum(w, axis=0)
     missing = np.nonzero(w_tot <= 0.0)[0].astype(int, copy=False)
+    # 条件分岐: `int(missing.size) > 0` を満たす経路を評価する。
     if int(missing.size) > 0:
         w[:, missing] = 1.0
         w_tot = np.sum(w, axis=0)
+
     w_norm = w / w_tot.reshape(1, -1)
 
     xi0_c = np.sum(w_norm * xi0, axis=0, keepdims=True)
@@ -498,6 +587,7 @@ def _combine_components(
             wc = float(w_norm[c, k])
             B[k, (2 * c + 0) * n_s + k] = wc
             B[n_s + k, (2 * c + 1) * n_s + k] = wc
+
     cov_c = B @ cov_m @ B.T
     cov_c = 0.5 * (cov_c + cov_c.T)
 
@@ -552,23 +642,31 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ap.add_argument("--cov-chunk-rows", type=int, default=64, help="Covariance read chunk rows (default: 64)")
     args = ap.parse_args(list(argv) if argv is not None else None)
 
+    # 条件分岐: `sparse is None` を満たす経路を評価する。
     if sparse is None:
         raise SystemExit("scipy is required (scipy.sparse)")
 
     data_dir = Path(str(args.data_dir)).resolve()
     raw_dir = data_dir / "raw"
     cov_path = raw_dir / "full-covariance-smoothed.fits"
+    # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
     if not cov_path.exists():
         raise SystemExit(f"missing covariance file: {cov_path} (run fetch_desi_dr1_vac_lya_correlations.py)")
 
     # Load scalar data from cf_* (concatenated in the official order).
+
     da, rp_lcdm, rt_lcdm, z, nb, comp_keys, comp_offsets = _load_components(raw_dir=raw_dir)
+    # 条件分岐: `da.size != 15000` を満たす経路を評価する。
     if da.size != 15000:
         raise SystemExit(f"unexpected total bins: {da.size} (expected 15000)")
 
     omega_m = float(args.lcdm_omega_m)
+    # 条件分岐: `not (math.isfinite(omega_m) and 0.0 < omega_m < 1.0)` を満たす経路を評価する。
     if not (math.isfinite(omega_m) and 0.0 < omega_m < 1.0):
         omega_m = _read_omegam_from_cf_header(raw_dir / _COMPONENTS[2].file)
+
+    # 条件分岐: `not (math.isfinite(omega_m) and 0.0 < omega_m < 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(omega_m) and 0.0 < omega_m < 1.0):
         omega_m = 0.315
 
@@ -576,6 +674,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Compute LCDM distances on a grid and interpolate per-bin AP rescale vs the fiducial LCDM coordinates.
     z_grid_max = float(max(float(args.z_max), float(np.max(z)), float(z_ref)))
     n_grid = int(args.lcdm_n_grid)
+    # 条件分岐: `n_grid < 16` を満たす経路を評価する。
     if n_grid < 16:
         raise SystemExit("--lcdm-n-grid must be >= 16 for stable interpolation")
 
@@ -593,12 +692,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     alpha_perp_z = np.where((dm_lcdm_z > 0.0) & (dm_pbg_z > 0.0), dm_pbg_z / dm_lcdm_z, float("nan"))
     alpha_par_z = np.where((dh_lcdm_z > 0.0) & (dh_pbg_z > 0.0), dh_pbg_z / dh_lcdm_z, float("nan"))
+    # 条件分岐: `not bool(np.all(np.isfinite(alpha_perp_z) & (alpha_perp_z > 0.0)))` を満たす経路を評価する。
     if not bool(np.all(np.isfinite(alpha_perp_z) & (alpha_perp_z > 0.0))):
         raise SystemExit("invalid per-bin alpha_perp_z (check z range / omega_m)")
+
+    # 条件分岐: `not bool(np.all(np.isfinite(alpha_par_z) & (alpha_par_z > 0.0)))` を満たす経路を評価する。
+
     if not bool(np.all(np.isfinite(alpha_par_z) & (alpha_par_z > 0.0))):
         raise SystemExit("invalid per-bin alpha_par_z (check z range / omega_m)")
 
     # Reference values (for logging).
+
     dm_lcdm_ref = float(np.interp(float(z_ref), z_grid, dm_grid))
     dh_lcdm_ref = _dh_lcdm_dimless(z_ref, omega_m=omega_m)
     dm_pbg_ref = _dm_pbg_dimless(z_ref)
@@ -637,8 +741,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     dists = [d.strip() for d in str(args.dists).split(",") if d.strip()]
     for dist in dists:
+        # 条件分岐: `dist not in {"lcdm", "pbg"}` を満たす経路を評価する。
         if dist not in {"lcdm", "pbg"}:
             raise SystemExit(f"unsupported dist: {dist} (expected lcdm or pbg)")
+
+        # 条件分岐: `dist == "lcdm"` を満たす経路を評価する。
 
         if dist == "lcdm":
             rp_use = rp_lcdm
@@ -676,6 +783,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
 
         # Multipole projection and coefficient matrix T (for covariance propagation).
+
         xi0, xi2, T, weight_sums = _fit_multipoles_and_T(
             rp=rp_use,
             rt=rt_use,
@@ -698,6 +806,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         comp_keys_out = list(comp_keys)
         combine_components_meta: Optional[Dict[str, Any]] = None
+        # 条件分岐: `bool(args.combine_components)` を満たす経路を評価する。
         if bool(args.combine_components):
             xi0, xi2, cov_m, combine_components_meta = _combine_components(
                 xi0=xi0,
@@ -712,6 +821,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             comp_keys_out = ["combined"]
 
         # File names (xi-from-catalogs compatible).
+
         stem = f"cosmology_bao_xi_from_catalogs_{str(args.sample)}_{str(args.caps)}_{dist}_zmin{zmin_tag}_zmax{zmax_tag}__{str(args.out_tag)}"
         out_npz = out_dir / f"{stem}.npz"
         out_metrics = out_dir / f"{stem}_metrics.json"
@@ -797,8 +907,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "cov は full-covariance-smoothed.fits（15000x15000）を同一射影で伝播したもの。",
             ],
         }
+        # 条件分岐: `combine_components_meta is not None` を満たす経路を評価する。
         if combine_components_meta is not None:
             payload["combine_components"] = combine_components_meta
+
         out_metrics.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
         try:
@@ -820,6 +932,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

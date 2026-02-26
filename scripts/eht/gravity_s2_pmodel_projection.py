@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -31,8 +32,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _maybe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
         return v if math.isfinite(v) else None
     except Exception:
@@ -83,6 +86,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not in_path.exists()` を満たす経路を評価する。
     if not in_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_constraints_json"
@@ -97,6 +101,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     orbit = (row_redshift.get("orbit_at_pericenter") or {}) if isinstance(row_redshift, dict) else {}
     r_peri_rs = _maybe_float(orbit.get("r_peri_schwarzschild_radii"))
     v_peri_kms = _maybe_float(orbit.get("v_peri_kms"))
+    # 条件分岐: `r_peri_rs is None or r_peri_rs <= 0 or v_peri_kms is None or v_peri_kms <= 0` を満たす経路を評価する。
     if r_peri_rs is None or r_peri_rs <= 0 or v_peri_kms is None or v_peri_kms <= 0:
         payload["ok"] = False
         payload["reason"] = "missing_orbit_pericenter_inputs"
@@ -213,6 +218,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

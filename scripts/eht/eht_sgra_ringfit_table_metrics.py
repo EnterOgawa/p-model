@@ -13,6 +13,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -47,6 +48,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -61,8 +63,10 @@ _RE_PM = re.compile(r"\$(?P<mean>-?\d+(?:\.\d+)?)\s*\\pm\s*(?P<sigma>\d+(?:\.\d+
 
 def _parse_pm(cell: str) -> Optional[Tuple[float, float]]:
     m = _RE_PM.search(cell)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     return float(m.group("mean")), float(m.group("sigma"))
 
 
@@ -118,14 +122,20 @@ def _parse_table(tex: str, *, source_path: Path) -> List[RingFitRow]:
     rows: List[RingFitRow] = []
     for lineno, raw in enumerate(tex.splitlines(), start=1):
         line = raw.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
+        # 条件分岐: `"\\label{tab:ring_fulfits_descattered}" in line` を満たす経路を評価する。
 
         if "\\label{tab:ring_fulfits_descattered}" in line:
             table = "descattered"
             pipeline = None
             cluster = None
             continue
+
+        # 条件分岐: `"\\label{tab:ring_fulfits_on-sky}" in line` を満たす経路を評価する。
+
         if "\\label{tab:ring_fulfits_on-sky}" in line:
             table = "on_sky"
             pipeline = None
@@ -133,34 +143,47 @@ def _parse_table(tex: str, *, source_path: Path) -> List[RingFitRow]:
             continue
 
         for token, name in pipeline_map.items():
+            # 条件分岐: `line.startswith(token)` を満たす経路を評価する。
             if line.startswith(token):
                 pipeline = name
                 continue
 
+        # 条件分岐: `table is None or pipeline is None` を満たす経路を評価する。
+
         if table is None or pipeline is None:
             continue
+
+        # 条件分岐: `"&" not in line` を満たす経路を評価する。
 
         if "&" not in line:
             continue
 
         # Skip header lines with units.
+
         if "\\rm{(\\mu as)}" in line or "\\hline" in line:
             continue
 
         parts = [_clean_cell(p) for p in line.split("&")]
+        # 条件分岐: `len(parts) < 7` を満たす経路を評価する。
         if len(parts) < 7:
             continue
 
         p0, p1, p2, p3, p4, p5, p6 = parts[:7]
+        # 条件分岐: `p0` を満たす経路を評価する。
         if p0:
             cluster = p0
+
+        # 条件分岐: `not cluster` を満たす経路を評価する。
+
         if not cluster:
             continue
 
         fit_method = p1
         d = _parse_pm(p2)
+        # 条件分岐: `d is None` を満たす経路を評価する。
         if d is None:
             continue
+
         d_mean, d_sigma = d
 
         w = _parse_pm(p3)
@@ -186,6 +209,7 @@ def _parse_table(tex: str, *, source_path: Path) -> List[RingFitRow]:
             source={"path": str(source_path), "line": int(lineno), "note": "appendix_ringfits.tex"},
         )
         rows.append(row)
+
     return rows
 
 
@@ -196,14 +220,19 @@ def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) 
 
     start_idx = None
     for i, line in enumerate(lines):
+        # 条件分岐: `label in line` を満たす経路を評価する。
         if label in line:
             start_idx = i
             break
+
+    # 条件分岐: `start_idx is None` を満たす経路を評価する。
+
     if start_idx is None:
         return []
 
     end_idx = None
     for j in range(start_idx, len(lines)):
+        # 条件分岐: `lines[j].strip().startswith("\\end{table*}")` を満たす経路を評価する。
         if lines[j].strip().startswith("\\end{table*}"):
             end_idx = j
             break
@@ -227,8 +256,11 @@ def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) 
     for off, raw in enumerate(block_lines):
         lineno = block_start_lineno + off
         line = raw.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
+        # 条件分岐: `line.startswith("Descattered")` を満たす経路を評価する。
 
         if line.startswith("Descattered"):
             table = "descattered"
@@ -236,6 +268,9 @@ def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) 
             day = None
             method_index = 0
             continue
+
+        # 条件分岐: `line.startswith("On-sky")` を満たす経路を評価する。
+
         if line.startswith("On-sky"):
             table = "on_sky"
             pipeline = None
@@ -244,48 +279,70 @@ def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) 
             continue
 
         for token, name in pipeline_map.items():
+            # 条件分岐: `line.startswith(token)` を満たす経路を評価する。
             if line.startswith(token):
                 pipeline = name
                 day = None
                 method_index = 0
                 continue
 
+        # 条件分岐: `table is None or pipeline is None` を満たす経路を評価する。
+
         if table is None or pipeline is None:
             continue
+
+        # 条件分岐: `"&" not in line` を満たす経路を評価する。
+
         if "&" not in line:
             continue
+
+        # 条件分岐: `"\\rm{(\\mu as)}" in line or "\\hline" in line` を満たす経路を評価する。
+
         if "\\rm{(\\mu as)}" in line or "\\hline" in line:
             continue
 
         parts = [_clean_cell(p) for p in line.split("&")]
+        # 条件分岐: `len(parts) < 4` を満たす経路を評価する。
         if len(parts) < 4:
             continue
+
         p0, p1, p2, p3 = parts[:4]
 
+        # 条件分岐: `p0` を満たす経路を評価する。
         if p0:
+            # 条件分岐: `"April 6" in p0` を満たす経路を評価する。
             if "April 6" in p0:
                 day = "april_6"
+            # 条件分岐: 前段条件が不成立で、`"April 7" in p0` を追加評価する。
             elif "April 7" in p0:
                 day = "april_7"
             else:
                 day = None
+
             method_index = 0
+
+        # 条件分岐: `day is None` を満たす経路を評価する。
 
         if day is None:
             continue
 
         d = _parse_pm(p2)
+        # 条件分岐: `d is None` を満たす経路を評価する。
         if d is None:
             continue
+
         d_mean, d_sigma = d
         w = _parse_pm(p3)
 
+        # 条件分岐: `"REx" in p1` を満たす経路を評価する。
         if "REx" in p1:
             method = "rex"
+        # 条件分岐: 前段条件が不成立で、`"\\vida" in p1 or "vida" in p1` を追加評価する。
         elif "\\vida" in p1 or "vida" in p1:
             method = "vida"
         else:
             method = "rex" if method_index == 0 else "vida" if method_index == 1 else f"m{method_index + 1}"
+
         method_index += 1
 
         rows.append(
@@ -301,14 +358,17 @@ def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) 
                 source={"path": str(source_path), "line": int(lineno), "note": "image_analysis.tex:tab:SgrA_ringfit"},
             )
         )
+
     return rows
 
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
+    # 条件分岐: `x.size == 0` を満たす経路を評価する。
     if x.size == 0:
         return {"n": 0}
+
     return {
         "n": int(x.size),
         "mean": float(np.mean(x)),
@@ -327,6 +387,7 @@ def _make_plot(*, metrics: Dict[str, Any], out_png: Path, title: str) -> None:
 
     _set_japanese_font()
     pipelines = [p for p in ("difmap", "ehtim", "smili", "themis") if p in (metrics.get("by_pipeline") or {})]
+    # 条件分岐: `not pipelines` を満たす経路を評価する。
     if not pipelines:
         raise RuntimeError("no pipelines to plot")
 
@@ -396,6 +457,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -413,6 +475,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     metrics: Dict[str, Any] = {}
     for tab, tab_rows in by_table.items():
+        # 条件分岐: `not tab_rows` を満たす経路を評価する。
         if not tab_rows:
             continue
 
@@ -440,8 +503,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         }
 
         try:
+            # 条件分岐: `tab == "descattered"` を満たす経路を評価する。
             if tab == "descattered":
                 _make_plot(metrics=metrics[tab], out_png=out_png_desc, title="Sgr A* ring fits (descattered): diameter by pipeline")
+            # 条件分岐: 前段条件が不成立で、`tab == "on_sky"` を追加評価する。
             elif tab == "on_sky":
                 _make_plot(metrics=metrics[tab], out_png=out_png_onsky, title="Sgr A* ring fits (on-sky): diameter by pipeline")
         except Exception as e:
@@ -449,6 +514,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     payload["metrics"] = metrics
 
+    # 条件分岐: `image_analysis_path.exists()` を満たす経路を評価する。
     if image_analysis_path.exists():
         ia_tex = _read_text(image_analysis_path)
         ia_rows = _parse_image_analysis_ringfit_summary_table(ia_tex, source_path=image_analysis_path)
@@ -460,6 +526,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         ia_metrics: Dict[str, Any] = {}
         for tab, tab_rows in ia_by_table.items():
+            # 条件分岐: `not tab_rows` を満たす経路を評価する。
             if not tab_rows:
                 continue
 
@@ -513,6 +580,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

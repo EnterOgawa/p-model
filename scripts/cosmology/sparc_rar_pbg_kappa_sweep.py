@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -77,10 +78,15 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
+    # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step...` を満たす経路を評価する。
     if not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step > 0):
         raise ValueError("invalid grid params")
+
+    # 条件分岐: `stop < start` を満たす経路を評価する。
+
     if stop < start:
         raise ValueError("stop < start")
+
     n = int(math.floor((stop - start) / step + 0.5)) + 1
     vv = start + step * np.arange(n, dtype=float)
     vv = vv[(vv >= start - 1e-12) & (vv <= stop + 1e-12)]
@@ -98,19 +104,25 @@ def _splits(seeds: Sequence[int], train_fracs: Sequence[float]) -> List[Tuple[in
 
 def _extract_low_accel_z(metrics: Dict[str, Any], model_name: str) -> float:
     for m in metrics.get("models", []):
+        # 条件分岐: `m.get("name") != model_name` を満たす経路を評価する。
         if m.get("name") != model_name:
             continue
+
         te = m.get("test", {}).get("with_sigma_int", {})
         return float(te.get("low_accel", {}).get("z", float("nan")))
+
     return float("nan")
 
 
 def _extract_sigma_int(metrics: Dict[str, Any], model_name: str) -> float:
     for m in metrics.get("models", []):
+        # 条件分岐: `m.get("name") != model_name` を満たす経路を評価する。
         if m.get("name") != model_name:
             continue
+
         fit = m.get("fit", {})
         return float(fit.get("sigma_int_dex", float("nan")))
+
     return float("nan")
 
 
@@ -267,19 +279,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rar_csv = Path(args.rar_csv)
+    # 条件分岐: `not rar_csv.exists()` を満たす経路を評価する。
     if not rar_csv.exists():
         raise SystemExit(f"missing rar csv: {rar_csv}")
+
     h0p_metrics = Path(args.h0p_metrics)
+    # 条件分岐: `not h0p_metrics.exists()` を満たす経路を評価する。
     if not h0p_metrics.exists():
         raise SystemExit(f"missing h0p metrics: {h0p_metrics}")
 
     seeds = list(range(int(args.seed_start), int(args.seed_start) + int(max(args.seed_count, 1))))
     train_fracs = _parse_grid(float(args.train_frac_start), float(args.train_frac_stop), float(args.train_frac_step))
     kappas = _unique_sorted([float(DEFAULT_PBG_KAPPA)] + list(args.kappa) + _parse_grid(float(args.kappa_start), float(args.kappa_stop), float(args.kappa_step)))
+    # 条件分岐: `not kappas` を満たす経路を評価する。
     if not kappas:
         kappas = [float(DEFAULT_PBG_KAPPA)]
 
     pts = _read_points(rar_csv)
+    # 条件分岐: `len(pts) < 100` を満たす経路を評価する。
     if len(pts) < 100:
         raise SystemExit(f"not enough points: {len(pts)}")
 
@@ -385,6 +402,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_png = Path(args.out_png)
     _plot_pass_rate(sweep_rows, out_png=out_png, kappa_ref=float(DEFAULT_PBG_KAPPA))
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -400,6 +418,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

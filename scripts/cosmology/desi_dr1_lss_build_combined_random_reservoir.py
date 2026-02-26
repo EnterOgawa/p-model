@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -40,34 +41,52 @@ from scripts.summary import worklog  # noqa: E402
 
 def _parse_indices(spec: str) -> List[int]:
     s = str(spec).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         raise ValueError("empty --random-indices")
+
     out: List[int] = []
     for part in s.split(","):
         p = part.strip()
+        # 条件分岐: `not p` を満たす経路を評価する。
         if not p:
             continue
+
+        # 条件分岐: `"-" in p` を満たす経路を評価する。
+
         if "-" in p:
             a_s, b_s = p.split("-", 1)
             a = int(a_s)
             b = int(b_s)
+            # 条件分岐: `b < a` を満たす経路を評価する。
             if b < a:
                 raise ValueError(f"invalid range: {p}")
+
             out.extend(list(range(a, b + 1)))
         else:
             out.append(int(p))
     # stable unique
+
     seen: set[int] = set()
     uniq: List[int] = []
     for i in out:
+        # 条件分岐: `i in seen` を満たす経路を評価する。
         if i in seen:
             continue
+
         seen.add(i)
         uniq.append(i)
+
+    # 条件分岐: `not uniq` を満たす経路を評価する。
+
     if not uniq:
         raise ValueError("no indices parsed from --random-indices")
+
+    # 条件分岐: `any(i < 0 for i in uniq)` を満たす経路を評価する。
+
     if any(i < 0 for i in uniq):
         raise ValueError("random indices must be >=0")
+
     return uniq
 
 
@@ -80,18 +99,25 @@ def _relpath(p: Path) -> str:
 
 def _load_manifest(data_dir: Path) -> Dict[str, Any]:
     mp = data_dir / "manifest.json"
+    # 条件分岐: `not mp.exists()` を満たす経路を評価する。
     if not mp.exists():
         raise FileNotFoundError(f"manifest not found: {mp}")
+
     return json.loads(mp.read_text(encoding="utf-8"))
 
 
 def _manifest_item(manifest: Dict[str, Any], *, sample: str, cap: str) -> Dict[str, Any]:
     key = f"{sample}:{cap}"
     it = (manifest.get("items") or {}).get(key)
+    # 条件分岐: `not isinstance(it, dict)` を満たす経路を評価する。
     if not isinstance(it, dict):
         raise KeyError(f"missing item {key} in manifest")
+
+    # 条件分岐: `"galaxy" not in it or "random" not in it` を満たす経路を評価する。
+
     if "galaxy" not in it or "random" not in it:
         raise KeyError(f"missing galaxy/random in manifest item {key}")
+
     return it
 
 
@@ -99,12 +125,14 @@ def _infer_combined_random_name(raw_or_npz_name: str, *, idx_tag: str, target_ro
     s = str(raw_or_npz_name)
     # Prefer a stable replacement of the trailing _<idx>_clustering.ran.fits...
     m = re.search(r"_(\d+)(_clustering\.ran\.fits.*)$", s)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         base = s[: m.start(1)]
         suffix = m.group(2)
         out = f"{base}{idx_tag}{suffix}.mix_reservoir_{int(target_rows)}_seed{int(seed)}.npz"
         return out
     # Fallback: append tag.
+
     stem = Path(s).name
     return f"{stem}.mix_reservoir_{int(target_rows)}_seed{int(seed)}_{idx_tag}.npz"
 
@@ -118,12 +146,17 @@ def _combine_random_npz(
     take_mode: str,
     shuffle_rows: bool,
 ) -> Dict[str, Any]:
+    # 条件分岐: `not src_npz_paths` を満たす経路を評価する。
     if not src_npz_paths:
         raise ValueError("empty src_npz_paths")
+
+    # 条件分岐: `not (int(target_rows) > 0)` を満たす経路を評価する。
+
     if not (int(target_rows) > 0):
         raise ValueError("--target-rows must be >0")
 
     # Determine allocation per index (deterministic; remainder goes to earlier indices).
+
     n_src = int(len(src_npz_paths))
     n_each = int(target_rows) // n_src
     rem = int(target_rows) - n_each * n_src
@@ -133,15 +166,20 @@ def _combine_random_npz(
     # Read first file to learn keys/dtypes/shapes.
     with np.load(src_npz_paths[0]) as z0:
         keys = list(z0.files)
+        # 条件分岐: `not keys` を満たす経路を評価する。
         if not keys:
             raise ValueError(f"empty npz: {src_npz_paths[0]}")
+
         for k in keys:
             a0 = np.asarray(z0[k])
+            # 条件分岐: `a0.ndim != 1` を満たす経路を評価する。
             if a0.ndim != 1:
                 raise ValueError(f"expected 1D arrays in npz: key={k} shape={a0.shape} ({src_npz_paths[0]})")
+
         dtypes = {k: np.asarray(z0[k]).dtype for k in keys}
 
     take_mode = str(take_mode).strip().lower()
+    # 条件分岐: `take_mode not in ("random", "prefix")` を満たす経路を評価する。
     if take_mode not in ("random", "prefix"):
         raise ValueError("--take-mode must be random/prefix")
 
@@ -151,12 +189,17 @@ def _combine_random_npz(
     per_src: List[Dict[str, Any]] = []
     for i, (src_path, take_n) in enumerate(zip(src_npz_paths, takes, strict=True)):
         with np.load(src_path) as z:
+            # 条件分岐: `list(z.files) != list(keys)` を満たす経路を評価する。
             if list(z.files) != list(keys):
                 raise ValueError(f"npz keys mismatch: {src_path} vs {src_npz_paths[0]}")
+
             n_avail = int(np.asarray(z[keys[0]]).shape[0])
+            # 条件分岐: `n_avail < int(take_n)` を満たす経路を評価する。
             if n_avail < int(take_n):
                 raise ValueError(f"npz too small: need {take_n} but have {n_avail}: {src_path}")
+
             sl = slice(offset, offset + int(take_n))
+            # 条件分岐: `take_mode == "prefix"` を満たす経路を評価する。
             if take_mode == "prefix":
                 sel = slice(0, int(take_n))
                 sel_meta: Dict[str, Any] = {"mode": "prefix", "start": 0, "stop": int(take_n)}
@@ -166,12 +209,16 @@ def _combine_random_npz(
                 # Sort for slightly more cache-friendly reads; order is irrelevant because we can shuffle later.
                 sel.sort()
                 sel_meta = {"mode": "random_choice_no_replace", "seed": int(seed) + int(i)}
+
             for k in keys:
                 out_arrays[k][sl] = np.asarray(z[k])[sel]
+
         per_src.append({"npz_path": _relpath(src_path), "take_rows": int(take_n), "select": sel_meta})
         offset += int(take_n)
+
     assert offset == int(target_rows)
 
+    # 条件分岐: `shuffle_rows` を満たす経路を評価する。
     if shuffle_rows:
         rng = np.random.default_rng(int(seed))
         perm = np.arange(int(target_rows), dtype=np.int64)
@@ -225,6 +272,7 @@ def main(argv: List[str] | None = None) -> int:
         manifests[int(idx)] = _load_manifest(d)
 
     # Use the first index as canonical for galaxy.
+
     idx0 = int(indices[0])
     m0 = manifests[idx0]
 
@@ -236,14 +284,17 @@ def main(argv: List[str] | None = None) -> int:
     for cap in ("north", "south"):
         it0 = _manifest_item(m0, sample=sample, cap=cap)
         gal_npz_src = _ROOT / Path(str(it0["galaxy"]["npz_path"]))
+        # 条件分岐: `not gal_npz_src.exists()` を満たす経路を評価する。
         if not gal_npz_src.exists():
             raise FileNotFoundError(f"missing galaxy npz: {gal_npz_src}")
+
         gal_name = gal_npz_src.name
         gal_npz_dst = out_extracted / gal_name
         shutil.copy2(gal_npz_src, gal_npz_dst)
         galaxy_out[cap] = gal_npz_dst
 
     # Build combined random NPZ for each cap.
+
     idx_tag = f"{min(indices)}to{max(indices)}"
     random_out: Dict[str, Path] = {}
     random_meta: Dict[str, Any] = {}
@@ -255,9 +306,12 @@ def main(argv: List[str] | None = None) -> int:
             mi = manifests[int(idx)]
             iti = _manifest_item(mi, sample=sample, cap=cap)
             rnd_npz_src = _ROOT / Path(str(iti["random"]["npz_path"]))
+            # 条件分岐: `not rnd_npz_src.exists()` を満たす経路を評価する。
             if not rnd_npz_src.exists():
                 raise FileNotFoundError(f"missing random npz: {rnd_npz_src}")
+
             src_npz_paths.append(rnd_npz_src)
+            # 条件分岐: `raw_name_hint is None` を満たす経路を評価する。
             if raw_name_hint is None:
                 raw_path = iti.get("random", {}).get("raw_path")
                 raw_name_hint = Path(str(raw_path)).name if raw_path else rnd_npz_src.name
@@ -337,6 +391,8 @@ def main(argv: List[str] | None = None) -> int:
     print(f"[ok] random south: {random_out['south']}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

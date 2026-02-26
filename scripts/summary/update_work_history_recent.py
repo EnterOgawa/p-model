@@ -6,8 +6,10 @@ from pathlib import Path
 
 def _split_history_blocks(text: str) -> tuple[str, list[str]]:
     match = re.search(r"^##\s+20\d\d-\d\d-\d\d", text, flags=re.M)
+    # 条件分岐: `not match` を満たす経路を評価する。
     if not match:
         return text, []
+
     header = text[: match.start()].rstrip() + "\n\n"
 
     starts = [m.start() for m in re.finditer(r"^##\s+20\d\d-\d\d-\d\d", text, flags=re.M)]
@@ -16,15 +18,19 @@ def _split_history_blocks(text: str) -> tuple[str, list[str]]:
     blocks: list[str] = []
     for start, end in zip(starts, starts[1:]):
         block = text[start:end].strip("\n")
+        # 条件分岐: `not block` を満たす経路を評価する。
         if not block:
             continue
+
         lines = block.splitlines()
         while lines and lines[-1].strip() == "":
             lines.pop()
+
         while lines and lines[-1].strip() == "---":
             lines.pop()
             while lines and lines[-1].strip() == "":
                 lines.pop()
+
         blocks.append("\n".join(lines).rstrip() + "\n")
 
     return header, blocks
@@ -56,12 +62,15 @@ def main() -> None:
     recent = blocks[-3:]
 
     content = _make_recent_header()
+    # 条件分岐: `recent` を満たす経路を評価する。
     if recent:
         content += "\n\n---\n\n".join(block.strip() + "\n" for block in recent).rstrip() + "\n"
 
     dst.write_text(content, encoding="utf-8")
     print(f"[ok] wrote: {dst}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

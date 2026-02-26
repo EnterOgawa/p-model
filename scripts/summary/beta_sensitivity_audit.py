@@ -34,6 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -61,34 +62,52 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         number = float(value)
+        # 条件分岐: `math.isfinite(number)` を満たす経路を評価する。
         if math.isfinite(number):
             return number
+
     return None
 
 
 def _classify_numeric(*, max_abs_delta: float, pass_abs_threshold: float, watch_abs_threshold: float) -> str:
+    # 条件分岐: `max_abs_delta <= pass_abs_threshold` を満たす経路を評価する。
     if max_abs_delta <= pass_abs_threshold:
         return "pass"
+
+    # 条件分岐: `max_abs_delta <= watch_abs_threshold` を満たす経路を評価する。
+
     if max_abs_delta <= watch_abs_threshold:
         return "watch"
+
     return "reject"
 
 
 def _status_severity(status: str) -> int:
+    # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
         return 0
+
+    # 条件分岐: `status == "watch"` を満たす経路を評価する。
+
     if status == "watch":
         return 1
+
     return 2
 
 
 def _categorical_triplet_status(*, case_low: str, case_ref: str, case_high: str) -> str:
+    # 条件分岐: `case_low == case_ref == case_high` を満たす経路を評価する。
     if case_low == case_ref == case_high:
         return "pass"
+
+    # 条件分岐: `case_ref in (case_low, case_high)` を満たす経路を評価する。
+
     if case_ref in (case_low, case_high):
         return "watch"
+
     return "reject"
 
 
@@ -106,27 +125,35 @@ def _load_frozen_beta() -> Dict[str, Any]:
         ROOT / "output" / "public" / "theory" / "frozen_parameters.json",
     ]
     for path in candidates:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         payload = _read_json(path)
         beta = _as_float(payload.get("beta"))
+        # 条件分岐: `beta is None` を満たす経路を評価する。
         if beta is None:
             continue
+
         gamma_sigma = _as_float(payload.get("gamma_pmodel_sigma"))
         beta_sigma = _as_float(payload.get("beta_sigma"))
+        # 条件分岐: `gamma_sigma is None and beta_sigma is not None` を満たす経路を評価する。
         if gamma_sigma is None and beta_sigma is not None:
             gamma_sigma = float(2.0 * beta_sigma)
+
         return {
             "path": path,
             "beta_ref": float(beta),
             "beta_sigma": beta_sigma,
             "gamma_sigma": gamma_sigma,
         }
+
     raise SystemExit("[fail] frozen beta not found in output/private/theory or output/public/theory.")
 
 
 def _run_checked(command: List[str]) -> None:
     proc = subprocess.run(command, cwd=str(ROOT), capture_output=True, text=True)
+    # 条件分岐: `proc.returncode != 0` を満たす経路を評価する。
     if proc.returncode != 0:
         raise RuntimeError(
             "command failed:\n"
@@ -144,27 +171,39 @@ def _extract_eht_delta_from_output() -> float:
         ROOT / "output" / "public" / "eht" / "eht_shadow_compare.json",
     ]
     for path in candidates:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         payload = _read_json(path)
         delta_ref = _as_float((payload.get("delta_reference") or {}).get("delta_coeff_p_minus_gr_schwarzschild"))
+        # 条件分岐: `delta_ref is None` を満たす経路を評価する。
         if delta_ref is None:
             ratio = _as_float((payload.get("phase4") or {}).get("shadow_diameter_coeff_ratio_p_over_gr"))
+            # 条件分岐: `ratio is not None` を満たす経路を評価する。
             if ratio is not None:
                 delta_ref = float(ratio - 1.0)
+
+        # 条件分岐: `delta_ref is not None` を満たす経路を評価する。
+
         if delta_ref is not None:
             return float(delta_ref)
+
     raise RuntimeError("failed to extract EHT delta from eht_shadow_compare outputs")
 
 
 def _extract_deuteron_b_from_output() -> float:
     path = ROOT / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise RuntimeError(f"missing deuteron metrics: {path}")
+
     payload = _read_json(path)
     b = _as_float((((payload.get("derived") or {}).get("binding_energy") or {}).get("B_MeV") or {}).get("value"))
+    # 条件分岐: `b is None` を満たす経路を評価する。
     if b is None:
         raise RuntimeError("failed to extract deuteron B_MeV value")
+
     return float(b)
 
 
@@ -174,8 +213,10 @@ def _extract_cmb_metrics_from_output() -> Dict[str, Any]:
         ROOT / "output" / "private" / "cosmology" / "cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
     ]
     for path in candidates:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         payload = _read_json(path)
         gate = payload.get("gate") if isinstance(payload.get("gate"), dict) else {}
         extended = gate.get("extended_4to6") if isinstance(gate.get("extended_4to6"), dict) else {}
@@ -183,21 +224,26 @@ def _extract_cmb_metrics_from_output() -> Dict[str, Any]:
         max_abs_delta_ell = _as_float(extended.get("max_abs_delta_ell"))
         max_abs_delta_amp_rel = _as_float(extended.get("max_abs_delta_amp_rel"))
         overall_status = str(overall_ext.get("status") or "unknown")
+        # 条件分岐: `max_abs_delta_ell is None or max_abs_delta_amp_rel is None` を満たす経路を評価する。
         if max_abs_delta_ell is None or max_abs_delta_amp_rel is None:
             continue
+
         return {
             "path": path,
             "holdout46_max_abs_delta_ell": float(max_abs_delta_ell),
             "holdout46_max_abs_delta_amp_rel": float(max_abs_delta_amp_rel),
             "overall_extended_status": overall_status,
         }
+
     raise RuntimeError("failed to extract CMB acoustic holdout metrics from output")
 
 
 def _extract_sparc_metrics_from_output() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "cosmology" / "sparc_rotation_curve_pmodel_audit_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise RuntimeError(f"missing SPARC metrics: {path}")
+
     payload = _read_json(path)
     fit_results = payload.get("fit_results") if isinstance(payload.get("fit_results"), dict) else {}
     pmodel = fit_results.get("pmodel_corrected") if isinstance(fit_results.get("pmodel_corrected"), dict) else {}
@@ -205,8 +251,10 @@ def _extract_sparc_metrics_from_output() -> Dict[str, Any]:
     chi2_dof_pmodel = _as_float(pmodel.get("chi2_dof"))
     delta_chi2 = _as_float(comparison.get("delta_chi2_baryon_minus_pmodel"))
     better_model = str(comparison.get("better_model_by_chi2") or "unknown")
+    # 条件分岐: `chi2_dof_pmodel is None or delta_chi2 is None` を満たす経路を評価する。
     if chi2_dof_pmodel is None or delta_chi2 is None:
         raise RuntimeError("failed to extract SPARC chi2 metrics")
+
     return {
         "path": path,
         "chi2_dof_pmodel": float(chi2_dof_pmodel),
@@ -217,8 +265,10 @@ def _extract_sparc_metrics_from_output() -> Dict[str, Any]:
 
 def _extract_bell_bridge_metrics_from_output() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "quantum" / "quantum_connection_bridge_table.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise RuntimeError(f"missing bell bridge metrics: {path}")
+
     payload = _read_json(path)
     overall = payload.get("overall") if isinstance(payload.get("overall"), dict) else {}
     selection = overall.get("selection_summary") if isinstance(overall.get("selection_summary"), dict) else {}
@@ -226,8 +276,10 @@ def _extract_bell_bridge_metrics_from_output() -> Dict[str, Any]:
     selection_max = _as_float(selection.get("normalized_score_max"))
     physics_max = _as_float(physics.get("normalized_score_max"))
     overall_status = str(overall.get("status") or "unknown")
+    # 条件分岐: `selection_max is None or physics_max is None` を満たす経路を評価する。
     if selection_max is None or physics_max is None:
         raise RuntimeError("failed to extract bell bridge normalized-score metrics")
+
     return {
         "path": path,
         "overall_status": overall_status,
@@ -244,14 +296,23 @@ def _set_beta_in_frozen_payload(payload: Dict[str, Any], beta: float) -> Dict[st
     out["gamma_pmodel"] = gamma
 
     constraints = out.get("constraints")
+    # 条件分岐: `isinstance(constraints, list)` を満たす経路を評価する。
     if isinstance(constraints, list):
         for row in constraints:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
+            # 条件分岐: `"beta" in row` を満たす経路を評価する。
+
             if "beta" in row:
                 row["beta"] = float(beta)
+
+            # 条件分岐: `"gamma" in row` を満たす経路を評価する。
+
             if "gamma" in row:
                 row["gamma"] = gamma
+
     return out
 
 
@@ -327,6 +388,7 @@ def _heavy_rerun_cases(
             out["restore"]["rerun_ref_done"] = True
         except Exception:
             out["restore"]["rerun_ref_done"] = False
+
     return out
 
 
@@ -366,19 +428,26 @@ def _full_rerun_followup(
     for case_name in case_names:
         row1 = run1_cases.get(case_name)
         row2 = run2_cases.get(case_name)
+        # 条件分岐: `not isinstance(row1, dict) or not isinstance(row2, dict)` を満たす経路を評価する。
         if not isinstance(row1, dict) or not isinstance(row2, dict):
             continue
 
         for key in numeric_keys:
             value1 = _as_float(row1.get(key))
             value2 = _as_float(row2.get(key))
+            # 条件分岐: `value1 is None or value2 is None` を満たす経路を評価する。
             if value1 is None or value2 is None:
                 continue
+
             delta = abs(float(value2) - float(value1))
             metric_key = f"{case_name}::{key}"
             numeric_per_metric_max[metric_key] = float(delta)
+            # 条件分岐: `delta > numeric_max_abs_delta` を満たす経路を評価する。
             if delta > numeric_max_abs_delta:
                 numeric_max_abs_delta = float(delta)
+
+            # 条件分岐: `delta > 0.0` を満たす経路を評価する。
+
             if delta > 0.0:
                 numeric_mismatch_rows.append(
                     {
@@ -393,6 +462,7 @@ def _full_rerun_followup(
         for key in categorical_keys:
             value1 = str(row1.get(key) or "")
             value2 = str(row2.get(key) or "")
+            # 条件分岐: `value1 != value2` を満たす経路を評価する。
             if value1 != value2:
                 categorical_mismatch_rows.append(
                     {
@@ -466,35 +536,47 @@ def _load_eht_metrics() -> Dict[str, Any]:
         ROOT / "output" / "private" / "eht" / "eht_shadow_compare.json",
     ]
     for path in candidates:
+        # 条件分岐: `path.exists()` を満たす経路を評価する。
         if path.exists():
             payload = _read_json(path)
             coeff_gr = _as_float((payload.get("reference_gr") or {}).get("shadow_diameter_coeff_rg"))
             delta_sigma_required = _as_float((payload.get("delta_reference") or {}).get("delta_sigma_required_3sigma"))
             delta_ref = _as_float((payload.get("delta_reference") or {}).get("delta_coeff_p_minus_gr_schwarzschild"))
+            # 条件分岐: `coeff_gr is None or delta_sigma_required is None` を満たす経路を評価する。
             if coeff_gr is None or delta_sigma_required is None:
                 continue
+
+            # 条件分岐: `delta_ref is None` を満たす経路を評価する。
+
             if delta_ref is None:
                 delta_ref = _as_float((payload.get("phase4") or {}).get("shadow_diameter_coeff_ratio_p_over_gr"))
+                # 条件分岐: `delta_ref is not None` を満たす経路を評価する。
                 if delta_ref is not None:
                     delta_ref = float(delta_ref - 1.0)
+
             return {
                 "path": path,
                 "coeff_gr": float(coeff_gr),
                 "delta_sigma_required_3sigma": float(delta_sigma_required),
                 "delta_ref": float(delta_ref) if delta_ref is not None else None,
             }
+
     raise SystemExit("[fail] eht_shadow_compare.json not found (public/private).")
 
 
 def _load_deuteron_metrics() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise SystemExit(f"[fail] missing: {path}")
+
     payload = _read_json(path)
     b_mev = _as_float((((payload.get("derived") or {}).get("binding_energy") or {}).get("B_MeV") or {}).get("value"))
     b_sigma = _as_float((((payload.get("derived") or {}).get("binding_energy") or {}).get("B_MeV") or {}).get("sigma"))
+    # 条件分岐: `b_mev is None or b_sigma is None` を満たす経路を評価する。
     if b_mev is None or b_sigma is None:
         raise SystemExit("[fail] invalid deuteron metrics JSON (B_MeV value/sigma missing).")
+
     return {"path": path, "b_mev": float(b_mev), "b_sigma": float(b_sigma)}
 
 
@@ -521,18 +603,24 @@ def _load_bell_bridge_metrics() -> Dict[str, Any]:
 
 def _load_quantum_shared_kpi() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "quantum" / "quantum_connection_shared_kpi.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise SystemExit(f"[fail] missing: {path}")
+
     payload = _read_json(path)
     overall = payload.get("overall") if isinstance(payload.get("overall"), dict) else {}
     channels = payload.get("channels") if isinstance(payload.get("channels"), list) else []
     channel_status = {}
     for row in channels:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         key = str(row.get("channel") or "")
+        # 条件分岐: `key` を満たす経路を評価する。
         if key:
             channel_status[key] = str(row.get("status") or "")
+
     return {
         "path": path,
         "overall_status": str(overall.get("status") or "unknown"),
@@ -543,9 +631,11 @@ def _load_quantum_shared_kpi() -> Dict[str, Any]:
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         path.write_text("", encoding="utf-8")
         return
+
     headers = list(rows[0].keys())
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
@@ -599,6 +689,7 @@ def _plot_summary(
     ]
     for row in rows_categorical:
         lines.append(f"- {row['indicator']}: {row['status']} ({row['case_low']}/{row['case_ref']}/{row['case_high']})")
+
     ax1.text(
         0.0,
         1.0,
@@ -673,18 +764,21 @@ def main() -> int:
     full_followup: Optional[Dict[str, Any]] = None
     heavy_enabled = bool(args.heavy_rerun or args.full_rerun_followup)
 
+    # 条件分岐: `args.full_rerun_followup` を満たす経路を評価する。
     if args.full_rerun_followup:
         frozen_path = Path(frozen["path"])
         full_followup = _full_rerun_followup(frozen_path=frozen_path, beta_cases=cases)
         runs_block = full_followup.get("runs") if isinstance(full_followup.get("runs"), dict) else {}
         run1_block = runs_block.get("run1") if isinstance(runs_block.get("run1"), dict) else {}
         heavy = run1_block
+    # 条件分岐: 前段条件が不成立で、`heavy_enabled` を追加評価する。
     elif heavy_enabled:
         frozen_path = Path(frozen["path"])
         heavy = _heavy_rerun_cases(frozen_path=frozen_path, beta_cases=cases)
         case_rows = heavy.get("cases") if isinstance(heavy.get("cases"), dict) else {}
 
     case_rows = heavy.get("cases") if isinstance((heavy or {}).get("cases"), dict) else {}
+    # 条件分岐: `case_rows` を満たす経路を評価する。
     if case_rows:
         heavy_eht_values = {}
         heavy_deuteron_values = {}
@@ -698,43 +792,67 @@ def main() -> int:
         heavy_bell_bridge_physics_values = {}
         heavy_bell_bridge_status_values = {}
         for case_name, row in case_rows.items():
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             delta = _as_float(row.get("eht_delta_coeff_p_minus_gr"))
+            # 条件分岐: `delta is not None` を満たす経路を評価する。
             if delta is not None:
                 heavy_eht_values[case_name] = float(delta)
+
             b_val = _as_float(row.get("deuteron_binding_B_MeV"))
+            # 条件分岐: `b_val is not None` を満たす経路を評価する。
             if b_val is not None:
                 heavy_deuteron_values[case_name] = float(b_val)
+
             cmb_dell = _as_float(row.get("cmb_holdout46_max_abs_delta_ell"))
+            # 条件分岐: `cmb_dell is not None` を満たす経路を評価する。
             if cmb_dell is not None:
                 heavy_cmb_dell_values[case_name] = float(cmb_dell)
+
             cmb_damp = _as_float(row.get("cmb_holdout46_max_abs_delta_amp_rel"))
+            # 条件分岐: `cmb_damp is not None` を満たす経路を評価する。
             if cmb_damp is not None:
                 heavy_cmb_damp_values[case_name] = float(cmb_damp)
+
             cmb_status = str(row.get("cmb_overall_extended_status") or "")
+            # 条件分岐: `cmb_status` を満たす経路を評価する。
             if cmb_status:
                 heavy_cmb_status_values[case_name] = cmb_status
+
             sparc_chi2 = _as_float(row.get("sparc_chi2_dof_pmodel"))
+            # 条件分岐: `sparc_chi2 is not None` を満たす経路を評価する。
             if sparc_chi2 is not None:
                 heavy_sparc_chi2_values[case_name] = float(sparc_chi2)
+
             sparc_delta = _as_float(row.get("sparc_delta_chi2_baryon_minus_pmodel"))
+            # 条件分岐: `sparc_delta is not None` を満たす経路を評価する。
             if sparc_delta is not None:
                 heavy_sparc_delta_chi2_values[case_name] = float(sparc_delta)
+
             sparc_model = str(row.get("sparc_better_model_by_chi2") or "")
+            # 条件分岐: `sparc_model` を満たす経路を評価する。
             if sparc_model:
                 heavy_sparc_better_model_values[case_name] = sparc_model
+
             bridge_selection = _as_float(row.get("bell_bridge_selection_normalized_score_max"))
+            # 条件分岐: `bridge_selection is not None` を満たす経路を評価する。
             if bridge_selection is not None:
                 heavy_bell_bridge_selection_values[case_name] = float(bridge_selection)
+
             bridge_physics = _as_float(row.get("bell_bridge_physics_normalized_score_max"))
+            # 条件分岐: `bridge_physics is not None` を満たす経路を評価する。
             if bridge_physics is not None:
                 heavy_bell_bridge_physics_values[case_name] = float(bridge_physics)
+
             bridge_status = str(row.get("bell_bridge_overall_status") or "")
+            # 条件分岐: `bridge_status` を満たす経路を評価する。
             if bridge_status:
                 heavy_bell_bridge_status_values[case_name] = bridge_status
 
     # Indicator 1: EHT coefficient delta (dimensionless; tied to Part II strong-field argument)
+
     coeff_gr = float(eht["coeff_gr"])
 
     def eht_delta(beta: float) -> float:
@@ -920,8 +1038,10 @@ def main() -> int:
     )
 
     def _safe_rel_pct(delta: float, ref: float) -> Optional[float]:
+        # 条件分岐: `ref == 0.0` を満たす経路を評価する。
         if ref == 0.0:
             return None
+
         return float(100.0 * delta / ref)
 
     rows_numeric: List[Dict[str, Any]] = [
@@ -1087,6 +1207,7 @@ def main() -> int:
     followup_numeric_status: Optional[str] = None
     followup_categorical_status: Optional[str] = None
     followup_restore_status: Optional[str] = None
+    # 条件分岐: `full_followup is not None` を満たす経路を評価する。
     if full_followup is not None:
         comparison = full_followup.get("comparison") if isinstance(full_followup.get("comparison"), dict) else {}
         numeric_comp = comparison.get("numeric") if isinstance(comparison.get("numeric"), dict) else {}
@@ -1122,6 +1243,7 @@ def main() -> int:
         followup_restore_status = str(restore_comp.get("status") or "unknown")
 
     # Categorical indicators
+
     q_status_ref = str(qkpi["overall_status"])
     q_status_low = q_status_ref
     q_status_high = q_status_ref
@@ -1201,6 +1323,7 @@ def main() -> int:
             "note": "heavy rerun invariance check (selection/physics bridge gate status).",
         },
     ]
+    # 条件分岐: `full_followup is not None` を満たす経路を評価する。
     if full_followup is not None:
         rows_categorical.append(
             {
@@ -1360,6 +1483,8 @@ def main() -> int:
     print(f"[ok] overall_status={overall_status}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

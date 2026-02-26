@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -24,6 +25,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest().upper()
 
 
@@ -33,24 +35,35 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _to_repo_path(root: Path, raw: str) -> Path:
     p = Path(raw)
+    # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
     if p.is_absolute():
         return p
+
     return root / p
 
 
 def _extract_local_files(source: Dict[str, Any]) -> List[Tuple[str, str, str | None]]:
     out: List[Tuple[str, str, str | None]] = []
     for k, v in source.items():
+        # 条件分岐: `not (isinstance(k, str) and k.startswith("local_"))` を満たす経路を評価する。
         if not (isinstance(k, str) and k.startswith("local_")):
             continue
+
+        # 条件分岐: `k.endswith("_sha256")` を満たす経路を評価する。
+
         if k.endswith("_sha256"):
             continue
+
+        # 条件分岐: `not isinstance(v, str) or not v.strip()` を満たす経路を評価する。
+
         if not isinstance(v, str) or not v.strip():
             continue
+
         sha_key = f"{k}_sha256"
         sha_expected = source.get(sha_key)
         sha_expected_s = str(sha_expected).strip().upper() if isinstance(sha_expected, str) else None
         out.append((k, v.strip(), sha_expected_s or None))
+
     return out
 
 
@@ -63,13 +76,18 @@ def main() -> int:
 
     obj = _read_json(inp)
     sources = obj.get("sources")
+    # 条件分岐: `not isinstance(sources, dict)` を満たす経路を評価する。
     if not isinstance(sources, dict):
         raise RuntimeError("data/eht/eht_black_holes.json: sources is missing or not a dict")
 
     rows: List[Dict[str, Any]] = []
     for source_key, source in sources.items():
+        # 条件分岐: `not isinstance(source_key, str)` を満たす経路を評価する。
         if not isinstance(source_key, str):
             continue
+
+        # 条件分岐: `not isinstance(source, dict)` を満たす経路を評価する。
+
         if not isinstance(source, dict):
             continue
 
@@ -77,6 +95,7 @@ def main() -> int:
         url = str(source.get("url") or "").strip() or None
 
         local_files = _extract_local_files(source)
+        # 条件分岐: `not local_files` を満たす経路を評価する。
         if not local_files:
             rows.append(
                 {
@@ -97,12 +116,20 @@ def main() -> int:
             exists = path.exists()
             actual = _sha256(path) if exists else None
             match = None
+            # 条件分岐: `sha_expected and actual` を満たす経路を評価する。
             if sha_expected and actual:
                 match = sha_expected == actual
+
+            # 条件分岐: `sha_expected and actual and not match` を満たす経路を評価する。
+
             if sha_expected and actual and not match:
                 ok_all = False
+
+            # 条件分岐: `not exists` を満たす経路を評価する。
+
             if not exists:
                 ok_all = False
+
             file_rows.append(
                 {
                     "field": field,
@@ -114,6 +141,7 @@ def main() -> int:
                     "sha256_match": match,
                 }
             )
+
         rows.append(
             {
                 "source_key": source_key,
@@ -158,6 +186,8 @@ def main() -> int:
     print(f"[ok] totals: {totals}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

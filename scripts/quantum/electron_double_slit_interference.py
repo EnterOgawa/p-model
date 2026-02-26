@@ -51,8 +51,10 @@ def sinc(x: np.ndarray) -> np.ndarray:
 
 
 def _load_json(path: Path) -> dict | None:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -122,6 +124,7 @@ def build_matter_wave_interference_precision_audit(
 
     alpha_z_abs = None
     epsilon_sigma = None
+    # 条件分岐: `alpha_metrics is not None` を満たす経路を評価する。
     if alpha_metrics is not None:
         alpha_derived = alpha_metrics.get("derived", {})
         alpha_z_abs = abs(float(alpha_derived.get("z_score", float("nan"))))
@@ -146,16 +149,20 @@ def build_matter_wave_interference_precision_audit(
     atom_precision_ratios: list[float] = []
     atom_precision_labels: list[str] = []
     atom_precision_by_channel: dict[str, float] = {}
+    # 条件分岐: `atom_audit_metrics is not None` を満たす経路を評価する。
     if atom_audit_metrics is not None:
         for entry in atom_audit_metrics.get("rows", []):
             req = entry.get("required_precision_3sigma")
             cur = entry.get("current_precision")
+            # 条件分岐: `isinstance(req, (int, float)) and isinstance(cur, (int, float)) and req > 0 a...` を満たす経路を評価する。
             if isinstance(req, (int, float)) and isinstance(cur, (int, float)) and req > 0 and cur > 0:
                 ratio = float(cur / req)
                 channel_name = str(entry.get("channel", "unknown"))
                 atom_precision_ratios.append(ratio)
                 atom_precision_labels.append(channel_name)
                 atom_precision_by_channel[channel_name] = ratio
+
+        # 条件分岐: `atom_precision_ratios` を満たす経路を評価する。
 
         if atom_precision_ratios:
             ratio_array = np.asarray(atom_precision_ratios, dtype=float)
@@ -194,12 +201,16 @@ def build_matter_wave_interference_precision_audit(
         notes.append("Missing atom_interferometer_unified_audit_metrics.json; atom precision-gap row skipped.")
 
     molecular_dev_abs: list[float] = []
+    # 条件分岐: `molecular_metrics is not None` を満たす経路を評価する。
     if molecular_metrics is not None:
         for entry in molecular_metrics.get("rows", []):
             for key in ("omega_e_ratio_meas_over_pred", "B_e_ratio_meas_over_pred"):
                 ratio = entry.get(key)
+                # 条件分岐: `isinstance(ratio, (int, float)) and ratio > 0` を満たす経路を評価する。
                 if isinstance(ratio, (int, float)) and ratio > 0:
                     molecular_dev_abs.append(abs(float(ratio) - 1.0))
+
+        # 条件分岐: `molecular_dev_abs` を満たす経路を評価する。
 
         if molecular_dev_abs:
             dev_arr = np.asarray(molecular_dev_abs, dtype=float)
@@ -259,27 +270,37 @@ def build_matter_wave_interference_precision_audit(
     ax1 = axes[0, 1]
     z_labels: list[str] = []
     z_values: list[float] = []
+    # 条件分岐: `alpha_z_abs is not None and np.isfinite(alpha_z_abs)` を満たす経路を評価する。
     if alpha_z_abs is not None and np.isfinite(alpha_z_abs):
         z_labels.append("atom α-consistency")
         z_values.append(float(alpha_z_abs))
+
     for row in rows:
+        # 条件分岐: `row["channel"] == "molecular_isotopic_scaling" and isinstance(row["metric_val...` を満たす経路を評価する。
         if row["channel"] == "molecular_isotopic_scaling" and isinstance(row["metric_value"], (int, float)):
+            # 条件分岐: `np.isfinite(float(row["metric_value"]))` を満たす経路を評価する。
             if np.isfinite(float(row["metric_value"])):
                 z_labels.append("molecular scaling")
                 z_values.append(float(row["metric_value"]))
+
+    # 条件分岐: `z_values` を満たす経路を評価する。
+
     if z_values:
         ax1.bar(z_labels, z_values, color=["#ff7f0e", "#2ca02c"][: len(z_values)])
+
     ax1.axhline(3.0, color="0.25", ls="--", lw=1.2)
     ax1.set_ylabel("z")
     ax1.set_title("Cross-channel consistency (|z|)")
     ax1.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
 
     ax2 = axes[1, 0]
+    # 条件分岐: `atom_precision_ratios` を満たす経路を評価する。
     if atom_precision_ratios:
         x = np.arange(len(atom_precision_ratios))
         ax2.bar(x, atom_precision_ratios, color="#9467bd")
         ax2.set_xticks(x)
         ax2.set_xticklabels(atom_precision_labels, rotation=20, ha="right")
+
     ax2.axhline(1.0, color="0.25", ls="--", lw=1.2)
     ax2.set_yscale("log")
     ax2.set_ylabel("current / required(3σ)")
@@ -287,8 +308,10 @@ def build_matter_wave_interference_precision_audit(
     ax2.grid(True, axis="y", ls=":", lw=0.6, alpha=0.7)
 
     ax3 = axes[1, 1]
+    # 条件分岐: `molecular_dev_abs` を満たす経路を評価する。
     if molecular_dev_abs:
         ax3.hist(molecular_dev_abs, bins=min(8, max(3, len(molecular_dev_abs))), color="#17becf", alpha=0.85)
+
     ax3.set_xlabel("abs(meas/pred - 1)")
     ax3.set_ylabel("count")
     ax3.set_title("Molecular isotopic scaling residuals")
@@ -449,6 +472,8 @@ def main() -> None:
     print(f"[ok] csv : {audit_csv}")
     print(f"[ok] json: {audit_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

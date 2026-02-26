@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -47,69 +48,108 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         number = float(value)
+        # 条件分岐: `math.isfinite(number)` を満たす経路を評価する。
         if math.isfinite(number):
             return number
+
     return None
 
 
 def _compute_pass(value: Optional[float], threshold: Optional[float], operator: str) -> Optional[bool]:
+    # 条件分岐: `value is None or threshold is None` を満たす経路を評価する。
     if value is None or threshold is None:
         return None
+
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
+
     if operator == "<=":
         return bool(value <= threshold)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
         return bool(value >= threshold)
+
     return None
 
 
 def _normalized_score(value: Optional[float], threshold: Optional[float], operator: str) -> Optional[float]:
+    # 条件分岐: `value is None or threshold is None or threshold == 0.0` を満たす経路を評価する。
     if value is None or threshold is None or threshold == 0.0:
         return None
+
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
+
     if operator == "<=":
         return float(value / threshold)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
+        # 条件分岐: `value == 0.0` を満たす経路を評価する。
         if value == 0.0:
             return math.inf
+
         return float(threshold / value)
+
     return None
 
 
 def _row_status(passed: Optional[bool], gate_level: str) -> str:
+    # 条件分岐: `passed is True` を満たす経路を評価する。
     if passed is True:
         return "pass"
+
+    # 条件分岐: `passed is None` を満たす経路を評価する。
+
     if passed is None:
         return "unknown"
+
+    # 条件分岐: `gate_level == "hard"` を満たす経路を評価する。
+
     if gate_level == "hard":
         return "reject"
+
     return "watch"
 
 
 def _criteria_map(criteria: Any) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
+    # 条件分岐: `not isinstance(criteria, list)` を満たす経路を評価する。
     if not isinstance(criteria, list):
         return out
+
     for row in criteria:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         criterion_id = str(row.get("id") or "")
+        # 条件分岐: `criterion_id` を満たす経路を評価する。
         if criterion_id:
             out[criterion_id] = row
+
     return out
 
 
 def _channel_entry(shared_kpi: Dict[str, Any], channel_name: str) -> Dict[str, Any]:
     channels = shared_kpi.get("channels") if isinstance(shared_kpi.get("channels"), list) else []
     for row in channels:
+        # 条件分岐: `isinstance(row, dict) and str(row.get("channel") or "") == channel_name` を満たす経路を評価する。
         if isinstance(row, dict) and str(row.get("channel") or "") == channel_name:
             return row
+
     return {}
 
 
@@ -122,26 +162,33 @@ def _extract_condensed_counts(shared_kpi: Dict[str, Any], condensed_summary: Dic
     reject_count = int(reject_n) if isinstance(reject_n, (int, float)) else 0
     inconclusive_count = int(inconclusive_n) if isinstance(inconclusive_n, (int, float)) else 0
 
+    # 条件分岐: `isinstance(reject_n, (int, float)) and isinstance(inconclusive_n, (int, float))` を満たす経路を評価する。
     if isinstance(reject_n, (int, float)) and isinstance(inconclusive_n, (int, float)):
         return {"reject_n": reject_count, "inconclusive_n": inconclusive_count}
 
     summary = condensed_summary.get("summary") if isinstance(condensed_summary.get("summary"), dict) else {}
     datasets = summary.get("datasets") if isinstance(summary.get("datasets"), list) else []
+    # 条件分岐: `not datasets` を満たす経路を評価する。
     if not datasets:
         return {"reject_n": reject_count, "inconclusive_n": inconclusive_count}
 
     reject_count = 0
     inconclusive_count = 0
     for dataset in datasets:
+        # 条件分岐: `not isinstance(dataset, dict)` を満たす経路を評価する。
         if not isinstance(dataset, dict):
             continue
+
         audit_gates = dataset.get("audit_gates") if isinstance(dataset.get("audit_gates"), dict) else {}
         falsification = audit_gates.get("falsification") if isinstance(audit_gates.get("falsification"), dict) else {}
         status = str(falsification.get("status") or "").strip().lower()
+        # 条件分岐: `status == "reject"` を満たす経路を評価する。
         if status == "reject":
             reject_count += 1
+        # 条件分岐: 前段条件が不成立で、`status != "ok"` を追加評価する。
         elif status != "ok":
             inconclusive_count += 1
+
     return {"reject_n": reject_count, "inconclusive_n": inconclusive_count}
 
 
@@ -224,8 +271,10 @@ def build_pack() -> Dict[str, Any]:
         )
 
     for source_row in nonrel_criteria:
+        # 条件分岐: `not isinstance(source_row, dict)` を満たす経路を評価する。
         if not isinstance(source_row, dict):
             continue
+
         channel_name = str(source_row.get("channel") or "")
         _add_mapped_row(
             rows,
@@ -303,8 +352,10 @@ def build_pack() -> Dict[str, Any]:
     charge_q = _as_float(((action.get("numerical_audit") or {}).get("charge_q")))
     epsilon_gate = None
     for row in nonrel_criteria:
+        # 条件分岐: `isinstance(row, dict)` を満たす経路を評価する。
         if isinstance(row, dict):
             epsilon_gate = _as_float(row.get("threshold"))
+            # 条件分岐: `epsilon_gate is not None` を満たす経路を評価する。
             if epsilon_gate is not None:
                 break
 
@@ -366,14 +417,18 @@ def build_pack() -> Dict[str, Any]:
     source_watchlist = born_ab_decision.get("watchlist") if isinstance(born_ab_decision.get("watchlist"), list) else []
 
     route_a_gate = "A_continue"
+    # 条件分岐: `hard_fail_ids or hard_unknown_ids` を満たす経路を評価する。
     if hard_fail_ids or hard_unknown_ids:
         route_a_gate = "A_reject"
+    # 条件分岐: 前段条件が不成立で、`cross_gate in ("A_continue", "A_reject")` を追加評価する。
     elif cross_gate in ("A_continue", "A_reject"):
         route_a_gate = cross_gate
+    # 条件分岐: 前段条件が不成立で、`str(born_pack_decision.get("route_a_gate") or "") in ("A_continue", "A_reject")` を追加評価する。
     elif str(born_pack_decision.get("route_a_gate") or "") in ("A_continue", "A_reject"):
         route_a_gate = str(born_pack_decision.get("route_a_gate"))
 
     transition = "A_to_B" if route_a_gate == "A_reject" else "A_stay"
+    # 条件分岐: `cross_transition == "A_to_B" and route_a_gate == "A_continue"` を満たす経路を評価する。
     if cross_transition == "A_to_B" and route_a_gate == "A_continue":
         transition = "A_stay"
 
@@ -385,9 +440,12 @@ def build_pack() -> Dict[str, Any]:
         status_count = {"pass": 0, "watch": 0, "reject": 0, "unknown": 0}
         for row in channel_rows:
             status = str(row.get("status") or "unknown")
+            # 条件分岐: `status not in status_count` を満たす経路を評価する。
             if status not in status_count:
                 status = "unknown"
+
             status_count[status] += 1
+
         shared_row = _channel_entry(shared_kpi, channel_name)
         channel_summary[channel_name] = {
             "rows_n": len(channel_rows),
@@ -468,16 +526,21 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         labels.append(str(row.get("id") or ""))
         score = _as_float(row.get("normalized_score"))
         scores.append(score if score is not None else math.nan)
         status = str(row.get("status") or "unknown")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             colors.append("#e03131")
+        # 条件分岐: 前段条件が不成立で、`status == "watch"` を追加評価する。
         elif status == "watch":
             colors.append("#f2c94c")
         else:
@@ -520,8 +583,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     def _resolve(path_text: str) -> Path:
         path = Path(path_text)
+        # 条件分岐: `path.is_absolute()` を満たす経路を評価する。
         if path.is_absolute():
             return path.resolve()
+
         return (ROOT / path).resolve()
 
     out_json = _resolve(args.out_json)
@@ -558,6 +623,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

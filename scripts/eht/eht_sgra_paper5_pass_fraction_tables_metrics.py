@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -38,6 +39,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -49,10 +51,15 @@ def _set_japanese_font() -> None:
 
 def _parse_float(token: str) -> Optional[float]:
     t = token.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
+    # 条件分岐: `t in {"--", "---"}` を満たす経路を評価する。
+
     if t in {"--", "---"}:
         return None
+
     try:
         v = float(t)
         return v if math.isfinite(v) else None
@@ -62,30 +69,39 @@ def _parse_float(token: str) -> Optional[float]:
 
 def _parse_cell_values(cell: str) -> List[float]:
     t = cell.strip()
+    # 条件分岐: `not t or t in {"--", "---"}` を満たす経路を評価する。
     if not t or t in {"--", "---"}:
         return []
+
     parts = [p.strip() for p in t.split(",")]
     out: List[float] = []
     for p in parts:
         v = _parse_float(p)
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             continue
+
         out.append(float(v))
+
     return out
 
 
 def _parse_latex_sci(token: str) -> Optional[float]:
     t = token.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
     t = t.replace("$", "")
     t = re.sub(r"\s+", "", t)
     m = re.match(r"^([+-]?\d*\.?\d+(?:[eE][+-]?\d+)?)\\times10\^\{([+-]?\d+)\}$", t)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         try:
             return float(m.group(1)) * (10.0 ** int(m.group(2)))
         except Exception:
             return None
+
     try:
         return float(t)
     except Exception:
@@ -100,16 +116,25 @@ def _strip_unescaped_tex_comment(line: str) -> str:
 def _extract_table_rows(tex_lines: Sequence[str]) -> List[Tuple[int, str]]:
     start_idx = None
     for i, line in enumerate(tex_lines):
+        # 条件分岐: `"\\startdata" in line` を満たす経路を評価する。
         if "\\startdata" in line:
             start_idx = i
             break
+
+    # 条件分岐: `start_idx is None` を満たす経路を評価する。
+
     if start_idx is None:
         return []
+
     end_idx = None
     for j in range(start_idx, len(tex_lines)):
+        # 条件分岐: `"\\enddata" in tex_lines[j]` を満たす経路を評価する。
         if "\\enddata" in tex_lines[j]:
             end_idx = j
             break
+
+    # 条件分岐: `end_idx is None` を満たす経路を評価する。
+
     if end_idx is None:
         end_idx = len(tex_lines)
 
@@ -117,17 +142,28 @@ def _extract_table_rows(tex_lines: Sequence[str]) -> List[Tuple[int, str]]:
     for off, raw in enumerate(tex_lines[start_idx + 1 : end_idx], start=0):
         lineno = (start_idx + 2) + off
         s = raw.strip()
+        # 条件分岐: `s.startswith("%")` を満たす経路を評価する。
         if s.startswith("%"):
             continue
+
         s = _strip_unescaped_tex_comment(s).strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
+        # 条件分岐: `s.startswith("\\hline")` を満たす経路を評価する。
+
         if s.startswith("\\hline"):
             continue
+
+        # 条件分岐: `"&" not in s` を満たす経路を評価する。
+
         if "&" not in s:
             continue
+
         s = s.replace("\\\\", "").strip()
         rows.append((int(lineno), s))
+
     return rows
 
 
@@ -136,8 +172,10 @@ def _rank_constraints(by_constraint: Dict[str, Dict[str, Any]]) -> List[Dict[str
     for name, rec in by_constraint.items():
         values = rec.get("values_all") if isinstance(rec.get("values_all"), list) else []
         vals = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             continue
+
         items.append(
             {
                 "constraint": name,
@@ -147,6 +185,7 @@ def _rank_constraints(by_constraint: Dict[str, Dict[str, Any]]) -> List[Dict[str
                 "mean": float(sum(vals) / len(vals)),
             }
         )
+
     items.sort(key=lambda x: (x["mean"], x["min"]))
     return items
 
@@ -165,6 +204,7 @@ def _summarize_pass_fail_rows(
         "fail_modes_top": [],
         "fail_count_histogram": {},
     }
+    # 条件分岐: `n == 0` を満たす経路を評価する。
     if n == 0:
         return summary
 
@@ -175,6 +215,7 @@ def _summarize_pass_fail_rows(
 
     for row in rows:
         pf = row.get("pass_fail")
+        # 条件分岐: `not isinstance(pf, dict)` を満たす経路を評価する。
         if not isinstance(pf, dict):
             continue
 
@@ -182,17 +223,22 @@ def _summarize_pass_fail_rows(
         fail_count = 0
         for c in pass_fail_columns:
             v = pf.get(c)
+            # 条件分岐: `v == "Pass"` を満たす経路を評価する。
             if v == "Pass":
                 counts[c]["pass"] += 1
+            # 条件分岐: 前段条件が不成立で、`v == "Fail"` を追加評価する。
             elif v == "Fail":
                 counts[c]["fail"] += 1
                 fail_count += 1
+                # 条件分岐: `c not in exclude` を満たす経路を評価する。
                 if c not in exclude:
                     failed_cols.append(c)
             else:
                 counts[c]["unknown"] += 1
+
         fail_hist[fail_count] = int(fail_hist.get(fail_count, 0) + 1)
 
+        # 条件分岐: `failed_cols` を満たす経路を評価する。
         if failed_cols:
             key = "|".join(sorted(failed_cols))
             fail_modes[key] = int(fail_modes.get(key, 0) + 1)
@@ -214,6 +260,7 @@ def _summarize_pass_fail_rows(
             "fail_fraction": fail_frac,
         }
         ranked.append({"constraint": c, "fail_fraction": fail_frac, "pass_fraction": pass_frac, "n": n})
+
     ranked.sort(key=lambda x: (-x["fail_fraction"], x["constraint"]))
 
     ranked_excl = [x for x in ranked if x.get("constraint") not in exclude]
@@ -233,32 +280,54 @@ def _summarize_pass_fail_rows(
 
 def _normalize_constraint_token_paper5(token: str) -> Optional[str]:
     t = token.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
+    # 条件分岐: `t in {"??", "--", "---"}` を満たす経路を評価する。
+
     if t in {"??", "--", "---"}:
         return None
 
     # Keep some TeX macros for matching.
+
     if re.search(r"\\mi\{\s*3\s*\}", t):
         return "M3"
 
+    # 条件分岐: `"Mring width" in t or "\\Mring width" in t` を満たす経路を評価する。
+
     if "Mring width" in t or "\\Mring width" in t:
         return "Ring_W"
+
+    # 条件分岐: `"Mring diameter" in t or "\\Mring diameter" in t` を満たす経路を評価する。
+
     if "Mring diameter" in t or "\\Mring diameter" in t:
         return "Ring_D"
+
+    # 条件分岐: `"Mring asymmetry" in t or "\\Mring asymmetry" in t` を満たす経路を評価する。
+
     if "Mring asymmetry" in t or "\\Mring asymmetry" in t:
         return "Ring_A"
 
+    # 条件分岐: `"86" in t and "GHz" in t` を満たす経路を評価する。
+
     if "86" in t and "GHz" in t:
+        # 条件分岐: `"flux" in t` を満たす経路を評価する。
         if "flux" in t:
             return "F86"
+
+        # 条件分岐: `"size" in t` を満たす経路を評価する。
+
         if "size" in t:
             return "lambda_maj86"
+
+    # 条件分岐: `"2.2" in t and ("\\mu" in t or "μ" in t or "mu" in t) and "flux" in t` を満たす経路を評価する。
 
     if "2.2" in t and ("\\mu" in t or "μ" in t or "mu" in t) and "flux" in t:
         return "F_2um"
 
     # Fallback to a compact plain-text token to avoid exploding variants.
+
     t = t.replace("$", "")
     t = re.sub(r"\\[, ]", " ", t)
     t = re.sub(r"\s+", " ", t).strip()
@@ -267,6 +336,7 @@ def _normalize_constraint_token_paper5(token: str) -> Optional[str]:
 
 def _summarize_near_passing_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     out: Dict[str, Any] = {"rows_n": int(len(rows)), "constraints_ranked_by_count": [], "fail_combos_top": []}
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return out
 
@@ -275,15 +345,19 @@ def _summarize_near_passing_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, An
     unknown_n = 0
     for row in rows:
         failed = row.get("failed_constraints_norm")
+        # 条件分岐: `not isinstance(failed, list)` を満たす経路を評価する。
         if not isinstance(failed, list):
             continue
+
         failed_clean = [c for c in failed if isinstance(c, str) and c]
+        # 条件分岐: `not failed_clean` を満たす経路を評価する。
         if not failed_clean:
             unknown_n += 1
             continue
 
         for c in failed_clean:
             counts[c] = int(counts.get(c, 0) + 1)
+
         key = "|".join(sorted(set(failed_clean)))
         combos[key] = int(combos.get(key, 0) + 1)
 
@@ -306,8 +380,10 @@ def _parse_paper5_near_passing_table(tex_path: Path, *, label: str) -> Dict[str,
     parsed_rows: List[Dict[str, Any]] = []
     for lineno, row in rows:
         cols = [c.strip() for c in row.split("&")]
+        # 条件分岐: `len(cols) < 6` を満たす経路を評価する。
         if len(cols) < 6:
             continue
+
         cols = cols[:6]
         code_setup = cols[0]
         mad_sane = cols[1]
@@ -320,8 +396,10 @@ def _parse_paper5_near_passing_table(tex_path: Path, *, label: str) -> Dict[str,
         failed_norm = []
         for p in failed_parts:
             norm = _normalize_constraint_token_paper5(p)
+            # 条件分岐: `norm is None` を満たす経路を評価する。
             if norm is None:
                 continue
+
             failed_norm.append(norm)
 
         parsed_rows.append(
@@ -361,14 +439,17 @@ def _parse_paper5_pass_fail_table(
     parsed_rows: List[Dict[str, Any]] = []
     for lineno, row in rows:
         cols = [c.strip() for c in row.split("&")]
+        # 条件分岐: `len(cols) < expected_cols` を満たす経路を評価する。
         if len(cols) < expected_cols:
             continue
+
         cols = cols[:expected_cols]
         pos = 0
         params_out: Dict[str, Any] = {}
         for name, kind in params:
             tok = cols[pos]
             pos += 1
+            # 条件分岐: `kind == "float"` を満たす経路を評価する。
             if kind == "float":
                 v = _parse_float(tok)
                 params_out[name] = v if v is not None else tok
@@ -385,9 +466,11 @@ def _parse_paper5_pass_fail_table(
         for name, kind in numeric:
             tok = cols[pos]
             pos += 1
+            # 条件分岐: `kind == "latex_sci"` を満たす経路を評価する。
             if kind == "latex_sci":
                 v = _parse_latex_sci(tok)
                 numeric_out[name] = v if v is not None else tok
+            # 条件分岐: 前段条件が不成立で、`kind == "float"` を追加評価する。
             elif kind == "float":
                 v = _parse_float(tok)
                 numeric_out[name] = v if v is not None else tok
@@ -425,16 +508,20 @@ def _aggregate_pass_fail_tables(
     totals: Dict[str, Dict[str, int]] = {}
 
     for table_key, tab in pass_fail_tables.items():
+        # 条件分岐: `not isinstance(tab, dict)` を満たす経路を評価する。
         if not isinstance(tab, dict):
             continue
+
         summary = tab.get("summary", {}) if isinstance(tab.get("summary"), dict) else {}
         by_constraint = summary.get("by_constraint", {}) if isinstance(summary.get("by_constraint"), dict) else {}
         rows_n = tab.get("rows_n")
+        # 条件分岐: `not isinstance(rows_n, int)` を満たす経路を評価する。
         if not isinstance(rows_n, int):
             rows_n = summary.get("rows_n") if isinstance(summary.get("rows_n"), int) else None
 
         all_pass_fraction = None
         rec_all = by_constraint.get("All") if isinstance(by_constraint.get("All"), dict) else None
+        # 条件分岐: `isinstance(rec_all, dict) and isinstance(rec_all.get("pass_fraction"), (int,...` を満たす経路を評価する。
         if isinstance(rec_all, dict) and isinstance(rec_all.get("pass_fraction"), (int, float)):
             all_pass_fraction = float(rec_all["pass_fraction"])
 
@@ -447,16 +534,23 @@ def _aggregate_pass_fail_tables(
         )
 
         for constraint, rec in by_constraint.items():
+            # 条件分岐: `constraint in exclude` を満たす経路を評価する。
             if constraint in exclude:
                 continue
+
+            # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
+
             if not isinstance(rec, dict):
                 continue
+
             fail_n = int(rec.get("fail_n", 0))
             pass_n = int(rec.get("pass_n", 0))
             unknown_n = int(rec.get("unknown_n", 0))
             denom = fail_n + pass_n + unknown_n
+            # 条件分岐: `denom <= 0` を満たす経路を評価する。
             if denom <= 0:
                 continue
+
             tot = totals.setdefault(constraint, {"fail_n": 0, "pass_n": 0, "unknown_n": 0, "denom": 0, "tables_n": 0})
             tot["fail_n"] += fail_n
             tot["pass_n"] += pass_n
@@ -467,8 +561,10 @@ def _aggregate_pass_fail_tables(
     ranked: List[Dict[str, Any]] = []
     for constraint, tot in totals.items():
         denom = int(tot.get("denom", 0))
+        # 条件分岐: `denom <= 0` を満たす経路を評価する。
         if denom <= 0:
             continue
+
         fail_n = int(tot.get("fail_n", 0))
         pass_n = int(tot.get("pass_n", 0))
         unknown_n = int(tot.get("unknown_n", 0))
@@ -484,6 +580,7 @@ def _aggregate_pass_fail_tables(
                 "pass_fraction": float(pass_n / denom),
             }
         )
+
     ranked.sort(key=lambda x: (-x["fail_fraction"], x["constraint"]))
     tables_summary.sort(key=lambda x: (x.get("table_key") or ""))
 
@@ -594,6 +691,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json), "png": str(out_png), "png_global": str(out_png_global), "png_near": str(out_png_near)},
     }
 
+    # 条件分岐: `not thermal_path.exists() or not expl_path.exists()` を満たす経路を評価する。
     if not thermal_path.exists() or not expl_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -606,13 +704,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     # Thermal table: constraint | kharma | bhac | hamr
+
     thermal_lines = _read_text(thermal_path).splitlines()
     thermal_rows = _extract_table_rows(thermal_lines)
     thermal_by_constraint: Dict[str, Dict[str, Any]] = {}
     for lineno, row in thermal_rows:
         cols = [c.strip() for c in row.split("&")]
+        # 条件分岐: `len(cols) < 4` を満たす経路を評価する。
         if len(cols) < 4:
             continue
+
         constraint = cols[0]
         kharma = _parse_float(cols[1])
         bhac = _parse_float(cols[2])
@@ -627,16 +728,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         }
 
     # Exploratory table (tab:passfraction): constraint/model | BHAC (4 cols) | HAMR (3 cols)
+
     expl_lines = _read_text(expl_path).splitlines()
     expl_rows = _extract_table_rows(expl_lines)
     expl_by_constraint: Dict[str, Dict[str, Any]] = {}
     for lineno, row in expl_rows:
         cols = [c.strip() for c in row.split("&")]
+        # 条件分岐: `len(cols) < 8` を満たす経路を評価する。
         if len(cols) < 8:
             continue
+
         constraint = cols[0]
+        # 条件分岐: `not constraint` を満たす経路を評価する。
         if not constraint:
             continue
+
         bhac_thermal = _parse_cell_values(cols[1])
         bhac_kappa_var = _parse_cell_values(cols[2])
         bhac_kappa35_eps = _parse_cell_values(cols[3])
@@ -657,6 +763,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "source_anchor": {"path": str(expl_path), "line": int(lineno), "label": "tab:passfraction"},
         }
 
+    # 条件分岐: `not thermal_by_constraint or not expl_by_constraint` を満たす経路を評価する。
+
     if not thermal_by_constraint or not expl_by_constraint:
         payload["ok"] = False
         payload["reason"] = "no_rows_parsed"
@@ -676,6 +784,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Optional: detailed Pass/Fail tables (tab:betacritPF / tab:VKbhacPF)
     pass_fail_tables: Dict[str, Any] = {}
     warnings: List[str] = []
+    # 条件分岐: `critical_beta_path.exists()` を満たす経路を評価する。
     if critical_beta_path.exists():
         pass_fail_tables["critical_beta_models"] = _parse_paper5_pass_fail_table(
             critical_beta_path,
@@ -700,6 +809,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_critical_beta_tex: {critical_beta_path}")
+
+    # 条件分岐: `bhac_varkappa_path.exists()` を満たす経路を評価する。
 
     if bhac_varkappa_path.exists():
         pass_fail_tables["frankfurt_variable_kappa_models_bhac"] = _parse_paper5_pass_fail_table(
@@ -729,6 +840,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_bhac_varkappa_tex: {bhac_varkappa_path}")
+
+    # 条件分岐: `frankfurt_thermal_path.exists()` を満たす経路を評価する。
 
     if frankfurt_thermal_path.exists():
         pass_fail_tables["frankfurt_thermal_models"] = _parse_paper5_pass_fail_table(
@@ -760,6 +873,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         warnings.append(f"missing_frankfurt_thermal_tex: {frankfurt_thermal_path}")
 
+    # 条件分岐: `frankfurt_kappa5_path.exists()` を満たす経路を評価する。
+
     if frankfurt_kappa5_path.exists():
         pass_fail_tables["frankfurt_kappa5_models"] = _parse_paper5_pass_fail_table(
             frankfurt_kappa5_path,
@@ -789,6 +904,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         warnings.append(f"missing_frankfurt_kappa5_tex: {frankfurt_kappa5_path}")
 
+    # 条件分岐: `frankfurt_fixed_kappa_var_eff_path.exists()` を満たす経路を評価する。
+
     if frankfurt_fixed_kappa_var_eff_path.exists():
         pass_fail_tables["frankfurt_fixed_kappa_variable_efficiency_models"] = _parse_paper5_pass_fail_table(
             frankfurt_fixed_kappa_var_eff_path,
@@ -817,6 +934,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_frankfurt_fixed_kappa_var_eff_tex: {frankfurt_fixed_kappa_var_eff_path}")
+
+    # 条件分岐: `illinois_thermal_path.exists()` を満たす経路を評価する。
 
     if illinois_thermal_path.exists():
         pass_fail_tables["illinois_thermal_models"] = _parse_paper5_pass_fail_table(
@@ -849,6 +968,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         warnings.append(f"missing_illinois_thermal_tex: {illinois_thermal_path}")
 
+    # 条件分岐: `koral_thermal_path.exists()` を満たす経路を評価する。
+
     if koral_thermal_path.exists():
         pass_fail_tables["koral_thermal_models"] = _parse_paper5_pass_fail_table(
             koral_thermal_path,
@@ -877,6 +998,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_koral_thermal_tex: {koral_thermal_path}")
+
+    # 条件分岐: `hamr_thermal_path.exists()` を満たす経路を評価する。
 
     if hamr_thermal_path.exists():
         pass_fail_tables["hamr_thermal_models"] = _parse_paper5_pass_fail_table(
@@ -907,6 +1030,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_hamr_thermal_tex: {hamr_thermal_path}")
+
+    # 条件分岐: `hamr_variable_kappa_path.exists()` を満たす経路を評価する。
 
     if hamr_variable_kappa_path.exists():
         pass_fail_tables["hamr_variable_kappa_models"] = _parse_paper5_pass_fail_table(
@@ -939,6 +1064,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         warnings.append(f"missing_hamr_variable_kappa_tex: {hamr_variable_kappa_path}")
 
+    # 条件分岐: `hamr_tilted_path.exists()` を満たす経路を評価する。
+
     if hamr_tilted_path.exists():
         pass_fail_tables["hamr_tilted_models"] = _parse_paper5_pass_fail_table(
             hamr_tilted_path,
@@ -962,6 +1089,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_hamr_tilted_tex: {hamr_tilted_path}")
+
+    # 条件分岐: `hamr_nonthermal_path.exists()` を満たす経路を評価する。
 
     if hamr_nonthermal_path.exists():
         pass_fail_tables["hamr_nonthermal_powerlaw_models"] = _parse_paper5_pass_fail_table(
@@ -987,6 +1116,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     else:
         warnings.append(f"missing_hamr_nonthermal_tex: {hamr_nonthermal_path}")
+
+    # 条件分岐: `ressler_wind_fed_path.exists()` を満たす経路を評価する。
 
     if ressler_wind_fed_path.exists():
         pass_fail_tables["wind_fed_models"] = _parse_paper5_pass_fail_table(
@@ -1014,10 +1145,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         warnings.append(f"missing_ressler_wind_fed_tex: {ressler_wind_fed_path}")
 
     near_tables: Dict[str, Any] = {}
+    # 条件分岐: `fail_one_thermal_path.exists()` を満たす経路を評価する。
     if fail_one_thermal_path.exists():
         near_tables["fail_one_thermal"] = _parse_paper5_near_passing_table(fail_one_thermal_path, label="tab:fail_one_thermal")
     else:
         warnings.append(f"missing_fail_one_thermal_tex: {fail_one_thermal_path}")
+
+    # 条件分岐: `fail_one_nonthermal_path.exists()` を満たす経路を評価する。
 
     if fail_one_nonthermal_path.exists():
         near_tables["fail_one_nonthermal"] = _parse_paper5_near_passing_table(
@@ -1026,15 +1160,25 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         warnings.append(f"missing_fail_one_nonthermal_tex: {fail_one_nonthermal_path}")
 
+    # 条件分岐: `fail_none_path.exists()` を満たす経路を評価する。
+
     if fail_none_path.exists():
         near_tables["fail_none"] = _parse_paper5_near_passing_table(fail_none_path, label="tab:fail_none")
     else:
         warnings.append(f"missing_fail_none_tex: {fail_none_path}")
 
+    # 条件分岐: `pass_fail_tables` を満たす経路を評価する。
+
     if pass_fail_tables:
         payload["extracted"]["pass_fail_tables"] = pass_fail_tables
+
+    # 条件分岐: `near_tables` を満たす経路を評価する。
+
     if near_tables:
         payload["extracted"]["near_passing"] = near_tables
+
+    # 条件分岐: `warnings` を満たす経路を評価する。
+
     if warnings:
         payload["warnings"] = warnings
 
@@ -1047,6 +1191,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ],
     }
 
+    # 条件分岐: `pass_fail_tables` を満たす経路を評価する。
     if pass_fail_tables:
         payload["derived"]["pass_fail_tables_global"] = _aggregate_pass_fail_tables(
             pass_fail_tables,
@@ -1054,20 +1199,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     near_passing = payload.get("extracted", {}).get("near_passing")
+    # 条件分岐: `isinstance(near_passing, dict) and near_passing` を満たす経路を評価する。
     if isinstance(near_passing, dict) and near_passing:
         combined_rows: List[Dict[str, Any]] = []
         for key, tab in near_passing.items():
+            # 条件分岐: `not isinstance(tab, dict)` を満たす経路を評価する。
             if not isinstance(tab, dict):
                 continue
+
             rows = tab.get("rows")
+            # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
             if not isinstance(rows, list):
                 continue
+
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 r2 = dict(r)
                 r2["table_key"] = key
                 combined_rows.append(r2)
+
         payload["derived"]["near_passing"] = {"combined_summary": _summarize_near_passing_rows(combined_rows)}
 
     try:
@@ -1076,23 +1229,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         _set_japanese_font()
 
         tables = payload.get("extracted", {}).get("pass_fail_tables", {})
+        # 条件分岐: `isinstance(tables, dict) and tables` を満たす経路を評価する。
         if isinstance(tables, dict) and tables:
             plot_defs = [
                 ("critical_beta_models", "Paper V: Critical Beta models (tab:betacritPF)"),
                 ("frankfurt_variable_kappa_models_bhac", "Paper V: Frankfurt variable κ models (tab:VKbhacPF; BHAC)"),
             ]
             keys = [k for k, _ in plot_defs if k in tables]
+            # 条件分岐: `keys` を満たす経路を評価する。
             if keys:
                 nrows = int(len(keys))
                 fig = plt.figure(figsize=(10.5, 4.3 * nrows))
                 for idx, (key, label) in enumerate(plot_defs, start=1):
+                    # 条件分岐: `key not in tables` を満たす経路を評価する。
                     if key not in tables:
                         continue
+
                     tab = tables[key]
                     summary = tab.get("summary", {}) if isinstance(tab, dict) else {}
                     ranked = summary.get("constraints_ranked_by_fail_fraction_excluding_aggregates")
+                    # 条件分岐: `not isinstance(ranked, list) or not ranked` を満たす経路を評価する。
                     if not isinstance(ranked, list) or not ranked:
                         ranked = summary.get("constraints_ranked_by_fail_fraction") if isinstance(summary.get("constraints_ranked_by_fail_fraction"), list) else []
+
                     ranked = [r for r in ranked if isinstance(r, dict) and isinstance(r.get("constraint"), str)]
                     constraints = [r["constraint"] for r in ranked]
                     fail_fracs = [float(r.get("fail_fraction", 0.0)) for r in ranked]
@@ -1109,9 +1268,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     n_total = tab.get("rows_n")
                     all_rec = summary.get("by_constraint", {}).get("All") if isinstance(summary.get("by_constraint"), dict) else None
                     all_pass = None
+                    # 条件分岐: `isinstance(all_rec, dict)` を満たす経路を評価する。
                     if isinstance(all_rec, dict):
                         all_pass = all_rec.get("pass_fraction")
+
                     subtitle = f"N={n_total}" if isinstance(n_total, int) else "N=?"
+                    # 条件分岐: `isinstance(all_pass, (int, float))` を満たす経路を評価する。
                     if isinstance(all_pass, (int, float)):
                         subtitle += f", All-pass fraction={float(all_pass):.3f}"
 
@@ -1119,8 +1281,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     ax.grid(True, axis="x", alpha=0.25)
 
                     for yi, val in enumerate(fail_fracs):
+                        # 条件分岐: `not (0.0 <= val <= 1.0)` を満たす経路を評価する。
                         if not (0.0 <= val <= 1.0):
                             continue
+
                         ax.text(min(0.98, val + 0.02), yi, f"{val:.2f}", va="center", ha="left", fontsize=9)
 
                 fig.tight_layout()
@@ -1129,9 +1293,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 plt.close(fig)
 
         global_ranked = payload.get("derived", {}).get("pass_fail_tables_global", {}).get("constraints_ranked_by_global_fail_fraction")
+        # 条件分岐: `isinstance(global_ranked, list) and global_ranked` を満たす経路を評価する。
         if isinstance(global_ranked, list) and global_ranked:
             top = [r for r in global_ranked if isinstance(r, dict) and isinstance(r.get("constraint"), str)]
             top = top[:12]
+            # 条件分岐: `top` を満たす経路を評価する。
             if top:
                 constraints = [r["constraint"] for r in top]
                 fail_fracs = [float(r.get("fail_fraction", 0.0)) for r in top]
@@ -1150,8 +1316,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ax.set_title("Paper V pass/fail: dominant constraints (global fail fraction)")
                 ax.grid(True, axis="x", alpha=0.25)
                 for yi, (val, n_tot, n_tab) in enumerate(zip(fail_fracs, totals, tables_n)):
+                    # 条件分岐: `not (0.0 <= val <= 1.0)` を満たす経路を評価する。
                     if not (0.0 <= val <= 1.0):
                         continue
+
                     ax.text(
                         min(0.98, val + 0.02),
                         yi,
@@ -1160,6 +1328,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         ha="left",
                         fontsize=9,
                     )
+
                 fig.tight_layout()
                 out_png_global.parent.mkdir(parents=True, exist_ok=True)
                 fig.savefig(out_png_global, dpi=200)
@@ -1171,11 +1340,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             .get("combined_summary", {})
             .get("constraints_ranked_by_count")
         )
+        # 条件分岐: `isinstance(near_ranked, list) and near_ranked` を満たす経路を評価する。
         if isinstance(near_ranked, list) and near_ranked:
             items = [r for r in near_ranked if isinstance(r, dict) and isinstance(r.get("constraint"), str)]
             constraints = [r["constraint"] for r in items]
             counts = [int(r.get("count", 0)) for r in items]
             total = int(sum(counts)) if counts else 0
+            # 条件分岐: `constraints and total > 0` を満たす経路を評価する。
             if constraints and total > 0:
                 fig = plt.figure(figsize=(10.5, 0.55 * len(constraints) + 1.6))
                 ax = fig.add_subplot(1, 1, 1)
@@ -1188,9 +1359,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 ax.set_title("Paper V near-passing: failed constraint counts (fail_one + fail_none)")
                 ax.grid(True, axis="x", alpha=0.25)
                 for yi, val in enumerate(counts):
+                    # 条件分岐: `val <= 0` を満たす経路を評価する。
                     if val <= 0:
                         continue
+
                     ax.text(val + 0.05, yi, f"{val} ({val/total:.2f})", va="center", ha="left", fontsize=9)
+
                 fig.tight_layout()
                 out_png_near.parent.mkdir(parents=True, exist_ok=True)
                 fig.savefig(out_png_near, dpi=200)
@@ -1239,6 +1413,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

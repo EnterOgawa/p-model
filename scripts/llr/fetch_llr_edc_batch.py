@@ -53,9 +53,11 @@ def _edc_bases() -> list[str]:
     # Allow overriding endpoints (comma-separated), while defaulting to ftp-first
     # because https occasionally returns 503.
     raw = os.environ.get("EDC_BASES", "").strip()
+    # 条件分岐: `raw` を満たす経路を評価する。
     if raw:
         bases = [b.strip().rstrip("/") for b in raw.split(",") if b.strip()]
         return bases or _DEFAULT_EDC_BASES
+
     return _DEFAULT_EDC_BASES
 
 
@@ -64,6 +66,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -74,6 +77,7 @@ def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
         try:
             with urllib.request.urlopen(req, timeout=timeout_s) as r:
                 b = r.read()
+
             return b.decode("utf-8", "replace")
         except urllib.error.HTTPError as e:  # type: ignore[attr-defined]
             last_err = e
@@ -99,11 +103,13 @@ def _fetch_text_any(path: str, *, timeout_s: int = 60) -> tuple[str, str]:
         except Exception as e:
             last_err = e
             print(f"[warn] fetch failed: {url}: {e}")
+
     raise RuntimeError(f"fetch failed for all endpoints: {path}: {last_err}")
 
 
 def _iter_hrefs(html: str) -> Iterable[str]:
     for href in re.findall(r'href=[\'"]([^\'"]+)[\'"]', html):
+        # 条件分岐: `href` を満たす経路を評価する。
         if href:
             yield href
 
@@ -113,26 +119,35 @@ def _iter_dir_names(listing: str) -> Iterable[str]:
     if "href=" in listing.lower():
         for href in _iter_hrefs(listing):
             name = href.rstrip("/").rsplit("/", 1)[-1].strip()
+            # 条件分岐: `name` を満たす経路を評価する。
             if name:
                 yield name
+
         return
 
     for raw in listing.splitlines():
         line = raw.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
         # Example:
         # drwxr-xr-x    2 9000     9000         4096 Jun 27  2025 2022
         # -rw-rw-r--    1 9000     121          7858 Apr 02  2015 apollo11_201205.npt
         # lrwxrwxrwx    1 ... name -> target
+
         if " -> " in line:
             line = line.split(" -> ", 1)[0].rstrip()
+
         toks = line.split()
+        # 条件分岐: `not toks` を満たす経路を評価する。
         if not toks:
             continue
+
         name = toks[-1].strip()
+        # 条件分岐: `name in (".", "..")` を満たす経路を評価する。
         if name in (".", ".."):
             continue
+
         yield name
 
 
@@ -140,8 +155,10 @@ def _list_years(target: str, root_path: str) -> list[int]:
     listing, _url = _fetch_text_any(f"{root_path}/{target}/")
     years: list[int] = []
     for name in _iter_dir_names(listing):
+        # 条件分岐: `re.fullmatch(r"\d{4}", name)` を満たす経路を評価する。
         if re.fullmatch(r"\d{4}", name):
             years.append(int(name))
+
     return sorted(set(years))
 
 
@@ -149,9 +166,12 @@ def _list_files(target: str, year: int, root_path: str) -> list[str]:
     listing, _url = _fetch_text_any(f"{root_path}/{target}/{year}/")
     files: list[str] = []
     for name in _iter_dir_names(listing):
+        # 条件分岐: `not name.lower().startswith(f"{target.lower()}_")` を満たす経路を評価する。
         if not name.lower().startswith(f"{target.lower()}_"):
             continue
+
         files.append(name)
+
     return sorted(set(files))
 
 
@@ -166,9 +186,11 @@ def _is_daily(filename: str) -> bool:
 
 def _download_any(path: str, dst: Path, *, force: bool) -> str:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return ""
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     last_err: Optional[Exception] = None
     used_url: Optional[str] = None
@@ -182,10 +204,12 @@ def _download_any(path: str, dst: Path, *, force: bool) -> str:
             try:
                 with urllib.request.urlopen(req, timeout=180) as r, open(tmp, "wb") as f:
                     shutil.copyfileobj(r, f, length=1024 * 1024)
+
                 used_url = url
                 break
             except urllib.error.HTTPError as e:  # type: ignore[attr-defined]
                 last_err = e
+                # 条件分岐: `int(getattr(e, "code", 0) or 0) not in (429, 500, 502, 503, 504)` を満たす経路を評価する。
                 if int(getattr(e, "code", 0) or 0) not in (429, 500, 502, 503, 504):
                     raise
             except urllib.error.URLError as e:  # type: ignore[attr-defined]
@@ -195,10 +219,14 @@ def _download_any(path: str, dst: Path, *, force: bool) -> str:
             print(f"[warn] download failed (attempt {attempt}/7): {url} → retry in {sleep_s:.1f}s")
             time.sleep(sleep_s)
 
+        # 条件分岐: `used_url` を満たす経路を評価する。
+
         if used_url:
             break
 
         print(f"[warn] download failed for endpoint: {url}: {last_err}")
+
+    # 条件分岐: `not used_url` を満たす経路を評価する。
 
     if not used_url:
         raise RuntimeError(f"download failed for all endpoints: {path}: {last_err}")
@@ -214,16 +242,24 @@ def _extract_station_codes(np2_path: Path) -> list[str]:
         txt = np2_path.read_text(encoding="utf-8", errors="replace")
     except Exception:
         return []
+
     for raw in txt.splitlines():
         line = raw.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
+        # 条件分岐: `line.lower().startswith("h2")` を満たす経路を評価する。
+
         if line.lower().startswith("h2"):
             toks = line.split()
+            # 条件分岐: `len(toks) >= 2` を満たす経路を評価する。
             if len(toks) >= 2:
                 st = toks[1].strip()
+                # 条件分岐: `st and st.lower() not in ("na", "nan")` を満たす経路を評価する。
                 if st and st.lower() not in ("na", "nan"):
                     stations.add(st.upper())
+
     return sorted(stations)
 
 
@@ -247,14 +283,20 @@ def _pick_latest_log(station: str) -> PickedLog:
     hits: list[tuple[str, str]] = []
     for h in hrefs:
         m = pat.match(f"{SLRLOG_ROOT_PATH}{h.lstrip('/')}" if not h.startswith("/pub/") else h)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             hits.append((m.group(1), h))
+
+    # 条件分岐: `not hits` を満たす経路を評価する。
+
     if not hits:
         raise FileNotFoundError(f"No site log found for station={station} at {SLRLOG_ROOT_PATH}")
+
     yyyymmdd, href = max(hits, key=lambda t: t[0])
     # href may already include the full path; normalize to /pub/...
     if not href.startswith("/"):
         href = f"{SLRLOG_ROOT_PATH}{href}"
+
     return PickedLog(station=station.upper(), yyyymmdd=yyyymmdd, url=f"{_edc_bases()[0]}{href}")
 
 
@@ -268,14 +310,17 @@ def _parse_coords_from_site_log(txt: str) -> dict:
     lat_m = re.search(r"Latitude\s*\[deg\]\s*:\s*([0-9.]+)\s*([NS])", txt, re.IGNORECASE)
     lon_m = re.search(r"Longitude\s*\[deg\]\s*:\s*([0-9.]+)\s*([EW])", txt, re.IGNORECASE)
     ele_m = re.search(r"Elevation\s*\[m\]\s*:\s*([0-9.]+)", txt, re.IGNORECASE)
+    # 条件分岐: `not (lat_m and lon_m and ele_m)` を満たす経路を評価する。
     if not (lat_m and lon_m and ele_m):
         raise ValueError("Failed to parse Latitude/Longitude/Elevation from site log.")
 
     lat = float(lat_m.group(1))
+    # 条件分岐: `lat_m.group(2).upper() == "S"` を満たす経路を評価する。
     if lat_m.group(2).upper() == "S":
         lat = -lat
 
     lon = float(lon_m.group(1))
+    # 条件分岐: `lon_m.group(2).upper() == "W"` を満たす経路を評価する。
     if lon_m.group(2).upper() == "W":
         lon = -lon
 
@@ -308,10 +353,12 @@ def _ensure_station_cached(root: Path, station: str, *, force: bool) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     station = station.strip().upper()
+    # 条件分岐: `not station` を満たす経路を評価する。
     if not station:
         return
 
     json_path = out_dir / f"{station.lower()}.json"
+    # 条件分岐: `json_path.exists() and not force` を満たす経路を評価する。
     if json_path.exists() and not force:
         return
 
@@ -336,11 +383,15 @@ def _ensure_station_cached(root: Path, station: str, *, force: bool) -> None:
 
 
 def _parse_years_arg(s: str) -> tuple[Optional[int], Optional[int]]:
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None, None
+
     m = re.fullmatch(r"(\d{4})(?:-(\d{4}))?", s.strip())
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"Invalid --years: {s} (expected YYYY or YYYY-YYYY)")
+
     y0 = int(m.group(1))
     y1 = int(m.group(2)) if m.group(2) else y0
     return min(y0, y1), max(y0, y1)
@@ -376,14 +427,19 @@ def main() -> int:
     args = ap.parse_args()
 
     targets = [t.strip() for t in str(args.targets).split(",") if t.strip()]
+    # 条件分岐: `not targets` を満たす経路を評価する。
     if not targets:
         print("[err] empty targets")
         return 2
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
+
     if args.offline:
+        # 条件分岐: `not manifest_path.exists()` を満たす経路を評価する。
         if not manifest_path.exists():
             print(f"[err] offline and missing manifest: {manifest_path}")
             return 2
+
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         except Exception as e:
@@ -393,18 +449,29 @@ def main() -> int:
         missing: list[str] = []
         for rec in manifest.get("files", []):
             rel = rec.get("cached_path")
+            # 条件分岐: `not rel` を満たす経路を評価する。
             if not rel:
                 continue
+
             p = root / Path(str(rel))
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(str(p))
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             print("[err] offline and missing cached files:")
             for p in missing[:50]:
                 print("  -", p)
+
+            # 条件分岐: `len(missing) > 50` を満たす経路を評価する。
+
             if len(missing) > 50:
                 print(f"  ... and {len(missing)-50} more")
+
             return 2
+
         print(f"[ok] offline: {manifest_path}")
         return 0
 
@@ -417,12 +484,15 @@ def main() -> int:
     prev_year_filter = None
     prev_include_daily = None
 
+    # 条件分岐: `bool(args.append) and manifest_path.exists() and not args.force` を満たす経路を評価する。
     if bool(args.append) and manifest_path.exists() and not args.force:
         try:
             prev = json.loads(manifest_path.read_text(encoding="utf-8"))
         except Exception as e:
             print(f"[warn] failed to read existing manifest for --append: {e} (fall back to full scan)")
             prev = None
+
+        # 条件分岐: `isinstance(prev, dict)` を満たす経路を評価する。
 
         if isinstance(prev, dict):
             prev_files = prev.get("files") if isinstance(prev.get("files"), list) else []
@@ -431,19 +501,27 @@ def main() -> int:
             prev_include_daily = prev.get("include_daily")
             for r in all_files:
                 k = str(r.get("edc_path") or "")
+                # 条件分岐: `not k` を満たす経路を評価する。
                 if not k:
                     t = str(r.get("target") or "")
                     y = str(r.get("year") or "")
                     fn = str(r.get("filename") or "")
+                    # 条件分岐: `t and y and fn` を満たす経路を評価する。
                     if t and y and fn:
                         k = f"{t}/{y}/{fn}"
+
+                # 条件分岐: `k` を満たす経路を評価する。
+
                 if k:
                     existing_keys.add(k)
+
                 for st in (r.get("stations") or []) if isinstance(r.get("stations"), list) else []:
+                    # 条件分岐: `isinstance(st, str) and st.strip()` を満たす経路を評価する。
                     if isinstance(st, str) and st.strip():
                         all_stations.add(st.strip().upper())
 
             for st in (prev.get("stations_detected") or []) if isinstance(prev.get("stations_detected"), list) else []:
+                # 条件分岐: `isinstance(st, str) and st.strip()` を満たす経路を評価する。
                 if isinstance(st, str) and st.strip():
                     all_stations.add(st.strip().upper())
 
@@ -454,8 +532,12 @@ def main() -> int:
         years_v2 = _list_years(target, NPT_ROOT_PATH_V2)
         years_v1 = _list_years(target, NPT_ROOT_PATH_V1)
         years = sorted(set(years_v1 + years_v2))
+        # 条件分岐: `y0 is not None` を満たす経路を評価する。
         if y0 is not None:
             years = [y for y in years if y0 <= y <= (y1 or y0)]
+
+        # 条件分岐: `not years` を満たす経路を評価する。
+
         if not years:
             print(f"[warn] no years for target={target}")
             continue
@@ -464,23 +546,31 @@ def main() -> int:
             # Prefer CRD v2 when available for the same year.
             root_path = NPT_ROOT_PATH_V2 if year in years_v2 else NPT_ROOT_PATH_V1
             files = _list_files(target, year, root_path)
+            # 条件分岐: `not files` を満たす経路を評価する。
             if not files:
                 continue
 
             selected: list[str] = []
             for fn in files:
+                # 条件分岐: `_is_monthly(fn)` を満たす経路を評価する。
                 if _is_monthly(fn):
                     selected.append(fn)
+                # 条件分岐: 前段条件が不成立で、`bool(args.include_daily) and _is_daily(fn)` を追加評価する。
                 elif bool(args.include_daily) and _is_daily(fn):
                     selected.append(fn)
 
             for fn in sorted(selected):
                 path = f"{root_path}/{target}/{year}/{fn}"
                 rec_key = path
+                # 条件分岐: `not rec_key` を満たす経路を評価する。
                 if not rec_key:
                     rec_key = f"{target}/{year}/{fn}"
+
+                # 条件分岐: `rec_key in existing_keys` を満たす経路を評価する。
+
                 if rec_key in existing_keys:
                     continue
+
                 dst = edc_dir / target / str(year) / fn
                 used_url = _download_any(path, dst, force=bool(args.force))
 
@@ -502,10 +592,12 @@ def main() -> int:
                         "stations": st_codes,
                     }
                 )
+                # 条件分岐: `rec_key` を満たす経路を評価する。
                 if rec_key:
                     existing_keys.add(rec_key)
 
     # Fetch station site logs for all detected stations
+
     stations_sorted = sorted(all_stations)
     for st in stations_sorted:
         try:
@@ -514,10 +606,12 @@ def main() -> int:
             print(f"[warn] station fetch failed: {st}: {e}")
 
     include_daily_out = bool(args.include_daily)
+    # 条件分岐: `isinstance(prev_include_daily, bool)` を満たす経路を評価する。
     if isinstance(prev_include_daily, bool):
         include_daily_out = bool(prev_include_daily) or include_daily_out
 
     year_filter_out = {"from": y0, "to": y1} if y0 is not None else None
+    # 条件分岐: `prev_year_filter is not None and bool(args.append) and manifest_path.exists()...` を満たす経路を評価する。
     if prev_year_filter is not None and bool(args.append) and manifest_path.exists() and not args.force:
         year_filter_out = prev_year_filter
 
@@ -537,6 +631,8 @@ def main() -> int:
     print(f"[ok] files: {len(all_files)}  stations: {len(stations_sorted)}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

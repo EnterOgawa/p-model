@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -42,9 +43,11 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         path.write_text("", encoding="utf-8")
         return
+
     fields = list(rows[0].keys())
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
@@ -63,22 +66,45 @@ def _unescape_cell(text: str) -> str:
 
 def _part4_section_for_topic(topic: str) -> str:
     t = str(topic)
+    # 条件分岐: `t.startswith("LLR")` を満たす経路を評価する。
     if t.startswith("LLR"):
         return "7"
+
+    # 条件分岐: `t.startswith("Cassini") or t.startswith("Viking") or t.startswith("Mercury")...` を満たす経路を評価する。
+
     if t.startswith("Cassini") or t.startswith("Viking") or t.startswith("Mercury") or t.startswith("GPS"):
         return "9"
+
+    # 条件分岐: `t.startswith("光偏向") or t.startswith("重力赤方偏移")` を満たす経路を評価する。
+
     if t.startswith("光偏向") or t.startswith("重力赤方偏移"):
         return "9"
+
+    # 条件分岐: `t.startswith("宇宙論") or t.startswith("JWST/MAST")` を満たす経路を評価する。
+
     if t.startswith("宇宙論") or t.startswith("JWST/MAST"):
         return "11"
+
+    # 条件分岐: `t.startswith("XRISM")` を満たす経路を評価する。
+
     if t.startswith("XRISM"):
         return "12"
+
+    # 条件分岐: `t.startswith("回転")` を満たす経路を評価する。
+
     if t.startswith("回転"):
         return "10 / 12"
+
+    # 条件分岐: `t.startswith("EHT") or t.startswith("連星パルサー") or t.startswith("重力波") or t.sta...` を満たす経路を評価する。
+
     if t.startswith("EHT") or t.startswith("連星パルサー") or t.startswith("重力波") or t.startswith("強場"):
         return "12"
+
+    # 条件分岐: `t.startswith("速度飽和")` を満たす経路を評価する。
+
     if t.startswith("速度飽和"):
         return "10"
+
     return "-"
 
 
@@ -93,6 +119,7 @@ def _build_marker_block(rows: List[Dict[str, Any]], *, public_png_ref: str) -> s
         observable = _escape_cell(str(row.get("observable", "")))
         part4_section = _escape_cell(_part4_section_for_topic(topic))
         lines.append(f"| {idx} | {topic} | {observable} | {part4_section} |")
+
     lines.append("")
     lines.append(f"行数固定: {len(rows)}（Table 1 行と 1:1 対応）")
     lines.append("")
@@ -111,6 +138,7 @@ def _sync_part4(path: Path, block: str) -> Dict[str, Any]:
     start_idx = text.find(MARK_START)
     end_idx = text.find(MARK_END)
     mode = "inserted"
+    # 条件分岐: `start_idx != -1 and end_idx != -1 and end_idx > start_idx` を満たす経路を評価する。
     if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
         end_pos = end_idx + len(MARK_END)
         new_text = text[:start_idx] + block + text[end_pos:]
@@ -123,10 +151,12 @@ def _sync_part4(path: Path, block: str) -> Dict[str, Any]:
             f"{block}\n\n"
         )
         insert_pos = text.find("## 3.")
+        # 条件分岐: `insert_pos == -1` を満たす経路を評価する。
         if insert_pos == -1:
             new_text = text.rstrip() + "\n\n" + section
         else:
             new_text = text[:insert_pos] + section + text[insert_pos:]
+
     path.write_text(new_text, encoding="utf-8")
     return {"mode": mode}
 
@@ -134,26 +164,41 @@ def _sync_part4(path: Path, block: str) -> Dict[str, Any]:
 def _extract_block_pairs(text: str) -> List[Tuple[str, str]]:
     start_idx = text.find(MARK_START)
     end_idx = text.find(MARK_END)
+    # 条件分岐: `start_idx == -1 or end_idx == -1 or end_idx <= start_idx` を満たす経路を評価する。
     if start_idx == -1 or end_idx == -1 or end_idx <= start_idx:
         return []
+
     block = text[start_idx + len(MARK_START):end_idx]
     pairs: List[Tuple[str, str]] = []
     for raw_line in block.splitlines():
         line = raw_line.strip()
+        # 条件分岐: `not line.startswith("|")` を満たす経路を評価する。
         if not line.startswith("|"):
             continue
+
+        # 条件分岐: `line.startswith("|---")` を満たす経路を評価する。
+
         if line.startswith("|---"):
             continue
+
         cols = [c.strip() for c in line.strip("|").split("|")]
+        # 条件分岐: `len(cols) < 4` を満たす経路を評価する。
         if len(cols) < 4:
             continue
+
+        # 条件分岐: `cols[0].lower() in {"no.", "no"}` を満たす経路を評価する。
+
         if cols[0].lower() in {"no.", "no"}:
             continue
+
         topic = _unescape_cell(cols[1])
         observable = _unescape_cell(cols[2])
+        # 条件分岐: `not topic or not observable` を満たす経路を評価する。
         if not topic or not observable:
             continue
+
         pairs.append((topic, observable))
+
     return pairs
 
 
@@ -206,8 +251,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     rows = table1.get("rows") if isinstance(table1.get("rows"), list) else []
     rows_norm: List[Dict[str, Any]] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         rows_norm.append(
             {
                 "topic": str(row.get("topic", "")).strip(),
@@ -216,6 +263,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         )
 
     sync_mode = "skipped"
+    # 条件分岐: `not args.no_sync` を満たす経路を評価する。
     if not args.no_sync:
         public_png_ref = f"output/public/summary/{args.prefix}.png"
         block = _build_marker_block(rows_norm, public_png_ref=public_png_ref)
@@ -231,12 +279,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     missing_pairs: List[Tuple[str, str]] = []
     for pair, n in table_counter.items():
         diff = n - int(part4_counter.get(pair, 0))
+        # 条件分岐: `diff > 0` を満たす経路を評価する。
         if diff > 0:
             missing_pairs.extend([pair] * diff)
 
     extra_pairs: List[Tuple[str, str]] = []
     for pair, n in part4_counter.items():
         diff = n - int(table_counter.get(pair, 0))
+        # 条件分岐: `diff > 0` を満たす経路を評価する。
         if diff > 0:
             extra_pairs.extend([pair] * diff)
 
@@ -350,6 +400,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         public_copies.append(str(dst).replace("\\", "/"))
+
     result["outputs"]["public_copies"] = public_copies
     _write_json(out_json, result)
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -393,6 +444,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(f"[ok] png : {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

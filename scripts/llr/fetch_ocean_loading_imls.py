@@ -45,18 +45,22 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     print(f"[dl] {url}")
     with urllib.request.urlopen(url, timeout=300) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -81,8 +85,10 @@ def main() -> int:
     args = ap.parse_args()
 
     out_dir = Path(args.out_dir)
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
     if not out_dir.is_absolute():
         out_dir = root / out_dir
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     dst = out_dir / "toc_fes2014b_harmod.hps"
@@ -102,6 +108,8 @@ def main() -> int:
     print(f"[ok] meta: {meta_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

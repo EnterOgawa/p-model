@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -53,16 +54,21 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         number = float(value)
+        # 条件分岐: `math.isfinite(number)` を満たす経路を評価する。
         if math.isfinite(number):
             return number
+
     return None
 
 
 def _safe_div(num: Optional[float], den: Optional[float]) -> Optional[float]:
+    # 条件分岐: `num is None or den is None or den == 0.0` を満たす経路を評価する。
     if num is None or den is None or den == 0.0:
         return None
+
     return float(num) / float(den)
 
 
@@ -70,9 +76,12 @@ def _count_status(rows: List[Dict[str, Any]]) -> Dict[str, int]:
     counts = {"pass": 0, "watch": 0, "reject": 0}
     for row in rows:
         status = str(row.get("status") or "reject")
+        # 条件分岐: `status not in counts` を満たす経路を評価する。
         if status not in counts:
             status = "reject"
+
         counts[status] += 1
+
     return counts
 
 
@@ -91,14 +100,21 @@ def _channel_bell(part3_audit: Dict[str, Any], bell_pack: Dict[str, Any]) -> Dic
     pairing_rows = pairing.get("datasets") if isinstance(pairing.get("datasets"), list) else []
     delta_sigma: List[float] = []
     for row in pairing_rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `not bool(row.get("supported"))` を満たす経路を評価する。
+
         if not bool(row.get("supported")):
             continue
+
         delta = row.get("delta") if isinstance(row.get("delta"), dict) else {}
         value = _as_float(delta.get("delta_over_sigma_boot"))
+        # 条件分岐: `value is not None` を満たす経路を評価する。
         if value is not None:
             delta_sigma.append(abs(value))
+
     pairing_max = max(delta_sigma) if delta_sigma else None
 
     bell_gate = (
@@ -110,11 +126,15 @@ def _channel_bell(part3_audit: Dict[str, Any], bell_pack: Dict[str, Any]) -> Dic
     delay_defined_n = 0
     delay_fail_n = 0
     for row in dataset_gates:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         flag = row.get("delay_z_ge_threshold")
+        # 条件分岐: `isinstance(flag, bool)` を満たす経路を評価する。
         if isinstance(flag, bool):
             delay_defined_n += 1
+            # 条件分岐: `not flag` を満たす経路を評価する。
             if not flag:
                 delay_fail_n += 1
 
@@ -122,14 +142,17 @@ def _channel_bell(part3_audit: Dict[str, Any], bell_pack: Dict[str, Any]) -> Dic
     delay_ok = delay_fast_min is not None and delay_fast_min >= delay_thr
     pairing_ok = pairing_max is not None and pairing_max <= pairing_thr
 
+    # 条件分岐: `selection_ok and pairing_ok and delay_ok` を満たす経路を評価する。
     if selection_ok and pairing_ok and delay_ok:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`selection_ok and pairing_ok` を追加評価する。
     elif selection_ok and pairing_ok:
         status = "watch"
     else:
         status = "reject"
 
     notes: List[str] = []
+    # 条件分岐: `delay_defined_n > 0 and delay_fail_n > 0` を満たす経路を評価する。
     if delay_defined_n > 0 and delay_fail_n > 0:
         notes.append(f"delay gate fail in {delay_fail_n}/{delay_defined_n} datasets (time-tag subsets still tracked by delay_fast_min).")
 
@@ -177,25 +200,33 @@ def _channel_interference(interference_metrics: Dict[str, Any]) -> Dict[str, Any
     fail_details: List[Dict[str, Any]] = []
 
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         passed = bool(row.get("pass_3sigma"))
         metric_value = _as_float(row.get("metric_value"))
         threshold = _as_float(row.get("threshold_3sigma"))
+        # 条件分岐: `passed` を満たす経路を評価する。
         if passed:
             pass_n += 1
             continue
+
         fail_n += 1
         ratio = _safe_div(metric_value, threshold)
+        # 条件分岐: `ratio is not None` を満たす経路を評価する。
         if ratio is not None:
             max_fail_over_thr = ratio if max_fail_over_thr is None else max(max_fail_over_thr, ratio)
+
         observable = str(row.get("observable") or "")
         metric_name = str(row.get("metric_name") or "")
         is_precision_gap = observable == "current_over_required_precision_ratio" or metric_name.endswith("ratio")
+        # 条件分岐: `is_precision_gap` を満たす経路を評価する。
         if is_precision_gap:
             precision_gap_fail_n += 1
         else:
             non_precision_fail_n += 1
+
         fail_details.append(
             {
                 "channel": row.get("channel"),
@@ -206,14 +237,18 @@ def _channel_interference(interference_metrics: Dict[str, Any]) -> Dict[str, Any
             }
         )
 
+    # 条件分岐: `fail_n == 0` を満たす経路を評価する。
+
     if fail_n == 0:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`non_precision_fail_n == 0` を追加評価する。
     elif non_precision_fail_n == 0:
         status = "watch"
     else:
         status = "reject"
 
     notes: List[str] = []
+    # 条件分岐: `precision_gap_fail_n > 0 and non_precision_fail_n == 0` を満たす経路を評価する。
     if precision_gap_fail_n > 0 and non_precision_fail_n == 0:
         notes.append("all fails are precision-gap type (sensitivity shortage), not direct inconsistency.")
 
@@ -257,9 +292,12 @@ def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
     excluded_rows: List[Dict[str, str]] = []
 
     for dataset in datasets:
+        # 条件分岐: `not isinstance(dataset, dict)` を満たす経路を評価する。
         if not isinstance(dataset, dict):
             continue
+
         name = str(dataset.get("dataset") or "")
+        # 条件分岐: `not bool(dataset.get("kpi_include", True))` を満たす経路を評価する。
         if not bool(dataset.get("kpi_include", True)):
             excluded_rows.append(
                 {
@@ -268,6 +306,7 @@ def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
                 }
             )
             continue
+
         audit = dataset.get("audit_gates") if isinstance(dataset.get("audit_gates"), dict) else {}
         falsification = audit.get("falsification") if isinstance(audit.get("falsification"), dict) else {}
         status = str(falsification.get("status") or "")
@@ -277,8 +316,10 @@ def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
             else None
         )
         worst_value = _as_float(worst)
+        # 条件分岐: `status == "ok"` を満たす経路を評価する。
         if status == "ok":
             ok_n += 1
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             reject_n += 1
             reject_rows.append((name, worst_value))
@@ -289,8 +330,10 @@ def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
     reject_ratio = _safe_div(float(reject_n), float(total)) if total > 0 else None
     reject_ratio_thr = 0.10
 
+    # 条件分岐: `reject_n == 0 and inconclusive_n == 0` を満たす経路を評価する。
     if reject_n == 0 and inconclusive_n == 0:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`reject_ratio is not None and reject_ratio <= reject_ratio_thr and inconclusiv...` を追加評価する。
     elif reject_ratio is not None and reject_ratio <= reject_ratio_thr and inconclusive_n == 0:
         status = "watch"
     else:
@@ -304,8 +347,12 @@ def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
     top_reject = [{"dataset": name, "worst_test_max_abs_z": value} for name, value in reject_rows_sorted[:5]]
 
     notes: List[str] = []
+    # 条件分岐: `reject_n > 0` を満たす経路を評価する。
     if reject_n > 0:
         notes.append(f"{reject_n} holdout datasets are reject (top offenders listed in diagnostics).")
+
+    # 条件分岐: `excluded_rows` を満たす経路を評価する。
+
     if excluded_rows:
         notes.append(f"{len(excluded_rows)} dataset(s) are excluded from KPI gating (diagnostic-only).")
 
@@ -396,13 +443,17 @@ def _write_csv(out_csv: Path, payload: Dict[str, Any]) -> None:
         )
         writer.writeheader()
         for row in rows:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             kpi = row.get("kpi") if isinstance(row.get("kpi"), dict) else {}
+            # 条件分岐: `row.get("channel") == "bell"` を満たす経路を評価する。
             if row.get("channel") == "bell":
                 primary_name = "selection_ratio_min"
                 primary_value = kpi.get("selection_ratio_min")
                 primary_thr = kpi.get("selection_ratio_threshold")
+            # 条件分岐: 前段条件が不成立で、`row.get("channel") == "interference"` を追加評価する。
             elif row.get("channel") == "interference":
                 primary_name = "fail_ratio"
                 primary_value = kpi.get("fail_ratio")
@@ -411,6 +462,7 @@ def _write_csv(out_csv: Path, payload: Dict[str, Any]) -> None:
                 primary_name = "reject_ratio"
                 primary_value = kpi.get("reject_ratio")
                 primary_thr = kpi.get("reject_ratio_watch_threshold")
+
             notes = row.get("notes") if isinstance(row.get("notes"), list) else []
             writer.writerow(
                 {
@@ -432,13 +484,17 @@ def _plot(out_png: Path, payload: Dict[str, Any]) -> None:
     values = []
     colors = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         labels.append(str(row.get("title") or row.get("channel") or "unknown"))
         sev = int(row.get("severity", 2))
         values.append(sev)
+        # 条件分岐: `sev == 0` を満たす経路を評価する。
         if sev == 0:
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`sev == 1` を追加評価する。
         elif sev == 1:
             colors.append("#f2c94c")
         else:
@@ -507,6 +563,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_png = Path(args.out_png).resolve() if Path(args.out_png).is_absolute() else (ROOT / args.out_png).resolve()
 
     for path in [part3_audit_path, bell_pack_path, interference_path, condensed_path]:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             raise FileNotFoundError(f"required input not found: {_rel(path)}")
 
@@ -545,6 +602,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

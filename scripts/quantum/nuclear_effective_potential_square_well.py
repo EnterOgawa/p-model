@@ -12,9 +12,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -25,6 +28,7 @@ def _load_json(path: Path) -> dict:
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -32,15 +36,19 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {extracted}"
         )
+
     payload = _load_json(extracted)
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted np scattering values.\n"
@@ -48,28 +56,38 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_np_scattering_sources.py\n"
             f"Expected: {extracted}"
         )
+
     j = _load_json(extracted)
     sets = j.get("parameter_sets")
+    # 条件分岐: `not isinstance(sets, list) or not sets` を満たす経路を評価する。
     if not isinstance(sets, list) or not sets:
         raise SystemExit(f"[fail] invalid extracted file: parameter_sets missing/empty: {extracted}")
+
     out: dict[int, dict[str, object]] = {}
     for s in sets:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         try:
             eq = int(s.get("eq_label"))
         except Exception:
             continue
+
         params = s.get("params")
+        # 条件分岐: `isinstance(params, dict)` を満たす経路を評価する。
         if isinstance(params, dict):
             out[eq] = params
+
     return out
 
 
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
+    # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
     if isinstance(obj, dict) and "value" in obj:
         return float(obj["value"])
+
     raise KeyError(key)
 
 
@@ -83,6 +101,7 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
 
       x cot x + kappa R = 0.
     """
+    # 条件分岐: `not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(r_fm) and r...` を満たす経路を評価する。
     if not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(r_fm) and r_fm > 0):
         raise ValueError("invalid kappa or R")
 
@@ -94,18 +113,24 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
 
     flo = f(lo)
     fhi = f(hi)
+    # 条件分岐: `not (flo > 0 and fhi < 0)` を満たす経路を評価する。
     if not (flo > 0 and fhi < 0):
         raise ValueError(f"no bracket for bound x: f(lo)={flo}, f(hi)={fhi}, kappaR={kappa_fm1*r_fm}")
 
     for _ in range(80):
         mid = 0.5 * (lo + hi)
         fmid = f(mid)
+        # 条件分岐: `fmid == 0 or (hi - lo) < 1e-14` を満たす経路を評価する。
         if fmid == 0 or (hi - lo) < 1e-14:
             return mid
+
+        # 条件分岐: `fmid > 0` を満たす経路を評価する。
+
         if fmid > 0:
             lo = mid
         else:
             hi = mid
+
     return 0.5 * (lo + hi)
 
 
@@ -115,6 +140,7 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
 
     Returns: V0 (MeV), x (dimensionless), k (fm^-1), kappa (fm^-1).
     """
+    # 条件分岐: `not (mu_mev > 0 and b_mev > 0 and r_fm > 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
     if not (mu_mev > 0 and b_mev > 0 and r_fm > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid inputs")
 
@@ -128,8 +154,10 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
 def _square_well_scattering_length(*, mu_mev: float, v0_mev: float, r_fm: float, hbarc_mev_fm: float) -> float:
     # Exact k->0 expression for an attractive square well.
     q0 = math.sqrt(2.0 * mu_mev * v0_mev) / hbarc_mev_fm
+    # 条件分岐: `not (math.isfinite(q0) and q0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(q0) and q0 > 0):
         return float("nan")
+
     return float(r_fm - (math.tan(q0 * r_fm) / q0))
 
 
@@ -151,8 +179,12 @@ def _fit_square_well_to_b_and_a(
       - For each R, V0 is determined by the bound-state condition.
       - Then solve a(R) = a_target by bracketing + bisection.
     """
+    # 条件分岐: `not (math.isfinite(a_target_fm) and a_target_fm != 0)` を満たす経路を評価する。
     if not (math.isfinite(a_target_fm) and a_target_fm != 0):
         raise ValueError("invalid a_target")
+
+    # 条件分岐: `not (r_min_fm > 0 and r_max_fm > r_min_fm)` を満たす経路を評価する。
+
     if not (r_min_fm > 0 and r_max_fm > r_min_fm):
         raise ValueError("invalid R range")
 
@@ -174,24 +206,32 @@ def _fit_square_well_to_b_and_a(
             prev_g = None
             continue
 
+        # 条件分岐: `not (math.isfinite(a_pred) and abs(a_pred) < 1e6)` を満たす経路を評価する。
+
         if not (math.isfinite(a_pred) and abs(a_pred) < 1e6):
             prev_r = None
             prev_g = None
             continue
 
         g = a_pred - a_target_fm
+        # 条件分岐: `prev_r is not None and prev_g is not None` を満たす経路を評価する。
         if prev_r is not None and prev_g is not None:
+            # 条件分岐: `math.isfinite(g) and math.isfinite(prev_g) and (g == 0 or (g > 0) != (prev_g...` を満たす経路を評価する。
             if math.isfinite(g) and math.isfinite(prev_g) and (g == 0 or (g > 0) != (prev_g > 0)):
                 # Avoid brackets that include a near-divergence (huge |g|).
                 if abs(g) < 1e3 and abs(prev_g) < 1e3:
                     candidates.append((prev_r, r, abs(prev_r - 2.0) + abs(r - 2.0)))
+
         prev_r = r
         prev_g = g
+
+    # 条件分岐: `not candidates` を満たす経路を評価する。
 
     if not candidates:
         raise ValueError("no bracket found for a(R)=a_target within scan range")
 
     # Prefer a "nuclear-ish" range near 2 fm to avoid jumping to high-n/near-resonant solutions.
+
     candidates.sort(key=lambda t: t[2])
     lo_r, hi_r, _ = candidates[0]
 
@@ -202,16 +242,21 @@ def _fit_square_well_to_b_and_a(
 
     g_lo = g_of_r(lo_r)
     g_hi = g_of_r(hi_r)
+    # 条件分岐: `not (math.isfinite(g_lo) and math.isfinite(g_hi) and (g_lo == 0 or (g_lo > 0)...` を満たす経路を評価する。
     if not (math.isfinite(g_lo) and math.isfinite(g_hi) and (g_lo == 0 or (g_lo > 0) != (g_hi > 0))):
         raise ValueError("invalid bracket after selection")
 
     for _ in range(90):
         mid = 0.5 * (lo_r + hi_r)
         g_mid = g_of_r(mid)
+        # 条件分岐: `g_mid == 0 or (hi_r - lo_r) < 1e-12` を満たす経路を評価する。
         if g_mid == 0 or (hi_r - lo_r) < 1e-12:
             lo_r = mid
             hi_r = mid
             break
+
+        # 条件分岐: `(g_mid > 0) == (g_lo > 0)` を満たす経路を評価する。
+
         if (g_mid > 0) == (g_lo > 0):
             lo_r = mid
             g_lo = g_mid
@@ -244,8 +289,10 @@ def _phase_shift_square_well(*, k_fm1: float, mu_mev: float, v0_mev: float, r_fm
       tan(kR + δ) = (k/q) tan(qR),  q = sqrt(k^2 + k0^2),  k0^2 = 2μV0/(ħc)^2
     and we take the k→0 continuous branch so δ→0.
     """
+    # 条件分岐: `k_fm1 == 0.0` を満たす経路を評価する。
     if k_fm1 == 0.0:
         return 0.0
+
     k0 = math.sqrt(2.0 * mu_mev * v0_mev) / hbarc_mev_fm
     q = math.sqrt(k_fm1**2 + k0**2)
     t = (k_fm1 / q) * math.tan(q * r_fm)
@@ -253,8 +300,10 @@ def _phase_shift_square_well(*, k_fm1: float, mu_mev: float, v0_mev: float, r_fm
     # Wrap to a principal interval near 0 (k is small in our usage).
     while delta > math.pi / 2.0:
         delta -= math.pi
+
     while delta < -math.pi / 2.0:
         delta += math.pi
+
     return float(delta)
 
 
@@ -272,15 +321,21 @@ def _fit_effective_range_expansion(
     points: list[dict[str, float]] = []
     for k in k_grid:
         delta = _phase_shift_square_well(k_fm1=k, mu_mev=mu_mev, v0_mev=v0_mev, r_fm=r_fm, hbarc_mev_fm=hbarc_mev_fm)
+        # 条件分岐: `not math.isfinite(delta) or abs(delta) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(delta) or abs(delta) < 1e-12:
             continue
+
         y = k / math.tan(delta)  # k cot δ
         x = k * k
+        # 条件分岐: `not (math.isfinite(x) and math.isfinite(y))` を満たす経路を評価する。
         if not (math.isfinite(x) and math.isfinite(y)):
             continue
+
         xs.append(x)
         ys.append(y)
         points.append({"k_fm1": float(k), "k2_fm2": float(x), "kcot_fm1": float(y), "delta_rad": float(delta)})
+
+    # 条件分岐: `len(xs) < 3` を満たす経路を評価する。
 
     if len(xs) < 3:
         raise ValueError("insufficient points for ERE fit")
@@ -288,8 +343,10 @@ def _fit_effective_range_expansion(
     xbar = sum(xs) / len(xs)
     ybar = sum(ys) / len(ys)
     sxx = sum((x - xbar) ** 2 for x in xs)
+    # 条件分岐: `sxx == 0.0` を満たす経路を評価する。
     if sxx == 0.0:
         raise ValueError("degenerate x grid for ERE fit")
+
     sxy = sum((x - xbar) * (y - ybar) for x, y in zip(xs, ys))
     slope = sxy / sxx
     intercept = ybar - slope * xbar  # k cot δ at k->0  == -1/a
@@ -323,6 +380,7 @@ def main() -> None:
     # Load baseline constants
     consts = _load_nist_codata_constants(root=root)
     for k in ("mp", "mn", "md"):
+        # 条件分岐: `k not in consts` を満たす経路を評価する。
         if k not in consts:
             raise SystemExit(f"[fail] missing constant {k!r} in extracted_values.json")
 
@@ -343,6 +401,7 @@ def main() -> None:
     np_sets = _load_np_scattering_sets(root=root)
     eq18 = np_sets.get(18)
     eq19 = np_sets.get(19)
+    # 条件分岐: `not (isinstance(eq18, dict) and isinstance(eq19, dict))` を満たす経路を評価する。
     if not (isinstance(eq18, dict) and isinstance(eq19, dict)):
         raise SystemExit("[fail] missing eq18/eq19 in extracted np scattering JSON")
 
@@ -393,6 +452,7 @@ def main() -> None:
         fits.append(t_out)
 
     # Envelope check: r_t should be within [min(eq18,eq19), max(eq18,eq19)] for this simplest ansatz.
+
     r_obs = [float(t["r_t_fm"]) for t in triplet_targets]
     r_min = min(r_obs)
     r_max = max(r_obs)
@@ -415,6 +475,7 @@ def main() -> None:
         v = [(-v0 if rr <= r0 else 0.0) for rr in r_plot]
         ax0.plot(r_plot, v, lw=2.2, color=col, label=f["label"])
         ax0.axvline(r0, color=col, lw=1.0, ls=":", alpha=0.7)
+
     ax0.set_xlabel("r (fm)")
     ax0.set_ylabel("V(r) (MeV)")
     ax0.set_title("Phenomenological u-profile as a square-well potential (triplet)")
@@ -560,6 +621,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -14,9 +14,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -27,12 +30,16 @@ def _load_json(path: Path) -> dict:
 def _load_nndc_e2plus_keV_by_zn(path: Path) -> dict[tuple[int, int], float]:
     extracted = _load_json(path)
     rows = extracted.get("rows")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         raise ValueError(f"invalid NNDC E(2+1) extracted dataset: rows missing/empty: {path}")
+
     out: dict[tuple[int, int], float] = {}
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         e = r.get("e2plus_keV")
@@ -40,9 +47,14 @@ def _load_nndc_e2plus_keV_by_zn(path: Path) -> dict[tuple[int, int], float]:
             e_val = float(e)
         except Exception:
             continue
+
+        # 条件分岐: `Z < 1 or N < 0 or not math.isfinite(e_val)` を満たす経路を評価する。
+
         if Z < 1 or N < 0 or not math.isfinite(e_val):
             continue
+
         out[(int(Z), int(N))] = float(e_val)
+
     return out
 
 
@@ -58,8 +70,10 @@ def _load_nudat3_spectroscopy_maps(path: Path) -> dict[str, dict[tuple[int, int]
     """
     extracted = _load_json(path)
     rows = extracted.get("rows")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         raise ValueError(f"invalid NuDat3 spectroscopy extracted dataset: rows missing/empty: {path}")
+
     out: dict[str, dict[tuple[int, int], float]] = {
         "e2plus_keV": {},
         "e4plus_keV": {},
@@ -67,23 +81,34 @@ def _load_nudat3_spectroscopy_maps(path: Path) -> dict[str, dict[tuple[int, int]
         "r42": {},
     }
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
+        # 条件分岐: `Z < 1 or N < 0` を満たす経路を評価する。
         if Z < 1 or N < 0:
             continue
+
         for k in ["e2plus_keV", "e4plus_keV", "e3minus_keV", "r42"]:
             v = r.get(k)
+            # 条件分岐: `v is None` を満たす経路を評価する。
             if v is None:
                 continue
+
             try:
                 v_f = float(v)
             except Exception:
                 continue
+
+            # 条件分岐: `not math.isfinite(v_f)` を満たす経路を評価する。
+
             if not math.isfinite(v_f):
                 continue
+
             out[str(k)][(int(Z), int(N))] = float(v_f)
+
     return out
 
 
@@ -110,27 +135,44 @@ def _beta2_for_zn(
       - imputed: neighbor-average imputation (neighbors policy only)
       - missing: no usable β2 (direct_only policy, or neighbors with no available neighbors)
     """
+    # 条件分岐: `not include_beta2` を満たす経路を評価する。
     if not include_beta2:
         return 0.0, "not_used"
+
+    # 条件分岐: `str(imputation) not in {"neighbors", "direct_only"}` を満たす経路を評価する。
+
     if str(imputation) not in {"neighbors", "direct_only"}:
         raise ValueError(f"unsupported beta2 imputation policy: {imputation}")
+
     v = beta2_by_zn.get((int(Z), int(N)))
+    # 条件分岐: `v is not None` を満たす経路を評価する。
     if v is not None:
         return float(v), "direct"
+
+    # 条件分岐: `str(imputation) == "direct_only"` を満たす経路を評価する。
+
     if str(imputation) == "direct_only":
         return 0.0, "missing"
+
     z_opts = [int(Z)] if (int(Z) % 2 == 0) else [int(Z) - 1, int(Z) + 1]
     n_opts = [int(N)] if (int(N) % 2 == 0) else [int(N) - 1, int(N) + 1]
     vals: list[float] = []
     for z0 in z_opts:
         for n0 in n_opts:
+            # 条件分岐: `z0 < 1 or n0 < 0` を満たす経路を評価する。
             if z0 < 1 or n0 < 0:
                 continue
+
             v0 = beta2_by_zn.get((int(z0), int(n0)))
+            # 条件分岐: `v0 is not None` を満たす経路を評価する。
             if v0 is not None:
                 vals.append(float(v0))
+
+    # 条件分岐: `vals` を満たす経路を評価する。
+
     if vals:
         return float(sum(vals) / float(len(vals))), "imputed"
+
     return 0.0, "missing"
 
 
@@ -143,9 +185,12 @@ def _volume_conserving_spheroid_axes_from_beta2(*, beta2: float, include_beta2: 
 
     The returned axes are normalized such that the equal-volume sphere has radius 1 (up to rounding).
     """
+    # 条件分岐: `not include_beta2` を満たす経路を評価する。
     if not include_beta2:
         return 1.0, 1.0
+
     b = abs(float(beta2))
+    # 条件分岐: `not (math.isfinite(b) and b > 0)` を満たす経路を評価する。
     if not (math.isfinite(b) and b > 0):
         return 1.0, 1.0
 
@@ -153,15 +198,19 @@ def _volume_conserving_spheroid_axes_from_beta2(*, beta2: float, include_beta2: 
     y90 = -math.sqrt(5.0 / (16.0 * math.pi))  # Y20 at θ=π/2
     rp = 1.0 + float(b) * float(y0)
     re = 1.0 + float(b) * float(y90)
+    # 条件分岐: `not (rp > 0 and re > 0)` を満たす経路を評価する。
     if not (rp > 0 and re > 0):
         return 1.0, 1.0
 
     # Scale to conserve volume: (re^2 * rp) -> 1.
+
     s = (1.0 / (float(re) * float(re) * float(rp))) ** (1.0 / 3.0)
     a = float(s) * float(re)
     c = float(s) * float(rp)
+    # 条件分岐: `not (math.isfinite(a) and math.isfinite(c) and a > 0 and c > 0)` を満たす経路を評価する。
     if not (math.isfinite(a) and math.isfinite(c) and a > 0 and c > 0):
         return 1.0, 1.0
+
     return float(a), float(c)
 
 
@@ -172,9 +221,12 @@ def _coulomb_shape_factor_from_beta2(*, beta2: float, include_beta2: bool) -> fl
     Mapping: R(θ)=R0(1+β2 Y20(θ)); then scale radii to conserve volume and compute the self-energy factor
     relative to a sphere of equal volume. Since B(E2)-derived β2 is a magnitude, we use |β2|.
     """
+    # 条件分岐: `not include_beta2` を満たす経路を評価する。
     if not include_beta2:
         return 1.0
+
     b = abs(float(beta2))
+    # 条件分岐: `not (math.isfinite(b) and b > 0)` を満たす経路を評価する。
     if not (math.isfinite(b) and b > 0):
         return 1.0
 
@@ -182,29 +234,42 @@ def _coulomb_shape_factor_from_beta2(*, beta2: float, include_beta2: bool) -> fl
     y90 = -math.sqrt(5.0 / (16.0 * math.pi))  # Y20 at θ=π/2
     rp = 1.0 + float(b) * float(y0)
     re = 1.0 + float(b) * float(y90)
+    # 条件分岐: `not (rp > 0 and re > 0)` を満たす経路を評価する。
     if not (rp > 0 and re > 0):
         return 1.0
 
     s = (1.0 / (float(re) * float(re) * float(rp))) ** (1.0 / 3.0)
     a = float(s) * float(re)
     c = float(s) * float(rp)
+    # 条件分岐: `not (math.isfinite(a) and math.isfinite(c) and a > 0 and c > 0)` を満たす経路を評価する。
     if not (math.isfinite(a) and math.isfinite(c) and a > 0 and c > 0):
         return 1.0
+
     q = float(c) / float(a)
+    # 条件分岐: `not (math.isfinite(q) and q > 0)` を満たす経路を評価する。
     if not (math.isfinite(q) and q > 0):
         return 1.0
+
+    # 条件分岐: `abs(float(q) - 1.0) < 1e-12` を満たす経路を評価する。
+
     if abs(float(q) - 1.0) < 1e-12:
         return 1.0
 
+    # 条件分岐: `q > 1.0` を満たす経路を評価する。
+
     if q > 1.0:
         e = math.sqrt(max(0.0, 1.0 - 1.0 / (float(q) * float(q))))
+        # 条件分岐: `e < 1e-12` を満たす経路を評価する。
         if e < 1e-12:
             return 1.0
+
         return (1.0 / (2.0 * (float(q) ** (2.0 / 3.0)) * float(e))) * math.log((1.0 + float(e)) / (1.0 - float(e)))
     else:
         e = math.sqrt(max(0.0, 1.0 - float(q) * float(q)))
+        # 条件分岐: `e < 1e-12` を満たす経路を評価する。
         if e < 1e-12:
             return 1.0
+
         return (float(q) ** (1.0 / 3.0)) * (math.asin(float(e)) / float(e))
 
 
@@ -214,35 +279,50 @@ def _surface_area_factor_from_beta2(*, beta2: float, include_beta2: bool) -> flo
 
     Used to apply a deterministic deformation correction to the surface term. Uses |beta2|.
     """
+    # 条件分岐: `not include_beta2` を満たす経路を評価する。
     if not include_beta2:
         return 1.0
+
     a, c = _volume_conserving_spheroid_axes_from_beta2(beta2=float(beta2), include_beta2=include_beta2)
+    # 条件分岐: `not (math.isfinite(a) and math.isfinite(c) and a > 0 and c > 0)` を満たす経路を評価する。
     if not (math.isfinite(a) and math.isfinite(c) and a > 0 and c > 0):
         return 1.0
+
+    # 条件分岐: `abs(float(c) - float(a)) < 1e-12` を満たす経路を評価する。
+
     if abs(float(c) - float(a)) < 1e-12:
         return 1.0
 
     r0 = (float(a) * float(a) * float(c)) ** (1.0 / 3.0)  # equal-volume sphere radius
+    # 条件分岐: `not (math.isfinite(r0) and r0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(r0) and r0 > 0):
         return 1.0
+
+    # 条件分岐: `c > a` を満たす経路を評価する。
 
     if c > a:
         # prolate spheroid
         e = math.sqrt(max(0.0, 1.0 - (float(a) * float(a)) / (float(c) * float(c))))
+        # 条件分岐: `e < 1e-12` を満たす経路を評価する。
         if e < 1e-12:
             return 1.0
+
         S = 2.0 * math.pi * (float(a) ** 2) * (1.0 + (float(c) / (float(a) * float(e))) * math.asin(float(e)))
     else:
         # oblate spheroid
         e = math.sqrt(max(0.0, 1.0 - (float(c) * float(c)) / (float(a) * float(a))))
+        # 条件分岐: `e < 1e-12` を満たす経路を評価する。
         if e < 1e-12:
             return 1.0
+
         atanh_e = 0.5 * math.log((1.0 + float(e)) / (1.0 - float(e)))
         S = 2.0 * math.pi * (float(a) ** 2) * (1.0 + ((1.0 - float(e) * float(e)) / float(e)) * float(atanh_e))
 
     S0 = 4.0 * math.pi * (float(r0) ** 2)
+    # 条件分岐: `not (math.isfinite(S) and S > 0 and math.isfinite(S0) and S0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(S) and S > 0 and math.isfinite(S0) and S0 > 0):
         return 1.0
+
     return float(S) / float(S0)
 
 
@@ -256,27 +336,36 @@ def _extract_potential_sets(*, metrics_7138: dict) -> dict[int, dict[str, object
       - singlet:  V1,V2 (attractive depths, MeV), Vb (repulsive height, MeV), Vt (attractive tail depth, MeV)
     """
     results = metrics_7138.get("results_by_dataset")
+    # 条件分岐: `not isinstance(results, list) or not results` を満たす経路を評価する。
     if not isinstance(results, list) or not results:
         raise SystemExit("[fail] invalid 7.13.8 metrics: results_by_dataset missing/empty")
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     out: dict[int, dict[str, object]] = {}
     for r in results:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         eq = r.get("eq_label")
+        # 条件分岐: `not isinstance(eq, int)` を満たす経路を評価する。
         if not isinstance(eq, int):
             continue
 
         ft = r.get("fit_triplet")
         fs = r.get("fit_singlet")
+        # 条件分岐: `not isinstance(ft, dict) or not isinstance(fs, dict)` を満たす経路を評価する。
         if not isinstance(ft, dict) or not isinstance(fs, dict):
             continue
+
         geo = ft.get("geometry")
+        # 条件分岐: `not isinstance(geo, dict)` を満たす経路を評価する。
         if not isinstance(geo, dict):
             continue
 
@@ -303,8 +392,11 @@ def _extract_potential_sets(*, metrics_7138: dict) -> dict[int, dict[str, object
 
         out[int(eq)] = {"geometry": geometry, "triplet": triplet, "singlet": singlet}
 
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit("[fail] could not extract any datasets from 7.13.8 metrics")
+
     return out
 
 
@@ -328,8 +420,12 @@ def _hf_base_energy_uniform_sphere_mev_per_a(
     hbarc_mev_fm: float,
     m_nucleon_c2_mev: float,
 ) -> dict[str, float]:
+    # 条件分岐: `not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A)` を満たす経路を評価する。
     if not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A):
         return {"T": float("nan"), "U_H": float("nan"), "U_F": float("nan"), "Coul": float("nan"), "E_base": float("nan")}
+
+    # 条件分岐: `not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0)` を満たす経路を評価する。
+
     if not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0):
         return {"T": float("nan"), "U_H": float("nan"), "U_F": float("nan"), "Coul": float("nan"), "E_base": float("nan")}
 
@@ -389,13 +485,18 @@ def _overlap_integral_J(*, a: float, b: float, R: float) -> float:
     J(a,b;R) = ∫_a^b r^2 * V_overlap(r;R) dr, where
       V_overlap(r;R) = π/12 * (16 R^3 - 12 R^2 r + r^3)   for 0<=r<=2R, else 0.
     """
+    # 条件分岐: `b <= a` を満たす経路を評価する。
     if b <= a:
         return 0.0
+
+    # 条件分岐: `not (R > 0 and math.isfinite(R))` を満たす経路を評価する。
+
     if not (R > 0 and math.isfinite(R)):
         return float("nan")
 
     a2 = max(0.0, min(float(a), 2.0 * R))
     b2 = max(0.0, min(float(b), 2.0 * R))
+    # 条件分岐: `b2 <= a2` を満たす経路を評価する。
     if b2 <= a2:
         return 0.0
 
@@ -422,6 +523,7 @@ def _mean_field_accum_mev_fm6(
 
     where V(r) is the Step 7.13.8 piecewise potential.
     """
+    # 条件分岐: `not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0):
         return float("nan")
 
@@ -441,6 +543,7 @@ def _mean_field_accum_mev_fm6(
     for a, b, v in segs:
         j = _overlap_integral_J(a=a, b=b, R=R_sharp_fm)
         accum += float(v) * float(j)
+
     return float(accum)
 
 
@@ -467,8 +570,10 @@ def _mean_field_potential_energy_per_particle_mev(
       -Vt   (Rb<=r<R3)        attractive tail (coarse-grained)
        0    (r>=R3)
     """
+    # 条件分岐: `not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0 and math.isfinite(rho_fm3)...` を満たす経路を評価する。
     if not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0 and math.isfinite(rho_fm3) and rho_fm3 > 0):
         return float("nan")
+
     V_sphere = (4.0 / 3.0) * math.pi * R_sharp_fm**3
     accum = _mean_field_accum_mev_fm6(
         R_sharp_fm=R_sharp_fm, geometry=geometry, V1_MeV=V1_MeV, V2_MeV=V2_MeV, Vb_MeV=Vb_MeV, Vt_MeV=Vt_MeV
@@ -483,8 +588,10 @@ def _fermi_kinetic_energy_per_particle_mev(*, rho_fm3: float, hbarc_mev_fm: floa
       E_F = (ħc)^2 kF^2 / (2 m c^2)
       <T>/A = 3/5 E_F
     """
+    # 条件分岐: `not (math.isfinite(rho_fm3) and rho_fm3 > 0)` を満たす経路を評価する。
     if not (math.isfinite(rho_fm3) and rho_fm3 > 0):
         return float("nan"), float("nan")
+
     g = 4.0
     kf = (6.0 * math.pi**2 * float(rho_fm3) / g) ** (1.0 / 3.0)
     ef = (float(hbarc_mev_fm) ** 2) * (kf**2) / (2.0 * float(m_nucleon_c2_mev))
@@ -506,6 +613,7 @@ def _fermi_kinetic_energy_two_component_mev_per_a(
       - rho_p, rho_n, kf_p, kf_n
       - T_p_per_A, T_n_per_A, T_total_per_A
     """
+    # 条件分岐: `not (Z >= 0 and N >= 0 and (Z + N) > 0 and math.isfinite(volume_fm3) and volu...` を満たす経路を評価する。
     if not (Z >= 0 and N >= 0 and (Z + N) > 0 and math.isfinite(volume_fm3) and volume_fm3 > 0):
         return {
             "rho_p_fm3": float("nan"),
@@ -525,6 +633,7 @@ def _fermi_kinetic_energy_two_component_mev_per_a(
         # g=2 -> kF=(6π^2 ρ / g)^(1/3) = (3π^2 ρ)^(1/3)
         if not (math.isfinite(rho) and rho > 0):
             return 0.0, 0.0
+
         kf = (3.0 * math.pi**2 * rho) ** (1.0 / 3.0)
         ef = (float(hbarc_mev_fm) ** 2) * (kf**2) / (2.0 * float(m_nucleon_c2_mev))
         t = (3.0 / 5.0) * ef
@@ -551,10 +660,15 @@ def _coulomb_energy_uniform_sphere_mev_per_a(*, Z: int, A: int, R_sharp_fm: floa
       E_C ≈ (3/5) (e^2) Z(Z-1) / R
     where e^2 (in MeV·fm) ≈ 1.43996448.
     """
+    # 条件分岐: `not (A > 0 and Z >= 0 and math.isfinite(R_sharp_fm) and R_sharp_fm > 0)` を満たす経路を評価する。
     if not (A > 0 and Z >= 0 and math.isfinite(R_sharp_fm) and R_sharp_fm > 0):
         return float("nan")
+
+    # 条件分岐: `Z <= 1` を満たす経路を評価する。
+
     if Z <= 1:
         return 0.0
+
     e2_mev_fm = 1.43996448
     e_total = (3.0 / 5.0) * e2_mev_fm * float(Z * (Z - 1)) / float(R_sharp_fm)
     return float(e_total / float(A))
@@ -581,8 +695,12 @@ def _mean_field_potential_energy_two_component_mev_per_a(
       - This is still a declared approximation (consistency check), not a full many-body solve.
       - Exchange/Fock terms are not included here.
     """
+    # 条件分岐: `not (Z >= 0 and N >= 0 and (Z + N) > 0 and math.isfinite(volume_fm3) and volu...` を満たす経路を評価する。
     if not (Z >= 0 and N >= 0 and (Z + N) > 0 and math.isfinite(volume_fm3) and volume_fm3 > 0):
         return {"rho_p_fm3": float("nan"), "rho_n_fm3": float("nan"), "U_pot_MeV_per_A": float("nan")}
+
+    # 条件分岐: `not (math.isfinite(pn_triplet_weight) and 0.0 <= pn_triplet_weight <= 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(pn_triplet_weight) and 0.0 <= pn_triplet_weight <= 1.0):
         return {"rho_p_fm3": float("nan"), "rho_n_fm3": float("nan"), "U_pot_MeV_per_A": float("nan")}
 
@@ -619,16 +737,20 @@ def _mean_field_potential_energy_two_component_mev_per_a(
 def _j1(x: float) -> float:
     # spherical Bessel j1(x)
     ax = abs(float(x))
+    # 条件分岐: `ax < 1e-6` を満たす経路を評価する。
     if ax < 1e-6:
         return float(x) / 3.0
+
     return math.sin(float(x)) / float(x) ** 2 - math.cos(float(x)) / float(x)
 
 
 def _slater_f(x: float) -> float:
     # f(x) = 3 j1(x) / x, with f(0)=1
     ax = abs(float(x))
+    # 条件分岐: `ax < 1e-6` を満たす経路を評価する。
     if ax < 1e-6:
         return 1.0
+
     return float(3.0 * _j1(float(x)) / float(x))
 
 
@@ -656,6 +778,7 @@ def _integral_Iex_mev_fm3(*, geometry: dict[str, float], V1_MeV: float, V2_MeV: 
 
     Numerical Simpson integration per segment (piecewise-constant V).
     """
+    # 条件分岐: `not (math.isfinite(kf_fm1) and kf_fm1 >= 0)` を満たす経路を評価する。
     if not (math.isfinite(kf_fm1) and kf_fm1 >= 0):
         return float("nan")
 
@@ -672,20 +795,26 @@ def _integral_Iex_mev_fm3(*, geometry: dict[str, float], V1_MeV: float, V2_MeV: 
 
     total = 0.0
     for a, b, v in segs:
+        # 条件分岐: `b <= a` を満たす経路を評価する。
         if b <= a:
             continue
         # Simpson with fixed resolution (fast enough; segments are short)
+
         n = 2000
         h = (b - a) / n
         s = 0.0
         for i in range(n + 1):
             r = a + i * h
             w = 4.0 if (i % 2 == 1) else 2.0
+            # 条件分岐: `i == 0 or i == n` を満たす経路を評価する。
             if i == 0 or i == n:
                 w = 1.0
+
             fr = _slater_f(float(kf_fm1) * float(r))
             s += w * (r**2) * float(v) * (fr**2)
+
         total += s * h / 3.0
+
     return float(4.0 * math.pi * total)
 
 
@@ -702,8 +831,10 @@ def _resolve_effective_potential_metrics_path(*, out_dir: Path) -> Path:
         out_dir / "nuclear_effective_potential_pion_constrained_barrier_tail_kq_scan_metrics.json",
     ]
     for p in candidates:
+        # 条件分岐: `p.exists()` を満たす経路を評価する。
         if p.exists():
             return p
+
     raise SystemExit(
         "[fail] missing nuclear effective-potential metrics (fixed u-profile).\n"
         "Run (recommended):\n"
@@ -715,16 +846,22 @@ def _resolve_effective_potential_metrics_path(*, out_dir: Path) -> Path:
 
 def _potential_metrics_input_entry(*, metrics_path: Path, metrics_obj: dict | None = None) -> dict[str, object]:
     entry: dict[str, object] = {"path": str(metrics_path), "sha256": _sha256(metrics_path)}
+    # 条件分岐: `isinstance(metrics_obj, dict)` を満たす経路を評価する。
     if isinstance(metrics_obj, dict):
         step = metrics_obj.get("step")
+        # 条件分岐: `isinstance(step, str) and step.strip()` を満たす経路を評価する。
         if isinstance(step, str) and step.strip():
             entry["step"] = step.strip()
+
         canon = metrics_obj.get("canonical")
+        # 条件分岐: `isinstance(canon, dict)` を満たす経路を評価する。
         if isinstance(canon, dict):
             selected_step = canon.get("selected_step")
             selected_metrics = canon.get("selected_metrics_json")
+            # 条件分岐: `selected_step is not None or selected_metrics is not None` を満たす経路を評価する。
             if selected_step is not None or selected_metrics is not None:
                 entry["canonical"] = {"selected_step": selected_step, "selected_metrics_json": selected_metrics}
+
     return entry
 
 
@@ -734,6 +871,7 @@ def _load_common_inputs(*, out_dir: Path) -> dict[str, object]:
     potential_metrics_input = _potential_metrics_input_entry(metrics_path=metrics_7138_path, metrics_obj=metrics_7138)
 
     rep_path = out_dir / "nuclear_binding_representative_nuclei_metrics.json"
+    # 条件分岐: `not rep_path.exists()` を満たす経路を評価する。
     if not rep_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.11 baseline metrics.\n"
@@ -741,8 +879,10 @@ def _load_common_inputs(*, out_dir: Path) -> dict[str, object]:
             "  python -B scripts/quantum/nuclear_binding_representative_nuclei.py\n"
             f"Expected: {rep_path}"
         )
+
     rep = _load_json(rep_path)
     nuclei = rep.get("nuclei")
+    # 条件分岐: `not isinstance(nuclei, list) or not nuclei` を満たす経路を評価する。
     if not isinstance(nuclei, list) or not nuclei:
         raise SystemExit(f"[fail] invalid baseline metrics: nuclei missing/empty: {rep_path}")
 
@@ -782,8 +922,10 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
 
     rows: list[dict[str, object]] = []
     for nuc in nuclei:
+        # 条件分岐: `not isinstance(nuc, dict)` を満たす経路を評価する。
         if not isinstance(nuc, dict):
             continue
+
         a = int(nuc["A"])
         z = int(nuc["Z"])
         n = int(nuc["N"])
@@ -846,6 +988,7 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
         )
 
     calib = next((r for r in rows if str(r["key"]) == str(calibrate_key)), None)
+    # 条件分岐: `calib is None` を満たす経路を評価する。
     if calib is None:
         raise SystemExit(f"[fail] calibrate_key not found in nuclei list: {calibrate_key}")
 
@@ -856,8 +999,10 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
     for eq in eq_labels:
         e_base = float(calib["per_eq"][eq]["E_base_MeV_per_A"])
         denom = rho_calib**repulsion_power
+        # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
         if not (math.isfinite(denom) and denom > 0):
             raise SystemExit("[fail] invalid calibration density")
+
         repulsion_coeffs[int(eq)] = float((e_target - e_base) / denom)
 
     stats: dict[int, dict[str, float]] = {}
@@ -905,6 +1050,7 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
     for eq in eq_labels:
         ba_pred = [float(r["per_eq"][eq]["B_over_A_pred_MeV"]) for r in rows]
         ax.plot(a13, ba_pred, marker="o", linestyle="--", label=f"pred (+rep; eq{eq})")
+
     ax.set_title("B/A: obs vs mean-field(+repulsion) pred")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -949,6 +1095,7 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
     ]
     for eq in eq_labels:
         lines.append(f"  - eq{eq}: C={repulsion_coeffs[eq]:.6g} (RMS={stats[eq]['residual_rms_MeV']:.3g} MeV)")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_mean_field_density_repulsion.png"
@@ -982,6 +1129,7 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
                     f"residual_eq{eq}_MeV",
                 ]
             )
+
         w.writerow(header)
         for r in rows:
             row = [
@@ -1007,6 +1155,7 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
                         f"{float(pe['B_over_A_residual_MeV']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_mean_field_density_repulsion_metrics.json"
@@ -1055,8 +1204,12 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     pot_sets = common["pot_sets"]
     eq_labels = common["eq_labels"]
 
+    # 条件分岐: `not (math.isfinite(derivative_eps_rel) and 0.0 < derivative_eps_rel < 0.05)` を満たす経路を評価する。
     if not (math.isfinite(derivative_eps_rel) and 0.0 < derivative_eps_rel < 0.05):
         raise SystemExit("[fail] derivative_eps_rel must be in (0, 0.05)")
+
+    # 条件分岐: `freeze_min_a < 1` を満たす経路を評価する。
+
     if freeze_min_a < 1:
         raise SystemExit("[fail] freeze_min_a must be >= 1")
 
@@ -1066,8 +1219,12 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     repulsion_power = 2.0
 
     def eval_base(*, A: int, Z: int, N: int, R_sharp_fm: float, eq: int) -> dict[str, float]:
+        # 条件分岐: `not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A)` を満たす経路を評価する。
         if not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A):
             return {"T": float("nan"), "U": float("nan"), "Coul": float("nan"), "E_base": float("nan")}
+
+        # 条件分岐: `not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0)` を満たす経路を評価する。
+
         if not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0):
             return {"T": float("nan"), "U": float("nan"), "Coul": float("nan"), "E_base": float("nan")}
 
@@ -1096,8 +1253,10 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
 
     rows: list[dict[str, object]] = []
     for nuc in nuclei:
+        # 条件分岐: `not isinstance(nuc, dict)` を満たす経路を評価する。
         if not isinstance(nuc, dict):
             continue
+
         A = int(nuc["A"])
         Z = int(nuc["Z"])
         N = int(nuc["N"])
@@ -1149,6 +1308,7 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
         )
 
     # Freeze C per-eq as the median over nuclei with A>=freeze_min_a.
+
     c_frozen: dict[int, float] = {}
     for eq in eq_labels:
         vals = [
@@ -1156,8 +1316,10 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
             for r in rows
             if int(r["A"]) >= int(freeze_min_a) and math.isfinite(float(r["per_eq"][eq]["C_est_from_radii"]))
         ]
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             raise SystemExit(f"[fail] no valid C estimates for eq{eq} with A>=freeze_min_a={freeze_min_a}")
+
         vals2 = sorted(vals)
         mid = len(vals2) // 2
         c_med = vals2[mid] if (len(vals2) % 2 == 1) else 0.5 * (vals2[mid - 1] + vals2[mid])
@@ -1209,6 +1371,7 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     for eq in eq_labels:
         ba_pred = [float(r["per_eq"][eq]["B_over_A_pred_MeV"]) for r in rows]
         ax.plot(a13, ba_pred, marker="o", linestyle="--", label=f"pred (C frozen by radii; eq{eq})")
+
     ax.set_title("B/A: obs vs pred (C frozen by radii equilibrium)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -1252,6 +1415,7 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     ]
     for eq in eq_labels:
         lines.append(f"  - eq{eq}: C={c_frozen[eq]:.6g} (RMS={stats[eq]['residual_rms_MeV']:.3g} MeV)")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_mean_field_repulsion_radii_frozen.png"
@@ -1288,6 +1452,7 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
                     f"residual_eq{eq}_MeV",
                 ]
             )
+
         w.writerow(header)
         for r in rows:
             row = [
@@ -1316,6 +1481,7 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
                         f"{float(pe['B_over_A_residual_MeV']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_mean_field_repulsion_radii_frozen_metrics.json"
@@ -1374,8 +1540,12 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     pot_sets = common["pot_sets"]
     eq_labels = common["eq_labels"]
 
+    # 条件分岐: `not (math.isfinite(derivative_eps_rel) and 0.0 < derivative_eps_rel < 0.05)` を満たす経路を評価する。
     if not (math.isfinite(derivative_eps_rel) and 0.0 < derivative_eps_rel < 0.05):
         raise SystemExit("[fail] derivative_eps_rel must be in (0, 0.05)")
+
+    # 条件分岐: `freeze_min_a < 1` を満たす経路を評価する。
+
     if freeze_min_a < 1:
         raise SystemExit("[fail] freeze_min_a must be >= 1")
 
@@ -1385,8 +1555,12 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     repulsion_power = 2.0
 
     def eval_base(*, A: int, Z: int, N: int, R_sharp_fm: float, eq: int) -> dict[str, float]:
+        # 条件分岐: `not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A)` を満たす経路を評価する。
         if not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A):
             return {"T": float("nan"), "U_H": float("nan"), "U_F": float("nan"), "Coul": float("nan"), "E_base": float("nan")}
+
+        # 条件分岐: `not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0)` を満たす経路を評価する。
+
         if not (math.isfinite(R_sharp_fm) and R_sharp_fm > 0):
             return {"T": float("nan"), "U_H": float("nan"), "U_F": float("nan"), "Coul": float("nan"), "E_base": float("nan")}
 
@@ -1442,8 +1616,10 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
 
     rows: list[dict[str, object]] = []
     for nuc in nuclei:
+        # 条件分岐: `not isinstance(nuc, dict)` を満たす経路を評価する。
         if not isinstance(nuc, dict):
             continue
+
         A = int(nuc["A"])
         Z = int(nuc["Z"])
         N = int(nuc["N"])
@@ -1499,8 +1675,10 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
             for r in rows
             if int(r["A"]) >= int(freeze_min_a) and math.isfinite(float(r["per_eq"][eq]["C3_est_from_radii"]))
         ]
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             raise SystemExit(f"[fail] no valid C3 estimates for eq{eq} with A>=freeze_min_a={freeze_min_a}")
+
         vals2 = sorted(vals)
         mid = len(vals2) // 2
         c_med = vals2[mid] if (len(vals2) % 2 == 1) else 0.5 * (vals2[mid - 1] + vals2[mid])
@@ -1527,6 +1705,7 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
                 }
             )
             res.append(float(ba_pred - ba_obs))
+
         rms = math.sqrt(sum(x * x for x in res) / len(res)) if res else float("nan")
         mean = sum(res) / len(res) if res else float("nan")
         stats[int(eq)] = {"residual_mean_MeV": float(mean), "residual_rms_MeV": float(rms)}
@@ -1551,6 +1730,7 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     for eq in eq_labels:
         ba_pred = [float(r["per_eq"][eq]["B_over_A_pred_MeV"]) for r in rows]
         ax.plot(a13, ba_pred, marker="o", linestyle="--", label=f"pred (HF + 3-body; eq{eq})")
+
     ax.set_title("B/A: obs vs pred (HF + 3-body; C3 frozen by radii)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -1596,6 +1776,7 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     ]
     for eq in eq_labels:
         lines.append(f"  - eq{eq}: C3={c3_frozen[eq]:.6g} (RMS={stats[eq]['residual_rms_MeV']:.3g} MeV)")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen.png"
@@ -1632,6 +1813,7 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
                     f"residual_eq{eq}_MeV",
                 ]
             )
+
         w.writerow(header)
         for r in rows:
             row = [
@@ -1661,6 +1843,7 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
                         f"{float(pe['B_over_A_residual_MeV']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
@@ -1716,6 +1899,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
       - spread of C3 estimates across heavy nuclei (as a systematic on frozen C3).
     """
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -1723,9 +1907,11 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
 
     rep_path = out_dir / "nuclear_binding_representative_nuclei_metrics.json"
+    # 条件分岐: `not rep_path.exists()` を満たす経路を評価する。
     if not rep_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.11 baseline metrics.\n"
@@ -1733,15 +1919,19 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/nuclear_binding_representative_nuclei.py\n"
             f"Expected: {rep_path}"
         )
+
     rep = _load_json(rep_path)
     rep_nuclei = rep.get("nuclei")
+    # 条件分岐: `not isinstance(rep_nuclei, list) or not rep_nuclei` を満たす経路を評価する。
     if not isinstance(rep_nuclei, list) or not rep_nuclei:
         raise SystemExit(f"[fail] invalid representative nuclei metrics: nuclei missing/empty: {rep_path}")
 
     sigma_by_key: dict[str, dict[str, float]] = {}
     for n in rep_nuclei:
+        # 条件分岐: `not isinstance(n, dict)` を満たす経路を評価する。
         if not isinstance(n, dict):
             continue
+
         key = str(n.get("key"))
         sigma_by_key[key] = {
             "sigma_ba_obs_MeV": float(n.get("binding_energy_per_nucleon_sigma_MeV", float("nan"))),
@@ -1749,6 +1939,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
         }
 
     rows = hf.get("rows")
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         raise SystemExit(f"[fail] invalid hf metrics: rows missing/empty: {metrics_hf_path}")
 
@@ -1759,15 +1950,19 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
     pn_triplet_weight = float((model.get("pair_channels") or {}).get("pn", {}).get("triplet_weight", 0.5)) if isinstance(model.get("pair_channels"), dict) else 0.5
 
     stats_in = hf.get("stats")
+    # 条件分岐: `not isinstance(stats_in, dict) or not stats_in` を満たす経路を評価する。
     if not isinstance(stats_in, dict) or not stats_in:
         raise SystemExit(f"[fail] invalid hf metrics: stats missing/empty: {metrics_hf_path}")
+
     eq_labels = sorted(int(k) for k in stats_in.keys())
 
     c3_frozen_by_eq = three_body.get("C3_frozen_by_eq")
+    # 条件分岐: `not isinstance(c3_frozen_by_eq, dict) or not c3_frozen_by_eq` を満たす経路を評価する。
     if not isinstance(c3_frozen_by_eq, dict) or not c3_frozen_by_eq:
         raise SystemExit(f"[fail] invalid hf metrics: model.three_body.C3_frozen_by_eq missing/empty: {metrics_hf_path}")
 
     # Robust scatter (MAD) of C3 estimates across heavy nuclei.
+
     def median(vals: list[float]) -> float:
         v = sorted(vals)
         m = len(v) // 2
@@ -1786,22 +1981,29 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
             and k in r["per_eq"]
             and math.isfinite(float(r["per_eq"][k]["C3_est_from_radii"]))
         ]
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             raise SystemExit(f"[fail] no valid C3_est_from_radii for eq{eq} with A>=freeze_min_A={freeze_min_a}")
+
         c3_heavy_vals_by_eq[int(eq)] = vals
         m = median(vals)
         mad = median([abs(x - m) for x in vals])
         c3_sigma_by_eq[int(eq)] = float(1.4826 * mad)
 
     # Per-nucleus derived uncertainty budget
+
     out_rows: list[dict[str, object]] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         key = str(r.get("key"))
         A = int(r.get("A", 0))
+        # 条件分岐: `key not in sigma_by_key` を満たす経路を評価する。
         if key not in sigma_by_key:
             raise SystemExit(f"[fail] missing sigma for nucleus key={key} in {rep_path}")
+
         sig = sigma_by_key[key]
         sigma_r = float(sig["sigma_r_charge_fm"])
         sigma_ba_obs = float(sig["sigma_ba_obs_MeV"])
@@ -1825,11 +2027,14 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
 
         per_eq_out: dict[str, dict[str, float]] = {}
         per_eq = r.get("per_eq")
+        # 条件分岐: `not isinstance(per_eq, dict)` を満たす経路を評価する。
         if not isinstance(per_eq, dict):
             raise SystemExit(f"[fail] invalid per_eq in hf metrics row: key={key}")
+
         for eq in eq_labels:
             k = str(eq)
             pe = per_eq.get(k)
+            # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
             if not isinstance(pe, dict):
                 raise SystemExit(f"[fail] missing per_eq[{k}] in hf metrics row: key={key}")
 
@@ -1867,6 +2072,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
         out_rows.append(item)
 
     # Aggregate chi2-like diagnostics (using sigma_total).
+
     diag: dict[str, object] = {
         "freeze_min_A": freeze_min_a,
         "pn_triplet_weight": pn_triplet_weight,
@@ -1879,6 +2085,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
         diag[f"n_eq{eq}"] = int(len(z2))
 
     # Plot
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -1898,6 +2105,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
         ba_pred = [float(r["per_eq"][k]["B_over_A_pred_MeV"]) for r in out_rows]
         yerr = [float(r["per_eq"][k]["sigma_total_MeV"]) for r in out_rows]
         ax.errorbar(a13, ba_pred, yerr=yerr, fmt="o", ms=4, linestyle="--", label=f"pred ±σ_total (eq{eq})")
+
     ax.set_title("B/A with uncertainty budget (HF+3-body; C3 frozen by radii)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -1917,6 +2125,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
         sig = float(c3_sigma_by_eq[int(eq)])
         ax.axhline(c3, linestyle="--")
         ax.fill_between([min(xs), max(xs)], [c3 - sig, c3 - sig], [c3 + sig, c3 + sig], alpha=0.15)
+
     ax.set_title(f"C3 estimates from radii equilibrium (A>={freeze_min_a})")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("C3 (MeV·fm^6)")
@@ -1930,6 +2139,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
         s_c = [float(r["per_eq"][k]["sigma_BA_from_C3_MeV"]) for r in out_rows]
         ax.plot(a13, s_r, marker=".", linestyle="-", label=f"σ_radii (eq{eq})")
         ax.plot(a13, s_c, marker=".", linestyle="--", label=f"σ_C3 (eq{eq})")
+
     ax.set_title("Uncertainty components")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("σ (MeV)")
@@ -1946,9 +2156,11 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
     ]
     for eq in eq_labels:
         lines.append(f"  - eq{eq}: σ_C3≈{c3_sigma_by_eq[int(eq)]:.3g} MeV·fm^6")
+
     lines.append("")
     for eq in eq_labels:
         lines.append(f"chi2-like(eq{eq})≈{diag[f'chi2_like_eq{eq}']:.3g}  (N={diag[f'n_eq{eq}']})")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty.png"
@@ -1984,6 +2196,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
                     f"z_eq{eq}",
                 ]
             )
+
         w.writerow(header)
         for r in out_rows:
             row = [
@@ -2013,6 +2226,7 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
                         f"{float(pe['z_residual']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_metrics.json"
@@ -2061,6 +2275,7 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
     against the (eq18 vs eq19) input-set ambiguity.
     """
     metrics_7152_path = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_metrics.json"
+    # 条件分岐: `not metrics_7152_path.exists()` を満たす経路を評価する。
     if not metrics_7152_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.2 metrics.\n"
@@ -2068,17 +2283,23 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.2\n"
             f"Expected: {metrics_7152_path}"
         )
+
     m = _load_json(metrics_7152_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.2 metrics: rows missing/empty: {metrics_7152_path}")
 
     # Require exactly eq18/eq19 for the initial scatter-systematics definition.
+
     eq_labels = ["18", "19"]
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         per_eq = r.get("per_eq")
+        # 条件分岐: `not isinstance(per_eq, dict) or any(k not in per_eq for k in eq_labels)` を満たす経路を評価する。
         if not isinstance(per_eq, dict) or any(k not in per_eq for k in eq_labels):
             raise SystemExit(f"[fail] 7.13.15.2 row missing per_eq for eq18/eq19: key={r.get('key')}")
 
@@ -2096,6 +2317,7 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
 
         pe18 = per_eq["18"]
         pe19 = per_eq["19"]
+        # 条件分岐: `not isinstance(pe18, dict) or not isinstance(pe19, dict)` を満たす経路を評価する。
         if not isinstance(pe18, dict) or not isinstance(pe19, dict):
             raise SystemExit(f"[fail] invalid per_eq mapping for key={r.get('key')}")
 
@@ -2115,8 +2337,12 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
         sigma_total = math.sqrt(sigma_base_sq + sigma_set**2)
         z = residual_mean / sigma_total if (math.isfinite(sigma_total) and sigma_total > 0) else float("nan")
 
+        # 条件分岐: `math.isfinite(z)` を満たす経路を評価する。
         if math.isfinite(z):
             z_vals.append(float(z))
+
+        # 条件分岐: `math.isfinite(sigma_set)` を満たす経路を評価する。
+
         if math.isfinite(sigma_set):
             sigma_set_vals.append(float(sigma_set))
 
@@ -2150,8 +2376,10 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
 
     def _median(vals: list[float]) -> float:
         v = sorted(vals)
+        # 条件分岐: `not v` を満たす経路を評価する。
         if not v:
             return float("nan")
+
         m = len(v) // 2
         return v[m] if (len(v) % 2 == 1) else 0.5 * (v[m - 1] + v[m])
 
@@ -2347,6 +2575,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     root = out_dir.parents[1]
 
     metrics_7152_path = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_metrics.json"
+    # 条件分岐: `not metrics_7152_path.exists()` を満たす経路を評価する。
     if not metrics_7152_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.2 metrics.\n"
@@ -2354,13 +2583,17 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.2\n"
             f"Expected: {metrics_7152_path}"
         )
+
     m = _load_json(metrics_7152_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.2 metrics: rows missing/empty: {metrics_7152_path}")
 
     # CODATA radii (light nuclei): rp, rd, ral. We need rd (d) and ral (alpha) here.
+
     codata_path = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_light_nuclei" / "extracted_values.json"
+    # 条件分岐: `not codata_path.exists()` を満たす経路を評価する。
     if not codata_path.exists():
         raise SystemExit(
             "[fail] missing CODATA light-nuclei cache.\n"
@@ -2368,21 +2601,30 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py --out-dirname nist_codata_2022_nuclear_light_nuclei --include-light-nuclei\n"
             f"Expected: {codata_path}"
         )
+
     codata = _load_json(codata_path)
     constants = codata.get("constants")
+    # 条件分岐: `not isinstance(constants, dict)` を満たす経路を評価する。
     if not isinstance(constants, dict):
         raise SystemExit(f"[fail] invalid CODATA extracted_values.json: constants missing/invalid: {codata_path}")
 
     def _codata_r_fm(name: str) -> tuple[float, float]:
         c = constants.get(name)
+        # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
         if not isinstance(c, dict):
             raise SystemExit(f"[fail] CODATA constant missing: {name} in {codata_path}")
+
         v_si = c.get("value_si")
         s_si = c.get("sigma_si")
+        # 条件分岐: `not isinstance(v_si, (int, float)) or not math.isfinite(float(v_si))` を満たす経路を評価する。
         if not isinstance(v_si, (int, float)) or not math.isfinite(float(v_si)):
             raise SystemExit(f"[fail] invalid CODATA value_si for {name}")
+
+        # 条件分岐: `not isinstance(s_si, (int, float)) or not math.isfinite(float(s_si))` を満たす経路を評価する。
+
         if not isinstance(s_si, (int, float)) or not math.isfinite(float(s_si)):
             raise SystemExit(f"[fail] invalid CODATA sigma_si for {name}")
+
         v_fm = float(v_si) * 1e15
         s_fm = float(s_si) * 1e15
         return v_fm, s_fm
@@ -2398,8 +2640,10 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     out_rows: list[dict[str, object]] = []
     z_by_eq: dict[str, list[float]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         key = str(r.get("key"))
         r_iaea = float(r.get("r_charge_fm", float("nan")))
         sigma_R_sharp = float(r.get("sigma_R_sharp_fm", float("nan")))
@@ -2408,6 +2652,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
         r_codata_sigma = float("nan")
         delta_r = float("nan")
         sigma_r_source = 0.0
+        # 条件分岐: `key in codata_radii and math.isfinite(r_iaea)` を満たす経路を評価する。
         if key in codata_radii and math.isfinite(r_iaea):
             r_codata = float(codata_radii[key]["r_fm"])
             r_codata_sigma = float(codata_radii[key]["sigma_fm"])
@@ -2436,13 +2681,16 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
         }
 
         per_eq_in = r.get("per_eq")
+        # 条件分岐: `not isinstance(per_eq_in, dict)` を満たす経路を評価する。
         if not isinstance(per_eq_in, dict):
             raise SystemExit(f"[fail] invalid per_eq in 7.13.15.2 row: key={key}")
 
         per_eq_out: dict[str, dict[str, float]] = {}
         for eq, pe in per_eq_in.items():
+            # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
             if not isinstance(pe, dict):
                 continue
+
             eqk = str(eq)
             sigma_tot = float(pe.get("sigma_total_MeV", float("nan")))
             sigma_r_mev = float(pe.get("sigma_BA_from_radii_MeV", float("nan")))
@@ -2454,6 +2702,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
             sigma_tot_plus = math.sqrt(float(sigma_tot) ** 2 + float(sigma_r_source_mev) ** 2) if (math.isfinite(sigma_tot) and math.isfinite(sigma_r_source_mev)) else float("nan")
             z = residual / sigma_tot_plus if (math.isfinite(sigma_tot_plus) and sigma_tot_plus > 0 and math.isfinite(residual)) else float("nan")
 
+            # 条件分岐: `math.isfinite(z)` を満たす経路を評価する。
             if math.isfinite(z):
                 z_by_eq.setdefault(eqk, []).append(float(z))
 
@@ -2466,10 +2715,12 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
                 "sigma_total_plus_r_source_MeV": float(sigma_tot_plus),
                 "z_residual_plus_r_source": float(z),
             }
+
         item["per_eq"] = per_eq_out
         out_rows.append(item)
 
     # Diagnostics
+
     diag: dict[str, object] = {
         "n_rows": int(len(out_rows)),
         "radii_source": {
@@ -2483,6 +2734,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
         diag[f"frac_within_3sigma_eq{eqk}"] = float(sum(1 for z in zs if abs(float(z)) <= 3.0) / len(zs)) if zs else float("nan")
 
     # Plot (2x2)
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -2502,6 +2754,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
         pred = [float(r["per_eq"][eqk]["B_over_A_pred_MeV"]) for r in out_rows]
         yerr = [float(r["per_eq"][eqk]["sigma_total_plus_r_source_MeV"]) for r in out_rows]
         ax.errorbar(a13, pred, yerr=yerr, fmt="o", ms=4, linestyle="--", label=f"pred ±σ_total+r_source (eq{eqk})")
+
     ax.set_title("B/A with added radii-source systematic (CODATA vs IAEA)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -2523,6 +2776,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     for eqk in sorted(z_by_eq.keys(), key=int):
         sig_mev = [float(r["per_eq"][eqk]["sigma_BA_from_r_source_MeV"]) for r in out_rows]
         ax.plot(a13, sig_mev, marker=".", linestyle="-", label=f"σ_BA(r_source) (eq{eqk})")
+
     ax.set_title("Propagated contribution to B/A (MeV)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("σ (MeV)")
@@ -2540,6 +2794,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     ]
     for eqk in sorted(z_by_eq.keys(), key=int):
         lines.append(f"chi2-like(eq{eqk})≈{diag[f'chi2_like_eq{eqk}']:.3g}  (N={diag[f'n_eq{eqk}']})")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic.png"
@@ -2579,6 +2834,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
                     f"z_plus_r_source_eq{eqk}",
                 ]
             )
+
         w.writerow(header)
         for r in out_rows:
             row = [
@@ -2612,6 +2868,7 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
                         f"{float(pe['z_residual_plus_r_source']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic_metrics.json"
@@ -2662,6 +2919,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
       in_domain := (A >= domain_min_a)
     """
     metrics_7152_path = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_metrics.json"
+    # 条件分岐: `not metrics_7152_path.exists()` を満たす経路を評価する。
     if not metrics_7152_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.2 metrics.\n"
@@ -2669,12 +2927,15 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.2\n"
             f"Expected: {metrics_7152_path}"
         )
+
     m7152 = _load_json(metrics_7152_path)
     rows_7152 = m7152.get("rows")
+    # 条件分岐: `not isinstance(rows_7152, list) or not rows_7152` を満たす経路を評価する。
     if not isinstance(rows_7152, list) or not rows_7152:
         raise SystemExit(f"[fail] invalid 7.13.15.2 metrics: rows missing/empty: {metrics_7152_path}")
 
     metrics_7154_path = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_radii_source_systematic_metrics.json"
+    # 条件分岐: `not metrics_7154_path.exists()` を満たす経路を評価する。
     if not metrics_7154_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.4 metrics.\n"
@@ -2682,25 +2943,36 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.4\n"
             f"Expected: {metrics_7154_path}"
         )
+
     m7154 = _load_json(metrics_7154_path)
     rows_7154 = m7154.get("rows")
+    # 条件分岐: `not isinstance(rows_7154, list) or not rows_7154` を満たす経路を評価する。
     if not isinstance(rows_7154, list) or not rows_7154:
         raise SystemExit(f"[fail] invalid 7.13.15.4 metrics: rows missing/empty: {metrics_7154_path}")
 
     by_key_7154: dict[str, dict[str, object]] = {}
     for r in rows_7154:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         key = str(r.get("key"))
         by_key_7154[key] = r
 
     # Determine eq labels from 7.13.15.2 (should be eq18/eq19).
+
     sample = next((r for r in rows_7152 if isinstance(r, dict)), None)
+    # 条件分岐: `not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict)` を満たす経路を評価する。
     if not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict):
         raise SystemExit(f"[fail] invalid 7.13.15.2 metrics row structure: {metrics_7152_path}")
+
     eq_keys = sorted([str(k) for k in sample["per_eq"].keys()], key=int)
+    # 条件分岐: `not eq_keys` を満たす経路を評価する。
     if not eq_keys:
         raise SystemExit(f"[fail] could not infer eq labels from 7.13.15.2: {metrics_7152_path}")
+
+    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
+
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.5 expects eq18/eq19 only; got: {eq_keys}")
 
@@ -2709,9 +2981,12 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
     z_dom_by_eq: dict[str, list[float]] = {k: [] for k in eq_keys}
 
     for r in rows_7152:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         key = str(r.get("key"))
+        # 条件分岐: `key not in by_key_7154` を満たす経路を評価する。
         if key not in by_key_7154:
             raise SystemExit(f"[fail] missing key={key} in 7.13.15.4 metrics: {metrics_7154_path}")
 
@@ -2719,16 +2994,19 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
         in_domain = bool(A >= int(domain_min_a))
 
         pe = r.get("per_eq")
+        # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
         if not isinstance(pe, dict):
             raise SystemExit(f"[fail] invalid per_eq in 7.13.15.2 row: key={key}")
 
         # Compute sigma_set from eq18 vs eq19 predictions (conservative, symmetric).
+
         pred18 = float(pe["18"].get("B_over_A_pred_MeV", float("nan"))) if isinstance(pe.get("18"), dict) else float("nan")
         pred19 = float(pe["19"].get("B_over_A_pred_MeV", float("nan"))) if isinstance(pe.get("19"), dict) else float("nan")
         sigma_set = 0.5 * abs(pred18 - pred19) if (math.isfinite(pred18) and math.isfinite(pred19)) else float("nan")
 
         r54 = by_key_7154[key]
         pe54 = r54.get("per_eq")
+        # 条件分岐: `not isinstance(pe54, dict)` を満たす経路を評価する。
         if not isinstance(pe54, dict):
             raise SystemExit(f"[fail] invalid per_eq in 7.13.15.4 row: key={key}")
 
@@ -2750,9 +3028,12 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
         per_eq_out: dict[str, dict[str, float]] = {}
         for eqk in eq_keys:
             pei = pe.get(eqk)
+            # 条件分岐: `not isinstance(pei, dict)` を満たす経路を評価する。
             if not isinstance(pei, dict):
                 raise SystemExit(f"[fail] missing per_eq[{eqk}] in 7.13.15.2 row: key={key}")
+
             pe54i = pe54.get(eqk)
+            # 条件分岐: `not isinstance(pe54i, dict)` を満たす経路を評価する。
             if not isinstance(pe54i, dict):
                 raise SystemExit(f"[fail] missing per_eq[{eqk}] in 7.13.15.4 row: key={key}")
 
@@ -2768,8 +3049,10 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
             z = residual / sigma_final if (math.isfinite(residual) and math.isfinite(sigma_final) and sigma_final > 0) else float("nan")
             passed = bool(math.isfinite(z) and abs(float(z)) <= 3.0)
 
+            # 条件分岐: `math.isfinite(z)` を満たす経路を評価する。
             if math.isfinite(z):
                 z_all_by_eq[eqk].append(float(z))
+                # 条件分岐: `in_domain` を満たす経路を評価する。
                 if in_domain:
                     z_dom_by_eq[eqk].append(float(z))
 
@@ -2803,6 +3086,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
         diag[f"frac_within_3sigma_domain_eq{eqk}"] = float(sum(1 for z in zs_dom if abs(float(z)) <= 3.0) / len(zs_dom)) if zs_dom else float("nan")
 
     # Plot (2x2)
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -2823,6 +3107,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
         pred = [float(r["per_eq"][eqk]["B_over_A_pred_MeV"]) for r in out_rows]
         yerr = [float(r["per_eq"][eqk]["sigma_final_MeV"]) for r in out_rows]
         ax.errorbar(a13, pred, yerr=yerr, fmt="o", ms=4, linestyle="--", label=f"pred ±σ_final (eq{eqk})")
+
     ax.set_title("B/A with combined rejection budget (HF+3-body)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -2840,6 +3125,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
         ys_out = [z for z, ok in zip(zvals, in_dom_mask, strict=True) if not ok]
         ax.scatter(xs_in, ys_in, s=35, label=f"z_final (eq{eqk}) in-domain")
         ax.scatter(xs_out, ys_out, s=35, alpha=0.4, label=f"z_final (eq{eqk}) out-of-domain")
+
     ax.axhline(0.0, color="k", linewidth=1)
     ax.axhline(3.0, color="tab:red", linestyle="--", linewidth=1)
     ax.axhline(-3.0, color="tab:red", linestyle="--", linewidth=1)
@@ -2855,6 +3141,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
         ax.plot(a13, [float(r["per_eq"][eqk]["sigma_total_MeV"]) for r in out_rows], marker=".", linestyle="--", label=f"σ_total (eq{eqk})")
         ax.plot(a13, [float(r["per_eq"][eqk]["sigma_r_source_MeV"]) for r in out_rows], marker=".", linestyle=":", label=f"σ_r_source (eq{eqk})")
         ax.plot(a13, [float(r["per_eq"][eqk]["sigma_final_MeV"]) for r in out_rows], marker=".", linestyle="-", label=f"σ_final (eq{eqk})")
+
     ax.set_title("Uncertainty budget components")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("σ (MeV)")
@@ -2875,6 +3162,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
             f"eq{eqk}: chi2(all)≈{diag[f'chi2_like_all_eq{eqk}']:.3g} (N={diag[f'n_all_eq{eqk}']})  "
             f"chi2(dom)≈{diag[f'chi2_like_domain_eq{eqk}']:.3g} (N={diag[f'n_domain_eq{eqk}']})"
         )
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_rejection_budget.png"
@@ -2908,6 +3196,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
                     f"pass_3sigma_eq{eqk}",
                 ]
             )
+
         w.writerow(header)
         for r in out_rows:
             row = [
@@ -2937,6 +3226,7 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
                         f"{float(peo['pass_3sigma']):.0f}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_rejection_budget_metrics.json"
@@ -2982,13 +3272,19 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
       - This step keeps the frozen C3 values from Step 7.13.15.1 (radii-equilibrium freeze).
       - It does NOT refit to B/A. The goal is to make "where it fails" visible at scale.
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `max_nuclei < 0` を満たす経路を評価する。
+
     if max_nuclei < 0:
         raise SystemExit("[fail] max_nuclei must be >= 0")
 
     # Load frozen HF+3-body configuration (C3, derivative eps, pn mix).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -2996,6 +3292,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
 
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
@@ -3009,16 +3306,21 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
     pn_triplet_weight = float(pn.get("triplet_weight", 0.5))
 
     stats_in = hf.get("stats")
+    # 条件分岐: `not isinstance(stats_in, dict) or not stats_in` を満たす経路を評価する。
     if not isinstance(stats_in, dict) or not stats_in:
         raise SystemExit(f"[fail] invalid 7.13.15 metrics: stats missing/empty: {metrics_hf_path}")
+
     eq_labels = sorted(int(k) for k in stats_in.keys())
 
     c3_frozen_by_eq = three_body.get("C3_frozen_by_eq")
+    # 条件分岐: `not isinstance(c3_frozen_by_eq, dict) or not c3_frozen_by_eq` を満たす経路を評価する。
     if not isinstance(c3_frozen_by_eq, dict) or not c3_frozen_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15 metrics: model.three_body.C3_frozen_by_eq missing/empty: {metrics_hf_path}")
 
     # Load robust C3 scatter (MAD→σ) from Step 7.13.15.2 (needed for an uncertainty budget).
+
     metrics_7152_path = out_dir / "nuclear_a_dependence_hf_three_body_uncertainty_metrics.json"
+    # 条件分岐: `not metrics_7152_path.exists()` を満たす経路を評価する。
     if not metrics_7152_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.2 metrics.\n"
@@ -3026,13 +3328,16 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.2\n"
             f"Expected: {metrics_7152_path}"
         )
+
     m7152 = _load_json(metrics_7152_path)
     diag_7152 = m7152.get("diag") if isinstance(m7152.get("diag"), dict) else {}
     c3_sigma_robust_by_eq = diag_7152.get("C3_sigma_robust_by_eq")
+    # 条件分岐: `not isinstance(c3_sigma_robust_by_eq, dict) or not c3_sigma_robust_by_eq` を満たす経路を評価する。
     if not isinstance(c3_sigma_robust_by_eq, dict) or not c3_sigma_robust_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.2 metrics: diag.C3_sigma_robust_by_eq missing/empty: {metrics_7152_path}")
 
     # Load potential sets + constants (from Step 7.13.8 metrics).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -3041,30 +3346,42 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
 
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N,A) -> (B/A, σ_B/A, symbol)
+
     ame_map: dict[tuple[int, int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or A < 2` を満たす経路を評価する。
         if Z < 1 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N, A)] = {
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
@@ -3073,8 +3390,10 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
 
     def fnum(s: str) -> float:
         t = s.strip()
+        # 条件分岐: `t == ""` を満たす経路を評価する。
         if t == "":
             return float("nan")
+
         try:
             return float(t)
         except Exception:
@@ -3084,11 +3403,14 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
     with radii_path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             Z = int(row.get("z", "-1"))
             N = int(row.get("n", "-1"))
             A = int(row.get("a", "-1"))
+            # 条件分岐: `Z < 1 or A < 2` を満たす経路を評価する。
             if Z < 1 or A < 2:
                 continue
 
@@ -3100,13 +3422,19 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             used = "published"
             r_use = float(r_val)
             r_unc_use = float(r_unc)
+            # 条件分岐: `not (math.isfinite(r_use) and r_use > 0)` を満たす経路を評価する。
             if not (math.isfinite(r_use) and r_use > 0):
                 used = "preliminary"
                 r_use = float(r_pre)
                 r_unc_use = float(r_pre_unc)
 
+            # 条件分岐: `not (math.isfinite(r_use) and r_use > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(r_use) and r_use > 0):
                 continue
+
+            # 条件分岐: `(Z, N, A) not in ame_map` を満たす経路を評価する。
+
             if (Z, N, A) not in ame_map:
                 continue
 
@@ -3128,13 +3456,17 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             )
 
     nuclei.sort(key=lambda x: (int(x["A"]), int(x["Z"]), int(x["N"]), str(x["radii_used"])))
+    # 条件分岐: `max_nuclei > 0` を満たす経路を評価する。
     if max_nuclei > 0:
         nuclei = nuclei[: int(max_nuclei)]
+
+    # 条件分岐: `not nuclei` を満たす経路を評価する。
 
     if not nuclei:
         raise SystemExit("[fail] no joined nuclei found (AME2020 × IAEA radii)")
 
     # Compute predictions + diagnostics.
+
     MAGIC = {2, 8, 20, 28, 50, 82, 126}
 
     out_rows: list[dict[str, object]] = []
@@ -3153,6 +3485,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
         rho0 = float(A) / float(V0)
 
         dR = float(derivative_eps_rel) * float(R_sharp)
+        # 条件分岐: `not (math.isfinite(dR) and dR > 0)` を満たす経路を評価する。
         if not (math.isfinite(dR) and dR > 0):
             dR = 1e-6 * float(R_sharp)
 
@@ -3188,10 +3521,15 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
         pred_by_eq: dict[str, float] = {}
         for eq in eq_labels:
             k = str(eq)
+            # 条件分岐: `k not in c3_frozen_by_eq` を満たす経路を評価する。
             if k not in c3_frozen_by_eq:
                 continue
+
+            # 条件分岐: `k not in c3_sigma_robust_by_eq` を満たす経路を評価する。
+
             if k not in c3_sigma_robust_by_eq:
                 continue
+
             c3 = float(c3_frozen_by_eq[k])
             c3_sigma = float(c3_sigma_robust_by_eq[k])
 
@@ -3272,11 +3610,15 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
                 "sigma_total_MeV": float(sigma_total),
             }
 
+        # 条件分岐: `not per_eq` を満たす経路を評価する。
+
         if not per_eq:
             continue
 
         # Dataset ambiguity systematic (eq18 vs eq19) if both exist.
+
         sigma_set = float("nan")
+        # 条件分岐: `"18" in pred_by_eq and "19" in pred_by_eq and math.isfinite(pred_by_eq["18"])...` を満たす経路を評価する。
         if "18" in pred_by_eq and "19" in pred_by_eq and math.isfinite(pred_by_eq["18"]) and math.isfinite(pred_by_eq["19"]):
             sigma_set = 0.5 * abs(float(pred_by_eq["18"]) - float(pred_by_eq["19"]))
 
@@ -3297,9 +3639,12 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             # Fallback: mean over available eqs.
             vals = [float(v) for v in pred_by_eq.values() if math.isfinite(float(v))]
             pred_mean = float(sum(vals) / len(vals)) if vals else float("nan")
+
         item["B_over_A_pred_mean_MeV"] = float(pred_mean)
         item["B_over_A_residual_mean_MeV"] = float(pred_mean - ba_obs) if math.isfinite(pred_mean) else float("nan")
         out_rows.append(item)
+
+    # 条件分岐: `not out_rows` を満たす経路を評価する。
 
     if not out_rows:
         raise SystemExit("[fail] no valid computed rows for Step 7.13.15.6")
@@ -3313,13 +3658,16 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
         return v[m] if (len(v) % 2 == 1) else 0.5 * (v[m - 1] + v[m])
 
     def _mad_to_sigma(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         med = _median(vals)
         mad = _median([abs(x - med) for x in vals])
         return float(1.4826 * mad)
 
     # Group metrics for residual_mean (shell/surface split).
+
     def summarize(items: list[dict[str, object]]) -> dict[str, float]:
         res = [float(it["B_over_A_residual_mean_MeV"]) for it in items if math.isfinite(float(it.get("B_over_A_residual_mean_MeV", float("nan"))))]
         abs_res = [abs(x) for x in res]
@@ -3331,17 +3679,21 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
         }
 
     # A bins (surface proxy)
+
     a_bins = [(2, 16), (16, 40), (40, 100), (100, 200), (200, 10**9)]
     def bin_label(a: int) -> str:
         for lo, hi in a_bins:
+            # 条件分岐: `lo <= a < hi` を満たす経路を評価する。
             if lo <= a < hi:
                 return f"{lo}<=A<{hi}" if hi < 10**8 else f"A>={lo}"
+
         return "unknown"
 
     for r in out_rows:
         r["A_bin"] = bin_label(int(r["A"]))
 
     # Published vs preliminary radii split
+
     rows_published = [r for r in out_rows if str(r.get("radii_used")) == "published"]
     rows_prelim = [r for r in out_rows if str(r.get("radii_used")) == "preliminary"]
     rows_domain = [r for r in out_rows if bool(r.get("in_domain"))]
@@ -3379,6 +3731,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             "nonmagic": summarize([r for r in items if not bool(r.get("magic_any"))]),
             "N_total": int(len(items)),
         }
+
     diag["surface_shell_split_domain"] = by_bin
 
     # C3_est_from_radii distribution (diagnostic for missing physics; do not refit)
@@ -3409,6 +3762,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             "N_all": float(len(vals_all)),
             "N_domain": float(len(vals_dom)),
         }
+
     diag["C3_est_from_radii_stats"] = c3_est_stats
 
     # Plot (2x2)
@@ -3459,6 +3813,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             for r in out_rows
         ]
         ax.scatter(a13, vals, s=10, alpha=0.35, label=f"C3_est_from_radii (eq{eq})")
+
     ax.set_title("C3_est_from_radii scatter (diagnostic)")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("C3_est (MeV·fm^6)")
@@ -3482,6 +3837,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
         k = str(eq)
         cs = diag["C3_est_from_radii_stats"][k]
         lines.append(f"  eq{eq}: median={cs['median_domain']:.4g}   σ≈{cs['sigma_robust_domain']:.4g}   (N={int(cs['N_domain']):d})")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_extended_dataset.png"
@@ -3528,6 +3884,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
                     f"z_final_eq{eq}",
                 ]
             )
+
         w.writerow(header)
         for r in out_rows:
             row = [
@@ -3559,9 +3916,11 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             for eq in eq_labels:
                 k = str(eq)
                 pe = per_eq.get(k)
+                # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
                 if not isinstance(pe, dict):
                     row.extend(["", "", "", "", "", "", ""])
                     continue
+
                 row.extend(
                     [
                         f"{float(pe['B_over_A_pred_MeV']):.12g}",
@@ -3573,6 +3932,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
                         f"{float(pe['z_final']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_extended_dataset_metrics.json"
@@ -3629,14 +3989,22 @@ def _run_step_7_13_15_7(
       E_total/A = E_base/A + C3_eff ρ^2  = E_base/A + C3_inf ρ^2 + C_surf/(6 R_sharp)
       B/A_pred = -E_total/A
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `fit_min_a < 1` を満たす経路を評価する。
+
     if fit_min_a < 1:
         raise SystemExit("[fail] fit_min_a must be >= 1")
+
+    # 条件分岐: `not (math.isfinite(clip_k) and clip_k >= 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(clip_k) and clip_k >= 0.0):
         raise SystemExit("[fail] clip_k must be finite and >= 0")
 
     metrics_7156_path = out_dir / "nuclear_a_dependence_hf_three_body_extended_dataset_metrics.json"
+    # 条件分岐: `not metrics_7156_path.exists()` を満たす経路を評価する。
     if not metrics_7156_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.6 metrics.\n"
@@ -3644,15 +4012,20 @@ def _run_step_7_13_15_7(
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.6\n"
             f"Expected: {metrics_7156_path}"
         )
+
     m7156 = _load_json(metrics_7156_path)
     rows_in = m7156.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.6 metrics: rows missing/empty: {metrics_7156_path}")
 
     sample = next((r for r in rows_in if isinstance(r, dict)), None)
+    # 条件分岐: `not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict)` を満たす経路を評価する。
     if not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict):
         raise SystemExit(f"[fail] invalid 7.13.15.6 row structure: per_eq missing: {metrics_7156_path}")
+
     eq_keys = sorted([str(k) for k in sample["per_eq"].keys()], key=int)
+    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.7 expects per_eq with eq18/eq19; got: {eq_keys}")
 
@@ -3662,8 +4035,10 @@ def _run_step_7_13_15_7(
         return v[m] if (len(v) % 2 == 1) else 0.5 * (v[m - 1] + v[m])
 
     def mad_to_sigma(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         m = median(vals)
         mad = median([abs(x - m) for x in vals])
         return float(1.4826 * mad)
@@ -3676,8 +4051,10 @@ def _run_step_7_13_15_7(
         sxx = float(sum(x * x for x in xs))
         sxy = float(sum(x * y for x, y in zip(xs, ys, strict=True)))
         denom = n * sxx - sx * sx
+        # 条件分岐: `not (math.isfinite(denom) and abs(denom) > 0)` を満たす経路を評価する。
         if not (math.isfinite(denom) and abs(denom) > 0):
             return float("nan"), float("nan")
+
         b = (n * sxy - sx * sy) / denom
         a = (sy - b * sx) / n
         return float(a), float(b)
@@ -3689,26 +4066,41 @@ def _run_step_7_13_15_7(
         xs: list[float] = []
         ys: list[float] = []
         for r in rows_in:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             A = int(r.get("A", 0))
+            # 条件分岐: `A < fit_min_a` を満たす経路を評価する。
             if A < fit_min_a:
                 continue
+
+            # 条件分岐: `not fit_include_preliminary and str(r.get("radii_used")) != "published"` を満たす経路を評価する。
+
             if not fit_include_preliminary and str(r.get("radii_used")) != "published":
                 continue
+
             R = float(r.get("R_sharp_fm", float("nan")))
             rho = float(r.get("rho_fm3", float("nan")))
             pe = r.get("per_eq")
+            # 条件分岐: `not isinstance(pe, dict) or eqk not in pe or not isinstance(pe[eqk], dict)` を満たす経路を評価する。
             if not isinstance(pe, dict) or eqk not in pe or not isinstance(pe[eqk], dict):
                 continue
+
             y = float(pe[eqk].get("C3_est_from_radii", float("nan")))
+            # 条件分岐: `not (math.isfinite(R) and R > 0 and math.isfinite(rho) and rho > 0 and math.i...` を満たす経路を評価する。
             if not (math.isfinite(R) and R > 0 and math.isfinite(rho) and rho > 0 and math.isfinite(y)):
                 continue
+
             x = 1.0 / (6.0 * (rho**2) * R)
+            # 条件分岐: `not (math.isfinite(x) and x > 0)` を満たす経路を評価する。
             if not (math.isfinite(x) and x > 0):
                 continue
+
             xs.append(float(x))
             ys.append(float(y))
+
+        # 条件分岐: `len(xs) < 20` を満たす経路を評価する。
 
         if len(xs) < 20:
             raise SystemExit(f"[fail] insufficient fit points for eq{eqk}: n={len(xs)} (fit_min_a={fit_min_a})")
@@ -3716,11 +4108,13 @@ def _run_step_7_13_15_7(
         a0, b0 = ols_fit(xs, ys)
         res0 = [y - (a0 + b0 * x) for x, y in zip(xs, ys, strict=True)]
         sig0 = mad_to_sigma(res0)
+        # 条件分岐: `not math.isfinite(sig0) or sig0 <= 0 or clip_k == 0` を満たす経路を評価する。
         if not math.isfinite(sig0) or sig0 <= 0 or clip_k == 0:
             keep = [True] * len(xs)
         else:
             thr = float(clip_k) * float(sig0)
             keep = [abs(r) <= thr for r in res0]
+
         xs2 = [x for x, k in zip(xs, keep, strict=True) if k]
         ys2 = [y for y, k in zip(ys, keep, strict=True) if k]
         a, b = ols_fit(xs2, ys2) if len(xs2) >= 20 else (a0, b0)
@@ -3740,15 +4134,19 @@ def _run_step_7_13_15_7(
         fit_points_by_eq[eqk] = {"x_fm5": xs2, "C3_est": ys2}
 
     # Predict with the frozen (C3_inf, C_surf).
+
     out_rows: list[dict[str, object]] = []
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         A = int(r.get("A", 0))
         Z = int(r.get("Z", 0))
         N = int(r.get("N", 0))
         R = float(r.get("R_sharp_fm", float("nan")))
         rho = float(r.get("rho_fm3", float("nan")))
+        # 条件分岐: `not (A > 0 and math.isfinite(R) and R > 0 and math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (A > 0 and math.isfinite(R) and R > 0 and math.isfinite(rho) and rho > 0):
             continue
 
@@ -3759,6 +4157,7 @@ def _run_step_7_13_15_7(
         in_domain = bool(A >= int(domain_min_a))
 
         per_eq_in = r.get("per_eq")
+        # 条件分岐: `not isinstance(per_eq_in, dict)` を満たす経路を評価する。
         if not isinstance(per_eq_in, dict):
             continue
 
@@ -3789,11 +4188,14 @@ def _run_step_7_13_15_7(
         pred_by_eq: dict[str, float] = {}
         per_eq_out: dict[str, dict[str, float]] = {}
         for eqk in eq_keys:
+            # 条件分岐: `eqk not in per_eq_in or not isinstance(per_eq_in[eqk], dict)` を満たす経路を評価する。
             if eqk not in per_eq_in or not isinstance(per_eq_in[eqk], dict):
                 continue
+
             base = per_eq_in[eqk]
             e_base = float(base.get("E_base_MeV_per_A", float("nan")))
             dE_dR = float(base.get("dEbase_dR_MeV_per_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(e_base) and math.isfinite(dE_dR))` を満たす経路を評価する。
             if not (math.isfinite(e_base) and math.isfinite(dE_dR)):
                 continue
 
@@ -3838,12 +4240,16 @@ def _run_step_7_13_15_7(
                 "sigma_total_MeV": float(sig_total),
             }
 
+        # 条件分岐: `not per_eq_out` を満たす経路を評価する。
+
         if not per_eq_out:
             continue
 
         sigma_set = 0.0
+        # 条件分岐: `"18" in pred_by_eq and "19" in pred_by_eq and math.isfinite(pred_by_eq["18"])...` を満たす経路を評価する。
         if "18" in pred_by_eq and "19" in pred_by_eq and math.isfinite(pred_by_eq["18"]) and math.isfinite(pred_by_eq["19"]):
             sigma_set = 0.5 * abs(float(pred_by_eq["18"]) - float(pred_by_eq["19"]))
+
         item["sigma_set_MeV"] = float(sigma_set)
 
         # Final z with σ_set (no choosing eq).
@@ -3858,15 +4264,19 @@ def _run_step_7_13_15_7(
 
         item["per_eq"] = per_eq_out
 
+        # 条件分岐: `"18" in pred_by_eq and "19" in pred_by_eq and math.isfinite(pred_by_eq["18"])...` を満たす経路を評価する。
         if "18" in pred_by_eq and "19" in pred_by_eq and math.isfinite(pred_by_eq["18"]) and math.isfinite(pred_by_eq["19"]):
             pred_mean = 0.5 * (float(pred_by_eq["18"]) + float(pred_by_eq["19"]))
         else:
             vals = [float(v) for v in pred_by_eq.values() if math.isfinite(float(v))]
             pred_mean = float(sum(vals) / len(vals)) if vals else float("nan")
+
         item["B_over_A_pred_mean_MeV"] = float(pred_mean)
         item["B_over_A_residual_mean_MeV"] = float(pred_mean - ba_obs) if math.isfinite(pred_mean) else float("nan")
 
         out_rows.append(item)
+
+    # 条件分岐: `not out_rows` を満たす経路を評価する。
 
     if not out_rows:
         raise SystemExit("[fail] no valid output rows for Step 7.13.15.7")
@@ -3904,6 +4314,7 @@ def _run_step_7_13_15_7(
         diag[f"frac_within_3sigma_domain_eq{eqk}"] = float(sum(1 for z in zs if abs(float(z)) <= 3.0) / len(zs)) if zs else float("nan")
 
     # Plot (2x2)
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -3925,6 +4336,7 @@ def _run_step_7_13_15_7(
         x0 = min(xs) if xs else 0.0
         x1 = max(xs) if xs else 1.0
         ax.plot([x0, x1], [a + b * x0, a + b * x1], linewidth=2, label=f"fit eq{eqk}: C3_inf={a:.3g}, C_surf={b:.3g}")
+
     ax.set_title("Radii-only fit: C3_est ≈ C3_inf + C_surf * x")
     ax.set_xlabel("x = 1/(6 ρ^2 R_sharp)  (fm^5)")
     ax.set_ylabel("C3_est_from_radii (MeV·fm^6)")
@@ -3954,6 +4366,7 @@ def _run_step_7_13_15_7(
             for r in out_rows
         ]
         ax.scatter(a13_all, zs, s=8, alpha=0.20, label=f"z_final (eq{eqk})")
+
     ax.axhline(0.0, color="k", linewidth=1)
     ax.axhline(3.0, color="tab:red", linestyle="--", linewidth=1)
     ax.axhline(-3.0, color="tab:red", linestyle="--", linewidth=1)
@@ -3980,6 +4393,7 @@ def _run_step_7_13_15_7(
         lines.append(
             f"  frac(|z|<=3) domain ≈ {diag[f'frac_within_3sigma_domain_eq{eqk}']:.3g}  (N={diag[f'n_domain_eq{eqk}']})"
         )
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_surface_term.png"
@@ -4025,6 +4439,7 @@ def _run_step_7_13_15_7(
                     f"pass_3sigma_eq{eqk}",
                 ]
             )
+
         w.writerow(header)
         for r in out_rows:
             row = [
@@ -4049,9 +4464,11 @@ def _run_step_7_13_15_7(
             assert isinstance(per_eq, dict)
             for eqk in eq_keys:
                 pe = per_eq.get(eqk)
+                # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
                 if not isinstance(pe, dict):
                     row.extend(["", "", "", "", "", "", "", ""])
                     continue
+
                 row.extend(
                     [
                         f"{float(pe['C3_inf']):.12g}",
@@ -4068,6 +4485,7 @@ def _run_step_7_13_15_7(
                         f"{float(pe['pass_3sigma']):.0f}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
@@ -4117,10 +4535,12 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
 
     This keeps fit/predict separation: σ_shell is a *rejection budget* item, not a tuned correction.
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -4128,15 +4548,20 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
     sample = next((r for r in rows_in if isinstance(r, dict)), None)
+    # 条件分岐: `not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict)` を満たす経路を評価する。
     if not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict):
         raise SystemExit(f"[fail] invalid 7.13.15.7 row structure: per_eq missing: {metrics_7157_path}")
+
     eq_keys = sorted([str(k) for k in sample["per_eq"].keys()], key=int)
+    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.8 expects per_eq with eq18/eq19; got: {eq_keys}")
 
@@ -4146,42 +4571,56 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
         return v[m2] if (len(v) % 2 == 1) else 0.5 * (v[m2 - 1] + v[m2])
 
     def mad_to_sigma(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         med = median(vals)
         mad = median([abs(x - med) for x in vals])
         return float(1.4826 * mad)
 
     # Compute σ_shell for categories from residual_mean scatter (domain only).
+
     def sigma_shell_from_items(items: list[dict[str, object]]) -> float:
         resid = [
             float(r.get("B_over_A_residual_mean_MeV", float("nan")))
             for r in items
             if math.isfinite(float(r.get("B_over_A_residual_mean_MeV", float("nan"))))
         ]
+        # 条件分岐: `not resid` を満たす経路を評価する。
         if not resid:
             return float("nan")
         # Robust "RMS about 0" scale for typical |residual| (do not center by median).
+
         sigma_resid0 = math.sqrt(median([float(x) ** 2 for x in resid]))
 
         sigma_mean_sq: list[float] = []
         for r in items:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             sigma_set = float(r.get("sigma_set_MeV", 0.0))
             pe = r.get("per_eq")
+            # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
             if not isinstance(pe, dict):
                 continue
+
             s18 = pe.get("18")
             s19 = pe.get("19")
+            # 条件分岐: `not (isinstance(s18, dict) and isinstance(s19, dict))` を満たす経路を評価する。
             if not (isinstance(s18, dict) and isinstance(s19, dict)):
                 continue
+
             st18 = float(s18.get("sigma_total_MeV", float("nan")))
             st19 = float(s19.get("sigma_total_MeV", float("nan")))
+            # 条件分岐: `not (math.isfinite(st18) and math.isfinite(st19))` を満たす経路を評価する。
             if not (math.isfinite(st18) and math.isfinite(st19)):
                 continue
+
             sigma_total_mean = math.sqrt(0.5 * (st18**2 + st19**2))
             sigma_mean = math.sqrt(sigma_total_mean**2 + float(sigma_set) ** 2)
+            # 条件分岐: `math.isfinite(sigma_mean) and sigma_mean > 0` を満たす経路を評価する。
             if math.isfinite(sigma_mean) and sigma_mean > 0:
                 sigma_mean_sq.append(float(sigma_mean**2))
 
@@ -4195,6 +4634,7 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
 
     sigma_shell_magic = sigma_shell_from_items(rows_magic)
     sigma_shell_nonmagic = sigma_shell_from_items(rows_nonmagic)
+    # 条件分岐: `not (math.isfinite(sigma_shell_magic) and math.isfinite(sigma_shell_nonmagic))` を満たす経路を評価する。
     if not (math.isfinite(sigma_shell_magic) and math.isfinite(sigma_shell_nonmagic)):
         raise SystemExit("[fail] could not derive sigma_shell for categories (magic/nonmagic)")
 
@@ -4204,8 +4644,10 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
     z_shell_dom_by_eq: dict[str, list[float]] = {k: [] for k in eq_keys}
 
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         A = int(r.get("A", 0))
         in_domain = bool(A >= int(domain_min_a))
         magic_any = bool(r.get("magic_any"))
@@ -4215,10 +4657,13 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
         resid_mean = float(r.get("B_over_A_residual_mean_MeV", float("nan")))
 
         pe = r.get("per_eq")
+        # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
         if not isinstance(pe, dict):
             continue
+
         pe18 = pe.get("18")
         pe19 = pe.get("19")
+        # 条件分岐: `not (isinstance(pe18, dict) and isinstance(pe19, dict))` を満たす経路を評価する。
         if not (isinstance(pe18, dict) and isinstance(pe19, dict)):
             continue
 
@@ -4230,8 +4675,10 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
             math.sqrt(float(sigma_mean) ** 2 + float(sigma_shell) ** 2) if math.isfinite(sigma_mean) and sigma_mean > 0 else float("nan")
         )
         z_mean_shell = float(resid_mean) / float(sigma_mean_shell) if (math.isfinite(resid_mean) and math.isfinite(sigma_mean_shell) and sigma_mean_shell > 0) else float("nan")
+        # 条件分岐: `math.isfinite(z_mean_shell)` を満たす経路を評価する。
         if math.isfinite(z_mean_shell):
             z_mean_shell_all.append(float(z_mean_shell))
+            # 条件分岐: `in_domain` を満たす経路を評価する。
             if in_domain:
                 z_mean_shell_dom.append(float(z_mean_shell))
 
@@ -4259,8 +4706,10 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
         per_eq_out: dict[str, dict[str, float]] = {}
         for eqk in eq_keys:
             pei = pe.get(eqk)
+            # 条件分岐: `not isinstance(pei, dict)` を満たす経路を評価する。
             if not isinstance(pei, dict):
                 continue
+
             residual = float(pei.get("B_over_A_residual_MeV", float("nan")))
             sigma_final = float(pei.get("sigma_final_MeV", float("nan")))
             sigma_final_shell = (
@@ -4269,6 +4718,7 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
             z_shell = float(residual) / float(sigma_final_shell) if (math.isfinite(residual) and math.isfinite(sigma_final_shell) and sigma_final_shell > 0) else float("nan")
             passed = bool(math.isfinite(z_shell) and abs(float(z_shell)) <= 3.0)
 
+            # 条件分岐: `in_domain and math.isfinite(z_shell)` を満たす経路を評価する。
             if in_domain and math.isfinite(z_shell):
                 z_shell_dom_by_eq[eqk].append(float(z_shell))
 
@@ -4308,6 +4758,7 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
         diag[f"frac_within_3sigma_domain_eq{eqk}"] = float(sum(1 for z in zs if abs(float(z)) <= 3.0) / len(zs)) if zs else float("nan")
 
     # Plot (2x2)
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -4369,6 +4820,7 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
         frac_key = f"frac_within_3sigma_domain_eq{eqk}"
         n_key = f"n_domain_eq{eqk}"
         lines.append(f"eq{eqk}: frac(|z|<=3) domain ≈ {diag[frac_key]:.3g}  (N={diag[n_key]})")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_hf_three_body_shell_term.png"
@@ -4405,6 +4857,7 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
                     f"pass_3sigma_shell_eq{eqk}",
                 ]
             )
+
         w.writerow(header)
         for r in out_rows:
             row = [
@@ -4427,9 +4880,11 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
             assert isinstance(per_eq, dict)
             for eqk in eq_keys:
                 pe = per_eq.get(eqk)
+                # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
                 if not isinstance(pe, dict):
                     row.extend(["", "", "", "", ""])
                     continue
+
                 row.extend(
                     [
                         f"{float(pe['B_over_A_residual_MeV']):.12g}",
@@ -4439,6 +4894,7 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
                         f"{float(pe['pass_3sigma_shell']):.0f}",
                     ]
                 )
+
             w.writerow(row)
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_term_metrics.json"
@@ -4490,10 +4946,12 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     Inputs:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit; predictions unchanged by shell σ).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -4504,54 +4962,77 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
     sample = next((r for r in rows_in if isinstance(r, dict)), None)
+    # 条件分岐: `not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict)` を満たす経路を評価する。
     if not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict):
         raise SystemExit(f"[fail] invalid 7.13.15.7 row structure: per_eq missing: {metrics_7157_path}")
+
     eq_keys = sorted([str(k) for k in sample["per_eq"].keys()], key=int)
+    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.9 expects per_eq with eq18/eq19; got: {eq_keys}")
 
     MAGIC = {2, 8, 20, 28, 50, 82, 126}
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist (should not, but keep safe).
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
 
     # Precompute total binding energies for obs/pred (eq18/eq19/mean).
+
     b_obs: dict[tuple[int, int], float] = {}
     b_pred_mean: dict[tuple[int, int], float] = {}
     b_pred_by_eq: dict[str, dict[tuple[int, int], float]] = {k: {} for k in eq_keys}
@@ -4571,16 +5052,21 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
         b_pred_mean[(Z, N)] = float(A) * float(ba_pred_mean)
 
         per_eq = r.get("per_eq")
+        # 条件分岐: `not isinstance(per_eq, dict)` を満たす経路を評価する。
         if not isinstance(per_eq, dict):
             raise SystemExit(f"[fail] missing per_eq for Z{Z} N{N} in 7.13.15.7 metrics")
+
         for eqk in eq_keys:
             pe = per_eq.get(eqk)
+            # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
             if not isinstance(pe, dict):
                 raise SystemExit(f"[fail] missing per_eq[{eqk}] for Z{Z} N{N} in 7.13.15.7 metrics")
+
             ba_pred = fnum(pe.get("B_over_A_pred_MeV"), ctx=f"B/A pred eq{eqk} Z{Z} N{N}")
             b_pred_by_eq[eqk][(Z, N)] = float(A) * float(ba_pred)
 
     # Separation energies (domain only; require both nuclei in-domain by A>=domain_min_a).
+
     sn_obs: dict[tuple[int, int], float] = {}
     sn_pred_mean: dict[tuple[int, int], float] = {}
     sn_pred_by_eq: dict[str, dict[tuple[int, int], float]] = {k: {} for k in eq_keys}
@@ -4592,11 +5078,14 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     s2n_rows: list[dict[str, object]] = []
 
     for (Z, N), A in a_by_zn.items():
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
 
         # S_n
+
         child1 = (Z, N - 1)
+        # 条件分岐: `child1 in a_by_zn and a_by_zn[child1] >= int(domain_min_a)` を満たす経路を評価する。
         if child1 in a_by_zn and a_by_zn[child1] >= int(domain_min_a):
             Sn_o = float(b_obs[(Z, N)] - b_obs[child1])
             Sn_pm = float(b_pred_mean[(Z, N)] - b_pred_mean[child1])
@@ -4630,7 +5119,9 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
             )
 
         # S_2n
+
         child2 = (Z, N - 2)
+        # 条件分岐: `child2 in a_by_zn and a_by_zn[child2] >= int(domain_min_a)` を満たす経路を評価する。
         if child2 in a_by_zn and a_by_zn[child2] >= int(domain_min_a):
             S2n_o = float(b_obs[(Z, N)] - b_obs[child2])
             S2n_pm = float(b_pred_mean[(Z, N)] - b_pred_mean[child2])
@@ -4663,15 +5154,22 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
                 }
             )
 
+    # 条件分岐: `not sn_rows and not s2n_rows` を満たす経路を評価する。
+
     if not sn_rows and not s2n_rows:
         raise SystemExit(f"[fail] no valid separation-energy pairs found in-domain (A>={domain_min_a})")
 
     # Shell-gap diagnostics around magic N0.
+
     gap_sn_rows: list[dict[str, object]] = []
     for N0 in sorted(MAGIC):
         for (Z, N) in list(sn_obs.keys()):
+            # 条件分岐: `N != int(N0)` を満たす経路を評価する。
             if N != int(N0):
                 continue
+
+            # 条件分岐: `(Z, N0 + 1) not in sn_obs` を満たす経路を評価する。
+
             if (Z, N0 + 1) not in sn_obs:
                 continue
 
@@ -4697,10 +5195,15 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     gap_s2n_rows: list[dict[str, object]] = []
     for N0 in sorted(MAGIC):
         for (Z, N) in list(s2n_obs.keys()):
+            # 条件分岐: `N != int(N0)` を満たす経路を評価する。
             if N != int(N0):
                 continue
+
+            # 条件分岐: `(Z, N0 + 2) not in s2n_obs` を満たす経路を評価する。
+
             if (Z, N0 + 2) not in s2n_obs:
                 continue
+
             g_obs = float(s2n_obs[(Z, N0)] - s2n_obs[(Z, N0 + 2)])
             g_p18 = float(s2n_pred_by_eq["18"][(Z, N0)] - s2n_pred_by_eq["18"][(Z, N0 + 2)])
             g_p19 = float(s2n_pred_by_eq["19"][(Z, N0)] - s2n_pred_by_eq["19"][(Z, N0 + 2)])
@@ -4721,6 +5224,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
             )
 
     # Diagnostics summary.
+
     sn_resid_mean = [float(r["residual_mean_MeV"]) for r in sn_rows]
     s2n_resid_mean = [float(r["residual_mean_MeV"]) for r in s2n_rows]
 
@@ -4739,6 +5243,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
         for r in rows:
             n0 = int(r.get("N_magic", -1))
             by_magic.setdefault(n0, []).append(r)
+
         out: dict[str, object] = {"n_total": len(rows), "by_magic_N": {}}
         for n0 in sorted(by_magic.keys()):
             items = by_magic[n0]
@@ -4751,6 +5256,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
                 f"median_{key_label}_pred_MeV": float(sorted(pred)[len(pred) // 2]) if pred else float("nan"),
                 f"rms_{key_label}_residual_MeV": rms(resid),
             }
+
         return out
 
     diag = {
@@ -4771,10 +5277,12 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     ax_sn, ax_s2n, ax_gsn, ax_gs2n = axes.flat
 
     def _scatter_residual(ax, records: list[dict[str, object]], *, title: str) -> None:
+        # 条件分岐: `not records` を満たす経路を評価する。
         if not records:
             ax.text(0.5, 0.5, "no data", ha="center", va="center")
             ax.set_title(title)
             return
+
         xs = [int(r["N_parent"]) for r in records]
         ys = [float(r["residual_mean_MeV"]) for r in records]
         ms = [bool(r.get("magic_any_pair")) for r in records]
@@ -4786,6 +5294,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
         ax.scatter(xs_magic, ys_magic, s=8, alpha=0.35, c="#d62728", label="magic N in pair")
         for n0 in sorted(MAGIC):
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.15)
+
         ax.axhline(0.0, color="k", lw=0.8, alpha=0.3)
         ax.set_xlabel("N (parent)")
         ax.set_ylabel("pred_mean - obs (MeV)")
@@ -4796,19 +5305,23 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     _scatter_residual(ax_s2n, s2n_rows, title=f"S_2n residuals (domain A>={domain_min_a})")
 
     def _scatter_gaps(ax, rows: list[dict[str, object]], *, title: str, xlab: str, ylab: str) -> None:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
             return
+
         by_magic: dict[int, list[dict[str, object]]] = {}
         for r in rows:
             by_magic.setdefault(int(r["N_magic"]), []).append(r)
+
         colors = plt.cm.tab10.colors
         for i, n0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[n0]
             xs = [float(x["obs_MeV"]) for x in items]
             ys = [float(x["pred_mean_MeV"]) for x in items]
             ax.scatter(xs, ys, s=18, alpha=0.75, color=colors[i % len(colors)], label=f"N={n0}")
+
         lo = min([float(r["obs_MeV"]) for r in rows] + [float(r["pred_mean_MeV"]) for r in rows])
         hi = max([float(r["obs_MeV"]) for r in rows] + [float(r["pred_mean_MeV"]) for r in rows])
         pad = 0.1 * (hi - lo) if math.isfinite(lo) and math.isfinite(hi) and hi > lo else 1.0
@@ -4944,10 +5457,12 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     Input:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -4958,13 +5473,17 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
     sample = next((r for r in rows_in if isinstance(r, dict)), None)
+    # 条件分岐: `not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict)` を満たす経路を評価する。
     if not isinstance(sample, dict) or not isinstance(sample.get("per_eq"), dict):
         raise SystemExit(f"[fail] invalid 7.13.15.7 row structure: per_eq missing: {metrics_7157_path}")
+
     eq_keys = sorted([str(k) for k in sample["per_eq"].keys()], key=int)
+    # 条件分岐: `set(eq_keys) != {"18", "19"}` を満たす経路を評価する。
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.10 expects per_eq with eq18/eq19; got: {eq_keys}")
 
@@ -4972,8 +5491,10 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     TRAIN_MAGIC_N = {50, 82}
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     def rms(vals: list[float]) -> float:
@@ -4985,33 +5506,50 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
         return v[m2] if (len(v) % 2 == 1) else 0.5 * (v[m2 - 1] + v[m2])
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
 
     # Precompute total binding energies for obs/pred (mean + per-eq), plus shell indicators.
+
     b_obs: dict[tuple[int, int], float] = {}
     b_pred_mean: dict[tuple[int, int], float] = {}
     b_pred_by_eq: dict[str, dict[tuple[int, int], float]] = {k: {} for k in eq_keys}
@@ -5041,27 +5579,38 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
         b_pred_mean[(Z, N)] = float(A) * float(ba_pred_mean)
 
         per_eq = r.get("per_eq")
+        # 条件分岐: `not isinstance(per_eq, dict)` を満たす経路を評価する。
         if not isinstance(per_eq, dict):
             raise SystemExit(f"[fail] missing per_eq for Z{Z} N{N} in 7.13.15.7 metrics")
+
         for eqk in eq_keys:
             pe = per_eq.get(eqk)
+            # 条件分岐: `not isinstance(pe, dict)` を満たす経路を評価する。
             if not isinstance(pe, dict):
                 raise SystemExit(f"[fail] missing per_eq[{eqk}] for Z{Z} N{N} in 7.13.15.7 metrics")
+
             ba_pred = fnum(pe.get("B_over_A_pred_MeV"), ctx=f"B/A pred eq{eqk} Z{Z} N{N}")
             b_pred_by_eq[eqk][(Z, N)] = float(A) * float(ba_pred)
 
     # Helper: build Sn/S2n pairs for a given binding-energy map.
+
     def build_pairs(*, b_map: dict[tuple[int, int], float], kind: str) -> list[dict[str, object]]:
+        # 条件分岐: `kind not in {"Sn", "S2n"}` を満たす経路を評価する。
         if kind not in {"Sn", "S2n"}:
             raise ValueError("invalid kind")
+
         dN = 1 if kind == "Sn" else 2
         out: list[dict[str, object]] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `int(A) < int(domain_min_a)` を満たす経路を評価する。
             if int(A) < int(domain_min_a):
                 continue
+
             child = (Z, N - dN)
+            # 条件分岐: `child not in a_by_zn or int(a_by_zn[child]) < int(domain_min_a)` を満たす経路を評価する。
             if child not in a_by_zn or int(a_by_zn[child]) < int(domain_min_a):
                 continue
+
             out.append(
                 {
                     "kind": kind,
@@ -5093,9 +5642,11 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                     "value_MeV": float(b_map[(Z, N)] - b_map[child]),
                 }
             )
+
         return out
 
     # Observed Sn/S2n.
+
     sn_obs_pairs = build_pairs(b_map=b_obs, kind="Sn")
     s2n_obs_pairs = build_pairs(b_map=b_obs, kind="S2n")
     # Predicted (uncorrected) Sn/S2n.
@@ -5105,21 +5656,28 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     # Fit: use Sn pairs only, and ONLY those involving magic-N in {50,82}.
     fit_records: list[tuple[float, float, float]] = []  # (residual, dI_any, dI_double)
     for obs_r, pred_r in zip(sn_obs_pairs, sn_pred_pairs, strict=True):
+        # 条件分岐: `not bool(pred_r.get("magicN_train_pair"))` を満たす経路を評価する。
         if not bool(pred_r.get("magicN_train_pair")):
             continue
         # Features: indicator differences for the pair.
+
         dI_any = float(bool(pred_r["magic_any_parent"])) - float(bool(pred_r["magic_any_child"]))
         dI_d = float(bool(pred_r["doubly_magic_parent"])) - float(bool(pred_r["doubly_magic_child"]))
+        # 条件分岐: `dI_any == 0.0 and dI_d == 0.0` を満たす経路を評価する。
         if dI_any == 0.0 and dI_d == 0.0:
             continue
+
         resid = float(pred_r["value_MeV"] - obs_r["value_MeV"])
         fit_records.append((resid, dI_any, dI_d))
+
+    # 条件分岐: `len(fit_records) < 2` を満たす経路を評価する。
 
     if len(fit_records) < 2:
         raise SystemExit(f"[fail] insufficient fit records for Step 7.13.15.10 (got {len(fit_records)})")
 
     # Solve least squares for a_any, a_double via 2x2 normal equations.
     # Minimize Σ (resid + a_any*dI_any + a_double*dI_double)^2.
+
     S11 = sum(d1 * d1 for _, d1, _ in fit_records)
     S22 = sum(d2 * d2 for _, _, d2 in fit_records)
     S12 = sum(d1 * d2 for _, d1, d2 in fit_records)
@@ -5127,6 +5685,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     t2 = sum((-resid) * d2 for resid, _, d2 in fit_records)
 
     det = S11 * S22 - S12 * S12
+    # 条件分岐: `abs(det) < 1e-12` を満たす経路を評価する。
     if abs(det) < 1e-12:
         # Fallback: fit only the best-constrained axis.
         a_any = (t1 / S11) if abs(S11) > 1e-12 else 0.0
@@ -5138,6 +5697,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
         solve_mode = "normal_equations_2x2"
 
     # Apply correction to binding energies.
+
     def delta_shell(zn: tuple[int, int]) -> float:
         return float(a_any) * float(bool(magic_any_by_zn[zn])) + float(a_double) * float(bool(doubly_by_zn[zn]))
 
@@ -5146,6 +5706,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
         b_pred_corr[zn] = float(val) + float(delta_shell(zn))
 
     # Corrected Sn/S2n.
+
     sn_corr_pairs = build_pairs(b_map=b_pred_corr, kind="Sn")
     s2n_corr_pairs = build_pairs(b_map=b_pred_corr, kind="S2n")
 
@@ -5165,10 +5726,15 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     for N0 in sorted(MAGIC):
         # 1n gap
         for (Z, Np), sn0 in list(sn_obs_map.items()):
+            # 条件分岐: `int(Np) != int(N0)` を満たす経路を評価する。
             if int(Np) != int(N0):
                 continue
+
+            # 条件分岐: `(Z, int(N0) + 1) not in sn_obs_map` を満たす経路を評価する。
+
             if (Z, int(N0) + 1) not in sn_obs_map:
                 continue
+
             g_obs = float(sn_obs_map[(Z, int(N0))] - sn_obs_map[(Z, int(N0) + 1)])
             g_pred = float(sn_pred_map[(Z, int(N0))] - sn_pred_map[(Z, int(N0) + 1)])
             g_corr = float(sn_corr_map[(Z, int(N0))] - sn_corr_map[(Z, int(N0) + 1)])
@@ -5185,11 +5751,17 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                 }
             )
         # 2n gap
+
         for (Z, Np), s2n0 in list(s2n_obs_map.items()):
+            # 条件分岐: `int(Np) != int(N0)` を満たす経路を評価する。
             if int(Np) != int(N0):
                 continue
+
+            # 条件分岐: `(Z, int(N0) + 2) not in s2n_obs_map` を満たす経路を評価する。
+
             if (Z, int(N0) + 2) not in s2n_obs_map:
                 continue
+
             g_obs = float(s2n_obs_map[(Z, int(N0))] - s2n_obs_map[(Z, int(N0) + 2)])
             g_pred = float(s2n_pred_map[(Z, int(N0))] - s2n_pred_map[(Z, int(N0) + 2)])
             g_corr = float(s2n_corr_map[(Z, int(N0))] - s2n_corr_map[(Z, int(N0) + 2)])
@@ -5241,6 +5813,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[dict[str, object]]] = {}
         for r in rows:
             by_magic.setdefault(int(r["N_magic"]), []).append(r)
+
         out: dict[str, object] = {
             "n_total": len(rows),
             "rms_resid_uncorrected_MeV": rms(resid_unc),
@@ -5257,6 +5830,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                 "rms_resid_uncorrected_MeV": rms([float(x["resid_uncorrected_MeV"]) for x in items]),
                 "rms_resid_corrected_MeV": rms([float(x["resid_corrected_MeV"]) for x in items]),
             }
+
         return out
 
     diag = {
@@ -5291,6 +5865,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
         ax.scatter(xs, r_cor, s=6, alpha=0.22, c="#1f77b4", label="corrected")
         for n0 in sorted(MAGIC):
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.12)
+
         ax.axhline(0.0, color="k", lw=0.8, alpha=0.25)
         ax.set_xlabel("N (parent)")
         ax.set_ylabel("pred - obs (MeV)")
@@ -5301,13 +5876,16 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     plot_residuals(ax_s2n, s2n_obs_pairs, s2n_pred_pairs, s2n_corr_pairs, title=f"S_2n residuals (A>={domain_min_a})")
 
     def plot_gaps(ax, rows: list[dict[str, object]], *, title: str, xlab: str, ylab: str) -> None:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
             return
+
         by_magic: dict[int, list[dict[str, object]]] = {}
         for r in rows:
             by_magic.setdefault(int(r["N_magic"]), []).append(r)
+
         colors = plt.cm.tab10.colors
         for i, n0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[n0]
@@ -5316,6 +5894,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
             y_cor = [float(x["pred_corrected_MeV"]) for x in items]
             ax.scatter(xs, y_unc, s=20, alpha=0.35, color=colors[i % len(colors)], marker="o", label=f"N={n0} (unc)")
             ax.scatter(xs, y_cor, s=28, alpha=0.75, color=colors[i % len(colors)], marker="x", label=f"N={n0} (cor)")
+
         lo = min([float(r["obs_MeV"]) for r in rows] + [float(r["pred_uncorrected_MeV"]) for r in rows] + [float(r["pred_corrected_MeV"]) for r in rows])
         hi = max([float(r["obs_MeV"]) for r in rows] + [float(r["pred_uncorrected_MeV"]) for r in rows] + [float(r["pred_corrected_MeV"]) for r in rows])
         pad = 0.1 * (hi - lo) if math.isfinite(lo) and math.isfinite(hi) and hi > lo else 1.0
@@ -5379,6 +5958,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                     "",
                 ]
             )
+
         for obs_r, pred_r, cor_r in zip(s2n_obs_pairs, s2n_pred_pairs, s2n_corr_pairs, strict=True):
             w.writerow(
                 [
@@ -5401,6 +5981,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                     "",
                 ]
             )
+
         for r in gap_sn_rows + gap_s2n_rows:
             kind = str(r["kind"])
             w.writerow(
@@ -5504,10 +6085,12 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     Input:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -5518,12 +6101,15 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     def rms(vals: list[float]) -> float:
@@ -5533,67 +6119,101 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     TRAIN_MAGIC_N = {50, 82}
 
     def hw_mev(A: int) -> float:
+        # 条件分岐: `A <= 0` を満たす経路を評価する。
         if A <= 0:
             return float("nan")
+
         return float(41.0 * (float(A) ** (-1.0 / 3.0)))
 
     def shell_S(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
         # Find shell interval (Mk < x <= Mk1).
+
         Mk = None
         Mk1 = None
         for a, b in zip(MAGIC[:-1], MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             # Beyond table: clamp to last interval.
             Mk = int(MAGIC[-2])
             Mk1 = int(MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 # Treat as being in the last shell, saturated at its edge.
                 Mk = int(MAGIC[-1])
                 Mk1 = int(MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
 
     # Binding energies (obs/pred) maps, domain-limited by A>=domain_min_a.
+
     b_obs: dict[tuple[int, int], float] = {}
     b_pred: dict[tuple[int, int], float] = {}
     a_by_zn: dict[tuple[int, int], int] = {}
@@ -5601,8 +6221,10 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
 
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         label_by_zn[(Z, N)] = str(r.get("label", f"Z{Z}-N{N}"))
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
@@ -5610,18 +6232,24 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         b_obs[(Z, N)] = float(A) * float(ba_obs)
         b_pred[(Z, N)] = float(A) * float(ba_pred)
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.11")
 
     # Separation energies from binding maps (Sn/S2n).
+
     def build_sep(*, b_map: dict[tuple[int, int], float], kind: str) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         dN = 1 if kind == "Sn" else 2
         for (Z, N), A in a_by_zn.items():
             child = (Z, N - dN)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     sn_obs = build_sep(b_map=b_obs, kind="Sn")
@@ -5636,12 +6264,17 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         for N0 in MAGIC[1:]:  # skip 0
             step = dN
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + step)
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(dN))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     gap_sn_obs = build_gap(sn_obs, dN=1)
@@ -5658,26 +6291,39 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
             hw = hw_mev(int(A))
             corr = float(kappa) * float(hw) * (shell_S(int(N)) + shell_S(int(Z)))
             out[(Z, N)] = float(b_pred[(Z, N)] + corr)
+
         return out
 
     # Precompute delta_gap for kappa=1 (linear).
+
     b_pred_k1 = corrected_binding(kappa=1.0)
     gap_sn_pred_k1 = build_gap(build_sep(b_map=b_pred_k1, kind="Sn"), dN=1)
 
     for (Z, N0, dN), g_obs in gap_sn_obs.items():
+        # 条件分岐: `int(dN) != 1` を満たす経路を評価する。
         if int(dN) != 1:
             continue
+
+        # 条件分岐: `int(N0) not in TRAIN_MAGIC_N` を満たす経路を評価する。
+
         if int(N0) not in TRAIN_MAGIC_N:
             continue
+
         g_unc = gap_sn_pred_unc.get((int(Z), int(N0), 1))
         g_k1 = gap_sn_pred_k1.get((int(Z), int(N0), 1))
+        # 条件分岐: `g_unc is None or g_k1 is None` を満たす経路を評価する。
         if g_unc is None or g_k1 is None:
             continue
+
         x = float(g_k1 - g_unc)  # change in predicted gap per kappa=1
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_unc)
         fit_pairs.append((y, x))
+
+    # 条件分岐: `not fit_pairs` を満たす経路を評価する。
 
     if not fit_pairs:
         raise SystemExit("[fail] no fit pairs for kappa (gap_n at magic N=50/82)")
@@ -5697,9 +6343,12 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     def residuals_sep(obs_map, pred_map) -> list[float]:
         out: list[float] = []
         for k, v in obs_map.items():
+            # 条件分岐: `k not in pred_map` を満たす経路を評価する。
             if k not in pred_map:
                 continue
+
             out.append(float(pred_map[k] - v))
+
         return out
 
     diag = {
@@ -5736,11 +6385,14 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, dN), g_obs in obs_gap.items():
             g_u = pred_unc.get((Z, N0, dN))
             g_c = pred_cor.get((Z, N0, dN))
+            # 条件分岐: `g_u is None or g_c is None` を満たす経路を評価する。
             if g_u is None or g_c is None:
                 continue
+
             r_u = float(g_u - g_obs)
             r_c = float(g_c - g_obs)
             rows_all.append((int(N0), r_u, r_c))
+            # 条件分岐: `int(N0) in TRAIN_MAGIC_N` を満たす経路を評価する。
             if int(N0) in TRAIN_MAGIC_N:
                 rows_train.append((int(N0), r_u, r_c))
             else:
@@ -5782,6 +6434,7 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         ax.scatter(xs, ys_c, s=6, alpha=0.22, c="#1f77b4", label="quantized shell (κ fit)")
         for n0 in MAGIC[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.12)
+
         ax.axhline(0.0, color="k", lw=0.8, alpha=0.25)
         ax.set_xlabel("N (parent)")
         ax.set_ylabel("pred - obs (MeV)")
@@ -5796,9 +6449,14 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, dN), g_obs in gap_obs.items():
             gu = gap_u.get((Z, N0, dN))
             gc = gap_c.get((Z, N0, dN))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             rows.append((int(N0), float(g_obs), float(gu), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -5808,6 +6466,7 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float]]] = {}
         for n0, obs, gu, gc in rows:
             by_magic.setdefault(int(n0), []).append((obs, gu, gc))
+
         for i, n0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[n0]
             xs = [o for (o, _, _) in items]
@@ -5851,14 +6510,19 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, _dN), g_obs in sorted(gap_sn_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", Z, N0, f"{g_obs:.12g}", f"{gu:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (Z, N0, _dN), g_obs in sorted(gap_s2n_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_s2n_pred_unc.get((Z, N0, 2))
             gc = gap_s2n_pred_cor.get((Z, N0, 2))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             w.writerow(["gap_S2n", Z, N0, f"{g_obs:.12g}", f"{gu:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_quantization_metrics.json"
@@ -5915,10 +6579,12 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     Input:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -5929,12 +6595,15 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     def rms(vals: list[float]) -> float:
@@ -5948,59 +6617,91 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def shell_S(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MAGIC[:-1], MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MAGIC[-2])
             Mk1 = int(MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MAGIC[-1])
                 Mk1 = int(MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
 
     # In-domain binding energies and correction basis terms (C_N, C_Z).
+
     a_by_zn: dict[tuple[int, int], int] = {}
     b_obs: dict[tuple[int, int], float] = {}
     b_pred: dict[tuple[int, int], float] = {}
@@ -6010,8 +6711,10 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
 
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         label_by_zn[(Z, N)] = str(r.get("label", f"Z{Z}-N{N}"))
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
@@ -6022,26 +6725,35 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         cN[(Z, N)] = float(hw) * float(shell_S(int(N)))
         cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.12")
 
     # Build separation energies and gaps for N-side and Z-side.
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -6049,12 +6761,17 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -6062,12 +6779,17 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     sn_obs = build_sep_n(b_obs, dN=1)
@@ -6102,37 +6824,57 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     # Fit kN from neutron gaps at magic N in TRAIN_MAGIC_N (1D LS).
     fit_n: list[tuple[float, float]] = []  # y, x
     for (Z, N0, step), g_obs in gap_sn_obs.items():
+        # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC_N` を満たす経路を評価する。
         if int(step) != 1 or int(N0) not in TRAIN_MAGIC_N:
             continue
+
         g_unc = gap_sn_pred_unc.get((Z, N0, 1))
         g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+        # 条件分岐: `g_unc is None or g_1 is None` を満たす経路を評価する。
         if g_unc is None or g_1 is None:
             continue
+
         x = float(g_1 - g_unc)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_unc)
         fit_n.append((y, x))
+
+    # 条件分岐: `not fit_n` を満たす経路を評価する。
+
     if not fit_n:
         raise SystemExit("[fail] no fit data for kN (gap_n at magic N=50/82)")
+
     kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
     # Fit kZ from proton gaps at magic Z in TRAIN_MAGIC_Z (1D LS).
     fit_z: list[tuple[float, float]] = []  # y, x
     for (N, Z0, step), g_obs in gap_sp_obs.items():
+        # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC_Z` を満たす経路を評価する。
         if int(step) != 1 or int(Z0) not in TRAIN_MAGIC_Z:
             continue
+
         g_unc = gap_sp_pred_unc.get((N, Z0, 1))
         g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+        # 条件分岐: `g_unc is None or g_1 is None` を満たす経路を評価する。
         if g_unc is None or g_1 is None:
             continue
+
         x = float(g_1 - g_unc)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_unc)
         fit_z.append((y, x))
+
+    # 条件分岐: `not fit_z` を満たす経路を評価する。
+
     if not fit_z:
         raise SystemExit("[fail] no fit data for kZ (gap_p at magic Z=50/82)")
+
     kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
 
     ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
@@ -6163,11 +6905,14 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, dN), g_obs in obs_gap.items():
             gu = pred_unc.get((Z, N0, dN))
             gc = pred_cor.get((Z, N0, dN))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             r_u = float(gu - g_obs)
             r_c = float(gc - g_obs)
             rows_all.append((int(N0), r_u, r_c))
+            # 条件分岐: `int(N0) in train_set` を満たす経路を評価する。
             if int(N0) in train_set:
                 rows_train.append((int(N0), r_u, r_c))
             else:
@@ -6244,6 +6989,7 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         ax.scatter(xs, ys_c, s=6, alpha=0.22, c="#1f77b4", label="quantized shell (kN/kZ fit)")
         for n0 in MAGIC[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.12)
+
         ax.axhline(0.0, color="k", lw=0.8, alpha=0.25)
         ax.set_xlabel("N (parent)")
         ax.set_ylabel("pred - obs (MeV)")
@@ -6260,6 +7006,7 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         ax.scatter(xs, ys_c, s=6, alpha=0.22, c="#1f77b4", label="quantized shell (kN/kZ fit)")
         for z0 in MAGIC[1:]:
             ax.axvline(int(z0), color="k", lw=0.6, alpha=0.12)
+
         ax.axhline(0.0, color="k", lw=0.8, alpha=0.25)
         ax.set_xlabel("Z (parent)")
         ax.set_ylabel("pred - obs (MeV)")
@@ -6273,9 +7020,14 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, dN), g_obs in gap_obs.items():
             gu = gap_u.get((Z, N0, dN))
             gc = gap_c.get((Z, N0, dN))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             rows.append((int(N0), float(g_obs), float(gu), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -6285,6 +7037,7 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float]]] = {}
         for n0, obs, gu, gc in rows:
             by_magic.setdefault(int(n0), []).append((obs, gu, gc))
+
         for i, n0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[n0]
             xs = [o for (o, _, _) in items]
@@ -6319,14 +7072,19 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, _dN), g_obs in sorted(gap_sn_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", f"Z{Z}", f"N{N0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             w.writerow(["gap_Sp", f"N{N}", f"Z{Z0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_quantization_asym_metrics.json"
@@ -6391,10 +7149,12 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     Input:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -6405,18 +7165,22 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
     # Observed magic list is used ONLY for evaluation and for the frozen training protocol.
+
     OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
     TRAIN_MAGIC_N = {50, 82}
     TRAIN_MAGIC_Z = {50, 82}
@@ -6431,8 +7195,10 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -6451,9 +7217,11 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
             orbs: list[dict[str, float]] = []
             for N_ho in range(max_major + 1):
                 l_vals = [l for l in range(0, N_ho + 1) if ((N_ho - l) % 2) == 0]
+                # 条件分岐: `not l_vals` を満たす経路を評価する。
                 if not l_vals:
                     continue
                 # Include spin degeneracy as a global factor (does not change the average).
+
                 weights = [2 * (2 * l + 1) for l in l_vals]
                 l2_avg = sum(w * float(l * (l + 1)) for l, w in zip(l_vals, weights, strict=True)) / float(sum(weights))
 
@@ -6472,38 +7240,52 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
                                 "deg": float(deg),
                             }
                         )
+
             return sorted(orbs, key=lambda o: float(o["E"]))
 
         # Ensure we cover at least max_x (with a margin) in cumulative degeneracy.
+
         margin = 32
         max_major = 0
         while True:
             orbs = gen_orbitals(max_major)
             total = int(sum(int(o["deg"]) for o in orbs))
+            # 条件分岐: `total >= int(max_x) + margin and max_major > 0` を満たす経路を評価する。
             if total >= int(max_x) + margin and max_major > 0:
                 break
+
             max_major += 1
+            # 条件分岐: `max_major > 40` を満たす経路を評価する。
             if max_major > 40:
                 break
 
         # Group orbitals by (nearly) equal energies so closures are not detected inside exact degeneracies.
+
         groups: list[list[dict[str, float]]] = []
         cur: list[dict[str, float]] = []
         for o in orbs:
+            # 条件分岐: `not cur` を満たす経路を評価する。
             if not cur:
                 cur = [o]
                 continue
+
+            # 条件分岐: `abs(float(o["E"]) - float(cur[0]["E"])) <= ENERGY_TOL` を満たす経路を評価する。
+
             if abs(float(o["E"]) - float(cur[0]["E"])) <= ENERGY_TOL:
                 cur.append(o)
             else:
                 groups.append(cur)
                 cur = [o]
+
+        # 条件分岐: `cur` を満たす経路を評価する。
+
         if cur:
             groups.append(cur)
 
         gaps = []
         for g1, g2 in zip(groups[:-1], groups[1:], strict=True):
             de = float(g2[0]["E"] - g1[0]["E"])
+            # 条件分岐: `math.isfinite(de) and de > ENERGY_TOL` を満たす経路を評価する。
             if math.isfinite(de) and de > ENERGY_TOL:
                 gaps.append(float(de))
 
@@ -6515,17 +7297,25 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         for g1, g2 in zip(groups[:-1], groups[1:], strict=True):
             cum += int(sum(int(o["deg"]) for o in g1))
             de = float(g2[0]["E"] - g1[0]["E"])
+            # 条件分岐: `math.isfinite(de) and de > thresh` を満たす経路を評価する。
             if math.isfinite(de) and de > thresh:
                 magic.append(int(cum))
+
+            # 条件分岐: `cum >= int(max_x) + margin` を満たす経路を評価する。
+
             if cum >= int(max_x) + margin:
                 break
+
+        # 条件分岐: `magic[-1] < int(max_x) + 1` を満たす経路を評価する。
 
         if magic[-1] < int(max_x) + 1:
             magic.append(int(max_x) + margin)
 
         # Unique + sorted (defensive).
+
         uniq: list[int] = []
         for x in sorted(set(int(v) for v in magic)):
+            # 条件分岐: `not uniq or x != uniq[-1]` を満たす経路を評価する。
             if not uniq or x != uniq[-1]:
                 uniq.append(int(x))
 
@@ -6537,33 +7327,50 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         }
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
 
     # In-domain binding energies and correction basis terms (C_N, C_Z).
+
     a_by_zn: dict[tuple[int, int], int] = {}
     b_obs: dict[tuple[int, int], float] = {}
     b_pred: dict[tuple[int, int], float] = {}
@@ -6572,8 +7379,10 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     max_z = 0
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
         ba_pred = fnum(r.get("B_over_A_pred_mean_MeV"), ctx=f"B/A pred_mean Z{Z} N{N}")
@@ -6582,38 +7391,56 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         max_n = max(max_n, int(N))
         max_z = max(max_z, int(Z))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.13")
 
     model_magic_info = _generate_model_magic(max_x=max(max_n, max_z) + 32)
     MODEL_MAGIC = model_magic_info["magic_boundaries"]
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] could not generate MODEL_MAGIC boundaries")
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     cN: dict[tuple[int, int], float] = {}
@@ -6624,22 +7451,29 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         cZ[(Z, N)] = float(hw) * float(shell_S_model(int(Z)))
 
     # Build separation energies and gaps (evaluated at OBS_MAGIC).
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -6647,12 +7481,17 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -6660,12 +7499,17 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     sn_obs = build_sep_n(b_obs, dN=1)
@@ -6700,37 +7544,57 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     # Fit kN from neutron gaps at magic N in TRAIN_MAGIC_N (1D LS).
     fit_n: list[tuple[float, float]] = []  # y, x
     for (Z, N0, step), g_obs in gap_sn_obs.items():
+        # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC_N` を満たす経路を評価する。
         if int(step) != 1 or int(N0) not in TRAIN_MAGIC_N:
             continue
+
         g_unc = gap_sn_pred_unc.get((Z, N0, 1))
         g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+        # 条件分岐: `g_unc is None or g_1 is None` を満たす経路を評価する。
         if g_unc is None or g_1 is None:
             continue
+
         x = float(g_1 - g_unc)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_unc)
         fit_n.append((y, x))
+
+    # 条件分岐: `not fit_n` を満たす経路を評価する。
+
     if not fit_n:
         raise SystemExit("[fail] no fit data for kN (gap_n at observed magic N=50/82)")
+
     kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
     # Fit kZ from proton gaps at magic Z in TRAIN_MAGIC_Z (1D LS).
     fit_z: list[tuple[float, float]] = []  # y, x
     for (N, Z0, step), g_obs in gap_sp_obs.items():
+        # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC_Z` を満たす経路を評価する。
         if int(step) != 1 or int(Z0) not in TRAIN_MAGIC_Z:
             continue
+
         g_unc = gap_sp_pred_unc.get((N, Z0, 1))
         g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+        # 条件分岐: `g_unc is None or g_1 is None` を満たす経路を評価する。
         if g_unc is None or g_1 is None:
             continue
+
         x = float(g_1 - g_unc)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_unc)
         fit_z.append((y, x))
+
+    # 条件分岐: `not fit_z` を満たす経路を評価する。
+
     if not fit_z:
         raise SystemExit("[fail] no fit data for kZ (gap_p at observed magic Z=50/82)")
+
     kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
 
     ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
@@ -6760,11 +7624,14 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, dN), g_obs in obs_gap.items():
             gu = pred_unc.get((Z, N0, dN))
             gc = pred_cor.get((Z, N0, dN))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             r_u = float(gu - g_obs)
             r_c = float(gc - g_obs)
             rows_all.append((int(N0), r_u, r_c))
+            # 条件分岐: `int(N0) in train_set` を満たす経路を評価する。
             if int(N0) in train_set:
                 rows_train.append((int(N0), r_u, r_c))
             else:
@@ -6828,6 +7695,7 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
+
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
 
@@ -6867,9 +7735,14 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, dN), g_obs in gap_obs.items():
             gu = gap_u.get((Z, N0, dN))
             gc = gap_c.get((Z, N0, dN))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             rows.append((int(N0), float(g_obs), float(gu), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -6879,6 +7752,7 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float]]] = {}
         for n0, obs, gu, gc in rows:
             by_magic.setdefault(int(n0), []).append((obs, gu, gc))
+
         for i, n0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[n0]
             xs = [o for (o, _, _) in items]
@@ -6918,14 +7792,19 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         for (Z, N0, _dN), g_obs in sorted(gap_sn_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", f"Z{Z}", f"N{N0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gc is None` を満たす経路を評価する。
             if gu is None or gc is None:
                 continue
+
             w.writerow(["gap_Sp", f"N{N}", f"Z{Z0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json"
@@ -6982,10 +7861,12 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit).
       - Step 7.13.15.13 metrics (MODEL_MAGIC and kN/kZ).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -6995,6 +7876,7 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         )
 
     metrics_71513_path = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json"
+    # 条件分岐: `not metrics_71513_path.exists()` を満たす経路を評価する。
     if not metrics_71513_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.13 metrics.\n"
@@ -7005,6 +7887,7 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
@@ -7013,21 +7896,27 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     def13 = m13.get("definition") if isinstance(m13.get("definition"), dict) else {}
 
     model_magic_info = diag13.get("model_magic") if isinstance(diag13.get("model_magic"), dict) else def13.get("model_magic")
+    # 条件分岐: `not isinstance(model_magic_info, dict)` を満たす経路を評価する。
     if not isinstance(model_magic_info, dict):
         raise SystemExit("[fail] Step 7.13.15.13 metrics missing model_magic")
+
     MODEL_MAGIC = model_magic_info.get("magic_boundaries")
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] Step 7.13.15.13 metrics: invalid model_magic.magic_boundaries")
 
     OBS_MAGIC = diag13.get("observed_magic_boundaries") if isinstance(diag13.get("observed_magic_boundaries"), list) else def13.get("observed_magic_boundaries")
+    # 条件分岐: `not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2:
         OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
 
     fit13 = diag13.get("fit") if isinstance(diag13.get("fit"), dict) else {}
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     kN = fnum(fit13.get("kN"), ctx="7.13.15.13 diag.fit.kN")
@@ -7040,69 +7929,107 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     def parity_sign(Z: int, N: int) -> int:
         z_even = (int(Z) % 2) == 0
         n_even = (int(N) % 2) == 0
+        # 条件分岐: `z_even and n_even` を満たす経路を評価する。
         if z_even and n_even:
             return 1
+
+        # 条件分岐: `(not z_even) and (not n_even)` を満たす経路を評価する。
+
         if (not z_even) and (not n_even):
             return -1
+
         return 0
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
+            # 条件分岐: `abs(int(x) - int(m0)) <= int(tol)` を満たす経路を評価する。
             if abs(int(x) - int(m0)) <= int(tol):
                 return True
+
         return False
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
@@ -7115,8 +8042,10 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     max_z = 0
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
         ba_pred = fnum(r.get("B_over_A_pred_mean_MeV"), ctx=f"B/A pred_mean Z{Z} N{N}")
@@ -7125,10 +8054,13 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         max_n = max(max_n, int(N))
         max_z = max(max_z, int(Z))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.14")
 
     # Step 7.13.15.13 shell correction basis.
+
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
@@ -7141,8 +8073,10 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         b_shell[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -7150,38 +8084,50 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     # Freeze pairing amplitude a_p from observed odd-even staggering (3-point formula),
     # independent of the mean-field / shell correction model.
     # Use a mid-shell set by excluding nuclei near observed shell closures (tol=1).
+
     ap_n_list: list[float] = []
     ap_p_list: list[float] = []
     for (Z, N), A in a_by_zn.items():
+        # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
         if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
             continue
+
+        # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
 
         if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
             dn = ((-1) ** int(N)) * (
                 float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])
             ) / 2.0
+            # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
             if math.isfinite(dn):
                 ap_n_list.append(abs(float(dn)) * math.sqrt(float(A)))
+
+        # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
 
         if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
             dp = ((-1) ** int(Z)) * (
                 float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])
             ) / 2.0
+            # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
             if math.isfinite(dp):
                 ap_p_list.append(abs(float(dp)) * math.sqrt(float(A)))
 
     a_p_n = _median(ap_n_list)
     a_p_p = _median(ap_p_list)
+    # 条件分岐: `math.isfinite(a_p_n) and math.isfinite(a_p_p)` を満たす経路を評価する。
     if math.isfinite(a_p_n) and math.isfinite(a_p_p):
         a_p = float(0.5 * (float(a_p_n) + float(a_p_p)))
+    # 条件分岐: 前段条件が不成立で、`math.isfinite(a_p_n)` を追加評価する。
     elif math.isfinite(a_p_n):
         a_p = float(a_p_n)
+    # 条件分岐: 前段条件が不成立で、`math.isfinite(a_p_p)` を追加評価する。
     elif math.isfinite(a_p_p):
         a_p = float(a_p_p)
     else:
         raise SystemExit("[fail] could not estimate pairing amplitude a_p from OES (3-point) in mid-shell set")
 
     # Pairing-corrected binding energies.
+
     b_pair: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         sgn = parity_sign(Z, N)
@@ -7189,22 +8135,29 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         b_pair[(Z, N)] = float(b_shell[(Z, N)]) + float(term)
 
     # Build separation energies and gaps (evaluated at OBS_MAGIC).
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -7212,12 +8165,17 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -7225,12 +8183,17 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     sn_obs = build_sep_n(b_obs, dN=1)
@@ -7284,16 +8247,22 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
             gu = pred_u.get(key)
             gs = pred_s.get(key)
             gp = pred_p.get(key)
+            # 条件分岐: `gu is None or gs is None or gp is None` を満たす経路を評価する。
             if gu is None or gs is None or gp is None:
                 continue
+
+            # 条件分岐: `key_is_magic == "N"` を満たす経路を評価する。
+
             if key_is_magic == "N":
                 m0 = int(key[1])  # (Z, N0, dN)
             else:
                 m0 = int(key[1])  # (N, Z0, dZ)
+
             r_u = float(gu - g_obs)
             r_s = float(gs - g_obs)
             r_p = float(gp - g_obs)
             rows_all.append((m0, r_u, r_s, r_p))
+            # 条件分岐: `int(m0) in train_set` を満たす経路を評価する。
             if int(m0) in train_set:
                 rows_train.append((m0, r_u, r_s, r_p))
             else:
@@ -7383,6 +8352,7 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
+
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
 
@@ -7425,10 +8395,15 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_u.get(key)
             gs = gap_s.get(key)
             gp = gap_p.get(key)
+            # 条件分岐: `gu is None or gs is None or gp is None` を満たす経路を評価する。
             if gu is None or gs is None or gp is None:
                 continue
+
             m0 = int(key[1])
             rows.append((m0, float(g_obs), float(gu), float(gs), float(gp)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -7438,6 +8413,7 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float, float]]] = {}
         for m0, obs, gu, gs, gp in rows:
             by_magic.setdefault(int(m0), []).append((obs, gu, gs, gp))
+
         for i, m0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[m0]
             xs = [o for (o, _, _, _) in items]
@@ -7488,8 +8464,10 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gs = gap_sn_pred_shell.get((Z, N0, 1))
             gp = gap_sn_pred_pair.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gs is None or gp is None` を満たす経路を評価する。
             if gu is None or gs is None or gp is None:
                 continue
+
             w.writerow(
                 [
                     "gap_Sn",
@@ -7504,12 +8482,15 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
                     f"{(gp-g_obs):.12g}",
                 ]
             )
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gs = gap_sp_pred_shell.get((N, Z0, 1))
             gp = gap_sp_pred_pair.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gs is None or gp is None` を満たす経路を評価する。
             if gu is None or gs is None or gp is None:
                 continue
+
             w.writerow(
                 [
                     "gap_Sp",
@@ -7584,10 +8565,12 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
       - Step 7.13.15.13 metrics (MODEL_MAGIC).
       - Step 7.13.15.14 metrics (a_p).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -7597,6 +8580,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         )
 
     metrics_71513_path = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json"
+    # 条件分岐: `not metrics_71513_path.exists()` を満たす経路を評価する。
     if not metrics_71513_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.13 metrics.\n"
@@ -7606,6 +8590,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         )
 
     metrics_71514_path = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_model_metrics.json"
+    # 条件分岐: `not metrics_71514_path.exists()` を満たす経路を評価する。
     if not metrics_71514_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.14 metrics.\n"
@@ -7616,6 +8601,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
@@ -7624,13 +8610,17 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     def13 = m13.get("definition") if isinstance(m13.get("definition"), dict) else {}
 
     model_magic_info = diag13.get("model_magic") if isinstance(diag13.get("model_magic"), dict) else def13.get("model_magic")
+    # 条件分岐: `not isinstance(model_magic_info, dict)` を満たす経路を評価する。
     if not isinstance(model_magic_info, dict):
         raise SystemExit("[fail] Step 7.13.15.13 metrics missing model_magic")
+
     MODEL_MAGIC = model_magic_info.get("magic_boundaries")
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] Step 7.13.15.13 metrics: invalid model_magic.magic_boundaries")
 
     OBS_MAGIC = diag13.get("observed_magic_boundaries") if isinstance(diag13.get("observed_magic_boundaries"), list) else def13.get("observed_magic_boundaries")
+    # 条件分岐: `not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2:
         OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
 
@@ -7639,8 +8629,10 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     pairing14 = diag14.get("pairing") if isinstance(diag14.get("pairing"), dict) else {}
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     a_p = fnum(pairing14.get("a_p_MeV"), ctx="7.13.15.14 diag.pairing.a_p_MeV")
@@ -7652,63 +8644,99 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     def parity_sign(Z: int, N: int) -> int:
         z_even = (int(Z) % 2) == 0
         n_even = (int(N) % 2) == 0
+        # 条件分岐: `z_even and n_even` を満たす経路を評価する。
         if z_even and n_even:
             return 1
+
+        # 条件分岐: `(not z_even) and (not n_even)` を満たす経路を評価する。
+
         if (not z_even) and (not n_even):
             return -1
+
         return 0
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
@@ -7721,8 +8749,10 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     max_z = 0
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
         ba_pred = fnum(r.get("B_over_A_pred_mean_MeV"), ctx=f"B/A pred_mean Z{Z} N{N}")
@@ -7731,10 +8761,13 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         max_n = max(max_n, int(N))
         max_z = max(max_z, int(Z))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.15")
 
     # Pairing baseline binding energies.
+
     b_base: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         sgn = parity_sign(Z, N)
@@ -7742,6 +8775,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term)
 
     # Shell correction basis terms.
+
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
@@ -7750,22 +8784,29 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         cZ[(Z, N)] = float(hw) * float(shell_S_model(int(Z)))
 
     # Build separation energies and gaps helpers.
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -7773,12 +8814,17 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -7786,15 +8832,21 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     # Observables (obs).
+
     sn_obs = build_sep_n(b_obs, dN=1)
     s2n_obs = build_sep_n(b_obs, dN=2)
     sp_obs = build_sep_p(b_obs, dZ=1)
@@ -7834,37 +8886,57 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
     fit_n: list[tuple[float, float]] = []  # y, x
     for (Z, N0, step), g_obs in gap_sn_obs.items():
+        # 条件分岐: `int(step) != 1 or int(N0) not in {50, 82}` を満たす経路を評価する。
         if int(step) != 1 or int(N0) not in {50, 82}:
             continue
+
         g_base = gap_sn_pred_base.get((Z, N0, 1))
         g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+        # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
         if g_base is None or g_1 is None:
             continue
+
         x = float(g_1 - g_base)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_base)
         fit_n.append((y, x))
+
+    # 条件分岐: `not fit_n` を満たす経路を評価する。
+
     if not fit_n:
         raise SystemExit("[fail] no fit data for kN (gap_n at observed magic N=50/82)")
+
     kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
     # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
     fit_z: list[tuple[float, float]] = []  # y, x
     for (N, Z0, step), g_obs in gap_sp_obs.items():
+        # 条件分岐: `int(step) != 1 or int(Z0) not in {50, 82}` を満たす経路を評価する。
         if int(step) != 1 or int(Z0) not in {50, 82}:
             continue
+
         g_base = gap_sp_pred_base.get((N, Z0, 1))
         g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+        # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
         if g_base is None or g_1 is None:
             continue
+
         x = float(g_1 - g_base)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_base)
         fit_z.append((y, x))
+
+    # 条件分岐: `not fit_z` を満たす経路を評価する。
+
     if not fit_z:
         raise SystemExit("[fail] no fit data for kZ (gap_p at observed magic Z=50/82)")
+
     kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
 
     ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
@@ -7895,13 +8967,16 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
             gu = pred_u.get(key)
             gb = pred_b.get(key)
             gc = pred_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             r_u = float(gu - g_obs)
             r_b = float(gb - g_obs)
             r_c = float(gc - g_obs)
             rows_all.append((m0, r_u, r_b, r_c))
+            # 条件分岐: `int(m0) in train_set` を満たす経路を評価する。
             if int(m0) in train_set:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
@@ -7962,6 +9037,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
+
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
 
@@ -8004,10 +9080,15 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_u.get(key)
             gb = gap_b.get(key)
             gc = gap_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             rows.append((m0, float(g_obs), float(gu), float(gb), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -8017,6 +9098,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float, float]]] = {}
         for m0, obs, gu, gb, gc in rows:
             by_magic.setdefault(int(m0), []).append((obs, gu, gb, gc))
+
         for i, m0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[m0]
             xs = [o for (o, _, _, _) in items]
@@ -8067,15 +9149,20 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gb = gap_sn_pred_base.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", f"Z{Z}", f"N{N0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gb = gap_sp_pred_base.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sp", f"N{N}", f"Z{Z0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_refreeze_metrics.json"
@@ -8133,10 +9220,12 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
       - Step 7.13.15.7 metrics (surface-term frozen by radii-only fit).
       - Step 7.13.15.13 metrics (MODEL_MAGIC).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -8146,6 +9235,7 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         )
 
     metrics_71513_path = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_model_metrics.json"
+    # 条件分岐: `not metrics_71513_path.exists()` を満たす経路を評価する。
     if not metrics_71513_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.13 metrics.\n"
@@ -8156,6 +9246,7 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
@@ -8164,19 +9255,25 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     def13 = m13.get("definition") if isinstance(m13.get("definition"), dict) else {}
 
     model_magic_info = diag13.get("model_magic") if isinstance(diag13.get("model_magic"), dict) else def13.get("model_magic")
+    # 条件分岐: `not isinstance(model_magic_info, dict)` を満たす経路を評価する。
     if not isinstance(model_magic_info, dict):
         raise SystemExit("[fail] Step 7.13.15.13 metrics missing model_magic")
+
     MODEL_MAGIC = model_magic_info.get("magic_boundaries")
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] Step 7.13.15.13 metrics: invalid model_magic.magic_boundaries")
 
     OBS_MAGIC = diag13.get("observed_magic_boundaries") if isinstance(diag13.get("observed_magic_boundaries"), list) else def13.get("observed_magic_boundaries")
+    # 条件分岐: `not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2:
         OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     def rms(vals: list[float]) -> float:
@@ -8186,67 +9283,102 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
+            # 条件分岐: `abs(int(x) - int(m0)) <= int(tol)` を満たす経路を評価する。
             if abs(int(x) - int(m0)) <= int(tol):
                 return True
+
         return False
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
@@ -8259,8 +9391,10 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     max_z = 0
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
         ba_pred = fnum(r.get("B_over_A_pred_mean_MeV"), ctx=f"B/A pred_mean Z{Z} N{N}")
@@ -8269,38 +9403,50 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         max_n = max(max_n, int(N))
         max_z = max(max_z, int(Z))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.16")
 
     # Freeze (a_n, a_p) from observed odd-even staggering (3-point formula), independent of the model.
     # Use a mid-shell set by excluding nuclei near observed shell closures (tol=1).
+
     an_list: list[float] = []
     ap_list: list[float] = []
     for (Z, N), A in a_by_zn.items():
+        # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
         if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
             continue
+
+        # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
 
         if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
             dn = ((-1) ** int(N)) * (
                 float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])
             ) / 2.0
+            # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
             if math.isfinite(dn):
                 # For an ansatz ~ a_n*(-1)^N/sqrt(A), the 3-point OES gives ~ 2*a_n/sqrt(A).
                 an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+        # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
 
         if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
             dp = ((-1) ** int(Z)) * (
                 float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])
             ) / 2.0
+            # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
             if math.isfinite(dp):
                 ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
 
     a_n = _median(an_list)
     a_p = _median(ap_list)
+    # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
     if not (math.isfinite(a_n) and math.isfinite(a_p)):
         raise SystemExit("[fail] could not estimate pairing amplitudes (a_n, a_p) from OES (3-point) in mid-shell set")
 
     # Pairing baseline binding energies.
+
     b_base: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -8308,6 +9454,7 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
     # Shell correction basis terms.
+
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
@@ -8316,22 +9463,29 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         cZ[(Z, N)] = float(hw) * float(shell_S_model(int(Z)))
 
     # Helpers.
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -8339,12 +9493,17 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -8352,15 +9511,21 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     # Observables (obs).
+
     sn_obs = build_sep_n(b_obs, dN=1)
     s2n_obs = build_sep_n(b_obs, dN=2)
     sp_obs = build_sep_p(b_obs, dZ=1)
@@ -8400,37 +9565,57 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
     fit_n: list[tuple[float, float]] = []  # y, x
     for (Z, N0, step), g_obs in gap_sn_obs.items():
+        # 条件分岐: `int(step) != 1 or int(N0) not in {50, 82}` を満たす経路を評価する。
         if int(step) != 1 or int(N0) not in {50, 82}:
             continue
+
         g_base = gap_sn_pred_base.get((Z, N0, 1))
         g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+        # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
         if g_base is None or g_1 is None:
             continue
+
         x = float(g_1 - g_base)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_base)
         fit_n.append((y, x))
+
+    # 条件分岐: `not fit_n` を満たす経路を評価する。
+
     if not fit_n:
         raise SystemExit("[fail] no fit data for kN (gap_n at observed magic N=50/82)")
+
     kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
     # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
     fit_z: list[tuple[float, float]] = []  # y, x
     for (N, Z0, step), g_obs in gap_sp_obs.items():
+        # 条件分岐: `int(step) != 1 or int(Z0) not in {50, 82}` を満たす経路を評価する。
         if int(step) != 1 or int(Z0) not in {50, 82}:
             continue
+
         g_base = gap_sp_pred_base.get((N, Z0, 1))
         g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+        # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
         if g_base is None or g_1 is None:
             continue
+
         x = float(g_1 - g_base)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_base)
         fit_z.append((y, x))
+
+    # 条件分岐: `not fit_z` を満たす経路を評価する。
+
     if not fit_z:
         raise SystemExit("[fail] no fit data for kZ (gap_p at observed magic Z=50/82)")
+
     kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
 
     ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
@@ -8461,13 +9646,16 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
             gu = pred_u.get(key)
             gb = pred_b.get(key)
             gc = pred_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             r_u = float(gu - g_obs)
             r_b = float(gb - g_obs)
             r_c = float(gc - g_obs)
             rows_all.append((m0, r_u, r_b, r_c))
+            # 条件分岐: `int(m0) in train_set` を満たす経路を評価する。
             if int(m0) in train_set:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
@@ -8536,6 +9724,7 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
+
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
 
@@ -8578,10 +9767,15 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_u.get(key)
             gb = gap_b.get(key)
             gc = gap_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             rows.append((m0, float(g_obs), float(gu), float(gb), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -8591,6 +9785,7 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float, float]]] = {}
         for m0, obs, gu, gb, gc in rows:
             by_magic.setdefault(int(m0), []).append((obs, gu, gb, gc))
+
         for i, m0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[m0]
             xs = [o for (o, _, _, _) in items]
@@ -8641,15 +9836,20 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gb = gap_sn_pred_base.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", f"Z{Z}", f"N{N0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gb = gap_sp_pred_base.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sp", f"N{N}", f"Z{Z0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json"
@@ -8705,10 +9905,12 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
       - Step 7.13.15.7 metrics (rows; B_obs, B_pred_mean).
       - Step 7.13.15.16 metrics (frozen a_n/a_p and kN/kZ).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -8718,6 +9920,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         )
 
     metrics_71516_path = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json"
+    # 条件分岐: `not metrics_71516_path.exists()` を満たす経路を評価する。
     if not metrics_71516_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.16 metrics.\n"
@@ -8728,6 +9931,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
@@ -8736,12 +9940,17 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     def16 = m16.get("definition") if isinstance(m16.get("definition"), dict) else {}
 
     MODEL_MAGIC = def16.get("model_magic_boundaries")
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         MODEL_MAGIC = diag16.get("model_magic_boundaries")
+
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
+
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] Step 7.13.15.16 metrics missing model_magic_boundaries")
 
     OBS_MAGIC = diag16.get("observed_magic_boundaries")
+    # 条件分岐: `not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2:
         OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
 
@@ -8749,8 +9958,10 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     pairing16 = diag16.get("pairing") if isinstance(diag16.get("pairing"), dict) else {}
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     a_n = fnum(pairing16.get("a_n_MeV"), ctx="7.13.15.16 diag.pairing.a_n_MeV")
@@ -8765,60 +9976,93 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
+            # 条件分岐: `abs(int(x) - int(m0)) <= int(tol)` を満たす経路を評価する。
             if abs(int(x) - int(m0)) <= int(tol):
                 return True
+
         return False
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
@@ -8831,8 +10075,10 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     max_z = 0
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
         ba_pred = fnum(r.get("B_over_A_pred_mean_MeV"), ctx=f"B/A pred_mean Z{Z} N{N}")
@@ -8841,10 +10087,13 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         max_n = max(max_n, int(N))
         max_z = max(max_z, int(Z))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.17")
 
     # Pairing baseline binding energies (frozen a_n/a_p).
+
     b_pair: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -8852,6 +10101,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         b_pair[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
     # Shell correction basis terms (frozen from 7.13.15.16) and a minimal collectivity proxy.
+
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
 
@@ -8862,29 +10112,44 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         This intentionally removes the explicit shell-degeneracy scaling (g) from S_shell,
         so a pn-collectivity proxy does not explode with increasing g.
         """
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (g - p) / float(g * g))
 
     x_coll: dict[tuple[int, int], float] = {}
@@ -8899,6 +10164,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         x_coll[(Z, N)] = float(hw) * float(qN) * float(qZ)
 
     # Frozen pairing+shell baseline (kN/kZ frozen from 7.13.15.16).
+
     b_base: dict[tuple[int, int], float] = {}
     for zn, b0 in b_pair.items():
         b_base[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
@@ -8906,45 +10172,67 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     # Freeze kNZ from separation-energy residuals (Sn/Sp) on a mid-shell training set (avoid closures).
     # This avoids absorbing the large global B residual scale (B/A is not calibrated here), while still
     # being independent from shell-gap targets.
+
     fit_pairs: list[tuple[float, float]] = []  # y, x where y=(obs-base) and x=(x_parent-x_child)
     n_fit_sn = 0
     n_fit_sp = 0
     for (Z, N), _A in a_by_zn.items():
         child = (Z, int(N) - 1)
+        # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
         if child not in a_by_zn:
             continue
+
+        # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(N) - 1, tol=1)...` を満たす経路を評価する。
+
         if near_observed_magic(int(N), tol=1) or near_observed_magic(int(N) - 1, tol=1) or near_observed_magic(int(Z), tol=1):
             continue
+
         x = float(x_coll[(Z, N)] - x_coll[child])
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         sn_obs_i = float(b_obs[(Z, N)] - b_obs[child])
         sn_base_i = float(b_base[(Z, N)] - b_base[child])
         y = float(sn_obs_i - sn_base_i)
+        # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(y):
             continue
+
         fit_pairs.append((y, x))
         n_fit_sn += 1
 
     for (Z, N), _A in a_by_zn.items():
         child = (int(Z) - 1, N)
+        # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
         if child not in a_by_zn:
             continue
+
+        # 条件分岐: `near_observed_magic(int(Z), tol=1) or near_observed_magic(int(Z) - 1, tol=1)...` を満たす経路を評価する。
+
         if near_observed_magic(int(Z), tol=1) or near_observed_magic(int(Z) - 1, tol=1) or near_observed_magic(int(N), tol=1):
             continue
+
         x = float(x_coll[(Z, N)] - x_coll[child])
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         sp_obs_i = float(b_obs[(Z, N)] - b_obs[child])
         sp_base_i = float(b_base[(Z, N)] - b_base[child])
         y = float(sp_obs_i - sp_base_i)
+        # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(y):
             continue
+
         fit_pairs.append((y, x))
         n_fit_sp += 1
 
+    # 条件分岐: `not fit_pairs` を満たす経路を評価する。
+
     if not fit_pairs:
         raise SystemExit("[fail] no fit data for kNZ (mid-shell Sn/Sp residuals; excluded near observed magic)")
+
     kNZ = float(sum(y * x for y, x in fit_pairs) / sum(x * x for _y, x in fit_pairs))
 
     # Corrected bindings.
@@ -8953,22 +10241,29 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         b_cor[zn] = float(b0) + float(kNZ) * float(x_coll[zn])
 
     # Helpers for separation energies and gaps.
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -8976,12 +10271,17 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
@@ -8989,15 +10289,21 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     # Observables (obs).
+
     sn_obs = build_sep_n(b_obs, dN=1)
     s2n_obs = build_sep_n(b_obs, dN=2)
     sp_obs = build_sep_p(b_obs, dZ=1)
@@ -9050,13 +10356,16 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
             gu = pred_u.get(key)
             gb = pred_b.get(key)
             gc = pred_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             r_u = float(gu - g_obs)
             r_b = float(gb - g_obs)
             r_c = float(gc - g_obs)
             rows_all.append((m0, r_u, r_b, r_c))
+            # 条件分岐: `int(m0) in train_set` を満たす経路を評価する。
             if int(m0) in train_set:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
@@ -9134,6 +10443,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
+
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
 
@@ -9176,10 +10486,15 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_u.get(key)
             gb = gap_b.get(key)
             gc = gap_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             rows.append((m0, float(g_obs), float(gu), float(gb), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -9189,6 +10504,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float, float]]] = {}
         for m0, obs, gu, gb, gc in rows:
             by_magic.setdefault(int(m0), []).append((obs, gu, gb, gc))
+
         for i, m0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[m0]
             xs = [o for (o, _, _, _) in items]
@@ -9257,15 +10573,20 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gb = gap_sn_pred_base.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", f"Z{Z}", f"N{N0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gb = gap_sp_pred_base.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sp", f"N{N}", f"Z{Z0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_pn_metrics.json"
@@ -9320,10 +10641,12 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
       - Step 7.13.15.7 metrics (rows; B_obs, B_pred_mean).
       - Step 7.13.15.16 metrics (frozen a_n/a_p and kN/kZ).
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
 
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -9333,6 +10656,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         )
 
     metrics_71516_path = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze_metrics.json"
+    # 条件分岐: `not metrics_71516_path.exists()` を満たす経路を評価する。
     if not metrics_71516_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.16 metrics.\n"
@@ -9343,6 +10667,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
 
     m = _load_json(metrics_7157_path)
     rows_in = m.get("rows")
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
@@ -9351,12 +10676,17 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     def16 = m16.get("definition") if isinstance(m16.get("definition"), dict) else {}
 
     MODEL_MAGIC = def16.get("model_magic_boundaries")
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         MODEL_MAGIC = diag16.get("model_magic_boundaries")
+
+    # 条件分岐: `not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2` を満たす経路を評価する。
+
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] Step 7.13.15.16 metrics missing model_magic_boundaries")
 
     OBS_MAGIC = diag16.get("observed_magic_boundaries")
+    # 条件分岐: `not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2` を満たす経路を評価する。
     if not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2:
         OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
 
@@ -9364,8 +10694,10 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     pairing16 = diag16.get("pairing") if isinstance(diag16.get("pairing"), dict) else {}
 
     def fnum(x: object, *, ctx: str) -> float:
+        # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
+
         return float(x)
 
     a_n = fnum(pairing16.get("a_n_MeV"), ctx="7.13.15.16 diag.pairing.a_n_MeV")
@@ -9380,87 +10712,134 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     def shell_open_q(x: int) -> float:
         # Open-shell indicator q=f(1-f) in [0, 1/4], with f=p/g.
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (g - p) / float(g * g))
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
+            # 条件分岐: `abs(int(x) - int(m0)) <= int(tol)` を満たす経路を評価する。
             if abs(int(x) - int(m0)) <= int(tol):
                 return True
+
         return False
 
     # Build a single (Z,N) map. Prefer published radii if duplicates exist.
+
     nuc_by_zn: dict[tuple[int, int], dict[str, object]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         try:
             Z = int(r.get("Z", -999))
             N = int(r.get("N", -999))
             A = int(r.get("A", -999))
         except Exception:
             continue
+
+        # 条件分岐: `Z < 0 or N < 0 or A < 1` を満たす経路を評価する。
+
         if Z < 0 or N < 0 or A < 1:
             continue
+
         key = (Z, N)
+        # 条件分岐: `key in nuc_by_zn` を満たす経路を評価する。
         if key in nuc_by_zn:
             prev_used = str(nuc_by_zn[key].get("radii_used", "")).strip().lower()
             curr_used = str(r.get("radii_used", "")).strip().lower()
+            # 条件分岐: `prev_used == "published"` を満たす経路を評価する。
             if prev_used == "published":
                 continue
+
+            # 条件分岐: `curr_used == "published"` を満たす経路を評価する。
+
             if curr_used == "published":
                 nuc_by_zn[key] = r
+
             continue
+
         nuc_by_zn[key] = r
+
+    # 条件分岐: `not nuc_by_zn` を満たす経路を評価する。
 
     if not nuc_by_zn:
         raise SystemExit("[fail] no nuclei rows found after parsing Step 7.13.15.7 metrics")
@@ -9473,8 +10852,10 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     max_z = 0
     for (Z, N), r in nuc_by_zn.items():
         A = int(r.get("A", 0))
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         a_by_zn[(Z, N)] = int(A)
         ba_obs = fnum(r.get("B_over_A_obs_MeV"), ctx=f"B/A obs Z{Z} N{N}")
         ba_pred = fnum(r.get("B_over_A_pred_mean_MeV"), ctx=f"B/A pred_mean Z{Z} N{N}")
@@ -9483,10 +10864,13 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         max_n = max(max_n, int(N))
         max_z = max(max_z, int(Z))
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found for Step 7.13.15.18")
 
     # Pairing baseline binding energies (frozen a_n/a_p).
+
     b_pair: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -9494,6 +10878,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         b_pair[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
     # Shell correction basis terms (frozen kN/kZ from 7.13.15.16) and q-bases.
+
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
     xqN: dict[tuple[int, int], float] = {}
@@ -9506,54 +10891,88 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         xqZ[(Z, N)] = float(hw) * float(shell_open_q(int(Z)))
 
     # Frozen pairing+shell baseline (kN/kZ).
+
     b_base: dict[tuple[int, int], float] = {}
     for zn, b0 in b_pair.items():
         b_base[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
     # Freeze kqN from mid-shell Sn residuals only.
+
     fit_n: list[tuple[float, float]] = []  # y, x
     for (Z, N), _A in a_by_zn.items():
         child = (Z, int(N) - 1)
+        # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
         if child not in a_by_zn:
             continue
+
+        # 条件分岐: `near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
+
         if near_observed_magic(int(Z), tol=1):
             continue
+
+        # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(N) - 1, tol=1)` を満たす経路を評価する。
+
         if near_observed_magic(int(N), tol=1) or near_observed_magic(int(N) - 1, tol=1):
             continue
+
         x = float(xqN[(Z, N)] - xqN[child])
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         sn_obs = float(b_obs[(Z, N)] - b_obs[child])
         sn_base = float(b_base[(Z, N)] - b_base[child])
         y = float(sn_obs - sn_base)
+        # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(y):
             continue
+
         fit_n.append((y, x))
+
+    # 条件分岐: `not fit_n` を満たす経路を評価する。
+
     if not fit_n:
         raise SystemExit("[fail] no fit data for kqN (mid-shell Sn residuals; excluded near observed magic)")
+
     kqN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
     # Freeze kqZ from mid-shell Sp residuals only.
     fit_z: list[tuple[float, float]] = []  # y, x
     for (Z, N), _A in a_by_zn.items():
         child = (int(Z) - 1, N)
+        # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
         if child not in a_by_zn:
             continue
+
+        # 条件分岐: `near_observed_magic(int(N), tol=1)` を満たす経路を評価する。
+
         if near_observed_magic(int(N), tol=1):
             continue
+
+        # 条件分岐: `near_observed_magic(int(Z), tol=1) or near_observed_magic(int(Z) - 1, tol=1)` を満たす経路を評価する。
+
         if near_observed_magic(int(Z), tol=1) or near_observed_magic(int(Z) - 1, tol=1):
             continue
+
         x = float(xqZ[(Z, N)] - xqZ[child])
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         sp_obs = float(b_obs[(Z, N)] - b_obs[child])
         sp_base = float(b_base[(Z, N)] - b_base[child])
         y = float(sp_obs - sp_base)
+        # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
         if not math.isfinite(y):
             continue
+
         fit_z.append((y, x))
+
+    # 条件分岐: `not fit_z` を満たす経路を評価する。
+
     if not fit_z:
         raise SystemExit("[fail] no fit data for kqZ (mid-shell Sp residuals; excluded near observed magic)")
+
     kqZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
 
     # Corrected bindings.
@@ -9562,49 +10981,67 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         b_cor[(Z, N)] = float(b_base[(Z, N)]) + float(kqN) * float(xqN[(Z, N)]) + float(kqZ) * float(xqZ[(Z, N)])
 
     # Helpers for separation energies and gaps.
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     # Observables (obs).
+
     sn_obs = build_sep_n(b_obs, dN=1)
     s2n_obs = build_sep_n(b_obs, dN=2)
     sp_obs = build_sep_p(b_obs, dZ=1)
@@ -9657,13 +11094,16 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
             gu = pred_u.get(key)
             gb = pred_b.get(key)
             gc = pred_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             r_u = float(gu - g_obs)
             r_b = float(gb - g_obs)
             r_c = float(gc - g_obs)
             rows_all.append((m0, r_u, r_b, r_c))
+            # 条件分岐: `int(m0) in train_set` を満たす経路を評価する。
             if int(m0) in train_set:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
@@ -9741,6 +11181,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
+
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
 
@@ -9783,10 +11224,15 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_u.get(key)
             gb = gap_b.get(key)
             gc = gap_c.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             m0 = int(key[1])
             rows.append((m0, float(g_obs), float(gu), float(gb), float(gc)))
+
+        # 条件分岐: `not rows` を満たす経路を評価する。
+
         if not rows:
             ax.text(0.5, 0.5, "no gap data", ha="center", va="center")
             ax.set_title(title)
@@ -9796,6 +11242,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         by_magic: dict[int, list[tuple[float, float, float, float]]] = {}
         for m0, obs, gu, gb, gc in rows:
             by_magic.setdefault(int(m0), []).append((obs, gu, gb, gc))
+
         for i, m0 in enumerate(sorted(by_magic.keys())):
             items = by_magic[m0]
             xs = [o for (o, _, _, _) in items]
@@ -9864,15 +11311,20 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gb = gap_sn_pred_base.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sn", f"Z{Z}", f"N{N0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
+
         for (N, Z0, _step), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gb = gap_sp_pred_base.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(["gap_Sp", f"N{N}", f"Z{Z0}", f"{g_obs:.12g}", f"{gu:.12g}", f"{gb:.12g}", f"{gc:.12g}", f"{(gu-g_obs):.12g}", f"{(gb-g_obs):.12g}", f"{(gc-g_obs):.12g}"])
 
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_collective_q_sep_metrics.json"
@@ -9926,6 +11378,7 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
     ]
 
     for step_id, _label, path in steps:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             raise SystemExit(
                 f"[fail] missing required metrics for Step {step_id}:\n"
@@ -9953,8 +11406,10 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
         ]
         for k in candidates:
             v = d.get(k)
+            # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
             if isinstance(v, (int, float)) and math.isfinite(float(v)):
                 return float(v), str(k)
+
         raise SystemExit(f"[fail] could not extract RMS from keys {candidates}; available keys={sorted(d.keys())}")
 
     rows: list[dict[str, object]] = []
@@ -9963,11 +11418,13 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
         diag = _as_dict(m.get("diag"))
         gap_n = _as_dict(diag.get("gap_Sn"))
         gap_p = _as_dict(diag.get("gap_Sp"))
+        # 条件分岐: `not gap_n or not gap_p` を満たす経路を評価する。
         if not gap_n or not gap_p:
             raise SystemExit(f"[fail] missing diag.gap_Sn/gap_Sp in: {path}")
 
         train_n, other_n = _pick_train_other(gap_n)
         train_p, other_p = _pick_train_other(gap_p)
+        # 条件分岐: `not train_n or not other_n or not train_p or not other_p` を満たす経路を評価する。
         if not train_n or not other_n or not train_p or not other_p:
             raise SystemExit(f"[fail] missing train/other magic splits in gap diag for: {path}")
 
@@ -9995,6 +11452,7 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
 
     baseline_step = "7.13.15.16"
     baseline = next((r for r in rows if r.get("step") == baseline_step), None)
+    # 条件分岐: `not isinstance(baseline, dict)` を満たす経路を評価する。
     if not isinstance(baseline, dict):
         raise SystemExit(f"[fail] baseline step not found in rows: {baseline_step}")
 
@@ -10039,8 +11497,10 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
     def _plot(ax, ys, *, title: str, ylabel: str, base: float, tol: float | None = None) -> None:
         ax.plot(xs, ys, marker="o", lw=1.6)
         ax.axhline(base, color="k", lw=1.0, alpha=0.35, linestyle="--", label="baseline")
+        # 条件分岐: `tol is not None and tol > 0` を満たす経路を評価する。
         if tol is not None and tol > 0:
             ax.axhline(base + tol, color="#d62728", lw=1.0, alpha=0.45, linestyle="--", label=f"baseline+{tol:g}")
+
         ax.set_xticks(xs, xt)
         ax.set_title(title)
         ax.set_xlabel("step suffix")
@@ -10145,6 +11605,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
     """
     baseline_step = "7.13.15.16"
     baseline_csv = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze.csv"
+    # 条件分岐: `not baseline_csv.exists()` を満たす経路を評価する。
     if not baseline_csv.exists():
         raise SystemExit(
             "[fail] missing baseline CSV for Step 7.13.15.20.\n"
@@ -10168,9 +11629,12 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
     with baseline_csv.open("r", newline="", encoding="utf-8") as f:
         r = csv.DictReader(f)
         for row in r:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             kind = str(row.get("kind", ""))
+            # 条件分岐: `kind not in {"gap_Sn", "gap_Sp"}` を満たす経路を評価する。
             if kind not in {"gap_Sn", "gap_Sp"}:
                 continue
 
@@ -10180,14 +11644,20 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                 resid = float(row.get(resid_key, "nan"))
             except Exception:
                 continue
+
+            # 条件分岐: `not (math.isfinite(obs) and math.isfinite(pred) and math.isfinite(resid))` を満たす経路を評価する。
+
             if not (math.isfinite(obs) and math.isfinite(pred) and math.isfinite(resid)):
                 continue
 
             key1 = str(row.get("key1", ""))
             key2 = str(row.get("key2", ""))
+            # 条件分岐: `not (key1 and key2 and key1[0] in {"Z", "N"} and key2[0] in {"Z", "N"})` を満たす経路を評価する。
             if not (key1 and key2 and key1[0] in {"Z", "N"} and key2[0] in {"Z", "N"}):
                 continue
+
             try:
+                # 条件分岐: `kind == "gap_Sn"` を満たす経路を評価する。
                 if kind == "gap_Sn":
                     Z = int(key1[1:])
                     N_magic = int(key2[1:])
@@ -10200,6 +11670,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                     magic = int(Z_magic)
             except Exception:
                 continue
+
             A = int(Z + N)
             split = "train" if int(magic) in TRAIN_MAGIC else "other"
 
@@ -10217,10 +11688,13 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                 }
             )
 
+    # 条件分岐: `not gap_rows` を満たす経路を評価する。
+
     if not gap_rows:
         raise SystemExit(f"[fail] no gap rows parsed from baseline CSV: {baseline_csv}")
 
     # Summaries by magic number.
+
     by_magic: dict[tuple[str, str, int], list[dict[str, object]]] = {}
     for gr in gap_rows:
         k = (str(gr["kind"]), str(gr["split"]), int(gr["magic"]))
@@ -10249,6 +11723,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
         )
 
     # Summaries by A-min threshold (focused on extrapolation domain).
+
     a_mins = [0, 16, 40, 60, 80]
     by_a_rows: list[dict[str, object]] = []
     for kind in ["gap_Sn", "gap_Sp"]:
@@ -10266,6 +11741,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                 )
 
     # Worst offenders (for spec: where physics is missing).
+
     def _worst(kind: str, split: str, n: int) -> list[dict[str, object]]:
         xs = [gr for gr in gap_rows if gr["kind"] == kind and gr["split"] == split]
         xs_sorted = sorted(xs, key=lambda gr: abs(float(gr["resid_MeV"])), reverse=True)
@@ -10282,6 +11758,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                     "resid_MeV": float(gr["resid_MeV"]),
                 }
             )
+
         return out
 
     worst_pack = {
@@ -10296,24 +11773,29 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
 
     def _plot_by_magic(ax, *, kind: str, title: str) -> None:
         mags = sorted({int(r["magic"]) for r in by_magic_rows if r["kind"] == kind})
+        # 条件分岐: `not mags` を満たす経路を評価する。
         if not mags:
             ax.text(0.5, 0.5, "no data", ha="center", va="center")
             ax.set_title(title)
             return
+
         xs = list(range(len(mags)))
         ys = []
         cs = []
         labels = []
         for m0 in mags:
             row = next((r for r in by_magic_rows if r["kind"] == kind and r["split"] == ("train" if m0 in TRAIN_MAGIC else "other") and int(r["magic"]) == m0), None)
+            # 条件分岐: `row is None` を満たす経路を評価する。
             if row is None:
                 ys.append(float("nan"))
                 cs.append("#7f7f7f")
                 labels.append(str(m0))
                 continue
+
             ys.append(float(row["rms_resid_MeV"]))
             cs.append("#1f77b4" if m0 in TRAIN_MAGIC else "#ff7f0e")
             labels.append(str(m0))
+
         ax.bar(xs, ys, color=cs, alpha=0.85)
         ax.set_xticks(xs, labels)
         ax.set_xlabel("magic number")
@@ -10340,7 +11822,9 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                 row = next((r for r in by_a_rows if r["kind"] == kind and r["split"] == "other" and int(r["A_min"]) == int(a_min)), None)
                 ys.append(float(row["rms_resid_MeV"]) if isinstance(row, dict) else float("nan"))
                 ns.append(int(row["count"]) if isinstance(row, dict) else 0)
+
             ax.plot(xs, ys, marker="o", color=col, lw=1.6, label=f"{kind} other (n@A>=0={ns[0]})")
+
         ax.set_xlabel("A_min")
         ax.set_ylabel("RMS(resid) other-magic (MeV)")
         ax.set_title("Other-magic RMS vs A_min (domain stress test)")
@@ -10350,10 +11834,12 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
     def _plot_coverage(ax) -> None:
         kinds = ["gap_Sn", "gap_Sp"]
         mags_all = sorted({int(r["magic"]) for r in by_magic_rows})
+        # 条件分岐: `not mags_all` を満たす経路を評価する。
         if not mags_all:
             ax.text(0.5, 0.5, "no data", ha="center", va="center")
             ax.set_title("Coverage")
             return
+
         xs = list(range(len(mags_all)))
         width = 0.38
         for i, kind in enumerate(kinds):
@@ -10362,13 +11848,20 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                 row_train = next((r for r in by_magic_rows if r["kind"] == kind and int(r["magic"]) == m0 and r["split"] == "train"), None)
                 row_other = next((r for r in by_magic_rows if r["kind"] == kind and int(r["magic"]) == m0 and r["split"] == "other"), None)
                 c = 0
+                # 条件分岐: `isinstance(row_train, dict)` を満たす経路を評価する。
                 if isinstance(row_train, dict):
                     c += int(row_train["count"])
+
+                # 条件分岐: `isinstance(row_other, dict)` を満たす経路を評価する。
+
                 if isinstance(row_other, dict):
                     c += int(row_other["count"])
+
                 counts.append(c)
+
             xshift = [x + (-0.5 * width if i == 0 else 0.5 * width) for x in xs]
             ax.bar(xshift, counts, width=width, alpha=0.65, label=kind)
+
         ax.set_xticks(xs, [str(m) for m in mags_all])
         ax.set_xlabel("magic number")
         ax.set_ylabel("count")
@@ -10419,6 +11912,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
                     f"{float(r0['worst_resid_MeV']):.12g}",
                 ]
             )
+
         for r1 in by_a_rows:
             w.writerow(
                 [
@@ -10502,13 +11996,19 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       - nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded.csv
       - nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
 
     # Frozen HF configuration (pn mix, etc).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -10516,6 +12016,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -10524,6 +12025,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -10531,15 +12033,20 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -10549,30 +12056,42 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
@@ -10580,10 +12099,13 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
 
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
     # Fixed protocol (same structure as Step 7.13.15.22): pairing OES freeze -> kN/kZ refreeze -> shell-gap decision.
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
@@ -10595,13 +12117,20 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
           E_x/V = -(3/4) (3/π)^(1/3) e^2 ρ_p^(4/3)
         Return per-nucleon (MeV per A).
         """
+        # 条件分岐: `not (A > 0 and Z >= 0 and math.isfinite(volume_fm3) and volume_fm3 > 0)` を満たす経路を評価する。
         if not (A > 0 and Z >= 0 and math.isfinite(volume_fm3) and volume_fm3 > 0):
             return float("nan")
+
+        # 条件分岐: `Z <= 0` を満たす経路を評価する。
+
         if Z <= 0:
             return 0.0
+
         rho_p = float(Z) / float(volume_fm3)
+        # 条件分岐: `not (math.isfinite(rho_p) and rho_p > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho_p) and rho_p > 0):
             return float("nan")
+
         coef = -(3.0 / 4.0) * ((3.0 / math.pi) ** (1.0 / 3.0)) * float(e2_mev_fm)
         e_density = float(coef) * (float(rho_p) ** (4.0 / 3.0))  # MeV fm^-3
         e_total = float(e_density) * float(volume_fm3)  # MeV
@@ -10617,8 +12146,10 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     ]
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -10630,34 +12161,50 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             return float(p * (p - g) / float(g))
 
         return shell_S
 
     # Predict B (total) for the expanded AME2020 set using the frozen radius model + Coulomb exchange.
+
     a_by_zn_all: dict[tuple[int, int], int] = {}
     b_obs_all: dict[tuple[int, int], float] = {}
     b_pred_all: dict[tuple[int, int], float] = {}
@@ -10672,23 +12219,31 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
 
         a13 = float(A) ** (1.0 / 3.0)
         r_charge = float(r0) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         V_sphere = (4.0 / 3.0) * math.pi * float(R_sharp) ** 3
         rho = float(A) / float(V_sphere)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -10696,12 +12251,16 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -10714,19 +12273,29 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 m_nucleon_c2_mev=float(m_nucleon_c2),
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not math.isfinite(base_e)` を満たす経路を評価する。
             if not math.isfinite(base_e):
                 continue
+
             e_cx = coulomb_exchange_slater_mev_per_a(Z=int(Z), A=int(A), volume_fm3=float(V_sphere))
+            # 条件分岐: `not math.isfinite(e_cx)` を満たす経路を評価する。
             if not math.isfinite(e_cx):
                 continue
+
             e_total = float(base_e) + float(e_cx) + float(c3_inf) * (float(rho) ** 2) + float(c_surf) / (6.0 * float(R_sharp))
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -10736,12 +12305,15 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model prediction")
 
     # Optional robustness pass: recompute the same prediction with β2 direct-only (no neighbor imputation),
     # and require the strict decision to agree (p-hacking avoidance).
     # Candidate domain boundaries (same as Step 7.13.15.22).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -10749,46 +12321,63 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
     # Helpers for separations and gaps.
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -10804,13 +12393,16 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -10849,29 +12441,43 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
         b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
         b_pred = {zn: b_pred_all[zn] for zn in a_by_zn.keys()}
+        # 条件分岐: `not a_by_zn` を満たす経路を評価する。
         if not a_by_zn:
             raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
         # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
         an_list: list[float] = []
         ap_list: list[float] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
             if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                 continue
+
+            # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
             if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                 dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                 if math.isfinite(dn):
                     an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+            # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
             if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                 dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                 if math.isfinite(dp):
                     ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
         a_n = _median(an_list)
         a_p = _median(ap_list)
+        # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p) and a_n > 0 and a_p > 0)` を満たす経路を評価する。
         if not (math.isfinite(a_n) and math.isfinite(a_p) and a_n > 0 and a_p > 0):
             raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
         # Pairing baseline binding energies.
+
         b_base: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
             term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -10879,6 +12485,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
         # Shell correction basis terms.
+
         shell_S = shell_S_factory(shell_magic)
         cN: dict[tuple[int, int], float] = {}
         cZ: dict[tuple[int, int], float] = {}
@@ -10888,6 +12495,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
         # Observables (obs).
+
         sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
         sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
         gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -10913,37 +12521,57 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
         fit_n: list[tuple[float, float]] = []
         for (Z, N0, step), g_obs in gap_sn_obs.items():
+            # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sn_pred_base.get((Z, N0, 1))
             g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_n.append((y, x))
+
+        # 条件分岐: `not fit_n` を満たす経路を評価する。
+
         if not fit_n:
             raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
         kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
         # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
         fit_z: list[tuple[float, float]] = []
         for (N, Z0, step), g_obs in gap_sp_obs.items():
+            # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sp_pred_base.get((N, Z0, 1))
             g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_z.append((y, x))
+
+        # 条件分岐: `not fit_z` を満たす経路を評価する。
+
         if not fit_z:
             raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
         kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
         ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -10953,6 +12581,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
         # Corrected gap predictions.
+
         gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
         gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -11004,9 +12633,12 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 )
 
     # Fit radius model (published only; radii-only fit).
+
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -11016,27 +12648,38 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     with radii_path.open("r", encoding="utf-8", newline="") as f:
         rr = csv.DictReader(f)
         for row in rr:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             Z = int(row.get("z", "-1"))
             N = int(row.get("n", "-1"))
             A = int(row.get("a", "-1"))
+            # 条件分岐: `Z < 1 or N < 0 or A < int(radius_fit_min_a)` を満たす経路を評価する。
             if Z < 1 or N < 0 or A < int(radius_fit_min_a):
                 continue
             # Use published radii only here (avoid mixing prelim into the fit).
+
             try:
                 r_val = float(str(row.get("radius_val", "")).strip() or "nan")
             except Exception:
                 r_val = float("nan")
+
+            # 条件分岐: `not (math.isfinite(r_val) and r_val > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(r_val) and r_val > 0):
                 continue
+
             a13 = float(A) ** (1.0 / 3.0)
+            # 条件分岐: `not (math.isfinite(a13) and a13 > 0)` を満たす経路を評価する。
             if not (math.isfinite(a13) and a13 > 0):
                 continue
+
             ratios.append(float(r_val) / float(a13))
             fit_rows.append({"A": float(A), "r_charge_fm": float(r_val), "a13": float(a13), "Z": float(Z), "N": float(N)})
 
     r0 = _median(ratios)
+    # 条件分岐: `not (math.isfinite(r0) and r0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(r0) and r0 > 0):
         raise SystemExit("[fail] could not fit r0 from radii-only data (median ratio invalid)")
 
@@ -11046,23 +12689,31 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     # Baseline coverage from the radii-joined CSV (for comparison).
     baseline_csv = out_dir / "nuclear_a_dependence_hf_three_body_shell_degeneracy_pairing_sep_refreeze.csv"
     baseline_counts: dict[tuple[str, int], int] = {}
+    # 条件分岐: `baseline_csv.exists()` を満たす経路を評価する。
     if baseline_csv.exists():
         with baseline_csv.open("r", newline="", encoding="utf-8") as f:
             br = csv.DictReader(f)
             for row in br:
                 kind = str(row.get("kind", ""))
+                # 条件分岐: `kind not in {"gap_Sn", "gap_Sp"}` を満たす経路を評価する。
                 if kind not in {"gap_Sn", "gap_Sp"}:
                     continue
+
                 key1 = str(row.get("key1", ""))
                 key2 = str(row.get("key2", ""))
+                # 条件分岐: `kind == "gap_Sn" and key2.startswith("N")` を満たす経路を評価する。
                 if kind == "gap_Sn" and key2.startswith("N"):
                     magic = int(key2[1:])
                     baseline_counts[(kind, magic)] = baseline_counts.get((kind, magic), 0) + 1
+
+                # 条件分岐: `kind == "gap_Sp" and key2.startswith("Z")` を満たす経路を評価する。
+
                 if kind == "gap_Sp" and key2.startswith("Z"):
                     magic = int(key2[1:])
                     baseline_counts[(kind, magic)] = baseline_counts.get((kind, magic), 0) + 1
 
     # Compute B_pred_mean for the expanded AME2020 set using the frozen radius model.
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
@@ -11071,35 +12722,52 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     TRAIN_MAGIC = {50, 82}
 
     def shell_S_model(x: int) -> float:
+        # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
             return 0.0
+
         Mk = None
         Mk1 = None
         for a, b in zip(MODEL_MAGIC[:-1], MODEL_MAGIC[1:], strict=True):
+            # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
             if int(a) < int(x) <= int(b):
                 Mk = int(a)
                 Mk1 = int(b)
                 break
+
+        # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
         if Mk is None or Mk1 is None:
             Mk = int(MODEL_MAGIC[-2])
             Mk1 = int(MODEL_MAGIC[-1])
+            # 条件分岐: `x > Mk1` を満たす経路を評価する。
             if x > Mk1:
                 Mk = int(MODEL_MAGIC[-1])
                 Mk1 = int(MODEL_MAGIC[-1] + 1)
+
         g = int(Mk1 - Mk)
+        # 条件分岐: `g <= 0` を満たす経路を評価する。
         if g <= 0:
             return 0.0
+
         p = int(x - Mk)
+        # 条件分岐: `p < 0` を満たす経路を評価する。
         if p < 0:
             p = 0
+
+        # 条件分岐: `p > g` を満たす経路を評価する。
+
         if p > g:
             p = g
+
         return float(p * (p - g) / float(g))
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
+            # 条件分岐: `abs(int(x) - int(m0)) <= int(tol)` を満たす経路を評価する。
             if abs(int(x) - int(m0)) <= int(tol):
                 return True
+
         return False
 
     a_by_zn: dict[tuple[int, int], int] = {}
@@ -11109,22 +12777,30 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
 
         a13 = float(A) ** (1.0 / 3.0)
         r_charge = float(r0) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         rho = float(A) / ((4.0 / 3.0) * math.pi * float(R_sharp) ** 3)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -11132,12 +12808,16 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -11150,16 +12830,24 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 m_nucleon_c2_mev=float(m_nucleon_c2),
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not math.isfinite(base_e)` を満たす経路を評価する。
             if not math.isfinite(base_e):
                 continue
+
             e_total = float(base_e) + float(c3_inf) * (float(rho) ** 2) + float(c_surf) / (6.0 * float(R_sharp))
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -11170,29 +12858,44 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model expansion")
 
     # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
     an_list: list[float] = []
     ap_list: list[float] = []
     for (Z, N), A in a_by_zn.items():
+        # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
         if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
             continue
+
+        # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
         if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
             dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+            # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
             if math.isfinite(dn):
                 an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+        # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
         if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
             dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+            # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
             if math.isfinite(dp):
                 ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
     a_n = _median(an_list)
     a_p = _median(ap_list)
+    # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
     if not (math.isfinite(a_n) and math.isfinite(a_p)):
         raise SystemExit("[fail] could not estimate pairing amplitudes (a_n, a_p) from OES (3-point) in mid-shell set")
 
     # Pairing baseline binding energies.
+
     b_base: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -11200,6 +12903,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
     # Shell correction basis terms.
+
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
@@ -11208,49 +12912,67 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         cZ[(Z, N)] = float(hw) * float(shell_S_model(int(Z)))
 
     # Helpers for separations and gaps.
+
     def build_sep_n(b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     # Observables (obs).
+
     sn_obs = build_sep_n(b_obs, dN=1)
     sp_obs = build_sep_p(b_obs, dZ=1)
     gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -11276,37 +12998,57 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
     fit_n: list[tuple[float, float]] = []
     for (Z, N0, step), g_obs in gap_sn_obs.items():
+        # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
         if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
             continue
+
         g_base = gap_sn_pred_base.get((Z, N0, 1))
         g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+        # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
         if g_base is None or g_1 is None:
             continue
+
         x = float(g_1 - g_base)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_base)
         fit_n.append((y, x))
+
+    # 条件分岐: `not fit_n` を満たす経路を評価する。
+
     if not fit_n:
         raise SystemExit("[fail] no fit data for kN (gap_n at observed magic N=50/82)")
+
     kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
     # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
     fit_z: list[tuple[float, float]] = []
     for (N, Z0, step), g_obs in gap_sp_obs.items():
+        # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
         if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
             continue
+
         g_base = gap_sp_pred_base.get((N, Z0, 1))
         g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+        # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
         if g_base is None or g_1 is None:
             continue
+
         x = float(g_1 - g_base)
+        # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
         if not math.isfinite(x) or abs(x) < 1e-12:
             continue
+
         y = float(g_obs - g_base)
         fit_z.append((y, x))
+
+    # 条件分岐: `not fit_z` を満たす経路を評価する。
+
     if not fit_z:
         raise SystemExit("[fail] no fit data for kZ (gap_p at observed magic Z=50/82)")
+
     kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
     ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -11316,6 +13058,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
     # Corrected gap predictions.
+
     sn_pred_cor = build_sep_n(b_cor, dN=1)
     sp_pred_cor = build_sep_p(b_cor, dZ=1)
     gap_sn_pred_cor = build_gap_n(sn_pred_cor, step=1)
@@ -11332,12 +13075,15 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1]) if key_is_magic == "N" else int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
+            # 条件分岐: `int(magic) in TRAIN_MAGIC` を満たす経路を評価する。
             if int(magic) in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -11357,15 +13103,21 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     # Coverage counts by magic number (obs gaps).
     cov_expanded: dict[tuple[str, int], int] = {}
     for (Z, N0, step) in gap_sn_obs.keys():
+        # 条件分岐: `int(step) != 1` を満たす経路を評価する。
         if int(step) != 1:
             continue
+
         cov_expanded[("gap_Sn", int(N0))] = cov_expanded.get(("gap_Sn", int(N0)), 0) + 1
+
     for (N, Z0, step) in gap_sp_obs.keys():
+        # 条件分岐: `int(step) != 1` を満たす経路を評価する。
         if int(step) != 1:
             continue
+
         cov_expanded[("gap_Sp", int(Z0))] = cov_expanded.get(("gap_Sp", int(Z0)), 0) + 1
 
     # CSV of gap rows (expanded).
+
     out_csv = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded.csv"
     header = [
         "kind",
@@ -11386,8 +13138,10 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = gap_sn_pred_unc.get((Z, N0, 1))
             gb = gap_sn_pred_base.get((Z, N0, 1))
             gc = gap_sn_pred_cor.get((Z, N0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(
                 [
                     "gap_Sn",
@@ -11402,12 +13156,15 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                     f"{float(gc - g_obs):.12g}",
                 ]
             )
+
         for (N, Z0, _dZ), g_obs in sorted(gap_sp_obs.items(), key=lambda x: (x[0][1], x[0][0])):
             gu = gap_sp_pred_unc.get((N, Z0, 1))
             gb = gap_sp_pred_base.get((N, Z0, 1))
             gc = gap_sp_pred_cor.get((N, Z0, 1))
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             w.writerow(
                 [
                     "gap_Sp",
@@ -11424,9 +13181,11 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
 
     # Plot coverage baseline vs expanded.
+
     import matplotlib.pyplot as plt
 
     mags = sorted({m for (_k, m) in (baseline_counts.keys() | cov_expanded.keys())})
+    # 条件分岐: `not mags` を満たす経路を評価する。
     if not mags:
         mags = [2, 8, 20, 28, 50, 82, 126]
 
@@ -11528,8 +13287,12 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.csv
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
 
@@ -11538,6 +13301,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen HF configuration (pn mix, etc).
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -11545,6 +13309,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -11553,6 +13318,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -11560,15 +13326,20 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -11578,73 +13349,104 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
+
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
     # Fit radius model (published only; radii-only fit).
+
     ratios: list[float] = []
     fit_rows: list[dict[str, float]] = []
     with radii_path.open("r", encoding="utf-8", newline="") as f:
         rr = csv.DictReader(f)
         for row in rr:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             Z = int(row.get("z", "-1"))
             N = int(row.get("n", "-1"))
             A = int(row.get("a", "-1"))
+            # 条件分岐: `Z < 1 or N < 0 or A < int(radius_fit_min_a)` を満たす経路を評価する。
             if Z < 1 or N < 0 or A < int(radius_fit_min_a):
                 continue
+
             try:
                 r_val = float(str(row.get("radius_val", "")).strip() or "nan")
             except Exception:
                 r_val = float("nan")
+
+            # 条件分岐: `not (math.isfinite(r_val) and r_val > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(r_val) and r_val > 0):
                 continue
+
             a13 = float(A) ** (1.0 / 3.0)
+            # 条件分岐: `not (math.isfinite(a13) and a13 > 0)` を満たす経路を評価する。
             if not (math.isfinite(a13) and a13 > 0):
                 continue
+
             ratios.append(float(r_val) / float(a13))
             fit_rows.append({"A": float(A), "r_charge_fm": float(r_val), "a13": float(a13), "Z": float(Z), "N": float(N)})
+
     r0 = _median(ratios)
+    # 条件分岐: `not (math.isfinite(r0) and r0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(r0) and r0 > 0):
         raise SystemExit("[fail] could not fit r0 from radii-only data (median ratio invalid)")
+
     fit_resids = [float(fr["r_charge_fm"] - float(r0) * float(fr["a13"])) for fr in fit_rows]
     fit_rms = math.sqrt(sum(x * x for x in fit_resids) / len(fit_resids)) if fit_resids else float("nan")
 
@@ -11674,22 +13476,30 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
 
         a13 = float(A) ** (1.0 / 3.0)
         r_charge = float(r0) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         rho = float(A) / ((4.0 / 3.0) * math.pi * float(R_sharp) ** 3)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -11697,12 +13507,16 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -11715,16 +13529,24 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 m_nucleon_c2_mev=float(m_nucleon_c2),
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not math.isfinite(base_e)` を満たす経路を評価する。
             if not math.isfinite(base_e):
                 continue
+
             e_total = float(base_e) + float(c3_inf) * (float(rho) ** 2) + float(c_surf) / (6.0 * float(R_sharp))
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -11734,10 +13556,13 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after AME2020 parsing")
 
     # Candidate domain boundaries (explicitly test a few cuts; no fitting).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -11748,29 +13573,44 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             return float(p * (p - g) / float(g))
 
         return shell_S
@@ -11779,42 +13619,58 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -11830,13 +13686,16 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -11875,29 +13734,43 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
         b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
         b_pred = {zn: b_pred_all[zn] for zn in a_by_zn.keys()}
+        # 条件分岐: `not a_by_zn` を満たす経路を評価する。
         if not a_by_zn:
             raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
         # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
         an_list: list[float] = []
         ap_list: list[float] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
             if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                 continue
+
+            # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
             if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                 dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                 if math.isfinite(dn):
                     an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+            # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
             if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                 dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                 if math.isfinite(dp):
                     ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
         a_n = _median(an_list)
         a_p = _median(ap_list)
+        # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
         if not (math.isfinite(a_n) and math.isfinite(a_p)):
             raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
         # Pairing baseline binding energies.
+
         b_base: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
             term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -11905,6 +13778,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
         # Shell correction basis terms.
+
         shell_S = shell_S_factory(shell_magic)
         cN: dict[tuple[int, int], float] = {}
         cZ: dict[tuple[int, int], float] = {}
@@ -11914,6 +13788,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
         # Observables (obs).
+
         sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
         sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
         gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -11939,37 +13814,57 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
         fit_n: list[tuple[float, float]] = []
         for (Z, N0, step), g_obs in gap_sn_obs.items():
+            # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sn_pred_base.get((Z, N0, 1))
             g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_n.append((y, x))
+
+        # 条件分岐: `not fit_n` を満たす経路を評価する。
+
         if not fit_n:
             raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
         kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
         # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
         fit_z: list[tuple[float, float]] = []
         for (N, Z0, step), g_obs in gap_sp_obs.items():
+            # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sp_pred_base.get((N, Z0, 1))
             g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_z.append((y, x))
+
+        # 条件分岐: `not fit_z` を満たす経路を評価する。
+
         if not fit_z:
             raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
         kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
         ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -11979,6 +13874,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
         # Corrected gap predictions.
+
         gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
         gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -12030,6 +13926,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 )
 
     # CSV (flat table).
+
     out_csv = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded.csv"
     header = [
         "shell_variant",
@@ -12122,6 +14019,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
 
     # Plot: delta RMS (shell - pairing) vs A_min for train/other and Sn/Sp.
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -12147,6 +14045,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 sub = g.get(subset) if isinstance(g.get(subset), dict) else {}
                 y = float(sub.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(sub.get("rms_resid_pairing_only_MeV", float("nan")))
                 ys.append(float(y))
+
             ax.plot(xs, ys, marker="o", linestyle="-", label=name)
             ax.set_title(title)
             ax.set_xlabel("domain A_min")
@@ -12222,13 +14121,19 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.csv
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
 
     # Frozen HF configuration (pn mix, etc).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -12236,6 +14141,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -12244,6 +14150,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -12251,15 +14158,20 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -12269,36 +14181,51 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
+
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
@@ -12306,42 +14233,59 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return float(sum(vals) / len(vals)) if vals else float("nan")
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
     # Fit radius model (published only; radii-only fit).
+
     x_list: list[float] = []
     y_list: list[float] = []
     fit_rows: list[dict[str, float]] = []
     with radii_path.open("r", encoding="utf-8", newline="") as f:
         rr = csv.DictReader(f)
         for row in rr:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             Z = int(row.get("z", "-1"))
             N = int(row.get("n", "-1"))
             A = int(row.get("a", "-1"))
+            # 条件分岐: `Z < 1 or N < 0 or A < int(radius_fit_min_a)` を満たす経路を評価する。
             if Z < 1 or N < 0 or A < int(radius_fit_min_a):
                 continue
+
             try:
                 r_val = float(str(row.get("radius_val", "")).strip() or "nan")
             except Exception:
                 r_val = float("nan")
+
+            # 条件分岐: `not (math.isfinite(r_val) and r_val > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(r_val) and r_val > 0):
                 continue
+
             a13 = float(A) ** (1.0 / 3.0)
+            # 条件分岐: `not (math.isfinite(a13) and a13 > 0)` を満たす経路を評価する。
             if not (math.isfinite(a13) and a13 > 0):
                 continue
+
             I = float(int(N) - int(Z)) / float(A)
             y = float(r_val) / float(a13)
+            # 条件分岐: `not (math.isfinite(I) and math.isfinite(y))` を満たす経路を評価する。
             if not (math.isfinite(I) and math.isfinite(y)):
                 continue
+
             x_list.append(float(I))
             y_list.append(float(y))
             fit_rows.append({"A": float(A), "Z": float(Z), "N": float(N), "I": float(I), "r_charge_fm": float(r_val), "r_over_a13": float(y)})
+
+    # 条件分岐: `len(x_list) < 10` を満たす経路を評価する。
 
     if len(x_list) < 10:
         raise SystemExit("[fail] insufficient radii-only fit rows for isospin radius model (need >=10)")
@@ -12349,8 +14293,10 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     mx = _mean(x_list)
     my = _mean(y_list)
     vx = sum((x - mx) ** 2 for x in x_list)
+    # 条件分岐: `not (math.isfinite(vx) and vx > 0)` を満たす経路を評価する。
     if not (math.isfinite(vx) and vx > 0):
         raise SystemExit("[fail] invalid variance in I for radius fit (vx<=0)")
+
     cov = sum((x - mx) * (y - my) for x, y in zip(x_list, y_list, strict=True))
     rI = float(cov / vx)
     r0 = float(my - rI * mx)
@@ -12382,24 +14328,33 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
+
         I = float(int(N) - int(Z)) / float(A)
 
         a13 = float(A) ** (1.0 / 3.0)
         r_over_a13 = float(r0) + float(rI) * float(I)
         r_charge = float(r_over_a13) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         rho = float(A) / ((4.0 / 3.0) * math.pi * float(R_sharp) ** 3)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -12407,12 +14362,16 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -12425,16 +14384,24 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 m_nucleon_c2_mev=float(m_nucleon_c2),
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not math.isfinite(base_e)` を満たす経路を評価する。
             if not math.isfinite(base_e):
                 continue
+
             e_total = float(base_e) + float(c3_inf) * (float(rho) ** 2) + float(c_surf) / (6.0 * float(R_sharp))
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -12444,10 +14411,13 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model expansion")
 
     # Candidate domain boundaries (same as Step 7.13.15.22).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -12458,29 +14428,44 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             return float(p * (p - g) / float(g))
 
         return shell_S
@@ -12489,42 +14474,58 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -12540,13 +14541,16 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -12585,29 +14589,43 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
         b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
         b_pred = {zn: b_pred_all[zn] for zn in a_by_zn.keys()}
+        # 条件分岐: `not a_by_zn` を満たす経路を評価する。
         if not a_by_zn:
             raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
         # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
         an_list: list[float] = []
         ap_list: list[float] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
             if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                 continue
+
+            # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
             if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                 dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                 if math.isfinite(dn):
                     an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+            # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
             if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                 dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                 if math.isfinite(dp):
                     ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
         a_n = _median(an_list)
         a_p = _median(ap_list)
+        # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p) and a_n > 0 and a_p > 0)` を満たす経路を評価する。
         if not (math.isfinite(a_n) and math.isfinite(a_p) and a_n > 0 and a_p > 0):
             raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
         # Pairing baseline binding energies.
+
         b_base: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
             term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -12615,6 +14633,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
         # Shell correction basis terms.
+
         shell_S = shell_S_factory(shell_magic)
         cN: dict[tuple[int, int], float] = {}
         cZ: dict[tuple[int, int], float] = {}
@@ -12624,6 +14643,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
         # Observables (obs).
+
         sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
         sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
         gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -12649,37 +14669,57 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
         fit_n: list[tuple[float, float]] = []
         for (Z, N0, step), g_obs in gap_sn_obs.items():
+            # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sn_pred_base.get((Z, N0, 1))
             g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_n.append((y, x))
+
+        # 条件分岐: `not fit_n` を満たす経路を評価する。
+
         if not fit_n:
             raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
         kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
         # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
         fit_z: list[tuple[float, float]] = []
         for (N, Z0, step), g_obs in gap_sp_obs.items():
+            # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sp_pred_base.get((N, Z0, 1))
             g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_z.append((y, x))
+
+        # 条件分岐: `not fit_z` を満たす経路を評価する。
+
         if not fit_z:
             raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
         kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
         ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -12689,6 +14729,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
         # Corrected gap predictions.
+
         gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
         gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -12740,6 +14781,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 )
 
     # CSV (flat table).
+
     out_csv = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin.csv"
     header = [
         "shell_variant",
@@ -12817,6 +14859,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
 
     # Plot: delta RMS (shell - pairing) vs A_min for train/other and Sn/Sp.
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -12842,6 +14885,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 sub = g.get(subset) if isinstance(g.get(subset), dict) else {}
                 y = float(sub.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(sub.get("rms_resid_pairing_only_MeV", float("nan")))
                 ys.append(float(y))
+
             ax.plot(xs, ys, marker="o", linestyle="-", label=name)
             ax.set_title(title)
             ax.set_xlabel("domain A_min")
@@ -12867,11 +14911,17 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     for r in ok_rows:
         sp = r.get("gap_Sp") if isinstance(r.get("gap_Sp"), dict) else {}
         other = sp.get("other_magic") if isinstance(sp.get("other_magic"), dict) else {}
+        # 条件分岐: `int(other.get("n", 0)) <= 0` を満たす経路を評価する。
         if int(other.get("n", 0)) <= 0:
             continue
+
         delta = float(other.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(other.get("rms_resid_pairing_only_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
+        # 条件分岐: `best_sp_other is None or delta < best_sp_other["delta"]` を満たす経路を評価する。
+
         if best_sp_other is None or delta < best_sp_other["delta"]:
             best_sp_other = {"shell_variant": r.get("shell_variant"), "domain_min_A": int(r.get("domain_min_A", -1)), "delta": float(delta), "pair": float(other.get("rms_resid_pairing_only_MeV", float("nan"))), "shell": float(other.get("rms_resid_pairing_shell_MeV", float("nan"))), "n": int(other.get("n", 0))}
 
@@ -12936,13 +14986,19 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.csv
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
 
     # Frozen HF configuration (pn mix, etc).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -12950,6 +15006,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -12958,6 +15015,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -12965,15 +15023,20 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -12983,13 +15046,19 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     # Use the same frozen radius model as Step 7.13.15.21 (baseline), to isolate the proton-side correction here.
+
     metrics_71521_path = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded_metrics.json"
+    # 条件分岐: `not metrics_71521_path.exists()` を満たす経路を評価する。
     if not metrics_71521_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.21 metrics.\n"
@@ -12997,44 +15066,58 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.21\n"
             f"Expected: {metrics_71521_path}"
         )
+
     m71521 = _load_json(metrics_71521_path)
     radius_model = m71521.get("radius_model") if isinstance(m71521.get("radius_model"), dict) else {}
     r0 = float(radius_model.get("r0_fm", float("nan")))
     fit_rms = float(radius_model.get("fit_rms_fm", float("nan")))
     n_fit = int(radius_model.get("n_fit", 0))
+    # 条件分岐: `not (math.isfinite(r0) and r0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(r0) and r0 > 0):
         raise SystemExit(f"[fail] invalid radius_model.r0_fm in 7.13.15.21 metrics: {metrics_71521_path}")
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
+
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
     # Fixed protocol (same structure as Step 7.13.15.22):
     # pairing OES freeze -> kN/kZ refreeze -> shell-gap strict decision.
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
@@ -13046,13 +15129,20 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
           E_x/V = -(3/4) (3/π)^(1/3) e^2 ρ_p^(4/3)
         Return per-nucleon (MeV per A).
         """
+        # 条件分岐: `not (A > 0 and Z >= 0 and math.isfinite(volume_fm3) and volume_fm3 > 0)` を満たす経路を評価する。
         if not (A > 0 and Z >= 0 and math.isfinite(volume_fm3) and volume_fm3 > 0):
             return float("nan")
+
+        # 条件分岐: `Z <= 0` を満たす経路を評価する。
+
         if Z <= 0:
             return 0.0
+
         rho_p = float(Z) / float(volume_fm3)
+        # 条件分岐: `not (math.isfinite(rho_p) and rho_p > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho_p) and rho_p > 0):
             return float("nan")
+
         coef = -(3.0 / 4.0) * ((3.0 / math.pi) ** (1.0 / 3.0)) * float(e2_mev_fm)
         e_density = float(coef) * (float(rho_p) ** (4.0 / 3.0))  # MeV fm^-3
         e_total = float(e_density) * float(volume_fm3)  # MeV
@@ -13068,8 +15158,10 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     ]
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -13078,6 +15170,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
 
     # Predict B (total) for the expanded AME2020 set using the frozen radius model + Coulomb exchange.
+
     a_by_zn_all: dict[tuple[int, int], int] = {}
     b_obs_all: dict[tuple[int, int], float] = {}
     b_pred_all: dict[tuple[int, int], float] = {}
@@ -13085,23 +15178,31 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
 
         a13 = float(A) ** (1.0 / 3.0)
         r_charge = float(r0) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         V_sphere = (4.0 / 3.0) * math.pi * float(R_sharp) ** 3
         rho = float(A) / float(V_sphere)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -13109,12 +15210,16 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -13127,19 +15232,29 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 m_nucleon_c2_mev=float(m_nucleon_c2),
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not math.isfinite(base_e)` を満たす経路を評価する。
             if not math.isfinite(base_e):
                 continue
+
             e_cx = coulomb_exchange_slater_mev_per_a(Z=int(Z), A=int(A), volume_fm3=float(V_sphere))
+            # 条件分岐: `not math.isfinite(e_cx)` を満たす経路を評価する。
             if not math.isfinite(e_cx):
                 continue
+
             e_total = float(base_e) + float(e_cx) + float(c3_inf) * (float(rho) ** 2) + float(c_surf) / (6.0 * float(R_sharp))
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -13149,10 +15264,13 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model prediction")
 
     # Candidate domain boundaries (same as Step 7.13.15.22).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -13163,29 +15281,44 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             return float(p * (p - g) / float(g))
 
         return shell_S
@@ -13198,32 +15331,49 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             denom = float(g) * float(g)
+            # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
             if not (math.isfinite(denom) and denom > 0):
                 return 0.0
+
             return float(p * (p - g) / float(denom))
 
         return shell_S
@@ -13241,8 +15391,11 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {"status": "skipped", "reason": "radii_by_zn is empty", "r_shell_fm": 0.0, "n_fit": 0}
@@ -13257,22 +15410,33 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+            # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
             if not math.isfinite(s_sum):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(s_sum)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(s_sum)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             num += float(w) * float(s_sum) * (float(r_obs) - float(base))
             den += float(w) * float(s_sum) * float(s_sum)
@@ -13305,46 +15469,63 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return out
 
     # Helpers for separations and gaps.
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -13360,13 +15541,16 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -13405,29 +15589,43 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
         b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
         b_pred = {zn: b_pred_all[zn] for zn in a_by_zn.keys()}
+        # 条件分岐: `not a_by_zn` を満たす経路を評価する。
         if not a_by_zn:
             raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
         # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
         an_list: list[float] = []
         ap_list: list[float] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
             if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                 continue
+
+            # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
             if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                 dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                 if math.isfinite(dn):
                     an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+            # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
             if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                 dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                 if math.isfinite(dp):
                     ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
         a_n = _median(an_list)
         a_p = _median(ap_list)
+        # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
         if not (math.isfinite(a_n) and math.isfinite(a_p)):
             raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
         # Pairing baseline binding energies.
+
         b_base: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
             term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -13435,6 +15633,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
         # Shell correction basis terms.
+
         shell_S = shell_S_factory(shell_magic)
         cN: dict[tuple[int, int], float] = {}
         cZ: dict[tuple[int, int], float] = {}
@@ -13444,6 +15643,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
         # Observables (obs).
+
         sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
         sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
         gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -13469,37 +15669,57 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
         fit_n: list[tuple[float, float]] = []
         for (Z, N0, step), g_obs in gap_sn_obs.items():
+            # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sn_pred_base.get((Z, N0, 1))
             g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_n.append((y, x))
+
+        # 条件分岐: `not fit_n` を満たす経路を評価する。
+
         if not fit_n:
             raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
         kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
         # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
         fit_z: list[tuple[float, float]] = []
         for (N, Z0, step), g_obs in gap_sp_obs.items():
+            # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sp_pred_base.get((N, Z0, 1))
             g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_z.append((y, x))
+
+        # 条件分岐: `not fit_z` を満たす経路を評価する。
+
         if not fit_z:
             raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
         kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
         ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -13509,6 +15729,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
         # Corrected gap predictions.
+
         gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
         gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -13560,6 +15781,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 )
 
     # CSV (flat table).
+
     out_csv = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_exchange.csv"
     header = [
         "shell_variant",
@@ -13637,6 +15859,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
 
     # Plot: delta RMS (shell - pairing) vs A_min for train/other and Sn/Sp.
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -13662,6 +15885,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 sub = g.get(subset) if isinstance(g.get(subset), dict) else {}
                 y = float(sub.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(sub.get("rms_resid_pairing_only_MeV", float("nan")))
                 ys.append(float(y))
+
             ax.plot(xs, ys, marker="o", linestyle="-", label=name)
             ax.set_title(title)
             ax.set_xlabel("domain A_min")
@@ -13687,11 +15911,17 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     for r in ok_rows:
         sp = r.get("gap_Sp") if isinstance(r.get("gap_Sp"), dict) else {}
         other = sp.get("other_magic") if isinstance(sp.get("other_magic"), dict) else {}
+        # 条件分岐: `int(other.get("n", 0)) <= 0` を満たす経路を評価する。
         if int(other.get("n", 0)) <= 0:
             continue
+
         delta = float(other.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(other.get("rms_resid_pairing_only_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
+        # 条件分岐: `best_sp_other is None or delta < best_sp_other["delta"]` を満たす経路を評価する。
+
         if best_sp_other is None or delta < best_sp_other["delta"]:
             best_sp_other = {
                 "shell_variant": r.get("shell_variant"),
@@ -13768,13 +15998,19 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.csv
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
 
     # Frozen HF configuration (pn mix, etc).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -13782,6 +16018,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -13790,6 +16027,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -13797,15 +16035,20 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -13815,13 +16058,19 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     # Use the same frozen radius model as Step 7.13.15.21 (baseline), to isolate the finite-size correction here.
+
     metrics_71521_path = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_coverage_expanded_metrics.json"
+    # 条件分岐: `not metrics_71521_path.exists()` を満たす経路を評価する。
     if not metrics_71521_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.21 metrics.\n"
@@ -13829,45 +16078,59 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.21\n"
             f"Expected: {metrics_71521_path}"
         )
+
     m71521 = _load_json(metrics_71521_path)
     radius_model = m71521.get("radius_model") if isinstance(m71521.get("radius_model"), dict) else {}
     r0 = float(radius_model.get("r0_fm", float("nan")))
     fit_rms = float(radius_model.get("fit_rms_fm", float("nan")))
     n_fit = int(radius_model.get("n_fit", 0))
+    # 条件分岐: `not (math.isfinite(r0) and r0 > 0)` を満たす経路を評価する。
     if not (math.isfinite(r0) and r0 > 0):
         raise SystemExit(f"[fail] invalid radius_model.r0_fm in 7.13.15.21 metrics: {metrics_71521_path}")
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
+
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
     # Deterministic finite-size Coulomb model:
     # - direct: 2pF profile (fixed diffuseness a), c determined per-A from r_rms
     # - exchange: Slater (LDA) on the same non-uniform density
+
     e2_mev_fm = 1.43996448
     coef_slater = -(3.0 / 4.0) * ((3.0 / math.pi) ** (1.0 / 3.0))
     fourpi_m13 = (4.0 * math.pi) ** (-1.0 / 3.0)
@@ -13877,13 +16140,18 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     finite_cache: dict[int, dict[str, float]] = {}
 
     def finite_size_coeffs_for_A(A: int) -> dict[str, float]:
+        # 条件分岐: `int(A) in finite_cache` を満たす経路を評価する。
         if int(A) in finite_cache:
             return finite_cache[int(A)]
+
+        # 条件分岐: `A <= 0` を満たす経路を評価する。
+
         if A <= 0:
             raise RuntimeError("A must be positive")
 
         a13 = float(A) ** (1.0 / 3.0)
         r_rms = float(r0) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_rms) and r_rms > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_rms) and r_rms > 0):
             raise RuntimeError(f"invalid r_rms for A={A}")
 
@@ -13891,8 +16159,10 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         c_guess = math.sqrt(c_guess2) if c_guess2 > 0 else max(0.1, float(r_rms) * 0.5)
 
         def rms_from_c(c_fm: float) -> float:
+            # 条件分岐: `not (math.isfinite(c_fm) and c_fm > 0)` を満たす経路を評価する。
             if not (math.isfinite(c_fm) and c_fm > 0):
                 return float("nan")
+
             r_max = max(20.0, 3.0 * float(r_rms) + 20.0 * float(a_diff_fm))
             n = int(math.ceil(r_max / float(dr_fm)))
             I2 = 0.0
@@ -13903,24 +16173,35 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 r2 = float(r) * float(r)
                 I2 += r2 * float(f)
                 I4 += (r2 * r2) * float(f)
+
             I2 *= float(dr_fm)
             I4 *= float(dr_fm)
+            # 条件分岐: `not (math.isfinite(I2) and I2 > 0 and math.isfinite(I4) and I4 > 0)` を満たす経路を評価する。
             if not (math.isfinite(I2) and I2 > 0 and math.isfinite(I4) and I4 > 0):
                 return float("nan")
+
             return math.sqrt(float(I4) / float(I2))
 
         # Bracket and bisection (few iterations; cached per-A).
+
         lo = max(0.05, 0.25 * float(c_guess))
         hi = max(lo * 1.1, 3.0 * float(c_guess) + 10.0 * float(a_diff_fm))
         target = float(r_rms)
         for _ in range(6):
             r_lo = rms_from_c(lo)
             r_hi = rms_from_c(hi)
+            # 条件分岐: `not (math.isfinite(r_lo) and math.isfinite(r_hi))` を満たす経路を評価する。
             if not (math.isfinite(r_lo) and math.isfinite(r_hi)):
                 hi *= 1.5
                 continue
+
+            # 条件分岐: `r_lo <= target <= r_hi` を満たす経路を評価する。
+
             if r_lo <= target <= r_hi:
                 break
+
+            # 条件分岐: `target < r_lo` を満たす経路を評価する。
+
             if target < r_lo:
                 lo *= 0.7
             else:
@@ -13930,15 +16211,19 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         for _ in range(18):
             mid = 0.5 * (float(lo) + float(hi))
             r_mid = rms_from_c(mid)
+            # 条件分岐: `not math.isfinite(r_mid)` を満たす経路を評価する。
             if not math.isfinite(r_mid):
                 break
+
             c = float(mid)
+            # 条件分岐: `r_mid < target` を満たす経路を評価する。
             if r_mid < target:
                 lo = float(mid)
             else:
                 hi = float(mid)
 
         # Coefficients for the final c.
+
         r_max = max(20.0, 3.0 * float(r_rms) + 20.0 * float(a_diff_fm))
         n = int(math.ceil(r_max / float(dr_fm)))
         rs: list[float] = []
@@ -13958,17 +16243,21 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             h1.append(float(r) * float(f))
             I2 += float(g2_i)
             I2_43 += float(r2) * (float(f) ** (4.0 / 3.0))
+
         I2 *= float(dr_fm)
         I2_43 *= float(dr_fm)
+        # 条件分岐: `not (math.isfinite(I2) and I2 > 0 and math.isfinite(I2_43) and I2_43 > 0)` を満たす経路を評価する。
         if not (math.isfinite(I2) and I2 > 0 and math.isfinite(I2_43) and I2_43 > 0):
             raise RuntimeError(f"finite-size integrals failed for A={A}")
 
         # A0(r)=∫_0^r f(r') r'^2 dr'  and  B0(r)=∫_r^∞ f(r') r' dr'  (no 4π).
+
         A0: list[float] = []
         acc = 0.0
         for v in g2:
             acc += float(v) * float(dr_fm)
             A0.append(float(acc))
+
         B0 = [0.0] * n
         acc = 0.0
         for i in range(n - 1, -1, -1):
@@ -13978,6 +16267,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         J = 0.0
         for r, f, a0, b0 in zip(rs, fs, A0, B0, strict=True):
             J += (float(r) * float(f) * float(a0) + (float(r) ** 2) * float(f) * float(b0))
+
         J *= float(dr_fm)
 
         e_dir_unit_over_e2 = 0.5 * float(J) / (float(I2) ** 2)  # [fm^-1]
@@ -13995,6 +16285,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return out
 
     # Predict B (total) for the expanded AME2020 set using the frozen radius model + Coulomb finite-size correction.
+
     a_by_zn_all: dict[tuple[int, int], int] = {}
     b_obs_all: dict[tuple[int, int], float] = {}
     b_pred_all: dict[tuple[int, int], float] = {}
@@ -14002,23 +16293,31 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
 
         a13 = float(A) ** (1.0 / 3.0)
         r_charge = float(r0) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         V_sphere = (4.0 / 3.0) * math.pi * float(R_sharp) ** 3
         rho = float(A) / float(V_sphere)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -14030,12 +16329,16 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -14049,10 +16352,12 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
             e_coul_uniform = float(base_pack.get("Coul", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not (math.isfinite(base_e) and math.isfinite(e_coul_uniform))` を満たす経路を評価する。
             if not (math.isfinite(base_e) and math.isfinite(e_coul_uniform)):
                 continue
 
             # Replace uniform-sphere Coulomb direct with 2pF direct, and add 2pF Slater exchange (LDA).
+
             if int(Z) <= 1:
                 e_dir_fs = 0.0
                 e_x_fs = 0.0
@@ -14064,12 +16369,18 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             e_surf = float(c_surf) / (6.0 * float(R_sharp)) * float(surface_factor)
             e_total = float(base_e) + float(e_coul_fs) + float(c3_inf) * (float(rho) ** 2) + float(e_surf)
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -14079,10 +16390,13 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model prediction")
 
     # Candidate domain boundaries (same as Step 7.13.15.22).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -14099,8 +16413,10 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     ]
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -14112,29 +16428,44 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             return float(p * (p - g) / float(g))
 
         return shell_S
@@ -14147,32 +16478,49 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             denom = float(g) * float(g)
+            # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
             if not (math.isfinite(denom) and denom > 0):
                 return 0.0
+
             return float(p * (p - g) / float(denom))
 
         return shell_S
@@ -14190,8 +16538,11 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {"status": "skipped", "reason": "radii_by_zn is empty", "r_shell_fm": 0.0, "n_fit": 0}
@@ -14206,22 +16557,33 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+            # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
             if not math.isfinite(s_sum):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(s_sum)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(s_sum)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             num += float(w) * float(s_sum) * (float(r_obs) - float(base))
             den += float(w) * float(s_sum) * float(s_sum)
@@ -14254,46 +16616,63 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return out
 
     # Helpers for separations and gaps.
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -14309,13 +16688,16 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -14350,6 +16732,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         }
 
     # Run the same frozen protocol as Step 7.13.15.22 on the expanded set.
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
@@ -14358,29 +16741,43 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
         b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
         b_pred = {zn: b_pred_all[zn] for zn in a_by_zn.keys()}
+        # 条件分岐: `not a_by_zn` を満たす経路を評価する。
         if not a_by_zn:
             raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
         # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
         an_list: list[float] = []
         ap_list: list[float] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
             if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                 continue
+
+            # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
             if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                 dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                 if math.isfinite(dn):
                     an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+            # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
             if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                 dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                 if math.isfinite(dp):
                     ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
         a_n = _median(an_list)
         a_p = _median(ap_list)
+        # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
         if not (math.isfinite(a_n) and math.isfinite(a_p)):
             raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
         # Pairing baseline binding energies.
+
         b_base: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
             term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -14388,6 +16785,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
         # Shell correction basis terms.
+
         shell_S = shell_S_factory(shell_magic)
         cN: dict[tuple[int, int], float] = {}
         cZ: dict[tuple[int, int], float] = {}
@@ -14397,6 +16795,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
         # Observables (obs).
+
         sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
         sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
         gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -14422,37 +16821,57 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
         fit_n: list[tuple[float, float]] = []
         for (Z, N0, step), g_obs in gap_sn_obs.items():
+            # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sn_pred_base.get((Z, N0, 1))
             g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_n.append((y, x))
+
+        # 条件分岐: `not fit_n` を満たす経路を評価する。
+
         if not fit_n:
             raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
         kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
         # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
         fit_z: list[tuple[float, float]] = []
         for (N, Z0, step), g_obs in gap_sp_obs.items():
+            # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sp_pred_base.get((N, Z0, 1))
             g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_z.append((y, x))
+
+        # 条件分岐: `not fit_z` を満たす経路を評価する。
+
         if not fit_z:
             raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
         kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
         ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -14462,6 +16881,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
         # Corrected gap predictions.
+
         gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
         gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -14513,6 +16933,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 )
 
     # CSV (flat table).
+
     out_csv = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_coulomb_finite_size.csv"
     header = [
         "shell_variant",
@@ -14587,6 +17008,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
 
     # Plot: delta RMS (shell - pairing) vs A_min for train/other and Sn/Sp.
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -14612,6 +17034,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 sub = g.get(subset) if isinstance(g.get(subset), dict) else {}
                 y = float(sub.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(sub.get("rms_resid_pairing_only_MeV", float("nan")))
                 ys.append(float(y))
+
             ax.plot(xs, ys, marker="o", linestyle="-", label=name)
             ax.set_title(title)
             ax.set_xlabel("domain A_min")
@@ -14636,11 +17059,17 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     for r in ok_rows:
         sp = r.get("gap_Sp") if isinstance(r.get("gap_Sp"), dict) else {}
         other = sp.get("other_magic") if isinstance(sp.get("other_magic"), dict) else {}
+        # 条件分岐: `int(other.get("n", 0)) <= 0` を満たす経路を評価する。
         if int(other.get("n", 0)) <= 0:
             continue
+
         delta = float(other.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(other.get("rms_resid_pairing_only_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
+        # 条件分岐: `best_sp_other is None or delta < best_sp_other["delta"]` を満たす経路を評価する。
+
         if best_sp_other is None or delta < best_sp_other["delta"]:
             best_sp_other = {
                 "shell_variant": r.get("shell_variant"),
@@ -14724,13 +17153,19 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.csv
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
 
     # Frozen HF configuration (pn mix, etc).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -14738,6 +17173,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -14746,6 +17182,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -14753,15 +17190,20 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -14771,13 +17213,19 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     # Use the independently frozen isospin radius model from Step 7.13.15.23, without refitting.
+
     metrics_71523_path = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json"
+    # 条件分岐: `not metrics_71523_path.exists()` を満たす経路を評価する。
     if not metrics_71523_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.23 metrics.\n"
@@ -14785,6 +17233,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.23\n"
             f"Expected: {metrics_71523_path}"
         )
+
     m71523 = _load_json(metrics_71523_path)
     radius_model_23 = m71523.get("radius_model") if isinstance(m71523.get("radius_model"), dict) else {}
     radius_model_form = str(radius_model_23.get("form", "r_charge = (r0 + rI*I)*A^(1/3), I=(N-Z)/A"))
@@ -14794,6 +17243,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     n_fit = int(radius_model_23.get("n_fit", 0))
     fit_rms = float(radius_model_23.get("fit_rms_fm", float("nan")))
     mean_I_fit = float(radius_model_23.get("mean_I_fit", float("nan")))
+    # 条件分岐: `not (math.isfinite(r0) and math.isfinite(rI))` を満たす経路を評価する。
     if not (math.isfinite(r0) and math.isfinite(rI)):
         raise SystemExit(f"[fail] invalid 7.13.15.23 radius_model (r0/rI missing): {metrics_71523_path}")
 
@@ -14801,30 +17251,38 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     def r_charge_pred(*, Z: int, N: int) -> float | None:
         A = int(Z) + int(N)
+        # 条件分岐: `A < 2 or int(Z) < 1 or int(N) < 0` を満たす経路を評価する。
         if A < 2 or int(Z) < 1 or int(N) < 0:
             return None
+
         I = float(int(N) - int(Z)) / float(A)
         a13 = float(A) ** (1.0 / 3.0)
         r_over_a13 = float(r0) + float(rI) * float(I)
         r_charge = float(r_over_a13) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0.0):
             return None
+
         return float(r_charge)
 
     def delta2r_pred_n(*, Z: int, N0: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z), N=int(N0))
         rLp = r_charge_pred(Z=int(Z), N=int(N0) - int(d))
         rRp = r_charge_pred(Z=int(Z), N=int(N0) + int(d))
+        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
         if r0p is None or rLp is None or rRp is None:
             return None
+
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
     def delta2r_pred_z(*, Z0: int, N: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z0), N=int(N))
         rLp = r_charge_pred(Z=int(Z0) - int(d), N=int(N))
         rRp = r_charge_pred(Z=int(Z0) + int(d), N=int(N))
+        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
         if r0p is None or rLp is None or rRp is None:
             return None
+
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
     def shell_S_radius_factory(magic_list: list[int]):
@@ -14835,32 +17293,49 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             denom = float(g) * float(g)
+            # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
             if not (math.isfinite(denom) and denom > 0):
                 return 0.0
+
             return float(p * (p - g) / float(denom))
 
         return shell_S
@@ -14878,8 +17353,11 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {"status": "skipped", "reason": "radii_by_zn is empty", "r_shell_fm": 0.0, "n_fit": 0}
@@ -14894,22 +17372,33 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+            # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
             if not math.isfinite(s_sum):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(s_sum)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(s_sum)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             num += float(w) * float(s_sum) * (float(r_obs) - float(base))
             den += float(w) * float(s_sum) * float(s_sum)
@@ -14954,8 +17443,11 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache_nz.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {
@@ -14979,23 +17471,34 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             sN = float(shell_S_r(int(N)))
             sZ = float(shell_S_r(int(Z)))
+            # 条件分岐: `not (math.isfinite(sN) and math.isfinite(sZ))` を満たす経路を評価する。
             if not (math.isfinite(sN) and math.isfinite(sZ)):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(sN)) + abs(float(sZ)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(sN)) + abs(float(sZ)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             y = float(r_obs) - float(base)
             s11 += float(w) * float(sN) * float(sN)
@@ -15007,6 +17510,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             counts[str(used) if str(used) in counts else "adopted"] += 1
 
         det = float(s11) * float(s22) - float(s12) * float(s12)
+        # 条件分岐: `math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v i...` を満たす経路を評価する。
         if math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v in (s11, s12, s22, t1, t2)):
             r_shell_n = (float(t1) * float(s22) - float(t2) * float(s12)) / float(det)
             r_shell_z = (float(s11) * float(t2) - float(s12) * float(t1)) / float(det)
@@ -15048,35 +17552,47 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
+
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
     # Deterministic finite-size Coulomb model:
     # - direct: 2pF profile (fixed diffuseness a), c determined from r_rms via bisection
     # - exchange: Slater (LDA) on the same non-uniform density
+
     e2_mev_fm = 1.43996448
     coef_slater = -(3.0 / 4.0) * ((3.0 / math.pi) ** (1.0 / 3.0))
     fourpi_m13 = (4.0 * math.pi) ** (-1.0 / 3.0)
@@ -15088,9 +17604,12 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     def finite_size_coeffs_for_rms(*, r_rms_fm: float) -> dict[str, float]:
         key = int(round(float(r_rms_fm) / float(cache_round_fm)))
+        # 条件分岐: `key in finite_cache` を満たす経路を評価する。
         if key in finite_cache:
             return finite_cache[int(key)]
+
         target_r_rms = float(key) * float(cache_round_fm)
+        # 条件分岐: `not (math.isfinite(target_r_rms) and target_r_rms > 0)` を満たす経路を評価する。
         if not (math.isfinite(target_r_rms) and target_r_rms > 0):
             raise RuntimeError("invalid r_rms")
 
@@ -15098,8 +17617,10 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         c_guess = math.sqrt(c_guess2) if c_guess2 > 0 else max(0.1, float(target_r_rms) * 0.5)
 
         def rms_from_c(c_fm: float) -> float:
+            # 条件分岐: `not (math.isfinite(c_fm) and c_fm > 0)` を満たす経路を評価する。
             if not (math.isfinite(c_fm) and c_fm > 0):
                 return float("nan")
+
             r_max = max(20.0, 3.0 * float(target_r_rms) + 20.0 * float(a_diff_fm))
             n = int(math.ceil(r_max / float(dr_fm)))
             I2 = 0.0
@@ -15110,23 +17631,34 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 r2 = float(r) * float(r)
                 I2 += r2 * float(f)
                 I4 += (r2 * r2) * float(f)
+
             I2 *= float(dr_fm)
             I4 *= float(dr_fm)
+            # 条件分岐: `not (math.isfinite(I2) and I2 > 0 and math.isfinite(I4) and I4 > 0)` を満たす経路を評価する。
             if not (math.isfinite(I2) and I2 > 0 and math.isfinite(I4) and I4 > 0):
                 return float("nan")
+
             return math.sqrt(float(I4) / float(I2))
 
         # Bracket and bisection (few iterations; cached per-quantized r_rms).
+
         lo = max(0.05, 0.25 * float(c_guess))
         hi = max(lo * 1.1, 3.0 * float(c_guess) + 10.0 * float(a_diff_fm))
         for _ in range(6):
             r_lo = rms_from_c(lo)
             r_hi = rms_from_c(hi)
+            # 条件分岐: `not (math.isfinite(r_lo) and math.isfinite(r_hi))` を満たす経路を評価する。
             if not (math.isfinite(r_lo) and math.isfinite(r_hi)):
                 hi *= 1.5
                 continue
+
+            # 条件分岐: `r_lo <= target_r_rms <= r_hi` を満たす経路を評価する。
+
             if r_lo <= target_r_rms <= r_hi:
                 break
+
+            # 条件分岐: `target_r_rms < r_lo` を満たす経路を評価する。
+
             if target_r_rms < r_lo:
                 lo *= 0.7
             else:
@@ -15136,15 +17668,19 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         for _ in range(18):
             mid = 0.5 * (float(lo) + float(hi))
             r_mid = rms_from_c(mid)
+            # 条件分岐: `not math.isfinite(r_mid)` を満たす経路を評価する。
             if not math.isfinite(r_mid):
                 break
+
             c = float(mid)
+            # 条件分岐: `r_mid < target_r_rms` を満たす経路を評価する。
             if r_mid < target_r_rms:
                 lo = float(mid)
             else:
                 hi = float(mid)
 
         # Coefficients for the final c.
+
         r_max = max(20.0, 3.0 * float(target_r_rms) + 20.0 * float(a_diff_fm))
         n = int(math.ceil(r_max / float(dr_fm)))
         rs: list[float] = []
@@ -15164,17 +17700,21 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             h1.append(float(r) * float(f))
             I2 += float(g2_i)
             I2_43 += float(r2) * (float(f) ** (4.0 / 3.0))
+
         I2 *= float(dr_fm)
         I2_43 *= float(dr_fm)
+        # 条件分岐: `not (math.isfinite(I2) and I2 > 0 and math.isfinite(I2_43) and I2_43 > 0)` を満たす経路を評価する。
         if not (math.isfinite(I2) and I2 > 0 and math.isfinite(I2_43) and I2_43 > 0):
             raise RuntimeError("finite-size integrals failed")
 
         # A0(r)=∫_0^r f(r') r'^2 dr'  and  B0(r)=∫_r^∞ f(r') r' dr'  (no 4π).
+
         A0: list[float] = []
         acc = 0.0
         for v in g2:
             acc += float(v) * float(dr_fm)
             A0.append(float(acc))
+
         B0 = [0.0] * n
         acc = 0.0
         for i in range(n - 1, -1, -1):
@@ -15184,6 +17724,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         J = 0.0
         for r, f, a0, b0 in zip(rs, fs, A0, B0, strict=True):
             J += (float(r) * float(f) * float(a0) + (float(r) ** 2) * float(f) * float(b0))
+
         J *= float(dr_fm)
 
         e_dir_unit_over_e2 = 0.5 * float(J) / (float(I2) ** 2)  # [fm^-1]
@@ -15201,6 +17742,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return out
 
     # Predict B (total) for the expanded AME2020 set using the frozen isospin radius model + Coulomb finite-size correction.
+
     a_by_zn_all: dict[tuple[int, int], int] = {}
     b_obs_all: dict[tuple[int, int], float] = {}
     b_pred_all: dict[tuple[int, int], float] = {}
@@ -15211,25 +17753,34 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
+
         I = float(int(N) - int(Z)) / float(A)
 
         a13 = float(A) ** (1.0 / 3.0)
         r_over_a13 = float(r0) + float(rI) * float(I)
         r_charge = float(r_over_a13) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         V_sphere = (4.0 / 3.0) * math.pi * float(R_sharp) ** 3
         rho = float(A) / float(V_sphere)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -15242,11 +17793,15 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             beta2=float(beta2_val), include_beta2=bool(include_beta2 and beta2_apply_surface)
         )
 
+        # 条件分岐: `include_beta2` を満たす経路を評価する。
         if include_beta2:
+            # 条件分岐: `beta2_mode == "direct"` を満たす経路を評価する。
             if beta2_mode == "direct":
                 n_beta2_direct += 1
+            # 条件分岐: 前段条件が不成立で、`beta2_mode == "imputed"` を追加評価する。
             elif beta2_mode == "imputed":
                 n_beta2_imputed += 1
+            # 条件分岐: 前段条件が不成立で、`beta2_mode == "missing"` を追加評価する。
             elif beta2_mode == "missing":
                 n_beta2_missing += 1
 
@@ -15257,12 +17812,16 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -15276,10 +17835,12 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
             e_coul_uniform = float(base_pack.get("Coul", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not (math.isfinite(base_e) and math.isfinite(e_coul_uniform))` を満たす経路を評価する。
             if not (math.isfinite(base_e) and math.isfinite(e_coul_uniform)):
                 continue
 
             # Replace uniform-sphere Coulomb direct with 2pF direct, and add 2pF Slater exchange (LDA).
+
             if int(Z) <= 1:
                 e_dir_fs = 0.0
                 e_x_fs = 0.0
@@ -15291,12 +17852,18 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             e_surf = float(c_surf) / (6.0 * float(R_sharp)) * float(surface_factor)
             e_total = float(base_e) + float(e_coul_fs) + float(c3_inf) * (float(rho) ** 2) + float(e_surf)
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -15306,10 +17873,13 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model prediction")
 
     # Candidate domain boundaries (same as Step 7.13.15.22).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -15326,8 +17896,10 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     ]
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -15339,29 +17911,44 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             return float(p * (p - g) / float(g))
 
         return shell_S
@@ -15374,32 +17961,49 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             denom = float(g) * float(g)
+            # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
             if not (math.isfinite(denom) and denom > 0):
                 return 0.0
+
             return float(p * (p - g) / float(denom))
 
         return shell_S
@@ -15417,8 +18021,11 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {"status": "skipped", "reason": "radii_by_zn is empty", "r_shell_fm": 0.0, "n_fit": 0}
@@ -15433,22 +18040,33 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+            # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
             if not math.isfinite(s_sum):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(s_sum)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(s_sum)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             num += float(w) * float(s_sum) * (float(r_obs) - float(base))
             den += float(w) * float(s_sum) * float(s_sum)
@@ -15481,46 +18099,63 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         return out
 
     # Helpers for separations and gaps.
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -15536,13 +18171,16 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -15577,6 +18215,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         }
 
     # Run the same frozen protocol as Step 7.13.15.22 on the expanded set.
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
@@ -15585,29 +18224,43 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
         b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
         b_pred = {zn: b_pred_all[zn] for zn in a_by_zn.keys()}
+        # 条件分岐: `not a_by_zn` を満たす経路を評価する。
         if not a_by_zn:
             raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
         # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
         an_list: list[float] = []
         ap_list: list[float] = []
         for (Z, N), A in a_by_zn.items():
+            # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
             if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                 continue
+
+            # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
             if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                 dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                 if math.isfinite(dn):
                     an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+            # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
             if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                 dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                 if math.isfinite(dp):
                     ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
         a_n = _median(an_list)
         a_p = _median(ap_list)
+        # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
         if not (math.isfinite(a_n) and math.isfinite(a_p)):
             raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
         # Pairing baseline binding energies.
+
         b_base: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
             term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -15615,6 +18268,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
         # Shell correction basis terms.
+
         shell_S = shell_S_factory(shell_magic)
         cN: dict[tuple[int, int], float] = {}
         cZ: dict[tuple[int, int], float] = {}
@@ -15624,6 +18278,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             cZ[(Z, N)] = float(hw) * float(shell_S(int(Z)))
 
         # Observables (obs).
+
         sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
         sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
         gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -15649,37 +18304,57 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         # Fit kN from neutron gaps at observed magic N in {50,82} (1D LS).
         fit_n: list[tuple[float, float]] = []
         for (Z, N0, step), g_obs in gap_sn_obs.items():
+            # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sn_pred_base.get((Z, N0, 1))
             g_1 = gap_sn_pred_N1.get((Z, N0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_n.append((y, x))
+
+        # 条件分岐: `not fit_n` を満たす経路を評価する。
+
         if not fit_n:
             raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
         kN = float(sum(y * x for y, x in fit_n) / sum(x * x for _y, x in fit_n))
 
         # Fit kZ from proton gaps at observed magic Z in {50,82} (1D LS).
         fit_z: list[tuple[float, float]] = []
         for (N, Z0, step), g_obs in gap_sp_obs.items():
+            # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
             if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                 continue
+
             g_base = gap_sp_pred_base.get((N, Z0, 1))
             g_1 = gap_sp_pred_Z1.get((N, Z0, 1))
+            # 条件分岐: `g_base is None or g_1 is None` を満たす経路を評価する。
             if g_base is None or g_1 is None:
                 continue
+
             x = float(g_1 - g_base)
+            # 条件分岐: `not math.isfinite(x) or abs(x) < 1e-12` を満たす経路を評価する。
             if not math.isfinite(x) or abs(x) < 1e-12:
                 continue
+
             y = float(g_obs - g_base)
             fit_z.append((y, x))
+
+        # 条件分岐: `not fit_z` を満たす経路を評価する。
+
         if not fit_z:
             raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
         kZ = float(sum(y * x for y, x in fit_z) / sum(x * x for _y, x in fit_z))
         ratio_kZ_over_kN = float(kZ / kN) if abs(kN) > 1e-12 else float("nan")
 
@@ -15689,6 +18364,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             b_cor[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
         # Corrected gap predictions.
+
         gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
         gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -15740,6 +18416,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 )
 
     # CSV (flat table).
+
     out_csv = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_coulomb_finite_size.csv"
     header = [
         "shell_variant",
@@ -15814,6 +18491,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             )
 
     # Plot: delta RMS (shell - pairing) vs A_min for train/other and Sn/Sp.
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -15839,6 +18517,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 sub = g.get(subset) if isinstance(g.get(subset), dict) else {}
                 y = float(sub.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(sub.get("rms_resid_pairing_only_MeV", float("nan")))
                 ys.append(float(y))
+
             ax.plot(xs, ys, marker="o", linestyle="-", label=name)
             ax.set_title(title)
             ax.set_xlabel("domain A_min")
@@ -15866,11 +18545,17 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     for r in ok_rows:
         sp = r.get("gap_Sp") if isinstance(r.get("gap_Sp"), dict) else {}
         other = sp.get("other_magic") if isinstance(sp.get("other_magic"), dict) else {}
+        # 条件分岐: `int(other.get("n", 0)) <= 0` を満たす経路を評価する。
         if int(other.get("n", 0)) <= 0:
             continue
+
         delta = float(other.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(other.get("rms_resid_pairing_only_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
+        # 条件分岐: `best_sp_other is None or delta < best_sp_other["delta"]` を満たす経路を評価する。
+
         if best_sp_other is None or delta < best_sp_other["delta"]:
             best_sp_other = {
                 "shell_variant": r.get("shell_variant"),
@@ -16013,22 +18698,44 @@ def _run_step_7_13_15_27(
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep.csv
       - output/public/quantum/nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_metrics.json
     """
+    # 条件分岐: `domain_min_a < 1` を満たす経路を評価する。
     if domain_min_a < 1:
         raise SystemExit("[fail] domain_min_a must be >= 1")
+
+    # 条件分岐: `radius_fit_min_a < 1` を満たす経路を評価する。
+
     if radius_fit_min_a < 1:
         raise SystemExit("[fail] radius_fit_min_a must be >= 1")
+
+    # 条件分岐: `not (math.isfinite(float(shell_s_power_g)) and float(shell_s_power_g) > 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(float(shell_s_power_g)) and float(shell_s_power_g) > 0.0):
         raise SystemExit("[fail] shell_s_power_g must be finite and > 0")
+
+    # 条件分岐: `bool(include_radii_kink or include_radii_kink_delta2r)` を満たす経路を評価する。
+
     if bool(include_radii_kink or include_radii_kink_delta2r):
+        # 条件分岐: `not (math.isfinite(float(radii_kink_sigma_min)) and float(radii_kink_sigma_mi...` を満たす経路を評価する。
         if not (math.isfinite(float(radii_kink_sigma_min)) and float(radii_kink_sigma_min) > 0.0):
             raise SystemExit("[fail] radii_kink_sigma_min must be finite and > 0")
+
+    # 条件分岐: `bool(include_radii_kink_delta2r)` を満たす経路を評価する。
+
     if bool(include_radii_kink_delta2r):
+        # 条件分岐: `not (math.isfinite(float(radii_kink_delta2r_resid_sigma_max)) and float(radii...` を満たす経路を評価する。
         if not (math.isfinite(float(radii_kink_delta2r_resid_sigma_max)) and float(radii_kink_delta2r_resid_sigma_max) > 0.0):
             raise SystemExit("[fail] radii_kink_delta2r_resid_sigma_max must be finite and > 0")
+
+    # 条件分岐: `bool(radii_kink_delta2r_radius_beta2 and (not include_beta2))` を満たす経路を評価する。
+
     if bool(radii_kink_delta2r_radius_beta2 and (not include_beta2)):
         raise SystemExit("[fail] radii_kink_delta2r_radius_beta2 requires include_beta2=True")
+
+    # 条件分岐: `bool(radii_kink_delta2r_radius_shell_nz_beta2 and (not include_beta2))` を満たす経路を評価する。
+
     if bool(radii_kink_delta2r_radius_shell_nz_beta2 and (not include_beta2)):
         raise SystemExit("[fail] radii_kink_delta2r_radius_shell_nz_beta2 requires include_beta2=True")
+
     if (
         int(bool(radii_kink_delta2r_radius_shell))
         + int(bool(radii_kink_delta2r_radius_shell_nz))
@@ -16068,8 +18775,11 @@ def _run_step_7_13_15_27(
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache_nz.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {
@@ -16093,23 +18803,34 @@ def _run_step_7_13_15_27(
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             sN = float(shell_S_r(int(N)))
             sZ = float(shell_S_r(int(Z)))
+            # 条件分岐: `not (math.isfinite(sN) and math.isfinite(sZ))` を満たす経路を評価する。
             if not (math.isfinite(sN) and math.isfinite(sZ)):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(sN)) + abs(float(sZ)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(sN)) + abs(float(sZ)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             y = float(r_obs) - float(base)
             s11 += float(w) * float(sN) * float(sN)
@@ -16121,6 +18842,7 @@ def _run_step_7_13_15_27(
             counts[str(used) if str(used) in counts else "adopted"] += 1
 
         det = float(s11) * float(s22) - float(s12) * float(s12)
+        # 条件分岐: `math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v i...` を満たす経路を評価する。
         if math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v in (s11, s12, s22, t1, t2)):
             r_shell_n = (float(t1) * float(s22) - float(t2) * float(s12)) / float(det)
             r_shell_z = (float(s11) * float(t2) - float(s12) * float(t1)) / float(det)
@@ -16172,8 +18894,11 @@ def _run_step_7_13_15_27(
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache_nz_beta2.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {
@@ -16199,34 +18924,48 @@ def _run_step_7_13_15_27(
         beta2_counts = {"direct": 0, "imputed": 0, "missing": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             b2, b2_mode = _beta2_for_zn(
                 Z=int(Z), N=int(N), beta2_by_zn=beta2_by_zn, include_beta2=include_beta2, imputation=str(beta2_imputation)
             )
+            # 条件分岐: `str(b2_mode) in beta2_counts` を満たす経路を評価する。
             if str(b2_mode) in beta2_counts:
                 beta2_counts[str(b2_mode)] += 1
+
             factor = math.sqrt(1.0 + float(k_beta2) * float(b2) * float(b2))
+            # 条件分岐: `not (math.isfinite(factor) and factor > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(factor) and factor > 0.0):
                 counts["skipped"] += 1
                 continue
+
             sN = float(shell_S_r(int(N)))
             sZ = float(shell_S_r(int(Z)))
+            # 条件分岐: `not (math.isfinite(sN) and math.isfinite(sZ))` を満たす経路を評価する。
             if not (math.isfinite(sN) and math.isfinite(sZ)):
                 counts["skipped"] += 1
                 continue
+
             xN = float(factor) * float(sN)
             xZ = float(factor) * float(sZ)
+            # 条件分岐: `abs(float(xN)) + abs(float(xZ)) < 1e-15` を満たす経路を評価する。
             if abs(float(xN)) + abs(float(xZ)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             y = float(r_obs) - float(base) * float(factor)
             s11 += float(w) * float(xN) * float(xN)
@@ -16238,6 +18977,7 @@ def _run_step_7_13_15_27(
             counts[str(used) if str(used) in counts else "adopted"] += 1
 
         det = float(s11) * float(s22) - float(s12) * float(s12)
+        # 条件分岐: `math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v i...` を満たす経路を評価する。
         if math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v in (s11, s12, s22, t1, t2)):
             r_shell_n = (float(t1) * float(s22) - float(t2) * float(s12)) / float(det)
             r_shell_z = (float(s11) * float(t2) - float(s12) * float(t1)) / float(det)
@@ -16287,7 +19027,9 @@ def _run_step_7_13_15_27(
     beta2_raw_path = beta2_path.parent / "adopted-entries.json"
     e2plus_path = Path(e2plus_path_override) if e2plus_path_override is not None else (beta2_path.parent / "extracted_e2plus.json")
     beta2_by_zn: dict[tuple[int, int], float] = {}
+    # 条件分岐: `include_beta2` を満たす経路を評価する。
     if include_beta2:
+        # 条件分岐: `not beta2_path.exists()` を満たす経路を評価する。
         if not beta2_path.exists():
             raise SystemExit(
                 "[fail] missing NNDC B(E2) deformation beta2 dataset.\n"
@@ -16295,24 +19037,36 @@ def _run_step_7_13_15_27(
                 "  python -B scripts/quantum/fetch_nuclear_deformation_be2_sources.py\n"
                 f"Expected: {beta2_path}"
             )
+
         beta2_extracted = _load_json(beta2_path)
         beta2_rows = beta2_extracted.get("rows")
+        # 条件分岐: `not isinstance(beta2_rows, list) or not beta2_rows` を満たす経路を評価する。
         if not isinstance(beta2_rows, list) or not beta2_rows:
             raise SystemExit(f"[fail] invalid NNDC beta2 extracted dataset: rows missing/empty: {beta2_path}")
+
         for r in beta2_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             Z = int(r.get("Z", -1))
             N = int(r.get("N", -1))
             b = float(r.get("beta2", float("nan")))
+            # 条件分岐: `Z < 1 or N < 0 or not math.isfinite(b)` を満たす経路を評価する。
             if Z < 1 or N < 0 or not math.isfinite(b):
                 continue
+
             beta2_by_zn[(int(Z), int(N))] = float(b)
+
+        # 条件分岐: `not beta2_by_zn` を満たす経路を評価する。
+
         if not beta2_by_zn:
             raise SystemExit(f"[fail] NNDC beta2 map is empty after parsing: {beta2_path}")
 
     e2plus_by_zn: dict[tuple[int, int], float] = {}
+    # 条件分岐: `include_e2plus` を満たす経路を評価する。
     if include_e2plus:
+        # 条件分岐: `not e2plus_path.exists()` を満たす経路を評価する。
         if not e2plus_path.exists():
             raise SystemExit(
                 "[fail] missing spectroscopy E(2+1) dataset.\n"
@@ -16320,18 +19074,27 @@ def _run_step_7_13_15_27(
                 f"  {e2plus_fetch_hint}\n"
                 f"Expected: {e2plus_path}"
             )
+
         try:
             e2plus_by_zn = _load_nndc_e2plus_keV_by_zn(e2plus_path)
         except Exception as e:
             raise SystemExit(f"[fail] failed to parse NNDC E(2+1) dataset: {e}: {e2plus_path}") from e
+
+        # 条件分岐: `not e2plus_by_zn` を満たす経路を評価する。
+
         if not e2plus_by_zn:
             raise SystemExit(f"[fail] NNDC E(2+1) map is empty after parsing: {e2plus_path}")
 
     spectro_multi_path = Path(spectro_multi_path_override) if spectro_multi_path_override is not None else None
     spectro_multi_maps: dict[str, dict[tuple[int, int], float]] | None = None
+    # 条件分岐: `include_spectro_multi` を満たす経路を評価する。
     if include_spectro_multi:
+        # 条件分岐: `spectro_multi_path is None` を満たす経路を評価する。
         if spectro_multi_path is None:
             raise SystemExit("[fail] include_spectro_multi requires spectro_multi_path_override")
+
+        # 条件分岐: `not spectro_multi_path.exists()` を満たす経路を評価する。
+
         if not spectro_multi_path.exists():
             raise SystemExit(
                 "[fail] missing NuDat3 spectroscopy multi-metric dataset.\n"
@@ -16339,15 +19102,21 @@ def _run_step_7_13_15_27(
                 f"  {spectro_multi_fetch_hint}\n"
                 f"Expected: {spectro_multi_path}"
             )
+
         try:
             spectro_multi_maps = _load_nudat3_spectroscopy_maps(spectro_multi_path)
         except Exception as e:
             raise SystemExit(f"[fail] failed to parse NuDat3 spectroscopy dataset: {e}: {spectro_multi_path}") from e
+
+        # 条件分岐: `not any(bool(v) for v in spectro_multi_maps.values())` を満たす経路を評価する。
+
         if not any(bool(v) for v in spectro_multi_maps.values()):
             raise SystemExit(f"[fail] NuDat3 spectroscopy maps are empty after parsing: {spectro_multi_path}")
 
     # Frozen HF configuration (pn mix, etc).
+
     metrics_hf_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_frozen_metrics.json"
+    # 条件分岐: `not metrics_hf_path.exists()` を満たす経路を評価する。
     if not metrics_hf_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15 metrics.\n"
@@ -16355,6 +19124,7 @@ def _run_step_7_13_15_27(
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15\n"
             f"Expected: {metrics_hf_path}"
         )
+
     hf = _load_json(metrics_hf_path)
     model = hf.get("model") if isinstance(hf.get("model"), dict) else {}
     pair_channels = model.get("pair_channels") if isinstance(model.get("pair_channels"), dict) else {}
@@ -16363,6 +19133,7 @@ def _run_step_7_13_15_27(
 
     # Frozen surface-term fit (C3_inf, C_surf) from Step 7.13.15.7.
     metrics_7157_path = out_dir / "nuclear_a_dependence_hf_three_body_surface_term_metrics.json"
+    # 条件分岐: `not metrics_7157_path.exists()` を満たす経路を評価する。
     if not metrics_7157_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.7 metrics.\n"
@@ -16370,15 +19141,20 @@ def _run_step_7_13_15_27(
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.7\n"
             f"Expected: {metrics_7157_path}"
         )
+
     m7157 = _load_json(metrics_7157_path)
     fit_by_eq = m7157.get("fit_by_eq")
+    # 条件分岐: `not isinstance(fit_by_eq, dict) or not fit_by_eq` を満たす経路を評価する。
     if not isinstance(fit_by_eq, dict) or not fit_by_eq:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: fit_by_eq missing/empty: {metrics_7157_path}")
+
     eq_labels = sorted(int(k) for k in fit_by_eq.keys() if str(k).isdigit())
+    # 条件分岐: `not eq_labels` を満たす経路を評価する。
     if not eq_labels:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: eq labels missing: {metrics_7157_path}")
 
     # Common potential inputs (eq18/eq19 sets).
+
     common = _load_common_inputs(out_dir=out_dir)
     pot_sets = common["pot_sets"]
     consts = common["constants"]
@@ -16388,14 +19164,19 @@ def _run_step_7_13_15_27(
     root = Path(__file__).resolve().parents[2]
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
+
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
 
     radii_by_zn: dict[tuple[int, int], tuple[float, float, str]] = {}
     radii_kink_counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
     kink_sigma_min = float(radii_kink_sigma_min)
+    # 条件分岐: `include_radii_kink or include_radii_kink_delta2r` を満たす経路を評価する。
     if include_radii_kink or include_radii_kink_delta2r:
         with radii_path.open("r", encoding="utf-8", newline="") as f:
             reader = csv.DictReader(f)
@@ -16406,27 +19187,36 @@ def _run_step_7_13_15_27(
                 except Exception:
                     radii_kink_counts["skipped"] += 1
                     continue
+
+                # 条件分岐: `Z < 1 or N < 0` を満たす経路を評価する。
+
                 if Z < 1 or N < 0:
                     radii_kink_counts["skipped"] += 1
                     continue
 
                 def fnum(key: str) -> float | None:
                     s = str(row.get(key, "")).strip()
+                    # 条件分岐: `not s` を満たす経路を評価する。
                     if not s:
                         return None
+
                     try:
                         x = float(s)
                     except Exception:
                         return None
+
                     return float(x) if math.isfinite(x) else None
 
                 r_val = fnum("radius_val")
                 r_unc = fnum("radius_unc")
                 used = "adopted"
+                # 条件分岐: `r_val is None or r_unc is None` を満たす経路を評価する。
                 if r_val is None or r_unc is None:
                     r_val = fnum("radius_preliminary_val")
                     r_unc = fnum("radius_preliminary_unc")
                     used = "preliminary"
+
+                # 条件分岐: `r_val is None or r_unc is None or not (float(r_val) > 0.0 and float(r_unc) >=...` を満たす経路を評価する。
 
                 if r_val is None or r_unc is None or not (float(r_val) > 0.0 and float(r_unc) >= 0.0):
                     radii_kink_counts["skipped"] += 1
@@ -16436,55 +19226,87 @@ def _run_step_7_13_15_27(
                 radii_kink_counts[str(used)] += 1
 
     def kink_info_n(*, Z: int, N0: int, d: int = 2) -> tuple[float, float, float] | None:
+        # 条件分岐: `not (include_radii_kink or include_radii_kink_delta2r)` を満たす経路を評価する。
         if not (include_radii_kink or include_radii_kink_delta2r):
             return None
+
+        # 条件分岐: `bool(include_radii_kink_delta2r and radii_kink_delta2r_even_even_only)` を満たす経路を評価する。
+
         if bool(include_radii_kink_delta2r and radii_kink_delta2r_even_even_only):
+            # 条件分岐: `(int(Z) % 2 != 0) or (int(N0) % 2 != 0)` を満たす経路を評価する。
             if (int(Z) % 2 != 0) or (int(N0) % 2 != 0):
                 return None
+
         c0 = radii_by_zn.get((int(Z), int(N0)))
         cL = radii_by_zn.get((int(Z), int(N0) - int(d)))
         cR = radii_by_zn.get((int(Z), int(N0) + int(d)))
+        # 条件分岐: `c0 is None or cL is None or cR is None` を満たす経路を評価する。
         if c0 is None or cL is None or cR is None:
             return None
+
         r0, s0, _ = c0
         rL, sL, _ = cL
         rR, sR, _ = cR
+        # 条件分岐: `not all(math.isfinite(float(x)) for x in (r0, rL, rR, s0, sL, sR))` を満たす経路を評価する。
         if not all(math.isfinite(float(x)) for x in (r0, rL, rR, s0, sL, sR)):
             return None
+
+        # 条件分岐: `float(s0) <= 0.0 or float(sL) <= 0.0 or float(sR) <= 0.0` を満たす経路を評価する。
+
         if float(s0) <= 0.0 or float(sL) <= 0.0 or float(sR) <= 0.0:
             return None
+
         d2 = float(rR) - 2.0 * float(r0) + float(rL)
         sig = math.sqrt(float(sR) ** 2 + 4.0 * float(s0) ** 2 + float(sL) ** 2)
+        # 条件分岐: `not (math.isfinite(d2) and math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(d2) and math.isfinite(sig) and sig > 0.0):
             return None
+
         return (abs(float(d2)) / float(sig), float(d2), float(sig))
 
     def kink_info_z(*, Z0: int, N: int, d: int = 2) -> tuple[float, float, float] | None:
+        # 条件分岐: `not (include_radii_kink or include_radii_kink_delta2r)` を満たす経路を評価する。
         if not (include_radii_kink or include_radii_kink_delta2r):
             return None
+
+        # 条件分岐: `bool(include_radii_kink_delta2r and radii_kink_delta2r_even_even_only)` を満たす経路を評価する。
+
         if bool(include_radii_kink_delta2r and radii_kink_delta2r_even_even_only):
+            # 条件分岐: `(int(Z0) % 2 != 0) or (int(N) % 2 != 0)` を満たす経路を評価する。
             if (int(Z0) % 2 != 0) or (int(N) % 2 != 0):
                 return None
+
         c0 = radii_by_zn.get((int(Z0), int(N)))
         cL = radii_by_zn.get((int(Z0) - int(d), int(N)))
         cR = radii_by_zn.get((int(Z0) + int(d), int(N)))
+        # 条件分岐: `c0 is None or cL is None or cR is None` を満たす経路を評価する。
         if c0 is None or cL is None or cR is None:
             return None
+
         r0, s0, _ = c0
         rL, sL, _ = cL
         rR, sR, _ = cR
+        # 条件分岐: `not all(math.isfinite(float(x)) for x in (r0, rL, rR, s0, sL, sR))` を満たす経路を評価する。
         if not all(math.isfinite(float(x)) for x in (r0, rL, rR, s0, sL, sR)):
             return None
+
+        # 条件分岐: `float(s0) <= 0.0 or float(sL) <= 0.0 or float(sR) <= 0.0` を満たす経路を評価する。
+
         if float(s0) <= 0.0 or float(sL) <= 0.0 or float(sR) <= 0.0:
             return None
+
         d2 = float(rR) - 2.0 * float(r0) + float(rL)
         sig = math.sqrt(float(sR) ** 2 + 4.0 * float(s0) ** 2 + float(sL) ** 2)
+        # 条件分岐: `not (math.isfinite(d2) and math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(d2) and math.isfinite(sig) and sig > 0.0):
             return None
+
         return (abs(float(d2)) / float(sig), float(d2), float(sig))
 
     # Use the independently frozen isospin radius model from Step 7.13.15.23, without refitting.
+
     metrics_71523_path = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json"
+    # 条件分岐: `not metrics_71523_path.exists()` を満たす経路を評価する。
     if not metrics_71523_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.23 metrics.\n"
@@ -16492,6 +19314,7 @@ def _run_step_7_13_15_27(
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.23\n"
             f"Expected: {metrics_71523_path}"
         )
+
     m71523 = _load_json(metrics_71523_path)
     radius_model_23 = m71523.get("radius_model") if isinstance(m71523.get("radius_model"), dict) else {}
     radius_model_form = str(radius_model_23.get("form", "r_charge = (r0 + rI*I)*A^(1/3), I=(N-Z)/A"))
@@ -16501,6 +19324,7 @@ def _run_step_7_13_15_27(
     n_fit = int(radius_model_23.get("n_fit", 0))
     fit_rms = float(radius_model_23.get("fit_rms_fm", float("nan")))
     mean_I_fit = float(radius_model_23.get("mean_I_fit", float("nan")))
+    # 条件分岐: `not (math.isfinite(r0) and math.isfinite(rI))` を満たす経路を評価する。
     if not (math.isfinite(r0) and math.isfinite(rI)):
         raise SystemExit(f"[fail] invalid 7.13.15.23 radius_model (r0/rI missing): {metrics_71523_path}")
 
@@ -16508,30 +19332,38 @@ def _run_step_7_13_15_27(
 
     def r_charge_pred(*, Z: int, N: int) -> float | None:
         A = int(Z) + int(N)
+        # 条件分岐: `A < 2 or int(Z) < 1 or int(N) < 0` を満たす経路を評価する。
         if A < 2 or int(Z) < 1 or int(N) < 0:
             return None
+
         I = float(int(N) - int(Z)) / float(A)
         a13 = float(A) ** (1.0 / 3.0)
         r_over_a13 = float(r0) + float(rI) * float(I)
         r_charge = float(r_over_a13) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0.0):
             return None
+
         return float(r_charge)
 
     def delta2r_pred_n(*, Z: int, N0: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z), N=int(N0))
         rLp = r_charge_pred(Z=int(Z), N=int(N0) - int(d))
         rRp = r_charge_pred(Z=int(Z), N=int(N0) + int(d))
+        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
         if r0p is None or rLp is None or rRp is None:
             return None
+
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
     def delta2r_pred_z(*, Z0: int, N: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z0), N=int(N))
         rLp = r_charge_pred(Z=int(Z0) - int(d), N=int(N))
         rRp = r_charge_pred(Z=int(Z0) + int(d), N=int(N))
+        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
         if r0p is None or rLp is None or rRp is None:
             return None
+
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
     def shell_S_radius_factory(magic_list: list[int]):
@@ -16542,32 +19374,49 @@ def _run_step_7_13_15_27(
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             denom = float(g) * float(g)
+            # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
             if not (math.isfinite(denom) and denom > 0):
                 return 0.0
+
             return float(p * (p - g) / float(denom))
 
         return shell_S
@@ -16585,8 +19434,11 @@ def _run_step_7_13_15_27(
         """
         key = tuple(int(x) for x in list(shell_magic))
         cached = radii_shell_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {"status": "skipped", "reason": "radii_by_zn is empty", "r_shell_fm": 0.0, "n_fit": 0}
@@ -16601,22 +19453,33 @@ def _run_step_7_13_15_27(
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
+
             s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+            # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
             if not math.isfinite(s_sum):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(s_sum)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(s_sum)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             num += float(w) * float(s_sum) * (float(r_obs) - float(base))
             den += float(w) * float(s_sum) * float(s_sum)
@@ -16663,8 +19526,11 @@ def _run_step_7_13_15_27(
         """
         key = int(fit_min_a)
         cached = radii_odd_even_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {"status": "skipped", "reason": "radii_by_zn is empty", "r_oe_N_fm": 0.0, "r_oe_Z_fm": 0.0, "n_fit": 0}
@@ -16680,13 +19546,18 @@ def _run_step_7_13_15_27(
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
@@ -16704,6 +19575,7 @@ def _run_step_7_13_15_27(
             counts[str(used) if str(used) in counts else "adopted"] += 1
 
         det = float(s11) * float(s22) - float(s12) * float(s12)
+        # 条件分岐: `math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v i...` を満たす経路を評価する。
         if math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v in (s11, s12, s22, t1, t2)):
             r_oe_n = (float(t1) * float(s22) - float(t2) * float(s12)) / float(det)
             r_oe_z = (float(s11) * float(t2) - float(s12) * float(t1)) / float(det)
@@ -16756,10 +19628,12 @@ def _run_step_7_13_15_27(
         """
         key = tuple([int(fit_min_a)] + [int(x) for x in list(magic)])
         cached = radii_magic_offset_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
 
         magic_set = {int(x) for x in list(magic) if int(x) > 0}
+        # 条件分岐: `not magic_set` を満たす経路を評価する。
         if not magic_set:
             out = {
                 "status": "skipped",
@@ -16771,6 +19645,8 @@ def _run_step_7_13_15_27(
             }
             radii_magic_offset_fit_cache[key] = out
             return out
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {
@@ -16793,13 +19669,18 @@ def _run_step_7_13_15_27(
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
@@ -16817,6 +19698,7 @@ def _run_step_7_13_15_27(
             counts[str(used) if str(used) in counts else "adopted"] += 1
 
         det = float(s11) * float(s22) - float(s12) * float(s12)
+        # 条件分岐: `math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v i...` を満たす経路を評価する。
         if math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v in (s11, s12, s22, t1, t2)):
             r_magic_n = (float(t1) * float(s22) - float(t2) * float(s12)) / float(det)
             r_magic_z = (float(s11) * float(t2) - float(s12) * float(t1)) / float(det)
@@ -16873,16 +19755,23 @@ def _run_step_7_13_15_27(
         - Keeps the model linear in (r_magic_N, r_magic_Z) so weighted LS is closed-form.
         - Intended to reduce Δ²r overshoot when a pure center-only offset is used.
         """
+        # 条件分岐: `not (math.isfinite(float(neighbor_weight)) and 0.0 <= float(neighbor_weight)...` を満たす経路を評価する。
         if not (math.isfinite(float(neighbor_weight)) and 0.0 <= float(neighbor_weight) <= 1.0):
             raise ValueError("neighbor_weight must be finite and within [0,1]")
+
+        # 条件分岐: `int(neighbor_step) <= 0` を満たす経路を評価する。
+
         if int(neighbor_step) <= 0:
             raise ValueError("neighbor_step must be >= 1")
+
         key = tuple([int(fit_min_a), int(round(float(neighbor_weight) * 1000)), int(neighbor_step)] + [int(x) for x in list(magic)])
         cached = radii_magic_offset_neighbors_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
 
         magic_set = {int(x) for x in list(magic) if int(x) > 0}
+        # 条件分岐: `not magic_set` を満たす経路を評価する。
         if not magic_set:
             out = {
                 "status": "skipped",
@@ -16896,6 +19785,8 @@ def _run_step_7_13_15_27(
             }
             radii_magic_offset_neighbors_fit_cache[key] = out
             return out
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {
@@ -16912,10 +19803,15 @@ def _run_step_7_13_15_27(
             return out
 
         def w_magic(x: int) -> float:
+            # 条件分岐: `int(x) in magic_set` を満たす経路を評価する。
             if int(x) in magic_set:
                 return 1.0
+
+            # 条件分岐: `(int(x) - int(neighbor_step)) in magic_set or (int(x) + int(neighbor_step)) i...` を満たす経路を評価する。
+
             if (int(x) - int(neighbor_step)) in magic_set or (int(x) + int(neighbor_step)) in magic_set:
                 return float(neighbor_weight)
+
             return 0.0
 
         s11 = 0.0
@@ -16927,24 +19823,34 @@ def _run_step_7_13_15_27(
         counts = {"adopted": 0, "preliminary": 0, "skipped": 0}
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
 
             wN = float(w_magic(int(N)))
             wZ = float(w_magic(int(Z)))
+            # 条件分岐: `not (math.isfinite(wN) and math.isfinite(wZ))` を満たす経路を評価する。
             if not (math.isfinite(wN) and math.isfinite(wZ)):
                 counts["skipped"] += 1
                 continue
+
+            # 条件分岐: `abs(float(wN)) + abs(float(wZ)) < 1e-15` を満たす経路を評価する。
+
             if abs(float(wN)) + abs(float(wZ)) < 1e-15:
                 continue
+
             w = 1.0 / (sig * sig)
             y = float(r_obs) - float(base)
             s11 += float(w) * float(wN) * float(wN)
@@ -16956,6 +19862,7 @@ def _run_step_7_13_15_27(
             counts[str(used) if str(used) in counts else "adopted"] += 1
 
         det = float(s11) * float(s22) - float(s12) * float(s12)
+        # 条件分岐: `math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v i...` を満たす経路を評価する。
         if math.isfinite(det) and abs(float(det)) > 0.0 and all(math.isfinite(v) for v in (s11, s12, s22, t1, t2)):
             r_magic_n = (float(t1) * float(s22) - float(t2) * float(s12)) / float(det)
             r_magic_z = (float(s11) * float(t2) - float(s12) * float(t1)) / float(det)
@@ -17015,8 +19922,11 @@ def _run_step_7_13_15_27(
         magic_list = sorted({int(x) for x in list(magic) if int(x) > 0})
         key = tuple([int(fit_min_a)] + [int(x) for x in magic_list])
         cached = radii_magic_offset_per_magic_fit_cache.get(key)
+        # 条件分岐: `isinstance(cached, dict)` を満たす経路を評価する。
         if isinstance(cached, dict):
             return cached
+
+        # 条件分岐: `not magic_list` を満たす経路を評価する。
 
         if not magic_list:
             out = {
@@ -17031,6 +19941,8 @@ def _run_step_7_13_15_27(
             }
             radii_magic_offset_per_magic_fit_cache[key] = out
             return out
+
+        # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
 
         if not radii_by_zn:
             out = {
@@ -17060,22 +19972,34 @@ def _run_step_7_13_15_27(
 
         for (Z, N), (r_obs, r_sig, used) in radii_by_zn.items():
             A = int(Z) + int(N)
+            # 条件分岐: `A < int(fit_min_a)` を満たす経路を評価する。
             if A < int(fit_min_a):
                 continue
+
             sig = float(r_sig)
+            # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
             if not (math.isfinite(sig) and sig > 0.0):
                 counts["skipped"] += 1
                 continue
+
             base = r_charge_pred(Z=int(Z), N=int(N))
+            # 条件分岐: `base is None` を満たす経路を評価する。
             if base is None:
                 counts["skipped"] += 1
                 continue
 
             active: list[int] = []
+            # 条件分岐: `int(N) in idx_N` を満たす経路を評価する。
             if int(N) in idx_N:
                 active.append(int(idx_N[int(N)]))
+
+            # 条件分岐: `int(Z) in idx_Z` を満たす経路を評価する。
+
             if int(Z) in idx_Z:
                 active.append(int(idx_Z[int(Z)]))
+
+            # 条件分岐: `not active` を満たす経路を評価する。
+
             if not active:
                 continue
 
@@ -17089,6 +20013,8 @@ def _run_step_7_13_15_27(
 
             rows_fit.append((float(r_obs), float(base), float(sig), int(Z), int(N)))
             counts[str(used) if str(used) in counts else "adopted"] += 1
+
+        # 条件分岐: `not rows_fit` を満たす経路を評価する。
 
         if not rows_fit:
             out = {
@@ -17106,8 +20032,10 @@ def _run_step_7_13_15_27(
             return out
 
         # Drop unconstrained parameters to avoid singular normal equations.
+
         active_params = [i for i in range(n_params) if int(used_counts[i]) > 0]
         n_active = int(len(active_params))
+        # 条件分岐: `n_active == 0` を満たす経路を評価する。
         if n_active == 0:
             out = {
                 "status": "skipped",
@@ -17132,32 +20060,48 @@ def _run_step_7_13_15_27(
             eps = 1e-18
             for i in range(n):
                 pivot = max(range(i, n), key=lambda r: abs(float(aug[r][i])))
+                # 条件分岐: `abs(float(aug[pivot][i])) < eps` を満たす経路を評価する。
                 if abs(float(aug[pivot][i])) < eps:
                     return None
+
+                # 条件分岐: `pivot != i` を満たす経路を評価する。
+
                 if pivot != i:
                     aug[i], aug[pivot] = aug[pivot], aug[i]
+
                 piv = float(aug[i][i])
                 inv = 1.0 / float(piv)
                 for k in range(i, n + 1):
                     aug[i][k] = float(aug[i][k]) * float(inv)
+
                 for r in range(n):
+                    # 条件分岐: `r == i` を満たす経路を評価する。
                     if r == i:
                         continue
+
                     factor = float(aug[r][i])
+                    # 条件分岐: `abs(float(factor)) < 1e-30` を満たす経路を評価する。
                     if abs(float(factor)) < 1e-30:
                         continue
+
                     for k in range(i, n + 1):
                         aug[r][k] = float(aug[r][k]) - float(factor) * float(aug[i][k])
+
             return [float(aug[i][n]) for i in range(n)]
 
         coeff_active = solve_gauss(MM, bb)
+        # 条件分岐: `coeff_active is None` を満たす経路を評価する。
         if coeff_active is None:
             # Ridge fallback (tiny diagonal) to handle near-singular cases.
             diag_max = max((abs(float(MM[i][i])) for i in range(n_active)), default=0.0)
             lam = max(1e-12 * float(diag_max), 1e-12)
             for i in range(n_active):
                 MM[i][i] = float(MM[i][i]) + float(lam)
+
             coeff_active = solve_gauss(MM, bb)
+
+        # 条件分岐: `coeff_active is None` を満たす経路を評価する。
+
         if coeff_active is None:
             coeff_active = [0.0 for _ in range(n_active)]
 
@@ -17196,35 +20140,47 @@ def _run_step_7_13_15_27(
 
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
 
     # Map: (Z,N) -> (A, B/A, sigma, symbol)
+
     ame_map: dict[tuple[int, int], dict[str, object]] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
         ba_sig_keV = float(r.get("binding_sigma_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ame_map[(Z, N)] = {
             "A": int(A),
             "symbol": str(r.get("symbol", "")),
             "B_over_A_obs_MeV": float(ba_keV) / 1000.0,
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
         }
+
+    # 条件分岐: `not ame_map` を満たす経路を評価する。
+
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
     # Deterministic finite-size Coulomb model:
     # - direct: 2pF profile (fixed diffuseness a), c determined from r_rms via bisection
     # - exchange: Slater (LDA) on the same non-uniform density
+
     e2_mev_fm = 1.43996448
     coef_slater = -(3.0 / 4.0) * ((3.0 / math.pi) ** (1.0 / 3.0))
     fourpi_m13 = (4.0 * math.pi) ** (-1.0 / 3.0)
@@ -17236,9 +20192,12 @@ def _run_step_7_13_15_27(
 
     def finite_size_coeffs_for_rms(*, r_rms_fm: float) -> dict[str, float]:
         key = int(round(float(r_rms_fm) / float(cache_round_fm)))
+        # 条件分岐: `key in finite_cache` を満たす経路を評価する。
         if key in finite_cache:
             return finite_cache[int(key)]
+
         target_r_rms = float(key) * float(cache_round_fm)
+        # 条件分岐: `not (math.isfinite(target_r_rms) and target_r_rms > 0)` を満たす経路を評価する。
         if not (math.isfinite(target_r_rms) and target_r_rms > 0):
             raise RuntimeError("invalid r_rms")
 
@@ -17246,8 +20205,10 @@ def _run_step_7_13_15_27(
         c_guess = math.sqrt(c_guess2) if c_guess2 > 0 else max(0.1, float(target_r_rms) * 0.5)
 
         def rms_from_c(c_fm: float) -> float:
+            # 条件分岐: `not (math.isfinite(c_fm) and c_fm > 0)` を満たす経路を評価する。
             if not (math.isfinite(c_fm) and c_fm > 0):
                 return float("nan")
+
             r_max = max(20.0, 3.0 * float(target_r_rms) + 20.0 * float(a_diff_fm))
             n = int(math.ceil(r_max / float(dr_fm)))
             I2 = 0.0
@@ -17258,23 +20219,34 @@ def _run_step_7_13_15_27(
                 r2 = float(r) * float(r)
                 I2 += r2 * float(f)
                 I4 += (r2 * r2) * float(f)
+
             I2 *= float(dr_fm)
             I4 *= float(dr_fm)
+            # 条件分岐: `not (math.isfinite(I2) and I2 > 0 and math.isfinite(I4) and I4 > 0)` を満たす経路を評価する。
             if not (math.isfinite(I2) and I2 > 0 and math.isfinite(I4) and I4 > 0):
                 return float("nan")
+
             return math.sqrt(float(I4) / float(I2))
 
         # Bracket and bisection (few iterations; cached per-quantized r_rms).
+
         lo = max(0.05, 0.25 * float(c_guess))
         hi = max(lo * 1.1, 3.0 * float(c_guess) + 10.0 * float(a_diff_fm))
         for _ in range(6):
             r_lo = rms_from_c(lo)
             r_hi = rms_from_c(hi)
+            # 条件分岐: `not (math.isfinite(r_lo) and math.isfinite(r_hi))` を満たす経路を評価する。
             if not (math.isfinite(r_lo) and math.isfinite(r_hi)):
                 hi *= 1.5
                 continue
+
+            # 条件分岐: `r_lo <= target_r_rms <= r_hi` を満たす経路を評価する。
+
             if r_lo <= target_r_rms <= r_hi:
                 break
+
+            # 条件分岐: `target_r_rms < r_lo` を満たす経路を評価する。
+
             if target_r_rms < r_lo:
                 lo *= 0.7
             else:
@@ -17284,15 +20256,19 @@ def _run_step_7_13_15_27(
         for _ in range(18):
             mid = 0.5 * (float(lo) + float(hi))
             r_mid = rms_from_c(mid)
+            # 条件分岐: `not math.isfinite(r_mid)` を満たす経路を評価する。
             if not math.isfinite(r_mid):
                 break
+
             c = float(mid)
+            # 条件分岐: `r_mid < target_r_rms` を満たす経路を評価する。
             if r_mid < target_r_rms:
                 lo = float(mid)
             else:
                 hi = float(mid)
 
         # Coefficients for the final c.
+
         r_max = max(20.0, 3.0 * float(target_r_rms) + 20.0 * float(a_diff_fm))
         n = int(math.ceil(r_max / float(dr_fm)))
         rs: list[float] = []
@@ -17312,17 +20288,21 @@ def _run_step_7_13_15_27(
             h1.append(float(r) * float(f))
             I2 += float(g2_i)
             I2_43 += float(r2) * (float(f) ** (4.0 / 3.0))
+
         I2 *= float(dr_fm)
         I2_43 *= float(dr_fm)
+        # 条件分岐: `not (math.isfinite(I2) and I2 > 0 and math.isfinite(I2_43) and I2_43 > 0)` を満たす経路を評価する。
         if not (math.isfinite(I2) and I2 > 0 and math.isfinite(I2_43) and I2_43 > 0):
             raise RuntimeError("finite-size integrals failed")
 
         # A0(r)=∫_0^r f(r') r'^2 dr'  and  B0(r)=∫_r^∞ f(r') r' dr'  (no 4π).
+
         A0: list[float] = []
         acc = 0.0
         for v in g2:
             acc += float(v) * float(dr_fm)
             A0.append(float(acc))
+
         B0 = [0.0] * n
         acc = 0.0
         for i in range(n - 1, -1, -1):
@@ -17332,6 +20312,7 @@ def _run_step_7_13_15_27(
         J = 0.0
         for r, f, a0, b0 in zip(rs, fs, A0, B0, strict=True):
             J += (float(r) * float(f) * float(a0) + (float(r) ** 2) * float(f) * float(b0))
+
         J *= float(dr_fm)
 
         e_dir_unit_over_e2 = 0.5 * float(J) / (float(I2) ** 2)  # [fm^-1]
@@ -17349,6 +20330,7 @@ def _run_step_7_13_15_27(
         return out
 
     # Predict B (total) for the expanded AME2020 set using the frozen isospin radius model + Coulomb finite-size correction.
+
     a_by_zn_all: dict[tuple[int, int], int] = {}
     b_obs_all: dict[tuple[int, int], float] = {}
     b_pred_all: dict[tuple[int, int], float] = {}
@@ -17359,25 +20341,34 @@ def _run_step_7_13_15_27(
 
     for (Z, N), v in ame_map.items():
         A = int(v["A"])
+        # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
         if A < int(domain_min_a):
             continue
+
         ba_obs = float(v["B_over_A_obs_MeV"])
+        # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
         if not math.isfinite(ba_obs):
             continue
+
         I = float(int(N) - int(Z)) / float(A)
 
         a13 = float(A) ** (1.0 / 3.0)
         r_over_a13 = float(r0) + float(rI) * float(I)
         r_charge = float(r_over_a13) * float(a13)
+        # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_charge) and r_charge > 0):
             n_skipped += 1
             continue
+
         R_sharp = _sharp_radius_from_rms(float(r_charge))
+        # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
         if not (math.isfinite(R_sharp) and R_sharp > 0):
             n_skipped += 1
             continue
+
         V_sphere = (4.0 / 3.0) * math.pi * float(R_sharp) ** 3
         rho = float(A) / float(V_sphere)
+        # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
         if not (math.isfinite(rho) and rho > 0):
             n_skipped += 1
             continue
@@ -17390,11 +20381,15 @@ def _run_step_7_13_15_27(
             beta2=float(beta2_val), include_beta2=bool(include_beta2 and beta2_apply_surface)
         )
 
+        # 条件分岐: `include_beta2` を満たす経路を評価する。
         if include_beta2:
+            # 条件分岐: `beta2_mode == "direct"` を満たす経路を評価する。
             if beta2_mode == "direct":
                 n_beta2_direct += 1
+            # 条件分岐: 前段条件が不成立で、`beta2_mode == "imputed"` を追加評価する。
             elif beta2_mode == "imputed":
                 n_beta2_imputed += 1
+            # 条件分岐: 前段条件が不成立で、`beta2_mode == "missing"` を追加評価する。
             elif beta2_mode == "missing":
                 n_beta2_missing += 1
 
@@ -17405,12 +20400,16 @@ def _run_step_7_13_15_27(
         preds: dict[int, float] = {}
         for eq in eq_labels:
             fk = fit_by_eq.get(str(eq))
+            # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
             if not isinstance(fk, dict):
                 continue
+
             c3_inf = float(fk.get("C3_inf", float("nan")))
             c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+            # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
             if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                 continue
+
             base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                 A=int(A),
                 Z=int(Z),
@@ -17424,10 +20423,12 @@ def _run_step_7_13_15_27(
             )
             base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
             e_coul_uniform = float(base_pack.get("Coul", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+            # 条件分岐: `not (math.isfinite(base_e) and math.isfinite(e_coul_uniform))` を満たす経路を評価する。
             if not (math.isfinite(base_e) and math.isfinite(e_coul_uniform)):
                 continue
 
             # Replace uniform-sphere Coulomb direct with 2pF direct, and add 2pF Slater exchange (LDA).
+
             if int(Z) <= 1:
                 e_dir_fs = 0.0
                 e_x_fs = 0.0
@@ -17438,12 +20439,18 @@ def _run_step_7_13_15_27(
             e_coul_fs = (float(e_dir_fs) - float(e_coul_uniform)) + float(e_x_fs)
             e_total = float(base_e) + float(e_coul_fs) + float(c3_inf) * (float(rho) ** 2) + float(c_surf) / (6.0 * float(R_sharp))
             ba_pred = -float(e_total)
+            # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
             if math.isfinite(ba_pred):
                 preds[int(eq)] = float(ba_pred)
+
+        # 条件分岐: `not preds` を満たす経路を評価する。
 
         if not preds:
             n_skipped += 1
             continue
+
+        # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
         if 18 in preds and 19 in preds:
             ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
         else:
@@ -17453,10 +20460,13 @@ def _run_step_7_13_15_27(
         b_obs_all[(int(Z), int(N))] = float(A) * float(ba_obs)
         b_pred_all[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
+    # 条件分岐: `not a_by_zn_all` を満たす経路を評価する。
+
     if not a_by_zn_all:
         raise SystemExit(f"[fail] no in-domain nuclei (A>={domain_min_a}) found after radius-model prediction")
 
     # Candidate domain boundaries (same as Step 7.13.15.22).
+
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
@@ -17472,8 +20482,10 @@ def _run_step_7_13_15_27(
     ]
 
     def _median(vals: list[float]) -> float:
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             return float("nan")
+
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
@@ -17485,77 +20497,111 @@ def _run_step_7_13_15_27(
         magic = list(magic_list)
 
         def shell_S(x: int) -> float:
+            # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
                 return 0.0
+
             Mk = None
             Mk1 = None
             for a, b in zip(magic[:-1], magic[1:], strict=True):
+                # 条件分岐: `int(a) < int(x) <= int(b)` を満たす経路を評価する。
                 if int(a) < int(x) <= int(b):
                     Mk = int(a)
                     Mk1 = int(b)
                     break
+
+            # 条件分岐: `Mk is None or Mk1 is None` を満たす経路を評価する。
+
             if Mk is None or Mk1 is None:
                 Mk = int(magic[-2])
                 Mk1 = int(magic[-1])
+                # 条件分岐: `x > Mk1` を満たす経路を評価する。
                 if x > Mk1:
                     Mk = int(magic[-1])
                     Mk1 = int(magic[-1] + 1)
+
             g = int(Mk1 - Mk)
+            # 条件分岐: `g <= 0` を満たす経路を評価する。
             if g <= 0:
                 return 0.0
+
             p = int(x - Mk)
+            # 条件分岐: `p < 0` を満たす経路を評価する。
             if p < 0:
                 p = 0
+
+            # 条件分岐: `p > g` を満たす経路を評価する。
+
             if p > g:
                 p = g
+
             denom = float(g) ** float(shell_s_power_g)
+            # 条件分岐: `not (math.isfinite(denom) and denom > 0)` を満たす経路を評価する。
             if not (math.isfinite(denom) and denom > 0):
                 return 0.0
+
             return float(p * (p - g) / float(denom))
 
         return shell_S
 
     # Helpers for separations and gaps.
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (Z, int(N) - int(dN))
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
             child = (int(Z) - int(dZ), N)
+            # 条件分岐: `child not in a_by_zn` を満たす経路を評価する。
             if child not in a_by_zn:
                 continue
+
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
+
         return out
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for N0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sn_map.items()):
+                # 条件分岐: `int(N) != int(N0)` を満たす経路を評価する。
                 if int(N) != int(N0):
                     continue
+
                 nxt = (Z, int(N0) + int(step))
+                # 条件分岐: `nxt not in sn_map` を満たす経路を評価する。
                 if nxt not in sn_map:
                     continue
+
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
+
         return out
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
             for (Z, N), _val in list(sp_map.items()):
+                # 条件分岐: `int(Z) != int(Z0)` を満たす経路を評価する。
                 if int(Z) != int(Z0):
                     continue
+
                 nxt = (int(Z0) + int(step), N)
+                # 条件分岐: `nxt not in sp_map` を満たす経路を評価する。
                 if nxt not in sp_map:
                     continue
+
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
+
         return out
 
     def summarize_gaps(
@@ -17571,13 +20617,16 @@ def _run_step_7_13_15_27(
             gu = g_unc.get(key)
             gb = g_base.get(key)
             gc = g_cor.get(key)
+            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
             if gu is None or gb is None or gc is None:
                 continue
+
             magic = int(key[1])
             resid_u = float(gu - obs)
             resid_b = float(gb - obs)
             resid_c = float(gc - obs)
             by_magic.setdefault(magic, []).append((resid_u, resid_b, resid_c))
+            # 条件分岐: `magic in TRAIN_MAGIC` を満たす経路を評価する。
             if magic in TRAIN_MAGIC:
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
@@ -17612,6 +20661,7 @@ def _run_step_7_13_15_27(
         }
 
     # Run the same frozen protocol as Step 7.13.15.22 on the expanded set.
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
 
@@ -17619,6 +20669,7 @@ def _run_step_7_13_15_27(
         # Solve min ||y - k0*x0 - k1*x1||^2 via 2x2 normal equations.
         if len(yx0x1) < 2:
             return float("nan"), float("nan")
+
         s00 = 0.0
         s01 = 0.0
         s11 = 0.0
@@ -17630,14 +20681,21 @@ def _run_step_7_13_15_27(
             s11 += float(x1) * float(x1)
             t0 += float(x0) * float(y)
             t1 += float(x1) * float(y)
+
         det = float(s00) * float(s11) - float(s01) * float(s01)
+        # 条件分岐: `not (math.isfinite(det) and abs(det) > 1e-18 and math.isfinite(s00) and math....` を満たす経路を評価する。
         if not (math.isfinite(det) and abs(det) > 1e-18 and math.isfinite(s00) and math.isfinite(s11)):
             # fallback: use x0 only
             if math.isfinite(s00) and s00 > 0:
                 return float(t0 / s00), 0.0
+
+            # 条件分岐: `math.isfinite(s11) and s11 > 0` を満たす経路を評価する。
+
             if math.isfinite(s11) and s11 > 0:
                 return 0.0, float(t1 / s11)
+
             return float("nan"), float("nan")
+
         k0 = (float(t0) * float(s11) - float(t1) * float(s01)) / float(det)
         k1 = (float(t1) * float(s00) - float(t0) * float(s01)) / float(det)
         return float(k0), float(k1)
@@ -17648,29 +20706,43 @@ def _run_step_7_13_15_27(
             a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
             b_obs = {zn: b_obs_all[zn] for zn in a_by_zn.keys()}
             b_pred = {zn: b_pred_all_map[zn] for zn in a_by_zn.keys()}
+            # 条件分岐: `not a_by_zn` を満たす経路を評価する。
             if not a_by_zn:
                 raise RuntimeError(f"empty domain slice at A_min={a_min}")
 
             # Freeze pairing (a_n, a_p) from OES (3-point) on B_obs.
+
             an_list: list[float] = []
             ap_list: list[float] = []
             for (Z, N), A in a_by_zn.items():
+                # 条件分岐: `near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1)` を満たす経路を評価する。
                 if near_observed_magic(int(N), tol=1) or near_observed_magic(int(Z), tol=1):
                     continue
+
+                # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
+
                 if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
                     dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+                    # 条件分岐: `math.isfinite(dn)` を満たす経路を評価する。
                     if math.isfinite(dn):
                         an_list.append(abs(float(dn)) * math.sqrt(float(A)) / 2.0)
+
+                # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
+
                 if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
                     dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+                    # 条件分岐: `math.isfinite(dp)` を満たす経路を評価する。
                     if math.isfinite(dp):
                         ap_list.append(abs(float(dp)) * math.sqrt(float(A)) / 2.0)
+
             a_n = _median(an_list)
             a_p = _median(ap_list)
+            # 条件分岐: `not (math.isfinite(a_n) and math.isfinite(a_p))` を満たす経路を評価する。
             if not (math.isfinite(a_n) and math.isfinite(a_p)):
                 raise RuntimeError(f"pairing freeze failed (no OES samples) at A_min={a_min}")
 
             # Pairing baseline binding energies.
+
             b_base: dict[tuple[int, int], float] = {}
             for (Z, N), A in a_by_zn.items():
                 term_n = float(a_n) * float(((-1) ** int(N))) / math.sqrt(float(A))
@@ -17678,6 +20750,7 @@ def _run_step_7_13_15_27(
                 b_base[(Z, N)] = float(b_pred[(Z, N)]) + float(term_n) + float(term_p)
 
             # Shell correction basis terms.
+
             shell_S = shell_S_factory(shell_magic)
             cN0: dict[tuple[int, int], float] = {}
             cZ0: dict[tuple[int, int], float] = {}
@@ -17692,6 +20765,7 @@ def _run_step_7_13_15_27(
                 cZ1[(Z, N)] = float(I) * float(hw) * float(shell_S(int(Z)))
 
             # Observables (obs).
+
             sn_obs = build_sep_n(a_by_zn, b_obs, dN=1)
             sp_obs = build_sep_p(a_by_zn, b_obs, dZ=1)
             gap_sn_obs = build_gap_n(sn_obs, step=1)
@@ -17722,50 +20796,78 @@ def _run_step_7_13_15_27(
             # Fit kN(I)=kN0+kN1*I from neutron gaps at observed magic N in {50,82}.
             fit_n: list[tuple[float, float, float]] = []
             for (Z, N0, step), g_obs in gap_sn_obs.items():
+                # 条件分岐: `int(step) != 1 or int(N0) not in TRAIN_MAGIC` を満たす経路を評価する。
                 if int(step) != 1 or int(N0) not in TRAIN_MAGIC:
                     continue
+
                 g_base = gap_sn_pred_base.get((Z, N0, 1))
                 g0 = gap_sn_pred_N0.get((Z, N0, 1))
                 g1 = gap_sn_pred_N1.get((Z, N0, 1))
+                # 条件分岐: `g_base is None or g0 is None or g1 is None` を満たす経路を評価する。
                 if g_base is None or g0 is None or g1 is None:
                     continue
+
                 x0 = float(g0 - g_base)
                 x1 = float(g1 - g_base)
+                # 条件分岐: `not (math.isfinite(x0) and math.isfinite(x1)) or (abs(x0) < 1e-12 and abs(x1)...` を満たす経路を評価する。
                 if not (math.isfinite(x0) and math.isfinite(x1)) or (abs(x0) < 1e-12 and abs(x1) < 1e-12):
                     continue
+
                 y = float(g_obs - g_base)
+                # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
                 if not math.isfinite(y):
                     continue
+
                 fit_n.append((y, x0, x1))
+
+            # 条件分岐: `not fit_n` を満たす経路を評価する。
+
             if not fit_n:
                 raise RuntimeError(f"no fit data for kN at A_min={a_min}")
+
             kN0, kN1 = fit2d(fit_n)
+            # 条件分岐: `not (math.isfinite(kN0) and math.isfinite(kN1))` を満たす経路を評価する。
             if not (math.isfinite(kN0) and math.isfinite(kN1)):
                 raise RuntimeError(f"failed kN(I) fit at A_min={a_min}")
 
             # Fit kZ(I)=kZ0+kZ1*I from proton gaps at observed magic Z in {50,82}.
+
             fit_z: list[tuple[float, float, float]] = []
             for (N, Z0, step), g_obs in gap_sp_obs.items():
+                # 条件分岐: `int(step) != 1 or int(Z0) not in TRAIN_MAGIC` を満たす経路を評価する。
                 if int(step) != 1 or int(Z0) not in TRAIN_MAGIC:
                     continue
+
                 g_base = gap_sp_pred_base.get((N, Z0, 1))
                 g0 = gap_sp_pred_Z0.get((N, Z0, 1))
                 g1 = gap_sp_pred_Z1.get((N, Z0, 1))
+                # 条件分岐: `g_base is None or g0 is None or g1 is None` を満たす経路を評価する。
                 if g_base is None or g0 is None or g1 is None:
                     continue
+
                 x0 = float(g0 - g_base)
                 x1 = float(g1 - g_base)
+                # 条件分岐: `not (math.isfinite(x0) and math.isfinite(x1)) or (abs(x0) < 1e-12 and abs(x1)...` を満たす経路を評価する。
                 if not (math.isfinite(x0) and math.isfinite(x1)) or (abs(x0) < 1e-12 and abs(x1) < 1e-12):
                     continue
+
                 y = float(g_obs - g_base)
+                # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
                 if not math.isfinite(y):
                     continue
+
                 fit_z.append((y, x0, x1))
+
+            # 条件分岐: `not fit_z` を満たす経路を評価する。
+
             if not fit_z:
                 raise RuntimeError(f"no fit data for kZ at A_min={a_min}")
+
             kZ0, kZ1 = fit2d(fit_z)
+            # 条件分岐: `not (math.isfinite(kZ0) and math.isfinite(kZ1))` を満たす経路を評価する。
             if not (math.isfinite(kZ0) and math.isfinite(kZ1)):
                 raise RuntimeError(f"failed kZ(I) fit at A_min={a_min}")
+
             ratio_kZ_over_kN = float(kZ0 / kN0) if abs(kN0) > 1e-12 else float("nan")
 
             # Corrected binding energies (pairing + refrozen shell with I dependence).
@@ -17774,6 +20876,7 @@ def _run_step_7_13_15_27(
                 b_cor[zn] = float(b0) + float(kN0) * float(cN0[zn]) + float(kN1) * float(cN1[zn]) + float(kZ0) * float(cZ0[zn]) + float(kZ1) * float(cZ1[zn])
 
             # Corrected gap predictions.
+
             gap_sn_pred_cor = build_gap_n(build_sep_n(a_by_zn, b_cor, dN=1), step=1)
             gap_sp_pred_cor = build_gap_p(build_sep_p(a_by_zn, b_cor, dZ=1), step=1)
 
@@ -17782,6 +20885,7 @@ def _run_step_7_13_15_27(
 
             spectro_pack: dict[str, object] | None = None
             pass_spectro = False
+            # 条件分岐: `include_e2plus` を満たす経路を評価する。
             if include_e2plus:
                 def is_peak_n(*, Z: int, N0: int) -> bool:
                     e0 = e2plus_by_zn.get((int(Z), int(N0)))
@@ -17812,19 +20916,30 @@ def _run_step_7_13_15_27(
                     n_peak = 0
                     rows: list[tuple[float, float, float]] = []
                     for (Z, N0, step), obs in gap_sn_obs.items():
+                        # 条件分岐: `int(step) != 1` を満たす経路を評価する。
                         if int(step) != 1:
                             continue
+
+                        # 条件分岐: `e2plus_by_zn.get((int(Z), int(N0))) is not None` を満たす経路を評価する。
+
                         if e2plus_by_zn.get((int(Z), int(N0))) is not None:
                             n_avail += 1
+
+                        # 条件分岐: `not is_peak_n(Z=int(Z), N0=int(N0))` を満たす経路を評価する。
+
                         if not is_peak_n(Z=int(Z), N0=int(N0)):
                             continue
+
                         n_peak += 1
                         gu = gap_sn_pred_unc.get((int(Z), int(N0), 1))
                         gb = gap_sn_pred_base.get((int(Z), int(N0), 1))
                         gc = gap_sn_pred_cor.get((int(Z), int(N0), 1))
+                        # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
                         if gu is None or gb is None or gc is None:
                             continue
+
                         rows.append((float(gu - obs), float(gb - obs), float(gc - obs)))
+
                     return {
                         "n_available": int(n_avail),
                         "n_peak": int(n_peak),
@@ -17838,19 +20953,30 @@ def _run_step_7_13_15_27(
                     n_peak = 0
                     rows: list[tuple[float, float, float]] = []
                     for (N, Z0, step), obs in gap_sp_obs.items():
+                        # 条件分岐: `int(step) != 1` を満たす経路を評価する。
                         if int(step) != 1:
                             continue
+
+                        # 条件分岐: `e2plus_by_zn.get((int(Z0), int(N))) is not None` を満たす経路を評価する。
+
                         if e2plus_by_zn.get((int(Z0), int(N))) is not None:
                             n_avail += 1
+
+                        # 条件分岐: `not is_peak_z(Z0=int(Z0), N=int(N))` を満たす経路を評価する。
+
                         if not is_peak_z(Z0=int(Z0), N=int(N)):
                             continue
+
                         n_peak += 1
                         gu = gap_sp_pred_unc.get((int(N), int(Z0), 1))
                         gb = gap_sp_pred_base.get((int(N), int(Z0), 1))
                         gc = gap_sp_pred_cor.get((int(N), int(Z0), 1))
+                        # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
                         if gu is None or gb is None or gc is None:
                             continue
+
                         rows.append((float(gu - obs), float(gb - obs), float(gc - obs)))
+
                     return {
                         "n_available": int(n_avail),
                         "n_peak": int(n_peak),
@@ -17881,7 +21007,9 @@ def _run_step_7_13_15_27(
 
             spectro_multi_pack: dict[str, object] | None = None
             pass_spectro_multi = False
+            # 条件分岐: `include_spectro_multi` を満たす経路を評価する。
             if include_spectro_multi:
+                # 条件分岐: `spectro_multi_maps is None` を満たす経路を評価する。
                 if spectro_multi_maps is None:
                     raise RuntimeError("include_spectro_multi=True but spectro_multi_maps is None (bug)")
 
@@ -17889,27 +21017,44 @@ def _run_step_7_13_15_27(
                     v0 = metric_by_zn.get((int(Z), int(N0)))
                     vL = metric_by_zn.get((int(Z), int(N0) - 2))
                     vR = metric_by_zn.get((int(Z), int(N0) + 2))
+                    # 条件分岐: `v0 is None or vL is None or vR is None` を満たす経路を評価する。
                     if v0 is None or vL is None or vR is None:
                         return False
+
+                    # 条件分岐: `str(kind) == "peak"` を満たす経路を評価する。
+
                     if str(kind) == "peak":
                         return float(v0) > float(vL) and float(v0) > float(vR)
+
+                    # 条件分岐: `str(kind) == "valley"` を満たす経路を評価する。
+
                     if str(kind) == "valley":
                         return float(v0) < float(vL) and float(v0) < float(vR)
+
                     raise ValueError(f"unsupported kind: {kind}")
 
                 def is_extreme_z(*, metric_by_zn: dict[tuple[int, int], float], Z0: int, N: int, kind: str) -> bool:
                     v0 = metric_by_zn.get((int(Z0), int(N)))
                     vL = metric_by_zn.get((int(Z0) - 2, int(N)))
                     vR = metric_by_zn.get((int(Z0) + 2, int(N)))
+                    # 条件分岐: `v0 is None or vL is None or vR is None` を満たす経路を評価する。
                     if v0 is None or vL is None or vR is None:
                         return False
+
+                    # 条件分岐: `str(kind) == "peak"` を満たす経路を評価する。
+
                     if str(kind) == "peak":
                         return float(v0) > float(vL) and float(v0) > float(vR)
+
+                    # 条件分岐: `str(kind) == "valley"` を満たす経路を評価する。
+
                     if str(kind) == "valley":
                         return float(v0) < float(vL) and float(v0) < float(vR)
+
                     raise ValueError(f"unsupported kind: {kind}")
 
                 def summarize_metric(*, metric_key: str, metric_label: str, metric_by_zn: dict[tuple[int, int], float], kind: str) -> dict[str, object]:
+                    # 条件分岐: `str(kind) not in {"peak", "valley"}` を満たす経路を評価する。
                     if str(kind) not in {"peak", "valley"}:
                         raise ValueError(f"unsupported kind: {kind}")
 
@@ -17918,19 +21063,30 @@ def _run_step_7_13_15_27(
                         n_ext = 0
                         rows: list[tuple[float, float, float]] = []
                         for (Z, N0, step), obs in gap_sn_obs.items():
+                            # 条件分岐: `int(step) != 1` を満たす経路を評価する。
                             if int(step) != 1:
                                 continue
+
+                            # 条件分岐: `metric_by_zn.get((int(Z), int(N0))) is not None` を満たす経路を評価する。
+
                             if metric_by_zn.get((int(Z), int(N0))) is not None:
                                 n_avail += 1
+
+                            # 条件分岐: `not is_extreme_n(metric_by_zn=metric_by_zn, Z=int(Z), N0=int(N0), kind=str(ki...` を満たす経路を評価する。
+
                             if not is_extreme_n(metric_by_zn=metric_by_zn, Z=int(Z), N0=int(N0), kind=str(kind)):
                                 continue
+
                             n_ext += 1
                             gu = gap_sn_pred_unc.get((int(Z), int(N0), 1))
                             gb = gap_sn_pred_base.get((int(Z), int(N0), 1))
                             gc = gap_sn_pred_cor.get((int(Z), int(N0), 1))
+                            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
                             if gu is None or gb is None or gc is None:
                                 continue
+
                             rows.append((float(gu - obs), float(gb - obs), float(gc - obs)))
+
                         return {
                             "n_available": int(n_avail),
                             "n_extrema": int(n_ext),
@@ -17944,19 +21100,30 @@ def _run_step_7_13_15_27(
                         n_ext = 0
                         rows: list[tuple[float, float, float]] = []
                         for (N, Z0, step), obs in gap_sp_obs.items():
+                            # 条件分岐: `int(step) != 1` を満たす経路を評価する。
                             if int(step) != 1:
                                 continue
+
+                            # 条件分岐: `metric_by_zn.get((int(Z0), int(N))) is not None` を満たす経路を評価する。
+
                             if metric_by_zn.get((int(Z0), int(N))) is not None:
                                 n_avail += 1
+
+                            # 条件分岐: `not is_extreme_z(metric_by_zn=metric_by_zn, Z0=int(Z0), N=int(N), kind=str(ki...` を満たす経路を評価する。
+
                             if not is_extreme_z(metric_by_zn=metric_by_zn, Z0=int(Z0), N=int(N), kind=str(kind)):
                                 continue
+
                             n_ext += 1
                             gu = gap_sp_pred_unc.get((int(N), int(Z0), 1))
                             gb = gap_sp_pred_base.get((int(N), int(Z0), 1))
                             gc = gap_sp_pred_cor.get((int(N), int(Z0), 1))
+                            # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
                             if gu is None or gb is None or gc is None:
                                 continue
+
                             rows.append((float(gu - obs), float(gb - obs), float(gc - obs)))
+
                         return {
                             "n_available": int(n_avail),
                             "n_extrema": int(n_ext),
@@ -17976,6 +21143,7 @@ def _run_step_7_13_15_27(
                         < float(spec_sp.get("rms_resid_pairing_only_MeV", float("nan")))
                     )
 
+                    # 条件分岐: `str(kind) == "peak"` を満たす経路を評価する。
                     if str(kind) == "peak":
                         cmp_n = f"{metric_label}(Z,N0) > {metric_label}(Z,N0±2) when neighbors exist (even-even only)"
                         cmp_z = f"{metric_label}(Z0,N) > {metric_label}(Z0±2,N) when neighbors exist (even-even only)"
@@ -18008,6 +21176,7 @@ def _run_step_7_13_15_27(
 
             radii_kink_pack: dict[str, object] | None = None
             pass_radii_kink = False
+            # 条件分岐: `include_radii_kink` を満たす経路を評価する。
             if include_radii_kink:
 
                 def is_kink_n(*, Z: int, N0: int) -> bool:
@@ -18023,19 +21192,30 @@ def _run_step_7_13_15_27(
                     n_kink = 0
                     rows: list[tuple[float, float, float]] = []
                     for (Z, N0, step), obs in gap_sn_obs.items():
+                        # 条件分岐: `int(step) != 1` を満たす経路を評価する。
                         if int(step) != 1:
                             continue
+
+                        # 条件分岐: `kink_info_n(Z=int(Z), N0=int(N0), d=2) is not None` を満たす経路を評価する。
+
                         if kink_info_n(Z=int(Z), N0=int(N0), d=2) is not None:
                             n_avail += 1
+
+                        # 条件分岐: `not is_kink_n(Z=int(Z), N0=int(N0))` を満たす経路を評価する。
+
                         if not is_kink_n(Z=int(Z), N0=int(N0)):
                             continue
+
                         n_kink += 1
                         gu = gap_sn_pred_unc.get((int(Z), int(N0), 1))
                         gb = gap_sn_pred_base.get((int(Z), int(N0), 1))
                         gc = gap_sn_pred_cor.get((int(Z), int(N0), 1))
+                        # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
                         if gu is None or gb is None or gc is None:
                             continue
+
                         rows.append((float(gu - obs), float(gb - obs), float(gc - obs)))
+
                     return {
                         "n_available": int(n_avail),
                         "n_kink": int(n_kink),
@@ -18049,19 +21229,30 @@ def _run_step_7_13_15_27(
                     n_kink = 0
                     rows: list[tuple[float, float, float]] = []
                     for (N, Z0, step), obs in gap_sp_obs.items():
+                        # 条件分岐: `int(step) != 1` を満たす経路を評価する。
                         if int(step) != 1:
                             continue
+
+                        # 条件分岐: `kink_info_z(Z0=int(Z0), N=int(N), d=2) is not None` を満たす経路を評価する。
+
                         if kink_info_z(Z0=int(Z0), N=int(N), d=2) is not None:
                             n_avail += 1
+
+                        # 条件分岐: `not is_kink_z(Z0=int(Z0), N=int(N))` を満たす経路を評価する。
+
                         if not is_kink_z(Z0=int(Z0), N=int(N)):
                             continue
+
                         n_kink += 1
                         gu = gap_sp_pred_unc.get((int(N), int(Z0), 1))
                         gb = gap_sp_pred_base.get((int(N), int(Z0), 1))
                         gc = gap_sp_pred_cor.get((int(N), int(Z0), 1))
+                        # 条件分岐: `gu is None or gb is None or gc is None` を満たす経路を評価する。
                         if gu is None or gb is None or gc is None:
                             continue
+
                         rows.append((float(gu - obs), float(gb - obs), float(gc - obs)))
+
                     return {
                         "n_available": int(n_avail),
                         "n_kink": int(n_kink),
@@ -18095,6 +21286,7 @@ def _run_step_7_13_15_27(
 
             radii_kink_delta2r_pack: dict[str, object] | None = None
             pass_radii_kink_delta2r = False
+            # 条件分岐: `include_radii_kink_delta2r` を満たす経路を評価する。
             if include_radii_kink_delta2r:
                 resid_sigma_max = float(radii_kink_delta2r_resid_sigma_max)
                 delta2r_pred_n_fn = delta2r_pred_n
@@ -18105,6 +21297,7 @@ def _run_step_7_13_15_27(
                 radii_magic_offset_pack: dict[str, object] | None = None
                 radii_magic_offset_neighbors_pack: dict[str, object] | None = None
                 radii_magic_offset_per_magic_pack: dict[str, object] | None = None
+                # 条件分岐: `bool(radii_kink_delta2r_radius_shell_nz_beta2)` を満たす経路を評価する。
                 if bool(radii_kink_delta2r_radius_shell_nz_beta2):
                     # Combined (still minimal) radius variant:
                     #   r_charge = (r_base + r_shell_N*S(N) + r_shell_Z*S(Z)) * sqrt(1 + (5/(4π))*beta2^2)
@@ -18115,16 +21308,23 @@ def _run_step_7_13_15_27(
                     radii_shell_pack = fit_radii_shell_nz_beta2(shell_magic=list(shell_magic))
                     r_shell_n = float(radii_shell_pack.get("r_shell_N_fm", 0.0))
                     r_shell_z = float(radii_shell_pack.get("r_shell_Z_fm", 0.0))
+                    # 条件分岐: `not math.isfinite(r_shell_n)` を満たす経路を評価する。
                     if not math.isfinite(r_shell_n):
                         r_shell_n = 0.0
+
+                    # 条件分岐: `not math.isfinite(r_shell_z)` を満たす経路を評価する。
+
                     if not math.isfinite(r_shell_z):
                         r_shell_z = 0.0
+
                     k_beta2 = 5.0 / (4.0 * math.pi)
 
                     def r_charge_pred_shell_nz_beta2(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
+                        # 条件分岐: `base is None` を満たす経路を評価する。
                         if base is None:
                             return None
+
                         b2, _ = _beta2_for_zn(
                             Z=int(Z),
                             N=int(N),
@@ -18136,27 +21336,35 @@ def _run_step_7_13_15_27(
                         factor = math.sqrt(1.0 + float(k_beta2) * float(b2) * float(b2))
                         sN = float(shell_S_r(int(N)))
                         sZ = float(shell_S_r(int(Z)))
+                        # 条件分岐: `not (math.isfinite(factor) and factor > 0.0 and math.isfinite(sN) and math.is...` を満たす経路を評価する。
                         if not (math.isfinite(factor) and factor > 0.0 and math.isfinite(sN) and math.isfinite(sZ)):
                             return None
+
                         out_r = (float(base) + float(r_shell_n) * float(sN) + float(r_shell_z) * float(sZ)) * float(factor)
+                        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(out_r) and out_r > 0.0):
                             return None
+
                         return float(out_r)
 
                     def delta2r_pred_n_shell_nz_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_shell_nz_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell_nz_beta2(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_shell_nz_beta2(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_shell_nz_beta2(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_shell_nz_beta2
@@ -18170,6 +21378,9 @@ def _run_step_7_13_15_27(
                         "k": float(k_beta2),
                         "combined_with_shell": True,
                     }
+
+                # 条件分岐: `bool(radii_kink_delta2r_radius_beta2)` を満たす経路を評価する。
+
                 if bool(radii_kink_delta2r_radius_beta2):
                     # Deformation-aware radius mapping (minimal: no free params; fixed from β2).
                     #
@@ -18180,8 +21391,10 @@ def _run_step_7_13_15_27(
 
                     def beta2_for_radius(*, Z: int, N: int) -> float:
                         v = beta2_by_zn.get((int(Z), int(N)))
+                        # 条件分岐: `v is not None and math.isfinite(float(v))` を満たす経路を評価する。
                         if v is not None and math.isfinite(float(v)):
                             return float(v)
+
                         vals: list[float] = []
                         for z0, n0 in [
                             (int(Z), int(N) - 1),
@@ -18194,37 +21407,50 @@ def _run_step_7_13_15_27(
                             (int(Z) + 1, int(N) + 1),
                         ]:
                             v0 = beta2_by_zn.get((int(z0), int(n0)))
+                            # 条件分岐: `v0 is None` を満たす経路を評価する。
                             if v0 is None:
                                 continue
+
+                            # 条件分岐: `math.isfinite(float(v0))` を満たす経路を評価する。
+
                             if math.isfinite(float(v0)):
                                 vals.append(float(v0))
+
                         return float(sum(vals) / len(vals)) if vals else 0.0
 
                     def r_charge_pred_beta2(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
+                        # 条件分岐: `base is None` を満たす経路を評価する。
                         if base is None:
                             return None
+
                         b2 = abs(float(beta2_for_radius(Z=int(Z), N=int(N))))
                         factor = math.sqrt(1.0 + float(k_beta2) * float(b2) * float(b2))
                         out_r = float(base) * float(factor)
+                        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(out_r) and out_r > 0.0):
                             return None
+
                         return float(out_r)
 
                     def delta2r_pred_n_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_beta2(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_beta2(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_beta2(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_beta2(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_beta2(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_beta2(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_beta2
@@ -18237,83 +21463,116 @@ def _run_step_7_13_15_27(
                         "beta2_imputation": "direct if present; else use (Z,N±1),(Z±1,N), then (Z±1,N±1); else 0",
                         "k": float(k_beta2),
                     }
+
+                # 条件分岐: `bool(radii_kink_delta2r_radius_odd_even)` を満たす経路を評価する。
+
                 if bool(radii_kink_delta2r_radius_odd_even):
                     radii_odd_even_pack = fit_radii_odd_even()
                     r_oe_n = float(radii_odd_even_pack.get("r_oe_N_fm", 0.0))
                     r_oe_z = float(radii_odd_even_pack.get("r_oe_Z_fm", 0.0))
+                    # 条件分岐: `not math.isfinite(r_oe_n)` を満たす経路を評価する。
                     if not math.isfinite(r_oe_n):
                         r_oe_n = 0.0
+
+                    # 条件分岐: `not math.isfinite(r_oe_z)` を満たす経路を評価する。
+
                     if not math.isfinite(r_oe_z):
                         r_oe_z = 0.0
 
                     def r_charge_pred_odd_even(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
+                        # 条件分岐: `base is None` を満たす経路を評価する。
                         if base is None:
                             return None
+
                         eN = 1.0 if (int(N) % 2 != 0) else 0.0
                         eZ = 1.0 if (int(Z) % 2 != 0) else 0.0
                         out_r = float(base) + float(r_oe_n) * float(eN) + float(r_oe_z) * float(eZ)
+                        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(out_r) and out_r > 0.0):
                             return None
+
                         return float(out_r)
 
                     def delta2r_pred_n_odd_even(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_odd_even(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_odd_even(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_odd_even(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_odd_even(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_odd_even(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_odd_even(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_odd_even(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_odd_even
                     delta2r_pred_z_fn = delta2r_pred_z_odd_even
+
+                # 条件分岐: `bool(radii_kink_delta2r_radius_magic_offset)` を満たす経路を評価する。
+
                 if bool(radii_kink_delta2r_radius_magic_offset):
                     radii_magic_offset_pack = fit_radii_magic_offset(magic=list(OBS_MAGIC))
                     magic_set = {int(x) for x in radii_magic_offset_pack.get("magic", []) if int(x) > 0}
                     r_magic_n = float(radii_magic_offset_pack.get("r_magic_N_fm", 0.0))
                     r_magic_z = float(radii_magic_offset_pack.get("r_magic_Z_fm", 0.0))
+                    # 条件分岐: `not math.isfinite(r_magic_n)` を満たす経路を評価する。
                     if not math.isfinite(r_magic_n):
                         r_magic_n = 0.0
+
+                    # 条件分岐: `not math.isfinite(r_magic_z)` を満たす経路を評価する。
+
                     if not math.isfinite(r_magic_z):
                         r_magic_z = 0.0
 
                     def r_charge_pred_magic_offset(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
+                        # 条件分岐: `base is None` を満たす経路を評価する。
                         if base is None:
                             return None
+
                         eN = 1.0 if int(N) in magic_set else 0.0
                         eZ = 1.0 if int(Z) in magic_set else 0.0
                         out_r = float(base) + float(r_magic_n) * float(eN) + float(r_magic_z) * float(eZ)
+                        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(out_r) and out_r > 0.0):
                             return None
+
                         return float(out_r)
 
                     def delta2r_pred_n_magic_offset(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_magic_offset(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_magic_offset(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_magic_offset(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_magic_offset(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_magic_offset(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_magic_offset
                     delta2r_pred_z_fn = delta2r_pred_z_magic_offset
+
+                # 条件分岐: `bool(radii_kink_delta2r_radius_magic_offset_neighbors)` を満たす経路を評価する。
+
                 if bool(radii_kink_delta2r_radius_magic_offset_neighbors):
                     radii_magic_offset_neighbors_pack = fit_radii_magic_offset_neighbors(magic=list(OBS_MAGIC), neighbor_weight=0.5, neighbor_step=2)
                     w_magic_cfg = radii_magic_offset_neighbors_pack.get("w_magic") if isinstance(radii_magic_offset_neighbors_pack.get("w_magic"), dict) else {}
@@ -18322,53 +21581,81 @@ def _run_step_7_13_15_27(
                     neighbor_step = int(w_magic_cfg.get("neighbor_step", 2))
                     r_magic_n = float(radii_magic_offset_neighbors_pack.get("r_magic_N_fm", 0.0))
                     r_magic_z = float(radii_magic_offset_neighbors_pack.get("r_magic_Z_fm", 0.0))
+                    # 条件分岐: `not math.isfinite(r_magic_n)` を満たす経路を評価する。
                     if not math.isfinite(r_magic_n):
                         r_magic_n = 0.0
+
+                    # 条件分岐: `not math.isfinite(r_magic_z)` を満たす経路を評価する。
+
                     if not math.isfinite(r_magic_z):
                         r_magic_z = 0.0
+
+                    # 条件分岐: `not (math.isfinite(neighbor_weight) and 0.0 <= neighbor_weight <= 1.0)` を満たす経路を評価する。
+
                     if not (math.isfinite(neighbor_weight) and 0.0 <= neighbor_weight <= 1.0):
                         neighbor_weight = 0.5
+
+                    # 条件分岐: `neighbor_step <= 0` を満たす経路を評価する。
+
                     if neighbor_step <= 0:
                         neighbor_step = 2
 
                     def w_magic(x: int) -> float:
+                        # 条件分岐: `int(x) in magic_set` を満たす経路を評価する。
                         if int(x) in magic_set:
                             return 1.0
+
+                        # 条件分岐: `(int(x) - int(neighbor_step)) in magic_set or (int(x) + int(neighbor_step)) i...` を満たす経路を評価する。
+
                         if (int(x) - int(neighbor_step)) in magic_set or (int(x) + int(neighbor_step)) in magic_set:
                             return float(neighbor_weight)
+
                         return 0.0
 
                     def r_charge_pred_magic_offset_neighbors(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
+                        # 条件分岐: `base is None` を満たす経路を評価する。
                         if base is None:
                             return None
+
                         wN = float(w_magic(int(N)))
                         wZ = float(w_magic(int(Z)))
+                        # 条件分岐: `not (math.isfinite(wN) and math.isfinite(wZ))` を満たす経路を評価する。
                         if not (math.isfinite(wN) and math.isfinite(wZ)):
                             return None
+
                         out_r = float(base) + float(r_magic_n) * float(wN) + float(r_magic_z) * float(wZ)
+                        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(out_r) and out_r > 0.0):
                             return None
+
                         return float(out_r)
 
                     def delta2r_pred_n_magic_offset_neighbors(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_magic_offset_neighbors(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_magic_offset_neighbors(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_magic_offset_neighbors(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_magic_offset_neighbors
                     delta2r_pred_z_fn = delta2r_pred_z_magic_offset_neighbors
+
+                # 条件分岐: `bool(radii_kink_delta2r_radius_magic_offset_per_magic)` を満たす経路を評価する。
+
                 if bool(radii_kink_delta2r_radius_magic_offset_per_magic):
                     radii_magic_offset_per_magic_pack = fit_radii_magic_offset_per_magic(magic=list(OBS_MAGIC))
                     coeffs = radii_magic_offset_per_magic_pack.get("coeffs") if isinstance(radii_magic_offset_per_magic_pack.get("coeffs"), dict) else {}
@@ -18377,88 +21664,121 @@ def _run_step_7_13_15_27(
 
                     def r_charge_pred_magic_offset_per_magic(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
+                        # 条件分岐: `base is None` を満たす経路を評価する。
                         if base is None:
                             return None
+
                         dm = float(coeffs_N.get(int(N), 0.0)) + float(coeffs_Z.get(int(Z), 0.0))
                         out_r = float(base) + float(dm)
+                        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(out_r) and out_r > 0.0):
                             return None
+
                         return float(out_r)
 
                     def delta2r_pred_n_magic_offset_per_magic(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_magic_offset_per_magic(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_magic_offset_per_magic(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_magic_offset_per_magic(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_magic_offset_per_magic
                     delta2r_pred_z_fn = delta2r_pred_z_magic_offset_per_magic
+
+                # 条件分岐: `bool(radii_kink_delta2r_radius_shell or radii_kink_delta2r_radius_shell_nz)` を満たす経路を評価する。
+
                 if bool(radii_kink_delta2r_radius_shell or radii_kink_delta2r_radius_shell_nz):
                     shell_S_r = shell_S_radius_factory(list(shell_magic))
 
+                    # 条件分岐: `bool(radii_kink_delta2r_radius_shell_nz)` を満たす経路を評価する。
                     if bool(radii_kink_delta2r_radius_shell_nz):
                         radii_shell_pack = fit_radii_shell_nz(shell_magic=list(shell_magic))
                         r_shell_n = float(radii_shell_pack.get("r_shell_N_fm", 0.0))
                         r_shell_z = float(radii_shell_pack.get("r_shell_Z_fm", 0.0))
+                        # 条件分岐: `not math.isfinite(r_shell_n)` を満たす経路を評価する。
                         if not math.isfinite(r_shell_n):
                             r_shell_n = 0.0
+
+                        # 条件分岐: `not math.isfinite(r_shell_z)` を満たす経路を評価する。
+
                         if not math.isfinite(r_shell_z):
                             r_shell_z = 0.0
 
                         def r_charge_pred_shell(*, Z: int, N: int) -> float | None:
                             base = r_charge_pred(Z=int(Z), N=int(N))
+                            # 条件分岐: `base is None` を満たす経路を評価する。
                             if base is None:
                                 return None
+
                             sN = float(shell_S_r(int(N)))
                             sZ = float(shell_S_r(int(Z)))
+                            # 条件分岐: `not (math.isfinite(sN) and math.isfinite(sZ))` を満たす経路を評価する。
                             if not (math.isfinite(sN) and math.isfinite(sZ)):
                                 return None
+
                             out_r = float(base) + float(r_shell_n) * float(sN) + float(r_shell_z) * float(sZ)
+                            # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                             if not (math.isfinite(out_r) and out_r > 0.0):
                                 return None
+
                             return float(out_r)
                     else:
                         radii_shell_pack = fit_radii_shell(shell_magic=list(shell_magic))
                         r_shell = float(radii_shell_pack.get("r_shell_fm", 0.0))
+                        # 条件分岐: `not math.isfinite(r_shell)` を満たす経路を評価する。
                         if not math.isfinite(r_shell):
                             r_shell = 0.0
 
                         def r_charge_pred_shell(*, Z: int, N: int) -> float | None:
                             base = r_charge_pred(Z=int(Z), N=int(N))
+                            # 条件分岐: `base is None` を満たす経路を評価する。
                             if base is None:
                                 return None
+
                             s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+                            # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
                             if not math.isfinite(s_sum):
                                 return None
+
                             out_r = float(base) + float(r_shell) * float(s_sum)
+                            # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                             if not (math.isfinite(out_r) and out_r > 0.0):
                                 return None
+
                             return float(out_r)
 
                     def delta2r_pred_n_shell(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_shell(Z=int(Z), N=int(N0) - int(d))
                         rRp = r_charge_pred_shell(Z=int(Z), N=int(N0) + int(d))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     def delta2r_pred_z_shell(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell(Z=int(Z0), N=int(N))
                         rLp = r_charge_pred_shell(Z=int(Z0) - int(d), N=int(N))
                         rRp = r_charge_pred_shell(Z=int(Z0) + int(d), N=int(N))
+                        # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                         if r0p is None or rLp is None or rRp is None:
                             return None
+
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
                     delta2r_pred_n_fn = delta2r_pred_n_shell
@@ -18472,26 +21792,39 @@ def _run_step_7_13_15_27(
                     worst: list[tuple[float, int, int, float, float, float, float]] = []
                     for (Z, N0) in radii_by_zn.keys():
                         info = kink_info_n(Z=int(Z), N0=int(N0), d=2)
+                        # 条件分岐: `info is None` を満たす経路を評価する。
                         if info is None:
                             continue
+
                         A0 = int(Z) + int(N0)
                         AL = int(Z) + int(N0) - 2
                         AR = int(Z) + int(N0) + 2
+                        # 条件分岐: `min(AL, A0, AR) < int(a_min)` を満たす経路を評価する。
                         if min(AL, A0, AR) < int(a_min):
                             continue
+
                         n_avail += 1
                         sig_obs, d2_obs, sig_obs_fm = info
+                        # 条件分岐: `float(sig_obs) < float(kink_sigma_min)` を満たす経路を評価する。
                         if float(sig_obs) < float(kink_sigma_min):
                             continue
+
+                        # 条件分岐: `bool(radii_kink_delta2r_center_magic_only) and (int(N0) not in set(int(x) for...` を満たす経路を評価する。
+
                         if bool(radii_kink_delta2r_center_magic_only) and (int(N0) not in set(int(x) for x in OBS_MAGIC)):
                             continue
+
                         n_kink += 1
                         d2_pred = delta2r_pred_n_fn(Z=int(Z), N0=int(N0), d=2)
+                        # 条件分岐: `d2_pred is None` を満たす経路を評価する。
                         if d2_pred is None:
                             continue
+
                         sig = float(sig_obs_fm)
+                        # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(sig) and sig > 0.0):
                             continue
+
                         resid = float(d2_pred) - float(d2_obs)
                         z = float(resid) / float(sig)
                         zscores.append(float(z))
@@ -18530,26 +21863,39 @@ def _run_step_7_13_15_27(
                     worst: list[tuple[float, int, int, float, float, float, float]] = []
                     for (Z0, N) in radii_by_zn.keys():
                         info = kink_info_z(Z0=int(Z0), N=int(N), d=2)
+                        # 条件分岐: `info is None` を満たす経路を評価する。
                         if info is None:
                             continue
+
                         A0 = int(Z0) + int(N)
                         AL = int(Z0) - 2 + int(N)
                         AR = int(Z0) + 2 + int(N)
+                        # 条件分岐: `min(AL, A0, AR) < int(a_min)` を満たす経路を評価する。
                         if min(AL, A0, AR) < int(a_min):
                             continue
+
                         n_avail += 1
                         sig_obs, d2_obs, sig_obs_fm = info
+                        # 条件分岐: `float(sig_obs) < float(kink_sigma_min)` を満たす経路を評価する。
                         if float(sig_obs) < float(kink_sigma_min):
                             continue
+
+                        # 条件分岐: `bool(radii_kink_delta2r_center_magic_only) and (int(Z0) not in set(int(x) for...` を満たす経路を評価する。
+
                         if bool(radii_kink_delta2r_center_magic_only) and (int(Z0) not in set(int(x) for x in OBS_MAGIC)):
                             continue
+
                         n_kink += 1
                         d2_pred = delta2r_pred_z_fn(Z0=int(Z0), N=int(N), d=2)
+                        # 条件分岐: `d2_pred is None` を満たす経路を評価する。
                         if d2_pred is None:
                             continue
+
                         sig = float(sig_obs_fm)
+                        # 条件分岐: `not (math.isfinite(sig) and sig > 0.0)` を満たす経路を評価する。
                         if not (math.isfinite(sig) and sig > 0.0):
                             continue
+
                         resid = float(d2_pred) - float(d2_obs)
                         z = float(resid) / float(sig)
                         zscores.append(float(z))
@@ -18599,20 +21945,37 @@ def _run_step_7_13_15_27(
                     "gap_Sp_delta2r": d2_sp,
                     "pass": bool(pass_radii_kink_delta2r),
                 }
+                # 条件分岐: `radii_shell_pack is not None` を満たす経路を評価する。
                 if radii_shell_pack is not None:
                     radii_kink_delta2r_pack["radius_shell"] = radii_shell_pack
+
+                # 条件分岐: `radii_beta2_pack is not None` を満たす経路を評価する。
+
                 if radii_beta2_pack is not None:
                     radii_kink_delta2r_pack["radius_beta2"] = radii_beta2_pack
+
+                # 条件分岐: `radii_odd_even_pack is not None` を満たす経路を評価する。
+
                 if radii_odd_even_pack is not None:
                     radii_kink_delta2r_pack["radius_odd_even"] = radii_odd_even_pack
+
+                # 条件分岐: `radii_magic_offset_pack is not None` を満たす経路を評価する。
+
                 if radii_magic_offset_pack is not None:
                     radii_kink_delta2r_pack["radius_magic_offset"] = radii_magic_offset_pack
+
+                # 条件分岐: `radii_magic_offset_neighbors_pack is not None` を満たす経路を評価する。
+
                 if radii_magic_offset_neighbors_pack is not None:
                     radii_kink_delta2r_pack["radius_magic_offset_neighbors"] = radii_magic_offset_neighbors_pack
+
+                # 条件分岐: `radii_magic_offset_per_magic_pack is not None` を満たす経路を評価する。
+
                 if radii_magic_offset_per_magic_pack is not None:
                     radii_kink_delta2r_pack["radius_magic_offset_per_magic"] = radii_magic_offset_per_magic_pack
 
             # Strict decision: train guardrail + other strict improvement (Sn and Sp).
+
             train_guard_mev = 0.5
             ok_train = (
                 float(diag_gap_sn["train_magic"]["rms_resid_pairing_shell_MeV"])
@@ -18628,12 +21991,22 @@ def _run_step_7_13_15_27(
             )
             pass_strict_train_other = bool(ok_train and ok_other)
             pass_strict = bool(pass_strict_train_other)
+            # 条件分岐: `bool(include_e2plus and e2plus_strict_peaks)` を満たす経路を評価する。
             if bool(include_e2plus and e2plus_strict_peaks):
                 pass_strict = bool(pass_strict and pass_spectro)
+
+            # 条件分岐: `bool(include_spectro_multi and spectro_multi_strict)` を満たす経路を評価する。
+
             if bool(include_spectro_multi and spectro_multi_strict):
                 pass_strict = bool(pass_strict and pass_spectro_multi)
+
+            # 条件分岐: `bool(include_radii_kink and radii_kink_strict)` を満たす経路を評価する。
+
             if bool(include_radii_kink and radii_kink_strict):
                 pass_strict = bool(pass_strict and pass_radii_kink)
+
+            # 条件分岐: `bool(include_radii_kink_delta2r and radii_kink_delta2r_strict)` を満たす経路を評価する。
+
             if bool(include_radii_kink_delta2r and radii_kink_delta2r_strict):
                 pass_strict = bool(pass_strict and pass_radii_kink_delta2r)
 
@@ -18642,15 +22015,25 @@ def _run_step_7_13_15_27(
                 "pass_strict_train_other": bool(pass_strict_train_other),
                 "pass_strict": bool(pass_strict),
             }
+            # 条件分岐: `include_e2plus` を満たす経路を評価する。
             if include_e2plus:
                 decision["pass_strict_spectro"] = bool(pass_spectro)
                 decision["spectro_strict_applied"] = bool(e2plus_strict_peaks)
+
+            # 条件分岐: `include_spectro_multi` を満たす経路を評価する。
+
             if include_spectro_multi:
                 decision["pass_strict_spectro_multi"] = bool(pass_spectro_multi)
                 decision["spectro_multi_strict_applied"] = bool(spectro_multi_strict)
+
+            # 条件分岐: `include_radii_kink` を満たす経路を評価する。
+
             if include_radii_kink:
                 decision["pass_strict_radii_kink"] = bool(pass_radii_kink)
                 decision["radii_kink_strict_applied"] = bool(radii_kink_strict)
+
+            # 条件分岐: `include_radii_kink_delta2r` を満たす経路を評価する。
+
             if include_radii_kink_delta2r:
                 decision["pass_strict_radii_kink_delta2r"] = bool(pass_radii_kink_delta2r)
                 decision["radii_kink_delta2r_strict_applied"] = bool(radii_kink_delta2r_strict)
@@ -18673,14 +22056,25 @@ def _run_step_7_13_15_27(
                 "gap_Sp": diag_gap_sp,
                 "decision": decision,
             }
+            # 条件分岐: `spectro_pack is not None` を満たす経路を評価する。
             if spectro_pack is not None:
                 out_pack["spectro_e2plus"] = spectro_pack
+
+            # 条件分岐: `spectro_multi_pack is not None` を満たす経路を評価する。
+
             if spectro_multi_pack is not None:
                 out_pack["spectro_nudat3_multi"] = spectro_multi_pack
+
+            # 条件分岐: `radii_kink_pack is not None` を満たす経路を評価する。
+
             if radii_kink_pack is not None:
                 out_pack["radii_kink"] = radii_kink_pack
+
+            # 条件分岐: `radii_kink_delta2r_pack is not None` を満たす経路を評価する。
+
             if radii_kink_delta2r_pack is not None:
                 out_pack["radii_kink_delta2r"] = radii_kink_delta2r_pack
+
             return out_pack
 
         out: list[dict[str, object]] = []
@@ -18701,6 +22095,7 @@ def _run_step_7_13_15_27(
                             "reason": str(e),
                         }
                     )
+
         return out
 
     rows = scan_rows(b_pred_all_map=b_pred_all)
@@ -18708,31 +22103,41 @@ def _run_step_7_13_15_27(
     beta2_counts_direct_only: dict[str, int] | None = None
     b_pred_all_direct_only: dict[tuple[int, int], float] | None = None
     n_skipped_direct_only = 0
+    # 条件分岐: `bool(include_beta2 and beta2_strict_coverage)` を満たす経路を評価する。
     if bool(include_beta2 and beta2_strict_coverage):
         beta2_counts_direct_only = {"direct": 0, "imputed": 0, "missing": 0}
         b_pred_all_direct_only = {}
 
         for (Z, N), v in ame_map.items():
             A = int(v["A"])
+            # 条件分岐: `A < int(domain_min_a)` を満たす経路を評価する。
             if A < int(domain_min_a):
                 continue
+
             ba_obs = float(v["B_over_A_obs_MeV"])
+            # 条件分岐: `not math.isfinite(ba_obs)` を満たす経路を評価する。
             if not math.isfinite(ba_obs):
                 continue
+
             I = float(int(N) - int(Z)) / float(A)
 
             a13 = float(A) ** (1.0 / 3.0)
             r_over_a13 = float(r0) + float(rI) * float(I)
             r_charge = float(r_over_a13) * float(a13)
+            # 条件分岐: `not (math.isfinite(r_charge) and r_charge > 0)` を満たす経路を評価する。
             if not (math.isfinite(r_charge) and r_charge > 0):
                 n_skipped_direct_only += 1
                 continue
+
             R_sharp = _sharp_radius_from_rms(float(r_charge))
+            # 条件分岐: `not (math.isfinite(R_sharp) and R_sharp > 0)` を満たす経路を評価する。
             if not (math.isfinite(R_sharp) and R_sharp > 0):
                 n_skipped_direct_only += 1
                 continue
+
             V_sphere = (4.0 / 3.0) * math.pi * float(R_sharp) ** 3
             rho = float(A) / float(V_sphere)
+            # 条件分岐: `not (math.isfinite(rho) and rho > 0)` を満たす経路を評価する。
             if not (math.isfinite(rho) and rho > 0):
                 n_skipped_direct_only += 1
                 continue
@@ -18745,10 +22150,13 @@ def _run_step_7_13_15_27(
                 beta2=float(beta2_val), include_beta2=bool(include_beta2 and beta2_apply_surface)
             )
 
+            # 条件分岐: `beta2_mode == "direct"` を満たす経路を評価する。
             if beta2_mode == "direct":
                 beta2_counts_direct_only["direct"] += 1
+            # 条件分岐: 前段条件が不成立で、`beta2_mode == "imputed"` を追加評価する。
             elif beta2_mode == "imputed":
                 beta2_counts_direct_only["imputed"] += 1
+            # 条件分岐: 前段条件が不成立で、`beta2_mode == "missing"` を追加評価する。
             elif beta2_mode == "missing":
                 beta2_counts_direct_only["missing"] += 1
 
@@ -18759,12 +22167,16 @@ def _run_step_7_13_15_27(
             preds: dict[int, float] = {}
             for eq in eq_labels:
                 fk = fit_by_eq.get(str(eq))
+                # 条件分岐: `not isinstance(fk, dict)` を満たす経路を評価する。
                 if not isinstance(fk, dict):
                     continue
+
                 c3_inf = float(fk.get("C3_inf", float("nan")))
                 c_surf = float(fk.get("C_surf_MeV_fm", float("nan")))
+                # 条件分岐: `not (math.isfinite(c3_inf) and math.isfinite(c_surf))` を満たす経路を評価する。
                 if not (math.isfinite(c3_inf) and math.isfinite(c_surf)):
                     continue
+
                 base_pack = _hf_base_energy_uniform_sphere_mev_per_a(
                     A=int(A),
                     Z=int(Z),
@@ -18778,10 +22190,12 @@ def _run_step_7_13_15_27(
                 )
                 base_e = float(base_pack.get("E_base", float("nan"))) if isinstance(base_pack, dict) else float("nan")
                 e_coul_uniform = float(base_pack.get("Coul", float("nan"))) if isinstance(base_pack, dict) else float("nan")
+                # 条件分岐: `not (math.isfinite(base_e) and math.isfinite(e_coul_uniform))` を満たす経路を評価する。
                 if not (math.isfinite(base_e) and math.isfinite(e_coul_uniform)):
                     continue
 
                 # Replace uniform-sphere Coulomb direct with 2pF direct, and add 2pF Slater exchange (LDA).
+
                 if int(Z) <= 1:
                     e_dir_fs = 0.0
                     e_x_fs = 0.0
@@ -18793,12 +22207,18 @@ def _run_step_7_13_15_27(
                 e_surf = float(c_surf) / (6.0 * float(R_sharp)) * float(surface_factor)
                 e_total = float(base_e) + float(e_coul_fs) + float(c3_inf) * (float(rho) ** 2) + float(e_surf)
                 ba_pred = -float(e_total)
+                # 条件分岐: `math.isfinite(ba_pred)` を満たす経路を評価する。
                 if math.isfinite(ba_pred):
                     preds[int(eq)] = float(ba_pred)
+
+            # 条件分岐: `not preds` を満たす経路を評価する。
 
             if not preds:
                 n_skipped_direct_only += 1
                 continue
+
+            # 条件分岐: `18 in preds and 19 in preds` を満たす経路を評価する。
+
             if 18 in preds and 19 in preds:
                 ba_pred_mean = float(0.5 * (float(preds[18]) + float(preds[19])))
             else:
@@ -18807,22 +22227,27 @@ def _run_step_7_13_15_27(
             b_pred_all_direct_only[(int(Z), int(N))] = float(A) * float(ba_pred_mean)
 
         missing_keys = set(b_pred_all.keys()) - set(b_pred_all_direct_only.keys())
+        # 条件分岐: `missing_keys` を満たす経路を評価する。
         if missing_keys:
             raise RuntimeError(f"direct-only beta2 pass is missing predictions for {len(missing_keys)} nuclei (unexpected)")
 
         rows_direct = scan_rows(b_pred_all_map=b_pred_all_direct_only)
         direct_pass: dict[tuple[str, int], bool] = {}
         for row_direct in rows_direct:
+            # 条件分岐: `str(row_direct.get("status", "")) != "ok"` を満たす経路を評価する。
             if str(row_direct.get("status", "")) != "ok":
                 continue
+
             sv0 = row_direct.get("shell_variant") if isinstance(row_direct.get("shell_variant"), dict) else {}
             key0 = (str(sv0.get("name", "")), int(row_direct.get("domain_min_A", -1)))
             dec0 = row_direct.get("decision") if isinstance(row_direct.get("decision"), dict) else {}
             direct_pass[key0] = bool(dec0.get("pass_strict", False))
 
         for r in rows:
+            # 条件分岐: `str(r.get("status", "")) != "ok"` を満たす経路を評価する。
             if str(r.get("status", "")) != "ok":
                 continue
+
             sv = r.get("shell_variant") if isinstance(r.get("shell_variant"), dict) else {}
             key = (str(sv.get("name", "")), int(r.get("domain_min_A", -1)))
             dec = r.get("decision") if isinstance(r.get("decision"), dict) else {}
@@ -18833,6 +22258,7 @@ def _run_step_7_13_15_27(
             dec["pass_strict"] = bool(p_primary and p_direct)
 
     # CSV (flat table).
+
     out_csv = out_dir / f"nuclear_a_dependence_hf_three_body_shellgap_decision_{out_stub}.csv"
     header = [
         "shell_variant",
@@ -18862,6 +22288,7 @@ def _run_step_7_13_15_27(
         "reason",
     ]
     extras: list[str] = []
+    # 条件分岐: `include_e2plus` を満たす経路を評価する。
     if include_e2plus:
         extras += [
             "spectro_e2plus_gap_Sn_n_available",
@@ -18874,6 +22301,9 @@ def _run_step_7_13_15_27(
             "spectro_e2plus_gap_Sp_rms_pairing_shell_MeV",
             "pass_strict_spectro",
         ]
+
+    # 条件分岐: `include_radii_kink` を満たす経路を評価する。
+
     if include_radii_kink:
         extras += [
             "radii_kink_gap_Sn_n_available",
@@ -18886,6 +22316,9 @@ def _run_step_7_13_15_27(
             "radii_kink_gap_Sp_rms_pairing_shell_MeV",
             "pass_strict_radii_kink",
         ]
+
+    # 条件分岐: `include_radii_kink_delta2r` を満たす経路を評価する。
+
     if include_radii_kink_delta2r:
         extras += [
             "radii_kink_delta2r_gap_Sn_n_available",
@@ -18900,10 +22333,17 @@ def _run_step_7_13_15_27(
             "radii_kink_delta2r_gap_Sp_max_abs_resid_sigma",
             "pass_strict_radii_kink_delta2r",
         ]
+
+    # 条件分岐: `extras` を満たす経路を評価する。
+
     if extras:
         header = header[:-2] + extras + header[-2:]
+
+    # 条件分岐: `bool(include_beta2 and beta2_strict_coverage)` を満たす経路を評価する。
+
     if bool(include_beta2 and beta2_strict_coverage):
         header = header[:-2] + ["pass_strict_primary", "pass_strict_direct_only", "pass_strict", "reason"]
+
     with out_csv.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
         w.writerow(header)
@@ -18948,6 +22388,7 @@ def _run_step_7_13_15_27(
                 f"{float(sp_ot.get('rms_resid_pairing_only_MeV', float('nan'))):.12g}" if status == "ok" else "",
                 f"{float(sp_ot.get('rms_resid_pairing_shell_MeV', float('nan'))):.12g}" if status == "ok" else "",
             ]
+            # 条件分岐: `include_e2plus` を満たす経路を評価する。
             if include_e2plus:
                 spectro = r.get("spectro_e2plus") if isinstance(r.get("spectro_e2plus"), dict) else {}
                 spec_sn = spectro.get("gap_Sn_peak") if isinstance(spectro.get("gap_Sn_peak"), dict) else {}
@@ -18963,6 +22404,9 @@ def _run_step_7_13_15_27(
                     f"{float(spec_sp.get('rms_resid_pairing_shell_MeV', float('nan'))):.12g}" if status == "ok" else "",
                     str(bool(decision.get("pass_strict_spectro", False))) if status == "ok" else "",
                 ]
+
+            # 条件分岐: `include_radii_kink` を満たす経路を評価する。
+
             if include_radii_kink:
                 kink = r.get("radii_kink") if isinstance(r.get("radii_kink"), dict) else {}
                 kink_sn = kink.get("gap_Sn_kink") if isinstance(kink.get("gap_Sn_kink"), dict) else {}
@@ -18978,6 +22422,9 @@ def _run_step_7_13_15_27(
                     f"{float(kink_sp.get('rms_resid_pairing_shell_MeV', float('nan'))):.12g}" if status == "ok" else "",
                     str(bool(decision.get("pass_strict_radii_kink", False))) if status == "ok" else "",
                 ]
+
+            # 条件分岐: `include_radii_kink_delta2r` を満たす経路を評価する。
+
             if include_radii_kink_delta2r:
                 d2 = r.get("radii_kink_delta2r") if isinstance(r.get("radii_kink_delta2r"), dict) else {}
                 d2_sn = d2.get("gap_Sn_delta2r") if isinstance(d2.get("gap_Sn_delta2r"), dict) else {}
@@ -18995,11 +22442,15 @@ def _run_step_7_13_15_27(
                     f"{float(d2_sp.get('max_abs_resid_sigma', float('nan'))):.12g}" if status == "ok" else "",
                     str(bool(decision.get("pass_strict_radii_kink_delta2r", False))) if status == "ok" else "",
                 ]
+
+            # 条件分岐: `bool(include_beta2 and beta2_strict_coverage)` を満たす経路を評価する。
+
             if bool(include_beta2 and beta2_strict_coverage):
                 row_out += [
                     str(bool(decision.get("pass_strict_primary", False))) if status == "ok" else "",
                     str(bool(decision.get("pass_strict_direct_only", False))) if status == "ok" else "",
                 ]
+
             row_out += [
                 str(bool(decision.get("pass_strict", False))) if status == "ok" else "",
                 reason,
@@ -19007,6 +22458,7 @@ def _run_step_7_13_15_27(
             w.writerow(row_out)
 
     # Plot: delta RMS (shell - pairing) vs A_min for train/other and Sn/Sp.
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -19032,6 +22484,7 @@ def _run_step_7_13_15_27(
                 sub = g.get(subset) if isinstance(g.get(subset), dict) else {}
                 y = float(sub.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(sub.get("rms_resid_pairing_only_MeV", float("nan")))
                 ys.append(float(y))
+
             ax.plot(xs, ys, marker="o", linestyle="-", label=name)
             ax.set_title(title)
             ax.set_xlabel("domain A_min")
@@ -19042,10 +22495,13 @@ def _run_step_7_13_15_27(
     for ax in axes.flatten():
         ax.legend(fontsize=8)
 
+    # 条件分岐: `not include_beta2` を満たす経路を評価する。
+
     if not include_beta2:
         title = f"Phase 7 / Step {step_id}: expanded-set shell-gap decision with isospin-dependent shell refreeze"
     else:
         title = f"Phase 7 / Step {step_id}: expanded-set shell-gap decision with β2-dependent Coulomb factor (NNDC B(E2)) + isospin-dependent shell refreeze"
+
     fig.suptitle(title, fontsize=12)
 
     out_png = out_dir / f"nuclear_a_dependence_hf_three_body_shellgap_decision_{out_stub}.png"
@@ -19057,6 +22513,7 @@ def _run_step_7_13_15_27(
     out_kink_png: Path | None = None
     out_kink_delta2r_png: Path | None = None
     out_kink_delta2r_csv: Path | None = None
+    # 条件分岐: `include_e2plus` を満たす経路を評価する。
     if include_e2plus:
         def is_peak_n(*, Z: int, N: int) -> bool:
             e0 = e2plus_by_zn.get((int(Z), int(N)))
@@ -19084,14 +22541,23 @@ def _run_step_7_13_15_27(
 
         pts: list[tuple[int, int, float, bool, bool]] = []
         for (Z, N), A in a_by_zn_all.items():
+            # 条件分岐: `int(A) < int(domain_min_a)` を満たす経路を評価する。
             if int(A) < int(domain_min_a):
                 continue
+
             e = e2plus_by_zn.get((int(Z), int(N)))
+            # 条件分岐: `e is None` を満たす経路を評価する。
             if e is None:
                 continue
+
+            # 条件分岐: `int(Z) % 2 != 0 or int(N) % 2 != 0` を満たす経路を評価する。
+
             if int(Z) % 2 != 0 or int(N) % 2 != 0:
                 continue
+
             pts.append((int(Z), int(N), float(e) / 1000.0, is_peak_n(Z=int(Z), N=int(N)), is_peak_z(Z=int(Z), N=int(N))))
+
+        # 条件分岐: `pts` を満たす経路を評価する。
 
         if pts:
             fig2, axes2 = plt.subplots(1, 2, figsize=(13, 4.2), constrained_layout=True)
@@ -19104,10 +22570,13 @@ def _run_step_7_13_15_27(
             peakZ = [p for p in pts if p[4]]
 
             axN.scatter(Ns, Es, s=10, alpha=0.25, color="0.3", label="even-even (E2+ available)")
+            # 条件分岐: `peakN` を満たす経路を評価する。
             if peakN:
                 axN.scatter([p[1] for p in peakN], [p[2] for p in peakN], s=18, marker="x", color="tab:red", label="peak in N (±2)")
+
             for m in OBS_MAGIC[1:]:
                 axN.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
             axN.set_title(f"E(2+_1) vs N ({e2plus_source_label}; even-even)")
             axN.set_xlabel("N")
             axN.set_ylabel("E(2+_1) (MeV)")
@@ -19115,10 +22584,13 @@ def _run_step_7_13_15_27(
             axN.legend(fontsize=8)
 
             axZ.scatter(Zs, Es, s=10, alpha=0.25, color="0.3", label="even-even (E2+ available)")
+            # 条件分岐: `peakZ` を満たす経路を評価する。
             if peakZ:
                 axZ.scatter([p[0] for p in peakZ], [p[2] for p in peakZ], s=18, marker="x", color="tab:blue", label="peak in Z (±2)")
+
             for m in OBS_MAGIC[1:]:
                 axZ.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
             axZ.set_title(f"E(2+_1) vs Z ({e2plus_source_label}; even-even)")
             axZ.set_xlabel("Z")
             axZ.set_ylabel("E(2+_1) (MeV)")
@@ -19130,29 +22602,47 @@ def _run_step_7_13_15_27(
             fig2.savefig(out_e2_png, dpi=160)
             plt.close(fig2)
 
+    # 条件分岐: `bool(include_spectro_multi and (spectro_multi_maps is not None))` を満たす経路を評価する。
+
     if bool(include_spectro_multi and (spectro_multi_maps is not None)):
         def is_extreme_n(*, metric_by_zn: dict[tuple[int, int], float], Z: int, N: int, kind: str) -> bool:
             v0 = metric_by_zn.get((int(Z), int(N)))
             vL = metric_by_zn.get((int(Z), int(N) - 2))
             vR = metric_by_zn.get((int(Z), int(N) + 2))
+            # 条件分岐: `v0 is None or vL is None or vR is None` を満たす経路を評価する。
             if v0 is None or vL is None or vR is None:
                 return False
+
+            # 条件分岐: `str(kind) == "peak"` を満たす経路を評価する。
+
             if str(kind) == "peak":
                 return float(v0) > float(vL) and float(v0) > float(vR)
+
+            # 条件分岐: `str(kind) == "valley"` を満たす経路を評価する。
+
             if str(kind) == "valley":
                 return float(v0) < float(vL) and float(v0) < float(vR)
+
             raise ValueError(f"unsupported kind: {kind}")
 
         def is_extreme_z(*, metric_by_zn: dict[tuple[int, int], float], Z: int, N: int, kind: str) -> bool:
             v0 = metric_by_zn.get((int(Z), int(N)))
             vL = metric_by_zn.get((int(Z) - 2, int(N)))
             vR = metric_by_zn.get((int(Z) + 2, int(N)))
+            # 条件分岐: `v0 is None or vL is None or vR is None` を満たす経路を評価する。
             if v0 is None or vL is None or vR is None:
                 return False
+
+            # 条件分岐: `str(kind) == "peak"` を満たす経路を評価する。
+
             if str(kind) == "peak":
                 return float(v0) > float(vL) and float(v0) > float(vR)
+
+            # 条件分岐: `str(kind) == "valley"` を満たす経路を評価する。
+
             if str(kind) == "valley":
                 return float(v0) < float(vL) and float(v0) < float(vR)
+
             raise ValueError(f"unsupported kind: {kind}")
 
         plot_specs: list[tuple[str, str, dict[tuple[int, int], float], str, str, float]] = [
@@ -19162,6 +22652,7 @@ def _run_step_7_13_15_27(
             ("R4/2", "r42", spectro_multi_maps.get("r42", {}), "valley", "", 1.0),
         ]
         plot_specs = [p for p in plot_specs if p[2]]
+        # 条件分岐: `plot_specs` を満たす経路を評価する。
         if plot_specs:
             fig3, axes3 = plt.subplots(len(plot_specs), 2, figsize=(13, 3.1 * len(plot_specs)), constrained_layout=True)
             axes_rows = [axes3] if len(plot_specs) == 1 else list(axes3)
@@ -19171,14 +22662,20 @@ def _run_step_7_13_15_27(
 
                 pts: list[tuple[int, int, float, bool, bool]] = []
                 for (Z, N), A in a_by_zn_all.items():
+                    # 条件分岐: `int(A) < int(domain_min_a)` を満たす経路を評価する。
                     if int(A) < int(domain_min_a):
                         continue
+
                     v = metric_by_zn.get((int(Z), int(N)))
+                    # 条件分岐: `v is None` を満たす経路を評価する。
                     if v is None:
                         continue
+
                     y = float(v) * float(scale)
+                    # 条件分岐: `not math.isfinite(y)` を満たす経路を評価する。
                     if not math.isfinite(y):
                         continue
+
                     pts.append(
                         (
                             int(Z),
@@ -19201,6 +22698,7 @@ def _run_step_7_13_15_27(
                 labelZ = "peak in Z (±2)" if str(kind) == "peak" else "valley in Z (±2)"
 
                 axN.scatter(Ns, Ys, s=10, alpha=0.25, color="0.3", label=f"even-even ({label} available)")
+                # 条件分岐: `extN` を満たす経路を評価する。
                 if extN:
                     axN.scatter(
                         [p[1] for p in extN],
@@ -19210,8 +22708,10 @@ def _run_step_7_13_15_27(
                         color="tab:red",
                         label=labelN,
                     )
+
                 for m in OBS_MAGIC[1:]:
                     axN.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
                 axN.set_title(f"{label} vs N ({spectro_multi_source_label}; even-even)")
                 axN.set_xlabel("N")
                 axN.set_ylabel(f"{label} ({yunit})" if yunit else f"{label}")
@@ -19219,6 +22719,7 @@ def _run_step_7_13_15_27(
                 axN.legend(fontsize=8)
 
                 axZ.scatter(Zs, Ys, s=10, alpha=0.25, color="0.3", label=f"even-even ({label} available)")
+                # 条件分岐: `extZ` を満たす経路を評価する。
                 if extZ:
                     axZ.scatter(
                         [p[0] for p in extZ],
@@ -19228,8 +22729,10 @@ def _run_step_7_13_15_27(
                         color="tab:blue",
                         label=labelZ,
                     )
+
                 for m in OBS_MAGIC[1:]:
                     axZ.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
                 axZ.set_title(f"{label} vs Z ({spectro_multi_source_label}; even-even)")
                 axZ.set_xlabel("Z")
                 axZ.set_ylabel(f"{label} ({yunit})" if yunit else f"{label}")
@@ -19241,6 +22744,8 @@ def _run_step_7_13_15_27(
             fig3.savefig(out_spec_png, dpi=160)
             plt.close(fig3)
 
+    # 条件分岐: `include_radii_kink` を満たす経路を評価する。
+
     if include_radii_kink:
         fig4, axes4 = plt.subplots(1, 2, figsize=(13, 4), constrained_layout=True)
         axN, axZ = axes4[0], axes4[1]
@@ -19249,10 +22754,13 @@ def _run_step_7_13_15_27(
         ptsZ: list[tuple[int, int, float, bool]] = []
         for (Z, N) in radii_by_zn.keys():
             infoN = kink_info_n(Z=int(Z), N0=int(N), d=2)
+            # 条件分岐: `infoN is not None` を満たす経路を評価する。
             if infoN is not None:
                 sigN, _, _ = infoN
                 ptsN.append((int(Z), int(N), float(sigN), float(sigN) >= float(kink_sigma_min)))
+
             infoZ = kink_info_z(Z0=int(Z), N=int(N), d=2)
+            # 条件分岐: `infoZ is not None` を満たす経路を評価する。
             if infoZ is not None:
                 sigZ, _, _ = infoZ
                 ptsZ.append((int(Z), int(N), float(sigZ), float(sigZ) >= float(kink_sigma_min)))
@@ -19262,10 +22770,13 @@ def _run_step_7_13_15_27(
         Ns_hit = [p[1] for p in ptsN if p[3]]
         sigNs_hit = [p[2] for p in ptsN if p[3]]
         axN.scatter(Ns, sigNs, s=10, alpha=0.25, color="0.3", label="available (Δ²r in N)")
+        # 条件分岐: `Ns_hit` を満たす経路を評価する。
         if Ns_hit:
             axN.scatter(Ns_hit, sigNs_hit, s=20, marker="x", color="tab:red", label=f"kink: |Δ²r|/σ≥{float(kink_sigma_min):g}")
+
         for m in OBS_MAGIC[1:]:
             axN.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
         axN.set_title("Charge-radii kink significance vs N (IAEA radii; step=2)")
         axN.set_xlabel("N (center)")
         axN.set_ylabel("|Δ²r|/σ")
@@ -19277,10 +22788,13 @@ def _run_step_7_13_15_27(
         Zs_hit = [p[0] for p in ptsZ if p[3]]
         sigZs_hit = [p[2] for p in ptsZ if p[3]]
         axZ.scatter(Zs, sigZs, s=10, alpha=0.25, color="0.3", label="available (Δ²r in Z)")
+        # 条件分岐: `Zs_hit` を満たす経路を評価する。
         if Zs_hit:
             axZ.scatter(Zs_hit, sigZs_hit, s=20, marker="x", color="tab:blue", label=f"kink: |Δ²r|/σ≥{float(kink_sigma_min):g}")
+
         for m in OBS_MAGIC[1:]:
             axZ.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
         axZ.set_title("Charge-radii kink significance vs Z (IAEA radii; step=2)")
         axZ.set_xlabel("Z (center)")
         axZ.set_ylabel("|Δ²r|/σ")
@@ -19291,6 +22805,8 @@ def _run_step_7_13_15_27(
         out_kink_png = out_dir / f"nuclear_a_dependence_hf_three_body_radii_kink_diagnostics_{out_stub}.png"
         fig4.savefig(out_kink_png, dpi=160)
         plt.close(fig4)
+
+    # 条件分岐: `include_radii_kink_delta2r` を満たす経路を評価する。
 
     if include_radii_kink_delta2r:
         resid_sigma_max = float(radii_kink_delta2r_resid_sigma_max)
@@ -19312,6 +22828,7 @@ def _run_step_7_13_15_27(
         diag_r_magic_z = float("nan")
         diag_magic_neighbor_weight = float("nan")
         diag_magic_neighbor_step = int(-1)
+        # 条件分岐: `bool(radii_kink_delta2r_radius_shell_nz_beta2)` を満たす経路を評価する。
         if bool(radii_kink_delta2r_radius_shell_nz_beta2):
             diag_shell_variant = "obs_magic"
             diag_shell_nz = True
@@ -19319,16 +22836,23 @@ def _run_step_7_13_15_27(
             radii_shell_pack = fit_radii_shell_nz_beta2(shell_magic=list(OBS_MAGIC))
             diag_r_shell_n = float(radii_shell_pack.get("r_shell_N_fm", float("nan")))
             diag_r_shell_z = float(radii_shell_pack.get("r_shell_Z_fm", float("nan")))
+            # 条件分岐: `not math.isfinite(diag_r_shell_n)` を満たす経路を評価する。
             if not math.isfinite(diag_r_shell_n):
                 diag_r_shell_n = 0.0
+
+            # 条件分岐: `not math.isfinite(diag_r_shell_z)` を満たす経路を評価する。
+
             if not math.isfinite(diag_r_shell_z):
                 diag_r_shell_z = 0.0
+
             k_beta2 = 5.0 / (4.0 * math.pi)
 
             def r_charge_pred_shell_nz_beta2(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
                 b2, _ = _beta2_for_zn(
                     Z=int(Z),
                     N=int(N),
@@ -19340,94 +22864,131 @@ def _run_step_7_13_15_27(
                 factor = math.sqrt(1.0 + float(k_beta2) * float(b2) * float(b2))
                 sN = float(shell_S_r(int(N)))
                 sZ = float(shell_S_r(int(Z)))
+                # 条件分岐: `not (math.isfinite(factor) and factor > 0.0 and math.isfinite(sN) and math.is...` を満たす経路を評価する。
                 if not (math.isfinite(factor) and factor > 0.0 and math.isfinite(sN) and math.isfinite(sZ)):
                     return None
+
                 out_r = (float(base) + float(diag_r_shell_n) * float(sN) + float(diag_r_shell_z) * float(sZ)) * float(factor)
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_shell_nz_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_shell_nz_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell_nz_beta2(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_shell_nz_beta2(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_shell_nz_beta2(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_shell_nz_beta2
             delta2r_pred_z_diag = delta2r_pred_z_shell_nz_beta2
+
+        # 条件分岐: `bool(radii_kink_delta2r_radius_shell or radii_kink_delta2r_radius_shell_nz)` を満たす経路を評価する。
+
         if bool(radii_kink_delta2r_radius_shell or radii_kink_delta2r_radius_shell_nz):
             diag_shell_variant = "obs_magic"
             shell_S_r = shell_S_radius_factory(list(OBS_MAGIC))
+            # 条件分岐: `bool(radii_kink_delta2r_radius_shell_nz)` を満たす経路を評価する。
             if bool(radii_kink_delta2r_radius_shell_nz):
                 diag_shell_nz = True
                 radii_shell_pack = fit_radii_shell_nz(shell_magic=list(OBS_MAGIC))
                 diag_r_shell_n = float(radii_shell_pack.get("r_shell_N_fm", float("nan")))
                 diag_r_shell_z = float(radii_shell_pack.get("r_shell_Z_fm", float("nan")))
+                # 条件分岐: `not math.isfinite(diag_r_shell_n)` を満たす経路を評価する。
                 if not math.isfinite(diag_r_shell_n):
                     diag_r_shell_n = 0.0
+
+                # 条件分岐: `not math.isfinite(diag_r_shell_z)` を満たす経路を評価する。
+
                 if not math.isfinite(diag_r_shell_z):
                     diag_r_shell_z = 0.0
             else:
                 radii_shell_pack = fit_radii_shell(shell_magic=list(OBS_MAGIC))
                 diag_r_shell = float(radii_shell_pack.get("r_shell_fm", float("nan")))
+                # 条件分岐: `not math.isfinite(diag_r_shell)` を満たす経路を評価する。
                 if not math.isfinite(diag_r_shell):
                     diag_r_shell = 0.0
 
             def r_charge_pred_shell(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
+                # 条件分岐: `diag_shell_nz` を満たす経路を評価する。
+
                 if diag_shell_nz:
                     sN = float(shell_S_r(int(N)))
                     sZ = float(shell_S_r(int(Z)))
+                    # 条件分岐: `not (math.isfinite(sN) and math.isfinite(sZ))` を満たす経路を評価する。
                     if not (math.isfinite(sN) and math.isfinite(sZ)):
                         return None
+
                     out_r = float(base) + float(diag_r_shell_n) * float(sN) + float(diag_r_shell_z) * float(sZ)
                 else:
                     s_sum = float(shell_S_r(int(N)) + shell_S_r(int(Z)))
+                    # 条件分岐: `not math.isfinite(s_sum)` を満たす経路を評価する。
                     if not math.isfinite(s_sum):
                         return None
+
                     out_r = float(base) + float(diag_r_shell) * float(s_sum)
+
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
+
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_shell(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_shell(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_shell(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_shell(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_shell(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_shell(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_shell
             delta2r_pred_z_diag = delta2r_pred_z_shell
+
+        # 条件分岐: `bool(radii_kink_delta2r_radius_beta2)` を満たす経路を評価する。
 
         if bool(radii_kink_delta2r_radius_beta2):
             k_beta2 = 5.0 / (4.0 * math.pi)
 
             def beta2_for_radius(*, Z: int, N: int) -> float:
                 v = beta2_by_zn.get((int(Z), int(N)))
+                # 条件分岐: `v is not None and math.isfinite(float(v))` を満たす経路を評価する。
                 if v is not None and math.isfinite(float(v)):
                     return float(v)
+
                 vals: list[float] = []
                 for z0, n0 in [
                     (int(Z), int(N) - 1),
@@ -19440,80 +23001,109 @@ def _run_step_7_13_15_27(
                     (int(Z) + 1, int(N) + 1),
                 ]:
                     v0 = beta2_by_zn.get((int(z0), int(n0)))
+                    # 条件分岐: `v0 is None` を満たす経路を評価する。
                     if v0 is None:
                         continue
+
+                    # 条件分岐: `math.isfinite(float(v0))` を満たす経路を評価する。
+
                     if math.isfinite(float(v0)):
                         vals.append(float(v0))
+
                 return float(sum(vals) / len(vals)) if vals else 0.0
 
             def r_charge_pred_beta2(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
                 b2 = abs(float(beta2_for_radius(Z=int(Z), N=int(N))))
                 factor = math.sqrt(1.0 + float(k_beta2) * float(b2) * float(b2))
                 out_r = float(base) * float(factor)
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_beta2(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_beta2(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_beta2(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_beta2(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_beta2(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_beta2(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_beta2
             delta2r_pred_z_diag = delta2r_pred_z_beta2
 
+        # 条件分岐: `bool(radii_kink_delta2r_radius_odd_even)` を満たす経路を評価する。
+
         if bool(radii_kink_delta2r_radius_odd_even):
             radii_oe_pack = fit_radii_odd_even()
             r_oe_n = float(radii_oe_pack.get("r_oe_N_fm", 0.0))
             r_oe_z = float(radii_oe_pack.get("r_oe_Z_fm", 0.0))
+            # 条件分岐: `not math.isfinite(r_oe_n)` を満たす経路を評価する。
             if not math.isfinite(r_oe_n):
                 r_oe_n = 0.0
+
+            # 条件分岐: `not math.isfinite(r_oe_z)` を満たす経路を評価する。
+
             if not math.isfinite(r_oe_z):
                 r_oe_z = 0.0
 
             def r_charge_pred_odd_even(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
                 eN = 1.0 if (int(N) % 2 != 0) else 0.0
                 eZ = 1.0 if (int(Z) % 2 != 0) else 0.0
                 out_r = float(base) + float(r_oe_n) * float(eN) + float(r_oe_z) * float(eZ)
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_odd_even(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_odd_even(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_odd_even(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_odd_even(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_odd_even(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_odd_even(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_odd_even(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_odd_even(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_odd_even
             delta2r_pred_z_diag = delta2r_pred_z_odd_even
+
+        # 条件分岐: `bool(radii_kink_delta2r_radius_magic_offset)` を満たす経路を評価する。
 
         if bool(radii_kink_delta2r_radius_magic_offset):
             diag_magic_variant = "obs_magic"
@@ -19523,40 +23113,55 @@ def _run_step_7_13_15_27(
             diag_r_magic_z = float(radii_magic_pack.get("r_magic_Z_fm", float("nan")))
             diag_magic_neighbor_weight = 0.0
             diag_magic_neighbor_step = 2
+            # 条件分岐: `not math.isfinite(diag_r_magic_n)` を満たす経路を評価する。
             if not math.isfinite(diag_r_magic_n):
                 diag_r_magic_n = 0.0
+
+            # 条件分岐: `not math.isfinite(diag_r_magic_z)` を満たす経路を評価する。
+
             if not math.isfinite(diag_r_magic_z):
                 diag_r_magic_z = 0.0
 
             def r_charge_pred_magic_offset(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
                 eN = 1.0 if int(N) in magic_set else 0.0
                 eZ = 1.0 if int(Z) in magic_set else 0.0
                 out_r = float(base) + float(diag_r_magic_n) * float(eN) + float(diag_r_magic_z) * float(eZ)
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_magic_offset(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_magic_offset(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_magic_offset(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_magic_offset(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_magic_offset(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_magic_offset(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_magic_offset
             delta2r_pred_z_diag = delta2r_pred_z_magic_offset
+
+        # 条件分岐: `bool(radii_kink_delta2r_radius_magic_offset_neighbors)` を満たす経路を評価する。
+
         if bool(radii_kink_delta2r_radius_magic_offset_neighbors):
             diag_magic_variant = "obs_magic_neighbors0p5"
             radii_magic_pack = fit_radii_magic_offset_neighbors(magic=list(OBS_MAGIC), neighbor_weight=0.5, neighbor_step=2)
@@ -19566,51 +23171,77 @@ def _run_step_7_13_15_27(
             diag_magic_neighbor_step = int(w_magic_cfg.get("neighbor_step", 2))
             diag_r_magic_n = float(radii_magic_pack.get("r_magic_N_fm", float("nan")))
             diag_r_magic_z = float(radii_magic_pack.get("r_magic_Z_fm", float("nan")))
+            # 条件分岐: `not math.isfinite(diag_r_magic_n)` を満たす経路を評価する。
             if not math.isfinite(diag_r_magic_n):
                 diag_r_magic_n = 0.0
+
+            # 条件分岐: `not math.isfinite(diag_r_magic_z)` を満たす経路を評価する。
+
             if not math.isfinite(diag_r_magic_z):
                 diag_r_magic_z = 0.0
+
+            # 条件分岐: `not (math.isfinite(diag_magic_neighbor_weight) and 0.0 <= float(diag_magic_ne...` を満たす経路を評価する。
+
             if not (math.isfinite(diag_magic_neighbor_weight) and 0.0 <= float(diag_magic_neighbor_weight) <= 1.0):
                 diag_magic_neighbor_weight = 0.5
+
+            # 条件分岐: `int(diag_magic_neighbor_step) <= 0` を満たす経路を評価する。
+
             if int(diag_magic_neighbor_step) <= 0:
                 diag_magic_neighbor_step = 2
 
             def w_magic(x: int) -> float:
+                # 条件分岐: `int(x) in magic_set` を満たす経路を評価する。
                 if int(x) in magic_set:
                     return 1.0
+
+                # 条件分岐: `(int(x) - int(diag_magic_neighbor_step)) in magic_set or (int(x) + int(diag_m...` を満たす経路を評価する。
+
                 if (int(x) - int(diag_magic_neighbor_step)) in magic_set or (int(x) + int(diag_magic_neighbor_step)) in magic_set:
                     return float(diag_magic_neighbor_weight)
+
                 return 0.0
 
             def r_charge_pred_magic_offset_neighbors(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
                 wN = float(w_magic(int(N)))
                 wZ = float(w_magic(int(Z)))
                 out_r = float(base) + float(diag_r_magic_n) * float(wN) + float(diag_r_magic_z) * float(wZ)
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_magic_offset_neighbors(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_magic_offset_neighbors(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_magic_offset_neighbors(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_magic_offset_neighbors(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_magic_offset_neighbors
             delta2r_pred_z_diag = delta2r_pred_z_magic_offset_neighbors
+
+        # 条件分岐: `bool(radii_kink_delta2r_radius_magic_offset_per_magic)` を満たす経路を評価する。
+
         if bool(radii_kink_delta2r_radius_magic_offset_per_magic):
             diag_magic_variant = "obs_magic_per_magic"
             radii_magic_pack = fit_radii_magic_offset_per_magic(magic=list(OBS_MAGIC))
@@ -19624,35 +23255,45 @@ def _run_step_7_13_15_27(
 
             def r_charge_pred_magic_offset_per_magic(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
+                # 条件分岐: `base is None` を満たす経路を評価する。
                 if base is None:
                     return None
+
                 dm = float(coeffs_N.get(int(N), 0.0)) + float(coeffs_Z.get(int(Z), 0.0))
                 out_r = float(base) + float(dm)
+                # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
                 if not (math.isfinite(out_r) and out_r > 0.0):
                     return None
+
                 return float(out_r)
 
             def delta2r_pred_n_magic_offset_per_magic(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0) - int(d))
                 rRp = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0) + int(d))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             def delta2r_pred_z_magic_offset_per_magic(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z0), N=int(N))
                 rLp = r_charge_pred_magic_offset_per_magic(Z=int(Z0) - int(d), N=int(N))
                 rRp = r_charge_pred_magic_offset_per_magic(Z=int(Z0) + int(d), N=int(N))
+                # 条件分岐: `r0p is None or rLp is None or rRp is None` を満たす経路を評価する。
                 if r0p is None or rLp is None or rRp is None:
                     return None
+
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
             delta2r_pred_n_diag = delta2r_pred_n_magic_offset_per_magic
             delta2r_pred_z_diag = delta2r_pred_z_magic_offset_per_magic
 
         diag_shell_extra: dict[str, object] = {}
+        # 条件分岐: `diag_shell_variant` を満たす経路を評価する。
         if diag_shell_variant:
+            # 条件分岐: `diag_shell_nz` を満たす経路を評価する。
             if diag_shell_nz:
                 diag_shell_extra = {
                     "radius_shell_variant": str(diag_shell_variant),
@@ -19663,6 +23304,7 @@ def _run_step_7_13_15_27(
                 diag_shell_extra = {"radius_shell_variant": str(diag_shell_variant), "r_shell_fm": float(diag_r_shell)}
 
         diag_magic_extra: dict[str, object] = {}
+        # 条件分岐: `diag_magic_variant` を満たす経路を評価する。
         if diag_magic_variant:
             diag_magic_extra = {
                 "radius_magic_variant": str(diag_magic_variant),
@@ -19676,22 +23318,28 @@ def _run_step_7_13_15_27(
 
         for (Z, N0) in radii_by_zn.keys():
             info = kink_info_n(Z=int(Z), N0=int(N0), d=2)
+            # 条件分岐: `info is not None` を満たす経路を評価する。
             if info is not None:
                 A0 = int(Z) + int(N0)
                 AL = int(Z) + int(N0) - 2
                 AR = int(Z) + int(N0) + 2
+                # 条件分岐: `min(AL, A0, AR) >= int(domain_min_a)` を満たす経路を評価する。
                 if min(AL, A0, AR) >= int(domain_min_a):
                     sig_obs, d2_obs, sig_obs_fm = info
                     d2_pred = delta2r_pred_n_diag(Z=int(Z), N0=int(N0), d=2)
+                    # 条件分岐: `d2_pred is not None` を満たす経路を評価する。
                     if d2_pred is not None:
                         sig = float(sig_obs_fm)
+                        # 条件分岐: `math.isfinite(sig) and sig > 0` を満たす経路を評価する。
                         if math.isfinite(sig) and sig > 0:
                             resid = float(d2_pred) - float(d2_obs)
                             z = float(resid) / float(sig)
                             absz = abs(float(z))
                             is_kink = bool(float(sig_obs) >= float(kink_sigma_min))
+                            # 条件分岐: `bool(radii_kink_delta2r_center_magic_only)` を満たす経路を評価する。
                             if bool(radii_kink_delta2r_center_magic_only):
                                 is_kink = bool(is_kink and int(N0) in set(int(x) for x in OBS_MAGIC))
+
                             is_reject = bool(is_kink and absz > float(resid_sigma_max))
                             used0 = str(radii_by_zn[(int(Z), int(N0))][2])
                             usedL = str(radii_by_zn[(int(Z), int(N0) - 2)][2])
@@ -19718,22 +23366,28 @@ def _run_step_7_13_15_27(
                             ptsN.append((int(Z), int(N0), float(absz), bool(is_kink), bool(is_reject)))
 
             infoZ = kink_info_z(Z0=int(Z), N=int(N0), d=2)
+            # 条件分岐: `infoZ is not None` を満たす経路を評価する。
             if infoZ is not None:
                 A0 = int(Z) + int(N0)
                 AL = int(Z) - 2 + int(N0)
                 AR = int(Z) + 2 + int(N0)
+                # 条件分岐: `min(AL, A0, AR) >= int(domain_min_a)` を満たす経路を評価する。
                 if min(AL, A0, AR) >= int(domain_min_a):
                     sig_obs, d2_obs, sig_obs_fm = infoZ
                     d2_pred = delta2r_pred_z_diag(Z0=int(Z), N=int(N0), d=2)
+                    # 条件分岐: `d2_pred is not None` を満たす経路を評価する。
                     if d2_pred is not None:
                         sig = float(sig_obs_fm)
+                        # 条件分岐: `math.isfinite(sig) and sig > 0` を満たす経路を評価する。
                         if math.isfinite(sig) and sig > 0:
                             resid = float(d2_pred) - float(d2_obs)
                             z = float(resid) / float(sig)
                             absz = abs(float(z))
                             is_kink = bool(float(sig_obs) >= float(kink_sigma_min))
+                            # 条件分岐: `bool(radii_kink_delta2r_center_magic_only)` を満たす経路を評価する。
                             if bool(radii_kink_delta2r_center_magic_only):
                                 is_kink = bool(is_kink and int(Z) in set(int(x) for x in OBS_MAGIC))
+
                             is_reject = bool(is_kink and absz > float(resid_sigma_max))
                             used0 = str(radii_by_zn[(int(Z), int(N0))][2])
                             usedL = str(radii_by_zn[(int(Z) - 2, int(N0))][2])
@@ -19774,11 +23428,16 @@ def _run_step_7_13_15_27(
                 "obs_sig",
                 "is_kink",
             ]
+            # 条件分岐: `diag_shell_variant` を満たす経路を評価する。
             if diag_shell_variant:
+                # 条件分岐: `diag_shell_nz` を満たす経路を評価する。
                 if diag_shell_nz:
                     header_delta2r += ["radius_shell_variant", "r_shell_N_fm", "r_shell_Z_fm"]
                 else:
                     header_delta2r += ["radius_shell_variant", "r_shell_fm"]
+
+            # 条件分岐: `diag_magic_variant` を満たす経路を評価する。
+
             if diag_magic_variant:
                 header_delta2r += [
                     "radius_magic_variant",
@@ -19787,6 +23446,7 @@ def _run_step_7_13_15_27(
                     "radius_magic_neighbor_weight",
                     "radius_magic_neighbor_step",
                 ]
+
             header_delta2r += ["used_center", "used_left", "used_right"]
             w.writerow(header_delta2r)
             for r in rows_delta2r:
@@ -19806,7 +23466,9 @@ def _run_step_7_13_15_27(
                     f"{float(r.get('obs_sig', float('nan'))):.12g}",
                     str(bool(r.get("is_kink", False))),
                 ]
+                # 条件分岐: `diag_shell_variant` を満たす経路を評価する。
                 if diag_shell_variant:
+                    # 条件分岐: `diag_shell_nz` を満たす経路を評価する。
                     if diag_shell_nz:
                         row_out += [
                             str(r.get("radius_shell_variant", "")),
@@ -19818,6 +23480,9 @@ def _run_step_7_13_15_27(
                             str(r.get("radius_shell_variant", "")),
                             f"{float(r.get('r_shell_fm', float('nan'))):.12g}",
                         ]
+
+                # 条件分岐: `diag_magic_variant` を満たす経路を評価する。
+
                 if diag_magic_variant:
                     row_out += [
                         str(r.get("radius_magic_variant", "")),
@@ -19826,6 +23491,7 @@ def _run_step_7_13_15_27(
                         f"{float(r.get('radius_magic_neighbor_weight', float('nan'))):.12g}",
                         int(r.get("radius_magic_neighbor_step", -1)),
                     ]
+
                 row_out += [
                     str(r.get("used_center", "")),
                     str(r.get("used_left", "")),
@@ -19841,13 +23507,19 @@ def _run_step_7_13_15_27(
         kink_ok_N = [p for p in ptsN if p[3] and not p[4]]
         kink_rej_N = [p for p in ptsN if p[3] and p[4]]
         axN.scatter(Ns, ysN, s=10, alpha=0.25, color="0.3", label="available (Δ²r residual in N)")
+        # 条件分岐: `kink_ok_N` を満たす経路を評価する。
         if kink_ok_N:
             axN.scatter([p[1] for p in kink_ok_N], [p[2] for p in kink_ok_N], s=22, marker="x", color="tab:green", label="kink: pass")
+
+        # 条件分岐: `kink_rej_N` を満たす経路を評価する。
+
         if kink_rej_N:
             axN.scatter([p[1] for p in kink_rej_N], [p[2] for p in kink_rej_N], s=22, marker="x", color="tab:red", label="kink: reject")
+
         axN.axhline(float(resid_sigma_max), color="k", linewidth=1.0, alpha=0.35, linestyle="--")
         for m in OBS_MAGIC[1:]:
             axN.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
         axN.set_title("Charge-radii kink residual |Δ²r_pred-Δ²r_obs|/σ_obs vs N (IAEA; step=2)")
         axN.set_xlabel("N (center)")
         axN.set_ylabel("|residual| / σ_obs")
@@ -19859,13 +23531,19 @@ def _run_step_7_13_15_27(
         kink_ok_Z = [p for p in ptsZ if p[3] and not p[4]]
         kink_rej_Z = [p for p in ptsZ if p[3] and p[4]]
         axZ.scatter(Zs, ysZ, s=10, alpha=0.25, color="0.3", label="available (Δ²r residual in Z)")
+        # 条件分岐: `kink_ok_Z` を満たす経路を評価する。
         if kink_ok_Z:
             axZ.scatter([p[0] for p in kink_ok_Z], [p[2] for p in kink_ok_Z], s=22, marker="x", color="tab:green", label="kink: pass")
+
+        # 条件分岐: `kink_rej_Z` を満たす経路を評価する。
+
         if kink_rej_Z:
             axZ.scatter([p[0] for p in kink_rej_Z], [p[2] for p in kink_rej_Z], s=22, marker="x", color="tab:blue", label="kink: reject")
+
         axZ.axhline(float(resid_sigma_max), color="k", linewidth=1.0, alpha=0.35, linestyle="--")
         for m in OBS_MAGIC[1:]:
             axZ.axvline(int(m), color="k", linewidth=1.0, alpha=0.12)
+
         axZ.set_title("Charge-radii kink residual |Δ²r_pred-Δ²r_obs|/σ_obs vs Z (IAEA; step=2)")
         axZ.set_xlabel("Z (center)")
         axZ.set_ylabel("|residual| / σ_obs")
@@ -19878,6 +23556,7 @@ def _run_step_7_13_15_27(
         plt.close(fig5)
 
     # Decision summary.
+
     ok_rows = [r for r in rows if r.get("status") == "ok"]
     n_pass = sum(1 for r in ok_rows if bool((r.get("decision") or {}).get("pass_strict", False)))
 
@@ -19885,11 +23564,17 @@ def _run_step_7_13_15_27(
     for r in ok_rows:
         sp = r.get("gap_Sp") if isinstance(r.get("gap_Sp"), dict) else {}
         other = sp.get("other_magic") if isinstance(sp.get("other_magic"), dict) else {}
+        # 条件分岐: `int(other.get("n", 0)) <= 0` を満たす経路を評価する。
         if int(other.get("n", 0)) <= 0:
             continue
+
         delta = float(other.get("rms_resid_pairing_shell_MeV", float("nan"))) - float(other.get("rms_resid_pairing_only_MeV", float("nan")))
+        # 条件分岐: `not math.isfinite(delta)` を満たす経路を評価する。
         if not math.isfinite(delta):
             continue
+
+        # 条件分岐: `best_sp_other is None or delta < best_sp_other["delta"]` を満たす経路を評価する。
+
         if best_sp_other is None or delta < best_sp_other["delta"]:
             best_sp_other = {
                 "shell_variant": r.get("shell_variant"),
@@ -19899,6 +23584,8 @@ def _run_step_7_13_15_27(
                 "shell": float(other.get("rms_resid_pairing_shell_MeV", float("nan"))),
                 "n": int(other.get("n", 0)),
             }
+
+    # 条件分岐: `not include_beta2` を満たす経路を評価する。
 
     if not include_beta2:
         conclusion = (
@@ -19916,12 +23603,19 @@ def _run_step_7_13_15_27(
             "If strict_pass==0, additional independently frozen structure inputs (beyond β2) are still required."
         )
 
+    # 条件分岐: `include_beta2` を満たす経路を評価する。
+
     if include_beta2:
         applied_bits = ["Coulomb shape factor f(beta2)"]
+        # 条件分岐: `beta2_apply_surface` を満たす経路を評価する。
         if beta2_apply_surface:
             applied_bits.append("surface-area factor g(beta2) on the surface term")
+
+        # 条件分岐: `beta2_strict_coverage` を満たす経路を評価する。
+
         if beta2_strict_coverage:
             applied_bits.append("robust: require agreement with direct-only (no-imputation) run")
+
         applied_text = ", ".join(applied_bits)
         conclusion = (
             f"strict_pass={n_pass}/{len(ok_rows)} over shell variants x A_min cuts. "
@@ -19931,23 +23625,37 @@ def _run_step_7_13_15_27(
             "If strict_pass==0, additional independently frozen structure inputs (beyond beta2) are still required."
         )
 
+    # 条件分岐: `include_e2plus` を満たす経路を評価する。
+
     if include_e2plus:
         conclusion = str(conclusion) + " This step also integrates a spectroscopy-based strict cross-check using E(2+_1) local peaks."
+
+    # 条件分岐: `include_spectro_multi` を満たす経路を評価する。
+
     if include_spectro_multi:
         conclusion = (
             str(conclusion)
             + " This step also integrates a spectroscopy-based strict cross-check using multiple NuDat 3.0 metrics (E2+, E4+, E3-, R4/2) via local extrema."
         )
+
+    # 条件分岐: `include_radii_kink` を満たす経路を評価する。
+
     if include_radii_kink:
         conclusion = (
             str(conclusion)
             + f" This step also integrates a charge-radii kink strict cross-check (|Δ²r|/σ>= {float(kink_sigma_min):g} with step=2)."
         )
+
+    # 条件分岐: `include_radii_kink_delta2r` を満たす経路を評価する。
+
     if include_radii_kink_delta2r:
         conclusion = (
             str(conclusion)
             + f" This step also compares charge-radii kink as an observable (Δ²r_pred vs Δ²r_obs; step=2) and applies a fixed residual threshold |Δ²r_pred-Δ²r_obs|/σ_obs <= {float(radii_kink_delta2r_resid_sigma_max):g}."
         )
+
+    # 条件分岐: `float(shell_s_power_g) != 1.0` を満たす経路を評価する。
+
     if float(shell_s_power_g) != 1.0:
         conclusion = str(conclusion) + f" S_shell normalization: p(p-g)/g^{float(shell_s_power_g):g}."
 
@@ -20170,16 +23878,30 @@ def _run_step_7_13_15_27(
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    # 条件分岐: `out_e2_png is not None` を満たす経路を評価する。
     if out_e2_png is not None:
         print(f"  {out_e2_png}")
+
+    # 条件分岐: `out_spec_png is not None` を満たす経路を評価する。
+
     if out_spec_png is not None:
         print(f"  {out_spec_png}")
+
+    # 条件分岐: `out_kink_png is not None` を満たす経路を評価する。
+
     if out_kink_png is not None:
         print(f"  {out_kink_png}")
+
+    # 条件分岐: `out_kink_delta2r_png is not None` を満たす経路を評価する。
+
     if out_kink_delta2r_png is not None:
         print(f"  {out_kink_delta2r_png}")
+
+    # 条件分岐: `out_kink_delta2r_csv is not None` を満たす経路を評価する。
+
     if out_kink_delta2r_csv is not None:
         print(f"  {out_kink_delta2r_csv}")
+
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
@@ -20526,6 +24248,7 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
     in_paths: dict[str, Path] = {}
     for variant_name, out_stub in variants:
         p = out_dir / f"nuclear_a_dependence_hf_three_body_shellgap_decision_{out_stub}_metrics.json"
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise SystemExit(
                 "[fail] missing inputs for Step 7.13.15.39.\n"
@@ -20536,27 +24259,34 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
                 "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.37\n"
                 "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.38\n"
             )
+
         in_paths[variant_name] = p
 
     rows: list[dict[str, object]] = []
     for variant_name, metrics_path in in_paths.items():
         m = _load_json(metrics_path)
         results = m.get("results")
+        # 条件分岐: `not isinstance(results, list) or not results` を満たす経路を評価する。
         if not isinstance(results, list) or not results:
             raise SystemExit(f"[fail] invalid metrics (missing/empty results): {metrics_path}")
+
         for r in results:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             domain_min_a = int(r.get("domain_min_A", 0) or 0)
 
             shell_variant = r.get("shell_variant")
             shell_variant_name = ""
+            # 条件分岐: `isinstance(shell_variant, dict)` を満たす経路を評価する。
             if isinstance(shell_variant, dict):
                 shell_variant_name = str(shell_variant.get("name", ""))
 
             decision = r.get("decision")
             pass_strict = False
             pass_delta2r = False
+            # 条件分岐: `isinstance(decision, dict)` を満たす経路を評価する。
             if isinstance(decision, dict):
                 pass_strict = bool(decision.get("pass_strict"))
                 pass_delta2r = bool(decision.get("pass_strict_radii_kink_delta2r"))
@@ -20576,18 +24306,26 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
 
             worst_axis = "Sp" if (math.isfinite(max_sp) and (not math.isfinite(max_sn) or max_sp >= max_sn)) else "Sn"
             worst_points = []
+            # 条件分岐: `worst_axis == "Sp" and isinstance(gap_sp, dict)` を満たす経路を評価する。
             if worst_axis == "Sp" and isinstance(gap_sp, dict):
                 worst_points = gap_sp.get("worst_points") if isinstance(gap_sp.get("worst_points"), list) else []
+
+            # 条件分岐: `worst_axis == "Sn" and isinstance(gap_sn, dict)` を満たす経路を評価する。
+
             if worst_axis == "Sn" and isinstance(gap_sn, dict):
                 worst_points = gap_sn.get("worst_points") if isinstance(gap_sn.get("worst_points"), list) else []
+
             worst0 = worst_points[0] if worst_points else {}
             worst_key = ""
             worst_abs = float("nan")
+            # 条件分岐: `isinstance(worst0, dict)` を満たす経路を評価する。
             if isinstance(worst0, dict):
+                # 条件分岐: `worst_axis == "Sp"` を満たす経路を評価する。
                 if worst_axis == "Sp":
                     worst_key = f"Z0={int(worst0.get('Z0', -1))},N={int(worst0.get('N', -1))}"
                 else:
                     worst_key = f"Z={int(worst0.get('Z', -1))},N0={int(worst0.get('N0', -1))}"
+
                 worst_abs = float(worst0.get("abs_resid_sigma", float("nan")))
 
             rows.append(
@@ -20644,6 +24382,7 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
             )
 
     # Summary counts + best rows (closest to the strict threshold).
+
     strict_threshold = 3.0
     summary: dict[str, object] = {
         "generated_utc": generated_utc,
@@ -20657,6 +24396,7 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
     per_variant: dict[str, list[dict[str, object]]] = {}
     for r in rows:
         per_variant.setdefault(str(r["variant"]), []).append(r)
+
     for variant_name, vrows in per_variant.items():
         n_total = len(vrows)
         n_pass_strict = sum(1 for r in vrows if bool(r.get("pass_strict")))
@@ -20675,6 +24415,7 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
     out_json = out_dir / "nuclear_a_dependence_hf_three_body_radii_kink_delta2r_strict_summary_metrics.json"
     with out_json.open("w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=2)
+
     summary["outputs"]["json"] = str(out_json)
 
     # Visual summary: one panel per radius-mapping variant.
@@ -20689,6 +24430,7 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
             xs = [int(r["domain_min_A"]) for r in sub]
             ys = [float(r["max_abs_resid_sigma"]) for r in sub]
             ax.plot(xs, ys, marker="o", linewidth=1.5, label=shell_name)
+
         ax.axhline(strict_threshold, color="k", linestyle="--", linewidth=1.0)
         ax.set_title(variant_name)
         ax.set_xlabel("domain_min_A")
@@ -20977,6 +24719,7 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
         out_dir
         / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_metrics.json"
     )
+    # 条件分岐: `not baseline_metrics_path.exists()` を満たす経路を評価する。
     if not baseline_metrics_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.44 baseline metrics.\n"
@@ -20992,29 +24735,41 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
         else None
     )
     delta2r_csv_s = baseline.get("outputs", {}).get("radii_kink_delta2r_csv") if isinstance(baseline.get("outputs"), dict) else None
+    # 条件分岐: `not isinstance(radii_path_s, str) or not radii_path_s` を満たす経路を評価する。
     if not isinstance(radii_path_s, str) or not radii_path_s:
         raise SystemExit(f"[fail] invalid baseline metrics: inputs.iaea_charge_radii_csv.path missing: {baseline_metrics_path}")
+
+    # 条件分岐: `not isinstance(delta2r_csv_s, str) or not delta2r_csv_s` を満たす経路を評価する。
+
     if not isinstance(delta2r_csv_s, str) or not delta2r_csv_s:
         raise SystemExit(f"[fail] invalid baseline metrics: outputs.radii_kink_delta2r_csv missing: {baseline_metrics_path}")
 
     radii_path = Path(radii_path_s)
     delta2r_csv_path = Path(delta2r_csv_s)
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA radii source csv: {radii_path}")
+
+    # 条件分岐: `not delta2r_csv_path.exists()` を満たす経路を評価する。
+
     if not delta2r_csv_path.exists():
         raise SystemExit(f"[fail] missing baseline delta2r csv: {delta2r_csv_path}")
 
     def fnum(row: dict[str, str], key: str) -> float | None:
         s = str(row.get(key, "")).strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             return None
+
         try:
             x = float(s)
         except Exception:
             return None
+
         return float(x) if math.isfinite(x) else None
 
     # Uncertainties only (fm). Adopted if available, otherwise preliminary.
+
     sigma_r_by_zn: dict[tuple[int, int], float] = {}
     with radii_path.open("r", encoding="utf-8", newline="") as f:
         rdr = csv.DictReader(f)
@@ -21024,15 +24779,24 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
                 N = int(str(row.get("n", "")).strip())
             except Exception:
                 continue
+
+            # 条件分岐: `Z < 1 or N < 0` を満たす経路を評価する。
+
             if Z < 1 or N < 0:
                 continue
+
             r_val = fnum(row, "radius_val")
             r_unc = fnum(row, "radius_unc")
+            # 条件分岐: `r_val is None or r_unc is None` を満たす経路を評価する。
             if r_val is None or r_unc is None:
                 r_val = fnum(row, "radius_preliminary_val")
                 r_unc = fnum(row, "radius_preliminary_unc")
+
+            # 条件分岐: `r_val is None or r_unc is None or not (float(r_val) > 0.0 and float(r_unc) >...` を満たす経路を評価する。
+
             if r_val is None or r_unc is None or not (float(r_val) > 0.0 and float(r_unc) > 0.0):
                 continue
+
             sigma_r_by_zn[(int(Z), int(N))] = float(r_unc)
 
     delta2r_rows: list[dict[str, object]] = []
@@ -21040,19 +24804,27 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
         rdr = csv.DictReader(f)
         for row in rdr:
             axis = str(row.get("axis", "")).strip().upper()
+            # 条件分岐: `axis not in {"N", "Z"}` を満たす経路を評価する。
             if axis not in {"N", "Z"}:
                 continue
+
             try:
                 Z = int(row.get("Z", -1))
                 N = int(row.get("N", -1))
             except Exception:
                 continue
+
             d2_obs = fnum(row, "delta2r_obs_fm")
             d2_pred = fnum(row, "delta2r_pred_fm")
+            # 条件分岐: `d2_obs is None or d2_pred is None` を満たす経路を評価する。
             if d2_obs is None or d2_pred is None:
                 continue
+
+            # 条件分岐: `not (math.isfinite(float(d2_obs)) and math.isfinite(float(d2_pred)))` を満たす経路を評価する。
+
             if not (math.isfinite(float(d2_obs)) and math.isfinite(float(d2_pred))):
                 continue
+
             delta2r_rows.append({"axis": axis, "Z": int(Z), "N": int(N), "delta2r_obs_fm": float(d2_obs), "delta2r_pred_fm": float(d2_pred)})
 
     scan = baseline.get("scan") if isinstance(baseline.get("scan"), dict) else {}
@@ -21076,13 +24848,20 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
         s0 = float(sigma_center)
         sR = float(sigma_right)
         rr = float(rho)
+        # 条件分岐: `not all(math.isfinite(x) and x > 0.0 for x in (sL, s0, sR)) or not (math.isfi...` を満たす経路を評価する。
         if not all(math.isfinite(x) and x > 0.0 for x in (sL, s0, sR)) or not (math.isfinite(rr) and abs(rr) < 1.0):
             return None
+
         var = sL * sL + 4.0 * s0 * s0 + sR * sR - 4.0 * rr * (sL * s0 + sR * s0) + 2.0 * (rr * rr) * (sL * sR)
+        # 条件分岐: `not math.isfinite(var)` を満たす経路を評価する。
         if not math.isfinite(var):
             return None
+
+        # 条件分岐: `var <= 0.0` を満たす経路を評価する。
+
         if var <= 0.0:
             return None
+
         return math.sqrt(float(var))
 
     def eval_axis(*, axis: str, a_min: int, rho: float) -> dict[str, object]:
@@ -21092,17 +24871,25 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
         z2_sum = 0.0
         worst: list[dict[str, object]] = []
         for r in delta2r_rows:
+            # 条件分岐: `str(r["axis"]) != str(axis)` を満たす経路を評価する。
             if str(r["axis"]) != str(axis):
                 continue
+
             Z = int(r["Z"])
             N = int(r["N"])
+            # 条件分岐: `axis == "N"` を満たす経路を評価する。
             if axis == "N":
                 Zc = Z
                 N0 = N
+                # 条件分岐: `even_even_only and ((Zc % 2 != 0) or (N0 % 2 != 0))` を満たす経路を評価する。
                 if even_even_only and ((Zc % 2 != 0) or (N0 % 2 != 0)):
                     continue
+
+                # 条件分岐: `int(Zc + N0 - 2) < int(a_min)` を満たす経路を評価する。
+
                 if int(Zc + N0 - 2) < int(a_min):
                     continue
+
                 s0 = sigma_r_by_zn.get((int(Zc), int(N0)))
                 sL = sigma_r_by_zn.get((int(Zc), int(N0) - 2))
                 sR = sigma_r_by_zn.get((int(Zc), int(N0) + 2))
@@ -21111,36 +24898,52 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
             else:
                 Z0 = Z
                 Nc = N
+                # 条件分岐: `even_even_only and ((Z0 % 2 != 0) or (Nc % 2 != 0))` を満たす経路を評価する。
                 if even_even_only and ((Z0 % 2 != 0) or (Nc % 2 != 0)):
                     continue
+
+                # 条件分岐: `int(Z0 + Nc - 2) < int(a_min)` を満たす経路を評価する。
+
                 if int(Z0 + Nc - 2) < int(a_min):
                     continue
+
                 s0 = sigma_r_by_zn.get((int(Z0), int(Nc)))
                 sL = sigma_r_by_zn.get((int(Z0) - 2, int(Nc)))
                 sR = sigma_r_by_zn.get((int(Z0) + 2, int(Nc)))
                 is_center_magic = bool(int(Z0) in obs_magic)
                 point_id = {"Z0": int(Z0), "N": int(Nc)}
 
+            # 条件分岐: `s0 is None or sL is None or sR is None` を満たす経路を評価する。
+
             if s0 is None or sL is None or sR is None:
                 continue
+
             n_available += 1
             sig = sigma_delta2r_ar1(sigma_left=float(sL), sigma_center=float(s0), sigma_right=float(sR), rho=float(rho))
+            # 条件分岐: `sig is None` を満たす経路を評価する。
             if sig is None:
                 continue
 
             d2_obs = float(r["delta2r_obs_fm"])
             d2_pred = float(r["delta2r_pred_fm"])
             obs_sig = abs(float(d2_obs)) / float(sig)
+            # 条件分岐: `float(obs_sig) < float(kink_sigma_min)` を満たす経路を評価する。
             if float(obs_sig) < float(kink_sigma_min):
                 continue
+
+            # 条件分岐: `center_magic_only and (not is_center_magic)` を満たす経路を評価する。
+
             if center_magic_only and (not is_center_magic):
                 continue
+
             n_kink += 1
 
             resid = float(d2_pred) - float(d2_obs)
             z = float(resid) / float(sig)
+            # 条件分岐: `not math.isfinite(z)` を満たす経路を評価する。
             if not math.isfinite(z):
                 continue
+
             n_eval += 1
             z2_sum += float(z) ** 2
             worst.append(
@@ -21176,6 +24979,7 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
             sn = eval_axis(axis="N", a_min=int(a_min), rho=float(rho))
             sp = eval_axis(axis="Z", a_min=int(a_min), rho=float(rho))
             sweep.append({"rho": float(rho), "gap_Sn_delta2r": sn, "gap_Sp_delta2r": sp, "pass": bool(sn["pass"] and sp["pass"])})
+
         pass_rhos = [float(x["rho"]) for x in sweep if bool(x.get("pass"))]
         pass_range = {"min": min(pass_rhos), "max": max(pass_rhos), "n": int(len(pass_rhos))} if pass_rhos else None
         results.append({"domain_min_A": int(a_min), "rho_sweep": sweep, "pass_rho_range": pass_range})
@@ -21224,10 +25028,12 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
                     )
 
     # Plot for the key domain_min_A=100 (if available).
+
     try:
         import matplotlib.pyplot as plt
 
         pick = next((x for x in results if int(x.get("domain_min_A", -1)) == 100), results[-1] if results else None)
+        # 条件分岐: `pick is not None` を満たす経路を評価する。
         if pick is not None:
             rho = [float(x["rho"]) for x in pick["rho_sweep"]]
             mx_sn = [float(x["gap_Sn_delta2r"]["max_abs_resid_sigma"]) for x in pick["rho_sweep"]]
@@ -21279,8 +25085,10 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
     out_json.write_text(json.dumps(out_pack, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print("[ok] wrote:")
+    # 条件分岐: `out_png is not None` を満たす経路を評価する。
     if out_png is not None:
         print(f"  {out_png}")
+
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
@@ -21304,6 +25112,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
         out_dir
         / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_metrics.json"
     )
+    # 条件分岐: `not baseline_7144_path.exists()` を満たす経路を評価する。
     if not baseline_7144_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.44 baseline metrics.\n"
@@ -21311,34 +25120,49 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.44\n"
             f"Expected: {baseline_7144_path}"
         )
+
     baseline_7144 = _load_json(baseline_7144_path)
     results_7144 = baseline_7144.get("results")
+    # 条件分岐: `not isinstance(results_7144, list) or not results_7144` を満たす経路を評価する。
     if not isinstance(results_7144, list) or not results_7144:
         raise SystemExit(f"[fail] invalid 7.13.15.44 metrics: results missing/empty: {baseline_7144_path}")
 
     # Use a representative run to extract the frozen magic-offset coefficients (obs_magic; A_min=100).
+
     r_magic_n = float("nan")
     r_magic_z = float("nan")
     magic_list: list[int] = []
     for rr in results_7144:
+        # 条件分岐: `not isinstance(rr, dict) or str(rr.get("status", "")) != "ok"` を満たす経路を評価する。
         if not isinstance(rr, dict) or str(rr.get("status", "")) != "ok":
             continue
+
+        # 条件分岐: `int(rr.get("domain_min_A", -1)) != 100` を満たす経路を評価する。
+
         if int(rr.get("domain_min_A", -1)) != 100:
             continue
+
         sv = rr.get("shell_variant") if isinstance(rr.get("shell_variant"), dict) else {}
+        # 条件分岐: `str(sv.get("name", "")) != "obs_magic"` を満たす経路を評価する。
         if str(sv.get("name", "")) != "obs_magic":
             continue
+
         rk = rr.get("radii_kink_delta2r") if isinstance(rr.get("radii_kink_delta2r"), dict) else {}
         mo = rk.get("radius_magic_offset") if isinstance(rk.get("radius_magic_offset"), dict) else {}
         r_magic_n = float(mo.get("r_magic_N_fm", float("nan")))
         r_magic_z = float(mo.get("r_magic_Z_fm", float("nan")))
         magic_list = [int(x) for x in mo.get("magic", [])] if isinstance(mo.get("magic"), list) else []
         break
+
+    # 条件分岐: `not (math.isfinite(r_magic_n) and math.isfinite(r_magic_z) and magic_list)` を満たす経路を評価する。
+
     if not (math.isfinite(r_magic_n) and math.isfinite(r_magic_z) and magic_list):
         raise SystemExit(f"[fail] could not extract radius_magic_offset coefficients from: {baseline_7144_path}")
+
     magic_set = {int(x) for x in magic_list if int(x) > 0}
 
     metrics_71523_path = out_dir / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_radii_isospin_metrics.json"
+    # 条件分岐: `not metrics_71523_path.exists()` を満たす経路を評価する。
     if not metrics_71523_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.15.23 metrics.\n"
@@ -21346,21 +25170,31 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.23\n"
             f"Expected: {metrics_71523_path}"
         )
+
     m71523 = _load_json(metrics_71523_path)
     radius_model = m71523.get("radius_model") if isinstance(m71523.get("radius_model"), dict) else {}
     r0 = float(radius_model.get("r0_fm", float("nan")))
     rI = float(radius_model.get("rI_fm", float("nan")))
+    # 条件分岐: `not (math.isfinite(r0) and math.isfinite(rI))` を満たす経路を評価する。
     if not (math.isfinite(r0) and math.isfinite(rI)):
         raise SystemExit(f"[fail] invalid 7.13.15.23 radius_model (r0/rI missing): {metrics_71523_path}")
 
     # Primary data inputs.
+
     radii_path = root / "data" / "quantum" / "sources" / "iaea_charge_radii" / "charge_radii.csv"
     ame_path = root / "data" / "quantum" / "sources" / "iaea_amdc_ame2020_mass_1_mas20" / "extracted_values.json"
     beta2_path = root / "data" / "quantum" / "sources" / "nndc_be2_adopted_entries" / "extracted_beta2.json"
+    # 条件分岐: `not radii_path.exists()` を満たす経路を評価する。
     if not radii_path.exists():
         raise SystemExit(f"[fail] missing IAEA charge radii csv: {radii_path}")
+
+    # 条件分岐: `not ame_path.exists()` を満たす経路を評価する。
+
     if not ame_path.exists():
         raise SystemExit(f"[fail] missing AME2020 extracted values: {ame_path}")
+
+    # 条件分岐: `not beta2_path.exists()` を満たす経路を評価する。
+
     if not beta2_path.exists():
         raise SystemExit(
             "[fail] missing NNDC B(E2) deformation beta2 dataset.\n"
@@ -21371,15 +25205,19 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
 
     def fnum(x: object) -> float | None:
         s = str(x).strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             return None
+
         try:
             v = float(s)
         except Exception:
             return None
+
         return float(v) if math.isfinite(v) else None
 
     # Charge radii (fm) and uncertainties (fm): adopted if present, else preliminary.
+
     radii_by_zn: dict[tuple[int, int], tuple[float, float]] = {}
     with radii_path.open("r", encoding="utf-8", newline="") as f:
         rdr = csv.DictReader(f)
@@ -21389,80 +25227,123 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
                 N = int(str(row.get("n", "")).strip())
             except Exception:
                 continue
+
+            # 条件分岐: `Z < 1 or N < 0` を満たす経路を評価する。
+
             if Z < 1 or N < 0:
                 continue
+
             r_val = fnum(row.get("radius_val", ""))
             r_unc = fnum(row.get("radius_unc", ""))
+            # 条件分岐: `r_val is None or r_unc is None` を満たす経路を評価する。
             if r_val is None or r_unc is None:
                 r_val = fnum(row.get("radius_preliminary_val", ""))
                 r_unc = fnum(row.get("radius_preliminary_unc", ""))
+
+            # 条件分岐: `r_val is None or r_unc is None` を満たす経路を評価する。
+
             if r_val is None or r_unc is None:
                 continue
+
+            # 条件分岐: `not (float(r_val) > 0.0 and float(r_unc) > 0.0)` を満たす経路を評価する。
+
             if not (float(r_val) > 0.0 and float(r_unc) > 0.0):
                 continue
+
             radii_by_zn[(int(Z), int(N))] = (float(r_val), float(r_unc))
+
+    # 条件分岐: `not radii_by_zn` を満たす経路を評価する。
+
     if not radii_by_zn:
         raise SystemExit(f"[fail] radii map is empty after parsing: {radii_path}")
 
     # AME2020 binding energies (MeV): B_obs(Z,N).
+
     ame = _load_json(ame_path)
     ame_rows = ame.get("rows")
+    # 条件分岐: `not isinstance(ame_rows, list) or not ame_rows` を満たす経路を評価する。
     if not isinstance(ame_rows, list) or not ame_rows:
         raise SystemExit(f"[fail] invalid AME2020 extracted values: rows missing/empty: {ame_path}")
+
     b_obs: dict[tuple[int, int], float] = {}
     a_by_zn: dict[tuple[int, int], int] = {}
     for r in ame_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         A = int(r.get("A", -1))
+        # 条件分岐: `Z < 1 or N < 0 or A < 2` を満たす経路を評価する。
         if Z < 1 or N < 0 or A < 2:
             continue
+
         ba_keV = float(r.get("binding_keV_per_A", float("nan")))
+        # 条件分岐: `not math.isfinite(ba_keV)` を満たす経路を評価する。
         if not math.isfinite(ba_keV):
             continue
+
         ba_mev = float(ba_keV) / 1000.0
         b_obs[(int(Z), int(N))] = float(A) * float(ba_mev)
         a_by_zn[(int(Z), int(N))] = int(A)
+
+    # 条件分岐: `not b_obs` を満たす経路を評価する。
+
     if not b_obs:
         raise SystemExit(f"[fail] B_obs map is empty after parsing: {ame_path}")
 
     # NNDC β2 map.
+
     beta2_extracted = _load_json(beta2_path)
     beta2_rows = beta2_extracted.get("rows")
+    # 条件分岐: `not isinstance(beta2_rows, list) or not beta2_rows` を満たす経路を評価する。
     if not isinstance(beta2_rows, list) or not beta2_rows:
         raise SystemExit(f"[fail] invalid NNDC beta2 extracted dataset: rows missing/empty: {beta2_path}")
+
     beta2_by_zn: dict[tuple[int, int], float] = {}
     for r in beta2_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         Z = int(r.get("Z", -1))
         N = int(r.get("N", -1))
         b2 = float(r.get("beta2", float("nan")))
+        # 条件分岐: `Z < 1 or N < 0 or not math.isfinite(b2)` を満たす経路を評価する。
         if Z < 1 or N < 0 or not math.isfinite(b2):
             continue
+
         beta2_by_zn[(int(Z), int(N))] = float(b2)
+
+    # 条件分岐: `not beta2_by_zn` を満たす経路を評価する。
+
     if not beta2_by_zn:
         raise SystemExit(f"[fail] NNDC beta2 map is empty after parsing: {beta2_path}")
 
     # Pairing indicators (local OES; 3-point) in MeV.
+
     dn_by_zn: dict[tuple[int, int], float] = {}
     dp_by_zn: dict[tuple[int, int], float] = {}
     for (Z, N), A in a_by_zn.items():
         # Neutron 3-point (uses N±1).
         dn = float("nan")
+        # 条件分岐: `(Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs` を満たす経路を評価する。
         if (Z, int(N) - 1) in b_obs and (Z, int(N) + 1) in b_obs:
             dn = ((-1) ** int(N)) * (float(b_obs[(Z, int(N) + 1)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(Z, int(N) - 1)])) / 2.0
+
         dn_by_zn[(int(Z), int(N))] = abs(float(dn)) if math.isfinite(dn) else float("nan")
 
         # Proton 3-point (uses Z±1).
         dp = float("nan")
+        # 条件分岐: `(int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs` を満たす経路を評価する。
         if (int(Z) - 1, N) in b_obs and (int(Z) + 1, N) in b_obs:
             dp = ((-1) ** int(Z)) * (float(b_obs[(int(Z) + 1, N)]) - 2.0 * float(b_obs[(Z, N)]) + float(b_obs[(int(Z) - 1, N)])) / 2.0
+
         dp_by_zn[(int(Z), int(N))] = abs(float(dp)) if math.isfinite(dp) else float("nan")
 
     # Model constants/rules.
+
     obs_magic = [2, 8, 20, 28, 50, 82, 126, 184]
     obs_magic_set = {int(x) for x in obs_magic}
     kink_sigma_min = 3.0
@@ -21474,30 +25355,47 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
 
     def r_pred_base(*, Z: int, N: int) -> float | None:
         A = int(Z) + int(N)
+        # 条件分岐: `A < 2 or int(Z) < 1 or int(N) < 0` を満たす経路を評価する。
         if A < 2 or int(Z) < 1 or int(N) < 0:
             return None
+
         I = float(int(N) - int(Z)) / float(A)
         r = (float(r0) + float(rI) * float(I)) * (float(A) ** (1.0 / 3.0))
+        # 条件分岐: `not (math.isfinite(r) and r > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(r) and r > 0.0):
             return None
+
+        # 条件分岐: `int(N) in magic_set` を満たす経路を評価する。
+
         if int(N) in magic_set:
             r = float(r) + float(r_magic_n)
+
+        # 条件分岐: `int(Z) in magic_set` を満たす経路を評価する。
+
         if int(Z) in magic_set:
             r = float(r) + float(r_magic_z)
+
         return float(r) if (math.isfinite(r) and r > 0.0) else None
 
     def r_pred_deformed(*, Z: int, N: int, use_deformation: bool) -> float | None:
         base = r_pred_base(Z=int(Z), N=int(N))
+        # 条件分岐: `base is None` を満たす経路を評価する。
         if base is None:
             return None
+
+        # 条件分岐: `not use_deformation` を満たす経路を評価する。
+
         if not use_deformation:
             return float(base)
+
         b2, _mode = _beta2_for_zn(Z=int(Z), N=int(N), beta2_by_zn=beta2_by_zn, include_beta2=True, imputation="neighbors")
         b2 = abs(float(b2))
         factor = math.sqrt(1.0 + float(k_beta2) * float(b2) * float(b2))
         out_r = float(base) * float(factor)
+        # 条件分岐: `not (math.isfinite(out_r) and out_r > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(out_r) and out_r > 0.0):
             return None
+
         return float(out_r)
 
     def pair_dn(*, Z: int, N: int) -> float:
@@ -21509,19 +25407,24 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
         return float(v) if (v is not None and math.isfinite(float(v))) else 0.0
 
     # Build Δ²r points (even-even only; step=2), for both axes.
+
     points: list[dict[str, object]] = []
     for (Z, N0), (r0_obs, s0_obs) in radii_by_zn.items():
         Z = int(Z)
         N0 = int(N0)
+        # 条件分岐: `(Z % 2 != 0) or (N0 % 2 != 0)` を満たす経路を評価する。
         if (Z % 2 != 0) or (N0 % 2 != 0):
             continue
         # Axis N (vary N at fixed Z).
+
         cL = radii_by_zn.get((int(Z), int(N0) - 2))
         cR = radii_by_zn.get((int(Z), int(N0) + 2))
+        # 条件分岐: `cL is not None and cR is not None` を満たす経路を評価する。
         if cL is not None and cR is not None:
             rL_obs, sL_obs = cL
             rR_obs, sR_obs = cR
             sig = math.sqrt(float(sR_obs) ** 2 + 4.0 * float(s0_obs) ** 2 + float(sL_obs) ** 2)
+            # 条件分岐: `math.isfinite(sig) and sig > 0.0` を満たす経路を評価する。
             if math.isfinite(sig) and sig > 0.0:
                 d2_obs = float(rR_obs) - 2.0 * float(r0_obs) + float(rL_obs)
                 obs_sig = abs(float(d2_obs)) / float(sig)
@@ -21541,12 +25444,15 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
                 )
 
         # Axis Z (vary Z at fixed N).
+
         cLz = radii_by_zn.get((int(Z) - 2, int(N0)))
         cRz = radii_by_zn.get((int(Z) + 2, int(N0)))
+        # 条件分岐: `cLz is not None and cRz is not None` を満たす経路を評価する。
         if cLz is not None and cRz is not None:
             rL_obs, sL_obs = cLz
             rR_obs, sR_obs = cRz
             sig = math.sqrt(float(sR_obs) ** 2 + 4.0 * float(s0_obs) ** 2 + float(sL_obs) ** 2)
+            # 条件分岐: `math.isfinite(sig) and sig > 0.0` を満たす経路を評価する。
             if math.isfinite(sig) and sig > 0.0:
                 d2_obs = float(rR_obs) - 2.0 * float(r0_obs) + float(rL_obs)
                 obs_sig = abs(float(d2_obs)) / float(sig)
@@ -21566,6 +25472,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
                     }
                 )
 
+    # 条件分岐: `not points` を満たす経路を評価する。
+
     if not points:
         raise SystemExit("[fail] no Δ²r points constructed from radii dataset")
 
@@ -21574,6 +25482,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             axis = str(p["axis"])
             Zc = int(p["Z"])
             x0 = int(p["X0"])
+            # 条件分岐: `axis == "N"` を満たす経路を評価する。
             if axis == "N":
                 # (Z, N0±2)
                 rL = r_pred_deformed(Z=Zc, N=int(x0) - 2, use_deformation=use_deformation)
@@ -21599,8 +25508,10 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
                 dpR = pair_dp(Z=int(x0) + 2, N=Nc)
 
             d2_pred = float("nan")
+            # 条件分岐: `rL is not None and r0m is not None and rR is not None` を満たす経路を評価する。
             if rL is not None and r0m is not None and rR is not None:
                 d2_pred = float(rR) - 2.0 * float(r0m) + float(rL)
+
             p[f"delta2r_pred_fm__deform_{int(bool(use_deformation))}"] = float(d2_pred)
             p[f"delta2_dn__deform_{int(bool(use_deformation))}"] = float(dnR) - 2.0 * float(dn0) + float(dnL)
             p[f"delta2_dp__deform_{int(bool(use_deformation))}"] = float(dpR) - 2.0 * float(dp0) + float(dpL)
@@ -21619,22 +25530,30 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
         bp = 0.0
         n_fit = 0
         for p in points:
+            # 条件分岐: `int(p.get("min_A", 0)) < int(fit_min_a)` を満たす経路を評価する。
             if int(p.get("min_A", 0)) < int(fit_min_a):
                 continue
+
             axis = str(p["axis"])
             x0 = int(p["X0"])
             # Train on non-magic centers only (fixed protocol).
             if (axis == "N" and int(x0) in obs_magic_set) or (axis == "Z" and int(x0) in obs_magic_set):
                 continue
+
             d2_pred = float(p.get(key_pred, float("nan")))
             d2_obs = float(p.get("delta2r_obs_fm", float("nan")))
             sig = float(p.get("sigma_obs_fm", float("nan")))
             dn2 = float(p.get(key_dn2, float("nan")))
             dp2 = float(p.get(key_dp2, float("nan")))
+            # 条件分岐: `not (math.isfinite(d2_pred) and math.isfinite(d2_obs) and math.isfinite(sig)...` を満たす経路を評価する。
             if not (math.isfinite(d2_pred) and math.isfinite(d2_obs) and math.isfinite(sig) and sig > 0.0):
                 continue
+
+            # 条件分岐: `not (math.isfinite(dn2) and math.isfinite(dp2))` を満たす経路を評価する。
+
             if not (math.isfinite(dn2) and math.isfinite(dp2)):
                 continue
+
             w = 1.0 / (float(sig) ** 2)
             resid0 = float(d2_pred) - float(d2_obs)
             Snn += float(w) * float(dn2) * float(dn2)
@@ -21643,9 +25562,12 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             bn += float(w) * float(dn2) * float(resid0)
             bp += float(w) * float(dp2) * float(resid0)
             n_fit += 1
+
         det = float(Snn) * float(Spp) - float(Snp) * float(Snp)
+        # 条件分岐: `not (n_fit > 10 and math.isfinite(det) and det > 0.0)` を満たす経路を評価する。
         if not (n_fit > 10 and math.isfinite(det) and det > 0.0):
             raise SystemExit(f"[fail] pairing fit is ill-conditioned (n_fit={n_fit}, det={det})")
+
         inv00 = float(Spp) / float(det)
         inv11 = float(Snn) / float(det)
         inv01 = -float(Snp) / float(det)
@@ -21688,8 +25610,10 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             sig = float(p.get("sigma_obs_fm", float("nan")))
             dn2 = float(p.get(key_dn2, float("nan")))
             dp2 = float(p.get(key_dp2, float("nan")))
+            # 条件分岐: `not (math.isfinite(d2_pred0) and math.isfinite(d2_obs) and math.isfinite(sig)...` を満たす経路を評価する。
             if not (math.isfinite(d2_pred0) and math.isfinite(d2_obs) and math.isfinite(sig) and sig > 0.0):
                 continue
+
             resid = (float(d2_pred0) + float(k_n) * float(dn2) + float(k_p) * float(dp2)) - float(d2_obs)
             z = float(resid) / float(sig)
             entry = {
@@ -21706,10 +25630,12 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
                 "delta2_dn": float(dn2),
                 "delta2_dp": float(dp2),
             }
+            # 条件分岐: `str(p["axis"]) == "N"` を満たす経路を評価する。
             if str(p["axis"]) == "N":
                 worst_n.append(entry)
             else:
                 worst_z.append(entry)
+
         worst_n = sorted(worst_n, key=lambda x: float(x["abs_resid_sigma"]), reverse=True)
         worst_z = sorted(worst_z, key=lambda x: float(x["abs_resid_sigma"]), reverse=True)
         mx_n = float(worst_n[0]["abs_resid_sigma"]) if worst_n else float("nan")
@@ -21747,16 +25673,23 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             for kp in ks:
                 m = eval_strict(use_deformation=use_deformation, k_n=float(kn), k_p=float(kp), strict_points=strict_points)
                 mx = max(float(m["max_abs_resid_sigma_Sn"]), float(m["max_abs_resid_sigma_Sp"]))
+                # 条件分岐: `not math.isfinite(mx)` を満たす経路を評価する。
                 if not math.isfinite(mx):
                     continue
+
                 dist2 = (float(kn) - float(k_fit_n)) ** 2 + (float(kp) - float(k_fit_p)) ** 2
                 score = float(dist2)
+                # 条件分岐: `mx < best_any_score` を満たす経路を評価する。
                 if mx < best_any_score:
                     best_any_score = float(mx)
                     best_any = {"k_n": float(kn), "k_p": float(kp), "max_abs": float(mx), "metrics": m}
+
+                # 条件分岐: `bool(m["pass"]) and score < best_score` を満たす経路を評価する。
+
                 if bool(m["pass"]) and score < best_score:
                     best_score = float(score)
                     best_pass = {"k_n": float(kn), "k_p": float(kp), "dist2_to_fit": float(dist2), "metrics": m}
+
         return {
             "grid": {"k_n_range": [float(k_min), float(k_max)], "k_p_range": [float(k_min), float(k_max)], "step": float(step)},
             "best_pass_near_fit": best_pass,
@@ -21776,6 +25709,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             gs = grid_search(use_deformation=use_def, strict_points=strict_pts, k_fit_n=kf_n, k_fit_p=kf_p)
             row[f"{tag}_baseline"] = m0
             row[f"{tag}_pair_fit"] = {"fit": fit, "metrics": mf, "grid_search": gs}
+
         summary_rows.append(row)
 
     out_stub = "radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal"
@@ -21842,6 +25776,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
                 )
 
     # Plot: compare baseline vs pair-fit (max abs z) for A_min.
+
     try:
         import matplotlib.pyplot as plt
 
@@ -21858,6 +25793,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             ]
             ax.plot(xs, y0, marker="o", linestyle="--", label=f"{label}: baseline (k_n=k_p=0)")
             ax.plot(xs, yf, marker="o", linestyle="-", label=f"{label}: pairing-fit (k_n,k_p frozen)")
+
         ax.axhline(float(resid_sigma_max), color="k", linewidth=1.0, alpha=0.6, linestyle=":")
         ax.set_xlabel("domain_min_A")
         ax.set_ylabel("max(|Δ²r_pred−Δ²r_obs|/σ_obs) over kink set (Sn & Sp)")
@@ -21922,8 +25858,10 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     out_json.write_text(json.dumps(out_pack, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print("[ok] wrote:")
+    # 条件分岐: `out_png is not None` を満たす経路を評価する。
     if out_png is not None:
         print(f"  {out_png}")
+
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
@@ -22017,9 +25955,13 @@ def main() -> None:
     parser.add_argument("--surface-fit-clip-k", type=float, default=5.0, help="7.13.15.7: robust MAD clip threshold (k*sigma); 0 disables clipping.")
     args = parser.parse_args()
 
+    # 条件分岐: `args.step == "7.13.13"` を満たす経路を評価する。
     if args.step == "7.13.13":
         _run_step_7_13_13(out_dir=out_dir, calibrate_key=str(args.calibrate_key), pn_triplet_weight=float(args.pn_triplet_weight))
         return
+
+    # 条件分岐: `args.step == "7.13.14"` を満たす経路を評価する。
+
     if args.step == "7.13.14":
         _run_step_7_13_14(
             out_dir=out_dir,
@@ -22028,6 +25970,9 @@ def main() -> None:
             derivative_eps_rel=float(args.derivative_eps_rel),
         )
         return
+
+    # 条件分岐: `args.step == "7.13.15"` を満たす経路を評価する。
+
     if args.step == "7.13.15":
         _run_step_7_13_15(
             out_dir=out_dir,
@@ -22036,21 +25981,39 @@ def main() -> None:
             derivative_eps_rel=float(args.derivative_eps_rel),
         )
         return
+
+    # 条件分岐: `args.step == "7.13.15.2"` を満たす経路を評価する。
+
     if args.step == "7.13.15.2":
         _run_step_7_13_15_2(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.3"` を満たす経路を評価する。
+
     if args.step == "7.13.15.3":
         _run_step_7_13_15_3(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.4"` を満たす経路を評価する。
+
     if args.step == "7.13.15.4":
         _run_step_7_13_15_4(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.5"` を満たす経路を評価する。
+
     if args.step == "7.13.15.5":
         _run_step_7_13_15_5(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.6"` を満たす経路を評価する。
+
     if args.step == "7.13.15.6":
         _run_step_7_13_15_6(out_dir=out_dir, domain_min_a=int(args.domain_min_A), max_nuclei=int(args.max_nuclei))
         return
+
+    # 条件分岐: `args.step == "7.13.15.7"` を満たす経路を評価する。
+
     if args.step == "7.13.15.7":
         _run_step_7_13_15_7(
             out_dir=out_dir,
@@ -22060,129 +26023,255 @@ def main() -> None:
             clip_k=float(args.surface_fit_clip_k),
         )
         return
+
+    # 条件分岐: `args.step == "7.13.15.8"` を満たす経路を評価する。
+
     if args.step == "7.13.15.8":
         _run_step_7_13_15_8(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.9"` を満たす経路を評価する。
+
     if args.step == "7.13.15.9":
         _run_step_7_13_15_9(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.10"` を満たす経路を評価する。
+
     if args.step == "7.13.15.10":
         _run_step_7_13_15_10(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.11"` を満たす経路を評価する。
+
     if args.step == "7.13.15.11":
         _run_step_7_13_15_11(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.12"` を満たす経路を評価する。
+
     if args.step == "7.13.15.12":
         _run_step_7_13_15_12(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.13"` を満たす経路を評価する。
+
     if args.step == "7.13.15.13":
         _run_step_7_13_15_13(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.14"` を満たす経路を評価する。
+
     if args.step == "7.13.15.14":
         _run_step_7_13_15_14(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.15"` を満たす経路を評価する。
+
     if args.step == "7.13.15.15":
         _run_step_7_13_15_15(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.16"` を満たす経路を評価する。
+
     if args.step == "7.13.15.16":
         _run_step_7_13_15_16(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.17"` を満たす経路を評価する。
+
     if args.step == "7.13.15.17":
         _run_step_7_13_15_17(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.18"` を満たす経路を評価する。
+
     if args.step == "7.13.15.18":
         _run_step_7_13_15_18(out_dir=out_dir, domain_min_a=int(args.domain_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.19"` を満たす経路を評価する。
+
     if args.step == "7.13.15.19":
         _run_step_7_13_15_19(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.20"` を満たす経路を評価する。
+
     if args.step == "7.13.15.20":
         _run_step_7_13_15_20(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.21"` を満たす経路を評価する。
+
     if args.step == "7.13.15.21":
         _run_step_7_13_15_21(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.22"` を満たす経路を評価する。
+
     if args.step == "7.13.15.22":
         _run_step_7_13_15_22(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.23"` を満たす経路を評価する。
+
     if args.step == "7.13.15.23":
         _run_step_7_13_15_23(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.24"` を満たす経路を評価する。
+
     if args.step == "7.13.15.24":
         _run_step_7_13_15_24(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.25"` を満たす経路を評価する。
+
     if args.step == "7.13.15.25":
         _run_step_7_13_15_25(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.26"` を満たす経路を評価する。
+
     if args.step == "7.13.15.26":
         _run_step_7_13_15_26(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.27"` を満たす経路を評価する。
+
     if args.step == "7.13.15.27":
         _run_step_7_13_15_27(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.28"` を満たす経路を評価する。
+
     if args.step == "7.13.15.28":
         _run_step_7_13_15_28(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.29"` を満たす経路を評価する。
+
     if args.step == "7.13.15.29":
         _run_step_7_13_15_29(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.30"` を満たす経路を評価する。
+
     if args.step == "7.13.15.30":
         _run_step_7_13_15_30(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.31"` を満たす経路を評価する。
+
     if args.step == "7.13.15.31":
         _run_step_7_13_15_31(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.32"` を満たす経路を評価する。
+
     if args.step == "7.13.15.32":
         _run_step_7_13_15_32(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.33"` を満たす経路を評価する。
+
     if args.step == "7.13.15.33":
         _run_step_7_13_15_33(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.34"` を満たす経路を評価する。
+
     if args.step == "7.13.15.34":
         _run_step_7_13_15_34(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.35"` を満たす経路を評価する。
+
     if args.step == "7.13.15.35":
         _run_step_7_13_15_35(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.36"` を満たす経路を評価する。
+
     if args.step == "7.13.15.36":
         _run_step_7_13_15_36(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.37"` を満たす経路を評価する。
+
     if args.step == "7.13.15.37":
         _run_step_7_13_15_37(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.38"` を満たす経路を評価する。
+
     if args.step == "7.13.15.38":
         _run_step_7_13_15_38(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.39"` を満たす経路を評価する。
+
     if args.step == "7.13.15.39":
         _run_step_7_13_15_39(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.40"` を満たす経路を評価する。
+
     if args.step == "7.13.15.40":
         _run_step_7_13_15_40(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.41"` を満たす経路を評価する。
+
     if args.step == "7.13.15.41":
         _run_step_7_13_15_41(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.42"` を満たす経路を評価する。
+
     if args.step == "7.13.15.42":
         _run_step_7_13_15_42(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.43"` を満たす経路を評価する。
+
     if args.step == "7.13.15.43":
         _run_step_7_13_15_43(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.44"` を満たす経路を評価する。
+
     if args.step == "7.13.15.44":
         _run_step_7_13_15_44(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.45"` を満たす経路を評価する。
+
     if args.step == "7.13.15.45":
         _run_step_7_13_15_45(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.46"` を満たす経路を評価する。
+
     if args.step == "7.13.15.46":
         _run_step_7_13_15_46(out_dir=out_dir, domain_min_a=int(args.domain_min_A), radius_fit_min_a=int(args.freeze_min_A))
         return
+
+    # 条件分岐: `args.step == "7.13.15.48"` を満たす経路を評価する。
+
     if args.step == "7.13.15.48":
         _run_step_7_13_15_48(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step == "7.13.15.49"` を満たす経路を評価する。
+
     if args.step == "7.13.15.49":
         _run_step_7_13_15_49(out_dir=out_dir)
         return
+
+    # 条件分岐: `args.step != "7.13.12"` を満たす経路を評価する。
+
     if args.step != "7.13.12":
         raise SystemExit(f"[fail] unknown step: {args.step}")
 
@@ -22190,6 +26279,7 @@ def main() -> None:
     metrics_7138 = _load_json(metrics_7138_path)
 
     rep_path = out_dir / "nuclear_binding_representative_nuclei_metrics.json"
+    # 条件分岐: `not rep_path.exists()` を満たす経路を評価する。
     if not rep_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.11 baseline metrics.\n"
@@ -22197,12 +26287,15 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_representative_nuclei.py\n"
             f"Expected: {rep_path}"
         )
+
     rep = _load_json(rep_path)
     nuclei = rep.get("nuclei")
+    # 条件分岐: `not isinstance(nuclei, list) or not nuclei` を満たす経路を評価する。
     if not isinstance(nuclei, list) or not nuclei:
         raise SystemExit(f"[fail] invalid baseline metrics: nuclei missing/empty: {rep_path}")
 
     # Constants (reuse from 7.13.8)
+
     consts = metrics_7138.get("constants") if isinstance(metrics_7138.get("constants"), dict) else {}
     hbarc = float(consts.get("hbarc_MeV_fm", 197.3269804))
     mu_c2 = float(consts.get("mu_c2_MeV", 469.4591551497099))
@@ -22217,8 +26310,10 @@ def main() -> None:
 
     rows: list[dict[str, object]] = []
     for nuc in nuclei:
+        # 条件分岐: `not isinstance(nuc, dict)` を満たす経路を評価する。
         if not isinstance(nuc, dict):
             continue
+
         a = int(nuc["A"])
         z = int(nuc["Z"])
         n = int(nuc["N"])
@@ -22275,6 +26370,7 @@ def main() -> None:
         )
 
     # Aggregate stats
+
     stats: dict[int, dict[str, float]] = {}
     for eq in eq_labels:
         res = [float(r["per_eq"][eq]["B_over_A_residual_MeV"]) for r in rows]
@@ -22283,6 +26379,7 @@ def main() -> None:
         stats[int(eq)] = {"residual_mean_MeV": float(mean), "residual_rms_MeV": float(rms)}
 
     # Plot
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -22300,6 +26397,7 @@ def main() -> None:
     for eq in eq_labels:
         ba_pred = [float(r["per_eq"][eq]["B_over_A_pred_MeV"]) for r in rows]
         ax.plot(a13, ba_pred, marker="o", linestyle="--", label=f"pred (mean-field; eq{eq})")
+
     ax.set_title("Binding energy per nucleon: obs vs mean-field pred")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("B/A (MeV)")
@@ -22314,6 +26412,7 @@ def main() -> None:
         u_vals = [float(r["per_eq"][eq]["U_pot_MeV_per_A"]) for r in rows]
         ax.plot(a13, t_vals, marker=".", linestyle="-", label=f"T (eq{eq})")
         ax.plot(a13, u_vals, marker=".", linestyle="--", label=f"U (eq{eq})")
+
     ax.set_title("Mean-field contributions")
     ax.set_xlabel("A^(1/3)")
     ax.set_ylabel("MeV per nucleon")
@@ -22342,6 +26441,7 @@ def main() -> None:
     for eq in eq_labels:
         s = stats[eq]
         lines.append(f"  - residual RMS (eq{eq}): {s['residual_rms_MeV']:.3g} MeV")
+
     ax.text(0.0, 1.0, "\n".join(lines), va="top", family="monospace", fontsize=9)
 
     out_png = out_dir / "nuclear_a_dependence_mean_field.png"
@@ -22374,6 +26474,7 @@ def main() -> None:
                     f"residual_eq{eq}_MeV",
                 ]
             )
+
         w.writerow(header)
         for r in rows:
             row = [
@@ -22398,9 +26499,11 @@ def main() -> None:
                         f"{float(pe['B_over_A_residual_MeV']):.12g}",
                     ]
                 )
+
             w.writerow(row)
 
     # Metrics
+
     out_json = out_dir / "nuclear_a_dependence_mean_field_metrics.json"
     out_json.write_text(
         json.dumps(
@@ -22443,6 +26546,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

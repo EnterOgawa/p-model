@@ -42,6 +42,7 @@ except Exception:  # pragma: no cover - optional dependency for offline/local ru
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -66,6 +67,7 @@ def _sha256_file(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -82,8 +84,10 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def _http_get_bytes(url: str) -> Tuple[bytes, str]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required for online fetch")
+
     r = requests.get(url, timeout=_REQ_TIMEOUT)
     r.raise_for_status()
     content_type = str(r.headers.get("Content-Type") or "")
@@ -100,17 +104,21 @@ def _extract_obsids_from_public_list(html: str) -> List[str]:
 
 def _parse_iso_date(s: str) -> Optional[str]:
     s = (s or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
     # Keep only YYYY-MM-DD for stability.
+
     m = re.match(r"^(\d{4}-\d{2}-\d{2})", s)
     return m.group(1) if m else None
 
 
 def _is_public_row(row: Dict[str, str], *, today_ymd: str) -> bool:
     d = _parse_iso_date(row.get("public_date") or "")
+    # 条件分岐: `not d` を満たす経路を評価する。
     if not d:
         return False
+
     return d <= today_ymd
 
 
@@ -128,9 +136,12 @@ def _read_resolve_rows(csv_path: Path) -> List[Dict[str, str]]:
     with csv_path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for r in reader:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             rows.append({str(k): (v or "").strip() for k, v in r.items() if k is not None})
+
     return rows
 
 
@@ -138,11 +149,15 @@ def _summarize_public_observations(rows: List[Dict[str, str]]) -> List[ResolveRo
     today_ymd = datetime.now(timezone.utc).date().isoformat()
     out: List[ResolveRow] = []
     for r in rows:
+        # 条件分岐: `not _is_public_row(r, today_ymd=today_ymd)` を満たす経路を評価する。
         if not _is_public_row(r, today_ymd=today_ymd):
             continue
+
         obsid = (r.get("observation_id") or "").strip()
+        # 条件分岐: `not obsid` を満たす経路を評価する。
         if not obsid:
             continue
+
         out.append(
             ResolveRow(
                 obsid=obsid,
@@ -152,6 +167,7 @@ def _summarize_public_observations(rows: List[Dict[str, str]]) -> List[ResolveRo
                 processing_version=(r.get("processing_version") or "").strip(),
             )
         )
+
     out.sort(key=lambda x: (x.public_date, x.obsid))
     return out
 
@@ -194,6 +210,7 @@ def _build_manifest(
                 "content_type": content_types.get(p.name, ""),
             }
         )
+
     return {
         "generated_utc": _utc_now(),
         "sources": {
@@ -240,6 +257,7 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
         public_list_text = html_bytes.decode("utf-8", errors="replace")
     except Exception:
         public_list_text = html_bytes.decode("latin-1", errors="replace")
+
     public_list_obsids = _extract_obsids_from_public_list(public_list_text)
 
     # Fetch metadata CSV (Resolve)
@@ -289,6 +307,8 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     print(f"[ok] wrote: {args.summary_csv}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

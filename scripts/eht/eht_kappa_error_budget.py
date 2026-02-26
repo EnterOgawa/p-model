@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -39,6 +40,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -50,8 +52,10 @@ def _set_japanese_font() -> None:
 
 def _maybe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
         return v if math.isfinite(v) else None
     except Exception:
@@ -61,8 +65,10 @@ def _maybe_float(x: Any) -> Optional[float]:
 def _std(values: Sequence[float]) -> Optional[float]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
+    # 条件分岐: `x.size < 2` を満たす経路を評価する。
     if x.size < 2:
         return None
+
     return float(np.std(x, ddof=1))
 
 
@@ -97,9 +103,11 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
     ax.set_xlabel("σ(κ) [1σ]")
     ax.set_title(title)
     ax.grid(True, axis="x", alpha=0.25)
+    # 条件分岐: `required is not None and math.isfinite(required) and required > 0` を満たす経路を評価する。
     if required is not None and math.isfinite(required) and required > 0:
         ax.axvline(required, color="#d62728", linewidth=2.0, label=f"target σ(κ) ≈ {required:.4f}")
         ax.legend(loc="lower right")
+
     fig.tight_layout(pad=0.6)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
@@ -109,14 +117,20 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
 def _finite_pos(values: Sequence[Optional[float]]) -> List[float]:
     out: List[float] = []
     for v in values:
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             continue
+
         try:
             x = float(v)
         except Exception:
             continue
+
+        # 条件分岐: `math.isfinite(x) and x > 0` を満たす経路を評価する。
+
         if math.isfinite(x) and x > 0:
             out.append(x)
+
     return out
 
 
@@ -193,6 +207,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json), "plot_png": str(out_png)},
     }
 
+    # 条件分岐: `not shadow_path.exists()` を満たす経路を評価する。
     if not shadow_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_shadow_compare_json"
@@ -204,9 +219,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     rows = shadow.get("rows") or []
     row_sgra = None
     for r in rows:
+        # 条件分岐: `isinstance(r, dict) and r.get("key") == "sgra"` を満たす経路を評価する。
         if isinstance(r, dict) and r.get("key") == "sgra":
             row_sgra = r
             break
+
+    # 条件分岐: `row_sgra is None` を満たす経路を評価する。
 
     if row_sgra is None:
         payload["ok"] = False
@@ -227,6 +245,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     refr_asymmetry_min = _maybe_float(row_sgra.get("refractive_asymmetry_uas_min"))
     refr_asymmetry_max = _maybe_float(row_sgra.get("refractive_asymmetry_uas_max"))
 
+    # 条件分岐: `ring is None or ring <= 0` を満たす経路を評価する。
     if ring is None or ring <= 0:
         payload["ok"] = False
         payload["reason"] = "invalid_ring_diameter"
@@ -237,189 +256,284 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ring_rel_sigma_published = (ring_sigma / ring) if (ring_sigma is not None and ring_sigma >= 0) else None
 
     ringfit = None
+    # 条件分岐: `ringfit_path.exists()` を満たす経路を評価する。
     if ringfit_path.exists():
         ringfit = _read_json(ringfit_path)
 
     calib = None
+    # 条件分岐: `calib_path.exists()` を満たす経路を評価する。
     if calib_path.exists():
         calib = _read_json(calib_path)
 
     var = None
+    # 条件分岐: `var_path.exists()` を満たす経路を評価する。
     if var_path.exists():
         var = _read_json(var_path)
 
     mring = None
+    # 条件分岐: `mring_path.exists()` を満たす経路を評価する。
     if mring_path.exists():
         mring = _read_json(mring_path)
 
     paper4 = None
+    # 条件分岐: `paper4_path.exists()` を満たす経路を評価する。
     if paper4_path.exists():
         paper4 = _read_json(paper4_path)
 
     paper4_morph = None
+    # 条件分岐: `paper4_morph_path.exists()` を満たす経路を評価する。
     if paper4_morph_path.exists():
         paper4_morph = _read_json(paper4_morph_path)
 
     paper4_thetag = None
+    # 条件分岐: `paper4_thetag_path.exists()` を満たす経路を評価する。
     if paper4_thetag_path.exists():
         paper4_thetag = _read_json(paper4_thetag_path)
 
     paper4_debiased_noise = None
+    # 条件分岐: `paper4_debiased_noise_path.exists()` を満たす経路を評価する。
     if paper4_debiased_noise_path.exists():
         paper4_debiased_noise = _read_json(paper4_debiased_noise_path)
 
     paper6 = None
+    # 条件分岐: `paper6_path.exists()` を満たす経路を評価する。
     if paper6_path.exists():
         paper6 = _read_json(paper6_path)
 
     paper2_gains = None
+    # 条件分岐: `paper2_gains_path.exists()` を満たす経路を評価する。
     if paper2_gains_path.exists():
         paper2_gains = _read_json(paper2_gains_path)
 
     paper2_syserr = None
+    # 条件分岐: `paper2_syserr_path.exists()` を満たす経路を評価する。
     if paper2_syserr_path.exists():
         paper2_syserr = _read_json(paper2_syserr_path)
 
     def _calib_fraction(key: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(calib, dict)` を満たす経路を評価する。
         if not isinstance(calib, dict):
             return None
+
+        # 条件分岐: `not bool(calib.get("ok"))` を満たす経路を評価する。
+
         if not bool(calib.get("ok")):
             return None
+
         derived = calib.get("derived") or {}
         return _maybe_float(derived.get(key))
 
     def _var_fraction(*keys: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(var, dict)` を満たす経路を評価する。
         if not isinstance(var, dict):
             return None
+
+        # 条件分岐: `not bool(var.get("ok"))` を満たす経路を評価する。
+
         if not bool(var.get("ok")):
             return None
+
         cur: Any = var
         for k in keys:
+            # 条件分岐: `not isinstance(cur, dict) or k not in cur` を満たす経路を評価する。
             if not isinstance(cur, dict) or k not in cur:
                 return None
+
             cur = cur[k]
+
         return _maybe_float(cur)
 
     def _mring_d_std_uas() -> Optional[float]:
+        # 条件分岐: `not isinstance(mring, dict)` を満たす経路を評価する。
         if not isinstance(mring, dict):
             return None
+
+        # 条件分岐: `not bool(mring.get("ok"))` を満たす経路を評価する。
+
         if not bool(mring.get("ok")):
             return None
+
         dsum = ((mring.get("derived") or {}).get("d_uas_summary") or {})
         return _maybe_float(dsum.get("std"))
 
     def _paper6_kappa_sigma_proxy_median() -> Optional[float]:
+        # 条件分岐: `not isinstance(paper6, dict)` を満たす経路を評価する。
         if not isinstance(paper6, dict):
             return None
+
+        # 条件分岐: `not bool(paper6.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper6.get("ok")):
             return None
+
         d = (paper6.get("derived") or {}).get("kappa_from_paper6_shadow_diameter_table") or {}
         return _maybe_float(d.get("sigma_avg_median"))
 
     def _paper6_kappa_sigma_proxy_kappa_mid_std() -> Optional[float]:
+        # 条件分岐: `not isinstance(paper6, dict)` を満たす経路を評価する。
         if not isinstance(paper6, dict):
             return None
+
+        # 条件分岐: `not bool(paper6.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper6.get("ok")):
             return None
+
         d = (paper6.get("derived") or {}).get("kappa_from_paper6_shadow_diameter_table") or {}
         mid_sum = d.get("kappa_mid_summary") if isinstance(d.get("kappa_mid_summary"), dict) else {}
         return _maybe_float(mid_sum.get("std"))
 
     def _paper2_gain_val(*keys: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(paper2_gains, dict)` を満たす経路を評価する。
         if not isinstance(paper2_gains, dict):
             return None
+
+        # 条件分岐: `not bool(paper2_gains.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper2_gains.get("ok")):
             return None
+
         cur: Any = paper2_gains
         for k in keys:
+            # 条件分岐: `not isinstance(cur, dict) or k not in cur` を満たす経路を評価する。
             if not isinstance(cur, dict) or k not in cur:
                 return None
+
             cur = cur[k]
+
         return _maybe_float(cur)
 
     def _paper2_syserr_val(*keys: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(paper2_syserr, dict)` を満たす経路を評価する。
         if not isinstance(paper2_syserr, dict):
             return None
+
+        # 条件分岐: `not bool(paper2_syserr.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper2_syserr.get("ok")):
             return None
+
         cur: Any = paper2_syserr
         for k in keys:
+            # 条件分岐: `not isinstance(cur, dict) or k not in cur` を満たす経路を評価する。
             if not isinstance(cur, dict) or k not in cur:
                 return None
+
             cur = cur[k]
+
         return _maybe_float(cur)
 
     def _paper4_debiased_noise_val(*keys: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(paper4_debiased_noise, dict)` を満たす経路を評価する。
         if not isinstance(paper4_debiased_noise, dict):
             return None
+
+        # 条件分岐: `not bool(paper4_debiased_noise.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper4_debiased_noise.get("ok")):
             return None
+
         cur: Any = paper4_debiased_noise
         for k in keys:
+            # 条件分岐: `not isinstance(cur, dict) or k not in cur` を満たす経路を評価する。
             if not isinstance(cur, dict) or k not in cur:
                 return None
+
             cur = cur[k]
+
         return _maybe_float(cur)
 
     def _paper4_kappa_sigma_proxy_gr_min() -> Optional[float]:
+        # 条件分岐: `not isinstance(paper4, dict)` を満たす経路を評価する。
         if not isinstance(paper4, dict):
             return None
+
+        # 条件分岐: `not bool(paper4.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper4.get("ok")):
             return None
+
         d = paper4.get("derived") if isinstance(paper4.get("derived"), dict) else {}
         return _maybe_float(d.get("kappa_sigma_proxy_gr_from_alpha_tot_sym_min"))
 
     def _paper4_morphology_kappa_sigma_proxy_hops_imaging_dhat_std() -> Optional[float]:
+        # 条件分岐: `not isinstance(paper4_morph, dict)` を満たす経路を評価する。
         if not isinstance(paper4_morph, dict):
             return None
+
+        # 条件分岐: `not bool(paper4_morph.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper4_morph.get("ok")):
             return None
+
         d = paper4_morph.get("derived") if isinstance(paper4_morph.get("derived"), dict) else {}
         return _maybe_float(d.get("kappa_sigma_proxy_paper4_morphology_hops_imaging_dhat_std"))
 
     def _paper4_thetag_kappa_sigma_proxy_hops_method_std_over_theta_unit() -> Optional[float]:
+        # 条件分岐: `not isinstance(paper4_thetag, dict)` を満たす経路を評価する。
         if not isinstance(paper4_thetag, dict):
             return None
+
+        # 条件分岐: `not bool(paper4_thetag.get("ok"))` を満たす経路を評価する。
+
         if not bool(paper4_thetag.get("ok")):
             return None
+
         d = paper4_thetag.get("derived") if isinstance(paper4_thetag.get("derived"), dict) else {}
         return _maybe_float(d.get("kappa_sigma_proxy_paper4_thetag_hops_method_std_over_theta_unit"))
 
     def _ringfit_rel_std(table_key: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(ringfit, dict)` を満たす経路を評価する。
         if not isinstance(ringfit, dict):
             return None
+
         metrics = (ringfit.get("metrics") or {}).get(table_key) or {}
         all_sum = metrics.get("d_mean_uas_summary_all") or {}
         std = _maybe_float(all_sum.get("std"))
+        # 条件分岐: `std is None` を満たす経路を評価する。
         if std is None:
             return None
+
         return float(std) / float(ring)
 
     def _image_analysis_rel_std(table_key: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(ringfit, dict)` を満たす経路を評価する。
         if not isinstance(ringfit, dict):
             return None
+
         metrics = (ringfit.get("metrics_image_analysis_ringfit") or {}).get(table_key) or {}
         all_sum = metrics.get("d_mean_uas_summary_all") or {}
         std = _maybe_float(all_sum.get("std"))
+        # 条件分岐: `std is None` を満たす経路を評価する。
         if std is None:
             return None
+
         return float(std) / float(ring)
 
     def _ringfit_pipeline_rel_std(table_key: str) -> Optional[float]:
+        # 条件分岐: `not isinstance(ringfit, dict)` を満たす経路を評価する。
         if not isinstance(ringfit, dict):
             return None
+
         by_pipeline = ((ringfit.get("metrics") or {}).get(table_key) or {}).get("by_pipeline") or {}
         means = []
         for p in ("difmap", "ehtim", "smili", "themis"):
             dsum = ((by_pipeline.get(p) or {}).get("d_mean_uas_summary") or {})
             m = _maybe_float(dsum.get("mean"))
+            # 条件分岐: `m is not None` を満たす経路を評価する。
             if m is not None:
                 means.append(float(m))
+
+        # 条件分岐: `len(means) < 2` を満たす経路を評価する。
+
         if len(means) < 2:
             return None
+
         s = _std(means)
+        # 条件分岐: `s is None` を満たす経路を評価する。
         if s is None:
             return None
+
         return float(s) / float(ring)
 
     kappa_sigma_ringfit_desc_all = _ringfit_rel_std("descattered")
@@ -519,64 +633,140 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
 
     items = {}
+    # 条件分岐: `ring_rel_sigma_published is not None` を満たす経路を評価する。
     if ring_rel_sigma_published is not None:
         items["σ(κ) from ring σ (published)"] = float(ring_rel_sigma_published)
+
+    # 条件分岐: `kappa_sigma_kerr is not None` を満たす経路を評価する。
+
     if kappa_sigma_kerr is not None:
         items["σ(κ) from Kerr range (ref)"] = float(kappa_sigma_kerr)
+
+    # 条件分岐: `kappa_sigma_proxy_gain_uniform_typical is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_gain_uniform_typical is not None:
         items["σ(κ) proxy: gain (5–15% uniform σ)"] = float(kappa_sigma_proxy_gain_uniform_typical)
+
+    # 条件分岐: `kappa_sigma_proxy_non_closing_vis_amp is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_non_closing_vis_amp is not None:
         items["σ(κ) proxy: non-closing vis amp (4%)"] = float(kappa_sigma_proxy_non_closing_vis_amp)
+
+    # 条件分岐: `kappa_sigma_proxy_gain_synthetic_combined_max is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_gain_synthetic_combined_max is not None:
         items["σ(κ) proxy: synthetic gains max √(offset²+p²)"] = float(kappa_sigma_proxy_gain_synthetic_combined_max)
+
+    # 条件分岐: `kappa_sigma_proxy_variability_max_2to6 is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_variability_max_2to6 is not None:
         items["σ(κ) proxy: variability noise (max 2–6 Gλ)"] = float(kappa_sigma_proxy_variability_max_2to6)
+
+    # 条件分岐: `kappa_sigma_proxy_scattering_kernel_major_over_ring is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_scattering_kernel_major_over_ring is not None:
         items["σ(κ) proxy: scattering kernel σ (major)"] = float(kappa_sigma_proxy_scattering_kernel_major_over_ring)
+
+    # 条件分岐: `kappa_sigma_proxy_refractive_wander_mid_over_ring is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_refractive_wander_mid_over_ring is not None:
         items["σ(κ) proxy: refractive wander (mid)"] = float(kappa_sigma_proxy_refractive_wander_mid_over_ring)
+
+    # 条件分岐: `kappa_sigma_proxy_refractive_distortion_mid_over_ring is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_refractive_distortion_mid_over_ring is not None:
         items["σ(κ) proxy: refractive distortion (mid)"] = float(kappa_sigma_proxy_refractive_distortion_mid_over_ring)
+
+    # 条件分岐: `kappa_sigma_proxy_refractive_distortion_max_over_ring is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_refractive_distortion_max_over_ring is not None:
         items["σ(κ) proxy: refractive distortion (max)"] = float(kappa_sigma_proxy_refractive_distortion_max_over_ring)
+
+    # 条件分岐: `kappa_sigma_proxy_refractive_asymmetry_mid_over_ring is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_refractive_asymmetry_mid_over_ring is not None:
         items["σ(κ) proxy: refractive asymmetry (mid)"] = float(kappa_sigma_proxy_refractive_asymmetry_mid_over_ring)
+
+    # 条件分岐: `kappa_sigma_proxy_mringfits_scan_std is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_mringfits_scan_std is not None:
         items["σ(κ) proxy: m-ring fits (scan-to-scan std)"] = float(kappa_sigma_proxy_mringfits_scan_std)
+
+    # 条件分岐: `kappa_sigma_proxy_paper4_alpha_tot_sym_min_gr is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper4_alpha_tot_sym_min_gr is not None:
         items["σ(κ) proxy: Paper IV α calibration (best σ_tot)"] = float(kappa_sigma_proxy_paper4_alpha_tot_sym_min_gr)
+
+    # 条件分岐: `kappa_sigma_proxy_paper4_morphology_hops_imaging_dhat_std is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper4_morphology_hops_imaging_dhat_std is not None:
         items["σ(κ) proxy: Paper IV morphology (HOPS imaging d_hat scatter)"] = float(
             kappa_sigma_proxy_paper4_morphology_hops_imaging_dhat_std
         )
+
+    # 条件分岐: `kappa_sigma_proxy_paper4_thetag_hops_method_std_over_theta_unit is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper4_thetag_hops_method_std_over_theta_unit is not None:
         items["σ(κ) proxy: Paper IV θ_g method scatter (HOPS)"] = float(
             kappa_sigma_proxy_paper4_thetag_hops_method_std_over_theta_unit
         )
+
+    # 条件分岐: `kappa_sigma_proxy_paper4_debiased_noise_a4_fraction is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper4_debiased_noise_a4_fraction is not None:
         items["σ(κ) proxy: Paper IV debiased a₄ (|u|=4 Gλ)"] = float(kappa_sigma_proxy_paper4_debiased_noise_a4_fraction)
+
+    # 条件分岐: `kappa_sigma_proxy_paper6_dsh_table_sigma_avg_median is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper6_dsh_table_sigma_avg_median is not None:
         items["σ(κ) proxy: emission model (thick disk; Paper VI d_sh table median)"] = float(
             kappa_sigma_proxy_paper6_dsh_table_sigma_avg_median
         )
+
+    # 条件分岐: `kappa_sigma_proxy_paper6_dsh_table_kappa_mid_std is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper6_dsh_table_kappa_mid_std is not None:
         items["σ(κ) proxy: Paper VI κ mid scatter (std)"] = float(kappa_sigma_proxy_paper6_dsh_table_kappa_mid_std)
+
+    # 条件分岐: `kappa_sigma_proxy_paper2_delta_g_alma_smt_quadrature is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper2_delta_g_alma_smt_quadrature is not None:
         items["σ(κ) proxy: Paper II Δg(ALMA,SMT) quadrature"] = float(kappa_sigma_proxy_paper2_delta_g_alma_smt_quadrature)
+
+    # 条件分岐: `kappa_sigma_proxy_paper2_delta_g_lmt_smt_tot_quadrature is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper2_delta_g_lmt_smt_tot_quadrature is not None:
         items["σ(κ) proxy: Paper II Δg(LMT,SMT,tot) quadrature"] = float(
             kappa_sigma_proxy_paper2_delta_g_lmt_smt_tot_quadrature
         )
+
+    # 条件分岐: `kappa_sigma_proxy_paper2_syserr_amp_fraction_max_over_pipelines is not None` を満たす経路を評価する。
+
     if kappa_sigma_proxy_paper2_syserr_amp_fraction_max_over_pipelines is not None:
         items["σ(κ) proxy: Paper II tab:syserr amp s (max)"] = float(kappa_sigma_proxy_paper2_syserr_amp_fraction_max_over_pipelines)
+
+    # 条件分岐: `kappa_sigma_image_analysis_desc_all is not None` を満たす経路を評価する。
+
     if kappa_sigma_image_analysis_desc_all is not None:
         items["σ(κ) proxy: image analysis table (descattered std)"] = float(kappa_sigma_image_analysis_desc_all)
+
+    # 条件分岐: `kappa_sigma_ringfit_desc_all is not None` を満たす経路を評価する。
+
     if kappa_sigma_ringfit_desc_all is not None:
         items["σ(κ) from ringfits (descattered std)"] = float(kappa_sigma_ringfit_desc_all)
+
+    # 条件分岐: `kappa_sigma_ringfit_on_all is not None` を満たす経路を評価する。
+
     if kappa_sigma_ringfit_on_all is not None:
         items["σ(κ) from ringfits (on-sky std)"] = float(kappa_sigma_ringfit_on_all)
+
+    # 条件分岐: `kappa_sigma_ringfit_desc_pipe is not None` を満たす経路を評価する。
+
     if kappa_sigma_ringfit_desc_pipe is not None:
         items["σ(κ) from ringfits (descattered pipeline scatter)"] = float(kappa_sigma_ringfit_desc_pipe)
+
+    # 条件分岐: `kappa_sigma_ringfit_on_pipe is not None` を満たす経路を評価する。
+
     if kappa_sigma_ringfit_on_pipe is not None:
         items["σ(κ) from ringfits (on-sky pipeline scatter)"] = float(kappa_sigma_ringfit_on_pipe)
 
@@ -682,6 +872,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

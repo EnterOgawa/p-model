@@ -35,6 +35,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -75,10 +76,15 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
+    # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and float...` を満たす経路を評価する。
     if not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and float(step) > 0):
         raise ValueError("invalid grid params")
+
+    # 条件分岐: `float(stop) < float(start)` を満たす経路を評価する。
+
     if float(stop) < float(start):
         raise ValueError("stop < start")
+
     n = int(math.floor((float(stop) - float(start)) / float(step) + 0.5)) + 1
     vv = float(start) + float(step) * np.arange(n, dtype=float)
     vv = vv[(vv >= float(start) - 1e-12) & (vv <= float(stop) + 1e-12)]
@@ -94,6 +100,7 @@ def _get_h0p_si(
     h0p_metrics: Path,
     h0p_km_s_mpc_override: Optional[float],
 ) -> Tuple[float, Dict[str, Any]]:
+    # 条件分岐: `h0p_km_s_mpc_override is not None and np.isfinite(h0p_km_s_mpc_override) and...` を満たす経路を評価する。
     if h0p_km_s_mpc_override is not None and np.isfinite(h0p_km_s_mpc_override) and float(h0p_km_s_mpc_override) > 0:
         h0_si = _h0p_si_from_km_s_mpc(float(h0p_km_s_mpc_override))
         return h0_si, {"mode": "override", "H0P_km_s_Mpc": float(h0p_km_s_mpc_override), "H0P_SI_s^-1": h0_si}
@@ -102,10 +109,12 @@ def _get_h0p_si(
     derived = d.get("derived", {}) if isinstance(d.get("derived", {}), dict) else {}
     params = d.get("params", {}) if isinstance(d.get("params", {}), dict) else {}
     h0_si = derived.get("H0P_SI_s^-1")
+    # 条件分岐: `isinstance(h0_si, (int, float)) and np.isfinite(h0_si) and float(h0_si) > 0` を満たす経路を評価する。
     if isinstance(h0_si, (int, float)) and np.isfinite(h0_si) and float(h0_si) > 0:
         return float(h0_si), {"mode": "metrics", "path": _rel(h0p_metrics), "H0P_SI_s^-1": float(h0_si)}
 
     h0_km_s_mpc = params.get("H0P_km_s_Mpc")
+    # 条件分岐: `isinstance(h0_km_s_mpc, (int, float)) and np.isfinite(h0_km_s_mpc) and float(...` を満たす経路を評価する。
     if isinstance(h0_km_s_mpc, (int, float)) and np.isfinite(h0_km_s_mpc) and float(h0_km_s_mpc) > 0:
         h0_si2 = _h0p_si_from_km_s_mpc(float(h0_km_s_mpc))
         return h0_si2, {"mode": "metrics_params", "path": _rel(h0p_metrics), "H0P_km_s_Mpc": float(h0_km_s_mpc), "H0P_SI_s^-1": h0_si2}
@@ -132,19 +141,25 @@ def _read_points(csv_path: Path) -> List[Point]:
         r = csv.DictReader(f)
         for row in r:
             gal = str(row.get("galaxy") or "").strip()
+            # 条件分岐: `not gal` を満たす経路を評価する。
             if not gal:
                 continue
+
             try:
                 g_bar = float(row.get("g_bar_m_s2") or "nan")
                 g_obs = float(row.get("g_obs_m_s2") or "nan")
                 sg_obs = float(row.get("g_obs_sigma_m_s2") or "nan")
             except Exception:
                 continue
+
+            # 条件分岐: `not (np.isfinite(g_bar) and np.isfinite(g_obs)) or g_bar <= 0.0 or g_obs <= 0.0` を満たす経路を評価する。
+
             if not (np.isfinite(g_bar) and np.isfinite(g_obs)) or g_bar <= 0.0 or g_obs <= 0.0:
                 continue
             # Optional components: vgas/vdisk/vbul are Rotmod components (Υ=1). g_bar can be recomputed as:
             # g_gas = vgas^2/r, g_disk_u = vdisk^2/r, g_bul_u = vbul^2/r.
             # Then g_bar(Υ)=g_gas + Υ_disk*g_disk_u + Υ_bulge*g_bul_u.
+
             g_gas = float("nan")
             g_disk_u = float("nan")
             g_bul_u = float("nan")
@@ -154,6 +169,7 @@ def _read_points(csv_path: Path) -> List[Point]:
                 vdisk_km_s = float(row.get("vdisk_km_s") or "nan")
                 vbul_km_s = float(row.get("vbul_km_s") or "nan")
                 rr_m = float(rr_kpc) * KPC_TO_M
+                # 条件分岐: `np.isfinite(rr_m) and rr_m > 0 and np.isfinite(vgas_km_s) and np.isfinite(vdi...` を満たす経路を評価する。
                 if np.isfinite(rr_m) and rr_m > 0 and np.isfinite(vgas_km_s) and np.isfinite(vdisk_km_s) and np.isfinite(vbul_km_s):
                     vgas = float(vgas_km_s) * KM_TO_M
                     vdisk = float(vdisk_km_s) * KM_TO_M
@@ -165,6 +181,7 @@ def _read_points(csv_path: Path) -> List[Point]:
                 pass
 
             pts.append(Point(galaxy=gal, g_bar=g_bar, g_obs=g_obs, sg_obs=sg_obs, g_gas=g_gas, g_disk_u=g_disk_u, g_bul_u=g_bul_u))
+
     return pts
 
 
@@ -190,6 +207,7 @@ def _fit_upsilon_global_grid(
 
     # Require component-based recomputation to be available for at least 90% of points.
     m_comp = np.isfinite(g_gas) & np.isfinite(g_d) & np.isfinite(g_b)
+    # 条件分岐: `int(np.count_nonzero(m_comp)) < int(0.9 * float(len(train)))` を満たす経路を評価する。
     if int(np.count_nonzero(m_comp)) < int(0.9 * float(len(train))):
         return {"status": "skipped", "reason": "missing_components", "n_total": int(len(train)), "n_with_components": int(np.count_nonzero(m_comp))}
 
@@ -202,6 +220,7 @@ def _fit_upsilon_global_grid(
     y = np.log10(g_obs)
     sigma_y = _sigma_log10_gobs(g_obs, sg_obs, floor_dex=float(sigma_floor_dex))
     m = np.isfinite(y) & np.isfinite(sigma_y) & (sigma_y > 0.0)
+    # 条件分岐: `int(np.count_nonzero(m)) < 50` を満たす経路を評価する。
     if int(np.count_nonzero(m)) < 50:
         return {"status": "skipped", "reason": "not_enough_points", "n_used": int(np.count_nonzero(m))}
 
@@ -213,10 +232,12 @@ def _fit_upsilon_global_grid(
 
     ud = np.asarray([float(x) for x in upsilon_disk_grid if np.isfinite(x) and float(x) >= 0.0], dtype=float)
     ub = np.asarray([float(x) for x in upsilon_bulge_grid if np.isfinite(x) and float(x) >= 0.0], dtype=float)
+    # 条件分岐: `ud.size == 0 or ub.size == 0` を満たす経路を評価する。
     if ud.size == 0 or ub.size == 0:
         return {"status": "skipped", "reason": "no_valid_upsilon_grid"}
 
     # Flatten 2D grid into vectors
+
     udv = np.repeat(ud, ub.size)
     ubv = np.tile(ub, ud.size)
     n_combo = int(udv.size)
@@ -239,10 +260,12 @@ def _fit_upsilon_global_grid(
     r = y[:, None] - y_pred
     # chi2 per combo
     w = 1.0 / (sigma_y * sigma_y)
+    # 条件分岐: `str(objective) == "chi2_all"` を満たす経路を評価する。
     if str(objective) == "chi2_all":
         chi2 = np.nansum((r * r) * w[:, None], axis=0)
         score = chi2
         meta: Dict[str, Any] = {"objective": "chi2_all"}
+    # 条件分岐: 前段条件が不成立で、`str(objective) == "chi2_low_accel"` を追加評価する。
     elif str(objective) == "chi2_low_accel":
         # Evaluate only low-accel points, where the candidate is expected to differ most.
         log10_gbar = np.log10(gbar)
@@ -254,6 +277,7 @@ def _fit_upsilon_global_grid(
         dof = n_low - 1
         score = np.where(dof >= 10, chi2_low / dof, np.nan)
         meta = {"objective": "chi2_low_accel", "n_low_min_required": 11}
+    # 条件分岐: 前段条件が不成立で、`str(objective) == "chi2_high_accel"` を追加評価する。
     elif str(objective) == "chi2_high_accel":
         # Calibrate Υ on higher-accel points (baryon-dominated), then test the low-accel regime on holdout.
         log10_gbar = np.log10(gbar)
@@ -267,8 +291,12 @@ def _fit_upsilon_global_grid(
     else:
         return {"status": "skipped", "reason": f"unknown_objective:{objective}"}
 
+    # 条件分岐: `not np.isfinite(chi2).any()` を満たす経路を評価する。
+
     if not np.isfinite(chi2).any():
         return {"status": "failed", "reason": "chi2_all_nan", "n_used": int(y.size), "n_combo": n_combo}
+
+    # 条件分岐: `not np.isfinite(score).any()` を満たす経路を評価する。
 
     if not np.isfinite(score).any():
         return {"status": "failed", "reason": "score_all_nan", "n_used": int(y.size), "n_combo": n_combo, "objective": str(objective)}
@@ -301,9 +329,12 @@ def _solve_sigma_int(resid: np.ndarray, sigma_y: np.ndarray, *, dof: int) -> flo
     m = np.isfinite(resid) & np.isfinite(sigma_y) & (sigma_y > 0.0)
     r = resid[m]
     sy = sigma_y[m]
+    # 条件分岐: `r.size < 10 or dof <= 1` を満たす経路を評価する。
     if r.size < 10 or dof <= 1:
         return 0.0
+
     chi2_0 = float(np.sum((r / sy) ** 2))
+    # 条件分岐: `chi2_0 <= float(dof)` を満たす経路を評価する。
     if chi2_0 <= float(dof):
         return 0.0
 
@@ -313,10 +344,12 @@ def _solve_sigma_int(resid: np.ndarray, sigma_y: np.ndarray, *, dof: int) -> flo
         mid = 0.5 * (lo + hi)
         denom = np.sqrt(sy * sy + mid * mid)
         chi2 = float(np.sum((r / denom) ** 2))
+        # 条件分岐: `chi2 > float(dof)` を満たす経路を評価する。
         if chi2 > float(dof):
             lo = mid
         else:
             hi = mid
+
     return float(hi)
 
 
@@ -338,6 +371,7 @@ def _eval_model(
     x = np.log10(g_bar)
     y = np.log10(g_obs)
     sigma_y = _sigma_log10_gobs(g_obs, sg_obs, floor_dex=float(sigma_floor_dex))
+    # 条件分岐: `sigma_int_dex > 0` を満たす経路を評価する。
     if sigma_int_dex > 0:
         sigma_y = np.sqrt(sigma_y * sigma_y + float(sigma_int_dex) * float(sigma_int_dex))
 
@@ -352,6 +386,7 @@ def _eval_model(
     mean_low = float("nan")
     sem_low = float("nan")
     z_low = float("nan")
+    # 条件分岐: `int(np.count_nonzero(m_low)) >= 10` を満たす経路を評価する。
     if int(np.count_nonzero(m_low)) >= 10:
         rr = r[m_low]
         w = 1.0 / (sigma_y[m_low] ** 2)
@@ -361,22 +396,29 @@ def _eval_model(
         z_low = mean_low / sem_low if sem_low > 0 else float("inf")
 
     # low-accel residual aggregated by galaxy (treat galaxies as independent units)
+
     galaxies = [p.galaxy for p in pts]
     by_gal: Dict[str, List[float]] = {}
     for i, gal in enumerate(galaxies):
+        # 条件分岐: `not bool(m_low[i])` を満たす経路を評価する。
         if not bool(m_low[i]):
             continue
+
         by_gal.setdefault(str(gal), []).append(float(r[i]))
 
     mpg = int(min_points_per_galaxy)
+    # 条件分岐: `mpg <= 0` を満たす経路を評価する。
     if mpg <= 0:
         mpg = 1
+
     gal_means_all = np.asarray([float(np.mean(v)) for v in by_gal.values() if len(v) >= mpg], dtype=float)
     gal_means_all = gal_means_all[np.isfinite(gal_means_all)]
 
     def _gal_stats(vv: np.ndarray) -> Dict[str, Any]:
+        # 条件分岐: `vv.size < 3 or not np.isfinite(vv).all()` を満たす経路を評価する。
         if vv.size < 3 or not np.isfinite(vv).all():
             return {"n": int(vv.size), "mean_residual_dex": float("nan"), "sem_dex": float("nan"), "z": float("nan"), "residual_quantiles_dex": {"q16": float("nan"), "q50": float("nan"), "q84": float("nan")}}
+
         mean = float(np.mean(vv))
         std = float(np.std(vv, ddof=1)) if vv.size >= 2 else float("nan")
         sem = float(std / math.sqrt(float(vv.size))) if np.isfinite(std) and std > 0 else float("nan")
@@ -399,18 +441,24 @@ def _eval_model(
     clip_k = float(galaxy_clipping_k)
     used = gal_means_all
     clip_info: Dict[str, Any] = {"method": method, "status": "skipped"}
+    # 条件分岐: `method == "none"` を満たす経路を評価する。
     if method == "none":
         clip_info = {"method": "none", "status": "skipped"}
+    # 条件分岐: 前段条件が不成立で、`method == "mad"` を追加評価する。
     elif method == "mad":
+        # 条件分岐: `not (np.isfinite(clip_k) and clip_k > 0)` を満たす経路を評価する。
         if not (np.isfinite(clip_k) and clip_k > 0):
             clip_info = {"method": "mad", "status": "skipped", "reason": "invalid_k", "k": float(galaxy_clipping_k)}
+        # 条件分岐: 前段条件が不成立で、`gal_means_all.size >= 5` を追加評価する。
         elif gal_means_all.size >= 5:
             med = float(np.median(gal_means_all))
             mad = float(np.median(np.abs(gal_means_all - med)))
             rsig = float(1.4826 * mad)
+            # 条件分岐: `np.isfinite(rsig) and rsig > 0` を満たす経路を評価する。
             if np.isfinite(rsig) and rsig > 0:
                 keep = np.abs(gal_means_all - med) <= float(clip_k) * rsig
                 vv2 = gal_means_all[keep]
+                # 条件分岐: `vv2.size >= 3` を満たす経路を評価する。
                 if vv2.size >= 3:
                     used = vv2
                     clip_info = {
@@ -495,8 +543,10 @@ def _split_by_galaxy(pts: Sequence[Point], *, seed: int, train_frac: float) -> T
 
 def _summarize_sweep(values: Sequence[float], *, threshold: float = 3.0) -> Dict[str, Any]:
     vv = np.asarray([float(x) for x in values if np.isfinite(x)], dtype=float)
+    # 条件分岐: `vv.size == 0` を満たす経路を評価する。
     if vv.size == 0:
         return {"n": 0, "min": float("nan"), "max": float("nan"), "median": float("nan"), "p16": float("nan"), "p84": float("nan"), "pass_rate_abs_lt_threshold": float("nan")}
+
     pass_rate = float(np.mean(np.abs(vv) < float(threshold)))
     return {
         "n": int(vv.size),
@@ -539,6 +589,7 @@ def _run_once(
     sigma_y_tr = _sigma_log10_gobs(g_obs_tr, sg_obs_tr, floor_dex=float(sigma_floor_dex))
 
     wanted = {str(x) for x in (models or []) if str(x)}
+    # 条件分岐: `not wanted` を満たす経路を評価する。
     if not wanted:
         wanted = {
             "baryons_only",
@@ -548,16 +599,20 @@ def _run_once(
         }
 
     # Model 0: baryons-only (no fit)
+
     sigma_int_bary = float("nan")
+    # 条件分岐: `"baryons_only" in wanted` を満たす経路を評価する。
     if "baryons_only" in wanted:
         ypred_bary_tr = np.log10(g_bar_tr)
         r_bary_tr = y_tr - ypred_bary_tr
         sigma_int_bary = _solve_sigma_int(r_bary_tr, sigma_y_tr, dof=int(np.isfinite(r_bary_tr).sum()) - 1)
 
     # Model 1: McGaugh+2016 empirical RAR (fit a0 on train)
+
     rar_fit: Dict[str, Any] = {}
     la0_best = float("nan")
     sigma_int_rar = float("nan")
+    # 条件分岐: `"baseline_rar_mcgaugh2016_fit_a0" in wanted or "candidate_rar_pbg_fit_kappa"...` を満たす経路を評価する。
     if "baseline_rar_mcgaugh2016_fit_a0" in wanted or "candidate_rar_pbg_fit_kappa" in wanted:
         rar_fit = _fit_log10_a0_grid(g_bar_tr, y_tr, sigma_y_tr)
         la0_best = float(rar_fit.get("log10_a0_best_m_s2") or float("nan"))
@@ -566,15 +621,21 @@ def _run_once(
         sigma_int_rar = _solve_sigma_int(r_rar_tr, sigma_y_tr, dof=int(np.isfinite(r_rar_tr).sum()) - 1)
 
     # Candidate: tie a0 to cosmology via a0 = kappa * c * H0^(P)
+
     h0p_si, h0p_src = _get_h0p_si(h0p_metrics=h0p_metrics, h0p_km_s_mpc_override=h0p_km_s_mpc_override)
     kappa = float(pbg_kappa)
+    # 条件分岐: `not np.isfinite(kappa) or kappa <= 0` を満たす経路を評価する。
     if not np.isfinite(kappa) or kappa <= 0:
         raise ValueError("--pbg-kappa must be positive")
+
     a0_pbg = float(kappa) * float(C_LIGHT_M_S) * float(h0p_si)
+    # 条件分岐: `not np.isfinite(a0_pbg) or a0_pbg <= 0` を満たす経路を評価する。
     if not np.isfinite(a0_pbg) or a0_pbg <= 0:
         raise ValueError("invalid a0 computed from kappa*c*H0^(P)")
+
     la0_pbg = float(math.log10(a0_pbg))
     sigma_int_pbg = float("nan")
+    # 条件分岐: `"candidate_rar_pbg_a0_fixed_kappa" in wanted or bool(fit_upsilon_global)` を満たす経路を評価する。
     if "candidate_rar_pbg_a0_fixed_kappa" in wanted or bool(fit_upsilon_global):
         ypred_pbg_tr = _rar_mcgaugh2016_log10_pred(g_bar_tr, log10_a0=la0_pbg)
         r_pbg_tr = y_tr - ypred_pbg_tr
@@ -583,11 +644,14 @@ def _run_once(
     # Candidate: fit kappa on train (1 parameter), then freeze and evaluate on holdout.
     # Note: since a0 = kappa*c*H0^(P) is one-to-one, fitting kappa is equivalent to fitting a0.
     # We express the fitted a0 as kappa for bookkeeping.
+
     kappa_fit: Dict[str, Any] = {"status": "skipped"}
     la0_kfit = float("nan")
     sigma_int_kfit = float("nan")
+    # 条件分岐: `"candidate_rar_pbg_fit_kappa" in wanted and np.isfinite(la0_best)` を満たす経路を評価する。
     if "candidate_rar_pbg_fit_kappa" in wanted and np.isfinite(la0_best):
         denom = float(C_LIGHT_M_S) * float(h0p_si)
+        # 条件分岐: `np.isfinite(denom) and denom > 0` を満たす経路を評価する。
         if np.isfinite(denom) and denom > 0:
             a0_best = float(10.0 ** la0_best)
             kappa_best = float(a0_best / denom) if denom > 0 else float("nan")
@@ -604,6 +668,7 @@ def _run_once(
             }
 
     # Evaluate on train/test
+
     out_models: List[Dict[str, Any]] = []
     for label, ypred_fn, sig_int in [
         ("baryons_only", lambda gb: np.log10(gb), sigma_int_bary),
@@ -611,9 +676,11 @@ def _run_once(
         ("candidate_rar_pbg_a0_fixed_kappa", lambda gb: _rar_mcgaugh2016_log10_pred(gb, log10_a0=la0_pbg), sigma_int_pbg),
         ("candidate_rar_pbg_fit_kappa", lambda gb: _rar_mcgaugh2016_log10_pred(gb, log10_a0=la0_kfit), sigma_int_kfit),
     ]:
+        # 条件分岐: `label not in wanted` を満たす経路を評価する。
         if label not in wanted:
             continue
         # train
+
         gb_tr = np.asarray([p.g_bar for p in train], dtype=float)
         ypred_tr = ypred_fn(gb_tr)
         tr_raw = _eval_model(
@@ -689,6 +756,7 @@ def _run_once(
         )
 
     # Optional: fit global Υ_disk/Υ_bulge on train (nuisance) and evaluate candidate on holdout.
+
     if bool(fit_upsilon_global):
         ud_grid = list(upsilon_disk_grid or [])
         ub_grid = list(upsilon_bulge_grid or [])
@@ -701,14 +769,17 @@ def _run_once(
             upsilon_disk_grid=ud_grid,
             upsilon_bulge_grid=ub_grid,
         )
+        # 条件分岐: `ups_fit.get("status") == "ok"` を満たす経路を評価する。
         if ups_fit.get("status") == "ok":
             ud_best = float(ups_fit["upsilon_disk_best"])
             ub_best = float(ups_fit["upsilon_bulge_best"])
 
             def _gbar_from_u(p: Point) -> float:
+                # 条件分岐: `np.isfinite(p.g_gas) and np.isfinite(p.g_disk_u) and np.isfinite(p.g_bul_u)` を満たす経路を評価する。
                 if np.isfinite(p.g_gas) and np.isfinite(p.g_disk_u) and np.isfinite(p.g_bul_u):
                     gb = float(p.g_gas + ud_best * p.g_disk_u + ub_best * p.g_bul_u)
                     return gb
+
                 return float(p.g_bar)
 
             train_u = [Point(galaxy=p.galaxy, g_bar=_gbar_from_u(p), g_obs=p.g_obs, sg_obs=p.sg_obs) for p in train]
@@ -874,37 +945,57 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rar_csv = Path(args.rar_csv)
+    # 条件分岐: `not rar_csv.exists()` を満たす経路を評価する。
     if not rar_csv.exists():
         raise FileNotFoundError(f"missing rar csv: {rar_csv}")
 
     pts = _read_points(rar_csv)
+    # 条件分岐: `not pts` を満たす経路を評価する。
     if not pts:
         raise RuntimeError("no valid points in rar csv")
 
+    # 条件分岐: `args.seeds` を満たす経路を評価する。
+
     if args.seeds:
         seeds = [int(x) for x in args.seeds]
+    # 条件分岐: 前段条件が不成立で、`args.seed_start is not None or args.seed_count is not None` を追加評価する。
     elif args.seed_start is not None or args.seed_count is not None:
+        # 条件分岐: `args.seed_start is None or args.seed_count is None` を満たす経路を評価する。
         if args.seed_start is None or args.seed_count is None:
             raise ValueError("--seed-start and --seed-count must be provided together")
+
+        # 条件分岐: `int(args.seed_count) <= 0` を満たす経路を評価する。
+
         if int(args.seed_count) <= 0:
             raise ValueError("--seed-count must be positive")
+
         seeds = [int(args.seed_start) + i for i in range(int(args.seed_count))]
     else:
         seeds = [int(args.seed)]
 
+    # 条件分岐: `args.train_fracs` を満たす経路を評価する。
+
     if args.train_fracs:
         train_fracs = [float(x) for x in args.train_fracs]
+    # 条件分岐: 前段条件が不成立で、`args.train_frac_start is not None or args.train_frac_stop is not None or args...` を追加評価する。
     elif args.train_frac_start is not None or args.train_frac_stop is not None or args.train_frac_step is not None:
+        # 条件分岐: `args.train_frac_start is None or args.train_frac_stop is None or args.train_f...` を満たす経路を評価する。
         if args.train_frac_start is None or args.train_frac_stop is None or args.train_frac_step is None:
             raise ValueError("--train-frac-start/--train-frac-stop/--train-frac-step must be provided together")
+
         start = float(args.train_frac_start)
         stop = float(args.train_frac_stop)
         step = float(args.train_frac_step)
+        # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step)) or step...` を満たす経路を評価する。
         if not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step)) or step <= 0:
             raise ValueError("invalid train-frac sweep parameters")
+
+        # 条件分岐: `stop < start` を満たす経路を評価する。
+
         if stop < start:
             raise ValueError("--train-frac-stop must be >= --train-frac-start")
         # Generate inclusive grid, rounding to avoid float accumulation.
+
         n = int(math.floor((stop - start) / step + 1.0 + 1e-12))
         train_fracs = [float(round(start + i * step, 12)) for i in range(n)]
     else:
@@ -912,6 +1003,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     train_fracs = [float(x) for x in train_fracs if np.isfinite(x)]
     for tf in train_fracs:
+        # 条件分岐: `not (0.1 <= float(tf) <= 0.95)` を満たす経路を評価する。
         if not (0.1 <= float(tf) <= 0.95):
             raise ValueError("--train-frac(s) must be in [0.1,0.95]")
 
@@ -942,32 +1034,46 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
 
     # Representative run for backward-compat fields: prefer (seed, train_frac) = (--seed, --train-frac) if included in sweep.
+
     rep = None
     want_seed = int(args.seed)
     want_tf = float(args.train_frac)
     for r in runs:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
+        # 条件分岐: `int(r.get("seed") or -1) == want_seed and np.isfinite(float(r.get("train_frac...` を満たす経路を評価する。
+
         if int(r.get("seed") or -1) == want_seed and np.isfinite(float(r.get("train_frac") or float("nan"))) and abs(float(r.get("train_frac")) - want_tf) < 1e-12:
             rep = r
             break
+
+    # 条件分岐: `rep is None` を満たす経路を評価する。
+
     if rep is None:
         rep = runs[0] if runs else {"seed": want_seed, "train_frac": want_tf, "counts": {}, "models": []}
 
     # Sweep summary (holdout low-accel z, with sigma_int)
     # - sweep_summary: point-level (radial points treated as independent)
     # - sweep_summary_galaxy: galaxy-level (galaxies treated as independent units)
+
     by_model: Dict[str, List[float]] = {}
     by_model_galaxy: Dict[str, List[float]] = {}
     for run in runs:
         for m in run.get("models", []) if isinstance(run.get("models"), list) else []:
+            # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
             if not isinstance(m, dict):
                 continue
+
             name = str(m.get("name") or "")
             z = (((m.get("test") or {}).get("with_sigma_int") or {}).get("low_accel") or {}).get("z")
+            # 条件分岐: `isinstance(z, (int, float)) and np.isfinite(z)` を満たす経路を評価する。
             if isinstance(z, (int, float)) and np.isfinite(z):
                 by_model.setdefault(name, []).append(float(z))
+
             z_gal = (((m.get("test") or {}).get("with_sigma_int") or {}).get("low_accel_galaxy") or {}).get("z")
+            # 条件分岐: `isinstance(z_gal, (int, float)) and np.isfinite(z_gal)` を満たす経路を評価する。
             if isinstance(z_gal, (int, float)) and np.isfinite(z_gal):
                 by_model_galaxy.setdefault(name, []).append(float(z_gal))
 
@@ -1002,6 +1108,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event("cosmology.sparc_rar_freeze_test", {"metrics": _rel(out)})
@@ -1011,6 +1118,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"metrics": _rel(out)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

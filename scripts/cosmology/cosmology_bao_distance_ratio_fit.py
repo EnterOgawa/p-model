@@ -42,6 +42,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -65,6 +66,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -84,16 +86,25 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `not math.isfinite(float(x))` を満たす経路を評価する。
+
     if not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -126,8 +137,10 @@ class BAORatioPoint:
 
 def _pred_dm_dh_over_rd(*, z: float, s_R: float, Q: float) -> Tuple[float, float]:
     op = 1.0 + float(z)
+    # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
     if not (op > 0.0):
         raise ValueError("z must satisfy 1+z>0")
+
     s_R = float(s_R)
     Q = float(Q)
     dm = Q * math.log(op) * (op ** (-s_R))
@@ -143,8 +156,10 @@ def _inv_cov_2x2(*, sig1: float, sig2: float, corr: float) -> Tuple[float, float
     a = sig1 * sig1
     d = sig2 * sig2
     det = a * d - cov * cov
+    # 条件分岐: `not (det > 0.0)` を満たす経路を評価する。
     if not (det > 0.0):
         return (float("nan"), float("nan"), float("nan"))
+
     inv11 = d / det
     inv22 = a / det
     inv12 = -cov / det
@@ -165,15 +180,20 @@ def _profile_Q_for_sR(points: Sequence[BAORatioPoint], *, s_R: float) -> Dict[st
         y = np.array([p.dm_over_rd, p.dh_over_rd], dtype=float)
 
         inv11, inv12, inv22 = _inv_cov_2x2(sig1=p.dm_over_rd_sigma, sig2=p.dh_over_rd_sigma, corr=p.corr_dm_dh)
+        # 条件分岐: `not (math.isfinite(inv11) and math.isfinite(inv22) and math.isfinite(inv12))` を満たす経路を評価する。
         if not (math.isfinite(inv11) and math.isfinite(inv22) and math.isfinite(inv12)):
             return {"Q_best": float("nan"), "Q_sigma": float("nan"), "chi2": float("nan")}
+
         W = np.array([[inv11, inv12], [inv12, inv22]], dtype=float)
 
         num += float(m.T @ W @ y)
         den += float(m.T @ W @ m)
 
+    # 条件分岐: `not (den > 0.0 and math.isfinite(den) and math.isfinite(num))` を満たす経路を評価する。
+
     if not (den > 0.0 and math.isfinite(den) and math.isfinite(num)):
         return {"Q_best": float("nan"), "Q_sigma": float("nan"), "chi2": float("nan")}
+
     Q = float(num / den)
     Q_sig = float(math.sqrt(1.0 / den))
 
@@ -184,23 +204,28 @@ def _profile_Q_for_sR(points: Sequence[BAORatioPoint], *, s_R: float) -> Dict[st
         d_dh = float(p.dh_over_rd) - dh_pred
 
         inv11, inv12, inv22 = _inv_cov_2x2(sig1=p.dm_over_rd_sigma, sig2=p.dh_over_rd_sigma, corr=p.corr_dm_dh)
+        # 条件分岐: `not (math.isfinite(inv11) and math.isfinite(inv22) and math.isfinite(inv12))` を満たす経路を評価する。
         if not (math.isfinite(inv11) and math.isfinite(inv22) and math.isfinite(inv12)):
             return {"Q_best": float("nan"), "Q_sigma": float("nan"), "chi2": float("nan")}
+
         chi2 += inv11 * d_dm * d_dm + 2.0 * inv12 * d_dm * d_dh + inv22 * d_dh * d_dh
 
     return {"Q_best": float(Q), "Q_sigma": float(Q_sig), "chi2": float(chi2)}
 
 
 def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max: float = 2.0) -> Dict[str, Any]:
+    # 条件分岐: `not points` を満たす経路を評価する。
     if not points:
         raise ValueError("no BAO ratio points")
 
     # 1) coarse grid
+
     s0 = np.linspace(float(s_R_min), float(s_R_max), 301, dtype=float)
     prof0 = []
     for s in s0:
         r = _profile_Q_for_sR(points, s_R=float(s))
         prof0.append({"s_R": float(s), **r})
+
     best0 = min(prof0, key=lambda x: (x["chi2"] if math.isfinite(x["chi2"]) else float("inf")))
 
     # 2) refine
@@ -212,6 +237,7 @@ def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max
     for s in s1:
         r = _profile_Q_for_sR(points, s_R=float(s))
         prof.append({"s_R": float(s), **r})
+
     best = min(prof, key=lambda x: (x["chi2"] if math.isfinite(x["chi2"]) else float("inf")))
 
     chi2_min = float(best["chi2"])
@@ -224,6 +250,7 @@ def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max
     s_arr = np.array([float(r["s_R"]) for r in prof], dtype=float)
     c_arr = np.array([float(r["chi2"]) for r in prof], dtype=float)
     ok = np.isfinite(c_arr)
+    # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
     if not np.any(ok):
         s_lo = float("nan")
         s_hi = float("nan")
@@ -243,25 +270,36 @@ def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max
         i = i_best
         while i > 0 and c_arr[i] <= target:
             i -= 1
+
+        # 条件分岐: `i_best > 0 and c_arr[i] > target and c_arr[i + 1] <= target` を満たす経路を評価する。
+
         if i_best > 0 and c_arr[i] > target and c_arr[i + 1] <= target:
             # interpolate between i (above) and i+1 (below)
             s0i, s1i = float(s_arr[i]), float(s_arr[i + 1])
             c0i, c1i = float(c_arr[i]), float(c_arr[i + 1])
             denom = float(c1i - c0i)
+            # 条件分岐: `abs(denom) < 1e-300` を満たす経路を評価する。
             if abs(denom) < 1e-300:
                 denom = math.copysign(1e-300, denom if denom != 0.0 else 1.0)
+
             t = (target - c0i) / denom
             s_lo = float(s0i + t * (s1i - s0i))
         # right side
+
         i = i_best
         while i < len(s_arr) - 1 and c_arr[i] <= target:
             i += 1
+
+        # 条件分岐: `i_best < len(s_arr) - 1 and c_arr[i] > target and c_arr[i - 1] <= target` を満たす経路を評価する。
+
         if i_best < len(s_arr) - 1 and c_arr[i] > target and c_arr[i - 1] <= target:
             s0i, s1i = float(s_arr[i - 1]), float(s_arr[i])
             c0i, c1i = float(c_arr[i - 1]), float(c_arr[i])
             denom = float(c1i - c0i)
+            # 条件分岐: `abs(denom) < 1e-300` を満たす経路を評価する。
             if abs(denom) < 1e-300:
                 denom = math.copysign(1e-300, denom if denom != 0.0 else 1.0)
+
             t = (target - c0i) / denom
             s_hi = float(s0i + t * (s1i - s0i))
 
@@ -278,8 +316,10 @@ def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max
         d_dh = float(p.dh_over_rd) - float(dh_pred)
         inv11, inv12, inv22 = _inv_cov_2x2(sig1=p.dm_over_rd_sigma, sig2=p.dh_over_rd_sigma, corr=p.corr_dm_dh)
         chi2_i = float("nan")
+        # 条件分岐: `math.isfinite(inv11) and math.isfinite(inv12) and math.isfinite(inv22)` を満たす経路を評価する。
         if math.isfinite(inv11) and math.isfinite(inv12) and math.isfinite(inv22):
             chi2_i = float(inv11 * d_dm * d_dm + 2.0 * inv12 * d_dm * d_dh + inv22 * d_dh * d_dh)
+
         sqrt_chi2 = float(math.sqrt(chi2_i)) if (math.isfinite(chi2_i) and chi2_i >= 0.0) else float("nan")
         rows.append(
             {
@@ -337,6 +377,7 @@ def _plot(
             d1, d2 = _pred_dm_dh_over_rd(z=float(z), s_R=float(s), Q=float(Q))
             dm.append(d1)
             dh.append(d2)
+
         return np.array(dm, dtype=float), np.array(dh, dtype=float)
 
     def _g(points: Sequence[BAORatioPoint]) -> Dict[str, np.ndarray]:
@@ -352,8 +393,10 @@ def _plot(
     d = _g(desi)
 
     z_all = [*b["z"].tolist(), *e["z"].tolist(), *d["z"].tolist()]
+    # 条件分岐: `not z_all` を満たす経路を評価する。
     if not z_all:
         return
+
     z_min = float(min(z_all))
     z_max = float(max(z_all))
     z_curve = np.linspace(max(0.0, z_min - 0.05), z_max + 0.1, 240, dtype=float)
@@ -371,14 +414,21 @@ def _plot(
     if boss:
         ax1.errorbar(b["z"], b["dm"], yerr=b["dms"], fmt="o", capsize=4, color="#111111", ecolor="#111111", label="BOSS DR12（比へ変換）")
         ax2.errorbar(b["z"], b["dh"], yerr=b["dhs"], fmt="o", capsize=4, color="#111111", ecolor="#111111", label="BOSS DR12（比へ変換）")
+
+    # 条件分岐: `eboss` を満たす経路を評価する。
+
     if eboss:
         ax1.errorbar(e["z"], e["dm"], yerr=e["dms"], fmt="s", capsize=4, color="#1f77b4", ecolor="#1f77b4", label="eBOSS DR16（一次ソース比）")
         ax2.errorbar(e["z"], e["dh"], yerr=e["dhs"], fmt="s", capsize=4, color="#1f77b4", ecolor="#1f77b4", label="eBOSS DR16（一次ソース比）")
+
+    # 条件分岐: `desi` を満たす経路を評価する。
+
     if desi:
         ax1.errorbar(d["z"], d["dm"], yerr=d["dms"], fmt="^", capsize=4, color="#2ca02c", ecolor="#2ca02c", label="DESI DR1（bao_data mean/cov）")
         ax2.errorbar(d["z"], d["dh"], yerr=d["dhs"], fmt="^", capsize=4, color="#2ca02c", ecolor="#2ca02c", label="DESI DR1（bao_data mean/cov）")
 
     # Model curves
+
     ax1.plot(z_curve, dm_all, color="#d62728", linewidth=2.2, label="fit（BOSS+eBOSS+DESI）")
     ax2.plot(z_curve, dh_all, color="#d62728", linewidth=2.2, label="fit（BOSS+eBOSS+DESI）")
     ax1.plot(z_curve, dm_b, color="#555555", linewidth=1.6, linestyle="--", alpha=0.9, label="fit（BOSSのみ）")
@@ -401,8 +451,10 @@ def _plot(
         bf = dict(fit.get("best_fit") or {})
         s = bf.get("s_R")
         ss = bf.get("s_R_sigma_1d")
+        # 条件分岐: `s is None or ss is None or not (math.isfinite(float(s)) and math.isfinite(flo...` を満たす経路を評価する。
         if s is None or ss is None or not (math.isfinite(float(s)) and math.isfinite(float(ss))):
             return "s_R=na"
+
         return f"s_R={_fmt_float(float(s), digits=3)}±{_fmt_float(float(ss), digits=3)}"
 
     fig.suptitle("宇宙論（BAOの多系統比較）：D_M/r_d と D_H/r_d の fit から s_R を推定（静的背景P）", fontsize=14)
@@ -430,20 +482,30 @@ def _plot_residuals(
 
     per = fit_all.get("per_point") if isinstance(fit_all.get("per_point"), list) else []
     rows = [r for r in per if isinstance(r, dict)]
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return
 
     # stable order: by z
+
     rows.sort(key=lambda r: float(r.get("z_eff") or 0.0))
 
     def _cat(pid: str) -> str:
         pid = str(pid or "")
+        # 条件分岐: `pid.startswith("boss_dr12")` を満たす経路を評価する。
         if pid.startswith("boss_dr12"):
             return "BOSS"
+
+        # 条件分岐: `pid.startswith("eboss_dr16") or pid.startswith("eboss_")` を満たす経路を評価する。
+
         if pid.startswith("eboss_dr16") or pid.startswith("eboss_"):
             return "eBOSS"
+
+        # 条件分岐: `pid.startswith("desi_dr1") or pid.startswith("desi_")` を満たす経路を評価する。
+
         if pid.startswith("desi_dr1") or pid.startswith("desi_"):
             return "DESI"
+
         return "other"
 
     colors = {"BOSS": "#111111", "eBOSS": "#1f77b4", "DESI": "#2ca02c", "other": "#777777"}
@@ -472,10 +534,15 @@ def _plot_residuals(
     for yi, v, r in zip(y, vals, rows):
         dmz = r.get("dm_residual_sigma")
         dhz = r.get("dh_residual_sigma")
+        # 条件分岐: `not (isinstance(dmz, (int, float)) and isinstance(dhz, (int, float)))` を満たす経路を評価する。
         if not (isinstance(dmz, (int, float)) and isinstance(dhz, (int, float))):
             continue
+
+        # 条件分岐: `not (math.isfinite(float(dmz)) and math.isfinite(float(dhz)))` を満たす経路を評価する。
+
         if not (math.isfinite(float(dmz)) and math.isfinite(float(dhz))):
             continue
+
         ax.text(
             max(0.02, vals_plot[int(yi)] + 0.05),
             float(yi),
@@ -528,17 +595,26 @@ def _plot_leave_one_out(
     import matplotlib.pyplot as plt
 
     rows = [r for r in leave_one_out if isinstance(r, dict)]
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return
 
     def _cat(pid: str) -> str:
         pid = str(pid or "")
+        # 条件分岐: `pid.startswith("boss_dr12")` を満たす経路を評価する。
         if pid.startswith("boss_dr12"):
             return "BOSS"
+
+        # 条件分岐: `pid.startswith("eboss_dr16") or pid.startswith("eboss_")` を満たす経路を評価する。
+
         if pid.startswith("eboss_dr16") or pid.startswith("eboss_"):
             return "eBOSS"
+
+        # 条件分岐: `pid.startswith("desi_dr1") or pid.startswith("desi_")` を満たす経路を評価する。
+
         if pid.startswith("desi_dr1") or pid.startswith("desi_"):
             return "DESI"
+
         return "other"
 
     colors = {"BOSS": "#111111", "eBOSS": "#1f77b4", "DESI": "#2ca02c", "other": "#777777"}
@@ -567,6 +643,7 @@ def _plot_leave_one_out(
         except Exception:
             s = float("nan")
             ss = float("nan")
+
         s_vals.append(s)
         s_sig.append(ss)
 
@@ -574,6 +651,7 @@ def _plot_leave_one_out(
             cd = float(fit.get("chi2_dof"))
         except Exception:
             cd = float("nan")
+
         chi2_dof.append(cd)
 
     x = np.arange(len(rows), dtype=float)
@@ -584,8 +662,10 @@ def _plot_leave_one_out(
     # s_R with error bars
     for cat in ("BOSS", "eBOSS", "DESI", "other"):
         idx = [i for i, c in enumerate(cats) if c == cat]
+        # 条件分岐: `not idx` を満たす経路を評価する。
         if not idx:
             continue
+
         ax1.errorbar(
             x[idx],
             [s_vals[i] for i in idx],
@@ -598,6 +678,7 @@ def _plot_leave_one_out(
         )
 
     # baseline
+
     bf0 = fit_all.get("best_fit") if isinstance(fit_all.get("best_fit"), dict) else {}
     try:
         s0 = float(bf0.get("s_R"))
@@ -605,6 +686,7 @@ def _plot_leave_one_out(
     except Exception:
         s0 = float("nan")
         s0s = float("nan")
+
     ax1.axhline(s0, color="#d62728", linestyle="--", linewidth=1.6, alpha=0.75, label="baseline（併合）")
     ax1.fill_between(
         [-0.5, float(len(rows)) - 0.5],
@@ -631,6 +713,9 @@ def _plot_leave_one_out(
         chi2d_0 = float(chi2_0) / float(dof_0) if (float(dof_0) > 0.0) else None
     except Exception:
         chi2d_0 = None
+
+    # 条件分岐: `chi2d_0 is not None and math.isfinite(float(chi2d_0))` を満たす経路を評価する。
+
     if chi2d_0 is not None and math.isfinite(float(chi2d_0)):
         ax2.axhline(float(chi2d_0), color="#d62728", linestyle="--", linewidth=1.6, alpha=0.75)
         ax2.text(
@@ -669,14 +754,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     in_path = Path(args.bao_ratio_data)
     raw = _read_json(in_path)
     pts = [BAORatioPoint.from_json(x) for x in (raw.get("constraints") or []) if isinstance(x, dict)]
+    # 条件分岐: `not pts` を満たす経路を評価する。
     if not pts:
         raise ValueError("No constraints in input JSON")
+
     pts = sorted(pts, key=lambda p: p.z_eff)
 
     boss = [p for p in pts if p.id.startswith("boss_dr12")]
     eboss = [p for p in pts if p.id.startswith("eboss_dr16") or p.id.startswith("eboss_")]
     desi = [p for p in pts if p.id.startswith("desi_dr1") or p.id.startswith("desi_")]
     other = [p for p in pts if p not in boss and p not in eboss and p not in desi]
+    # 条件分岐: `other` を満たす経路を評価する。
     if other:
         # Keep them in the combined fit, but label them as "other" in metrics.
         pass
@@ -708,8 +796,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     loo_rows: List[Dict[str, Any]] = []
     for p in pts:
         subset = [q for q in pts if q.id != p.id]
+        # 条件分岐: `len(subset) < 2` を満たす経路を評価する。
         if len(subset) < 2:
             continue
+
         fit = _fit_sR_Q(subset)
         fit_small = {
             "best_fit": dict(fit.get("best_fit") or {}),
@@ -723,6 +813,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 "fit": fit_small,
             }
         )
+
     _plot_leave_one_out(out_png=out_png_loo, fit_all=fit_all, leave_one_out=loo_rows)
 
     metrics: Dict[str, Any] = {
@@ -787,6 +878,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -47,16 +48,21 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _as_float(v: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(v, (int, float))` を満たす経路を評価する。
     if isinstance(v, (int, float)):
         f = float(v)
+        # 条件分岐: `math.isfinite(f)` を満たす経路を評価する。
         if math.isfinite(f):
             return f
+
     return None
 
 
@@ -213,9 +219,12 @@ def build_pack() -> Dict[str, Any]:
 def _write_csv(path: Path, rows: List[Dict[str, Any]], criteria: List[Dict[str, Any]]) -> None:
     merged: Dict[str, Dict[str, Any]] = {str(r["channel"]): dict(r) for r in rows if isinstance(r, dict)}
     for c in criteria:
+        # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
         if not isinstance(c, dict):
             continue
+
         ch = str(c.get("channel") or "")
+        # 条件分岐: `ch in merged` を満たす経路を評価する。
         if ch in merged:
             merged[ch]["gate_metric"] = c.get("metric")
             merged[ch]["gate_threshold"] = c.get("threshold")
@@ -297,10 +306,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
+
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
+
     if not out_csv.is_absolute():
         out_csv = (ROOT / out_csv).resolve()
+
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
+
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
@@ -336,6 +352,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

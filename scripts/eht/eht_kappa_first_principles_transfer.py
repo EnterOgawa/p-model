@@ -14,6 +14,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -37,6 +38,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -51,15 +53,21 @@ def _safe_float(value: Any) -> Optional[float]:
         out = float(value)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(out)` を満たす経路を評価する。
+
     if not math.isfinite(out):
         return None
+
     return out
 
 
 def _find_row(rows: Sequence[Dict[str, Any]], key: str) -> Optional[Dict[str, Any]]:
     for row in rows:
+        # 条件分岐: `str(row.get("key", "")).strip().lower() == key.lower()` を満たす経路を評価する。
         if str(row.get("key", "")).strip().lower() == key.lower():
             return row
+
     return None
 
 
@@ -72,8 +80,10 @@ def _budget_scattering_proxy(payload_budget: Dict[str, Any]) -> Optional[float]:
     ]
     vals = [_safe_float(row.get(k)) for k in keys]
     vals_f = [v for v in vals if v is not None and v > 0]
+    # 条件分岐: `not vals_f` を満たす経路を評価する。
     if not vals_f:
         return None
+
     return float(max(vals_f))
 
 
@@ -88,8 +98,12 @@ def _predict_row(
     ring_sigma = _safe_float(row.get("ring_diameter_obs_uas_sigma"))
     kappa_fit = _safe_float(row.get("kappa_ring_over_shadow_fit_pmodel"))
     sigma_abs = _safe_float(row.get("kappa_sigma_assumed_kerr"))
+    # 条件分岐: `theta_sh is None or theta_sh <= 0 or ring_sigma is None or kappa_fit is None` を満たす経路を評価する。
     if theta_sh is None or theta_sh <= 0 or ring_sigma is None or kappa_fit is None:
         return None
+
+    # 条件分岐: `sigma_abs is None or sigma_abs <= 0` を満たす経路を評価する。
+
     if sigma_abs is None or sigma_abs <= 0:
         sigma_abs = 0.0
 
@@ -272,6 +286,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         },
     }
 
+    # 条件分岐: `not in_shadow.exists()` を満たす経路を評価する。
     if not in_shadow.exists():
         payload["overall_status"] = "reject"
         payload["reason"] = "missing_shadow_compare_json"
@@ -282,10 +297,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     shadow_payload = _read_json(in_shadow)
     rows_shadow = shadow_payload.get("rows") or []
+    # 条件分岐: `not isinstance(rows_shadow, list)` を満たす経路を評価する。
     if not isinstance(rows_shadow, list):
         rows_shadow = []
 
     budget_payload: Dict[str, Any] = {}
+    # 条件分岐: `in_budget.exists()` を満たす経路を評価する。
     if in_budget.exists():
         budget_payload = _read_json(in_budget)
 
@@ -294,14 +311,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     rows_out: List[Dict[str, Any]] = []
     for key in ("m87", "sgra"):
         row = _find_row(rows_shadow, key)
+        # 条件分岐: `not row` を満たす経路を評価する。
         if not row:
             continue
+
         sigma_scat = sgra_scat_sigma if key == "sgra" else None
         row_out = _predict_row(row, sigma_scat_override=sigma_scat)
+        # 条件分岐: `row_out` を満たす経路を評価する。
         if row_out:
             rows_out.append(row_out)
 
     payload["rows"] = rows_out
+    # 条件分岐: `not rows_out` を満たす経路を評価する。
     if not rows_out:
         payload["overall_status"] = "reject"
         payload["reason"] = "no_usable_rows"
@@ -324,6 +345,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _plot(rows_out, out_png)
 
     public_outputs: Optional[Dict[str, str]] = None
+    # 条件分岐: `not args.skip_public_copy` を満たす経路を評価する。
     if not args.skip_public_copy:
         public_outputs = _mirror_to_public(
             src_json=out_json, src_csv=out_csv, src_png=out_png, public_dir=public_outdir
@@ -367,12 +389,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] png : {out_png}")
+    # 条件分岐: `public_outputs` を満たす経路を評価する。
     if public_outputs:
         print(f"[ok] public json: {public_outputs['json']}")
         print(f"[ok] public csv : {public_outputs['csv']}")
         print(f"[ok] public png : {public_outputs['plot_png']}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

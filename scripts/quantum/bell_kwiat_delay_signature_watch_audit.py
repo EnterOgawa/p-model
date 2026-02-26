@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -30,11 +31,15 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: float, digits: int = 6) -> str:
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -53,8 +58,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -64,16 +71,23 @@ def _set_japanese_font() -> None:
 def _sigma_median(arr: np.ndarray) -> Optional[float]:
     data = np.asarray(arr, dtype=float)
     n = int(data.size)
+    # 条件分岐: `n < 5` を満たす経路を評価する。
     if n < 5:
         return None
+
     q25, q75 = np.quantile(data, [0.25, 0.75])
     iqr = float(q75 - q25)
+    # 条件分岐: `iqr > 0` を満たす経路を評価する。
     if iqr > 0:
         sigma = iqr / 1.349
     else:
         sigma = float(np.std(data, ddof=1))
+
+    # 条件分岐: `not math.isfinite(sigma) or sigma <= 0.0` を満たす経路を評価する。
+
     if not math.isfinite(sigma) or sigma <= 0.0:
         return None
+
     return float(1.2533141373155001 * sigma / math.sqrt(float(n)))
 
 
@@ -90,23 +104,32 @@ def _delay_stat(
     dt1 = np.asarray(dt1_in, dtype=float) + float(offset_ns)
     dt1 = dt1[dt1 >= 0.0]
 
+    # 条件分岐: `window_ns is not None and math.isfinite(float(window_ns))` を満たす経路を評価する。
     if window_ns is not None and math.isfinite(float(window_ns)):
         w = float(window_ns)
         dt0 = dt0[dt0 <= w]
         dt1 = dt1[dt1 <= w]
 
+    # 条件分岐: `clip_quantile is not None` を満たす経路を評価する。
+
     if clip_quantile is not None:
         q = float(clip_quantile)
+        # 条件分岐: `0.0 < q < 1.0` を満たす経路を評価する。
         if 0.0 < q < 1.0:
+            # 条件分岐: `dt0.size > 0` を満たす経路を評価する。
             if dt0.size > 0:
                 q0 = float(np.quantile(dt0, q))
                 dt0 = dt0[dt0 <= q0]
+
+            # 条件分岐: `dt1.size > 0` を満たす経路を評価する。
+
             if dt1.size > 0:
                 q1 = float(np.quantile(dt1, q))
                 dt1 = dt1[dt1 <= q1]
 
     n0 = int(dt0.size)
     n1 = int(dt1.size)
+    # 条件分岐: `n0 < min_n or n1 < min_n` を満たす経路を評価する。
     if n0 < min_n or n1 < min_n:
         return {
             "n0": n0,
@@ -123,6 +146,7 @@ def _delay_stat(
     delta = median0 - median1
     s0 = _sigma_median(dt0)
     s1 = _sigma_median(dt1)
+    # 条件分岐: `s0 is None or s1 is None` を満たす経路を評価する。
     if s0 is None or s1 is None:
         return {
             "n0": n0,
@@ -133,11 +157,14 @@ def _delay_stat(
             "sigma_delta_ns": None,
             "z_delta_median": None,
         }
+
     sigma_delta = float(math.sqrt(s0 * s0 + s1 * s1))
+    # 条件分岐: `sigma_delta <= 0.0` を満たす経路を評価する。
     if sigma_delta <= 0.0:
         z = None
     else:
         z = float(delta / sigma_delta)
+
     return {
         "n0": n0,
         "n1": n1,
@@ -154,10 +181,15 @@ def _max_abs_z(entry: Dict[str, Any]) -> Optional[float]:
     bz = entry.get("bob", {}).get("z_delta_median") if isinstance(entry.get("bob"), dict) else None
     vals = []
     for value in (az, bz):
+        # 条件分岐: `isinstance(value, (int, float)) and math.isfinite(float(value))` を満たす経路を評価する。
         if isinstance(value, (int, float)) and math.isfinite(float(value)):
             vals.append(abs(float(value)))
+
+    # 条件分岐: `not vals` を満たす経路を評価する。
+
     if not vals:
         return None
+
     return max(vals)
 
 
@@ -173,14 +205,18 @@ def _run_audit(
 ) -> Dict[str, Any]:
     metrics = _read_json(window_metrics_json)
     windows = metrics.get("config", {}).get("windows_ns")
+    # 条件分岐: `not isinstance(windows, list) or not windows` を満たす経路を評価する。
     if not isinstance(windows, list) or not windows:
         windows = metrics.get("window_sweep", {}).get("values")
+
     windows_ns = [float(w) for w in windows if isinstance(w, (int, float))]
     windows_ns = sorted(set(windows_ns))
 
     natural_window = metrics.get("natural_window", {}).get("recommended_window_ns")
+    # 条件分岐: `not isinstance(natural_window, (int, float))` を満たす経路を評価する。
     if not isinstance(natural_window, (int, float)):
         natural_window = windows_ns[-1] if windows_ns else None
+
     natural_window_ns = float(natural_window) if natural_window is not None else None
 
     npz = np.load(delay_npz)
@@ -267,8 +303,10 @@ def _run_audit(
         vals: List[float] = []
         for item in items:
             z = item.get("max_abs_z")
+            # 条件分岐: `isinstance(z, (int, float)) and math.isfinite(float(z))` を満たす経路を評価する。
             if isinstance(z, (int, float)) and math.isfinite(float(z)):
                 vals.append(float(z))
+
         return max(vals) if vals else None
 
     max_window_raw = _max_z(window_sweep)
@@ -342,8 +380,10 @@ def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
             )
 
     baseline = payload.get("baseline") if isinstance(payload.get("baseline"), dict) else {}
+    # 条件分岐: `baseline` を満たす経路を評価する。
     if baseline:
         _push("baseline", [baseline])
+
     _push("window_raw", payload.get("window_sweep_raw") if isinstance(payload.get("window_sweep_raw"), list) else [])
     _push(
         "window_tail_clipped",
@@ -416,10 +456,15 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     y_raw = [y for _, y in xy_raw]
     x_clp = [x for x, _ in xy_clp]
     y_clp = [y for _, y in xy_clp]
+    # 条件分岐: `x_raw and y_raw` を満たす経路を評価する。
     if x_raw and y_raw:
         ax0.plot(x_raw, y_raw, marker="o", linewidth=1.8, label="raw")
+
+    # 条件分岐: `x_clp and y_clp` を満たす経路を評価する。
+
     if x_clp and y_clp:
         ax0.plot(x_clp, y_clp, marker="s", linewidth=1.5, label="tail-clipped")
+
     ax0.axhline(z_thr, color="#333333", linestyle="--", linewidth=1.1)
     ax0.set_xlabel("window half-width (ns)")
     ax0.set_ylabel("max abs(z_delay)")
@@ -430,8 +475,10 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     ax1 = axes[1]
     x_off = [float(r.get("offset_ns")) for r in offset_rows if isinstance(r.get("offset_ns"), (int, float))]
     y_off = [float(r.get("max_abs_z")) for r in offset_rows if isinstance(r.get("max_abs_z"), (int, float))]
+    # 条件分岐: `x_off and y_off` を満たす経路を評価する。
     if x_off and y_off:
         ax1.plot(x_off, y_off, marker="o", linewidth=1.8, color="#1f77b4")
+
     ax1.axhline(z_thr, color="#333333", linestyle="--", linewidth=1.1)
     ax1.set_xlabel("relative offset applied to setting-1 (ns)")
     ax1.set_ylabel("max abs(z_delay)")
@@ -444,13 +491,19 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     for r in accidental_rows:
         q = r.get("clip_quantile")
         z = r.get("max_abs_z")
+        # 条件分岐: `not isinstance(z, (int, float))` を満たす経路を評価する。
         if not isinstance(z, (int, float)):
             continue
+
         q_plot = 1.0 if q is None else float(q)
         x_acc.append(q_plot)
         y_acc.append(float(z))
+
+    # 条件分岐: `x_acc and y_acc` を満たす経路を評価する。
+
     if x_acc and y_acc:
         ax2.plot(x_acc, y_acc, marker="o", linewidth=1.8, color="#ff7f0e")
+
     ax2.axhline(z_thr, color="#333333", linestyle="--", linewidth=1.1)
     ax2.set_xlabel("tail clip quantile (1.0=no clip)")
     ax2.set_ylabel("max abs(z_delay)")
@@ -511,6 +564,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _plot(out_png, payload)
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
             dst = public_outdir / src.name
@@ -538,10 +592,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

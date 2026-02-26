@@ -35,6 +35,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -80,8 +81,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
     path = root / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None, "output/private/theory/frozen_parameters.json (missing)"
+
     try:
         j = _read_json(path)
         beta = float(j["beta"])
@@ -111,13 +114,17 @@ def _write_measurements_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
 
 def _load_measurements(path: Optional[Path]) -> List[GammaMeasurement]:
+    # 条件分岐: `not path` を満たす経路を評価する。
     if not path:
         return []
+
     try:
         j = _read_json(path)
         raw = j.get("measurements")
+        # 条件分岐: `not isinstance(raw, list)` を満たす経路を評価する。
         if not isinstance(raw, list):
             return []
+
         return [GammaMeasurement.from_json(x) for x in raw if isinstance(x, dict)]
     except Exception:
         return []
@@ -143,10 +150,12 @@ def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str
     obs_rows: List[Dict[str, Any]] = []
     for m in measurements:
         z_score = None
+        # 条件分岐: `m.sigma > 0` を満たす経路を評価する。
         if m.sigma > 0:
             z_score = (m.gamma - gamma_pmodel) / m.sigma
 
         # alpha = alpha_GR * (1+gamma)/2, so sigma_alpha = alpha_GR * sigma/2
+
         alpha_obs_limb = alpha_gr_limb * (1.0 + float(m.gamma)) / 2.0
         alpha_sigma = abs(alpha_gr_limb * float(m.sigma) / 2.0)
 
@@ -167,6 +176,7 @@ def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str
         )
 
     best: Optional[Dict[str, Any]] = None
+    # 条件分岐: `obs_rows` を満たす経路を評価する。
     if obs_rows:
         best = min(obs_rows, key=lambda r: float(r["sigma"]) if r.get("sigma") else float("inf"))
 
@@ -181,6 +191,7 @@ def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str
         "rel_error": abs(alpha_limb - alpha_gr_limb) / alpha_gr_limb,
         "measurement_count": int(len(obs_rows)),
     }
+    # 条件分岐: `best` を満たす経路を評価する。
     if best:
         metrics.update(
             {
@@ -230,11 +241,13 @@ def main() -> int:
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `args.beta is not None` を満たす経路を評価する。
     if args.beta is not None:
         beta = float(args.beta)
         beta_source = "cli"
     else:
         beta, beta_source = _try_load_frozen_beta(root)
+        # 条件分岐: `beta is None` を満たす経路を評価する。
         if beta is None:
             beta = 1.0
             beta_source = "default_beta_1"
@@ -258,6 +271,7 @@ def main() -> int:
         linewidth=1.0,
         label=f"標準理論（GR, γ=1）: {float(metrics.get('reference_arcsec_limb', 1.75)):.3f} 角秒（太陽縁）",
     )
+    # 条件分岐: `metrics.get("observed_alpha_arcsec_limb_best") is not None and metrics.get("o...` を満たす経路を評価する。
     if metrics.get("observed_alpha_arcsec_limb_best") is not None and metrics.get("observed_alpha_sigma_arcsec_limb_best") is not None:
         label = str(metrics.get("observed_best_label") or metrics.get("observed_best_id") or "観測")
         ax1.errorbar(
@@ -270,6 +284,7 @@ def main() -> int:
             markersize=4,
             label=f"観測（代表: {label}）",
         )
+
     ax1.set_xlim(1.0, 10.0)
     ax1.set_xlabel("インパクトパラメータ b [太陽半径 R_sun]")
     ax1.set_ylabel("偏向角 α [角秒]")
@@ -279,6 +294,7 @@ def main() -> int:
 
     # Right: observed gamma
     ax2.axhline(1.0, color="gray", linestyle="--", linewidth=1.0, label="標準理論（GR）: γ=1")
+    # 条件分岐: `metrics.get("gamma_pmodel") is not None` を満たす経路を評価する。
     if metrics.get("gamma_pmodel") is not None:
         ax2.axhline(
             float(metrics["gamma_pmodel"]),
@@ -287,10 +303,15 @@ def main() -> int:
             linewidth=1.0,
             label=f"P-model 予測: γ=2β-1 = {float(metrics['gamma_pmodel']):.6f}",
         )
+
+    # 条件分岐: `obs_rows` を満たす経路を評価する。
+
     if obs_rows:
         for r in obs_rows:
+            # 条件分岐: `r.get("year") is None or r.get("gamma") is None or r.get("sigma") is None` を満たす経路を評価する。
             if r.get("year") is None or r.get("gamma") is None or r.get("sigma") is None:
                 continue
+
             ax2.errorbar(
                 [int(r["year"])],
                 [float(r["gamma"])],
@@ -302,6 +323,7 @@ def main() -> int:
             )
     else:
         ax2.text(0.5, 0.5, "観測データなし", ha="center", va="center", transform=ax2.transAxes)
+
     ax2.set_xlabel("年")
     ax2.set_ylabel("PPN γ（光偏向の強さ）")
     ax2.set_title("光偏向パラメータ γ（観測）")
@@ -338,6 +360,8 @@ def main() -> int:
     print(f"[ok] metrics: {json_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

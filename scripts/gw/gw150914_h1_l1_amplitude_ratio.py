@@ -18,6 +18,7 @@ import numpy as np  # noqa: E402
 from scipy.signal import hilbert  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,8 +45,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -56,24 +59,30 @@ def _slugify(s: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (s or "").strip())
     while "__" in out:
         out = out.replace("__", "_")
+
     return out.strip("_") or "event"
 
 
 def _corrcoef_1d(x: np.ndarray, y: np.ndarray) -> float:
+    # 条件分岐: `x.size != y.size or x.size < 8` を満たす経路を評価する。
     if x.size != y.size or x.size < 8:
         return float("nan")
+
     x0 = x - float(np.mean(x))
     y0 = y - float(np.mean(y))
     nx = float(np.linalg.norm(x0))
     ny = float(np.linalg.norm(y0))
     den = nx * ny
+    # 条件分岐: `not math.isfinite(den) or den <= 0.0` を満たす経路を評価する。
     if not math.isfinite(den) or den <= 0.0:
         return float("nan")
+
     return float(np.dot(x0, y0) / den)
 
 
 def _scan_lag_corr(x_first: np.ndarray, x_second: np.ndarray, max_lag_samples: int) -> Tuple[np.ndarray, np.ndarray, int, float]:
     n = int(min(x_first.size, x_second.size))
+    # 条件分岐: `n <= 16` を満たす経路を評価する。
     if n <= 16:
         return np.array([0], dtype=np.int32), np.array([float("nan")], dtype=np.float64), 0, float("nan")
 
@@ -88,22 +97,27 @@ def _scan_lag_corr(x_first: np.ndarray, x_second: np.ndarray, max_lag_samples: i
     best_abs = -1.0
     for i, lag in enumerate(lags):
         lg = int(lag)
+        # 条件分岐: `lg > 0` を満たす経路を評価する。
         if lg > 0:
             a = h[lg:]
             b = l[:-lg]
+        # 条件分岐: 前段条件が不成立で、`lg < 0` を追加評価する。
         elif lg < 0:
             a = h[:lg]
             b = l[-lg:]
         else:
             a = h
             b = l
+
         c = _corrcoef_1d(a, b)
         corrs[i] = c
         score = abs(float(c)) if math.isfinite(float(c)) else -1.0
+        # 条件分岐: `score > best_abs` を満たす経路を評価する。
         if score > best_abs:
             best_abs = score
             best_lag = lg
             best_corr = float(c)
+
     return lags, corrs, best_lag, best_corr
 
 
@@ -115,10 +129,15 @@ def _apply_lag_to_first(
     t0 = np.asarray(t[:n], dtype=np.float64)
     h0 = np.asarray(x_first[:n], dtype=np.float64)
     l0 = np.asarray(x_second[:n], dtype=np.float64)
+    # 条件分岐: `lag > 0` を満たす経路を評価する。
     if lag > 0:
         return t0[lag:], h0[lag:], l0[:-lag]
+
+    # 条件分岐: `lag < 0` を満たす経路を評価する。
+
     if lag < 0:
         return t0[:lag], h0[:lag], l0[-lag:]
+
     return t0, h0, l0
 
 
@@ -134,17 +153,21 @@ def _align_on_common_grid(
     detector_second: str,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float]:
     fs_ref = float(min(fs_first, fs_second))
+    # 条件分岐: `not (math.isfinite(fs_ref) and fs_ref > 0)` を満たす経路を評価する。
     if not (math.isfinite(fs_ref) and fs_ref > 0):
         raise ValueError("invalid sampling rate")
 
     t_min = float(max(float(t_first[0]), float(t_second[0])))
     t_max = float(min(float(t_first[-1]), float(t_second[-1])))
+    # 条件分岐: `not math.isfinite(t_min) or not math.isfinite(t_max) or t_max <= t_min` を満たす経路を評価する。
     if not math.isfinite(t_min) or not math.isfinite(t_max) or t_max <= t_min:
         raise ValueError(f"no overlap between {detector_first}/{detector_second} time ranges")
 
     n = int(math.floor((t_max - t_min) * fs_ref))
+    # 条件分岐: `n < 128` を満たす経路を評価する。
     if n < 128:
         raise ValueError("overlap window too short")
+
     t = t_min + np.arange(n, dtype=np.float64) / fs_ref
 
     xh = np.interp(t, t_first, x_first)
@@ -164,23 +187,31 @@ def _prepare_detector_series(
     gps_start, fs, strain = _parse_gwosc_txt_gz(strain_path)
     x = np.asarray(strain, dtype=np.float64)
     x = x - float(np.mean(x))
+    # 条件分岐: `preprocess == "whiten"` を満たす経路を評価する。
     if preprocess == "whiten":
         xf = _whiten_fft(x, fs, f_lo=float(f_lo), f_hi=float(f_hi), welch_nperseg=int(whiten_nperseg))
     else:
         xf = _bandpass(x, fs, f_lo=float(f_lo), f_hi=float(f_hi), order=4)
+
     t = (float(gps_start) + np.arange(xf.size, dtype=np.float64) / float(fs)) - float(gps_event)
     return t, xf, float(fs), float(gps_start)
 
 
 def _fmt_float(v: float, ndigits: int = 6) -> str:
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
         return ""
+
     x = float(v)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{ndigits}g}"
+
     return f"{x:.{ndigits}f}".rstrip("0").rstrip(".")
 
 
@@ -201,6 +232,7 @@ def _build_metrics(
     mask = (envelope_strength >= threshold) & (env_l1 > eps)
 
     min_pts = int(max(32, min_ratio_points))
+    # 条件分岐: `int(np.sum(mask)) < min_pts` を満たす経路を評価する。
     if int(np.sum(mask)) < min_pts:
         k = int(min(max(min_pts, int(0.2 * env_l1.size)), env_l1.size))
         idx = np.argsort(envelope_strength)[::-1]
@@ -210,6 +242,7 @@ def _build_metrics(
 
     ratio = env_h1[mask] / env_l1[mask]
     t_ratio = t_aligned[mask]
+    # 条件分岐: `ratio.size < 8` を満たす経路を評価する。
     if ratio.size < 8:
         raise ValueError("ratio sample too small after envelope selection")
 
@@ -221,9 +254,11 @@ def _build_metrics(
 
     slope = float("nan")
     slope_window_frac = float("nan")
+    # 条件分岐: `ratio.size >= 10` を満たす経路を評価する。
     if ratio.size >= 10:
         slope = float(np.polyfit(t_ratio, ratio, 1)[0])
         dt = float(np.max(t_ratio) - np.min(t_ratio))
+        # 条件分岐: `dt > 0` を満たす経路を評価する。
         if dt > 0:
             slope_window_frac = float(abs(slope) * dt / (abs(q50) + 1e-15))
 
@@ -267,23 +302,36 @@ def _gate_status(
     reasons: List[str] = []
     status = "pass"
 
+    # 条件分岐: `not math.isfinite(abs_corr) or abs_corr < float(corr_min)` を満たす経路を評価する。
     if not math.isfinite(abs_corr) or abs_corr < float(corr_min):
         status = "reject"
         reasons.append("low_cross_correlation")
+
+    # 条件分岐: `int(ratio_points) < int(min_ratio_points)` を満たす経路を評価する。
+
     if int(ratio_points) < int(min_ratio_points):
         status = "reject"
         reasons.append("insufficient_ratio_samples")
 
+    # 条件分岐: `status != "reject"` を満たす経路を評価する。
+
     if status != "reject":
+        # 条件分岐: `math.isfinite(iqr_over_median) and iqr_over_median > float(iqr_warn)` を満たす経路を評価する。
         if math.isfinite(iqr_over_median) and iqr_over_median > float(iqr_warn):
             status = "watch"
             reasons.append("ratio_spread_large")
+
+        # 条件分岐: `math.isfinite(slope_window_fraction) and slope_window_fraction > float(slope_...` を満たす経路を評価する。
+
         if math.isfinite(slope_window_fraction) and slope_window_fraction > float(slope_warn):
             status = "watch"
             reasons.append("ratio_time_drift_large")
 
+    # 条件分岐: `not reasons` を満たす経路を評価する。
+
     if not reasons:
         reasons.append("all_gates_passed")
+
     return status, reasons
 
 
@@ -339,12 +387,20 @@ def _plot(
     med = float(ratio_stats.get("median", float("nan")))
     p16 = float(ratio_stats.get("p16", float("nan")))
     p84 = float(ratio_stats.get("p84", float("nan")))
+    # 条件分岐: `math.isfinite(med)` を満たす経路を評価する。
     if math.isfinite(med):
         ax3.axhline(med, color="#111111", linewidth=1.8, label=f"median={med:.3f}")
+
+    # 条件分岐: `math.isfinite(p16)` を満たす経路を評価する。
+
     if math.isfinite(p16):
         ax3.axhline(p16, color="#555555", linestyle="--", linewidth=1.0, label=f"p16={p16:.3f}")
+
+    # 条件分岐: `math.isfinite(p84)` を満たす経路を評価する。
+
     if math.isfinite(p84):
         ax3.axhline(p84, color="#555555", linestyle="--", linewidth=1.0, label=f"p84={p84:.3f}")
+
     ax3.set_title(
         f"Envelope amplitude ratio |{detector_first}|/|{detector_second}| "
         + f"(best corr={best_corr:+.3f}, half-span/med={ratio_stats.get('p16_p84_halfspan_over_median', float('nan')):.3f})"
@@ -470,9 +526,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     event_name = str(args.event).strip() or "GW150914"
     event_slug = _slugify(event_name)
     detectors_in = [d.strip().upper() for d in str(args.detectors).split(",") if d.strip()]
+    # 条件分岐: `len(detectors_in) < 2` を満たす経路を評価する。
     if len(detectors_in) < 2:
         print("[err] --detectors must include two detector names (e.g. H1,L1 or H1,V1)")
         return 2
+
     order = {"H1": 0, "L1": 1, "V1": 2, "K1": 3}
     pair = sorted(detectors_in[:2], key=lambda d: (order.get(d, 999), d))
     detector_first, detector_second = pair[0], pair[1]
@@ -482,14 +540,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     except Exception:
         print("[err] invalid --window (expected \"start,end\")")
         return 2
+
+    # 条件分岐: `not (math.isfinite(ws) and math.isfinite(we) and ws < we)` を満たす経路を評価する。
+
     if not (math.isfinite(ws) and math.isfinite(we) and ws < we):
         print("[err] invalid --window range")
         return 2
+
+    # 条件分岐: `args.data_dir` を満たす経路を評価する。
 
     if args.data_dir:
         data_dir = Path(args.data_dir)
     else:
         data_dir = root / "data" / "gw" / event_slug
+
     outdir = Path(args.outdir)
     public_outdir = Path(args.public_outdir)
     outdir.mkdir(parents=True, exist_ok=True)
@@ -521,6 +585,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     strain_paths = ((fetch.get("paths") or {}).get("strain") or {}) if isinstance(fetch, dict) else {}
     path_first = Path(strain_paths.get(detector_first) or "")
     path_second = Path(strain_paths.get(detector_second) or "")
+    # 条件分岐: `not path_first.exists() or not path_second.exists()` を満たす経路を評価する。
     if not path_first.exists() or not path_second.exists():
         print(f"[err] {detector_first}/{detector_second} strain file missing")
         return 2
@@ -557,9 +622,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 2
 
     mask_window = (t_common >= ws) & (t_common <= we)
+    # 条件分岐: `int(np.sum(mask_window)) < 128` を満たす経路を評価する。
     if int(np.sum(mask_window)) < 128:
         print("[err] analysis window too short after alignment")
         return 2
+
     t_win = t_common[mask_window]
     h_win = xh_common[mask_window]
     l_win = xl_common[mask_window]
@@ -570,6 +637,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     abs_best_corr = abs(float(best_corr)) if math.isfinite(float(best_corr)) else float("nan")
 
     t_al, h_al, l_al = _apply_lag_to_first(t_win, h_win, l_win, best_lag_samples)
+    # 条件分岐: `t_al.size < 128` を満たす経路を評価する。
     if t_al.size < 128:
         print("[err] aligned window too short")
         return 2
@@ -711,12 +779,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "consistency_definition": "high |corr| and stable envelope ratio across the chirp window",
         },
     }
+    # 条件分岐: `detector_first == "H1"` を満たす経路を評価する。
     if detector_first == "H1":
         payload["metrics"]["best_lag_samples_apply_to_h1"] = int(best_lag_samples)
         payload["metrics"]["best_lag_ms_apply_to_h1"] = float(best_lag_ms)
+
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     copied: List[Path] = []
+    # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in [out_png, out_json, out_summary_csv, out_lag_csv, out_samples_csv]:
             dst = public_outdir / src.name
@@ -756,10 +827,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] summary csv: {out_summary_csv}")
     print(f"[ok] lag csv    : {out_lag_csv}")
     print(f"[ok] samples csv: {out_samples_csv}")
+    # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -33,6 +33,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -47,25 +48,36 @@ _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
 def _resolve_path_like(p: Any) -> Optional[Path]:
+    # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
         return None
+
     s = str(p).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
+
     if os.name == "nt":
         m = _WSL_ABS_RE.match(s)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             drive = m.group(1).upper()
             rest = m.group(2).replace("/", "\\")
             return Path(f"{drive}:\\{rest}")
     else:
+        # 条件分岐: `_WIN_ABS_RE.match(s)` を満たす経路を評価する。
         if _WIN_ABS_RE.match(s):
             drive = s[0].lower()
             rest = s[2:].lstrip("\\/").replace("\\", "/")
             return Path(f"/mnt/{drive}/{rest}")
+
     path = Path(s)
+    # 条件分岐: `path.is_absolute()` を満たす経路を評価する。
     if path.is_absolute():
         return path
+
     return _ROOT / path
 
 
@@ -91,6 +103,7 @@ class WedgePoint:
 
 def _eps_proxy_from_ratio(ratio: float) -> float:
     r = float(ratio)
+    # 条件分岐: `not (math.isfinite(r) and r > 0.0)` を満たす経路を評価する。
     if not (math.isfinite(r) and r > 0.0):
         return float("nan")
     # Parameterization used elsewhere in this repo:
@@ -98,24 +111,34 @@ def _eps_proxy_from_ratio(ratio: float) -> float:
     # Here ratio is stored as s∥/s⊥ (fid-coordinate wedge peak positions). Under AP,
     #   s∥/s⊥ ≈ (1/α∥)/(1/α⊥) = α⊥/α∥ = 1/(α∥/α⊥)
     # so we invert it to match the ε sign convention used in peakfit.
+
     return float(r ** (-1.0 / 3.0) - 1.0)
 
 
 def _status_from_abs_eps(abs_eps: float, *, ok_max: float = 0.015, mixed_max: float = 0.03) -> str:
+    # 条件分岐: `not math.isfinite(float(abs_eps))` を満たす経路を評価する。
     if not math.isfinite(float(abs_eps)):
         return "info"
+
     x = float(abs_eps)
+    # 条件分岐: `x <= float(ok_max)` を満たす経路を評価する。
     if x <= float(ok_max):
         return "ok"
+
+    # 条件分岐: `x <= float(mixed_max)` を満たす経路を評価する。
+
     if x <= float(mixed_max):
         return "mixed"
+
     return "ng"
 
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)
     except Exception:
         return None
@@ -125,6 +148,7 @@ def _load_from_metrics(d: Dict[str, Any], *, source_json: str) -> Optional[Wedge
     params = d.get("params", {}) if isinstance(d.get("params", {}), dict) else {}
     derived = d.get("derived", {}) if isinstance(d.get("derived", {}), dict) else {}
     wedges = derived.get("bao_wedges", {}) if isinstance(derived.get("bao_wedges", {}), dict) else {}
+    # 条件分岐: `not wedges.get("enabled", False)` を満たす経路を評価する。
     if not wedges.get("enabled", False):
         return None
 
@@ -170,20 +194,29 @@ def _load_from_metrics(d: Dict[str, Any], *, source_json: str) -> Optional[Wedge
 
 def _infer_npz_path(metrics_path: Path, d: Dict[str, Any]) -> Optional[Path]:
     outputs = d.get("outputs", {}) if isinstance(d.get("outputs", {}), dict) else {}
+    # 条件分岐: `isinstance(outputs, dict) and outputs.get("npz")` を満たす経路を評価する。
     if isinstance(outputs, dict) and outputs.get("npz"):
         return _resolve_path_like(outputs.get("npz"))
+
+    # 条件分岐: `str(metrics_path).endswith("_metrics.json")` を満たす経路を評価する。
+
     if str(metrics_path).endswith("_metrics.json"):
         return Path(str(metrics_path)[: -len("_metrics.json")] + ".npz")
+
     return None
 
 
 def _npz_scalar(arr: Any, key: str) -> Optional[float]:
     try:
+        # 条件分岐: `key not in arr` を満たす経路を評価する。
         if key not in arr:
             return None
+
         v = arr[key]
+        # 条件分岐: `isinstance(v, np.ndarray)` を満たす経路を評価する。
         if isinstance(v, np.ndarray):
             v = v.reshape(-1)[0]
+
         return float(v)
     except Exception:
         return None
@@ -201,17 +234,23 @@ def _load_from_npz(metrics_path: Path, d: Dict[str, Any], *, mu_split_default: f
     z_cut = params.get("z_cut", {}) if isinstance(params.get("z_cut", {}), dict) else {}
     z_bin = str(z_cut.get("bin", "none"))
     z_eff = _safe_float(derived.get("z_eff_gal_weighted"))
+    # 条件分岐: `z_eff is None` を満たす経路を評価する。
     if z_eff is None:
         return None
 
     mu_bins = params.get("mu_bins", {}) if isinstance(params.get("mu_bins", {}), dict) else {}
     mu_max = _safe_float(mu_bins.get("mu_max", 1.0))
+    # 条件分岐: `mu_max is None` を満たす経路を評価する。
     if mu_max is None:
         mu_max = 1.0
+
+    # 条件分岐: `abs(float(mu_max) - 1.0) > 1e-6` を満たす経路を評価する。
+
     if abs(float(mu_max) - 1.0) > 1e-6:
         return None
 
     npz_path = _infer_npz_path(metrics_path, d)
+    # 条件分岐: `not npz_path or not npz_path.exists()` を満たす経路を評価する。
     if not npz_path or not npz_path.exists():
         return None
 
@@ -221,33 +260,61 @@ def _load_from_npz(metrics_path: Path, d: Dict[str, Any], *, mu_split_default: f
             xi0 = np.asarray(arr["xi0"], dtype=float)
             xi2 = np.asarray(arr["xi2"], dtype=float)
 
+            # 条件分岐: `xi0.ndim == 2 and xi0.shape[0] == 1` を満たす経路を評価する。
             if xi0.ndim == 2 and xi0.shape[0] == 1:
                 xi0 = xi0.reshape(-1)
+
+            # 条件分岐: `xi2.ndim == 2 and xi2.shape[0] == 1` を満たす経路を評価する。
+
             if xi2.ndim == 2 and xi2.shape[0] == 1:
                 xi2 = xi2.reshape(-1)
+
+            # 条件分岐: `xi0.ndim != 1 or xi2.ndim != 1` を満たす経路を評価する。
+
             if xi0.ndim != 1 or xi2.ndim != 1:
                 return None
+
+            # 条件分岐: `(xi0.size != s.size) or (xi2.size != s.size)` を満たす経路を評価する。
+
             if (xi0.size != s.size) or (xi2.size != s.size):
                 return None
 
             mu_split = _safe_float(mu_bins.get("mu_split"))
+            # 条件分岐: `mu_split is None` を満たす経路を評価する。
             if mu_split is None:
                 mu_split = _npz_scalar(arr, "mu_split")
+
+            # 条件分岐: `mu_split is None` を満たす経路を評価する。
+
             if mu_split is None:
                 mu_split = float(mu_split_default)
+
+            # 条件分岐: `not (0.0 < float(mu_split) < 1.0)` を満たす経路を評価する。
+
             if not (0.0 < float(mu_split) < 1.0):
                 return None
 
             # Prefer stored wedges if present.
+
             if ("xi_wedge_transverse" in arr) and ("xi_wedge_radial" in arr):
                 xi_perp = np.asarray(arr["xi_wedge_transverse"], dtype=float)
                 xi_par = np.asarray(arr["xi_wedge_radial"], dtype=float)
+                # 条件分岐: `xi_perp.ndim == 2 and xi_perp.shape[0] == 1` を満たす経路を評価する。
                 if xi_perp.ndim == 2 and xi_perp.shape[0] == 1:
                     xi_perp = xi_perp.reshape(-1)
+
+                # 条件分岐: `xi_par.ndim == 2 and xi_par.shape[0] == 1` を満たす経路を評価する。
+
                 if xi_par.ndim == 2 and xi_par.shape[0] == 1:
                     xi_par = xi_par.reshape(-1)
+
+                # 条件分岐: `xi_perp.ndim != 1 or xi_par.ndim != 1` を満たす経路を評価する。
+
                 if xi_perp.ndim != 1 or xi_par.ndim != 1:
                     return None
+
+                # 条件分岐: `(xi_perp.size != s.size) or (xi_par.size != s.size)` を満たす経路を評価する。
+
                 if (xi_perp.size != s.size) or (xi_par.size != s.size):
                     return None
             else:
@@ -259,6 +326,7 @@ def _load_from_npz(metrics_path: Path, d: Dict[str, Any], *, mu_split_default: f
                 peak_par = _estimate_bao_peak_s2_xi(s=s, xi=xi_par)
             except Exception:
                 return None
+
             s_perp = float(peak_perp.get("s_peak"))
             s_par = float(peak_par.get("s_peak"))
     except Exception:
@@ -296,11 +364,17 @@ def _load_points(paths: Iterable[Path], *, mu_split_default: float) -> List[Wedg
             d = json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             continue
+
         pt = _load_from_metrics(d, source_json=str(p))
+        # 条件分岐: `pt is None` を満たす経路を評価する。
         if pt is None:
             pt = _load_from_npz(p, d, mu_split_default=mu_split_default)
+
+        # 条件分岐: `pt is not None` を満たす経路を評価する。
+
         if pt is not None:
             out.append(pt)
+
     return out
 
 
@@ -308,15 +382,19 @@ def _group(points: List[WedgePoint]) -> Dict[Tuple[str, str, str], List[WedgePoi
     g: Dict[Tuple[str, str, str], List[WedgePoint]] = {}
     for p in points:
         g.setdefault((p.sample, p.caps, p.dist), []).append(p)
+
     for k in list(g):
         g[k] = sorted(g[k], key=lambda x: x.z_eff)
+
     return g
 
 
 def _drift(values: List[float]) -> Dict[str, float]:
     a = np.asarray(list(values), dtype=np.float64)
+    # 条件分岐: `a.size == 0` を満たす経路を評価する。
     if a.size == 0:
         return {"n": 0, "mean": float("nan"), "std": float("nan"), "span": float("nan")}
+
     return {
         "n": int(a.size),
         "mean": float(np.mean(a)),
@@ -347,18 +425,28 @@ def main(argv: list[str] | None = None) -> int:
     pts = _load_points(paths, mu_split_default=float(args.mu_split))
 
     sample_f = str(args.sample).strip().lower()
+    # 条件分岐: `sample_f` を満たす経路を評価する。
     if sample_f:
         pts = [p for p in pts if p.sample.lower() == sample_f]
+
     caps_f = str(args.caps).strip().lower()
+    # 条件分岐: `caps_f` を満たす経路を評価する。
     if caps_f:
         pts = [p for p in pts if p.caps.lower() == caps_f]
+
     out_tag_f = str(args.out_tag).strip()
+    # 条件分岐: `out_tag_f == "none"` を満たす経路を評価する。
     if out_tag_f == "none":
         pts = [p for p in pts if p.out_tag is None]
+    # 条件分岐: 前段条件が不成立で、`out_tag_f == "any"` を追加評価する。
     elif out_tag_f == "any":
         pts = [p for p in pts if p.out_tag is not None]
+    # 条件分岐: 前段条件が不成立で、`out_tag_f` を追加評価する。
     elif out_tag_f:
         pts = [p for p in pts if (p.out_tag == out_tag_f)]
+
+    # 条件分岐: `bool(args.require_zbin)` を満たす経路を評価する。
+
     if bool(args.require_zbin):
         pts = [p for p in pts if p.z_bin != "none"]
 
@@ -369,8 +457,10 @@ def main(argv: list[str] | None = None) -> int:
     # Keep the default output names stable for run_all (which may pass sample/caps filters).
     # Only add a suffix when out_tag is explicitly non-default to avoid clobbering baseline outputs.
     suffix = ""
+    # 条件分岐: `out_tag_f == "any"` を満たす経路を評価する。
     if out_tag_f == "any":
         suffix = "__outtag_any"
+    # 条件分岐: 前段条件が不成立で、`out_tag_f not in ("none", "any") and out_tag_f` を追加評価する。
     elif out_tag_f not in ("none", "any") and out_tag_f:
         suffix = f"__{out_tag_f}"
 
@@ -392,6 +482,7 @@ def main(argv: list[str] | None = None) -> int:
         rel = [p for p in xs if bool(getattr(p, "reliable", True))]
         unrel = [p for p in xs if not bool(getattr(p, "reliable", True))]
 
+        # 条件分岐: `rel` を満たす経路を評価する。
         if rel:
             z_rel = [p.z_eff for p in rel]
             delta_rel = [p.delta_s for p in rel]
@@ -399,10 +490,13 @@ def main(argv: list[str] | None = None) -> int:
             ax1.plot(z_rel, delta_rel, marker=base_marker, color=color, linewidth=1.8, markersize=6, label=label)
             ax2.plot(z_rel, ratio_rel, marker=base_marker, color=color, linewidth=1.8, markersize=6, label=label)
 
+        # 条件分岐: `unrel` を満たす経路を評価する。
+
         if unrel:
             z_u = [p.z_eff for p in unrel]
             delta_u = [p.delta_s for p in unrel]
             ratio_u = [p.ratio for p in unrel]
+            # 条件分岐: `rel` を満たす経路を評価する。
             if rel:
                 ax1.scatter(z_u, delta_u, marker="x", color=color, s=45, alpha=0.6)
                 ax2.scatter(z_u, ratio_u, marker="x", color=color, s=45, alpha=0.6)
@@ -423,14 +517,25 @@ def main(argv: list[str] | None = None) -> int:
     ax2.legend(fontsize=9, loc="best")
 
     title_suffix = ""
+    # 条件分岐: `sample_f` を満たす経路を評価する。
     if sample_f:
         title_suffix += f" sample={sample_f}"
+
+    # 条件分岐: `caps_f` を満たす経路を評価する。
+
     if caps_f:
         title_suffix += f" caps={caps_f}"
+
+    # 条件分岐: `out_tag_f != "none"` を満たす経路を評価する。
+
     if out_tag_f != "none":
         title_suffix += f" out_tag={out_tag_f or 'none'}"
+
+    # 条件分岐: `args.require_zbin` を満たす経路を評価する。
+
     if args.require_zbin:
         title_suffix += " zbin_only"
+
     fig.suptitle(f"BAO wedge anisotropy (catalog-based ξℓ){title_suffix}", fontsize=13)
     fig.tight_layout(rect=(0.0, 0.02, 1.0, 0.94))
     fig.savefig(out_png, dpi=200)
@@ -511,6 +616,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

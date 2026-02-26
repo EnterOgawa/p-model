@@ -24,14 +24,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -40,8 +44,11 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -56,12 +63,15 @@ def _parse_value_cell(html_text: str, *, label: str) -> tuple[Decimal, str, str]
     Returns (value, unit, raw_text).
     """
     m = re.search(rf"{re.escape(label)}\s*</TD>\s*<TD[^>]*>(.*?)</TD>", html_text, flags=re.I | re.S)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"missing row: {label}")
+
     cell_html = m.group(1)
     cell_txt = _strip_tags(html_lib.unescape(cell_html))
     cell_txt = " ".join(cell_txt.split())
 
+    # 条件分岐: `"x 10" in cell_txt` を満たす経路を評価する。
     if "x 10" in cell_txt:
         left, right = cell_txt.split("x 10", 1)
         num = Decimal(re.sub(r"\s+", "", left.strip()))
@@ -81,18 +91,22 @@ def _parse_value_cell(html_text: str, *, label: str) -> tuple[Decimal, str, str]
 def _extract_constant(html_text: str, *, expected_codata_year: int | None) -> dict[str, object]:
     # Example: <title>CODATA Value:    proton mass</title>
     mt = re.search(r"<title>\s*CODATA Value:\s*(.*?)</title>", html_text, flags=re.I | re.S)
+    # 条件分岐: `not mt` を満たす経路を評価する。
     if not mt:
         raise ValueError("missing <title> constant name")
+
     name = " ".join(_strip_tags(html_lib.unescape(mt.group(1))).split()).strip()
 
     ms = re.search(r"Source:\s*(\d{4})\s*CODATA", html_text, flags=re.I)
     codata_year = int(ms.group(1)) if ms else None
+    # 条件分岐: `expected_codata_year is not None and codata_year is not None and codata_year...` を満たす経路を評価する。
     if expected_codata_year is not None and codata_year is not None and codata_year != expected_codata_year:
         raise ValueError(f"CODATA year mismatch: got {codata_year}, expected {expected_codata_year}")
 
     value, unit_value, raw_value = _parse_value_cell(html_text, label="Value")
     sigma, unit_sigma, raw_sigma = _parse_value_cell(html_text, label="Standard uncertainty")
     unit = unit_value.strip() if unit_value.strip() else unit_sigma.strip()
+    # 条件分岐: `unit_sigma.strip() and unit_value.strip() and unit_sigma.strip() != unit_valu...` を満たす経路を評価する。
     if unit_sigma.strip() and unit_value.strip() and unit_sigma.strip() != unit_value.strip():
         raise ValueError(f"unit mismatch: value unit={unit_value!r} vs sigma unit={unit_sigma!r}")
 
@@ -150,6 +164,7 @@ def main() -> None:
         ConstantSpec(code="md", url=f"{base}?md", relpath="nist_cuu_Value_md.html"),
         ConstantSpec(code="rd", url=f"{base}?rd", relpath="nist_cuu_Value_rd.html"),
     ]
+    # 条件分岐: `args.include_light_nuclei` を満たす経路を評価する。
     if args.include_light_nuclei:
         specs.extend(
             [
@@ -161,6 +176,8 @@ def main() -> None:
             ]
         )
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
+
     if not args.offline:
         for spec in specs:
             _download(spec.url, src_dir / spec.relpath)
@@ -169,9 +186,11 @@ def main() -> None:
     extracted: dict[str, object] = {}
     for spec in specs:
         path = src_dir / spec.relpath
+        # 条件分岐: `not path.exists() or path.stat().st_size == 0` を満たす経路を評価する。
         if not path.exists() or path.stat().st_size == 0:
             missing.append(path)
             continue
+
         html_text = path.read_text(encoding="utf-8", errors="replace")
         extracted[spec.code] = {
             "url": spec.url,
@@ -179,6 +198,8 @@ def main() -> None:
             "local_sha256": _sha256(path),
             **_extract_constant(html_text, expected_codata_year=expected_year_opt),
         }
+
+    # 条件分岐: `missing` を満たす経路を評価する。
 
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
@@ -219,6 +240,7 @@ def main() -> None:
         manifest["files"].append(
             {"url": spec.url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
         )
+
     manifest["files"].append(
         {
             "url": None,
@@ -234,6 +256,8 @@ def main() -> None:
     print(f"[ok] extracted: {out_extracted}")
     print(f"[ok] manifest : {out_manifest}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

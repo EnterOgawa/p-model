@@ -62,16 +62,20 @@ _LEAP_TABLE: list[tuple[datetime, int]] = [
 
 
 def tai_minus_utc_seconds(dt_utc: datetime) -> int:
+    # 条件分岐: `dt_utc.tzinfo is None` を満たす経路を評価する。
     if dt_utc.tzinfo is None:
         raise ValueError("dt_utc must be timezone-aware (UTC)")
+
     dt = dt_utc.astimezone(timezone.utc)
     # Find the last entry with effective <= dt
     out = _LEAP_TABLE[0][1]
     for eff, val in _LEAP_TABLE:
+        # 条件分岐: `dt >= eff` を満たす経路を評価する。
         if dt >= eff:
             out = val
         else:
             break
+
     return int(out)
 
 
@@ -127,6 +131,7 @@ def _f_d(s: str) -> float:
 
 def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> HarposModel:
     keep: Optional[set[str]] = None
+    # 条件分岐: `keep_sites is not None` を満たす経路を評価する。
     if keep_sites is not None:
         keep = {str(k).strip() for k in keep_sites if str(k).strip()}
 
@@ -136,33 +141,47 @@ def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> H
     validity_radius_m = float("nan")
 
     for raw in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        # 条件分岐: `not raw` を満たす経路を評価する。
         if not raw:
             continue
+
+        # 条件分岐: `raw.startswith("#")` を満たす経路を評価する。
+
         if raw.startswith("#"):
             continue
+
         line = raw.rstrip("\n")
+        # 条件分岐: `not line.strip()` を満たす経路を評価する。
         if not line.strip():
             continue
 
         # Header/trailer (HARPOS ...) or other descriptive lines
+
         if line.startswith("HARPOS"):
             continue
 
         rec = line[:1]
+        # 条件分岐: `rec == "A"` を満たす経路を評価する。
         if rec == "A":
             # Validity radius line: "A  3000.000000"
             toks = line.split()
+            # 条件分岐: `len(toks) >= 2` を満たす経路を評価する。
             if len(toks) >= 2:
                 try:
                     validity_radius_m = float(toks[1])
                 except Exception:
                     pass
+
             continue
+
+        # 条件分岐: `rec == "H"` を満たす経路を評価する。
 
         if rec == "H":
             toks = line.split()
+            # 条件分岐: `len(toks) < 5` を満たす経路を評価する。
             if len(toks) < 5:
                 continue
+
             name = toks[1].strip()
             harmonics[name] = HarmonicDef(
                 phase_rad=_f_d(toks[2]),
@@ -171,27 +190,41 @@ def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> H
             )
             continue
 
+        # 条件分岐: `rec == "S"` を満たす経路を評価する。
+
         if rec == "S":
             toks = line.split()
+            # 条件分岐: `len(toks) < 5` を満たす経路を評価する。
             if len(toks) < 5:
                 continue
+
             site = toks[1].strip()
             try:
                 sites[site] = SiteDef(x_m=float(toks[2]), y_m=float(toks[3]), z_m=float(toks[4]))
             except Exception:
                 continue
+
             continue
+
+        # 条件分岐: `rec == "D"` を満たす経路を評価する。
 
         if rec == "D":
             toks = line.split()
+            # 条件分岐: `len(toks) < 9` を満たす経路を評価する。
             if len(toks) < 9:
                 continue
+
             harm = toks[1].strip()
             site = toks[2].strip()
+            # 条件分岐: `keep is not None and site not in keep` を満たす経路を評価する。
             if keep is not None and site not in keep:
                 continue
+
+            # 条件分岐: `site not in coeffs` を満たす経路を評価する。
+
             if site not in coeffs:
                 coeffs[site] = {}
+
             try:
                 coeffs[site][harm] = UENCoef(
                     up_cos_m=float(toks[3]),
@@ -203,6 +236,7 @@ def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> H
                 )
             except Exception:
                 continue
+
             continue
 
         # Ignore unknown record types
@@ -211,10 +245,13 @@ def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> H
         validity_radius_m = 0.0
 
     # Ensure sites exist for all kept coeff sites (best-effort).
+
     for site in list(coeffs.keys()):
+        # 条件分岐: `site in sites` を満たす経路を評価する。
         if site in sites:
             continue
         # Not fatal: the caller may still use displacement (UEN) without coordinates.
+
         sites[site] = SiteDef(x_m=float("nan"), y_m=float("nan"), z_m=float("nan"))
 
     return HarposModel(path=path, validity_radius_m=float(validity_radius_m), harmonics=harmonics, sites=sites, coeffs=coeffs)
@@ -224,15 +261,19 @@ def best_site_by_ecef(model: HarposModel, *, x_m: float, y_m: float, z_m: float)
     best_site: Optional[str] = None
     best_dist = float("inf")
     for sid, s in model.sites.items():
+        # 条件分岐: `not (math.isfinite(s.x_m) and math.isfinite(s.y_m) and math.isfinite(s.z_m))` を満たす経路を評価する。
         if not (math.isfinite(s.x_m) and math.isfinite(s.y_m) and math.isfinite(s.z_m)):
             continue
+
         dx = float(s.x_m - x_m)
         dy = float(s.y_m - y_m)
         dz = float(s.z_m - z_m)
         d = math.sqrt(dx * dx + dy * dy + dz * dz)
+        # 条件分岐: `d < best_dist` を満たす経路を評価する。
         if d < best_dist:
             best_dist = d
             best_site = sid
+
     return best_site, float(best_dist)
 
 
@@ -242,6 +283,7 @@ def displacement_uen_m(model: HarposModel, *, site_id: str, dt_utc: datetime) ->
     """
     sid = str(site_id).strip()
     site_coeffs = model.coeffs.get(sid)
+    # 条件分岐: `not site_coeffs` を満たす経路を評価する。
     if not site_coeffs:
         return 0.0, 0.0, 0.0
 
@@ -252,8 +294,10 @@ def displacement_uen_m(model: HarposModel, *, site_id: str, dt_utc: datetime) ->
 
     for harm, c in site_coeffs.items():
         hdef = model.harmonics.get(harm)
+        # 条件分岐: `hdef is None` を満たす経路を評価する。
         if hdef is None:
             continue
+
         theta = hdef.phase_rad + hdef.freq_rad_s * t + 0.5 * hdef.accel_rad_s2 * t * t
         ct = math.cos(theta)
         st = math.sin(theta)

@@ -22,6 +22,7 @@ import numpy as np
 import pandas as pd
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -41,14 +42,17 @@ def _to_float(x: Any) -> float:
         v = float(x)
     except Exception:
         return float("nan")
+
     return v if math.isfinite(v) else float("nan")
 
 
 def _rms(arr: Iterable[float]) -> float:
     a = np.asarray(list(arr), dtype=float)
     a = a[np.isfinite(a)]
+    # 条件分岐: `len(a) == 0` を満たす経路を評価する。
     if len(a) == 0:
         return float("nan")
+
     return float(np.sqrt(np.mean(a * a)))
 
 
@@ -61,21 +65,28 @@ def _safe_rel(path: Path, root: Path) -> str:
 
 def _read_record11_meta(path: Path, line_numbers: Sequence[int]) -> Dict[int, Dict[str, float]]:
     need = set(int(v) for v in line_numbers if v is not None and np.isfinite(float(v)))
+    # 条件分岐: `not need` を満たす経路を評価する。
     if not need:
         return {}
+
     out: Dict[int, Dict[str, float]] = {}
     with path.open("r", encoding="utf-8", errors="replace") as f:
         for lineno, raw in enumerate(f, start=1):
+            # 条件分岐: `lineno not in need` を満たす経路を評価する。
             if lineno not in need:
                 continue
+
             toks = raw.strip().split()
+            # 条件分岐: `not toks or toks[0] != "11"` を満たす経路を評価する。
             if not toks or toks[0] != "11":
                 continue
+
             out[int(lineno)] = {
                 "np_window_s": _to_float(toks[5]) if len(toks) > 5 else float("nan"),
                 "np_n_raw_ranges": _to_float(toks[6]) if len(toks) > 6 else float("nan"),
                 "np_bin_rms_ps": _to_float(toks[7]) if len(toks) > 7 else float("nan"),
             }
+
     return out
 
 
@@ -92,19 +103,25 @@ def _augment_points_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
     cache: Dict[str, Dict[int, Dict[str, float]]] = {}
     for src, g in grouped:
         p = (root / Path(str(src))).resolve()
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         ln = pd.to_numeric(g["lineno"], errors="coerce").dropna().astype(int).tolist()
         cache[str(src)] = _read_record11_meta(p, ln)
 
     for pos, row in enumerate(out.itertuples(index=False)):
         src = str(getattr(row, "source_file", ""))
         ln = getattr(row, "lineno", float("nan"))
+        # 条件分岐: `not (src and np.isfinite(_to_float(ln)))` を満たす経路を評価する。
         if not (src and np.isfinite(_to_float(ln))):
             continue
+
         rec = cache.get(src, {}).get(int(float(ln)))
+        # 条件分岐: `rec is None` を満たす経路を評価する。
         if rec is None:
             continue
+
         np_window[pos] = _to_float(rec.get("np_window_s"))
         np_n_raw[pos] = _to_float(rec.get("np_n_raw_ranges"))
         np_bin_rms[pos] = _to_float(rec.get("np_bin_rms_ps"))
@@ -118,8 +135,10 @@ def _augment_points_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
 
 def _weighted_rms_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
     ok = np.isfinite(values_ns) & np.isfinite(sigma_ps) & (sigma_ps > 0)
+    # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
     if not np.any(ok):
         return float("nan")
+
     y = values_ns[ok]
     w = 1.0 / np.maximum((sigma_ps[ok] / 1000.0) ** 2, 1e-24)
     return float(np.sqrt(np.sum(w * y * y) / np.sum(w)))
@@ -127,8 +146,10 @@ def _weighted_rms_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
 
 def _solve_model_floor_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
     ok = np.isfinite(values_ns) & np.isfinite(sigma_ps) & (sigma_ps > 0)
+    # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
     if not np.any(ok):
         return float("nan")
+
     y_ps = values_ns[ok] * 1000.0
     s2 = sigma_ps[ok] ** 2
     r2 = y_ps ** 2
@@ -137,10 +158,12 @@ def _solve_model_floor_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
     for _ in range(120):
         mid = 0.5 * (lo + hi)
         chi = float(np.mean(r2 / np.maximum(s2 + mid * mid, 1e-24)))
+        # 条件分岐: `chi > 1.0` を満たす経路を評価する。
         if chi > 1.0:
             lo = mid
         else:
             hi = mid
+
     return float(hi / 1000.0)
 
 
@@ -150,30 +173,38 @@ def _fit_bias_model_ns(
     use_station: bool,
     use_target: bool,
 ) -> Dict[str, Any]:
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         return {"ok": False, "reason": "empty"}
+
     work = df.copy()
     work["residual_ns"] = pd.to_numeric(work.get("residual_sr_tropo_tide_ns"), errors="coerce")
     work["sigma_ps"] = pd.to_numeric(work.get("np_bin_rms_ps"), errors="coerce")
     work["station"] = work.get("station", pd.Series(dtype=str)).astype(str).str.strip().str.upper()
     work["target"] = work.get("target", pd.Series(dtype=str)).astype(str).str.strip().str.lower()
     work = work[np.isfinite(work["residual_ns"]) & np.isfinite(work["sigma_ps"]) & (work["sigma_ps"] > 0)].copy()
+    # 条件分岐: `work.empty` を満たす経路を評価する。
     if work.empty:
         return {"ok": False, "reason": "no_valid_rows"}
 
     cols: List[np.ndarray] = [np.ones((len(work),), dtype=float)]
     col_names: List[str] = ["intercept"]
 
+    # 条件分岐: `use_station` を満たす経路を評価する。
     if use_station:
         st_levels = sorted(work["station"].dropna().unique().tolist())
+        # 条件分岐: `len(st_levels) >= 2` を満たす経路を評価する。
         if len(st_levels) >= 2:
             ref_st = str(st_levels[0])
             for st in st_levels[1:]:
                 cols.append((work["station"] == st).to_numpy(dtype=float))
                 col_names.append(f"station:{st}")
 
+    # 条件分岐: `use_target` を満たす経路を評価する。
+
     if use_target:
         tg_levels = sorted(work["target"].dropna().unique().tolist())
+        # 条件分岐: `len(tg_levels) >= 2` を満たす経路を評価する。
         if len(tg_levels) >= 2:
             ref_tg = str(tg_levels[0])
             for tg in tg_levels[1:]:
@@ -203,19 +234,25 @@ def _fit_bias_model_ns(
 
 def _safe_corr_np(a: np.ndarray, b: np.ndarray) -> float:
     ok = np.isfinite(a) & np.isfinite(b)
+    # 条件分岐: `int(np.sum(ok)) < 3` を満たす経路を評価する。
     if int(np.sum(ok)) < 3:
         return float("nan")
+
     aa = a[ok]
     bb = b[ok]
+    # 条件分岐: `float(np.std(aa)) <= 0.0 or float(np.std(bb)) <= 0.0` を満たす経路を評価する。
     if float(np.std(aa)) <= 0.0 or float(np.std(bb)) <= 0.0:
         return float("nan")
+
     return float(np.corrcoef(aa, bb)[0, 1])
 
 
 def _fit_linear_with_intercept(y: np.ndarray, x: np.ndarray) -> Tuple[float, float, float, float]:
     ok = np.isfinite(y) & np.isfinite(x)
+    # 条件分岐: `int(np.sum(ok)) < 3` を満たす経路を評価する。
     if int(np.sum(ok)) < 3:
         return float("nan"), float("nan"), float("nan"), float("nan")
+
     yy = y[ok]
     xx = x[ok]
     A = np.column_stack([np.ones_like(xx), xx])
@@ -236,10 +273,14 @@ def _prepare_operational_correction_frame(df: pd.DataFrame) -> pd.DataFrame:
     work["dt_tropo_ns"] = pd.to_numeric(work.get("dt_tropo_ns"), errors="coerce")
     work["station"] = work.get("station", pd.Series(dtype=str)).astype(str).str.strip().str.upper()
     work["target"] = work.get("target", pd.Series(dtype=str)).astype(str).str.strip().str.lower()
+    # 条件分岐: `"epoch_utc" in work.columns` を満たす経路を評価する。
     if "epoch_utc" in work.columns:
         work["epoch_utc"] = pd.to_datetime(work["epoch_utc"], utc=True, errors="coerce")
     else:
         work["epoch_utc"] = pd.NaT
+
+    # 条件分岐: `"year_month" in work.columns` を満たす経路を評価する。
+
     if "year_month" in work.columns:
         ym = work.get("year_month", pd.Series(dtype=str)).astype(str).str.strip()
         ym_bad = ym.eq("") | ym.eq("nan") | ym.eq("NaT")
@@ -247,6 +288,7 @@ def _prepare_operational_correction_frame(df: pd.DataFrame) -> pd.DataFrame:
         work["year_month"] = np.where(ym_bad, ym_from_epoch, ym)
     else:
         work["year_month"] = work["epoch_utc"].dt.strftime("%Y-%m")
+
     work["year_month"] = work["year_month"].astype(str).str.strip()
     work["year_month"] = work["year_month"].replace({"NaT": "", "nan": "", "None": ""})
     work = work[np.isfinite(work["residual_ns"])].copy().reset_index(drop=True)
@@ -260,6 +302,7 @@ def _apply_operational_systematic_corrections(
 ) -> Dict[str, Any]:
     work = _prepare_operational_correction_frame(df)
     n_rows = int(len(work))
+    # 条件分岐: `work.empty` を満たす経路を評価する。
     if work.empty:
         return {
             "n_rows": 0,
@@ -279,14 +322,17 @@ def _apply_operational_systematic_corrections(
     n_apol_corrected_points = 0
 
     apol = work[work["station"] == "APOL"].copy()
+    # 条件分岐: `not apol.empty` を満たす経路を評価する。
     if not apol.empty:
         for tg, g in apol.groupby("target", dropna=False):
             x_all = g["dt_tropo_ns"].to_numpy(dtype=float)
             y_all = g["residual_ns"].to_numpy(dtype=float)
             ok = np.isfinite(x_all) & np.isfinite(y_all)
             n_ok = int(np.sum(ok))
+            # 条件分岐: `n_ok < int(apol_min_points)` を満たす経路を評価する。
             if n_ok < int(apol_min_points):
                 continue
+
             intercept, slope, corr, r2 = _fit_linear_with_intercept(y_all[ok], x_all[ok])
             idx = g.index.to_numpy()[ok]
             pred = intercept + slope * x_all[ok]
@@ -302,6 +348,7 @@ def _apply_operational_systematic_corrections(
                     "r2": r2,
                 }
             )
+
     apol_models.sort(key=lambda x: abs(_to_float(x.get("slope_ns_per_ns"))), reverse=True)
 
     gmask = (
@@ -314,6 +361,7 @@ def _apply_operational_systematic_corrections(
     residual_combined = residual_apol.copy()
     n_grsm_points = 0
     n_grsm_bins = 0
+    # 条件分岐: `bool(np.any(gmask.to_numpy(dtype=bool)))` を満たす経路を評価する。
     if bool(np.any(gmask.to_numpy(dtype=bool))):
         sub = work.loc[gmask, ["station", "target", "year_month"]].copy()
         sub["residual_raw"] = residual_raw[gmask.to_numpy(dtype=bool)]
@@ -350,6 +398,7 @@ def _apply_operational_systematic_corrections(
 def _collect_manifest_diagnostics(root: Path, manifest_path: Path) -> Dict[str, Any]:
     manifest = _read_json(manifest_path)
     file_recs = manifest.get("files") or []
+    # 条件分岐: `not isinstance(file_recs, list)` を満たす経路を評価する。
     if not isinstance(file_recs, list):
         raise RuntimeError(f"manifest.files is not list: {manifest_path}")
 
@@ -363,14 +412,18 @@ def _collect_manifest_diagnostics(root: Path, manifest_path: Path) -> Dict[str, 
 
     for rec in file_recs:
         rel = rec.get("cached_path")
+        # 条件分岐: `not rel` を満たす経路を評価する。
         if not rel:
             continue
+
         p = (root / str(rel)).resolve()
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             missing_files += 1
             continue
 
         df = llr.parse_crd_npt11(p, assume_two_way_if_missing=True)
+        # 条件分岐: `df.empty` を満たす経路を評価する。
         if df.empty:
             continue
 
@@ -403,6 +456,7 @@ def _collect_manifest_diagnostics(root: Path, manifest_path: Path) -> Dict[str, 
         )
         target_counts.update(tg)
 
+        # 条件分岐: `"epoch_utc" in df.columns` を満たす経路を評価する。
         if "epoch_utc" in df.columns:
             e = pd.to_datetime(df["epoch_utc"], utc=True, errors="coerce")
             ys = e.dt.year.dropna().astype(int).tolist()
@@ -421,9 +475,12 @@ def _collect_manifest_diagnostics(root: Path, manifest_path: Path) -> Dict[str, 
 
 
 def _load_batch_metrics(metrics_csv: Path) -> Dict[str, Any]:
+    # 条件分岐: `not metrics_csv.exists()` を満たす経路を評価する。
     if not metrics_csv.exists():
         return {"exists": False}
+
     df = pd.read_csv(metrics_csv)
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         return {"exists": True, "n_groups": 0}
 
@@ -433,6 +490,7 @@ def _load_batch_metrics(metrics_csv: Path) -> Dict[str, Any]:
     median_group = float(np.nanmedian(rms_col.to_numpy(dtype=float))) if len(df) else float("nan")
     weighted_all = float("nan")
     ok = np.isfinite(rms_col.to_numpy(dtype=float)) & np.isfinite(n_col.to_numpy(dtype=float)) & (n_col.to_numpy(dtype=float) > 0)
+    # 条件分岐: `np.any(ok)` を満たす経路を評価する。
     if np.any(ok):
         rv = rms_col.to_numpy(dtype=float)[ok]
         nv = n_col.to_numpy(dtype=float)[ok]
@@ -460,13 +518,17 @@ def _load_batch_metrics(metrics_csv: Path) -> Dict[str, Any]:
 
 
 def _group_weighted_rms(df: pd.DataFrame, rms_col: str) -> float:
+    # 条件分岐: `df.empty or rms_col not in df.columns` を満たす経路を評価する。
     if df.empty or rms_col not in df.columns:
         return float("nan")
+
     rms = pd.to_numeric(df[rms_col], errors="coerce").to_numpy(dtype=float)
     n = pd.to_numeric(df.get("n"), errors="coerce").to_numpy(dtype=float)
     ok = np.isfinite(rms) & np.isfinite(n) & (n > 0)
+    # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
     if not np.any(ok):
         return float("nan")
+
     return float(np.sqrt(np.sum(n[ok] * rms[ok] * rms[ok]) / np.sum(n[ok])))
 
 
@@ -481,11 +543,14 @@ def _build_root_cause_decomposition(
     pwr = summary.get("point_weighted_rms_ns") if isinstance(summary.get("point_weighted_rms_ns"), dict) else {}
 
     df = pd.DataFrame()
+    # 条件分岐: `metrics_csv.exists()` を満たす経路を評価する。
     if metrics_csv.exists():
         try:
             df = pd.read_csv(metrics_csv)
         except Exception:
             df = pd.DataFrame()
+
+    # 条件分岐: `not df.empty` を満たす経路を評価する。
 
     if not df.empty:
         df = df.copy()
@@ -498,6 +563,7 @@ def _build_root_cause_decomposition(
             "rms_sr_tropo_earth_shapiro_ns",
             "rms_sr_tropo_tide_no_ocean_ns",
         ]:
+            # 条件分岐: `col in df.columns` を満たす経路を評価する。
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
@@ -506,8 +572,10 @@ def _build_root_cause_decomposition(
 
     def _weighted(key: str, col: str) -> float:
         v = _to_float(pwr.get(key))
+        # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
         if np.isfinite(v):
             return float(v)
+
         return _group_weighted_rms(df, col)
 
     ablation_median = {
@@ -552,8 +620,10 @@ def _build_root_cause_decomposition(
     total_gain_weighted = _to_float(ablation_weighted["station_reflector"]) - _to_float(ablation_weighted["station_reflector_tropo_tide"])
 
     def _safe_share(v: float, total: float) -> float:
+        # 条件分岐: `not (np.isfinite(v) and np.isfinite(total) and abs(total) > 0.0)` を満たす経路を評価する。
         if not (np.isfinite(v) and np.isfinite(total) and abs(total) > 0.0):
             return float("nan")
+
         return float(v / total)
 
     gain_share_median = {
@@ -584,8 +654,10 @@ def _build_root_cause_decomposition(
 
     def _excess_ns(v: float) -> float:
         vv = _to_float(v)
+        # 条件分岐: `not np.isfinite(vv)` を満たす経路を評価する。
         if not np.isfinite(vv):
             return float("nan")
+
         return float(max(vv - threshold_ns, 0.0))
 
     excess_over_4ns["ablation_median_excess_ns"] = {
@@ -601,10 +673,12 @@ def _build_root_cause_decomposition(
         "station_reflector_tropo_no_shapiro": _excess_ns(ablation_weighted.get("station_reflector_tropo_no_shapiro")),
     }
 
+    # 条件分岐: `not df.empty and "rms_sr_tropo_tide_ns" in df.columns` を満たす経路を評価する。
     if not df.empty and "rms_sr_tropo_tide_ns" in df.columns:
         use = df.copy()
         use["rms_sr_tropo_tide_ns"] = pd.to_numeric(use["rms_sr_tropo_tide_ns"], errors="coerce")
         use = use[np.isfinite(use["n"]) & (use["n"] > 0) & np.isfinite(use["rms_sr_tropo_tide_ns"])].copy()
+        # 条件分岐: `not use.empty` を満たす経路を評価する。
         if not use.empty:
             use["sse_tide"] = use["n"] * use["rms_sr_tropo_tide_ns"] * use["rms_sr_tropo_tide_ns"]
             use["sse_excess_4ns"] = use["n"] * np.maximum(
@@ -678,9 +752,11 @@ def _build_root_cause_decomposition(
                         "excess_share_over4ns": float(sse_ex / total_sse_excess) if (np.isfinite(sse_ex) and total_sse_excess > 0) else float("nan"),
                     }
                 )
+
             excess_over_4ns["top_group_excess_contributors"] = top_group_excess_rows
 
             use_no_nglr1 = use[use["target"].astype(str).str.lower() != "nglr1"].copy()
+            # 条件分岐: `not use_no_nglr1.empty` を満たす経路を評価する。
             if not use_no_nglr1.empty:
                 sse_no_nglr1 = float(np.sum(use_no_nglr1["sse_tide"].to_numpy(dtype=float)))
                 n_no_nglr1 = float(np.sum(use_no_nglr1["n"].to_numpy(dtype=float)))
@@ -690,6 +766,7 @@ def _build_root_cause_decomposition(
 
             grsm = use[use["station"].astype(str).str.upper() == "GRSM"]
             grsm_med = float(np.nanmedian(grsm["rms_sr_tropo_tide_ns"].to_numpy(dtype=float))) if not grsm.empty else float("nan")
+            # 条件分岐: `np.isfinite(grsm_med)` を満たす経路を評価する。
             if np.isfinite(grsm_med):
                 use_apol_capped = use.copy()
                 apol_mask = use_apol_capped["station"].astype(str).str.upper() == "APOL"
@@ -793,6 +870,7 @@ def _build_root_cause_decomposition(
 
     likely_causes: List[Dict[str, Any]] = []
     tropo_share = _to_float(gain_share_median.get("tropo_from_sr"))
+    # 条件分岐: `np.isfinite(tropo_share)` を満たす経路を評価する。
     if np.isfinite(tropo_share):
         likely_causes.append(
             {
@@ -808,6 +886,7 @@ def _build_root_cause_decomposition(
 
     bias_global_gain = _to_float(((points_diag.get("bias_model_global") or {}).get("weighted_gain_ns")))
     bias_modern_gain = _to_float(((points_diag.get("bias_model_modern_apol_target") or {}).get("weighted_gain_ns")))
+    # 条件分岐: `np.isfinite(bias_global_gain) or np.isfinite(bias_modern_gain)` を満たす経路を評価する。
     if np.isfinite(bias_global_gain) or np.isfinite(bias_modern_gain):
         likely_causes.append(
             {
@@ -823,6 +902,7 @@ def _build_root_cause_decomposition(
 
     station_counts = manifest_diag.get("station_counts") or {}
     total_station = float(sum(float(v) for v in station_counts.values())) if station_counts else 0.0
+    # 条件分岐: `total_station > 0` を満たす経路を評価する。
     if total_station > 0:
         dom_station, dom_count = max(station_counts.items(), key=lambda kv: float(kv[1]))
         dom_ratio = float(float(dom_count) / total_station)
@@ -836,6 +916,7 @@ def _build_root_cause_decomposition(
         )
 
     missing_pos = station_meta_diag.get("missing_pos_eop") if isinstance(station_meta_diag.get("missing_pos_eop"), list) else []
+    # 条件分岐: `missing_pos` を満たす経路を評価する。
     if missing_pos:
         likely_causes.append(
             {
@@ -847,6 +928,7 @@ def _build_root_cause_decomposition(
         )
 
     nglr1_row = next((r for r in target_rows if str(r.get("target", "")).lower() == "nglr1"), None)
+    # 条件分岐: `nglr1_row is not None` を満たす経路を評価する。
     if nglr1_row is not None:
         likely_causes.append(
             {
@@ -886,22 +968,26 @@ def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
     rows: List[Dict[str, Any]] = []
     for section in ["ablation_median_ns", "ablation_weighted_ns", "incremental_gain_median_ns", "incremental_gain_weighted_ns"]:
         block = root_cause.get(section)
+        # 条件分岐: `isinstance(block, dict)` を満たす経路を評価する。
         if isinstance(block, dict):
             for k, v in block.items():
                 rows.append({"type": "metric", "section": section, "id": str(k), "value": _to_float(v), "note": ""})
 
     for section in ["gain_share_median", "gain_share_weighted"]:
         block = root_cause.get(section)
+        # 条件分岐: `isinstance(block, dict)` を満たす経路を評価する。
         if isinstance(block, dict):
             for k, v in block.items():
                 rows.append({"type": "share", "section": section, "id": str(k), "value": _to_float(v), "note": ""})
 
     block = root_cause.get("bottleneck_scenarios")
+    # 条件分岐: `isinstance(block, dict)` を満たす経路を評価する。
     if isinstance(block, dict):
         for k, v in block.items():
             rows.append({"type": "scenario", "section": "bottleneck_scenarios", "id": str(k), "value": _to_float(v), "note": ""})
 
     ex4 = root_cause.get("excess_over_4ns")
+    # 条件分岐: `isinstance(ex4, dict)` を満たす経路を評価する。
     if isinstance(ex4, dict):
         rows.append(
             {
@@ -922,8 +1008,10 @@ def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
                     "note": "",
                 }
             )
+
         for key in ["ablation_median_excess_ns", "ablation_weighted_excess_ns"]:
             block = ex4.get(key)
+            # 条件分岐: `isinstance(block, dict)` を満たす経路を評価する。
             if isinstance(block, dict):
                 for kk, vv in block.items():
                     rows.append(
@@ -935,6 +1023,7 @@ def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
                             "note": "",
                         }
                     )
+
         for r in ex4.get("station_excess_share") or []:
             rows.append(
                 {
@@ -948,6 +1037,7 @@ def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
                     ),
                 }
             )
+
         for r in ex4.get("target_excess_share") or []:
             rows.append(
                 {
@@ -961,6 +1051,7 @@ def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
                     ),
                 }
             )
+
         for r in ex4.get("top_group_excess_contributors") or []:
             rows.append(
                 {
@@ -1069,6 +1160,7 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     ax[0, 1].set_ylabel("share of total gain")
     ax[0, 1].set_title("Gain-share split (median)")
 
+    # 条件分岐: `station_rows` を満たす経路を評価する。
     if station_rows:
         st_labels = [str(r.get("station")) for r in station_rows]
         st_vals = [_to_float(r.get("sse_share")) for r in station_rows]
@@ -1079,6 +1171,8 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     else:
         ax[1, 0].text(0.5, 0.5, "no station rows", ha="center", va="center")
         ax[1, 0].set_axis_off()
+
+    # 条件分岐: `top_groups` を満たす経路を評価する。
 
     if top_groups:
         gp_labels = [f"{r.get('station')}/{r.get('target')}" for r in top_groups]
@@ -1100,6 +1194,7 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
 def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     ex4 = root_cause.get("excess_over_4ns") if isinstance(root_cause.get("excess_over_4ns"), dict) else {}
     threshold = _to_float(ex4.get("threshold_ns"))
+    # 条件分岐: `not np.isfinite(threshold)` を満たす経路を評価する。
     if not np.isfinite(threshold):
         threshold = 4.0
 
@@ -1121,12 +1216,15 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
     ax[0, 0].bar(stage_labels, stage_vals, color=["#4e79a7", "#f28e2b", "#59a14f"])
     ax[0, 0].axhline(threshold, color="black", linestyle="--", linewidth=1.2, label=f"threshold {threshold:.1f} ns")
     for i, v in enumerate(stage_vals):
+        # 条件分岐: `np.isfinite(v)` を満たす経路を評価する。
         if np.isfinite(v):
             ax[0, 0].text(i, v + 0.04, f"+{max(v - threshold, 0.0):.2f} ns", ha="center", va="bottom", fontsize=9)
+
     ax[0, 0].set_ylabel("median RMS [ns]")
     ax[0, 0].set_title("Ablation vs 4 ns threshold")
     ax[0, 0].legend(loc="upper right", fontsize=8)
 
+    # 条件分岐: `station_ex` を満たす経路を評価する。
     if station_ex:
         st_labels = [str(r.get("station")) for r in station_ex][::-1]
         st_vals = [_to_float(r.get("excess_share_over4ns")) for r in station_ex][::-1]
@@ -1137,6 +1235,8 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
         ax[0, 1].text(0.5, 0.5, "no station excess rows", ha="center", va="center")
         ax[0, 1].set_axis_off()
 
+    # 条件分岐: `group_ex` を満たす経路を評価する。
+
     if group_ex:
         gp_labels = [f"{r.get('station')}/{r.get('target')}" for r in group_ex][::-1]
         gp_vals = [_to_float(r.get("excess_share_over4ns")) for r in group_ex][::-1]
@@ -1146,6 +1246,8 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
     else:
         ax[1, 0].text(0.5, 0.5, "no group excess rows", ha="center", va="center")
         ax[1, 0].set_axis_off()
+
+    # 条件分岐: `ranking` を満たす経路を評価する。
 
     if ranking:
         r_labels = [str(r.get("id", "")).replace("_", "\n") for r in ranking]
@@ -1174,12 +1276,17 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
 
 
 def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict[str, Any]:
+    # 条件分岐: `not points_csv.exists()` を満たす経路を評価する。
     if not points_csv.exists():
         return {"exists": False}
+
     try:
         df = pd.read_csv(points_csv)
     except Exception:
         return {"exists": True, "n_rows": 0}
+
+    # 条件分岐: `df.empty` を満たす経路を評価する。
+
     if df.empty:
         return {"exists": True, "n_rows": 0}
 
@@ -1191,20 +1298,25 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
     work["station"] = work.get("station", pd.Series(dtype=str)).astype(str).str.strip().str.upper()
     work["target"] = work.get("target", pd.Series(dtype=str)).astype(str).str.strip().str.lower()
     work["year_month"] = work.get("year_month", pd.Series(dtype=str)).astype(str).str.strip()
+    # 条件分岐: `"epoch_utc" in work.columns` を満たす経路を評価する。
     if "epoch_utc" in work.columns:
         work["epoch_utc"] = pd.to_datetime(work["epoch_utc"], utc=True, errors="coerce")
         work["year"] = work["epoch_utc"].dt.year
     else:
         work["year"] = np.nan
+
     work = work[work["inlier_best"] & np.isfinite(work["residual_ns"])].copy().reset_index(drop=True)
+    # 条件分岐: `work.empty` を満たす経路を評価する。
     if work.empty:
         return {"exists": True, "n_rows": int(len(df)), "n_inlier": 0}
 
     def _rms_ns(series: pd.Series) -> float:
         arr = pd.to_numeric(series, errors="coerce").to_numpy(dtype=float)
         arr = arr[np.isfinite(arr)]
+        # 条件分岐: `len(arr) == 0` を満たす経路を評価する。
         if len(arr) == 0:
             return float("nan")
+
         return float(np.sqrt(np.mean(arr * arr)))
 
     current_rms = _rms_ns(work["residual_ns"])
@@ -1253,6 +1365,7 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
 
     # 非物理だが原因分離には有効な上限プロキシ（どこまで下がるか）
     # station×target×month の平均オフセット除去
+
     mu_stm = work.groupby(["station", "target", "year_month"], dropna=False)["residual_ns"].transform("mean")
     _add_proxy(
         "remove_station_target_month_mean",
@@ -1282,12 +1395,15 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
                 "sse_share": float(sse / total_sse) if total_sse > 0 else float("nan"),
             }
         )
+
     group_rows.sort(key=lambda x: _to_float(x.get("sse_share")), reverse=True)
 
     monthly_rows: List[Dict[str, Any]] = []
     for (st, tg, ym), g in work.groupby(["station", "target", "year_month"], dropna=False):
+        # 条件分岐: `str(ym).strip() == ""` を満たす経路を評価する。
         if str(ym).strip() == "":
             continue
+
         sse = float(np.sum(g["sse"].to_numpy(dtype=float)))
         monthly_rows.append(
             {
@@ -1300,6 +1416,7 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
                 "sse_share": float(sse / total_sse) if total_sse > 0 else float("nan"),
             }
         )
+
     monthly_rows.sort(key=lambda x: _to_float(x.get("sse_share")), reverse=True)
 
     grsm_ap15_rows = [r for r in monthly_rows if r.get("station") == "GRSM" and r.get("target") == "apollo15"]
@@ -1314,6 +1431,7 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
         "r2": float("nan"),
     }
     apol_tropo_by_target: List[Dict[str, Any]] = []
+    # 条件分岐: `not apol.empty` を満たす経路を評価する。
     if not apol.empty:
         y = apol["residual_ns"].to_numpy(dtype=float)
         x = apol["dt_tropo_ns"].to_numpy(dtype=float)
@@ -1330,8 +1448,10 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
             tg = str(rec.get("target", ""))
             g = apol[apol["target"] == tg].copy()
             ok_n = int(rec.get("n_points", 0) or 0)
+            # 条件分岐: `g.empty or ok_n <= 0` を満たす経路を評価する。
             if g.empty or ok_n <= 0:
                 continue
+
             apol_tropo_by_target.append(
                 {
                     "target": tg,
@@ -1343,6 +1463,7 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
                     "r2": _to_float(rec.get("r2")),
                 }
             )
+
     apol_tropo_by_target.sort(key=lambda x: abs(_to_float(x.get("slope_ns_per_ns"))), reverse=True)
 
     # APOL の target別 tropo回帰補正（原因寄与の大きさ評価）
@@ -1350,8 +1471,10 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
         corr_pack.get("residual_apol_tropo_corrected_ns", np.array([], dtype=float)),
         dtype=float,
     )
+    # 条件分岐: `len(corrected_apol_tropo) != len(work)` を満たす経路を評価する。
     if len(corrected_apol_tropo) != len(work):
         corrected_apol_tropo = work["residual_ns"].to_numpy(dtype=float).copy()
+
     _add_proxy(
         "apol_targetwise_tropo_regression",
         corrected_apol_tropo,
@@ -1363,8 +1486,10 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
         corr_pack.get("residual_grsm_apollo_month_corrected_ns", np.array([], dtype=float)),
         dtype=float,
     )
+    # 条件分岐: `len(corrected_grsm_apollo_month) != len(work)` を満たす経路を評価する。
     if len(corrected_grsm_apollo_month) != len(work):
         corrected_grsm_apollo_month = work["residual_ns"].to_numpy(dtype=float).copy()
+
     _add_proxy(
         "grsm_apollo_monthly_mean_offset",
         corrected_grsm_apollo_month,
@@ -1376,8 +1501,10 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
         corr_pack.get("residual_combined_corrected_ns", np.array([], dtype=float)),
         dtype=float,
     )
+    # 条件分岐: `len(corrected_combined) != len(work)` を満たす経路を評価する。
     if len(corrected_combined) != len(work):
         corrected_combined = corrected_apol_tropo.copy()
+
     _add_proxy(
         "combined_apol_tropo_plus_grsm_apollo_month",
         corrected_combined,
@@ -1387,14 +1514,18 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
     elev_bins = [0.0, 20.0, 30.0, 45.0, 60.0, 90.0]
     elev_labels = ["<20", "20-30", "30-45", "45-60", "60+"]
     apol_elev_rows: List[Dict[str, Any]] = []
+    # 条件分岐: `not apol.empty` を満たす経路を評価する。
     if not apol.empty:
         ap = apol[np.isfinite(apol["elev_mean_deg"])].copy()
+        # 条件分岐: `not ap.empty` を満たす経路を評価する。
         if not ap.empty:
             ap["elev_bin"] = pd.cut(ap["elev_mean_deg"], bins=elev_bins, labels=elev_labels, include_lowest=True, right=False)
             for lb in elev_labels:
                 g = ap[ap["elev_bin"] == lb]
+                # 条件分岐: `g.empty` を満たす経路を評価する。
                 if g.empty:
                     continue
+
                 apol_elev_rows.append(
                     {
                         "elev_bin": lb,
@@ -1451,6 +1582,7 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
                 "note": "",
             }
         )
+
     for r in deep.get("proxy_corrections") or []:
         rows.append(
             {
@@ -1462,7 +1594,9 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
                 "note": str(r.get("note", "")),
             }
         )
+
     op_profile = deep.get("operational_profile") if isinstance(deep.get("operational_profile"), dict) else {}
+    # 条件分岐: `op_profile` を満たす経路を評価する。
     if op_profile:
         rows.append(
             {
@@ -1494,6 +1628,7 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
                 "note": "",
             }
         )
+
     for r in deep.get("top_station_target_sse_contributors") or []:
         rows.append(
             {
@@ -1505,6 +1640,7 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
                 "note": "",
             }
         )
+
     for r in deep.get("apol_tropo_coupling_by_target") or []:
         rows.append(
             {
@@ -1516,6 +1652,7 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
                 "note": "",
             }
         )
+
     for r in deep.get("grsm_apollo15_monthly_trend") or []:
         rows.append(
             {
@@ -1527,6 +1664,7 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
                 "note": "",
             }
         )
+
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
@@ -1538,11 +1676,16 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
     bars: List[Tuple[str, float, str]] = []
     for r in scenarios:
         rid = str(r.get("id", ""))
+        # 条件分岐: `rid == "current"` を満たす経路を評価する。
         if rid == "current":
             continue
+
         bars.append((f"S:{rid}", _to_float(r.get("gain_ns_vs_current")), "#e15759"))
+
     for r in proxies:
         bars.append((f"P:{str(r.get('id', ''))}", _to_float(r.get("gain_ns_vs_current")), "#4e79a7"))
+
+    # 条件分岐: `bars` を満たす経路を評価する。
 
     if bars:
         labels = [b[0] for b in bars]
@@ -1558,6 +1701,7 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
         ax[0, 0].set_axis_off()
 
     top_groups = list(deep.get("top_station_target_sse_contributors") or [])[:8]
+    # 条件分岐: `top_groups` を満たす経路を評価する。
     if top_groups:
         labels = [f"{r.get('station')}/{r.get('target')}" for r in top_groups][::-1]
         shares = [_to_float(r.get("sse_share")) for r in top_groups][::-1]
@@ -1569,6 +1713,7 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
         ax[0, 1].set_axis_off()
 
     apol_target = list(deep.get("apol_tropo_coupling_by_target") or [])
+    # 条件分岐: `apol_target` を満たす経路を評価する。
     if apol_target:
         labels = [str(r.get("target")) for r in apol_target]
         slopes = [_to_float(r.get("slope_ns_per_ns")) for r in apol_target]
@@ -1580,6 +1725,7 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
         ax[1, 0].set_ylabel("slope d(residual)/d(dt_tropo)")
         ax[1, 0].set_title("APOL tropo-coupling by target")
         for i, c in enumerate(corr):
+            # 条件分岐: `np.isfinite(c)` を満たす経路を評価する。
             if np.isfinite(c):
                 ax[1, 0].text(i, slopes[i], f"corr={c:.2f}", ha="center", va="bottom", fontsize=8)
     else:
@@ -1587,6 +1733,7 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
         ax[1, 0].set_axis_off()
 
     trend = list(deep.get("grsm_apollo15_monthly_trend") or [])
+    # 条件分岐: `trend` を満たす経路を評価する。
     if trend:
         months = [str(r.get("year_month")) for r in trend]
         rms_vals = [_to_float(r.get("rms_ns")) for r in trend]
@@ -1609,9 +1756,12 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
 
 
 def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Path) -> Dict[str, Any]:
+    # 条件分岐: `not points_csv.exists()` を満たす経路を評価する。
     if not points_csv.exists():
         return {"exists": False}
+
     df = pd.read_csv(points_csv)
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         return {"exists": True, "n_points": 0}
 
@@ -1622,6 +1772,7 @@ def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Pat
     inlier = _augment_points_with_np_meta(inlier, root)
     corr_pack = _apply_operational_systematic_corrections(inlier, apol_min_points=30)
     corr_combined = np.asarray(corr_pack.get("residual_combined_corrected_ns", np.array([], dtype=float)), dtype=float)
+    # 条件分岐: `len(corr_combined) == len(inlier)` を満たす経路を評価する。
     if len(corr_combined) == len(inlier):
         inlier["residual_operational_corrected_ns"] = corr_combined
     else:
@@ -1631,12 +1782,16 @@ def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Pat
 
     year_rows: List[Dict[str, Any]] = []
     for y, sub in inlier.groupby("year"):
+        # 条件分岐: `pd.isna(y)` を満たす経路を評価する。
         if pd.isna(y):
             continue
+
         vals = sub["residual_sr_tropo_tide_ns"].to_numpy(dtype=float)
         vals = vals[np.isfinite(vals)]
+        # 条件分岐: `len(vals) == 0` を満たす経路を評価する。
         if len(vals) == 0:
             continue
+
         year_rows.append(
             {
                 "year": int(y),
@@ -1644,6 +1799,7 @@ def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Pat
                 "rms_ns": _rms(vals),
             }
         )
+
     year_rows.sort(key=lambda x: int(x["year"]))
 
     modern = inlier[inlier["year"] >= int(modern_start_year)].copy()
@@ -1743,18 +1899,23 @@ def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Pat
 
 
 def _load_station_metadata_diagnostics(station_meta_json: Path) -> Dict[str, Any]:
+    # 条件分岐: `not station_meta_json.exists()` を満たす経路を評価する。
     if not station_meta_json.exists():
         return {"exists": False}
+
     obj = _read_json(station_meta_json)
     stations = obj.get("stations") if isinstance(obj, dict) else None
+    # 条件分岐: `not isinstance(stations, dict)` を満たす経路を評価する。
     if not isinstance(stations, dict):
         return {"exists": True, "n_stations": 0, "n_pos_eop": 0, "pos_eop_share": float("nan"), "missing_pos_eop": []}
 
     rows: List[Dict[str, Any]] = []
     for st, rec in stations.items():
         src = ""
+        # 条件分岐: `isinstance(rec, dict)` を満たす経路を評価する。
         if isinstance(rec, dict):
             src = str(rec.get("station_coord_source_used", "")).strip().lower()
+
         rows.append({"station": str(st), "source": src})
 
     n_st = int(len(rows))
@@ -1772,12 +1933,17 @@ def _load_station_metadata_diagnostics(station_meta_json: Path) -> Dict[str, Any
 
 
 def _load_coverage_diagnostics(coverage_csv: Path) -> Dict[str, Any]:
+    # 条件分岐: `not coverage_csv.exists()` を満たす経路を評価する。
     if not coverage_csv.exists():
         return {"exists": False}
+
     try:
         df = pd.read_csv(coverage_csv)
     except Exception:
         return {"exists": True, "n_rows": 0, "nglr1_points_unique": 0, "nglr1_rows": []}
+
+    # 条件分岐: `df.empty` を満たす経路を評価する。
+
     if df.empty:
         return {"exists": True, "n_rows": 0, "nglr1_points_unique": 0, "nglr1_rows": []}
 
@@ -1785,6 +1951,7 @@ def _load_coverage_diagnostics(coverage_csv: Path) -> Dict[str, Any]:
     ng = df[tgt == "nglr1"].copy()
     n_unique = int(pd.to_numeric(ng.get("n_unique"), errors="coerce").fillna(0).sum()) if not ng.empty else 0
     ng_rows: List[Dict[str, Any]] = []
+    # 条件分岐: `not ng.empty` を満たす経路を評価する。
     if not ng.empty:
         for r in ng.itertuples(index=False):
             ng_rows.append(
@@ -1796,6 +1963,7 @@ def _load_coverage_diagnostics(coverage_csv: Path) -> Dict[str, Any]:
                     "included_in_metrics": bool(getattr(r, "included_in_metrics", False)),
                 }
             )
+
     return {
         "exists": True,
         "n_rows": int(len(df)),
@@ -1831,6 +1999,7 @@ def _build_checks(
             "note": "CRD range_type が two-way 以外を含むか。",
         }
     )
+    # 条件分岐: `not only_two_way` を満たす経路を評価する。
     if not only_two_way:
         likely_gaps.append("CRD range_type が mixed。one-way/unknown の扱いを追加検証する。")
 
@@ -1838,9 +2007,11 @@ def _build_checks(
     total_station = float(sum(station_counts.values())) if station_counts else 0.0
     dom_station = None
     dom_ratio = float("nan")
+    # 条件分岐: `total_station > 0` を満たす経路を評価する。
     if total_station > 0:
         dom_station, dom_count = max(station_counts.items(), key=lambda kv: kv[1])
         dom_ratio = float(dom_count / total_station)
+
     bias_global = points_diag.get("bias_model_global") if isinstance(points_diag.get("bias_model_global"), dict) else {}
     bias_gain = _to_float((bias_global or {}).get("weighted_gain_ns"))
     station_balanced = bool(np.isfinite(dom_ratio) and dom_ratio <= float(dominance_warn_ratio))
@@ -1861,6 +2032,7 @@ def _build_checks(
             "note": "局偏在は残るが、station+target バイアス補正で weighted RMS が改善するかを併せて判定。",
         }
     )
+    # 条件分岐: `not station_balance_ok` を満たす経路を評価する。
     if not station_balance_ok:
         likely_gaps.append("局データが偏在（例: GRSM優勢）。bias補正でも改善不足のため層別I/Fを追加する。")
 
@@ -1884,6 +2056,7 @@ def _build_checks(
             "note": "全局でIERS系（EDC pos+eop）を使った統一計算かを判定。",
         }
     )
+    # 条件分岐: `not iers_unified` を満たす経路を評価する。
     if not iers_unified:
         missing_txt = ", ".join(str(x) for x in missing_pos) if missing_pos else "不明"
         likely_gaps.append(
@@ -1909,12 +2082,14 @@ def _build_checks(
         if np.isfinite(op_corr_floor_before) and np.isfinite(op_corr_floor_after)
         else float("nan")
     )
+    # 条件分岐: `np.isfinite(apol_modern_floor)` を満たす経路を評価する。
     if np.isfinite(apol_modern_floor):
         modern_ok = bool(np.isfinite(apol_modern_weighted) and apol_modern_weighted <= apol_modern_floor)
         modern_threshold: Any = {"operational_floor_ns": apol_modern_floor}
     else:
         modern_ok = bool(np.isfinite(apol_modern_weighted) and apol_modern_weighted <= float(modern_goal_ns))
         modern_threshold = {"fallback_goal_ns": float(modern_goal_ns)}
+
     checks.append(
         {
             "id": "apol_modern_operational_gate",
@@ -1927,6 +2102,7 @@ def _build_checks(
             "note": "APOL (modern, nglr1除外) を NP重みの運用指標で判定（中央値RMSは主判定に使わない）。",
         }
     )
+    # 条件分岐: `not modern_ok` を満たす経路を評価する。
     if not modern_ok:
         likely_gaps.append("modern APOL の weighted RMS が推定floorを超過。遅延補正/幾何の未導入要素を追加点検。")
 
@@ -1954,8 +2130,11 @@ def _build_checks(
             "note": "APOL target別tropo + GRSM Apollo月次補正の本線I/F改善量を監査。",
         }
     )
+    # 条件分岐: `not correction_gain_ok` を満たす経路を評価する。
     if not correction_gain_ok:
         likely_gaps.append("本線I/F補正の global gain が不足。局×月ドリフトと遅延モデル係数の再同定が必要。")
+
+    # 条件分岐: `np.isfinite(apol_modern_corr_floor)` を満たす経路を評価する。
 
     if np.isfinite(apol_modern_corr_floor):
         modern_corr_ok = bool(np.isfinite(apol_modern_corr_weighted) and apol_modern_corr_weighted <= apol_modern_corr_floor)
@@ -1963,6 +2142,7 @@ def _build_checks(
     else:
         modern_corr_ok = bool(np.isfinite(apol_modern_corr_weighted) and apol_modern_corr_weighted <= float(modern_goal_ns))
         modern_corr_threshold = {"fallback_goal_ns": float(modern_goal_ns)}
+
     checks.append(
         {
             "id": "apol_modern_operational_gate_corrected",
@@ -1976,6 +2156,7 @@ def _build_checks(
             "note": "本線I/F補正適用後の modern APOL weighted 指標を判定。",
         }
     )
+    # 条件分岐: `not modern_corr_ok` を満たす経路を評価する。
     if not modern_corr_ok:
         likely_gaps.append("本線I/F補正後も modern APOL weighted RMS が floor超過。追加補正（遅延/幾何）を要検討。")
 
@@ -1999,6 +2180,7 @@ def _build_checks(
             "note": "NGLR-1 点数が mm級判定に十分か。",
         }
     )
+    # 条件分岐: `not ng_ok` を満たす経路を評価する。
     if not ng_ok:
         likely_gaps.append("NGLR-1 点数が不足。mm級判定は coverage 拡充待ち。")
 
@@ -2014,8 +2196,10 @@ def _build_checks(
             "note": "中央値RMSは補助指標。主判定はNP重み運用指標（weighted RMS / z / χ²様）を採用。",
         }
     )
+    # 条件分岐: `not semantics_ok` を満たす経路を評価する。
     if not semantics_ok:
         likely_gaps.append("CRDのNP不確かさ復元カバレッジが不足。source_file:lineno 対応を再点検。")
+
     likely_gaps.append("時系列の局座標/EOP・遅延補正をフルIERS準拠で全局統一していない。")
 
     has_watch = any(str(c.get("status")) == "watch" for c in checks)
@@ -2148,6 +2332,7 @@ def _write_plot(path: Path, manifest_diag: Dict[str, Any], metrics_diag: Dict[st
     station_counts = manifest_diag.get("station_counts") or {}
     stations = sorted(station_counts.keys())
     vals = np.array([float(station_counts[s]) for s in stations], dtype=float)
+    # 条件分岐: `np.sum(vals) > 0` を満たす経路を評価する。
     if np.sum(vals) > 0:
         ratios = vals / np.sum(vals)
     else:
@@ -2197,6 +2382,7 @@ def _write_plot(path: Path, manifest_diag: Dict[str, Any], metrics_diag: Dict[st
     ax[1].set_ylabel("ns")
     ax[1].tick_params(axis="x", rotation=20)
 
+    # 条件分岐: `years and yr` を満たす経路を評価する。
     if years and yr:
         ax[2].plot(years, yr, marker="o", color="#76b7b2")
         ax[2].set_title("Yearly RMS (inlier)")
@@ -2296,25 +2482,49 @@ def main() -> int:
     coverage_csv_path = Path(str(args.coverage_csv))
     station_meta_path = Path(str(args.station_metadata))
     out_dir = Path(str(args.out_dir))
+    # 条件分岐: `not manifest_path.is_absolute()` を満たす経路を評価する。
     if not manifest_path.is_absolute():
         manifest_path = (root / manifest_path).resolve()
+
+    # 条件分岐: `not batch_summary_path.is_absolute()` を満たす経路を評価する。
+
     if not batch_summary_path.is_absolute():
         batch_summary_path = (root / batch_summary_path).resolve()
+
+    # 条件分岐: `not batch_metrics_path.is_absolute()` を満たす経路を評価する。
+
     if not batch_metrics_path.is_absolute():
         batch_metrics_path = (root / batch_metrics_path).resolve()
+
+    # 条件分岐: `not batch_points_path.is_absolute()` を満たす経路を評価する。
+
     if not batch_points_path.is_absolute():
         batch_points_path = (root / batch_points_path).resolve()
+
+    # 条件分岐: `not coverage_csv_path.is_absolute()` を満たす経路を評価する。
+
     if not coverage_csv_path.is_absolute():
         coverage_csv_path = (root / coverage_csv_path).resolve()
+
+    # 条件分岐: `not station_meta_path.is_absolute()` を満たす経路を評価する。
+
     if not station_meta_path.is_absolute():
         station_meta_path = (root / station_meta_path).resolve()
+
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
+
     if not out_dir.is_absolute():
         out_dir = (root / out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not manifest_path.exists()` を満たす経路を評価する。
     if not manifest_path.exists():
         print(f"[err] missing manifest: {manifest_path}")
         return 2
+
+    # 条件分岐: `not batch_summary_path.exists()` を満たす経路を評価する。
+
     if not batch_summary_path.exists():
         print(f"[err] missing batch summary: {batch_summary_path}")
         return 2
@@ -2429,6 +2639,8 @@ def main() -> int:
     print(f"[ok] overall={overall} decision={decision}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

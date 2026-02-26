@@ -26,6 +26,7 @@ from typing import Any, Dict, List, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -75,21 +76,30 @@ def _extract_section(path: Path, heading_fragment: str) -> str:
     level = None
     for idx, line in enumerate(lines):
         s = line.strip()
+        # 条件分岐: `s.startswith("#") and heading_fragment in s` を満たす経路を評価する。
         if s.startswith("#") and heading_fragment in s:
             start = idx
             level = len(s) - len(s.lstrip("#"))
             break
+
+    # 条件分岐: `start is None or level is None` を満たす経路を評価する。
+
     if start is None or level is None:
         return ""
+
     end = len(lines)
     for idx in range(start + 1, len(lines)):
         s = lines[idx].strip()
+        # 条件分岐: `not s.startswith("#")` を満たす経路を評価する。
         if not s.startswith("#"):
             continue
+
         lv = len(s) - len(s.lstrip("#"))
+        # 条件分岐: `lv <= level` を満たす経路を評価する。
         if lv <= level:
             end = idx
             break
+
     return "\n".join(lines[start:end])
 
 
@@ -102,8 +112,10 @@ def _status_bool(v: bool) -> str:
 
 
 def _plot(doc_ratios: Dict[str, float], flux_caseb: float, flux_direct: float, out_png: Path) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     labels = list(doc_ratios.keys())
     values = [float(doc_ratios[k]) for k in labels]
 
@@ -426,6 +438,7 @@ def main() -> None:
         out_png,
     )
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -446,12 +459,16 @@ def main() -> None:
 
     print(f"[ok] wrote {out_json}")
     print(f"[ok] wrote {out_csv}")
+    # 条件分岐: `plt is not None` を満たす経路を評価する。
     if plt is not None:
         print(f"[ok] wrote {out_png}")
     else:
         print("[warn] matplotlib not available; png not generated")
+
     print(f"[done] overall_status={overall_status} decision={decision} hard_reject_n={hard_reject_n}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

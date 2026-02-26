@@ -20,9 +20,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -32,10 +35,13 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _rho_at(table: list[dict[str, Any]], t_c: float) -> Optional[float]:
     for r in table:
+        # 条件分岐: `abs(float(r.get("T_C", -1.0)) - float(t_c)) < 1e-6` を満たす経路を評価する。
         if abs(float(r.get("T_C", -1.0)) - float(t_c)) < 1e-6:
             v = r.get("rho_ohm_cm")
+            # 条件分岐: `isinstance(v, (int, float)) and float(v) > 0` を満たす経路を評価する。
             if isinstance(v, (int, float)) and float(v) > 0:
                 return float(v)
+
     return None
 
 
@@ -51,6 +57,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_nbsir74_496_silicon_resistivity"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -59,25 +66,33 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     samples = extracted.get("samples")
+    # 条件分岐: `not isinstance(samples, list) or not samples` を満たす経路を評価する。
     if not isinstance(samples, list) or not samples:
         raise SystemExit(f"[fail] samples missing/empty: {extracted_path}")
 
     rows: list[dict[str, Any]] = []
     for s in samples:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         sid = str(s.get("sample_id") or "")
         stype = s.get("type")
         doping = s.get("doping")
         table = s.get("rho_range_table")
+        # 条件分岐: `not sid or not isinstance(table, list) or not table` を満たす経路を評価する。
         if not sid or not isinstance(table, list) or not table:
             continue
+
+        # 条件分岐: `stype not in ("p", "n")` を満たす経路を評価する。
+
         if stype not in ("p", "n"):
             continue
 
         rho20 = _rho_at(table, 20.0)
         rho30 = _rho_at(table, 30.0)
         rho23 = _rho_at(table, 23.0)
+        # 条件分岐: `rho20 is None or rho30 is None or rho23 is None` を満たす経路を評価する。
         if rho20 is None or rho30 is None or rho23 is None:
             continue
 
@@ -95,10 +110,13 @@ def main() -> None:
             }
         )
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit("[fail] no usable samples with {20,23,30}°C mean rho extracted")
 
     # CSV
+
     out_csv = out_dir / "condensed_silicon_resistivity_temperature_coefficient_baseline.csv"
     with out_csv.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(
@@ -119,20 +137,28 @@ def main() -> None:
             w.writerow(r)
 
     # Plot
+
     plt.figure(figsize=(8.5, 4.8))
 
     def pick_style(t: str, d: str) -> tuple[str, str]:
+        # 条件分岐: `t == "p" and d == "Al"` を満たす経路を評価する。
         if t == "p" and d == "Al":
             return ("#d62728", "p-type (Al)")
+
+        # 条件分岐: `t == "p"` を満たす経路を評価する。
+
         if t == "p":
             return ("#ff7f0e", "p-type (B)")
+
         return ("#1f77b4", "n-type")
 
     series: dict[str, dict[str, Any]] = {}
     for r in rows:
         color, label = pick_style(str(r["type"]), str(r.get("doping") or ""))
+        # 条件分岐: `label not in series` を満たす経路を評価する。
         if label not in series:
             series[label] = {"color": color, "xs": [], "ys": []}
+
         series[label]["xs"].append(float(r["rho_23C_ohm_cm"]))
         series[label]["ys"].append(float(r["pct_per_K_proxy"]))
 
@@ -157,6 +183,7 @@ def main() -> None:
         key = f"{r['type']}:{r.get('doping') or ''}"
         by_type[key] = by_type.get(key, 0) + 1
         v = float(r["pct_per_K_proxy"])
+        # 条件分岐: `key not in ranges_by_type` を満たす経路を評価する。
         if key not in ranges_by_type:
             ranges_by_type[key] = {"min": v, "max": v}
         else:
@@ -164,14 +191,17 @@ def main() -> None:
             ranges_by_type[key]["max"] = float(max(ranges_by_type[key]["max"], v))
 
     # Correlation: log10(rho_23C) vs pct_per_K_proxy (purely descriptive).
+
     xs = [math.log10(float(r["rho_23C_ohm_cm"])) for r in rows if float(r["rho_23C_ohm_cm"]) > 0]
     ys = [float(r["pct_per_K_proxy"]) for r in rows if float(r["rho_23C_ohm_cm"]) > 0]
     corr_log10rho_vs_pct = None
+    # 条件分岐: `len(xs) == len(ys) and len(xs) >= 3` を満たす経路を評価する。
     if len(xs) == len(ys) and len(xs) >= 3:
         mx = sum(xs) / len(xs)
         my = sum(ys) / len(ys)
         vx = sum((x - mx) ** 2 for x in xs) / (len(xs) - 1)
         vy = sum((y - my) ** 2 for y in ys) / (len(ys) - 1)
+        # 条件分岐: `vx > 0 and vy > 0` を満たす経路を評価する。
         if vx > 0 and vy > 0:
             cov = sum((x - mx) * (y - my) for x, y in zip(xs, ys)) / (len(xs) - 1)
             corr_log10rho_vs_pct = float(cov / math.sqrt(vx * vy))
@@ -227,6 +257,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

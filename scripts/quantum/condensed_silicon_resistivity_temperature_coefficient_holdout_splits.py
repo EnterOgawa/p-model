@@ -21,9 +21,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             hash_obj.update(chunk)
+
     return hash_obj.hexdigest()
 
 
@@ -33,10 +36,13 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _rho_at(table: list[dict[str, Any]], t_c: float) -> Optional[float]:
     for row in table:
+        # 条件分岐: `abs(float(row.get("T_C", -1.0)) - float(t_c)) < 1e-6` を満たす経路を評価する。
         if abs(float(row.get("T_C", -1.0)) - float(t_c)) < 1e-6:
             value = row.get("rho_ohm_cm")
+            # 条件分岐: `isinstance(value, (int, float)) and float(value) > 0` を満たす経路を評価する。
             if isinstance(value, (int, float)) and float(value) > 0:
                 return float(value)
+
     return None
 
 
@@ -54,12 +60,16 @@ def _metrics_for_idx(
     is_train: bool,
 ) -> dict[str, float | int]:
     indices = np.asarray(idx, dtype=np.int64).reshape(-1)
+    # 条件分岐: `indices.size == 0` を満たす経路を評価する。
     if indices.size == 0:
         return {"n": 0, "max_abs_z": float("nan"), "rms_z": float("nan"), "reduced_chi2": float("nan"), "exceed_3sigma_n": 0}
+
     z_scores = (y_pred[indices] - y_obs[indices]) / float(max(1e-12, sigma))
     z_scores = z_scores[np.isfinite(z_scores)]
+    # 条件分岐: `z_scores.size == 0` を満たす経路を評価する。
     if z_scores.size == 0:
         return {"n": 0, "max_abs_z": float("nan"), "rms_z": float("nan"), "reduced_chi2": float("nan"), "exceed_3sigma_n": 0}
+
     n_points = int(z_scores.size)
     sum_z2 = float(np.sum(z_scores * z_scores))
     max_abs_z = float(np.max(np.abs(z_scores)))
@@ -79,12 +89,16 @@ def _metrics_for_idx(
 def _robust_sigma(residuals: np.ndarray) -> float:
     values = np.asarray(residuals, dtype=float).reshape(-1)
     values = values[np.isfinite(values)]
+    # 条件分岐: `values.size == 0` を満たす経路を評価する。
     if values.size == 0:
         return 1.0
+
     median = float(np.median(values))
     mad = float(np.median(np.abs(values - median)))
+    # 条件分岐: `mad > 0` を満たす経路を評価する。
     if mad > 0:
         return float(1.4826 * mad)
+
     std = float(np.std(values, ddof=1)) if values.size > 1 else 0.0
     return float(std if std > 0 else 1.0)
 
@@ -119,6 +133,7 @@ def _fit_linear(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndarray) -> 
         beta, *_ = np.linalg.lstsq(design, y_vals, rcond=None)
     except Exception:
         beta = np.linalg.pinv(design) @ y_vals
+
     intercept = float(beta[0])
     slope = float(beta[1])
     return intercept, slope
@@ -131,6 +146,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_nbsir74_496_silicon_resistivity"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -139,26 +155,36 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     samples = extracted.get("samples")
+    # 条件分岐: `not isinstance(samples, list) or not samples` を満たす経路を評価する。
     if not isinstance(samples, list) or not samples:
         raise SystemExit(f"[fail] samples missing/empty: {extracted_path}")
 
     rows: list[dict[str, Any]] = []
     for sample in samples:
+        # 条件分岐: `not isinstance(sample, dict)` を満たす経路を評価する。
         if not isinstance(sample, dict):
             continue
+
         sample_id = str(sample.get("sample_id") or "")
         sample_type = sample.get("type")
         doping = sample.get("doping")
         table = sample.get("rho_range_table")
+        # 条件分岐: `not sample_id or not isinstance(table, list) or not table` を満たす経路を評価する。
         if not sample_id or not isinstance(table, list) or not table:
             continue
+
+        # 条件分岐: `sample_type not in ("p", "n")` を満たす経路を評価する。
+
         if sample_type not in ("p", "n"):
             continue
+
         rho20 = _rho_at(table, 20.0)
         rho30 = _rho_at(table, 30.0)
         rho23 = _rho_at(table, 23.0)
+        # 条件分岐: `rho20 is None or rho30 is None or rho23 is None` を満たす経路を評価する。
         if rho20 is None or rho30 is None or rho23 is None:
             continue
+
         coeff = _coeff_ln_rho_per_k(rho20=rho20, rho30=rho30)
         rows.append(
             {
@@ -171,6 +197,8 @@ def main() -> None:
             }
         )
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise SystemExit("[fail] no usable samples with {20,23,30}°C mean rho extracted")
 
@@ -181,6 +209,7 @@ def main() -> None:
     log10_median = float(np.median(log10_rho_23c))
     idx_low = np.where(log10_rho_23c <= log10_median)[0].astype(np.int64)
     idx_high = np.where(log10_rho_23c > log10_median)[0].astype(np.int64)
+    # 条件分岐: `idx_low.size == 0 or idx_high.size == 0` を満たす経路を評価する。
     if idx_low.size == 0 or idx_high.size == 0:
         raise SystemExit("[fail] split by median log10 rho produced empty train/test")
 
@@ -332,17 +361,24 @@ def main() -> None:
     ax0 = axes[0]
 
     def pick_style(sample_type: str, doping_label: str) -> tuple[str, str]:
+        # 条件分岐: `sample_type == "p" and doping_label == "Al"` を満たす経路を評価する。
         if sample_type == "p" and doping_label == "Al":
             return ("#d62728", "p-type (Al)")
+
+        # 条件分岐: `sample_type == "p"` を満たす経路を評価する。
+
         if sample_type == "p":
             return ("#ff7f0e", "p-type (B)")
+
         return ("#1f77b4", "n-type")
 
     series: dict[str, dict[str, Any]] = {}
     for row in rows:
         color, label = pick_style(str(row["type"]), str(row.get("doping") or ""))
+        # 条件分岐: `label not in series` を満たす経路を評価する。
         if label not in series:
             series[label] = {"color": color, "xs": [], "ys": []}
+
         series[label]["xs"].append(math.log10(float(row["rho_23C_ohm_cm"])))
         series[label]["ys"].append(float(row["pct_per_K_proxy"]))
 
@@ -420,6 +456,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

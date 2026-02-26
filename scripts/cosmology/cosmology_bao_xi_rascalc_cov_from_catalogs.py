@@ -40,6 +40,7 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -49,10 +50,15 @@ from scripts.summary import worklog  # noqa: E402
 
 def _infer_cap_label(path: Path, *, fallback: str) -> str:
     s = path.name.lower()
+    # 条件分岐: `"ngc" in s or "north" in s` を満たす経路を評価する。
     if "ngc" in s or "north" in s:
         return "north"
+
+    # 条件分岐: `"sgc" in s or "south" in s` を満たす経路を評価する。
+
     if "sgc" in s or "south" in s:
         return "south"
+
     return fallback
 
 
@@ -84,9 +90,13 @@ def _load_cap_inputs(
 
     mg = np.isfinite(z_g0) & (z_g0 > 0.0) & np.isfinite(w_g0)
     mr = np.isfinite(z_r0) & (z_r0 > 0.0) & np.isfinite(w_r0)
+    # 条件分岐: `z_min is not None` を満たす経路を評価する。
     if z_min is not None:
         mg = mg & (z_g0 >= float(z_min))
         mr = mr & (z_r0 >= float(z_min))
+
+    # 条件分岐: `z_max is not None` を満たす経路を評価する。
+
     if z_max is not None:
         mg = mg & (z_g0 < float(z_max))
         mr = mr & (z_r0 < float(z_max))
@@ -121,8 +131,10 @@ def _load_cap_inputs(
 
 
 def _permute_cov_rascalc_to_peakfit(cov: np.ndarray, *, n_r: int, max_l: int) -> np.ndarray:
+    # 条件分岐: `int(max_l) % 2 != 0` を満たす経路を評価する。
     if int(max_l) % 2 != 0:
         raise ValueError("max_l must be even")
+
     n_l = int(max_l) // 2 + 1
     cov = np.asarray(cov, dtype=float).reshape(int(n_r) * n_l, int(n_r) * n_l)
 
@@ -134,6 +146,7 @@ def _permute_cov_rascalc_to_peakfit(cov: np.ndarray, *, n_r: int, max_l: int) ->
         for r in range(int(n_r)):
             perm[k] = int(r) * n_l + int(l_idx)
             k += 1
+
     cov2 = cov[np.ix_(perm, perm)]
     cov2 = 0.5 * (cov2 + cov2.T)
     return cov2
@@ -174,33 +187,52 @@ def main(argv: List[str] | None = None) -> int:
     )
     args = ap.parse_args(list(argv) if argv is not None else None)
 
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
     if os.name == "nt":
         raise SystemExit("RascalC is not supported on Windows; run this under WSL (Ubuntu-24.04) as per AGENTS.md.")
 
     metrics_path = Path(str(args.xi_metrics_json)).resolve()
+    # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
     if not metrics_path.exists():
         raise SystemExit(f"metrics json not found: {metrics_path}")
 
     output_suffix = str(args.output_suffix).strip()
+    # 条件分岐: `not output_suffix` を満たす経路を評価する。
     if not output_suffix:
         raise SystemExit("--output-suffix must be non-empty")
+
+    # 条件分岐: `any(sep in output_suffix for sep in ("/", "\\", ":", "\0"))` を満たす経路を評価する。
+
     if any(sep in output_suffix for sep in ("/", "\\", ":", "\0")):
         raise SystemExit(f"invalid --output-suffix (contains path separator or invalid char): {output_suffix!r}")
 
+    # 条件分岐: `int(args.max_l) % 2 != 0 or int(args.max_l) < 0` を満たす経路を評価する。
+
     if int(args.max_l) % 2 != 0 or int(args.max_l) < 0:
         raise SystemExit("--max-l must be an even integer >= 0")
+
+    # 条件分岐: `int(args.threads) <= 0` を満たす経路を評価する。
+
     if int(args.threads) <= 0:
         raise SystemExit("--threads must be >= 1")
+
+    # 条件分岐: `int(args.n_loops) <= 0 or int(args.n_loops) % int(args.threads) != 0` を満たす経路を評価する。
+
     if int(args.n_loops) <= 0 or int(args.n_loops) % int(args.threads) != 0:
         raise SystemExit("--n-loops must be divisible by --threads")
+
+    # 条件分岐: `int(args.loops_per_sample) <= 0 or int(args.n_loops) % int(args.loops_per_sam...` を満たす経路を評価する。
+
     if int(args.loops_per_sample) <= 0 or int(args.n_loops) % int(args.loops_per_sample) != 0:
         raise SystemExit("--loops-per-sample must divide --n-loops")
 
     metrics = json.loads(metrics_path.read_text(encoding="utf-8"))
 
     xi_npz_path = Path(str(metrics["outputs"]["npz"])).resolve()
+    # 条件分岐: `not xi_npz_path.exists()` を満たす経路を評価する。
     if not xi_npz_path.exists():
         raise SystemExit(f"xi npz not found: {xi_npz_path}")
+
     tag = xi_npz_path.stem
 
     params = metrics.get("params", {})
@@ -212,14 +244,22 @@ def main(argv: List[str] | None = None) -> int:
     rnd_npz_list = list(rnd_npz_raw) if isinstance(rnd_npz_raw, list) else [str(rnd_npz_raw)]
     gal_npzs = [Path(str(p)).resolve() for p in gal_npz_list]
     rnd_npzs = [Path(str(p)).resolve() for p in rnd_npz_list]
+    # 条件分岐: `len(gal_npzs) != len(rnd_npzs)` を満たす経路を評価する。
     if len(gal_npzs) != len(rnd_npzs):
         raise SystemExit(f"galaxy_npz and random_npz count mismatch: {len(gal_npzs)} vs {len(rnd_npzs)}")
+
+    # 条件分岐: `not gal_npzs` を満たす経路を評価する。
+
     if not gal_npzs:
         raise SystemExit("inputs.galaxy_npz is empty")
+
     for p in gal_npzs:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise SystemExit(f"galaxy npz not found: {p}")
+
     for p in rnd_npzs:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise SystemExit(f"random npz not found: {p}")
 
@@ -239,18 +279,22 @@ def main(argv: List[str] | None = None) -> int:
     s_min = float(s_bins.get("min", 30.0))
     s_max = float(s_bins.get("max", 150.0))
     s_step = float(s_bins.get("step", 5.0))
+    # 条件分岐: `not (math.isfinite(s_min) and math.isfinite(s_max) and math.isfinite(s_step)...` を満たす経路を評価する。
     if not (math.isfinite(s_min) and math.isfinite(s_max) and math.isfinite(s_step) and s_step > 0 and s_max > s_min):
         raise SystemExit(f"invalid s_bins in metrics: {s_bins}")
 
     mu_bins = params.get("mu_bins", {}) or {}
     mu_max = float(mu_bins.get("mu_max", 1.0))
     nmu = int(mu_bins.get("nmu", 120))
+    # 条件分岐: `not (math.isfinite(mu_max) and mu_max > 0.0 and nmu >= 1)` を満たす経路を評価する。
     if not (math.isfinite(mu_max) and mu_max > 0.0 and nmu >= 1):
         raise SystemExit(f"invalid mu_bins in metrics: {mu_bins}")
 
     # Load xi output bins (for output file convention).
+
     with np.load(xi_npz_path) as z:
         s_xi = np.asarray(z["s"], dtype=float).reshape(-1)
+
     n_s = int(s_xi.size)
 
     out_cov_npz = xi_npz_path.with_name(f"{xi_npz_path.stem}__{output_suffix}.npz")
@@ -287,8 +331,10 @@ def main(argv: List[str] | None = None) -> int:
         g = cap_inputs["gal"]
         r = cap_inputs["rnd"]
         w_r_cap = np.asarray(r["w"], dtype=np.float64)
+        # 条件分岐: `cap_label in scale_by_cap` を満たす経路を評価する。
         if cap_label in scale_by_cap:
             w_r_cap = w_r_cap * float(scale_by_cap[cap_label])
+
         cap_g.append(
             {
                 "ra": np.asarray(g["ra"], dtype=np.float64),
@@ -327,14 +373,18 @@ def main(argv: List[str] | None = None) -> int:
 
     # Match the binning convention used by cosmology_bao_xi_from_catalogs.py:
     # s_bins are edges with inclusive max.
+
     n_bins_exact = (float(s_max) - float(s_min)) / float(s_step)
     n_bins = int(np.rint(n_bins_exact))
+    # 条件分岐: `not np.allclose(n_bins_exact, float(n_bins), rtol=0.0, atol=1e-9) or n_bins < 1` を満たす経路を評価する。
     if not np.allclose(n_bins_exact, float(n_bins), rtol=0.0, atol=1e-9) or n_bins < 1:
         raise SystemExit(f"s_bins are not an integer grid: (max-min)/step={n_bins_exact} from {s_bins}")
+
     s_edges = (float(s_min) + float(s_step) * np.arange(int(n_bins) + 1, dtype=float)).astype(float, copy=False)
     mu_edges = np.linspace(-float(mu_max), float(mu_max), int(2 * int(nmu)) + 1, dtype=float)
 
     counts_path = base_dir / "pycorr_allcounts_cov.npy"
+    # 条件分岐: `counts_path.exists()` を満たす経路を評価する。
     if counts_path.exists():
         cf_cov = TwoPointCorrelationFunction.load(str(counts_path))
     else:
@@ -358,7 +408,9 @@ def main(argv: List[str] | None = None) -> int:
         print(f"[info] computed pycorr counts in {dt:.1f} s -> {counts_path}")
 
     # Sanity: ensure s bins match the xi output bins (within tolerance).
+
     s_cov = np.asarray(cf_cov.sepavg(axis=0), dtype=float).reshape(-1)
+    # 条件分岐: `s_cov.size != s_xi.size or not np.allclose(s_cov, s_xi, rtol=0.0, atol=1e-9)` を満たす経路を評価する。
     if s_cov.size != s_xi.size or not np.allclose(s_cov, s_xi, rtol=0.0, atol=1e-9):
         raise SystemExit(
             "RascalC cov binning mismatch vs xi output. "
@@ -369,6 +421,7 @@ def main(argv: List[str] | None = None) -> int:
     # Use the wrapped pycorr estimator directly as the xi(s,mu) table.
     # (Passing a raw grid tuple triggers a known RascalC interface pitfall where bin edges are built by
     # elementwise addition instead of concatenation.)
+
     xi_table = cf_cov
 
     try:
@@ -381,9 +434,11 @@ def main(argv: List[str] | None = None) -> int:
         ) from e
 
     # Random subset for geometry sampling (avoid ordering bias).
+
     n_rnd = int(pos_r.shape[0])
     n_sub = int(min(max(1, int(args.randoms_subset)), n_rnd))
     rng = np.random.default_rng(int(args.seed))
+    # 条件分岐: `n_sub < n_rnd` を満たす経路を評価する。
     if n_sub < n_rnd:
         idx = rng.choice(n_rnd, size=n_sub, replace=False)
         pos_r_sub = pos_r[idx]
@@ -394,6 +449,7 @@ def main(argv: List[str] | None = None) -> int:
         w_r_sub = w_r
 
     # Run RascalC.
+
     res = run_cov(
         mode="legendre_projected",
         max_l=int(args.max_l),
@@ -494,6 +550,8 @@ def main(argv: List[str] | None = None) -> int:
     print(f"[ok] metrics : {out_cov_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

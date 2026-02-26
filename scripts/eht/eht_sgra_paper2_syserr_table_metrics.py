@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,16 +34,20 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     xs = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
+    # 条件分岐: `not xs` を満たす経路を評価する。
     if not xs:
         return {"n": 0}
+
     xs_sorted = sorted(xs)
     n = len(xs_sorted)
     mean = sum(xs_sorted) / n
+    # 条件分岐: `n >= 2` を満たす経路を評価する。
     if n >= 2:
         var = sum((x - mean) ** 2 for x in xs_sorted) / (n - 1)
         std = math.sqrt(var)
     else:
         std = 0.0
+
     median = xs_sorted[n // 2] if (n % 2 == 1) else 0.5 * (xs_sorted[n // 2 - 1] + xs_sorted[n // 2])
     return {
         "n": int(n),
@@ -66,8 +71,10 @@ def _clean_test_name(s: str) -> str:
 
 def _parse_float(s: str) -> Optional[float]:
     t = s.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
     try:
         v = float(t)
         return v if math.isfinite(v) else None
@@ -77,24 +84,37 @@ def _parse_float(s: str) -> Optional[float]:
 
 def _parse_s_token(token: str) -> Optional[Dict[str, Any]]:
     t = token.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
     t = t.replace("$", "")
+    # 条件分岐: `r"\%" in t` を満たす経路を評価する。
     if r"\%" in t:
         unit = "percent"
         v = _parse_float(t.replace(r"\%", "").strip())
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             return None
+
         return {"value": float(v), "unit": unit}
+
+    # 条件分岐: `r"\degr" in t` を満たす経路を評価する。
+
     if r"\degr" in t:
         unit = "deg"
         v = _parse_float(t.replace(r"\degr", "").strip())
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             return None
+
         return {"value": float(v), "unit": unit}
+
     v = _parse_float(t)
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return None
+
     return {"value": float(v), "unit": "unknown"}
 
 
@@ -113,8 +133,10 @@ class SysErrRow:
 
 def _parse_int(s: str) -> Optional[int]:
     t = s.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return None
+
     try:
         return int(t)
     except Exception:
@@ -126,18 +148,26 @@ def _extract_sgra_syserr_table_rows(tex_lines: Sequence[str], *, source_path: Pa
     in_sgra = False
     for lineno, raw in enumerate(tex_lines, start=1):
         line = raw.strip()
+        # 条件分岐: `not in_sgra` を満たす経路を評価する。
         if not in_sgra:
+            # 条件分岐: `line.startswith(r"\sgra&")` を満たす経路を評価する。
             if line.startswith(r"\sgra&"):
                 in_sgra = True
             else:
                 continue
 
+        # 条件分岐: `line.startswith(r"\hline")` を満たす経路を評価する。
+
         if line.startswith(r"\hline"):
             break
+
+        # 条件分岐: `"&" not in line or r"\\" not in line` を満たす経路を評価する。
+
         if "&" not in line or r"\\" not in line:
             continue
 
         parts = [p.strip() for p in line.split("&")]
+        # 条件分岐: `len(parts) < 8` を満たす経路を評価する。
         if len(parts) < 8:
             continue
 
@@ -146,6 +176,7 @@ def _extract_sgra_syserr_table_rows(tex_lines: Sequence[str], *, source_path: Pa
 
         casa_s = _parse_s_token(parts[2])
         hops_s = _parse_s_token(parts[5])
+        # 条件分岐: `casa_s is None or hops_s is None` を満たす経路を評価する。
         if casa_s is None or hops_s is None:
             continue
 
@@ -167,6 +198,7 @@ def _extract_sgra_syserr_table_rows(tex_lines: Sequence[str], *, source_path: Pa
                 source_anchor={"path": str(source_path), "line": int(lineno), "label": "tab:syserr"},
             )
         )
+
     return rows
 
 
@@ -196,6 +228,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -207,6 +240,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     rows = _extract_sgra_syserr_table_rows(lines, source_path=tex_path)
     payload["extracted"]["rows"] = [r.__dict__ for r in rows]
     payload["extracted"]["rows_n"] = int(len(rows))
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         payload["ok"] = False
         payload["reason"] = "sgra_rows_not_found"
@@ -215,6 +249,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return 0
 
     # Derived summaries (use only percent-valued rows as amplitude-like scales).
+
     casa_amp_pct = [r.casa_s["value"] for r in rows if r.casa_s.get("unit") == "percent"]
     hops_amp_pct = [r.hops_s["value"] for r in rows if r.hops_s.get("unit") == "percent"]
     both_amp_pct = casa_amp_pct + hops_amp_pct
@@ -260,6 +295,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

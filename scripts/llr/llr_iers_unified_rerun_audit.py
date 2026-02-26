@@ -43,39 +43,57 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _op_metric(op_json: Dict[str, Any], subset: str, key: str) -> float:
     rows = op_json.get("summary")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return float("nan")
+
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `str(row.get("subset", "")) == subset` を満たす経路を評価する。
+
         if str(row.get("subset", "")) == subset:
             return _to_float(row.get(key))
+
     return float("nan")
 
 
 def _precision_check_status(precision_json: Dict[str, Any], check_id: str) -> str:
     checks = precision_json.get("checks")
+    # 条件分岐: `not isinstance(checks, list)` を満たす経路を評価する。
     if not isinstance(checks, list):
         return "unknown"
+
     for check in checks:
+        # 条件分岐: `not isinstance(check, dict)` を満たす経路を評価する。
         if not isinstance(check, dict):
             continue
+
+        # 条件分岐: `str(check.get("id", "")) == check_id` を満たす経路を評価する。
+
         if str(check.get("id", "")) == check_id:
             return str(check.get("status", "unknown"))
+
     return "unknown"
 
 
 def _station_meta_diag(meta_json: Dict[str, Any]) -> Dict[str, Any]:
     stations = meta_json.get("stations")
+    # 条件分岐: `not isinstance(stations, dict)` を満たす経路を評価する。
     if not isinstance(stations, dict):
         return {"n_stations": 0, "n_pos_eop": 0, "pos_eop_share": float("nan"), "missing_pos_eop": [], "by_station": []}
 
     rows: List[Dict[str, Any]] = []
     for station, rec in stations.items():
         src = ""
+        # 条件分岐: `isinstance(rec, dict)` を満たす経路を評価する。
         if isinstance(rec, dict):
             src = str(rec.get("station_coord_source_used", "")).strip().lower()
+
         rows.append({"station": str(station), "source": src})
+
     rows.sort(key=lambda x: str(x["station"]))
 
     n_st = int(len(rows))
@@ -155,9 +173,12 @@ def main() -> int:
     ]
     resolved: List[Path] = []
     for path in paths:
+        # 条件分岐: `not path.is_absolute()` を満たす経路を評価する。
         if not path.is_absolute():
             path = (_ROOT / path).resolve()
+
         resolved.append(path)
+
     (
         baseline_summary_path,
         baseline_operational_path,
@@ -168,11 +189,14 @@ def main() -> int:
         iers_station_meta_path,
     ) = resolved
 
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
     if not out_dir.is_absolute():
         out_dir = (_ROOT / out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for path in resolved:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             print(f"[err] missing required input: {path}")
             return 2
@@ -210,23 +234,36 @@ def main() -> int:
 
     precision_watch_checks: List[str] = []
     checks = iers_precision.get("checks")
+    # 条件分岐: `isinstance(checks, list)` を満たす経路を評価する。
     if isinstance(checks, list):
         for check in checks:
+            # 条件分岐: `not isinstance(check, dict)` を満たす経路を評価する。
             if not isinstance(check, dict):
                 continue
+
+            # 条件分岐: `str(check.get("status", "")).lower() == "watch"` を満たす経路を評価する。
+
             if str(check.get("status", "")).lower() == "watch":
                 cid = str(check.get("id", "")).strip()
+                # 条件分岐: `cid` を満たす経路を評価する。
                 if cid:
                     precision_watch_checks.append(cid)
 
     modern_gate_status = _precision_check_status(iers_precision, "apol_modern_operational_gate")
     decision = "pass" if iers_all_station_unified and iers_mode == "pos_eop" and modern_gate_status == "pass" else "watch"
     reasons: List[str] = []
+    # 条件分岐: `iers_mode != "pos_eop"` を満たす経路を評価する。
     if iers_mode != "pos_eop":
         reasons.append("IERS rerun が station-coords=pos_eop で実行されていない。")
+
+    # 条件分岐: `not iers_all_station_unified` を満たす経路を評価する。
+
     if not iers_all_station_unified:
         missing = station_diag.get("missing_pos_eop") or []
         reasons.append(f"全局IERS統一が未達（pos+eop未対応局: {','.join(missing) if missing else 'N/A'}）。")
+
+    # 条件分岐: `modern_gate_status != "pass"` を満たす経路を評価する。
+
     if modern_gate_status != "pass":
         reasons.append("modern APOL operational gate が pass ではない。")
 
@@ -269,6 +306,8 @@ def main() -> int:
     print(f"[ok] {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -32,6 +33,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -52,40 +54,58 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)
     except Exception:
         return None
 
 
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
+    # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
     if not math.isfinite(abs_z):
         return ("info", "#999999")
+
+    # 条件分岐: `abs_z < 3.0` を満たす経路を評価する。
+
     if abs_z < 3.0:
         return ("ok", "#2ca02c")
+
+    # 条件分岐: `abs_z < 5.0` を満たす経路を評価する。
+
     if abs_z < 5.0:
         return ("mixed", "#ffbf00")
+
     return ("ng", "#d62728")
 
 
 def _load_required(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(
             f"missing required metrics: {path} (run scripts/summary/run_all.py --offline first)"
         )
+
     return _read_json(path)
 
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None or not math.isfinite(float(x))` を満たす経路を評価する。
     if x is None or not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -141,16 +161,22 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # --- Extract key numbers
     pack_rows = pack.get("rows") or []
+    # 条件分岐: `not isinstance(pack_rows, list) or not pack_rows` を満たす経路を評価する。
     if not isinstance(pack_rows, list) or not pack_rows:
         raise ValueError("invalid pack metrics (rows missing): cosmology_static_infinite_hypothesis_pack_metrics.json")
 
     ddr_rows = ddr.get("rows") or []
+    # 条件分岐: `not isinstance(ddr_rows, list) or not ddr_rows` を満たす経路を評価する。
     if not isinstance(ddr_rows, list) or not ddr_rows:
         raise ValueError("invalid DDR metrics (rows missing): cosmology_distance_duality_constraints_metrics.json")
 
     ddr_rep = next((r for r in ddr_rows if isinstance(r, dict) and r.get("id") == "martinelli2021_snIa_bao"), None)
+    # 条件分岐: `not isinstance(ddr_rep, dict)` を満たす経路を評価する。
     if not isinstance(ddr_rep, dict):
         ddr_rep = next((r for r in ddr_rows if isinstance(r, dict) and r.get("uses_bao") is True), None)
+
+    # 条件分岐: `not isinstance(ddr_rep, dict)` を満たす経路を評価する。
+
     if not isinstance(ddr_rep, dict):
         ddr_rep = ddr_rows[0] if isinstance(ddr_rows[0], dict) else {}
 
@@ -167,8 +193,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         None,
     )
     ddr_abs_z_raw = _safe_float((ddr_sys_row or {}).get("abs_z_raw"))
+    # 条件分岐: `ddr_abs_z_raw is None and z_ddr is not None` を満たす経路を評価する。
     if ddr_abs_z_raw is None and z_ddr is not None:
         ddr_abs_z_raw = abs(float(z_ddr))
+
     ddr_abs_z_sys = _safe_float((ddr_sys_row or {}).get("abs_z_with_category_sys"))
     ddr_sigma_cat = _safe_float((ddr_sys_row or {}).get("sigma_sys_category"))
     sig_mult_3s_sys = (None if ddr_abs_z_sys is None else float(ddr_abs_z_sys) / 3.0)
@@ -197,10 +225,12 @@ def main(argv: Optional[List[str]] = None) -> int:
             rows = (payload.get("scan") or {}).get("by_variant") or []
             for r in rows:
                 v = r.get("variant") or {}
+                # 条件分岐: `str(v.get("id") or "") == variant_id` を満たす経路を評価する。
                 if str(v.get("id") or "") == variant_id:
                     return _safe_float(r.get("estimated_f_1sigma_all_candidates"))
         except Exception:
             return None
+
         return None
 
     f_boss_baseline_all = _pick_f(bao_global_prior_survey_f, "boss_dr12_dm_h_baseline")
@@ -221,10 +251,17 @@ def main(argv: Optional[List[str]] = None) -> int:
             v = r.get("variant") or {}
             om = v.get("omitted") or {}
             om_id = str(om.get("id") or "")
+            # 条件分岐: `om_id == "eboss_dr16_lya_z233"` を満たす経路を評価する。
             if om_id == "eboss_dr16_lya_z233":
                 f_comb_drop_eboss_lya = _safe_float(r.get("estimated_f_1sigma_all_candidates"))
+
+            # 条件分岐: `om_id == "desi_dr1_lya_z2330"` を満たす経路を評価する。
+
             if om_id == "desi_dr1_lya_z2330":
                 f_comb_drop_desi_lya = _safe_float(r.get("estimated_f_1sigma_all_candidates"))
+
+            # 条件分岐: `str(om.get("short_label") or "").strip().startswith("Lyα")` を満たす経路を評価する。
+
             if str(om.get("short_label") or "").strip().startswith("Lyα"):
                 f_comb_drop_lya = _safe_float(r.get("estimated_f_1sigma_all_candidates"))
                 # keep scanning to also catch DESI/eBOSS specific ids if present
@@ -232,6 +269,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         f_comb_drop_lya = None
 
     tol_rows = tolman.get("rows") or []
+    # 条件分岐: `not isinstance(tol_rows, list) or not tol_rows` を満たす経路を評価する。
     if not isinstance(tol_rows, list) or not tol_rows:
         raise ValueError("invalid Tolman metrics (rows missing): cosmology_tolman_surface_brightness_constraints_metrics.json")
 
@@ -266,18 +304,24 @@ def main(argv: Optional[List[str]] = None) -> int:
     colors: List[str] = []
     ann: List[str] = []
     for r in pack_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         label = str(r.get("label") or "").strip()
         z = _safe_float(r.get("z_static"))
+        # 条件分岐: `not label or z is None or not math.isfinite(float(z))` を満たす経路を評価する。
         if not label or z is None or not math.isfinite(float(z)):
             continue
+
         az = abs(float(z))
         status, color = _classify_sigma(az)
         labels.append(label)
         abs_zs.append(az)
         colors.append(color)
         ann.append(f"{az:.2f}" if az < 20 else f">20 ({az:.2f})")
+
+    # 条件分岐: `not labels` を満たす経路を評価する。
 
     if not labels:
         raise ValueError("no valid rows in static hypothesis pack")
@@ -333,6 +377,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     y0 -= 0.02
 
     tol_note = ""
+    # 条件分岐: `tol_r_evol is not None and tol_r_evol < 0` を満たす経路を評価する。
     if tol_r_evol is not None and tol_r_evol < 0:
         tol_note = "（R band は整合に逆符号の進化補正が必要）"
 
@@ -495,6 +540,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

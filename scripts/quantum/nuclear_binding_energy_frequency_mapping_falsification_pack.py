@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -24,24 +27,36 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     Inclusive percentile with linear interpolation.
     p in [0,100].
     """
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
 def _stats(vals: list[float]) -> dict[str, float]:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan")}
+
     vs = sorted(vals)
     return {
         "n": float(len(vs)),
@@ -52,14 +67,18 @@ def _stats(vals: list[float]) -> dict[str, float]:
 
 
 def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
+    # 条件分岐: `not (math.isfinite(p16) and math.isfinite(p84))` を満たす経路を評価する。
     if not (math.isfinite(p16) and math.isfinite(p84)):
         return float("nan")
+
     return 0.5 * (p84 - p16)
 
 
 def _median(vals: list[float]) -> float:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return float("nan")
+
     vs = sorted(vals)
     return _percentile(vs, 50)
 
@@ -84,24 +103,37 @@ def _load_ratios(*, csv_path: Path) -> dict[str, list[tuple[int, float]]]:
             try:
                 a = int(row["A"])
                 b_obs = float(row["B_obs_MeV"])
+                # 条件分岐: `not math.isfinite(b_obs) or b_obs <= 0` を満たす経路を評価する。
                 if not math.isfinite(b_obs) or b_obs <= 0:
                     continue
+
                 rg = float(row["ratio_collective"])
                 rl = float(row["ratio_local_spacing"])
             except Exception:
                 continue
+
+            # 条件分岐: `a <= 1` を満たす経路を評価する。
+
             if a <= 1:
                 continue
+
+            # 条件分岐: `math.isfinite(rg) and rg > 0` を満たす経路を評価する。
+
             if math.isfinite(rg) and rg > 0:
                 out["global"].append((a, rg))
+
+            # 条件分岐: `math.isfinite(rl) and rl > 0` を満たす経路を評価する。
+
             if math.isfinite(rl) and rl > 0:
                 out["local"].append((a, rl))
+
     return out
 
 
 def _load_differential_channels(*, out_dir: Path) -> tuple[dict[str, object], dict[str, object], list[dict[str, object]]]:
     theory_path = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
     quant_path = out_dir / "nuclear_binding_energy_frequency_mapping_differential_quantification_metrics.json"
+    # 条件分岐: `not theory_path.exists() or not quant_path.exists()` を満たす経路を評価する。
     if not theory_path.exists() or not quant_path.exists():
         raise SystemExit(
             "[fail] missing Step 7.13.17.11/.12 metrics.\n"
@@ -147,19 +179,26 @@ def _safe_float(value: object) -> float | None:
         f = float(value)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(f)` を満たす経路を評価する。
+
     if not math.isfinite(f):
         return None
+
     return f
 
 
 def _median_or_none(vals: list[float]) -> float | None:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return None
+
     return _median(vals)
 
 
 def _load_separation_crosscheck(*, out_dir: Path) -> dict[str, object]:
     metrics_path = out_dir / "nuclear_a_dependence_hf_three_body_separation_energies_metrics.json"
+    # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
     if not metrics_path.exists():
         raise SystemExit(
             "[fail] missing separation-energy cross-check metrics.\n"
@@ -167,6 +206,7 @@ def _load_separation_crosscheck(*, out_dir: Path) -> dict[str, object]:
             "  python -B scripts/quantum/nuclear_a_dependence_mean_field.py --step 7.13.15.9\n"
             f"Expected: {metrics_path}"
         )
+
     j = _read_json(metrics_path)
     diag = j.get("diag") if isinstance(j.get("diag"), dict) else {}
     sn = diag.get("Sn") if isinstance(diag.get("Sn"), dict) else {}
@@ -179,17 +219,23 @@ def _load_separation_crosscheck(*, out_dir: Path) -> dict[str, object]:
 
     gap_sn_rms = []
     for item in by_magic_sn.values():
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         v = _safe_float(item.get("rms_gap_n_residual_MeV"))
+        # 条件分岐: `v is not None` を満たす経路を評価する。
         if v is not None:
             gap_sn_rms.append(v)
 
     gap_s2n_rms = []
     for item in by_magic_s2n.values():
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
         v = _safe_float(item.get("rms_gap_2n_residual_MeV"))
+        # 条件分岐: `v is not None` を満たす経路を評価する。
         if v is not None:
             gap_s2n_rms.append(v)
 
@@ -208,13 +254,20 @@ def _load_separation_crosscheck(*, out_dir: Path) -> dict[str, object]:
 
 def _extract_domain_result(metrics: dict[str, object], *, domain_min_a: int) -> dict[str, object]:
     results = metrics.get("results")
+    # 条件分岐: `not isinstance(results, list)` を満たす経路を評価する。
     if not isinstance(results, list):
         return {}
+
     for item in results:
+        # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
         if not isinstance(item, dict):
             continue
+
+        # 条件分岐: `int(item.get("domain_min_A", -1)) == domain_min_a` を満たす経路を評価する。
+
         if int(item.get("domain_min_A", -1)) == domain_min_a:
             return item
+
     return {}
 
 
@@ -233,6 +286,7 @@ def _extract_radii_block(domain_result: dict[str, object], *, block_key: str) ->
 
 def _load_radii_crosscheck(*, out_dir: Path) -> dict[str, object]:
     metrics_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json"
+    # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
     if not metrics_path.exists():
         raise SystemExit(
             "[fail] missing charge-radius kink cross-check metrics.\n"
@@ -270,16 +324,23 @@ def _load_selected_nuclei_rows(*, csv_path: Path, keys: list[tuple[int, int]]) -
                 a = int(row["A"])
             except Exception:
                 continue
+
+            # 条件分岐: `(z, a) not in keyset` を満たす経路を評価する。
+
             if (z, a) not in keyset:
                 continue
+
             out.append(row)
     # Keep same order as keys if present.
+
     out_sorted: list[dict[str, object]] = []
     for z, a in keys:
         for r in out:
+            # 条件分岐: `int(r["Z"]) == z and int(r["A"]) == a` を満たす経路を評価する。
             if int(r["Z"]) == z and int(r["A"]) == a:
                 out_sorted.append(r)
                 break
+
     return out_sorted
 
 
@@ -289,6 +350,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     diff_csv = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.csv"
+    # 条件分岐: `not diff_csv.exists()` を満たす経路を評価する。
     if not diff_csv.exists():
         raise SystemExit(
             "[fail] missing differential predictions CSV.\n"
@@ -298,8 +360,10 @@ def main() -> None:
         )
 
     ratios = _load_ratios(csv_path=diff_csv)
+    # 条件分岐: `not ratios["global"] or not ratios["local"]` を満たす経路を評価する。
     if not ratios["global"] or not ratios["local"]:
         raise SystemExit(f"[fail] parsed 0 usable ratios from: {diff_csv}")
+
     theory_metrics, quant_metrics, channels = _load_differential_channels(out_dir=out_dir)
     sep_crosscheck = _load_separation_crosscheck(out_dir=out_dir)
     radii_crosscheck = _load_radii_crosscheck(out_dir=out_dir)
@@ -393,6 +457,7 @@ def main() -> None:
         rel = c.get("required_relative_sigma_3sigma") if isinstance(c.get("required_relative_sigma_3sigma"), dict) else {}
         med = _safe_float(rel.get("median"))
         ch_vals.append(100.0 * med if med is not None else float("nan"))
+
     ax2.bar(range(len(ch_labels)), ch_vals, color=["tab:red", "tab:blue"], alpha=0.85)
     ax2.set_xticks(range(len(ch_labels)))
     ax2.set_xticklabels(ch_labels, rotation=15, ha="right")
@@ -412,8 +477,10 @@ def main() -> None:
     ]
     radius_plot_vals = [v if v is not None else float("nan") for v in radius_vals]
     ax3.bar(range(len(radius_labels)), radius_plot_vals, color=["0.7", "0.6", "tab:green", "tab:green"], alpha=0.9)
+    # 条件分岐: `radius_threshold is not None` を満たす経路を評価する。
     if radius_threshold is not None:
         ax3.axhline(radius_threshold, color="0.2", lw=1.2, ls="--")
+
     ax3.set_xticks(range(len(radius_labels)))
     ax3.set_xticklabels(radius_labels, rotation=15, ha="right")
     ax3.set_ylabel("max abs residual [σ]")
@@ -485,6 +552,9 @@ def main() -> None:
             rl = float(r["ratio_local_spacing"])
         except Exception:
             continue
+
+        # 条件分岐: `not (math.isfinite(b_obs) and b_obs > 0 and math.isfinite(rg) and rg > 0 and...` を満たす経路を評価する。
+
         if not (math.isfinite(b_obs) and b_obs > 0 and math.isfinite(rg) and rg > 0 and math.isfinite(rl) and rl > 0):
             continue
 
@@ -517,6 +587,7 @@ def main() -> None:
         )
 
     out_table = out_dir / "nuclear_binding_energy_frequency_mapping_falsification_table.csv"
+    # 条件分岐: `table_rows` を満たす経路を評価する。
     if table_rows:
         with out_table.open("w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=list(table_rows[0].keys()))
@@ -610,10 +681,14 @@ def main() -> None:
 
     print("[ok] wrote:")
     print(f"  {out_png}")
+    # 条件分岐: `table_rows` を満たす経路を評価する。
     if table_rows:
         print(f"  {out_table}")
+
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

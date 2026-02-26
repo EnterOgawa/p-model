@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -46,34 +47,46 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
+
     try:
         data = _read_json(p)
     except Exception:
         return {"path": _relpath(p), "exists": True, "parse_error": True}
+
     out: Dict[str, Any] = {"path": _relpath(p), "exists": True}
     for k in ("beta", "beta_sigma", "gamma_pmodel", "gamma_pmodel_sigma", "delta"):
+        # 条件分岐: `k in data` を満たす経路を評価する。
         if k in data:
             out[k] = data.get(k)
+
     policy = data.get("policy")
+    # 条件分岐: `isinstance(policy, dict)` を満たす経路を評価する。
     if isinstance(policy, dict):
         out["policy"] = {kk: policy.get(kk) for kk in ("fit_predict_separation", "beta_source", "delta_source", "note")}
+
     return out
 
 
 def _get_nested(d: Dict[str, Any], path: List[str]) -> Any:
     cur: Any = d
     for k in path:
+        # 条件分岐: `not isinstance(cur, dict)` を満たす経路を評価する。
         if not isinstance(cur, dict):
             return None
+
         cur = cur.get(k)
+
     return cur
 
 
 def _as_float(v: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)):
         return float(v)
+
     return None
 
 
@@ -109,39 +122,51 @@ def _criterion(
 
 
 def _eval_ge(v: Optional[float], thr: float) -> Optional[bool]:
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return None
+
     return bool(v >= thr)
 
 
 def _eval_le(v: Optional[float], thr: float) -> Optional[bool]:
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return None
+
     return bool(v <= thr)
 
 
 def _eval_lt(v: Optional[float], thr: float) -> Optional[bool]:
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return None
+
     return bool(v < thr)
 
 
 def _eval_abs_le(v: Optional[float], thr: float) -> Optional[bool]:
+    # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
         return None
+
     return bool(abs(v) <= thr)
 
 
 def _try_read_csv_head(path: Path, *, n: int = 2) -> List[Dict[str, str]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     rows: List[Dict[str, str]] = []
     with open(path, "r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for i, r in enumerate(reader):
             rows.append({k: str(v) for k, v in (r or {}).items() if k})
+            # 条件分岐: `i + 1 >= n` を満たす経路を評価する。
             if i + 1 >= n:
                 break
+
     return rows
 
 
@@ -160,18 +185,23 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     cass_rmse = _as_float((cass_focus or {}).get("rmse") if isinstance(cass_focus, dict) else None)
 
     cass_nrmse = None
+    # 条件分岐: `isinstance(cass_windows, dict)` を満たす経路を評価する。
     if isinstance(cass_windows, dict):
         w = cass_windows.get("-10 to +10 days") or cass_windows.get("all (available points)") or {}
+        # 条件分岐: `isinstance(w, dict)` を満たす経路を評価する。
         if isinstance(w, dict):
             rmse = _as_float(w.get("rmse"))
             max_obs = _as_float(w.get("max_obs"))
             min_obs = _as_float(w.get("min_obs"))
+            # 条件分岐: `rmse is not None and max_obs is not None and min_obs is not None and (max_obs...` を満たす経路を評価する。
             if rmse is not None and max_obs is not None and min_obs is not None and (max_obs - min_obs) != 0.0:
                 cass_nrmse = rmse / (max_obs - min_obs)
 
     # Parameter freeze check (metadata)
+
     cass_meta_path = _ROOT / "output" / "private" / "cassini" / "cassini_fig2_run_metadata.json"
     cass_beta_used = None
+    # 条件分岐: `cass_meta_path.exists()` を満たす経路を評価する。
     if cass_meta_path.exists():
         try:
             m = _read_json(cass_meta_path)
@@ -180,6 +210,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
             cass_beta_used = None
 
     cass_beta_match = None
+    # 条件分岐: `beta_frozen is not None and cass_beta_used is not None` を満たす経路を評価する。
     if beta_frozen is not None and cass_beta_used is not None:
         cass_beta_match = abs(cass_beta_used - beta_frozen) <= 1e-12
 
@@ -238,6 +269,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     gps_pmod_med = _as_float((gps_metrics or {}).get("pmodel_rms_ns_median") if isinstance(gps_metrics, dict) else None)
 
     gps_ratio = None
+    # 条件分岐: `gps_brdc_med is not None and gps_pmod_med is not None and gps_brdc_med != 0.0` を満たす経路を評価する。
     if gps_brdc_med is not None and gps_pmod_med is not None and gps_brdc_med != 0.0:
         gps_ratio = gps_pmod_med / gps_brdc_med
 
@@ -279,6 +311,7 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     llr_beta_used = None
     llr_tide = None
     llr_nosh = None
+    # 条件分岐: `llr_summary_path.exists()` を満たす経路を評価する。
     if llr_summary_path.exists():
         try:
             j = _read_json(llr_summary_path)
@@ -290,10 +323,12 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
             pass
 
     llr_beta_match = None
+    # 条件分岐: `beta_frozen is not None and llr_beta_used is not None` を満たす経路を評価する。
     if beta_frozen is not None and llr_beta_used is not None:
         llr_beta_match = abs(llr_beta_used - beta_frozen) <= 1e-12
 
     llr_ratio = None
+    # 条件分岐: `llr_tide is not None and llr_nosh is not None and llr_nosh != 0.0` を満たす経路を評価する。
     if llr_tide is not None and llr_nosh is not None and llr_nosh != 0.0:
         llr_ratio = llr_tide / llr_nosh
 
@@ -332,15 +367,18 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     # ----------------
     mer_path = _ROOT / "output" / "private" / "mercury" / "mercury_precession_metrics.json"
     mer_diff_pct = None
+    # 条件分岐: `mer_path.exists()` を満たす経路を評価する。
     if mer_path.exists():
         try:
             m = _read_json(mer_path)
             ref = _as_float(m.get("reference_arcsec_century"))
             sim = _as_float(_get_nested(m, ["simulation_physical", "pmodel", "arcsec_per_century"]))
+            # 条件分岐: `ref is not None and sim is not None and ref != 0.0` を満たす経路を評価する。
             if ref is not None and sim is not None and ref != 0.0:
                 mer_diff_pct = 100.0 * (sim - ref) / ref
         except Exception:
             pass
+
     criteria.append(
         _criterion(
             cid="mercury_ref_agree",
@@ -362,22 +400,29 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
     # ----------------
     vik_path = _ROOT / "output" / "private" / "viking" / "viking_shapiro_result.csv"
     vik_max = None
+    # 条件分岐: `vik_path.exists()` を満たす経路を評価する。
     if vik_path.exists():
         try:
             with open(vik_path, "r", encoding="utf-8", newline="") as f:
                 reader = csv.DictReader(f)
                 for r in reader:
                     v = r.get("shapiro_delay_us")
+                    # 条件分岐: `v is None or str(v).strip() == ""` を満たす経路を評価する。
                     if v is None or str(v).strip() == "":
                         continue
+
                     try:
                         us = float(v)
                     except Exception:
                         continue
+
+                    # 条件分岐: `vik_max is None or us > vik_max` を満たす経路を評価する。
+
                     if vik_max is None or us > vik_max:
                         vik_max = us
         except Exception:
             pass
+
     criteria.append(
         _criterion(
             cid="viking_peak_range",
@@ -444,15 +489,21 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     in_path = Path(args.consistency)
+    # 条件分岐: `not in_path.is_absolute()` を満たす経路を評価する。
     if not in_path.is_absolute():
         in_path = (_ROOT / in_path).resolve()
+
+    # 条件分岐: `not in_path.exists()` を満たす経路を評価する。
+
     if not in_path.exists():
         print(f"[err] missing input: {in_path}")
         return 2
 
     out_path = Path(args.out)
+    # 条件分岐: `not out_path.is_absolute()` を満たす経路を評価する。
     if not out_path.is_absolute():
         out_path = (_ROOT / out_path).resolve()
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     consistency = _read_json(in_path)
@@ -471,6 +522,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

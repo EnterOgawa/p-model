@@ -19,8 +19,10 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _as_float(x: object) -> float | None:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)  # type: ignore[arg-type]
     except Exception:
         return None
@@ -55,6 +57,7 @@ def main() -> None:
     slug = str(args.slug).strip().lower()
     src_dir = root / "data" / "quantum" / "sources" / f"nist_webbook_diatomic_{slug}"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing extracted values: {extracted_path}\n"
@@ -63,6 +66,7 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     sel = extracted.get("selected")
+    # 条件分岐: `not isinstance(sel, dict)` を満たす経路を評価する。
     if not isinstance(sel, dict):
         raise SystemExit(f"[fail] selected missing in: {extracted_path}")
 
@@ -75,12 +79,15 @@ def main() -> None:
     de = _as_float(sel.get("D_e_cm^-1"))
     re_a = _as_float(sel.get("r_e_A"))
 
+    # 条件分岐: `omega_e is None or omega_exe is None or be is None or alpha_e is None or de i...` を満たす経路を評価する。
     if omega_e is None or omega_exe is None or be is None or alpha_e is None or de is None or re_a is None:
         raise SystemExit("[fail] missing required constants in selected block (expected ωe, ωexe, Be, αe, De, re)")
 
     # Morse potential (phenomenological) derived estimates.
+
     d_e_morse_cm_inv = None
     d0_morse_cm_inv = None
+    # 条件分岐: `omega_exe != 0.0` を満たす経路を評価する。
     if omega_exe != 0.0:
         d_e_morse_cm_inv = (omega_e * omega_e) / (4.0 * omega_exe)
         # Zero-point energy (Morse; ignoring higher terms):
@@ -125,8 +132,10 @@ def main() -> None:
     ax.set_axis_off()
 
     species_label = slug.upper()
+    # 条件分岐: `slug == "h2"` を満たす経路を評価する。
     if slug == "h2":
         species_label = "H2"
+    # 条件分岐: 前段条件が不成立で、`slug == "d2"` を追加評価する。
     elif slug == "d2":
         species_label = "D2"
 
@@ -145,6 +154,7 @@ def main() -> None:
     ]
     morse_d0 = derived["morse"]["D0_eV"]
     morse_de = derived["morse"]["D_e_eV"]
+    # 条件分岐: `morse_de is not None and morse_d0 is not None` を満たす経路を評価する。
     if morse_de is not None and morse_d0 is not None:
         lines.append(("Morse (derived)", f"D_e≈{morse_de:.4f} eV, D0≈{morse_d0:.4f} eV (from ωe, ωexe)"))
 
@@ -201,6 +211,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

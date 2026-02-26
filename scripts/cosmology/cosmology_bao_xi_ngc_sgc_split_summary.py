@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -48,8 +49,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -61,22 +64,31 @@ _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
 def _resolve_path_like(p: Any) -> Optional[Path]:
+    # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
         return None
+
     s = str(p).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
+
     if os.name == "nt":
         m = _WSL_ABS_RE.match(s)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             drive = m.group(1).upper()
             rest = m.group(2).replace("/", "\\")
             return Path(f"{drive}:\\{rest}")
     else:
+        # 条件分岐: `_WIN_ABS_RE.match(s)` を満たす経路を評価する。
         if _WIN_ABS_RE.match(s):
             drive = s[0].lower()
             rest = s[2:].lstrip("\\/").replace("\\", "/")
             return Path(f"/mnt/{drive}/{rest}")
+
     path = Path(s)
     return path if path.is_absolute() else (_ROOT / path)
 
@@ -88,9 +100,12 @@ def _load_json(path: Path) -> Dict[str, Any]:
 def _pick(d: Dict[str, Any], *keys: str, default: Any = None) -> Any:
     cur: Any = d
     for k in keys:
+        # 条件分岐: `not isinstance(cur, dict) or k not in cur` を満たす経路を評価する。
         if not isinstance(cur, dict) or k not in cur:
             return default
+
         cur = cur[k]
+
     return cur
 
 
@@ -108,8 +123,10 @@ class Point:
 
 def _metrics_path(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) -> Path:
     suffix = str(suffix)
+    # 条件分岐: `suffix and not suffix.startswith("__")` を満たす経路を評価する。
     if suffix and not suffix.startswith("__"):
         suffix = "__" + suffix
+
     name = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}{suffix}_metrics.json"
     return _ROOT / "output" / "private" / "cosmology" / name
 
@@ -135,10 +152,15 @@ def _load_point(path: Path, *, zbin: str, caps: str) -> Point:
 
 def _caps_label(caps: str) -> str:
     caps = str(caps)
+    # 条件分岐: `caps == "north"` を満たす経路を評価する。
     if caps == "north":
         return "NGC"
+
+    # 条件分岐: `caps == "south"` を満たす経路を評価する。
+
     if caps == "south":
         return "SGC"
+
     return caps
 
 
@@ -166,6 +188,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     zbins = [s.strip() for s in str(args.zbins).split(",") if s.strip()]
+    # 条件分岐: `not zbins` を満たす経路を評価する。
     if not zbins:
         raise SystemExit("--zbins must be non-empty")
 
@@ -179,18 +202,23 @@ def main(argv: Optional[List[str]] = None) -> int:
     for zbin in zbins:
         for caps in caps_list:
             p = _metrics_path(sample=str(args.sample), caps=caps, dist=str(args.dist), zbin=zbin, suffix=str(args.suffix))
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 raise SystemExit(f"missing metrics: {p}")
+
             points.append(_load_point(p, zbin=zbin, caps=caps))
 
     # Compute per-zbin NGC-SGC deltas (systematic indicator).
+
     deltas: List[Dict[str, Any]] = []
     curve_rmse: List[Dict[str, Any]] = []
     for zbin in zbins:
         ngc = next((pt for pt in points if pt.zbin == zbin and pt.caps == "north"), None)
         sgc = next((pt for pt in points if pt.zbin == zbin and pt.caps == "south"), None)
+        # 条件分岐: `ngc is None or sgc is None` を満たす経路を評価する。
         if ngc is None or sgc is None:
             continue
+
         deltas.append(
             {
                 "zbin": zbin,
@@ -206,11 +234,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         try:
             p_ngc = _resolve_path_like(ngc.source_npz)
             p_sgc = _resolve_path_like(sgc.source_npz)
+            # 条件分岐: `p_ngc and p_sgc and p_ngc.exists() and p_sgc.exists()` を満たす経路を評価する。
             if p_ngc and p_sgc and p_ngc.exists() and p_sgc.exists():
                 a = np.load(str(p_ngc))
                 b = np.load(str(p_sgc))
                 s_a = np.asarray(a["s"], dtype=float)
                 s_b = np.asarray(b["s"], dtype=float)
+                # 条件分岐: `s_a.shape == s_b.shape and np.allclose(s_a, s_b, rtol=0.0, atol=1e-12)` を満たす経路を評価する。
                 if s_a.shape == s_b.shape and np.allclose(s_a, s_b, rtol=0.0, atol=1e-12):
                     s2 = s_a * s_a
                     s2xi0_a = s2 * np.asarray(a["xi0"], dtype=float)
@@ -310,8 +340,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -46,8 +46,10 @@ class FitsBintableLayout:
 
 def _read_exact(f: BinaryIO, n: int) -> bytes:
     b = f.read(n)
+    # 条件分岐: `b is None` を満たす経路を評価する。
     if b is None:
         return b""
+
     return b
 
 
@@ -64,23 +66,30 @@ def _read_header_blocks(f: BinaryIO) -> bytes:
     chunks: List[bytes] = []
     while True:
         block = _read_exact(f, _BLOCK)
+        # 条件分岐: `len(block) != _BLOCK` を満たす経路を評価する。
         if len(block) != _BLOCK:
             raise EOFError("unexpected EOF while reading FITS header")
+
         chunks.append(block)
         # END card may be in this block
         for card in _iter_cards_from_header_bytes(block):
+            # 条件分岐: `card.startswith("END")` を満たす経路を評価する。
             if card.startswith("END"):
                 return b"".join(chunks)
 
 
 def _parse_int_card(card: str) -> Optional[int]:
+    # 条件分岐: `"=" not in card` を満たす経路を評価する。
     if "=" not in card:
         return None
     # KEYWORD = value / comment
+
     rhs = card.split("=", 1)[1]
     rhs = rhs.split("/", 1)[0].strip()
+    # 条件分岐: `not rhs` を満たす経路を評価する。
     if not rhs:
         return None
+
     try:
         return int(rhs)
     except Exception:
@@ -88,12 +97,16 @@ def _parse_int_card(card: str) -> Optional[int]:
 
 
 def _parse_str_card(card: str) -> Optional[str]:
+    # 条件分岐: `"=" not in card` を満たす経路を評価する。
     if "=" not in card:
         return None
+
     rhs = card.split("=", 1)[1]
     rhs = rhs.split("/", 1)[0].strip()
+    # 条件分岐: `len(rhs) >= 2 and rhs[0] == "'" and rhs[-1] == "'"` を満たす経路を評価する。
     if len(rhs) >= 2 and rhs[0] == "'" and rhs[-1] == "'":
         return rhs[1:-1]
+
     return None
 
 
@@ -103,45 +116,75 @@ def _tform_to_numpy_dtype(tform: str) -> Tuple[np.dtype, int, int]:
     FITS binary tables are big-endian.
     """
     m = _TFORM_RE.match(tform)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError(f"unsupported TFORM: {tform!r}")
+
     rep = int(m.group("rep") or "1")
     code = m.group("code")
+    # 条件分岐: `rep < 1` を満たす経路を評価する。
     if rep < 1:
         raise ValueError(f"invalid repeat in TFORM: {tform!r}")
+
+    # 条件分岐: `code == "A"` を満たす経路を評価する。
 
     if code == "A":
         dt = np.dtype(f"S{rep}")
         return dt, rep, rep
+
+    # 条件分岐: `code == "I"` を満たす経路を評価する。
+
     if code == "I":
         dt = np.dtype(">i2")
         return dt, rep, 2 * rep
+
+    # 条件分岐: `code == "J"` を満たす経路を評価する。
+
     if code == "J":
         dt = np.dtype(">i4")
         return dt, rep, 4 * rep
+
+    # 条件分岐: `code == "K"` を満たす経路を評価する。
+
     if code == "K":
         dt = np.dtype(">i8")
         return dt, rep, 8 * rep
+
+    # 条件分岐: `code == "E"` を満たす経路を評価する。
+
     if code == "E":
         dt = np.dtype(">f4")
         return dt, rep, 4 * rep
+
+    # 条件分岐: `code == "D"` を満たす経路を評価する。
+
     if code == "D":
         dt = np.dtype(">f8")
         return dt, rep, 8 * rep
+
+    # 条件分岐: `code == "B"` を満たす経路を評価する。
+
     if code == "B":
         dt = np.dtype("u1")
         return dt, rep, 1 * rep
+
+    # 条件分岐: `code == "L"` を満たす経路を評価する。
+
     if code == "L":
         # Logical (boolean): stored as 1 byte per element (typically 'T'/'F').
         # We keep the raw byte here; higher-level code may map 'T'->True.
         dt = np.dtype("S1")
         return dt, rep, 1 * rep
+
+    # 条件分岐: `code == "X"` を満たす経路を評価する。
+
     if code == "X":
         # Bit array: rep is in bits, storage is ceil(rep/8) bytes.
         # We expose raw bytes here. Most callers won't request bit-array columns.
         dt = np.dtype("u1")
         nbytes = (rep + 7) // 8
         return dt, rep, int(nbytes)
+
     raise ValueError(f"unsupported TFORM code: {code!r} (tform={tform!r})")
 
 
@@ -163,35 +206,50 @@ def read_first_bintable_layout(f: BinaryIO) -> FitsBintableLayout:
 
     for card in _iter_cards_from_header_bytes(hdr):
         key = card[:8].strip()
+        # 条件分岐: `key == "NAXIS1"` を満たす経路を評価する。
         if key == "NAXIS1":
             row_bytes = _parse_int_card(card)
+        # 条件分岐: 前段条件が不成立で、`key == "NAXIS2"` を追加評価する。
         elif key == "NAXIS2":
             n_rows = _parse_int_card(card)
+        # 条件分岐: 前段条件が不成立で、`key == "TFIELDS"` を追加評価する。
         elif key == "TFIELDS":
             tfields = _parse_int_card(card)
+        # 条件分岐: 前段条件が不成立で、`key.startswith("TTYPE")` を追加評価する。
         elif key.startswith("TTYPE"):
             try:
                 i = int(key[5:])
             except Exception:
                 continue
+
             v = _parse_str_card(card)
+            # 条件分岐: `v is not None` を満たす経路を評価する。
             if v is not None:
                 ttype[i] = v.strip()
+        # 条件分岐: 前段条件が不成立で、`key.startswith("TFORM")` を追加評価する。
         elif key.startswith("TFORM"):
             try:
                 i = int(key[5:])
             except Exception:
                 continue
+
             v = _parse_str_card(card)
+            # 条件分岐: `v is not None` を満たす経路を評価する。
             if v is not None:
                 tform[i] = v.strip()
 
+    # 条件分岐: `row_bytes is None or n_rows is None or tfields is None` を満たす経路を評価する。
+
     if row_bytes is None or n_rows is None or tfields is None:
         raise ValueError("failed to parse BINTABLE header (missing NAXIS1/NAXIS2/TFIELDS)")
+
+    # 条件分岐: `tfields < 1` を満たす経路を評価する。
+
     if tfields < 1:
         raise ValueError(f"invalid TFIELDS: {tfields}")
 
     # compute offsets by walking all fields in order
+
     columns: List[str] = []
     offsets: Dict[str, int] = {}
     formats: Dict[str, str] = {}
@@ -199,13 +257,17 @@ def read_first_bintable_layout(f: BinaryIO) -> FitsBintableLayout:
     for i in range(1, tfields + 1):
         name = ttype.get(i)
         fmt = tform.get(i)
+        # 条件分岐: `name is None or fmt is None` を満たす経路を評価する。
         if name is None or fmt is None:
             raise ValueError(f"missing TTYPE/TFORM for field {i} (got TTYPE={name}, TFORM={fmt})")
+
         _, _, width = _tform_to_numpy_dtype(fmt)
         columns.append(name)
         offsets[name] = off
         formats[name] = fmt
         off += width
+
+    # 条件分岐: `off != row_bytes` を満たす経路を評価する。
 
     if off != row_bytes:
         # Accept but warn via exception? Here we keep strict to avoid mis-parse.
@@ -234,26 +296,32 @@ def read_bintable_columns(
     """
     want = [c.strip() for c in columns]
     for c in want:
+        # 条件分岐: `c not in layout.offsets` を満たす経路を評価する。
         if c not in layout.offsets:
             raise KeyError(f"column not found: {c!r}")
 
     n_total = int(layout.n_rows)
     n_read = n_total if max_rows is None else min(n_total, int(max_rows))
+    # 条件分岐: `n_read < 0` を満たす経路を評価する。
     if n_read < 0:
         raise ValueError("max_rows must be >= 0")
 
     # Build numpy structured dtype with offsets and itemsize = row_bytes.
+
     names: List[str] = []
     fmts: List[np.dtype] = []
     offs: List[int] = []
     for c in want:
         tform = layout.formats[c]
         dt, rep, _ = _tform_to_numpy_dtype(tform)
+        # 条件分岐: `rep != 1` を満たす経路を評価する。
         if rep != 1:
             raise ValueError(f"only scalar fields supported in read_bintable_columns (col={c!r}, TFORM={tform!r})")
+
         names.append(c)
         fmts.append(dt)
         offs.append(int(layout.offsets[c]))
+
     dt_struct = np.dtype({"names": names, "formats": fmts, "offsets": offs, "itemsize": int(layout.row_bytes)})
 
     out: Dict[str, np.ndarray] = {c: np.empty(n_read, dtype=np.float64) for c in want}
@@ -263,15 +331,19 @@ def read_bintable_columns(
     while i0 < n_read:
         n_chunk = min(int(chunk_rows), n_read - i0)
         b = _read_exact(f, n_chunk * row_bytes)
+        # 条件分岐: `len(b) != n_chunk * row_bytes` を満たす経路を評価する。
         if len(b) != n_chunk * row_bytes:
             raise EOFError("unexpected EOF while reading BINTABLE data")
+
         arr = np.frombuffer(b, dtype=dt_struct, count=n_chunk)
         for c in want:
             # Convert big-endian scalar to native float64.
             out[c][i0 : i0 + n_chunk] = np.asarray(arr[c], dtype=np.float64)
+
         i0 += n_chunk
 
     # If max_rows < total rows, we stop here (caller may close stream early).
+
     return out
 
 
@@ -292,13 +364,18 @@ def iter_bintable_column_chunks(
     """
     want = [c.strip() for c in columns]
     for c in want:
+        # 条件分岐: `c not in layout.offsets` を満たす経路を評価する。
         if c not in layout.offsets:
             raise KeyError(f"column not found: {c!r}")
 
     n_total = int(layout.n_rows)
     n_read = n_total if max_rows is None else min(n_total, int(max_rows))
+    # 条件分岐: `n_read < 0` を満たす経路を評価する。
     if n_read < 0:
         raise ValueError("max_rows must be >= 0")
+
+    # 条件分岐: `int(chunk_rows) <= 0` を満たす経路を評価する。
+
     if int(chunk_rows) <= 0:
         raise ValueError("chunk_rows must be > 0")
 
@@ -308,11 +385,14 @@ def iter_bintable_column_chunks(
     for c in want:
         tform = layout.formats[c]
         dt, rep, _ = _tform_to_numpy_dtype(tform)
+        # 条件分岐: `rep != 1` を満たす経路を評価する。
         if rep != 1:
             raise ValueError(f"only scalar fields supported in iter_bintable_column_chunks (col={c!r}, TFORM={tform!r})")
+
         names.append(c)
         fmts.append(dt)
         offs.append(int(layout.offsets[c]))
+
     dt_struct = np.dtype({"names": names, "formats": fmts, "offsets": offs, "itemsize": int(layout.row_bytes)})
 
     row_bytes = int(layout.row_bytes)
@@ -320,12 +400,15 @@ def iter_bintable_column_chunks(
     while i0 < n_read:
         n_chunk = min(int(chunk_rows), n_read - i0)
         b = _read_exact(f, n_chunk * row_bytes)
+        # 条件分岐: `len(b) != n_chunk * row_bytes` を満たす経路を評価する。
         if len(b) != n_chunk * row_bytes:
             raise EOFError("unexpected EOF while reading BINTABLE data")
+
         arr = np.frombuffer(b, dtype=dt_struct, count=n_chunk)
         out: Dict[str, np.ndarray] = {}
         for c in want:
             out[c] = np.asarray(arr[c], dtype=np.float64)
+
         i0 += n_chunk
         yield out
 

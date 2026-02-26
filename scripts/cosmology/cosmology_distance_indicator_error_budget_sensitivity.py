@@ -44,6 +44,7 @@ import numpy as np
 import pandas as pd
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -66,6 +67,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -80,6 +82,7 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -97,12 +100,15 @@ def _load_pantheonplus_dat(path: Path) -> pd.DataFrame:
     # Normalize for convenience.
     if "zCMB" in df.columns and "zcmb" not in df.columns:
         df = df.rename(columns={"zCMB": "zcmb"})
+
     return df
 
 
 def _as_int_series(df: pd.DataFrame, col: str) -> pd.Series:
+    # 条件分岐: `col not in df.columns` を満たす経路を評価する。
     if col not in df.columns:
         return pd.Series([0] * int(len(df)))
+
     s = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return s.astype(int, copy=False)
 
@@ -116,8 +122,10 @@ def _subset_df_and_cov(
 ) -> Tuple[pd.DataFrame, Optional[np.ndarray], Optional[np.ndarray]]:
     idx = np.asarray(idx, dtype=int)
     idx = idx[(idx >= 0) & (idx < int(len(df)))]
+    # 条件分岐: `idx.size == 0` を満たす経路を評価する。
     if idx.size == 0:
         return (df.iloc[0:0].copy(), None, None)
+
     df2 = df.iloc[idx].copy().reset_index(drop=True)
     cov_stat2 = cov_stat[np.ix_(idx, idx)].copy() if cov_stat is not None else None
     cov_tot2 = cov_tot[np.ix_(idx, idx)].copy() if cov_tot is not None else None
@@ -132,16 +140,20 @@ def _pantheonplus_select_unique_cid_indices(df: pd.DataFrame, *, prefer_sigma: O
       - pick the smallest diagonal sigma (prefer_sigma) within each CID.
       - tie-breaker: smaller IDSURVEY, then earlier row.
     """
+    # 条件分岐: `"CID" not in df.columns` を満たす経路を評価する。
     if "CID" not in df.columns:
         return np.arange(int(len(df)), dtype=int)
+
     cid = df["CID"].astype(str)
     ids = _as_int_series(df, "IDSURVEY").to_numpy(dtype=int, copy=False)
     orig = np.arange(int(len(df)), dtype=int)
+    # 条件分岐: `prefer_sigma is None` を満たす経路を評価する。
     if prefer_sigma is None:
         # fallback: try MU_SH0ES_ERR_DIAG, else all NaN (then uses IDSURVEY/orig)
         sig = pd.to_numeric(df.get("MU_SH0ES_ERR_DIAG"), errors="coerce").to_numpy(dtype=float, copy=False)
     else:
         sig = np.asarray(prefer_sigma, dtype=float)
+        # 条件分岐: `sig.shape != (int(len(df)),)` を満たす経路を評価する。
         if sig.shape != (int(len(df)),):
             sig = np.full(int(len(df)), np.nan, dtype=float)
 
@@ -166,8 +178,10 @@ def _load_cov_txt(path: Path) -> np.ndarray:
       - first line: N
       - then N*N floats (sequential)
     """
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(str(path))
+
     first = path.read_text(encoding="utf-8", errors="replace").splitlines()[0].strip()
     try:
         n = int(first)
@@ -175,8 +189,10 @@ def _load_cov_txt(path: Path) -> np.ndarray:
         raise ValueError(f"Invalid first line for covariance (expected N int): {first!r}") from e
 
     data = np.loadtxt(path, dtype=float, skiprows=1)
+    # 条件分岐: `data.size != int(n) * int(n)` を満たす経路を評価する。
     if data.size != int(n) * int(n):
         raise ValueError(f"covariance size mismatch: got {data.size}, expected {n*n}")
+
     return data.reshape((n, n))
 
 
@@ -189,12 +205,17 @@ def _compute_sn_binned_budget_pantheonplus(
     cov_statonly: Optional[np.ndarray],
     cov_total: Optional[np.ndarray],
 ) -> List[Dict[str, Any]]:
+    # 条件分岐: `"zcmb" not in df.columns` を満たす経路を評価する。
     if "zcmb" not in df.columns:
         raise ValueError("Pantheon+ .dat must contain column: zCMB (or normalized 'zcmb')")
 
     n_rows = int(len(df))
+    # 条件分岐: `cov_statonly is not None and cov_statonly.shape != (n_rows, n_rows)` を満たす経路を評価する。
     if cov_statonly is not None and cov_statonly.shape != (n_rows, n_rows):
         raise ValueError(f"Pantheon+ STATONLY covariance shape mismatch: {cov_statonly.shape} vs n={n_rows}")
+
+    # 条件分岐: `cov_total is not None and cov_total.shape != (n_rows, n_rows)` を満たす経路を評価する。
+
     if cov_total is not None and cov_total.shape != (n_rows, n_rows):
         raise ValueError(f"Pantheon+ STAT+SYS covariance shape mismatch: {cov_total.shape} vs n={n_rows}")
 
@@ -211,14 +232,17 @@ def _compute_sn_binned_budget_pantheonplus(
         idx0 = sub0.index.to_numpy(dtype=int)
         # Valid points: need diagonal sigma.
         sig0 = None
+        # 条件分岐: `diag_stat is not None` を満たす経路を評価する。
         if diag_stat is not None:
             sig0 = diag_stat[idx0]
             ok = np.isfinite(sig0) & (sig0 > 0.0)
         else:
             ok = np.zeros_like(idx0, dtype=bool)
+
         idx = idx0[ok]
         n = int(idx.size)
 
+        # 条件分岐: `n < int(min_points)` を満たす経路を評価する。
         if n < int(min_points):
             out.append(
                 {
@@ -244,16 +268,19 @@ def _compute_sn_binned_budget_pantheonplus(
         sigma_sem_stat_diag = float(math.sqrt(1.0 / float(w.sum())))
 
         sigma_sem_stat_cov: Optional[float] = None
+        # 条件分岐: `cov_statonly is not None` を満たす経路を評価する。
         if cov_statonly is not None:
             cov_bin = cov_statonly[np.ix_(idx, idx)].astype(float, copy=False)
             sigma_sem_stat_cov = base._cov_sem_weighted(cov_bin)
 
         sigma_median_total: Optional[float] = None
         sigma_sem_total_cov: Optional[float] = None
+        # 条件分岐: `cov_total is not None` を満たす経路を評価する。
         if cov_total is not None:
             try:
                 cov_bin_tot = cov_total[np.ix_(idx, idx)].astype(float, copy=False)
                 sigma_sem_total_cov = base._cov_sem_weighted(cov_bin_tot)
+                # 条件分岐: `diag_total is not None` を満たす経路を評価する。
                 if diag_total is not None:
                     sigma_median_total = float(np.nanmedian(diag_total[idx]))
             except Exception:
@@ -274,6 +301,7 @@ def _compute_sn_binned_budget_pantheonplus(
                 "sigma_sem_total_cov": sigma_sem_total_cov,
             }
         )
+
     return out
 
 
@@ -329,6 +357,7 @@ def _compute_reach_limits_for_sn_bins(
     boss_dm_corr = None
     boss_dm_sigmas = None
     boss_dm_match = []
+    # 条件分岐: `boss_baofs_cov is not None and bao_z.size` を満たす経路を評価する。
     if boss_baofs_cov is not None and bao_z.size:
         try:
             boss_params = list(boss_baofs_cov["parameters"])
@@ -359,6 +388,7 @@ def _compute_reach_limits_for_sn_bins(
             bao_mu_grid_cov = np.array(bao_mu_grid_naive, copy=True)
 
     # Budgets
+
     budget_opt = np.sqrt(np.maximum(0.0, sn_sem_grid) ** 2 + np.maximum(0.0, bao_mu_grid_naive) ** 2 + rdrag_mu**2)
     budget_cons = np.sqrt(np.maximum(0.0, sn_med_grid) ** 2 + np.maximum(0.0, bao_mu_grid_naive) ** 2 + rdrag_mu**2)
     budget_opt_total = np.sqrt(
@@ -382,8 +412,10 @@ def _compute_reach_limits_for_sn_bins(
     limits: Dict[str, Any] = {"opt": {}, "cons": {}}
     limits_total: Dict[str, Any] = {"opt": {}, "cons": {}}
     for label, dm_req in [("bao", dm_req_bao), ("no_bao", dm_req_no)]:
+        # 条件分岐: `dm_req is None` を満たす経路を評価する。
         if dm_req is None:
             continue
+
         limits["opt"][label] = {}
         limits["cons"][label] = {}
         limits_total["opt"][label] = {}
@@ -506,16 +538,25 @@ def _plot_sensitivity(
             for ss in scenarios:
                 for mm in sigs:
                     a, b = _pick_limits(ss, which, mm)
+                    # 条件分岐: `a is not None and math.isfinite(float(a))` を満たす経路を評価する。
                     if a is not None and math.isfinite(float(a)):
                         y_all.append(float(a))
+
+                    # 条件分岐: `b is not None and math.isfinite(float(b))` を満たす経路を評価する。
+
                     if b is not None and math.isfinite(float(b)):
                         y_all.append(float(b))
+
+            # 条件分岐: `y_all` を満たす経路を評価する。
+
             if y_all:
                 ymax = max(ymax, float(np.nanmax(y_all)) * 1.25)
         except Exception:
             pass
+
         ax.set_ylim(0.0, ymax)
 
+        # 条件分岐: `rep` を満たす経路を評価する。
         if rep:
             eps = rep.get("epsilon0_obs")
             sig = rep.get("epsilon0_sigma")
@@ -532,8 +573,10 @@ def _plot_sensitivity(
             )
 
     handles, labels_leg = ax1.get_legend_handles_labels()
+    # 条件分岐: `handles` を満たす経路を評価する。
     if handles:
         fig.legend(handles, labels_leg, loc="lower center", ncol=4, fontsize=10, frameon=False)
+
     fig.suptitle("距離指標の誤差予算：SNeサンプル/共分散の扱いによる z_limit の変動（SEMベース）", fontsize=13)
     fig.tight_layout(rect=(0.0, 0.06, 1.0, 0.95))
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -558,6 +601,7 @@ def _plot_scan_heatmap(
     msk = ~np.isfinite(data)
     vmin = float(np.nanmin(data)) if np.isfinite(data).any() else 0.0
     vmax = float(np.nanmax(data)) if np.isfinite(data).any() else 1.0
+    # 条件分岐: `vmax <= vmin` を満たす経路を評価する。
     if vmax <= vmin:
         vmax = vmin + 1e-9
 
@@ -577,8 +621,10 @@ def _plot_scan_heatmap(
     for iy in range(data.shape[0]):
         for ix in range(data.shape[1]):
             v = data[iy, ix]
+            # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
             if not math.isfinite(float(v)):
                 continue
+
             ax.text(ix, iy, f"{v:.3f}", ha="center", va="center", fontsize=9, color="white")
 
     cbar = fig.colorbar(img, ax=ax, fraction=0.046, pad=0.04)
@@ -601,6 +647,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     bin_width = float(args.bin_width)
     sn_min_points = int(args.sn_min_points)
     sigma_multipliers = [float(x) for x in str(args.sigma_multipliers).split(",") if str(x).strip()]
+    # 条件分岐: `not sigma_multipliers` を満たす経路を評価する。
     if not sigma_multipliers:
         sigma_multipliers = [1.0, 3.0]
 
@@ -851,6 +898,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             envelope["cons_total"][which][key] = _max_or_none(vals_cons_t)
 
     # Step 14.2.20: scan (HF subset) for plausible upper bounds from binning choices.
+
     scan_bin_widths = [0.05, 0.1, 0.2]
     scan_min_points = [8, 10, 15, 20]
     scan_values = np.full((len(scan_min_points), len(scan_bin_widths)), np.nan, dtype=float)
@@ -913,9 +961,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     scan_best = None
     try:
         flat = scan_values[np.isfinite(scan_values)]
+        # 条件分岐: `flat.size` を満たす経路を評価する。
         if flat.size:
             best_val = float(np.nanmax(flat))
             best_idx = np.argwhere(np.isfinite(scan_values) & (scan_values == best_val))
+            # 条件分岐: `best_idx.size` を満たす経路を評価する。
             if best_idx.size:
                 iy, ix = [int(x) for x in best_idx[0]]
                 scan_best = {"no_bao_opt_total_3sigma": best_val, "bin_width": scan_bin_widths[ix], "sn_min_points": scan_min_points[iy]}
@@ -1028,6 +1078,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -48,6 +49,7 @@ def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -
     text = (metric_public or "").strip() or (metric_fallback or "").strip()
 
     sigma_m = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*σ", text)
+    # 条件分岐: `sigma_m` を満たす経路を評価する。
     if sigma_m:
         try:
             return _clamp(abs(float(sigma_m.group(1))), 0.0, 3.0)
@@ -55,6 +57,7 @@ def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -
             pass
 
     z_m = re.search(r"\bz\s*=\s*([+-]?[0-9]+(?:\.[0-9]+)?)\b", text)
+    # 条件分岐: `z_m` を満たす経路を評価する。
     if z_m:
         try:
             return _clamp(abs(float(z_m.group(1))), 0.0, 3.0)
@@ -67,13 +70,21 @@ def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -
             delta_vals.append(abs(float(m.group(1))))
         except Exception:
             continue
+
+    # 条件分岐: `delta_vals` を満たす経路を評価する。
+
     if delta_vals:
         return _clamp(max(delta_vals) / 0.33, 0.0, 3.0)
 
     pm = (pmodel or "").strip()
+    # 条件分岐: `pm` を満たす経路を評価する。
     if pm:
+        # 条件分岐: `any(k in pm for k in ("同", "同スケール", "弱場写像", "整合", "ε=0"))` を満たす経路を評価する。
         if any(k in pm for k in ("同", "同スケール", "弱場写像", "整合", "ε=0")):
             return 0.5
+
+        # 条件分岐: `any(k in pm for k in ("入口", "基準値", "ターゲット", "固定", "再導出", "必要条件", "制約"))` を満たす経路を評価する。
+
         if any(k in pm for k in ("入口", "基準値", "ターゲット", "固定", "再導出", "必要条件", "制約")):
             return 1.5
 
@@ -81,39 +92,61 @@ def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -
 
 
 def _status_from_score(score: Optional[float]) -> str:
+    # 条件分岐: `score is None` を満たす経路を評価する。
     if score is None:
         return "info"
+
+    # 条件分岐: `score <= 1.0` を満たす経路を評価する。
+
     if score <= 1.0:
         return "ok"
+
+    # 条件分岐: `score <= 2.0` を満たす経路を評価する。
+
     if score <= 2.0:
         return "mixed"
+
     return "ng"
 
 
 def _short_observable_label(observable: str) -> str:
     obs = (observable or "").strip()
+    # 条件分岐: `not obs` を満たす経路を評価する。
     if not obs:
         return "detail"
 
     # Prefer stable, short tokens for the overview y-axis.
+
     if "COW" in obs:
         return "COW"
+
+    # 条件分岐: `"原子干渉" in obs` を満たす経路を評価する。
+
     if "原子干渉" in obs:
         return "原子干渉計"
 
     for token in ("H I", "He I", "H2", "HD", "D2", "D0"):
+        # 条件分岐: `token in obs` を満たす経路を評価する。
         if token in obs:
             return token
+
+    # 条件分岐: `"一次線" in obs or "代表遷移" in obs` を満たす経路を評価する。
 
     if "一次線" in obs or "代表遷移" in obs:
         return "lines"
 
+    # 条件分岐: `"photon" in obs or "time-tag" in obs` を満たす経路を評価する。
+
     if "photon" in obs or "time-tag" in obs:
         return "time-tag"
+
+    # 条件分岐: `"共分散" in obs or "系統" in obs` を満たす経路を評価する。
+
     if "共分散" in obs or "系統" in obs:
         return "cov+sys"
 
     # Fallback: remove parenthetical notes and truncate.
+
     obs = re.sub(r"[（(].*?[）)]", "", obs).strip()
     obs = re.sub(r"\s+", " ", obs)
     return obs[:16] if len(obs) > 16 else obs
@@ -132,6 +165,7 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
         ],
     }
 
+    # 条件分岐: `not table1_json.exists()` を満たす経路を評価する。
     if not table1_json.exists():
         return payload
 
@@ -141,26 +175,35 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
 
     topic_counts: Dict[str, int] = {}
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         topic = str(r.get("topic") or "").strip()
+        # 条件分岐: `not topic` を満たす経路を評価する。
         if not topic:
             continue
+
         topic_counts[topic] = topic_counts.get(topic, 0) + 1
 
     out_rows: List[Dict[str, Any]] = []
     for idx, r in enumerate(rows):
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         topic = str(r.get("topic") or "").strip()
+        # 条件分岐: `not topic` を満たす経路を評価する。
         if not topic:
             continue
+
         observable = str(r.get("observable") or "").strip()
         metric = str(r.get("metric") or "")
         metric_public = str(r.get("metric_public") or "")
         pmodel = str(r.get("pmodel") or "")
 
         label = topic
+        # 条件分岐: `topic_counts.get(topic, 0) > 1` を満たす経路を評価する。
         if topic_counts.get(topic, 0) > 1:
             label = f"{topic}：{_short_observable_label(observable)}"
 
@@ -233,6 +276,8 @@ def main() -> int:
     print(f"Wrote: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

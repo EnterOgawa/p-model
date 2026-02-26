@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -28,6 +29,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest().upper()
 
 
@@ -38,6 +40,7 @@ def _read_head(path: Path, n: int = 8) -> bytes:
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
@@ -47,6 +50,7 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-eht-supporting-fetch/1.0"})
     with urllib.request.urlopen(req, timeout=240) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -54,32 +58,47 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
 def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for m in tf.getmembers():
+        # 条件分岐: `not isinstance(m.name, str)` を満たす経路を評価する。
         if not isinstance(m.name, str):
             continue
+
         p = Path(m.name)
+        # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
         if p.is_absolute():
             raise RuntimeError(f"unsafe tar member (absolute path): {m.name}")
+
+        # 条件分岐: `any(part in ("..", "") for part in p.parts)` を満たす経路を評価する。
+
         if any(part in ("..", "") for part in p.parts):
             raise RuntimeError(f"unsafe tar member (path traversal): {m.name}")
+
     tf.extractall(out_dir)
 
 
 def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
+    # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
     if out_dir.exists() and any(out_dir.iterdir()) and not force:
         print(f"[skip] extracted: {out_dir}")
         return True
 
+    # 条件分岐: `force and out_dir.exists()` を満たす経路を評価する。
+
     if force and out_dir.exists():
         for p in out_dir.glob("*"):
+            # 条件分岐: `p.is_dir()` を満たす経路を評価する。
             if p.is_dir():
                 shutil.rmtree(p)
             else:
                 p.unlink(missing_ok=True)
 
     head = _read_head(tar_path, 5)
+    # 条件分岐: `head.startswith(b"%PDF")` を満たす経路を評価する。
     if head.startswith(b"%PDF"):
         print(f"[warn] e-print looks like PDF (not tar.gz): {tar_path.name} (skipping extract)")
         return False
+
+    # 条件分岐: `not head.startswith(b"\x1f\x8b")` を満たす経路を評価する。
+
     if not head.startswith(b"\x1f\x8b"):
         print(f"[warn] e-print is not gzip (skipping extract): {tar_path.name}")
         return False
@@ -87,6 +106,7 @@ def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
     try:
         with tarfile.open(tar_path, "r:gz") as tf:
             _safe_extractall(tf, out_dir)
+
         print(f"[ok] extracted: {out_dir}")
         return True
     except tarfile.ReadError as e:
@@ -95,8 +115,10 @@ def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
 
 
 def _count_tex_files(dir_path: Path) -> Optional[int]:
+    # 条件分岐: `not (dir_path.exists() and dir_path.is_dir())` を満たす経路を評価する。
     if not (dir_path.exists() and dir_path.is_dir()):
         return None
+
     return sum(1 for _ in dir_path.rglob("*.tex"))
 
 
@@ -169,10 +191,13 @@ def main() -> int:
         doi = str(paper.get("doi") or "").strip() or None
 
         notes: List[str] = []
+        # 条件分岐: `kind == "arxiv"` を満たす経路を評価する。
         if kind == "arxiv":
             arxiv_id = str(paper.get("arxiv") or "").strip()
+            # 条件分岐: `not arxiv_id` を満たす経路を評価する。
             if not arxiv_id:
                 raise RuntimeError(f"missing arxiv id for: {key}")
+
             pdf_url = f"https://arxiv.org/pdf/{arxiv_id}.pdf"
             src_url = f"https://arxiv.org/e-print/{arxiv_id}"
 
@@ -180,11 +205,13 @@ def main() -> int:
             src_path = sources_dir / f"arxiv_{arxiv_id}_src.tar.gz"
             extract_dir = sources_dir / f"arxiv_{arxiv_id}"
 
+            # 条件分岐: `not args.offline` を満たす経路を評価する。
             if not args.offline:
                 try:
                     _download(pdf_url, pdf_path, force=bool(args.force))
                 except Exception as e:
                     notes.append(f"pdf download failed: {e}")
+
                 try:
                     _download(src_url, src_path, force=bool(args.force))
                 except Exception as e:
@@ -192,6 +219,7 @@ def main() -> int:
 
             extracted_ok = False
             try:
+                # 条件分岐: `src_path.exists()` を満たす経路を評価する。
                 if src_path.exists():
                     extracted_ok = _extract_src(src_path, extract_dir, force=bool(args.force))
             except Exception as e:
@@ -218,13 +246,18 @@ def main() -> int:
             rows.append(row)
             continue
 
+        # 条件分岐: `kind == "direct_pdf"` を満たす経路を評価する。
+
         if kind == "direct_pdf":
             url_pdf = str(paper.get("url_pdf") or "").strip()
             url_landing = str(paper.get("url_landing") or "").strip() or None
             local_name = str(paper.get("local_pdf_name") or "").strip()
+            # 条件分岐: `not (url_pdf and local_name)` を満たす経路を評価する。
             if not (url_pdf and local_name):
                 raise RuntimeError(f"missing url_pdf/local_pdf_name for: {key}")
+
             pdf_path = sources_dir / local_name
+            # 条件分岐: `not args.offline` を満たす経路を評価する。
             if not args.offline:
                 try:
                     _download(url_pdf, pdf_path, force=bool(args.force))
@@ -276,6 +309,8 @@ def main() -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

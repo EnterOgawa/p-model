@@ -42,6 +42,7 @@ except Exception:  # pragma: no cover
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -71,6 +72,7 @@ def _sha256_file(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -87,9 +89,12 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:  # pragma: no cover
         raise RuntimeError("requests is required for online fetch")
+
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         return {
             "status": "skipped_exists",
@@ -98,17 +103,21 @@ def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
             "sha256": _sha256_file(dst),
             "url": url,
         }
+
     r = requests.get(url, timeout=_REQ_TIMEOUT, stream=True)
     r.raise_for_status()
     h = hashlib.sha256()
     n = 0
     with dst.open("wb") as f:
         for chunk in r.iter_content(chunk_size=1024 * 1024):
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 continue
+
             f.write(chunk)
             h.update(chunk)
             n += len(chunk)
+
     return {"status": "downloaded", "path": _rel(dst), "bytes": int(n), "sha256": h.hexdigest(), "url": url}
 
 
@@ -117,35 +126,53 @@ _SRSPEC_RE = re.compile(r"SRSPEC", flags=re.IGNORECASE)
 
 def _iter_xmm_srspec_files(cache_root: Path, *, obsids: Optional[Sequence[str]] = None) -> Iterable[Path]:
     base = cache_root / "xmm"
+    # 条件分岐: `not base.exists()` を満たす経路を評価する。
     if not base.exists():
         return []
+
     wanted = {str(x).strip() for x in (obsids or []) if str(x).strip()}
     for rev_dir in sorted(base.glob("rev*")):
+        # 条件分岐: `not rev_dir.is_dir()` を満たす経路を評価する。
         if not rev_dir.is_dir():
             continue
+
         for obs_dir in sorted(rev_dir.glob("*")):
+            # 条件分岐: `not obs_dir.is_dir()` を満たす経路を評価する。
             if not obs_dir.is_dir():
                 continue
+
             obsid = obs_dir.name
+            # 条件分岐: `wanted and obsid not in wanted` を満たす経路を評価する。
             if wanted and obsid not in wanted:
                 continue
+
             pps = obs_dir / "PPS"
+            # 条件分岐: `not pps.exists()` を満たす経路を評価する。
             if not pps.exists():
                 continue
+
             for p in sorted(pps.glob("*.FTZ")):
+                # 条件分岐: `_SRSPEC_RE.search(p.name)` を満たす経路を評価する。
                 if _SRSPEC_RE.search(p.name):
                     yield p
 
 
 def _resp_base_for_name(respfile: str) -> Optional[Tuple[str, str]]:
     s = str(respfile).strip().strip("'")
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     low = s.lower()
+    # 条件分岐: `low.startswith(("m1_", "m2_", "m11_", "m21_"))` を満たす経路を評価する。
     if low.startswith(("m1_", "m2_", "m11_", "m21_")):
         return "MOS", _BASE_MOS
+
+    # 条件分岐: `low.startswith(("epn_", "pn_", "pnu_", "p11_", "p21_"))` を満たす経路を評価する。
+
     if low.startswith(("epn_", "pn_", "pnu_", "p11_", "p21_")):
         return "PN", _BASE_PN
+
     return None
 
 
@@ -172,8 +199,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir = _ROOT / "data" / "xrism" / "xmm_epic_responses"
     out_manifest = _ROOT / "data" / "xrism" / "sources" / "xmm_epic_responses_manifest.json"
 
+    # 条件分岐: `args.offline and args.download_missing` を満たす経路を評価する。
     if args.offline and args.download_missing:
         ap.error("--offline and --download-missing cannot be used together")
+
+    # 条件分岐: `(not args.offline) and requests is None` を満たす経路を評価する。
+
     if (not args.offline) and requests is None:
         raise RuntimeError("requests is required for online fetch")
 
@@ -187,17 +218,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             hdr = _fits_read_spectrum_header(p)
         except Exception:
             continue
+
         resp = str(hdr.get("RESPFILE") or "").strip().strip("'")
+        # 条件分岐: `resp` を満たす経路を評価する。
         if resp:
             respfiles.append(resp)
             debug_sources.append(_rel(p))
+
     respfiles.extend(extra)
 
     uniq = []
     seen = set()
     for r in respfiles:
+        # 条件分岐: `r in seen` を満たす経路を評価する。
         if r in seen:
             continue
+
         seen.add(r)
         uniq.append(r)
 
@@ -218,29 +254,40 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     for name in uniq:
         info = _resp_base_for_name(name)
+        # 条件分岐: `info is None` を満たす経路を評価する。
         if info is None:
             run["results"]["skipped"].append({"status": "skipped_unknown_instrument", "respfile": name})
             continue
+
         inst, base_url = info
         url = urljoin(base_url, name)
         dst = out_dir / inst / name
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
+            # 条件分岐: `dst.exists()` を満たす経路を評価する。
             if dst.exists():
                 run["results"]["skipped"].append(
                     {"status": "offline_exists", "respfile": name, "path": _rel(dst), "sha256": _sha256_file(dst)}
                 )
             else:
                 run["results"]["skipped"].append({"status": "offline_missing", "respfile": name, "path": _rel(dst)})
+
             continue
+
+        # 条件分岐: `not args.download_missing and not dst.exists()` を満たす経路を評価する。
 
         if not args.download_missing and not dst.exists():
             run["results"]["skipped"].append({"status": "skipped_missing", "respfile": name, "path": _rel(dst), "url": url})
             continue
+
         try:
             res = _download(url, dst=dst, force=bool(args.force))
         except Exception as e:
             run["results"]["errors"].append({"status": "error", "respfile": name, "path": _rel(dst), "url": url, "error": str(e)})
             continue
+
+        # 条件分岐: `res.get("status") == "downloaded"` を満たす経路を評価する。
+
         if res.get("status") == "downloaded":
             run["results"]["downloaded"].append({**res, "respfile": name})
         else:
@@ -249,8 +296,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     prev = _read_json(out_manifest)
     manifest = dict(prev)
     history = manifest.get("history", [])
+    # 条件分岐: `not isinstance(history, list)` を満たす経路を評価する。
     if not isinstance(history, list):
         history = []
+
     history.append(run)
     manifest["history"] = history
     manifest["latest"] = run
@@ -275,6 +324,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"manifest": _rel(out_manifest), "downloaded": len(run["results"]["downloaded"])}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

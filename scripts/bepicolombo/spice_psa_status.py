@@ -30,6 +30,7 @@ from urllib.parse import urljoin
 from urllib.request import Request, urlopen
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -45,14 +46,18 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(1024 * 1024)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and dst.stat().st_size > 0` を満たす経路を評価する。
     if dst.exists() and dst.stat().st_size > 0:
         return {
             "url": url,
@@ -65,6 +70,7 @@ def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     req = Request(url, method="GET")
     with urlopen(req, timeout=timeout_sec) as resp:
         data = resp.read()
+
     dst.write_bytes(data)
     return {
         "url": url,
@@ -88,9 +94,12 @@ def _http_status(url: str, *, timeout_sec: float) -> Tuple[Optional[int], Option
 
 def _fetch_cached_html(url: str, cache_path: Path, *, offline: bool, timeout_sec: float) -> Tuple[Optional[str], Optional[str]]:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `offline` を満たす経路を評価する。
     if offline:
+        # 条件分岐: `not cache_path.exists()` を満たす経路を評価する。
         if not cache_path.exists():
             return None, f"offline mode: cache missing: {cache_path}"
+
         try:
             return cache_path.read_bytes().decode("utf-8", errors="replace"), None
         except Exception as e:
@@ -106,20 +115,32 @@ def _fetch_cached_html(url: str, cache_path: Path, *, offline: bool, timeout_sec
 def _parse_apache_index_entries(html_text: str, *, include_dirs: bool, include_files: bool) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
     for ln in html_text.splitlines():
+        # 条件分岐: `"<a href=" not in ln` を満たす経路を評価する。
         if "<a href=" not in ln:
             continue
+
         m = re.search(r'href="([^"]+)"', ln)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         href = m.group(1)
+        # 条件分岐: `href.startswith("?") or href.startswith("/") or href in ("../",)` を満たす経路を評価する。
         if href.startswith("?") or href.startswith("/") or href in ("../",):
             continue
+
+        # 条件分岐: `"Parent Directory" in ln` を満たす経路を評価する。
+
         if "Parent Directory" in ln:
             continue
 
         is_dir = href.endswith("/")
+        # 条件分岐: `is_dir and not include_dirs` を満たす経路を評価する。
         if is_dir and not include_dirs:
             continue
+
+        # 条件分岐: `(not is_dir) and not include_files` を満たす経路を評価する。
+
         if (not is_dir) and not include_files:
             continue
 
@@ -132,10 +153,13 @@ def _parse_apache_index_entries(html_text: str, *, include_dirs: bool, include_f
     out: List[Dict[str, str]] = []
     for r in rows:
         n = r.get("name") or ""
+        # 条件分岐: `not n or n in seen` を満たす経路を評価する。
         if not n or n in seen:
             continue
+
         seen.add(n)
         out.append(r)
+
     return out
 
 
@@ -145,12 +169,16 @@ def _pick_latest_versioned_name(names: List[str], *, prefix: str, suffix: str) -
     pat = re.compile(rf"^{re.escape(prefix)}v(\d+){re.escape(suffix)}$")
     for n in names:
         m = pat.match(n)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         v = int(m.group(1))
+        # 条件分岐: `best_v is None or v > best_v` を満たす経路を評価する。
         if best_v is None or v > best_v:
             best_v = v
             best_name = n
+
     return best_name, best_v
 
 
@@ -172,12 +200,17 @@ def _inventory_summary(lines: List[str]) -> Dict[str, Any]:
     n_total = 0
     for ln in lines:
         s = ln.strip()
+        # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
             continue
+
         parts = s.split(",", 1)
+        # 条件分岐: `len(parts) != 2` を満たす経路を評価する。
         if len(parts) != 2:
             continue
+
         lidvid = parts[1].strip()
+        # 条件分岐: `not lidvid` を満たす経路を評価する。
         if not lidvid:
             continue
 
@@ -188,22 +221,29 @@ def _inventory_summary(lines: List[str]) -> Dict[str, Any]:
         type_counts[prefix] = int(type_counts.get(prefix, 0) + 1)
 
         lower = f"_{prod.lower()}_"
+        # 条件分岐: `"_mpo_" in lower` を満たす経路を評価する。
         if "_mpo_" in lower:
             craft_counts["mpo"] += 1
+            # 条件分岐: `len(examples["mpo"]) < 3` を満たす経路を評価する。
             if len(examples["mpo"]) < 3:
                 examples["mpo"].append(prod)
+        # 条件分岐: 前段条件が不成立で、`"_mmo_" in lower` を追加評価する。
         elif "_mmo_" in lower:
             craft_counts["mmo"] += 1
+            # 条件分岐: `len(examples["mmo"]) < 3` を満たす経路を評価する。
             if len(examples["mmo"]) < 3:
                 examples["mmo"].append(prod)
+        # 条件分岐: 前段条件が不成立で、`"_mtm_" in lower` を追加評価する。
         elif "_mtm_" in lower:
             craft_counts["mtm"] += 1
+            # 条件分岐: `len(examples["mtm"]) < 3` を満たす経路を評価する。
             if len(examples["mtm"]) < 3:
                 examples["mtm"].append(prod)
         else:
             craft_counts["other"] += 1
 
     # Sort for stable output
+
     type_counts_sorted = dict(sorted(type_counts.items(), key=lambda kv: (-kv[1], kv[0])))
     return {
         "n_total": n_total,
@@ -233,6 +273,7 @@ def _set_japanese_font() -> None:
                 break
             except Exception:
                 continue
+
         matplotlib.rcParams["axes.unicode_minus"] = False
     except Exception:
         return
@@ -260,6 +301,7 @@ def main() -> None:
 
     cache_meta_path = data_dir / "fetch_meta.json"
     prev_meta: Dict[str, Any] = {}
+    # 条件分岐: `cache_meta_path.exists()` を満たす経路を評価する。
     if cache_meta_path.exists():
         try:
             prev_meta = json.loads(cache_meta_path.read_text(encoding="utf-8"))
@@ -277,10 +319,13 @@ def main() -> None:
         "inventory": {},
     }
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         meta["note"] = "offline mode; network was not used"
+        # 条件分岐: `prev_meta` を満たす経路を評価する。
         if prev_meta:
             for k in ("expected", "listing", "downloads", "inventory"):
+                # 条件分岐: `k in prev_meta` を満たす経路を評価する。
                 if k in prev_meta:
                     meta[k] = prev_meta.get(k)
     else:
@@ -289,6 +334,7 @@ def main() -> None:
         for d in ("document/", "miscellaneous/", "spice_kernels/"):
             st, err = _http_status(urljoin(base_url, d), timeout_sec=float(args.timeout_sec))
             exp[d] = {"status": st, "error": err}
+
         meta["expected"] = exp
 
         # Listings (cache html for offline)
@@ -296,6 +342,7 @@ def main() -> None:
         base_html, base_err = _fetch_cached_html(
             base_url, data_dir / "base_index.html", offline=False, timeout_sec=float(args.timeout_sec)
         )
+        # 条件分岐: `base_err` を満たす経路を評価する。
         if base_err:
             listing["base_error"] = base_err
             base_entries: List[Dict[str, str]] = []
@@ -306,6 +353,7 @@ def main() -> None:
         sk_html, sk_err = _fetch_cached_html(
             spice_kernels_url, data_dir / "spice_kernels_index.html", offline=False, timeout_sec=float(args.timeout_sec)
         )
+        # 条件分岐: `sk_err` を満たす経路を評価する。
         if sk_err:
             listing["spice_kernels_error"] = sk_err
             sk_entries: List[Dict[str, str]] = []
@@ -318,6 +366,7 @@ def main() -> None:
         # Pick latest bundle xml + latest inventory csv
         base_names = [str(e.get("name") or "") for e in base_entries if isinstance(e, dict)]
         bundle_name, bundle_v = _pick_latest_versioned_name(base_names, prefix="bundle_bc_spice_", suffix=".xml")
+        # 条件分岐: `bundle_name and bundle_v is not None` を満たす経路を評価する。
         if bundle_name and bundle_v is not None:
             try:
                 meta["downloads"].append(
@@ -329,6 +378,7 @@ def main() -> None:
 
         sk_names = [str(e.get("name") or "") for e in sk_entries if isinstance(e, dict)]
         inv_name, inv_v = _pick_latest_versioned_name(sk_names, prefix="collection_spice_kernels_inventory_", suffix=".csv")
+        # 条件分岐: `inv_name and inv_v is not None` を満たす経路を評価する。
         if inv_name and inv_v is not None:
             inv_path = data_dir / inv_name
             try:
@@ -345,6 +395,7 @@ def main() -> None:
                 meta.setdefault("errors", []).append({"stage": "download_or_parse_inventory", "error": str(e)})
 
     # Persist cache meta for offline
+
     data_dir.mkdir(parents=True, exist_ok=True)
     cache_meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -386,10 +437,12 @@ def main() -> None:
         lines.append("BepiColombo（SPICE）：ESA PSA 公開状況（一次ソース確認）")
         lines.append(f"確認時刻(UTC): {status_payload.get('generated_utc')}")
         lines.append(f"対象: {base_url}")
+        # 条件分岐: `status_payload.get("offline")` を満たす経路を評価する。
         if status_payload.get("offline"):
             lines.append("モード: offline（ネットワーク未使用）")
 
         exp = status_payload.get("expected") or {}
+        # 条件分岐: `exp` を満たす経路を評価する。
         if exp:
             lines.append("")
             lines.append("公開ディレクトリ（HTTPステータス）:")
@@ -401,26 +454,32 @@ def main() -> None:
                 lines.append(f"  - {d:<14} : {ok} ({s})")
 
         bl = status_payload.get("bundle_latest") or {}
+        # 条件分岐: `isinstance(bl, dict) and bl.get("name")` を満たす経路を評価する。
         if isinstance(bl, dict) and bl.get("name"):
             lines.append("")
             lines.append(f"最新bundle: {bl.get('name')}")
 
         inv_latest = status_payload.get("inventory_latest") or {}
+        # 条件分岐: `isinstance(inv_latest, dict) and inv_latest.get("name")` を満たす経路を評価する。
         if isinstance(inv_latest, dict) and inv_latest.get("name"):
             lines.append("")
             lines.append(f"最新inventory: {inv_latest.get('name')}（件数 {inv_latest.get('n_total')}）")
 
             cc = inv_latest.get("craft_counts") or {}
+            # 条件分岐: `isinstance(cc, dict)` を満たす経路を評価する。
             if isinstance(cc, dict):
                 lines.append(
                     f"  spacecraft内訳: MPO={cc.get('mpo')}, MMO={cc.get('mmo')}, MTM={cc.get('mtm')}, other={cc.get('other')}"
                 )
 
             tc = inv_latest.get("type_counts") or {}
+            # 条件分岐: `isinstance(tc, dict) and tc` を満たす経路を評価する。
             if isinstance(tc, dict) and tc:
                 top = list(tc.items())[:6]
                 top_s = ", ".join([f"{k}={v}" for k, v in top])
                 lines.append(f"  type上位: {top_s}")
+
+        # 条件分岐: `status_payload.get("errors")` を満たす経路を評価する。
 
         if status_payload.get("errors"):
             lines.append("")
@@ -452,6 +511,8 @@ def main() -> None:
     print("Wrote:", status_out)
     print("Wrote:", out_dir / "spice_psa_status.png")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

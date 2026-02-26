@@ -31,6 +31,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -85,6 +86,7 @@ def _baryons_only_stats(
     z_low = float("nan")
     mean_low = float("nan")
     sem_low = float("nan")
+    # 条件分岐: `int(np.count_nonzero(m_low)) >= 10` を満たす経路を評価する。
     if int(np.count_nonzero(m_low)) >= 10:
         r_low = resid[m_low]
         w = 1.0 / (sigma_y[m_low] ** 2)
@@ -124,6 +126,7 @@ def _rar_fixed_a0_stats(
     z_low = float("nan")
     mean_low = float("nan")
     sem_low = float("nan")
+    # 条件分岐: `int(np.count_nonzero(m_low)) >= 10` を満たす経路を評価する。
     if int(np.count_nonzero(m_low)) >= 10:
         r_low = resid[m_low]
         w = 1.0 / (sigma_y[m_low] ** 2)
@@ -170,6 +173,7 @@ def _collect_points_from_zip(
             n_gal += 1
 
     # Keep only positive accelerations
+
     g_bar = np.asarray([float(p["g_bar_m_s2"]) for p in points], dtype=float)
     g_obs = np.asarray([float(p["g_obs_m_s2"]) for p in points], dtype=float)
     sg_obs = np.asarray([float(p["g_obs_sigma_m_s2"]) for p in points], dtype=float)
@@ -220,6 +224,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rotmod_zip = Path(args.rotmod_zip)
+    # 条件分岐: `not rotmod_zip.exists()` を満たす経路を評価する。
     if not rotmod_zip.exists():
         raise FileNotFoundError(f"missing Rotmod zip: {rotmod_zip}")
 
@@ -231,11 +236,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     try:
         h0p_si, h0p_src = _get_h0p_si(h0p_metrics=Path(args.h0p_metrics), h0p_km_s_mpc_override=args.h0p_km_s_mpc)
         kappa = float(args.pbg_kappa)
+        # 条件分岐: `not np.isfinite(kappa) or kappa <= 0` を満たす経路を評価する。
         if not np.isfinite(kappa) or kappa <= 0:
             raise ValueError("--pbg-kappa must be positive")
+
         a0_pbg = float(kappa) * float(C_LIGHT_M_S) * float(h0p_si)
+        # 条件分岐: `not np.isfinite(a0_pbg) or a0_pbg <= 0` を満たす経路を評価する。
         if not np.isfinite(a0_pbg) or a0_pbg <= 0:
             raise ValueError("invalid a0 computed from kappa*c*H0^(P)")
+
         la0_pbg = float(math.log10(a0_pbg))
         pbg_a0 = {"status": "ok", "H0P_source": h0p_src, "kappa": float(kappa), "a0_m_s2": float(a0_pbg), "log10_a0_m_s2": float(la0_pbg)}
     except Exception as e:
@@ -274,6 +283,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             sigma_y = np.where(np.isfinite(sigma_y) & (sigma_y < sigma_floor), sigma_floor, sigma_y)
             rar_fit = _fit_log10_a0_grid(g_bar, y, sigma_y)
             cand_stats: Dict[str, Any] = {"status": "skipped"}
+            # 条件分岐: `np.isfinite(la0_pbg)` を満たす経路を評価する。
             if np.isfinite(la0_pbg):
                 cand_stats = _rar_fixed_a0_stats(
                     g_bar,
@@ -297,23 +307,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             # envelope update
             mean_low = float(stats["low_accel"]["weighted_mean_dex"])
             z_low = float(stats["low_accel"]["z"])
+            # 条件分岐: `np.isfinite(mean_low)` を満たす経路を評価する。
             if np.isfinite(mean_low):
                 lo, hi = env["baryons_only_low_accel_weighted_mean_dex"]
                 env["baryons_only_low_accel_weighted_mean_dex"] = [min(lo, mean_low) if np.isfinite(lo) else mean_low, max(hi, mean_low) if np.isfinite(hi) else mean_low]
+
+            # 条件分岐: `np.isfinite(z_low)` を満たす経路を評価する。
+
             if np.isfinite(z_low):
                 lo, hi = env["baryons_only_low_accel_z"]
                 env["baryons_only_low_accel_z"] = [min(lo, z_low) if np.isfinite(lo) else z_low, max(hi, z_low) if np.isfinite(hi) else z_low]
+
             a0_best = float(rar_fit.get("a0_best_m_s2") or float("nan"))
+            # 条件分岐: `np.isfinite(a0_best)` を満たす経路を評価する。
             if np.isfinite(a0_best):
                 lo, hi = env["rar_fit_a0_best_m_s2"]
                 env["rar_fit_a0_best_m_s2"] = [min(lo, a0_best) if np.isfinite(lo) else a0_best, max(hi, a0_best) if np.isfinite(hi) else a0_best]
+
+            # 条件分岐: `isinstance(cand_stats, dict) and cand_stats.get("status") == "ok"` を満たす経路を評価する。
+
             if isinstance(cand_stats, dict) and cand_stats.get("status") == "ok":
                 c_low = cand_stats.get("low_accel") if isinstance(cand_stats.get("low_accel"), dict) else {}
                 c_mean = float(c_low.get("weighted_mean_dex") or float("nan"))
                 c_z = float(c_low.get("z") or float("nan"))
+                # 条件分岐: `np.isfinite(c_mean)` を満たす経路を評価する。
                 if np.isfinite(c_mean):
                     lo, hi = env["candidate_pbg_low_accel_weighted_mean_dex"]
                     env["candidate_pbg_low_accel_weighted_mean_dex"] = [min(lo, c_mean) if np.isfinite(lo) else c_mean, max(hi, c_mean) if np.isfinite(hi) else c_mean]
+
+                # 条件分岐: `np.isfinite(c_z)` を満たす経路を評価する。
+
                 if np.isfinite(c_z):
                     lo, hi = env["candidate_pbg_low_accel_z"]
                     env["candidate_pbg_low_accel_z"] = [min(lo, c_z) if np.isfinite(lo) else c_z, max(hi, c_z) if np.isfinite(hi) else c_z]
@@ -335,6 +358,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event("cosmology.sparc_rar_mlr_sweep", {"metrics": _rel(out), "n_variants": int(len(variants))})
@@ -344,6 +368,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"metrics": _rel(out), "n_variants": len(variants)}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

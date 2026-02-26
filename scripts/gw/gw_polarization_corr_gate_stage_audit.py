@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -43,8 +44,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -52,14 +55,20 @@ def _set_japanese_font() -> None:
 
 
 def _fmt(v: float, digits: int = 7) -> str:
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
         return ""
+
     x = float(v)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -67,15 +76,22 @@ def _parse_corr_grid(spec: str) -> List[float]:
     vals: List[float] = []
     for token in str(spec).split(","):
         t = token.strip()
+        # 条件分岐: `not t` を満たす経路を評価する。
         if not t:
             continue
+
         try:
             v = float(t)
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(v) or v < 0.0` を満たす経路を評価する。
+
         if not math.isfinite(v) or v < 0.0:
             continue
+
         vals.append(v)
+
     uniq = sorted(set(round(v, 6) for v in vals))
     return [float(v) for v in uniq]
 
@@ -86,20 +102,30 @@ def _corr_tag(corr: float) -> str:
 
 def _status_bucket(status: str) -> str:
     s = str(status or "")
+    # 条件分岐: `s.startswith("reject")` を満たす経路を評価する。
     if s.startswith("reject"):
         return "reject"
+
+    # 条件分岐: `s.startswith("watch")` を満たす経路を評価する。
+
     if s.startswith("watch"):
         return "watch"
+
+    # 条件分岐: `s.startswith("pass")` を満たす経路を評価する。
+
     if s.startswith("pass"):
         return "pass"
+
     return "other"
 
 
 def _event_name_list(rows: List[Dict[str, Any]], predicate) -> List[str]:
     out: List[str] = []
     for row in rows:
+        # 条件分岐: `predicate(row)` を満たす経路を評価する。
         if predicate(row):
             out.append(str(row.get("event", "")))
+
     return sorted([v for v in out if v])
 
 
@@ -126,12 +152,15 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             vals: List[Any] = []
             for h in headers:
                 v = row.get(h, "")
+                # 条件分岐: `isinstance(v, float)` を満たす経路を評価する。
                 if isinstance(v, float):
                     vals.append(_fmt(v))
+                # 条件分岐: 前段条件が不成立で、`isinstance(v, list)` を追加評価する。
                 elif isinstance(v, list):
                     vals.append(";".join(str(x) for x in v))
                 else:
                     vals.append(v)
+
             w.writerow(vals)
 
 
@@ -148,8 +177,10 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, locked_corr: float) -> None
     ax0.set_ylabel("count")
     ax0.set_title("Three-detector usable-event count vs corr gate")
     ax0.grid(True, axis="both", alpha=0.25)
+    # 条件分岐: `math.isfinite(float(locked_corr))` を満たす経路を評価する。
     if math.isfinite(float(locked_corr)):
         ax0.axvline(float(locked_corr), color="#444444", linestyle="--", linewidth=1.0, label=f"locked corr={locked_corr:.3f}")
+
     ax0.legend(loc="upper right", fontsize=9)
 
     width = 0.02
@@ -160,6 +191,7 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, locked_corr: float) -> None
     ax1.set_xlabel("corr_use_min")
     ax1.grid(True, axis="y", alpha=0.25)
     ax1.legend(loc="upper right", fontsize=9)
+    # 条件分岐: `math.isfinite(float(locked_corr))` を満たす経路を評価する。
     if math.isfinite(float(locked_corr)):
         ax1.axvline(float(locked_corr), color="#444444", linestyle="--", linewidth=1.0)
 
@@ -187,9 +219,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     events = [s.strip() for s in str(args.events).split(",") if s.strip()]
     corr_grid = _parse_corr_grid(str(args.corr_grid))
+    # 条件分岐: `not events` を満たす経路を評価する。
     if not events:
         print("[err] --events is empty")
         return 2
+
+    # 条件分岐: `not corr_grid` を満たす経路を評価する。
+
     if not corr_grid:
         print("[err] --corr-grid is empty")
         return 2
@@ -237,6 +273,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "run_prefix": run_prefix,
             "network_json": str(run_json).replace("\\", "/"),
         }
+        # 条件分岐: `int(rc) != 0 or not run_json.exists()` を満たす経路を評価する。
         if int(rc) != 0 or not run_json.exists():
             row_base.update(
                 {
@@ -283,6 +320,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     stage_rows = sorted(stage_rows, key=lambda r: float(r.get("corr_use_min", 0.0)))
     min_usable_events = int(max(1, int(args.min_usable_events)))
     candidates = [r for r in stage_rows if int(r.get("n_usable_events", 0)) >= min_usable_events]
+    # 条件分岐: `not candidates` を満たす経路を評価する。
     if not candidates:
         locked_corr = float("nan")
         locked_events: List[str] = []
@@ -295,9 +333,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         locked_events = list(locked.get("usable_events") or [])
         stable_signature = True
         for row in candidates:
+            # 条件分岐: `set(row.get("usable_events") or []) != set(locked_events)` を満たす経路を評価する。
             if set(row.get("usable_events") or []) != set(locked_events):
                 stable_signature = False
                 break
+
         decision = "lock_corr_gate"
         decision_reason = (
             "strictest_threshold_with_minimum_usable_events_and_stable_selection"
@@ -354,6 +394,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -382,13 +423,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] png : {out_png}")
+    # 条件分岐: `math.isfinite(float(locked_corr))` を満たす経路を評価する。
     if math.isfinite(float(locked_corr)):
         print(f"[ok] locked corr_use_min: {locked_corr:.3f} | events={','.join(locked_events) if locked_events else '-'}")
     else:
         print("[warn] no locked corr_use_min candidate")
+
     print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -14,6 +14,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -43,8 +44,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -72,15 +75,23 @@ def _pbdot_quadrupole_peters_mathews(*, Pb_days: float, e: float, m1_msun: float
     Returns Pdot_b in [s/s].
     """
 
+    # 条件分岐: `not (math.isfinite(Pb_days) and Pb_days > 0)` を満たす経路を評価する。
     if not (math.isfinite(Pb_days) and Pb_days > 0):
         return float("nan")
+
+    # 条件分岐: `not (math.isfinite(e) and 0.0 <= e < 1.0)` を満たす経路を評価する。
+
     if not (math.isfinite(e) and 0.0 <= e < 1.0):
         return float("nan")
+
+    # 条件分岐: `not (math.isfinite(m1_msun) and m1_msun > 0 and math.isfinite(m2_msun) and m2...` を満たす経路を評価する。
+
     if not (math.isfinite(m1_msun) and m1_msun > 0 and math.isfinite(m2_msun) and m2_msun > 0):
         return float("nan")
 
     Pb_s = Pb_days * _DAY_S
     m_tot = m1_msun + m2_msun
+    # 条件分岐: `not (math.isfinite(m_tot) and m_tot > 0)` を満たす経路を評価する。
     if not (math.isfinite(m_tot) and m_tot > 0):
         return float("nan")
 
@@ -96,18 +107,27 @@ def _sigma_equiv_from_ci95(half_width: float) -> float:
 
 def _extract_uncertainties(sysrec: Dict[str, Any]) -> Tuple[float, float, str]:
     unc = sysrec.get("metric", {}).get("uncertainty", {})
+    # 条件分岐: `not isinstance(unc, dict)` を満たす経路を評価する。
     if not isinstance(unc, dict):
         return float("nan"), float("nan"), ""
+
     kind = str(unc.get("kind") or "").strip()
+    # 条件分岐: `kind == "sigma"` を満たす経路を評価する。
     if kind == "sigma":
         sigma_1 = float(unc.get("sigma", float("nan")))
         sigma_95 = 1.959963984540054 * sigma_1 if math.isfinite(sigma_1) and sigma_1 > 0 else float("nan")
         return sigma_1, sigma_95, str(unc.get("confidence") or "1σ")
+
+    # 条件分岐: `kind == "ci95_half_width"` を満たす経路を評価する。
+
     if kind == "ci95_half_width":
         hw = float(unc.get("half_width", float("nan")))
+        # 条件分岐: `not math.isfinite(hw) or hw <= 0` を満たす経路を評価する。
         if not math.isfinite(hw) or hw <= 0:
             return float("nan"), float("nan"), str(unc.get("confidence") or "95%")
+
         return _sigma_equiv_from_ci95(hw), hw, str(unc.get("confidence") or "95%")
+
     return float("nan"), float("nan"), str(unc.get("confidence") or "")
 
 
@@ -129,10 +149,12 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         pred_paper = float("nan")
 
         inputs = s.get("inputs") or {}
+        # 条件分岐: `isinstance(inputs, dict)` を満たす経路を評価する。
         if isinstance(inputs, dict):
             oe = inputs.get("orbital_elements") or {}
             masses = inputs.get("masses_msun") or {}
             terms = inputs.get("pbdot_terms") or {}
+            # 条件分岐: `isinstance(oe, dict) and isinstance(masses, dict) and isinstance(terms, dict)` を満たす経路を評価する。
             if isinstance(oe, dict) and isinstance(masses, dict) and isinstance(terms, dict):
                 pb_days = float(oe.get("Pb_days", float("nan")))
                 ecc = float(oe.get("e", float("nan")))
@@ -140,11 +162,13 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 m2_msun = float(masses.get("m2", float("nan")))
 
                 intr = terms.get("intrinsic") or {}
+                # 条件分岐: `isinstance(intr, dict)` を満たす経路を評価する。
                 if isinstance(intr, dict):
                     pbdot_intr = float(intr.get("value", float("nan")))
                     pbdot_intr_sigma_1 = float(intr.get("sigma_1", float("nan")))
 
                 pred_ref = terms.get("gr_quadrupole_paper") or terms.get("gw_quadrupole_paper") or {}
+                # 条件分岐: `isinstance(pred_ref, dict)` を満たす経路を評価する。
                 if isinstance(pred_ref, dict):
                     pred_paper = float(pred_ref.get("value", float("nan")))
 
@@ -154,18 +178,26 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     m1_msun=m1_msun,
                     m2_msun=m2_msun,
                 )
+                # 条件分岐: `math.isfinite(pbdot_intr) and math.isfinite(pbdot_pred) and pbdot_pred != 0.0` を満たす経路を評価する。
                 if math.isfinite(pbdot_intr) and math.isfinite(pbdot_pred) and pbdot_pred != 0.0:
                     r = pbdot_intr / pbdot_pred
 
         # Uncertainty (prefer paper-stated R uncertainty; fallback to intrinsic Pdot uncertainty).
+
         sigma_1, sigma_95, conf = _extract_uncertainties(s)
+        # 条件分岐: `(not math.isfinite(sigma_1) or sigma_1 <= 0) and math.isfinite(pbdot_intr_sig...` を満たす経路を評価する。
         if (not math.isfinite(sigma_1) or sigma_1 <= 0) and math.isfinite(pbdot_intr_sigma_1) and math.isfinite(pbdot_pred) and pbdot_pred != 0.0:
             sigma_1 = abs(pbdot_intr_sigma_1 / pbdot_pred)
             sigma_95 = 1.959963984540054 * sigma_1
             conf = "1σ（Pdot_b,int の誤差から伝播）"
 
+        # 条件分岐: `not math.isfinite(r)` を満たす経路を評価する。
+
         if not math.isfinite(r):
             r = r_paper
+
+        # 条件分岐: `not math.isfinite(r)` を満たす経路を評価する。
+
         if not math.isfinite(r):
             continue
 
@@ -173,11 +205,13 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         frac_abs = abs(delta)
         frac_3sigma = float("nan")
         frac_95 = float("nan")
+        # 条件分岐: `math.isfinite(sigma_1) and sigma_1 > 0` を満たす経路を評価する。
         if math.isfinite(sigma_1) and sigma_1 > 0:
             frac_3sigma = frac_abs + 3.0 * sigma_1
             frac_95 = frac_abs + 1.959963984540054 * sigma_1
 
         pred_rel_err = float("nan")
+        # 条件分岐: `math.isfinite(pred_paper) and pred_paper != 0.0 and math.isfinite(pbdot_pred)` を満たす経路を評価する。
         if math.isfinite(pred_paper) and pred_paper != 0.0 and math.isfinite(pbdot_pred):
             pred_rel_err = (pbdot_pred - pred_paper) / pred_paper
 
@@ -207,6 +241,7 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 },
             }
         )
+
     return out
 
 
@@ -235,12 +270,16 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
 
     for xi, m in zip(x, metrics):
         r = float(m.get("R", float("nan")))
+        # 条件分岐: `not math.isfinite(r)` を満たす経路を評価する。
         if not math.isfinite(r):
             continue
+
         sig = float(m.get("sigma_1", float("nan")))
         sig_txt = ""
+        # 条件分岐: `math.isfinite(sig) and sig > 0` を満たす経路を評価する。
         if math.isfinite(sig) and sig > 0:
             sig_txt = f"±{sig:.2g}"
+
         ax.text(
             xi,
             r + 0.0025,
@@ -258,6 +297,7 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
 
     # Tight y-range for readability (auto but keep around 1)
     finite = [v for v in y if math.isfinite(v)]
+    # 条件分岐: `finite` を満たす経路を評価する。
     if finite:
         lo = min(finite)
         hi = max(finite)
@@ -283,10 +323,12 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     for m in metrics:
         r = float(m.get("R", float("nan")))
         sig = float(m.get("sigma_1", float("nan")))
+        # 条件分岐: `not math.isfinite(r)` を満たす経路を評価する。
         if not math.isfinite(r):
             delta_pct.append(float("nan"))
         else:
             delta_pct.append((r - 1.0) * 100.0)
+
         sigma_pct.append(sig * 100.0 if math.isfinite(sig) and sig > 0 else float("nan"))
 
     fig, ax = plt.subplots(figsize=(12.8, 6.0), dpi=180)
@@ -305,12 +347,17 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     )
 
     for xi, d, s in zip(x, delta_pct, sigma_pct):
+        # 条件分岐: `not math.isfinite(d)` を満たす経路を評価する。
         if not math.isfinite(d):
             continue
+
+        # 条件分岐: `math.isfinite(s) and s > 0` を満たす経路を評価する。
+
         if math.isfinite(s) and s > 0:
             txt = f"{d:+.3f}% ±{s:.2g}%"
         else:
             txt = f"{d:+.3f}%"
+
         ax.text(xi, d + (0.02 if d >= 0 else -0.02), txt, ha="center", va="bottom" if d >= 0 else "top", fontsize=10)
 
     ax.set_xticks(x, labels, rotation=0, ha="center")
@@ -320,6 +367,7 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0)
 
     finite = [v for v in delta_pct if math.isfinite(v)]
+    # 条件分岐: `finite` を満たす経路を評価する。
     if finite:
         lo = min(finite)
         hi = max(finite)
@@ -354,11 +402,13 @@ def main() -> int:
 
     payload = _read_json(in_json)
     systems = payload.get("systems", [])
+    # 条件分岐: `not isinstance(systems, list)` を満たす経路を評価する。
     if not isinstance(systems, list):
         print(f"[err] invalid systems in {in_json}")
         return 2
 
     metrics = _compute_metrics([s for s in systems if isinstance(s, dict)])
+    # 条件分岐: `not metrics` を満たす経路を評価する。
     if not metrics:
         print("[err] no valid system records")
         return 2
@@ -401,6 +451,8 @@ def main() -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

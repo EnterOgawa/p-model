@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,13 +34,16 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 def _find_first(lines: Sequence[str], pattern: re.Pattern[str]) -> Optional[Tuple[int, re.Match[str]]]:
     for i, line in enumerate(lines, start=1):
         m = pattern.search(line)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             return i, m
+
     return None
 
 
 def _anchor(path: Path, lineno: int, label: str, line: str, match: Optional[re.Match[str]] = None) -> Dict[str, Any]:
     s = line.rstrip("\n")
+    # 条件分岐: `match is None` を満たす経路を評価する。
     if match is None:
         snippet = s.strip()[:240]
     else:
@@ -49,6 +53,7 @@ def _anchor(path: Path, lineno: int, label: str, line: str, match: Optional[re.M
         end = min(len(s), start + 240)
         start = max(0, end - 240)
         snippet = s[start:end].strip()
+
     return {"path": str(path), "line": int(lineno), "label": label, "snippet": snippet}
 
 
@@ -63,8 +68,10 @@ def _maybe_float(x: str) -> Optional[float]:
 def _strip_tex_math(s: str) -> str:
     # Remove surrounding $...$ and common wrappers.
     s = s.strip()
+    # 条件分岐: `s.startswith("$") and s.endswith("$") and len(s) >= 2` を満たす経路を評価する。
     if s.startswith("$") and s.endswith("$") and len(s) >= 2:
         s = s[1:-1].strip()
+
     s = s.replace("\\,", "").replace("\\mathrm{mJy}", "").strip()
     return s
 
@@ -82,6 +89,7 @@ def _parse_value_cell(cell: str) -> Dict[str, Any]:
     struck = False
     inner = raw
     m = re.search(r"\\sout\{(.+?)\}", raw)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         struck = True
         inner = m.group(1)
@@ -91,8 +99,10 @@ def _parse_value_cell(cell: str) -> Dict[str, Any]:
     m2 = re.match(r"^\s*([0-9.]+)\s*(?:\\pm\s*([0-9.]+))?\s*$", inner)
     val = None
     err = None
+    # 条件分岐: `m2` を満たす経路を評価する。
     if m2:
         val = _maybe_float(m2.group(1))
+        # 条件分岐: `m2.group(2) is not None` を満たす経路を評価する。
         if m2.group(2) is not None:
             err = _maybe_float(m2.group(2))
 
@@ -104,10 +114,12 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
 
     label_pat = re.compile(r"\\label\{table1:percentiles\}")
     label_hit = _find_first(lines, label_pat)
+    # 条件分岐: `label_hit is None` を満たす経路を評価する。
     if label_hit is None:
         out["ok"] = False
         out["reason"] = "table_label_not_found"
         return out
+
     label_line, _ = label_hit
 
     # Parse from label line forward until end of table.
@@ -121,25 +133,35 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
 
     for idx in range(label_line, min(label_line + 200, len(lines))):
         line = lines[idx - 1]
+        # 条件分岐: `"\\end{table" in line` を満たす経路を評価する。
         if "\\end{table" in line:
             break
 
+        # 条件分岐: `"Percentiles" in line and ":" in line and "&" in line` を満たす経路を評価する。
+
         if "Percentiles" in line and ":" in line and "&" in line:
             m = year_line_pat.search(line)
+            # 条件分岐: `m` を満たす経路を評価する。
             if m:
                 current_year = _strip_tex_math(m.group(1)).replace("\\&", "&").strip()
                 cols = [c.strip() for c in m.group(2).split("&")]
                 current_percentiles = cols
+
             continue
+
+        # 条件分岐: `current_year is None or current_percentiles is None` を満たす経路を評価する。
 
         if current_year is None or current_percentiles is None:
             continue
 
         # Interested in the polarization-averaged row only.
+
         if re.search(r"\bAverage\b", line):
             parts = [p.strip() for p in _split_tex_cells(line)]
+            # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
             if len(parts) < 2:
                 continue
+
             name = parts[0]
             cells = parts[1:]
             # remove trailing '\\' on last cell
@@ -147,6 +169,7 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
                 cells[-1] = cells[-1].replace("\\\\", "").strip()
 
             # Expect 5 percentile columns
+
             if len(cells) < 5:
                 continue
 
@@ -161,18 +184,25 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
                 pnum = re.sub(r"[^0-9]", "", p_label)
                 key = f"p{pnum}" if pnum else p_label
                 row["percentiles"][key] = _parse_value_cell(cell)
+
             rows.append(row)
             continue
 
         # Final combined row: "2017, 2018 \\& 2019 average & ..."
+
         if "average" in line and "2017" in line and "2018" in line and "2019" in line and "&" in line:
             parts = [p.strip() for p in _split_tex_cells(line)]
             name = parts[0]
             cells = parts[1:]
+            # 条件分岐: `cells` を満たす経路を評価する。
             if cells:
                 cells[-1] = cells[-1].replace("\\\\", "").strip()
+
+            # 条件分岐: `len(cells) < 5` を満たす経路を評価する。
+
             if len(cells) < 5:
                 continue
+
             row = {
                 "year_label": "2017-2019",
                 "row_label": _strip_tex_math(name).replace("\\&", "&"),
@@ -183,7 +213,10 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
                 pnum = re.sub(r"[^0-9]", "", p_label)
                 key = f"p{pnum}" if pnum else p_label
                 row["percentiles"][key] = _parse_value_cell(cell)
+
             rows.append(row)
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
 
     if not rows:
         out["ok"] = False
@@ -225,6 +258,7 @@ def main() -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -239,6 +273,7 @@ def main() -> int:
         r"turns over at a median flux density of\s*\$\(\s*([0-9.]+)\s*\\pm\s*([0-9.]+)\s*\)~\\mathrm\{mJy\}\$"
     )
     med_hit = _find_first(lines, med_pat)
+    # 条件分岐: `med_hit is not None` を満たす経路を評価する。
     if med_hit is not None:
         lineno, m = med_hit
         payload["extracted"]["median_turnover_mJy"] = _maybe_float(m.group(1))
@@ -256,11 +291,14 @@ def main() -> int:
 
     # Convenience derived dicts: pull polarization-averaged percentiles for 2017/2018/2019/2017-2019.
     by_year: Dict[str, Any] = {}
+    # 条件分岐: `table.get("ok") and isinstance(table.get("rows"), list)` を満たす経路を評価する。
     if table.get("ok") and isinstance(table.get("rows"), list):
         for r in table["rows"]:
             y = r.get("year_label")
+            # 条件分岐: `not isinstance(y, str)` を満たす経路を評価する。
             if not isinstance(y, str):
                 continue
+
             per = r.get("percentiles") or {}
             by_year[y] = {
                 "p5": per.get("p5"),
@@ -269,6 +307,7 @@ def main() -> int:
                 "p86": per.get("p86"),
                 "p95": per.get("p95"),
             }
+
     payload["derived"]["percentiles_avg_by_year"] = by_year
 
     _write_json(out_json, payload)
@@ -292,6 +331,8 @@ def main() -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

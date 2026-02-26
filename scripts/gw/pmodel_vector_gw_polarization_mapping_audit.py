@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -52,8 +53,10 @@ def _set_japanese_font() -> None:
         ]
         available = {font.name for font in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -64,26 +67,35 @@ def _slugify(value: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (value or "").strip())
     while "__" in out:
         out = out.replace("__", "_")
+
     return out.strip("_") or "event"
 
 
 def _fmt(value: float, digits: int = 7) -> str:
+    # 条件分岐: `not math.isfinite(float(value))` を満たす経路を評価する。
     if not math.isfinite(float(value)):
         return ""
+
     x = float(value)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     abs_x = abs(x)
+    # 条件分岐: `abs_x >= 1e4 or abs_x < 1e-3` を満たす経路を評価する。
     if abs_x >= 1e4 or abs_x < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _canonical_pair(detector_first: str, detector_second: str) -> Tuple[str, str]:
     first = str(detector_first).upper().strip()
     second = str(detector_second).upper().strip()
+    # 条件分岐: `first <= second` を満たす経路を評価する。
     if first <= second:
         return first, second
+
     return second, first
 
 
@@ -100,14 +112,17 @@ def _load_pair_metrics(event: str, detector_first: str, detector_second: str) ->
         _ROOT / "output" / "private" / "gw" / legacy_stem,
     ]
     for path in candidates:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         try:
             payload = json.loads(path.read_text(encoding="utf-8"))
             payload["_metrics_path"] = str(path).replace("\\", "/")
             return payload
         except Exception:
             continue
+
     return None
 
 
@@ -124,8 +139,10 @@ def _load_lag_scan(event: str, detector_first: str, detector_second: str) -> Opt
         _ROOT / "output" / "private" / "gw" / legacy_stem,
     ]
     for path in candidates:
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         lags: List[float] = []
         corrs: List[float] = []
         try:
@@ -133,17 +150,24 @@ def _load_lag_scan(event: str, detector_first: str, detector_second: str) -> Opt
                 next(handle, None)
                 for line in handle:
                     cells = [c.strip() for c in line.split(",")]
+                    # 条件分岐: `len(cells) < 2` を満たす経路を評価する。
                     if len(cells) < 2:
                         continue
+
                     lag_ms = _safe_float(cells[0])
                     corr = _safe_float(cells[1])
+                    # 条件分岐: `math.isfinite(lag_ms) and math.isfinite(corr)` を満たす経路を評価する。
                     if math.isfinite(lag_ms) and math.isfinite(corr):
                         lags.append(float(lag_ms))
                         corrs.append(float(corr))
+
+            # 条件分岐: `lags` を満たす経路を評価する。
+
             if lags:
                 return np.asarray(lags, dtype=np.float64), np.asarray(corrs, dtype=np.float64)
         except Exception:
             continue
+
     return None
 
 
@@ -155,34 +179,46 @@ def _estimate_delay_tolerance_ms(
 ) -> float:
     sample_floor_ms = 1000.0 / analysis_fs_hz if math.isfinite(analysis_fs_hz) and analysis_fs_hz > 0.0 else 0.25
     tol_floor_ms = max(0.25, 2.0 * sample_floor_ms)
+    # 条件分岐: `lag_scan is None or not math.isfinite(abs_corr)` を満たす経路を評価する。
     if lag_scan is None or not math.isfinite(abs_corr):
         return float(tol_floor_ms)
+
     lags_ms, corrs = lag_scan
+    # 条件分岐: `lags_ms.size < 3` を満たす経路を評価する。
     if lags_ms.size < 3:
         return float(tol_floor_ms)
+
     threshold = 0.95 * float(abs_corr)
     mask = np.abs(corrs) >= threshold
+    # 条件分岐: `int(np.sum(mask)) < 2` を満たす経路を評価する。
     if int(np.sum(mask)) < 2:
         return float(tol_floor_ms)
+
     span_ms = float(np.max(lags_ms[mask]) - np.min(lags_ms[mask]))
     return float(max(tol_floor_ms, 0.5 * span_ms))
 
 
 def _range_clip(values: np.ndarray, q_lo: float = 0.5, q_hi: float = 99.5) -> Tuple[float, float]:
+    # 条件分岐: `values.size == 0` を満たす経路を評価する。
     if values.size == 0:
         return float("nan"), float("nan")
+
     return float(np.percentile(values, q_lo)), float(np.percentile(values, q_hi))
 
 
 def _interval_overlap(a_lo: float, a_hi: float, b_lo: float, b_hi: float) -> bool:
+    # 条件分岐: `not (math.isfinite(a_lo) and math.isfinite(a_hi) and math.isfinite(b_lo) and...` を満たす経路を評価する。
     if not (math.isfinite(a_lo) and math.isfinite(a_hi) and math.isfinite(b_lo) and math.isfinite(b_hi)):
         return False
+
     return not (a_hi < b_lo or b_hi < a_lo)
 
 
 def _min_rel_mismatch(values: np.ndarray, target: float) -> float:
+    # 条件分岐: `values.size == 0 or not math.isfinite(target)` を満たす経路を評価する。
     if values.size == 0 or not math.isfinite(target):
         return float("nan")
+
     denom = abs(float(target)) + 1e-15
     return float(np.min(np.abs(values - float(target)) / denom))
 
@@ -220,8 +256,10 @@ def _vector_ratio_grid_for_direction(
         floor_first = floor_frac * float(np.max(amp_first)) if amp_first.size else 0.0
         floor_second = floor_frac * float(np.max(amp_second)) if amp_second.size else 0.0
         usable = (amp_first > max(1e-10, floor_first)) & (amp_second > max(1e-10, floor_second))
+        # 条件分岐: `np.any(usable)` を満たす経路を評価する。
         if np.any(usable):
             ratios.extend((amp_first[usable] / amp_second[usable]).tolist())
+
     return np.asarray(ratios, dtype=np.float64)
 
 
@@ -258,10 +296,12 @@ def _run_network_scalar_gate(
         "reject_factor_focus_summary": [],
         "reject_factor_summary_json_path": "",
     }
+    # 条件分岐: `not enabled` を満たす経路を評価する。
     if not enabled:
         return result
 
     script = _ROOT / "scripts" / "gw" / "gw_polarization_h1_l1_v1_network_audit.py"
+    # 条件分岐: `not script.exists()` を満たす経路を評価する。
     if not script.exists():
         result["status"] = "inconclusive"
         result["reason"] = "network_audit_script_missing"
@@ -298,12 +338,14 @@ def _run_network_scalar_gate(
         "--prefix",
         str(prefix),
     ]
+    # 条件分岐: `allow_pair_pruning` を満たす経路を評価する。
     if allow_pair_pruning:
         cmd.append("--allow-pair-pruning")
 
     proc = subprocess.run(cmd, cwd=str(_ROOT), capture_output=True, text=True)
     result["ran"] = True
     result["returncode"] = int(proc.returncode)
+    # 条件分岐: `proc.returncode != 0` を満たす経路を評価する。
     if proc.returncode != 0:
         result["status"] = "inconclusive"
         result["reason"] = "network_audit_subprocess_failed"
@@ -312,6 +354,7 @@ def _run_network_scalar_gate(
         return result
 
     json_path = outdir / f"{prefix}.json"
+    # 条件分岐: `not json_path.exists()` を満たす経路を評価する。
     if not json_path.exists():
         result["status"] = "inconclusive"
         result["reason"] = "network_audit_json_missing"
@@ -328,13 +371,18 @@ def _run_network_scalar_gate(
     rows = payload.get("rows") if isinstance(payload.get("rows"), list) else []
     scalar_fracs: List[float] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         quality = str(row.get("quality", ""))
         status = str(row.get("status", ""))
         value = _safe_float(row.get("scalar_overlap_fraction"))
+        # 条件分岐: `quality == "usable" and status.startswith(("reject_", "watch_", "pass_")) and...` を満たす経路を評価する。
         if quality == "usable" and status.startswith(("reject_", "watch_", "pass_")) and math.isfinite(value):
             scalar_fracs.append(float(value))
+
+    # 条件分岐: `scalar_fracs` を満たす経路を評価する。
 
     if scalar_fracs:
         scalar_arr = np.asarray(scalar_fracs, dtype=np.float64)
@@ -348,8 +396,10 @@ def _run_network_scalar_gate(
     network_reason = str(summary.get("overall_reason", "no_reason"))
     n_usable_events = int(_safe_float(summary.get("n_usable_events")))
     scalar_proxy = _safe_float(summary.get("scalar_only_mode_global_upper_bound_proxy"))
+    # 条件分岐: `math.isfinite(scalar_proxy)` を満たす経路を評価する。
     if math.isfinite(scalar_proxy):
         scalar_max = float(scalar_proxy)
+        # 条件分岐: `not math.isfinite(scalar_med)` を満たす経路を評価する。
         if not math.isfinite(scalar_med):
             scalar_med = float(scalar_proxy)
 
@@ -406,6 +456,7 @@ def _event_audit_row(
         "status_reason": "metrics_not_found",
         "metrics_path": "",
     }
+    # 条件分岐: `payload is None` を満たす経路を評価する。
     if payload is None:
         return base
 
@@ -413,8 +464,10 @@ def _event_audit_row(
     ratio = metrics.get("ratio") if isinstance(metrics.get("ratio"), dict) else {}
     inputs = payload.get("inputs") if isinstance(payload.get("inputs"), dict) else {}
     best_lag_ms = _safe_float(metrics.get("best_lag_ms_apply_to_first"))
+    # 条件分岐: `not math.isfinite(best_lag_ms)` を満たす経路を評価する。
     if not math.isfinite(best_lag_ms):
         best_lag_ms = _safe_float(metrics.get("best_lag_ms_apply_to_h1"))
+
     abs_corr = _safe_float(metrics.get("abs_best_corr"))
     ratio_p16 = _safe_float(ratio.get("p16"))
     ratio_med = _safe_float(ratio.get("median"))
@@ -436,11 +489,13 @@ def _event_audit_row(
     base["ratio_obs_median"] = ratio_med
     base["ratio_obs_p84"] = ratio_p84
 
+    # 条件分岐: `not (math.isfinite(abs_corr) and abs_corr >= float(corr_min))` を満たす経路を評価する。
     if not (math.isfinite(abs_corr) and abs_corr >= float(corr_min)):
         base["quality"] = "low_corr"
         base["status"] = "inconclusive_low_corr"
         base["status_reason"] = f"abs_corr<{corr_min}"
         return base
+
     if not (
         math.isfinite(best_lag_ms)
         and math.isfinite(ratio_p16)
@@ -456,6 +511,7 @@ def _event_audit_row(
 
     detector_a, detector_b = _canonical_pair(detector_first, detector_second)
     geometry = _build_network_geometry()
+    # 条件分岐: `detector_a not in geometry or detector_b not in geometry` を満たす経路を評価する。
     if detector_a not in geometry or detector_b not in geometry:
         base["quality"] = "bad_detector"
         base["status"] = "inconclusive_detector_missing"
@@ -476,6 +532,7 @@ def _event_audit_row(
     ring_dirs: List[np.ndarray] = []
     for direction in sky_dirs:
         delay_model_ms = float(np.dot(position_a - position_b, direction) / _C * 1e3)
+        # 条件分岐: `abs(delay_model_ms - delay_obs_ms) <= delay_tol_ms` を満たす経路を評価する。
         if abs(delay_model_ms - delay_obs_ms) <= delay_tol_ms:
             ring_dirs.append(direction)
 
@@ -484,6 +541,7 @@ def _event_audit_row(
     base["ring_directions_used"] = int(ring_array.shape[0])
     base["ring_directions_fraction"] = float(ring_array.shape[0] / max(int(sky_dirs.shape[0]), 1))
 
+    # 条件分岐: `ring_array.shape[0] < int(max(1, min_ring_directions))` を満たす経路を評価する。
     if ring_array.shape[0] < int(max(1, min_ring_directions)):
         base["quality"] = "insufficient_geometry"
         base["status"] = "inconclusive_geometry"
@@ -510,10 +568,17 @@ def _event_audit_row(
             cosi_grid=cosi_grid,
             response_floor_frac=float(response_floor_frac),
         )
+        # 条件分岐: `tensor_ratio.size > 0` を満たす経路を評価する。
         if tensor_ratio.size > 0:
             tensor_all.extend(tensor_ratio.tolist())
+
+        # 条件分岐: `vector_ratio.size > 0` を満たす経路を評価する。
+
         if vector_ratio.size > 0:
             vector_all.extend(vector_ratio.tolist())
+
+        # 条件分岐: `scalar_ratio.size > 0` を満たす経路を評価する。
+
         if scalar_ratio.size > 0:
             scalar_all.extend(scalar_ratio.tolist())
 
@@ -547,19 +612,31 @@ def _event_audit_row(
 
     status = "reject_vector_mapping_failed"
     reason = []
+    # 条件分岐: `hard_pass` を満たす経路を評価する。
     if hard_pass:
         status = "pass_tensor_equivalent_vector_mapping"
         reason.append("all_hard_gates_passed")
+        # 条件分岐: `scalar_overlap` を満たす経路を評価する。
         if scalar_overlap:
             reason.append("scalar_overlap_remains_for_two_detector_case")
             status = "watch_scalar_not_excluded_two_detector_degeneracy"
     else:
+        # 条件分岐: `not gate_corr` を満たす経路を評価する。
         if not gate_corr:
             reason.append("low_corr")
+
+        # 条件分岐: `not gate_lag_causal` を満たす経路を評価する。
+
         if not gate_lag_causal:
             reason.append("lag_outside_causal_baseline_bound")
+
+        # 条件分岐: `not gate_vector_overlap` を満たす経路を評価する。
+
         if not gate_vector_overlap:
             reason.append("vector_ratio_interval_no_overlap")
+
+        # 条件分岐: `not gate_tensor_equiv` を満たす経路を評価する。
+
         if not gate_tensor_equiv:
             reason.append("vector_tensor_equivalence_broken")
 
@@ -634,10 +711,12 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             out: List[Any] = []
             for key in headers:
                 value = row.get(key, "")
+                # 条件分岐: `isinstance(value, float)` を満たす経路を評価する。
                 if isinstance(value, float):
                     out.append(_fmt(value))
                 else:
                     out.append(value)
+
             writer.writerow(out)
 
 
@@ -645,8 +724,10 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, detector_pair_label: str) -
     _set_japanese_font()
     usable = [row for row in rows if str(row.get("quality")) == "usable"]
     labels = [str(row.get("event", "")) for row in usable]
+    # 条件分岐: `not labels` を満たす経路を評価する。
     if not labels:
         labels = [str(row.get("event", "")) for row in rows]
+
     idx = np.arange(len(labels), dtype=float)
 
     lag_ratio = np.asarray(
@@ -665,8 +746,10 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, detector_pair_label: str) -
     fig, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(12.8, 9.0), sharex=True)
     fig.suptitle(f"P_μ transverse-wave mapping audit (GW {detector_pair_label})")
 
+    # 条件分岐: `usable` を満たす経路を評価する。
     if usable:
         ax0.bar(idx, lag_ratio, color="#1f77b4", alpha=0.9)
+
     ax0.axhline(1.0, color="#333333", linestyle="--", linewidth=1.0, label="causal bound")
     ax0.set_ylabel("|delay_obs| / (delay_max+tol)")
     ax0.set_title("Phase-delay causal consistency")
@@ -674,17 +757,21 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, detector_pair_label: str) -
     ax0.legend(loc="best", fontsize=9)
 
     width = 0.24
+    # 条件分岐: `usable` を満たす経路を評価する。
     if usable:
         ax1.bar(idx - width, tensor_mismatch, width=width, color="#2ca02c", alpha=0.9, label="tensor mismatch")
         ax1.bar(idx, vector_mismatch, width=width, color="#1f77b4", alpha=0.9, label="vector mismatch")
         ax1.bar(idx + width, scalar_mismatch, width=width, color="#ff7f0e", alpha=0.9, label="scalar mismatch")
+
     ax1.set_ylabel("min rel mismatch")
     ax1.set_title("Observed ratio to model families")
     ax1.grid(True, axis="y", alpha=0.25)
     ax1.legend(loc="best", fontsize=9)
 
+    # 条件分岐: `usable` を満たす経路を評価する。
     if usable:
         ax2.bar(idx, equiv_ratio, color="#9467bd", alpha=0.9, label="vector/tensor mismatch ratio")
+
     ax2.axhline(1.0, color="#333333", linestyle="--", linewidth=1.0, label="equivalent")
     ax2.set_ylabel("equivalence ratio")
     ax2.set_xlabel("event")
@@ -745,6 +832,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = parser.parse_args(list(argv) if argv is not None else None)
 
     events = [value.strip() for value in str(args.events).split(",") if value.strip()]
+    # 条件分岐: `not events` を満たす経路を評価する。
     if not events:
         print("[err] --events is empty")
         return 2
@@ -793,16 +881,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     watch_rows = [row for row in usable if str(row.get("status", "")).startswith("watch")]
     pass_rows = [row for row in usable if str(row.get("status", "")).startswith("pass")]
 
+    # 条件分岐: `not usable` を満たす経路を評価する。
     if not usable:
         overall_status = "inconclusive"
         overall_reason = "no_usable_events"
+    # 条件分岐: 前段条件が不成立で、`reject_rows` を追加評価する。
     elif reject_rows:
         overall_status = "reject"
         overall_reason = "at_least_one_event_failed_hard_mapping_gate"
+    # 条件分岐: 前段条件が不成立で、`watch_rows` を追加評価する。
     elif watch_rows:
+        # 条件分岐: `bool(network_gate.get("scalar_exclusion_pass")) and bool(network_gate.get("te...` を満たす経路を評価する。
         if bool(network_gate.get("scalar_exclusion_pass")) and bool(network_gate.get("tensor_consistency_pass")):
             overall_status = "pass"
             overall_reason = "pairwise_scalar_overlap_resolved_by_h1_l1_v1_network_gate"
+        # 条件分岐: 前段条件が不成立で、`bool(network_gate.get("scalar_reduction_pass"))` を追加評価する。
         elif bool(network_gate.get("scalar_reduction_pass")):
             overall_status = "watch"
             overall_reason = "pairwise_scalar_overlap_reduced_by_h1_l1_v1_network_gate_but_not_fully_excluded"
@@ -812,6 +905,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         overall_status = "pass"
         overall_reason = "vector_mapping_tensor_equivalent_for_all_usable_events"
+
     out_json = outdir / f"{args.prefix}.json"
     out_csv = outdir / f"{args.prefix}.csv"
     out_png = outdir / f"{args.prefix}.png"
@@ -886,6 +980,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -921,6 +1016,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] overall_status={overall_status} reason={overall_reason}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -26,23 +26,30 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
@@ -62,8 +69,12 @@ def _load_all_nuclei_csv(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
                 "B_obs_MeV": float(row["B_obs_MeV"]),
                 "B_pred_collective_MeV": float(row["B_pred_collective_MeV"]),
             }
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] no rows loaded: {path}")
+
     return out
 
 
@@ -79,8 +90,12 @@ def _load_semf_proxy_csv(path: Path) -> dict[tuple[int, int], float]:
             # Delta_B_P_minus_SEMF = B_P - B_SEMF.
             b_semf = b_obs - delta_p_minus_semf
             out[(z, n)] = b_semf
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise SystemExit(f"[fail] no rows loaded: {path}")
+
     return out
 
 
@@ -88,8 +103,10 @@ def _build_s2n_map(binding_map: dict[tuple[int, int], float]) -> dict[tuple[int,
     out: dict[tuple[int, int], float] = {}
     for (z, n), b_parent in binding_map.items():
         child = (z, n - 2)
+        # 条件分岐: `child in binding_map` を満たす経路を評価する。
         if child in binding_map:
             out[(z, n)] = float(b_parent - binding_map[child])
+
     return out
 
 
@@ -97,8 +114,10 @@ def _build_s2p_map(binding_map: dict[tuple[int, int], float]) -> dict[tuple[int,
     out: dict[tuple[int, int], float] = {}
     for (z, n), b_parent in binding_map.items():
         child = (z - 2, n)
+        # 条件分岐: `child in binding_map` を満たす経路を評価する。
         if child in binding_map:
             out[(z, n)] = float(b_parent - binding_map[child])
+
     return out
 
 
@@ -112,12 +131,20 @@ def _build_gap2n_rows(
         for z in sorted({key[0] for key in s2n_obs.keys()}):
             k0 = (z, n0)
             k1 = (z, n0 + 2)
+            # 条件分岐: `k0 not in s2n_obs or k1 not in s2n_obs` を満たす経路を評価する。
             if k0 not in s2n_obs or k1 not in s2n_obs:
                 continue
+
+            # 条件分岐: `k0 not in s2n_p or k1 not in s2n_p` を満たす経路を評価する。
+
             if k0 not in s2n_p or k1 not in s2n_p:
                 continue
+
+            # 条件分岐: `k0 not in s2n_semf or k1 not in s2n_semf` を満たす経路を評価する。
+
             if k0 not in s2n_semf or k1 not in s2n_semf:
                 continue
+
             gap_obs = float(s2n_obs[k0] - s2n_obs[k1])
             gap_p = float(s2n_p[k0] - s2n_p[k1])
             gap_semf = float(s2n_semf[k0] - s2n_semf[k1])
@@ -135,6 +162,7 @@ def _build_gap2n_rows(
                     "delta_P_minus_shell_proxy_MeV": float(gap_p - gap_semf),
                 }
             )
+
     return rows
 
 
@@ -148,12 +176,20 @@ def _build_gap2p_rows(
         for n in sorted({key[1] for key in s2p_obs.keys()}):
             k0 = (z0, n)
             k1 = (z0 + 2, n)
+            # 条件分岐: `k0 not in s2p_obs or k1 not in s2p_obs` を満たす経路を評価する。
             if k0 not in s2p_obs or k1 not in s2p_obs:
                 continue
+
+            # 条件分岐: `k0 not in s2p_p or k1 not in s2p_p` を満たす経路を評価する。
+
             if k0 not in s2p_p or k1 not in s2p_p:
                 continue
+
+            # 条件分岐: `k0 not in s2p_semf or k1 not in s2p_semf` を満たす経路を評価する。
+
             if k0 not in s2p_semf or k1 not in s2p_semf:
                 continue
+
             gap_obs = float(s2p_obs[k0] - s2p_obs[k1])
             gap_p = float(s2p_p[k0] - s2p_p[k1])
             gap_semf = float(s2p_semf[k0] - s2p_semf[k1])
@@ -171,6 +207,7 @@ def _build_gap2p_rows(
                     "delta_P_minus_shell_proxy_MeV": float(gap_p - gap_semf),
                 }
             )
+
     return rows
 
 
@@ -200,6 +237,7 @@ def _summarize_by_magic(rows: list[dict[str, Any]], *, axis: str, gap_kind: str)
                 ),
             }
         )
+
     return out
 
 
@@ -212,6 +250,7 @@ def _representative_rows(
     by_nz_magic: dict[tuple[int, int], dict[str, Any]] = {}
     for row in gap2n_rows:
         by_zn_magic[(int(row["Z"]), int(row["magic"]))] = row
+
     for row in gap2p_rows:
         by_nz_magic[(int(row["magic"]), int(row["N"]))] = row
 
@@ -234,14 +273,17 @@ def _representative_rows(
                 "gap_S2p_pred_shell_proxy_MeV": float(r_p["gap_pred_shell_proxy_MeV"]) if r_p else float("nan"),
             }
         )
+
     return out
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         w = csv.writer(f)
         w.writerow(headers)
@@ -261,10 +303,17 @@ def main() -> None:
         / "nuclear_a_dependence_hf_three_body_shellgap_decision_expanded_shell_i_dep_beta2_surface_cov_spectro_multi_nudat3_shellS_g2_metrics.json"
     )
 
+    # 条件分岐: `not all_nuclei_csv.exists()` を満たす経路を評価する。
     if not all_nuclei_csv.exists():
         raise SystemExit(f"[fail] missing required input: {all_nuclei_csv}")
+
+    # 条件分岐: `not diff_csv.exists()` を満たす経路を評価する。
+
     if not diff_csv.exists():
         raise SystemExit(f"[fail] missing required input: {diff_csv}")
+
+    # 条件分岐: `not shell_proxy_metrics.exists()` を満たす経路を評価する。
+
     if not shell_proxy_metrics.exists():
         raise SystemExit(f"[fail] missing required input: {shell_proxy_metrics}")
 
@@ -295,10 +344,13 @@ def main() -> None:
     shell_results = shell_payload.get("results", [])
     best_shell_row: dict[str, Any] | None = None
     best_delta = float("inf")
+    # 条件分岐: `isinstance(shell_results, list)` を満たす経路を評価する。
     if isinstance(shell_results, list):
         for item in shell_results:
+            # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
             if not isinstance(item, dict):
                 continue
+
             gap_sn = item.get("gap_Sn", {}) if isinstance(item.get("gap_Sn"), dict) else {}
             gap_sp = item.get("gap_Sp", {}) if isinstance(item.get("gap_Sp"), dict) else {}
             other_sn = gap_sn.get("other_magic", {}) if isinstance(gap_sn.get("other_magic"), dict) else {}
@@ -307,18 +359,28 @@ def main() -> None:
             pair_sn = float(other_sn.get("rms_resid_pairing_only_MeV", float("nan")))
             shell_sp = float(other_sp.get("rms_resid_pairing_shell_MeV", float("nan")))
             pair_sp = float(other_sp.get("rms_resid_pairing_only_MeV", float("nan")))
+            # 条件分岐: `not (math.isfinite(shell_sn) and math.isfinite(pair_sn))` を満たす経路を評価する。
             if not (math.isfinite(shell_sn) and math.isfinite(pair_sn)):
                 continue
+
+            # 条件分岐: `not math.isfinite(shell_sp)` を満たす経路を評価する。
+
             if not math.isfinite(shell_sp):
                 shell_sp = 0.0
+
+            # 条件分岐: `not math.isfinite(pair_sp)` を満たす経路を評価する。
+
             if not math.isfinite(pair_sp):
                 pair_sp = 0.0
+
             delta = abs(shell_sn - pair_sn) + abs(shell_sp - pair_sp)
+            # 条件分岐: `delta < best_delta` を満たす経路を評価する。
             if delta < best_delta:
                 best_delta = delta
                 best_shell_row = item
 
     # Plot.
+
     import matplotlib.pyplot as plt
 
     fig, axes = plt.subplots(2, 2, figsize=(14.0, 9.0), dpi=160)
@@ -448,6 +510,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

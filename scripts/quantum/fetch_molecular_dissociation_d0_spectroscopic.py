@@ -25,22 +25,28 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path, *, force: bool) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0 and not force` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0 and not force:
         print(f"[skip] exists: {out_path}")
         return
+
     tmp = out_path.with_suffix(out_path.suffix + ".part")
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     print(f"[dl] {url}")
     with urlopen(req, timeout=180) as resp, tmp.open("wb") as f:
         shutil.copyfileobj(resp, f, length=1024 * 1024)
+
     tmp.replace(out_path)
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
@@ -54,8 +60,10 @@ def _strip_tags(s: str) -> str:
 
 def _extract_arxiv_abstract(html: str) -> str:
     m = re.search(r'<blockquote class="abstract[^"]*">(.*?)</blockquote>', html, flags=re.S | re.M)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError("abstract blockquote not found in arXiv HTML")
+
     txt = _strip_tags(m.group(1))
     return re.sub(r"^Abstract:\s*", "", txt)
 
@@ -68,29 +76,40 @@ def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float
       '36405.78253(7)' -> (36405.78253, 0.00007)
     """
     ss = str(s).strip()
+    # 条件分岐: `not ss` を満たす経路を評価する。
     if not ss:
         return None, None
+
     ss = ss.replace(" ", "")
     ss = ss.replace("\\,", "")  # arXiv thin-space thousands separators
     ss = ss.replace(",", "")  # just in case
     m = re.fullmatch(r"([0-9]+(?:\.[0-9]+)?)(?:\((\d+)\))?", ss)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None, None
+
     val_str = m.group(1)
     unc_str = m.group(2)
     try:
         val = float(val_str)
     except Exception:
         return None, None
+
+    # 条件分岐: `not unc_str` を満たす経路を評価する。
+
     if not unc_str:
         return val, None
+
     decimals = 0
+    # 条件分岐: `"." in val_str` を満たす経路を評価する。
     if "." in val_str:
         decimals = len(val_str.split(".", 1)[1])
+
     try:
         unc = int(unc_str) * (10.0 ** (-decimals))
     except Exception:
         unc = None
+
     return val, unc
 
 
@@ -102,27 +121,36 @@ def _extract_d0_from_arxiv_abstract(abstract: str, *, molecule: str) -> dict[str
       - d0_cm^-1
       - d0_unc_cm^-1
     """
+    # 条件分岐: `molecule == "D2"` を満たす経路を評価する。
     if molecule == "D2":
         # Pattern: ... dissociation energy ... D_0(D_2) = 36\,748.362\,282(26) \wn ...
         m = re.search(r"D_0[^{=]{0,120}=\s*([0-9][0-9\\,\.]+(?:\(\d+\))?)", abstract)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             raise ValueError("D0 token not found in D2 arXiv abstract")
+
         token = m.group(1)
         val, unc = _parse_value_with_paren_unc(token)
         return {"d0_token": token, "d0_cm^-1": val, "d0_unc_cm^-1": unc, "rotational_N": 0}
 
+    # 条件分岐: `molecule == "H2"` を満たす経路を評価する。
+
     if molecule == "H2":
         # Prefer the experimental value: "The new result of 35999.582834(11) cm^{-1} ..."
         m = re.search(r"new result of\s+([0-9]+(?:\.[0-9]+)?\(\d+\))", abstract, flags=re.I)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             token = m.group(1)
             val, unc = _parse_value_with_paren_unc(token)
             return {"d0_token": token, "d0_cm^-1": val, "d0_unc_cm^-1": unc, "rotational_N": 1}
 
         # Fallback: first wavenumber with uncertainty after mentioning dissociation energy.
+
         m2 = re.search(r"dissociation energy.*?([0-9]+(?:\.[0-9]+)?\(\d+\))\s*cm", abstract, flags=re.I)
+        # 条件分岐: `not m2` を満たす経路を評価する。
         if not m2:
             raise ValueError("D0 token not found in H2 arXiv abstract")
+
         token = m2.group(1)
         val, unc = _parse_value_with_paren_unc(token)
         return {"d0_token": token, "d0_cm^-1": val, "d0_unc_cm^-1": unc, "rotational_N": 1}
@@ -133,11 +161,16 @@ def _extract_d0_from_arxiv_abstract(abstract: str, *, molecule: str) -> dict[str
 def _extract_d0_from_vu_html(html: str) -> dict[str, Any]:
     # Pattern: ... D0(HD)=36405.78253(7)cm-1 ...
     m = re.search(r"D0\(HD\)\s*=\s*([0-9]+(?:\.[0-9]+)?\(\d+\))\s*cm-1", html)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         # Sometimes there is no space between token and unit.
         m = re.search(r"D0\(HD\)\s*=\s*([0-9]+(?:\.[0-9]+)?\(\d+\))cm-1", html)
+
+    # 条件分岐: `not m` を満たす経路を評価する。
+
     if not m:
         raise ValueError("D0(HD) token not found in VU HTML")
+
     token = m.group(1)
     val, unc = _parse_value_with_paren_unc(token)
     return {"d0_token": token, "d0_cm^-1": val, "d0_unc_cm^-1": unc, "rotational_N": 0}
@@ -188,6 +221,7 @@ def main(argv: list[str] | None = None) -> int:
         abs_path = src_dir / f"arxiv_abs_{arxiv_id}.html"
         pdf_path = src_dir / f"arxiv_pdf_{arxiv_id}.pdf"
 
+        # 条件分岐: `args.offline` を満たす経路を評価する。
         if args.offline:
             raw_files.extend([abs_path, pdf_path])
             continue
@@ -222,7 +256,9 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     # VU Amsterdam: cache HTML page for HD.
+
     vu_path = src_dir / "vu_publication_hd_d0.html"
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         raw_files.append(vu_path)
     else:
@@ -251,10 +287,13 @@ def main(argv: list[str] | None = None) -> int:
     extracted_path = src_dir / "extracted_values.json"
     manifest_path = src_dir / "manifest.json"
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing = [p for p in raw_files + [extracted_path, manifest_path] if not p.exists()]
+        # 条件分岐: `missing` を満たす経路を評価する。
         if missing:
             raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return 0
 
@@ -296,6 +335,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] wrote: {manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

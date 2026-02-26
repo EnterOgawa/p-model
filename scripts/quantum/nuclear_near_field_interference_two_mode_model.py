@@ -13,6 +13,7 @@ def _load_json(path: Path) -> dict:
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -20,17 +21,22 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {extracted}"
         )
+
     payload = _load_json(extracted)
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
 def _get_const_si(consts: dict[str, dict[str, object]], key: str) -> tuple[float, float]:
     obj = consts.get(key)
+    # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
     if not isinstance(obj, dict):
         raise KeyError(key)
+
     return float(obj["value_si"]), float(obj["sigma_si"])
 
 
@@ -40,28 +46,41 @@ def _load_lambda_pi_fm(*, root: Path) -> float:
     Fallback to the standard π± Compton length if missing.
     """
     metrics = root / "output" / "public" / "quantum" / "qcd_hadron_masses_baseline_metrics.json"
+    # 条件分岐: `metrics.exists()` を満たす経路を評価する。
     if metrics.exists():
         j = _load_json(metrics)
         rows = j.get("rows")
+        # 条件分岐: `isinstance(rows, list)` を満たす経路を評価する。
         if isinstance(rows, list):
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
+                # 条件分岐: `r.get("label") == "π±"` を満たす経路を評価する。
+
                 if r.get("label") == "π±":
                     lam = r.get("compton_lambda_fm")
+                    # 条件分岐: `isinstance(lam, (int, float)) and math.isfinite(float(lam)) and float(lam) > 0` を満たす経路を評価する。
                     if isinstance(lam, (int, float)) and math.isfinite(float(lam)) and float(lam) > 0:
                         return float(lam)
     # π±: m≈139.57039 MeV, ħc≈197.32698 MeV·fm → λ≈1.4138 fm
+
     return 1.413816930654131
 
 
 def _exp_coupling_mev(*, r_fm: float, r0_fm: float, j_at_r0_mev: float, L_fm: float) -> float:
+    # 条件分岐: `not (math.isfinite(r_fm) and r_fm >= 0)` を満たす経路を評価する。
     if not (math.isfinite(r_fm) and r_fm >= 0):
         return float("nan")
+
+    # 条件分岐: `not (math.isfinite(r0_fm) and r0_fm > 0 and math.isfinite(j_at_r0_mev) and j_...` を満たす経路を評価する。
+
     if not (math.isfinite(r0_fm) and r0_fm > 0 and math.isfinite(j_at_r0_mev) and j_at_r0_mev > 0 and math.isfinite(L_fm) and L_fm > 0):
         return float("nan")
     # J(R)=J0 exp(-R/L) with J(R0)=j_at_r0 -> J0=j_at_r0 exp(R0/L)
     # => J(R)=j_at_r0 exp((R0-R)/L)
+
     return float(j_at_r0_mev * math.exp((r0_fm - r_fm) / L_fm))
 
 
@@ -115,17 +134,23 @@ def main() -> None:
 
     # Range proxy
     L_fm = float(args.L_fm)
+    # 条件分岐: `not (math.isfinite(L_fm) and L_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(L_fm) and L_fm > 0):
         L_fm = _load_lambda_pi_fm(root=root)
 
     r0_fm = float(args.r0_fm)
     rmax_fm = float(args.rmax_fm)
+    # 条件分岐: `not (math.isfinite(r0_fm) and r0_fm > 0)` を満たす経路を評価する。
     if not (math.isfinite(r0_fm) and r0_fm > 0):
         raise SystemExit("[fail] --r0-fm must be positive")
+
+    # 条件分岐: `not (math.isfinite(rmax_fm) and rmax_fm > r0_fm)` を満たす経路を評価する。
+
     if not (math.isfinite(rmax_fm) and rmax_fm > r0_fm):
         raise SystemExit("[fail] --rmax-fm must be > r0")
 
     # Sample
+
     rs = [i * 0.02 for i in range(0, int(rmax_fm / 0.02) + 1)]
     js = [_exp_coupling_mev(r_fm=r, r0_fm=r0_fm, j_at_r0_mev=j_at_r0_mev, L_fm=L_fm) for r in rs]
     splits = [2.0 * j for j in js]
@@ -230,6 +255,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -22,6 +22,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -31,7 +32,9 @@ def _set_japanese_font() -> None:
         pass
 
 # --- Paths ---
+
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -49,6 +52,7 @@ IMG_FILENAME = OUT_DIR / 'viking_p_model_vs_measured_no_arrow.png'
 
 def create_viking_plot():
     """CSVからバイキングの検証グラフ（矢印なし）を生成する"""
+    # 条件分岐: `not INPUT_CSV.exists()` を満たす経路を評価する。
     if not INPUT_CSV.exists():
         print(f"Warning: {INPUT_CSV} が見つかりません。グラフ生成をスキップします。")
         return None
@@ -104,6 +108,7 @@ def add_slide_safe(prs, title_text, body_text):
         slide.shapes.title.text = title_text
     
     # 本文設定（プレースホルダーを探す）
+
     found_body = False
     for shape in slide.placeholders:
         # 一般的に本文はidx 1
@@ -113,6 +118,7 @@ def add_slide_safe(prs, title_text, body_text):
             break
     
     # プレースホルダーが見つからない場合はテキストボックスを手動追加
+
     if not found_body:
         left = Inches(1)
         top = Inches(2)
@@ -192,6 +198,7 @@ def main():
         print("画像がないため、バイキングのスライドに画像を挿入できませんでした。")
 
     # (5) 結論
+
     add_slide_safe(prs,
         "結論：物理モデルとしての確度",
         "P-modelは「概念モデル」から「計算可能な物理モデル」へ\n\n" +
@@ -217,6 +224,8 @@ def main():
         )
     except Exception:
         pass
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

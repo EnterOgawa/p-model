@@ -21,35 +21,44 @@ def _parse_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
 def _pearson(xs: list[float], ys: list[float]) -> float:
     pairs = [(float(x), float(y)) for x, y in zip(xs, ys) if math.isfinite(float(x)) and math.isfinite(float(y))]
+    # 条件分岐: `len(pairs) < 3` を満たす経路を評価する。
     if len(pairs) < 3:
         return float("nan")
+
     xvals = [p[0] for p in pairs]
     yvals = [p[1] for p in pairs]
     mean_x = sum(xvals) / float(len(xvals))
     mean_y = sum(yvals) / float(len(yvals))
     var_x = sum((x - mean_x) ** 2 for x in xvals)
     var_y = sum((y - mean_y) ** 2 for y in yvals)
+    # 条件分岐: `var_x <= 0.0 or var_y <= 0.0` を満たす経路を評価する。
     if var_x <= 0.0 or var_y <= 0.0:
         return float("nan")
+
     cov = sum((x - mean_x) * (y - mean_y) for x, y in pairs)
     return float(cov / math.sqrt(var_x * var_y))
 
@@ -61,17 +70,22 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -84,8 +98,10 @@ def _key(z: int, n: int, a: int) -> tuple[int, int, int]:
 
 
 def _label(symbol: str, a: int, z: int, n: int) -> str:
+    # 条件分岐: `symbol` を満たす経路を評価する。
     if symbol:
         return f"{symbol}-{a}"
+
     return f"Z{z}N{n}A{a}"
 
 
@@ -113,8 +129,10 @@ def _build_figure(
     for i in range(len(matrix_channels)):
         for j in range(len(matrix_channels)):
             value = corr_abs_log[i][j]
+            # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
             if math.isfinite(value):
                 ax00.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=8, color="black")
+
     fig.colorbar(img, ax=ax00, fraction=0.046, pad=0.04)
 
     scatter_rows = [
@@ -181,6 +199,7 @@ def main() -> None:
     in_upper = out_dir / "nuclear_systematic_error_upper_bounds_channel_bounds.csv"
 
     for path in (in_be, in_radius, in_sep, in_q, in_upper):
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             raise SystemExit(f"[fail] missing input: {path}")
 
@@ -224,13 +243,19 @@ def main() -> None:
             a = int(row["A_parent"])
             key = _key(z, n, a)
             value = _parse_float(row.get("resid_after_MeV"))
+            # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
             if not math.isfinite(value):
                 continue
+
+            # 条件分岐: `key not in sep_acc` を満たす経路を評価する。
+
             if key not in sep_acc:
                 sep_acc[key] = []
                 sep_obs_count[key] = 0
+
             sep_acc[key].append(float(value))
             sep_obs_count[key] += 1
+
     sep_map: dict[tuple[int, int, int], dict[str, float]] = {}
     for key, values in sep_acc.items():
         abs_values = [abs(v) for v in values]
@@ -251,17 +276,24 @@ def main() -> None:
             a = int(row["A"])
             key = _key(z, n, a)
             value = _parse_float(row.get("resid_after_MeV"))
+            # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
             if not math.isfinite(value):
                 continue
+
+            # 条件分岐: `key not in q_acc` を満たす経路を評価する。
+
             if key not in q_acc:
                 q_acc[key] = []
                 q_channel_count[key] = 0
                 q_mode_count[key] = {"beta_minus": 0, "beta_plus": 0}
+
             q_acc[key].append(float(value))
             q_channel_count[key] += 1
             channel = str(row.get("channel", ""))
+            # 条件分岐: `channel in {"beta_minus", "beta_plus"}` を満たす経路を評価する。
             if channel in {"beta_minus", "beta_plus"}:
                 q_mode_count[key][channel] += 1
+
     q_map: dict[tuple[int, int, int], dict[str, float]] = {}
     for key, values in q_acc.items():
         abs_values = [abs(v) for v in values]
@@ -328,6 +360,7 @@ def main() -> None:
         channel_scale[channel] = _safe_median(
             [float(row[key_name]) for row in rows_joined if math.isfinite(float(row[key_name]))]
         )
+        # 条件分岐: `not math.isfinite(channel_scale[channel]) or channel_scale[channel] <= 0.0` を満たす経路を評価する。
         if not math.isfinite(channel_scale[channel]) or channel_scale[channel] <= 0.0:
             raise SystemExit(f"[fail] invalid channel scale for {channel}")
 
@@ -335,12 +368,14 @@ def main() -> None:
         available_norms: list[float] = []
         for channel, key_name in channel_abs_key.items():
             value = _parse_float(row.get(key_name))
+            # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
             if math.isfinite(value):
                 norm_value = float(value / channel_scale[channel])
                 row[f"{channel}_norm"] = norm_value
                 available_norms.append(norm_value)
             else:
                 row[f"{channel}_norm"] = float("nan")
+
         row["n_channels_available"] = len(available_norms)
         row["consistency_median_norm"] = _safe_median(available_norms)
         row["consistency_max_norm"] = max(available_norms) if available_norms else float("nan")
@@ -405,6 +440,7 @@ def main() -> None:
                     ),
                 }
             )
+
         corr_abs_log_matrix.append(matrix_row)
 
     upper_scale_map: dict[str, float] = {}
@@ -412,12 +448,16 @@ def main() -> None:
         for row in csv.DictReader(f):
             channel_name = str(row.get("channel", ""))
             upper = _parse_float(row.get("sigma_sys_upper_bound_worst_case"))
+            # 条件分岐: `channel_name == "be_rms_MeV"` を満たす経路を評価する。
             if channel_name == "be_rms_MeV":
                 upper_scale_map["be"] = upper
+            # 条件分岐: 前段条件が不成立で、`channel_name == "sep_rms_MeV"` を追加評価する。
             elif channel_name == "sep_rms_MeV":
                 upper_scale_map["sep"] = upper
+            # 条件分岐: 前段条件が不成立で、`channel_name == "q_beta_minus_rms_MeV"` を追加評価する。
             elif channel_name == "q_beta_minus_rms_MeV":
                 upper_scale_map["q"] = upper
+            # 条件分岐: 前段条件が不成立で、`channel_name == "beta2_rms"` を追加評価する。
             elif channel_name == "beta2_rms":
                 upper_scale_map["radius"] = upper
 
@@ -513,6 +553,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

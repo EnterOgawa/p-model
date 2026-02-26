@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -51,31 +52,40 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for r in reader:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             rows.append({str(k): (v or "").strip() for k, v in r.items() if k is not None})
+
     return rows
 
 
 def _parse_iso_date(s: str) -> Optional[str]:
     s = (s or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     m = re.match(r"^(\d{4}-\d{2}-\d{2})", s)
     return m.group(1) if m else None
 
 
 def _is_public(row: Dict[str, str], *, today_ymd: str) -> bool:
     d = _parse_iso_date(row.get("public_date") or "")
+    # 条件分岐: `not d` を満たす経路を評価する。
     if not d:
         return False
+
     return d <= today_ymd
 
 
 def _maybe_float(x: str) -> Optional[float]:
     s = (x or "").strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     try:
         return float(s)
     except Exception:
@@ -180,15 +190,23 @@ def _pick_obsids_for_object(
 ) -> List[Dict[str, str]]:
     cand: List[Dict[str, str]] = []
     for r in rows:
+        # 条件分岐: `not _is_public(r, today_ymd=today_ymd)` を満たす経路を評価する。
         if not _is_public(r, today_ymd=today_ymd):
             continue
+
+        # 条件分岐: `(r.get("object_name") or "").strip() != object_name` を満たす経路を評価する。
+
         if (r.get("object_name") or "").strip() != object_name:
             continue
+
         obsid = (r.get("observation_id") or "").strip()
+        # 条件分岐: `not obsid` を満たす経路を評価する。
         if not obsid:
             continue
+
         cand.append(r)
     # Prefer longer Resolve exposure.
+
     cand.sort(key=lambda r: -(float(r.get("resolve_exposure") or 0.0)))
     return cand[: max(0, int(max_obsids))]
 
@@ -212,9 +230,11 @@ def build_catalog(
             today_ymd=today_ymd,
             max_obsids=max_obsids_per_object,
         )
+        # 条件分岐: `not picked` を満たす経路を評価する。
         if not picked:
             missing.append(p.object_name)
             continue
+
         for r in picked:
             obsid = (r.get("observation_id") or "").strip()
             targets.append(
@@ -286,10 +306,14 @@ def main(argv: Optional[Iterable[str]] = None) -> int:
     )
 
     print(f"[ok] wrote: {args.out_json}")
+    # 条件分岐: `catalog.get("missing_object_names")` を満たす経路を評価する。
     if catalog.get("missing_object_names"):
         print(f"[warn] missing objects: {', '.join(catalog['missing_object_names'])}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

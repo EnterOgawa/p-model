@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -42,8 +43,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -51,14 +54,20 @@ def _set_japanese_font() -> None:
 
 
 def _fmt(v: float, digits: int = 7) -> str:
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
         return ""
+
     x = float(v)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -67,19 +76,31 @@ def _safe_float(v: Any) -> float:
         x = float(v)
     except Exception:
         return float("nan")
+
     return x
 
 
 def _status_bucket(status: str) -> str:
     s = str(status or "")
+    # 条件分岐: `s.startswith("reject")` を満たす経路を評価する。
     if s.startswith("reject"):
         return "reject"
+
+    # 条件分岐: `s.startswith("watch")` を満たす経路を評価する。
+
     if s.startswith("watch"):
         return "watch"
+
+    # 条件分岐: `s.startswith("pass")` を満たす経路を評価する。
+
     if s.startswith("pass"):
         return "pass"
+
+    # 条件分岐: `s.startswith("inconclusive")` を満たす経路を評価する。
+
     if s.startswith("inconclusive"):
         return "inconclusive"
+
     return "other"
 
 
@@ -88,8 +109,10 @@ def _is_decisive(status: str) -> bool:
 
 
 def _load_payload(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"missing audit json: {path}")
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -97,9 +120,12 @@ def _index_rows(rows: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
     for row in rows:
         event = str(row.get("event") or "").strip()
+        # 条件分岐: `not event` を満たす経路を評価する。
         if not event:
             continue
+
         out[event] = row
+
     return out
 
 
@@ -108,6 +134,7 @@ def _count_summary(rows: List[Dict[str, Any]]) -> Dict[str, int]:
     for row in rows:
         bucket = _status_bucket(str(row.get("status") or ""))
         status_counts[bucket] = int(status_counts.get(bucket, 0)) + 1
+
     decisive = int(status_counts["reject"] + status_counts["watch"] + status_counts["pass"])
     return {
         "n_rows": int(len(rows)),
@@ -123,12 +150,20 @@ def _count_summary(rows: List[Dict[str, Any]]) -> Dict[str, int]:
 def _transition_class(before_status: str, after_status: str) -> str:
     before_decisive = _is_decisive(before_status)
     after_decisive = _is_decisive(after_status)
+    # 条件分岐: `not before_decisive and after_decisive` を満たす経路を評価する。
     if not before_decisive and after_decisive:
         return "inconclusive_to_decisive"
+
+    # 条件分岐: `before_decisive and not after_decisive` を満たす経路を評価する。
+
     if before_decisive and not after_decisive:
         return "decisive_to_inconclusive"
+
+    # 条件分岐: `before_status == after_status` を満たす経路を評価する。
+
     if before_status == after_status:
         return "status_unchanged"
+
     return "status_changed_same_decisiveness"
 
 
@@ -158,10 +193,12 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             vals: List[Any] = []
             for h in headers:
                 v = row.get(h, "")
+                # 条件分岐: `isinstance(v, float)` を満たす経路を評価する。
                 if isinstance(v, float):
                     vals.append(_fmt(v))
                 else:
                     vals.append(v)
+
             w.writerow(vals)
 
 
@@ -305,9 +342,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         [str(r.get("event")) for r in transition_rows if str(r.get("transition_class")) == "decisive_to_inconclusive"]
     )
 
+    # 条件分岐: `decisive_delta > 0 and inconclusive_delta < 0` を満たす経路を評価する。
     if decisive_delta > 0 and inconclusive_delta < 0:
         overall_status = "pass"
         decision = "inconclusive_reduced_and_decisive_events_increased"
+    # 条件分岐: 前段条件が不成立で、`decisive_delta > 0 or inconclusive_delta < 0` を追加評価する。
     elif decisive_delta > 0 or inconclusive_delta < 0:
         overall_status = "watch"
         decision = "partial_improvement_only"
@@ -377,6 +416,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -399,6 +439,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

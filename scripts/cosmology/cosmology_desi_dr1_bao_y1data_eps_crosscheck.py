@@ -37,6 +37,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -108,10 +109,12 @@ def _mc_eps_from_dm_dh(
 def _sigma_from_ci(ci: List[float]) -> float:
     try:
         lo, hi = float(ci[0]), float(ci[1])
+        # 条件分岐: `math.isfinite(lo) and math.isfinite(hi)` を満たす経路を評価する。
         if math.isfinite(lo) and math.isfinite(hi):
             return 0.5 * abs(hi - lo)
     except Exception:
         pass
+
     return float("nan")
 
 
@@ -120,15 +123,22 @@ def _extract_peakfit_eps(points: List[Dict[str, Any]], *, dist: str, z_target: f
     best: Optional[Dict[str, Any]] = None
     best_dz = float("inf")
     for p in points:
+        # 条件分岐: `str(p.get("dist")) != dist` を満たす経路を評価する。
         if str(p.get("dist")) != dist:
             continue
+
         z_eff = float(p.get("z_eff"))
         dz = abs(z_eff - float(z_target))
+        # 条件分岐: `dz < best_dz` を満たす経路を評価する。
         if dz < best_dz:
             best_dz = dz
             best = p
+
+    # 条件分岐: `best is None or best_dz > float(z_tol)` を満たす経路を評価する。
+
     if best is None or best_dz > float(z_tol):
         return None
+
     eps = float(best["fit"]["free"]["eps"])
     ci = best["fit"]["free"].get("eps_ci_1sigma", None)
     sig = _sigma_from_ci(ci) if isinstance(ci, list) else float("nan")
@@ -147,9 +157,12 @@ def _extract_wedge_eps_proxy(
     groups = wedge_metrics.get("groups", {}) if isinstance(wedge_metrics.get("groups", {}), dict) else {}
     key = f"{str(sample).strip().lower()}/{str(caps).strip().lower()}/{str(dist).strip().lower()}"
     g = groups.get(key)
+    # 条件分岐: `not isinstance(g, dict)` を満たす経路を評価する。
     if not isinstance(g, dict):
         return None
+
     pts = g.get("points", [])
+    # 条件分岐: `not isinstance(pts, list)` を満たす経路を評価する。
     if not isinstance(pts, list):
         return None
 
@@ -159,11 +172,15 @@ def _extract_wedge_eps_proxy(
         try:
             z_eff = float(p.get("z_eff"))
             dz = abs(z_eff - float(z_target))
+            # 条件分岐: `dz < best_dz` を満たす経路を評価する。
             if dz < best_dz:
                 best_dz = dz
                 best = p
         except Exception:
             continue
+
+    # 条件分岐: `best is None or best_dz > float(z_tol)` を満たす経路を評価する。
+
     if best is None or best_dz > float(z_tol):
         return None
 
@@ -179,8 +196,10 @@ def _extract_dm_dh_from_y1data_row(r: Dict[str, Any]) -> _DmDh:
     dm = r["dm_over_rd"]
     dh = r["dh_over_rd"]
     corr = float(r.get("corr_r_dm_dh", 0.0))
+    # 条件分岐: `dm is None or dh is None` を満たす経路を評価する。
     if dm is None or dh is None:
         raise ValueError("row does not contain dm/dh (expected for LRG1/LRG2)")
+
     return _DmDh(
         z_eff=z_eff,
         dm_mean=float(dm["mean"]),
@@ -194,25 +213,39 @@ def _extract_dm_dh_from_y1data_row(r: Dict[str, Any]) -> _DmDh:
 def _extract_dm_dh_from_bao_data(bao: Dict[str, Any], *, dataset_name: str) -> _DmDh:
     ds = None
     for d in bao.get("datasets", []):
+        # 条件分岐: `isinstance(d, dict) and str(d.get("name")) == str(dataset_name)` を満たす経路を評価する。
         if isinstance(d, dict) and str(d.get("name")) == str(dataset_name):
             ds = d
             break
+
+    # 条件分岐: `not isinstance(ds, dict)` を満たす経路を評価する。
+
     if not isinstance(ds, dict):
         raise ValueError(f"bao_data missing dataset: {dataset_name}")
+
     z_eff = ds.get("z_eff", None)
+    # 条件分岐: `z_eff is None` を満たす経路を評価する。
     if z_eff is None:
         raise ValueError(f"bao_data dataset has no single z_eff: {dataset_name}")
+
     z_eff = float(z_eff)
     qs = ds.get("quantities", [])
     mean = ds.get("mean", [])
     cov = ds.get("cov", [])
+    # 条件分岐: `not (isinstance(qs, list) and isinstance(mean, list) and isinstance(cov, list))` を満たす経路を評価する。
     if not (isinstance(qs, list) and isinstance(mean, list) and isinstance(cov, list)):
         raise ValueError(f"bao_data dataset malformed: {dataset_name}")
+
+    # 条件分岐: `len(qs) != len(mean) or len(qs) != len(cov)` を満たす経路を評価する。
+
     if len(qs) != len(mean) or len(qs) != len(cov):
         raise ValueError(f"bao_data dataset size mismatch: {dataset_name}")
+
     q_to_i = {str(q): i for i, q in enumerate(qs)}
+    # 条件分岐: `"DM_over_rs" not in q_to_i or "DH_over_rs" not in q_to_i` を満たす経路を評価する。
     if "DM_over_rs" not in q_to_i or "DH_over_rs" not in q_to_i:
         raise ValueError(f"bao_data dataset missing DM_over_rs/DH_over_rs: {dataset_name} qs={qs}")
+
     i_dm = int(q_to_i["DM_over_rs"])
     i_dh = int(q_to_i["DH_over_rs"])
     dm_mean = float(mean[i_dm])
@@ -241,6 +274,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -299,17 +333,26 @@ def main() -> int:
     bao_path = Path(args.bao_data_json)
     peakfit_path = Path(args.peakfit_metrics_json)
     wedge_path = Path(args.wedge_metrics_json) if str(args.wedge_metrics_json).strip() else None
+    # 条件分岐: `not y1_path.exists()` を満たす経路を評価する。
     if not y1_path.exists():
         raise SystemExit(f"missing y1data json: {y1_path}")
+
     bao: Optional[Dict[str, Any]] = None
+    # 条件分岐: `bao_path.exists()` を満たす経路を評価する。
     if bao_path.exists():
         try:
             bao_any = _load_json(bao_path)
             bao = bao_any if isinstance(bao_any, dict) else None
         except Exception:
             bao = None
+
+    # 条件分岐: `not peakfit_path.exists()` を満たす経路を評価する。
+
     if not peakfit_path.exists():
         raise SystemExit(f"missing peakfit metrics json: {peakfit_path}")
+
+    # 条件分岐: `wedge_path is not None and not wedge_path.exists()` を満たす経路を評価する。
+
     if wedge_path is not None and not wedge_path.exists():
         raise SystemExit(f"missing wedge metrics json: {wedge_path}")
 
@@ -317,6 +360,7 @@ def main() -> int:
     peakfit = _load_json(peakfit_path)
     wedge_metrics: Optional[Dict[str, Any]] = _load_json(wedge_path) if wedge_path is not None else None
     peakfit_points = peakfit.get("results", [])
+    # 条件分岐: `not isinstance(peakfit_points, list)` を満たす経路を評価する。
     if not isinstance(peakfit_points, list):
         raise SystemExit("peakfit metrics has invalid 'results' (expected list)")
 
@@ -324,9 +368,12 @@ def main() -> int:
     y1_by_tracer: Dict[str, Dict[str, Any]] = {str(r.get("tracer")): r for r in rows if str(r.get("tracer", "")).strip()}
 
     tracers = [t.strip() for t in str(args.tracers).split(",") if t.strip()]
+    # 条件分岐: `not tracers` を満たす経路を評価する。
     if not tracers:
         raise SystemExit("--tracers must not be empty")
+
     missing = [t for t in tracers if t not in y1_by_tracer]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"y1data missing tracers: {missing}")
 
@@ -354,28 +401,36 @@ def main() -> int:
 
     for tracer in tracers:
         r = y1_by_tracer[tracer]
+        # 条件分岐: `r.get("dm_over_rd") in (None, "null") or r.get("dh_over_rd") in (None, "null")` を満たす経路を評価する。
         if r.get("dm_over_rd") in (None, "null") or r.get("dh_over_rd") in (None, "null"):
             raise SystemExit(
                 f"tracer '{tracer}' does not provide DM/DH in Y1data (likely DV-only). "
                 "This eps cross-check requires anisotropic (DM/DH) constraints."
             )
+
         dm_dh_y1 = _extract_dm_dh_from_y1data_row(r)
         dm_dh = dm_dh_y1
         source_used = "y1data"
+        # 条件分岐: `bool(args.prefer_bao_data) and bao is not None` を満たす経路を評価する。
         if bool(args.prefer_bao_data) and bao is not None:
+            # 条件分岐: `tracer not in bao_dataset_map` を満たす経路を評価する。
             if tracer not in bao_dataset_map:
                 raise SystemExit(f"bao_data dataset mapping missing for tracer '{tracer}' (update bao_dataset_map).")
+
             dm_dh = _extract_dm_dh_from_bao_data(bao, dataset_name=str(bao_dataset_map[tracer]))
             source_used = "bao_data"
 
         # Always compute and record y1data vs bao_data consistency if possible.
+
         if bao is not None:
             try:
+                # 条件分岐: `tracer in bao_dataset_map` を満たす経路を評価する。
                 if tracer in bao_dataset_map:
                     dm_dh_bao = _extract_dm_dh_from_bao_data(bao, dataset_name=str(bao_dataset_map[tracer]))
                 else:
                     dm_dh_bao = None
                     raise ValueError(f"bao_dataset_map missing for tracer '{tracer}'")
+
                 source_consistency[tracer] = {
                     "y1data": {
                         "z_eff": dm_dh_y1.z_eff,
@@ -443,10 +498,12 @@ def main() -> int:
 
         fit_lcdm = _extract_peakfit_eps(peakfit_points, dist="lcdm", z_target=z_eff, z_tol=float(args.z_tol))
         fit_pbg = _extract_peakfit_eps(peakfit_points, dist="pbg", z_target=z_eff, z_tol=float(args.z_tol))
+        # 条件分岐: `fit_lcdm is None or fit_pbg is None` を満たす経路を評価する。
         if fit_lcdm is None or fit_pbg is None:
             raise SystemExit(
                 f"peakfit metrics does not contain both lcdm/pbg points close to z_eff={z_eff:.3f} for tracer {tracer}"
             )
+
         fit[tracer] = {"lcdm": fit_lcdm, "pbg": fit_pbg}
 
         deltas[tracer] = {}
@@ -469,9 +526,11 @@ def main() -> int:
                 "sigma_fit_diag": sig_fit,
             }
         # Record source used for this tracer.
+
         deltas[tracer]["_source_used_for_expected"] = {"name": source_used}
 
     # Plot
+
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
@@ -484,9 +543,11 @@ def main() -> int:
         es_fit = [fit[t][dist].eps_sigma for t in tracers]
         ys_wedge = []
         for t in tracers:
+            # 条件分岐: `wedge_metrics is None` を満たす経路を評価する。
             if wedge_metrics is None:
                 ys_wedge.append(float("nan"))
                 continue
+
             pt_w = _extract_wedge_eps_proxy(
                 wedge_metrics,
                 dist=dist,
@@ -501,6 +562,7 @@ def main() -> int:
         ax.errorbar(xs, ys_exp, yerr=es_exp, fmt="o", ms=7, capsize=3, label="公開距離制約（BAO fit; 派生）→ε_expected")
         ax.errorbar(xs, ys_fit, yerr=es_fit, fmt="s", ms=6, capsize=3, label="catalog ξℓ→peakfit（diag）")
         ok_w = [math.isfinite(float(y)) for y in ys_wedge]
+        # 条件分岐: `any(ok_w)` を満たす経路を評価する。
         if any(ok_w):
             ax.scatter(
                 [x for x, ok in zip(xs, ok_w, strict=True) if ok],
@@ -509,8 +571,10 @@ def main() -> int:
                 s=55,
                 label="catalog μ-wedge→ε_proxy",
             )
+
         for x, y, lab in zip(xs, ys_exp, tracers, strict=True):
             ax.annotate(lab, (x, y), xytext=(6, 6), textcoords="offset points", fontsize=9)
+
         ax.set_title(title, fontsize=12)
         ax.set_xlabel("z_eff", fontsize=11)
         ax.grid(True, alpha=0.25)
@@ -523,6 +587,7 @@ def main() -> int:
     plt.close(fig)
 
     wedge_proxy: Optional[Dict[str, Dict[str, Optional[float]]]] = None
+    # 条件分岐: `wedge_metrics is not None` を満たす経路を評価する。
     if wedge_metrics is not None:
         wedge_proxy = {}
         for t in tracers:
@@ -594,6 +659,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

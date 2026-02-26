@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 import sys
 
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -34,10 +35,15 @@ def _rel(path: Path) -> str:
 
 
 def _gate_status(*, z_abs: float, hard: float, watch: float) -> str:
+    # 条件分岐: `z_abs <= watch` を満たす経路を評価する。
     if z_abs <= watch:
         return "pass"
+
+    # 条件分岐: `z_abs <= hard` を満たす経路を評価する。
+
     if z_abs <= hard:
         return "watch"
+
     return "reject"
 
 
@@ -61,11 +67,15 @@ def _freeze_tf(
     cf_tref_mev: float,
 ) -> tuple[float, float]:
     n_eff = 5.0 - cf_alpha - (1.0 / q_b)
+    # 条件分岐: `n_eff <= 1.0e-8` を満たす経路を評価する。
     if n_eff <= 1.0e-8:
         raise ValueError(f"invalid n_eff={n_eff:.6g}")
+
     base = (cf0 * (q_b / t_b_sec) * (cf_tref_mev ** (-cf_alpha)) * (t_b_mev ** (-1.0 / q_b))) / a_w
+    # 条件分岐: `base <= 0.0` を満たす経路を評価する。
     if base <= 0.0:
         raise ValueError(f"invalid freeze base={base:.6g}")
+
     tf_mev = float(base ** (1.0 / n_eff))
     return tf_mev, float(n_eff)
 
@@ -118,14 +128,17 @@ def _numeric_gradient(
         eps = max(abs(mu) * 1.0e-4, 1.0e-7)
         x_lo = mu - eps
         x_hi = mu + eps
+        # 条件分岐: `spec.lower is not None and x_lo <= float(spec.lower)` を満たす経路を評価する。
         if spec.lower is not None and x_lo <= float(spec.lower):
             x_lo = max(float(spec.lower) * (1.0 + 1.0e-6), mu)
+
         p_lo = dict(nominal_params)
         p_hi = dict(nominal_params)
         p_lo[spec.name] = float(x_lo)
         p_hi[spec.name] = float(x_hi)
         try:
             y_hi = _evaluate_state(params=p_hi, args=args)[target]
+            # 条件分岐: `x_lo == mu` を満たす経路を評価する。
             if x_lo == mu:
                 p_mu = dict(nominal_params)
                 p_mu[spec.name] = mu
@@ -136,6 +149,7 @@ def _numeric_gradient(
                 grad[spec.name] = float((y_hi - y_lo) / (x_hi - x_lo))
         except Exception:
             grad[spec.name] = float("nan")
+
     return grad
 
 
@@ -246,12 +260,15 @@ def _plot_audit(
     z_labels = ["raw", "propagated-linear", "propagated-mc"]
     colors = []
     for z in z_vals:
+        # 条件分岐: `z <= watch_z_threshold` を満たす経路を評価する。
         if z <= watch_z_threshold:
             colors.append("#2ca02c")
+        # 条件分岐: 前段条件が不成立で、`z <= hard_z_threshold` を追加評価する。
         elif z <= hard_z_threshold:
             colors.append("#ffbf00")
         else:
             colors.append("#d62728")
+
     ax.bar(z_labels, z_vals, color=colors)
     ax.axhline(watch_z_threshold, color="#777777", ls="--", lw=1.0, label=f"watch |z|={watch_z_threshold:g}")
     ax.axhline(hard_z_threshold, color="#444444", ls=":", lw=1.0, label=f"hard |z|={hard_z_threshold:g}")
@@ -309,9 +326,12 @@ def main() -> int:
         acc = 0.0
         for spec in specs:
             g = float(grad.get(spec.name, float("nan")))
+            # 条件分岐: `not math.isfinite(g)` を満たす経路を評価する。
             if not math.isfinite(g):
                 continue
+
             acc += (g * float(spec.sigma)) ** 2
+
         return float(math.sqrt(acc))
 
     sigma_tf_linear = _linear_sigma(grad_tf)
@@ -321,12 +341,17 @@ def main() -> int:
     rng = np.random.default_rng(int(args.mc_seed))
     sample_map: dict[str, np.ndarray] = {}
     for spec in specs:
+        # 条件分岐: `spec.sigma > 0.0` を満たす経路を評価する。
         if spec.sigma > 0.0:
             arr = rng.normal(loc=float(spec.mu), scale=float(spec.sigma), size=int(args.mc_samples))
         else:
             arr = np.full(int(args.mc_samples), float(spec.mu), dtype=float)
+
+        # 条件分岐: `spec.lower is not None` を満たす経路を評価する。
+
         if spec.lower is not None:
             arr = np.maximum(arr, float(spec.lower))
+
         sample_map[spec.name] = arr
 
     cf0_s = sample_map["cf0"]
@@ -362,6 +387,7 @@ def main() -> int:
     tf_valid = tf_s[np.isfinite(tf_s)]
     cf_valid = cf_tf_s[np.isfinite(cf_tf_s)]
     y_valid = y_s[np.isfinite(y_s)]
+    # 条件分岐: `tf_valid.size < 100 or cf_valid.size < 100 or y_valid.size < 100` を満たす経路を評価する。
     if tf_valid.size < 100 or cf_valid.size < 100 or y_valid.size < 100:
         raise RuntimeError("insufficient valid Monte Carlo samples for He-4 propagation")
 
@@ -388,8 +414,10 @@ def main() -> int:
         watch=float(args.watch_z_threshold),
     )
 
+    # 条件分岐: `raw_status == "watch" and propagated_status == "pass"` を満たす経路を評価する。
     if raw_status == "watch" and propagated_status == "pass":
         convergence_outcome = "watch_to_pass_after_uncertainty_propagation"
+    # 条件分岐: 前段条件が不成立で、`raw_status == propagated_status` を追加評価する。
     elif raw_status == propagated_status:
         convergence_outcome = "watch_fixed_after_uncertainty_propagation"
     else:
@@ -409,15 +437,19 @@ def main() -> int:
                 "sigma_contribution_abs": sigma_term,
             }
         )
+
     contrib_rows.sort(key=lambda r: (0.0 if not math.isfinite(float(r["sigma_contribution_abs"])) else -float(r["sigma_contribution_abs"])))
 
     contrib_group: dict[str, float] = {}
     for row in contrib_rows:
         gname = str(row["group"])
         sval = float(row["sigma_contribution_abs"])
+        # 条件分岐: `not math.isfinite(sval)` を満たす経路を評価する。
         if not math.isfinite(sval):
             continue
+
         contrib_group[gname] = contrib_group.get(gname, 0.0) + sval**2
+
     for key in list(contrib_group):
         contrib_group[key] = float(math.sqrt(contrib_group[key]))
 
@@ -591,6 +623,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

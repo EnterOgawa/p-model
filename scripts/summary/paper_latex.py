@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -67,20 +68,31 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
     stripped_lower = stripped_title.lower()
     merged = f"{raw_lower} {stripped_lower}"
 
+    # 条件分岐: `"ベルテスト" in raw_title or "bell" in merged` を満たす経路を評価する。
     if "ベルテスト" in raw_title or "bell" in merged:
         return "bell-test"
+
+    # 条件分岐: `"原子核" in raw_title or "nuclear" in merged` を満たす経路を評価する。
 
     if "原子核" in raw_title or "nuclear" in merged:
         return "nuclear"
 
+    # 条件分岐: `"原子・分子" in raw_title or ("atomic" in merged and "molecular" in merged)` を満たす経路を評価する。
+
     if "原子・分子" in raw_title or ("atomic" in merged and "molecular" in merged):
         return "atomic-molecular"
+
+    # 条件分岐: `"物性" in raw_title or "condensed" in merged` を満たす経路を評価する。
 
     if "物性" in raw_title or "condensed" in merged:
         return "materials"
 
+    # 条件分岐: `"統計力学" in raw_title or "熱力学" in raw_title or "thermo" in merged` を満たす経路を評価する。
+
     if "統計力学" in raw_title or "熱力学" in raw_title or "thermo" in merged:
         return "stat-thermo"
+
+    # 条件分岐: `"ddr" in merged or "distance duality" in merged` を満たす経路を評価する。
 
     if "ddr" in merged or "distance duality" in merged:
         return "cosmo-ddr"
@@ -101,11 +113,17 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
     ):
         return "tf-light"
 
+    # 条件分岐: `"eht" in merged` を満たす経路を評価する。
+
     if "eht" in merged:
         return "eht"
 
+    # 条件分岐: `"節マップ" in raw_title or "項目対応" in raw_title` を満たす経路を評価する。
+
     if "節マップ" in raw_title or "項目対応" in raw_title:
         return "section-map"
+
+    # 条件分岐: `"検証サマリ" in raw_title or "scoreboard" in merged` を満たす経路を評価する。
 
     if "検証サマリ" in raw_title or "scoreboard" in merged:
         return "validation-summary"
@@ -123,13 +141,19 @@ def _build_section_label(
     number_tag = number.replace(".", "-") if number else ""
 
     base = _section_label_hint(raw_title, stripped_title) or _safe_label(stripped_title)
+    # 条件分岐: `base == "p"` を満たす経路を評価する。
     if base == "p":
         base = "tf-pfield"
 
+    # 条件分岐: `base in _GENERIC_SECTION_LABELS` を満たす経路を評価する。
+
     if base in _GENERIC_SECTION_LABELS:
         raw_base = _safe_label(raw_title)
+        # 条件分岐: `raw_base not in _GENERIC_SECTION_LABELS` を満たす経路を評価する。
         if raw_base not in _GENERIC_SECTION_LABELS:
             base = raw_base
+
+    # 条件分岐: `base in _GENERIC_SECTION_LABELS` を満たす経路を評価する。
 
     if base in _GENERIC_SECTION_LABELS:
         base = f"sec-{number_tag}" if number_tag else "sec-topic"
@@ -233,10 +257,12 @@ def _match_leading_image_line(line_text: str) -> Optional[tuple[str, str]]:
         s,
         flags=re.IGNORECASE,
     )
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
 
     path_text = m.group(1).strip()
+    # 条件分岐: `not _is_image_path(path_text)` を満たす経路を評価する。
     if not _is_image_path(path_text):
         return None
 
@@ -248,6 +274,7 @@ def _fallback_caption_from_path(raw_path: str) -> str:
     stem = Path(raw_path).stem
     normalized = stem.replace("__", " ").replace("_", " ").replace("-", " ")
     normalized = re.sub(r"\s+", " ", normalized).strip()
+    # 条件分岐: `not normalized` を満たす経路を評価する。
     if not normalized:
         return "観測・理論比較の結果図。"
 
@@ -283,6 +310,7 @@ def _fallback_caption_from_path(raw_path: str) -> str:
 
 
 def _is_image_markdown_line(stripped: str) -> bool:
+    # 条件分岐: `_match_leading_image_line(stripped)` を満たす経路を評価する。
     if _match_leading_image_line(stripped):
         return True
 
@@ -294,28 +322,42 @@ def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str,
     while j < len(lines):
         raw = lines[j]
         stripped = raw.strip()
+        # 条件分岐: `not stripped` を満たす経路を評価する。
         if not stripped:
             break
+
+        # 条件分岐: `stripped.startswith("```") or stripped == "$$"` を満たす経路を評価する。
 
         if stripped.startswith("```") or stripped == "$$":
             break
 
+        # 条件分岐: `re.match(r"^(#{1,6})\s+", stripped)` を満たす経路を評価する。
+
         if re.match(r"^(#{1,6})\s+", stripped):
             break
+
+        # 条件分岐: `_is_image_markdown_line(stripped)` を満たす経路を評価する。
 
         if _is_image_markdown_line(stripped):
             break
 
+        # 条件分岐: `re.match(r"^\s*[-*]\s+(.+)$", raw) or re.match(r"^\s*\d+[.)]\s+(.+)$", raw)` を満たす経路を評価する。
+
         if re.match(r"^\s*[-*]\s+(.+)$", raw) or re.match(r"^\s*\d+[.)]\s+(.+)$", raw):
             break
 
+        # 条件分岐: `"|" in raw and (j + 1) < len(lines) and _is_table_separator(lines[j + 1])` を満たす経路を評価する。
+
         if "|" in raw and (j + 1) < len(lines) and _is_table_separator(lines[j + 1]):
             break
+
+        # 条件分岐: `_is_table_separator(raw)` を満たす経路を評価する。
 
         if _is_table_separator(raw):
             break
 
         candidate = re.sub(r"\s{2,}$", "", stripped).strip()
+        # 条件分岐: `candidate` を満たす経路を評価する。
         if candidate:
             return candidate, (j - start_index + 1)
 
@@ -326,6 +368,7 @@ def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str,
 
 def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
     normalized = _normalize_tex_path(raw_path.strip())
+    # 条件分岐: `normalized.startswith("http://") or normalized.startswith("https://")` を満たす経路を評価する。
     if normalized.startswith("http://") or normalized.startswith("https://"):
         return normalized, False
 
@@ -334,6 +377,7 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
 
     def add_candidate(path_obj: Path) -> None:
         key = str(path_obj.resolve()) if path_obj.is_absolute() else str(path_obj)
+        # 条件分岐: `key in candidate_norms` を満たす経路を評価する。
         if key in candidate_norms:
             return
 
@@ -341,10 +385,13 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
         candidate_paths.append(path_obj)
 
     path_obj = Path(normalized)
+    # 条件分岐: `path_obj.is_absolute()` を満たす経路を評価する。
     if path_obj.is_absolute():
         add_candidate(path_obj)
     else:
         add_candidate(root / path_obj)
+
+    # 条件分岐: `normalized.startswith("output/") and not normalized.startswith("output/public...` を満たす経路を評価する。
 
     if normalized.startswith("output/") and not normalized.startswith("output/public/") and not normalized.startswith("output/private/"):
         tail = normalized[len("output/") :]
@@ -352,8 +399,11 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
         add_candidate(root / "output" / "private" / Path(tail))
 
     resolved_existing = next((candidate for candidate in candidate_paths if candidate.exists()), None)
+    # 条件分岐: `resolved_existing is not None` を満たす経路を評価する。
     if resolved_existing is not None:
         return str(resolved_existing), True
+
+    # 条件分岐: `candidate_paths` を満たす経路を評価する。
 
     if candidate_paths:
         return str(candidate_paths[0]), False
@@ -368,6 +418,7 @@ _USED_REFERENCE_KEYS: set[str] = set()
 
 
 def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, str]]:
+    # 条件分岐: `not references_md.exists()` を満たす経路を評価する。
     if not references_md.exists():
         return [], {}
 
@@ -376,23 +427,30 @@ def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, s
     in_internal_block = False
     for raw_line in references_md.read_text(encoding="utf-8", errors="replace").splitlines():
         stripped = raw_line.strip()
+        # 条件分岐: `stripped == "<!-- INTERNAL_ONLY_START -->"` を満たす経路を評価する。
         if stripped == "<!-- INTERNAL_ONLY_START -->":
             in_internal_block = True
             continue
+
+        # 条件分岐: `stripped == "<!-- INTERNAL_ONLY_END -->"` を満たす経路を評価する。
 
         if stripped == "<!-- INTERNAL_ONLY_END -->":
             in_internal_block = False
             continue
 
+        # 条件分岐: `in_internal_block` を満たす経路を評価する。
+
         if in_internal_block:
             continue
 
         match = re.match(r"^\s*-\s+\[([A-Za-z0-9][A-Za-z0-9_.:-]*)\]\s+(.+)$", raw_line)
+        # 条件分岐: `not match` を満たす経路を評価する。
         if not match:
             continue
 
         key = match.group(1).strip()
         text = match.group(2).strip()
+        # 条件分岐: `key not in refs` を満たす経路を評価する。
         if key not in refs:
             order.append(key)
 
@@ -402,6 +460,7 @@ def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, s
 
 
 def _render_bibliography_section() -> str:
+    # 条件分岐: `not _USED_REFERENCE_KEYS` を満たす経路を評価する。
     if not _USED_REFERENCE_KEYS:
         return ""
 
@@ -409,6 +468,7 @@ def _render_bibliography_section() -> str:
     ordered_used = [key for key in _REFERENCE_ORDER if key in _USED_REFERENCE_KEYS]
     for key in ordered_used:
         ref_text = _REFERENCE_TEXT.get(key, "").strip()
+        # 条件分岐: `not ref_text` を満たす経路を評価する。
         if not ref_text:
             continue
 
@@ -432,17 +492,21 @@ def _render_figure_block(
     used_figure_labels: dict[str, int],
 ) -> list[str]:
     resolved_path, exists = _resolve_image_path(raw_path, root=root)
+    # 条件分岐: `resolved_path.startswith("http://") or resolved_path.startswith("https://")` を満たす経路を評価する。
     if resolved_path.startswith("http://") or resolved_path.startswith("https://"):
         return [r"\noindent\href{" + _escape_tex(resolved_path) + "}{" + _convert_inline(caption or raw_path) + "}", ""]
 
     resolved_obj = Path(resolved_path)
     tex_path = Path(raw_path).name or "missing_figure.png"
 
+    # 条件分岐: `exists` を満たす経路を評価する。
     if exists:
         try:
             source_key = str(resolved_obj.resolve())
         except Exception:
             source_key = str(resolved_obj)
+
+        # 条件分岐: `source_key in staged_assets` を満たす経路を評価する。
 
         if source_key in staged_assets:
             tex_path = staged_assets[source_key]
@@ -465,10 +529,12 @@ def _render_figure_block(
 
     normalized_caption = caption.strip()
     normalized_caption = re.sub(r"[:：]\s*$", "", normalized_caption).strip()
+    # 条件分岐: `not normalized_caption` を満たす経路を評価する。
     if not normalized_caption:
         normalized_caption = _fallback_caption_from_path(raw_path)
 
     caption_text = _convert_inline(normalized_caption)
+    # 条件分岐: `not exists` を満たす経路を評価する。
     if not exists:
         caption_text = _convert_inline(f"{normalized_caption} (missing file: {raw_path})")
 
@@ -620,30 +686,46 @@ _PHYSICS_ASCII_GREEK_TOKEN_RE = re.compile(
 
 def _looks_like_artifact_code(s: str) -> bool:
     candidate = s.strip()
+    # 条件分岐: `not candidate` を満たす経路を評価する。
     if not candidate:
         return False
 
     low = candidate.lower()
+    # 条件分岐: `"://" in candidate` を満たす経路を評価する。
     if "://" in candidate:
         return True
+
+    # 条件分岐: `re.match(r"^[A-Za-z]:[\\/]", candidate)` を満たす経路を評価する。
 
     if re.match(r"^[A-Za-z]:[\\/]", candidate):
         return True
 
+    # 条件分岐: `low.startswith(("output/", "scripts/", "data/", "doc/", "./", "../", ".\\", "...` を満たす経路を評価する。
+
     if low.startswith(("output/", "scripts/", "data/", "doc/", "./", "../", ".\\", "..\\")):
         return True
+
+    # 条件分岐: `_CODE_FILE_EXT_RE.search(low)` を満たす経路を評価する。
 
     if _CODE_FILE_EXT_RE.search(low):
         return True
 
+    # 条件分岐: `re.fullmatch(r"[A-Za-z0-9_.-]+/", candidate)` を満たす経路を評価する。
+
     if re.fullmatch(r"[A-Za-z0-9_.-]+/", candidate):
         return True
+
+    # 条件分岐: `_MATH_GREEK_OR_SYMBOL_RE.search(candidate)` を満たす経路を評価する。
 
     if _MATH_GREEK_OR_SYMBOL_RE.search(candidate):
         return False
 
+    # 条件分岐: `"%" in candidate` を満たす経路を評価する。
+
     if "%" in candidate:
         return True
+
+    # 条件分岐: `re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+", candidate)` を満たす経路を評価する。
 
     if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+", candidate):
         return True
@@ -660,25 +742,38 @@ def _looks_like_artifact_code(s: str) -> bool:
     ) and "\\" not in candidate:
         return True
 
+    # 条件分岐: `"=" in candidate and " " in candidate and "\\" not in candidate and not re.se...` を満たす経路を評価する。
+
     if "=" in candidate and " " in candidate and "\\" not in candidate and not re.search(r"[{}^]", candidate):
         lhs = candidate.split("=", 1)[0].strip()
+        # 条件分岐: `len(lhs) >= 4 and re.search(r"[A-Za-z]", lhs)` を満たす経路を評価する。
         if len(lhs) >= 4 and re.search(r"[A-Za-z]", lhs):
             return True
 
+    # 条件分岐: `candidate.count("_") >= 2 and "\\" not in candidate` を満たす経路を評価する。
+
     if candidate.count("_") >= 2 and "\\" not in candidate:
         return True
+
+    # 条件分岐: `re.search(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+){2,}", candidate)` を満たす経路を評価する。
 
     if re.search(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+){2,}", candidate):
         return True
 
     m_snake = re.fullmatch(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+", candidate)
+    # 条件分岐: `m_snake` を満たす経路を評価する。
     if m_snake:
         parts = candidate.split("_")
+        # 条件分岐: `len(parts) >= 3` を満たす経路を評価する。
         if len(parts) >= 3:
             return True
 
+        # 条件分岐: `len(parts) == 2 and (len(parts[0]) > 1 or len(parts[1]) > 1)` を満たす経路を評価する。
+
         if len(parts) == 2 and (len(parts[0]) > 1 or len(parts[1]) > 1):
             return True
+
+    # 条件分岐: `re.match(r"^(?:--?)[A-Za-z0-9][A-Za-z0-9_.-]*(?:=[^\\s]+)?$", candidate)` を満たす経路を評価する。
 
     if re.match(r"^(?:--?)[A-Za-z0-9][A-Za-z0-9_.-]*(?:=[^\\s]+)?$", candidate):
         return True
@@ -687,25 +782,37 @@ def _looks_like_artifact_code(s: str) -> bool:
         r"^(?P<lhs>[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\s*=\s*(?P<rhs>[^=]+)$",
         candidate,
     )
+    # 条件分岐: `m_keyval` を満たす経路を評価する。
     if m_keyval:
         lhs = m_keyval.group("lhs")
         rhs = m_keyval.group("rhs")
         lhs_low = lhs.lower()
         rhs_low = rhs.lower()
+        # 条件分岐: `re.search(r"[\\α-ωΑ-ΩΔΘΛΞΠΣΦΨΩ^{}()|]", rhs)` を満たす経路を評価する。
         if re.search(r"[\\α-ωΑ-ΩΔΘΛΞΠΣΦΨΩ^{}()|]", rhs):
             return False
+
+        # 条件分岐: `re.search(r"[A-Z]", lhs) or len(lhs) <= 3` を満たす経路を評価する。
 
         if re.search(r"[A-Z]", lhs) or len(lhs) <= 3:
             return False
 
+        # 条件分岐: `lhs_low.count("_") >= 1 and len(lhs_low) >= 6` を満たす経路を評価する。
+
         if lhs_low.count("_") >= 1 and len(lhs_low) >= 6:
             return True
+
+        # 条件分岐: `lhs_low in {"event", "event_counter", "next", "source", "selected", "target",...` を満たす経路を評価する。
 
         if lhs_low in {"event", "event_counter", "next", "source", "selected", "target", "without", "shift"}:
             return True
 
+        # 条件分岐: `re.search(r"[A-Za-z0-9]+_[A-Za-z0-9_]+", rhs)` を満たす経路を評価する。
+
         if re.search(r"[A-Za-z0-9]+_[A-Za-z0-9_]+", rhs):
             return True
+
+        # 条件分岐: `rhs_low in {"pass", "watch", "reject", "true", "false", "none"}` を満たす経路を評価する。
 
         if rhs_low in {"pass", "watch", "reject", "true", "false", "none"}:
             return True
@@ -731,41 +838,66 @@ def _looks_like_artifact_code(s: str) -> bool:
 
 def _looks_like_math_code(s: str) -> bool:
     candidate = s.strip()
+    # 条件分岐: `not candidate` を満たす経路を評価する。
     if not candidate:
         return False
+
+    # 条件分岐: `_looks_like_artifact_code(candidate)` を満たす経路を評価する。
 
     if _looks_like_artifact_code(candidate):
         return False
 
+    # 条件分岐: `_MATH_GREEK_OR_SYMBOL_RE.search(candidate)` を満たす経路を評価する。
+
     if _MATH_GREEK_OR_SYMBOL_RE.search(candidate):
         return True
+
+    # 条件分岐: `re.search(r"\\[A-Za-z]+", candidate)` を満たす経路を評価する。
 
     if re.search(r"\\[A-Za-z]+", candidate):
         return True
 
+    # 条件分岐: `re.search(r"[A-Za-z][_^][A-Za-z0-9\\{(]", candidate)` を満たす経路を評価する。
+
     if re.search(r"[A-Za-z][_^][A-Za-z0-9\\{(]", candidate):
         return True
+
+    # 条件分岐: `re.search(r"[A-Za-z]\([A-Za-z0-9_,+\-*/ ]+\)", candidate)` を満たす経路を評価する。
 
     if re.search(r"[A-Za-z]\([A-Za-z0-9_,+\-*/ ]+\)", candidate):
         return True
 
+    # 条件分岐: `" " not in candidate and re.search(r"[+\-*/]", candidate) and re.search(r"[A-...` を満たす経路を評価する。
+
     if " " not in candidate and re.search(r"[+\-*/]", candidate) and re.search(r"[A-Za-zα-ωΑ-Ω]", candidate):
         return True
+
+    # 条件分岐: `candidate in {"ln", "exp", "sqrt()", "sin", "cos", "tan", "max", "min"}` を満たす経路を評価する。
 
     if candidate in {"ln", "exp", "sqrt()", "sin", "cos", "tan", "max", "min"}:
         return True
 
+    # 条件分岐: `re.search(r"[=<>|]", candidate)` を満たす経路を評価する。
+
     if re.search(r"[=<>|]", candidate):
         return True
+
+    # 条件分岐: `re.fullmatch(r"[A-Za-z](?:/[A-Za-z0-9_]+)+", candidate)` を満たす経路を評価する。
 
     if re.fullmatch(r"[A-Za-z](?:/[A-Za-z0-9_]+)+", candidate):
         return True
 
+    # 条件分岐: `re.fullmatch(r"[A-Za-z][0-9]+", candidate)` を満たす経路を評価する。
+
     if re.fullmatch(r"[A-Za-z][0-9]+", candidate):
         return True
 
+    # 条件分岐: `re.fullmatch(r"[A-Za-z](?:_[A-Za-z0-9]+)?", candidate)` を満たす経路を評価する。
+
     if re.fullmatch(r"[A-Za-z](?:_[A-Za-z0-9]+)?", candidate):
         return True
+
+    # 条件分岐: `" " in candidate and _MATH_GREEK_OR_SYMBOL_RE.search(candidate)` を満たす経路を評価する。
 
     if " " in candidate and _MATH_GREEK_OR_SYMBOL_RE.search(candidate):
         return True
@@ -774,8 +906,11 @@ def _looks_like_math_code(s: str) -> bool:
 
 
 def _format_subscript_token(sub: str) -> str:
+    # 条件分岐: `re.fullmatch(r"[A-Za-z0-9]", sub)` を満たす経路を評価する。
     if re.fullmatch(r"[A-Za-z0-9]", sub):
         return sub
+
+    # 条件分岐: `"_" in sub` を満たす経路を評価する。
 
     if "_" in sub:
         return r"\mathrm{" + sub.replace("_", r"\_") + "}"
@@ -798,21 +933,31 @@ def _normalize_word_subscripts(text: str) -> str:
 
 def _looks_like_physics_equation_code(s: str) -> bool:
     candidate = s.strip()
+    # 条件分岐: `not candidate` を満たす経路を評価する。
     if not candidate:
         return False
 
     low = candidate.lower()
+    # 条件分岐: `"://" in candidate` を満たす経路を評価する。
     if "://" in candidate:
         return False
+
+    # 条件分岐: `re.match(r"^[A-Za-z]:[\\/]", candidate)` を満たす経路を評価する。
 
     if re.match(r"^[A-Za-z]:[\\/]", candidate):
         return False
 
+    # 条件分岐: `low.startswith(("output/", "scripts/", "data/", "doc/", "./", "../", ".\\", "...` を満たす経路を評価する。
+
     if low.startswith(("output/", "scripts/", "data/", "doc/", "./", "../", ".\\", "..\\")):
         return False
 
+    # 条件分岐: `_CODE_FILE_EXT_RE.search(low)` を満たす経路を評価する。
+
     if _CODE_FILE_EXT_RE.search(low):
         return False
+
+    # 条件分岐: `not re.search(r"(=|<=|>=|<|>|≈|≃|≡|∝)", candidate)` を満たす経路を評価する。
 
     if not re.search(r"(=|<=|>=|<|>|≈|≃|≡|∝)", candidate):
         return False
@@ -820,17 +965,26 @@ def _looks_like_physics_equation_code(s: str) -> bool:
     lhs = re.split(r"(?:<=|>=|=|<|>|≈|≃|≡|∝)", candidate, maxsplit=1)[0].strip()
     lhs = lhs.replace(r"\_", "_")
     lhs_plain = lhs
+    # 条件分岐: `lhs_plain.startswith("|") and lhs_plain.endswith("|") and len(lhs_plain) >= 2` を満たす経路を評価する。
     if lhs_plain.startswith("|") and lhs_plain.endswith("|") and len(lhs_plain) >= 2:
         lhs_plain = lhs_plain[1:-1].strip()
+
+    # 条件分岐: `_PHYSICS_SINGLE_LHS_RE.fullmatch(lhs)` を満たす経路を評価する。
 
     if _PHYSICS_SINGLE_LHS_RE.fullmatch(lhs):
         return True
 
+    # 条件分岐: `_PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(lhs)` を満たす経路を評価する。
+
     if _PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(lhs):
         return True
 
+    # 条件分岐: `_PHYSICS_SINGLE_LHS_RE.fullmatch(lhs_plain)` を満たす経路を評価する。
+
     if _PHYSICS_SINGLE_LHS_RE.fullmatch(lhs_plain):
         return True
+
+    # 条件分岐: `_PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(lhs_plain)` を満たす経路を評価する。
 
     if _PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(lhs_plain):
         return True
@@ -855,11 +1009,17 @@ def _looks_like_physics_equation_code(s: str) -> bool:
     ):
         return True
 
+    # 条件分岐: `re.fullmatch(r"[A-Z][A-Za-z0-9]{0,4}(?:_[A-Za-z0-9]+)?(?:\([^()]*\))?", lhs)` を満たす経路を評価する。
+
     if re.fullmatch(r"[A-Z][A-Za-z0-9]{0,4}(?:_[A-Za-z0-9]+)?(?:\([^()]*\))?", lhs):
         return True
 
+    # 条件分岐: `re.fullmatch(r"[A-Z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*(?:/[A-Za-z0-9_,]+)?(?:\([^...` を満たす経路を評価する。
+
     if re.fullmatch(r"[A-Z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*(?:/[A-Za-z0-9_,]+)?(?:\([^()]*\))?", lhs):
         return True
+
+    # 条件分岐: `_MATH_GREEK_OR_SYMBOL_RE.search(candidate) or re.search(r"\\[A-Za-z]+", candi...` を満たす経路を評価する。
 
     if _MATH_GREEK_OR_SYMBOL_RE.search(candidate) or re.search(r"\\[A-Za-z]+", candidate):
         return True
@@ -869,17 +1029,26 @@ def _looks_like_physics_equation_code(s: str) -> bool:
 
 def _looks_like_physics_symbol_code(s: str) -> bool:
     candidate = s.strip().replace(r"\_", "_")
+    # 条件分岐: `not candidate` を満たす経路を評価する。
     if not candidate:
         return False
+
+    # 条件分岐: `re.search(r"[=<>]", candidate)` を満たす経路を評価する。
 
     if re.search(r"[=<>]", candidate):
         return False
 
+    # 条件分岐: `_PHYSICS_SINGLE_LHS_RE.fullmatch(candidate)` を満たす経路を評価する。
+
     if _PHYSICS_SINGLE_LHS_RE.fullmatch(candidate):
         return True
 
+    # 条件分岐: `_PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(candidate)` を満たす経路を評価する。
+
     if _PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(candidate):
         return True
+
+    # 条件分岐: `re.fullmatch(r"[A-Z][A-Za-z0-9]{0,4}(?:_[A-Za-z0-9]+)?", candidate)` を満たす経路を評価する。
 
     if re.fullmatch(r"[A-Z][A-Za-z0-9]{0,4}(?:_[A-Za-z0-9]+)?", candidate):
         return True
@@ -1002,8 +1171,11 @@ def _postprocess_latex_body(body: str) -> str:
             .replace(r"\}", "}")
         )
         payload = re.sub(r"\s+", " ", payload).strip()
+        # 条件分岐: `_looks_like_artifact_code(payload)` を満たす経路を評価する。
         if _looks_like_artifact_code(payload):
             return match.group(0)
+
+        # 条件分岐: `_looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code...` を満たす経路を評価する。
 
         if _looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code(payload):
             return "$" + _normalize_inline_math_payload(payload) + "$"
@@ -1044,6 +1216,7 @@ def _postprocess_latex_body(body: str) -> str:
     )
     def _texttt_allowbreak(match: re.Match[str]) -> str:
         payload = match.group(1)
+        # 条件分岐: `len(payload) < 28 or r"\_" not in payload` を満たす経路を評価する。
         if len(payload) < 28 or r"\_" not in payload:
             return match.group(0)
 
@@ -1069,17 +1242,26 @@ def _convert_inline(text: str) -> str:
     def repl_inline_code(match: re.Match[str]) -> str:
         payload_raw = match.group(1)
         payload = payload_raw.strip()
+        # 条件分岐: `not payload` を満たす経路を評価する。
         if not payload:
             return ""
+
+        # 条件分岐: `_PUNCT_ONLY_RE.fullmatch(payload)` を満たす経路を評価する。
 
         if _PUNCT_ONLY_RE.fullmatch(payload):
             return make_token(_escape_tex(payload))
 
+        # 条件分岐: `re.search(r"[\u3040-\u30ff\u3400-\u9fff]", payload) and not _looks_like_artif...` を満たす経路を評価する。
+
         if re.search(r"[\u3040-\u30ff\u3400-\u9fff]", payload) and not _looks_like_artifact_code(payload):
             return make_token(_escape_tex(payload))
 
+        # 条件分岐: `_looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code...` を満たす経路を評価する。
+
         if _looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code(payload):
             return make_token("$" + _normalize_inline_math_payload(payload) + "$")
+
+        # 条件分岐: `_looks_like_math_code(payload)` を満たす経路を評価する。
 
         if _looks_like_math_code(payload):
             return make_token("$" + _normalize_inline_math_payload(payload) + "$")
@@ -1091,6 +1273,7 @@ def _convert_inline(text: str) -> str:
     def repl_inline_math(match: re.Match[str]) -> str:
         payload_raw = match.group(1)
         payload = payload_raw.strip()
+        # 条件分岐: `not payload` を満たす経路を評価する。
         if not payload:
             return ""
 
@@ -1098,6 +1281,8 @@ def _convert_inline(text: str) -> str:
             _looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code(payload)
         ):
             return make_token(r"\texttt{" + _escape_tex(payload) + r"}")
+
+        # 条件分岐: `re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+", payload)` を満たす経路を評価する。
 
         if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+", payload):
             return make_token(r"\texttt{" + _escape_tex(payload) + r"}")
@@ -1117,6 +1302,7 @@ def _convert_inline(text: str) -> str:
 
         no_scheme = re.match(r"^[a-z][a-z0-9+.\-]*:", target_norm) is None
         target_core = re.split(r"[?#]", target_norm, maxsplit=1)[0]
+        # 条件分岐: `no_scheme and (target_core.endswith(".html") or target_core.endswith(".htm"))` を満たす経路を評価する。
         if no_scheme and (target_core.endswith(".html") or target_core.endswith(".htm")):
             return make_token(_escape_tex(label))
 
@@ -1126,8 +1312,11 @@ def _convert_inline(text: str) -> str:
 
     def repl_citation(match: re.Match[str]) -> str:
         keys = [k.strip() for k in re.split(r"\s*[,;]\s*", match.group("keys")) if k.strip()]
+        # 条件分岐: `not keys` を満たす経路を評価する。
         if not keys:
             return match.group(0)
+
+        # 条件分岐: `not all(key in _REFERENCE_KEYS for key in keys)` を満たす経路を評価する。
 
         if not all(key in _REFERENCE_KEYS for key in keys):
             return match.group(0)
@@ -1150,9 +1339,12 @@ def _convert_inline(text: str) -> str:
         changed = False
         for key, rendered in token_map.items():
             escaped_key = _escape_tex(key)
+            # 条件分岐: `escaped_key in escaped` を満たす経路を評価する。
             if escaped_key in escaped:
                 escaped = escaped.replace(escaped_key, rendered)
                 changed = True
+
+        # 条件分岐: `not changed` を満たす経路を評価する。
 
         if not changed:
             break
@@ -1162,6 +1354,7 @@ def _convert_inline(text: str) -> str:
 
 def _is_table_separator(line: str) -> bool:
     s = line.strip()
+    # 条件分岐: `"|" not in s` を満たす経路を評価する。
     if "|" not in s:
         return False
 
@@ -1171,8 +1364,11 @@ def _is_table_separator(line: str) -> bool:
 
 def _parse_table_row(line: str) -> list[str]:
     s = line.strip()
+    # 条件分岐: `s.startswith("|")` を満たす経路を評価する。
     if s.startswith("|"):
         s = s[1:]
+
+    # 条件分岐: `s.endswith("|")` を満たす経路を評価する。
 
     if s.endswith("|"):
         s = s[:-1]
@@ -1184,25 +1380,34 @@ def _parse_table_row(line: str) -> list[str]:
     escaped = False
 
     for ch in s:
+        # 条件分岐: `escaped` を満たす経路を評価する。
         if escaped:
             buf.append(ch)
             escaped = False
             continue
+
+        # 条件分岐: `ch == "\\"` を満たす経路を評価する。
 
         if ch == "\\":
             buf.append(ch)
             escaped = True
             continue
 
+        # 条件分岐: `ch == "`" and not in_math` を満たす経路を評価する。
+
         if ch == "`" and not in_math:
             in_code = not in_code
             buf.append(ch)
             continue
 
+        # 条件分岐: `ch == "$" and not in_code` を満たす経路を評価する。
+
         if ch == "$" and not in_code:
             in_math = not in_math
             buf.append(ch)
             continue
+
+        # 条件分岐: `ch == "|" and not in_code and not in_math` を満たす経路を評価する。
 
         if ch == "|" and not in_code and not in_math:
             cells.append("".join(buf).strip())
@@ -1216,6 +1421,7 @@ def _parse_table_row(line: str) -> list[str]:
 
 
 def _render_table(block_lines: list[str]) -> list[str]:
+    # 条件分岐: `len(block_lines) < 2` を満たす経路を評価する。
     if len(block_lines) < 2:
         return [_convert_inline(block_lines[0])] if block_lines else []
 
@@ -1228,14 +1434,18 @@ def _render_table(block_lines: list[str]) -> list[str]:
 
     compact_table = ncols >= 4
     table_font = r"\normalsize"
+    # 条件分岐: `ncols >= 7` を満たす経路を評価する。
     if ncols >= 7:
         table_font = r"\tiny"
+    # 条件分岐: 前段条件が不成立で、`ncols >= 5` を追加評価する。
     elif ncols >= 5:
         table_font = r"\scriptsize"
+    # 条件分岐: 前段条件が不成立で、`ncols >= 4` を追加評価する。
     elif ncols >= 4:
         table_font = r"\footnotesize"
 
     out: list[str] = []
+    # 条件分岐: `compact_table` を満たす経路を評価する。
     if compact_table:
         out += [
             r"\begingroup",
@@ -1252,6 +1462,7 @@ def _render_table(block_lines: list[str]) -> list[str]:
         out.append(" & ".join(_convert_inline(c) for c in padded[:ncols]) + r" \\")
 
     out += [r"\bottomrule", r"\end{longtable}"]
+    # 条件分岐: `compact_table` を満たす経路を評価する。
     if compact_table:
         out.append(r"\endgroup")
 
@@ -1286,6 +1497,7 @@ def _markdown_to_latex(
 
     def flush_paragraph() -> None:
         nonlocal paragraph
+        # 条件分岐: `paragraph` を満たす経路を評価する。
         if paragraph:
             out.append(_convert_inline(" ".join(s.strip() for s in paragraph if s.strip())))
             out.append("")
@@ -1293,6 +1505,7 @@ def _markdown_to_latex(
 
     def close_list() -> None:
         nonlocal list_mode
+        # 条件分岐: `list_mode` を満たす経路を評価する。
         if list_mode:
             out.append(r"\end{" + list_mode + "}")
             out.append("")
@@ -1302,8 +1515,11 @@ def _markdown_to_latex(
         line = lines[i]
         stripped = line.strip()
 
+        # 条件分岐: `in_code` を満たす経路を評価する。
         if in_code:
+            # 条件分岐: `stripped.startswith("```")` を満たす経路を評価する。
             if stripped.startswith("```"):
+                # 条件分岐: `code_listing_open` を満たす経路を評価する。
                 if code_listing_open:
                     out.append(r"\end{lstlisting}")
                 else:
@@ -1318,13 +1534,18 @@ def _markdown_to_latex(
             i += 1
             continue
 
+        # 条件分岐: `in_math` を満たす経路を評価する。
+
         if in_math:
+            # 条件分岐: `stripped == "$$"` を満たす経路を評価する。
             if stripped == "$$":
                 out.append(r"\]")
                 out.append("")
                 in_math = False
+            # 条件分岐: 前段条件が不成立で、`stripped.endswith("$$")` を追加評価する。
             elif stripped.endswith("$$"):
                 body_end = line.rsplit("$$", 1)[0].strip()
+                # 条件分岐: `body_end` を満たす経路を評価する。
                 if body_end:
                     out.append(body_end)
 
@@ -1348,6 +1569,8 @@ def _markdown_to_latex(
             i += 1
             continue
 
+        # 条件分岐: `stripped == "$$"` を満たす経路を評価する。
+
         if stripped == "$$":
             flush_paragraph()
             close_list()
@@ -1356,11 +1579,14 @@ def _markdown_to_latex(
             i += 1
             continue
 
+        # 条件分岐: `stripped.startswith("$$") and stripped.endswith("$$") and len(stripped) > 4` を満たす経路を評価する。
+
         if stripped.startswith("$$") and stripped.endswith("$$") and len(stripped) > 4:
             flush_paragraph()
             close_list()
             math_inline = stripped[2:-2].strip()
             out.append(r"\[")
+            # 条件分岐: `math_inline` を満たす経路を評価する。
             if math_inline:
                 out.append(math_inline)
 
@@ -1369,11 +1595,14 @@ def _markdown_to_latex(
             i += 1
             continue
 
+        # 条件分岐: `stripped.startswith("$$") and len(stripped) > 2` を満たす経路を評価する。
+
         if stripped.startswith("$$") and len(stripped) > 2:
             flush_paragraph()
             close_list()
             out.append(r"\[")
             body_start = line.split("$$", 1)[1].strip()
+            # 条件分岐: `body_start` を満たす経路を評価する。
             if body_start:
                 out.append(body_start)
 
@@ -1382,12 +1611,15 @@ def _markdown_to_latex(
             continue
 
         m_leading_image = _match_leading_image_line(stripped)
+        # 条件分岐: `m_leading_image` を満たす経路を評価する。
         if m_leading_image:
             path_text, inline_desc = m_leading_image
             caption_text = ""
             consumed_after_caption = 0
+            # 条件分岐: `paragraph` を満たす経路を評価する。
             if paragraph:
                 last_line = re.sub(r"\s{2,}$", "", paragraph[-1]).strip()
+                # 条件分岐: `re.match(r"^(図|Figure|Fig\.?)", last_line, flags=re.IGNORECASE)` を満たす経路を評価する。
                 if re.match(r"^(図|Figure|Fig\.?)", last_line, flags=re.IGNORECASE):
                     paragraph = paragraph[:-1]
                     flush_paragraph()
@@ -1395,14 +1627,21 @@ def _markdown_to_latex(
                 else:
                     flush_paragraph()
 
+            # 条件分岐: `not caption_text and inline_desc` を満たす経路を評価する。
+
             if not caption_text and inline_desc:
                 caption_text = inline_desc
 
+            # 条件分岐: `not caption_text` を満たす経路を評価する。
+
             if not caption_text:
                 next_caption, consumed = _extract_following_caption(lines, i + 1)
+                # 条件分岐: `next_caption` を満たす経路を評価する。
                 if next_caption:
                     caption_text = next_caption
                     consumed_after_caption = consumed
+
+            # 条件分岐: `not caption_text` を満たす経路を評価する。
 
             if not caption_text:
                 caption_text = _fallback_caption_from_path(path_text)
@@ -1447,6 +1686,8 @@ def _markdown_to_latex(
             i += 1
             continue
 
+        # 条件分岐: `stripped == ""` を満たす経路を評価する。
+
         if stripped == "":
             flush_paragraph()
             close_list()
@@ -1461,8 +1702,11 @@ def _markdown_to_latex(
             block = [line]
             i += 1
             while i < len(lines):
+                # 条件分岐: `lines[i].strip() == ""` を満たす経路を評価する。
                 if lines[i].strip() == "":
                     break
+
+                # 条件分岐: `"|" not in lines[i]` を満たす経路を評価する。
 
                 if "|" not in lines[i]:
                     break
@@ -1476,6 +1720,7 @@ def _markdown_to_latex(
         # headings
 
         m_head = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
+        # 条件分岐: `m_head` を満たす経路を評価する。
         if m_head:
             flush_paragraph()
             close_list()
@@ -1483,23 +1728,30 @@ def _markdown_to_latex(
             raw_title = m_head.group(2).strip()
             title = _strip_heading_prefix(raw_title)
             heading_number = _extract_heading_number(raw_title)
+            # 条件分岐: `level == 1 and not top_h1_seen` を満たす経路を評価する。
             if level == 1 and not top_h1_seen:
                 top_h1_seen = True
                 i += 1
                 continue
 
             effective_level = 1 if level == 1 else max(1, level - 1)
+            # 条件分岐: `effective_level == 1 and title.startswith("付録")` を満たす経路を評価する。
             if effective_level == 1 and title.startswith("付録"):
+                # 条件分岐: `not appendix_started` を満たす経路を評価する。
                 if not appendix_started:
                     out.append(r"\appendix")
                     out.append("")
                     appendix_started = True
 
                 appendix_title = re.sub(r"^付録\s*[A-Za-zＡ-Ｚ0-9一二三四五六七八九十]*\s*[\.．:：]?\s*", "", title).strip()
+                # 条件分岐: `appendix_title` を満たす経路を評価する。
                 if appendix_title:
                     title = appendix_title
 
+            # 条件分岐: `effective_level == 1` を満たす経路を評価する。
+
             if effective_level == 1:
+                # 条件分岐: `_is_abstract_heading(title)` を満たす経路を評価する。
                 if _is_abstract_heading(title):
                     out.append(r"\section*{" + _convert_inline(title) + "}")
                     out.append("")
@@ -1507,20 +1759,28 @@ def _markdown_to_latex(
                     i += 1
                     continue
 
+                # 条件分岐: `chapter_started` を満たす経路を評価する。
+
                 if chapter_started:
                     out.append(r"\clearpage")
                     out.append("")
 
                 chapter_started = True
 
+            # 条件分岐: `effective_level == 1` を満たす経路を評価する。
+
             if effective_level == 1:
                 cmd = "section"
+            # 条件分岐: 前段条件が不成立で、`effective_level == 2` を追加評価する。
             elif effective_level == 2:
                 cmd = "subsection"
+            # 条件分岐: 前段条件が不成立で、`effective_level == 3` を追加評価する。
             elif effective_level == 3:
                 cmd = "subsubsection"
+            # 条件分岐: 前段条件が不成立で、`effective_level == 4` を追加評価する。
             elif effective_level == 4:
                 cmd = "paragraph"
+            # 条件分岐: 前段条件が不成立で、`effective_level == 5` を追加評価する。
             elif effective_level == 5:
                 cmd = "subparagraph"
             else:
@@ -1531,6 +1791,7 @@ def _markdown_to_latex(
 
             force_subsection_pagebreak = False
             force_heading_pagebreak = False
+            # 条件分岐: `cmd == "subsection"` を満たす経路を評価する。
             if cmd == "subsection":
                 if (
                     profile == "part2_astrophysics"
@@ -1551,23 +1812,35 @@ def _markdown_to_latex(
                 ):
                     force_subsection_pagebreak = True
 
+            # 条件分岐: `profile == "part2_astrophysics" and "項目対応（節マップ）" in title` を満たす経路を評価する。
+
             if profile == "part2_astrophysics" and "項目対応（節マップ）" in title:
                 force_heading_pagebreak = True
+
+            # 条件分岐: `profile == "part3_quantum" and "項目対応（節マップ）" in title` を満たす経路を評価する。
 
             if profile == "part3_quantum" and "項目対応（節マップ）" in title:
                 force_heading_pagebreak = True
 
+            # 条件分岐: `profile == "part3_quantum"` を満たす経路を評価する。
+
             if profile == "part3_quantum":
+                # 条件分岐: `heading_number in {"4.10.2", "4.10.3", "4.11.2", "4.11.3"}` を満たす経路を評価する。
                 if heading_number in {"4.10.2", "4.10.3", "4.11.2", "4.11.3"}:
                     force_heading_pagebreak = True
+                # 条件分岐: 前段条件が不成立で、`("黒体放射の基準量" in title) or ("黒体：エントロピーと第2法則整合" in title)` を追加評価する。
                 elif ("黒体放射の基準量" in title) or ("黒体：エントロピーと第2法則整合" in title):
                     force_heading_pagebreak = True
+
+            # 条件分岐: `force_subsection_pagebreak or force_heading_pagebreak` を満たす経路を評価する。
 
             if force_subsection_pagebreak or force_heading_pagebreak:
                 # If a markdown horizontal rule was emitted just before this heading,
                 # remove it so the heading itself can start at the very top of the page.
                 while out and out[-1] == "":
                     out.pop()
+
+                # 条件分岐: `len(out) >= 3 and out[-3:] == [r"\medskip", r"\hrule", r"\medskip"]` を満たす経路を評価する。
 
                 if len(out) >= 3 and out[-3:] == [r"\medskip", r"\hrule", r"\medskip"]:
                     del out[-3:]
@@ -1586,6 +1859,7 @@ def _markdown_to_latex(
                 and heading_number == "2.0"
                 and "統一解釈" in title
             )
+            # 条件分岐: `unnumbered_subsection` を満たす経路を評価する。
             if unnumbered_subsection:
                 out.append(rf"\{cmd}*{{\texorpdfstring{{{heading_tex}}}{{{heading_pdf}}}}}")
             else:
@@ -1609,6 +1883,7 @@ def _markdown_to_latex(
         # image-only line
 
         m_img = re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", stripped)
+        # 条件分岐: `m_img` を満たす経路を評価する。
         if m_img:
             flush_paragraph()
             close_list()
@@ -1616,11 +1891,15 @@ def _markdown_to_latex(
             path = m_img.group(2).strip()
             caption_text = alt
             consumed_after_caption = 0
+            # 条件分岐: `not caption_text` を満たす経路を評価する。
             if not caption_text:
                 next_caption, consumed = _extract_following_caption(lines, i + 1)
+                # 条件分岐: `next_caption` を満たす経路を評価する。
                 if next_caption:
                     caption_text = next_caption
                     consumed_after_caption = consumed
+
+            # 条件分岐: `not caption_text` を満たす経路を評価する。
 
             if not caption_text:
                 caption_text = _fallback_caption_from_path(path)
@@ -1652,6 +1931,7 @@ def _markdown_to_latex(
 
             out.append(r"\begin{quote}")
             for q in q_lines:
+                # 条件分岐: `q` を満たす経路を評価する。
                 if q:
                     out.append(_convert_inline(q) + r"\\")
 
@@ -1662,8 +1942,10 @@ def _markdown_to_latex(
         # lists
 
         m_ul = re.match(r"^\s*[-*]\s+(.+)$", line)
+        # 条件分岐: `m_ul` を満たす経路を評価する。
         if m_ul:
             flush_paragraph()
+            # 条件分岐: `list_mode != "itemize"` を満たす経路を評価する。
             if list_mode != "itemize":
                 close_list()
                 out.append(r"\begin{itemize}[leftmargin=2em]")
@@ -1674,8 +1956,10 @@ def _markdown_to_latex(
             continue
 
         m_ol = re.match(r"^\s*\d+[.)]\s+(.+)$", line)
+        # 条件分岐: `m_ol` を満たす経路を評価する。
         if m_ol:
             flush_paragraph()
+            # 条件分岐: `list_mode != "enumerate"` を満たす経路を評価する。
             if list_mode != "enumerate":
                 close_list()
                 out.append(r"\begin{enumerate}[leftmargin=2em]")
@@ -1693,11 +1977,15 @@ def _markdown_to_latex(
     flush_paragraph()
     close_list()
 
+    # 条件分岐: `in_code` を満たす経路を評価する。
     if in_code:
+        # 条件分岐: `code_listing_open` を満たす経路を評価する。
         if code_listing_open:
             out.append(r"\end{lstlisting}")
         else:
             out.append(r"\end{verbatim}")
+
+    # 条件分岐: `in_math` を満たす経路を評価する。
 
     if in_math:
         out.append(r"\]")
@@ -1727,21 +2015,29 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _REFERENCE_KEYS = set(_REFERENCE_TEXT.keys())
     _USED_REFERENCE_KEYS = set()
 
+    # 条件分岐: `args.manuscript` を満たす経路を評価する。
     if args.manuscript:
         manuscript_md = Path(args.manuscript)
     else:
+        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
         if profile == "paper":
             manuscript_md = root / "doc" / "paper" / "10_part1_core_theory.md"
+        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
         elif profile == "part2_astrophysics":
             manuscript_md = root / "doc" / "paper" / "11_part2_astrophysics.md"
+        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
         elif profile == "part3_quantum":
             manuscript_md = root / "doc" / "paper" / "12_part3_quantum.md"
         else:
             manuscript_md = root / "doc" / "paper" / "13_part4_verification.md"
 
+    # 条件分岐: `not manuscript_md.exists()` を満たす経路を評価する。
+
     if not manuscript_md.exists():
         print(f"[error] manuscript not found: {manuscript_md}")
         return 1
+
+    # 条件分岐: `args.outdir` を満たす経路を評価する。
 
     if args.outdir:
         outdir = Path(args.outdir)
@@ -1752,13 +2048,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     figures_dir = outdir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `args.out_name` を満たす経路を評価する。
     if args.out_name:
         out_name = str(args.out_name)
     else:
+        # 条件分岐: `profile == "paper"` を満たす経路を評価する。
         if profile == "paper":
             out_name = "pmodel_paper.tex"
+        # 条件分岐: 前段条件が不成立で、`profile == "part2_astrophysics"` を追加評価する。
         elif profile == "part2_astrophysics":
             out_name = "pmodel_paper_part2_astrophysics.tex"
+        # 条件分岐: 前段条件が不成立で、`profile == "part3_quantum"` を追加評価する。
         elif profile == "part3_quantum":
             out_name = "pmodel_paper_part3_quantum.tex"
         else:
@@ -1874,6 +2174,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

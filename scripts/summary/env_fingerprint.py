@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -57,16 +58,20 @@ def _run_text(cmd: List[str]) -> Dict[str, Any]:
 
 def _pip_version() -> Optional[str]:
     res = _run_text([sys.executable, "-m", "pip", "--version"])
+    # 条件分岐: `not res.get("ok")` を満たす経路を評価する。
     if not res.get("ok"):
         return None
+
     s = str(res.get("stdout") or "").strip()
     return s or None
 
 
 def _pip_freeze() -> Dict[str, Any]:
     res = _run_text([sys.executable, "-m", "pip", "freeze"])
+    # 条件分岐: `not res.get("ok")` を満たす経路を評価する。
     if not res.get("ok"):
         return {"ok": False, "error": res.get("error") or (res.get("stderr") or "").strip() or "pip freeze failed"}
+
     lines = [ln.strip() for ln in str(res.get("stdout") or "").splitlines() if ln.strip()]
     return {"ok": True, "packages": lines}
 
@@ -85,8 +90,10 @@ def build_fingerprint(*, include_freeze: bool) -> Dict[str, Any]:
         },
         "pip": {"version": _pip_version()},
     }
+    # 条件分岐: `include_freeze` を満たす経路を評価する。
     if include_freeze:
         payload["pip"]["freeze"] = _pip_freeze()
+
     return payload
 
 
@@ -102,8 +109,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     out_json = Path(str(args.out_json))
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
 
     payload = build_fingerprint(include_freeze=(not bool(args.no_freeze)))
@@ -124,13 +133,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     print("env_fingerprint:")
     print(f"- out: {out_json}")
+    # 条件分岐: `"freeze" in (payload.get("pip") or {})` を満たす経路を評価する。
     if "freeze" in (payload.get("pip") or {}):
         freeze = (payload.get("pip") or {}).get("freeze") or {}
         print(f"- pip_freeze_ok: {freeze.get('ok', False)}")
+        # 条件分岐: `freeze.get("ok", False)` を満たす経路を評価する。
         if freeze.get("ok", False):
             print(f"- packages: {len(freeze.get('packages') or [])}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

@@ -86,8 +86,10 @@ def _constraints_from_known_sources() -> List[GammaConstraint]:
 
 def _load_vlbi_best_from_solar_deflection_metrics(root: Path) -> Optional[GammaConstraint]:
     path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     try:
         j = _read_json(path)
         m = dict(j.get("metrics") or {})
@@ -116,8 +118,10 @@ def _load_vlbi_best_from_solar_deflection_metrics(root: Path) -> Optional[GammaC
 def _weighted_average(betas: List[Tuple[float, float]]) -> Tuple[float, float]:
     # inverse-variance weighting
     items = [(b, s) for (b, s) in betas if s > 0 and math.isfinite(b) and math.isfinite(s)]
+    # 条件分岐: `not items` を満たす経路を評価する。
     if not items:
         return 1.0, float("nan")
+
     wsum = sum(1.0 / (s * s) for (_, s) in items)
     mean = sum(b / (s * s) for (b, s) in items) / wsum
     sigma = math.sqrt(1.0 / wsum)
@@ -150,39 +154,50 @@ def main() -> int:
     constraints: List[GammaConstraint] = []
     constraints.extend(_constraints_from_known_sources())
     vlbi_best = _load_vlbi_best_from_solar_deflection_metrics(root)
+    # 条件分岐: `vlbi_best` を満たす経路を評価する。
     if vlbi_best:
         constraints.append(vlbi_best)
 
     # Choose beta
+
     beta: float
     beta_sigma: float
     beta_source: str
 
+    # 条件分岐: `args.beta is not None` を満たす経路を評価する。
     if args.beta is not None:
         beta = float(args.beta)
         beta_sigma = float(args.beta_sigma) if args.beta_sigma is not None else float("nan")
         beta_source = "override_cli"
+    # 条件分岐: 前段条件が不成立で、`args.beta_source == "fixed1"` を追加評価する。
     elif args.beta_source == "fixed1":
         beta = 1.0
         beta_sigma = 0.0
         beta_source = "fixed_beta_1"
+    # 条件分岐: 前段条件が不成立で、`args.beta_source == "vlbi_best"` を追加評価する。
     elif args.beta_source == "vlbi_best":
+        # 条件分岐: `not vlbi_best` を満たす経路を評価する。
         if not vlbi_best:
             raise SystemExit("VLBI best constraint not found (solar_light_deflection_metrics.json missing).")
+
         beta, beta_sigma = beta_from_gamma(vlbi_best.gamma, vlbi_best.sigma)
         beta_source = "vlbi_best"
+    # 条件分岐: 前段条件が不成立で、`args.beta_source == "weighted"` を追加評価する。
     elif args.beta_source == "weighted":
         beta_candidates: List[Tuple[float, float]] = []
         for c in constraints:
             b, s = beta_from_gamma(c.gamma, c.sigma)
             beta_candidates.append((b, s))
+
         beta, beta_sigma = _weighted_average(beta_candidates)
         beta_source = "weighted_constraints"
     else:
         # cassini2003 default
         cassini = next((c for c in constraints if c.id.startswith("cassini_2003")), None)
+        # 条件分岐: `not cassini` を満たす経路を評価する。
         if not cassini:
             raise SystemExit("Cassini constraint not found (internal definition missing).")
+
         beta, beta_sigma = beta_from_gamma(cassini.gamma, cassini.sigma)
         beta_source = "cassini2003"
 
@@ -242,6 +257,8 @@ def main() -> int:
     print(f"beta={beta} (sigma={beta_sigma}) -> gamma={gamma}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

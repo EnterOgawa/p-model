@@ -47,6 +47,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -68,6 +69,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -91,46 +93,63 @@ def _maybe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return float(v)
 
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         j = _read_json(path)
     except Exception:
         return {}
+
     out: Dict[str, Dict[str, Any]] = {}
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         r_id = str(r.get("id") or "")
+        # 条件分岐: `not r_id` を満たす経路を評価する。
         if not r_id:
             continue
+
         sigma_total = _maybe_float(r.get("sigma_total"))
+        # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
         if sigma_total is None or not (sigma_total > 0.0):
             continue
+
         out[r_id] = {
             "sigma_total": float(sigma_total),
             "sigma_sys_category": _maybe_float(r.get("sigma_sys_category")),
             "category": str(r.get("category") or "") or None,
         }
+
     return out
 
 
 def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> "DDRConstraint":
+    # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
         return replace(ddr, sigma_policy="raw")
 
     row = envelope.get(ddr.id)
+    # 条件分岐: `not row` を満たす経路を評価する。
     if not row:
         return replace(ddr, sigma_policy="raw")
 
     sigma_total = _maybe_float(row.get("sigma_total"))
+    # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
     if sigma_total is None or not (sigma_total > 0.0):
         return replace(ddr, sigma_policy="raw")
 
@@ -144,13 +163,20 @@ def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -205,8 +231,10 @@ def _grid_zscore(
     y_vals: np.ndarray,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """Return z-score grid and epsilon0 grid."""
+    # 条件分岐: `sig <= 0` を満たす経路を評価する。
     if sig <= 0:
         raise ValueError("sigma must be > 0")
+
     zz = np.zeros((len(y_vals), len(x_vals)), dtype=float)
     ee = np.zeros_like(zz)
     for iy, y in enumerate(y_vals):
@@ -223,6 +251,7 @@ def _grid_zscore(
             )
             ee[iy, ix] = eps
             zz[iy, ix] = (eps - eps_obs) / sig
+
     return zz, ee
 
 
@@ -237,18 +266,26 @@ def _solve_single_mechanism(
     # Base (static-min) is p_e=p_t=1 and s_L=s_R=alpha=0 -> eps=-1.
     # Solve epsilon0_model = eps_target for one free variable.
     base_no_sr_no_alpha = (p_e + p_t - 0.0) / 2.0 - 2.0 + 0.0 + 0.0
+    # 条件分岐: `mode == "opacity_only"` を満たす経路を評価する。
     if mode == "opacity_only":
         # Solve for alpha with s_L=s_R=0.
         alpha = eps_target - base_no_sr_no_alpha
         return {"alpha_opacity": float(alpha), "s_L": 0.0, "s_R": 0.0}
+
+    # 条件分岐: `mode == "ruler_only"` を満たす経路を評価する。
+
     if mode == "ruler_only":
         s_R = eps_target - base_no_sr_no_alpha
         return {"alpha_opacity": 0.0, "s_L": 0.0, "s_R": float(s_R)}
+
+    # 条件分岐: `mode == "candle_only"` を満たす経路を評価する。
+
     if mode == "candle_only":
         # Solve for s_L with s_R=alpha=0.
         # eps = (p_e+p_t - s_L)/2 -2 = base_no_sr_no_alpha - s_L/2
         s_L = -2.0 * (eps_target - base_no_sr_no_alpha)
         return {"alpha_opacity": 0.0, "s_L": float(s_L), "s_R": 0.0}
+
     raise ValueError(f"unknown mode: {mode}")
 
 
@@ -522,6 +559,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "applied_count": applied_ddr_sigma_count,
         "note": "If the envelope file is missing, σ_cat inflation is skipped for all rows (falls back to raw).",
     }
+    # 条件分岐: `not constraints` を満たす経路を評価する。
     if not constraints:
         raise SystemExit(f"no constraints found in: {data_path}")
 
@@ -533,6 +571,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     p_e = float(args.p_e)
     p_t = float(args.p_t)
     n_grid = int(args.grid)
+    # 条件分岐: `n_grid < 40` を満たす経路を評価する。
     if n_grid < 40:
         raise ValueError("--grid must be >= 40")
 
@@ -577,6 +616,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

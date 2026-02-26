@@ -32,6 +32,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -42,25 +43,36 @@ _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
 def _resolve_path_like(p: Any) -> Optional[Path]:
+    # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
         return None
+
     s = str(p).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
+
     if os.name == "nt":
         m = _WSL_ABS_RE.match(s)
+        # 条件分岐: `m` を満たす経路を評価する。
         if m:
             drive = m.group(1).upper()
             rest = m.group(2).replace("/", "\\")
             return Path(f"{drive}:\\{rest}")
     else:
+        # 条件分岐: `_WIN_ABS_RE.match(s)` を満たす経路を評価する。
         if _WIN_ABS_RE.match(s):
             drive = s[0].lower()
             rest = s[2:].lstrip("\\/").replace("\\", "/")
             return Path(f"/mnt/{drive}/{rest}")
+
     path = Path(s)
+    # 条件分岐: `path.is_absolute()` を満たす経路を評価する。
     if path.is_absolute():
         return path
+
     return _ROOT / path
 
 
@@ -70,14 +82,19 @@ def _load_ross_dat(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     e: list[float] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         parts = t.split()
+        # 条件分岐: `len(parts) < 3` を満たす経路を評価する。
         if len(parts) < 3:
             continue
+
         s.append(float(parts[0]))
         y.append(float(parts[1]))
         e.append(float(parts[2]))
+
     return np.asarray(s, dtype=float), np.asarray(y, dtype=float), np.asarray(e, dtype=float)
 
 
@@ -85,25 +102,37 @@ def _load_ross_covariance(path: Path) -> np.ndarray:
     rows: list[list[float]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         rows.append([float(x) for x in t.split()])
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise ValueError(f"empty covariance file: {path}")
+
     mat = np.asarray(rows, dtype=np.float64)
+    # 条件分岐: `mat.ndim != 2 or mat.shape[0] != mat.shape[1]` を満たす経路を評価する。
     if mat.ndim != 2 or mat.shape[0] != mat.shape[1]:
         raise ValueError(f"invalid covariance shape: {mat.shape} ({path})")
+
     return mat
 
 
 def _cov_inv_with_jitter(cov: np.ndarray) -> np.ndarray:
     c = np.asarray(cov, dtype=np.float64)
+    # 条件分岐: `c.ndim != 2 or c.shape[0] != c.shape[1]` を満たす経路を評価する。
     if c.ndim != 2 or c.shape[0] != c.shape[1]:
         raise ValueError(f"invalid covariance shape: {c.shape}")
+
     diag = np.diag(c)
     jitter = float(np.nanmax(diag)) * 1e-12 if diag.size else 0.0
+    # 条件分岐: `not np.isfinite(jitter) or jitter <= 0.0` を満たす経路を評価する。
     if not np.isfinite(jitter) or jitter <= 0.0:
         jitter = 1e-12
+
     cj = c + jitter * np.eye(c.shape[0], dtype=np.float64)
     try:
         return np.linalg.inv(cj)
@@ -114,8 +143,10 @@ def _cov_inv_with_jitter(cov: np.ndarray) -> np.ndarray:
 def _chi2_from_cov_inv(residual: np.ndarray, cov_inv: np.ndarray) -> float:
     r = np.asarray(residual, dtype=np.float64).reshape(-1)
     ci = np.asarray(cov_inv, dtype=np.float64)
+    # 条件分岐: `ci.shape[0] != ci.shape[1] or ci.shape[0] != r.size` を満たす経路を評価する。
     if ci.shape[0] != ci.shape[1] or ci.shape[0] != r.size:
         raise ValueError(f"chi2 dim mismatch: residual={r.size} cov_inv={ci.shape}")
+
     return float(r @ ci @ r)
 
 
@@ -123,8 +154,10 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
     a = np.asarray(a, dtype=float)
     b = np.asarray(b, dtype=float)
     m = np.isfinite(a) & np.isfinite(b)
+    # 条件分岐: `not np.any(m)` を満たす経路を評価する。
     if not np.any(m):
         return float("nan")
+
     return float(np.sqrt(np.mean((a[m] - b[m]) ** 2)))
 
 
@@ -153,12 +186,20 @@ def _iter_metrics_files() -> Iterable[Path]:
 
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
+    # 条件分岐: `z == "b1"` を満たす経路を評価する。
     if z == "b1":
         return 1
+
+    # 条件分岐: `z == "b2"` を満たす経路を評価する。
+
     if z == "b2":
         return 2
+
+    # 条件分岐: `z == "b3"` を満たす経路を評価する。
+
     if z == "b3":
         return 3
+
     return None
 
 
@@ -179,46 +220,76 @@ def _load_catalog_cases(
             m = json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             continue
+
         params = (m.get("params", {}) or {}) if isinstance(m, dict) else {}
+        # 条件分岐: `str(params.get("sample", "")) != str(sample)` を満たす経路を評価する。
         if str(params.get("sample", "")) != str(sample):
             continue
+
+        # 条件分岐: `str(params.get("caps", "")) != str(caps)` を満たす経路を評価する。
+
         if str(params.get("caps", "")) != str(caps):
             continue
+
+        # 条件分岐: `str(params.get("distance_model", "")) != str(dist)` を満たす経路を評価する。
+
         if str(params.get("distance_model", "")) != str(dist):
             continue
+
+        # 条件分岐: `str(params.get("weight_scheme", "")) != str(weight_scheme)` を満たす経路を評価する。
+
         if str(params.get("weight_scheme", "")) != str(weight_scheme):
             continue
+
+        # 条件分岐: `str(params.get("random_kind", "")) != str(random_kind)` を満たす経路を評価する。
+
         if str(params.get("random_kind", "")) != str(random_kind):
             continue
 
         z_bin = ((params.get("z_cut", {}) or {}).get("bin", "none")) if isinstance(params.get("z_cut", {}), dict) else "none"
         z_int = _zbin_label_to_int(str(z_bin))
+        # 条件分岐: `require_zbin and z_int is None` を満たす経路を評価する。
         if require_zbin and z_int is None:
             continue
+
+        # 条件分岐: `not require_zbin and z_int is not None` を満たす経路を評価する。
+
         if not require_zbin and z_int is not None:
             continue
 
         tag_in = params.get("out_tag", None)
         out_tag: Optional[str]
+        # 条件分岐: `tag_in is None` を満たす経路を評価する。
         if tag_in is None:
             out_tag = None
         else:
             s = str(tag_in).strip()
             out_tag = s if s and s.lower() != "null" else None
 
+        # 条件分岐: `out_tag is None` を満たす経路を評価する。
+
         if out_tag is None:
+            # 条件分岐: `not include_baseline` を満たす経路を評価する。
             if not include_baseline:
                 continue
         else:
+            # 条件分岐: `out_tag_prefix and (not str(out_tag).startswith(str(out_tag_prefix)))` を満たす経路を評価する。
             if out_tag_prefix and (not str(out_tag).startswith(str(out_tag_prefix))):
                 continue
 
         outputs = m.get("outputs", {}) if isinstance(m.get("outputs", {}), dict) else {}
         npz_path = _resolve_path_like(outputs.get("npz", None))
+        # 条件分岐: `npz_path is None` を満たす経路を評価する。
         if npz_path is None:
             continue
+
+        # 条件分岐: `not npz_path.is_absolute()` を満たす経路を評価する。
+
         if not npz_path.is_absolute():
             npz_path = (_ROOT / npz_path).resolve()
+
+        # 条件分岐: `not npz_path.exists()` を満たす経路を評価する。
+
         if not npz_path.exists():
             continue
 
@@ -226,6 +297,7 @@ def _load_catalog_cases(
         cases.append(
             CatalogCase(zbin=int(z_int) if z_int is not None else 0, out_tag=out_tag, recon=dict(recon), npz_path=npz_path, metrics_path=p)
         )
+
     return cases
 
 
@@ -234,6 +306,7 @@ def _group_by_out_tag(cases: List[CatalogCase]) -> Dict[str, Dict[int, CatalogCa
     for c in cases:
         key = c.out_tag if c.out_tag is not None else "baseline"
         out.setdefault(key, {})[int(c.zbin)] = c
+
     return out
 
 
@@ -279,18 +352,25 @@ def main(argv: list[str] | None = None) -> int:
     out_tag_prefix = str(args.out_tag_prefix).strip()
     include_baseline = bool(args.include_baseline)
     ross_dir = (_ROOT / str(args.ross_dir)).resolve()
+    # 条件分岐: `not ross_dir.exists()` を満たす経路を評価する。
     if not ross_dir.exists():
         alt = (_ROOT / "data" / "cosmology" / "ross_2016_combineddr12_corrfunc").resolve()
+        # 条件分岐: `alt.exists()` を満たす経路を評価する。
         if alt.exists():
             ross_dir = alt
+
     bincent = int(args.bincent)
+    # 条件分岐: `bincent < 0 or bincent > 4` を満たす経路を評価する。
     if bincent < 0 or bincent > 4:
         raise SystemExit("--bincent must be in 0..4")
+
     s_min = float(args.s_min)
     s_max = float(args.s_max)
     xi2_weight = float(args.xi2_weight)
+    # 条件分岐: `not (np.isfinite(xi2_weight) and xi2_weight >= 0.0)` を満たす経路を評価する。
     if not (np.isfinite(xi2_weight) and xi2_weight >= 0.0):
         raise SystemExit("--xi2-weight must be >= 0")
+
     rank_by = str(args.rank_by)
 
     out_png = (_ROOT / str(args.out_png)).resolve()
@@ -315,20 +395,27 @@ def main(argv: list[str] | None = None) -> int:
     for zb in z_bins:
         p_mono = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zb}_correlation_function_monopole_post_recon_bincent{bincent}.dat"
         p_quad = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zb}_correlation_function_quadrupole_post_recon_bincent{bincent}.dat"
+        # 条件分岐: `not (p_mono.exists() and p_quad.exists())` を満たす経路を評価する。
         if not (p_mono.exists() and p_quad.exists()):
             raise SystemExit(f"missing Ross files for zbin{zb} bincent{bincent}: {ross_dir}")
+
         s0, xi0, e0 = _load_ross_dat(p_mono)
         s2, xi2, e2 = _load_ross_dat(p_quad)
         p_cov = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zb}_covariance_monoquad_post_recon_bincent{bincent}.dat"
+        # 条件分岐: `not p_cov.exists()` を満たす経路を評価する。
         if not p_cov.exists():
             raise SystemExit(f"missing Ross covariance for zbin{zb} bincent{bincent}: {p_cov}")
+
         cov_full = _load_ross_covariance(p_cov)
+        # 条件分岐: `cov_full.shape[0] != cov_full.shape[1] or cov_full.shape[0] != 2 * s0.size` を満たす経路を評価する。
         if cov_full.shape[0] != cov_full.shape[1] or cov_full.shape[0] != 2 * s0.size:
             raise SystemExit(f"unexpected Ross covariance shape for zbin{zb} (expected {2*s0.size}x{2*s0.size}): {cov_full.shape}")
 
         idx_s = np.where((s0 >= s_min) & (s0 <= s_max))[0]
+        # 条件分岐: `idx_s.size < 6` を満たす経路を評価する。
         if idx_s.size < 6:
             raise SystemExit(f"too few Ross bins in range [{s_min},{s_max}] for zbin{zb} (n={idx_s.size})")
+
         idx_all = np.concatenate([idx_s, idx_s + s0.size])
         cov_sub = cov_full[np.ix_(idx_all, idx_all)]
         cov_inv = _cov_inv_with_jitter(cov_sub)
@@ -365,6 +452,7 @@ def main(argv: list[str] | None = None) -> int:
                 s_cat = np.asarray(z["s"], dtype=float)
                 xi0_cat = np.asarray(z["xi0"], dtype=float)
                 xi2_cat = np.asarray(z["xi2"], dtype=float)
+
             s2_xi0_cat = (s_cat * s_cat) * xi0_cat
             s2_xi2_cat = (s_cat * s_cat) * xi2_cat
 
@@ -403,6 +491,7 @@ def main(argv: list[str] | None = None) -> int:
                 "rmse_s2_xi2": rmse2,
                 "chi2_dof_xi0_xi2_ross_post_recon": chi2_dof,
             }
+            # 条件分岐: `zb == 2` を満たす経路を評価する。
             if zb == 2:
                 recon_meta = dict(c.recon or {})
 
@@ -423,12 +512,14 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     # Rank by requested metric.
+
     if rank_by == "rmse":
         ranked = sorted(results, key=lambda r: float(r.get("rmse_mean", {}).get("score", float("inf"))))
     else:
         ranked = sorted(results, key=lambda r: float((r.get("chi2_dof_mean", {}) or {}).get("xi0_xi2", float("inf"))))
 
     # Plot: top-N configs.
+
     top_n = max(1, int(args.top_n))
     show = ranked[:top_n]
     labels = [str(r["label"]) for r in show]
@@ -506,6 +597,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -29,32 +29,51 @@ def _parse_station_xyz(path: Path) -> Dict[str, Tuple[float, float, float]]:
     with gzip.open(path, "rt", encoding="utf-8", errors="replace") as f:
         for raw in f:
             line = raw.rstrip("\n")
+            # 条件分岐: `line.startswith("+SOLUTION/ESTIMATE")` を満たす経路を評価する。
             if line.startswith("+SOLUTION/ESTIMATE"):
                 in_est = True
                 continue
+
+            # 条件分岐: `in_est and line.startswith("-SOLUTION/ESTIMATE")` を満たす経路を評価する。
+
             if in_est and line.startswith("-SOLUTION/ESTIMATE"):
                 break
+
+            # 条件分岐: `not in_est` を満たす経路を評価する。
+
             if not in_est:
                 continue
+
+            # 条件分岐: `not line.strip() or line.startswith("*")` を満たす経路を評価する。
+
             if not line.strip() or line.startswith("*"):
                 continue
+
             parts = line.split()
+            # 条件分岐: `len(parts) < 10` を満たす経路を評価する。
             if len(parts) < 10:
                 continue
+
             typ = str(parts[1]).strip().upper()
+            # 条件分岐: `typ not in ("STAX", "STAY", "STAZ")` を満たす経路を評価する。
             if typ not in ("STAX", "STAY", "STAZ"):
                 continue
+
             code = str(parts[2]).strip()
             try:
                 value = float(parts[-2])
             except Exception:
                 continue
+
             rec = stations.setdefault(code, {})
             rec[typ] = float(value)
+
     out: Dict[str, Tuple[float, float, float]] = {}
     for code, rec in stations.items():
+        # 条件分岐: `all(k in rec for k in ("STAX", "STAY", "STAZ"))` を満たす経路を評価する。
         if all(k in rec for k in ("STAX", "STAY", "STAZ")):
             out[code] = (float(rec["STAX"]), float(rec["STAY"]), float(rec["STAZ"]))
+
     return out
 
 
@@ -73,8 +92,10 @@ def _ecef_from_geodetic(lat_deg: float, lon_deg: float, h_m: float) -> Tuple[flo
 
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `not APOL_META_PATH.exists()` を満たす経路を評価する。
     if not APOL_META_PATH.exists():
         raise FileNotFoundError(f"APOL metadata missing: {APOL_META_PATH}")
+
     apol_meta = json.loads(APOL_META_PATH.read_text(encoding="utf-8"))
     apol_pad_id = int(apol_meta.get("cdp_pad_id"))
     apol_code = str(apol_pad_id)
@@ -92,10 +113,13 @@ def main() -> int:
 
     for p in snx_paths:
         station_xyz = _parse_station_xyz(p)
+        # 条件分岐: `apol_code in station_xyz` を満たす経路を評価する。
         if apol_code in station_xyz:
             apol_hits.append(str(p.relative_to(ROOT)))
+
         for code, xyz in station_xyz.items():
             code_counts[code] = int(code_counts.get(code, 0)) + 1
+            # 条件分岐: `code not in code_xyz_sample` を満たす経路を評価する。
             if code not in code_xyz_sample:
                 code_xyz_sample[code] = xyz
                 code_file_sample[code] = str(p.relative_to(ROOT))
@@ -116,12 +140,15 @@ def main() -> int:
         )
 
     df = pd.DataFrame(rows)
+    # 条件分岐: `len(df) > 0` を満たす経路を評価する。
     if len(df) > 0:
         df = df.sort_values(["distance_from_apol_geodetic_km", "station_code"]).reset_index(drop=True)
+
     df.to_csv(OUT_CSV, index=False, encoding="utf-8")
 
     nearest_code = None
     nearest_km = float("nan")
+    # 条件分岐: `len(df) > 0` を満たす経路を評価する。
     if len(df) > 0:
         nearest_code = str(df.iloc[0]["station_code"])
         nearest_km = float(df.iloc[0]["distance_from_apol_geodetic_km"])
@@ -130,9 +157,11 @@ def main() -> int:
     alias_safe = bool(np.isfinite(nearest_km) and nearest_km <= alias_safe_threshold_km)
     apol_present = len(apol_hits) > 0
 
+    # 条件分岐: `apol_present` を満たす経路を評価する。
     if apol_present:
         decision = "pass"
         reasons = ["APOL pad code is present in cached pos+eop SINEX files."]
+    # 条件分岐: 前段条件が不成立で、`alias_safe` を追加評価する。
     elif alias_safe:
         decision = "watch"
         reasons = [
@@ -148,6 +177,7 @@ def main() -> int:
         ]
 
     topn = min(10, len(df))
+    # 条件分岐: `topn > 0` を満たす経路を評価する。
     if topn > 0:
         fig, ax = plt.subplots(figsize=(10, 4.2))
         top = df.head(topn).copy()
@@ -209,10 +239,14 @@ def main() -> int:
     print(json.dumps({"decision": decision, "n_snx_files_scanned": len(snx_paths), "n_files_with_apol_code": len(apol_hits), "nearest_station_code": nearest_code, "nearest_distance_km": nearest_km}, ensure_ascii=False))
     print(f"[ok] {OUT_JSON.relative_to(ROOT)}")
     print(f"[ok] {OUT_CSV.relative_to(ROOT)}")
+    # 条件分岐: `OUT_PNG.exists()` を満たす経路を評価する。
     if OUT_PNG.exists():
         print(f"[ok] {OUT_PNG.relative_to(ROOT)}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

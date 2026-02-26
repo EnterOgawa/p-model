@@ -23,6 +23,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_atspec_handbook"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing extracted values: {extracted_path}\n"
@@ -31,6 +32,7 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     rec = extracted.get("hydrogen_hyperfine_21cm")
+    # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
     if not isinstance(rec, dict):
         raise SystemExit(f"[fail] hydrogen_hyperfine_21cm missing in: {extracted_path}")
 
@@ -47,6 +49,7 @@ def main() -> None:
     f_hz = _get_float("f_hz")
     sigma_hz = _get_float("sigma_hz")
 
+    # 条件分岐: `f_hz <= 0 or sigma_hz <= 0` を満たす経路を評価する。
     if f_hz <= 0 or sigma_hz <= 0:
         raise SystemExit(f"[fail] invalid frequency/uncertainty: f_hz={f_hz}, sigma_hz={sigma_hz}")
 
@@ -127,6 +130,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

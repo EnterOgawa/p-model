@@ -56,6 +56,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -77,6 +78,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -96,34 +98,51 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _load_required(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"missing required input: {path} (run scripts/summary/run_all.py --offline first)")
+
     return _read_json(path)
 
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return float(v)
 
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
     x = float(x)
+    # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
     if not math.isfinite(x):
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -196,27 +215,37 @@ def _envelope(constraints: List[ScalarConstraint], *, nsigma: float) -> Tuple[Op
     lows: List[float] = []
     highs: List[float] = []
     for c in constraints:
+        # 条件分岐: `not (math.isfinite(c.mu) and math.isfinite(c.sigma) and c.sigma > 0.0)` を満たす経路を評価する。
         if not (math.isfinite(c.mu) and math.isfinite(c.sigma) and c.sigma > 0.0):
             continue
+
         lows.append(float(c.mu - float(nsigma) * c.sigma))
         highs.append(float(c.mu + float(nsigma) * c.sigma))
+
+    # 条件分岐: `not lows` を満たす経路を評価する。
+
     if not lows:
         return (None, None)
+
     return (float(min(lows)), float(max(highs)))
 
 
 def _extract_pt(pe_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
     rows = pe_metrics.get("rows") or []
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         return (None, None)
+
     r0 = rows[0] if isinstance(rows[0], dict) else {}
     return (_safe_float(r0.get("p_t_obs")), _safe_float(r0.get("p_t_sigma")))
 
 
 def _extract_pT(cmb_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
     rows = cmb_metrics.get("rows") or []
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         return (None, None)
+
     r0 = rows[0] if isinstance(rows[0], dict) else {}
     return (_safe_float(r0.get("p_T_obs")), _safe_float(r0.get("p_T_sigma")))
 
@@ -239,69 +268,109 @@ def _extract_sR_by_subset(bao_ratio_fit_metrics: Dict[str, Any]) -> Dict[str, Tu
             out[key] = (_safe_float(bf.get("s_R")), _safe_float(bf.get("s_R_sigma_1d")))
         except Exception:
             out[key] = (None, None)
+
     return out
 
 
 def _classify_sigma(abs_z: Optional[float]) -> Optional[str]:
+    # 条件分岐: `abs_z is None` を満たす経路を評価する。
     if abs_z is None:
         return None
+
     try:
         az = float(abs_z)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(az)` を満たす経路を評価する。
+
     if not math.isfinite(az):
         return None
+
+    # 条件分岐: `az < 3.0` を満たす経路を評価する。
+
     if az < 3.0:
         return "ok"
+
+    # 条件分岐: `az < 5.0` を満たす経路を評価する。
+
     if az < 5.0:
         return "mixed"
+
     return "ng"
 
 
 def _min_abs_z(rows: List[Dict[str, Any]], *, keep: Optional[callable] = None) -> Optional[float]:
     best: Optional[float] = None
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
+        # 条件分岐: `keep is not None and not bool(keep(r))` を満たす経路を評価する。
+
         if keep is not None and not bool(keep(r)):
             continue
+
         az = r.get("abs_z")
+        # 条件分岐: `az is None` を満たす経路を評価する。
         if az is None:
             continue
+
         try:
             azf = float(az)
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(azf)` を満たす経路を評価する。
+
         if not math.isfinite(azf):
             continue
+
+        # 条件分岐: `best is None or azf < best` を満たす経路を評価する。
+
         if best is None or azf < best:
             best = azf
+
     return best
 
 
 def _env_from_gaussian(mu: Optional[float], sigma: Optional[float], *, nsigma: float) -> Tuple[Optional[float], Optional[float]]:
+    # 条件分岐: `mu is None or sigma is None` を満たす経路を評価する。
     if mu is None or sigma is None:
         return (None, None)
+
+    # 条件分岐: `not (math.isfinite(mu) and math.isfinite(sigma) and sigma > 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(mu) and math.isfinite(sigma) and sigma > 0.0):
         return (None, None)
+
     return (float(mu - float(nsigma) * sigma), float(mu + float(nsigma) * sigma))
 
 
 def _zscore_required(required: float, *, mu: float, sigma: float) -> Optional[float]:
+    # 条件分岐: `not (math.isfinite(required) and math.isfinite(mu) and math.isfinite(sigma) a...` を満たす経路を評価する。
     if not (math.isfinite(required) and math.isfinite(mu) and math.isfinite(sigma) and sigma > 0.0):
         return None
+
     return float((required - mu) / sigma)
 
 
 def _factor_to_delta_mu_mag(factor: Optional[float]) -> Optional[float]:
+    # 条件分岐: `factor is None` を満たす経路を評価する。
     if factor is None:
         return None
+
     try:
         f = float(factor)
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(f) and f > 0.0)` を満たす経路を評価する。
+
     if not (math.isfinite(f) and f > 0.0):
         return None
+
     return float(5.0 * math.log10(f))
 
 
@@ -317,6 +386,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = out_dir / "cosmology_ddr_reconnection_conditions_metrics.json"
 
     nsigma = float(args.nsigma)
+    # 条件分岐: `not (math.isfinite(nsigma) and nsigma > 0.0)` を満たす経路を評価する。
     if not (math.isfinite(nsigma) and nsigma > 0.0):
         raise SystemExit("--nsigma must be finite and > 0")
 
@@ -333,14 +403,18 @@ def main(argv: Optional[List[str]] = None) -> int:
     sn_evo_data = _load_required(_ROOT / "data" / "cosmology" / "sn_standard_candle_evolution_constraints.json")
 
     ddr_rows_raw = ddr_metrics.get("rows") or []
+    # 条件分岐: `not isinstance(ddr_rows_raw, list) or not ddr_rows_raw` を満たす経路を評価する。
     if not isinstance(ddr_rows_raw, list) or not ddr_rows_raw:
         raise ValueError("invalid DDR metrics: missing rows")
+
     ddr_rows = [DDRRow.from_metrics_row(r) for r in ddr_rows_raw if isinstance(r, dict)]
     ddr_rows = [r for r in ddr_rows if r.id]
+    # 条件分岐: `not ddr_rows` を満たす経路を評価する。
     if not ddr_rows:
         raise ValueError("no valid DDR rows")
 
     # Representative DDR row: smallest sigma.
+
     rep_ddr = min(ddr_rows, key=lambda r: r.epsilon0_sigma if r.epsilon0_sigma > 0.0 else float("inf"))
 
     # Independent probes: p_t from SN time dilation, and p_T from T(z) as a proxy for p_e.
@@ -389,8 +463,10 @@ def main(argv: Optional[List[str]] = None) -> int:
         delta_eps = float(r.epsilon0_obs - r.epsilon0_pred_pbg_static)  # ~= ε0_obs + 1
         # Allow p_t/p_e to move (optional reference; does not change much with current constraints).
         corr_ptpe: Optional[float] = None
+        # 条件分岐: `p_t_obs is not None and p_T_obs is not None` を満たす経路を評価する。
         if p_t_obs is not None and p_T_obs is not None:
             corr_ptpe = float(r.epsilon0_obs + 2.0 - (p_t_obs + p_T_obs) / 2.0)
+
         computed_rows.append(
             {
                 "id": r.id,
@@ -412,6 +488,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
 
     # Sort for readability (BAO-based first, then by sigma).
+
     computed_rows.sort(key=lambda rr: (not bool(rr["uses_bao"]), float(rr["epsilon0_sigma"])))
 
     # Representative comparisons: how far required values sit from existing constraints.
@@ -434,6 +511,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "abs_z": (None if z is None else abs(float(z))),
             }
         )
+
     rep_alpha_vs_constraints.sort(key=lambda r: (float("inf") if r["abs_z"] is None else float(r["abs_z"])), reverse=True)
 
     rep_alpha_vs_gw_constraints: List[Dict[str, Any]] = []
@@ -450,6 +528,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "abs_z": (None if z is None else abs(float(z))),
             }
         )
+
     rep_alpha_vs_gw_constraints.sort(key=lambda r: (float("inf") if r["abs_z"] is None else float(r["abs_z"])), reverse=True)
 
     rep_sL_vs_constraints: List[Dict[str, Any]] = []
@@ -468,6 +547,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 "abs_z": (None if z is None else abs(float(z))),
             }
         )
+
     rep_sL_vs_constraints.sort(key=lambda r: (float("inf") if r["abs_z"] is None else float(r["abs_z"])), reverse=True)
 
     rep_sR_vs_bao_fit: List[Dict[str, Any]] = []
@@ -492,6 +572,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # Decision policy (explicit): classify by sigma distance to the closest compatible constraint.
     # NOTE: for opacity/s_L we report both "all" and a conservative subset that excludes BAO/CMB (and CDDR-assumed for s_L).
+
     rep_alpha_min_abs_z_all = _min_abs_z(rep_alpha_vs_constraints)
     rep_alpha_min_abs_z_nobao_nocmb = _min_abs_z(
         rep_alpha_vs_constraints, keep=lambda r: (r.get("uses_bao") is False and r.get("uses_cmb") is False)
@@ -536,9 +617,12 @@ def main(argv: Optional[List[str]] = None) -> int:
     ) -> None:
         for env, env_label, color, alpha in envs:
             lo, hi = env
+            # 条件分岐: `lo is None or hi is None` を満たす経路を評価する。
             if lo is None or hi is None:
                 continue
+
             ax.axvspan(lo, hi, color=color, alpha=float(alpha), lw=0.0, label=env_label)
+
         ax.axvline(0.0, color="#333333", lw=1.0, alpha=0.35)
         for i, row in enumerate(computed_rows):
             x = float(row[x_name])
@@ -547,6 +631,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             c = color_bao if is_bao else color_nobao
             m = "o" if is_bao else "s"
             ax.errorbar(x, y[i], xerr=xerr, fmt=m, ms=5, color=c, ecolor=c, elinewidth=1.2, capsize=2, alpha=0.95)
+
         ax.set_title(title, fontsize=12)
         ax.set_yticks(y)
         ax.set_yticklabels(labels, fontsize=9)
@@ -554,6 +639,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         ax.grid(axis="x", alpha=0.25)
 
     # Errorbars: use ε0_sigma (propagate for s_L-only case).
+
     for row in computed_rows:
         row["_sig_alpha"] = float(row["epsilon0_sigma"])
         row["_sig_sL"] = float(2.0 * row["epsilon0_sigma"])
@@ -613,10 +699,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         h, l = ax.get_legend_handles_labels()
         handles_all.extend(h)
         labels_all.extend(l)
+
     env_seen: Dict[str, Any] = {}
     for h, l in zip(handles_all, labels_all):
+        # 条件分岐: `not l or l in env_seen` を満たす経路を評価する。
         if not l or l in env_seen:
             continue
+
         env_seen[l] = h
 
     legend_elems = [
@@ -785,6 +874,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

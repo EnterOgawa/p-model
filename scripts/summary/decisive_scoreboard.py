@@ -31,8 +31,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -74,37 +76,52 @@ class ZRow:
 
 
 def _load_frozen(root: Path, path: Optional[Path]) -> Dict[str, Any]:
+    # 条件分岐: `path and path.exists()` を満たす経路を評価する。
     if path and path.exists():
         return _read_json(path)
+
     default = root / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `default.exists()` を満たす経路を評価する。
     if default.exists():
         return _read_json(default)
+
     return {"beta": 1.0, "beta_sigma": None, "gamma_pmodel": 1.0, "policy": {"beta_source": "default_beta_1"}}
 
 
 def _format_float(x: float, *, digits: int = 6) -> str:
+    # 条件分岐: `x == 0` を満たす経路を評価する。
     if x == 0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax < 1e-3 or ax >= 1e5` を満たす経路を評価する。
     if ax < 1e-3 or ax >= 1e5:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
 def _z_fit_cassini_gamma(frozen: Dict[str, Any]) -> Optional[ZRow]:
     # If beta is frozen from Cassini γ, we can show it as a FIT row (z=0 by construction).
     constraints = frozen.get("constraints")
+    # 条件分岐: `not isinstance(constraints, list)` を満たす経路を評価する。
     if not isinstance(constraints, list):
         return None
 
     cassini = None
     for c in constraints:
+        # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
         if not isinstance(c, dict):
             continue
+
         cid = str(c.get("id") or "")
+        # 条件分岐: `cid.startswith("cassini_2003_")` を満たす経路を評価する。
         if cid.startswith("cassini_2003_"):
             cassini = c
             break
+
+    # 条件分岐: `not cassini` を満たす経路を評価する。
+
     if not cassini:
         return None
 
@@ -113,6 +130,7 @@ def _z_fit_cassini_gamma(frozen: Dict[str, Any]) -> Optional[ZRow]:
     beta = float(frozen.get("beta", 1.0))
     gamma_pred = float(2.0 * beta - 1.0)
     z = 0.0 if sigma > 0 else float("nan")
+    # 条件分岐: `sigma > 0` を満たす経路を評価する。
     if sigma > 0:
         z = (gamma_pred - gamma) / sigma
 
@@ -130,8 +148,10 @@ def _z_fit_cassini_gamma(frozen: Dict[str, Any]) -> Optional[ZRow]:
 
 def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
     path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     j = _read_json(path)
     m = dict(j.get("metrics") or {})
     obs_gamma = float(m["observed_gamma_best"])
@@ -139,8 +159,10 @@ def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
     obs_label = str(m.get("observed_best_label") or "VLBI")
     beta = float(frozen.get("beta", 1.0))
     gamma_pred = float(2.0 * beta - 1.0)
+    # 条件分岐: `obs_sigma <= 0` を満たす経路を評価する。
     if obs_sigma <= 0:
         return None
+
     z = (gamma_pred - obs_gamma) / obs_sigma
     return ZRow(
         id="solar_deflection_gamma",
@@ -156,18 +178,24 @@ def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
 
 def _z_gravitational_redshift(root: Path) -> List[ZRow]:
     path = root / "output" / "private" / "theory" / "gravitational_redshift_experiments.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
     out: List[ZRow] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         epsilon = float(r["epsilon"])
         sigma = float(r["sigma"])
+        # 条件分岐: `sigma <= 0` を満たす経路を評価する。
         if sigma <= 0:
             continue
+
         z = (0.0 - epsilon) / sigma
         label = str(r.get("short_label") or r.get("id") or "redshift")
         out.append(
@@ -182,13 +210,16 @@ def _z_gravitational_redshift(root: Path) -> List[ZRow]:
                 note="定義：z_obs=(1+ε)ΔU/c^2。弱場のP-model予測はε=0（GRと同じ一次）。",
             )
         )
+
     return out
 
 
 def _z_eht_ring_vs_shadow(root: Path, frozen: Dict[str, Any]) -> List[ZRow]:
     path = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     j = _read_json(path)
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
     coeff_rg_beta1 = float(j.get("pmodel", {}).get("shadow_diameter_coeff_rg", float("nan")))
@@ -196,24 +227,30 @@ def _z_eht_ring_vs_shadow(root: Path, frozen: Dict[str, Any]) -> List[ZRow]:
     out: List[ZRow] = []
 
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         name = str(r.get("name") or r.get("key") or "EHT")
         ring = float(r["ring_diameter_obs_uas"])
         ring_sigma = float(r["ring_diameter_obs_uas_sigma"])
         theta_unit = float(r["theta_unit_uas"])
         theta_unit_sigma = float(r["theta_unit_uas_sigma"])
+        # 条件分岐: `ring_sigma <= 0 or theta_unit <= 0` を満たす経路を評価する。
         if ring_sigma <= 0 or theta_unit <= 0:
             continue
 
         # P-model shadow diameter prediction (β scales linearly)
+
         shadow = coeff_rg_beta1 * beta * theta_unit
         shadow_sigma = abs(shadow) * abs(theta_unit_sigma / theta_unit) if theta_unit_sigma > 0 else 0.0
 
         # Compare ring vs shadow under κ=1, with combined uncertainty (obs + model param).
         sigma_tot = math.sqrt(ring_sigma * ring_sigma + shadow_sigma * shadow_sigma)
+        # 条件分岐: `sigma_tot <= 0` を満たす経路を評価する。
         if sigma_tot <= 0:
             continue
+
         z = (shadow - ring) / sigma_tot
 
         out.append(
@@ -228,6 +265,7 @@ def _z_eht_ring_vs_shadow(root: Path, frozen: Dict[str, Any]) -> List[ZRow]:
                 note="EHTは“リング直径”の推定であり、理論の“シャドウ直径”とは同一ではない。ここでは κ=1 を仮定して整合性を確認する。",
             )
         )
+
     return out
 
 
@@ -238,10 +276,12 @@ def build_scoreboard(root: Path, *, frozen: Dict[str, Any]) -> Dict[str, Any]:
 
     zrows: List[ZRow] = []
     fit_row = _z_fit_cassini_gamma(frozen)
+    # 条件分岐: `fit_row` を満たす経路を評価する。
     if fit_row:
         zrows.append(fit_row)
 
     solar = _z_solar_deflection(root, frozen)
+    # 条件分岐: `solar` を満たす経路を評価する。
     if solar:
         zrows.append(solar)
 
@@ -278,12 +318,15 @@ def plot_scoreboard(rows: List[ZRow], *, beta: float, beta_source: str, out_png:
     # Color by abs(z)
     colors = []
     for r in ordered:
+        # 条件分岐: `r.kind == "fit"` を満たす経路を評価する。
         if r.kind == "fit":
             colors.append("#7f7f7f")
         else:
             az = abs(r.z)
+            # 条件分岐: `az <= 1.0` を満たす経路を評価する。
             if az <= 1.0:
                 colors.append("#2ca02c")
+            # 条件分岐: 前段条件が不成立で、`az <= 2.0` を追加評価する。
             elif az <= 2.0:
                 # Yellow (needs further verification)
                 colors.append("#f1c232")
@@ -299,6 +342,7 @@ def plot_scoreboard(rows: List[ZRow], *, beta: float, beta_source: str, out_png:
     ax.axvline(0.0, color="#333333", linewidth=1.0)
     for x in (-2.0, -1.0, 1.0, 2.0):
         ax.axvline(x, color="#999999", linewidth=1.0, linestyle="--")
+
     ax.set_xlabel("z スコア（予測−観測）/σ")
     ax.set_title(f"決定的スコアボード（β固定: β={beta:.9f}, source={beta_source}）")
     ax.invert_yaxis()
@@ -359,8 +403,10 @@ def main() -> int:
     # Recreate ZRow objects from payload rows for plotting
     zrows: List[ZRow] = []
     for r in payload.get("rows") or []:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         zrows.append(
             ZRow(
                 id=str(r.get("id") or ""),
@@ -421,6 +467,8 @@ def main() -> int:
     print(f"Wrote: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

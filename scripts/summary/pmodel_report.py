@@ -42,6 +42,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -56,6 +57,7 @@ def _rel_url(from_dir: Path, target: Path) -> str:
         rel = os.path.relpath(target, start=from_dir)
     except ValueError:
         rel = str(target)
+
     return rel.replace("\\", "/")
 
 
@@ -72,8 +74,10 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 def _pick_newest(glob_paths: List[Path]) -> Optional[Path]:
     items = [p for p in glob_paths if p.exists()]
+    # 条件分岐: `not items` を満たす経路を評価する。
     if not items:
         return None
+
     return max(items, key=lambda p: p.stat().st_mtime)
 
 
@@ -97,25 +101,35 @@ def _cassini_section(root: Path) -> Section:
 
     metrics: Dict[str, Any] = {}
     notes: List[str] = []
+    # 条件分岐: `metrics_csv.exists()` を満たす経路を評価する。
     if metrics_csv.exists():
         rows = _read_csv_dicts(metrics_csv)
         row_all = next((r for r in rows if (r.get("window") or "").startswith("all")), rows[0] if rows else None)
+        # 条件分岐: `row_all` を満たす経路を評価する。
         if row_all:
             metrics["n"] = int(float(row_all.get("n", "nan")))
             rmse = _try_float(row_all.get("rmse", ""))
             corr = _try_float(row_all.get("corr", ""))
+            # 条件分岐: `rmse is not None` を満たす経路を評価する。
             if rmse is not None:
                 metrics["rmse"] = rmse
+
+            # 条件分岐: `corr is not None` を満たす経路を評価する。
+
             if corr is not None:
                 metrics["corr"] = corr
     else:
         notes.append(f"Missing: {metrics_csv}")
 
     images: List[Tuple[str, Path]] = []
+    # 条件分岐: `overlay.exists()` を満たす経路を評価する。
     if overlay.exists():
         images.append(("重ね合わせ（拡大）", overlay))
     else:
         notes.append(f"Missing: {overlay_zoom} / {overlay_full}")
+
+    # 条件分岐: `residuals.exists()` を満たす経路を評価する。
+
     if residuals.exists():
         images.append(("残差", residuals))
 
@@ -138,6 +152,7 @@ def _viking_section(root: Path) -> Section:
 
     metrics: Dict[str, Any] = {}
     notes: List[str] = []
+    # 条件分岐: `csv_path.exists()` を満たす経路を評価する。
     if csv_path.exists():
         peak_us = None
         peak_t = None
@@ -146,19 +161,30 @@ def _viking_section(root: Path) -> Section:
             for row in r:
                 t = row.get("time_utc")
                 v = _try_float(row.get("shapiro_delay_us", ""))
+                # 条件分岐: `t is None or v is None` を満たす経路を評価する。
                 if t is None or v is None:
                     continue
+
+                # 条件分岐: `peak_us is None or v > peak_us` を満たす経路を評価する。
+
                 if peak_us is None or v > peak_us:
                     peak_us = v
                     peak_t = t
+
+        # 条件分岐: `peak_us is not None` を満たす経路を評価する。
+
         if peak_us is not None:
             metrics["peak_delay_us"] = peak_us
+
+        # 条件分岐: `peak_t is not None` を満たす経路を評価する。
+
         if peak_t is not None:
             metrics["peak_time_utc"] = peak_t
     else:
         notes.append(f"Missing: {csv_path}")
 
     images: List[Tuple[str, Path]] = []
+    # 条件分岐: `plot.exists()` を満たす経路を評価する。
     if plot.exists():
         images.append(("シミュレーション vs 観測（代表値）", plot))
     else:
@@ -185,6 +211,7 @@ def _gps_section(root: Path) -> Section:
 
     metrics: Dict[str, Any] = {}
     notes: List[str] = []
+    # 条件分岐: `summary_csv.exists()` を満たす経路を評価する。
     if summary_csv.exists():
         rms_b_ns: List[float] = []
         rms_p_ns: List[float] = []
@@ -192,19 +219,27 @@ def _gps_section(root: Path) -> Section:
             r = csv.DictReader(f)
             for row in r:
                 rms_m = _try_float(row.get("RMS_BRDC_m", ""))
+                # 条件分岐: `rms_m is None` を満たす経路を評価する。
                 if rms_m is None:
                     continue
+
                 rms_b_ns.append((rms_m / 299_792_458.0) * 1e9)
 
                 rms_p_m = _try_float(row.get("RMS_PMODEL_m", ""))
+                # 条件分岐: `rms_p_m is not None` を満たす経路を評価する。
                 if rms_p_m is not None:
                     rms_p_ns.append((rms_p_m / 299_792_458.0) * 1e9)
+
+        # 条件分岐: `rms_b_ns` を満たす経路を評価する。
 
         if rms_b_ns:
             b_sorted = sorted(rms_b_ns)
             metrics["n_sats"] = len(b_sorted)
             metrics["brdc_rms_ns_median"] = b_sorted[len(b_sorted) // 2]
             metrics["brdc_rms_ns_max"] = max(b_sorted)
+
+        # 条件分岐: `rms_p_ns` を満たす経路を評価する。
+
         if rms_p_ns:
             p_sorted = sorted(rms_p_ns)
             metrics["pmodel_rms_ns_median"] = p_sorted[len(p_sorted) // 2]
@@ -219,12 +254,18 @@ def _gps_section(root: Path) -> Section:
                 for row in rows:
                     b_m = _try_float(row.get("RMS_BRDC_m", ""))
                     p_m = _try_float(row.get("RMS_PMODEL_m", ""))
+                    # 条件分岐: `b_m is None or p_m is None` を満たす経路を評価する。
                     if b_m is None or p_m is None:
                         continue
+
+                    # 条件分岐: `p_m < b_m` を満たす経路を評価する。
+
                     if p_m < b_m:
                         better += 1
+                    # 条件分岐: 前段条件が不成立で、`p_m > b_m` を追加評価する。
                     elif p_m > b_m:
                         worse += 1
+
                 metrics["pmodel_better_count"] = better
                 metrics["brdc_better_count"] = worse
             except Exception:
@@ -233,12 +274,22 @@ def _gps_section(root: Path) -> Section:
         notes.append(f"Missing: {summary_csv}")
 
     images: List[Tuple[str, Path]] = []
+    # 条件分岐: `rms_plot.exists()` を満たす経路を評価する。
     if rms_plot.exists():
         images.append(("残差RMS（BRDC vs P-model）, 全衛星", rms_plot))
+
+    # 条件分岐: `g01_plot.exists()` を満たす経路を評価する。
+
     if g01_plot.exists():
         images.append(("時系列例（G01）", g01_plot))
+
+    # 条件分岐: `plot_all.exists()` を満たす経路を評価する。
+
     if plot_all.exists():
         images.append(("残差（BRDC - IGS）, 全衛星", plot_all))
+
+    # 条件分岐: `not images` を満たす経路を評価する。
+
     if not images:
         notes.append(f"Missing: {rms_plot} / {g01_plot} / {plot_all}")
 
@@ -263,6 +314,7 @@ def _llr_section(root: Path) -> Section:
 
     metrics: Dict[str, Any] = {}
     notes: List[str] = []
+    # 条件分岐: `table and table.exists()` を満たす経路を評価する。
     if table and table.exists():
         res_ns: List[float] = []
         with open(table, "r", newline="", encoding="utf-8") as f:
@@ -270,9 +322,14 @@ def _llr_section(root: Path) -> Section:
             for row in r:
                 obs = _try_float(row.get("tof_obs_s", ""))
                 mod = _try_float(row.get("tof_model_s", ""))
+                # 条件分岐: `obs is None or mod is None` を満たす経路を評価する。
                 if obs is None or mod is None:
                     continue
+
                 res_ns.append((obs - mod) * 1e9)
+
+        # 条件分岐: `res_ns` を満たす経路を評価する。
+
         if res_ns:
             mean = sum(res_ns) / len(res_ns)
             rms = math.sqrt(sum((x - mean) ** 2 for x in res_ns) / len(res_ns))
@@ -282,10 +339,14 @@ def _llr_section(root: Path) -> Section:
         notes.append(f"Missing: {out_dir}/*_table.csv")
 
     images: List[Tuple[str, Path]] = []
+    # 条件分岐: `overlay` を満たす経路を評価する。
     if overlay:
         images.append(("観測 vs モデル（平均除去）", overlay))
     else:
         notes.append(f"Missing: {out_dir}/*_overlay_tof.png")
+
+    # 条件分岐: `residual` を満たす経路を評価する。
+
     if residual:
         images.append(("残差（観測 - モデル）", residual))
 
@@ -307,6 +368,7 @@ def _mercury_section(root: Path) -> Section:
 
     notes: List[str] = []
     images: List[Tuple[str, Path]] = []
+    # 条件分岐: `plot.exists()` を満たす経路を評価する。
     if plot.exists():
         images.append(("軌道 / 近日点移動（概念図）", plot))
     else:
@@ -333,10 +395,14 @@ def _theory_section(root: Path) -> Section:
     # Solar light deflection
     solar_png = out_dir / "solar_light_deflection.png"
     solar_json = out_dir / "solar_light_deflection_metrics.json"
+    # 条件分岐: `solar_png.exists()` を満たす経路を評価する。
     if solar_png.exists():
         images.append(("太陽重力による光の偏向（α vs b）", solar_png))
     else:
         notes.append(f"Missing: {solar_png}")
+
+    # 条件分岐: `solar_json.exists()` を満たす経路を評価する。
+
     if solar_json.exists():
         try:
             j = _read_json(solar_json)
@@ -350,12 +416,17 @@ def _theory_section(root: Path) -> Section:
         notes.append(f"Missing: {solar_json}")
 
     # GPS time dilation breakdown
+
     gps_png = out_dir / "gps_time_dilation.png"
     gps_json = out_dir / "gps_time_dilation_metrics.json"
+    # 条件分岐: `gps_png.exists()` を満たす経路を評価する。
     if gps_png.exists():
         images.append(("GPSの時間補正（区間あたり）", gps_png))
     else:
         notes.append(f"Missing: {gps_png}")
+
+    # 条件分岐: `gps_json.exists()` を満たす経路を評価する。
+
     if gps_json.exists():
         try:
             j = _read_json(gps_json)
@@ -392,6 +463,7 @@ def _run_all_status_section(root: Path, out_dir: Path) -> Section:
     }
     notes: List[str] = []
 
+    # 条件分岐: `not status_path.exists()` を満たす経路を評価する。
     if not status_path.exists():
         notes.append(f"Missing: {status_path}")
         return Section(
@@ -424,27 +496,37 @@ def _run_all_status_section(root: Path, out_dir: Path) -> Section:
     failed = 0
     skipped = 0
     for t in tasks:
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
+
         key = str(t.get("key", ""))
+        # 条件分岐: `t.get("skipped", False)` を満たす経路を評価する。
         if t.get("skipped", False):
             skipped += 1
             reason = t.get("reason", "")
             notes.append(f"{key}: スキップ（{reason}）")
             continue
+
+        # 条件分岐: `t.get("ok", False)` を満たす経路を評価する。
+
         if t.get("ok", False):
             ok += 1
             rc = t.get("returncode", 0)
             elapsed = t.get("elapsed_s", None)
+            # 条件分岐: `isinstance(elapsed, (int, float))` を満たす経路を評価する。
             if isinstance(elapsed, (int, float)):
                 notes.append(f"{key}: OK（rc={rc}, {elapsed:.2f}秒）")
             else:
                 notes.append(f"{key}: OK（rc={rc}）")
+
             continue
+
         failed += 1
         rc = t.get("returncode", None)
         log = t.get("log", "")
         elapsed = t.get("elapsed_s", None)
+        # 条件分岐: `isinstance(elapsed, (int, float))` を満たす経路を評価する。
         if isinstance(elapsed, (int, float)):
             notes.append(f"{key}: 失敗（rc={rc}, {elapsed:.2f}秒） log={log}")
         else:
@@ -476,10 +558,13 @@ def _public_section(root: Path) -> Section:
     images: List[Tuple[str, Path]] = []
     metrics: Dict[str, Any] = {}
 
+    # 条件分岐: `dash_png.exists()` を満たす経路を評価する。
     if dash_png.exists():
         images.append(("一般向けダッシュボード（観測/標準値 vs シミュレーション）", dash_png))
     else:
         notes.append(f"Missing: {dash_png}")
+
+    # 条件分岐: `dash_json.exists()` を満たす経路を評価する。
 
     if dash_json.exists():
         try:
@@ -539,6 +624,7 @@ def _render_html(sections: List[Section], out_dir: Path) -> Path:
             f'<div class="muted">手順: <code>{html.escape(_rel_url(out_dir, sec.runbook_path))}</code></div>'
         )
 
+        # 条件分岐: `sec.metrics` を満たす経路を評価する。
         if sec.metrics:
             parts.append("<table>")
             parts.append("<tr><th>指標</th><th>値</th></tr>")
@@ -549,13 +635,19 @@ def _render_html(sections: List[Section], out_dir: Path) -> Path:
                     f"<td><code>{html.escape(str(v))}</code></td>"
                     "</tr>"
                 )
+
             parts.append("</table>")
+
+        # 条件分岐: `sec.notes` を満たす経路を評価する。
 
         if sec.notes:
             parts.append("<ul>")
             for n in sec.notes:
                 parts.append(f"<li class='muted'>{html.escape(n)}</li>")
+
             parts.append("</ul>")
+
+        # 条件分岐: `not sec.images` を満たす経路を評価する。
 
         if not sec.images:
             parts.append("<p class='muted'>画像が見つかりません。</p>")
@@ -585,10 +677,12 @@ def _render_dashboard_png(sections: List[Section], out_dir: Path) -> Optional[Pa
 
     panels: List[Tuple[str, Path]] = []
     for sec in sections:
+        # 条件分岐: `sec.images` を満たす経路を評価する。
         if sec.images:
             panels.append((sec.title, sec.images[0][1]))
 
     panels = [(t, p) for t, p in panels if p.exists()]
+    # 条件分岐: `not panels` を満たす経路を評価する。
     if not panels:
         return None
 
@@ -651,8 +745,10 @@ def main() -> int:
     print(f"[ok] html: {html_path}")
 
     dashboard = None
+    # 条件分岐: `not args.no_dashboard` を満たす経路を評価する。
     if not args.no_dashboard:
         dashboard = _render_dashboard_png(sections, out_dir)
+        # 条件分岐: `dashboard` を満たす経路を評価する。
         if dashboard:
             print(f"[ok] dashboard: {dashboard}")
         else:
@@ -678,7 +774,9 @@ def main() -> int:
     json_path.write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] summary: {json_path}")
 
+    # 条件分岐: `args.open` を満たす経路を評価する。
     if args.open:
+        # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
         if os.name == "nt":
             try:
                 os.startfile(str(html_path))  # type: ignore[attr-defined]
@@ -689,6 +787,8 @@ def main() -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

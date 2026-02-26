@@ -24,18 +24,24 @@ def _kj_per_mol_to_ev(kj_per_mol: float) -> float:
 
 def _load_dhf_kj_per_mol(root: Path, slug: str) -> tuple[float, Optional[float], Path]:
     src = root / "data" / "quantum" / "sources" / f"nist_webbook_thermo_{slug}" / "extracted_values.json"
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise SystemExit(
             f"[fail] missing thermochemistry cache: {src}\n"
             "Run fetch_nist_webbook_thermochemistry.py to populate the cache."
         )
+
     j = _read_json(src)
     sel = j.get("selected")
+    # 条件分岐: `not isinstance(sel, dict)` を満たす経路を評価する。
     if not isinstance(sel, dict):
         raise SystemExit(f"[fail] selected missing in: {src}")
+
     val = sel.get("dhf_kj_per_mol")
+    # 条件分岐: `not isinstance(val, (int, float))` を満たす経路を評価する。
     if not isinstance(val, (int, float)):
         raise SystemExit(f"[fail] dhf_kj_per_mol missing in selected: {src}")
+
     unc = sel.get("dhf_unc_kj_per_mol")
     unc_f = None if unc is None else float(unc)
     return float(val), unc_f, src
@@ -51,10 +57,13 @@ def _prop_unc_sum(terms: list[tuple[float, Optional[float]]]) -> Optional[float]
     ss = 0.0
     any_unc = False
     for a, sig in terms:
+        # 条件分岐: `sig is None` を満たす経路を評価する。
         if sig is None:
             continue
+
         any_unc = True
         ss += (a * sig) ** 2
+
     return math.sqrt(ss) if any_unc else None
 
 
@@ -174,6 +183,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

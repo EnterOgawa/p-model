@@ -26,6 +26,7 @@ from typing import Any, Dict, List
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -47,6 +48,7 @@ def _set_japanese_font() -> None:
         ]
         available = {font.name for font in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -88,6 +90,7 @@ def _build_trace_rows() -> List[Dict[str, Any]]:
         )
 
     # SNe Ia (SALT2) pipeline
+
     add_row(
         pipeline_id="snia_salt2",
         pipeline_label="SNe Ia (SALT2): photometry -> D_L",
@@ -243,12 +246,15 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         )
 
         pipeline_stats["rows_total"] = int(pipeline_stats["rows_total"]) + 1
+        # 条件分岐: `has_one_plus_z` を満たす経路を評価する。
         if has_one_plus_z:
             total_with_1pz += 1
             pipeline_stats["rows_with_1pz"] = int(pipeline_stats["rows_with_1pz"]) + 1
             role_counts: Dict[str, int] = dict(pipeline_stats["role_counts"])
             role_counts[role] = int(role_counts.get(role, 0)) + 1
             pipeline_stats["role_counts"] = role_counts
+
+        # 条件分岐: `geometry` を満たす経路を評価する。
 
         if geometry:
             total_geometry += 1
@@ -362,6 +368,7 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
     axis_top.legend(loc="upper right", frameon=True)
 
     geometry_points = summary["geometry_injection_points"]
+    # 条件分岐: `geometry_points` を満たす経路を評価する。
     if geometry_points:
         y_positions = np.arange(len(geometry_points))
         labels = [
@@ -473,6 +480,8 @@ def main(argv: List[str] | None = None) -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

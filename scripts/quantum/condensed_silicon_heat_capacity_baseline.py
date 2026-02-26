@@ -19,9 +19,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -41,8 +44,10 @@ def _cp_shomate(*, coeffs: dict[str, float], t_k: float) -> float:
 
 
 def _linspace_inclusive(x0: float, x1: float, n: int) -> list[float]:
+    # 条件分岐: `n <= 1` を満たす経路を評価する。
     if n <= 1:
         return [x0]
+
     step = (x1 - x0) / (n - 1)
     return [x0 + i * step for i in range(n)]
 
@@ -54,6 +59,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_webbook_condensed_silicon_si"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -62,25 +68,33 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     shomate = extracted.get("shomate")
+    # 条件分岐: `not isinstance(shomate, list) or not shomate` を満たす経路を評価する。
     if not isinstance(shomate, list) or not shomate:
         raise SystemExit(f"[fail] shomate blocks missing/empty: {extracted_path}")
 
     blocks: list[dict[str, Any]] = []
     for b in shomate:
+        # 条件分岐: `not isinstance(b, dict)` を満たす経路を評価する。
         if not isinstance(b, dict):
             continue
+
         phase = str(b.get("phase") or "")
         coeffs = b.get("coeffs")
+        # 条件分岐: `not phase or not isinstance(coeffs, dict)` を満たす経路を評価する。
         if not phase or not isinstance(coeffs, dict):
             continue
+
         t_min = float(b.get("t_min_k"))
         t_max = float(b.get("t_max_k"))
         blocks.append({"phase": phase, "t_min_k": t_min, "t_max_k": t_max, "coeffs": coeffs})
+
+    # 条件分岐: `not blocks` を満たす経路を評価する。
 
     if not blocks:
         raise SystemExit(f"[fail] no usable Shomate blocks parsed: {extracted_path}")
 
     # Sample points (dense enough for plotting).
+
     rows: list[dict[str, Any]] = []
     for b in sorted(blocks, key=lambda x: float(x["t_min_k"])):
         t0 = float(b["t_min_k"])
@@ -100,6 +114,7 @@ def main() -> None:
             )
 
     # CSV
+
     out_csv = out_dir / "condensed_silicon_heat_capacity_baseline.csv"
     with out_csv.open("w", encoding="utf-8", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["phase", "T_K", "Cp_J_per_molK"])
@@ -108,6 +123,7 @@ def main() -> None:
             w.writerow(r)
 
     # Plot
+
     plt.figure(figsize=(8.5, 4.6))
     colors = {"solid": "#1f77b4", "liquid": "#d62728"}
     for phase in sorted({r["phase"] for r in rows}):
@@ -116,10 +132,15 @@ def main() -> None:
         plt.plot(xs, ys, label=phase, color=colors.get(phase, None))
 
     # Mark melting point boundary used in WebBook table split (if present).
+
     t_melt = None
     for b in blocks:
+        # 条件分岐: `str(b["phase"]) == "solid"` を満たす経路を評価する。
         if str(b["phase"]) == "solid":
             t_melt = float(b["t_max_k"])
+
+    # 条件分岐: `t_melt is not None` を満たす経路を評価する。
+
     if t_melt is not None:
         plt.axvline(t_melt, color="k", alpha=0.25, linewidth=1)
         plt.text(t_melt, plt.ylim()[0], " melt", rotation=90, va="bottom", ha="left", alpha=0.6)
@@ -140,11 +161,16 @@ def main() -> None:
         # Pick the first block whose range covers target_t.
         picked = None
         for b in blocks:
+            # 条件分岐: `float(b["t_min_k"]) <= target_t <= float(b["t_max_k"]) + 1e-9` を満たす経路を評価する。
             if float(b["t_min_k"]) <= target_t <= float(b["t_max_k"]) + 1e-9:
                 picked = b
                 break
+
+        # 条件分岐: `picked is None` を満たす経路を評価する。
+
         if picked is None:
             continue
+
         cp = _cp_shomate(coeffs=picked["coeffs"], t_k=float(target_t))
         key_points.append(
             {
@@ -208,6 +234,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

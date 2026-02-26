@@ -37,6 +37,7 @@ except Exception:  # pragma: no cover
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -56,6 +57,7 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -67,17 +69,22 @@ def _relpath(path: Path) -> str:
 
 
 def _download(url: str, dst: Path) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required (pip install requests)")
+
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(dst.suffix + ".part")
     with requests.get(url, stream=True, timeout=_REQ_TIMEOUT) as r:
         r.raise_for_status()
         with tmp.open("wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024):
+                # 条件分岐: `not chunk` を満たす経路を評価する。
                 if not chunk:
                     continue
+
                 f.write(chunk)
+
     tmp.replace(dst)
     return {"bytes": int(dst.stat().st_size), "sha256": _sha256(dst)}
 
@@ -86,15 +93,21 @@ def _parse_sha256sum(text: str) -> Dict[str, str]:
     out: Dict[str, str] = {}
     for line in str(text).splitlines():
         s = line.strip()
+        # 条件分岐: `not s or s.startswith("#")` を満たす経路を評価する。
         if not s or s.startswith("#"):
             continue
+
         parts = s.split()
+        # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
         if len(parts) < 2:
             continue
+
         sha = parts[0].strip().lower()
         name = parts[-1].strip()
+        # 条件分岐: `len(sha) == 64 and name` を満たす経路を評価する。
         if len(sha) == 64 and name:
             out[name] = sha
+
     return out
 
 
@@ -125,6 +138,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "cf_qso_x_lyb_exp.fits",
         "full-covariance-smoothed.fits",
     ]
+    # 条件分岐: `bool(args.include_dmat)` を満たす経路を評価する。
     if bool(args.include_dmat):
         want.extend(
             [
@@ -136,10 +150,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # Fetch sha256sum (small) first so we can validate as we go.
+
     sha_expected: Dict[str, str] = {}
     sha_path = raw_dir / "dr1_vac_dr1_lya-correlations_v1.0.sha256sum"
+    # 条件分岐: `sha_path.exists()` を満たす経路を評価する。
     if sha_path.exists():
         sha_expected = _parse_sha256sum(sha_path.read_text(encoding="utf-8", errors="ignore"))
+    # 条件分岐: 前段条件が不成立で、`(not bool(args.offline)) and bool(args.download_missing)` を追加評価する。
     elif (not bool(args.offline)) and bool(args.download_missing):
         meta = _download(base_url + sha_path.name, sha_path)
         sha_expected = _parse_sha256sum(sha_path.read_text(encoding="utf-8", errors="ignore"))
@@ -150,17 +167,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = raw_dir / name
         url = base_url + name
         item: Dict[str, Any] = {"url": url, "path": _relpath(dst)}
+        # 条件分岐: `dst.exists()` を満たす経路を評価する。
         if dst.exists():
             item["bytes"] = int(dst.stat().st_size)
             item["sha256"] = _sha256(dst)
+        # 条件分岐: 前段条件が不成立で、`(not bool(args.offline)) and bool(args.download_missing)` を追加評価する。
         elif (not bool(args.offline)) and bool(args.download_missing):
             item.update(_download(url, dst))
 
         exp = sha_expected.get(name)
+        # 条件分岐: `exp` を満たす経路を評価する。
         if exp:
             item["sha256_expected"] = exp
             got = str(item.get("sha256") or "").lower()
             item["sha256_ok"] = bool(got and got == exp)
+
         files_meta[name] = item
 
     manifest = {
@@ -194,14 +215,21 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ok_n = sum(1 for v in files_meta.values() if v.get("sha256_ok") is True)
     exp_n = sum(1 for v in files_meta.values() if v.get("sha256_expected"))
     print(f"[ok] wrote: {out_manifest}")
+    # 条件分岐: `exp_n` を満たす経路を評価する。
     if exp_n:
         print(f"[ok] sha256_ok: {ok_n}/{exp_n}")
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         print("[warn] missing files (run with --download-missing):")
         for m in missing:
             print(f"  - {m}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

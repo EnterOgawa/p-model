@@ -75,11 +75,13 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
@@ -89,23 +91,30 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-fetch-reflectors/1.0"})
     with urllib.request.urlopen(req, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
 def _extract_tar(tar_path: Path, out_dir: Path, *, force: bool) -> None:
+    # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
     if out_dir.exists() and any(out_dir.iterdir()) and not force:
         print(f"[skip] extracted: {out_dir}")
         return
+
     out_dir.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `force` を満たす経路を評価する。
     if force:
         for p in out_dir.glob("*"):
+            # 条件分岐: `p.is_dir()` を満たす経路を評価する。
             if p.is_dir():
                 shutil.rmtree(p)
             else:
                 p.unlink(missing_ok=True)
+
     with tarfile.open(tar_path, "r:gz") as tf:
         tf.extractall(out_dir)
+
     print(f"[ok] extracted: {out_dir}")
 
 
@@ -120,14 +129,20 @@ def _table_slice(tex: str, label: str) -> str:
     """
     marker = f"\\label{{{label}}}"
     idx = tex.find(marker)
+    # 条件分岐: `idx < 0` を満たす経路を評価する。
     if idx < 0:
         raise ValueError(f"label not found: {label}")
+
     start = tex.rfind("\\begin{table}", 0, idx)
+    # 条件分岐: `start < 0` を満たす経路を評価する。
     if start < 0:
         raise ValueError(f"begin{{table}} not found for: {label}")
+
     end = tex.find("\\end{table}", idx)
+    # 条件分岐: `end < 0` を満たす経路を評価する。
     if end < 0:
         raise ValueError(f"end{{table}} not found for: {label}")
+
     return tex[start : end + len("\\end{table}")]
 
 
@@ -157,17 +172,23 @@ def _parse_ilrs_nglr1_pa(html: str) -> dict[str, Any]:
     # Find the PA section.
     start = None
     for i, line in enumerate(lines):
+        # 条件分岐: `"Retroreflector Coordinates (Principal Axis-PA)" in line` を満たす経路を評価する。
         if "Retroreflector Coordinates (Principal Axis-PA)" in line:
             start = i
             break
+
+    # 条件分岐: `start is None` を満たす経路を評価する。
+
     if start is None:
         raise ValueError("ILRS page parse failed: PA section header not found.")
 
     def _pick(prefix: str) -> float:
         for line in lines[start : start + 80]:
+            # 条件分岐: `line.startswith(prefix)` を満たす経路を評価する。
             if line.startswith(prefix):
                 _, v = line.split("=", 1)
                 return float(v.strip())
+
         raise ValueError(f"ILRS page parse failed: missing {prefix} in PA section.")
 
     lon_deg = _pick("lon")
@@ -225,33 +246,47 @@ def _clean_tex_name(s: str) -> str:
 
 def _to_float(cell: str) -> float:
     v = _clean_tex_cell(cell)
+    # 条件分岐: `not v` を満たす経路を評価する。
     if not v:
         raise ValueError(f"empty numeric cell: {cell!r}")
+
     return float(v)
 
 
 def _split_rows(table_block: str) -> list[str]:
     m = re.search(r"\\begin\{tabular\}\{[^}]+\}", table_block)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError("missing tabular environment")
+
     body_start = m.end()
     body_end = table_block.find("\\end{tabular}", body_start)
+    # 条件分岐: `body_end < 0` を満たす経路を評価する。
     if body_end < 0:
         raise ValueError("missing end{tabular}")
+
     body = table_block[body_start:body_end]
 
     parts = body.split("\\tabularnewline")
     rows: list[str] = []
     for p in parts:
         r = p.replace("\n", " ").strip()
+        # 条件分岐: `not r` を満たす経路を評価する。
         if not r:
             continue
+
         r = r.replace("\\hline", "").strip()
+        # 条件分岐: `not r` を満たす経路を評価する。
         if not r:
             continue
+
+        # 条件分岐: `r.startswith("Reflector&") or r.startswith("Reflector &")` を満たす経路を評価する。
+
         if r.startswith("Reflector&") or r.startswith("Reflector &"):
             continue
+
         rows.append(r)
+
     return rows
 
 
@@ -260,11 +295,15 @@ def _parse_all5(table_block: str) -> list[ParsedRow]:
     out: list[ParsedRow] = []
     for r in rows:
         cells = [c.strip() for c in r.split("&")]
+        # 条件分岐: `len(cells) < 7` を満たす経路を評価する。
         if len(cells) < 7:
             continue
+
         name = _clean_tex_name(cells[0])
+        # 条件分岐: `name.lower() == "reflector"` を満たす経路を評価する。
         if name.lower() == "reflector":
             continue
+
         out.append(
             ParsedRow(
                 name=name,
@@ -276,8 +315,12 @@ def _parse_all5(table_block: str) -> list[ParsedRow]:
                 z_m=_to_float(cells[6]),
             )
         )
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError("no rows parsed from tab:all-5")
+
     return out
 
 
@@ -286,11 +329,15 @@ def _parse_tides(table_block: str) -> list[TideRow]:
     out: list[TideRow] = []
     for r in rows:
         cells = [c.strip() for c in r.split("&")]
+        # 条件分岐: `len(cells) < 4` を満たす経路を評価する。
         if len(cells) < 4:
             continue
+
         name = _clean_tex_name(cells[0])
+        # 条件分岐: `name.lower() == "reflector"` を満たす経路を評価する。
         if name.lower() == "reflector":
             continue
+
         out.append(
             TideRow(
                 name=name,
@@ -299,8 +346,12 @@ def _parse_tides(table_block: str) -> list[TideRow]:
                 r_dlambda_cosphi_m=_to_float(cells[3]),
             )
         )
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError("no rows parsed from tab:tides")
+
     return out
 
 
@@ -313,8 +364,10 @@ def _canon_key(reflector_name: str) -> str:
         "lunokhod 1": "luna17",
         "lunokhod 2": "luna21",
     }
+    # 条件分岐: `n in mapping` を満たす経路を評価する。
     if n in mapping:
         return mapping[n]
+
     raise ValueError(f"unknown reflector name in source table: {reflector_name!r}")
 
 
@@ -331,10 +384,15 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="Re-download and overwrite cached source / output JSON.")
     args = ap.parse_args()
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
+        # 条件分岐: `not tar_path.exists()` を満たす経路を評価する。
         if not tar_path.exists():
             print(f"[err] offline and missing: {tar_path}")
             return 2
+
+        # 条件分岐: `not ilrs_nglr1_path.exists()` を満たす経路を評価する。
+
         if not ilrs_nglr1_path.exists():
             print(f"[err] offline and missing: {ilrs_nglr1_path}")
             return 2
@@ -345,6 +403,7 @@ def main() -> int:
     _extract_tar(tar_path, extract_dir, force=bool(args.force))
 
     tex_path = _find_tex_file(extract_dir)
+    # 条件分岐: `tex_path is None or not tex_path.exists()` を満たす経路を評価する。
     if tex_path is None or not tex_path.exists():
         print(f"[err] missing .tex in: {extract_dir}")
         return 3
@@ -390,6 +449,7 @@ def main() -> int:
         }
 
     # NGLR-1 (new reflector): source is ILRS mission page, PA coordinates (km → m).
+
     ilrs_html = ilrs_nglr1_path.read_text(encoding="utf-8", errors="replace")
     nglr1 = _parse_ilrs_nglr1_pa(ilrs_html)
     reflectors["nglr1"] = {
@@ -463,8 +523,11 @@ def main() -> int:
     for k in sorted(reflectors.keys()):
         v = reflectors[k]
         print(f"  - {k}: X,Y,Z = {v['x_m']:.3f}, {v['y_m']:.3f}, {v['z_m']:.3f} m")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

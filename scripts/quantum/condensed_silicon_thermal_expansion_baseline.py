@@ -24,9 +24,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -79,12 +82,16 @@ def _sigma_fit_1e8_per_k(*, t_k: float, fit_error: dict[str, Any]) -> float | No
     """
     Return the curve-fit standard error in units of 1e-8 / K, if parseable.
     """
+    # 条件分岐: `not fit_error` を満たす経路を評価する。
     if not fit_error:
         return None
+
     lt = fit_error.get("lt") if isinstance(fit_error.get("lt"), dict) else None
     ge = fit_error.get("ge") if isinstance(fit_error.get("ge"), dict) else None
+    # 条件分岐: `not (isinstance(lt, dict) and isinstance(ge, dict))` を満たす経路を評価する。
     if not (isinstance(lt, dict) and isinstance(ge, dict)):
         return None
+
     try:
         t0 = float(lt.get("t_k"))
         s0 = float(lt.get("sigma_1e_8_per_k"))
@@ -92,10 +99,17 @@ def _sigma_fit_1e8_per_k(*, t_k: float, fit_error: dict[str, Any]) -> float | No
         s1 = float(ge.get("sigma_1e_8_per_k"))
     except Exception:
         return None
+
+    # 条件分岐: `not (math.isfinite(t0) and math.isfinite(s0) and math.isfinite(t1) and math.i...` を満たす経路を評価する。
+
     if not (math.isfinite(t0) and math.isfinite(s0) and math.isfinite(t1) and math.isfinite(s1)):
         return None
+
+    # 条件分岐: `abs(t0 - t1) > 1e-9` を満たす経路を評価する。
+
     if abs(t0 - t1) > 1e-9:
         return None
+
     return s0 if float(t_k) < t0 else s1
 
 
@@ -106,6 +120,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -114,18 +129,24 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     coeffs = extracted.get("coefficients")
+    # 条件分岐: `not isinstance(coeffs, dict)` を満たす経路を評価する。
     if not isinstance(coeffs, dict):
         raise SystemExit(f"[fail] coefficients missing: {extracted_path}")
+
     coeffs_f = {str(k).lower(): float(v) for k, v in coeffs.items()}
     missing = [k for k in "abcdefghijkl" if k not in coeffs_f]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"[fail] missing coefficients: {missing}")
 
     dr = extracted.get("data_range")
+    # 条件分岐: `not isinstance(dr, dict)` を満たす経路を評価する。
     if not isinstance(dr, dict):
         raise SystemExit(f"[fail] data_range missing: {extracted_path}")
+
     t_min = float(dr.get("t_min_k"))
     t_max = float(dr.get("t_max_k"))
+    # 条件分岐: `not (math.isfinite(t_min) and math.isfinite(t_max) and t_min < t_max)` を満たす経路を評価する。
     if not (math.isfinite(t_min) and math.isfinite(t_max) and t_min < t_max):
         raise SystemExit(f"[fail] invalid data_range: {dr}")
 
@@ -167,6 +188,7 @@ def main() -> None:
             w.writerow(r)
 
     # Plot
+
     xs = [float(r["T_K"]) for r in rows]
     ys = [float(r["alpha_1e-8_per_K"]) for r in rows]
     plt.figure(figsize=(8.5, 4.6))
@@ -194,8 +216,10 @@ def main() -> None:
     for t in sample_t:
         alpha = float(a_at(t))
         sigma = _sigma_fit_1e8_per_k(t_k=float(t), fit_error=fit_error)
+        # 条件分岐: `sigma is None` を満たす経路を評価する。
         if sigma is None:
             continue
+
         sigma_f = float(sigma)
         falsification_targets.append(
             {
@@ -256,6 +280,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

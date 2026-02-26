@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -32,6 +33,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -52,25 +54,37 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(v) or math.isinf(v)` を満たす経路を評価する。
+
     if math.isnan(v) or math.isinf(v):
         return None
+
     return v
 
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None or not math.isfinite(float(x))` を満たす経路を評価する。
     if x is None or not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -83,16 +97,30 @@ def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     label = str(row.get("short_label") or row.get("id") or "")
     rid = str(row.get("id") or "")
 
+    # 条件分岐: `uses_bao` を満たす経路を評価する。
     if uses_bao:
         return ("SNIa+BAO", "#1f77b4")
+
+    # 条件分岐: `"H(z)" in label or "snIa_hz" in rid` を満たす経路を評価する。
+
     if "H(z)" in label or "snIa_hz" in rid:
         return ("SNIa+H(z)", "#9467bd")
+
+    # 条件分岐: `label.startswith("Clusters") or "Clusters" in label or "clusters" in rid` を満たす経路を評価する。
+
     if label.startswith("Clusters") or "Clusters" in label or "clusters" in rid:
         return ("Clusters+SNIa", "#2ca02c")
+
+    # 条件分岐: `"SGL" in label or "sgl" in rid` を満たす経路を評価する。
+
     if "SGL" in label or "sgl" in rid:
         return ("SGL+SNIa+GRB", "#ff7f0e")
+
+    # 条件分岐: `"radio" in label or "radio" in rid` を満たす経路を評価する。
+
     if "radio" in label or "radio" in rid:
         return ("SNe+radio", "#8c564b")
+
     return ("other", "#7f7f7f")
 
 
@@ -119,22 +147,29 @@ def main(argv: Optional[List[str]] = None) -> int:
     _set_japanese_font()
 
     ddr_metrics_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    # 条件分岐: `not ddr_metrics_path.exists()` を満たす経路を評価する。
     if not ddr_metrics_path.exists():
         raise FileNotFoundError(
             f"missing required metrics: {ddr_metrics_path} (run scripts/summary/run_all.py --offline first)"
         )
+
     ddr = _read_json(ddr_metrics_path)
     rows_in = ddr.get("rows") or []
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise ValueError("invalid DDR metrics (rows missing): cosmology_distance_duality_constraints_metrics.json")
 
     rows: List[Dict[str, Any]] = []
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         z = _safe_float(r.get("z_pbg_static"))
+        # 条件分岐: `z is None` を満たす経路を評価する。
         if z is None:
             continue
+
         az = abs(float(z))
         cat, color = _category(r)
         rows.append(
@@ -167,19 +202,28 @@ def main(argv: Optional[List[str]] = None) -> int:
     worst_no_bao_absz = -1.0
     for r in rows:
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `bool(r.get("uses_bao", False)) and sig is not None and sig > 0 and sig < best...` を満たす経路を評価する。
         if bool(r.get("uses_bao", False)) and sig is not None and sig > 0 and sig < best_bao_sig:
             best_bao_sig = float(sig)
             tightest_bao = r
+
+        # 条件分岐: `not bool(r.get("uses_bao", False))` を満たす経路を評価する。
+
         if not bool(r.get("uses_bao", False)):
             az = float(r["abs_z_pbg_static"])
+            # 条件分岐: `az < best_no_bao_absz` を満たす経路を評価する。
             if az < best_no_bao_absz:
                 best_no_bao_absz = az
                 least_reject_no_bao = r
+
+            # 条件分岐: `az > worst_no_bao_absz` を満たす経路を評価する。
+
             if az > worst_no_bao_absz:
                 worst_no_bao_absz = az
                 strongest_reject_no_bao = r
 
     # Figure
+
     import matplotlib.pyplot as plt
 
     fig = plt.figure(figsize=(16, 9))
@@ -212,9 +256,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         ax.text(min(cap - 0.2, float(xi) + 0.2), yi, t, va="center", ha="left", fontsize=9, color="#333333")
 
     # Legend by category (dedup)
+
     seen: Dict[str, str] = {}
     for r in rows:
         seen.setdefault(str(r["category"]), str(r["category_color"]))
+
     handles = [
         plt.Line2D([0], [0], marker="s", color="w", markerfacecolor=c, markersize=10, label=k) for k, c in seen.items()
     ]
@@ -236,6 +282,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return y_top - (0.055 * (1 + len(lines))) - 0.03
 
     y0 = 0.98
+    # 条件分岐: `isinstance(tightest_bao, dict)` を満たす経路を評価する。
     if isinstance(tightest_bao, dict):
         y0 = _box(
             y0,
@@ -249,6 +296,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             fc="#f4f8ff",
         )
 
+    # 条件分岐: `isinstance(least_reject_no_bao, dict)` を満たす経路を評価する。
+
     if isinstance(least_reject_no_bao, dict):
         y0 = _box(
             y0,
@@ -260,6 +309,8 @@ def main(argv: Optional[List[str]] = None) -> int:
             ],
             fc="#f7fff4",
         )
+
+    # 条件分岐: `isinstance(strongest_reject_no_bao, dict)` を満たす経路を評価する。
 
     if isinstance(strongest_reject_no_bao, dict):
         y0 = _box(
@@ -349,6 +400,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

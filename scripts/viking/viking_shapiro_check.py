@@ -13,6 +13,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -28,6 +29,7 @@ def _make_ssl_context() -> ssl.SSLContext:
     - HORIZONS_CA_BUNDLE / SSL_CERT_FILE / REQUESTS_CA_BUNDLE があればそれをcafileとして利用
     - それ以外はデフォルトのCAを利用
     """
+    # 条件分岐: `os.environ.get("HORIZONS_INSECURE", "").strip() == "1"` を満たす経路を評価する。
     if os.environ.get("HORIZONS_INSECURE", "").strip() == "1":
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
@@ -40,6 +42,7 @@ def _make_ssl_context() -> ssl.SSLContext:
         or os.environ.get("REQUESTS_CA_BUNDLE")
     )
 
+    # 条件分岐: `cafile` を満たす経路を評価する。
     if cafile:
         return ssl.create_default_context(cafile=cafile)
 
@@ -47,6 +50,7 @@ def _make_ssl_context() -> ssl.SSLContext:
 
 
 # SSL設定（Horizonsへの接続用）
+
 SSL_CTX = _make_ssl_context()
 
 def _cache_key(command: str, start: str, stop: str, step: str, center: str) -> str:
@@ -93,9 +97,12 @@ def fetch_horizons_cached(
     txt_path = cache_dir / f"horizons_vectors_{command}_{key}.txt"
     meta_path = cache_dir / f"horizons_vectors_{command}_{key}.json"
 
+    # 条件分岐: `txt_path.exists()` を満たす経路を評価する。
     if txt_path.exists():
         print(f"[cache] Using {txt_path}")
         return txt_path.read_text(encoding="utf-8", errors="ignore")
+
+    # 条件分岐: `offline` を満たす経路を評価する。
 
     if offline:
         raise RuntimeError(f"Offline mode: cache not found: {txt_path}")
@@ -122,6 +129,7 @@ def fetch_horizons_cached(
 
 def parse_vectors_csv(txt: str):
     """HorizonsのCSV出力をパースして (time, r, v) のリストを返す"""
+    # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
     if "$$SOE" not in txt or "$$EOE" not in txt:
         raise RuntimeError(f"Horizons API Error: Missing $$SOE/$$EOE markers.")
     
@@ -129,9 +137,11 @@ def parse_vectors_csv(txt: str):
     rows=[]
     for line in block.splitlines():
         parts=[p.strip() for p in line.strip().split(",")]
+        # 条件分岐: `len(parts) < 8` を満たす経路を評価する。
         if len(parts) < 8:
             continue
         # 日付パース (例: A.D. 1976-Nov-25 00:00:00.0000)
+
         cal = parts[1].replace("A.D.", "").strip()
         t = datetime.strptime(cal, "%Y-%b-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
         
@@ -139,9 +149,11 @@ def parse_vectors_csv(txt: str):
         x=float(parts[2])*1000.0; y=float(parts[3])*1000.0; z=float(parts[4])*1000.0
         vx=float(parts[5])*1000.0; vy=float(parts[6])*1000.0; vz=float(parts[7])*1000.0
         rows.append((t, (x,y,z), (vx,vy,vz)))
+
     return rows
 
 # --- ベクトル演算関数 ---
+
 def dot(a,b): return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]
 def sub(a,b): return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
 def norm(a): return math.sqrt(dot(a,a))
@@ -234,11 +246,13 @@ def main():
         
         results.append((t, total_delay_us))
         
+        # 条件分岐: `total_delay_us > max_delay_us` を満たす経路を評価する。
         if total_delay_us > max_delay_us:
             max_delay_us = total_delay_us
             max_delay_time = t
 
     # 結果表示
+
     print("-" * 40)
     print(f"Peak Shapiro Delay (Round Trip): {max_delay_us:.2f} microseconds")
     print(f"At Time (UTC)                  : {max_delay_time}")
@@ -252,6 +266,7 @@ def main():
         w.writerow(["time_utc", "shapiro_delay_us"])
         for r in results:
             w.writerow([r[0].isoformat(), f"{r[1]:.4f}"])
+
     print(f"Saved: {out_file}")
 
     try:
@@ -274,6 +289,8 @@ def main():
         )
     except Exception:
         pass
+
+# 条件分岐: `__name__=="__main__"` を満たす経路を評価する。
 
 if __name__=="__main__":
     main()

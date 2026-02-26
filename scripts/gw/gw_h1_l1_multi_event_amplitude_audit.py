@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -42,8 +43,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -54,18 +57,25 @@ def _slugify(s: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (s or "").strip())
     while "__" in out:
         out = out.replace("__", "_")
+
     return out.strip("_") or "event"
 
 
 def _fmt(v: float, digits: int = 7) -> str:
+    # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
         return ""
+
     x = float(v)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -75,6 +85,7 @@ def _load_metrics_json(event: str, slug: str) -> Optional[Dict[str, Any]]:
         _ROOT / "output" / "private" / "gw" / f"{slug}_h1_l1_amplitude_ratio_metrics.json",
     ]
     for path in candidates:
+        # 条件分岐: `path.exists()` を満たす経路を評価する。
         if path.exists():
             try:
                 payload = json.loads(path.read_text(encoding="utf-8"))
@@ -83,10 +94,12 @@ def _load_metrics_json(event: str, slug: str) -> Optional[Dict[str, Any]]:
                 return payload
             except Exception:
                 continue
+
     return None
 
 
 def _event_row(event: str, payload: Optional[Dict[str, Any]], corr_use_min: float) -> Dict[str, Any]:
+    # 条件分岐: `payload is None` を満たす経路を評価する。
     if payload is None:
         return {
             "event": event,
@@ -174,10 +187,13 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, corr_use_min: float) -> Non
 
     colors = []
     for s in status:
+        # 条件分岐: `s == "pass"` を満たす経路を評価する。
         if s == "pass":
             colors.append("#2ca02c")
+        # 条件分岐: 前段条件が不成立で、`s == "watch"` を追加評価する。
         elif s == "watch":
             colors.append("#f2c744")
+        # 条件分岐: 前段条件が不成立で、`s == "reject"` を追加評価する。
         elif s == "reject":
             colors.append("#d62728")
         else:
@@ -193,6 +209,7 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, corr_use_min: float) -> Non
     ax0.legend(loc="upper right")
 
     valid = np.isfinite(ratio_med) & np.isfinite(ratio_p16) & np.isfinite(ratio_p84)
+    # 条件分岐: `np.any(valid)` を満たす経路を評価する。
     if np.any(valid):
         yerr = np.vstack(
             [
@@ -212,6 +229,7 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, corr_use_min: float) -> Non
             markersize=5.0,
             label="|H1|/|L1| (median, p16–p84)",
         )
+
     ax1.set_ylabel("envelope ratio")
     ax1.set_xlabel("event")
     ax1.grid(True, axis="y", alpha=0.3)
@@ -246,6 +264,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     events = [s.strip() for s in str(args.events).split(",") if s.strip()]
+    # 条件分岐: `not events` を満たす経路を評価する。
     if not events:
         print("[err] --events is empty")
         return 2
@@ -254,8 +273,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     missing_events: List[str] = []
     for event in events:
         payload = _load_metrics_json(event, _slugify(event))
+        # 条件分岐: `payload is None` を満たす経路を評価する。
         if payload is None:
             missing_events.append(event)
+
         rows.append(_event_row(event, payload, float(args.corr_use_min)))
 
     usable_rows = [r for r in rows if str(r.get("quality")) == "usable"]
@@ -313,6 +334,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -343,6 +365,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

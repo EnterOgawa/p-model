@@ -27,22 +27,31 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
+
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req, timeout=60) as resp, out_path.open("wb") as f:
         f.write(resp.read())
+
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -90,10 +99,15 @@ def _clean_ascii(s: str) -> str:
 def _parse_temp_c(token: str) -> Optional[float]:
     t = str(token).strip().translate(_TEMP_TRANSLATE)
     t = re.sub(r"[^0-9.+-]", "", t)
+    # 条件分岐: `t.startswith(".")` を満たす経路を評価する。
     if t.startswith("."):
         t = "0" + t
+
+    # 条件分岐: `not t` を満たす経路を評価する。
+
     if not t:
         return None
+
     try:
         return float(t)
     except Exception:
@@ -103,19 +117,25 @@ def _parse_temp_c(token: str) -> Optional[float]:
 def _parse_nbs_float(token: str) -> Optional[float]:
     s = str(token).strip().translate(_NUM_TRANSLATE)
     s = re.sub(r"[^0-9.+-Ee]", "", s)
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
     # Scientific notation like 7.439-04 meaning 7.439e-04.
+
     m = re.match(r"^([+-]?\d+(?:\.\d+)?)([+-])(\d+)$", s)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         try:
             mant = float(m.group(1))
             exp = int(m.group(3))
+            # 条件分岐: `m.group(2) == "-"` を満たす経路を評価する。
             if m.group(2) == "-":
                 exp = -exp
+
             return mant * (10.0**exp)
         except Exception:
             return None
+
     try:
         return float(s)
     except Exception:
@@ -144,8 +164,12 @@ def _repair_split_nbs_numbers(clean_line: str) -> str:
         before = out
         for pat, repl in _SPLIT_NBS_NUMBER_REPAIRS:
             out = pat.sub(repl, out)
+
+        # 条件分岐: `out == before` を満たす経路を評価する。
+
         if out == before:
             break
+
     return out
 
 
@@ -156,6 +180,7 @@ def _find_appendix_e_start(reader: PdfReader) -> Optional[int]:
         # Use a distinctive phrase from the Appendix E header to avoid false positives earlier in the report.
         if "APPENDIXE" in tc and "0TO50" in tc and "VANDERPAUW" in tc:
             return i
+
     return None
 
 
@@ -165,20 +190,28 @@ def _split_pos_for_page(lines: list[str]) -> Optional[int]:
     candidates: list[float] = []
     for ln in lines:
         runs = [(m.start(), m.end() - m.start()) for m in re.finditer(r" {10,}", ln)]
+        # 条件分岐: `not runs` を満たす経路を評価する。
         if not runs:
             continue
+
         s, l = max(runs, key=lambda x: x[1])
         # Require a sufficiently wide gap to represent the column separator.
         if l >= 20:
             candidates.append(float(s) + float(l) / 2.0)
+
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         return None
+
     return int(round(median(candidates)))
 
 
 def _split_columns(line: str, split_pos: Optional[int]) -> tuple[str, str]:
+    # 条件分岐: `split_pos is None or split_pos <= 0` を満たす経路を評価する。
     if split_pos is None or split_pos <= 0:
         return line.rstrip(), ""
+
     left = line[:split_pos].rstrip()
     right = line[split_pos:].strip()
     return left, right
@@ -186,29 +219,40 @@ def _split_columns(line: str, split_pos: Optional[int]) -> tuple[str, str]:
 
 def _is_sample_header(line: str) -> bool:
     u = line.upper()
+    # 条件分岐: `"TYPE" not in u` を満たす経路を評価する。
     if "TYPE" not in u:
         # Some extracted headers degrade "TYPE" (e.g., "TYPF"); still detect via "TYP".
         if "TYP" not in u:
             return False
     # Accept degraded spellings like "P-TYPF", "N-TYPIT", etc.
+
     return bool(re.search(r"\bP\s*-?\s*TYP", u) or re.search(r"\bN\s*-?\s*TYP", u))
 
 
 def _infer_type(line: str) -> Optional[str]:
     u = line.upper()
+    # 条件分岐: `re.search(r"\bP\s*-?\s*TYP", u)` を満たす経路を評価する。
     if re.search(r"\bP\s*-?\s*TYP", u):
         return "p"
+
+    # 条件分岐: `re.search(r"\bN\s*-?\s*TYP", u)` を満たす経路を評価する。
+
     if re.search(r"\bN\s*-?\s*TYP", u):
         return "n"
+
     return None
 
 
 def _infer_doping(line: str, *, sample_type: Optional[str]) -> Optional[str]:
     u = line.upper()
+    # 条件分岐: `sample_type == "p"` を満たす経路を評価する。
     if sample_type == "p":
+        # 条件分岐: `"(AL" in u or "AL)" in u` を満たす経路を評価する。
         if "(AL" in u or "AL)" in u:
             return "Al"
+
         return "B"
+
     return None
 
 
@@ -228,6 +272,7 @@ def _parse_range_row(line: str) -> Optional[RangeRow]:
     raw_clean = _clean_ascii(line)
     repaired = _repair_split_nbs_numbers(raw_clean)
     tokens = repaired.split()
+    # 条件分岐: `len(tokens) < 4` を満たす経路を評価する。
     if len(tokens) < 4:
         return None
 
@@ -239,17 +284,27 @@ def _parse_range_row(line: str) -> Optional[RangeRow]:
     # Look for the "TO" separator token in various degraded forms.
     for i in range(3, len(tokens) - 1):
         sep = tokens[i].upper()
+        # 条件分岐: `sep in {"TO", "T0", "RO", "R0"}` を満たす経路を評価する。
         if sep in {"TO", "T0", "RO", "R0"}:
             rho_hi = _parse_nbs_float(tokens[i + 1])
             break
+
+        # 条件分岐: `sep == "T" and tokens[i + 1] in {"0", "O", "o"} and i + 2 < len(tokens)` を満たす経路を評価する。
+
         if sep == "T" and tokens[i + 1] in {"0", "O", "o"} and i + 2 < len(tokens):
             rho_hi = _parse_nbs_float(tokens[i + 2])
             break
+
+    # 条件分岐: `rho_hi is None` を満たす経路を評価する。
+
     if rho_hi is None:
         rho_hi = _parse_nbs_float(tokens[3])
 
+    # 条件分岐: `t_c is None or rho is None` を満たす経路を評価する。
+
     if t_c is None or rho is None:
         return None
+
     return RangeRow(t_c=float(t_c), rho=float(rho), rho_lo=rho_lo, rho_hi=rho_hi, raw=raw_clean)
 
 
@@ -261,10 +316,14 @@ def _extract_samples_from_stream(lines: list[str], *, source_pages: list[int]) -
 
     def flush() -> None:
         nonlocal cur, reading, rows
+        # 条件分岐: `cur is None` を満たす経路を評価する。
         if cur is None:
             rows = []
             reading = False
             return
+
+        # 条件分岐: `rows` を満たす経路を評価する。
+
         if rows:
             # Keep the last parsed range table for the sample.
             cur["rho_range_table"] = [
@@ -277,16 +336,23 @@ def _extract_samples_from_stream(lines: list[str], *, source_pages: list[int]) -
                 }
                 for r in sorted(rows, key=lambda x: x.t_c)
             ]
+
+        # 条件分岐: `cur.get("rho_range_table")` を満たす経路を評価する。
+
         if cur.get("rho_range_table"):
             samples.append(cur)
+
         cur = None
         rows = []
         reading = False
 
     for raw in lines:
         line = _clean_ascii(raw)
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
+        # 条件分岐: `_is_sample_header(line)` を満たす経路を評価する。
 
         if _is_sample_header(line):
             flush()
@@ -301,23 +367,32 @@ def _extract_samples_from_stream(lines: list[str], *, source_pages: list[int]) -
             }
             continue
 
+        # 条件分岐: `cur is None` を満たす経路を評価する。
+
         if cur is None:
             continue
+
+        # 条件分岐: `_RANGE_HEADER_RE.search(line) and "TO" not in line.upper()` を満たす経路を評価する。
 
         if _RANGE_HEADER_RE.search(line) and "TO" not in line.upper():
             reading = True
             rows = []
             continue
 
+        # 条件分岐: `reading` を満たす経路を評価する。
+
         if reading:
             # Stop if another header-like section begins.
             if line.lower().startswith("ranges given"):
                 reading = False
                 continue
+
             rr = _parse_range_row(line)
+            # 条件分岐: `rr is None` を満たす経路を評価する。
             if rr is None:
                 # Some extracted lines merge "logp=..." etc; ignore.
                 continue
+
             rows.append(rr)
             # Typical table has temperatures {0,10,20,23,30,40,50}.
             if len({round(r.t_c, 2) for r in rows}) >= 7:
@@ -332,10 +407,12 @@ def _extract_samples_from_stream(lines: list[str], *, source_pages: list[int]) -
 def _extract_samples(pdf_path: Path) -> dict[str, Any]:
     reader = PdfReader(str(pdf_path))
     start = _find_appendix_e_start(reader)
+    # 条件分岐: `start is None` を満たす経路を評価する。
     if start is None:
         raise ValueError("APPENDIX E not found in PDF text")
 
     # Scan a bounded window after Appendix E start (covers the data tables in this report).
+
     pg0 = start
     pg1 = min(len(reader.pages), start + 15)
     pages = list(range(pg0, pg1))
@@ -350,8 +427,12 @@ def _extract_samples(pdf_path: Path) -> dict[str, Any]:
         split_pos = _split_pos_for_page(ls)
         for ln in ls:
             left, right = _split_columns(ln, split_pos)
+            # 条件分岐: `left.strip()` を満たす経路を評価する。
             if left.strip():
                 left_lines.append(left)
+
+            # 条件分岐: `right.strip()` を満たす経路を評価する。
+
             if right.strip():
                 right_lines.append(right)
 
@@ -386,8 +467,11 @@ def main(argv: list[str] | None = None) -> int:
     url_pdf = "https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nbsir74-496.pdf"
     out_pdf = out_dir / "nbsir74-496.pdf"
 
+    # 条件分岐: `not args.offline` を満たす経路を評価する。
     if not args.offline:
         _download(url_pdf, out_pdf)
+
+    # 条件分岐: `not out_pdf.exists() or out_pdf.stat().st_size == 0` を満たす経路を評価する。
 
     if not out_pdf.exists() or out_pdf.stat().st_size == 0:
         raise SystemExit(f"[fail] missing pdf: {out_pdf}")
@@ -432,6 +516,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] wrote: {out_manifest}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

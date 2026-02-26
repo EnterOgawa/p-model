@@ -34,6 +34,7 @@ from typing import Any, Dict, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -48,8 +49,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -58,8 +61,10 @@ def _set_japanese_font() -> None:
 
 def _legendre_p(l: int, x: np.ndarray) -> np.ndarray:
     l = int(l)
+    # 条件分岐: `l < 0` を満たす経路を評価する。
     if l < 0:
         raise ValueError("l must be >=0")
+
     coeff = np.zeros((l + 1,), dtype=float)
     coeff[l] = 1.0
     return np.polynomial.legendre.legval(np.asarray(x, dtype=float), coeff)
@@ -89,6 +94,7 @@ def _window_coupling_coeffs() -> Dict[Tuple[int, int, int], float]:
                 pL = p[L]
                 integral = float(np.sum(w_q * pn * pe * pL))
                 out[(n, ell, L)] = 0.5 * float(2 * n + 1) * integral
+
     return out
 
 
@@ -110,11 +116,17 @@ def _window_wL(
     """
     counts = np.asarray(counts, dtype=np.float64)
     mu_edges = np.asarray(mu_edges, dtype=np.float64)
+    # 条件分岐: `counts.ndim != 2` を満たす経路を評価する。
     if counts.ndim != 2:
         raise ValueError("counts must be 2D (nbins,nmu)")
+
+    # 条件分岐: `mu_edges.ndim != 1 or mu_edges.size < 2` を満たす経路を評価する。
+
     if mu_edges.ndim != 1 or mu_edges.size < 2:
         raise ValueError("mu_edges must be 1D (nmu+1)")
+
     nmu = int(mu_edges.size - 1)
+    # 条件分岐: `counts.shape[1] != nmu` を満たす経路を評価する。
     if counts.shape[1] != nmu:
         raise ValueError(f"nmu mismatch: counts={counts.shape[1]} mu_edges={nmu}")
 
@@ -122,13 +134,17 @@ def _window_wL(
     r0 = np.sum(counts, axis=1)
     out: Dict[int, np.ndarray] = {0: np.ones_like(r0, dtype=np.float64)}
     for L in ls:
+        # 条件分岐: `int(L) == 0` を満たす経路を評価する。
         if int(L) == 0:
             continue
+
         pL = _legendre_p(int(L), mu_mid)
         rL = float(2 * int(L) + 1) * np.sum(counts * pL[None, :], axis=1)
         with np.errstate(divide="ignore", invalid="ignore"):
             w = rL / r0
+
         out[int(L)] = np.where(np.isfinite(w), w, np.nan).astype(np.float64)
+
     return out
 
 
@@ -145,9 +161,13 @@ class MixingSeries:
 def _mixing_from_w(wL: Dict[int, np.ndarray]) -> MixingSeries:
     s = None
     for v in wL.values():
+        # 条件分岐: `s is None` を満たす経路を評価する。
         if s is None:
             s = np.zeros_like(v, dtype=np.float64)
             break
+
+    # 条件分岐: `s is None` を満たす経路を評価する。
+
     if s is None:
         raise ValueError("empty wL")
 
@@ -157,12 +177,17 @@ def _mixing_from_w(wL: Dict[int, np.ndarray]) -> MixingSeries:
         out = np.zeros_like(s, dtype=np.float64)
         for L in ls:
             c = float(_WINDOW_COEFFS[(int(n), int(ell), int(L))])
+            # 条件分岐: `c == 0.0` を満たす経路を評価する。
             if c == 0.0:
                 continue
+
             w = wL.get(int(L), None)
+            # 条件分岐: `w is None` を満たす経路を評価する。
             if w is None:
                 continue
+
             out += c * np.asarray(w, dtype=np.float64)
+
         return out
 
     return MixingSeries(
@@ -179,15 +204,19 @@ def _safe_max_abs_in_range(s: np.ndarray, y: np.ndarray, *, s_min: float, s_max:
     s = np.asarray(s, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
     m = (s >= float(s_min)) & (s <= float(s_max)) & np.isfinite(y)
+    # 条件分岐: `not np.any(m)` を満たす経路を評価する。
     if not np.any(m):
         return float("nan")
+
     return float(np.nanmax(np.abs(y[m])))
 
 
 def _path_for(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) -> Path:
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}"
+    # 条件分岐: `suffix` を満たす経路を評価する。
     if suffix:
         base = f"{base}{suffix}"
+
     return _ROOT / "output" / "private" / "cosmology" / f"{base}.npz"
 
 
@@ -199,33 +228,45 @@ def _load_npz(path: Path) -> Dict[str, np.ndarray]:
 def _xi_l_from_xi_mu(*, xi_mu: np.ndarray, mu_edges: np.ndarray, ell: int) -> np.ndarray:
     xi_mu = np.asarray(xi_mu, dtype=np.float64)
     mu_edges = np.asarray(mu_edges, dtype=np.float64).reshape(-1)
+    # 条件分岐: `xi_mu.ndim != 2` を満たす経路を評価する。
     if xi_mu.ndim != 2:
         raise ValueError("xi_mu must be 2D (nbins,nmu)")
+
+    # 条件分岐: `mu_edges.ndim != 1 or mu_edges.size < 2` を満たす経路を評価する。
+
     if mu_edges.ndim != 1 or mu_edges.size < 2:
         raise ValueError("mu_edges must be 1D (nmu+1)")
+
     nmu = int(mu_edges.size - 1)
+    # 条件分岐: `xi_mu.shape[1] != nmu` を満たす経路を評価する。
     if xi_mu.shape[1] != nmu:
         raise ValueError(f"xi_mu nmu mismatch: xi_mu={xi_mu.shape[1]} mu_edges={nmu}")
 
     mu_mid = 0.5 * (mu_edges[:-1] + mu_edges[1:])
     dmu = np.diff(mu_edges)
+    # 条件分岐: `not np.allclose(dmu, float(dmu[0]), rtol=0.0, atol=1e-12)` を満たす経路を評価する。
     if not np.allclose(dmu, float(dmu[0]), rtol=0.0, atol=1e-12):
         # Should not happen for our Corrfunc configs, but support just in case.
         w = dmu[None, :]
     else:
         w = float(dmu[0])
+
     pL = _legendre_p(int(ell), mu_mid)
+    # 条件分岐: `isinstance(w, float)` を満たす経路を評価する。
     if isinstance(w, float):
         integ = np.sum(xi_mu * pL[None, :], axis=1) * w
     else:
         integ = np.sum(xi_mu * pL[None, :] * w, axis=1)
+
     return (float(2 * int(ell) + 1) * integ).astype(np.float64)
 
 
 def _try_load_recon_gap_rmse() -> Dict[str, Any]:
     path = _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
         return data.get("results", {}) if isinstance(data, dict) else {}
@@ -264,11 +305,16 @@ def main(argv: Optional[list[str]] = None) -> int:
     suffixes: list[str] = []
     for s in suffixes_raw:
         s2 = s.strip()
+        # 条件分岐: `not s2` を満たす経路を評価する。
         if not s2:
             suffixes.append("")
             continue
+
+        # 条件分岐: `not s2.startswith("__")` を満たす経路を評価する。
+
         if not s2.startswith("__"):
             s2 = "__" + s2
+
         suffixes.append(s2)
 
     out_png = Path(str(args.out_png))
@@ -283,23 +329,29 @@ def main(argv: Optional[list[str]] = None) -> int:
     for zbin in zbins:
         for suf in suffixes:
             p = _path_for(sample=sample, caps=caps, dist=dist, zbin=zbin, suffix=suf)
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(str(p))
                 continue
+
             try:
                 z = _load_npz(p)
+                # 条件分岐: `"s" not in z or "mu_edges" not in z or "rr_w" not in z or "xi0" not in z or "...` を満たす経路を評価する。
                 if "s" not in z or "mu_edges" not in z or "rr_w" not in z or "xi0" not in z or "xi2" not in z:
                     raise ValueError("missing required keys")
+
                 loaded[zbin][suf or ""] = {"path": str(p), "npz": z}
             except Exception:
                 missing.append(str(p))
 
     any_loaded = any(bool(loaded[z]) for z in zbins)
+    # 条件分岐: `not any_loaded` を満たす経路を評価する。
     if not any_loaded:
         print("[skip] cosmology_bao_catalog_window_mixing: no input npz found")
         return 0
 
     # Compute mixing + derived diagnostics
+
     results: Dict[str, Any] = {}
     for zbin in zbins:
         out_z: Dict[str, Any] = {}
@@ -312,6 +364,7 @@ def main(argv: Optional[list[str]] = None) -> int:
             xi2 = np.asarray(z["xi2"], dtype=np.float64)
             xi4: np.ndarray | None = None
             try:
+                # 条件分岐: `"xi_mu" in z` を満たす経路を評価する。
                 if "xi_mu" in z:
                     xi4 = _xi_l_from_xi_mu(xi_mu=z["xi_mu"], mu_edges=mu_edges, ell=4)
             except Exception:
@@ -331,6 +384,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
             # Recon has SS grid (shifted randoms); compute the same proxies for reference.
             ss_entry: Dict[str, Any] | None = None
+            # 条件分岐: `"ss_w" in z and np.asarray(z["ss_w"]).size > 0` を満たす経路を評価する。
             if "ss_w" in z and np.asarray(z["ss_w"]).size > 0:
                 ss = np.asarray(z["ss_w"], dtype=np.float64)
                 w_ss = _window_wL(counts=ss, mu_edges=mu_edges)
@@ -378,8 +432,10 @@ def main(argv: Optional[list[str]] = None) -> int:
                 }
 
             # Optional: compare with recon gap RMSE if available.
+
             rmse_key = suf_key.lstrip("_") if suf_key else None
             rmse_s2_xi2: float | None = None
+            # 条件分岐: `rmse_key and rmse_key in rmse_lookup` を満たす経路を評価する。
             if rmse_key and rmse_key in rmse_lookup:
                 try:
                     rmse_s2_xi2 = float(rmse_lookup[rmse_key]["rmse_s2_xi2_ross_post_recon__catalog_recon"][str(int(zbin[-1]))])
@@ -439,13 +495,16 @@ def main(argv: Optional[list[str]] = None) -> int:
                 },
                 **({"ss": ss_entry} if ss_entry is not None else {}),
             }
+
         results[zbin] = out_z
 
     # Plot: (left) m20(s) proxy, (right) s^2 * xi2_leak(s) from xi0 (and optionally xi4)
+
     _set_japanese_font()
     import matplotlib.pyplot as plt  # noqa: E402
 
     fig, axes = plt.subplots(len(zbins), 2, figsize=(12, 8), sharex=True)
+    # 条件分岐: `len(zbins) == 1` を満たす経路を評価する。
     if len(zbins) == 1:
         axes = np.asarray([axes])
 
@@ -470,10 +529,12 @@ def main(argv: Optional[list[str]] = None) -> int:
             xi0 = np.asarray(z["xi0"], dtype=np.float64)
             xi4 = None
             try:
+                # 条件分岐: `"xi_mu" in z` を満たす経路を評価する。
                 if "xi_mu" in z:
                     xi4 = _xi_l_from_xi_mu(xi_mu=z["xi_mu"], mu_edges=mu_edges, ell=4)
             except Exception:
                 xi4 = None
+
             w_rr = _window_wL(counts=rr, mu_edges=mu_edges)
             mix_rr = _mixing_from_w(w_rr)
 
@@ -483,6 +544,7 @@ def main(argv: Optional[list[str]] = None) -> int:
 
             xi2_leak = mix_rr.m20 * xi0
             ax_y.plot(s, (s * s) * xi2_leak, color=c, linewidth=1.5, alpha=0.9, label=label)
+            # 条件分岐: `xi4 is not None` を満たす経路を評価する。
             if xi4 is not None:
                 ax_y.plot(
                     s,
@@ -498,9 +560,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         ax_y.set_title(f"{zbin}: 推定漏れ s²(m20·ξ0)")
         ax_m.grid(True, alpha=0.3)
         ax_y.grid(True, alpha=0.3)
+        # 条件分岐: `i == len(zbins) - 1` を満たす経路を評価する。
         if i == len(zbins) - 1:
             ax_m.set_xlabel("s [Mpc/h]")
             ax_y.set_xlabel("s [Mpc/h]")
+
         ax_m.set_ylabel("m20(s)")
         ax_y.set_ylabel("s² ξ2_leak")
 
@@ -552,6 +616,8 @@ def main(argv: Optional[list[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

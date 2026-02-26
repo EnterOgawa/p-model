@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,6 +34,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -53,13 +55,19 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return v
 
 
@@ -68,22 +76,38 @@ def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     label = str(row.get("short_label") or row.get("id") or "")
     rid = str(row.get("id") or "")
 
+    # 条件分岐: `uses_bao` を満たす経路を評価する。
     if uses_bao:
         return ("SNIa+BAO", "#1f77b4")
+
+    # 条件分岐: `"H(z)" in label or "snIa_hz" in rid` を満たす経路を評価する。
+
     if "H(z)" in label or "snIa_hz" in rid:
         return ("SNIa+H(z)", "#9467bd")
+
+    # 条件分岐: `label.startswith("Clusters") or "Clusters" in label or "clusters" in rid` を満たす経路を評価する。
+
     if label.startswith("Clusters") or "Clusters" in label or "clusters" in rid:
         return ("Clusters+SNIa", "#2ca02c")
+
+    # 条件分岐: `"SGL" in label or "sgl" in rid` を満たす経路を評価する。
+
     if "SGL" in label or "sgl" in rid:
         return ("SGL+SNIa+GRB", "#ff7f0e")
+
+    # 条件分岐: `"radio" in label or "radio" in rid` を満たす経路を評価する。
+
     if "radio" in label or "radio" in rid:
         return ("SNe+radio", "#8c564b")
+
     return ("other", "#7f7f7f")
 
 
 def _robust_sigma(values: List[float]) -> float:
+    # 条件分岐: `len(values) < 2` を満たす経路を評価する。
     if len(values) < 2:
         return 0.0
+
     med = statistics.median(values)
     mad = statistics.median([abs(x - med) for x in values])
     # For a normal distribution, sigma ≈ 1.4826 * MAD.
@@ -99,8 +123,10 @@ def _sigma_needed_for_nonreject(
     """
     Extra sigma_sys (added in quadrature) required to make |delta_eps|/sigma_total <= threshold.
     """
+    # 条件分岐: `sigma_obs <= 0 or threshold <= 0` を満たす経路を評価する。
     if sigma_obs <= 0 or threshold <= 0:
         return float("nan")
+
     needed_total = abs(float(delta_eps)) / float(threshold)
     v = float(needed_total) ** 2 - float(sigma_obs) ** 2
     return math.sqrt(v) if v > 0 else 0.0
@@ -135,12 +161,15 @@ def main(argv: Optional[List[str]] = None) -> int:
     _set_japanese_font()
 
     metrics_path = _ROOT / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
+    # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
     if not metrics_path.exists():
         raise FileNotFoundError(
             f"missing required metrics: {metrics_path} (run scripts/summary/run_all.py --offline first)"
         )
+
     ddr = _read_json(metrics_path)
     rows_in = ddr.get("rows") or []
+    # 条件分岐: `not isinstance(rows_in, list) or not rows_in` を満たす経路を評価する。
     if not isinstance(rows_in, list) or not rows_in:
         raise ValueError("invalid DDR metrics (rows missing): cosmology_distance_duality_constraints_metrics.json")
 
@@ -149,12 +178,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     rows: List[Dict[str, Any]] = []
     eps_by_cat: Dict[str, List[float]] = {}
     for r in rows_in:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         eps = _safe_float(r.get("epsilon0_obs"))
         sig = _safe_float(r.get("epsilon0_sigma"))
+        # 条件分岐: `eps is None or sig is None or sig <= 0` を満たす経路を評価する。
         if eps is None or sig is None or sig <= 0:
             continue
+
         cat, cat_color = _category(r)
         eps_by_cat.setdefault(cat, []).append(float(eps))
         rows.append(
@@ -170,10 +203,13 @@ def main(argv: Optional[List[str]] = None) -> int:
             }
         )
 
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise ValueError("no usable DDR rows found (epsilon0_obs/epsilon0_sigma missing)")
 
     # Estimate category-level systematic widths from within-category spread.
+
     sigma_sys_by_cat = {cat: _robust_sigma(vals) for cat, vals in eps_by_cat.items()}
     sigma_sys_by_cat = {cat: float(v) for cat, v in sigma_sys_by_cat.items()}
 
@@ -252,13 +288,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     for cat in sorted(sigma_sys_by_cat.keys()):
         n = len(eps_by_cat.get(cat) or [])
         lines.append(f"  - {cat}: n={n}, σ_cat={sigma_sys_by_cat[cat]:.3f}")
+
     lines.append("")
     lines.append(f"3σ基準で >{thr:g}→≤{thr:g} に移動: {len(moved_to_ok)} 件")
+    # 条件分岐: `moved_to_ok` を満たす経路を評価する。
     if moved_to_ok:
         for r in moved_to_ok[:6]:
             lines.append(
                 f"  - {r['short_label']}: {r['abs_z_raw']:.2f} → {r['abs_z_with_category_sys']:.2f}"
             )
+
     lines.append("")
     lines.append("減少が大きい例:")
     for r in most_reduced[:6]:
@@ -339,6 +378,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

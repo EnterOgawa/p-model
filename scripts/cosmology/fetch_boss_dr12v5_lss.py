@@ -48,6 +48,7 @@ except Exception:  # pragma: no cover - optional dependency for offline/local ru
     requests = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -122,12 +123,15 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return None
+
     try:
         return path.relative_to(_ROOT).as_posix()
     except Exception:
@@ -135,17 +139,22 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
 
 
 def _download_file(url: str, dst: Path) -> Dict[str, Any]:
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to download remote files. Install it or place files under data/.../raw/")
+
     dst.parent.mkdir(parents=True, exist_ok=True)
     tmp = dst.with_suffix(dst.suffix + ".part")
     with requests.get(url, stream=True, timeout=120) as r:
         r.raise_for_status()
         with tmp.open("wb") as f:
             for chunk in r.iter_content(chunk_size=1024 * 1024):
+                # 条件分岐: `not chunk` を満たす経路を評価する。
                 if not chunk:
                     continue
+
                 f.write(chunk)
+
     tmp.replace(dst)
     return {"bytes": dst.stat().st_size, "sha256": _sha256(dst)}
 
@@ -162,6 +171,7 @@ def _extract_local_gz_to_npz(
         layout = read_first_bintable_layout(f)
         cols = read_bintable_columns(f, layout=layout, columns=want_cols, max_rows=max_rows)
     # Save as float64 arrays.
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -188,6 +198,7 @@ def _extract_local_gz_to_npz_prefix_rows(
     with gzip.open(gz_path, "rb") as f:
         layout = read_first_bintable_layout(f)
         cols = read_bintable_columns(f, layout=layout, columns=want_cols, max_rows=int(max_rows))
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -234,25 +245,41 @@ def _extract_local_gz_to_npz_reservoir(
         cover_rows: Dict[int, Dict[str, float]] = {}
         cover_target: Optional[np.ndarray] = None
         cover_remaining: Optional[set[int]] = None
+        # 条件分岐: `cover_sectors` を満たす経路を評価する。
         if cover_sectors:
             cover_sectors_int = {int(s) for s in cover_sectors}
+            # 条件分岐: `len(cover_sectors_int) > int(sample_rows)` を満たす経路を評価する。
             if len(cover_sectors_int) > int(sample_rows):
                 raise ValueError("cover_sectors must be <= sample_rows")
+
+            # 条件分岐: `cover_on_col == "SECTOR_KEY"` を満たす経路を評価する。
+
             if cover_on_col == "SECTOR_KEY":
+                # 条件分岐: `"IPOLY" not in want_cols or "ISECT" not in want_cols` を満たす経路を評価する。
                 if "IPOLY" not in want_cols or "ISECT" not in want_cols:
                     raise ValueError("cover_on_col=SECTOR_KEY requires IPOLY and ISECT in want_cols")
             else:
+                # 条件分岐: `cover_on_col not in want_cols` を満たす経路を評価する。
                 if cover_on_col not in want_cols:
                     raise ValueError(f"cover_on_col must be included in want_cols: {cover_on_col}")
+
+            # 条件分岐: `(cover_z_min is not None) or (cover_z_max is not None)` を満たす経路を評価する。
+
             if (cover_z_min is not None) or (cover_z_max is not None):
+                # 条件分岐: `"Z" not in want_cols` を満たす経路を評価する。
                 if "Z" not in want_cols:
                     raise ValueError("cover_z_min/max requires Z in want_cols")
+
+                # 条件分岐: `(cover_z_min is not None) and (cover_z_max is not None) and not (float(cover_...` を満たす経路を評価する。
+
                 if (cover_z_min is not None) and (cover_z_max is not None) and not (float(cover_z_min) < float(cover_z_max)):
                     raise ValueError("cover_z_min must be < cover_z_max when both are provided")
+
             cover_target = np.fromiter(sorted(cover_sectors_int), dtype=np.int64)
             cover_remaining = set(cover_sectors_int)
 
             def _cover_keys(ch: Dict[str, Any]) -> np.ndarray:
+                # 条件分岐: `cover_on_col == "SECTOR_KEY"` を満たす経路を評価する。
                 if cover_on_col == "SECTOR_KEY":
                     ip = np.asarray(ch["IPOLY"], dtype=np.float64)
                     isect = np.asarray(ch["ISECT"], dtype=np.float64)
@@ -262,6 +289,7 @@ def _extract_local_gz_to_npz_reservoir(
                     out = np.full(int(ip.shape[0]), -1, dtype=np.int64)
                     out[valid] = (ip_i[valid] << 32) + (is_i[valid] & np.int64(0xFFFFFFFF))
                     return out
+
                 v = np.asarray(ch[cover_on_col], dtype=np.float64)
                 valid = np.isfinite(v)
                 out = np.full(int(v.shape[0]), -1, dtype=np.int64)
@@ -271,36 +299,55 @@ def _extract_local_gz_to_npz_reservoir(
             def _cover_wrap(it: Any) -> Any:
                 nonlocal cover_remaining
                 for ch in it:
+                    # 条件分岐: `not ch` を満たす経路を評価する。
                     if not ch:
                         continue
+
+                    # 条件分岐: `cover_remaining` を満たす経路を評価する。
+
                     if cover_remaining:
                         try:
                             keys = _cover_keys(ch)
                         except Exception:
                             yield ch
                             continue
+
                         m = np.isin(keys, cover_target)
+                        # 条件分岐: `(cover_z_min is not None) or (cover_z_max is not None)` を満たす経路を評価する。
                         if (cover_z_min is not None) or (cover_z_max is not None):
                             z = np.asarray(ch["Z"], dtype=np.float64)
                             z_ok = np.isfinite(z)
+                            # 条件分岐: `cover_z_min is not None` を満たす経路を評価する。
                             if cover_z_min is not None:
                                 z_ok = z_ok & (z >= float(cover_z_min))
+
+                            # 条件分岐: `cover_z_max is not None` を満たす経路を評価する。
+
                             if cover_z_max is not None:
                                 z_ok = z_ok & (z < float(cover_z_max))
+
                             m = m & z_ok
+
+                        # 条件分岐: `np.any(m)` を満たす経路を評価する。
+
                         if np.any(m):
                             idxs = np.nonzero(m)[0]
                             for ii in idxs:
                                 s = int(keys[ii])
+                                # 条件分岐: `s not in cover_remaining` を満たす経路を評価する。
                                 if s not in cover_remaining:
                                     continue
+
                                 cover_rows[s] = {c: float(np.asarray(ch[c], dtype=np.float64)[ii]) for c in want_cols}
                                 cover_remaining.remove(s)
+                                # 条件分岐: `not cover_remaining` を満たす経路を評価する。
                                 if not cover_remaining:
                                     break
+
                     yield ch
 
             chunks = _cover_wrap(chunks)
+
         cols, scanned = _reservoir_sample_from_chunks(
             chunks,
             want_cols=want_cols,
@@ -308,6 +355,7 @@ def _extract_local_gz_to_npz_reservoir(
             seed=int(seed),
             total_rows=int(scan_max_rows) if scan_max_rows is not None else int(layout.n_rows),
         )
+        # 条件分岐: `cover_target is not None` を満たす経路を評価する。
         if cover_target is not None:
             sect_out = _cover_keys(cols)
             present = set(int(s) for s in np.unique(sect_out) if int(s) >= 0)
@@ -316,6 +364,7 @@ def _extract_local_gz_to_npz_reservoir(
 
             replaced = 0
             missing_not_found: list[int] = []
+            # 条件分岐: `missing_before` を満たす経路を評価する。
             if missing_before:
                 # Replace only rows from sectors with duplicates to preserve coverage.
                 uniq, cnt = np.unique(sect_out, return_counts=True)
@@ -323,12 +372,18 @@ def _extract_local_gz_to_npz_reservoir(
                 replace_idx: list[int] = []
                 need = len(missing_before)
                 for s, c in zip(uniq[order], cnt[order]):
+                    # 条件分岐: `int(c) <= 1 or len(replace_idx) >= need` を満たす経路を評価する。
                     if int(c) <= 1 or len(replace_idx) >= need:
                         break
+
                     idxs = np.nonzero(sect_out == int(s))[0]
                     take = min(int(c) - 1, need - len(replace_idx))
+                    # 条件分岐: `take > 0` を満たす経路を評価する。
                     if take > 0:
                         replace_idx.extend([int(x) for x in idxs[-take:]])
+
+                # 条件分岐: `len(replace_idx) < need` を満たす経路を評価する。
+
                 if len(replace_idx) < need:
                     # Fallback (should not happen for multi-million row randoms).
                     extra = [int(i) for i in range(int(sect_out.size)) if int(i) not in set(replace_idx)]
@@ -336,11 +391,14 @@ def _extract_local_gz_to_npz_reservoir(
 
                 for idx, sec in zip(replace_idx[:need], missing_before):
                     row = cover_rows.get(int(sec))
+                    # 条件分岐: `not row` を満たす経路を評価する。
                     if not row:
                         missing_not_found.append(int(sec))
                         continue
+
                     for c in want_cols:
                         cols[c][int(idx)] = float(row[c])
+
                     replaced += 1
 
             sect_after = _cover_keys(cols)
@@ -359,6 +417,7 @@ def _extract_local_gz_to_npz_reservoir(
                 "missing_not_found": int(len(missing_not_found)),
                 "missing_after_sample": missing_after[:20],
             }
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -391,14 +450,17 @@ def _extract_remote_gz_to_npz_prefix_rows(
     Stream a remote .fits.gz, read only the first `max_rows` rows from the first BINTABLE,
     and store selected columns into a compressed npz.
     """
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to stream remote files. Install it or download files to data/.../raw/")
+
     out_npz.parent.mkdir(parents=True, exist_ok=True)
     with requests.get(url, stream=True, timeout=180) as r:
         r.raise_for_status()
         with gzip.GzipFile(fileobj=r.raw, mode="rb") as f:
             layout = read_first_bintable_layout(f)
             cols = read_bintable_columns(f, layout=layout, columns=want_cols, max_rows=int(max_rows))
+
     np.savez_compressed(out_npz, **cols)
     meta = {
         "rows_total": int(layout.n_rows),
@@ -424,29 +486,41 @@ def _try_build_prefix_from_existing_npz(
     derive a smaller prefix NPZ (e.g. prefix_200000) by slicing it.
     This avoids re-downloading the remote random catalog for convergence runs.
     """
+    # 条件分岐: `int(max_rows) <= 0` を満たす経路を評価する。
     if int(max_rows) <= 0:
         return None
     # Find the smallest existing prefix >= requested.
+
     candidates: list[tuple[int, Path]] = []
     for p in ext_dir.glob(f"{base_name}.prefix_*.npz"):
         try:
             n = int(p.name.rsplit(".prefix_", 1)[1].split(".npz", 1)[0])
         except Exception:
             continue
+
+        # 条件分岐: `n >= int(max_rows)` を満たす経路を評価する。
+
         if n >= int(max_rows):
             candidates.append((n, p))
+
+    # 条件分岐: `not candidates` を満たす経路を評価する。
+
     if not candidates:
         return None
+
     candidates.sort(key=lambda x: x[0])
     src_n, src_npz = candidates[0]
 
     with np.load(src_npz) as z:
         cols: Dict[str, np.ndarray] = {}
         for c in want_cols:
+            # 条件分岐: `c not in z.files` を満たす経路を評価する。
             if c not in z.files:
                 return None
+
             arr = np.asarray(z[c], dtype=np.float64)
             cols[c] = arr[: int(max_rows)]
+
     out_npz.parent.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(out_npz, **cols)
 
@@ -475,8 +549,10 @@ def _reservoir_sample_from_chunks(
       - Keep the `sample_rows` smallest keys.
     This can be done in streaming fashion, and is robust against row ordering bias.
     """
+    # 条件分岐: `int(sample_rows) <= 0` を満たす経路を評価する。
     if int(sample_rows) <= 0:
         raise ValueError("sample_rows must be > 0")
+
     rng = np.random.default_rng(int(seed))
 
     # Fast path for large-N catalogs:
@@ -496,24 +572,33 @@ def _reservoir_sample_from_chunks(
         scanned = 0
 
         for chunk in chunks:
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 continue
+
             n = int(next(iter(chunk.values())).shape[0])
+            # 条件分岐: `n <= 0` を満たす経路を評価する。
             if n <= 0:
                 continue
+
             scanned += n
             keys = rng.random(n, dtype=np.float64)
             m = keys < p
+            # 条件分岐: `not np.any(m)` を満たす経路を評価する。
             if not np.any(m):
                 continue
+
             buf_keys.append(keys[m])
             for c in want_cols:
                 buf_cols[c].append(np.asarray(chunk[c], dtype=np.float64)[m])
+
+        # 条件分岐: `not buf_keys` を満たす経路を評価する。
 
         if not buf_keys:
             return ({c: np.zeros(0, dtype=np.float64) for c in want_cols}, scanned)
 
         keys_all = np.concatenate(buf_keys)
+        # 条件分岐: `int(keys_all.size) < k` を満たす経路を評価する。
         if int(keys_all.size) < k:
             # Extremely unlikely when p is biased upward, but keep best-effort.
             cols_out = {c: np.concatenate(buf_cols[c]) if buf_cols[c] else np.zeros(0, dtype=np.float64) for c in want_cols}
@@ -524,6 +609,7 @@ def _reservoir_sample_from_chunks(
         for c in want_cols:
             vals = np.concatenate(buf_cols[c])
             cols_out[c] = np.asarray(vals[idx], dtype=np.float64)
+
         return (cols_out, scanned)
 
     res_keys: np.ndarray | None = None
@@ -531,15 +617,21 @@ def _reservoir_sample_from_chunks(
     scanned = 0
 
     for chunk in chunks:
+        # 条件分岐: `not chunk` を満たす経路を評価する。
         if not chunk:
             continue
+
         n = int(next(iter(chunk.values())).shape[0])
+        # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
             continue
+
         scanned += n
         keys = rng.random(n, dtype=np.float64)
 
+        # 条件分岐: `res_keys is None` を満たす経路を評価する。
         if res_keys is None:
+            # 条件分岐: `n <= int(sample_rows)` を満たす経路を評価する。
             if n <= int(sample_rows):
                 res_keys = keys
                 res_cols = {c: np.asarray(chunk[c], dtype=np.float64) for c in want_cols}
@@ -553,6 +645,7 @@ def _reservoir_sample_from_chunks(
 
         k = int(sample_rows)
         n_res = int(res_keys.shape[0])
+        # 条件分岐: `n_res < k` を満たす経路を評価する。
         if n_res < k:
             # Still filling: merge then keep min(k, total).
             keys_comb = np.concatenate([res_keys, keys])
@@ -577,8 +670,10 @@ def _reservoir_sample_from_chunks(
             continue
 
         # Full reservoir: only consider candidates that can enter (key < current max).
+
         thresh = float(np.max(res_keys))
         cand = keys < thresh
+        # 条件分岐: `not np.any(cand)` を満たす経路を評価する。
         if not np.any(cand):
             continue
 
@@ -603,8 +698,11 @@ def _reservoir_sample_from_chunks(
         res_keys = res_keys_new
         res_cols = res_cols_new
 
+    # 条件分岐: `res_keys is None` を満たす経路を評価する。
+
     if res_keys is None:
         return ({c: np.zeros(0, dtype=np.float64) for c in want_cols}, scanned)
+
     return (res_cols, scanned)
 
 
@@ -626,8 +724,10 @@ def _extract_remote_gz_to_npz_reservoir(
     Stream a remote .fits.gz, scan the first BINTABLE, and reservoir-sample `sample_rows` rows
     (uniform without replacement) into a compressed NPZ.
     """
+    # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
         raise RuntimeError("requests is required to stream remote files. Install it or download files to data/.../raw/")
+
     out_npz.parent.mkdir(parents=True, exist_ok=True)
     cover_meta: Optional[Dict[str, Any]] = None
 
@@ -645,25 +745,41 @@ def _extract_remote_gz_to_npz_reservoir(
             cover_rows: Dict[int, Dict[str, float]] = {}
             cover_target: Optional[np.ndarray] = None
             cover_remaining: Optional[set[int]] = None
+            # 条件分岐: `cover_sectors` を満たす経路を評価する。
             if cover_sectors:
                 cover_sectors_int = {int(s) for s in cover_sectors}
+                # 条件分岐: `len(cover_sectors_int) > int(sample_rows)` を満たす経路を評価する。
                 if len(cover_sectors_int) > int(sample_rows):
                     raise ValueError("cover_sectors must be <= sample_rows")
+
+                # 条件分岐: `cover_on_col == "SECTOR_KEY"` を満たす経路を評価する。
+
                 if cover_on_col == "SECTOR_KEY":
+                    # 条件分岐: `"IPOLY" not in want_cols or "ISECT" not in want_cols` を満たす経路を評価する。
                     if "IPOLY" not in want_cols or "ISECT" not in want_cols:
                         raise ValueError("cover_on_col=SECTOR_KEY requires IPOLY and ISECT in want_cols")
                 else:
+                    # 条件分岐: `cover_on_col not in want_cols` を満たす経路を評価する。
                     if cover_on_col not in want_cols:
                         raise ValueError(f"cover_on_col must be included in want_cols: {cover_on_col}")
+
+                # 条件分岐: `(cover_z_min is not None) or (cover_z_max is not None)` を満たす経路を評価する。
+
                 if (cover_z_min is not None) or (cover_z_max is not None):
+                    # 条件分岐: `"Z" not in want_cols` を満たす経路を評価する。
                     if "Z" not in want_cols:
                         raise ValueError("cover_z_min/max requires Z in want_cols")
+
+                    # 条件分岐: `(cover_z_min is not None) and (cover_z_max is not None) and not (float(cover_...` を満たす経路を評価する。
+
                     if (cover_z_min is not None) and (cover_z_max is not None) and not (float(cover_z_min) < float(cover_z_max)):
                         raise ValueError("cover_z_min must be < cover_z_max when both are provided")
+
                 cover_target = np.fromiter(sorted(cover_sectors_int), dtype=np.int64)
                 cover_remaining = set(cover_sectors_int)
 
                 def _cover_keys(ch: Dict[str, Any]) -> np.ndarray:
+                    # 条件分岐: `cover_on_col == "SECTOR_KEY"` を満たす経路を評価する。
                     if cover_on_col == "SECTOR_KEY":
                         ip = np.asarray(ch["IPOLY"], dtype=np.float64)
                         isect = np.asarray(ch["ISECT"], dtype=np.float64)
@@ -673,6 +789,7 @@ def _extract_remote_gz_to_npz_reservoir(
                         out = np.full(int(ip.shape[0]), -1, dtype=np.int64)
                         out[valid] = (ip_i[valid] << 32) + (is_i[valid] & np.int64(0xFFFFFFFF))
                         return out
+
                     v = np.asarray(ch[cover_on_col], dtype=np.float64)
                     valid = np.isfinite(v)
                     out = np.full(int(v.shape[0]), -1, dtype=np.int64)
@@ -682,36 +799,55 @@ def _extract_remote_gz_to_npz_reservoir(
                 def _cover_wrap(it: Any) -> Any:
                     nonlocal cover_remaining
                     for ch in it:
+                        # 条件分岐: `not ch` を満たす経路を評価する。
                         if not ch:
                             continue
+
+                        # 条件分岐: `cover_remaining` を満たす経路を評価する。
+
                         if cover_remaining:
                             try:
                                 keys = _cover_keys(ch)
                             except Exception:
                                 yield ch
                                 continue
+
                             m = np.isin(keys, cover_target)
+                            # 条件分岐: `(cover_z_min is not None) or (cover_z_max is not None)` を満たす経路を評価する。
                             if (cover_z_min is not None) or (cover_z_max is not None):
                                 z = np.asarray(ch["Z"], dtype=np.float64)
                                 z_ok = np.isfinite(z)
+                                # 条件分岐: `cover_z_min is not None` を満たす経路を評価する。
                                 if cover_z_min is not None:
                                     z_ok = z_ok & (z >= float(cover_z_min))
+
+                                # 条件分岐: `cover_z_max is not None` を満たす経路を評価する。
+
                                 if cover_z_max is not None:
                                     z_ok = z_ok & (z < float(cover_z_max))
+
                                 m = m & z_ok
+
+                            # 条件分岐: `np.any(m)` を満たす経路を評価する。
+
                             if np.any(m):
                                 idxs = np.nonzero(m)[0]
                                 for ii in idxs:
                                     s = int(keys[ii])
+                                    # 条件分岐: `s not in cover_remaining` を満たす経路を評価する。
                                     if s not in cover_remaining:
                                         continue
+
                                     cover_rows[s] = {c: float(np.asarray(ch[c], dtype=np.float64)[ii]) for c in want_cols}
                                     cover_remaining.remove(s)
+                                    # 条件分岐: `not cover_remaining` を満たす経路を評価する。
                                     if not cover_remaining:
                                         break
+
                         yield ch
 
                 chunks = _cover_wrap(chunks)
+
             cols, scanned = _reservoir_sample_from_chunks(
                 chunks,
                 want_cols=want_cols,
@@ -719,6 +855,7 @@ def _extract_remote_gz_to_npz_reservoir(
                 seed=int(seed),
                 total_rows=int(scan_max_rows) if scan_max_rows is not None else int(layout.n_rows),
             )
+            # 条件分岐: `cover_target is not None` を満たす経路を評価する。
             if cover_target is not None:
                 sect_out = _cover_keys(cols)
                 present = set(int(s) for s in np.unique(sect_out) if int(s) >= 0)
@@ -727,29 +864,39 @@ def _extract_remote_gz_to_npz_reservoir(
 
                 replaced = 0
                 missing_not_found: list[int] = []
+                # 条件分岐: `missing_before` を満たす経路を評価する。
                 if missing_before:
                     uniq, cnt = np.unique(sect_out, return_counts=True)
                     order = np.argsort(-cnt, kind="mergesort")
                     replace_idx: list[int] = []
                     need = len(missing_before)
                     for s, c in zip(uniq[order], cnt[order]):
+                        # 条件分岐: `int(c) <= 1 or len(replace_idx) >= need` を満たす経路を評価する。
                         if int(c) <= 1 or len(replace_idx) >= need:
                             break
+
                         idxs = np.nonzero(sect_out == int(s))[0]
                         take = min(int(c) - 1, need - len(replace_idx))
+                        # 条件分岐: `take > 0` を満たす経路を評価する。
                         if take > 0:
                             replace_idx.extend([int(x) for x in idxs[-take:]])
+
+                    # 条件分岐: `len(replace_idx) < need` を満たす経路を評価する。
+
                     if len(replace_idx) < need:
                         extra = [int(i) for i in range(int(sect_out.size)) if int(i) not in set(replace_idx)]
                         replace_idx.extend(extra[: need - len(replace_idx)])
 
                     for idx, sec in zip(replace_idx[:need], missing_before):
                         row = cover_rows.get(int(sec))
+                        # 条件分岐: `not row` を満たす経路を評価する。
                         if not row:
                             missing_not_found.append(int(sec))
                             continue
+
                         for c in want_cols:
                             cols[c][int(idx)] = float(row[c])
+
                         replaced += 1
 
                 sect_after = _cover_keys(cols)
@@ -793,23 +940,29 @@ def _existing_npz_meta(path: Path) -> Dict[str, Any]:
     name = path.name
     sampling: Dict[str, Any] = {"method": "cached"}
     try:
+        # 条件分岐: `".prefix_" in name` を満たす経路を評価する。
         if ".prefix_" in name:
             n = int(name.rsplit(".prefix_", 1)[1].split(".npz", 1)[0])
             sampling = {"method": "prefix_rows", "max_rows": n}
+        # 条件分岐: 前段条件が不成立で、`".reservoir_" in name` を追加評価する。
         elif ".reservoir_" in name:
             tail = name.rsplit(".reservoir_", 1)[1].split(".npz", 1)[0]
             # reservoir_<N>_seed<S>[_scan<M>]
             parts = tail.split("_")
+            # 条件分岐: `len(parts) >= 2 and parts[1].startswith("seed")` を満たす経路を評価する。
             if len(parts) >= 2 and parts[1].startswith("seed"):
                 sample_rows = int(parts[0])
                 seed = int(parts[1].removeprefix("seed"))
                 scan_max_rows = None
                 for p in parts[2:]:
+                    # 条件分岐: `p.startswith("scan")` を満たす経路を評価する。
                     if p.startswith("scan"):
                         scan_max_rows = int(p.removeprefix("scan"))
+
                 sampling = {"method": "reservoir", "sample_rows": sample_rows, "seed": seed, "scan_max_rows": scan_max_rows}
     except Exception:
         sampling = {"method": "cached"}
+
     try:
         with np.load(path) as z:
             files = list(z.files)
@@ -817,6 +970,7 @@ def _existing_npz_meta(path: Path) -> Dict[str, Any]:
     except Exception:
         files = []
         n = 0
+
     return {"rows_total": None, "rows_saved": n, "row_bytes": None, "columns": files, "sampling": sampling}
 
 
@@ -830,13 +984,17 @@ def _normalize_cached_extract_meta(path: Path, meta: Optional[Dict[str, Any]]) -
     """
     meta_in: Dict[str, Any] = dict(meta) if isinstance(meta, dict) else {}
     sampling_method = str(meta_in.get("sampling", {}).get("method", "")).strip()
+    # 条件分岐: `(not sampling_method) or sampling_method == "cached"` を満たす経路を評価する。
     if (not sampling_method) or sampling_method == "cached":
         inferred = _existing_npz_meta(path)
         # Preserve high-fidelity fields if present in the existing meta.
         for k in ("rows_total", "row_bytes", "source_url"):
+            # 条件分岐: `k in meta_in and meta_in.get(k) is not None` を満たす経路を評価する。
             if k in meta_in and meta_in.get(k) is not None:
                 inferred[k] = meta_in.get(k)
+
         return inferred
+
     return meta_in
 
 
@@ -911,38 +1069,70 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     base_url = str(args.base_url).strip()
+    # 条件分岐: `not base_url` を満たす経路を評価する。
     if not base_url:
         raise SystemExit("--base-url must be non-empty")
+
+    # 条件分岐: `not (base_url.startswith("http://") or base_url.startswith("https://"))` を満たす経路を評価する。
+
     if not (base_url.startswith("http://") or base_url.startswith("https://")):
         raise SystemExit("--base-url must start with http:// or https://")
+
+    # 条件分岐: `not base_url.endswith("/")` を満たす経路を評価する。
+
     if not base_url.endswith("/"):
         base_url += "/"
 
     samples = [s.strip().lower() for s in str(args.samples).split(",") if s.strip()]
     caps = [c.strip().lower() for c in str(args.caps).split(",") if c.strip()]
     random_kind = str(args.random_kind).strip()
+    # 条件分岐: `random_kind not in ("random0", "random1")` を満たす経路を評価する。
     if random_kind not in ("random0", "random1"):
         raise SystemExit("--random-kind must be random0 or random1")
+
     random_sampling = str(args.random_sampling).strip().lower()
+    # 条件分岐: `random_sampling not in ("prefix_rows", "reservoir")` を満たす経路を評価する。
     if random_sampling not in ("prefix_rows", "reservoir"):
         raise SystemExit("--random-sampling must be prefix_rows or reservoir")
+
     random_cover_galaxy_sectors = bool(args.random_cover_galaxy_sectors)
+    # 条件分岐: `random_cover_galaxy_sectors and random_sampling != "reservoir"` を満たす経路を評価する。
     if random_cover_galaxy_sectors and random_sampling != "reservoir":
         raise SystemExit("--random-cover-galaxy-sectors requires --random-sampling reservoir")
+
     random_cover_z_min = args.random_cover_z_min
     random_cover_z_max = args.random_cover_z_max
+    # 条件分岐: `(random_cover_z_min is not None or random_cover_z_max is not None) and not ra...` を満たす経路を評価する。
     if (random_cover_z_min is not None or random_cover_z_max is not None) and not random_cover_galaxy_sectors:
         raise SystemExit("--random-cover-z-min/max requires --random-cover-galaxy-sectors")
+
+    # 条件分岐: `(random_cover_z_min is not None) and (random_cover_z_max is not None) and not...` を満たす経路を評価する。
+
     if (random_cover_z_min is not None) and (random_cover_z_max is not None) and not (float(random_cover_z_min) < float(random_cover_z_max)):
         raise SystemExit("--random-cover-z-min must be < --random-cover-z-max when both are provided")
+
+    # 条件分岐: `int(args.random_max_rows) <= 0` を満たす経路を評価する。
+
     if int(args.random_max_rows) <= 0:
         raise SystemExit("--random-max-rows must be > 0")
+
+    # 条件分岐: `int(args.galaxy_max_rows) < 0` を満たす経路を評価する。
+
     if int(args.galaxy_max_rows) < 0:
         raise SystemExit("--galaxy-max-rows must be >= 0")
+
+    # 条件分岐: `int(args.random_scan_max_rows) < 0` を満たす経路を評価する。
+
     if int(args.random_scan_max_rows) < 0:
         raise SystemExit("--random-scan-max-rows must be >= 0")
+
+    # 条件分岐: `int(args.galaxy_scan_max_rows) < 0` を満たす経路を評価する。
+
     if int(args.galaxy_scan_max_rows) < 0:
         raise SystemExit("--galaxy-scan-max-rows must be >= 0")
+
+    # 条件分岐: `int(args.chunk_rows) <= 0` を満たす経路を評価する。
+
     if int(args.chunk_rows) <= 0:
         raise SystemExit("--chunk-rows must be > 0")
 
@@ -955,6 +1145,7 @@ def main(argv: list[str] | None = None) -> int:
 
     manifest_path = data_dir / "manifest.json"
     manifest: Dict[str, Any] = {}
+    # 条件分岐: `manifest_path.exists()` を満たす経路を評価する。
     if manifest_path.exists():
         try:
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -968,19 +1159,29 @@ def main(argv: list[str] | None = None) -> int:
     manifest.setdefault("items", {})
 
     galaxy_sampling_arg = str(args.galaxy_sampling).strip().lower()
+    # 条件分岐: `galaxy_sampling_arg not in ("auto", "download_full", "prefix_rows", "reservoir")` を満たす経路を評価する。
     if galaxy_sampling_arg not in ("auto", "download_full", "prefix_rows", "reservoir"):
         raise SystemExit("--galaxy-sampling must be auto, download_full, prefix_rows, or reservoir")
+
+    # 条件分岐: `galaxy_sampling_arg == "auto"` を満たす経路を評価する。
+
     if galaxy_sampling_arg == "auto":
         galaxy_sampling = "prefix_rows" if int(args.galaxy_max_rows) > 0 else "download_full"
     else:
         galaxy_sampling = galaxy_sampling_arg
+
+    # 条件分岐: `galaxy_sampling in ("prefix_rows", "reservoir") and int(args.galaxy_max_rows)...` を満たす経路を評価する。
+
     if galaxy_sampling in ("prefix_rows", "reservoir") and int(args.galaxy_max_rows) <= 0:
         raise SystemExit("--galaxy-max-rows must be > 0 when --galaxy-sampling is prefix_rows/reservoir")
 
     for sample in samples:
+        # 条件分岐: `sample not in _SAMPLE_FILES` を満たす経路を評価する。
         if sample not in _SAMPLE_FILES:
             raise SystemExit(f"unknown sample: {sample} (supported: {sorted(_SAMPLE_FILES)})")
+
         for cap in caps:
+            # 条件分岐: `cap not in _SAMPLE_FILES[sample]` を満たす経路を評価する。
             if cap not in _SAMPLE_FILES[sample]:
                 raise SystemExit(f"unknown cap: {cap} (supported: north,south)")
 
@@ -989,6 +1190,7 @@ def main(argv: list[str] | None = None) -> int:
             manifest["items"].setdefault(item_key, {})
             prev_item = dict(manifest["items"].get(item_key, {}))
 
+            # 条件分岐: `not args.skip_galaxy` を満たす経路を評価する。
             if not args.skip_galaxy:
                 gal_name = files["galaxy"]
                 gal_url = base_url + gal_name
@@ -1004,6 +1206,7 @@ def main(argv: list[str] | None = None) -> int:
                     "IPOLY",
                     "ISECT",
                 ]
+                # 条件分岐: `galaxy_sampling == "prefix_rows"` を満たす経路を評価する。
                 if galaxy_sampling == "prefix_rows":
                     gal_npz = ext_dir / f"{gal_name}.prefix_{int(args.galaxy_max_rows)}.npz"
                     gal_dst = raw_dir / gal_name
@@ -1011,11 +1214,13 @@ def main(argv: list[str] | None = None) -> int:
                     raw_bytes = int(gal_dst.stat().st_size) if gal_dst.exists() else None
                     prev = prev_item.get("galaxy", {})
                     prev_npz = str(prev.get("npz_path", "")).strip()
+                    # 条件分岐: `gal_npz.exists() and not args.force` を満たす経路を評価する。
                     if gal_npz.exists() and not args.force:
                         print(f"[skip] {gal_npz.name} (cached)")
                         emeta_prev = prev.get("extract") if prev_npz == _relpath(gal_npz) else None
                         emeta = _normalize_cached_extract_meta(gal_npz, emeta_prev)
                     else:
+                        # 条件分岐: `gal_dst.exists()` を満たす経路を評価する。
                         if gal_dst.exists():
                             print(f"[extract] {gal_name} (prefix {int(args.galaxy_max_rows):,} rows; local) -> {gal_npz.name}")
                             emeta = _extract_local_gz_to_npz_prefix_rows(
@@ -1033,6 +1238,7 @@ def main(argv: list[str] | None = None) -> int:
                                 want_cols=gal_cols,
                                 max_rows=int(args.galaxy_max_rows),
                             )
+
                     manifest["items"][item_key]["galaxy"] = {
                         "url": gal_url,
                         "raw_path": _relpath(raw_path),
@@ -1041,23 +1247,29 @@ def main(argv: list[str] | None = None) -> int:
                         "npz_path": _relpath(gal_npz),
                         "extract": emeta,
                     }
+                # 条件分岐: 前段条件が不成立で、`galaxy_sampling == "reservoir"` を追加評価する。
                 elif galaxy_sampling == "reservoir":
                     tag = f"reservoir_{int(args.galaxy_max_rows)}_seed{int(args.sampling_seed)}"
+                    # 条件分岐: `int(args.galaxy_scan_max_rows) > 0` を満たす経路を評価する。
                     if int(args.galaxy_scan_max_rows) > 0:
                         tag += f"_scan{int(args.galaxy_scan_max_rows)}"
+
                     gal_npz = ext_dir / f"{gal_name}.{tag}.npz"
                     gal_dst = raw_dir / gal_name
                     raw_path = gal_dst if gal_dst.exists() else None
                     raw_bytes = int(gal_dst.stat().st_size) if gal_dst.exists() else None
                     prev = prev_item.get("galaxy", {})
                     prev_npz = str(prev.get("npz_path", "")).strip()
+                    # 条件分岐: `gal_npz.exists() and not args.force` を満たす経路を評価する。
                     if gal_npz.exists() and not args.force:
                         print(f"[skip] {gal_npz.name} (cached)")
                         emeta = prev.get("extract") if prev_npz == _relpath(gal_npz) else None
+                        # 条件分岐: `not isinstance(emeta, dict)` を満たす経路を評価する。
                         if not isinstance(emeta, dict):
                             emeta = _existing_npz_meta(gal_npz)
                     else:
                         scan_max = int(args.galaxy_scan_max_rows) if int(args.galaxy_scan_max_rows) > 0 else None
+                        # 条件分岐: `gal_dst.exists()` を満たす経路を評価する。
                         if gal_dst.exists():
                             print(
                                 f"[extract] {gal_name} (reservoir {int(args.galaxy_max_rows):,} rows, seed={int(args.sampling_seed)}; local) -> {gal_npz.name}"
@@ -1085,6 +1297,7 @@ def main(argv: list[str] | None = None) -> int:
                                 scan_max_rows=scan_max,
                                 chunk_rows=int(args.chunk_rows),
                             )
+
                     manifest["items"][item_key]["galaxy"] = {
                         "url": gal_url,
                         "raw_path": _relpath(raw_path),
@@ -1095,6 +1308,7 @@ def main(argv: list[str] | None = None) -> int:
                     }
                 else:
                     gal_dst = raw_dir / gal_name
+                    # 条件分岐: `not gal_dst.exists()` を満たす経路を評価する。
                     if not gal_dst.exists():
                         print(f"[download] {gal_name}")
                         dmeta = _download_file(gal_url, gal_dst)
@@ -1102,12 +1316,14 @@ def main(argv: list[str] | None = None) -> int:
                         dmeta = {"bytes": gal_dst.stat().st_size, "sha256": _sha256(gal_dst)}
 
                     gal_npz = ext_dir / f"{gal_name}.npz"
+                    # 条件分岐: `gal_npz.exists() and not args.force` を満たす経路を評価する。
                     if gal_npz.exists() and not args.force:
                         print(f"[skip] {gal_npz.name} (cached)")
                         emeta = _normalize_cached_extract_meta(gal_npz, _existing_npz_meta(gal_npz))
                     else:
                         print(f"[extract] {gal_name} -> {gal_npz.name}")
                         emeta = _extract_local_gz_to_npz(gal_dst, out_npz=gal_npz, want_cols=gal_cols, max_rows=None)
+
                     manifest["items"][item_key]["galaxy"] = {
                         "url": gal_url,
                         "raw_path": _relpath(gal_dst),
@@ -1117,14 +1333,18 @@ def main(argv: list[str] | None = None) -> int:
                         "extract": emeta,
                     }
 
+            # 条件分岐: `not args.skip_random` を満たす経路を評価する。
+
             if not args.skip_random:
                 rnd_name = files[random_kind]
                 rnd_url = base_url + rnd_name
                 rnd_cols = ["RA", "DEC", "Z", "WEIGHT_FKP", "IPOLY", "ISECT"]
+                # 条件分岐: `random_sampling == "prefix_rows"` を満たす経路を評価する。
                 if random_sampling == "prefix_rows":
                     rnd_npz = ext_dir / f"{rnd_name}.prefix_{int(args.random_max_rows)}.npz"
                     prev = prev_item.get("random", {})
                     prev_npz = str(prev.get("npz_path", "")).strip()
+                    # 条件分岐: `rnd_npz.exists() and not args.force` を満たす経路を評価する。
                     if rnd_npz.exists() and not args.force:
                         print(f"[skip] {rnd_npz.name} (cached)")
                         rmeta_prev = prev.get("extract") if prev_npz == _relpath(rnd_npz) else None
@@ -1138,12 +1358,14 @@ def main(argv: list[str] | None = None) -> int:
                             want_cols=rnd_cols,
                             max_rows=int(args.random_max_rows),
                         )
+                        # 条件分岐: `isinstance(rmeta, dict)` を満たす経路を評価する。
                         if isinstance(rmeta, dict):
                             print(
                                 f"[derive] {rnd_name} (prefix {int(args.random_max_rows):,} rows) from existing NPZ -> {rnd_npz.name}"
                             )
                         else:
                             rnd_dst = raw_dir / rnd_name
+                            # 条件分岐: `rnd_dst.exists()` を満たす経路を評価する。
                             if rnd_dst.exists():
                                 print(f"[extract] {rnd_name} (prefix {int(args.random_max_rows):,} rows; local) -> {rnd_npz.name}")
                                 rmeta = _extract_local_gz_to_npz_prefix_rows(
@@ -1163,13 +1385,19 @@ def main(argv: list[str] | None = None) -> int:
                                 )
                 else:
                     tag = f"reservoir_{int(args.random_max_rows)}_seed{int(args.sampling_seed)}"
+                    # 条件分岐: `int(args.random_scan_max_rows) > 0` を満たす経路を評価する。
                     if int(args.random_scan_max_rows) > 0:
                         tag += f"_scan{int(args.random_scan_max_rows)}"
+
+                    # 条件分岐: `random_cover_galaxy_sectors` を満たす経路を評価する。
+
                     if random_cover_galaxy_sectors:
                         tag += "_covergal"
+
                     rnd_npz = ext_dir / f"{rnd_name}.{tag}.npz"
                     prev = prev_item.get("random", {})
                     prev_npz = str(prev.get("npz_path", "")).strip()
+                    # 条件分岐: `rnd_npz.exists() and not args.force` を満たす経路を評価する。
                     if rnd_npz.exists() and not args.force:
                         print(f"[skip] {rnd_npz.name} (cached)")
                         rmeta_prev = prev.get("extract") if prev_npz == _relpath(rnd_npz) else None
@@ -1178,50 +1406,77 @@ def main(argv: list[str] | None = None) -> int:
                         scan_max = int(args.random_scan_max_rows) if int(args.random_scan_max_rows) > 0 else None
                         rnd_dst = raw_dir / rnd_name
                         cover_sectors: Optional[set[int]] = None
+                        # 条件分岐: `random_cover_galaxy_sectors` を満たす経路を評価する。
                         if random_cover_galaxy_sectors:
                             gal_npz_for_cover: Optional[Path] = None
                             try:
                                 gal_entry = manifest.get("items", {}).get(item_key, {}).get("galaxy", {})
                                 gal_npz_rel = str(gal_entry.get("npz_path", "")).strip()
+                                # 条件分岐: `gal_npz_rel` を満たす経路を評価する。
                                 if gal_npz_rel:
                                     gal_npz_for_cover = Path(gal_npz_rel)
+                                    # 条件分岐: `not gal_npz_for_cover.is_absolute()` を満たす経路を評価する。
                                     if not gal_npz_for_cover.is_absolute():
                                         gal_npz_for_cover = _ROOT / gal_npz_for_cover
                             except Exception:
                                 gal_npz_for_cover = None
+
+                            # 条件分岐: `gal_npz_for_cover is None` を満たす経路を評価する。
+
                             if gal_npz_for_cover is None:
                                 cand = ext_dir / f"{files['galaxy']}.npz"
+                                # 条件分岐: `cand.exists()` を満たす経路を評価する。
                                 if cand.exists():
                                     gal_npz_for_cover = cand
+
+                            # 条件分岐: `gal_npz_for_cover is None or (not gal_npz_for_cover.exists())` を満たす経路を評価する。
+
                             if gal_npz_for_cover is None or (not gal_npz_for_cover.exists()):
                                 raise SystemExit(
                                     f"--random-cover-galaxy-sectors requires an existing galaxy NPZ for {item_key}. "
                                     "Run this script once without --skip-galaxy to create it."
                                 )
+
                             with np.load(gal_npz_for_cover) as z:
+                                # 条件分岐: `"IPOLY" not in z.files or "ISECT" not in z.files` を満たす経路を評価する。
                                 if "IPOLY" not in z.files or "ISECT" not in z.files:
                                     raise SystemExit(f"galaxy NPZ missing IPOLY/ISECT: {gal_npz_for_cover}")
+
+                                # 条件分岐: `"Z" not in z.files` を満たす経路を評価する。
+
                                 if "Z" not in z.files:
                                     raise SystemExit(f"galaxy NPZ missing Z: {gal_npz_for_cover}")
+
                                 ip = np.asarray(z["IPOLY"], dtype=np.float64)
                                 isect = np.asarray(z["ISECT"], dtype=np.float64)
                                 zg = np.asarray(z["Z"], dtype=np.float64)
                                 valid = np.isfinite(ip) & np.isfinite(isect)
                                 valid = valid & np.isfinite(zg)
+                                # 条件分岐: `random_cover_z_min is not None` を満たす経路を評価する。
                                 if random_cover_z_min is not None:
                                     valid = valid & (zg >= float(random_cover_z_min))
+
+                                # 条件分岐: `random_cover_z_max is not None` を満たす経路を評価する。
+
                                 if random_cover_z_max is not None:
                                     valid = valid & (zg < float(random_cover_z_max))
+
                                 ip_i = ip.astype(np.int64, copy=False)
                                 is_i = isect.astype(np.int64, copy=False)
                                 keys = (ip_i[valid] << 32) + (is_i[valid] & np.int64(0xFFFFFFFF))
                                 cover_sectors = {int(s) for s in np.unique(keys)}
+
                             ztag = ""
+                            # 条件分岐: `random_cover_z_min is not None or random_cover_z_max is not None` を満たす経路を評価する。
                             if random_cover_z_min is not None or random_cover_z_max is not None:
                                 lo = "-inf" if (random_cover_z_min is None) else str(float(random_cover_z_min))
                                 hi = "+inf" if (random_cover_z_max is None) else str(float(random_cover_z_max))
                                 ztag = f" (Z in [{lo},{hi}))"
+
                             print(f"[cover] random will cover galaxy sector keys: {len(cover_sectors):,} (IPOLY<<32 + ISECT){ztag}")
+
+                        # 条件分岐: `rnd_dst.exists()` を満たす経路を評価する。
+
                         if rnd_dst.exists():
                             print(
                                 f"[extract] {rnd_name} (reservoir {int(args.random_max_rows):,} rows, seed={int(args.sampling_seed)}; local) -> {rnd_npz.name}"
@@ -1257,6 +1512,7 @@ def main(argv: list[str] | None = None) -> int:
                                 cover_z_min=random_cover_z_min,
                                 cover_z_max=random_cover_z_max,
                             )
+
                 rnd_dst = raw_dir / rnd_name
                 raw_path = rnd_dst if rnd_dst.exists() else None
                 raw_bytes = int(rnd_dst.stat().st_size) if rnd_dst.exists() else None
@@ -1303,6 +1559,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

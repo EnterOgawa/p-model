@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -193,8 +194,10 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in criteria:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         value = float(row.get("value", math.nan))
         threshold = float(row.get("threshold", math.nan))
         score = value / threshold if math.isfinite(value) and math.isfinite(threshold) and threshold != 0.0 else math.nan
@@ -241,10 +244,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
+
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
+
     if not out_csv.is_absolute():
         out_csv = (ROOT / out_csv).resolve()
+
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
+
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
@@ -277,6 +287,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

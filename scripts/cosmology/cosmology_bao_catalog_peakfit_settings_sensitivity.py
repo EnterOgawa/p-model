@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -55,6 +56,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -84,8 +86,10 @@ def _profile_sigma_from_ci(ci_1sigma: Sequence[float | None]) -> Optional[float]
     try:
         lo = float(ci_1sigma[0])
         hi = float(ci_1sigma[1])
+        # 条件分岐: `math.isfinite(lo) and math.isfinite(hi) and hi > lo` を満たす経路を評価する。
         if math.isfinite(lo) and math.isfinite(hi) and hi > lo:
             return 0.5 * (hi - lo)
+
         return None
     except Exception:
         return None
@@ -136,6 +140,7 @@ def _load_case(case: _catalog_peakfit.CatalogCase) -> LoadedCase:
     z_cut = (m.get("params", {}) or {}).get("z_cut", {}) or {}
     z_min = float(z_cut.get("z_min", float("nan")))
     z_max = float(z_cut.get("z_max", float("nan")))
+    # 条件分岐: `not (math.isfinite(z_min) and math.isfinite(z_max) and z_max > z_min)` を満たす経路を評価する。
     if not (math.isfinite(z_min) and math.isfinite(z_max) and z_max > z_min):
         raise ValueError(f"invalid z_cut in metrics: {case.metrics_path}")
 
@@ -145,14 +150,19 @@ def _load_case(case: _catalog_peakfit.CatalogCase) -> LoadedCase:
         xi2_all = np.asarray(z["xi2"], dtype=float).reshape(-1)
 
     cov_path = case.npz_path.with_name(f"{case.npz_path.stem}__jk_cov.npz")
+    # 条件分岐: `not cov_path.exists()` を満たす経路を評価する。
     if not cov_path.exists():
         raise FileNotFoundError(f"missing jackknife cov: {cov_path}")
+
     with np.load(cov_path) as zc:
         s_cov = np.asarray(zc["s"], dtype=float).reshape(-1)
         cov_full = np.asarray(zc["cov"], dtype=float)
 
+    # 条件分岐: `s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e...` を満たす経路を評価する。
+
     if s_cov.shape != s_all.shape or not np.allclose(s_cov, s_all, rtol=0.0, atol=1e-12):
         raise ValueError(f"jackknife cov uses different s bins: xi={case.npz_path.name}, cov={cov_path.name}")
+
     n_all = int(s_all.size)
     cov_full = np.asarray(cov_full, dtype=float).reshape(2 * n_all, 2 * n_all)
     return LoadedCase(case=case, z_min=z_min, z_max=z_max, s_all=s_all, xi0_all=xi0_all, xi2_all=xi2_all, cov_full=cov_full)
@@ -171,6 +181,7 @@ def _fit_one(
 
     m_fit = (s_all >= float(scenario.r_min)) & (s_all <= float(scenario.r_max)) & np.isfinite(xi0_all) & np.isfinite(xi2_all)
     idx = np.nonzero(m_fit)[0].astype(int, copy=False)
+    # 条件分岐: `idx.size < 10` を満たす経路を評価する。
     if idx.size < 10:
         raise ValueError(f"too few bins after range cut: n={idx.size} (r={scenario.r_min}..{scenario.r_max})")
 
@@ -186,14 +197,17 @@ def _fit_one(
     cov_inv = 0.5 * (cov_inv + cov_inv.T)
 
     mu_n = int(scenario.mu_n)
+    # 条件分岐: `mu_n < 20` を満たす経路を評価する。
     if mu_n < 20:
         raise ValueError("--mu-n must be >= 20")
+
     mu, w = np.polynomial.legendre.leggauss(mu_n)
     sqrt1mu2 = np.sqrt(np.maximum(0.0, 1.0 - mu * mu))
     p2_fid = _peakfit._p2(mu)
 
     alpha_grid = np.arange(float(scenario.alpha_min), float(scenario.alpha_max) + 0.5 * float(scenario.alpha_step), float(scenario.alpha_step))
     eps_grid = np.arange(float(scenario.eps_min), float(scenario.eps_max) + 0.5 * float(scenario.eps_step), float(scenario.eps_step))
+    # 条件分岐: `alpha_grid.size < 5 or eps_grid.size < 5` を満たす経路を評価する。
     if alpha_grid.size < 5 or eps_grid.size < 5:
         raise ValueError("grid too small; widen ranges or reduce steps")
 
@@ -262,8 +276,13 @@ def _fit_one(
         except Exception:
             ci_clipped = True
 
+        # 条件分岐: `(not edge_hit) and (not ci_clipped)` を満たす経路を評価する。
+
         if (not edge_hit) and (not ci_clipped):
             break
+
+        # 条件分岐: `expands_done >= int(scenario.eps_rescan_max_expands)` を満たす経路を評価する。
+
         if expands_done >= int(scenario.eps_rescan_max_expands):
             break
 
@@ -287,11 +306,14 @@ def _fit_one(
     abs_sigma_is_lower_bound = False
     try:
         sigma_eps = _profile_sigma_from_ci([eps_ci_1, eps_ci_2])
+        # 条件分岐: `sigma_eps is not None and sigma_eps > 0` を満たす経路を評価する。
         if sigma_eps is not None and sigma_eps > 0:
             abs_sigma = abs_eps / float(sigma_eps)
     except Exception:
         sigma_eps = None
         abs_sigma = None
+
+    # 条件分岐: `edge_hit or ci_clipped` を満たす経路を評価する。
 
     if edge_hit or ci_clipped:
         abs_sigma = float(mixed_max) + 1.0
@@ -417,28 +439,45 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     caps = str(args.caps)
     dists = [d.strip() for d in str(args.dists).split(",") if d.strip()]
     out_tag = str(args.out_tag)
+    # 条件分岐: `not dists` を満たす経路を評価する。
     if not dists:
         raise SystemExit("--dists must not be empty")
 
     # Load the same case definition as the main peakfit script.
+
     cases = _catalog_peakfit._load_cases(sample=sample, caps=caps, dists=dists, require_zbin=False, out_tag=out_tag)
+    # 条件分岐: `not cases` を満たす経路を評価する。
     if not cases:
         raise SystemExit(f"no matching xi inputs: sample={sample}, caps={caps}, dists={dists}, out_tag={out_tag}")
 
     # Coordinate-spec guard (same rationale as cosmology_bao_catalog_peakfit).
+
     z_sources = {str(c.z_source) for c in cases if str(c.z_source)}
     los_defs = {str(c.los) for c in cases if str(c.los)}
     weight_schemes = {str(c.weight_scheme) for c in cases if str(c.weight_scheme)}
     est_hashes = {str(c.estimator_spec_hash) for c in cases if str(c.estimator_spec_hash)}
     recon_modes = {str(c.recon_mode) for c in cases if str(c.recon_mode)}
+    # 条件分岐: `len(z_sources) != 1` を満たす経路を評価する。
     if len(z_sources) != 1:
         raise SystemExit(f"mixed z_source across inputs: {', '.join(sorted(z_sources))}")
+
+    # 条件分岐: `len(los_defs) != 1` を満たす経路を評価する。
+
     if len(los_defs) != 1:
         raise SystemExit(f"mixed los across inputs: {', '.join(sorted(los_defs))}")
+
+    # 条件分岐: `len(weight_schemes) != 1` を満たす経路を評価する。
+
     if len(weight_schemes) != 1:
         raise SystemExit(f"mixed weight_scheme across inputs: {', '.join(sorted(weight_schemes))}")
+
+    # 条件分岐: `len(est_hashes) != 1` を満たす経路を評価する。
+
     if len(est_hashes) != 1:
         raise SystemExit(f"mixed estimator_spec across inputs: {', '.join(sorted(est_hashes))}")
+
+    # 条件分岐: `len(recon_modes) != 1` を満たす経路を評価する。
+
     if len(recon_modes) != 1:
         raise SystemExit(f"mixed recon_mode across inputs: {', '.join(sorted(recon_modes))}")
 
@@ -452,6 +491,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         sc_res: List[Dict[str, Any]] = []
         for lc in loaded:
             sc_res.append(_fit_one(lc=lc, scenario=sc, ok_max=float(args.ok_max), mixed_max=float(args.mixed_max)))
+
         results_by_scenario.append(
             {
                 "scenario": {
@@ -490,8 +530,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     zrange_meta = {lc.zrange_key: lc.zrange_label for lc in loaded}
 
     fig, axes = plt.subplots(nrows=len(zranges), ncols=1, figsize=(12.8, 3.6 * len(zranges)), sharex=True)
+    # 条件分岐: `len(zranges) == 1` を満たす経路を評価する。
     if len(zranges) == 1:
         axes = [axes]
+
     x = np.arange(len(scenarios), dtype=float)
     colors = {"lcdm": "#1f77b4", "pbg": "#ff7f0e"}
     markers = {"lcdm": "o", "pbg": "s"}
@@ -505,12 +547,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             yerr_hi: List[float] = []
             for pack in results_by_scenario:
                 rr = [r for r in pack["results"] if r["dist"] == dist and r["z_range"]["key"] == zkey]
+                # 条件分岐: `not rr` を満たす経路を評価する。
                 if not rr:
                     xs.append(float("nan"))
                     ys.append(float("nan"))
                     yerr_lo.append(float("nan"))
                     yerr_hi.append(float("nan"))
                     continue
+
                 r0 = rr[0]
                 eps = float(r0["fit"]["free"]["eps"])
                 ci = r0["fit"]["free"].get("eps_ci_1sigma") or [float("nan"), float("nan")]
@@ -592,6 +636,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

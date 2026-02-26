@@ -43,6 +43,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -64,6 +65,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -87,8 +89,12 @@ def _safe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `math.isnan(v) or math.isinf(v)` を満たす経路を評価する。
+
     if math.isnan(v) or math.isinf(v):
         return None
+
     return v
 
 
@@ -128,12 +134,15 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
         sig = float(r.n_sigma)
         z_frw = None
         z_pbg = None
+        # 条件分岐: `sig > 0` を満たす経路を評価する。
         if sig > 0:
             z_frw = (n_frw - float(r.n_obs)) / sig
             z_pbg = (n_pbg_static - float(r.n_obs)) / sig
 
         # "Non-rejection" threshold (3σ): require sig >= |n_model - n_obs| / 3.
+
         sig_need_nonreject_pbg_3sigma = None
+        # 条件分岐: `sig > 0` を満たす経路を評価する。
         if sig > 0:
             sig_need_nonreject_pbg_3sigma = abs(n_pbg_static - float(r.n_obs)) / 3.0
 
@@ -158,6 +167,7 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
                 "source": r.source,
             }
         )
+
     return out
 
 
@@ -183,8 +193,10 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
         n_obs = _safe_float(r.get("n_obs"))
         sig = _safe_float(r.get("n_sigma"))
         label = str(r.get("short_label") or r.get("id") or "")
+        # 条件分岐: `n_obs is None or sig is None or sig <= 0` を満たす経路を評価する。
         if n_obs is None or sig is None or sig <= 0:
             continue
+
         sb_mid = one_p_z ** (-float(n_obs))
         sb_lo = one_p_z ** (-(float(n_obs) + float(sig)))
         sb_hi = one_p_z ** (-(float(n_obs) - float(sig)))
@@ -256,11 +268,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     data_path = Path(args.data)
     z_max = float(args.z_max)
+    # 条件分岐: `not (z_max > 0.0)` を満たす経路を評価する。
     if not (z_max > 0.0):
         raise ValueError("--z-max must be > 0")
 
     src = _read_json(data_path)
     constraints = [Constraint.from_json(c) for c in (src.get("constraints") or [])]
+    # 条件分岐: `not constraints` を満たす経路を評価する。
     if not constraints:
         raise SystemExit(f"no constraints found in: {data_path}")
 
@@ -305,6 +319,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

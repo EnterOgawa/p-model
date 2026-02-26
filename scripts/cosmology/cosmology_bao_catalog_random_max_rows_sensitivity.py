@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -54,6 +55,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -77,8 +79,10 @@ def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
 
 def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     lo, hi = _ci_asym_err(eps, ci_1sigma)
+    # 条件分岐: `not np.isfinite(lo) or not np.isfinite(hi)` を満たす経路を評価する。
     if not np.isfinite(lo) or not np.isfinite(hi):
         return float("nan")
+
     return float(0.5 * (lo + hi))
 
 
@@ -94,12 +98,20 @@ class EpsPoint:
 
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
+    # 条件分岐: `z == "b1"` を満たす経路を評価する。
     if z == "b1":
         return 1
+
+    # 条件分岐: `z == "b2"` を満たす経路を評価する。
+
     if z == "b2":
         return 2
+
+    # 条件分岐: `z == "b3"` を満たす経路を評価する。
+
     if z == "b3":
         return 3
+
     return None
 
 
@@ -107,11 +119,15 @@ def _extract_catalog_eps_peakfit(metrics: Dict[str, Any], *, dist: str) -> Dict[
     out: Dict[int, EpsPoint] = {}
     for r in metrics.get("results", []):
         try:
+            # 条件分岐: `str(r.get("dist")) != str(dist)` を満たす経路を評価する。
             if str(r.get("dist")) != str(dist):
                 continue
+
             z_int = _zbin_label_to_int(str(r.get("z_bin")))
+            # 条件分岐: `z_int is None` を満たす経路を評価する。
             if z_int is None:
                 continue
+
             z_eff = float(r.get("z_eff"))
             eps = float(r["fit"]["free"]["eps"])
             ci = r["fit"]["free"].get("eps_ci_1sigma")
@@ -131,6 +147,7 @@ def _extract_catalog_eps_peakfit(metrics: Dict[str, Any], *, dist: str) -> Dict[
             )
         except Exception:
             continue
+
     return out
 
 
@@ -153,6 +170,7 @@ def _extract_published_eps(metrics: Dict[str, Any]) -> Dict[int, EpsPoint]:
             )
         except Exception:
             continue
+
     return out
 
 
@@ -163,9 +181,12 @@ _RE_RES = re.compile(r"\.reservoir_(\d+)_seed(\d+)(?:_scan(\d+))?\.npz$", re.IGN
 def _parse_random_npz_name(name: str) -> Optional[Dict[str, Any]]:
     n = str(name)
     m = _RE_PREFIX.search(n)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         return {"method": "prefix_rows", "max_rows": int(m.group(1))}
+
     m = _RE_RES.search(n)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         return {
             "method": "reservoir",
@@ -173,6 +194,7 @@ def _parse_random_npz_name(name: str) -> Optional[Dict[str, Any]]:
             "seed": int(m.group(2)),
             "scan_max_rows": None if m.group(3) is None else int(m.group(3)),
         }
+
     return None
 
 
@@ -185,36 +207,58 @@ def _infer_random_sampling_from_xi_metrics(xi_metrics_path: Path) -> Dict[str, A
         try:
             name = Path(str(p)).name
             meta = _parse_random_npz_name(name)
+            # 条件分岐: `meta` を満たす経路を評価する。
             if meta:
                 parsed.append(meta)
         except Exception:
             continue
+
+    # 条件分岐: `not parsed` を満たす経路を評価する。
+
     if not parsed:
         return {"unknown": True, "random_npz": paths}
     # Guard: require consistent sampling across caps.
+
     keys = {json.dumps(x, sort_keys=True) for x in parsed}
+    # 条件分岐: `len(keys) != 1` を満たす経路を評価する。
     if len(keys) != 1:
         return {"inconsistent": True, "by_cap": parsed, "random_npz": paths}
+
     out = parsed[0].copy()
     out["random_npz"] = paths
     return out
 
 
 def _format_sampling_label(meta: Dict[str, Any]) -> str:
+    # 条件分岐: `meta.get("unknown")` を満たす経路を評価する。
     if meta.get("unknown"):
         return "unknown"
+
+    # 条件分岐: `meta.get("inconsistent")` を満たす経路を評価する。
+
     if meta.get("inconsistent"):
         return "inconsistent"
+
+    # 条件分岐: `str(meta.get("method")) == "prefix_rows"` を満たす経路を評価する。
+
     if str(meta.get("method")) == "prefix_rows":
         n = int(meta.get("max_rows"))
+        # 条件分岐: `n >= 1_000_000` を満たす経路を評価する。
         if n >= 1_000_000:
             return f"prefix {n/1_000_000:.1f}M"
+
         return f"prefix {n/1_000:.0f}k"
+
+    # 条件分岐: `str(meta.get("method")) == "reservoir"` を満たす経路を評価する。
+
     if str(meta.get("method")) == "reservoir":
         n = int(meta.get("sample_rows"))
+        # 条件分岐: `n >= 1_000_000` を満たす経路を評価する。
         if n >= 1_000_000:
             return f"reservoir {n/1_000_000:.1f}M"
+
         return f"reservoir {n/1_000:.0f}k"
+
     return str(meta.get("method") or "unknown")
 
 
@@ -290,18 +334,26 @@ def main(argv: list[str] | None = None) -> int:
         metas = []
         for zbin, pt in points.items():
             mi = (pt.meta.get("inputs", {}) or {}).get("metrics_json")
+            # 条件分岐: `not mi` を満たす経路を評価する。
             if not mi:
                 continue
+
             try:
                 xi_path = Path(str(mi))
                 metas.append(_infer_random_sampling_from_xi_metrics(xi_path))
             except Exception:
                 continue
+
+        # 条件分岐: `not metas` を満たす経路を評価する。
+
         if not metas:
             return {"unknown": True}
+
         keys = {json.dumps(m, sort_keys=True) for m in metas}
+        # 条件分岐: `len(keys) != 1` を満たす経路を評価する。
         if len(keys) != 1:
             return {"inconsistent": True, "by_zbin": metas}
+
         return metas[0]
 
     sampling_base = _sampling_for_case(base_pts)
@@ -340,6 +392,7 @@ def main(argv: list[str] | None = None) -> int:
         x_offset=0.0,
     )
 
+    # 条件分岐: `alt_pts` を満たす経路を評価する。
     if alt_pts:
         _errorbar(
             ax0,
@@ -364,19 +417,23 @@ def main(argv: list[str] | None = None) -> int:
         dy = []
         ds = []
         for z in z_bins:
+            # 条件分岐: `z not in points or z not in pub` を満たす経路を評価する。
             if z not in points or z not in pub:
                 dy.append(np.nan)
                 ds.append(np.nan)
                 continue
+
             dy.append(points[z].eps - pub[z].eps)
             s = np.sqrt(_sym_sigma_from_ci(pub[z].eps, pub[z].meta.get("eps_ci_1sigma")) ** 2 + _sym_sigma_from_ci(points[z].eps, points[z].meta.get("eps_ci_1sigma")) ** 2)
             ds.append(float(s))
+
         return np.asarray(dy, dtype=float), np.asarray(ds, dtype=float)
 
     d_base, s_base = _delta(base_pts)
     ax1.plot(xs, d_base, "-s", color="#1f77b4", label=f"Δε ({_format_sampling_label(sampling_base)})")
     ax1.fill_between(xs, d_base - s_base, d_base + s_base, color="#1f77b4", alpha=0.15)
 
+    # 条件分岐: `alt_pts` を満たす経路を評価する。
     if alt_pts:
         d_alt, s_alt = _delta(alt_pts)
         ax1.plot(xs, d_alt, "-^", color="#ff7f0e", label=f"Δε ({_format_sampling_label(sampling_alt)})")
@@ -437,6 +494,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

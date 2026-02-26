@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -46,34 +47,49 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _sha256(path: Path) -> Optional[str]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     digest = hashlib.sha256()
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             digest.update(chunk)
+
     return digest.hexdigest()
 
 
 def _as_list_of_str(value: Any) -> List[str]:
+    # 条件分岐: `not isinstance(value, list)` を満たす経路を評価する。
     if not isinstance(value, list):
         return []
+
     return [str(x) for x in value if isinstance(x, str)]
 
 
 def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
+    # 条件分岐: `passed is True` を満たす経路を評価する。
     if passed is True:
         return "pass"
+
+    # 条件分岐: `passed is None` を満たす経路を評価する。
+
     if passed is None:
         return "unknown"
+
+    # 条件分岐: `gate_level == "hard"` を満たす経路を評価する。
+
     if gate_level == "hard":
         return "reject"
+
     return "watch"
 
 
@@ -103,16 +119,24 @@ def _row(
 
 
 def _all_true(rows: Any) -> Optional[bool]:
+    # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
         return None
+
     flags: List[bool] = []
     for row in rows:
+        # 条件分岐: `isinstance(row, dict)` を満たす経路を評価する。
         if isinstance(row, dict):
             item = row.get("pass")
+            # 条件分岐: `isinstance(item, bool)` を満たす経路を評価する。
             if isinstance(item, bool):
                 flags.append(item)
+
+    # 条件分岐: `not flags` を満たす経路を評価する。
+
     if not flags:
         return None
+
     return all(flags)
 
 
@@ -120,12 +144,18 @@ def _bridge_watch_ids(bridge: Dict[str, Any]) -> List[str]:
     rows = bridge.get("rows") if isinstance(bridge.get("rows"), list) else []
     out: List[str] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `str(row.get("status") or "") == "watch"` を満たす経路を評価する。
+
         if str(row.get("status") or "") == "watch":
             row_id = str(row.get("id") or "")
+            # 条件分岐: `row_id` を満たす経路を評価する。
             if row_id:
                 out.append(row_id)
+
     return sorted(set(out))
 
 
@@ -190,8 +220,10 @@ def build_payload(
     kwiat_max_abs_z_any = kwiat_summary.get("max_abs_z_any")
     kwiat_hard_gate_applicable = bool(kwiat_summary.get("hard_gate_applicable")) if "hard_gate_applicable" in kwiat_summary else None
     kwiat_margin_to_hard = None
+    # 条件分岐: `isinstance(kwiat_max_abs_z_any, (int, float))` を満たす経路を評価する。
     if isinstance(kwiat_max_abs_z_any, (int, float)):
         kwiat_margin_to_hard = 3.0 - float(kwiat_max_abs_z_any)
+
     kwiat_nonhard_stable = (
         kwiat_watch_decision == "keep_watch_nonhard_gate"
         and isinstance(kwiat_max_abs_z_any, (int, float))
@@ -203,8 +235,10 @@ def build_payload(
     hom_ratio_detrended = hom_summary.get("detrended_ratio_median")
     hom_hard_gate_applicable = bool(hom_summary.get("hard_gate_applicable")) if "hard_gate_applicable" in hom_summary else None
     hom_margin_to_threshold = None
+    # 条件分岐: `isinstance(hom_ratio_detrended, (int, float))` を満たす経路を評価する。
     if isinstance(hom_ratio_detrended, (int, float)):
         hom_margin_to_threshold = 1.0 - float(hom_ratio_detrended)
+
     hom_nonhard_stable = (
         hom_watch_decision == "keep_watch_nonhard_gate"
         and isinstance(hom_ratio_detrended, (int, float))
@@ -389,14 +423,22 @@ def build_payload(
         "quantum_connection_shared_kpi_json": shared_json,
         "derivation_parameter_falsification_pack_json": deriv_pack_json,
     }
+    # 条件分岐: `kwiat_watch_json is not None` を満たす経路を評価する。
     if kwiat_watch_json is not None:
         input_paths["bell_kwiat_delay_signature_watch_audit_json"] = kwiat_watch_json
+
+    # 条件分岐: `hom_watch_json is not None` を満たす経路を評価する。
+
     if hom_watch_json is not None:
         input_paths["hom_noise_psd_watch_audit_json"] = hom_watch_json
 
     nonhard_watch_stable: List[str] = []
+    # 条件分岐: `"kwiat2013_prl111_130406_05082013_15:delay_signature" in watchlist and kwiat_...` を満たす経路を評価する。
     if "kwiat2013_prl111_130406_05082013_15:delay_signature" in watchlist and kwiat_nonhard_stable:
         nonhard_watch_stable.append("kwiat2013_prl111_130406_05082013_15:delay_signature")
+
+    # 条件分岐: `"hom_noise_psd_shape" in watchlist and hom_nonhard_stable` を満たす経路を評価する。
+
     if "hom_noise_psd_shape" in watchlist and hom_nonhard_stable:
         nonhard_watch_stable.append("hom_noise_psd_shape")
 
@@ -491,17 +533,22 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         labels.append(str(row.get("id") or ""))
         score = row.get("score")
         score_f = float(score) if isinstance(score, (int, float)) else np.nan
         scores.append(score_f)
         status = str(row.get("status") or "")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             colors.append("#e03131")
+        # 条件分岐: 前段条件が不成立で、`status == "watch"` を追加評価する。
         elif status == "watch":
             colors.append("#f2c94c")
         else:
@@ -592,8 +639,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     def _resolve(path_text: str) -> Path:
         p = Path(path_text)
+        # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
         if p.is_absolute():
             return p.resolve()
+
         return (ROOT / p).resolve()
 
     action = _resolve(args.action)
@@ -610,6 +659,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_png = _resolve(args.out_png)
 
     for p in [action, nonrel, born_pack, born_ab, bridge, shared, deriv_pack]:
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"required input not found: {_rel(p)}")
 
@@ -654,6 +704,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

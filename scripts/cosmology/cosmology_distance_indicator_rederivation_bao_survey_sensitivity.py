@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -65,8 +66,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -86,27 +89,42 @@ def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
     for tok in (s or "").split(","):
         tok = tok.strip()
+        # 条件分岐: `not tok` を満たす経路を評価する。
         if not tok:
             continue
+
         try:
             v = float(tok)
         except Exception:
             continue
+
+        # 条件分岐: `not (v > 0.0 and math.isfinite(v))` を満たす経路を評価する。
+
         if not (v > 0.0 and math.isfinite(v)):
             continue
+
         out.append(v)
+
     return sorted(set(out))
 
 
 def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
+    # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
     if not xs or len(xs) != len(ys):
         return None
+
+    # 条件分岐: `not math.isfinite(float(threshold))` を満たす経路を評価する。
+
     if not math.isfinite(float(threshold)):
         return None
+
     xs_f = [float(x) for x in xs]
     ys_f = [float(y) for y in ys]
+    # 条件分岐: `any((x <= 0.0 or not math.isfinite(x)) for x in xs_f)` を満たす経路を評価する。
     if any((x <= 0.0 or not math.isfinite(x)) for x in xs_f):
         return None
+
+    # 条件分岐: `math.isfinite(ys_f[0]) and ys_f[0] <= float(threshold)` を満たす経路を評価する。
 
     if math.isfinite(ys_f[0]) and ys_f[0] <= float(threshold):
         return xs_f[0]
@@ -114,12 +132,22 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
     for i in range(1, len(xs_f)):
         x0, x1 = xs_f[i - 1], xs_f[i]
         y0, y1 = ys_f[i - 1], ys_f[i]
+        # 条件分岐: `not (math.isfinite(y0) and math.isfinite(y1))` を満たす経路を評価する。
         if not (math.isfinite(y0) and math.isfinite(y1)):
             continue
+
+        # 条件分岐: `(y0 - threshold) == 0.0` を満たす経路を評価する。
+
         if (y0 - threshold) == 0.0:
             return x0
+
+        # 条件分岐: `(y0 - threshold) * (y1 - threshold) > 0.0` を満たす経路を評価する。
+
         if (y0 - threshold) * (y1 - threshold) > 0.0:
             continue
+
+        # 条件分岐: `y1 == y0` を満たす経路を評価する。
+
         if y1 == y0:
             return x1
 
@@ -128,6 +156,7 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
         lx1 = math.log10(x1)
         lx = lx0 + float(t) * (lx1 - lx0)
         return float(10.0**lx)
+
     return None
 
 
@@ -162,13 +191,23 @@ def _evaluate_best_pair(
                     p_e=p_e,
                 )
                 v = float(fit.get("max_abs_z", float("nan")))
+                # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
                 if not math.isfinite(v):
                     valid = False
                     break
+
+                # 条件分岐: `v <= 1.0` を満たす経路を評価する。
+
                 if v <= 1.0:
                     ok_1 += 1
+
+                # 条件分岐: `v <= 3.0` を満たす経路を評価する。
+
                 if v <= 3.0:
                     ok_3 += 1
+
+                # 条件分岐: `v > worst_v` を満たす経路を評価する。
+
                 if v > worst_v:
                     worst_v = v
                     worst_row = {
@@ -177,6 +216,8 @@ def _evaluate_best_pair(
                         "max_abs_z": v,
                         "limiting_observation": str(fit.get("limiting_observation") or "na"),
                     }
+
+            # 条件分岐: `not valid or worst_v < 0.0` を満たす経路を評価する。
 
             if not valid or worst_v < 0.0:
                 continue
@@ -190,6 +231,7 @@ def _evaluate_best_pair(
                 "opacity": {"id": op.id, "short_label": op.short_label, "mean": op.mean, "sigma": op.sigma},
                 "candle": {"id": cd.id, "short_label": cd.short_label, "mean": cd.mean, "sigma": cd.sigma},
             }
+            # 条件分岐: `best is None or float(candidate["worst_max_abs_z"]) < float(best["worst_max_a...` を満たす経路を評価する。
             if best is None or float(candidate["worst_max_abs_z"]) < float(best["worst_max_abs_z"]):
                 best = candidate
 
@@ -216,10 +258,15 @@ def _plot_f_bars(
     import matplotlib.pyplot as plt
 
     def _sanitize(v: Optional[float]) -> float:
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             return float(max_f * 1.25)
+
+        # 条件分岐: `not (math.isfinite(float(v)) and float(v) > 0.0)` を満たす経路を評価する。
+
         if not (math.isfinite(float(v)) and float(v) > 0.0):
             return float(max_f * 1.25)
+
         return float(v)
 
     f_all_v = [_sanitize(v) for v in f_all]
@@ -244,6 +291,7 @@ def _plot_f_bars(
 
     for bar, txt in zip(bars1, ann_all):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.05, txt, ha="center", va="bottom", fontsize=9)
+
     for bar, txt in zip(bars2, ann_ind):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.05, txt, ha="center", va="bottom", fontsize=9)
 
@@ -322,6 +370,7 @@ def _compute_required_f_scan(
                 "series": series,
             }
         )
+
     return results
 
 
@@ -354,14 +403,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     in_pe = data_dir / "cmb_temperature_scaling_constraints.json"
 
     for p in (in_bao_baseline, in_bao_ratio, in_ddr, in_opacity, in_candle, in_pt, in_pe):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing input: {p}")
 
     scan_scales = _parse_scales(str(args.bao_sigma_scale_scan))
+    # 条件分岐: `not scan_scales` を満たす経路を評価する。
     if not scan_scales:
         raise ValueError("empty --bao-sigma-scale-scan")
 
     # Load constraints
+
     ddr_rows = _read_json(in_ddr).get("constraints") or []
     opacity_rows = _read_json(in_opacity).get("constraints") or []
     candle_rows = _read_json(in_candle).get("constraints") or []
@@ -375,11 +427,13 @@ def main(argv: Optional[List[str]] = None) -> int:
         cand._apply_ddr_sigma_policy(cand.DDRConstraint.from_json(r), policy=ddr_sigma_policy, envelope=ddr_env)
         for r in ddr_rows
     ]
+    # 条件分岐: `not ddr` を満たす経路を評価する。
     if not ddr:
         raise ValueError("no DDR constraints found")
 
     opacity_all = cand._as_gaussian_list(opacity_rows, mean_key="alpha_opacity", sigma_key="alpha_opacity_sigma")
     candle_all = cand._as_gaussian_list(candle_rows, mean_key="s_L", sigma_key="s_L_sigma")
+    # 条件分岐: `not opacity_all or not candle_all` を満たす経路を評価する。
     if not opacity_all or not candle_all:
         raise ValueError("no opacity/candle constraints found")
 
@@ -388,10 +442,15 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     pt_all = cand._as_gaussian_list(pt_rows, mean_key="p_t", sigma_key="p_t_sigma")
     pe_all_from_beta = cand._as_pT_constraints(pe_rows)
+    # 条件分岐: `not pt_all` を満たす経路を評価する。
     if not pt_all:
         raise ValueError("no SN time dilation constraint found")
+
+    # 条件分岐: `not pe_all_from_beta` を満たす経路を評価する。
+
     if not pe_all_from_beta:
         raise ValueError("no CMB temperature scaling constraint found")
+
     p_t = pt_all[0]
     p_e = pe_all_from_beta[0]
 
@@ -445,7 +504,9 @@ def main(argv: Optional[List[str]] = None) -> int:
         for i in range(len(sRs)):
             for j in range(i + 1, len(sRs)):
                 max_pair = max(max_pair, abs(sRs[i] - sRs[j]))
+
         sigma_sys = 0.5 * float(max_pair)
+        # 条件分岐: `math.isfinite(sigma_sys) and sigma_sys > 0.0` を満たす経路を評価する。
         if math.isfinite(sigma_sys) and sigma_sys > 0.0:
             sigma_total = float(math.sqrt(float(comb["sigma"]) ** 2 + float(sigma_sys) ** 2))
             variants.append(
@@ -465,6 +526,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     # Optional (diagnostic): treat the maximum leave-one-out shift as an additional systematic width in s_R.
     # This connects "single-point dominance" (especially high-z points) to the effective BAO prior looseness.
+
     try:
         comb = next(v for v in variants if str(v.get("id") or "") == "bao_ratio_combined")
         sR_full = float(comb["s_R"])
@@ -474,11 +536,16 @@ def main(argv: Optional[List[str]] = None) -> int:
             fit = item.get("fit") or {}
             bf = fit.get("best_fit") or {}
             sR = bf.get("s_R")
+            # 条件分岐: `isinstance(sR, (int, float)) and math.isfinite(float(sR))` を満たす経路を評価する。
             if isinstance(sR, (int, float)) and math.isfinite(float(sR)):
                 shifts.append(float(sR) - sR_full)
+
+        # 条件分岐: `shifts` を満たす経路を評価する。
+
         if shifts:
             max_shift = float(max(abs(x) for x in shifts))
             sigma_sys = 0.5 * max_shift
+            # 条件分岐: `math.isfinite(sigma_sys) and sigma_sys > 0.0` を満たす経路を評価する。
             if math.isfinite(sigma_sys) and sigma_sys > 0.0:
                 sigma_total = float(math.sqrt(float(comb["sigma"]) ** 2 + float(sigma_sys) ** 2))
                 variants.append(
@@ -495,6 +562,8 @@ def main(argv: Optional[List[str]] = None) -> int:
                 )
     except Exception:
         pass
+
+    # 条件分岐: `len(variants) < 2` を満たす経路を評価する。
 
     if len(variants) < 2:
         raise ValueError("BAO ratio variants not found; expected at least boss_only/eboss_only/combined")
@@ -592,10 +661,15 @@ def main(argv: Optional[List[str]] = None) -> int:
         bf = fit.get("best_fit") or {}
         omitted_id = str(omitted.get("id") or "").strip()
         omitted_label = _short_point_label(str(omitted.get("short_label") or omitted_id or "unknown"))
+        # 条件分岐: `not omitted_id` を満たす経路を評価する。
         if not omitted_id:
             continue
+
+        # 条件分岐: `not (isinstance(bf.get("s_R"), (int, float)) and isinstance(bf.get("s_R_sigma...` を満たす経路を評価する。
+
         if not (isinstance(bf.get("s_R"), (int, float)) and isinstance(bf.get("s_R_sigma_1d"), (int, float))):
             continue
+
         loo_variants.append(
             {
                 "id": f"bao_ratio_combined_drop_{omitted_id}",
@@ -611,6 +685,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     loo_results: List[Dict[str, Any]] = []
     out_png_loo: Optional[Path] = None
     out_metrics_loo: Optional[Path] = None
+    # 条件分岐: `len(loo_variants) >= 3` を満たす経路を評価する。
     if len(loo_variants) >= 3:
         loo_results = _compute_required_f_scan(
             variants=loo_variants,
@@ -713,11 +788,15 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_metrics}")
+    # 条件分岐: `out_png_loo and out_metrics_loo` を満たす経路を評価する。
     if out_png_loo and out_metrics_loo:
         print(f"[ok] png : {out_png_loo}")
         print(f"[ok] json: {out_metrics_loo}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

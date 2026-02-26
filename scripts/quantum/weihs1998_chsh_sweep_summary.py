@@ -32,6 +32,7 @@ def _load_sweep(csv_path: Path) -> tuple[list[float], list[float]]:
             y = float(y_s) if y_s not in (None, "", "nan") else float("nan")
             xs.append(x)
             ys.append(y)
+
     return xs, ys
 
 
@@ -59,12 +60,15 @@ def main() -> None:
     out_dir = root / "output" / "public" / "quantum"
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `args.runs` を満たす経路を評価する。
     if args.runs:
         specs: list[RunSpec] = []
         for s in args.runs:
             parts = str(s).split(":")
+            # 条件分岐: `len(parts) != 3` を満たす経路を評価する。
             if len(parts) != 3:
                 raise SystemExit(f"[fail] invalid --runs item: {s} (expected subdir:run:out_tag)")
+
             specs.append(RunSpec(subdir=parts[0], run=parts[1], out_tag=parts[2]))
     else:
         specs = _default_runs()
@@ -74,9 +78,11 @@ def main() -> None:
 
     for sp in specs:
         csv_path = out_dir / f"weihs1998_chsh_sweep__{sp.out_tag}.csv"
+        # 条件分岐: `not csv_path.exists()` を満たす経路を評価する。
         if not csv_path.exists():
             missing.append(str(csv_path))
             continue
+
         xs, ys = _load_sweep(csv_path)
         best = max((y for y in ys if y == y), default=float("nan"))  # ignore NaN
         series.append(
@@ -89,13 +95,17 @@ def main() -> None:
             }
         )
 
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         print("[fail] missing per-run sweeps (run weihs1998_time_tag_reanalysis.py first):")
         for p in missing:
             print(f"- {p}")
+
         raise SystemExit(1)
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(figsize=(11.5, 6.5), dpi=150)
@@ -103,6 +113,7 @@ def main() -> None:
         csv_path = out_dir / f"weihs1998_chsh_sweep__{sp.out_tag}.csv"
         xs, ys = _load_sweep(csv_path)
         ax.plot(xs, ys, marker="o", lw=1.8, label=f"{sp.subdir}/{sp.run}")
+
     ax.axhline(2.0, color="0.25", ls="--", lw=1.0, label="local bound |S|=2")
     ax.set_xlabel("coincidence window half-width (ns)")
     ax.set_ylabel("|S| (fixed CHSH variant)")
@@ -136,6 +147,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

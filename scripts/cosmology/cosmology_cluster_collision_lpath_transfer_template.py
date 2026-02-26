@@ -34,6 +34,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -79,16 +80,25 @@ def _safe_float(value: Any) -> Optional[float]:
         out = float(value)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(out)` を満たす経路を評価する。
+
     if not math.isfinite(out):
         return None
+
     return out
 
 
 def _parse_opt_float(value: Any) -> Optional[float]:
+    # 条件分岐: `value is None` を満たす経路を評価する。
     if value is None:
         return None
+
+    # 条件分岐: `isinstance(value, str) and value.strip() == ""` を満たす経路を評価する。
+
     if isinstance(value, str) and value.strip() == "":
         return None
+
     return _safe_float(value)
 
 
@@ -107,59 +117,80 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
 
 
 def _sha256_file(path: Path) -> Optional[str]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     hasher = hashlib.sha256()
     with path.open("rb") as handle:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             hasher.update(chunk)
+
     return hasher.hexdigest()
 
 
 def _file_signature(path: Path) -> Dict[str, Any]:
     payload: Dict[str, Any] = {"path": _rel(path), "exists": bool(path.exists())}
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return payload
+
     try:
         stat = path.stat()
         payload["size_bytes"] = int(stat.st_size)
         payload["mtime_utc"] = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
     except Exception:
         pass
+
     digest = _sha256_file(path)
+    # 条件分岐: `digest is not None` を満たす経路を評価する。
     if digest is not None:
         payload["sha256"] = digest
+
     return payload
 
 
 def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
+
     diagnostics = payload.get("diagnostics")
+    # 条件分岐: `not isinstance(diagnostics, dict)` を満たす経路を評価する。
     if not isinstance(diagnostics, dict):
         return {}
+
     watchpack = diagnostics.get("primary_dataset_update_watchpack")
+    # 条件分岐: `not isinstance(watchpack, dict)` を満たす経路を評価する。
     if not isinstance(watchpack, dict):
         return {}
+
     return watchpack
 
 
 def _load_cases(path: Path) -> List[TransferCase]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"missing transfer cases CSV: {path}")
+
     out: List[TransferCase] = []
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             case_id = str(row.get("case_id", "")).strip()
+            # 条件分岐: `not case_id` を満たす経路を評価する。
             if not case_id:
                 continue
+
             label = str(row.get("label", case_id)).strip() or case_id
             cluster_family = str(row.get("cluster_family", "")).strip() or "unknown"
             branch_anchor = str(row.get("branch_anchor", "")).strip() or "bullet_main"
@@ -180,35 +211,46 @@ def _load_cases(path: Path) -> List[TransferCase]:
                     note=note,
                 )
             )
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise RuntimeError(f"no valid rows in transfer cases CSV: {path}")
+
     return out
 
 
 def _load_primary_registration(path: Path) -> Dict[str, Dict[str, Any]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     out: Dict[str, Dict[str, Any]] = {}
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
             case_id = str(row.get("case_id", "")).strip()
+            # 条件分岐: `not case_id` を満たす経路を評価する。
             if not case_id:
                 continue
+
             out[case_id] = {
                 "offset_obs_kpc": _parse_opt_float(row.get("offset_obs_kpc")),
                 "offset_sigma_kpc": _parse_opt_float(row.get("offset_sigma_kpc")),
                 "source_mode": str(row.get("source_mode", "primary_map_registered")).strip() or "primary_map_registered",
                 "note": str(row.get("note", "")).strip(),
             }
+
     return out
 
 
 def _bootstrap_primary_registration_csv(path: Path, cases: Sequence[TransferCase]) -> int:
     rows: List[Dict[str, Any]] = []
     for case in cases:
+        # 条件分岐: `str(case.cluster_family).lower() == "bullet"` を満たす経路を評価する。
         if str(case.cluster_family).lower() == "bullet":
             continue
+
         rows.append(
             {
                 "case_id": case.case_id,
@@ -220,8 +262,12 @@ def _bootstrap_primary_registration_csv(path: Path, cases: Sequence[TransferCase
                 "note": "fill offset_obs_kpc and offset_sigma_kpc from primary lensing/offset map",
             }
         )
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         return 0
+
     _write_csv(
         path,
         rows,
@@ -239,20 +285,29 @@ def _bootstrap_primary_registration_csv(path: Path, cases: Sequence[TransferCase
 
 
 def _load_bullet_reference(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"missing Bullet derivation JSON: {path}")
+
     src = json.loads(path.read_text(encoding="utf-8"))
     cluster_rows = src.get("cluster_rows", [])
+    # 条件分岐: `not isinstance(cluster_rows, list)` を満たす経路を評価する。
     if not isinstance(cluster_rows, list):
         cluster_rows = []
+
     pred_map: Dict[str, float] = {}
     for row in cluster_rows:
         cid = str(row.get("cluster_id", "")).strip()
         pred = _safe_float(row.get("pred_offset_kpc"))
+        # 条件分岐: `cid and pred is not None and pred > 0.0` を満たす経路を評価する。
         if cid and pred is not None and pred > 0.0:
             pred_map[cid] = float(abs(pred))
+
+    # 条件分岐: `"bullet_main" not in pred_map or "bullet_sub" not in pred_map` を満たす経路を評価する。
+
     if "bullet_main" not in pred_map or "bullet_sub" not in pred_map:
         raise RuntimeError("missing bullet_main/bullet_sub predicted offsets in derivation JSON")
+
     return {
         "source_json": src,
         "pred_offset_by_anchor": pred_map,
@@ -260,8 +315,10 @@ def _load_bullet_reference(path: Path) -> Dict[str, Any]:
 
 
 def _load_lpath_reference(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"missing L_path scaling JSON: {path}")
+
     src = json.loads(path.read_text(encoding="utf-8"))
     ref = src.get("reference_state", {})
     decision = src.get("decision", {})
@@ -270,8 +327,10 @@ def _load_lpath_reference(path: Path) -> Dict[str, Any]:
     tau_free0 = _safe_float(ref.get("tau_free_gyr"))
     lpath0 = _safe_float(ref.get("lpath_kpc"))
     temp_power = _safe_float(inputs.get("temp_power_collisional_branch"))
+    # 条件分岐: `pi0 is None or tau_free0 is None or lpath0 is None or temp_power is None` を満たす経路を評価する。
     if pi0 is None or tau_free0 is None or lpath0 is None or temp_power is None:
         raise RuntimeError("missing reference_state/input fields in lpath scaling JSON")
+
     return {
         "source_json": src,
         "pi0": float(pi0),
@@ -288,13 +347,16 @@ def _ratio_lpath(pi0: float, rho_ratio: float, v_ratio: float, temp_ratio: float
     rv = max(float(v_ratio), 1.0e-12)
     rt = max(float(temp_ratio), 1.0e-12)
     denom = rv + pi0 * rr * (rt**temp_power)
+    # 条件分岐: `(not math.isfinite(denom)) or denom <= 0.0` を満たす経路を評価する。
     if (not math.isfinite(denom)) or denom <= 0.0:
         return float("nan")
+
     return float((1.0 + pi0) / denom)
 
 
 def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_power: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         path.write_bytes(b"")
         return
@@ -315,6 +377,7 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
     axes[0].grid(True, axis="y", alpha=0.25)
 
     obs_rows = [r for r in rows if _safe_float(r.get("offset_obs_kpc")) is not None and _safe_float(r.get("offset_sigma_kpc")) is not None]
+    # 条件分岐: `obs_rows` を満たす経路を評価する。
     if obs_rows:
         x2 = np.arange(len(obs_rows), dtype=float)
         obs = np.array([float(r["offset_obs_kpc"]) for r in obs_rows], dtype=float)
@@ -417,6 +480,7 @@ def main() -> int:
     cases_loaded = _load_cases(args.cases_csv)
     primary_registration_bootstrap_rows = 0
     primary_registration_bootstrapped = False
+    # 条件分岐: `args.bootstrap_primary_registration and (not args.primary_registration_csv.ex...` を満たす経路を評価する。
     if args.bootstrap_primary_registration and (not args.primary_registration_csv.exists()):
         primary_registration_bootstrap_rows = _bootstrap_primary_registration_csv(args.primary_registration_csv, cases_loaded)
         primary_registration_bootstrapped = primary_registration_bootstrap_rows > 0
@@ -447,10 +511,13 @@ def main() -> int:
         primary_status = "skipped_bullet"
         next_action = "none"
 
+        # 条件分岐: `is_non_bullet` を満たす経路を評価する。
         if is_non_bullet:
             reg = primary_registration_map.get(case.case_id)
+            # 条件分岐: `not args.apply_primary_registration` を満たす経路を評価する。
             if not args.apply_primary_registration:
                 primary_status = "apply_not_requested"
+            # 条件分岐: 前段条件が不成立で、`reg is None` を追加評価する。
             elif reg is None:
                 primary_status = "missing_registration_row"
                 primary_registration_rows_missing += 1
@@ -463,14 +530,18 @@ def main() -> int:
                 reg_sig = _parse_opt_float(reg.get("offset_sigma_kpc"))
                 reg_source_mode = str(reg.get("source_mode", "primary_map_registered")).strip() or "primary_map_registered"
                 reg_note = str(reg.get("note", "")).strip()
+                # 条件分岐: `reg_obs is not None and reg_sig is not None and reg_sig > 0.0` を満たす経路を評価する。
                 if reg_obs is not None and reg_sig is not None and reg_sig > 0.0:
                     updated_obs = float(reg_obs)
                     updated_sig = float(reg_sig)
                     source_mode_after = reg_source_mode
+                    # 条件分岐: `reg_note` を満たす経路を評価する。
                     if reg_note:
                         updated_note = f"{updated_note} | registration_note:{reg_note}" if updated_note else f"registration_note:{reg_note}"
+
                     primary_status = "applied"
                     primary_registration_rows_applied += 1
+                # 条件分岐: 前段条件が不成立で、`reg_obs_raw_txt == "" and reg_sig_raw_txt == ""` を追加評価する。
                 elif reg_obs_raw_txt == "" and reg_sig_raw_txt == "":
                     primary_status = "pending_registration_values"
                     primary_registration_rows_pending_values += 1
@@ -478,8 +549,11 @@ def main() -> int:
                     primary_status = "invalid_registration_row"
                     primary_registration_rows_invalid += 1
 
+            # 条件分岐: `updated_obs is None or updated_sig is None or updated_sig <= 0.0` を満たす経路を評価する。
+
             if updated_obs is None or updated_sig is None or updated_sig <= 0.0:
                 next_action = "register_offset_obs_and_sigma_from_primary_dataset"
+            # 条件分岐: 前段条件が不成立で、`source_mode_after != "primary_map_registered"` を追加評価する。
             elif source_mode_after != "primary_map_registered":
                 next_action = "set_source_mode_primary_map_registered_after_primary_map_link"
 
@@ -499,6 +573,7 @@ def main() -> int:
             )
         )
         primary_registration_status_by_case[case.case_id] = primary_status
+        # 条件分岐: `is_non_bullet` を満たす経路を評価する。
         if is_non_bullet:
             primary_apply_report_rows.append(
                 {
@@ -561,14 +636,19 @@ def main() -> int:
             else None
         )
 
+        # 条件分岐: `not has_ratio` を満たす経路を評価する。
         if not has_ratio:
             row_status = "input_missing_ratio"
+        # 条件分岐: 前段条件が不成立で、`offset_ref is None` を追加評価する。
         elif offset_ref is None:
             row_status = "unknown_branch_anchor"
+        # 条件分岐: 前段条件が不成立で、`obs is None or sig is None or sig <= 0.0` を追加評価する。
         elif obs is None or sig is None or sig <= 0.0:
             row_status = "template_no_observation"
+        # 条件分岐: 前段条件が不成立で、`z is None or (not math.isfinite(z))` を追加評価する。
         elif z is None or (not math.isfinite(z)):
             row_status = "invalid_observation"
+        # 条件分岐: 前段条件が不成立で、`abs(z) <= 3.0` を追加評価する。
         elif abs(z) <= 3.0:
             row_status = "pass"
         else:
@@ -578,14 +658,17 @@ def main() -> int:
         has_observed_offset = obs is not None and sig is not None and sig > 0.0
         source_mode_primary = str(case.source_mode).strip() == "primary_map_registered"
         primary_registration_status = str(primary_registration_status_by_case.get(case.case_id, "not_evaluated"))
+        # 条件分岐: `is_non_bullet and not has_observed_offset` を満たす経路を評価する。
         if is_non_bullet and not has_observed_offset:
             readiness_state = "missing_observed_offset"
             priority_class = "low_blocked_missing_primary_data"
             required_action = "register_offset_obs_and_sigma_from_primary_dataset"
+        # 条件分岐: 前段条件が不成立で、`is_non_bullet and not source_mode_primary` を追加評価する。
         elif is_non_bullet and not source_mode_primary:
             readiness_state = "pending_primary_registration"
             priority_class = "low_blocked_missing_primary_data"
             required_action = "set_source_mode_primary_map_registered_after_primary_map_link"
+        # 条件分岐: 前段条件が不成立で、`row_status == "pass"` を追加評価する。
         elif row_status == "pass":
             readiness_state = "ready"
             priority_class = "active"
@@ -734,9 +817,11 @@ def main() -> int:
 
     hard_reject_n = int(sum(1 for check in checks if bool(check.get("hard_fail"))))
     watch_fail_n = int(sum(1 for check in checks if bool(check.get("watch_fail"))))
+    # 条件分岐: `hard_reject_n > 0` を満たす経路を評価する。
     if hard_reject_n > 0:
         overall_status = "reject"
         decision = "cluster_collision_lpath_transfer_reject"
+    # 条件分岐: 前段条件が不成立で、`watch_fail_n > 0` を追加評価する。
     elif watch_fail_n > 0:
         overall_status = "watch"
         decision = "cluster_collision_lpath_transfer_watch_missing_nonbullet_observed_offsets"
@@ -766,24 +851,33 @@ def main() -> int:
     prev_applied_rows = int(previous_watchpack.get("primary_registration_rows_applied", 0))
     prev_apply_requested = bool(previous_watchpack.get("apply_primary_registration", False))
     prev_event_counter = int(previous_watchpack.get("event_counter", 0))
+    # 条件分岐: `not previous_watchpack` を満たす経路を評価する。
     if not previous_watchpack:
         update_event_type = "bootstrap"
+    # 条件分岐: 前段条件が不成立で、`prev_sha != current_sha` を追加評価する。
     elif prev_sha != current_sha:
         update_event_type = "input_hash_changed"
+    # 条件分岐: 前段条件が不成立で、`prev_apply_requested != bool(args.apply_primary_registration)` を追加評価する。
     elif prev_apply_requested != bool(args.apply_primary_registration):
         update_event_type = "apply_mode_changed"
+    # 条件分岐: 前段条件が不成立で、`bool(args.apply_primary_registration) and prev_primary_sha != current_primary...` を追加評価する。
     elif bool(args.apply_primary_registration) and prev_primary_sha != current_primary_sha:
         update_event_type = "primary_registration_hash_changed"
+    # 条件分岐: 前段条件が不成立で、`prev_blocked_set != blocked_set` を追加評価する。
     elif prev_blocked_set != blocked_set:
         update_event_type = "blocked_case_set_changed"
+    # 条件分岐: 前段条件が不成立で、`prev_missing_obs != non_bullet_missing_obs_n` を追加評価する。
     elif prev_missing_obs != non_bullet_missing_obs_n:
         update_event_type = "missing_obs_count_changed"
+    # 条件分岐: 前段条件が不成立で、`prev_pending_source_mode != non_bullet_pending_source_mode_n` を追加評価する。
     elif prev_pending_source_mode != non_bullet_pending_source_mode_n:
         update_event_type = "source_mode_pending_count_changed"
+    # 条件分岐: 前段条件が不成立で、`prev_applied_rows != primary_registration_rows_applied` を追加評価する。
     elif prev_applied_rows != primary_registration_rows_applied:
         update_event_type = "applied_rows_changed"
     else:
         update_event_type = "no_change"
+
     update_event_detected = update_event_type != "no_change"
     event_counter = prev_event_counter + (1 if update_event_detected else 0)
     next_action = (
@@ -884,6 +978,7 @@ def main() -> int:
                 "note": case.note,
             }
         )
+
     template_fields = [
         "case_id",
         "label",
@@ -904,8 +999,10 @@ def main() -> int:
 
     primary_registration_template_rows: List[Dict[str, Any]] = []
     for row in rows_out:
+        # 条件分岐: `str(row["cluster_family"]).lower() == "bullet"` を満たす経路を評価する。
         if str(row["cluster_family"]).lower() == "bullet":
             continue
+
         required_action = str(row.get("required_action", "none"))
         primary_registration_template_rows.append(
             {
@@ -920,6 +1017,7 @@ def main() -> int:
                 "note": row.get("note"),
             }
         )
+
     primary_registration_template_fields = [
         "case_id",
         "label",
@@ -1077,6 +1175,7 @@ def main() -> int:
     _write_json(out_private_json, payload)
     _write_json(out_public_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -1147,6 +1246,8 @@ def main() -> int:
     print(f"[out] {out_public_apply_report}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

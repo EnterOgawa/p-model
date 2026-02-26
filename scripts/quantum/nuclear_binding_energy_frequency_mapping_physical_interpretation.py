@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -24,24 +27,36 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     Inclusive percentile with linear interpolation.
     p in [0,100].
     """
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
 def _stats(vals: list[float]) -> dict[str, float]:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan")}
+
     vs = sorted(vals)
     return {
         "n": float(len(vs)),
@@ -76,16 +91,27 @@ def _load_required_nu(*, csv_path: Path) -> list[dict[str, object]]:
                 continue
 
             # Exclude unbound / negative B entries and non-physical rows.
+
             if a <= 1 or not math.isfinite(b_obs) or b_obs <= 0:
                 continue
+
+            # 条件分岐: `not math.isfinite(j_e) or j_e <= 0` を満たす経路を評価する。
+
             if not math.isfinite(j_e) or j_e <= 0:
                 continue
+
+            # 条件分岐: `not math.isfinite(c_req) or c_req <= 0` を満たす経路を評価する。
+
             if not math.isfinite(c_req) or c_req <= 0:
                 continue
+
+            # 条件分岐: `not math.isfinite(c_col) or c_col <= 0` を満たす経路を評価する。
+
             if not math.isfinite(c_col) or c_col <= 0:
                 continue
 
             nu_eff = b_obs / (j_e * a)
+            # 条件分岐: `not math.isfinite(nu_eff)` を満たす経路を評価する。
             if not math.isfinite(nu_eff):
                 continue
 
@@ -103,6 +129,7 @@ def _load_required_nu(*, csv_path: Path) -> list[dict[str, object]]:
                     "parity": parity,
                 }
             )
+
     return out
 
 
@@ -112,6 +139,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(
             "[fail] missing frozen all-nuclei residual CSV.\n"
@@ -121,6 +149,7 @@ def main() -> None:
         )
 
     rows = _load_required_nu(csv_path=in_csv)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {in_csv}")
 
@@ -133,21 +162,26 @@ def main() -> None:
     per_a: dict[int, dict[str, float]] = {}
     for a0 in a_points:
         vals = [float(r["nu_eff_required"]) for r in rows if int(r["A"]) == a0]
+        # 条件分岐: `vals` を満たす経路を評価する。
         if vals:
             per_a[a0] = _stats(vals)
 
     # Simple bin medians for plotting.
+
     bins = [2, 6, 10, 20, 40, 60, 80, 100, 150, 200, 250, 300]
     bin_centers: list[float] = []
     bin_medians: list[float] = []
     for lo, hi in zip(bins[:-1], bins[1:], strict=True):
         vals = [float(r["nu_eff_required"]) for r in rows if lo <= int(r["A"]) < hi]
+        # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
             continue
+
         bin_centers.append(0.5 * (lo + hi))
         bin_medians.append(_stats(vals)["median"])
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     a_measured: list[int] = []
@@ -158,6 +192,7 @@ def main() -> None:
         a = int(r["A"])
         nu = float(r["nu_eff_required"])
         src = str(r["radius_source"])
+        # 条件分岐: `src == "measured_r_rms" or src == "tail_scale_anchor"` を満たす経路を評価する。
         if src == "measured_r_rms" or src == "tail_scale_anchor":
             a_measured.append(a)
             nu_measured.append(nu)
@@ -169,10 +204,12 @@ def main() -> None:
     ax.scatter(a_fallback, nu_fallback, s=10, alpha=0.18, color="0.55", label="radius law subset (r0·A^(1/3))")
     ax.scatter(a_measured, nu_measured, s=14, alpha=0.35, color="tab:blue", label="measured radii subset")
 
+    # 条件分岐: `bin_centers and bin_medians` を満たす経路を評価する。
     if bin_centers and bin_medians:
         ax.plot(bin_centers, bin_medians, color="tab:orange", lw=2.0, label="bin median")
 
     # Reference guides (diagnostic only; not a claim about nuclear microstructure).
+
     ax.axhline(2.0, color="0.2", lw=1.2, ls="--", label="baseline (collective C=A−1 ⇒ ν_eff≈2)")
     ax.fill_between([0, 320], [6, 6], [20, 20], color="tab:green", alpha=0.08, label="O(10) saturation-like scale (guide)")
 
@@ -218,6 +255,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -26,6 +26,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -48,9 +49,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -64,9 +68,11 @@ def build_pack(*, root: Path, metrics_relpaths: List[str]) -> Dict[str, Any]:
 
     for rel in metrics_relpaths:
         p = (root / rel).resolve()
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             missing.append(rel)
             continue
+
         j = _read_json(p)
         tests.append(
             {
@@ -80,6 +86,8 @@ def build_pack(*, root: Path, metrics_relpaths: List[str]) -> Dict[str, Any]:
                 "notes": j.get("notes"),
             }
         )
+
+    # 条件分岐: `missing` を満たす経路を評価する。
 
     if missing:
         raise SystemExit(
@@ -116,8 +124,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     out_path = Path(args.out)
+    # 条件分岐: `not out_path.is_absolute()` を満たす経路を評価する。
     if not out_path.is_absolute():
         out_path = (_ROOT / out_path).resolve()
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     metrics_relpaths = [
@@ -132,6 +142,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     ]
     holdout_summary_relpath = "output/public/quantum/condensed_holdout_audit_summary.json"
     holdout_summary_path = (_ROOT / holdout_summary_relpath).resolve()
+    # 条件分岐: `not holdout_summary_path.exists()` を満たす経路を評価する。
     if not holdout_summary_path.exists():
         raise SystemExit(
             "[fail] missing holdout audit summary:\n"
@@ -174,6 +185,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

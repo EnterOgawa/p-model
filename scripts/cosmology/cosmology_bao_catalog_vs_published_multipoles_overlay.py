@@ -34,6 +34,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -55,6 +56,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -74,14 +76,19 @@ def _load_ross_dat(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     e: list[float] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         parts = t.split()
+        # 条件分岐: `len(parts) < 3` を満たす経路を評価する。
         if len(parts) < 3:
             continue
+
         s.append(float(parts[0]))
         y.append(float(parts[1]))
         e.append(float(parts[2]))
+
     return np.asarray(s, dtype=float), np.asarray(y, dtype=float), np.asarray(e, dtype=float)
 
 
@@ -99,6 +106,7 @@ def _shell_mean_r_from_bin_center(r: np.ndarray, *, bin_size: float) -> np.ndarr
     den = (rp**3 - rm**3)
     with np.errstate(divide="ignore", invalid="ignore"):
         out = num / den
+
     return np.where(np.isfinite(out), out, r)
 
 
@@ -106,27 +114,39 @@ def _load_ross_covariance(path: Path) -> np.ndarray:
     rows: list[list[float]] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         rows.append([float(x) for x in t.split()])
+
+    # 条件分岐: `not rows` を満たす経路を評価する。
+
     if not rows:
         raise ValueError(f"empty covariance file: {path}")
+
     mat = np.asarray(rows, dtype=np.float64)
+    # 条件分岐: `mat.ndim != 2 or mat.shape[0] != mat.shape[1]` を満たす経路を評価する。
     if mat.ndim != 2 or mat.shape[0] != mat.shape[1]:
         raise ValueError(f"invalid covariance shape: {mat.shape} ({path})")
+
     return mat
 
 
 def _chi2_from_cov(residual: np.ndarray, cov: np.ndarray) -> float:
     r = np.asarray(residual, dtype=np.float64).reshape(-1)
     c = np.asarray(cov, dtype=np.float64)
+    # 条件分岐: `c.shape[0] != c.shape[1] or c.shape[0] != r.size` を満たす経路を評価する。
     if c.shape[0] != c.shape[1] or c.shape[0] != r.size:
         raise ValueError(f"chi2 dim mismatch: residual={r.size} cov={c.shape}")
     # Numerical guard: tiny diagonal jitter.
+
     diag = np.diag(c)
     jitter = float(np.nanmax(diag)) * 1e-12 if diag.size else 0.0
+    # 条件分岐: `not np.isfinite(jitter) or jitter <= 0.0` を満たす経路を評価する。
     if not np.isfinite(jitter) or jitter <= 0.0:
         jitter = 1e-12
+
     try:
         x = np.linalg.solve(c + jitter * np.eye(c.shape[0], dtype=np.float64), r)
         return float(r @ x)
@@ -140,13 +160,18 @@ def _load_two_col_dat(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     y: list[float] = []
     for line in path.read_text(encoding="utf-8").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         parts = t.split()
+        # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
         if len(parts) < 2:
             continue
+
         s.append(float(parts[0]))
         y.append(float(parts[1]))
+
     return np.asarray(s, dtype=float), np.asarray(y, dtype=float)
 
 
@@ -160,12 +185,15 @@ class Series:
 def _load_catalog_npz(path: Path, *, ell: int) -> Series:
     with np.load(path) as z:
         s = np.asarray(z["s"], dtype=float)
+        # 条件分岐: `ell == 0` を満たす経路を評価する。
         if ell == 0:
             xi = np.asarray(z["xi0"], dtype=float)
+        # 条件分岐: 前段条件が不成立で、`ell == 2` を追加評価する。
         elif ell == 2:
             xi = np.asarray(z["xi2"], dtype=float)
         else:
             raise ValueError("ell must be 0 or 2")
+
     s2_xi = (s * s) * xi
     return Series(s=s, s2_xi=s2_xi, err_s2_xi=None)
 
@@ -194,8 +222,12 @@ def _load_recon_multipole_from_counts(
     applied after reconstruction.
     """
     recon_estimator = str(recon_estimator).strip()
+    # 条件分岐: `recon_estimator == "stored"` を満たす経路を評価する。
     if recon_estimator == "stored":
         return _load_catalog_npz(path, ell=ell)
+
+    # 条件分岐: `recon_estimator not in ("delta_rr0", "delta_ss", "counts_rr0", "counts_ss")` を満たす経路を評価する。
+
     if recon_estimator not in ("delta_rr0", "delta_ss", "counts_rr0", "counts_ss"):
         raise ValueError(f"invalid recon_estimator: {recon_estimator}")
 
@@ -211,13 +243,19 @@ def _load_recon_multipole_from_counts(
         ss_tot = float(z["ss_tot"])
         mu_edges = np.asarray(z["mu_edges"], dtype=float) if ("mu_edges" in z) else None
 
+    # 条件分岐: `ss_w is None` を満たす経路を評価する。
+
     if ss_w is None:
         raise ValueError(f"recon estimator requested but ss_w missing in npz: {path}")
+
+    # 条件分岐: `mu_edges is None or mu_edges.size < 2` を満たす経路を評価する。
+
     if mu_edges is None or mu_edges.size < 2:
         raise ValueError(f"mu_edges missing/invalid in npz: {path}")
 
     nmu = int(mu_edges.size - 1)
     nb = int(s.size)
+    # 条件分岐: `dd_w.shape != (nb, nmu) or ds_w.shape != (nb, nmu) or rr0_w.shape != (nb, nmu...` を満たす経路を評価する。
     if dd_w.shape != (nb, nmu) or ds_w.shape != (nb, nmu) or rr0_w.shape != (nb, nmu) or ss_w.shape != (nb, nmu):
         raise ValueError(
             f"pair-count grid shape mismatch in {path}: "
@@ -233,14 +271,18 @@ def _load_recon_multipole_from_counts(
     rr0n = rr0_w / rr0_tot
     ssn = ss_w / ss_tot
 
+    # 条件分岐: `recon_estimator in ("delta_rr0", "delta_ss")` を満たす経路を評価する。
     if recon_estimator in ("delta_rr0", "delta_ss"):
         num = ddn - 2.0 * dsn + ssn
         denom = rr0n if (recon_estimator == "delta_rr0") else ssn
         with np.errstate(divide="ignore", invalid="ignore"):
             xi = num / denom
+
         xi = np.where(np.isfinite(xi), xi, 0.0)
+        # 条件分岐: `ell == 0` を満たす経路を評価する。
         if ell == 0:
             xi_l = np.sum(xi * dmu, axis=1)
+        # 条件分岐: 前段条件が不成立で、`ell == 2` を追加評価する。
         elif ell == 2:
             p2 = 0.5 * (3.0 * mu_mid * mu_mid - 1.0)
             xi_l = 5.0 * np.sum(xi * p2[None, :] * dmu, axis=1)
@@ -253,6 +295,7 @@ def _load_recon_multipole_from_counts(
         if ell == 0:
             pl = np.ones_like(mu_mid, dtype=np.float64)
             norm = 1.0
+        # 条件分岐: 前段条件が不成立で、`ell == 2` を追加評価する。
         elif ell == 2:
             pl = 0.5 * (3.0 * mu_mid * mu_mid - 1.0)
             norm = 5.0
@@ -267,6 +310,7 @@ def _load_recon_multipole_from_counts(
         denom0 = np.sum(rr0n * dmu, axis=1) if (recon_estimator == "counts_rr0") else np.sum(ssn * dmu, axis=1)
         with np.errstate(divide="ignore", invalid="ignore"):
             xi_l = num_l / denom0
+
         xi_l = np.where(np.isfinite(xi_l), xi_l, 0.0)
 
     s2_xi = (s * s) * np.asarray(xi_l, dtype=float)
@@ -293,8 +337,10 @@ def _maybe_recompute_recon_series_with_rr0_denominator(
 
 
 def _maybe_load_catalog_npz(path: Path, *, ell: int) -> Series | None:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     return _load_catalog_npz(path, ell=ell)
 
 
@@ -325,8 +371,10 @@ def _clip_range_by_center_then_project_x(
     s_center = np.asarray(s_center, dtype=float)
     s_x = np.asarray(s_x, dtype=float)
     s2_xi = np.asarray(s2_xi, dtype=float)
+    # 条件分岐: `err_s2_xi is not None` を満たす経路を評価する。
     if err_s2_xi is not None:
         err_s2_xi = np.asarray(err_s2_xi, dtype=float)
+
     m = (s_center >= float(s_min)) & (s_center <= float(s_max))
     return Series(s=s_x[m], s2_xi=s2_xi[m], err_s2_xi=(err_s2_xi[m] if err_s2_xi is not None else None))
 
@@ -344,8 +392,10 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
     a = np.asarray(a, dtype=float)
     b = np.asarray(b, dtype=float)
     m = np.isfinite(a) & np.isfinite(b)
+    # 条件分岐: `not np.any(m)` を満たす経路を評価する。
     if not np.any(m):
         return float("nan")
+
     return float(np.sqrt(np.mean((a[m] - b[m]) ** 2)))
 
 
@@ -427,6 +477,7 @@ def main(argv: list[str] | None = None) -> int:
     bincent = int(args.bincent)
     ross_x_axis = str(args.ross_x_axis)
     ross_bin_size = float(args.ross_bin_size)
+    # 条件分岐: `bincent < 0 or bincent > 4` を満たす経路を評価する。
     if bincent < 0 or bincent > 4:
         raise SystemExit("--bincent must be in 0..4")
 
@@ -469,6 +520,7 @@ def main(argv: list[str] | None = None) -> int:
         p_mono = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zb}_correlation_function_monopole_post_recon_bincent{bincent}.dat"
         p_quad = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zb}_correlation_function_quadrupole_post_recon_bincent{bincent}.dat"
         p_cov = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zb}_covariance_monoquad_post_recon_bincent{bincent}.dat"
+        # 条件分岐: `not (p_mono.exists() and p_quad.exists())` を満たす経路を評価する。
         if not (p_mono.exists() and p_quad.exists()):
             raise SystemExit(f"missing Ross files for zbin{zb} bincent{bincent}: {ross_dir}")
 
@@ -508,8 +560,10 @@ def main(argv: list[str] | None = None) -> int:
         # Catalog-based (Corrfunc): NPZ stores xi; convert to s^2 xi.
         ztag = f"b{zb}"
         cat_npz = (_ROOT / f"{cat_prefix}{ztag}{cat_suffix}.npz").resolve()
+        # 条件分岐: `not cat_npz.exists()` を満たす経路を評価する。
         if not cat_npz.exists():
             raise SystemExit(f"missing catalog npz: {cat_npz}")
+
         cat0 = _clip_range(_load_catalog_npz(cat_npz, ell=0), s_min=s_min, s_max=s_max)
         cat2 = _clip_range(_load_catalog_npz(cat_npz, ell=2), s_min=s_min, s_max=s_max)
 
@@ -527,6 +581,7 @@ def main(argv: list[str] | None = None) -> int:
 
         rmse0_rec = None
         rmse2_rec = None
+        # 条件分岐: `cat0_rec is not None and cat2_rec is not None` を満たす経路を評価する。
         if cat0_rec is not None and cat2_rec is not None:
             _, _, _, y_cat0_rec = _align_on_s(pub0, cat0_rec)
             _, _, _, y_cat2_rec = _align_on_s(pub2, cat2_rec)
@@ -534,17 +589,21 @@ def main(argv: list[str] | None = None) -> int:
             rmse2_rec = _rmse(y_pub2, y_cat2_rec)
 
         # Optional chi2/dof using Ross covariance (xi, not s^2 xi).
+
         chi2_dof_pre = None
         chi2_dof_rec = None
         try:
+            # 条件分岐: `p_cov.exists()` を満たす経路を評価する。
             if p_cov.exists():
                 cov_full = _load_ross_covariance(p_cov)
                 n_full = int(np.asarray(s0, dtype=float).size)
+                # 条件分岐: `cov_full.shape[0] == 2 * n_full` を満たす経路を評価する。
                 if cov_full.shape[0] == 2 * n_full:
                     m0 = (np.asarray(s0, dtype=float) >= s_min) & (np.asarray(s0, dtype=float) <= s_max)
                     m2 = (np.asarray(s2, dtype=float) >= s_min) & (np.asarray(s2, dtype=float) <= s_max)
                     idx0 = np.nonzero(m0)[0].astype(int, copy=False)
                     idx2 = np.nonzero(m2)[0].astype(int, copy=False)
+                    # 条件分岐: `(idx0.size > 0) and (idx2.size > 0)` を満たす経路を評価する。
                     if (idx0.size > 0) and (idx2.size > 0):
                         idx_all = np.concatenate([idx0, idx2 + n_full], axis=0)
                         cov = cov_full[np.ix_(idx_all, idx_all)]
@@ -554,17 +613,20 @@ def main(argv: list[str] | None = None) -> int:
                             s_cat = np.asarray(z["s"], dtype=float)
                             xi_cat0 = np.asarray(z["xi0"], dtype=float)
                             xi_cat2 = np.asarray(z["xi2"], dtype=float)
+
                         r0 = np.asarray(y0, dtype=float)[m0] - np.interp(np.asarray(s0, dtype=float)[m0], s_cat, xi_cat0)
                         r2 = np.asarray(y2, dtype=float)[m2] - np.interp(np.asarray(s2, dtype=float)[m2], s_cat, xi_cat2)
                         res = np.concatenate([r0, r2], axis=0)
                         chi2 = _chi2_from_cov(res, cov)
                         chi2_dof_pre = float(chi2 / max(1, int(res.size)))
 
+                        # 条件分岐: `cat_npz_recon.exists()` を満たす経路を評価する。
                         if cat_npz_recon.exists():
                             with np.load(cat_npz_recon) as z:
                                 s_cat_r = np.asarray(z["s"], dtype=float)
                                 xi_cat0_r = np.asarray(z["xi0"], dtype=float)
                                 xi_cat2_r = np.asarray(z["xi2"], dtype=float)
+
                             r0r = np.asarray(y0, dtype=float)[m0] - np.interp(np.asarray(s0, dtype=float)[m0], s_cat_r, xi_cat0_r)
                             r2r = np.asarray(y2, dtype=float)[m2] - np.interp(np.asarray(s2, dtype=float)[m2], s_cat_r, xi_cat2_r)
                             res_r = np.concatenate([r0r, r2r], axis=0)
@@ -576,6 +638,7 @@ def main(argv: list[str] | None = None) -> int:
             chi2_dof_rec = None
 
         # Satpathy vs catalog: evaluate on the catalog grid (Phase A pre-recon validation).
+
         y_sat0_on_cat = np.interp(np.asarray(cat0.s, dtype=float), np.asarray(sat0.s, dtype=float), np.asarray(sat0.s2_xi, dtype=float))
         y_sat2_on_cat = np.interp(np.asarray(cat2.s, dtype=float), np.asarray(sat2.s, dtype=float), np.asarray(sat2.s2_xi, dtype=float))
         rmse0_sat = _rmse(np.asarray(cat0.s2_xi, dtype=float), y_sat0_on_cat)
@@ -608,30 +671,43 @@ def main(argv: list[str] | None = None) -> int:
         ax_m.errorbar(s_al, y_pub0, yerr=e_pub0, fmt="o", markersize=3, color="black", alpha=0.8, label="published (Ross post-recon)")
         ax_m.plot(sat0.s, sat0.s2_xi, "-", color="#9467bd", linewidth=1.2, alpha=0.8, label="published (Satpathy pre-recon)")
         ax_m.plot(cat0.s, cat0.s2_xi, "-", color="#1f77b4", linewidth=1.6, label="catalog (Corrfunc)")
+        # 条件分岐: `cat0_rec is not None` を満たす経路を評価する。
         if cat0_rec is not None:
             label = "catalog (recon grid)"
+            # 条件分岐: `recon_estimator != "stored"` を満たす経路を評価する。
             if recon_estimator != "stored":
                 label = f"catalog (recon: {recon_estimator})"
+
             ax_m.plot(cat0_rec.s, cat0_rec.s2_xi, "-", color="#ff7f0e", linewidth=1.6, label=label)
+
         ax_m.set_ylabel(f"zbin{zb}\n$s^2\\,\\xi_0$")
         ax_m.grid(True, alpha=0.3)
 
         ax_q.errorbar(s_al, y_pub2, yerr=e_pub2, fmt="o", markersize=3, color="black", alpha=0.8, label="published (Ross post-recon)")
         ax_q.plot(sat2.s, sat2.s2_xi, "-", color="#9467bd", linewidth=1.2, alpha=0.8, label="published (Satpathy pre-recon)")
         ax_q.plot(cat2.s, cat2.s2_xi, "-", color="#1f77b4", linewidth=1.6, label="catalog (Corrfunc)")
+        # 条件分岐: `cat2_rec is not None` を満たす経路を評価する。
         if cat2_rec is not None:
             label = "catalog (recon grid)"
+            # 条件分岐: `recon_estimator != "stored"` を満たす経路を評価する。
             if recon_estimator != "stored":
                 label = f"catalog (recon: {recon_estimator})"
+
             ax_q.plot(cat2_rec.s, cat2_rec.s2_xi, "-", color="#ff7f0e", linewidth=1.6, label=label)
+
         ax_q.set_ylabel(f"zbin{zb}\n$s^2\\,\\xi_2$")
         ax_q.grid(True, alpha=0.3)
 
         rmse_lines0 = [f"RMSE (Ross)={rmse0:.3g}", f"RMSE (Sat)={rmse0_sat:.3g}"]
+        # 条件分岐: `rmse0_rec is not None` を満たす経路を評価する。
         if rmse0_rec is not None:
             rmse_lines0.insert(1, f"RMSE (Ross, recon)={rmse0_rec:.3g}")
+
+        # 条件分岐: `chi2_dof_rec is not None` を満たす経路を評価する。
+
         if chi2_dof_rec is not None:
             rmse_lines0.append(f"chi2/dof (Ross, recon)={chi2_dof_rec:.3g}")
+
         ax_m.text(
             0.02,
             0.95,
@@ -643,8 +719,10 @@ def main(argv: list[str] | None = None) -> int:
             bbox=dict(boxstyle="round", facecolor="white", alpha=0.6, edgecolor="none"),
         )
         rmse_lines2 = [f"RMSE (Ross)={rmse2:.3g}", f"RMSE (Sat)={rmse2_sat:.3g}"]
+        # 条件分岐: `rmse2_rec is not None` を満たす経路を評価する。
         if rmse2_rec is not None:
             rmse_lines2.insert(1, f"RMSE (Ross, recon)={rmse2_rec:.3g}")
+
         ax_q.text(
             0.02,
             0.95,
@@ -684,6 +762,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

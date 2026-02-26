@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -56,14 +57,17 @@ def _set_japanese_font() -> None:
     ]
     installed = {f.name for f in mpl.font_manager.fontManager.ttflist}
     chosen = [name for name in candidates if name in installed]
+    # 条件分岐: `chosen` を満たす経路を評価する。
     if chosen:
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
 
 
 def _safe_float(x: Any) -> Optional[float]:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return None
+
     try:
         return float(x)
     except Exception:
@@ -87,8 +91,10 @@ def _load_peakfit_points(metrics_path: Path) -> List[PeakfitPoint]:
     d = json.loads(metrics_path.read_text(encoding="utf-8"))
     out: List[PeakfitPoint] = []
     for r in d.get("results", []) if isinstance(d, dict) else []:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         sample = str(r.get("sample") or "")
         caps = str(r.get("caps") or "")
         dist = str(r.get("dist") or "")
@@ -100,17 +106,23 @@ def _load_peakfit_points(metrics_path: Path) -> List[PeakfitPoint]:
         sigma_is_lower_bound = bool((screening or {}).get("abs_sigma_is_lower_bound", False))
         status = str((screening or {}).get("status") or "")
 
+        # 条件分岐: `sigma is None` を満たす経路を評価する。
         if sigma is None:
             # Fallback: infer from CI width when available.
             ci = (fit_free or {}).get("eps_ci_1sigma") if isinstance(fit_free, dict) else None
+            # 条件分岐: `isinstance(ci, list) and len(ci) == 2` を満たす経路を評価する。
             if isinstance(ci, list) and len(ci) == 2:
                 lo = _safe_float(ci[0])
                 hi = _safe_float(ci[1])
+                # 条件分岐: `lo is not None and hi is not None` を満たす経路を評価する。
                 if lo is not None and hi is not None:
                     sigma = 0.5 * abs(hi - lo)
                     scan = (screening or {}).get("scan") if isinstance((screening or {}).get("scan"), dict) else {}
+                    # 条件分岐: `bool((scan or {}).get("ci_clipped", False))` を満たす経路を評価する。
                     if bool((scan or {}).get("ci_clipped", False)):
                         sigma_is_lower_bound = True
+
+        # 条件分岐: `not sample or not caps or not dist or z_eff is None or eps is None` を満たす経路を評価する。
 
         if not sample or not caps or not dist or z_eff is None or eps is None:
             continue
@@ -128,15 +140,21 @@ def _load_peakfit_points(metrics_path: Path) -> List[PeakfitPoint]:
                 source_metrics=str(metrics_path.as_posix()),
             )
         )
+
     return out
 
 
 def _dist_style(dist: str) -> Tuple[str, str]:
     dist = str(dist)
+    # 条件分岐: `dist == "lcdm"` を満たす経路を評価する。
     if dist == "lcdm":
         return "#1f77b4", "o"
+
+    # 条件分岐: `dist == "pbg"` を満たす経路を評価する。
+
     if dist == "pbg":
         return "#ff7f0e", "s"
+
     return "#7f7f7f", "D"
 
 
@@ -144,22 +162,40 @@ def _sample_label(sample: str) -> str:
     # Keep names compact and stable.
     if sample == "lowz":
         return "BOSS LOWZ"
+
+    # 条件分岐: `sample == "cmass"` を満たす経路を評価する。
+
     if sample == "cmass":
         return "BOSS CMASS"
+
+    # 条件分岐: `sample == "lrgpcmass_rec"` を満たす経路を評価する。
+
     if sample == "lrgpcmass_rec":
         return "eBOSS LRG"
+
+    # 条件分岐: `sample == "qso"` を満たす経路を評価する。
+
     if sample == "qso":
         return "eBOSS QSO"
+
     return sample
 
 
 def _caps_label(caps: str) -> str:
+    # 条件分岐: `caps == "combined"` を満たす経路を評価する。
     if caps == "combined":
         return "combined"
+
+    # 条件分岐: `caps == "north"` を満たす経路を評価する。
+
     if caps == "north":
         return "NGC"
+
+    # 条件分岐: `caps == "south"` を満たす経路を評価する。
+
     if caps == "south":
         return "SGC"
+
     return caps
 
 
@@ -167,13 +203,20 @@ def _calc_delta_z(
     a: PeakfitPoint | None, b: PeakfitPoint | None
 ) -> Tuple[Optional[float], Optional[float], Optional[float]]:
     """Return (delta=a-b, sigma_delta, z=delta/sigma_delta)."""
+    # 条件分岐: `a is None or b is None` を満たす経路を評価する。
     if a is None or b is None:
         return None, None, None
+
+    # 条件分岐: `a.sigma_eps_1sigma is None or b.sigma_eps_1sigma is None` を満たす経路を評価する。
+
     if a.sigma_eps_1sigma is None or b.sigma_eps_1sigma is None:
         return None, None, None
+
     sigma_delta = math.sqrt(float(a.sigma_eps_1sigma) ** 2 + float(b.sigma_eps_1sigma) ** 2)
+    # 条件分岐: `not (sigma_delta > 0)` を満たす経路を評価する。
     if not (sigma_delta > 0):
         return None, None, None
+
     delta = float(a.eps) - float(b.eps)
     return delta, sigma_delta, float(delta / sigma_delta)
 
@@ -212,14 +255,20 @@ def main(argv: list[str] | None = None) -> int:
     for sample in samples:
         for caps in caps_list:
             metrics_path = out_dir / f"cosmology_bao_catalog_peakfit_{sample}_{caps}_metrics.json"
+            # 条件分岐: `not metrics_path.exists()` を満たす経路を評価する。
             if not metrics_path.exists():
                 missing.append(f"{sample}/{caps}")
                 continue
+
             inputs.append(metrics_path.as_posix())
             for pt in _load_peakfit_points(metrics_path):
+                # 条件分岐: `pt.dist not in dists` を満たす経路を評価する。
                 if pt.dist not in dists:
                     continue
+
                 by_key[(pt.sample, pt.caps, pt.dist)] = pt
+
+    # 条件分岐: `not by_key` を満たす経路を評価する。
 
     if not by_key:
         raise SystemExit(f"no inputs found (missing={missing})")
@@ -228,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
         return by_key.get((sample, caps, dist))
 
     # Derived stats: cap tension (north - south)
+
     cap_tension: Dict[str, Dict[str, Any]] = {}
     for sample in samples:
         cap_tension[sample] = {}
@@ -244,6 +294,7 @@ def main(argv: list[str] | None = None) -> int:
             }
 
     # CSV rows
+
     csv_rows: List[Dict[str, Any]] = []
     for sample in samples:
         for dist in dists:
@@ -275,6 +326,7 @@ def main(argv: list[str] | None = None) -> int:
             )
 
     # Plot
+
     _set_japanese_font()
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14.5, 5.6), dpi=140)
 
@@ -283,16 +335,20 @@ def main(argv: list[str] | None = None) -> int:
     for sample in samples:
         for dist in dists:
             pt = get(sample, "combined", dist)
+            # 条件分岐: `pt is None` を満たす経路を評価する。
             if pt is None:
                 continue
+
             color, marker = _dist_style(dist)
             x = float(pt.z_eff) + float(offsets.get(dist, 0.0))
             y = float(pt.eps)
             sig = pt.sigma_eps_1sigma
+            # 条件分岐: `sig is not None and sig > 0` を満たす経路を評価する。
             if sig is not None and sig > 0:
                 ax1.errorbar([x], [y], yerr=[sig], fmt=marker, color=color, ecolor=color, capsize=3, markersize=7)
             else:
                 ax1.plot([x], [y], marker=marker, color=color, markersize=7, linestyle="none")
+
             ax1.annotate(
                 _sample_label(sample),
                 (x, y),
@@ -317,6 +373,7 @@ def main(argv: list[str] | None = None) -> int:
             mpl.lines.Line2D([0], [0], marker=marker, color=color, linestyle="none", markersize=7)
         )
         labels.append(dist)
+
     ax1.legend(handles, labels, loc="upper right", frameon=True, title="dist")
 
     # Panel B: cap tension z-score (north - south)
@@ -327,6 +384,7 @@ def main(argv: list[str] | None = None) -> int:
         for sample in samples:
             zd = cap_tension.get(sample, {}).get(dist, {}).get("z_delta")
             zvals.append(float(zd) if isinstance(zd, (int, float)) and math.isfinite(float(zd)) else float("nan"))
+
         color, _marker = _dist_style(dist)
         ax2.bar(x + (j - (len(dists) - 1) / 2.0) * width, zvals, width=width, color=color, alpha=0.85, label=dist)
 
@@ -334,6 +392,7 @@ def main(argv: list[str] | None = None) -> int:
     for thr, ls, a in [(3.0, "--", 0.6), (5.0, ":", 0.5)]:
         ax2.axhline(+thr, color="#444444", linestyle=ls, linewidth=1, alpha=a)
         ax2.axhline(-thr, color="#444444", linestyle=ls, linewidth=1, alpha=a)
+
     ax2.set_xticks(x, [_sample_label(s) for s in samples], rotation=20, ha="right")
     ax2.set_ylabel("z = (ε_NGC − ε_SGC) / √(σ_N^2+σ_S^2)")
     ax2.set_title("cap依存（NGC/SGC）: 張力の定量化")
@@ -391,6 +450,8 @@ def main(argv: list[str] | None = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

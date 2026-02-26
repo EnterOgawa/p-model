@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 from pypdf import PdfReader
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -32,9 +33,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as handle:
         while True:
             block = handle.read(chunk_bytes)
+            # 条件分岐: `not block` を満たす経路を評価する。
             if not block:
                 break
+
             digest.update(block)
+
     return digest.hexdigest()
 
 
@@ -47,8 +51,10 @@ def _rel(path: Path) -> str:
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(handle)
         writer.writerow(headers)
@@ -58,8 +64,10 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 def _ensure_pdf(*, url: str, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `path.exists()` を満たす経路を評価する。
     if path.exists():
         return
+
     urllib.request.urlretrieve(url, path)
 
 
@@ -78,8 +86,10 @@ def _extract_pdf_text(path: Path) -> str:
 
 def _match_required(pattern: str, text: str, *, label: str) -> tuple[float, float]:
     hit = re.search(pattern, text, flags=re.IGNORECASE)
+    # 条件分岐: `not hit` を満たす経路を評価する。
     if not hit:
         raise SystemExit(f"[fail] cannot extract {label} from CKM source text")
+
     value = float(hit.group(1))
     sigma = float(hit.group(2))
     return value, sigma
@@ -160,11 +170,13 @@ def _correlation_reassessment(
     watch_to_pass_with_uncorrelated_sigma = bool(math.isfinite(z_uncorrelated) and z_uncorrelated <= watch_z_threshold)
     hard_to_pass_with_reported_sigma = bool(math.isfinite(z_reported) and z_reported <= hard_z_threshold)
 
+    # 条件分岐: `watch_to_pass_with_reported_sigma` を満たす経路を評価する。
     if watch_to_pass_with_reported_sigma:
         watch_resolution_status = "watch_pass_already_satisfied"
         watch_lock_reason = "none"
     else:
         watch_resolution_status = "watch_locked_by_current_primary_source_precision"
+        # 条件分岐: `math.isfinite(sigma_gap_watch) and sigma_gap_watch > 0.0` を満たす経路を評価する。
         if math.isfinite(sigma_gap_watch) and sigma_gap_watch > 0.0:
             watch_lock_reason = (
                 "reported first-row sigma is below watch-pass requirement; input precision update is required."
@@ -268,8 +280,10 @@ def main() -> None:
 
     hard_pass = bool(math.isfinite(z_abs_reported) and z_abs_reported <= float(args.hard_z_threshold))
     watch_pass = bool(math.isfinite(z_abs_reported) and z_abs_reported <= float(args.watch_z_threshold))
+    # 条件分岐: `hard_pass and watch_pass` を満たす経路を評価する。
     if hard_pass and watch_pass:
         status = "pass"
+    # 条件分岐: 前段条件が不成立で、`hard_pass` を追加評価する。
     elif hard_pass:
         status = "watch"
     else:
@@ -377,6 +391,8 @@ def main() -> None:
     print(f"  {out_json}")
     print(f"  {out_png}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -21,9 +21,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -61,10 +64,15 @@ def _k_w_mk_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray
 
 
 def _k_at_t(*, t_k: float, coeffs: dict[str, float], t_min_k: float, t_max_k: float) -> Optional[float]:
+    # 条件分岐: `not (math.isfinite(t_k) and math.isfinite(t_min_k) and math.isfinite(t_max_k))` を満たす経路を評価する。
     if not (math.isfinite(t_k) and math.isfinite(t_min_k) and math.isfinite(t_max_k)):
         return None
+
+    # 条件分岐: `t_k < t_min_k - 1e-9 or t_k > t_max_k + 1e-9` を満たす経路を評価する。
+
     if t_k < t_min_k - 1e-9 or t_k > t_max_k + 1e-9:
         return None
+
     v = float(_k_w_mk_from_coeffs(np.array([float(t_k)], dtype=float), coeffs)[0])
     return v if math.isfinite(v) else None
 
@@ -76,6 +84,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_trc_ofhc_copper_thermal_conductivity"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -83,11 +92,13 @@ def main() -> None:
         )
 
     extracted = _read_json(extracted_path)
+    # 条件分岐: `extracted.get("property") != "thermal_conductivity"` を満たす経路を評価する。
     if extracted.get("property") != "thermal_conductivity":
         raise SystemExit(f"[fail] unexpected property in {extracted_path}: {extracted.get('property')!r}")
 
     units = str(extracted.get("units") or "")
     rrr_obj = extracted.get("rrr")
+    # 条件分岐: `not isinstance(rrr_obj, dict) or not rrr_obj` を満たす経路を評価する。
     if not isinstance(rrr_obj, dict) or not rrr_obj:
         raise SystemExit(f"[fail] rrr missing/empty: {extracted_path}")
 
@@ -97,13 +108,17 @@ def main() -> None:
             rrr_values.append(int(str(k)))
         except Exception:
             continue
+
     rrr_values = sorted(set(rrr_values))
+    # 条件分岐: `not rrr_values` を満たす経路を評価する。
     if not rrr_values:
         raise SystemExit(f"[fail] could not parse RRR keys: {list(rrr_obj.keys())[:10]}")
 
     # Use the intersection of ranges across RRR sets for plotting/CSV.
+
     t_min = max(float(rrr_obj[str(r)]["data_range"]["t_min_k"]) for r in rrr_values)
     t_max = min(float(rrr_obj[str(r)]["data_range"]["t_max_k"]) for r in rrr_values)
+    # 条件分岐: `not (math.isfinite(t_min) and math.isfinite(t_max) and 0 < t_min < t_max)` を満たす経路を評価する。
     if not (math.isfinite(t_min) and math.isfinite(t_max) and 0 < t_min < t_max):
         raise SystemExit(f"[fail] invalid common range: [{t_min}, {t_max}]")
 
@@ -113,11 +128,14 @@ def main() -> None:
     curves: dict[int, np.ndarray] = {}
     for r in rrr_values:
         coeffs = rrr_obj[str(r)].get("coefficients")
+        # 条件分岐: `not isinstance(coeffs, dict)` を満たす経路を評価する。
         if not isinstance(coeffs, dict):
             raise SystemExit(f"[fail] missing coefficients for RRR={r}")
+
         curves[int(r)] = _k_w_mk_from_coeffs(t_grid, coeffs=coeffs)  # W/(m-K)
 
     # CSV
+
     out_csv = out_dir / "condensed_ofhc_copper_thermal_conductivity_baseline.csv"
     with out_csv.open("w", encoding="utf-8", newline="") as f:
         fieldnames = ["T_K"] + [f"k_RRR{r}_W_mK" for r in rrr_values]
@@ -127,14 +145,17 @@ def main() -> None:
             row: dict[str, Any] = {"T_K": float(t_grid[i])}
             for r in rrr_values:
                 row[f"k_RRR{r}_W_mK"] = float(curves[r][i])
+
             w.writerow(row)
 
     # Plot (log-log)
+
     plt.figure(figsize=(8.5, 4.8))
     colors = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
     for idx, r in enumerate(rrr_values):
         c = colors[idx % len(colors)]
         plt.plot(t_grid, curves[r], label=f"RRR={r}", color=c, linewidth=2.0, alpha=0.95)
+
     plt.xscale("log")
     plt.yscale("log")
     plt.xlabel("Temperature T (K)")
@@ -177,8 +198,10 @@ def main() -> None:
         err_rel = float(fit_err_pct[str(r)]) / 100.0
         tt = []
         for t_s, k in k_ref[str(r)].items():
+            # 条件分岐: `k is None or not math.isfinite(float(k))` を満たす経路を評価する。
             if k is None or not math.isfinite(float(k)):
                 continue
+
             kf = float(k)
             sigma_k = err_rel * kf
             tt.append(
@@ -255,6 +278,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

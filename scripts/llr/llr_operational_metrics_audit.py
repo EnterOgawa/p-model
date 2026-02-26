@@ -39,22 +39,29 @@ def _safe_rel(path: Path, root: Path) -> str:
 
 def _read_record11_meta(path: Path, line_numbers: Sequence[int]) -> Dict[int, Dict[str, float]]:
     need = set(int(v) for v in line_numbers if v is not None and np.isfinite(float(v)))
+    # 条件分岐: `not need` を満たす経路を評価する。
     if not need:
         return {}
+
     out: Dict[int, Dict[str, float]] = {}
     with path.open("r", encoding="utf-8", errors="replace") as f:
         for lineno, raw in enumerate(f, start=1):
+            # 条件分岐: `lineno not in need` を満たす経路を評価する。
             if lineno not in need:
                 continue
+
             toks = raw.strip().split()
+            # 条件分岐: `not toks or toks[0] != "11"` を満たす経路を評価する。
             if not toks or toks[0] != "11":
                 continue
+
             item: Dict[str, float] = {
                 "np_window_s": _to_float(toks[5]) if len(toks) > 5 else float("nan"),
                 "np_n_raw_ranges": _to_float(toks[6]) if len(toks) > 6 else float("nan"),
                 "np_bin_rms_ps": _to_float(toks[7]) if len(toks) > 7 else float("nan"),
             }
             out[int(lineno)] = item
+
     return out
 
 
@@ -71,19 +78,25 @@ def _augment_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
     cache: Dict[str, Dict[int, Dict[str, float]]] = {}
     for src, g in grouped:
         p = (root / Path(str(src))).resolve()
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         ln = pd.to_numeric(g["lineno"], errors="coerce").dropna().astype(int).tolist()
         cache[str(src)] = _read_record11_meta(p, ln)
 
     for idx, row in out.iterrows():
         src = str(row.get("source_file", ""))
         ln = row.get("lineno")
+        # 条件分岐: `not (src and np.isfinite(_to_float(ln)))` を満たす経路を評価する。
         if not (src and np.isfinite(_to_float(ln))):
             continue
+
         rec = cache.get(src, {}).get(int(float(ln)))
+        # 条件分岐: `not rec` を満たす経路を評価する。
         if not rec:
             continue
+
         np_window[idx] = _to_float(rec.get("np_window_s"))
         np_n_raw[idx] = _to_float(rec.get("np_n_raw_ranges"))
         np_bin_rms[idx] = _to_float(rec.get("np_bin_rms_ps"))
@@ -95,8 +108,10 @@ def _augment_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
 
 
 def _solve_floor_ps(residual_ps: np.ndarray, sigma_ps: np.ndarray) -> float:
+    # 条件分岐: `len(residual_ps) == 0` を満たす経路を評価する。
     if len(residual_ps) == 0:
         return float("nan")
+
     r2 = residual_ps * residual_ps
     s2 = sigma_ps * sigma_ps
     lo = 0.0
@@ -104,14 +119,17 @@ def _solve_floor_ps(residual_ps: np.ndarray, sigma_ps: np.ndarray) -> float:
     for _ in range(120):
         mid = 0.5 * (lo + hi)
         val = float(np.mean(r2 / np.maximum(s2 + mid * mid, 1e-24)))
+        # 条件分岐: `val > 1.0` を満たす経路を評価する。
         if val > 1.0:
             lo = mid
         else:
             hi = mid
+
     return float(hi)
 
 
 def _subset_metrics(df: pd.DataFrame) -> Dict[str, Any]:
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         return {"n_points": 0}
 
@@ -124,6 +142,7 @@ def _subset_metrics(df: pd.DataFrame) -> Dict[str, Any]:
     bin_rms_ps = bin_rms_ps[ok]
     n_raw = n_raw[ok]
 
+    # 条件分岐: `len(res_ns) == 0` を満たす経路を評価する。
     if len(res_ns) == 0:
         return {"n_points": 0}
 
@@ -136,6 +155,7 @@ def _subset_metrics(df: pd.DataFrame) -> Dict[str, Any]:
 
     ok_n = np.isfinite(n_raw) & (n_raw > 0)
     z_np_mean = np.array([], dtype=float)
+    # 条件分岐: `np.any(ok_n)` を満たす経路を評価する。
     if np.any(ok_n):
         sigma_mean_ps = bin_rms_ps[ok_n] / np.sqrt(n_raw[ok_n])
         z_np_mean = np.abs(res_ps[ok_n]) / np.maximum(sigma_mean_ps, 1e-12)
@@ -158,8 +178,10 @@ def _subset_metrics(df: pd.DataFrame) -> Dict[str, Any]:
 
 
 def _write_plot(path: Path, summary_rows: List[Dict[str, Any]]) -> None:
+    # 条件分岐: `not summary_rows` を満たす経路を評価する。
     if not summary_rows:
         return
+
     names = [str(r["subset"]) for r in summary_rows]
     wrms = [float(r.get("weighted_rms_ns_bin_rms", float("nan"))) for r in summary_rows]
     floor = [float(r.get("model_floor_ns_for_chi2eq1", float("nan"))) for r in summary_rows]
@@ -210,17 +232,24 @@ def main() -> int:
 
     points_path = Path(str(args.points_csv))
     out_dir = Path(str(args.out_dir))
+    # 条件分岐: `not points_path.is_absolute()` を満たす経路を評価する。
     if not points_path.is_absolute():
         points_path = (_ROOT / points_path).resolve()
+
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
+
     if not out_dir.is_absolute():
         out_dir = (_ROOT / out_dir).resolve()
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not points_path.exists()` を満たす経路を評価する。
     if not points_path.exists():
         print(f"[err] missing points csv: {points_path}")
         return 2
 
     df = pd.read_csv(points_path)
+    # 条件分岐: `df.empty` を満たす経路を評価する。
     if df.empty:
         print(f"[err] empty points csv: {points_path}")
         return 2
@@ -311,6 +340,8 @@ def main() -> int:
     print(f"[ok] {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

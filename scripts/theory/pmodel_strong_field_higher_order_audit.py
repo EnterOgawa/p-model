@@ -28,6 +28,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -78,66 +79,89 @@ def _sha256_file(path: Path) -> Optional[str]:
         with path.open("rb") as f:
             while True:
                 chunk = f.read(1024 * 1024)
+                # 条件分岐: `not chunk` を満たす経路を評価する。
                 if not chunk:
                     break
+
                 h.update(chunk)
     except Exception:
         return None
+
     return h.hexdigest().upper()
 
 
 def _file_signature(path: Optional[Path]) -> Dict[str, Any]:
+    # 条件分岐: `path is None` を満たす経路を評価する。
     if path is None:
         return {"exists": False, "path": None}
+
     payload: Dict[str, Any] = {"exists": bool(path.exists()), "path": _rel(path)}
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return payload
+
     try:
         stat = path.stat()
         payload["size_bytes"] = int(stat.st_size)
         payload["mtime_utc"] = datetime.fromtimestamp(stat.st_mtime, timezone.utc).isoformat()
     except Exception:
         pass
+
     sha256 = _sha256_file(path)
+    # 条件分岐: `sha256 is not None` を満たす経路を評価する。
     if sha256 is not None:
         payload["sha256"] = sha256
+
     return payload
 
 
 def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         payload = _read_json(path)
     except Exception:
         return {}
+
     diagnostics = payload.get("diagnostics")
+    # 条件分岐: `not isinstance(diagnostics, dict)` を満たす経路を評価する。
     if not isinstance(diagnostics, dict):
         return {}
+
     watchpack = diagnostics.get("eht_kappa_update_watchpack")
+    # 条件分岐: `not isinstance(watchpack, dict)` を満たす経路を評価する。
     if not isinstance(watchpack, dict):
         return {}
+
     return watchpack
 
 
 def _load_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Path]:
     for path in paths:
+        # 条件分岐: `path.exists()` を満たす経路を評価する。
         if path.exists():
             return _read_json(path), path
+
     raise FileNotFoundError(f"No input found among: {[str(p) for p in paths]}")
 
 
 def _load_optional_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Optional[Path]]:
     for path in paths:
+        # 条件分岐: `path.exists()` を満たす経路を評価する。
         if path.exists():
             return _read_json(path), path
+
     return {}, None
 
 
 def _load_optional_csv_first_existing(paths: Sequence[Path]) -> Tuple[List[Dict[str, str]], Optional[Path]]:
     for path in paths:
+        # 条件分岐: `path.exists()` を満たす経路を評価する。
         if path.exists():
             return _read_csv_rows(path), path
+
     return [], None
 
 
@@ -146,29 +170,41 @@ def _to_float(v: Any) -> Optional[float]:
         val = float(v)
     except Exception:
         return None
+
+    # 条件分岐: `not np.isfinite(val)` を満たす経路を評価する。
+
     if not np.isfinite(val):
         return None
+
     return val
 
 
 def _resolve_existing_path(path_like: Any) -> Optional[Path]:
+    # 条件分岐: `path_like is None` を満たす経路を評価する。
     if path_like is None:
         return None
+
     raw = str(path_like).strip()
+    # 条件分岐: `not raw` を満たす経路を評価する。
     if not raw:
         return None
+
     p = Path(raw)
     candidates: List[Path] = []
+    # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
     if p.is_absolute():
         candidates.append(p)
     else:
         candidates.extend([ROOT / p, Path(raw)])
+
     for c in candidates:
         try:
+            # 条件分岐: `c.exists()` を満たす経路を評価する。
             if c.exists():
                 return c.resolve()
         except Exception:
             continue
+
     return None
 
 
@@ -177,64 +213,93 @@ def _load_planck_tt_binned_sigma(path: Path) -> Optional[Tuple[np.ndarray, np.nd
         arr = np.loadtxt(path)
     except Exception:
         return None
+
+    # 条件分岐: `arr.ndim != 2 or arr.shape[1] < 4` を満たす経路を評価する。
+
     if arr.ndim != 2 or arr.shape[1] < 4:
         return None
+
     ell = np.asarray(arr[:, 0], dtype=float)
     err_lo = np.asarray(arr[:, 2], dtype=float)
     err_hi = np.asarray(arr[:, 3], dtype=float)
     sigma = 0.5 * (np.abs(err_lo) + np.abs(err_hi))
     mask = np.isfinite(ell) & np.isfinite(sigma) & (sigma > 0.0)
+    # 条件分岐: `not np.any(mask)` を満たす経路を評価する。
     if not np.any(mask):
         return None
+
     return ell[mask], sigma[mask]
 
 
 def _nearest_planck_sigma(ell_grid: np.ndarray, sigma_grid: np.ndarray, ell_target: float) -> Optional[float]:
+    # 条件分岐: `ell_grid.size == 0 or sigma_grid.size == 0` を満たす経路を評価する。
     if ell_grid.size == 0 or sigma_grid.size == 0:
         return None
+
     idx = int(np.argmin(np.abs(ell_grid - float(ell_target))))
     sig = float(sigma_grid[idx])
+    # 条件分岐: `not np.isfinite(sig) or sig <= 0.0` を満たす経路を評価する。
     if not np.isfinite(sig) or sig <= 0.0:
         return None
+
     return sig
 
 
 def _sigma_from_p16_p84(block: Dict[str, Any]) -> Optional[float]:
     p16_p84 = block.get("p16_p84")
+    # 条件分岐: `not isinstance(p16_p84, list) or len(p16_p84) != 2` を満たす経路を評価する。
     if not isinstance(p16_p84, list) or len(p16_p84) != 2:
         return None
+
     lo = _to_float(p16_p84[0])
     hi = _to_float(p16_p84[1])
+    # 条件分岐: `lo is None or hi is None` を満たす経路を評価する。
     if lo is None or hi is None:
         return None
+
+    # 条件分岐: `hi < lo` を満たす経路を評価する。
+
     if hi < lo:
         lo, hi = hi, lo
+
     sig = 0.5 * (hi - lo)
+    # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
     if sig <= 0.0:
         return None
+
     return float(sig)
 
 
 def _extract_eht_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     rows = payload.get("rows")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return []
+
     out: List[LambdaObs] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         key = str(row.get("key", "")).strip().lower()
+        # 条件分岐: `key not in {"m87", "sgra"}` を満たす経路を評価する。
         if key not in {"m87", "sgra"}:
             continue
+
         obs = _to_float(row.get("shadow_diameter_obs_uas"))
         pred = _to_float(row.get("shadow_diameter_pmodel_uas"))
         sig = _to_float(row.get("shadow_diameter_obs_uas_sigma"))
+        # 条件分岐: `obs is None or pred is None or sig is None or pred <= 0.0 or sig <= 0.0` を満たす経路を評価する。
         if obs is None or pred is None or sig is None or pred <= 0.0 or sig <= 0.0:
             continue
+
         lam = (obs / pred) - 1.0
         sig_lam = sig / pred
+        # 条件分岐: `sig_lam <= 0.0` を満たす経路を評価する。
         if sig_lam <= 0.0:
             continue
+
         out.append(
             LambdaObs(
                 channel="EHT",
@@ -245,6 +310,7 @@ def _extract_eht_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
                 note="λ_H inferred from fractional shadow-size mismatch (obs/pred - 1).",
             )
         )
+
     return out
 
 
@@ -269,19 +335,31 @@ def _extract_gw_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     m_ring_sig = _sigma_from_p16_p84(m_ring_block)
     a_ring_sig = _sigma_from_p16_p84(a_ring_block)
 
+    # 条件分岐: `m_ring is None` を満たす経路を評価する。
     if m_ring is None:
         m_ring = _to_float(ring_1d.get("final_mass_det_msun"))
+
+    # 条件分岐: `a_ring is None` を満たす経路を評価する。
+
     if a_ring is None:
         a_ring = _to_float(ring_1d.get("final_spin"))
 
+    # 条件分岐: `m_gr is not None and m_ring is not None and m_gr > 0` を満たす経路を評価する。
+
     if m_gr is not None and m_ring is not None and m_gr > 0:
         sig_mass = None
+        # 条件分岐: `m_gr_sig is not None and m_ring_sig is not None` を満たす経路を評価する。
         if m_gr_sig is not None and m_ring_sig is not None:
             sig_mass = math.sqrt(m_gr_sig * m_gr_sig + m_ring_sig * m_ring_sig)
+        # 条件分岐: 前段条件が不成立で、`m_gr_sig is not None` を追加評価する。
         elif m_gr_sig is not None:
             sig_mass = m_gr_sig
+        # 条件分岐: 前段条件が不成立で、`m_ring_sig is not None` を追加評価する。
         elif m_ring_sig is not None:
             sig_mass = m_ring_sig
+
+        # 条件分岐: `sig_mass is not None and sig_mass > 0` を満たす経路を評価する。
+
         if sig_mass is not None and sig_mass > 0:
             out.append(
                 LambdaObs(
@@ -293,14 +371,23 @@ def _extract_gw_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
                     note="λ_H from ringdown-inferred final mass vs IMR posterior median.",
                 )
             )
+
+    # 条件分岐: `a_gr is not None and a_ring is not None and a_gr > 0` を満たす経路を評価する。
+
     if a_gr is not None and a_ring is not None and a_gr > 0:
         sig_spin = None
+        # 条件分岐: `a_gr_sig is not None and a_ring_sig is not None` を満たす経路を評価する。
         if a_gr_sig is not None and a_ring_sig is not None:
             sig_spin = math.sqrt(a_gr_sig * a_gr_sig + a_ring_sig * a_ring_sig)
+        # 条件分岐: 前段条件が不成立で、`a_gr_sig is not None` を追加評価する。
         elif a_gr_sig is not None:
             sig_spin = a_gr_sig
+        # 条件分岐: 前段条件が不成立で、`a_ring_sig is not None` を追加評価する。
         elif a_ring_sig is not None:
             sig_spin = a_ring_sig
+
+        # 条件分岐: `sig_spin is not None and sig_spin > 0` を満たす経路を評価する。
+
         if sig_spin is not None and sig_spin > 0:
             out.append(
                 LambdaObs(
@@ -312,24 +399,35 @@ def _extract_gw_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
                     note="λ_H from ringdown-inferred final spin vs IMR posterior median.",
                 )
             )
+
     return out
 
 
 def _extract_gw_premger_overlap(payload: Dict[str, Any]) -> Dict[str, Any]:
     dets = payload.get("detectors")
+    # 条件分岐: `not isinstance(dets, list)` を満たす経路を評価する。
     if not isinstance(dets, list):
         return {"median_overlap": float("nan"), "n_detectors": 0}
+
     overlaps: List[float] = []
     for det in dets:
+        # 条件分岐: `not isinstance(det, dict)` を満たす経路を評価する。
         if not isinstance(det, dict):
             continue
+
         wave = det.get("waveform_fit") if isinstance(det.get("waveform_fit"), dict) else {}
         ov = _to_float(wave.get("overlap"))
+        # 条件分岐: `ov is None` を満たす経路を評価する。
         if ov is None:
             continue
+
         overlaps.append(float(ov))
+
+    # 条件分岐: `not overlaps` を満たす経路を評価する。
+
     if not overlaps:
         return {"median_overlap": float("nan"), "n_detectors": 0}
+
     arr = np.asarray(overlaps, dtype=float)
     return {
         "median_overlap": float(np.median(arr)),
@@ -346,6 +444,7 @@ def _extract_gw_primary_homology(payload: Dict[str, Any]) -> Dict[str, Any]:
     gate = payload.get("gate") if isinstance(payload.get("gate"), dict) else {}
 
     corr = _to_float(metrics.get("abs_best_corr"))
+    # 条件分岐: `corr is None` を満たす経路を評価する。
     if corr is None:
         raw_corr = _to_float(metrics.get("best_corr"))
         corr = abs(raw_corr) if raw_corr is not None else None
@@ -402,16 +501,24 @@ def _extract_gw_polarization_stage_readiness(payload: Dict[str, Any]) -> Dict[st
     rows = payload.get("rows") if isinstance(payload.get("rows"), list) else []
     locked = _to_float(summary.get("locked_corr_use_min"))
     locked_row: Dict[str, Any] = {}
+    # 条件分岐: `locked is not None` を満たす経路を評価する。
     if locked is not None:
         for row in rows:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             corr = _to_float(row.get("corr_use_min"))
+            # 条件分岐: `corr is not None and abs(corr - locked) <= 1.0e-9` を満たす経路を評価する。
             if corr is not None and abs(corr - locked) <= 1.0e-9:
                 locked_row = row
                 break
+
+    # 条件分岐: `not locked_row and rows` を満たす経路を評価する。
+
     if not locked_row and rows:
         for row in rows:
+            # 条件分岐: `isinstance(row, dict)` を満たす経路を評価する。
             if isinstance(row, dict):
                 locked_row = row
                 break
@@ -443,6 +550,7 @@ def _extract_gw_polarization_stage_readiness(payload: Dict[str, Any]) -> Dict[st
 def _derive_aic_support_recovery_target(fit_joint: Dict[str, Any]) -> Dict[str, Any]:
     chi2_base = _to_float(fit_joint.get("chi2_baseline"))
     chi2_fit = _to_float(fit_joint.get("chi2_fit"))
+    # 条件分岐: `chi2_base is None or chi2_fit is None` を満たす経路を評価する。
     if chi2_base is None or chi2_fit is None:
         return {
             "ok": False,
@@ -458,11 +566,15 @@ def _derive_aic_support_recovery_target(fit_joint: Dict[str, Any]) -> Dict[str, 
     required_abs_z_single_if_one_sigma_residual = float(math.sqrt(missing_delta_chi2_gain + 1.0))
 
     def _n_needed(avg_abs_z: float) -> int:
+        # 条件分岐: `avg_abs_z <= 0.0` を満たす経路を評価する。
         if avg_abs_z <= 0.0:
             return 0
+
         gain_per_obs = avg_abs_z * avg_abs_z
+        # 条件分岐: `gain_per_obs <= 0.0` を満たす経路を評価する。
         if gain_per_obs <= 0.0:
             return 0
+
         return int(math.ceil(missing_delta_chi2_gain / gain_per_obs)) if missing_delta_chi2_gain > 0 else 0
 
     return {
@@ -502,15 +614,23 @@ def _extract_gw_polarization_high_tension_candidates(
         scalar_mismatch_vals: List[float] = []
         n_reject_tensor_events = 0
         for event_row in event_rows:
+            # 条件分岐: `not isinstance(event_row, dict)` を満たす経路を評価する。
             if not isinstance(event_row, dict):
                 continue
+
             status = str(event_row.get("status") or "").lower()
+            # 条件分岐: `status == "reject_tensor_response"` を満たす経路を評価する。
             if status == "reject_tensor_response":
                 n_reject_tensor_events += 1
+
             tmis = _to_float(event_row.get("tensor_mismatch_max"))
             smis = _to_float(event_row.get("scalar_mismatch_max"))
+            # 条件分岐: `tmis is not None` を満たす経路を評価する。
             if tmis is not None:
                 tensor_mismatch_vals.append(abs(float(tmis)))
+
+            # 条件分岐: `smis is not None` を満たす経路を評価する。
+
             if smis is not None:
                 scalar_mismatch_vals.append(abs(float(smis)))
 
@@ -545,6 +665,7 @@ def _extract_gw_polarization_high_tension_candidates(
 
     eligible_rows = [r for r in rows if bool(r.get("eligible_as_high_tension_candidate"))]
     best_row: Optional[Dict[str, Any]] = None
+    # 条件分岐: `eligible_rows` を満たす経路を評価する。
     if eligible_rows:
         best_row = max(
             eligible_rows,
@@ -585,6 +706,7 @@ def _build_gw_polarization_injected_observables(
     sigma_ref_fit_gw = _to_float(fit_gw.get("lambda_sigma"))
     sigma_ref_candidates = [sigma_ref_fit_gw, sigma_ref_gw, sigma_ref_all]
     sigma_ref = next((float(v) for v in sigma_ref_candidates if v is not None and float(v) > 0.0), None)
+    # 条件分岐: `sigma_ref is None` を満たす経路を評価する。
     if sigma_ref is None:
         return {
             "ok": False,
@@ -596,8 +718,10 @@ def _build_gw_polarization_injected_observables(
     lambda_gw = _to_float(fit_gw.get("lambda_fit"))
     lambda_joint = _to_float(fit_joint.get("lambda_fit"))
     sign_reference = 1.0
+    # 条件分岐: `lambda_gw is not None and lambda_joint is not None and abs(lambda_gw - lambda...` を満たす経路を評価する。
     if lambda_gw is not None and lambda_joint is not None and abs(lambda_gw - lambda_joint) > 0.0:
         sign_reference = 1.0 if (lambda_gw - lambda_joint) >= 0.0 else -1.0
+    # 条件分岐: 前段条件が不成立で、`lambda_gw is not None and abs(lambda_gw) > 0.0` を追加評価する。
     elif lambda_gw is not None and abs(lambda_gw) > 0.0:
         sign_reference = 1.0 if lambda_gw >= 0.0 else -1.0
 
@@ -607,18 +731,26 @@ def _build_gw_polarization_injected_observables(
     required_abs_z = _to_float(registry.get("required_abs_z_for_single_new_channel"))
 
     for row in rows_in:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `not bool(row.get("eligible_as_high_tension_candidate"))` を満たす経路を評価する。
+
         if not bool(row.get("eligible_as_high_tension_candidate")):
             continue
+
         source_id = str(row.get("source_id") or "").strip()
         tensor_mismatch = _to_float(row.get("tensor_mismatch_median"))
         scalar_mismatch = _to_float(row.get("scalar_mismatch_median"))
         n_reject_tensor = max(0, int(_to_float(row.get("n_reject_tensor_events")) or 0))
         n_usable = max(0, int(_to_float(row.get("n_usable_events")) or 0))
         n_events = max(1, int(_to_float(row.get("n_events")) or 1))
+        # 条件分岐: `not source_id or tensor_mismatch is None` を満たす経路を評価する。
         if not source_id or tensor_mismatch is None:
             continue
+
+        # 条件分岐: `scalar_mismatch is None or scalar_mismatch <= 0.0` を満たす経路を評価する。
 
         if scalar_mismatch is None or scalar_mismatch <= 0.0:
             scalar_mismatch = float(tensor_mismatch)
@@ -710,17 +842,25 @@ def _extract_cross_domain_high_tension_candidates(
     z_frame: List[float] = []
     frame_reject_experiments: List[str] = []
     for row in frame_rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         observable = str(row.get("observable") or "").strip().lower()
         status = str(row.get("status") or "").strip().lower()
         z_scalar = _to_float(row.get("z_scalar"))
+        # 条件分岐: `observable != "frame_dragging" or status != "reject" or z_scalar is None` を満たす経路を評価する。
         if observable != "frame_dragging" or status != "reject" or z_scalar is None:
             continue
+
         z_frame.append(abs(float(z_scalar)))
         exp = str(row.get("experiment") or "").strip()
+        # 条件分岐: `exp` を満たす経路を評価する。
         if exp:
             frame_reject_experiments.append(exp)
+
+    # 条件分岐: `z_frame` を満たす経路を評価する。
+
     if z_frame:
         z_raw = float(max(z_frame))
         rows.append(
@@ -743,9 +883,13 @@ def _extract_cross_domain_high_tension_candidates(
     thresholds = cmb_peak_uplift.get("thresholds") if isinstance(cmb_peak_uplift.get("thresholds"), dict) else {}
     baryon_model: Dict[str, Any] = {}
     for model in models:
+        # 条件分岐: `isinstance(model, dict) and str(model.get("key") or "").strip().lower() == "b...` を満たす経路を評価する。
         if isinstance(model, dict) and str(model.get("key") or "").strip().lower() == "baryon_only":
             baryon_model = model
             break
+
+    # 条件分岐: `baryon_model` を満たす経路を評価する。
+
     if baryon_model:
         metrics = baryon_model.get("metrics") if isinstance(baryon_model.get("metrics"), dict) else {}
         ratios = baryon_model.get("ratios") if isinstance(baryon_model.get("ratios"), dict) else {}
@@ -758,6 +902,7 @@ def _extract_cross_domain_high_tension_candidates(
             (abs(float(ratio_err)) / ratio_pass) if ratio_err is not None and ratio_pass is not None and ratio_pass > 0.0 else None
         )
         z_candidates = [v for v in [z_amp, z_ratio] if v is not None and np.isfinite(v)]
+        # 条件分岐: `z_candidates` を満たす経路を評価する。
         if z_candidates:
             z_raw = float(max(z_candidates))
             rows.append(
@@ -786,6 +931,7 @@ def _extract_cross_domain_high_tension_candidates(
     comparison = cluster_models.get("comparison") if isinstance(cluster_models.get("comparison"), dict) else {}
     z_lens = _to_float(baryon.get("max_abs_z_p_lens"))
     delta_chi2 = _to_float(comparison.get("delta_chi2_baryon_minus_pmodel"))
+    # 条件分岐: `z_lens is not None and np.isfinite(z_lens)` を満たす経路を評価する。
     if z_lens is not None and np.isfinite(z_lens):
         z_raw = abs(float(z_lens))
         rows.append(
@@ -817,10 +963,12 @@ def _extract_cross_domain_high_tension_candidates(
             float(z_capped / required_abs_z) if z_capped is not None and required_abs_z is not None and required_abs_z > 0.0 else None
         )
         row["eligible_as_high_tension_candidate"] = eligible
+        # 条件分岐: `eligible` を満たす経路を評価する。
         if eligible:
             eligible_rows.append(row)
 
     best_row: Optional[Dict[str, Any]] = None
+    # 条件分岐: `eligible_rows` を満たす経路を評価する。
     if eligible_rows:
         best_row = max(
             eligible_rows,
@@ -853,6 +1001,7 @@ def _build_cross_domain_injected_observables(
     sigma_ref_joint = _to_float(fit_joint.get("lambda_sigma"))
     sigma_ref_candidates = [sigma_ref_joint, sigma_ref_all]
     sigma_ref = next((float(v) for v in sigma_ref_candidates if v is not None and float(v) > 0.0), None)
+    # 条件分岐: `sigma_ref is None` を満たす経路を評価する。
     if sigma_ref is None:
         return {
             "ok": False,
@@ -868,15 +1017,22 @@ def _build_cross_domain_injected_observables(
     observables_minus: List[LambdaObs] = []
 
     for row in rows_in:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `not bool(row.get("eligible_as_high_tension_candidate"))` を満たす経路を評価する。
+
         if not bool(row.get("eligible_as_high_tension_candidate")):
             continue
+
         source_id = str(row.get("source_id") or "").strip()
         domain = str(row.get("domain") or "").strip()
         z_capped = _to_float(row.get("z_proxy_capped"))
+        # 条件分岐: `not source_id or z_capped is None` を満たす経路を評価する。
         if not source_id or z_capped is None:
             continue
+
         lambda_plus = float(z_capped * sigma_ref)
         lambda_minus = float(-z_capped * sigma_ref)
 
@@ -947,11 +1103,15 @@ def _extract_cross_domain_direct_observables(
         sigma_source_counts[source] = int(sigma_source_counts.get(source, 0) + 1)
 
     def _add_covariance_pair(source_i: str, source_j: str, cov_lambda: float, origin: str) -> None:
+        # 条件分岐: `not source_i or not source_j or source_i == source_j` を満たす経路を評価する。
         if not source_i or not source_j or source_i == source_j:
             return
+
         cov_val = _to_float(cov_lambda)
+        # 条件分岐: `cov_val is None` を満たす経路を評価する。
         if cov_val is None:
             return
+
         covariance_pairs.append(
             {
                 "source_i": source_i,
@@ -963,17 +1123,22 @@ def _extract_cross_domain_direct_observables(
 
     frame_rows = frame_dragging_scalar_limit.get("rows") if isinstance(frame_dragging_scalar_limit.get("rows"), list) else []
     for row in frame_rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         observable = str(row.get("observable") or "").strip().lower()
+        # 条件分岐: `observable != "frame_dragging"` を満たす経路を評価する。
         if observable != "frame_dragging":
             continue
+
         source_id = str(row.get("id") or "").strip()
         experiment = str(row.get("experiment") or "").strip()
         observed = _to_float(row.get("observed"))
         observed_sigma = _to_float(row.get("observed_sigma"))
         value_domain = str(row.get("value_domain") or "").strip().lower()
         reference_prediction = _to_float(row.get("reference_prediction"))
+        # 条件分岐: `observed is None or observed_sigma is None or observed_sigma <= 0.0` を満たす経路を評価する。
         if observed is None or observed_sigma is None or observed_sigma <= 0.0:
             continue
 
@@ -981,17 +1146,22 @@ def _extract_cross_domain_direct_observables(
         sigma_lambda = None
         mapping_detail = None
         sigma_source = "primary_observed_sigma"
+        # 条件分岐: `value_domain == "ratio_to_gr"` を満たす経路を評価する。
         if value_domain == "ratio_to_gr":
             lambda_obs = float(observed - 1.0)
             sigma_lambda = float(observed_sigma)
             mapping_detail = "lambda = mu_obs - 1 (mu is ratio-to-GR observable)"
+        # 条件分岐: 前段条件が不成立で、`reference_prediction is not None and abs(reference_prediction) > 0.0` を追加評価する。
         elif reference_prediction is not None and abs(reference_prediction) > 0.0:
             lambda_obs = float((observed / reference_prediction) - 1.0)
             sigma_lambda = float(observed_sigma / abs(reference_prediction))
             mapping_detail = "lambda = obs/reference_prediction - 1"
 
+        # 条件分岐: `lambda_obs is None or sigma_lambda is None or sigma_lambda <= 0.0 or not np.i...` を満たす経路を評価する。
+
         if lambda_obs is None or sigma_lambda is None or sigma_lambda <= 0.0 or not np.isfinite(sigma_lambda):
             continue
+
         _count_sigma_source(sigma_source)
         obs = LambdaObs(
             channel="XDOM_DIR",
@@ -1027,14 +1197,21 @@ def _extract_cross_domain_direct_observables(
     cmb_primary_sigma_grid = _load_planck_tt_binned_sigma(cmb_primary_input) if cmb_primary_input is not None else None
     cmb_model: Dict[str, Any] = {}
     for model in models:
+        # 条件分岐: `not isinstance(model, dict)` を満たす経路を評価する。
         if not isinstance(model, dict):
             continue
+
         key = str(model.get("key") or "").strip().lower()
+        # 条件分岐: `key == "pressure_ruler"` を満たす経路を評価する。
         if key == "pressure_ruler":
             cmb_model = model
             break
+
+    # 条件分岐: `not cmb_model` を満たす経路を評価する。
+
     if not cmb_model:
         for model in models:
+            # 条件分岐: `isinstance(model, dict) and str(model.get("key") or "").strip().lower() == "p...` を満たす経路を評価する。
             if isinstance(model, dict) and str(model.get("key") or "").strip().lower() == "pressure":
                 cmb_model = model
                 break
@@ -1044,36 +1221,55 @@ def _extract_cross_domain_direct_observables(
     peak_obs_sigma_by_n: Dict[int, float] = {}
     peak_obs_entry_by_n: Dict[int, Dict[str, Any]] = {}
     for peak in peaks:
+        # 条件分岐: `not isinstance(peak, dict)` を満たす経路を評価する。
         if not isinstance(peak, dict):
             continue
+
         label = str(peak.get("label") or "").strip()
         peak_n = int(_to_float(peak.get("n")) or 0)
         observed_block = peak.get("observed") if isinstance(peak.get("observed"), dict) else {}
         predicted_block = peak.get("predicted") if isinstance(peak.get("predicted"), dict) else {}
         observed_amp = _to_float(observed_block.get("amplitude"))
         predicted_amp = _to_float(predicted_block.get("amplitude"))
+        # 条件分岐: `observed_amp is None or predicted_amp is None or predicted_amp <= 0.0` を満たす経路を評価する。
         if observed_amp is None or predicted_amp is None or predicted_amp <= 0.0:
             continue
+
         peak_obs_amp_by_n[peak_n] = float(observed_amp)
 
         sigma_amp = _to_float(observed_block.get("sigma"))
         sigma_source = "primary_observed_peak_sigma"
+        # 条件分岐: `sigma_amp is None` を満たす経路を評価する。
         if sigma_amp is None:
             sigma_amp = _to_float(observed_block.get("amplitude_sigma"))
+
+        # 条件分岐: `sigma_amp is None` を満たす経路を評価する。
+
         if sigma_amp is None:
             obs_ell = _to_float(observed_block.get("ell"))
+            # 条件分岐: `obs_ell is not None and cmb_primary_sigma_grid is not None` を満たす経路を評価する。
             if obs_ell is not None and cmb_primary_sigma_grid is not None:
                 sigma_amp = _nearest_planck_sigma(cmb_primary_sigma_grid[0], cmb_primary_sigma_grid[1], obs_ell)
+                # 条件分岐: `sigma_amp is not None` を満たす経路を評価する。
                 if sigma_amp is not None:
                     sigma_source = "primary_planck_binned_sigma"
+
         sigma_lambda = float(sigma_amp / abs(predicted_amp)) if sigma_amp is not None and sigma_amp > 0.0 else None
+        # 条件分岐: `sigma_lambda is None and amp_sigma_proxy is not None and amp_sigma_proxy > 0.0` を満たす経路を評価する。
         if sigma_lambda is None and amp_sigma_proxy is not None and amp_sigma_proxy > 0.0:
             sigma_lambda = float(amp_sigma_proxy)
             sigma_source = "threshold_proxy_amplitude_pass"
+
+        # 条件分岐: `sigma_lambda is None` を満たす経路を評価する。
+
         if sigma_lambda is None:
             continue
+
+        # 条件分岐: `sigma_amp is not None and sigma_amp > 0.0` を満たす経路を評価する。
+
         if sigma_amp is not None and sigma_amp > 0.0:
             peak_obs_sigma_by_n[peak_n] = float(sigma_amp)
+
         _count_sigma_source(sigma_source)
         lambda_obs = float((observed_amp / predicted_amp) - 1.0)
         source_id = f"xdom_dir::cmb::{label or 'peak'}"
@@ -1117,6 +1313,7 @@ def _extract_cross_domain_direct_observables(
     ratio_sigma_obs = _to_float(ratios.get("a3_a1_obs_sigma"))
     ratio_sigma_source = "primary_observed_ratio_sigma"
     ratio_source: Optional[str] = None
+    # 条件分岐: `ratio_sigma_obs is None` を満たす経路を評価する。
     if ratio_sigma_obs is None:
         a1_obs = peak_obs_amp_by_n.get(1)
         a3_obs = peak_obs_amp_by_n.get(3)
@@ -1133,9 +1330,15 @@ def _extract_cross_domain_direct_observables(
         ):
             ratio_sigma_obs = abs(ratio_obs) * math.sqrt((s3_obs / a3_obs) ** 2 + (s1_obs / a1_obs) ** 2)
             ratio_sigma_source = "primary_propagated_from_peak_sigmas"
+
+    # 条件分岐: `ratio_sigma_obs is None and ratio_sigma_proxy is not None and ratio_sigma_pro...` を満たす経路を評価する。
+
     if ratio_sigma_obs is None and ratio_sigma_proxy is not None and ratio_sigma_proxy > 0.0:
         ratio_sigma_obs = float(ratio_sigma_proxy)
         ratio_sigma_source = "threshold_proxy_ratio_pass"
+
+    # 条件分岐: `ratio_obs is not None and ratio_pred is not None and ratio_pred > 0.0 and rat...` を満たす経路を評価する。
+
     if ratio_obs is not None and ratio_pred is not None and ratio_pred > 0.0 and ratio_sigma_obs is not None and ratio_sigma_obs > 0.0:
         lambda_obs = float((ratio_obs / ratio_pred) - 1.0)
         sigma_lambda = float(ratio_sigma_obs / abs(ratio_pred))
@@ -1210,14 +1413,18 @@ def _extract_cross_domain_direct_observables(
             var_r = float(ratio_sigma_obs) * float(ratio_sigma_obs)
             numerator = float((s3 * s3) + (ratio_obs * ratio_obs * s1 * s1) - (var_r * a1 * a1))
             denominator = float(2.0 * ratio_obs)
+            # 条件分岐: `abs(denominator) > 0.0` を満たす経路を評価する。
             if abs(denominator) > 0.0:
                 cov13_candidate = numerator / denominator
                 bound = abs(float(s1 * s3))
                 cov13 = float(max(-bound, min(bound, cov13_candidate)))
                 cov13_mode = "inferred_from_ratio_sigma"
+
         cmb_covariance_summary["inferred_amp_cov13"] = float(cov13)
+        # 条件分岐: `s1 is not None and s3 is not None and s1 > 0.0 and s3 > 0.0` を満たす経路を評価する。
         if s1 is not None and s3 is not None and s1 > 0.0 and s3 > 0.0:
             cmb_covariance_summary["inferred_amp_corr13"] = float(cov13 / (s1 * s3))
+
         cmb_covariance_summary["amp_cov13_mode"] = cov13_mode
 
         if (
@@ -1246,13 +1453,18 @@ def _extract_cross_domain_direct_observables(
     cmb_covariance_summary["pair_count"] = len(covariance_pairs)
 
     cluster_rows = cluster_collision_offset.get("cluster_rows")
+    # 条件分岐: `isinstance(cluster_rows, list)` を満たす経路を評価する。
     if isinstance(cluster_rows, list):
         for row in cluster_rows:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             model_name = str(row.get("model") or "").strip().lower()
+            # 条件分岐: `model_name != "pmodel_corrected"` を満たす経路を評価する。
             if model_name != "pmodel_corrected":
                 continue
+
             cluster_id = str(row.get("cluster_id") or "").strip()
             observed = _to_float(row.get("obs_lens_gas_offset_kpc"))
             observed_sigma = _to_float(row.get("obs_lens_gas_sigma_kpc"))
@@ -1266,10 +1478,13 @@ def _extract_cross_domain_direct_observables(
                 or abs(predicted) <= 0.0
             ):
                 continue
+
             lambda_obs = float((observed / predicted) - 1.0)
             sigma_lambda = float(observed_sigma / abs(predicted))
+            # 条件分岐: `sigma_lambda <= 0.0 or not np.isfinite(sigma_lambda)` を満たす経路を評価する。
             if sigma_lambda <= 0.0 or not np.isfinite(sigma_lambda):
                 continue
+
             sigma_source = "primary_observed_sigma"
             _count_sigma_source(sigma_source)
             obs = LambdaObs(
@@ -1323,18 +1538,24 @@ def _extract_cross_domain_direct_observables(
 
 def _extract_pulsar_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     rows = payload.get("metrics")
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         return []
+
     out: List[LambdaObs] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         source_id = str(row.get("id", "")).strip()
         label = str(row.get("name", "")).strip() or source_id
         delta = _to_float(row.get("delta"))
         sigma = _to_float(row.get("sigma_1"))
+        # 条件分岐: `not source_id or delta is None or sigma is None or sigma <= 0.0` を満たす経路を評価する。
         if not source_id or delta is None or sigma is None or sigma <= 0.0:
             continue
+
         out.append(
             LambdaObs(
                 channel="PULSAR",
@@ -1345,31 +1566,45 @@ def _extract_pulsar_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
                 note="λ_H proxy from binary-pulsar orbital-decay ratio R-1 (intrinsic Pbdot corrected).",
             )
         )
+
     return out
 
 
 def _extract_xray_isco_observables(rows: Sequence[Dict[str, Any]]) -> List[LambdaObs]:
     out: List[LambdaObs] = []
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         constrained = str(row.get("proxy_isco_constrained", "")).strip()
+        # 条件分岐: `constrained != "1"` を満たす経路を評価する。
         if constrained != "1":
             continue
+
+        # 条件分岐: `str(row.get("r_in_bound", "")).strip()` を満たす経路を評価する。
+
         if str(row.get("r_in_bound", "")).strip():
             continue
+
         rin = _to_float(row.get("r_in_rg"))
         sig_tot = _to_float(row.get("sigma_total_rg"))
+        # 条件分岐: `rin is None or sig_tot is None or rin <= 0.0 or sig_tot <= 0.0` を満たす経路を評価する。
         if rin is None or sig_tot is None or rin <= 0.0 or sig_tot <= 0.0:
             continue
+
         source = str(row.get("obsid", "")).strip() or str(row.get("target_name", "")).strip()
         mission = str(row.get("mission", "")).strip().lower() or "xray"
+        # 条件分岐: `not source` を満たす経路を評価する。
         if not source:
             continue
+
         lam = (rin / 6.0) - 1.0
         sig_lam = sig_tot / 6.0
+        # 条件分岐: `sig_lam <= 0.0` を満たす経路を評価する。
         if sig_lam <= 0.0:
             continue
+
         out.append(
             LambdaObs(
                 channel="XRAY",
@@ -1380,6 +1615,7 @@ def _extract_xray_isco_observables(rows: Sequence[Dict[str, Any]]) -> List[Lambd
                 note="λ_H proxy from Fe-Kα broad-line inner-radius vs GR ISCO baseline (proxy fit, systematics folded).",
             )
         )
+
     return out
 
 
@@ -1399,21 +1635,33 @@ def _extract_lambda_h_n0_bridge(payload: Dict[str, Any]) -> Dict[str, Any]:
     lambda_h_from_ratio = None
     lambda_h_from_pct = None
     lambda_h_from_eps2 = None
+    # 条件分岐: `c_ref is not None and coeff_linear is not None` を満たす経路を評価する。
     if c_ref is not None and coeff_linear is not None:
         delta_core = float(coeff_linear - c_ref)
+
+    # 条件分岐: `coeff_full is not None and coeff_linear is not None` を満たす経路を評価する。
+
     if coeff_full is not None and coeff_linear is not None:
         delta_n0 = float(coeff_full - coeff_linear)
 
+    # 条件分岐: `delta_core is not None and delta_n0 is not None and abs(delta_core) > 0.0` を満たす経路を評価する。
+
     if delta_core is not None and delta_n0 is not None and abs(delta_core) > 0.0:
         lambda_h_from_ratio = float(delta_n0 / delta_core)
+
+    # 条件分岐: `core_gap_pct is not None and n0_contribution_pct is not None and abs(core_gap...` を満たす経路を評価する。
+
     if core_gap_pct is not None and n0_contribution_pct is not None and abs(core_gap_pct) > 0.0:
         lambda_h_from_pct = float(n0_contribution_pct / core_gap_pct)
 
     lambda_h = None
     for candidate in (lambda_h_from_pct, lambda_h_from_ratio):
+        # 条件分岐: `candidate is not None and np.isfinite(candidate)` を満たす経路を評価する。
         if candidate is not None and np.isfinite(candidate):
             lambda_h = float(candidate)
             break
+
+    # 条件分岐: `lambda_h is not None and eps2 is not None and eps2 > 0.0` を満たす経路を評価する。
 
     if lambda_h is not None and eps2 is not None and eps2 > 0.0:
         lambda_h_from_eps2 = float(lambda_h / eps2)
@@ -1463,8 +1711,11 @@ def _extract_eht_kappa_precision(payload: Dict[str, Any]) -> Dict[str, Any]:
         "kappa_sigma_assumed_kerr",
     ):
         v = _to_float(row.get(key))
+        # 条件分岐: `v is not None and np.isfinite(v) and v > 0.0` を満たす経路を評価する。
         if v is not None and np.isfinite(v) and v > 0.0:
             compressed_candidates.append((key, float(v)))
+
+    # 条件分岐: `compressed_candidates` を満たす経路を評価する。
 
     if compressed_candidates:
         mode = "max(method_scatter_median, ring_published, kerr_floor)"
@@ -1475,13 +1726,19 @@ def _extract_eht_kappa_precision(payload: Dict[str, Any]) -> Dict[str, Any]:
 
     ratio_conservative = float("nan")
     ratio_compressed = float("nan")
+    # 条件分岐: `required is not None and required > 0.0` を満たす経路を評価する。
     if required is not None and required > 0.0:
+        # 条件分岐: `conservative is not None and conservative > 0.0` を満たす経路を評価する。
         if conservative is not None and conservative > 0.0:
             ratio_conservative = float(conservative / required)
+
+        # 条件分岐: `np.isfinite(compressed) and compressed > 0.0` を満たす経路を評価する。
+
         if np.isfinite(compressed) and compressed > 0.0:
             ratio_compressed = float(compressed / required)
 
     compression_factor = float("nan")
+    # 条件分岐: `conservative is not None and conservative > 0.0 and np.isfinite(compressed) a...` を満たす経路を評価する。
     if conservative is not None and conservative > 0.0 and np.isfinite(compressed) and compressed > 0.0:
         compression_factor = float(conservative / compressed)
 
@@ -1511,6 +1768,7 @@ def _derive_eht_kappa_readiness(eht_kappa_precision: Dict[str, Any]) -> Dict[str
     info_multiplier_if_sigma_inv_sqrt_n = float("nan")
     gate_ready = False
 
+    # 条件分岐: `required is not None and compressed is not None and required > 0.0 and compre...` を満たす経路を評価する。
     if required is not None and compressed is not None and required > 0.0 and compressed > 0.0:
         ratio_current = compressed / required
         ratio_excess = ratio_current - 1.0
@@ -1519,6 +1777,8 @@ def _derive_eht_kappa_readiness(eht_kappa_precision: Dict[str, Any]) -> Dict[str
         sigma_reduction_percent = 100.0 * sigma_reduction_fraction
         info_multiplier_if_sigma_inv_sqrt_n = ratio_current * ratio_current
         gate_ready = ratio_current <= 1.0
+
+    # 条件分岐: `conservative is not None and compressed is not None and conservative > 0.0 an...` を満たす経路を評価する。
 
     if conservative is not None and compressed is not None and conservative > 0.0 and compressed > 0.0:
         sigma_from_conservative_gain = (conservative - compressed) / conservative
@@ -1552,6 +1812,7 @@ def _derive_eht_kappa_update_watchpack(
     ratio_current = _to_float(eht_kappa_readiness.get("ratio_current"))
     ratio_previous = _to_float(previous_watchpack.get("ratio_current"))
     ratio_delta_vs_previous = float("nan")
+    # 条件分岐: `ratio_current is not None and ratio_previous is not None` を満たす経路を評価する。
     if ratio_current is not None and ratio_previous is not None:
         ratio_delta_vs_previous = float(ratio_current - ratio_previous)
 
@@ -1571,6 +1832,7 @@ def _derive_eht_kappa_update_watchpack(
     curr_size = _to_float(current_input_signature.get("size_bytes"))
     prev_size = _to_float(previous_signature.get("size_bytes"))
     metadata_changed_without_hash_change = False
+    # 条件分岐: `curr_exists and prev_exists and not hash_changed` を満たす経路を評価する。
     if curr_exists and prev_exists and not hash_changed:
         if (curr_mtime and prev_mtime and curr_mtime != prev_mtime) or (
             curr_size is not None and prev_size is not None and curr_size != prev_size
@@ -1579,10 +1841,13 @@ def _derive_eht_kappa_update_watchpack(
 
     baseline_initialized_now = curr_exists and not prev_exists
     update_event_detected = hash_changed
+    # 条件分岐: `baseline_initialized_now` を満たす経路を評価する。
     if baseline_initialized_now:
         update_event_type = "baseline_initialized"
+    # 条件分岐: 前段条件が不成立で、`hash_changed` を追加評価する。
     elif hash_changed:
         update_event_type = "input_hash_changed"
+    # 条件分岐: 前段条件が不成立で、`metadata_changed_without_hash_change` を追加評価する。
     elif metadata_changed_without_hash_change:
         update_event_type = "metadata_changed_hash_same"
     else:
@@ -1624,6 +1889,7 @@ def _derive_eht_kappa_update_watchpack(
 
 
 def _weighted_fit(observables: Sequence[LambdaObs]) -> Dict[str, Any]:
+    # 条件分岐: `not observables` を満たす経路を評価する。
     if not observables:
         return {
             "ok": False,
@@ -1643,6 +1909,7 @@ def _weighted_fit(observables: Sequence[LambdaObs]) -> Dict[str, Any]:
     w = 1.0 / np.square(s)
 
     denom = float(np.sum(w))
+    # 条件分岐: `denom <= 0.0` を満たす経路を評価する。
     if denom <= 0.0:
         return {
             "ok": False,
@@ -1694,6 +1961,7 @@ def _weighted_fit_with_covariance(
     covariance_pairs: Optional[Sequence[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     base = _weighted_fit(observables)
+    # 条件分岐: `not observables` を満たす経路を評価する。
     if not observables:
         return base
 
@@ -1704,25 +1972,33 @@ def _weighted_fit_with_covariance(
     index_by_source: Dict[str, int] = {}
     for idx, row in enumerate(observables):
         source = str(row.source)
+        # 条件分岐: `source and source not in index_by_source` を満たす経路を評価する。
         if source and source not in index_by_source:
             index_by_source[source] = idx
 
     applied_pairs: List[Dict[str, Any]] = []
     requested_pairs = 0
+    # 条件分岐: `covariance_pairs is not None` を満たす経路を評価する。
     if covariance_pairs is not None:
         for pair in covariance_pairs:
+            # 条件分岐: `not isinstance(pair, dict)` を満たす経路を評価する。
             if not isinstance(pair, dict):
                 continue
+
             requested_pairs += 1
             src_i = str(pair.get("source_i") or "").strip()
             src_j = str(pair.get("source_j") or "").strip()
             cov_ij = _to_float(pair.get("cov_lambda"))
+            # 条件分岐: `not src_i or not src_j or src_i == src_j or cov_ij is None` を満たす経路を評価する。
             if not src_i or not src_j or src_i == src_j or cov_ij is None:
                 continue
+
             i = index_by_source.get(src_i)
             j = index_by_source.get(src_j)
+            # 条件分岐: `i is None or j is None` を満たす経路を評価する。
             if i is None or j is None:
                 continue
+
             cov[i, j] = float(cov_ij)
             cov[j, i] = float(cov_ij)
             applied_pairs.append(
@@ -1745,10 +2021,15 @@ def _weighted_fit_with_covariance(
         min_eig_before = float(np.min(eigvals))
     except Exception:
         eigvals = np.asarray([], dtype=float)
+
+    # 条件分岐: `np.isfinite(min_eig_before)` を満たす経路を評価する。
+
     if np.isfinite(min_eig_before):
+        # 条件分岐: `min_eig_before < -singular_eps` を満たす経路を評価する。
         if min_eig_before < -singular_eps:
             reg_jitter = float(abs(min_eig_before) + singular_eps)
             cov = cov + np.eye(n, dtype=float) * reg_jitter
+        # 条件分岐: 前段条件が不成立で、`min_eig_before <= singular_eps` を追加評価する。
         elif min_eig_before <= singular_eps:
             prefer_pinv = True
 
@@ -1756,8 +2037,13 @@ def _weighted_fit_with_covariance(
         cond_number_pre = float(np.linalg.cond(cov))
     except Exception:
         cond_number_pre = float("nan")
+
+    # 条件分岐: `np.isfinite(cond_number_pre) and cond_number_pre > 1.0e10` を満たす経路を評価する。
+
     if np.isfinite(cond_number_pre) and cond_number_pre > 1.0e10:
         prefer_pinv = True
+
+    # 条件分岐: `prefer_pinv` を満たす経路を評価する。
 
     if prefer_pinv:
         cov_inv = np.linalg.pinv(cov, rcond=1.0e-12)
@@ -1772,6 +2058,7 @@ def _weighted_fit_with_covariance(
 
     ones = np.ones(n, dtype=float)
     denom = float(ones.T @ cov_inv @ ones)
+    # 条件分岐: `not np.isfinite(denom) or denom <= 0.0` を満たす経路を評価する。
     if not np.isfinite(denom) or denom <= 0.0:
         out = dict(base)
         out.update(
@@ -1835,16 +2122,30 @@ def _build_design_matrix(observables: Sequence[LambdaObs], model_id: str) -> Tup
     is_xray = np.asarray([1.0 if ch == "XRAY" else 0.0 for ch in channels], dtype=float)
     is_imaging = np.asarray([1.0 if ch in {"EHT", "XRAY"} else 0.0 for ch in channels], dtype=float)
 
+    # 条件分岐: `model_id == "shared_lambda"` を満たす経路を評価する。
     if model_id == "shared_lambda":
         return ["lambda0"], one[:, None]
+
+    # 条件分岐: `model_id == "split_eht_offset"` を満たす経路を評価する。
+
     if model_id == "split_eht_offset":
         return ["lambda0", "delta_eht"], np.column_stack([one, is_eht])
+
+    # 条件分岐: `model_id == "split_gw_offset"` を満たす経路を評価する。
+
     if model_id == "split_gw_offset":
         return ["lambda0", "delta_gw"], np.column_stack([one, is_gw])
+
+    # 条件分岐: `model_id == "split_imaging_vs_wave"` を満たす経路を評価する。
+
     if model_id == "split_imaging_vs_wave":
         return ["lambda0", "delta_imaging"], np.column_stack([one, is_imaging])
+
+    # 条件分岐: `model_id == "channel_offsets_4"` を満たす経路を評価する。
+
     if model_id == "channel_offsets_4":
         return ["lambda_eht", "lambda_gw", "lambda_pulsar", "lambda_xray"], np.column_stack([is_eht, is_gw, is_pulsar, is_xray])
+
     raise ValueError(f"Unknown model_id: {model_id}")
 
 
@@ -1856,12 +2157,15 @@ def _weighted_linear_fit(
     param_names: Sequence[str],
     X: np.ndarray,
 ) -> Dict[str, Any]:
+    # 条件分岐: `not observables` を満たす経路を評価する。
     if not observables:
         return {"ok": False, "model_id": model_id, "model_label": model_label, "n_obs": 0, "k_params": int(X.shape[1])}
+
     y = np.asarray([o.lambda_obs for o in observables], dtype=float)
     s = np.asarray([o.sigma_lambda for o in observables], dtype=float)
     n = int(y.size)
     k = int(X.shape[1])
+    # 条件分岐: `X.shape[0] != n or k <= 0` を満たす経路を評価する。
     if X.shape[0] != n or k <= 0:
         return {"ok": False, "model_id": model_id, "model_label": model_label, "n_obs": n, "k_params": k}
 
@@ -1910,6 +2214,7 @@ def _weighted_linear_fit(
 def _ansatz_extension_model_matrix(observables: Sequence[LambdaObs], fit_joint: Dict[str, Any]) -> Dict[str, Any]:
     chi2_baseline = _to_float(fit_joint.get("chi2_baseline"))
     chi2_shared = _to_float(fit_joint.get("chi2_fit"))
+    # 条件分岐: `chi2_baseline is None or chi2_shared is None or not np.isfinite(chi2_baseline...` を満たす経路を評価する。
     if chi2_baseline is None or chi2_shared is None or not np.isfinite(chi2_baseline) or not np.isfinite(chi2_shared):
         return {
             "ok": False,
@@ -1938,6 +2243,7 @@ def _ansatz_extension_model_matrix(observables: Sequence[LambdaObs], fit_joint: 
             param_names=names,
             X=X,
         )
+        # 条件分岐: `not bool(fit.get("ok"))` を満たす経路を評価する。
         if not bool(fit.get("ok")):
             rows.append(
                 {
@@ -1954,8 +2260,10 @@ def _ansatz_extension_model_matrix(observables: Sequence[LambdaObs], fit_joint: 
         k = int(fit.get("k_params", 0))
         chi2_fit = _to_float(fit.get("chi2"))
         aic_fit = _to_float(fit.get("aic"))
+        # 条件分岐: `chi2_fit is None or aic_fit is None` を満たす経路を評価する。
         if chi2_fit is None or aic_fit is None:
             continue
+
         delta_aic_vs_baseline = float(aic_fit - aic_baseline)
         delta_aic_vs_shared = float(aic_fit - aic_shared)
         delta_aic_theoretical_min = float(2.0 * k - chi2_baseline)
@@ -1985,6 +2293,7 @@ def _ansatz_extension_model_matrix(observables: Sequence[LambdaObs], fit_joint: 
         )
 
     valid = [r for r in rows if bool(r.get("ok"))]
+    # 条件分岐: `not valid` を満たす経路を評価する。
     if not valid:
         return {
             "ok": False,
@@ -2045,6 +2354,7 @@ def _aic_support_scenario_matrix(
         obs: List[LambdaObs] = []
         for channel in channels:
             obs.extend(pools.get(channel, []))
+
         fit = _weighted_fit(obs)
         delta_aic = _to_float(fit.get("delta_aic_fit_minus_baseline"))
         rows.append(
@@ -2062,6 +2372,7 @@ def _aic_support_scenario_matrix(
         )
 
     valid = [r for r in rows if _to_float(r.get("delta_aic_fit_minus_baseline")) is not None]
+    # 条件分岐: `not valid` を満たす経路を評価する。
     if not valid:
         return {
             "ok": False,
@@ -2086,16 +2397,23 @@ def _aic_support_scenario_matrix(
 
 
 def _status_from_gate(passed: bool, gate_level: str) -> str:
+    # 条件分岐: `passed` を満たす経路を評価する。
     if passed:
         return "pass"
+
     return "reject" if gate_level == "hard" else "watch"
 
 
 def _score_from_status(status: str) -> float:
+    # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
         return 1.0
+
+    # 条件分岐: `status == "watch"` を満たす経路を評価する。
+
     if status == "watch":
         return 0.5
+
     return 0.0
 
 
@@ -2147,11 +2465,14 @@ def _build_checks(
     sig_g = _to_float(fit_gw.get("lambda_sigma"))
     z_consistency = float("nan")
     consistency_pass = False
+    # 条件分岐: `lam_e is not None and lam_g is not None and sig_e is not None and sig_g is no...` を満たす経路を評価する。
     if lam_e is not None and lam_g is not None and sig_e is not None and sig_g is not None:
         sig_comb = math.sqrt(sig_e * sig_e + sig_g * sig_g)
+        # 条件分岐: `sig_comb > 0.0` を満たす経路を評価する。
         if sig_comb > 0.0:
             z_consistency = abs(lam_e - lam_g) / sig_comb
             consistency_pass = z_consistency <= 3.0
+
     add_check(
         "strong_field::single_lambda_consistency",
         "abs(lambda_EHT-lambda_GW)/sigma_combined",
@@ -2199,6 +2520,7 @@ def _build_checks(
     gw_expected = ">=0.60"
     gw_note = "GW150914 の一次 strain 同型監査（H1/L1 相関）で pre-merger 同型を判定する。"
     gw_pass = gw_homology is not None and gw_homology >= 0.60
+    # 条件分岐: `gw_homology is None` を満たす経路を評価する。
     if gw_homology is None:
         overlap = _to_float(premerger_overlap.get("median_overlap"))
         gw_metric = "median_overlap(GW150914 H1/L1; chirp fallback)"
@@ -2206,6 +2528,7 @@ def _build_checks(
         gw_note = "一次 strain 同型指標が欠損のため chirp overlap にフォールバック。"
         gw_homology = overlap
         gw_pass = overlap is not None and overlap >= 0.20
+
     add_check(
         "strong_field::gw_primary_homology_gate",
         gw_metric,
@@ -2220,8 +2543,10 @@ def _build_checks(
     gw_multi_n = int(gw_multi_event_homology.get("n_usable_events", 0))
     gw_multi_status = str(gw_multi_event_homology.get("overall_status") or "")
     gw_multi_pass = gw_multi_n >= 2 and gw_multi_value is not None and gw_multi_value >= 0.60
+    # 条件分岐: `gw_multi_status.lower() == "reject"` を満たす経路を評価する。
     if gw_multi_status.lower() == "reject":
         gw_multi_pass = False
+
     add_check(
         "strong_field::gw_multi_event_homology_gate",
         "median_abs_corr_usable(H1/L1 multi-event)",
@@ -2260,11 +2585,14 @@ def _build_checks(
     sig_g = _to_float(fit_gw.get("lambda_sigma"))
     z_pg = float("nan")
     pass_pg = False
+    # 条件分岐: `lam_p is not None and sig_p is not None and sig_p > 0.0 and lam_g is not None...` を満たす経路を評価する。
     if lam_p is not None and sig_p is not None and sig_p > 0.0 and lam_g is not None and sig_g is not None and sig_g > 0.0:
         sig_comb = math.sqrt(sig_p * sig_p + sig_g * sig_g)
+        # 条件分岐: `sig_comb > 0.0` を満たす経路を評価する。
         if sig_comb > 0.0:
             z_pg = abs(lam_p - lam_g) / sig_comb
             pass_pg = z_pg <= 3.0
+
     add_check(
         "strong_field::gw_pulsar_consistency_gate",
         "abs(lambda_GW-lambda_PULSAR)/sigma_combined",
@@ -2290,11 +2618,14 @@ def _build_checks(
     sig_x = _to_float(fit_xray.get("lambda_sigma"))
     z_xg = float("nan")
     pass_xg = False
+    # 条件分岐: `lam_x is not None and sig_x is not None and sig_x > 0.0 and lam_g is not None...` を満たす経路を評価する。
     if lam_x is not None and sig_x is not None and sig_x > 0.0 and lam_g is not None and sig_g is not None and sig_g > 0.0:
         sig_comb = math.sqrt(sig_x * sig_x + sig_g * sig_g)
+        # 条件分岐: `sig_comb > 0.0` を満たす経路を評価する。
         if sig_comb > 0.0:
             z_xg = abs(lam_x - lam_g) / sig_comb
             pass_xg = z_xg <= 3.0
+
     add_check(
         "strong_field::gw_xray_consistency_gate",
         "abs(lambda_GW-lambda_XRAY)/sigma_combined",
@@ -2310,15 +2641,18 @@ def _build_checks(
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(c["id"]) for c in checks if c.get("gate_level") == "hard" and c.get("pass") is not True]
     watch_ids = [str(c["id"]) for c in checks if c.get("gate_level") == "watch" and c.get("pass") is not True]
+    # 条件分岐: `hard_fail_ids` を満たす経路を評価する。
     if hard_fail_ids:
         overall = "reject"
         decision = "strong_field_higher_order_reject"
+    # 条件分岐: 前段条件が不成立で、`watch_ids` を追加評価する。
     elif watch_ids:
         overall = "watch"
         decision = "strong_field_higher_order_watch"
     else:
         overall = "pass"
         decision = "strong_field_higher_order_pass"
+
     return {
         "overall_status": overall,
         "decision": decision,
@@ -2364,8 +2698,10 @@ def _write_csv(path: Path, rows: Sequence[LambdaObs], lambda_joint: float) -> No
 
 
 def _set_japanese_font() -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     try:
         import matplotlib as mpl
         import matplotlib.font_manager as fm
@@ -2373,8 +2709,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -2396,8 +2734,10 @@ def _plot(
     gw_multi_homology: float,
     gw_area_sigma: float,
 ) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     _set_japanese_font()
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -2419,6 +2759,7 @@ def _plot(
             color=color_map.get(row.channel, "#666666"),
             capsize=3,
         )
+
     lam_joint = float(fit_joint.get("lambda_fit", 0.0))
     sig_joint = float(fit_joint.get("lambda_sigma", float("nan")))
     lam_eht = float(fit_eht.get("lambda_fit", float("nan")))
@@ -2427,16 +2768,30 @@ def _plot(
     lam_xray = float(fit_xray.get("lambda_fit", float("nan")))
     ax0.axvline(0.0, color="#666666", linestyle="--", linewidth=1.0, label="baseline λ=0")
     ax0.axvline(lam_joint, color="#2ca02c", linestyle="-", linewidth=1.8, label="joint λ fit")
+    # 条件分岐: `np.isfinite(sig_joint) and sig_joint > 0` を満たす経路を評価する。
     if np.isfinite(sig_joint) and sig_joint > 0:
         ax0.axvspan(lam_joint - sig_joint, lam_joint + sig_joint, color="#2ca02c", alpha=0.15, lw=0)
+
+    # 条件分岐: `np.isfinite(lam_eht)` を満たす経路を評価する。
+
     if np.isfinite(lam_eht):
         ax0.axvline(lam_eht, color="#1f77b4", linestyle=":", linewidth=1.2, label="EHT-only fit")
+
+    # 条件分岐: `np.isfinite(lam_gw)` を満たす経路を評価する。
+
     if np.isfinite(lam_gw):
         ax0.axvline(lam_gw, color="#ff7f0e", linestyle=":", linewidth=1.2, label="GW-only fit")
+
+    # 条件分岐: `np.isfinite(lam_pulsar)` を満たす経路を評価する。
+
     if np.isfinite(lam_pulsar):
         ax0.axvline(lam_pulsar, color="#2ca02c", linestyle=":", linewidth=1.2, label="Pulsar-only fit")
+
+    # 条件分岐: `np.isfinite(lam_xray)` を満たす経路を評価する。
+
     if np.isfinite(lam_xray):
         ax0.axvline(lam_xray, color="#8c564b", linestyle=":", linewidth=1.2, label="X-ray ISCO-only fit")
+
     ax0.set_yticks(y)
     ax0.set_yticklabels(labels)
     ax0.set_xlabel("λ_H estimate")
@@ -2458,6 +2813,7 @@ def _plot(
     ax1.grid(alpha=0.25, axis="y")
     for b in bars:
         h = b.get_height()
+        # 条件分岐: `np.isfinite(h)` を満たす経路を評価する。
         if np.isfinite(h):
             ax1.text(b.get_x() + b.get_width() * 0.5, h, f"{h:.3f}", ha="center", va="bottom", fontsize=8)
 
@@ -2868,6 +3224,7 @@ def main() -> int:
     kappa_compressed_sigma = _to_float(eht_kappa_precision.get("compressed_sigma"))
     kappa_ratio_conservative = _to_float(eht_kappa_precision.get("ratio_conservative_over_required"))
     kappa_ratio = _to_float(eht_kappa_precision.get("ratio_compressed_over_required"))
+    # 条件分岐: `kappa_ratio is None` を満たす経路を評価する。
     if kappa_ratio is None:
         kappa_ratio = float("nan")
 
@@ -2918,17 +3275,32 @@ def main() -> int:
                 "abs_z_joint_minus_anchor": abs(z_anchor_vs_joint),
             }
         )
+
     gw_pol_candidate_entries: List[Tuple[str, Dict[str, Any]]] = []
+    # 条件分岐: `gw_pol_network_candidate_1_path is not None` を満たす経路を評価する。
     if gw_pol_network_candidate_1_path is not None:
         gw_pol_candidate_entries.append(("corr005_ext4_sky50k", gw_pol_network_candidate_1))
+
+    # 条件分岐: `gw_pol_network_candidate_2_path is not None` を満たす経路を評価する。
+
     if gw_pol_network_candidate_2_path is not None:
         gw_pol_candidate_entries.append(("corr005_pruned_sky50k", gw_pol_network_candidate_2))
+
+    # 条件分岐: `gw_pol_network_candidate_3_path is not None` を満たす経路を評価する。
+
     if gw_pol_network_candidate_3_path is not None:
         gw_pol_candidate_entries.append(("corr005_pruned_ext4_sky50k", gw_pol_network_candidate_3))
+
+    # 条件分岐: `gw_pol_network_candidate_4_path is not None` を満たす経路を評価する。
+
     if gw_pol_network_candidate_4_path is not None:
         gw_pol_candidate_entries.append(("corr005_whitenrefresh_sky50k", gw_pol_network_candidate_4))
+
+    # 条件分岐: `gw_pol_network_candidate_5_path is not None` を満たす経路を評価する。
+
     if gw_pol_network_candidate_5_path is not None:
         gw_pol_candidate_entries.append(("corr003_ext4", gw_pol_network_candidate_5))
+
     gw_polarization_high_tension_candidates = _extract_gw_polarization_high_tension_candidates(
         gw_pol_candidate_entries, support_recovery_target
     )
@@ -2971,7 +3343,9 @@ def main() -> int:
     selected_sign = None
     selected_fit: Dict[str, Any] = {}
     delta_aic_with_cross_domain_selected = None
+    # 条件分岐: `delta_aic_with_cross_domain_plus is not None and delta_aic_with_cross_domain_...` を満たす経路を評価する。
     if delta_aic_with_cross_domain_plus is not None and delta_aic_with_cross_domain_minus is not None:
+        # 条件分岐: `delta_aic_with_cross_domain_plus <= delta_aic_with_cross_domain_minus` を満たす経路を評価する。
         if delta_aic_with_cross_domain_plus <= delta_aic_with_cross_domain_minus:
             selected_sign = "plus"
             selected_fit = fit_joint_with_cross_domain_plus
@@ -2980,10 +3354,12 @@ def main() -> int:
             selected_sign = "minus"
             selected_fit = fit_joint_with_cross_domain_minus
             delta_aic_with_cross_domain_selected = float(delta_aic_with_cross_domain_minus)
+    # 条件分岐: 前段条件が不成立で、`delta_aic_with_cross_domain_plus is not None` を追加評価する。
     elif delta_aic_with_cross_domain_plus is not None:
         selected_sign = "plus"
         selected_fit = fit_joint_with_cross_domain_plus
         delta_aic_with_cross_domain_selected = float(delta_aic_with_cross_domain_plus)
+    # 条件分岐: 前段条件が不成立で、`delta_aic_with_cross_domain_minus is not None` を追加評価する。
     elif delta_aic_with_cross_domain_minus is not None:
         selected_sign = "minus"
         selected_fit = fit_joint_with_cross_domain_minus
@@ -3069,6 +3445,7 @@ def main() -> int:
     gw_multi_homology_value = _to_float(gw_multi_event_homology_diag.get("homology_value"))
     gw_area_sigma_value = _to_float(gw_area_theorem_diag.get("sigma_gaussian_combined"))
     gw_homology_expected = 0.60
+    # 条件分岐: `gw_homology_value is None` を満たす経路を評価する。
     if gw_homology_value is None:
         fallback_overlap = _to_float(premerger_overlap.get("median_overlap"))
         gw_homology_value = fallback_overlap
@@ -3285,6 +3662,7 @@ def main() -> int:
     }
     _write_json(out_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -3444,6 +3822,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

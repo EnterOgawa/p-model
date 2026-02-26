@@ -20,18 +20,24 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path, *, expected_bytes: int | None, max_bytes: int) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
+        # 条件分岐: `expected_bytes is None or out_path.stat().st_size == expected_bytes` を満たす経路を評価する。
         if expected_bytes is None or out_path.stat().st_size == expected_bytes:
             print(f"[skip] exists: {out_path}")
             return
+
         print(f"[redo] size mismatch: {out_path} ({out_path.stat().st_size} != {expected_bytes})")
         out_path.unlink()
 
@@ -39,29 +45,40 @@ def _download(url: str, out_path: Path, *, expected_bytes: int | None, max_bytes
     with urlopen(req) as resp:
         total = resp.headers.get("Content-Length")
         total_i = int(total) if total is not None else None
+        # 条件分岐: `total_i is not None and total_i > max_bytes` を満たす経路を評価する。
         if total_i is not None and total_i > max_bytes:
             raise SystemExit(
                 f"[fail] refusing to download large file ({total_i} bytes > max={max_bytes} bytes):\n"
                 f"  {url}\n"
                 "Re-run with a larger --max-gib if you really want this download."
             )
+
         with out_path.open("wb") as f:
             done = 0
             while True:
                 chunk = resp.read(8 * 1024 * 1024)
+                # 条件分岐: `not chunk` を満たす経路を評価する。
                 if not chunk:
                     break
+
                 f.write(chunk)
                 done += len(chunk)
+                # 条件分岐: `total_i and done and done % (128 * 1024 * 1024) < len(chunk)` を満たす経路を評価する。
                 if total_i and done and done % (128 * 1024 * 1024) < len(chunk):
                     print(f"  ... {done/total_i:.1%} ({done}/{total_i} bytes)")
+
+    # 条件分岐: `expected_bytes is not None and out_path.stat().st_size != expected_bytes` を満たす経路を評価する。
 
     if expected_bytes is not None and out_path.stat().st_size != expected_bytes:
         raise RuntimeError(
             f"downloaded size mismatch: {out_path} ({out_path.stat().st_size} != {expected_bytes})"
         )
+
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -101,24 +118,32 @@ def main() -> None:
     ]
 
     max_bytes = int(float(args.max_gib) * (1024**3))
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing: list[Path] = []
         for spec in files:
             path = src_dir / spec.relpath
+            # 条件分岐: `not path.exists() or path.stat().st_size == 0` を満たす経路を評価する。
             if not path.exists() or path.stat().st_size == 0:
                 missing.append(path)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return
 
     for spec in files:
+        # 条件分岐: `spec.expected_bytes is not None and spec.expected_bytes > max_bytes` を満たす経路を評価する。
         if spec.expected_bytes is not None and spec.expected_bytes > max_bytes:
             raise SystemExit(
                 f"[fail] refusing to download large file ({_format_gib(spec.expected_bytes)} > max={args.max_gib} GiB):\n"
                 f"  {spec.relpath}\n"
                 "Re-run with a larger --max-gib if you really want this download."
             )
+
         _download(spec.url, src_dir / spec.relpath, expected_bytes=spec.expected_bytes, max_bytes=max_bytes)
 
     manifest = {
@@ -142,6 +167,8 @@ def main() -> None:
     out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] manifest: {out}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

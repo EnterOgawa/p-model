@@ -42,6 +42,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -55,6 +56,7 @@ def _date_from_year_doy(year: int, doy: int) -> date:
 
 def _download(url: str, gz_path: Path, *, force: bool) -> None:
     gz_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `gz_path.exists() and not force` を満たす経路を評価する。
     if gz_path.exists() and not force:
         print(f"[skip] exists: {gz_path}")
         return
@@ -63,18 +65,22 @@ def _download(url: str, gz_path: Path, *, force: bool) -> None:
     print(f"[dl] {url}")
     with urllib.request.urlopen(url, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(gz_path)
     print(f"[ok] saved: {gz_path} ({gz_path.stat().st_size} bytes)")
 
 
 def _gunzip(src_gz: Path, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     with gzip.open(src_gz, "rb") as r, open(tmp, "wb") as w:
         shutil.copyfileobj(r, w, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] unzip: {dst} ({dst.stat().st_size} bytes)")
 
@@ -125,6 +131,7 @@ def main() -> int:
     ap.add_argument("--force", action="store_true", help="Re-download and overwrite cached files.")
     args = ap.parse_args()
 
+    # 条件分岐: `args.date` を満たす経路を評価する。
     if args.date:
         try:
             y, m, d = (int(x) for x in args.date.split("-"))
@@ -132,11 +139,14 @@ def main() -> int:
         except Exception:
             print(f"[err] invalid --date: {args.date} (expected YYYY-MM-DD)")
             return 2
+
         year = dt.year
         doy = int(dt.strftime("%j"))
     else:
         year = int(args.year)
         doy = int(args.doy)
+
+    # 条件分岐: `doy < 1 or doy > 366` を満たす経路を評価する。
 
     if doy < 1 or doy > 366:
         print(f"[err] invalid --doy: {doy}")
@@ -148,17 +158,22 @@ def main() -> int:
     out_clk = data_dir / t.clk_out
     out_sp3 = data_dir / t.sp3_out
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing = [p for p in (out_brdc, out_clk, out_sp3) if not p.exists()]
+        # 条件分岐: `missing` を満たす経路を評価する。
         if missing:
             print("[err] offline and missing:")
             for p in missing:
                 print(f"  - {p}")
+
             return 2
+
         print("[ok] offline: inputs already exist.")
         return 0
 
     # URLs
+
     url_brdc = f"{BASE}/BRDC/{t.year}/{t.doy:03d}/{t.brdc_gz}"
     url_prod = f"{BASE}/products/{t.gps_week}"
     url_clk = f"{url_prod}/{t.clk_gz}"
@@ -195,6 +210,8 @@ def main() -> int:
     print(f"[ok] meta: {meta_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -33,8 +34,10 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _find_sentence_block(text: str, needle: str, *, window: int = 700) -> Optional[str]:
     i = text.find(needle)
+    # 条件分岐: `i < 0` を満たす経路を評価する。
     if i < 0:
         return None
+
     a = max(0, i - 120)
     b = min(len(text), i + window)
     return text[a:b]
@@ -46,16 +49,20 @@ def _sigma_uniform_range(lo: float, hi: float) -> float:
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     xs = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
+    # 条件分岐: `not xs` を満たす経路を評価する。
     if not xs:
         return {"n": 0}
+
     xs_sorted = sorted(xs)
     n = len(xs_sorted)
     mean = sum(xs_sorted) / n
+    # 条件分岐: `n >= 2` を満たす経路を評価する。
     if n >= 2:
         var = sum((x - mean) ** 2 for x in xs_sorted) / (n - 1)
         std = math.sqrt(var)
     else:
         std = 0.0
+
     median = xs_sorted[n // 2] if (n % 2 == 1) else 0.5 * (xs_sorted[n // 2 - 1] + xs_sorted[n // 2])
     return {
         "n": int(n),
@@ -69,8 +76,10 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
 
 def _parse_float_or_none(s: str) -> Optional[float]:
     t = s.strip()
+    # 条件分岐: `not t or t in {"---", "--"}` を満たす経路を評価する。
     if not t or t in {"---", "--"}:
         return None
+
     try:
         v = float(t)
         return v if math.isfinite(v) else None
@@ -94,14 +103,22 @@ def _parse_synthetic_gain_table(tex: str, *, source_path: Path) -> Dict[str, Any
     rows = []
     for lineno, raw in enumerate(tex.splitlines(), start=1):
         line = raw.strip()
+        # 条件分岐: `not line or "&" not in line` を満たす経路を評価する。
         if not line or "&" not in line:
             continue
+
+        # 条件分岐: `line.startswith("Station") or line.startswith("\\hline")` を満たす経路を評価する。
+
         if line.startswith("Station") or line.startswith("\\hline"):
             continue
+
         parts = [p.strip().rstrip("\\").strip() for p in line.split("&")]
+        # 条件分岐: `len(parts) < 7` を満たす経路を評価する。
         if len(parts) < 7:
             continue
+
         station = parts[0]
+        # 条件分岐: `station in {"ALMA", "APEX", "SMT", "JCMT", "LMT", "IRAM", "SMA", "SPT"}` を満たす経路を評価する。
         if station in {"ALMA", "APEX", "SMT", "JCMT", "LMT", "IRAM", "SMA", "SPT"}:
             g_offset_mean = _parse_float_or_none(parts[1])
             g_p_mean = _parse_float_or_none(parts[2])
@@ -123,8 +140,10 @@ def _parse_synthetic_gain_table(tex: str, *, source_path: Path) -> Dict[str, Any
             )
 
     def _combine(a: Optional[float], b: Optional[float]) -> Optional[float]:
+        # 条件分岐: `a is None or b is None` を満たす経路を評価する。
         if a is None or b is None:
             return None
+
         return math.sqrt(float(a) ** 2 + float(b) ** 2)
 
     combined_mean = [_combine(r.g_offset_mean, r.g_p_mean) for r in rows]
@@ -177,6 +196,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "outputs": {"json": str(out_json)},
     }
 
+    # 条件分岐: `not tex_path.exists()` を満たす経路を評価する。
     if not tex_path.exists():
         payload["ok"] = False
         payload["reason"] = "missing_input_tex"
@@ -194,6 +214,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     m_intra = re.search(r"intrasite baselines\s*\(\$\s*\\sim\s*(\d+)\\%\s*\$\)", tex)
     m_lmt = re.search(r"LMT\s*\(\$\s*\\sim\s*(\d+)\\%\s*\$\)", tex)
 
+    # 条件分岐: `m_range` を満たす経路を評価する。
     if m_range:
         lo_pct = float(m_range.group(1))
         hi_pct = float(m_range.group(2))
@@ -202,16 +223,23 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         payload["derived"]["gain_uncertainty_fraction_sigma_uniform_typical"] = _sigma_uniform_range(
             lo_pct / 100.0, hi_pct / 100.0
         )
+
+    # 条件分岐: `m_intra` を満たす経路を評価する。
+
     if m_intra:
         intra_pct = float(m_intra.group(1))
         payload["extracted"]["gain_uncertainty_percent_intrasite"] = intra_pct
         payload["derived"]["gain_uncertainty_fraction_intrasite"] = intra_pct / 100.0
+
+    # 条件分岐: `m_lmt` を満たす経路を評価する。
+
     if m_lmt:
         lmt_pct = float(m_lmt.group(1))
         payload["extracted"]["gain_uncertainty_percent_lmt"] = lmt_pct
         payload["derived"]["gain_uncertainty_fraction_lmt"] = lmt_pct / 100.0
 
     # Non-closing errors sentence.
+
     nc_snip = _find_sentence_block(tex, "non-closing errors are estimated")
     payload["extracted"]["non_closing_anchor_snippet"] = nc_snip
 
@@ -221,12 +249,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         tex,
         flags=re.S,
     )
+    # 条件分岐: `m_nc` を満たす経路を評価する。
     if m_nc:
         cphase_deg = float(m_nc.group(1))
         lca_pct = float(m_nc.group(2))
         payload["extracted"]["non_closing_closure_phase_deg"] = cphase_deg
         payload["extracted"]["non_closing_log_closure_amp_percent"] = lca_pct
         payload["derived"]["non_closing_log_closure_amp_fraction"] = lca_pct / 100.0
+
+    # 条件分岐: `m_tr` を満たす経路を評価する。
+
     if m_tr:
         vis_phase_deg = float(m_tr.group(1))
         vis_amp_pct = float(m_tr.group(2))
@@ -235,16 +267,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         payload["derived"]["non_closing_vis_amp_fraction"] = vis_amp_pct / 100.0
 
     # Synthetic gain table (appendix_synthetic).
+
     if synth_path.exists():
         synth_tex = _read_text(synth_path)
         payload["extracted"]["synthetic_gain_table"] = _parse_synthetic_gain_table(synth_tex, source_path=synth_path)
         combined_max = ((payload["extracted"]["synthetic_gain_table"] or {}).get("derived") or {}).get("combined_mean_max")
+        # 条件分岐: `combined_max is not None` を満たす経路を評価する。
         if combined_max is not None:
             payload["derived"]["gain_synthetic_combined_mean_max"] = float(combined_max)
     else:
         payload["extracted"]["synthetic_gain_table"] = {"ok": False, "reason": "missing_synthetic_tex", "path": str(synth_path)}
 
     # Sanity: require at least the key scalars.
+
     required_keys = [
         "gain_uncertainty_percent_range_typical",
         "gain_uncertainty_percent_lmt",
@@ -253,6 +288,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "non_closing_closure_phase_deg",
     ]
     missing = [k for k in required_keys if k not in payload["extracted"]]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         payload["ok"] = False
         payload["reason"] = "missing_expected_fields"
@@ -276,6 +312,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

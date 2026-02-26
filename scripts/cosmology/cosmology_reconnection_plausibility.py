@@ -36,6 +36,7 @@ from typing import Any, Dict, List, Optional, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -57,6 +58,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -80,46 +82,63 @@ def _maybe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return float(v)
 
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         j = _read_json(path)
     except Exception:
         return {}
+
     out: Dict[str, Dict[str, Any]] = {}
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         r_id = str(r.get("id") or "")
+        # 条件分岐: `not r_id` を満たす経路を評価する。
         if not r_id:
             continue
+
         sigma_total = _maybe_float(r.get("sigma_total"))
+        # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
         if sigma_total is None or not (sigma_total > 0.0):
             continue
+
         out[r_id] = {
             "sigma_total": float(sigma_total),
             "sigma_sys_category": _maybe_float(r.get("sigma_sys_category")),
             "category": str(r.get("category") or "") or None,
         }
+
     return out
 
 
 def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> "DDRConstraint":
+    # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
         return replace(ddr, sigma_policy="raw")
 
     row = envelope.get(ddr.id)
+    # 条件分岐: `not row` を満たす経路を評価する。
     if not row:
         return replace(ddr, sigma_policy="raw")
 
     sigma_total = _maybe_float(row.get("sigma_total"))
+    # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
     if sigma_total is None or not (sigma_total > 0.0):
         return replace(ddr, sigma_policy="raw")
 
@@ -133,13 +152,20 @@ def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -243,15 +269,19 @@ class BAOConstraint:
 
 
 def _primary_ddr(ddr_rows: Sequence[DDRConstraint]) -> DDRConstraint:
+    # 条件分岐: `not ddr_rows` を満たす経路を評価する。
     if not ddr_rows:
         raise ValueError("no DDR constraints")
+
     return min(ddr_rows, key=lambda r: (r.epsilon0_sigma if r.epsilon0_sigma > 0 else float("inf")))
 
 
 def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
     """Pick the most constraining row (smallest positive sigma)."""
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise ValueError("empty constraint list")
+
     best = None
     best_sig = float("inf")
     for r in rows:
@@ -259,17 +289,26 @@ def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
             sig = float(getattr(r, sigma_field))
         except Exception:
             continue
+
+        # 条件分岐: `not (sig > 0)` を満たす経路を評価する。
+
         if not (sig > 0):
             continue
+
+        # 条件分岐: `sig < best_sig` を満たす経路を評価する。
+
         if sig < best_sig:
             best_sig = sig
             best = r
+
     return best if best is not None else rows[0]
 
 
 def _z_score(x: float, mu: float, sig: float) -> Optional[float]:
+    # 条件分岐: `not (sig > 0)` を満たす経路を評価する。
     if not (sig > 0):
         return None
+
     return (x - mu) / sig
 
 
@@ -300,6 +339,7 @@ def _plot(
     eps_obs = float(ddr.epsilon0)
     eps_sig = float(ddr.epsilon0_sigma)
     ddr_sigma_suffix = ""
+    # 条件分岐: `str(getattr(ddr, "sigma_policy", "raw")) == "category_sys"` を満たす経路を評価する。
     if str(getattr(ddr, "sigma_policy", "raw")) == "category_sys":
         ddr_sigma_suffix = (
             f"（σ_cat≈{_fmt_float(ddr.sigma_sys_category, digits=3)}, rawσ≈{_fmt_float(ddr.epsilon0_sigma_raw, digits=3)}）"
@@ -370,6 +410,7 @@ def _plot(
     ax.invert_yaxis()
     ax.grid(True, linestyle="--", alpha=0.5, axis="x")
     ax.legend(fontsize=9, loc="upper left")
+    # 条件分岐: `z_alpha_primary is not None` を満たす経路を評価する。
     if z_alpha_primary is not None:
         ax.text(
             0.02,
@@ -386,6 +427,7 @@ def _plot(
         )
 
     # 2) Standard candle evolution s_L
+
     ax = axes[1]
     y = np.arange(len(candle_sorted), dtype=float)
     cd_mu = np.array([float(r.s_L) for r in candle_sorted], dtype=float)
@@ -409,6 +451,7 @@ def _plot(
     ax.invert_yaxis()
     ax.grid(True, linestyle="--", alpha=0.5, axis="x")
     ax.legend(fontsize=9, loc="upper left")
+    # 条件分岐: `z_sL_primary is not None` を満たす経路を評価する。
     if z_sL_primary is not None:
         ax.text(
             0.02,
@@ -426,6 +469,7 @@ def _plot(
         )
 
     # 3) BAO ruler r_drag
+
     ax = axes[2]
     y = np.arange(len(bao_sorted), dtype=float)
     bao_mu = np.array([float(r.r_drag_mpc) for r in bao_sorted], dtype=float)
@@ -449,6 +493,7 @@ def _plot(
     ax.invert_yaxis()
     ax.grid(True, linestyle="--", alpha=0.5, axis="x")
     ax.legend(fontsize=9, loc="upper left")
+    # 条件分岐: `z_rdrag_primary is not None` を満たす経路を評価する。
     if z_rdrag_primary is not None:
         ax.text(
             0.02,
@@ -488,6 +533,7 @@ def _plot(
         for r in opacity_sorted:
             z = _z_score(alpha_req, float(r.alpha_opacity), float(r.alpha_opacity_sigma))
             out[str(r.id)] = None if z is None else float(z)
+
         return out
 
     def _z_scores_candle() -> Dict[str, Any]:
@@ -495,6 +541,7 @@ def _plot(
         for r in candle_sorted:
             z = _z_score(s_L_req, float(r.s_L), float(r.s_L_sigma))
             out[str(r.id)] = None if z is None else float(z)
+
         return out
 
     def _z_scores_bao() -> Dict[str, Any]:
@@ -502,6 +549,7 @@ def _plot(
         for r in bao_sorted:
             z = _z_score(float(r.r_drag_mpc) * (2.0**s_R_req), float(r.r_drag_mpc), float(r.r_drag_sigma_mpc))
             out[str(r.id)] = None if z is None else float(z)
+
         return out
 
     return {
@@ -662,16 +710,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     op_src = _read_json(opacity_path)
     op_rows = [OpacityConstraint.from_json(c) for c in (op_src.get("constraints") or [])]
+    # 条件分岐: `not op_rows` を満たす経路を評価する。
     if not op_rows:
         raise SystemExit(f"no opacity constraints found in: {opacity_path}")
 
     cd_src = _read_json(candle_path)
     cd_rows = [CandleEvoConstraint.from_json(c) for c in (cd_src.get("constraints") or [])]
+    # 条件分岐: `not cd_rows` を満たす経路を評価する。
     if not cd_rows:
         raise SystemExit(f"no candle evolution constraints found in: {candle_path}")
 
     bao_src = _read_json(bao_path)
     bao_rows = [BAOConstraint.from_json(c) for c in (bao_src.get("constraints") or [])]
+    # 条件分岐: `not bao_rows` を満たす経路を評価する。
     if not bao_rows:
         raise SystemExit(f"no BAO constraints found in: {bao_path}")
 
@@ -730,6 +781,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

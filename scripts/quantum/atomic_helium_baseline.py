@@ -18,8 +18,10 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _as_float(x: object) -> float | None:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)  # type: ignore[arg-type]
     except Exception:
         return None
@@ -33,6 +35,7 @@ def main() -> None:
     # Source: NIST ASD cached output (Phase 7 / Step 7.12)
     src_dir = root / "data" / "quantum" / "sources" / "nist_asd_he_i_lines"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing extracted values: {extracted_path}\n"
@@ -41,6 +44,7 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     selected = extracted.get("selected_lines")
+    # 条件分岐: `not isinstance(selected, list) or not selected` を満たす経路を評価する。
     if not isinstance(selected, list) or not selected:
         raise SystemExit(f"[fail] selected_lines missing/empty in: {extracted_path}")
 
@@ -50,14 +54,19 @@ def main() -> None:
 
     lines_out: list[dict[str, Any]] = []
     for rec in selected:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         sel = rec.get("selected")
+        # 条件分岐: `not isinstance(sel, dict)` を満たす経路を評価する。
         if not isinstance(sel, dict):
             continue
+
         lam_nm = _as_float(sel.get("lambda_vac_nm"))
         lam_unc_A = _as_float(sel.get("lambda_vac_unc_A"))
         aki = _as_float(sel.get("Aki_s^-1"))
+        # 条件分岐: `lam_nm is None or lam_nm <= 0` を満たす経路を評価する。
         if lam_nm is None or lam_nm <= 0:
             continue
 
@@ -77,6 +86,8 @@ def main() -> None:
                 "Type": sel.get("Type"),
             }
         )
+
+    # 条件分岐: `not lines_out` を満たす経路を評価する。
 
     if not lines_out:
         raise SystemExit("[fail] no usable lines parsed from extracted_values.json")
@@ -141,6 +152,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

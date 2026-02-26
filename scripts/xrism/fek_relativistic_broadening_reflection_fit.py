@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -71,17 +72,23 @@ def _load_rmf_sources_from_detail(detail_json: Dict[str, Any]) -> List[Dict[str,
     debug = detail_json.get("debug", {})
     rmf_sources = debug.get("rmf_sources", [])
     out: List[Dict[str, Any]] = []
+    # 条件分岐: `not isinstance(rmf_sources, list)` を満たす経路を評価する。
     if not isinstance(rmf_sources, list):
         return out
+
     for s in rmf_sources:
+        # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
         if not isinstance(s, dict):
             continue
+
         spec = str(s.get("spec") or "").strip()
         bkg = str(s.get("bkg") or "").strip()
         arf = str(s.get("arf") or "").strip()
         rmf = str(s.get("rmf_local") or "").strip()
+        # 条件分岐: `not spec` を満たす経路を評価する。
         if not spec:
             continue
+
         out.append(
             {
                 "spec": spec,
@@ -92,6 +99,7 @@ def _load_rmf_sources_from_detail(detail_json: Dict[str, Any]) -> List[Dict[str,
                 "spectrum_rebin": s.get("spectrum_rebin") if isinstance(s.get("spectrum_rebin"), dict) else {},
             }
         )
+
     return out
 
 
@@ -106,15 +114,21 @@ def _try_import_xspec() -> Tuple[Optional[object], str]:
 
 def _find_xspec_cli(path_hint: str) -> Optional[Path]:
     hint = str(path_hint or "").strip()
+    # 条件分岐: `hint` を満たす経路を評価する。
     if hint:
         p = Path(hint)
+        # 条件分岐: `p.exists()` を満たす経路を評価する。
         if p.exists():
             return p
         # Allow passing a bare command name.
+
         q = shutil.which(hint)
+        # 条件分岐: `q` を満たす経路を評価する。
         if q:
             return Path(q)
+
         return None
+
     q = shutil.which("xspec")
     return Path(q) if q else None
 
@@ -128,6 +142,7 @@ def _parse_xspec_tclout_line(stdout: str, key: str) -> str:
     m = None
     for mm in re.finditer(rf"^{re.escape(key)}=(.*)$", stdout, flags=re.MULTILINE):
         m = mm
+
     return (m.group(1).strip() if m else "").strip()
 
 
@@ -138,6 +153,7 @@ def _parse_float_list(text: str) -> List[float]:
             out.append(float(s))
         except Exception:
             continue
+
     return out
 
 
@@ -147,8 +163,10 @@ _BLOCK = 2880
 
 def _read_exact(f, n: int) -> bytes:  # type: ignore[no-untyped-def]
     b = f.read(int(n))
+    # 条件分岐: `b is None` を満たす経路を評価する。
     if b is None:
         return b""
+
     return b
 
 
@@ -156,11 +174,14 @@ def _read_header_blocks(f) -> bytes:  # type: ignore[no-untyped-def]
     chunks: List[bytes] = []
     while True:
         block = _read_exact(f, _BLOCK)
+        # 条件分岐: `len(block) != _BLOCK` を満たす経路を評価する。
         if len(block) != _BLOCK:
             raise EOFError("unexpected EOF while reading FITS header")
+
         chunks.append(block)
         for i in range(0, _BLOCK, _CARD):
             card = block[i : i + _CARD].decode("ascii", errors="ignore")
+            # 条件分岐: `card.startswith("END")` を満たす経路を評価する。
             if card.startswith("END"):
                 return b"".join(chunks)
 
@@ -170,11 +191,14 @@ def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     for i in range(0, len(header_bytes), _CARD):
         card = header_bytes[i : i + _CARD].decode("ascii", errors="ignore")
         key = card[:8].strip()
+        # 条件分岐: `not key or "=" not in card` を満たす経路を評価する。
         if not key or "=" not in card:
             continue
+
         rhs = card.split("=", 1)[1]
         rhs = rhs.split("/", 1)[0].strip()
         kv[key] = rhs
+
     return kv
 
 
@@ -187,6 +211,7 @@ def _read_ogip_spectrum_columns(path: Path) -> Dict[str, List[int]]:
         row_bytes = int(float(kv.get("NAXIS1", "0") or "0"))
         n_rows = int(float(kv.get("NAXIS2", "0") or "0"))
         tfields = int(float(kv.get("TFIELDS", "0") or "0"))
+        # 条件分岐: `row_bytes <= 0 or n_rows <= 0 or tfields <= 0` を満たす経路を評価する。
         if row_bytes <= 0 or n_rows <= 0 or tfields <= 0:
             raise ValueError("invalid SPECTRUM header (missing NAXIS1/NAXIS2/TFIELDS)")
 
@@ -194,9 +219,12 @@ def _read_ogip_spectrum_columns(path: Path) -> Dict[str, List[int]]:
         tform: Dict[int, str] = {}
         for i in range(1, tfields + 1):
             t = kv.get(f"TTYPE{i}")
+            # 条件分岐: `t is not None` を満たす経路を評価する。
             if t is not None:
                 ttype[i] = str(t).strip().strip("'").strip()
+
             fm = kv.get(f"TFORM{i}")
+            # 条件分岐: `fm is not None` を満たす経路を評価する。
             if fm is not None:
                 tform[i] = str(fm).strip().strip("'").strip()
 
@@ -206,30 +234,43 @@ def _read_ogip_spectrum_columns(path: Path) -> Dict[str, List[int]]:
         for i in range(1, tfields + 1):
             name = ttype.get(i, "")
             fmt = tform.get(i, "")
+            # 条件分岐: `not name or not fmt` を満たす経路を評価する。
             if not name or not fmt:
                 raise ValueError(f"missing TTYPE/TFORM for field {i}")
+
             code = fmt.split("(", 1)[0].strip().upper()
+            # 条件分岐: `code.startswith("1")` を満たす経路を評価する。
             if code.startswith("1"):
                 code = code[1:]
+
+            # 条件分岐: `code == "I"` を満たす経路を評価する。
+
             if code == "I":
                 width = 2
+            # 条件分岐: 前段条件が不成立で、`code == "J"` を追加評価する。
             elif code == "J":
                 width = 4
             else:
                 raise ValueError(f"unsupported TFORM for OGIP spectrum: {fmt!r}")
+
             offsets[name] = int(off)
             widths[name] = int(width)
             off += int(width)
+
+        # 条件分岐: `off != row_bytes` を満たす経路を評価する。
+
         if off != row_bytes:
             raise ValueError(f"row size mismatch: sum(TFORM widths)={off} != NAXIS1={row_bytes}")
 
         raw = _read_exact(f, row_bytes * n_rows)
+        # 条件分岐: `len(raw) != row_bytes * n_rows` を満たす経路を評価する。
         if len(raw) != row_bytes * n_rows:
             raise EOFError("unexpected EOF while reading SPECTRUM table")
 
     want = ["CHANNEL", "COUNTS", "GROUPING", "QUALITY"]
     out: Dict[str, List[int]] = {}
     for k in want:
+        # 条件分岐: `k in offsets` を満たす経路を評価する。
         if k in offsets:
             out[k] = [0] * int(n_rows)
 
@@ -237,15 +278,19 @@ def _read_ogip_spectrum_columns(path: Path) -> Dict[str, List[int]]:
     for i in range(int(n_rows)):
         base = i * row_bytes
         for k, n_b in widths.items():
+            # 条件分岐: `k not in out` を満たす経路を評価する。
             if k not in out:
                 continue
+
             o = offsets[k]
             out[k][i] = int.from_bytes(mv[base + o : base + o + n_b], byteorder="big", signed=True)
+
     return out
 
 
 def _pad_spaces_to_block(f, n_written: int) -> None:  # type: ignore[no-untyped-def]
     pad = (-int(n_written)) % _BLOCK
+    # 条件分岐: `pad` を満たす経路を評価する。
     if pad:
         f.write(b" " * pad)
 
@@ -254,10 +299,15 @@ def _fits_card(key: str, value: str, comment: str = "") -> str:
     k = str(key)[:8].ljust(8)
     v = str(value).strip()
     s = f"{k}= {v}"
+    # 条件分岐: `comment` を満たす経路を評価する。
     if comment:
         s += f" / {comment}"
+
+    # 条件分岐: `len(s) > _CARD` を満たす経路を評価する。
+
     if len(s) > _CARD:
         s = s[:_CARD]
+
     return s.ljust(_CARD)
 
 
@@ -289,6 +339,7 @@ def _read_pha_header_seed(path: Path) -> _PhaHeaderSeed:
     with opener(path, "rb") as f:  # type: ignore[arg-type]
         _ = _read_header_blocks(f)  # primary
         hdr_ext = _read_header_blocks(f)  # SPECTRUM
+
     kv = _parse_header_kv(hdr_ext)
 
     def g(key: str, default: str) -> str:
@@ -325,11 +376,16 @@ def _write_ogip_pha(
     include_links: bool = False,
 ) -> None:
     n_rows = int(len(channels))
+    # 条件分岐: `n_rows <= 0 or n_rows != int(len(counts))` を満たす経路を評価する。
     if n_rows <= 0 or n_rows != int(len(counts)):
         raise ValueError("invalid channels/counts length")
+
     has_gq = grouping is not None and quality is not None
+    # 条件分岐: `has_gq and (len(grouping or []) != n_rows or len(quality or []) != n_rows)` を満たす経路を評価する。
     if has_gq and (len(grouping or []) != n_rows or len(quality or []) != n_rows):
         raise ValueError("invalid grouping/quality length")
+
+    # 条件分岐: `has_gq` を満たす経路を評価する。
 
     if has_gq:
         tfields = 4
@@ -363,6 +419,7 @@ def _write_ogip_pha(
     for i, (tt, tf) in enumerate(zip(ttypes, tforms), start=1):
         cards_ext.append(_fits_card(f"TTYPE{i}", f"'{tt}'"))
         cards_ext.append(_fits_card(f"TFORM{i}", f"'{tf}'"))
+
     cards_ext.extend(
         [
             _fits_card("EXTNAME", "'SPECTRUM'"),
@@ -383,14 +440,19 @@ def _write_ogip_pha(
             _fits_card("SYS_ERR", seed.sys_err),
         ]
     )
+    # 条件分岐: `bool(include_links)` を満たす経路を評価する。
     if bool(include_links):
         # XSPEC expects these keywords to exist for OGIP spectra. We keep them as 'none'
         # because the analysis fixes response/arf/background explicitly in the .xcm.
         cards_ext.append(_fits_card("RESPFILE", "'none'"))
         cards_ext.append(_fits_card("ANCRFILE", "'none'"))
         cards_ext.append(_fits_card("BACKFILE", "'none'"))
+
+    # 条件分岐: `str(seed.corrscal).strip()` を満たす経路を評価する。
+
     if str(seed.corrscal).strip():
         cards_ext.append(_fits_card("CORRSCAL", seed.corrscal))
+
     cards_ext.append(_fits_end_card())
 
     data = bytearray(int(row_bytes) * int(n_rows))
@@ -398,6 +460,7 @@ def _write_ogip_pha(
         base = i * row_bytes
         data[base : base + 2] = int(channels[i]).to_bytes(2, byteorder="big", signed=True)
         data[base + 2 : base + 6] = int(counts[i]).to_bytes(4, byteorder="big", signed=True)
+        # 条件分岐: `has_gq and grouping is not None and quality is not None` を満たす経路を評価する。
         if has_gq and grouping is not None and quality is not None:
             data[base + 6 : base + 8] = int(grouping[i]).to_bytes(2, byteorder="big", signed=True)
             data[base + 8 : base + 10] = int(quality[i]).to_bytes(2, byteorder="big", signed=True)
@@ -414,40 +477,52 @@ def _write_ogip_pha(
 
         f.write(bytes(data))
         pad = (-len(data)) % _BLOCK
+        # 条件分岐: `pad` を満たす経路を評価する。
         if pad:
             f.write(b"\0" * pad)
 
 
 def _rebin_sum(values: List[int], factor: int) -> List[int]:
+    # 条件分岐: `factor <= 1` を満たす経路を評価する。
     if factor <= 1:
         return list(values)
+
     n = int(len(values))
+    # 条件分岐: `n % factor != 0` を満たす経路を評価する。
     if n % factor != 0:
         raise ValueError(f"length not divisible by factor: {n} % {factor} != 0")
+
     return [int(sum(values[i : i + factor])) for i in range(0, n, factor)]
 
 
 def _rebin_max(values: List[int], factor: int) -> List[int]:
+    # 条件分岐: `factor <= 1` を満たす経路を評価する。
     if factor <= 1:
         return list(values)
+
     n = int(len(values))
+    # 条件分岐: `n % factor != 0` を満たす経路を評価する。
     if n % factor != 0:
         raise ValueError(f"length not divisible by factor: {n} % {factor} != 0")
+
     return [int(max(values[i : i + factor])) for i in range(0, n, factor)]
 
 
 def _maybe_rebin_pha_for_xspec(*, obsid: str, inst_tag: str, ds: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
     rebin = ds.get("spectrum_rebin") if isinstance(ds.get("spectrum_rebin"), dict) else {}
+    # 条件分岐: `str(rebin.get("status") or "") != "rebinned"` を満たす経路を評価する。
     if str(rebin.get("status") or "") != "rebinned":
         return {"spec": str(ds.get("spec") or ""), "bkg": str(ds.get("bkg") or ""), "rebinned": False}
 
     factor = int(rebin.get("factor") or 0)
     n_out = int(rebin.get("n_out") or 0)
+    # 条件分岐: `factor <= 1 or n_out <= 0` を満たす経路を評価する。
     if factor <= 1 or n_out <= 0:
         return {"spec": str(ds.get("spec") or ""), "bkg": str(ds.get("bkg") or ""), "rebinned": False}
 
     spec_in = (_ROOT / str(ds.get("spec") or "")).resolve()
     bkg_in = (_ROOT / str(ds.get("bkg") or "")).resolve() if str(ds.get("bkg") or "") else None
+    # 条件分岐: `not spec_in.exists()` を満たす経路を評価する。
     if not spec_in.exists():
         raise FileNotFoundError(f"missing spectrum: {spec_in}")
 
@@ -459,21 +534,29 @@ def _maybe_rebin_pha_for_xspec(*, obsid: str, inst_tag: str, ds: Dict[str, Any],
     ch_in = cols.get("CHANNEL", [])
     counts_in = cols.get("COUNTS", [])
     qual_in = cols.get("QUALITY")
+    # 条件分岐: `len(ch_in) != len(counts_in) or len(ch_in) <= 0` を満たす経路を評価する。
     if len(ch_in) != len(counts_in) or len(ch_in) <= 0:
         raise ValueError("invalid spectrum columns")
+
+    # 条件分岐: `len(ch_in) != int(n_out) * int(factor)` を満たす経路を評価する。
+
     if len(ch_in) != int(n_out) * int(factor):
         raise ValueError(f"unexpected spectrum length: {len(ch_in)} (expected {n_out}*{factor})")
 
     # Ensure standard 0..N-1 channel numbering.
+
     order = sorted(range(len(ch_in)), key=lambda i: ch_in[i])
     ch_sorted = [int(ch_in[i]) for i in order]
+    # 条件分岐: `ch_sorted != list(range(len(ch_sorted)))` を満たす経路を評価する。
     if ch_sorted != list(range(len(ch_sorted))):
         raise ValueError("unexpected CHANNEL numbering (expected 0..N-1)")
+
     counts_sorted = [int(counts_in[i]) for i in order]
     counts_out = _rebin_sum(counts_sorted, factor)
 
     quality_out: Optional[List[int]] = None
     grouping_out: Optional[List[int]] = None
+    # 条件分岐: `isinstance(qual_in, list) and len(qual_in) == len(ch_in)` を満たす経路を評価する。
     if isinstance(qual_in, list) and len(qual_in) == len(ch_in):
         qual_sorted = [int(qual_in[i]) for i in order]
         quality_out = _rebin_max(qual_sorted, factor)
@@ -490,19 +573,27 @@ def _maybe_rebin_pha_for_xspec(*, obsid: str, inst_tag: str, ds: Dict[str, Any],
         include_links=True,
     )
 
+    # 条件分岐: `bkg_out is not None and bkg_in is not None and bkg_in.exists()` を満たす経路を評価する。
     if bkg_out is not None and bkg_in is not None and bkg_in.exists():
         seed_b = _read_pha_header_seed(bkg_in)
         cols_b = _read_ogip_spectrum_columns(bkg_in)
         ch_b = cols_b.get("CHANNEL", [])
         counts_b = cols_b.get("COUNTS", [])
+        # 条件分岐: `len(ch_b) != len(counts_b) or len(ch_b) <= 0` を満たす経路を評価する。
         if len(ch_b) != len(counts_b) or len(ch_b) <= 0:
             raise ValueError("invalid background columns")
+
+        # 条件分岐: `len(ch_b) != int(n_out) * int(factor)` を満たす経路を評価する。
+
         if len(ch_b) != int(n_out) * int(factor):
             raise ValueError(f"unexpected background length: {len(ch_b)} (expected {n_out}*{factor})")
+
         order_b = sorted(range(len(ch_b)), key=lambda i: ch_b[i])
         ch_sorted_b = [int(ch_b[i]) for i in order_b]
+        # 条件分岐: `ch_sorted_b != list(range(len(ch_sorted_b)))` を満たす経路を評価する。
         if ch_sorted_b != list(range(len(ch_sorted_b))):
             raise ValueError("unexpected background CHANNEL numbering (expected 0..N-1)")
+
         counts_sorted_b = [int(counts_b[i]) for i in order_b]
         counts_out_b = _rebin_sum(counts_sorted_b, factor)
         _write_ogip_pha(
@@ -537,8 +628,10 @@ def _build_xspec_xcm_diskline(
     lo, hi = float(band_keV[0]), float(band_keV[1])
 
     def q(p: Optional[Path]) -> str:
+        # 条件分岐: `p is None` を満たす経路を評価する。
         if p is None:
             return ""
+
         return f"\"{p.resolve().as_posix()}\""
 
     lines: List[str] = [
@@ -547,12 +640,20 @@ def _build_xspec_xcm_diskline(
         "log chatter 5",
         f"data {q(spec_path)}",
     ]
+    # 条件分岐: `bkg_path is not None and bkg_path.exists()` を満たす経路を評価する。
     if bkg_path is not None and bkg_path.exists():
         lines.append(f"backgrnd {q(bkg_path)}")
+
+    # 条件分岐: `rmf_path is not None and rmf_path.exists()` を満たす経路を評価する。
+
     if rmf_path is not None and rmf_path.exists():
         lines.append(f"response {q(rmf_path)}")
+
+    # 条件分岐: `arf_path is not None and arf_path.exists()` を満たす経路を評価する。
+
     if arf_path is not None and arf_path.exists():
         lines.append(f"arf {q(arf_path)}")
+
     lines.extend(
         [
             f"ignore **-{lo} {hi}-**",
@@ -625,6 +726,7 @@ def _run_xspec_fit_diskline_cli(
 
     stdout = (res.stdout or "").strip()
     stderr = (res.stderr or "").strip()
+    # 条件分岐: `res.returncode != 0` を満たす経路を評価する。
     if res.returncode != 0:
         return {
             "status": "fail",
@@ -639,6 +741,7 @@ def _run_xspec_fit_diskline_cli(
     rin_param_s = _parse_xspec_tclout_line(stdout, "RIN_PARAM")
     rin_err_s = _parse_xspec_tclout_line(stdout, "RIN_ERR")
 
+    # 条件分岐: `not stat_s or not dof_s or not rin_param_s` を満たす経路を評価する。
     if not stat_s or not dof_s or not rin_param_s:
         return {
             "status": "fail",
@@ -654,6 +757,7 @@ def _run_xspec_fit_diskline_cli(
         stat = float(_parse_float_list(stat_s)[0])
     except Exception:
         pass
+
     try:
         dof = int(float(_parse_float_list(dof_s)[0]))
     except Exception:
@@ -673,35 +777,47 @@ def _run_xspec_fit_diskline_cli(
     err_low = float(err_vals[0]) if len(err_vals) >= 1 else float("nan")
     err_high = float(err_vals[1]) if len(err_vals) >= 2 else float("nan")
     r_in_stat = float("nan")
+    # 条件分岐: `math.isfinite(r_in) and math.isfinite(err_low) and math.isfinite(err_high)` を満たす経路を評価する。
     if math.isfinite(r_in) and math.isfinite(err_low) and math.isfinite(err_high):
         # XSPEC may report either absolute bounds (low < value < high) or deltas (low < 0 < high).
         # When pegged at a hard limit, it may return 0 0 with flags; treat as "no estimate".
         if err_low == 0.0 and err_high == 0.0:
             r_in_stat = float("nan")
+        # 条件分岐: 前段条件が不成立で、`err_low < 0.0 and err_high > 0.0` を追加評価する。
         elif err_low < 0.0 and err_high > 0.0:
             r_in_stat = max(abs(err_low), abs(err_high))
+        # 条件分岐: 前段条件が不成立で、`err_low <= r_in <= err_high` を追加評価する。
         elif err_low <= r_in <= err_high:
             r_in_stat = max(abs(r_in - err_low), abs(err_high - r_in))
         else:
             r_in_stat = max(abs(err_low), abs(err_high))
 
     r_in_bound = ""
+    # 条件分岐: `err_flags and len(err_flags) == 9` を満たす経路を評価する。
     if err_flags and len(err_flags) == 9:
         # 4: hit hard lower limit, 5: hit hard upper limit (1-indexed in manual).
         if err_flags[3] == "T":
             r_in_bound = "lower"
+        # 条件分岐: 前段条件が不成立で、`err_flags[4] == "T"` を追加評価する。
         elif err_flags[4] == "T":
             r_in_bound = "upper"
     # Fallback bound detection from hard limits.
+
     if not r_in_bound and math.isfinite(r_in):
+        # 条件分岐: `math.isfinite(p_min) and abs(r_in - p_min) <= 1e-6` を満たす経路を評価する。
         if math.isfinite(p_min) and abs(r_in - p_min) <= 1e-6:
             r_in_bound = "lower"
+        # 条件分岐: 前段条件が不成立で、`math.isfinite(p_max) and abs(r_in - p_max) <= 1e-6` を追加評価する。
         elif math.isfinite(p_max) and abs(r_in - p_max) <= 1e-6:
             r_in_bound = "upper"
+
+    # 条件分岐: `r_in_bound` を満たす経路を評価する。
+
     if r_in_bound:
         r_in_stat = float("nan")
 
     redchi2 = float(stat / dof) if dof > 0 and math.isfinite(stat) else float("nan")
+    # 条件分岐: `not (math.isfinite(stat) and dof > 0 and math.isfinite(r_in))` を満たす経路を評価する。
     if not (math.isfinite(stat) and dof > 0 and math.isfinite(r_in)):
         return {
             "status": "fail",
@@ -710,6 +826,7 @@ def _run_xspec_fit_diskline_cli(
             "stderr_tail": stderr[-4000:],
             "method_tag": "xspec_diskline_v2",
         }
+
     return {
         "status": "ok",
         "band_keV": [float(band_keV[0]), float(band_keV[1])],
@@ -750,10 +867,17 @@ def _run_xspec_fit_diskline(
     Xset.logChatter = 5
 
     s = Spectrum(str(spec_path))
+    # 条件分岐: `bkg_path is not None and bkg_path.exists()` を満たす経路を評価する。
     if bkg_path is not None and bkg_path.exists():
         s.background = str(bkg_path)
+
+    # 条件分岐: `rmf_path is not None and rmf_path.exists()` を満たす経路を評価する。
+
     if rmf_path is not None and rmf_path.exists():
         s.response = str(rmf_path)
+
+    # 条件分岐: `arf_path is not None and arf_path.exists()` を満たす経路を評価する。
+
     if arf_path is not None and arf_path.exists():
         try:
             s.response.arf = str(arf_path)
@@ -772,14 +896,17 @@ def _run_xspec_fit_diskline(
         m.tbabs.nH.values = [0.5]
     except Exception:
         pass
+
     try:
         m.powerlaw.PhoIndex.values = [1.7]
     except Exception:
         pass
+
     try:
         m.powerlaw.norm.values = [1e-2]
     except Exception:
         pass
+
     try:
         m.diskline.LineE.values = [6.4]
         m.diskline.Beta.values = [-2.0]
@@ -809,6 +936,7 @@ def _run_xspec_fit_diskline(
         pass
 
     # Try XSPEC error command (may fail depending on environment).
+
     try:
         # diskline Rin is typically the 7th parameter for tbabs*(powerlaw+diskline),
         # but we avoid relying on global indices; use a best-effort error call.
@@ -867,6 +995,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     targets = _read_json(targets_path)
     items = targets.get("targets", [])
+    # 条件分岐: `not isinstance(items, list) or not items` を満たす経路を評価する。
     if not isinstance(items, list) or not items:
         raise RuntimeError(f"no targets in {targets_path}")
 
@@ -890,18 +1019,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     n_written = 0
 
     for t in items:
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
+
         xmm_list = t.get("xmm", [])
+        # 条件分岐: `not isinstance(xmm_list, list)` を満たす経路を評価する。
         if not isinstance(xmm_list, list):
             continue
 
         for d in xmm_list:
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
             if not isinstance(d, dict):
                 continue
+
             obsid = str(d.get("obsid") or "").strip()
+            # 条件分岐: `not obsid` を満たす経路を評価する。
             if not obsid:
                 continue
+
+            # 条件分岐: `only_obsid and obsid != only_obsid` を満たす経路を評価する。
+
             if only_obsid and obsid != only_obsid:
                 continue
 
@@ -930,15 +1068,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 },
             }
 
+            # 条件分岐: `bool(args.dry_run)` を満たす経路を評価する。
             if bool(args.dry_run):
                 # Do not overwrite an already-fixed result with a dry-run placeholder.
                 prev_ok = False
+                # 条件分岐: `out_path.exists()` を満たす経路を評価する。
                 if out_path.exists():
                     prev = _read_json(out_path)
                     prev_status = str(prev.get("status") or "").strip().lower()
                     prev_ok = prev_status == "ok"
 
                 # Always freeze the XSPEC command plan as an .xcm file.
+
                 if rmf_sources:
                     ds = rmf_sources[0]
                     spec_path = _ROOT / str(ds["spec"])
@@ -949,8 +1090,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     inst_tag = "m1" if "M1" in str(spec_path.name).upper() else "m2"
                     rebin_artifacts = _maybe_rebin_pha_for_xspec(obsid=obsid, inst_tag=inst_tag, ds=ds, out_dir=out_dir)
                     plan["xspec"]["pha_rebin"] = rebin_artifacts
+                    # 条件分岐: `rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("spec") or "")` を満たす経路を評価する。
                     if rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("spec") or ""):
                         spec_path = _ROOT / str(rebin_artifacts["spec"])
+
+                    # 条件分岐: `rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("bkg") or "")` を満たす経路を評価する。
+
                     if rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("bkg") or ""):
                         bkg_path = _ROOT / str(rebin_artifacts["bkg"])
 
@@ -974,10 +1119,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "xspec_import_error": pyxspec_err if not pyxspec_available else "",
                     "plan": plan,
                 }
+                # 条件分岐: `not prev_ok` を満たす経路を評価する。
                 if not prev_ok:
                     _write_json(out_path, obj)
                     n_written += 1
+
                 continue
+
+            # 条件分岐: `not xspec_available` を満たす経路を評価する。
 
             if not xspec_available:
                 obj = {
@@ -992,6 +1141,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 n_written += 1
                 blocked_any = True
                 continue
+
+            # 条件分岐: `not rmf_sources` を満たす経路を評価する。
 
             if not rmf_sources:
                 obj = {
@@ -1008,6 +1159,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 continue
 
             # Fit MOS1 first when available (keep the minimal workflow stable).
+
             ds = rmf_sources[0]
             spec_path = _ROOT / str(ds["spec"])
             bkg_path = (_ROOT / str(ds["bkg"])) if ds.get("bkg") else None
@@ -1018,14 +1170,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 inst_tag = "m1" if "M1" in str(spec_path.name).upper() else "m2"
                 rebin_artifacts = _maybe_rebin_pha_for_xspec(obsid=obsid, inst_tag=inst_tag, ds=ds, out_dir=out_dir)
                 plan["xspec"]["pha_rebin"] = rebin_artifacts
+                # 条件分岐: `rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("spec") or "")` を満たす経路を評価する。
                 if rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("spec") or ""):
                     spec_path = _ROOT / str(rebin_artifacts["spec"])
+
+                # 条件分岐: `rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("bkg") or "")` を満たす経路を評価する。
+
                 if rebin_artifacts.get("rebinned") and str(rebin_artifacts.get("bkg") or ""):
                     bkg_path = _ROOT / str(rebin_artifacts["bkg"])
 
+                # 条件分岐: `bool(args.prefer_cli) or not pyxspec_available` を満たす経路を評価する。
+
                 if bool(args.prefer_cli) or not pyxspec_available:
+                    # 条件分岐: `xspec_bin is None` を満たす経路を評価する。
                     if xspec_bin is None:
                         raise RuntimeError("xspec_cli_not_found")
+
                     fit = _run_xspec_fit_diskline_cli(
                         xspec_bin=xspec_bin,
                         xcm_path=xcm_path,
@@ -1045,6 +1205,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         arf_path=arf_path,
                         band_keV=band,
                     )
+
                 obj = {
                     "generated_utc": _utc_now(),
                     "obsid": obsid,
@@ -1084,12 +1245,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 fail_any = True
 
     print(json.dumps({"written": n_written, "out_dir": _rel(out_dir)}, ensure_ascii=False))
+    # 条件分岐: `fail_any` を満たす経路を評価する。
     if fail_any:
         return 1
+
+    # 条件分岐: `blocked_any` を満たす経路を評価する。
+
     if blocked_any:
         return 2
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

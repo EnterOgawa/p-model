@@ -33,6 +33,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -51,26 +52,34 @@ def _rel(path: Path) -> str:
 
 
 def _read_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
 def _sha256(path: Path) -> Optional[str]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
+
     h = hashlib.sha256()
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _as_float(value: Any, default: float = 0.0) -> float:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         out = float(value)
+        # 条件分岐: `math.isfinite(out)` を満たす経路を評価する。
         if math.isfinite(out):
             return out
+
     return float(default)
 
 
@@ -98,12 +107,15 @@ def _criterion(
     note: str,
     gate_level: str = "hard",
 ) -> Dict[str, Any]:
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
     if operator == "<=":
         passed = bool(value <= threshold)
+    # 条件分岐: 前段条件が不成立で、`operator == ">="` を追加評価する。
     elif operator == ">=":
         passed = bool(value >= threshold)
     else:
         raise ValueError(f"Unsupported operator: {operator}")
+
     return {
         "id": cid,
         "metric": metric,
@@ -117,21 +129,34 @@ def _criterion(
 
 
 def _target_manifold(*, has_scalar_multiplet: bool, has_only_complex_scalar: bool) -> str:
+    # 条件分岐: `has_scalar_multiplet` を満たす経路を評価する。
     if has_scalar_multiplet:
         return "S3-like"
+
+    # 条件分岐: `has_only_complex_scalar` を満たす経路を評価する。
+
     if has_only_complex_scalar:
         return "S1-like"
+
     return "unknown"
 
 
 def _pi4_group(manifold: str) -> str:
     key = manifold.lower()
+    # 条件分岐: `key.startswith("s1")` を満たす経路を評価する。
     if key.startswith("s1"):
         return "0"
+
+    # 条件分岐: `key.startswith("s2")` を満たす経路を評価する。
+
     if key.startswith("s2"):
         return "Z2"
+
+    # 条件分岐: `key.startswith("s3")` を満たす経路を評価する。
+
     if key.startswith("s3"):
         return "Z2"
+
     return "unknown"
 
 
@@ -141,12 +166,19 @@ def _fr_sector_available(pi4_group: str) -> bool:
 
 def _gate_score(value: float, threshold: float, operator: str) -> float:
     eps = 1.0e-15
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
     if operator == "<=":
+        # 条件分岐: `threshold <= 0.0` を満たす経路を評価する。
         if threshold <= 0.0:
             return 0.0 if value <= 0.0 else 10.0
+
         return min(max(value, eps) / threshold, 10.0)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
         return min(threshold / max(value, eps), 10.0)
+
     return float("nan")
 
 
@@ -169,9 +201,11 @@ def _defect_operator_metrics(*, winding_q: int = 1) -> Dict[str, Any]:
             anti = alpha[ia] @ alpha[ja] + alpha[ja] @ alpha[ia]
             target = 2.0 * (1.0 if ia == ja else 0.0) * i4
             clifford_errors.append(float(np.linalg.norm(anti - target, ord="fro")))
+
     for ia in range(3):
         anti_ab = alpha[ia] @ beta + beta @ alpha[ia]
         clifford_errors.append(float(np.linalg.norm(anti_ab, ord="fro")))
+
     clifford_errors.append(float(np.linalg.norm(beta @ beta - i4, ord="fro")))
     clifford_max_error = max(clifford_errors) if clifford_errors else float("inf")
 
@@ -188,6 +222,7 @@ def _defect_operator_metrics(*, winding_q: int = 1) -> Dict[str, Any]:
                 target_abs = np.array([target, target, target, target], dtype=float)
                 rel = np.max(np.abs(np.sort(np.abs(eig)) - target_abs) / max(target, 1.0e-12))
                 dispersion_rel_errors.append(float(rel))
+
     dispersion_max_rel_error = max(dispersion_rel_errors) if dispersion_rel_errors else float("inf")
 
     sigma_z4 = np.kron(i2, sigma_z)
@@ -347,8 +382,10 @@ def _decision_from_criteria(criteria: List[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(row["id"]) for row in criteria if row.get("gate_level") == "hard" and not bool(row.get("pass"))]
     watch_fail_ids = [str(row["id"]) for row in criteria if row.get("gate_level") == "watch" and not bool(row.get("pass"))]
 
+    # 条件分岐: `hard_fail_ids` を満たす経路を評価する。
     if hard_fail_ids:
         overall_status = "reject"
+    # 条件分岐: 前段条件が不成立で、`watch_fail_ids` を追加評価する。
     elif watch_fail_ids:
         overall_status = "watch"
     else:
@@ -362,20 +399,30 @@ def _decision_from_criteria(criteria: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def _hard_reject_reason(*, hard_fail_ids: List[str]) -> str:
+    # 条件分岐: `not hard_fail_ids` を満たす経路を評価する。
     if not hard_fail_ids:
         return ""
+
     topological_fail = any(f.startswith("topology::") or f.startswith("spin::") for f in hard_fail_ids)
     operator_fail = "operator::first_order_spinor_operator" in hard_fail_ids
     dependency_fail = "dependency::external_spinor_field" in hard_fail_ids
+    # 条件分岐: `topological_fail and (operator_fail or dependency_fail)` を満たす経路を評価する。
     if topological_fail and (operator_fail or dependency_fail):
         return (
             "Topological precondition and spinor-operator closure are both incomplete: "
             "FR sector / phase term plus first-order spinor operator are required."
         )
+
+    # 条件分岐: `topological_fail` を満たす経路を評価する。
+
     if topological_fail:
         return "Topological precondition for fermionic FR sign is not satisfied in the current action."
+
+    # 条件分岐: `operator_fail or dependency_fail` を満たす経路を評価する。
+
     if operator_fail or dependency_fail:
         return "Spinor operator closure is missing; external spinor dependency remains."
+
     return "Hard gate failed in fermion-emergence mapping audit."
 
 
@@ -419,6 +466,7 @@ def build_pack(
 
     theta_effective_inferred = 0.0
     theta_symbol_present = _contains_any(joined_text, ["theta", "θ"])
+    # 条件分岐: `theta_symbol_present and has_topological_term` を満たす経路を評価する。
     if theta_symbol_present and has_topological_term:
         theta_effective_inferred = math.pi
 
@@ -459,16 +507,19 @@ def build_pack(
     derivation_chain: Dict[str, Any] = {}
 
     scenario_key = str(scenario).strip().lower()
+    # 条件分岐: `scenario_key not in {"baseline", "topological_extension", "defect_operator_ex...` を満たす経路を評価する。
     if scenario_key not in {"baseline", "topological_extension", "defect_operator_extension"}:
         raise ValueError(f"Unsupported scenario: {scenario}")
 
     operator_metrics: Optional[Dict[str, Any]] = None
+    # 条件分岐: `scenario_key in {"topological_extension", "defect_operator_extension"}` を満たす経路を評価する。
     if scenario_key in {"topological_extension", "defect_operator_extension"}:
         selected_manifold = manifold_candidate
         selected_pi4 = _pi4_group(selected_manifold)
         selected_fr_available = _fr_sector_available(selected_pi4)
         selected_has_topological_term = True
         selected_theta = float(theta_candidate_rad)
+        # 条件分岐: `scenario_key == "defect_operator_extension"` を満たす経路を評価する。
         if scenario_key == "defect_operator_extension":
             operator_metrics = _defect_operator_metrics(winding_q=1)
             selected_has_spinor_symbol = bool(operator_metrics.get("operator_closure_pass"))
@@ -522,26 +573,42 @@ def build_pack(
     hard_reject_reason = _hard_reject_reason(hard_fail_ids=hard_fail_ids) if overall_status == "reject" else ""
 
     next_required_extensions: List[str] = []
+    # 条件分岐: `"topology::fr_z2_sector" in hard_fail_ids or "topology::topological_term_pres...` を満たす経路を評価する。
     if "topology::fr_z2_sector" in hard_fail_ids or "topology::topological_term_presence" in hard_fail_ids:
         next_required_extensions.append(
             "Introduce a concrete topological term carrying FR sign structure (e.g., Hopf/WZ-type) in L_total."
         )
+
+    # 条件分岐: `"spin::baseline_half_spin_mismatch_q1" in hard_fail_ids` を満たす経路を評価する。
+
     if "spin::baseline_half_spin_mismatch_q1" in hard_fail_ids:
         next_required_extensions.append(
             "Fix the phase-to-spin mapping for odd Q so that s(Q=1) matches a half-integer sector."
         )
+
+    # 条件分岐: `"operator::first_order_spinor_operator" in hard_fail_ids` を満たす経路を評価する。
+
     if "operator::first_order_spinor_operator" in hard_fail_ids:
         next_required_extensions.append(
             "Derive first-order spinor effective operator directly from P-defect collective coordinates."
         )
+
+    # 条件分岐: `"dependency::external_spinor_field" in hard_fail_ids` を満たす経路を評価する。
+
     if "dependency::external_spinor_field" in hard_fail_ids:
         next_required_extensions.append(
             "Close the route without external spinor insertion in the action-level observable chain."
         )
+
+    # 条件分岐: `"trace::action_level_derivation_traceability" in watch_fail_ids` を満たす経路を評価する。
+
     if "trace::action_level_derivation_traceability" in watch_fail_ids:
         next_required_extensions.append(
             "Promote defect-to-spinor derivation steps from audit ansatz into explicit action-level equations/text."
         )
+
+    # 条件分岐: `not next_required_extensions` を満たす経路を評価する。
+
     if not next_required_extensions:
         next_required_extensions.append("Maintain gate stability and rerun only on input_hash_changed.")
 
@@ -682,14 +749,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in criteria:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         value = _as_float(row.get("value"), default=float("nan"))
         threshold = _as_float(row.get("threshold"), default=float("nan"))
         operator = str(row.get("operator") or "")
         score = _gate_score(value, threshold, operator)
+        # 条件分岐: `not math.isfinite(score)` を満たす経路を評価する。
         if not math.isfinite(score):
             score = 10.0
+
         labels.append(str(row.get("id") or ""))
         scores.append(float(score))
         colors.append("#2f9e44" if bool(row.get("pass")) else "#dc2626")
@@ -817,14 +888,27 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
 
+    # 条件分岐: `not action_json.is_absolute()` を満たす経路を評価する。
     if not action_json.is_absolute():
         action_json = (ROOT / action_json).resolve()
+
+    # 条件分岐: `not closure_json.is_absolute()` を満たす経路を評価する。
+
     if not closure_json.is_absolute():
         closure_json = (ROOT / closure_json).resolve()
+
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
+
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
+
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
+
     if not out_csv.is_absolute():
         out_csv = (ROOT / out_csv).resolve()
+
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
+
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
@@ -869,6 +953,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

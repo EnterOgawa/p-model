@@ -34,6 +34,7 @@ from typing import Any
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -48,8 +49,10 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -65,16 +68,24 @@ def _parse_ross_xi_file(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]
     err_list: list[float] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         cols = t.split()
+        # 条件分岐: `len(cols) < 3` を満たす経路を評価する。
         if len(cols) < 3:
             continue
+
         s_list.append(float(cols[0]))
         xi_list.append(float(cols[1]))
         err_list.append(float(cols[2]))
+
+    # 条件分岐: `not s_list` を満たす経路を評価する。
+
     if not s_list:
         raise ValueError(f"no data rows found: {path}")
+
     return np.asarray(s_list, dtype=float), np.asarray(xi_list, dtype=float), np.asarray(err_list, dtype=float)
 
 
@@ -82,12 +93,17 @@ def _read_cov(path: Path) -> np.ndarray:
     rows: list[list[float]] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         t = line.strip()
+        # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
         if not t or t.startswith("#"):
             continue
+
         rows.append([float(x) for x in t.split()])
+
     cov = np.asarray(rows, dtype=float)
+    # 条件分岐: `cov.ndim != 2 or cov.shape[0] != cov.shape[1]` を満たす経路を評価する。
     if cov.ndim != 2 or cov.shape[0] != cov.shape[1]:
         raise ValueError(f"invalid covariance shape: {cov.shape} from {path}")
+
     cov = 0.5 * (cov + cov.T)
     return cov
 
@@ -123,9 +139,12 @@ def _fit_broadband_6param(*, r: np.ndarray, residual: np.ndarray, cov_inv: np.nd
     """
     r = np.asarray(r, dtype=float)
     residual = np.asarray(residual, dtype=float)
+    # 条件分岐: `r.ndim != 1` を満たす経路を評価する。
     if r.ndim != 1:
         raise ValueError("r must be 1D")
+
     n = int(r.size)
+    # 条件分岐: `residual.shape != (2 * n,)` を満たす経路を評価する。
     if residual.shape != (2 * n,):
         raise ValueError("residual must have shape (2*n,)")
 
@@ -166,6 +185,7 @@ def _load_ross_template(*, base_dir: Path, mod: str, scale: float = 2.1) -> dict
     p0 = base_dir / f"xi0{mod}"
     p2 = base_dir / f"xi2{mod}"
     p4 = base_dir / f"xi4{mod}"
+    # 条件分岐: `not (p0.exists() and p2.exists() and p4.exists())` を満たす経路を評価する。
     if not (p0.exists() and p2.exists() and p4.exists()):
         raise FileNotFoundError(f"missing template files under {base_dir} for mod={mod}")
 
@@ -174,20 +194,27 @@ def _load_ross_template(*, base_dir: Path, mod: str, scale: float = 2.1) -> dict
         y: list[float] = []
         for line in p.read_text(encoding="utf-8", errors="replace").splitlines():
             t = line.strip()
+            # 条件分岐: `not t or t.startswith("#")` を満たす経路を評価する。
             if not t or t.startswith("#"):
                 continue
+
             a = t.split()
+            # 条件分岐: `len(a) < 2` を満たす経路を評価する。
             if len(a) < 2:
                 continue
+
             x.append(float(a[0]))
             y.append(float(a[1]))
+
         return np.asarray(x, dtype=float), np.asarray(y, dtype=float)
 
     r0, xi0 = _read_xy(p0)
     r2, xi2 = _read_xy(p2)
     r4, xi4 = _read_xy(p4)
+    # 条件分岐: `not (np.allclose(r0, r2) and np.allclose(r0, r4))` を満たす経路を評価する。
     if not (np.allclose(r0, r2) and np.allclose(r0, r4)):
         raise ValueError("template r grids mismatch (xi0/xi2/xi4)")
+
     r = r0
     return {"r": r, "xi0": scale * xi0, "xi2": scale * xi2, "xi4": scale * xi4}
 
@@ -219,8 +246,10 @@ def _ap_multipoles_from_template(
     r = float(r)
     alpha = float(alpha)
     eps = float(eps)
+    # 条件分岐: `nmu <= 0` を満たす経路を評価する。
     if nmu <= 0:
         raise ValueError("nmu must be >0")
+
     onepe = 1.0 + eps
     ar = alpha * (onepe * onepe)
     at = alpha / onepe
@@ -234,6 +263,7 @@ def _ap_multipoles_from_template(
     xi0p = _interp1(rp, rt, tpl["xi0"])
     xi2p = _interp1(rp, rt, tpl["xi2"])
     ximu = xi0p + _p2(mup) * xi2p
+    # 条件分岐: `include_xi4` を満たす経路を評価する。
     if include_xi4:
         xi4p = _interp1(rp, rt, tpl["xi4"])
         ximu = ximu + _p4(mup) * xi4p
@@ -299,20 +329,25 @@ def main(argv: list[str] | None = None) -> int:
 
     bincent_min = int(args.bincent_min)
     bincent_max = int(args.bincent_max)
+    # 条件分岐: `bincent_min < 0 or bincent_max < bincent_min` を満たす経路を評価する。
     if bincent_min < 0 or bincent_max < bincent_min:
         raise SystemExit("--bincent-min/max invalid")
+
     bincents = list(range(bincent_min, bincent_max + 1))
 
     s_min = float(args.s_min)
     s_max = float(args.s_max)
+    # 条件分岐: `not (0.0 < s_min < s_max)` を満たす経路を評価する。
     if not (0.0 < s_min < s_max):
         raise SystemExit("--s-min/max invalid (requires 0 < s_min < s_max)")
 
     bs = float(args.bs)
+    # 条件分岐: `bs <= 0.0` を満たす経路を評価する。
     if bs <= 0.0:
         raise SystemExit("--bs must be >0")
 
     # Load catalog recon curves (xi0/xi2) for each zbin once.
+
     zbins = [1, 2, 3]
     zbin_to_b = {1: "b1", 2: "b2", 3: "b3"}
     cat_curves: dict[int, dict[str, np.ndarray]] = {}
@@ -325,8 +360,10 @@ def main(argv: list[str] | None = None) -> int:
             / "cosmology"
             / f"cosmology_bao_xi_from_catalogs_{args.sample}_{args.caps}_{args.dist}_{b}{args.catalog_recon_suffix}.npz"
         )
+        # 条件分岐: `not cat_npz.exists()` を満たす経路を評価する。
         if not cat_npz.exists():
             raise SystemExit(f"missing catalog recon npz: {cat_npz}")
+
         used_inputs.append(str(cat_npz))
         with np.load(cat_npz, allow_pickle=True) as z:
             cat_curves[zbin] = {
@@ -336,6 +373,7 @@ def main(argv: list[str] | None = None) -> int:
             }
 
     # Evaluate recon gap significance using Ross covariance (monoquad) in the Ross fit range.
+
     results: dict[str, Any] = {"per": {}, "summary": {}}
     for zbin in zbins:
         results["per"][str(zbin)] = {}
@@ -349,17 +387,21 @@ def main(argv: list[str] | None = None) -> int:
             ross_mono = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zbin}_correlation_function_monopole_post_recon_bincent{binc}.dat"
             ross_quad = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zbin}_correlation_function_quadrupole_post_recon_bincent{binc}.dat"
             ross_cov = ross_dir / f"Ross_2016_COMBINEDDR12_zbin{zbin}_covariance_monoquad_post_recon_bincent{binc}.dat"
+            # 条件分岐: `not (ross_mono.exists() and ross_quad.exists() and ross_cov.exists())` を満たす経路を評価する。
             if not (ross_mono.exists() and ross_quad.exists() and ross_cov.exists()):
                 raise SystemExit(f"missing Ross files: zbin={zbin} bincent={binc} under {ross_dir}")
+
             used_inputs.extend([str(ross_mono), str(ross_quad), str(ross_cov)])
 
             s0, x0, _ = _parse_ross_xi_file(ross_mono)
             s2, x2, _ = _parse_ross_xi_file(ross_quad)
+            # 条件分岐: `not np.allclose(s0, s2)` を満たす経路を評価する。
             if not np.allclose(s0, s2):
                 raise SystemExit(f"Ross mono/quad s grids mismatch: zbin={zbin} bincent={binc}")
 
             cov_full = _read_cov(ross_cov)
             n_all = int(s0.size)
+            # 条件分岐: `cov_full.shape != (2 * n_all, 2 * n_all)` を満たす経路を評価する。
             if cov_full.shape != (2 * n_all, 2 * n_all):
                 raise SystemExit(
                     f"Ross covariance shape mismatch: zbin={zbin} bincent={binc} cov={cov_full.shape} expected={(2*n_all,2*n_all)}"
@@ -367,6 +409,7 @@ def main(argv: list[str] | None = None) -> int:
 
             m = (s0 > s_min) & (s0 < s_max)  # match baofit_pub2D.py (strict)
             idx = np.nonzero(m)[0].astype(int)
+            # 条件分岐: `idx.size < 8` を満たす経路を評価する。
             if idx.size < 8:
                 raise SystemExit(f"too few points after fit-range cut: zbin={zbin} bincent={binc} n={idx.size}")
 
@@ -435,6 +478,7 @@ def main(argv: list[str] | None = None) -> int:
             }
 
         # Summaries across bincent
+
         chi2d_raw = [float(results["per"][str(zbin)][str(b)]["chi2_dof_raw"]) for b in bincents]
         chi2d_after = [float(results["per"][str(zbin)][str(b)]["chi2_dof_after_broadband"]) for b in bincents]
         results["summary"][str(zbin)] = {
@@ -447,10 +491,14 @@ def main(argv: list[str] | None = None) -> int:
         }
 
     # ξ4 mixing check (model-side, AP変換での ξ4→ξ2 の寄与の目安)
+
     try:
         eps_grid = [float(x.strip()) for x in str(args.eps_grid).split(",") if x.strip()]
     except Exception as e:
         raise SystemExit(f"invalid --eps-grid: {e}") from e
+
+    # 条件分岐: `not eps_grid` を満たす経路を評価する。
+
     if not eps_grid:
         raise SystemExit("--eps-grid must not be empty")
 
@@ -469,6 +517,7 @@ def main(argv: list[str] | None = None) -> int:
             denom = max(abs((r * r) * xi2_full), 1e-30)
             d_s2xi2.append(float(abs(d)))
             rel_s2xi2.append(float(abs(d) / denom))
+
         mix_rows.append(
             {
                 "eps": float(eps),
@@ -478,6 +527,7 @@ def main(argv: list[str] | None = None) -> int:
                 "median_rel_delta_s2_xi2": float(np.median(rel_s2xi2)),
             }
         )
+
     xi4_mix["rows"] = mix_rows
 
     # Plot
@@ -505,6 +555,7 @@ def main(argv: list[str] | None = None) -> int:
         ax.legend(loc="upper right", fontsize=8)
 
     # xi4 mixing (AP)
+
     eps_vals = np.array([r["eps"] for r in mix_rows], dtype=float)
     y_abs = np.array([r["max_abs_delta_s2_xi2"] for r in mix_rows], dtype=float)
     y_rel = np.array([r["max_rel_delta_s2_xi2"] for r in mix_rows], dtype=float)
@@ -568,6 +619,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] json: {out_json}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

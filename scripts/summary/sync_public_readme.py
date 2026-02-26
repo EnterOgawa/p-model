@@ -11,14 +11,22 @@ def _sha256(path: Path) -> str:
 
 
 def _copy_if_needed(src: Path, dst: Path, dry_run: bool = False) -> bool:
+    # 条件分岐: `not src.exists()` を満たす経路を評価する。
     if not src.exists():
         raise FileNotFoundError(f"missing source: {src}")
+
+    # 条件分岐: `dst.exists() and _sha256(src) == _sha256(dst)` を満たす経路を評価する。
+
     if dst.exists() and _sha256(src) == _sha256(dst):
         print(f"[ok] up-to-date: {dst}")
         return False
+
+    # 条件分岐: `dry_run` を満たす経路を評価する。
+
     if dry_run:
         print(f"[dry-run] copy: {src} -> {dst}")
         return True
+
     dst.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(src, dst)
     print(f"[ok] copied: {src} -> {dst}")
@@ -50,25 +58,38 @@ def main() -> int:
     repo_readme = root / "README.md"
     public_readme = root / "output" / "public" / "README.md"
 
+    # 条件分岐: `args.direction == "public-to-root"` を満たす経路を評価する。
     if args.direction == "public-to-root":
+        # 条件分岐: `not public_readme.exists()` を満たす経路を評価する。
         if not public_readme.exists():
+            # 条件分岐: `not args.bootstrap` を満たす経路を評価する。
             if not args.bootstrap:
                 print(f"[err] missing: {public_readme}")
                 print("[hint] run with --bootstrap once to initialize from root README.")
                 return 1
+
+            # 条件分岐: `not repo_readme.exists()` を満たす経路を評価する。
+
             if not repo_readme.exists():
                 print(f"[err] missing bootstrap source: {repo_readme}")
                 return 1
+
             _copy_if_needed(repo_readme, public_readme, dry_run=args.dry_run)
+
         _copy_if_needed(public_readme, repo_readme, dry_run=args.dry_run)
         return 0
+
+    # 条件分岐: `not repo_readme.exists()` を満たす経路を評価する。
 
     if not repo_readme.exists():
         print(f"[err] missing source: {repo_readme}")
         return 1
+
     _copy_if_needed(repo_readme, public_readme, dry_run=args.dry_run)
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

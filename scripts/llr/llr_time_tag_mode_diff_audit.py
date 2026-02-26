@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -46,44 +47,59 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _load_metrics(path: Path) -> Tuple[pd.DataFrame, List[str]]:
     df = pd.read_csv(path)
     for col in ("station", "target"):
+        # 条件分岐: `col not in df.columns` を満たす経路を評価する。
         if col not in df.columns:
             raise ValueError(f"missing column in metrics: {col}")
+
     key_cols = ["station", "target"]
     exclude = set(key_cols + ["time_tag_mode", "beta", "has_station", "has_reflector"])
     metric_cols: List[str] = []
     for col in df.columns:
+        # 条件分岐: `col in exclude` を満たす経路を評価する。
         if col in exclude:
             continue
+
         values = pd.to_numeric(df[col], errors="coerce")
+        # 条件分岐: `values.notna().any()` を満たす経路を評価する。
         if values.notna().any():
             df[col] = values
             metric_cols.append(col)
+
+    # 条件分岐: `not metric_cols` を満たす経路を評価する。
+
     if not metric_cols:
         raise ValueError("no comparable numeric metric columns found in metrics csv")
+
     keep = key_cols + metric_cols
     return df[keep].copy(), metric_cols
 
 
 def _mode_counts(by_station: Any) -> Dict[str, int]:
     out: Dict[str, int] = {}
+    # 条件分岐: `not isinstance(by_station, dict)` を満たす経路を評価する。
     if not isinstance(by_station, dict):
         return out
+
     for value in by_station.values():
         key = str(value)
         out[key] = int(out.get(key, 0) + 1)
+
     return out
 
 
 def _median_map(summary: Dict[str, Any]) -> Dict[str, float]:
     src = summary.get("median_rms_ns")
+    # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
     if not isinstance(src, dict):
         return {}
+
     out: Dict[str, float] = {}
     for key, value in src.items():
         try:
             out[str(key)] = float(value)
         except Exception:
             continue
+
     return out
 
 
@@ -91,6 +107,7 @@ def _build_plot(df: pd.DataFrame, out_png: Path) -> None:
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig, ax = plt.subplots(figsize=(10, 4.8))
     changed = df[df["abs_delta_rms_ns"] > 0].copy()
+    # 条件分岐: `changed.empty` を満たす経路を評価する。
     if changed.empty:
         ax.axis("off")
         ax.text(
@@ -117,6 +134,7 @@ def _build_plot(df: pd.DataFrame, out_png: Path) -> None:
         ax.set_xlabel("Δrms_ns (auto - tx)")
         ax.set_title("LLR full-batch time-tag mode difference audit")
         ax.invert_yaxis()
+
     fig.tight_layout()
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
@@ -134,6 +152,7 @@ def run(args: argparse.Namespace) -> int:
     auto_metrics, auto_metric_cols = _load_metrics(auto_dir / "llr_batch_metrics.csv")
     tx_metrics, tx_metric_cols = _load_metrics(tx_dir / "llr_batch_metrics.csv")
     shared_metric_cols = [col for col in auto_metric_cols if col in set(tx_metric_cols)]
+    # 条件分岐: `not shared_metric_cols` を満たす経路を評価する。
     if not shared_metric_cols:
         raise ValueError("no shared numeric metric columns between auto and tx metrics csv")
 
@@ -154,8 +173,10 @@ def run(args: argparse.Namespace) -> int:
             t_col = f"{metric}_tx"
             a_val = pd.to_numeric(pd.Series([row.get(a_col)]), errors="coerce").iloc[0]
             t_val = pd.to_numeric(pd.Series([row.get(t_col)]), errors="coerce").iloc[0]
+            # 条件分岐: `pd.isna(a_val) and pd.isna(t_val)` を満たす経路を評価する。
             if pd.isna(a_val) and pd.isna(t_val):
                 continue
+
             delta = float(a_val - t_val)
             long_rows.append(
                 {
@@ -168,6 +189,7 @@ def run(args: argparse.Namespace) -> int:
                     "abs_delta_rms_ns": abs(delta),
                 }
             )
+
     diff_long = pd.DataFrame(long_rows)
     max_abs = float(diff_long["abs_delta_rms_ns"].max()) if not diff_long.empty else float("nan")
     mean_abs = float(diff_long["abs_delta_rms_ns"].mean()) if not diff_long.empty else float("nan")
@@ -177,6 +199,7 @@ def run(args: argparse.Namespace) -> int:
     tx_med = _median_map(tx_summary)
     median_delta: Dict[str, float] = {}
     for key in sorted(set(auto_med) | set(tx_med)):
+        # 条件分岐: `key in auto_med and key in tx_med` を満たす経路を評価する。
         if key in auto_med and key in tx_med:
             median_delta[key] = float(auto_med[key] - tx_med[key])
 
@@ -235,6 +258,7 @@ def run(args: argparse.Namespace) -> int:
         f"max_abs_delta_rms_ns={result['metrics_diff']['max_abs_delta_rms_ns']:.6g}"
     )
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -282,6 +306,8 @@ def build_parser() -> argparse.ArgumentParser:
     )
     return p
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(run(build_parser().parse_args()))

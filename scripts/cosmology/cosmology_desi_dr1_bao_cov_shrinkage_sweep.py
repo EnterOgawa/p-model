@@ -35,6 +35,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -58,35 +59,50 @@ class _Row:
 
 def _parse_lams(spec: str) -> List[float]:
     s = str(spec).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         raise ValueError("empty --lams")
+
     out: List[float] = []
     for part in s.split(","):
         p = part.strip()
+        # 条件分岐: `not p` を満たす経路を評価する。
         if not p:
             continue
+
         lam = float(p)
+        # 条件分岐: `not (math.isfinite(lam) and 0.0 <= lam <= 1.0)` を満たす経路を評価する。
         if not (math.isfinite(lam) and 0.0 <= lam <= 1.0):
             raise ValueError(f"invalid lambda: {p} (must be within [0,1])")
+
         out.append(lam)
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise ValueError("no lambdas parsed")
     # unique, keep order
+
     seen: set[float] = set()
     uniq: List[float] = []
     for x in out:
+        # 条件分岐: `x in seen` を満たす経路を評価する。
         if x in seen:
             continue
+
         seen.add(x)
         uniq.append(x)
+
     return uniq
 
 
 def _lam_tag(lam: float) -> str:
     # 0.2 -> 0p2, 1.0 -> 1p0
     s = f"{float(lam):.4f}".rstrip("0").rstrip(".")
+    # 条件分岐: `s == ""` を満たす経路を評価する。
     if s == "":
         s = "0"
+
     return s.replace("-", "m").replace(".", "p")
 
 
@@ -114,8 +130,10 @@ def _collect_rows(cross_metrics: Dict[str, Any], *, out_tag: str, lam: float) ->
     deltas = res.get("delta_fit_minus_expected") if isinstance(res.get("delta_fit_minus_expected"), dict) else {}
     out: List[_Row] = []
     for t in tracers:
+        # 条件分岐: `t not in expected or t not in fit or t not in deltas` を満たす経路を評価する。
         if t not in expected or t not in fit or t not in deltas:
             continue
+
         for dist in ("lcdm", "pbg"):
             e = expected.get(t, {}).get(dist, {})
             f = fit.get(t, {}).get(dist, {})
@@ -134,6 +152,7 @@ def _collect_rows(cross_metrics: Dict[str, Any], *, out_tag: str, lam: float) ->
                     z_score_vs_y1data=_safe_float(d.get("z_score_vs_y1data")),
                 )
             )
+
     return out
 
 
@@ -196,43 +215,72 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     out_tag = str(args.out_tag).strip()
+    # 条件分岐: `not out_tag` を満たす経路を評価する。
     if not out_tag:
         raise SystemExit("--out-tag must be non-empty")
+
     sample = str(args.sample).strip()
     caps = str(args.caps).strip()
     tracers = str(args.tracers).strip()
+    # 条件分岐: `not sample` を満たす経路を評価する。
     if not sample:
         raise SystemExit("--sample must be non-empty")
+
+    # 条件分岐: `not caps` を満たす経路を評価する。
+
     if not caps:
         raise SystemExit("--caps must be non-empty")
+
+    # 条件分岐: `not tracers` を満たす経路を評価する。
+
     if not tracers:
         raise SystemExit("--tracers must be non-empty")
+
     smooth_power_max = int(args.smooth_power_max)
+    # 条件分岐: `smooth_power_max < 0` を満たす経路を評価する。
     if smooth_power_max < 0:
         raise SystemExit("--smooth-power-max must be >=0")
+
     lams = _parse_lams(str(args.lams))
 
     cov_source = str(args.cov_source).strip().lower()
+    # 条件分岐: `cov_source not in ("jackknife", "rascalc", "vac")` を満たす経路を評価する。
     if cov_source not in ("jackknife", "rascalc", "vac"):
         raise SystemExit("--cov-source must be jackknife, rascalc, or vac")
+
     cov_suffix = str(args.cov_suffix).strip()
     cov_bandwidth_bins = int(args.cov_bandwidth_bins)
     cov_bandwidth_xi02_bins = int(args.cov_bandwidth_xi02_bins)
+    # 条件分岐: `cov_bandwidth_bins < -1` を満たす経路を評価する。
     if cov_bandwidth_bins < -1:
         raise SystemExit("--cov-bandwidth-bins must be >= -1")
+
+    # 条件分岐: `cov_bandwidth_xi02_bins < -1` を満たす経路を評価する。
+
     if cov_bandwidth_xi02_bins < -1:
         raise SystemExit("--cov-bandwidth-xi02-bins must be >= -1")
 
     default_cov_tag = "jk_cov" if cov_source == "jackknife" else ("rascalc_cov" if cov_source == "rascalc" else "vac_cov")
     reg_tag = cov_suffix if cov_suffix else default_cov_tag
+    # 条件分岐: `bool(args.cov_zero_xi02)` を満たす経路を評価する。
     if bool(args.cov_zero_xi02):
         reg_tag = f"{reg_tag}_xi02zero"
+
+    # 条件分岐: `cov_bandwidth_bins >= 0` を満たす経路を評価する。
+
     if cov_bandwidth_bins >= 0:
         reg_tag = f"{reg_tag}_band{int(cov_bandwidth_bins)}"
+
+    # 条件分岐: `cov_bandwidth_xi02_bins >= 0` を満たす経路を評価する。
+
     if cov_bandwidth_xi02_bins >= 0:
         reg_tag = f"{reg_tag}_x{int(cov_bandwidth_xi02_bins)}"
+
+    # 条件分岐: `int(smooth_power_max) != 2` を満たす経路を評価する。
+
     if int(smooth_power_max) != 2:
         reg_tag = f"{reg_tag}_smooth{int(smooth_power_max)}"
+
     is_default_reg = (
         (cov_source == "jackknife")
         and (not cov_suffix)
@@ -259,6 +307,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         cross_out_tag = f"{out_tag}__{suffix}"
         cross_metrics_path = _cross_metrics_path(out_tag=cross_out_tag)
 
+        # 条件分岐: `bool(args.skip_existing) and peakfit_metrics.exists() and cross_metrics_path....` を満たす経路を評価する。
         if bool(args.skip_existing) and peakfit_metrics.exists() and cross_metrics_path.exists():
             pass
         else:
@@ -282,12 +331,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "--output-suffix",
                     suffix,
                 ]
+            # 条件分岐: `cov_suffix` を満たす経路を評価する。
             if cov_suffix:
                 peakfit_argv.extend(["--cov-suffix", cov_suffix])
+
+            # 条件分岐: `bool(args.cov_zero_xi02)` を満たす経路を評価する。
+
             if bool(args.cov_zero_xi02):
                 peakfit_argv.append("--cov-zero-xi02")
 
             ret = _peakfit.main(peakfit_argv)
+            # 条件分岐: `int(ret) != 0` を満たす経路を評価する。
             if int(ret) != 0:
                 raise SystemExit(f"peakfit failed (lambda={lam})")
 
@@ -303,6 +357,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 tracers,
             ]
             proc = subprocess.run(cmd, cwd=str(_ROOT), capture_output=True, text=True)
+            # 条件分岐: `proc.returncode != 0` を満たす経路を評価する。
             if proc.returncode != 0:
                 sys.stderr.write(proc.stdout)
                 sys.stderr.write(proc.stderr)
@@ -321,6 +376,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # Write CSV.
+
     with out_csv.open("w", encoding="utf-8", newline="") as f:
         w = csv.writer(f)
         w.writerow(
@@ -354,6 +410,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
 
     # Plot.
+
     try:
         import matplotlib
 
@@ -373,6 +430,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             sharey=True,
             dpi=180,
         )
+        # 条件分岐: `not isinstance(axes, (list, tuple))` を満たす経路を評価する。
         if not isinstance(axes, (list, tuple)):
             axes = [axes]
 
@@ -386,13 +444,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 xs = sorted(m.keys())
                 ys = [m[x] for x in xs]
                 ax.plot(xs, ys, marker="o", ms=5, lw=2.0, label=dist, color=colors.get(dist, None))
+
             ax.set_title(f"{t}: z_score_combined vs shrinkage λ", fontsize=12)
             ax.set_xlabel("λ (shrink -> diag)")
             ax.grid(True, alpha=0.25)
 
         # Common legend outside (avoid covering data).
+
         try:
             handles, labels = axes[0].get_legend_handles_labels()
+            # 条件分岐: `handles` を満たす経路を評価する。
             if handles:
                 fig.legend(handles, labels, loc="upper left", bbox_to_anchor=(1.02, 1.0), borderaxespad=0.0, fontsize=10)
         except Exception:
@@ -448,6 +509,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] csv : {out_csv}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

@@ -38,29 +38,36 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
         return resp.read().decode("utf-8", errors="ignore")
 
 def parse_vectors_csv(txt: str):
+    # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
     if "$$SOE" not in txt or "$$EOE" not in txt:
         return None
+
     block = txt.split("$$SOE")[1].split("$$EOE")[0].strip()
 
     rows = []
     for line in block.splitlines():
         line = line.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
         parts = [p.strip() for p in line.split(",")]
         # Expect: JD, Calendar, X,Y,Z,VX,VY,VZ
         if len(parts) < 8:
             continue
+
         cal = parts[1].replace("A.D.", "").strip()
         t = datetime.strptime(cal, "%Y-%b-%d %H:%M:%S.%f").replace(tzinfo=timezone.utc)
         x = float(parts[2]); y = float(parts[3]); z = float(parts[4])
         vx = float(parts[5]); vy = float(parts[6]); vz = float(parts[7])
         rows.append((t, x, y, z, vx, vy, vz))
+
     return rows
 
 def dot(a, b): return a[0]*b[0] + a[1]*b[1] + a[2]*b[2]
 def cross(a, b):
     return (a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0])
+
 def norm(a): return math.sqrt(dot(a,a))
 def sub(a, b): return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
 def add(a, b): return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
@@ -85,6 +92,7 @@ def impact_b_and_dbdt(rE, vE, rS, vS):
         return None
 
     # dU/dt = (u · u') / |u|
+
     dU = dot(u, up) / U
     # dD/dt = (dr · dv) / |dr|
     dD = dot(dr, dv) / D
@@ -126,22 +134,27 @@ def main():
 
     earth_txt = fetch_horizons("399", start, stop, step, center="500@10")
     earth = parse_vectors_csv(earth_txt)
+    # 条件分岐: `earth is None` を満たす経路を評価する。
     if earth is None:
         raise RuntimeError("Earth vectors parse failed")
 
     # Cassini candidates; -82 worked for you
+
     cass_txt = fetch_horizons("-82", start, stop, step, center="500@10")
     cass = parse_vectors_csv(cass_txt)
+    # 条件分岐: `cass is None` を満たす経路を評価する。
     if cass is None:
         raise RuntimeError("Cassini vectors parse failed")
 
     # maps: time -> (r[m], v[m/s])
+
     E = {t: ((x*1000.0,y*1000.0,z*1000.0),(vx*1000.0,vy*1000.0,vz*1000.0))
          for (t,x,y,z,vx,vy,vz) in earth}
     S = {t: ((x*1000.0,y*1000.0,z*1000.0),(vx*1000.0,vy*1000.0,vz*1000.0))
          for (t,x,y,z,vx,vy,vz) in cass}
 
     times = sorted(set(E.keys()) & set(S.keys()))
+    # 条件分岐: `len(times) < 1000` を満たす経路を評価する。
     if len(times) < 1000:
         raise RuntimeError(f"Too few common epochs: {len(times)}")
 
@@ -155,8 +168,10 @@ def main():
         r2 = norm(rS)
 
         out = impact_b_and_dbdt(rE, vE, rS, vS)
+        # 条件分岐: `out is None` を満たす経路を評価する。
         if out is None:
             continue
+
         b, bdot, R = out
 
         dt_rt = shapiro_roundtrip(r1, r2, b, gamma=gamma)
@@ -167,6 +182,7 @@ def main():
         dt_list.append(dt_rt); y_list.append(y)
 
     # find extrema
+
     idx_bmin = min(range(len(b_list)), key=lambda i: b_list[i])
     idx_ypeak = max(range(len(y_list)), key=lambda i: abs(y_list[i]))
 
@@ -190,7 +206,10 @@ def main():
         for t,r1,r2,b,bd,dtv,yv in zip(times, r1_list, r2_list, b_list, bdot_list, dt_list, y_list):
             w.writerow([t.isoformat(), f"{r1:.6e}", f"{r2:.6e}", f"{b:.6e}",
                         f"{bd:.6e}", f"{dtv:.12e}", f"{yv:.12e}"])
+
     print("Wrote:", out)
+
+# 条件分岐: `__name__=="__main__"` を満たす経路を評価する。
 
 if __name__=="__main__":
     main()

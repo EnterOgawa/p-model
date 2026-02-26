@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -133,21 +134,28 @@ def _check_markdown_prose_no_latex_escapes(*, paper_dir: Path) -> _Check:
         for lineno, line in enumerate(lines, start=1):
             stripped = line.strip()
 
+            # 条件分岐: `stripped.startswith("```")` を満たす経路を評価する。
             if stripped.startswith("```"):
                 in_code_fence = not in_code_fence
                 continue
+
+            # 条件分岐: `in_code_fence` を満たす経路を評価する。
+
             if in_code_fence:
                 continue
 
             # Split by $$ to isolate math/prose segments and toggle state across lines.
+
             parts = line.split("$$")
             cur_in_math = in_math
             for idx, seg in enumerate(parts):
                 seg_in_math = cur_in_math
+                # 条件分岐: `not seg_in_math` を満たす経路を評価する。
                 if not seg_in_math:
                     seg_no_code = re.sub(r"`[^`]*`", "", seg)
                     seg_no_inline_math = _MD_INLINE_MATH_RE.sub("", seg_no_code)
                     m = _MD_PROSE_LATEX_ESCAPE_RE.search(seg_no_inline_math)
+                    # 条件分岐: `m` を満たす経路を評価する。
                     if m:
                         hits.append(
                             {
@@ -158,8 +166,12 @@ def _check_markdown_prose_no_latex_escapes(*, paper_dir: Path) -> _Check:
                             }
                         )
                         break
+
+                # 条件分岐: `idx != len(parts) - 1` を満たす経路を評価する。
+
                 if idx != len(parts) - 1:
                     cur_in_math = not cur_in_math
+
             in_math = cur_in_math
 
     return _Check(ok=(len(hits) == 0), details={"files": int(len(md_paths)), "hits": hits[:50], "hits_total": int(len(hits))})
@@ -188,15 +200,23 @@ def _check_publish_html_no_repo_paths(*, html_text: str) -> _Check:
     hits: List[Dict[str, Any]] = []
     for m in _HTML_CODE_RE.finditer(html_text):
         code = html.unescape(m.group(1)).strip().replace("\\", "/")
+        # 条件分岐: `not code` を満たす経路を評価する。
         if not code:
             continue
+
         reason = None
+        # 条件分岐: `any(code.startswith(p) for p in banned_prefixes)` を満たす経路を評価する。
         if any(code.startswith(p) for p in banned_prefixes):
             reason = "repo_path"
+        # 条件分岐: 前段条件が不成立で、`any(code.startswith(p) for p in banned_command_prefixes)` を追加評価する。
         elif any(code.startswith(p) for p in banned_command_prefixes):
             reason = "run_command"
+        # 条件分岐: 前段条件が不成立で、`code.startswith("python ") and ("scripts/" in code)` を追加評価する。
         elif code.startswith("python ") and ("scripts/" in code):
             reason = "run_command"
+
+        # 条件分岐: `reason` を満たす経路を評価する。
+
         if reason:
             hits.append({"reason": reason, "code": code[:300]})
 
@@ -215,20 +235,29 @@ def _iter_markdown_prose_segments(md_text: str):
     in_math = False
     for lineno, line in enumerate(lines, start=1):
         stripped = line.strip()
+        # 条件分岐: `stripped.startswith("```")` を満たす経路を評価する。
         if stripped.startswith("```"):
             in_code_fence = not in_code_fence
             continue
+
+        # 条件分岐: `in_code_fence` を満たす経路を評価する。
+
         if in_code_fence:
             continue
 
         parts = line.split("$$")
         cur_in_math = in_math
         for idx, seg in enumerate(parts):
+            # 条件分岐: `not cur_in_math` を満たす経路を評価する。
             if not cur_in_math:
                 seg_no_code = re.sub(r"`[^`]*`", "", seg)
                 yield int(lineno), seg_no_code, stripped
+
+            # 条件分岐: `idx != len(parts) - 1` を満たす経路を評価する。
+
             if idx != len(parts) - 1:
                 cur_in_math = not cur_in_math
+
         in_math = cur_in_math
 
 
@@ -247,12 +276,18 @@ def _check_markdown_section_references(*, paper_dir: Path) -> _Check:
         in_code_fence = False
         for line in txt.splitlines():
             stripped = line.strip()
+            # 条件分岐: `stripped.startswith("```")` を満たす経路を評価する。
             if stripped.startswith("```"):
                 in_code_fence = not in_code_fence
                 continue
+
+            # 条件分岐: `in_code_fence` を満たす経路を評価する。
+
             if in_code_fence:
                 continue
+
             m = _MD_HEADING_NUM_RE.match(line)
+            # 条件分岐: `m` を満たす経路を評価する。
             if m:
                 headings.add(m.group(1))
 
@@ -263,14 +298,19 @@ def _check_markdown_section_references(*, paper_dir: Path) -> _Check:
             for a, b in _MD_SECTION_REF_SLASH_RE.findall(seg):
                 refs.add(a)
                 refs.add(b)
+
             for a, b in _MD_SECTION_REF_RANGE_RE.findall(seg):
                 refs.add(a)
                 refs.add(b)
+
             for n in _MD_SECTION_REF_SINGLE_RE.findall(seg):
                 refs.add(n)
+
             for n in sorted(refs):
+                # 条件分岐: `n in headings` を満たす経路を評価する。
                 if n in headings:
                     continue
+
                 missing.append(
                     {
                         "file": str(path.relative_to(_ROOT)).replace("\\", "/"),
@@ -299,6 +339,7 @@ def _extract_figure_numbers_from_html(text: str) -> set[int]:
             out.add(int(x))
         except Exception:
             continue
+
     return out
 
 
@@ -307,8 +348,10 @@ def _check_markdown_figure_number_references(*, manuscript_md: Path, html_text: 
     Check that references like '図16' in a manuscript do not exceed / fall outside
     the actual figure numbers present in the corresponding publish HTML.
     """
+    # 条件分岐: `not manuscript_md.exists()` を満たす経路を評価する。
     if not manuscript_md.exists():
         return _Check(ok=False, details={"missing": True, "manuscript": str(manuscript_md)})
+
     md_text = _read_text(manuscript_md)
     fig_nums = _extract_figure_numbers_from_html(html_text)
 
@@ -319,6 +362,9 @@ def _check_markdown_figure_number_references(*, manuscript_md: Path, html_text: 
                 n = int(m.group(1))
             except Exception:
                 continue
+
+            # 条件分岐: `(not fig_nums) or (n not in fig_nums)` を満たす経路を評価する。
+
             if (not fig_nums) or (n not in fig_nums):
                 bad.append(
                     {
@@ -349,10 +395,12 @@ def _check_no_double_backslash(text: str) -> _Check:
     idx = scrubbed.find("\\\\")
     ok = idx < 0
     ctx: Optional[str] = None
+    # 条件分岐: `not ok` を満たす経路を評価する。
     if not ok:
         start = max(0, idx - 60)
         end = min(len(scrubbed), idx + 140)
         ctx = scrubbed[start:end]
+
     return _Check(ok=ok, details={"found_index": (None if ok else int(idx)), "context": ctx})
 
 
@@ -367,11 +415,14 @@ def _check_no_substrings(text: str, substrings: Sequence[str]) -> _Check:
     found: List[Dict[str, Any]] = []
     for s in substrings:
         idx = text.find(s)
+        # 条件分岐: `idx < 0` を満たす経路を評価する。
         if idx < 0:
             continue
+
         start = max(0, idx - 80)
         end = min(len(text), idx + 240)
         found.append({"substring": s, "found_index": int(idx), "context": text[start:end]})
+
     return _Check(ok=(len(found) == 0), details={"found": found[:10], "found_total": int(len(found))})
 
 
@@ -432,8 +483,10 @@ def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
     }
 
     def _range_and_missing(nums: List[int]) -> tuple[Optional[list[int]], List[int]]:
+        # 条件分岐: `not nums` を満たす経路を評価する。
         if not nums:
             return None, []
+
         lo, hi = min(nums), max(nums)
         missing = [n for n in range(lo, hi + 1) if n not in set(nums)]
         return [lo, hi], missing
@@ -460,31 +513,38 @@ def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
             and (details["fig_id_count"] > 0)
             and (details["caption_count"] > 0)
         )
+        # 条件分岐: `allow_sparse` を満たす経路を評価する。
         if allow_sparse:
             ok = base_ok
         else:
             ok = base_ok and (details["fig_id_missing_in_range"] == []) and (details["caption_missing_in_range"] == [])
+
     details["allow_sparse"] = bool(allow_sparse)
     return _Check(ok=ok, details=details)
 
 
 def _read_docx_document_xml(docx_path: Path) -> Optional[str]:
+    # 条件分岐: `not docx_path.exists()` を満たす経路を評価する。
     if not docx_path.exists():
         return None
+
     try:
         with zipfile.ZipFile(docx_path) as z:
             xml = z.read("word/document.xml")
+
         return xml.decode("utf-8", errors="ignore")
     except Exception:
         return None
 
 
 def _check_docx_callout_punctuation(*, docx_xml: Optional[str]) -> _Check:
+    # 条件分岐: `not docx_xml` を満たす経路を評価する。
     if not docx_xml:
         return _Check(ok=True, details={"skipped": True, "reason": "missing docx or unreadable word/document.xml"})
 
     marker = "要請（P内部）→帰結"
     idx = docx_xml.find(marker)
+    # 条件分岐: `idx < 0` を満たす経路を評価する。
     if idx < 0:
         return _Check(ok=False, details={"marker": marker, "found": False})
 
@@ -513,15 +573,18 @@ _BORDER_VAL_RE = re.compile(
 
 
 def _check_docx_a0_table_no_borders(*, docx_xml: Optional[str]) -> _Check:
+    # 条件分岐: `not docx_xml` を満たす経路を評価する。
     if not docx_xml:
         return _Check(ok=True, details={"skipped": True, "reason": "missing docx or unreadable word/document.xml"})
 
     marker = "自由度台帳"
     idx = docx_xml.find(marker)
+    # 条件分岐: `idx < 0` を満たす経路を評価する。
     if idx < 0:
         return _Check(ok=False, details={"marker": marker, "found": False})
 
     tbl_idx = docx_xml.find("<w:tbl", idx)
+    # 条件分岐: `tbl_idx < 0` を満たす経路を評価する。
     if tbl_idx < 0:
         return _Check(ok=False, details={"marker": marker, "found": True, "table_found": False})
 
@@ -589,31 +652,49 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     paper_html = Path(str(args.paper_html))
+    # 条件分岐: `not paper_html.is_absolute()` を満たす経路を評価する。
     if not paper_html.is_absolute():
         paper_html = (_ROOT / paper_html).resolve()
+
     paper_docx = Path(str(args.paper_docx))
+    # 条件分岐: `not paper_docx.is_absolute()` を満たす経路を評価する。
     if not paper_docx.is_absolute():
         paper_docx = (_ROOT / paper_docx).resolve()
+
     part2_html = Path(str(args.part2_html))
+    # 条件分岐: `not part2_html.is_absolute()` を満たす経路を評価する。
     if not part2_html.is_absolute():
         part2_html = (_ROOT / part2_html).resolve()
+
     part3_html = Path(str(args.part3_html))
+    # 条件分岐: `not part3_html.is_absolute()` を満たす経路を評価する。
     if not part3_html.is_absolute():
         part3_html = (_ROOT / part3_html).resolve()
+
     part4_html = Path(str(args.part4_html))
+    # 条件分岐: `not part4_html.is_absolute()` を満たす経路を評価する。
     if not part4_html.is_absolute():
         part4_html = (_ROOT / part4_html).resolve()
+
     public_html = Path(str(args.public_html))
+    # 条件分岐: `not public_html.is_absolute()` を満たす経路を評価する。
     if not public_html.is_absolute():
         public_html = (_ROOT / public_html).resolve()
+
     out_json = Path(str(args.out_json))
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `not paper_html.exists()` を満たす経路を評価する。
     if not paper_html.exists():
         print(f"[err] missing: {paper_html}")
         return 2
+
+    # 条件分岐: `not part4_html.exists()` を満たす経路を評価する。
+
     if not part4_html.exists():
         print(f"[err] missing: {part4_html}")
         return 2
@@ -655,6 +736,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "paper_docx_a0_table_no_borders": _check_docx_a0_table_no_borders(docx_xml=docx_xml),
     }
 
+    # 条件分岐: `isinstance(part2_text, str)` を満たす経路を評価する。
     if isinstance(part2_text, str):
         checks.update(
             {
@@ -671,6 +753,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             }
         )
 
+    # 条件分岐: `isinstance(part3_text, str)` を満たす経路を評価する。
+
     if isinstance(part3_text, str):
         checks.update(
             {
@@ -686,6 +770,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ),
             }
         )
+
+    # 条件分岐: `isinstance(public_text, str)` を満たす経路を評価する。
 
     if isinstance(public_text, str):
         checks.update(
@@ -720,8 +806,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(f"- ok: {payload['ok']}")
     for k, v in checks.items():
         print(f"- {k}: {v.ok}")
+
     print(f"[ok] json: {out_json}")
 
+    # 条件分岐: `not bool(args.no_log)` を満たす経路を評価する。
     if not bool(args.no_log):
         worklog.append_event(
             {
@@ -734,6 +822,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     return 0 if ok else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

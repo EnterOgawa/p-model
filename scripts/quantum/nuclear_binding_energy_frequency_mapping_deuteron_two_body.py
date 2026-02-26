@@ -12,9 +12,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -25,6 +28,7 @@ def _load_json(path: Path) -> dict:
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
     extracted = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted.exists()` を満たす経路を評価する。
     if not extracted.exists():
         raise SystemExit(
             "[fail] missing extracted CODATA constants.\n"
@@ -32,10 +36,13 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
             "  python -B scripts/quantum/fetch_nuclear_binding_sources.py\n"
             f"Expected: {extracted}"
         )
+
     payload = _load_json(extracted)
     consts = payload.get("constants")
+    # 条件分岐: `not isinstance(consts, dict)` を満たす経路を評価する。
     if not isinstance(consts, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: constants is not a dict: {extracted}")
+
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
@@ -49,6 +56,7 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
 
       x cot x + kappa R = 0.
     """
+    # 条件分岐: `not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(r_fm) and r...` を満たす経路を評価する。
     if not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(r_fm) and r_fm > 0):
         raise ValueError("invalid kappa or R")
 
@@ -60,18 +68,24 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
 
     flo = f(lo)
     fhi = f(hi)
+    # 条件分岐: `not (flo > 0 and fhi < 0)` を満たす経路を評価する。
     if not (flo > 0 and fhi < 0):
         raise ValueError(f"no bracket for bound x: f(lo)={flo}, f(hi)={fhi}, kappaR={kappa_fm1*r_fm}")
 
     for _ in range(96):
         mid = 0.5 * (lo + hi)
         fmid = f(mid)
+        # 条件分岐: `fmid == 0 or (hi - lo) < 1e-15` を満たす経路を評価する。
         if fmid == 0 or (hi - lo) < 1e-15:
             return mid
+
+        # 条件分岐: `fmid > 0` を満たす経路を評価する。
+
         if fmid > 0:
             lo = mid
         else:
             hi = mid
+
     return 0.5 * (lo + hi)
 
 
@@ -81,6 +95,7 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
 
     Returns: V0 (MeV), x (dimensionless), k (fm^-1), kappa (fm^-1).
     """
+    # 条件分岐: `not (mu_mev > 0 and b_mev > 0 and r_fm > 0 and hbarc_mev_fm > 0)` を満たす経路を評価する。
     if not (mu_mev > 0 and b_mev > 0 and r_fm > 0 and hbarc_mev_fm > 0):
         raise ValueError("invalid inputs")
 
@@ -99,6 +114,7 @@ def main() -> None:
     consts = _load_nist_codata_constants(root=root)
     need = ["mp", "mn", "md", "rd"]
     for k in need:
+        # 条件分岐: `k not in consts` を満たす経路を評価する。
         if k not in consts:
             raise SystemExit(f"[fail] missing constant {k!r} in extracted_values.json")
 
@@ -140,13 +156,16 @@ def main() -> None:
     hbarc_mev_fm = float(qcd_metrics.get("constants", {}).get("hbar_c_mev_fm", 197.3269804))
 
     lambda_pi_fm: float | None = None
+    # 条件分岐: `isinstance(qcd_metrics.get("rows"), list)` を満たす経路を評価する。
     if isinstance(qcd_metrics.get("rows"), list):
         for row in qcd_metrics["rows"]:
+            # 条件分岐: `isinstance(row, dict) and row.get("label") == "π±"` を満たす経路を評価する。
             if isinstance(row, dict) and row.get("label") == "π±":
                 try:
                     lambda_pi_fm = float(row.get("compton_lambda_fm"))
                 except Exception:
                     lambda_pi_fm = None
+
                 break
 
     rd_fm = rd_m * 1e15
@@ -161,11 +180,15 @@ def main() -> None:
     fits: list[dict[str, object]] = []
     for r in ranges:
         r_fm = r.get("R_fm")
+        # 条件分岐: `r_fm is None` を満たす経路を評価する。
         if r_fm is None:
             continue
+
         r_fm = float(r_fm)
+        # 条件分岐: `not (math.isfinite(r_fm) and r_fm > 0)` を満たす経路を評価する。
         if not (math.isfinite(r_fm) and r_fm > 0):
             continue
+
         sw = _square_well_from_r(mu_mev=mu_mev, b_mev=b_mev, r_fm=r_fm, hbarc_mev_fm=hbarc_mev_fm)
         fits.append(
             {
@@ -179,6 +202,7 @@ def main() -> None:
         )
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     fig = plt.figure(figsize=(12.8, 4.4), dpi=160)
@@ -235,6 +259,7 @@ def main() -> None:
     ax1.plot(xs, ys, marker="o", lw=1.8)
     for x, y, lab in zip(xs, ys, labels):
         ax1.text(x, y, lab.replace("R = ", ""), fontsize=8, ha="left", va="bottom", rotation=15)
+
     ax1.set_xlabel("well range R (fm)")
     ax1.set_ylabel("required depth V0 (MeV)")
     ax1.set_title("Square-well depth required to support B (illustration)")
@@ -307,6 +332,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

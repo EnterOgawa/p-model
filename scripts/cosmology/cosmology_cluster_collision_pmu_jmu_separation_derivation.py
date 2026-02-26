@@ -32,6 +32,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -131,8 +132,10 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
 
 
 def _load_observations(path: Path) -> List[CollisionObs]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(f"missing input CSV: {path}")
+
     out: List[CollisionObs] = []
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
@@ -144,8 +147,12 @@ def _load_observations(path: Path) -> List[CollisionObs]:
                 sig = float(row.get("lens_gas_offset_kpc_sigma", "nan"))
             except Exception:
                 continue
+
+            # 条件分岐: `not cid or not np.isfinite(obs) or not np.isfinite(sig) or sig <= 0.0` を満たす経路を評価する。
+
             if not cid or not np.isfinite(obs) or not np.isfinite(sig) or sig <= 0.0:
                 continue
+
             out.append(
                 CollisionObs(
                     cluster_id=cid,
@@ -154,8 +161,12 @@ def _load_observations(path: Path) -> List[CollisionObs]:
                     offset_sigma_kpc=float(sig),
                 )
             )
+
+    # 条件分岐: `not out` を満たす経路を評価する。
+
     if not out:
         raise RuntimeError(f"no valid rows in {path}")
+
     return out
 
 
@@ -185,22 +196,28 @@ def _positive_mean(values: Sequence[float], fallback: float) -> float:
     arr = np.asarray(values, dtype=float)
     arr = arr[np.isfinite(arr)]
     arr = arr[arr > 0.0]
+    # 条件分岐: `arr.size == 0` を満たす経路を評価する。
     if arr.size == 0:
         return float(max(fallback, 1.0e-8))
+
     return float(np.mean(arr))
 
 
 def _timescale_from_series(series: np.ndarray, t: np.ndarray, fallback: float) -> float:
     y = np.asarray(series, dtype=float)
     tt = np.asarray(t, dtype=float)
+    # 条件分岐: `y.size < 3 or tt.size != y.size` を満たす経路を評価する。
     if y.size < 3 or tt.size != y.size:
         return float(max(fallback, 1.0e-8))
+
     dt = float(max(np.median(np.diff(tt)), 1.0e-9))
     dy_dt = np.gradient(y, dt)
     power = float(np.mean(y * y))
     slope_power = float(np.mean(dy_dt * dy_dt))
+    # 条件分岐: `(not np.isfinite(power)) or (not np.isfinite(slope_power)) or power <= 0.0 or...` を満たす経路を評価する。
     if (not np.isfinite(power)) or (not np.isfinite(slope_power)) or power <= 0.0 or slope_power <= 0.0:
         return float(max(fallback, 1.0e-8))
+
     return float(max(np.sqrt(power / slope_power), dt))
 
 
@@ -234,6 +251,7 @@ def _derive_tau_origin(
         j = chi * v
 
         mask = t >= cfg_seed.t_collision_gyr
+        # 条件分岐: `int(np.count_nonzero(mask)) >= 8` を満たす経路を評価する。
         if int(np.count_nonzero(mask)) >= 8:
             t_use = t[mask]
             v_use = v[mask]
@@ -253,16 +271,19 @@ def _derive_tau_origin(
     inv_tau_eff = (1.0 / tau_free) + (1.0 / tau_int) + (1.0 / tau_damp)
     tau_eff_harmonic = float(1.0 / max(inv_tau_eff, 1.0e-12))
 
+    # 条件分岐: `extended_kernel` を満たす経路を評価する。
     if extended_kernel:
         tau_fast = float(max(min(tau_int, tau_damp), cfg_seed.dt_gyr, 1.0e-8))
         tau_slow = float(max(max(tau_int, tau_damp), tau_fast, cfg_seed.dt_gyr, 1.0e-8))
         inv_rate_sum = (1.0 / tau_fast) + (1.0 / tau_slow)
+        # 条件分岐: `inv_rate_sum <= 0.0 or (not np.isfinite(inv_rate_sum))` を満たす経路を評価する。
         if inv_rate_sum <= 0.0 or (not np.isfinite(inv_rate_sum)):
             w_fast = 0.5
             w_slow = 0.5
         else:
             w_fast = float((1.0 / tau_fast) / inv_rate_sum)
             w_slow = float((1.0 / tau_slow) / inv_rate_sum)
+
         tau_kernel = float(max(w_fast * tau_fast + w_slow * tau_slow, cfg_seed.dt_gyr, 1.0e-8))
         tau_eff = float(tau_free + eta_weight * tau_kernel)
         xi_derived = float((tau_int + tau_damp) / max(tau_eff, 1.0e-12))
@@ -315,6 +336,7 @@ def _build_retarded_current(
 ) -> Dict[str, Any]:
     drive = np.asarray(current_drive, dtype=float)
     n = int(drive.size)
+    # 条件分岐: `n == 0` を満たす経路を評価する。
     if n == 0:
         return {
             "delay_steps": 0,
@@ -330,6 +352,8 @@ def _build_retarded_current(
             "kernel_weight_fast": 1.0,
             "kernel_weight_slow": 0.0,
         }
+
+    # 条件分岐: `not enabled` を満たす経路を評価する。
 
     if not enabled:
         return {
@@ -350,6 +374,7 @@ def _build_retarded_current(
     dt_safe = max(float(dt_gyr), 1.0e-9)
     delay_steps = max(int(round(float(delay_gyr) / dt_safe)), 0)
     delayed = np.empty_like(drive)
+    # 条件分岐: `delay_steps > 0` を満たす経路を評価する。
     if delay_steps > 0:
         delayed[:delay_steps] = drive[0]
         delayed[delay_steps:] = drive[:-delay_steps]
@@ -357,10 +382,12 @@ def _build_retarded_current(
         delayed[:] = drive
 
     mode = str(kernel_mode).strip()
+    # 条件分岐: `mode == "double_exp_derived"` を満たす経路を評価する。
     if mode == "double_exp_derived":
         tau_fast = max(float(tau_kernel_fast_gyr), dt_safe)
         tau_slow = max(float(tau_kernel_slow_gyr), tau_fast)
         inv_rate_sum = (1.0 / tau_fast) + (1.0 / tau_slow)
+        # 条件分岐: `inv_rate_sum <= 0.0 or (not np.isfinite(inv_rate_sum))` を満たす経路を評価する。
         if inv_rate_sum <= 0.0 or (not np.isfinite(inv_rate_sum)):
             w_fast = 0.5
             w_slow = 0.5
@@ -375,6 +402,7 @@ def _build_retarded_current(
         for i in range(1, n):
             smooth_fast[i] = smooth_fast[i - 1] + dt_safe * (delayed[i - 1] - smooth_fast[i - 1]) / tau_fast
             smooth_slow[i] = smooth_slow[i - 1] + dt_safe * (delayed[i - 1] - smooth_slow[i - 1]) / tau_slow
+
         smoothed = w_fast * smooth_fast + w_slow * smooth_slow
         tau = float(w_fast * tau_fast + w_slow * tau_slow)
     else:
@@ -390,6 +418,7 @@ def _build_retarded_current(
 
     x = delayed - float(np.mean(delayed))
     y = smoothed - float(np.mean(smoothed))
+    # 条件分岐: `np.all(np.abs(x) < 1.0e-14) or np.all(np.abs(y) < 1.0e-14)` を満たす経路を評価する。
     if np.all(np.abs(x) < 1.0e-14) or np.all(np.abs(y) < 1.0e-14):
         peak_idx = n - 1
         peak_corr = 0.0
@@ -397,6 +426,7 @@ def _build_retarded_current(
         corr = np.correlate(y, x, mode="full")
         peak_idx = int(np.argmax(corr))
         peak_corr = float(corr[peak_idx] / max(np.linalg.norm(y) * np.linalg.norm(x), 1.0e-12))
+
     lag_steps = peak_idx - (n - 1)
     lag_gyr = float(lag_steps * dt_safe)
 
@@ -560,6 +590,7 @@ def _track_response(
             else float(cfg.retarded_kernel_tau_gyr)
         ),
     )
+    # 条件分岐: `cfg.retarded_enabled` を満たす経路を評価する。
     if cfg.retarded_enabled:
         rw = float(min(max(cfg.retarded_weight, 0.0), 1.0))
         current_effective = (1.0 - rw) * current_drive + rw * np.asarray(retarded["current_smoothed"], dtype=float)
@@ -582,16 +613,25 @@ def _track_response(
     prev_nonzero = 0.0
     sign_flip_idx: List[int] = []
     for i, sg in enumerate(sign_series):
+        # 条件分岐: `sg == 0.0` を満たす経路を評価する。
         if sg == 0.0:
             continue
+
+        # 条件分岐: `prev_nonzero == 0.0` を満たす経路を評価する。
+
         if prev_nonzero == 0.0:
             prev_nonzero = sg
             continue
+
+        # 条件分岐: `sg != prev_nonzero` を満たす経路を評価する。
+
         if sg != prev_nonzero:
             sign_flip_idx.append(i)
             prev_nonzero = sg
+
     first_flip_time = float(t[sign_flip_idx[0]]) if sign_flip_idx else None
     lag_to_collision = None
+    # 条件分岐: `first_flip_time is not None` を満たす経路を評価する。
     if first_flip_time is not None:
         lag_to_collision = float(first_flip_time - cfg.t_collision_gyr)
 
@@ -653,22 +693,33 @@ def _fit_xi(
         valid = True
         for obs in observations:
             kin = kin_map.get(obs.cluster_id)
+            # 条件分岐: `kin is None` を満たす経路を評価する。
             if kin is None:
                 valid = False
                 break
+
             tr = _track_response(kin, cfg, xi_coupling=float(xi))
             tracks[obs.cluster_id] = tr
             residual = float(tr["pred_offset_kpc"]) - obs.offset_obs_kpc
             chi2 += (residual / obs.offset_sigma_kpc) ** 2
+
+        # 条件分岐: `not valid` を満たす経路を評価する。
+
         if not valid:
             continue
+
+        # 条件分岐: `chi2 < best_chi2` を満たす経路を評価する。
+
         if chi2 < best_chi2:
             best_chi2 = float(chi2)
             best_xi = float(xi)
             best_tracks = tracks
 
+    # 条件分岐: `not best_tracks` を満たす経路を評価する。
+
     if not best_tracks:
         raise RuntimeError("xi fitting failed: no valid cluster tracks")
+
     return best_xi, best_chi2, best_tracks
 
 
@@ -683,12 +734,15 @@ def _evaluate_fixed_xi(
     chi2 = 0.0
     for obs in observations:
         kin = kin_map.get(obs.cluster_id)
+        # 条件分岐: `kin is None` を満たす経路を評価する。
         if kin is None:
             raise RuntimeError(f"missing kinematics template for {obs.cluster_id}")
+
         tr = _track_response(kin, cfg, xi_coupling=float(xi_value))
         tracks[obs.cluster_id] = tr
         residual = float(tr["pred_offset_kpc"]) - obs.offset_obs_kpc
         chi2 += (residual / obs.offset_sigma_kpc) ** 2
+
     return float(xi_value), float(chi2), tracks
 
 
@@ -878,6 +932,7 @@ def _build_checks(
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fails = [str(c.get("id")) for c in checks if str(c.get("gate_level")) == "hard" and not bool(c.get("pass"))]
     watch_fails = [str(c.get("id")) for c in checks if str(c.get("gate_level")) != "hard" and not bool(c.get("pass"))]
+    # 条件分岐: `hard_fails` を満たす経路を評価する。
     if hard_fails:
         return {
             "overall_status": "reject",
@@ -886,6 +941,9 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "watch_ids": watch_fails,
             "rule": "Reject if any hard gate fails.",
         }
+
+    # 条件分岐: `watch_fails` を満たす経路を評価する。
+
     if watch_fails:
         return {
             "overall_status": "watch",
@@ -894,6 +952,7 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
             "watch_ids": watch_fails,
             "rule": "Watch if hard gates pass and any watch gate fails.",
         }
+
     return {
         "overall_status": "pass",
         "decision": "cluster_collision_pmu_jmu_pass",
@@ -910,8 +969,10 @@ def _plot(
     traces: Dict[str, Dict[str, Any]],
     t_collision_gyr: float,
 ) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
+
     path.parent.mkdir(parents=True, exist_ok=True)
 
     labels = [str(r["label"]) for r in rows]
@@ -939,6 +1000,7 @@ def _plot(
         d = np.asarray(tr["delta_kpc"], dtype=float)
         ax1.plot(t, d, linewidth=2.0, label=f"{row['label']}: Δx(P-gas)")
         flip_time = tr.get("first_sign_flip_time_gyr")
+        # 条件分岐: `isinstance(flip_time, (float, int)) and np.isfinite(float(flip_time))` を満たす経路を評価する。
         if isinstance(flip_time, (float, int)) and np.isfinite(float(flip_time)):
             ax1.scatter([float(flip_time)], [0.0], marker="x", s=60, zorder=4)
 
@@ -1059,20 +1121,26 @@ def main() -> int:
     observations = _load_observations(args.input_csv)
     kin_map = _default_kinematics()
     observations = [row for row in observations if row.cluster_id in kin_map]
+    # 条件分岐: `len(observations) < 2` を満たす経路を評価する。
     if len(observations) < 2:
         raise RuntimeError("need >=2 observed clusters matched to kinematic templates (bullet_main/bullet_sub)")
 
     step_tag = str(args.step_tag).strip()
+    # 条件分岐: `str(args.tau_origin_mode).strip() == "derived"` を満たす経路を評価する。
     if str(args.tau_origin_mode).strip() == "derived":
         tau_origin_mode = "derived"
+    # 条件分岐: 前段条件が不成立で、`str(args.tau_origin_mode).strip() == "legacy"` を追加評価する。
     elif str(args.tau_origin_mode).strip() == "legacy":
         tau_origin_mode = "legacy"
     else:
         tau_origin_mode = "derived" if step_tag in {"8.7.25.14", "8.7.25.15", "8.7.25.16"} else "legacy"
 
+    # 条件分岐: `str(args.retarded_kernel_mode).strip() in {"single_exp", "double_exp_derived"}` を満たす経路を評価する。
+
     if str(args.retarded_kernel_mode).strip() in {"single_exp", "double_exp_derived"}:
         kernel_mode_seed = str(args.retarded_kernel_mode).strip()
     else:
+        # 条件分岐: `step_tag in {"8.7.25.15", "8.7.25.16"}` を満たす経路を評価する。
         if step_tag in {"8.7.25.15", "8.7.25.16"}:
             kernel_mode_seed = "double_exp_derived"
         else:
@@ -1105,6 +1173,7 @@ def main() -> int:
     )
 
     tau_origin: TauOrigin
+    # 条件分岐: `tau_origin_mode == "derived"` を満たす経路を評価する。
     if tau_origin_mode == "derived":
         tau_origin = _derive_tau_origin(kin_map, cfg_seed, extended_kernel=(step_tag in {"8.7.25.15", "8.7.25.16"}))
         tau_response = float(tau_origin.tau_eff_gyr)
@@ -1164,19 +1233,26 @@ def main() -> int:
         retarded_kernel_tau_slow_gyr=float(retarded_kernel_tau_slow),
     )
 
+    # 条件分岐: `str(args.xi_mode).strip() == "fit"` を満たす経路を評価する。
     if str(args.xi_mode).strip() == "fit":
         xi_mode = "fit"
+    # 条件分岐: 前段条件が不成立で、`str(args.xi_mode).strip() == "fixed"` を追加評価する。
     elif str(args.xi_mode).strip() == "fixed":
         xi_mode = "fixed"
+    # 条件分岐: 前段条件が不成立で、`str(args.xi_mode).strip() == "derived"` を追加評価する。
     elif str(args.xi_mode).strip() == "derived":
         xi_mode = "derived"
     else:
+        # 条件分岐: `tau_origin_mode != "derived"` を満たす経路を評価する。
         if tau_origin_mode != "derived":
             xi_mode = "fit"
+        # 条件分岐: 前段条件が不成立で、`step_tag in {"8.7.25.15", "8.7.25.16"}` を追加評価する。
         elif step_tag in {"8.7.25.15", "8.7.25.16"}:
             xi_mode = "derived"
         else:
             xi_mode = "fixed"
+
+    # 条件分岐: `xi_mode == "fit"` を満たす経路を評価する。
 
     if xi_mode == "fit":
         xi_best, chi2, traces = _fit_xi(
@@ -1188,6 +1264,7 @@ def main() -> int:
             xi_count=int(args.xi_count),
         )
         n_fit_params = 1
+    # 条件分岐: 前段条件が不成立で、`xi_mode == "derived"` を追加評価する。
     elif xi_mode == "derived":
         xi_best, chi2, traces = _evaluate_fixed_xi(
             observations,
@@ -1217,7 +1294,9 @@ def main() -> int:
 
         flip_t = tr.get("first_sign_flip_time_gyr")
         flip_lag = tr.get("lag_to_collision_gyr")
+        # 条件分岐: `isinstance(flip_lag, (float, int)) and np.isfinite(float(flip_lag))` を満たす経路を評価する。
         if isinstance(flip_lag, (float, int)) and np.isfinite(float(flip_lag)):
+            # 条件分岐: `abs(float(flip_lag)) <= cfg.sign_flip_window_gyr` を満たす経路を評価する。
             if abs(float(flip_lag)) <= cfg.sign_flip_window_gyr:
                 n_sign_flip_in_window += 1
 
@@ -1287,8 +1366,12 @@ def main() -> int:
     )
     tau_reconstruction_rel_error = float(abs(mean_peak_lag - cfg.tau_response_gyr) / max(cfg.tau_response_gyr, 1.0e-9))
     ad_hoc_parameter_count = int(tau_origin.ad_hoc_parameter_count)
+    # 条件分岐: `xi_mode == "fit"` を満たす経路を評価する。
     if xi_mode == "fit":
         ad_hoc_parameter_count += 1
+
+    # 条件分岐: `tau_origin_mode == "legacy"` を満たす経路を評価する。
+
     if tau_origin_mode == "legacy":
         ad_hoc_parameter_count += 1
 
@@ -1605,6 +1688,7 @@ def main() -> int:
     }
     _write_json(out_json, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -1664,6 +1748,8 @@ def main() -> int:
     )
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

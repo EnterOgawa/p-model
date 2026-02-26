@@ -48,6 +48,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -62,17 +63,24 @@ def _read_csv(path: Path) -> pd.DataFrame:
 
 
 def _require(path: Path) -> Path:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise FileNotFoundError(str(path))
+
     return path
 
 
 def _format_num(x: Any, *, digits: int = 3) -> str:
     try:
+        # 条件分岐: `isinstance(x, int)` を満たす経路を評価する。
         if isinstance(x, int):
             return str(x)
+
+        # 条件分岐: `isinstance(x, float)` を満たす経路を評価する。
+
         if isinstance(x, float):
             return f"{x:.{digits}g}"
+
         return str(x)
     except Exception:
         return str(x)
@@ -111,15 +119,24 @@ def main() -> int:
     pos_dir = Path(str(args.pos_eop_dir))
     slr_dir = Path(str(args.slrlog_dir))
     out_dir = Path(str(args.out_dir))
+    # 条件分岐: `not pos_dir.is_absolute()` を満たす経路を評価する。
     if not pos_dir.is_absolute():
         pos_dir = root / pos_dir
+
+    # 条件分岐: `not slr_dir.is_absolute()` を満たす経路を評価する。
+
     if not slr_dir.is_absolute():
         slr_dir = root / slr_dir
+
+    # 条件分岐: `not out_dir.is_absolute()` を満たす経路を評価する。
+
     if not out_dir.is_absolute():
         out_dir = root / out_dir
+
     out_dir.mkdir(parents=True, exist_ok=True)
 
     metric_col = str(args.metric_col).strip()
+    # 条件分岐: `not metric_col` を満たす経路を評価する。
     if not metric_col:
         print("[err] empty --metric-col")
         return 2
@@ -131,6 +148,7 @@ def main() -> int:
     # ------------------------------------------------------------
     pos_metrics = _read_csv(_require(pos_dir / "llr_batch_metrics.csv"))
     slr_metrics = _read_csv(_require(slr_dir / "llr_batch_metrics.csv"))
+    # 条件分岐: `metric_col not in pos_metrics.columns or metric_col not in slr_metrics.columns` を満たす経路を評価する。
     if metric_col not in pos_metrics.columns or metric_col not in slr_metrics.columns:
         print(f"[err] metric column not found in both CSVs: {metric_col}")
         print(f"  pos cols: {pos_metrics.columns.tolist()}")
@@ -146,11 +164,13 @@ def main() -> int:
     merged["rms_slrlog_ns"] = merged["rms_slrlog_ns"].astype(float)
     merged = merged[np.isfinite(merged["rms_pos_eop_ns"]) & np.isfinite(merged["rms_slrlog_ns"])].copy()
 
+    # 条件分岐: `merged.empty` を満たす経路を評価する。
     if merged.empty:
         print("[err] no common station×target rows to compare (merged empty)")
         return 2
 
     # Robust plot range
+
     p99 = float(np.nanpercentile(np.concatenate([merged["rms_pos_eop_ns"].to_numpy(), merged["rms_slrlog_ns"].to_numpy()]), 99))
     lim = max(5.0, p99 * 1.15)
 
@@ -158,6 +178,7 @@ def main() -> int:
     for st in sorted(merged["station"].astype(str).unique().tolist()):
         sub = merged[merged["station"].astype(str) == st]
         plt.scatter(sub["rms_slrlog_ns"], sub["rms_pos_eop_ns"], s=35, alpha=0.85, label=str(st))
+
     plt.plot([0, lim], [0, lim], color="#444444", lw=1.0, ls="--", alpha=0.8, label="y=x")
     plt.xlim(0, lim)
     plt.ylim(0, lim)
@@ -205,6 +226,7 @@ def main() -> int:
     for st in sorted(merged["station"].astype(str).unique().tolist()):
         sub = merged[merged["station"].astype(str) == st]
         ax0.scatter(sub["rms_slrlog_ns"], sub["rms_pos_eop_ns"], s=30, alpha=0.85, label=str(st))
+
     ax0.plot([0, lim], [0, lim], color="#444444", lw=1.0, ls="--", alpha=0.8)
     ax0.set_xlim(0, lim)
     ax0.set_ylim(0, lim)
@@ -237,6 +259,7 @@ def main() -> int:
     slr_monthly = _read_csv(_require(slr_dir / monthly_name))
     # Expected columns: model, station, year_month, n, rms_ns
     needed = {"model", "station", "year_month", "n", "rms_ns"}
+    # 条件分岐: `not needed.issubset(set(pos_monthly.columns)) or not needed.issubset(set(slr_...` を満たす経路を評価する。
     if not needed.issubset(set(pos_monthly.columns)) or not needed.issubset(set(slr_monthly.columns)):
         # Optional: skip if unavailable
         print(f"[warn] monthly models CSV missing expected columns; skip monthly plot: {monthly_name}")
@@ -261,6 +284,7 @@ def main() -> int:
     ppos = _prep_monthly(pos_monthly, label="pos+eop/auto")
     pslr = _prep_monthly(slr_monthly, label="slrlog")
 
+    # 条件分岐: `not ppos.empty and not pslr.empty` を満たす経路を評価する。
     if not ppos.empty and not pslr.empty:
         plt.figure(figsize=(12, 4.8))
         plt.plot(np.array(pslr["t"].dt.to_pydatetime()), pslr["rms_ns"].to_numpy(dtype=float), marker="o", label="slrlog")
@@ -275,6 +299,7 @@ def main() -> int:
         plt.close()
 
     # Emit a tiny JSON for report wiring / provenance
+
     meta: Dict[str, Any] = {
         "pos_eop_dir": str(pos_dir.relative_to(root)).replace("\\", "/") if str(pos_dir).startswith(str(root)) else str(pos_dir),
         "slrlog_dir": str(slr_dir.relative_to(root)).replace("\\", "/") if str(slr_dir).startswith(str(root)) else str(slr_dir),
@@ -293,6 +318,8 @@ def main() -> int:
     print(f"[ok] wrote: {p_combo}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

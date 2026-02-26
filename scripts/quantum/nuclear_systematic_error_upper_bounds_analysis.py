@@ -20,13 +20,16 @@ def _parse_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out if math.isfinite(out) else float("nan")
 
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
+    # 条件分岐: `not finite` を満たす経路を評価する。
     if not finite:
         return float("nan")
+
     return float(median(finite))
 
 
@@ -37,17 +40,22 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -56,11 +64,15 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
 
 
 def _sigma_sys_required_for_gate(*, residual_scale: float, sigma_stat: float, z_gate: float = Z_GATE) -> float:
+    # 条件分岐: `not (math.isfinite(residual_scale) and math.isfinite(sigma_stat) and residual...` を満たす経路を評価する。
     if not (math.isfinite(residual_scale) and math.isfinite(sigma_stat) and residual_scale > 0.0 and sigma_stat >= 0.0):
         return float("nan")
+
     threshold = residual_scale / z_gate
+    # 条件分岐: `threshold <= sigma_stat` を満たす経路を評価する。
     if threshold <= sigma_stat:
         return 0.0
+
     return float(math.sqrt(max(threshold * threshold - sigma_stat * sigma_stat, 0.0)))
 
 
@@ -134,6 +146,7 @@ def main() -> None:
     in_beta2_summary = out_dir / "nuclear_deformation_parameter_prediction_summary.csv"
 
     for p in (in_stat_summary, in_pairing_summary, in_sep_summary, in_q_summary, in_beta2_summary):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise SystemExit(f"[fail] missing input: {p}")
 
@@ -150,12 +163,14 @@ def main() -> None:
         "beta2_rms",
     ]
     for key in required_sigma_stat_keys:
+        # 条件分岐: `key not in sigma_stat or not math.isfinite(sigma_stat[key])` を満たす経路を評価する。
         if key not in sigma_stat or not math.isfinite(sigma_stat[key]):
             raise SystemExit(f"[fail] missing mc_std for {key}")
 
     residual_scale: dict[str, float] = {}
     with in_pairing_summary.open("r", encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
+            # 条件分岐: `str(row.get("group_type")) == "all" and str(row.get("group")) == "all"` を満たす経路を評価する。
             if str(row.get("group_type")) == "all" and str(row.get("group")) == "all":
                 residual_scale["be_rms_MeV"] = _parse_float(row.get("median_abs_resid_after_MeV"))
                 break
@@ -165,30 +180,41 @@ def main() -> None:
         for row in csv.DictReader(f):
             group_type = str(row.get("group_type", ""))
             obs = str(row.get("group", ""))
+            # 条件分岐: `group_type == "observable" and obs in {"S_n", "S_p", "S_2n", "S_2p"}` を満たす経路を評価する。
             if group_type == "observable" and obs in {"S_n", "S_p", "S_2n", "S_2p"}:
                 value = _parse_float(row.get("median_abs_resid_after_MeV"))
+                # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
                 if math.isfinite(value):
                     sep_medians.append(float(value))
+
     residual_scale["sep_rms_MeV"] = _safe_median(sep_medians)
 
     with in_q_summary.open("r", encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
             group = str(row.get("group"))
             value = _parse_float(row.get("median_abs_resid_after_MeV"))
+            # 条件分岐: `group == "beta_minus" and math.isfinite(value)` を満たす経路を評価する。
             if group == "beta_minus" and math.isfinite(value):
                 residual_scale["q_beta_minus_rms_MeV"] = float(value)
+
+            # 条件分岐: `group == "beta_plus" and math.isfinite(value)` を満たす経路を評価する。
+
             if group == "beta_plus" and math.isfinite(value):
                 residual_scale["q_beta_plus_rms_MeV"] = float(value)
 
     with in_beta2_summary.open("r", encoding="utf-8", newline="") as f:
         for row in csv.DictReader(f):
+            # 条件分岐: `str(row.get("group_type")) == "overall" and str(row.get("group")) == "beta2"` を満たす経路を評価する。
             if str(row.get("group_type")) == "overall" and str(row.get("group")) == "beta2":
                 value = _parse_float(row.get("median_abs_resid"))
+                # 条件分岐: `math.isfinite(value)` を満たす経路を評価する。
                 if math.isfinite(value):
                     residual_scale["beta2_rms"] = float(value)
+
                 break
 
     for key in required_sigma_stat_keys:
+        # 条件分岐: `key not in residual_scale or not math.isfinite(residual_scale[key])` を満たす経路を評価する。
         if key not in residual_scale or not math.isfinite(residual_scale[key]):
             raise SystemExit(f"[fail] missing residual scale for {key}")
 
@@ -277,22 +303,32 @@ def main() -> None:
             for source in sources:
                 frac = float(source_channel_fraction[source][channel])
                 sys_components.append(abs(frac * resid))
+
+            # 条件分岐: `mode == "linear"` を満たす経路を評価する。
+
             if mode == "linear":
                 sigma_sys = float(sum(sys_components))
             else:
                 sigma_sys = float(math.sqrt(sum(v * v for v in sys_components)))
+
             sigma_total = float(math.sqrt(stat * stat + sigma_sys * sigma_sys))
             z_value = float(resid / sigma_total) if sigma_total > 0.0 else float("nan")
             gate_pass = bool(math.isfinite(z_value) and abs(z_value) <= Z_GATE)
             required_sigma_sys = _sigma_sys_required_for_gate(residual_scale=resid, sigma_stat=stat, z_gate=Z_GATE)
             inflation = float(required_sigma_sys / stat) if (math.isfinite(required_sigma_sys) and stat > 0.0) else float("nan")
+            # 条件分岐: `math.isfinite(z_value)` を満たす経路を評価する。
             if math.isfinite(z_value):
                 scenario_z_values.append(abs(z_value))
+                # 条件分岐: `abs(z_value) > worst_abs_z` を満たす経路を評価する。
                 if abs(z_value) > worst_abs_z:
                     worst_abs_z = abs(z_value)
                     worst_channel = channel
+
+            # 条件分岐: `not gate_pass` を満たす経路を評価する。
+
             if not gate_pass:
                 gate_fail += 1
+
             full_rows.append(
                 {
                     "scenario": scenario_name,
@@ -394,6 +430,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

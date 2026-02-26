@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -24,24 +27,36 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     Inclusive percentile with linear interpolation.
     p in [0,100].
     """
+    # 条件分岐: `not sorted_vals` を満たす経路を評価する。
     if not sorted_vals:
         raise ValueError("empty")
+
+    # 条件分岐: `p <= 0` を満たす経路を評価する。
+
     if p <= 0:
         return float(sorted_vals[0])
+
+    # 条件分岐: `p >= 100` を満たす経路を評価する。
+
     if p >= 100:
         return float(sorted_vals[-1])
+
     x = (len(sorted_vals) - 1) * (p / 100.0)
     i0 = int(math.floor(x))
     i1 = int(math.ceil(x))
+    # 条件分岐: `i0 == i1` を満たす経路を評価する。
     if i0 == i1:
         return float(sorted_vals[i0])
+
     w = x - i0
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
 def _stats(vals: list[float]) -> dict[str, float]:
+    # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
         return {"n": 0.0, "median": float("nan"), "p16": float("nan"), "p84": float("nan")}
+
     vs = sorted(vals)
     return {
         "n": float(len(vs)),
@@ -52,12 +67,15 @@ def _stats(vals: list[float]) -> dict[str, float]:
 
 
 def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
+    # 条件分岐: `not (math.isfinite(p16) and math.isfinite(p84))` を満たす経路を評価する。
     if not (math.isfinite(p16) and math.isfinite(p84)):
         return float("nan")
+
     return 0.5 * (p84 - p16)
 
 
 def _load_thresholds(*, json_path: Path) -> dict[str, object]:
+    # 条件分岐: `not json_path.exists()` を満たす経路を評価する。
     if not json_path.exists():
         return {
             "z_median_abs_max": 3.0,
@@ -66,14 +84,18 @@ def _load_thresholds(*, json_path: Path) -> dict[str, object]:
             "a_high_bin": [250, 300],
             "note": "Default operational thresholds (frozen in Step 7.13.17.10).",
         }
+
     payload = json.loads(json_path.read_text(encoding="utf-8"))
     thresholds = payload.get("thresholds")
+    # 条件分岐: `not isinstance(thresholds, dict)` を満たす経路を評価する。
     if not isinstance(thresholds, dict):
         raise SystemExit(f"[fail] invalid thresholds in: {json_path}")
+
     return thresholds
 
 
 def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds: dict[str, object]) -> dict[str, object]:
+    # 条件分岐: `not pairs` を満たす経路を評価する。
     if not pairs:
         return {
             "model_id": model_id,
@@ -88,8 +110,10 @@ def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds:
         }
 
     a_low, a_high = thresholds["a_low_bin"], thresholds["a_high_bin"]
+    # 条件分岐: `not (isinstance(a_low, list) and len(a_low) == 2 and isinstance(a_high, list)...` を満たす経路を評価する。
     if not (isinstance(a_low, list) and len(a_low) == 2 and isinstance(a_high, list) and len(a_high) == 2):
         raise SystemExit("[fail] invalid a_low_bin/a_high_bin thresholds")
+
     low_lo, low_hi = int(a_low[0]), int(a_low[1])
     high_lo, high_hi = int(a_high[0]), int(a_high[1])
 
@@ -97,12 +121,18 @@ def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds:
     log10r_low: list[float] = []
     log10r_high: list[float] = []
     for a, r in pairs:
+        # 条件分岐: `not (math.isfinite(r) and r > 0)` を満たす経路を評価する。
         if not (math.isfinite(r) and r > 0):
             continue
+
         v = math.log10(r)
         log10r_all.append(v)
+        # 条件分岐: `low_lo <= a < low_hi` を満たす経路を評価する。
         if low_lo <= a < low_hi:
             log10r_low.append(v)
+
+        # 条件分岐: `high_lo <= a < high_hi` を満たす経路を評価する。
+
         if high_lo <= a < high_hi:
             log10r_high.append(v)
 
@@ -144,6 +174,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     diff_csv = out_dir / "nuclear_binding_energy_frequency_mapping_differential_predictions.csv"
+    # 条件分岐: `not diff_csv.exists()` を満たす経路を評価する。
     if not diff_csv.exists():
         raise SystemExit(
             "[fail] missing differential predictions CSV.\n"
@@ -177,14 +208,29 @@ def main() -> None:
                 b_pred_local = float(row["B_pred_local_spacing_MeV"])
             except Exception:
                 continue
+
+            # 条件分岐: `a <= 1` を満たす経路を評価する。
+
             if a <= 1:
                 continue
+
+            # 条件分岐: `not (math.isfinite(b_obs) and b_obs > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(b_obs) and b_obs > 0):
                 continue
+
+            # 条件分岐: `not (math.isfinite(ratio_local) and ratio_local > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(ratio_local) and ratio_local > 0):
                 continue
+
+            # 条件分岐: `not (math.isfinite(c_base) and c_base > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(c_base) and c_base > 0):
                 continue
+
+            # 条件分岐: `not (math.isfinite(b_pred_local) and b_pred_local > 0)` を満たす経路を評価する。
+
             if not (math.isfinite(b_pred_local) and b_pred_local > 0):
                 continue
 
@@ -194,6 +240,7 @@ def main() -> None:
 
             ratio_local_sat = ratio_local * (c_eff / c_base)
             b_pred_local_sat = b_pred_local * (c_eff / c_base)
+            # 条件分岐: `not (math.isfinite(ratio_local_sat) and ratio_local_sat > 0)` を満たす経路を評価する。
             if not (math.isfinite(ratio_local_sat) and ratio_local_sat > 0):
                 continue
 
@@ -213,10 +260,13 @@ def main() -> None:
                 }
             )
 
+    # 条件分岐: `not rows_out` を満たす経路を評価する。
+
     if not rows_out:
         raise SystemExit(f"[fail] parsed 0 usable rows from: {diff_csv}")
 
     # Summaries (evaluate under frozen operational thresholds).
+
     m_local = _model_summary(model_id="local_spacing_d_in_exp (Step 7.13.17.9)", pairs=pairs_local, thresholds=thresholds)
     m_local_sat = _model_summary(
         model_id="local_spacing_d_in_exp + nu_saturation (Step 7.13.18)", pairs=pairs_local_sat, thresholds=thresholds
@@ -229,6 +279,7 @@ def main() -> None:
         writer.writerows(rows_out)
 
     # Plot (readability-first; do not overfit the narrative).
+
     try:
         import matplotlib.pyplot as plt
     except Exception as e:
@@ -310,6 +361,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

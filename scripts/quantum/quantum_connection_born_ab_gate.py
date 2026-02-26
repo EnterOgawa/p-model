@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -50,49 +51,80 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         number = float(value)
+        # 条件分岐: `math.isfinite(number)` を満たす経路を評価する。
         if math.isfinite(number):
             return number
+
     return None
 
 
 def _find_row(rows: List[Dict[str, Any]], channel: str) -> Optional[Dict[str, Any]]:
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `str(row.get("channel") or "") == channel` を満たす経路を評価する。
+
         if str(row.get("channel") or "") == channel:
             return row
+
     return None
 
 
 def _compute_pass(value: Optional[float], threshold: Optional[float], operator: str) -> Optional[bool]:
+    # 条件分岐: `value is None or threshold is None` を満たす経路を評価する。
     if value is None or threshold is None:
         return None
+
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
+
     if operator == "<=":
         return bool(value <= threshold)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
         return bool(value >= threshold)
+
     return None
 
 
 def _normalized_score(value: Optional[float], threshold: Optional[float], operator: str) -> Optional[float]:
+    # 条件分岐: `value is None or threshold is None or threshold == 0.0` を満たす経路を評価する。
     if value is None or threshold is None or threshold == 0.0:
         return None
+
+    # 条件分岐: `operator == "<="` を満たす経路を評価する。
+
     if operator == "<=":
         return float(value) / float(threshold)
+
+    # 条件分岐: `operator == ">="` を満たす経路を評価する。
+
     if operator == ">=":
+        # 条件分岐: `value == 0.0` を満たす経路を評価する。
         if value == 0.0:
             return math.inf
+
         return float(threshold) / float(value)
+
     return None
 
 
 def _row_status(passed: Optional[bool], gate: bool) -> str:
+    # 条件分岐: `passed is True` を満たす経路を評価する。
     if passed is True:
         return "pass"
+
+    # 条件分岐: `gate` を満たす経路を評価する。
+
     if gate:
         return "reject"
+
     return "watch"
 
 
@@ -138,13 +170,17 @@ def _from_born_pack(born_pack: Dict[str, Any]) -> List[Dict[str, Any]]:
     }
     out: List[Dict[str, Any]] = []
     for row in criteria_in:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         value = _as_float(row.get("value"))
         threshold = _as_float(row.get("threshold"))
         operator = str(row.get("operator") or "")
+        # 条件分岐: `threshold is None or operator not in ("<=", ">=")` を満たす経路を評価する。
         if threshold is None or operator not in ("<=", ">="):
             continue
+
         cid = str(row.get("id") or "")
         out.append(
             _criterion(
@@ -160,6 +196,7 @@ def _from_born_pack(born_pack: Dict[str, Any]) -> List[Dict[str, Any]]:
                 source="born_route_a_proxy_constraints_pack",
             )
         )
+
     return out
 
 
@@ -186,6 +223,7 @@ def build_payload(
     cow_max_residual_fraction = _as_float(cow_residual.get("max_abs_residual_fraction"))
     cow_coverage_ratio_legacy = _as_float(cow_metrics.get("numeric_coverage_ratio"))
     cow_coverage_ratio_targeted = _as_float(cow_metrics.get("numeric_coverage_ratio_targeted"))
+    # 条件分岐: `cow_coverage_ratio_targeted is not None` を満たす経路を評価する。
     if cow_coverage_ratio_targeted is not None:
         cow_coverage_metric = "numeric_coverage_ratio_targeted"
         cow_coverage_ratio = cow_coverage_ratio_targeted
@@ -294,8 +332,12 @@ def build_payload(
     atom_alpha = _find_row(matter_rows, "atom_recoil_alpha")
     atom_precision = _find_row(matter_rows, "atom_interferometer_precision")
     atom_precision_ratio = _as_float((atom_precision or {}).get("metric_value"))
+    # 条件分岐: `atom_precision_ratio is None` を満たす経路を評価する。
     if atom_precision_ratio is None:
         atom_precision_ratio = _as_float(precision_gap_watch.get("median_ratio"))
+
+    # 条件分岐: `atom_alpha and atom_precision_ratio is not None` を満たす経路を評価する。
+
     if atom_alpha and atom_precision_ratio is not None:
         atom_section = {
             "atom_alpha_abs_z": _as_float(atom_alpha.get("metric_value")),
@@ -316,8 +358,10 @@ def build_payload(
         channel = str(row.get("channel") or "unknown")
         status = str(row.get("status") or "watch")
         bucket = channel_summary.setdefault(channel, {"pass": 0, "watch": 0, "reject": 0})
+        # 条件分岐: `status not in bucket` を満たす経路を評価する。
         if status not in bucket:
             status = "watch"
+
         bucket[status] += 1
 
     return {
@@ -385,14 +429,18 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     scores: List[float] = []
     colors: List[str] = []
     for row in criteria:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         labels.append(str(row.get("id") or ""))
         score = _as_float(row.get("normalized_score"))
         scores.append(score if score is not None else math.nan)
         status = str(row.get("status") or "watch")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             colors.append("#e03131")
         else:
@@ -455,8 +503,10 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     def _resolve(path_text: str) -> Path:
         path = Path(path_text)
+        # 条件分岐: `path.is_absolute()` を満たす経路を評価する。
         if path.is_absolute():
             return path.resolve()
+
         return (ROOT / path).resolve()
 
     born_pack = _resolve(args.born_pack)
@@ -468,6 +518,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_png = _resolve(args.out_png)
 
     for input_path in [born_pack, cow_metrics, matter_metrics, hom_metrics]:
+        # 条件分岐: `not input_path.exists()` を満たす経路を評価する。
         if not input_path.exists():
             raise FileNotFoundError(f"required input not found: {_rel(input_path)}")
 
@@ -508,6 +559,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

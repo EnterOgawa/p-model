@@ -30,6 +30,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -76,9 +77,14 @@ def _read_points(csv_path: Path) -> List[Dict[str, float]]:
                 sg_obs = float(row.get("g_obs_sigma_m_s2") or "nan")
             except Exception:
                 continue
+
+            # 条件分岐: `not (np.isfinite(g_bar) and np.isfinite(g_obs)) or g_bar <= 0.0 or g_obs <= 0.0` を満たす経路を評価する。
+
             if not (np.isfinite(g_bar) and np.isfinite(g_obs)) or g_bar <= 0.0 or g_obs <= 0.0:
                 continue
+
             pts.append({"g_bar": g_bar, "g_obs": g_obs, "sg_obs": sg_obs})
+
     return pts
 
 
@@ -106,6 +112,7 @@ def _fit_log10_a0_grid(
     n_grid: int = 801,
 ) -> Dict[str, Any]:
     m = np.isfinite(g_bar) & (g_bar > 0.0) & np.isfinite(y_log10_gobs) & np.isfinite(sigma_y) & (sigma_y > 0.0)
+    # 条件分岐: `int(np.count_nonzero(m)) < 10` を満たす経路を評価する。
     if int(np.count_nonzero(m)) < 10:
         return {"status": "not_enough_points", "n_used": int(np.count_nonzero(m))}
 
@@ -119,9 +126,13 @@ def _fit_log10_a0_grid(
         y_pred = _rar_mcgaugh2016_log10_pred(gb, log10_a0=float(la0))
         rr = y - y_pred
         mm = np.isfinite(rr)
+        # 条件分岐: `int(np.count_nonzero(mm)) < 10` を満たす経路を評価する。
         if int(np.count_nonzero(mm)) < 10:
             continue
+
         chi2[i] = float(np.sum((rr[mm] / sy[mm]) ** 2))
+
+    # 条件分岐: `not np.isfinite(chi2).any()` を満たす経路を評価する。
 
     if not np.isfinite(chi2).any():
         return {"status": "failed", "reason": "chi2 all nan"}
@@ -141,6 +152,7 @@ def _fit_log10_a0_grid(
     left = i_best
     while left > 0 and np.isfinite(chi2[left - 1]) and chi2[left - 1] <= thresh:
         left -= 1
+
     right = i_best
     while right + 1 < chi2.size and np.isfinite(chi2[right + 1]) and chi2[right + 1] <= thresh:
         right += 1
@@ -176,6 +188,7 @@ def _get_h0p_si(
     h0p_metrics: Path,
     h0p_km_s_mpc_override: Optional[float],
 ) -> Tuple[float, Dict[str, Any]]:
+    # 条件分岐: `h0p_km_s_mpc_override is not None and np.isfinite(h0p_km_s_mpc_override) and...` を満たす経路を評価する。
     if h0p_km_s_mpc_override is not None and np.isfinite(h0p_km_s_mpc_override) and float(h0p_km_s_mpc_override) > 0:
         h0_si = _h0p_si_from_km_s_mpc(float(h0p_km_s_mpc_override))
         return h0_si, {"mode": "override", "H0P_km_s_Mpc": float(h0p_km_s_mpc_override), "H0P_SI_s^-1": h0_si}
@@ -184,10 +197,12 @@ def _get_h0p_si(
     derived = d.get("derived", {}) if isinstance(d.get("derived", {}), dict) else {}
     params = d.get("params", {}) if isinstance(d.get("params", {}), dict) else {}
     h0_si = derived.get("H0P_SI_s^-1")
+    # 条件分岐: `isinstance(h0_si, (int, float)) and np.isfinite(h0_si) and float(h0_si) > 0` を満たす経路を評価する。
     if isinstance(h0_si, (int, float)) and np.isfinite(h0_si) and float(h0_si) > 0:
         return float(h0_si), {"mode": "metrics", "path": _rel(h0p_metrics), "H0P_SI_s^-1": float(h0_si)}
 
     h0_km_s_mpc = params.get("H0P_km_s_Mpc")
+    # 条件分岐: `isinstance(h0_km_s_mpc, (int, float)) and np.isfinite(h0_km_s_mpc) and float(...` を満たす経路を評価する。
     if isinstance(h0_km_s_mpc, (int, float)) and np.isfinite(h0_km_s_mpc) and float(h0_km_s_mpc) > 0:
         h0_si2 = _h0p_si_from_km_s_mpc(float(h0_km_s_mpc))
         return h0_si2, {"mode": "metrics_params", "path": _rel(h0p_metrics), "H0P_km_s_Mpc": float(h0_km_s_mpc), "H0P_SI_s^-1": h0_si2}
@@ -204,6 +219,7 @@ def _rar_fixed_a0_stats(
     low_accel_cut_log10_gbar: float,
 ) -> Dict[str, Any]:
     m = np.isfinite(g_bar) & (g_bar > 0.0) & np.isfinite(y_log10_gobs) & np.isfinite(sigma_y) & (sigma_y > 0.0)
+    # 条件分岐: `int(np.count_nonzero(m)) < 10` を満たす経路を評価する。
     if int(np.count_nonzero(m)) < 10:
         return {"status": "not_enough_points", "n_used": int(np.count_nonzero(m))}
 
@@ -213,6 +229,7 @@ def _rar_fixed_a0_stats(
     y_pred = _rar_mcgaugh2016_log10_pred(gb, log10_a0=float(log10_a0))
     resid = y - y_pred
     mm = np.isfinite(resid)
+    # 条件分岐: `int(np.count_nonzero(mm)) < 10` を満たす経路を評価する。
     if int(np.count_nonzero(mm)) < 10:
         return {"status": "failed", "reason": "residual all nan"}
 
@@ -227,6 +244,7 @@ def _rar_fixed_a0_stats(
     mean_low = float("nan")
     sem_low = float("nan")
     z_low = float("nan")
+    # 条件分岐: `int(np.count_nonzero(m_low)) >= 10` を満たす経路を評価する。
     if int(np.count_nonzero(m_low)) >= 10:
         r_low = resid[m_low]
         w = 1.0 / (sy[m_low] ** 2)
@@ -259,18 +277,24 @@ def _rar_fixed_a0_stats(
     }
 
 def _summarize_freeze_test_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
+    # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
     if not isinstance(d, dict):
         return {"status": "invalid"}
+
     models = d.get("models")
+    # 条件分岐: `not isinstance(models, list) or not models` を満たす経路を評価する。
     if not isinstance(models, list) or not models:
         return {"status": "not_found"}
+
     sweep_summary = d.get("sweep_summary") if isinstance(d.get("sweep_summary"), dict) else {}
     sweep_summary_galaxy = d.get("sweep_summary_galaxy") if isinstance(d.get("sweep_summary_galaxy"), dict) else {}
     runs = d.get("runs") if isinstance(d.get("runs"), list) else []
     out_models: List[Dict[str, Any]] = []
     for m in models:
+        # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
         if not isinstance(m, dict):
             continue
+
         name = str(m.get("name") or "")
         test = m.get("test") if isinstance(m.get("test"), dict) else {}
         with_si = test.get("with_sigma_int") if isinstance(test.get("with_sigma_int"), dict) else {}
@@ -300,6 +324,7 @@ def _summarize_freeze_test_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
                 },
             }
         )
+
     return {
         "status": "ok",
         "generated_utc": d.get("generated_utc"),
@@ -317,6 +342,7 @@ def _summarize_freeze_test_mlr_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any
     Summarize output/private/cosmology/sparc_rar_freeze_test_mlr_sweep_metrics.json into a small dict
     suitable for inclusion in sparc_falsification_pack.json (avoid embedding the full variants list).
     """
+    # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
     if not isinstance(d, dict):
         return {"status": "invalid"}
 
@@ -337,18 +363,26 @@ def _summarize_freeze_test_mlr_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any
     best: Optional[Dict[str, Any]] = None
     variants = d.get("variants", []) if isinstance(d.get("variants"), list) else []
     for v in variants:
+        # 条件分岐: `not isinstance(v, dict) or v.get("status") != "ok"` を満たす経路を評価する。
         if not isinstance(v, dict) or v.get("status") != "ok":
             continue
+
         ud = v.get("upsilon_disk")
         ub = v.get("upsilon_bulge")
         ss_g = v.get("sweep_summary_galaxy", {}) if isinstance(v.get("sweep_summary_galaxy"), dict) else {}
         cand = ss_g.get(cand_name, {}) if isinstance(ss_g.get(cand_name), dict) else {}
         pr = cand.get("pass_rate_abs_lt_threshold")
+        # 条件分岐: `not (isinstance(pr, (int, float)) and np.isfinite(pr))` を満たす経路を評価する。
         if not (isinstance(pr, (int, float)) and np.isfinite(pr)):
             continue
+
         row = {"upsilon_disk": ud, "upsilon_bulge": ub, "pass_rate_abs_lt_threshold": float(pr), "median_z": cand.get("median")}
+        # 条件分岐: `worst is None or float(row["pass_rate_abs_lt_threshold"]) < float(worst["pass...` を満たす経路を評価する。
         if worst is None or float(row["pass_rate_abs_lt_threshold"]) < float(worst["pass_rate_abs_lt_threshold"]):
             worst = row
+
+        # 条件分岐: `best is None or float(row["pass_rate_abs_lt_threshold"]) > float(best["pass_r...` を満たす経路を評価する。
+
         if best is None or float(row["pass_rate_abs_lt_threshold"]) > float(best["pass_rate_abs_lt_threshold"]):
             best = row
 
@@ -392,8 +426,10 @@ def _adoption_eval_from_sweep_summary(
 ) -> Dict[str, Any]:
     models: Dict[str, Any] = {}
     for name, stats in sweep_summary.items():
+        # 条件分岐: `not isinstance(stats, dict)` を満たす経路を評価する。
         if not isinstance(stats, dict):
             continue
+
         n = int(stats.get("n") or 0)
         pr = stats.get("pass_rate_abs_lt_threshold")
         pr_f = float(pr) if isinstance(pr, (int, float)) and np.isfinite(pr) else float("nan")
@@ -406,6 +442,7 @@ def _adoption_eval_from_sweep_summary(
             "median_z": stats.get("median"),
             "adopted": adopted,
         }
+
     return {
         "criteria": {
             "threshold_abs_z": float(threshold_abs_z),
@@ -422,6 +459,7 @@ def _summarize_freeze_test_upsilon_fit_metrics(d: Dict[str, Any]) -> Dict[str, A
     Summarize a freeze-test metrics JSON that includes the nuisance model
     `candidate_rar_pbg_a0_fixed_kappa_fit_upsilon_global` (Υ fitted on train).
     """
+    # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
     if not isinstance(d, dict):
         return {"status": "invalid"}
 
@@ -438,19 +476,28 @@ def _summarize_freeze_test_upsilon_fit_metrics(d: Dict[str, Any]) -> Dict[str, A
     for run in runs:
         models = run.get("models", []) if isinstance(run, dict) and isinstance(run.get("models"), list) else []
         for m in models:
+            # 条件分岐: `not isinstance(m, dict) or str(m.get("name") or "") != model_name` を満たす経路を評価する。
             if not isinstance(m, dict) or str(m.get("name") or "") != model_name:
                 continue
+
             ups = (m.get("fit", {}) if isinstance(m.get("fit"), dict) else {}).get("upsilon_fit", {})
+            # 条件分岐: `not isinstance(ups, dict) or ups.get("status") != "ok"` を満たす経路を評価する。
             if not isinstance(ups, dict) or ups.get("status") != "ok":
                 continue
+
             ud = ups.get("upsilon_disk_best")
             ub = ups.get("upsilon_bulge_best")
+            # 条件分岐: `isinstance(ud, (int, float)) and np.isfinite(ud)` を満たす経路を評価する。
             if isinstance(ud, (int, float)) and np.isfinite(ud):
                 k = f"{float(ud):g}"
                 disk_counts[k] = int(disk_counts.get(k, 0) + 1)
+
+            # 条件分岐: `isinstance(ub, (int, float)) and np.isfinite(ub)` を満たす経路を評価する。
+
             if isinstance(ub, (int, float)) and np.isfinite(ub):
                 k = f"{float(ub):g}"
                 bulge_counts[k] = int(bulge_counts.get(k, 0) + 1)
+
             n_ok += 1
 
     return {
@@ -480,6 +527,7 @@ def _summarize_freeze_test_procedure_sweep_metrics(d: Dict[str, Any]) -> Dict[st
     """
     Summarize output/private/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json into a small dict.
     """
+    # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
     if not isinstance(d, dict):
         return {"status": "invalid"}
 
@@ -489,6 +537,7 @@ def _summarize_freeze_test_procedure_sweep_metrics(d: Dict[str, Any]) -> Dict[st
     candidate = d.get("candidate", {}) if isinstance(d.get("candidate"), dict) else {}
 
     robust_adopted = None
+    # 条件分岐: `cand_env.get("status") == "ok"` を満たす経路を評価する。
     if cand_env.get("status") == "ok":
         try:
             robust_adopted = bool(float(cand_env.get("min")) >= 0.95)
@@ -573,10 +622,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = p.parse_args(list(argv) if argv is not None else None)
 
     rar_csv = Path(args.rar_csv)
+    # 条件分岐: `not rar_csv.exists()` を満たす経路を評価する。
     if not rar_csv.exists():
         raise FileNotFoundError(f"missing rar csv: {rar_csv}")
 
     pts = _read_points(rar_csv)
+    # 条件分岐: `not pts` を満たす経路を評価する。
     if not pts:
         raise RuntimeError("no valid points found in rar csv")
 
@@ -598,8 +649,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     bins: List[Dict[str, Any]] = []
     for lo, hi in zip(edges[:-1], edges[1:]):
         m = (x >= lo) & (x < hi) & np.isfinite(resid)
+        # 条件分岐: `int(np.count_nonzero(m)) == 0` を満たす経路を評価する。
         if int(np.count_nonzero(m)) == 0:
             continue
+
         rr = resid[m]
         bins.append(
             {
@@ -613,10 +666,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
 
     # Simple null test in low-acceleration domain: mean(resid)/SEM(resid)
+
     m_low = np.isfinite(resid) & np.isfinite(sigma_y) & (x < float(args.low_accel_cut))
     z_low = float("nan")
     mean_low = float("nan")
     sem_low = float("nan")
+    # 条件分岐: `int(np.count_nonzero(m_low)) >= 10` を満たす経路を評価する。
     if int(np.count_nonzero(m_low)) >= 10:
         r_low = resid[m_low]
         w = 1.0 / (sigma_y[m_low] ** 2)
@@ -626,17 +681,22 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         z_low = mean_low / sem_low if sem_low > 0 else float("inf")
 
     # Baseline fit (not a P-model prediction): empirical RAR function with fitted a0.
+
     baseline_rar_fit = _fit_log10_a0_grid(g_bar, y, sigma_y)
     candidate_pbg: Dict[str, Any] = {"status": "skipped"}
     h0p_src: Dict[str, Any] = {}
     try:
         h0p_si, h0p_src = _get_h0p_si(h0p_metrics=Path(args.h0p_metrics), h0p_km_s_mpc_override=args.h0p_km_s_mpc)
         kappa = float(args.pbg_kappa)
+        # 条件分岐: `not np.isfinite(kappa) or kappa <= 0` を満たす経路を評価する。
         if not np.isfinite(kappa) or kappa <= 0:
             raise ValueError("--pbg-kappa must be positive")
+
         a0_pbg = float(kappa) * float(C_LIGHT_M_S) * float(h0p_si)
+        # 条件分岐: `not np.isfinite(a0_pbg) or a0_pbg <= 0` を満たす経路を評価する。
         if not np.isfinite(a0_pbg) or a0_pbg <= 0:
             raise ValueError("invalid a0 computed from kappa*c*H0^(P)")
+
         la0_pbg = float(math.log10(a0_pbg))
         candidate_pbg = _rar_fixed_a0_stats(
             g_bar=g_bar,
@@ -651,6 +711,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     freeze_test_path = Path(args.freeze_test_metrics)
     freeze_test_summary: Dict[str, Any] = {"status": "skipped"}
+    # 条件分岐: `freeze_test_path.exists()` を満たす経路を評価する。
     if freeze_test_path.exists():
         freeze_test_summary = _summarize_freeze_test_metrics(_read_json(freeze_test_path))
         freeze_test_summary["metrics_path"] = _rel(freeze_test_path)
@@ -659,6 +720,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     upsilon_fit_path = Path(args.freeze_test_upsilon_fit_metrics)
     upsilon_fit_summary: Dict[str, Any] = {"status": "skipped"}
+    # 条件分岐: `upsilon_fit_path.exists()` を満たす経路を評価する。
     if upsilon_fit_path.exists():
         upsilon_fit_summary = _summarize_freeze_test_upsilon_fit_metrics(_read_json(upsilon_fit_path))
         upsilon_fit_summary["metrics_path"] = _rel(upsilon_fit_path)
@@ -667,6 +729,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     proc_sweep_path = Path(args.freeze_test_procedure_sweep_metrics)
     proc_sweep_summary: Dict[str, Any] = {"status": "skipped"}
+    # 条件分岐: `proc_sweep_path.exists()` を満たす経路を評価する。
     if proc_sweep_path.exists():
         proc_sweep_summary = _summarize_freeze_test_procedure_sweep_metrics(_read_json(proc_sweep_path))
         proc_sweep_summary["metrics_path"] = _rel(proc_sweep_path)
@@ -675,6 +738,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     mlr_sweep_path = Path(args.freeze_test_mlr_sweep_metrics)
     mlr_sweep_summary: Dict[str, Any] = {"status": "skipped"}
+    # 条件分岐: `mlr_sweep_path.exists()` を満たす経路を評価する。
     if mlr_sweep_path.exists():
         mlr_sweep_summary = _summarize_freeze_test_mlr_sweep_metrics(_read_json(mlr_sweep_path))
         mlr_sweep_summary["metrics_path"] = _rel(mlr_sweep_path)
@@ -683,27 +747,36 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     adoption_eval: Dict[str, Any] = {"status": "skipped"}
     adoption_eval_galaxy: Dict[str, Any] = {"status": "skipped"}
+    # 条件分岐: `isinstance(freeze_test_summary, dict) and freeze_test_summary.get("status") =...` を満たす経路を評価する。
     if isinstance(freeze_test_summary, dict) and freeze_test_summary.get("status") == "ok":
         ss = freeze_test_summary.get("sweep_summary", {})
+        # 条件分岐: `isinstance(ss, dict)` を満たす経路を評価する。
         if isinstance(ss, dict):
             adoption_eval = _adoption_eval_from_sweep_summary(ss, pass_rate_required=0.95, threshold_abs_z=3.0, min_runs=100)
+
         ss_gal = freeze_test_summary.get("sweep_summary_galaxy", {})
+        # 条件分岐: `isinstance(ss_gal, dict)` を満たす経路を評価する。
         if isinstance(ss_gal, dict):
             adoption_eval_galaxy = _adoption_eval_from_sweep_summary(ss_gal, pass_rate_required=0.95, threshold_abs_z=3.0, min_runs=100)
 
     # Combine stability gate (split dependence), M/L robustness gate, and procedure robustness gate
     # into a single "final" adopted flag.
+
     adopted_fixed_ml = None
     robust_adopted_mlr = None
     try:
         cand_fixed = (adoption_eval_galaxy.get("models", {}) if isinstance(adoption_eval_galaxy.get("models", {}), dict) else {}).get("candidate_rar_pbg_a0_fixed_kappa", {})
+        # 条件分岐: `isinstance(cand_fixed, dict) and "adopted" in cand_fixed` を満たす経路を評価する。
         if isinstance(cand_fixed, dict) and "adopted" in cand_fixed:
             adopted_fixed_ml = bool(cand_fixed.get("adopted"))
     except Exception:
         adopted_fixed_ml = None
+
     try:
+        # 条件分岐: `isinstance(mlr_sweep_summary, dict) and isinstance(mlr_sweep_summary.get("can...` を満たす経路を評価する。
         if isinstance(mlr_sweep_summary, dict) and isinstance(mlr_sweep_summary.get("candidate"), dict):
             ra = mlr_sweep_summary["candidate"].get("robust_adopted")
+            # 条件分岐: `isinstance(ra, bool)` を満たす経路を評価する。
             if isinstance(ra, bool):
                 robust_adopted_mlr = ra
     except Exception:
@@ -711,14 +784,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     robust_adopted_procedure = None
     try:
+        # 条件分岐: `isinstance(proc_sweep_summary, dict) and isinstance(proc_sweep_summary.get("c...` を満たす経路を評価する。
         if isinstance(proc_sweep_summary, dict) and isinstance(proc_sweep_summary.get("candidate"), dict):
             ra = proc_sweep_summary["candidate"].get("robust_adopted")
+            # 条件分岐: `isinstance(ra, bool)` を満たす経路を評価する。
             if isinstance(ra, bool):
                 robust_adopted_procedure = ra
     except Exception:
         robust_adopted_procedure = None
 
     adopted_final = None
+    # 条件分岐: `isinstance(adopted_fixed_ml, bool) and isinstance(robust_adopted_mlr, bool) a...` を満たす経路を評価する。
     if isinstance(adopted_fixed_ml, bool) and isinstance(robust_adopted_mlr, bool) and isinstance(robust_adopted_procedure, bool):
         adopted_final = bool(adopted_fixed_ml and robust_adopted_mlr and robust_adopted_procedure)
 
@@ -795,6 +871,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     }
     _write_json(out, pack)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -807,6 +884,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(json.dumps({"pack": _rel(out), "n_points": int(len(pts))}, ensure_ascii=False))
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

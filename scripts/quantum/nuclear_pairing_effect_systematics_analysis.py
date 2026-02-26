@@ -17,21 +17,28 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _rms(values: list[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     return math.sqrt(sum(v * v for v in values) / float(len(values)))
 
 
 def _safe_median(values: list[float]) -> float:
+    # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
         return float("nan")
+
     return float(median(values))
 
 
@@ -47,8 +54,10 @@ def _solve_2x2(
     a11 = s11 + ridge
     a22 = s22 + ridge
     det = a11 * a22 - s12 * s12
+    # 条件分岐: `det == 0.0` を満たす経路を評価する。
     if det == 0.0:
         raise SystemExit("[fail] singular 2x2 system in pairing fit")
+
     k_n = (t1 * a22 - t2 * s12) / det
     k_p = (a11 * t2 - s12 * t1) / det
     return float(k_n), float(k_p)
@@ -56,9 +65,11 @@ def _solve_2x2(
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
+        # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
             f.write("")
             return
+
         headers = list(rows[0].keys())
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -72,6 +83,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     in_csv = out_dir / "nuclear_binding_energy_frequency_mapping_ame2020_all_nuclei.csv"
+    # 条件分岐: `not in_csv.exists()` を満たす経路を評価する。
     if not in_csv.exists():
         raise SystemExit(f"[fail] missing required input: {in_csv}")
 
@@ -84,8 +96,10 @@ def main() -> None:
             a = int(row["A"])
             b_obs = float(row["B_obs_MeV"])
             b_pred = float(row["B_pred_collective_MeV"])
+            # 条件分岐: `not (math.isfinite(b_obs) and math.isfinite(b_pred))` を満たす経路を評価する。
             if not (math.isfinite(b_obs) and math.isfinite(b_pred)):
                 continue
+
             by_key[(z, n)] = {
                 "Z": z,
                 "N": n,
@@ -97,6 +111,8 @@ def main() -> None:
                 "B_pred_collective_MeV": b_pred,
             }
 
+    # 条件分岐: `not by_key` を満たす経路を評価する。
+
     if not by_key:
         raise SystemExit(f"[fail] no usable rows loaded: {in_csv}")
 
@@ -106,21 +122,25 @@ def main() -> None:
     for (z, n), center in by_key.items():
         up = by_key.get((z, n + 1))
         dn = by_key.get((z, n - 1))
+        # 条件分岐: `up is not None and dn is not None` を満たす経路を評価する。
         if up is not None and dn is not None:
             b_plus = float(up["B_obs_MeV"])
             b0 = float(center["B_obs_MeV"])
             b_minus = float(dn["B_obs_MeV"])
             val = abs(((-1) ** n) * (b_plus - 2.0 * b0 + b_minus) / 2.0)
+            # 条件分岐: `math.isfinite(val)` を満たす経路を評価する。
             if math.isfinite(val):
                 delta_n_map[(z, n)] = float(val)
 
         zp = by_key.get((z + 1, n))
         zm = by_key.get((z - 1, n))
+        # 条件分岐: `zp is not None and zm is not None` を満たす経路を評価する。
         if zp is not None and zm is not None:
             b_plus = float(zp["B_obs_MeV"])
             b0 = float(center["B_obs_MeV"])
             b_minus = float(zm["B_obs_MeV"])
             val = abs(((-1) ** z) * (b_plus - 2.0 * b0 + b_minus) / 2.0)
+            # 条件分岐: `math.isfinite(val)` を満たす経路を評価する。
             if math.isfinite(val):
                 delta_p_map[(z, n)] = float(val)
 
@@ -132,8 +152,10 @@ def main() -> None:
         delta_n = delta_n_map.get((z, n), float("nan"))
         delta_p = delta_p_map.get((z, n), float("nan"))
         resid_before = float(b_pred - b_obs)
+        # 条件分岐: `math.isfinite(delta_n) and math.isfinite(delta_p)` を満たす経路を評価する。
         if math.isfinite(delta_n) and math.isfinite(delta_p):
             fit_rows.append((resid_before, float(delta_n), float(delta_p), int(row["A"])))
+
         rows.append(
             {
                 "Z": z,
@@ -150,12 +172,15 @@ def main() -> None:
             }
         )
 
+    # 条件分岐: `len(fit_rows) < 10` を満たす経路を評価する。
+
     if len(fit_rows) < 10:
         raise SystemExit(f"[fail] insufficient fit rows for pairing correction: n={len(fit_rows)}")
 
     resid_by_a: dict[int, list[float]] = defaultdict(list)
     for row in rows:
         resid_by_a[int(row["A"])].append(float(row["resid_before_MeV"]))
+
     resid_median_by_a = {a: _safe_median(vs) for a, vs in resid_by_a.items()}
 
     s11 = 0.0
@@ -170,6 +195,7 @@ def main() -> None:
         s12 += delta_n * delta_p
         t1 += delta_n * y
         t2 += delta_p * y
+
     k_n, k_p = _solve_2x2(s11=s11, s22=s22, s12=s12, t1=t1, t2=t2)
 
     for row in rows:
@@ -214,6 +240,7 @@ def main() -> None:
     summary_rows.append(summarize_group(rows, "all", "all"))
     for key in ["ee", "eo", "oe", "oo"]:
         summary_rows.append(summarize_group(grouped_parity.get(key, []), "parity", key))
+
     summary_rows.append(summarize_group(grouped_magic.get("magic_any", []), "magic", "magic_any"))
     summary_rows.append(summarize_group(grouped_magic.get("nonmagic", []), "magic", "nonmagic"))
 
@@ -247,6 +274,7 @@ def main() -> None:
         grp = summarize_group(grouped_parity.get(label, []), "parity", label)
         pb.append(float(grp["rms_resid_before_MeV"]))
         pa.append(float(grp["rms_resid_after_MeV"]))
+
     x = list(range(len(parity_labels)))
     ax10.bar([i - 0.18 for i in x], pb, width=0.36, label="before pairing corr.", alpha=0.85)
     ax10.bar([i + 0.18 for i in x], pa, width=0.36, label="after pairing corr.", alpha=0.85)
@@ -265,6 +293,7 @@ def main() -> None:
         grp = summarize_group(grouped_magic.get(label, []), "magic", label)
         mb.append(float(grp["rms_resid_before_MeV"]))
         ma.append(float(grp["rms_resid_after_MeV"]))
+
     x2 = list(range(len(magic_labels)))
     ax11.bar([i - 0.18 for i in x2], mb, width=0.36, label="before pairing corr.", alpha=0.85)
     ax11.bar([i + 0.18 for i in x2], ma, width=0.36, label="after pairing corr.", alpha=0.85)
@@ -339,6 +368,8 @@ def main() -> None:
     print(f"  {out_png}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

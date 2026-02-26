@@ -39,6 +39,7 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -60,6 +61,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -79,16 +81,25 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 
 def _fmt_float(x: Optional[float], *, digits: int = 3) -> str:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return ""
+
+    # 条件分岐: `not math.isfinite(float(x))` を満たす経路を評価する。
+
     if not math.isfinite(float(x)):
         return ""
+
     x = float(x)
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -97,8 +108,12 @@ def _maybe_float(x: Any) -> Optional[float]:
         v = float(x)
     except Exception:
         return None
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         return None
+
     return float(v)
 
 
@@ -138,50 +153,71 @@ class GaussianConstraint:
     assumes_cddr: Optional[bool]
 
     def is_independent(self) -> bool:
+        # 条件分岐: `self.uses_bao is True` を満たす経路を評価する。
         if self.uses_bao is True:
             return False
+
+        # 条件分岐: `self.uses_cmb is True` を満たす経路を評価する。
+
         if self.uses_cmb is True:
             return False
+
+        # 条件分岐: `self.assumes_cddr is True` を満たす経路を評価する。
+
         if self.assumes_cddr is True:
             return False
+
         return True
 
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     try:
         j = _read_json(path)
     except Exception:
         return {}
+
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
     out: Dict[str, Dict[str, Any]] = {}
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         r_id = str(r.get("id") or "")
+        # 条件分岐: `not r_id` を満たす経路を評価する。
         if not r_id:
             continue
+
         sigma_total = _maybe_float(r.get("sigma_total"))
+        # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
         if sigma_total is None or not (sigma_total > 0.0):
             continue
+
         out[r_id] = {
             "sigma_total": float(sigma_total),
             "sigma_sys_category": _maybe_float(r.get("sigma_sys_category")),
             "category": str(r.get("category") or "") or None,
         }
+
     return out
 
 
 def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> DDRConstraint:
+    # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
         return replace(ddr, sigma_policy="raw")
 
     row = envelope.get(ddr.id)
+    # 条件分岐: `not row` を満たす経路を評価する。
     if not row:
         return replace(ddr, sigma_policy="raw")
 
     sigma_total = _maybe_float(row.get("sigma_total"))
+    # 条件分岐: `sigma_total is None or not (sigma_total > 0.0)` を満たす経路を評価する。
     if sigma_total is None or not (sigma_total > 0.0):
         return replace(ddr, sigma_policy="raw")
 
@@ -210,8 +246,12 @@ def _as_gaussian_list(
             sig = float(r[sigma_key])
         except Exception:
             continue
+
+        # 条件分岐: `not (sig > 0.0 and math.isfinite(sig))` を満たす経路を評価する。
+
         if not (sig > 0.0 and math.isfinite(sig)):
             continue
+
         out.append(
             GaussianConstraint(
                 id=str(r.get("id") or ""),
@@ -227,6 +267,7 @@ def _as_gaussian_list(
                 ),
             )
         )
+
     return out
 
 
@@ -238,8 +279,12 @@ def _as_pT_constraints(rows: Sequence[Dict[str, Any]]) -> List[GaussianConstrain
             sig = float(r["beta_T_sigma"])
         except Exception:
             continue
+
+        # 条件分岐: `not (sig > 0.0 and math.isfinite(sig))` を満たす経路を評価する。
+
         if not (sig > 0.0 and math.isfinite(sig)):
             continue
+
         out.append(
             GaussianConstraint(
                 id=str(r.get("id") or ""),
@@ -251,6 +296,7 @@ def _as_pT_constraints(rows: Sequence[Dict[str, Any]]) -> List[GaussianConstrain
                 assumes_cddr=None,
             )
         )
+
     return out
 
 
@@ -348,6 +394,7 @@ def _plot_matrix(
         for ix in range(z_grid.shape[1]):
             v = float(z_grid[iy, ix])
             ax.text(ix, iy, _fmt_float(v, digits=2), ha="center", va="center", fontsize=8, color="#111111")
+            # 条件分岐: `bool(independent_mask[iy, ix])` を満たす経路を評価する。
             if bool(independent_mask[iy, ix]):
                 rect = __import__("matplotlib.patches").patches.Rectangle(
                     (ix - 0.5, iy - 0.5),
@@ -396,6 +443,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     in_bao_fit = out_dir / "cosmology_bao_scaled_distance_fit_metrics.json"
 
     for p in (in_ddr, in_opacity, in_candle, in_pt, in_pe, in_bao_fit):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"missing input: {p}")
 
@@ -407,6 +455,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         _apply_ddr_sigma_policy(DDRConstraint.from_json(r), policy=ddr_sigma_policy, envelope=ddr_env)
         for r in (_read_json(in_ddr).get("constraints") or [])
     ]
+    # 条件分岐: `not ddr_all` を満たす経路を評価する。
     if not ddr_all:
         raise ValueError("no DDR constraints found")
 
@@ -418,6 +467,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     candle_all = _as_gaussian_list(_read_json(in_candle).get("constraints") or [], mean_key="s_L", sigma_key="s_L_sigma")
     pt_all = _as_gaussian_list(_read_json(in_pt).get("constraints") or [], mean_key="p_t", sigma_key="p_t_sigma")
     pe_all = _as_pT_constraints(_read_json(in_pe).get("constraints") or [])
+    # 条件分岐: `not (opacity_all and candle_all and pt_all and pe_all)` を満たす経路を評価する。
     if not (opacity_all and candle_all and pt_all and pe_all):
         raise ValueError("missing constraints (opacity/candle/p_t/p_e)")
 
@@ -433,6 +483,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     rep_no_bao_id = "holanda2012_clusters_snIa_constitution_eta0_linear_noniso_spherical"
     ddr_bao = next((d for d in ddr_all if d.id == rep_bao_id), None)
     ddr_no = next((d for d in ddr_all if d.id == rep_no_bao_id), None)
+    # 条件分岐: `ddr_bao is None or ddr_no is None` を満たす経路を評価する。
     if ddr_bao is None or ddr_no is None:
         raise ValueError("representative DDR ids not found (update constants if schema changed)")
 
@@ -463,6 +514,7 @@ def main(argv: Optional[List[str]] = None) -> int:
                 z_grid[iy, ix] = v
                 limiting[iy][ix] = str(fit["limiting_observation"])
                 ind_mask[iy, ix] = bool(op.is_independent() and cd.is_independent())
+                # 条件分岐: `v < best_val` を満たす経路を評価する。
                 if v < best_val:
                     best_val = v
                     best_ij = (iy, ix)
@@ -600,6 +652,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     print(f"[ok] json: {out_metrics}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

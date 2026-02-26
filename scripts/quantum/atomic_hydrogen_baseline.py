@@ -20,8 +20,10 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 def _as_float(x: object) -> float | None:
     try:
+        # 条件分岐: `x is None` を満たす経路を評価する。
         if x is None:
             return None
+
         return float(x)  # type: ignore[arg-type]
     except Exception:
         return None
@@ -32,17 +34,25 @@ def _read_tsv_rows(path: Path) -> list[dict[str, str]]:
         reader = csv.DictReader(f, delimiter="\t")
         rows: list[dict[str, str]] = []
         for row in reader:
+            # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
             if not isinstance(row, dict):
                 continue
+
             cleaned: dict[str, str] = {}
             for k, v in row.items():
+                # 条件分岐: `k is None` を満たす経路を評価する。
                 if k is None:
                     continue
+
                 key = str(k).strip()
+                # 条件分岐: `not key` を満たす経路を評価する。
                 if not key:
                     continue
+
                 cleaned[key] = "" if v is None else str(v).strip()
+
             rows.append(cleaned)
+
         return rows
 
 
@@ -57,32 +67,47 @@ def _find_multiplet_components(
 
     for row in rows:
         obs_nu_str = row.get("obs_nu(A)", "")
+        # 条件分岐: `not obs_nu_str` を満たす経路を評価する。
         if not obs_nu_str:
             continue
+
         aki_str = row.get("Aki(s^-1)", "")
+        # 条件分岐: `not aki_str` を満たす経路を評価する。
         if not aki_str:
             continue
+
         type_str = (row.get("Type") or "").strip()
+        # 条件分岐: `type_str` を満たす経路を評価する。
         if type_str:
             # We focus on the E1 multiplet components for the baseline target.
             continue
 
         obs_nu = _as_float(obs_nu_str)
         aki = _as_float(aki_str)
+        # 条件分岐: `obs_nu is None or aki is None or aki <= 0` を満たす経路を評価する。
         if obs_nu is None or aki is None or aki <= 0:
             continue
+
+        # 条件分岐: `math.isclose(obs_nu, 0.0)` を満たす経路を評価する。
+
         if math.isclose(obs_nu, 0.0):
             continue
 
         lambda_vac_A = -1.0 / obs_nu
+        # 条件分岐: `not math.isfinite(lambda_vac_A) or lambda_vac_A <= 0` を満たす経路を評価する。
         if not math.isfinite(lambda_vac_A) or lambda_vac_A <= 0:
             continue
+
+        # 条件分岐: `abs(lambda_vac_A - center_lambda_vac_A) > window_A` を満たす経路を評価する。
+
         if abs(lambda_vac_A - center_lambda_vac_A) > window_A:
             continue
 
         key = (obs_nu_str, row.get("ritz_wn(A)", ""), aki_str, type_str)
+        # 条件分岐: `key in seen` を満たす経路を評価する。
         if key in seen:
             continue
+
         seen.add(key)
 
         components.append(
@@ -108,6 +133,7 @@ def main() -> None:
     # Source: NIST ASD cached output (Phase 7 / Step 7.12)
     src_dir = root / "data" / "quantum" / "sources" / "nist_asd_h_i_lines"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing extracted values: {extracted_path}\n"
@@ -116,15 +142,23 @@ def main() -> None:
 
     extracted = _read_json(extracted_path)
     selected = extracted.get("selected_lines")
+    # 条件分岐: `not isinstance(selected, list) or not selected` を満たす経路を評価する。
     if not isinstance(selected, list) or not selected:
         raise SystemExit(f"[fail] selected_lines missing/empty in: {extracted_path}")
 
     raw_file = extracted.get("raw_file")
     raw_path = Path(raw_file) if isinstance(raw_file, str) else None
+    # 条件分岐: `raw_path is None` を満たす経路を評価する。
     if raw_path is None:
         raise SystemExit(f"[fail] raw_file missing in extracted values: {extracted_path}")
+
+    # 条件分岐: `not raw_path.exists()` を満たす経路を評価する。
+
     if not raw_path.exists():
         raw_path = src_dir / raw_path.name
+
+    # 条件分岐: `not raw_path.exists()` を満たす経路を評価する。
+
     if not raw_path.exists():
         raise SystemExit(f"[fail] raw TSV missing: {raw_path}")
 
@@ -136,14 +170,19 @@ def main() -> None:
 
     lines_out: list[dict[str, Any]] = []
     for rec in selected:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         sel = rec.get("selected")
+        # 条件分岐: `not isinstance(sel, dict)` を満たす経路を評価する。
         if not isinstance(sel, dict):
             continue
+
         lam_nm = _as_float(sel.get("lambda_vac_nm"))
         lam_unc_A = _as_float(sel.get("lambda_vac_unc_A"))
         aki = _as_float(sel.get("Aki_s^-1"))
+        # 条件分岐: `lam_nm is None or lam_nm <= 0` を満たす経路を評価する。
         if lam_nm is None or lam_nm <= 0:
             continue
 
@@ -164,6 +203,8 @@ def main() -> None:
             }
         )
 
+    # 条件分岐: `not lines_out` を満たす経路を評価する。
+
     if not lines_out:
         raise SystemExit("[fail] no usable lines parsed from extracted_values.json")
 
@@ -176,10 +217,13 @@ def main() -> None:
     multiplet_window_A = 0.5
     multiplets_out: list[dict[str, Any]] = []
     for rec in selected:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         line_id = str(rec.get("id") or "")
         center_A = _as_float(rec.get("approx_lambda_vac_A"))
+        # 条件分岐: `not line_id or center_A is None or center_A <= 0` を満たす経路を評価する。
         if not line_id or center_A is None or center_A <= 0:
             continue
 
@@ -188,8 +232,10 @@ def main() -> None:
             center_lambda_vac_A=float(center_A),
             window_A=multiplet_window_A,
         )
+        # 条件分岐: `not comps` を満たす経路を評価する。
         if not comps:
             continue
+
         lam_min = float(comps[0]["lambda_vac_nm"])
         lam_max = float(comps[-1]["lambda_vac_nm"])
         multiplets_out.append(
@@ -215,16 +261,21 @@ def main() -> None:
     multiplet_note_lines: list[str] = []
     for m in multiplets_out:
         n = m.get("n_components")
+        # 条件分岐: `not isinstance(n, int) or n <= 1` を満たす経路を評価する。
         if not isinstance(n, int) or n <= 1:
             continue
+
         label = multiplet_label.get(str(m.get("id") or ""), str(m.get("id") or ""))
         mn = m.get("lambda_min_nm")
         mx = m.get("lambda_max_nm")
+        # 条件分岐: `not isinstance(mn, (int, float)) or not isinstance(mx, (int, float))` を満たす経路を評価する。
         if not isinstance(mn, (int, float)) or not isinstance(mx, (int, float)):
             continue
+
         multiplet_note_lines.append(f"{label}: {mn:.3f}–{mx:.3f} nm (N={n})")
 
     # ---- Figure ----
+
     fig_w, fig_h, dpi = 11.5, 4.6, 180
     fig, ax = plt.subplots(1, 1, figsize=(fig_w, fig_h), dpi=dpi)
     ax.set_title("Phase 7 / Step 7.12: Atomic baseline (Hydrogen, NIST ASD)", fontsize=13)
@@ -292,6 +343,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

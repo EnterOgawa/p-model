@@ -24,20 +24,25 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
 
     # Some repositories (e.g., CaltechAUTHORS file storage redirects) may reject
     # non-browser user agents with 403; use a conservative browser-like UA.
+
     req = Request(
         url,
         headers={
@@ -51,38 +56,50 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=30) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
 def _parse_float(s: str) -> float:
     x = float(str(s).strip())
+    # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
     if not math.isfinite(x):
         raise ValueError(f"non-finite float: {s!r}")
+
     return float(x)
 
 
 def _extract_textarea_table(html: str) -> list[dict[str, float]]:
     m = re.search(r"<textarea[^>]*>(.*?)</textarea>", html, flags=re.IGNORECASE | re.DOTALL)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         raise ValueError("missing <textarea> table with DOS data")
 
     rows: list[dict[str, float]] = []
     for line in m.group(1).strip().splitlines():
         parts = str(line).strip().split()
+        # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
         if len(parts) < 2:
             continue
+
         omega = _parse_float(parts[0])
         dos = _parse_float(parts[1])
         rows.append({"omega_rad_s": float(omega), "dos_per_m3_per_rad_s": float(dos)})
+
+    # 条件分岐: `len(rows) < 10` を満たす経路を評価する。
 
     if len(rows) < 10:
         raise ValueError(f"too few DOS rows parsed: n={len(rows)}")
 
     # Ensure monotonic omega.
+
     rows.sort(key=lambda r: float(r["omega_rad_s"]))
     for i in range(1, len(rows)):
+        # 条件分岐: `rows[i]["omega_rad_s"] <= rows[i - 1]["omega_rad_s"]` を満たす経路を評価する。
         if rows[i]["omega_rad_s"] <= rows[i - 1]["omega_rad_s"]:
             raise ValueError("omega is not strictly increasing after sort")
 
@@ -90,14 +107,19 @@ def _extract_textarea_table(html: str) -> list[dict[str, float]]:
 
 
 def _trapz_xy(xs: list[float], ys: list[float]) -> float:
+    # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
         raise ValueError("invalid arrays for trapz")
+
     s = 0.0
     for i in range(1, len(xs)):
         dx = float(xs[i]) - float(xs[i - 1])
+        # 条件分岐: `dx <= 0.0` を満たす経路を評価する。
         if dx <= 0.0:
             raise ValueError("xs must be strictly increasing")
+
         s += 0.5 * (float(ys[i - 1]) + float(ys[i])) * dx
+
     return float(s)
 
 
@@ -105,6 +127,7 @@ def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) ->
     """
     Return the x value where cumulative trapezoidal integral reaches frac of the total.
     """
+    # 条件分岐: `not (0.0 < float(frac) < 1.0)` を満たす経路を評価する。
     if not (0.0 < float(frac) < 1.0):
         raise ValueError("frac must be in (0,1)")
 
@@ -118,6 +141,7 @@ def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) ->
         y1 = float(ys[i])
         dx = x1 - x0
         area = 0.5 * (y0 + y1) * dx
+        # 条件分岐: `cum + area >= target and area > 0.0` を満たす経路を評価する。
         if cum + area >= target and area > 0.0:
             # Linear interpolation in x within this trapezoid using cumulative area fraction.
             # For robustness (and because the grid is fine), approximate the DOS linearly.
@@ -130,14 +154,17 @@ def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) ->
             b = dx * y0
             c = -remaining
             t: float
+            # 条件分岐: `abs(a) < 1e-30` を満たす経路を評価する。
             if abs(a) < 1e-30:
                 t = 0.0 if abs(b) < 1e-30 else float(-c / b)
             else:
                 disc = b * b - 4.0 * a * c
                 disc = max(0.0, float(disc))
                 t = float((-b + math.sqrt(disc)) / (2.0 * a))
+
             t = min(1.0, max(0.0, float(t)))
             return {"x": float(x0 + t * dx), "cum": float(cum + remaining), "total": float(total)}
+
         cum += area
 
     return {"x": float(xs[-1]), "cum": float(total), "total": float(total)}
@@ -175,21 +202,28 @@ def main() -> None:
 
     root = _repo_root()
     source = str(args.source)
+    # 条件分岐: `source == "hadley_html"` を満たす経路を評価する。
     if source == "hadley_html":
         default_dir = "hadley_si_phonon_dos"
+    # 条件分岐: 前段条件が不成立で、`source == "osti_kim2015_prb91_014307"` を追加評価する。
     elif source == "osti_kim2015_prb91_014307":
         default_dir = "osti_kim2015_prb91_014307_si_phonon_anharmonicity"
     else:
         default_dir = "caltechauthors_kim2015_prb91_014307_si_phonon_anharmonicity"
+
     src_dir = root / "data" / "quantum" / "sources" / str(args.out_dirname or default_dir)
     src_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `source == "hadley_html"` を満たす経路を評価する。
     if source == "hadley_html":
         url = "https://lampz.tugraz.at/~hadley/ss1/phonons/dos/si_phonon_dos.html"
         html_path = src_dir / "si_phonon_dos.html"
 
+        # 条件分岐: `not args.offline` を満たす経路を評価する。
         if not args.offline:
             _download(url, html_path)
+
+        # 条件分岐: `not html_path.exists() or html_path.stat().st_size == 0` を満たす経路を評価する。
 
         if not html_path.exists() or html_path.stat().st_size == 0:
             raise SystemExit(f"[fail] missing: {html_path}")
@@ -280,6 +314,7 @@ def main() -> None:
 
     # Primary (experimental) anharmonic phonon DOS reference (accepted manuscript via OSTI).
     # Kim et al. Phys. Rev. B 91, 014307 (2015). DOI: 10.1103/PhysRevB.91.014307
+
     if source == "osti_kim2015_prb91_014307":
         osti_id = "1185765"
         # NOTE: OSTI has two entrypoint URL styles; the /pages/ form is stable for public access.
@@ -288,14 +323,19 @@ def main() -> None:
         html_path = src_dir / f"osti_biblio_{osti_id}.html"
         pdf_path = src_dir / f"osti_purl_{osti_id}.pdf"
 
+        # 条件分岐: `not args.offline` を満たす経路を評価する。
         if not args.offline:
             _download(url_landing, html_path)
             _download(url_pdf, pdf_path)
 
         missing: list[Path] = []
         for p in [html_path, pdf_path]:
+            # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
             if not p.exists() or p.stat().st_size == 0:
                 missing.append(p)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
@@ -350,6 +390,7 @@ def main() -> None:
 
     # Open-access mirror of the published paper PDF via CaltechAUTHORS.
     # Kim et al. Phys. Rev. B 91, 014307 (2015). DOI: 10.1103/PhysRevB.91.014307
+
     if source == "caltechauthors_kim2015_prb91_014307":
         record_id = "67hvq-njk27"
         url_landing = f"https://authors.library.caltech.edu/records/{record_id}/latest"
@@ -361,14 +402,19 @@ def main() -> None:
         html_path = src_dir / f"caltechauthors_record_{record_id}.html"
         pdf_path = src_dir / "PhysRevB.91.014307.pdf"
 
+        # 条件分岐: `not args.offline` を満たす経路を評価する。
         if not args.offline:
             _download(url_landing, html_path)
             _download(url_pdf, pdf_path)
 
         missing: list[Path] = []
         for p in [html_path, pdf_path]:
+            # 条件分岐: `not p.exists() or p.stat().st_size == 0` を満たす経路を評価する。
             if not p.exists() or p.stat().st_size == 0:
                 missing.append(p)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
 
@@ -425,6 +471,8 @@ def main() -> None:
 
     raise SystemExit(f"[fail] unsupported source: {source!r}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

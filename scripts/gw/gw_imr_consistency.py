@@ -30,6 +30,7 @@ except Exception as e:  # pragma: no cover
     raise RuntimeError("scipy is required for gaussian z-scores") from e
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -59,8 +60,10 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
+
         mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -72,6 +75,7 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -86,86 +90,118 @@ def _write_json(path: Path, payload: Dict[str, Any]) -> None:
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         return
+
     tmp = dst.with_suffix(dst.suffix + ".part")
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-gw/1.0"})
     print(f"[dl] {url}")
     with urllib.request.urlopen(req, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
+    # 条件分岐: `not v` を満たす経路を評価する。
     if not v:
         return "v3"
+
+    # 条件分岐: `not v.lower().startswith("v")` を満たす経路を評価する。
+
     if not v.lower().startswith("v"):
         v = "v" + v
+
     return v
 
 
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
+    # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
     if not v or v == "auto":
         return ["v3", "v2", "v1"]
+
     return [_normalize_gwosc_version(version)]
 
 
 def _gwosc_catalog_url(catalog: str) -> str:
     cat = (catalog or "").strip()
+    # 条件分岐: `not cat` を満たす経路を評価する。
     if not cat:
         raise ValueError("catalog is required")
+
     return f"https://gwosc.org/eventapi/json/{cat}/"
 
 
 def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     cat = (catalog or "").strip()
+    # 条件分岐: `not cat` を満たす経路を評価する。
     if not cat:
         raise ValueError("catalog is required")
+
     ev = (event or "").strip()
+    # 条件分岐: `not ev` を満たす経路を評価する。
     if not ev:
         raise ValueError("event is required")
+
     v = _normalize_gwosc_version(version)
     return f"https://gwosc.org/eventapi/json/{cat}/{ev}/{v}"
 
 
 def _resolve_event_common_name(*, catalog: str, event: str) -> str:
     target = (event or "").strip()
+    # 条件分岐: `not target` を満たす経路を評価する。
     if not target:
         raise ValueError("event name is required")
+
+    # 条件分岐: `"_" in target` を満たす経路を評価する。
+
     if "_" in target:
         return target
 
     url = _gwosc_catalog_url(catalog)
     obj = json.loads(urllib.request.urlopen(url, timeout=60).read().decode("utf-8"))
     events = obj.get("events") or {}
+    # 条件分岐: `not isinstance(events, dict) or not events` を満たす経路を評価する。
     if not isinstance(events, dict) or not events:
         raise ValueError(f"invalid catalog payload: {catalog}")
 
     cand: List[Tuple[float, str]] = []
     for k, v in events.items():
+        # 条件分岐: `not isinstance(v, dict)` を満たす経路を評価する。
         if not isinstance(v, dict):
             continue
+
         common = str(v.get("commonName") or "").strip()
+        # 条件分岐: `not common` を満たす経路を評価する。
         if not common:
             continue
+
+        # 条件分岐: `common.startswith(target) or str(k).startswith(target)` を満たす経路を評価する。
+
         if common.startswith(target) or str(k).startswith(target):
             snr = v.get("network_matched_filter_snr")
             try:
                 snr_f = float(snr) if snr is not None else float("nan")
             except Exception:
                 snr_f = float("nan")
+
             cand.append((snr_f, common))
+
+    # 条件分岐: `not cand` を満たす経路を評価する。
 
     if not cand:
         raise ValueError(f"event '{target}' not found in catalog '{catalog}'")
 
     cand_sorted = sorted(cand, key=lambda t: (-(t[0] if math.isfinite(t[0]) else -1.0), t[1]))
     chosen = cand_sorted[0][1]
+    # 条件分岐: `len({c for _, c in cand}) > 1` を満たす経路を評価する。
     if len({c for _, c in cand}) > 1:
         print(f"[warn] multiple matches for '{target}', picked: {chosen}")
+
     return chosen
 
 
@@ -184,7 +220,9 @@ def _fetch_event_json(
     event_json_path = data_dir / f"{resolved_event}_event.json"
 
     event_json_url = ""
+    # 条件分岐: `offline` を満たす経路を評価する。
     if offline:
+        # 条件分岐: `not event_json_path.exists()` を満たす経路を評価する。
         if not event_json_path.exists():
             raise FileNotFoundError("offline and missing event JSON: " + str(event_json_path))
     else:
@@ -196,19 +234,27 @@ def _fetch_event_json(
                 event_json_url = url_try
                 break
             except urllib.error.HTTPError as e:
+                # 条件分岐: `int(getattr(e, "code", 0) or 0) == 404 and len(_candidate_gwosc_versions(vers...` を満たす経路を評価する。
                 if int(getattr(e, "code", 0) or 0) == 404 and len(_candidate_gwosc_versions(version)) > 1:
                     last_404 = e
                     continue
+
                 raise
+
+        # 条件分岐: `event_json_url == "" and last_404 is not None` を満たす経路を評価する。
+
         if event_json_url == "" and last_404 is not None:
             raise last_404
 
     obj = _read_json(event_json_path)
     events = obj.get("events") or {}
+    # 条件分岐: `not isinstance(events, dict) or not events` を満たす経路を評価する。
     if not isinstance(events, dict) or not events:
         raise ValueError("invalid event JSON: missing 'events'")
+
     event_key = next(iter(events.keys()))
     event_info = events[event_key]
+    # 条件分岐: `not isinstance(event_info, dict)` を満たす経路を評価する。
     if not isinstance(event_info, dict):
         raise ValueError("invalid event JSON: event is not an object")
 
@@ -225,33 +271,46 @@ def _infer_filename_from_url(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
     parts = [p for p in parsed.path.split("/") if p]
     for i, p in enumerate(parts):
+        # 条件分岐: `p == "files" and i + 1 < len(parts)` を満たす経路を評価する。
         if p == "files" and i + 1 < len(parts):
             return parts[i + 1]
+
     name = Path(parsed.path).name
+    # 条件分岐: `name and name != "content"` を満たす経路を評価する。
     if name and name != "content":
         return name
+
     return "posterior_samples.h5"
 
 
 def _select_preferred_posterior(event_info: Dict[str, Any], *, prefer_waveform: str) -> Tuple[str, Dict[str, Any]]:
     params = event_info.get("parameters") or {}
+    # 条件分岐: `not isinstance(params, dict) or not params` を満たす経路を評価する。
     if not isinstance(params, dict) or not params:
         raise ValueError("event JSON missing parameters dict")
 
     prefer = (prefer_waveform or "").strip()
     entries: List[Tuple[int, str, str, Dict[str, Any]]] = []
     for name, rec in params.items():
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         data_url = str(rec.get("data_url") or "").strip()
+        # 条件分岐: `not data_url` を満たす経路を評価する。
         if not data_url:
             continue
+
         wf = str(rec.get("waveform_family") or "").strip()
+        # 条件分岐: `prefer and wf and wf != prefer` を満たす経路を評価する。
         if prefer and wf and wf != prefer:
             continue
+
         is_pref = 1 if bool(rec.get("is_preferred")) else 0
         date = str(rec.get("date_added") or "").strip()
         entries.append((is_pref, date, str(name), rec))
+
+    # 条件分岐: `not entries` を満たす経路を評価する。
 
     if not entries:
         raise ValueError("no posterior samples found in event parameters")
@@ -265,24 +324,32 @@ def _find_posterior_samples_dataset(h5: h5py.File) -> h5py.Dataset:
     found: List[h5py.Dataset] = []
 
     def visitor(name: str, obj: Any) -> None:
+        # 条件分岐: `not isinstance(obj, h5py.Dataset)` を満たす経路を評価する。
         if not isinstance(obj, h5py.Dataset):
             return
+
+        # 条件分岐: `name.endswith("posterior_samples")` を満たす経路を評価する。
+
         if name.endswith("posterior_samples"):
             found.append(obj)
 
     h5.visititems(visitor)
+    # 条件分岐: `not found` を満たす経路を評価する。
     if not found:
         raise ValueError("posterior_samples dataset not found in HDF5")
 
     required = {"final_mass", "final_spin"}
     for ds in found:
         names = set(getattr(ds.dtype, "names", ()) or ())
+        # 条件分岐: `required.issubset(names)` を満たす経路を評価する。
         if required.issubset(names):
             return ds
+
     return found[0]
 
 
 # Berti+ (2006) fit for l=m=2, n=0 (fundamental) mode.
+
 def _qnm_220_omega_m(a: np.ndarray) -> np.ndarray:
     a = np.asarray(a, dtype=np.float64)
     a = np.clip(a, 0.0, 0.999999)
@@ -312,17 +379,22 @@ def _invert_qnm_220_to_spin(Q: float) -> Optional[float]:
     # Q = 0.7000 + 1.4187*(1-a)^(-0.4990)
     if not (Q > 0.7000):
         return None
+
     x = 1.4187 / (Q - 0.7000)
     one_minus_a = x ** (1.0 / 0.4990)
     a = 1.0 - one_minus_a
+    # 条件分岐: `not math.isfinite(a)` を満たす経路を評価する。
     if not math.isfinite(a):
         return None
+
     return float(min(0.999999, max(0.0, a)))
 
 
 def _invert_qnm_220_to_mass_msun(*, f_hz: float, a: float) -> Optional[float]:
+    # 条件分岐: `not (f_hz > 0.0)` を満たす経路を評価する。
     if not (f_hz > 0.0):
         return None
+
     g = 6.67430e-11
     c = 299792458.0
     m_sun = 1.98847e30
@@ -332,8 +404,10 @@ def _invert_qnm_220_to_mass_msun(*, f_hz: float, a: float) -> Optional[float]:
 
 
 def _median_and_sigma_from_p16_p84(p16_p84: Sequence[float]) -> Tuple[float, float]:
+    # 条件分岐: `not isinstance(p16_p84, (list, tuple)) or len(p16_p84) != 2` を満たす経路を評価する。
     if not isinstance(p16_p84, (list, tuple)) or len(p16_p84) != 2:
         return float("nan"), float("nan")
+
     p16, p84 = float(p16_p84[0]), float(p16_p84[1])
     med = 0.5 * (p16 + p84)
     sig = 0.5 * (p84 - p16)
@@ -368,6 +442,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_png = out_dir / f"{args.slug}_imr_consistency.png"
 
     ring_json_path = Path(args.ringdown_json) if str(args.ringdown_json).strip() else (out_dir / f"{args.slug}_ringdown_qnm_fit.json")
+    # 条件分岐: `not ring_json_path.exists()` を満たす経路を評価する。
     if not ring_json_path.exists():
         out = {
             "generated_utc": _iso_utc_now(),
@@ -380,6 +455,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     ring = _read_json(ring_json_path)
     comb = ((ring.get("results") or {}).get("combined") or {}) if isinstance(ring.get("results") or {}, dict) else {}
+    # 条件分岐: `str(comb.get("status") or "") != "ok"` を満たす経路を評価する。
     if str(comb.get("status") or "") != "ok":
         out = {
             "generated_utc": _iso_utc_now(),
@@ -392,12 +468,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     f_meas = float(((comb.get("median") or {}).get("f_hz")) or float("nan"))
     tau_meas = float(((comb.get("median") or {}).get("tau_s")) or float("nan"))
+    # 条件分岐: `not (math.isfinite(f_meas) and math.isfinite(tau_meas))` を満たす経路を評価する。
     if not (math.isfinite(f_meas) and math.isfinite(tau_meas)):
         raise ValueError("invalid ringdown measurement in json")
 
     # Measurement uncertainty proxy:
     # - statistical: half-width of (p16,p84) at the reference ringdown start time (from data release)
     # - systematic: scatter of medians across start-time scan
+
     res = (ring.get("results") or {}) if isinstance(ring.get("results") or {}, dict) else {}
     q220 = (res.get("qnm_220") or {}) if isinstance(res.get("qnm_220") or {}, dict) else {}
     ref = (q220.get("reference") or {}) if isinstance(q220.get("reference") or {}, dict) else {}
@@ -429,13 +507,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     pe_name, pe = _select_preferred_posterior(info, prefer_waveform=str(args.prefer_waveform))
     data_url = str(pe.get("data_url") or "").strip()
+    # 条件分岐: `not data_url` を満たす経路を評価する。
     if not data_url:
         raise ValueError("selected posterior missing data_url")
+
     fname = _infer_filename_from_url(data_url)
+    # 条件分岐: `not fname.lower().endswith(".h5") and not fname.lower().endswith(".hdf5")` を満たす経路を評価する。
     if not fname.lower().endswith(".h5") and not fname.lower().endswith(".hdf5"):
         fname = f"{fname}.h5"
+
     post_path = data_dir / fname
+    # 条件分岐: `bool(args.offline)` を満たす経路を評価する。
     if bool(args.offline):
+        # 条件分岐: `not post_path.exists()` を満たす経路を評価する。
         if not post_path.exists():
             raise FileNotFoundError("offline and missing posterior: " + str(post_path))
     else:
@@ -464,8 +548,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     def z_score(x: float, mu: float, sig1: float, sig2: float) -> float:
         sig = math.sqrt(max(0.0, float(sig1)) ** 2 + max(0.0, float(sig2)) ** 2)
+        # 条件分岐: `not (sig > 0.0)` を満たす経路を評価する。
         if not (sig > 0.0):
             return float("nan")
+
         return (float(x) - float(mu)) / sig
 
     z_f = z_score(f_meas, pred_summary["f_hz"]["median"], sig_f_meas, sig_f_pred)
@@ -480,6 +566,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     # Propagate (f,tau) uncertainty → (M,a) by Monte Carlo for a more meaningful consistency check.
     rd_mc: Dict[str, Any] = {"status": "not_computed"}
+    # 条件分岐: `sig_f_meas > 0 and sig_tau_meas > 0` を満たす経路を評価する。
     if sig_f_meas > 0 and sig_tau_meas > 0:
         g = 6.67430e-11
         c = 299792458.0
@@ -494,6 +581,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         f_s = f_s[ok]
         tau_s = tau_s[ok]
         q_s = q_s[ok]
+        # 条件分岐: `len(f_s) > 50` を満たす経路を評価する。
         if len(f_s) > 50:
             one_minus_a = (1.4187 / (q_s - 0.7000)) ** (1.0 / 0.4990)
             a_s = np.clip(1.0 - one_minus_a, 0.0, 0.999999)
@@ -512,6 +600,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
 
     # Compare ringdown-inferred to PE posterior (Gaussian; include ringdown MC variance when available).
+
     _, sig_m_det = _median_and_sigma_from_p16_p84(pred_summary["final_mass_det_msun"]["p16_p84"])
     _, sig_a_f = _median_and_sigma_from_p16_p84(pred_summary["final_spin"]["p16_p84"])
     _, sig_m_rd = _median_and_sigma_from_p16_p84(((rd_mc.get("final_mass_det_msun") or {}).get("p16_p84") or []))
@@ -524,6 +613,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # 2D Mahalanobis on (M,a) between PE mean and ringdown MC mean (covariances added).
     md2 = float("nan")
     p_md2 = float("nan")
+    # 条件分岐: `rd_mc.get("status") == "ok" and len(m_det) > 50` を満たす経路を評価する。
     if rd_mc.get("status") == "ok" and len(m_det) > 50:
         mu_pe = np.array([float(np.mean(m_det)), float(np.mean(a_f))], dtype=np.float64)
         cov_pe = np.cov(np.vstack([m_det, a_f]), ddof=1)
@@ -606,16 +696,20 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     ax_tau.legend(fontsize=9)
 
     ax_m.hist(m_det, bins=80, color="#54A24B", alpha=0.8, density=True)
+    # 条件分岐: `m_cmp is not None and math.isfinite(float(m_cmp))` を満たす経路を評価する。
     if m_cmp is not None and math.isfinite(float(m_cmp)):
         ax_m.axvline(float(m_cmp), color="black", lw=1.5, label="ringdown inferred")
+
     ax_m.set_title(f"Final mass (det)  z1d={z_m_1d:.2f}")
     ax_m.set_xlabel("M_f (M_sun)")
     ax_m.grid(True, alpha=0.3)
     ax_m.legend(fontsize=9)
 
     ax_a.hist(a_f, bins=80, color="#B279A2", alpha=0.8, density=True)
+    # 条件分岐: `a_cmp is not None and math.isfinite(float(a_cmp))` を満たす経路を評価する。
     if a_cmp is not None and math.isfinite(float(a_cmp)):
         ax_a.axvline(float(a_cmp), color="black", lw=1.5, label="ringdown inferred")
+
     ax_a.set_title(f"Final spin  z1d={z_a_1d:.2f}")
     ax_a.set_xlabel("a_f")
     ax_a.grid(True, alpha=0.3)
@@ -643,6 +737,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] png : {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

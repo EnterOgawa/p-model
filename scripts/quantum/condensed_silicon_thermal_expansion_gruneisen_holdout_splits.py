@@ -17,11 +17,13 @@ def _repo_root() -> Path:
 
 
 _ROOT = _repo_root()
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 # Reuse the same implementation as Step 7.14.11/7.14.14 so that
 # the holdout test (7.14.15) is comparable and does not fork physics code.
+
 from scripts.quantum.condensed_silicon_thermal_expansion_gruneisen_debye_einstein_model import (  # noqa: E402
     _alpha_1e8_per_k,
     _debye_cv_molar,
@@ -40,9 +42,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -68,18 +73,24 @@ def _metrics_for_range(
         ao = float(alpha_obs[i])
         ap = float(alpha_pred[i])
         sig = float(sigma_fit[i])
+        # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
         if sig <= 0.0:
             continue
+
+        # 条件分岐: `ao != 0.0 and ap != 0.0 and (ao > 0.0) != (ap > 0.0)` を満たす経路を評価する。
 
         if ao != 0.0 and ap != 0.0 and (ao > 0.0) != (ap > 0.0):
             sign_mismatch += 1
 
         z = (ap - ao) / sig
+        # 条件分岐: `not math.isfinite(z)` を満たす経路を評価する。
         if not math.isfinite(z):
             continue
+
         n += 1
         sum_z2 += z * z
         max_abs_z = max(max_abs_z, abs(z))
+        # 条件分岐: `abs(z) > 3.0` を満たす経路を評価する。
         if abs(z) > 3.0:
             exceed_3sigma += 1
 
@@ -116,8 +127,10 @@ def _fit_debye_einstein_1(
         b2 = 0.0
         for i in train_idx:
             sig = float(sigma_fit[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             w = 1.0 / (sig * sig)
             x1 = float(cv_d[i])
             x2 = float(cv_e[i])
@@ -129,19 +142,25 @@ def _fit_debye_einstein_1(
             b2 += w * x2 * y
 
         sol = _solve_2x2(a11=s11, a12=s12, a22=s22, b1=b1, b2=b2)
+        # 条件分岐: `sol is None` を満たす経路を評価する。
         if sol is None:
             continue
+
         a_d, a_e = sol
 
         sse = 0.0
         for i in train_idx:
             sig = float(sigma_fit[i])
+            # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
             if sig <= 0.0:
                 continue
+
             w = 1.0 / (sig * sig)
             pred = float(a_d) * float(cv_d[i]) + float(a_e) * float(cv_e[i])
             r = float(alpha_obs[i]) - pred
             sse += w * r * r
+
+        # 条件分岐: `best is None or float(sse) < float(best["sse"])` を満たす経路を評価する。
 
         if best is None or float(sse) < float(best["sse"]):
             best = {
@@ -150,6 +169,8 @@ def _fit_debye_einstein_1(
                 "a_e": float(a_e),
                 "sse": float(sse),
             }
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise SystemExit("[fail] theta_E scan failed (einstein_branches=1)")
@@ -200,8 +221,10 @@ def _fit_debye_einstein_2(
             b3 = 0.0
             for i in train_idx:
                 sig = float(sigma_fit[i])
+                # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
                 if sig <= 0.0:
                     continue
+
                 w = 1.0 / (sig * sig)
                 x1 = float(cv_d[i])
                 x2 = float(cv_e1[i])
@@ -218,19 +241,25 @@ def _fit_debye_einstein_2(
                 b3 += w * x3 * y
 
             sol = _solve_3x3(a11=s11, a12=s12, a13=s13, a22=s22, a23=s23, a33=s33, b1=b1, b2=b2, b3=b3)
+            # 条件分岐: `sol is None` を満たす経路を評価する。
             if sol is None:
                 continue
+
             a_d, a_e1, a_e2 = sol
 
             sse = 0.0
             for i in train_idx:
                 sig = float(sigma_fit[i])
+                # 条件分岐: `sig <= 0.0` を満たす経路を評価する。
                 if sig <= 0.0:
                     continue
+
                 w = 1.0 / (sig * sig)
                 pred = float(a_d) * float(cv_d[i]) + float(a_e1) * float(cv_e1[i]) + float(a_e2) * float(cv_e2[i])
                 r = float(alpha_obs[i]) - pred
                 sse += w * r * r
+
+            # 条件分岐: `best is None or float(sse) < float(best["sse"])` を満たす経路を評価する。
 
             if best is None or float(sse) < float(best["sse"]):
                 best = {
@@ -241,6 +270,8 @@ def _fit_debye_einstein_2(
                     "a_e2": float(a_e2),
                     "sse": float(sse),
                 }
+
+    # 条件分岐: `best is None` を満たす経路を評価する。
 
     if best is None:
         raise SystemExit("[fail] theta_E1/theta_E2 scan failed (einstein_branches=2)")
@@ -281,36 +312,47 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     alpha_src = root / "data" / "quantum" / "sources" / "nist_trc_silicon_thermal_expansion" / "extracted_values.json"
+    # 条件分岐: `not alpha_src.exists()` を満たす経路を評価する。
     if not alpha_src.exists():
         raise SystemExit(
             f"[fail] missing: {alpha_src}\n"
             "Run: python -B scripts/quantum/fetch_silicon_thermal_expansion_sources.py"
         )
+
     alpha_extracted = _read_json(alpha_src)
     coeffs_obj = alpha_extracted.get("coefficients")
+    # 条件分岐: `not isinstance(coeffs_obj, dict)` を満たす経路を評価する。
     if not isinstance(coeffs_obj, dict):
         raise SystemExit(f"[fail] coefficients missing: {alpha_src}")
+
     coeffs = {str(k).lower(): float(v) for k, v in coeffs_obj.items()}
     missing = [k for k in "abcdefghijkl" if k not in coeffs]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit(f"[fail] missing coefficients: {missing}")
 
     dr = alpha_extracted.get("data_range")
+    # 条件分岐: `not isinstance(dr, dict)` を満たす経路を評価する。
     if not isinstance(dr, dict):
         raise SystemExit(f"[fail] data_range missing: {alpha_src}")
+
     t_min = int(math.ceil(float(dr.get("t_min_k"))))
     t_max = int(math.floor(float(dr.get("t_max_k"))))
+    # 条件分岐: `not (0 < t_min < t_max)` を満たす経路を評価する。
     if not (0 < t_min < t_max):
         raise SystemExit(f"[fail] invalid data_range: {dr}")
 
     fe = alpha_extracted.get("fit_error_relative_to_data")
+    # 条件分岐: `not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinsta...` を満たす経路を評価する。
     if not isinstance(fe, dict) or not isinstance(fe.get("lt"), dict) or not isinstance(fe.get("ge"), dict):
         raise SystemExit(f"[fail] fit_error_relative_to_data missing: {alpha_src}")
+
     t_sigma_split = float(fe["lt"].get("t_k", 50.0))
     sigma_lt_1e8 = float(fe["lt"].get("sigma_1e_8_per_k", 0.03))
     sigma_ge_1e8 = float(fe["ge"].get("sigma_1e_8_per_k", 0.5))
 
     theta_from_metrics = _theta_d_from_existing_metrics(root)
+    # 条件分岐: `theta_from_metrics is not None` を満たす経路を評価する。
     if theta_from_metrics is not None:
         theta_d = float(theta_from_metrics)
         theta_d_source: dict[str, object] = {
@@ -341,6 +383,7 @@ def main() -> None:
         test_min, test_max = float(s["test"][0]), float(s["test"][1])
         train_idx = _range_idx(temps, t_min=train_min, t_max=train_max)
         test_idx = _range_idx(temps, t_min=test_min, t_max=test_max)
+        # 条件分岐: `len(train_idx) < 20 or len(test_idx) < 20` を満たす経路を評価する。
         if len(train_idx) < 20 or len(test_idx) < 20:
             raise SystemExit(f"[fail] split {s['name']} has too few points: train={len(train_idx)}, test={len(test_idx)}")
 
@@ -428,6 +471,7 @@ def main() -> None:
             w.writerow(r)
 
     # Plot: compare holdout severity (max abs z / reduced chi2)
+
     categories: list[str] = []
     maxz_train: list[float] = []
     maxz_test: list[float] = []
@@ -506,6 +550,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

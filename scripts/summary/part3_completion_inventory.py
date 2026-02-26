@@ -28,6 +28,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -68,15 +69,24 @@ def _strip_internal_lines(lines: Sequence[str]) -> List[str]:
     out: List[str] = []
     in_internal = False
     for line in lines:
+        # 条件分岐: `_INTERNAL_ONLY_START in line` を満たす経路を評価する。
         if _INTERNAL_ONLY_START in line:
             in_internal = True
             continue
+
+        # 条件分岐: `_INTERNAL_ONLY_END in line` を満たす経路を評価する。
+
         if _INTERNAL_ONLY_END in line:
             in_internal = False
             continue
+
+        # 条件分岐: `in_internal` を満たす経路を評価する。
+
         if in_internal:
             continue
+
         out.append(line)
+
     return out
 
 
@@ -85,16 +95,20 @@ def _parse_sections(lines: Sequence[str]) -> List[MdSection]:
     # (level, line_no, line_idx, section_num, title)
     for i, raw in enumerate(lines):
         m = _RE_HEADING.match(raw)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         level = len(m.group(1))
         title_full = m.group("title").strip()
         sec_num = None
         sec_title = title_full
         mn = _RE_SECTION_NUM.match(title_full)
+        # 条件分岐: `mn` を満たす経路を評価する。
         if mn:
             sec_num = mn.group("num")
             sec_title = mn.group("title").strip()
+
         headings.append((level, i + 1, i, sec_num, sec_title))
 
     sections: List[MdSection] = []
@@ -102,9 +116,11 @@ def _parse_sections(lines: Sequence[str]) -> List[MdSection]:
         end_idx_excl = len(lines)
         for j in range(idx + 1, len(headings)):
             next_level, _, next_line_idx, _, _ = headings[j]
+            # 条件分岐: `next_level <= level` を満たす経路を評価する。
             if next_level <= level:
                 end_idx_excl = next_line_idx
                 break
+
         sections.append(
             MdSection(
                 level=level,
@@ -116,26 +132,39 @@ def _parse_sections(lines: Sequence[str]) -> List[MdSection]:
                 body_end_idx=end_idx_excl,
             )
         )
+
     return sections
 
 
 def _is_candidate_section(sec: MdSection) -> bool:
+    # 条件分岐: `not sec.section_num` を満たす経路を評価する。
     if not sec.section_num:
         return False
+
     return sec.section_num.startswith("4.2.") or sec.section_num.startswith("5.")
 
 
 def _is_container(sec: MdSection, *, all_secs: Sequence[MdSection]) -> bool:
+    # 条件分岐: `not sec.section_num` を満たす経路を評価する。
     if not sec.section_num:
         return False
+
     prefix = sec.section_num + "."
     for other in all_secs:
+        # 条件分岐: `other.heading_line_idx <= sec.heading_line_idx` を満たす経路を評価する。
         if other.heading_line_idx <= sec.heading_line_idx:
             continue
+
+        # 条件分岐: `other.heading_line_idx >= sec.body_end_idx` を満たす経路を評価する。
+
         if other.heading_line_idx >= sec.body_end_idx:
             continue
+
+        # 条件分岐: `other.section_num and other.section_num.startswith(prefix)` を満たす経路を評価する。
+
         if other.section_num and other.section_num.startswith(prefix):
             return True
+
     return False
 
 
@@ -143,6 +172,7 @@ def _category_for(sec_num: str, title: str) -> str:
     # Primary mapping by section number (stable within Part III).
     if sec_num == "4.2.1" or sec_num.startswith("4.2.1.") or sec_num == "5.1" or sec_num.startswith("5.1."):
         return "Bell"
+
     if (
         sec_num == "5.2"
         or sec_num.startswith("5.2.")
@@ -156,6 +186,7 @@ def _category_for(sec_num: str, title: str) -> str:
         or sec_num.startswith("4.2.5.")
     ):
         return "干渉"
+
     if (
         sec_num == "5.3"
         or sec_num.startswith("5.3.")
@@ -165,6 +196,7 @@ def _category_for(sec_num: str, title: str) -> str:
         or sec_num.startswith("4.2.7.")
     ):
         return "核"
+
     if (
         sec_num == "4.2.15"
         or sec_num.startswith("4.2.15.")
@@ -172,6 +204,7 @@ def _category_for(sec_num: str, title: str) -> str:
         or sec_num.startswith("4.2.16.")
     ):
         return "熱"
+
     if (
         sec_num == "4.2.6"
         or sec_num.startswith("4.2.6.")
@@ -179,54 +212,92 @@ def _category_for(sec_num: str, title: str) -> str:
         or sec_num.startswith("4.2.8.")
     ):
         return "物性"
+
+    # 条件分岐: `sec_num.startswith("4.2.") and re.match(r"^4\.2\.(9|10|11|12|13|14)(?:\.|$)",...` を満たす経路を評価する。
+
     if sec_num.startswith("4.2.") and re.match(r"^4\.2\.(9|10|11|12|13|14)(?:\.|$)", sec_num):
         return "物性"
 
     # Fallback by keywords (for future extension).
+
     t = title
+    # 条件分岐: `"Bell" in t or "ベル" in t` を満たす経路を評価する。
     if "Bell" in t or "ベル" in t:
         return "Bell"
+
+    # 条件分岐: `"干渉" in t or "interference" in t.lower() or "de Broglie" in t` を満たす経路を評価する。
+
     if "干渉" in t or "interference" in t.lower() or "de Broglie" in t:
         return "干渉"
+
+    # 条件分岐: `"核" in t or "deuteron" in t.lower()` を満たす経路を評価する。
+
     if "核" in t or "deuteron" in t.lower():
         return "核"
+
+    # 条件分岐: `"熱" in t or "thermo" in t.lower() or "黒体" in t` を満たす経路を評価する。
+
     if "熱" in t or "thermo" in t.lower() or "黒体" in t:
         return "熱"
+
+    # 条件分岐: `"物性" in t or "凝縮" in t or "QED" in t` を満たす経路を評価する。
+
     if "物性" in t or "凝縮" in t or "QED" in t:
         return "物性"
+
     return "未分類"
 
 
 def _extract_bold_field(section_lines: Sequence[str], field_name: str) -> Optional[str]:
     for i, line in enumerate(section_lines):
         m = _RE_BOLD_FIELD.match(line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         name = (m.group("name") or "").strip()
+        # 条件分岐: `name != field_name` を満たす経路を評価する。
         if name != field_name:
             continue
+
         buf: List[str] = [m.group("rest") or ""]
         for j in range(i + 1, len(section_lines)):
+            # 条件分岐: `_RE_BOLD_FIELD.match(section_lines[j]) or _RE_HEADING.match(section_lines[j])` を満たす経路を評価する。
             if _RE_BOLD_FIELD.match(section_lines[j]) or _RE_HEADING.match(section_lines[j]):
                 break
+
             buf.append(section_lines[j])
+
         return "\n".join(buf)
+
     return None
 
 
 def _is_meaningful(text: Optional[str]) -> bool:
+    # 条件分岐: `text is None` を満たす経路を評価する。
     if text is None:
         return False
+
     t = text.strip()
+    # 条件分岐: `not t` を満たす経路を評価する。
     if not t:
         return False
+
     t_norm = t.replace("`", "").strip().lower()
+    # 条件分岐: `t_norm in {"tbd", "n/a", "na", "—", "-", "なし", "未定"}` を満たす経路を評価する。
     if t_norm in {"tbd", "n/a", "na", "—", "-", "なし", "未定"}:
         return False
+
+    # 条件分岐: `t_norm.replace("-", "").strip() == ""` を満たす経路を評価する。
+
     if t_norm.replace("-", "").strip() == "":
         return False
+
+    # 条件分岐: `re.fullmatch(r"[—\-\s]+", t)` を満たす経路を評価する。
+
     if re.fullmatch(r"[—\-\s]+", t):
         return False
+
     return True
 
 
@@ -236,27 +307,44 @@ def _has_output_reference(text: str) -> bool:
 
 def _has_frozen_marker(text: str) -> bool:
     t = text
+    # 条件分岐: `"凍結" in t or "凍結値" in t` を満たす経路を評価する。
     if "凍結" in t or "凍結値" in t:
         return True
+
+    # 条件分岐: `"固定" in t` を満たす経路を評価する。
+
     if "固定" in t:
         return True
+
+    # 条件分岐: `"固定値" in t` を満たす経路を評価する。
+
     if "固定値" in t:
         return True
+
     tl = t.lower()
+    # 条件分岐: `"frozen_parameters" in tl or "frozen parameter" in tl or "freeze" in tl` を満たす経路を評価する。
     if "frozen_parameters" in tl or "frozen parameter" in tl or "freeze" in tl:
         return True
+
     return False
 
 
 def _has_reject_marker(text: str) -> bool:
     t = text
+    # 条件分岐: `"棄却条件" in t` を満たす経路を評価する。
     if "棄却条件" in t:
         return True
+
+    # 条件分岐: `"棄却" in t` を満たす経路を評価する。
+
     if "棄却" in t:
         return True
+
     tl = t.lower()
+    # 条件分岐: `"reject" in tl or "no-go" in tl or "pass/fail" in tl` を満たす経路を評価する。
     if "reject" in tl or "no-go" in tl or "pass/fail" in tl:
         return True
+
     return False
 
 
@@ -290,11 +378,13 @@ def build_inventory(*, paper_md: Path) -> Dict[str, Any]:
             "Output": _is_meaningful(output_text) or _has_output_reference(body_text),
         }
         missing = [k for k, ok in found.items() if not ok]
+        # 条件分岐: `not missing` を満たす経路を評価する。
         if not missing:
             continue
 
         sec_num = sec.section_num or ""
         cat = _category_for(sec_num, sec.title)
+        # 条件分岐: `cat not in missing_by_cat` を満たす経路を評価する。
         if cat not in missing_by_cat:
             cat = "未分類"
 
@@ -347,18 +437,25 @@ def _write_md(path: Path, payload: Dict[str, Any]) -> None:
     lines.append("")
     rules = payload.get("rules", {})
     for k in ("Input", "Frozen", "Statistic", "Reject", "Output"):
+        # 条件分岐: `k in rules` を満たす経路を評価する。
         if k in rules:
             lines.append(f"- {k}: {rules.get(k)}")
+
+    # 条件分岐: `"note" in rules` を満たす経路を評価する。
+
     if "note" in rules:
         lines.append(f"- note: {rules.get('note')}")
+
     lines.append("")
 
     missing_by_cat = payload.get("missing_by_category", {}) or {}
     order = ["Bell", "干渉", "核", "物性", "熱", "未分類"]
     for cat in order:
         items = missing_by_cat.get(cat)
+        # 条件分岐: `not items` を満たす経路を評価する。
         if not items:
             continue
+
         lines.append(f"## {cat}")
         lines.append("")
         for it in items:
@@ -368,7 +465,10 @@ def _write_md(path: Path, payload: Dict[str, Any]) -> None:
             missing = it.get("missing") or []
             loc = f"doc/paper/12_part3_quantum.md:{ln}"
             lines.append(f"- {sec} {title}（{loc}） missing={', '.join(missing)}")
+
         lines.append("")
+
+    # 条件分岐: `payload.get("summary", {}).get("missing_sections", 0) == 0` を満たす経路を評価する。
 
     if payload.get("summary", {}).get("missing_sections", 0) == 0:
         lines.append("- 欠落は検出されなかった。")
@@ -394,14 +494,20 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     paper_md = Path(args.paper)
+    # 条件分岐: `not paper_md.is_absolute()` を満たす経路を評価する。
     if not paper_md.is_absolute():
         paper_md = (_ROOT / paper_md).resolve()
+
+    # 条件分岐: `not paper_md.exists()` を満たす経路を評価する。
+
     if not paper_md.exists():
         raise SystemExit(f"[error] paper not found: {paper_md}")
 
     outdir = Path(args.outdir)
+    # 条件分岐: `not outdir.is_absolute()` を満たす経路を評価する。
     if not outdir.is_absolute():
         outdir = (_ROOT / outdir).resolve()
+
     outdir.mkdir(parents=True, exist_ok=True)
 
     payload = build_inventory(paper_md=paper_md)
@@ -425,8 +531,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

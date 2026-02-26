@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -43,6 +44,7 @@ def _set_japanese_font() -> None:
         candidates = ["IPAexGothic", "IPAGothic", "Yu Gothic", "Meiryo", "Noto Sans CJK JP"]
         installed = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in candidates if name in installed]
+        # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
@@ -57,15 +59,22 @@ def _read_json(path: Path) -> Dict[str, Any]:
 def _extract_delta_m(stations: Dict[str, Any]) -> List[Tuple[str, float]]:
     out: List[Tuple[str, float]] = []
     for st, meta in sorted(stations.items(), key=lambda kv: str(kv[0])):
+        # 条件分岐: `not isinstance(meta, dict)` を満たす経路を評価する。
         if not isinstance(meta, dict):
             continue
+
         dr = meta.get("delta_vs_slrlog_m")
+        # 条件分岐: `not isinstance(dr, (int, float))` を満たす経路を評価する。
         if not isinstance(dr, (int, float)):
             continue
+
         v = float(dr)
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
         if not math.isfinite(v):
             continue
+
         out.append((str(st), v))
+
     return out
 
 
@@ -80,20 +89,27 @@ def main(argv: List[str] | None = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     in_json = Path(str(args.in_json))
+    # 条件分岐: `not in_json.is_absolute()` を満たす経路を評価する。
     if not in_json.is_absolute():
         in_json = (_ROOT / in_json).resolve()
+
+    # 条件分岐: `not in_json.exists()` を満たす経路を評価する。
+
     if not in_json.exists():
         print(f"[err] missing: {in_json}")
         return 2
 
     out_png = Path(str(args.out_png))
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
     if not out_png.is_absolute():
         out_png = (_ROOT / out_png).resolve()
+
     out_png.parent.mkdir(parents=True, exist_ok=True)
 
     d = _read_json(in_json)
     stations = d.get("stations") if isinstance(d.get("stations"), dict) else {}
     items = _extract_delta_m(stations)
+    # 条件分岐: `not items` を満たす経路を評価する。
     if not items:
         print("[err] no delta_vs_slrlog_m values found in input json")
         return 2
@@ -121,6 +137,7 @@ def main(argv: List[str] | None = None) -> int:
     for label in ax.get_xticklabels():
         label.set_rotation(45)
         label.set_ha("right")
+
     fig.tight_layout()
     fig.savefig(out_png, dpi=220, bbox_inches="tight")
     plt.close(fig)
@@ -138,6 +155,8 @@ def main(argv: List[str] | None = None) -> int:
     print(f"[ok] png: {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

@@ -25,10 +25,15 @@ class ZRange:
 
     def stable_over(self, *, threshold_abs: float) -> bool:
         thr = float(threshold_abs)
+        # 条件分岐: `not (math.isfinite(thr) and thr >= 0.0)` を満たす経路を評価する。
         if not (math.isfinite(thr) and thr >= 0.0):
             raise ValueError("threshold_abs must be finite and >= 0")
+
+        # 条件分岐: `self.sign_flips()` を満たす経路を評価する。
+
         if self.sign_flips():
             return False
+
         return (self.z_max <= -thr) or (self.z_min >= thr)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -54,6 +59,7 @@ def _safe_float(x: Any) -> float:
         v = float(x)
     except Exception:
         return float("nan")
+
     return v if math.isfinite(v) else float("nan")
 
 
@@ -70,14 +76,21 @@ def _load_points(
         dist = str(row.get("dist", "")).strip()
         lam = _safe_float(row.get("lambda"))
         z = _safe_float(row.get(z_field))
+        # 条件分岐: `not (math.isfinite(lam) and math.isfinite(z))` を満たす経路を評価する。
         if not (math.isfinite(lam) and math.isfinite(z)):
             continue
+
+        # 条件分岐: `lam < float(lam_min) - 1e-12 or lam > float(lam_max) + 1e-12` を満たす経路を評価する。
+
         if lam < float(lam_min) - 1e-12 or lam > float(lam_max) + 1e-12:
             continue
+
         key = (tracer, dist)
         pts.setdefault(key, []).append((lam, z))
+
     for items in pts.values():
         items.sort(key=lambda t: t[0])
+
     return pts
 
 
@@ -95,6 +108,7 @@ def _summarize_points(
             z_min=float(min(zs)),
             z_max=float(max(zs)),
         )
+
     return out
 
 
@@ -104,12 +118,18 @@ def _ensure_paths(paths: List[str]) -> List[Path]:
     for p in paths:
         path = Path(p)
         path = path if path.is_absolute() else (_ROOT / path).resolve()
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             missing.append(str(path))
             continue
+
         out.append(path)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         raise SystemExit("missing sweep csv(s):\n" + "\n".join(missing))
+
     return out
 
 
@@ -121,6 +141,7 @@ def _set_japanese_font() -> None:
         preferred = ["Yu Gothic", "Meiryo", "BIZ UDGothic", "MS Gothic", "Yu Mincho", "MS Mincho"]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `chosen` を満たす経路を評価する。
         if chosen:
             mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
             mpl.rcParams["axes.unicode_minus"] = False
@@ -130,14 +151,25 @@ def _set_japanese_font() -> None:
 
 def _short_method_label(method: str) -> str:
     m = str(method or "").lower()
+    # 条件分岐: `"vac_lya" in m or "lya_corr" in m` を満たす経路を評価する。
     if "vac_lya" in m or "lya_corr" in m:
         return "VAC (Lyα)"
+
+    # 条件分岐: `"jk_cov" in m` を満たす経路を評価する。
+
     if "jk_cov" in m:
         return "jackknife"
+
+    # 条件分岐: `"rascalc" in m` を満たす経路を評価する。
+
     if "rascalc" in m:
         return "RascalC"
+
+    # 条件分岐: `len(method) > 44` を満たす経路を評価する。
+
     if len(method) > 44:
         return method[:44] + "…"
+
     return method
 
 
@@ -170,6 +202,7 @@ def main() -> None:
 
     lam_min = float(args.lam_min)
     lam_max = float(args.lam_max)
+    # 条件分岐: `not (math.isfinite(lam_min) and math.isfinite(lam_max) and lam_min <= lam_max)` を満たす経路を評価する。
     if not (math.isfinite(lam_min) and math.isfinite(lam_max) and lam_min <= lam_max):
         raise SystemExit("--lam-min/--lam-max must be finite and lam_min<=lam_max")
 
@@ -180,6 +213,7 @@ def main() -> None:
     out_public_png = out_path.with_suffix("").with_name(out_path.stem + "_public.png")
 
     csv_paths: List[Path] = []
+    # 条件分岐: `args.csv` を満たす経路を評価する。
     if args.csv:
         csv_paths = _ensure_paths(list(args.csv or []))
     else:
@@ -187,20 +221,26 @@ def main() -> None:
         # or auto-discover sweep CSVs under output/private/cosmology.
         reuse: List[str] = []
         try:
+            # 条件分岐: `out_path.exists()` を満たす経路を評価する。
             if out_path.exists():
                 prev = json.loads(out_path.read_text(encoding="utf-8"))
                 prev_inputs = prev.get("inputs") if isinstance(prev, dict) else None
                 prev_csv = prev_inputs.get("csv") if isinstance(prev_inputs, dict) else None
+                # 条件分岐: `isinstance(prev_csv, list)` を満たす経路を評価する。
                 if isinstance(prev_csv, list):
                     reuse = [str(x) for x in prev_csv if str(x).strip()]
         except Exception:
             reuse = []
+
+        # 条件分岐: `reuse` を満たす経路を評価する。
 
         if reuse:
             try:
                 csv_paths = _ensure_paths(reuse)
             except SystemExit:
                 csv_paths = []
+
+        # 条件分岐: `not csv_paths` を満たす経路を評価する。
 
         if not csv_paths:
             sweep_dir = _ROOT / "output" / "private" / "cosmology"
@@ -212,6 +252,8 @@ def main() -> None:
                 )
             except Exception:
                 csv_paths = []
+
+    # 条件分岐: `not csv_paths` を満たす経路を評価する。
 
     if not csv_paths:
         payload = {
@@ -286,19 +328,23 @@ def main() -> None:
         for (tracer, dist), zr in sorted(zmap.items()):
             method_out.setdefault(tracer, {})[dist] = zr.to_dict()
             by_tracer_dist_across_methods.setdefault((tracer, dist), []).append(zr)
+
         summary_by_method[method] = method_out
 
     target_dist = str(args.target_dist).strip()
     thr = float(args.threshold_abs)
     min_tracers = int(args.min_tracers)
+    # 条件分岐: `min_tracers < 1` を満たす経路を評価する。
     if min_tracers < 1:
         raise SystemExit("--min-tracers must be >= 1")
 
     passing_tracers: List[str] = []
     tracer_gate: Dict[str, Any] = {}
     for (tracer, dist), zrs in sorted(by_tracer_dist_across_methods.items()):
+        # 条件分岐: `dist != target_dist` を満たす経路を評価する。
         if dist != target_dist:
             continue
+
         stable_all = all(zr.stable_over(threshold_abs=thr) for zr in zrs)
         tracer_gate[tracer] = {
             "dist": dist,
@@ -307,6 +353,7 @@ def main() -> None:
             "methods_n": int(len(zrs)),
             "ranges": [zr.to_dict() for zr in zrs],
         }
+        # 条件分岐: `stable_all` を満たす経路を評価する。
         if stable_all:
             passing_tracers.append(tracer)
 
@@ -347,10 +394,13 @@ def main() -> None:
         target_dist = str(args.target_dist).strip()
         thr = float(args.threshold_abs)
 
+        # 条件分岐: `passing_tracers` を満たす経路を評価する。
         if passing_tracers:
             tracers_to_plot = list(passing_tracers)
         else:
             tracers_to_plot = sorted({tr for (tr, dist) in by_tracer_dist_across_methods.keys() if dist == target_dist})
+
+        # 条件分岐: `tracers_to_plot` を満たす経路を評価する。
 
         if tracers_to_plot:
             fig, axes = plt.subplots(
@@ -359,6 +409,7 @@ def main() -> None:
                 figsize=(10.0, 3.2 * len(tracers_to_plot)),
                 sharex=True,
             )
+            # 条件分岐: `len(tracers_to_plot) == 1` を満たす経路を評価する。
             if len(tracers_to_plot) == 1:
                 axes = [axes]  # type: ignore[list-item]
 
@@ -371,8 +422,10 @@ def main() -> None:
                 ys: List[float] = []
                 for method, pts in sorted(points_by_method.items()):
                     series = pts.get((tracer, target_dist))
+                    # 条件分岐: `not series` を満たす経路を評価する。
                     if not series:
                         continue
+
                     xs = [t[0] for t in series]
                     zs = [t[1] for t in series]
                     ys.extend(zs)
@@ -383,6 +436,7 @@ def main() -> None:
                 ranges = gate.get("ranges") if isinstance(gate, dict) else None
                 zmin_all: Optional[float] = None
                 zmax_all: Optional[float] = None
+                # 条件分岐: `isinstance(ranges, list) and ranges` を満たす経路を評価する。
                 if isinstance(ranges, list) and ranges:
                     try:
                         zmin_all = min(float(r.get("z_min")) for r in ranges if r.get("z_min") is not None)
@@ -392,13 +446,16 @@ def main() -> None:
                         zmax_all = None
 
                 title = f"{tracer}（dist={target_dist}）"
+                # 条件分岐: `zmin_all is not None and zmax_all is not None` を満たす経路を評価する。
                 if zmin_all is not None and zmax_all is not None:
                     title += f"  z∈[{zmin_all:.2f},{zmax_all:.2f}]"
+
                 title += f"  stable(|z|≥{thr:g})={'yes' if stable else 'no'}"
                 ax.set_title(title)
 
                 ax.set_ylabel(str(args.z_field))
                 ax.grid(True, alpha=0.25)
+                # 条件分岐: `ys` を満たす経路を評価する。
                 if ys:
                     ymin = min(ys + [-thr])
                     ymax = max(ys + [+thr])
@@ -427,9 +484,12 @@ def main() -> None:
     print(f"- min_tracers   : {min_tracers}")
     print(f"- promoted      : {promoted} (passing={len(passing_tracers)}: {', '.join(passing_tracers) if passing_tracers else 'none'})")
     print(f"[ok] json: {out_path}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] png: {out_png}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

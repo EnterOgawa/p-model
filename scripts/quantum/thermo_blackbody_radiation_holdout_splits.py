@@ -21,9 +21,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             hash_obj.update(chunk)
+
     return hash_obj.hexdigest()
 
 
@@ -32,15 +35,19 @@ def _read_json(path: Path) -> dict[str, Any]:
 
 
 def _as_float(value: Any) -> float:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         return float(value)
+
     raise TypeError(f"expected number, got: {type(value)}")
 
 
 def _get_constant(extracted: dict[str, Any], code: str) -> dict[str, Any]:
     constants = extracted.get("constants")
+    # 条件分岐: `not isinstance(constants, dict) or code not in constants or not isinstance(co...` を満たす経路を評価する。
     if not isinstance(constants, dict) or code not in constants or not isinstance(constants.get(code), dict):
         raise KeyError(f"missing constant: {code}")
+
     return constants[code]
 
 
@@ -54,12 +61,16 @@ def _metrics_for_idx(
     is_train: bool,
 ) -> dict[str, float | int]:
     indices = np.asarray(idx, dtype=np.int64).reshape(-1)
+    # 条件分岐: `indices.size == 0` を満たす経路を評価する。
     if indices.size == 0:
         return {"n": 0, "max_abs_z": float("nan"), "rms_z": float("nan"), "reduced_chi2": float("nan"), "exceed_3sigma_n": 0}
+
     z_scores = (y_pred[indices] - y_obs[indices]) / np.maximum(1e-30, sigma[indices])
     z_scores = z_scores[np.isfinite(z_scores)]
+    # 条件分岐: `z_scores.size == 0` を満たす経路を評価する。
     if z_scores.size == 0:
         return {"n": 0, "max_abs_z": float("nan"), "rms_z": float("nan"), "reduced_chi2": float("nan"), "exceed_3sigma_n": 0}
+
     n_points = int(z_scores.size)
     sum_z2 = float(np.sum(z_scores * z_scores))
     max_abs_z = float(np.max(np.abs(z_scores)))
@@ -104,6 +115,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_blackbody_constants"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -306,6 +318,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -55,54 +56,82 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _as_float(value: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
         v = float(value)
+        # 条件分岐: `math.isfinite(v)` を満たす経路を評価する。
         if math.isfinite(v):
             return v
+
     return None
 
 
 def _safe_div(num: Optional[float], den: Optional[float]) -> Optional[float]:
+    # 条件分岐: `num is None or den is None or den == 0.0` を満たす経路を評価する。
     if num is None or den is None or den == 0.0:
         return None
+
     return float(num) / float(den)
 
 
 def _score_status(score: Optional[float]) -> str:
+    # 条件分岐: `score is None` を満たす経路を評価する。
     if score is None:
         return "watch"
+
+    # 条件分岐: `score <= 1.0` を満たす経路を評価する。
+
     if score <= 1.0:
         return "pass"
+
+    # 条件分岐: `score <= 1.5` を満たす経路を評価する。
+
     if score <= 1.5:
         return "watch"
+
     return "reject"
 
 
 def _pick_model(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return None
+
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         mid = str(row.get("model_id") or "")
+        # 条件分岐: `"nu_saturation" in mid` を満たす経路を評価する。
         if "nu_saturation" in mid:
             return row
+
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         passes = row.get("passes") if isinstance(row.get("passes"), dict) else {}
+        # 条件分岐: `bool(passes.get("median_within_3sigma")) and bool(passes.get("a_trend_within_...` を満たす経路を評価する。
         if bool(passes.get("median_within_3sigma")) and bool(passes.get("a_trend_within_3sigma")):
             return row
+
     for row in rows:
+        # 条件分岐: `isinstance(row, dict)` を満たす経路を評価する。
         if isinstance(row, dict):
             return row
+
     return None
 
 
@@ -152,6 +181,7 @@ def _extract_nuclear_sep_radius(nuclear_pack: Dict[str, Any]) -> Dict[str, Dict[
     sep_available = bool(gate_status.get("separation_gap_available"))
     sep_score = sep_ratio if sep_available else None
     sep_status = _score_status(sep_score)
+    # 条件分岐: `not sep_available and sep_status == "watch"` を満たす経路を評価する。
     if not sep_available and sep_status == "watch":
         sep_status = "reject"
 
@@ -210,8 +240,10 @@ def _extract_condensed(condensed_holdout: Dict[str, Any]) -> Dict[str, Any]:
         gates = row.get("audit_gates") if isinstance(row.get("audit_gates"), dict) else {}
         fals = gates.get("falsification") if isinstance(gates.get("falsification"), dict) else {}
         status = str(fals.get("status") or "")
+        # 条件分岐: `status == "ok"` を満たす経路を評価する。
         if status == "ok":
             ok_n += 1
+        # 条件分岐: 前段条件が不成立で、`status == "reject"` を追加評価する。
         elif status == "reject":
             reject_n += 1
         else:
@@ -223,12 +255,14 @@ def _extract_condensed(condensed_holdout: Dict[str, Any]) -> Dict[str, Any]:
     reject_thr = 0.10
     reject_score = _safe_div(reject_ratio, reject_thr)
 
+    # 条件分岐: `inconclusive_n == 0` を満たす経路を評価する。
     if inconclusive_n == 0:
         score = reject_score
     else:
         score = None
 
     status = _score_status(score)
+    # 条件分岐: `inconclusive_n > 0 and status == "watch"` を満たす経路を評価する。
     if inconclusive_n > 0 and status == "watch":
         status = "reject"
 
@@ -259,16 +293,22 @@ def _extract_nuclear_holdout_context(nuclear_holdout: Dict[str, Any]) -> Dict[st
         "deformed_outlier_frac": None,
     }
     for row in groups:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         gid = str(row.get("group_id") or "")
         frac = _as_float(row.get("outlier_abs_z_gt3_frac"))
+        # 条件分岐: `gid == "all"` を満たす経路を評価する。
         if gid == "all":
             context["all_outlier_frac"] = frac
+        # 条件分岐: 前段条件が不成立で、`gid == "near_magic_width2"` を追加評価する。
         elif gid == "near_magic_width2":
             context["near_magic_outlier_frac"] = frac
+        # 条件分岐: 前段条件が不成立で、`gid == "deformed_abs_beta2_ge_0p20_nonmagic"` を追加評価する。
         elif gid == "deformed_abs_beta2_ge_0p20_nonmagic":
             context["deformed_outlier_frac"] = frac
+
     return context
 
 
@@ -280,12 +320,14 @@ def _build_matrix(axes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         for axis_j in axes:
             id_j = str(axis_j.get("axis_id") or "")
             score_j = _as_float(axis_j.get("score"))
+            # 条件分岐: `score_i is None or score_j is None` を満たす経路を評価する。
             if score_i is None or score_j is None:
                 pair_score = None
                 pair_status = "watch"
             else:
                 pair_score = max(score_i, score_j)
                 pair_status = _score_status(pair_score)
+
             rows.append(
                 {
                     "axis_i": id_i,
@@ -296,6 +338,7 @@ def _build_matrix(axes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     "pair_status": pair_status,
                 }
             )
+
     return rows
 
 
@@ -317,6 +360,7 @@ def _write_csv(out_csv: Path, axes: List[Dict[str, Any]], matrix_rows: List[Dict
                     json.dumps(axis.get("details"), ensure_ascii=False, separators=(",", ":")),
                 ]
             )
+
         writer.writerow([])
         writer.writerow(["section", "axis_i", "axis_j", "pair_score_max", "pair_status"])
         for row in matrix_rows:
@@ -336,8 +380,10 @@ def _plot(
     status_colors = []
     for axis in axes:
         status = str(axis.get("status") or "watch")
+        # 条件分岐: `status == "pass"` を満たす経路を評価する。
         if status == "pass":
             status_colors.append("#2f9e44")
+        # 条件分岐: 前段条件が不成立で、`status == "watch"` を追加評価する。
         elif status == "watch":
             status_colors.append("#f2c94c")
         else:
@@ -349,9 +395,12 @@ def _plot(
     for row in matrix_rows:
         i = id_to_idx.get(str(row.get("axis_i")))
         j = id_to_idx.get(str(row.get("axis_j")))
+        # 条件分岐: `i is None or j is None` を満たす経路を評価する。
         if i is None or j is None:
             continue
+
         v = _as_float(row.get("pair_score_max"))
+        # 条件分岐: `v is not None` を満たす経路を評価する。
         if v is not None:
             mat[i, j] = float(v)
 
@@ -374,11 +423,14 @@ def _plot(
     ax01.set_title("Cross-check matrix (pair max score)")
     for i in range(n):
         for j in range(n):
+            # 条件分岐: `not np.isfinite(mat[i, j])` を満たす経路を評価する。
             if not np.isfinite(mat[i, j]):
                 txt = "n/a"
             else:
                 txt = f"{mat[i, j]:.2f}"
+
             ax01.text(j, i, txt, ha="center", va="center", fontsize=8, color="black")
+
     fig.colorbar(im, ax=ax01, fraction=0.046, pad=0.04)
 
     ctx_labels = ["nuclear_all", "nuclear_near_magic", "nuclear_deformed", "condensed_reject_ratio"]
@@ -438,8 +490,10 @@ def build_payload(
     finite_scores = [s for s in scores if s is not None and math.isfinite(s)]
     overall_score = max(finite_scores) if finite_scores else None
     axis_statuses = [str(a.get("status") or "watch") for a in axes]
+    # 条件分岐: `any(s == "reject" for s in axis_statuses)` を満たす経路を評価する。
     if any(s == "reject" for s in axis_statuses):
         overall_status = "reject"
+    # 条件分岐: 前段条件が不成立で、`any(s == "watch" for s in axis_statuses)` を追加評価する。
     elif any(s == "watch" for s in axis_statuses):
         overall_status = "watch"
     else:
@@ -527,6 +581,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_png = Path(args.out_png).resolve() if Path(args.out_png).is_absolute() else (ROOT / args.out_png).resolve()
 
     for p in (in_minphys, in_pack, in_n_hold, in_c_hold):
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             raise FileNotFoundError(f"required input not found: {_rel(p)}")
 
@@ -576,6 +631,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

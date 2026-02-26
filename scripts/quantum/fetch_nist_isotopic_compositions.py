@@ -25,9 +25,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -40,12 +43,15 @@ def _sanitize_token(s: str) -> str:
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
+
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req) as resp, out_path.open("wb") as f:
         f.write(resp.read())
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -60,16 +66,21 @@ class _HTMLTableParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         t = tag.lower()
+        # 条件分岐: `t == "tr"` を満たす経路を評価する。
         if t == "tr":
             self._in_tr = True
             self._cur_row = []
             return
+
+        # 条件分岐: `t in ("td", "th") and self._in_tr` を満たす経路を評価する。
+
         if t in ("td", "th") and self._in_tr:
             self._in_cell = True
             self._cur_cell_parts = []
 
     def handle_endtag(self, tag: str) -> None:
         t = tag.lower()
+        # 条件分岐: `t in ("td", "th") and self._in_tr and self._in_cell` を満たす経路を評価する。
         if t in ("td", "th") and self._in_tr and self._in_cell:
             txt = "".join(self._cur_cell_parts)
             txt = html_module.unescape(txt).replace("\u00a0", " ")
@@ -78,13 +89,19 @@ class _HTMLTableParser(HTMLParser):
             self._cur_cell_parts = []
             self._in_cell = False
             return
+
+        # 条件分岐: `t == "tr" and self._in_tr` を満たす経路を評価する。
+
         if t == "tr" and self._in_tr:
+            # 条件分岐: `self._cur_row` を満たす経路を評価する。
             if self._cur_row:
                 self.rows.append(self._cur_row)
+
             self._cur_row = []
             self._in_tr = False
 
     def handle_data(self, data: str) -> None:
+        # 条件分岐: `self._in_tr and self._in_cell` を満たす経路を評価する。
         if self._in_tr and self._in_cell:
             self._cur_cell_parts.append(data)
 
@@ -97,27 +114,38 @@ def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float
       '' -> (None, None)
     """
     ss = str(s).strip()
+    # 条件分岐: `not ss` を満たす経路を評価する。
     if not ss:
         return None, None
+
     ss = ss.replace(" ", "")
     m = re.fullmatch(r"([0-9]+(?:\.[0-9]+)?)(?:\((\d+)\))?", ss)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None, None
+
     val_str = m.group(1)
     unc_str = m.group(2)
     try:
         val = float(val_str)
     except Exception:
         return None, None
+
+    # 条件分岐: `not unc_str` を満たす経路を評価する。
+
     if not unc_str:
         return val, None
+
     decimals = 0
+    # 条件分岐: `"." in val_str` を満たす経路を評価する。
     if "." in val_str:
         decimals = len(val_str.split(".", 1)[1])
+
     try:
         unc = int(unc_str) * (10.0 ** (-decimals))
     except Exception:
         unc = None
+
     return val, unc
 
 
@@ -126,11 +154,15 @@ def _parse_range(s: str) -> Optional[list[float]]:
     Parse e.g. '[1.007 84, 1.008 11]' -> [1.00784, 1.00811]
     """
     ss = str(s).strip()
+    # 条件分岐: `not ss` を満たす経路を評価する。
     if not ss:
         return None
+
     m = re.fullmatch(r"\[(.+),(.+)\]", ss)
+    # 条件分岐: `not m` を満たす経路を評価する。
     if not m:
         return None
+
     left = m.group(1).strip().replace(" ", "")
     right = m.group(2).strip().replace(" ", "")
     try:
@@ -150,6 +182,7 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     element = str(args.element).strip()
+    # 条件分岐: `not element` を満たす経路を評価する。
     if not element:
         raise SystemExit("[fail] --element is empty")
 
@@ -163,13 +196,19 @@ def main(argv: list[str] | None = None) -> int:
     extracted_path = src_dir / "extracted_values.json"
     manifest_path = src_dir / "manifest.json"
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing: list[Path] = []
         for p in (raw_path, extracted_path, manifest_path):
+            # 条件分岐: `not p.exists()` を満たす経路を評価する。
             if not p.exists():
                 missing.append(p)
+
+        # 条件分岐: `missing` を満たす経路を評価する。
+
         if missing:
             raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
+
         print("[ok] offline check passed")
         return 0
 
@@ -188,12 +227,19 @@ def main(argv: list[str] | None = None) -> int:
         # Example (D): ['D','2','2.014 101 778 12(12)','0.000 115(70)']
         if not row:
             continue
+
+        # 条件分岐: `"Isotope" in row and "Relative Atomic Mass" in row` を満たす経路を評価する。
+
         if "Isotope" in row and "Relative Atomic Mass" in row:
             continue
+
+        # 条件分岐: `row[0].strip() == "Quantity" and "Value" in row` を満たす経路を評価する。
+
         if row[0].strip() == "Quantity" and "Value" in row:
             continue
 
         rec: dict[str, Any] = {}
+        # 条件分岐: `len(row) >= 7 and re.fullmatch(r"\d+", row[0].strip() or "")` を満たす経路を評価する。
         if len(row) >= 7 and re.fullmatch(r"\d+", row[0].strip() or ""):
             # First isotope row includes atomic number and standard atomic weight range.
             atomic_number = int(row[0].strip())
@@ -203,8 +249,10 @@ def main(argv: list[str] | None = None) -> int:
             comp_text = row[4]
             std_weight_text = row[5]
             notes = (row[6].strip() or None)
+            # 条件分岐: `standard_atomic_weight_range_u is None` を満たす経路を評価する。
             if standard_atomic_weight_range_u is None:
                 standard_atomic_weight_range_u = _parse_range(std_weight_text)
+        # 条件分岐: 前段条件が不成立で、`len(row) >= 3 and re.fullmatch(r"\d+", row[1].strip() or "")` を追加評価する。
         elif len(row) >= 3 and re.fullmatch(r"\d+", row[1].strip() or ""):
             sym = row[0].strip()
             mass_number = int(row[1].strip())
@@ -225,6 +273,7 @@ def main(argv: list[str] | None = None) -> int:
             "isotopic_composition_unc": comp_unc,
             "notes": notes,
         }
+        # 条件分岐: `mass_u is not None` を満たす経路を評価する。
         if mass_u is not None:
             isotopes.append(rec)
 
@@ -264,6 +313,8 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[ok] wrote: {manifest_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

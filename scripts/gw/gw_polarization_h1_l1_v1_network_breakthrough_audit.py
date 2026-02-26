@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,8 +45,10 @@ def _set_japanese_font() -> None:
         ]
         available_fonts = {font.name for font in font_manager.fontManager.ttflist}
         selected_fonts = [name for name in preferred_fonts if name in available_fonts]
+        # 条件分岐: `not selected_fonts` を満たす経路を評価する。
         if not selected_fonts:
             return
+
         mpl.rcParams["font.family"] = selected_fonts + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
     except Exception:
@@ -57,22 +60,35 @@ def _safe_float(value: Any) -> float:
         out = float(value)
     except Exception:
         return float("nan")
+
     return out
 
 
 def _fmt(value: Any, digits: int = 7) -> str:
+    # 条件分岐: `isinstance(value, (int, np.integer))` を満たす経路を評価する。
     if isinstance(value, (int, np.integer)):
         return str(int(value))
+
+    # 条件分岐: `not isinstance(value, (float, np.floating))` を満たす経路を評価する。
+
     if not isinstance(value, (float, np.floating)):
         return str(value)
+
     numeric_value = float(value)
+    # 条件分岐: `not math.isfinite(numeric_value)` を満たす経路を評価する。
     if not math.isfinite(numeric_value):
         return ""
+
+    # 条件分岐: `numeric_value == 0.0` を満たす経路を評価する。
+
     if numeric_value == 0.0:
         return "0"
+
     abs_value = abs(numeric_value)
+    # 条件分岐: `abs_value >= 1e4 or abs_value < 1e-3` を満たす経路を評価する。
     if abs_value >= 1e4 or abs_value < 1e-3:
         return f"{numeric_value:.{digits}g}"
+
     return f"{numeric_value:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -80,9 +96,12 @@ def _parse_float_grid(text: str) -> List[float]:
     out: List[float] = []
     for token in str(text).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         out.append(float(token))
+
     return out
 
 
@@ -90,9 +109,12 @@ def _parse_int_grid(text: str) -> List[int]:
     out: List[int] = []
     for token in str(text).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         out.append(int(token))
+
     return out
 
 
@@ -101,43 +123,73 @@ def _parse_bool_grid(text: str) -> List[bool]:
     out: List[bool] = []
     for token in str(text).split(","):
         token = token.strip().lower()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
+        # 条件分岐: `token not in mapping` を満たす経路を評価する。
+
         if token not in mapping:
             raise ValueError(f"invalid bool token in grid: {token}")
+
         out.append(bool(mapping[token]))
+
     return out
 
 
 def _status_bucket(status: str) -> str:
     text = str(status or "")
+    # 条件分岐: `text.startswith("pass")` を満たす経路を評価する。
     if text.startswith("pass"):
         return "pass"
+
+    # 条件分岐: `text.startswith("watch")` を満たす経路を評価する。
+
     if text.startswith("watch"):
         return "watch"
+
+    # 条件分岐: `text.startswith("reject")` を満たす経路を評価する。
+
     if text.startswith("reject"):
         return "reject"
+
+    # 条件分岐: `text.startswith("inconclusive")` を満たす経路を評価する。
+
     if text.startswith("inconclusive"):
         return "inconclusive"
+
     return "other"
 
 
 def _status_rank(status: str) -> int:
     bucket = _status_bucket(status)
+    # 条件分岐: `bucket == "pass"` を満たす経路を評価する。
     if bucket == "pass":
         return 3
+
+    # 条件分岐: `bucket == "watch"` を満たす経路を評価する。
+
     if bucket == "watch":
         return 2
+
+    # 条件分岐: `bucket == "reject"` を満たす経路を評価する。
+
     if bucket == "reject":
         return 1
+
+    # 条件分岐: `bucket == "inconclusive"` を満たす経路を評価する。
+
     if bucket == "inconclusive":
         return 0
+
     return -1
 
 
 def _scalar_rank(value: float) -> float:
+    # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
     if not math.isfinite(value):
         return -1.0e12
+
     return -float(value)
 
 
@@ -186,6 +238,7 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             for key in headers:
                 value = row.get(key, "")
                 values.append(_fmt(value) if isinstance(value, float) else value)
+
             writer.writerow(values)
 
 
@@ -202,12 +255,14 @@ def _plot(rows: List[Dict[str, Any]], status_counts: Dict[str, int], pair_summar
     figure, axes = plt.subplots(3, 1, figsize=(13.5, 10.2))
     axis_scatter, axis_status, axis_pair = axes
 
+    # 条件分岐: `rows` を満たす経路を評価する。
     if rows:
         usable_values = np.asarray([int(row.get("n_usable_events", 0)) for row in rows], dtype=float)
         scalar_values = np.asarray([_safe_float(row.get("scalar_overlap_proxy")) for row in rows], dtype=float)
         status_values = [str(row.get("status", "")) for row in rows]
         colors = [color_map[_status_bucket(status)] for status in status_values]
         axis_scatter.scatter(usable_values, scalar_values, c=colors, s=34, alpha=0.85, edgecolor="none")
+
     axis_scatter.axhline(0.0, color="#666666", linestyle="--", linewidth=1.0, alpha=0.8)
     axis_scatter.set_xlabel("n usable events")
     axis_scatter.set_ylabel("scalar overlap proxy")
@@ -223,6 +278,7 @@ def _plot(rows: List[Dict[str, Any]], status_counts: Dict[str, int], pair_summar
     axis_status.set_title("Trial status counts")
     axis_status.grid(True, axis="y", alpha=0.25)
 
+    # 条件分岐: `pair_summary` を満たす経路を評価する。
     if pair_summary:
         labels = [str(row.get("pair", "")) for row in pair_summary[:4]]
         shares = np.asarray([_safe_float(row.get("weighted_share_sum")) for row in pair_summary[:4]], dtype=float)
@@ -237,6 +293,7 @@ def _plot(rows: List[Dict[str, Any]], status_counts: Dict[str, int], pair_summar
     else:
         axis_pair.text(0.5, 0.5, "No pair decomposition available", ha="center", va="center", fontsize=12)
         axis_pair.set_xticks([])
+
     axis_pair.set_ylabel("normalized score")
     axis_pair.set_title("Dominant bottleneck pairs")
     axis_pair.grid(True, axis="y", alpha=0.25)
@@ -252,15 +309,22 @@ def _aggregate_pair_bottlenecks(trial_rows: List[Dict[str, Any]]) -> List[Dict[s
     pair_accumulator: Dict[str, Dict[str, float]] = {}
     for row in trial_rows:
         pair = str(row.get("top_bottleneck_pair", "")).strip()
+        # 条件分岐: `not pair` を満たす経路を評価する。
         if not pair:
             continue
+
         share = _safe_float(row.get("top_bottleneck_share"))
         fail_rate = _safe_float(row.get("top_bottleneck_fail_rate"))
         count = pair_accumulator.setdefault(pair, {"weighted_share_sum": 0.0, "fail_rate_sum": 0.0, "n": 0.0})
+        # 条件分岐: `math.isfinite(share)` を満たす経路を評価する。
         if math.isfinite(share):
             count["weighted_share_sum"] += float(max(0.0, share))
+
+        # 条件分岐: `math.isfinite(fail_rate)` を満たす経路を評価する。
+
         if math.isfinite(fail_rate):
             count["fail_rate_sum"] += float(max(0.0, fail_rate))
+
         count["n"] += 1.0
 
     output: List[Dict[str, Any]] = []
@@ -274,9 +338,11 @@ def _aggregate_pair_bottlenecks(trial_rows: List[Dict[str, Any]]) -> List[Dict[s
                 "tensor_fail_rate_mean": float(values["fail_rate_sum"] / max(float(n_samples), 1.0)),
             }
         )
+
     output.sort(key=lambda row: (_safe_float(row.get("weighted_share_sum")), _safe_float(row.get("tensor_fail_rate_mean"))), reverse=True)
     for index, row in enumerate(output, start=1):
         row["bottleneck_rank"] = int(index)
+
     return output
 
 
@@ -316,6 +382,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     geometry_relax_grid = _parse_float_grid(str(args.geometry_relax_grid))
     geometry_delay_floor_ms_grid = _parse_float_grid(str(args.geometry_delay_floor_ms_grid))
     pair_pruning_grid = _parse_bool_grid(str(args.pair_pruning_grid))
+    # 条件分岐: `not (corr_use_min_grid and response_floor_grid and min_ring_grid and geometry...` を満たす経路を評価する。
     if not (corr_use_min_grid and response_floor_grid and min_ring_grid and geometry_relax_grid and geometry_delay_floor_ms_grid and pair_pruning_grid):
         print("[err] tuning grids must not be empty")
         return 2
@@ -326,6 +393,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     public_outdir.mkdir(parents=True, exist_ok=True)
 
     network_script = _ROOT / "scripts" / "gw" / "gw_polarization_h1_l1_v1_network_audit.py"
+    # 条件分岐: `not network_script.exists()` を満たす経路を評価する。
     if not network_script.exists():
         print(f"[err] missing script: {network_script}")
         return 2
@@ -381,6 +449,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "--prefix",
             str(trial_id),
         ]
+        # 条件分岐: `bool(allow_pair_pruning)` を満たす経路を評価する。
         if bool(allow_pair_pruning):
             command.append("--allow-pair-pruning")
 
@@ -396,6 +465,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         top_bottleneck_share = float("nan")
         top_bottleneck_fail_rate = float("nan")
 
+        # 条件分岐: `process.returncode == 0 and trial_json.exists()` を満たす経路を評価する。
         if process.returncode == 0 and trial_json.exists():
             try:
                 payload = _load_json(trial_json)
@@ -415,8 +485,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
                 outputs = payload.get("outputs") if isinstance(payload.get("outputs"), dict) else {}
                 reject_summary_path_raw = str(outputs.get("reject_factor_summary_json", "") or "")
+                # 条件分岐: `reject_summary_path_raw` を満たす経路を評価する。
                 if reject_summary_path_raw:
                     reject_summary_path = Path(reject_summary_path_raw.replace("/", "\\"))
+                    # 条件分岐: `reject_summary_path.exists()` を満たす経路を評価する。
                     if reject_summary_path.exists():
                         reject_summary_payload = _load_json(reject_summary_path)
                         pair_rows = (
@@ -424,6 +496,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                             if isinstance(reject_summary_payload.get("pair_summary_rows"), list)
                             else []
                         )
+                        # 条件分岐: `pair_rows` を満たす経路を評価する。
                         if pair_rows:
                             first_pair = pair_rows[0] if isinstance(pair_rows[0], dict) else {}
                             top_bottleneck_pair = str(first_pair.get("pair", ""))
@@ -457,6 +530,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             }
         )
 
+        # 条件分岐: `not bool(args.keep_trial_artifacts)` を満たす経路を評価する。
         if not bool(args.keep_trial_artifacts):
             cleanup_paths = [
                 trial_json,
@@ -475,6 +549,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 public_outdir / f"{trial_id}_reject_factor_decomposition.png",
             ]
             for path in cleanup_paths:
+                # 条件分岐: `path.exists()` を満たす経路を評価する。
                 if path.exists():
                     path.unlink()
 
@@ -502,10 +577,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     pair_bottleneck_summary = _aggregate_pair_bottlenecks(trial_rows)
 
+    # 条件分岐: `pass_found` を満たす経路を評価する。
     if pass_found:
         decision_status = "pass"
         decision = "network_breakthrough_pass"
         decision_reason = "at_least_one_trial_reaches_pass_with_three_detector_constraints"
+    # 条件分岐: 前段条件が不成立で、`watch_found` を追加評価する。
     elif watch_found:
         decision_status = "watch"
         decision = "network_breakthrough_watch"
@@ -594,6 +671,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         destination = public_outdir / source.name
         shutil.copy2(source, destination)
         public_copies.append(str(destination).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = public_copies
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -628,6 +706,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] png : {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

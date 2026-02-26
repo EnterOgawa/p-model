@@ -77,12 +77,15 @@ def _sweep_pair(
     for i, w in enumerate(windows):
         m = dt < w
         n = int(np.count_nonzero(m))
+        # 条件分岐: `n == 0` を満たす経路を評価する。
         if n == 0:
             e[i] = float("nan")
             acc[i] = 0.0
             continue
+
         e[i] = float(prod[m].mean())
         acc[i] = n / float(phi.shape[0])
+
     return e, acc
 
 
@@ -195,6 +198,8 @@ def main() -> None:
     print(f"[ok] png : {out_png}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

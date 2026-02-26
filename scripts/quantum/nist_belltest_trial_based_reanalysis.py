@@ -39,11 +39,13 @@ def _compute_trial_counts(
     bad_sync_idx: np.ndarray,
 ) -> TrialCounts:
     n = int(a_clicks.shape[0])
+    # 条件分岐: `b_clicks.shape[0] != n or a_setting_raw.shape[0] != n or b_setting_raw.shape[...` を満たす経路を評価する。
     if b_clicks.shape[0] != n or a_setting_raw.shape[0] != n or b_setting_raw.shape[0] != n:
         raise ValueError("array length mismatch in hdf5 build file")
 
     mask = np.ones((n,), dtype=bool)
     for idx in bad_sync_idx.tolist():
+        # 条件分岐: `0 <= idx < n` を満たす経路を評価する。
         if 0 <= idx < n:
             mask[int(idx)] = False
 
@@ -122,9 +124,11 @@ def _ch_j_variants(counts: TrialCounts) -> dict[str, dict[str, float | int]]:
                 "B2": int(b2),
                 "J_prob": float(j),
             }
+            # 条件分岐: `best_j is None or j > best_j` を満たす経路を評価する。
             if best_j is None or j > best_j:
                 best_j = j
                 best_key = key
+
     assert best_key is not None and best_j is not None
     out["_best"] = {"key": best_key, "J_prob": float(best_j)}
     return out
@@ -132,8 +136,10 @@ def _ch_j_variants(counts: TrialCounts) -> dict[str, dict[str, float | int]]:
 
 def _load_coincidence_sweep(csv_path: Path) -> dict[str, np.ndarray]:
     rows = list(csv.DictReader(csv_path.read_text(encoding="utf-8").splitlines()))
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise ValueError(f"empty csv: {csv_path}")
+
     def col(name: str, t=float) -> np.ndarray:
         return np.asarray([t(r[name]) for r in rows])
 
@@ -195,10 +201,12 @@ def main() -> None:
         / "03_43_CH_pockel_100kHz.run4.afterTimingfix2_afterfixingModeLocking.dat.compressed.build.hdf5"
     )
     hdf5_path = args.hdf5 or default_hdf5
+    # 条件分岐: `not hdf5_path.exists()` を満たす経路を評価する。
     if not hdf5_path.exists():
         raise SystemExit(f"[fail] missing hdf5 build: {hdf5_path} (run fetch_nist_belltestdata.py --hdf5)")
 
     # Load trial-based (sync-indexed) arrays from the build file.
+
     try:
         import h5py
     except Exception as e:  # pragma: no cover
@@ -226,12 +234,15 @@ def main() -> None:
         bad: set[int] = set()
         for side in ("alice", "bob"):
             g = f[side]
+            # 条件分岐: `"badSyncInfo" not in g` を満たす経路を評価する。
             if "badSyncInfo" not in g:
                 continue
+
             arr = g["badSyncInfo"][()]
             # Observed shapes: (1, N) in some runs; missing in others.
             flat = np.asarray(arr).reshape(-1)
             bad |= set(map(int, flat.tolist()))
+
         bad_idx = np.asarray(sorted(i for i in bad if 0 <= i < n_use), dtype=np.int64)
 
         counts = _compute_trial_counts(
@@ -246,11 +257,14 @@ def main() -> None:
 
     # Optional: compare against coincidence-based (greedy pairing) window sweep.
     sweep = None
+    # 条件分岐: `args.coincidence_sweep_csv is not None` を満たす経路を評価する。
     if args.coincidence_sweep_csv is not None:
         sweep_csv = args.coincidence_sweep_csv
     else:
         sweep_csv = out_dir / f"nist_belltest_coincidence_sweep__{args.out_tag}.csv"
         sweep_csv = sweep_csv if sweep_csv.exists() else None
+
+    # 条件分岐: `sweep_csv is not None and sweep_csv.exists()` を満たす経路を評価する。
 
     if sweep_csv is not None and sweep_csv.exists():
         sweep = _load_coincidence_sweep(sweep_csv)
@@ -272,6 +286,7 @@ def main() -> None:
         sweep["J_prob_A1=0_B1=0"] = j_sweep
 
     # Outputs
+
     tag = args.out_tag
     out_png = out_dir / f"nist_belltest_trial_based__{tag}.png"
     out_json = out_dir / f"nist_belltest_trial_based_metrics__{tag}.json"
@@ -295,6 +310,7 @@ def main() -> None:
     ax0 = axes[0]
     ax0.set_title("Coincidences: coincidence-based (window) vs trial-based (sync/slot)")
 
+    # 条件分岐: `sweep is not None` を満たす経路を評価する。
     if sweep is not None:
         ax0.plot(
             sweep["window_ns"],
@@ -303,6 +319,7 @@ def main() -> None:
             lw=1.4,
             label="coincidence-based pairs_total (greedy, PPS-aligned)",
         )
+
     trial_total = int(counts.n_coinc.sum())
     ax0.axhline(trial_total, color="0.2", ls="--", lw=1.0, label=f"trial-based coincidences={trial_total}")
     ax0.set_xscale("log")
@@ -315,6 +332,7 @@ def main() -> None:
     ax1.set_title("CH J_prob (A1=0,B1=0): window dependence")
     # Trial-based J for A1=0,B1=0.
     j_trial = float(ch["A1=0,B1=0"]["J_prob"])
+    # 条件分岐: `sweep is not None and "J_prob_A1=0_B1=0" in sweep` を満たす経路を評価する。
     if sweep is not None and "J_prob_A1=0_B1=0" in sweep:
         ax1.plot(
             sweep["window_ns"],
@@ -386,6 +404,7 @@ def main() -> None:
         ],
     }
 
+    # 条件分岐: `sweep is not None` を満たす経路を評価する。
     if sweep is not None:
         metrics["comparison"] = {
             "coincidence_sweep_csv": str(sweep_csv),
@@ -400,6 +419,8 @@ def main() -> None:
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] json: {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -60,6 +61,7 @@ def _ring_dirs_from_constraints(
     geometry_relax_factor: float,
     geometry_delay_floor_s: float,
 ) -> Tuple[np.ndarray, str]:
+    # 条件分岐: `not constraints` を満たす経路を評価する。
     if not constraints:
         return sky_dirs[:0], "none"
 
@@ -68,7 +70,9 @@ def _ring_dirs_from_constraints(
         baseline = geom[c["first"]]["position_m"] - geom[c["second"]]["position_m"]
         dt_pred = -(sky_dirs @ baseline) / _C
         mask &= np.abs(dt_pred - float(c["delay_s"])) <= float(c["delay_tol_s"])
+
     ring_strict = sky_dirs[mask]
+    # 条件分岐: `int(ring_strict.shape[0]) >= int(min_ring_directions)` を満たす経路を評価する。
     if int(ring_strict.shape[0]) >= int(min_ring_directions):
         return ring_strict, "strict"
 
@@ -78,9 +82,12 @@ def _ring_dirs_from_constraints(
         dt_pred = -(sky_dirs @ baseline) / _C
         tol = max(float(c["delay_tol_s"]), float(geometry_delay_floor_s)) * float(geometry_relax_factor)
         mask_relaxed &= np.abs(dt_pred - float(c["delay_s"])) <= tol
+
     ring_relaxed = sky_dirs[mask_relaxed]
+    # 条件分岐: `int(ring_relaxed.shape[0]) >= int(min_ring_directions)` を満たす経路を評価する。
     if int(ring_relaxed.shape[0]) >= int(min_ring_directions):
         return ring_relaxed, "relaxed"
+
     return ring_relaxed, "relaxed_insufficient"
 
 
@@ -93,6 +100,7 @@ def _select_pruned_constraints(
     geometry_relax_factor: float,
     geometry_delay_floor_s: float,
 ) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `len(constraints) < 3` を満たす経路を評価する。
     if len(constraints) < 3:
         return None
 
@@ -110,8 +118,10 @@ def _select_pruned_constraints(
                 geometry_delay_floor_s=float(geometry_delay_floor_s),
             )
             ring_n = int(ring_dirs.shape[0])
+            # 条件分岐: `ring_n < int(min_ring_directions)` を満たす経路を評価する。
             if ring_n < int(min_ring_directions):
                 continue
+
             corr_sum = float(sum(_safe_float(c.get("abs_corr")) for c in subset_list))
             candidate = {
                 "constraints": subset_list,
@@ -120,18 +130,28 @@ def _select_pruned_constraints(
                 "geometry_mode": geometry_mode,
                 "corr_sum": corr_sum,
             }
+            # 条件分岐: `size_best is None` を満たす経路を評価する。
             if size_best is None:
                 size_best = candidate
                 continue
+
+            # 条件分岐: `int(candidate["ring_n"]) > int(size_best["ring_n"])` を満たす経路を評価する。
+
             if int(candidate["ring_n"]) > int(size_best["ring_n"]):
                 size_best = candidate
             elif int(candidate["ring_n"]) == int(size_best["ring_n"]) and float(candidate["corr_sum"]) > float(
                 size_best["corr_sum"]
             ):
                 size_best = candidate
+
+        # 条件分岐: `size_best is not None` を満たす経路を評価する。
+
         if size_best is not None:
             best_candidate = size_best
             break
+
+    # 条件分岐: `best_candidate is None` を満たす経路を評価する。
+
     if best_candidate is None:
         return None
 
@@ -169,6 +189,7 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             for h in headers:
                 v = row.get(h, "")
                 vals.append(_fmt(v) if isinstance(v, float) else v)
+
             w.writerow(vals)
 
 
@@ -213,27 +234,42 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
 def _pair_factor_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     for row in rows:
+        # 条件分岐: `str(row.get("quality", "")) != "usable"` を満たす経路を評価する。
         if str(row.get("quality", "")) != "usable":
             continue
+
         event_status = str(row.get("status", ""))
+        # 条件分岐: `not event_status.startswith(("reject_", "watch_", "pass_"))` を満たす経路を評価する。
         if not event_status.startswith(("reject_", "watch_", "pass_")):
             continue
+
         event = str(row.get("event", ""))
         pair_results = row.get("pair_results")
+        # 条件分岐: `not isinstance(pair_results, list)` を満たす経路を評価する。
         if not isinstance(pair_results, list):
             continue
+
         for pr in pair_results:
+            # 条件分岐: `not isinstance(pr, dict)` を満たす経路を評価する。
             if not isinstance(pr, dict):
                 continue
+
             delay_s = _safe_float(pr.get("delay_s"))
             delay_tol_s = _safe_float(pr.get("delay_tol_s"))
             lag_ms = float("nan")
             lag_tol_ms = float("nan")
             lag_over_tol = float("nan")
+            # 条件分岐: `math.isfinite(delay_s)` を満たす経路を評価する。
             if math.isfinite(delay_s):
                 lag_ms = float(-delay_s * 1.0e3)
+
+            # 条件分岐: `math.isfinite(delay_tol_s)` を満たす経路を評価する。
+
             if math.isfinite(delay_tol_s):
                 lag_tol_ms = float(delay_tol_s * 1.0e3)
+
+            # 条件分岐: `math.isfinite(lag_ms) and math.isfinite(lag_tol_ms) and lag_tol_ms > 0.0` を満たす経路を評価する。
+
             if math.isfinite(lag_ms) and math.isfinite(lag_tol_ms) and lag_tol_ms > 0.0:
                 lag_over_tol = float(abs(lag_ms) / lag_tol_ms)
 
@@ -241,6 +277,7 @@ def _pair_factor_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
             obs_med = _safe_float(pr.get("obs_med"))
             obs_p84 = _safe_float(pr.get("obs_p84"))
             obs_iqr_rel = float("nan")
+            # 条件分岐: `math.isfinite(obs_p16) and math.isfinite(obs_p84) and math.isfinite(obs_med)...` を満たす経路を評価する。
             if math.isfinite(obs_p16) and math.isfinite(obs_p84) and math.isfinite(obs_med) and abs(obs_med) > 0.0:
                 obs_iqr_rel = float(abs(obs_p84 - obs_p16) / abs(obs_med))
 
@@ -264,13 +301,16 @@ def _pair_factor_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                     "obs_ratio_iqr_rel": obs_iqr_rel,
                 }
             )
+
     return out
 
 
 def _median(values: List[float]) -> float:
     arr = np.asarray([v for v in values if math.isfinite(v)], dtype=np.float64)
+    # 条件分岐: `arr.size == 0` を満たす経路を評価する。
     if arr.size == 0:
         return float("nan")
+
     return float(np.median(arr))
 
 
@@ -282,12 +322,16 @@ def _pair_factor_summary(detail_rows: List[Dict[str, Any]]) -> List[Dict[str, An
 
     reject_event_sum: Dict[str, float] = {}
     for row in detail_rows:
+        # 条件分岐: `int(row.get("event_is_tensor_reject", 0)) != 1` を満たす経路を評価する。
         if int(row.get("event_is_tensor_reject", 0)) != 1:
             continue
+
         event = str(row.get("event", ""))
         value = _safe_float(row.get("tensor_mismatch"))
+        # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
         if not math.isfinite(value):
             continue
+
         reject_event_sum[event] = reject_event_sum.get(event, 0.0) + max(0.0, float(value))
 
     summary_rows: List[Dict[str, Any]] = []
@@ -299,11 +343,14 @@ def _pair_factor_summary(detail_rows: List[Dict[str, Any]]) -> List[Dict[str, An
 
         reject_share_vals: List[float] = []
         for r in rows_pair:
+            # 条件分岐: `int(r.get("event_is_tensor_reject", 0)) != 1` を満たす経路を評価する。
             if int(r.get("event_is_tensor_reject", 0)) != 1:
                 continue
+
             event = str(r.get("event", ""))
             denom = float(reject_event_sum.get(event, 0.0))
             num = _safe_float(r.get("tensor_mismatch"))
+            # 条件分岐: `denom > 0.0 and math.isfinite(num)` を満たす経路を評価する。
             if denom > 0.0 and math.isfinite(num):
                 reject_share_vals.append(float(max(0.0, num) / denom))
 
@@ -333,6 +380,7 @@ def _pair_factor_summary(detail_rows: List[Dict[str, Any]]) -> List[Dict[str, An
     )
     for idx, row in enumerate(summary_rows, start=1):
         row["bottleneck_rank"] = int(idx)
+
     return summary_rows
 
 
@@ -346,10 +394,12 @@ def _write_table_csv(path: Path, rows: List[Dict[str, Any]], headers: List[str])
             for h in headers:
                 value = row.get(h, "")
                 values.append(_fmt(value) if isinstance(value, float) else value)
+
             w.writerow(values)
 
 
 def _plot_pair_factor_summary(rows: List[Dict[str, Any]], out_png: Path) -> None:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         fig, ax = plt.subplots(figsize=(10.0, 4.2))
         ax.axis("off")
@@ -367,6 +417,7 @@ def _plot_pair_factor_summary(rows: List[Dict[str, Any]], out_png: Path) -> None
         fig.savefig(out_png, dpi=200, bbox_inches="tight")
         plt.close(fig)
         return
+
     _set_japanese_font()
     labels = [str(r.get("pair", "")) for r in rows]
     x = np.arange(len(rows), dtype=float)
@@ -423,13 +474,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     events = [s.strip() for s in str(args.events).split(",") if s.strip()]
+    # 条件分岐: `not events` を満たす経路を評価する。
     if not events:
         print("[err] --events is empty")
         return 2
+
     detectors = sorted(
         [d.strip().upper() for d in str(args.detectors).split(",") if d.strip().upper() in _DETECTOR_SITES],
         key=_detector_order,
     )
+    # 条件分岐: `len(detectors) < 3` を満たす経路を評価する。
     if len(detectors) < 3:
         print("[err] need at least 3 detectors (H1,L1,V1)")
         return 2
@@ -455,15 +509,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for first, second in pair_list:
             pair = f"{first}-{second}"
             payload = _load_metrics(event, slug, first, second)
+            # 条件分岐: `payload is None` を満たす経路を評価する。
             if payload is None:
                 missing.append(pair)
                 continue
+
             metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
             ratio = metrics.get("ratio") if isinstance(metrics.get("ratio"), dict) else {}
             inputs = payload.get("inputs") if isinstance(payload.get("inputs"), dict) else {}
             best_lag_ms = _safe_float(metrics.get("best_lag_ms_apply_to_first"))
+            # 条件分岐: `not math.isfinite(best_lag_ms)` を満たす経路を評価する。
             if not math.isfinite(best_lag_ms):
                 best_lag_ms = _safe_float(metrics.get("best_lag_ms_apply_to_h1"))
+
             abs_corr = _safe_float(metrics.get("abs_best_corr"))
             obs_p16 = _safe_float(ratio.get("p16"))
             obs_med = _safe_float(ratio.get("median"))
@@ -474,12 +532,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 best_lag_ms=best_lag_ms, best_abs_corr=abs_corr, fs_hz=fs_hz, lag_scan=lag_scan
             )
             delay_s = -best_lag_ms * 1e-3 if math.isfinite(best_lag_ms) else float("nan")
+            # 条件分岐: `not (math.isfinite(abs_corr) and abs_corr >= float(args.corr_use_min))` を満たす経路を評価する。
             if not (math.isfinite(abs_corr) and abs_corr >= float(args.corr_use_min)):
                 low_corr.append(pair)
                 continue
+
+            # 条件分岐: `not (math.isfinite(delay_s) and math.isfinite(obs_p16) and math.isfinite(obs_...` を満たす経路を評価する。
+
             if not (math.isfinite(delay_s) and math.isfinite(obs_p16) and math.isfinite(obs_med) and math.isfinite(obs_p84)):
                 bad_fields.append(pair)
                 continue
+
             constraints.append(
                 {
                     "pair": pair,
@@ -494,14 +557,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 }
             )
 
+        # 条件分岐: `len(constraints) < 2` を満たす経路を評価する。
+
         if len(constraints) < 2:
             reason = []
+            # 条件分岐: `missing` を満たす経路を評価する。
             if missing:
                 reason.append(f"missing={','.join(missing)}")
+
+            # 条件分岐: `low_corr` を満たす経路を評価する。
+
             if low_corr:
                 reason.append(f"low_corr={','.join(low_corr)}")
+
+            # 条件分岐: `bad_fields` を満たす経路を評価する。
+
             if bad_fields:
                 reason.append(f"bad_fields={','.join(bad_fields)}")
+
             rows.append(
                 {
                     "event": event,
@@ -535,6 +608,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             geometry_relax_factor=geometry_relax_factor,
             geometry_delay_floor_s=geometry_delay_floor_s,
         )
+        # 条件分岐: `ring_dirs.shape[0] < min_ring_directions and bool(args.allow_pair_pruning)` を満たす経路を評価する。
         if ring_dirs.shape[0] < min_ring_directions and bool(args.allow_pair_pruning):
             pruned = _select_pruned_constraints(
                 constraints=constraints,
@@ -544,12 +618,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 geometry_relax_factor=geometry_relax_factor,
                 geometry_delay_floor_s=geometry_delay_floor_s,
             )
+            # 条件分岐: `pruned is not None` を満たす経路を評価する。
             if pruned is not None:
                 effective_constraints = list(pruned["constraints"])
                 pair_pruning_applied = 1
                 dropped_pairs = list(pruned.get("dropped_pairs") or [])
                 ring_dirs = pruned["ring_dirs"]
                 geometry_mode = str(pruned.get("geometry_mode") or geometry_mode)
+
+        # 条件分岐: `ring_dirs.shape[0] < min_ring_directions` を満たす経路を評価する。
 
         if ring_dirs.shape[0] < min_ring_directions:
             rows.append(
@@ -589,10 +666,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     cosi_grid=cosi_grid,
                     response_floor_frac=float(args.response_floor_frac),
                 )
+                # 条件分岐: `tensor_r.size > 0` を満たす経路を評価する。
                 if tensor_r.size > 0:
                     tensor_all.extend(tensor_r.tolist())
+
+                # 条件分岐: `scalar_r.size > 0` を満たす経路を評価する。
+
                 if scalar_r.size > 0:
                     scalar_all.extend(scalar_r.tolist())
+
             tensor_arr = np.asarray(tensor_all, dtype=np.float64)
             scalar_arr = np.asarray(scalar_all, dtype=np.float64)
             t_lo, t_hi = _range_clip(tensor_arr, 0.5, 99.5)
@@ -649,14 +731,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     usable = [r for r in rows if str(r.get("quality")) == "usable" and str(r.get("status", "")).startswith(("reject_", "watch_", "pass_"))]
     pair_pruned_events = [r for r in rows if int(_safe_float(r.get("pair_pruning_applied"))) == 1]
+    # 条件分岐: `not usable` を満たす経路を評価する。
     if not usable:
         overall_status, overall_reason = "inconclusive", "no_usable_events"
+    # 条件分岐: 前段条件が不成立で、`any(str(r.get("status")) == "reject_tensor_response" for r in usable)` を追加評価する。
     elif any(str(r.get("status")) == "reject_tensor_response" for r in usable):
         overall_status, overall_reason = "reject", "tensor_response_failed_for_some_events"
+    # 条件分岐: 前段条件が不成立で、`all(str(r.get("status")) == "pass_scalar_only_disfavored" for r in usable)` を追加評価する。
     elif all(str(r.get("status")) == "pass_scalar_only_disfavored" for r in usable):
         overall_status, overall_reason = "pass", "scalar_only_disfavored_in_all_usable_events"
     else:
         overall_status, overall_reason = "watch", "scalar_not_excluded_with_current_three_detector_constraints"
+
     scalar_proxy = float(max((_safe_float(r.get("scalar_overlap_fraction")) for r in usable), default=1.0 if usable else 0.0))
 
     outdir = Path(str(args.outdir))
@@ -785,6 +871,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -811,6 +898,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

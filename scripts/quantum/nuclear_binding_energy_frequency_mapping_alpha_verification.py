@@ -13,9 +13,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -28,8 +31,12 @@ def _require_float(obj: object, *, path: Path, key_path: str) -> float:
         v = float(obj)
     except Exception as e:
         raise SystemExit(f"[fail] invalid float at {key_path} in {path}: {e}") from e
+
+    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
     if not math.isfinite(v):
         raise SystemExit(f"[fail] non-finite float at {key_path} in {path}")
+
     return v
 
 
@@ -39,6 +46,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     deut_path = root / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
+    # 条件分岐: `not deut_path.exists()` を満たす経路を評価する。
     if not deut_path.exists():
         raise SystemExit(
             "[fail] missing deuteron binding baseline metrics.\n"
@@ -46,9 +54,11 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_deuteron.py\n"
             f"Expected: {deut_path}"
         )
+
     deut = _load_json(deut_path)
 
     light_path = root / "output" / "public" / "quantum" / "nuclear_binding_light_nuclei_metrics.json"
+    # 条件分岐: `not light_path.exists()` を満たす経路を評価する。
     if not light_path.exists():
         raise SystemExit(
             "[fail] missing light-nuclei binding baseline metrics.\n"
@@ -56,9 +66,11 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_light_nuclei.py\n"
             f"Expected: {light_path}"
         )
+
     light = _load_json(light_path)
 
     two_body_path = root / "output" / "public" / "quantum" / "nuclear_binding_energy_frequency_mapping_deuteron_two_body_metrics.json"
+    # 条件分岐: `not two_body_path.exists()` を満たす経路を評価する。
     if not two_body_path.exists():
         raise SystemExit(
             "[fail] missing deuteron two-body mapping metrics.\n"
@@ -66,11 +78,13 @@ def main() -> None:
             "  python -B scripts/quantum/nuclear_binding_energy_frequency_mapping_deuteron_two_body.py\n"
             f"Expected: {two_body_path}"
         )
+
     two_body = _load_json(two_body_path)
 
     # Fixed observables / constants
     b_d = _require_float(deut.get("derived", {}).get("binding_energy", {}).get("B_MeV", {}).get("value"), path=deut_path, key_path="derived.binding_energy.B_MeV.value")
     inv_kappa_d = _require_float(deut.get("derived", {}).get("inv_kappa_fm"), path=deut_path, key_path="derived.inv_kappa_fm")
+    # 条件分岐: `not (b_d > 0 and inv_kappa_d > 0)` を満たす経路を評価する。
     if not (b_d > 0 and inv_kappa_d > 0):
         raise SystemExit("[fail] invalid deuteron B or inv_kappa (non-positive)")
 
@@ -84,6 +98,7 @@ def main() -> None:
         path=light_path,
         key_path="derived.alpha.binding_energy.B_MeV.sigma",
     )
+    # 条件分岐: `not (b_alpha_obs > 0 and sigma_b_alpha_obs >= 0)` を満たす経路を評価する。
     if not (b_alpha_obs > 0 and sigma_b_alpha_obs >= 0):
         raise SystemExit("[fail] invalid alpha B_obs or sigma (non-positive/negative)")
 
@@ -97,6 +112,7 @@ def main() -> None:
         path=light_path,
         key_path="constants_from_nist_codata.ral_fm.sigma",
     )
+    # 条件分岐: `not (r_alpha_rms > 0 and sigma_r_alpha_rms >= 0)` を満たす経路を評価する。
     if not (r_alpha_rms > 0 and sigma_r_alpha_rms >= 0):
         raise SystemExit("[fail] invalid alpha charge radius (non-positive/negative sigma)")
 
@@ -105,11 +121,13 @@ def main() -> None:
         path=two_body_path,
         key_path="derived.lambda_pi_pm_fm",
     )
+    # 条件分岐: `not (l_range > 0)` を満たす経路を評価する。
     if not (l_range > 0):
         raise SystemExit("[fail] invalid range scale L (non-positive)")
 
     # Geometry proxy: convert rms charge radius to an equivalent uniform-sphere radius.
     # For a uniform sphere: r_rms = sqrt(3/5) R  =>  R = sqrt(5/3) r_rms
+
     r_alpha_uniform = math.sqrt(5.0 / 3.0) * r_alpha_rms
     sigma_r_alpha_uniform = math.sqrt(5.0 / 3.0) * sigma_r_alpha_rms
 
@@ -154,6 +172,7 @@ def main() -> None:
         )
 
     # Required coherence factor to match observation under this geometry/range I/F.
+
     c_required = b_alpha_obs / (2.0 * j_alpha_mev) if j_alpha_mev > 0 else float("nan")
 
     # Choose baseline method (minimal overcounting; closest to required C in this frozen I/F).
@@ -197,6 +216,7 @@ def main() -> None:
             )
 
     # Plot
+
     import matplotlib.pyplot as plt
 
     x = list(range(len(rows)))
@@ -305,6 +325,8 @@ def main() -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

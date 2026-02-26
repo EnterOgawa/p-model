@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -58,8 +59,10 @@ def _run(cmd: List[str]) -> Dict[str, Any]:
 
 
 def _load_json(path: Path) -> Dict[str, Any]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return {}
+
     return json.loads(path.read_text(encoding="utf-8"))
 
 
@@ -145,14 +148,22 @@ def main(argv: List[str] | None = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
+
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
+
     if not out_csv.is_absolute():
         out_csv = (ROOT / out_csv).resolve()
+
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
+
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
     runs: List[Dict[str, Any]] = []
+    # 条件分岐: `not args.skip_upstream` を満たす経路を評価する。
     if not args.skip_upstream:
         commands = [
             [sys.executable, "-B", "scripts/quantum/weak_interaction_ckm_first_row_audit.py"],
@@ -222,12 +233,15 @@ def main(argv: List[str] | None = None) -> int:
     ]
 
     hard_reject = any(str(r.get("status")) == "reject" for r in rows if str(r.get("id")) != "op_cycle::ckm_pmns_closure")
+    # 条件分岐: `hard_reject` を満たす経路を評価する。
     if hard_reject:
         overall_status = "reject"
         decision = "operational_cycle_failed"
+    # 条件分岐: 前段条件が不成立で、`ckm_pmns_status == "watch"` を追加評価する。
     elif ckm_pmns_status == "watch":
         overall_status = "watch"
         decision = "operational_cycle_stable_with_ckm_watch"
+    # 条件分岐: 前段条件が不成立で、`ckm_pmns_status == "pass"` を追加評価する。
     elif ckm_pmns_status == "pass":
         overall_status = "pass"
         decision = "operational_cycle_stable_all_pass"
@@ -294,6 +308,8 @@ def main(argv: List[str] | None = None) -> int:
 
     return 0 if overall_status in {"pass", "watch"} else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -54,13 +55,16 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _tail(s: str, n: int = 8000) -> str:
     s = s or ""
+    # 条件分岐: `len(s) <= n` を満たす経路を評価する。
     if len(s) <= n:
         return s
+
     return s[-n:]
 
 
@@ -96,8 +100,10 @@ def _run_cmd(cmd: List[str], *, cwd: Path) -> CmdResult:
 
 def _path_from_any(root: Path, raw: str) -> Path:
     p = Path(str(raw))
+    # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
     if p.is_absolute():
         return p
+
     return (root / p).resolve()
 
 
@@ -122,6 +128,7 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
         "notes": [],
     }
 
+    # 条件分岐: `not pack_path.exists()` を満たす経路を評価する。
     if not pack_path.exists():
         out["notes"].append("missing falsification_pack.json")
         return out
@@ -140,14 +147,18 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
 
     ds_rows: List[Dict[str, Any]] = []
     for ds in pack.get("datasets") if isinstance(pack.get("datasets"), list) else []:
+        # 条件分岐: `not isinstance(ds, dict)` を満たす経路を評価する。
         if not isinstance(ds, dict):
             continue
+
         delay = ds.get("delay_signature") if isinstance(ds.get("delay_signature"), dict) else {}
         z_vals: List[float] = []
         for party in ("Alice", "Bob"):
             z = (delay.get(party) or {}).get("z_delta_median")
+            # 条件分岐: `isinstance(z, (int, float))` を満たす経路を評価する。
             if isinstance(z, (int, float)):
                 z_vals.append(float(z))
+
         delay_z = max(z_vals) if z_vals else None
 
         ratio = ds.get("ratio")
@@ -173,6 +184,7 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
         "threshold": 1.0,
         "details": [],
     }
+    # 条件分岐: `pairing_summary_path.exists()` を満たす経路を評価する。
     if pairing_summary_path.exists():
         pairing = _read_json(pairing_summary_path)
         supported = [x for x in (pairing.get("datasets") or []) if isinstance(x, dict) and x.get("supported") is True]
@@ -181,16 +193,20 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
         for x in supported:
             delta = x.get("delta") if isinstance(x.get("delta"), dict) else {}
             v = delta.get("delta_over_sigma_boot")
+            # 条件分岐: `isinstance(v, (int, float))` を満たす経路を評価する。
             if isinstance(v, (int, float)):
                 deltas.append(float(v))
+
             pairing_gate["details"].append(
                 {
                     "dataset_id": x.get("dataset_id"),
                     "delta_over_sigma_boot": float(v) if isinstance(v, (int, float)) else None,
                 }
             )
+
         pairing_gate["max_delta_over_sigma_boot"] = max(deltas) if deltas else None
         pairing_gate["ok"] = bool(supported) and bool((pairing_gate["max_delta_over_sigma_boot"] or 0.0) < pairing_gate["threshold"])
+
     out["pairing_crosscheck_gate"] = pairing_gate
 
     required = [
@@ -199,6 +215,7 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
         ("pairing_crosscheck_summary_json", pairing_summary_path),
     ]
     missing = [name for name, p in required if not p.exists()]
+    # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         out["notes"].append(f"missing required artifacts: {', '.join(missing)}")
 
@@ -234,6 +251,7 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
         "notes": [],
     }
 
+    # 条件分岐: `not pack_path.exists()` を満たす経路を評価する。
     if not pack_path.exists():
         out["notes"].append("missing nuclear falsification pack")
         return out
@@ -245,8 +263,10 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
     # Baseline models (from pack).
     baseline_rows: List[Dict[str, Any]] = []
     for m in pack.get("models") if isinstance(pack.get("models"), list) else []:
+        # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
         if not isinstance(m, dict):
             continue
+
         passes = m.get("passes") if isinstance(m.get("passes"), dict) else {}
         baseline_rows.append(
             {
@@ -256,6 +276,7 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
                 "passes": {"median_within_3sigma": passes.get("median_within_3sigma"), "a_trend_within_3sigma": passes.get("a_trend_within_3sigma")},
             }
         )
+
     out["baseline_models"] = baseline_rows
 
     # Main gate (minimal additional physics: nu-saturation pass).
@@ -265,6 +286,7 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
         "passes": None,
         "thresholds": None,
     }
+    # 条件分岐: `not metrics_minphys.exists()` を満たす経路を評価する。
     if not metrics_minphys.exists():
         out["notes"].append("missing minimal additional physics metrics")
     else:
@@ -274,23 +296,36 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
         # Prefer the nu-saturation model if present; otherwise fallback to first model.
         chosen = None
         for m in models:
+            # 条件分岐: `isinstance(m, dict) and "nu_saturation" in str(m.get("model_id") or "")` を満たす経路を評価する。
             if isinstance(m, dict) and "nu_saturation" in str(m.get("model_id") or ""):
                 chosen = m
                 break
+
+        # 条件分岐: `chosen is None and models and isinstance(models[0], dict)` を満たす経路を評価する。
+
         if chosen is None and models and isinstance(models[0], dict):
             chosen = models[0]
+
+        # 条件分岐: `chosen` を満たす経路を評価する。
+
         if chosen:
             passes = chosen.get("passes") if isinstance(chosen.get("passes"), dict) else {}
             main_gate["model_id"] = chosen.get("model_id")
             main_gate["passes"] = {"median_within_3sigma": passes.get("median_within_3sigma"), "a_trend_within_3sigma": passes.get("a_trend_within_3sigma")}
             main_gate["ok"] = bool(passes.get("median_within_3sigma")) and bool(passes.get("a_trend_within_3sigma"))
+
     out["main_gate"] = main_gate
 
+    # 条件分岐: `not zn_map.exists()` を満たす経路を評価する。
     if not zn_map.exists():
         out["notes"].append("missing Z-N residual map artifact")
 
+    # 条件分岐: `not holdout_summary.exists()` を満たす経路を評価する。
+
     if not holdout_summary.exists():
         out["notes"].append("missing nuclear holdout audit summary")
+
+    # 条件分岐: `not cross_matrix_json.exists()` を満たす経路を評価する。
 
     if not cross_matrix_json.exists():
         out["notes"].append("missing nuclear-condensed cross-check matrix summary")
@@ -307,8 +342,10 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
         and bool(holdout_summary.exists())
         and bool(cross_matrix_json.exists())
     )
+    # 条件分岐: `not metrics_theory_diff.exists()` を満たす経路を評価する。
     if not metrics_theory_diff.exists():
         out["notes"].append("missing theory-diff metrics (diff prediction density gate)")
+
     return out
 
 
@@ -333,15 +370,20 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         "summary": {"tests_total": 0, "tests_ok": 0, "tests_unknown": 0, "tests_failed": 0},
         "notes": [],
     }
+    # 条件分岐: `not pack_path.exists()` を満たす経路を評価する。
     if not pack_path.exists():
         out["notes"].append("missing condensed falsification pack")
         return out
+
+    # 条件分岐: `not holdout_summary.exists()` を満たす経路を評価する。
+
     if not holdout_summary.exists():
         out["notes"].append("missing condensed holdout audit summary")
 
     pack = _read_json(pack_path)
     tests = pack.get("tests") if isinstance(pack.get("tests"), list) else []
     holdout_audit = pack.get("holdout_audit") if isinstance(pack.get("holdout_audit"), dict) else None
+    # 条件分岐: `holdout_audit is None` を満たす経路を評価する。
     if holdout_audit is None:
         out["notes"].append("missing holdout_audit in condensed falsification pack")
     else:
@@ -350,11 +392,15 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         summary_exists = bool(summary_path and summary_path.exists())
         expected_sha = holdout_audit.get("summary_sha256")
         sha_ok = None
+        # 条件分岐: `summary_exists and isinstance(expected_sha, str) and expected_sha` を満たす経路を評価する。
         if summary_exists and isinstance(expected_sha, str) and expected_sha:
             sha_ok = (_sha256(summary_path) == expected_sha)
+
         matches_expected = None
+        # 条件分岐: `summary_path` を満たす経路を評価する。
         if summary_path:
             matches_expected = summary_path.resolve() == holdout_summary.resolve()
+
         out["holdout_audit"] = {
             "present": True,
             "summary_json": str(summary_json) if summary_json is not None else None,
@@ -363,10 +409,17 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             "summary_matches_expected": matches_expected,
             "step": holdout_audit.get("step"),
         }
+        # 条件分岐: `not summary_exists` を満たす経路を評価する。
         if not summary_exists:
             out["notes"].append("holdout_audit summary_json missing")
+
+        # 条件分岐: `sha_ok is False` を満たす経路を評価する。
+
         if sha_ok is False:
             out["notes"].append("holdout_audit summary sha256 mismatch")
+
+        # 条件分岐: `matches_expected is False` を満たす経路を評価する。
+
         if matches_expected is False:
             out["notes"].append("holdout_audit summary_json path differs from expected condensed_holdout_audit_summary.json")
 
@@ -374,6 +427,7 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         # Some metrics store sampled keys like "298.15K".
         if float(t_k).is_integer():
             return f"{int(t_k)}K"
+
         return f"{t_k}K"
 
     def _eval_targets_from_code_results(*, mj: Dict[str, Any], targets: List[Dict[str, Any]]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
@@ -387,14 +441,17 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             val = r.get("value_m")
             tgt = g.get("target_value_m")
             thr = g.get("reject_if_abs_minus_target_gt_m")
+            # 条件分岐: `not all(isinstance(x, (int, float)) for x in (val, tgt, thr))` を満たす経路を評価する。
             if not all(isinstance(x, (int, float)) for x in (val, tgt, thr)):
                 rows.append({"code": code, "ok": None})
                 all_ok = False
                 continue
+
             diff = abs(float(val) - float(tgt))
             ok = diff <= float(thr)
             rows.append({"code": code, "abs_diff": diff, "threshold": float(thr), "ok": ok})
             all_ok = all_ok and ok
+
         return all_ok, "targets_by_code", rows
 
     def _eval_targets_from_cp_keypoints(*, mj: Dict[str, Any], targets: List[Dict[str, Any]]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
@@ -407,20 +464,25 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             t_k = g.get("T_K")
             tgt = g.get("Cp_target_J_per_molK")
             thr = g.get("reject_if_abs_Cp_minus_target_gt_J_per_molK")
+            # 条件分岐: `not isinstance(t_k, (int, float))` を満たす経路を評価する。
             if not isinstance(t_k, (int, float)):
                 rows.append({"phase": phase, "T_K": None, "ok": None})
                 all_ok = False
                 continue
+
             kp = by_phase_t.get((phase, float(t_k))) or {}
             val = kp.get("Cp_J_per_molK")
+            # 条件分岐: `not all(isinstance(x, (int, float)) for x in (val, tgt, thr))` を満たす経路を評価する。
             if not all(isinstance(x, (int, float)) for x in (val, tgt, thr)):
                 rows.append({"phase": phase, "T_K": float(t_k), "ok": None})
                 all_ok = False
                 continue
+
             diff = abs(float(val) - float(tgt))
             ok = diff <= float(thr)
             rows.append({"phase": phase, "T_K": float(t_k), "abs_diff": diff, "threshold": float(thr), "ok": ok})
             all_ok = all_ok and ok
+
         return all_ok, "targets_by_cp_keypoints", rows
 
     def _eval_targets_from_alpha_samples(*, mj: Dict[str, Any], targets: List[Dict[str, Any]]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
@@ -431,19 +493,24 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             t_k = g.get("T_K")
             tgt = g.get("alpha_target_1e-8_per_K")
             thr = g.get("reject_if_abs_alpha_minus_target_gt_1e-8_per_K")
+            # 条件分岐: `not isinstance(t_k, (int, float))` を満たす経路を評価する。
             if not isinstance(t_k, (int, float)):
                 rows.append({"T_K": None, "ok": None})
                 all_ok = False
                 continue
+
             val = samples.get(_key(float(t_k)))
+            # 条件分岐: `not all(isinstance(x, (int, float)) for x in (val, tgt, thr))` を満たす経路を評価する。
             if not all(isinstance(x, (int, float)) for x in (val, tgt, thr)):
                 rows.append({"T_K": float(t_k), "ok": None})
                 all_ok = False
                 continue
+
             diff = abs(float(val) - float(tgt))
             ok = diff <= float(thr)
             rows.append({"T_K": float(t_k), "abs_diff": diff, "threshold": float(thr), "ok": ok})
             all_ok = all_ok and ok
+
         return all_ok, "targets_by_alpha_samples", rows
 
     def _eval_targets_from_copper_k_selected(*, mj: Dict[str, Any], fals: Dict[str, Any]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
@@ -453,38 +520,49 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         rows: List[Dict[str, Any]] = []
         all_ok = True
         for rrr_s, tdef in targets_by_rrr.items():
+            # 条件分岐: `not isinstance(tdef, dict)` を満たす経路を評価する。
             if not isinstance(tdef, dict):
                 continue
+
             k_by_t = k_sel.get(str(rrr_s)) if isinstance(k_sel.get(str(rrr_s)), dict) else {}
             targets = tdef.get("targets_at_selected_T") if isinstance(tdef.get("targets_at_selected_T"), list) else []
             for g in targets:
+                # 条件分岐: `not isinstance(g, dict)` を満たす経路を評価する。
                 if not isinstance(g, dict):
                     continue
+
                 t_k = g.get("T_K")
                 tgt = g.get("k_target_W_mK")
                 thr = g.get("reject_if_abs_k_minus_target_gt_W_mK")
+                # 条件分岐: `not isinstance(t_k, (int, float))` を満たす経路を評価する。
                 if not isinstance(t_k, (int, float)):
                     rows.append({"rrr": rrr_s, "T_K": None, "ok": None})
                     all_ok = False
                     continue
+
                 val = k_by_t.get(str(float(t_k)))
+                # 条件分岐: `not all(isinstance(x, (int, float)) for x in (val, tgt, thr))` を満たす経路を評価する。
                 if not all(isinstance(x, (int, float)) for x in (val, tgt, thr)):
                     rows.append({"rrr": rrr_s, "T_K": float(t_k), "ok": None})
                     all_ok = False
                     continue
+
                 diff = abs(float(val) - float(tgt))
                 ok = diff <= float(thr)
                 rows.append({"rrr": int(rrr_s) if str(rrr_s).isdigit() else rrr_s, "T_K": float(t_k), "abs_diff": diff, "threshold": float(thr), "ok": ok})
                 all_ok = all_ok and ok
+
         return all_ok, "targets_by_rrr_selected_T", rows
 
     def _eval_resistivity_necessary_conditions(*, mj: Dict[str, Any], fals: Dict[str, Any]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
         results = mj.get("results") if isinstance(mj.get("results"), dict) else {}
         reject_if_non_pos = bool(fals.get("reject_if_pct_per_K_proxy_non_positive", False))
         min_pct = results.get("min_pct_per_K_proxy")
+        # 条件分岐: `reject_if_non_pos and isinstance(min_pct, (int, float))` を満たす経路を評価する。
         if reject_if_non_pos and isinstance(min_pct, (int, float)):
             ok = float(min_pct) > 0.0
             return ok, "necessary_conditions", [{"check": "min_pct_per_K_proxy>0", "value": float(min_pct), "ok": ok}]
+
         return True, "baseline_envelope_only", []
 
     rows: List[Dict[str, Any]] = []
@@ -493,6 +571,7 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
     failed_n = 0
 
     for t in tests:
+        # 条件分岐: `not isinstance(t, dict)` を満たす経路を評価する。
         if not isinstance(t, dict):
             continue
 
@@ -502,6 +581,7 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         metrics_ok = bool(metrics_path and metrics_path.exists())
 
         sha_ok = None
+        # 条件分岐: `metrics_ok and isinstance(expected_sha, str) and expected_sha` を満たす経路を評価する。
         if metrics_ok and isinstance(expected_sha, str) and expected_sha:
             sha_ok = (_sha256(metrics_path) == expected_sha)
 
@@ -509,6 +589,7 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         gate_reason: Optional[str] = None
         target_rows: List[Dict[str, Any]] = []
 
+        # 条件分岐: `not metrics_ok` を満たす経路を評価する。
         if not metrics_ok:
             gate_ok = False
             gate_reason = "missing metrics_json"
@@ -542,6 +623,7 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
                 fit = mj.get("fit") or {}
                 theta = fit.get("theta_D_K")
                 thr = fals.get("reject_if_abs_theta_D_minus_target_gt_K")
+                # 条件分岐: `isinstance(theta, (int, float)) and isinstance(thr, (int, float))` を満たす経路を評価する。
                 if isinstance(theta, (int, float)) and isinstance(thr, (int, float)):
                     gate_ok = True
                     gate_reason = "baseline_freeze_fit_target_self"
@@ -561,8 +643,11 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
                 gate_ok = True
                 gate_reason = "baseline_metrics_only"
 
+        # 条件分岐: `gate_ok is True` を満たす経路を評価する。
+
         if gate_ok is True:
             ok_n += 1
+        # 条件分岐: 前段条件が不成立で、`gate_ok is False` を追加評価する。
         elif gate_ok is False:
             failed_n += 1
         else:
@@ -582,8 +667,10 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
     out["tests"] = rows
     out["summary"] = {"tests_total": int(len(rows)), "tests_ok": int(ok_n), "tests_unknown": int(unknown_n), "tests_failed": int(failed_n)}
     holdout_ok = bool(out.get("holdout_audit", {}).get("present")) and bool(out.get("holdout_audit", {}).get("summary_exists"))
+    # 条件分岐: `out.get("holdout_audit", {}).get("summary_sha256_ok") is False` を満たす経路を評価する。
     if out.get("holdout_audit", {}).get("summary_sha256_ok") is False:
         holdout_ok = False
+
     out["ok"] = (failed_n == 0) and (unknown_n == 0) and (len(rows) > 0) and holdout_ok
     return out
 
@@ -596,6 +683,7 @@ def _audit_completion_inventory(*, root: Path) -> Dict[str, Any]:
         "summary": None,
         "notes": [],
     }
+    # 条件分岐: `not inv_path.exists()` を満たす経路を評価する。
     if not inv_path.exists():
         out["notes"].append("missing completion inventory output")
         return out
@@ -620,11 +708,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     out_json = Path(str(args.out_json))
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (_ROOT / out_json).resolve()
+
     out_json.parent.mkdir(parents=True, exist_ok=True)
 
     cmd_results: List[CmdResult] = []
+    # 条件分岐: `not bool(args.no_regenerate)` を満たす経路を評価する。
     if not bool(args.no_regenerate):
         generators: List[List[str]] = [
             [sys.executable, "-B", str(_ROOT / "scripts" / "quantum" / "bell_primary_products.py")],
@@ -728,11 +819,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"- nuclear_ok: {bool(nuclear.get('ok'))}")
     print(f"- condensed_ok: {bool(condensed.get('ok'))}")
     print(f"- inventory_ok: {bool(inventory.get('ok'))}")
+    # 条件分岐: `cmd_results` を満たす経路を評価する。
     if cmd_results:
         worst_rc = max(int(c.returncode) for c in cmd_results)
         print(f"- generators_ran: {len(cmd_results)} (worst_rc={worst_rc})")
+
     return 0 if overall_ok else 1
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":  # pragma: no cover
     raise SystemExit(main())

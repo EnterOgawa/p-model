@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -61,8 +62,10 @@ def _output_item(rel: str, *, note: str = "") -> Dict[str, Any]:
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
+    # 条件分岐: `not p.exists()` を満たす経路を評価する。
     if not p.exists():
         return {"path": _relpath(p), "exists": False}
+
     try:
         data = json.loads(p.read_text(encoding="utf-8"))
     except Exception:
@@ -70,11 +73,15 @@ def _try_load_frozen_parameters() -> Dict[str, Any]:
 
     out: Dict[str, Any] = {"path": _relpath(p), "exists": True}
     for k in ("beta", "beta_sigma", "gamma_pmodel", "gamma_pmodel_sigma", "delta"):
+        # 条件分岐: `k in data` を満たす経路を評価する。
         if k in data:
             out[k] = data.get(k)
+
     policy = data.get("policy")
+    # 条件分岐: `isinstance(policy, dict)` を満たす経路を評価する。
     if isinstance(policy, dict):
         out["policy"] = {kk: policy.get(kk) for kk in ("fit_predict_separation", "beta_source", "delta_source", "note")}
+
     return out
 
 
@@ -413,6 +420,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

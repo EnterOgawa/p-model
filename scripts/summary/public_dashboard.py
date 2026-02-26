@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,10 +45,17 @@ def _remap_output_path(path: Path) -> Path:
         return path
 
     parts = list(rel.parts)
+    # 条件分岐: `len(parts) < 2` を満たす経路を評価する。
     if len(parts) < 2:
         return path
+
+    # 条件分岐: `parts[0] != "output"` を満たす経路を評価する。
+
     if parts[0] != "output":
         return path
+
+    # 条件分岐: `parts[1] in ("public", "private")` を満たす経路を評価する。
+
     if parts[1] in ("public", "private"):
         return path
 
@@ -56,11 +64,14 @@ def _remap_output_path(path: Path) -> Path:
     # Quantum artifacts are now tracked under output/public/quantum.
     if topic == "quantum":
         cand = (_ROOT / "output" / "public" / topic / tail).resolve()
+        # 条件分岐: `cand.exists()` を満たす経路を評価する。
         if cand.exists():
             return cand
 
     # Default: treat as local-only under output/private/<topic>/.
+
     cand = (_ROOT / "output" / "private" / topic / tail).resolve()
+    # 条件分岐: `cand.exists()` を満たす経路を評価する。
     if cand.exists():
         return cand
 
@@ -82,6 +93,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -116,9 +128,12 @@ def _try_read_csv_rows(path: Path, *, max_rows: int = 200) -> List[Dict[str, str
             reader = csv.DictReader(f)
             rows: List[Dict[str, str]] = []
             for i, r in enumerate(reader):
+                # 条件分岐: `i >= int(max_rows)` を満たす経路を評価する。
                 if i >= int(max_rows):
                     break
+
                 rows.append({str(k): ("" if v is None else str(v)) for k, v in dict(r).items()})
+
             return rows
     except Exception:
         return []
@@ -131,6 +146,7 @@ def _try_compute_llr_inlier_rms(points_csv: Path) -> Optional[Dict[str, Any]]:
     scripts/llr/llr_batch_eval.py and is small enough to stream.
     """
     points_csv = _remap_output_path(points_csv)
+    # 条件分岐: `not points_csv.exists()` を満たす経路を評価する。
     if not points_csv.exists():
         return None
 
@@ -153,43 +169,62 @@ def _try_compute_llr_inlier_rms(points_csv: Path) -> Optional[Dict[str, Any]]:
             for row in reader:
                 n_total += 1
                 inlier = (row.get("inlier_best") or "").strip().lower()
+                # 条件分岐: `inlier not in ("1", "true", "yes")` を満たす経路を評価する。
                 if inlier not in ("1", "true", "yes"):
                     continue
+
                 n_inlier += 1
                 for out_k, col in cols.items():
                     v_raw = (row.get(col) or "").strip()
+                    # 条件分岐: `not v_raw` を満たす経路を評価する。
                     if not v_raw:
                         continue
+
                     try:
                         v = float(v_raw)
                     except Exception:
                         continue
+
+                    # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
                     if not math.isfinite(v):
                         continue
+
                     sums_sq[out_k] += v * v
                     counts[out_k] += 1
 
         def _rms(k: str) -> Optional[float]:
             c = counts.get(k, 0)
+            # 条件分岐: `not c` を満たす経路を評価する。
             if not c:
                 return None
+
             return math.sqrt(sums_sq[k] / float(c))
 
         out: Dict[str, Any] = {"n_total": n_total, "n_inlier": n_inlier}
         for k in cols.keys():
             out[k] = _rms(k)
+
         return out
     except Exception:
         return None
 
 
 def _format_num(x: Any, *, digits: int = 3) -> str:
+    # 条件分岐: `isinstance(x, bool) or x is None` を満たす経路を評価する。
     if isinstance(x, bool) or x is None:
         return str(x)
+
+    # 条件分岐: `isinstance(x, int)` を満たす経路を評価する。
+
     if isinstance(x, int):
         return str(x)
+
+    # 条件分岐: `isinstance(x, float)` を満たす経路を評価する。
+
     if isinstance(x, float):
         return f"{x:.{digits}g}"
+
     return str(x)
 
 
@@ -200,33 +235,42 @@ def _as_str(x: Any) -> str:
 def _extract_cassini_metrics(root: Path) -> Dict[str, Any]:
     metrics_csv = root / "output" / "cassini" / "cassini_fig2_metrics.csv"
     txt = _try_read_text(metrics_csv)
+    # 条件分岐: `not txt` を満たす経路を評価する。
     if not txt:
         return {}
 
     # Minimal CSV parse (no pandas dependency)
+
     lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+    # 条件分岐: `len(lines) < 2` を満たす経路を評価する。
     if len(lines) < 2:
         return {}
+
     header = lines[0].split(",")
     rows = [dict(zip(header, ln.split(","))) for ln in lines[1:]]
     row_all = next((r for r in rows if (r.get("window") or "").startswith("all")), rows[0] if rows else None)
+    # 条件分岐: `not row_all` を満たす経路を評価する。
     if not row_all:
         return {}
 
     out: Dict[str, Any] = {}
     for k in ("n", "rmse", "corr", "beta"):
         v = row_all.get(k)
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             continue
+
         try:
             out[k] = float(v) if "." in v or "e" in v.lower() else int(v)
         except Exception:
             out[k] = v
+
     return out
 
 
 def _extract_viking_peak(root: Path) -> Dict[str, Any]:
     csv_path = _remap_output_path(root / "output" / "viking" / "viking_shapiro_result.csv")
+    # 条件分岐: `not csv_path.exists()` を満たす経路を評価する。
     if not csv_path.exists():
         return {}
 
@@ -242,12 +286,18 @@ def _extract_viking_peak(root: Path) -> Dict[str, Any]:
                     v = float((r.get("shapiro_delay_us") or "").strip())
                 except Exception:
                     continue
+
+                # 条件分岐: `peak_us is None or v > peak_us` を満たす経路を評価する。
+
                 if peak_us is None or v > peak_us:
                     peak_us = v
                     peak_time = (r.get("time_utc") or "").strip()
 
+        # 条件分岐: `peak_us is None` を満たす経路を評価する。
+
         if peak_us is None:
             return {}
+
         return {"peak_us": float(peak_us), "peak_time_utc": peak_time}
     except Exception:
         return {}
@@ -258,10 +308,17 @@ def _format_sci(x: Any, *, digits: int = 2) -> str:
         v = float(x)
     except Exception:
         return str(x)
+
+    # 条件分岐: `v == 0.0` を満たす経路を評価する。
+
     if v == 0.0:
         return "0"
+
+    # 条件分岐: `not (v == v)` を満たす経路を評価する。
+
     if not (v == v):  # NaN
         return "n/a"
+
     return f"{v:.{digits}e}"
 
 
@@ -269,6 +326,7 @@ def _panel_text(title: str, lines: List[str]) -> str:
     s = title
     for ln in lines:
         s += "\n" + ln
+
     return s
 
 
@@ -277,6 +335,7 @@ def _rel_url(from_dir: Path, target: Path) -> str:
         rel = os.path.relpath(target, start=from_dir)
     except ValueError:
         rel = str(target)
+
     return rel.replace("\\", "/")
 
 
@@ -285,6 +344,7 @@ def _rel_repo_path(root: Path, target: Path) -> str:
         rel = target.relative_to(root)
     except ValueError:
         return str(target).replace("\\", "/")
+
     return str(rel).replace("\\", "/")
 
 
@@ -310,24 +370,32 @@ def _render_text_with_links(text: str, *, root: Path, out_dir: Path) -> str:
         split_idx = None
         for ch in split_chars:
             i = trimmed.find(ch)
+            # 条件分岐: `i >= 0` を満たす経路を評価する。
             if i >= 0:
                 split_idx = i if split_idx is None else min(split_idx, i)
+
+        # 条件分岐: `split_idx is not None and split_idx > 0` を満たす経路を評価する。
+
         if split_idx is not None and split_idx > 0:
             suffix = trimmed[split_idx:]
             trimmed = trimmed[:split_idx]
 
         trailer = ""
         while trimmed and not (root / trimmed).exists():
+            # 条件分岐: `trimmed[-1] in _TRAIL_TRIM` を満たす経路を評価する。
             if trimmed[-1] in _TRAIL_TRIM:
                 trailer = trimmed[-1] + trailer
                 trimmed = trimmed[:-1]
                 continue
+
             break
 
         target = (root / trimmed) if trimmed else None
+        # 条件分岐: `trimmed and target and target.exists()` を満たす経路を評価する。
         if trimmed and target and target.exists():
             href = _rel_url(out_dir, target)
             parts.append(f"<a href='{html.escape(href)}'><code>{html.escape(trimmed)}</code></a>")
+            # 条件分岐: `trailer or suffix` を満たす経路を評価する。
             if trailer or suffix:
                 parts.append(html.escape(trailer + suffix))
         else:
@@ -344,10 +412,14 @@ def _extract_cassini_best_beta(root: Path) -> Dict[str, Any]:
     # when the most recent Cassini run was executed with --no-sweep.
     meta = _try_read_json(root / "output" / "cassini" / "cassini_fig2_run_metadata.json") or {}
     best_beta = None
+    # 条件分岐: `isinstance(meta, dict)` を満たす経路を評価する。
     if isinstance(meta, dict):
         outputs = meta.get("outputs")
+        # 条件分岐: `isinstance(outputs, dict)` を満たす経路を評価する。
         if isinstance(outputs, dict):
             best_beta = outputs.get("best_beta_by_rmse10")
+
+    # 条件分岐: `best_beta is None` を満たす経路を評価する。
 
     if best_beta is None:
         return {}
@@ -362,18 +434,23 @@ def _extract_cassini_best_beta(root: Path) -> Dict[str, Any]:
     # Optional: if sweep CSV exists, also extract the corresponding RMSE(±10d).
     sweep_csv = root / "output" / "cassini" / "cassini_beta_sweep_rmse.csv"
     txt = _try_read_text(sweep_csv)
+    # 条件分岐: `not txt` を満たす経路を評価する。
     if not txt:
         return out
 
     lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+    # 条件分岐: `len(lines) < 2` を満たす経路を評価する。
     if len(lines) < 2:
         return out
+
     header = lines[0].split(",")
 
     def _f(r: Dict[str, str], k: str) -> Optional[float]:
         v = r.get(k)
+        # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             return None
+
         try:
             return float(v)
         except Exception:
@@ -384,14 +461,21 @@ def _extract_cassini_best_beta(root: Path) -> Dict[str, Any]:
         row = dict(zip(header, ln.split(",")))
         beta = _f(row, "beta")
         rmse10 = _f(row, "rmse_10")
+        # 条件分岐: `beta is None or rmse10 is None` を満たす経路を評価する。
         if beta is None or rmse10 is None:
             continue
+
+        # 条件分岐: `abs(beta - best_beta_f) <= 1e-12` を満たす経路を評価する。
+
         if abs(beta - best_beta_f) <= 1e-12:
             best_rmse10 = rmse10
             break
 
+    # 条件分岐: `best_rmse10 is not None` を満たす経路を評価する。
+
     if best_rmse10 is not None:
         out["best_rmse10"] = best_rmse10
+
     return out
 
 
@@ -430,16 +514,21 @@ def _llr_residual_vs_elevation_cards(root: Path) -> List[Dict[str, Any]]:
     diag = _try_read_json(out_llr / "llr_station_diagnostics.json") or {}
     diag_map: Dict[str, Any] = {}
     stations: List[str] = []
+    # 条件分岐: `isinstance(diag, dict)` を満たす経路を評価する。
     if isinstance(diag, dict):
         sd = diag.get("station_diagnostics")
+        # 条件分岐: `isinstance(sd, dict)` を満たす経路を評価する。
         if isinstance(sd, dict):
             diag_map = sd
             stations = sorted(str(k) for k in sd.keys())
+
+    # 条件分岐: `not stations` を満たす経路を評価する。
 
     if not stations:
         # Fallback: include typical stations if the corresponding figures exist.
         for st in ("GRSM", "APOL", "MATM", "WETL"):
             fname = "llr_grsm_residual_vs_elevation.png" if st == "GRSM" else f"llr_{st.lower()}_residual_vs_elevation.png"
+            # 条件分岐: `(out_llr / fname).exists()` を満たす経路を評価する。
             if (out_llr / fname).exists():
                 stations.append(st)
 
@@ -448,6 +537,7 @@ def _llr_residual_vs_elevation_cards(root: Path) -> List[Dict[str, Any]]:
         st_u = str(st).strip().upper()
         fname = "llr_grsm_residual_vs_elevation.png" if st_u == "GRSM" else f"llr_{st_u.lower()}_residual_vs_elevation.png"
         path = out_llr / fname
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
 
@@ -459,10 +549,17 @@ def _llr_residual_vs_elevation_cards(root: Path) -> List[Dict[str, Any]]:
         summary_lines = [
             "仰角（高度角）と残差の相関を見ることで、大気（対流圏）や低仰角データの影響を確認する。",
         ]
+        # 条件分岐: `n is not None` を満たす経路を評価する。
         if n is not None:
             summary_lines.append(f"点数 n={_format_num(n)}")
+
+        # 条件分岐: `rms is not None` を満たす経路を評価する。
+
         if rms is not None:
             summary_lines.append(f"RMS={_format_num(rms, digits=4)} ns（SR+Tropo+Tide）")
+
+        # 条件分岐: `corr is not None` を満たす経路を評価する。
+
         if corr is not None:
             summary_lines.append(f"相関 corr(残差,仰角)={_format_num(corr, digits=4)}")
 
@@ -486,21 +583,28 @@ def _llr_residual_vs_elevation_cards(root: Path) -> List[Dict[str, Any]]:
                 ],
             }
         )
+
     return cards
 
 
 def _pick_llr_stem(root: Path) -> str:
     out_llr = root / "output" / "llr"
     for stem in ("llr_primary", "demo_llr_like"):
+        # 条件分岐: `(out_llr / f"{stem}_summary.json").exists()` を満たす経路を評価する。
         if (out_llr / f"{stem}_summary.json").exists():
             return stem
 
     candidates = sorted(out_llr.glob("*_summary.json"), key=lambda p: p.stat().st_mtime, reverse=True)
     for p in candidates:
+        # 条件分岐: `p.stem.startswith("merged")` を満たす経路を評価する。
         if p.stem.startswith("merged"):
             continue
+
+        # 条件分岐: `p.name.endswith("_summary.json")` を満たす経路を評価する。
+
         if p.name.endswith("_summary.json"):
             return p.name[: -len("_summary.json")]
+
     return "demo_llr_like"
 
 
@@ -554,10 +658,12 @@ def _render_public_html(
         while sec_id in used:
             sec_id = f"{base}-{n}"
             n += 1
+
         used.add(sec_id)
         sec_ids[sec_title] = sec_id
 
     # TOC
+
     parts.append("<h2>目次</h2><ul>")
     for sec_title, graphs in sections:
         sec_id = sec_ids.get(sec_title, "")
@@ -565,8 +671,10 @@ def _render_public_html(
         for g in graphs:
             gid = g.get("id") or ""
             gt = g.get("title") or ""
+            # 条件分岐: `gid and gt` を満たす経路を評価する。
             if gid and gt:
                 parts.append(f"<li style='margin-left:18px'><a href='#{html.escape(gid)}'>{html.escape(gt)}</a></li>")
+
     parts.append("</ul>")
 
     for sec_title, graphs in sections:
@@ -587,14 +695,21 @@ def _render_public_html(
             parts.append(f"<h3>{html.escape(gt)}</h3>")
 
             parts.append("<div class='meta'>")
+            # 条件分岐: `kind` を満たす経路を評価する。
             if kind:
                 parts.append(f"<span class='badge'>{html.escape(kind)}</span>")
+
+            # 条件分岐: `detail_href` を満たす経路を評価する。
+
             if detail_href:
                 parts.append(f"<a class='badge' href='{html.escape(detail_href)}'>詳細</a>")
+
             parts.append("</div>")
 
+            # 条件分岐: `path is None or path == ""` を満たす経路を評価する。
             if path is None or path == "":
                 pass
+            # 条件分岐: 前段条件が不成立で、`isinstance(path, Path) and path.exists()` を追加評価する。
             elif isinstance(path, Path) and path.exists():
                 rel = _rel_url(out_dir, path)
                 parts.append(f"<a href='{html.escape(rel)}'><img src='{html.escape(rel)}' alt='{html.escape(gt)}'></a>")
@@ -602,40 +717,56 @@ def _render_public_html(
             else:
                 parts.append(f"<div class='muted'>Missing: <code>{html.escape(str(path))}</code></div>")
 
+            # 条件分岐: `summary_lines` を満たす経路を評価する。
+
             if summary_lines:
                 parts.append("<div class='muted'>概要</div><ul>")
                 for ln in summary_lines:
                     parts.append(f"<li>{_render_text_with_links(str(ln), root=root, out_dir=out_dir)}</li>")
+
                 parts.append("</ul>")
+
+            # 条件分岐: `explain_lines` を満たす経路を評価する。
 
             if explain_lines:
                 parts.append("<div class='muted'>解説</div><ul>")
                 for ln in explain_lines:
                     parts.append(f"<li>{_render_text_with_links(str(ln), root=root, out_dir=out_dir)}</li>")
+
                 parts.append("</ul>")
+
+            # 条件分岐: `isinstance(table, dict) and table.get("rows")` を満たす経路を評価する。
 
             if isinstance(table, dict) and table.get("rows"):
                 headers = table.get("headers") or []
                 rows = table.get("rows") or []
                 caption = str(table.get("caption") or "")
                 parts.append("<div class='muted'>一覧</div>")
+                # 条件分岐: `caption` を満たす経路を評価する。
                 if caption:
                     parts.append(f"<div class='muted'>{html.escape(caption)}</div>")
+
                 parts.append("<div class='table-wrap'><table><thead><tr>")
                 for h in headers:
                     parts.append(f"<th>{html.escape(str(h))}</th>")
+
                 parts.append("</tr></thead><tbody>")
                 for r in rows:
                     parts.append("<tr>")
                     for cell in (r or []):
                         parts.append(f"<td>{html.escape(str(cell))}</td>")
+
                     parts.append("</tr>")
+
                 parts.append("</tbody></table></div>")
+
+            # 条件分岐: `detail_lines` を満たす経路を評価する。
 
             if detail_lines:
                 parts.append("<div class='muted'>詳細解説</div><ul>")
                 for ln in detail_lines:
                     parts.append(f"<li>{_render_text_with_links(str(ln), root=root, out_dir=out_dir)}</li>")
+
                 parts.append("</ul>")
 
             parts.append("</div>")
@@ -651,6 +782,7 @@ def _extract_roadmap_table(root: Path) -> Dict[str, Any]:
 
     updated_utc: Optional[str] = None
     m = re.search(r"最終更新（UTC）：\s*([0-9]{4}-[0-9]{2}-[0-9]{2})", text)
+    # 条件分岐: `m` を満たす経路を評価する。
     if m:
         updated_utc = m.group(1).strip()
 
@@ -658,8 +790,10 @@ def _extract_roadmap_table(root: Path) -> Dict[str, Any]:
     phases: Dict[int, Tuple[str, str, str]] = {}
     for line in text.splitlines():
         m = re.match(r"\s*-\s*Phase\s*(\d+)（([^）]+)）:\s*(.+)\s*$", line)
+        # 条件分岐: `not m` を満たす経路を評価する。
         if not m:
             continue
+
         phase = int(m.group(1))
         theme = m.group(2).strip()
         status_full = m.group(3).strip()
@@ -674,6 +808,7 @@ def _extract_roadmap_table(root: Path) -> Dict[str, Any]:
     focus_theme: Optional[str] = None
     for phase in sorted(phases.keys()):
         theme, status_short, _status_full = phases[phase]
+        # 条件分岐: `status_short not in ("完了", "一旦完了")` を満たす経路を評価する。
         if status_short not in ("完了", "一旦完了"):
             focus_phase = phase
             focus_theme = theme
@@ -695,11 +830,14 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
     paper_html = root / "output" / "private" / "summary" / "pmodel_paper.html"
 
     j = _try_read_json(json_path)
+    # 条件分岐: `not isinstance(j, dict)` を満たす経路を評価する。
     if not isinstance(j, dict):
         detail_href = None
+        # 条件分岐: `paper_html.exists()` を満たす経路を評価する。
         if paper_html.exists():
             # public report lives in output/private/summary, so link by filename.
             detail_href = "pmodel_paper.html"
+
         return {
             "id": "paper_table1",
             "title": "検証サマリ（Table 1）",
@@ -722,8 +860,10 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
     headers = ["テーマ", "観測量/指標", "データ", "N", "参照", "P-model", "差/指標（技術）", "かんたん解釈"]
     rows: List[List[str]] = []
     for r in rows_dict:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         n = r.get("n")
         rows.append(
             [
@@ -743,8 +883,10 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
         f"生成（UTC）: {generated_utc}" if generated_utc else "生成時刻: （不明）",
         "論文化（Phase 8 / Step 8.2）用の最小サマリ。output/ の確定結果から集計（再計算なし）。",
     ]
+    # 条件分岐: `isinstance(notes, list)` を満たす経路を評価する。
     if isinstance(notes, list):
         for ln in notes[:3]:
+            # 条件分岐: `ln` を満たす経路を評価する。
             if ln:
                 summary_lines.append(str(ln))
 
@@ -770,6 +912,7 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
     frozen_path = root / "output" / "theory" / "frozen_parameters.json"
 
     j = _try_read_json(json_path)
+    # 条件分岐: `not isinstance(j, dict) or not png_path.exists()` を満たす経路を評価する。
     if not isinstance(j, dict) or not png_path.exists():
         return {
             "id": "decisive_scoreboard",
@@ -787,12 +930,15 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
     gamma_p = j.get("gamma_pmodel")
 
     rows = j.get("rows") or []
+    # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
     if not isinstance(rows, list):
         rows = []
 
     # Summary: show the worst |z| among predict rows + a short list.
+
     predict_rows = [r for r in rows if isinstance(r, dict) and str(r.get("kind") or "") == "predict"]
     max_abs_z = None
+    # 条件分岐: `predict_rows` を満たす経路を評価する。
     if predict_rows:
         try:
             max_abs_z = max(float(r.get("abs_z")) for r in predict_rows if r.get("abs_z") is not None)
@@ -800,23 +946,34 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
             max_abs_z = None
 
     summary_lines: List[str] = []
+    # 条件分岐: `beta is not None` を満たす経路を評価する。
     if beta is not None:
+        # 条件分岐: `beta_sigma is not None` を満たす経路を評価する。
         if beta_sigma is not None:
             summary_lines.append(
                 f"β固定: β={_format_num(float(beta), digits=10)} ± {_format_num(float(beta_sigma), digits=3)}（source={beta_source or 'unknown'}）"
             )
         else:
             summary_lines.append(f"β固定: β={_format_num(float(beta), digits=10)}（source={beta_source or 'unknown'}）")
+
+    # 条件分岐: `gamma_p is not None` を満たす経路を評価する。
+
     if gamma_p is not None:
         summary_lines.append(f"P-model: γ=2β-1 → γ={_format_num(float(gamma_p), digits=10)}")
+
+    # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
+
     if max_abs_z is not None:
         summary_lines.append(f"最大|z|（predictのみ）={max_abs_z:.2f}（小さいほど整合）")
 
     # Table: full z-score list
+
     table_rows: List[List[str]] = []
     for r in rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         label = _as_str(r.get("label"))
         kind = _as_str(r.get("kind"))
         obs = _as_str(r.get("observed"))
@@ -827,6 +984,7 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
             z_txt = f"{float(z):+.2f}" if z is not None else ""
         except Exception:
             z_txt = _as_str(z)
+
         table_rows.append([label, kind, obs, pred, sig, z_txt])
 
     table = {
@@ -836,6 +994,7 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
     }
 
     frozen_note = "βは凍結済み"
+    # 条件分岐: `frozen_path.exists()` を満たす経路を評価する。
     if frozen_path.exists():
         frozen_note = "βは凍結済み（frozen_parameters.json）"
 
@@ -867,6 +1026,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
     png_path = root / "output" / "private" / "summary" / "validation_scoreboard.png"
 
     j = _try_read_json(json_path)
+    # 条件分岐: `not isinstance(j, dict) or not png_path.exists()` を満たす経路を評価する。
     if not isinstance(j, dict) or not png_path.exists():
         return {
             "id": "validation_scoreboard",
@@ -887,13 +1047,19 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
 
     def find_metric(row_id: str) -> Optional[str]:
         for r in rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
+            # 条件分岐: `str(r.get("id") or "") == row_id` を満たす経路を評価する。
+
             if str(r.get("id") or "") == row_id:
                 return _as_str(r.get("metric"))
+
         return None
 
     summary_lines: List[str] = []
+    # 条件分岐: `sigma_stats and sigma_stats.get("n")` を満たす経路を評価する。
     if sigma_stats and sigma_stats.get("n"):
         n_sigma = int(sigma_stats.get("n") or 0)
         n1 = int(sigma_stats.get("n_within_1sigma") or 0)
@@ -904,6 +1070,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
             rate2_txt = f"（{float(rate2)*100:.1f}%）" if rate2 is not None else ""
         except Exception:
             rate2_txt = ""
+
         summary_lines.append(f"σ評価可能: 2σ以内 {n2}/{n_sigma} {rate2_txt}、1σ以内 {n1}/{n_sigma}")
 
     ok = int(status_counts.get("ok") or 0)
@@ -912,12 +1079,14 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
     info = int(status_counts.get("info") or 0)
     summary_lines.append(f"全体（要約行）: OK={ok}, 要改善={mixed}, 不一致={ng}, 参考={info}")
 
+    # 条件分岐: `table1_counts` を満たす経路を評価する。
     if table1_counts:
         t_ok = int(table1_counts.get("ok") or 0)
         t_mixed = int(table1_counts.get("mixed") or 0)
         t_ng = int(table1_counts.get("ng") or 0)
         t_info = int(table1_counts.get("info") or 0)
         suffix = ""
+        # 条件分岐: `isinstance(table1_summary, dict)` を満たす経路を評価する。
         if isinstance(table1_summary, dict):
             try:
                 ok_rate = float(table1_summary.get("ok_rate"))
@@ -925,13 +1094,16 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
                 suffix = f" / OK率={ok_rate*100:.1f}% / OK+要改善={ok_mixed_rate*100:.1f}%"
             except Exception:
                 suffix = ""
+
         summary_lines.append(f"Table 1（全27行, 目安）: OK={t_ok}, 要改善={t_mixed}, 不一致={t_ng}, 参考={t_info}{suffix}")
 
     gw_metric = find_metric("gw")
+    # 条件分岐: `gw_metric` を満たす経路を評価する。
     if gw_metric:
         summary_lines.append(f"重力波（要約）: {gw_metric}")
 
     cosmo_ddr = find_metric("cosmo_ddr")
+    # 条件分岐: `cosmo_ddr` を満たす経路を評価する。
     if cosmo_ddr:
         summary_lines.append(f"宇宙論（距離二重性）: {cosmo_ddr}")
 
@@ -942,18 +1114,26 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
     ]
     policy = j.get("policy") if isinstance(j.get("policy"), dict) else {}
     exceptions = policy.get("exceptions") if isinstance(policy.get("exceptions"), dict) else {}
+    # 条件分岐: `exceptions` を満たす経路を評価する。
     if exceptions:
+        # 条件分岐: `isinstance(exceptions.get("cosmo_ddr"), str)` を満たす経路を評価する。
         if isinstance(exceptions.get("cosmo_ddr"), str):
             explain_lines.append("注意: 宇宙論（DDR/Tolman）は距離指標の前提（標準光源/標準定規/進化/不透明度）が強く効く。")
+
+        # 条件分岐: `isinstance(exceptions.get("eht"), str)` を満たす経路を評価する。
+
         if isinstance(exceptions.get("eht"), str):
             explain_lines.append("注意: EHTは κ（リング/影）や散乱・スピン系統が支配的で、κ=1のzは入口。")
 
     table = None
+    # 条件分岐: `table1_breakdown` を満たす経路を評価する。
     if table1_breakdown:
         table_rows: List[List[str]] = []
         for r in table1_breakdown:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             metric_public = _as_str(r.get("metric_public"))
             metric = _as_str(r.get("metric"))
             table_rows.append(
@@ -964,6 +1144,9 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
                     metric_public or metric,
                 ]
             )
+
+        # 条件分岐: `table_rows` を満たす経路を評価する。
+
         if table_rows:
             table = {
                 "headers": ["テーマ", "観測量/指標", "判定（目安）", "かんたん解釈"],
@@ -991,6 +1174,7 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
     png_path = root / "output" / "private" / "summary" / "decisive_falsification.png"
 
     j = _try_read_json(json_path)
+    # 条件分岐: `not isinstance(j, dict) or not png_path.exists()` を満たす経路を評価する。
     if not isinstance(j, dict) or not png_path.exists():
         return {
             "id": "decisive_falsification",
@@ -1005,41 +1189,56 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
         }
 
     policy = j.get("policy") or {}
+    # 条件分岐: `not isinstance(policy, dict)` を満たす経路を評価する。
     if not isinstance(policy, dict):
         policy = {}
+
     beta = policy.get("beta")
     delta_adopted = policy.get("delta")
 
     eht = j.get("eht") or {}
+    # 条件分岐: `not isinstance(eht, dict)` を満たす経路を評価する。
     if not isinstance(eht, dict):
         eht = {}
+
     ratio = eht.get("shadow_diameter_coeff_ratio_p_over_gr")
     diff_percent = eht.get("shadow_diameter_coeff_diff_percent")
     rel_sigma_needed = eht.get("rel_sigma_needed_3sigma_percent")
     eht_rows = eht.get("rows") or []
+    # 条件分岐: `not isinstance(eht_rows, list)` を満たす経路を評価する。
     if not isinstance(eht_rows, list):
         eht_rows = []
 
     delta = j.get("delta") or {}
+    # 条件分岐: `not isinstance(delta, dict)` を満たす経路を評価する。
     if not isinstance(delta, dict):
         delta = {}
+
     gamma_max = delta.get("gamma_max_for_delta_adopted")
     delta_rows = delta.get("rows") or []
+    # 条件分岐: `not isinstance(delta_rows, list)` を満たす経路を評価する。
     if not isinstance(delta_rows, list):
         delta_rows = []
 
     summary_lines: List[str] = []
+    # 条件分岐: `ratio is not None and diff_percent is not None` を満たす経路を評価する。
     if ratio is not None and diff_percent is not None:
         summary_lines.append(
             f"EHT（影直径係数）: 係数比 P/GR={_format_num(float(ratio), digits=10)}（差={_format_num(float(diff_percent), digits=4)}%）"
         )
+
+    # 条件分岐: `rel_sigma_needed is not None` を満たす経路を評価する。
+
     if rel_sigma_needed is not None:
         summary_lines.append(f"3σ判別に必要な総合1σ（相対）≈{_format_num(float(rel_sigma_needed), digits=4)}%")
 
     # EHT: per-target gap summary
+
     for r in eht_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         name = _as_str(r.get("name"))
         sigma_now = r.get("sigma_obs_now_uas")
         sigma_now_kappa = r.get("sigma_obs_now_with_kappa_uas")
@@ -1050,23 +1249,41 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
         gap_kappa_scatt = r.get("gap_factor_now_over_needed_with_kappa_scattering")
         theta_rel_now_pct = r.get("theta_unit_rel_sigma_now_pct")
         theta_rel_need_pct = r.get("theta_unit_rel_sigma_needed_pct")
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
+        # 条件分岐: `sigma_now is None` を満たす経路を評価する。
+
         if sigma_now is None:
             continue
+
         try:
             kappa_hint = ""
             gap_hint = ""
+            # 条件分岐: `sigma_now_kappa is not None` を満たす経路を評価する。
             if sigma_now_kappa is not None:
                 kappa_hint += f"（参考:+κ={_format_num(float(sigma_now_kappa), digits=4)} μas）"
+
+            # 条件分岐: `sigma_now_kappa_scatt is not None` を満たす経路を評価する。
+
             if sigma_now_kappa_scatt is not None:
                 kappa_hint += f"（参考:+κ+散乱={_format_num(float(sigma_now_kappa_scatt), digits=4)} μas）"
+
+            # 条件分岐: `gap_kappa is not None` を満たす経路を評価する。
+
             if gap_kappa is not None:
                 gap_hint += f"（参考×{float(gap_kappa):.2f}）"
+
+            # 条件分岐: `gap_kappa_scatt is not None` を満たす経路を評価する。
+
             if gap_kappa_scatt is not None:
                 gap_hint += f"（参考×{float(gap_kappa_scatt):.2f}）"
 
+            # 条件分岐: `sigma_need is None or not math.isfinite(float(sigma_need))` を満たす経路を評価する。
+
             if sigma_need is None or not math.isfinite(float(sigma_need)):
+                # 条件分岐: `theta_rel_now_pct is not None and theta_rel_need_pct is not None` を満たす経路を評価する。
                 if theta_rel_now_pct is not None and theta_rel_need_pct is not None:
                     summary_lines.append(
                         f"{name}: 必要σ_obs=n/a（θ_unit相対誤差={float(theta_rel_now_pct):.1f}% > 要求={float(theta_rel_need_pct):.1f}%）"
@@ -1074,6 +1291,7 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
                 else:
                     summary_lines.append(f"{name}: 必要σ_obs=n/a（質量/距離の不確かさが支配）")
             else:
+                # 条件分岐: `gap is None or not math.isfinite(float(gap))` を満たす経路を評価する。
                 if gap is None or not math.isfinite(float(gap)):
                     summary_lines.append(
                         f"{name}: 現状σ_obs={_format_num(float(sigma_now), digits=4)} μas{kappa_hint} → 必要σ_obs={_format_num(float(sigma_need), digits=4)} μas"
@@ -1086,6 +1304,7 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
             continue
 
     # δ: compact summary (kept minimal because δ is a constraint, not a measured fit)
+
     if delta_adopted is not None and gamma_max is not None:
         try:
             summary_lines.append(
@@ -1095,13 +1314,18 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
             pass
 
     # Table: EHT gaps
+
     table_rows: List[List[str]] = []
     for r in eht_rows:
+        # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
         if not isinstance(r, dict):
             continue
+
         name = _as_str(r.get("name"))
+        # 条件分岐: `not name` を満たす経路を評価する。
         if not name:
             continue
+
         diff_uas = r.get("diff_uas")
         sigma_now = r.get("sigma_obs_now_uas")
         sigma_now_kappa = r.get("sigma_obs_now_with_kappa_uas")
@@ -1140,6 +1364,7 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
         )
 
     eht_table = None
+    # 条件分岐: `table_rows` を満たす経路を評価する。
     if table_rows:
         eht_table = {
             "headers": [
@@ -1162,12 +1387,14 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
         }
 
     delta_hint_lines: List[str] = []
+    # 条件分岐: `delta_rows` を満たす経路を評価する。
     if delta_rows:
         # Show only the tightest (smallest) delta upper bound as a short hint.
         try:
             tightest = min((r for r in delta_rows if isinstance(r, dict)), key=lambda x: float(x.get("delta_upper_from_gamma")))
             label = _as_str(tightest.get("label"))
             du = tightest.get("delta_upper_from_gamma")
+            # 条件分岐: `label and du is not None` を満たす経路を評価する。
             if label and du is not None:
                 delta_hint_lines.append(f"既知観測の上限（例）: {label} → δ < {float(du):.0e}（概算）")
         except Exception:
@@ -1205,6 +1432,7 @@ def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
     png_path = root / "output" / "private" / "summary" / "decisive_candidates.png"
 
     j = _try_read_json(json_path)
+    # 条件分岐: `not isinstance(j, dict) or not png_path.exists()` を満たす経路を評価する。
     if not isinstance(j, dict) or not png_path.exists():
         return {
             "id": "decisive_candidates",
@@ -1224,24 +1452,39 @@ def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
     eht_gaps: List[str] = []
     delta_gap = None
     for c in candidates:
+        # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
         if not isinstance(c, dict):
             continue
+
         topic = _as_str(c.get("topic"))
+        # 条件分岐: `topic.startswith("EHT")` を満たす経路を評価する。
         if topic.startswith("EHT"):
             tgt = _as_str(c.get("target"))
             gap = c.get("gap_factor_now_over_needed_with_kappa")
+            # 条件分岐: `gap is None` を満たす経路を評価する。
             if gap is None:
                 gap = c.get("gap_factor_now_over_needed")
+
+            # 条件分岐: `tgt and gap is not None` を満たす経路を評価する。
+
             if tgt and gap is not None:
                 try:
                     eht_gaps.append(f"{tgt}: ギャップ≈{_format_num(float(gap), digits=3)}×")
                 except Exception:
                     pass
+
+        # 条件分岐: `topic.startswith("速度飽和")` を満たす経路を評価する。
+
         if topic.startswith("速度飽和"):
             delta_gap = c.get("gap_gamma_needed_over_obs")
 
+    # 条件分岐: `eht_gaps` を満たす経路を評価する。
+
     if eht_gaps:
         summary_lines.append("EHT（影直径係数）の必要精度ギャップ（参考:+κ）: " + " / ".join(eht_gaps))
+
+    # 条件分岐: `delta_gap is not None` を満たす経路を評価する。
+
     if delta_gap is not None:
         try:
             summary_lines.append(f"速度飽和δ: γ_needed/γ_obs_max≈{_format_sci(delta_gap, digits=2)}×（概算）")
@@ -1250,8 +1493,10 @@ def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
 
     table_rows: List[List[str]] = []
     for c in candidates:
+        # 条件分岐: `not isinstance(c, dict)` を満たす経路を評価する。
         if not isinstance(c, dict):
             continue
+
         topic = _as_str(c.get("topic"))
         target = _as_str(c.get("target"))
         observable = _as_str(c.get("observable"))
@@ -1261,42 +1506,56 @@ def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
         now = ""
         gap = ""
 
+        # 条件分岐: `topic.startswith("EHT")` を満たす経路を評価する。
         if topic.startswith("EHT"):
             try:
                 need = f"σ_total≤{_format_num(float(c.get('sigma_needed_3sigma_uas')), digits=3)} μas"
             except Exception:
                 need = ""
+
             try:
                 now_val = c.get("sigma_now_uas")
                 now = f"σ_total≈{_format_num(float(now_val), digits=3)} μas" if now_val is not None else ""
             except Exception:
                 now = ""
+
             try:
                 now_k = c.get("sigma_now_with_kappa_uas")
+                # 条件分岐: `now_k is not None` を満たす経路を評価する。
                 if now_k is not None:
                     now += f"（参考:+κ={_format_num(float(now_k), digits=3)}）"
             except Exception:
                 pass
+
             try:
                 g = c.get("gap_factor_now_over_needed_with_kappa")
+                # 条件分岐: `g is None` を満たす経路を評価する。
                 if g is None:
                     g = c.get("gap_factor_now_over_needed")
+
+                # 条件分岐: `g is not None` を満たす経路を評価する。
+
                 if g is not None:
                     gap = f"{_format_num(float(g), digits=3)}×"
             except Exception:
                 gap = ""
+
+        # 条件分岐: `topic.startswith("速度飽和")` を満たす経路を評価する。
 
         if topic.startswith("速度飽和"):
             try:
                 need = f"γ≳{_format_sci(c.get('gamma_needed_to_probe_delta_adopted'), digits=2)}"
             except Exception:
                 need = ""
+
             try:
                 now = f"γ_max(既知)≈{_format_sci(c.get('gamma_obs_max_in_sources'), digits=2)}"
             except Exception:
                 now = ""
+
             try:
                 g = c.get("gap_gamma_needed_over_obs")
+                # 条件分岐: `g is not None` を満たす経路を評価する。
                 if g is not None:
                     gap = f"{_format_sci(g, digits=2)}×"
             except Exception:
@@ -1334,6 +1593,7 @@ def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
     manuscript_md = root / "doc" / "paper" / "10_manuscript.md"
     sources_md = root / "doc" / "paper" / "20_data_sources.md"
 
+    # 条件分岐: `paper_html.exists()` を満たす経路を評価する。
     if paper_html.exists():
         return {
             "id": "paper_html",
@@ -1371,6 +1631,7 @@ def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
 
 def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[str, Any]]:
     path = root / "output" / "private" / "summary" / "work_history.jsonl"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
 
@@ -1383,6 +1644,7 @@ def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[s
             ev = json.loads(ln)
         except Exception:
             continue
+
         ts = str(ev.get("generated_utc") or "")
         event_type = str(ev.get("event_type") or "")
 
@@ -1392,9 +1654,12 @@ def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[s
 
         outputs = ev.get("outputs") or {}
         out_hint = ""
+        # 条件分岐: `isinstance(outputs, dict)` を満たす経路を評価する。
         if isinstance(outputs, dict):
+            # 条件分岐: `any("bepicolombo" in str(v).lower() for v in outputs.values() if isinstance(v...` を満たす経路を評価する。
             if any("bepicolombo" in str(v).lower() for v in outputs.values() if isinstance(v, str)):
                 continue
+
             preferred = [
                 "public_report_html",
                 "dashboard_png",
@@ -1407,11 +1672,16 @@ def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[s
             ]
             for k in preferred:
                 v = outputs.get(k)
+                # 条件分岐: `isinstance(v, str) and v` を満たす経路を評価する。
                 if isinstance(v, str) and v:
                     out_hint = v
                     break
+
+            # 条件分岐: `not out_hint` を満たす経路を評価する。
+
             if not out_hint:
                 out_hint = ", ".join(sorted(str(k) for k in outputs.keys())[:6])
+
         rows.append([ts, event_type, out_hint])
 
     return {
@@ -1424,6 +1694,7 @@ def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[s
 def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
     status_path = root / "output" / "private" / "summary" / "run_all_status.json"
     st = _try_read_json(status_path)
+    # 条件分岐: `not isinstance(st, dict)` を満たす経路を評価する。
     if not isinstance(st, dict):
         return None
 
@@ -1436,19 +1707,25 @@ def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
     fail_n = 0
     rows: List[List[str]] = []
     for rec in st.get("tasks") or []:
+        # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
             continue
+
         key = str(rec.get("key") or "")
 
         # Public report: do not surface blocked topics.
         if "bepicolombo" in key.lower():
             continue
 
+        # 条件分岐: `rec.get("skipped")` を満たす経路を評価する。
+
         if rec.get("skipped"):
             skipped_n += 1
             reason = str(rec.get("reason") or "")
             rows.append([key, "skipped", "", reason])
             continue
+
+        # 条件分岐: `rec.get("ok") is True` を満たす経路を評価する。
 
         if rec.get("ok") is True:
             ok_n += 1
@@ -1461,11 +1738,17 @@ def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
         rows.append([key, "fail", elapsed_s, log])
 
     summary_lines: List[str] = []
+    # 条件分岐: `generated` を満たす経路を評価する。
     if generated:
         summary_lines.append(f"最終実行（UTC）: {generated}")
+
+    # 条件分岐: `mode` を満たす経路を評価する。
+
     if mode:
         summary_lines.append(f"モード: {mode}")
+
     summary_lines.append(f"タスク: ok={ok_n}, skipped={skipped_n}, fail={fail_n}")
+    # 条件分岐: `include_blocked` を満たす経路を評価する。
     if include_blocked:
         summary_lines.append("include_blocked=1（ブロック中テーマは公開レポートでは非表示）")
 
@@ -1512,29 +1795,45 @@ def _render_llr_detail_html(
         return html.escape(_as_str(text))
 
     selected_info: List[str] = []
+    # 条件分岐: `llr_stem == "llr_primary"` を満たす経路を評価する。
     if llr_stem == "llr_primary":
         src = " / ".join(
             [x for x in [llr_source.get("source"), llr_source.get("target"), llr_source.get("filename")] if x]
         )
+        # 条件分岐: `src` を満たす経路を評価する。
         if src:
             selected_info.append(f"入力（一次データ）: {src}")
         else:
             selected_info.append("入力（一次データ）: EDC公開データ（data/llr にキャッシュ）")
     else:
         selected_info.append("入力（デモ）: demo_llr_like.crd（動作確認用）")
+
+    # 条件分岐: `llr_summary` を満たす経路を評価する。
+
     if llr_summary:
+        # 条件分岐: `llr_summary.get("station")` を満たす経路を評価する。
         if llr_summary.get("station"):
             selected_info.append(f"観測局: {llr_summary.get('station')}")
+
+        # 条件分岐: `llr_summary.get("target")` を満たす経路を評価する。
+
         if llr_summary.get("target"):
             selected_info.append(f"反射器: {llr_summary.get('target')}")
+
+        # 条件分岐: `llr_summary.get("n_npt11") is not None` を満たす経路を評価する。
+
         if llr_summary.get("n_npt11") is not None:
             selected_info.append(f"点数（CRD Normal Point, record 11）: {llr_summary.get('n_npt11')}")
+
+    # 条件分岐: `llr_batch_summary` を満たす経路を評価する。
+
     if llr_batch_summary:
         selected_info.append(
             f"バッチ: {llr_batch_summary.get('n_files')}ファイル / {llr_batch_summary.get('n_points_total')}点（station×reflector）"
         )
 
     # Per-figure details (kept compact but more explicit than the public page).
+
     detail: Dict[str, List[str]] = {
         "llr_time_tag_selection": [
             "観測ファイルに書かれた時刻が tx/rx/mid のどれか不明確な場合、モデル評価時刻がズレて残差が大きく崩れる。",
@@ -1651,11 +1950,14 @@ def _render_llr_detail_html(
     parts.append("<li>LLRグラフが「何の観測量」で「何を比較」しているのかを、図ごとに明確化する。</li>")
     parts.append("<li>モデルの正否は、残差（観測 - モデル）をns精度まで詰めて判断する。</li>")
     parts.append("</ul>")
+    # 条件分岐: `selected_info` を満たす経路を評価する。
     if selected_info:
         parts.append("<div class='muted'>使用データ</div><ul>")
         for ln in selected_info:
             parts.append(f"<li>{_h(ln)}</li>")
+
         parts.append("</ul>")
+
     parts.append("<div class='muted'>関連ドキュメント</div><ul>")
     parts.append("<li><a href='../../doc/llr/README.md'>doc/llr/README.md</a></li>")
     parts.append("<li><a href='../../doc/llr/MODEL_SPEC.md'>doc/llr/MODEL_SPEC.md</a></li>")
@@ -1666,8 +1968,10 @@ def _render_llr_detail_html(
     for g in graphs:
         gid = _as_str(g.get("id"))
         gt = _as_str(g.get("title"))
+        # 条件分岐: `gid and gt` を満たす経路を評価する。
         if gid and gt:
             parts.append(f"<li><a href='#{_h(gid)}'>{_h(gt)}</a></li>")
+
     parts.append("</ul>")
 
     for g in graphs:
@@ -1682,8 +1986,10 @@ def _render_llr_detail_html(
         parts.append(f"<h2 id='{_h(gid)}'>{_h(gt)}</h2>")
         parts.append("<div class='card'>")
         parts.append("<div class='meta'>")
+        # 条件分岐: `kind` を満たす経路を評価する。
         if kind:
             parts.append(f"<span class='badge'>{_h(kind)}</span>")
+
         parts.append("<a class='badge' href='#top'>ページ上部へ</a>")
         parts.append("</div>")
 
@@ -1695,39 +2001,56 @@ def _render_llr_detail_html(
         else:
             parts.append(f"<div class='muted'>Missing: <code>{_h(path)}</code></div>")
 
+        # 条件分岐: `detail.get(gid)` を満たす経路を評価する。
+
         if detail.get(gid):
             parts.append("<div class='muted'>詳細解説</div><ul>")
             for ln in detail[gid]:
                 parts.append(f"<li>{_h(ln)}</li>")
+
             parts.append("</ul>")
+
+        # 条件分岐: `summary_lines` を満たす経路を評価する。
 
         if summary_lines:
             parts.append("<div class='muted'>一覧ページの概要</div><ul>")
             for ln in summary_lines:
                 parts.append(f"<li>{_h(ln)}</li>")
+
             parts.append("</ul>")
+
+        # 条件分岐: `explain_lines` を満たす経路を評価する。
+
         if explain_lines:
             parts.append("<div class='muted'>一覧ページの簡易解説</div><ul>")
             for ln in explain_lines:
                 parts.append(f"<li>{_h(ln)}</li>")
+
             parts.append("</ul>")
+
+        # 条件分岐: `isinstance(table, dict) and table.get("rows")` を満たす経路を評価する。
 
         if isinstance(table, dict) and table.get("rows"):
             headers = table.get("headers") or []
             rows = table.get("rows") or []
             caption = _as_str(table.get("caption") or "")
             parts.append("<div class='muted'>一覧（抜粋）</div>")
+            # 条件分岐: `caption` を満たす経路を評価する。
             if caption:
                 parts.append(f"<div class='muted'>{_h(caption)}</div>")
+
             parts.append("<div class='table-wrap'><table><thead><tr>")
             for h in headers:
                 parts.append(f"<th>{_h(h)}</th>")
+
             parts.append("</tr></thead><tbody>")
             for r in rows:
                 parts.append("<tr>")
                 for cell in (r or []):
                     parts.append(f"<td>{_h(cell)}</td>")
+
                 parts.append("</tr>")
+
             parts.append("</tbody></table></div>")
 
         parts.append("</div>")
@@ -1764,38 +2087,57 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
             v = float(x)
         except Exception:
             return None
+
+        # 条件分岐: `not math.isfinite(v)` を満たす経路を評価する。
+
         if not math.isfinite(v):
             return None
+
         return v
 
     # Bell tests (time-tag / selection)
+
     nist_png = out_q / "nist_belltest_time_tag_bias.png"
     nist_m = _try_read_json(out_q / "nist_belltest_time_tag_bias_metrics.json") or {}
     nist_summary: List[str] = []
+    # 条件分岐: `isinstance(nist_m, dict)` を満たす経路を評価する。
     if isinstance(nist_m, dict):
         ds = nist_m.get("delay_stats_ns") if isinstance(nist_m.get("delay_stats_ns"), dict) else {}
         a = ds.get("alice") if isinstance(ds.get("alice"), dict) else {}
         b = ds.get("bob") if isinstance(ds.get("bob"), dict) else {}
         ksa = _safe_float(a.get("ks_setting0_vs_1"))
         ksb = _safe_float(b.get("ks_setting0_vs_1"))
+        # 条件分岐: `ksa is not None or ksb is not None` を満たす経路を評価する。
         if ksa is not None or ksb is not None:
             nist_summary.append(
                 "設定依存のclick delay（KS距離）: "
                 f"A={_format_num(ksa, digits=3) if ksa is not None else 'n/a'}, "
                 f"B={_format_num(ksb, digits=3) if ksb is not None else 'n/a'}"
             )
+
         am0 = _safe_float(a.get("setting0_median"))
         am1 = _safe_float(a.get("setting1_median"))
         bm0 = _safe_float(b.get("setting0_median"))
         bm1 = _safe_float(b.get("setting1_median"))
+        # 条件分岐: `am0 is not None and am1 is not None` を満たす経路を評価する。
         if am0 is not None and am1 is not None:
             nist_summary.append(f"A median delay: s0={am0:.1f} ns, s1={am1:.1f} ns（Δ={am0-am1:+.1f} ns）")
+
+        # 条件分岐: `bm0 is not None and bm1 is not None` を満たす経路を評価する。
+
         if bm0 is not None and bm1 is not None:
             nist_summary.append(f"B median delay: s0={bm0:.1f} ns, s1={bm1:.1f} ns（Δ={bm0-bm1:+.1f} ns）")
+
+    # 条件分岐: `not nist_summary` を満たす経路を評価する。
+
     if not nist_summary:
         nist_summary = ["time-tag（生ログ）から、設定依存の時間構造が現れるかを可視化（KS距離＋window掃引）。"]
+
+    # 条件分岐: `not nist_png.exists()` を満たす経路を評価する。
+
     if not nist_png.exists():
         nist_summary = ["未生成: python -B scripts/quantum/nist_belltest_time_tag_reanalysis.py"]
+
     cards.append(
         {
             "id": "quantum_bell_nist",
@@ -1818,22 +2160,37 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     delft_png = out_q / "delft_hensen2015_chsh.png"
     delft_m = _try_read_json(out_q / "delft_hensen2015_chsh_metrics.json") or {}
     delft_summary: List[str] = []
+    # 条件分岐: `isinstance(delft_m, dict)` を満たす経路を評価する。
     if isinstance(delft_m, dict):
         base = delft_m.get("baseline") if isinstance(delft_m.get("baseline"), dict) else {}
         s = _safe_float(base.get("S"))
         se = _safe_float(base.get("S_err"))
         nt = base.get("n_trials")
         pv = _safe_float(base.get("p_value"))
+        # 条件分岐: `s is not None and se is not None` を満たす経路を評価する。
         if s is not None and se is not None:
             delft_summary.append(f"baseline CHSH: S={s:.3f}±{se:.3f}")
+
+        # 条件分岐: `nt is not None` を満たす経路を評価する。
+
         if nt is not None:
             delft_summary.append(f"trial数（baseline）: n={int(nt)}")
+
+        # 条件分岐: `pv is not None` を満たす経路を評価する。
+
         if pv is not None:
             delft_summary.append(f"p-value（baseline）={pv:.3g}")
+
+    # 条件分岐: `not delft_summary` を満たす経路を評価する。
+
     if not delft_summary:
         delft_summary = ["event-ready（trial-based）データで、window start の選択に対する CHSH S の感度を可視化。"]
+
+    # 条件分岐: `not delft_png.exists()` を満たす経路を評価する。
+
     if not delft_png.exists():
         delft_summary = ["未生成: python -B scripts/quantum/delft_hensen2015_chsh_reanalysis.py"]
+
     cards.append(
         {
             "id": "quantum_bell_delft",
@@ -1854,6 +2211,7 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     delft2_png = out_q / "delft_hensen2016_srep30289_chsh.png"
     delft2_m = _try_read_json(out_q / "delft_hensen2016_srep30289_chsh_metrics.json") or {}
     delft2_summary: List[str] = []
+    # 条件分岐: `isinstance(delft2_m, dict)` を満たす経路を評価する。
     if isinstance(delft2_m, dict):
         base = delft2_m.get("baseline") if isinstance(delft2_m.get("baseline"), dict) else {}
         combined = base.get("combined") if isinstance(base.get("combined"), dict) else {}
@@ -1861,16 +2219,30 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
         se = _safe_float(combined.get("S_err"))
         nt = base.get("n_trials_total")
         pv = _safe_float(base.get("p_value"))
+        # 条件分岐: `s is not None and se is not None` を満たす経路を評価する。
         if s is not None and se is not None:
             delft2_summary.append(f"baseline combined CHSH: S={s:.3f}±{se:.3f}")
+
+        # 条件分岐: `nt is not None` を満たす経路を評価する。
+
         if nt is not None:
             delft2_summary.append(f"trial数（baseline）: n={int(nt)}")
+
+        # 条件分岐: `pv is not None` を満たす経路を評価する。
+
         if pv is not None:
             delft2_summary.append(f"p-value（baseline）={pv:.3g}")
+
+    # 条件分岐: `not delft2_summary` を満たす経路を評価する。
+
     if not delft2_summary:
         delft2_summary = ["event-ready（trial-based）データで、旧/新 detector を統合し CHSH を評価。"]
+
+    # 条件分岐: `not delft2_png.exists()` を満たす経路を評価する。
+
     if not delft2_png.exists():
         delft2_summary = ["未生成: python -B scripts/quantum/delft_hensen2015_chsh_reanalysis.py --profile hensen2016_srep30289"]
+
     cards.append(
         {
             "id": "quantum_bell_delft_2016",
@@ -1892,20 +2264,31 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     weihs_png = out_q / "weihs1998_chsh_sweep_summary__multi_subdirs.png"
     weihs_m = _try_read_json(out_q / "weihs1998_chsh_sweep_summary__multi_subdirs_metrics.json") or {}
     weihs_summary: List[str] = []
+    # 条件分岐: `isinstance(weihs_m, dict)` を満たす経路を評価する。
     if isinstance(weihs_m, dict):
         series = weihs_m.get("series") if isinstance(weihs_m.get("series"), list) else []
         for s in series:
+            # 条件分岐: `not isinstance(s, dict)` を満たす経路を評価する。
             if not isinstance(s, dict):
                 continue
+
             subdir = _as_str(s.get("subdir"))
             run = _as_str(s.get("run"))
             mS = _safe_float(s.get("max_abs_S_fixed"))
+            # 条件分岐: `subdir and run` を満たす経路を評価する。
             if subdir and run:
                 weihs_summary.append(f"{subdir}/{run}: max|S|={_format_num(mS, digits=4) if mS is not None else 'n/a'}")
+
+    # 条件分岐: `not weihs_summary` を満たす経路を評価する。
+
     if not weihs_summary:
         weihs_summary = ["複数条件（subdir）で coincidence window sweep の感度を横断比較。"]
+
+    # 条件分岐: `not weihs_png.exists()` を満たす経路を評価する。
+
     if not weihs_png.exists():
         weihs_summary = ["未生成: python -B scripts/quantum/weihs1998_time_tag_reanalysis.py（+ summary）"]
+
     cards.append(
         {
             "id": "quantum_bell_weihs",
@@ -1927,10 +2310,12 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     sel_png = out_q / "bell_selection_sensitivity_summary.png"
     sel_m = _try_read_json(out_q / "bell_selection_sensitivity_summary.json") or {}
     sel_summary: List[str] = []
+    # 条件分岐: `isinstance(sel_m, dict)` を満たす経路を評価する。
     if isinstance(sel_m, dict):
         w = sel_m.get("weihs") if isinstance(sel_m.get("weihs"), dict) else {}
         w_min = _safe_float(w.get("abs_S_min"))
         w_max = _safe_float(w.get("abs_S_max"))
+        # 条件分岐: `w_min is not None and w_max is not None` を満たす経路を評価する。
         if w_min is not None and w_max is not None:
             sel_summary.append(f"Weihs |S| range: {_format_num(w_min, digits=3)} → {_format_num(w_max, digits=3)}")
 
@@ -1938,8 +2323,12 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
         jmin = _safe_float(n.get("j_prob_sweep_min"))
         jmax = _safe_float(n.get("j_prob_sweep_max"))
         jtb = _safe_float(n.get("j_prob_trial_best"))
+        # 条件分岐: `jmin is not None and jmax is not None` を満たす経路を評価する。
         if jmin is not None and jmax is not None:
             sel_summary.append(f"NIST J_prob (coincidence): {_format_num(jmin, digits=4)} → {_format_num(jmax, digits=4)}")
+
+        # 条件分岐: `jtb is not None` を満たす経路を評価する。
+
         if jtb is not None:
             sel_summary.append(f"NIST J_prob (trial-based best): {_format_num(jtb, digits=4)}")
 
@@ -1947,29 +2336,41 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
         kjmin = _safe_float(k.get("j_prob_sweep_min"))
         kjmax = _safe_float(k.get("j_prob_sweep_max"))
         kjtb = _safe_float(k.get("j_prob_trial_best"))
+        # 条件分岐: `kjmin is not None and kjmax is not None` を満たす経路を評価する。
         if kjmin is not None and kjmax is not None:
             sel_summary.append(f"Kwiat2013 J_prob: {_format_num(kjmin, digits=4)} → {_format_num(kjmax, digits=4)}")
+
+        # 条件分岐: `kjtb is not None` を満たす経路を評価する。
+
         if kjtb is not None:
             sel_summary.append(f"Kwiat2013 J_prob (baseline): {_format_num(kjtb, digits=4)}")
 
         d15 = sel_m.get("delft2015") if isinstance(sel_m.get("delft2015"), dict) else {}
         dsmin = _safe_float(d15.get("sweep_S_min"))
         dsmax = _safe_float(d15.get("sweep_S_max"))
+        # 条件分岐: `dsmin is not None and dsmax is not None` を満たす経路を評価する。
         if dsmin is not None and dsmax is not None:
             sel_summary.append(f"Delft 2015 CHSH S (sweep): {_format_num(dsmin, digits=3)} → {_format_num(dsmax, digits=3)}")
 
         d16 = sel_m.get("delft2016") if isinstance(sel_m.get("delft2016"), dict) else {}
         d16min = _safe_float(d16.get("sweep_combined_S_min"))
         d16max = _safe_float(d16.get("sweep_combined_S_max"))
+        # 条件分岐: `d16min is not None and d16max is not None` を満たす経路を評価する。
         if d16min is not None and d16max is not None:
             sel_summary.append(
                 f"Delft 2016 CHSH S (combined sweep): {_format_num(d16min, digits=3)} → {_format_num(d16max, digits=3)}"
             )
 
+    # 条件分岐: `not sel_summary` を満たす経路を評価する。
+
     if not sel_summary:
         sel_summary = ["複数データセットで、selection（window/offset）が統計量をどれだけ動かすかを横断可視化。"]
+
+    # 条件分岐: `not sel_png.exists()` を満たす経路を評価する。
+
     if not sel_png.exists():
         sel_summary = ["未生成: python -B scripts/quantum/bell_selection_sensitivity_summary.py"]
+
     cards.append(
         {
             "id": "quantum_bell_selection_sensitivity",
@@ -1991,19 +2392,30 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     qopt_png = out_q / "photon_quantum_interference.png"
     qopt_m = _try_read_json(out_q / "photon_quantum_interference_metrics.json") or {}
     qopt_summary: List[str] = []
+    # 条件分岐: `isinstance(qopt_m, dict)` を満たす経路を評価する。
     if isinstance(qopt_m, dict):
         sp = qopt_m.get("single_photon_interference") if isinstance(qopt_m.get("single_photon_interference"), dict) else {}
         sigL = _safe_float(sp.get("sigma_path_nm_from_visibility"))
+        # 条件分岐: `sigL is not None` を満たす経路を評価する。
         if sigL is not None:
             qopt_summary.append(f"単一光子: V≥0.8 → 等価 path noise σL≈{sigL:.1f} nm（簡易モデル）")
+
         sq = qopt_m.get("squeezing") if isinstance(qopt_m.get("squeezing"), dict) else {}
         eta = _safe_float(sq.get("eta_lower_if_perfect_intrinsic"))
+        # 条件分岐: `eta is not None` を満たす経路を評価する。
         if eta is not None:
             qopt_summary.append(f"スクイーズド光: 10 dB → loss-only bound η≥{eta:.3f}")
+
+    # 条件分岐: `not qopt_summary` を満たす経路を評価する。
+
     if not qopt_summary:
         qopt_summary = ["単一光子・HOM・スクイーズド光の観測量を一次ソースで固定し、簡易な対応関係（mapping）を提示。"]
+
+    # 条件分岐: `not qopt_png.exists()` を満たす経路を評価する。
+
     if not qopt_png.exists():
         qopt_summary = ["未生成: python -B scripts/quantum/photon_quantum_interference.py"]
+
     cards.append(
         {
             "id": "quantum_photon_interference",
@@ -2025,23 +2437,36 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     qed_png = out_q / "qed_vacuum_precision.png"
     qed_m = _try_read_json(out_q / "qed_vacuum_precision_metrics.json") or {}
     qed_summary: List[str] = []
+    # 条件分岐: `isinstance(qed_m, dict)` を満たす経路を評価する。
     if isinstance(qed_m, dict):
         # Casimir: prefer the primary source's stated relative precision if present.
         rel_prec = None
         try:
             sources = qed_m.get("sources") if isinstance(qed_m.get("sources"), list) else []
+            # 条件分岐: `sources and isinstance(sources[0], dict)` を満たす経路を評価する。
             if sources and isinstance(sources[0], dict):
                 abs_v = (sources[0].get("abstract_value") or {}) if isinstance(sources[0].get("abstract_value"), dict) else {}
                 rel_prec = _safe_float(abs_v.get("relative_precision_at_closest_separation"))
         except Exception:
             rel_prec = None
+
+        # 条件分岐: `rel_prec is not None` を満たす経路を評価する。
+
         if rel_prec is not None:
             qed_summary.append(f"Casimir: closest-separation precision ≈{rel_prec*100:.1f}%（一次ソース）")
+
         qed_summary.append("Lamb shift: 代表スケーリング（Z^4）＋高次（Z^6）を整理（定義と系統の入口）")
+
+    # 条件分岐: `not qed_summary` を満たす経路を評価する。
+
     if not qed_summary:
         qed_summary = ["Casimir/Lamb の一次ソースと観測量を固定し、量子解釈の最低要件（再現できなければ棄却）を明文化。"]
+
+    # 条件分岐: `not qed_png.exists()` を満たす経路を評価する。
+
     if not qed_png.exists():
         qed_summary = ["未生成: python -B scripts/quantum/qed_vacuum_precision.py"]
+
     cards.append(
         {
             "id": "quantum_qed_vacuum_precision",
@@ -2086,13 +2511,16 @@ def main() -> int:
     viking_peak = _extract_viking_peak(root)
 
     viking_notes: List[str] = ["最大遅延: 文献で約200-250 マイクロ秒"]
+    # 条件分岐: `viking_peak.get("peak_us") is not None` を満たす経路を評価する。
     if viking_peak.get("peak_us") is not None:
         peak_us = float(viking_peak["peak_us"])
         peak_t = _as_str(viking_peak.get("peak_time_utc"))
+        # 条件分岐: `peak_t` を満たす経路を評価する。
         if peak_t:
             viking_notes.insert(0, f"P-model 最大（往復）={peak_us:.2f} μs（{peak_t}）")
         else:
             viking_notes.insert(0, f"P-model 最大（往復）={peak_us:.2f} μs")
+
         viking_notes.append("文献代表値: 約250 μs")
 
     solar_best_label = _as_str(solar_m.get("observed_best_label")) or _as_str(solar_m.get("observed_best_id"))
@@ -2193,6 +2621,7 @@ def main() -> int:
         )
 
         notes = panel_notes.get(title, [])
+        # 条件分岐: `notes` を満たす経路を評価する。
         if notes:
             ax_note.text(
                 0.0,
@@ -2206,6 +2635,7 @@ def main() -> int:
             )
 
         expl = panel_explain.get(title, [])
+        # 条件分岐: `expl` を満たす経路を評価する。
         if expl:
             ax_explain.text(
                 0.0,
@@ -2218,9 +2648,12 @@ def main() -> int:
                 linespacing=1.12,
             )
 
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
+
         if not path.exists():
             ax_img.text(0.03, 0.97, f"Missing:\n{path}", transform=ax_img.transAxes, va="top")
             continue
+
         try:
             img = mpimg.imread(str(path))
             ax_img.imshow(img)
@@ -2242,8 +2675,10 @@ def main() -> int:
     try:
         p = root / "output" / "cassini" / "cassini_pds_vs_digitized_metrics.csv"
         txt = _try_read_text(p)
+        # 条件分岐: `txt` を満たす経路を評価する。
         if txt:
             lines = [ln.strip() for ln in txt.splitlines() if ln.strip()]
+            # 条件分岐: `len(lines) >= 2` を満たす経路を評価する。
             if len(lines) >= 2:
                 header = lines[0].split(",")
                 vals = lines[1].split(",")
@@ -2258,8 +2693,10 @@ def main() -> int:
                     "n_zero_shift",
                 ):
                     v = row.get(k)
+                    # 条件分岐: `v is None` を満たす経路を評価する。
                     if v is None:
                         continue
+
                     try:
                         cassini_pds_vs_dig[k] = float(v) if (("." in v) or ("e" in v.lower())) else int(v)
                     except Exception:
@@ -2271,35 +2708,51 @@ def main() -> int:
     cassini_effective_source = ""
     cassini_obs_label = ""
     cassini_fallback_reason = ""
+    # 条件分岐: `isinstance(cassini_run_meta, dict)` を満たす経路を評価する。
     if isinstance(cassini_run_meta, dict):
         cassini_effective_source = str(cassini_run_meta.get("effective_source") or "")
         cassini_fallback_reason = str(cassini_run_meta.get("fallback_reason") or "")
         labels = cassini_run_meta.get("labels")
+        # 条件分岐: `isinstance(labels, dict)` を満たす経路を評価する。
         if isinstance(labels, dict):
             cassini_obs_label = str(labels.get("obs_label") or "")
 
     def _cassini_obs_kind() -> str:
+        # 条件分岐: `cassini_effective_source.startswith("pds_tdf")` を満たす経路を評価する。
         if cassini_effective_source.startswith("pds_tdf"):
             return "観測（一次データ: PDS TDF）"
+
+        # 条件分岐: `cassini_effective_source.startswith("pds_odf")` を満たす経路を評価する。
+
         if cassini_effective_source.startswith("pds_odf"):
             return "観測（一次データ: PDS ODF）"
+
+        # 条件分岐: `cassini_effective_source.startswith("digitized")` を満たす経路を評価する。
+
         if cassini_effective_source.startswith("digitized"):
             return "観測（論文図をデジタイズ）"
+
         return "観測（ソース不明）"
 
     cassini_obs_kind = _cassini_obs_kind()
+    # 条件分岐: `cassini_fallback_reason == "pds_cache_missing"` を満たす経路を評価する。
     if cassini_fallback_reason == "pds_cache_missing":
         cassini_obs_kind += "（PDSキャッシュ未取得のため代替）"
 
     cassini_source_tag = "観測"
+    # 条件分岐: `cassini_effective_source.startswith("pds_tdf_processed")` を満たす経路を評価する。
     if cassini_effective_source.startswith("pds_tdf_processed"):
         cassini_source_tag = "一次データ（PDS TDF, 処理後）"
+    # 条件分岐: 前段条件が不成立で、`cassini_effective_source.startswith("pds_tdf_raw")` を追加評価する。
     elif cassini_effective_source.startswith("pds_tdf_raw"):
         cassini_source_tag = "一次データ（PDS TDF, 生値）"
+    # 条件分岐: 前段条件が不成立で、`cassini_effective_source.startswith("pds_odf_raw")` を追加評価する。
     elif cassini_effective_source.startswith("pds_odf_raw"):
         cassini_source_tag = "一次データ（PDS ODF, 生値）"
+    # 条件分岐: 前段条件が不成立で、`cassini_effective_source.startswith("digitized")` を追加評価する。
     elif cassini_effective_source.startswith("digitized"):
         cassini_source_tag = "論文図デジタイズ"
+
     bepi_more_psa = _extract_bepicolombo_more_psa_status(root)
     bepi_spice_psa = _extract_bepicolombo_spice_psa_status(root)
     bepi_shapiro_pred = _extract_bepicolombo_shapiro_predict(root)
@@ -2321,6 +2774,7 @@ def main() -> int:
     try:
         outliers_csv = root / "output" / "llr" / "batch" / "llr_outliers.csv"
         rows = _try_read_csv_rows(outliers_csv, max_rows=50) if outliers_csv.exists() else []
+        # 条件分岐: `rows` を満たす経路を評価する。
         if rows:
             table_rows: List[List[str]] = []
             for r in rows:
@@ -2335,10 +2789,12 @@ def main() -> int:
                     delta_s = _format_num(float(delta), digits=6)
                 except Exception:
                     delta_s = str(delta)
+
                 try:
                     elev_s = _format_num(float(elev), digits=4)
                 except Exception:
                     elev_s = str(elev)
+
                 table_rows.append([t, st, tgt, delta_s, elev_s, tag, src])
 
             llr_outliers_table = {
@@ -2353,6 +2809,7 @@ def main() -> int:
     try:
         diag_csv = root / "output" / "llr" / "batch" / "llr_outliers_diagnosis.csv"
         rows = _try_read_csv_rows(diag_csv, max_rows=50) if diag_csv.exists() else []
+        # 条件分岐: `rows` を満たす経路を評価する。
         if rows:
             table_rows = []
             for r in rows:
@@ -2408,14 +2865,19 @@ def main() -> int:
         llr_outliers_diag_table = None
 
     def _fmt_ns_to_us(x: Any) -> str:
+        # 条件分岐: `not isinstance(x, (int, float))` を満たす経路を評価する。
         if not isinstance(x, (int, float)):
             return "n/a"
+
         return _format_num(float(x) / 1e3, digits=4)
 
     def _llr_best_time_tag_summary_lines() -> List[str]:
+        # 条件分岐: `not llr_time_tag_best` を満たす経路を評価する。
         if not llr_time_tag_best:
             return []
+
         best_by_station = llr_time_tag_best.get("best_mode_by_station") or {}
+        # 条件分岐: `not isinstance(best_by_station, dict) or not best_by_station` を満たす経路を評価する。
         if not isinstance(best_by_station, dict) or not best_by_station:
             return []
 
@@ -2424,17 +2886,22 @@ def main() -> int:
         s = ", ".join([f"{k}={v}" for k, v in ordered])
 
         metric = llr_time_tag_best.get("selection_metric")
+        # 条件分岐: `metric` を満たす経路を評価する。
         if metric:
             return [f"最適time-tag（局別）: {s}", f"評価指標: {metric}"]
+
         return [f"最適time-tag（局別）: {s}"]
 
     def _llr_outliers_diag_summary_lines() -> List[str]:
+        # 条件分岐: `not llr_outliers_diag_summary` を満たす経路を評価する。
         if not llr_outliers_diag_summary:
             return ["外れ値診断（output/llr/batch/llr_outliers_diagnosis_summary.json）が見つかりません。"]
+
         tt = llr_outliers_diag_summary.get("time_tag_sensitivity") if isinstance(llr_outliers_diag_summary, dict) else None
         tm = llr_outliers_diag_summary.get("target_mixing_sensitivity") if isinstance(llr_outliers_diag_summary, dict) else None
         by_cause = llr_outliers_diag_summary.get("by_cause_hint") if isinstance(llr_outliers_diag_summary, dict) else None
         lines: List[str] = []
+        # 条件分岐: `isinstance(tt, dict)` を満たす経路を評価する。
         if isinstance(tt, dict):
             lines.append(
                 "time-tag感度: computed="
@@ -2448,6 +2915,9 @@ def main() -> int:
                 + "/"
                 + str(llr_outliers_diag_summary.get("n_outliers"))
             )
+
+        # 条件分岐: `isinstance(tm, dict)` を満たす経路を評価する。
+
         if isinstance(tm, dict):
             lines.append(
                 "ターゲット混入推定: "
@@ -2456,34 +2926,46 @@ def main() -> int:
                 + str(llr_outliers_diag_summary.get("n_outliers"))
             )
             try:
+                # 条件分岐: `int(tm.get("n_suspected") or 0) > 0` を満たす経路を評価する。
                 if int(tm.get("n_suspected") or 0) > 0:
                     lines.append("注記: 混入疑いは統計から除外（再割当しない）")
             except Exception:
                 pass
+
+        # 条件分岐: `isinstance(by_cause, dict) and by_cause` を満たす経路を評価する。
+
         if isinstance(by_cause, dict) and by_cause:
             parts = [f"{k}={v}" for k, v in by_cause.items()]
             lines.append("原因分類: " + ", ".join(parts))
+
         lines.append("一覧: output/llr/batch/llr_outliers_diagnosis.csv")
         return lines
 
     def _llr_outliers_target_mixing_summary_lines() -> List[str]:
+        # 条件分岐: `not llr_outliers_diag_summary` を満たす経路を評価する。
         if not llr_outliers_diag_summary:
             return ["外れ値診断（output/llr/batch/llr_outliers_diagnosis_summary.json）が見つかりません。"]
+
         tm = llr_outliers_diag_summary.get("target_mixing_sensitivity") if isinstance(llr_outliers_diag_summary, dict) else None
+        # 条件分岐: `not isinstance(tm, dict)` を満たす経路を評価する。
         if not isinstance(tm, dict):
             return ["ターゲット混入診断（target_mixing_sensitivity）が見つかりません。"]
+
         n_outliers = llr_outliers_diag_summary.get("n_outliers")
         n_sus = tm.get("n_suspected")
         lines = [f"ターゲット混入推定: {_format_num(n_sus)}/{_format_num(n_outliers)}", "注記: 疑いがあっても自動再割当しない（統計から除外・一次データ行確認）"]
         crit = tm.get("criteria") if isinstance(tm.get("criteria"), dict) else None
+        # 条件分岐: `isinstance(crit, dict)` を満たす経路を評価する。
         if isinstance(crit, dict):
             try:
                 lines.append(f"判定基準: |Δ_raw|≥{_format_num(crit.get('abs_delta_raw_ge_ns'))} ns かつ best |Δ_raw|≤{_format_num(crit.get('best_abs_delta_raw_le_ns'))} ns")
             except Exception:
                 pass
+
         return lines
 
     def _bepicolombo_more_psa_summary_lines() -> List[str]:
+        # 条件分岐: `not bepi_more_psa` を満たす経路を評価する。
         if not bepi_more_psa:
             return [
                 "一次ソース（ESA PSA）に公開されているかを確認し、検証の入口とする。",
@@ -2500,17 +2982,24 @@ def main() -> int:
             f"ドキュメント: {downloaded}/{total} 件をローカル保持",
             f"データ本体ディレクトリ公開: {'あり' if has_data_dirs else 'なし（404の可能性）'}",
         ]
+        # 条件分岐: `isinstance(listing, dict)` を満たす経路を評価する。
         if isinstance(listing, dict):
             base_entries = listing.get("base_entries") if isinstance(listing.get("base_entries"), list) else []
+            # 条件分岐: `base_entries` を満たす経路を評価する。
             if base_entries:
                 n_dir = sum(1 for e in base_entries if isinstance(e, dict) and e.get("is_dir") == "1")
                 n_file = sum(1 for e in base_entries if isinstance(e, dict) and e.get("is_dir") == "0")
                 lines.append(f"bc_mpo_more/ 直下: dir={n_dir}, file={n_file}")
+
+        # 条件分岐: `errs` を満たす経路を評価する。
+
         if errs:
             lines.append(f"注意: エラー {len(errs)} 件（details: output/bepicolombo/more_psa_status.json）")
+
         return lines
 
     def _bepicolombo_spice_psa_summary_lines() -> List[str]:
+        # 条件分岐: `not bepi_spice_psa` を満たす経路を評価する。
         if not bepi_spice_psa:
             return [
                 "幾何（軌道/座標系）の一次ソースとして、SPICE kernels の公開状況を確認する。",
@@ -2524,17 +3013,26 @@ def main() -> int:
         craft = inv.get("craft_counts") if isinstance(inv.get("craft_counts"), dict) else {}
 
         lines: List[str] = []
+        # 条件分岐: `inv_name` を満たす経路を評価する。
         if inv_name:
             lines.append(f"最新inventory: {inv_name}")
+
+        # 条件分岐: `n_total is not None` を満たす経路を評価する。
+
         if n_total is not None:
             lines.append(f"inventory件数: {n_total}")
+
+        # 条件分岐: `craft` を満たす経路を評価する。
+
         if craft:
             lines.append(
                 f"spacecraft内訳: MPO={craft.get('mpo')}, MMO={craft.get('mmo')}, MTM={craft.get('mtm')}, other={craft.get('other')}"
             )
+
         return lines
 
     def _bepicolombo_shapiro_predict_summary_lines() -> List[str]:
+        # 条件分岐: `not bepi_shapiro_pred` を満たす経路を評価する。
         if not bepi_shapiro_pred:
             return [
                 "SPICE（一次ソース）で幾何を計算し、太陽会合での Shapiro y(t) を予測する。",
@@ -2549,19 +3047,34 @@ def main() -> int:
         raw_b = bepi_shapiro_pred.get("b_min_raw_rsun_in_window")
 
         lines: List[str] = []
+        # 条件分岐: `t0` を満たす経路を評価する。
         if t0:
             lines.append(f"会合中心（b_min）: {t0}")
+
+        # 条件分岐: `bmin is not None` を満たす経路を評価する。
+
         if bmin is not None:
             lines.append(f"b_min={_format_num(bmin, digits=4)} R_sun（閾値={_format_num(min_b, digits=3)} R_sun）")
+
+        # 条件分岐: `ypk is not None` を満たす経路を評価する。
+
         if ypk is not None:
             lines.append(f"y_peak（Eq2, |y|最大）={_format_num(ypk, digits=4)}")
+
+        # 条件分岐: `isinstance(dt_rng, list) and len(dt_rng) == 2` を満たす経路を評価する。
+
         if isinstance(dt_rng, list) and len(dt_rng) == 2:
             lines.append(f"往復Δt（μs, 非遮蔽のみ）={_format_num(dt_rng[0], digits=2)} .. {_format_num(dt_rng[1], digits=2)}")
+
+        # 条件分岐: `raw_b is not None` を満たす経路を評価する。
+
         if raw_b is not None:
             lines.append(f"参考: 窓内の最小b（無制限）={_format_num(raw_b, digits=4)} R_sun")
+
         return lines
 
     def _bepicolombo_conjunction_catalog_summary_lines() -> List[str]:
+        # 条件分岐: `not bepi_conj_catalog` を満たす経路を評価する。
         if not bepi_conj_catalog:
             return [
                 "SPICE（一次ソース）で会合イベントを抽出し、Shapiro信号の強さを一覧化する。",
@@ -2569,23 +3082,28 @@ def main() -> int:
             ]
 
         summ = bepi_conj_catalog.get("summary") if isinstance(bepi_conj_catalog, dict) else None
+        # 条件分岐: `not isinstance(summ, dict)` を満たす経路を評価する。
         if not isinstance(summ, dict):
             summ = {}
 
         lines: List[str] = []
         span = summ.get("span_utc") if isinstance(summ.get("span_utc"), dict) else {}
+        # 条件分岐: `isinstance(span, dict)` を満たす経路を評価する。
         if isinstance(span, dict):
             a = span.get("start")
             b = span.get("stop")
+            # 条件分岐: `a and b` を満たす経路を評価する。
             if a and b:
                 lines.append(f"期間: {a} 〜 {b}")
 
         n_events = summ.get("n_events")
         n_usable = summ.get("n_usable_events")
+        # 条件分岐: `n_events is not None` を満たす経路を評価する。
         if n_events is not None:
             lines.append(f"イベント数: {n_events}（usable: {n_usable}）")
 
         bmin = summ.get("b_min_nonocculted_rsun_min")
+        # 条件分岐: `bmin is not None` を満たす経路を評価する。
         if bmin is not None:
             try:
                 lines.append(f"最小 b（非遮蔽）: {float(bmin):.6f} R_sun")
@@ -2593,6 +3111,7 @@ def main() -> int:
                 pass
 
         dtmax = summ.get("dt_roundtrip_us_max")
+        # 条件分岐: `dtmax is not None` を満たす経路を評価する。
         if dtmax is not None:
             try:
                 lines.append(f"最大 Δt（非遮蔽）: {float(dtmax):.2f} μs")
@@ -2604,6 +3123,7 @@ def main() -> int:
             if isinstance(bepi_conj_catalog.get("scan"), dict)
             else None
         )
+        # 条件分岐: `step is not None` を満たす経路を評価する。
         if step is not None:
             try:
                 lines.append(f"refine_step={float(step):.0f} s（時刻精度の目安）")
@@ -2616,12 +3136,15 @@ def main() -> int:
     try:
         docs = bepi_more_docs.get("documents") if isinstance(bepi_more_docs, dict) else None
         generated = bepi_more_docs.get("generated_utc") if isinstance(bepi_more_docs, dict) else None
+        # 条件分岐: `isinstance(docs, list) and docs` を満たす経路を評価する。
         if isinstance(docs, list) and docs:
             headers = ["タイトル", "文書番号", "版", "出版年", "発行日", "ファイル"]
             rows: List[List[str]] = []
             for d in docs:
+                # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
                 if not isinstance(d, dict):
                     continue
+
                 rows.append(
                     [
                         _as_str(d.get("title")),
@@ -2632,6 +3155,7 @@ def main() -> int:
                         _as_str(d.get("file_name")),
                     ]
                 )
+
             bepi_docs_table = {
                 "headers": headers,
                 "rows": rows,
@@ -2655,8 +3179,12 @@ def main() -> int:
         "左は可視化のため近日点移動を誇張（cを小さくした表示）。",
         "右は実Cでの近日点移動（角秒）を周回ごとに累積。",
     ]
+    # 条件分岐: `mercury_p_century is not None` を満たす経路を評価する。
     if mercury_p_century is not None:
         mercury_summary_lines.insert(0, f"P-model 推定={mercury_p_century:.3f} 角秒/世紀（実C）")
+
+    # 条件分岐: `mercury_ref is not None` を満たす経路を評価する。
+
     if mercury_ref is not None:
         mercury_summary_lines.insert(1, f"参照（観測残差の代表）≈{mercury_ref:.2f} 角秒/世紀")
 
@@ -2685,6 +3213,7 @@ def main() -> int:
     eht_m87_epoch = (
         _try_read_json(root / "output" / "eht" / "eht_m87_persistent_shadow_ring_diameter_metrics.json") or {}
     )
+    # 条件分岐: `isinstance(eht_m87_epoch, dict) and eht_m87_epoch` を満たす経路を評価する。
     if isinstance(eht_m87_epoch, dict) and eht_m87_epoch:
         rms = (
             eht_m87_epoch.get("ring_measurements")
@@ -2693,8 +3222,10 @@ def main() -> int:
         )
         parts: List[str] = []
         for rm in rms:
+            # 条件分岐: `not isinstance(rm, dict)` を満たす経路を評価する。
             if not isinstance(rm, dict):
                 continue
+
             epoch = str(rm.get("epoch") or "")
             try:
                 d = float(rm.get("diameter_uas"))
@@ -2702,13 +3233,21 @@ def main() -> int:
                 sp = float(rm.get("sigma_plus_uas"))
             except Exception:
                 continue
+
+            # 条件分岐: `epoch` を満たす経路を評価する。
+
             if epoch:
+                # 条件分岐: `abs(sm - sp) < 1e-12` を満たす経路を評価する。
                 if abs(sm - sp) < 1e-12:
                     parts.append(f"{epoch}: {d:.1f}±{sm:.1f} µas")
                 else:
                     parts.append(f"{epoch}: {d:.1f}(-{sm:.1f}/+{sp:.1f}) µas")
+
+        # 条件分岐: `parts` を満たす経路を評価する。
+
         if parts:
             eht_m87_multi_epoch_summary_lines.append(" / ".join(parts))
+
         try:
             d = float(eht_m87_epoch.get("delta_2018_minus_2017_uas"))
             s = float(eht_m87_epoch.get("delta_sigma_uas_avg_sym"))
@@ -2725,6 +3264,7 @@ def main() -> int:
     eht_kerr_def = (
         _try_read_json(root / "output" / "eht" / "eht_kerr_shadow_coeff_definition_sensitivity_metrics.json") or {}
     )
+    # 条件分岐: `isinstance(eht_kerr_grid, dict) and eht_kerr_grid` を満たす経路を評価する。
     if isinstance(eht_kerr_grid, dict) and eht_kerr_grid:
         try:
             c = (eht_kerr_grid.get("coefficients") or {}) if isinstance(eht_kerr_grid.get("coefficients"), dict) else {}
@@ -2733,20 +3273,26 @@ def main() -> int:
             eht_kerr_grid_summary_lines.append(f"P-model係数は Kerr係数レンジより +{d0:.2f}%〜+{d1:.2f}%（avg(width,height)）")
         except Exception:
             pass
+
         ovs = eht_kerr_grid.get("object_overlays") if isinstance(eht_kerr_grid.get("object_overlays"), list) else []
         for ov in ovs:
+            # 条件分岐: `not isinstance(ov, dict)` を満たす経路を評価する。
             if not isinstance(ov, dict):
                 continue
+
             name = str(ov.get("name") or ov.get("key") or "")
             try:
                 d0 = float(ov.get("delta_p_over_kerr_min_percent"))
                 d1 = float(ov.get("delta_p_over_kerr_max_percent"))
+                # 条件分岐: `name` を満たす経路を評価する。
                 if name:
                     eht_kerr_grid_summary_lines.append(f"{name}: +{d0:.2f}%〜+{d1:.2f}%（制約下）")
             except Exception:
                 continue
     else:
         eht_kerr_grid_summary_lines = ["出力未生成: scripts/eht/eht_kerr_shadow_coeff_grid.py を実行してください。"]
+
+    # 条件分岐: `isinstance(eht_kerr_def, dict) and eht_kerr_def` を満たす経路を評価する。
 
     if isinstance(eht_kerr_def, dict) and eht_kerr_def:
         try:
@@ -2755,6 +3301,7 @@ def main() -> int:
             eht_kerr_def_sens_summary_lines.append(f"定義依存 spread: max≈{smax:.2f}% / median≈{smed:.3f}%")
         except Exception:
             pass
+
         try:
             rg = (eht_kerr_def.get("ranges_global") or {}) if isinstance(eht_kerr_def.get("ranges_global"), dict) else {}
             env = (rg.get("envelope") or {}) if isinstance(rg.get("envelope"), dict) else {}
@@ -2765,12 +3312,19 @@ def main() -> int:
             pass
     else:
         eht_kerr_def_sens_summary_lines = ["出力未生成: scripts/eht/eht_kerr_shadow_coeff_definition_sensitivity.py を実行してください。"]
+
+    # 条件分岐: `eht_rows` を満たす経路を評価する。
+
     if eht_rows:
+        # 条件分岐: `eht_beta is not None` を満たす経路を評価する。
         if eht_beta is not None:
             eht_summary_lines.append(f"P-model は β={eht_beta:g}（Cassini拘束により概ね1）で計算。")
+
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
             obs = r.get("ring_diameter_obs_uas")
             obs_s = r.get("ring_diameter_obs_uas_sigma")
@@ -2788,15 +3342,19 @@ def main() -> int:
                 continue
 
         # Phase 4: differential prediction (P-model vs GR)
+
         try:
             p4 = (eht_cmp.get("phase4") or {}) if isinstance(eht_cmp, dict) else {}
             ratio = float(p4.get("shadow_diameter_coeff_ratio_p_over_gr"))
             eht_diff_summary_lines.append(f"差分予測（係数比 P/GR）={ratio:.4f}（差 {(ratio-1)*100:.2f}%）")
         except Exception:
             pass
+
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
             try:
                 d = float(r.get("shadow_diameter_diff_p_minus_gr_uas"))
@@ -2804,8 +3362,14 @@ def main() -> int:
                 need = float(r.get("shadow_diameter_sigma_obs_needed_3sigma_uas"))
             except Exception:
                 continue
+
+            # 条件分岐: `not (name and (d == d) and (ds == ds))` を満たす経路を評価する。
+
             if not (name and (d == d) and (ds == ds)):
                 continue
+
+            # 条件分岐: `need == need and need > 0` を満たす経路を評価する。
+
             if need == need and need > 0:
                 eht_diff_summary_lines.append(f"{name}: 差={d:+.2f}±{ds:.2f} μas、3σ判別に必要な観測誤差(1σ)<{need:.2f} μas")
             else:
@@ -2813,23 +3377,28 @@ def main() -> int:
                 try:
                     rel = float(r.get("theta_unit_rel_sigma", float("nan")))
                     rel_req = float(r.get("theta_unit_rel_sigma_required_3sigma", float("nan")))
+                    # 条件分岐: `math.isfinite(rel) and math.isfinite(rel_req) and rel_req > 0` を満たす経路を評価する。
                     if math.isfinite(rel) and math.isfinite(rel_req) and rel_req > 0:
                         extra = f"（θ_unit相対誤差={rel*100:.1f}% > 要求={rel_req*100:.1f}%）"
                 except Exception:
                     extra = ""
+
                 eht_diff_summary_lines.append(
                     f"{name}: 差={d:+.2f}±{ds:.2f} μas、3σ判別に必要精度=n/a（質量/距離の不確かさが支配）{extra}"
                 )
 
         # Systematics: ring diameter vs shadow diameter (kappa), and Kerr coefficient range (reference)
+
         try:
             kerr_def = (
                 (eht_cmp.get("reference_gr_kerr_definition_sensitivity") or {}) if isinstance(eht_cmp, dict) else {}
             )
+            # 条件分岐: `isinstance(kerr_def, dict) and kerr_def.get("coeff_min") is not None and kerr...` を満たす経路を評価する。
             if isinstance(kerr_def, dict) and kerr_def.get("coeff_min") is not None and kerr_def.get("coeff_max") is not None:
                 kmin = float(kerr_def.get("coeff_min"))
                 kmax = float(kerr_def.get("coeff_max"))
                 spread = kerr_def.get("definition_spread_rel_max")
+                # 条件分岐: `spread is not None` を満たす経路を評価する。
                 if spread is not None:
                     eht_sys_summary_lines.append(
                         f"参考: GR（Kerr）係数レンジ={kmin:.3f}–{kmax:.3f}（definition envelope; max spread≈{float(spread)*100:.2f}%）"
@@ -2844,9 +3413,12 @@ def main() -> int:
                 eht_sys_summary_lines.append(f"参考: GR（Kerr）係数レンジ={kmin:.3f}–{kmax:.3f}（定義={method}）")
         except Exception:
             pass
+
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
             try:
                 kp = float(r.get("kappa_ring_over_shadow_fit_pmodel"))
@@ -2855,23 +3427,32 @@ def main() -> int:
                 kgs = float(r.get("kappa_ring_over_shadow_fit_gr_sigma"))
             except Exception:
                 continue
+
+            # 条件分岐: `name and (kp == kp) and (kg == kg)` を満たす経路を評価する。
+
             if name and (kp == kp) and (kg == kg):
                 eht_sys_summary_lines.append(f"{name}: κ(P-model)={kp:.3f}±{kps:.3f}, κ(GR)={kg:.3f}±{kgs:.3f}")
 
         # Kappa precision requirement (3σ discrimination) summary.
+
         eht_kappa_precision_summary_lines.append("κ（リング/シャドウ比）の必要精度（相対, 1σ；3σ判別の目安）。")
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
+            # 条件分岐: `not name` を満たす経路を評価する。
             if not name:
                 continue
+
             try:
                 ring = float(r.get("ring_diameter_obs_uas", float("nan")))
                 ring_s = float(r.get("ring_diameter_obs_uas_sigma", float("nan")))
                 ring_rel = ring_s / ring if ring > 0 else float("nan")
             except Exception:
                 ring_rel = float("nan")
+
             try:
                 req0 = float(r.get("kappa_sigma_required_3sigma_if_ring_sigma_zero", float("nan")))
                 req_cur = float(r.get("kappa_sigma_required_3sigma_if_ring_sigma_current", float("nan")))
@@ -2882,19 +3463,26 @@ def main() -> int:
                 continue
 
             parts: List[str] = []
+            # 条件分岐: `math.isfinite(req0) and req0 > 0` を満たす経路を評価する。
             if math.isfinite(req0) and req0 > 0:
                 parts.append(f"κ要求<{req0*100:.2f}%（ringσ→0）")
             else:
+                # 条件分岐: `math.isfinite(tu) and math.isfinite(tu_req) and tu_req > 0 and tu > tu_req` を満たす経路を評価する。
                 if math.isfinite(tu) and math.isfinite(tu_req) and tu_req > 0 and tu > tu_req:
                     parts.append(f"κ要求=n/a（θ_unit相対誤差={tu*100:.1f}% > 要求={tu_req*100:.1f}%）")
                 else:
                     parts.append("κ要求=n/a")
 
+            # 条件分岐: `math.isfinite(req_cur) and req_cur > 0` を満たす経路を評価する。
+
             if math.isfinite(req_cur) and req_cur > 0:
                 parts.append(f"κ要求<{req_cur*100:.2f}%（ringσ=現状）")
             else:
+                # 条件分岐: `math.isfinite(ring_rel)` を満たす経路を評価する。
                 if math.isfinite(ring_rel):
                     parts.append(f"ringσ={ring_rel*100:.1f}%")
+
+            # 条件分岐: `math.isfinite(kerr_s) and kerr_s > 0` を満たす経路を評価する。
 
             if math.isfinite(kerr_s) and kerr_s > 0:
                 parts.append(f"参考: Kerr系統σ≈{kerr_s*100:.2f}%")
@@ -2902,13 +3490,18 @@ def main() -> int:
             eht_kappa_precision_summary_lines.append(f"{name}: " + " / ".join(parts))
 
         # Kappa tradeoff summary (ring σ vs κσ).
+
         eht_kappa_tradeoff_summary_lines.append("3σ判別の誤差予算：ring σ（統計）と κσ（系統）のトレードオフ。")
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
+            # 条件分岐: `not name` を満たす経路を評価する。
             if not name:
                 continue
+
             try:
                 tu = float(r.get("theta_unit_rel_sigma", float("nan")))
                 tu_req = float(r.get("theta_unit_rel_sigma_required_3sigma", float("nan")))
@@ -2922,34 +3515,52 @@ def main() -> int:
             except Exception:
                 continue
 
+            # 条件分岐: `math.isfinite(tu) and math.isfinite(tu_req) and tu_req > 0 and tu > tu_req` を満たす経路を評価する。
+
             if math.isfinite(tu) and math.isfinite(tu_req) and tu_req > 0 and tu > tu_req:
                 extra = ""
+                # 条件分岐: `math.isfinite(tu_factor) and tu_factor > 1` を満たす経路を評価する。
                 if math.isfinite(tu_factor) and tu_factor > 1:
                     extra = f"（~{tu_factor:.1f}×改善）"
+
                 eht_kappa_tradeoff_summary_lines.append(
                     f"{name}: θ_unit={tu*100:.1f}% > 要求={tu_req*100:.1f}%{extra}（まず質量/距離が律速）"
                 )
                 continue
 
             parts: List[str] = []
+            # 条件分岐: `math.isfinite(ring_rel)` を満たす経路を評価する。
             if math.isfinite(ring_rel):
                 parts.append(f"ringσ={ring_rel*100:.1f}%")
+                # 条件分岐: `math.isfinite(ring_factor) and ring_factor > 1` を満たす経路を評価する。
                 if math.isfinite(ring_factor) and ring_factor > 1:
                     parts.append(f"ring精度は~{ring_factor:.1f}×改善が目安（κ=1仮定）")
+
+            # 条件分岐: `math.isfinite(kerr_s) and kerr_s > 0` を満たす経路を評価する。
+
             if math.isfinite(kerr_s) and kerr_s > 0:
                 parts.append(f"参考: κ系統（Kerr）σ≈{kerr_s*100:.2f}%")
+
+            # 条件分岐: `math.isfinite(kreq0) and kreq0 > 0` を満たす経路を評価する。
+
             if math.isfinite(kreq0) and kreq0 > 0:
                 parts.append(f"κ要求<{kreq0*100:.2f}%（ringσ→0）")
+
             eht_kappa_tradeoff_summary_lines.append(f"{name}: " + " / ".join(parts))
 
         # Delta precision summary (reference).
+
         eht_delta_precision_summary_lines.append("δ（Schwarzschild shadow deviation）の必要精度（参考; δはモデル依存）。")
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
+            # 条件分岐: `not name` を満たす経路を評価する。
             if not name:
                 continue
+
             try:
                 req = float(r.get("delta_sigma_required_3sigma", float("nan")))
                 vlti = float(r.get("delta_schwarzschild_vlti_sigma_sym", float("nan")))
@@ -2960,39 +3571,60 @@ def main() -> int:
                 continue
 
             parts: List[str] = []
+            # 条件分岐: `math.isfinite(req) and req > 0` を満たす経路を評価する。
             if math.isfinite(req) and req > 0:
                 parts.append(f"要求≈{req*100:.2f}%（3σ）")
+
+            # 条件分岐: `math.isfinite(vlti) and vlti > 0` を満たす経路を評価する。
+
             if math.isfinite(vlti) and vlti > 0:
+                # 条件分岐: `math.isfinite(vlti_factor) and vlti_factor > 1` を満たす経路を評価する。
                 if math.isfinite(vlti_factor) and vlti_factor > 1:
                     parts.append(f"VLTI: δσ≈{vlti*100:.1f}%（~{vlti_factor:.1f}×改善）")
                 else:
                     parts.append(f"VLTI: δσ≈{vlti*100:.1f}%")
+
+            # 条件分岐: `math.isfinite(keck) and keck > 0` を満たす経路を評価する。
+
             if math.isfinite(keck) and keck > 0:
+                # 条件分岐: `math.isfinite(keck_factor) and keck_factor > 1` を満たす経路を評価する。
                 if math.isfinite(keck_factor) and keck_factor > 1:
                     parts.append(f"Keck: δσ≈{keck*100:.1f}%（~{keck_factor:.1f}×改善）")
                 else:
                     parts.append(f"Keck: δσ≈{keck*100:.1f}%")
+
+            # 条件分岐: `parts` を満たす経路を評価する。
+
             if parts:
                 eht_delta_precision_summary_lines.append(f"{name}: " + " / ".join(parts))
 
         # Z-score summary (obs - pred, normalized by combined uncertainty), under κ=1 assumption.
+
         eht_zscore_summary_lines.append("zスコア=(観測-予測)/σ_total（σ_total=√(σ_obs^2+σ_pred^2), κ=1 の仮定）")
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
             try:
                 zp = float(r.get("zscore_pmodel"))
                 zg = float(r.get("zscore_gr"))
             except Exception:
                 continue
+
+            # 条件分岐: `name and (zp == zp) and (zg == zg)` を満たす経路を評価する。
+
             if name and (zp == zp) and (zg == zg):
                 eht_zscore_summary_lines.append(f"{name}: z(P-model)={zp:+.2f}, z(GR)={zg:+.2f}")
 
         # Morphology: additional observables that inform systematics (width/asymmetry).
+
         for r in eht_rows:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             name = str(r.get("name") or r.get("key") or "")
             try:
                 w_min = float(r.get("ring_fractional_width_min", float("nan")))
@@ -3004,28 +3636,43 @@ def main() -> int:
                 scatt_b = float(r.get("scattering_kernel_fwhm_minor_uas", float("nan")))
             except Exception:
                 continue
+
+            # 条件分岐: `not name` を満たす経路を評価する。
+
             if not name:
                 continue
 
             parts: List[str] = []
+            # 条件分岐: `(w_min == w_min) and (w_max == w_max)` を満たす経路を評価する。
             if (w_min == w_min) and (w_max == w_max):
                 parts.append(f"幅(W/d)={w_min:.2f}–{w_max:.2f}")
+            # 条件分岐: 前段条件が不成立で、`w_max == w_max` を追加評価する。
             elif w_max == w_max:
                 parts.append(f"幅(W/d)≤{w_max:.2f}")
+            # 条件分岐: 前段条件が不成立で、`w_min == w_min` を追加評価する。
             elif w_min == w_min:
                 parts.append(f"幅(W/d)≥{w_min:.2f}")
 
+            # 条件分岐: `(a_min == a_min) and (a_max == a_max)` を満たす経路を評価する。
+
             if (a_min == a_min) and (a_max == a_max):
                 parts.append(f"非対称A={a_min:.2f}–{a_max:.2f}")
+            # 条件分岐: 前段条件が不成立で、`a_max == a_max` を追加評価する。
             elif a_max == a_max:
                 parts.append(f"非対称A≤{a_max:.2f}")
+            # 条件分岐: 前段条件が不成立で、`a_min == a_min` を追加評価する。
             elif a_min == a_min:
                 parts.append(f"非対称A≥{a_min:.2f}")
 
+            # 条件分岐: `(scatt_a == scatt_a) and (scatt_b == scatt_b) and (scatt_a > 0) and (scatt_b...` を満たす経路を評価する。
+
             if (scatt_a == scatt_a) and (scatt_b == scatt_b) and (scatt_a > 0) and (scatt_b > 0):
                 parts.append(f"散乱blur FWHM≈{scatt_a:.0f}×{scatt_b:.0f} μas（参考）")
+            # 条件分岐: 前段条件が不成立で、`scatt == scatt and scatt > 0` を追加評価する。
             elif scatt == scatt and scatt > 0:
                 parts.append(f"散乱blur FWHM≈{scatt:.0f} μas（参考）")
+
+            # 条件分岐: `parts` を満たす経路を評価する。
 
             if parts:
                 eht_morph_summary_lines.append(f"{name}: " + ", ".join(parts) + "（一次ソース/参考レンジ）")
@@ -3038,6 +3685,7 @@ def main() -> int:
         eht_kappa_precision_summary_lines = ["出力未生成: scripts/eht/eht_shadow_compare.py を実行してください。"]
 
     # EHT (Sgr A* Paper V): near-passing rescue conditions (M3 / 2.2 μm / KS sensitivity)
+
     paper5_rescue = (
         _try_read_json(root / "output" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json") or {}
     )
@@ -3047,6 +3695,7 @@ def main() -> int:
         ks = (m3.get("historical_distribution_values_ks") or {}) if isinstance(m3, dict) else {}
         salvage = (derived.get("near_passing_salvage") or {}) if isinstance(derived, dict) else {}
 
+        # 条件分岐: `isinstance(ks, dict) and ks.get("ok") is True` を満たす経路を評価する。
         if isinstance(ks, dict) and ks.get("ok") is True:
             alpha = float(ks.get("alpha")) if ks.get("alpha") is not None else None
             d = float(ks.get("d")) if ks.get("d") is not None else None
@@ -3054,12 +3703,14 @@ def main() -> int:
             n2017 = int(ks.get("n_2017")) if ks.get("n_2017") is not None else None
             nh = int(ks.get("n_historical")) if ks.get("n_historical") is not None else None
 
+            # 条件分岐: `(d is not None) and (p is not None) and (alpha is not None) and (n2017 is not...` を満たす経路を評価する。
             if (d is not None) and (p is not None) and (alpha is not None) and (n2017 is not None) and (nh is not None):
                 eht_paper5_m3_rescue_summary_lines.append(
                     f"KS（2017 n={n2017} vs historical n={nh}）: D={d:.6f}, p={p:.6f}（α={alpha:g}）"
                 )
 
                 margin = ks.get("margin") or {}
+                # 条件分岐: `isinstance(margin, dict) and margin.get("p_minus_alpha") is not None` を満たす経路を評価する。
                 if isinstance(margin, dict) and margin.get("p_minus_alpha") is not None:
                     try:
                         pma = float(margin.get("p_minus_alpha"))
@@ -3068,11 +3719,13 @@ def main() -> int:
                         pass
 
             dd = ks.get("d_discreteness") or {}
+            # 条件分岐: `isinstance(dd, dict) and dd.get("d_step") is not None` を満たす経路を評価する。
             if isinstance(dd, dict) and dd.get("d_step") is not None:
                 try:
                     d_step = float(dd.get("d_step"))
                     d_up = float(dd.get("d_next_up")) if dd.get("d_next_up") is not None else None
                     p_up = float(dd.get("p_next_up_asymptotic")) if dd.get("p_next_up_asymptotic") is not None else None
+                    # 条件分岐: `(d_up is not None) and (p_up is not None)` を満たす経路を評価する。
                     if (d_up is not None) and (p_up is not None):
                         eht_paper5_m3_rescue_summary_lines.append(
                             f"Dは離散（step={d_step:.6f}）。1 step上（D={d_up:.6f}）で p≈{p_up:.6f}"
@@ -3083,10 +3736,12 @@ def main() -> int:
                     pass
 
             ds = ks.get("digitize_scale_thresholds") or {}
+            # 条件分岐: `isinstance(ds, dict) and ds.get("scale_up_to_decrease_hist_le_count_by_1") is...` を満たす経路を評価する。
             if isinstance(ds, dict) and ds.get("scale_up_to_decrease_hist_le_count_by_1") is not None:
                 try:
                     scale_up = float(ds.get("scale_up_to_decrease_hist_le_count_by_1"))
                     rel = float(ds.get("delta_rel_to_move_hist_le_max_to_t")) if ds.get("delta_rel_to_move_hist_le_max_to_t") is not None else None
+                    # 条件分岐: `rel is not None` を満たす経路を評価する。
                     if rel is not None:
                         eht_paper5_m3_rescue_summary_lines.append(
                             f"digitize/系統の目安: mi3 を一様に +{rel*100:.2f}%（×{scale_up:.6f}）で D が 1 step 変化"
@@ -3098,19 +3753,25 @@ def main() -> int:
                 except Exception:
                     pass
 
+        # 条件分岐: `isinstance(salvage, dict) and isinstance(salvage.get("constraints_ranked_by_c...` を満たす経路を評価する。
+
         if isinstance(salvage, dict) and isinstance(salvage.get("constraints_ranked_by_count"), list):
             top = salvage.get("constraints_ranked_by_count")[:2]
             parts: List[str] = []
             for row in top:
+                # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
                 if not isinstance(row, dict):
                     continue
+
                 c = str(row.get("constraint") or "")
                 f = row.get("fraction")
                 try:
                     parts.append(f"{c}={float(f)*100:.0f}%")
                 except Exception:
                     continue
+
             total_n = salvage.get("rows_total_n")
+            # 条件分岐: `parts and total_n is not None` を満たす経路を評価する。
             if parts and total_n is not None:
                 try:
                     eht_paper5_m3_rescue_summary_lines.append(
@@ -3121,18 +3782,24 @@ def main() -> int:
     except Exception:
         eht_paper5_m3_rescue_summary_lines = []
 
+    # 条件分岐: `not eht_paper5_m3_rescue_summary_lines` を満たす経路を評価する。
+
     if not eht_paper5_m3_rescue_summary_lines:
         eht_paper5_m3_rescue_summary_lines = [
             "出力未生成: scripts/eht/eht_sgra_paper5_m3_nir_reconnection_conditions.py を実行してください。"
         ]
 
     # Strong-field: binary pulsars (orbital decay) and GW150914 chirp phase (GWOSC)
+
     pulsar_metrics = _try_read_json(root / "output" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json") or {}
     pulsar_summary_lines: List[str] = []
+    # 条件分岐: `isinstance(pulsar_metrics, dict) and isinstance(pulsar_metrics.get("metrics")...` を満たす経路を評価する。
     if isinstance(pulsar_metrics, dict) and isinstance(pulsar_metrics.get("metrics"), list):
         for m in pulsar_metrics.get("metrics") or []:
+            # 条件分岐: `not isinstance(m, dict)` を満たす経路を評価する。
             if not isinstance(m, dict):
                 continue
+
             name = str(m.get("name") or m.get("id") or "")
             R = m.get("R")
             sigma_1 = m.get("sigma_1")
@@ -3140,17 +3807,23 @@ def main() -> int:
             non_gr_3s = m.get("non_gr_fraction_upper_3sigma")
             try:
                 msg = f"{name}: R={float(R):.6f} ±{_format_sci(float(sigma_1), digits=2)}（{conf}）"
+                # 条件分岐: `non_gr_3s is not None` を満たす経路を評価する。
                 if non_gr_3s is not None:
                     msg += f" / 非GR成分上限（概算, 3σ）<{float(non_gr_3s)*100:.2f}%"
+
                 pulsar_summary_lines.append(msg)
             except Exception:
                 continue
+
+        # 条件分岐: `not pulsar_summary_lines` を満たす経路を評価する。
+
         if not pulsar_summary_lines:
             pulsar_summary_lines = ["出力の読み取りに失敗: output/pulsar/binary_pulsar_orbital_decay_metrics.json"]
     else:
         pulsar_summary_lines = ["出力未生成: scripts/pulsar/binary_pulsar_orbital_decay.py を実行してください。"]
 
     # GW: summarize multiple events succinctly (public-friendly)
+
     gw_summary_lines: List[str] = []
     gw_events = [
         ("GW150914", "gw150914"),
@@ -3163,9 +3836,12 @@ def main() -> int:
     gw_summary_lines.append("公開データ: GWOSC（複数イベント, chirp整合の指標 R^2）")
     for ev_name, slug in gw_events:
         path = root / "output" / "gw" / f"{slug}_chirp_phase_metrics.json"
+        # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
             continue
+
         gw_metrics = _try_read_json(path) or {}
+        # 条件分岐: `not (isinstance(gw_metrics, dict) and isinstance(gw_metrics.get("detectors"),...` を満たす経路を評価する。
         if not (isinstance(gw_metrics, dict) and isinstance(gw_metrics.get("detectors"), list)):
             continue
 
@@ -3173,8 +3849,10 @@ def main() -> int:
         dets = gw_metrics.get("detectors") or []
         best: Optional[Tuple[float, str, str]] = None  # (r2, detector, preprocess)
         for d in dets:
+            # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
             if not isinstance(d, dict):
                 continue
+
             det = str(d.get("detector") or "")
             preprocess = str(d.get("preprocess") or "")
             fit = d.get("fit") if isinstance(d.get("fit"), dict) else {}
@@ -3183,25 +3861,36 @@ def main() -> int:
                 r2f = float(r2)
             except Exception:
                 continue
+
+            # 条件分岐: `best is None or r2f > best[0]` を満たす経路を評価する。
+
             if best is None or r2f > best[0]:
                 best = (r2f, det, preprocess)
+
+        # 条件分岐: `best is None` を満たす経路を評価する。
 
         if best is None:
             continue
 
         r2f, det, preprocess = best
         suffix = f" ({det})"
+        # 条件分岐: `preprocess` を満たす経路を評価する。
         if preprocess:
             suffix = f" ({det}, {preprocess})"
+
         gw_summary_lines.append(f"{ev_name}: best R^2={_format_num(r2f, digits=4)}{suffix}")
+
+    # 条件分岐: `not any_gw` を満たす経路を評価する。
 
     if not any_gw:
         gw_summary_lines = ["出力未生成: scripts/gw/gw150914_chirp_phase.py を実行してください。"]
 
     # Phase 4 (differential): saturation parameter δ consistency
+
     delta_sat = _try_read_json(root / "output" / "theory" / "delta_saturation_constraints.json") or {}
     delta_sat_summary_lines: List[str] = []
     delta_sat_table: Optional[Dict[str, Any]] = None
+    # 条件分岐: `isinstance(delta_sat, dict) and delta_sat.get("rows")` を満たす経路を評価する。
     if isinstance(delta_sat, dict) and delta_sat.get("rows"):
         try:
             delta_adopted = float(delta_sat.get("delta_adopted"))
@@ -3213,14 +3902,19 @@ def main() -> int:
             strictest: Optional[Tuple[str, float, float]] = None  # (label, gamma_obs, delta_upper)
             table_rows: List[List[str]] = []
             for r in delta_sat.get("rows") or []:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("label") or r.get("key") or "")
                 gamma_obs = float(r.get("gamma_obs"))
                 delta_upper = float(r.get("delta_upper_from_gamma"))
                 table_rows.append([label, _format_sci(gamma_obs, digits=1), _format_sci(delta_upper, digits=1)])
+                # 条件分岐: `strictest is None or (delta_upper == delta_upper and delta_upper < strictest[2])` を満たす経路を評価する。
                 if strictest is None or (delta_upper == delta_upper and delta_upper < strictest[2]):
                     strictest = (label, gamma_obs, delta_upper)
+
+            # 条件分岐: `strictest is not None` を満たす経路を評価する。
 
             if strictest is not None:
                 label, gamma_obs, delta_upper = strictest
@@ -3242,18 +3936,25 @@ def main() -> int:
         delta_sat_summary_lines = ["出力未生成: scripts/theory/delta_saturation_constraints.py を実行してください。"]
 
     # Theory: gravitational redshift (observed deviation epsilon vs prediction epsilon=0)
+
     redshift = _try_read_json(root / "output" / "theory" / "gravitational_redshift_experiments.json") or {}
     redshift_summary_lines: List[str] = []
     redshift_table: Optional[Dict[str, Any]] = None
     redshift_definition_lines: List[str] = []
+    # 条件分岐: `isinstance(redshift, dict) and redshift.get("rows")` を満たす経路を評価する。
     if isinstance(redshift, dict) and redshift.get("rows"):
         try:
             definition = redshift.get("definition") or {}
+            # 条件分岐: `isinstance(definition, dict)` を満たす経路を評価する。
             if isinstance(definition, dict):
                 eps_def = str(definition.get("epsilon") or "").strip()
                 pred_def = str(definition.get("pmodel_prediction") or "").strip()
+                # 条件分岐: `eps_def` を満たす経路を評価する。
                 if eps_def:
                     redshift_definition_lines.append(f"εの定義: {eps_def}")
+
+                # 条件分岐: `pred_def` を満たす経路を評価する。
+
                 if pred_def:
                     redshift_definition_lines.append(f"P-model予測: {pred_def}")
 
@@ -3261,26 +3962,34 @@ def main() -> int:
             table_rows: List[List[str]] = []
             max_abs_z: Optional[float] = None
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("short_label") or r.get("id") or "")
                 eps = float(r.get("epsilon") or 0.0)
                 sig = float(r.get("sigma") or 0.0)
                 z = r.get("z_score")
                 zf = None if z is None else float(z)
+                # 条件分岐: `zf is not None` を満たす経路を評価する。
                 if zf is not None:
                     az = abs(zf)
+                    # 条件分岐: `max_abs_z is None or az > max_abs_z` を満たす経路を評価する。
                     if max_abs_z is None or az > max_abs_z:
                         max_abs_z = az
 
                 src = r.get("source") or {}
+                # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
                 if not isinstance(src, dict):
                     src = {}
+
                 doi = str(src.get("doi") or "")
                 year = str(src.get("year") or "")
                 src_txt = doi or (str(src.get("url") or "") if src.get("url") else "")
+                # 条件分岐: `year and doi` を満たす経路を評価する。
                 if year and doi:
                     src_txt = f"{year}, {doi}"
+                # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
                 elif year and not src_txt:
                     src_txt = year
 
@@ -3290,10 +3999,13 @@ def main() -> int:
 
                 redshift_summary_lines.append(f"{label}: ε={eps_txt} ± {sig_txt}（z={z_txt}）")
                 sigma_note = str(r.get("sigma_note") or "").strip()
+                # 条件分岐: `sigma_note` を満たす経路を評価する。
                 if sigma_note:
                     redshift_summary_lines.append(f"  注: {label} のσは {sigma_note}")
 
                 table_rows.append([label, eps_txt, sig_txt, z_txt, src_txt])
+
+            # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
 
             if max_abs_z is not None:
                 redshift_summary_lines.insert(0, f"最大|z|={max_abs_z:.2f}（小さいほど整合）")
@@ -3310,21 +4022,31 @@ def main() -> int:
         redshift_summary_lines = ["出力未生成: scripts/theory/gravitational_redshift_experiments.py を実行してください。"]
 
     # Theory: frame dragging (observed ratio μ vs prediction μ=1)
+
     frame_drag = _try_read_json(root / "output" / "theory" / "frame_dragging_experiments.json") or {}
     frame_drag_summary_lines: List[str] = []
     frame_drag_table: Optional[Dict[str, Any]] = None
     frame_drag_definition_lines: List[str] = []
+    # 条件分岐: `isinstance(frame_drag, dict) and frame_drag.get("rows")` を満たす経路を評価する。
     if isinstance(frame_drag, dict) and frame_drag.get("rows"):
         try:
             definition = frame_drag.get("definition") or {}
+            # 条件分岐: `isinstance(definition, dict)` を満たす経路を評価する。
             if isinstance(definition, dict):
                 obs_def = str(definition.get("observable") or "").strip()
                 mu_def = str(definition.get("mu") or "").strip()
                 pred_def = str(definition.get("pmodel_prediction") or "").strip()
+                # 条件分岐: `obs_def` を満たす経路を評価する。
                 if obs_def:
                     frame_drag_definition_lines.append(f"観測量: {obs_def}")
+
+                # 条件分岐: `mu_def` を満たす経路を評価する。
+
                 if mu_def:
                     frame_drag_definition_lines.append(f"μの定義: {mu_def}")
+
+                # 条件分岐: `pred_def` を満たす経路を評価する。
+
                 if pred_def:
                     frame_drag_definition_lines.append(f"P-model予測: {pred_def}")
 
@@ -3332,26 +4054,34 @@ def main() -> int:
             table_rows: List[List[str]] = []
             max_abs_z: Optional[float] = None
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("short_label") or r.get("id") or "")
                 mu = float(r.get("mu") or 0.0)
                 sig = float(r.get("mu_sigma") or 0.0)
                 z = r.get("z_score")
                 zf = None if z is None else float(z)
+                # 条件分岐: `zf is not None` を満たす経路を評価する。
                 if zf is not None:
                     az = abs(zf)
+                    # 条件分岐: `max_abs_z is None or az > max_abs_z` を満たす経路を評価する。
                     if max_abs_z is None or az > max_abs_z:
                         max_abs_z = az
 
                 src = r.get("source") or {}
+                # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
                 if not isinstance(src, dict):
                     src = {}
+
                 doi = str(src.get("doi") or "")
                 year = str(src.get("year") or "")
                 src_txt = doi or (str(src.get("url") or "") if src.get("url") else "")
+                # 条件分岐: `year and doi` を満たす経路を評価する。
                 if year and doi:
                     src_txt = f"{year}, {doi}"
+                # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
                 elif year and not src_txt:
                     src_txt = year
 
@@ -3364,7 +4094,9 @@ def main() -> int:
                 omega_sig = r.get("omega_obs_sigma_mas_per_yr")
                 omega_pred = r.get("omega_pred_mas_per_yr")
                 try:
+                    # 条件分岐: `omega_obs is not None and omega_pred is not None` を満たす経路を評価する。
                     if omega_obs is not None and omega_pred is not None:
+                        # 条件分岐: `omega_sig is not None` を満たす経路を評価する。
                         if omega_sig is not None:
                             extra = f" / |Ω|={abs(float(omega_obs)):.1f}±{abs(float(omega_sig)):.1f} mas/yr（予測 {abs(float(omega_pred)):.1f}）"
                         else:
@@ -3374,10 +4106,13 @@ def main() -> int:
 
                 frame_drag_summary_lines.append(f"{label}: μ={mu_txt} ± {sig_txt}（z={z_txt}）{extra}")
                 sigma_note = str(r.get("sigma_note") or "").strip()
+                # 条件分岐: `sigma_note` を満たす経路を評価する。
                 if sigma_note:
                     frame_drag_summary_lines.append(f"  注: {label} のσは {sigma_note}")
 
                 table_rows.append([label, mu_txt, sig_txt, z_txt, src_txt])
+
+            # 条件分岐: `max_abs_z is not None` を満たす経路を評価する。
 
             if max_abs_z is not None:
                 frame_drag_summary_lines.insert(0, f"最大|z|={max_abs_z:.2f}（小さいほど整合）")
@@ -3394,6 +4129,7 @@ def main() -> int:
         frame_drag_summary_lines = ["出力未生成: scripts/theory/frame_dragging_experiments.py を実行してください。"]
 
     # Cosmology: distance duality (DDR) observational constraint (epsilon0)
+
     cosmo_ddr = (
         _try_read_json(
             root / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
@@ -3403,17 +4139,26 @@ def main() -> int:
     cosmo_ddr_summary_lines: List[str] = []
     cosmo_ddr_table: Optional[Dict[str, Any]] = None
     cosmo_ddr_definition_lines: List[str] = []
+    # 条件分岐: `isinstance(cosmo_ddr, dict) and cosmo_ddr.get("rows")` を満たす経路を評価する。
     if isinstance(cosmo_ddr, dict) and cosmo_ddr.get("rows"):
         try:
             definition = cosmo_ddr.get("definition") or {}
+            # 条件分岐: `isinstance(definition, dict)` を満たす経路を評価する。
             if isinstance(definition, dict):
                 eps_def = str(definition.get("epsilon0") or "").strip()
                 eta_def = str(definition.get("eta") or "").strip()
                 pred_def = str(definition.get("pbg_static_prediction") or "").strip()
+                # 条件分岐: `eps_def` を満たす経路を評価する。
                 if eps_def:
                     cosmo_ddr_definition_lines.append(f"ε0の定義: {eps_def}")
+
+                # 条件分岐: `eta_def` を満たす経路を評価する。
+
                 if eta_def:
                     cosmo_ddr_definition_lines.append(f"ηの定義: {eta_def}")
+
+                # 条件分岐: `pred_def` を満たす経路を評価する。
+
                 if pred_def:
                     cosmo_ddr_definition_lines.append(f"背景P（静的）予測: {pred_def}")
 
@@ -3421,8 +4166,10 @@ def main() -> int:
             table_rows: List[List[str]] = []
             max_abs_z_pbg: Optional[float] = None
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("short_label") or r.get("id") or "")
                 eps = float(r.get("epsilon0_obs") or 0.0)
                 sig = float(r.get("epsilon0_sigma") or 0.0)
@@ -3430,19 +4177,25 @@ def main() -> int:
                 z_frw = r.get("z_frw")
                 z_pbg_f = None if z_pbg is None else float(z_pbg)
                 z_frw_f = None if z_frw is None else float(z_frw)
+                # 条件分岐: `z_pbg_f is not None` を満たす経路を評価する。
                 if z_pbg_f is not None:
                     az = abs(z_pbg_f)
+                    # 条件分岐: `max_abs_z_pbg is None or az > max_abs_z_pbg` を満たす経路を評価する。
                     if max_abs_z_pbg is None or az > max_abs_z_pbg:
                         max_abs_z_pbg = az
 
                 src = r.get("source") or {}
+                # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
                 if not isinstance(src, dict):
                     src = {}
+
                 doi = str(src.get("doi") or "")
                 year = str(src.get("year") or "")
                 src_txt = doi or (str(src.get("url") or "") if src.get("url") else "")
+                # 条件分岐: `year and doi` を満たす経路を評価する。
                 if year and doi:
                     src_txt = f"{year}, {doi}"
+                # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
                 elif year and not src_txt:
                     src_txt = year
 
@@ -3464,19 +4217,27 @@ def main() -> int:
                     dl_fac = r.get("extra_dl_factor_needed_z1")
                     dmu = r.get("delta_distance_modulus_mag_z1")
                     flux_dim = r.get("flux_dimming_factor_needed_z1")
+                    # 条件分岐: `delta_eps is not None and dl_fac is not None` を満たす経路を評価する。
                     if delta_eps is not None and dl_fac is not None:
                         extra = f"  必要補正: Δε≈{float(delta_eps):.3f}（z=1でD_L×{float(dl_fac):.2f}）"
+                        # 条件分岐: `dmu is not None and flux_dim is not None` を満たす経路を評価する。
                         if dmu is not None and flux_dim is not None:
                             extra += f"（Δμ≈{float(dmu):.2f} mag, flux≈1/{float(flux_dim):.2f}）"
+
                         cosmo_ddr_summary_lines.append(extra)
                 except Exception:
                     pass
+
+                # 条件分岐: `need_txt` を満たす経路を評価する。
+
                 if need_txt:
                     cosmo_ddr_summary_lines.append(
                         f"  参考: 背景P（静的, ε0=-1）を3σで“棄却しない”には σ≳{need_txt} が必要（現状より大きい）"
                     )
 
                 table_rows.append([label, f"{eps:+.3f}", f"{sig:.3f}", z_frw_txt, z_pbg_txt, need_txt, src_txt])
+
+            # 条件分岐: `max_abs_z_pbg is not None` を満たす経路を評価する。
 
             if max_abs_z_pbg is not None:
                 cosmo_ddr_summary_lines.insert(
@@ -3499,6 +4260,7 @@ def main() -> int:
         ]
 
     # Cosmology: Tolman surface brightness (SB dimming) observational constraint (n exponent)
+
     cosmo_tolman = (
         _try_read_json(
             root / "output" / "private" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
@@ -3508,22 +4270,35 @@ def main() -> int:
     cosmo_tolman_summary_lines: List[str] = []
     cosmo_tolman_table: Optional[Dict[str, Any]] = None
     cosmo_tolman_definition_lines: List[str] = []
+    # 条件分岐: `isinstance(cosmo_tolman, dict) and cosmo_tolman.get("rows")` を満たす経路を評価する。
     if isinstance(cosmo_tolman, dict) and cosmo_tolman.get("rows"):
         try:
             definition = cosmo_tolman.get("definition") or {}
+            # 条件分岐: `isinstance(definition, dict)` を満たす経路を評価する。
             if isinstance(definition, dict):
                 obs_def = str(definition.get("observable") or "").strip()
                 preds = definition.get("predictions") or {}
                 note = str(definition.get("note") or "").strip()
+                # 条件分岐: `obs_def` を満たす経路を評価する。
                 if obs_def:
                     cosmo_tolman_definition_lines.append(f"nの定義: {obs_def}")
+
+                # 条件分岐: `isinstance(preds, dict)` を満たす経路を評価する。
+
                 if isinstance(preds, dict):
                     frw_def = str(preds.get("FRW") or "").strip()
                     pbg_def = str(preds.get("P_bg_static") or "").strip()
+                    # 条件分岐: `frw_def` を満たす経路を評価する。
                     if frw_def:
                         cosmo_tolman_definition_lines.append(f"標準（FRW）: {frw_def}")
+
+                    # 条件分岐: `pbg_def` を満たす経路を評価する。
+
                     if pbg_def:
                         cosmo_tolman_definition_lines.append(f"背景P（静的）: {pbg_def}")
+
+                # 条件分岐: `note` を満たす経路を評価する。
+
                 if note:
                     cosmo_tolman_definition_lines.append(f"注: {note}")
 
@@ -3531,8 +4306,10 @@ def main() -> int:
             table_rows: List[List[str]] = []
             max_abs_z_pbg: Optional[float] = None
             for r in rows:
+                # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
                 if not isinstance(r, dict):
                     continue
+
                 label = str(r.get("short_label") or r.get("id") or "")
                 n_obs = float(r.get("n_obs") or 0.0)
                 sig = float(r.get("n_sigma") or 0.0)
@@ -3542,19 +4319,25 @@ def main() -> int:
                 z_pbg_f = None if z_pbg is None else float(z_pbg)
                 z_frw_f = None if z_frw is None else float(z_frw)
                 evol_pbg_f = None if evol_pbg is None else float(evol_pbg)
+                # 条件分岐: `z_pbg_f is not None` を満たす経路を評価する。
                 if z_pbg_f is not None:
                     az = abs(z_pbg_f)
+                    # 条件分岐: `max_abs_z_pbg is None or az > max_abs_z_pbg` を満たす経路を評価する。
                     if max_abs_z_pbg is None or az > max_abs_z_pbg:
                         max_abs_z_pbg = az
 
                 src = r.get("source") or {}
+                # 条件分岐: `not isinstance(src, dict)` を満たす経路を評価する。
                 if not isinstance(src, dict):
                     src = {}
+
                 doi = str(src.get("doi") or "")
                 year = str(src.get("year") or "")
                 src_txt = doi or (str(src.get("url") or "") if src.get("url") else "")
+                # 条件分岐: `year and doi` を満たす経路を評価する。
                 if year and doi:
                     src_txt = f"{year}, {doi}"
+                # 条件分岐: 前段条件が不成立で、`year and not src_txt` を追加評価する。
                 elif year and not src_txt:
                     src_txt = year
 
@@ -3568,17 +4351,22 @@ def main() -> int:
 
                 # Keep the summary short: emphasize background-P mismatch and the sign of required evolution.
                 evol_note = ""
+                # 条件分岐: `evol_pbg_f is not None and evol_pbg_f < 0` を満たす経路を評価する。
                 if evol_pbg_f is not None and evol_pbg_f < 0:
                     evol_note = "（整合には進化補正が逆符号）"
+
                 cosmo_tolman_summary_lines.append(
                     f"{label}: n={n_obs:.2f} ± {sig:.2f}（z: 標準={z_frw_txt}, 背景P静的={z_pbg_txt}）{evol_note}"
                 )
+                # 条件分岐: `need_txt` を満たす経路を評価する。
                 if need_txt:
                     cosmo_tolman_summary_lines.append(
                         f"  参考: 背景P（静的, n=2）を3σで“棄却しない”には σ?{need_txt} が必要（進化の系統は別）"
                     )
 
                 table_rows.append([label, f"{n_obs:.2f}", f"{sig:.2f}", z_frw_txt, z_pbg_txt, evol_pbg_txt, need_txt, src_txt])
+
+            # 条件分岐: `max_abs_z_pbg is not None` を満たす経路を評価する。
 
             if max_abs_z_pbg is not None:
                 cosmo_tolman_summary_lines.insert(
@@ -3602,12 +4390,14 @@ def main() -> int:
         ]
 
     # Cosmology: tension attribution (Step 16.5 entrance)
+
     cosmo_tension_attr = (
         _try_read_json(root / "output" / "private" / "cosmology" / "cosmology_tension_attribution_metrics.json")
         or {}
     )
     cosmo_tension_attr_summary_lines: List[str] = []
     cosmo_tension_attr_detail_lines: List[str] = []
+    # 条件分岐: `isinstance(cosmo_tension_attr, dict) and isinstance(cosmo_tension_attr.get("r...` を満たす経路を評価する。
     if isinstance(cosmo_tension_attr, dict) and isinstance(cosmo_tension_attr.get("results"), dict):
         try:
             res = cosmo_tension_attr.get("results") or {}
@@ -3619,6 +4409,7 @@ def main() -> int:
             ddr_z_abs = None
             try:
                 z = ddr_rep.get("z_pbg_static")
+                # 条件分岐: `z is not None` を満たす経路を評価する。
                 if z is not None:
                     ddr_z_abs = abs(float(z))
             except Exception:
@@ -3627,6 +4418,7 @@ def main() -> int:
             ddr_sig_mult = None
             try:
                 v = ddr_rep.get("sigma_multiplier_to_not_reject_pbg_static_3sigma")
+                # 条件分岐: `v is not None` を満たす経路を評価する。
                 if v is not None:
                     ddr_sig_mult = float(v)
             except Exception:
@@ -3635,6 +4427,7 @@ def main() -> int:
             bao_f = None
             try:
                 v = bao_relax.get("rep_bao_f_for_max_abs_z_le_1sigma")
+                # 条件分岐: `v is not None` を満たす経路を評価する。
                 if v is not None:
                     bao_f = float(v)
             except Exception:
@@ -3645,8 +4438,12 @@ def main() -> int:
             sn_z = None
             cmb_z = None
             try:
+                # 条件分岐: `sn.get("z_std") is not None` を満たす経路を評価する。
                 if sn.get("z_std") is not None:
                     sn_z = float(sn.get("z_std"))
+
+                # 条件分岐: `cmb.get("z_std") is not None` を満たす経路を評価する。
+
                 if cmb.get("z_std") is not None:
                     cmb_z = float(cmb.get("z_std"))
             except Exception:
@@ -3655,26 +4452,40 @@ def main() -> int:
             cosmo_tension_attr_summary_lines.append(
                 "要旨：張力は距離指標依存（DDR/BAO/Tolman）に集中し、独立プローブ（時間伸長/T(z)）は整合。"
             )
+            # 条件分岐: `ddr_z_abs is not None` を満たす経路を評価する。
             if ddr_z_abs is not None:
                 msg = f"DDR（SNIa+BAO代表）: |z|≈{ddr_z_abs:.1f}"
+                # 条件分岐: `ddr_sig_mult is not None` を満たす経路を評価する。
                 if ddr_sig_mult is not None:
                     msg += f" / 3σ回避にσ×{ddr_sig_mult:.1f}"
+
                 cosmo_tension_attr_summary_lines.append(msg)
+
+            # 条件分岐: `bao_f is not None` を満たす経路を評価する。
+
             if bao_f is not None:
                 cosmo_tension_attr_summary_lines.append(
                     f"候補探索: 代表（BAO含むDDR）を1σに入れるにはBAOのσを f≈{bao_f:.2f} 倍に緩める必要"
                 )
+
+            # 条件分岐: `sn_z is not None and cmb_z is not None` を満たす経路を評価する。
+
             if sn_z is not None and cmb_z is not None:
                 cosmo_tension_attr_summary_lines.append(
                     f"独立プローブ: SN time dilation（z={sn_z:+.2f}）, CMB T(z)（z={cmb_z:+.2f}）"
                 )
 
+            # 条件分岐: `isinstance(next_actions, list) and next_actions` を満たす経路を評価する。
+
             if isinstance(next_actions, list) and next_actions:
                 cosmo_tension_attr_detail_lines.append("次の検証（要約）:")
                 for line in next_actions[:6]:
+                    # 条件分岐: `not isinstance(line, str)` を満たす経路を評価する。
                     if not isinstance(line, str):
                         continue
+
                     cosmo_tension_attr_detail_lines.append(f"- {line}")
+
             cosmo_tension_attr_detail_lines.append(
                 "再現: scripts/cosmology/cosmology_tension_attribution.py → output/cosmology/cosmology_tension_attribution.png"
             )
@@ -3689,12 +4500,14 @@ def main() -> int:
         ]
 
     # Cosmology: DESI DR1 BAO promotion check (multi-tracer; screening→確証)
+
     cosmo_desi_promo = (
         _try_read_json(root / "output" / "private" / "cosmology" / "cosmology_desi_dr1_bao_promotion_check.json")
         or {}
     )
     cosmo_desi_promo_summary_lines: List[str] = []
     cosmo_desi_promo_detail_lines: List[str] = []
+    # 条件分岐: `isinstance(cosmo_desi_promo, dict) and isinstance(cosmo_desi_promo.get("resul...` を満たす経路を評価する。
     if isinstance(cosmo_desi_promo, dict) and isinstance(cosmo_desi_promo.get("result"), dict):
         try:
             res = cosmo_desi_promo.get("result") or {}
@@ -3709,26 +4522,38 @@ def main() -> int:
             z_field = str(params.get("z_field") or "")
             target_dist = str(params.get("target_dist") or "")
 
+            # 条件分岐: `promoted` を満たす経路を評価する。
             if promoted:
                 cosmo_desi_promo_summary_lines.append("DESI DR1 BAO: multi-tracer 昇格（screening→確証）= promoted")
             else:
                 cosmo_desi_promo_summary_lines.append("DESI DR1 BAO: multi-tracer 昇格（screening→確証）= not promoted")
 
+            # 条件分岐: `z_field and target_dist and thr is not None` を満たす経路を評価する。
+
             if z_field and target_dist and thr is not None:
                 cosmo_desi_promo_summary_lines.append(f"判定: dist={target_dist}, z={z_field}, stable |z|≥{thr:g}")
+
+            # 条件分岐: `min_tracers is not None` を満たす経路を評価する。
+
             if min_tracers is not None:
                 cosmo_desi_promo_summary_lines.append(f"条件: min_tracers={int(min_tracers)}")
+
+            # 条件分岐: `passing` を満たす経路を評価する。
+
             if passing:
                 cosmo_desi_promo_summary_lines.append("passing_tracers=" + ", ".join(passing))
 
             # Per-tracer z-range across methods (min/max over λ and methods).
+
             if isinstance(gate, dict) and passing:
                 for tracer in passing[:6]:
                     g = gate.get(tracer) if isinstance(gate, dict) else None
                     ranges = g.get("ranges") if isinstance(g, dict) else None
                     stable = bool(g.get("stable_all_methods")) if isinstance(g, dict) else False
+                    # 条件分岐: `not (isinstance(ranges, list) and ranges)` を満たす経路を評価する。
                     if not (isinstance(ranges, list) and ranges):
                         continue
+
                     try:
                         zmin = min(float(r.get("z_min")) for r in ranges if r.get("z_min") is not None)
                         zmax = max(float(r.get("z_max")) for r in ranges if r.get("z_max") is not None)
@@ -3758,37 +4583,48 @@ def main() -> int:
         ]
 
     # JWST/MAST spectra (x1d): cache/availability summary (distance-indicator independent).
+
     jwst_mast_summary_lines: List[str] = []
     jwst_mast_detail_lines: List[str] = []
     jwst_mast_table: Optional[Dict[str, Any]] = None
     jwst_waitlist_path = root / "output" / "private" / "cosmology" / "jwst_spectra_release_waitlist.json"
     jwst_waitlist_by_slug: Dict[str, Dict[str, Any]] = {}
     try:
+        # 条件分岐: `jwst_waitlist_path.exists()` を満たす経路を評価する。
         if jwst_waitlist_path.exists():
             wl = _try_read_json(jwst_waitlist_path) or {}
             blocked = wl.get("blocked_targets") if isinstance(wl, dict) else None
+            # 条件分岐: `isinstance(blocked, list)` を満たす経路を評価する。
             if isinstance(blocked, list):
                 for b in blocked:
+                    # 条件分岐: `not isinstance(b, dict)` を満たす経路を評価する。
                     if not isinstance(b, dict):
                         continue
+
                     slug = str(b.get("target_slug") or "").strip()
+                    # 条件分岐: `slug` を満たす経路を評価する。
                     if slug:
                         jwst_waitlist_by_slug[slug] = dict(b)
     except Exception:
         jwst_waitlist_by_slug = {}
 
     jwst_manifest_all_path = root / "data" / "cosmology" / "mast" / "jwst_spectra" / "manifest_all.json"
+    # 条件分岐: `jwst_manifest_all_path.exists()` を満たす経路を評価する。
     if jwst_manifest_all_path.exists():
         jwst_obj = _try_read_json(jwst_manifest_all_path) or {}
         try:
             jwst_items = jwst_obj.get("items") or {}
+            # 条件分岐: `not isinstance(jwst_items, dict)` を満たす経路を評価する。
             if not isinstance(jwst_items, dict):
                 jwst_items = {}
+
             table_rows: List[List[str]] = []
             ok_count = 0
             for slug, info in sorted(jwst_items.items(), key=lambda kv: str(kv[0])):
+                # 条件分岐: `not isinstance(info, dict)` を満たす経路を評価する。
                 if not isinstance(info, dict):
                     continue
+
                 manifest_rel = _as_str(info.get("manifest") or "")
                 manifest = _try_read_json(root / manifest_rel) if manifest_rel else None
                 manifest = manifest if isinstance(manifest, dict) else {}
@@ -3796,24 +4632,31 @@ def main() -> int:
                 obs_n = len(manifest.get("obs") or []) if isinstance(manifest.get("obs"), list) else 0
                 qc = manifest.get("qc") if isinstance(manifest.get("qc"), dict) else {}
                 x1d_local_n = int(qc.get("spectra_plotted") or 0) if isinstance(qc, dict) else 0
+                # 条件分岐: `x1d_local_n > 0` を満たす経路を評価する。
                 if x1d_local_n > 0:
                     ok_count += 1
 
                 # Release date (earliest)
+
                 rel_utc = ""
                 try:
                     rels = []
                     for o in manifest.get("obs") or []:
+                        # 条件分岐: `not isinstance(o, dict)` を満たす経路を評価する。
                         if not isinstance(o, dict):
                             continue
+
                         s = _as_str(o.get("t_obs_release_utc") or "")
+                        # 条件分岐: `s` を満たす経路を評価する。
                         if s:
                             rels.append(s)
+
                     rel_utc = min(rels) if rels else ""
                 except Exception:
                     rel_utc = ""
 
                 # Access state
+
                 state = "ok" if x1d_local_n > 0 else "unknown"
                 try:
                     dls = manifest.get("downloads") or []
@@ -3821,29 +4664,37 @@ def main() -> int:
                         isinstance(d, dict) and int(d.get("status_code") or 0) == 401 for d in dls
                     ):
                         state = "proprietary/401"
+                    # 条件分岐: 前段条件が不成立で、`str(slug) in jwst_waitlist_by_slug` を追加評価する。
                     elif str(slug) in jwst_waitlist_by_slug:
                         # The waitlist is the source of truth for future release dates (no download attempt needed).
                         state = "not_released_yet"
+                    # 条件分岐: 前段条件が不成立で、`x1d_local_n <= 0 and obs_n > 0` を追加評価する。
                     elif x1d_local_n <= 0 and obs_n > 0:
                         state = "no_local_x1d"
+                    # 条件分岐: 前段条件が不成立で、`obs_n <= 0` を追加評価する。
                     elif obs_n <= 0:
                         state = "not_found"
                 except Exception:
                     state = "unknown"
 
                 # Best z (if available)
+
                 z_txt = ""
                 nm_txt = ""
                 try:
                     z_est = manifest.get("z_estimate") or info.get("z_estimate") or {}
+                    # 条件分岐: `isinstance(z_est, dict) and bool(z_est.get("ok"))` を満たす経路を評価する。
                     if isinstance(z_est, dict) and bool(z_est.get("ok")):
                         best = z_est.get("best") or {}
+                        # 条件分岐: `isinstance(best, dict)` を満たす経路を評価する。
                         if isinstance(best, dict):
                             z_mean = best.get("z_mean_from_matches")
                             z_raw = best.get("z")
                             z_val = z_mean if z_mean is not None else z_raw
+                            # 条件分岐: `z_val is not None` を満たす経路を評価する。
                             if z_val is not None:
                                 z_txt = f"{float(z_val):.3f}"
+
                             nm_txt = str(int(best.get("n_matches") or 0))
                 except Exception:
                     z_txt = ""
@@ -3855,21 +4706,25 @@ def main() -> int:
                 f"MAST（JWST）から x1d（1D spectrum）を取得し、ローカルへキャッシュ（対象 {len(table_rows)}）。",
                 f"x1d 取得OK={ok_count}/{len(table_rows)}（残りは proprietary/未取得 等）。",
             ]
+            # 条件分岐: `jwst_waitlist_by_slug` を満たす経路を評価する。
             if jwst_waitlist_by_slug:
                 jwst_mast_summary_lines.append(
                     f"公開待ち（release日が未来）={len(jwst_waitlist_by_slug)}/{len(table_rows)}（waitlist固定）。"
                 )
+
             jwst_mast_detail_lines = [
                 "距離指標（ΛCDM距離など）の二次産物ではなく、スペクトル一次データから z（輝線のズレ）を直接扱う入口。",
                 "保存: data/cosmology/mast/jwst_spectra/<target>/raw/*.fits（x1d）と manifest.json（取得条件/一覧）。",
                 "再現（online取得）: python -B scripts/cosmology/fetch_mast_jwst_spectra.py --download-missing --max-obs 1",
                 "再現（offline QC+z推定）: python -B scripts/cosmology/fetch_mast_jwst_spectra.py --offline --estimate-z",
             ]
+            # 条件分岐: `jwst_waitlist_by_slug` を満たす経路を評価する。
             if jwst_waitlist_by_slug:
                 jwst_mast_detail_lines.append(
                     "公開待ち（release日が未来）の定量化: python -B scripts/cosmology/jwst_spectra_release_waitlist.py"
                 )
                 jwst_mast_detail_lines.append("出力: output/cosmology/jwst_spectra_release_waitlist.json")
+
             jwst_mast_table = {
                 "headers": ["対象", "obs数", "local x1d", "release(UTC)", "z(best)", "matches", "状態"],
                 "rows": table_rows,
@@ -5417,8 +6272,10 @@ def main() -> int:
     llr_section_idx: Optional[int] = None
     try:
         for idx, (sec_title, graphs) in enumerate(sections):
+            # 条件分岐: `sec_title != LLR_LONG_NAME or not isinstance(graphs, list) or not graphs` を満たす経路を評価する。
             if sec_title != LLR_LONG_NAME or not isinstance(graphs, list) or not graphs:
                 continue
+
             llr_section_idx = idx
             llr_graphs_detail = graphs
             break
@@ -5427,9 +6284,11 @@ def main() -> int:
         llr_section_idx = None
 
     # Detailed LLR page (anchors per graph), so readers can jump from the public report.
+
     llr_detail_html: Optional[Path] = None
     try:
         llr_graphs = llr_graphs_detail
+        # 条件分岐: `not (isinstance(llr_graphs, list) and llr_graphs)` を満たす経路を評価する。
         if not (isinstance(llr_graphs, list) and llr_graphs):
             llr_graphs = next(
                 (
@@ -5439,6 +6298,9 @@ def main() -> int:
                 ),
                 None,
             )
+
+        # 条件分岐: `isinstance(llr_graphs, list) and llr_graphs` を満たす経路を評価する。
+
         if isinstance(llr_graphs, list) and llr_graphs:
             llr_detail_html = _render_llr_detail_html(
                 out_dir=out_dir,
@@ -5451,6 +6313,7 @@ def main() -> int:
             rel_llr_detail = _rel_url(out_dir, llr_detail_html)
             for g in llr_graphs:
                 gid = str(g.get("id") or "")
+                # 条件分岐: `gid` を満たす経路を評価する。
                 if gid:
                     g["detail_href"] = f"{rel_llr_detail}#{gid}"
     except Exception as e:
@@ -5459,34 +6322,51 @@ def main() -> int:
 
     # Public report should keep LLR minimal: show only the residual (obs - model) card.
     # Detailed diagnostics stay in output/private/summary/details/llr.html.
+
     try:
+        # 条件分岐: `llr_section_idx is not None and isinstance(llr_graphs_detail, list) and llr_g...` を満たす経路を評価する。
         if llr_section_idx is not None and isinstance(llr_graphs_detail, list) and llr_graphs_detail:
             llr_public_ids = {"llr_residual"}
             llr_graphs_public: List[Dict[str, Any]] = []
             for g in llr_graphs_detail:
+                # 条件分岐: `str(g.get("id") or "") not in llr_public_ids` を満たす経路を評価する。
                 if str(g.get("id") or "") not in llr_public_ids:
                     continue
+
                 g_pub = dict(g)
+                # 条件分岐: `str(g_pub.get("id") or "") == "llr_residual"` を満たす経路を評価する。
                 if str(g_pub.get("id") or "") == "llr_residual":
                     rms_ns = llr_model_metrics.get("rms_residual_station_reflector_ns")
                     st = llr_model_metrics.get("station_code") or llr_summary.get("station")
                     tgt = llr_model_metrics.get("target") or llr_summary.get("target")
                     summary_lines: List[str] = []
+                    # 条件分岐: `st or tgt` を満たす経路を評価する。
                     if st or tgt:
                         summary_lines.append(f"代表例: {st} → {tgt}".strip())
+
+                    # 条件分岐: `isinstance(rms_ns, (int, float))` を満たす経路を評価する。
+
                     if isinstance(rms_ns, (int, float)):
                         one_way_m = float(rms_ns) * 0.149896229
                         summary_lines.append(
                             f"残差RMS={_format_num(float(rms_ns), digits=4)} ns（片道距離で約{_format_num(one_way_m, digits=3)} m）"
                         )
+
+                    # 条件分岐: `summary_lines` を満たす経路を評価する。
+
                     if summary_lines:
                         g_pub["summary_lines"] = summary_lines
+
                     g_pub["explain_lines"] = [
                         "残差（観測 - モデル）。0に近いほど一致している。",
                         "定数オフセット整列後なので、装置遅延などの定数差は吸収している。",
                     ]
                     g_pub["detail_lines"] = []
+
                 llr_graphs_public.append(g_pub)
+
+            # 条件分岐: `llr_graphs_public` を満たす経路を評価する。
+
             if llr_graphs_public:
                 sections[llr_section_idx] = (LLR_LONG_NAME, llr_graphs_public)
     except Exception:
@@ -5541,8 +6421,11 @@ def main() -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

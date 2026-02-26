@@ -27,6 +27,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -49,9 +50,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -60,16 +64,21 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _require_path(path: Path, *, hint: str) -> None:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise SystemExit(f"[fail] missing: {path}\n{hint}")
 
 
 def _walk_collect_key_values(obj: Any, *, key: str, out: List[Any]) -> None:
+    # 条件分岐: `isinstance(obj, dict)` を満たす経路を評価する。
     if isinstance(obj, dict):
         for k, v in obj.items():
+            # 条件分岐: `k == key` を満たす経路を評価する。
             if k == key:
                 out.append(v)
+
             _walk_collect_key_values(v, key=key, out=out)
+    # 条件分岐: 前段条件が不成立で、`isinstance(obj, list)` を追加評価する。
     elif isinstance(obj, list):
         for v in obj:
             _walk_collect_key_values(v, key=key, out=out)
@@ -82,13 +91,24 @@ def _unique_float(values: List[Any], *, name: str) -> float:
             fv = float(v)
         except Exception:
             continue
+
+        # 条件分岐: `not math.isfinite(fv)` を満たす経路を評価する。
+
         if not math.isfinite(fv):
             continue
+
         uniq.add(float(fv))
+
+    # 条件分岐: `not uniq` を満たす経路を評価する。
+
     if not uniq:
         raise SystemExit(f"[fail] could not extract {name} as a finite float")
+
+    # 条件分岐: `len(uniq) != 1` を満たす経路を評価する。
+
     if len(uniq) != 1:
         raise SystemExit(f"[fail] expected a single unique {name} value, got {sorted(uniq)}")
+
     return next(iter(uniq))
 
 
@@ -127,11 +147,14 @@ def build_quantum_frozen_parameters(*, root: Path) -> Dict[str, Any]:
 
     # Nuclear effective potential canonical selection.
     sel_root = j_eff.get("barrier_tail_channel_split_kq_triplet_barrier_fraction_scan")
+    # 条件分岐: `not isinstance(sel_root, dict)` を満たす経路を評価する。
     if not isinstance(sel_root, dict):
         raise SystemExit("[fail] nuclear_effective_potential_canonical_metrics.json missing selection root")
+
     kq = sel_root.get("selected_channel_split_kq_from_7_13_8_4")
     geom = sel_root.get("frozen_singlet_geometry_from_7_13_8_4")
     triplet = sel_root.get("selected")
+    # 条件分岐: `not isinstance(kq, dict) or not isinstance(geom, dict) or not isinstance(trip...` を満たす経路を評価する。
     if not isinstance(kq, dict) or not isinstance(geom, dict) or not isinstance(triplet, dict):
         raise SystemExit("[fail] canonical selection fields missing in nuclear_effective_potential_canonical_metrics.json")
 
@@ -221,8 +244,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = ap.parse_args(argv)
 
     out_path = Path(args.out)
+    # 条件分岐: `not out_path.is_absolute()` を満たす経路を評価する。
     if not out_path.is_absolute():
         out_path = (_ROOT / out_path).resolve()
+
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
     payload = build_quantum_frozen_parameters(root=_ROOT)
@@ -243,6 +268,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

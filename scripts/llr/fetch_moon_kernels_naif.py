@@ -70,11 +70,13 @@ def _sha256(path: Path) -> str:
     with open(path, "rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
     if dst.exists() and not force:
         print(f"[skip] exists: {dst}")
         return
@@ -83,6 +85,7 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[dl] {url}")
     with urllib.request.urlopen(url, timeout=180) as r, open(tmp, "wb") as f:
         shutil.copyfileobj(r, f, length=1024 * 1024)
+
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
@@ -98,13 +101,17 @@ def main() -> int:
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    # 条件分岐: `args.offline` を満たす経路を評価する。
     if args.offline:
         missing = [k.name for k in KERNELS if not (out_dir / k.name).exists()]
+        # 条件分岐: `missing` を満たす経路を評価する。
         if missing:
             print("[err] offline and missing kernels:")
             for m in missing:
                 print("  -", m)
+
             return 2
+
         print(f"[ok] offline: {out_dir}")
         return 0
 
@@ -132,6 +139,8 @@ def main() -> int:
     print(f"[ok] meta: {meta_path}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

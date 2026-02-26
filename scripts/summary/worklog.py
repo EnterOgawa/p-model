@@ -33,34 +33,41 @@ def _lock_path_for(jsonl_path: Path) -> Path:
 
 def _ensure_lock_file(lock_path: Path) -> None:
     lock_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `lock_path.exists() and lock_path.stat().st_size >= 1` を満たす経路を評価する。
     if lock_path.exists() and lock_path.stat().st_size >= 1:
         return
     # Ensure the file is at least 1 byte so region locking is well-defined on Windows.
+
     with open(lock_path, "ab") as f:
+        # 条件分岐: `f.tell() == 0` を満たす経路を評価する。
         if f.tell() == 0:
             f.write(b"0")
             f.flush()
 
 
 def _lock_file(f) -> None:  # type: ignore[no-untyped-def]
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
     if os.name == "nt":
         import msvcrt
 
         f.seek(0)
         msvcrt.locking(f.fileno(), msvcrt.LK_LOCK, 1)
         return
+
     import fcntl
 
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
 
 
 def _unlock_file(f) -> None:  # type: ignore[no-untyped-def]
+    # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
     if os.name == "nt":
         import msvcrt
 
         f.seek(0)
         msvcrt.locking(f.fileno(), msvcrt.LK_UNLCK, 1)
         return
+
     import fcntl
 
     fcntl.flock(f.fileno(), fcntl.LOCK_UN)
@@ -86,18 +93,29 @@ def append_event(event: Dict[str, Any], *, jsonl_path: Optional[Path] = None) ->
     ev.setdefault("generated_utc", datetime.now(timezone.utc).isoformat())
 
     def _norm(v: Any) -> Any:
+        # 条件分岐: `isinstance(v, Path)` を満たす経路を評価する。
         if isinstance(v, Path):
             return _rel(root, v)
+
+        # 条件分岐: `isinstance(v, dict)` を満たす経路を評価する。
+
         if isinstance(v, dict):
             return {kk: _norm(vv) for kk, vv in v.items()}
+
+        # 条件分岐: `isinstance(v, (list, tuple))` を満たす経路を評価する。
+
         if isinstance(v, (list, tuple)):
             return [_norm(vv) for vv in v]
+
         return v
 
     # Normalize common path-like fields if present
+
     for k in ("output", "outputs", "summary_path", "status_path", "log", "input", "inputs"):
+        # 条件分岐: `k not in ev` を満たす経路を評価する。
         if k not in ev:
             continue
+
         ev[k] = _norm(ev.get(k))
 
     line = json.dumps(ev, ensure_ascii=False)
@@ -110,4 +128,5 @@ def append_event(event: Dict[str, Any], *, jsonl_path: Optional[Path] = None) ->
                 f.write(line + "\n")
         finally:
             _unlock_file(lf)
+
     return path

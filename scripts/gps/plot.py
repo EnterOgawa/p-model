@@ -31,6 +31,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -41,6 +42,7 @@ def _set_japanese_font() -> None:
 
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -66,8 +68,10 @@ def plot_all_residuals_brdc(sats: List[str]) -> Path:
     count = 0
     for sat in sats:
         filename = OUT_DIR / f"residual_precise_{sat}.csv"
+        # 条件分岐: `not filename.exists()` を満たす経路を評価する。
         if not filename.exists():
             continue
+
         try:
             df = pd.read_csv(filename)
             df["time_utc"] = pd.to_datetime(df["time_utc"])
@@ -96,6 +100,7 @@ def plot_all_residuals_brdc(sats: List[str]) -> Path:
 
 def plot_residual_compare_g01() -> Optional[Path]:
     path = OUT_DIR / "residual_precise_G01.csv"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None
 
@@ -105,6 +110,7 @@ def plot_residual_compare_g01() -> Optional[Path]:
     _set_japanese_font()
     plt.figure(figsize=(10.5, 5.2))
     plt.plot(df["time_utc"], df["res_brdc_s"] * 1e9, label="放送暦（BRDC）- IGS", linewidth=1.6)
+    # 条件分岐: `"res_pmodel_s" in df.columns` を満たす経路を評価する。
     if "res_pmodel_s" in df.columns:
         plt.plot(
             df["time_utc"],
@@ -112,6 +118,7 @@ def plot_residual_compare_g01() -> Optional[Path]:
             label="P-model（dt_rel除去）- IGS",
             linewidth=1.6,
         )
+
     plt.title("GPS 時計残差：G01（観測IGSに対する比較）", fontsize=14)
     plt.xlabel("UTC時刻")
     plt.ylabel("残差 [ns]（バイアス＋ドリフト除去後）")
@@ -135,15 +142,19 @@ def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path]
 
     for row in summary_rows:
         prn = (row.get("PRN") or "").strip()
+        # 条件分岐: `not prn` を満たす経路を評価する。
         if not prn:
             continue
+
         try:
             rms_b_m = float(row.get("RMS_BRDC_m") or "nan")
         except Exception:
             continue
+
         rms_b_ns.append((prn, _to_ns_from_m(rms_b_m)))
 
         rms_p_m_raw = row.get("RMS_PMODEL_m")
+        # 条件分岐: `rms_p_m_raw is not None and str(rms_p_m_raw).strip() != ""` を満たす経路を評価する。
         if rms_p_m_raw is not None and str(rms_p_m_raw).strip() != "":
             try:
                 rms_p_m = float(rms_p_m_raw)
@@ -157,11 +168,15 @@ def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path]
     metrics: Dict[str, float] = {
         "n_sats": float(len(rms_b_ns)),
     }
+    # 条件分岐: `rms_b_ns` を満たす経路を評価する。
     if rms_b_ns:
         b_vals = [v for _, v in rms_b_ns]
         b_sorted = sorted(b_vals)
         metrics["brdc_rms_ns_median"] = b_sorted[len(b_sorted) // 2]
         metrics["brdc_rms_ns_max"] = max(b_sorted)
+
+    # 条件分岐: `rms_p_ns` を満たす経路を評価する。
+
     if rms_p_ns:
         p_vals = [v for _, v in rms_p_ns]
         p_sorted = sorted(p_vals)
@@ -174,14 +189,22 @@ def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path]
         worse = 0
         for prn, b in b_map.items():
             p = p_map.get(prn)
+            # 条件分岐: `p is None` を満たす経路を評価する。
             if p is None:
                 continue
+
+            # 条件分岐: `p < b` を満たす経路を評価する。
+
             if p < b:
                 better += 1
+            # 条件分岐: 前段条件が不成立で、`p > b` を追加評価する。
             elif p > b:
                 worse += 1
+
         metrics["pmodel_better_count"] = float(better)
         metrics["brdc_better_count"] = float(worse)
+
+    # 条件分岐: `not rms_b_ns or not rms_p_ns` を満たす経路を評価する。
 
     if not rms_b_ns or not rms_p_ns:
         return None, metrics
@@ -217,6 +240,7 @@ def _detrend_affine(t_s: "np.ndarray", y: "np.ndarray") -> "np.ndarray":
     # y - (a + b t)
     if len(t_s) < 2:
         return y.copy()
+
     t0 = t_s[0]
     tt = t_s - t0
     A = np.vstack([np.ones_like(tt), tt]).T
@@ -230,12 +254,14 @@ def _dt_rel_from_r(t_s: "np.ndarray", r_m: "np.ndarray") -> "np.ndarray":
     #   dt_rel = -2 (r·v)/c^2
     # and r·v = r * dr/dt (since dr/dt = (r·v)/r). We estimate dr/dt by finite differences.
     n = len(r_m)
+    # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
         return np.zeros_like(r_m)
 
     drdt = np.zeros_like(r_m, dtype=float)
     drdt[0] = (r_m[1] - r_m[0]) / (t_s[1] - t_s[0])
     drdt[-1] = (r_m[-1] - r_m[-2]) / (t_s[-1] - t_s[-2])
+    # 条件分岐: `n >= 3` を満たす経路を評価する。
     if n >= 3:
         drdt[1:-1] = (r_m[2:] - r_m[:-2]) / (t_s[2:] - t_s[:-2])
 
@@ -245,12 +271,14 @@ def _dt_rel_from_r(t_s: "np.ndarray", r_m: "np.ndarray") -> "np.ndarray":
 
 def plot_relativistic_correction_example(prn: str = "G02") -> Tuple[Optional[Path], Dict[str, float]]:
     path = OUT_DIR / f"residual_precise_{prn}.csv"
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return None, {}
 
     df = pd.read_csv(path)
     df["time_utc"] = pd.to_datetime(df["time_utc"])
 
+    # 条件分岐: `"pmodel_clk_s" not in df.columns or "r_m" not in df.columns or "tsec" not in...` を満たす経路を評価する。
     if "pmodel_clk_s" not in df.columns or "r_m" not in df.columns or "tsec" not in df.columns:
         return None, {}
 
@@ -266,14 +294,18 @@ def plot_relativistic_correction_example(prn: str = "G02") -> Tuple[Optional[Pat
 
     # Metrics
     def _corr(a: "np.ndarray", b: "np.ndarray") -> float:
+        # 条件分岐: `len(a) < 2` を満たす経路を評価する。
         if len(a) < 2:
             return float("nan")
+
         aa = a - float(np.mean(a))
         bb = b - float(np.mean(b))
         da = float(np.sqrt(np.sum(aa * aa)))
         db = float(np.sqrt(np.sum(bb * bb)))
+        # 条件分岐: `da == 0.0 or db == 0.0` を満たす経路を評価する。
         if da == 0.0 or db == 0.0:
             return float("nan")
+
         return float(np.sum(aa * bb) / (da * db))
 
     rmse_s = float(np.sqrt(np.mean((p_det - rel_det) ** 2)))
@@ -310,6 +342,7 @@ def main() -> None:
 
     # Determine satellites from residual files (fallback to G01.. patterns).
     sats = sorted([p.stem.replace("residual_precise_", "") for p in OUT_DIR.glob("residual_precise_G*.csv")])
+    # 条件分岐: `not sats` を満たす経路を評価する。
     if not sats:
         sats = [
             "G01",
@@ -352,6 +385,7 @@ def main() -> None:
     summary_rows = load_summary(summary_csv) if summary_csv.exists() else []
     rms_png, metrics = plot_rms_compare(summary_rows)
     rel_png, rel_metrics = plot_relativistic_correction_example("G02")
+    # 条件分岐: `rel_metrics` を満たす経路を評価する。
     if rel_metrics:
         metrics.update({f"rel_{k}": v for k, v in rel_metrics.items() if k != "prn"})
 
@@ -397,6 +431,8 @@ def main() -> None:
     except Exception:
         pass
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

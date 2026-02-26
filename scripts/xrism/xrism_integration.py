@@ -33,6 +33,7 @@ except Exception:  # pragma: no cover
     plt = None
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,15 +45,20 @@ def _utc_now() -> str:
 
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
+    # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         return []
+
     rows: List[Dict[str, str]] = []
     with path.open("r", encoding="utf-8", newline="") as f:
         reader = csv.DictReader(f)
         for r in reader:
+            # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
             if not isinstance(r, dict):
                 continue
+
             rows.append({str(k): (v or "").strip() for k, v in r.items() if k is not None})
+
     return rows
 
 
@@ -69,31 +75,49 @@ def _write_json(path: Path, obj: Dict[str, Any]) -> None:
 
 
 def _maybe_float(x: object) -> Optional[float]:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return None
+
+    # 条件分岐: `isinstance(x, (int, float))` を満たす経路を評価する。
+
     if isinstance(x, (int, float)):
         v = float(x)
         return v if math.isfinite(v) else None
+
     s = str(x).strip()
+    # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
         return None
+
     try:
         v = float(s)
     except Exception:
         return None
+
     return v if math.isfinite(v) else None
 
 
 def _maybe_bool(x: object) -> Optional[bool]:
+    # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
         return None
+
+    # 条件分岐: `isinstance(x, bool)` を満たす経路を評価する。
+
     if isinstance(x, bool):
         return x
+
     s = str(x).strip().lower()
+    # 条件分岐: `s in {"true", "t", "1", "yes", "y"}` を満たす経路を評価する。
     if s in {"true", "t", "1", "yes", "y"}:
         return True
+
+    # 条件分岐: `s in {"false", "f", "0", "no", "n"}` を満たす経路を評価する。
+
     if s in {"false", "f", "0", "no", "n"}:
         return False
+
     return None
 
 
@@ -105,29 +129,46 @@ def _rel(path: Path) -> str:
 
 
 def _combine_sigma(stat: Optional[float], sys_: Optional[float]) -> Optional[float]:
+    # 条件分岐: `stat is None and sys_ is None` を満たす経路を評価する。
     if stat is None and sys_ is None:
         return None
+
     s2 = 0.0
+    # 条件分岐: `stat is not None` を満たす経路を評価する。
     if stat is not None:
         s2 += float(stat) ** 2
+
+    # 条件分岐: `sys_ is not None` を満たす経路を評価する。
+
     if sys_ is not None:
         s2 += float(sys_) ** 2
+
     return math.sqrt(s2) if s2 > 0 else 0.0
 
 
 def _sys_over_stat(stat: Optional[float], sys_: Optional[float]) -> Optional[float]:
+    # 条件分岐: `stat is None or sys_ is None` を満たす経路を評価する。
     if stat is None or sys_ is None:
         return None
+
+    # 条件分岐: `stat <= 0` を満たす経路を評価する。
+
     if stat <= 0:
         return None
+
     return float(sys_) / float(stat)
 
 
 def _gamma_from_beta(beta: float) -> Optional[float]:
+    # 条件分岐: `not math.isfinite(beta)` を満たす経路を評価する。
     if not math.isfinite(beta):
         return None
+
+    # 条件分岐: `abs(beta) >= 1.0` を満たす経路を評価する。
+
     if abs(beta) >= 1.0:
         return None
+
     return 1.0 / math.sqrt(1.0 - float(beta) ** 2)
 
 
@@ -136,11 +177,15 @@ def _delta_upper_from_gamma(gamma_obs: float) -> Optional[float]:
     δ upper bound from requiring γ_max >= γ_obs where γ_max~sqrt((1+δ)/δ).
     => δ <= 1/(γ_obs^2 - 1)
     """
+    # 条件分岐: `not math.isfinite(gamma_obs) or gamma_obs <= 1.0` を満たす経路を評価する。
     if not math.isfinite(gamma_obs) or gamma_obs <= 1.0:
         return None
+
     denom = float(gamma_obs) ** 2 - 1.0
+    # 条件分岐: `denom <= 0` を満たす経路を評価する。
     if denom <= 0:
         return None
+
     return 1.0 / denom
 
 
@@ -158,8 +203,10 @@ def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
     for r in rows:
         obsid = str(r.get("obsid") or "").strip()
+        # 条件分岐: `not obsid` を満たす経路を評価する。
         if not obsid:
             continue
+
         out[obsid] = {
             "obsid": obsid,
             "pi_path": str(r.get("pi_path") or "").strip(),
@@ -172,6 +219,7 @@ def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
             "apply_gti": bool(_maybe_bool(r.get("apply_gti")) or False),
             "gti_n": _maybe_float(r.get("gti_n")),
         }
+
     return out
 
 
@@ -204,8 +252,10 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
     per_obsid: Dict[str, Dict[str, Any]] = {}
     for r in rows:
         obsid = str(r.get("obsid") or "").strip()
+        # 条件分岐: `not obsid` を満たす経路を評価する。
         if not obsid:
             continue
+
         detected = bool(_maybe_bool(r.get("detected")) or False)
         beta = _maybe_float(r.get("beta"))
         beta_stat = _maybe_float(r.get("beta_err_stat"))
@@ -230,12 +280,15 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
             "sys_over_stat": ratio,
             "detected": detected,
         }
+        # 条件分岐: `detected and beta is not None` を満たす経路を評価する。
         if detected and beta is not None:
             detected_rows.append(item)
 
         # Keep a per-obsid "best" row for reporting:
         # prefer detected, then prefer stable (sys/stat<=gate), then smallest total sigma.
+
         prev = per_obsid.get(obsid)
+        # 条件分岐: `prev is None` を満たす経路を評価する。
         if prev is None:
             per_obsid[obsid] = item
         else:
@@ -245,19 +298,26 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
             cur_ratio = _maybe_float(item.get("sys_over_stat"))
             prev_good = prev_ratio is not None and prev_ratio <= gate_ratio
             cur_good = cur_ratio is not None and cur_ratio <= gate_ratio
+            # 条件分岐: `cur_det and not prev_det` を満たす経路を評価する。
             if cur_det and not prev_det:
                 per_obsid[obsid] = item
+            # 条件分岐: 前段条件が不成立で、`cur_det == prev_det` を追加評価する。
             elif cur_det == prev_det:
+                # 条件分岐: `cur_det and prev_det and cur_good and not prev_good` を満たす経路を評価する。
                 if cur_det and prev_det and cur_good and not prev_good:
                     per_obsid[obsid] = item
+                # 条件分岐: 前段条件が不成立で、`cur_det and prev_det and cur_good == prev_good` を追加評価する。
                 elif cur_det and prev_det and cur_good == prev_good:
                     prev_sig = _maybe_float(prev.get("beta_sigma_total")) or float("inf")
                     cur_sig = _maybe_float(item.get("beta_sigma_total")) or float("inf")
+                    # 条件分岐: `cur_sig < prev_sig` を満たす経路を評価する。
                     if cur_sig < prev_sig:
                         per_obsid[obsid] = item
+                # 条件分岐: 前段条件が不成立で、`(not cur_det) and (not prev_det)` を追加評価する。
                 elif (not cur_det) and (not prev_det):
                     prev_sig = _maybe_float(prev.get("beta_sigma_total")) or float("inf")
                     cur_sig = _maybe_float(item.get("beta_sigma_total")) or float("inf")
+                    # 条件分岐: `cur_sig < prev_sig` を満たす経路を評価する。
                     if cur_sig < prev_sig:
                         per_obsid[obsid] = item
 
@@ -271,12 +331,15 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
     excluded_detected_obsids_sysdom: List[str] = []
     for it in detected_per_obsid:
         ratio = _maybe_float(it.get("sys_over_stat"))
+        # 条件分岐: `ratio is not None and ratio <= gate_ratio` を満たす経路を評価する。
         if ratio is not None and ratio <= gate_ratio:
             good_per_obsid.append(it)
         else:
             obsid = str(it.get("obsid") or "").strip()
+            # 条件分岐: `obsid` を満たす経路を評価する。
             if obsid:
                 excluded_detected_obsids_sysdom.append(obsid)
+
     detected_obsids_good = sorted({str(it.get("obsid") or "") for it in good_per_obsid if str(it.get("obsid") or "").strip()})
     n_detected_obsids_good = len(detected_obsids_good)
 
@@ -285,9 +348,12 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
     candidates_for_best = good_per_obsid if good_per_obsid else detected_per_obsid
     for r in candidates_for_best:
         b = _maybe_float(r.get("beta"))
+        # 条件分岐: `b is None` を満たす経路を評価する。
         if b is None:
             continue
+
         a = abs(float(b))
+        # 条件分岐: `beta_abs_best is None or a > beta_abs_best` を満たす経路を評価する。
         if beta_abs_best is None or a > beta_abs_best:
             beta_abs_best = a
             best_row = r
@@ -296,21 +362,31 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
     delta_upper_from_best = _delta_upper_from_gamma(float(gamma_best)) if gamma_best is not None else None
 
     reasons: List[str] = []
+    # 条件分岐: `n_detected_obsids_good < 2` を満たす経路を評価する。
     if n_detected_obsids_good < 2:
         reasons.append("detected_obsid_count<2（sys/stat≤10 を満たす検出 obsid が不足）")
+
     worst_ratio = None
     for it in good_per_obsid:
         ratio = _maybe_float(it.get("sys_over_stat"))
+        # 条件分岐: `ratio is None` を満たす経路を評価する。
         if ratio is None:
             continue
+
+        # 条件分岐: `worst_ratio is None or ratio > worst_ratio` を満たす経路を評価する。
+
         if worst_ratio is None or ratio > worst_ratio:
             worst_ratio = ratio
+
+    # 条件分岐: `not good_per_obsid` を満たす経路を評価する。
+
     if not good_per_obsid:
         # If nothing passes the gate, be explicit about why adoption is blocked.
         reasons.append("系統散らばり（window/gain/rebin）が統計誤差の10倍を超える（sys/stat>10）")
 
     table1_status = "screening"
     adopt_for_sigma = False
+    # 条件分岐: `not reasons` を満たす経路を評価する。
     if not reasons:
         table1_status = "adopted"
         adopt_for_sigma = True
@@ -319,8 +395,10 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
         adopt_for_sigma = False
 
     # Attach event-level QC to per-obsid best rows (if present).
+
     for obsid, it in per_obsid.items():
         qc = qc_by_obsid.get(obsid)
+        # 条件分岐: `qc is not None` を満たす経路を評価する。
         if qc is not None:
             it["event_level_qc"] = qc
 
@@ -375,8 +453,10 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
     per_obsid: Dict[str, Dict[str, Any]] = {}
     for r in rows:
         obsid = str(r.get("obsid") or "").strip()
+        # 条件分岐: `not obsid` を満たす経路を評価する。
         if not obsid:
             continue
+
         detected = bool(_maybe_bool(r.get("detected")) or False)
         z_opt = _maybe_float(r.get("z_opt"))
         z_x = _maybe_float(r.get("z_xray"))
@@ -411,20 +491,25 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
             "sigma_v_intr_sys_kms": sigma_v_sys,
             "detected": detected,
         }
+        # 条件分岐: `detected and z_x is not None and z_opt is not None` を満たす経路を評価する。
         if detected and z_x is not None and z_opt is not None:
             detected_rows.append(item)
 
         prev = per_obsid.get(obsid)
+        # 条件分岐: `prev is None` を満たす経路を評価する。
         if prev is None:
             per_obsid[obsid] = item
         else:
             prev_det = bool(prev.get("detected"))
             cur_det = bool(item.get("detected"))
+            # 条件分岐: `cur_det and not prev_det` を満たす経路を評価する。
             if cur_det and not prev_det:
                 per_obsid[obsid] = item
+            # 条件分岐: 前段条件が不成立で、`cur_det == prev_det` を追加評価する。
             elif cur_det == prev_det:
                 prev_sig = _maybe_float(prev.get("z_xray_sigma_total")) or float("inf")
                 cur_sig = _maybe_float(item.get("z_xray_sigma_total")) or float("inf")
+                # 条件分岐: `cur_sig < prev_sig` を満たす経路を評価する。
                 if cur_sig < prev_sig:
                     per_obsid[obsid] = item
 
@@ -438,8 +523,10 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
         dz = _maybe_float(it.get("delta_z"))
         sig = _maybe_float(it.get("z_xray_sigma_total"))
         z_score = None
+        # 条件分岐: `dz is not None and sig is not None and sig > 0` を満たす経路を評価する。
         if dz is not None and sig is not None and sig > 0:
             z_score = float(dz) / float(sig)
+
         cross_checks.append(
             {
                 "obsid": obsid,
@@ -454,22 +541,33 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
         )
 
     # Adopt gate: need >=2 detected obsids AND systematics not dominating.
+
     reasons: List[str] = []
+    # 条件分岐: `n_detected_obsids < 2` を満たす経路を評価する。
     if n_detected_obsids < 2:
         reasons.append("detected_obsid_count<2（現状は確度の高い線検出が不足）")
     # Best-per-obsid is used as a conservative systematics proxy.
+
     worst_ratio = None
     for it in per_obsid.values():
         ratio = _maybe_float(it.get("sys_over_stat"))
+        # 条件分岐: `ratio is None` を満たす経路を評価する。
         if ratio is None:
             continue
+
+        # 条件分岐: `worst_ratio is None or ratio > worst_ratio` を満たす経路を評価する。
+
         if worst_ratio is None or ratio > worst_ratio:
             worst_ratio = ratio
+
+    # 条件分岐: `worst_ratio is None or worst_ratio > 10.0` を満たす経路を評価する。
+
     if worst_ratio is None or worst_ratio > 10.0:
         reasons.append("系統散らばり（window/gain/rebin）が統計誤差の10倍を超える（sys/stat>10）")
 
     table1_status = "screening"
     adopt_for_sigma = False
+    # 条件分岐: `not reasons` を満たす経路を評価する。
     if not reasons:
         table1_status = "adopted"
         adopt_for_sigma = True
@@ -479,6 +577,7 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
 
     for obsid, it in per_obsid.items():
         qc = qc_by_obsid.get(obsid)
+        # 条件分岐: `qc is not None` を満たす経路を評価する。
         if qc is not None:
             it["event_level_qc"] = qc
 
@@ -505,11 +604,13 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
 
 
 def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, Any]) -> bool:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return False
 
     bh_rows = [r for r in (bh.get("per_obsid_best") or []) if r.get("detected") is True]
     cl_rows = [r for r in (cluster.get("per_obsid_best") or []) if r.get("detected") is True]
+    # 条件分岐: `not bh_rows and not cl_rows` を満たす経路を評価する。
     if not bh_rows and not cl_rows:
         fig, ax = plt.subplots(1, 1, figsize=(11, 6.5), constrained_layout=True)
         ax.axis("off")
@@ -552,8 +653,10 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
         for r in bh_rows:
             beta = _maybe_float(r.get("beta")) or 0.0
             sigma = _maybe_float(r.get("beta_sigma_total"))
+            # 条件分岐: `sigma is None` を満たす経路を評価する。
             if sigma is None:
                 sigma = _combine_sigma(_maybe_float(r.get("beta_err_stat")), _maybe_float(r.get("beta_sys_total")))
+
             ys.append(beta)
             yerrs.append(float(sigma or 0.0))
             target = str(r.get("target_name", "")).strip() or str(r.get("obsid", "")).strip()
@@ -571,6 +674,7 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
         ax_bh.text(0.5, 0.5, "BH/AGN: no detected obsid", ha="center", va="center", transform=ax_bh.transAxes)
 
     # Panel B: cluster delta_v (converted from delta_z)
+
     if cl_rows:
         c_kms = 299792.458
         xs = list(range(len(cl_rows)))
@@ -581,8 +685,10 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
             dv = _maybe_float(r.get("delta_v_kms")) or 0.0
             z_opt = _maybe_float(r.get("z_opt")) or 0.0
             sigma_z = _maybe_float(r.get("z_xray_sigma_total"))
+            # 条件分岐: `sigma_z is None` を満たす経路を評価する。
             if sigma_z is None:
                 sigma_z = _combine_sigma(_maybe_float(r.get("z_xray_err_stat")), _maybe_float(r.get("z_xray_sys_total")))
+
             dv_err = (c_kms * float(sigma_z) / (1.0 + z_opt)) if sigma_z is not None else 0.0
             ys.append(dv)
             yerrs.append(float(dv_err))
@@ -651,6 +757,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     out_png = out_dir / "xrism_resolve_summary.png"
     plot_ok = _plot_resolve_summary(out_png, bh=payload["xrism"]["bh"], cluster=payload["xrism"]["cluster"])
+    # 条件分岐: `not plot_ok` を満たす経路を評価する。
     if not plot_ok:
         payload["outputs"]["resolve_summary_png"] = None
         payload.setdefault("notes", []).append("resolve_summary_png is skipped (matplotlib missing or no detected rows).")
@@ -673,10 +780,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pass
 
     print(f"[ok] wrote: {out_path}")
+    # 条件分岐: `plot_ok` を満たす経路を評価する。
     if plot_ok:
         print(f"[ok] wrote: {out_png}")
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

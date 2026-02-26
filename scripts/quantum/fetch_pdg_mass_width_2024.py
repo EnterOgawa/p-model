@@ -24,14 +24,18 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             chunk = f.read(chunk_bytes)
+            # 条件分岐: `not chunk` を満たす経路を評価する。
             if not chunk:
                 break
+
             h.update(chunk)
+
     return h.hexdigest()
 
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `out_path.exists() and out_path.stat().st_size > 0` を満たす経路を評価する。
     if out_path.exists() and out_path.stat().st_size > 0:
         print(f"[skip] exists: {out_path}")
         return
@@ -40,8 +44,11 @@ def _download(url: str, out_path: Path) -> None:
     with urlopen(req, timeout=60) as resp, out_path.open("wb") as f:
         f.write(resp.read())
 
+    # 条件分岐: `out_path.stat().st_size == 0` を満たす経路を評価する。
+
     if out_path.stat().st_size == 0:
         raise RuntimeError(f"downloaded empty file: {out_path}")
+
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
@@ -69,10 +76,16 @@ def main() -> None:
     missing: list[Path] = []
     for spec in files:
         path = src_dir / spec.relpath
+        # 条件分岐: `not args.offline` を満たす経路を評価する。
         if not args.offline:
             _download(spec.url, path)
+
+        # 条件分岐: `not path.exists() or path.stat().st_size == 0` を満たす経路を評価する。
+
         if not path.exists() or path.stat().st_size == 0:
             missing.append(path)
+
+    # 条件分岐: `missing` を満たす経路を評価する。
 
     if missing:
         raise SystemExit("[fail] missing files:\n" + "\n".join(f"- {p}" for p in missing))
@@ -101,6 +114,8 @@ def main() -> None:
     out.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] manifest: {out}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

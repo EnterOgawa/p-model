@@ -30,6 +30,7 @@ from typing import Any, Dict, Optional
 from urllib.request import Request, urlopen
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -44,6 +45,7 @@ def _sha256(path: Path) -> str:
     with path.open("rb") as f:
         for chunk in iter(lambda: f.read(1024 * 1024), b""):
             h.update(chunk)
+
     return h.hexdigest()
 
 
@@ -53,6 +55,7 @@ def _download(url: str, out_path: Path, *, timeout_s: int = 60) -> Dict[str, Any
     with urlopen(req, timeout=timeout_s) as resp:
         headers = {k.lower(): v for k, v in (resp.headers.items() if resp.headers else [])}
         body = resp.read()
+
     out_path.write_bytes(body)
     return {
         "url": url,
@@ -71,26 +74,38 @@ def _extract_zip(zip_path: Path, out_dir: Path) -> Dict[str, Any]:
     with zipfile.ZipFile(zip_path) as z:
         for info in z.infolist():
             name = str(info.filename).replace("\\", "/")
+            # 条件分岐: `not name or name.endswith("/")` を満たす経路を評価する。
             if not name or name.endswith("/"):
                 continue
+
+            # 条件分岐: `name.startswith("__MACOSX/") or "/__MACOSX/" in name` を満たす経路を評価する。
+
             if name.startswith("__MACOSX/") or "/__MACOSX/" in name:
                 skipped += 1
                 continue
+
+            # 条件分岐: `name.endswith(".DS_Store") or "/.DS_Store" in name` を満たす経路を評価する。
+
             if name.endswith(".DS_Store") or "/.DS_Store" in name:
                 skipped += 1
                 continue
 
             # The zip contains a top-level folder; flatten into out_dir.
+
             parts = [p for p in name.split("/") if p and p not in (".", "..")]
+            # 条件分岐: `len(parts) >= 2 and parts[0].lower().startswith("ross_2016")` を満たす経路を評価する。
             if len(parts) >= 2 and parts[0].lower().startswith("ross_2016"):
                 rel = Path(*parts[1:])
             else:
                 rel = Path(*parts)
+
             dest = out_dir / rel
             dest.parent.mkdir(parents=True, exist_ok=True)
             with z.open(info) as src, dest.open("wb") as dst:
                 dst.write(src.read())
+
             extracted += 1
+
     return {"files_extracted": extracted, "files_skipped": skipped}
 
 
@@ -115,12 +130,17 @@ def main(argv: Optional[list[str]] = None) -> int:
     zip_cache = data_dir / "sources" / "Ross_etal_2016_COMBINEDDR12_corrfunc.zip"
     meta_path = out_dir / "_download_meta.json"
 
+    # 条件分岐: `out_dir.exists() and _looks_ready(out_dir) and not bool(args.force)` を満たす経路を評価する。
     if out_dir.exists() and _looks_ready(out_dir) and not bool(args.force):
         print(f"[skip] already present: {out_dir}")
         return 0
+
+    # 条件分岐: `out_dir.exists() and bool(args.force)` を満たす経路を評価する。
+
     if out_dir.exists() and bool(args.force):
         # Remove only known data files; keep directory.
         for p in out_dir.glob("*"):
+            # 条件分岐: `p.name.startswith("Ross_2016_COMBINEDDR12_") or p.name in ("README", "_downlo...` を満たす経路を評価する。
             if p.name.startswith("Ross_2016_COMBINEDDR12_") or p.name in ("README", "_download_meta.json"):
                 try:
                     p.unlink()
@@ -160,8 +180,11 @@ def main(argv: Optional[list[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

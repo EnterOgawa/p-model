@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(ROOT) not in sys.path` を満たす経路を評価する。
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
@@ -50,10 +51,13 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(v: Any) -> Optional[float]:
+    # 条件分岐: `isinstance(v, (int, float))` を満たす経路を評価する。
     if isinstance(v, (int, float)):
         f = float(v)
+        # 条件分岐: `math.isfinite(f)` を満たす経路を評価する。
         if math.isfinite(f):
             return f
+
     return None
 
 
@@ -69,11 +73,15 @@ def _criterion(
     note: str,
 ) -> Dict[str, Any]:
     passed: Optional[bool] = None
+    # 条件分岐: `value is not None` を満たす経路を評価する。
     if value is not None:
+        # 条件分岐: `operator == "<="` を満たす経路を評価する。
         if operator == "<=":
             passed = bool(value <= threshold)
+        # 条件分岐: 前段条件が不成立で、`operator == ">="` を追加評価する。
         elif operator == ">=":
             passed = bool(value >= threshold)
+
     return {
         "id": cid,
         "proxy": proxy,
@@ -89,10 +97,15 @@ def _criterion(
 
 def _extract_row(rows: List[Dict[str, Any]], channel: str) -> Optional[Dict[str, Any]]:
     for row in rows:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
+        # 条件分岐: `str(row.get("channel") or "") == channel` を満たす経路を評価する。
+
         if str(row.get("channel") or "") == channel:
             return row
+
     return None
 
 
@@ -114,10 +127,15 @@ def build_pack() -> Dict[str, Any]:
 
     alpha_z = _as_float((row_alpha or {}).get("metric_value"))
     visibility_ratio_raw = _as_float((row_visibility or {}).get("metric_value"))
+    # 条件分岐: `visibility_ratio_raw is None` を満たす経路を評価する。
     if visibility_ratio_raw is None:
         visibility_ratio_raw = _as_float(precision_gap_watch.get("visibility_reference_ratio"))
+
+    # 条件分岐: `visibility_ratio_raw is None` を満たす経路を評価する。
+
     if visibility_ratio_raw is None:
         visibility_ratio_raw = _as_float(precision_gap_watch.get("median_ratio"))
+
     visibility_ratio_log10 = float(np.log10(visibility_ratio_raw)) if visibility_ratio_raw is not None and visibility_ratio_raw > 0 else None
     visibility_ref_channel = str(precision_gap_watch.get("visibility_reference_channel") or "atom_gravimeter")
     molecular_z = _as_float((row_molecular or {}).get("metric_value"))
@@ -126,11 +144,15 @@ def build_pack() -> Dict[str, Any]:
     fast_prefixes = ("weihs1998_", "nist_")
     fast_rows: List[Dict[str, Any]] = []
     for ds in datasets:
+        # 条件分岐: `not isinstance(ds, dict)` を満たす経路を評価する。
         if not isinstance(ds, dict):
             continue
+
         dataset_id = str(ds.get("dataset_id") or "")
+        # 条件分岐: `not dataset_id.startswith(fast_prefixes)` を満たす経路を評価する。
         if not dataset_id.startswith(fast_prefixes):
             continue
+
         delay = ds.get("delay_signature") if isinstance(ds.get("delay_signature"), dict) else {}
         a = delay.get("Alice") if isinstance(delay.get("Alice"), dict) else {}
         b = delay.get("Bob") if isinstance(delay.get("Bob"), dict) else {}
@@ -209,6 +231,7 @@ def build_pack() -> Dict[str, Any]:
     hard_fail = [c["id"] for c in criteria if c.get("gate") and c.get("pass") is False]
     hard_unknown = [c["id"] for c in criteria if c.get("gate") and c.get("pass") is None]
 
+    # 条件分岐: `hard_fail or hard_unknown` を満たす経路を評価する。
     if hard_fail or hard_unknown:
         decision = "A_to_B"
     else:
@@ -216,6 +239,7 @@ def build_pack() -> Dict[str, Any]:
 
     visibility_ok = next((c.get("pass") for c in criteria if c.get("id") == "visibility_atom_precision_gap"), None)
     watchlist: List[str] = []
+    # 条件分岐: `visibility_ok is False` を満たす経路を評価する。
     if visibility_ok is False:
         watchlist.append("visibility_precision_gap")
 
@@ -266,28 +290,36 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     crit = payload.get("criteria") if isinstance(payload.get("criteria"), list) else []
     score_rows = []
     for row in crit:
+        # 条件分岐: `not isinstance(row, dict)` を満たす経路を評価する。
         if not isinstance(row, dict):
             continue
+
         cid = str(row.get("id") or "")
         val = _as_float(row.get("value"))
         thr = _as_float(row.get("threshold"))
         op = str(row.get("operator") or "")
+        # 条件分岐: `val is None or thr is None or thr == 0.0` を満たす経路を評価する。
         if val is None or thr is None or thr == 0.0:
             score = math.nan
+        # 条件分岐: 前段条件が不成立で、`op == "<="` を追加評価する。
         elif op == "<=":
             score = float(val / thr)
+        # 条件分岐: 前段条件が不成立で、`op == ">="` を追加評価する。
         elif op == ">=":
             score = float(thr / val) if val != 0.0 else math.inf
         else:
             score = math.nan
+
         score_rows.append((cid, score, row.get("pass"), bool(row.get("gate"))))
 
     labels = [r[0] for r in score_rows]
     scores = [r[1] for r in score_rows]
     colors = []
     for _, _, passed, gate in score_rows:
+        # 条件分岐: `passed is None` を満たす経路を評価する。
         if passed is None:
             colors.append("#9ca3af")
+        # 条件分岐: 前段条件が不成立で、`passed` を追加評価する。
         elif passed:
             colors.append("#2f9e44" if gate else "#1d4ed8")
         else:
@@ -332,10 +364,17 @@ def main(argv: Optional[List[str]] = None) -> int:
     out_json = Path(args.out_json)
     out_csv = Path(args.out_csv)
     out_png = Path(args.out_png)
+    # 条件分岐: `not out_json.is_absolute()` を満たす経路を評価する。
     if not out_json.is_absolute():
         out_json = (ROOT / out_json).resolve()
+
+    # 条件分岐: `not out_csv.is_absolute()` を満たす経路を評価する。
+
     if not out_csv.is_absolute():
         out_csv = (ROOT / out_csv).resolve()
+
+    # 条件分岐: `not out_png.is_absolute()` を満たす経路を評価する。
+
     if not out_png.is_absolute():
         out_png = (ROOT / out_png).resolve()
 
@@ -368,6 +407,8 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -42,6 +42,7 @@ from typing import Any, Dict, Iterable, List, Sequence
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -101,14 +102,20 @@ def _parse_rotmod_lines(lines: Iterable[str]) -> List[RotmodPoint]:
     points: List[RotmodPoint] = []
     for raw_line in lines:
         line = raw_line.strip()
+        # 条件分岐: `not line` を満たす経路を評価する。
         if not line:
             continue
+
         _ = DISTANCE_RE.match(line)
+        # 条件分岐: `line.startswith("#")` を満たす経路を評価する。
         if line.startswith("#"):
             continue
+
         parts = line.split()
+        # 条件分岐: `len(parts) < 6` を満たす経路を評価する。
         if len(parts) < 6:
             continue
+
         try:
             radius_kpc = float(parts[0])
             velocity_obs_km_s = float(parts[1])
@@ -118,6 +125,7 @@ def _parse_rotmod_lines(lines: Iterable[str]) -> List[RotmodPoint]:
             velocity_bulge_unit_km_s = float(parts[5])
         except Exception:
             continue
+
         if (
             not np.isfinite(radius_kpc)
             or radius_kpc <= 0.0
@@ -128,6 +136,7 @@ def _parse_rotmod_lines(lines: Iterable[str]) -> List[RotmodPoint]:
             or not np.isfinite(velocity_bulge_unit_km_s)
         ):
             continue
+
         points.append(
             RotmodPoint(
                 galaxy="",
@@ -139,10 +148,12 @@ def _parse_rotmod_lines(lines: Iterable[str]) -> List[RotmodPoint]:
                 velocity_bulge_unit_km_s=float(velocity_bulge_unit_km_s),
             )
         )
+
     return points
 
 
 def _load_rotmod_points(rotmod_zip: Path) -> List[RotmodPoint]:
+    # 条件分岐: `not rotmod_zip.exists()` を満たす経路を評価する。
     if not rotmod_zip.exists():
         raise FileNotFoundError(f"missing Rotmod zip: {rotmod_zip}")
 
@@ -166,6 +177,7 @@ def _load_rotmod_points(rotmod_zip: Path) -> List[RotmodPoint]:
                         velocity_bulge_unit_km_s=point.velocity_bulge_unit_km_s,
                     )
                 )
+
     return all_points
 
 
@@ -174,11 +186,15 @@ def _h0p_from_metrics(metrics_path: Path) -> float:
     derived = payload.get("derived") if isinstance(payload.get("derived"), dict) else {}
     params = payload.get("params") if isinstance(payload.get("params"), dict) else {}
     h0_si = derived.get("H0P_SI_s^-1")
+    # 条件分岐: `isinstance(h0_si, (int, float)) and np.isfinite(h0_si) and float(h0_si) > 0.0` を満たす経路を評価する。
     if isinstance(h0_si, (int, float)) and np.isfinite(h0_si) and float(h0_si) > 0.0:
         return float(h0_si)
+
     h0_km_s_mpc = params.get("H0P_km_s_Mpc")
+    # 条件分岐: `isinstance(h0_km_s_mpc, (int, float)) and np.isfinite(h0_km_s_mpc) and float(...` を満たす経路を評価する。
     if isinstance(h0_km_s_mpc, (int, float)) and np.isfinite(h0_km_s_mpc) and float(h0_km_s_mpc) > 0.0:
         return float(h0_km_s_mpc) * 1.0e3 / MPC_TO_M
+
     raise RuntimeError(f"failed to read H0^(P) from: {metrics_path}")
 
 
@@ -219,8 +235,10 @@ def _velocity_model(
     acceleration_bar_m_s2 = velocity_bar_sq_m2_s2 / np.maximum(radius_m, acceleration_floor_m_s2)
     acceleration_bar_m_s2 = np.maximum(acceleration_bar_m_s2, acceleration_floor_m_s2)
 
+    # 条件分岐: `mode == "baryon_only"` を満たす経路を評価する。
     if mode == "baryon_only":
         acceleration_pred_m_s2 = acceleration_bar_m_s2
+    # 条件分岐: 前段条件が不成立で、`mode == "pmodel_boost"` を追加評価する。
     elif mode == "pmodel_boost":
         x_ratio = acceleration_bar_m_s2 / max(float(a0_m_s2), acceleration_floor_m_s2)
         x_ratio = np.maximum(x_ratio, 1e-30)
@@ -304,6 +322,7 @@ def _fit_upsilon(
     chi2_min = float(chi2_arr[best_idx])
     delta = chi2_arr - chi2_min
     one_sigma_mask = delta <= 1.0
+    # 条件分岐: `np.any(one_sigma_mask)` を満たす経路を評価する。
     if np.any(one_sigma_mask):
         upsilon_lo = float(upsilon_grid[np.where(one_sigma_mask)[0][0]])
         upsilon_hi = float(upsilon_grid[np.where(one_sigma_mask)[0][-1]])
@@ -474,6 +493,7 @@ def _plot_summary(
     pmodel_best: Dict[str, Any],
     sigma_floor_km_s: float,
 ) -> None:
+    # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
         return
 
@@ -564,17 +584,22 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     rotmod_zip = Path(args.rotmod_zip)
     h0p_metrics = Path(args.h0p_metrics)
+    # 条件分岐: `not h0p_metrics.exists()` を満たす経路を評価する。
     if not h0p_metrics.exists():
         fallback = _ROOT / "output" / "public" / "cosmology" / "cosmology_redshift_pbg_metrics.json"
+        # 条件分岐: `fallback.exists()` を満たす経路を評価する。
         if fallback.exists():
             h0p_metrics = fallback
         else:
             raise FileNotFoundError(f"missing h0p metrics: {args.h0p_metrics} (fallback also missing)")
 
+    # 条件分岐: `float(args.upsilon_step) <= 0.0 or float(args.upsilon_max) < float(args.upsil...` を満たす経路を評価する。
+
     if float(args.upsilon_step) <= 0.0 or float(args.upsilon_max) < float(args.upsilon_min):
         raise ValueError("invalid upsilon grid")
 
     points = _load_rotmod_points(rotmod_zip)
+    # 条件分岐: `len(points) < 100` を満たす経路を評価する。
     if len(points) < 100:
         raise RuntimeError(f"too few SPARC points: {len(points)}")
 
@@ -584,11 +609,13 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     h0p_si_s = _h0p_from_metrics(h0p_metrics)
     a0_m_s2 = float(args.pbg_kappa) * C_LIGHT_M_S * h0p_si_s
+    # 条件分岐: `not np.isfinite(a0_m_s2) or a0_m_s2 <= 0.0` を満たす経路を評価する。
     if not np.isfinite(a0_m_s2) or a0_m_s2 <= 0.0:
         raise RuntimeError("invalid a0 from kappa*c*H0P")
 
     upsilon_grid = np.arange(float(args.upsilon_min), float(args.upsilon_max) + 0.5 * float(args.upsilon_step), float(args.upsilon_step))
     upsilon_grid = upsilon_grid[np.isfinite(upsilon_grid) & (upsilon_grid >= 0.0)]
+    # 条件分岐: `upsilon_grid.size < 2` を満たす経路を評価する。
     if upsilon_grid.size < 2:
         raise RuntimeError("upsilon grid too small")
 
@@ -703,6 +730,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     }
     _write_json(out_metrics, payload)
 
+    # 条件分岐: `worklog is not None` を満たす経路を評価する。
     if worklog is not None:
         try:
             worklog.append_event(
@@ -734,11 +762,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     print(f"[ok] wrote: {out_points_csv}")
     print(f"[ok] wrote: {out_galaxy_csv}")
+    # 条件分岐: `out_png.exists()` を満たす経路を評価する。
     if out_png.exists():
         print(f"[ok] wrote: {out_png}")
+
     print(f"[ok] wrote: {out_metrics}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

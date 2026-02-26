@@ -30,8 +30,10 @@ def _chsh_sign_patterns() -> list[np.ndarray]:
             ],
             dtype=np.int8,
         )
+        # 条件分岐: `int(np.prod(s)) == -1` を満たす経路を評価する。
         if int(np.prod(s)) == -1:
             patterns.append(s)
+
     return patterns
 
 
@@ -39,6 +41,7 @@ _CHSH_SIGNS = _chsh_sign_patterns()
 
 
 def _best_chsh(E: np.ndarray) -> ChshBest:
+    # 条件分岐: `E.shape != (2, 2)` を満たす経路を評価する。
     if E.shape != (2, 2):
         raise ValueError(f"E must be 2x2, got {E.shape}")
 
@@ -46,13 +49,19 @@ def _best_chsh(E: np.ndarray) -> ChshBest:
     for swap_a in (False, True):
         for swap_b in (False, True):
             E2 = E.copy()
+            # 条件分岐: `swap_a` を満たす経路を評価する。
             if swap_a:
                 E2 = E2[[1, 0], :]
+
+            # 条件分岐: `swap_b` を満たす経路を評価する。
+
             if swap_b:
                 E2 = E2[:, [1, 0]]
+
             for s in _CHSH_SIGNS:
                 v = float(np.sum(s * E2))
                 a = abs(v)
+                # 条件分岐: `best is None or a > best.abs_s_value` を満たす経路を評価する。
                 if best is None or a > best.abs_s_value:
                     best = ChshBest(
                         s_value=v,
@@ -61,6 +70,7 @@ def _best_chsh(E: np.ndarray) -> ChshBest:
                         swap_b=swap_b,
                         sign_matrix=s.astype(int).tolist(),
                     )
+
     assert best is not None
     return best
 
@@ -72,10 +82,15 @@ def _canonical_chsh(E: np.ndarray) -> float:
 
 def _apply_chsh_variant(E: np.ndarray, variant: ChshBest) -> float:
     E2 = E.copy()
+    # 条件分岐: `variant.swap_a` を満たす経路を評価する。
     if variant.swap_a:
         E2 = E2[[1, 0], :]
+
+    # 条件分岐: `variant.swap_b` を満たす経路を評価する。
+
     if variant.swap_b:
         E2 = E2[:, [1, 0]]
+
     s = np.array(variant.sign_matrix, dtype=np.int8)
     return float(np.sum(s * E2))
 
@@ -88,6 +103,7 @@ def _read_zip_bytes(zip_path: Path, member: str) -> bytes:
 def _load_run_arrays(*, src_dir: Path, subdir: str, run: str) -> dict[str, np.ndarray]:
     alice_zip = src_dir / "Alice.zip"
     bob_zip = src_dir / "Bob.zip"
+    # 条件分岐: `not alice_zip.exists() or not bob_zip.exists()` を満たす経路を評価する。
     if not alice_zip.exists() or not bob_zip.exists():
         raise FileNotFoundError(
             "Missing Weihs1998 zips. Fetch first:\n"
@@ -102,10 +118,12 @@ def _load_run_arrays(*, src_dir: Path, subdir: str, run: str) -> dict[str, np.nd
     b_v = np.frombuffer(_read_zip_bytes(bob_zip, f"{b_prefix}_V.dat"), dtype=">f8")
     b_c = np.frombuffer(_read_zip_bytes(bob_zip, f"{b_prefix}_C.dat"), dtype=">u2")
 
+    # 条件分岐: `len(a_v) != len(a_c) or len(b_v) != len(b_c)` を満たす経路を評価する。
     if len(a_v) != len(a_c) or len(b_v) != len(b_c):
         raise RuntimeError(
             f"length mismatch: A(V)={len(a_v)} A(C)={len(a_c)}; B(V)={len(b_v)} B(C)={len(b_c)}"
         )
+
     return {"a_t": a_v, "a_c": a_c, "b_t": b_v, "b_c": b_c}
 
 
@@ -113,6 +131,8 @@ def _estimate_offset_s(t_a: np.ndarray, t_b: np.ndarray, *, sample_max: int = 20
     # Estimate constant offset by nearest-neighbor dt peak (coarse but robust enough for plotting sweeps).
     if t_a.size == 0 or t_b.size == 0:
         raise ValueError("empty t_a/t_b")
+
+    # 条件分岐: `t_a.size > sample_max` を満たす経路を評価する。
 
     if t_a.size > sample_max:
         idx = np.linspace(0, t_a.size - 1, sample_max, dtype=np.int64)
@@ -131,10 +151,12 @@ def _estimate_offset_s(t_a: np.ndarray, t_b: np.ndarray, *, sample_max: int = 20
     half = 200e-9  # +/- 200 ns around median
     mask = (dt > (med - half)) & (dt < (med + half))
     sel = dt[mask]
+    # 条件分岐: `sel.size < 100` を満たす経路を評価する。
     if sel.size < 100:
         return {"offset_s": med, "offset_method": "median_dt", "offset_peak_count": float(sel.size)}
 
     # Bin width: 0.5 ns. Enough to locate the peak without overfitting noise.
+
     bin_w = 0.5e-9
     n_bins = int(math.ceil((2 * half) / bin_w))
     edges = np.linspace(med - half, med + half, n_bins + 1)
@@ -156,6 +178,7 @@ def _extract_setting_and_outcome(c: int, *, encoding: str) -> tuple[int, int]:
     if encoding == "bit0-setting":
         setting = c & 1
         detector = (c >> 1) & 1
+    # 条件分岐: 前段条件が不成立で、`encoding == "bit0-detector"` を追加評価する。
     elif encoding == "bit0-detector":
         detector = c & 1
         setting = (c >> 1) & 1
@@ -187,9 +210,13 @@ def _pair_and_accumulate(
     nb = int(t_b.size)
     while i < na and j < nb:
         dt = float(t_b[j] - t_a[i] - offset_s)
+        # 条件分岐: `dt < -window_s` を満たす経路を評価する。
         if dt < -window_s:
             j += 1
             continue
+
+        # 条件分岐: `dt > window_s` を満たす経路を評価する。
+
         if dt > window_s:
             i += 1
             continue
@@ -210,8 +237,10 @@ def _safe_div(sum_prod: np.ndarray, n: np.ndarray) -> np.ndarray:
     E = np.full((2, 2), np.nan, dtype=float)
     for a in (0, 1):
         for b in (0, 1):
+            # 条件分岐: `n[a, b] > 0` を満たす経路を評価する。
             if n[a, b] > 0:
                 E[a, b] = float(sum_prod[a, b]) / float(n[a, b])
+
     return E
 
 
@@ -274,14 +303,17 @@ def main() -> None:
 
     # Pick a fixed sign/swap variant from a reference window to avoid "per-window best" overfitting.
     ref_w = float(args.ref_window_ns)
+    # 条件分岐: `ref_w not in windows_ns` を満たす経路を評価する。
     if ref_w not in windows_ns:
         # Use the closest value in the list.
         ref_w = min(windows_ns, key=lambda x: abs(x - ref_w))
 
     variant_fixed: ChshBest | None = None
     for w_ns in windows_ns:
+        # 条件分岐: `w_ns != ref_w` を満たす経路を評価する。
         if w_ns != ref_w:
             continue
+
         n, sum_prod, _ = _pair_and_accumulate(
             t_a,
             c_a,
@@ -294,6 +326,9 @@ def main() -> None:
         E_ref = _safe_div(sum_prod, n)
         variant_fixed = _best_chsh(E_ref)
         break
+
+    # 条件分岐: `variant_fixed is None` を満たす経路を評価する。
+
     if variant_fixed is None:
         raise RuntimeError("failed to determine fixed CHSH variant")
 
@@ -341,6 +376,7 @@ def main() -> None:
         }
         rows.append(rec)
 
+        # 条件分岐: `best_overall is None or float(best.abs_s_value) > float(best_overall["S_best_...` を満たす経路を評価する。
         if best_overall is None or float(best.abs_s_value) > float(best_overall["S_best_abs"]):
             best_overall = rec
 
@@ -352,6 +388,7 @@ def main() -> None:
         w.writeheader()
         for r in rows:
             w.writerow(r)
+
     print(f"[ok] csv: {csv_path}")
 
     metrics = {
@@ -416,6 +453,8 @@ def main() -> None:
     metrics_path.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"[ok] metrics: {metrics_path}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

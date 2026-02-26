@@ -32,6 +32,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -53,6 +54,7 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
+        # 条件分岐: `not chosen` を満たす経路を評価する。
         if not chosen:
             return
 
@@ -74,16 +76,22 @@ def _fmt_float_token(x: float) -> str:
 def _scenario_label(meta: Dict[str, Any], *, default_lcdm: Dict[str, Any]) -> str:
     z_source = str(meta.get("z_source") or "obs")
     parts: List[str] = []
+    # 条件分岐: `z_source != "obs"` を満たす経路を評価する。
     if z_source != "obs":
         parts.append(f"z={z_source}")
 
     lcdm = meta.get("lcdm") if isinstance(meta.get("lcdm"), dict) else {}
     n_grid = lcdm.get("n_grid", default_lcdm.get("n_grid"))
     z_grid_max = lcdm.get("z_grid_max", default_lcdm.get("z_grid_max"))
+    # 条件分岐: `(n_grid is not None) and int(n_grid) != int(default_lcdm.get("n_grid", n_grid))` を満たす経路を評価する。
     if (n_grid is not None) and int(n_grid) != int(default_lcdm.get("n_grid", n_grid)):
         parts.append(f"ng={int(n_grid)}")
+
+    # 条件分岐: `(z_grid_max is not None) and float(z_grid_max) != float(default_lcdm.get("z_g...` を満たす経路を評価する。
+
     if (z_grid_max is not None) and float(z_grid_max) != float(default_lcdm.get("z_grid_max", z_grid_max)):
         parts.append(f"zg={_fmt_float_token(float(z_grid_max))}")
+
     return "A0" if not parts else " / ".join(parts)
 
 
@@ -157,13 +165,16 @@ def _extract_points_from_peakfit_metrics(metrics_path: Path) -> Tuple[Dict[str, 
             )
         except Exception:
             continue
+
     return d, points
 
 
 def _pick(points: Sequence[Point], *, out_tag: str, dist: str, zrange_key: str) -> Optional[Point]:
     for p in points:
+        # 条件分岐: `p.out_tag == out_tag and p.dist == dist and p.zrange_key == zrange_key` を満たす経路を評価する。
         if p.out_tag == out_tag and p.dist == dist and p.zrange_key == zrange_key:
             return p
+
     return None
 
 
@@ -197,6 +208,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     caps = str(args.caps)
     base_tag = str(args.base_out_tag)
 
+    # 条件分岐: `str(args.variant_out_tags).strip()` を満たす経路を評価する。
     if str(args.variant_out_tags).strip():
         variant_tags = [s.strip() for s in str(args.variant_out_tags).split(",") if s.strip()]
     else:
@@ -215,12 +227,17 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     p_metrics = {tag: peakfit_metrics_path(tag) for tag in out_tags}
     missing = [tag for tag, p in p_metrics.items() if not p.exists()]
+    # 条件分岐: `not p_metrics[base_tag].exists()` を満たす経路を評価する。
     if not p_metrics[base_tag].exists():
         print(f"[skip] missing baseline peakfit metrics: {p_metrics[base_tag]}")
         return 0
+
+    # 条件分岐: `missing` を満たす経路を評価する。
+
     if missing:
         print("[warn] missing variant peakfit metrics (skip those tags):")
         for tag in missing:
+            # 条件分岐: `tag != base_tag` を満たす経路を評価する。
             if tag != base_tag:
                 print(f"  - {tag}: {p_metrics[tag]}")
 
@@ -228,8 +245,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     by_tag_inputs: Dict[str, Any] = {}
     for tag in out_tags:
         p = p_metrics[tag]
+        # 条件分岐: `not p.exists()` を満たす経路を評価する。
         if not p.exists():
             continue
+
         m, pts = _extract_points_from_peakfit_metrics(p)
         by_tag_inputs[tag] = {
             "metrics_json": str(p),
@@ -239,7 +258,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         all_points.extend([Point(out_tag=tag, label=p0.label, dist=p0.dist, z_min=p0.z_min, z_max=p0.z_max, z_eff=p0.z_eff, eps=p0.eps, sigma_eps=p0.sigma_eps, abs_sigma=p0.abs_sigma, status=p0.status, xi_metrics_path=p0.xi_metrics_path, xi_coord_hash=p0.xi_coord_hash) for p0 in pts])
 
     # Determine z ranges present (prefer stable order by z_min).
+
     z_ranges = sorted({p.zrange_key for p in all_points}, key=lambda k: float(k.split("_")[0].replace("zmin", "").replace("p", ".")))
+    # 条件分岐: `not z_ranges` を満たす経路を評価する。
     if not z_ranges:
         print("[skip] no points extracted")
         return 0
@@ -269,12 +290,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             yerr = []
             for t in tag_list:
                 p = _pick(all_points, out_tag=t, dist=dist, zrange_key=zkey)
+                # 条件分岐: `p is None` を満たす経路を評価する。
                 if p is None:
                     y.append(float("nan"))
                     yerr.append(float("nan"))
                 else:
                     y.append(float(p.eps))
                     yerr.append(float(p.sigma_eps))
+
             x = np.arange(len(tag_list), dtype=float)
             y = np.asarray(y, dtype=float)
             yerr = np.asarray(yerr, dtype=float)
@@ -300,10 +323,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     fig.suptitle("BAO coordinate-spec sensitivity (catalog-based peakfit)", fontsize=12)
 
+    # 条件分岐: `str(args.out_png).strip()` を満たす経路を評価する。
     if str(args.out_png).strip():
         out_png = (_ROOT / str(args.out_png)).resolve()
     else:
         out_png = (_ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_coordinate_spec_sensitivity__{sample}_{caps}__{base_tag}.png").resolve()
+
+    # 条件分岐: `str(args.out_json).strip()` を満たす経路を評価する。
+
     if str(args.out_json).strip():
         out_json = (_ROOT / str(args.out_json)).resolve()
     else:
@@ -362,6 +389,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -20,9 +20,12 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     with path.open("rb") as f:
         while True:
             b = f.read(chunk_bytes)
+            # 条件分岐: `not b` を満たす経路を評価する。
             if not b:
                 break
+
             h.update(b)
+
     return h.hexdigest()
 
 
@@ -31,15 +34,19 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
 
 def _as_float(v: Any) -> float:
+    # 条件分岐: `isinstance(v, (int, float))` を満たす経路を評価する。
     if isinstance(v, (int, float)):
         return float(v)
+
     raise TypeError(f"expected number, got: {type(v)}")
 
 
 def _get_constant(extracted: Dict[str, Any], code: str) -> Dict[str, Any]:
     c = extracted.get("constants")
+    # 条件分岐: `not isinstance(c, dict) or code not in c or not isinstance(c.get(code), dict)` を満たす経路を評価する。
     if not isinstance(c, dict) or code not in c or not isinstance(c.get(code), dict):
         raise KeyError(f"missing constant: {code}")
+
     return c[code]
 
 
@@ -50,6 +57,7 @@ def main() -> None:
 
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_blackbody_constants"
     extracted_path = src_dir / "extracted_values.json"
+    # 条件分岐: `not extracted_path.exists()` を満たす経路を評価する。
     if not extracted_path.exists():
         raise SystemExit(
             f"[fail] missing: {extracted_path}\n"
@@ -126,6 +134,7 @@ def main() -> None:
             w.writerow(r)
 
     # Plot: log-log scaling (u~T^4, n~T^3).
+
     xs = [10 ** (i / 20.0) for i in range(0, 81)]  # 1..1e4 K
     u_curve = [a_rad * (t**4) for t in xs]
     n_curve = [n_coeff * (t**3) for t in xs]
@@ -199,6 +208,8 @@ def main() -> None:
     print(f"[ok] wrote: {out_png}")
     print(f"[ok] wrote: {out_metrics}")
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     main()

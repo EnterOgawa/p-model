@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
 _ROOT = Path(__file__).resolve().parents[2]
+# 条件分岐: `str(_ROOT) not in sys.path` を満たす経路を評価する。
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
@@ -34,31 +35,50 @@ def _safe_float(v: Any) -> float:
         x = float(v)
     except Exception:
         return float("nan")
+
     return x
 
 
 def _status_rank(status: str) -> int:
     s = str(status or "")
+    # 条件分岐: `s.startswith("pass")` を満たす経路を評価する。
     if s.startswith("pass"):
         return 3
+
+    # 条件分岐: `s.startswith("watch")` を満たす経路を評価する。
+
     if s.startswith("watch"):
         return 2
+
+    # 条件分岐: `s.startswith("reject")` を満たす経路を評価する。
+
     if s.startswith("reject"):
         return 1
+
+    # 条件分岐: `s.startswith("inconclusive")` を満たす経路を評価する。
+
     if s.startswith("inconclusive"):
         return 0
+
     return -1
 
 
 def _fmt(v: Any, digits: int = 6) -> str:
     x = _safe_float(v)
+    # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
     if not math.isfinite(x):
         return ""
+
+    # 条件分岐: `x == 0.0` を満たす経路を評価する。
+
     if x == 0.0:
         return "0"
+
     ax = abs(x)
+    # 条件分岐: `ax >= 1e4 or ax < 1e-3` を満たす経路を評価する。
     if ax >= 1e4 or ax < 1e-3:
         return f"{x:.{digits}g}"
+
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
@@ -70,12 +90,15 @@ def _parse_float_grid(raw: str) -> List[float]:
     out: List[float] = []
     for token in str(raw).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         try:
             out.append(float(token))
         except Exception:
             continue
+
     return sorted(set(out))
 
 
@@ -83,12 +106,15 @@ def _parse_int_grid(raw: str) -> List[int]:
     out: List[int] = []
     for token in str(raw).split(","):
         token = token.strip()
+        # 条件分岐: `not token` を満たす経路を評価する。
         if not token:
             continue
+
         try:
             out.append(int(token))
         except Exception:
             continue
+
     return sorted(set(out))
 
 
@@ -99,8 +125,10 @@ def _subset_iter(events: List[str], min_size: int, max_size: int, anchor_event: 
     anchor = str(anchor_event or "").strip()
     for size in range(lo, hi + 1):
         for subset in combinations(events, size):
+            # 条件分岐: `anchor and anchor not in subset` を満たす経路を評価する。
             if anchor and anchor not in subset:
                 continue
+
             yield subset
 
 
@@ -122,22 +150,28 @@ def _row_key_for_coverage(row: Dict[str, Any]) -> Tuple[int, int, float]:
 
 def _pick_best(rows: List[Dict[str, Any]], pred) -> Optional[Dict[str, Any]]:
     cand = [row for row in rows if pred(row)]
+    # 条件分岐: `not cand` を満たす経路を評価する。
     if not cand:
         return None
+
     cand.sort(key=_row_key_for_gate)
     return cand[0]
 
 
 def _pick_best_coverage(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return None
+
     rows_sorted = sorted(rows, key=_row_key_for_coverage, reverse=True)
     return rows_sorted[0]
 
 
 def _pick_best_subset_coverage(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return None
+
     rows_sorted = sorted(
         rows,
         key=lambda r: (
@@ -205,14 +239,18 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
 
     colors = []
     for value in y_scalar:
+        # 条件分岐: `not math.isfinite(float(value))` を満たす経路を評価する。
         if not math.isfinite(float(value)):
             colors.append("#9aa0a6")
+        # 条件分岐: 前段条件が不成立で、`value < float(gate_scalar_max)` を追加評価する。
         elif value < float(gate_scalar_max):
             colors.append("#2ca02c")
+        # 条件分岐: 前段条件が不成立で、`value <= 0.5` を追加評価する。
         elif value <= 0.5:
             colors.append("#f2c744")
         else:
             colors.append("#d62728")
+
     ax1.bar(x, y_scalar, color=colors, alpha=0.9)
     ax1.axhline(float(gate_scalar_max), color="#2ca02c", linestyle="--", linewidth=1.4, label=f"gate scalar<{_fmt(gate_scalar_max)}")
     ax1.axhline(0.5, color="#f2c744", linestyle=":", linewidth=1.2, label="watch boundary = 0.5")
@@ -240,9 +278,11 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
+    # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         path.write_text("", encoding="utf-8")
         return
+
     fields = list(rows[0].keys())
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fields)
@@ -289,9 +329,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     args = ap.parse_args(list(argv) if argv is not None else None)
 
     events = _parse_events(args.events)
+    # 条件分岐: `len(events) < 2` を満たす経路を評価する。
     if len(events) < 2:
         print("[err] need at least two events")
         return 2
+
+    # 条件分岐: `args.anchor_event and args.anchor_event not in events` を満たす経路を評価する。
+
     if args.anchor_event and args.anchor_event not in events:
         print(f"[err] anchor event not in events: {args.anchor_event}")
         return 2
@@ -300,6 +344,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     floor_grid = _parse_float_grid(args.response_floor_grid)
     min_ring_grid = _parse_int_grid(args.min_ring_grid)
     relax_grid = _parse_float_grid(args.relax_grid)
+    # 条件分岐: `not (corr_grid and floor_grid and min_ring_grid and relax_grid)` を満たす経路を評価する。
     if not (corr_grid and floor_grid and min_ring_grid and relax_grid):
         print("[err] tuning grids must not be empty")
         return 2
@@ -309,6 +354,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     outdir.mkdir(parents=True, exist_ok=True)
     public_outdir.mkdir(parents=True, exist_ok=True)
     tuning_script = _ROOT / "scripts" / "gw" / "gw_polarization_h1_l1_v1_network_tuning_audit.py"
+    # 条件分岐: `not tuning_script.exists()` を満たす経路を評価する。
     if not tuning_script.exists():
         print(f"[err] missing tuning script: {tuning_script}")
         return 2
@@ -316,6 +362,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     subset_rows: List[Dict[str, Any]] = []
     subset_payloads: List[Dict[str, Any]] = []
     subsets = list(_subset_iter(events, int(args.subset_min_size), int(args.subset_max_size), str(args.anchor_event)))
+    # 条件分岐: `not subsets` を満たす経路を評価する。
     if not subsets:
         print("[err] no subsets generated (check subset range / anchor)")
         return 2
@@ -359,6 +406,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         ]
         proc = subprocess.run(cmd, cwd=str(_ROOT), capture_output=True, text=True, check=False)
         tuning_json = outdir / f"{subset_prefix}.json"
+        # 条件分岐: `proc.returncode != 0 or not tuning_json.exists()` を満たす経路を評価する。
         if proc.returncode != 0 or not tuning_json.exists():
             subset_rows.append(
                 {
@@ -416,15 +464,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         for suffix in (".json", ".csv", ".png"):
             for base_dir in (outdir, public_outdir):
                 tmp_path = base_dir / f"{subset_prefix}{suffix}"
+                # 条件分岐: `tmp_path.exists()` を満たす経路を評価する。
                 if tmp_path.exists():
                     try:
                         tmp_path.unlink()
                     except Exception:
                         pass
+
         for base_dir in (outdir, public_outdir):
             for trial_path in base_dir.glob(f"{subset_trial_prefix}_*"):
+                # 条件分岐: `not trial_path.is_file()` を満たす経路を評価する。
                 if not trial_path.is_file():
                     continue
+
                 try:
                     trial_path.unlink()
                 except Exception:
@@ -433,6 +485,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     gate_hits = [row for row in subset_rows if int(row.get("best_gate_found", 0)) > 0]
     with_u2 = [row for row in subset_rows if int(row.get("best_u2_n_usable_events", 0)) >= int(args.gate_usable_min)]
     best_u2_all = None
+    # 条件分岐: `with_u2` を満たす経路を評価する。
     if with_u2:
         best_u2_all = sorted(
             with_u2,
@@ -442,12 +495,15 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 -_status_rank(str(r.get("best_u2_status", ""))),
             ),
         )[0]
+
     best_coverage = _pick_best_subset_coverage(subset_rows)
 
+    # 条件分岐: `gate_hits` を満たす経路を評価する。
     if gate_hits:
         overall_status = "pass"
         decision = "coverage_gate_pass_found"
         reason = "at_least_one_subset_reaches_scalar_gate_under_usable_coverage"
+    # 条件分岐: 前段条件が不成立で、`with_u2` を追加評価する。
     elif with_u2:
         overall_status = "watch"
         decision = "coverage_gate_not_reached_boundary_locked"
@@ -521,6 +577,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         dst = public_outdir / src.name
         shutil.copy2(src, dst)
         copied.append(str(dst).replace("\\", "/"))
+
     payload_out["outputs"]["public_copies"] = copied
     out_json.write_text(json.dumps(payload_out, ensure_ascii=False, indent=2), encoding="utf-8")
     shutil.copy2(out_json, public_outdir / out_json.name)
@@ -545,6 +602,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         pass
 
     print(f"[ok] subsets={len(subset_rows)} gate_hits={len(gate_hits)} status={overall_status}")
+    # 条件分岐: `isinstance(best_u2_all, dict)` を満たす経路を評価する。
     if isinstance(best_u2_all, dict):
         print(
             "[ok] best_u2 subset={subset} scalar={scalar} usable={usable}".format(
@@ -553,11 +611,14 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 usable=int(best_u2_all.get("best_u2_n_usable_events", 0)),
             )
         )
+
     print(f"[ok] json: {out_json}")
     print(f"[ok] csv : {out_csv}")
     print(f"[ok] png : {out_png}")
     return 0
 
+
+# 条件分岐: `__name__ == "__main__"` を満たす経路を評価する。
 
 if __name__ == "__main__":
     raise SystemExit(main())
