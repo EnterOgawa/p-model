@@ -69,16 +69,22 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
 
     if "ベルテスト" in raw_title or "bell" in merged:
         return "bell-test"
+
     if "原子核" in raw_title or "nuclear" in merged:
         return "nuclear"
+
     if "原子・分子" in raw_title or ("atomic" in merged and "molecular" in merged):
         return "atomic-molecular"
+
     if "物性" in raw_title or "condensed" in merged:
         return "materials"
+
     if "統計力学" in raw_title or "熱力学" in raw_title or "thermo" in merged:
         return "stat-thermo"
+
     if "ddr" in merged or "distance duality" in merged:
         return "cosmo-ddr"
+
     if (
         "p場" in raw_title
         or "p 場" in raw_title
@@ -86,6 +92,7 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
         or (" p " in f" {merged} " and ("field" in merged or "potential" in merged))
     ):
         return "tf-pfield"
+
     if (
         "光" in raw_title
         or "屈折" in raw_title
@@ -93,8 +100,16 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
         or "photon" in merged
     ):
         return "tf-light"
+
     if "eht" in merged:
         return "eht"
+
+    if "節マップ" in raw_title or "項目対応" in raw_title:
+        return "section-map"
+
+    if "検証サマリ" in raw_title or "scoreboard" in merged:
+        return "validation-summary"
+
     return ""
 
 
@@ -110,6 +125,7 @@ def _build_section_label(
     base = _section_label_hint(raw_title, stripped_title) or _safe_label(stripped_title)
     if base == "p":
         base = "tf-pfield"
+
     if base in _GENERIC_SECTION_LABELS:
         raw_base = _safe_label(raw_title)
         if raw_base not in _GENERIC_SECTION_LABELS:
@@ -219,9 +235,11 @@ def _match_leading_image_line(line_text: str) -> Optional[tuple[str, str]]:
     )
     if not m:
         return None
+
     path_text = m.group(1).strip()
     if not _is_image_path(path_text):
         return None
+
     desc_text = (m.group(2) or "").strip()
     return path_text, desc_text
 
@@ -259,6 +277,7 @@ def _fallback_caption_from_path(raw_path: str) -> str:
     words = []
     for token in normalized.split(" "):
         words.append(token_map.get(token.lower(), token))
+
     text = " ".join(words).strip()
     return f"{text}の比較結果を示す。"
 
@@ -266,6 +285,7 @@ def _fallback_caption_from_path(raw_path: str) -> str:
 def _is_image_markdown_line(stripped: str) -> bool:
     if _match_leading_image_line(stripped):
         return True
+
     return bool(re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", stripped))
 
 
@@ -276,23 +296,31 @@ def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str,
         stripped = raw.strip()
         if not stripped:
             break
+
         if stripped.startswith("```") or stripped == "$$":
             break
+
         if re.match(r"^(#{1,6})\s+", stripped):
             break
+
         if _is_image_markdown_line(stripped):
             break
+
         if re.match(r"^\s*[-*]\s+(.+)$", raw) or re.match(r"^\s*\d+[.)]\s+(.+)$", raw):
             break
+
         if "|" in raw and (j + 1) < len(lines) and _is_table_separator(lines[j + 1]):
             break
+
         if _is_table_separator(raw):
             break
 
         candidate = re.sub(r"\s{2,}$", "", stripped).strip()
         if candidate:
             return candidate, (j - start_index + 1)
+
         j += 1
+
     return "", 0
 
 
@@ -308,6 +336,7 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
         key = str(path_obj.resolve()) if path_obj.is_absolute() else str(path_obj)
         if key in candidate_norms:
             return
+
         candidate_norms.add(key)
         candidate_paths.append(path_obj)
 
@@ -325,8 +354,10 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
     resolved_existing = next((candidate for candidate in candidate_paths if candidate.exists()), None)
     if resolved_existing is not None:
         return str(resolved_existing), True
+
     if candidate_paths:
         return str(candidate_paths[0]), False
+
     return normalized, False
 
 
@@ -348,19 +379,23 @@ def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, s
         if stripped == "<!-- INTERNAL_ONLY_START -->":
             in_internal_block = True
             continue
+
         if stripped == "<!-- INTERNAL_ONLY_END -->":
             in_internal_block = False
             continue
+
         if in_internal_block:
             continue
 
         match = re.match(r"^\s*-\s+\[([A-Za-z0-9][A-Za-z0-9_.:-]*)\]\s+(.+)$", raw_line)
         if not match:
             continue
+
         key = match.group(1).strip()
         text = match.group(2).strip()
         if key not in refs:
             order.append(key)
+
         refs[key] = text
 
     return order, refs
@@ -376,9 +411,11 @@ def _render_bibliography_section() -> str:
         ref_text = _REFERENCE_TEXT.get(key, "").strip()
         if not ref_text:
             continue
+
         rendered = _convert_inline(ref_text)
         rendered = re.sub(r"\\texttt\{(https?://[^{}]+)\}", r"\\url{\1}", rendered)
         lines.append(r"\bibitem{" + key + "} " + rendered)
+
     lines += [r"\end{thebibliography}", ""]
     return "\n".join(lines)
 
@@ -418,6 +455,7 @@ def _render_figure_block(
             while candidate.lower() in used_figure_names:
                 candidate = f"{stem}__{serial}{suffix}"
                 serial += 1
+
             used_figure_names.add(candidate.lower())
             dst = figures_dir / candidate
             dst.parent.mkdir(parents=True, exist_ok=True)
@@ -443,7 +481,7 @@ def _render_figure_block(
     return [
         r"\begin{figure}[H]",
         r"\centering",
-        r"\includegraphics[width=\linewidth]{" + _escape_tex(_normalize_tex_path(tex_path)) + "}",
+        r"\includegraphics[width=\linewidth]{" + _normalize_tex_path(tex_path) + "}",
         r"\caption{" + caption_text + "}",
         r"\label{" + _escape_tex(figure_label) + "}",
         r"\end{figure}",
@@ -584,50 +622,67 @@ def _looks_like_artifact_code(s: str) -> bool:
     candidate = s.strip()
     if not candidate:
         return False
+
     low = candidate.lower()
     if "://" in candidate:
         return True
+
     if re.match(r"^[A-Za-z]:[\\/]", candidate):
         return True
+
     if low.startswith(("output/", "scripts/", "data/", "doc/", "./", "../", ".\\", "..\\")):
         return True
+
     if _CODE_FILE_EXT_RE.search(low):
         return True
+
     if re.fullmatch(r"[A-Za-z0-9_.-]+/", candidate):
         return True
+
     if _MATH_GREEK_OR_SYMBOL_RE.search(candidate):
         return False
+
     if "%" in candidate:
         return True
+
     if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+", candidate):
         return True
+
     if re.fullmatch(
         r"[A-Za-z][A-Za-z0-9_.]*(?:_[A-Za-z0-9_.]+)+\s*(?:<=|>=|==|!=|<|>)\s*[-+]?(?:\d+(?:\.\d+)?|true|false)",
         low,
     ):
         return True
+
     if re.fullmatch(
         r"(?:max|min)\s*\|?.+\|?\s*(?:<=|>=|<|>)\s*[-+]?\d+(?:\.\d+)?",
         candidate,
     ) and "\\" not in candidate:
         return True
+
     if "=" in candidate and " " in candidate and "\\" not in candidate and not re.search(r"[{}^]", candidate):
         lhs = candidate.split("=", 1)[0].strip()
         if len(lhs) >= 4 and re.search(r"[A-Za-z]", lhs):
             return True
+
     if candidate.count("_") >= 2 and "\\" not in candidate:
         return True
+
     if re.search(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+){2,}", candidate):
         return True
+
     m_snake = re.fullmatch(r"[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+", candidate)
     if m_snake:
         parts = candidate.split("_")
         if len(parts) >= 3:
             return True
+
         if len(parts) == 2 and (len(parts[0]) > 1 or len(parts[1]) > 1):
             return True
+
     if re.match(r"^(?:--?)[A-Za-z0-9][A-Za-z0-9_.-]*(?:=[^\\s]+)?$", candidate):
         return True
+
     m_keyval = re.match(
         r"^(?P<lhs>[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)*)\s*=\s*(?P<rhs>[^=]+)$",
         candidate,
@@ -639,16 +694,22 @@ def _looks_like_artifact_code(s: str) -> bool:
         rhs_low = rhs.lower()
         if re.search(r"[\\α-ωΑ-ΩΔΘΛΞΠΣΦΨΩ^{}()|]", rhs):
             return False
+
         if re.search(r"[A-Z]", lhs) or len(lhs) <= 3:
             return False
+
         if lhs_low.count("_") >= 1 and len(lhs_low) >= 6:
             return True
+
         if lhs_low in {"event", "event_counter", "next", "source", "selected", "target", "without", "shift"}:
             return True
+
         if re.search(r"[A-Za-z0-9]+_[A-Za-z0-9_]+", rhs):
             return True
+
         if rhs_low in {"pass", "watch", "reject", "true", "false", "none"}:
             return True
+
     if low in {
         "pass",
         "watch",
@@ -664,6 +725,7 @@ def _looks_like_artifact_code(s: str) -> bool:
         "no_change",
     }:
         return True
+
     return False
 
 
@@ -671,38 +733,53 @@ def _looks_like_math_code(s: str) -> bool:
     candidate = s.strip()
     if not candidate:
         return False
+
     if _looks_like_artifact_code(candidate):
         return False
+
     if _MATH_GREEK_OR_SYMBOL_RE.search(candidate):
         return True
+
     if re.search(r"\\[A-Za-z]+", candidate):
         return True
+
     if re.search(r"[A-Za-z][_^][A-Za-z0-9\\{(]", candidate):
         return True
+
     if re.search(r"[A-Za-z]\([A-Za-z0-9_,+\-*/ ]+\)", candidate):
         return True
+
     if " " not in candidate and re.search(r"[+\-*/]", candidate) and re.search(r"[A-Za-zα-ωΑ-Ω]", candidate):
         return True
+
     if candidate in {"ln", "exp", "sqrt()", "sin", "cos", "tan", "max", "min"}:
         return True
+
     if re.search(r"[=<>|]", candidate):
         return True
+
     if re.fullmatch(r"[A-Za-z](?:/[A-Za-z0-9_]+)+", candidate):
         return True
+
     if re.fullmatch(r"[A-Za-z][0-9]+", candidate):
         return True
+
     if re.fullmatch(r"[A-Za-z](?:_[A-Za-z0-9]+)?", candidate):
         return True
+
     if " " in candidate and _MATH_GREEK_OR_SYMBOL_RE.search(candidate):
         return True
+
     return False
 
 
 def _format_subscript_token(sub: str) -> str:
     if re.fullmatch(r"[A-Za-z0-9]", sub):
         return sub
+
     if "_" in sub:
         return r"\mathrm{" + sub.replace("_", r"\_") + "}"
+
     return r"\mathrm{" + sub + "}"
 
 
@@ -723,30 +800,41 @@ def _looks_like_physics_equation_code(s: str) -> bool:
     candidate = s.strip()
     if not candidate:
         return False
+
     low = candidate.lower()
     if "://" in candidate:
         return False
+
     if re.match(r"^[A-Za-z]:[\\/]", candidate):
         return False
+
     if low.startswith(("output/", "scripts/", "data/", "doc/", "./", "../", ".\\", "..\\")):
         return False
+
     if _CODE_FILE_EXT_RE.search(low):
         return False
+
     if not re.search(r"(=|<=|>=|<|>|≈|≃|≡|∝)", candidate):
         return False
+
     lhs = re.split(r"(?:<=|>=|=|<|>|≈|≃|≡|∝)", candidate, maxsplit=1)[0].strip()
     lhs = lhs.replace(r"\_", "_")
     lhs_plain = lhs
     if lhs_plain.startswith("|") and lhs_plain.endswith("|") and len(lhs_plain) >= 2:
         lhs_plain = lhs_plain[1:-1].strip()
+
     if _PHYSICS_SINGLE_LHS_RE.fullmatch(lhs):
         return True
+
     if _PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(lhs):
         return True
+
     if _PHYSICS_SINGLE_LHS_RE.fullmatch(lhs_plain):
         return True
+
     if _PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(lhs_plain):
         return True
+
     if re.fullmatch(
         r"(?:[A-Za-z](?:_[A-Za-z0-9]+)?|\\[A-Za-z]+(?:_[A-Za-z0-9]+)?)"
         r"/"
@@ -755,6 +843,7 @@ def _looks_like_physics_equation_code(s: str) -> bool:
         lhs_plain,
     ):
         return True
+
     if re.fullmatch(
         r"(?:[A-Za-z](?:_[A-Za-z0-9]+)?|\\[A-Za-z]+(?:_[A-Za-z0-9]+)?)"
         r"/"
@@ -765,12 +854,16 @@ def _looks_like_physics_equation_code(s: str) -> bool:
         lhs_plain,
     ):
         return True
+
     if re.fullmatch(r"[A-Z][A-Za-z0-9]{0,4}(?:_[A-Za-z0-9]+)?(?:\([^()]*\))?", lhs):
         return True
+
     if re.fullmatch(r"[A-Z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)*(?:/[A-Za-z0-9_,]+)?(?:\([^()]*\))?", lhs):
         return True
+
     if _MATH_GREEK_OR_SYMBOL_RE.search(candidate) or re.search(r"\\[A-Za-z]+", candidate):
         return True
+
     return False
 
 
@@ -778,14 +871,19 @@ def _looks_like_physics_symbol_code(s: str) -> bool:
     candidate = s.strip().replace(r"\_", "_")
     if not candidate:
         return False
+
     if re.search(r"[=<>]", candidate):
         return False
+
     if _PHYSICS_SINGLE_LHS_RE.fullmatch(candidate):
         return True
+
     if _PHYSICS_ASCII_GREEK_TOKEN_RE.fullmatch(candidate):
         return True
+
     if re.fullmatch(r"[A-Z][A-Za-z0-9]{0,4}(?:_[A-Za-z0-9]+)?", candidate):
         return True
+
     return False
 
 
@@ -821,10 +919,13 @@ def _normalize_inline_math_payload(code_text: str) -> str:
     normalized = re.sub(r"\\\\(?=[A-Za-z])", r"\\", normalized)
     for src, dst in _SUPERSCRIPT_TO_ASCII.items():
         normalized = normalized.replace(src, dst)
+
     for src, dst in _SUBSCRIPT_TO_ASCII.items():
         normalized = normalized.replace(src, dst)
+
     for src, dst in _MATH_UNICODE_TO_LATEX.items():
         normalized = normalized.replace(src, dst)
+
     for src, dst in _GREEK_UNICODE_TO_LATEX.items():
         normalized = normalized.replace(src, dst)
 
@@ -903,8 +1004,10 @@ def _postprocess_latex_body(body: str) -> str:
         payload = re.sub(r"\s+", " ", payload).strip()
         if _looks_like_artifact_code(payload):
             return match.group(0)
+
         if _looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code(payload):
             return "$" + _normalize_inline_math_payload(payload) + "$"
+
         return match.group(0)
 
     normalized = re.sub(r"\\texttt\{([^{}]+)\}", repl_texttt_math, normalized)
@@ -943,6 +1046,7 @@ def _postprocess_latex_body(body: str) -> str:
         payload = match.group(1)
         if len(payload) < 28 or r"\_" not in payload:
             return match.group(0)
+
         return r"\texttt{" + payload.replace(r"\_", r"\_\allowbreak ") + "}"
 
     normalized = re.sub(r"\\texttt\{([^{}]+)\}", _texttt_allowbreak, normalized)
@@ -961,19 +1065,25 @@ def _convert_inline(text: str) -> str:
         return key
 
     # inline code
+
     def repl_inline_code(match: re.Match[str]) -> str:
         payload_raw = match.group(1)
         payload = payload_raw.strip()
         if not payload:
             return ""
+
         if _PUNCT_ONLY_RE.fullmatch(payload):
             return make_token(_escape_tex(payload))
+
         if re.search(r"[\u3040-\u30ff\u3400-\u9fff]", payload) and not _looks_like_artifact_code(payload):
             return make_token(_escape_tex(payload))
+
         if _looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code(payload):
             return make_token("$" + _normalize_inline_math_payload(payload) + "$")
+
         if _looks_like_math_code(payload):
             return make_token("$" + _normalize_inline_math_payload(payload) + "$")
+
         return make_token(r"\texttt{" + _escape_tex(payload) + r"}")
 
     text = re.sub(r"`([^`]+)`", repl_inline_code, text)
@@ -983,12 +1093,15 @@ def _convert_inline(text: str) -> str:
         payload = payload_raw.strip()
         if not payload:
             return ""
+
         if _looks_like_artifact_code(payload) and not (
             _looks_like_physics_equation_code(payload) or _looks_like_physics_symbol_code(payload)
         ):
             return make_token(r"\texttt{" + _escape_tex(payload) + r"}")
+
         if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z0-9_]+)+", payload):
             return make_token(r"\texttt{" + _escape_tex(payload) + r"}")
+
         return make_token("$" + _normalize_inline_math_payload(payload) + "$")
 
     text = re.sub(
@@ -1015,10 +1128,13 @@ def _convert_inline(text: str) -> str:
         keys = [k.strip() for k in re.split(r"\s*[,;]\s*", match.group("keys")) if k.strip()]
         if not keys:
             return match.group(0)
+
         if not all(key in _REFERENCE_KEYS for key in keys):
             return match.group(0)
+
         for key in keys:
             _USED_REFERENCE_KEYS.add(key)
+
         return make_token(r"\cite{" + ",".join(keys) + "}")
 
     text = _CITATION_BLOCK_RE.sub(repl_citation, text)
@@ -1037,8 +1153,10 @@ def _convert_inline(text: str) -> str:
             if escaped_key in escaped:
                 escaped = escaped.replace(escaped_key, rendered)
                 changed = True
+
         if not changed:
             break
+
     return escaped
 
 
@@ -1046,6 +1164,7 @@ def _is_table_separator(line: str) -> bool:
     s = line.strip()
     if "|" not in s:
         return False
+
     core = s.replace("|", "").replace(":", "").replace(" ", "")
     return bool(core) and set(core) <= {"-"}
 
@@ -1054,6 +1173,7 @@ def _parse_table_row(line: str) -> list[str]:
     s = line.strip()
     if s.startswith("|"):
         s = s[1:]
+
     if s.endswith("|"):
         s = s[:-1]
 
@@ -1068,22 +1188,27 @@ def _parse_table_row(line: str) -> list[str]:
             buf.append(ch)
             escaped = False
             continue
+
         if ch == "\\":
             buf.append(ch)
             escaped = True
             continue
+
         if ch == "`" and not in_math:
             in_code = not in_code
             buf.append(ch)
             continue
+
         if ch == "$" and not in_code:
             in_math = not in_math
             buf.append(ch)
             continue
+
         if ch == "|" and not in_code and not in_math:
             cells.append("".join(buf).strip())
             buf = []
             continue
+
         buf.append(ch)
 
     cells.append("".join(buf).strip())
@@ -1093,6 +1218,7 @@ def _parse_table_row(line: str) -> list[str]:
 def _render_table(block_lines: list[str]) -> list[str]:
     if len(block_lines) < 2:
         return [_convert_inline(block_lines[0])] if block_lines else []
+
     header = _parse_table_row(block_lines[0])
     body_lines = block_lines[2:] if _is_table_separator(block_lines[1]) else block_lines[1:]
     rows = [_parse_table_row(line) for line in body_lines]
@@ -1108,6 +1234,7 @@ def _render_table(block_lines: list[str]) -> list[str]:
         table_font = r"\scriptsize"
     elif ncols >= 4:
         table_font = r"\footnotesize"
+
     out: list[str] = []
     if compact_table:
         out += [
@@ -1116,15 +1243,18 @@ def _render_table(block_lines: list[str]) -> list[str]:
             r"\setlength{\tabcolsep}{2pt}",
             r"\renewcommand{\arraystretch}{1.05}",
         ]
+
     out += [r"\begin{longtable}{" + colspec + "}", r"\toprule"]
     out.append(" & ".join(_convert_inline(c) for c in header) + r" \\")
     out.append(r"\midrule")
     for row in rows:
         padded = row + [""] * (ncols - len(row))
         out.append(" & ".join(_convert_inline(c) for c in padded[:ncols]) + r" \\")
+
     out += [r"\bottomrule", r"\end{longtable}"]
     if compact_table:
         out.append(r"\endgroup")
+
     out.append("")
     return out
 
@@ -1178,11 +1308,13 @@ def _markdown_to_latex(
                     out.append(r"\end{lstlisting}")
                 else:
                     out.append(r"\end{verbatim}")
+
                 out.append("")
                 in_code = False
                 code_listing_open = False
             else:
                 out.append(line.rstrip("\n"))
+
             i += 1
             continue
 
@@ -1195,15 +1327,18 @@ def _markdown_to_latex(
                 body_end = line.rsplit("$$", 1)[0].strip()
                 if body_end:
                     out.append(body_end)
+
                 out.append(r"\]")
                 out.append("")
                 in_math = False
             else:
                 out.append(line)
+
             i += 1
             continue
 
         # block starts
+
         if stripped.startswith("```"):
             flush_paragraph()
             close_list()
@@ -1228,6 +1363,7 @@ def _markdown_to_latex(
             out.append(r"\[")
             if math_inline:
                 out.append(math_inline)
+
             out.append(r"\]")
             out.append("")
             i += 1
@@ -1240,6 +1376,7 @@ def _markdown_to_latex(
             body_start = line.split("$$", 1)[1].strip()
             if body_start:
                 out.append(body_start)
+
             in_math = True
             i += 1
             continue
@@ -1257,15 +1394,19 @@ def _markdown_to_latex(
                     caption_text = last_line
                 else:
                     flush_paragraph()
+
             if not caption_text and inline_desc:
                 caption_text = inline_desc
+
             if not caption_text:
                 next_caption, consumed = _extract_following_caption(lines, i + 1)
                 if next_caption:
                     caption_text = next_caption
                     consumed_after_caption = consumed
+
             if not caption_text:
                 caption_text = _fallback_caption_from_path(path_text)
+
             close_list()
             out.extend(
                 _render_figure_block(
@@ -1313,6 +1454,7 @@ def _markdown_to_latex(
             continue
 
         # table block
+
         if "|" in line and (i + 1) < len(lines) and _is_table_separator(lines[i + 1]):
             flush_paragraph()
             close_list()
@@ -1321,14 +1463,18 @@ def _markdown_to_latex(
             while i < len(lines):
                 if lines[i].strip() == "":
                     break
+
                 if "|" not in lines[i]:
                     break
+
                 block.append(lines[i])
                 i += 1
+
             out.extend(_render_table(block))
             continue
 
         # headings
+
         m_head = re.match(r"^(#{1,6})\s+(.+?)\s*$", line)
         if m_head:
             flush_paragraph()
@@ -1348,9 +1494,11 @@ def _markdown_to_latex(
                     out.append(r"\appendix")
                     out.append("")
                     appendix_started = True
+
                 appendix_title = re.sub(r"^付録\s*[A-Za-zＡ-Ｚ0-9一二三四五六七八九十]*\s*[\.．:：]?\s*", "", title).strip()
                 if appendix_title:
                     title = appendix_title
+
             if effective_level == 1:
                 if _is_abstract_heading(title):
                     out.append(r"\section*{" + _convert_inline(title) + "}")
@@ -1358,10 +1506,13 @@ def _markdown_to_latex(
                     chapter_started = True
                     i += 1
                     continue
+
                 if chapter_started:
                     out.append(r"\clearpage")
                     out.append("")
+
                 chapter_started = True
+
             if effective_level == 1:
                 cmd = "section"
             elif effective_level == 2:
@@ -1377,6 +1528,7 @@ def _markdown_to_latex(
                 out.append("")
                 i += 1
                 continue
+
             force_subsection_pagebreak = False
             force_heading_pagebreak = False
             if cmd == "subsection":
@@ -1401,8 +1553,10 @@ def _markdown_to_latex(
 
             if profile == "part2_astrophysics" and "項目対応（節マップ）" in title:
                 force_heading_pagebreak = True
+
             if profile == "part3_quantum" and "項目対応（節マップ）" in title:
                 force_heading_pagebreak = True
+
             if profile == "part3_quantum":
                 if heading_number in {"4.10.2", "4.10.3", "4.11.2", "4.11.3"}:
                     force_heading_pagebreak = True
@@ -1414,12 +1568,16 @@ def _markdown_to_latex(
                 # remove it so the heading itself can start at the very top of the page.
                 while out and out[-1] == "":
                     out.pop()
+
                 if len(out) >= 3 and out[-3:] == [r"\medskip", r"\hrule", r"\medskip"]:
                     del out[-3:]
+
                 while out and out[-1] == "":
                     out.pop()
+
                 out.append(r"\clearpage")
                 out.append("")
+
             heading_tex = _convert_inline(title)
             heading_pdf = _escape_tex(_heading_pdf_text(title))
             unnumbered_subsection = (
@@ -1432,6 +1590,7 @@ def _markdown_to_latex(
                 out.append(rf"\{cmd}*{{\texorpdfstring{{{heading_tex}}}{{{heading_pdf}}}}}")
             else:
                 out.append(rf"\{cmd}{{\texorpdfstring{{{heading_tex}}}{{{heading_pdf}}}}}")
+
             section_label = _build_section_label(raw_title, title, used_labels=used_labels)
             out.append(rf"\label{{sec:{section_label}}}")
             out.append("")
@@ -1439,6 +1598,7 @@ def _markdown_to_latex(
             continue
 
         # horizontal rule
+
         if re.match(r"^[-*_]{3,}\s*$", stripped):
             flush_paragraph()
             close_list()
@@ -1447,6 +1607,7 @@ def _markdown_to_latex(
             continue
 
         # image-only line
+
         m_img = re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", stripped)
         if m_img:
             flush_paragraph()
@@ -1460,8 +1621,10 @@ def _markdown_to_latex(
                 if next_caption:
                     caption_text = next_caption
                     consumed_after_caption = consumed
+
             if not caption_text:
                 caption_text = _fallback_caption_from_path(path)
+
             out.extend(
                 _render_figure_block(
                     raw_path=path,
@@ -1478,6 +1641,7 @@ def _markdown_to_latex(
             continue
 
         # blockquote
+
         if stripped.startswith(">"):
             flush_paragraph()
             close_list()
@@ -1485,15 +1649,18 @@ def _markdown_to_latex(
             while i < len(lines) and lines[i].strip().startswith(">"):
                 q_lines.append(lines[i].strip()[1:].strip())
                 i += 1
+
             out.append(r"\begin{quote}")
             for q in q_lines:
                 if q:
                     out.append(_convert_inline(q) + r"\\")
+
             out.append(r"\end{quote}")
             out.append("")
             continue
 
         # lists
+
         m_ul = re.match(r"^\s*[-*]\s+(.+)$", line)
         if m_ul:
             flush_paragraph()
@@ -1501,6 +1668,7 @@ def _markdown_to_latex(
                 close_list()
                 out.append(r"\begin{itemize}[leftmargin=2em]")
                 list_mode = "itemize"
+
             out.append(r"\item " + _convert_inline(m_ul.group(1).strip()))
             i += 1
             continue
@@ -1512,11 +1680,13 @@ def _markdown_to_latex(
                 close_list()
                 out.append(r"\begin{enumerate}[leftmargin=2em]")
                 list_mode = "enumerate"
+
             out.append(r"\item " + _convert_inline(m_ol.group(1).strip()))
             i += 1
             continue
 
         # default paragraph line
+
         paragraph.append(line)
         i += 1
 
@@ -1528,6 +1698,7 @@ def _markdown_to_latex(
             out.append(r"\end{lstlisting}")
         else:
             out.append(r"\end{verbatim}")
+
     if in_math:
         out.append(r"\]")
 
@@ -1576,6 +1747,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         outdir = Path(args.outdir)
     else:
         outdir = root / "output" / "private" / "summary"
+
     outdir.mkdir(parents=True, exist_ok=True)
     figures_dir = outdir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
@@ -1610,6 +1782,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "part4_verification": "P-model Paper Part IV (Verification Materials)",
     }
     title = title_map.get(profile, "P-model Paper")
+    author_tex = (
+        r"\author{" "\n"
+        r"  Shunji Ogawa \\" "\n"
+        r"  \vspace{0.2em}" "\n"
+        r"  \small ENTERSYSTEM Co., Ltd., Osaka, Japan" "\n"
+        r"}"
+    )
 
     tex = (
         r"% !TeX program = lualatex" "\n"
@@ -1665,7 +1844,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         r"\newcommand{\Deltaz}{\Delta z}" "\n"
         r"\newcommand{\DeltaAIC}{\Delta \mathrm{AIC}}" "\n\n"
         + r"\title{" + _escape_tex(title) + "}\n"
-        + r"\author{P-model Project}" + "\n"
+        + author_tex + "\n"
         + r"\date{" + _escape_tex(datetime.now(timezone.utc).strftime("%Y-%m-%d UTC")) + "}\n\n"
         + r"\begin{document}" + "\n"
         + r"\ifPDFTeX\begin{CJK}{UTF8}{min}\fi" + "\n"
@@ -1692,6 +1871,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         )
     except Exception:
         pass
+
     return 0
 
 

@@ -7,8 +7,7 @@
 
 ## 👤 Author
 - **Shunji Ogawa**
-- **Enter System Co., Ltd., Osaka, Japan**
-- **Email:** `s_ogawa@entersystem.co.jp`
+- **ENTERSYSTEM Co., Ltd., Osaka, Japan**
 
 ## 🕊 Foreword: 理念と先人たちへの敬意
 P-modelは、既存の物理学を否定するためのものではありません。
@@ -106,7 +105,7 @@ P-modelは、既存理論と結果が分岐する以下の「差分予測」を�
 本プロジェクトは、学術的テキストと検証コードの役割を明確に分けるため、デュアルライセンスを採用しています。
 
 * **論文ドキュメントおよびテキスト (Papers and Text):**
-  外部で公開されている論文ファイル（Part I〜IV）、本リポジトリ内の図表、および本READMEのテキストは、[Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) の下でライセンスされています。原著作者（Shunji Ogawa / Enter System Co., Ltd.）のクレジットを明記する限りにおいて共有を歓迎しますが、**理論のテキストや数式、図表を改変したものを配布することは固く禁じます。** *(本リポジトリのスクリプトを用いて論文データを生成した場合であっても、理論の根幹をなす著作物の改変禁止の制限は維持されます)*
+  外部で公開されている論文ファイル（Part I〜IV）、本リポジトリ内の図表、および本READMEのテキストは、[Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) の下でライセンスされています。原著作者（Shunji Ogawa / ENTERSYSTEM Co., Ltd.）のクレジットを明記する限りにおいて共有を歓迎しますが、**理論のテキストや数式、図表を改変したものを配布することは固く禁じます。** *(本リポジトリのスクリプトを用いて論文データを生成した場合であっても、理論の根幹をなす著作物の改変禁止の制限は維持されます)*
   
 * **検証コードデータ (Code and Data):**
   本リポジトリ内の検証スクリプト（`scripts/`）、出力データ（`output/`）等のプログラムコードは、[MIT License](https://opensource.org/licenses/MIT) の下でライセンスされています。透明性のある科学的検証と議論を促進するため、自由にコードを実行利用改変することができます。
