@@ -19,8 +19,49 @@ REM   build_materials.bat 1  (Part I only)
 REM   build_materials.bat 2  (Part II only)
 REM   build_materials.bat 3  (Part III only)
 REM   build_materials.bat 4  (Part IV only)
+REM
+REM Console log:
+REM   - Every run writes full console output to:
+REM     output\private\summary\logs\build_materials_console_YYYYmmdd_HHMMSS.log
 
-for %%I in ("%~dp0..\\..") do set "ROOT=%%~fI"
+if /I "%~1"=="__run__" (
+  shift
+  goto main
+)
+
+for %%I in ("%~f0") do set "SELF_DIR_BOOT=%%~dpI"
+for %%I in ("%SELF_DIR_BOOT%..\\..") do set "ROOT_BOOT=%%~fI"
+if not exist "%ROOT_BOOT%\\scripts\\summary\\paper_build.py" (
+  for %%I in ("%CD%") do set "ROOT_BOOT=%%~fI"
+)
+if not exist "%ROOT_BOOT%\\scripts\\summary\\paper_build.py" (
+  echo [err] Cannot resolve repo root from "%~f0"
+  exit /b 1
+)
+set "LOG_DIR=%ROOT_BOOT%\output\private\summary\logs"
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%" >nul 2>&1
+for /f %%I in ('powershell -NoProfile -Command "(Get-Date).ToUniversalTime().ToString(\"yyyyMMdd_HHmmss\")"') do set "LOG_TS=%%I"
+set "LOG_FILE=%LOG_DIR%\build_materials_console_%LOG_TS%.log"
+set "CMDLINE=""%~f0"" __run__ %*"
+
+echo [info] full console log: "%LOG_FILE%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Continue'; & cmd /d /v:on /c $env:CMDLINE 2>&1 | Tee-Object -FilePath $env:LOG_FILE; exit $LASTEXITCODE"
+set "RC=%ERRORLEVEL%"
+echo [info] build_materials exit code: %RC%
+exit /b %RC%
+
+:main
+
+if defined ROOT_BOOT if exist "%ROOT_BOOT%\\scripts\\summary\\paper_build.py" (
+  set "ROOT=%ROOT_BOOT%"
+) else (
+  for %%I in ("%~f0") do set "SELF_DIR=%%~dpI"
+  for %%I in ("%SELF_DIR%..\\..") do set "ROOT=%%~fI"
+)
+if not exist "%ROOT%\\scripts\\summary\\paper_build.py" (
+  echo [err] Cannot resolve repo root: "%ROOT%"
+  exit /b 1
+)
 pushd "%ROOT%" >nul 2>&1
 if errorlevel 1 (
   echo [err] Cannot cd to repo root: "%ROOT%"
@@ -31,6 +72,11 @@ set "MODE=%~1"
 if "%MODE%"=="" set "MODE=full"
 
 set "DOCX_TIMEOUT=600"
+
+echo.
+echo === sync_public_readme ===
+python -B scripts\summary\sync_public_readme.py --direction public-to-root --bootstrap
+if errorlevel 1 goto fail
 
 set "PROFILE="
 set "HTML_NAME="
@@ -93,6 +139,10 @@ if errorlevel 1 goto fail
 echo.
 echo === latex_paper (%PROFILE%) ===
 python -B scripts\summary\paper_latex.py --profile %PROFILE% --outdir output\private\summary
+if errorlevel 1 goto fail
+echo.
+echo === paper_tex_audit (%PROFILE%) ===
+python -B scripts\summary\paper_tex_audit.py --profile %PROFILE% --outdir output\private\summary
 if errorlevel 1 goto fail
 
 set "DOCX_HTML_IN=output\private\summary\%HTML_NAME%"
@@ -199,6 +249,10 @@ python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
+echo.
+echo === paper_tex_audit (paper/part2/part3/part4) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --outdir output\private\summary
+if errorlevel 1 goto fail
 
 echo.
 echo === docx_paper (paper) ===
@@ -300,6 +354,10 @@ if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part3_quantum --outdir output\private\summary
 if errorlevel 1 goto fail
 python -B scripts\summary\paper_latex.py --profile part4_verification --outdir output\private\summary
+if errorlevel 1 goto fail
+echo.
+echo === paper_tex_audit (paper/part2/part3/part4) ===
+python -B scripts\summary\paper_tex_audit.py --profile paper --profile part2_astrophysics --profile part3_quantum --profile part4_verification --outdir output\private\summary
 if errorlevel 1 goto fail
 
 echo.
