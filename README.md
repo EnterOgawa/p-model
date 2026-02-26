@@ -67,6 +67,14 @@ Part IIにおいてマクロな重力異常（フレームドラッグ）を説�
 
 事後的な条件の調整を排した客観的な検証においては、$S>2$ という特異な相関は現れません。非局所性という前提に頼らなくとも、世界はアインシュタインが信じた通り、局所的で決定論的であると説明できるのです。
 
+### 量子コンピューターの物理的実態（波の局所的な共鳴装置）
+「もし非局所的なもつれが存在しないのであれば、なぜ現実に量子コンピューターは動作しているのか？」という疑問が生じるのは当然です。
+P-modelでは、量子コンピューターの計算能力を「多世界での同時計算」や「非局所的なテレパシー」によるものとは解釈しません。その物理的実態は、極めて精巧に制御された**「局所的なアナログ波の共鳴回路（結合振動子）」**であると説明します。
+
+超伝導量子ビットなどのハードウェアにおいて、複数の量子ビットは魔法のように同期しているわけではなく、マイクロ波キャビティやジョセフソン接合を介して物理的に接続されています。P-modelの視点では、量子計算とは「特定のアルゴリズムというフィルターに対して波を流し込み、最も強く共鳴した波形（正解の傾向）を局所的な干渉によって増幅し、読み取るプロセス」に他なりません。
+
+この決定論的な波の干渉モデルは、量子コンピューターが決して1回で100%の正答を出せず、熱やノイズの揺らぎに対する統計的なエラー訂正を絶えず必要とする現実のハードウェアの挙動とも完全に整合します。
+
 ---
 
 ## 🔮 Differential Predictions (未来観測による検証マイルストーン)
@@ -89,6 +97,33 @@ P-modelは、既存理論と結果が分岐する以下の「差分予測」を�
 3. **Statistic & Reject:** 明確に定義された棄却の閾値。
 
 本リポジトリの `scripts/` および `output/` には、これらの検証を自ら実行するためのコード群が格納されています。
+
+## 🧪 Verification Method (検証方法)
+
+最短で再現する場合は、以下の順で実行してください（PowerShell想定）。
+
+1. **環境準備**
+   - Python 3.12+（推奨）
+   - TeX監査まで行う場合：`lualatex`（TeX Live）
+   - DOCX出力まで行う場合：Word または変換環境
+
+2. **全体検証（軽量）**
+   - `python -B scripts/summary/run_all.py --offline --jobs 2`
+
+3. **論文ビルド（Partごと）**
+   - Part I: `python -B scripts/summary/paper_build.py --profile paper --tex-audit-engine lualatex --tex-audit-require-engine`
+   - Part II: `python -B scripts/summary/paper_build.py --profile part2_astrophysics --tex-audit-engine lualatex --tex-audit-require-engine`
+   - Part III: `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+   - Part IV: `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
+
+4. **主要出力の確認先**
+   - HTML/DOCX/TeX: `output/private/summary/`
+   - 公開成果物: `output/public/`
+
+5. **判定の確認**
+   - `paper_tex_audit.json`（TeX監査）
+   - `paper_table1_results.*`（総合判定）
+   - `run_all_status.json`（一括実行ステータス）
 
 ---
 
