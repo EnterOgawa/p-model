@@ -111,6 +111,7 @@ def _check_part3_lint_strict() -> _Check:
 
 
 _MD_PROSE_LATEX_ESCAPE_RE = re.compile(r"\\\\|\\[A-Za-z]+")
+_MD_INLINE_MATH_RE = re.compile(r"(?<!\\)\$[^$\n]*(?<!\\)\$")
 
 
 def _check_markdown_prose_no_latex_escapes(*, paper_dir: Path) -> _Check:
@@ -145,7 +146,8 @@ def _check_markdown_prose_no_latex_escapes(*, paper_dir: Path) -> _Check:
                 seg_in_math = cur_in_math
                 if not seg_in_math:
                     seg_no_code = re.sub(r"`[^`]*`", "", seg)
-                    m = _MD_PROSE_LATEX_ESCAPE_RE.search(seg_no_code)
+                    seg_no_inline_math = _MD_INLINE_MATH_RE.sub("", seg_no_code)
+                    m = _MD_PROSE_LATEX_ESCAPE_RE.search(seg_no_inline_math)
                     if m:
                         hits.append(
                             {

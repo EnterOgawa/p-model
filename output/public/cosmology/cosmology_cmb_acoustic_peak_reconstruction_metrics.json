@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T04:38:28.962842+00:00",
+  "generated_utc": "2026-02-22T11:27:59.815723+00:00",
   "input": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
   "source_note": {
     "dataset": "Planck 2018 TT binned spectrum (COM_PowerSpect_CMB-TT-binned_R3.01)",
@@ -62,6 +62,42 @@
       "ratio_a2_a1": 0.44420598199597333,
       "ratio_a3_a1": 0.435304896614145,
       "ratio_a3_a1_corrected": 0.5640092163996819
+    },
+    "first_principles_closure": {
+      "closure_assumptions": {
+        "static_space_branch": true,
+        "no_dark_matter_drive_term": true,
+        "tight_coupling": true,
+        "definitions": {
+          "u_psi": "u_Psi = |Psi_P|/c^2",
+          "r_loading": "R_P",
+          "cs_ratio": "c_s,P/c",
+          "scattering_ratio": "lambda_sc/r_s"
+        }
+      },
+      "derived_parameters": {
+        "u_psi": 0.0585294493547553,
+        "r_p_from_well_and_cs": 0.21298625225878498,
+        "cs_over_c": 0.5242174014457914,
+        "cs_over_c_squared": 0.2748038839785781,
+        "lambda_sc_over_r_s": 1.7461615852530348,
+        "delta_p_from_scattering": 0.2863423432417026
+      },
+      "consistency_to_modal_fit": {
+        "r_p_modal_fit": 0.21298625225878495,
+        "delta_p_modal_fit": 0.2863423432417026,
+        "abs_diff_r_p": 2.7755575615628914e-17,
+        "abs_diff_delta_p": 0.0
+      },
+      "third_peak_dm_free_damping_proof": {
+        "formula": "A3/A1 = exp(-2*delta_P) * (D3/D1) < 1 for delta_P>0 and D3<=D1",
+        "damping_factor_exp_term": 0.5640092163996819,
+        "silk_ratio_d3_over_d1": 0.7718045804160559,
+        "a3_over_a1_pred_dm_free": 0.435304896614145,
+        "a3_over_a1_observed": 0.435304896614145,
+        "abs_rel_error_vs_observed": 0.0,
+        "attenuation_theorem_pass": true
+      }
     },
     "n_modes_for_plot": 8
   },

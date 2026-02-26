@@ -38,7 +38,7 @@ _ROOT = Path(__file__).resolve().parents[2]
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
-from scripts.summary import worklog  # noqa: E402
+from scripts.summary import paper_latex as _paper_latex, worklog  # noqa: E402
 
 FigureAnchorMap = Dict[str, Tuple[str, str]]
 
@@ -497,6 +497,23 @@ def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
     return body_html[: m.end(1)] + "\n" + insert_html + "\n" + body_html[m.end(1) :]
 
 
+def _inject_pagebreak_before_heading_ids(body_html: str, *, heading_ids: Sequence[str]) -> str:
+    """
+    Insert explicit page-break markers before selected heading ids.
+    Used to keep DOCX pagination deterministic for specific subsections.
+    """
+    if not body_html:
+        return body_html
+    ids = [str(x).strip() for x in heading_ids if str(x).strip()]
+    if not ids:
+        return body_html
+    out = body_html
+    for hid in ids:
+        pat = re.compile(rf'(<h[2-5][^>]*id="{re.escape(hid)}"[^>]*>)', flags=re.S)
+        out = pat.sub(r"<div class='pb-before'></div>\n\1", out, count=1)
+    return out
+
+
 def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple[str, str]:
     """
     Normalize heading anchors like "#11" or "#1-introduction" into "#section-1-1", etc.
@@ -871,7 +888,116 @@ def _strip_internal_blocks(md_text: str, *, mode: str) -> str:
     return _INTERNAL_BLOCK_RE.sub("", md_text)
 
 
+_INLINE_MATH_PARITY_RE = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)\$(?!\$)")
+_CJK_CHAR_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
+
+
+def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
+    """
+    Apply the same inline math heuristics used by paper_latex so publish HTML/DOCX
+    stays aligned with TeX output for Part I-IV.
+    """
+
+    token_map: Dict[str, str] = {}
+    token_index = 0
+
+    def make_token(rendered: str) -> str:
+        nonlocal token_index
+        key = f"@@PHTMLTOK{token_index}@@"
+        token_map[key] = rendered
+        token_index += 1
+        return key
+
+    def repl_inline_code(match: re.Match[str]) -> str:
+        payload = (match.group(1) or "").strip()
+        if not payload:
+            return make_token(match.group(0))
+        if _paper_latex._PUNCT_ONLY_RE.fullmatch(payload):
+            return make_token(match.group(0))
+        if _CJK_CHAR_RE.search(payload) and not _paper_latex._looks_like_artifact_code(payload):
+            return make_token(match.group(0))
+        if (
+            _paper_latex._looks_like_physics_equation_code(payload)
+            or _paper_latex._looks_like_physics_symbol_code(payload)
+            or _paper_latex._looks_like_math_code(payload)
+        ):
+            return make_token("$" + _paper_latex._normalize_inline_math_payload(payload) + "$")
+        return make_token(match.group(0))
+
+    normalized = re.sub(r"`([^`]+)`", repl_inline_code, text)
+
+    def repl_inline_math(match: re.Match[str]) -> str:
+        payload = (match.group(1) or "").strip()
+        if not payload:
+            return match.group(0)
+        if _paper_latex._looks_like_artifact_code(payload) and not (
+            _paper_latex._looks_like_physics_equation_code(payload)
+            or _paper_latex._looks_like_physics_symbol_code(payload)
+        ):
+            return make_token(match.group(0))
+        return make_token("$" + _paper_latex._normalize_inline_math_payload(payload) + "$")
+
+    normalized = _INLINE_MATH_PARITY_RE.sub(repl_inline_math, normalized)
+    normalized = _paper_latex._replace_plain_symbolic_tokens(normalized, make_token)
+
+    for _ in range(len(token_map) + 1):
+        changed = False
+        for key, rendered in token_map.items():
+            if key in normalized:
+                normalized = normalized.replace(key, rendered)
+                changed = True
+        if not changed:
+            break
+    return normalized
+
+
+def _normalize_markdown_for_tex_docx_parity(md_text: str) -> str:
+    """
+    Normalize inline pseudo-math in markdown prose so HTML/DOCX follows the same
+    math tokenization rules as TeX generation.
+    """
+
+    lines = md_text.splitlines()
+    out_lines: List[str] = []
+    in_code_fence = False
+    in_math_block = False
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("```"):
+            in_code_fence = not in_code_fence
+            out_lines.append(line)
+            continue
+        if in_code_fence:
+            out_lines.append(line)
+            continue
+
+        parts = line.split("$$")
+        if len(parts) == 1:
+            if in_math_block:
+                out_lines.append(line)
+            else:
+                out_lines.append(_normalize_inline_markdown_segment_for_parity(line))
+            continue
+
+        cur_in_math = in_math_block
+        rewritten_parts: List[str] = []
+        for idx, part in enumerate(parts):
+            if cur_in_math:
+                rewritten_parts.append(part)
+            else:
+                rewritten_parts.append(_normalize_inline_markdown_segment_for_parity(part))
+            if idx != len(parts) - 1:
+                cur_in_math = not cur_in_math
+
+        out_lines.append("$$".join(rewritten_parts))
+        in_math_block = cur_in_math
+
+    return "\n".join(out_lines)
+
+
 _MATH_BLOCK_RE = re.compile(r"\$\$(.+?)\$\$", flags=re.DOTALL)
+_INLINE_MATH_RE = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)\$(?!\$)")
 
 
 def _read_bytes(path: Path) -> bytes:
@@ -883,7 +1009,7 @@ def _data_uri_png(png_bytes: bytes) -> str:
     return f"data:image/png;base64,{b64}"
 
 
-def _render_equation_png(*, latex: str, eq_dir: Path) -> Path:
+def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> Path:
     """
     Render a LaTeX math string to a PNG file (white background, tight bbox).
 
@@ -897,7 +1023,27 @@ def _render_equation_png(*, latex: str, eq_dir: Path) -> Path:
     # matplotlib mathtext は `\\phi` を改行コマンド `\\` と解釈して壊れるため、
     # ここで正規化してから描画する。
     latex_norm = latex.strip().replace("\r\n", "\n")
-    latex_norm = latex_norm.replace("\\\\", "\\")
+    # Normalize only duplicated macro-introducing backslashes (e.g. "\\phi" -> "\phi").
+    # Keep row-separator style "\\ " untouched for matrix-like expressions.
+    latex_norm = re.sub(r"\\\\(?=[A-Za-z])", r"\\", latex_norm)
+    # matplotlib mathtext does not support \begin{...}\end{...} environments.
+    # Convert common matrix environments to bracketed lists.
+    def _matrix_env_repl(m: re.Match[str]) -> str:
+        env = str(m.group(1) or "").strip().lower()
+        body = str(m.group(2) or "")
+        body = body.replace("\n", " ")
+        body = re.sub(r"\\\\+", " ; ", body)
+        body = body.replace("&", " , ")
+        body = re.sub(r"\s+", " ", body).strip(" ;,")
+        if env == "pmatrix":
+            return rf"\left({body}\right)"
+        return rf"\left[{body}\right]"
+    latex_norm = re.sub(
+        r"\\begin\{(bmatrix|pmatrix|matrix|array)\}(?:\{[^{}]*\})?(.*?)\\end\{\1\}",
+        _matrix_env_repl,
+        latex_norm,
+        flags=re.DOTALL,
+    )
     # matplotlib mathtext does not support some LaTeX delimiter aliases.
     # Normalize common variants to equivalent tokens that mathtext can render.
     latex_norm = (
@@ -906,13 +1052,22 @@ def _render_equation_png(*, latex: str, eq_dir: Path) -> Path:
         .replace("\\lVert", "\\|")
         .replace("\\rVert", "\\|")
     )
+    # matplotlib mathtext has limited macro support and can fail on
+    # vector/bold commands often used in the manuscript.
+    # Normalize unsupported wrappers to plain symbols while preserving semantics.
+    for macro in ("mathbf", "boldsymbol", "bm"):
+        latex_norm = re.sub(rf"\\{macro}\s*\{{([^{{}}]+)\}}", r"{\1}", latex_norm)
+        latex_norm = re.sub(rf"\\{macro}\s+([A-Za-z])", r"{\1}", latex_norm)
+        latex_norm = re.sub(rf"\\{macro}(?=\\[A-Za-z]+)", "", latex_norm)
     latex_norm = " ".join(latex_norm.split())
 
     # NOTE: Rendering parameters must be part of the cache key, otherwise changing
     # font size / DPI would not invalidate existing PNGs.
-    eq_dpi = 300
-    eq_fontsize = 6.5  # was 26; user requested 1/4 size (uniform)
-    style_version = f"eqpng_v2|dpi={eq_dpi}|fs={eq_fontsize}"
+    eq_dpi = 110 if inline else 300
+    eq_fontsize = 4.5 if inline else 6.5
+    pad_inches = 0.0 if inline else 0.08
+    render_mode = "inline" if inline else "block"
+    style_version = f"eqpng_v4|mode={render_mode}|dpi={eq_dpi}|fs={eq_fontsize}|pad={pad_inches}"
 
     key = hashlib.sha1(f"{style_version}\n{latex_norm}".encode("utf-8")).hexdigest()[:12]
     out = eq_dir / f"eq_{key}.png"
@@ -945,8 +1100,22 @@ def _render_equation_png(*, latex: str, eq_dir: Path) -> Path:
     )
 
     buf = io.BytesIO()
-    fig.savefig(buf, format="png", bbox_inches="tight", pad_inches=0.25, facecolor="white")
-    plt.close(fig)
+    try:
+        fig.savefig(buf, format="png", bbox_inches="tight", pad_inches=pad_inches, facecolor="white")
+        plt.close(fig)
+    except Exception as exc:
+        plt.close(fig)
+        print(f"[warn] equation render fallback (mathtext): {exc!r}")
+        fig = plt.figure(figsize=(0.01, 0.01), dpi=eq_dpi)
+        fig.patch.set_facecolor("white")
+        ax = fig.add_axes([0, 0, 1, 1])
+        ax.axis("off")
+        ax.set_facecolor("white")
+        fallback_text = " ".join(latex_norm.split())
+        ax.text(0.5, 0.5, fallback_text, fontsize=eq_fontsize, ha="center", va="center", color="black")
+        buf = io.BytesIO()
+        fig.savefig(buf, format="png", bbox_inches="tight", pad_inches=pad_inches, facecolor="white")
+        plt.close(fig)
     out.write_bytes(buf.getvalue())
     return out
 
@@ -959,7 +1128,7 @@ def _replace_math_blocks_with_images(
     embed_images: bool,
 ) -> str:
     """
-    $$ ... $$ で書かれた数式ブロックを “数式画像” に置換する（publishモードのみ）。
+    $$ ... $$ のブロック数式と $ ... $ のインライン数式を “数式画像” に置換する（publishモードのみ）。
     """
     if mode != "publish":
         return md_text
@@ -970,16 +1139,51 @@ def _replace_math_blocks_with_images(
         latex = m.group(1).strip()
         if not latex:
             return ""
-        png_path = _render_equation_png(latex=latex, eq_dir=eq_dir)
+        png_path = _render_equation_png(latex=latex, eq_dir=eq_dir, inline=False)
         if embed_images:
             src = _data_uri_png(_read_bytes(png_path))
         else:
             src = _rel_url(out_dir, png_path)
         # LaTeX のバックスラッシュ表記（例: `\\gamma`）は本文外の属性でも目立つため、publish では汎用の代替文言にする。
         alt = "数式"
-        return f"<div class='equation-block'><img class='equation-img' src='{src}' alt='{alt}'></div>"
+        latex_attr = html.escape(latex, quote=True)
+        return (
+            "<div class='equation-block'>"
+            f"<img class='equation-img' src='{src}' alt='{alt}' data-latex='{latex_attr}'>"
+            "</div>"
+        )
 
-    return _MATH_BLOCK_RE.sub(repl, md_text)
+    replaced = _MATH_BLOCK_RE.sub(repl, md_text)
+
+    def _looks_like_inline_math(expr: str) -> bool:
+        s = (expr or "").strip()
+        if not s:
+            return False
+        # Avoid replacing plain currency-like values (e.g., "$5", "$12.3%").
+        if re.fullmatch(r"[0-9]+(?:[.,][0-9]+)?%?", s):
+            return False
+        # Treat almost all remaining `$...$` as math.
+        # This intentionally includes simple variables such as `$e$`, `$R$`, `$m1$`
+        # so TeX-like markers never leak into Word as raw text.
+        return True
+
+    def repl_inline(m: re.Match[str]) -> str:
+        latex = (m.group(1) or "").strip()
+        if not _looks_like_inline_math(latex):
+            return m.group(0)
+        png_path = _render_equation_png(latex=latex, eq_dir=eq_dir, inline=True)
+        if embed_images:
+            src = _data_uri_png(_read_bytes(png_path))
+        else:
+            src = _rel_url(out_dir, png_path)
+        latex_attr = html.escape(latex, quote=True)
+        return (
+            "<span class='equation-inline'>"
+            f"<img class='equation-inline-img' src='{src}' alt='数式-inline' data-latex='{latex_attr}' style='height:0.95em;width:auto;vertical-align:middle;'>"
+            "</span>"
+        )
+
+    return _INLINE_MATH_RE.sub(repl_inline, replaced)
 
 
 def _inline_png_code_snippets(
@@ -1131,9 +1335,12 @@ def _render_html(
         "figcaption{margin:0 0 6px 0}"
         ".equation-block{overflow-x:auto;overflow-y:hidden;margin:6px 0;padding:2px 0}"
         ".equation-img{border:none;border-radius:0;display:block;margin:0 auto;max-width:none;height:auto}"
+        ".equation-inline{display:inline-block;vertical-align:middle;line-height:1}"
+        ".equation-inline-img{border:none;border-radius:0;display:inline-block;vertical-align:middle;max-width:none;height:1.25em}"
         ".inline-figure{margin:14px 0 18px 0}"
         ".inline-figure img{width:100%}"
         ".fig-link{display:block}"
+        ".pb-before{break-before:page;page-break-before:always;height:0;margin:0;padding:0}"
         ".table-wrap{overflow-x:auto;margin:8px 0 10px 0}"
         "table{border-collapse:separate;border-spacing:0;width:100%;font-size:12px}"
         "th,td{border:none;padding:6px 8px;vertical-align:top}"
@@ -1142,7 +1349,7 @@ def _render_html(
         "a:hover{text-decoration:underline}"
         ".toc{font-size:13px}"
         ".toc ul{margin-left:18px}"
-        "@media print{body{margin:0;max-width:none} .card{break-inside:avoid-page;page-break-inside:avoid} .equation-block{overflow-x:visible} .equation-img{max-width:100%} details{display:none}}"
+        "@media print{body{margin:0;max-width:none} .card{break-inside:avoid-page;page-break-inside:avoid} .equation-block{overflow-x:visible} .equation-img{max-width:100%} .pb-before{break-before:page;page-break-before:always} details{display:none}}"
     )
     parts.append("</style>")
     parts.append("</head><body>")
@@ -1386,6 +1593,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if include_uncertainty and uncertainty_md.exists():
         uncertainty_text = _read_text(uncertainty_md)
         uncertainty_text = _strip_internal_blocks(uncertainty_text, mode=mode)
+        uncertainty_text = _normalize_markdown_for_tex_docx_parity(uncertainty_text)
         uncertainty_text = _replace_math_blocks_with_images(
             uncertainty_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
@@ -1412,6 +1620,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if manuscript_md.exists():
         manuscript_text = _read_text(manuscript_md)
         manuscript_text = _strip_internal_blocks(manuscript_text, mode=mode)
+        manuscript_text = _normalize_markdown_for_tex_docx_parity(manuscript_text)
         manuscript_text = _replace_math_blocks_with_images(
             manuscript_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
@@ -1428,6 +1637,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             if table1_json.exists():
                 table1_html = _render_table1_html_from_json(table1_json, profile=profile)
                 body = _inject_table1_after_h3(body, insert_html=table1_html)
+        if profile == "part3_quantum":
+            body = _inject_pagebreak_before_heading_ids(
+                body,
+                heading_ids=("section-4-10-2", "section-4-10-3"),
+            )
         body = _inline_png_code_snippets(
             body,
             root=root,
@@ -1454,6 +1668,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if include_quantum_appendix_a and quantum_appendix_a_md.exists():
         appendix_text = _read_text(quantum_appendix_a_md)
         appendix_text = _strip_internal_blocks(appendix_text, mode=mode)
+        appendix_text = _normalize_markdown_for_tex_docx_parity(appendix_text)
         appendix_text = _replace_math_blocks_with_images(appendix_text, out_dir=out_dir, mode=mode, embed_images=embed_images)
         body, toc = _markdown_to_html(appendix_text)
         if mode != "publish":
@@ -1486,6 +1701,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if include_definitions and definitions_md.exists():
         definitions_text = _read_text(definitions_md)
         definitions_text = _strip_internal_blocks(definitions_text, mode=mode)
+        definitions_text = _normalize_markdown_for_tex_docx_parity(definitions_text)
         definitions_text = _replace_math_blocks_with_images(
             definitions_text, out_dir=out_dir, mode=mode, embed_images=embed_images
         )
@@ -1512,6 +1728,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if include_llr_appendix and llr_appendix_md.exists():
         llr_text = _read_text(llr_appendix_md)
         llr_text = _strip_internal_blocks(llr_text, mode=mode)
+        llr_text = _normalize_markdown_for_tex_docx_parity(llr_text)
         llr_text = _replace_math_blocks_with_images(llr_text, out_dir=out_dir, mode=mode, embed_images=embed_images)
         body, toc = _markdown_to_html(llr_text)
         if mode != "publish":
@@ -1565,6 +1782,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if sources_md.exists():
         sources_text = _read_text(sources_md)
         sources_text = _strip_internal_blocks(sources_text, mode=mode)
+        sources_text = _normalize_markdown_for_tex_docx_parity(sources_text)
         if mode == "publish":
             sources_text = _filter_md_h2_sections_by_ref_keys(sources_text, keep_keys=used_cite_keys)
         sources_text = _replace_math_blocks_with_images(
@@ -1593,6 +1811,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if refs_md.exists():
         refs_text = _read_text(refs_md)
         refs_text = _strip_internal_blocks(refs_text, mode=mode)
+        refs_text = _normalize_markdown_for_tex_docx_parity(refs_text)
         if mode == "publish":
             refs_text = _filter_md_h2_sections_by_ref_keys(refs_text, keep_keys=used_cite_keys)
         refs_text = _inject_reference_anchors(refs_text)

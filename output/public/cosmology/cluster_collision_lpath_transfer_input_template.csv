@@ -1,5 +1,5 @@
-case_id,label,cluster_family,branch_anchor,rho_ratio,v_ratio,temp_ratio,offset_obs_kpc,offset_sigma_kpc,source_mode,note
-bullet_main_recheck,Bullet main halo recheck,bullet,bullet_main,1.0,1.0,1.0,190.0,25.0,primary_map_registered,bullet baseline recheck with fixed L_path ratio law
-bullet_sub_recheck,Bullet sub-halo recheck,bullet,bullet_sub,1.0,1.0,1.0,140.0,20.0,primary_map_registered,bullet baseline recheck with fixed L_path ratio law
-el_gordo_main_template,El Gordo main-like transfer,el_gordo,bullet_main,1.0,1.0,1.0,,,template_pending_primary,replace rho/v/T and observed offsets when El Gordo primary map registration is available
-el_gordo_sub_template,El Gordo sub-like transfer,el_gordo,bullet_sub,1.0,1.0,1.0,,,template_pending_primary,replace rho/v/T and observed offsets when El Gordo primary map registration is available
+case_id,label,cluster_family,branch_anchor,rho_ratio,v_ratio,temp_ratio,offset_obs_kpc,offset_sigma_kpc,readiness_state,priority_class,source_mode,note
+bullet_main_recheck,Bullet main halo recheck,bullet,bullet_main,1.0,1.0,1.0,190.0,25.0,ready,active,primary_map_registered,bullet baseline recheck with fixed L_path ratio law
+bullet_sub_recheck,Bullet sub-halo recheck,bullet,bullet_sub,1.0,1.0,1.0,140.0,20.0,ready,active,primary_map_registered,bullet baseline recheck with fixed L_path ratio law
+el_gordo_main_template,El Gordo main-like transfer,el_gordo,bullet_main,1.0,1.0,1.0,,,pending_primary_registration,low_blocked_missing_primary_data,template_pending_primary,replace rho/v/T and observed offsets when El Gordo primary map registration is available
+el_gordo_sub_template,El Gordo sub-like transfer,el_gordo,bullet_sub,1.0,1.0,1.0,,,pending_primary_registration,low_blocked_missing_primary_data,template_pending_primary,replace rho/v/T and observed offsets when El Gordo primary map registration is available

@@ -1,0 +1,2 @@
+generated_utc,update_event_type,update_event_detected,rerun_triggered,rerun_ok,n_three_detector_events,prev_n_gate_hits,curr_n_gate_hits,prev_best_u2_scalar_overlap_proxy,curr_best_u2_scalar_overlap_proxy,improved_gate_hits,improved_best_u2,improvement_detected,overall_status,decision,event_counter,next_action,input_hash
+2026-02-22T23:47:39.015900+00:00,no_change,0,0,1,4,0,0,0.5,0.5,0,0,0,watch,no_change_hold,1,wait_for_three_detector_input_hash_change_then_rerun_step_8_7_19_10,5c2cd8d004186df06ae4d86b0d233c20b63c55389ecf5011495beb8a1963b83b

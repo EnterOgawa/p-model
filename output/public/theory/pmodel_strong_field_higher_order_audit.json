@@ -1255,6 +1255,42 @@
       "ok": true,
       "support_gate_cleared_with_injection": false
     },
+    "lambda_h_anchor_vs_joint_fit": {
+      "abs_z_joint_minus_anchor": 589.6845609882519,
+      "delta_lambda_joint_minus_anchor": -0.03907885510040005,
+      "in_gate_now": false,
+      "lambda_h_anchor": 0.0390291963816193,
+      "lambda_h_joint_fit": -4.9658718780751984e-05,
+      "lambda_h_joint_sigma": 6.627077879554424e-05,
+      "note": "The N0^(2)-anchored lambda_H is a physical anchor from strong-field source closure. Joint-channel lambda_H remains an effective fit parameter; consistency is reported as diagnostics only.",
+      "ok": true,
+      "z_joint_minus_anchor": -589.6845609882519
+    },
+    "lambda_h_n0_physical_bridge": {
+      "anchor_selection_policy": "prefer_percent_ratio_then_absolute_ratio",
+      "definition": {
+        "baseline_excess": "DeltaC_core = C_linear - C_ref",
+        "lambda_h_link": "lambda_H ≡ DeltaC_N0 / DeltaC_core",
+        "nonlinear_excess": "DeltaC_N0 = C_full - C_linear",
+        "self_interaction_link": "lambda_H = epsilon_nl^2 * Xi_N0"
+      },
+      "lambda_h_anchor": 0.0390291963816193,
+      "lambda_h_from_percent_ratio": 0.0390291963816193,
+      "lambda_h_from_ratio": 0.1187791294266484,
+      "note": "λ_H is anchored to the explicit N0^(2) source strength from Step 8.7.32.11. This defines the physical meaning of λ_H before multi-channel effective fitting.",
+      "ok": true,
+      "terms": {
+        "c_full": 10.569104612668946,
+        "c_linear": 10.55033404224525,
+        "c_ref": 10.392304845413264,
+        "core_gap_pct": 4.627814940128316,
+        "delta_c_core": 0.15802919683198624,
+        "delta_c_n0": 0.018770570423695787,
+        "epsilon_nl_squared": 0.0064,
+        "n0_contribution_pct": 0.18061989811605983
+      },
+      "xi_n0_anchor": 6.098311934628016
+    },
     "pulsar_orbital_decay_channels": {
       "chi2_dof_baseline": 0.49833988047774574,
       "chi2_dof_fit": 0.4774035556968532,
@@ -1395,10 +1431,11 @@
       "ok": true
     }
   },
-  "generated_utc": "2026-02-21T23:15:32.039331+00:00",
+  "generated_utc": "2026-02-22T12:05:28.463894+00:00",
   "inputs": {
     "cosmology_cluster_collision_p_peak_offset_audit_json": "output/public/cosmology/cosmology_cluster_collision_p_peak_offset_audit.json",
     "cosmology_cmb_peak_uplift_audit_json": "output/public/cosmology/cosmology_cmb_peak_uplift_audit.json",
+    "effective_metric_n0_source_solution_audit_json": "output/public/theory/pmodel_effective_metric_n0_source_solution_audit.json",
     "eht_kappa_error_budget_json": "output/public/eht/eht_kappa_error_budget.json",
     "eht_shadow_compare_json": "output/public/eht/eht_shadow_compare.json",
     "frame_dragging_scalar_limit_combined_audit_json": "output/public/theory/frame_dragging_scalar_limit_combined_audit.json",
@@ -1430,6 +1467,6 @@
   "phase": {
     "name": "strong-field higher-order closure audit",
     "phase": 8,
-    "step": "8.7.27.31"
+    "step": "8.7.27.33"
   }
 }

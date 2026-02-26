@@ -141,6 +141,17 @@
       "value": 3.141984622437141
     },
     {
+      "expected": "<=3.0 (when n_clusters<=2)",
+      "gate_level": "watch",
+      "id": "bullet::low_dof_fit_margin",
+      "metric": "chi2_dof_low_dof_guard",
+      "note": "低自由度（main/sub の2成分）では境界的適合を保守的に watch 判定へ落とす。 3σ棄却域ではないが、完全適合とはみなさない。",
+      "pass": false,
+      "score": 0.0,
+      "status": "watch",
+      "value": 3.141984622437141
+    },
+    {
       "expected": "<=3.0",
       "gate_level": "hard",
       "id": "bullet::offset_z_gate",
@@ -294,11 +305,13 @@
     }
   ],
   "decision": {
-    "decision": "cluster_collision_pmu_jmu_pass",
+    "decision": "cluster_collision_pmu_jmu_watch",
     "hard_fail_ids": [],
-    "overall_status": "pass",
-    "rule": "Pass if all hard/watch gates pass.",
-    "watch_ids": []
+    "overall_status": "watch",
+    "rule": "Watch if hard gates pass and any watch gate fails.",
+    "watch_ids": [
+      "bullet::low_dof_fit_margin"
+    ]
   },
   "falsification_gate": {
     "reject_if": [
@@ -313,7 +326,8 @@
       "tau_reconstruction_rel_error > 0.20."
     ],
     "watch_if": [
-      "Hard checks pass but no sign flip appears near collision transition window."
+      "Hard checks pass but no sign flip appears near collision transition window.",
+      "Low-DoF boundary guard: when n_clusters<=2 and chi2/dof>3.0, keep overall status at watch."
     ]
   },
   "fit": {
@@ -321,6 +335,11 @@
     "chi2": 6.283969244874282,
     "chi2_dof": 3.141984622437141,
     "dof": 2,
+    "low_dof_effective_dof_for_boundary_check": 1,
+    "low_dof_guard_active": true,
+    "low_dof_guard_threshold_chi2_dof": 3.0,
+    "low_dof_proxy_chi2": 3.141984622437141,
+    "low_dof_proxy_p_upper": 0.07630091186098129,
     "max_abs_z_offset": 2.03404559355896,
     "n_fit_parameters": 0,
     "n_observations": 2,
@@ -340,7 +359,7 @@
     },
     "xi_mode": "derived"
   },
-  "generated_utc": "2026-02-21T06:31:58.281619+00:00",
+  "generated_utc": "2026-02-22T11:00:17.840132+00:00",
   "inputs": {
     "offset_observations_csv": "data/cosmology/bullet_cluster/collision_offset_observables.csv"
   },

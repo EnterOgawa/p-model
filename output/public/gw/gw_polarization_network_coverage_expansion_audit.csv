@@ -1,0 +1,8 @@
+subset_events,subset_size,n_trials,pass_found,status_counts_reject,status_counts_watch,status_counts_pass,status_counts_inconclusive,best_gate_found,best_gate_scalar_overlap_proxy,best_gate_n_usable_events,best_gate_status,best_u2_scalar_overlap_proxy,best_u2_n_usable_events,best_u2_status,best_coverage_n_usable_events,best_coverage_scalar_overlap_proxy,best_coverage_status,best_coverage_corr_use_min,best_coverage_response_floor_frac,best_coverage_min_ring_directions,best_coverage_geometry_relax_factor,best_coverage_allow_pair_pruning
+"GW200129_065458,GW200224_222234",2,24,0,16,0,0,8,0,,0,,,0,,1,0.333333,reject,0.05,0.05,6,2,0
+"GW200129_065458,GW200115_042309",2,24,0,24,0,0,0,0,,0,,,0,,1,0,reject,0.07,0.05,6,2,0
+"GW200129_065458,GW200311_115853",2,24,0,20,0,0,4,0,,0,,0.5,2,reject,2,0.5,reject,0.05,0.05,6,4,0
+"GW200129_065458,GW200224_222234,GW200115_042309",3,24,0,24,0,0,0,0,,0,,,0,,1,0,reject,0.07,0.05,6,2,0
+"GW200129_065458,GW200224_222234,GW200311_115853",3,24,0,20,0,0,4,0,,0,,0.5,2,reject,2,0.5,reject,0.05,0.05,6,4,0
+"GW200129_065458,GW200115_042309,GW200311_115853",3,24,0,24,0,0,0,0,,0,,0.5,2,reject,2,0.5,reject,0.05,0.05,6,4,0
+"GW200129_065458,GW200224_222234,GW200115_042309,GW200311_115853",4,24,0,24,0,0,0,0,,0,,0.5,2,reject,2,0.5,reject,0.05,0.05,6,4,0

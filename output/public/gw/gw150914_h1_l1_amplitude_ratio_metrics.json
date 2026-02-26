@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T08:14:29.369673+00:00",
+  "generated_utc": "2026-02-23T13:20:10.242332+00:00",
   "schema": "wavep.gw.detector_pair_amplitude_ratio_audit.v1",
   "event": {
     "name": "GW150914",
@@ -64,7 +64,7 @@
     ]
   },
   "sources": {
-    "generated_utc": "2026-02-22T08:14:28.937511+00:00",
+    "generated_utc": "2026-02-23T13:20:09.809632+00:00",
     "source": "GWOSC (GWTC-1-confident / GW150914 / v3)",
     "urls": {
       "event_json": "https://gwosc.org/eventapi/json/GWTC-1-confident/GW150914/v3",

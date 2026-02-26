@@ -88,6 +88,13 @@ def _safe_float(x: Any) -> Optional[float]:
     return v
 
 
+def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
+    for path in paths:
+        if path.exists():
+            return path
+    return None
+
+
 @dataclass(frozen=True)
 class TableRow:
     topic: str
@@ -778,6 +785,115 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
     return out
 
 
+def _load_gw250114_rows(root: Path) -> List[TableRow]:
+    area_path = _first_existing(
+        [
+            _OUT_PRIVATE / "gw" / "gw250114_area_theorem_test.json",
+            _OUT_PUBLIC / "gw" / "gw250114_area_theorem_test.json",
+            root / "output" / "gw" / "gw250114_area_theorem_test.json",
+        ]
+    )
+    qnm_path = _first_existing(
+        [
+            _OUT_PRIVATE / "gw" / "gw250114_ringdown_qnm_fit.json",
+            _OUT_PUBLIC / "gw" / "gw250114_ringdown_qnm_fit.json",
+            root / "output" / "gw" / "gw250114_ringdown_qnm_fit.json",
+        ]
+    )
+    imr_path = _first_existing(
+        [
+            _OUT_PRIVATE / "gw" / "gw250114_imr_consistency.json",
+            _OUT_PUBLIC / "gw" / "gw250114_imr_consistency.json",
+            root / "output" / "gw" / "gw250114_imr_consistency.json",
+        ]
+    )
+    if area_path is None and qnm_path is None and imr_path is None:
+        return []
+
+    area_sigma = None
+    first_time_ge5 = None
+    n_combined = None
+    if area_path is not None:
+        try:
+            ja = _read_json(area_path)
+            summary = ja.get("summary") if isinstance(ja.get("summary"), dict) else {}
+            sigma_ref = summary.get("sigma_ref") if isinstance(summary.get("sigma_ref"), dict) else {}
+            area_sigma = _safe_float(sigma_ref.get("sigma_gaussian_combined"))
+            first_time_ge5 = _safe_float(summary.get("first_time_sigma_ge_5_combined"))
+            n_combined = int(_safe_float(summary.get("n_combined")) or 0)
+        except Exception:
+            area_sigma = None
+            first_time_ge5 = None
+
+    qnm_f_hz = None
+    qnm_tau_s = None
+    if qnm_path is not None:
+        try:
+            jq = _read_json(qnm_path)
+            res = jq.get("results") if isinstance(jq.get("results"), dict) else {}
+            combined = res.get("combined") if isinstance(res.get("combined"), dict) else {}
+            med = combined.get("median") if isinstance(combined.get("median"), dict) else {}
+            qnm_f_hz = _safe_float(med.get("f_hz"))
+            qnm_tau_s = _safe_float(med.get("tau_s"))
+        except Exception:
+            qnm_f_hz = None
+            qnm_tau_s = None
+
+    z_mass = None
+    z_spin = None
+    p_imr = None
+    if imr_path is not None:
+        try:
+            ji = _read_json(imr_path)
+            cons = ji.get("consistency") if isinstance(ji.get("consistency"), dict) else {}
+            z_mass = _safe_float(cons.get("z_final_mass_det_1d"))
+            z_spin = _safe_float(cons.get("z_final_spin_1d"))
+            p_imr = _safe_float(cons.get("p_value_mahalanobis2"))
+        except Exception:
+            z_mass = None
+            z_spin = None
+            p_imr = None
+
+    metric_parts: List[str] = []
+    if area_sigma is not None:
+        metric_parts.append(f"面積定理(合成): {_fmt_float(area_sigma, digits=3)}σ")
+    if first_time_ge5 is not None:
+        metric_parts.append(f"first σ≥5 at t_ref={_fmt_float(first_time_ge5, digits=1)}M")
+    if qnm_f_hz is not None:
+        metric_parts.append(f"QNM(220): f={_fmt_float(qnm_f_hz, digits=3)} Hz")
+    if qnm_tau_s is not None:
+        metric_parts.append(f"τ={_fmt_float(qnm_tau_s, digits=6)} s")
+    if z_mass is not None:
+        metric_parts.append(f"IMR mass z={_fmt_float(z_mass, digits=3)}")
+    if z_spin is not None:
+        metric_parts.append(f"IMR spin z={_fmt_float(z_spin, digits=3)}")
+    if p_imr is not None:
+        metric_parts.append(f"IMR p={_fmt_float(p_imr, digits=3)}")
+
+    metric_public_parts: List[str] = []
+    if area_sigma is not None:
+        metric_public_parts.append(f"面積定理有意度={_fmt_float(area_sigma, digits=2)}σ")
+    if z_mass is not None or z_spin is not None:
+        zvals = [abs(v) for v in (z_mass, z_spin) if v is not None]
+        if zvals:
+            metric_public_parts.append(f"IMR整合 max|z|={_fmt_float(max(zvals), digits=2)}")
+    if p_imr is not None:
+        metric_public_parts.append(f"IMR整合 p={_fmt_float(p_imr, digits=3)}")
+
+    return [
+        TableRow(
+            topic="重力波（GW250114: 面積定理/QNM/IMR）",
+            observable="面積定理の有意度 + ringdown QNM(220) + IMR整合",
+            data="GW250114 data release（Zenodo/GWOSC）",
+            n=n_combined if (n_combined is not None and n_combined > 0) else None,
+            reference="面積定理（ΣA_f>A_i）とGR ringdown/IMR整合",
+            pmodel="同一I/Fで area・QNM・IMR を横断整合",
+            metric=" / ".join(metric_parts),
+            metric_public=" / ".join(metric_public_parts),
+        )
+    ]
+
+
 def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "theory" / "gravitational_redshift_experiments.json"
     if not path.exists():
@@ -1389,13 +1505,21 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
         return f"ε={_fmt_float(e, digits=3)}±{_fmt_float(s, digits=3)}"
 
     # Phase 4.5B decisive: BOSS DR12v5 (CMASSLOWZTOT; z-bins) with MW multigrid recon + Ross cov.
-    path = (
-        root
-        / "output"
-        / "cosmology"
-        / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_mw_multigrid_ani_mw_rw_boss_recon_rz_zmin0p2_zmax0p75_g512_bias1p85_f0p757_metrics.json"
+    path = _first_existing(
+        [
+            _OUT_PRIVATE
+            / "cosmology"
+            / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_mw_multigrid_ani_mw_rw_boss_recon_rz_zmin0p2_zmax0p75_g512_bias1p85_f0p757_metrics.json",
+            _OUT_PUBLIC
+            / "cosmology"
+            / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_mw_multigrid_ani_mw_rw_boss_recon_rz_zmin0p2_zmax0p75_g512_bias1p85_f0p757_metrics.json",
+            root
+            / "output"
+            / "cosmology"
+            / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__recon_mw_multigrid_ani_mw_rw_boss_recon_rz_zmin0p2_zmax0p75_g512_bias1p85_f0p757_metrics.json",
+        ]
     )
-    if path.exists():
+    if path is not None and path.exists():
         try:
             j = _read_json(path)
         except Exception:
@@ -1432,13 +1556,21 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
                     metric_parts.append(f"Δε(pbg−lcdm)={_fmt_float(float(eps_p) - float(eps_l), digits=3)}")
 
                 # Pre-recon cross-check (Satpathy 2016 covariance).
-                prerecon_path = (
-                    root
-                    / "output"
-                    / "cosmology"
-                    / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json"
+                prerecon_path = _first_existing(
+                    [
+                        _OUT_PRIVATE
+                        / "cosmology"
+                        / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json",
+                        _OUT_PUBLIC
+                        / "cosmology"
+                        / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json",
+                        root
+                        / "output"
+                        / "cosmology"
+                        / "cosmology_bao_catalog_peakfit_cmasslowztot_combined_zbinonly__prerecon_metrics.json",
+                    ]
                 )
-                if prerecon_path.exists():
+                if prerecon_path is not None and prerecon_path.exists():
                     try:
                         jp = _read_json(prerecon_path)
                         by_p = _collect_peakfit_results(jp)
@@ -1630,22 +1762,52 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
     # Phase 4.5B.21.4.4 extension: DESI DR1 LRG (catalog-based; dv=[xi0,xi2] + cov; LRG1/LRG2 bins).
     # Prefer the "primary product" pipeline outputs (RascalC/jackknife) when available.
     desi_candidates = [
-        root
-        / "output"
+        _OUT_PRIVATE
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_reservoir_r0to17_mix_metrics.json",
+        _OUT_PUBLIC
         / "cosmology"
         / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_reservoir_r0to17_mix_metrics.json",
         root
         / "output"
         / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_reservoir_r0to17_mix__rascalc_cov_reservoir_r0to17_mix_metrics.json",
+        _OUT_PRIVATE
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_shrink0p2_full_r0r1_mean_metrics.json",
+        _OUT_PUBLIC
+        / "cosmology"
         / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_shrink0p2_full_r0r1_mean_metrics.json",
         root
         / "output"
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_shrink0p2_full_r0r1_mean_metrics.json",
+        _OUT_PRIVATE
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_both_full_r0r1_mean_metrics.json",
+        _OUT_PUBLIC
         / "cosmology"
         / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_both_full_r0r1_mean_metrics.json",
         root
         / "output"
         / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0r1_mean__jk_cov_both_full_r0r1_mean_metrics.json",
+        _OUT_PRIVATE
+        / "cosmology"
         / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0__jk_cov_both_full_r0_metrics.json",
+        _OUT_PUBLIC
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0__jk_cov_both_full_r0_metrics.json",
+        root
+        / "output"
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins_full_r0__jk_cov_both_full_r0_metrics.json",
+        _OUT_PRIVATE
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins__jk_cov_both_metrics.json",
+        _OUT_PUBLIC
+        / "cosmology"
+        / "cosmology_bao_catalog_peakfit_lrg_combined__w_desi_default_ms_off_y1bins__jk_cov_both_metrics.json",
         root
         / "output"
         / "cosmology"
@@ -1749,6 +1911,603 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
     return out_rows
 
 
+def _load_cosmology_cmb_polarization_phase_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PRIVATE / "cosmology" / "cosmology_cmb_polarization_phase_audit_metrics.json",
+            _OUT_PUBLIC / "cosmology" / "cosmology_cmb_polarization_phase_audit_metrics.json",
+            root / "output" / "cosmology" / "cosmology_cmb_polarization_phase_audit_metrics.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    phase_fit = j.get("phase_fit") if isinstance(j.get("phase_fit"), dict) else {}
+    ee = phase_fit.get("ee") if isinstance(phase_fit.get("ee"), dict) else {}
+    te = phase_fit.get("te") if isinstance(phase_fit.get("te"), dict) else {}
+    delta_ee = _safe_float(ee.get("delta_fit"))
+    delta_te = _safe_float(te.get("delta_fit"))
+    abs_ee = _safe_float(ee.get("abs_shift_from_expected"))
+    abs_te = _safe_float(te.get("abs_shift_from_expected"))
+
+    gate = j.get("gate") if isinstance(j.get("gate"), dict) else {}
+    hard = gate.get("hard_gate") if isinstance(gate.get("hard_gate"), dict) else {}
+    hard_pass = bool(hard.get("pass"))
+    overall = str(gate.get("overall_status") or "")
+
+    metric_parts: List[str] = []
+    if delta_ee is not None:
+        metric_parts.append(f"Δϕ_EE={_fmt_float(delta_ee, digits=3)}")
+    if delta_te is not None:
+        metric_parts.append(f"Δϕ_TE={_fmt_float(delta_te, digits=3)}")
+    if abs_ee is not None:
+        metric_parts.append(f"|Δϕ_EE−0.5|={_fmt_float(abs_ee, digits=3)}")
+    if abs_te is not None:
+        metric_parts.append(f"|Δϕ_TE−0.25|={_fmt_float(abs_te, digits=3)}")
+    metric_parts.append(f"hard_gate={'pass' if hard_pass else 'fail'}")
+    if overall:
+        metric_parts.append(f"overall={overall}")
+
+    metric_public = ""
+    if abs_ee is not None and abs_te is not None:
+        metric_public = (
+            f"位相ズレ判定: {'pass' if hard_pass else 'fail'}"
+            f"（EE={_fmt_float(abs_ee, digits=3)}, TE={_fmt_float(abs_te, digits=3)}）"
+        )
+
+    return [
+        TableRow(
+            topic="宇宙論（CMB偏極位相）",
+            observable="TT/EE/TE 音響位相差（Δϕ_EE, Δϕ_TE）",
+            data="Planck 2018 TT/TE/EE（binned）",
+            n=None,
+            reference="Δϕ_EE=0.5, Δϕ_TE=0.25（位相ロック）",
+            pmodel="Θ∝cos(k r_s), Π/E∝sin(k r_s) から位相差を導出",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_cosmology_fsigma8_growth_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PRIVATE / "cosmology" / "cosmology_fsigma8_growth_mapping_metrics.json",
+            _OUT_PUBLIC / "cosmology" / "cosmology_fsigma8_growth_mapping_metrics.json",
+            root / "output" / "cosmology" / "cosmology_fsigma8_growth_mapping_metrics.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    branches = j.get("branches") if isinstance(j.get("branches"), dict) else {}
+    delay = branches.get("delay") if isinstance(branches.get("delay"), dict) else {}
+    chi2 = _safe_float(delay.get("chi2"))
+    dof = int(_safe_float(delay.get("dof")) or 0)
+    chi2_dof = _safe_float(delay.get("chi2_per_dof"))
+    max_abs_z = _safe_float(delay.get("max_abs_z_score"))
+    tau_eff = _safe_float(delay.get("tau_eff_gyr"))
+    gates = j.get("gates") if isinstance(j.get("gates"), dict) else {}
+    overall = str(gates.get("overall_status") or "")
+    n_pts = int(_safe_float((j.get("inputs") or {}).get("n_rsd_points")) or 0) if isinstance(j.get("inputs"), dict) else 0
+
+    metric_parts: List[str] = []
+    if chi2 is not None and dof > 0:
+        metric_parts.append(f"delay: χ²/dof={_fmt_float(chi2, digits=3)}/{dof}")
+    if chi2_dof is not None:
+        metric_parts.append(f"χ²/ν={_fmt_float(chi2_dof, digits=3)}")
+    if max_abs_z is not None:
+        metric_parts.append(f"max|z|={_fmt_float(max_abs_z, digits=3)}")
+    if tau_eff is not None:
+        metric_parts.append(f"τ_eff={_fmt_float(tau_eff, digits=4)} Gyr")
+    if overall:
+        metric_parts.append(f"overall={overall}")
+
+    metric_public = ""
+    if chi2 is not None and dof > 0:
+        metric_public = f"fσ8整合: χ²/dof={_fmt_float(chi2, digits=3)}/{dof}"
+        if max_abs_z is not None:
+            metric_public += f"（max|z|={_fmt_float(max_abs_z, digits=3)}）"
+
+    return [
+        TableRow(
+            topic="宇宙論（構造形成 fσ8）",
+            observable="成長率 fσ8（遅延枝の実効摩擦 Γ_eff）",
+            data="BOSS DR12 consensus fσ8（RSD）",
+            n=n_pts if n_pts > 0 else None,
+            reference="観測 fσ8(z)（一次統計）",
+            pmodel="遅延ポテンシャルから Γ_eff を導出し growth 方程式へ写像",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_cosmology_cmb_acoustic_peak_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PUBLIC / "cosmology" / "cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
+            _OUT_PRIVATE / "cosmology" / "cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
+            root / "output" / "cosmology" / "cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    gate = j.get("gate") if isinstance(j.get("gate"), dict) else {}
+    first3 = gate.get("first3") if isinstance(gate.get("first3"), dict) else {}
+    ext46 = gate.get("extended_4to6") if isinstance(gate.get("extended_4to6"), dict) else {}
+    overall = gate.get("overall") if isinstance(gate.get("overall"), dict) else {}
+    overall_ext = gate.get("overall_extended") if isinstance(gate.get("overall_extended"), dict) else {}
+
+    model = j.get("model") if isinstance(j.get("model"), dict) else {}
+    closure = model.get("first_principles_closure") if isinstance(model.get("first_principles_closure"), dict) else {}
+    dm_free = (
+        closure.get("third_peak_dm_free_damping_proof")
+        if isinstance(closure.get("third_peak_dm_free_damping_proof"), dict)
+        else {}
+    )
+
+    first3_ell = _safe_float(first3.get("max_abs_delta_ell"))
+    first3_amp = _safe_float(first3.get("max_abs_delta_amp_rel"))
+    ext46_ell = _safe_float(ext46.get("max_abs_delta_ell"))
+    ext46_amp = _safe_float(ext46.get("max_abs_delta_amp_rel"))
+    theorem_pass = bool(dm_free.get("attenuation_theorem_pass"))
+    a3_pred = _safe_float(dm_free.get("a3_over_a1_pred_dm_free"))
+    a3_obs = _safe_float(dm_free.get("a3_over_a1_observed"))
+
+    metric_parts: List[str] = []
+    if first3_ell is not None:
+        metric_parts.append(f"first3 max|Δℓ|={_fmt_float(first3_ell, digits=3)}")
+    if first3_amp is not None:
+        metric_parts.append(f"first3 max|ΔA/A|={_fmt_float(first3_amp, digits=3)}")
+    if ext46_ell is not None:
+        metric_parts.append(f"holdout4-6 max|Δℓ|={_fmt_float(ext46_ell, digits=3)}")
+    if ext46_amp is not None:
+        metric_parts.append(f"holdout4-6 max|ΔA/A|={_fmt_float(ext46_amp, digits=3)}")
+    metric_parts.append(f"dm-free第3ピーク減衰={'pass' if theorem_pass else 'fail'}")
+    if a3_pred is not None and a3_obs is not None:
+        metric_parts.append(f"A3/A1(pred/obs)={_fmt_float(a3_pred, digits=3)}/{_fmt_float(a3_obs, digits=3)}")
+    if isinstance(overall, dict) and overall.get("status"):
+        metric_parts.append(f"core={str(overall.get('status'))}")
+    if isinstance(overall_ext, dict) and overall_ext.get("status"):
+        metric_parts.append(f"extended={str(overall_ext.get('status'))}")
+
+    metric_public = ""
+    if first3_ell is not None and ext46_ell is not None:
+        metric_public = (
+            f"逆同定+holdout整合: first3 max|Δℓ|={_fmt_float(first3_ell, digits=2)}, "
+            f"holdout4-6 max|Δℓ|={_fmt_float(ext46_ell, digits=2)}"
+        )
+        metric_public += f" / DMなし第3ピーク減衰={'成立' if theorem_pass else '未達'}"
+
+    n_obs = len(j.get("observed_peaks") or []) if isinstance(j.get("observed_peaks"), list) else None
+    return [
+        TableRow(
+            topic="宇宙論（CMB音響ピーク）",
+            observable="TT音響ピーク（1〜3逆同定, 4〜6 holdout）",
+            data="Planck 2018 TT binned spectrum",
+            n=n_obs if (n_obs is not None and n_obs > 0) else None,
+            reference="第1〜3ピーク位置/振幅（第4〜6はholdout）",
+            pmodel="光子-バリオン流体のcos解 + DMなし減衰則",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_sparc_rotation_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PUBLIC / "cosmology" / "sparc_rotation_curve_pmodel_audit_metrics.json",
+            _OUT_PRIVATE / "cosmology" / "sparc_rotation_curve_pmodel_audit_metrics.json",
+            root / "output" / "cosmology" / "sparc_rotation_curve_pmodel_audit_metrics.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    counts = j.get("counts") if isinstance(j.get("counts"), dict) else {}
+    fit = j.get("fit_results") if isinstance(j.get("fit_results"), dict) else {}
+    pm = fit.get("pmodel_corrected") if isinstance(fit.get("pmodel_corrected"), dict) else {}
+    baryon = fit.get("baryon_only") if isinstance(fit.get("baryon_only"), dict) else {}
+    comp = fit.get("comparison") if isinstance(fit.get("comparison"), dict) else {}
+    gal = fit.get("galaxy_level_summary") if isinstance(fit.get("galaxy_level_summary"), dict) else {}
+
+    n_gal = int(_safe_float(counts.get("n_galaxies")) or 0)
+    delta_chi2 = _safe_float(comp.get("delta_chi2_baryon_minus_pmodel"))
+    ratio = _safe_float(comp.get("chi2_dof_ratio_pmodel_over_baryon"))
+    pm_chi2_dof = _safe_float(pm.get("chi2_dof"))
+    baryon_chi2_dof = _safe_float(baryon.get("chi2_dof"))
+    median_pm = _safe_float(gal.get("median_chi2_dof_pmodel"))
+    median_b = _safe_float(gal.get("median_chi2_dof_baryon"))
+    upsilon = _safe_float(pm.get("upsilon_best"))
+
+    metric_parts: List[str] = []
+    if delta_chi2 is not None:
+        metric_parts.append(f"Δχ²(baryon−P)={_fmt_float(delta_chi2, digits=2)}")
+    if ratio is not None:
+        metric_parts.append(f"χ²/ν比(P/baryon)={_fmt_float(ratio, digits=3)}")
+    if pm_chi2_dof is not None and baryon_chi2_dof is not None:
+        metric_parts.append(
+            f"χ²/ν: P={_fmt_float(pm_chi2_dof, digits=3)}, baryon={_fmt_float(baryon_chi2_dof, digits=3)}"
+        )
+    if median_pm is not None and median_b is not None:
+        metric_parts.append(
+            f"銀河別中央値 χ²/ν: P={_fmt_float(median_pm, digits=3)}, baryon={_fmt_float(median_b, digits=3)}"
+        )
+    if upsilon is not None:
+        metric_parts.append(f"single-Υ best={_fmt_float(upsilon, digits=3)}")
+
+    metric_public = ""
+    if delta_chi2 is not None and pm_chi2_dof is not None:
+        metric_public = (
+            f"single-Υで説明力向上: Δχ²={_fmt_float(delta_chi2, digits=1)}, "
+            f"P-model χ²/ν={_fmt_float(pm_chi2_dof, digits=2)}"
+        )
+
+    return [
+        TableRow(
+            topic="銀河回転曲線（SPARC）",
+            observable="V_obs(R) の回転曲線フィット（single-Υ）",
+            data="SPARC 175 galaxies",
+            n=n_gal if n_gal > 0 else None,
+            reference="baryon-only baseline",
+            pmodel="P場補正項 + single-Υ",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_bbn_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PUBLIC / "quantum" / "bbn_he4_watch_convergence_audit_metrics.json",
+            _OUT_PRIVATE / "quantum" / "bbn_he4_watch_convergence_audit_metrics.json",
+            root / "output" / "quantum" / "bbn_he4_watch_convergence_audit_metrics.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    decision = j.get("decision") if isinstance(j.get("decision"), dict) else {}
+    lin = j.get("linear_propagation") if isinstance(j.get("linear_propagation"), dict) else {}
+    mc = j.get("mc_propagation") if isinstance(j.get("mc_propagation"), dict) else {}
+    inputs = j.get("inputs") if isinstance(j.get("inputs"), dict) else {}
+    nominal = j.get("freeze_nominal") if isinstance(j.get("freeze_nominal"), dict) else {}
+
+    y_obs = _safe_float(inputs.get("he4_obs"))
+    y_sig = _safe_float(inputs.get("he4_sigma_obs"))
+    y_pred = _safe_float(nominal.get("y_pred"))
+    z_lin = _safe_float(lin.get("z_abs"))
+    z_mc = _safe_float(mc.get("z_abs"))
+    overall = str(decision.get("overall_status") or "")
+    criterion = str(decision.get("criterion") or "")
+    q_b = None
+    params = j.get("uncertainty_parameters") if isinstance(j.get("uncertainty_parameters"), list) else []
+    for p in params:
+        if not isinstance(p, dict):
+            continue
+        if str(p.get("name") or "") == "q_b":
+            q_b = _safe_float(p.get("mu"))
+            break
+
+    metric_parts: List[str] = []
+    if y_pred is not None and y_obs is not None and y_sig is not None:
+        metric_parts.append(
+            f"Yp(pred/obs)={_fmt_float(y_pred, digits=4)}/{_fmt_float(y_obs, digits=4)}±{_fmt_float(y_sig, digits=4)}"
+        )
+    if z_lin is not None:
+        metric_parts.append(f"|z|_linear={_fmt_float(z_lin, digits=3)}")
+    if z_mc is not None:
+        metric_parts.append(f"|z|_MC={_fmt_float(z_mc, digits=3)}")
+    if q_b is not None:
+        metric_parts.append(f"q_B={_fmt_float(q_b, digits=3)}")
+    if overall:
+        metric_parts.append(f"overall={overall}")
+    if criterion:
+        metric_parts.append(f"criterion={criterion}")
+
+    metric_public = ""
+    if y_pred is not None and y_obs is not None:
+        metric_public = f"Yp整合: pred={_fmt_float(y_pred, digits=4)}, obs={_fmt_float(y_obs, digits=4)}"
+        if z_lin is not None:
+            metric_public += f" / |z|={_fmt_float(z_lin, digits=2)}"
+
+    n_mc = int(_safe_float(inputs.get("mc_samples")) or 0)
+    return [
+        TableRow(
+            topic="BBN（初期熱史）",
+            observable="He-4 質量比 Yp（凍結温度導出）",
+            data="light-element abundance benchmark",
+            n=n_mc if n_mc > 0 else None,
+            reference="Yp≈0.25（観測）",
+            pmodel="q_B=1/2 枝 + 弱相互作用凍結で導出",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_background_metric_choice_rows(root: Path) -> List[TableRow]:
+    out: List[TableRow] = []
+    for case_label, relpath in (
+        ("caseB", "pmodel_vector_metric_choice_audit_caseB_effective.json"),
+        ("caseA", "pmodel_vector_metric_choice_audit_caseA_flat.json"),
+    ):
+        path = _first_existing(
+            [
+                _OUT_PUBLIC / "theory" / relpath,
+                _OUT_PRIVATE / "theory" / relpath,
+                root / "output" / "theory" / relpath,
+            ]
+        )
+        if path is None:
+            continue
+        try:
+            j = _read_json(path)
+        except Exception:
+            continue
+
+        case_result = j.get("case_result") if isinstance(j.get("case_result"), dict) else {}
+        summary = case_result.get("summary") if isinstance(case_result.get("summary"), dict) else {}
+        derived = case_result.get("derived") if isinstance(case_result.get("derived"), dict) else {}
+        rows = summary.get("rows") if isinstance(summary.get("rows"), list) else []
+        overall = str(summary.get("overall_status") or "")
+        decision = str(summary.get("decision") or "")
+        z_gamma = _safe_float(derived.get("z_gamma"))
+        mercury_rel = _safe_float(derived.get("mercury_rel_error"))
+        nonlinear = bool(derived.get("nonlinear_pde_closure_pass")) if "nonlinear_pde_closure_pass" in derived else None
+
+        metric_parts: List[str] = []
+        if z_gamma is not None:
+            metric_parts.append(f"γ gate z={_fmt_float(z_gamma, digits=3)}")
+        if mercury_rel is not None:
+            metric_parts.append(f"Mercury係数残差={_fmt_float(mercury_rel, digits=6)}")
+        if nonlinear is not None:
+            metric_parts.append(f"nonlinear_pde_closure={'pass' if nonlinear else 'fail'}")
+        if decision:
+            metric_parts.append(f"decision={decision}")
+        if overall:
+            metric_parts.append(f"overall={overall}")
+
+        metric_public = ""
+        if case_label == "caseB":
+            metric_public = "有効計量 g_{μν}(P) を採用（weak-field + 非線形PDE closure）"
+        else:
+            metric_public = "平坦背景 η_{μν} は weak-field 監査で棄却"
+
+        out.append(
+            TableRow(
+                topic=f"背景計量（{case_label}）",
+                observable="ベクトル拡張の計量選択ゲート",
+                data="Mercury + 光偏向 + PDE closure",
+                n=len(rows) if rows else None,
+                reference="weak-field整合 + closure pass",
+                pmodel="caseB: g_{μν}(P) / caseA: η_{μν}",
+                metric=" / ".join(metric_parts),
+                metric_public=metric_public,
+            )
+        )
+    return out
+
+
+def _load_gw_polarization_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PUBLIC / "gw" / "pmodel_vector_gw_polarization_mapping_audit.json",
+            _OUT_PRIVATE / "gw" / "pmodel_vector_gw_polarization_mapping_audit.json",
+            root / "output" / "gw" / "pmodel_vector_gw_polarization_mapping_audit.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    summary = j.get("summary") if isinstance(j.get("summary"), dict) else {}
+    network = summary.get("network_gate") if isinstance(summary.get("network_gate"), dict) else {}
+    overall = str(summary.get("overall_status") or "")
+    reason = str(summary.get("overall_reason") or "")
+    n_usable = int(_safe_float(summary.get("n_usable_events")) or 0)
+    scalar_excl = bool(network.get("scalar_exclusion_pass")) if "scalar_exclusion_pass" in network else None
+    tensor_pass = bool(network.get("tensor_consistency_pass")) if "tensor_consistency_pass" in network else None
+    scalar_red = bool(network.get("scalar_reduction_pass")) if "scalar_reduction_pass" in network else None
+
+    metric_parts: List[str] = []
+    if overall:
+        metric_parts.append(f"overall={overall}")
+    if scalar_red is not None:
+        metric_parts.append(f"scalar_reduction={'pass' if scalar_red else 'fail'}")
+    if scalar_excl is not None:
+        metric_parts.append(f"scalar_exclusion={'pass' if scalar_excl else 'fail'}")
+    if tensor_pass is not None:
+        metric_parts.append(f"tensor_consistency={'pass' if tensor_pass else 'fail'}")
+    if reason:
+        metric_parts.append(f"reason={reason}")
+
+    metric_public = "3検出器(H1/L1/V1)でスカラー縮退は低減したが完全排除は未達"
+    return [
+        TableRow(
+            topic="重力波（偏光モード）",
+            observable="ベクトル横波 vs スカラー縮退（H1/L1/V1）",
+            data="GW150914 + network gate events",
+            n=n_usable if n_usable > 0 else None,
+            reference="scalar_exclusion_pass=true（hard pass）",
+            pmodel="P_μ ベクトル横波応答",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
+    deriv_path = _first_existing(
+        [
+            _OUT_PUBLIC / "cosmology" / "cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+            _OUT_PRIVATE / "cosmology" / "cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+            root / "output" / "cosmology" / "cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
+        ]
+    )
+    audit_path = _first_existing(
+        [
+            _OUT_PUBLIC / "cosmology" / "cosmology_cluster_collision_p_peak_offset_audit.json",
+            _OUT_PRIVATE / "cosmology" / "cosmology_cluster_collision_p_peak_offset_audit.json",
+            root / "output" / "cosmology" / "cosmology_cluster_collision_p_peak_offset_audit.json",
+        ]
+    )
+    if deriv_path is None and audit_path is None:
+        return []
+
+    chi2_dof = None
+    max_abs_z = None
+    ad_hoc_n = None
+    xi_mode = ""
+    deriv_status = ""
+    n_obs = None
+    if deriv_path is not None:
+        try:
+            jd = _read_json(deriv_path)
+            fit = jd.get("fit") if isinstance(jd.get("fit"), dict) else {}
+            chi2_dof = _safe_float(fit.get("chi2_dof"))
+            max_abs_z = _safe_float(fit.get("max_abs_z_offset"))
+            ad_hoc_n = int(_safe_float(fit.get("ad_hoc_parameter_count")) or 0)
+            xi_mode = str(fit.get("xi_mode") or "")
+            n_obs = int(_safe_float(fit.get("n_observations")) or 0)
+            deriv_status = str((jd.get("decision") or {}).get("overall_status") or "")
+        except Exception:
+            chi2_dof = None
+
+    chi2_dof_audit = None
+    max_abs_z_lens = None
+    audit_status = ""
+    if audit_path is not None:
+        try:
+            ja = _read_json(audit_path)
+            pm = ((ja.get("models") or {}).get("pmodel_corrected") or {}) if isinstance(ja.get("models"), dict) else {}
+            chi2_dof_audit = _safe_float(pm.get("chi2_dof"))
+            max_abs_z_lens = _safe_float(pm.get("max_abs_z_p_lens"))
+            audit_status = str((ja.get("decision") or {}).get("overall_status") or "")
+        except Exception:
+            chi2_dof_audit = None
+
+    metric_parts: List[str] = []
+    if chi2_dof is not None:
+        metric_parts.append(f"導出系: χ²/ν={_fmt_float(chi2_dof, digits=3)}")
+    if max_abs_z is not None:
+        metric_parts.append(f"導出系 max|z|={_fmt_float(max_abs_z, digits=3)}")
+    if chi2_dof_audit is not None:
+        metric_parts.append(f"オフセット監査: χ²/ν={_fmt_float(chi2_dof_audit, digits=3)}")
+    if max_abs_z_lens is not None:
+        metric_parts.append(f"レンズ重心 max|z|={_fmt_float(max_abs_z_lens, digits=3)}")
+    if ad_hoc_n is not None:
+        metric_parts.append(f"ad_hoc={ad_hoc_n}")
+    if xi_mode:
+        metric_parts.append(f"xi_mode={xi_mode}")
+    if deriv_status:
+        metric_parts.append(f"derivation={deriv_status}")
+    if audit_status:
+        metric_parts.append(f"audit={audit_status}")
+
+    metric_public = ""
+    if chi2_dof is not None:
+        metric_public = f"Bullet系オフセット（導出）: χ²/ν={_fmt_float(chi2_dof, digits=3)}"
+    if max_abs_z is not None:
+        metric_public += f" / max|z|={_fmt_float(max_abs_z, digits=3)}"
+
+    return [
+        TableRow(
+            topic="宇宙論（銀河団衝突オフセット）",
+            observable="レンズ中心−ガス中心オフセット（Bullet系）",
+            data="Bullet Cluster offset observables（main/sub）",
+            n=n_obs if (n_obs is not None and n_obs > 0) else None,
+            reference="観測オフセット（κ/Σ と X線中心）",
+            pmodel="P_μ–J^μ 遅延核から Δx を導出（外部手足しなし）",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
+def _load_strong_field_higher_order_rows(root: Path) -> List[TableRow]:
+    path = _first_existing(
+        [
+            _OUT_PUBLIC / "theory" / "pmodel_strong_field_higher_order_audit.json",
+            _OUT_PRIVATE / "theory" / "pmodel_strong_field_higher_order_audit.json",
+            root / "output" / "theory" / "pmodel_strong_field_higher_order_audit.json",
+        ]
+    )
+    if path is None:
+        return []
+    try:
+        j = _read_json(path)
+    except Exception:
+        return []
+
+    fits = j.get("fits") if isinstance(j.get("fits"), dict) else {}
+    joint = fits.get("joint") if isinstance(fits.get("joint"), dict) else {}
+    delta_aic = _safe_float(joint.get("delta_aic_fit_minus_baseline"))
+    lam = _safe_float(joint.get("lambda_fit"))
+    lam_sig = _safe_float(joint.get("lambda_sigma"))
+    chi2_dof = _safe_float(joint.get("chi2_dof_fit"))
+    n_obs = int(_safe_float(joint.get("n_obs")) or 0)
+    decision = str((j.get("decision") or {}).get("overall_status") or "")
+
+    metric_parts: List[str] = []
+    if delta_aic is not None:
+        metric_parts.append(f"ΔAIC(fit−baseline)={_fmt_float(delta_aic, digits=3)}")
+    if lam is not None and lam_sig is not None and lam_sig > 0:
+        metric_parts.append(f"λ_H={_fmt_float(lam, digits=6)}±{_fmt_float(lam_sig, digits=6)}")
+    elif lam is not None:
+        metric_parts.append(f"λ_H={_fmt_float(lam, digits=6)}")
+    if chi2_dof is not None:
+        metric_parts.append(f"χ²/ν={_fmt_float(chi2_dof, digits=3)}")
+    if decision:
+        metric_parts.append(f"overall={decision}")
+
+    metric_public = ""
+    if delta_aic is not None:
+        metric_public = f"強場高次項の同時拘束: ΔAIC={_fmt_float(delta_aic, digits=3)}"
+    if decision:
+        metric_public += f"（{decision}）"
+
+    return [
+        TableRow(
+            topic="強場（高次項同時拘束）",
+            observable="単一 λ_H で EHT+GW+Pulsar+Fe-Kα を同時拘束",
+            data="EHT/GW250114/連星パルサー/Fe-Kα（統合監査）",
+            n=n_obs if n_obs > 0 else None,
+            reference="baseline: λ_H=0（高次項なし）",
+            pmodel="fit: 単一 λ_H（チャネル横断）",
+            metric=" / ".join(metric_parts),
+            metric_public=metric_public,
+        )
+    ]
+
+
 def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
     """
     Best-effort label for catalog sampling (random subsampling) used by ξℓ inputs.
@@ -1813,12 +2572,19 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
 
 
 def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
-    path = _OUT_PRIVATE / "theory" / "frame_dragging_experiments.json"
-    if not path.exists():
-        return []
-    j = _read_json(path)
-    rows = j.get("rows") or []
     out: List[TableRow] = []
+    path = _first_existing(
+        [
+            _OUT_PUBLIC / "theory" / "frame_dragging_experiments.json",
+            _OUT_PRIVATE / "theory" / "frame_dragging_experiments.json",
+            root / "output" / "theory" / "frame_dragging_experiments.json",
+        ]
+    )
+    if path is not None:
+        j = _read_json(path)
+        rows = j.get("rows") or []
+    else:
+        rows = []
     for r in rows:
         if not isinstance(r, dict):
             continue
@@ -1880,6 +2646,88 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
                 metric_public=metric_public,
             )
         )
+
+    scalar_audit_path = _first_existing(
+        [
+            _OUT_PUBLIC / "theory" / "frame_dragging_scalar_limit_combined_audit.json",
+            _OUT_PRIVATE / "theory" / "frame_dragging_scalar_limit_combined_audit.json",
+            root / "output" / "theory" / "frame_dragging_scalar_limit_combined_audit.json",
+        ]
+    )
+    if scalar_audit_path is not None:
+        try:
+            js = _read_json(scalar_audit_path)
+            gate = js.get("gate") if isinstance(js.get("gate"), dict) else {}
+            summary = js.get("summary") if isinstance(js.get("summary"), dict) else {}
+            rows_scalar = js.get("rows") if isinstance(js.get("rows"), list) else []
+
+            z_gate = _safe_float(gate.get("z_reject"))
+            z_by_exp: Dict[str, float] = {}
+            for rr in rows_scalar:
+                if not isinstance(rr, dict):
+                    continue
+                observable = str(rr.get("observable") or "")
+                if observable != "frame_dragging":
+                    continue
+                exp = str(rr.get("experiment") or rr.get("label") or rr.get("id") or "")
+                z_scalar = _safe_float(rr.get("z_scalar"))
+                if exp and z_scalar is not None:
+                    z_by_exp[exp] = z_scalar
+
+            n_channels = int(_safe_float(summary.get("frame_dragging_channels_n")) or len(z_by_exp))
+            n_reject = int(_safe_float(summary.get("frame_dragging_reject_n")) or 0)
+            decision = str(summary.get("decision") or "")
+            overall = str(summary.get("overall_status") or "")
+
+            z_gp = z_by_exp.get("GP-B")
+            z_lageos = z_by_exp.get("LAGEOS")
+
+            reference_parts: List[str] = []
+            if z_gp is not None:
+                reference_parts.append(f"GP-B z={_fmt_float(z_gp, digits=2)}")
+            if z_lageos is not None:
+                reference_parts.append(f"LAGEOS z={_fmt_float(z_lageos, digits=2)}")
+            if z_gate is not None:
+                reference_parts.append(f"reject if abs(z)>{_fmt_float(z_gate, digits=1)}")
+
+            metric_parts: List[str] = []
+            if z_gp is not None or z_lageos is not None:
+                zz: List[str] = []
+                if z_gp is not None:
+                    zz.append(f"GP-B z_scalar={_fmt_float(z_gp, digits=3)}")
+                if z_lageos is not None:
+                    zz.append(f"LAGEOS z_scalar={_fmt_float(z_lageos, digits=3)}")
+                metric_parts.append(" / ".join(zz))
+            if n_channels > 0:
+                metric_parts.append(f"frame-dragging reject={n_reject}/{n_channels}")
+            if z_gate is not None:
+                metric_parts.append(f"gate=abs(z)>{_fmt_float(z_gate, digits=1)}")
+            if decision:
+                metric_parts.append(f"decision={decision}")
+            if overall:
+                metric_parts.append(f"overall={overall}")
+
+            metric_public = "純スカラー極限は棄却（GP-B/LAGEOS の両方で frame-dragging が reject）"
+            if z_gp is not None and z_lageos is not None:
+                metric_public += (
+                    f" / GP-B z={_fmt_float(z_gp, digits=2)}, "
+                    f"LAGEOS z={_fmt_float(z_lageos, digits=1)}"
+                )
+
+            out.append(
+                TableRow(
+                    topic="回転（フレームドラッグ）",
+                    observable="純スカラー極限（回転項なし）棄却ゲート",
+                    data="GP-B + LAGEOS（統合）",
+                    n=n_channels if n_channels > 0 else None,
+                    reference=" / ".join(reference_parts) if reference_parts else "統合 scalar-limit 監査",
+                    pmodel="回転源 J^i≠0 では P_φ≠0（4元ベクトル P_μ が必須）",
+                    metric=" / ".join(metric_parts),
+                    metric_public=metric_public,
+                )
+            )
+        except Exception:
+            pass
     return out
 
 
@@ -3334,10 +4182,20 @@ def build_table1_rows(root: Path) -> List[TableRow]:
     rows.extend(_load_cosmology_jwst_mast_rows(root))
     rows.extend(_load_xrism_rows(root))
     rows.extend(_load_cosmology_bao_primary_rows(root))
+    rows.extend(_load_cosmology_cmb_polarization_phase_rows(root))
+    rows.extend(_load_cosmology_cmb_acoustic_peak_rows(root))
+    rows.extend(_load_cosmology_fsigma8_growth_rows(root))
+    rows.extend(_load_cosmology_cluster_collision_rows(root))
     rows.extend(_load_frame_dragging_rows(root))
+    rows.extend(_load_gw_polarization_rows(root))
+    rows.extend(_load_background_metric_choice_rows(root))
     rows.extend(_load_eht_rows(root))
+    rows.extend(_load_sparc_rotation_rows(root))
     rows.extend(_load_pulsar_rows(root))
     rows.extend(_load_gw_rows(root))
+    rows.extend(_load_gw250114_rows(root))
+    rows.extend(_load_strong_field_higher_order_rows(root))
+    rows.extend(_load_bbn_rows(root))
     rows.extend(_load_delta_rows(root))
     return rows
 

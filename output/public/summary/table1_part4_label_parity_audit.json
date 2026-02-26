@@ -1,0 +1,44 @@
+{
+  "generated_utc": "2026-02-22T23:47:39.093488+00:00",
+  "schema": "wavep.summary.table1_part4_label_parity.v1",
+  "phase": 8,
+  "step": "8.2.35.3",
+  "inputs": {
+    "table1_json": "C:/develop/waveP/output/private/summary/paper_table1_results.json",
+    "part4_markdown": "C:/develop/waveP/doc/paper/13_part4_verification.md",
+    "sync_part4": true,
+    "sync_mode": "replaced"
+  },
+  "summary": {
+    "overall_status": "pass",
+    "decision": "table1_part4_label_parity_pass",
+    "next_action": "parity_locked_keep_table1_and_part4_in_sync",
+    "n_table1_rows": 39,
+    "n_part4_label_rows": 39,
+    "n_matched_rows": 39,
+    "n_missing_rows": 0,
+    "n_extra_rows": 0
+  },
+  "missing_pairs": [],
+  "extra_pairs": [],
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/summary/table1_part4_label_parity_audit.json",
+    "audit_csv": "C:/develop/waveP/output/private/summary/table1_part4_label_parity_audit.csv",
+    "audit_png": "C:/develop/waveP/output/private/summary/table1_part4_label_parity_audit.png",
+    "public_copies": [
+      "C:/develop/waveP/output/public/summary/table1_part4_label_parity_audit.json",
+      "C:/develop/waveP/output/public/summary/table1_part4_label_parity_audit.csv",
+      "C:/develop/waveP/output/public/summary/table1_part4_label_parity_audit.png"
+    ]
+  },
+  "falsification": {
+    "hard_pass_if": [
+      "all Table 1 (topic, observable) pairs appear in Part IV label block with exact text equality",
+      "no extra (topic, observable) pair exists in Part IV label block"
+    ],
+    "reject_if": [
+      "any missing pair exists",
+      "any extra pair exists"
+    ]
+  }
+}

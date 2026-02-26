@@ -137,6 +137,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         default=str(
             _ROOT
             / "output"
+            / "private"
             / "cosmology"
             / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
         ),
@@ -151,9 +152,13 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     in_metrics = Path(args.in_metrics)
     if not in_metrics.exists():
-        raise FileNotFoundError(
-            f"missing required metrics: {in_metrics} (run scripts/summary/run_all.py --offline first)"
-        )
+        legacy = _ROOT / "output" / "cosmology" / "cosmology_distance_indicator_rederivation_candidate_search_metrics.json"
+        if legacy.exists():
+            in_metrics = legacy
+        else:
+            raise FileNotFoundError(
+                f"missing required metrics: {in_metrics} (run scripts/summary/run_all.py --offline first)"
+            )
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

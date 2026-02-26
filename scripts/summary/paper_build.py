@@ -33,7 +33,7 @@ if str(_ROOT) not in sys.path:
 from scripts.cosmology import jwst_spectra_integration, jwst_spectra_release_waitlist
 from scripts.gw import gw_multi_event_summary
 from scripts.xrism import fek_relativistic_broadening_isco_constraints, xrism_integration
-from scripts.summary import html_to_docx, paper_html, paper_lint, paper_tables, worklog
+from scripts.summary import html_to_docx, paper_html, paper_latex, paper_lint, paper_tables, paper_tex_audit, worklog
 
 
 def _repo_root() -> Path:
@@ -91,6 +91,27 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         type=float,
         default=7.0,
         help="Page margins in mm for DOCX export (default: 7; slightly safer than 5 for Word UI/print).",
+    )
+    ap.add_argument(
+        "--skip-tex-audit",
+        action="store_true",
+        help="Skip strict post-build TeX audit (default: enabled).",
+    )
+    ap.add_argument(
+        "--tex-audit-engine",
+        choices=["auto", "lualatex", "xelatex", "pdflatex", "none"],
+        default="auto",
+        help="TeX compiler selection for audit (default: auto).",
+    )
+    ap.add_argument(
+        "--tex-audit-require-engine",
+        action="store_true",
+        help="Fail audit when TeX compiler is unavailable.",
+    )
+    ap.add_argument(
+        "--tex-audit-fail-on-overfull",
+        action="store_true",
+        help="Treat Overfull \\\\hbox warnings as errors in TeX audit.",
     )
     # Backward-compatible alias (historical name). Keep it, but generate DOCX instead of PDF.
     ap.add_argument("--skip-pdf", dest="skip_docx", action="store_true", help=argparse.SUPPRESS)
@@ -271,6 +292,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] build: {paper_html_path}")
     if (not args.skip_docx) and paper_docx_path.exists():
         print(f"[ok] docx : {paper_docx_path}")
+
+    # strict post-build TeX audit (Part I-IV common gate)
+    tex_argv: list[str] = ["--profile", profile, "--outdir", str(out_dir)]
+    rc = paper_latex.main(tex_argv)
+    if rc != 0:
+        return rc
+    if not args.skip_tex_audit:
+        audit_argv: list[str] = [
+            "--profile",
+            profile,
+            "--outdir",
+            str(out_dir),
+            "--engine",
+            str(args.tex_audit_engine),
+        ]
+        if bool(args.tex_audit_require_engine):
+            audit_argv.append("--require-engine")
+        if bool(args.tex_audit_fail_on_overfull):
+            audit_argv.append("--fail-on-overfull")
+        rc = paper_tex_audit.main(audit_argv)
+        if rc != 0:
+            return rc
     return 0
 
 

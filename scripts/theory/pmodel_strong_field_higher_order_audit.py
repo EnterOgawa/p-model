@@ -1383,6 +1383,72 @@ def _extract_xray_isco_observables(rows: Sequence[Dict[str, Any]]) -> List[Lambd
     return out
 
 
+def _extract_lambda_h_n0_bridge(payload: Dict[str, Any]) -> Dict[str, Any]:
+    budget = payload.get("ring_coefficient_budget") if isinstance(payload.get("ring_coefficient_budget"), dict) else {}
+    nonlinear = payload.get("nonlinear_order") if isinstance(payload.get("nonlinear_order"), dict) else {}
+
+    c_ref = _to_float(budget.get("c_ref"))
+    coeff_linear = _to_float(budget.get("coeff_linear_mean"))
+    coeff_full = _to_float(budget.get("coeff_full_mean"))
+    core_gap_pct = _to_float(budget.get("core_gap_pct"))
+    n0_contribution_pct = _to_float(budget.get("n0_contribution_pct"))
+    eps2 = _to_float(nonlinear.get("epsilon_nl_squared"))
+
+    delta_core = None
+    delta_n0 = None
+    lambda_h_from_ratio = None
+    lambda_h_from_pct = None
+    lambda_h_from_eps2 = None
+    if c_ref is not None and coeff_linear is not None:
+        delta_core = float(coeff_linear - c_ref)
+    if coeff_full is not None and coeff_linear is not None:
+        delta_n0 = float(coeff_full - coeff_linear)
+
+    if delta_core is not None and delta_n0 is not None and abs(delta_core) > 0.0:
+        lambda_h_from_ratio = float(delta_n0 / delta_core)
+    if core_gap_pct is not None and n0_contribution_pct is not None and abs(core_gap_pct) > 0.0:
+        lambda_h_from_pct = float(n0_contribution_pct / core_gap_pct)
+
+    lambda_h = None
+    for candidate in (lambda_h_from_pct, lambda_h_from_ratio):
+        if candidate is not None and np.isfinite(candidate):
+            lambda_h = float(candidate)
+            break
+
+    if lambda_h is not None and eps2 is not None and eps2 > 0.0:
+        lambda_h_from_eps2 = float(lambda_h / eps2)
+
+    ok = bool(lambda_h is not None and np.isfinite(lambda_h))
+    return {
+        "ok": ok,
+        "definition": {
+            "baseline_excess": "DeltaC_core = C_linear - C_ref",
+            "nonlinear_excess": "DeltaC_N0 = C_full - C_linear",
+            "lambda_h_link": "lambda_H ≡ DeltaC_N0 / DeltaC_core",
+            "self_interaction_link": "lambda_H = epsilon_nl^2 * Xi_N0",
+        },
+        "terms": {
+            "c_ref": c_ref,
+            "c_linear": coeff_linear,
+            "c_full": coeff_full,
+            "delta_c_core": delta_core,
+            "delta_c_n0": delta_n0,
+            "core_gap_pct": core_gap_pct,
+            "n0_contribution_pct": n0_contribution_pct,
+            "epsilon_nl_squared": eps2,
+        },
+        "lambda_h_from_ratio": lambda_h_from_ratio,
+        "lambda_h_from_percent_ratio": lambda_h_from_pct,
+        "anchor_selection_policy": "prefer_percent_ratio_then_absolute_ratio",
+        "lambda_h_anchor": lambda_h,
+        "xi_n0_anchor": lambda_h_from_eps2,
+        "note": (
+            "λ_H is anchored to the explicit N0^(2) source strength from Step 8.7.32.11. "
+            "This defines the physical meaning of λ_H before multi-channel effective fitting."
+        ),
+    }
+
+
 def _extract_eht_kappa_precision(payload: Dict[str, Any]) -> Dict[str, Any]:
     rows = payload.get("rows") if isinstance(payload.get("rows"), dict) else {}
     row = rows.get("sgra") if isinstance(rows.get("sgra"), dict) else {}
@@ -2677,6 +2743,18 @@ def parse_args() -> argparse.Namespace:
         help="Cluster collision offset audit JSON (private fallback).",
     )
     parser.add_argument(
+        "--effective-metric-n0-audit-json",
+        type=Path,
+        default=ROOT / "output" / "public" / "theory" / "pmodel_effective_metric_n0_source_solution_audit.json",
+        help="Effective-metric N0^(2) source-solution audit JSON (public).",
+    )
+    parser.add_argument(
+        "--effective-metric-n0-audit-json-fallback",
+        type=Path,
+        default=ROOT / "output" / "private" / "theory" / "pmodel_effective_metric_n0_source_solution_audit.json",
+        help="Effective-metric N0^(2) source-solution audit JSON (private fallback).",
+    )
+    parser.add_argument(
         "--output-dir",
         type=Path,
         default=ROOT / "output" / "public" / "theory",
@@ -2753,6 +2831,9 @@ def main() -> int:
     cluster_collision_offset, cluster_collision_offset_path = _load_optional_first_existing(
         [args.cluster_collision_offset_json, args.cluster_collision_offset_json_fallback]
     )
+    effective_metric_n0, effective_metric_n0_path = _load_optional_first_existing(
+        [args.effective_metric_n0_audit_json, args.effective_metric_n0_audit_json_fallback]
+    )
 
     obs_eht = _extract_eht_observables(eht_shadow)
     obs_gw = _extract_gw_observables(gw_imr)
@@ -2807,6 +2888,36 @@ def main() -> int:
         cmb_peak_uplift=cmb_peak_uplift,
         cluster_collision_offset=cluster_collision_offset,
     )
+    lambda_h_n0_bridge = _extract_lambda_h_n0_bridge(effective_metric_n0)
+    lambda_h_anchor = _to_float(lambda_h_n0_bridge.get("lambda_h_anchor"))
+    lambda_h_joint = _to_float(fit_joint.get("lambda_fit"))
+    lambda_h_joint_sigma = _to_float(fit_joint.get("lambda_sigma"))
+    lambda_h_anchor_vs_joint_fit: Dict[str, Any] = {
+        "ok": bool(lambda_h_n0_bridge.get("ok")),
+        "in_gate_now": False,
+        "note": (
+            "The N0^(2)-anchored lambda_H is a physical anchor from strong-field source closure. "
+            "Joint-channel lambda_H remains an effective fit parameter; consistency is reported as diagnostics only."
+        ),
+    }
+    if (
+        lambda_h_anchor is not None
+        and lambda_h_joint is not None
+        and lambda_h_joint_sigma is not None
+        and lambda_h_joint_sigma > 0.0
+    ):
+        delta_anchor_vs_joint = float(lambda_h_joint - lambda_h_anchor)
+        z_anchor_vs_joint = float(delta_anchor_vs_joint / lambda_h_joint_sigma)
+        lambda_h_anchor_vs_joint_fit.update(
+            {
+                "lambda_h_anchor": lambda_h_anchor,
+                "lambda_h_joint_fit": lambda_h_joint,
+                "lambda_h_joint_sigma": lambda_h_joint_sigma,
+                "delta_lambda_joint_minus_anchor": delta_anchor_vs_joint,
+                "z_joint_minus_anchor": z_anchor_vs_joint,
+                "abs_z_joint_minus_anchor": abs(z_anchor_vs_joint),
+            }
+        )
     gw_pol_candidate_entries: List[Tuple[str, Dict[str, Any]]] = []
     if gw_pol_network_candidate_1_path is not None:
         gw_pol_candidate_entries.append(("corr005_ext4_sky50k", gw_pol_network_candidate_1))
@@ -3053,6 +3164,9 @@ def main() -> int:
             "cosmology_cluster_collision_p_peak_offset_audit_json": (
                 _rel(cluster_collision_offset_path) if cluster_collision_offset_path is not None else None
             ),
+            "effective_metric_n0_source_solution_audit_json": (
+                _rel(effective_metric_n0_path) if effective_metric_n0_path is not None else None
+            ),
         },
         "channel_observables": [
             {
@@ -3131,6 +3245,8 @@ def main() -> int:
                 "note": cross_domain_direct_mapping.get("note"),
             },
             "cross_domain_direct_projection": cross_domain_direct_projection,
+            "lambda_h_n0_physical_bridge": lambda_h_n0_bridge,
+            "lambda_h_anchor_vs_joint_fit": lambda_h_anchor_vs_joint_fit,
             "pulsar_orbital_decay_channels": {
                 "n_obs": fit_pulsar.get("n_obs", 0),
                 "lambda_fit": fit_pulsar.get("lambda_fit"),
@@ -3271,6 +3387,10 @@ def main() -> int:
                     "cross_domain_direct_trial_support_gate_cleared": cross_domain_direct_projection.get(
                         "support_gate_cleared_with_direct_mapping"
                     ),
+                    "lambda_h_n0_bridge_ok": lambda_h_n0_bridge.get("ok"),
+                    "lambda_h_n0_anchor": lambda_h_n0_bridge.get("lambda_h_anchor"),
+                    "xi_n0_anchor": lambda_h_n0_bridge.get("xi_n0_anchor"),
+                    "lambda_h_anchor_vs_joint_abs_z": lambda_h_anchor_vs_joint_fit.get("abs_z_joint_minus_anchor"),
                     "pulsar_n_obs": fit_pulsar.get("n_obs"),
                     "pulsar_lambda_fit": fit_pulsar.get("lambda_fit"),
                     "pulsar_lambda_sigma": fit_pulsar.get("lambda_sigma"),

@@ -558,10 +558,18 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             "are recovered without breaking geodetic control."
         ),
         "equations": {
-            "interaction": "L_int = g * P_mu * J^mu",
+            "interaction": "L_int = g_P * P_mu * J^mu",
+            "scalar_limit": "J^i=0 => P_i=0 => P_0=P (reduction to scalar branch)",
+            "axisymmetric_mode": "P_phi(r,theta) = mu_drag * sin^2(theta) / r^2",
+            "vector_potential_mapping": "A_phi^(P) = xi_rot * P_phi",
+            "curl_component_r": "(curl A^(P))_r = (1/(r sin theta)) d_theta[sin theta A_phi^(P)] = 3 xi_rot mu_drag sin(theta) cos(theta)/r^3",
+            "curl_component_theta": "(curl A^(P))_theta = -(1/r) d_r[r A_phi^(P)] = xi_rot mu_drag sin^2(theta)/r^3",
+            "precession_definition": "Omega_LT^(P) = (1/2) |curl A^(P)|",
+            "precession_equatorial_limit": "theta=pi/2 => Omega_LT^(P) = |xi_rot mu_drag|/(2 r^3) = kappa_rot * Omega_LT_ref",
             "rotational_ansatz": "P_i ~ kappa_rot * epsilon_ijk * J^j * x^k / r^3",
-            "precession_mapping": "Omega_P = kappa_rot * Omega_LT_ref",
-            "scalar_limit": "J^i=0 => P_i=0 (reduction to scalar branch)",
+            "precession_mapping": "Omega_LT^(P) = kappa_rot * Omega_LT_ref ; lambda_rot = kappa_rot - 1",
+            "mu_ratio": "mu = |Omega_obs|/|Omega_pred| with Omega_pred = Omega_LT_ref",
+            "gr_match_clause": "kappa_rot ~ 1 and geodetic control retained => mu ~ 1 (GR weak-field normalization)",
         },
         "gate": {"z_reject": float(args.z_reject)},
         "inputs": {

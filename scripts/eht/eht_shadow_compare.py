@@ -39,6 +39,49 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _resolve_phase4_coeff_ratio(
+    root: Path, coeff_ratio_baseline: float
+) -> Tuple[float, float, str, Optional[str]]:
+    """Resolve phase-4 (strong-field corrected) coefficient ratio.
+
+    Returns:
+      (coeff_ratio, coeff_diff_percent, source, source_relpath_or_none)
+    """
+    diff_baseline = (
+        (coeff_ratio_baseline - 1.0) * 100.0 if math.isfinite(coeff_ratio_baseline) else float("nan")
+    )
+    candidates = [
+        root / "output" / "public" / "theory" / "pmodel_effective_metric_n0_source_solution_audit.json",
+        root / "output" / "private" / "theory" / "pmodel_effective_metric_n0_source_solution_audit.json",
+    ]
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            payload = _read_json(path)
+            budget = payload.get("ring_coefficient_budget")
+            if not isinstance(budget, dict):
+                continue
+            for key in ("core_plus_n0_gap_pct", "core_plus_n0_closed_gap_pct"):
+                pct = budget.get(key)
+                pct_v = float(pct)
+                if math.isfinite(pct_v):
+                    return (
+                        1.0 + (pct_v / 100.0),
+                        pct_v,
+                        f"{path.as_posix()}:ring_coefficient_budget.{key}",
+                        path.relative_to(root).as_posix(),
+                    )
+        except Exception:
+            continue
+    return (
+        coeff_ratio_baseline,
+        diff_baseline,
+        "baseline(4eβ / 2√27)",
+        None,
+    )
+
+
 def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 2500) -> Dict[str, float]:
     """Compute basic geometric stats of a Kerr shadow boundary in units of M=GM/c^2.
 
@@ -634,7 +677,14 @@ def main() -> int:
 
     coeff_pmodel = 4.0 * math.e * beta  # θ_shadow = coeff * GM/(c^2 D)
     coeff_gr = 2.0 * math.sqrt(27.0)  # Schwarzschild shadow diameter
-    coeff_ratio_p_over_gr = (coeff_pmodel / coeff_gr) if coeff_gr != 0 else float("nan")
+    coeff_ratio_p_over_gr_baseline = (coeff_pmodel / coeff_gr) if coeff_gr != 0 else float("nan")
+    (
+        coeff_ratio_p_over_gr,
+        coeff_diff_pct_phase4,
+        coeff_ratio_source,
+        coeff_ratio_source_relpath,
+    ) = _resolve_phase4_coeff_ratio(root, coeff_ratio_p_over_gr_baseline)
+    coeff_pmodel_phase4 = (coeff_gr * coeff_ratio_p_over_gr) if math.isfinite(coeff_ratio_p_over_gr) else coeff_pmodel
     delta_coeff_p_minus_gr = (coeff_ratio_p_over_gr - 1.0) if math.isfinite(coeff_ratio_p_over_gr) else float("nan")
     delta_sigma_required_3sigma = (
         (abs(float(delta_coeff_p_minus_gr)) / 3.0) if math.isfinite(delta_coeff_p_minus_gr) else float("nan")
@@ -778,19 +828,27 @@ def main() -> int:
             else float("nan")
         )
 
-        diff_uas = theta_p_uas - theta_gr_uas
+        theta_p_phase4_uas = coeff_pmodel_phase4 * theta_unit_uas
+        theta_p_phase4_uas_sigma = abs(theta_p_phase4_uas) * ratio_sigma
+
+        diff_uas = theta_p_phase4_uas - theta_gr_uas
         diff_uas_sigma = abs(diff_uas) * ratio_sigma
         diff_pct = (100.0 * diff_uas / theta_gr_uas) if theta_gr_uas != 0 else float("nan")
         sigma_obs_needed_3sigma_uas = _sigma_needed_for_discrimination(
             diff_uas,
-            sigma_pred_a=float(theta_p_uas_sigma),
+            sigma_pred_a=float(theta_p_phase4_uas_sigma),
             sigma_pred_b=float(theta_gr_uas_sigma),
             n_sigma=3.0,
         )
         # If mass/distance uncertainty dominates, even sigma_obs→0 cannot separate the two models.
         theta_unit_rel_sigma_required_3sigma = (
-            abs(coeff_pmodel - coeff_gr) / (3.0 * math.sqrt(coeff_pmodel**2 + coeff_gr**2))
-            if (math.isfinite(coeff_pmodel) and math.isfinite(coeff_gr) and (coeff_pmodel > 0) and (coeff_gr > 0))
+            abs(coeff_pmodel_phase4 - coeff_gr) / (3.0 * math.sqrt(coeff_pmodel_phase4**2 + coeff_gr**2))
+            if (
+                math.isfinite(coeff_pmodel_phase4)
+                and math.isfinite(coeff_gr)
+                and (coeff_pmodel_phase4 > 0)
+                and (coeff_gr > 0)
+            )
             else float("nan")
         )
         ring_sigma_required_3sigma_uas_if_kappa1 = (
@@ -1080,6 +1138,8 @@ def main() -> int:
                 "theta_unit_rel_sigma": ratio_sigma,
                 "shadow_diameter_pmodel_uas": theta_p_uas,
                 "shadow_diameter_pmodel_uas_sigma": theta_p_uas_sigma,
+                "shadow_diameter_pmodel_phase4_uas": theta_p_phase4_uas,
+                "shadow_diameter_pmodel_phase4_uas_sigma": theta_p_phase4_uas_sigma,
                 "shadow_diameter_gr_uas": theta_gr_uas,
                 "shadow_diameter_gr_uas_sigma": theta_gr_uas_sigma,
                 "shadow_diameter_gr_kerr_min_uas": theta_gr_kerr_min_uas,
@@ -1094,6 +1154,8 @@ def main() -> int:
                 "shadow_diameter_diff_p_minus_gr_uas_sigma": diff_uas_sigma,
                 "shadow_diameter_diff_percent": diff_pct,
                 "shadow_diameter_coeff_ratio_p_over_gr": coeff_ratio_p_over_gr,
+                "shadow_diameter_coeff_ratio_p_over_gr_baseline": coeff_ratio_p_over_gr_baseline,
+                "shadow_diameter_coeff_ratio_source": coeff_ratio_source,
                 "shadow_diameter_sigma_obs_needed_3sigma_uas": sigma_obs_needed_3sigma_uas,
                 "theta_unit_rel_sigma_required_3sigma": theta_unit_rel_sigma_required_3sigma,
                 "theta_unit_rel_sigma_improvement_factor_to_3sigma": theta_unit_rel_sigma_improvement_factor_to_3sigma,
@@ -1153,6 +1215,7 @@ def main() -> int:
             "beta": beta,
             "beta_source": beta_source,
             "shadow_diameter_coeff_rg": coeff_pmodel,  # coefficient multiplying GM/(c^2 D)
+            "shadow_diameter_coeff_rg_phase4": coeff_pmodel_phase4,
             "notes": [
                 "最小モデル: P/P0=exp(GM/(c^2 r)), n=(P/P0)^(2β).",
                 "球対称屈折率で b=n(r)r の最小が捕獲境界となり、θ_shadow=4eβ(GM/(c^2D)).",
@@ -1166,6 +1229,10 @@ def main() -> int:
         "reference_gr_kerr_definition_sensitivity": kerr_range_full_def_env,
         "phase4": {
             "shadow_diameter_coeff_ratio_p_over_gr": coeff_ratio_p_over_gr,
+            "shadow_diameter_coeff_ratio_p_over_gr_baseline": coeff_ratio_p_over_gr_baseline,
+            "shadow_diameter_coeff_source": coeff_ratio_source,
+            "shadow_diameter_coeff_source_relpath": coeff_ratio_source_relpath,
+            "shadow_diameter_coeff_phase4_diff_percent": coeff_diff_pct_phase4,
             "shadow_diameter_coeff_diff_percent": (coeff_ratio_p_over_gr - 1.0) * 100.0
             if math.isfinite(coeff_ratio_p_over_gr)
             else None,
@@ -2136,7 +2203,10 @@ def main() -> int:
         )
 
         fig9, ax = plt.subplots(1, 1, figsize=(12.8, 4.9))
-        ax.bar(x, req_pct, color="#1f77b4", alpha=0.25, label="必要 δ精度（1σ, 係数差4.6%の3σ判別; 参考）")
+        req_label = "必要 δ精度（1σ, 係数差の3σ判別; 参考）"
+        if math.isfinite(coeff_diff_pct_phase4):
+            req_label = f"必要 δ精度（1σ, 係数差{coeff_diff_pct_phase4:.4f}%の3σ判別; 参考）"
+        ax.bar(x, req_pct, color="#1f77b4", alpha=0.25, label=req_label)
 
         if np.any(np.isfinite(vlti_pct)):
             ax.plot(x, vlti_pct, "o", color="#ff7f0e", alpha=0.95, label="現状 δσ（VLTI; 一次ソース）")
@@ -2345,8 +2415,12 @@ def main() -> int:
                     "n_objects": len(rows),
                     "beta": beta,
                     "coeff_pmodel": coeff_pmodel,
+                    "coeff_pmodel_phase4": coeff_pmodel_phase4,
                     "coeff_gr": coeff_gr,
                     "coeff_ratio_p_over_gr": coeff_ratio_p_over_gr,
+                    "coeff_ratio_p_over_gr_baseline": coeff_ratio_p_over_gr_baseline,
+                    "coeff_ratio_source": coeff_ratio_source,
+                    "coeff_diff_pct_phase4": coeff_diff_pct_phase4,
                     "kerr_coeff_min": (kerr_range_full.get("coeff_min") if isinstance(kerr_range_full, dict) else None),
                     "kerr_coeff_max": (kerr_range_full.get("coeff_max") if isinstance(kerr_range_full, dict) else None),
                 },

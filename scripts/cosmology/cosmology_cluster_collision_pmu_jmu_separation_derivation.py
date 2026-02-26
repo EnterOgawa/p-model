@@ -822,6 +822,19 @@ def _build_checks(
         chi2_dof <= 4.0,
         "導出枝の offset 再現精度が watch 以上であること。",
     )
+    low_dof_watch = int(n_clusters) <= 2
+    add(
+        "bullet::low_dof_fit_margin",
+        "chi2_dof_low_dof_guard",
+        float(chi2_dof),
+        "<=3.0 (when n_clusters<=2)",
+        "watch",
+        (not low_dof_watch) or (chi2_dof <= 3.0),
+        (
+            "低自由度（main/sub の2成分）では境界的適合を保守的に watch 判定へ落とす。"
+            " 3σ棄却域ではないが、完全適合とはみなさない。"
+        ),
+    )
     add(
         "bullet::offset_z_gate",
         "max_abs_z_offset",
@@ -1253,6 +1266,9 @@ def main() -> int:
     n_obs = len(rows_out)
     dof = max(n_obs - n_fit_params, 1)
     chi2_dof = float(chi2 / dof)
+    low_dof_effective = 1 if n_obs <= 2 else int(dof)
+    low_dof_proxy_chi2 = float(chi2_dof) if n_obs <= 2 else float(chi2)
+    low_dof_proxy_p_upper = float(math.erfc(math.sqrt(max(low_dof_proxy_chi2, 0.0) / 2.0)))
     rms_residual = float(np.sqrt(np.mean([float(r["residual_offset_kpc"]) ** 2 for r in rows_out])))
 
     lw_block = _build_lw_like_estimates(
@@ -1542,6 +1558,11 @@ def main() -> int:
             "n_observations": int(n_obs),
             "n_fit_parameters": int(n_fit_params),
             "dof": int(dof),
+            "low_dof_guard_active": bool(n_obs <= 2),
+            "low_dof_guard_threshold_chi2_dof": 3.0,
+            "low_dof_effective_dof_for_boundary_check": int(low_dof_effective),
+            "low_dof_proxy_chi2": float(low_dof_proxy_chi2),
+            "low_dof_proxy_p_upper": float(low_dof_proxy_p_upper),
             "rms_residual_kpc": rms_residual,
             "max_abs_z_offset": float(max_abs_z),
             "n_sign_flip_within_window": int(n_sign_flip_in_window),
@@ -1578,6 +1599,7 @@ def main() -> int:
             ],
             "watch_if": [
                 "Hard checks pass but no sign flip appears near collision transition window.",
+                "Low-DoF boundary guard: when n_clusters<=2 and chi2/dof>3.0, keep overall status at watch.",
             ],
         },
     }

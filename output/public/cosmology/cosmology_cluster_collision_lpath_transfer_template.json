@@ -10,7 +10,7 @@
     },
     {
       "check_id": "lpath_transfer::source_lpath_status",
-      "expected": "pass",
+      "expected": "pass or watch",
       "gate_level": "hard",
       "hard_fail": false,
       "metric": "lpath_source_overall_status",
@@ -48,6 +48,15 @@
       "metric": "non_bullet_rows_missing_observed_offset",
       "value": 2,
       "watch_fail": true
+    },
+    {
+      "check_id": "lpath_transfer::nonbullet_primary_source_mode_ready",
+      "expected": "0",
+      "gate_level": "watch",
+      "hard_fail": false,
+      "metric": "non_bullet_rows_not_primary_registered",
+      "value": 2,
+      "watch_fail": true
     }
   ],
   "cluster_rows": [
@@ -63,6 +72,10 @@
       "offset_pred_kpc": 139.148860161026,
       "offset_ref_kpc": 139.148860161026,
       "offset_sigma_kpc": 25.0,
+      "primary_registration_status": "skipped_bullet",
+      "priority_class": "active",
+      "readiness_state": "ready",
+      "required_action": "none",
       "residual_kpc": -50.85113983897401,
       "rho_ratio": 1.0,
       "row_status": "pass",
@@ -84,6 +97,10 @@
       "offset_pred_kpc": 110.6972508579986,
       "offset_ref_kpc": 110.6972508579986,
       "offset_sigma_kpc": 20.0,
+      "primary_registration_status": "skipped_bullet",
+      "priority_class": "active",
+      "readiness_state": "ready",
+      "required_action": "none",
       "residual_kpc": -29.302749142001403,
       "rho_ratio": 1.0,
       "row_status": "pass",
@@ -105,6 +122,10 @@
       "offset_pred_kpc": 139.148860161026,
       "offset_ref_kpc": 139.148860161026,
       "offset_sigma_kpc": null,
+      "primary_registration_status": "pending_registration_values",
+      "priority_class": "low_blocked_missing_primary_data",
+      "readiness_state": "missing_observed_offset",
+      "required_action": "register_offset_obs_and_sigma_from_primary_dataset",
       "residual_kpc": null,
       "rho_ratio": 1.0,
       "row_status": "template_no_observation",
@@ -126,6 +147,10 @@
       "offset_pred_kpc": 110.6972508579986,
       "offset_ref_kpc": 110.6972508579986,
       "offset_sigma_kpc": null,
+      "primary_registration_status": "pending_registration_values",
+      "priority_class": "low_blocked_missing_primary_data",
+      "readiness_state": "missing_observed_offset",
+      "required_action": "register_offset_obs_and_sigma_from_primary_dataset",
       "residual_kpc": null,
       "rho_ratio": 1.0,
       "row_status": "template_no_observation",
@@ -140,7 +165,70 @@
     "decision": "cluster_collision_lpath_transfer_watch_missing_nonbullet_observed_offsets",
     "hard_reject_n": 0,
     "overall_status": "watch",
-    "watch_fail_n": 1
+    "watch_fail_n": 2
+  },
+  "diagnostics": {
+    "non_bullet_primary_registration_apply_report": {
+      "bootstrap_rows": 0,
+      "bootstrapped": false,
+      "n_applied": 0,
+      "n_invalid_registration_rows": 0,
+      "n_missing_registration_rows": 0,
+      "n_pending_registration_rows": 2,
+      "n_rows": 2
+    },
+    "non_bullet_primary_registration_checklist": {
+      "blocked_case_ids": [
+        "el_gordo_main_template",
+        "el_gordo_sub_template"
+      ],
+      "n_blocked_rows": 2,
+      "n_rows": 2
+    },
+    "primary_dataset_update_watchpack": {
+      "apply_primary_registration": true,
+      "blocked_priority_class": "low_blocked_missing_primary_data",
+      "blocked_reason": "missing_nonbullet_primary_offsets",
+      "event_counter": 3,
+      "input_file_signature": {
+        "exists": true,
+        "mtime_utc": "2026-02-21T22:39:03.675298+00:00",
+        "path": "data/cosmology/bullet_cluster/collision_lpath_transfer_cases.csv",
+        "sha256": "b6169942c22889fe9006c8e749eddb6c3a15905d81d5c1d169bbf3385a653f60",
+        "size_bytes": 839
+      },
+      "next_action": "register_nonbullet_primary_offsets_then_rerun_step_8_7_25",
+      "nonbullet_blocked_case_ids": [
+        "el_gordo_main_template",
+        "el_gordo_sub_template"
+      ],
+      "nonbullet_missing_obs_case_ids": [
+        "el_gordo_main_template",
+        "el_gordo_sub_template"
+      ],
+      "nonbullet_missing_obs_count": 2,
+      "nonbullet_pending_source_mode_case_ids": [
+        "el_gordo_main_template",
+        "el_gordo_sub_template"
+      ],
+      "nonbullet_pending_source_mode_count": 2,
+      "primary_registration_bootstrap_rows": 0,
+      "primary_registration_bootstrapped": false,
+      "primary_registration_file_signature": {
+        "exists": true,
+        "mtime_utc": "2026-02-22T23:24:17.674414+00:00",
+        "path": "data/cosmology/bullet_cluster/collision_lpath_nonbullet_primary_registration.csv",
+        "sha256": "c7bdedf37df3942527caa066db2fca2bbde59ac2fc4409b4ea5f375e1dfb25f9",
+        "size_bytes": 413
+      },
+      "primary_registration_rows_applied": 0,
+      "primary_registration_rows_invalid": 0,
+      "primary_registration_rows_loaded": 2,
+      "primary_registration_rows_missing": 0,
+      "primary_registration_rows_pending_values": 2,
+      "update_event_detected": false,
+      "update_event_type": "no_change"
+    }
   },
   "equations": {
     "lpath_balance": "L_path=c_w/(v/L_corr + A_col rho T^{temp_power})",
@@ -159,27 +247,36 @@
       "Non-Bullet transfer rows do not yet have observed offsets/sigma."
     ]
   },
-  "generated_utc": "2026-02-21T22:43:55.185014+00:00",
+  "generated_utc": "2026-02-22T23:24:54.095178+00:00",
   "inputs": {
+    "apply_primary_registration": true,
+    "bootstrap_primary_registration": false,
     "bullet_derivation_json": "output/public/cosmology/cosmology_cluster_collision_pmu_jmu_separation_derivation.json",
     "cases_csv": "data/cosmology/bullet_cluster/collision_lpath_transfer_cases.csv",
-    "lpath_scaling_json": "output/public/cosmology/cosmology_lpath_scaling_law_prediction.json"
+    "lpath_scaling_json": "output/public/cosmology/cosmology_lpath_scaling_law_prediction.json",
+    "primary_registration_csv": "data/cosmology/bullet_cluster/collision_lpath_nonbullet_primary_registration.csv"
   },
   "intent": "Re-evaluate Bullet offsets with fixed L_path ratio law and lock reusable transfer template for non-Bullet collision clusters.",
   "outputs": {
     "private_csv": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.csv",
     "private_json": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.json",
+    "private_nonbullet_checklist_csv": "output/private/cosmology/cluster_collision_nonbullet_primary_registration_checklist.csv",
+    "private_nonbullet_primary_registration_apply_report_csv": "output/private/cosmology/cluster_collision_nonbullet_primary_registration_apply_report.csv",
+    "private_nonbullet_primary_registration_template_csv": "output/private/cosmology/cluster_collision_nonbullet_primary_registration_template.csv",
     "private_png": "output/private/cosmology/cosmology_cluster_collision_lpath_transfer_template.png",
     "private_template_csv": "output/private/cosmology/cluster_collision_lpath_transfer_input_template.csv",
     "public_csv": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.csv",
     "public_json": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.json",
+    "public_nonbullet_checklist_csv": "output/public/cosmology/cluster_collision_nonbullet_primary_registration_checklist.csv",
+    "public_nonbullet_primary_registration_apply_report_csv": "output/public/cosmology/cluster_collision_nonbullet_primary_registration_apply_report.csv",
+    "public_nonbullet_primary_registration_template_csv": "output/public/cosmology/cluster_collision_nonbullet_primary_registration_template.csv",
     "public_png": "output/public/cosmology/cosmology_cluster_collision_lpath_transfer_template.png",
     "public_template_csv": "output/public/cosmology/cluster_collision_lpath_transfer_input_template.csv"
   },
   "phase": {
     "name": "cluster collision lpath transfer template",
     "phase": 8,
-    "step": "8.7.25.22"
+    "step": "8.7.25.26"
   },
   "reference_state": {
     "anchor_offset_reference_kpc": {
@@ -194,10 +291,25 @@
     "temp_power_collisional_branch": -1.5
   },
   "summary": {
+    "blocked_priority_class": "low_blocked_missing_primary_data",
     "bullet_recheck_chi2_dof": 3.141984622437141,
     "bullet_recheck_max_abs_z": 2.03404559355896,
     "bullet_recheck_rows": 2,
+    "non_bullet_blocked_case_ids": [
+      "el_gordo_main_template",
+      "el_gordo_sub_template"
+    ],
+    "non_bullet_checklist_rows": 2,
     "non_bullet_rows_missing_observed_offset": 2,
+    "non_bullet_rows_not_primary_registered": 2,
+    "primary_registration_bootstrap_rows": 0,
+    "primary_registration_bootstrapped": false,
+    "primary_registration_rows_applied": 0,
+    "primary_registration_rows_invalid": 0,
+    "primary_registration_rows_loaded": 2,
+    "primary_registration_rows_missing": 0,
+    "primary_registration_rows_pending_values": 2,
+    "primary_registration_template_rows": 2,
     "template_case_rows": 4
   }
 }

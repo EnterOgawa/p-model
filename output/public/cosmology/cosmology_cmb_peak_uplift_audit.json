@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T08:12:57.155058+00:00",
+  "generated_utc": "2026-02-23T13:18:36.706669+00:00",
   "input": "C:/develop/waveP/data/cosmology/planck2018_com_power_spect_tt_binned_r3.01.txt",
   "step": "8.7.18.1",
   "purpose": "CMB third-peak uplift audit with four-model comparison (baryon-only / pressure / ruler / pressure+ruler).",

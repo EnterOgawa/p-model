@@ -1,0 +1,453 @@
+{
+  "generated_utc": "2026-02-22T23:47:39.015900+00:00",
+  "schema": "wavep.gw.polarization.network_event_update_watch.v1",
+  "phase": 8,
+  "step": "8.7.19.14",
+  "inputs": {
+    "event_list": "C:/develop/waveP/data/gw/event_list.json",
+    "anchor_event": "GW200129_065458",
+    "coverage_prefix": "gw_polarization_network_coverage_expansion_audit",
+    "force_rerun": false
+  },
+  "summary": {
+    "overall_status": "watch",
+    "decision": "no_change_hold",
+    "next_action": "wait_for_three_detector_input_hash_change_then_rerun_step_8_7_19_10",
+    "update_event_type": "no_change",
+    "update_event_detected": false,
+    "rerun_triggered": false,
+    "rerun_ok": true,
+    "event_counter": 1,
+    "n_three_detector_events": 4,
+    "current_input_hash": "5c2cd8d004186df06ae4d86b0d233c20b63c55389ecf5011495beb8a1963b83b",
+    "previous_input_hash": "5c2cd8d004186df06ae4d86b0d233c20b63c55389ecf5011495beb8a1963b83b",
+    "gate_hits_previous": 0,
+    "gate_hits_current": 0,
+    "best_u2_previous": 0.5,
+    "best_u2_current": 0.5,
+    "improvement_detected": false,
+    "needed_gate_hits_for_pass": 1,
+    "needed_best_u2_drop_for_pass": 9.999778782798785e-13,
+    "blocked_priority_class": "low_blocked_missing_high_quality_three_detector_events"
+  },
+  "coverage_gap_checklist": [
+    {
+      "requirement_id": "polarization::usable_subsets_with_min_coverage",
+      "metric": "n_subsets_with_usable_min",
+      "value": 4,
+      "expected": ">=1",
+      "status": "pass",
+      "required_action": "none"
+    },
+    {
+      "requirement_id": "polarization::coverage_gate_hits",
+      "metric": "n_gate_hits",
+      "value": 0,
+      "expected": ">=1",
+      "status": "watch",
+      "required_action": "need_additional_high_quality_three_detector_events_to_raise_gate_hits"
+    },
+    {
+      "requirement_id": "polarization::best_u2_below_watch_boundary",
+      "metric": "best_u2_scalar_overlap_proxy",
+      "value": 0.5,
+      "expected": "<0.5 (usable>=2)",
+      "status": "watch",
+      "required_action": "need_best_u2_reduction_with_usable_events_kept_at_least_2"
+    }
+  ],
+  "three_detector_events": [
+    {
+      "name": "GW200129_065458",
+      "slug": "gw200129_065458",
+      "type": "BBH",
+      "profile": "bbh_default",
+      "catalog": "GWTC-3-confident",
+      "detectors": [
+        "H1",
+        "L1",
+        "V1"
+      ],
+      "network_snr": 26.8,
+      "p_astro": 0.99,
+      "far_yr": 1e-05,
+      "inventory": {
+        "exists": true,
+        "n_files": 5,
+        "files": [
+          {
+            "relpath": "GW200129_065458_event.json",
+            "size": 20541
+          },
+          {
+            "relpath": "gw200129_065458_sources.json",
+            "size": 3058
+          },
+          {
+            "relpath": "H-H1_GWOSC_4KHZ_R1-1264316101-32.txt.gz",
+            "size": 1358982
+          },
+          {
+            "relpath": "L-L1_GWOSC_4KHZ_R1-1264316101-32.txt.gz",
+            "size": 1340422
+          },
+          {
+            "relpath": "V-V1_GWOSC_4KHZ_R1-1264316101-32.txt.gz",
+            "size": 1353643
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "name": "GW200224_222234",
+      "slug": "gw200224_222234",
+      "type": "BBH",
+      "profile": "bbh_hilbert_short",
+      "catalog": "GWTC-3-confident",
+      "detectors": [
+        "H1",
+        "L1",
+        "V1"
+      ],
+      "network_snr": 20.0,
+      "p_astro": 0.99,
+      "far_yr": 1e-05,
+      "inventory": {
+        "exists": true,
+        "n_files": 5,
+        "files": [
+          {
+            "relpath": "GW200224_222234_event.json",
+            "size": 22144
+          },
+          {
+            "relpath": "gw200224_222234_sources.json",
+            "size": 3058
+          },
+          {
+            "relpath": "H-H1_GWOSC_4KHZ_R1-1266618157-32.txt.gz",
+            "size": 1367615
+          },
+          {
+            "relpath": "L-L1_GWOSC_4KHZ_R1-1266618157-32.txt.gz",
+            "size": 1339237
+          },
+          {
+            "relpath": "V-V1_GWOSC_4KHZ_R1-1266618157-32.txt.gz",
+            "size": 1355224
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "name": "GW200311_115853",
+      "slug": "gw200311_115853",
+      "type": "BBH",
+      "profile": "bbh_default",
+      "catalog": "GWTC-3-confident",
+      "detectors": [
+        "H1",
+        "L1",
+        "V1"
+      ],
+      "network_snr": 17.8,
+      "p_astro": 0.99,
+      "far_yr": 1e-05,
+      "inventory": {
+        "exists": true,
+        "n_files": 5,
+        "files": [
+          {
+            "relpath": "GW200311_115853_event.json",
+            "size": 22147
+          },
+          {
+            "relpath": "gw200311_115853_sources.json",
+            "size": 3058
+          },
+          {
+            "relpath": "H-H1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+            "size": 1358726
+          },
+          {
+            "relpath": "L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+            "size": 1340128
+          },
+          {
+            "relpath": "V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+            "size": 1359703
+          }
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "name": "GW200115_042309",
+      "slug": "gw200115_042309",
+      "type": "NSBH",
+      "profile": "nsbh_guided",
+      "catalog": "GWTC-3-confident",
+      "detectors": [
+        "H1",
+        "L1",
+        "V1"
+      ],
+      "network_snr": 11.3,
+      "p_astro": 0.99,
+      "far_yr": 1e-05,
+      "inventory": {
+        "exists": true,
+        "n_files": 5,
+        "files": [
+          {
+            "relpath": "GW200115_042309_event.json",
+            "size": 20542
+          },
+          {
+            "relpath": "gw200115_042309_sources.json",
+            "size": 3058
+          },
+          {
+            "relpath": "H-H1_GWOSC_4KHZ_R1-1263097392-32.txt.gz",
+            "size": 1368524
+          },
+          {
+            "relpath": "L-L1_GWOSC_4KHZ_R1-1263097392-32.txt.gz",
+            "size": 1339221
+          },
+          {
+            "relpath": "V-V1_GWOSC_4KHZ_R1-1263097392-32.txt.gz",
+            "size": 1362752
+          }
+        ],
+        "truncated": false
+      }
+    }
+  ],
+  "coverage_metrics_previous": {
+    "overall_status": "watch",
+    "decision": "coverage_gate_not_reached_boundary_locked",
+    "reason": "usable_coverage_exists_but_scalar_gate_not_reached",
+    "n_subsets_tested": 7,
+    "n_gate_hits": 0,
+    "n_subsets_with_usable_min": 4,
+    "best_u2_scalar_overlap_proxy": 0.5,
+    "best_u2_n_usable_events": 2,
+    "best_u2_subset_events": "GW200129_065458,GW200311_115853"
+  },
+  "coverage_metrics_current": {
+    "overall_status": "watch",
+    "decision": "coverage_gate_not_reached_boundary_locked",
+    "reason": "usable_coverage_exists_but_scalar_gate_not_reached",
+    "n_subsets_tested": 7,
+    "n_gate_hits": 0,
+    "n_subsets_with_usable_min": 4,
+    "best_u2_scalar_overlap_proxy": 0.5,
+    "best_u2_n_usable_events": 2,
+    "best_u2_subset_events": "GW200129_065458,GW200311_115853"
+  },
+  "coverage_rerun": {},
+  "input_signature": {
+    "digest_sha256": "5c2cd8d004186df06ae4d86b0d233c20b63c55389ecf5011495beb8a1963b83b",
+    "canonical_event_count": 4,
+    "canonical_payload": {
+      "event_list_path": "C:/develop/waveP/data/gw/event_list.json",
+      "events": [
+        {
+          "name": "GW200129_065458",
+          "slug": "gw200129_065458",
+          "type": "BBH",
+          "profile": "bbh_default",
+          "catalog": "GWTC-3-confident",
+          "detectors": [
+            "H1",
+            "L1",
+            "V1"
+          ],
+          "network_snr": 26.8,
+          "p_astro": 0.99,
+          "far_yr": 1e-05,
+          "inventory": {
+            "exists": true,
+            "n_files": 5,
+            "files": [
+              {
+                "relpath": "GW200129_065458_event.json",
+                "size": 20541
+              },
+              {
+                "relpath": "gw200129_065458_sources.json",
+                "size": 3058
+              },
+              {
+                "relpath": "H-H1_GWOSC_4KHZ_R1-1264316101-32.txt.gz",
+                "size": 1358982
+              },
+              {
+                "relpath": "L-L1_GWOSC_4KHZ_R1-1264316101-32.txt.gz",
+                "size": 1340422
+              },
+              {
+                "relpath": "V-V1_GWOSC_4KHZ_R1-1264316101-32.txt.gz",
+                "size": 1353643
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "name": "GW200224_222234",
+          "slug": "gw200224_222234",
+          "type": "BBH",
+          "profile": "bbh_hilbert_short",
+          "catalog": "GWTC-3-confident",
+          "detectors": [
+            "H1",
+            "L1",
+            "V1"
+          ],
+          "network_snr": 20.0,
+          "p_astro": 0.99,
+          "far_yr": 1e-05,
+          "inventory": {
+            "exists": true,
+            "n_files": 5,
+            "files": [
+              {
+                "relpath": "GW200224_222234_event.json",
+                "size": 22144
+              },
+              {
+                "relpath": "gw200224_222234_sources.json",
+                "size": 3058
+              },
+              {
+                "relpath": "H-H1_GWOSC_4KHZ_R1-1266618157-32.txt.gz",
+                "size": 1367615
+              },
+              {
+                "relpath": "L-L1_GWOSC_4KHZ_R1-1266618157-32.txt.gz",
+                "size": 1339237
+              },
+              {
+                "relpath": "V-V1_GWOSC_4KHZ_R1-1266618157-32.txt.gz",
+                "size": 1355224
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "name": "GW200311_115853",
+          "slug": "gw200311_115853",
+          "type": "BBH",
+          "profile": "bbh_default",
+          "catalog": "GWTC-3-confident",
+          "detectors": [
+            "H1",
+            "L1",
+            "V1"
+          ],
+          "network_snr": 17.8,
+          "p_astro": 0.99,
+          "far_yr": 1e-05,
+          "inventory": {
+            "exists": true,
+            "n_files": 5,
+            "files": [
+              {
+                "relpath": "GW200311_115853_event.json",
+                "size": 22147
+              },
+              {
+                "relpath": "gw200311_115853_sources.json",
+                "size": 3058
+              },
+              {
+                "relpath": "H-H1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+                "size": 1358726
+              },
+              {
+                "relpath": "L-L1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+                "size": 1340128
+              },
+              {
+                "relpath": "V-V1_GWOSC_4KHZ_R1-1267963136-32.txt.gz",
+                "size": 1359703
+              }
+            ],
+            "truncated": false
+          }
+        },
+        {
+          "name": "GW200115_042309",
+          "slug": "gw200115_042309",
+          "type": "NSBH",
+          "profile": "nsbh_guided",
+          "catalog": "GWTC-3-confident",
+          "detectors": [
+            "H1",
+            "L1",
+            "V1"
+          ],
+          "network_snr": 11.3,
+          "p_astro": 0.99,
+          "far_yr": 1e-05,
+          "inventory": {
+            "exists": true,
+            "n_files": 5,
+            "files": [
+              {
+                "relpath": "GW200115_042309_event.json",
+                "size": 20542
+              },
+              {
+                "relpath": "gw200115_042309_sources.json",
+                "size": 3058
+              },
+              {
+                "relpath": "H-H1_GWOSC_4KHZ_R1-1263097392-32.txt.gz",
+                "size": 1368524
+              },
+              {
+                "relpath": "L-L1_GWOSC_4KHZ_R1-1263097392-32.txt.gz",
+                "size": 1339221
+              },
+              {
+                "relpath": "V-V1_GWOSC_4KHZ_R1-1263097392-32.txt.gz",
+                "size": 1362752
+              }
+            ],
+            "truncated": false
+          }
+        }
+      ]
+    }
+  },
+  "outputs": {
+    "audit_json": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.json",
+    "audit_csv": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.csv",
+    "audit_png": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch.png",
+    "audit_checklist_csv": "C:/develop/waveP/output/private/gw/gw_polarization_network_event_update_watch_checklist.csv",
+    "public_copies": [
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.json",
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.csv",
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch.png",
+      "C:/develop/waveP/output/public/gw/gw_polarization_network_event_update_watch_checklist.csv"
+    ]
+  },
+  "falsification": {
+    "hard_pass_if": [
+      "coverage_metrics_current.n_gate_hits increases and best_u2 decreases below watch boundary under usable>=2"
+    ],
+    "watch_if": [
+      "three-detector hash is stable (no change) and coverage remains unchanged",
+      "hash changed but rerun keeps best_u2 at watch boundary with usable>=2"
+    ],
+    "reject_if": [
+      "coverage rerun repeatedly fails after hash change"
+    ]
+  }
+}

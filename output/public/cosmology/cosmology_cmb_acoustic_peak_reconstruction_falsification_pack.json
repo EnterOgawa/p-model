@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-22T04:38:28.963614+00:00",
+  "generated_utc": "2026-02-22T11:27:59.816246+00:00",
   "kind": "cmb_acoustic_peak_reconstruction_pmodel_modal",
   "decision_rule": {
     "first3": "max(|Δell_n|) <= 15 and max(|ΔA_n/A_n|) <= 0.15",
@@ -156,7 +156,8 @@
   "notes": [
     "本packは CMB TT のピーク構造（第1〜第6）に限定した最小監査であり、ΛCDM全体（全天球尤度・全成分同時fit）の置換主張ではない。",
     "第4〜第6ピークは holdout として扱い、n=1..3 から推定したパラメータの予測力を確認する。",
-    "流体方程式の縮約で Θ_tilde_k = A_k cos(k r_s)+B_k sin(k r_s) を固定し、adiabatic枝（B_k=0）で TT ピークの cos 構造を使う。"
+    "流体方程式の縮約で Θ_tilde_k = A_k cos(k r_s)+B_k sin(k r_s) を固定し、adiabatic枝（B_k=0）で TT ピークの cos 構造を使う。",
+    "第一原理閉包として、R_P はポテンシャル井戸深さ u_Psi=|Psi_P|/c^2 と音速 c_s,P から、delta_P は散乱長 lambda_sc から導出し、DMなし枝で A3/A1=exp(-2delta_P)*(D3/D1)<1 を固定する。"
   ],
   "related_outputs": {
     "metrics_json": "C:/develop/waveP/output/private/cosmology/cosmology_cmb_acoustic_peak_reconstruction_metrics.json",
