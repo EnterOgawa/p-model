@@ -3,6 +3,7 @@
 
 [![Release](https://img.shields.io/github/v/release/EnterOgawa/p-model?label=Latest%20Release)](https://github.com/EnterOgawa/p-model/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC_BY--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
 
 ## 🕊 Foreword: 理念と先人たちへの敬意
 P-modelは、既存の物理学を否定するためのものではありません。
@@ -81,5 +82,17 @@ P-modelは「検証不可能なポエム」を拒絶します。
 1. **理論を読む:** まずは `papers/` ディレクトリにある **Part I (コア理論)** からお読みください。すべての数式と記号の定義がここに集約されています。
 2. **データを検証する:** `Part IV` にあたる検証資料（スクリプト群出力台帳）は、本リポジトリのツリーから直接参照可能です。
 3. **議論に参加する:** 理論に対する反証、データ解析のバグ報告、新たな観測データへの適用については、GitHub Issuesをご利用ください。
+
+---
+
+##  License (ライセンス)
+
+本プロジェクトは、学術的テキストと検証コードで構成されているため、デュアルライセンスを採用しています。
+
+* **論文ドキュメント (Papers, Figures, and Text):**
+  `papers/` ディレクトリ内のすべての論文ファイル（LaTeXソース、PDF）、図表、および本READMEのテキストは、[Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) の下でライセンスされています。原著作者（P-model Project / EnterOgawa）のクレジットを明記する限りにおいて、自由な共有再配布を歓迎しますが、**論文の中身（文章、数式、図表）を改変したものを配布することは固く禁じます。**
+  
+* **検証コードデータ (Code and Data):**
+  `scripts/` および `output/` ディレクトリ内の検証スクリプト、データパーサー、および生成物は、[MIT License](https://opensource.org/licenses/MIT) の下でライセンスされています。誰もが自分の環境でP-modelを検証し、あるいは反証を試みるために、自由にコードを利用改変することができます。
 
 > *"自然は究極的にはシンプルである。時間は幾何学の次元ではなく、波であり、マクロな星の自転も、ミクロな素粒子のスピンも、すべてはその波の局所的な渦に過ぎない。"*
