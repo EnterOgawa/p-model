@@ -9,6 +9,13 @@
 - **Shunji Ogawa**
 - **ENTERSYSTEM Co., Ltd., Osaka, Japan**
 
+## 🌐 For English Readers (English version coming soon)
+**P-model** is a novel, deterministic, and local unified theory based on "Time-Wave Dynamics" ($P_\mu$). It unifies macroscopic gravity and microscopic quantum phenomena without assuming dark matter, spatial expansion, or quantum non-locality. 
+Notably, our comprehensive re-analysis of raw time-tag data from historic Bell tests demonstrates that apparent quantum non-locality is an illusion caused by **selection bias in coincidence windows**.
+The full English translation of our four-part paper series and validation scripts will be published shortly. Please **Star** this repository to stay updated!
+
+---
+
 ## 🕊 Foreword: 理念と先人たちへの敬意
 P-modelは、既存の物理学を否定するためのものではありません。
 アインシュタインを筆頭に、これまで物理学という巨大な山に挑み、人類の知を切り拓いてきたすべての先人たちに対し、最大限の感謝と深い尊敬の念を抱いています。彼らの偉大な観測データの蓄積と、緻密に組み上げられた基礎理論の礎がなければ、このモデルが決して産声を上げることはありませんでした。
@@ -79,12 +86,12 @@ P-modelでは、量子コンピューターの計算能力を「多世界での�
 
 ## 🔮 Differential Predictions (未来観測による検証マイルストーン)
 
-P-modelは、既存理論（GR/QM/ΛCDM）と結果が分岐する「差分予測」を事前に固定し、将来観測によって判定可能な形で提示する。
+P-modelは、既存理論と結果が分岐する以下の「差分予測」を提示し、今後の観測データによる検証を待ち受けます。
 
-* **ngEHTによる強場像の差分検証:** ngEHTの解像度・uvカバレッジ向上により、（例：リング径比κ／非円形度εなど）強場像の形状指標におけるGR（Kerr）からの系統的残差が分離可能になる。  
-* **重力波（GW）の偏光・モデル選択:** 高S/Nイベントにおいて、テンソル-only（GR）とP-modelの「4次元ベクトル射影」モデルを同一データで比較し、偏光分解／残差／ベイズ因子等によりどちらが支持されるかを判定できる。  
-* **高赤方偏移銀河の年齢（JWST）:** 分光等で年齢推定の不確かさが縮小した後も、標準的な宇宙年齢上限と整合しない成熟銀河が系統的に残るか（または消えるか）で、P-modelと標準枠組みの分岐が判定できる。  
-* **完全ブラインドでのベルテスト判定:** 解析手順と同時計数窓を事前固定した完全ブラインドテストにより、CHSH等の指標が抽出条件に依存して現れるのか、あるいは条件に依らず再現するのかを客観的に判定できる。
+* **ngEHTによる強場非線形項の検証:** 次世代EHTの精度向上により、P-model固有の空間勾配の非線形項が分離可能になります。
+* **重力波（GW）の偏光とスカラー縮退の検証:** 高S/Nの重力波イベントにおいて、P-modelの「4次元ベクトル射影」がテンソル波（GR）よりも整合性が高いかどうかが検証されます。
+* **高赤方偏移銀河の年齢（JWST）:** 空間膨張を仮定しないP-modelは、「成熟した巨大銀河の年齢矛盾」に対して自然な説明を提供します。
+* **完全ブラインドでのベルテスト検証:** 解析時の「同時計数窓」を事前に固定した完全ブラインドテストにより、非局所的な相関の実在性が客観的に証明されます。
 
 ---
 
@@ -98,32 +105,22 @@ P-modelは、既存理論（GR/QM/ΛCDM）と結果が分岐する「差分予�
 
 本リポジトリの `scripts/` および `output/` には、これらの検証を自ら実行するためのコード群が格納されています。
 
-## 🧪 Verification Method (検証方法)
+---
 
-最短で再現する場合は、以下の順で実行してください（PowerShell想定）。
+##  Core Scripts Architecture (検証スクリプトの実行方法)
 
-1. **環境準備**
-   - Python 3.12+（推奨）
-   - TeX監査まで行う場合：`lualatex`（TeX Live）
-   - DOCX出力まで行う場合：Word または変換環境
+P-modelの各パートに対応する検証スクリプトは、以下のコマンドで一括実行およびPDF生成が可能です。Python環境（`pandas`, `numpy`, `matplotlib`等）とLaTeX環境（`lualatex`）が必要です。
 
-2. **全体検証（軽量）**
-   - `python -B scripts/summary/run_all.py --offline --jobs 2`
+1. **全体の一括実行**
+   `python scripts/summary/run_all.py`
+2. **Part II（宇宙物理編）の検証実行**
+   `python -B scripts/summary/paper_build.py --profile part2_astro --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+3. **Part III（量子物理編）の検証実行**
+   `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+4. **Part IV（検証資料）のコンパイル**
+   `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
 
-3. **論文ビルド（Partごと）**
-   - Part I: `python -B scripts/summary/paper_build.py --profile paper --tex-audit-engine lualatex --tex-audit-require-engine`
-   - Part II: `python -B scripts/summary/paper_build.py --profile part2_astrophysics --tex-audit-engine lualatex --tex-audit-require-engine`
-   - Part III: `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
-   - Part IV: `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
-
-4. **主要出力の確認先**
-   - HTML/DOCX/TeX: `output/private/summary/`
-   - 公開成果物: `output/public/`
-
-5. **判定の確認**
-   - `paper_tex_audit.json`（TeX監査）
-   - `paper_table1_results.*`（総合判定）
-   - `run_all_status.json`（一括実行ステータス）
+*各スクリプトの詳細な出力結果は `output/public/` および `output/private/summary/` に生成されます。*
 
 ---
 
