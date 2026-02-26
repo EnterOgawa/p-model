@@ -44,9 +44,12 @@ MPC_TO_M = 3.0856775814913673e22
 DEFAULT_PBG_KAPPA = 1.0 / (2.0 * math.pi)
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -55,9 +58,13 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
@@ -65,6 +72,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_read_points` の入出力契約と処理意図を定義する。
 
 def _read_points(csv_path: Path) -> List[Dict[str, float]]:
     pts: List[Dict[str, float]] = []
@@ -88,6 +97,8 @@ def _read_points(csv_path: Path) -> List[Dict[str, float]]:
     return pts
 
 
+# 関数: `_rar_mcgaugh2016_log10_pred` の入出力契約と処理意図を定義する。
+
 def _rar_mcgaugh2016_log10_pred(g_bar: np.ndarray, *, log10_a0: float) -> np.ndarray:
     # McGaugh+ (2016) empirical RAR function:
     # g_obs = g_bar / (1 - exp(-sqrt(g_bar/a0)))
@@ -101,6 +112,8 @@ def _rar_mcgaugh2016_log10_pred(g_bar: np.ndarray, *, log10_a0: float) -> np.nda
     g_pred = np.asarray(g_bar, dtype=float) / denom
     return np.log10(g_pred)
 
+
+# 関数: `_fit_log10_a0_grid` の入出力契約と処理意図を定義する。
 
 def _fit_log10_a0_grid(
     g_bar: np.ndarray,
@@ -179,9 +192,13 @@ def _fit_log10_a0_grid(
         },
     }
 
+# 関数: `_h0p_si_from_km_s_mpc` の入出力契約と処理意図を定義する。
+
 def _h0p_si_from_km_s_mpc(h0_km_s_mpc: float) -> float:
     return float(h0_km_s_mpc) * 1.0e3 / MPC_TO_M
 
+
+# 関数: `_get_h0p_si` の入出力契約と処理意図を定義する。
 
 def _get_h0p_si(
     *,
@@ -209,6 +226,8 @@ def _get_h0p_si(
 
     raise RuntimeError(f"failed to read H0^(P) from metrics: {h0p_metrics}")
 
+
+# 関数: `_rar_fixed_a0_stats` の入出力契約と処理意図を定義する。
 
 def _rar_fixed_a0_stats(
     *,
@@ -276,6 +295,8 @@ def _rar_fixed_a0_stats(
         },
     }
 
+# 関数: `_summarize_freeze_test_metrics` の入出力契約と処理意図を定義する。
+
 def _summarize_freeze_test_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     # 条件分岐: `not isinstance(d, dict)` を満たす経路を評価する。
     if not isinstance(d, dict):
@@ -336,6 +357,8 @@ def _summarize_freeze_test_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
         "models": out_models,
     }
 
+
+# 関数: `_summarize_freeze_test_mlr_sweep_metrics` の入出力契約と処理意図を定義する。
 
 def _summarize_freeze_test_mlr_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -417,6 +440,8 @@ def _summarize_freeze_test_mlr_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any
     }
 
 
+# 関数: `_adoption_eval_from_sweep_summary` の入出力契約と処理意図を定義する。
+
 def _adoption_eval_from_sweep_summary(
     sweep_summary: Dict[str, Any],
     *,
@@ -453,6 +478,8 @@ def _adoption_eval_from_sweep_summary(
         "models": models,
     }
 
+
+# 関数: `_summarize_freeze_test_upsilon_fit_metrics` の入出力契約と処理意図を定義する。
 
 def _summarize_freeze_test_upsilon_fit_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -523,6 +550,8 @@ def _summarize_freeze_test_upsilon_fit_metrics(d: Dict[str, Any]) -> Dict[str, A
     }
 
 
+# 関数: `_summarize_freeze_test_procedure_sweep_metrics` の入出力契約と処理意図を定義する。
+
 def _summarize_freeze_test_procedure_sweep_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     """
     Summarize output/private/cosmology/sparc_rar_freeze_test_procedure_sweep_metrics.json into a small dict.
@@ -564,6 +593,8 @@ def _summarize_freeze_test_procedure_sweep_metrics(d: Dict[str, Any]) -> Dict[st
         "note": inputs.get("note"),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

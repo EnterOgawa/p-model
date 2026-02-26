@@ -56,9 +56,12 @@ _BASE_MOS = urljoin(_BASE, "MOS/")
 _BASE_PN = urljoin(_BASE, "PN/")
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -66,6 +69,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -76,6 +81,8 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -83,10 +90,14 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -124,6 +135,7 @@ def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
 _SRSPEC_RE = re.compile(r"SRSPEC", flags=re.IGNORECASE)
 
 
+# 関数: `_iter_xmm_srspec_files` の入出力契約と処理意図を定義する。
 def _iter_xmm_srspec_files(cache_root: Path, *, obsids: Optional[Sequence[str]] = None) -> Iterable[Path]:
     base = cache_root / "xmm"
     # 条件分岐: `not base.exists()` を満たす経路を評価する。
@@ -157,6 +169,8 @@ def _iter_xmm_srspec_files(cache_root: Path, *, obsids: Optional[Sequence[str]] 
                     yield p
 
 
+# 関数: `_resp_base_for_name` の入出力契約と処理意図を定義する。
+
 def _resp_base_for_name(respfile: str) -> Optional[Tuple[str, str]]:
     s = str(respfile).strip().strip("'")
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -175,6 +189,8 @@ def _resp_base_for_name(respfile: str) -> Optional[Tuple[str, str]]:
 
     return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch XMM EPIC canned RMFs referenced by PPS spectra (RESPFILE).")

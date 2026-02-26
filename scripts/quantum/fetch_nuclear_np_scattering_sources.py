@@ -11,12 +11,15 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 
+# クラス: `FileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FileSpec:
     url: str
     relpath: str
     expected_bytes: int | None = None
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -31,6 +34,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, expected_bytes: int | None, max_bytes: int) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -72,6 +77,8 @@ def _download(url: str, out_path: Path, *, expected_bytes: int | None, max_bytes
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_parse_paren_uncertainty` の入出力契約と処理意図を定義する。
+
 def _parse_paren_uncertainty(num: str) -> dict[str, float]:
     """
     Parse values like:
@@ -97,6 +104,8 @@ def _parse_paren_uncertainty(num: str) -> dict[str, float]:
     return out
 
 
+# 関数: `_extract_equation_block` の入出力契約と処理意図を定義する。
+
 def _extract_equation_block(tex: str, *, label: str) -> str:
     label_token = f"\\label{{{label}}}"
     idx_label = tex.find(label_token)
@@ -118,7 +127,10 @@ def _extract_equation_block(tex: str, *, label: str) -> str:
     return tex[idx_begin:idx_end]
 
 
+# 関数: `_extract_params_from_block` の入出力契約と処理意図を定義する。
+
 def _extract_params_from_block(block: str) -> dict[str, object]:
+    # 関数: `find_num` の入出力契約と処理意図を定義する。
     def find_num(key: str, pat: str) -> dict[str, float] | None:
         m = re.search(pat, block)
         # 条件分岐: `not m` を満たす経路を評価する。
@@ -143,6 +155,8 @@ def _extract_params_from_block(block: str) -> dict[str, object]:
     return out
 
 
+# 関数: `_read_member_from_tar_gz` の入出力契約と処理意図を定義する。
+
 def _read_member_from_tar_gz(tar_gz_path: Path, *, member_name: str) -> str:
     with tar_gz_path.open("rb") as f:
         data = f.read()
@@ -160,6 +174,8 @@ def _read_member_from_tar_gz(tar_gz_path: Path, *, member_name: str) -> str:
 
         return extracted.read().decode("utf-8", errors="replace")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -253,6 +269,7 @@ def main() -> None:
         "files": [],
     }
 
+    # 関数: `add_file` の入出力契約と処理意図を定義する。
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
         # 条件分岐: `extra` を満たす経路を評価する。

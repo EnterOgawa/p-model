@@ -37,6 +37,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -55,6 +56,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# クラス: `FitResult` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class FitResult:
     rmse_s2_raw: float
@@ -64,6 +67,8 @@ class FitResult:
     n_points: int
     coef_a0_a1_a2: list[float]
 
+
+# 関数: `_parse_ross_xi_file` の入出力契約と処理意図を定義する。
 
 def _parse_ross_xi_file(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -98,6 +103,8 @@ def _parse_ross_xi_file(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]
     return s, xi, err
 
 
+# 関数: `_fit_broadband_diff` の入出力契約と処理意図を定義する。
+
 def _fit_broadband_diff(*, s: np.ndarray, diff: np.ndarray, sigma: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Fit diff(s) = a0 + a1/s + a2/s^2 with weights 1/sigma^2.
@@ -129,10 +136,14 @@ def _fit_broadband_diff(*, s: np.ndarray, diff: np.ndarray, sigma: np.ndarray) -
     return coef.astype(np.float64), fit.astype(np.float64)
 
 
+# 関数: `_rmse` の入出力契約と処理意図を定義する。
+
 def _rmse(x: np.ndarray) -> float:
     x = np.asarray(x, dtype=np.float64)
     return float(np.sqrt(np.mean(x * x)))
 
+
+# 関数: `_summarize_across_bincent` の入出力契約と処理意図を定義する。
 
 def _summarize_across_bincent(values: list[float]) -> dict[str, float]:
     arr = np.asarray(values, dtype=np.float64)
@@ -142,6 +153,8 @@ def _summarize_across_bincent(values: list[float]) -> dict[str, float]:
         "max": float(np.max(arr)),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Broadband absorption sensitivity vs Ross bincent and s-range.")

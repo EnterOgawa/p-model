@@ -11,9 +11,12 @@ from typing import Any, Dict, List
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -29,9 +32,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(v: Any) -> float:
     # 条件分岐: `isinstance(v, (int, float))` を満たす経路を評価する。
@@ -41,6 +48,8 @@ def _as_float(v: Any) -> float:
     raise TypeError(f"expected number, got: {type(v)}")
 
 
+# 関数: `_get_constant` の入出力契約と処理意図を定義する。
+
 def _get_constant(extracted: Dict[str, Any], code: str) -> Dict[str, Any]:
     c = extracted.get("constants")
     # 条件分岐: `not isinstance(c, dict) or code not in c or not isinstance(c.get(code), dict)` を満たす経路を評価する。
@@ -49,6 +58,8 @@ def _get_constant(extracted: Dict[str, Any], code: str) -> Dict[str, Any]:
 
     return c[code]
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

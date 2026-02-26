@@ -33,6 +33,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -58,14 +59,20 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_z_score` の入出力契約と処理意図を定義する。
 
 def _z_score(x: float, mu: float, sigma: float) -> Optional[float]:
     # 条件分岐: `not all(isinstance(v, (int, float)) and math.isfinite(float(v)) for v in (x,...` を満たす経路を評価する。
@@ -79,6 +86,8 @@ def _z_score(x: float, mu: float, sigma: float) -> Optional[float]:
 
     return (float(x) - float(mu)) / float(sigma)
 
+
+# 関数: `_classify_abs_sigma` の入出力契約と処理意図を定義する。
 
 def _classify_abs_sigma(abs_sigma: Optional[float]) -> Optional[str]:
     # 条件分岐: `abs_sigma is None` を満たす経路を評価する。
@@ -103,6 +112,8 @@ def _classify_abs_sigma(abs_sigma: Optional[float]) -> Optional[str]:
     return "ng"
 
 
+# 関数: `_classify_abs_z` の入出力契約と処理意図を定義する。
+
 def _classify_abs_z(abs_z: Optional[float]) -> Optional[str]:
     # Use the project's standard |z| thresholds for "ok/mixed/ng".
     if abs_z is None:
@@ -126,11 +137,15 @@ def _classify_abs_z(abs_z: Optional[float]) -> Optional[str]:
     return "ng"
 
 
+# クラス: `StudyMax` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class StudyMax:
     name: str
     abs_sigma: Optional[float]
 
+
+# 関数: `_extract_ledger_maxima` の入出力契約と処理意図を定義する。
 
 def _extract_ledger_maxima(ledger: Dict[str, Any]) -> Tuple[List[StudyMax], Optional[float]]:
     studies = ledger.get("studies", [])
@@ -168,6 +183,8 @@ def _extract_ledger_maxima(ledger: Dict[str, Any]) -> Tuple[List[StudyMax], Opti
     return maxima, global_max
 
 
+# 関数: `_find_ddr_fit` の入出力契約と処理意図を定義する。
+
 def _find_ddr_fit(candidate_search: Dict[str, Any], *, ddr_id: str, fit_key: str) -> Optional[Dict[str, Any]]:
     per_ddr = candidate_search.get("results", {}).get("per_ddr", [])
     # 条件分岐: `not isinstance(per_ddr, list)` を満たす経路を評価する。
@@ -199,6 +216,8 @@ def _find_ddr_fit(candidate_search: Dict[str, Any], *, ddr_id: str, fit_key: str
     return None
 
 
+# 関数: `_plot_sigma_like` の入出力契約と処理意図を定義する。
+
 def _plot_sigma_like(summary_rows: List[Tuple[str, float]], out_png: Path) -> Optional[str]:
     # 条件分岐: `not summary_rows` を満たす経路を評価する。
     if not summary_rows:
@@ -228,6 +247,8 @@ def _plot_sigma_like(summary_rows: List[Tuple[str, float]], out_png: Path) -> Op
     plt.close(fig)
     return str(out_png)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     p = argparse.ArgumentParser()

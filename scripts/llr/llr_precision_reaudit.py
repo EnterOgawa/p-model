@@ -29,13 +29,18 @@ if str(_ROOT) not in sys.path:
 from scripts.llr import llr_pmodel_overlay_horizons_noargs as llr  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(x: Any) -> float:
     try:
@@ -45,6 +50,8 @@ def _to_float(x: Any) -> float:
 
     return v if math.isfinite(v) else float("nan")
 
+
+# 関数: `_rms` の入出力契約と処理意図を定義する。
 
 def _rms(arr: Iterable[float]) -> float:
     a = np.asarray(list(arr), dtype=float)
@@ -56,12 +63,16 @@ def _rms(arr: Iterable[float]) -> float:
     return float(np.sqrt(np.mean(a * a)))
 
 
+# 関数: `_safe_rel` の入出力契約と処理意図を定義する。
+
 def _safe_rel(path: Path, root: Path) -> str:
     try:
         return str(path.resolve().relative_to(root)).replace("\\", "/")
     except Exception:
         return str(path.resolve()).replace("\\", "/")
 
+
+# 関数: `_read_record11_meta` の入出力契約と処理意図を定義する。
 
 def _read_record11_meta(path: Path, line_numbers: Sequence[int]) -> Dict[int, Dict[str, float]]:
     need = set(int(v) for v in line_numbers if v is not None and np.isfinite(float(v)))
@@ -89,6 +100,8 @@ def _read_record11_meta(path: Path, line_numbers: Sequence[int]) -> Dict[int, Di
 
     return out
 
+
+# 関数: `_augment_points_with_np_meta` の入出力契約と処理意図を定義する。
 
 def _augment_points_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
     out = df.copy()
@@ -133,6 +146,8 @@ def _augment_points_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
     return out
 
 
+# 関数: `_weighted_rms_ns` の入出力契約と処理意図を定義する。
+
 def _weighted_rms_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
     ok = np.isfinite(values_ns) & np.isfinite(sigma_ps) & (sigma_ps > 0)
     # 条件分岐: `not np.any(ok)` を満たす経路を評価する。
@@ -143,6 +158,8 @@ def _weighted_rms_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
     w = 1.0 / np.maximum((sigma_ps[ok] / 1000.0) ** 2, 1e-24)
     return float(np.sqrt(np.sum(w * y * y) / np.sum(w)))
 
+
+# 関数: `_solve_model_floor_ns` の入出力契約と処理意図を定義する。
 
 def _solve_model_floor_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
     ok = np.isfinite(values_ns) & np.isfinite(sigma_ps) & (sigma_ps > 0)
@@ -166,6 +183,8 @@ def _solve_model_floor_ns(values_ns: np.ndarray, sigma_ps: np.ndarray) -> float:
 
     return float(hi / 1000.0)
 
+
+# 関数: `_fit_bias_model_ns` の入出力契約と処理意図を定義する。
 
 def _fit_bias_model_ns(
     df: pd.DataFrame,
@@ -232,6 +251,8 @@ def _fit_bias_model_ns(
     }
 
 
+# 関数: `_safe_corr_np` の入出力契約と処理意図を定義する。
+
 def _safe_corr_np(a: np.ndarray, b: np.ndarray) -> float:
     ok = np.isfinite(a) & np.isfinite(b)
     # 条件分岐: `int(np.sum(ok)) < 3` を満たす経路を評価する。
@@ -246,6 +267,8 @@ def _safe_corr_np(a: np.ndarray, b: np.ndarray) -> float:
 
     return float(np.corrcoef(aa, bb)[0, 1])
 
+
+# 関数: `_fit_linear_with_intercept` の入出力契約と処理意図を定義する。
 
 def _fit_linear_with_intercept(y: np.ndarray, x: np.ndarray) -> Tuple[float, float, float, float]:
     ok = np.isfinite(y) & np.isfinite(x)
@@ -266,6 +289,8 @@ def _fit_linear_with_intercept(y: np.ndarray, x: np.ndarray) -> Tuple[float, flo
     corr = _safe_corr_np(yy, xx)
     return intercept, slope, corr, r2
 
+
+# 関数: `_prepare_operational_correction_frame` の入出力契約と処理意図を定義する。
 
 def _prepare_operational_correction_frame(df: pd.DataFrame) -> pd.DataFrame:
     work = df.copy()
@@ -294,6 +319,8 @@ def _prepare_operational_correction_frame(df: pd.DataFrame) -> pd.DataFrame:
     work = work[np.isfinite(work["residual_ns"])].copy().reset_index(drop=True)
     return work
 
+
+# 関数: `_apply_operational_systematic_corrections` の入出力契約と処理意図を定義する。
 
 def _apply_operational_systematic_corrections(
     df: pd.DataFrame,
@@ -395,6 +422,8 @@ def _apply_operational_systematic_corrections(
     }
 
 
+# 関数: `_collect_manifest_diagnostics` の入出力契約と処理意図を定義する。
+
 def _collect_manifest_diagnostics(root: Path, manifest_path: Path) -> Dict[str, Any]:
     manifest = _read_json(manifest_path)
     file_recs = manifest.get("files") or []
@@ -474,6 +503,8 @@ def _collect_manifest_diagnostics(root: Path, manifest_path: Path) -> Dict[str, 
     }
 
 
+# 関数: `_load_batch_metrics` の入出力契約と処理意図を定義する。
+
 def _load_batch_metrics(metrics_csv: Path) -> Dict[str, Any]:
     # 条件分岐: `not metrics_csv.exists()` を満たす経路を評価する。
     if not metrics_csv.exists():
@@ -517,6 +548,8 @@ def _load_batch_metrics(metrics_csv: Path) -> Dict[str, Any]:
     }
 
 
+# 関数: `_group_weighted_rms` の入出力契約と処理意図を定義する。
+
 def _group_weighted_rms(df: pd.DataFrame, rms_col: str) -> float:
     # 条件分岐: `df.empty or rms_col not in df.columns` を満たす経路を評価する。
     if df.empty or rms_col not in df.columns:
@@ -531,6 +564,8 @@ def _group_weighted_rms(df: pd.DataFrame, rms_col: str) -> float:
 
     return float(np.sqrt(np.sum(n[ok] * rms[ok] * rms[ok]) / np.sum(n[ok])))
 
+
+# 関数: `_build_root_cause_decomposition` の入出力契約と処理意図を定義する。
 
 def _build_root_cause_decomposition(
     summary: Dict[str, Any],
@@ -567,8 +602,12 @@ def _build_root_cause_decomposition(
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
 
+    # 関数: `_med` の入出力契約と処理意図を定義する。
+
     def _med(key: str) -> float:
         return _to_float(med.get(key))
+
+    # 関数: `_weighted` の入出力契約と処理意図を定義する。
 
     def _weighted(key: str, col: str) -> float:
         v = _to_float(pwr.get(key))
@@ -619,6 +658,7 @@ def _build_root_cause_decomposition(
     total_gain_median = _to_float(ablation_median["station_reflector"]) - _to_float(ablation_median["station_reflector_tropo_tide"])
     total_gain_weighted = _to_float(ablation_weighted["station_reflector"]) - _to_float(ablation_weighted["station_reflector_tropo_tide"])
 
+    # 関数: `_safe_share` の入出力契約と処理意図を定義する。
     def _safe_share(v: float, total: float) -> float:
         # 条件分岐: `not (np.isfinite(v) and np.isfinite(total) and abs(total) > 0.0)` を満たす経路を評価する。
         if not (np.isfinite(v) and np.isfinite(total) and abs(total) > 0.0):
@@ -652,6 +692,7 @@ def _build_root_cause_decomposition(
         "top_group_excess_contributors": [],
     }
 
+    # 関数: `_excess_ns` の入出力契約と処理意図を定義する。
     def _excess_ns(v: float) -> float:
         vv = _to_float(v)
         # 条件分岐: `not np.isfinite(vv)` を満たす経路を評価する。
@@ -964,6 +1005,8 @@ def _build_root_cause_decomposition(
     }
 
 
+# 関数: `_write_root_cause_csv` の入出力契約と処理意図を定義する。
+
 def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
     rows: List[Dict[str, Any]] = []
     for section in ["ablation_median_ns", "ablation_weighted_ns", "incremental_gain_median_ns", "incremental_gain_weighted_ns"]:
@@ -1130,6 +1173,8 @@ def _write_root_cause_csv(path: Path, root_cause: Dict[str, Any]) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
+# 関数: `_write_root_cause_plot` の入出力契約と処理意図を定義する。
+
 def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     ab_m = root_cause.get("ablation_median_ns") or {}
     gain_share = root_cause.get("gain_share_median") or {}
@@ -1190,6 +1235,8 @@ def _write_root_cause_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     plt.savefig(path, dpi=180)
     plt.close(fig)
 
+
+# 関数: `_write_root_cause_over4_plot` の入出力契約と処理意図を定義する。
 
 def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None:
     ex4 = root_cause.get("excess_over_4ns") if isinstance(root_cause.get("excess_over_4ns"), dict) else {}
@@ -1275,6 +1322,8 @@ def _write_root_cause_over4_plot(path: Path, root_cause: Dict[str, Any]) -> None
     plt.close(fig)
 
 
+# 関数: `_build_bottleneck_deepdive` の入出力契約と処理意図を定義する。
+
 def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict[str, Any]:
     # 条件分岐: `not points_csv.exists()` を満たす経路を評価する。
     if not points_csv.exists():
@@ -1310,6 +1359,8 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
     if work.empty:
         return {"exists": True, "n_rows": int(len(df)), "n_inlier": 0}
 
+    # 関数: `_rms_ns` の入出力契約と処理意図を定義する。
+
     def _rms_ns(series: pd.Series) -> float:
         arr = pd.to_numeric(series, errors="coerce").to_numpy(dtype=float)
         arr = arr[np.isfinite(arr)]
@@ -1324,6 +1375,7 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
     total_sse = float(np.sum(work["sse"].to_numpy(dtype=float)))
     corr_pack = _apply_operational_systematic_corrections(work, apol_min_points=30)
 
+    # 関数: `_scenario` の入出力契約と処理意図を定義する。
     def _scenario(mask: np.ndarray, scenario_id: str) -> Dict[str, Any]:
         sub = work[mask].copy()
         rms_v = _rms_ns(sub["residual_ns"]) if not sub.empty else float("nan")
@@ -1350,6 +1402,7 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
 
     proxy_corrections: List[Dict[str, Any]] = []
 
+    # 関数: `_add_proxy` の入出力契約と処理意図を定義する。
     def _add_proxy(proxy_id: str, corrected_residual: np.ndarray, note: str) -> None:
         rms_v = _rms(corrected_residual)
         proxy_corrections.append(
@@ -1569,6 +1622,8 @@ def _build_bottleneck_deepdive(points_csv: Path, modern_start_year: int) -> Dict
     }
 
 
+# 関数: `_write_bottleneck_deepdive_csv` の入出力契約と処理意図を定義する。
+
 def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
     rows: List[Dict[str, Any]] = []
     for r in deep.get("scenario_rms") or []:
@@ -1668,6 +1723,8 @@ def _write_bottleneck_deepdive_csv(path: Path, deep: Dict[str, Any]) -> None:
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
+# 関数: `_write_bottleneck_deepdive_plot` の入出力契約と処理意図を定義する。
+
 def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
     fig, ax = plt.subplots(2, 2, figsize=(15.6, 9.2))
 
@@ -1754,6 +1811,8 @@ def _write_bottleneck_deepdive_plot(path: Path, deep: Dict[str, Any]) -> None:
     plt.savefig(path, dpi=180)
     plt.close(fig)
 
+
+# 関数: `_load_points_diagnostics` の入出力契約と処理意図を定義する。
 
 def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Path) -> Dict[str, Any]:
     # 条件分岐: `not points_csv.exists()` を満たす経路を評価する。
@@ -1898,6 +1957,8 @@ def _load_points_diagnostics(points_csv: Path, modern_start_year: int, root: Pat
     }
 
 
+# 関数: `_load_station_metadata_diagnostics` の入出力契約と処理意図を定義する。
+
 def _load_station_metadata_diagnostics(station_meta_json: Path) -> Dict[str, Any]:
     # 条件分岐: `not station_meta_json.exists()` を満たす経路を評価する。
     if not station_meta_json.exists():
@@ -1931,6 +1992,8 @@ def _load_station_metadata_diagnostics(station_meta_json: Path) -> Dict[str, Any
         "by_station": rows,
     }
 
+
+# 関数: `_load_coverage_diagnostics` の入出力契約と処理意図を定義する。
 
 def _load_coverage_diagnostics(coverage_csv: Path) -> Dict[str, Any]:
     # 条件分岐: `not coverage_csv.exists()` を満たす経路を評価する。
@@ -1971,6 +2034,8 @@ def _load_coverage_diagnostics(coverage_csv: Path) -> Dict[str, Any]:
         "nglr1_rows": ng_rows,
     }
 
+
+# 関数: `_build_checks` の入出力契約と処理意図を定義する。
 
 def _build_checks(
     manifest_diag: Dict[str, Any],
@@ -2207,6 +2272,8 @@ def _build_checks(
     return checks, overall, likely_gaps
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, checks: List[Dict[str, Any]], metrics_diag: Dict[str, Any], points_diag: Dict[str, Any]) -> None:
     rows: List[Dict[str, Any]] = []
     for c in checks:
@@ -2328,6 +2395,8 @@ def _write_csv(path: Path, checks: List[Dict[str, Any]], metrics_diag: Dict[str,
     pd.DataFrame(rows).to_csv(path, index=False)
 
 
+# 関数: `_write_plot` の入出力契約と処理意図を定義する。
+
 def _write_plot(path: Path, manifest_diag: Dict[str, Any], metrics_diag: Dict[str, Any], points_diag: Dict[str, Any]) -> None:
     station_counts = manifest_diag.get("station_counts") or {}
     stations = sorted(station_counts.keys())
@@ -2397,6 +2466,8 @@ def _write_plot(path: Path, manifest_diag: Dict[str, Any], metrics_diag: Dict[st
     plt.savefig(path, dpi=180)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

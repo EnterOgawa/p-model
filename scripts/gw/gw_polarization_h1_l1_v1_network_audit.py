@@ -43,14 +43,19 @@ from scripts.gw.gw_polarization_antenna_pattern_audit import (  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_detector_order` の入出力契約と処理意図を定義する。
 
 def _detector_order(det: str) -> int:
     order = {"H1": 0, "L1": 1, "V1": 2, "K1": 3}
     return int(order.get(str(det).upper(), 999))
 
+
+# 関数: `_ring_dirs_from_constraints` の入出力契約と処理意図を定義する。
 
 def _ring_dirs_from_constraints(
     *,
@@ -90,6 +95,8 @@ def _ring_dirs_from_constraints(
 
     return ring_relaxed, "relaxed_insufficient"
 
+
+# 関数: `_select_pruned_constraints` の入出力契約と処理意図を定義する。
 
 def _select_pruned_constraints(
     *,
@@ -161,6 +168,8 @@ def _select_pruned_constraints(
     return best_candidate
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
         "event",
@@ -192,6 +201,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             w.writerow(vals)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
@@ -230,6 +241,8 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_pair_factor_rows` の入出力契約と処理意図を定義する。
 
 def _pair_factor_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -305,6 +318,8 @@ def _pair_factor_rows(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
+# 関数: `_median` の入出力契約と処理意図を定義する。
+
 def _median(values: List[float]) -> float:
     arr = np.asarray([v for v in values if math.isfinite(v)], dtype=np.float64)
     # 条件分岐: `arr.size == 0` を満たす経路を評価する。
@@ -313,6 +328,8 @@ def _median(values: List[float]) -> float:
 
     return float(np.median(arr))
 
+
+# 関数: `_pair_factor_summary` の入出力契約と処理意図を定義する。
 
 def _pair_factor_summary(detail_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     by_pair: Dict[str, List[Dict[str, Any]]] = {}
@@ -384,6 +401,8 @@ def _pair_factor_summary(detail_rows: List[Dict[str, Any]]) -> List[Dict[str, An
     return summary_rows
 
 
+# 関数: `_write_table_csv` の入出力契約と処理意図を定義する。
+
 def _write_table_csv(path: Path, rows: List[Dict[str, Any]], headers: List[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -397,6 +416,8 @@ def _write_table_csv(path: Path, rows: List[Dict[str, Any]], headers: List[str])
 
             w.writerow(values)
 
+
+# 関数: `_plot_pair_factor_summary` の入出力契約と処理意図を定義する。
 
 def _plot_pair_factor_summary(rows: List[Dict[str, Any]], out_png: Path) -> None:
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -450,6 +471,8 @@ def _plot_pair_factor_summary(rows: List[Dict[str, Any]], out_png: Path) -> None
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.19.3: H1/L1/V1 polarization network audit.")

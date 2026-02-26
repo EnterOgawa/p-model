@@ -41,9 +41,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -52,14 +55,20 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(value: Any) -> Optional[float]:
     # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
@@ -71,6 +80,8 @@ def _as_float(value: Any) -> Optional[float]:
 
     return None
 
+
+# 関数: `_classify_numeric` の入出力契約と処理意図を定義する。
 
 def _classify_numeric(*, max_abs_delta: float, pass_abs_threshold: float, watch_abs_threshold: float) -> str:
     # 条件分岐: `max_abs_delta <= pass_abs_threshold` を満たす経路を評価する。
@@ -85,6 +96,8 @@ def _classify_numeric(*, max_abs_delta: float, pass_abs_threshold: float, watch_
     return "reject"
 
 
+# 関数: `_status_severity` の入出力契約と処理意図を定義する。
+
 def _status_severity(status: str) -> int:
     # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
@@ -97,6 +110,8 @@ def _status_severity(status: str) -> int:
 
     return 2
 
+
+# 関数: `_categorical_triplet_status` の入出力契約と処理意図を定義する。
 
 def _categorical_triplet_status(*, case_low: str, case_ref: str, case_high: str) -> str:
     # 条件分岐: `case_low == case_ref == case_high` を満たす経路を評価する。
@@ -111,6 +126,8 @@ def _categorical_triplet_status(*, case_low: str, case_ref: str, case_high: str)
     return "reject"
 
 
+# 関数: `_invariance_thresholds` の入出力契約と処理意図を定義する。
+
 def _invariance_thresholds(ref_value: float) -> Dict[str, float]:
     scale = max(1.0, abs(float(ref_value)))
     return {
@@ -118,6 +135,8 @@ def _invariance_thresholds(ref_value: float) -> Dict[str, float]:
         "watch_abs_threshold": float(1e-4 * scale),
     }
 
+
+# 関数: `_load_frozen_beta` の入出力契約と処理意図を定義する。
 
 def _load_frozen_beta() -> Dict[str, Any]:
     candidates = [
@@ -151,6 +170,8 @@ def _load_frozen_beta() -> Dict[str, Any]:
     raise SystemExit("[fail] frozen beta not found in output/private/theory or output/public/theory.")
 
 
+# 関数: `_run_checked` の入出力契約と処理意図を定義する。
+
 def _run_checked(command: List[str]) -> None:
     proc = subprocess.run(command, cwd=str(ROOT), capture_output=True, text=True)
     # 条件分岐: `proc.returncode != 0` を満たす経路を評価する。
@@ -164,6 +185,8 @@ def _run_checked(command: List[str]) -> None:
             + (proc.stderr or "")
         )
 
+
+# 関数: `_extract_eht_delta_from_output` の入出力契約と処理意図を定義する。
 
 def _extract_eht_delta_from_output() -> float:
     candidates = [
@@ -192,6 +215,8 @@ def _extract_eht_delta_from_output() -> float:
     raise RuntimeError("failed to extract EHT delta from eht_shadow_compare outputs")
 
 
+# 関数: `_extract_deuteron_b_from_output` の入出力契約と処理意図を定義する。
+
 def _extract_deuteron_b_from_output() -> float:
     path = ROOT / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -206,6 +231,8 @@ def _extract_deuteron_b_from_output() -> float:
 
     return float(b)
 
+
+# 関数: `_extract_cmb_metrics_from_output` の入出力契約と処理意図を定義する。
 
 def _extract_cmb_metrics_from_output() -> Dict[str, Any]:
     candidates = [
@@ -238,6 +265,8 @@ def _extract_cmb_metrics_from_output() -> Dict[str, Any]:
     raise RuntimeError("failed to extract CMB acoustic holdout metrics from output")
 
 
+# 関数: `_extract_sparc_metrics_from_output` の入出力契約と処理意図を定義する。
+
 def _extract_sparc_metrics_from_output() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "cosmology" / "sparc_rotation_curve_pmodel_audit_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -263,6 +292,8 @@ def _extract_sparc_metrics_from_output() -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_bell_bridge_metrics_from_output` の入出力契約と処理意図を定義する。
+
 def _extract_bell_bridge_metrics_from_output() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "quantum" / "quantum_connection_bridge_table.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -287,6 +318,8 @@ def _extract_bell_bridge_metrics_from_output() -> Dict[str, Any]:
         "physics_normalized_score_max": float(physics_max),
     }
 
+
+# 関数: `_set_beta_in_frozen_payload` の入出力契約と処理意図を定義する。
 
 def _set_beta_in_frozen_payload(payload: Dict[str, Any], beta: float) -> Dict[str, Any]:
     gamma = float(2.0 * beta - 1.0)
@@ -315,6 +348,8 @@ def _set_beta_in_frozen_payload(payload: Dict[str, Any], beta: float) -> Dict[st
 
     return out
 
+
+# 関数: `_heavy_rerun_cases` の入出力契約と処理意図を定義する。
 
 def _heavy_rerun_cases(
     *,
@@ -391,6 +426,8 @@ def _heavy_rerun_cases(
 
     return out
 
+
+# 関数: `_full_rerun_followup` の入出力契約と処理意図を定義する。
 
 def _full_rerun_followup(
     *,
@@ -530,6 +567,8 @@ def _full_rerun_followup(
     }
 
 
+# 関数: `_load_eht_metrics` の入出力契約と処理意図を定義する。
+
 def _load_eht_metrics() -> Dict[str, Any]:
     candidates = [
         ROOT / "output" / "public" / "eht" / "eht_shadow_compare.json",
@@ -564,6 +603,8 @@ def _load_eht_metrics() -> Dict[str, Any]:
     raise SystemExit("[fail] eht_shadow_compare.json not found (public/private).")
 
 
+# 関数: `_load_deuteron_metrics` の入出力契約と処理意図を定義する。
+
 def _load_deuteron_metrics() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "quantum" / "nuclear_binding_deuteron_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -580,12 +621,16 @@ def _load_deuteron_metrics() -> Dict[str, Any]:
     return {"path": path, "b_mev": float(b_mev), "b_sigma": float(b_sigma)}
 
 
+# 関数: `_load_cmb_metrics` の入出力契約と処理意図を定義する。
+
 def _load_cmb_metrics() -> Dict[str, Any]:
     try:
         return _extract_cmb_metrics_from_output()
     except Exception as exc:
         raise SystemExit(f"[fail] {exc}") from exc
 
+
+# 関数: `_load_sparc_metrics` の入出力契約と処理意図を定義する。
 
 def _load_sparc_metrics() -> Dict[str, Any]:
     try:
@@ -594,12 +639,16 @@ def _load_sparc_metrics() -> Dict[str, Any]:
         raise SystemExit(f"[fail] {exc}") from exc
 
 
+# 関数: `_load_bell_bridge_metrics` の入出力契約と処理意図を定義する。
+
 def _load_bell_bridge_metrics() -> Dict[str, Any]:
     try:
         return _extract_bell_bridge_metrics_from_output()
     except Exception as exc:
         raise SystemExit(f"[fail] {exc}") from exc
 
+
+# 関数: `_load_quantum_shared_kpi` の入出力契約と処理意図を定義する。
 
 def _load_quantum_shared_kpi() -> Dict[str, Any]:
     path = ROOT / "output" / "public" / "quantum" / "quantum_connection_shared_kpi.json"
@@ -629,6 +678,8 @@ def _load_quantum_shared_kpi() -> Dict[str, Any]:
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -643,6 +694,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow(row)
 
+
+# 関数: `_plot_summary` の入出力契約と処理意図を定義する。
 
 def _plot_summary(
     *,
@@ -705,6 +758,8 @@ def _plot_summary(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Beta sensitivity audit for Part II/III key indicators.")
@@ -855,6 +910,7 @@ def main() -> int:
 
     coeff_gr = float(eht["coeff_gr"])
 
+    # 関数: `eht_delta` の入出力契約と処理意図を定義する。
     def eht_delta(beta: float) -> float:
         return float((4.0 * math.e * beta / coeff_gr) - 1.0)
 
@@ -876,6 +932,7 @@ def main() -> int:
     # Indicator 2: PPN gamma(β)=2β-1
     gamma_sigma = _as_float(frozen.get("gamma_sigma")) or 2.3e-5
 
+    # 関数: `gamma_pred` の入出力契約と処理意図を定義する。
     def gamma_pred(beta: float) -> float:
         return float(2.0 * beta - 1.0)
 
@@ -1037,6 +1094,7 @@ def main() -> int:
         watch_abs_threshold=bridge_physics_watch_thr,
     )
 
+    # 関数: `_safe_rel_pct` の入出力契約と処理意図を定義する。
     def _safe_rel_pct(delta: float, ref: float) -> Optional[float]:
         # 条件分岐: `ref == 0.0` を満たす経路を評価する。
         if ref == 0.0:

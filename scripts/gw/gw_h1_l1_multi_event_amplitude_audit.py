@@ -24,9 +24,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -53,6 +56,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_slugify` の入出力契約と処理意図を定義する。
+
 def _slugify(s: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (s or "").strip())
     while "__" in out:
@@ -60,6 +65,8 @@ def _slugify(s: str) -> str:
 
     return out.strip("_") or "event"
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(v: float, digits: int = 7) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
@@ -79,6 +86,8 @@ def _fmt(v: float, digits: int = 7) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_load_metrics_json` の入出力契約と処理意図を定義する。
+
 def _load_metrics_json(event: str, slug: str) -> Optional[Dict[str, Any]]:
     candidates = [
         _ROOT / "output" / "public" / "gw" / f"{slug}_h1_l1_amplitude_ratio_metrics.json",
@@ -97,6 +106,8 @@ def _load_metrics_json(event: str, slug: str) -> Optional[Dict[str, Any]]:
 
     return None
 
+
+# 関数: `_event_row` の入出力契約と処理意図を定義する。
 
 def _event_row(event: str, payload: Optional[Dict[str, Any]], corr_use_min: float) -> Dict[str, Any]:
     # 条件分岐: `payload is None` を満たす経路を評価する。
@@ -152,6 +163,8 @@ def _event_row(event: str, payload: Optional[Dict[str, Any]], corr_use_min: floa
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     headers = [
@@ -174,6 +187,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             w.writerow([_fmt(row.get(h, float("nan"))) if isinstance(row.get(h), float) else row.get(h, "") for h in headers])
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path, corr_use_min: float) -> None:
     _set_japanese_font()
@@ -243,6 +258,8 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, corr_use_min: float) -> Non
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.19.1: multi-event H1/L1 amplitude-ratio audit.")

@@ -118,6 +118,7 @@ _SAMPLE_FILES: Dict[str, Dict[str, Dict[str, str]]] = {
 }
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -126,6 +127,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -137,6 +140,8 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_download_file` の入出力契約と処理意図を定義する。
 
 def _download_file(url: str, dst: Path) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -158,6 +163,8 @@ def _download_file(url: str, dst: Path) -> Dict[str, Any]:
     tmp.replace(dst)
     return {"bytes": dst.stat().st_size, "sha256": _sha256(dst)}
 
+
+# 関数: `_extract_local_gz_to_npz` の入出力契約と処理意図を定義する。
 
 def _extract_local_gz_to_npz(
     gz_path: Path,
@@ -181,6 +188,8 @@ def _extract_local_gz_to_npz(
     }
     return meta
 
+
+# 関数: `_extract_local_gz_to_npz_prefix_rows` の入出力契約と処理意図を定義する。
 
 def _extract_local_gz_to_npz_prefix_rows(
     gz_path: Path,
@@ -211,6 +220,8 @@ def _extract_local_gz_to_npz_prefix_rows(
     }
     return meta
 
+
+# 関数: `_extract_local_gz_to_npz_reservoir` の入出力契約と処理意図を定義する。
 
 def _extract_local_gz_to_npz_reservoir(
     gz_path: Path,
@@ -278,6 +289,7 @@ def _extract_local_gz_to_npz_reservoir(
             cover_target = np.fromiter(sorted(cover_sectors_int), dtype=np.int64)
             cover_remaining = set(cover_sectors_int)
 
+            # 関数: `_cover_keys` の入出力契約と処理意図を定義する。
             def _cover_keys(ch: Dict[str, Any]) -> np.ndarray:
                 # 条件分岐: `cover_on_col == "SECTOR_KEY"` を満たす経路を評価する。
                 if cover_on_col == "SECTOR_KEY":
@@ -295,6 +307,8 @@ def _extract_local_gz_to_npz_reservoir(
                 out = np.full(int(v.shape[0]), -1, dtype=np.int64)
                 out[valid] = v[valid].astype(np.int64)
                 return out
+
+            # 関数: `_cover_wrap` の入出力契約と処理意図を定義する。
 
             def _cover_wrap(it: Any) -> Any:
                 nonlocal cover_remaining
@@ -439,6 +453,8 @@ def _extract_local_gz_to_npz_reservoir(
     return meta
 
 
+# 関数: `_extract_remote_gz_to_npz_prefix_rows` の入出力契約と処理意図を定義する。
+
 def _extract_remote_gz_to_npz_prefix_rows(
     url: str,
     *,
@@ -472,6 +488,8 @@ def _extract_remote_gz_to_npz_prefix_rows(
     }
     return meta
 
+
+# 関数: `_try_build_prefix_from_existing_npz` の入出力契約と処理意図を定義する。
 
 def _try_build_prefix_from_existing_npz(
     *,
@@ -534,6 +552,8 @@ def _try_build_prefix_from_existing_npz(
     }
     return meta
 
+
+# 関数: `_reservoir_sample_from_chunks` の入出力契約と処理意図を定義する。
 
 def _reservoir_sample_from_chunks(
     chunks: Any,
@@ -706,6 +726,8 @@ def _reservoir_sample_from_chunks(
     return (res_cols, scanned)
 
 
+# 関数: `_extract_remote_gz_to_npz_reservoir` の入出力契約と処理意図を定義する。
+
 def _extract_remote_gz_to_npz_reservoir(
     url: str,
     *,
@@ -778,6 +800,7 @@ def _extract_remote_gz_to_npz_reservoir(
                 cover_target = np.fromiter(sorted(cover_sectors_int), dtype=np.int64)
                 cover_remaining = set(cover_sectors_int)
 
+                # 関数: `_cover_keys` の入出力契約と処理意図を定義する。
                 def _cover_keys(ch: Dict[str, Any]) -> np.ndarray:
                     # 条件分岐: `cover_on_col == "SECTOR_KEY"` を満たす経路を評価する。
                     if cover_on_col == "SECTOR_KEY":
@@ -795,6 +818,8 @@ def _extract_remote_gz_to_npz_reservoir(
                     out = np.full(int(v.shape[0]), -1, dtype=np.int64)
                     out[valid] = v[valid].astype(np.int64)
                     return out
+
+                # 関数: `_cover_wrap` の入出力契約と処理意図を定義する。
 
                 def _cover_wrap(it: Any) -> Any:
                     nonlocal cover_remaining
@@ -936,6 +961,8 @@ def _extract_remote_gz_to_npz_reservoir(
     return meta
 
 
+# 関数: `_existing_npz_meta` の入出力契約と処理意図を定義する。
+
 def _existing_npz_meta(path: Path) -> Dict[str, Any]:
     name = path.name
     sampling: Dict[str, Any] = {"method": "cached"}
@@ -974,6 +1001,8 @@ def _existing_npz_meta(path: Path) -> Dict[str, Any]:
     return {"rows_total": None, "rows_saved": n, "row_bytes": None, "columns": files, "sampling": sampling}
 
 
+# 関数: `_normalize_cached_extract_meta` の入出力契約と処理意図を定義する。
+
 def _normalize_cached_extract_meta(path: Path, meta: Optional[Dict[str, Any]]) -> Dict[str, Any]:
     """
     Ensure extract meta has a concrete sampling description.
@@ -997,6 +1026,8 @@ def _normalize_cached_extract_meta(path: Path, meta: Optional[Dict[str, Any]]) -
 
     return meta_in
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch BOSS DR12v5 LSS catalogs (galaxy+random) and extract columns to NPZ.")

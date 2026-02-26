@@ -12,9 +12,12 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -30,9 +33,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_cp_shomate` の入出力契約と処理意図を定義する。
 
 def _cp_shomate(*, coeffs: dict[str, float], t_k: float) -> float:
     t = t_k / 1000.0
@@ -43,6 +50,8 @@ def _cp_shomate(*, coeffs: dict[str, float], t_k: float) -> float:
     e = float(coeffs["E"])
     return a + b * t + c * (t**2) + d * (t**3) + (e / (t**2))
 
+
+# 関数: `_debye_integrand` の入出力契約と処理意図を定義する。
 
 def _debye_integrand(x: float) -> float:
     # 条件分岐: `x <= 0.0` を満たす経路を評価する。
@@ -57,6 +66,8 @@ def _debye_integrand(x: float) -> float:
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
+
+# 関数: `_simpson_integrate` の入出力契約と処理意図を定義する。
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
     # 条件分岐: `n < 2` を満たす経路を評価する。
@@ -77,6 +88,8 @@ def _simpson_integrate(f, a: float, b: float, n: int) -> float:
     return s * (h / 3.0)
 
 
+# 関数: `_debye_cv_molar` の入出力契約と処理意図を定義する。
+
 def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     # 条件分岐: `t_k <= 0.0 or theta_d_k <= 0.0` を満たす経路を評価する。
     if t_k <= 0.0 or theta_d_k <= 0.0:
@@ -93,6 +106,8 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     integral = _simpson_integrate(_debye_integrand, 0.0, y_eff, n)
     return 9.0 * r * ((t_k / theta_d_k) ** 3) * integral
 
+
+# 関数: `_golden_section_minimize` の入出力契約と処理意図を定義する。
 
 def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_iter: int = 120) -> tuple[float, float]:
     gr = (math.sqrt(5.0) - 1.0) / 2.0
@@ -122,6 +137,8 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
     return x, f(x)
 
 
+# クラス: `FitRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class FitRow:
     t_k: float
@@ -129,6 +146,8 @@ class FitRow:
     cp_debye: float
     resid: float
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()
@@ -175,6 +194,7 @@ def main() -> None:
 
     fit_points = sorted(fit_points, key=lambda x: x[0])
 
+    # 関数: `sse` の入出力契約と処理意図を定義する。
     def sse(theta: float) -> float:
         return sum((cp - _debye_cv_molar(t_k=t, theta_d_k=theta)) ** 2 for (t, cp) in fit_points)
 

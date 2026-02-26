@@ -24,9 +24,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -53,6 +56,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
+
 def _fmt(v: float, digits: int = 7) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
@@ -71,6 +76,8 @@ def _fmt(v: float, digits: int = 7) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(v: Any) -> float:
     try:
         x = float(v)
@@ -79,6 +86,8 @@ def _safe_float(v: Any) -> float:
 
     return x
 
+
+# 関数: `_status_bucket` の入出力契約と処理意図を定義する。
 
 def _status_bucket(status: str) -> str:
     s = str(status or "")
@@ -104,9 +113,13 @@ def _status_bucket(status: str) -> str:
     return "other"
 
 
+# 関数: `_is_decisive` の入出力契約と処理意図を定義する。
+
 def _is_decisive(status: str) -> bool:
     return _status_bucket(status) in {"reject", "watch", "pass"}
 
+
+# 関数: `_load_payload` の入出力契約と処理意図を定義する。
 
 def _load_payload(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -115,6 +128,8 @@ def _load_payload(path: Path) -> Dict[str, Any]:
 
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_index_rows` の入出力契約と処理意図を定義する。
 
 def _index_rows(rows: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
@@ -128,6 +143,8 @@ def _index_rows(rows: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
 
     return out
 
+
+# 関数: `_count_summary` の入出力契約と処理意図を定義する。
 
 def _count_summary(rows: List[Dict[str, Any]]) -> Dict[str, int]:
     status_counts = {"reject": 0, "watch": 0, "pass": 0, "inconclusive": 0, "other": 0}
@@ -146,6 +163,8 @@ def _count_summary(rows: List[Dict[str, Any]]) -> Dict[str, int]:
         "n_other": int(status_counts["other"]),
     }
 
+
+# 関数: `_transition_class` の入出力契約と処理意図を定義する。
 
 def _transition_class(before_status: str, after_status: str) -> str:
     before_decisive = _is_decisive(before_status)
@@ -166,6 +185,8 @@ def _transition_class(before_status: str, after_status: str) -> str:
 
     return "status_changed_same_decisiveness"
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
@@ -201,6 +222,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             w.writerow(vals)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -259,6 +282,8 @@ def _plot(
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.19.5: compare baseline/refined network audits and quantify inconclusive reduction.")

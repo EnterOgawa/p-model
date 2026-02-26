@@ -40,9 +40,13 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -51,10 +55,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -64,6 +72,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_f` の入出力契約と処理意図を定義する。
 
 def _f(value: Any, default: float = float("nan")) -> float:
     try:
@@ -79,10 +89,14 @@ def _f(value: Any, default: float = float("nan")) -> float:
     return float(out)
 
 
+# 関数: `_safe_rel` の入出力契約と処理意図を定義する。
+
 def _safe_rel(a: float, b: float) -> float:
     denom = max(abs(b), 1.0e-12)
     return float(abs(a - b) / denom)
 
+
+# 関数: `_render_png` の入出力契約と処理意図を定義する。
 
 def _render_png(
     path: Path,
@@ -133,6 +147,8 @@ def _render_png(
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit tau/xi derivation chain from Bullet separation derivation output.")

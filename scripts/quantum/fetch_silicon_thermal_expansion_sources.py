@@ -11,13 +11,18 @@ from typing import Any
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -32,6 +37,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -52,10 +59,14 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_strip_tags` の入出力契約と処理意図を定義する。
+
 def _strip_tags(s: str) -> str:
     # Avoid stripping comparison operators like "< 50K" that appear in plain text.
     return re.sub(r"</?[A-Za-z][^>]*>", " ", s)
 
+
+# 関数: `_extract_first_table` の入出力契約と処理意図を定義する。
 
 def _extract_first_table(html: str, *, class_name: str) -> str:
     m = re.search(
@@ -69,6 +80,8 @@ def _extract_first_table(html: str, *, class_name: str) -> str:
 
     return m.group(0)
 
+
+# 関数: `_parse_coeff_table` の入出力契約と処理意図を定義する。
 
 def _parse_coeff_table(*, html: str) -> dict[str, Any]:
     tbl = _extract_first_table(html, class_name="properties")
@@ -154,6 +167,8 @@ def _parse_coeff_table(*, html: str) -> dict[str, Any]:
         "reference_1": ref_1 or "",
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

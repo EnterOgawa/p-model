@@ -53,6 +53,7 @@ from scripts.cosmology import cosmology_bao_xi_from_catalogs as _xi  # noqa: E40
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_infer_cap_label` の入出力契約と処理意図を定義する。
 def _infer_cap_label(path: Path, *, fallback: str) -> str:
     s = path.name.lower()
     # 条件分岐: `"ngc" in s or "north" in s` を満たす経路を評価する。
@@ -66,6 +67,8 @@ def _infer_cap_label(path: Path, *, fallback: str) -> str:
 
     return fallback
 
+
+# 関数: `_ra_quantile_edges` の入出力契約と処理意図を定義する。
 
 def _ra_quantile_edges(ra_deg_all: np.ndarray, n_regions: int) -> np.ndarray:
     ra = np.asarray(ra_deg_all, dtype=float).reshape(-1)
@@ -93,6 +96,8 @@ def _ra_quantile_edges(ra_deg_all: np.ndarray, n_regions: int) -> np.ndarray:
     return edges
 
 
+# 関数: `_assign_region_ra` の入出力契約と処理意図を定義する。
+
 def _assign_region_ra(ra_deg: np.ndarray, edges: np.ndarray) -> np.ndarray:
     ra = np.mod(np.asarray(ra_deg, dtype=float), 360.0)
     # right edge belongs to previous bin except the last edge (360).
@@ -100,6 +105,8 @@ def _assign_region_ra(ra_deg: np.ndarray, edges: np.ndarray) -> np.ndarray:
     idx = np.clip(idx, 0, int(edges.size - 2))
     return idx.astype(np.int32, copy=False)
 
+
+# 関数: `_quantile_edges` の入出力契約と処理意図を定義する。
 
 def _quantile_edges(x: np.ndarray, n_regions: int) -> np.ndarray:
     v = np.asarray(x, dtype=float).reshape(-1)
@@ -125,12 +132,16 @@ def _quantile_edges(x: np.ndarray, n_regions: int) -> np.ndarray:
     return edges
 
 
+# 関数: `_assign_region_1d` の入出力契約と処理意図を定義する。
+
 def _assign_region_1d(x: np.ndarray, edges: np.ndarray) -> np.ndarray:
     v = np.asarray(x, dtype=float).reshape(-1)
     idx = np.searchsorted(edges, v, side="right") - 1
     idx = np.clip(idx, 0, int(edges.size - 2))
     return idx.astype(np.int32, copy=False)
 
+
+# 関数: `_choose_grid` の入出力契約と処理意図を定義する。
 
 def _choose_grid(n_regions: int) -> Tuple[int, int]:
     """
@@ -156,6 +167,8 @@ def _choose_grid(n_regions: int) -> Tuple[int, int]:
     return int(best), int(n // best)
 
 
+# 関数: `_ra_shift_to_largest_gap` の入出力契約と処理意図を定義する。
+
 def _ra_shift_to_largest_gap(ra_deg_all: np.ndarray) -> float:
     ra = np.asarray(ra_deg_all, dtype=float).reshape(-1)
     ra = ra[np.isfinite(ra)]
@@ -178,12 +191,16 @@ def _ra_shift_to_largest_gap(ra_deg_all: np.ndarray) -> float:
     return float(ra_sorted[k + 1])
 
 
+# 関数: `_ra_quantile_edges_unwrapped` の入出力契約と処理意図を定義する。
+
 def _ra_quantile_edges_unwrapped(ra_deg_all: np.ndarray, n_regions: int) -> Tuple[np.ndarray, float]:
     shift = _ra_shift_to_largest_gap(ra_deg_all)
     ra_shifted = np.mod(np.asarray(ra_deg_all, dtype=float) - shift, 360.0)
     edges = _ra_quantile_edges(ra_shifted, n_regions=n_regions)
     return edges, float(shift)
 
+
+# 関数: `_weighted_totals` の入出力契約と処理意図を定義する。
 
 def _weighted_totals(w_g: np.ndarray, w_r: np.ndarray) -> Dict[str, float]:
     w_g = np.asarray(w_g, dtype=float).reshape(-1)
@@ -210,6 +227,8 @@ def _weighted_totals(w_g: np.ndarray, w_r: np.ndarray) -> Dict[str, float]:
         "rr_tot": rr_tot,
     }
 
+
+# 関数: `_paircounts_for_subset` の入出力契約と処理意図を定義する。
 
 def _paircounts_for_subset(
     *,
@@ -273,6 +292,8 @@ def _paircounts_for_subset(
     )
     return {"DD_w": dd_w, "DR_w": dr_w, "RR_w": rr_w}
 
+
+# 関数: `_load_cap_inputs` の入出力契約と処理意図を定義する。
 
 def _load_cap_inputs(
     *,
@@ -341,6 +362,8 @@ def _load_cap_inputs(
         "dist_meta": dist_meta,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: jackknife covariance for catalog-based xi multipoles (xi0/xi2).")

@@ -53,6 +53,7 @@ from scripts.cosmology import (  # noqa: E402
 )
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -78,14 +79,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_parse_scales` の入出力契約と処理意図を定義する。
 
 def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
@@ -109,6 +116,8 @@ def _parse_scales(s: str) -> List[float]:
 
     return sorted(set(out))
 
+
+# 関数: `_crossing_x_log` の入出力契約と処理意図を定義する。
 
 def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
     # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
@@ -162,6 +171,8 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
     return None
 
 
+# 関数: `_classify_cell` の入出力契約と処理意図を定義する。
+
 def _classify_cell(v: Optional[float]) -> int:
     """
     Returns category index for coloring.
@@ -192,6 +203,8 @@ def _classify_cell(v: Optional[float]) -> int:
     return 2
 
 
+# 関数: `_short_mode_label` の入出力契約と処理意図を定義する。
+
 def _short_mode_label(mode: str) -> str:
     m = str(mode)
     mapping = {
@@ -203,6 +216,8 @@ def _short_mode_label(mode: str) -> str:
     }
     return mapping.get(m, m)
 
+
+# 関数: `_evaluate_best_pair` の入出力契約と処理意図を定義する。
 
 def _evaluate_best_pair(
     *,
@@ -289,6 +304,8 @@ def _evaluate_best_pair(
         "candle": None,
     }
 
+
+# 関数: `_plot_matrix` の入出力契約と処理意図を定義する。
 
 def _plot_matrix(
     *,
@@ -398,6 +415,8 @@ def _plot_matrix(
     plt.close(fig)
 
 
+# 関数: `_plot_global_prior_sigma_scan_by_mode` の入出力契約と処理意図を定義する。
+
 def _plot_global_prior_sigma_scan_by_mode(
     *,
     out_png: Path,
@@ -476,6 +495,8 @@ def _plot_global_prior_sigma_scan_by_mode(
     plt.close(fig)
 
 
+# 関数: `_extract_bao_modes` の入出力契約と処理意図を定義する。
+
 def _extract_bao_modes(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     rows = metrics.get("bao_fit_sensitivity") if isinstance(metrics.get("bao_fit_sensitivity"), list) else []
@@ -508,6 +529,8 @@ def _extract_bao_modes(metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()

@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -36,6 +37,7 @@ from scripts.quantum.condensed_silicon_thermal_expansion_gruneisen_debye_einstei
 )
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -50,9 +52,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_load_ioffe_bulk_modulus_model` の入出力契約と処理意図を定義する。
 
 def _load_ioffe_bulk_modulus_model(*, root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
@@ -119,6 +125,8 @@ def _load_ioffe_bulk_modulus_model(*, root: Path) -> dict[str, Any]:
     }
 
 
+# 関数: `_bulk_modulus_pa` の入出力契約と処理意図を定義する。
+
 def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
     """
     Piecewise bulk modulus B(T) in Pa, derived from Ioffe elastic constants.
@@ -143,6 +151,7 @@ def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
         c12_a = float(model["c12_intercept_1e11_dyn_cm2"])
         c12_b = float(model["c12_slope_1e11_dyn_cm2_per_K"])
 
+        # 関数: `b_lin` の入出力契約と処理意図を定義する。
         def b_lin(t_use: float) -> float:
             c11 = float(c11_a + c11_b * t_use)
             c12 = float(c12_a + c12_b * t_use)
@@ -154,6 +163,8 @@ def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
 
     return float(b_1e11) * 1e10
 
+
+# 関数: `_load_silicon_molar_volume_m3_per_mol` の入出力契約と処理意図を定義する。
 
 def _load_silicon_molar_volume_m3_per_mol(*, root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "nist_codata_2022_silicon_lattice" / "extracted_values.json"
@@ -186,6 +197,8 @@ def _load_silicon_molar_volume_m3_per_mol(*, root: Path) -> dict[str, Any]:
     v_m = n_a * (float(a_m) ** 3) / 8.0
     return {"path": str(src), "sha256": _sha256(src), "a_m": float(a_m), "V_m3_per_mol": float(v_m)}
 
+
+# 関数: `_parse_args` の入出力契約と処理意図を定義する。
 
 def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
@@ -466,6 +479,8 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     return p.parse_args(argv)
 
 
+# 関数: `_median_positive` の入出力契約と処理意図を定義する。
+
 def _median_positive(values: list[float]) -> float:
     xs = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v)) and float(v) > 0.0]
     # 条件分岐: `not xs` を満たす経路を評価する。
@@ -481,6 +496,8 @@ def _median_positive(values: list[float]) -> float:
 
     return float(0.5 * (float(xs[mid - 1]) + float(xs[mid])))
 
+
+# 関数: `_trapz_xy` の入出力契約と処理意図を定義する。
 
 def _trapz_xy(xs: list[float], ys: list[float]) -> float:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -498,6 +515,8 @@ def _trapz_xy(xs: list[float], ys: list[float]) -> float:
 
     return float(s)
 
+
+# 関数: `_integrate_split_trapz` の入出力契約と処理意図を定義する。
 
 def _integrate_split_trapz(xs: list[float], ys: list[float], *, x_split: float) -> tuple[float, float]:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -536,6 +555,8 @@ def _integrate_split_trapz(xs: list[float], ys: list[float], *, x_split: float) 
 
     return float(s_lo), float(s_hi)
 
+
+# 関数: `_integrate_range_trapz` の入出力契約と処理意図を定義する。
 
 def _integrate_range_trapz(xs: list[float], ys: list[float], *, x_min: float, x_max: float) -> float:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -577,6 +598,8 @@ def _integrate_range_trapz(xs: list[float], ys: list[float], *, x_min: float, x_
 
     return float(s)
 
+
+# 関数: `_molar_volume_from_alpha_fit` の入出力契約と処理意図を定義する。
 
 def _molar_volume_from_alpha_fit(
     *,
@@ -637,6 +660,8 @@ def _molar_volume_from_alpha_fit(
     return [float(v_ref_m3_per_mol * math.exp(float(d))) for d in delta_ln_v]
 
 
+# 関数: `_find_x_at_cum_fraction` の入出力契約と処理意図を定義する。
+
 def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) -> float:
     # 条件分岐: `not (0.0 < float(frac) < 1.0)` を満たす経路を評価する。
     if not (0.0 < float(frac) < 1.0):
@@ -679,6 +704,8 @@ def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) ->
     return float(xs[-1])
 
 
+# 関数: `_interp_piecewise_linear` の入出力契約と処理意図を定義する。
+
 def _interp_piecewise_linear(xs: list[float], ys: list[float], xq: list[float]) -> list[float]:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
@@ -691,6 +718,8 @@ def _interp_piecewise_linear(xs: list[float], ys: list[float], xq: list[float]) 
     yq = np.interp(xq_np, x_sorted, y_sorted, left=float(y_sorted[0]), right=float(y_sorted[-1]))
     return [float(v) for v in yq.tolist()]
 
+
+# 関数: `_cv_factor` の入出力契約と処理意図を定義する。
 
 def _cv_factor(x: float) -> float:
     """
@@ -721,6 +750,8 @@ def _cv_factor(x: float) -> float:
     ex = float(em1 + 1.0)
     return float((x * x * ex) / (em1 * em1))
 
+
+# 関数: `_cv_factor_np` の入出力契約と処理意図を定義する。
 
 def _cv_factor_np(x: np.ndarray) -> np.ndarray:
     """
@@ -766,6 +797,8 @@ def _cv_factor_np(x: np.ndarray) -> np.ndarray:
     return out
 
 
+# 関数: `_u_th_factor_np` の入出力契約と処理意図を定義する。
+
 def _u_th_factor_np(x: np.ndarray) -> np.ndarray:
     """
     Thermal energy factor for a harmonic oscillator, excluding the 1/2 zero-point term.
@@ -781,6 +814,8 @@ def _u_th_factor_np(x: np.ndarray) -> np.ndarray:
     out[mask] = x[mask] / den[mask]
     return out
 
+
+# 関数: `_numeric_dydx` の入出力契約と処理意図を定義する。
 
 def _numeric_dydx(xs: list[float], ys: list[float]) -> list[float]:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -805,6 +840,8 @@ def _numeric_dydx(xs: list[float], ys: list[float]) -> list[float]:
     return out
 
 
+# 関数: `_interp_linear` の入出力契約と処理意図を定義する。
+
 def _interp_linear(x0: float, x1: float, y0: float, y1: float, x: float) -> float:
     # 条件分岐: `x1 == x0` を満たす経路を評価する。
     if x1 == x0:
@@ -814,6 +851,8 @@ def _interp_linear(x0: float, x1: float, y0: float, y1: float, x: float) -> floa
     t = min(1.0, max(0.0, float(t)))
     return float(float(y0) + t * (float(y1) - float(y0)))
 
+
+# 関数: `_append_boundary_point` の入出力契約と処理意図を定義する。
 
 def _append_boundary_point(
     *, omega: np.ndarray, g_per_atom: np.ndarray, theta_k: np.ndarray, omega_boundary: float
@@ -849,6 +888,8 @@ def _append_boundary_point(
     th_tail = np.concatenate((np.array([th_b], dtype=float), th[i0:]), axis=0)
     return w_tail, g_tail, th_tail, i0
 
+
+# 関数: `_kim2015_linear_global_softening_scale` の入出力契約と処理意図を定義する。
 
 def _kim2015_linear_global_softening_scale(
     *,
@@ -914,6 +955,8 @@ def _kim2015_linear_global_softening_scale(
     }
 
 
+# 関数: `_kim2015_fig2_mode_softening_scales` の入出力契約と処理意図を定義する。
+
 def _kim2015_fig2_mode_softening_scales(
     *,
     root: Path,
@@ -953,6 +996,8 @@ def _kim2015_fig2_mode_softening_scales(
     if not isinstance(series_obj, dict) or not isinstance(derived_obj, dict):
         raise SystemExit(f"[fail] invalid fig2 digitized structure: {src}")
 
+    # 関数: `_rows_for` の入出力契約と処理意図を定義する。
+
     def _rows_for(key: str) -> list[dict[str, float]]:
         s = series_obj.get(key)
         # 条件分岐: `not isinstance(s, dict) or not isinstance(s.get("rows"), list)` を満たす経路を評価する。
@@ -974,6 +1019,8 @@ def _kim2015_fig2_mode_softening_scales(
 
         rows.sort(key=lambda rr: float(rr["t_K"]))
         return rows
+
+    # 関数: `_rows_for_derived` の入出力契約と処理意図を定義する。
 
     def _rows_for_derived(key: str) -> list[dict[str, float]]:
         d = derived_obj.get(key)
@@ -1011,10 +1058,14 @@ def _kim2015_fig2_mode_softening_scales(
         if not (math.isfinite(alpha_300) and alpha_300 > 0.0):
             raise SystemExit("[fail] --mode-softening=kim2015_fig2_features_eq8_quasi requires a valid alpha_300K input")
 
+        # 関数: `_interp_y` の入出力契約と処理意図を定義する。
+
         def _interp_y(rows: list[dict[str, float]], t0: float) -> float:
             ts = [float(r["t_K"]) for r in rows]
             ys = [float(r["omega_scale"]) for r in rows]
             return float(_interp_piecewise_linear(ts, ys, [float(t0)])[0])
+
+        # 関数: `_slope_y` の入出力契約と処理意図を定義する。
 
         def _slope_y(rows: list[dict[str, float]], t0: float) -> float:
             # Piecewise-linear slope dy/dT at t0, clamped to end segments.
@@ -1097,6 +1148,8 @@ def _kim2015_fig2_mode_softening_scales(
             "note": "omega_scale is adjusted as omega_scale^exponent to keep only the Eq.(8) quasiharmonic component at 300 K.",
         }
 
+    # 関数: `_interp_scale` の入出力契約と処理意図を定義する。
+
     def _interp_scale(rows: list[dict[str, float]]) -> list[float]:
         ts = [float(r["t_K"]) for r in rows]
         ys = [float(r["omega_scale"]) for r in rows]
@@ -1140,6 +1193,8 @@ def _kim2015_fig2_mode_softening_scales(
     }
     return out
 
+
+# 関数: `_metrics_for_range` の入出力契約と処理意図を定義する。
 
 def _metrics_for_range(
     *,
@@ -1193,6 +1248,8 @@ def _metrics_for_range(
     }
 
 
+# 関数: `_fit_two_basis_weighted_ls` の入出力契約と処理意図を定義する。
+
 def _fit_two_basis_weighted_ls(
     *,
     x1: list[float],
@@ -1210,6 +1267,8 @@ def _fit_two_basis_weighted_ls(
     # 条件分岐: `not idx` を満たす経路を評価する。
     if not idx:
         raise ValueError("empty fit idx")
+
+    # 関数: `sse_for` の入出力契約と処理意図を定義する。
 
     def sse_for(a1: float, a2: float) -> float:
         sse = 0.0
@@ -1350,6 +1409,8 @@ def _fit_two_basis_weighted_ls(
     }
 
 
+# 関数: `_fit_three_basis_weighted_ls` の入出力契約と処理意図を定義する。
+
 def _fit_three_basis_weighted_ls(
     *,
     x1: list[float],
@@ -1373,6 +1434,7 @@ def _fit_three_basis_weighted_ls(
 
     ridge_lambda = 0.0
 
+    # 関数: `sse_for` の入出力契約と処理意図を定義する。
     def sse_for(a1: float, a2: float, a3: float) -> float:
         sse = 0.0
         for i in idx:
@@ -1387,6 +1449,8 @@ def _fit_three_basis_weighted_ls(
             sse += w * r * r
 
         return float(sse)
+
+    # 関数: `ok` の入出力契約と処理意図を定義する。
 
     def ok(a1: float, a2: float, a3: float) -> bool:
         # 条件分岐: `not enforce_signs` を満たす経路を評価する。
@@ -1606,6 +1670,8 @@ def _fit_three_basis_weighted_ls(
     }
 
 
+# 関数: `_solve_4x4` の入出力契約と処理意図を定義する。
+
 def _solve_4x4(
     *,
     a11: float,
@@ -1684,6 +1750,8 @@ def _solve_4x4(
     return x1, x2, x3, x4
 
 
+# 関数: `_fit_four_basis_weighted_ls` の入出力契約と処理意図を定義する。
+
 def _fit_four_basis_weighted_ls(
     *,
     x1: list[float],
@@ -1706,6 +1774,8 @@ def _fit_four_basis_weighted_ls(
     if not idx:
         raise ValueError("empty fit idx")
 
+    # 関数: `sse_for` の入出力契約と処理意図を定義する。
+
     def sse_for(a1: float, a2: float, a3: float, a4: float) -> float:
         sse = 0.0
         for i in idx:
@@ -1720,6 +1790,8 @@ def _fit_four_basis_weighted_ls(
             sse += w * r * r
 
         return float(sse)
+
+    # 関数: `ok` の入出力契約と処理意図を定義する。
 
     def ok(a1: float, a2: float, a3: float, a4: float) -> bool:
         # 条件分岐: `not enforce_signs` を満たす経路を評価する。
@@ -1817,6 +1889,7 @@ def _fit_four_basis_weighted_ls(
 
     candidates: list[dict[str, float]] = []
 
+    # 関数: `add_candidate` の入出力契約と処理意図を定義する。
     def add_candidate(a1: float, a2: float, a3: float, a4: float) -> None:
         # 条件分岐: `ok(a1, a2, a3, a4)` を満たす経路を評価する。
         if ok(a1, a2, a3, a4):
@@ -1921,6 +1994,8 @@ def _fit_four_basis_weighted_ls(
     }
 
 
+# 関数: `_solve_weighted_normal_equations` の入出力契約と処理意図を定義する。
+
 def _solve_weighted_normal_equations(
     *,
     cols: list[list[float]],
@@ -1996,6 +2071,8 @@ def _solve_weighted_normal_equations(
     return sol
 
 
+# 関数: `_fit_basis_plus_delta_weighted_ls` の入出力契約と処理意図を定義する。
+
 def _fit_basis_plus_delta_weighted_ls(
     *,
     x_cols: list[list[float]],
@@ -2028,6 +2105,7 @@ def _fit_basis_plus_delta_weighted_ls(
 
     x_delta = [sum(float(g_cols[j][i]) * float(x_cols[j][i]) for j in range(k)) for i in range(n)]
 
+    # 関数: `sse_for` の入出力契約と処理意図を定義する。
     def sse_for(a_vals: list[float], delta: float) -> float:
         sse = 0.0
         for i in idx:
@@ -2045,6 +2123,8 @@ def _fit_basis_plus_delta_weighted_ls(
             sse += w * r * r
 
         return float(sse)
+
+    # 関数: `ok` の入出力契約と処理意図を定義する。
 
     def ok(a_vals: list[float]) -> bool:
         # 条件分岐: `not enforce_signs` を満たす経路を評価する。
@@ -2148,6 +2228,8 @@ def _fit_basis_plus_delta_weighted_ls(
     return best
 
 
+# 関数: `_kim2015_table1_gruneisen_diagnostics` の入出力契約と処理意図を定義する。
+
 def _kim2015_table1_gruneisen_diagnostics(
     *,
     root: Path,
@@ -2203,6 +2285,8 @@ def _kim2015_table1_gruneisen_diagnostics(
     if not isinstance(series_obj, dict) or not isinstance(derived_obj, dict):
         return None
 
+    # 関数: `_rows_for` の入出力契約と処理意図を定義する。
+
     def _rows_for(key: str, *, derived: bool = False) -> list[dict[str, float]]:
         container = derived_obj if derived else series_obj
         s = container.get(key)
@@ -2237,10 +2321,14 @@ def _kim2015_table1_gruneisen_diagnostics(
     if any(len(v) < 2 for v in feat_rows.values()):
         return None
 
+    # 関数: `_interp_y` の入出力契約と処理意図を定義する。
+
     def _interp_y(rows: list[dict[str, float]], t0: float) -> float:
         ts = [float(r["t_K"]) for r in rows]
         ys = [float(r["omega_scale"]) for r in rows]
         return float(_interp_piecewise_linear(ts, ys, [float(t0)])[0])
+
+    # 関数: `_slope_y` の入出力契約と処理意図を定義する。
 
     def _slope_y(rows: list[dict[str, float]], t0: float) -> float:
         # Piecewise-linear slope dy/dT at t0, clamped to end segments.
@@ -2400,6 +2488,8 @@ def _kim2015_table1_gruneisen_diagnostics(
         ],
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[list[str]] = None) -> None:
     args = _parse_args(argv)
@@ -2925,6 +3015,8 @@ def main(argv: Optional[list[str]] = None) -> None:
             except ValueError:
                 raise SystemExit("[fail] internal: alpha(T) grid does not include 300 K (expected integer grid)")
 
+            # 関数: `_centered` の入出力契約と処理意図を定義する。
+
             def _centered(vals: list[float]) -> list[float]:
                 g_raw = [1.0 - float(x) for x in vals]
                 # 条件分岐: `gamma_trend == "kim2015_fig2_softening_common_centered300"` を満たす経路を評価する。
@@ -3416,6 +3508,7 @@ def main(argv: Optional[list[str]] = None) -> None:
         temps_src = [temps_src[i] for i in order]
         g_src_mat = np.stack([g_src_rows[i] for i in order], axis=0)  # (n_T, n_E)
 
+        # 関数: `_dos_at_t` の入出力契約と処理意図を定義する。
         def _dos_at_t(t_k: float) -> np.ndarray:
             t_k = float(t_k)
             # 条件分岐: `t_k <= float(temps_src[0])` を満たす経路を評価する。
@@ -3563,6 +3656,8 @@ def main(argv: Optional[list[str]] = None) -> None:
     if len(fit_idx) < 100:
         raise SystemExit(f"[fail] not enough fit points: n={len(fit_idx)} in [{fit_min_k},{fit_max_k}] K")
 
+    # 関数: `_basis_list` の入出力契約と処理意図を定義する。
+
     def _basis_list(values: list[float]) -> list[float]:
         # 条件分岐: `not use_bulk_modulus` を満たす経路を評価する。
         if not use_bulk_modulus:
@@ -3574,6 +3669,8 @@ def main(argv: Optional[list[str]] = None) -> None:
             raise ValueError("basis length mismatch")
 
         return [float(values[i]) * float(inv_bv[i]) for i in range(len(values))]
+
+    # 関数: `_basis_np` の入出力契約と処理意図を定義する。
 
     def _basis_np(values: np.ndarray) -> np.ndarray:
         # 条件分岐: `not use_bulk_modulus` を満たす経路を評価する。
@@ -4274,10 +4371,14 @@ def main(argv: Optional[list[str]] = None) -> None:
 
         model_name = f"{model_name} + Cv via numeric dU/dT (omega(T) included)"
 
+    # 関数: `_fmt_tag_sci` の入出力契約と処理意図を定義する。
+
     def _fmt_tag_sci(v: float) -> str:
         s = f"{float(v):.0e}"
         s = s.replace("+", "")
         return s
+
+    # 関数: `_fmt_tag_sci_precise` の入出力契約と処理意図を定義する。
 
     def _fmt_tag_sci_precise(v: float) -> str:
         s = f"{float(v):.2e}"

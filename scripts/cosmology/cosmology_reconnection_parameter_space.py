@@ -54,6 +54,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -79,14 +80,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: Any) -> Optional[float]:
     try:
@@ -101,6 +108,8 @@ def _maybe_float(x: Any) -> Optional[float]:
 
     return float(v)
 
+
+# 関数: `_load_ddr_systematics_envelope` の入出力契約と処理意図を定義する。
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -138,6 +147,8 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_apply_ddr_sigma_policy` の入出力契約と処理意図を定義する。
+
 def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> "DDRConstraint":
     # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
@@ -162,6 +173,8 @@ def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict
     )
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -180,6 +193,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# クラス: `DDRConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRConstraint:
     id: str
@@ -193,6 +208,7 @@ class DDRConstraint:
     sigma_policy: str = "raw"
     category: Optional[str] = None
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "DDRConstraint":
         sigma = float(j["epsilon0_sigma"])
@@ -207,6 +223,8 @@ class DDRConstraint:
         )
 
 
+# 関数: `epsilon0_model` の入出力契約と処理意図を定義する。
+
 def epsilon0_model(
     *,
     p_e: float,
@@ -217,6 +235,8 @@ def epsilon0_model(
 ) -> float:
     return (p_e + p_t - s_L) / 2.0 - 2.0 + s_R + alpha_opacity
 
+
+# 関数: `_grid_zscore` の入出力契約と処理意図を定義する。
 
 def _grid_zscore(
     *,
@@ -255,6 +275,8 @@ def _grid_zscore(
     return zz, ee
 
 
+# 関数: `_solve_single_mechanism` の入出力契約と処理意図を定義する。
+
 def _solve_single_mechanism(
     *,
     eps_target: float,
@@ -288,6 +310,8 @@ def _solve_single_mechanism(
 
     raise ValueError(f"unknown mode: {mode}")
 
+
+# 関数: `_z1_interpretation` の入出力契約と処理意図を定義する。
 
 def _z1_interpretation(
     *,
@@ -323,6 +347,8 @@ def _z1_interpretation(
     }
     return out
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -384,6 +410,7 @@ def _plot(
 
     fig, axes = plt.subplots(1, 3, figsize=(18, 5.8))
 
+    # 関数: `draw_panel` の入出力契約と処理意図を定義する。
     def draw_panel(ax, xx, yy, zz, title: str, xlabel: str, ylabel: str) -> None:
         # Clip to keep colors readable.
         z_clip = np.clip(zz, -8.0, 8.0)
@@ -505,6 +532,8 @@ def _plot(
         "canonical_solutions": solutions,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: explore DDR reconnection parameter space (static background-P).")

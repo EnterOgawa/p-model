@@ -18,18 +18,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_lines` の入出力契約と処理意図を定義する。
 
 def _read_lines(path: Path) -> List[str]:
     return path.read_text(encoding="utf-8", errors="replace").splitlines()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_first` の入出力契約と処理意図を定義する。
 
 def _find_first(lines: Sequence[str], pattern: re.Pattern[str]) -> Optional[Tuple[int, re.Match[str]]]:
     for i, line in enumerate(lines, start=1):
@@ -41,6 +48,8 @@ def _find_first(lines: Sequence[str], pattern: re.Pattern[str]) -> Optional[Tupl
     return None
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(x: str) -> Optional[float]:
     try:
         v = float(x)
@@ -48,6 +57,8 @@ def _maybe_float(x: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_anchor_snippet` の入出力契約と処理意図を定義する。
 
 def _anchor_snippet(line: str, match: Optional[re.Match[str]] = None, *, max_len: int = 240) -> str:
     s = line.rstrip("\n")
@@ -63,11 +74,15 @@ def _anchor_snippet(line: str, match: Optional[re.Match[str]] = None, *, max_len
     return s[start:end].strip()
 
 
+# 関数: `_get_anchor` の入出力契約と処理意図を定義する。
+
 def _get_anchor(
     path: Path, line: int, *, label: str, snippet: str, match: Optional[re.Match[str]] = None
 ) -> Dict[str, Any]:
     return {"path": str(path), "line": int(line), "label": label, "snippet": _anchor_snippet(snippet, match)}
 
+
+# 関数: `_ks_c_alpha` の入出力契約と処理意図を定義する。
 
 def _ks_c_alpha(alpha: float) -> Optional[float]:
     # Standard 2-sample KS asymptotic constants (commonly tabulated).
@@ -92,6 +107,8 @@ def _ks_c_alpha(alpha: float) -> Optional[float]:
     return None
 
 
+# 関数: `_ks_two_sample_dcrit` の入出力契約と処理意図を定義する。
+
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
     # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
@@ -104,6 +121,8 @@ def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
 
     return float(c * math.sqrt((n + m) / (n * m)))
 
+
+# 関数: `_parse_nir_constraint` の入出力契約と処理意図を定義する。
 
 def _parse_nir_constraint(observations_tex: Path) -> Dict[str, Any]:
     lines = _read_lines(observations_tex)
@@ -167,6 +186,8 @@ def _parse_nir_constraint(observations_tex: Path) -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_parse_m3_constraint` の入出力契約と処理意図を定義する。
 
 def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
     lines = _read_lines(observations_tex)
@@ -251,6 +272,8 @@ def _parse_m3_constraint(observations_tex: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_parse_m3_sensitivity` の入出力契約と処理意図を定義する。
+
 def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dict[str, Any]:
     disc_lines = _read_lines(discussion_tex)
     conc_lines = _read_lines(conclusions_tex)
@@ -318,6 +341,8 @@ def _parse_m3_sensitivity(*, discussion_tex: Path, conclusions_tex: Path) -> Dic
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

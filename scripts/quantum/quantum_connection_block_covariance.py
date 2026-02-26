@@ -35,9 +35,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -46,9 +49,13 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(value: Any) -> Optional[float]:
     # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
@@ -60,6 +67,8 @@ def _as_float(value: Any) -> Optional[float]:
 
     return None
 
+
+# 関数: `_resample` の入出力契約と処理意図を定義する。
 
 def _resample(series: np.ndarray, n_points: int) -> np.ndarray:
     # 条件分岐: `series.ndim != 1` を満たす経路を評価する。
@@ -86,10 +95,14 @@ def _resample(series: np.ndarray, n_points: int) -> np.ndarray:
     return np.interp(x_new, x_old, series).astype(float)
 
 
+# 関数: `_safe_log1p` の入出力契約と処理意図を定義する。
+
 def _safe_log1p(series: np.ndarray) -> np.ndarray:
     clipped = np.clip(series.astype(float), a_min=0.0, a_max=None)
     return np.log1p(clipped)
 
+
+# 関数: `_eigen_summary` の入出力契約と処理意図を定義する。
 
 def _eigen_summary(matrix: np.ndarray, labels: List[str]) -> Dict[str, Any]:
     # 条件分岐: `matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1] or matrix.shape[0] == 0` を満たす経路を評価する。
@@ -115,6 +128,8 @@ def _eigen_summary(matrix: np.ndarray, labels: List[str]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_bell_series` の入出力契約と処理意図を定義する。
+
 def _extract_bell_series(cross_cov: Dict[str, Any]) -> np.ndarray:
     matrices = cross_cov.get("matrices") if isinstance(cross_cov.get("matrices"), dict) else {}
     profile_cov = np.array(matrices.get("profile_cov") or [], dtype=float)
@@ -125,6 +140,8 @@ def _extract_bell_series(cross_cov: Dict[str, Any]) -> np.ndarray:
     sigma = np.sqrt(np.clip(np.diag(profile_cov), a_min=0.0, a_max=None))
     return sigma.astype(float)
 
+
+# 関数: `_extract_interference_series` の入出力契約と処理意図を定義する。
 
 def _extract_interference_series(born_ab: Dict[str, Any]) -> np.ndarray:
     criteria = born_ab.get("criteria") if isinstance(born_ab.get("criteria"), list) else []
@@ -153,6 +170,8 @@ def _extract_interference_series(born_ab: Dict[str, Any]) -> np.ndarray:
 
     return np.array(values, dtype=float)
 
+
+# 関数: `_extract_condensed_series` の入出力契約と処理意図を定義する。
 
 def _extract_condensed_series(condensed: Dict[str, Any]) -> np.ndarray:
     summary = condensed.get("summary") if isinstance(condensed.get("summary"), dict) else {}
@@ -183,6 +202,8 @@ def _extract_condensed_series(condensed: Dict[str, Any]) -> np.ndarray:
 
     return np.array(values, dtype=float)
 
+
+# 関数: `build_payload` の入出力契約と処理意図を定義する。
 
 def build_payload(
     *,
@@ -302,6 +323,8 @@ def build_payload(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
     matrices = payload.get("matrices") if isinstance(payload.get("matrices"), dict) else {}
     labels = matrices.get("channel_order") if isinstance(matrices.get("channel_order"), list) else []
@@ -330,6 +353,8 @@ def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
                     }
                 )
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     matrices = payload.get("matrices") if isinstance(payload.get("matrices"), dict) else {}
@@ -385,6 +410,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     plt.close(fig)
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Build block covariance across Bell/interference/condensed channels.")
     parser.add_argument(
@@ -424,6 +451,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # 関数: `_resolve` の入出力契約と処理意図を定義する。
     def _resolve(path_text: str) -> Path:
         path = Path(path_text)
         # 条件分岐: `path.is_absolute()` を満たす経路を評価する。

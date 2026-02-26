@@ -17,22 +17,31 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# クラス: `EventSpec` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class EventSpec:
@@ -42,6 +51,7 @@ class EventSpec:
     profile: str
     optional: bool
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name,
@@ -51,6 +61,8 @@ class EventSpec:
             "optional": self.optional,
         }
 
+
+# 関数: `_load_event_specs` の入出力契約と処理意図を定義する。
 
 def _load_event_specs(root: Path) -> List[EventSpec]:
     path = root / "data" / "gw" / "event_list.json"
@@ -88,6 +100,8 @@ def _load_event_specs(root: Path) -> List[EventSpec]:
     return out
 
 
+# 関数: `_load_run_all_status` の入出力契約と処理意図を定義する。
+
 def _load_run_all_status(root: Path) -> Dict[str, Any]:
     path = root / "output" / "private" / "summary" / "run_all_status.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -99,6 +113,8 @@ def _load_run_all_status(root: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_task_map_from_status` の入出力契約と処理意図を定義する。
 
 def _task_map_from_status(status: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     tasks = status.get("tasks")
@@ -133,6 +149,7 @@ _REASON_RULES: List[Tuple[str, re.Pattern[str]]] = [
 ]
 
 
+# 関数: `_classify_reason` の入出力契約と処理意図を定義する。
 def _classify_reason(text: str) -> str:
     s = (text or "").strip()
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -146,6 +163,8 @@ def _classify_reason(text: str) -> str:
 
     return "unknown"
 
+
+# 関数: `_event_result` の入出力契約と処理意図を定義する。
 
 def _event_result(
     *, root: Path, spec: EventSpec, task_rec: Optional[Dict[str, Any]]
@@ -186,6 +205,8 @@ def _event_result(
     return False, reason, log_path, metrics_path
 
 
+# 関数: `_summarize_by_type` の入出力契約と処理意図を定義する。
+
 def _summarize_by_type(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     by_type: Dict[str, Dict[str, Any]] = {}
     for r in rows:
@@ -214,6 +235,8 @@ def _summarize_by_type(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
 
     return by_type
 
+
+# 関数: `_load_detector_stats_from_metrics` の入出力契約と処理意図を定義する。
 
 def _load_detector_stats_from_metrics(metrics_path: Optional[str]) -> Dict[str, Any]:
     # 条件分岐: `not metrics_path` を満たす経路を評価する。
@@ -281,6 +304,8 @@ def _load_detector_stats_from_metrics(metrics_path: Optional[str]) -> Dict[str, 
     }
 
 
+# 関数: `_summarize_detector_skips` の入出力契約と処理意図を定義する。
+
 def _summarize_detector_skips(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     by_reason: Dict[str, int] = {}
     by_subreason: Dict[str, int] = {}
@@ -335,6 +360,8 @@ def _summarize_detector_skips(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         **({"skipped_by_detector_subreason": by_detector_subreason} if by_detector_subreason else {}),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Diagnose GW event_list run status (success/failure reasons).")

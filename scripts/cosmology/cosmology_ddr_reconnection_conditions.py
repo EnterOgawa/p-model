@@ -63,6 +63,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -88,14 +89,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_load_required` の入出力契約と処理意図を定義する。
 
 def _load_required(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -104,6 +111,8 @@ def _load_required(path: Path) -> Dict[str, Any]:
 
     return _read_json(path)
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -122,6 +131,8 @@ def _safe_float(x: Any) -> Optional[float]:
 
     return float(v)
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -146,6 +157,8 @@ def _fmt(x: Optional[float], *, digits: int = 3) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# クラス: `DDRRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRRow:
     id: str
@@ -158,6 +171,7 @@ class DDRRow:
     flux_dimming_z1: Optional[float]
     tau_equiv_z1: Optional[float]
 
+    # 関数: `from_metrics_row` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_metrics_row(r: Dict[str, Any]) -> "DDRRow":
         return DDRRow(
@@ -173,6 +187,8 @@ class DDRRow:
         )
 
 
+# クラス: `ScalarConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ScalarConstraint:
     id: str
@@ -184,6 +200,7 @@ class ScalarConstraint:
     assumes_cddr: Optional[bool] = None
     is_forecast: Optional[bool] = None
 
+    # 関数: `from_opacity_row` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_opacity_row(r: Dict[str, Any]) -> "ScalarConstraint":
         return ScalarConstraint(
@@ -196,6 +213,8 @@ class ScalarConstraint:
             assumes_cddr=None,
             is_forecast=(None if r.get("is_forecast") is None else bool(r.get("is_forecast"))),
         )
+
+    # 関数: `from_sn_evo_row` の入出力契約と処理意図を定義する。
 
     @staticmethod
     def from_sn_evo_row(r: Dict[str, Any]) -> "ScalarConstraint":
@@ -210,6 +229,8 @@ class ScalarConstraint:
             assumes_cddr=(None if assumes_cddr is None else bool(assumes_cddr)),
         )
 
+
+# 関数: `_envelope` の入出力契約と処理意図を定義する。
 
 def _envelope(constraints: List[ScalarConstraint], *, nsigma: float) -> Tuple[Optional[float], Optional[float]]:
     lows: List[float] = []
@@ -230,6 +251,8 @@ def _envelope(constraints: List[ScalarConstraint], *, nsigma: float) -> Tuple[Op
     return (float(min(lows)), float(max(highs)))
 
 
+# 関数: `_extract_pt` の入出力契約と処理意図を定義する。
+
 def _extract_pt(pe_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
     rows = pe_metrics.get("rows") or []
     # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
@@ -239,6 +262,8 @@ def _extract_pt(pe_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[f
     r0 = rows[0] if isinstance(rows[0], dict) else {}
     return (_safe_float(r0.get("p_t_obs")), _safe_float(r0.get("p_t_sigma")))
 
+
+# 関数: `_extract_pT` の入出力契約と処理意図を定義する。
 
 def _extract_pT(cmb_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
     rows = cmb_metrics.get("rows") or []
@@ -250,6 +275,8 @@ def _extract_pT(cmb_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[
     return (_safe_float(r0.get("p_T_obs")), _safe_float(r0.get("p_T_sigma")))
 
 
+# 関数: `_extract_sR` の入出力契約と処理意図を定義する。
+
 def _extract_sR(bao_ratio_fit_metrics: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
     try:
         comb = (bao_ratio_fit_metrics.get("results") or {}).get("combined") or {}
@@ -258,6 +285,8 @@ def _extract_sR(bao_ratio_fit_metrics: Dict[str, Any]) -> Tuple[Optional[float],
     except Exception:
         return (None, None)
 
+
+# 関数: `_extract_sR_by_subset` の入出力契約と処理意図を定義する。
 
 def _extract_sR_by_subset(bao_ratio_fit_metrics: Dict[str, Any]) -> Dict[str, Tuple[Optional[float], Optional[float]]]:
     out: Dict[str, Tuple[Optional[float], Optional[float]]] = {}
@@ -271,6 +300,8 @@ def _extract_sR_by_subset(bao_ratio_fit_metrics: Dict[str, Any]) -> Dict[str, Tu
 
     return out
 
+
+# 関数: `_classify_sigma` の入出力契約と処理意図を定義する。
 
 def _classify_sigma(abs_z: Optional[float]) -> Optional[str]:
     # 条件分岐: `abs_z is None` を満たす経路を評価する。
@@ -299,6 +330,8 @@ def _classify_sigma(abs_z: Optional[float]) -> Optional[str]:
 
     return "ng"
 
+
+# 関数: `_min_abs_z` の入出力契約と処理意図を定義する。
 
 def _min_abs_z(rows: List[Dict[str, Any]], *, keep: Optional[callable] = None) -> Optional[float]:
     best: Optional[float] = None
@@ -335,6 +368,8 @@ def _min_abs_z(rows: List[Dict[str, Any]], *, keep: Optional[callable] = None) -
     return best
 
 
+# 関数: `_env_from_gaussian` の入出力契約と処理意図を定義する。
+
 def _env_from_gaussian(mu: Optional[float], sigma: Optional[float], *, nsigma: float) -> Tuple[Optional[float], Optional[float]]:
     # 条件分岐: `mu is None or sigma is None` を満たす経路を評価する。
     if mu is None or sigma is None:
@@ -348,6 +383,8 @@ def _env_from_gaussian(mu: Optional[float], sigma: Optional[float], *, nsigma: f
     return (float(mu - float(nsigma) * sigma), float(mu + float(nsigma) * sigma))
 
 
+# 関数: `_zscore_required` の入出力契約と処理意図を定義する。
+
 def _zscore_required(required: float, *, mu: float, sigma: float) -> Optional[float]:
     # 条件分岐: `not (math.isfinite(required) and math.isfinite(mu) and math.isfinite(sigma) a...` を満たす経路を評価する。
     if not (math.isfinite(required) and math.isfinite(mu) and math.isfinite(sigma) and sigma > 0.0):
@@ -355,6 +392,8 @@ def _zscore_required(required: float, *, mu: float, sigma: float) -> Optional[fl
 
     return float((required - mu) / sigma)
 
+
+# 関数: `_factor_to_delta_mu_mag` の入出力契約と処理意図を定義する。
 
 def _factor_to_delta_mu_mag(factor: Optional[float]) -> Optional[float]:
     # 条件分岐: `factor is None` を満たす経路を評価する。
@@ -373,6 +412,8 @@ def _factor_to_delta_mu_mag(factor: Optional[float]) -> Optional[float]:
 
     return float(5.0 * math.log10(f))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="DDR reconnection conditions (Step 4.7): quantify required α/s_L/s_R.")
@@ -605,6 +646,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     labels = [str(r["short_label"]) for r in computed_rows]
     y = np.arange(len(computed_rows), dtype=float)
 
+    # 関数: `_plot_panel` の入出力契約と処理意図を定義する。
     def _plot_panel(
         ax: Any,
         *,

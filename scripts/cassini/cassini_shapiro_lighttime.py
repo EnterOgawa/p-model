@@ -17,6 +17,7 @@ SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False
 SSL_CTX.verify_mode = ssl.CERT_NONE
 
+# 関数: `fetch_horizons` の入出力契約と処理意図を定義する。
 def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@10") -> str:
     params = {
         "format": "text",
@@ -36,6 +37,8 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
     url = "https://ssd.jpl.nasa.gov/api/horizons.api?" + urllib.parse.urlencode(params)
     with urllib.request.urlopen(url, timeout=180, context=SSL_CTX) as resp:
         return resp.read().decode("utf-8", errors="ignore")
+
+# 関数: `parse_vectors_csv` の入出力契約と処理意図を定義する。
 
 def parse_vectors_csv(txt: str):
     # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
@@ -58,10 +61,16 @@ def parse_vectors_csv(txt: str):
 
     return rows
 
+# 関数: `dot` の入出力契約と処理意図を定義する。
+
 def dot(a,b): return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]
+# 関数: `sub` の入出力契約と処理意図を定義する。
 def sub(a,b): return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+# 関数: `add` の入出力契約と処理意図を定義する。
 def add(a,b): return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
+# 関数: `mul` の入出力契約と処理意図を定義する。
 def mul(a,k): return (a[0]*k, a[1]*k, a[2]*k)
+# 関数: `norm` の入出力契約と処理意図を定義する。
 def norm(a): return math.sqrt(dot(a,a))
 
 # Hermite interpolation for position using (r0,v0) and (r1,v1)
@@ -77,12 +86,17 @@ def hermite(r0,v0,r1,v1, u, h):
         add(mul(r1,h01), mul(v1, h11*h))
     )
 
+# クラス: `StateTable` の責務と境界条件を定義する。
+
 class StateTable:
+    # 関数: `__init__` の入出力契約と処理意図を定義する。
     def __init__(self, rows):
         self.t=[r[0] for r in rows]
         self.r=[r[1] for r in rows]
         self.v=[r[2] for r in rows]
         self.dt=(self.t[1]-self.t[0]).total_seconds()
+
+    # 関数: `state` の入出力契約と処理意図を定義する。
 
     def state(self, tq: datetime):
         # assume tq within range; find i such that t[i] <= tq <= t[i+1]
@@ -98,11 +112,15 @@ class StateTable:
         # velocity not needed for delay, but could be obtained by derivative; skip for now
         return r
 
+# 関数: `shapiro_oneway` の入出力契約と処理意図を定義する。
+
 def shapiro_oneway(r1, r2, R, gamma=1.0):
     # One-way Shapiro delay (weak field): (1+gamma) GM/c^3 ln((r1+r2+R)/(r1+r2-R))
     num = (r1 + r2 + R)
     den = (r1 + r2 - R)
     return (1.0+gamma)*MU_SUN/(C**3) * math.log(num/den)
+
+# 関数: `solve_downlink_time` の入出力契約と処理意図を定義する。
 
 def solve_downlink_time(tR, earth_tab, cass_tab, gamma=1.0, iters=8):
     # Solve tR = tB + (R/c + dt_shapiro) for tB
@@ -121,6 +139,8 @@ def solve_downlink_time(tR, earth_tab, cass_tab, gamma=1.0, iters=8):
 
     return tB
 
+# 関数: `solve_uplink_time` の入出力契約と処理意図を定義する。
+
 def solve_uplink_time(tB, earth_tab, cass_tab, gamma=1.0, iters=8):
     # Solve tB = tT + (R/c + dt_shapiro) for tT
     tT = tB - timedelta(seconds=3600)  # initial guess
@@ -137,6 +157,8 @@ def solve_uplink_time(tB, earth_tab, cass_tab, gamma=1.0, iters=8):
         tT = tT_new
 
     return tT
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
     root = Path(__file__).resolve().parents[2]

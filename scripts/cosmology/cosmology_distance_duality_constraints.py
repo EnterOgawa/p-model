@@ -49,6 +49,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -74,14 +75,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -95,6 +102,8 @@ def _fmt_float(x: float, *, digits: int = 6) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -110,6 +119,8 @@ def _safe_float(x: Any) -> Optional[float]:
     return v
 
 
+# クラス: `Constraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Constraint:
     id: str
@@ -121,6 +132,7 @@ class Constraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "Constraint":
         return Constraint(
@@ -134,6 +146,8 @@ class Constraint:
             source=dict(j.get("source") or {}),
         )
 
+
+# 関数: `compute` の入出力契約と処理意図を定義する。
 
 def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -278,6 +292,8 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
 
     return out
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> None:
     _set_japanese_font()
@@ -442,6 +458,8 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
     plt.close(fig)
 
 
+# 関数: `_plot_eta_pmodel` の入出力契約と処理意図を定義する。
+
 def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> None:
     """Plot η^(P)(z) ≡ D_L/((1+z)D_A) inferred from ε0 constraints (parameterization-dependent view)."""
     _set_japanese_font()
@@ -542,6 +560,8 @@ def _plot_eta_pmodel(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: fl
     plt.close(fig)
 
 
+# 関数: `_select_representative` の入出力契約と処理意図を定義する。
+
 def _select_representative(rows: Sequence[Dict[str, Any]]) -> Dict[str, Optional[Dict[str, Any]]]:
     best_bao: Optional[Dict[str, Any]] = None
     best_bao_sig = float("inf")
@@ -582,6 +602,8 @@ def _select_representative(rows: Sequence[Dict[str, Any]]) -> Dict[str, Optional
     return {"bao": best_bao, "no_bao": best_no_bao}
 
 
+# 関数: `_z_limit_for_budget_mag` の入出力契約と処理意図を定義する。
+
 def _z_limit_for_budget_mag(*, delta_eps: float, budget_mag: float) -> Optional[float]:
     """Solve |Δμ(z)|=budget_mag for z, where Δμ(z)=5*Δε*log10(1+z)."""
     # 条件分岐: `not (budget_mag > 0)` を満たす経路を評価する。
@@ -596,6 +618,8 @@ def _z_limit_for_budget_mag(*, delta_eps: float, budget_mag: float) -> Optional[
     exponent = float(budget_mag) / (5.0 * a)
     return float(10.0**exponent - 1.0)
 
+
+# 関数: `_reach_values_for_z` の入出力契約と処理意図を定義する。
 
 def _reach_values_for_z(*, delta_eps: float, z: float) -> Dict[str, float]:
     op = 1.0 + float(z)
@@ -617,6 +641,8 @@ def _reach_values_for_z(*, delta_eps: float, z: float) -> Dict[str, float]:
         "tau_equivalent_dimming": float(tau_equiv),
     }
 
+
+# 関数: `_build_reach_metrics` の入出力契約と処理意図を定義する。
 
 def _build_reach_metrics(
     *,
@@ -669,6 +695,8 @@ def _build_reach_metrics(
 
     return out
 
+
+# 関数: `_plot_reach_limit` の入出力契約と処理意図を定義する。
 
 def _plot_reach_limit(
     *,
@@ -756,6 +784,8 @@ def _plot_reach_limit(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: distance duality (DDR) constraints and rejection condition.")
@@ -939,6 +969,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     # Step 5.3.16: Freeze a human-readable comparison table in the η^(P) space.
     eta_p_table_md = out_dir / "cosmology_ddr_pmodel_eta_constraints_table.md"
 
+    # 関数: `_fmt_pm` の入出力契約と処理意図を定義する。
     def _fmt_pm(x: Any, s: Any, *, digits: int = 3) -> str:
         vx = _safe_float(x)
         vs = _safe_float(s)
@@ -947,6 +978,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return "n/a"
 
         return f"{vx:.{digits}f}±{vs:.{digits}f}"
+
+    # 関数: `_fmt_z` の入出力契約と処理意図を定義する。
 
     def _fmt_z(x: Any, *, digits: int = 2) -> str:
         vx = _safe_float(x)

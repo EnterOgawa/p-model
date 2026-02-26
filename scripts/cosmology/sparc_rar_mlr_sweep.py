@@ -50,9 +50,13 @@ except Exception:  # pragma: no cover
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -61,10 +65,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_baryons_only_stats` の入出力契約と処理意図を定義する。
 
 def _baryons_only_stats(
     g_bar: np.ndarray,
@@ -103,6 +111,8 @@ def _baryons_only_stats(
         "low_accel": {"cut_log10_gbar": float(low_accel_cut_log10_gbar), "weighted_mean_dex": mean_low, "sem_dex": sem_low, "z": z_low},
     }
 
+
+# 関数: `_rar_fixed_a0_stats` の入出力契約と処理意図を定義する。
 
 def _rar_fixed_a0_stats(
     g_bar: np.ndarray,
@@ -147,6 +157,8 @@ def _rar_fixed_a0_stats(
     }
 
 
+# 関数: `_collect_points_from_zip` の入出力契約と処理意図を定義する。
+
 def _collect_points_from_zip(
     rotmod_zip: Path,
     *,
@@ -180,6 +192,8 @@ def _collect_points_from_zip(
     m = np.isfinite(g_bar) & np.isfinite(g_obs) & (g_bar > 0.0) & (g_obs > 0.0)
     return {"n_galaxies": int(n_gal), "g_bar": g_bar[m], "g_obs": g_obs[m], "sg_obs": sg_obs[m]}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

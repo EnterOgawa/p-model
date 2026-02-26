@@ -90,6 +90,7 @@ HORIZONS_TIME_QUANTUM_US = 100
 _POS_EOP_PARSED_CACHE: Dict[Path, Dict[str, Any]] = {}
 
 
+# 関数: `_parse_yymmdd_to_date` の入出力契約と処理意図を定義する。
 def _parse_yymmdd_to_date(yymmdd: str) -> Optional[datetime]:
     """
     Parse YYMMDD into UTC datetime at 00:00.
@@ -110,6 +111,8 @@ def _parse_yymmdd_to_date(yymmdd: str) -> Optional[datetime]:
         return None
 
 
+# 関数: `_pos_eop_snx_path` の入出力契約と処理意図を定義する。
+
 def _pos_eop_snx_path(repo_root: Path, yymmdd: str) -> Path:
     dt = _parse_yymmdd_to_date(yymmdd)
     # 条件分岐: `dt is None` を満たす経路を評価する。
@@ -119,6 +122,8 @@ def _pos_eop_snx_path(repo_root: Path, yymmdd: str) -> Path:
     year = dt.year
     return repo_root / POS_EOP_SNX_DIR_REL / str(year) / str(yymmdd) / f"pos_eop_{yymmdd}.snx.gz"
 
+
+# 関数: `_iter_cached_pos_eop_yymmdd` の入出力契約と処理意図を定義する。
 
 def _iter_cached_pos_eop_yymmdd(repo_root: Path) -> List[str]:
     root = repo_root / POS_EOP_SNX_DIR_REL
@@ -135,6 +140,8 @@ def _iter_cached_pos_eop_yymmdd(repo_root: Path) -> List[str]:
 
     return sorted(yymmdd)
 
+
+# 関数: `_nearest_pos_eop_yymmdd` の入出力契約と処理意図を定義する。
 
 def _nearest_pos_eop_yymmdd(repo_root: Path, target_dt: datetime, *, max_days: int = 45) -> Optional[str]:
     # 条件分岐: `target_dt.tzinfo is None` を満たす経路を評価する。
@@ -166,6 +173,8 @@ def _nearest_pos_eop_yymmdd(repo_root: Path, target_dt: datetime, *, max_days: i
 
     return best[1] if best else None
 
+
+# 関数: `_nearest_pos_eop_yymmdd_for_code` の入出力契約と処理意図を定義する。
 
 def _nearest_pos_eop_yymmdd_for_code(
     repo_root: Path,
@@ -229,6 +238,8 @@ def _nearest_pos_eop_yymmdd_for_code(
     return None
 
 
+# 関数: `_sinex_epoch_to_utc` の入出力契約と処理意図を定義する。
+
 def _sinex_epoch_to_utc(epoch: str) -> Optional[datetime]:
     # YY:DOY:SSSSS (seconds of day) -> UTC
     s = str(epoch).strip()
@@ -246,6 +257,8 @@ def _sinex_epoch_to_utc(epoch: str) -> Optional[datetime]:
     except Exception:
         return None
 
+
+# 関数: `parse_pos_eop_snx_gz` の入出力契約と処理意図を定義する。
 
 def parse_pos_eop_snx_gz(path: Path) -> Dict[str, Any]:
     """
@@ -339,6 +352,8 @@ def parse_pos_eop_snx_gz(path: Path) -> Dict[str, Any]:
     _POS_EOP_PARSED_CACHE[path] = out
     return out
 
+
+# 関数: `load_station_xyz_from_pos_eop` の入出力契約と処理意図を定義する。
 
 def load_station_xyz_from_pos_eop(
     repo_root: Path,
@@ -448,6 +463,8 @@ def load_station_xyz_from_pos_eop(
     }
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -480,6 +497,7 @@ def _set_japanese_font() -> None:
 _SPICE_CTX: Optional[Dict[str, Any]] = None
 
 
+# 関数: `_try_load_spice` の入出力契約と処理意図を定義する。
 def _try_load_spice(repo_root: Path) -> Optional[Any]:
     """
     Return spiceypy module after loading required kernels, or None.
@@ -525,6 +543,8 @@ def _try_load_spice(repo_root: Path) -> Optional[Any]:
     _SPICE_CTX = {"spice": sp, "status": "ok", "kernel_dir": str(kdir)}
     return sp
 
+
+# 関数: `_moon_pa_de421_to_j2000_matrix` の入出力契約と処理意図を定義する。
 
 def _moon_pa_de421_to_j2000_matrix(repo_root: Path, dt_utc: datetime) -> Optional[np.ndarray]:
     """
@@ -582,6 +602,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_load_station_geodetic` の入出力契約と処理意図を定義する。
+
 def _load_station_geodetic(repo_root: Path, station_code: Optional[str]) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not station_code` を満たす経路を評価する。
     if not station_code:
@@ -626,6 +648,8 @@ def _load_station_geodetic(repo_root: Path, station_code: Optional[str]) -> Opti
     return meta
 
 
+# 関数: `_norm_key` の入出力契約と処理意図を定義する。
+
 def _norm_key(s: Optional[str]) -> str:
     # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
@@ -633,6 +657,8 @@ def _norm_key(s: Optional[str]) -> str:
 
     return re.sub(r"[^a-z0-9]+", "", str(s).strip().lower())
 
+
+# 関数: `_load_reflector_pa` の入出力契約と処理意図を定義する。
 
 def _load_reflector_pa(repo_root: Path, target_name: Optional[str]) -> Optional[Dict[str, Any]]:
     """
@@ -677,6 +703,8 @@ def _load_reflector_pa(repo_root: Path, target_name: Optional[str]) -> Optional[
     return None
 
 
+# 関数: `ecef_from_geodetic` の入出力契約と処理意図を定義する。
+
 def ecef_from_geodetic(lat_deg: float, lon_deg: float, h_m: float) -> np.ndarray:
     # WGS84 geodetic -> ECEF (meters)
     lat = math.radians(lat_deg)
@@ -694,6 +722,8 @@ def ecef_from_geodetic(lat_deg: float, lon_deg: float, h_m: float) -> np.ndarray
     z = (N * (1.0 - e2) + h_m) * sin_lat
     return np.array([x, y, z], dtype=float)
 
+
+# 関数: `geodetic_from_ecef` の入出力契約と処理意図を定義する。
 
 def geodetic_from_ecef(x_m: float, y_m: float, z_m: float) -> tuple[float, float, float]:
     """
@@ -732,6 +762,8 @@ def geodetic_from_ecef(x_m: float, y_m: float, z_m: float) -> tuple[float, float
     return (math.degrees(lon), math.degrees(lat), float(h))
 
 
+# 関数: `_julian_date_utc` の入出力契約と処理意図を定義する。
+
 def _julian_date_utc(dt: datetime) -> float:
     # UTC as UT1 approximation (sufficient for this stage).
     dt = dt.astimezone(timezone.utc)
@@ -754,6 +786,8 @@ def _julian_date_utc(dt: datetime) -> float:
     return float(JD)
 
 
+# 関数: `gmst_rad` の入出力契約と処理意図を定義する。
+
 def gmst_rad(dt_utc: datetime) -> float:
     # Vallado-style GMST (IAU 1982), good enough for ECEF->ECI z-rotation in this project phase.
     jd = _julian_date_utc(dt_utc)
@@ -767,6 +801,8 @@ def gmst_rad(dt_utc: datetime) -> float:
     gmst_sec = gmst_sec % 86400.0
     return (gmst_sec / 86400.0) * 2.0 * math.pi
 
+
+# 関数: `ecef_to_eci_zrot` の入出力契約と処理意図を定義する。
 
 def ecef_to_eci_zrot(ecef_m: np.ndarray, times_utc: List[datetime]) -> np.ndarray:
     # ECEF -> ECI using only Earth rotation (GMST). Shape: (n,3)
@@ -797,6 +833,7 @@ def _moon_iau_alpha_delta_w_rad(dt_utc: datetime) -> tuple[float, float, float]:
     d = jd - 2451545.0
     T = d / 36525.0
 
+    # 関数: `_deg` の入出力契約と処理意図を定義する。
     def _deg(x: float) -> float:
         return math.radians(x)
 
@@ -865,6 +902,8 @@ def _moon_iau_alpha_delta_w_rad(dt_utc: datetime) -> tuple[float, float, float]:
     return alpha, delta, W
 
 
+# 関数: `moon_pa_to_icrf_matrix` の入出力契約と処理意図を定義する。
+
 def moon_pa_to_icrf_matrix(dt_utc: datetime) -> np.ndarray:
     """
     Rotation matrix R (3x3) that maps a vector in Moon body-fixed principal-axis frame
@@ -913,13 +952,19 @@ def _open_text(path: Path) -> io.TextIOBase:
     return path.open("r", encoding="utf-8", errors="replace")
 
 
+# 関数: `_rtype` の入出力契約と処理意図を定義する。
+
 def _rtype(line: str) -> str:
     return line[:2].strip().upper() if line else ""
 
 
+# 関数: `_is_na` の入出力契約と処理意図を定義する。
+
 def _is_na(tok: str) -> bool:
     return tok.lower() in ("na", "nan")
 
+
+# 関数: `_to_int` の入出力契約と処理意図を定義する。
 
 def _to_int(tok: str) -> Optional[int]:
     # 条件分岐: `tok is None or _is_na(tok)` を満たす経路を評価する。
@@ -932,6 +977,8 @@ def _to_int(tok: str) -> Optional[int]:
         return None
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
+
 def _to_float(tok: str) -> Optional[float]:
     # 条件分岐: `tok is None or _is_na(tok)` を満たす経路を評価する。
     if tok is None or _is_na(tok):
@@ -943,6 +990,8 @@ def _to_float(tok: str) -> Optional[float]:
         return None
 
 
+# クラス: `Context` の責務と境界条件を定義する。
+
 @dataclass
 class Context:
     station: Optional[str] = None
@@ -950,6 +999,8 @@ class Context:
     session_day_utc: Optional[datetime] = None  # midnight UTC of session start day
     range_type: Optional[int] = None            # 1=one-way, 2=two-way
 
+
+# 関数: `parse_crd_npt11` の入出力契約と処理意図を定義する。
 
 def parse_crd_npt11(path: Path, assume_two_way_if_missing: bool = True) -> pd.DataFrame:
     """
@@ -1155,6 +1206,7 @@ _VEC_XYZ_LINE_RE = re.compile(
 )
 
 
+# 関数: `_horizons_get_text` の入出力契約と処理意図を定義する。
 def _horizons_get_text(params: Dict[str, str]) -> str:
     q = urllib.parse.urlencode(params, safe="'@,;:+ ")
     url = HORIZONS_API + "?" + q
@@ -1198,6 +1250,8 @@ def _horizons_get_text(params: Dict[str, str]) -> str:
             raise
 
 
+# 関数: `_quantize_utc_for_horizons` の入出力契約と処理意図を定義する。
+
 def _quantize_utc_for_horizons(dt: datetime) -> datetime:
     """
     Horizonsのepoch表示は秒の小数4桁（0.0001s=100µs）。それに合わせて入力時刻を丸める。
@@ -1214,11 +1268,15 @@ def _quantize_utc_for_horizons(dt: datetime) -> datetime:
     return dt.replace(microsecond=us_round)
 
 
+# 関数: `_format_calendar_utc` の入出力契約と処理意図を定義する。
+
 def _format_calendar_utc(dt: datetime) -> str:
     dt = _quantize_utc_for_horizons(dt)
     # 6桁microsecondを4桁にして渡す（Horizons側の表記に合わせる）
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:-2]
 
+
+# 関数: `_format_tlist` の入出力契約と処理意図を定義する。
 
 def _format_tlist(times_utc: List[datetime]) -> str:
     # Horizons accepts TLIST with quoted calendar strings.
@@ -1228,6 +1286,8 @@ def _format_tlist(times_utc: List[datetime]) -> str:
 
     return ",".join(items)
 
+
+# 関数: `fetch_vectors` の入出力契約と処理意図を定義する。
 
 def fetch_vectors(
     command: str,
@@ -1307,6 +1367,8 @@ def fetch_vectors(
     return pd.DataFrame(rows, columns=["epoch_utc", "x_km", "y_km", "z_km"]).sort_values("epoch_utc")
 
 
+# 関数: `fetch_vectors_chunked` の入出力契約と処理意図を定義する。
+
 def fetch_vectors_chunked(
     command: str,
     center: str,
@@ -1378,6 +1440,8 @@ def _times_fingerprint(times_utc: List[datetime]) -> str:
     return h.hexdigest()[:16]
 
 
+# 関数: `fetch_vectors_chunked_cached` の入出力契約と処理意図を定義する。
+
 def fetch_vectors_chunked_cached(
     command: str,
     center: str,
@@ -1393,6 +1457,7 @@ def fetch_vectors_chunked_cached(
 ) -> pd.DataFrame:
     cache_dir.mkdir(parents=True, exist_ok=True)
 
+    # 関数: `_read_cache_csv` の入出力契約と処理意図を定義する。
     def _read_cache_csv(p: Path) -> pd.DataFrame:
         df = pd.read_csv(p)
         # NOTE: Pandas may fail to parse mixed precision timestamps unless format is specified.
@@ -1692,6 +1757,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
 
     requested = os.environ.get("LLR_TIME_TAG", "").strip().lower() or "auto"
 
+    # 関数: `_load_time_tag_best_by_station` の入出力契約と処理意図を定義する。
     def _load_time_tag_best_by_station(repo_root: Path) -> Optional[Dict[str, str]]:
         p = repo_root / "output" / "private" / "llr" / "batch" / "llr_time_tag_best_by_station.json"
         # 条件分岐: `not p.exists()` を満たす経路を評価する。
@@ -1753,6 +1819,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     tag_times = [t.to_pydatetime() for t in df["epoch_utc"].tolist()]
     obs = df["tof_obs_s"].to_numpy(dtype=float)
 
+    # 関数: `_sec` の入出力契約と処理意図を定義する。
     def _sec(x: float) -> timedelta:
         return timedelta(seconds=float(x))
 
@@ -1805,6 +1872,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     offline = os.environ.get("HORIZONS_OFFLINE", "").strip() == "1"
     cache_dir = outdir.parent / "horizons_cache"
 
+    # 関数: `_unique_sorted` の入出力契約と処理意図を定義する。
     def _unique_sorted(times: List[datetime]) -> List[datetime]:
         return sorted({t.astimezone(timezone.utc) for t in times})
 
@@ -1814,6 +1882,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     moon_all = fetch_vectors_chunked_cached("301", "500@399", times_all, chunk=chunk, cache_dir=cache_dir, offline=offline, ref_plane="FRAME")
     sun_all = fetch_vectors_chunked_cached("10", "500@399", times_all, chunk=chunk, cache_dir=cache_dir, offline=offline, ref_plane="FRAME")
 
+    # 関数: `_to_map` の入出力契約と処理意図を定義する。
     def _to_map(vdf: pd.DataFrame) -> Dict[datetime, np.ndarray]:
         out_map: Dict[datetime, np.ndarray] = {}
         for r in vdf.itertuples(index=False):
@@ -2065,6 +2134,7 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
     plt.savefig(res_path, dpi=200)
     plt.close()
 
+    # 関数: `_rms_ns` の入出力契約と処理意図を定義する。
     def _rms_ns(series: Any) -> float:
         try:
             arr = np.asarray(series, dtype=float)
@@ -2144,6 +2214,8 @@ def run(crd_path: Path, beta: float, outdir: Path, chunk: int) -> Dict[str, Path
         "metrics": metrics_path,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     repo = Path(__file__).resolve().parents[2]

@@ -77,6 +77,7 @@ FILES = [
 ]
 
 
+# クラス: `BaoDataset` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class BaoDataset:
     name: str
@@ -89,9 +90,13 @@ class BaoDataset:
     cov: List[List[float]]
 
 
+# 関数: `_now_utc` の入出力契約と処理意図を定義する。
+
 def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
 
 def _fetch_text(url: str, *, timeout_sec: int) -> str:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -102,6 +107,8 @@ def _fetch_text(url: str, *, timeout_sec: int) -> str:
     r.raise_for_status()
     return r.text
 
+
+# 関数: `_parse_mean` の入出力契約と処理意図を定義する。
 
 def _parse_mean(text: str) -> Tuple[Optional[float], List[float], List[str], List[float]]:
     """
@@ -148,6 +155,8 @@ def _parse_mean(text: str) -> Tuple[Optional[float], List[float], List[str], Lis
     return z_eff, z_vals, qs, vals
 
 
+# 関数: `_parse_cov` の入出力契約と処理意図を定義する。
+
 def _parse_cov(text: str) -> List[List[float]]:
     rows: List[List[float]] = []
     for line in text.splitlines():
@@ -172,6 +181,8 @@ def _parse_cov(text: str) -> List[List[float]]:
     return rows
 
 
+# 関数: `_load_dataset` の入出力契約と処理意図を定義する。
+
 def _load_dataset(name: str, mean_path: Path, cov_path: Path) -> BaoDataset:
     mean_text = mean_path.read_text(encoding="utf-8", errors="replace")
     cov_text = cov_path.read_text(encoding="utf-8", errors="replace")
@@ -192,6 +203,8 @@ def _load_dataset(name: str, mean_path: Path, cov_path: Path) -> BaoDataset:
         cov=cov,
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch DESI DR1 BAO (Gaussian) mean/cov from CobayaSampler/bao_data.")

@@ -85,9 +85,12 @@ _PLAIN_AP_Z_TRIPLET_RE = re.compile(r"\bz\s*(?:≈|=)\s*\d+(?:\.\d+)?/\d+(?:\.\d
 _DISTANCE_FORMULA_IN_TEXTTT_RE = re.compile(r"\\texttt\{[^{}]*(?:D\\_\{A\}|D\\_\{V\}|d\\_\{A\}|d\\_\{M\})[^{}]*\}")
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_find_engine_binary` の入出力契約と処理意図を定義する。
 
 def _find_engine_binary(engine: str) -> str | None:
     from_path = shutil.which(engine)
@@ -140,6 +143,8 @@ def _find_engine_binary(engine: str) -> str | None:
     return None
 
 
+# 関数: `_pick_engine` の入出力契約と処理意図を定義する。
+
 def _pick_engine(choice: str) -> Tuple[str | None, str]:
     # 条件分岐: `choice == "none"` を満たす経路を評価する。
     if choice == "none":
@@ -159,6 +164,8 @@ def _pick_engine(choice: str) -> Tuple[str | None, str]:
 
     return None, "missing"
 
+
+# 関数: `_strip_comment` の入出力契約と処理意図を定義する。
 
 def _strip_comment(line: str) -> str:
     out: list[str] = []
@@ -187,9 +194,13 @@ def _strip_comment(line: str) -> str:
     return "".join(out)
 
 
+# 関数: `_strip_inline_math` の入出力契約と処理意図を定義する。
+
 def _strip_inline_math(text: str) -> str:
     return _INLINE_MATH_RE.sub("", text)
 
+
+# 関数: `_texttt_unescape` の入出力契約と処理意図を定義する。
 
 def _texttt_unescape(payload: str) -> str:
     out = payload
@@ -199,6 +210,8 @@ def _texttt_unescape(payload: str) -> str:
     out = out.replace(r"\%", "%").replace(r"\&", "&").replace(r"\$", "$")
     return out.strip()
 
+
+# 関数: `_is_pathlike_token` の入出力契約と処理意図を定義する。
 
 def _is_pathlike_token(text: str) -> bool:
     low = text.lower()
@@ -229,6 +242,8 @@ def _is_pathlike_token(text: str) -> bool:
     return False
 
 
+# 関数: `_looks_like_pseudo_math_texttt` の入出力契約と処理意図を定義する。
+
 def _looks_like_pseudo_math_texttt(text: str) -> bool:
     # 条件分岐: `not text` を満たす経路を評価する。
     if not text:
@@ -255,6 +270,8 @@ def _looks_like_pseudo_math_texttt(text: str) -> bool:
 
     return has_var and (has_cmp or has_math_ops or has_equal)
 
+
+# 関数: `_static_audit` の入出力契約と処理意図を定義する。
 
 def _static_audit(tex_text: str) -> Dict[str, Any]:
     errors: List[str] = []
@@ -366,6 +383,8 @@ def _static_audit(tex_text: str) -> Dict[str, Any]:
     return {"errors": errors, "warnings": warnings, "duplicate_labels": dup}
 
 
+# 関数: `_run_compile` の入出力契約と処理意図を定義する。
+
 def _run_compile(
     *,
     engine: str,
@@ -428,6 +447,8 @@ def _run_compile(
     }
 
 
+# 関数: `_audit_profile` の入出力契約と処理意図を定義する。
+
 def _audit_profile(
     *,
     profile: str,
@@ -480,6 +501,8 @@ def _audit_profile(
     result["ok"] = (len(static_errors) == 0) and (len(compile_errors) == 0)
     return result
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Strict post-build TeX audit for paper profiles.")

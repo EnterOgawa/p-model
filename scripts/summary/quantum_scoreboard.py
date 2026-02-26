@@ -18,22 +18,31 @@ from scripts.summary import worklog  # noqa: E402
 from scripts.summary.validation_scoreboard import plot_validation_scoreboard  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_clamp` の入出力契約と処理意図を定義する。
+
 def _clamp(x: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, x))
 
+
+# 関数: `_score_norm_quantum` の入出力契約と処理意図を定義する。
 
 def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -> Optional[float]:
     """
@@ -91,6 +100,8 @@ def _score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -
     return 1.5
 
 
+# 関数: `_status_from_score` の入出力契約と処理意図を定義する。
+
 def _status_from_score(score: Optional[float]) -> str:
     # 条件分岐: `score is None` を満たす経路を評価する。
     if score is None:
@@ -108,6 +119,8 @@ def _status_from_score(score: Optional[float]) -> str:
 
     return "ng"
 
+
+# 関数: `_short_observable_label` の入出力契約と処理意図を定義する。
 
 def _short_observable_label(observable: str) -> str:
     obs = (observable or "").strip()
@@ -151,6 +164,8 @@ def _short_observable_label(observable: str) -> str:
     obs = re.sub(r"\s+", " ", obs)
     return obs[:16] if len(obs) > 16 else obs
 
+
+# 関数: `build_quantum_scoreboard` の入出力契約と処理意図を定義する。
 
 def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
     table1_json = root / "output" / "private" / "summary" / "paper_table1_quantum_results.json"
@@ -229,6 +244,8 @@ def build_quantum_scoreboard(root: Path) -> Dict[str, Any]:
     payload["rows"] = out_rows
     return payload
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

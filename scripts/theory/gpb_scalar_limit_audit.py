@@ -21,6 +21,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -46,14 +47,20 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -68,6 +75,8 @@ def _fmt_float(x: float, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
+
 def _to_float(v: Any) -> Optional[float]:
     try:
         val = float(v)
@@ -81,6 +90,8 @@ def _to_float(v: Any) -> Optional[float]:
 
     return val
 
+
+# 関数: `_compute_rows` の入出力契約と処理意図を定義する。
 
 def _compute_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
@@ -123,6 +134,8 @@ def _compute_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     return rows
 
 
+# 関数: `_build_summary` の入出力契約と処理意図を定義する。
+
 def _build_summary(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     n_pass = sum(1 for r in rows if r.get("status") == "pass")
     n_reject = sum(1 for r in rows if r.get("status") == "reject")
@@ -155,6 +168,8 @@ def _build_summary(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         ),
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
@@ -227,6 +242,8 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     plt.close(fig)
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="") as f:
@@ -265,6 +282,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _ROOT

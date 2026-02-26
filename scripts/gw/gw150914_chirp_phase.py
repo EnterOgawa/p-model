@@ -34,13 +34,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -67,6 +72,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -75,6 +82,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -92,6 +101,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
+# 関数: `_normalize_gwosc_version` の入出力契約と処理意図を定義する。
+
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
     # 条件分岐: `not v` を満たす経路を評価する。
@@ -106,6 +117,8 @@ def _normalize_gwosc_version(version: str) -> str:
     return v
 
 
+# 関数: `_candidate_gwosc_versions` の入出力契約と処理意図を定義する。
+
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
     # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
@@ -115,12 +128,16 @@ def _candidate_gwosc_versions(version: str) -> List[str]:
     return [_normalize_gwosc_version(version)]
 
 
+# 関数: `_gwosc_event_json_url` の入出力契約と処理意図を定義する。
+
 def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     cat = (catalog or "").strip() or "GWTC-1-confident"
     ev = (event or "").strip()
     v = _normalize_gwosc_version(version)
     return f"https://gwosc.org/eventapi/json/{cat}/{ev}/{v}"
 
+
+# 関数: `_pick_event_from_eventapi_json` の入出力契約と処理意図を定義する。
 
 def _pick_event_from_eventapi_json(obj: Dict[str, Any], *, event: str) -> Tuple[str, Dict[str, Any]]:
     events = obj.get("events") or {}
@@ -157,6 +174,8 @@ def _pick_event_from_eventapi_json(obj: Dict[str, Any], *, event: str) -> Tuple[
 
     return str(k0), v0
 
+
+# 関数: `_pick_strain_entry` の入出力契約と処理意図を定義する。
 
 def _pick_strain_entry(
     strain_list: List[Dict[str, Any]],
@@ -198,6 +217,8 @@ def _pick_strain_entry(
 
     return sorted(cand_d, key=lambda e: _int(e.get("sampling_rate")) or 10**9)[0]
 
+
+# 関数: `_fetch_inputs` の入出力契約と処理意図を定義する。
 
 def _fetch_inputs(
     data_dir: Path,
@@ -346,6 +367,8 @@ def _fetch_inputs(
     return {"paths": {"event_json": event_json_path, "strain": strain_paths}, "meta": meta, "event_info": event_info}
 
 
+# 関数: `_parse_gwosc_txt_gz` の入出力契約と処理意図を定義する。
+
 def _parse_gwosc_txt_gz(path: Path) -> Tuple[float, float, np.ndarray]:
     """
     Return (gps_start, fs_hz, strain) for GWOSC TXT.GZ.
@@ -420,6 +443,8 @@ def _parse_gwosc_txt_gz(path: Path) -> Tuple[float, float, np.ndarray]:
     return gps_start, fs, strain
 
 
+# 関数: `_bandpass` の入出力契約と処理意図を定義する。
+
 def _bandpass(x: np.ndarray, fs: float, *, f_lo: float, f_hi: float, order: int = 4) -> np.ndarray:
     nyq = 0.5 * fs
     lo = float(f_lo) / nyq
@@ -431,6 +456,8 @@ def _bandpass(x: np.ndarray, fs: float, *, f_lo: float, f_hi: float, order: int 
     b, a = butter(order, [lo, hi], btype="band")
     return filtfilt(b, a, x)
 
+
+# 関数: `_whiten_fft` の入出力契約と処理意図を定義する。
 
 def _whiten_fft(
     x: np.ndarray,
@@ -484,6 +511,8 @@ def _whiten_fft(
     W2[mask] = W[mask]
     return np.fft.irfft(W2, n=int(x.size))
 
+
+# 関数: `_extract_frequency_track_stft_guided` の入出力契約と処理意図を定義する。
 
 def _extract_frequency_track_stft_guided(
     t: np.ndarray,
@@ -650,6 +679,8 @@ def _extract_frequency_track_stft_guided(
     return t_sub[keep], f_sel[keep], meta
 
 
+# 関数: `_extract_instantaneous_frequency` の入出力契約と処理意図を定義する。
+
 def _extract_instantaneous_frequency(
     t: np.ndarray,
     x: np.ndarray,
@@ -682,6 +713,8 @@ def _extract_instantaneous_frequency(
     f_sel = f_inst[mask]
     return t_sel, f_sel
 
+
+# 関数: `_extract_frequency_track_stft` の入出力契約と処理意図を定義する。
 
 def _extract_frequency_track_stft(
     t: np.ndarray,
@@ -773,6 +806,8 @@ def _extract_frequency_track_stft(
     return t_out, f_out
 
 
+# 関数: `_fit_chirp_mass_from_track` の入出力契約と処理意図を定義する。
+
 def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, Any], np.ndarray]:
     """
     Fit t = tc - A * f^{-8/3} and derive chirp mass from A.
@@ -797,6 +832,7 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
     x = x_all[base]
     y = y_all[base]
 
+    # 関数: `_polyfit1` の入出力契約と処理意図を定義する。
     def _polyfit1(x1: np.ndarray, y1: np.ndarray) -> Tuple[float, float, bool]:
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always", _NP_RANK_WARNING)
@@ -952,6 +988,8 @@ def _fit_chirp_mass_from_track(t: np.ndarray, f: np.ndarray) -> Tuple[Dict[str, 
     }, out_mask
 
 
+# 関数: `_repair_track_monotonic` の入出力契約と処理意図を定義する。
+
 def _repair_track_monotonic(t: np.ndarray, f: np.ndarray, *, max_points: int = 240) -> Tuple[np.ndarray, np.ndarray]:
     """
     Best-effort cleanup for noisy instantaneous-frequency tracks:
@@ -993,6 +1031,8 @@ def _repair_track_monotonic(t: np.ndarray, f: np.ndarray, *, max_points: int = 2
     return t1[mask2], f1[mask2]
 
 
+# 関数: `_fit_summary` の入出力契約と処理意図を定義する。
+
 def _fit_summary(fit: Dict[str, Any]) -> Dict[str, Any]:
     # 条件分岐: `not isinstance(fit, dict)` を満たす経路を評価する。
     if not isinstance(fit, dict):
@@ -1022,6 +1062,8 @@ def _fit_summary(fit: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_predict_f_from_fit` の入出力契約と処理意図を定義する。
+
 def _predict_f_from_fit(t: np.ndarray, *, tc: float, A: float) -> np.ndarray:
     # From t = tc - A f^{-8/3} => f = (A/(tc-t))^{3/8}
     if not (math.isfinite(A) and A > 0):
@@ -1033,6 +1075,8 @@ def _predict_f_from_fit(t: np.ndarray, *, tc: float, A: float) -> np.ndarray:
     out[mask] = np.power(A / dt[mask], 3.0 / 8.0)
     return out
 
+
+# 関数: `_render` の入出力契約と処理意図を定義する。
 
 def _render(
     results: List[Dict[str, Any]],
@@ -1143,6 +1187,8 @@ def _render(
     plt.close(fig)
 
 
+# 関数: `_render_public` の入出力契約と処理意図を定義する。
+
 def _render_public(
     results: List[Dict[str, Any]],
     *,
@@ -1215,6 +1261,8 @@ def _render_public(
     plt.close(fig)
 
 
+# 関数: `_fit_waveform_template_from_chirp` の入出力契約と処理意図を定義する。
+
 def _fit_waveform_template_from_chirp(
     *,
     t: np.ndarray,
@@ -1247,6 +1295,7 @@ def _fit_waveform_template_from_chirp(
     t0, t1 = float(t0_req), float(t1_req)
     auto_shifted = False
 
+    # 関数: `_select_window` の入出力契約と処理意図を定義する。
     def _select_window(_t0: float, _t1: float) -> Tuple[np.ndarray, np.ndarray]:
         m = (t >= _t0) & (t <= _t1)
         # 条件分岐: `not np.any(m)` を満たす経路を評価する。
@@ -1378,6 +1427,8 @@ def _fit_waveform_template_from_chirp(
     }
 
 
+# 関数: `_render_waveform_compare` の入出力契約と処理意図を定義する。
+
 def _render_waveform_compare(
     results: List[Dict[str, Any]],
     *,
@@ -1456,6 +1507,8 @@ def _render_waveform_compare(
     plt.close(fig)
 
 
+# 関数: `_render_waveform_compare_public` の入出力契約と処理意図を定義する。
+
 def _render_waveform_compare_public(
     results: List[Dict[str, Any]],
     *,
@@ -1517,6 +1570,8 @@ def _render_waveform_compare_public(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()
@@ -1662,6 +1717,7 @@ def main() -> int:
     results: List[Dict[str, Any]] = []
     skipped: List[Dict[str, Any]] = []
 
+    # 関数: `_extract_and_fit` の入出力契約と処理意図を定義する。
     def _extract_and_fit(
         method: str,
         *,
@@ -1766,6 +1822,7 @@ def main() -> int:
 
         preprocess_cache: Dict[str, np.ndarray] = {}
 
+        # 関数: `_get_xf` の入出力契約と処理意図を定義する。
         def _get_xf(kind: str) -> Tuple[str, np.ndarray]:
             k = (kind or "").strip().lower() or "bandpass"
             # 条件分岐: `k in preprocess_cache` を満たす経路を評価する。
@@ -1790,6 +1847,8 @@ def main() -> int:
             preprocess_cache[k] = xf0
             return "bandpass", xf0
 
+        # 関数: `_expand_window` の入出力契約と処理意図を定義する。
+
         def _expand_window(window: Tuple[float, float]) -> Tuple[float, float]:
             start, end = float(window[0]), float(window[1])
             # 条件分岐: `not (math.isfinite(start) and math.isfinite(end) and start < end)` を満たす経路を評価する。
@@ -1812,6 +1871,7 @@ def main() -> int:
         attempts: List[Dict[str, Any]] = []
         picked: Optional[Dict[str, Any]] = None
 
+        # 関数: `_try_one` の入出力契約と処理意図を定義する。
         def _try_one(
             *,
             method: str,

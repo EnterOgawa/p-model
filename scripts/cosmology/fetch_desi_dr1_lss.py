@@ -88,6 +88,7 @@ _SAMPLE_FILES: Dict[str, Dict[str, Dict[str, str]]] = {
 }
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -96,6 +97,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -107,6 +110,8 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_download_file` の入出力契約と処理意図を定義する。
 
 def _download_file(url: str, dst: Path) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -128,6 +133,8 @@ def _download_file(url: str, dst: Path) -> Dict[str, Any]:
     tmp.replace(dst)
     return {"bytes": dst.stat().st_size, "sha256": _sha256(dst)}
 
+
+# 関数: `_extract_local_fits_to_npz` の入出力契約と処理意図を定義する。
 
 def _extract_local_fits_to_npz(
     fits_path: Path,
@@ -155,6 +162,8 @@ def _extract_local_fits_to_npz(
     return meta
 
 
+# 関数: `_npz_rows` の入出力契約と処理意図を定義する。
+
 def _npz_rows(npz_path: Path) -> int:
     with np.load(npz_path) as z:
         # 条件分岐: `"RA" in z` を満たす経路を評価する。
@@ -167,12 +176,16 @@ def _npz_rows(npz_path: Path) -> int:
     raise ValueError(f"npz has no arrays: {npz_path}")
 
 
+# 関数: `_read_layout_local` の入出力契約と処理意図を定義する。
+
 def _read_layout_local(fits_path: Path) -> Dict[str, int]:
     with fits_path.open("rb") as f:
         layout = read_first_bintable_layout(f)
 
     return {"rows_total": int(layout.n_rows), "row_bytes": int(layout.row_bytes)}
 
+
+# 関数: `_read_layout_remote` の入出力契約と処理意図を定義する。
 
 def _read_layout_remote(url: str) -> Dict[str, int]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -185,6 +198,8 @@ def _read_layout_remote(url: str) -> Dict[str, int]:
 
     return {"rows_total": int(layout.n_rows), "row_bytes": int(layout.row_bytes)}
 
+
+# 関数: `_extract_remote_fits_to_npz` の入出力契約と処理意図を定義する。
 
 def _extract_remote_fits_to_npz(
     url: str,
@@ -215,6 +230,8 @@ def _extract_remote_fits_to_npz(
     }
     return meta
 
+
+# 関数: `_reservoir_sample_from_chunks` の入出力契約と処理意図を定義する。
 
 def _reservoir_sample_from_chunks(
     chunks: Any,
@@ -349,6 +366,8 @@ def _reservoir_sample_from_chunks(
     return (res_cols, scanned)
 
 
+# 関数: `_extract_remote_fits_to_npz_reservoir` の入出力契約と処理意図を定義する。
+
 def _extract_remote_fits_to_npz_reservoir(
     url: str,
     *,
@@ -402,6 +421,8 @@ def _extract_remote_fits_to_npz_reservoir(
     return meta
 
 
+# 関数: `_extract_local_fits_to_npz_reservoir` の入出力契約と処理意図を定義する。
+
 def _extract_local_fits_to_npz_reservoir(
     fits_path: Path,
     *,
@@ -450,6 +471,8 @@ def _extract_local_fits_to_npz_reservoir(
     }
     return meta
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch DESI DR1 LSS clustering catalogs and extract columns to NPZ.")

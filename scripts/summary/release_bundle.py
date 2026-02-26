@@ -34,9 +34,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import release_manifest, worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -45,9 +48,13 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8", errors="replace"))
 
+
+# クラス: `_BundleSpec` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _BundleSpec:
@@ -79,6 +86,7 @@ _BUNDLE_SPECS: Dict[str, _BundleSpec] = {
 }
 
 
+# 関数: `_load_or_build_manifest` の入出力契約と処理意図を定義する。
 def _load_or_build_manifest(*, compute_hash: bool) -> Dict[str, Any]:
     manifest_path = _ROOT / "output" / "private" / "summary" / "release_manifest.json"
     # 条件分岐: `(not manifest_path.exists()) or (manifest_path.stat().st_size <= 10)` を満たす経路を評価する。
@@ -97,6 +105,8 @@ def _load_or_build_manifest(*, compute_hash: bool) -> Dict[str, Any]:
 
     return payload
 
+
+# 関数: `_manifest_group_paths` の入出力契約と処理意図を定義する。
 
 def _manifest_group_paths(payload: Dict[str, Any], group: str) -> List[Path]:
     files = payload.get("files") or {}
@@ -122,6 +132,8 @@ def _manifest_group_paths(payload: Dict[str, Any], group: str) -> List[Path]:
     return out
 
 
+# 関数: `_iter_repo_files` の入出力契約と処理意図を定義する。
+
 def _iter_repo_files(root: Path, *, base: Path, patterns: Sequence[str]) -> Iterable[Path]:
     for pat in patterns:
         for p in base.rglob(pat):
@@ -129,6 +141,8 @@ def _iter_repo_files(root: Path, *, base: Path, patterns: Sequence[str]) -> Iter
             if p.is_file():
                 yield p
 
+
+# 関数: `_collect_files` の入出力契約と処理意図を定義する。
 
 def _collect_files(spec: _BundleSpec, payload: Dict[str, Any]) -> List[Path]:
     files: List[Path] = []
@@ -186,6 +200,8 @@ def _collect_files(spec: _BundleSpec, payload: Dict[str, Any]) -> List[Path]:
 
     return uniq
 
+
+# 関数: `_write_bundle_zip` の入出力契約と処理意図を定義する。
 
 def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path], payload: Dict[str, Any]) -> None:
     out_zip.parent.mkdir(parents=True, exist_ok=True)
@@ -247,6 +263,8 @@ def _write_bundle_zip(*, out_zip: Path, spec: _BundleSpec, files: Sequence[Path]
 
     tmp.replace(out_zip)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Phase 8 / Step 8.3: build release zip bundles.")

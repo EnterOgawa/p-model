@@ -39,6 +39,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -64,14 +65,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_fmt_float_token` の入出力契約と処理意図を定義する。
 
 def _fmt_float_token(x: float) -> str:
     t = f"{float(x):g}".replace(".", "p").replace("-", "m")
     return t
 
+
+# 関数: `_scenario_label` の入出力契約と処理意図を定義する。
 
 def _scenario_label(meta: Dict[str, Any], *, default_lcdm: Dict[str, Any]) -> str:
     z_source = str(meta.get("z_source") or "obs")
@@ -95,13 +102,18 @@ def _scenario_label(meta: Dict[str, Any], *, default_lcdm: Dict[str, Any]) -> st
     return "A0" if not parts else " / ".join(parts)
 
 
+# 関数: `_zrange_key` の入出力契約と処理意図を定義する。
+
 def _zrange_key(z_min: float, z_max: float) -> str:
+    # 関数: `fmt` の入出力契約と処理意図を定義する。
     def fmt(x: float) -> str:
         t = f"{float(x):.3f}".rstrip("0").rstrip(".")
         return t.replace(".", "p")
 
     return f"zmin{fmt(z_min)}_zmax{fmt(z_max)}"
 
+
+# クラス: `Point` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class Point:
@@ -118,10 +130,13 @@ class Point:
     xi_metrics_path: Path
     xi_coord_hash: Optional[str]
 
+    # 関数: `zrange_key` の入出力契約と処理意図を定義する。
     @property
     def zrange_key(self) -> str:
         return _zrange_key(self.z_min, self.z_max)
 
+
+# 関数: `_extract_points_from_peakfit_metrics` の入出力契約と処理意図を定義する。
 
 def _extract_points_from_peakfit_metrics(metrics_path: Path) -> Tuple[Dict[str, Any], List[Point]]:
     d = _load_json(metrics_path)
@@ -169,6 +184,8 @@ def _extract_points_from_peakfit_metrics(metrics_path: Path) -> Tuple[Dict[str, 
     return d, points
 
 
+# 関数: `_pick` の入出力契約と処理意図を定義する。
+
 def _pick(points: Sequence[Point], *, out_tag: str, dist: str, zrange_key: str) -> Optional[Point]:
     for p in points:
         # 条件分岐: `p.out_tag == out_tag and p.dist == dist and p.zrange_key == zrange_key` を満たす経路を評価する。
@@ -177,6 +194,8 @@ def _pick(points: Sequence[Point], *, out_tag: str, dist: str, zrange_key: str) 
 
     return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="BAO coordinateization-spec sensitivity (from peakfit metrics).")
@@ -222,6 +241,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     out_tags = [base_tag] + [t for t in variant_tags if t != base_tag]
 
+    # 関数: `peakfit_metrics_path` の入出力契約と処理意図を定義する。
     def peakfit_metrics_path(tag: str) -> Path:
         return (_ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_peakfit_{sample}_{caps}__{tag}_metrics.json").resolve()
 

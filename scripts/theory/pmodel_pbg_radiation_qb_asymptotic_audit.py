@@ -40,9 +40,13 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -51,10 +55,14 @@ def _rel(path: Path) -> str:
         return path.resolve().as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -64,6 +72,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) ->
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_parse_float_list` の入出力契約と処理意図を定義する。
 
 def _parse_float_list(raw: str) -> list[float]:
     values: list[float] = []
@@ -77,6 +87,8 @@ def _parse_float_list(raw: str) -> list[float]:
 
     return values
 
+
+# 関数: `_q_eff_exact` の入出力契約と処理意図を定義する。
 
 def _q_eff_exact(delta_t: float, c_val: float) -> float:
     # 条件分岐: `delta_t <= 0.0` を満たす経路を評価する。
@@ -97,6 +109,8 @@ def _q_eff_exact(delta_t: float, c_val: float) -> float:
     x = 2.0 * math.sqrt(-c_val) * delta_t
     return delta_t * math.sqrt(-c_val) / math.tan(x)
 
+
+# 関数: `_build_payload` の入出力契約と処理意図を定義する。
 
 def _build_payload(args: argparse.Namespace) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     c_light = 299_792_458.0
@@ -285,6 +299,8 @@ def _build_payload(args: argparse.Namespace) -> tuple[dict[str, Any], list[dict[
     return payload, csv_rows
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(path: Path, payload: dict[str, Any]) -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -359,6 +375,8 @@ def _plot(path: Path, payload: dict[str, Any]) -> None:
     fig.savefig(path, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit q_B=1/2 asymptotic closure from background-wave radiation source.")

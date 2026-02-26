@@ -21,6 +21,7 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# クラス: `RouteDef` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class RouteDef:
     route_id: str
@@ -47,9 +48,12 @@ ROUTES = (
 CHANNELS = ("all", "beta_minus", "beta_plus")
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 
 def _parse_float(value: Any) -> float:
     try:
@@ -59,6 +63,8 @@ def _parse_float(value: Any) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_parse_bool` の入出力契約と処理意図を定義する。
 
 def _parse_bool(value: Any) -> bool | None:
     # 条件分岐: `isinstance(value, bool)` を満たす経路を評価する。
@@ -77,6 +83,8 @@ def _parse_bool(value: Any) -> bool | None:
 
     return None
 
+
+# 関数: `_parse_mode_channel_flags` の入出力契約と処理意図を定義する。
 
 def _parse_mode_channel_flags(observed_modes: list[dict[str, Any]]) -> tuple[bool, bool, float, float]:
     has_beta_minus = False
@@ -107,6 +115,8 @@ def _parse_mode_channel_flags(observed_modes: list[dict[str, Any]]) -> tuple[boo
 
     return has_beta_minus, has_beta_plus, float(branch_beta_minus), float(branch_beta_plus)
 
+
+# 関数: `_load_nudat_primary_modes` の入出力契約と処理意図を定義する。
 
 def _load_nudat_primary_modes(path: Path) -> dict[str, dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -142,6 +152,8 @@ def _load_nudat_primary_modes(path: Path) -> dict[str, dict[str, Any]]:
     return out
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -157,6 +169,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_file_signature` の入出力契約と処理意図を定義する。
 
 def _file_signature(path: Path | None) -> dict[str, Any]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -183,6 +197,8 @@ def _file_signature(path: Path | None) -> dict[str, Any]:
     return payload
 
 
+# 関数: `_load_previous_ckm_watchpack` の入出力契約と処理意図を定義する。
+
 def _load_previous_ckm_watchpack(path: Path) -> dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -205,6 +221,8 @@ def _load_previous_ckm_watchpack(path: Path) -> dict[str, Any]:
 
     return watchpack
 
+
+# 関数: `_derive_ckm_primary_update_watchpack` の入出力契約と処理意図を定義する。
 
 def _derive_ckm_primary_update_watchpack(
     *,
@@ -285,6 +303,8 @@ def _derive_ckm_primary_update_watchpack(
     }
 
 
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
+
 def _percentile(values: list[float], p: float) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -295,6 +315,8 @@ def _percentile(values: list[float], p: float) -> float:
     idx = max(0, min(len(s) - 1, idx))
     return float(s[idx])
 
+
+# 関数: `_median` の入出力契約と処理意図を定義する。
 
 def _median(values: list[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
@@ -311,6 +333,8 @@ def _median(values: list[float]) -> float:
     return float((s[mid - 1] + s[mid]) / 2.0)
 
 
+# 関数: `_safe_max` の入出力契約と処理意図を定義する。
+
 def _safe_max(values: list[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -319,6 +343,8 @@ def _safe_max(values: list[float]) -> float:
     return float(max(values))
 
 
+# 関数: `_safe_frac_le` の入出力契約と処理意図を定義する。
+
 def _safe_frac_le(values: list[float], threshold: float) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -326,6 +352,8 @@ def _safe_frac_le(values: list[float], threshold: float) -> float:
 
     return float(sum(1 for v in values if float(v) <= threshold) / float(len(values)))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -341,12 +369,16 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow([row.get(h) for h in headers])
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return str(path.relative_to(ROOT)).replace("\\", "/")
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_route_channel_summary` の入出力契約と処理意図を定義する。
 
 def _route_channel_summary(
     *,
@@ -424,6 +456,8 @@ def _route_channel_summary(
     }
 
 
+# 関数: `_decision` の入出力契約と処理意図を定義する。
+
 def _decision(all_rows: list[dict[str, Any]]) -> dict[str, Any]:
     by_route = {str(r["route_id"]): r for r in all_rows if str(r.get("channel")) == "all"}
     route_a = by_route.get("A_transfer_surrogate")
@@ -453,6 +487,8 @@ def _decision(all_rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+# 関数: `_deterministic_holdout_flag` の入出力契約と処理意図を定義する。
+
 def _deterministic_holdout_flag(*, nuclide_key: str, modulo: int, residue: int) -> bool:
     # 条件分岐: `modulo <= 1` を満たす経路を評価する。
     if modulo <= 1:
@@ -464,6 +500,8 @@ def _deterministic_holdout_flag(*, nuclide_key: str, modulo: int, residue: int) 
     bucket = int(digest[:8], 16) % int(modulo)
     return bool(bucket == int(residue))
 
+
+# 関数: `_split_rows_by_holdout` の入出力契約と処理意図を定義する。
 
 def _split_rows_by_holdout(
     *,
@@ -511,6 +549,8 @@ def _split_rows_by_holdout(
     }
     return train_rows, holdout_rows, split_meta
 
+
+# 関数: `_fit_weighted_linear_q` の入出力契約と処理意図を定義する。
 
 def _fit_weighted_linear_q(
     *,
@@ -565,6 +605,8 @@ def _fit_weighted_linear_q(
         "sigma_floor_MeV": float(sigma_floor),
     }
 
+
+# 関数: `_route_metrics_calibrated` の入出力契約と処理意図を定義する。
 
 def _route_metrics_calibrated(
     *,
@@ -660,6 +702,8 @@ def _route_metrics_calibrated(
     }
 
 
+# 関数: `_aic_like` の入出力契約と処理意図を定義する。
+
 def _aic_like(
     *,
     chi2: float,
@@ -680,6 +724,8 @@ def _aic_like(
     bic = float(chi2 + k_params * math.log(float(n_obs)))
     return {"aic_chi2": aic, "aicc_chi2": aicc, "bic_chi2": bic}
 
+
+# 関数: `_equalized_route_audit` の入出力契約と処理意図を定義する。
 
 def _equalized_route_audit(
     *,
@@ -823,6 +869,8 @@ def _equalized_route_audit(
     return summary_rows, equalized_pack, split_meta
 
 
+# 関数: `_build_equalized_holdout_figure` の入出力契約と処理意図を定義する。
+
 def _build_equalized_holdout_figure(
     *,
     equalized_pack: dict[str, Any],
@@ -867,6 +915,8 @@ def _build_equalized_holdout_figure(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(
     *,
@@ -915,6 +965,8 @@ def _build_figure(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_load_ckm_gate` の入出力契約と処理意図を定義する。
 
 def _load_ckm_gate(path: Path) -> dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -965,6 +1017,8 @@ def _load_ckm_gate(path: Path) -> dict[str, Any]:
     return out
 
 
+# 関数: `_load_pmns_gate` の入出力契約と処理意図を定義する。
+
 def _load_pmns_gate(path: Path) -> dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -1000,6 +1054,8 @@ def _load_pmns_gate(path: Path) -> dict[str, Any]:
     }
     return out
 
+
+# 関数: `_combine_closure_gates` の入出力契約と処理意図を定義する。
 
 def _combine_closure_gates(*, ckm_gate: dict[str, Any], pmns_gate: dict[str, Any]) -> dict[str, Any]:
     ckm_hard = ckm_gate.get("hard_pass")
@@ -1057,6 +1113,8 @@ def _combine_closure_gates(*, ckm_gate: dict[str, Any], pmns_gate: dict[str, Any
         ),
     }
 
+
+# 関数: `_route_a_watch_outliers` の入出力契約と処理意図を定義する。
 
 def _route_a_watch_outliers(
     *,
@@ -1150,6 +1208,8 @@ def _route_a_watch_outliers(
     return sorted(out, key=lambda row: float(row.get("abs_z_qbeta", 0.0)), reverse=True)
 
 
+# 関数: `_route_a_watch_outlier_summary` の入出力契約と処理意図を定義する。
+
 def _route_a_watch_outlier_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     by_channel = Counter(str(row.get("channel", "")) for row in rows)
     by_a = Counter(int(row.get("A", -1)) for row in rows)
@@ -1168,6 +1228,8 @@ def _route_a_watch_outlier_summary(rows: list[dict[str, Any]]) -> dict[str, Any]
         "max_abs_delta_q_MeV": _safe_max(abs_delta_vals),
     }
 
+
+# 関数: `_build_route_a_watch_outlier_figure` の入出力契約と処理意図を定義する。
 
 def _build_route_a_watch_outlier_figure(
     *,
@@ -1224,6 +1286,8 @@ def _build_route_a_watch_outlier_figure(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(

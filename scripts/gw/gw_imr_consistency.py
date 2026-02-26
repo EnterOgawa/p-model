@@ -37,13 +37,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -70,6 +75,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -79,14 +86,20 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -104,6 +117,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
+# 関数: `_normalize_gwosc_version` の入出力契約と処理意図を定義する。
+
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
     # 条件分岐: `not v` を満たす経路を評価する。
@@ -118,6 +133,8 @@ def _normalize_gwosc_version(version: str) -> str:
     return v
 
 
+# 関数: `_candidate_gwosc_versions` の入出力契約と処理意図を定義する。
+
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
     # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
@@ -127,6 +144,8 @@ def _candidate_gwosc_versions(version: str) -> List[str]:
     return [_normalize_gwosc_version(version)]
 
 
+# 関数: `_gwosc_catalog_url` の入出力契約と処理意図を定義する。
+
 def _gwosc_catalog_url(catalog: str) -> str:
     cat = (catalog or "").strip()
     # 条件分岐: `not cat` を満たす経路を評価する。
@@ -135,6 +154,8 @@ def _gwosc_catalog_url(catalog: str) -> str:
 
     return f"https://gwosc.org/eventapi/json/{cat}/"
 
+
+# 関数: `_gwosc_event_json_url` の入出力契約と処理意図を定義する。
 
 def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     cat = (catalog or "").strip()
@@ -150,6 +171,8 @@ def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     v = _normalize_gwosc_version(version)
     return f"https://gwosc.org/eventapi/json/{cat}/{ev}/{v}"
 
+
+# 関数: `_resolve_event_common_name` の入出力契約と処理意図を定義する。
 
 def _resolve_event_common_name(*, catalog: str, event: str) -> str:
     target = (event or "").strip()
@@ -204,6 +227,8 @@ def _resolve_event_common_name(*, catalog: str, event: str) -> str:
 
     return chosen
 
+
+# 関数: `_fetch_event_json` の入出力契約と処理意図を定義する。
 
 def _fetch_event_json(
     *,
@@ -267,6 +292,8 @@ def _fetch_event_json(
     }
 
 
+# 関数: `_infer_filename_from_url` の入出力契約と処理意図を定義する。
+
 def _infer_filename_from_url(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
     parts = [p for p in parsed.path.split("/") if p]
@@ -282,6 +309,8 @@ def _infer_filename_from_url(url: str) -> str:
 
     return "posterior_samples.h5"
 
+
+# 関数: `_select_preferred_posterior` の入出力契約と処理意図を定義する。
 
 def _select_preferred_posterior(event_info: Dict[str, Any], *, prefer_waveform: str) -> Tuple[str, Dict[str, Any]]:
     params = event_info.get("parameters") or {}
@@ -320,9 +349,12 @@ def _select_preferred_posterior(event_info: Dict[str, Any], *, prefer_waveform: 
     return chosen[2], chosen[3]
 
 
+# 関数: `_find_posterior_samples_dataset` の入出力契約と処理意図を定義する。
+
 def _find_posterior_samples_dataset(h5: h5py.File) -> h5py.Dataset:
     found: List[h5py.Dataset] = []
 
+    # 関数: `visitor` の入出力契約と処理意図を定義する。
     def visitor(name: str, obj: Any) -> None:
         # 条件分岐: `not isinstance(obj, h5py.Dataset)` を満たす経路を評価する。
         if not isinstance(obj, h5py.Dataset):
@@ -356,11 +388,15 @@ def _qnm_220_omega_m(a: np.ndarray) -> np.ndarray:
     return 1.5251 - 1.1568 * (1.0 - a) ** 0.1292
 
 
+# 関数: `_qnm_220_quality_factor` の入出力契約と処理意図を定義する。
+
 def _qnm_220_quality_factor(a: np.ndarray) -> np.ndarray:
     a = np.asarray(a, dtype=np.float64)
     a = np.clip(a, 0.0, 0.999999)
     return 0.7000 + 1.4187 * (1.0 - a) ** (-0.4990)
 
+
+# 関数: `_qnm_220_f_tau_hz_s` の入出力契約と処理意図を定義する。
 
 def _qnm_220_f_tau_hz_s(*, m_det_msun: np.ndarray, a: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     g = 6.67430e-11
@@ -374,6 +410,8 @@ def _qnm_220_f_tau_hz_s(*, m_det_msun: np.ndarray, a: np.ndarray) -> Tuple[np.nd
     tau_s = q / (math.pi * f_hz)
     return f_hz, tau_s
 
+
+# 関数: `_invert_qnm_220_to_spin` の入出力契約と処理意図を定義する。
 
 def _invert_qnm_220_to_spin(Q: float) -> Optional[float]:
     # Q = 0.7000 + 1.4187*(1-a)^(-0.4990)
@@ -390,6 +428,8 @@ def _invert_qnm_220_to_spin(Q: float) -> Optional[float]:
     return float(min(0.999999, max(0.0, a)))
 
 
+# 関数: `_invert_qnm_220_to_mass_msun` の入出力契約と処理意図を定義する。
+
 def _invert_qnm_220_to_mass_msun(*, f_hz: float, a: float) -> Optional[float]:
     # 条件分岐: `not (f_hz > 0.0)` を満たす経路を評価する。
     if not (f_hz > 0.0):
@@ -403,6 +443,8 @@ def _invert_qnm_220_to_mass_msun(*, f_hz: float, a: float) -> Optional[float]:
     return float(m_kg / m_sun)
 
 
+# 関数: `_median_and_sigma_from_p16_p84` の入出力契約と処理意図を定義する。
+
 def _median_and_sigma_from_p16_p84(p16_p84: Sequence[float]) -> Tuple[float, float]:
     # 条件分岐: `not isinstance(p16_p84, (list, tuple)) or len(p16_p84) != 2` を満たす経路を評価する。
     if not isinstance(p16_p84, (list, tuple)) or len(p16_p84) != 2:
@@ -413,6 +455,8 @@ def _median_and_sigma_from_p16_p84(p16_p84: Sequence[float]) -> Tuple[float, flo
     sig = 0.5 * (p84 - p16)
     return med, sig
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     _set_japanese_font()
@@ -533,6 +577,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     a_f = np.asarray(arr["final_spin"], dtype=np.float64)
     f_pred, tau_pred = _qnm_220_f_tau_hz_s(m_det_msun=m_det, a=a_f)
 
+    # 関数: `q` の入出力契約と処理意図を定義する。
     def q(x: np.ndarray, probs: Sequence[float]) -> List[float]:
         return [float(v) for v in np.quantile(x, probs)]
 
@@ -546,6 +591,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _, sig_f_pred = _median_and_sigma_from_p16_p84(pred_summary["f_hz"]["p16_p84"])
     _, sig_tau_pred = _median_and_sigma_from_p16_p84(pred_summary["tau_s"]["p16_p84"])
 
+    # 関数: `z_score` の入出力契約と処理意図を定義する。
     def z_score(x: float, mu: float, sig1: float, sig2: float) -> float:
         sig = math.sqrt(max(0.0, float(sig1)) ** 2 + max(0.0, float(sig2)) ** 2)
         # 条件分岐: `not (sig > 0.0)` を満たす経路を評価する。

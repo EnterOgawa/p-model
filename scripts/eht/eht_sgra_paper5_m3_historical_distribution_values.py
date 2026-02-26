@@ -20,18 +20,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_summary` の入出力契約と処理意図を定義する。
 
 def _summary(xs: Sequence[float]) -> Dict[str, Any]:
     ys = [float(x) for x in xs if isinstance(x, (int, float)) and x == x]
@@ -45,6 +52,8 @@ def _summary(xs: Sequence[float]) -> Dict[str, Any]:
     return {"n": n, "min": ys[0], "max": ys[-1], "mean": sum(ys) / n, "median": med}
 
 
+# 関数: `_std_pop` の入出力契約と処理意図を定義する。
+
 def _std_pop(xs: Sequence[float]) -> float:
     ys = [float(x) for x in xs if isinstance(x, (int, float)) and x == x]
     # 条件分岐: `not ys` を満たす経路を評価する。
@@ -54,6 +63,8 @@ def _std_pop(xs: Sequence[float]) -> float:
     mu = sum(ys) / len(ys)
     return math.sqrt(sum((v - mu) ** 2 for v in ys) / len(ys))
 
+
+# 関数: `_ks_two_sample_d` の入出力契約と処理意図を定義する。
 
 def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Optional[float]:
     a = sorted(float(x) for x in sample_a if isinstance(x, (int, float)) and x == x)
@@ -85,6 +96,8 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
     return float(d)
 
 
+# 関数: `_ks_qks` の入出力契約と処理意図を定義する。
+
 def _ks_qks(lam: float, *, max_terms: int = 200) -> float:
     # 条件分岐: `lam <= 0.0` を満たす経路を評価する。
     if lam <= 0.0:
@@ -101,6 +114,8 @@ def _ks_qks(lam: float, *, max_terms: int = 200) -> float:
     return max(0.0, min(1.0, 2.0 * s))
 
 
+# 関数: `_ks_p_value_asymptotic` の入出力契約と処理意図を定義する。
+
 def _ks_p_value_asymptotic(d: float, n: int, m: int) -> Optional[float]:
     # 条件分岐: `not isinstance(d, (int, float)) or not (d == d)` を満たす経路を評価する。
     if not isinstance(d, (int, float)) or not (d == d):
@@ -116,6 +131,8 @@ def _ks_p_value_asymptotic(d: float, n: int, m: int) -> Optional[float]:
     return float(_ks_qks(lam))
 
 
+# 関数: `_mjd_to_date` の入出力契約と処理意図を定義する。
+
 def _mjd_to_date(mjd: float) -> date:
     # MJD 51544.0 = 2000-01-01 00:00:00 UTC.
     base = datetime(2000, 1, 1, tzinfo=timezone.utc)
@@ -123,9 +140,13 @@ def _mjd_to_date(mjd: float) -> date:
     return dt.date()
 
 
+# 関数: `_ymd_from_mjd_floor` の入出力契約と処理意図を定義する。
+
 def _ymd_from_mjd_floor(mjd: float) -> str:
     return _mjd_to_date(math.floor(float(mjd))).isoformat()
 
+
+# 関数: `_parse_n_mu_sigma_from_wielgus_raw` の入出力契約と処理意図を定義する。
 
 def _parse_n_mu_sigma_from_wielgus_raw(raw: str) -> Optional[Tuple[int, float, float]]:
     # Parse "... & <duration_h> & <N> & $<mu>\\pm<sigma>$ & <sigma_over_mu> & ..." from Wielgus+2022 TeX table row.
@@ -159,6 +180,8 @@ def _parse_n_mu_sigma_from_wielgus_raw(raw: str) -> Optional[Tuple[int, float, f
 
     return n, mu, sig
 
+
+# 関数: `_cluster_by_y_gaps` の入出力契約と処理意図を定義する。
 
 def _cluster_by_y_gaps(points: Sequence[Tuple[float, float]], k: int) -> List[List[Tuple[float, float]]]:
     # 条件分岐: `k <= 0` を満たす経路を評価する。
@@ -196,6 +219,8 @@ def _cluster_by_y_gaps(points: Sequence[Tuple[float, float]], k: int) -> List[Li
     return clusters
 
 
+# 関数: `_best_assignment_by_count` の入出力契約と処理意図を定義する。
+
 def _best_assignment_by_count(clusters: Sequence[Sequence[Any]], expected_counts_by_key: Dict[str, int]) -> Optional[Dict[int, str]]:
     keys = list(expected_counts_by_key.keys())
     # 条件分岐: `not keys` を満たす経路を評価する。
@@ -230,6 +255,8 @@ def _best_assignment_by_count(clusters: Sequence[Sequence[Any]], expected_counts
     return {i: str(best_perm[i]) for i in range(len(best_perm))}
 
 
+# 関数: `_calibrate_affine_from_mean_std` の入出力契約と処理意図を定義する。
+
 def _calibrate_affine_from_mean_std(y_vals: Sequence[float], mu_target: float, sig_target: float) -> Optional[Tuple[float, float]]:
     ys = [float(y) for y in y_vals if isinstance(y, (int, float)) and y == y]
     # 条件分岐: `not ys` を満たす経路を評価する。
@@ -246,6 +273,8 @@ def _calibrate_affine_from_mean_std(y_vals: Sequence[float], mu_target: float, s
     b = float(mu_target) - a * float(my)
     return a, b
 
+
+# 関数: `_extract_largest_rgb_image_from_pdf` の入出力契約と処理意図を定義する。
 
 def _extract_largest_rgb_image_from_pdf(pdf_path: Path) -> Optional["Any"]:
     try:
@@ -302,6 +331,8 @@ def _extract_largest_rgb_image_from_pdf(pdf_path: Path) -> Optional["Any"]:
         return None
 
 
+# 関数: `_detect_strong_border_lines_1d` の入出力契約と処理意図を定義する。
+
 def _detect_strong_border_lines_1d(counts: "Any", *, frac: float) -> List[int]:
     # counts: 1D array-like of nonnegative ints
     try:
@@ -341,6 +372,8 @@ def _detect_strong_border_lines_1d(counts: "Any", *, frac: float) -> List[int]:
     lines.append(int((s + prev) // 2))
     return sorted(lines)
 
+
+# 関数: `_digitize_red_curve_from_bower2018_timeseries_pdf` の入出力契約と処理意図を定義する。
 
 def _digitize_red_curve_from_bower2018_timeseries_pdf(
     pdf_path: Path,
@@ -481,6 +514,8 @@ def _digitize_red_curve_from_bower2018_timeseries_pdf(
     return out_rows, notes
 
 
+# 関数: `_digitize_red_markers_from_bower2018_timeseries_pdf_vector` の入出力契約と処理意図を定義する。
+
 def _digitize_red_markers_from_bower2018_timeseries_pdf_vector(
     pdf_path: Path,
     *,
@@ -501,6 +536,8 @@ def _digitize_red_markers_from_bower2018_timeseries_pdf_vector(
     except Exception as e:
         return None, [f"numpy_unavailable:{e}"]
 
+    # 関数: `_mat_mul` の入出力契約と処理意図を定義する。
+
     def _mat_mul(m1: Tuple[float, float, float, float, float, float], m2: Tuple[float, float, float, float, float, float]) -> Tuple[float, float, float, float, float, float]:
         a, b, c, d, e, f = m1
         a2, b2, c2, d2, e2, f2 = m2
@@ -512,6 +549,8 @@ def _digitize_red_markers_from_bower2018_timeseries_pdf_vector(
             a * e2 + c * f2 + e,
             b * e2 + d * f2 + f,
         )
+
+    # 関数: `_tf` の入出力契約と処理意図を定義する。
 
     def _tf(m: Tuple[float, float, float, float, float, float], x: float, y: float) -> Tuple[float, float]:
         a, b, c, d, e, f = m
@@ -634,6 +673,8 @@ def _digitize_red_markers_from_bower2018_timeseries_pdf_vector(
     return out_rows, notes
 
 
+# 関数: `_month_day_to_ymd_2005` の入出力契約と処理意図を定義する。
+
 def _month_day_to_ymd_2005(label: str) -> Optional[str]:
     # Expected labels: "Jun 4", "Jul 30" (from thesis figure legends).
     if not isinstance(label, str):
@@ -672,6 +713,8 @@ def _month_day_to_ymd_2005(label: str) -> Optional[str]:
 
     return f"2005-{mm:02d}-{day:02d}"
 
+
+# 関数: `_extract_eps_block_from_thesis_ps_gz` の入出力契約と処理意図を定義する。
 
 def _extract_eps_block_from_thesis_ps_gz(ps_gz_path: Path, required_substrings: Sequence[str]) -> Optional[List[str]]:
     try:
@@ -718,6 +761,8 @@ def _extract_eps_block_from_thesis_ps_gz(ps_gz_path: Path, required_substrings: 
 
     return None
 
+
+# 関数: `_parse_marrone2006_sma_from_thesis_ps_gz` の入出力契約と処理意図を定義する。
 
 def _parse_marrone2006_sma_from_thesis_ps_gz(
     ps_gz_path: Path, expected_by_date: Dict[str, Dict[str, Any]]
@@ -828,6 +873,8 @@ def _parse_marrone2006_sma_from_thesis_ps_gz(
     return out, notes
 
 
+# 関数: `_parse_yusef2009_sma_fig11_ps` の入出力契約と処理意図を定義する。
+
 def _parse_yusef2009_sma_fig11_ps(
     ps_path: Path, expected_by_date: Dict[str, Dict[str, Any]]
 ) -> Tuple[Dict[str, List[Tuple[float, float]]], List[str]]:
@@ -911,6 +958,8 @@ def _parse_yusef2009_sma_fig11_ps(
     return out, notes
 
 
+# 関数: `_parse_witzel2021_dbf1` の入出力契約と処理意図を定義する。
+
 def _parse_witzel2021_dbf1(path: Path) -> Dict[Tuple[str, float], List[Tuple[float, float]]]:
     # key: (OBS, freq_GHz) -> [(t_min, flux_Jy)]
     out: Dict[Tuple[str, float], List[Tuple[float, float]]] = defaultdict(list)
@@ -940,6 +989,8 @@ def _parse_witzel2021_dbf1(path: Path) -> Dict[Tuple[str, float], List[Tuple[flo
 
     return dict(out)
 
+
+# 関数: `_parse_fazio2018_dbf3_sma` の入出力契約と処理意図を定義する。
 
 def _parse_fazio2018_dbf3_sma(path: Path) -> Dict[str, List[Tuple[float, float]]]:
     # key: date_ymd -> [(t_min, flux_Jy)] for SMA rows
@@ -971,6 +1022,8 @@ def _parse_fazio2018_dbf3_sma(path: Path) -> Dict[str, List[Tuple[float, float]]
     return dict(out)
 
 
+# クラス: `_PanelMap` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class _PanelMap:
     x0: float
@@ -982,8 +1035,11 @@ class _PanelMap:
     c: float
     d: float
 
+    # 関数: `contains` の入出力契約と処理意図を定義する。
     def contains(self, x: float, y: float) -> bool:
         return (self.x0 <= x <= self.x0 + self.w) and (self.y0 <= y <= self.y0 + self.h)
+
+    # 関数: `xy_to_data` の入出力契約と処理意図を定義する。
 
     def xy_to_data(self, x: float, y: float) -> Tuple[float, float]:
         # x_data is in "days since 2000-01-01" per plot label
@@ -991,6 +1047,8 @@ class _PanelMap:
         flux = self.c * y + self.d
         return float(xday), float(flux)
 
+
+# 関数: `_extract_idl_panels` の入出力契約と処理意図を定義する。
 
 def _extract_idl_panels(text: str) -> List[Tuple[float, float, float, float]]:
     re_h = re.compile(
@@ -1028,6 +1086,8 @@ def _extract_idl_panels(text: str) -> List[Tuple[float, float, float, float]]:
 
     return sorted(panels, key=lambda t: (t[1], t[0]))
 
+
+# 関数: `_extract_idl_ticks` の入出力契約と処理意図を定義する。
 
 def _extract_idl_ticks(lines: Sequence[str]) -> List[Tuple[float, float, float]]:
     # IDL EPS uses both:
@@ -1068,6 +1128,8 @@ def _extract_idl_ticks(lines: Sequence[str]) -> List[Tuple[float, float, float]]
 
     return out
 
+
+# 関数: `_fit_panel_maps` の入出力契約と処理意図を定義する。
 
 def _fit_panel_maps(lines: Sequence[str], panels: Sequence[Tuple[float, float, float, float]]) -> List[_PanelMap]:
     ticks = _extract_idl_ticks(lines)
@@ -1127,10 +1189,14 @@ def _fit_panel_maps(lines: Sequence[str], panels: Sequence[Tuple[float, float, f
     return maps
 
 
+# 関数: `_extract_idl_mz_points` の入出力契約と処理意図を定義する。
+
 def _extract_idl_mz_points(text: str) -> List[Tuple[float, float]]:
     re_mz = re.compile(r"(?P<x>-?\d+(?:\.\d+)?)\s+(?P<y>-?\d+(?:\.\d+)?)\s+M\s+Z\b")
     return [(float(m.group("x")), float(m.group("y"))) for m in re_mz.finditer(text)]
 
+
+# 関数: `_parse_dexter2014_idl_eps` の入出力契約と処理意図を定義する。
 
 def _parse_dexter2014_idl_eps(path: Path) -> Dict[str, List[Tuple[float, float]]]:
     # Returns date_ymd -> [(t_min, flux_Jy)] using "days since 2000-01-01" axis.
@@ -1158,6 +1224,8 @@ def _parse_dexter2014_idl_eps(path: Path) -> Dict[str, List[Tuple[float, float]]
 
     return dict(by_date)
 
+
+# 関数: `_parse_gnuplot_eps_ticks` の入出力契約と処理意図を定義する。
 
 def _parse_gnuplot_eps_ticks(lines: Sequence[str]) -> Tuple[List[Tuple[float, float]], List[Tuple[float, float]]]:
     # Return (x_ticks, y_ticks) as (coord, value), supporting multi-line label emission.
@@ -1207,6 +1275,8 @@ def _parse_gnuplot_eps_ticks(lines: Sequence[str]) -> Tuple[List[Tuple[float, fl
     return xt, yt
 
 
+# 関数: `_fit_linear_map` の入出力契約と処理意図を定義する。
+
 def _fit_linear_map(pairs: Sequence[Tuple[float, float]]) -> Optional[Tuple[float, float]]:
     # value = a*coord + b
     try:
@@ -1225,6 +1295,8 @@ def _fit_linear_map(pairs: Sequence[Tuple[float, float]]) -> Optional[Tuple[floa
     a, b = np.linalg.lstsq(A, Y, rcond=None)[0]
     return float(a), float(b)
 
+
+# 関数: `_parse_marrone2008_f2b_sgra` の入出力契約と処理意図を定義する。
 
 def _parse_marrone2008_f2b_sgra(path: Path) -> List[Tuple[float, float]]:
     # Extract Sgr A* flux time series from gnuplot EPS (filled circles = CircleF).
@@ -1291,6 +1363,8 @@ def _parse_marrone2008_f2b_sgra(path: Path) -> List[Tuple[float, float]]:
     return out
 
 
+# 関数: `_segment_mi3` の入出力契約と処理意図を定義する。
+
 def _segment_mi3(rows: Sequence[Tuple[float, float]], segments_n: int) -> Tuple[List[Dict[str, Any]], List[str]]:
     notes: List[str] = []
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -1330,6 +1404,8 @@ def _segment_mi3(rows: Sequence[Tuple[float, float]], segments_n: int) -> Tuple[
     return out, notes
 
 
+# 関数: `_plot_ecdf` の入出力契約と処理意図を定義する。
+
 def _plot_ecdf(samples: Dict[str, Sequence[float]], out_png: Path, *, title: str) -> Optional[str]:
     try:
         import matplotlib
@@ -1361,6 +1437,8 @@ def _plot_ecdf(samples: Dict[str, Sequence[float]], out_png: Path, *, title: str
     plt.close(fig)
     return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(

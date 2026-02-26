@@ -6,9 +6,12 @@ import shutil
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
+
+# 関数: `_copy_if_needed` の入出力契約と処理意図を定義する。
 
 def _copy_if_needed(src: Path, dst: Path, dry_run: bool = False) -> bool:
     # 条件分岐: `not src.exists()` を満たす経路を評価する。
@@ -32,6 +35,8 @@ def _copy_if_needed(src: Path, dst: Path, dry_run: bool = False) -> bool:
     print(f"[ok] copied: {src} -> {dst}")
     return True
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(

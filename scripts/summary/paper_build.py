@@ -37,9 +37,12 @@ from scripts.xrism import fek_relativistic_broadening_isco_constraints, xrism_in
 from scripts.summary import html_to_docx, paper_html, paper_latex, paper_lint, paper_tables, paper_tex_audit, worklog
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_run_best_effort` の入出力契約と処理意図を定義する。
 
 def _run_best_effort(argv: list[str], *, cwd: Path) -> None:
     try:
@@ -48,6 +51,8 @@ def _run_best_effort(argv: list[str], *, cwd: Path) -> None:
         cmd = " ".join(str(x) for x in argv)
         print(f"[warn] pre-step failed (continuing): {cmd}\n  {e}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Build paper artifacts (Table 1 + HTML + lint).")

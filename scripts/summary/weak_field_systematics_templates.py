@@ -28,9 +28,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -39,9 +42,13 @@ def _relpath(p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_pick_main_script` の入出力契約と処理意図を定義する。
 
 def _pick_main_script(test: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     scripts = test.get("scripts") or []
@@ -66,6 +73,8 @@ def _pick_main_script(test: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     return None
 
+
+# 関数: `_paths_from_outputs` の入出力契約と処理意図を定義する。
 
 def _paths_from_outputs(test: Dict[str, Any], *, limit: int = 8) -> List[str]:
     outs = test.get("outputs") or []
@@ -92,6 +101,8 @@ def _paths_from_outputs(test: Dict[str, Any], *, limit: int = 8) -> List[str]:
     return paths
 
 
+# 関数: `_sys_item` の入出力契約と処理意図を定義する。
+
 def _sys_item(
     *,
     sys_id: str,
@@ -116,6 +127,8 @@ def _sys_item(
     }
 
 
+# 関数: `_knob` の入出力契約と処理意図を定義する。
+
 def _knob(
     *,
     key: str,
@@ -138,6 +151,8 @@ def _knob(
     return out
 
 
+# 関数: `build_templates` の入出力契約と処理意図を定義する。
+
 def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
     tests = matrix.get("tests") or []
     # 条件分岐: `not isinstance(tests, list) or not tests` を満たす経路を評価する。
@@ -154,6 +169,8 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
         # 条件分岐: `isinstance(tid, str) and tid` を満たす経路を評価する。
         if isinstance(tid, str) and tid:
             test_by_id[tid] = t
+
+    # 関数: `_t` の入出力契約と処理意図を定義する。
 
     def _t(tid: str) -> Tuple[Dict[str, Any], Dict[str, Any], List[str]]:
         # 条件分岐: `tid not in test_by_id` を満たす経路を評価する。
@@ -737,6 +754,8 @@ def build_templates(matrix: Dict[str, Any]) -> Dict[str, Any]:
     }
     return payload
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Generate weak-field systematics decomposition templates (Phase 6 / Step 6.2.2).")

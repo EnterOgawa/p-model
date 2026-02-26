@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # From the arXiv abstract (2309.14953v3): geopotential difference in m^2 s^-2.
@@ -22,10 +23,14 @@ class Config:
     g_m_per_s2: float = 9.80665
 
 
+# 関数: `fractional_frequency_shift` の入出力契約と処理意図を定義する。
+
 def fractional_frequency_shift(delta_u_m2_s2: float, *, c_m_per_s: float) -> float:
     # Gravitational redshift for stationary clocks: z ≡ Δf/f ≈ ΔU / c^2.
     return float(delta_u_m2_s2 / (c_m_per_s**2))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

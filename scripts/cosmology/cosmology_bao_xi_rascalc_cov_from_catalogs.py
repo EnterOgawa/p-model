@@ -48,6 +48,7 @@ from scripts.cosmology import cosmology_bao_xi_from_catalogs as _xi  # noqa: E40
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_infer_cap_label` の入出力契約と処理意図を定義する。
 def _infer_cap_label(path: Path, *, fallback: str) -> str:
     s = path.name.lower()
     # 条件分岐: `"ngc" in s or "north" in s` を満たす経路を評価する。
@@ -61,6 +62,8 @@ def _infer_cap_label(path: Path, *, fallback: str) -> str:
 
     return fallback
 
+
+# 関数: `_load_cap_inputs` の入出力契約と処理意図を定義する。
 
 def _load_cap_inputs(
     *,
@@ -130,6 +133,8 @@ def _load_cap_inputs(
     }
 
 
+# 関数: `_permute_cov_rascalc_to_peakfit` の入出力契約と処理意図を定義する。
+
 def _permute_cov_rascalc_to_peakfit(cov: np.ndarray, *, n_r: int, max_l: int) -> np.ndarray:
     # 条件分岐: `int(max_l) % 2 != 0` を満たす経路を評価する。
     if int(max_l) % 2 != 0:
@@ -151,6 +156,8 @@ def _permute_cov_rascalc_to_peakfit(cov: np.ndarray, *, n_r: int, max_l: int) ->
     cov2 = 0.5 * (cov2 + cov2.T)
     return cov2
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: RascalC covariance for catalog-based xi multipoles (xi0/xi2).")

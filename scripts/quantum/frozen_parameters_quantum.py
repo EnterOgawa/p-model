@@ -34,9 +34,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -44,6 +47,8 @@ def _relpath(p: Path) -> str:
     except Exception:
         return str(p).replace("\\", "/")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -59,15 +64,21 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_require_path` の入出力契約と処理意図を定義する。
 
 def _require_path(path: Path, *, hint: str) -> None:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
         raise SystemExit(f"[fail] missing: {path}\n{hint}")
 
+
+# 関数: `_walk_collect_key_values` の入出力契約と処理意図を定義する。
 
 def _walk_collect_key_values(obj: Any, *, key: str, out: List[Any]) -> None:
     # 条件分岐: `isinstance(obj, dict)` を満たす経路を評価する。
@@ -83,6 +94,8 @@ def _walk_collect_key_values(obj: Any, *, key: str, out: List[Any]) -> None:
         for v in obj:
             _walk_collect_key_values(v, key=key, out=out)
 
+
+# 関数: `_unique_float` の入出力契約と処理意図を定義する。
 
 def _unique_float(values: List[Any], *, name: str) -> float:
     uniq: Set[float] = set()
@@ -111,6 +124,8 @@ def _unique_float(values: List[Any], *, name: str) -> float:
 
     return next(iter(uniq))
 
+
+# 関数: `build_quantum_frozen_parameters` の入出力契約と処理意図を定義する。
 
 def build_quantum_frozen_parameters(*, root: Path) -> Dict[str, Any]:
     theory_frozen = root / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -232,6 +247,8 @@ def build_quantum_frozen_parameters(*, root: Path) -> Dict[str, Any]:
     }
     return payload
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Build Part III (quantum) frozen parameter index JSON.")

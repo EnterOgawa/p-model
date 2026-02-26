@@ -21,14 +21,19 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -48,6 +53,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(value: Any) -> Optional[float]:
     try:
         out = float(value)
@@ -62,6 +69,8 @@ def _safe_float(value: Any) -> Optional[float]:
     return out
 
 
+# 関数: `_find_row` の入出力契約と処理意図を定義する。
+
 def _find_row(rows: Sequence[Dict[str, Any]], key: str) -> Optional[Dict[str, Any]]:
     for row in rows:
         # 条件分岐: `str(row.get("key", "")).strip().lower() == key.lower()` を満たす経路を評価する。
@@ -70,6 +79,8 @@ def _find_row(rows: Sequence[Dict[str, Any]], key: str) -> Optional[Dict[str, An
 
     return None
 
+
+# 関数: `_budget_scattering_proxy` の入出力契約と処理意図を定義する。
 
 def _budget_scattering_proxy(payload_budget: Dict[str, Any]) -> Optional[float]:
     row = ((payload_budget.get("rows") or {}).get("sgra")) or {}
@@ -86,6 +97,8 @@ def _budget_scattering_proxy(payload_budget: Dict[str, Any]) -> Optional[float]:
 
     return float(max(vals_f))
 
+
+# 関数: `_predict_row` の入出力契約と処理意図を定義する。
 
 def _predict_row(
     row: Dict[str, Any],
@@ -136,6 +149,8 @@ def _predict_row(
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     try:
         import matplotlib.pyplot as plt
@@ -172,6 +187,8 @@ def _plot(rows: Sequence[Dict[str, Any]], out_png: Path) -> None:
     fig.savefig(out_png, dpi=220)
     plt.close(fig)
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(rows: Sequence[Dict[str, Any]], out_csv: Path) -> None:
     out_csv.parent.mkdir(parents=True, exist_ok=True)
@@ -216,6 +233,8 @@ def _write_csv(rows: Sequence[Dict[str, Any]], out_csv: Path) -> None:
             )
 
 
+# 関数: `_mirror_to_public` の入出力契約と処理意図を定義する。
+
 def _mirror_to_public(*, src_json: Path, src_csv: Path, src_png: Path, public_dir: Path) -> Dict[str, str]:
     public_dir.mkdir(parents=True, exist_ok=True)
     dst_json = public_dir / src_json.name
@@ -230,6 +249,8 @@ def _mirror_to_public(*, src_json: Path, src_csv: Path, src_png: Path, public_di
         "plot_png": str(dst_png),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _ROOT

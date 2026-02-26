@@ -26,9 +26,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -55,6 +58,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(value: Any) -> float:
     try:
         out = float(value)
@@ -63,6 +68,8 @@ def _safe_float(value: Any) -> float:
 
     return out
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(value: Any, digits: int = 7) -> str:
     # 条件分岐: `isinstance(value, (int, np.integer))` を満たす経路を評価する。
@@ -92,6 +99,8 @@ def _fmt(value: Any, digits: int = 7) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_parse_float_grid` の入出力契約と処理意図を定義する。
+
 def _parse_float_grid(text: str) -> List[float]:
     out: List[float] = []
     for token in str(text).split(","):
@@ -105,6 +114,8 @@ def _parse_float_grid(text: str) -> List[float]:
     return out
 
 
+# 関数: `_parse_int_grid` の入出力契約と処理意図を定義する。
+
 def _parse_int_grid(text: str) -> List[int]:
     out: List[int] = []
     for token in str(text).split(","):
@@ -117,6 +128,8 @@ def _parse_int_grid(text: str) -> List[int]:
 
     return out
 
+
+# 関数: `_parse_bool_grid` の入出力契約と処理意図を定義する。
 
 def _parse_bool_grid(text: str) -> List[bool]:
     mapping = {"0": False, "1": True, "false": False, "true": True, "no": False, "yes": True}
@@ -136,6 +149,8 @@ def _parse_bool_grid(text: str) -> List[bool]:
 
     return out
 
+
+# 関数: `_status_rank` の入出力契約と処理意図を定義する。
 
 def _status_rank(status: str) -> int:
     s = str(status or "")
@@ -161,6 +176,8 @@ def _status_rank(status: str) -> int:
     return -1
 
 
+# 関数: `_status_bucket` の入出力契約と処理意図を定義する。
+
 def _status_bucket(status: str) -> str:
     s = str(status or "")
     # 条件分岐: `s.startswith("pass")` を満たす経路を評価する。
@@ -185,6 +202,8 @@ def _status_bucket(status: str) -> str:
     return "other"
 
 
+# 関数: `_trial_sort_key` の入出力契約と処理意図を定義する。
+
 def _trial_sort_key(row: Dict[str, Any]) -> Tuple[int, int, float]:
     status = str(row.get("status", ""))
     n_usable = int(row.get("n_usable_events", 0))
@@ -192,6 +211,8 @@ def _trial_sort_key(row: Dict[str, Any]) -> Tuple[int, int, float]:
     scalar_term = scalar if math.isfinite(scalar) else 9.9e9
     return (_status_rank(status), n_usable, -scalar_term)
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
@@ -226,6 +247,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             w.writerow(vals)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
@@ -269,6 +292,8 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.32.3 next: tune H1/L1/V1 network gate parameters and fix best-achievable region.")

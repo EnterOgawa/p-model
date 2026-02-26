@@ -51,6 +51,7 @@ MU_SUN = 1.3271244e20  # m^3/s^2
 R_SUN = 6.957e8  # m
 
 
+# クラス: `SeriesRow` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class SeriesRow:
     et: float
@@ -68,9 +69,13 @@ class SeriesRow:
     y_full: float
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -97,6 +102,8 @@ def _set_japanese_font() -> None:
     except Exception:
         return
 
+
+# 関数: `_load_kernels_from_meta` の入出力契約と処理意図を定義する。
 
 def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     meta_path = kernels_dir / "kernels_meta.json"
@@ -133,6 +140,8 @@ def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     return {"meta_path": str(meta_path), "meta": meta, "loaded": loaded}
 
 
+# 関数: `_wn_intervals` の入出力契約と処理意図を定義する。
+
 def _wn_intervals(window) -> List[Tuple[float, float]]:
     out: List[Tuple[float, float]] = []
     n = int(sp.wncard(window))
@@ -143,6 +152,8 @@ def _wn_intervals(window) -> List[Tuple[float, float]]:
     return out
 
 
+# 関数: `_spk_time_bounds` の入出力契約と処理意図を定義する。
+
 def _spk_time_bounds(spk_path: Path, obj_id: int) -> Tuple[float, float]:
     cov = sp.spkcov(str(spk_path), int(obj_id))
     intervals = _wn_intervals(cov)
@@ -152,6 +163,8 @@ def _spk_time_bounds(spk_path: Path, obj_id: int) -> Tuple[float, float]:
 
     return min(a for a, _ in intervals), max(b for _, b in intervals)
 
+
+# 関数: `_impact_b_and_bdot` の入出力契約と処理意図を定義する。
 
 def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, vS_mps: np.ndarray) -> Tuple[float, float]:
     """
@@ -218,11 +231,15 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
     return b, bdot
 
 
+# 関数: `_shapiro_dt_roundtrip` の入出力契約と処理意図を定義する。
+
 def _shapiro_dt_roundtrip(r1_m: float, r2_m: float, b_m: float, *, beta: float) -> float:
     # Round-trip delay (b approximation). PPN gamma = 2β-1  => (1+gamma)=2β
     one_plus_gamma = 2.0 * float(beta)
     return 2.0 * one_plus_gamma * MU_SUN / (C**3) * math.log((4.0 * r1_m * r2_m) / (b_m * b_m))
 
+
+# 関数: `_y_eq2` の入出力契約と処理意図を定義する。
 
 def _y_eq2(b_m: float, bdot_mps: float, *, beta: float) -> float:
     # Eq(2) approximation used in Cassini analyses:
@@ -231,12 +248,16 @@ def _y_eq2(b_m: float, bdot_mps: float, *, beta: float) -> float:
     return 4.0 * one_plus_gamma * MU_SUN / (C**3) * (bdot_mps / b_m)
 
 
+# 関数: `_y_full` の入出力契約と処理意図を定義する。
+
 def _y_full(r1_m: float, r1dot_mps: float, r2_m: float, r2dot_mps: float, b_m: float, bdot_mps: float, *, beta: float) -> float:
     # Round-trip Doppler observable (sign convention): y = - d(Δt)/dt
     one_plus_gamma = 2.0 * float(beta)
     coef = 2.0 * one_plus_gamma * MU_SUN / (C**3)
     return -coef * ((r1dot_mps / r1_m) + (r2dot_mps / r2_m) - 2.0 * (bdot_mps / b_m))
 
+
+# 関数: `_state_m` の入出力契約と処理意図を定義する。
 
 def _state_m(target: str, et: float, *, observer: str = "SUN") -> Tuple[np.ndarray, np.ndarray]:
     # SPICE state is km and km/s by default.
@@ -245,6 +266,8 @@ def _state_m(target: str, et: float, *, observer: str = "SUN") -> Tuple[np.ndarr
     v_kmps = np.array(st[3:], dtype=float)
     return r_km * 1000.0, v_kmps * 1000.0
 
+
+# 関数: `_find_conjunction_center` の入出力契約と処理意図を定義する。
 
 def _find_conjunction_center(
     target: str,
@@ -303,6 +326,8 @@ def _find_conjunction_center(
     return et_min, b_min
 
 
+# 関数: `_build_series` の入出力契約と処理意図を定義する。
+
 def _build_series(
     target: str,
     *,
@@ -357,6 +382,8 @@ def _build_series(
     return out
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: Iterable[SeriesRow]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -399,6 +426,8 @@ def _write_csv(path: Path, rows: Iterable[SeriesRow]) -> None:
                 ]
             )
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[SeriesRow], *, title: str, min_b_rsun: float) -> None:
     _set_japanese_font()
@@ -444,6 +473,8 @@ def _plot(path: Path, rows: List[SeriesRow], *, title: str, min_b_rsun: float) -
     fig.savefig(path, dpi=160)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="BepiColombo (MPO) Shapiro geometry prediction from SPICE kernels.")

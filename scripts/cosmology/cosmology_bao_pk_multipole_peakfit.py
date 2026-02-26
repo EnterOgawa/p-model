@@ -49,12 +49,15 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `ZBin` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ZBin:
     zbin: int
     z_eff: float
     label: str
 
+
+# クラス: `PKDataset` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class PKDataset:
@@ -69,6 +72,8 @@ class PKDataset:
     sig0: np.ndarray
     sig2: np.ndarray
 
+
+# クラス: `WindowKernel` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class WindowKernel:
@@ -102,6 +107,7 @@ class WindowKernel:
     m20: np.ndarray  # (n_s,)
     m22: np.ndarray  # (n_s,)
 
+    # 関数: `matrix_for_k_out` の入出力契約と処理意図を定義する。
     def matrix_for_k_out(self, k_out: np.ndarray) -> np.ndarray:
         k_out = np.asarray(k_out, dtype=float)
         n_out = int(k_out.size)
@@ -133,6 +139,8 @@ class WindowKernel:
         return k_mat
 
 
+# クラス: `WindowOp` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class WindowOp:
     kernel: WindowKernel
@@ -146,6 +154,7 @@ _ZBINS: List[ZBin] = [
 ]
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -174,6 +183,7 @@ def _set_japanese_font() -> None:
 _NUM_LINE = re.compile(r"^[-+]?\d+\.\d+")
 
 
+# 関数: `_trap_weights` の入出力契約と処理意図を定義する。
 def _trap_weights(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     n = int(x.size)
@@ -193,6 +203,8 @@ def _trap_weights(x: np.ndarray) -> np.ndarray:
     return w
 
 
+# 関数: `_sph_j0` の入出力契約と処理意図を定義する。
+
 def _sph_j0(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     out = np.empty_like(x, dtype=float)
@@ -210,6 +222,8 @@ def _sph_j0(x: np.ndarray) -> np.ndarray:
 
     return out
 
+
+# 関数: `_sph_j2` の入出力契約と処理意図を定義する。
 
 def _sph_j2(x: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
@@ -232,6 +246,8 @@ def _sph_j2(x: np.ndarray) -> np.ndarray:
     return out
 
 
+# 関数: `_legendre_p` の入出力契約と処理意図を定義する。
+
 def _legendre_p(l: int, x: np.ndarray) -> np.ndarray:
     l = int(l)
     # 条件分岐: `l < 0` を満たす経路を評価する。
@@ -242,6 +258,8 @@ def _legendre_p(l: int, x: np.ndarray) -> np.ndarray:
     coeff[l] = 1.0
     return np.polynomial.legendre.legval(np.asarray(x, dtype=float), coeff)
 
+
+# 関数: `_window_coupling_coeffs` の入出力契約と処理意図を定義する。
 
 def _window_coupling_coeffs() -> Dict[Tuple[int, int, int], float]:
     """
@@ -273,6 +291,7 @@ def _window_coupling_coeffs() -> Dict[Tuple[int, int, int], float]:
 
 _WINDOW_COEFFS = _window_coupling_coeffs()
 
+# 関数: `_read_pk_table` の入出力契約と処理意図を定義する。
 def _read_pk_table(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     k: List[float] = []
     pk: List[float] = []
@@ -299,6 +318,8 @@ def _read_pk_table(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     return np.asarray(k, dtype=float), np.asarray(pk, dtype=float), np.asarray(sig, dtype=float)
 
+
+# 関数: `_read_window_rr` の入出力契約と処理意図を定義する。
 
 def _read_window_rr(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     s: List[float] = []
@@ -355,6 +376,8 @@ def _read_window_rr(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.
     )
 
 
+# 関数: `_build_window_kernel` の入出力契約と処理意図を定義する。
+
 def _build_window_kernel(
     *,
     data_dir: Path,
@@ -408,6 +431,7 @@ def _build_window_kernel(
     # Window mixing in ξ multipoles (per s).
     wL = {0: w0, 2: w2, 4: w4, 6: w6, 8: w8}
 
+    # 関数: `mix` の入出力契約と処理意図を定義する。
     def mix(n: int, ell: int) -> np.ndarray:
         out = np.zeros_like(s, dtype=float)
         for L in (0, 2, 4, 6, 8):
@@ -458,6 +482,8 @@ def _build_window_kernel(
         m22=m22,
     )
 
+# 関数: `_read_cov_index_to_k` の入出力契約と処理意図を定義する。
+
 def _read_cov_index_to_k(path: Path) -> Dict[int, float]:
     idx_to_k: Dict[int, float] = {}
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -493,6 +519,8 @@ def _read_cov_index_to_k(path: Path) -> Dict[int, float]:
     return idx_to_k
 
 
+# 関数: `_match_indices_for_k` の入出力契約と処理意図を定義する。
+
 def _match_indices_for_k(*, k_data: np.ndarray, idx_to_k: Dict[int, float], tol: float = 5e-4) -> Tuple[List[int], List[int]]:
     # For each k, find the indices that correspond to that k (typically monopole and quadrupole blocks).
     k_data = np.asarray(k_data, dtype=float)
@@ -511,6 +539,8 @@ def _match_indices_for_k(*, k_data: np.ndarray, idx_to_k: Dict[int, float], tol:
 
     return idx0, idx2
 
+
+# 関数: `_read_cov_submatrix` の入出力契約と処理意図を定義する。
 
 def _read_cov_submatrix(
     *, cov_path: Path, idx0: List[int], idx2: List[int], n: int
@@ -554,10 +584,14 @@ def _read_cov_submatrix(
     return cov
 
 
+# 関数: `_p2` の入出力契約と処理意図を定義する。
+
 def _p2(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=float)
     return 0.5 * (3.0 * mu * mu - 1.0)
 
+
+# 関数: `_f_ap_pbg_exponential` の入出力契約と処理意図を定義する。
 
 def _f_ap_pbg_exponential(z: float) -> float:
     op = 1.0 + float(z)
@@ -567,6 +601,8 @@ def _f_ap_pbg_exponential(z: float) -> float:
 
     return float(op * math.log(op))
 
+
+# 関数: `_f_ap_lcdm_flat` の入出力契約と処理意図を定義する。
 
 def _f_ap_lcdm_flat(z: float, *, omega_m: float, n_grid: int = 4000) -> float:
     z = float(z)
@@ -592,6 +628,8 @@ def _f_ap_lcdm_flat(z: float, *, omega_m: float, n_grid: int = 4000) -> float:
     return float(ez * integral)
 
 
+# 関数: `_eps_from_f_ap_ratio` の入出力契約と処理意図を定義する。
+
 def _eps_from_f_ap_ratio(*, f_ap_model: float, f_ap_fid: float) -> float:
     # 条件分岐: `not (math.isfinite(f_ap_model) and math.isfinite(f_ap_fid) and f_ap_model > 0...` を満たす経路を評価する。
     if not (math.isfinite(f_ap_model) and math.isfinite(f_ap_fid) and f_ap_model > 0.0 and f_ap_fid > 0.0):
@@ -600,6 +638,8 @@ def _eps_from_f_ap_ratio(*, f_ap_model: float, f_ap_fid: float) -> float:
     ratio = float(f_ap_fid / f_ap_model)  # alpha_parallel/alpha_perp
     return float(ratio ** (1.0 / 3.0) - 1.0)
 
+
+# 関数: `_design_matrix` の入出力契約と処理意図を定義する。
 
 def _design_matrix(
     k_fid: np.ndarray,
@@ -682,6 +722,7 @@ def _design_matrix(
     i02_b0 = np.full(n, 0.5 * sum_wp2_true * jfac, dtype=float)
     i22_b0 = np.full(n, 2.5 * sum_wp2_true_p2 * jfac, dtype=float)
 
+    # 関数: `integrate` の入出力契約と処理意図を定義する。
     def integrate(f: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         i00 = 0.5 * np.sum(f * w0[None, :], axis=1) * jfac
         i20 = 2.5 * np.sum(f * w_p2[None, :], axis=1) * jfac
@@ -710,6 +751,8 @@ def _design_matrix(
     return mtx
 
 
+# 関数: `_gls_fit` の入出力契約と処理意図を定義する。
+
 def _gls_fit(*, y: np.ndarray, mtx: np.ndarray, cov_inv: np.ndarray) -> Dict[str, Any]:
     a = mtx.T @ cov_inv @ mtx
     b = mtx.T @ cov_inv @ y
@@ -723,6 +766,8 @@ def _gls_fit(*, y: np.ndarray, mtx: np.ndarray, cov_inv: np.ndarray) -> Dict[str
     chi2 = float(r.T @ cov_inv @ r)
     return {"x": x, "y_pred": y_pred, "residual": r, "chi2": chi2}
 
+
+# 関数: `_scan_grid_joint` の入出力契約と処理意図を定義する。
 
 def _scan_grid_joint(
     *,
@@ -817,6 +862,8 @@ def _scan_grid_joint(
     return best
 
 
+# 関数: `_profile_ci` の入出力契約と処理意図を定義する。
+
 def _profile_ci(
     *,
     x: np.ndarray,
@@ -850,6 +897,8 @@ def _profile_ci(
     right = i0
     while right + 1 < int(x.size) and bool(inside[right + 1]):
         right += 1
+
+    # 関数: `interp_cross` の入出力契約と処理意図を定義する。
 
     def interp_cross(i_out: int, i_in: int) -> Optional[float]:
         x0 = float(x[i_out])
@@ -893,6 +942,8 @@ def _profile_ci(
     return lo, hi
 
 
+# 関数: `_predict_curve` の入出力契約と処理意図を定義する。
+
 def _predict_curve(
     *,
     k_grid: np.ndarray,
@@ -921,6 +972,8 @@ def _predict_curve(
     n = int(k_grid.size)
     return y[:n], y[n:]
 
+
+# 関数: `_load_dataset` の入出力契約と処理意図を定義する。
 
 def _load_dataset(
     *,
@@ -1000,6 +1053,8 @@ def _load_dataset(
         sig2=sig2,
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: BAO peak fit from BOSS DR12 P(k) multipoles (Beutler data).")

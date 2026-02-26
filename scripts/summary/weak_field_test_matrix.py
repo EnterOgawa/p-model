@@ -28,9 +28,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -39,10 +42,14 @@ def _relpath(p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_path_item` の入出力契約と処理意図を定義する。
+
 def _path_item(rel: str, *, required: bool, note: str) -> Dict[str, Any]:
     p = (_ROOT / rel).resolve()
     return {"path": rel.replace("\\", "/"), "required": bool(required), "exists": p.exists(), "note": str(note)}
 
+
+# 関数: `_script_item` の入出力契約と処理意図を定義する。
 
 def _script_item(rel: str, *, role: str, repro: str, note: str = "") -> Dict[str, Any]:
     p = (_ROOT / rel).resolve()
@@ -55,10 +62,14 @@ def _script_item(rel: str, *, role: str, repro: str, note: str = "") -> Dict[str
     }
 
 
+# 関数: `_output_item` の入出力契約と処理意図を定義する。
+
 def _output_item(rel: str, *, note: str = "") -> Dict[str, Any]:
     p = (_ROOT / rel).resolve()
     return {"path": rel.replace("\\", "/"), "exists": p.exists(), "note": str(note)}
 
+
+# 関数: `_try_load_frozen_parameters` の入出力契約と処理意図を定義する。
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -84,6 +95,8 @@ def _try_load_frozen_parameters() -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `build_matrix` の入出力契約と処理意図を定義する。
 
 def build_matrix() -> Dict[str, Any]:
     frozen = _try_load_frozen_parameters()
@@ -388,6 +401,8 @@ def build_matrix() -> Dict[str, Any]:
 
     return payload
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Build weak-field test matrix (Phase 6 / Step 6.2.1).")

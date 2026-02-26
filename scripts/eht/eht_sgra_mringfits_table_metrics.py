@@ -20,18 +20,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_block` の入出力契約と処理意図を定義する。
 
 def _find_block(text: str, needle: str, *, window: int = 900) -> Optional[str]:
     i = text.find(needle)
@@ -43,6 +50,8 @@ def _find_block(text: str, needle: str, *, window: int = 900) -> Optional[str]:
     b = min(len(text), i + window)
     return text[a:b]
 
+
+# 関数: `_summary` の入出力契約と処理意図を定義する。
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
@@ -61,6 +70,8 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
     }
 
 
+# クラス: `MringFitRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class MringFitRow:
     scan: int
@@ -76,6 +87,7 @@ _RE_ROW = re.compile(
 )
 
 
+# 関数: `_parse_table` の入出力契約と処理意図を定義する。
 def _parse_table(tex: str, *, source_path: Path) -> List[MringFitRow]:
     label = "\\label{tab:mringfits}"
     lines = tex.splitlines()
@@ -139,6 +151,8 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MringFitRow]:
 
     return rows
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

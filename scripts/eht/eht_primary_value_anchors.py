@@ -18,18 +18,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_fmt_float_tokens` の入出力契約と処理意図を定義する。
 
 def _fmt_float_tokens(x: float) -> List[str]:
     # 条件分岐: `not math.isfinite(float(x))` を満たす経路を評価する。
@@ -46,6 +53,8 @@ def _fmt_float_tokens(x: float) -> List[str]:
 
     return [s for s in out if s and s != "nan"]
 
+
+# 関数: `_fmt_decimal_tokens` の入出力契約と処理意図を定義する。
 
 def _fmt_decimal_tokens(x: float, *, decimals: int = 2) -> List[str]:
     """Format float tokens without a coarse integer fallback.
@@ -66,6 +75,8 @@ def _fmt_decimal_tokens(x: float, *, decimals: int = 2) -> List[str]:
     return sorted([s for s in out if s and s != "nan"], key=len, reverse=True)
 
 
+# 関数: `_derive_unpacked_dir` の入出力契約と処理意図を定義する。
+
 def _derive_unpacked_dir(local_src: str) -> Optional[str]:
     s = str(local_src).strip()
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -80,11 +91,15 @@ def _derive_unpacked_dir(local_src: str) -> Optional[str]:
     return None
 
 
+# 関数: `_iter_tex_files` の入出力契約と処理意図を定義する。
+
 def _iter_tex_files(root_dir: Path) -> Iterable[Path]:
     for p in root_dir.rglob("*.tex"):
         # avoid extremely deep / build directories (none expected, but keep safe)
         yield p
 
+
+# 関数: `_find_regex_in_files` の入出力契約と処理意図を定義する。
 
 def _find_regex_in_files(
     *,
@@ -122,6 +137,8 @@ def _find_regex_in_files(
     return hits
 
 
+# クラス: `AnchorSpec` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class AnchorSpec:
     key: str
@@ -134,6 +151,8 @@ class AnchorSpec:
     note: str
     derived_check: Optional[Dict[str, Any]] = None
 
+
+# 関数: `_build_anchor_specs` の入出力契約と処理意図を定義する。
 
 def _build_anchor_specs(eht: Dict[str, Any]) -> List[AnchorSpec]:
     objects = eht.get("objects") if isinstance(eht.get("objects"), list) else []
@@ -443,6 +462,8 @@ def _build_anchor_specs(eht: Dict[str, Any]) -> List[AnchorSpec]:
 
     return specs
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

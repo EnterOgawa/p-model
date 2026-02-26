@@ -10,6 +10,7 @@ import numpy as np
 from scipy.stats import binom
 
 
+# クラス: `Params` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Params:
     # Event-ready validity (Supplementary: Section E/K in the original release notes).
@@ -31,6 +32,8 @@ class Params:
     start_offset_points: int = 100
 
 
+# 関数: `_load_table_from_zip` の入出力契約と処理意図を定義する。
+
 def _load_table_from_zip(zip_path: Path, *, member: str) -> tuple[np.ndarray, np.ndarray]:
     # 条件分岐: `not zip_path.exists()` を満たす経路を評価する。
     if not zip_path.exists():
@@ -47,6 +50,8 @@ def _load_table_from_zip(zip_path: Path, *, member: str) -> tuple[np.ndarray, np
     return ts, data
 
 
+# クラス: `ChshResult` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ChshResult:
     n_trials: int
@@ -58,6 +63,8 @@ class ChshResult:
     s: float
     s_err: float
 
+
+# 関数: `_analyze` の入出力契約と処理意図を定義する。
 
 def _analyze(data: np.ndarray, *, p: Params, start_offset_ps: int = 0) -> ChshResult:
     # Columns in bell_open_data.txt (see release notes / example script).
@@ -163,6 +170,8 @@ def _analyze(data: np.ndarray, *, p: Params, start_offset_ps: int = 0) -> ChshRe
     )
 
 
+# クラス: `Hensen2016Params` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Hensen2016Params:
     # event_ready_window_start_channel0 differs between old/new detector runs.
@@ -190,6 +199,8 @@ class Hensen2016Params:
     start_offset_points: int = 100
 
 
+# クラス: `Hensen2016Result` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Hensen2016Result:
     n_trials_total: int
@@ -204,6 +215,8 @@ class Hensen2016Result:
     s_combined: float
     s_err_combined: float
 
+
+# 関数: `_analyze_hensen2016` の入出力契約と処理意図を定義する。
 
 def _analyze_hensen2016(
     data_old: np.ndarray, data_new: np.ndarray, *, p: Hensen2016Params, start_offset_ps: int = 0
@@ -310,6 +323,7 @@ def _analyze_hensen2016(
     inputs_ab = [(0, 0), (0, 1), (1, 0), (1, 1)]
     outputs_xy = [(+1, +1), (+1, -1), (-1, +1), (-1, -1)]
 
+    # 関数: `_corr_and_s` の入出力契約と処理意図を定義する。
     def _corr_and_s(psi: int) -> tuple[np.ndarray, np.ndarray, np.ndarray, float, float, int]:
         corr = np.zeros((4, 4), dtype=np.int64)
         e = np.zeros((4,), dtype=float)
@@ -366,6 +380,8 @@ def _analyze_hensen2016(
         s_err_combined=s_err_combined,
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(

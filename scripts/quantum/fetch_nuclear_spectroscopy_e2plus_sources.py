@@ -8,11 +8,14 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 
+# クラス: `FileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FileSpec:
     url: str
     relpath: str
 
+
+# 関数: `_parse_energy_to_keV` の入出力契約と処理意図を定義する。
 
 def _parse_energy_to_keV(obj: object) -> tuple[float, float | None] | None:
     # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
@@ -48,6 +51,8 @@ def _parse_energy_to_keV(obj: object) -> tuple[float, float | None] | None:
     return float(e_keV), (float(e_sigma) if e_sigma is not None else None)
 
 
+# 関数: `_parse_dimensionless` の入出力契約と処理意図を定義する。
+
 def _parse_dimensionless(obj: object) -> tuple[float, float | None] | None:
     # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
     if not isinstance(obj, dict):
@@ -72,6 +77,8 @@ def _parse_dimensionless(obj: object) -> tuple[float, float | None] | None:
     return float(v), (float(s) if s is not None else None)
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -85,6 +92,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -104,6 +113,8 @@ def _download(url: str, out_path: Path) -> None:
 
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -369,6 +380,7 @@ def main() -> None:
         "files": [],
     }
 
+    # 関数: `add_file` の入出力契約と処理意図を定義する。
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item: dict[str, object] = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
         # 条件分岐: `extra` を満たす経路を評価する。

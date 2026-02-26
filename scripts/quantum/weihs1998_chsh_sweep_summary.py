@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Iterable, List, Tuple
 
 
+# クラス: `RunSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class RunSpec:
     subdir: str
@@ -15,11 +16,15 @@ class RunSpec:
     out_tag: str
 
 
+# 関数: `_default_runs` の入出力契約と処理意図を定義する。
+
 def _default_runs() -> List[RunSpec]:
     base = "weihs1998_longdist_"
     runs = ["longdist0", "longdist1", "longdist2", "longdist10"]
     return [RunSpec(subdir="longdist", run=r, out_tag=base + r) for r in runs]
 
+
+# 関数: `_load_sweep` の入出力契約と処理意図を定義する。
 
 def _load_sweep(csv_path: Path) -> tuple[list[float], list[float]]:
     xs: list[float] = []
@@ -35,6 +40,8 @@ def _load_sweep(csv_path: Path) -> tuple[list[float], list[float]]:
 
     return xs, ys
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

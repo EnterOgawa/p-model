@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # Casimir (Roy, Lin, Mohideen; quant-ph/9906062v3):
@@ -33,6 +34,8 @@ class Config:
     casimir_a_nm_max: float = 2000.0
 
 
+# 関数: `casimir_pressure_parallel_plates_pa` の入出力契約と処理意図を定義する。
+
 def casimir_pressure_parallel_plates_pa(a_m: float, *, h_j_s: float, c_m_s: float) -> float:
     # Ideal perfectly conducting parallel plates:
     # P = -π^2 ħ c / (240 a^4)
@@ -42,6 +45,8 @@ def casimir_pressure_parallel_plates_pa(a_m: float, *, h_j_s: float, c_m_s: floa
     hbar = h_j_s / (2.0 * math.pi)
     return float(-(math.pi**2) * hbar * c_m_s / (240.0 * (a_m**4)))
 
+
+# 関数: `casimir_force_sphere_plate_n` の入出力契約と処理意図を定義する。
 
 def casimir_force_sphere_plate_n(a_m: float, *, radius_m: float, h_j_s: float, c_m_s: float) -> float:
     # Proximity force approximation (PFA) for ideal conductors:
@@ -53,6 +58,8 @@ def casimir_force_sphere_plate_n(a_m: float, *, radius_m: float, h_j_s: float, c
     hbar = h_j_s / (2.0 * math.pi)
     return float(-(math.pi**3) * hbar * c_m_s * radius_m / (360.0 * (a_m**3)))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -67,6 +74,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest().upper()
 
+
+# 関数: `_extract_hydrogen_1s2s_frequency` の入出力契約と処理意図を定義する。
 
 def _extract_hydrogen_1s2s_frequency(*, pdf_path: Path) -> tuple[int, int, str]:
     # 条件分岐: `not pdf_path.exists()` を満たす経路を評価する。
@@ -103,6 +112,8 @@ def _extract_hydrogen_1s2s_frequency(*, pdf_path: Path) -> tuple[int, int, str]:
     sigma_hz = int(m.group(2))
     return f_hz, sigma_hz, m.group(0)
 
+
+# 関数: `_extract_alpha_inverse` の入出力契約と処理意図を定義する。
 
 def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
     # 条件分岐: `not pdf_path.exists()` を満たす経路を評価する。
@@ -151,6 +162,8 @@ def _extract_alpha_inverse(*, pdf_path: Path) -> tuple[float, float, str]:
     sigma = float(unc_int) * (10.0 ** (-decimals))
     return val, sigma, m.group(0)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -238,6 +251,8 @@ def main() -> None:
         m_nuc = float(A) * m_p
         phi = G * m_nuc / r
         return float(phi / (c**2))
+
+    # 関数: `_deltaE_eV` の入出力契約と処理意図を定義する。
 
     def _deltaE_eV(*, phi_over_c2: float) -> float:
         # Potential energy scale for electron: ΔE ~ m_e * |φ|.

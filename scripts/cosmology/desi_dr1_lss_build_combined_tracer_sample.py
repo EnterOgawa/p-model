@@ -45,12 +45,15 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 def _relpath(p: Path) -> str:
     try:
         return p.relative_to(_ROOT).as_posix()
     except Exception:
         return p.as_posix()
 
+
+# 関数: `_load_manifest` の入出力契約と処理意図を定義する。
 
 def _load_manifest(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -65,6 +68,8 @@ def _load_manifest(path: Path) -> Dict[str, Any]:
     return obj
 
 
+# 関数: `_require_item` の入出力契約と処理意図を定義する。
+
 def _require_item(manifest: Dict[str, Any], *, sample: str, cap: str) -> Dict[str, Any]:
     key = f"{str(sample).strip()}:{str(cap).strip()}"
     it = (manifest.get("items") or {}).get(key)
@@ -75,10 +80,14 @@ def _require_item(manifest: Dict[str, Any], *, sample: str, cap: str) -> Dict[st
     return it
 
 
+# 関数: `_load_npz` の入出力契約と処理意図を定義する。
+
 def _load_npz(path: Path) -> Dict[str, np.ndarray]:
     with np.load(path) as z:
         return {k: np.asarray(z[k]) for k in z.files}
 
+
+# 関数: `_concat_npz_dicts` の入出力契約と処理意図を定義する。
 
 def _concat_npz_dicts(dicts: List[Dict[str, np.ndarray]]) -> Dict[str, np.ndarray]:
     # 条件分岐: `not dicts` を満たす経路を評価する。
@@ -101,6 +110,8 @@ def _concat_npz_dicts(dicts: List[Dict[str, np.ndarray]]) -> Dict[str, np.ndarra
 
     return out
 
+
+# 関数: `_downsample_rows` の入出力契約と処理意図を定義する。
 
 def _downsample_rows(
     arrs: Dict[str, np.ndarray], *, target_rows: int | None, seed: int, shuffle: bool
@@ -135,11 +146,15 @@ def _downsample_rows(
     return out, {"rows_in": n, "rows_out": int(sel.size), "seed": int(seed), "shuffle_rows": bool(shuffle)}
 
 
+# 関数: `_desi_default_weight` の入出力契約と処理意図を定義する。
+
 def _desi_default_weight(cols: Dict[str, np.ndarray]) -> np.ndarray:
     w_fkp = np.asarray(cols["WEIGHT_FKP"], dtype=np.float64)
     w_base = np.asarray(cols["WEIGHT"], dtype=np.float64)
     return w_fkp * w_base
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Build a combined-tracer DESI DR1 LSS sample from extracted NPZ.")

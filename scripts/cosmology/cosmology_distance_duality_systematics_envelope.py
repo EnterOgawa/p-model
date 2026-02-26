@@ -19,6 +19,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -44,14 +45,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -70,6 +77,8 @@ def _safe_float(x: Any) -> Optional[float]:
 
     return v
 
+
+# 関数: `_category` の入出力契約と処理意図を定義する。
 
 def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     uses_bao = bool(row.get("uses_bao", False))
@@ -103,6 +112,8 @@ def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     return ("other", "#7f7f7f")
 
 
+# 関数: `_robust_sigma` の入出力契約と処理意図を定義する。
+
 def _robust_sigma(values: List[float]) -> float:
     # 条件分岐: `len(values) < 2` を満たす経路を評価する。
     if len(values) < 2:
@@ -113,6 +124,8 @@ def _robust_sigma(values: List[float]) -> float:
     # For a normal distribution, sigma ≈ 1.4826 * MAD.
     return 1.4826 * float(mad)
 
+
+# 関数: `_sigma_needed_for_nonreject` の入出力契約と処理意図を定義する。
 
 def _sigma_needed_for_nonreject(
     delta_eps: float,
@@ -131,6 +144,8 @@ def _sigma_needed_for_nonreject(
     v = float(needed_total) ** 2 - float(sigma_obs) ** 2
     return math.sqrt(v) if v > 0 else 0.0
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(

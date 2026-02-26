@@ -35,9 +35,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -54,6 +57,7 @@ _INTERNAL_ONLY_START = "<!-- INTERNAL_ONLY_START -->"
 _INTERNAL_ONLY_END = "<!-- INTERNAL_ONLY_END -->"
 
 
+# クラス: `MdSection` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class MdSection:
     level: int
@@ -64,6 +68,8 @@ class MdSection:
     body_start_idx: int  # 0-based
     body_end_idx: int  # 0-based, exclusive
 
+
+# 関数: `_strip_internal_lines` の入出力契約と処理意図を定義する。
 
 def _strip_internal_lines(lines: Sequence[str]) -> List[str]:
     out: List[str] = []
@@ -89,6 +95,8 @@ def _strip_internal_lines(lines: Sequence[str]) -> List[str]:
 
     return out
 
+
+# 関数: `_parse_sections` の入出力契約と処理意図を定義する。
 
 def _parse_sections(lines: Sequence[str]) -> List[MdSection]:
     headings: List[Tuple[int, int, int, Optional[str], str]] = []
@@ -136,6 +144,8 @@ def _parse_sections(lines: Sequence[str]) -> List[MdSection]:
     return sections
 
 
+# 関数: `_is_candidate_section` の入出力契約と処理意図を定義する。
+
 def _is_candidate_section(sec: MdSection) -> bool:
     # 条件分岐: `not sec.section_num` を満たす経路を評価する。
     if not sec.section_num:
@@ -143,6 +153,8 @@ def _is_candidate_section(sec: MdSection) -> bool:
 
     return sec.section_num.startswith("4.2.") or sec.section_num.startswith("5.")
 
+
+# 関数: `_is_container` の入出力契約と処理意図を定義する。
 
 def _is_container(sec: MdSection, *, all_secs: Sequence[MdSection]) -> bool:
     # 条件分岐: `not sec.section_num` を満たす経路を評価する。
@@ -167,6 +179,8 @@ def _is_container(sec: MdSection, *, all_secs: Sequence[MdSection]) -> bool:
 
     return False
 
+
+# 関数: `_category_for` の入出力契約と処理意図を定義する。
 
 def _category_for(sec_num: str, title: str) -> str:
     # Primary mapping by section number (stable within Part III).
@@ -248,6 +262,8 @@ def _category_for(sec_num: str, title: str) -> str:
     return "未分類"
 
 
+# 関数: `_extract_bold_field` の入出力契約と処理意図を定義する。
+
 def _extract_bold_field(section_lines: Sequence[str], field_name: str) -> Optional[str]:
     for i, line in enumerate(section_lines):
         m = _RE_BOLD_FIELD.match(line)
@@ -272,6 +288,8 @@ def _extract_bold_field(section_lines: Sequence[str], field_name: str) -> Option
 
     return None
 
+
+# 関数: `_is_meaningful` の入出力契約と処理意図を定義する。
 
 def _is_meaningful(text: Optional[str]) -> bool:
     # 条件分岐: `text is None` を満たす経路を評価する。
@@ -301,9 +319,13 @@ def _is_meaningful(text: Optional[str]) -> bool:
     return True
 
 
+# 関数: `_has_output_reference` の入出力契約と処理意図を定義する。
+
 def _has_output_reference(text: str) -> bool:
     return "output/" in text.replace("\\", "/")
 
+
+# 関数: `_has_frozen_marker` の入出力契約と処理意図を定義する。
 
 def _has_frozen_marker(text: str) -> bool:
     t = text
@@ -329,6 +351,8 @@ def _has_frozen_marker(text: str) -> bool:
     return False
 
 
+# 関数: `_has_reject_marker` の入出力契約と処理意図を定義する。
+
 def _has_reject_marker(text: str) -> bool:
     t = text
     # 条件分岐: `"棄却条件" in t` を満たす経路を評価する。
@@ -347,6 +371,8 @@ def _has_reject_marker(text: str) -> bool:
 
     return False
 
+
+# 関数: `build_inventory` の入出力契約と処理意図を定義する。
 
 def build_inventory(*, paper_md: Path) -> Dict[str, Any]:
     raw_lines = paper_md.read_text(encoding="utf-8").splitlines()
@@ -418,10 +444,14 @@ def build_inventory(*, paper_md: Path) -> Dict[str, Any]:
     return payload
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_md` の入出力契約と処理意図を定義する。
 
 def _write_md(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -476,6 +506,8 @@ def _write_md(path: Path, payload: Dict[str, Any]) -> None:
 
     path.write_text("\n".join(lines), encoding="utf-8")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Inventory Part III completeness (Input/Frozen/Statistic/Reject/Output) and emit missing-only list.")

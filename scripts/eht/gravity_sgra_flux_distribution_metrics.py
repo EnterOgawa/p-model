@@ -18,18 +18,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_lines` の入出力契約と処理意図を定義する。
 
 def _read_lines(path: Path) -> List[str]:
     return path.read_text(encoding="utf-8", errors="replace").splitlines()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_first` の入出力契約と処理意図を定義する。
 
 def _find_first(lines: Sequence[str], pattern: re.Pattern[str]) -> Optional[Tuple[int, re.Match[str]]]:
     for i, line in enumerate(lines, start=1):
@@ -40,6 +47,8 @@ def _find_first(lines: Sequence[str], pattern: re.Pattern[str]) -> Optional[Tupl
 
     return None
 
+
+# 関数: `_anchor` の入出力契約と処理意図を定義する。
 
 def _anchor(path: Path, lineno: int, label: str, line: str, match: Optional[re.Match[str]] = None) -> Dict[str, Any]:
     s = line.rstrip("\n")
@@ -57,6 +66,8 @@ def _anchor(path: Path, lineno: int, label: str, line: str, match: Optional[re.M
     return {"path": str(path), "line": int(lineno), "label": label, "snippet": snippet}
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(x: str) -> Optional[float]:
     try:
         v = float(x)
@@ -64,6 +75,8 @@ def _maybe_float(x: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_strip_tex_math` の入出力契約と処理意図を定義する。
 
 def _strip_tex_math(s: str) -> str:
     # Remove surrounding $...$ and common wrappers.
@@ -76,6 +89,8 @@ def _strip_tex_math(s: str) -> str:
     return s
 
 
+# 関数: `_split_tex_cells` の入出力契約と処理意図を定義する。
+
 def _split_tex_cells(line: str) -> List[str]:
     # Split a TeX table row by '&' while keeping '\&' as a literal ampersand.
     placeholder = "__AMP__PLACEHOLDER__"
@@ -83,6 +98,8 @@ def _split_tex_cells(line: str) -> List[str]:
     parts = [p.replace(placeholder, "\\&") for p in safe.split("&")]
     return parts
 
+
+# 関数: `_parse_value_cell` の入出力契約と処理意図を定義する。
 
 def _parse_value_cell(cell: str) -> Dict[str, Any]:
     raw = cell.strip()
@@ -108,6 +125,8 @@ def _parse_value_cell(cell: str) -> Dict[str, Any]:
 
     return {"raw": raw, "value_mJy": val, "sigma_mJy": err, "struck_out": struck}
 
+
+# 関数: `_parse_percentiles_table` の入出力契約と処理意図を定義する。
 
 def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, Any]:
     out: Dict[str, Any] = {"ok": True}
@@ -228,6 +247,8 @@ def _parse_percentiles_table(lines: Sequence[str], tex_path: Path) -> Dict[str, 
     out["anchor"] = _anchor(tex_path, label_line, "table1_percentiles_label", lines[label_line - 1])
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Extract GRAVITY (2020) Sgr A* NIR flux distribution percentiles (Table 1).")

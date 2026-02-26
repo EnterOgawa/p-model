@@ -20,18 +20,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -61,6 +68,7 @@ def _set_japanese_font() -> None:
 _RE_PM = re.compile(r"\$(?P<mean>-?\d+(?:\.\d+)?)\s*\\pm\s*(?P<sigma>\d+(?:\.\d+)?)\s*\$")
 
 
+# 関数: `_parse_pm` の入出力契約と処理意図を定義する。
 def _parse_pm(cell: str) -> Optional[Tuple[float, float]]:
     m = _RE_PM.search(cell)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -69,6 +77,8 @@ def _parse_pm(cell: str) -> Optional[Tuple[float, float]]:
 
     return float(m.group("mean")), float(m.group("sigma"))
 
+
+# クラス: `RingFitRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class RingFitRow:
@@ -89,6 +99,8 @@ class RingFitRow:
     source: Dict[str, Any]
 
 
+# クラス: `RingFitSummaryRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class RingFitSummaryRow:
     table: str  # "descattered" or "on_sky"
@@ -102,9 +114,13 @@ class RingFitSummaryRow:
     source: Dict[str, Any]
 
 
+# 関数: `_clean_cell` の入出力契約と処理意図を定義する。
+
 def _clean_cell(s: str) -> str:
     return s.strip().rstrip("\\").strip()
 
+
+# 関数: `_parse_table` の入出力契約と処理意図を定義する。
 
 def _parse_table(tex: str, *, source_path: Path) -> List[RingFitRow]:
     # Identify which table we are currently in.
@@ -212,6 +228,8 @@ def _parse_table(tex: str, *, source_path: Path) -> List[RingFitRow]:
 
     return rows
 
+
+# 関数: `_parse_image_analysis_ringfit_summary_table` の入出力契約と処理意図を定義する。
 
 def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) -> List[RingFitSummaryRow]:
     # Parse Table "tab:SgrA_ringfit" in Paper III (image_analysis.tex).
@@ -362,6 +380,8 @@ def _parse_image_analysis_ringfit_summary_table(tex: str, *, source_path: Path) 
     return rows
 
 
+# 関数: `_summary` の入出力契約と処理意図を定義する。
+
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
@@ -378,6 +398,8 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
         "max": float(np.max(x)),
     }
 
+
+# 関数: `_make_plot` の入出力契約と処理意図を定義する。
 
 def _make_plot(*, metrics: Dict[str, Any], out_png: Path, title: str) -> None:
     try:
@@ -415,6 +437,8 @@ def _make_plot(*, metrics: Dict[str, Any], out_png: Path, title: str) -> None:
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

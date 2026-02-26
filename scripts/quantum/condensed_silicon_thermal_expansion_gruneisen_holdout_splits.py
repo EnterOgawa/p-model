@@ -12,6 +12,7 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -37,6 +38,7 @@ from scripts.quantum.condensed_silicon_thermal_expansion_gruneisen_debye_einstei
 )
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -51,9 +53,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_range_idx` の入出力契約と処理意図を定義する。
+
 def _range_idx(temps: list[float], *, t_min: float, t_max: float) -> list[int]:
     return [i for i, t in enumerate(temps) if float(t_min) <= float(t) <= float(t_max)]
 
+
+# 関数: `_metrics_for_range` の入出力契約と処理意図を定義する。
 
 def _metrics_for_range(
     *,
@@ -106,6 +112,8 @@ def _metrics_for_range(
         "exceed_3sigma_n": int(exceed_3sigma),
     }
 
+
+# 関数: `_fit_debye_einstein_1` の入出力契約と処理意図を定義する。
 
 def _fit_debye_einstein_1(
     *,
@@ -190,6 +198,8 @@ def _fit_debye_einstein_1(
         "alpha_pred": alpha_pred,
     }
 
+
+# 関数: `_fit_debye_einstein_2` の入出力契約と処理意図を定義する。
 
 def _fit_debye_einstein_2(
     *,
@@ -305,6 +315,8 @@ def _fit_debye_einstein_2(
         "alpha_pred": alpha_pred,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

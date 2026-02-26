@@ -8,13 +8,18 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(x: object) -> float | None:
     try:
@@ -26,6 +31,8 @@ def _as_float(x: object) -> float | None:
     except Exception:
         return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

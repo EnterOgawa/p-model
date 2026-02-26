@@ -10,6 +10,7 @@ from statistics import median
 from typing import Any
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(text: str) -> float:
     s = str(text).strip()
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -21,6 +22,8 @@ def _parse_float(text: str) -> float:
     except ValueError:
         return float("nan")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -38,6 +41,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -46,6 +51,8 @@ def _rms(values: list[float]) -> float:
 
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
+
+# 関数: `_median_abs` の入出力契約と処理意図を定義する。
 
 def _median_abs(values: list[float]) -> float:
     finite = [abs(float(v)) for v in values if math.isfinite(float(v))]
@@ -56,6 +63,8 @@ def _median_abs(values: list[float]) -> float:
     return float(median(finite))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -64,6 +73,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -78,6 +89,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             w.writerow([row.get(h) for h in headers])
 
+
+# 関数: `_weighted_mean` の入出力契約と処理意図を定義する。
 
 def _weighted_mean(values: list[float], sigmas: list[float]) -> tuple[float, float]:
     weighted: list[tuple[float, float]] = []
@@ -110,6 +123,8 @@ def _weighted_mean(values: list[float], sigmas: list[float]) -> tuple[float, flo
     return center, float(math.sqrt(max(variance, 0.0)))
 
 
+# 関数: `_fit_radius_a13` の入出力契約と処理意図を定義する。
+
 def _fit_radius_a13(*, a13: list[float], radii: list[float], weights: list[float]) -> float:
     s_xy = 0.0
     s_xx = 0.0
@@ -128,6 +143,8 @@ def _fit_radius_a13(*, a13: list[float], radii: list[float], weights: list[float
 
     return float(s_xy / s_xx)
 
+
+# 関数: `_fit_radius_a13_i` の入出力契約と処理意図を定義する。
 
 def _fit_radius_a13_i(
     *,
@@ -165,6 +182,8 @@ def _fit_radius_a13_i(
     return float(r0), float(r_i)
 
 
+# 関数: `_j_from_radius` の入出力契約と処理意図を定義する。
+
 def _j_from_radius(*, r_rms_fm: float, r_ref_fm: float, l_fm: float, j_ref_mev: float) -> float:
     # 条件分岐: `not (math.isfinite(r_rms_fm) and math.isfinite(r_ref_fm) and math.isfinite(l_...` を満たす経路を評価する。
     if not (math.isfinite(r_rms_fm) and math.isfinite(r_ref_fm) and math.isfinite(l_fm) and math.isfinite(j_ref_mev) and l_fm > 0.0):
@@ -173,6 +192,8 @@ def _j_from_radius(*, r_rms_fm: float, r_ref_fm: float, l_fm: float, j_ref_mev: 
     r_sharp = math.sqrt(5.0 / 3.0) * r_rms_fm
     return float(j_ref_mev * math.exp((r_ref_fm - r_sharp) / l_fm))
 
+
+# 関数: `_a_band` の入出力契約と処理意図を定義する。
 
 def _a_band(a: int) -> str:
     # 条件分岐: `a <= 16` を満たす経路を評価する。
@@ -191,6 +212,8 @@ def _a_band(a: int) -> str:
 
     return "A_101_plus"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

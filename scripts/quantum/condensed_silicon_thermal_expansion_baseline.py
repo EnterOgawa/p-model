@@ -11,13 +11,18 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -33,9 +38,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_alpha_1e8_per_k` の入出力契約と処理意図を定義する。
 
 def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
     """
@@ -78,6 +87,8 @@ def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
     return float(term1 + term2 + term3)
 
 
+# 関数: `_sigma_fit_1e8_per_k` の入出力契約と処理意図を定義する。
+
 def _sigma_fit_1e8_per_k(*, t_k: float, fit_error: dict[str, Any]) -> float | None:
     """
     Return the curve-fit standard error in units of 1e-8 / K, if parseable.
@@ -112,6 +123,8 @@ def _sigma_fit_1e8_per_k(*, t_k: float, fit_error: dict[str, Any]) -> float | No
 
     return s0 if float(t_k) < t0 else s1
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()
@@ -205,6 +218,7 @@ def main() -> None:
     plt.savefig(out_png, dpi=200)
     plt.close()
 
+    # 関数: `a_at` の入出力契約と処理意図を定義する。
     def a_at(t: float) -> float:
         return _alpha_1e8_per_k(t_k=float(t), coeffs=coeffs_f)
 

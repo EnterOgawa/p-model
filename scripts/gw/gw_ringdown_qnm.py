@@ -39,13 +39,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -72,6 +77,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -81,14 +88,20 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -106,6 +119,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
+# 関数: `_infer_zenodo_record_id_from_url` の入出力契約と処理意図を定義する。
+
 def _infer_zenodo_record_id_from_url(url: str) -> Optional[int]:
     try:
         parsed = urllib.parse.urlparse(str(url))
@@ -120,9 +135,13 @@ def _infer_zenodo_record_id_from_url(url: str) -> Optional[int]:
     return None
 
 
+# 関数: `_zenodo_file_url` の入出力契約と処理意図を定義する。
+
 def _zenodo_file_url(*, record_id: int, filename: str) -> str:
     return f"https://zenodo.org/api/records/{int(record_id)}/files/{filename}/content"
 
+
+# 関数: `_ensure_extracted` の入出力契約と処理意図を定義する。
 
 def _ensure_extracted(tar_path: Path, *, extract_dir: Path, members: Sequence[str]) -> None:
     extract_dir.mkdir(parents=True, exist_ok=True)
@@ -135,6 +154,8 @@ def _ensure_extracted(tar_path: Path, *, extract_dir: Path, members: Sequence[st
 
             tf.extract(tf.getmember(name), path=extract_dir)
 
+
+# 関数: `_read_pandas_hdf_block0` の入出力契約と処理意図を定義する。
 
 def _read_pandas_hdf_block0(path: Path) -> Dict[str, np.ndarray]:
     with h5py.File(path, "r") as f:
@@ -149,6 +170,8 @@ def _read_pandas_hdf_block0(path: Path) -> Dict[str, np.ndarray]:
 
     return {name: vals[:, i] for i, name in enumerate(cols)}
 
+
+# 関数: `_select_preferred_posterior` の入出力契約と処理意図を定義する。
 
 def _select_preferred_posterior(event_info: Dict[str, Any]) -> Optional[str]:
     params = event_info.get("parameters") or {}
@@ -180,6 +203,8 @@ def _select_preferred_posterior(event_info: Dict[str, Any]) -> Optional[str]:
     return best
 
 
+# 関数: `_summarize_1d` の入出力契約と処理意図を定義する。
+
 def _summarize_1d(x: np.ndarray) -> Dict[str, Any]:
     x = np.asarray(x, dtype=np.float64)
     return {
@@ -189,6 +214,8 @@ def _summarize_1d(x: np.ndarray) -> Dict[str, Any]:
         "p05_p95": [float(v) for v in np.quantile(x, [0.05, 0.95])],
     }
 
+
+# 関数: `_normalize_gwosc_version` の入出力契約と処理意図を定義する。
 
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
@@ -204,6 +231,8 @@ def _normalize_gwosc_version(version: str) -> str:
     return v
 
 
+# 関数: `_candidate_gwosc_versions` の入出力契約と処理意図を定義する。
+
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
     # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
@@ -213,6 +242,8 @@ def _candidate_gwosc_versions(version: str) -> List[str]:
     return [_normalize_gwosc_version(version)]
 
 
+# 関数: `_gwosc_catalog_url` の入出力契約と処理意図を定義する。
+
 def _gwosc_catalog_url(catalog: str) -> str:
     cat = (catalog or "").strip()
     # 条件分岐: `not cat` を満たす経路を評価する。
@@ -221,6 +252,8 @@ def _gwosc_catalog_url(catalog: str) -> str:
 
     return f"https://gwosc.org/eventapi/json/{cat}/"
 
+
+# 関数: `_gwosc_event_json_url` の入出力契約と処理意図を定義する。
 
 def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     cat = (catalog or "").strip()
@@ -236,6 +269,8 @@ def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     v = _normalize_gwosc_version(version)
     return f"https://gwosc.org/eventapi/json/{cat}/{ev}/{v}"
 
+
+# 関数: `_resolve_event_common_name` の入出力契約と処理意図を定義する。
 
 def _resolve_event_common_name(*, catalog: str, event: str) -> str:
     target = (event or "").strip()
@@ -303,6 +338,8 @@ def _resolve_event_common_name(*, catalog: str, event: str) -> str:
     return chosen
 
 
+# 関数: `_pick_hdf5_strain_entry` の入出力契約と処理意図を定義する。
+
 def _pick_hdf5_strain_entry(
     strain_list: Sequence[Dict[str, Any]],
     *,
@@ -319,6 +356,8 @@ def _pick_hdf5_strain_entry(
     # 条件分岐: `not cand` を満たす経路を評価する。
     if not cand:
         return None
+
+    # 関数: `_int` の入出力契約と処理意図を定義する。
 
     def _int(x: Any) -> int:
         try:
@@ -337,6 +376,8 @@ def _pick_hdf5_strain_entry(
 
     return sorted(cand, key=lambda e: _int(e.get("sampling_rate")) or 10**9)[0]
 
+
+# 関数: `_download_event_and_strain` の入出力契約と処理意図を定義する。
 
 def _download_event_and_strain(
     *,
@@ -477,6 +518,8 @@ def _download_event_and_strain(
     }
 
 
+# クラス: `FitVariant` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class FitVariant:
     bandpass_hz: Tuple[float, float]
@@ -489,6 +532,7 @@ class FitVariant:
     f_step_hz: float
     tau_steps: int
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "bandpass_hz": [float(self.bandpass_hz[0]), float(self.bandpass_hz[1])],
@@ -507,6 +551,8 @@ class FitVariant:
         }
 
 
+# 関数: `_bandpass` の入出力契約と処理意図を定義する。
+
 def _bandpass(x: np.ndarray, fs_hz: float, low_hz: float, high_hz: float) -> np.ndarray:
     nyq = 0.5 * fs_hz
     low = max(1e-6, float(low_hz) / nyq)
@@ -518,6 +564,8 @@ def _bandpass(x: np.ndarray, fs_hz: float, low_hz: float, high_hz: float) -> np.
     sos = butter(4, [low, high], btype="bandpass", output="sos")
     return sosfiltfilt(sos, x)
 
+
+# 関数: `_slice_strain_hdf5` の入出力契約と処理意図を定義する。
 
 def _slice_strain_hdf5(
     path: Path,
@@ -546,6 +594,8 @@ def _slice_strain_hdf5(
         x = np.asarray(ds[i0:i1], dtype=np.float64)
         return x, fs
 
+
+# 関数: `_fit_damped_sinusoid` の入出力契約と処理意図を定義する。
 
 def _fit_damped_sinusoid(
     t: np.ndarray,
@@ -610,6 +660,8 @@ def _fit_damped_sinusoid(
     return best
 
 
+# 関数: `_summarize_variants` の入出力契約と処理意図を定義する。
+
 def _summarize_variants(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     ok = [r for r in rows if r.get("ok")]
     # 条件分岐: `not ok` を満たす経路を評価する。
@@ -632,6 +684,8 @@ def _summarize_variants(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         "p16_p84": {"f_hz": [p16_f, p84_f], "tau_s": [p16_tau, p84_tau]},
     }
 
+
+# 関数: `_parse_bandpass_list` の入出力契約と処理意図を定義する。
 
 def _parse_bandpass_list(spec: str) -> List[Tuple[float, float]]:
     out: List[Tuple[float, float]] = []
@@ -657,6 +711,8 @@ def _parse_bandpass_list(spec: str) -> List[Tuple[float, float]]:
     return out
 
 
+# 関数: `_parse_float_list` の入出力契約と処理意図を定義する。
+
 def _parse_float_list(spec: str) -> List[float]:
     out: List[float] = []
     s = (spec or "").strip()
@@ -674,6 +730,8 @@ def _parse_float_list(spec: str) -> List[float]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     _set_japanese_font()
@@ -764,6 +822,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         s220 = _read_pandas_hdf_block0(p220)
         s221 = _read_pandas_hdf_block0(p221)
 
+        # 関数: `by_start` の入出力契約と処理意図を定義する。
         def by_start(samples: Dict[str, np.ndarray], *, f_key: str, g_key: str) -> List[Dict[str, Any]]:
             start = np.asarray(samples["start time [M]"], dtype=np.float64)
             out_rows: List[Dict[str, Any]] = []
@@ -789,6 +848,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         t_ref_220 = 10.5
         t_ref_221 = 6.0
 
+        # 関数: `pick_ref` の入出力契約と処理意図を定義する。
         def pick_ref(rows: List[Dict[str, Any]], t_ref: float) -> Dict[str, Any]:
             # 条件分岐: `not rows` を満たす経路を評価する。
             if not rows:

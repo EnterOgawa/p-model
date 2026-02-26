@@ -53,9 +53,12 @@ KPC_TO_M = 3.0856775814913673e19
 KM_TO_M = 1.0e3
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -64,9 +67,13 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
@@ -74,6 +81,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_parse_grid` の入出力契約と処理意図を定義する。
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and float...` を満たす経路を評価する。
@@ -91,9 +100,13 @@ def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     return [float(x) for x in vv.tolist()]
 
 
+# 関数: `_h0p_si_from_km_s_mpc` の入出力契約と処理意図を定義する。
+
 def _h0p_si_from_km_s_mpc(h0_km_s_mpc: float) -> float:
     return float(h0_km_s_mpc) * 1.0e3 / MPC_TO_M
 
+
+# 関数: `_get_h0p_si` の入出力契約と処理意図を定義する。
 
 def _get_h0p_si(
     *,
@@ -122,6 +135,8 @@ def _get_h0p_si(
     raise RuntimeError(f"failed to read H0^(P) from metrics: {h0p_metrics}")
 
 
+# クラス: `Point` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Point:
     galaxy: str
@@ -134,6 +149,8 @@ class Point:
     g_disk_u: float = float("nan")
     g_bul_u: float = float("nan")
 
+
+# 関数: `_read_points` の入出力契約と処理意図を定義する。
 
 def _read_points(csv_path: Path) -> List[Point]:
     pts: List[Point] = []
@@ -184,6 +201,8 @@ def _read_points(csv_path: Path) -> List[Point]:
 
     return pts
 
+
+# 関数: `_fit_upsilon_global_grid` の入出力契約と処理意図を定義する。
 
 def _fit_upsilon_global_grid(
     train: Sequence[Point],
@@ -315,6 +334,8 @@ def _fit_upsilon_global_grid(
     }
 
 
+# 関数: `_sigma_log10_gobs` の入出力契約と処理意図を定義する。
+
 def _sigma_log10_gobs(g_obs: np.ndarray, sg_obs: np.ndarray, *, floor_dex: float) -> np.ndarray:
     sigma_y = sg_obs / (g_obs * math.log(10.0))
     sigma_floor = float(max(floor_dex, 1e-6))
@@ -322,6 +343,8 @@ def _sigma_log10_gobs(g_obs: np.ndarray, sg_obs: np.ndarray, *, floor_dex: float
     sigma_y = np.where(np.isfinite(sigma_y) & (sigma_y < sigma_floor), sigma_floor, sigma_y)
     return sigma_y
 
+
+# 関数: `_solve_sigma_int` の入出力契約と処理意図を定義する。
 
 def _solve_sigma_int(resid: np.ndarray, sigma_y: np.ndarray, *, dof: int) -> float:
     # Find sigma_int >= 0 such that chi2/dof ~= 1 for chi2=sum(r^2/(sy^2+si^2)).
@@ -352,6 +375,8 @@ def _solve_sigma_int(resid: np.ndarray, sigma_y: np.ndarray, *, dof: int) -> flo
 
     return float(hi)
 
+
+# 関数: `_eval_model` の入出力契約と処理意図を定義する。
 
 def _eval_model(
     name: str,
@@ -414,6 +439,7 @@ def _eval_model(
     gal_means_all = np.asarray([float(np.mean(v)) for v in by_gal.values() if len(v) >= mpg], dtype=float)
     gal_means_all = gal_means_all[np.isfinite(gal_means_all)]
 
+    # 関数: `_gal_stats` の入出力契約と処理意図を定義する。
     def _gal_stats(vv: np.ndarray) -> Dict[str, Any]:
         # 条件分岐: `vv.size < 3 or not np.isfinite(vv).all()` を満たす経路を評価する。
         if vv.size < 3 or not np.isfinite(vv).all():
@@ -530,6 +556,8 @@ def _eval_model(
     }
 
 
+# 関数: `_split_by_galaxy` の入出力契約と処理意図を定義する。
+
 def _split_by_galaxy(pts: Sequence[Point], *, seed: int, train_frac: float) -> Tuple[List[Point], List[Point]]:
     galaxies = sorted({p.galaxy for p in pts})
     rng = random.Random(int(seed))
@@ -540,6 +568,8 @@ def _split_by_galaxy(pts: Sequence[Point], *, seed: int, train_frac: float) -> T
     test = [p for p in pts if p.galaxy not in train_set]
     return train, test
 
+
+# 関数: `_summarize_sweep` の入出力契約と処理意図を定義する。
 
 def _summarize_sweep(values: Sequence[float], *, threshold: float = 3.0) -> Dict[str, Any]:
     vv = np.asarray([float(x) for x in values if np.isfinite(x)], dtype=float)
@@ -559,6 +589,8 @@ def _summarize_sweep(values: Sequence[float], *, threshold: float = 3.0) -> Dict
         "threshold_abs_z": float(threshold),
     }
 
+
+# 関数: `_run_once` の入出力契約と処理意図を定義する。
 
 def _run_once(
     pts: Sequence[Point],
@@ -774,6 +806,7 @@ def _run_once(
             ud_best = float(ups_fit["upsilon_disk_best"])
             ub_best = float(ups_fit["upsilon_bulge_best"])
 
+            # 関数: `_gbar_from_u` の入出力契約と処理意図を定義する。
             def _gbar_from_u(p: Point) -> float:
                 # 条件分岐: `np.isfinite(p.g_gas) and np.isfinite(p.g_disk_u) and np.isfinite(p.g_bul_u)` を満たす経路を評価する。
                 if np.isfinite(p.g_gas) and np.isfinite(p.g_disk_u) and np.isfinite(p.g_bul_u):
@@ -889,6 +922,8 @@ def _run_once(
         "models": out_models,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

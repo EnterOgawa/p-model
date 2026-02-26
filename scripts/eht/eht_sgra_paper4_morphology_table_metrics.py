@@ -21,22 +21,31 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_block` の入出力契約と処理意図を定義する。
 
 def _find_block(text: str, needle: str, *, window: int = 1600) -> Optional[str]:
     i = text.find(needle)
@@ -49,6 +58,8 @@ def _find_block(text: str, needle: str, *, window: int = 1600) -> Optional[str]:
     return text[a:b]
 
 
+# 関数: `_unwrap_multirow_cell` の入出力契約と処理意図を定義する。
+
 def _unwrap_multirow_cell(s: str) -> str:
     s = str(s).strip()
     m = re.match(r"^\\multirow\{[^}]+\}\{[^}]+\}\{(.+)\}$", s)
@@ -59,6 +70,8 @@ def _unwrap_multirow_cell(s: str) -> str:
     return s
 
 
+# 関数: `_tex_to_plain` の入出力契約と処理意図を定義する。
+
 def _tex_to_plain(s: str) -> str:
     s = str(s)
     s = s.replace("{", "").replace("}", "")
@@ -67,6 +80,8 @@ def _tex_to_plain(s: str) -> str:
     s = re.sub(r"\s+", " ", s)
     return s.strip()
 
+
+# 関数: `_parse_subsup_pm` の入出力契約と処理意図を定義する。
 
 def _parse_subsup_pm(s: str) -> Optional[Tuple[float, float, float]]:
     """
@@ -102,9 +117,13 @@ def _parse_subsup_pm(s: str) -> Optional[Tuple[float, float, float]]:
     return (mid, abs(minus), abs(plus))
 
 
+# 関数: `_sym_sigma` の入出力契約と処理意図を定義する。
+
 def _sym_sigma(minus: float, plus: float) -> float:
     return 0.5 * (float(minus) + float(plus))
 
+
+# 関数: `_summary` の入出力契約と処理意図を定義する。
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
@@ -123,6 +142,8 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
     }
 
 
+# クラス: `MorphRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class MorphRow:
     analysis_class: str
@@ -133,6 +154,8 @@ class MorphRow:
     hops_d: Optional[Tuple[float, float, float]]
     source_anchor: Dict[str, Any]
 
+
+# 関数: `_parse_table` の入出力契約と処理意図を定義する。
 
 def _parse_table(tex: str, *, source_path: Path) -> List[MorphRow]:
     label = "\\label{tab:SgrAMorphology}"
@@ -237,9 +260,13 @@ def _parse_table(tex: str, *, source_path: Path) -> List[MorphRow]:
     return rows
 
 
+# 関数: `_select_rows` の入出力契約と処理意図を定義する。
+
 def _select_rows(rows: List[MorphRow], *, analysis_class: str) -> List[MorphRow]:
     return [r for r in rows if r.analysis_class == analysis_class]
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
@@ -324,6 +351,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     break
         except Exception:
             ring_ref_uas = None
+
+    # 関数: `_gather` の入出力契約と処理意図を定義する。
 
     def _gather(values: List[MorphRow], *, pipeline: str) -> List[float]:
         out: List[float] = []

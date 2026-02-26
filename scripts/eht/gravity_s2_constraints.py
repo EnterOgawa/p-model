@@ -18,13 +18,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# 関数: `_extract_brace_block_from` の入出力契約と処理意図を定義する。
 
 def _extract_brace_block_from(text: str, start_index: int, start_token: str) -> Optional[str]:
     # 条件分岐: `start_index < 0` を満たす経路を評価する。
@@ -52,6 +57,8 @@ def _extract_brace_block_from(text: str, start_index: int, start_token: str) -> 
     return None
 
 
+# 関数: `_extract_first_nonempty_brace_block` の入出力契約と処理意図を定義する。
+
 def _extract_first_nonempty_brace_block(text: str, start_token: str, *, min_len: int = 40) -> Optional[str]:
     search_from = 0
     while True:
@@ -68,6 +75,8 @@ def _extract_first_nonempty_brace_block(text: str, start_token: str, *, min_len:
         search_from = i + len(start_token)
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(s: str) -> Optional[float]:
     try:
         return float(s)
@@ -75,12 +84,16 @@ def _maybe_float(s: str) -> Optional[float]:
         return None
 
 
+# 関数: `_norm_tex` の入出力契約と処理意図を定義する。
+
 def _norm_tex(s: str) -> str:
     # Keep the TeX control sequences but drop whitespace and \! to make regex parsing robust.
     s = s.replace("\\!", "")
     s = re.sub(r"\s+", "", s)
     return s
 
+
+# クラス: `RedshiftConstraint` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class RedshiftConstraint:
@@ -92,6 +105,8 @@ class RedshiftConstraint:
     v_peri_kms: Optional[float]
 
 
+# クラス: `PrecessionConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class PrecessionConstraint:
     f_sp: float
@@ -99,6 +114,8 @@ class PrecessionConstraint:
     delta_phi_arcmin_per_orbit: Optional[float]
     eccentricity: Optional[float]
 
+
+# 関数: `_parse_redshift_2018` の入出力契約と処理意図を定義する。
 
 def _parse_redshift_2018(tex: str) -> Dict[str, Any]:
     abstract = _extract_first_nonempty_brace_block(tex, "\\abstract{")
@@ -161,6 +178,8 @@ def _parse_redshift_2018(tex: str) -> Dict[str, Any]:
     }
 
 
+# 関数: `_parse_precession_2020` の入出力契約と処理意図を定義する。
+
 def _parse_precession_2020(tex: str) -> Dict[str, Any]:
     abstract = _extract_first_nonempty_brace_block(tex, "\\abstract{")
     # 条件分岐: `abstract is None` を満たす経路を評価する。
@@ -211,6 +230,8 @@ def _parse_precession_2020(tex: str) -> Dict[str, Any]:
         },
     }
 
+
+# 関数: `_estimate_discrimination_scale` の入出力契約と処理意図を定義する。
 
 def _estimate_discrimination_scale(*, r_peri_rs: Optional[float], v_peri_kms: Optional[float]) -> Dict[str, Any]:
     # 条件分岐: `r_peri_rs is None or v_peri_kms is None` を満たす経路を評価する。
@@ -264,10 +285,14 @@ def _estimate_discrimination_scale(*, r_peri_rs: Optional[float], v_peri_kms: Op
     }
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

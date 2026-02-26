@@ -37,13 +37,18 @@ except Exception as e:  # pragma: no cover
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
+
+# 関数: `_resolve_output_path` の入出力契約と処理意図を定義する。
 
 def _resolve_output_path(root: Path, rel: str) -> Path:
     rel_norm = rel.replace("\\", "/")
@@ -89,6 +94,8 @@ def _resolve_output_path(root: Path, rel: str) -> Path:
 
     return root / Path(rel_norm)
 
+# 関数: `_extract_result_figure_paths` の入出力契約と処理意図を定義する。
+
 def _extract_result_figure_paths(manuscript_text: str) -> List[str]:
     """
     Extract `output/...png` like paths referenced in the Results chapter (4.2..4.12).
@@ -108,6 +115,8 @@ def _extract_result_figure_paths(manuscript_text: str) -> List[str]:
     norm = sorted({p.replace("\\", "/") for p in paths})
     return norm
 
+
+# 関数: `_as_float01` の入出力契約と処理意図を定義する。
 
 def _as_float01(img: np.ndarray) -> np.ndarray:
     # 条件分岐: `img.dtype.kind == "f"` を満たす経路を評価する。
@@ -132,6 +141,8 @@ def _as_float01(img: np.ndarray) -> np.ndarray:
     return img.astype(np.float32, copy=False)
 
 
+# 関数: `_median_bg_rgb` の入出力契約と処理意図を定義する。
+
 def _median_bg_rgb(img01: np.ndarray) -> np.ndarray:
     # 条件分岐: `img01.ndim == 2` を満たす経路を評価する。
     if img01.ndim == 2:
@@ -143,6 +154,8 @@ def _median_bg_rgb(img01: np.ndarray) -> np.ndarray:
     return np.median(corners, axis=0).astype(np.float32)
 
 
+# 関数: `_nonbg_mask` の入出力契約と処理意図を定義する。
+
 def _nonbg_mask(img01: np.ndarray, *, tol: float) -> np.ndarray:
     # 条件分岐: `img01.ndim == 2` を満たす経路を評価する。
     if img01.ndim == 2:
@@ -153,6 +166,8 @@ def _nonbg_mask(img01: np.ndarray, *, tol: float) -> np.ndarray:
     bg = _median_bg_rgb(img01)
     return np.any(np.abs(rgb - bg[None, None, :]) > tol, axis=2)
 
+
+# 関数: `_edge_nonbg_fraction` の入出力契約と処理意図を定義する。
 
 def _edge_nonbg_fraction(mask: np.ndarray, *, border_px: int) -> float:
     h, w = mask.shape
@@ -169,6 +184,8 @@ def _edge_nonbg_fraction(mask: np.ndarray, *, border_px: int) -> float:
 
     return float((mask & border).sum()) / float(denom)
 
+
+# 関数: `_bbox_margins` の入出力契約と処理意図を定義する。
 
 def _bbox_margins(mask: np.ndarray) -> Optional[Dict[str, int]]:
     ys, xs = np.where(mask)
@@ -187,6 +204,8 @@ def _bbox_margins(mask: np.ndarray) -> Optional[Dict[str, int]]:
     }
 
 
+# クラス: `FigureAudit` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class FigureAudit:
     path: str
@@ -199,6 +218,7 @@ class FigureAudit:
     edge_touch: Optional[bool] = None
     notes: str = ""
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "path": self.path,
@@ -212,6 +232,8 @@ class FigureAudit:
             "notes": self.notes,
         }
 
+
+# 関数: `audit_figures` の入出力契約と処理意図を定義する。
 
 def audit_figures(
     root: Path,
@@ -275,10 +297,14 @@ def audit_figures(
     return missing, audits
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, audits: Sequence[FigureAudit]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -319,6 +345,8 @@ def _write_csv(path: Path, audits: Sequence[FigureAudit]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Audit readability-related properties of key paper figures.")

@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -20,6 +21,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -41,6 +44,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
 
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

@@ -55,6 +55,7 @@ LLR_SHORT_NAME = "月レーザー測距（LLR: Lunar Laser Ranging）"
 _NGLR1_MIN_POINTS_CAP = 6
 
 
+# 関数: `_min_points_for_target` の入出力契約と処理意図を定義する。
 def _min_points_for_target(target: Any, default_min_points: int) -> int:
     try:
         t = str(target or "").strip().lower()
@@ -69,9 +70,13 @@ def _min_points_for_target(target: Any, default_min_points: int) -> int:
     return int(default_min_points)
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     # Reuse the same policy as other scripts
@@ -80,6 +85,8 @@ def _set_japanese_font() -> None:
     except Exception:
         pass
 
+
+# 関数: `_save_placeholder_plot_png` の入出力契約と処理意図を定義する。
 
 def _save_placeholder_plot_png(path: Path, title: str, lines: List[str]) -> None:
     _set_japanese_font()
@@ -96,9 +103,13 @@ def _save_placeholder_plot_png(path: Path, title: str, lines: List[str]) -> None
     plt.close()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_station_xyz_overrides` の入出力契約と処理意図を定義する。
 
 def _load_station_xyz_overrides(path: Path) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Any]]:
     diag: Dict[str, Any] = {
@@ -110,6 +121,7 @@ def _load_station_xyz_overrides(path: Path) -> Tuple[Dict[str, Dict[str, Any]], 
     data = _read_json(path)
     out: Dict[str, Dict[str, Any]] = {}
 
+    # 関数: `_add` の入出力契約と処理意図を定義する。
     def _add(station: Any, rec: Any, default_source: str) -> None:
         # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
         if not isinstance(rec, dict):
@@ -182,6 +194,8 @@ def _load_station_xyz_overrides(path: Path) -> Tuple[Dict[str, Dict[str, Any]], 
     return out, diag
 
 
+# 関数: `_quantize` の入出力契約と処理意図を定義する。
+
 def _quantize(dt: datetime) -> datetime:
     return llr._quantize_utc_for_horizons(dt)  # type: ignore[attr-defined]
 
@@ -189,12 +203,16 @@ def _quantize(dt: datetime) -> datetime:
 TimeTagMode = Literal["tx", "rx", "mid", "auto"]
 
 
+# 関数: `_time_tag_mode_env` の入出力契約と処理意図を定義する。
 def _time_tag_mode_env() -> str:
     mode = os.environ.get("LLR_TIME_TAG", "").strip().lower()
     return mode
 
 
+# 関数: `_build_tx_b_rx` の入出力契約と処理意図を定義する。
+
 def _build_tx_b_rx(tag_times: List[datetime], tof_s: np.ndarray, mode: str) -> Tuple[List[datetime], List[datetime], List[datetime]]:
+    # 関数: `_sec` の入出力契約と処理意図を定義する。
     def _sec(x: float) -> timedelta:
         return timedelta(seconds=float(x))
 
@@ -227,6 +245,8 @@ def _build_tx_b_rx(tag_times: List[datetime], tof_s: np.ndarray, mode: str) -> T
     return tx_times, b_times, rx_times
 
 
+# 関数: `_to_vec_map` の入出力契約と処理意図を定義する。
+
 def _to_vec_map(vdf: pd.DataFrame) -> Dict[datetime, np.ndarray]:
     out: Dict[datetime, np.ndarray] = {}
     for r in vdf.itertuples(index=False):
@@ -241,17 +261,23 @@ def _to_vec_map(vdf: pd.DataFrame) -> Dict[datetime, np.ndarray]:
     return out
 
 
+# 関数: `_safe_id` の入出力契約と処理意図を定義する。
+
 def _safe_id(s: str) -> str:
     import re
 
     return re.sub(r"[^a-z0-9]+", "", (s or "").strip().lower()) or "na"
 
 
+# 関数: `_rms_ns` の入出力契約と処理意図を定義する。
+
 def _rms_ns(arr: np.ndarray) -> float:
     a = np.asarray(arr, dtype=float)
     a = a[np.isfinite(a)]
     return float(np.sqrt(np.mean(a * a))) if len(a) else float("nan")
 
+
+# 関数: `_robust_inlier_mask_ns` の入出力契約と処理意図を定義する。
 
 def _robust_inlier_mask_ns(delta_ns: np.ndarray, *, clip_sigma: float, clip_min_ns: float) -> np.ndarray:
     """
@@ -282,6 +308,8 @@ def _robust_inlier_mask_ns(delta_ns: np.ndarray, *, clip_sigma: float, clip_min_
     return ok & (np.abs(x - med) <= thr)
 
 
+# 関数: `_offset_align_residual_ns` の入出力契約と処理意図を定義する。
+
 def _offset_align_residual_ns(
     obs_s: np.ndarray,
     pred_s: np.ndarray,
@@ -307,6 +335,8 @@ def _offset_align_residual_ns(
     res[inl] = (obs[inl] - (pred[inl] + k)) * 1e9
     return res
 
+
+# 関数: `_offset_align_residual_all_ns` の入出力契約と処理意図を定義する。
 
 def _offset_align_residual_all_ns(
     obs_s: np.ndarray,
@@ -335,6 +365,8 @@ def _offset_align_residual_all_ns(
     res[ok] = (obs[ok] - (pred[ok] + k)) * 1e9
     return res
 
+
+# 関数: `_filter_llr_rows_by_tof` の入出力契約と処理意図を定義する。
 
 def _filter_llr_rows_by_tof(
     all_df: pd.DataFrame,
@@ -388,6 +420,8 @@ def _filter_llr_rows_by_tof(
     return keep_df.reset_index(drop=True)
 
 
+# クラス: `ModePrediction` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ModePrediction:
     mode: str
@@ -409,6 +443,8 @@ class ModePrediction:
     elev_up_deg: np.ndarray  # (n,)
     elev_dn_deg: np.ndarray  # (n,)
 
+
+# 関数: `_compute_predictions_for_mode` の入出力契約と処理意図を定義する。
 
 def _compute_predictions_for_mode(
     *,
@@ -725,6 +761,8 @@ def _compute_predictions_for_mode(
         station_atmos[str(st)]["T_med_k"] = float(np.median(T_ok)) if len(T_ok) else float("nan")
         station_atmos[str(st)]["RH_med_percent"] = float(np.median(RH_ok)) if len(RH_ok) else float("nan")
 
+    # 関数: `_saast_zhd_m` の入出力契約と処理意図を定義する。
+
     def _saast_zhd_m(pressure_hpa: float, phi_rad: float, height_m: float) -> float:
         # Saastamoinen hydrostatic zenith delay [m]
         h_km = height_m / 1000.0
@@ -735,10 +773,14 @@ def _compute_predictions_for_mode(
 
         return float(0.0022768 * pressure_hpa / denom)
 
+    # 関数: `_sat_vapor_pressure_hpa` の入出力契約と処理意図を定義する。
+
     def _sat_vapor_pressure_hpa(temp_k: float) -> float:
         # Tetens formula (hPa)
         t_c = float(temp_k - 273.15)
         return float(6.112 * np.exp((17.67 * t_c) / (t_c + 243.5)))
+
+    # 関数: `_saast_zwd_m` の入出力契約と処理意図を定義する。
 
     def _saast_zwd_m(temp_k: float, rh_percent: float) -> float:
         # Saastamoinen wet zenith delay [m]
@@ -792,6 +834,7 @@ def _compute_predictions_for_mode(
     _B_HT = 5.49e-3
     _C_HT = 1.14e-3
 
+    # 関数: `_interp_lat` の入出力契約と処理意図を定義する。
     def _interp_lat(abs_lat_rad: float, values: list[float]) -> float:
         x = float(abs_lat_rad)
         # 条件分岐: `x <= _NMF_LAT_RAD[0]` を満たす経路を評価する。
@@ -813,6 +856,8 @@ def _compute_predictions_for_mode(
 
         return float(values[-1])
 
+    # 関数: `_marini_mapping_from_sin` の入出力契約と処理意図を定義する。
+
     def _marini_mapping_from_sin(sin_e: float, a: float, b: float, c: float) -> float:
         # Marini (1972) mapping normalized to 1 at zenith (Niell, 1996)
         s = float(sin_e)
@@ -821,6 +866,8 @@ def _compute_predictions_for_mode(
         num = 1.0 + a / (1.0 + b / (1.0 + c))
         den = s + a / (s + b / (s + c))
         return float(num / den)
+
+    # 関数: `_nmf_mapping_factors` の入出力契約と処理意図を定義する。
 
     def _nmf_mapping_factors(*, sin_e: float, lat_rad: float, height_m: float, dt_utc: datetime) -> tuple[float, float]:
         # Seasonal term (day of year)
@@ -865,6 +912,7 @@ def _compute_predictions_for_mode(
     L2_MOON = 0.01
     G_MOON = GM_MOON / (R_MOON**2)
 
+    # 関数: `_tide_disp_vec` の入出力契約と処理意図を定義する。
     def _tide_disp_vec(
         *,
         u_r: np.ndarray,
@@ -1127,6 +1175,8 @@ def _compute_predictions_for_mode(
     )
 
 
+# 関数: `_compute_group_metrics` の入出力契約と処理意図を定義する。
+
 def _compute_group_metrics(
     *,
     all_df: pd.DataFrame,
@@ -1236,6 +1286,8 @@ def _compute_group_metrics(
     return pd.DataFrame(rows).sort_values(["station", "target"]).reset_index(drop=True)
 
 
+# 関数: `_station_weighted_rms_sr_ns` の入出力契約と処理意図を定義する。
+
 def _station_weighted_rms_sr_ns(
     *,
     all_df: pd.DataFrame,
@@ -1274,6 +1326,8 @@ def _station_weighted_rms_sr_ns(
 
     return out
 
+
+# 関数: `_pick_best_time_tag_by_station` の入出力契約と処理意図を定義する。
 
 def _pick_best_time_tag_by_station(
     *,
@@ -1314,6 +1368,8 @@ def _pick_best_time_tag_by_station(
     return best, rms_by_station_mode
 
 
+# 関数: `_mix_predictions_by_station` の入出力契約と処理意図を定義する。
+
 def _mix_predictions_by_station(
     *,
     all_df: pd.DataFrame,
@@ -1324,6 +1380,7 @@ def _mix_predictions_by_station(
     stations_arr = all_df["station"].to_numpy()
     chosen = np.array([best_mode_by_station.get(str(st), "tx") for st in stations_arr], dtype=object)
 
+    # 関数: `_mix_field` の入出力契約と処理意図を定義する。
     def _mix_field(field: str) -> np.ndarray:
         out = np.full((n,), np.nan, dtype=float)
         for mode, preds in preds_by_mode.items():
@@ -1336,6 +1393,8 @@ def _mix_predictions_by_station(
             out[mask] = v[mask]
 
         return out
+
+    # 関数: `_mix_bool` の入出力契約と処理意図を定義する。
 
     def _mix_bool(field: str) -> np.ndarray:
         outb = np.zeros((n,), dtype=bool)
@@ -1371,6 +1430,8 @@ def _mix_predictions_by_station(
         elev_dn_deg=_mix_field("elev_dn_deg"),
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()
@@ -1842,6 +1903,7 @@ def main() -> int:
     if mode == "auto":
         best_path = out_dir / "llr_time_tag_best_by_station.json"
 
+        # 関数: `_load_time_tag_best` の入出力契約と処理意図を定義する。
         def _load_time_tag_best(path: Path) -> tuple[Optional[Dict[str, str]], Optional[Dict[str, Dict[str, float]]]]:
             # 条件分岐: `not path.exists()` を満たす経路を評価する。
             if not path.exists():
@@ -2530,6 +2592,7 @@ def main() -> int:
                     "median"
                 )
 
+                # 関数: `_cause_hint` の入出力契約と処理意図を定義する。
                 def _cause_hint(row: pd.Series) -> str:
                     a = row.get("abs_delta_centered_ns")
                     # 条件分岐: `a is None or not np.isfinite(float(a))` を満たす経路を評価する。
@@ -2947,9 +3010,12 @@ def main() -> int:
 
             # 条件分岐: `len(res_final) >= 100` を満たす経路を評価する。
             if len(res_final) >= 100:
+                # 関数: `_rms` の入出力契約と処理意図を定義する。
                 def _rms(x: np.ndarray) -> float:
                     x = x[np.isfinite(x)]
                     return float(np.sqrt(np.mean(x * x))) if len(x) else float("nan")
+
+                # 関数: `_ecdf_abs` の入出力契約と処理意図を定義する。
 
                 def _ecdf_abs(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
                     x = np.abs(x[np.isfinite(x)])
@@ -3030,10 +3096,14 @@ def main() -> int:
         except Exception as e:
             print(f"[warn] residual distribution plot failed: {e}")
 
+        # 関数: `_grp_rms` の入出力契約と処理意図を定義する。
+
         def _grp_rms(x: pd.Series) -> float:
             a = x.to_numpy(dtype=float)
             a = a[np.isfinite(a)]
             return float(np.sqrt(np.mean(a * a))) if len(a) else float("nan")
+
+        # 関数: `_grp_mean` の入出力契約と処理意図を定義する。
 
         def _grp_mean(x: pd.Series) -> float:
             a = x.to_numpy(dtype=float)
@@ -3186,10 +3256,13 @@ def main() -> int:
                 diag_ok = diag_ok.dropna(subset=["epoch_utc"])
                 diag_ok["ym"] = diag_ok["epoch_utc"].dt.strftime("%Y-%m")
 
+                # 関数: `_rms_series_ns` の入出力契約と処理意図を定義する。
                 def _rms_series_ns(x: pd.Series) -> float:
                     a = x.to_numpy(dtype=float)
                     a = a[np.isfinite(a)]
                     return float(np.sqrt(np.mean(a * a))) if len(a) else float("nan")
+
+                # 関数: `_corr` の入出力契約と処理意図を定義する。
 
                 def _corr(a: pd.Series, b: pd.Series) -> float:
                     x = a.to_numpy(dtype=float)
@@ -3377,6 +3450,8 @@ def main() -> int:
         v = v[np.isfinite(v)]
         return float(np.median(v)) if len(v) else float("nan")
 
+    # 関数: `_point_weighted_rms` の入出力契約と処理意図を定義する。
+
     def _point_weighted_rms(col: str) -> float:
         # 条件分岐: `col not in metrics_df.columns or "n" not in metrics_df.columns` を満たす経路を評価する。
         if col not in metrics_df.columns or "n" not in metrics_df.columns:
@@ -3390,6 +3465,8 @@ def main() -> int:
             return float("nan")
 
         return float(np.sqrt(np.sum(nv[ok] * rv[ok] * rv[ok]) / np.sum(nv[ok])))
+
+    # 関数: `_diag_rms` の入出力契約と処理意図を定義する。
 
     def _diag_rms(
         *,
@@ -3415,6 +3492,7 @@ def main() -> int:
                 }
 
             dm = d[d["year"] >= int(modern_start_year)].copy()
+            # 関数: `_rms_of` の入出力契約と処理意図を定義する。
             def _rms_of(sub: pd.DataFrame) -> float:
                 x = pd.to_numeric(sub["residual_sr_tropo_tide_ns"], errors="coerce").to_numpy(dtype=float)
                 x = x[np.isfinite(x)]
@@ -3610,6 +3688,7 @@ def main() -> int:
     print(f"[ok] plots  : {p1} / {p2} / {p3} / {p4} / {p5}")
 
     try:
+        # 関数: `_safe_rel` の入出力契約と処理意図を定義する。
         def _safe_rel(p: Path) -> str:
             try:
                 return str(p.relative_to(root)).replace("\\", "/")

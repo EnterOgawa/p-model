@@ -47,6 +47,7 @@ JOURNAL_DOI = "10.1016/j.icarus.2010.11.010"
 ILRS_NGLR1_URL = "https://ilrs.gsfc.nasa.gov/missions/satellite_missions/current_missions/ngl1_general.html"
 
 
+# クラス: `ParsedRow` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ParsedRow:
     name: str
@@ -58,6 +59,8 @@ class ParsedRow:
     z_m: float
 
 
+# クラス: `TideRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TideRow:
     name: str
@@ -66,9 +69,13 @@ class TideRow:
     r_dlambda_cosphi_m: float
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -78,6 +85,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -95,6 +104,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
+
+# 関数: `_extract_tar` の入出力契約と処理意図を定義する。
 
 def _extract_tar(tar_path: Path, out_dir: Path, *, force: bool) -> None:
     # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
@@ -118,10 +129,14 @@ def _extract_tar(tar_path: Path, out_dir: Path, *, force: bool) -> None:
     print(f"[ok] extracted: {out_dir}")
 
 
+# 関数: `_find_tex_file` の入出力契約と処理意図を定義する。
+
 def _find_tex_file(extract_dir: Path) -> Optional[Path]:
     candidates = sorted(extract_dir.glob("*.tex"), key=lambda p: p.stat().st_size, reverse=True)
     return candidates[0] if candidates else None
 
+
+# 関数: `_table_slice` の入出力契約と処理意図を定義する。
 
 def _table_slice(tex: str, label: str) -> str:
     """
@@ -146,6 +161,8 @@ def _table_slice(tex: str, label: str) -> str:
     return tex[start : end + len("\\end{table}")]
 
 
+# 関数: `_strip_html_lines` の入出力契約と処理意図を定義する。
+
 def _strip_html_lines(html: str) -> list[str]:
     # Naive but robust enough for the ILRS mission pages we use:
     # replace tags with newlines and collapse whitespace.
@@ -154,6 +171,8 @@ def _strip_html_lines(html: str) -> list[str]:
     lines = [l.strip() for l in text.splitlines() if l.strip()]
     return lines
 
+
+# 関数: `_parse_ilrs_nglr1_pa` の入出力契約と処理意図を定義する。
 
 def _parse_ilrs_nglr1_pa(html: str) -> dict[str, Any]:
     """
@@ -181,6 +200,8 @@ def _parse_ilrs_nglr1_pa(html: str) -> dict[str, Any]:
 
     if start is None:
         raise ValueError("ILRS page parse failed: PA section header not found.")
+
+    # 関数: `_pick` の入出力契約と処理意図を定義する。
 
     def _pick(prefix: str) -> float:
         for line in lines[start : start + 80]:
@@ -213,6 +234,7 @@ def _parse_ilrs_nglr1_pa(html: str) -> dict[str, Any]:
 _RE_LATEX_CMD = re.compile(r"\\[a-zA-Z]+\*?(?:\[[^\]]*])?(?:\{[^}]*})?")
 
 
+# 関数: `_clean_tex_cell` の入出力契約と処理意図を定義する。
 def _clean_tex_cell(s: str) -> str:
     """
     Minimal TeX stripping for numeric cells in Murphy et al. tables.
@@ -232,6 +254,8 @@ def _clean_tex_cell(s: str) -> str:
     return s
 
 
+# 関数: `_clean_tex_name` の入出力契約と処理意図を定義する。
+
 def _clean_tex_name(s: str) -> str:
     s = s.strip()
     s = s.replace("\\phtneg", "")
@@ -244,6 +268,8 @@ def _clean_tex_name(s: str) -> str:
     return s
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
+
 def _to_float(cell: str) -> float:
     v = _clean_tex_cell(cell)
     # 条件分岐: `not v` を満たす経路を評価する。
@@ -252,6 +278,8 @@ def _to_float(cell: str) -> float:
 
     return float(v)
 
+
+# 関数: `_split_rows` の入出力契約と処理意図を定義する。
 
 def _split_rows(table_block: str) -> list[str]:
     m = re.search(r"\\begin\{tabular\}\{[^}]+\}", table_block)
@@ -290,6 +318,8 @@ def _split_rows(table_block: str) -> list[str]:
     return rows
 
 
+# 関数: `_parse_all5` の入出力契約と処理意図を定義する。
+
 def _parse_all5(table_block: str) -> list[ParsedRow]:
     rows = _split_rows(table_block)
     out: list[ParsedRow] = []
@@ -324,6 +354,8 @@ def _parse_all5(table_block: str) -> list[ParsedRow]:
     return out
 
 
+# 関数: `_parse_tides` の入出力契約と処理意図を定義する。
+
 def _parse_tides(table_block: str) -> list[TideRow]:
     rows = _split_rows(table_block)
     out: list[TideRow] = []
@@ -355,6 +387,8 @@ def _parse_tides(table_block: str) -> list[TideRow]:
     return out
 
 
+# 関数: `_canon_key` の入出力契約と処理意図を定義する。
+
 def _canon_key(reflector_name: str) -> str:
     n = reflector_name.strip().lower()
     mapping = {
@@ -370,6 +404,8 @@ def _canon_key(reflector_name: str) -> str:
 
     raise ValueError(f"unknown reflector name in source table: {reflector_name!r}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

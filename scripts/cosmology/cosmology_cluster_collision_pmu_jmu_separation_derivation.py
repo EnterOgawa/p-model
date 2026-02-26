@@ -50,6 +50,7 @@ KM_S_TO_KPC_GYR = 1.0227121650537077
 LIGHT_SPEED_KM_S = 299792.458
 
 
+# クラス: `CollisionObs` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class CollisionObs:
     cluster_id: str
@@ -58,6 +59,8 @@ class CollisionObs:
     offset_sigma_kpc: float
 
 
+# クラス: `Kinematics` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Kinematics:
     cluster_id: str
@@ -65,6 +68,8 @@ class Kinematics:
     v_post_km_s: float
     chi_post: float
 
+
+# クラス: `SimConfig` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class SimConfig:
@@ -87,6 +92,8 @@ class SimConfig:
     retarded_kernel_tau_slow_gyr: float
 
 
+# クラス: `TauOrigin` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TauOrigin:
     mode: str
@@ -106,9 +113,13 @@ class TauOrigin:
     ad_hoc_parameter_count: int
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -117,10 +128,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -130,6 +145,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_load_observations` の入出力契約と処理意図を定義する。
 
 def _load_observations(path: Path) -> List[CollisionObs]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -170,6 +187,8 @@ def _load_observations(path: Path) -> List[CollisionObs]:
     return out
 
 
+# 関数: `_default_kinematics` の入出力契約と処理意図を定義する。
+
 def _default_kinematics() -> Dict[str, Kinematics]:
     return {
         "bullet_main": Kinematics(
@@ -187,10 +206,14 @@ def _default_kinematics() -> Dict[str, Kinematics]:
     }
 
 
+# 関数: `_smooth_transition` の入出力契約と処理意図を定義する。
+
 def _smooth_transition(t: np.ndarray, t0: float, width: float) -> np.ndarray:
     width_safe = max(width, 1.0e-6)
     return 1.0 / (1.0 + np.exp(-(t - t0) / width_safe))
 
+
+# 関数: `_positive_mean` の入出力契約と処理意図を定義する。
 
 def _positive_mean(values: Sequence[float], fallback: float) -> float:
     arr = np.asarray(values, dtype=float)
@@ -202,6 +225,8 @@ def _positive_mean(values: Sequence[float], fallback: float) -> float:
 
     return float(np.mean(arr))
 
+
+# 関数: `_timescale_from_series` の入出力契約と処理意図を定義する。
 
 def _timescale_from_series(series: np.ndarray, t: np.ndarray, fallback: float) -> float:
     y = np.asarray(series, dtype=float)
@@ -221,10 +246,14 @@ def _timescale_from_series(series: np.ndarray, t: np.ndarray, fallback: float) -
     return float(max(np.sqrt(power / slope_power), dt))
 
 
+# 関数: `_velocity_profile` の入出力契約と処理意図を定義する。
+
 def _velocity_profile(t: np.ndarray, *, v_pre: float, v_post: float, t_collision: float, t_drag: float) -> np.ndarray:
     after = v_post + (v_pre - v_post) * np.exp(-np.clip(t - t_collision, 0.0, None) / max(t_drag, 1.0e-6))
     return np.where(t <= t_collision, v_pre, after)
 
+
+# 関数: `_derive_tau_origin` の入出力契約と処理意図を定義する。
 
 def _derive_tau_origin(
     kin_map: Dict[str, Kinematics],
@@ -322,6 +351,8 @@ def _derive_tau_origin(
         ad_hoc_parameter_count=0,
     )
 
+
+# 関数: `_build_retarded_current` の入出力契約と処理意図を定義する。
 
 def _build_retarded_current(
     current_drive: np.ndarray,
@@ -446,6 +477,8 @@ def _build_retarded_current(
     }
 
 
+# 関数: `_build_lw_like_estimates` の入出力契約と処理意図を定義する。
+
 def _build_lw_like_estimates(
     rows: Sequence[Dict[str, Any]],
     traces: Dict[str, Dict[str, Any]],
@@ -548,6 +581,8 @@ def _build_lw_like_estimates(
         "cluster_contribution_decomposition": decomposition_rows,
     }
 
+
+# 関数: `_track_response` の入出力契約と処理意図を定義する。
 
 def _track_response(
     kin: Kinematics,
@@ -673,6 +708,8 @@ def _track_response(
     }
 
 
+# 関数: `_fit_xi` の入出力契約と処理意図を定義する。
+
 def _fit_xi(
     observations: Sequence[CollisionObs],
     kin_map: Dict[str, Kinematics],
@@ -723,6 +760,8 @@ def _fit_xi(
     return best_xi, best_chi2, best_tracks
 
 
+# 関数: `_evaluate_fixed_xi` の入出力契約と処理意図を定義する。
+
 def _evaluate_fixed_xi(
     observations: Sequence[CollisionObs],
     kin_map: Dict[str, Kinematics],
@@ -746,6 +785,8 @@ def _evaluate_fixed_xi(
     return float(xi_value), float(chi2), tracks
 
 
+# 関数: `_build_checks` の入出力契約と処理意図を定義する。
+
 def _build_checks(
     *,
     step_tag: str,
@@ -765,6 +806,7 @@ def _build_checks(
 ) -> List[Dict[str, Any]]:
     checks: List[Dict[str, Any]] = []
 
+    # 関数: `add` の入出力契約と処理意図を定義する。
     def add(
         cid: str,
         metric: str,
@@ -929,6 +971,8 @@ def _build_checks(
     return checks
 
 
+# 関数: `_decision_from_checks` の入出力契約と処理意図を定義する。
+
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fails = [str(c.get("id")) for c in checks if str(c.get("gate_level")) == "hard" and not bool(c.get("pass"))]
     watch_fails = [str(c.get("id")) for c in checks if str(c.get("gate_level")) != "hard" and not bool(c.get("pass"))]
@@ -961,6 +1005,8 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         "rule": "Pass if all hard/watch gates pass.",
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     path: Path,
@@ -1015,6 +1061,8 @@ def _plot(
     fig.savefig(path, dpi=160)
     plt.close(fig)
 
+
+# 関数: `parse_args` の入出力契約と処理意図を定義する。
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -1108,6 +1156,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--step-tag", type=str, default="8.7.25.16", help="Step tag written in output JSON.")
     return parser.parse_args()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     args = parse_args()

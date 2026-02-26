@@ -13,6 +13,7 @@ from typing import Any
 ENERGY_KEYS = ("e2plus", "e4plus", "e3minus")
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(value: object) -> float:
     try:
         out = float(value)
@@ -21,6 +22,8 @@ def _parse_float(value: object) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -38,6 +41,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_median_abs` の入出力契約と処理意図を定義する。
+
 def _median_abs(values: list[float]) -> float:
     finite = [abs(float(v)) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -46,6 +51,8 @@ def _median_abs(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_rms` の入出力契約と処理意図を定義する。
 
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
@@ -56,6 +63,8 @@ def _rms(values: list[float]) -> float:
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -64,6 +73,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -78,6 +89,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow([row.get(h) for h in headers])
 
+
+# 関数: `_solve_linear_system` の入出力契約と処理意図を定義する。
 
 def _solve_linear_system(matrix: list[list[float]], rhs: list[float]) -> list[float]:
     n = len(rhs)
@@ -119,6 +132,8 @@ def _solve_linear_system(matrix: list[list[float]], rhs: list[float]) -> list[fl
     return b
 
 
+# 関数: `_weighted_linear_fit` の入出力契約と処理意図を定義する。
+
 def _weighted_linear_fit(
     *,
     xs: list[list[float]],
@@ -159,9 +174,13 @@ def _weighted_linear_fit(
     return _solve_linear_system(xtwx, xtwy)
 
 
+# 関数: `_dot` の入出力契約と処理意図を定義する。
+
 def _dot(x: list[float], beta: list[float]) -> float:
     return float(sum(float(a) * float(b) for a, b in zip(x, beta)))
 
+
+# 関数: `_a_band` の入出力契約と処理意図を定義する。
 
 def _a_band(a: int) -> str:
     # 条件分岐: `a <= 40` を満たす経路を評価する。
@@ -175,6 +194,8 @@ def _a_band(a: int) -> str:
 
     return "A_101_plus"
 
+
+# 関数: `_r42_class` の入出力契約と処理意図を定義する。
 
 def _r42_class(value: float) -> str:
     # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
@@ -193,6 +214,8 @@ def _r42_class(value: float) -> str:
 
     return "rotational_like"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -351,6 +374,8 @@ def main() -> None:
     if len(r42_xs) >= 20:
         observables_for_summary.append("r42")
 
+    # 関数: `_mad_sigma` の入出力契約と処理意図を定義する。
+
     def _mad_sigma(values: list[float]) -> float:
         finite = [float(v) for v in values if math.isfinite(float(v))]
         # 条件分岐: `len(finite) < 3` を満たす経路を評価する。
@@ -435,6 +460,8 @@ def main() -> None:
             row["r42_z_robust"] = float((val - r42_center) / r42_sigma_robust)
         else:
             row["r42_z_robust"] = float("nan")
+
+    # 関数: `summarize_energy` の入出力契約と処理意図を定義する。
 
     def summarize_energy(key: str) -> dict[str, Any]:
         sub = [r for r in full_rows if math.isfinite(float(r[f"{key}_pred_MeV"])) and math.isfinite(float(r[f"{key}_obs_MeV"])) and float(r[f"{key}_obs_MeV"]) > 0.0]

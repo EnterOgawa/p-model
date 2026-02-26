@@ -39,6 +39,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -64,9 +65,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_ci_asym_err` の入出力契約と処理意図を定義する。
 
 def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
     try:
@@ -75,6 +80,8 @@ def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
     except Exception:
         return float("nan"), float("nan")
 
+
+# 関数: `_sym_sigma_from_ci` の入出力契約と処理意図を定義する。
 
 def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     lo, hi = _ci_asym_err(eps, ci_1sigma)
@@ -85,6 +92,8 @@ def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     return float(0.5 * (lo + hi))
 
 
+# クラス: `EpsPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class EpsPoint:
     label: str
@@ -94,6 +103,8 @@ class EpsPoint:
     err_hi: float
     meta: Dict[str, Any]
 
+
+# 関数: `_extract_published_eps` の入出力契約と処理意図を定義する。
 
 def _extract_published_eps(metrics: Dict[str, Any]) -> Dict[int, EpsPoint]:
     out: Dict[int, EpsPoint] = {}
@@ -118,6 +129,8 @@ def _extract_published_eps(metrics: Dict[str, Any]) -> Dict[int, EpsPoint]:
     return out
 
 
+# 関数: `_zbin_label_to_int` の入出力契約と処理意図を定義する。
+
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
     # 条件分岐: `z == "b1"` を満たす経路を評価する。
@@ -136,6 +149,8 @@ def _zbin_label_to_int(z_bin: str) -> Optional[int]:
 
     return None
 
+
+# 関数: `_extract_catalog_eps` の入出力契約と処理意図を定義する。
 
 def _extract_catalog_eps(metrics: Dict[str, Any]) -> Dict[Tuple[str, int], EpsPoint]:
     out: Dict[Tuple[str, int], EpsPoint] = {}
@@ -175,6 +190,8 @@ def _extract_catalog_eps(metrics: Dict[str, Any]) -> Dict[Tuple[str, int], EpsPo
     return out
 
 
+# 関数: `_errorbar` の入出力契約と処理意図を定義する。
+
 def _errorbar(
     ax: Any,
     *,
@@ -201,6 +218,8 @@ def _errorbar(
         markersize=6,
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Cross-check BAO ε: catalog-based ξℓ vs published multipoles.")
@@ -272,6 +291,7 @@ def main(argv: list[str] | None = None) -> int:
     # Use published z_eff as the reference x-grid for readability.
     z_ref = np.array([pub_post_eps[z].z_eff if z in pub_post_eps else float("nan") for z in z_bins], dtype=float)
 
+    # 関数: `_arr` の入出力契約と処理意図を定義する。
     def _arr(points: Dict[int, EpsPoint]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         y = np.array([points[z].eps if z in points else float("nan") for z in z_bins], dtype=float)
         lo = np.array([points[z].err_lo if z in points else float("nan") for z in z_bins], dtype=float)
@@ -281,6 +301,7 @@ def main(argv: list[str] | None = None) -> int:
     y_post, lo_post, hi_post = _arr(pub_post_eps)
     y_pre, lo_pre, hi_pre = _arr(pub_pre_eps)
 
+    # 関数: `_arr_cat` の入出力契約と処理意図を定義する。
     def _arr_cat(points: Dict[Tuple[str, int], EpsPoint], dist: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         y = np.array([points.get((dist, z), EpsPoint("", float("nan"), float("nan"), float("nan"), float("nan"), {})).eps for z in z_bins], dtype=float)
         lo = np.array([points.get((dist, z), EpsPoint("", float("nan"), float("nan"), float("nan"), float("nan"), {})).err_lo for z in z_bins], dtype=float)

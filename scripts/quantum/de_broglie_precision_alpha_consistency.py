@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Measurement` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Measurement:
     label: str
@@ -18,6 +19,8 @@ class Measurement:
     local_pdf: str
     local_pdf_sha256: str
 
+
+# 関数: `epsilon_from_alpha_inv` の入出力契約と処理意図を定義する。
 
 def epsilon_from_alpha_inv(*, alpha_inv_ref: float, alpha_inv_meas: float) -> float:
     """
@@ -31,6 +34,8 @@ def epsilon_from_alpha_inv(*, alpha_inv_ref: float, alpha_inv_meas: float) -> fl
     """
     return float((alpha_inv_ref / alpha_inv_meas) ** 2 - 1.0)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

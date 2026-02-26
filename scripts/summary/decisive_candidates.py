@@ -21,13 +21,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -54,14 +59,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_format_num` の入出力契約と処理意図を定義する。
 
 def _format_num(x: Any, *, digits: int = 4) -> str:
     try:
@@ -87,6 +98,8 @@ def _format_num(x: Any, *, digits: int = 4) -> str:
     return f"{v:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_load_decisive_falsification` の入出力契約と処理意図を定義する。
+
 def _load_decisive_falsification(root: Path) -> Dict[str, Any]:
     path = root / "output" / "private" / "summary" / "decisive_falsification.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -99,6 +112,8 @@ def _load_decisive_falsification(root: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_load_eht_paper5_m3_rescue_metrics` の入出力契約と処理意図を定義する。
 
 def _load_eht_paper5_m3_rescue_metrics(root: Path) -> Dict[str, Any]:
     path = root / "output" / "private" / "eht" / "eht_sgra_paper5_m3_nir_reconnection_conditions_metrics.json"
@@ -148,6 +163,8 @@ def _load_eht_paper5_m3_rescue_metrics(root: Path) -> Dict[str, Any]:
         "p_if_effective_n_curves_30": p_neff_curves,
     }
 
+
+# 関数: `_extract_eht_candidates` の入出力契約と処理意図を定義する。
 
 def _extract_eht_candidates(fals: Dict[str, Any], *, paper5_m3_rescue: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
     eht = fals.get("eht") if isinstance(fals.get("eht"), dict) else {}
@@ -230,6 +247,8 @@ def _extract_eht_candidates(fals: Dict[str, Any], *, paper5_m3_rescue: Optional[
     return out
 
 
+# 関数: `_extract_delta_candidate` の入出力契約と処理意図を定義する。
+
 def _extract_delta_candidate(fals: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     delta = fals.get("delta") if isinstance(fals.get("delta"), dict) else {}
     rows = delta.get("rows") if isinstance(delta.get("rows"), list) else []
@@ -279,6 +298,8 @@ def _extract_delta_candidate(fals: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     }
 
 
+# 関数: `_extract_s2_candidate` の入出力契約と処理意図を定義する。
+
 def _extract_s2_candidate(root: Path) -> Optional[Dict[str, Any]]:
     path = root / "output" / "private" / "eht" / "gravity_s2_pmodel_projection.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -316,6 +337,8 @@ def _extract_s2_candidate(root: Path) -> Optional[Dict[str, Any]]:
         "source_keys": "GRAVITY2018 (f), GRAVITY2020 (f_SP)",
     }
 
+
+# 関数: `_render_table` の入出力契約と処理意図を定義する。
 
 def _render_table(candidates: List[Dict[str, Any]], *, out_png: Path) -> None:
     _set_japanese_font()
@@ -465,6 +488,8 @@ def _render_table(candidates: List[Dict[str, Any]], *, out_png: Path) -> None:
     plt.close(fig)
 
 
+# 関数: `_build_payload` の入出力契約と処理意図を定義する。
+
 def _build_payload(root: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     fals = _load_decisive_falsification(root)
 
@@ -506,6 +531,8 @@ def _build_payload(root: Path) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     }
     return payload, candidates
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

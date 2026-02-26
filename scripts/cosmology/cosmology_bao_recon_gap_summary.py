@@ -37,6 +37,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -55,6 +56,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_parse_utc` の入出力契約と処理意図を定義する。
+
 def _parse_utc(s: Any) -> Optional[datetime]:
     # 条件分岐: `s is None` を満たす経路を評価する。
     if s is None:
@@ -65,6 +68,8 @@ def _parse_utc(s: Any) -> Optional[datetime]:
     except Exception:
         return None
 
+
+# 関数: `_norm_variant_name` の入出力契約と処理意図を定義する。
 
 def _norm_variant_name(s: str) -> str:
     s = str(s).strip()
@@ -77,6 +82,8 @@ def _norm_variant_name(s: str) -> str:
 
     return s
 
+
+# 関数: `_color_for_rmse` の入出力契約と処理意図を定義する。
 
 def _color_for_rmse(v: float) -> str:
     # 条件分岐: `not np.isfinite(v)` を満たす経路を評価する。
@@ -96,6 +103,8 @@ def _color_for_rmse(v: float) -> str:
     return "#d62728"  # red
 
 
+# 関数: `_as_float_or_nan` の入出力契約と処理意図を定義する。
+
 def _as_float_or_nan(v: Any) -> float:
     # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
@@ -106,6 +115,8 @@ def _as_float_or_nan(v: Any) -> float:
     except Exception:
         return float("nan")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

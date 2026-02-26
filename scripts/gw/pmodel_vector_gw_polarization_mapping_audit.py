@@ -34,9 +34,12 @@ from scripts.summary import worklog  # noqa: E402
 _C = 299_792_458.0
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -63,6 +66,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_slugify` の入出力契約と処理意図を定義する。
+
 def _slugify(value: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (value or "").strip())
     while "__" in out:
@@ -70,6 +75,8 @@ def _slugify(value: str) -> str:
 
     return out.strip("_") or "event"
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(value: float, digits: int = 7) -> str:
     # 条件分岐: `not math.isfinite(float(value))` を満たす経路を評価する。
@@ -89,6 +96,8 @@ def _fmt(value: float, digits: int = 7) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_canonical_pair` の入出力契約と処理意図を定義する。
+
 def _canonical_pair(detector_first: str, detector_second: str) -> Tuple[str, str]:
     first = str(detector_first).upper().strip()
     second = str(detector_second).upper().strip()
@@ -98,6 +107,8 @@ def _canonical_pair(detector_first: str, detector_second: str) -> Tuple[str, str
 
     return second, first
 
+
+# 関数: `_load_pair_metrics` の入出力契約と処理意図を定義する。
 
 def _load_pair_metrics(event: str, detector_first: str, detector_second: str) -> Optional[Dict[str, Any]]:
     event_slug = _slugify(event)
@@ -125,6 +136,8 @@ def _load_pair_metrics(event: str, detector_first: str, detector_second: str) ->
 
     return None
 
+
+# 関数: `_load_lag_scan` の入出力契約と処理意図を定義する。
 
 def _load_lag_scan(event: str, detector_first: str, detector_second: str) -> Optional[Tuple[np.ndarray, np.ndarray]]:
     event_slug = _slugify(event)
@@ -171,6 +184,8 @@ def _load_lag_scan(event: str, detector_first: str, detector_second: str) -> Opt
     return None
 
 
+# 関数: `_estimate_delay_tolerance_ms` の入出力契約と処理意図を定義する。
+
 def _estimate_delay_tolerance_ms(
     *,
     abs_corr: float,
@@ -198,6 +213,8 @@ def _estimate_delay_tolerance_ms(
     return float(max(tol_floor_ms, 0.5 * span_ms))
 
 
+# 関数: `_range_clip` の入出力契約と処理意図を定義する。
+
 def _range_clip(values: np.ndarray, q_lo: float = 0.5, q_hi: float = 99.5) -> Tuple[float, float]:
     # 条件分岐: `values.size == 0` を満たす経路を評価する。
     if values.size == 0:
@@ -205,6 +222,8 @@ def _range_clip(values: np.ndarray, q_lo: float = 0.5, q_hi: float = 99.5) -> Tu
 
     return float(np.percentile(values, q_lo)), float(np.percentile(values, q_hi))
 
+
+# 関数: `_interval_overlap` の入出力契約と処理意図を定義する。
 
 def _interval_overlap(a_lo: float, a_hi: float, b_lo: float, b_hi: float) -> bool:
     # 条件分岐: `not (math.isfinite(a_lo) and math.isfinite(a_hi) and math.isfinite(b_lo) and...` を満たす経路を評価する。
@@ -214,6 +233,8 @@ def _interval_overlap(a_lo: float, a_hi: float, b_lo: float, b_hi: float) -> boo
     return not (a_hi < b_lo or b_hi < a_lo)
 
 
+# 関数: `_min_rel_mismatch` の入出力契約と処理意図を定義する。
+
 def _min_rel_mismatch(values: np.ndarray, target: float) -> float:
     # 条件分岐: `values.size == 0 or not math.isfinite(target)` を満たす経路を評価する。
     if values.size == 0 or not math.isfinite(target):
@@ -222,6 +243,8 @@ def _min_rel_mismatch(values: np.ndarray, target: float) -> float:
     denom = abs(float(target)) + 1e-15
     return float(np.min(np.abs(values - float(target)) / denom))
 
+
+# 関数: `_vector_ratio_grid_for_direction` の入出力契約と処理意図を定義する。
 
 def _vector_ratio_grid_for_direction(
     *,
@@ -262,6 +285,8 @@ def _vector_ratio_grid_for_direction(
 
     return np.asarray(ratios, dtype=np.float64)
 
+
+# 関数: `_run_network_scalar_gate` の入出力契約と処理意図を定義する。
 
 def _run_network_scalar_gate(
     *,
@@ -433,6 +458,8 @@ def _run_network_scalar_gate(
     )
     return result
 
+
+# 関数: `_event_audit_row` の入出力契約と処理意図を定義する。
 
 def _event_audit_row(
     *,
@@ -668,6 +695,8 @@ def _event_audit_row(
     return base
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
         "event",
@@ -719,6 +748,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             writer.writerow(out)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path, detector_pair_label: str) -> None:
     _set_japanese_font()
@@ -786,6 +817,8 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, detector_pair_label: str) -
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(

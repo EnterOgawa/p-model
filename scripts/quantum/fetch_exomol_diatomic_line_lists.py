@@ -13,32 +13,44 @@ from typing import Any, Optional
 from urllib.request import Request, urlopen
 
 
+# クラス: `ExoMolLineListSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ExoMolLineListSpec:
     molecule: str  # ExoMol molecule folder (e.g., "H2")
     isotopologue: str  # ExoMol isotopologue tag (e.g., "1H2", "1H-2H")
     dataset: str  # ExoMol dataset tag (e.g., "RACPPK")
 
+    # 関数: `page_url` の入出力契約と処理意図を定義する。
     @property
     def page_url(self) -> str:
         return f"https://exomol.com/data/molecules/{self.molecule}/{self.isotopologue}/{self.dataset}"
 
+    # 関数: `db_base_url` の入出力契約と処理意図を定義する。
+
     @property
     def db_base_url(self) -> str:
         return f"https://exomol.com/db/{self.molecule}/{self.isotopologue}/{self.dataset}/"
+
+    # 関数: `file_prefix` の入出力契約と処理意図を定義する。
 
     @property
     def file_prefix(self) -> str:
         return f"{self.isotopologue}__{self.dataset}"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -54,6 +66,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest().upper()
 
 
+# 関数: `_sanitize_token` の入出力契約と処理意図を定義する。
+
 def _sanitize_token(s: str) -> str:
     ss = str(s).strip().lower()
     ss = re.sub(r"\s+", "_", ss)
@@ -61,6 +75,8 @@ def _sanitize_token(s: str) -> str:
     ss = re.sub(r"_+", "_", ss).strip("_")
     return ss or "unknown"
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, force: bool) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -79,10 +95,14 @@ def _download(url: str, out_path: Path, *, force: bool) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_read_bz2_text` の入出力契約と処理意図を定義する。
+
 def _read_bz2_text(path: Path) -> str:
     raw = path.read_bytes()
     return bz2.decompress(raw).decode("utf-8", errors="replace")
 
+
+# 関数: `_parse_states_stats` の入出力契約と処理意図を定義する。
 
 def _parse_states_stats(text: str) -> dict[str, Any]:
     rows = []
@@ -121,6 +141,8 @@ def _parse_states_stats(text: str) -> dict[str, Any]:
     }
 
 
+# 関数: `_parse_trans_stats` の入出力契約と処理意図を定義する。
+
 def _parse_trans_stats(text: str) -> dict[str, Any]:
     n = 0
     nu_min = None
@@ -154,6 +176,8 @@ def _parse_trans_stats(text: str) -> dict[str, Any]:
         "A_max_s^-1": (None if a_max is None else float(a_max)),
     }
 
+
+# 関数: `_write_manifest` の入出力契約と処理意図を定義する。
 
 def _write_manifest(
     *,
@@ -190,6 +214,8 @@ def _write_manifest(
     out_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return out_path
 
+
+# 関数: `_write_extracted` の入出力契約と処理意図を定義する。
 
 def _write_extracted(
     *,
@@ -235,12 +261,16 @@ def _write_extracted(
     return out_path
 
 
+# 関数: `_offline_check` の入出力契約と処理意図を定義する。
+
 def _offline_check(paths: list[Path]) -> None:
     missing = [p for p in paths if not p.exists()]
     # 条件分岐: `missing` を満たす経路を評価する。
     if missing:
         raise SystemExit("[fail] missing cache files:\n" + "\n".join(f"- {p}" for p in missing))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch ExoMol diatomic line lists (H2/HD) and cache for offline use.")

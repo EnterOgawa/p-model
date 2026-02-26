@@ -19,18 +19,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -50,6 +57,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(x: Any) -> Optional[float]:
     try:
         # 条件分岐: `x is None` を満たす経路を評価する。
@@ -62,6 +71,8 @@ def _maybe_float(x: Any) -> Optional[float]:
         return None
 
 
+# 関数: `_std` の入出力契約と処理意図を定義する。
+
 def _std(values: Sequence[float]) -> Optional[float]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
@@ -72,6 +83,8 @@ def _std(values: Sequence[float]) -> Optional[float]:
     return float(np.std(x, ddof=1))
 
 
+# 関数: `_plot_budget` の入出力契約と処理意図を定義する。
+
 def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[float], out_png: Path) -> None:
     try:
         import matplotlib.pyplot as plt
@@ -80,6 +93,7 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
 
     _set_japanese_font()
 
+    # 関数: `_short_label` の入出力契約と処理意図を定義する。
     def _short_label(s: str) -> str:
         s = str(s)
         s = s.replace("σ(κ) proxy: ", "proxy: ")
@@ -114,6 +128,8 @@ def _plot_budget(*, title: str, items: Dict[str, float], required: Optional[floa
     plt.close(fig)
 
 
+# 関数: `_finite_pos` の入出力契約と処理意図を定義する。
+
 def _finite_pos(values: Sequence[Optional[float]]) -> List[float]:
     out: List[float] = []
     for v in values:
@@ -133,6 +149,8 @@ def _finite_pos(values: Sequence[Optional[float]]) -> List[float]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
@@ -310,6 +328,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if paper2_syserr_path.exists():
         paper2_syserr = _read_json(paper2_syserr_path)
 
+    # 関数: `_calib_fraction` の入出力契約と処理意図を定義する。
+
     def _calib_fraction(key: str) -> Optional[float]:
         # 条件分岐: `not isinstance(calib, dict)` を満たす経路を評価する。
         if not isinstance(calib, dict):
@@ -322,6 +342,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         derived = calib.get("derived") or {}
         return _maybe_float(derived.get(key))
+
+    # 関数: `_var_fraction` の入出力契約と処理意図を定義する。
 
     def _var_fraction(*keys: str) -> Optional[float]:
         # 条件分岐: `not isinstance(var, dict)` を満たす経路を評価する。
@@ -343,6 +365,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         return _maybe_float(cur)
 
+    # 関数: `_mring_d_std_uas` の入出力契約と処理意図を定義する。
+
     def _mring_d_std_uas() -> Optional[float]:
         # 条件分岐: `not isinstance(mring, dict)` を満たす経路を評価する。
         if not isinstance(mring, dict):
@@ -355,6 +379,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         dsum = ((mring.get("derived") or {}).get("d_uas_summary") or {})
         return _maybe_float(dsum.get("std"))
+
+    # 関数: `_paper6_kappa_sigma_proxy_median` の入出力契約と処理意図を定義する。
 
     def _paper6_kappa_sigma_proxy_median() -> Optional[float]:
         # 条件分岐: `not isinstance(paper6, dict)` を満たす経路を評価する。
@@ -369,6 +395,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         d = (paper6.get("derived") or {}).get("kappa_from_paper6_shadow_diameter_table") or {}
         return _maybe_float(d.get("sigma_avg_median"))
 
+    # 関数: `_paper6_kappa_sigma_proxy_kappa_mid_std` の入出力契約と処理意図を定義する。
+
     def _paper6_kappa_sigma_proxy_kappa_mid_std() -> Optional[float]:
         # 条件分岐: `not isinstance(paper6, dict)` を満たす経路を評価する。
         if not isinstance(paper6, dict):
@@ -382,6 +410,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         d = (paper6.get("derived") or {}).get("kappa_from_paper6_shadow_diameter_table") or {}
         mid_sum = d.get("kappa_mid_summary") if isinstance(d.get("kappa_mid_summary"), dict) else {}
         return _maybe_float(mid_sum.get("std"))
+
+    # 関数: `_paper2_gain_val` の入出力契約と処理意図を定義する。
 
     def _paper2_gain_val(*keys: str) -> Optional[float]:
         # 条件分岐: `not isinstance(paper2_gains, dict)` を満たす経路を評価する。
@@ -403,6 +433,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         return _maybe_float(cur)
 
+    # 関数: `_paper2_syserr_val` の入出力契約と処理意図を定義する。
+
     def _paper2_syserr_val(*keys: str) -> Optional[float]:
         # 条件分岐: `not isinstance(paper2_syserr, dict)` を満たす経路を評価する。
         if not isinstance(paper2_syserr, dict):
@@ -422,6 +454,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             cur = cur[k]
 
         return _maybe_float(cur)
+
+    # 関数: `_paper4_debiased_noise_val` の入出力契約と処理意図を定義する。
 
     def _paper4_debiased_noise_val(*keys: str) -> Optional[float]:
         # 条件分岐: `not isinstance(paper4_debiased_noise, dict)` を満たす経路を評価する。
@@ -443,6 +477,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         return _maybe_float(cur)
 
+    # 関数: `_paper4_kappa_sigma_proxy_gr_min` の入出力契約と処理意図を定義する。
+
     def _paper4_kappa_sigma_proxy_gr_min() -> Optional[float]:
         # 条件分岐: `not isinstance(paper4, dict)` を満たす経路を評価する。
         if not isinstance(paper4, dict):
@@ -455,6 +491,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         d = paper4.get("derived") if isinstance(paper4.get("derived"), dict) else {}
         return _maybe_float(d.get("kappa_sigma_proxy_gr_from_alpha_tot_sym_min"))
+
+    # 関数: `_paper4_morphology_kappa_sigma_proxy_hops_imaging_dhat_std` の入出力契約と処理意図を定義する。
 
     def _paper4_morphology_kappa_sigma_proxy_hops_imaging_dhat_std() -> Optional[float]:
         # 条件分岐: `not isinstance(paper4_morph, dict)` を満たす経路を評価する。
@@ -469,6 +507,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         d = paper4_morph.get("derived") if isinstance(paper4_morph.get("derived"), dict) else {}
         return _maybe_float(d.get("kappa_sigma_proxy_paper4_morphology_hops_imaging_dhat_std"))
 
+    # 関数: `_paper4_thetag_kappa_sigma_proxy_hops_method_std_over_theta_unit` の入出力契約と処理意図を定義する。
+
     def _paper4_thetag_kappa_sigma_proxy_hops_method_std_over_theta_unit() -> Optional[float]:
         # 条件分岐: `not isinstance(paper4_thetag, dict)` を満たす経路を評価する。
         if not isinstance(paper4_thetag, dict):
@@ -481,6 +521,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         d = paper4_thetag.get("derived") if isinstance(paper4_thetag.get("derived"), dict) else {}
         return _maybe_float(d.get("kappa_sigma_proxy_paper4_thetag_hops_method_std_over_theta_unit"))
+
+    # 関数: `_ringfit_rel_std` の入出力契約と処理意図を定義する。
 
     def _ringfit_rel_std(table_key: str) -> Optional[float]:
         # 条件分岐: `not isinstance(ringfit, dict)` を満たす経路を評価する。
@@ -496,6 +538,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
         return float(std) / float(ring)
 
+    # 関数: `_image_analysis_rel_std` の入出力契約と処理意図を定義する。
+
     def _image_analysis_rel_std(table_key: str) -> Optional[float]:
         # 条件分岐: `not isinstance(ringfit, dict)` を満たす経路を評価する。
         if not isinstance(ringfit, dict):
@@ -509,6 +553,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             return None
 
         return float(std) / float(ring)
+
+    # 関数: `_ringfit_pipeline_rel_std` の入出力契約と処理意図を定義する。
 
     def _ringfit_pipeline_rel_std(table_key: str) -> Optional[float]:
         # 条件分岐: `not isinstance(ringfit, dict)` を満たす経路を評価する。

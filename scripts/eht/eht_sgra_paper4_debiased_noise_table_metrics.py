@@ -18,18 +18,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_block` の入出力契約と処理意図を定義する。
 
 def _find_block(text: str, needle: str, *, window: int = 1200) -> Optional[str]:
     i = text.find(needle)
@@ -47,6 +54,7 @@ _RE_PM = re.compile(r"(?P<mid>\d+(?:\.\d+)?)\s*\\pm\s*(?P<sig>\d+(?:\.\d+)?)")
 _RE_TENPOW = re.compile(r"\\times\s*10\^\{\s*(?P<exp>[-+]?\d+)\s*\}")
 
 
+# 関数: `_parse_norm_variance` の入出力契約と処理意図を定義する。
 def _parse_norm_variance(cell: str) -> Optional[Dict[str, Any]]:
     s = cell.strip().strip("$")
     s = s.replace(" ", "")
@@ -80,6 +88,8 @@ def _parse_norm_variance(cell: str) -> Optional[Dict[str, Any]]:
     }
 
 
+# 関数: `_parse_percent_pm` の入出力契約と処理意図を定義する。
+
 def _parse_percent_pm(cell: str) -> Optional[Tuple[float, float]]:
     s = cell.strip().strip("$")
     s = s.replace(" ", "")
@@ -96,6 +106,8 @@ def _parse_percent_pm(cell: str) -> Optional[Tuple[float, float]]:
 
     return (mid, sig)
 
+
+# 関数: `_parse_float_pm` の入出力契約と処理意図を定義する。
 
 def _parse_float_pm(cell: str) -> Optional[Tuple[float, float]]:
     s = cell.strip().strip("$")
@@ -114,6 +126,8 @@ def _parse_float_pm(cell: str) -> Optional[Tuple[float, float]]:
     return (mid, sig)
 
 
+# 関数: `_parse_upper_limit` の入出力契約と処理意図を定義する。
+
 def _parse_upper_limit(cell: str) -> Optional[float]:
     s = cell.strip().strip("$")
     s = s.replace(" ", "")
@@ -127,6 +141,8 @@ def _parse_upper_limit(cell: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_extract_debiased_table` の入出力契約と処理意図を定義する。
 
 def _extract_debiased_table(lines: Sequence[str], *, source_path: Path) -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
     label = r"\label{tab:debiased_noise}"
@@ -274,6 +290,8 @@ def _extract_debiased_table(lines: Sequence[str], *, source_path: Path) -> Tuple
 
     return (baseline_rows, params)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

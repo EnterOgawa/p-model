@@ -11,6 +11,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import japanize_matplotlib  # type: ignore  # noqa: F401
@@ -34,6 +35,8 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
 
 
+# 関数: `_out_tag_suffix` の入出力契約と処理意図を定義する。
+
 def _out_tag_suffix(out_tag: str) -> str:
     t = str(out_tag).strip()
     # 条件分岐: `(not t) or (t == "none")` を満たす経路を評価する。
@@ -48,9 +51,13 @@ def _out_tag_suffix(out_tag: str) -> str:
     return f"__{t}"
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_select_metrics_file` の入出力契約と処理意図を定義する。
 
 def _select_metrics_file(*, root: Path, sample: str, caps: str, out_tag: str) -> Path | None:
     out_dir = root / "output" / "private" / "cosmology"
@@ -66,6 +73,8 @@ def _select_metrics_file(*, root: Path, sample: str, caps: str, out_tag: str) ->
     return path if path.exists() else None
 
 
+# クラス: `PeakfitPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class PeakfitPoint:
     sample: str
@@ -77,6 +86,8 @@ class PeakfitPoint:
     status: str
     source_metrics: str
 
+
+# 関数: `_iter_points_from_metrics` の入出力契約と処理意図を定義する。
 
 def _iter_points_from_metrics(*, metrics_path: Path) -> Iterable[PeakfitPoint]:
     d = _load_json(metrics_path)
@@ -95,6 +106,8 @@ def _iter_points_from_metrics(*, metrics_path: Path) -> Iterable[PeakfitPoint]:
         except Exception:
             continue
 
+
+# 関数: `_caps_label` の入出力契約と処理意図を定義する。
 
 def _caps_label(caps: str) -> str:
     caps = str(caps)
@@ -115,6 +128,8 @@ def _caps_label(caps: str) -> str:
     return caps
 
 
+# 関数: `_status_color` の入出力契約と処理意図を定義する。
+
 def _status_color(status: str) -> str:
     status = str(status)
     # 条件分岐: `status == "ok"` を満たす経路を評価する。
@@ -134,6 +149,8 @@ def _status_color(status: str) -> str:
     return "#7f7f7f"
 
 
+# 関数: `_dist_style` の入出力契約と処理意図を定義する。
+
 def _dist_style(dist: str) -> tuple[str, str]:
     dist = str(dist)
     # 条件分岐: `dist == "lcdm"` を満たす経路を評価する。
@@ -147,6 +164,8 @@ def _dist_style(dist: str) -> tuple[str, str]:
 
     return "#7f7f7f", "D"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: BAO catalog-based peakfit eps summary across caps (NGC/SGC).")

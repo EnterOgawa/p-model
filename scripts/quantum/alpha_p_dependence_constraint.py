@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # --- Primary constraints (as-used; see sources in metrics) ---
@@ -42,9 +43,13 @@ class Config:
     dpi: int = 170
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(root: Path, p: Path) -> str:
     try:
@@ -53,9 +58,13 @@ def _relpath(root: Path, p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_try_load_h_1s2s_fractional_sigma` の入出力契約と処理意図を定義する。
 
 def _try_load_h_1s2s_fractional_sigma(root: Path) -> Optional[float]:
     p = root / "output" / "public" / "quantum" / "qed_vacuum_precision_metrics.json"
@@ -78,6 +87,8 @@ def _try_load_h_1s2s_fractional_sigma(root: Path) -> Optional[float]:
     return None
 
 
+# 関数: `_sun_potential_delta_u_earth_orbit` の入出力契約と処理意図を定義する。
+
 def _sun_potential_delta_u_earth_orbit(cfg: Config) -> Dict[str, float]:
     e = float(cfg.earth_orbit_eccentricity)
     a = float(cfg.au_m)
@@ -99,6 +110,8 @@ def _sun_potential_delta_u_earth_orbit(cfg: Config) -> Dict[str, float]:
         "delta_u_lnP_over_1": float(delta_u_over_c2),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

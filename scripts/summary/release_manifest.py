@@ -37,9 +37,12 @@ from scripts.summary import public_outputs_manifest_continuity  # noqa: E402
 from scripts.summary import public_manifest_citation_set  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -47,6 +50,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -62,6 +67,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# クラス: `_FileInfo` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class _FileInfo:
     path: str
@@ -70,6 +77,8 @@ class _FileInfo:
     mtime_utc: Optional[str]
     sha256: Optional[str]
 
+
+# 関数: `_file_info` の入出力契約と処理意図を定義する。
 
 def _file_info(path: Path, *, compute_hash: bool) -> _FileInfo:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -81,6 +90,8 @@ def _file_info(path: Path, *, compute_hash: bool) -> _FileInfo:
     digest = _sha256(path) if compute_hash else None
     return _FileInfo(path=_rel(path), exists=True, size_bytes=int(st.st_size), mtime_utc=mtime, sha256=digest)
 
+
+# 関数: `_default_manifest_paths` の入出力契約と処理意図を定義する。
 
 def _default_manifest_paths() -> Dict[str, List[Path]]:
     """
@@ -148,6 +159,8 @@ def _default_manifest_paths() -> Dict[str, List[Path]]:
         ],
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Phase 8 / Step 8.7.16: generate release manifest JSON.")

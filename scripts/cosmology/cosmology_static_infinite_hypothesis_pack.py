@@ -19,6 +19,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -44,14 +45,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, *, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -66,6 +73,8 @@ def _fmt_float(x: float, *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(x: Any) -> Optional[float]:
     try:
         # 条件分岐: `x is None` を満たす経路を評価する。
@@ -76,6 +85,8 @@ def _safe_float(x: Any) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_arxiv_id_from_url` の入出力契約と処理意図を定義する。
 
 def _arxiv_id_from_url(url: str) -> str:
     s = (url or "").strip()
@@ -99,6 +110,8 @@ def _arxiv_id_from_url(url: str) -> str:
 
     return ""
 
+
+# 関数: `_source_short` の入出力契約と処理意図を定義する。
 
 def _source_short(source: Any) -> str:
     # 条件分岐: `not isinstance(source, dict)` を満たす経路を評価する。
@@ -125,6 +138,8 @@ def _source_short(source: Any) -> str:
     return year
 
 
+# 関数: `_classify_sigma` の入出力契約と処理意図を定義する。
+
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
     if not math.isfinite(abs_z):
@@ -142,6 +157,8 @@ def _classify_sigma(abs_z: float) -> Tuple[str, str]:
 
     return ("ng", "#d62728")
 
+
+# 関数: `_select_ddr_representatives` の入出力契約と処理意図を定義する。
 
 def _select_ddr_representatives(rows: Sequence[Dict[str, Any]]) -> Dict[str, Optional[Dict[str, Any]]]:
     best_bao: Optional[Dict[str, Any]] = None
@@ -178,6 +195,8 @@ def _select_ddr_representatives(rows: Sequence[Dict[str, Any]]) -> Dict[str, Opt
     return {"bao": best_bao, "no_bao": best_no_bao}
 
 
+# クラス: `PackRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class PackRow:
     label: str
@@ -187,6 +206,8 @@ class PackRow:
     note: str
     sources: str
 
+
+# 関数: `_plot_pack` の入出力契約と処理意図を定義する。
 
 def _plot_pack(rows: Sequence[PackRow], *, out_png: Path, cap_sigma: float) -> None:
     _set_japanese_font()
@@ -280,6 +301,8 @@ def _plot_pack(rows: Sequence[PackRow], *, out_png: Path, cap_sigma: float) -> N
     plt.close(fig)
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: static-infinite-space hypothesis verification pack.")
     ap.add_argument(
@@ -332,6 +355,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     err_env_opt_total = ((err_budget_sens.get("envelope") or {}).get("opt_total") or {}) if isinstance(err_budget_sens, dict) else {}
     err_scan_best = ((err_budget_sens.get("scan") or {}).get("best") or {}) if isinstance(err_budget_sens, dict) else {}
 
+    # 関数: `ddr_note` の入出力契約と処理意図を定義する。
     def ddr_note(kind: str) -> str:
         k = kind.lower()
         rep = reach_reps.get(k)

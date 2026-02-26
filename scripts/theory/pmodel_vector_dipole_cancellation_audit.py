@@ -21,6 +21,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -46,14 +47,20 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(v: Any) -> Optional[float]:
     try:
@@ -69,6 +76,8 @@ def _to_float(v: Any) -> Optional[float]:
     return val
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
@@ -81,6 +90,8 @@ def _fmt_float(x: float, digits: int = 6) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_extract_rows` の入出力契約と処理意図を定義する。
 
 def _extract_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -141,6 +152,8 @@ def _extract_rows(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     return out
 
 
+# 関数: `_dipole_norm` の入出力契約と処理意図を定義する。
+
 def _dipole_norm(m1: float, m2: float, eta1: float, eta2: float) -> float:
     total = m1 + m2
     r1 = m2 / total
@@ -149,6 +162,8 @@ def _dipole_norm(m1: float, m2: float, eta1: float, eta2: float) -> float:
     denom = max(1e-30, abs(total) * max(abs(eta1), abs(eta2)))
     return abs(d) / denom
 
+
+# 関数: `_build_audit_rows` の入出力契約と処理意図を定義する。
 
 def _build_audit_rows(
     rows: Sequence[Dict[str, Any]],
@@ -179,6 +194,8 @@ def _build_audit_rows(
 
     return out
 
+
+# 関数: `_gate_payload` の入出力契約と処理意図を定義する。
 
 def _gate_payload(rows: Sequence[Dict[str, Any]], z_reject: float, dipole_tol: float, epsilon_gate: float) -> Dict[str, Any]:
     max_dipole_norm = max(float(r.get("dipole_norm_universal") or 0.0) for r in rows)
@@ -233,6 +250,8 @@ def _gate_payload(rows: Sequence[Dict[str, Any]], z_reject: float, dipole_tol: f
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> None:
     _set_japanese_font()
     labels = [str(r.get("id") or f"row{i+1}") for i, r in enumerate(rows)]
@@ -250,6 +269,29 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
     ax0.axhline(z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax0.axhline(-z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax0.axhline(0.0, color="#666666", linestyle="-", linewidth=0.9)
+    x_label = (x[-1] + 0.45) if len(x) > 0 else 0.45
+    ax0.text(
+        x_label,
+        z_reject,
+        "3σ (Reject)",
+        ha="left",
+        va="bottom",
+        fontsize=8.5,
+        color="#333333",
+        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 1.2},
+        clip_on=False,
+    )
+    ax0.text(
+        x_label,
+        -z_reject,
+        "-3σ (Reject)",
+        ha="left",
+        va="top",
+        fontsize=8.5,
+        color="#333333",
+        bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 1.2},
+        clip_on=False,
+    )
     ax0.set_ylabel("z = (R-1)/σ")
     ax0.set_title("Binary-pulsar consistency under dipole=0 (quadrupole-leading)")
     ax0.grid(True, axis="y", alpha=0.25)
@@ -276,6 +318,8 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -317,6 +361,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _ROOT

@@ -42,6 +42,7 @@ _WIN_ABS_RE = re.compile(r"^[a-zA-Z]:[\\/]")
 _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
+# 関数: `_resolve_path_like` の入出力契約と処理意図を定義する。
 def _resolve_path_like(p: Any) -> Optional[Path]:
     # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
@@ -76,6 +77,8 @@ def _resolve_path_like(p: Any) -> Optional[Path]:
     return _ROOT / path
 
 
+# 関数: `_load_ross_dat` の入出力契約と処理意図を定義する。
+
 def _load_ross_dat(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     s: list[float] = []
     y: list[float] = []
@@ -97,6 +100,8 @@ def _load_ross_dat(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
 
     return np.asarray(s, dtype=float), np.asarray(y, dtype=float), np.asarray(e, dtype=float)
 
+
+# 関数: `_load_ross_covariance` の入出力契約と処理意図を定義する。
 
 def _load_ross_covariance(path: Path) -> np.ndarray:
     rows: list[list[float]] = []
@@ -121,6 +126,8 @@ def _load_ross_covariance(path: Path) -> np.ndarray:
     return mat
 
 
+# 関数: `_cov_inv_with_jitter` の入出力契約と処理意図を定義する。
+
 def _cov_inv_with_jitter(cov: np.ndarray) -> np.ndarray:
     c = np.asarray(cov, dtype=np.float64)
     # 条件分岐: `c.ndim != 2 or c.shape[0] != c.shape[1]` を満たす経路を評価する。
@@ -140,6 +147,8 @@ def _cov_inv_with_jitter(cov: np.ndarray) -> np.ndarray:
         return np.linalg.pinv(cj)
 
 
+# 関数: `_chi2_from_cov_inv` の入出力契約と処理意図を定義する。
+
 def _chi2_from_cov_inv(residual: np.ndarray, cov_inv: np.ndarray) -> float:
     r = np.asarray(residual, dtype=np.float64).reshape(-1)
     ci = np.asarray(cov_inv, dtype=np.float64)
@@ -149,6 +158,8 @@ def _chi2_from_cov_inv(residual: np.ndarray, cov_inv: np.ndarray) -> float:
 
     return float(r @ ci @ r)
 
+
+# 関数: `_rmse` の入出力契約と処理意図を定義する。
 
 def _rmse(a: np.ndarray, b: np.ndarray) -> float:
     a = np.asarray(a, dtype=float)
@@ -161,6 +172,8 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.sqrt(np.mean((a[m] - b[m]) ** 2)))
 
 
+# 関数: `_align_interp` の入出力契約と処理意図を定義する。
+
 def _align_interp(pub_s: np.ndarray, pub_y: np.ndarray, cat_s: np.ndarray, cat_y: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     pub_s = np.asarray(pub_s, dtype=float)
     pub_y = np.asarray(pub_y, dtype=float)
@@ -169,6 +182,8 @@ def _align_interp(pub_s: np.ndarray, pub_y: np.ndarray, cat_s: np.ndarray, cat_y
     y_cat = np.interp(pub_s, cat_s, cat_y)
     return pub_s, pub_y, y_cat
 
+
+# クラス: `CatalogCase` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class CatalogCase:
@@ -179,10 +194,14 @@ class CatalogCase:
     metrics_path: Path
 
 
+# 関数: `_iter_metrics_files` の入出力契約と処理意図を定義する。
+
 def _iter_metrics_files() -> Iterable[Path]:
     out_dir = _ROOT / "output" / "private" / "cosmology"
     yield from sorted(out_dir.glob("cosmology_bao_xi_from_catalogs_*_metrics.json"))
 
+
+# 関数: `_zbin_label_to_int` の入出力契約と処理意図を定義する。
 
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
@@ -202,6 +221,8 @@ def _zbin_label_to_int(z_bin: str) -> Optional[int]:
 
     return None
 
+
+# 関数: `_load_catalog_cases` の入出力契約と処理意図を定義する。
 
 def _load_catalog_cases(
     *,
@@ -301,6 +322,8 @@ def _load_catalog_cases(
     return cases
 
 
+# 関数: `_group_by_out_tag` の入出力契約と処理意図を定義する。
+
 def _group_by_out_tag(cases: List[CatalogCase]) -> Dict[str, Dict[int, CatalogCase]]:
     out: Dict[str, Dict[int, CatalogCase]] = {}
     for c in cases:
@@ -309,6 +332,8 @@ def _group_by_out_tag(cases: List[CatalogCase]) -> Dict[str, Dict[int, CatalogCa
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Scan reconstruction params by RMSE vs Ross 2016 post-recon multipoles.")

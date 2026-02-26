@@ -15,6 +15,7 @@ C = 299_792_458.0  # m/s
 MU_E = 3.986004418e14  # m^3/s^2
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -40,10 +41,14 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `grav_rate` の入出力契約と処理意図を定義する。
+
 def grav_rate(mu: float, r_m: float) -> float:
     # P-model gravitational factor used in docs: exp(-mu/(c^2 r))
     return math.exp(-mu / (C * C * r_m))
 
+
+# 関数: `vel_rate` の入出力契約と処理意図を定義する。
 
 def vel_rate(v_m_s: float, delta: float) -> float:
     # Velocity factor:
@@ -52,9 +57,13 @@ def vel_rate(v_m_s: float, delta: float) -> float:
     return math.sqrt((1.0 - (v_m_s * v_m_s) / (C * C) + delta) / (1.0 + delta))
 
 
+# 関数: `circular_orbit_speed` の入出力契約と処理意図を定義する。
+
 def circular_orbit_speed(mu: float, r_m: float) -> float:
     return math.sqrt(mu / r_m)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]

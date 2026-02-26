@@ -25,9 +25,12 @@ ROW_LABELS = ("e", "mu", "tau")
 COL_LABELS = ("1", "2", "3")
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -45,12 +48,16 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return str(path.relative_to(ROOT)).replace("\\", "/")
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -65,6 +72,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow([row.get(h) for h in headers])
 
 
+# 関数: `_ensure_pdf` の入出力契約と処理意図を定義する。
+
 def _ensure_pdf(*, url: str, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -74,10 +83,14 @@ def _ensure_pdf(*, url: str, path: Path) -> None:
     urllib.request.urlretrieve(url, path)
 
 
+# 関数: `_extract_pdf_text` の入出力契約と処理意図を定義する。
+
 def _extract_pdf_text(path: Path) -> str:
     reader = PdfReader(str(path))
     return "\n".join((page.extract_text() or "") for page in reader.pages)
 
+
+# 関数: `_normalize_text` の入出力契約と処理意図を定義する。
 
 def _normalize_text(text: str) -> str:
     out = text.replace("−", "-").replace("–", "-").replace("—", "-").replace("→", "->")
@@ -85,6 +98,8 @@ def _normalize_text(text: str) -> str:
     out = re.sub(r"\s+", " ", out)
     return out
 
+
+# 関数: `_extract_matrix_ranges` の入出力契約と処理意図を定義する。
 
 def _extract_matrix_ranges(text: str, *, marker: str, end_marker: str | None) -> list[dict[str, Any]]:
     start = text.find(marker)
@@ -126,6 +141,8 @@ def _extract_matrix_ranges(text: str, *, marker: str, end_marker: str | None) ->
     return out
 
 
+# 関数: `_dataset_metrics` の入出力契約と処理意図を定義する。
+
 def _dataset_metrics(entries: list[dict[str, Any]]) -> dict[str, Any]:
     by_key = {(str(e["row"]), str(e["col"])): e for e in entries}
     row_e = [by_key[("e", "1")], by_key[("e", "2")], by_key[("e", "3")]]
@@ -158,6 +175,8 @@ def _dataset_metrics(entries: list[dict[str, Any]]) -> dict[str, Any]:
         },
     }
 
+
+# 関数: `_build_plot` の入出力契約と処理意図を定義する。
 
 def _build_plot(
     *,
@@ -207,6 +226,8 @@ def _build_plot(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Step 8.7.22: PMNS first-row quantitative audit")

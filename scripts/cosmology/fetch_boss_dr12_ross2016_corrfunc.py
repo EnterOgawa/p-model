@@ -40,6 +40,7 @@ from scripts.summary import worklog  # noqa: E402
 _URL = "https://dr12.sdss3.org/sas/dr12/boss/papers/clustering/Ross_etal_2016_COMBINEDDR12_corrfunc.zip"
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -48,6 +49,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, timeout_s: int = 60) -> Dict[str, Any]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -66,6 +69,8 @@ def _download(url: str, out_path: Path, *, timeout_s: int = 60) -> Dict[str, Any
         "content_type": headers.get("content-type"),
     }
 
+
+# 関数: `_extract_zip` の入出力契約と処理意図を定義する。
 
 def _extract_zip(zip_path: Path, out_dir: Path) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -109,15 +114,21 @@ def _extract_zip(zip_path: Path, out_dir: Path) -> Dict[str, Any]:
     return {"files_extracted": extracted, "files_skipped": skipped}
 
 
+# 関数: `_looks_ready` の入出力契約と処理意図を定義する。
+
 def _looks_ready(out_dir: Path) -> bool:
     # Minimal check: one representative file from zbin3/bincent0.
     return (out_dir / "Ross_2016_COMBINEDDR12_zbin3_correlation_function_monopole_post_recon_bincent0.dat").exists()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser()

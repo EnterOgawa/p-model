@@ -39,9 +39,12 @@ from scripts.summary import worklog  # noqa: E402
 DEFAULT_PRIOR_SOURCE_IDS = ["lageos_frame_dragging"]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -50,6 +53,8 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -57,6 +62,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(v: Any) -> Optional[float]:
     try:
@@ -71,6 +78,8 @@ def _to_float(v: Any) -> Optional[float]:
 
     return val
 
+
+# 関数: `_status_from_pass` の入出力契約と処理意図を定義する。
 
 def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
     # 条件分岐: `passed is True` を満たす経路を評価する。
@@ -90,6 +99,8 @@ def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
     return "watch"
 
 
+# 関数: `_score_from_status` の入出力契約と処理意図を定義する。
+
 def _score_from_status(status: str) -> float:
     # 条件分岐: `status == "pass"` を満たす経路を評価する。
     if status == "pass":
@@ -103,6 +114,8 @@ def _score_from_status(status: str) -> float:
     return 0.0
 
 
+# 関数: `_pick_frame_rows` の入出力契約と処理意図を定義する。
+
 def _pick_frame_rows(rot_payload: Dict[str, Any], branch_name: str) -> List[Dict[str, Any]]:
     branches = rot_payload.get("branches") if isinstance(rot_payload.get("branches"), dict) else {}
     branch = branches.get(branch_name) if isinstance(branches, dict) else {}
@@ -113,6 +126,8 @@ def _pick_frame_rows(rot_payload: Dict[str, Any], branch_name: str) -> List[Dict
 
     return [r for r in rows if isinstance(r, dict) and str(r.get("kind") or "") == "frame_dragging"]
 
+
+# 関数: `_derive_prior_from_channels` の入出力契約と処理意図を定義する。
 
 def _derive_prior_from_channels(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     for preferred_id in DEFAULT_PRIOR_SOURCE_IDS:
@@ -174,6 +189,8 @@ def _derive_prior_from_channels(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         "note": "No finite channel was available to derive a fallback prior.",
     }
 
+
+# 関数: `_load_prior` の入出力契約と処理意図を定義する。
 
 def _load_prior(prior_json: Path, channel_rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     # 条件分岐: `not prior_json.exists()` を満たす経路を評価する。
@@ -237,6 +254,8 @@ def _load_prior(prior_json: Path, channel_rows: List[Dict[str, Any]]) -> Dict[st
     }
 
 
+# 関数: `_build_channel_rows` の入出力契約と処理意図を定義する。
+
 def _build_channel_rows(
     *,
     static_rows: List[Dict[str, Any]],
@@ -288,6 +307,8 @@ def _build_channel_rows(
 
     return rows
 
+
+# 関数: `build_payload` の入出力契約と処理意図を定義する。
 
 def build_payload(
     *,
@@ -376,6 +397,7 @@ def build_payload(
 
     checks: List[Dict[str, Any]] = []
 
+    # 関数: `add_check` の入出力契約と処理意図を定義する。
     def add_check(
         cid: str,
         metric: str,
@@ -617,6 +639,8 @@ def build_payload(
     return payload
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -647,6 +671,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow(row)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     channel_rows = payload.get("channel_rows") if isinstance(payload.get("channel_rows"), list) else []
@@ -741,6 +767,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(

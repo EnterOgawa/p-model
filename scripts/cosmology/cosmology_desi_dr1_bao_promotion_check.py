@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, List, Optional, Tuple
 _ROOT = Path(__file__).resolve().parents[2]
 
 
+# クラス: `ZRange` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ZRange:
     lam_min: float
@@ -20,8 +21,11 @@ class ZRange:
     z_min: float
     z_max: float
 
+    # 関数: `sign_flips` の入出力契約と処理意図を定義する。
     def sign_flips(self) -> bool:
         return (self.z_min <= 0.0 <= self.z_max) and not (self.z_min == 0.0 == self.z_max)
+
+    # 関数: `stable_over` の入出力契約と処理意図を定義する。
 
     def stable_over(self, *, threshold_abs: float) -> bool:
         thr = float(threshold_abs)
@@ -36,6 +40,8 @@ class ZRange:
 
         return (self.z_max <= -thr) or (self.z_min >= thr)
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
+
     def to_dict(self) -> Dict[str, Any]:
         return {
             "lam_min": float(self.lam_min),
@@ -47,12 +53,16 @@ class ZRange:
         }
 
 
+# 関数: `_iter_rows` の入出力契約と処理意図を定義する。
+
 def _iter_rows(path: Path) -> Iterable[Dict[str, str]]:
     with path.open("r", newline="", encoding="utf-8") as f:
         r = csv.DictReader(f)
         for row in r:
             yield row
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> float:
     try:
@@ -62,6 +72,8 @@ def _safe_float(x: Any) -> float:
 
     return v if math.isfinite(v) else float("nan")
 
+
+# 関数: `_load_points` の入出力契約と処理意図を定義する。
 
 def _load_points(
     path: Path,
@@ -94,6 +106,8 @@ def _load_points(
     return pts
 
 
+# 関数: `_summarize_points` の入出力契約と処理意図を定義する。
+
 def _summarize_points(
     pts: Dict[Tuple[str, str], List[Tuple[float, float]]],
 ) -> Dict[Tuple[str, str], ZRange]:
@@ -111,6 +125,8 @@ def _summarize_points(
 
     return out
 
+
+# 関数: `_ensure_paths` の入出力契約と処理意図を定義する。
 
 def _ensure_paths(paths: List[str]) -> List[Path]:
     out: List[Path] = []
@@ -133,6 +149,8 @@ def _ensure_paths(paths: List[str]) -> List[Path]:
     return out
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -148,6 +166,8 @@ def _set_japanese_font() -> None:
     except Exception:
         pass
 
+
+# 関数: `_short_method_label` の入出力契約と処理意図を定義する。
 
 def _short_method_label(method: str) -> str:
     m = str(method or "").lower()
@@ -172,6 +192,8 @@ def _short_method_label(method: str) -> str:
 
     return method
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="DESI DR1: promotion gate check from shrinkage sweep CSV(s).")

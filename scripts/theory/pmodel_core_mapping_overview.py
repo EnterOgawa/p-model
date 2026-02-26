@@ -12,14 +12,44 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "output" / "private" / "theory"
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+def _set_japanese_font() -> None:
+    try:
+        import matplotlib as mpl
+        import matplotlib.font_manager as fm
+
+        preferred = [
+            "Yu Gothic",
+            "Meiryo",
+            "BIZ UDGothic",
+            "MS Gothic",
+            "Yu Mincho",
+            "MS Mincho",
+        ]
+        available = {f.name for f in fm.fontManager.ttflist}
+        chosen = [name for name in preferred if name in available]
+        if not chosen:
+            return
+
+        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
+        mpl.rcParams["axes.unicode_minus"] = False
+    except Exception:
+        return
+
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_box` の入出力契約と処理意図を定義する。
 
 def _box(*, ax: Any, xy: tuple[float, float], wh: tuple[float, float], text: str, fc: str) -> None:
     x, y = xy
@@ -48,6 +78,8 @@ def _box(*, ax: Any, xy: tuple[float, float], wh: tuple[float, float], text: str
     )
 
 
+# 関数: `_arrow` の入出力契約と処理意図を定義する。
+
 def _arrow(*, ax: Any, a: tuple[float, float], b: tuple[float, float]) -> None:
     patch = FancyArrowPatch(
         a,
@@ -61,11 +93,14 @@ def _arrow(*, ax: Any, a: tuple[float, float], b: tuple[float, float]) -> None:
     ax.add_patch(patch)
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out_png = OUT_DIR / "pmodel_core_mapping_overview.png"
     out_json = OUT_DIR / "pmodel_core_mapping_overview_metrics.json"
 
+    _set_japanese_font()
     fig, ax = plt.subplots(figsize=(12.5, 5.0), dpi=200)
     ax.set_axis_off()
 
@@ -85,43 +120,43 @@ def main() -> None:
         xy=pos_p,
         wh=wh_main,
         fc="#f3f7ff",
-        text="P(x)\nTime-wave density (scalar)\n(operational: clocks)",
+        text="P(x)\n時間波密度 / Time-wave density\n（静止極限スカラー / scalar mode）",
     )
     _box(
         ax=ax,
         xy=pos_phi,
         wh=wh_main,
         fc="#f9f3ff",
-        text="φ = −c² ln(P/P0)\nPotential mapping\n(Newton form)",
+        text="φ = −c² ln(P/P0)\nポテンシャル写像 / potential mapping\n（ニュートン形 / Newton form）",
     )
-    _box(ax=ax, xy=pos_g, wh=wh_small, fc="#f8fff3", text="Gravity\n a = −∇φ\n(slide down P-gradient)")
+    _box(ax=ax, xy=pos_g, wh=wh_small, fc="#f8fff3", text="重力 / Gravity\n a = −∇φ\n（P勾配へ滑る / slide down P-gradient）")
     _box(
         ax=ax,
         xy=pos_clk,
         wh=wh_small,
         fc="#fff8f3",
-        text="Clocks (bound modes)\n dτ/dt = (P0/P)·(dτ/dt)v\n(velocity term: standard recovery)",
+        text="時計（束縛モード）/ Clocks (bound)\n dτ/dt = (P0/P)·(dτ/dt)v\n（速度項は標準回収 / SR-recovery）",
     )
     _box(
         ax=ax,
         xy=pos_light,
         wh=wh_small,
         fc="#f3fff9",
-        text="Light (free wave)\n n(P)=(P/P0)^(2β)\n β: response strength",
+        text="光（自由波）/ Light (free wave)\n n(P)=(P/P0)^(2β)\n β: 応答強度 / response strength",
     )
     _box(
         ax=ax,
         xy=pos_q,
         wh=wh_main,
         fc="#fff3f3",
-        text="Quantum (Part III)\nBound modes / correlations\n(selection sensitivity)",
+        text="量子（Part III）/ Quantum\n束縛モード・相関\n（selection 感度監査）",
     )
     _box(
         ax=ax,
         xy=pos_cos,
         wh=wh_main,
         fc="#f3fff3",
-        text="Cosmology (Part II)\nBackground P: Pbg(t)\n 1+z = Pem/Pobs",
+        text="宇宙論（Part II）/ Cosmology\n背景P: Pbg(t)\n 1+z = Pem/Pobs",
     )
 
     _arrow(ax=ax, a=(pos_p[0] + wh_main[0], pos_p[1] + 0.5 * wh_main[1]), b=(pos_phi[0], pos_phi[1] + 0.5 * wh_main[1]))
@@ -134,7 +169,7 @@ def main() -> None:
     ax.text(
         0.5,
         0.03,
-        "Part I freezes the mapping + β. Part II/III test falsification under frozen values.",
+        "Part I: 写像と β を凍結。Part II/III: 凍結値のまま反証監査。",
         transform=ax.transAxes,
         ha="center",
         va="center",

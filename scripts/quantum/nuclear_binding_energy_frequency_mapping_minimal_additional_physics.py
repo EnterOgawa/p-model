@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,6 +22,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
     """
@@ -52,6 +55,8 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
+# 関数: `_stats` の入出力契約と処理意図を定義する。
+
 def _stats(vals: list[float]) -> dict[str, float]:
     # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
@@ -66,6 +71,8 @@ def _stats(vals: list[float]) -> dict[str, float]:
     }
 
 
+# 関数: `_robust_sigma_from_p16_p84` の入出力契約と処理意図を定義する。
+
 def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
     # 条件分岐: `not (math.isfinite(p16) and math.isfinite(p84))` を満たす経路を評価する。
     if not (math.isfinite(p16) and math.isfinite(p84)):
@@ -73,6 +80,8 @@ def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
 
     return 0.5 * (p84 - p16)
 
+
+# 関数: `_load_thresholds` の入出力契約と処理意図を定義する。
 
 def _load_thresholds(*, json_path: Path) -> dict[str, object]:
     # 条件分岐: `not json_path.exists()` を満たす経路を評価する。
@@ -93,6 +102,8 @@ def _load_thresholds(*, json_path: Path) -> dict[str, object]:
 
     return thresholds
 
+
+# 関数: `_model_summary` の入出力契約と処理意図を定義する。
 
 def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds: dict[str, object]) -> dict[str, object]:
     # 条件分岐: `not pairs` を満たす経路を評価する。
@@ -167,6 +178,8 @@ def _model_summary(*, model_id: str, pairs: list[tuple[int, float]], thresholds:
         "passes": passes,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

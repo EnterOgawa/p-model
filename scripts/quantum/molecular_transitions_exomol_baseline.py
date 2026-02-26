@@ -12,13 +12,18 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_read_bz2_lines` の入出力契約と処理意図を定義する。
 
 def _read_bz2_lines(path: Path) -> list[str]:
     raw = path.read_bytes()
@@ -26,21 +31,29 @@ def _read_bz2_lines(path: Path) -> list[str]:
     return [ln for ln in text.splitlines() if ln.strip()]
 
 
+# 関数: `_read_text_lines` の入出力契約と処理意図を定義する。
+
 def _read_text_lines(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8", errors="replace")
     return [ln for ln in text.splitlines() if ln.strip()]
 
+
+# 関数: `_cm_inv_to_hz` の入出力契約と処理意図を定義する。
 
 def _cm_inv_to_hz(cm_inv: float) -> float:
     c = 299_792_458.0
     return c * (cm_inv * 100.0)
 
 
+# 関数: `_cm_inv_to_ev` の入出力契約と処理意図を定義する。
+
 def _cm_inv_to_ev(cm_inv: float) -> float:
     h = 6.626_070_15e-34  # exact (SI)
     e_charge = 1.602_176_634e-19  # exact (J/eV)
     return (h * _cm_inv_to_hz(cm_inv)) / e_charge
 
+
+# 関数: `_cm_inv_to_um` の入出力契約と処理意図を定義する。
 
 def _cm_inv_to_um(cm_inv: float) -> float:
     # 条件分岐: `cm_inv == 0.0` を満たす経路を評価する。
@@ -49,6 +62,8 @@ def _cm_inv_to_um(cm_inv: float) -> float:
 
     return 1e4 / cm_inv
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: object) -> Optional[float]:
     try:
@@ -60,6 +75,8 @@ def _safe_float(x: object) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_parse_state_row` の入出力契約と処理意図を定義する。
 
 def _parse_state_row(parts: list[str]) -> dict[str, Any] | None:
     """
@@ -116,6 +133,8 @@ def _parse_state_row(parts: list[str]) -> dict[str, Any] | None:
     return {"id": state_id, "E_cm^-1": energy_cm, "g": g, "J": j, "v": v, "parity": parity, "lifetime_s": lifetime_s}
 
 
+# 関数: `_load_states_map` の入出力契約と処理意図を定義する。
+
 def _load_states_map(states_bz2: Path) -> dict[int, dict[str, Any]]:
     states: dict[int, dict[str, Any]] = {}
     for line in _read_bz2_lines(states_bz2):
@@ -134,6 +153,8 @@ def _load_states_map(states_bz2: Path) -> dict[int, dict[str, Any]]:
 
     return states
 
+
+# 関数: `_load_transitions` の入出力契約と処理意図を定義する。
 
 def _load_transitions(trans_bz2: Path) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
@@ -161,7 +182,10 @@ def _load_transitions(trans_bz2: Path) -> list[dict[str, Any]]:
     return rows
 
 
+# 関数: `_transition_label` の入出力契約と処理意図を定義する。
+
 def _transition_label(*, upper: dict[str, Any], lower: dict[str, Any]) -> str:
+    # 関数: `fmt_state` の入出力契約と処理意図を定義する。
     def fmt_state(s: dict[str, Any]) -> str:
         v = s.get("v")
         j = s.get("J")
@@ -180,9 +204,13 @@ def _transition_label(*, upper: dict[str, Any], lower: dict[str, Any]) -> str:
     return f"{fmt_state(upper)} → {fmt_state(lower)}"
 
 
+# 関数: `_molat_transition_label` の入出力契約と処理意図を定義する。
+
 def _molat_transition_label(*, upper_state: str, vu: int, ju: int, vl: int, jl: int) -> str:
     return f"{upper_state}(v={vu},J={ju}) → X(v={vl},J={jl})"
 
+
+# 関数: `_load_molat_d2_transitions` の入出力契約と処理意図を定義する。
 
 def _load_molat_d2_transitions(*, source_dir: Path) -> tuple[list[dict[str, Any]], Path]:
     extracted_path = source_dir / "extracted_values.json"
@@ -236,6 +264,8 @@ def _load_molat_d2_transitions(*, source_dir: Path) -> tuple[list[dict[str, Any]
 
     return rows, extracted_path
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Build an offline-stable molecular transition baseline from ExoMol line lists.")

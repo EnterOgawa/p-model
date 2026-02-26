@@ -22,9 +22,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -32,6 +35,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_gate_status` の入出力契約と処理意図を定義する。
 
 def _gate_status(*, z_abs: float, hard: float, watch: float) -> str:
     # 条件分岐: `z_abs <= watch` を満たす経路を評価する。
@@ -45,6 +50,8 @@ def _gate_status(*, z_abs: float, hard: float, watch: float) -> str:
 
     return "reject"
 
+
+# 関数: `_predict_li7h` の入出力契約と処理意図を定義する。
 
 def _predict_li7h(
     *,
@@ -99,6 +106,8 @@ def _predict_li7h(
         "li7h_pred": li7h_pred,
     }
 
+
+# 関数: `_plot_sweep` の入出力契約と処理意図を定義する。
 
 def _plot_sweep(
     *,
@@ -178,6 +187,8 @@ def _plot_sweep(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Step 8.7.22.14: Li-7 channel sensitivity audit (T_N, q_B, eta_b sweep).")
@@ -325,6 +336,7 @@ def main() -> int:
     watch_rows = [r for r in rows if str(r["status"]) == "watch"]
     reject_rows = [r for r in rows if str(r["status"]) == "reject"]
 
+    # 関数: `_bounds` の入出力契約と処理意図を定義する。
     def _bounds(data: list[dict[str, Any]], key: str) -> dict[str, float] | None:
         # 条件分岐: `not data` を満たす経路を評価する。
         if not data:

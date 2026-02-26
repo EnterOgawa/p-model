@@ -21,6 +21,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -46,14 +47,20 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(value: Any) -> Optional[float]:
     try:
@@ -69,6 +76,8 @@ def _to_float(value: Any) -> Optional[float]:
     return parsed
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(value: float, digits: int = 6) -> str:
     # 条件分岐: `value == 0.0` を満たす経路を評価する。
     if value == 0.0:
@@ -82,9 +91,13 @@ def _fmt_float(value: float, digits: int = 6) -> str:
     return f"{value:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_status_bool` の入出力契約と処理意図を定義する。
+
 def _status_bool(value: bool) -> str:
     return "pass" if value else "reject"
 
+
+# 関数: `_load_common_inputs` の入出力契約と処理意図を定義する。
 
 def _load_common_inputs(mercury_payload: Dict[str, Any], solar_payload: Dict[str, Any]) -> Dict[str, float]:
     mercury_obs = _to_float(mercury_payload.get("reference_arcsec_century"))
@@ -119,6 +132,8 @@ def _load_common_inputs(mercury_payload: Dict[str, Any], solar_payload: Dict[str
     }
 
 
+# 関数: `_load_beta_from_sources` の入出力契約と処理意図を定義する。
+
 def _load_beta_from_sources(
     *, beta_override: Optional[float], frozen_path: Path, solar_payload: Dict[str, Any], fallback: float
 ) -> float:
@@ -146,6 +161,8 @@ def _load_beta_from_sources(
     return float(fallback)
 
 
+# 関数: `_row_summary` の入出力契約と処理意図を定義する。
+
 def _row_summary(rows: Sequence[Dict[str, Any]]) -> Tuple[int, int, int]:
     hard_reject = 0
     watch_n = 0
@@ -164,6 +181,8 @@ def _row_summary(rows: Sequence[Dict[str, Any]]) -> Tuple[int, int, int]:
 
     return hard_reject, watch_n, pass_n
 
+
+# 関数: `_build_case_a` の入出力契約と処理意図を定義する。
 
 def _build_case_a(
     *,
@@ -262,6 +281,8 @@ def _build_case_a(
         },
     }
 
+
+# 関数: `_build_case_b` の入出力契約と処理意図を定義する。
 
 def _build_case_b(
     *,
@@ -380,6 +401,8 @@ def _build_case_b(
     }
 
 
+# 関数: `_load_case_a_summary` の入出力契約と処理意図を定義する。
+
 def _load_case_a_summary(path: Path) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -398,6 +421,8 @@ def _load_case_a_summary(path: Path) -> Optional[Dict[str, Any]]:
 
     return None
 
+
+# 関数: `_resolve_metric_choice_decision` の入出力契約と処理意図を定義する。
 
 def _resolve_metric_choice_decision(
     *,
@@ -473,6 +498,8 @@ def _resolve_metric_choice_decision(
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(case_payload: Dict[str, Any], out_png: Path, title: str, row_prefix: str) -> None:
     _set_japanese_font()
 
@@ -534,6 +561,8 @@ def _plot(case_payload: Dict[str, Any], out_png: Path, title: str, row_prefix: s
     plt.close(figure)
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -570,6 +599,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     default_mercury = _ROOT / "output" / "private" / "mercury" / "mercury_precession_metrics.json"

@@ -21,13 +21,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -54,14 +59,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_format_num` の入出力契約と処理意図を定義する。
 
 def _format_num(x: float, *, digits: int = 4) -> str:
     # 条件分岐: `x == 0` を満たす経路を評価する。
@@ -76,10 +87,14 @@ def _format_num(x: float, *, digits: int = 4) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_max_finite` の入出力契約と処理意図を定義する。
+
 def _max_finite(*vals: float) -> float:
     finite = [v for v in vals if math.isfinite(v)]
     return max(finite) if finite else float("nan")
 
+
+# 関数: `_load_frozen` の入出力契約と処理意図を定義する。
 
 def _load_frozen(root: Path, frozen_path: Path) -> Dict[str, Any]:
     # 条件分岐: `frozen_path.exists()` を満たす経路を評価する。
@@ -88,6 +103,8 @@ def _load_frozen(root: Path, frozen_path: Path) -> Dict[str, Any]:
 
     return {"beta": 1.0, "delta": 0.0, "policy": {"beta_source": "default_beta_1"}}
 
+
+# 関数: `_load_kappa_error_budget` の入出力契約と処理意図を定義する。
 
 def _load_kappa_error_budget(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -100,6 +117,8 @@ def _load_kappa_error_budget(path: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_extract_eht_requirements` の入出力契約と処理意図を定義する。
 
 def _extract_eht_requirements(eht: Dict[str, Any], *, kappa_budget: Dict[str, Any]) -> Dict[str, Any]:
     p4 = eht.get("phase4") if isinstance(eht.get("phase4"), dict) else {}
@@ -248,6 +267,7 @@ def _extract_eht_requirements(eht: Dict[str, Any], *, kappa_budget: Dict[str, An
             else float("nan")
         )
 
+        # 関数: `_z_sep` の入出力契約と処理意図を定義する。
         def _z_sep(sigma_obs: float) -> float:
             denom = float("nan")
             # 条件分岐: `all(math.isfinite(x) for x in (sigma_pred_p, sigma_pred_gr, sigma_obs))` を満たす経路を評価する。
@@ -351,6 +371,8 @@ def _extract_eht_requirements(eht: Dict[str, Any], *, kappa_budget: Dict[str, An
     }
 
 
+# 関数: `_extract_delta_constraints` の入出力契約と処理意図を定義する。
+
 def _extract_delta_constraints(delta_j: Dict[str, Any]) -> Dict[str, Any]:
     delta_adopted = float(delta_j.get("delta_adopted", float("nan")))
     gamma_max = float(delta_j.get("gamma_max_for_delta_adopted", float("nan")))
@@ -386,6 +408,8 @@ def _extract_delta_constraints(delta_j: Dict[str, Any]) -> Dict[str, Any]:
         ),
     }
 
+
+# 関数: `_render_figure` の入出力契約と処理意図を定義する。
 
 def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     _set_japanese_font()
@@ -505,6 +529,8 @@ def _render_figure(payload: Dict[str, Any], *, out_png: Path) -> None:
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

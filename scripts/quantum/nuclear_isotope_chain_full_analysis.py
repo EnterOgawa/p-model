@@ -13,6 +13,7 @@ from typing import Any
 REPRESENTATIVE_Z = [8, 20, 50, 82]
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -29,6 +30,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -38,6 +41,8 @@ def _rms(values: list[float]) -> float:
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -46,6 +51,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -60,6 +67,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow([row.get(h) for h in headers])
 
+
+# 関数: `_edge_class` の入出力契約と処理意図を定義する。
 
 def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
     proton_edge = d_proton <= edge_width
@@ -80,6 +89,8 @@ def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
 
     return "interior"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

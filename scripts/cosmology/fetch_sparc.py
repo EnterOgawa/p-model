@@ -42,9 +42,12 @@ from scripts.summary import worklog  # noqa: E402
 _REQ_TIMEOUT = (30, 600)  # (connect, read)
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -53,6 +56,8 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -60,10 +65,14 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -73,6 +82,8 @@ def _sha256_file(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -109,6 +120,8 @@ def _download(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
     tmp.replace(dst)
     return {"status": "downloaded", "path": _rel(dst), "bytes": int(n), "sha256": h.hexdigest(), "url": url}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

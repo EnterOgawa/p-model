@@ -18,9 +18,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -47,9 +50,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_gamma_max` の入出力契約と処理意図を定義する。
 
 def _gamma_max(delta: float) -> float:
     # gamma_max = sqrt((1+δ)/δ)  (≈ 1/sqrt(δ) when δ<<1)
@@ -59,6 +66,8 @@ def _gamma_max(delta: float) -> float:
     return math.sqrt((1.0 + float(delta)) / float(delta))
 
 
+# 関数: `_delta_upper_for_gamma` の入出力契約と処理意図を定義する。
+
 def _delta_upper_for_gamma(gamma_obs: float) -> float:
     # Require gamma_max >= gamma_obs
     # => (1+δ)/δ >= gamma^2  -> 1/δ + 1 >= gamma^2 -> δ <= 1/(gamma^2 - 1)
@@ -67,6 +76,8 @@ def _delta_upper_for_gamma(gamma_obs: float) -> float:
 
     return 1.0 / (float(gamma_obs) * float(gamma_obs) - 1.0)
 
+
+# 関数: `_fmt_sci` の入出力契約と処理意図を定義する。
 
 def _fmt_sci(x: float, *, digits: int = 2) -> str:
     # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
@@ -81,6 +92,8 @@ def _fmt_sci(x: float, *, digits: int = 2) -> str:
     return f"{x:.{digits}e}"
 
 
+# クラス: `Example` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Example:
     key: str
@@ -90,6 +103,8 @@ class Example:
     notes: str
     source: str
 
+
+# 関数: `_parse_example` の入出力契約と処理意図を定義する。
 
 def _parse_example(o: Dict[str, Any]) -> Example:
     return Example(
@@ -101,6 +116,8 @@ def _parse_example(o: Dict[str, Any]) -> Example:
         source=str(o.get("source") or ""),
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

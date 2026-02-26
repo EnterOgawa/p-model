@@ -106,6 +106,7 @@ _HREF_RE = re.compile(r'href="([^"]+)"', re.IGNORECASE)
 _RETRY_STATUSES = {429, 500, 502, 503, 504}
 
 
+# クラス: `Candidate` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Candidate:
     url: str
@@ -113,9 +114,13 @@ class Candidate:
     source_dir: str
 
 
+# 関数: `_now_utc` の入出力契約と処理意図を定義する。
+
 def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_norm_url` の入出力契約と処理意図を定義する。
 
 def _norm_url(u: str) -> str:
     # Normalize: keep scheme+netloc+path, drop fragments.
@@ -128,14 +133,20 @@ def _norm_url(u: str) -> str:
     return f"{p.scheme}://{p.netloc}{path}"
 
 
+# 関数: `_is_dir_url` の入出力契約と処理意図を定義する。
+
 def _is_dir_url(u: str) -> bool:
     return u.endswith("/")
 
+
+# 関数: `_should_skip_dir` の入出力契約と処理意図を定義する。
 
 def _should_skip_dir(u: str) -> bool:
     lu = u.lower()
     return any(s in lu for s in _SKIP_DIR_SUBSTRS)
 
+
+# 関数: `_is_candidate_file` の入出力契約と処理意図を定義する。
 
 def _is_candidate_file(name: str) -> bool:
     n = str(name).strip()
@@ -153,6 +164,8 @@ def _is_candidate_file(name: str) -> bool:
     return bool(_CANDIDATE_NAME_RE.search(n))
 
 
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
+
 def _fetch_text(url: str, *, timeout_sec: int) -> str:
     # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
@@ -161,6 +174,8 @@ def _fetch_text(url: str, *, timeout_sec: int) -> str:
     r = _request_with_retries("GET", url, timeout_sec=timeout_sec)
     return r.text
 
+
+# 関数: `_webdav_propfind` の入出力契約と処理意図を定義する。
 
 def _webdav_propfind(url: str, *, timeout_sec: int) -> str:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -184,6 +199,8 @@ def _webdav_propfind(url: str, *, timeout_sec: int) -> str:
     return r.text
 
 
+# 関数: `_session` の入出力契約と処理意図を定義する。
+
 def _session() -> "requests.Session":
     # Lazily create one session to reuse TCP/TLS connections (directory crawls are request-heavy).
     # NOTE: requests is Optional; type ignore for mypy isn't used here.
@@ -198,6 +215,8 @@ def _session() -> "requests.Session":
 
     return s
 
+
+# 関数: `_request_with_retries` の入出力契約と処理意図を定義する。
 
 def _request_with_retries(
     method: str,
@@ -252,6 +271,8 @@ def _request_with_retries(
     raise last_err
 
 
+# 関数: `_iter_hrefs` の入出力契約と処理意図を定義する。
+
 def _iter_hrefs(html: str) -> Iterable[str]:
     # Directory listing is usually <pre><a href="...">; a regex is enough.
     for m in _HREF_RE.finditer(html):
@@ -262,6 +283,8 @@ def _iter_hrefs(html: str) -> Iterable[str]:
 
         yield href
 
+
+# 関数: `_iter_webdav_hrefs` の入出力契約と処理意図を定義する。
 
 def _iter_webdav_hrefs(xml_text: str) -> Iterable[str]:
     # WebDAV PROPFIND depth=1 returns <D:multistatus><D:response>...</D:response></...>.
@@ -308,6 +331,8 @@ def _iter_webdav_hrefs(xml_text: str) -> Iterable[str]:
 
         yield href
 
+
+# 関数: `_iter_listing_hrefs` の入出力契約と処理意図を定義する。
 
 def _iter_listing_hrefs(
     url: str,
@@ -362,6 +387,8 @@ def _iter_listing_hrefs(
 
     return [], "none"
 
+
+# 関数: `discover` の入出力契約と処理意図を定義する。
 
 def discover(
     roots: List[str],
@@ -484,6 +511,8 @@ def discover(
     }
     return cand_sorted, meta
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Discover DESI public 2pt products (multipoles/cov) by crawling directory listings.")

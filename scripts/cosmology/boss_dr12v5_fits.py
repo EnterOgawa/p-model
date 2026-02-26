@@ -35,6 +35,7 @@ _BLOCK = 2880
 _TFORM_RE = re.compile(r"^\s*(?P<rep>\d*)(?P<code>[A-Z])\s*$")
 
 
+# クラス: `FitsBintableLayout` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FitsBintableLayout:
     row_bytes: int
@@ -43,6 +44,8 @@ class FitsBintableLayout:
     offsets: Dict[str, int]
     formats: Dict[str, str]  # FITS TFORM (raw)
 
+
+# 関数: `_read_exact` の入出力契約と処理意図を定義する。
 
 def _read_exact(f: BinaryIO, n: int) -> bytes:
     b = f.read(n)
@@ -53,10 +56,14 @@ def _read_exact(f: BinaryIO, n: int) -> bytes:
     return b
 
 
+# 関数: `_iter_cards_from_header_bytes` の入出力契約と処理意図を定義する。
+
 def _iter_cards_from_header_bytes(header_bytes: bytes) -> Iterable[str]:
     for i in range(0, len(header_bytes), _CARD):
         yield header_bytes[i : i + _CARD].decode("ascii", errors="ignore")
 
+
+# 関数: `_read_header_blocks` の入出力契約と処理意図を定義する。
 
 def _read_header_blocks(f: BinaryIO) -> bytes:
     """
@@ -78,6 +85,8 @@ def _read_header_blocks(f: BinaryIO) -> bytes:
                 return b"".join(chunks)
 
 
+# 関数: `_parse_int_card` の入出力契約と処理意図を定義する。
+
 def _parse_int_card(card: str) -> Optional[int]:
     # 条件分岐: `"=" not in card` を満たす経路を評価する。
     if "=" not in card:
@@ -96,6 +105,8 @@ def _parse_int_card(card: str) -> Optional[int]:
         return None
 
 
+# 関数: `_parse_str_card` の入出力契約と処理意図を定義する。
+
 def _parse_str_card(card: str) -> Optional[str]:
     # 条件分岐: `"=" not in card` を満たす経路を評価する。
     if "=" not in card:
@@ -109,6 +120,8 @@ def _parse_str_card(card: str) -> Optional[str]:
 
     return None
 
+
+# 関数: `_tform_to_numpy_dtype` の入出力契約と処理意図を定義する。
 
 def _tform_to_numpy_dtype(tform: str) -> Tuple[np.dtype, int, int]:
     """
@@ -187,6 +200,8 @@ def _tform_to_numpy_dtype(tform: str) -> Tuple[np.dtype, int, int]:
 
     raise ValueError(f"unsupported TFORM code: {code!r} (tform={tform!r})")
 
+
+# 関数: `read_first_bintable_layout` の入出力契約と処理意図を定義する。
 
 def read_first_bintable_layout(f: BinaryIO) -> FitsBintableLayout:
     """
@@ -282,6 +297,8 @@ def read_first_bintable_layout(f: BinaryIO) -> FitsBintableLayout:
     )
 
 
+# 関数: `read_bintable_columns` の入出力契約と処理意図を定義する。
+
 def read_bintable_columns(
     f: BinaryIO,
     *,
@@ -346,6 +363,8 @@ def read_bintable_columns(
 
     return out
 
+
+# 関数: `iter_bintable_column_chunks` の入出力契約と処理意図を定義する。
 
 def iter_bintable_column_chunks(
     f: BinaryIO,
@@ -412,6 +431,8 @@ def iter_bintable_column_chunks(
         i0 += n_chunk
         yield out
 
+
+# 関数: `open_gz_stream_from_bytes` の入出力契約と処理意図を定義する。
 
 def open_gz_stream_from_bytes(prefix: bytes) -> BinaryIO:
     """

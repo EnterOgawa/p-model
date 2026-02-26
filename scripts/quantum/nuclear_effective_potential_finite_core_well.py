@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,9 +22,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -45,6 +50,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
 
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
+
+# 関数: `_load_np_scattering_sets` の入出力契約と処理意図を定義する。
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
@@ -82,6 +89,8 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     return out
 
 
+# 関数: `_get_value` の入出力契約と処理意図を定義する。
+
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
     # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
@@ -91,6 +100,8 @@ def _get_value(params: dict[str, object], key: str) -> float:
     raise KeyError(key)
 
 
+# 関数: `_cot` の入出力契約と処理意図を定義する。
+
 def _cot(x: float) -> float:
     # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
@@ -99,6 +110,8 @@ def _cot(x: float) -> float:
     return math.cos(x) / math.sin(x)
 
 
+# 関数: `_coth` の入出力契約と処理意図を定義する。
+
 def _coth(x: float) -> float:
     # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
@@ -106,6 +119,8 @@ def _coth(x: float) -> float:
 
     return math.cosh(x) / math.sinh(x)
 
+
+# 関数: `_y_core` の入出力契約と処理意図を定義する。
 
 def _y_core(
     *, e_mev: float, vc_mev: float, rc_fm: float, mu_mev: float, hbarc_mev_fm: float
@@ -146,6 +161,8 @@ def _y_core(
 
     return float(p * _cot(p * rc_fm))
 
+
+# 関数: `_y_after_well` の入出力契約と処理意図を定義する。
 
 def _y_after_well(*, y_in: float, q_fm1: float, l_fm: float) -> float:
     """
@@ -192,6 +209,8 @@ def _y_after_well(*, y_in: float, q_fm1: float, l_fm: float) -> float:
     return float(num / denom)
 
 
+# 関数: `_solve_bound_x` の入出力契約と処理意図を定義する。
+
 def _solve_bound_x(
     *, kappa_fm1: float, l_fm: float, y_c_fm1: float, prefer_x0: float = 2.1, x_max: float = 2.5
 ) -> float:
@@ -201,6 +220,8 @@ def _solve_bound_x(
     # 条件分岐: `not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(l_fm) and l...` を満たす経路を評価する。
     if not (math.isfinite(kappa_fm1) and kappa_fm1 > 0 and math.isfinite(l_fm) and l_fm > 0):
         raise ValueError("invalid kappa or L")
+
+    # 関数: `f` の入出力契約と処理意図を定義する。
 
     def f(x: float) -> float:
         k2 = x / l_fm
@@ -293,6 +314,8 @@ def _solve_bound_x(
     return float(0.5 * (lo + hi))
 
 
+# 関数: `_triplet_depth_from_b` の入出力契約と処理意図を定義する。
+
 def _triplet_depth_from_b(
     *,
     b_mev: float,
@@ -316,6 +339,8 @@ def _triplet_depth_from_b(
     v0 = b_mev + (hbarc_mev_fm**2) * (q**2) / (2.0 * mu_mev)
     return {"V0_mev": float(v0), "kappa_fm1": float(kappa), "x": float(x), "q_fm1": float(q), "y_c_fm1": float(y_c)}
 
+
+# 関数: `_scattering_length_zero_energy` の入出力契約と処理意図を定義する。
 
 def _scattering_length_zero_energy(
     *,
@@ -344,6 +369,8 @@ def _scattering_length_zero_energy(
 
     return float(r_out - (1.0 / y_r))
 
+
+# 関数: `_phase_shift` の入出力契約と処理意図を定義する。
 
 def _phase_shift(
     *,
@@ -393,6 +420,8 @@ def _phase_shift(
     return float(delta)
 
 
+# 関数: `_solve_3x3` の入出力契約と処理意図を定義する。
+
 def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
     m = [row[:] + [rhs] for row, rhs in zip(a, b)]
 
@@ -422,6 +451,8 @@ def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
 
     return x
 
+
+# 関数: `_fit_kcot_ere` の入出力契約と処理意図を定義する。
 
 def _fit_kcot_ere(
     *, rc_fm: float, l_fm: float, vc_mev: float, v0_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -504,6 +535,8 @@ def _fit_kcot_ere(
     }
 
 
+# 関数: `_solve_l_for_triplet_a` の入出力契約と処理意図を定義する。
+
 def _solve_l_for_triplet_a(
     *,
     rc_fm: float,
@@ -523,6 +556,8 @@ def _solve_l_for_triplet_a(
     if not (l_min_fm > 0 and l_max_fm > l_min_fm):
         raise ValueError("invalid L range")
 
+    # 関数: `a_of_l` の入出力契約と処理意図を定義する。
+
     def a_of_l(l: float) -> float:
         v0 = _triplet_depth_from_b(
             b_mev=b_mev, rc_fm=rc_fm, l_fm=l, vc_mev=vc_mev, mu_mev=mu_mev, hbarc_mev_fm=hbarc_mev_fm
@@ -533,6 +568,7 @@ def _solve_l_for_triplet_a(
 
     cache: dict[float, tuple[float, float]] = {}
 
+    # 関数: `f_of_l` の入出力契約と処理意図を定義する。
     def f_of_l(l: float) -> float:
         # 条件分岐: `l in cache` を満たす経路を評価する。
         if l in cache:
@@ -552,6 +588,8 @@ def _solve_l_for_triplet_a(
 
         cache[l] = (float(f), float(v0))
         return float(f)
+
+    # 関数: `v0_of_l` の入出力契約と処理意図を定義する。
 
     def v0_of_l(l: float) -> float:
         # 条件分岐: `l in cache` を満たす経路を評価する。
@@ -651,6 +689,8 @@ def _solve_l_for_triplet_a(
     return float(mid), float(v0_of_l(mid))
 
 
+# 関数: `_solve_triplet_geometry_for_vc` の入出力契約と処理意図を定義する。
+
 def _solve_triplet_geometry_for_vc(
     *,
     vc_mev: float,
@@ -670,6 +710,7 @@ def _solve_triplet_geometry_for_vc(
     rc_max = 1.2
     cache: dict[float, dict[str, object]] = {}
 
+    # 関数: `eval_rc` の入出力契約と処理意図を定義する。
     def eval_rc(rc: float) -> dict[str, object]:
         # 条件分岐: `rc in cache` を満たす経路を評価する。
         if rc in cache:
@@ -682,6 +723,8 @@ def _solve_triplet_geometry_for_vc(
         out = {"Rc_fm": float(rc), "L_fm": float(l), "R_fm": float(rc + l), "V0_t_MeV": float(v0), "ere": ere}
         cache[rc] = out
         return out
+
+    # 関数: `g_of_rc` の入出力契約と処理意図を定義する。
 
     def g_of_rc(rc: float) -> float:
         s = eval_rc(rc)
@@ -811,6 +854,8 @@ def _solve_triplet_geometry_for_vc(
     return s
 
 
+# 関数: `_solve_vc_for_triplet` の入出力契約と処理意図を定義する。
+
 def _solve_vc_for_triplet(
     *,
     b_mev: float,
@@ -830,6 +875,7 @@ def _solve_vc_for_triplet(
 
     cache: dict[float, dict[str, object]] = {}
 
+    # 関数: `eval_vc` の入出力契約と処理意図を定義する。
     def eval_vc(vc: float) -> dict[str, object]:
         # 条件分岐: `vc in cache` を満たす経路を評価する。
         if vc in cache:
@@ -840,6 +886,8 @@ def _solve_vc_for_triplet(
         )
         cache[vc] = geo
         return geo
+
+    # 関数: `h` の入出力契約と処理意図を定義する。
 
     def h(vc: float) -> float:
         geo = eval_vc(vc)
@@ -924,6 +972,8 @@ def _solve_vc_for_triplet(
     return geo
 
 
+# 関数: `_solve_singlet_depth_from_a` の入出力契約と処理意図を定義する。
+
 def _solve_singlet_depth_from_a(
     *,
     rc_fm: float,
@@ -939,6 +989,8 @@ def _solve_singlet_depth_from_a(
     # 条件分岐: `not math.isfinite(a_s_target_fm) or a_s_target_fm == 0` を満たす経路を評価する。
     if not math.isfinite(a_s_target_fm) or a_s_target_fm == 0:
         raise ValueError("invalid a_s target")
+
+    # 関数: `f` の入出力契約と処理意図を定義する。
 
     def f(v0: float) -> float:
         a_pred = _scattering_length_zero_energy(
@@ -1024,6 +1076,8 @@ def _solve_singlet_depth_from_a(
 
     return float(best_v)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -1194,6 +1248,7 @@ def main() -> None:
         ax0 = fig.add_subplot(gs[row, 0])
         r_plot = [i * 0.02 for i in range(0, 501)]  # 0..10 fm
 
+        # 関数: `v_profile` の入出力契約と処理意図を定義する。
         def v_profile(rr: float, *, v0: float) -> float:
             # 条件分岐: `rr < rc` を満たす経路を評価する。
             if rr < rc:

@@ -11,18 +11,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_expect_sigma_z` の入出力契約と処理意図を定義する。
 
 def _expect_sigma_z(psi: np.ndarray) -> float:
     sigma_z = np.array([[1.0, 0.0], [0.0, -1.0]], dtype=np.complex128)
     return float(np.real(np.vdot(psi, sigma_z @ psi)))
 
 
+# 関数: `_coherence_abs` の入出力契約と処理意図を定義する。
+
 def _coherence_abs(psi: np.ndarray) -> float:
     return float(abs(np.conjugate(psi[0]) * psi[1]))
 
+
+# 関数: `_safe_norm` の入出力契約と処理意図を定義する。
 
 def _safe_norm(psi: np.ndarray) -> np.ndarray:
     norm = float(np.linalg.norm(psi))
@@ -32,6 +39,8 @@ def _safe_norm(psi: np.ndarray) -> np.ndarray:
 
     return psi / norm
 
+
+# 関数: `_safe_corr` の入出力契約と処理意図を定義する。
 
 def _safe_corr(x: np.ndarray, y: np.ndarray) -> float:
     x_std = float(np.std(x))
@@ -47,6 +56,8 @@ def _safe_corr(x: np.ndarray, y: np.ndarray) -> float:
 
     return value
 
+
+# 関数: `_simulate_trajectory` の入出力契約と処理意図を定義する。
 
 def _simulate_trajectory(
     *,
@@ -161,6 +172,8 @@ def _simulate_trajectory(
         "final_env": float(env_hist[-1]),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

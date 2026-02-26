@@ -31,13 +31,18 @@ BASE = "https://edc.dgfi.tum.de"
 LIST_URL = f"{BASE}/pub/slr/slrlog/"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
 
 def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     with urllib.request.urlopen(url, timeout=timeout_s) as r:
@@ -46,10 +51,14 @@ def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     return b.decode("utf-8", "replace")
 
 
+# 関数: `_iter_hrefs` の入出力契約と処理意図を定義する。
+
 def _iter_hrefs(html: str) -> list[str]:
     hrefs = re.findall(r'href=[\'"]([^\'"]+)[\'"]', html)
     return [h for h in hrefs if h]
 
+
+# 関数: `_detect_station_from_primary` の入出力契約と処理意図を定義する。
 
 def _detect_station_from_primary(root: Path) -> Optional[str]:
     data_dir = root / "data" / "llr"
@@ -89,12 +98,16 @@ def _detect_station_from_primary(root: Path) -> Optional[str]:
     return None
 
 
+# クラス: `PickedLog` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class PickedLog:
     station: str
     yyyymmdd: str
     url: str
 
+
+# 関数: `_pick_latest_log` の入出力契約と処理意図を定義する。
 
 def _pick_latest_log(station: str) -> PickedLog:
     station_l = station.lower()
@@ -120,6 +133,8 @@ def _pick_latest_log(station: str) -> PickedLog:
     return PickedLog(station=station.upper(), yyyymmdd=yyyymmdd, url=f"{BASE}{href}")
 
 
+# 関数: `_download` の入出力契約と処理意図を定義する。
+
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
@@ -135,6 +150,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
+
+# 関数: `_parse_coords` の入出力契約と処理意図を定義する。
 
 def _parse_coords(txt: str) -> dict:
     # Latitude            [deg]: 32.780361 N
@@ -183,6 +200,8 @@ def _parse_coords(txt: str) -> dict:
         "height_m": elev,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

@@ -43,6 +43,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -68,14 +69,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -99,6 +106,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_find_value_at_z` の入出力契約と処理意図を定義する。
 
 def _find_value_at_z(values_at_z: List[Dict[str, Any]], z: float) -> Optional[Dict[str, Any]]:
     best: Optional[Dict[str, Any]] = None
@@ -128,11 +137,15 @@ def _find_value_at_z(values_at_z: List[Dict[str, Any]], z: float) -> Optional[Di
     return best
 
 
+# 関数: `_compute_delta_mu_curve` の入出力契約と処理意図を定義する。
+
 def _compute_delta_mu_curve(delta_eps: float, z: np.ndarray) -> np.ndarray:
     z = np.asarray(z, dtype=float)
     # extra_dl_factor = (1+z)^Δε, Δμ = 5 log10(extra_dl_factor)
     return 5.0 * np.log10(np.maximum(1e-300, (1.0 + z) ** float(delta_eps)))
 
+
+# 関数: `_plot_figure` の入出力契約と処理意図を定義する。
 
 def _plot_figure(
     *,
@@ -377,6 +390,8 @@ def _plot_figure(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser()

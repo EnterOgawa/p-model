@@ -38,9 +38,12 @@ SEVERITY = {"pass": 0, "watch": 1, "reject": 2}
 STATUS_BY_SEVERITY = {0: "pass", 1: "watch", 2: "reject"}
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -49,9 +52,13 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(value: Any) -> Optional[float]:
     # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
@@ -64,6 +71,8 @@ def _as_float(value: Any) -> Optional[float]:
     return None
 
 
+# 関数: `_safe_div` の入出力契約と処理意図を定義する。
+
 def _safe_div(num: Optional[float], den: Optional[float]) -> Optional[float]:
     # 条件分岐: `num is None or den is None or den == 0.0` を満たす経路を評価する。
     if num is None or den is None or den == 0.0:
@@ -71,6 +80,8 @@ def _safe_div(num: Optional[float], den: Optional[float]) -> Optional[float]:
 
     return float(num) / float(den)
 
+
+# 関数: `_count_status` の入出力契約と処理意図を定義する。
 
 def _count_status(rows: List[Dict[str, Any]]) -> Dict[str, int]:
     counts = {"pass": 0, "watch": 0, "reject": 0}
@@ -84,6 +95,8 @@ def _count_status(rows: List[Dict[str, Any]]) -> Dict[str, int]:
 
     return counts
 
+
+# 関数: `_channel_bell` の入出力契約と処理意図を定義する。
 
 def _channel_bell(part3_audit: Dict[str, Any], bell_pack: Dict[str, Any]) -> Dict[str, Any]:
     thresholds = bell_pack.get("thresholds") if isinstance(bell_pack.get("thresholds"), dict) else {}
@@ -184,6 +197,8 @@ def _channel_bell(part3_audit: Dict[str, Any], bell_pack: Dict[str, Any]) -> Dic
     }
 
 
+# 関数: `_channel_interference` の入出力契約と処理意図を定義する。
+
 def _channel_interference(interference_metrics: Dict[str, Any]) -> Dict[str, Any]:
     rows = interference_metrics.get("rows") if isinstance(interference_metrics.get("rows"), list) else []
     precision_gap_watch = (
@@ -280,6 +295,8 @@ def _channel_interference(interference_metrics: Dict[str, Any]) -> Dict[str, Any
         "notes": notes,
     }
 
+
+# 関数: `_channel_condensed` の入出力契約と処理意図を定義する。
 
 def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
     summary = condensed_summary.get("summary") if isinstance(condensed_summary.get("summary"), dict) else {}
@@ -378,6 +395,8 @@ def _channel_condensed(condensed_summary: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# 関数: `build_payload` の入出力契約と処理意図を定義する。
+
 def build_payload(
     *,
     part3_audit_json: Path,
@@ -423,6 +442,8 @@ def build_payload(
         },
     }
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(out_csv: Path, payload: Dict[str, Any]) -> None:
     rows = payload.get("channels") if isinstance(payload.get("channels"), list) else []
@@ -478,6 +499,8 @@ def _write_csv(out_csv: Path, payload: Dict[str, Any]) -> None:
             )
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(out_png: Path, payload: Dict[str, Any]) -> None:
     rows = payload.get("channels") if isinstance(payload.get("channels"), list) else []
     labels = []
@@ -514,6 +537,8 @@ def _plot(out_png: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Build shared KPI pack for quantum connection reinforcement (Step 7.21.1).")

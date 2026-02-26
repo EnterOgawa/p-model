@@ -21,6 +21,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -46,9 +47,13 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_read_json_if_exists` の入出力契約と処理意図を定義する。
 
 def _read_json_if_exists(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -61,10 +66,14 @@ def _read_json_if_exists(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -79,6 +88,8 @@ def _fmt_float(x: float, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
+
 def _to_float(v: Any) -> Optional[float]:
     try:
         val = float(v)
@@ -92,6 +103,8 @@ def _to_float(v: Any) -> Optional[float]:
 
     return val
 
+
+# 関数: `_extract_inputs` の入出力契約と処理意図を定義する。
 
 def _extract_inputs(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     geodetic_row: Dict[str, Any] = {}
@@ -181,6 +194,8 @@ def _extract_inputs(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) 
     return geodetic_row, frame_rows
 
 
+# 関数: `_fit_kappa` の入出力契約と処理意図を定義する。
+
 def _fit_kappa(frame_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     num = 0.0
     den = 0.0
@@ -220,6 +235,8 @@ def _fit_kappa(frame_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_score_status` の入出力契約と処理意図を定義する。
+
 def _score_status(z: Optional[float], z_reject: float) -> str:
     # 条件分岐: `z is None` を満たす経路を評価する。
     if z is None:
@@ -227,6 +244,8 @@ def _score_status(z: Optional[float], z_reject: float) -> str:
 
     return "reject" if abs(z) > z_reject else "pass"
 
+
+# 関数: `_build_branch_rows` の入出力契約と処理意図を定義する。
 
 def _build_branch_rows(
     branch: str,
@@ -301,6 +320,8 @@ def _build_branch_rows(
     return rows
 
 
+# 関数: `_branch_summary` の入出力契約と処理意図を定義する。
+
 def _branch_summary(rows: Sequence[Dict[str, Any]], z_reject: float) -> Dict[str, Any]:
     frame = [r for r in rows if str(r.get("kind") or "") == "frame_dragging"]
     pass_n = sum(1 for r in frame if r.get("status") == "pass")
@@ -330,6 +351,8 @@ def _branch_summary(rows: Sequence[Dict[str, Any]], z_reject: float) -> Dict[str
         "status": status,
     }
 
+
+# 関数: `_extract_metric_bridge` の入出力契約と処理意図を定義する。
 
 def _extract_metric_bridge(metric_payload: Dict[str, Any]) -> Dict[str, Any]:
     case_result = metric_payload.get("case_result") or {}
@@ -361,6 +384,8 @@ def _extract_metric_bridge(metric_payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_boundary_bridge` の入出力契約と処理意図を定義する。
+
 def _extract_boundary_bridge(strong_payload: Dict[str, Any], flux_closure_threshold: float) -> Dict[str, Any]:
     axisymmetric = strong_payload.get("axisymmetric_pde_block") or {}
     diagnostics = axisymmetric.get("boundary_diagnostics") or {}
@@ -389,6 +414,8 @@ def _extract_boundary_bridge(strong_payload: Dict[str, Any], flux_closure_thresh
         "status": status,
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     static_rows: Sequence[Dict[str, Any]],
@@ -452,8 +479,8 @@ def _plot(
     ax2 = fig.add_subplot(1, 3, 3)
     z_static = [float(r["z_score"]) if r.get("z_score") is not None else 0.0 for r in frame_static]
     z_rot = [float(r["z_score"]) if r.get("z_score") is not None else 0.0 for r in frame_rot]
-    ax2.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.92, label="δP_rot=0")
-    ax2.bar(x + width / 2.0, z_rot, width=width, color="#2ca02c", alpha=0.92, label="δP_rot≠0")
+    bars_static = ax2.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.92, label="δP_rot=0")
+    bars_rot = ax2.bar(x + width / 2.0, z_rot, width=width, color="#2ca02c", alpha=0.92, label="δP_rot≠0")
     ax2.axhline(z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax2.axhline(-z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax2.axhline(0.0, color="#666666", linestyle="-", linewidth=0.9)
@@ -463,12 +490,23 @@ def _plot(
     ax2.set_title("Precession gate comparison")
     ax2.grid(True, axis="y", alpha=0.25)
     ax2.legend(loc="best")
+    max_abs_z_panel = max([abs(v) for v in z_static + z_rot] + [abs(z_reject), 1e-6])
+    y_margin = 0.08 * max_abs_z_panel
+    ax2.set_ylim(-(max_abs_z_panel + y_margin), max_abs_z_panel + y_margin)
+    for bar in list(bars_static) + list(bars_rot):
+        h = float(bar.get_height())
+        x_center = bar.get_x() + bar.get_width() * 0.5
+        y_text = h + (0.015 * max_abs_z_panel if h >= 0.0 else -0.03 * max_abs_z_panel)
+        va = "bottom" if h >= 0.0 else "top"
+        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=8.5, color="0.20")
 
     fig.tight_layout()
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -518,6 +556,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _ROOT

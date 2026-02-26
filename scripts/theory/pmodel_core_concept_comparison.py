@@ -12,14 +12,19 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT_DIR = ROOT / "output" / "private" / "theory"
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_pick_font_family` の入出力契約と処理意図を定義する。
 
 def _pick_font_family(candidates: list[str]) -> Optional[str]:
     try:
@@ -35,6 +40,8 @@ def _pick_font_family(candidates: list[str]) -> Optional[str]:
 
     return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)

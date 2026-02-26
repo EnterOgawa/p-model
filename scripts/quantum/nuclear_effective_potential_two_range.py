@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -23,9 +24,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -47,6 +52,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
 
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
+
+# 関数: `_load_np_scattering_sets` の入出力契約と処理意図を定義する。
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
@@ -83,6 +90,8 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
 
     return out
 
+
+# 関数: `_load_pion_range_scale` の入出力契約と処理意図を定義する。
 
 def _load_pion_range_scale(*, root: Path) -> dict[str, object]:
     """
@@ -142,6 +151,8 @@ def _load_pion_range_scale(*, root: Path) -> dict[str, object]:
     }
 
 
+# 関数: `_get_value` の入出力契約と処理意図を定義する。
+
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
     # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
@@ -151,6 +162,8 @@ def _get_value(params: dict[str, object], key: str) -> float:
     raise KeyError(key)
 
 
+# 関数: `_cot` の入出力契約と処理意図を定義する。
+
 def _cot(x: float) -> float:
     # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
@@ -159,6 +172,8 @@ def _cot(x: float) -> float:
     return math.cos(x) / math.sin(x)
 
 
+# 関数: `_coth` の入出力契約と処理意図を定義する。
+
 def _coth(x: float) -> float:
     # 条件分岐: `abs(x) < 1e-10` を満たす経路を評価する。
     if abs(x) < 1e-10:
@@ -166,6 +181,8 @@ def _coth(x: float) -> float:
 
     return math.cosh(x) / math.sinh(x)
 
+
+# 関数: `_region_q` の入出力契約と処理意図を定義する。
 
 def _region_q(*, e_mev: float, vdepth_mev: float, mu_mev: float, hbarc_mev_fm: float) -> tuple[str, float]:
     """
@@ -198,6 +215,8 @@ def _region_q(*, e_mev: float, vdepth_mev: float, mu_mev: float, hbarc_mev_fm: f
 
     return ("zero", 0.0)
 
+
+# 関数: `_region_q_potential` の入出力契約と処理意図を定義する。
 
 def _region_q_potential(
     *, e_mev: float, potential_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -232,6 +251,8 @@ def _region_q_potential(
 
     return ("zero", 0.0)
 
+
+# 関数: `_propagate_y` の入出力契約と処理意図を定義する。
 
 def _propagate_y(*, y_in: float, mode: str, q: float, l_fm: float) -> float:
     """
@@ -299,6 +320,8 @@ def _propagate_y(*, y_in: float, mode: str, q: float, l_fm: float) -> float:
     return float("nan")
 
 
+# 関数: `_y_at_r2` の入出力契約と処理意図を定義する。
+
 def _y_at_r2(
     *,
     e_mev: float,
@@ -322,6 +345,8 @@ def _y_at_r2(
     y = _propagate_y(y_in=y, mode=m2, q=q2, l_fm=(r2_fm - r1_fm))
     return float(y)
 
+
+# 関数: `_y_at_r2_signed_two_range` の入出力契約と処理意図を定義する。
 
 def _y_at_r2_signed_two_range(
     *,
@@ -360,6 +385,8 @@ def _y_at_r2_signed_two_range(
     return float(y)
 
 
+# 関数: `_y_at_r_end_segments` の入出力契約と処理意図を定義する。
+
 def _y_at_r_end_segments(
     *, e_mev: float, segments: list[tuple[float, float]], mu_mev: float, hbarc_mev_fm: float
 ) -> float:
@@ -393,6 +420,8 @@ def _y_at_r_end_segments(
 
     return float(y)
 
+
+# 関数: `_y_at_r2_repulsive_core_two_range` の入出力契約と処理意図を定義する。
 
 def _y_at_r2_repulsive_core_two_range(
     *,
@@ -435,6 +464,8 @@ def _y_at_r2_repulsive_core_two_range(
     return float(y)
 
 
+# 関数: `_solve_v1_from_b` の入出力契約と処理意図を定義する。
+
 def _solve_v1_from_b(
     *,
     b_mev: float,
@@ -459,6 +490,7 @@ def _solve_v1_from_b(
     kappa = math.sqrt(2.0 * mu_mev * b_mev) / hbarc_mev_fm
     v1_min = max(v2_mev, b_mev + 1e-6)
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v1: float) -> float:
         y = _y_at_r2(
             e_mev=-b_mev,
@@ -545,6 +577,8 @@ def _solve_v1_from_b(
     return {"V1_MeV": float(v1_star), "kappa_fm1": float(kappa)}
 
 
+# 関数: `_solve_v1_from_b_segments` の入出力契約と処理意図を定義する。
+
 def _solve_v1_from_b_segments(
     *,
     b_mev: float,
@@ -586,6 +620,7 @@ def _solve_v1_from_b_segments(
     # Minimal bound: V1 must exceed B so that the inner region can support an oscillatory component.
     v1_min = b_mev + 1e-6
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v1_mev: float) -> float:
         # 条件分岐: `not (math.isfinite(v1_mev) and v1_mev > b_mev)` を満たす経路を評価する。
         if not (math.isfinite(v1_mev) and v1_mev > b_mev):
@@ -690,6 +725,8 @@ def _solve_v1_from_b_segments(
     return {"V1_MeV": float(v1_star), "kappa_fm1": float(kappa)}
 
 
+# 関数: `_solve_v1_from_b_repulsive_core_two_range` の入出力契約と処理意図を定義する。
+
 def _solve_v1_from_b_repulsive_core_two_range(
     *,
     b_mev: float,
@@ -720,6 +757,7 @@ def _solve_v1_from_b_repulsive_core_two_range(
     kappa = math.sqrt(2.0 * mu_mev * b_mev) / hbarc_mev_fm
     v1_min = max(v2_mev, b_mev + 1e-6)
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v1: float) -> float:
         y = _y_at_r2_repulsive_core_two_range(
             e_mev=-b_mev,
@@ -808,6 +846,8 @@ def _solve_v1_from_b_repulsive_core_two_range(
     return {"V1_MeV": float(v1_star), "kappa_fm1": float(kappa)}
 
 
+# 関数: `_scattering_length_exact` の入出力契約と処理意図を定義する。
+
 def _scattering_length_exact(
     *, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
 ) -> float:
@@ -826,6 +866,8 @@ def _scattering_length_exact(
 
     return float(r2_fm - (1.0 / y))
 
+
+# 関数: `_scattering_length_exact_signed_two_range` の入出力契約と処理意図を定義する。
 
 def _scattering_length_exact_signed_two_range(
     *, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -846,6 +888,8 @@ def _scattering_length_exact_signed_two_range(
     return float(r2_fm - (1.0 / y))
 
 
+# 関数: `_scattering_length_exact_segments` の入出力契約と処理意図を定義する。
+
 def _scattering_length_exact_segments(
     *, r_end_fm: float, segments: list[tuple[float, float]], mu_mev: float, hbarc_mev_fm: float
 ) -> float:
@@ -856,6 +900,8 @@ def _scattering_length_exact_segments(
 
     return float(r_end_fm - (1.0 / y))
 
+
+# 関数: `_scattering_length_exact_repulsive_core_two_range` の入出力契約と処理意図を定義する。
 
 def _scattering_length_exact_repulsive_core_two_range(
     *,
@@ -885,6 +931,8 @@ def _scattering_length_exact_repulsive_core_two_range(
 
     return float(r2_fm - (1.0 / y))
 
+
+# 関数: `_phase_shift` の入出力契約と処理意図を定義する。
 
 def _phase_shift(
     *, k_fm1: float, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -927,6 +975,8 @@ def _phase_shift(
 
     return float(delta)
 
+
+# 関数: `_phase_shift_signed_two_range` の入出力契約と処理意図を定義する。
 
 def _phase_shift_signed_two_range(
     *, k_fm1: float, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -975,6 +1025,8 @@ def _phase_shift_signed_two_range(
     return float(delta)
 
 
+# 関数: `_phase_shift_segments` の入出力契約と処理意図を定義する。
+
 def _phase_shift_segments(
     *,
     k_fm1: float,
@@ -1013,6 +1065,8 @@ def _phase_shift_segments(
 
     return float(delta)
 
+
+# 関数: `_phase_shift_repulsive_core_two_range` の入出力契約と処理意図を定義する。
 
 def _phase_shift_repulsive_core_two_range(
     *,
@@ -1073,6 +1127,8 @@ def _phase_shift_repulsive_core_two_range(
     return float(delta)
 
 
+# 関数: `_solve_3x3` の入出力契約と処理意図を定義する。
+
 def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
     m = [row[:] + [rhs] for row, rhs in zip(a, b)]
     for col in range(3):
@@ -1101,6 +1157,8 @@ def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
 
     return x
 
+
+# 関数: `_fit_kcot_ere` の入出力契約と処理意図を定義する。
 
 def _fit_kcot_ere(
     *, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -1171,6 +1229,8 @@ def _fit_kcot_ere(
     }
 
 
+# 関数: `_fit_kcot_ere_signed_two_range` の入出力契約と処理意図を定義する。
+
 def _fit_kcot_ere_signed_two_range(
     *, r1_fm: float, r2_fm: float, v1_mev: float, v2_mev: float, mu_mev: float, hbarc_mev_fm: float
 ) -> dict[str, object]:
@@ -1239,6 +1299,8 @@ def _fit_kcot_ere_signed_two_range(
         "points": points,
     }
 
+
+# 関数: `_fit_kcot_ere_segments` の入出力契約と処理意図を定義する。
 
 def _fit_kcot_ere_segments(
     *,
@@ -1310,6 +1372,8 @@ def _fit_kcot_ere_segments(
         "points": points,
     }
 
+
+# 関数: `_fit_kcot_ere_repulsive_core_two_range` の入出力契約と処理意図を定義する。
 
 def _fit_kcot_ere_repulsive_core_two_range(
     *,
@@ -1390,6 +1454,8 @@ def _fit_kcot_ere_repulsive_core_two_range(
     }
 
 
+# 関数: `_eval_triplet_candidate` の入出力契約と処理意図を定義する。
+
 def _eval_triplet_candidate(
     *,
     b_mev: float,
@@ -1451,6 +1517,8 @@ def _eval_triplet_candidate(
     }
 
 
+# 関数: `_yukawa_tail_avg_factor` の入出力契約と処理意図を定義する。
+
 def _yukawa_tail_avg_factor(*, length_fm: float, lambda_pi_fm: float) -> float:
     """
     Average factor for an exponential tail relative to its boundary value:
@@ -1473,6 +1541,8 @@ def _yukawa_tail_avg_factor(*, length_fm: float, lambda_pi_fm: float) -> float:
 
     return float((1.0 / x) * (1.0 - math.exp(-x)))
 
+
+# 関数: `_barrier_tail_config` の入出力契約と処理意図を定義する。
 
 def _barrier_tail_config(
     *,
@@ -1554,6 +1624,8 @@ def _barrier_tail_config(
         "tail_depth_coeff": float(tail_depth_coeff),
     }
 
+
+# 関数: `_barrier_tail_config_free_depth` の入出力契約と処理意図を定義する。
 
 def _barrier_tail_config_free_depth(
     *,
@@ -1642,6 +1714,8 @@ def _barrier_tail_config_free_depth(
         "tail_depth_coeff": float(tail_depth_coeff),
     }
 
+
+# 関数: `_eval_triplet_candidate_three_range_tail` の入出力契約と処理意図を定義する。
 
 def _eval_triplet_candidate_three_range_tail(
     *,
@@ -1750,6 +1824,8 @@ def _eval_triplet_candidate_three_range_tail(
         "score": float(score),
     }
 
+
+# 関数: `_eval_triplet_candidate_three_range_barrier_tail` の入出力契約と処理意図を定義する。
 
 def _eval_triplet_candidate_three_range_barrier_tail(
     *,
@@ -1887,6 +1963,8 @@ def _eval_triplet_candidate_three_range_barrier_tail(
     }
 
 
+# 関数: `_eval_triplet_candidate_three_range_barrier_tail_free_depth` の入出力契約と処理意図を定義する。
+
 def _eval_triplet_candidate_three_range_barrier_tail_free_depth(
     *,
     b_mev: float,
@@ -2020,6 +2098,8 @@ def _eval_triplet_candidate_three_range_barrier_tail_free_depth(
     }
 
 
+# 関数: `_eval_triplet_candidate_repulsive_core_fixed_geometry` の入出力契約と処理意図を定義する。
+
 def _eval_triplet_candidate_repulsive_core_fixed_geometry(
     *,
     b_mev: float,
@@ -2107,6 +2187,8 @@ def _eval_triplet_candidate_repulsive_core_fixed_geometry(
         "score": float(score),
     }
 
+
+# 関数: `_fit_triplet_repulsive_core_fixed_geometry` の入出力契約と処理意図を定義する。
 
 def _fit_triplet_repulsive_core_fixed_geometry(
     *,
@@ -2227,6 +2309,8 @@ def _fit_triplet_repulsive_core_fixed_geometry(
     return best
 
 
+# 関数: `_fit_triplet_two_range` の入出力契約と処理意図を定義する。
+
 def _fit_triplet_two_range(
     *,
     b_mev: float,
@@ -2328,6 +2412,8 @@ def _fit_triplet_two_range(
 
     return best
 
+
+# 関数: `_fit_triplet_two_range_pion_constrained` の入出力契約と処理意図を定義する。
 
 def _fit_triplet_two_range_pion_constrained(
     *,
@@ -2460,6 +2546,8 @@ def _fit_triplet_two_range_pion_constrained(
     }
     return best
 
+
+# 関数: `_fit_triplet_three_range_tail_pion_constrained` の入出力契約と処理意図を定義する。
 
 def _fit_triplet_three_range_tail_pion_constrained(
     *,
@@ -2611,6 +2699,8 @@ def _fit_triplet_three_range_tail_pion_constrained(
     }
     return best
 
+
+# 関数: `_fit_triplet_three_range_barrier_tail_pion_constrained` の入出力契約と処理意図を定義する。
 
 def _fit_triplet_three_range_barrier_tail_pion_constrained(
     *,
@@ -2778,6 +2868,8 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained(
     }
     return best
 
+
+# 関数: `_fit_triplet_three_range_barrier_tail_pion_constrained_free_depth` の入出力契約と処理意図を定義する。
 
 def _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
     *,
@@ -2954,6 +3046,8 @@ def _fit_triplet_three_range_barrier_tail_pion_constrained_free_depth(
     return best
 
 
+# 関数: `_fit_lambda_for_singlet` の入出力契約と処理意図を定義する。
+
 def _fit_lambda_for_singlet(
     *,
     a_s_target_fm: float,
@@ -2972,6 +3066,8 @@ def _fit_lambda_for_singlet(
     # 条件分岐: `not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0)` を満たす経路を評価する。
     if not (math.isfinite(a_s_target_fm) and a_s_target_fm != 0):
         raise ValueError("invalid a_s target")
+
+    # 関数: `f` の入出力契約と処理意図を定義する。
 
     def f(lam: float) -> float:
         a = _scattering_length_exact(
@@ -3058,6 +3154,8 @@ def _fit_lambda_for_singlet(
     return {"lambda": float(0.5 * (lo + hi)), "note": "bisection solve on λ (max iter)"}
 
 
+# 関数: `_fit_v2s_for_singlet` の入出力契約と処理意図を定義する。
+
 def _fit_v2s_for_singlet(
     *,
     a_s_target_fm: float,
@@ -3094,6 +3192,7 @@ def _fit_v2s_for_singlet(
 
     a_abs_max = 1e6
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v2_s: float) -> float:
         y = _y_at_r2(
             e_mev=0.0,
@@ -3114,6 +3213,8 @@ def _fit_v2s_for_singlet(
             return float("nan")
 
         return float(y - y_target)
+
+    # 関数: `scan_and_solve` の入出力契約と処理意図を定義する。
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
         n_scan = 600
@@ -3271,6 +3372,8 @@ def _fit_v2s_for_singlet(
     return relaxed
 
 
+# 関数: `_fit_v2s_for_singlet_signed_two_range` の入出力契約と処理意図を定義する。
+
 def _fit_v2s_for_singlet_signed_two_range(
     *,
     a_s_target_fm: float,
@@ -3302,6 +3405,7 @@ def _fit_v2s_for_singlet_signed_two_range(
 
     a_abs_max = 1e6
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v2_s: float) -> float:
         y = _y_at_r2_signed_two_range(
             e_mev=0.0,
@@ -3322,6 +3426,8 @@ def _fit_v2s_for_singlet_signed_two_range(
             return float("nan")
 
         return float(y - y_target)
+
+    # 関数: `scan_and_solve` の入出力契約と処理意図を定義する。
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
         n_scan = 700
@@ -3482,6 +3588,8 @@ def _fit_v2s_for_singlet_signed_two_range(
     return relaxed
 
 
+# 関数: `_fit_v2s_for_singlet_three_range_tail` の入出力契約と処理意図を定義する。
+
 def _fit_v2s_for_singlet_three_range_tail(
     *,
     a_s_target_fm: float,
@@ -3529,6 +3637,7 @@ def _fit_v2s_for_singlet_three_range_tail(
 
     a_abs_max = 1e6
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v2_s: float) -> float:
         segs = [
             (float(r1_fm), -float(v1_s_mev)),
@@ -3546,6 +3655,8 @@ def _fit_v2s_for_singlet_three_range_tail(
             return float("nan")
 
         return float(y - y_target)
+
+    # 関数: `scan_and_solve` の入出力契約と処理意図を定義する。
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
         n_scan = 800
@@ -3713,6 +3824,8 @@ def _fit_v2s_for_singlet_three_range_tail(
     return relaxed
 
 
+# 関数: `_fit_v2s_for_singlet_three_range_barrier_tail` の入出力契約と処理意図を定義する。
+
 def _fit_v2s_for_singlet_three_range_barrier_tail(
     *,
     a_s_target_fm: float,
@@ -3766,6 +3879,7 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
 
     a_abs_max = 1e6
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v2_s: float) -> float:
         # 条件分岐: `not (math.isfinite(v2_s) and v2_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v2_s) and v2_s >= 0):
@@ -3794,6 +3908,8 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
             return float("nan")
 
         return float(y - y_target)
+
+    # 関数: `scan_and_solve` の入出力契約と処理意図を定義する。
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
         n_scan = 900
@@ -3954,6 +4070,8 @@ def _fit_v2s_for_singlet_three_range_barrier_tail(
     return relaxed
 
 
+# 関数: `_fit_v1v2_for_singlet_by_a_and_r` の入出力契約と処理意図を定義する。
+
 def _fit_v1v2_for_singlet_by_a_and_r(
     *,
     a_s_target_fm: float,
@@ -3994,6 +4112,7 @@ def _fit_v1v2_for_singlet_by_a_and_r(
     tol_r = 2e-3  # fm
     max_iter = 70
 
+    # 関数: `eval_v1` の入出力契約と処理意図を定義する。
     def eval_v1(v1_s: float) -> dict[str, object] | None:
         # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
@@ -4278,6 +4397,8 @@ def _fit_v1v2_for_singlet_by_a_and_r(
     return best_sol
 
 
+# 関数: `_fit_v1v2_for_singlet_by_a_and_r_three_range_tail` の入出力契約と処理意図を定義する。
+
 def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
     *,
     a_s_target_fm: float,
@@ -4315,6 +4436,7 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
 
     r3_fm = float(r2_fm) + float(tail_len_fm)
 
+    # 関数: `eval_v1` の入出力契約と処理意図を定義する。
     def eval_v1(v1_s: float) -> dict[str, object] | None:
         # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
@@ -4443,6 +4565,8 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
         best["tail"] = {"R3_fm": float(r3_fm), "L3_fm": float(tail_len_fm), "V3_tail_MeV": float(v3_tail_mev)}
         return best
 
+    # 関数: `penalty` の入出力契約と処理意図を定義する。
+
     def penalty(sol: dict[str, object]) -> float:
         v1 = float(sol["V1_s_MeV"])
         v2 = float(sol["V2_s_MeV"])
@@ -4551,6 +4675,8 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_tail(
     return best_sol
 
 
+# 関数: `_fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail` の入出力契約と処理意図を定義する。
+
 def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     *,
     a_s_target_fm: float,
@@ -4596,6 +4722,7 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     tol_a = 0.05  # fm
     tol_r = 2e-3  # fm
 
+    # 関数: `eval_v1` の入出力契約と処理意図を定義する。
     def eval_v1(v1_s: float) -> dict[str, object] | None:
         # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
@@ -4816,6 +4943,8 @@ def _fit_v1v2_for_singlet_by_a_and_r_three_range_barrier_tail(
     return best_sol
 
 
+# 関数: `_fit_v2s_for_singlet_repulsive_core_two_range` の入出力契約と処理意図を定義する。
+
 def _fit_v2s_for_singlet_repulsive_core_two_range(
     *,
     a_s_target_fm: float,
@@ -4850,6 +4979,7 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
 
     a_abs_max = 1e6
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(v2_s: float) -> float:
         y = _y_at_r2_repulsive_core_two_range(
             e_mev=0.0,
@@ -4872,6 +5002,8 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
             return float("nan")
 
         return float(y - y_target)
+
+    # 関数: `scan_and_solve` の入出力契約と処理意図を定義する。
 
     def scan_and_solve(*, v2_min: float, v2_max: float, tag: str) -> dict[str, object]:
         n_scan = 700
@@ -4996,6 +5128,8 @@ def _fit_v2s_for_singlet_repulsive_core_two_range(
     return fit
 
 
+# 関数: `_fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r` の入出力契約と処理意図を定義する。
+
 def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
     *,
     a_s_target_fm: float,
@@ -5027,6 +5161,7 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
     tol_r = 2e-3
     max_iter = 70
 
+    # 関数: `eval_v1` の入出力契約と処理意図を定義する。
     def eval_v1(v1_s: float) -> dict[str, object] | None:
         # 条件分岐: `not (math.isfinite(v1_s) and v1_s >= 0)` を満たす経路を評価する。
         if not (math.isfinite(v1_s) and v1_s >= 0):
@@ -5154,6 +5289,8 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
         best["scan_v1"] = {"v1_min": float(v1_lo), "v1_max": float(v1_hi), "n_scan": int(n_scan)}
         return best
 
+    # 関数: `penalty` の入出力契約と処理意図を定義する。
+
     def penalty(sol: dict[str, object]) -> float:
         v1 = float(sol["V1_s_MeV"])
         v2 = float(sol["V2_s_MeV"])
@@ -5258,6 +5395,8 @@ def _fit_v1v2_for_singlet_repulsive_core_two_range_by_a_and_r(
 
     return best_sol
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> None:
     p = argparse.ArgumentParser(description="Phase 7 / Step 7.9+ nuclear two-range ansatz experiments")
@@ -5896,6 +6035,7 @@ def main(argv: list[str] | None = None) -> None:
         v2t_env_scan = {"min": float(min(v2t_obs_list_scan)), "max": float(max(v2t_obs_list_scan))}
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
+        # 関数: `dist_to_env` の入出力契約と処理意図を定義する。
         def dist_to_env(x: float, env: dict[str, float]) -> float:
             # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
@@ -6112,6 +6252,7 @@ def main(argv: list[str] | None = None) -> None:
         v2t_env_scan = {"min": float(min(v2t_obs_list_scan)), "max": float(max(v2t_obs_list_scan))}
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
+        # 関数: `dist_to_env` の入出力契約と処理意図を定義する。
         def dist_to_env(x: float, env: dict[str, float]) -> float:
             # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
@@ -6476,6 +6617,7 @@ def main(argv: list[str] | None = None) -> None:
         v2t_env_scan = {"min": float(min(v2t_obs_list_scan)), "max": float(max(v2t_obs_list_scan))}
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
+        # 関数: `dist_to_env` の入出力契約と処理意図を定義する。
         def dist_to_env(x: float, env: dict[str, float]) -> float:
             # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
@@ -6839,6 +6981,8 @@ def main(argv: list[str] | None = None) -> None:
 
             return True
 
+        # 関数: `_r1_row_key` の入出力契約と処理意図を定義する。
+
         def _r1_row_key(row: dict[str, object]) -> tuple[float, float, float]:
             max_dist_v2s = float(row.get("max_dist_v2s_fm3", float("inf")))
             max_abs_dr_s = float(row.get("max_abs_r_s_fit_minus_obs_fm", float("inf")))
@@ -6876,6 +7020,7 @@ def main(argv: list[str] | None = None) -> None:
         v2t_env_scan = {"min": float(min(v2t_obs_list_scan)), "max": float(max(v2t_obs_list_scan))}
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
+        # 関数: `dist_to_env` の入出力契約と処理意図を定義する。
         def dist_to_env(x: float, env: dict[str, float]) -> float:
             # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
@@ -7213,6 +7358,7 @@ def main(argv: list[str] | None = None) -> None:
         v2t_env_scan = {"min": float(min(v2t_obs_list_scan)), "max": float(max(v2t_obs_list_scan))}
         rs_env_scan = {"min": float(min(rs_obs_list_scan)), "max": float(max(rs_obs_list_scan))}
 
+        # 関数: `dist_to_env` の入出力契約と処理意図を定義する。
         def dist_to_env(x: float, env: dict[str, float]) -> float:
             # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
             if not math.isfinite(x):
@@ -7225,6 +7371,8 @@ def main(argv: list[str] | None = None) -> None:
                 return 0.0
 
             return float(min(abs(x - lo), abs(x - hi)))
+
+        # 関数: `margin_to_env` の入出力契約と処理意図を定義する。
 
         def margin_to_env(x: float, env: dict[str, float]) -> float:
             # Positive only when inside; otherwise negative (by distance).
@@ -8483,6 +8631,7 @@ def main(argv: list[str] | None = None) -> None:
         rb_s_geo = float(sing_geo.get("Rb_fm", rb))
         r3_s_geo = float(sing_geo.get("R3_fm", r3))
 
+        # 関数: `v_profile` の入出力契約と処理意図を定義する。
         def v_profile(
             rr: float, *, vc_mev: float, rc_fm: float, r1_fm: float, r2_fm: float, r3_fm: float, v1: float, v2: float, v3: float
         ) -> float:
@@ -8506,6 +8655,8 @@ def main(argv: list[str] | None = None) -> None:
                 return -v3
 
             return 0.0
+
+        # 関数: `v_profile_barrier_tail` の入出力契約と処理意図を定義する。
 
         def v_profile_barrier_tail(
             rr: float,

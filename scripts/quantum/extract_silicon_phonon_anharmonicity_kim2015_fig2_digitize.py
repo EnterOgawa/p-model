@@ -14,13 +14,18 @@ from pypdf import PdfReader
 from pypdf.generic import ContentStream
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -35,6 +40,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_mat_mul` の入出力契約と処理意図を定義する。
 
 def _mat_mul(
     m1: tuple[float, float, float, float, float, float],
@@ -52,14 +59,20 @@ def _mat_mul(
     )
 
 
+# 関数: `_mat_apply` の入出力契約と処理意図を定義する。
+
 def _mat_apply(m: tuple[float, float, float, float, float, float], x: float, y: float) -> tuple[float, float]:
     a, b, c, d, e, f = m
     return (a * float(x) + c * float(y) + e, b * float(x) + d * float(y) + f)
 
 
+# 関数: `_round_rgb` の入出力契約と処理意図を定義する。
+
 def _round_rgb(rgb: tuple[float, float, float]) -> tuple[float, float, float]:
     return tuple(round(float(c), 2) for c in rgb)  # type: ignore[return-value]
 
+
+# クラス: `_PathRec` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _PathRec:
@@ -72,22 +85,31 @@ class _PathRec:
     stroke_rgb: tuple[float, float, float]
     fill_rgb: tuple[float, float, float]
 
+    # 関数: `cx` の入出力契約と処理意図を定義する。
     @property
     def cx(self) -> float:
         return 0.5 * (float(self.xmin) + float(self.xmax))
+
+    # 関数: `cy` の入出力契約と処理意図を定義する。
 
     @property
     def cy(self) -> float:
         return 0.5 * (float(self.ymin) + float(self.ymax))
 
+    # 関数: `w` の入出力契約と処理意図を定義する。
+
     @property
     def w(self) -> float:
         return float(self.xmax) - float(self.xmin)
+
+    # 関数: `h` の入出力契約と処理意図を定義する。
 
     @property
     def h(self) -> float:
         return float(self.ymax) - float(self.ymin)
 
+
+# 関数: `_extract_paths` の入出力契約と処理意図を定義する。
 
 def _extract_paths(page, reader: PdfReader) -> list[_PathRec]:
     """
@@ -225,6 +247,8 @@ def _extract_paths(page, reader: PdfReader) -> list[_PathRec]:
     return out
 
 
+# 関数: `_dedup_sorted` の入出力契約と処理意図を定義する。
+
 def _dedup_sorted(vals: Iterable[float], *, tol: float) -> list[float]:
     out: list[float] = []
     for v in sorted(float(x) for x in vals):
@@ -234,6 +258,8 @@ def _dedup_sorted(vals: Iterable[float], *, tol: float) -> list[float]:
 
     return out
 
+
+# 関数: `_infer_fig2_bbox` の入出力契約と処理意図を定義する。
 
 def _infer_fig2_bbox(paths: list[_PathRec]) -> tuple[float, float, float, float]:
     """
@@ -307,6 +333,8 @@ def _infer_fig2_bbox(paths: list[_PathRec]) -> tuple[float, float, float, float]
     return (x0, x1, float(y0), float(y1))
 
 
+# 関数: `_infer_zero_line_y` の入出力契約と処理意図を定義する。
+
 def _infer_zero_line_y(paths: list[_PathRec], *, bbox: tuple[float, float, float, float]) -> float:
     x0, x1, y0, _y1 = bbox
     width = float(x1 - x0)
@@ -348,6 +376,8 @@ def _infer_zero_line_y(paths: list[_PathRec], *, bbox: tuple[float, float, float
     return float(best.cy)
 
 
+# 関数: `_find_nearest` の入出力契約と処理意図を定義する。
+
 def _find_nearest(points: list[tuple[float, float]], *, x_target: float, tol_x: float) -> tuple[float, float]:
     best: tuple[float, float] | None = None
     for x, y in points:
@@ -367,6 +397,8 @@ def _find_nearest(points: list[tuple[float, float]], *, x_target: float, tol_x: 
 
     return best
 
+
+# 関数: `_try_read_mean_softening_at_tmax` の入出力契約と処理意図を定義する。
 
 def _try_read_mean_softening_at_tmax(root: Path, *, default_value: float) -> float:
     """
@@ -406,6 +438,8 @@ def _try_read_mean_softening_at_tmax(root: Path, *, default_value: float) -> flo
 
     return float(default_value)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -494,6 +528,7 @@ def main() -> None:
         "avg": {"fill_rgb": (0.14, 0.12, 0.13), "n_points": 4, "label": "mean over 5 features (dotted)"},
     }
 
+    # 関数: `_is_marker` の入出力契約と処理意図を定義する。
     def _is_marker(p: _PathRec) -> bool:
         # 条件分岐: `p.paint not in ("S", "s")` を満たす経路を評価する。
         if p.paint not in ("S", "s"):
@@ -600,6 +635,7 @@ def main() -> None:
 
     soft_per_y = float(mean_soft_tmax / dy_avg)
 
+    # 関数: `to_softening_frac` の入出力契約と処理意図を定義する。
     def to_softening_frac(y_pdf: float) -> float:
         return float((float(y_pdf) - float(y_zero)) * soft_per_y)
 
@@ -684,6 +720,7 @@ def main() -> None:
     plt.figure(figsize=(9.6, 5.6), dpi=150)
     ts = [float(t) for t in temps_k]
 
+    # 関数: `_plot_series` の入出力契約と処理意図を定義する。
     def _plot_series(label: str, rows: list[dict[str, float]], *, color: str) -> None:
         ys = [float(r["softening_frac_neg_dE_over_E"]) for r in rows]
         plt.plot(ts, ys, marker="o", ms=3, lw=1.2, color=color, label=label)

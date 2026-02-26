@@ -53,6 +53,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -78,6 +79,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
+
 def _fmt(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
@@ -91,10 +94,14 @@ def _fmt(x: float, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# クラス: `Peak` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class Peak:
@@ -105,6 +112,8 @@ class Peak:
     ell: float
     amplitude: float
 
+
+# 関数: `_acoustic_solution_summary` の入出力契約と処理意図を定義する。
 
 def _acoustic_solution_summary(*, c_s_p: float = 1.0 / math.sqrt(3.0)) -> Dict[str, Any]:
     cs = float(c_s_p)
@@ -140,6 +149,8 @@ def _acoustic_solution_summary(*, c_s_p: float = 1.0 / math.sqrt(3.0)) -> Dict[s
     }
 
 
+# 関数: `_rk4_acoustic_cosine_validation` の入出力契約と処理意図を定義する。
+
 def _rk4_acoustic_cosine_validation(*, k_mode: float, c_s_p: float, s_end: float, n_steps: int) -> Dict[str, Any]:
     k = float(k_mode)
     cs = float(c_s_p)
@@ -158,6 +169,7 @@ def _rk4_acoustic_cosine_validation(*, k_mode: float, c_s_p: float, s_end: float
     y[0, 0] = 1.0
     y[0, 1] = 0.0
 
+    # 関数: `rhs` の入出力契約と処理意図を定義する。
     def rhs(state: np.ndarray) -> np.ndarray:
         return np.asarray([state[1], -omega_sq * state[0]], dtype=float)
 
@@ -186,6 +198,8 @@ def _rk4_acoustic_cosine_validation(*, k_mode: float, c_s_p: float, s_end: float
     }
 
 
+# 関数: `_read_planck_tt` の入出力契約と処理意図を定義する。
+
 def _read_planck_tt(path: Path) -> Dict[str, np.ndarray]:
     arr = np.loadtxt(path)
     # 条件分岐: `arr.ndim != 2 or arr.shape[1] < 5` を満たす経路を評価する。
@@ -200,6 +214,8 @@ def _read_planck_tt(path: Path) -> Dict[str, np.ndarray]:
     sigma = np.maximum(0.5 * (np.abs(err_lo) + np.abs(err_hi)), 1e-12)
     return {"ell": ell, "dl": dl, "sigma": sigma, "bestfit": bestfit}
 
+
+# 関数: `_find_peak` の入出力契約と処理意図を定義する。
 
 def _find_peak(ell: np.ndarray, y: np.ndarray, lo: float, hi: float, *, mode: str = "max") -> Peak:
     m = (ell >= float(lo)) & (ell <= float(hi))
@@ -220,6 +236,8 @@ def _find_peak(ell: np.ndarray, y: np.ndarray, lo: float, hi: float, *, mode: st
         amplitude=float(y[idx]),
     )
 
+
+# 関数: `_extract_observed_peaks` の入出力契約と処理意図を定義する。
 
 def _extract_observed_peaks(ell: np.ndarray, dl: np.ndarray) -> Tuple[List[Peak], List[Peak]]:
     fit_peak_ranges = [
@@ -245,11 +263,15 @@ def _extract_observed_peaks(ell: np.ndarray, dl: np.ndarray) -> Tuple[List[Peak]
     return fit_peaks, holdout_peaks
 
 
+# 関数: `_silk_damping_factor` の入出力契約と処理意図を定義する。
+
 def _silk_damping_factor(n: int, l_acoustic: float, phi: float, silk_kappa: float) -> float:
     ell_n = (float(n) - float(phi)) * float(l_acoustic)
     ell_d = max(float(silk_kappa) * float(l_acoustic), 1e-12)
     return float(math.exp(-((ell_n / ell_d) ** 2)))
 
+
+# 関数: `_fit_modal_params` の入出力契約と処理意図を定義する。
 
 def _fit_modal_params(obs: Sequence[Peak], *, silk_kappa: float) -> Dict[str, float]:
     # 条件分岐: `len(obs) != 3` を満たす経路を評価する。
@@ -313,6 +335,8 @@ def _fit_modal_params(obs: Sequence[Peak], *, silk_kappa: float) -> Dict[str, fl
         "ratio_a3_a1_corrected": ratio_31_corr,
     }
 
+
+# 関数: `_first_principles_closure` の入出力契約と処理意図を定義する。
 
 def _first_principles_closure(
     *,
@@ -401,6 +425,8 @@ def _first_principles_closure(
     }
 
 
+# 関数: `_predict_modal_peak` の入出力契約と処理意図を定義する。
+
 def _predict_modal_peak(n: int, p: Dict[str, float]) -> Dict[str, float]:
     l_acoustic = float(p["l_acoustic"])
     phi = float(p["phi"])
@@ -415,9 +441,13 @@ def _predict_modal_peak(n: int, p: Dict[str, float]) -> Dict[str, float]:
     return {"n": int(n), "ell": float(ell), "amplitude": float(amp)}
 
 
+# 関数: `_predict_modal_series` の入出力契約と処理意図を定義する。
+
 def _predict_modal_series(p: Dict[str, float], *, n_modes: int) -> List[Dict[str, float]]:
     return [_predict_modal_peak(n, p) for n in range(1, int(n_modes) + 1)]
 
+
+# 関数: `_build_envelope_curve` の入出力契約と処理意図を定義する。
 
 def _build_envelope_curve(ell: np.ndarray, series: Sequence[Dict[str, float]], *, l_acoustic: float) -> np.ndarray:
     # 可視化用の滑らかな包絡（判定本体はピーク表で行う）
@@ -432,6 +462,8 @@ def _build_envelope_curve(ell: np.ndarray, series: Sequence[Dict[str, float]], *
 
     return y
 
+
+# 関数: `_falsification_gate` の入出力契約と処理意図を定義する。
 
 def _falsification_gate(
     obs3: Sequence[Peak],
@@ -549,6 +581,8 @@ def _falsification_gate(
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(
     *,
     ell: np.ndarray,
@@ -635,6 +669,8 @@ def _plot(
     plt.close(fig)
 
 
+# 関数: `_write_peak_csv` の入出力契約と処理意図を定義する。
+
 def _write_peak_csv(
     path: Path,
     obs3: Sequence[Peak],
@@ -668,6 +704,8 @@ def _write_peak_csv(
             )
 
 
+# 関数: `_copy_outputs_to_public` の入出力契約と処理意図を定義する。
+
 def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str, str]:
     public_dir.mkdir(parents=True, exist_ok=True)
     copied: Dict[str, str] = {}
@@ -678,6 +716,8 @@ def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> 
 
     return copied
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="CMB acoustic-peak reconstruction (P-model modal approximation).")

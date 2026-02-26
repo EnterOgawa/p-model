@@ -37,9 +37,12 @@ from scripts.summary import public_outputs_manifest  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -48,9 +51,13 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8", errors="replace"))
 
+
+# 関数: `_git` の入出力契約と処理意図を定義する。
 
 def _git(*args: str) -> Tuple[int, str]:
     try:
@@ -70,6 +77,8 @@ def _git(*args: str) -> Tuple[int, str]:
     return (int(proc.returncode), (proc.stdout or "").strip())
 
 
+# 関数: `_latest_tag` の入出力契約と処理意図を定義する。
+
 def _latest_tag() -> str:
     rc, out = _git("tag", "--sort=-creatordate")
     # 条件分岐: `rc != 0` を満たす経路を評価する。
@@ -80,6 +89,8 @@ def _latest_tag() -> str:
     return tags[0] if tags else ""
 
 
+# 関数: `_head_short` の入出力契約と処理意図を定義する。
+
 def _head_short() -> str:
     rc, out = _git("rev-parse", "--short", "HEAD")
     # 条件分岐: `rc != 0 or not out` を満たす経路を評価する。
@@ -88,6 +99,8 @@ def _head_short() -> str:
 
     return out
 
+
+# 関数: `_tag_exists` の入出力契約と処理意図を定義する。
 
 def _tag_exists(tag: str) -> bool:
     # 条件分岐: `not tag` を満たす経路を評価する。
@@ -98,11 +111,15 @@ def _tag_exists(tag: str) -> bool:
     return rc == 0
 
 
+# 関数: `_sanitize_label` の入出力契約と処理意図を定義する。
+
 def _sanitize_label(text: str) -> str:
     s = re.sub(r"[^A-Za-z0-9._-]+", "_", text.strip())
     s = s.strip("._-")
     return s or "snapshot"
 
+
+# 関数: `_topic_map` の入出力契約と処理意図を定義する。
 
 def _topic_map(items: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
@@ -121,6 +138,8 @@ def _topic_map(items: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_required_core_map` の入出力契約と処理意図を定義する。
+
 def _required_core_map(items: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
     for item in items:
@@ -138,6 +157,8 @@ def _required_core_map(items: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]
 
     return out
 
+
+# 関数: `_build_topic_deltas` の入出力契約と処理意図を定義する。
 
 def _build_topic_deltas(
     prev_topics: List[Dict[str, Any]],
@@ -181,6 +202,8 @@ def _build_topic_deltas(
 
     return rows
 
+
+# 関数: `_build_required_core_deltas` の入出力契約と処理意図を定義する。
 
 def _build_required_core_deltas(
     prev_items: List[Dict[str, Any]],
@@ -229,6 +252,8 @@ def _build_required_core_deltas(
     return rows
 
 
+# 関数: `_write_topic_delta_csv` の入出力契約と処理意図を定義する。
+
 def _write_topic_delta_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -260,6 +285,8 @@ def _write_topic_delta_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             )
 
 
+# 関数: `_find_latest_snapshot` の入出力契約と処理意図を定義する。
+
 def _find_latest_snapshot(snapshots_dir: Path, *, exclude: Path) -> Optional[Path]:
     files = [p for p in snapshots_dir.glob("public_outputs_manifest_snapshot_*.json") if p.is_file()]
     # 条件分岐: `not files` を満たす経路を評価する。
@@ -274,6 +301,8 @@ def _find_latest_snapshot(snapshots_dir: Path, *, exclude: Path) -> Optional[Pat
 
     return None
 
+
+# 関数: `_compact_snapshot` の入出力契約と処理意図を定義する。
 
 def _compact_snapshot(
     *,
@@ -310,6 +339,8 @@ def _compact_snapshot(
         "topics": topics,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(

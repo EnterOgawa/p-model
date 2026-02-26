@@ -46,6 +46,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -71,14 +72,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 3) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -103,6 +110,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 3) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(x: Any) -> Optional[float]:
     try:
         v = float(x)
@@ -117,6 +126,8 @@ def _maybe_float(x: Any) -> Optional[float]:
     return float(v)
 
 
+# クラス: `DDRConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRConstraint:
     id: str
@@ -129,6 +140,7 @@ class DDRConstraint:
     sigma_policy: str = "raw"
     category: Optional[str] = None
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "DDRConstraint":
         sigma = float(j["epsilon0_sigma"])
@@ -142,6 +154,8 @@ class DDRConstraint:
         )
 
 
+# クラス: `GaussianConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class GaussianConstraint:
     id: str
@@ -152,6 +166,7 @@ class GaussianConstraint:
     uses_cmb: Optional[bool]
     assumes_cddr: Optional[bool]
 
+    # 関数: `is_independent` の入出力契約と処理意図を定義する。
     def is_independent(self) -> bool:
         # 条件分岐: `self.uses_bao is True` を満たす経路を評価する。
         if self.uses_bao is True:
@@ -169,6 +184,8 @@ class GaussianConstraint:
 
         return True
 
+
+# 関数: `_load_ddr_systematics_envelope` の入出力契約と処理意図を定義する。
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -206,6 +223,8 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_apply_ddr_sigma_policy` の入出力契約と処理意図を定義する。
+
 def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> DDRConstraint:
     # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
@@ -229,6 +248,8 @@ def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[s
         category=str(row.get("category") or "") or None,
     )
 
+
+# 関数: `_as_gaussian_list` の入出力契約と処理意図を定義する。
 
 def _as_gaussian_list(
     rows: Sequence[Dict[str, Any]],
@@ -271,6 +292,8 @@ def _as_gaussian_list(
     return out
 
 
+# 関数: `_as_pT_constraints` の入出力契約と処理意図を定義する。
+
 def _as_pT_constraints(rows: Sequence[Dict[str, Any]]) -> List[GaussianConstraint]:
     out: List[GaussianConstraint] = []
     for r in rows:
@@ -299,6 +322,8 @@ def _as_pT_constraints(rows: Sequence[Dict[str, Any]]) -> List[GaussianConstrain
 
     return out
 
+
+# 関数: `_wls_max_abs_z` の入出力契約と処理意図を定義する。
 
 def _wls_max_abs_z(
     *,
@@ -364,6 +389,8 @@ def _wls_max_abs_z(
     }
 
 
+# 関数: `_plot_matrix` の入出力契約と処理意図を定義する。
+
 def _plot_matrix(
     ax: Any,
     *,
@@ -416,6 +443,8 @@ def _plot_matrix(
     ax.tick_params(which="minor", bottom=False, left=False)
     return im
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()

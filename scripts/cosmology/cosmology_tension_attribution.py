@@ -18,6 +18,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -43,14 +44,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -62,6 +69,8 @@ def _safe_float(x: Any) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_classify_sigma` の入出力契約と処理意図を定義する。
 
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
@@ -81,6 +90,8 @@ def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     return ("ng", "#d62728")
 
 
+# 関数: `_load_required` の入出力契約と処理意図を定義する。
+
 def _load_required(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -90,6 +101,8 @@ def _load_required(path: Path) -> Dict[str, Any]:
 
     return _read_json(path)
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
     # 条件分岐: `x is None or not math.isfinite(float(x))` を満たす経路を評価する。
@@ -108,6 +121,8 @@ def _fmt(x: Optional[float], *, digits: int = 3) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
@@ -220,6 +235,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     bao_f_1s = _safe_float((bao_sigma_scan.get("results", {}).get("thresholds") or {}).get("rep_bao_f_for_max_abs_z_le_1sigma"))
 
+    # 関数: `_pick_f` の入出力契約と処理意図を定義する。
     def _pick_f(payload: Dict[str, Any], variant_id: str) -> Optional[float]:
         try:
             rows = (payload.get("scan") or {}).get("by_variant") or []
@@ -347,6 +363,7 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     ax_info.axis("off")
 
+    # 関数: `_box` の入出力契約と処理意図を定義する。
     def _box(y_top: float, title: str, lines: List[str], *, fc: str = "#ffffff") -> float:
         txt = title + "\n" + "\n".join(lines)
         ax_info.text(

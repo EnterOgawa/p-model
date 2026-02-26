@@ -46,6 +46,7 @@ except Exception:
 KM_S_TO_KPC_GYR = 1.0227121650537077
 
 
+# クラス: `Scenario` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Scenario:
     scenario_id: str
@@ -56,9 +57,13 @@ class Scenario:
     note: str
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -67,10 +72,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -80,6 +89,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_render_png` の入出力契約と処理意図を定義する。
 
 def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float, tau0_gyr: float, pi0: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -124,6 +135,8 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, lpath0_kpc: float
     plt.close(fig)
 
 
+# 関数: `_default_scenarios` の入出力契約と処理意図を定義する。
+
 def _default_scenarios() -> List[Scenario]:
     return [
         Scenario("baseline", "baseline", 1.0, 1.0, 1.0, "reference state"),
@@ -137,6 +150,8 @@ def _default_scenarios() -> List[Scenario]:
     ]
 
 
+# 関数: `_ratio_lpath` の入出力契約と処理意図を定義する。
+
 def _ratio_lpath(pi0: float, rho_ratio: float, v_ratio: float, temp_ratio: float, *, temp_power: float) -> float:
     rho_r = max(float(rho_ratio), 1.0e-12)
     v_r = max(float(v_ratio), 1.0e-12)
@@ -148,6 +163,8 @@ def _ratio_lpath(pi0: float, rho_ratio: float, v_ratio: float, temp_ratio: float
 
     return float((1.0 + pi0) / denom)
 
+
+# 関数: `_load_reference` の入出力契約と処理意図を定義する。
 
 def _load_reference(input_json: Path) -> Dict[str, Any]:
     # 条件分岐: `not input_json.exists()` を満たす経路を評価する。
@@ -214,6 +231,8 @@ def _load_reference(input_json: Path) -> Dict[str, Any]:
         "n_pi_samples": int(pi_arr.size),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Predict universal L_path scaling from P_mu-J^mu derivation chain.")

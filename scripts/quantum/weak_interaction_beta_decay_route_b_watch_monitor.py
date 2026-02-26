@@ -18,13 +18,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
+
 def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest().lower()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -33,10 +38,14 @@ def _rel(path: Path) -> str:
         return path.resolve().as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -56,6 +65,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             w.writerow(row)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Route-B watch monitor: rerun only when input hashes changed.")

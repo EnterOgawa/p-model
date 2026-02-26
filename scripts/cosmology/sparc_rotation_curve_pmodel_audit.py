@@ -64,6 +64,7 @@ DEFAULT_PBG_KAPPA = 1.0 / (2.0 * math.pi)
 DISTANCE_RE = re.compile(r"^#\s*Distance\s*=\s*(?P<d>[0-9.+-Ee]+)\s*Mpc\s*$")
 
 
+# クラス: `RotmodPoint` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class RotmodPoint:
     galaxy: str
@@ -75,9 +76,13 @@ class RotmodPoint:
     velocity_bulge_unit_km_s: float
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -86,10 +91,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
@@ -97,6 +106,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_parse_rotmod_lines` の入出力契約と処理意図を定義する。
 
 def _parse_rotmod_lines(lines: Iterable[str]) -> List[RotmodPoint]:
     points: List[RotmodPoint] = []
@@ -152,6 +163,8 @@ def _parse_rotmod_lines(lines: Iterable[str]) -> List[RotmodPoint]:
     return points
 
 
+# 関数: `_load_rotmod_points` の入出力契約と処理意図を定義する。
+
 def _load_rotmod_points(rotmod_zip: Path) -> List[RotmodPoint]:
     # 条件分岐: `not rotmod_zip.exists()` を満たす経路を評価する。
     if not rotmod_zip.exists():
@@ -181,6 +194,8 @@ def _load_rotmod_points(rotmod_zip: Path) -> List[RotmodPoint]:
     return all_points
 
 
+# 関数: `_h0p_from_metrics` の入出力契約と処理意図を定義する。
+
 def _h0p_from_metrics(metrics_path: Path) -> float:
     payload = _read_json(metrics_path)
     derived = payload.get("derived") if isinstance(payload.get("derived"), dict) else {}
@@ -198,6 +213,8 @@ def _h0p_from_metrics(metrics_path: Path) -> float:
     raise RuntimeError(f"failed to read H0^(P) from: {metrics_path}")
 
 
+# 関数: `_arrays_from_points` の入出力契約と処理意図を定義する。
+
 def _arrays_from_points(points: Sequence[RotmodPoint]) -> Dict[str, np.ndarray]:
     return {
         "radius_m": np.asarray([point.radius_kpc for point in points], dtype=float) * KPC_TO_M,
@@ -208,6 +225,8 @@ def _arrays_from_points(points: Sequence[RotmodPoint]) -> Dict[str, np.ndarray]:
         "velocity_bulge_unit_m_s": np.asarray([point.velocity_bulge_unit_km_s for point in points], dtype=float) * KM_TO_M,
     }
 
+
+# 関数: `_velocity_model` の入出力契約と処理意図を定義する。
 
 def _velocity_model(
     arrays: Dict[str, np.ndarray],
@@ -258,6 +277,8 @@ def _velocity_model(
     }
 
 
+# 関数: `_chi2_metrics` の入出力契約と処理意図を定義する。
+
 def _chi2_metrics(
     velocity_obs_km_s: np.ndarray,
     velocity_obs_sigma_km_s: np.ndarray,
@@ -281,6 +302,8 @@ def _chi2_metrics(
         "max_abs_pull": float(np.max(np.abs(pull_sigma))),
     }
 
+
+# 関数: `_fit_upsilon` の入出力契約と処理意図を定義する。
 
 def _fit_upsilon(
     arrays: Dict[str, np.ndarray],
@@ -347,6 +370,8 @@ def _fit_upsilon(
     }
 
 
+# 関数: `_write_points_csv` の入出力契約と処理意図を定義する。
+
 def _write_points_csv(
     out_csv: Path,
     points: Sequence[RotmodPoint],
@@ -411,6 +436,8 @@ def _write_points_csv(
                 }
             )
 
+
+# 関数: `_write_galaxy_summary_csv` の入出力契約と処理意図を定義する。
 
 def _write_galaxy_summary_csv(
     out_csv: Path,
@@ -485,6 +512,8 @@ def _write_galaxy_summary_csv(
     }
 
 
+# 関数: `_plot_summary` の入出力契約と処理意図を定義する。
+
 def _plot_summary(
     out_png: Path,
     *,
@@ -555,6 +584,8 @@ def _plot_summary(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="SPARC rotation-curve audit with single M/L fit.")

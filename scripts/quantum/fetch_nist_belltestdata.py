@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
+# クラス: `FileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FileSpec:
     url: str
@@ -28,6 +29,7 @@ _HDF5_BUILD_SUFFIX = ".dat.compressed.build.hdf5"
 _PART_RE = re.compile(r"^(?P<base>.+)\.(?P<side>alice|bob)\.dat\.compressed\.(?P<part>z\d\d)$")
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -41,6 +43,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, expected_bytes: int | None) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -81,6 +85,8 @@ def _download(url: str, out_path: Path, *, expected_bytes: int | None) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_s3_list_objects_v2` の入出力契約と処理意図を定義する。
+
 def _s3_list_objects_v2(*, prefix: str) -> list[dict[str, str | int]]:
     out: list[dict[str, str | int]] = []
     token: str | None = None
@@ -115,6 +121,8 @@ def _s3_list_objects_v2(*, prefix: str) -> list[dict[str, str | int]]:
 
     return out
 
+
+# 関数: `_list_run_bases` の入出力契約と処理意図を定義する。
 
 def _list_run_bases(
     *, date: str, contains: str | None
@@ -184,6 +192,8 @@ def _list_run_bases(
     return alice, bob, multipart, alice_parts, bob_parts
 
 
+# 関数: `_list_hdf5_builds` の入出力契約と処理意図を定義する。
+
 def _list_hdf5_builds(*, date: str, contains: str | None) -> dict[str, int]:
     prefix = f"belldata/processed_compressed/hdf5/{date}/"
     sizes: dict[str, int] = {}
@@ -209,9 +219,13 @@ def _list_hdf5_builds(*, date: str, contains: str | None) -> dict[str, int]:
     return sizes
 
 
+# 関数: `_format_gib` の入出力契約と処理意図を定義する。
+
 def _format_gib(n_bytes: int) -> str:
     return f"{n_bytes / (1024**3):.2f} GiB"
 
+
+# 関数: `_spec_for_run` の入出力契約と処理意図を定義する。
 
 def _spec_for_run(*, side: str, date: str, run_base: str, expected_bytes: int | None) -> FileSpec:
     filename = f"{run_base}.{side}.dat.compressed.zip"
@@ -220,6 +234,8 @@ def _spec_for_run(*, side: str, date: str, run_base: str, expected_bytes: int | 
     return FileSpec(url=url, relpath=relpath, expected_bytes=expected_bytes)
 
 
+# 関数: `_spec_for_run_part` の入出力契約と処理意図を定義する。
+
 def _spec_for_run_part(*, side: str, date: str, run_base: str, part: str, expected_bytes: int | None) -> FileSpec:
     filename = f"{run_base}.{side}.dat.compressed.{part}"
     relpath = f"compressed/{side}/{date}/{filename}"
@@ -227,12 +243,16 @@ def _spec_for_run_part(*, side: str, date: str, run_base: str, part: str, expect
     return FileSpec(url=url, relpath=relpath, expected_bytes=expected_bytes)
 
 
+# 関数: `_spec_for_hdf5_build` の入出力契約と処理意図を定義する。
+
 def _spec_for_hdf5_build(*, date: str, run_base: str, expected_bytes: int | None) -> FileSpec:
     filename = f"{run_base}{_HDF5_BUILD_SUFFIX}"
     relpath = f"processed_compressed/hdf5/{date}/{filename}"
     url = f"{_S3_BASE}/belldata/{relpath}"
     return FileSpec(url=url, relpath=relpath, expected_bytes=expected_bytes)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(

@@ -47,19 +47,26 @@ from scripts.summary import paper_lint as _paper_lint  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# クラス: `_Check` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _Check:
     ok: bool
     details: Dict[str, Any]
 
+
+# 関数: `_check_paper_lint_strict` の入出力契約と処理意図を定義する。
 
 def _check_paper_lint_strict() -> _Check:
     root = _ROOT
@@ -73,6 +80,8 @@ def _check_paper_lint_strict() -> _Check:
     return _Check(ok=ok, details={"errors": result.errors, "warnings": result.warnings})
 
 
+# 関数: `_check_part4_lint_strict` の入出力契約と処理意図を定義する。
+
 def _check_part4_lint_strict() -> _Check:
     root = _ROOT
     result = _paper_lint._lint(  # noqa: SLF001
@@ -85,6 +94,8 @@ def _check_part4_lint_strict() -> _Check:
     return _Check(ok=ok, details={"errors": result.errors, "warnings": result.warnings})
 
 
+# 関数: `_check_part2_lint_strict` の入出力契約と処理意図を定義する。
+
 def _check_part2_lint_strict() -> _Check:
     root = _ROOT
     result = _paper_lint._lint(  # noqa: SLF001
@@ -96,6 +107,8 @@ def _check_part2_lint_strict() -> _Check:
     ok = (len(result.errors) == 0) and (len(result.warnings) == 0)
     return _Check(ok=ok, details={"errors": result.errors, "warnings": result.warnings})
 
+
+# 関数: `_check_part3_lint_strict` の入出力契約と処理意図を定義する。
 
 def _check_part3_lint_strict() -> _Check:
     root = _ROOT
@@ -115,6 +128,7 @@ _MD_PROSE_LATEX_ESCAPE_RE = re.compile(r"\\\\|\\[A-Za-z]+")
 _MD_INLINE_MATH_RE = re.compile(r"(?<!\\)\$[^$\n]*(?<!\\)\$")
 
 
+# 関数: `_check_markdown_prose_no_latex_escapes` の入出力契約と処理意図を定義する。
 def _check_markdown_prose_no_latex_escapes(*, paper_dir: Path) -> _Check:
     """
     Enforce repo rule (5.5): prose must not expose LaTeX escapes like '\\gamma' or '\\\\'.
@@ -187,6 +201,7 @@ _MD_FIG_REF_RE = re.compile(r"図\s*(\d{1,4})")
 _HTML_CODE_RE = re.compile(r"<code>([^<]{1,1000})</code>")
 
 
+# 関数: `_check_publish_html_no_repo_paths` の入出力契約と処理意図を定義する。
 def _check_publish_html_no_repo_paths(*, html_text: str) -> _Check:
     """
     Enforce paper design policy:
@@ -222,6 +237,8 @@ def _check_publish_html_no_repo_paths(*, html_text: str) -> _Check:
 
     return _Check(ok=(len(hits) == 0), details={"hits_total": int(len(hits)), "hits": hits[:50]})
 
+
+# 関数: `_iter_markdown_prose_segments` の入出力契約と処理意図を定義する。
 
 def _iter_markdown_prose_segments(md_text: str):
     """
@@ -260,6 +277,8 @@ def _iter_markdown_prose_segments(md_text: str):
 
         in_math = cur_in_math
 
+
+# 関数: `_check_markdown_section_references` の入出力契約と処理意図を定義する。
 
 def _check_markdown_section_references(*, paper_dir: Path) -> _Check:
     """
@@ -331,6 +350,8 @@ def _check_markdown_section_references(*, paper_dir: Path) -> _Check:
     )
 
 
+# 関数: `_extract_figure_numbers_from_html` の入出力契約と処理意図を定義する。
+
 def _extract_figure_numbers_from_html(text: str) -> set[int]:
     caps = re.findall(r"<figcaption><strong>図(\d+):", text)
     out: set[int] = set()
@@ -342,6 +363,8 @@ def _extract_figure_numbers_from_html(text: str) -> set[int]:
 
     return out
 
+
+# 関数: `_check_markdown_figure_number_references` の入出力契約と処理意図を定義する。
 
 def _check_markdown_figure_number_references(*, manuscript_md: Path, html_text: str) -> _Check:
     """
@@ -386,6 +409,8 @@ def _check_markdown_figure_number_references(*, manuscript_md: Path, html_text: 
     )
 
 
+# 関数: `_check_no_double_backslash` の入出力契約と処理意図を定義する。
+
 def _check_no_double_backslash(text: str) -> _Check:
     # Ignore occurrences inside code/pre blocks so Windows paths like
     # `output\\private\\summary\\...` do not trigger false positives.
@@ -403,6 +428,8 @@ def _check_no_double_backslash(text: str) -> _Check:
 
     return _Check(ok=ok, details={"found_index": (None if ok else int(idx)), "context": ctx})
 
+
+# 関数: `_check_no_substrings` の入出力契約と処理意図を定義する。
 
 def _check_no_substrings(text: str, substrings: Sequence[str]) -> _Check:
     """
@@ -430,6 +457,7 @@ _HTML_ID_RE = re.compile(r"\bid=['\"]([^'\"]+)['\"]", re.IGNORECASE)
 _HTML_HREF_ANCHOR_RE = re.compile(r"\bhref=['\"]#([^'\"]+)['\"]", re.IGNORECASE)
 
 
+# 関数: `_check_internal_anchor_links` の入出力契約と処理意図を定義する。
 def _check_internal_anchor_links(text: str) -> _Check:
     """
     Check that in-page links (href="#...") resolve to an existing id="...".
@@ -454,11 +482,14 @@ _EQ_IMG_ALT_RE = re.compile(
 )
 
 
+# 関数: `_check_equation_alt` の入出力契約と処理意図を定義する。
 def _check_equation_alt(text: str) -> _Check:
     alts = _EQ_IMG_ALT_RE.findall(text)
     bad = [a for a in alts if a != "数式"]
     return _Check(ok=(len(bad) == 0), details={"count": int(len(alts)), "bad_examples": bad[:10]})
 
+
+# 関数: `_check_figure_numbering` の入出力契約と処理意図を定義する。
 
 def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
     # id='fig-001' numbering
@@ -482,6 +513,7 @@ def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
         "caption_non_monotone_pairs": 0,
     }
 
+    # 関数: `_range_and_missing` の入出力契約と処理意図を定義する。
     def _range_and_missing(nums: List[int]) -> tuple[Optional[list[int]], List[int]]:
         # 条件分岐: `not nums` を満たす経路を評価する。
         if not nums:
@@ -523,6 +555,8 @@ def _check_figure_numbering(text: str, *, allow_sparse: bool = False) -> _Check:
     return _Check(ok=ok, details=details)
 
 
+# 関数: `_read_docx_document_xml` の入出力契約と処理意図を定義する。
+
 def _read_docx_document_xml(docx_path: Path) -> Optional[str]:
     # 条件分岐: `not docx_path.exists()` を満たす経路を評価する。
     if not docx_path.exists():
@@ -536,6 +570,8 @@ def _read_docx_document_xml(docx_path: Path) -> Optional[str]:
     except Exception:
         return None
 
+
+# 関数: `_check_docx_callout_punctuation` の入出力契約と処理意図を定義する。
 
 def _check_docx_callout_punctuation(*, docx_xml: Optional[str]) -> _Check:
     # 条件分岐: `not docx_xml` を満たす経路を評価する。
@@ -572,6 +608,7 @@ _BORDER_VAL_RE = re.compile(
 )
 
 
+# 関数: `_check_docx_a0_table_no_borders` の入出力契約と処理意図を定義する。
 def _check_docx_a0_table_no_borders(*, docx_xml: Optional[str]) -> _Check:
     # 条件分岐: `not docx_xml` を満たす経路を評価する。
     if not docx_xml:
@@ -603,6 +640,8 @@ def _check_docx_a0_table_no_borders(*, docx_xml: Optional[str]) -> _Check:
         },
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Paper publish QC (Phase 8 / Step 8.2).")

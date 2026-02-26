@@ -33,13 +33,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -66,6 +71,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -75,14 +82,20 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -100,6 +113,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
+# 関数: `_infer_zenodo_record_id_from_url` の入出力契約と処理意図を定義する。
+
 def _infer_zenodo_record_id_from_url(url: str) -> Optional[int]:
     try:
         parsed = urllib.parse.urlparse(str(url))
@@ -114,9 +129,13 @@ def _infer_zenodo_record_id_from_url(url: str) -> Optional[int]:
     return None
 
 
+# 関数: `_zenodo_file_url` の入出力契約と処理意図を定義する。
+
 def _zenodo_file_url(*, record_id: int, filename: str) -> str:
     return f"https://zenodo.org/api/records/{int(record_id)}/files/{filename}/content"
 
+
+# 関数: `_ensure_extracted` の入出力契約と処理意図を定義する。
 
 def _ensure_extracted(tar_path: Path, *, extract_dir: Path, members: Sequence[str]) -> None:
     extract_dir.mkdir(parents=True, exist_ok=True)
@@ -129,6 +148,8 @@ def _ensure_extracted(tar_path: Path, *, extract_dir: Path, members: Sequence[st
 
             tf.extract(tf.getmember(name), path=extract_dir)
 
+
+# 関数: `_select_preferred_posterior_url` の入出力契約と処理意図を定義する。
 
 def _select_preferred_posterior_url(event_info: Dict[str, Any]) -> Optional[str]:
     params = event_info.get("parameters") or {}
@@ -160,6 +181,8 @@ def _select_preferred_posterior_url(event_info: Dict[str, Any]) -> Optional[str]
     return best
 
 
+# 関数: `_normalize_gwosc_version` の入出力契約と処理意図を定義する。
+
 def _normalize_gwosc_version(version: str) -> str:
     v = (version or "").strip()
     # 条件分岐: `not v` を満たす経路を評価する。
@@ -174,6 +197,8 @@ def _normalize_gwosc_version(version: str) -> str:
     return v
 
 
+# 関数: `_candidate_gwosc_versions` の入出力契約と処理意図を定義する。
+
 def _candidate_gwosc_versions(version: str) -> List[str]:
     v = (version or "").strip().lower()
     # 条件分岐: `not v or v == "auto"` を満たす経路を評価する。
@@ -183,6 +208,8 @@ def _candidate_gwosc_versions(version: str) -> List[str]:
     return [_normalize_gwosc_version(version)]
 
 
+# 関数: `_gwosc_catalog_url` の入出力契約と処理意図を定義する。
+
 def _gwosc_catalog_url(catalog: str) -> str:
     cat = (catalog or "").strip()
     # 条件分岐: `not cat` を満たす経路を評価する。
@@ -191,6 +218,8 @@ def _gwosc_catalog_url(catalog: str) -> str:
 
     return f"https://gwosc.org/eventapi/json/{cat}/"
 
+
+# 関数: `_gwosc_event_json_url` の入出力契約と処理意図を定義する。
 
 def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     cat = (catalog or "").strip()
@@ -206,6 +235,8 @@ def _gwosc_event_json_url(*, catalog: str, event: str, version: str) -> str:
     v = _normalize_gwosc_version(version)
     return f"https://gwosc.org/eventapi/json/{cat}/{ev}/{v}"
 
+
+# 関数: `_resolve_event_common_name` の入出力契約と処理意図を定義する。
 
 def _resolve_event_common_name(*, catalog: str, event: str) -> str:
     target = (event or "").strip()
@@ -260,6 +291,8 @@ def _resolve_event_common_name(*, catalog: str, event: str) -> str:
 
     return chosen
 
+
+# 関数: `_fetch_event_json` の入出力契約と処理意図を定義する。
 
 def _fetch_event_json(
     *,
@@ -323,6 +356,8 @@ def _fetch_event_json(
     }
 
 
+# 関数: `_infer_filename_from_url` の入出力契約と処理意図を定義する。
+
 def _infer_filename_from_url(url: str) -> str:
     parsed = urllib.parse.urlparse(url)
     parts = [p for p in parsed.path.split("/") if p]
@@ -339,6 +374,8 @@ def _infer_filename_from_url(url: str) -> str:
 
     return "posterior_samples.h5"
 
+
+# 関数: `_select_preferred_posterior` の入出力契約と処理意図を定義する。
 
 def _select_preferred_posterior(event_info: Dict[str, Any], *, prefer_waveform: str) -> Tuple[str, Dict[str, Any]]:
     params = event_info.get("parameters") or {}
@@ -377,9 +414,12 @@ def _select_preferred_posterior(event_info: Dict[str, Any], *, prefer_waveform: 
     return chosen[2], chosen[3]
 
 
+# 関数: `_find_posterior_samples_dataset` の入出力契約と処理意図を定義する。
+
 def _find_posterior_samples_dataset(h5: h5py.File) -> h5py.Dataset:
     found: List[h5py.Dataset] = []
 
+    # 関数: `visitor` の入出力契約と処理意図を定義する。
     def visitor(name: str, obj: Any) -> None:
         # 条件分岐: `not isinstance(obj, h5py.Dataset)` を満たす経路を評価する。
         if not isinstance(obj, h5py.Dataset):
@@ -407,12 +447,16 @@ def _find_posterior_samples_dataset(h5: h5py.File) -> h5py.Dataset:
     return found[0]
 
 
+# 関数: `_kerr_horizon_area` の入出力契約と処理意図を定義する。
+
 def _kerr_horizon_area(m: np.ndarray, a: np.ndarray) -> np.ndarray:
     m = np.asarray(m, dtype=np.float64)
     a = np.asarray(a, dtype=np.float64)
     a = np.clip(a, 0.0, 0.999999)
     return 8.0 * math.pi * (m**2) * (1.0 + np.sqrt(1.0 - a**2))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     _set_japanese_font()
@@ -507,6 +551,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     pyr_sub = rng.choice(pyr, size=n_match, replace=False)
     rem_combined = np.concatenate([rem_rd_sub, pyr_sub])
 
+    # 関数: `sigma_gaussian` の入出力契約と処理意図を定義する。
     def sigma_gaussian(rem: np.ndarray, insp: np.ndarray) -> float:
         mu_r = float(np.mean(rem))
         sig_r = float(np.std(rem, ddof=0))

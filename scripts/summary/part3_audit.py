@@ -39,9 +39,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -49,6 +52,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -59,6 +64,8 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_tail` の入出力契約と処理意図を定義する。
+
 def _tail(s: str, n: int = 8000) -> str:
     s = s or ""
     # 条件分岐: `len(s) <= n` を満たす経路を評価する。
@@ -68,9 +75,13 @@ def _tail(s: str, n: int = 8000) -> str:
     return s[-n:]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# クラス: `CmdResult` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class CmdResult:
@@ -82,6 +93,8 @@ class CmdResult:
     stdout_tail: str
     stderr_tail: str
 
+
+# 関数: `_run_cmd` の入出力契約と処理意図を定義する。
 
 def _run_cmd(cmd: List[str], *, cwd: Path) -> CmdResult:
     t0 = time.time()
@@ -98,6 +111,8 @@ def _run_cmd(cmd: List[str], *, cwd: Path) -> CmdResult:
     )
 
 
+# 関数: `_path_from_any` の入出力契約と処理意図を定義する。
+
 def _path_from_any(root: Path, raw: str) -> Path:
     p = Path(str(raw))
     # 条件分岐: `p.is_absolute()` を満たす経路を評価する。
@@ -106,6 +121,8 @@ def _path_from_any(root: Path, raw: str) -> Path:
 
     return (root / p).resolve()
 
+
+# 関数: `_audit_bell` の入出力契約と処理意図を定義する。
 
 def _audit_bell(*, root: Path) -> Dict[str, Any]:
     bell_dir = root / "output" / "public" / "quantum" / "bell"
@@ -222,6 +239,8 @@ def _audit_bell(*, root: Path) -> Dict[str, Any]:
     out["ok"] = (len(missing) == 0) and bool(pairing_gate.get("ok"))
     return out
 
+
+# 関数: `_audit_nuclear` の入出力契約と処理意図を定義する。
 
 def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
     out_dir = root / "output" / "public" / "quantum"
@@ -349,6 +368,8 @@ def _audit_nuclear(*, root: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_audit_condensed_and_thermal` の入出力契約と処理意図を定義する。
+
 def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
     pack_path = root / "output" / "public" / "quantum" / "condensed_falsification_pack.json"
     holdout_summary = root / "output" / "public" / "quantum" / "condensed_holdout_audit_summary.json"
@@ -423,12 +444,16 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
         if matches_expected is False:
             out["notes"].append("holdout_audit summary_json path differs from expected condensed_holdout_audit_summary.json")
 
+    # 関数: `_key` の入出力契約と処理意図を定義する。
+
     def _key(t_k: float) -> str:
         # Some metrics store sampled keys like "298.15K".
         if float(t_k).is_integer():
             return f"{int(t_k)}K"
 
         return f"{t_k}K"
+
+    # 関数: `_eval_targets_from_code_results` の入出力契約と処理意図を定義する。
 
     def _eval_targets_from_code_results(*, mj: Dict[str, Any], targets: List[Dict[str, Any]]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
         results = mj.get("results") if isinstance(mj.get("results"), list) else []
@@ -453,6 +478,8 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             all_ok = all_ok and ok
 
         return all_ok, "targets_by_code", rows
+
+    # 関数: `_eval_targets_from_cp_keypoints` の入出力契約と処理意図を定義する。
 
     def _eval_targets_from_cp_keypoints(*, mj: Dict[str, Any], targets: List[Dict[str, Any]]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
         key_points = mj.get("key_points") if isinstance(mj.get("key_points"), list) else []
@@ -485,6 +512,8 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
 
         return all_ok, "targets_by_cp_keypoints", rows
 
+    # 関数: `_eval_targets_from_alpha_samples` の入出力契約と処理意図を定義する。
+
     def _eval_targets_from_alpha_samples(*, mj: Dict[str, Any], targets: List[Dict[str, Any]]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
         samples = mj.get("sample_alpha_1e-8_per_K") if isinstance(mj.get("sample_alpha_1e-8_per_K"), dict) else {}
         rows: List[Dict[str, Any]] = []
@@ -512,6 +541,8 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
             all_ok = all_ok and ok
 
         return all_ok, "targets_by_alpha_samples", rows
+
+    # 関数: `_eval_targets_from_copper_k_selected` の入出力契約と処理意図を定義する。
 
     def _eval_targets_from_copper_k_selected(*, mj: Dict[str, Any], fals: Dict[str, Any]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
         results = mj.get("results") if isinstance(mj.get("results"), dict) else {}
@@ -553,6 +584,8 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
                 all_ok = all_ok and ok
 
         return all_ok, "targets_by_rrr_selected_T", rows
+
+    # 関数: `_eval_resistivity_necessary_conditions` の入出力契約と処理意図を定義する。
 
     def _eval_resistivity_necessary_conditions(*, mj: Dict[str, Any], fals: Dict[str, Any]) -> Tuple[Optional[bool], str, List[Dict[str, Any]]]:
         results = mj.get("results") if isinstance(mj.get("results"), dict) else {}
@@ -675,6 +708,8 @@ def _audit_condensed_and_thermal(*, root: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_audit_completion_inventory` の入出力契約と処理意図を定義する。
+
 def _audit_completion_inventory(*, root: Path) -> Dict[str, Any]:
     inv_path = root / "output" / "public" / "summary" / "part3_completion_inventory.json"
     out: Dict[str, Any] = {
@@ -695,6 +730,8 @@ def _audit_completion_inventory(*, root: Path) -> Dict[str, Any]:
     out["ok"] = (missing_sections == 0)
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Phase 7 / Step 7.20.7: Part III audit harness (packs→gates→summary).")

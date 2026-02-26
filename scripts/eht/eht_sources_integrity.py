@@ -16,9 +16,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -29,9 +32,13 @@ def _sha256(path: Path) -> str:
     return h.hexdigest().upper()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_to_repo_path` の入出力契約と処理意図を定義する。
 
 def _to_repo_path(root: Path, raw: str) -> Path:
     p = Path(raw)
@@ -41,6 +48,8 @@ def _to_repo_path(root: Path, raw: str) -> Path:
 
     return root / p
 
+
+# 関数: `_extract_local_files` の入出力契約と処理意図を定義する。
 
 def _extract_local_files(source: Dict[str, Any]) -> List[Tuple[str, str, str | None]]:
     out: List[Tuple[str, str, str | None]] = []
@@ -66,6 +75,8 @@ def _extract_local_files(source: Dict[str, Any]) -> List[Tuple[str, str, str | N
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

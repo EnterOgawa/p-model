@@ -37,9 +37,12 @@ from typing import Iterable, List, Optional, Sequence, Tuple
 DEFAULT_BASE_URL = "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -49,6 +52,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool, timeout_s: int = 180) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -64,6 +69,8 @@ def _download(url: str, dst: Path, *, force: bool, timeout_s: int = 180) -> None
     tmp.replace(dst)
 
 
+# 関数: `_iter_lines` の入出力契約と処理意図を定義する。
+
 def _iter_lines(path: Path) -> Iterable[str]:
     # PDS index files are typically CRLF; keep robust.
     txt = path.read_text(encoding="utf-8", errors="replace")
@@ -74,6 +81,8 @@ def _iter_lines(path: Path) -> Iterable[str]:
             yield ln
 
 
+# 関数: `_cors_for_doy` の入出力契約と処理意図を定義する。
+
 def _cors_for_doy(doy: int) -> int:
     # SCE1 2002 DOY 157-186 are split into 4-day volumes:
     # 157-160 => 0021, 161-164 => 0022, ... 185-186 => 0028
@@ -83,12 +92,16 @@ def _cors_for_doy(doy: int) -> int:
     return 21 + ((doy - 157) // 4)
 
 
+# クラス: `IndexEntry` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class IndexEntry:
     cors: int
     label_rel: str
     data_rel: str
 
+
+# 関数: `_parse_index_tab` の入出力契約と処理意図を定義する。
 
 def _parse_index_tab(index_tab: Path, cors: int) -> List[IndexEntry]:
     out: List[IndexEntry] = []
@@ -116,6 +129,8 @@ def _parse_index_tab(index_tab: Path, cors: int) -> List[IndexEntry]:
     return out
 
 
+# 関数: `_select_odf` の入出力契約と処理意図を定義する。
+
 def _select_odf(entries: Sequence[IndexEntry], *, doy_start: int, doy_stop: int) -> List[IndexEntry]:
     picked: List[IndexEntry] = []
     pat = re.compile(r"^SCE1_(\d{3})/ODF/", re.IGNORECASE)
@@ -132,6 +147,8 @@ def _select_odf(entries: Sequence[IndexEntry], *, doy_start: int, doy_stop: int)
 
     return picked
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

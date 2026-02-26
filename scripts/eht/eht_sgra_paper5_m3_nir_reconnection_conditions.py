@@ -17,18 +17,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_ks_c_alpha` の入出力契約と処理意図を定義する。
 
 def _ks_c_alpha(alpha: float) -> Optional[float]:
     # Standard 2-sample KS asymptotic constants.
@@ -53,6 +60,8 @@ def _ks_c_alpha(alpha: float) -> Optional[float]:
     return None
 
 
+# 関数: `_ks_two_sample_dcrit` の入出力契約と処理意図を定義する。
+
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
     # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
     if n <= 0 or m <= 0:
@@ -65,6 +74,8 @@ def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
 
     return float(c * math.sqrt((n + m) / (n * m)))
 
+
+# 関数: `_ks_two_sample_d` の入出力契約と処理意図を定義する。
 
 def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Optional[float]:
     a = [float(x) for x in sample_a if isinstance(x, (int, float))]
@@ -133,6 +144,8 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
     return float(d)
 
 
+# 関数: `_ks_two_sample_p_asymptotic` の入出力契約と処理意図を定義する。
+
 def _ks_two_sample_p_asymptotic(d: float, n: int, m: int) -> Optional[float]:
     # Reference: standard asymptotic KS distribution (same functional form as scipy.stats.ks_2samp(mode="asymp")).
     if not isinstance(d, (int, float)) or d < 0:
@@ -176,6 +189,8 @@ def _ks_two_sample_p_asymptotic(d: float, n: int, m: int) -> Optional[float]:
 
     return float(p)
 
+
+# 関数: `_ks_solve_d_for_p_asymptotic` の入出力契約と処理意図を定義する。
 
 def _ks_solve_d_for_p_asymptotic(alpha: float, n: int, m: int) -> Optional[float]:
     # Solve p_asymptotic(d) = alpha for d in [0, 1] via bisection.
@@ -222,6 +237,8 @@ def _ks_solve_d_for_p_asymptotic(alpha: float, n: int, m: int) -> Optional[float
     return float(hi)
 
 
+# 関数: `_near_passing_rows` の入出力契約と処理意図を定義する。
+
 def _near_passing_rows(pass_fraction_metrics: Dict[str, Any]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
     near = (pass_fraction_metrics.get("extracted") or {}).get("near_passing") or {}
@@ -231,6 +248,8 @@ def _near_passing_rows(pass_fraction_metrics: Dict[str, Any]) -> List[Dict[str, 
 
     return out
 
+
+# 関数: `_count_relax_pass` の入出力契約と処理意図を定義する。
 
 def _count_relax_pass(rows: List[Dict[str, Any]], relax: Sequence[str]) -> int:
     relax_set = set(relax)
@@ -244,6 +263,8 @@ def _count_relax_pass(rows: List[Dict[str, Any]], relax: Sequence[str]) -> int:
     return n
 
 
+# 関数: `_extract_near_combo_counts` の入出力契約と処理意図を定義する。
+
 def _extract_near_combo_counts(pass_fraction_metrics: Dict[str, Any]) -> Dict[str, Any]:
     combined = (
         (pass_fraction_metrics.get("derived") or {})
@@ -256,6 +277,8 @@ def _extract_near_combo_counts(pass_fraction_metrics: Dict[str, Any]) -> Dict[st
 
     return combined
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()
@@ -535,6 +558,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                         n_sma_carma = int((seg_by.get("SMA") or 0) + (seg_by.get("CARMA") or 0))
                     except Exception:
                         n_sma_carma = None
+
+                # 関数: `_add` の入出力契約と処理意図を定義する。
 
                 def _add(name: str, n_obs: Any) -> None:
                     # 条件分岐: `not isinstance(n_obs, int) or n_obs <= 0` を満たす経路を評価する。

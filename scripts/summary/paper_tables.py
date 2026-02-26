@@ -41,6 +41,7 @@ _OUT_PUBLIC = _ROOT / "output" / "public"
 _OUT_PRIVATE = _ROOT / "output" / "private"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
@@ -48,13 +49,18 @@ def _repo_root() -> Path:
 _C_M_PER_S = 299_792_458.0
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -74,6 +80,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_fmt_sci` の入出力契約と処理意図を定義する。
+
 def _fmt_sci(x: Optional[float], *, digits: int = 3) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -82,6 +90,8 @@ def _fmt_sci(x: Optional[float], *, digits: int = 3) -> str:
     return f"{x:.{digits}e}"
 
 
+# 関数: `_fmt_pct` の入出力契約と処理意図を定義する。
+
 def _fmt_pct(x: Optional[float], *, digits: int = 2) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -89,6 +99,8 @@ def _fmt_pct(x: Optional[float], *, digits: int = 2) -> str:
 
     return f"{x * 100.0:.{digits}f}".rstrip("0").rstrip(".") + "%"
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -104,6 +116,8 @@ def _safe_float(x: Any) -> Optional[float]:
     return v
 
 
+# 関数: `_first_existing` の入出力契約と処理意図を定義する。
+
 def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
     for path in paths:
         # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -112,6 +126,8 @@ def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
 
     return None
 
+
+# クラス: `TableRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class TableRow:
@@ -124,6 +140,7 @@ class TableRow:
     metric: str
     metric_public: str = ""
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "topic": self.topic,
@@ -137,10 +154,14 @@ class TableRow:
         }
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[TableRow]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,9 +183,13 @@ def _write_csv(path: Path, rows: Sequence[TableRow]) -> None:
             )
 
 
+# 関数: `_md_escape` の入出力契約と処理意図を定義する。
+
 def _md_escape(s: str) -> str:
     return s.replace("|", "\\|")
 
+
+# 関数: `_write_markdown` の入出力契約と処理意図を定義する。
 
 def _write_markdown(path: Path, *, title: str, rows: Sequence[TableRow], notes: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -202,6 +227,8 @@ def _write_markdown(path: Path, *, title: str, rows: Sequence[TableRow], notes: 
     lines.append("")
     path.write_text("\n".join(lines), encoding="utf-8")
 
+
+# 関数: `_load_llr_rows` の入出力契約と処理意図を定義する。
 
 def _load_llr_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "llr" / "batch" / "llr_batch_summary.json"
@@ -291,6 +318,8 @@ def _load_llr_rows(root: Path) -> List[TableRow]:
     return rows
 
 
+# 関数: `_load_cassini_rows` の入出力契約と処理意図を定義する。
+
 def _load_cassini_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "cassini" / "cassini_fig2_metrics.csv"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -343,6 +372,8 @@ def _load_cassini_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_viking_rows` の入出力契約と処理意図を定義する。
+
 def _load_viking_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "viking" / "viking_shapiro_result.csv"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -388,6 +419,8 @@ def _load_viking_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_mercury_rows` の入出力契約と処理意図を定義する。
+
 def _load_mercury_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "mercury" / "mercury_precession_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -419,6 +452,8 @@ def _load_mercury_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_gps_rows` の入出力契約と処理意図を定義する。
 
 def _load_gps_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "gps" / "gps_compare_metrics.json"
@@ -457,6 +492,8 @@ def _load_gps_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_solar_light_deflection_rows` の入出力契約と処理意図を定義する。
 
 def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
     """
@@ -558,6 +595,8 @@ def _load_solar_light_deflection_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_eht_rows` の入出力契約と処理意図を定義する。
+
 def _load_eht_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "eht" / "eht_shadow_compare.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -633,6 +672,8 @@ def _load_eht_rows(root: Path) -> List[TableRow]:
 
     return out
 
+
+# 関数: `_load_pulsar_rows` の入出力契約と処理意図を定義する。
 
 def _load_pulsar_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
@@ -721,7 +762,10 @@ def _load_pulsar_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_gw_rows` の入出力契約と処理意図を定義する。
+
 def _load_gw_rows(root: Path) -> List[TableRow]:
+    # 関数: `_load_event_pairs` の入出力契約と処理意図を定義する。
     def _load_event_pairs() -> List[Tuple[str, str]]:
         path = root / "data" / "gw" / "event_list.json"
         # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -946,6 +990,8 @@ def _load_gw_rows(root: Path) -> List[TableRow]:
     return out
 
 
+# 関数: `_load_gw250114_rows` の入出力契約と処理意図を定義する。
+
 def _load_gw250114_rows(root: Path) -> List[TableRow]:
     area_path = _first_existing(
         [
@@ -1086,6 +1132,8 @@ def _load_gw250114_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_gravitational_redshift_rows` の入出力契約と処理意図を定義する。
+
 def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "theory" / "gravitational_redshift_experiments.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -1145,6 +1193,8 @@ def _load_gravitational_redshift_rows(root: Path) -> List[TableRow]:
 
     return out
 
+
+# 関数: `_load_cosmology_distance_duality_rows` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
@@ -1384,6 +1434,8 @@ def _load_cosmology_distance_duality_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_cosmology_tolman_surface_brightness_rows` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_tolman_surface_brightness_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -1472,6 +1524,8 @@ def _load_cosmology_tolman_surface_brightness_rows(root: Path) -> List[TableRow]
     return out
 
 
+# 関数: `_fmt_source_short` の入出力契約と処理意図を定義する。
+
 def _fmt_source_short(source: Any) -> str:
     # 条件分岐: `not isinstance(source, dict)` を満たす経路を評価する。
     if not isinstance(source, dict):
@@ -1501,6 +1555,8 @@ def _fmt_source_short(source: Any) -> str:
 
     return year
 
+
+# 関数: `_load_cosmology_independent_probe_rows` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
@@ -1593,6 +1649,8 @@ def _load_cosmology_independent_probe_rows(root: Path) -> List[TableRow]:
     return out
 
 
+# 関数: `_load_cosmology_jwst_mast_rows` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
     """
     JWST/MAST x1d pipeline status (Phase 4 / Step 4.6).
@@ -1670,6 +1728,8 @@ def _load_cosmology_jwst_mast_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_xrism_rows` の入出力契約と処理意図を定義する。
 
 def _load_xrism_rows(root: Path) -> List[TableRow]:
     """
@@ -1838,6 +1898,8 @@ def _load_xrism_rows(root: Path) -> List[TableRow]:
     return out
 
 
+# 関数: `_load_cosmology_bao_primary_rows` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
     """
     BAO primary-statistics row for Table 1.
@@ -1847,6 +1909,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
     """
     out_rows: List[TableRow] = []
 
+    # 関数: `_collect_peakfit_results` の入出力契約と処理意図を定義する。
     def _collect_peakfit_results(payload: Dict[str, Any]) -> Dict[Tuple[str, str], Dict[str, Any]]:
         out: Dict[Tuple[str, str], Dict[str, Any]] = {}
         rows = payload.get("results") if isinstance(payload.get("results"), list) else []
@@ -1873,6 +1936,8 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
             }
 
         return out
+
+    # 関数: `_fmt_pm` の入出力契約と処理意図を定義する。
 
     def _fmt_pm(eps: Any, sig: Any) -> str:
         e = _safe_float(eps)
@@ -2300,6 +2365,7 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
         if jd is not None:
             rows = jd.get("results") if isinstance(jd.get("results"), list) else []
 
+            # 関数: `_collect_by_dist` の入出力契約と処理意図を定義する。
             def _collect_by_dist(dist: str) -> List[Dict[str, Any]]:
                 out: List[Dict[str, Any]] = []
                 for r in rows:
@@ -2412,6 +2478,8 @@ def _load_cosmology_bao_primary_rows(root: Path) -> List[TableRow]:
     return out_rows
 
 
+# 関数: `_load_cosmology_cmb_polarization_phase_rows` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_cmb_polarization_phase_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
         [
@@ -2489,6 +2557,8 @@ def _load_cosmology_cmb_polarization_phase_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_cosmology_fsigma8_growth_rows` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_fsigma8_growth_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
         [
@@ -2563,6 +2633,8 @@ def _load_cosmology_fsigma8_growth_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_cosmology_cmb_acoustic_peak_rows` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_cmb_acoustic_peak_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
@@ -2662,6 +2734,8 @@ def _load_cosmology_cmb_acoustic_peak_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_sparc_rotation_rows` の入出力契約と処理意図を定義する。
+
 def _load_sparc_rotation_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
         [
@@ -2745,6 +2819,8 @@ def _load_sparc_rotation_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_bbn_rows` の入出力契約と処理意図を定義する。
 
 def _load_bbn_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
@@ -2844,6 +2920,8 @@ def _load_bbn_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_background_metric_choice_rows` の入出力契約と処理意図を定義する。
+
 def _load_background_metric_choice_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
     for case_label, relpath in (
@@ -2924,6 +3002,8 @@ def _load_background_metric_choice_rows(root: Path) -> List[TableRow]:
     return out
 
 
+# 関数: `_load_gw_polarization_rows` の入出力契約と処理意図を定義する。
+
 def _load_gw_polarization_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
         [
@@ -2989,6 +3069,8 @@ def _load_gw_polarization_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_cosmology_cluster_collision_rows` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
     deriv_path = _first_existing(
@@ -3107,6 +3189,8 @@ def _load_cosmology_cluster_collision_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_strong_field_higher_order_rows` の入出力契約と処理意図を定義する。
+
 def _load_strong_field_higher_order_rows(root: Path) -> List[TableRow]:
     path = _first_existing(
         [
@@ -3180,6 +3264,8 @@ def _load_strong_field_higher_order_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_infer_catalog_sampling_label` の入出力契約と処理意図を定義する。
+
 def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
     """
     Best-effort label for catalog sampling (random subsampling) used by ξℓ inputs.
@@ -3217,6 +3303,7 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
         items = j.get("items") or {}
         caps_to_use = ["north", "south"] if caps == "combined" else [caps]
 
+        # 関数: `_desc_from_name` の入出力契約と処理意図を定義する。
         def _desc_from_name(name: str) -> str:
             # 条件分岐: `".prefix_" in name` を満たす経路を評価する。
             if ".prefix_" in name:
@@ -3263,6 +3350,8 @@ def _infer_catalog_sampling_label(root: Path, *, sample: str, caps: str) -> str:
     except Exception:
         return "random=?"
 
+
+# 関数: `_load_frame_dragging_rows` の入出力契約と処理意図を定義する。
 
 def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
@@ -3473,6 +3562,8 @@ def _load_frame_dragging_rows(root: Path) -> List[TableRow]:
     return out
 
 
+# 関数: `_load_delta_rows` の入出力契約と処理意図を定義する。
+
 def _load_delta_rows(root: Path) -> List[TableRow]:
     path = _OUT_PRIVATE / "theory" / "delta_saturation_constraints.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -3516,6 +3607,8 @@ def _load_delta_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_quantum_bell_rows` の入出力契約と処理意図を定義する。
+
 def _load_quantum_bell_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "bell" / "table1_row.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -3542,6 +3635,8 @@ def _load_quantum_bell_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_quantum_gravity_quantum_interference_rows` の入出力契約と処理意図を定義する。
 
 def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow]:
     rows: List[TableRow] = []
@@ -3653,6 +3748,8 @@ def _load_quantum_gravity_quantum_interference_rows(root: Path) -> List[TableRow
     return rows
 
 
+# 関数: `_load_quantum_matter_wave_rows` の入出力契約と処理意図を定義する。
+
 def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
     rows: List[TableRow] = []
 
@@ -3720,6 +3817,8 @@ def _load_quantum_matter_wave_rows(root: Path) -> List[TableRow]:
     return rows
 
 
+# 関数: `_load_quantum_decoherence_rows` の入出力契約と処理意図を定義する。
+
 def _load_quantum_decoherence_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "gravity_induced_decoherence_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -3765,6 +3864,8 @@ def _load_quantum_decoherence_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_quantum_photon_interference_rows` の入出力契約と処理意図を定義する。
 
 def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "photon_quantum_interference_metrics.json"
@@ -3843,6 +3944,8 @@ def _load_quantum_photon_interference_rows(root: Path) -> List[TableRow]:
         )
     ]
 
+
+# 関数: `_load_quantum_qed_vacuum_rows` の入出力契約と処理意図を定義する。
 
 def _load_quantum_qed_vacuum_rows(root: Path) -> List[TableRow]:
     path = _OUT_PUBLIC / "quantum" / "qed_vacuum_precision_metrics.json"
@@ -3937,9 +4040,12 @@ def _load_quantum_qed_vacuum_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_quantum_atomic_molecular_rows` の入出力契約と処理意図を定義する。
+
 def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
     out: List[TableRow] = []
 
+    # 関数: `build_row` の入出力契約と処理意図を定義する。
     def build_row(*, path: Path, observable: str, data: str, name_map: Dict[str, str]) -> TableRow | None:
         # 条件分岐: `not path.exists()` を満たす経路を評価する。
         if not path.exists():
@@ -4100,6 +4206,8 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
     # 条件分岐: `row_he is not None` を満たす経路を評価する。
     if row_he is not None:
         out.append(row_he)
+
+    # 関数: `add_diatomic_row` の入出力契約と処理意図を定義する。
 
     def add_diatomic_row(*, slug: str, label: str) -> None:
         path = _OUT_PUBLIC / "quantum" / f"molecular_{slug}_baseline_metrics.json"
@@ -4384,6 +4492,8 @@ def _load_quantum_atomic_molecular_rows(root: Path) -> List[TableRow]:
     return out
 
 
+# 関数: `_load_quantum_nuclear_rows` の入出力契約と処理意図を定義する。
+
 def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     """
     Phase 7 / Step 7.9 nuclear baseline + minimal effective-equation summary.
@@ -4503,6 +4613,8 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     # 条件分岐: `b_mev is not None` を満たす経路を評価する。
     if b_mev is not None:
         parts.append(f"B≈{_fmt_float(b_mev, digits=6)} MeV")
+
+    # 関数: `_append_barrier_tail_rows` の入出力契約と処理意図を定義する。
 
     def _append_barrier_tail_rows() -> tuple[Optional[bool], Optional[bool], Optional[bool]]:
         rows = j.get("results_by_dataset")
@@ -5291,6 +5403,8 @@ def _load_quantum_nuclear_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `_load_quantum_planned_rows` の入出力契約と処理意図を定義する。
+
 def _load_quantum_planned_rows(root: Path) -> List[TableRow]:
     # NOTE: Planned rows are included even if the corresponding outputs are not yet available.
     # Avoid citation keys here to keep "データ出典/参考文献" filtered to actually-used citations.
@@ -5326,6 +5440,8 @@ def _load_quantum_planned_rows(root: Path) -> List[TableRow]:
     ]
 
 
+# 関数: `build_table1_rows` の入出力契約と処理意図を定義する。
+
 def build_table1_rows(root: Path) -> List[TableRow]:
     rows: List[TableRow] = []
     rows.extend(_load_llr_rows(root))
@@ -5359,6 +5475,8 @@ def build_table1_rows(root: Path) -> List[TableRow]:
     return rows
 
 
+# 関数: `build_table1_quantum_rows` の入出力契約と処理意図を定義する。
+
 def build_table1_quantum_rows(root: Path) -> List[TableRow]:
     rows: List[TableRow] = []
     rows.extend(_load_quantum_bell_rows(root))
@@ -5372,6 +5490,8 @@ def build_table1_quantum_rows(root: Path) -> List[TableRow]:
     rows.extend(_load_quantum_planned_rows(root))
     return rows
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Generate paper tables from fixed outputs.")

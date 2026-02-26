@@ -50,6 +50,7 @@ OUTPUT_PPTX = OUT_DIR / 'P_model_Verification_Full.pptx'
 INPUT_CSV = OUT_DIR / 'viking_shapiro_result.csv'
 IMG_FILENAME = OUT_DIR / 'viking_p_model_vs_measured_no_arrow.png'
 
+# 関数: `create_viking_plot` の入出力契約と処理意図を定義する。
 def create_viking_plot():
     """CSVからバイキングの検証グラフ（矢印なし）を生成する"""
     # 条件分岐: `not INPUT_CSV.exists()` を満たす経路を評価する。
@@ -93,6 +94,8 @@ def create_viking_plot():
     print(f"Graph generated: {IMG_FILENAME}")
     return IMG_FILENAME
 
+# 関数: `add_slide_safe` の入出力契約と処理意図を定義する。
+
 def add_slide_safe(prs, title_text, body_text):
     """スライドを追加し、レイアウトエラーを回避してテキストを設定する"""
     # タイトル付きレイアウト(通常index 1)を使用、失敗したらindex 0を試行
@@ -129,6 +132,8 @@ def add_slide_safe(prs, title_text, body_text):
         tf.text = body_text
         
     return slide
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
     # 1. グラフ画像の生成

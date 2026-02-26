@@ -49,6 +49,8 @@ except Exception:
     plt = None
 
 
+# クラス: `TransferCase` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TransferCase:
     case_id: str
@@ -64,9 +66,13 @@ class TransferCase:
     note: str
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -74,6 +80,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(value: Any) -> Optional[float]:
     try:
@@ -89,6 +97,8 @@ def _safe_float(value: Any) -> Optional[float]:
     return out
 
 
+# 関数: `_parse_opt_float` の入出力契約と処理意図を定義する。
+
 def _parse_opt_float(value: Any) -> Optional[float]:
     # 条件分岐: `value is None` を満たす経路を評価する。
     if value is None:
@@ -102,10 +112,14 @@ def _parse_opt_float(value: Any) -> Optional[float]:
     return _safe_float(value)
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -115,6 +129,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> Optional[str]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -132,6 +148,8 @@ def _sha256_file(path: Path) -> Optional[str]:
 
     return hasher.hexdigest()
 
+
+# 関数: `_file_signature` の入出力契約と処理意図を定義する。
 
 def _file_signature(path: Path) -> Dict[str, Any]:
     payload: Dict[str, Any] = {"path": _rel(path), "exists": bool(path.exists())}
@@ -153,6 +171,8 @@ def _file_signature(path: Path) -> Dict[str, Any]:
 
     return payload
 
+
+# 関数: `_load_previous_watchpack` の入出力契約と処理意図を定義する。
 
 def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -176,6 +196,8 @@ def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
 
     return watchpack
 
+
+# 関数: `_load_cases` の入出力契約と処理意図を定義する。
 
 def _load_cases(path: Path) -> List[TransferCase]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -220,6 +242,8 @@ def _load_cases(path: Path) -> List[TransferCase]:
     return out
 
 
+# 関数: `_load_primary_registration` の入出力契約と処理意図を定義する。
+
 def _load_primary_registration(path: Path) -> Dict[str, Dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -243,6 +267,8 @@ def _load_primary_registration(path: Path) -> Dict[str, Dict[str, Any]]:
 
     return out
 
+
+# 関数: `_bootstrap_primary_registration_csv` の入出力契約と処理意図を定義する。
 
 def _bootstrap_primary_registration_csv(path: Path, cases: Sequence[TransferCase]) -> int:
     rows: List[Dict[str, Any]] = []
@@ -284,6 +310,8 @@ def _bootstrap_primary_registration_csv(path: Path, cases: Sequence[TransferCase
     return len(rows)
 
 
+# 関数: `_load_bullet_reference` の入出力契約と処理意図を定義する。
+
 def _load_bullet_reference(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -314,6 +342,8 @@ def _load_bullet_reference(path: Path) -> Dict[str, Any]:
     }
 
 
+# 関数: `_load_lpath_reference` の入出力契約と処理意図を定義する。
+
 def _load_lpath_reference(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -342,6 +372,8 @@ def _load_lpath_reference(path: Path) -> Dict[str, Any]:
     }
 
 
+# 関数: `_ratio_lpath` の入出力契約と処理意図を定義する。
+
 def _ratio_lpath(pi0: float, rho_ratio: float, v_ratio: float, temp_ratio: float, *, temp_power: float) -> float:
     rr = max(float(rho_ratio), 1.0e-12)
     rv = max(float(v_ratio), 1.0e-12)
@@ -353,6 +385,8 @@ def _ratio_lpath(pi0: float, rho_ratio: float, v_ratio: float, temp_ratio: float
 
     return float((1.0 + pi0) / denom)
 
+
+# 関数: `_render_png` の入出力契約と処理意図を定義する。
 
 def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_power: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -408,6 +442,8 @@ def _render_png(path: Path, rows: Sequence[Dict[str, Any]], *, pi0: float, temp_
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(

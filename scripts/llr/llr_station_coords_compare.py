@@ -29,9 +29,12 @@ import pandas as pd
 LLR_SHORT_NAME = "月レーザー測距（LLR: Lunar Laser Ranging）"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -58,9 +61,13 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_csv` の入出力契約と処理意図を定義する。
+
 def _read_csv(path: Path) -> pd.DataFrame:
     return pd.read_csv(path)
 
+
+# 関数: `_require` の入出力契約と処理意図を定義する。
 
 def _require(path: Path) -> Path:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -69,6 +76,8 @@ def _require(path: Path) -> Path:
 
     return path
 
+
+# 関数: `_format_num` の入出力契約と処理意図を定義する。
 
 def _format_num(x: Any, *, digits: int = 3) -> str:
     try:
@@ -85,6 +94,8 @@ def _format_num(x: Any, *, digits: int = 3) -> str:
     except Exception:
         return str(x)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()
@@ -268,6 +279,7 @@ def main() -> int:
     monthly_min_n = int(args.monthly_min_n)
     model_key = "SR+Tropo+Tide"
 
+    # 関数: `_prep_monthly` の入出力契約と処理意図を定義する。
     def _prep_monthly(df: pd.DataFrame, *, label: str) -> pd.DataFrame:
         out = df.copy()
         out["station"] = out["station"].astype(str).str.upper()

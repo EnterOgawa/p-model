@@ -45,6 +45,7 @@ _WIN_ABS_RE = re.compile(r"^[a-zA-Z]:[\\/]")
 _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
+# 関数: `_resolve_path_like` の入出力契約と処理意図を定義する。
 def _resolve_path_like(p: Any) -> Optional[Path]:
     # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
@@ -79,6 +80,8 @@ def _resolve_path_like(p: Any) -> Optional[Path]:
     return _ROOT / path
 
 
+# クラス: `PeakPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class PeakPoint:
     sample: str
@@ -94,6 +97,8 @@ class PeakPoint:
     z_max: Optional[float]
     source_json: str
 
+
+# 関数: `_load_points` の入出力契約と処理意図を定義する。
 
 def _load_points(paths: Iterable[Path]) -> List[PeakPoint]:
     out: List[PeakPoint] = []
@@ -194,6 +199,8 @@ def _load_points(paths: Iterable[Path]) -> List[PeakPoint]:
     return out
 
 
+# 関数: `_group_points` の入出力契約と処理意図を定義する。
+
 def _group_points(points: List[PeakPoint]) -> Dict[Tuple[str, str, str], List[PeakPoint]]:
     g: Dict[Tuple[str, str, str], List[PeakPoint]] = {}
     for pt in points:
@@ -205,6 +212,8 @@ def _group_points(points: List[PeakPoint]) -> Dict[Tuple[str, str, str], List[Pe
 
     return g
 
+
+# 関数: `_drift_stats` の入出力契約と処理意図を定義する。
 
 def _drift_stats(values: List[float]) -> Dict[str, float]:
     s = np.asarray(list(values), dtype=np.float64)
@@ -219,6 +228,8 @@ def _drift_stats(values: List[float]) -> Dict[str, float]:
         "span": float(np.max(s) - np.min(s)),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Summarize BAO peak positions from catalog-based xi outputs.")

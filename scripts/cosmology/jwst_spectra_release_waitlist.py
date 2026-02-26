@@ -20,13 +20,18 @@ from typing import Any, Optional, Sequence
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_parse_utc_iso` の入出力契約と処理意図を定義する。
 
 def _parse_utc_iso(s: str) -> datetime:
     # Expect "+00:00" style. Guard for robustness.
@@ -36,6 +41,8 @@ def _parse_utc_iso(s: str) -> datetime:
     return datetime.fromisoformat(s).astimezone(timezone.utc)
 
 
+# 関数: `_fmt_utc` の入出力契約と処理意図を定義する。
+
 def _fmt_utc(dt: datetime | None) -> str | None:
     # 条件分岐: `dt is None` を満たす経路を評価する。
     if dt is None:
@@ -43,6 +50,8 @@ def _fmt_utc(dt: datetime | None) -> str | None:
 
     return dt.astimezone(timezone.utc).isoformat()
 
+
+# クラス: `TargetReleaseRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class TargetReleaseRow:
@@ -56,6 +65,8 @@ class TargetReleaseRow:
     next_release_utc: str | None
     latest_release_utc: str | None
 
+
+# 関数: `_summarize_manifest` の入出力契約と処理意図を定義する。
 
 def _summarize_manifest(manifest_path: Path) -> TargetReleaseRow:
     obj = _load_json(manifest_path)
@@ -110,6 +121,8 @@ def _summarize_manifest(manifest_path: Path) -> TargetReleaseRow:
         latest_release_utc=_fmt_utc(latest_release),
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Summarize JWST spectra manifest release status (Phase 4 / Step 4.6).")

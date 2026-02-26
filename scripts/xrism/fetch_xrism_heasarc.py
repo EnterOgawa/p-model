@@ -57,9 +57,12 @@ _DEFAULT_BASE_URL = "https://heasarc.gsfc.nasa.gov/FTP/xrism/data/obs"
 _REQ_TIMEOUT = (30, 600)  # (connect, read)
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -69,6 +72,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -81,10 +86,14 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -103,6 +112,8 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
 
     return rows
 
+
+# 関数: `_ensure_targets_template` の入出力契約と処理意図を定義する。
 
 def _ensure_targets_template(path: Path) -> None:
     # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -126,6 +137,8 @@ def _ensure_targets_template(path: Path) -> None:
         w.writerow(example)
 
 
+# 関数: `_http_get_text` の入出力契約と処理意図を定義する。
+
 def _http_get_text(url: str) -> str:
     # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
@@ -136,6 +149,8 @@ def _http_get_text(url: str) -> str:
     r.encoding = r.encoding or "utf-8"
     return r.text
 
+
+# 関数: `_http_exists` の入出力契約と処理意図を定義する。
 
 def _http_exists(url: str) -> bool:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -157,6 +172,8 @@ def _http_exists(url: str) -> bool:
 
     return ok
 
+
+# 関数: `_parse_apache_index_links` の入出力契約と処理意図を定義する。
 
 def _parse_apache_index_links(html: str) -> List[str]:
     # HEASARC FTP over HTTPS typically exposes an auto index page. Keep parsing lightweight.
@@ -205,6 +222,8 @@ def _parse_apache_index_links(html: str) -> List[str]:
     return dedup
 
 
+# 関数: `_list_remote_files_recursive` の入出力契約と処理意図を定義する。
+
 def _list_remote_files_recursive(dir_url: str, *, max_files: Optional[int] = None) -> List[str]:
     # 条件分岐: `not dir_url.endswith("/")` を満たす経路を評価する。
     if not dir_url.endswith("/"):
@@ -238,6 +257,8 @@ def _list_remote_files_recursive(dir_url: str, *, max_files: Optional[int] = Non
     return files
 
 
+# 関数: `_list_remote_dir_hrefs` の入出力契約と処理意図を定義する。
+
 def _list_remote_dir_hrefs(dir_url: str) -> List[str]:
     # 条件分岐: `not dir_url.endswith("/")` を満たす経路を評価する。
     if not dir_url.endswith("/"):
@@ -246,6 +267,8 @@ def _list_remote_dir_hrefs(dir_url: str) -> List[str]:
     html = _http_get_text(dir_url)
     return _parse_apache_index_links(html)
 
+
+# 関数: `_infer_remote_obs_root` の入出力契約と処理意図を定義する。
 
 def _infer_remote_obs_root(
     *,
@@ -271,6 +294,8 @@ def _infer_remote_obs_root(
     return None, None
 
 
+# 関数: `_download_file` の入出力契約と処理意図を定義する。
+
 def _download_file(url: str, out_path: Path) -> None:
     # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
@@ -288,6 +313,8 @@ def _download_file(url: str, out_path: Path) -> None:
             f.write(chunk)
 
 
+# 関数: `_find_first_file` の入出力契約と処理意図を定義する。
+
 def _find_first_file(root: Path, patterns: Sequence[str]) -> Optional[Path]:
     for pat in patterns:
         hits = sorted(root.glob(pat))
@@ -298,6 +325,8 @@ def _find_first_file(root: Path, patterns: Sequence[str]) -> Optional[Path]:
 
     return None
 
+
+# 関数: `_load_pha_counts` の入出力契約と処理意図を定義する。
 
 def _load_pha_counts(pha_path: Path) -> Tuple[np.ndarray, np.ndarray, str]:
     # 条件分岐: `read_first_bintable_layout is None or read_bintable_columns is None` を満たす経路を評価する。
@@ -336,6 +365,8 @@ def _load_pha_counts(pha_path: Path) -> Tuple[np.ndarray, np.ndarray, str]:
     return x, y, y_label
 
 
+# 関数: `_try_channel_to_energy_keV` の入出力契約と処理意図を定義する。
+
 def _try_channel_to_energy_keV(rmf_path: Optional[Path]) -> Optional[Dict[int, float]]:
     # 条件分岐: `rmf_path is None` を満たす経路を評価する。
     if rmf_path is None:
@@ -367,6 +398,8 @@ def _try_channel_to_energy_keV(rmf_path: Optional[Path]) -> Optional[Dict[int, f
     except Exception:
         return None
 
+
+# 関数: `_write_spectrum_qc` の入出力契約と処理意図を定義する。
 
 def _write_spectrum_qc(obsid: str, pha_path: Path, rmf_path: Optional[Path], out_png: Path) -> Optional[str]:
     # 条件分岐: `plt is None` を満たす経路を評価する。
@@ -402,6 +435,8 @@ def _write_spectrum_qc(obsid: str, pha_path: Path, rmf_path: Optional[Path], out
     plt.close(fig)
     return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

@@ -35,6 +35,7 @@ import matplotlib.pyplot as plt
 C = 299_792_458.0  # m/s
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -60,6 +61,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_open_text` の入出力契約と処理意図を定義する。
+
 def _open_text(path: Path) -> io.TextIOBase:
     # 条件分岐: `path.suffix.lower() == ".gz"` を満たす経路を評価する。
     if path.suffix.lower() == ".gz":
@@ -67,6 +70,8 @@ def _open_text(path: Path) -> io.TextIOBase:
 
     return path.open("r", encoding="utf-8", errors="replace")
 
+
+# 関数: `_rtype` の入出力契約と処理意図を定義する。
 
 def _rtype(line: str) -> str:
     # 条件分岐: `not line` を満たす経路を評価する。
@@ -81,9 +86,13 @@ def _rtype(line: str) -> str:
     return line.split()[0].strip().upper()
 
 
+# 関数: `_is_na` の入出力契約と処理意図を定義する。
+
 def _is_na(tok: str) -> bool:
     return tok.lower() in ("na", "nan")
 
+
+# 関数: `_to_int` の入出力契約と処理意図を定義する。
 
 def _to_int(tok: str) -> Optional[int]:
     # 条件分岐: `tok is None or _is_na(tok)` を満たす経路を評価する。
@@ -96,6 +105,8 @@ def _to_int(tok: str) -> Optional[int]:
         return None
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
+
 def _to_float(tok: str) -> Optional[float]:
     # 条件分岐: `tok is None or _is_na(tok)` を満たす経路を評価する。
     if tok is None or _is_na(tok):
@@ -107,6 +118,8 @@ def _to_float(tok: str) -> Optional[float]:
         return None
 
 
+# クラス: `Context` の責務と境界条件を定義する。
+
 @dataclass
 class Context:
     station_name: Optional[str] = None
@@ -115,11 +128,15 @@ class Context:
     range_type: Optional[int] = None
 
 
+# 関数: `_parse_h2` の入出力契約と処理意図を定義する。
+
 def _parse_h2(tokens: List[str], ctx: Context) -> None:
     # 条件分岐: `len(tokens) >= 2 and not _is_na(tokens[1])` を満たす経路を評価する。
     if len(tokens) >= 2 and not _is_na(tokens[1]):
         ctx.station_name = tokens[1]
 
+
+# 関数: `_parse_h3` の入出力契約と処理意図を定義する。
 
 def _parse_h3(tokens: List[str], ctx: Context) -> None:
     # 条件分岐: `len(tokens) >= 2 and not _is_na(tokens[1])` を満たす経路を評価する。
@@ -127,7 +144,10 @@ def _parse_h3(tokens: List[str], ctx: Context) -> None:
         ctx.target_name = tokens[1]
 
 
+# 関数: `_parse_h4` の入出力契約と処理意図を定義する。
+
 def _parse_h4(tokens: List[str], ctx: Context) -> None:
+    # 関数: `_dt_at` の入出力契約と処理意図を定義する。
     def _dt_at(i: int) -> Optional[datetime]:
         try:
             y = _to_int(tokens[i]); mo = _to_int(tokens[i+1]); d = _to_int(tokens[i+2])
@@ -160,6 +180,8 @@ def _parse_h4(tokens: List[str], ctx: Context) -> None:
     ctx.range_type = rt
 
 
+# 関数: `_epoch_from_sod` の入出力契約と処理意図を定義する。
+
 def _epoch_from_sod(ctx: Context, sod: Optional[float]) -> Optional[datetime]:
     # 条件分岐: `ctx.session_day_utc is None or sod is None` を満たす経路を評価する。
     if ctx.session_day_utc is None or sod is None:
@@ -167,6 +189,8 @@ def _epoch_from_sod(ctx: Context, sod: Optional[float]) -> Optional[datetime]:
 
     return ctx.session_day_utc + timedelta(seconds=float(sod))
 
+
+# 関数: `_one_way_range_m` の入出力契約と処理意図を定義する。
 
 def _one_way_range_m(range_type: Optional[int], tof_s: Optional[float], default_two_way: bool = True) -> Optional[float]:
     # 条件分岐: `tof_s is None` を満たす経路を評価する。
@@ -190,6 +214,8 @@ def _one_way_range_m(range_type: Optional[int], tof_s: Optional[float], default_
 
     return None
 
+
+# 関数: `parse_npt11` の入出力契約と処理意図を定義する。
 
 def parse_npt11(path: Path, default_two_way: bool = True) -> pd.DataFrame:
     ctx = Context()
@@ -243,6 +269,8 @@ def parse_npt11(path: Path, default_two_way: bool = True) -> pd.DataFrame:
 
     return df
 
+
+# 関数: `quicklook` の入出力契約と処理意図を定義する。
 
 def quicklook(df: pd.DataFrame, out_prefix: Path) -> Dict[str, Any]:
     out_prefix.parent.mkdir(parents=True, exist_ok=True)
@@ -362,6 +390,8 @@ def quicklook(df: pd.DataFrame, out_prefix: Path) -> Dict[str, Any]:
     return summary
 
 
+# 関数: `iter_inputs` の入出力契約と処理意図を定義する。
+
 def iter_inputs(path: Path, recursive: bool) -> List[Path]:
     # 条件分岐: `path.is_file()` を満たす経路を評価する。
     if path.is_file():
@@ -386,6 +416,8 @@ def iter_inputs(path: Path, recursive: bool) -> List[Path]:
 
     raise FileNotFoundError(path)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     repo = Path(__file__).resolve().parents[2]

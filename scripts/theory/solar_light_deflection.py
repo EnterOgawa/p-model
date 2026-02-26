@@ -20,6 +20,7 @@ R_SUN_M = 695_700_000.0  # m
 RAD_TO_ARCSEC = (180.0 / math.pi) * 3600.0
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -45,6 +46,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# クラス: `GammaMeasurement` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class GammaMeasurement:
     id: str
@@ -56,6 +59,7 @@ class GammaMeasurement:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "GammaMeasurement":
         return GammaMeasurement(
@@ -70,14 +74,20 @@ class GammaMeasurement:
         )
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_try_load_frozen_beta` の入出力契約と処理意図を定義する。
 
 def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
     path = root / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -92,6 +102,8 @@ def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
     except Exception:
         return None, "output/private/theory/frozen_parameters.json:beta (read failed)"
 
+
+# 関数: `_write_measurements_csv` の入出力契約と処理意図を定義する。
 
 def _write_measurements_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -113,6 +125,8 @@ def _write_measurements_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             w.writerow({k: r.get(k) for k in fields})
 
 
+# 関数: `_load_measurements` の入出力契約と処理意図を定義する。
+
 def _load_measurements(path: Optional[Path]) -> List[GammaMeasurement]:
     # 条件分岐: `not path` を満たす経路を評価する。
     if not path:
@@ -130,12 +144,16 @@ def _load_measurements(path: Optional[Path]) -> List[GammaMeasurement]:
         return []
 
 
+# 関数: `deflection_arcsec` の入出力契約と処理意図を定義する。
+
 def deflection_arcsec(beta: float, impact_parameter_m: float) -> float:
     # Weak-field ray deflection (from Phase 1 derivation):
     # alpha ≈ 4*beta*GM/(c^2 b)
     alpha_rad = (4.0 * beta * GM_SUN) / (C * C * impact_parameter_m)
     return alpha_rad * RAD_TO_ARCSEC
 
+
+# 関数: `compute` の入出力契約と処理意図を定義する。
 
 def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str, Any], np.ndarray, np.ndarray]:
     b_over = np.linspace(1.0, 10.0, 400)
@@ -211,6 +229,8 @@ def compute(beta: float, measurements: List[GammaMeasurement]) -> Tuple[Dict[str
     }
     return payload, b_over, alpha_arcsec
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = Path(__file__).resolve().parents[2]

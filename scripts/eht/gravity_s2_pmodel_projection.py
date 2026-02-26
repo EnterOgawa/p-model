@@ -17,18 +17,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: Any) -> Optional[float]:
     try:
@@ -42,11 +49,15 @@ def _maybe_float(x: Any) -> Optional[float]:
         return None
 
 
+# 関数: `_z_rel_gr` の入出力契約と処理意図を定義する。
+
 def _z_rel_gr(*, epsilon: float, beta: float) -> float:
     # A compact "clock-rate" representation consistent with the 1PN term:
     # z ≈ (1/√(1-2ε))(1/√(1-β²)) - 1 ≈ ε + β²/2 + O(ε², β⁴, εβ²).
     return (1.0 / (math.sqrt(1.0 - 2.0 * epsilon) * math.sqrt(1.0 - beta * beta))) - 1.0
 
+
+# 関数: `_z_rel_pmodel` の入出力契約と処理意図を定義する。
 
 def _z_rel_pmodel(*, epsilon: float, beta: float, delta: float) -> float:
     # Part I core (clock model):
@@ -55,6 +66,8 @@ def _z_rel_pmodel(*, epsilon: float, beta: float, delta: float) -> float:
     #   dτ/dt = exp(-ε) * sqrt((1-β²+δ0)/(1+δ0)).
     return (math.exp(epsilon) * math.sqrt((1.0 + delta) / (1.0 - beta * beta + delta))) - 1.0
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

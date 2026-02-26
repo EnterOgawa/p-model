@@ -46,6 +46,7 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -71,6 +72,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
+
 def _fmt(value: float, digits: int = 6) -> str:
     # 条件分岐: `value == 0.0` を満たす経路を評価する。
     if value == 0.0:
@@ -84,10 +87,14 @@ def _fmt(value: float, digits: int = 6) -> str:
     return f"{value:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_quadrupole_velocity_gradient_summary` の入出力契約と処理意図を定義する。
 
 def _quadrupole_velocity_gradient_summary(*, c_s_p: float = 1.0 / math.sqrt(3.0)) -> Dict[str, Any]:
     cs = float(c_s_p)
@@ -106,6 +113,8 @@ def _quadrupole_velocity_gradient_summary(*, c_s_p: float = 1.0 / math.sqrt(3.0)
         "polarization_source_mapping": "Q/U source in Thomson term is proportional to (1-mu^2) Pi_k; therefore E-mode is sourced by velocity-gradient phase (sin branch).",
     }
 
+
+# 関数: `_phase_shift_complete_proof` の入出力契約と処理意図を定義する。
 
 def _phase_shift_complete_proof(
     *,
@@ -160,6 +169,8 @@ def _phase_shift_complete_proof(
     }
 
 
+# クラス: `Spectrum` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Spectrum:
     ell: np.ndarray
@@ -167,6 +178,8 @@ class Spectrum:
     sigma: np.ndarray
     bestfit: np.ndarray
 
+
+# クラス: `Feature` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class Feature:
@@ -180,15 +193,20 @@ class Feature:
     sigma_dl: float
     ell_half_width: float
 
+    # 関数: `delta_ell` の入出力契約と処理意図を定義する。
     @property
     def delta_ell(self) -> float:
         return float(self.ell_obs - self.ell_pred)
+
+    # 関数: `z_ell` の入出力契約と処理意図を定義する。
 
     @property
     def z_ell(self) -> float:
         denom = max(float(self.ell_half_width), 1e-9)
         return float(self.delta_ell / denom)
 
+
+# 関数: `_read_binned_spectrum` の入出力契約と処理意図を定義する。
 
 def _read_binned_spectrum(path: Path) -> Spectrum:
     arr = np.loadtxt(path)
@@ -204,6 +222,8 @@ def _read_binned_spectrum(path: Path) -> Spectrum:
     bestfit = arr[:, 4].astype(float)
     return Spectrum(ell=ell, dl=dl, sigma=sigma, bestfit=bestfit)
 
+
+# 関数: `_find_extremum` の入出力契約と処理意図を定義する。
 
 def _find_extremum(ell: np.ndarray, y: np.ndarray, lo: float, hi: float, *, kind: str) -> int:
     mask = (ell >= float(lo)) & (ell <= float(hi))
@@ -225,6 +245,8 @@ def _find_extremum(ell: np.ndarray, y: np.ndarray, lo: float, hi: float, *, kind
     return int(idxs[local_idx])
 
 
+# 関数: `_ell_half_width` の入出力契約と処理意図を定義する。
+
 def _ell_half_width(ell: np.ndarray, index: int) -> float:
     # 条件分岐: `index <= 0` を満たす経路を評価する。
     if index <= 0:
@@ -237,6 +259,8 @@ def _ell_half_width(ell: np.ndarray, index: int) -> float:
 
     return float(0.5 * abs(ell[index + 1] - ell[index - 1]))
 
+
+# 関数: `_fit_tt_acoustic` の入出力契約と処理意図を定義する。
 
 def _fit_tt_acoustic(tt: Spectrum) -> Dict[str, Any]:
     peak_ranges = [(150.0, 320.0), (400.0, 650.0), (700.0, 950.0)]
@@ -286,6 +310,8 @@ def _fit_tt_acoustic(tt: Spectrum) -> Dict[str, Any]:
     return {"ell_a": ell_a, "phi": phi, "features": tt_fixed}
 
 
+# 関数: `_detect_ee_peaks` の入出力契約と処理意図を定義する。
+
 def _detect_ee_peaks(ee: Spectrum, *, ell_a: float, phi: float, count: int, window: float) -> List[Feature]:
     rows: List[Feature] = []
     for mode in range(1, int(count) + 1):
@@ -307,6 +333,8 @@ def _detect_ee_peaks(ee: Spectrum, *, ell_a: float, phi: float, count: int, wind
 
     return rows
 
+
+# 関数: `_detect_te_extrema` の入出力契約と処理意図を定義する。
 
 def _detect_te_extrema(te: Spectrum, *, ell_a: float, phi: float, count: int, window: float) -> List[Feature]:
     rows: List[Feature] = []
@@ -331,6 +359,8 @@ def _detect_te_extrema(te: Spectrum, *, ell_a: float, phi: float, count: int, wi
     return rows
 
 
+# 関数: `_fit_phase_offset` の入出力契約と処理意図を定義する。
+
 def _fit_phase_offset(features: Sequence[Feature], *, ell_a: float, phi: float) -> Dict[str, float]:
     # 条件分岐: `not features` を満たす経路を評価する。
     if not features:
@@ -346,6 +376,8 @@ def _fit_phase_offset(features: Sequence[Feature], *, ell_a: float, phi: float) 
 
     return {"delta_fit": delta_fit, "delta_sigma": delta_sigma}
 
+
+# 関数: `_phase_gate` の入出力契約と処理意図を定義する。
 
 def _phase_gate(
     *,
@@ -423,6 +455,8 @@ def _phase_gate(
         "hard_fail": hard_fail,
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -522,6 +556,8 @@ def _plot(
     plt.close(fig)
 
 
+# 関数: `_write_peaks_csv` の入出力契約と処理意図を定義する。
+
 def _write_peaks_csv(path: Path, rows: Sequence[Feature]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
@@ -559,6 +595,8 @@ def _write_peaks_csv(path: Path, rows: Sequence[Feature]) -> None:
             )
 
 
+# 関数: `_copy_to_public` の入出力契約と処理意図を定義する。
+
 def _copy_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str, str]:
     public_dir.mkdir(parents=True, exist_ok=True)
     copied: Dict[str, str] = {}
@@ -569,6 +607,8 @@ def _copy_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str
 
     return copied
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="CMB polarization phase audit (TT/TE/EE with Stokes transport extension).")

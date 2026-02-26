@@ -45,6 +45,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `ZBin` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ZBin:
     zbin: int
@@ -59,6 +60,7 @@ _ZBINS: List[ZBin] = [
 ]
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -84,6 +86,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_table` の入出力契約と処理意図を定義する。
+
 def _read_table(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     s: List[float] = []
     xi: List[float] = []
@@ -106,6 +110,8 @@ def _read_table(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.asarray(s, dtype=float), np.asarray(xi, dtype=float), np.asarray(sig, dtype=float)
 
 
+# 関数: `_read_cov` の入出力契約と処理意図を定義する。
+
 def _read_cov(path: Path) -> np.ndarray:
     rows: List[List[float]] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -124,6 +130,8 @@ def _read_cov(path: Path) -> np.ndarray:
     cov = 0.5 * (cov + cov.T)
     return cov
 
+
+# 関数: `_read_table_two_cols` の入出力契約と処理意図を定義する。
 
 def _read_table_two_cols(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     s: List[float] = []
@@ -144,6 +152,8 @@ def _read_table_two_cols(path: Path) -> Tuple[np.ndarray, np.ndarray]:
 
     return np.asarray(s, dtype=float), np.asarray(xi, dtype=float)
 
+
+# 関数: `_read_satpathy_cov` の入出力契約と処理意図を定義する。
 
 def _read_satpathy_cov(path: Path) -> np.ndarray:
     # Same format as Ross (dense whitespace-separated matrix) but without comment header.
@@ -170,6 +180,8 @@ def _read_satpathy_cov(path: Path) -> np.ndarray:
     return cov
 
 
+# 関数: `_satpathy_s_bins_from_cov` の入出力契約と処理意図を定義する。
+
 def _satpathy_s_bins_from_cov(cov: np.ndarray) -> np.ndarray:
     # Pre-recon covariance is 48x48 (mono+quad). We assume 5 Mpc/h binning from 30.
     n2 = int(cov.shape[0])
@@ -182,6 +194,8 @@ def _satpathy_s_bins_from_cov(cov: np.ndarray) -> np.ndarray:
     ds = 5.0
     return s0 + ds * np.arange(n, dtype=float)
 
+
+# 関数: `_select_by_exact_s` の入出力契約と処理意図を定義する。
 
 def _select_by_exact_s(s_all: np.ndarray, y_all: np.ndarray, s_sel: np.ndarray) -> np.ndarray:
     lookup = {float(x): float(v) for x, v in zip(np.asarray(s_all, dtype=float), np.asarray(y_all, dtype=float))}
@@ -204,10 +218,14 @@ def _select_by_exact_s(s_all: np.ndarray, y_all: np.ndarray, s_sel: np.ndarray) 
     return np.asarray(out, dtype=float)
 
 
+# 関数: `_p2` の入出力契約と処理意図を定義する。
+
 def _p2(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=float)
     return 0.5 * (3.0 * mu * mu - 1.0)
 
+
+# 関数: `_f_ap_pbg_exponential` の入出力契約と処理意図を定義する。
 
 def _f_ap_pbg_exponential(z: float) -> float:
     op = 1.0 + float(z)
@@ -217,6 +235,8 @@ def _f_ap_pbg_exponential(z: float) -> float:
 
     return float(op * math.log(op))
 
+
+# 関数: `_f_ap_lcdm_flat` の入出力契約と処理意図を定義する。
 
 def _f_ap_lcdm_flat(z: float, *, omega_m: float, n_grid: int = 4000) -> float:
     z = float(z)
@@ -242,6 +262,8 @@ def _f_ap_lcdm_flat(z: float, *, omega_m: float, n_grid: int = 4000) -> float:
     return float(ez * integral)
 
 
+# 関数: `_eps_from_f_ap_ratio` の入出力契約と処理意図を定義する。
+
 def _eps_from_f_ap_ratio(*, f_ap_model: float, f_ap_fid: float) -> float:
     # 条件分岐: `not (math.isfinite(f_ap_model) and math.isfinite(f_ap_fid) and f_ap_model > 0...` を満たす経路を評価する。
     if not (math.isfinite(f_ap_model) and math.isfinite(f_ap_fid) and f_ap_model > 0.0 and f_ap_fid > 0.0):
@@ -251,6 +273,8 @@ def _eps_from_f_ap_ratio(*, f_ap_model: float, f_ap_fid: float) -> float:
     ratio = float(f_ap_fid / f_ap_model)
     return float(ratio ** (1.0 / 3.0) - 1.0)
 
+
+# 関数: `_subset_monoquad` の入出力契約と処理意図を定義する。
 
 def _subset_monoquad(
     *,
@@ -302,6 +326,8 @@ def _subset_monoquad(
     }
 
 
+# 関数: `_smooth_basis_labels` の入出力契約と処理意図を定義する。
+
 def _smooth_basis_labels(*, smooth_power_max: int) -> List[str]:
     pmax = int(smooth_power_max)
     # 条件分岐: `pmax < 0` を満たす経路を評価する。
@@ -319,6 +345,8 @@ def _smooth_basis_labels(*, smooth_power_max: int) -> List[str]:
     return labels
 
 
+# 関数: `_n_basis_terms` の入出力契約と処理意図を定義する。
+
 def _n_basis_terms(*, smooth_power_max: int) -> int:
     # constant + inv_s^1..inv_s^p + peak
     pmax = int(smooth_power_max)
@@ -329,6 +357,8 @@ def _n_basis_terms(*, smooth_power_max: int) -> int:
     return 1 + pmax + 1
 
 
+# 関数: `_n_linear_params` の入出力契約と処理意図を定義する。
+
 def _n_linear_params(*, smooth_power_max: int, n_components: int = 1) -> int:
     # xi0_true and xi2_true each use the same basis; repeated per component.
     n_components = int(n_components)
@@ -338,6 +368,8 @@ def _n_linear_params(*, smooth_power_max: int, n_components: int = 1) -> int:
 
     return n_components * 2 * _n_basis_terms(smooth_power_max=smooth_power_max)
 
+
+# 関数: `_design_matrix` の入出力契約と処理意図を定義する。
 
 def _design_matrix(
     s_fid: np.ndarray,
@@ -442,6 +474,7 @@ def _design_matrix(
     i02_b0 = np.full(n, 0.5 * sum_wp2_true, dtype=float)
     i22_b0 = np.full(n, 2.5 * sum_wp2_true_p2, dtype=float)
 
+    # 関数: `integrate` の入出力契約と処理意図を定義する。
     def integrate(f: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
         i00 = 0.5 * np.sum(f * w0[None, :], axis=1)
         i20 = 2.5 * np.sum(f * w_p2[None, :], axis=1)
@@ -489,6 +522,8 @@ def _design_matrix(
     return mtx
 
 
+# 関数: `_gls_fit` の入出力契約と処理意図を定義する。
+
 def _gls_fit(*, y: np.ndarray, mtx: np.ndarray, cov_inv: np.ndarray) -> Dict[str, Any]:
     a = mtx.T @ cov_inv @ mtx
     b = mtx.T @ cov_inv @ y
@@ -502,6 +537,8 @@ def _gls_fit(*, y: np.ndarray, mtx: np.ndarray, cov_inv: np.ndarray) -> Dict[str
     chi2 = float(r.T @ cov_inv @ r)
     return {"x": x, "y_pred": y_pred, "residual": r, "chi2": chi2}
 
+
+# 関数: `_scan_grid` の入出力契約と処理意図を定義する。
 
 def _scan_grid(
     *,
@@ -590,6 +627,8 @@ def _scan_grid(
     return best
 
 
+# 関数: `_predict_curve` の入出力契約と処理意図を定義する。
+
 def _predict_curve(
     *,
     s_grid: np.ndarray,
@@ -630,9 +669,13 @@ def _predict_curve(
     return xi0, xi2
 
 
+# 関数: `_chi2_block` の入出力契約と処理意図を定義する。
+
 def _chi2_block(*, residual: np.ndarray, cov_inv_block: np.ndarray) -> float:
     return float(residual.T @ cov_inv_block @ residual)
 
+
+# 関数: `_profile_ci` の入出力契約と処理意図を定義する。
 
 def _profile_ci(
     *,
@@ -669,6 +712,8 @@ def _profile_ci(
     right = i0
     while right + 1 < int(x.size) and bool(inside[right + 1]):
         right += 1
+
+    # 関数: `interp_cross` の入出力契約と処理意図を定義する。
 
     def interp_cross(i_out: int, i_in: int) -> Optional[float]:
         x0 = float(x[i_out])
@@ -711,6 +756,8 @@ def _profile_ci(
 
     return lo, hi
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: BAO peak fit from BOSS DR12 ξℓ (Ross 2016, post-recon).")

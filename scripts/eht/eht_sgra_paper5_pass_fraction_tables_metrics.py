@@ -18,18 +18,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -49,6 +56,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
+
 def _parse_float(token: str) -> Optional[float]:
     t = token.strip()
     # 条件分岐: `not t` を満たす経路を評価する。
@@ -66,6 +75,8 @@ def _parse_float(token: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_parse_cell_values` の入出力契約と処理意図を定義する。
 
 def _parse_cell_values(cell: str) -> List[float]:
     t = cell.strip()
@@ -85,6 +96,8 @@ def _parse_cell_values(cell: str) -> List[float]:
 
     return out
 
+
+# 関数: `_parse_latex_sci` の入出力契約と処理意図を定義する。
 
 def _parse_latex_sci(token: str) -> Optional[float]:
     t = token.strip()
@@ -108,10 +121,14 @@ def _parse_latex_sci(token: str) -> Optional[float]:
         return None
 
 
+# 関数: `_strip_unescaped_tex_comment` の入出力契約と処理意図を定義する。
+
 def _strip_unescaped_tex_comment(line: str) -> str:
     # TeX comment starts at first unescaped '%'.
     return re.split(r"(?<!\\)%", line, maxsplit=1)[0]
 
+
+# 関数: `_extract_table_rows` の入出力契約と処理意図を定義する。
 
 def _extract_table_rows(tex_lines: Sequence[str]) -> List[Tuple[int, str]]:
     start_idx = None
@@ -167,6 +184,8 @@ def _extract_table_rows(tex_lines: Sequence[str]) -> List[Tuple[int, str]]:
     return rows
 
 
+# 関数: `_rank_constraints` の入出力契約と処理意図を定義する。
+
 def _rank_constraints(by_constraint: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
     items = []
     for name, rec in by_constraint.items():
@@ -189,6 +208,8 @@ def _rank_constraints(by_constraint: Dict[str, Dict[str, Any]]) -> List[Dict[str
     items.sort(key=lambda x: (x["mean"], x["min"]))
     return items
 
+
+# 関数: `_summarize_pass_fail_rows` の入出力契約と処理意図を定義する。
 
 def _summarize_pass_fail_rows(
     rows: Sequence[Dict[str, Any]],
@@ -278,6 +299,8 @@ def _summarize_pass_fail_rows(
     return summary
 
 
+# 関数: `_normalize_constraint_token_paper5` の入出力契約と処理意図を定義する。
+
 def _normalize_constraint_token_paper5(token: str) -> Optional[str]:
     t = token.strip()
     # 条件分岐: `not t` を満たす経路を評価する。
@@ -334,6 +357,8 @@ def _normalize_constraint_token_paper5(token: str) -> Optional[str]:
     return t or None
 
 
+# 関数: `_summarize_near_passing_rows` の入出力契約と処理意図を定義する。
+
 def _summarize_near_passing_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     out: Dict[str, Any] = {"rows_n": int(len(rows)), "constraints_ranked_by_count": [], "fail_combos_top": []}
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -372,6 +397,8 @@ def _summarize_near_passing_rows(rows: Sequence[Dict[str, Any]]) -> Dict[str, An
     out["unknown_rows_n"] = int(unknown_n)
     return out
 
+
+# 関数: `_parse_paper5_near_passing_table` の入出力契約と処理意図を定義する。
 
 def _parse_paper5_near_passing_table(tex_path: Path, *, label: str) -> Dict[str, Any]:
     lines = _read_text(tex_path).splitlines()
@@ -417,6 +444,8 @@ def _parse_paper5_near_passing_table(tex_path: Path, *, label: str) -> Dict[str,
 
     return {"rows_n": int(len(parsed_rows)), "rows": parsed_rows, "summary": _summarize_near_passing_rows(parsed_rows)}
 
+
+# 関数: `_parse_paper5_pass_fail_table` の入出力契約と処理意図を定義する。
 
 def _parse_paper5_pass_fail_table(
     tex_path: Path,
@@ -497,6 +526,8 @@ def _parse_paper5_pass_fail_table(
         "summary": summary,
     }
 
+
+# 関数: `_aggregate_pass_fail_tables` の入出力契約と処理意図を定義する。
 
 def _aggregate_pass_fail_tables(
     pass_fail_tables: Dict[str, Any],
@@ -591,6 +622,8 @@ def _aggregate_pass_fail_tables(
         "constraints_ranked_by_global_fail_fraction": ranked,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

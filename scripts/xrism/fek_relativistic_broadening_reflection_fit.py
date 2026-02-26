@@ -45,9 +45,13 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -56,6 +60,8 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -63,10 +69,14 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_load_rmf_sources_from_detail` の入出力契約と処理意図を定義する。
 
 def _load_rmf_sources_from_detail(detail_json: Dict[str, Any]) -> List[Dict[str, Any]]:
     debug = detail_json.get("debug", {})
@@ -103,6 +113,8 @@ def _load_rmf_sources_from_detail(detail_json: Dict[str, Any]) -> List[Dict[str,
     return out
 
 
+# 関数: `_try_import_xspec` の入出力契約と処理意図を定義する。
+
 def _try_import_xspec() -> Tuple[Optional[object], str]:
     try:
         import xspec  # type: ignore
@@ -111,6 +123,8 @@ def _try_import_xspec() -> Tuple[Optional[object], str]:
     except Exception as e:
         return None, str(e)
 
+
+# 関数: `_find_xspec_cli` の入出力契約と処理意図を定義する。
 
 def _find_xspec_cli(path_hint: str) -> Optional[Path]:
     hint = str(path_hint or "").strip()
@@ -137,6 +151,7 @@ _FLOAT_RE = re.compile(r"[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][-+]?\d+)?")
 _ERR_FLAGS_RE = re.compile(r"\b[TF]{9}\b")
 
 
+# 関数: `_parse_xspec_tclout_line` の入出力契約と処理意図を定義する。
 def _parse_xspec_tclout_line(stdout: str, key: str) -> str:
     # Use the last occurrence to tolerate repeated commands.
     m = None
@@ -145,6 +160,8 @@ def _parse_xspec_tclout_line(stdout: str, key: str) -> str:
 
     return (m.group(1).strip() if m else "").strip()
 
+
+# 関数: `_parse_float_list` の入出力契約と処理意図を定義する。
 
 def _parse_float_list(text: str) -> List[float]:
     out: List[float] = []
@@ -161,6 +178,7 @@ _CARD = 80
 _BLOCK = 2880
 
 
+# 関数: `_read_exact` の入出力契約と処理意図を定義する。
 def _read_exact(f, n: int) -> bytes:  # type: ignore[no-untyped-def]
     b = f.read(int(n))
     # 条件分岐: `b is None` を満たす経路を評価する。
@@ -169,6 +187,8 @@ def _read_exact(f, n: int) -> bytes:  # type: ignore[no-untyped-def]
 
     return b
 
+
+# 関数: `_read_header_blocks` の入出力契約と処理意図を定義する。
 
 def _read_header_blocks(f) -> bytes:  # type: ignore[no-untyped-def]
     chunks: List[bytes] = []
@@ -186,6 +206,8 @@ def _read_header_blocks(f) -> bytes:  # type: ignore[no-untyped-def]
                 return b"".join(chunks)
 
 
+# 関数: `_parse_header_kv` の入出力契約と処理意図を定義する。
+
 def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     kv: Dict[str, str] = {}
     for i in range(0, len(header_bytes), _CARD):
@@ -201,6 +223,8 @@ def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
 
     return kv
 
+
+# 関数: `_read_ogip_spectrum_columns` の入出力契約と処理意図を定義する。
 
 def _read_ogip_spectrum_columns(path: Path) -> Dict[str, List[int]]:
     opener = gzip.open if path.name.lower().endswith(".ftz") or path.name.lower().endswith(".gz") else Path.open
@@ -288,12 +312,16 @@ def _read_ogip_spectrum_columns(path: Path) -> Dict[str, List[int]]:
     return out
 
 
+# 関数: `_pad_spaces_to_block` の入出力契約と処理意図を定義する。
+
 def _pad_spaces_to_block(f, n_written: int) -> None:  # type: ignore[no-untyped-def]
     pad = (-int(n_written)) % _BLOCK
     # 条件分岐: `pad` を満たす経路を評価する。
     if pad:
         f.write(b" " * pad)
 
+
+# 関数: `_fits_card` の入出力契約と処理意図を定義する。
 
 def _fits_card(key: str, value: str, comment: str = "") -> str:
     k = str(key)[:8].ljust(8)
@@ -311,9 +339,13 @@ def _fits_card(key: str, value: str, comment: str = "") -> str:
     return s.ljust(_CARD)
 
 
+# 関数: `_fits_end_card` の入出力契約と処理意図を定義する。
+
 def _fits_end_card() -> str:
     return "END".ljust(_CARD)
 
+
+# クラス: `_PhaHeaderSeed` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _PhaHeaderSeed:
@@ -334,6 +366,8 @@ class _PhaHeaderSeed:
     hduvers1: str
 
 
+# 関数: `_read_pha_header_seed` の入出力契約と処理意図を定義する。
+
 def _read_pha_header_seed(path: Path) -> _PhaHeaderSeed:
     opener = gzip.open if path.name.lower().endswith(".ftz") or path.name.lower().endswith(".gz") else Path.open
     with opener(path, "rb") as f:  # type: ignore[arg-type]
@@ -342,6 +376,7 @@ def _read_pha_header_seed(path: Path) -> _PhaHeaderSeed:
 
     kv = _parse_header_kv(hdr_ext)
 
+    # 関数: `g` の入出力契約と処理意図を定義する。
     def g(key: str, default: str) -> str:
         return str(kv.get(key, default)).strip()
 
@@ -363,6 +398,8 @@ def _read_pha_header_seed(path: Path) -> _PhaHeaderSeed:
         hduvers1=g("HDUVERS1", "'1.1.0'"),
     )
 
+
+# 関数: `_write_ogip_pha` の入出力契約と処理意図を定義する。
 
 def _write_ogip_pha(
     out_path: Path,
@@ -482,6 +519,8 @@ def _write_ogip_pha(
             f.write(b"\0" * pad)
 
 
+# 関数: `_rebin_sum` の入出力契約と処理意図を定義する。
+
 def _rebin_sum(values: List[int], factor: int) -> List[int]:
     # 条件分岐: `factor <= 1` を満たす経路を評価する。
     if factor <= 1:
@@ -495,6 +534,8 @@ def _rebin_sum(values: List[int], factor: int) -> List[int]:
     return [int(sum(values[i : i + factor])) for i in range(0, n, factor)]
 
 
+# 関数: `_rebin_max` の入出力契約と処理意図を定義する。
+
 def _rebin_max(values: List[int], factor: int) -> List[int]:
     # 条件分岐: `factor <= 1` を満たす経路を評価する。
     if factor <= 1:
@@ -507,6 +548,8 @@ def _rebin_max(values: List[int], factor: int) -> List[int]:
 
     return [int(max(values[i : i + factor])) for i in range(0, n, factor)]
 
+
+# 関数: `_maybe_rebin_pha_for_xspec` の入出力契約と処理意図を定義する。
 
 def _maybe_rebin_pha_for_xspec(*, obsid: str, inst_tag: str, ds: Dict[str, Any], out_dir: Path) -> Dict[str, Any]:
     rebin = ds.get("spectrum_rebin") if isinstance(ds.get("spectrum_rebin"), dict) else {}
@@ -616,6 +659,8 @@ def _maybe_rebin_pha_for_xspec(*, obsid: str, inst_tag: str, ds: Dict[str, Any],
     }
 
 
+# 関数: `_build_xspec_xcm_diskline` の入出力契約と処理意図を定義する。
+
 def _build_xspec_xcm_diskline(
     *,
     spec_path: Path,
@@ -627,6 +672,7 @@ def _build_xspec_xcm_diskline(
 ) -> str:
     lo, hi = float(band_keV[0]), float(band_keV[1])
 
+    # 関数: `q` の入出力契約と処理意図を定義する。
     def q(p: Optional[Path]) -> str:
         # 条件分岐: `p is None` を満たす経路を評価する。
         if p is None:
@@ -685,6 +731,8 @@ def _build_xspec_xcm_diskline(
     )
     return "\n".join(lines) + "\n"
 
+
+# 関数: `_run_xspec_fit_diskline_cli` の入出力契約と処理意図を定義する。
 
 def _run_xspec_fit_diskline_cli(
     *,
@@ -849,6 +897,8 @@ def _run_xspec_fit_diskline_cli(
     }
 
 
+# 関数: `_run_xspec_fit_diskline` の入出力契約と処理意図を定義する。
+
 def _run_xspec_fit_diskline(
     *,
     spec_path: Path,
@@ -957,6 +1007,8 @@ def _run_xspec_fit_diskline(
         "method_tag": "xspec_diskline_v2",
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

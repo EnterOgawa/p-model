@@ -37,9 +37,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -48,9 +51,13 @@ def _relpath(p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -77,6 +84,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_try_load_frozen_parameters` の入出力契約と処理意図を定義する。
+
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
     # 条件分岐: `not p.exists()` を満たす経路を評価する。
@@ -101,6 +110,8 @@ def _try_load_frozen_parameters() -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_load_cassini_metrics` の入出力契約と処理意図を定義する。
 
 def _load_cassini_metrics(csv_path: Path) -> Dict[str, Dict[str, float]]:
     rows: Dict[str, Dict[str, float]] = {}
@@ -129,15 +140,21 @@ def _load_cassini_metrics(csv_path: Path) -> Dict[str, Dict[str, float]]:
     return rows
 
 
+# 関数: `_load_gps_metrics` の入出力契約と処理意図を定義する。
+
 def _load_gps_metrics(json_path: Path) -> Dict[str, Any]:
     d = _read_json(json_path)
     return d.get("metrics") if isinstance(d.get("metrics"), dict) else {}
 
 
+# 関数: `_load_llr_summary` の入出力契約と処理意図を定義する。
+
 def _load_llr_summary(json_path: Path) -> Dict[str, Any]:
     d = _read_json(json_path)
     return d.get("median_rms_ns") if isinstance(d.get("median_rms_ns"), dict) else {}
 
+
+# 関数: `_load_mercury_metrics` の入出力契約と処理意図を定義する。
 
 def _load_mercury_metrics(json_path: Path) -> Dict[str, Any]:
     d = _read_json(json_path)
@@ -167,6 +184,8 @@ def _load_mercury_metrics(json_path: Path) -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_load_viking_series` の入出力契約と処理意図を定義する。
 
 def _load_viking_series(csv_path: Path) -> Dict[str, Any]:
     max_us = None
@@ -200,6 +219,8 @@ def _load_viking_series(csv_path: Path) -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_run` の入出力契約と処理意図を定義する。
 
 def _run(cmd: List[str], *, cwd: Path, timeout_s: float, log_path: Path) -> Dict[str, Any]:
     t0 = time.perf_counter()
@@ -239,6 +260,8 @@ def _run(cmd: List[str], *, cwd: Path, timeout_s: float, log_path: Path) -> Dict
 
     return {"ok": proc.returncode == 0, "returncode": proc.returncode, "elapsed_s": elapsed}
 
+
+# 関数: `collect` の入出力契約と処理意図を定義する。
 
 def collect(
     *,
@@ -318,6 +341,7 @@ def collect(
 
     results: Dict[str, Any] = {}
 
+    # 関数: `_want` の入出力契約と処理意図を定義する。
     def _want(test_id: str) -> bool:
         return (tests_filter is None) or (test_id in tests_filter)
 
@@ -430,6 +454,8 @@ def collect(
     meta: Dict[str, Any] = {"matrix": matrix, "templates": templates, "frozen": frozen}
     return payload, meta
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
     _set_japanese_font()
@@ -606,6 +632,8 @@ def _plot(payload: Dict[str, Any], *, out_png: Path) -> None:
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Aggregate weak-field test consistency metrics (Phase 6 / Step 6.2.3).")

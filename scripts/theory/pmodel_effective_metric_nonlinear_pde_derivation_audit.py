@@ -41,9 +41,13 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -52,14 +56,20 @@ def _rel(path: Path) -> str:
         return path.resolve().as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -69,6 +79,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_extract_section` の入出力契約と処理意図を定義する。
 
 def _extract_section(path: Path, heading_fragment: str) -> str:
     lines = path.read_text(encoding="utf-8").splitlines()
@@ -103,13 +115,19 @@ def _extract_section(path: Path, heading_fragment: str) -> str:
     return "\n".join(lines[start:end])
 
 
+# 関数: `_contains_all` の入出力契約と処理意図を定義する。
+
 def _contains_all(text: str, patterns: Sequence[str]) -> bool:
     return all(re.search(pat, text, flags=re.MULTILINE) is not None for pat in patterns)
 
 
+# 関数: `_status_bool` の入出力契約と処理意図を定義する。
+
 def _status_bool(v: bool) -> str:
     return "pass" if bool(v) else "reject"
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(doc_ratios: Dict[str, float], flux_caseb: float, flux_direct: float, out_png: Path) -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
@@ -148,6 +166,8 @@ def _plot(doc_ratios: Dict[str, float], flux_caseb: float, flux_direct: float, o
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Audit nonlinear effective-metric PDE derivation closure.")

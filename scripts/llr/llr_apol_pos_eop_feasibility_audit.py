@@ -23,6 +23,7 @@ OUT_CSV = OUT_DIR / "llr_apol_pos_eop_feasibility_audit.csv"
 OUT_PNG = OUT_DIR / "llr_apol_pos_eop_feasibility_audit.png"
 
 
+# 関数: `_parse_station_xyz` の入出力契約と処理意図を定義する。
 def _parse_station_xyz(path: Path) -> Dict[str, Tuple[float, float, float]]:
     stations: Dict[str, Dict[str, float]] = {}
     in_est = False
@@ -77,6 +78,8 @@ def _parse_station_xyz(path: Path) -> Dict[str, Tuple[float, float, float]]:
     return out
 
 
+# 関数: `_ecef_from_geodetic` の入出力契約と処理意図を定義する。
+
 def _ecef_from_geodetic(lat_deg: float, lon_deg: float, h_m: float) -> Tuple[float, float, float]:
     a = 6_378_137.0
     f = 1.0 / 298.257223563
@@ -89,6 +92,8 @@ def _ecef_from_geodetic(lat_deg: float, lon_deg: float, h_m: float) -> Tuple[flo
     z = (n * (1.0 - e2) + float(h_m)) * math.sin(lat)
     return (x, y, z)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     OUT_DIR.mkdir(parents=True, exist_ok=True)

@@ -41,9 +41,13 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 
+# 関数: `_now_utc_iso` の入出力契約と処理意図を定義する。
+
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_as_relpath` の入出力契約と処理意図を定義する。
 
 def _as_relpath(path: Path) -> str:
     try:
@@ -51,6 +55,8 @@ def _as_relpath(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_strip_metrics_suffix` の入出力契約と処理意図を定義する。
 
 def _strip_metrics_suffix(metrics_path: Path) -> str:
     name = metrics_path.name
@@ -60,6 +66,8 @@ def _strip_metrics_suffix(metrics_path: Path) -> str:
 
     return name[: -len("_metrics.json")]
 
+
+# 関数: `_split_case_and_out_tag` の入出力契約と処理意図を定義する。
 
 def _split_case_and_out_tag(stem: str) -> Tuple[str, str]:
     # 条件分岐: `"__" not in stem` を満たす経路を評価する。
@@ -74,11 +82,16 @@ def _split_case_and_out_tag(stem: str) -> Tuple[str, str]:
     return case_prefix, out_tag
 
 
+# 関数: `_load_metrics` の入出力契約と処理意図を定義する。
+
 def _load_metrics(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_assert_same_case` の入出力契約と処理意図を定義する。
+
 def _assert_same_case(metrics_list: List[Dict[str, Any]], paths: List[Path]) -> None:
+    # 関数: `key` の入出力契約と処理意図を定義する。
     def key(m: Dict[str, Any]) -> Dict[str, Any]:
         params = m.get("params", {}) or {}
         # Compare the case identity (exclude out_tag).
@@ -109,6 +122,8 @@ def _assert_same_case(metrics_list: List[Dict[str, Any]], paths: List[Path]) -> 
                 f"path={p}"
             )
 
+
+# 関数: `_mean_npz_arrays` の入出力契約と処理意図を定義する。
 
 def _mean_npz_arrays(npz_paths: List[Path]) -> Dict[str, np.ndarray]:
     # 条件分岐: `not npz_paths` を満たす経路を評価する。
@@ -148,6 +163,8 @@ def _mean_npz_arrays(npz_paths: List[Path]) -> Dict[str, np.ndarray]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Combine xi_from_catalogs outputs across multiple random realizations.")

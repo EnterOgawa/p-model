@@ -19,18 +19,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_summary` の入出力契約と処理意図を定義する。
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     xs = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
@@ -59,6 +66,8 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_clean_test_name` の入出力契約と処理意図を定義する。
+
 def _clean_test_name(s: str) -> str:
     t = s
     t = t.replace(r"\,$-$\,", "-")
@@ -68,6 +77,8 @@ def _clean_test_name(s: str) -> str:
     t = re.sub(r"\s+", " ", t).strip()
     return t
 
+
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 
 def _parse_float(s: str) -> Optional[float]:
     t = s.strip()
@@ -81,6 +92,8 @@ def _parse_float(s: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_parse_s_token` の入出力契約と処理意図を定義する。
 
 def _parse_s_token(token: str) -> Optional[Dict[str, Any]]:
     t = token.strip()
@@ -118,6 +131,8 @@ def _parse_s_token(token: str) -> Optional[Dict[str, Any]]:
     return {"value": float(v), "unit": "unknown"}
 
 
+# クラス: `SysErrRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class SysErrRow:
     test_tex: str
@@ -131,6 +146,8 @@ class SysErrRow:
     source_anchor: Dict[str, Any]
 
 
+# 関数: `_parse_int` の入出力契約と処理意図を定義する。
+
 def _parse_int(s: str) -> Optional[int]:
     t = s.strip()
     # 条件分岐: `not t` を満たす経路を評価する。
@@ -142,6 +159,8 @@ def _parse_int(s: str) -> Optional[int]:
     except Exception:
         return None
 
+
+# 関数: `_extract_sgra_syserr_table_rows` の入出力契約と処理意図を定義する。
 
 def _extract_sgra_syserr_table_rows(tex_lines: Sequence[str], *, source_path: Path) -> List[SysErrRow]:
     rows: List[SysErrRow] = []
@@ -201,6 +220,8 @@ def _extract_sgra_syserr_table_rows(tex_lines: Sequence[str], *, source_path: Pa
 
     return rows
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

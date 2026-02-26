@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # --- Reference Earth parameters (SI) ---
@@ -45,9 +46,13 @@ class Config:
     dpi: int = 175
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(root: Path, p: Path) -> str:
     try:
@@ -56,20 +61,28 @@ def _relpath(root: Path, p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_x` の入出力契約と処理意図を定義する。
 
 def _x(*, gm_m3_s2: float, r_m: float, c_m_per_s: float) -> float:
     # x ≡ GM/(c^2 r)
     return float(gm_m3_s2 / ((c_m_per_s**2) * r_m))
 
 
+# 関数: `_clock_rate_pmodel` の入出力契約と処理意図を定義する。
+
 def _clock_rate_pmodel(*, x_dimless: float) -> float:
     # P-model stationary clock map for point mass:
     #   ln(P/P0) = x  => P0/P = exp(-x)
     return float(math.exp(-x_dimless))
 
+
+# 関数: `_clock_rate_gr_schwarzschild` の入出力契約と処理意図を定義する。
 
 def _clock_rate_gr_schwarzschild(*, x_dimless: float) -> float:
     # GR stationary clock map (Schwarzschild):
@@ -79,6 +92,8 @@ def _clock_rate_gr_schwarzschild(*, x_dimless: float) -> float:
 
     return float(math.sqrt(1.0 - 2.0 * x_dimless))
 
+
+# 関数: `_redshift_between_radii` の入出力契約と処理意図を定義する。
 
 def _redshift_between_radii(
     *, gm_m3_s2: float, r_low_m: float, r_high_m: float, cfg: Config, body_label: str = ""
@@ -130,6 +145,8 @@ def _redshift_between_radii(
     }
 
 
+# 関数: `_required_precision_for_3sigma` の入出力契約と処理意図を定義する。
+
 def _required_precision_for_3sigma(*, delta_abs: float) -> Optional[float]:
     # 条件分岐: `not math.isfinite(delta_abs) or delta_abs <= 0` を満たす経路を評価する。
     if not math.isfinite(delta_abs) or delta_abs <= 0:
@@ -138,11 +155,15 @@ def _required_precision_for_3sigma(*, delta_abs: float) -> Optional[float]:
     return float(delta_abs / 3.0)
 
 
+# 関数: `_atom_gyro_phase_rad` の入出力契約と処理意図を定義する。
+
 def _atom_gyro_phase_rad(*, keff_1_per_m: float, v_transverse_m_per_s: float, omega_rad_per_s: float, T_s: float) -> float:
     # Light-pulse atom gyroscope proxy (Sagnac-like term):
     #   φ_Ω ≈ 2 k_eff v_trans Ω T²
     return float(2.0 * keff_1_per_m * v_transverse_m_per_s * omega_rad_per_s * (T_s**2))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -167,6 +188,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow({k: row.get(k) for k in fields})
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -231,6 +254,7 @@ def main() -> None:
         gm_m3_s2=cfg.gm_earth_m3_s2, r_low_m=r0, r_high_m=r0 + clock_h_m, cfg=cfg, body_label="Earth"
     )
 
+    # 関数: `_phase_delta_from_rel` の入出力契約と処理意図を定義する。
     def _phase_delta_from_rel(phi_rad: float, rel: float) -> float:
         return float(phi_rad * rel)
 

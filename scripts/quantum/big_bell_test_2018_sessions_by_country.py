@@ -12,11 +12,14 @@ from xml.etree import ElementTree as ET
 _NS_MAIN = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 
 
+# クラス: `CountrySessions` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class CountrySessions:
     country: str
     sessions: int
 
+
+# 関数: `_cellref_to_rowcol` の入出力契約と処理意図を定義する。
 
 def _cellref_to_rowcol(cellref: str) -> tuple[int, int]:
     col = ""
@@ -35,6 +38,8 @@ def _cellref_to_rowcol(cellref: str) -> tuple[int, int]:
     return int(row), c
 
 
+# 関数: `_load_shared_strings` の入出力契約と処理意図を定義する。
+
 def _load_shared_strings(z: zipfile.ZipFile) -> List[str]:
     ss = ET.fromstring(z.read("xl/sharedStrings.xml"))
     out: List[str] = []
@@ -50,6 +55,8 @@ def _load_shared_strings(z: zipfile.ZipFile) -> List[str]:
 
     return out
 
+
+# 関数: `_sheet_cells` の入出力契約と処理意図を定義する。
 
 def _sheet_cells(z: zipfile.ZipFile, *, sheet_xml: str, shared_strings: List[str]) -> Dict[tuple[int, int], str]:
     root = ET.fromstring(z.read(sheet_xml))
@@ -81,6 +88,8 @@ def _sheet_cells(z: zipfile.ZipFile, *, sheet_xml: str, shared_strings: List[str
 
     return cells
 
+
+# 関数: `_load_sessions_by_country` の入出力契約と処理意図を定義する。
 
 def _load_sessions_by_country(xlsx_path: Path) -> List[CountrySessions]:
     # 条件分岐: `not xlsx_path.exists()` を満たす経路を評価する。
@@ -118,6 +127,8 @@ def _load_sessions_by_country(xlsx_path: Path) -> List[CountrySessions]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(description="Summarize Big Bell Test 2018 source data: sessions by country (Fig.2a).")

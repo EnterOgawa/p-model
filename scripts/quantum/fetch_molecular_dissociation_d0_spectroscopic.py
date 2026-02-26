@@ -12,13 +12,18 @@ from typing import Any, Optional
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -33,6 +38,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, force: bool) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -51,12 +58,16 @@ def _download(url: str, out_path: Path, *, force: bool) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_strip_tags` の入出力契約と処理意図を定義する。
+
 def _strip_tags(s: str) -> str:
     ss = re.sub(r"<[^>]+>", "", s)
     ss = html_module.unescape(ss).replace("\u00a0", " ")
     ss = re.sub(r"\s+", " ", ss).strip()
     return ss
 
+
+# 関数: `_extract_arxiv_abstract` の入出力契約と処理意図を定義する。
 
 def _extract_arxiv_abstract(html: str) -> str:
     m = re.search(r'<blockquote class="abstract[^"]*">(.*?)</blockquote>', html, flags=re.S | re.M)
@@ -67,6 +78,8 @@ def _extract_arxiv_abstract(html: str) -> str:
     txt = _strip_tags(m.group(1))
     return re.sub(r"^Abstract:\s*", "", txt)
 
+
+# 関数: `_parse_value_with_paren_unc` の入出力契約と処理意図を定義する。
 
 def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float]]:
     """
@@ -113,6 +126,8 @@ def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float
     return val, unc
 
 
+# 関数: `_extract_d0_from_arxiv_abstract` の入出力契約と処理意図を定義する。
+
 def _extract_d0_from_arxiv_abstract(abstract: str, *, molecule: str) -> dict[str, Any]:
     """
     Extract spectroscopic dissociation energy D0 from an arXiv abstract.
@@ -158,6 +173,8 @@ def _extract_d0_from_arxiv_abstract(abstract: str, *, molecule: str) -> dict[str
     raise ValueError(f"unsupported molecule: {molecule}")
 
 
+# 関数: `_extract_d0_from_vu_html` の入出力契約と処理意図を定義する。
+
 def _extract_d0_from_vu_html(html: str) -> dict[str, Any]:
     # Pattern: ... D0(HD)=36405.78253(7)cm-1 ...
     m = re.search(r"D0\(HD\)\s*=\s*([0-9]+(?:\.[0-9]+)?\(\d+\))\s*cm-1", html)
@@ -175,6 +192,8 @@ def _extract_d0_from_vu_html(html: str) -> dict[str, Any]:
     val, unc = _parse_value_with_paren_unc(token)
     return {"d0_token": token, "d0_cm^-1": val, "d0_unc_cm^-1": unc, "rotational_N": 0}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -23,9 +24,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
     """
@@ -57,6 +62,8 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
+# 関数: `_require_float` の入出力契約と処理意図を定義する。
+
 def _require_float(obj: object, *, path: Path, key_path: str) -> float:
     try:
         v = float(obj)
@@ -71,6 +78,8 @@ def _require_float(obj: object, *, path: Path, key_path: str) -> float:
     return v
 
 
+# 関数: `_safe_div` の入出力契約と処理意図を定義する。
+
 def _safe_div(numerator: float, denominator: float) -> float:
     # 条件分岐: `denominator == 0.0` を満たす経路を評価する。
     if denominator == 0.0:
@@ -78,6 +87,8 @@ def _safe_div(numerator: float, denominator: float) -> float:
 
     return numerator / denominator
 
+
+# 関数: `_load_ame2020_rows` の入出力契約と処理意図を定義する。
 
 def _load_ame2020_rows(*, root: Path, src_dirname: str) -> list[dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
@@ -117,6 +128,8 @@ def _load_ame2020_rows(*, root: Path, src_dirname: str) -> list[dict[str, object
 
     return out
 
+
+# 関数: `_load_iaea_charge_radii_csv` の入出力契約と処理意図を定義する。
 
 def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[int, int], dict[str, float]]:
     import csv as csv_lib
@@ -160,6 +173,8 @@ def _load_iaea_charge_radii_csv(*, root: Path, src_dirname: str) -> dict[tuple[i
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(
@@ -272,14 +287,21 @@ def main(argv: list[str] | None = None) -> int:
     magic_z = {2, 8, 20, 28, 50, 82}
     magic_n = {2, 8, 20, 28, 50, 82, 126}
 
+    # 関数: `parity_class` の入出力契約と処理意図を定義する。
     def parity_class(z: int, n: int) -> str:
         return ("e" if (z % 2 == 0) else "o") + ("e" if (n % 2 == 0) else "o")
+
+    # 関数: `c_collective` の入出力契約と処理意図を定義する。
 
     def c_collective(a: int) -> int:
         return a - 1
 
+    # 関数: `c_pn_only` の入出力契約と処理意図を定義する。
+
     def c_pn_only(z: int, n: int) -> int:
         return z * n
+
+    # 関数: `c_pairwise_all` の入出力契約と処理意図を定義する。
 
     def c_pairwise_all(a: int) -> int:
         return a * (a - 1) // 2
@@ -382,6 +404,7 @@ def main(argv: list[str] | None = None) -> int:
         c1 = c_pn_only(z, n)
         c2 = c_pairwise_all(a)
 
+        # 関数: `pred` の入出力契約と処理意図を定義する。
         def pred(c_factor: int) -> tuple[float, float, float, float]:
             b_pred = 2.0 * float(c_factor) * float(j_mev)
             sigma_b_pred = 2.0 * float(c_factor) * float(sigma_j_mev)
@@ -492,6 +515,8 @@ def main(argv: list[str] | None = None) -> int:
             row["log10_ratio_collective"] = float("nan")
             row["z_robust_log10_ratio_collective"] = float("nan")
             row["is_outlier_robust_abs_z_gt3"] = False
+
+    # 関数: `robust_stats` の入出力契約と処理意図を定義する。
 
     def robust_stats(vals: list[float]) -> dict[str, float]:
         # 条件分岐: `not vals` を満たす経路を評価する。

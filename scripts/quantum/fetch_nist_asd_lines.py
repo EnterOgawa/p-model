@@ -14,6 +14,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
+# クラス: `TargetLine` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class TargetLine:
     id: str
@@ -22,13 +23,19 @@ class TargetLine:
     prefer_max_Aki: bool = True
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -44,6 +51,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_sanitize_token` の入出力契約と処理意図を定義する。
+
 def _sanitize_token(s: str) -> str:
     s = s.strip().lower()
     s = s.replace("+", " ")
@@ -51,6 +60,8 @@ def _sanitize_token(s: str) -> str:
     s = re.sub(r"[^a-z0-9_]+", "", s)
     return s or "unknown"
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -65,6 +76,8 @@ def _download(url: str, out_path: Path) -> None:
 
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
+
+# 関数: `_read_tsv` の入出力契約と処理意図を定義する。
 
 def _read_tsv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     txt = path.read_text(encoding="utf-8", errors="replace")
@@ -100,6 +113,8 @@ def _read_tsv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
     return header, rows
 
 
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
+
 def _as_float(s: str | None) -> float | None:
     # 条件分岐: `s is None` を満たす経路を評価する。
     if s is None:
@@ -116,6 +131,8 @@ def _as_float(s: str | None) -> float | None:
         return None
 
 
+# 関数: `_derive_lambda_from_obs_nu_A` の入出力契約と処理意図を定義する。
+
 def _derive_lambda_from_obs_nu_A(nu_invA: float) -> float | None:
     # 条件分岐: `nu_invA == 0.0` を満たす経路を評価する。
     if nu_invA == 0.0:
@@ -124,6 +141,8 @@ def _derive_lambda_from_obs_nu_A(nu_invA: float) -> float | None:
 
     return -1.0 / nu_invA
 
+
+# 関数: `_pick_line_for_target` の入出力契約と処理意図を定義する。
 
 def _pick_line_for_target(rows: list[dict[str, str]], target: TargetLine) -> dict[str, Any] | None:
     candidates: list[dict[str, Any]] = []
@@ -178,6 +197,8 @@ def _pick_line_for_target(rows: list[dict[str, str]], target: TargetLine) -> dic
 
     return min(candidates, key=lambda c: abs(float(c["delta_A"])))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

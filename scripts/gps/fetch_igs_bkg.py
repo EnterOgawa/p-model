@@ -33,9 +33,12 @@ BASE = "https://igs.bkg.bund.de/root_ftp/IGS"
 GPS_EPOCH = date(1980, 1, 6)  # start of GPS week 0
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -46,13 +49,19 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_gps_week` の入出力契約と処理意図を定義する。
+
 def _gps_week(d: date) -> int:
     return (d - GPS_EPOCH).days // 7
 
 
+# 関数: `_date_from_year_doy` の入出力契約と処理意図を定義する。
+
 def _date_from_year_doy(year: int, doy: int) -> date:
     return date(year, 1, 1) + timedelta(days=doy - 1)
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, gz_path: Path, *, force: bool) -> None:
     gz_path.parent.mkdir(parents=True, exist_ok=True)
@@ -70,6 +79,8 @@ def _download(url: str, gz_path: Path, *, force: bool) -> None:
     print(f"[ok] saved: {gz_path} ({gz_path.stat().st_size} bytes)")
 
 
+# 関数: `_gunzip` の入出力契約と処理意図を定義する。
+
 def _gunzip(src_gz: Path, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
@@ -85,6 +96,8 @@ def _gunzip(src_gz: Path, dst: Path, *, force: bool) -> None:
     print(f"[ok] unzip: {dst} ({dst.stat().st_size} bytes)")
 
 
+# クラス: `Targets` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Targets:
     year: int
@@ -97,6 +110,8 @@ class Targets:
     clk_out: str
     sp3_out: str
 
+
+# 関数: `_targets_for` の入出力契約と処理意図を定義する。
 
 def _targets_for(year: int, doy: int) -> Targets:
     d = _date_from_year_doy(year, doy)
@@ -117,6 +132,8 @@ def _targets_for(year: int, doy: int) -> Targets:
         sp3_out=sp3,
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

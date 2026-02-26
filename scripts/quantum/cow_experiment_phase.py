@@ -11,6 +11,7 @@ from typing import Any
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # Geometry: Mannheim (arXiv:gr-qc/9611037) describes a square ABCD of side H.
@@ -32,6 +33,8 @@ class Config:
     v_grid_m_per_s: tuple[float, ...] = (1000.0, 1500.0, 2000.0, 2500.0, 3000.0)
 
 
+# 関数: `cow_phase_shift_rad` の入出力契約と処理意図を定義する。
+
 def cow_phase_shift_rad(*, m_kg: float, g_m_per_s2: float, H_m: float, v0_m_per_s: float) -> float:
     """
     COW phase shift for a square interferometer of side H (Mannheim gr-qc/9611037):
@@ -41,9 +44,13 @@ def cow_phase_shift_rad(*, m_kg: float, g_m_per_s2: float, H_m: float, v0_m_per_
     return float(-m_kg * g_m_per_s2 * (H_m**2) / (hbar * v0_m_per_s))
 
 
+# 関数: `_now_iso_utc` の入出力契約と処理意図を定義する。
+
 def _now_iso_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_reference_catalog` の入出力契約と処理意図を定義する。
 
 def _reference_catalog(*, cfg: Config, phi0_cycles: float) -> list[dict[str, Any]]:
     """
@@ -162,6 +169,8 @@ def _reference_catalog(*, cfg: Config, phi0_cycles: float) -> list[dict[str, Any
     ]
 
 
+# 関数: `_hv_sweep_rows` の入出力契約と処理意図を定義する。
+
 def _hv_sweep_rows(*, cfg: Config, m_n: float) -> list[dict[str, float]]:
     rows: list[dict[str, float]] = []
     for h_m in cfg.H_grid_m:
@@ -181,6 +190,8 @@ def _hv_sweep_rows(*, cfg: Config, m_n: float) -> list[dict[str, float]]:
     return rows
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -188,6 +199,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]], fieldnames: list[str]) ->
         for row in rows:
             writer.writerow(row)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

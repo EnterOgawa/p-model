@@ -37,9 +37,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -54,6 +57,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -81,6 +86,8 @@ def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     }
 
 
+# 関数: `_http_status` の入出力契約と処理意図を定義する。
+
 def _http_status(url: str, *, timeout_sec: float) -> Tuple[Optional[int], Optional[str]]:
     req = Request(url, method="HEAD")
     try:
@@ -91,6 +98,8 @@ def _http_status(url: str, *, timeout_sec: float) -> Tuple[Optional[int], Option
     except Exception as e:
         return None, str(e)
 
+
+# 関数: `_fetch_cached_html` の入出力契約と処理意図を定義する。
 
 def _fetch_cached_html(url: str, cache_path: Path, *, offline: bool, timeout_sec: float) -> Tuple[Optional[str], Optional[str]]:
     cache_path.parent.mkdir(parents=True, exist_ok=True)
@@ -111,6 +120,8 @@ def _fetch_cached_html(url: str, cache_path: Path, *, offline: bool, timeout_sec
     except Exception as e:
         return None, str(e)
 
+
+# 関数: `_parse_apache_index_entries` の入出力契約と処理意図を定義する。
 
 def _parse_apache_index_entries(html_text: str, *, include_dirs: bool, include_files: bool) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
@@ -163,6 +174,8 @@ def _parse_apache_index_entries(html_text: str, *, include_dirs: bool, include_f
     return out
 
 
+# 関数: `_pick_latest_versioned_name` の入出力契約と処理意図を定義する。
+
 def _pick_latest_versioned_name(names: List[str], *, prefix: str, suffix: str) -> Tuple[Optional[str], Optional[int]]:
     best_name = None
     best_v = None
@@ -182,6 +195,8 @@ def _pick_latest_versioned_name(names: List[str], *, prefix: str, suffix: str) -
     return best_name, best_v
 
 
+# 関数: `_read_lines` の入出力契約と処理意図を定義する。
+
 def _read_lines(path: Path) -> List[str]:
     try:
         return path.read_text(encoding="utf-8").splitlines()
@@ -191,6 +206,8 @@ def _read_lines(path: Path) -> List[str]:
         except Exception:
             return []
 
+
+# 関数: `_inventory_summary` の入出力契約と処理意図を定義する。
 
 def _inventory_summary(lines: List[str]) -> Dict[str, Any]:
     type_counts: Dict[str, int] = {}
@@ -253,6 +270,8 @@ def _inventory_summary(lines: List[str]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib
@@ -278,6 +297,8 @@ def _set_japanese_font() -> None:
     except Exception:
         return
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="BepiColombo SPICE (PSA bc_spice) status + inventory cache")

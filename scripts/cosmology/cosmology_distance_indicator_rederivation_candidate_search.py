@@ -63,6 +63,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -88,14 +89,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -120,6 +127,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(x: Any) -> Optional[float]:
     try:
         v = float(x)
@@ -133,6 +142,8 @@ def _maybe_float(x: Any) -> Optional[float]:
 
     return float(v)
 
+
+# 関数: `_classify_sigma` の入出力契約と処理意図を定義する。
 
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
@@ -152,6 +163,8 @@ def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     return ("ng", "#d62728")
 
 
+# クラス: `DDRConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRConstraint:
     id: str
@@ -166,6 +179,7 @@ class DDRConstraint:
     sigma_policy: str = "raw"
     category: Optional[str] = None
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "DDRConstraint":
         sigma = float(j["epsilon0_sigma"])
@@ -181,6 +195,8 @@ class DDRConstraint:
         )
 
 
+# クラス: `GaussianConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class GaussianConstraint:
     id: str
@@ -193,6 +209,7 @@ class GaussianConstraint:
     assumes_cddr: Optional[bool]
     source: Dict[str, Any]
 
+    # 関数: `is_independent` の入出力契約と処理意図を定義する。
     def is_independent(self) -> bool:
         # Conservative filter: avoid BAO/CMB compression and avoid assuming CDDR.
         if self.uses_bao is True:
@@ -211,6 +228,8 @@ class GaussianConstraint:
         return True
 
 
+# 関数: `_pick_tightest` の入出力契約と処理意図を定義する。
+
 def _pick_tightest(rows: Sequence[GaussianConstraint]) -> Optional[GaussianConstraint]:
     best: Optional[GaussianConstraint] = None
     best_sig = float("inf")
@@ -228,6 +247,8 @@ def _pick_tightest(rows: Sequence[GaussianConstraint]) -> Optional[GaussianConst
 
     return best
 
+
+# 関数: `_load_ddr_systematics_envelope` の入出力契約と処理意図を定義する。
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     """
@@ -272,6 +293,8 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_apply_ddr_sigma_policy` の入出力契約と処理意図を定義する。
+
 def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> DDRConstraint:
     # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
@@ -295,6 +318,8 @@ def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[s
         category=str(row.get("category") or "") or None,
     )
 
+
+# 関数: `_as_gaussian_list` の入出力契約と処理意図を定義する。
 
 def _as_gaussian_list(
     rows: Sequence[Dict[str, Any]],
@@ -339,6 +364,8 @@ def _as_gaussian_list(
     return out
 
 
+# 関数: `_as_pT_constraints` の入出力契約と処理意図を定義する。
+
 def _as_pT_constraints(rows: Sequence[Dict[str, Any]]) -> List[GaussianConstraint]:
     """
     Convert CMB temperature scaling constraints (beta_T) into p_T=1-beta_T.
@@ -373,6 +400,8 @@ def _as_pT_constraints(rows: Sequence[Dict[str, Any]]) -> List[GaussianConstrain
 
     return out
 
+
+# 関数: `_wls_fit` の入出力契約と処理意図を定義する。
 
 def _wls_fit(
     *,
@@ -470,6 +499,8 @@ def _wls_fit(
     }
 
 
+# 関数: `_choose_best` の入出力契約と処理意図を定義する。
+
 def _choose_best(
     candidates: Sequence[Dict[str, Any]],
 ) -> Optional[Dict[str, Any]]:
@@ -477,11 +508,15 @@ def _choose_best(
     if not candidates:
         return None
 
+    # 関数: `key` の入出力契約と処理意図を定義する。
+
     def key(c: Dict[str, Any]) -> Tuple[float, float]:
         return (float(c["fit"]["max_abs_z"]), float(c["fit"]["chi2"]))
 
     return min(candidates, key=key)
 
+
+# 関数: `_best_with_fixed_opacity` の入出力契約と処理意図を定義する。
 
 def _best_with_fixed_opacity(
     *,
@@ -518,6 +553,8 @@ def _best_with_fixed_opacity(
 
     return _choose_best(candidates)
 
+
+# 関数: `_compute_per_ddr` の入出力契約と処理意図を定義する。
 
 def _compute_per_ddr(
     *,
@@ -628,6 +665,8 @@ def _compute_per_ddr(
     return per_ddr
 
 
+# 関数: `_pick_representative` の入出力契約と処理意図を定義する。
+
 def _pick_representative(
     rows: Sequence[Dict[str, Any]],
     uses_bao: bool,
@@ -655,6 +694,8 @@ def _pick_representative(
     return best
 
 
+# 関数: `_parse_scales` の入出力契約と処理意図を定義する。
+
 def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
     for tok in (s or "").split(","):
@@ -680,6 +721,8 @@ def _parse_scales(s: str) -> List[float]:
     return out
 
 
+# 関数: `_plot_bao_sigma_scan` の入出力契約と処理意図を定義する。
+
 def _plot_bao_sigma_scan(
     *,
     out_png: Path,
@@ -690,6 +733,7 @@ def _plot_bao_sigma_scan(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    # 関数: `_colors_for_limiting` の入出力契約と処理意図を定義する。
     def _colors_for_limiting() -> Dict[str, str]:
         return {
             "DDR ε0": "#1f77b4",
@@ -702,6 +746,7 @@ def _plot_bao_sigma_scan(
 
     color_map = _colors_for_limiting()
 
+    # 関数: `_series_to_xy` の入出力契約と処理意図を定義する。
     def _series_to_xy(series: Sequence[Dict[str, Any]]) -> Tuple[List[float], List[float], List[str]]:
         xs: List[float] = []
         ys: List[float] = []
@@ -716,6 +761,7 @@ def _plot_bao_sigma_scan(
     x_bao, y_bao, lim_bao = _series_to_xy(rep_bao_series)
     x_nb, y_nb, lim_nb = _series_to_xy(rep_no_bao_series)
 
+    # 関数: `_crossing_x_log` の入出力契約と処理意図を定義する。
     def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
         # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
         if not xs or len(xs) != len(ys):
@@ -833,6 +879,8 @@ def _plot_bao_sigma_scan(
     plt.close(fig)
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(
     *,
     out_png: Path,
@@ -842,6 +890,7 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    # 関数: `_short_obs` の入出力契約と処理意図を定義する。
     def _short_obs(s: Any) -> str:
         t = str(s or "").strip()
         # 条件分岐: `not t` を満たす経路を評価する。
@@ -850,6 +899,8 @@ def _plot(
         # Keep only the leading label (avoid extremely long strings in plots).
 
         return t.split(" / ")[0].strip()
+
+    # 関数: `_summarize_candidate` の入出力契約と処理意図を定義する。
 
     def _summarize_candidate(*, prefix: str, cand: Optional[Dict[str, Any]]) -> List[str]:
         # 条件分岐: `not isinstance(cand, dict)` を満たす経路を評価する。
@@ -1053,6 +1104,8 @@ def _plot(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()
@@ -1329,6 +1382,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             rep_b = _pick_representative(per_ddr_f, True, prefer_ind=True)
             rep_n = _pick_representative(per_ddr_f, False, prefer_ind=True)
 
+            # 関数: `_extract` の入出力契約と処理意図を定義する。
             def _extract(rep: Optional[Dict[str, Any]], *, f: float) -> Dict[str, Any]:
                 # 条件分岐: `rep is None` を満たす経路を評価する。
                 if rep is None:
@@ -1363,6 +1417,7 @@ def main(argv: Optional[List[str]] = None) -> int:
             out_dir / "cosmology_distance_indicator_rederivation_candidate_search_bao_sigma_scan_metrics.json"
         )
 
+        # 関数: `_crossing_x_log` の入出力契約と処理意図を定義する。
         def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
             # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
             if not xs or len(xs) != len(ys):

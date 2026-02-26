@@ -39,9 +39,12 @@ C = 299792458.0
 M_SUN = 1.98847e30
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -49,6 +52,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -63,10 +68,14 @@ def _fmt_float(x: float, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -93,6 +102,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_integrate_psi` の入出力契約と処理意図を定義する。
+
 def _integrate_psi(x: np.ndarray, compactness_c: float) -> np.ndarray:
     integrand = compactness_c * x / (x**3 + 1.0)
     xr = x[::-1]
@@ -103,6 +114,8 @@ def _integrate_psi(x: np.ndarray, compactness_c: float) -> np.ndarray:
     tail = compactness_c / max(float(x[-1]), 1.0)
     return integ_rev[::-1] + tail
 
+
+# 関数: `_single_audit` の入出力契約と処理意図を定義する。
 
 def _single_audit(
     *,
@@ -202,6 +215,8 @@ def _single_audit(
     }
 
 
+# 関数: `_build_sweep` の入出力契約と処理意図を定義する。
+
 def _build_sweep(
     *,
     mass_kg: float,
@@ -250,6 +265,8 @@ def _build_sweep(
     }
 
 
+# 関数: `_overall_decision` の入出力契約と処理意図を定義する。
+
 def _overall_decision(baseline: Dict[str, Any]) -> Dict[str, Any]:
     central_finite = bool(baseline.get("central_quantity_finite"))
     stability = bool((baseline.get("numerical_stability") or {}).get("pass"))
@@ -281,6 +298,8 @@ def _overall_decision(baseline: Dict[str, Any]) -> Dict[str, Any]:
         "reject_reason": reason,
     }
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, sweep_rows: List[Dict[str, Any]], baseline_c: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -319,6 +338,8 @@ def _write_csv(path: Path, sweep_rows: List[Dict[str, Any]], baseline_c: float) 
                 ]
             )
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -398,6 +419,8 @@ def _plot(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Run Step 8.7.30 blackhole interior regularization audit.")

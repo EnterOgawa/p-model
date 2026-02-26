@@ -46,9 +46,12 @@ _DETECTOR_SITES = {
 }
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -75,6 +78,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_slugify` の入出力契約と処理意図を定義する。
+
 def _slugify(s: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (s or "").strip())
     while "__" in out:
@@ -82,6 +87,8 @@ def _slugify(s: str) -> str:
 
     return out.strip("_") or "event"
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> float:
     try:
@@ -92,10 +99,14 @@ def _safe_float(x: Any) -> float:
     return v if math.isfinite(v) else float("nan")
 
 
+# 関数: `_detector_order` の入出力契約と処理意図を定義する。
+
 def _detector_order(det: str) -> int:
     order = {"H1": 0, "L1": 1, "V1": 2, "K1": 3}
     return int(order.get(str(det).upper(), 999))
 
+
+# 関数: `_canonical_pair` の入出力契約と処理意図を定義する。
 
 def _canonical_pair(det_a: str, det_b: str) -> Tuple[str, str]:
     da = str(det_a).upper().strip()
@@ -107,6 +118,8 @@ def _canonical_pair(det_a: str, det_b: str) -> Tuple[str, str]:
     pair = sorted([da, db], key=lambda d: (_detector_order(d), d))
     return pair[0], pair[1]
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(v: float, digits: int = 7) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
@@ -125,6 +138,8 @@ def _fmt(v: float, digits: int = 7) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_site_geometry` の入出力契約と処理意図を定義する。
 
 def _site_geometry(lat_deg: float, lon_deg: float, xarm_az_deg: float) -> Dict[str, np.ndarray]:
     lat = math.radians(float(lat_deg))
@@ -152,9 +167,13 @@ def _site_geometry(lat_deg: float, lon_deg: float, xarm_az_deg: float) -> Dict[s
     }
 
 
+# 関数: `_build_network_geometry` の入出力契約と処理意図を定義する。
+
 def _build_network_geometry() -> Dict[str, Dict[str, np.ndarray]]:
     return {det: _site_geometry(**cfg) for det, cfg in _DETECTOR_SITES.items()}
 
+
+# 関数: `_fibonacci_sphere` の入出力契約と処理意図を定義する。
 
 def _fibonacci_sphere(n: int) -> np.ndarray:
     n_use = int(max(64, n))
@@ -166,6 +185,8 @@ def _fibonacci_sphere(n: int) -> np.ndarray:
     y = r_xy * np.sin(phi)
     return np.stack([x, y, z], axis=1)
 
+
+# 関数: `_load_metrics` の入出力契約と処理意図を定義する。
 
 def _load_metrics(event: str, slug: str, det_first: str = "H1", det_second: str = "L1") -> Optional[Dict[str, Any]]:
     pair_stem = f"{_slugify(det_first)}_{_slugify(det_second)}"
@@ -194,6 +215,8 @@ def _load_metrics(event: str, slug: str, det_first: str = "H1", det_second: str 
 
     return None
 
+
+# 関数: `_load_lag_scan` の入出力契約と処理意図を定義する。
 
 def _load_lag_scan(slug: str, det_first: str = "H1", det_second: str = "L1") -> Optional[Tuple[np.ndarray, np.ndarray]]:
     pair_stem = f"{_slugify(det_first)}_{_slugify(det_second)}"
@@ -241,6 +264,8 @@ def _load_lag_scan(slug: str, det_first: str = "H1", det_second: str = "L1") -> 
     return None
 
 
+# 関数: `_estimate_delay_tolerance_s` の入出力契約と処理意図を定義する。
+
 def _estimate_delay_tolerance_s(
     *,
     best_lag_ms: float,
@@ -268,6 +293,8 @@ def _estimate_delay_tolerance_s(
     return float(max(tol_floor, 0.5 * span_ms * 1e-3))
 
 
+# 関数: `_direction_basis` の入出力契約と処理意図を定義する。
+
 def _direction_basis(n: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     nx, ny, nz = float(n[0]), float(n[1]), float(n[2])
     theta = math.acos(max(-1.0, min(1.0, nz)))
@@ -282,6 +309,8 @@ def _direction_basis(n: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     e_phi /= np.linalg.norm(e_phi)
     return e_theta, e_phi
 
+
+# 関数: `_response_grid_for_direction` の入出力契約と処理意図を定義する。
 
 def _response_grid_for_direction(
     *,
@@ -332,6 +361,8 @@ def _response_grid_for_direction(
     return np.asarray(tensor_ratios, dtype=np.float64), np.asarray(scalar_ratios, dtype=np.float64)
 
 
+# 関数: `_range_clip` の入出力契約と処理意図を定義する。
+
 def _range_clip(arr: np.ndarray, q_lo: float = 0.5, q_hi: float = 99.5) -> Tuple[float, float]:
     # 条件分岐: `arr.size == 0` を満たす経路を評価する。
     if arr.size == 0:
@@ -339,6 +370,8 @@ def _range_clip(arr: np.ndarray, q_lo: float = 0.5, q_hi: float = 99.5) -> Tuple
 
     return float(np.percentile(arr, q_lo)), float(np.percentile(arr, q_hi))
 
+
+# 関数: `_interval_overlap` の入出力契約と処理意図を定義する。
 
 def _interval_overlap(a_lo: float, a_hi: float, b_lo: float, b_hi: float) -> bool:
     # 条件分岐: `not (math.isfinite(a_lo) and math.isfinite(a_hi) and math.isfinite(b_lo) and...` を満たす経路を評価する。
@@ -348,6 +381,8 @@ def _interval_overlap(a_lo: float, a_hi: float, b_lo: float, b_hi: float) -> boo
     return not (a_hi < b_lo or b_hi < a_lo)
 
 
+# 関数: `_min_rel_mismatch` の入出力契約と処理意図を定義する。
+
 def _min_rel_mismatch(arr: np.ndarray, target: float) -> float:
     # 条件分岐: `arr.size == 0 or not math.isfinite(target)` を満たす経路を評価する。
     if arr.size == 0 or not math.isfinite(target):
@@ -356,6 +391,8 @@ def _min_rel_mismatch(arr: np.ndarray, target: float) -> float:
     den = abs(float(target)) + 1e-15
     return float(np.min(np.abs(arr - float(target)) / den))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
@@ -402,6 +439,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             w.writerow(vals)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
@@ -478,6 +517,8 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path) -> None:
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.19.2: detector antenna-pattern polarization audit.")

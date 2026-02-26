@@ -10,6 +10,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # Bach et al. 2012 (arXiv:1210.6243v1): electron beam energy.
@@ -24,6 +25,8 @@ class Config:
     theta_mrad_max: float = 2.0
     n_theta: int = 4001
 
+
+# 関数: `electron_de_broglie_wavelength_m` の入出力契約と処理意図を定義する。
 
 def electron_de_broglie_wavelength_m(*, energy_eV: float) -> float:
     """
@@ -42,6 +45,8 @@ def electron_de_broglie_wavelength_m(*, energy_eV: float) -> float:
     return float(h / p)
 
 
+# 関数: `sinc` の入出力契約と処理意図を定義する。
+
 def sinc(x: np.ndarray) -> np.ndarray:
     # numpy.sinc is sin(pi x)/(pi x); we want sin(x)/x.
     y = np.ones_like(x, dtype=float)
@@ -50,6 +55,8 @@ def sinc(x: np.ndarray) -> np.ndarray:
     return y
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict | None:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -57,6 +64,8 @@ def _load_json(path: Path) -> dict | None:
 
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_channel_row` の入出力契約と処理意図を定義する。
 
 def _channel_row(
     *,
@@ -84,6 +93,8 @@ def _channel_row(
         "data_status": data_status,
     }
 
+
+# 関数: `build_matter_wave_interference_precision_audit` の入出力契約と処理意図を定義する。
 
 def build_matter_wave_interference_precision_audit(
     *,
@@ -353,6 +364,8 @@ def build_matter_wave_interference_precision_audit(
 
     return summary_csv, out_json
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

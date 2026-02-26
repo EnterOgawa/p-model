@@ -10,13 +10,18 @@ from typing import Any, Optional
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -31,6 +36,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -51,6 +58,8 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
+
 def _as_float(s: str) -> Optional[float]:
     ss = str(s).strip()
     # 条件分岐: `not ss or ss.upper() == "N/A"` を満たす経路を評価する。
@@ -62,6 +71,8 @@ def _as_float(s: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_parse_janaf_txt` の入出力契約と処理意図を定義する。
 
 def _parse_janaf_txt(txt: str) -> dict[str, Any]:
     lines = [ln.rstrip("\n") for ln in txt.splitlines() if ln.strip()]
@@ -168,6 +179,8 @@ def _parse_janaf_txt(txt: str) -> dict[str, Any]:
         "points": points_sorted,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

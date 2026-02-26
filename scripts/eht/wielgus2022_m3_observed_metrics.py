@@ -18,18 +18,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_lines` の入出力契約と処理意図を定義する。
 
 def _read_lines(path: Path) -> List[str]:
     return path.read_text(encoding="utf-8", errors="replace").splitlines()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_anchor` の入出力契約と処理意図を定義する。
 
 def _anchor(path: Path, line: int, *, label: str, snippet: str) -> Dict[str, Any]:
     return {"path": str(path), "line": int(line), "label": label, "snippet": snippet.strip()[:240]}
@@ -39,6 +46,7 @@ _RE_MULTICOL = re.compile(r"\\multicolumn\{\d+\}\{[^}]*\}\{(?P<content>[^}]*)\}"
 _RE_FLOAT = re.compile(r"(?P<num>-?\d+(?:\.\d+)?)")
 
 
+# 関数: `_parse_float_list` の入出力契約と処理意図を定義する。
 def _parse_float_list(cell: str) -> List[float]:
     s = cell.strip()
     m = _RE_MULTICOL.search(s)
@@ -56,6 +64,8 @@ def _parse_float_list(cell: str) -> List[float]:
 
     return out
 
+
+# 関数: `_extract_sigma_mu_3h_table` の入出力契約と処理意図を定義する。
 
 def _extract_sigma_mu_3h_table(*, s4_path: Path, lines: Sequence[str]) -> Dict[str, Any]:
     label = "\\label{tab:sigma_mu_3h}"
@@ -199,6 +209,7 @@ _RE_D3H = re.compile(
 )
 
 
+# 関数: `_extract_drw_predicted_sigma_mu_3h` の入出力契約と処理意図を定義する。
 def _extract_drw_predicted_sigma_mu_3h(*, s4_path: Path, lines: Sequence[str]) -> Dict[str, Any]:
     for i, raw in enumerate(lines, start=1):
         m = _RE_D3H.search(raw)
@@ -220,6 +231,7 @@ def _extract_drw_predicted_sigma_mu_3h(*, s4_path: Path, lines: Sequence[str]) -
 _RE_PM3 = re.compile(r"\$\s*(?P<v>\d+(?:\.\d+)?)\^\{\+?(?P<plus>\d+(?:\.\d+)?)\}_\{-(?P<minus>\d+(?:\.\d+)?)\}\s*\$")
 
 
+# 関数: `_parse_pm3` の入出力契約と処理意図を定義する。
 def _parse_pm3(cell: str) -> Optional[Tuple[float, float, float]]:
     m = _RE_PM3.search(cell.strip())
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -228,6 +240,8 @@ def _parse_pm3(cell: str) -> Optional[Tuple[float, float, float]]:
 
     return float(m.group("v")), float(m.group("plus")), float(m.group("minus"))
 
+
+# 関数: `_extract_gpresults_tau` の入出力契約と処理意図を定義する。
 
 def _extract_gpresults_tau(*, s5_path: Path, lines: Sequence[str]) -> Dict[str, Any]:
     # Parse tau (hours) from a subset of rows in Table tab:GPresults.
@@ -283,6 +297,8 @@ def _extract_gpresults_tau(*, s5_path: Path, lines: Sequence[str]) -> Dict[str, 
     return {"ok": ok, "rows": out_rows, "rows_n": len(out_rows), "label": "tab:GPresults"}
 
 
+# 関数: `_summary_stats` の入出力契約と処理意図を定義する。
+
 def _summary_stats(values: Sequence[float]) -> Dict[str, Any]:
     xs = [float(x) for x in values if isinstance(x, (int, float))]
     xs = [x for x in xs if x == x]  # drop NaN
@@ -313,6 +329,7 @@ _MONTHS = {
 }
 
 
+# 関数: `_parse_ymd` の入出力契約と処理意図を定義する。
 def _parse_ymd(date_raw: str) -> Optional[str]:
     # Expected formats: "2005 June 4", "2017 October 11a", etc.
     tokens = date_raw.strip().split()
@@ -344,6 +361,8 @@ def _parse_ymd(date_raw: str) -> Optional[str]:
     return f"{year:04d}-{month:02d}-{day:02d}"
 
 
+# 関数: `_clean_cell` の入出力契約と処理意図を定義する。
+
 def _clean_cell(cell: str) -> str:
     return cell.strip().rstrip("\\").strip()
 
@@ -351,6 +370,7 @@ def _clean_cell(cell: str) -> str:
 _RE_CITET = re.compile(r"\\citet\{(?P<key>[^}]+)\}")
 
 
+# 関数: `_normalize_reference` の入出力契約と処理意図を定義する。
 def _normalize_reference(reference_raw: str) -> Dict[str, Any]:
     m = _RE_CITET.search(reference_raw)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -360,6 +380,8 @@ def _normalize_reference(reference_raw: str) -> Dict[str, Any]:
     return {"raw": reference_raw, "key": m.group("key").strip()}
 
 
+# 関数: `_normalize_array` の入出力契約と処理意図を定義する。
+
 def _normalize_array(array_raw: str) -> str:
     # e.g., "CARMA$^a$" -> "CARMA"
     s = array_raw.strip()
@@ -368,6 +390,8 @@ def _normalize_array(array_raw: str) -> str:
     s = re.sub(r"\s+", " ", s).strip()
     return s.split()[0] if s else array_raw.strip()
 
+
+# 関数: `_extract_detections_other_papers_table` の入出力契約と処理意図を定義する。
 
 def _extract_detections_other_papers_table(*, s4_path: Path, lines: Sequence[str]) -> Dict[str, Any]:
     label = "\\label{tab:detections_other_papers}"
@@ -477,6 +501,8 @@ def _extract_detections_other_papers_table(*, s4_path: Path, lines: Sequence[str
     return {"ok": True, "source_anchor": header_anchor, "rows_n": len(rows), "rows": rows}
 
 
+# 関数: `_paper5_historical_distribution_candidate` の入出力契約と処理意図を定義する。
+
 def _paper5_historical_distribution_candidate(
     detections_other_papers: Dict[str, Any],
     *,
@@ -579,6 +605,8 @@ def _paper5_historical_distribution_candidate(
     }
 
 
+# 関数: `_ks_two_sample_d` の入出力契約と処理意図を定義する。
+
 def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Optional[float]:
     a = sorted(float(x) for x in sample_a if isinstance(x, (int, float)))
     b = sorted(float(x) for x in sample_b if isinstance(x, (int, float)))
@@ -611,6 +639,8 @@ def _ks_two_sample_d(sample_a: Sequence[float], sample_b: Sequence[float]) -> Op
     return float(d)
 
 
+# 関数: `_ks_qks` の入出力契約と処理意図を定義する。
+
 def _ks_qks(lam: float, *, max_terms: int = 200) -> float:
     # Q_KS(λ) = 2 Σ_{k=1..∞} (-1)^{k-1} exp(-2 k^2 λ^2)
     if lam <= 0.0:
@@ -637,6 +667,8 @@ def _ks_qks(lam: float, *, max_terms: int = 200) -> float:
     return float(q)
 
 
+# 関数: `_ks_pvalue_2samp_asymptotic` の入出力契約と処理意図を定義する。
+
 def _ks_pvalue_2samp_asymptotic(sample_a: Sequence[float], sample_b: Sequence[float]) -> Optional[float]:
     d = _ks_two_sample_d(sample_a, sample_b)
     # 条件分岐: `d is None` を満たす経路を評価する。
@@ -658,6 +690,8 @@ def _ks_pvalue_2samp_asymptotic(sample_a: Sequence[float], sample_b: Sequence[fl
     lam = (sq + 0.12 + 0.11 / sq) * float(d)
     return _ks_qks(lam)
 
+
+# 関数: `_ks_two_sample_dcrit` の入出力契約と処理意図を定義する。
 
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
     # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
@@ -685,6 +719,8 @@ def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
 
     return float(c * math.sqrt((n + m) / (n * m)))
 
+
+# 関数: `_select_paper5_7samples_candidate` の入出力契約と処理意図を定義する。
 
 def _select_paper5_7samples_candidate(
     sigma_mu_table: Dict[str, Any],
@@ -721,6 +757,7 @@ def _select_paper5_7samples_candidate(
 
     samples: List[Dict[str, Any]] = []
 
+    # 関数: `_add` の入出力契約と処理意図を定義する。
     def _add(inst: str, pipe: Optional[str], band: str, day: int, vals: List[float], *, source: Dict[str, Any]) -> None:
         for j, x in enumerate(vals, start=1):
             samples.append(
@@ -764,6 +801,8 @@ def _select_paper5_7samples_candidate(
         ),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

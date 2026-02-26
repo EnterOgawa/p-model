@@ -40,6 +40,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -65,14 +66,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_extract_label` の入出力契約と処理意図を定義する。
 
 def _extract_label(block: Dict[str, Any], key: str) -> str:
     v = block.get(key)
@@ -83,6 +90,8 @@ def _extract_label(block: Dict[str, Any], key: str) -> str:
     label = str(v.get("short_label") or v.get("id") or "").strip()
     return label
 
+
+# 関数: `_plot_counts` の入出力契約と処理意図を定義する。
 
 def _plot_counts(
     ax: Any,
@@ -136,6 +145,8 @@ def _plot_counts(
         if b > 0:
             ax.text(b + 0.05, yi + h / 2, f"{int(b)}", va="center", ha="left", fontsize=9)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(

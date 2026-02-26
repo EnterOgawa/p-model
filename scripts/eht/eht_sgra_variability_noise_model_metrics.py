@@ -19,18 +19,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_snippet` の入出力契約と処理意図を定義する。
 
 def _find_snippet(text: str, needle: str, *, window: int = 700) -> Optional[str]:
     i = text.find(needle)
@@ -43,9 +50,13 @@ def _find_snippet(text: str, needle: str, *, window: int = 700) -> Optional[str]
     return text[a:b]
 
 
+# 関数: `_mid` の入出力契約と処理意図を定義する。
+
 def _mid(lo: float, hi: float) -> float:
     return 0.5 * (float(lo) + float(hi))
 
+
+# 関数: `_sigma_var` の入出力契約と処理意図を定義する。
 
 def _sigma_var(u_gly: float, *, a: float, b: float, c: float, u0_gly: float) -> float:
     # 条件分岐: `u_gly <= 0 or u0_gly <= 0` を満たす経路を評価する。
@@ -58,6 +69,8 @@ def _sigma_var(u_gly: float, *, a: float, b: float, c: float, u0_gly: float) -> 
     s2 = (a * a) * ((u_gly / 4.0) ** c) * (num / den)
     return math.sqrt(s2) if s2 >= 0 and math.isfinite(s2) else float("nan")
 
+
+# 関数: `_max_sigma_var_in_range` の入出力契約と処理意図を定義する。
 
 def _max_sigma_var_in_range(
     *, u_min: float, u_max: float, step: float, a: float, b: float, c: float, u0_gly: float
@@ -89,6 +102,8 @@ def _max_sigma_var_in_range(
     return {"u_min_gly": u_min, "u_max_gly": u_max, "step_gly": step, "max": best, "u_at_max_gly": best_u}
 
 
+# クラス: `PremodelingRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class PremodelingRow:
     source: str
@@ -101,6 +116,7 @@ class PremodelingRow:
 _RE_RANGE = re.compile(r"\$\[\s*(?P<lo>-?\d+(?:\.\d+)?)\s*,\s*(?P<hi>-?\d+(?:\.\d+)?)\s*\]\$")
 
 
+# 関数: `_parse_range_cell` の入出力契約と処理意図を定義する。
 def _parse_range_cell(cell: str) -> Optional[Tuple[float, float]]:
     m = _RE_RANGE.search(cell.strip())
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -111,6 +127,8 @@ def _parse_range_cell(cell: str) -> Optional[Tuple[float, float]]:
     hi = float(m.group("hi"))
     return (lo, hi) if lo <= hi else (hi, lo)
 
+
+# 関数: `_parse_premodeling_table` の入出力契約と処理意図を定義する。
 
 def _parse_premodeling_table(tex: str, *, source_path: Path) -> List[PremodelingRow]:
     label = "\\label{tab:premodeling}"
@@ -192,6 +210,8 @@ def _parse_premodeling_table(tex: str, *, source_path: Path) -> List[Premodeling
 
     return rows
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

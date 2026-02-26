@@ -16,6 +16,7 @@ import numpy as np
 _REC_DTYPE = np.dtype([("ch", "u1"), ("t", "<u8"), ("sec", "<u2")], align=False)  # 11 bytes/rec
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # NIST timetag bin: 78.125 ps (12.8 GHz clock)
@@ -42,6 +43,8 @@ class Config:
     max_seconds: int | None = None
 
 
+# 関数: `_ks_distance` の入出力契約と処理意図を定義する。
+
 def _ks_distance(x: np.ndarray, y: np.ndarray) -> float:
     # Two-sample KS statistic without scipy.
     if x.size == 0 or y.size == 0:
@@ -67,6 +70,8 @@ def _ks_distance(x: np.ndarray, y: np.ndarray) -> float:
     return float(d)
 
 
+# クラス: `SideEvents` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class SideEvents:
     click_t: np.ndarray  # timetag counts
@@ -75,6 +80,8 @@ class SideEvents:
     pps_t: np.ndarray  # timetag counts
     counts_by_channel: dict[int, int]
 
+
+# クラス: `_ZipCdEntry` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _ZipCdEntry:
@@ -87,7 +94,10 @@ class _ZipCdEntry:
     uncompressed_size: int
 
 
+# クラス: `_MultiFileStream` の責務と境界条件を定義する。
+
 class _MultiFileStream:
+    # 関数: `__init__` の入出力契約と処理意図を定義する。
     def __init__(
         self, *, parts: list[Path], start_disk: int, start_offset: int, max_bytes: int, chunk_bytes: int = 8 * 1024 * 1024
     ) -> None:
@@ -107,6 +117,8 @@ class _MultiFileStream:
         self._chunk_bytes = int(chunk_bytes)
         self._f = self._parts[self._disk].open("rb")
         self._f.seek(self._off)
+
+    # 関数: `read` の入出力契約と処理意図を定義する。
 
     def read(self, n: int = -1) -> bytes:
         # 条件分岐: `self._remaining <= 0` を満たす経路を評価する。
@@ -148,6 +160,8 @@ class _MultiFileStream:
 
         return bytes(out)
 
+    # 関数: `_advance_disk` の入出力契約と処理意図を定義する。
+
     def _advance_disk(self) -> None:
         self._f.close()
         self._disk += 1
@@ -160,6 +174,8 @@ class _MultiFileStream:
         self._f = self._parts[self._disk].open("rb")
         self._f.seek(0)
 
+    # 関数: `close` の入出力契約と処理意図を定義する。
+
     def close(self) -> None:
         try:
             self._f.close()
@@ -167,12 +183,17 @@ class _MultiFileStream:
             pass
 
 
+# クラス: `_DeflateReader` の責務と境界条件を定義する。
+
 class _DeflateReader:
+    # 関数: `__init__` の入出力契約と処理意図を定義する。
     def __init__(self, raw: _MultiFileStream) -> None:
         self._raw = raw
         self._z = zlib.decompressobj(-15)  # raw DEFLATE stream (zip format)
         self._buf = bytearray()
         self._eof = False
+
+    # 関数: `read` の入出力契約と処理意図を定義する。
 
     def read(self, n: int = -1) -> bytes:
         # 条件分岐: `n == 0` を満たす経路を評価する。
@@ -214,12 +235,16 @@ class _DeflateReader:
         del self._buf[:n]
         return out
 
+    # 関数: `close` の入出力契約と処理意図を定義する。
+
     def close(self) -> None:
         try:
             self._raw.close()
         except Exception:
             pass
 
+
+# 関数: `_parse_eocd_tail` の入出力契約と処理意図を定義する。
 
 def _parse_eocd_tail(tail: bytes) -> tuple[int, int, int, int, int, int, int]:
     idx = tail.rfind(b"PK\x05\x06")
@@ -235,6 +260,8 @@ def _parse_eocd_tail(tail: bytes) -> tuple[int, int, int, int, int, int, int]:
     return idx, disk, disk_cd, n_total, cd_size, cd_offset, comment_len
 
 
+# 関数: `_parse_zip64_locator` の入出力契約と処理意図を定義する。
+
 def _parse_zip64_locator(tail: bytes) -> tuple[int, int, int, int] | None:
     idx = tail.rfind(b"PK\x06\x07")
     # 条件分岐: `idx < 0` を満たす経路を評価する。
@@ -248,6 +275,8 @@ def _parse_zip64_locator(tail: bytes) -> tuple[int, int, int, int] | None:
 
     return idx, disk_start, int(rec_offset), int(n_disks)
 
+
+# 関数: `_read_zip64_eocd` の入出力契約と処理意図を定義する。
 
 def _read_zip64_eocd(path: Path, *, disk_start: int, rec_offset: int) -> dict[str, int]:
     # For our use we only need cd_size/cd_offset/n_total, but parse the full header for sanity.
@@ -279,6 +308,8 @@ def _read_zip64_eocd(path: Path, *, disk_start: int, rec_offset: int) -> dict[st
         "n_this": int(n_this),
     }
 
+
+# 関数: `_parse_cd_entry` の入出力契約と処理意図を定義する。
 
 def _parse_cd_entry(cd: bytes, *, pos: int) -> tuple[_ZipCdEntry, int]:
     # 条件分岐: `cd[pos : pos + 4] != b"PK\x01\x02"` を満たす経路を評価する。
@@ -370,6 +401,8 @@ def _parse_cd_entry(cd: bytes, *, pos: int) -> tuple[_ZipCdEntry, int]:
         comment_end,
     )
 
+
+# 関数: `_open_single_member_stream_multipart` の入出力契約と処理意図を定義する。
 
 def _open_single_member_stream_multipart(zip_last: Path) -> tuple[object, str]:
     # Find sibling parts: "<...>.z01, .z02, ... , .zip". We expect the caller to pass the final ".zip".
@@ -501,6 +534,8 @@ def _open_single_member_stream_multipart(zip_last: Path) -> tuple[object, str]:
     raise ValueError(f"unsupported compression method in multipart zip: {ent.method}")
 
 
+# 関数: `_open_single_member_stream` の入出力契約と処理意図を定義する。
+
 @contextlib.contextmanager
 def _open_single_member_stream(zip_path: Path):  # noqa: ANN001
     # Normal single-file zip
@@ -530,6 +565,8 @@ def _open_single_member_stream(zip_path: Path):  # noqa: ANN001
         if callable(close):
             close()
 
+
+# 関数: `_read_side` の入出力契約と処理意図を定義する。
 
 def _read_side(zip_path: Path, *, max_seconds: int | None) -> SideEvents:
     # 条件分岐: `not zip_path.exists()` を満たす経路を評価する。
@@ -661,6 +698,8 @@ def _read_side(zip_path: Path, *, max_seconds: int | None) -> SideEvents:
     )
 
 
+# 関数: `_estimate_pps_offset` の入出力契約と処理意図を定義する。
+
 def _estimate_pps_offset(pps_a: np.ndarray, pps_b: np.ndarray, *, max_shift: int = 5) -> dict[str, float | int]:
     # 条件分岐: `pps_a.size < 20 or pps_b.size < 20` を満たす経路を評価する。
     if pps_a.size < 20 or pps_b.size < 20:
@@ -695,6 +734,8 @@ def _estimate_pps_offset(pps_a: np.ndarray, pps_b: np.ndarray, *, max_shift: int
     mad, _, med, shift, n = best
     return {"offset_counts": int(round(med)), "shift": int(shift), "mad_counts": mad, "n_used": int(n)}
 
+
+# 関数: `_coincidence_sweep` の入出力契約と処理意図を定義する。
 
 def _coincidence_sweep(
     a_t: np.ndarray,
@@ -743,6 +784,8 @@ def _coincidence_sweep(
     return counts, pairs
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Reanalyze NIST Bell test time-tag data (coincidence/window bias).")
     parser.add_argument(
@@ -775,6 +818,7 @@ def main() -> None:
 
     cfg = Config(max_seconds=args.max_seconds)
 
+    # 関数: `_tag` の入出力契約と処理意図を定義する。
     def _tag(name: str, *, ext: str) -> Path:
         stem = name if not args.out_tag else f"{name}__{args.out_tag}"
         return out_dir / f"{stem}.{ext}"
@@ -856,6 +900,7 @@ def main() -> None:
     fig = plt.figure(figsize=(13.5, 4.2), dpi=150)
     gs = fig.add_gridspec(1, 3, width_ratios=[1.0, 1.0, 1.35])
 
+    # 関数: `_delay_panel` の入出力契約と処理意図を定義する。
     def _delay_panel(ax, title: str, d0: np.ndarray, d1: np.ndarray) -> None:
         # Focus on the bulk region to show setting-dependent shifts.
         allv = np.concatenate([d0, d1]) if d0.size and d1.size else (d0 if d0.size else d1)
@@ -909,6 +954,7 @@ def main() -> None:
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+    # 関数: `_infer_run_base` の入出力契約と処理意図を定義する。
     def _infer_run_base(path: Path, *, side: str) -> str:
         suf = f".{side}.dat.compressed.zip"
         return path.name[: -len(suf)] if path.name.endswith(suf) else path.name

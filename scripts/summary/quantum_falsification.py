@@ -36,9 +36,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -47,9 +50,13 @@ def _relpath(p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(v: Any) -> Optional[float]:
     # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
@@ -58,6 +65,8 @@ def _as_float(v: Any) -> Optional[float]:
 
     return None
 
+
+# 関数: `_try_load_frozen_parameters` の入出力契約と処理意図を定義する。
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -84,6 +93,8 @@ def _try_load_frozen_parameters() -> Dict[str, Any]:
     return out
 
 
+# 関数: `_n_eff` の入出力契約と処理意図を定義する。
+
 def _n_eff(n0: int, n1: int) -> Optional[float]:
     # 条件分岐: `n0 <= 0 or n1 <= 0` を満たす経路を評価する。
     if n0 <= 0 or n1 <= 0:
@@ -91,6 +102,8 @@ def _n_eff(n0: int, n1: int) -> Optional[float]:
 
     return float(n0) * float(n1) / float(n0 + n1)
 
+
+# 関数: `_ks_z` の入出力契約と処理意図を定義する。
 
 def _ks_z(ks: Optional[float], n0: int, n1: int) -> Optional[float]:
     # 条件分岐: `ks is None or not math.isfinite(float(ks))` を満たす経路を評価する。
@@ -104,6 +117,8 @@ def _ks_z(ks: Optional[float], n0: int, n1: int) -> Optional[float]:
 
     return float(ks) * math.sqrt(float(ne))
 
+
+# 関数: `_extract_ks_delay` の入出力契約と処理意図を定義する。
 
 def _extract_ks_delay(entry: Dict[str, Any]) -> Tuple[Optional[float], Optional[float]]:
     """
@@ -129,6 +144,8 @@ def _extract_ks_delay(entry: Dict[str, Any]) -> Tuple[Optional[float], Optional[
     return (ks_a, ks_b)
 
 
+# 関数: `_extract_delay_signature` の入出力契約と処理意図を定義する。
+
 def _extract_delay_signature(entry: Dict[str, Any]) -> Tuple[Optional[Dict[str, Any]], Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
     """
     Returns (method, alice_sig, bob_sig) if present.
@@ -143,6 +160,8 @@ def _extract_delay_signature(entry: Dict[str, Any]) -> Tuple[Optional[Dict[str, 
     b = sig.get("Bob") if isinstance(sig.get("Bob"), dict) else None
     return (method, a, b)
 
+
+# 関数: `_criterion` の入出力契約と処理意図を定義する。
 
 def _criterion(
     *,
@@ -174,6 +193,8 @@ def _criterion(
         "notes": str(notes),
     }
 
+
+# 関数: `_estimate_atom_interferometer_beta_delta` の入出力契約と処理意図を定義する。
 
 def _estimate_atom_interferometer_beta_delta(
     atom_metrics: Dict[str, Any],
@@ -228,6 +249,8 @@ def _estimate_atom_interferometer_beta_delta(
     }
 
 
+# 関数: `_load_nist_setting_counts` の入出力契約と処理意図を定義する。
+
 def _load_nist_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]:
     npz = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "normalized_events.npz"
     # 条件分岐: `not npz.exists()` を満たす経路を評価する。
@@ -245,6 +268,8 @@ def _load_nist_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]
     cb = np.bincount(b_set, minlength=2)[:2].astype(int).tolist()
     return {"alice_clicks_by_setting": ca, "bob_clicks_by_setting": cb}
 
+
+# 関数: `_load_nist_delay_stats` の入出力契約と処理意図を定義する。
 
 def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
     """
@@ -303,6 +328,8 @@ def _load_nist_delay_stats(dataset_id: str) -> Optional[Dict[str, Any]]:
     }
 
 
+# 関数: `_load_trial_setting_counts` の入出力契約と処理意図を定義する。
+
 def _load_trial_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]]:
     p = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "trial_based_counts.json"
     # 条件分岐: `not p.exists()` を満たす経路を評価する。
@@ -326,6 +353,8 @@ def _load_trial_setting_counts(dataset_id: str) -> Optional[Dict[str, List[int]]
 
     return None
 
+
+# 関数: `_load_weihs_pair_counts_at_ref_window` の入出力契約と処理意図を定義する。
 
 def _load_weihs_pair_counts_at_ref_window(dataset_id: str) -> Optional[Dict[str, Any]]:
     p = _ROOT / "output" / "public" / "quantum" / "bell" / dataset_id / "window_sweep_metrics.json"
@@ -386,6 +415,8 @@ def _load_weihs_pair_counts_at_ref_window(dataset_id: str) -> Optional[Dict[str,
 
     return {"ref_window_ns": float(ref_window), "pairs_by_setting_pair": [[n00, n01], [n10, n11]]}
 
+
+# 関数: `build_quantum_falsification` の入出力契約と処理意図を定義する。
 
 def build_quantum_falsification(*, frozen: Dict[str, Any]) -> Dict[str, Any]:
     beta_frozen = _as_float(frozen.get("beta"))
@@ -583,6 +614,8 @@ def build_quantum_falsification(*, frozen: Dict[str, Any]) -> Dict[str, Any]:
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Generate Phase 7 quantum falsification/decisiveness pack JSON.")

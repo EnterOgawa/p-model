@@ -9,13 +9,18 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(x: object) -> float | None:
     try:
@@ -28,9 +33,13 @@ def _as_float(x: object) -> float | None:
         return None
 
 
+# 関数: `_reduced_mass` の入出力契約と処理意図を定義する。
+
 def _reduced_mass(m1: float, m2: float) -> float:
     return (m1 * m2) / (m1 + m2)
 
+
+# 関数: `_load_nist_h_isotope_masses_u` の入出力契約と処理意図を定義する。
 
 def _load_nist_h_isotope_masses_u(root: Path) -> tuple[dict[str, float], dict[str, Any]] | None:
     path = root / "data" / "quantum" / "sources" / "nist_isotopic_compositions_h" / "extracted_values.json"
@@ -73,6 +82,8 @@ def _load_nist_h_isotope_masses_u(root: Path) -> tuple[dict[str, float], dict[st
     return masses, meta
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main() -> None:
     root = _repo_root()
     out_dir = root / "output" / "public" / "quantum"
@@ -93,6 +104,8 @@ def main() -> None:
                 "meta": meta,
                 "masses_u": {"H1": masses_u["H1"], "D2": masses_u["D2"]},
             }
+
+    # 関数: `_get_mass` の入出力契約と処理意図を定義する。
 
     def _get_mass(symbol_a: str) -> float:
         # 条件分岐: `mass_model["kind"] == "nist_relative_atomic_mass_u"` を満たす経路を評価する。

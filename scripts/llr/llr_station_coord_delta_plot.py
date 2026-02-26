@@ -29,6 +29,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import japanize_matplotlib  # type: ignore  # noqa: F401
@@ -52,9 +53,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_extract_delta_m` の入出力契約と処理意図を定義する。
 
 def _extract_delta_m(stations: Dict[str, Any]) -> List[Tuple[str, float]]:
     out: List[Tuple[str, float]] = []
@@ -77,6 +82,8 @@ def _extract_delta_m(stations: Dict[str, Any]) -> List[Tuple[str, float]]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     default_in = _ROOT / "output" / "private" / "llr" / "batch" / "llr_station_metadata_used.json"

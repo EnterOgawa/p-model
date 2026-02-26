@@ -43,6 +43,7 @@ from scripts.cosmology.cosmology_cmb_acoustic_peak_reconstruction import (  # no
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 def _fmt(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
     if x == 0.0:
@@ -56,10 +57,14 @@ def _fmt(x: float, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_copy_outputs_to_public` の入出力契約と処理意図を定義する。
 
 def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str, str]:
     public_dir.mkdir(parents=True, exist_ok=True)
@@ -71,6 +76,8 @@ def _copy_outputs_to_public(private_paths: Sequence[Path], public_dir: Path) -> 
 
     return copied
 
+
+# 関数: `_grade` の入出力契約と処理意図を定義する。
 
 def _grade(value: float, pass_limit: float, watch_limit: float) -> str:
     v = abs(float(value))
@@ -86,6 +93,8 @@ def _grade(value: float, pass_limit: float, watch_limit: float) -> str:
     return "reject"
 
 
+# 関数: `_merge_status` の入出力契約と処理意図を定義する。
+
 def _merge_status(parts: Sequence[str]) -> str:
     # 条件分岐: `any(s == "reject" for s in parts)` を満たす経路を評価する。
     if any(s == "reject" for s in parts):
@@ -99,9 +108,13 @@ def _merge_status(parts: Sequence[str]) -> str:
     return "watch"
 
 
+# 関数: `_status_rank` の入出力契約と処理意図を定義する。
+
 def _status_rank(status: str) -> int:
     return {"pass": 0, "watch": 1, "reject": 2}.get(str(status), 3)
 
+
+# 関数: `_model_params` の入出力契約と処理意図を定義する。
 
 def _model_params(ref: Dict[str, float], pressure: float, ruler: float) -> Dict[str, float]:
     baseline_l_scale_drop = 0.006
@@ -120,6 +133,8 @@ def _model_params(ref: Dict[str, float], pressure: float, ruler: float) -> Dict[
     out["ell_damping"] = float(out["silk_kappa"]) * float(out["l_acoustic"])
     return out
 
+
+# 関数: `_evaluate_model` の入出力契約と処理意図を定義する。
 
 def _evaluate_model(
     *,
@@ -187,6 +202,8 @@ def _evaluate_model(
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(out_png: Path, obs3: Sequence[Any], rows: Sequence[Dict[str, Any]], decision: str) -> None:
     _set_japanese_font()
     import matplotlib.pyplot as plt
@@ -238,6 +255,8 @@ def _plot(out_png: Path, obs3: Sequence[Any], rows: Sequence[Dict[str, Any]], de
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="CMB third-peak uplift audit (baryon-only vs pressure/ruler).")

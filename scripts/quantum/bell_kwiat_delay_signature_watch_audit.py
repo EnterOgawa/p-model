@@ -21,14 +21,19 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -42,6 +47,8 @@ def _fmt_float(x: float, digits: int = 6) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -68,6 +75,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_sigma_median` の入出力契約と処理意図を定義する。
+
 def _sigma_median(arr: np.ndarray) -> Optional[float]:
     data = np.asarray(arr, dtype=float)
     n = int(data.size)
@@ -90,6 +99,8 @@ def _sigma_median(arr: np.ndarray) -> Optional[float]:
 
     return float(1.2533141373155001 * sigma / math.sqrt(float(n)))
 
+
+# 関数: `_delay_stat` の入出力契約と処理意図を定義する。
 
 def _delay_stat(
     dt0_in: np.ndarray,
@@ -176,6 +187,8 @@ def _delay_stat(
     }
 
 
+# 関数: `_max_abs_z` の入出力契約と処理意図を定義する。
+
 def _max_abs_z(entry: Dict[str, Any]) -> Optional[float]:
     az = entry.get("alice", {}).get("z_delta_median") if isinstance(entry.get("alice"), dict) else None
     bz = entry.get("bob", {}).get("z_delta_median") if isinstance(entry.get("bob"), dict) else None
@@ -192,6 +205,8 @@ def _max_abs_z(entry: Dict[str, Any]) -> Optional[float]:
 
     return max(vals)
 
+
+# 関数: `_run_audit` の入出力契約と処理意図を定義する。
 
 def _run_audit(
     *,
@@ -299,6 +314,8 @@ def _run_audit(
         item["max_abs_z"] = _max_abs_z(item)
         accidental_sweep.append(item)
 
+    # 関数: `_max_z` の入出力契約と処理意図を定義する。
+
     def _max_z(items: List[Dict[str, Any]]) -> Optional[float]:
         vals: List[float] = []
         for item in items:
@@ -357,10 +374,13 @@ def _run_audit(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     rows: List[Dict[str, Any]] = []
 
+    # 関数: `_push` の入出力契約と処理意図を定義する。
     def _push(tag: str, items: List[Dict[str, Any]]) -> None:
         for item in items:
             rows.append(
@@ -429,6 +449,8 @@ def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
                 ]
             )
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     _set_japanese_font()
@@ -518,6 +540,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     default_npz = ROOT / "output" / "public" / "quantum" / "bell" / "kwiat2013_prl111_130406_05082013_15" / "delay_signature_ref_samples.npz"

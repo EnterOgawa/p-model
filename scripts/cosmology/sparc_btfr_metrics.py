@@ -44,9 +44,13 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -55,10 +59,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# クラス: `BtfrRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class BtfrRow:
@@ -82,6 +90,8 @@ class BtfrRow:
     wm50c_km_s: float
     e_wm50c_km_s: float
 
+
+# 関数: `_iter_rows` の入出力契約と処理意図を定義する。
 
 def _iter_rows(path: Path) -> Iterable[BtfrRow]:
     # BTFR_Lelli2019.mrt is a CDS-style table with an ASCII header and whitespace-separated rows.
@@ -136,6 +146,8 @@ def _iter_rows(path: Path) -> Iterable[BtfrRow]:
         )
 
 
+# 関数: `_fit_logmb_vs_logv` の入出力契約と処理意図を定義する。
+
 def _fit_logmb_vs_logv(x: np.ndarray, y: np.ndarray, *, w: Optional[np.ndarray]) -> Dict[str, Any]:
     # 条件分岐: `x.size < 10` を満たす経路を評価する。
     if x.size < 10:
@@ -165,6 +177,8 @@ def _fit_logmb_vs_logv(x: np.ndarray, y: np.ndarray, *, w: Optional[np.ndarray])
         },
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(out_png: Path, *, x: np.ndarray, y: np.ndarray, fit: Dict[str, Any], xlabel: str) -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
@@ -197,6 +211,8 @@ def _plot(out_png: Path, *, x: np.ndarray, y: np.ndarray, fit: Dict[str, Any], x
     plt.close()
 
 
+# 関数: `_extract_xy` の入出力契約と処理意図を定義する。
+
 def _extract_xy(rows: Sequence[BtfrRow], *, velocity_key: str) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     # returns x=log10(V), y=logMb, w=1/sigma_y
     vx: List[float] = []
@@ -225,6 +241,8 @@ def _extract_xy(rows: Sequence[BtfrRow], *, velocity_key: str) -> Tuple[np.ndarr
 
     return np.asarray(vx, dtype=float), np.asarray(vy, dtype=float), np.asarray(vw, dtype=float)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

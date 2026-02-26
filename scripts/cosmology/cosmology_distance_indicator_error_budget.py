@@ -45,6 +45,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -70,14 +71,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -87,6 +94,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -106,6 +115,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(x: Any) -> Optional[float]:
     try:
         # 条件分岐: `x is None` を満たす経路を評価する。
@@ -117,6 +128,8 @@ def _safe_float(x: Any) -> Optional[float]:
         return None
 
 
+# 関数: `_load_pantheon_lcparam` の入出力契約と処理意図を定義する。
+
 def _load_pantheon_lcparam(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, sep=r"\s+", engine="python")
     # 条件分岐: `"#name" in df.columns` を満たす経路を評価する。
@@ -125,6 +138,8 @@ def _load_pantheon_lcparam(path: Path) -> pd.DataFrame:
 
     return df
 
+
+# 関数: `_load_pantheon_sys_cov` の入出力契約と処理意図を定義する。
 
 def _load_pantheon_sys_cov(path: Path) -> np.ndarray:
     """
@@ -151,6 +166,8 @@ def _load_pantheon_sys_cov(path: Path) -> np.ndarray:
 
     return data.reshape((n, n))
 
+
+# 関数: `_cov_sem_weighted` の入出力契約と処理意図を定義する。
 
 def _cov_sem_weighted(cov: np.ndarray) -> Optional[float]:
     """
@@ -182,6 +199,8 @@ def _cov_sem_weighted(cov: np.ndarray) -> Optional[float]:
     v = math.sqrt(1.0 / denom)
     return v if math.isfinite(v) else None
 
+
+# 関数: `_compute_sn_binned_budget` の入出力契約と処理意図を定義する。
 
 def _compute_sn_binned_budget(
     df: pd.DataFrame,
@@ -263,6 +282,8 @@ def _compute_sn_binned_budget(
     return out
 
 
+# 関数: `_bao_mu_sigma_mag_from_boss_ap` の入出力契約と処理意図を定義する。
+
 def _bao_mu_sigma_mag_from_boss_ap(path: Path) -> List[Dict[str, Any]]:
     src = _read_json(path)
     rows = src.get("constraints") or []
@@ -294,6 +315,8 @@ def _bao_mu_sigma_mag_from_boss_ap(path: Path) -> List[Dict[str, Any]]:
     return out
 
 
+# 関数: `_r_drag_mu_sigma_mag` の入出力契約と処理意図を定義する。
+
 def _r_drag_mu_sigma_mag(path: Path) -> Optional[Dict[str, Any]]:
     src = _read_json(path)
     rows = src.get("constraints") or []
@@ -324,6 +347,8 @@ def _r_drag_mu_sigma_mag(path: Path) -> Optional[Dict[str, Any]]:
     }
 
 
+# 関数: `_load_boss_baofs_reduced_cov_cij` の入出力契約と処理意図を定義する。
+
 def _load_boss_baofs_reduced_cov_cij(path: Path) -> Dict[str, Any]:
     src = _read_json(path)
     params = src.get("parameters") or []
@@ -349,6 +374,8 @@ def _load_boss_baofs_reduced_cov_cij(path: Path) -> Dict[str, Any]:
 
     return {"raw": src, "parameters": params, "cij_1e4": mat}
 
+
+# 関数: `_match_boss_dm_indices` の入出力契約と処理意図を定義する。
 
 def _match_boss_dm_indices(
     boss_params: List[Dict[str, Any]], bao_points: List[Dict[str, Any]], *, z_tol: float = 5e-4
@@ -386,6 +413,8 @@ def _match_boss_dm_indices(
 
     return out_idx, out_param
 
+
+# 関数: `_bao_mu_sigma_mag_from_dm_cov_interpolated` の入出力契約と処理意図を定義する。
 
 def _bao_mu_sigma_mag_from_dm_cov_interpolated(
     *,
@@ -466,11 +495,14 @@ def _bao_mu_sigma_mag_from_dm_cov_interpolated(
     return out_mu
 
 
+# 関数: `_load_reach_representatives` の入出力契約と処理意図を定義する。
+
 def _load_reach_representatives(reach_metrics_path: Path) -> Dict[str, Any]:
     src = _read_json(reach_metrics_path)
     reps = src.get("representatives") or {}
     reach = src.get("reach") or {}
 
+    # 関数: `extract` の入出力契約と処理意図を定義する。
     def extract(key: str) -> Optional[Dict[str, Any]]:
         rr = reach.get(key)
         # 条件分岐: `not isinstance(rr, dict)` を満たす経路を評価する。
@@ -497,6 +529,8 @@ def _load_reach_representatives(reach_metrics_path: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_interp_on_grid` の入出力契約と処理意図を定義する。
+
 def _interp_on_grid(x: np.ndarray, y: np.ndarray, x_grid: np.ndarray) -> np.ndarray:
     # 条件分岐: `x.size == 0 or y.size == 0` を満たす経路を評価する。
     if x.size == 0 or y.size == 0:
@@ -516,11 +550,15 @@ def _interp_on_grid(x: np.ndarray, y: np.ndarray, x_grid: np.ndarray) -> np.ndar
     return np.interp(x_grid, xs, ys, left=float(ys[0]), right=float(ys[-1]))
 
 
+# 関数: `_required_delta_mu_mag` の入出力契約と処理意図を定義する。
+
 def _required_delta_mu_mag(delta_eps_needed: float, z: np.ndarray) -> np.ndarray:
     op = 1.0 + z
     log10_op = np.log10(op)
     return np.abs(5.0 * float(delta_eps_needed) * log10_op)
 
+
+# 関数: `_z_limit` の入出力契約と処理意図を定義する。
 
 def _z_limit(required: np.ndarray, budget: np.ndarray, z: np.ndarray, *, sigma_multiplier: float) -> Optional[float]:
     ok = np.isfinite(required) & np.isfinite(budget) & (budget >= 0.0) & (z >= 0.0)
@@ -544,6 +582,8 @@ def _z_limit(required: np.ndarray, budget: np.ndarray, z: np.ndarray, *, sigma_m
 
     return float(zz[idx - 1])
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -823,6 +863,7 @@ def _plot(
 
     # Summary values at z_ref.
     z_refs = [0.1, 0.5, 1.0, 2.0]
+    # 関数: `sample` の入出力契約と処理意図を定義する。
     def sample(arr: np.ndarray, zref: float) -> Optional[float]:
         # 条件分岐: `not (0.0 <= zref <= float(z_max))` を満たす経路を評価する。
         if not (0.0 <= zref <= float(z_max)):
@@ -877,6 +918,8 @@ def _plot(
         "reach_limits_total": limits_total,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: distance-indicator error budget (Pantheon + BOSS DR12).")

@@ -61,6 +61,7 @@ _LEAP_TABLE: list[tuple[datetime, int]] = [
 ]
 
 
+# 関数: `tai_minus_utc_seconds` の入出力契約と処理意図を定義する。
 def tai_minus_utc_seconds(dt_utc: datetime) -> int:
     # 条件分岐: `dt_utc.tzinfo is None` を満たす経路を評価する。
     if dt_utc.tzinfo is None:
@@ -79,16 +80,22 @@ def tai_minus_utc_seconds(dt_utc: datetime) -> int:
     return int(out)
 
 
+# 関数: `utc_to_tt` の入出力契約と処理意図を定義する。
+
 def utc_to_tt(dt_utc: datetime) -> datetime:
     # TT = UTC + (TAI-UTC) + 32.184s
     off = float(tai_minus_utc_seconds(dt_utc)) + 32.184
     return dt_utc.astimezone(timezone.utc) + timedelta(seconds=off)
 
 
+# 関数: `seconds_since_j2000_tt` の入出力契約と処理意図を定義する。
+
 def seconds_since_j2000_tt(dt_utc: datetime) -> float:
     dt_tt = utc_to_tt(dt_utc)
     return (dt_tt - J2000_TT).total_seconds()
 
+
+# クラス: `HarmonicDef` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class HarmonicDef:
@@ -97,12 +104,16 @@ class HarmonicDef:
     accel_rad_s2: float
 
 
+# クラス: `SiteDef` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class SiteDef:
     x_m: float
     y_m: float
     z_m: float
 
+
+# クラス: `UENCoef` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class UENCoef:
@@ -114,6 +125,8 @@ class UENCoef:
     north_sin_m: float
 
 
+# クラス: `HarposModel` の責務と境界条件を定義する。
+
 @dataclass
 class HarposModel:
     path: Path
@@ -124,10 +137,14 @@ class HarposModel:
     coeffs: Dict[str, Dict[str, UENCoef]]
 
 
+# 関数: `_f_d` の入出力契約と処理意図を定義する。
+
 def _f_d(s: str) -> float:
     # HARPOS uses Fortran 'D' exponent in some places.
     return float(s.replace("D", "E").replace("d", "E"))
 
+
+# 関数: `parse_harpos` の入出力契約と処理意図を定義する。
 
 def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> HarposModel:
     keep: Optional[set[str]] = None
@@ -257,6 +274,8 @@ def parse_harpos(path: Path, *, keep_sites: Optional[Iterable[str]] = None) -> H
     return HarposModel(path=path, validity_radius_m=float(validity_radius_m), harmonics=harmonics, sites=sites, coeffs=coeffs)
 
 
+# 関数: `best_site_by_ecef` の入出力契約と処理意図を定義する。
+
 def best_site_by_ecef(model: HarposModel, *, x_m: float, y_m: float, z_m: float) -> Tuple[Optional[str], float]:
     best_site: Optional[str] = None
     best_dist = float("inf")
@@ -276,6 +295,8 @@ def best_site_by_ecef(model: HarposModel, *, x_m: float, y_m: float, z_m: float)
 
     return best_site, float(best_dist)
 
+
+# 関数: `displacement_uen_m` の入出力契約と処理意図を定義する。
 
 def displacement_uen_m(model: HarposModel, *, site_id: str, dt_utc: datetime) -> Tuple[float, float, float]:
     """

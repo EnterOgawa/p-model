@@ -33,6 +33,7 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -58,9 +59,12 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_build_trace_rows` の入出力契約と処理意図を定義する。
+
 def _build_trace_rows() -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
 
+    # 関数: `add_row` の入出力契約と処理意図を定義する。
     def add_row(
         *,
         pipeline_id: str,
@@ -219,6 +223,8 @@ def _build_trace_rows() -> List[Dict[str, Any]]:
     return rows
 
 
+# 関数: `_summarize_rows` の入出力契約と処理意図を定義する。
+
 def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     by_pipeline: Dict[str, Dict[str, Any]] = {}
     geometry_points: List[Dict[str, Any]] = []
@@ -288,6 +294,8 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = [
@@ -309,10 +317,14 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> None:
     _set_japanese_font()
@@ -405,9 +417,13 @@ def _plot(path: Path, rows: List[Dict[str, Any]], summary: Dict[str, Any]) -> No
     plt.close(figure)
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -415,6 +431,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(

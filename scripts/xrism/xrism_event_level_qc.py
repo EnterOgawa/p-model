@@ -40,14 +40,19 @@ from scripts.xrism.xrism_event_utils import (  # noqa: E402
 )
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_sanitize_variant` の入出力契約と処理意図を定義する。
 
 def _sanitize_variant(s: str) -> str:
     s = str(s or "").strip()
@@ -61,6 +66,8 @@ def _sanitize_variant(s: str) -> str:
     return s
 
 
+# 関数: `_parse_int_list` の入出力契約と処理意図を定義する。
+
 def _parse_int_list(s: str) -> List[int]:
     out: List[int] = []
     for part in str(s or "").split(","):
@@ -73,6 +80,8 @@ def _parse_int_list(s: str) -> List[int]:
 
     return out
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: object) -> Optional[float]:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -97,6 +106,8 @@ def _maybe_float(x: object) -> Optional[float]:
 
     return v if np.isfinite(v) else None
 
+
+# 関数: `_align_counts_to_rmf` の入出力契約と処理意図を定義する。
 
 def _align_counts_to_rmf(
     *,
@@ -128,6 +139,8 @@ def _align_counts_to_rmf(
     return out
 
 
+# 関数: `_read_obsids_from_catalog` の入出力契約と処理意図を定義する。
+
 def _read_obsids_from_catalog(path: Path) -> List[str]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -147,6 +160,8 @@ def _read_obsids_from_catalog(path: Path) -> List[str]:
 
     return sorted(set(obsids))
 
+
+# 関数: `_run_qc` の入出力契約と処理意図を定義する。
 
 def _run_qc(
     *,
@@ -360,6 +375,8 @@ def _run_qc(
     return {"summary_csv": str(out_csv), "summary_metrics": str(out_metrics), "variant": v, "n_rows": int(len(rows))}
 
 
+# 関数: `_summarize_rows` の入出力契約と処理意図を定義する。
+
 def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
     l1 = [float(v) for r in rows if (v := _maybe_float(r.get("l1_norm_a"))) is not None]
     ms = [float(v) for r in rows if (v := _maybe_float(r.get("mean_shift_keV"))) is not None]
@@ -370,6 +387,8 @@ def _summarize_rows(rows: List[Dict[str, Any]]) -> Dict[str, Any]:
         "mean_shift_eV_event_minus_products_range": [float(min(ms_eV)), float(max(ms_eV))] if ms_eV else None,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

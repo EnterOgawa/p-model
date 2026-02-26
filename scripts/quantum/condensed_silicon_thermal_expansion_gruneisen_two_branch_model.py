@@ -12,9 +12,12 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -30,9 +33,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_alpha_1e8_per_k` の入出力契約と処理意図を定義する。
 
 def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
     """
@@ -70,6 +77,8 @@ def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
     return float(term1 + term2 + term3)
 
 
+# 関数: `_debye_integrand` の入出力契約と処理意図を定義する。
+
 def _debye_integrand(x: float) -> float:
     # 条件分岐: `x <= 0.0` を満たす経路を評価する。
     if x <= 0.0:
@@ -83,6 +92,8 @@ def _debye_integrand(x: float) -> float:
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
+
+# 関数: `_simpson_integrate` の入出力契約と処理意図を定義する。
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
     # 条件分岐: `n < 2` を満たす経路を評価する。
@@ -103,6 +114,8 @@ def _simpson_integrate(f, a: float, b: float, n: int) -> float:
     return s * (h / 3.0)
 
 
+# 関数: `_debye_cv_molar` の入出力契約と処理意図を定義する。
+
 def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     """
     Debye heat capacity Cv for a monatomic solid, per mole.
@@ -120,6 +133,8 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     integral = _simpson_integrate(_debye_integrand, 0.0, y_eff, n)
     return 9.0 * r * ((t_k / theta_d_k) ** 3) * integral
 
+
+# 関数: `_golden_section_minimize` の入出力契約と処理意図を定義する。
 
 def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_iter: int = 120) -> tuple[float, float]:
     gr = (math.sqrt(5.0) - 1.0) / 2.0
@@ -149,6 +164,8 @@ def _golden_section_minimize(f, lo: float, hi: float, *, tol: float = 1e-6, max_
     return x, f(x)
 
 
+# 関数: `_theta_d_from_existing_metrics` の入出力契約と処理意図を定義する。
+
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
     # 条件分岐: `not m.exists()` を満たす経路を評価する。
@@ -173,11 +190,15 @@ def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     return None
 
 
+# クラス: `DebyeFitPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DebyeFitPoint:
     t_k: float
     cp_obs: float
 
+
+# 関数: `_fit_theta_d_from_janaf` の入出力契約と処理意図を定義する。
 
 def _fit_theta_d_from_janaf(root: Path) -> tuple[float, list[DebyeFitPoint]]:
     src = root / "data" / "quantum" / "sources" / "nist_janaf_silicon_si" / "extracted_values.json"
@@ -217,12 +238,15 @@ def _fit_theta_d_from_janaf(root: Path) -> tuple[float, list[DebyeFitPoint]]:
 
     fit_points = sorted(fit_points, key=lambda x: x.t_k)
 
+    # 関数: `sse` の入出力契約と処理意図を定義する。
     def sse(theta: float) -> float:
         return float(sum((p.cp_obs - _debye_cv_molar(t_k=p.t_k, theta_d_k=theta)) ** 2 for p in fit_points))
 
     theta0, _ = _golden_section_minimize(sse, 300.0, 900.0, tol=1e-5)
     return float(theta0), fit_points
 
+
+# 関数: `_infer_zero_crossing` の入出力契約と処理意図を定義する。
 
 def _infer_zero_crossing(
     xs: list[float],
@@ -279,6 +303,8 @@ def _infer_zero_crossing(
     return max(candidates, key=lambda c: float(c["x_cross"]))
 
 
+# 関数: `_logspace` の入出力契約と処理意図を定義する。
+
 def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
     # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
@@ -294,6 +320,8 @@ def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
     return [10 ** (l0 + (l1 - l0) * i / (n - 1)) for i in range(n)]
 
 
+# 関数: `_solve_2x2` の入出力契約と処理意図を定義する。
+
 def _solve_2x2(*, a11: float, a12: float, a22: float, b1: float, b2: float) -> Optional[tuple[float, float]]:
     det = float(a11) * float(a22) - float(a12) * float(a12)
     # 条件分岐: `not math.isfinite(det) or abs(det) <= 1e-30` を満たす経路を評価する。
@@ -308,6 +336,8 @@ def _solve_2x2(*, a11: float, a12: float, a22: float, b1: float, b2: float) -> O
 
     return float(x1), float(x2)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

@@ -46,9 +46,12 @@ _CORE_REQUIRED_REL: List[str] = [
 ]
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -56,6 +59,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -70,6 +75,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_collect_public_files` の入出力契約と処理意図を定義する。
 
 def _collect_public_files(*, public_root: Path, exclude: List[Path]) -> List[Path]:
     ex = {str(p.resolve()).lower() for p in exclude}
@@ -90,6 +97,8 @@ def _collect_public_files(*, public_root: Path, exclude: List[Path]) -> List[Pat
     return files
 
 
+# 関数: `_topic_from_rel` の入出力契約と処理意図を定義する。
+
 def _topic_from_rel(rel_path: str) -> str:
     rel_norm = rel_path.replace("\\", "/")
     prefix = "output/public/"
@@ -105,6 +114,8 @@ def _topic_from_rel(rel_path: str) -> str:
     return rem.split("/", 1)[0]
 
 
+# 関数: `_write_topics_csv` の入出力契約と処理意図を定義する。
+
 def _write_topics_csv(*, out_csv: Path, rows: List[Dict[str, Any]]) -> None:
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     with out_csv.open("w", encoding="utf-8", newline="") as f:
@@ -113,6 +124,8 @@ def _write_topics_csv(*, out_csv: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             w.writerow([row.get("topic", ""), int(row.get("file_count", 0)), int(row.get("total_size_bytes", 0))])
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Phase 8 / Step 8.7.16: build hash manifest for output/public.")

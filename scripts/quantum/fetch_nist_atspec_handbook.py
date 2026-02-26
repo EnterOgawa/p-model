@@ -10,13 +10,18 @@ from typing import Any, Optional
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -31,6 +36,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -53,6 +60,8 @@ def _download(url: str, out_path: Path) -> None:
     if head != b"%PDF-":
         raise RuntimeError(f"[fail] downloaded file does not look like a PDF: {out_path} (head={head!r})")
 
+
+# 関数: `_parse_value_with_paren_unc` の入出力契約と処理意図を定義する。
 
 def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float]]:
     """
@@ -95,6 +104,8 @@ def _parse_value_with_paren_unc(s: str) -> tuple[Optional[float], Optional[float
     return val, unc
 
 
+# 関数: `_extract_pdf_text` の入出力契約と処理意図を定義する。
+
 def _extract_pdf_text(pdf_path: Path) -> str:
     # 条件分岐: `not pdf_path.exists()` を満たす経路を評価する。
     if not pdf_path.exists():
@@ -111,6 +122,8 @@ def _extract_pdf_text(pdf_path: Path) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

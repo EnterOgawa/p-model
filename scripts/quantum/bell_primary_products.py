@@ -18,15 +18,20 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT_BASE = ROOT / "output" / "public" / "quantum" / "bell"
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_stable_seed` の入出力契約と処理意図を定義する。
 
 def _stable_seed(*parts: str) -> int:
     payload = "::".join([str(p) for p in parts]).encode("utf-8")
     digest = hashlib.sha256(payload).digest()
     return int.from_bytes(digest[:8], "little") % (2**32)
 
+
+# 関数: `_shuffle_setting_bits_codes` の入出力契約と処理意図を定義する。
 
 def _shuffle_setting_bits_codes(c: np.ndarray, *, encoding: str, rng: np.random.Generator) -> np.ndarray:
     """
@@ -59,6 +64,8 @@ def _shuffle_setting_bits_codes(c: np.ndarray, *, encoding: str, rng: np.random.
 
     raise ValueError(f"unknown encoding: {encoding}")
 
+
+# 関数: `_circular_time_shift_sorted_pair` の入出力契約と処理意図を定義する。
 
 def _circular_time_shift_sorted_pair(
     t_s: np.ndarray, x: np.ndarray, *, shift_s: float
@@ -95,6 +102,8 @@ def _circular_time_shift_sorted_pair(
     )
 
 
+# 関数: `_snap_to_grid_ge` の入出力契約と処理意図を定義する。
+
 def _snap_to_grid_ge(*, x: float | None, grid: Iterable[float]) -> float | None:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -123,6 +132,8 @@ def _snap_to_grid_ge(*, x: float | None, grid: Iterable[float]) -> float | None:
     return float(vals[-1])
 
 
+# 関数: `_safe_div_array` の入出力契約と処理意図を定義する。
+
 def _safe_div_array(num: np.ndarray, den: np.ndarray) -> np.ndarray:
     num0 = np.asarray(num, dtype=float)
     den0 = np.asarray(den, dtype=float)
@@ -131,14 +142,20 @@ def _safe_div_array(num: np.ndarray, den: np.ndarray) -> np.ndarray:
     return out
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_read_json_or_none` の入出力契約と処理意図を定義する。
 
 def _read_json_or_none(path: Path) -> Any | None:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -151,6 +168,8 @@ def _read_json_or_none(path: Path) -> Any | None:
         return None
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -160,6 +179,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_relpath_from_root` の入出力契約と処理意図を定義する。
+
 def _relpath_from_root(path: Path) -> str:
     try:
         rel = path.resolve().relative_to(ROOT.resolve())
@@ -168,6 +189,8 @@ def _relpath_from_root(path: Path) -> str:
 
     return rel.as_posix()
 
+
+# 関数: `_load_script_module` の入出力契約と処理意図を定義する。
 
 def _load_script_module(*, rel_path: str, name: str) -> Any:
     path = ROOT / rel_path
@@ -185,6 +208,8 @@ def _load_script_module(*, rel_path: str, name: str) -> Any:
     spec.loader.exec_module(mod)
     return mod
 
+
+# 関数: `_ks_distance` の入出力契約と処理意図を定義する。
 
 def _ks_distance(x: np.ndarray, y: np.ndarray) -> float:
     # 条件分岐: `x.size == 0 or y.size == 0` を満たす経路を評価する。
@@ -211,6 +236,8 @@ def _ks_distance(x: np.ndarray, y: np.ndarray) -> float:
     return float(d)
 
 
+# 関数: `_delay_signature_delta_median` の入出力契約と処理意図を定義する。
+
 def _delay_signature_delta_median(
     x0: np.ndarray | list[float],
     x1: np.ndarray | list[float],
@@ -228,6 +255,8 @@ def _delay_signature_delta_median(
     if not math.isfinite(eps) or eps <= 0.0 or eps >= 0.5:
         eps = 0.1
 
+    # 関数: `_clean` の入出力契約と処理意図を定義する。
+
     def _clean(a: np.ndarray | list[float]) -> np.ndarray:
         x = np.asarray(a, dtype=float).reshape(-1)
         return x[np.isfinite(x)]
@@ -237,6 +266,7 @@ def _delay_signature_delta_median(
     n0 = int(x0v.size)
     n1 = int(x1v.size)
 
+    # 関数: `_median_and_sigma` の入出力契約と処理意図を定義する。
     def _median_and_sigma(x: np.ndarray) -> tuple[float | None, float | None, float | None, float | None]:
         n = int(x.size)
         # 条件分岐: `n <= 1` を満たす経路を評価する。
@@ -285,6 +315,8 @@ def _delay_signature_delta_median(
     }
 
 
+# 関数: `_finite` の入出力契約と処理意図を定義する。
+
 def _finite(values: Iterable[float | None]) -> list[float]:
     out: list[float] = []
     for v in values:
@@ -305,6 +337,8 @@ def _finite(values: Iterable[float | None]) -> list[float]:
     return out
 
 
+# 関数: `_min_max` の入出力契約と処理意図を定義する。
+
 def _min_max(values: Iterable[float | None]) -> tuple[float | None, float | None]:
     v = _finite(values)
     # 条件分岐: `not v` を満たす経路を評価する。
@@ -313,6 +347,8 @@ def _min_max(values: Iterable[float | None]) -> tuple[float | None, float | None
 
     return float(min(v)), float(max(v))
 
+
+# 関数: `_dataset_display_name` の入出力契約と処理意図を定義する。
 
 def _dataset_display_name(dataset_id: str) -> str:
     ds = str(dataset_id or "")
@@ -343,6 +379,8 @@ def _dataset_display_name(dataset_id: str) -> str:
     return ds
 
 
+# 関数: `_dataset_year` の入出力契約と処理意図を定義する。
+
 def _dataset_year(dataset_id: str) -> int | None:
     ds = str(dataset_id or "")
     # 条件分岐: `ds.startswith("weihs1998_")` を満たす経路を評価する。
@@ -372,6 +410,8 @@ def _dataset_year(dataset_id: str) -> int | None:
     return None
 
 
+# 関数: `_dataset_selection_class` の入出力契約と処理意図を定義する。
+
 def _dataset_selection_class(dataset_id: str) -> str:
     ds = str(dataset_id or "")
     # 条件分岐: `ds.startswith("delft_hensen")` を満たす経路を評価する。
@@ -381,6 +421,8 @@ def _dataset_selection_class(dataset_id: str) -> str:
     return "time_tag_window_or_offset"
 
 
+# 関数: `_dataset_statistic_family` の入出力契約と処理意図を定義する。
+
 def _dataset_statistic_family(dataset_id: str) -> str:
     ds = str(dataset_id or "")
     # 条件分岐: `ds.startswith(("nist_", "kwiat2013_"))` を満たす経路を評価する。
@@ -389,6 +431,8 @@ def _dataset_statistic_family(dataset_id: str) -> str:
 
     return "CHSH"
 
+
+# 関数: `_linear_trend_metrics` の入出力契約と処理意図を定義する。
 
 def _linear_trend_metrics(points: Iterable[tuple[float | None, float | None]]) -> dict[str, Any]:
     xs_v: list[float] = []
@@ -453,6 +497,8 @@ def _linear_trend_metrics(points: Iterable[tuple[float | None, float | None]]) -
     }
 
 
+# 関数: `_group_metric_summary` の入出力契約と処理意図を定義する。
+
 def _group_metric_summary(
     rows: list[dict[str, Any]],
     *,
@@ -497,6 +543,8 @@ def _group_metric_summary(
     return out
 
 
+# 関数: `_delay_signature_z_max` の入出力契約と処理意図を定義する。
+
 def _delay_signature_z_max(delay_signature: Any) -> float | None:
     # 条件分岐: `not isinstance(delay_signature, dict)` を満たす経路を評価する。
     if not isinstance(delay_signature, dict):
@@ -523,6 +571,8 @@ def _delay_signature_z_max(delay_signature: Any) -> float | None:
     return float(max(zs)) if zs else None
 
 
+# 関数: `_nanstd` の入出力契約と処理意図を定義する。
+
 def _nanstd(values: Iterable[float | None]) -> float:
     v = np.asarray(_finite(values), dtype=float)
     # 条件分岐: `v.size <= 1` を満たす経路を評価する。
@@ -531,6 +581,8 @@ def _nanstd(values: Iterable[float | None]) -> float:
 
     return float(np.std(v, ddof=1))
 
+
+# 関数: `_nan_cov` の入出力契約と処理意図を定義する。
 
 def _nan_cov(X: np.ndarray) -> np.ndarray:
     X = np.asarray(X, dtype=float)
@@ -554,6 +606,8 @@ def _nan_cov(X: np.ndarray) -> np.ndarray:
     return cov
 
 
+# 関数: `_matrix_to_json` の入出力契約と処理意図を定義する。
+
 def _matrix_to_json(cov: np.ndarray) -> list[list[float | None]]:
     m = np.asarray(cov, dtype=float)
     out: list[list[float | None]] = []
@@ -567,6 +621,8 @@ def _matrix_to_json(cov: np.ndarray) -> list[list[float | None]]:
 
     return out
 
+
+# 関数: `_matrix_from_json` の入出力契約と処理意図を定義する。
 
 def _matrix_from_json(cov_json: Any) -> np.ndarray:
     # 条件分岐: `not isinstance(cov_json, list)` を満たす経路を評価する。
@@ -609,6 +665,8 @@ def _matrix_from_json(cov_json: Any) -> np.ndarray:
     return np.asarray(rows, dtype=float)
 
 
+# 関数: `_diag_sigma_from_cov` の入出力契約と処理意図を定義する。
+
 def _diag_sigma_from_cov(cov: np.ndarray) -> list[float | None]:
     m = np.asarray(cov, dtype=float)
     # 条件分岐: `m.ndim != 2 or m.shape[0] == 0` を満たす経路を評価する。
@@ -633,6 +691,8 @@ def _diag_sigma_from_cov(cov: np.ndarray) -> list[float | None]:
 
     return out
 
+
+# 関数: `_cov_eigen_summary` の入出力契約と処理意図を定義する。
 
 def _cov_eigen_summary(cov: np.ndarray) -> dict[str, Any]:
     m = np.asarray(cov, dtype=float)
@@ -664,6 +724,8 @@ def _cov_eigen_summary(cov: np.ndarray) -> dict[str, Any]:
         "condition_number_abs": cond,
     }
 
+
+# 関数: `_corrcoef_rows` の入出力契約と処理意図を定義する。
 
 def _corrcoef_rows(X: np.ndarray) -> np.ndarray:
     a = np.asarray(X, dtype=float)
@@ -705,6 +767,8 @@ def _corrcoef_rows(X: np.ndarray) -> np.ndarray:
     return out
 
 
+# 関数: `_bootstrap_corrcoef_rows` の入出力契約と処理意図を定義する。
+
 def _bootstrap_corrcoef_rows(
     X: np.ndarray,
     *,
@@ -735,6 +799,8 @@ def _bootstrap_corrcoef_rows(
     return mean, sigma, cov_flat
 
 
+# 関数: `_jackknife_corrcoef_rows` の入出力契約と処理意図を定義する。
+
 def _jackknife_corrcoef_rows(X: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     a = np.asarray(X, dtype=float)
     # 条件分岐: `a.ndim != 2` を満たす経路を評価する。
@@ -759,6 +825,8 @@ def _jackknife_corrcoef_rows(X: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     sigma = np.sqrt(np.maximum(var, 0.0))
     return mean, sigma
 
+
+# 関数: `_extract_sweep_profile` の入出力契約と処理意図を定義する。
 
 def _extract_sweep_profile(
     *,
@@ -850,6 +918,8 @@ def _extract_sweep_profile(
     }
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(value: Any) -> float | None:
     try:
         out = float(value)
@@ -863,6 +933,8 @@ def _safe_float(value: Any) -> float | None:
 
     return out
 
+
+# 関数: `_row_nearest` の入出力契約と処理意図を定義する。
 
 def _row_nearest(*, rows: list[dict[str, Any]], x_key: str, target: float) -> dict[str, Any] | None:
     best: tuple[float, dict[str, Any]] | None = None
@@ -883,6 +955,8 @@ def _row_nearest(*, rows: list[dict[str, Any]], x_key: str, target: float) -> di
 
     return best[1] if best is not None else None
 
+
+# 関数: `_extract_xy` の入出力契約と処理意図を定義する。
 
 def _extract_xy(
     *,
@@ -927,6 +1001,8 @@ def _extract_xy(
     return xs, ys
 
 
+# 関数: `_local_slope_at` の入出力契約と処理意図を定義する。
+
 def _local_slope_at(
     *,
     rows: list[dict[str, Any]],
@@ -959,6 +1035,8 @@ def _local_slope_at(
     return float(dy / dx)
 
 
+# 関数: `_median_step` の入出力契約と処理意図を定義する。
+
 def _median_step(*, values: list[float]) -> float | None:
     # 条件分岐: `len(values) < 2` を満たす経路を評価する。
     if len(values) < 2:
@@ -974,6 +1052,8 @@ def _median_step(*, values: list[float]) -> float | None:
     return float(np.median(diffs))
 
 
+# 関数: `_relative_spread` の入出力契約と処理意図を定義する。
+
 def _relative_spread(values: list[float]) -> float | None:
     arr = np.asarray(_finite(values), dtype=float)
     # 条件分岐: `arr.size <= 1` を満たす経路を評価する。
@@ -984,6 +1064,8 @@ def _relative_spread(values: list[float]) -> float | None:
     scale = max(abs(med), 1e-12)
     return float(np.std(arr, ddof=1) / scale)
 
+
+# 関数: `_flatten_counts_from_row` の入出力契約と処理意図を定義する。
 
 def _flatten_counts_from_row(row: dict[str, Any]) -> list[float]:
     out: list[float] = []
@@ -1017,6 +1099,8 @@ def _flatten_counts_from_row(row: dict[str, Any]) -> list[float]:
     return out
 
 
+# 関数: `_max_abs_delay_median_ns` の入出力契約と処理意図を定義する。
+
 def _max_abs_delay_median_ns(delay_signature: Any) -> tuple[float | None, float | None]:
     # 条件分岐: `not isinstance(delay_signature, dict)` を満たす経路を評価する。
     if not isinstance(delay_signature, dict):
@@ -1037,6 +1121,8 @@ def _max_abs_delay_median_ns(delay_signature: Any) -> tuple[float | None, float 
     z = _delay_signature_z_max(delay_signature)
     return (float(max(vals)) if vals else None), z
 
+
+# 関数: `_reshape_2x2_counts` の入出力契約と処理意図を定義する。
 
 def _reshape_2x2_counts(raw: Any) -> np.ndarray | None:
     # 条件分岐: `not isinstance(raw, list) or len(raw) != 2` を満たす経路を評価する。
@@ -1068,6 +1154,8 @@ def _reshape_2x2_counts(raw: Any) -> np.ndarray | None:
     return arr
 
 
+# 関数: `_setting_balance_from_pair_trials` の入出力契約と処理意図を定義する。
+
 def _setting_balance_from_pair_trials(pair_trials: np.ndarray) -> dict[str, Any] | None:
     arr = np.asarray(pair_trials, dtype=float)
     # 条件分岐: `arr.shape != (2, 2)` を満たす経路を評価する。
@@ -1091,6 +1179,8 @@ def _setting_balance_from_pair_trials(pair_trials: np.ndarray) -> dict[str, Any]
         "pair_balance_score": float(pair_balance) if pair_balance is not None else None,
     }
 
+
+# 関数: `_setting_balance_from_marginals` の入出力契約と処理意図を定義する。
 
 def _setting_balance_from_marginals(
     *,
@@ -1136,6 +1226,8 @@ def _setting_balance_from_marginals(
         "marginal_balance_score": float(balance),
     }
 
+
+# 関数: `_load_detection_efficiency_proxy` の入出力契約と処理意図を定義する。
 
 def _load_detection_efficiency_proxy(*, ds_dir: Path) -> dict[str, Any]:
     trial_path = ds_dir / "trial_based_counts.json"
@@ -1196,6 +1288,8 @@ def _load_detection_efficiency_proxy(*, ds_dir: Path) -> dict[str, Any]:
         "eta_pair": float(eta_pair) if eta_pair is not None else None,
     }
 
+
+# 関数: `_load_freedom_choice_proxy` の入出力契約と処理意図を定義する。
 
 def _load_freedom_choice_proxy(*, dataset_id: str, ds_dir: Path) -> dict[str, Any]:
     trial_path = ds_dir / "trial_based_counts.json"
@@ -1287,6 +1381,8 @@ def _load_freedom_choice_proxy(*, dataset_id: str, ds_dir: Path) -> dict[str, An
 
     return {"supported": False, "reason": "no setting-balance source found"}
 
+
+# 関数: `_write_selection_loophole_quantification` の入出力契約と処理意図を定義する。
 
 def _write_selection_loophole_quantification(
     *,
@@ -1413,6 +1509,8 @@ def _write_selection_loophole_quantification(
             }
         )
 
+    # 関数: `_summary_for` の入出力契約と処理意図を定義する。
+
     def _summary_for(name: str) -> dict[str, Any]:
         vals: list[float] = []
         pass_n = 0
@@ -1519,6 +1617,7 @@ def _write_selection_loophole_quantification(
     labels = [str(r.get("display_name") or r.get("dataset_id") or "") for r in rows]
     x = np.arange(len(labels), dtype=float)
 
+    # 関数: `_panel_data` の入出力契約と処理意図を定義する。
     def _panel_data(key: str) -> tuple[list[float], list[str], list[bool]]:
         values: list[float] = []
         colors: list[str] = []
@@ -1578,6 +1677,8 @@ def _write_selection_loophole_quantification(
     return payload
 
 
+# 関数: `_corrcoef_columns` の入出力契約と処理意図を定義する。
+
 def _corrcoef_columns(X: np.ndarray) -> np.ndarray:
     a = np.asarray(X, dtype=float)
     # 条件分岐: `a.ndim != 2` を満たす経路を評価する。
@@ -1609,6 +1710,8 @@ def _corrcoef_columns(X: np.ndarray) -> np.ndarray:
 
     return out
 
+
+# 関数: `_write_systematics_decomposition_15items` の入出力契約と処理意図を定義する。
 
 def _write_systematics_decomposition_15items(
     *,
@@ -1650,6 +1753,7 @@ def _write_systematics_decomposition_15items(
     matrix_sigma: list[list[float]] = []
     csv_rows: list[dict[str, Any]] = []
 
+    # 関数: `_make_item` の入出力契約と処理意図を定義する。
     def _make_item(value: float, source: str, method: str) -> dict[str, Any]:
         return {"delta_stat": float(max(value, 0.0)), "source": str(source), "method": str(method)}
 
@@ -2273,6 +2377,8 @@ def _write_systematics_decomposition_15items(
     return payload
 
 
+# 関数: `_recommend_plateau_x` の入出力契約と処理意図を定義する。
+
 def _recommend_plateau_x(
     *,
     rows: list[dict[str, Any]],
@@ -2309,6 +2415,8 @@ def _recommend_plateau_x(
     return float(pts[-1][0])
 
 
+# 関数: `_load_time_tag_times_seconds` の入出力契約と処理意図を定義する。
+
 def _load_time_tag_times_seconds(*, ds_dir: Path) -> tuple[np.ndarray, np.ndarray, dict[str, Any]] | None:
     npz_path = ds_dir / "normalized_events.npz"
     # 条件分岐: `not npz_path.exists()` を満たす経路を評価する。
@@ -2341,6 +2449,8 @@ def _load_time_tag_times_seconds(*, ds_dir: Path) -> tuple[np.ndarray, np.ndarra
 
     return None
 
+
+# 関数: `_recommend_time_tag_window_from_dt_peak` の入出力契約と処理意図を定義する。
 
 def _recommend_time_tag_window_from_dt_peak(
     *,
@@ -2478,6 +2588,8 @@ def _recommend_time_tag_window_from_dt_peak(
     return float(rec), method
 
 
+# 関数: `_nist_trial_match_recommended_window_ns` の入出力契約と処理意図を定義する。
+
 def _nist_trial_match_recommended_window_ns(
     *, ds_dir: Path, rows: list[dict[str, Any]]
 ) -> tuple[float | None, dict[str, Any] | None]:
@@ -2539,6 +2651,8 @@ def _nist_trial_match_recommended_window_ns(
     return float(rec_w), method
 
 
+# 関数: `_recommend_natural_window` の入出力契約と処理意図を定義する。
+
 def _recommend_natural_window(
     *,
     dataset_id: str,
@@ -2598,12 +2712,16 @@ def _recommend_natural_window(
     return rec, {"name": "pairs_plateau", "plateau_fraction": float(plateau_fraction)}
 
 
+# クラス: `ChshVariant` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ChshVariant:
     swap_a: bool
     swap_b: bool
     sign_matrix: tuple[tuple[int, int], tuple[int, int]]  # each entry ±1
 
+
+# 関数: `_chsh_sign_patterns` の入出力契約と処理意図を定義する。
 
 def _chsh_sign_patterns() -> list[np.ndarray]:
     patterns: list[np.ndarray] = []
@@ -2625,6 +2743,7 @@ def _chsh_sign_patterns() -> list[np.ndarray]:
 _CHSH_SIGNS = _chsh_sign_patterns()
 
 
+# 関数: `_apply_chsh_variant` の入出力契約と処理意図を定義する。
 def _apply_chsh_variant(E: np.ndarray, variant: ChshVariant) -> float:
     E2 = np.asarray(E, dtype=float).copy()
     # 条件分岐: `E2.shape != (2, 2)` を満たす経路を評価する。
@@ -2644,6 +2763,8 @@ def _apply_chsh_variant(E: np.ndarray, variant: ChshVariant) -> float:
     s = np.asarray(variant.sign_matrix, dtype=np.int8)
     return float(np.sum(s * E2))
 
+
+# 関数: `_best_chsh_variant` の入出力契約と処理意図を定義する。
 
 def _best_chsh_variant(E: np.ndarray) -> tuple[ChshVariant, float]:
     # 条件分岐: `np.asarray(E).shape != (2, 2)` を満たす経路を評価する。
@@ -2677,6 +2798,8 @@ def _best_chsh_variant(E: np.ndarray) -> tuple[ChshVariant, float]:
     assert best is not None
     return best
 
+
+# 関数: `_bootstrap_chsh_s_sigma` の入出力契約と処理意図を定義する。
 
 def _bootstrap_chsh_s_sigma(
     *,
@@ -2717,6 +2840,8 @@ def _bootstrap_chsh_s_sigma(
     return _nanstd(samples)
 
 
+# 関数: `_bootstrap_ch_j_sigma` の入出力契約と処理意図を定義する。
+
 def _bootstrap_ch_j_sigma(
     *,
     n_trials: np.ndarray,
@@ -2743,6 +2868,7 @@ def _bootstrap_ch_j_sigma(
     a2 = 1 - a1
     b2 = 1 - b1
 
+    # 関数: `_binom` の入出力契約と処理意図を定義する。
     def _binom(n: int, k: int) -> int:
         # 条件分岐: `n <= 0` を満たす経路を評価する。
         if n <= 0:
@@ -2779,6 +2905,8 @@ def _bootstrap_ch_j_sigma(
     return _nanstd(samples)
 
 
+# 関数: `_load_csv_dicts` の入出力契約と処理意図を定義する。
+
 def _load_csv_dicts(path: Path) -> list[dict[str, str]]:
     import csv
 
@@ -2791,13 +2919,19 @@ def _load_csv_dicts(path: Path) -> list[dict[str, str]]:
     return rows
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
+
 def _parse_float(row: dict[str, str], key: str) -> float:
     return float(row[key])
 
 
+# 関数: `_parse_int` の入出力契約と処理意図を定義する。
+
 def _parse_int(row: dict[str, str], key: str) -> int:
     return int(float(row[key]))
 
+
+# 関数: `_weihs1998_dataset` の入出力契約と処理意図を定義する。
 
 def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     mod = _load_script_module(rel_path="scripts/quantum/weihs1998_time_tag_reanalysis.py", name="_weihs1998")
@@ -3199,10 +3333,13 @@ def _weihs1998_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     }
 
 
+# 関数: `_delft_datasets` の入出力契約と処理意図を定義する。
+
 def _delft_datasets(*, overwrite: bool) -> list[dict[str, Any]]:
     mod = _load_script_module(rel_path="scripts/quantum/delft_hensen2015_chsh_reanalysis.py", name="_delft")
     results: list[dict[str, Any]] = []
 
+    # 関数: `_write_trial_only_window_unsupported` の入出力契約と処理意図を定義する。
     def _write_trial_only_window_unsupported(dataset_id: str) -> None:
         _write_json(
             OUT_BASE / dataset_id / "window_sweep_metrics.json",
@@ -3436,6 +3573,8 @@ def _delft_datasets(*, overwrite: bool) -> list[dict[str, Any]]:
 
     return results
 
+
+# 関数: `_nist_dataset` の入出力契約と処理意図を定義する。
 
 def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
     dataset_id = "nist_03_43_afterfixingModeLocking_s3600"
@@ -3961,6 +4100,8 @@ def _nist_dataset(*, overwrite: bool) -> dict[str, Any]:
     }
 
 
+# 関数: `_kwiat2013_dataset` の入出力契約と処理意図を定義する。
+
 def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     """
     Christensen et al. 2013 (PRL 111, 130406; Kwiat group) CH Bell-test data.
@@ -4045,6 +4186,8 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
                 "ref_window_ns": float(tb.get("ref_window_ns")) if tb.get("ref_window_ns") is not None else None,
             },
         }
+
+    # 関数: `_dt_min_by_trial` の入出力契約と処理意図を定義する。
 
     def _dt_min_by_trial(*, click_t: np.ndarray, triggers: np.ndarray) -> np.ndarray:
         max_i64 = np.iinfo(np.int64).max
@@ -4440,6 +4583,8 @@ def _kwiat2013_dataset(*, dataset_id: str, overwrite: bool) -> dict[str, Any]:
     }
 
 
+# 関数: `_build_table1_row` の入出力契約と処理意図を定義する。
+
 def _build_table1_row(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     weihs = next((r for r in results if r.get("dataset_id") == "weihs1998_longdist_longdist1"), None)
     nist = next((r for r in results if r.get("dataset_id") == "nist_03_43_afterfixingModeLocking_s3600"), None)
@@ -4484,6 +4629,8 @@ def _build_table1_row(*, results: list[dict[str, Any]]) -> dict[str, Any]:
         "metric_public": metric_public,
     }
 
+
+# 関数: `_build_falsification_pack` の入出力契約と処理意図を定義する。
 
 def _build_falsification_pack(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     # Operational falsification examples:
@@ -4662,6 +4809,8 @@ def _build_falsification_pack(*, results: list[dict[str, Any]]) -> dict[str, Any
     return pack
 
 
+# 関数: `_enrich_falsification_pack_cross_dataset` の入出力契約と処理意図を定義する。
+
 def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
     """
     Make the Bell falsification pack self-contained by attaching cross-dataset summaries.
@@ -4698,6 +4847,7 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
     ds_list = pack.get("datasets") if isinstance(pack.get("datasets"), list) else []
     ds_list = [d for d in ds_list if isinstance(d, dict)]
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
     def _median(xs: list[float]) -> float | None:
         vals = [float(x) for x in xs if x is not None and math.isfinite(float(x))]
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -4706,9 +4856,13 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
 
         return float(np.nanmedian(np.asarray(vals, dtype=float)))
 
+    # 関数: `_min` の入出力契約と処理意図を定義する。
+
     def _min(xs: list[float]) -> float | None:
         vals = [float(x) for x in xs if x is not None and math.isfinite(float(x))]
         return float(min(vals)) if vals else None
+
+    # 関数: `_max` の入出力契約と処理意図を定義する。
 
     def _max(xs: list[float]) -> float | None:
         vals = [float(x) for x in xs if x is not None and math.isfinite(float(x))]
@@ -4899,6 +5053,8 @@ def _enrich_falsification_pack_cross_dataset(*, pack_path: Path) -> None:
     _write_json(pack_path, pack)
 
 
+# 関数: `_write_covariance_products` の入出力契約と処理意図を定義する。
+
 def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     """
     Phase 7 / Step 7.16.7-7.16.9:
@@ -4910,6 +5066,7 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     - output/public/quantum/bell/longterm_consistency.json / .png
     """
 
+    # 関数: `_attach_cov_diagnostics` の入出力契約と処理意図を定義する。
     def _attach_cov_diagnostics(obj: dict[str, Any]) -> None:
         # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
         if not isinstance(obj, dict):
@@ -6193,6 +6350,8 @@ def _write_covariance_products(*, results: list[dict[str, Any]]) -> None:
     plt.close(fig)
 
 
+# 関数: `_write_freeze_policy` の入出力契約と処理意図を定義する。
+
 def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Phase 7 / Step 7.20.2:
@@ -6201,6 +6360,7 @@ def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     Freeze policy must be "blind": it must not inspect the Bell statistic values (S/J) to pick window/offset.
     """
 
+    # 関数: `_sha256_or_none` の入出力契約と処理意図を定義する。
     def _sha256_or_none(p: Path) -> str | None:
         return _sha256(p) if p.exists() else None
 
@@ -6339,6 +6499,8 @@ def _write_freeze_policy(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     return payload
 
 
+# 関数: `_write_null_tests` の入出力契約と処理意図を定義する。
+
 def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Phase 7 / Step 7.20.1:
@@ -6346,6 +6508,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     - output/public/quantum/bell/null_tests_summary.json
     """
 
+    # 関数: `_safe_float` の入出力契約と処理意図を定義する。
     def _safe_float(x: Any) -> float | None:
         try:
             v = float(x)
@@ -6353,6 +6516,8 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
             return None
 
         return v if math.isfinite(v) else None
+
+    # 関数: `_abs_delta_over_sigma` の入出力契約と処理意図を定義する。
 
     def _abs_delta_over_sigma(*, x: float | None, y: float | None, sigma: float | None) -> float | None:
         xv = _safe_float(x)
@@ -6443,6 +6608,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                 E_ref = mod._safe_div(sum_prod_ref, n_ref)
                 variant_fixed, _s_ref_best = _best_chsh_variant(E_ref)
 
+                # 関数: `_compute_s_abs_and_pairs` の入出力契約と処理意図を定義する。
                 def _compute_s_abs_and_pairs(tt_a: np.ndarray, cc_a: np.ndarray, tt_b: np.ndarray, cc_b: np.ndarray) -> tuple[float | None, int | None]:
                     n, sum_prod, pairs_total = mod._pair_and_accumulate(
                         tt_a,
@@ -6464,6 +6630,8 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                         return None, int(pairs_total)
 
                     return float(abs(float(s))), int(pairs_total)
+
+                # 関数: `_compute_delay_z_max` の入出力契約と処理意図を定義する。
 
                 def _compute_delay_z_max(tt_a: np.ndarray, cc_a: np.ndarray, tt_b: np.ndarray, cc_b: np.ndarray) -> float | None:
                     dt_by_ab: dict[tuple[int, int], list[float]] = {(0, 0): [], (0, 1): [], (1, 0): [], (1, 1): []}
@@ -6592,6 +6760,8 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                 # 条件分岐: `frozen_off is None` を満たす経路を評価する。
                 if frozen_off is None:
                     frozen_off = 0.0
+
+                # 関数: `_shuffle_settings_column` の入出力契約と処理意図を定義する。
 
                 def _shuffle_settings_column(data: np.ndarray, *, col: int, seed: int) -> np.ndarray:
                     rng = np.random.default_rng(int(seed))
@@ -6736,6 +6906,7 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
                 b0 = np.asarray(dt["bob_setting0_dt_ns"], dtype=float)
                 b1v = np.asarray(dt["bob_setting1_dt_ns"], dtype=float)
 
+                # 関数: `_shuffle_labels` の入出力契約と処理意図を定義する。
                 def _shuffle_labels(x0: np.ndarray, x1: np.ndarray, *, seed: int) -> tuple[np.ndarray, np.ndarray]:
                     x = np.concatenate([np.asarray(x0, dtype=float).reshape(-1), np.asarray(x1, dtype=float).reshape(-1)], axis=0)
                     labels = np.concatenate(
@@ -6812,6 +6983,8 @@ def _write_null_tests(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     return summary
 
 
+# 関数: `_write_pairing_crosschecks` の入出力契約と処理意図を定義する。
+
 def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Phase 7 / Step 7.20.3:
@@ -6821,8 +6994,11 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
     Quantify "implementation/pairing choice" differences as a systematic (for supported datasets).
     """
 
+    # 関数: `_sha256_or_none` の入出力契約と処理意図を定義する。
     def _sha256_or_none(p: Path) -> str | None:
         return _sha256(p) if p.exists() else None
+
+    # 関数: `_extract_setting_and_outcome_vec` の入出力契約と処理意図を定義する。
 
     def _extract_setting_and_outcome_vec(c: np.ndarray, *, encoding: str) -> tuple[np.ndarray, np.ndarray]:
         cc = np.asarray(c, dtype=np.uint16).reshape(-1)
@@ -6844,6 +7020,8 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
 
         outcome = (np.int8(1) - np.int8(2) * det).astype(np.int8, copy=False)  # det 0->+1, det 1->-1
         return setting, outcome
+
+    # 関数: `_compute_ch_j_prob` の入出力契約と処理意図を定義する。
 
     def _compute_ch_j_prob(
         *,
@@ -6889,6 +7067,8 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
             - p_a1
             - p_b1
         )
+
+    # 関数: `_mutual_nearest_pairs` の入出力契約と処理意図を定義する。
 
     def _mutual_nearest_pairs(
         t_a: np.ndarray,
@@ -6942,6 +7122,8 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
         j_valid = j_near[m].astype(np.int64, copy=False)
         mutual = i_near[j_valid] == i_valid
         return i_valid[mutual], j_valid[mutual]
+
+    # 関数: `_mutual_nearest_pairs_counts_chunked` の入出力契約と処理意図を定義する。
 
     def _mutual_nearest_pairs_counts_chunked(
         t_a: np.ndarray,
@@ -7484,6 +7666,8 @@ def _write_pairing_crosschecks(*, results: list[dict[str, Any]]) -> dict[str, An
     _write_json(summary_path, summary)
     return summary
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

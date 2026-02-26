@@ -45,9 +45,12 @@ SLRLOG_ROOT_PATH = "/pub/slr/slrlog/"
 DEFAULT_TARGETS = ["apollo11", "apollo14", "apollo15", "luna17", "luna21", "nglr1"]
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_edc_bases` の入出力契約と処理意図を定義する。
 
 def _edc_bases() -> list[str]:
     # Allow overriding endpoints (comma-separated), while defaulting to ftp-first
@@ -61,6 +64,8 @@ def _edc_bases() -> list[str]:
     return _DEFAULT_EDC_BASES
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with open(path, "rb") as f:
@@ -69,6 +74,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
 
 def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-fetch-llr-edc-batch/1.0"})
@@ -94,6 +101,8 @@ def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     raise RuntimeError(f"fetch failed after retries: {url}: {last_err}")
 
 
+# 関数: `_fetch_text_any` の入出力契約と処理意図を定義する。
+
 def _fetch_text_any(path: str, *, timeout_s: int = 60) -> tuple[str, str]:
     last_err: Optional[Exception] = None
     for base in _edc_bases():
@@ -107,12 +116,16 @@ def _fetch_text_any(path: str, *, timeout_s: int = 60) -> tuple[str, str]:
     raise RuntimeError(f"fetch failed for all endpoints: {path}: {last_err}")
 
 
+# 関数: `_iter_hrefs` の入出力契約と処理意図を定義する。
+
 def _iter_hrefs(html: str) -> Iterable[str]:
     for href in re.findall(r'href=[\'"]([^\'"]+)[\'"]', html):
         # 条件分岐: `href` を満たす経路を評価する。
         if href:
             yield href
 
+
+# 関数: `_iter_dir_names` の入出力契約と処理意図を定義する。
 
 def _iter_dir_names(listing: str) -> Iterable[str]:
     # Handle both Apache-style HTML listings and FTP LIST output.
@@ -151,6 +164,8 @@ def _iter_dir_names(listing: str) -> Iterable[str]:
         yield name
 
 
+# 関数: `_list_years` の入出力契約と処理意図を定義する。
+
 def _list_years(target: str, root_path: str) -> list[int]:
     listing, _url = _fetch_text_any(f"{root_path}/{target}/")
     years: list[int] = []
@@ -161,6 +176,8 @@ def _list_years(target: str, root_path: str) -> list[int]:
 
     return sorted(set(years))
 
+
+# 関数: `_list_files` の入出力契約と処理意図を定義する。
 
 def _list_files(target: str, year: int, root_path: str) -> list[str]:
     listing, _url = _fetch_text_any(f"{root_path}/{target}/{year}/")
@@ -175,14 +192,20 @@ def _list_files(target: str, year: int, root_path: str) -> list[str]:
     return sorted(set(files))
 
 
+# 関数: `_is_monthly` の入出力契約と処理意図を定義する。
+
 def _is_monthly(filename: str) -> bool:
     # e.g. apollo11_202212.np2 (YYYYMM) / apollo11_201205.npt
     return bool(re.search(r"_(\d{6})\.(np2|npt)$", filename, re.IGNORECASE))
 
 
+# 関数: `_is_daily` の入出力契約と処理意図を定義する。
+
 def _is_daily(filename: str) -> bool:
     return bool(re.search(r"_(\d{8})\.(np2|npt)$", filename, re.IGNORECASE))
 
+
+# 関数: `_download_any` の入出力契約と処理意図を定義する。
 
 def _download_any(path: str, dst: Path, *, force: bool) -> str:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -236,6 +259,8 @@ def _download_any(path: str, dst: Path, *, force: bool) -> str:
     return used_url
 
 
+# 関数: `_extract_station_codes` の入出力契約と処理意図を定義する。
+
 def _extract_station_codes(np2_path: Path) -> list[str]:
     stations: set[str] = set()
     try:
@@ -275,6 +300,8 @@ class PickedLog:
     url: str
 
 
+# 関数: `_pick_latest_log` の入出力契約と処理意図を定義する。
+
 def _pick_latest_log(station: str) -> PickedLog:
     station_l = station.lower()
     listing, _url = _fetch_text_any(SLRLOG_ROOT_PATH, timeout_s=60)
@@ -299,6 +326,8 @@ def _pick_latest_log(station: str) -> PickedLog:
 
     return PickedLog(station=station.upper(), yyyymmdd=yyyymmdd, url=f"{_edc_bases()[0]}{href}")
 
+
+# 関数: `_parse_coords_from_site_log` の入出力契約と処理意図を定義する。
 
 def _parse_coords_from_site_log(txt: str) -> dict:
     # Latitude            [deg]: 32.780361 N
@@ -348,6 +377,8 @@ def _parse_coords_from_site_log(txt: str) -> dict:
     }
 
 
+# 関数: `_ensure_station_cached` の入出力契約と処理意図を定義する。
+
 def _ensure_station_cached(root: Path, station: str, *, force: bool) -> None:
     out_dir = root / "data" / "llr" / "stations"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -382,6 +413,8 @@ def _ensure_station_cached(root: Path, station: str, *, force: bool) -> None:
     json_path.write_text(json.dumps(meta_out, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_parse_years_arg` の入出力契約と処理意図を定義する。
+
 def _parse_years_arg(s: str) -> tuple[Optional[int], Optional[int]]:
     # 条件分岐: `not s` を満たす経路を評価する。
     if not s:
@@ -396,6 +429,8 @@ def _parse_years_arg(s: str) -> tuple[Optional[int], Optional[int]]:
     y1 = int(m.group(2)) if m.group(2) else y0
     return min(y0, y1), max(y0, y1)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

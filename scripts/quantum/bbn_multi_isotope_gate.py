@@ -21,9 +21,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -32,6 +35,8 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_z_score` の入出力契約と処理意図を定義する。
+
 def _z_score(*, pred: float | None, obs: float, sigma: float) -> float | None:
     # 条件分岐: `pred is None or not math.isfinite(pred) or sigma <= 0.0` を満たす経路を評価する。
     if pred is None or not math.isfinite(pred) or sigma <= 0.0:
@@ -39,6 +44,8 @@ def _z_score(*, pred: float | None, obs: float, sigma: float) -> float | None:
 
     return float((pred - obs) / sigma)
 
+
+# 関数: `_gate_status` の入出力契約と処理意図を定義する。
 
 def _gate_status(*, z_abs: float | None, hard: float, watch: float) -> str:
     # 条件分岐: `z_abs is None` を満たす経路を評価する。
@@ -57,6 +64,8 @@ def _gate_status(*, z_abs: float | None, hard: float, watch: float) -> str:
 
     return "reject"
 
+
+# 関数: `_plot_gate` の入出力契約と処理意図を定義する。
 
 def _plot_gate(path: Path, rows: list[dict[str, Any]], hard: float, watch: float) -> None:
     labels = [str(r["observable"]) for r in rows]
@@ -92,6 +101,8 @@ def _plot_gate(path: Path, rows: list[dict[str, Any]], hard: float, watch: float
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(

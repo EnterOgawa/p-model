@@ -27,9 +27,12 @@ _M_SUN = 1.98847e30  # kg
 _SEC_PER_YEAR = 365.25 * 24.0 * 3600.0
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -56,10 +59,14 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_chirp_mass_solar` の入出力契約と処理意図を定義する。
 
 def _chirp_mass_solar(m1_solar: float, m2_solar: float) -> float:
     m1 = float(m1_solar)
@@ -70,6 +77,8 @@ def _chirp_mass_solar(m1_solar: float, m2_solar: float) -> float:
 
     return (m1 * m2) ** (3.0 / 5.0) / (m1 + m2) ** (1.0 / 5.0)
 
+
+# 関数: `_pbdot_quadrupole_s_per_s` の入出力契約と処理意図を定義する。
 
 def _pbdot_quadrupole_s_per_s(mc_solar: float, pb_s: float, e: float) -> float:
     # 条件分岐: `pb_s <= 0` を満たす経路を評価する。
@@ -91,6 +100,8 @@ def _pbdot_quadrupole_s_per_s(mc_solar: float, pb_s: float, e: float) -> float:
     return -(192.0 * math.pi / 5.0) * (x ** (5.0 / 3.0)) * fe
 
 
+# 関数: `_ttc_quadrupole_s` の入出力契約と処理意図を定義する。
+
 def _ttc_quadrupole_s(mc_solar: float, f_hz: float) -> float:
     # 条件分岐: `f_hz <= 0` を満たす経路を評価する。
     if f_hz <= 0:
@@ -100,6 +111,8 @@ def _ttc_quadrupole_s(mc_solar: float, f_hz: float) -> float:
     tau = (_G * mc_kg) / (_C**3)
     return (5.0 / 256.0) * (tau ** (-5.0 / 3.0)) * ((math.pi * float(f_hz)) ** (-8.0 / 3.0))
 
+
+# 関数: `_render_plot` の入出力契約と処理意図を定義する。
 
 def _render_plot(out_png: Path, *, zmax_pb_hours: float, zmax_f_hz: float) -> Dict[str, Any]:
     _set_japanese_font()
@@ -171,6 +184,8 @@ def _render_plot(out_png: Path, *, zmax_pb_hours: float, zmax_f_hz: float) -> Di
 
     return example
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     root = _ROOT

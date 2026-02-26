@@ -47,9 +47,13 @@ except Exception:  # pragma: no cover
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -58,10 +62,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_parse_grid` の入出力契約と処理意図を定義する。
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step...` を満たす経路を評価する。
@@ -79,13 +87,19 @@ def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     return [float(x) for x in vv.tolist()]
 
 
+# 関数: `_unique_sorted` の入出力契約と処理意図を定義する。
+
 def _unique_sorted(values: Sequence[float]) -> List[float]:
     return sorted({float(x) for x in values if np.isfinite(x)})
 
 
+# 関数: `_splits` の入出力契約と処理意図を定義する。
+
 def _splits(seeds: Sequence[int], train_fracs: Sequence[float]) -> List[Tuple[int, float]]:
     return [(int(s), float(f)) for s in seeds for f in train_fracs]
 
+
+# 関数: `_parse_clipping_specs` の入出力契約と処理意図を定義する。
 
 def _parse_clipping_specs(specs: Sequence[str]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -136,12 +150,16 @@ def _parse_clipping_specs(specs: Sequence[str]) -> List[Dict[str, Any]]:
     return uniq
 
 
+# クラス: `_Variant` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class _Variant:
     sigma_floor_dex: float
     low_accel_cut_log10_gbar: float
     min_points_per_galaxy: int
 
+
+# 関数: `_plot_heatmaps` の入出力契約と処理意図を定義する。
 
 def _plot_heatmaps(
     *,
@@ -246,6 +264,8 @@ def _plot_heatmaps(
     fig.savefig(out_png, dpi=160)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

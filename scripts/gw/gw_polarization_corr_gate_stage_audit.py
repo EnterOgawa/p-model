@@ -25,9 +25,12 @@ from scripts.gw import gw_polarization_h1_l1_v1_network_audit as network_audit  
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -54,6 +57,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
+
 def _fmt(v: float, digits: int = 7) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
@@ -71,6 +76,8 @@ def _fmt(v: float, digits: int = 7) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_parse_corr_grid` の入出力契約と処理意図を定義する。
 
 def _parse_corr_grid(spec: str) -> List[float]:
     vals: List[float] = []
@@ -96,9 +103,13 @@ def _parse_corr_grid(spec: str) -> List[float]:
     return [float(v) for v in uniq]
 
 
+# 関数: `_corr_tag` の入出力契約と処理意図を定義する。
+
 def _corr_tag(corr: float) -> str:
     return f"{int(round(float(corr) * 1000.0)):04d}"
 
+
+# 関数: `_status_bucket` の入出力契約と処理意図を定義する。
 
 def _status_bucket(status: str) -> str:
     s = str(status or "")
@@ -119,6 +130,8 @@ def _status_bucket(status: str) -> str:
     return "other"
 
 
+# 関数: `_event_name_list` の入出力契約と処理意図を定義する。
+
 def _event_name_list(rows: List[Dict[str, Any]], predicate) -> List[str]:
     out: List[str] = []
     for row in rows:
@@ -128,6 +141,8 @@ def _event_name_list(rows: List[Dict[str, Any]], predicate) -> List[str]:
 
     return sorted([v for v in out if v])
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
@@ -163,6 +178,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             w.writerow(vals)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], out_png: Path, locked_corr: float) -> None:
     _set_japanese_font()
@@ -201,6 +218,8 @@ def _plot(rows: List[Dict[str, Any]], out_png: Path, locked_corr: float) -> None
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.19.4: stage corr_use_min gate for 3-detector GW polarization audit.")

@@ -41,6 +41,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -66,9 +67,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_ross_dat` の入出力契約と処理意図を定義する。
 
 def _load_ross_dat(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     s: list[float] = []
@@ -92,6 +97,8 @@ def _load_ross_dat(path: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     return np.asarray(s, dtype=float), np.asarray(y, dtype=float), np.asarray(e, dtype=float)
 
 
+# 関数: `_shell_mean_r_from_bin_center` の入出力契約と処理意図を定義する。
+
 def _shell_mean_r_from_bin_center(r: np.ndarray, *, bin_size: float) -> np.ndarray:
     """
     Shell-mean radius used in Ross' baofit_pub2D.py as a small bin-centering correction.
@@ -109,6 +116,8 @@ def _shell_mean_r_from_bin_center(r: np.ndarray, *, bin_size: float) -> np.ndarr
 
     return np.where(np.isfinite(out), out, r)
 
+
+# 関数: `_load_ross_covariance` の入出力契約と処理意図を定義する。
 
 def _load_ross_covariance(path: Path) -> np.ndarray:
     rows: list[list[float]] = []
@@ -133,6 +142,8 @@ def _load_ross_covariance(path: Path) -> np.ndarray:
     return mat
 
 
+# 関数: `_chi2_from_cov` の入出力契約と処理意図を定義する。
+
 def _chi2_from_cov(residual: np.ndarray, cov: np.ndarray) -> float:
     r = np.asarray(residual, dtype=np.float64).reshape(-1)
     c = np.asarray(cov, dtype=np.float64)
@@ -155,6 +166,8 @@ def _chi2_from_cov(residual: np.ndarray, cov: np.ndarray) -> float:
         return float(r @ inv @ r)
 
 
+# 関数: `_load_two_col_dat` の入出力契約と処理意図を定義する。
+
 def _load_two_col_dat(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     s: list[float] = []
     y: list[float] = []
@@ -175,12 +188,16 @@ def _load_two_col_dat(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     return np.asarray(s, dtype=float), np.asarray(y, dtype=float)
 
 
+# クラス: `Series` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Series:
     s: np.ndarray
     s2_xi: np.ndarray
     err_s2_xi: np.ndarray | None
 
+
+# 関数: `_load_catalog_npz` の入出力契約と処理意図を定義する。
 
 def _load_catalog_npz(path: Path, *, ell: int) -> Series:
     with np.load(path) as z:
@@ -197,6 +214,8 @@ def _load_catalog_npz(path: Path, *, ell: int) -> Series:
     s2_xi = (s * s) * xi
     return Series(s=s, s2_xi=s2_xi, err_s2_xi=None)
 
+
+# 関数: `_load_recon_multipole_from_counts` の入出力契約と処理意図を定義する。
 
 def _load_recon_multipole_from_counts(
     *,
@@ -317,6 +336,8 @@ def _load_recon_multipole_from_counts(
     return Series(s=s, s2_xi=s2_xi, err_s2_xi=None)
 
 
+# 関数: `_maybe_recompute_recon_series_with_rr0_denominator` の入出力契約と処理意図を定義する。
+
 def _maybe_recompute_recon_series_with_rr0_denominator(
     *, recon_npz: Path, rr0_npz: Path, ell: int
 ) -> Series | None:
@@ -336,6 +357,8 @@ def _maybe_recompute_recon_series_with_rr0_denominator(
     return None
 
 
+# 関数: `_maybe_load_catalog_npz` の入出力契約と処理意図を定義する。
+
 def _maybe_load_catalog_npz(path: Path, *, ell: int) -> Series | None:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -344,6 +367,8 @@ def _maybe_load_catalog_npz(path: Path, *, ell: int) -> Series | None:
     return _load_catalog_npz(path, ell=ell)
 
 
+# 関数: `_clip_range` の入出力契約と処理意図を定義する。
+
 def _clip_range(series: Series, *, s_min: float, s_max: float) -> Series:
     m = (series.s >= float(s_min)) & (series.s <= float(s_max))
     s = series.s[m]
@@ -351,6 +376,8 @@ def _clip_range(series: Series, *, s_min: float, s_max: float) -> Series:
     e = series.err_s2_xi[m] if series.err_s2_xi is not None else None
     return Series(s=s, s2_xi=y, err_s2_xi=e)
 
+
+# 関数: `_clip_range_by_center_then_project_x` の入出力契約と処理意図を定義する。
 
 def _clip_range_by_center_then_project_x(
     *,
@@ -379,6 +406,8 @@ def _clip_range_by_center_then_project_x(
     return Series(s=s_x[m], s2_xi=s2_xi[m], err_s2_xi=(err_s2_xi[m] if err_s2_xi is not None else None))
 
 
+# 関数: `_align_on_s` の入出力契約と処理意図を定義する。
+
 def _align_on_s(pub: Series, cat: Series) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     # Expect matching s bins (5 Mpc/h), but be robust via interpolation.
     s = np.asarray(pub.s, dtype=float)
@@ -387,6 +416,8 @@ def _align_on_s(pub: Series, cat: Series) -> Tuple[np.ndarray, np.ndarray, np.nd
     y_cat = np.interp(s, np.asarray(cat.s, dtype=float), np.asarray(cat.s2_xi, dtype=float))
     return s, y_pub, e_pub, y_cat
 
+
+# 関数: `_rmse` の入出力契約と処理意図を定義する。
 
 def _rmse(a: np.ndarray, b: np.ndarray) -> float:
     a = np.asarray(a, dtype=float)
@@ -398,6 +429,8 @@ def _rmse(a: np.ndarray, b: np.ndarray) -> float:
 
     return float(np.sqrt(np.mean((a[m] - b[m]) ** 2)))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

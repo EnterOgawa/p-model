@@ -50,6 +50,7 @@ _KEEP_FILES = {
 }
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -58,6 +59,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, timeout_s: int = 90) -> Dict[str, Any]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -76,6 +79,8 @@ def _download(url: str, out_path: Path, *, timeout_s: int = 90) -> Dict[str, Any
         "content_type": headers.get("content-type"),
     }
 
+
+# 関数: `_extract_zip` の入出力契約と処理意図を定義する。
 
 def _extract_zip(zip_path: Path, out_dir: Path) -> Dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -118,16 +123,22 @@ def _extract_zip(zip_path: Path, out_dir: Path) -> Dict[str, Any]:
     return {"files_extracted": extracted, "files_kept": kept, "files_skipped": skipped}
 
 
+# 関数: `_looks_ready` の入出力契約と処理意図を定義する。
+
 def _looks_ready(out_dir: Path) -> bool:
     return (out_dir / "Satpathy_2016_COMBINEDDR12_Bin1_Monopole_pre_recon.dat").exists() and (
         out_dir / "Satpathy_2016_COMBINEDDR12_Bin3_CovarianceMatrix_pre_recon.txt"
     ).exists()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser()

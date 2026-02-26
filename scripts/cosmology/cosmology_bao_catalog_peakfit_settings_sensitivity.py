@@ -41,6 +41,7 @@ from scripts.cosmology import cosmology_bao_xi_multipole_peakfit as _peakfit  # 
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -66,11 +67,16 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_sanitize_tag` の入出力契約と処理意図を定義する。
+
 def _sanitize_tag(s: str) -> str:
     return _catalog_peakfit._sanitize_out_tag(str(s))
 
 
+# 関数: `_zrange_key` の入出力契約と処理意図を定義する。
+
 def _zrange_key(z_min: float, z_max: float) -> str:
+    # 関数: `fmt` の入出力契約と処理意図を定義する。
     def fmt(x: float) -> str:
         t = f"{float(x):.3f}".rstrip("0").rstrip(".")
         return t.replace(".", "p")
@@ -78,9 +84,13 @@ def _zrange_key(z_min: float, z_max: float) -> str:
     return f"zmin{fmt(z_min)}_zmax{fmt(z_max)}"
 
 
+# 関数: `_zrange_label` の入出力契約と処理意図を定義する。
+
 def _zrange_label(z_min: float, z_max: float) -> str:
     return f"{float(z_min):.1f}–{float(z_max):.1f}"
 
+
+# 関数: `_profile_sigma_from_ci` の入出力契約と処理意図を定義する。
 
 def _profile_sigma_from_ci(ci_1sigma: Sequence[float | None]) -> Optional[float]:
     try:
@@ -95,6 +105,8 @@ def _profile_sigma_from_ci(ci_1sigma: Sequence[float | None]) -> Optional[float]
         return None
 
 
+# クラス: `LoadedCase` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class LoadedCase:
     case: _catalog_peakfit.CatalogCase
@@ -105,14 +117,19 @@ class LoadedCase:
     xi2_all: np.ndarray
     cov_full: np.ndarray  # shape (2*n, 2*n)
 
+    # 関数: `zrange_key` の入出力契約と処理意図を定義する。
     @property
     def zrange_key(self) -> str:
         return _zrange_key(self.z_min, self.z_max)
+
+    # 関数: `zrange_label` の入出力契約と処理意図を定義する。
 
     @property
     def zrange_label(self) -> str:
         return _zrange_label(self.z_min, self.z_max)
 
+
+# クラス: `FitScenario` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class FitScenario:
@@ -134,6 +151,8 @@ class FitScenario:
     eps_rescan_max_expands: int
     quad_weight: float
 
+
+# 関数: `_load_case` の入出力契約と処理意図を定義する。
 
 def _load_case(case: _catalog_peakfit.CatalogCase) -> LoadedCase:
     m = json.loads(case.metrics_path.read_text(encoding="utf-8"))
@@ -167,6 +186,8 @@ def _load_case(case: _catalog_peakfit.CatalogCase) -> LoadedCase:
     cov_full = np.asarray(cov_full, dtype=float).reshape(2 * n_all, 2 * n_all)
     return LoadedCase(case=case, z_min=z_min, z_max=z_max, s_all=s_all, xi0_all=xi0_all, xi2_all=xi2_all, cov_full=cov_full)
 
+
+# 関数: `_fit_one` の入出力契約と処理意図を定義する。
 
 def _fit_one(
     *,
@@ -370,6 +391,8 @@ def _fit_one(
     }
 
 
+# 関数: `_default_scenarios` の入出力契約と処理意図を定義する。
+
 def _default_scenarios() -> List[FitScenario]:
     # Baseline matches cosmology_bao_catalog_peakfit defaults (for comparability).
     base = dict(
@@ -390,6 +413,7 @@ def _default_scenarios() -> List[FitScenario]:
         quad_weight=1.0,
     )
 
+    # 関数: `sc` の入出力契約と処理意図を定義する。
     def sc(sid: str, title: str, **kw: Any) -> FitScenario:
         cfg = dict(base)
         cfg.update(kw)
@@ -414,6 +438,8 @@ def _default_scenarios() -> List[FitScenario]:
         sc("awide", "alpha∈[0.8,1.2]", alpha_min=0.8, alpha_max=1.2, alpha_step=0.004),
     ]
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: peakfit setting sensitivity (jackknife cov; catalog-based xiℓ).")

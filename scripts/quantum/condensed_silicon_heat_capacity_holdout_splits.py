@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -31,6 +32,7 @@ from scripts.quantum.condensed_silicon_heat_capacity_debye_baseline import (  # 
 )
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -45,9 +47,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_cp_shomate` の入出力契約と処理意図を定義する。
 
 def _cp_shomate(*, coeffs: dict[str, float], t_k: float) -> float:
     t = t_k / 1000.0
@@ -59,16 +65,22 @@ def _cp_shomate(*, coeffs: dict[str, float], t_k: float) -> float:
     return a + b * t + c * (t**2) + d * (t**3) + (e / (t**2))
 
 
+# 関数: `_sigma_cp_proxy` の入出力契約と処理意図を定義する。
+
 def _sigma_cp_proxy(cp_j_per_molk: float) -> float:
     # Same proxy as the baseline metrics (NIST WebBook condensed Shomate blocks):
     # max(2% of Cp, 0.2 J/mol·K)
     return float(max(0.02 * abs(float(cp_j_per_molk)), 0.2))
 
 
+# 関数: `_smoothstep` の入出力契約と処理意図を定義する。
+
 def _smoothstep(u: float) -> float:
     x = 0.0 if u <= 0.0 else (1.0 if u >= 1.0 else float(u))
     return x * x * (3.0 - 2.0 * x)
 
+
+# 関数: `_load_webbook_shomate_solid` の入出力契約と処理意図を定義する。
 
 def _load_webbook_shomate_solid(*, path: Path) -> dict[str, Any]:
     """
@@ -113,6 +125,8 @@ def _load_webbook_shomate_solid(*, path: Path) -> dict[str, Any]:
     raise RuntimeError(f"solid Shomate block not found: {path}")
 
 
+# 関数: `_cp_frozen_hybrid_debye_shomate` の入出力契約と処理意図を定義する。
+
 def _cp_frozen_hybrid_debye_shomate(
     *,
     t_k: float,
@@ -138,6 +152,8 @@ def _cp_frozen_hybrid_debye_shomate(
     return float(_debye_cv_molar(t_k=t, theta_d_k=float(theta_d_k)))
 
 
+# 関数: `_fit_theta_d_minimax_max_abs_z` の入出力契約と処理意図を定義する。
+
 def _fit_theta_d_minimax_max_abs_z(
     *,
     temps_k: np.ndarray,
@@ -152,6 +168,7 @@ def _fit_theta_d_minimax_max_abs_z(
     Fit θ_D by minimizing the maximum |z| over the training range.
     """
 
+    # 関数: `max_abs_z` の入出力契約と処理意図を定義する。
     def max_abs_z(theta: float) -> float:
         worst = 0.0
         th = float(theta)
@@ -183,6 +200,8 @@ def _fit_theta_d_minimax_max_abs_z(
     theta_opt, _ = _golden_section_minimize(max_abs_z, lo, hi, tol=1e-6)
     return float(theta_opt)
 
+
+# 関数: `_metrics_for_idx` の入出力契約と処理意図を定義する。
 
 def _metrics_for_idx(
     *,
@@ -227,6 +246,8 @@ def _metrics_for_idx(
     }
 
 
+# 関数: `_fit_theta_d` の入出力契約と処理意図を定義する。
+
 def _fit_theta_d(
     *,
     temps_k: np.ndarray,
@@ -234,6 +255,7 @@ def _fit_theta_d(
     sigma: np.ndarray,
     train_idx: list[int],
 ) -> float:
+    # 関数: `sse` の入出力契約と処理意図を定義する。
     def sse(theta: float) -> float:
         s = 0.0
         for i in train_idx:
@@ -251,6 +273,8 @@ def _fit_theta_d(
     theta0, _ = _golden_section_minimize(sse, 200.0, 1200.0, tol=1e-6)
     return float(theta0)
 
+
+# 関数: `_fit_shomate_coeffs` の入出力契約と処理意図を定義する。
 
 def _fit_shomate_coeffs(
     *,
@@ -293,6 +317,8 @@ def _fit_shomate_coeffs(
     a, b, c, d, e = [float(v) for v in coeff.tolist()]
     return {"A": a, "B": b, "C": c, "D": d, "E": e}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     out_dir = _ROOT / "output" / "public" / "quantum"
@@ -341,6 +367,7 @@ def main() -> None:
     cp_obs = np.asarray([float(p["Cp_J_per_molK"]) for p in solid], dtype=float)
     sigma = np.asarray([_sigma_cp_proxy(float(cp)) for cp in cp_obs.tolist()], dtype=float)
 
+    # 関数: `_idx_in_range` の入出力契約と処理意図を定義する。
     def _idx_in_range(t0: float, t1: float) -> list[int]:
         return [i for i, t in enumerate(temps_k.tolist()) if float(t0) <= float(t) <= float(t1)]
 

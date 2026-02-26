@@ -9,12 +9,15 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, FancyBboxPatch
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     fig_w_in: float = 11.0
     fig_h_in: float = 6.2
     dpi: int = 180
 
+
+# 関数: `_add_box` の入出力契約と処理意図を定義する。
 
 def _add_box(ax, x: float, y: float, w: float, h: float, text: str, *, fc: str, ec: str) -> None:
     box = FancyBboxPatch(
@@ -30,10 +33,14 @@ def _add_box(ax, x: float, y: float, w: float, h: float, text: str, *, fc: str, 
     ax.text(x + w / 2.0, y + h / 2.0, text, ha="center", va="center", fontsize=10.5)
 
 
+# 関数: `_add_arrow` の入出力契約と処理意図を定義する。
+
 def _add_arrow(ax, x0: float, y0: float, x1: float, y1: float) -> None:
     arrow = FancyArrowPatch((x0, y0), (x1, y1), arrowstyle="->", mutation_scale=14, linewidth=1.4, color="#333333")
     ax.add_patch(arrow)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

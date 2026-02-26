@@ -17,9 +17,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -35,12 +38,16 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return str(path.relative_to(_ROOT)).replace("\\", "/")
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -57,6 +64,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             w.writerow([r.get(h) for h in headers])
 
 
+# 関数: `_fmt_range` の入出力契約と処理意図を定義する。
+
 def _fmt_range(r: Sequence[float]) -> str:
     # 条件分岐: `len(r) != 2` を満たす経路を評価する。
     if len(r) != 2:
@@ -64,6 +73,8 @@ def _fmt_range(r: Sequence[float]) -> str:
 
     return f"{float(r[0]):g}-{float(r[1]):g}K"
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(v: object) -> Optional[float]:
     try:
@@ -74,12 +85,16 @@ def _safe_float(v: object) -> Optional[float]:
     return x if math.isfinite(x) else None
 
 
+# 関数: `_safe_int` の入出力契約と処理意図を定義する。
+
 def _safe_int(v: object) -> Optional[int]:
     try:
         return int(v)
     except Exception:
         return None
 
+
+# 関数: `_gate_ok` の入出力契約と処理意図を定義する。
 
 def _gate_ok(
     max_abs_z: Optional[float],
@@ -105,6 +120,8 @@ def _gate_ok(
     return bool(reduced_chi2 <= reduced_chi2_le)
 
 
+# 関数: `_all_true` の入出力契約と処理意図を定義する。
+
 def _all_true(values: Sequence[Optional[bool]]) -> Optional[bool]:
     # 条件分岐: `any(v is False for v in values)` を満たす経路を評価する。
     if any(v is False for v in values):
@@ -117,6 +134,8 @@ def _all_true(values: Sequence[Optional[bool]]) -> Optional[bool]:
 
     return None
 
+
+# 関数: `_falsification_status` の入出力契約と処理意図を定義する。
 
 def _falsification_status(
     *, app_ok: Optional[bool], strict_ok: Optional[bool], holdout_ok: Optional[bool]
@@ -137,6 +156,8 @@ def _falsification_status(
 
     return "inconclusive"
 
+
+# 関数: `_minimax_gate_summary` の入出力契約と処理意図を定義する。
 
 def _minimax_gate_summary(
     split_summaries: Sequence[Dict[str, Any]],
@@ -270,6 +291,8 @@ def _minimax_gate_summary(
 
     return summary
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     out_dir = _ROOT / "output" / "public" / "quantum"

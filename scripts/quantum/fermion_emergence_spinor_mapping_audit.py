@@ -40,9 +40,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -51,6 +54,8 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -58,6 +63,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> Optional[str]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -72,6 +79,8 @@ def _sha256(path: Path) -> Optional[str]:
     return h.hexdigest()
 
 
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
+
 def _as_float(value: Any, default: float = 0.0) -> float:
     # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
@@ -83,19 +92,27 @@ def _as_float(value: Any, default: float = 0.0) -> float:
     return float(default)
 
 
+# 関数: `_contains_any` の入出力契約と処理意図を定義する。
+
 def _contains_any(text: str, patterns: List[str]) -> bool:
     lowered = text.lower()
     return any(p in lowered for p in patterns)
 
+
+# 関数: `_nearest_half_integer` の入出力契約と処理意図を定義する。
 
 def _nearest_half_integer(value: float) -> float:
     k = round(value - 0.5)
     return float(k + 0.5)
 
 
+# 関数: `_half_spin_mismatch` の入出力契約と処理意図を定義する。
+
 def _half_spin_mismatch(spin_value: float) -> float:
     return abs(float(spin_value) - _nearest_half_integer(float(spin_value)))
 
+
+# 関数: `_criterion` の入出力契約と処理意図を定義する。
 
 def _criterion(
     *,
@@ -128,6 +145,8 @@ def _criterion(
     }
 
 
+# 関数: `_target_manifold` の入出力契約と処理意図を定義する。
+
 def _target_manifold(*, has_scalar_multiplet: bool, has_only_complex_scalar: bool) -> str:
     # 条件分岐: `has_scalar_multiplet` を満たす経路を評価する。
     if has_scalar_multiplet:
@@ -140,6 +159,8 @@ def _target_manifold(*, has_scalar_multiplet: bool, has_only_complex_scalar: boo
 
     return "unknown"
 
+
+# 関数: `_pi4_group` の入出力契約と処理意図を定義する。
 
 def _pi4_group(manifold: str) -> str:
     key = manifold.lower()
@@ -160,9 +181,13 @@ def _pi4_group(manifold: str) -> str:
     return "unknown"
 
 
+# 関数: `_fr_sector_available` の入出力契約と処理意図を定義する。
+
 def _fr_sector_available(pi4_group: str) -> bool:
     return str(pi4_group).upper() == "Z2"
 
+
+# 関数: `_gate_score` の入出力契約と処理意図を定義する。
 
 def _gate_score(value: float, threshold: float, operator: str) -> float:
     eps = 1.0e-15
@@ -181,6 +206,8 @@ def _gate_score(value: float, threshold: float, operator: str) -> float:
 
     return float("nan")
 
+
+# 関数: `_defect_operator_metrics` の入出力契約と処理意図を定義する。
 
 def _defect_operator_metrics(*, winding_q: int = 1) -> Dict[str, Any]:
     sigma_x = np.array([[0.0, 1.0], [1.0, 0.0]], dtype=np.complex128)
@@ -227,6 +254,7 @@ def _defect_operator_metrics(*, winding_q: int = 1) -> Dict[str, Any]:
 
     sigma_z4 = np.kron(i2, sigma_z)
 
+    # 関数: `_u` の入出力契約と処理意図を定義する。
     def _u(phi: float) -> np.ndarray:
         return math.cos(phi / 2.0) * i4 - 1.0j * math.sin(phi / 2.0) * sigma_z4
 
@@ -258,6 +286,8 @@ def _defect_operator_metrics(*, winding_q: int = 1) -> Dict[str, Any]:
     }
 
 
+# 関数: `_defect_action_level_derivation_chain` の入出力契約と処理意図を定義する。
+
 def _defect_action_level_derivation_chain() -> Dict[str, Any]:
     equations = [
         "L_ext = |D_mu P|^2 - V(|P|) - 1/4 F_munu F^munu + lambda_H * J_Hopf[P]",
@@ -287,6 +317,8 @@ def _defect_action_level_derivation_chain() -> Dict[str, Any]:
         "completeness_ratio": float(completeness_ratio),
     }
 
+
+# 関数: `_build_criteria` の入出力契約と処理意図を定義する。
 
 def _build_criteria(
     *,
@@ -378,6 +410,8 @@ def _build_criteria(
     ]
 
 
+# 関数: `_decision_from_criteria` の入出力契約と処理意図を定義する。
+
 def _decision_from_criteria(criteria: List[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(row["id"]) for row in criteria if row.get("gate_level") == "hard" and not bool(row.get("pass"))]
     watch_fail_ids = [str(row["id"]) for row in criteria if row.get("gate_level") == "watch" and not bool(row.get("pass"))]
@@ -397,6 +431,8 @@ def _decision_from_criteria(criteria: List[Dict[str, Any]]) -> Dict[str, Any]:
         "watch_fail_ids": watch_fail_ids,
     }
 
+
+# 関数: `_hard_reject_reason` の入出力契約と処理意図を定義する。
 
 def _hard_reject_reason(*, hard_fail_ids: List[str]) -> str:
     # 条件分岐: `not hard_fail_ids` を満たす経路を評価する。
@@ -425,6 +461,8 @@ def _hard_reject_reason(*, hard_fail_ids: List[str]) -> str:
 
     return "Hard gate failed in fermion-emergence mapping audit."
 
+
+# 関数: `build_pack` の入出力契約と処理意図を定義する。
 
 def build_pack(
     *,
@@ -720,6 +758,8 @@ def build_pack(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -740,6 +780,8 @@ def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
         for row in criteria:
             writer.writerow(row)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     criteria = payload.get("criteria") if isinstance(payload.get("criteria"), list) else []
@@ -824,6 +866,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Generate fermion-emergence spinor mapping audit pack.")

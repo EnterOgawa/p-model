@@ -31,9 +31,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -42,10 +45,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
@@ -61,6 +68,8 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     return rows
 
 
+# 関数: `_parse_iso_date` の入出力契約と処理意図を定義する。
+
 def _parse_iso_date(s: str) -> Optional[str]:
     s = (s or "").strip()
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -71,6 +80,8 @@ def _parse_iso_date(s: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
+# 関数: `_is_public` の入出力契約と処理意図を定義する。
+
 def _is_public(row: Dict[str, str], *, today_ymd: str) -> bool:
     d = _parse_iso_date(row.get("public_date") or "")
     # 条件分岐: `not d` を満たす経路を評価する。
@@ -79,6 +90,8 @@ def _is_public(row: Dict[str, str], *, today_ymd: str) -> bool:
 
     return d <= today_ymd
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: str) -> Optional[float]:
     s = (x or "").strip()
@@ -92,6 +105,8 @@ def _maybe_float(x: str) -> Optional[float]:
         return None
 
 
+# クラス: `TargetPreset` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TargetPreset:
     object_name: str
@@ -103,6 +118,8 @@ class TargetPreset:
     arxiv_refs: List[str]
     notes: str
 
+
+# 関数: `_default_presets` の入出力契約と処理意図を定義する。
 
 def _default_presets() -> List[TargetPreset]:
     # Minimal seeded presets (expand as data / refs accumulate).
@@ -181,6 +198,8 @@ def _default_presets() -> List[TargetPreset]:
     ]
 
 
+# 関数: `_pick_obsids_for_object` の入出力契約と処理意図を定義する。
+
 def _pick_obsids_for_object(
     rows: List[Dict[str, str]],
     *,
@@ -210,6 +229,8 @@ def _pick_obsids_for_object(
     cand.sort(key=lambda r: -(float(r.get("resolve_exposure") or 0.0)))
     return cand[: max(0, int(max_obsids))]
 
+
+# 関数: `build_catalog` の入出力契約と処理意図を定義する。
 
 def build_catalog(
     *,
@@ -272,6 +293,8 @@ def build_catalog(
     _write_json(out_json, out)
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Iterable[str]] = None) -> int:
     p = argparse.ArgumentParser()

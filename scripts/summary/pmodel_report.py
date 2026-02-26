@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 
+# クラス: `Section` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Section:
     key: str
@@ -23,9 +24,13 @@ class Section:
     notes: List[str]
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -52,6 +57,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_rel_url` の入出力契約と処理意図を定義する。
+
 def _rel_url(from_dir: Path, target: Path) -> str:
     try:
         rel = os.path.relpath(target, start=from_dir)
@@ -61,16 +68,22 @@ def _rel_url(from_dir: Path, target: Path) -> str:
     return rel.replace("\\", "/")
 
 
+# 関数: `_read_csv_dicts` の入出力契約と処理意図を定義する。
+
 def _read_csv_dicts(path: Path) -> List[Dict[str, str]]:
     with open(path, "r", newline="", encoding="utf-8") as f:
         r = csv.DictReader(f)
         return list(r)
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
+# 関数: `_pick_newest` の入出力契約と処理意図を定義する。
 
 def _pick_newest(glob_paths: List[Path]) -> Optional[Path]:
     items = [p for p in glob_paths if p.exists()]
@@ -81,12 +94,16 @@ def _pick_newest(glob_paths: List[Path]) -> Optional[Path]:
     return max(items, key=lambda p: p.stat().st_mtime)
 
 
+# 関数: `_try_float` の入出力契約と処理意図を定義する。
+
 def _try_float(x: str) -> Optional[float]:
     try:
         return float(x)
     except Exception:
         return None
 
+
+# 関数: `_cassini_section` の入出力契約と処理意図を定義する。
 
 def _cassini_section(root: Path) -> Section:
     out_dir = root / "output" / "private" / "cassini"
@@ -142,6 +159,8 @@ def _cassini_section(root: Path) -> Section:
         notes=notes,
     )
 
+
+# 関数: `_viking_section` の入出力契約と処理意図を定義する。
 
 def _viking_section(root: Path) -> Section:
     out_dir = root / "output" / "private" / "viking"
@@ -199,6 +218,8 @@ def _viking_section(root: Path) -> Section:
         notes=notes,
     )
 
+
+# 関数: `_gps_section` の入出力契約と処理意図を定義する。
 
 def _gps_section(root: Path) -> Section:
     out_dir = root / "output" / "private" / "gps"
@@ -303,6 +324,8 @@ def _gps_section(root: Path) -> Section:
     )
 
 
+# 関数: `_llr_section` の入出力契約と処理意図を定義する。
+
 def _llr_section(root: Path) -> Section:
     out_root = root / "output" / "private" / "llr"
     runbook = root / "doc" / "llr" / "README.md"
@@ -360,6 +383,8 @@ def _llr_section(root: Path) -> Section:
     )
 
 
+# 関数: `_mercury_section` の入出力契約と処理意図を定義する。
+
 def _mercury_section(root: Path) -> Section:
     out_dir = root / "output" / "private" / "mercury"
     runbook = root / "doc" / "mercury" / "README.md"
@@ -383,6 +408,8 @@ def _mercury_section(root: Path) -> Section:
         notes=notes,
     )
 
+
+# 関数: `_theory_section` の入出力契約と処理意図を定義する。
 
 def _theory_section(root: Path) -> Section:
     out_dir = root / "output" / "private" / "theory"
@@ -453,6 +480,8 @@ def _theory_section(root: Path) -> Section:
         ],
     )
 
+
+# 関数: `_run_all_status_section` の入出力契約と処理意図を定義する。
 
 def _run_all_status_section(root: Path, out_dir: Path) -> Section:
     status_path = root / "output" / "private" / "summary" / "run_all_status.json"
@@ -547,6 +576,8 @@ def _run_all_status_section(root: Path, out_dir: Path) -> Section:
     )
 
 
+# 関数: `_public_section` の入出力契約と処理意図を定義する。
+
 def _public_section(root: Path) -> Section:
     out_dir = root / "output" / "private" / "summary"
     runbook = root / "doc" / "summary" / "README.md"
@@ -584,6 +615,8 @@ def _public_section(root: Path) -> Section:
         notes=notes,
     )
 
+
+# 関数: `_render_html` の入出力契約と処理意図を定義する。
 
 def _render_html(sections: List[Section], out_dir: Path) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -667,6 +700,8 @@ def _render_html(sections: List[Section], out_dir: Path) -> Path:
     return html_path
 
 
+# 関数: `_render_dashboard_png` の入出力契約と処理意図を定義する。
+
 def _render_dashboard_png(sections: List[Section], out_dir: Path) -> Optional[Path]:
     try:
         import matplotlib.pyplot as plt
@@ -713,6 +748,8 @@ def _render_dashboard_png(sections: List[Section], out_dir: Path) -> Optional[Pa
     plt.close(fig)
     return out_path
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

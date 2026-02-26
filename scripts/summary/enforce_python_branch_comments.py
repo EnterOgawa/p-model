@@ -23,6 +23,7 @@ from typing import Iterable, List, Sequence
 IF_HEADER_RE = re.compile(r"^(?P<indent>\s*)(?P<kw>if|elif)\s+(?P<cond>.+):\s*(?:#.*)?$")
 
 
+# クラス: `Violation` の責務と境界条件を定義する。
 @dataclass
 class Violation:
     """Represents one missing branch-comment finding."""
@@ -30,6 +31,8 @@ class Violation:
     line: int
     message: str
 
+
+# クラス: `FileResult` の責務と境界条件を定義する。
 
 @dataclass
 class FileResult:
@@ -39,6 +42,8 @@ class FileResult:
     violations: List[Violation]
     changed: bool
 
+
+# 関数: `_detect_newline_style` の入出力契約と処理意図を定義する。
 
 def _detect_newline_style(text: str) -> str:
     """Return dominant newline style from input text."""
@@ -59,6 +64,8 @@ def _detect_newline_style(text: str) -> str:
     return "\n"
 
 
+# 関数: `_iter_python_files` の入出力契約と処理意図を定義する。
+
 def _iter_python_files(paths: Sequence[Path]) -> Iterable[Path]:
     """Yield Python files from path list."""
     for candidate in paths:
@@ -74,6 +81,8 @@ def _iter_python_files(paths: Sequence[Path]) -> Iterable[Path]:
                 yield python_file
 
 
+# 関数: `_previous_nonempty` の入出力契約と処理意図を定義する。
+
 def _previous_nonempty(lines: Sequence[str]) -> str | None:
     """Return previous non-empty line from built output buffer."""
     for line_text in reversed(lines):
@@ -83,6 +92,8 @@ def _previous_nonempty(lines: Sequence[str]) -> str | None:
 
     return None
 
+
+# 関数: `_normalize_condition_text` の入出力契約と処理意図を定義する。
 
 def _normalize_condition_text(condition_text: str) -> str:
     """Normalize condition snippet for compact comments."""
@@ -94,6 +105,8 @@ def _normalize_condition_text(condition_text: str) -> str:
     return compact
 
 
+# 関数: `_comment_for_branch` の入出力契約と処理意図を定義する。
+
 def _comment_for_branch(*, keyword: str, condition: str) -> str:
     """Build branch comment text."""
     condition_text = _normalize_condition_text(condition)
@@ -103,6 +116,8 @@ def _comment_for_branch(*, keyword: str, condition: str) -> str:
 
     return f"# 条件分岐: 前段条件が不成立で、`{condition_text}` を追加評価する。"
 
+
+# 関数: `_audit_or_fix_text` の入出力契約と処理意図を定義する。
 
 def _audit_or_fix_text(source_text: str, *, apply_fix: bool) -> tuple[str, List[Violation], bool]:
     """Audit/fix one source text and return normalized text + findings."""
@@ -145,6 +160,8 @@ def _audit_or_fix_text(source_text: str, *, apply_fix: bool) -> tuple[str, List[
     return normalized_text, violations, changed
 
 
+# 関数: `_run_for_file` の入出力契約と処理意図を定義する。
+
 def _run_for_file(path: Path, *, apply_fix: bool) -> FileResult:
     """Run audit/fix for one file."""
     source_text = path.read_text(encoding="utf-8")
@@ -156,6 +173,8 @@ def _run_for_file(path: Path, *, apply_fix: bool) -> FileResult:
 
     return FileResult(path=path, violations=violations, changed=changed and normalized_text != source_text)
 
+
+# 関数: `parse_args` の入出力契約と処理意図を定義する。
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
@@ -173,6 +192,8 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     """CLI entry point."""

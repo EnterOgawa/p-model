@@ -64,6 +64,7 @@ G_NEWTON = 6.67430e-11
 GIGAYEAR_S = 365.25 * 24.0 * 3600.0 * 1.0e9
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -89,14 +90,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_copy_to_public` の入出力契約と処理意図を定義する。
 
 def _copy_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str, str]:
     public_dir.mkdir(parents=True, exist_ok=True)
@@ -109,6 +116,8 @@ def _copy_to_public(private_paths: Sequence[Path], public_dir: Path) -> Dict[str
     return copied
 
 
+# クラス: `RSDPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class RSDPoint:
     z: float
@@ -118,6 +127,8 @@ class RSDPoint:
     fs8_obs: float
     fs8_sigma: float
 
+
+# クラス: `BranchResult` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class BranchResult:
@@ -137,6 +148,8 @@ class BranchResult:
     dlnh_dlnasorted_desc: np.ndarray
     c_sorted_desc: np.ndarray
 
+
+# 関数: `_load_boss_rsd_points` の入出力契約と処理意図を定義する。
 
 def _load_boss_rsd_points(path: Path) -> List[RSDPoint]:
     raw = _read_json(path)
@@ -176,6 +189,8 @@ def _load_boss_rsd_points(path: Path) -> List[RSDPoint]:
     return points
 
 
+# 関数: `_load_tau_eff_seconds` の入出力契約と処理意図を定義する。
+
 def _load_tau_eff_seconds(path: Path) -> float:
     raw = _read_json(path)
     tau_block = dict(raw.get("tau_origin_block", {}))
@@ -193,6 +208,8 @@ def _load_tau_eff_seconds(path: Path) -> float:
     return float(tau_eff_gyr * GIGAYEAR_S)
 
 
+# 関数: `_interp_log` の入出力契約と処理意図を定義する。
+
 def _interp_log(a_nodes: np.ndarray, y_nodes: np.ndarray, a_eval: np.ndarray) -> np.ndarray:
     x_nodes = np.log(a_nodes)
     x_eval = np.log(a_eval)
@@ -201,13 +218,18 @@ def _interp_log(a_nodes: np.ndarray, y_nodes: np.ndarray, a_eval: np.ndarray) ->
     return np.exp(lny_eval)
 
 
+# 関数: `_make_background_functions` の入出力契約と処理意図を定義する。
+
 def _make_background_functions(a_nodes: np.ndarray, h_nodes: np.ndarray) -> Dict[str, Any]:
     x_nodes = np.log(a_nodes)
     ln_h_nodes = np.log(h_nodes)
     dlnh_dx_nodes = np.gradient(ln_h_nodes, x_nodes)
 
+    # 関数: `h_of_x` の入出力契約と処理意図を定義する。
     def h_of_x(x: np.ndarray) -> np.ndarray:
         return np.exp(np.interp(x, x_nodes, ln_h_nodes))
+
+    # 関数: `dlnh_dx_of_x` の入出力契約と処理意図を定義する。
 
     def dlnh_dx_of_x(x: np.ndarray) -> np.ndarray:
         return np.interp(x, x_nodes, dlnh_dx_nodes)
@@ -220,6 +242,8 @@ def _make_background_functions(a_nodes: np.ndarray, h_nodes: np.ndarray) -> Dict
         "dlnh_dx_of_x": dlnh_dx_of_x,
     }
 
+
+# 関数: `_integrate_growth` の入出力契約と処理意図を定義する。
 
 def _integrate_growth(
     *,
@@ -241,6 +265,7 @@ def _integrate_growth(
     h_grid = h_of_x(x_grid)
     h_ref = float(np.interp(math.log(a_ref), x_grid, h_grid))
 
+    # 関数: `rhs` の入出力契約と処理意図を定義する。
     def rhs(x: float, state: np.ndarray) -> np.ndarray:
         d = float(state[0])
         dp = float(state[1])
@@ -296,6 +321,8 @@ def _integrate_growth(
         "a_ref": np.array([a_ref], dtype=float),
     }
 
+
+# 関数: `_evaluate_branch` の入出力契約と処理意図を定義する。
 
 def _evaluate_branch(
     *,
@@ -372,6 +399,8 @@ def _evaluate_branch(
     )
 
 
+# 関数: `_fit_mu_ref` の入出力契約と処理意図を定義する。
+
 def _fit_mu_ref(
     *,
     branch: str,
@@ -409,6 +438,8 @@ def _fit_mu_ref(
     return best
 
 
+# 関数: `_write_points_csv` の入出力契約と処理意図を定義する。
+
 def _write_points_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     fieldnames = [
         "branch",
@@ -432,6 +463,8 @@ def _write_points_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow({k: row.get(k) for k in fieldnames})
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -506,6 +539,8 @@ def _plot(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Step 8.7.18.2: fσ8 growth mapping with delayed-P effective friction.")

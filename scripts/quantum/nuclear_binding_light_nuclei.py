@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,6 +22,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path, src_dirname: str) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
@@ -43,6 +46,8 @@ def _load_nist_codata_constants(*, root: Path, src_dirname: str) -> dict[str, di
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
+# 関数: `_load_iaea_charge_radii_a3` の入出力契約と処理意図を定義する。
+
 def _load_iaea_charge_radii_a3(*, root: Path, src_dirname: str) -> dict[str, dict[str, float]]:
     src_dir = root / "data" / "quantum" / "sources" / src_dirname
     extracted = src_dir / "extracted_values.json"
@@ -61,6 +66,8 @@ def _load_iaea_charge_radii_a3(*, root: Path, src_dirname: str) -> dict[str, dic
     if not isinstance(radii, dict):
         raise SystemExit(f"[fail] invalid extracted_values.json: radii is not a dict: {extracted}")
 
+    # 関数: `unpack` の入出力契約と処理意図を定義する。
+
     def unpack(key: str) -> dict[str, float]:
         item = radii.get(key)
         # 条件分岐: `not isinstance(item, dict)` を満たす経路を評価する。
@@ -71,6 +78,8 @@ def _load_iaea_charge_radii_a3(*, root: Path, src_dirname: str) -> dict[str, dic
 
     return {"t": unpack("t"), "h": unpack("h")}
 
+
+# 関数: `_binding_energy_from_masses_mev` の入出力契約と処理意図を定義する。
 
 def _binding_energy_from_masses_mev(
     *,
@@ -85,6 +94,8 @@ def _binding_energy_from_masses_mev(
     sigma_b_mev = sigma_b_j / (1e6 * e_charge_c)
     return float(b_mev), float(sigma_b_mev)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

@@ -16,6 +16,7 @@ INCONSISTENT_MAX_NORM_GATE = 5.0
 LOG_EPS = 1.0e-12
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(value: Any) -> float:
     try:
         out = float(value)
@@ -24,6 +25,8 @@ def _parse_float(value: Any) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
@@ -34,6 +37,8 @@ def _safe_median(values: list[float]) -> float:
     return float(median(finite))
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -42,6 +47,8 @@ def _rms(values: list[float]) -> float:
 
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
+
+# 関数: `_pearson` の入出力契約と処理意図を定義する。
 
 def _pearson(xs: list[float], ys: list[float]) -> float:
     pairs = [(float(x), float(y)) for x, y in zip(xs, ys) if math.isfinite(float(x)) and math.isfinite(float(y))]
@@ -63,6 +70,8 @@ def _pearson(xs: list[float], ys: list[float]) -> float:
     return float(cov / math.sqrt(var_x * var_y))
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -79,6 +88,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -93,9 +104,13 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow([row.get(h) for h in headers])
 
 
+# 関数: `_key` の入出力契約と処理意図を定義する。
+
 def _key(z: int, n: int, a: int) -> tuple[int, int, int]:
     return (int(z), int(n), int(a))
 
+
+# 関数: `_label` の入出力契約と処理意図を定義する。
 
 def _label(symbol: str, a: int, z: int, n: int) -> str:
     # 条件分岐: `symbol` を満たす経路を評価する。
@@ -104,6 +119,8 @@ def _label(symbol: str, a: int, z: int, n: int) -> str:
 
     return f"Z{z}N{n}A{a}"
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(
     *,
@@ -186,6 +203,8 @@ def _build_figure(
     fig.savefig(out_png)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

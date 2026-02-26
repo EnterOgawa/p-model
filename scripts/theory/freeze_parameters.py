@@ -10,18 +10,25 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# クラス: `GammaConstraint` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class GammaConstraint:
@@ -32,6 +39,7 @@ class GammaConstraint:
     kind: str
     source: Dict[str, Any]
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self, *, beta: float, beta_sigma: float) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -45,6 +53,8 @@ class GammaConstraint:
         }
 
 
+# 関数: `beta_from_gamma` の入出力契約と処理意図を定義する。
+
 def beta_from_gamma(gamma: float, sigma: float) -> Tuple[float, float]:
     # PPN mapping: (1+gamma)=2β  ->  β=(1+gamma)/2
     beta = 0.5 * (1.0 + float(gamma))
@@ -52,11 +62,15 @@ def beta_from_gamma(gamma: float, sigma: float) -> Tuple[float, float]:
     return beta, beta_sigma
 
 
+# 関数: `gamma_from_beta` の入出力契約と処理意図を定義する。
+
 def gamma_from_beta(beta: float, beta_sigma: float) -> Tuple[float, float]:
     gamma = float(2.0 * beta - 1.0)
     gamma_sigma = float(2.0 * abs(beta_sigma))
     return gamma, gamma_sigma
 
+
+# 関数: `_constraints_from_known_sources` の入出力契約と処理意図を定義する。
 
 def _constraints_from_known_sources() -> List[GammaConstraint]:
     # Note: This is a fit/predict *policy* input. We keep it small and stable and cite the primary sources.
@@ -83,6 +97,8 @@ def _constraints_from_known_sources() -> List[GammaConstraint]:
         ),
     ]
 
+
+# 関数: `_load_vlbi_best_from_solar_deflection_metrics` の入出力契約と処理意図を定義する。
 
 def _load_vlbi_best_from_solar_deflection_metrics(root: Path) -> Optional[GammaConstraint]:
     path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
@@ -115,6 +131,8 @@ def _load_vlbi_best_from_solar_deflection_metrics(root: Path) -> Optional[GammaC
         return None
 
 
+# 関数: `_weighted_average` の入出力契約と処理意図を定義する。
+
 def _weighted_average(betas: List[Tuple[float, float]]) -> Tuple[float, float]:
     # inverse-variance weighting
     items = [(b, s) for (b, s) in betas if s > 0 and math.isfinite(b) and math.isfinite(s)]
@@ -127,6 +145,8 @@ def _weighted_average(betas: List[Tuple[float, float]]) -> Tuple[float, float]:
     sigma = math.sqrt(1.0 / wsum)
     return float(mean), float(sigma)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

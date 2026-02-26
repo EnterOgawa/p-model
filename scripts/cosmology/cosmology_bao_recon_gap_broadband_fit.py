@@ -40,6 +40,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -57,6 +58,8 @@ def _set_japanese_font() -> None:
     except Exception:
         pass
 
+
+# 関数: `_parse_ross_xi_file` の入出力契約と処理意図を定義する。
 
 def _parse_ross_xi_file(path: Path) -> dict[float, tuple[float, float]]:
     """
@@ -86,6 +89,8 @@ def _parse_ross_xi_file(path: Path) -> dict[float, tuple[float, float]]:
 
     return out
 
+
+# 関数: `_fit_broadband_diff` の入出力契約と処理意図を定義する。
 
 def _fit_broadband_diff(
     *,
@@ -126,10 +131,14 @@ def _fit_broadband_diff(
     return coef.astype(np.float64), fit.astype(np.float64)
 
 
+# 関数: `_rmse` の入出力契約と処理意図を定義する。
+
 def _rmse(x: np.ndarray) -> float:
     x = np.asarray(x, dtype=np.float64)
     return float(np.sqrt(np.mean(x * x)))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Quantify recon ξ2 gap absorbable by broadband (a0+a1/r+a2/r^2).")

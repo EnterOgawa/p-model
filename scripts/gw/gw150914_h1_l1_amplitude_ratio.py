@@ -26,9 +26,12 @@ from scripts.gw.gw150914_chirp_phase import _bandpass, _fetch_inputs, _parse_gwo
 from scripts.summary import worklog
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -55,6 +58,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_slugify` の入出力契約と処理意図を定義する。
+
 def _slugify(s: str) -> str:
     out = "".join(ch.lower() if ch.isalnum() else "_" for ch in (s or "").strip())
     while "__" in out:
@@ -62,6 +67,8 @@ def _slugify(s: str) -> str:
 
     return out.strip("_") or "event"
 
+
+# 関数: `_corrcoef_1d` の入出力契約と処理意図を定義する。
 
 def _corrcoef_1d(x: np.ndarray, y: np.ndarray) -> float:
     # 条件分岐: `x.size != y.size or x.size < 8` を満たす経路を評価する。
@@ -79,6 +86,8 @@ def _corrcoef_1d(x: np.ndarray, y: np.ndarray) -> float:
 
     return float(np.dot(x0, y0) / den)
 
+
+# 関数: `_scan_lag_corr` の入出力契約と処理意図を定義する。
 
 def _scan_lag_corr(x_first: np.ndarray, x_second: np.ndarray, max_lag_samples: int) -> Tuple[np.ndarray, np.ndarray, int, float]:
     n = int(min(x_first.size, x_second.size))
@@ -121,6 +130,8 @@ def _scan_lag_corr(x_first: np.ndarray, x_second: np.ndarray, max_lag_samples: i
     return lags, corrs, best_lag, best_corr
 
 
+# 関数: `_apply_lag_to_first` の入出力契約と処理意図を定義する。
+
 def _apply_lag_to_first(
     t: np.ndarray, x_first: np.ndarray, x_second: np.ndarray, lag_samples: int
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -140,6 +151,8 @@ def _apply_lag_to_first(
 
     return t0, h0, l0
 
+
+# 関数: `_align_on_common_grid` の入出力契約と処理意図を定義する。
 
 def _align_on_common_grid(
     t_first: np.ndarray,
@@ -175,6 +188,8 @@ def _align_on_common_grid(
     return t, xh, xl, fs_ref
 
 
+# 関数: `_prepare_detector_series` の入出力契約と処理意図を定義する。
+
 def _prepare_detector_series(
     strain_path: Path,
     *,
@@ -197,6 +212,8 @@ def _prepare_detector_series(
     return t, xf, float(fs), float(gps_start)
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(v: float, ndigits: int = 6) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
@@ -214,6 +231,8 @@ def _fmt_float(v: float, ndigits: int = 6) -> str:
 
     return f"{x:.{ndigits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_build_metrics` の入出力契約と処理意図を定義する。
 
 def _build_metrics(
     *,
@@ -288,6 +307,8 @@ def _build_metrics(
     }
 
 
+# 関数: `_gate_status` の入出力契約と処理意図を定義する。
+
 def _gate_status(
     *,
     abs_corr: float,
@@ -334,6 +355,8 @@ def _gate_status(
 
     return status, reasons
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -417,6 +440,8 @@ def _plot(
     plt.close(fig)
 
 
+# 関数: `_write_summary_csv` の入出力契約と処理意図を定義する。
+
 def _write_summary_csv(path: Path, summary_row: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     keys = [
@@ -444,6 +469,8 @@ def _write_summary_csv(path: Path, summary_row: Dict[str, Any]) -> None:
         w.writerow([summary_row.get(k, "") for k in keys])
 
 
+# 関数: `_write_lag_scan_csv` の入出力契約と処理意図を定義する。
+
 def _write_lag_scan_csv(path: Path, lags_ms: np.ndarray, corrs: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="") as f:
@@ -452,6 +479,8 @@ def _write_lag_scan_csv(path: Path, lags_ms: np.ndarray, corrs: np.ndarray) -> N
         for lag_ms, corr in zip(lags_ms.tolist(), corrs.tolist()):
             w.writerow([_fmt_float(float(lag_ms), 6), _fmt_float(float(corr), 8)])
 
+
+# 関数: `_write_ratio_samples_csv` の入出力契約と処理意図を定義する。
 
 def _write_ratio_samples_csv(
     path: Path,
@@ -494,6 +523,8 @@ def _write_ratio_samples_csv(
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _ROOT

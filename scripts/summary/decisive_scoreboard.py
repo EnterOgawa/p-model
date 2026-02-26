@@ -12,9 +12,12 @@ from typing import Any, Dict, List, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -41,14 +44,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# クラス: `ZRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class ZRow:
@@ -61,6 +70,7 @@ class ZRow:
     kind: str  # fit/predict
     note: str
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -75,6 +85,8 @@ class ZRow:
         }
 
 
+# 関数: `_load_frozen` の入出力契約と処理意図を定義する。
+
 def _load_frozen(root: Path, path: Optional[Path]) -> Dict[str, Any]:
     # 条件分岐: `path and path.exists()` を満たす経路を評価する。
     if path and path.exists():
@@ -88,6 +100,8 @@ def _load_frozen(root: Path, path: Optional[Path]) -> Dict[str, Any]:
     return {"beta": 1.0, "beta_sigma": None, "gamma_pmodel": 1.0, "policy": {"beta_source": "default_beta_1"}}
 
 
+# 関数: `_format_float` の入出力契約と処理意図を定義する。
+
 def _format_float(x: float, *, digits: int = 6) -> str:
     # 条件分岐: `x == 0` を満たす経路を評価する。
     if x == 0:
@@ -100,6 +114,8 @@ def _format_float(x: float, *, digits: int = 6) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_z_fit_cassini_gamma` の入出力契約と処理意図を定義する。
 
 def _z_fit_cassini_gamma(frozen: Dict[str, Any]) -> Optional[ZRow]:
     # If beta is frozen from Cassini γ, we can show it as a FIT row (z=0 by construction).
@@ -146,6 +162,8 @@ def _z_fit_cassini_gamma(frozen: Dict[str, Any]) -> Optional[ZRow]:
     )
 
 
+# 関数: `_z_solar_deflection` の入出力契約と処理意図を定義する。
+
 def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
     path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -175,6 +193,8 @@ def _z_solar_deflection(root: Path, frozen: Dict[str, Any]) -> Optional[ZRow]:
         note="VLBIのPPN γ推定（一次ソース）との比較。P-modelでは γ=2β−1。",
     )
 
+
+# 関数: `_z_gravitational_redshift` の入出力契約と処理意図を定義する。
 
 def _z_gravitational_redshift(root: Path) -> List[ZRow]:
     path = root / "output" / "private" / "theory" / "gravitational_redshift_experiments.json"
@@ -213,6 +233,8 @@ def _z_gravitational_redshift(root: Path) -> List[ZRow]:
 
     return out
 
+
+# 関数: `_z_eht_ring_vs_shadow` の入出力契約と処理意図を定義する。
 
 def _z_eht_ring_vs_shadow(root: Path, frozen: Dict[str, Any]) -> List[ZRow]:
     path = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
@@ -269,6 +291,8 @@ def _z_eht_ring_vs_shadow(root: Path, frozen: Dict[str, Any]) -> List[ZRow]:
     return out
 
 
+# 関数: `build_scoreboard` の入出力契約と処理意図を定義する。
+
 def build_scoreboard(root: Path, *, frozen: Dict[str, Any]) -> Dict[str, Any]:
     beta = float(frozen.get("beta", 1.0))
     beta_sigma = frozen.get("beta_sigma")
@@ -302,6 +326,8 @@ def build_scoreboard(root: Path, *, frozen: Dict[str, Any]) -> Dict[str, Any]:
     }
     return payload
 
+
+# 関数: `plot_scoreboard` の入出力契約と処理意図を定義する。
 
 def plot_scoreboard(rows: List[ZRow], *, beta: float, beta_source: str, out_png: Path) -> None:
     _set_japanese_font()
@@ -365,6 +391,8 @@ def plot_scoreboard(rows: List[ZRow], *, beta: float, beta_source: str, out_png:
     fig.savefig(out_png, dpi=160)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

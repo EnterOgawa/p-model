@@ -41,9 +41,13 @@ except Exception:  # pragma: no cover
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -52,9 +56,13 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -64,6 +72,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_copy_file` の入出力契約と処理意図を定義する。
 
 def _copy_file(src: Path, dst: Path, *, overwrite: bool) -> None:
     # 条件分岐: `not src.exists()` を満たす経路を評価する。
@@ -78,6 +88,8 @@ def _copy_file(src: Path, dst: Path, *, overwrite: bool) -> None:
     shutil.copy2(src, dst)
 
 
+# 関数: `_artifact_record` の入出力契約と処理意図を定義する。
+
 def _artifact_record(path: Path) -> Dict[str, Any]:
     return {
         "path": _rel(path),
@@ -85,6 +97,8 @@ def _artifact_record(path: Path) -> Dict[str, Any]:
         "bytes": int(path.stat().st_size) if path.exists() else None,
     }
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(x: Any) -> Optional[float]:
     try:
@@ -94,6 +108,8 @@ def _as_float(x: Any) -> Optional[float]:
 
     return v if v == v else None
 
+
+# 関数: `_build_pack` の入出力契約と処理意図を定義する。
 
 def _build_pack(
     *,
@@ -128,6 +144,8 @@ def _build_pack(
         # 条件分岐: `isinstance(v, list)` を満たす経路を評価する。
         if isinstance(v, list):
             op_summary = v
+
+    # 関数: `_op_metric` の入出力契約と処理意図を定義する。
 
     def _op_metric(subset: str, key: str) -> Optional[float]:
         for row in op_summary:
@@ -517,6 +535,8 @@ def _build_pack(
     return pack
 
 
+# 関数: `run` の入出力契約と処理意図を定義する。
+
 def run(
     *,
     in_dir: Path,
@@ -711,6 +731,8 @@ def run(
 
     return pack_path, warnings
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Promote LLR batch audit outputs into output/public/llr.")

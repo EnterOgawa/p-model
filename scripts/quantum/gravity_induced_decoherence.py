@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # Constants
@@ -34,10 +35,14 @@ class Config:
     n_t_noise: int = 500
 
 
+# 関数: `visibility_gaussian_phase_noise` の入出力契約と処理意図を定義する。
+
 def visibility_gaussian_phase_noise(phase_sigma_rad: np.ndarray) -> np.ndarray:
     # If phase is Gaussian with std σ, visibility V = exp(-σ^2/2).
     return np.exp(-0.5 * (phase_sigma_rad**2))
 
+
+# 関数: `ensemble_gravity_phase_sigma_rad` の入出力契約と処理意図を定義する。
 
 def ensemble_gravity_phase_sigma_rad(
     *, omega0_rad_s: float, g_m_per_s2: float, sigma_z_m: float, t_s: np.ndarray, c_m_per_s: float
@@ -45,6 +50,8 @@ def ensemble_gravity_phase_sigma_rad(
     # σ_φ = ω0 * (g σ_z / c^2) * t
     return omega0_rad_s * (g_m_per_s2 * sigma_z_m / (c_m_per_s**2)) * t_s
 
+
+# 関数: `required_sigma_y_for_visibility` の入出力契約と処理意図を定義する。
 
 def required_sigma_y_for_visibility(*, vis: float, omega0_rad_s: float, t_s: np.ndarray) -> np.ndarray:
     # V = exp(-(omega σ_y t)^2/2) -> σ_y = sqrt(-2 ln V) / (omega t)
@@ -54,6 +61,8 @@ def required_sigma_y_for_visibility(*, vis: float, omega0_rad_s: float, t_s: np.
     k = math.sqrt(-2.0 * math.log(vis))
     return (k / (omega0_rad_s * t_s)).astype(float)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

@@ -11,9 +11,12 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -29,9 +32,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_rho_at` の入出力契約と処理意図を定義する。
 
 def _rho_at(table: list[dict[str, Any]], t_c: float) -> Optional[float]:
     for r in table:
@@ -45,10 +52,14 @@ def _rho_at(table: list[dict[str, Any]], t_c: float) -> Optional[float]:
     return None
 
 
+# 関数: `_coeff_ln_rho_per_k` の入出力契約と処理意図を定義する。
+
 def _coeff_ln_rho_per_k(*, rho20: float, rho30: float) -> float:
     # Approximate d ln(rho)/dT around ~25°C using a 20–30°C finite difference.
     return (math.log(rho30) - math.log(rho20)) / 10.0
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()
@@ -140,6 +151,7 @@ def main() -> None:
 
     plt.figure(figsize=(8.5, 4.8))
 
+    # 関数: `pick_style` の入出力契約と処理意図を定義する。
     def pick_style(t: str, d: str) -> tuple[str, str]:
         # 条件分岐: `t == "p" and d == "Al"` を満たす経路を評価する。
         if t == "p" and d == "Al":

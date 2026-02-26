@@ -6,9 +6,12 @@ import math
 from pathlib import Path
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -31,6 +34,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
+# 関数: `_get_const_si` の入出力契約と処理意図を定義する。
+
 def _get_const_si(consts: dict[str, dict[str, object]], key: str) -> tuple[float, float]:
     obj = consts.get(key)
     # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
@@ -39,6 +44,8 @@ def _get_const_si(consts: dict[str, dict[str, object]], key: str) -> tuple[float
 
     return float(obj["value_si"]), float(obj["sigma_si"])
 
+
+# 関数: `_load_lambda_pi_fm` の入出力契約と処理意図を定義する。
 
 def _load_lambda_pi_fm(*, root: Path) -> float:
     """
@@ -69,6 +76,8 @@ def _load_lambda_pi_fm(*, root: Path) -> float:
     return 1.413816930654131
 
 
+# 関数: `_exp_coupling_mev` の入出力契約と処理意図を定義する。
+
 def _exp_coupling_mev(*, r_fm: float, r0_fm: float, j_at_r0_mev: float, L_fm: float) -> float:
     # 条件分岐: `not (math.isfinite(r_fm) and r_fm >= 0)` を満たす経路を評価する。
     if not (math.isfinite(r_fm) and r_fm >= 0):
@@ -83,6 +92,8 @@ def _exp_coupling_mev(*, r_fm: float, r0_fm: float, j_at_r0_mev: float, L_fm: fl
 
     return float(j_at_r0_mev * math.exp((r0_fm - r_fm) / L_fm))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser()

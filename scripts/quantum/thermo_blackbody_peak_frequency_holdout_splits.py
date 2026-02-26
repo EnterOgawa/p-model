@@ -12,9 +12,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     hash_obj = hashlib.sha256()
@@ -30,9 +33,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return hash_obj.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(value: Any) -> float:
     # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
@@ -42,6 +49,8 @@ def _as_float(value: Any) -> float:
     raise TypeError(f"expected number, got: {type(value)}")
 
 
+# 関数: `_get_constant` の入出力契約と処理意図を定義する。
+
 def _get_constant(extracted: dict[str, Any], code: str) -> dict[str, Any]:
     constants = extracted.get("constants")
     # 条件分岐: `not isinstance(constants, dict) or code not in constants or not isinstance(co...` を満たす経路を評価する。
@@ -50,6 +59,8 @@ def _get_constant(extracted: dict[str, Any], code: str) -> dict[str, Any]:
 
     return constants[code]
 
+
+# 関数: `_metrics_for_idx` の入出力契約と処理意図を定義する。
 
 def _metrics_for_idx(
     *,
@@ -87,6 +98,8 @@ def _metrics_for_idx(
     }
 
 
+# 関数: `_fit_log_powerlaw` の入出力契約と処理意図を定義する。
+
 def _fit_log_powerlaw(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndarray) -> tuple[float, float]:
     indices = np.asarray(idx, dtype=np.int64).reshape(-1)
     x_vals = np.asarray(x_values, dtype=float).reshape(-1)[indices]
@@ -100,6 +113,8 @@ def _fit_log_powerlaw(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndarra
     return log10_coeff, exponent
 
 
+# 関数: `_fit_fixed_exponent` の入出力契約と処理意図を定義する。
+
 def _fit_fixed_exponent(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndarray, exponent: float) -> float:
     indices = np.asarray(idx, dtype=np.int64).reshape(-1)
     x_vals = np.asarray(x_values, dtype=float).reshape(-1)[indices]
@@ -107,6 +122,8 @@ def _fit_fixed_exponent(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndar
     denom = np.maximum(1e-300, x_vals**float(exponent))
     return float(np.mean(y_vals / denom))
 
+
+# 関数: `_wien_peak_x_frequency` の入出力契約と処理意図を定義する。
 
 def _wien_peak_x_frequency() -> float:
     # Solve 3(1 - e^{-x}) = x for the frequency peak of B_ν.
@@ -123,6 +140,8 @@ def _wien_peak_x_frequency() -> float:
 
     return 0.5 * (lo + hi)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

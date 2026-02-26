@@ -49,6 +49,7 @@ Q_CONST_BETA_MINUS_MEV = float((M_NEUTRON_U - M_HYDROGEN_U) * AMU_TO_MEV)
 Q_CONST_BETA_PLUS_MEV = float((M_HYDROGEN_U - M_NEUTRON_U - 2.0 * M_ELECTRON_U) * AMU_TO_MEV)
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(value: Any) -> float:
     try:
         out = float(value)
@@ -57,6 +58,8 @@ def _parse_float(value: Any) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
@@ -67,6 +70,8 @@ def _safe_median(values: list[float]) -> float:
     return float(median(finite))
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -75,6 +80,8 @@ def _rms(values: list[float]) -> float:
 
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
+
+# 関数: `_pearson` の入出力契約と処理意図を定義する。
 
 def _pearson(xs: list[float], ys: list[float]) -> float:
     paired = [(float(x), float(y)) for x, y in zip(xs, ys) if math.isfinite(float(x)) and math.isfinite(float(y))]
@@ -96,6 +103,8 @@ def _pearson(xs: list[float], ys: list[float]) -> float:
     return float(cov / math.sqrt(vx * vy))
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -109,6 +118,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow([row.get(h) for h in headers])
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -125,6 +136,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_parse_halflife_seconds` の入出力契約と処理意図を定義する。
 
 def _parse_halflife_seconds(level: dict[str, Any]) -> float:
     half = level.get("halflife")
@@ -145,6 +158,8 @@ def _parse_halflife_seconds(level: dict[str, Any]) -> float:
 
     return float(value * scale)
 
+
+# 関数: `_extract_observed_modes` の入出力契約と処理意図を定義する。
 
 def _extract_observed_modes(level: dict[str, Any]) -> list[str]:
     decay_modes = level.get("decayModes")
@@ -171,12 +186,16 @@ def _extract_observed_modes(level: dict[str, Any]) -> list[str]:
     return out
 
 
+# 関数: `_mode_flags` の入出力契約と処理意図を定義する。
+
 def _mode_flags(observed_modes: list[str]) -> tuple[bool, bool]:
     mode_upper = [m.upper() for m in observed_modes]
     has_beta_minus = any("B-" in m for m in mode_upper)
     has_beta_plus = any(("EC" in m) or ("B+" in m) for m in mode_upper)
     return has_beta_minus, has_beta_plus
 
+
+# 関数: `_read_primary` の入出力契約と処理意図を定義する。
 
 def _read_primary(path: Path) -> dict[str, dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -215,6 +234,8 @@ def _read_primary(path: Path) -> dict[str, dict[str, Any]]:
     return out
 
 
+# 関数: `_read_secondary_q` の入出力契約と処理意図を定義する。
+
 def _read_secondary_q(path: Path) -> dict[str, dict[str, float]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     # 条件分岐: `not isinstance(payload, dict)` を満たす経路を評価する。
@@ -251,6 +272,8 @@ def _read_secondary_q(path: Path) -> dict[str, dict[str, float]]:
     return out
 
 
+# 関数: `_read_binding` の入出力契約と処理意図を定義する。
+
 def _read_binding(path: Path) -> dict[tuple[int, int], dict[str, float]]:
     out: dict[tuple[int, int], dict[str, float]] = {}
     with path.open("r", encoding="utf-8", newline="") as f:
@@ -266,6 +289,8 @@ def _read_binding(path: Path) -> dict[tuple[int, int], dict[str, float]]:
     return out
 
 
+# 関数: `_q_pred_from_binding` の入出力契約と処理意図を定義する。
+
 def _q_pred_from_binding(*, channel: str, b_parent: float, b_daughter: float) -> float:
     # 条件分岐: `channel == "beta_minus"` を満たす経路を評価する。
     if channel == "beta_minus":
@@ -278,6 +303,8 @@ def _q_pred_from_binding(*, channel: str, b_parent: float, b_daughter: float) ->
 
     raise ValueError(f"unsupported channel: {channel}")
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, dict[str, Any]], out_png: Path) -> None:
     import matplotlib.pyplot as plt
@@ -365,6 +392,8 @@ def _build_figure(*, rows: list[dict[str, Any]], summary_by_channel: dict[str, d
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

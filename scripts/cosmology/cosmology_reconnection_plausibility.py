@@ -43,6 +43,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -68,14 +69,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: Any) -> Optional[float]:
     try:
@@ -90,6 +97,8 @@ def _maybe_float(x: Any) -> Optional[float]:
 
     return float(v)
 
+
+# 関数: `_load_ddr_systematics_envelope` の入出力契約と処理意図を定義する。
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -127,6 +136,8 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_apply_ddr_sigma_policy` の入出力契約と処理意図を定義する。
+
 def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> "DDRConstraint":
     # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
@@ -151,6 +162,8 @@ def _apply_ddr_sigma_policy(ddr: "DDRConstraint", *, policy: str, envelope: Dict
     )
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -169,6 +182,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# クラス: `DDRConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRConstraint:
     id: str
@@ -182,6 +197,7 @@ class DDRConstraint:
     sigma_policy: str = "raw"
     category: Optional[str] = None
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "DDRConstraint":
         sigma = float(j["epsilon0_sigma"])
@@ -196,6 +212,8 @@ class DDRConstraint:
         )
 
 
+# クラス: `OpacityConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class OpacityConstraint:
     id: str
@@ -206,6 +224,7 @@ class OpacityConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "OpacityConstraint":
         return OpacityConstraint(
@@ -219,6 +238,8 @@ class OpacityConstraint:
         )
 
 
+# クラス: `CandleEvoConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class CandleEvoConstraint:
     id: str
@@ -230,6 +251,7 @@ class CandleEvoConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "CandleEvoConstraint":
         assumes_cddr = j.get("assumes_cddr")
@@ -245,6 +267,8 @@ class CandleEvoConstraint:
         )
 
 
+# クラス: `BAOConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class BAOConstraint:
     id: str
@@ -255,6 +279,7 @@ class BAOConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "BAOConstraint":
         return BAOConstraint(
@@ -268,6 +293,8 @@ class BAOConstraint:
         )
 
 
+# 関数: `_primary_ddr` の入出力契約と処理意図を定義する。
+
 def _primary_ddr(ddr_rows: Sequence[DDRConstraint]) -> DDRConstraint:
     # 条件分岐: `not ddr_rows` を満たす経路を評価する。
     if not ddr_rows:
@@ -275,6 +302,8 @@ def _primary_ddr(ddr_rows: Sequence[DDRConstraint]) -> DDRConstraint:
 
     return min(ddr_rows, key=lambda r: (r.epsilon0_sigma if r.epsilon0_sigma > 0 else float("inf")))
 
+
+# 関数: `_primary_by_sigma` の入出力契約と処理意図を定義する。
 
 def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
     """Pick the most constraining row (smallest positive sigma)."""
@@ -304,6 +333,8 @@ def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
     return best if best is not None else rows[0]
 
 
+# 関数: `_z_score` の入出力契約と処理意図を定義する。
+
 def _z_score(x: float, mu: float, sig: float) -> Optional[float]:
     # 条件分岐: `not (sig > 0)` を満たす経路を評価する。
     if not (sig > 0):
@@ -311,6 +342,8 @@ def _z_score(x: float, mu: float, sig: float) -> Optional[float]:
 
     return (x - mu) / sig
 
+
+# 関数: `_interpret_z1` の入出力契約と処理意図を定義する。
 
 def _interpret_z1(delta_eps: float) -> Dict[str, float]:
     one_p_z = 2.0
@@ -326,6 +359,8 @@ def _interpret_z1(delta_eps: float) -> Dict[str, float]:
         "tau_equivalent_dimming_z1": float(tau_equiv),
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -528,6 +563,7 @@ def _plot(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+    # 関数: `_z_scores_opacity` の入出力契約と処理意図を定義する。
     def _z_scores_opacity() -> Dict[str, Any]:
         out: Dict[str, Any] = {}
         for r in opacity_sorted:
@@ -536,6 +572,8 @@ def _plot(
 
         return out
 
+    # 関数: `_z_scores_candle` の入出力契約と処理意図を定義する。
+
     def _z_scores_candle() -> Dict[str, Any]:
         out: Dict[str, Any] = {}
         for r in candle_sorted:
@@ -543,6 +581,8 @@ def _plot(
             out[str(r.id)] = None if z is None else float(z)
 
         return out
+
+    # 関数: `_z_scores_bao` の入出力契約と処理意図を定義する。
 
     def _z_scores_bao() -> Dict[str, Any]:
         out: Dict[str, Any] = {}
@@ -639,6 +679,8 @@ def _plot(
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: reconnection plausibility vs external constraints (Step 14.2.2).")

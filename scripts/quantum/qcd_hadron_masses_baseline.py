@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Dict, Iterable, List, Optional
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -16,6 +17,7 @@ def _utc_now() -> str:
 HBAR_C_MEV_FM = 197.3269804
 
 
+# クラス: `PdgRow` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class PdgRow:
     pdg_id: int
@@ -24,6 +26,8 @@ class PdgRow:
     mass_err_minus_gev: Optional[float]
     name_field: str
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(s: str) -> Optional[float]:
     t = s.strip()
@@ -43,6 +47,8 @@ def _safe_float(s: str) -> Optional[float]:
 
     return float(v)
 
+
+# 関数: `_parse_pdg_mcdata_mass_width` の入出力契約と処理意図を定義する。
 
 def _parse_pdg_mcdata_mass_width(lines: Iterable[str]) -> Dict[int, PdgRow]:
     rows: Dict[int, PdgRow] = {}
@@ -93,6 +99,8 @@ def _parse_pdg_mcdata_mass_width(lines: Iterable[str]) -> Dict[int, PdgRow]:
     return rows
 
 
+# 関数: `_mev` の入出力契約と処理意図を定義する。
+
 def _mev(x_gev: Optional[float]) -> Optional[float]:
     # 条件分岐: `x_gev is None` を満たす経路を評価する。
     if x_gev is None:
@@ -101,6 +109,8 @@ def _mev(x_gev: Optional[float]) -> Optional[float]:
     return float(x_gev) * 1e3
 
 
+# 関数: `_compton_lambda_fm` の入出力契約と処理意図を定義する。
+
 def _compton_lambda_fm(mass_mev: Optional[float]) -> Optional[float]:
     # 条件分岐: `mass_mev is None or mass_mev <= 0` を満たす経路を評価する。
     if mass_mev is None or mass_mev <= 0:
@@ -108,6 +118,8 @@ def _compton_lambda_fm(mass_mev: Optional[float]) -> Optional[float]:
 
     return HBAR_C_MEV_FM / mass_mev
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

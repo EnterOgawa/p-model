@@ -40,6 +40,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -65,9 +66,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_ci_asym_err` の入出力契約と処理意図を定義する。
 
 def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
     try:
@@ -76,6 +81,8 @@ def _ci_asym_err(eps: float, ci_1sigma: Any) -> Tuple[float, float]:
     except Exception:
         return float("nan"), float("nan")
 
+
+# 関数: `_sym_sigma_from_ci` の入出力契約と処理意図を定義する。
 
 def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     lo, hi = _ci_asym_err(eps, ci_1sigma)
@@ -86,6 +93,8 @@ def _sym_sigma_from_ci(eps: float, ci_1sigma: Any) -> float:
     return float(0.5 * (lo + hi))
 
 
+# クラス: `EpsPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class EpsPoint:
     zbin: int
@@ -95,6 +104,8 @@ class EpsPoint:
     err_hi: float
     meta: Dict[str, Any]
 
+
+# 関数: `_zbin_label_to_int` の入出力契約と処理意図を定義する。
 
 def _zbin_label_to_int(z_bin: str) -> Optional[int]:
     z = str(z_bin).strip().lower()
@@ -114,6 +125,8 @@ def _zbin_label_to_int(z_bin: str) -> Optional[int]:
 
     return None
 
+
+# 関数: `_extract_catalog_eps_peakfit` の入出力契約と処理意図を定義する。
 
 def _extract_catalog_eps_peakfit(metrics: Dict[str, Any], *, dist: str) -> Dict[int, EpsPoint]:
     out: Dict[int, EpsPoint] = {}
@@ -151,6 +164,8 @@ def _extract_catalog_eps_peakfit(metrics: Dict[str, Any], *, dist: str) -> Dict[
     return out
 
 
+# 関数: `_extract_published_eps` の入出力契約と処理意図を定義する。
+
 def _extract_published_eps(metrics: Dict[str, Any]) -> Dict[int, EpsPoint]:
     out: Dict[int, EpsPoint] = {}
     for r in metrics.get("results", []):
@@ -178,6 +193,7 @@ _RE_PREFIX = re.compile(r"\.prefix_(\d+)\.npz$", re.IGNORECASE)
 _RE_RES = re.compile(r"\.reservoir_(\d+)_seed(\d+)(?:_scan(\d+))?\.npz$", re.IGNORECASE)
 
 
+# 関数: `_parse_random_npz_name` の入出力契約と処理意図を定義する。
 def _parse_random_npz_name(name: str) -> Optional[Dict[str, Any]]:
     n = str(name)
     m = _RE_PREFIX.search(n)
@@ -197,6 +213,8 @@ def _parse_random_npz_name(name: str) -> Optional[Dict[str, Any]]:
 
     return None
 
+
+# 関数: `_infer_random_sampling_from_xi_metrics` の入出力契約と処理意図を定義する。
 
 def _infer_random_sampling_from_xi_metrics(xi_metrics_path: Path) -> Dict[str, Any]:
     d = _load_json(xi_metrics_path)
@@ -228,6 +246,8 @@ def _infer_random_sampling_from_xi_metrics(xi_metrics_path: Path) -> Dict[str, A
     out["random_npz"] = paths
     return out
 
+
+# 関数: `_format_sampling_label` の入出力契約と処理意図を定義する。
 
 def _format_sampling_label(meta: Dict[str, Any]) -> str:
     # 条件分岐: `meta.get("unknown")` を満たす経路を評価する。
@@ -262,6 +282,8 @@ def _format_sampling_label(meta: Dict[str, Any]) -> str:
     return str(meta.get("method") or "unknown")
 
 
+# 関数: `_errorbar` の入出力契約と処理意図を定義する。
+
 def _errorbar(
     ax: Any,
     *,
@@ -288,6 +310,8 @@ def _errorbar(
         markersize=6,
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="BAO catalog-based ε sensitivity to random max_rows.")

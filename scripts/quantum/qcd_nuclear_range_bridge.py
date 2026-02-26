@@ -9,13 +9,18 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8", errors="replace"))
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -31,6 +36,8 @@ def _safe_float(x: Any) -> Optional[float]:
     return float(v)
 
 
+# クラス: `NuclearPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class NuclearPoint:
     step: str
@@ -42,6 +49,8 @@ class NuclearPoint:
     v2s_obs_fm3: Optional[float]
     v2s_pred_fm3: Optional[float]
 
+
+# 関数: `_load_pion_lambdas` の入出力契約と処理意図を定義する。
 
 def _load_pion_lambdas(*, root: Path) -> Dict[str, float]:
     """
@@ -97,6 +106,8 @@ def _load_pion_lambdas(*, root: Path) -> Dict[str, float]:
         "lambda_pi_avg_fm": float(0.5 * (lam_pm + lam_0)),
     }
 
+
+# 関数: `_extract_points` の入出力契約と処理意図を定義する。
 
 def _extract_points(metrics: Dict[str, Any]) -> List[NuclearPoint]:
     step = str(metrics.get("step") or "")
@@ -166,6 +177,8 @@ def _extract_points(metrics: Dict[str, Any]) -> List[NuclearPoint]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

@@ -23,9 +23,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -33,6 +36,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_gate_status` の入出力契約と処理意図を定義する。
 
 def _gate_status(*, z_abs: float, hard: float, watch: float) -> str:
     # 条件分岐: `z_abs <= watch` を満たす経路を評価する。
@@ -47,6 +52,8 @@ def _gate_status(*, z_abs: float, hard: float, watch: float) -> str:
     return "reject"
 
 
+# クラス: `_ParamSpec` の責務と境界条件を定義する。
+
 @dataclass
 class _ParamSpec:
     name: str
@@ -55,6 +62,8 @@ class _ParamSpec:
     lower: float | None
     group: str
 
+
+# 関数: `_freeze_tf` の入出力契約と処理意図を定義する。
 
 def _freeze_tf(
     *,
@@ -80,15 +89,21 @@ def _freeze_tf(
     return tf_mev, float(n_eff)
 
 
+# 関数: `_cf_at_tf` の入出力契約と処理意図を定義する。
+
 def _cf_at_tf(*, tf_mev: float, cf0: float, cf_alpha: float, cf_tref_mev: float) -> float:
     return float(cf0 * (tf_mev / cf_tref_mev) ** cf_alpha)
 
+
+# 関数: `_he4_from_tf` の入出力契約と処理意図を定義する。
 
 def _he4_from_tf(*, tf_mev: float, delta_m_mev: float, delta_t_n_sec: float, tau_n_sec: float) -> float:
     np_f = math.exp(-delta_m_mev / tf_mev)
     np_n = np_f * math.exp(-delta_t_n_sec / tau_n_sec)
     return float(2.0 * np_n / (1.0 + np_n))
 
+
+# 関数: `_evaluate_state` の入出力契約と処理意図を定義する。
 
 def _evaluate_state(*, params: dict[str, float], args: argparse.Namespace) -> dict[str, float]:
     tf_mev, n_eff = _freeze_tf(
@@ -114,6 +129,8 @@ def _evaluate_state(*, params: dict[str, float], args: argparse.Namespace) -> di
     )
     return {"tf_mev": tf_mev, "cf_tf": cf_tf, "y_pred": y_pred, "n_eff": n_eff}
 
+
+# 関数: `_numeric_gradient` の入出力契約と処理意図を定義する。
 
 def _numeric_gradient(
     *,
@@ -152,6 +169,8 @@ def _numeric_gradient(
 
     return grad
 
+
+# 関数: `_build_specs` の入出力契約と処理意図を定義する。
 
 def _build_specs(args: argparse.Namespace) -> list[_ParamSpec]:
     return [
@@ -200,6 +219,8 @@ def _build_specs(args: argparse.Namespace) -> list[_ParamSpec]:
     ]
 
 
+# 関数: `_summarize_samples` の入出力契約と処理意図を定義する。
+
 def _summarize_samples(values: np.ndarray) -> dict[str, float]:
     return {
         "count": int(values.size),
@@ -210,6 +231,8 @@ def _summarize_samples(values: np.ndarray) -> dict[str, float]:
         "p95": float(np.quantile(values, 0.95)),
     }
 
+
+# 関数: `_plot_audit` の入出力契約と処理意図を定義する。
 
 def _plot_audit(
     *,
@@ -283,6 +306,8 @@ def _plot_audit(
     plt.close(fig)
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Step 8.7.22.15: propagate freeze-chain derivation uncertainty for He-4 gate.")
     parser.add_argument("--outdir", type=Path, default=ROOT / "output" / "public" / "quantum")
@@ -322,6 +347,7 @@ def main() -> int:
     grad_cf = _numeric_gradient(target="cf_tf", specs=specs, nominal_params=nominal_params, args=args)
     grad_y = _numeric_gradient(target="y_pred", specs=specs, nominal_params=nominal_params, args=args)
 
+    # 関数: `_linear_sigma` の入出力契約と処理意図を定義する。
     def _linear_sigma(grad: dict[str, float]) -> float:
         acc = 0.0
         for spec in specs:

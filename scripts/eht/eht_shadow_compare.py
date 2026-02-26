@@ -17,9 +17,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -37,9 +40,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_resolve_phase4_coeff_ratio` の入出力契約と処理意図を定義する。
 
 def _resolve_phase4_coeff_ratio(
     root: Path, coeff_ratio_baseline: float
@@ -89,6 +96,8 @@ def _resolve_phase4_coeff_ratio(
         None,
     )
 
+
+# 関数: `_kerr_shadow_boundary_stats` の入出力契約と処理意図を定義する。
 
 def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 2500) -> Dict[str, float]:
     """Compute basic geometric stats of a Kerr shadow boundary in units of M=GM/c^2.
@@ -190,6 +199,8 @@ def _kerr_shadow_boundary_stats(a_star: float, inc_deg: float, *, n_r: int = 250
     return {"width": float(width), "height": float(height), "area": float(area), "perimeter": float(perimeter)}
 
 
+# 関数: `_kerr_shadow_diameter_coeff_from_stats` の入出力契約と処理意図を定義する。
+
 def _kerr_shadow_diameter_coeff_from_stats(stats: Dict[str, float], *, method: str) -> float:
     width = float(stats.get("width", float("nan")))
     height = float(stats.get("height", float("nan")))
@@ -217,6 +228,8 @@ def _kerr_shadow_diameter_coeff_from_stats(stats: Dict[str, float], *, method: s
 
     return float("nan")
 
+
+# 関数: `_kerr_shadow_diameter_coeff_effective` の入出力契約と処理意図を定義する。
 
 def _kerr_shadow_diameter_coeff_effective(
     a_star: float,
@@ -246,6 +259,8 @@ def _kerr_shadow_diameter_coeff_effective(
     return _kerr_shadow_diameter_coeff_from_stats(stats, method=str(method))
 
 
+# 関数: `_kerr_shadow_diameter_coeff_avg_width_height` の入出力契約と処理意図を定義する。
+
 def _kerr_shadow_diameter_coeff_avg_width_height(a_star: float, inc_deg: float, *, n_r: int = 2500) -> float:
     """Kerr shadow "effective diameter coefficient" in units of GM/(c^2 D).
 
@@ -260,6 +275,8 @@ def _kerr_shadow_diameter_coeff_avg_width_height(a_star: float, inc_deg: float, 
 
     return _kerr_shadow_diameter_coeff_effective(float(a_star), float(inc_deg), n_r=int(n_r), method="avg_wh")
 
+
+# 関数: `_kerr_shadow_coeff_range` の入出力契約と処理意図を定義する。
 
 def _kerr_shadow_coeff_range(
     *,
@@ -369,6 +386,8 @@ def _kerr_shadow_coeff_range(
         "grid": {"a_samples": int(a_samples), "inc_step_deg": float(inc_step_deg)},
     }
 
+
+# 関数: `_kerr_shadow_coeff_range_definition_envelope` の入出力契約と処理意図を定義する。
 
 def _kerr_shadow_coeff_range_definition_envelope(
     *,
@@ -492,6 +511,8 @@ def _kerr_shadow_coeff_range_definition_envelope(
     }
 
 
+# クラス: `BH` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class BH:
     key: str
@@ -535,6 +556,8 @@ class BH:
     kerr_inc_deg_max: Optional[float]
     source_keys: Tuple[str, ...]
 
+
+# 関数: `_parse_bh` の入出力契約と処理意図を定義する。
 
 def _parse_bh(o: Dict[str, Any]) -> BH:
     key = str(o.get("key") or "")
@@ -669,6 +692,8 @@ def _parse_bh(o: Dict[str, Any]) -> BH:
     )
 
 
+# 関数: `_prop_sigma_ratio` の入出力契約と処理意図を定義する。
+
 def _prop_sigma_ratio(m: float, dm: float, d: float, dd: float) -> float:
     eps = 0.0
     # 条件分岐: `m > 0 and dm > 0` を満たす経路を評価する。
@@ -682,6 +707,8 @@ def _prop_sigma_ratio(m: float, dm: float, d: float, dd: float) -> float:
 
     return math.sqrt(eps)
 
+
+# 関数: `_sigma_needed_for_discrimination` の入出力契約と処理意図を定義する。
 
 def _sigma_needed_for_discrimination(
     diff: float,
@@ -717,6 +744,8 @@ def _sigma_needed_for_discrimination(
 
     return math.sqrt(a2 / 2.0)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()
@@ -897,6 +926,7 @@ def main() -> int:
             + ((theta_p_beta1_uas_sigma / theta_p_beta1_uas) ** 2 if theta_p_beta1_uas != 0 else 0.0)
         )
 
+        # 関数: `_z` の入出力契約と処理意図を定義する。
         def _z(res: float, s1: float, s2: float) -> float:
             denom = math.sqrt((s1 or 0.0) ** 2 + (s2 or 0.0) ** 2)
             return (res / denom) if denom > 0 else float("nan")

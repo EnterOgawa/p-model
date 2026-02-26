@@ -21,13 +21,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -54,14 +59,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# クラス: `Point` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class Point:
@@ -73,6 +84,7 @@ class Point:
     r2: Optional[float]
     match: Optional[float]
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "event": self.event,
@@ -84,6 +96,8 @@ class Point:
             "match": self.match,
         }
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -98,6 +112,8 @@ def _safe_float(x: Any) -> Optional[float]:
 
     return v
 
+
+# 関数: `_load_event_list` の入出力契約と処理意図を定義する。
 
 def _load_event_list(root: Path) -> List[Dict[str, Any]]:
     path = root / "data" / "gw" / "event_list.json"
@@ -124,6 +140,8 @@ def _load_event_list(root: Path) -> List[Dict[str, Any]]:
     return out
 
 
+# 関数: `_load_default_event_pairs` の入出力契約と処理意図を定義する。
+
 def _load_default_event_pairs(root: Path) -> List[Tuple[str, str]]:
     events = _load_event_list(root)
     out: List[Tuple[str, str]] = []
@@ -138,6 +156,8 @@ def _load_default_event_pairs(root: Path) -> List[Tuple[str, str]]:
 
     return out
 
+
+# 関数: `_load_event_meta_by_slug` の入出力契約と処理意図を定義する。
 
 def _load_event_meta_by_slug(root: Path) -> Dict[str, Dict[str, float]]:
     events = _load_event_list(root)
@@ -180,6 +200,8 @@ def _load_event_meta_by_slug(root: Path) -> Dict[str, Dict[str, float]]:
     return out
 
 
+# 関数: `_fmt_g` の入出力契約と処理意図を定義する。
+
 def _fmt_g(x: Optional[float], *, digits: int = 3) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -187,6 +209,8 @@ def _fmt_g(x: Optional[float], *, digits: int = 3) -> str:
 
     return f"{float(x):.{int(digits)}g}"
 
+
+# 関数: `_collect_points` の入出力契約と処理意図を定義する。
 
 def _collect_points(
     root: Path, events: Sequence[Tuple[str, str]]
@@ -255,6 +279,8 @@ def _collect_points(
     return points, used_paths, wave_franges, match_omitted_by_reason
 
 
+# 関数: `_detector_order` の入出力契約と処理意図を定義する。
+
 def _detector_order(dets: List[str]) -> List[str]:
     preferred = ["H1", "L1", "V1", "K1"]
     seen = []
@@ -270,6 +296,8 @@ def _detector_order(dets: List[str]) -> List[str]:
 
     return seen
 
+
+# 関数: `_plot_summary` の入出力契約と処理意図を定義する。
 
 def _plot_summary(
     *,
@@ -413,6 +441,8 @@ def _plot_summary(
     plt.close(fig)
 
 
+# 関数: `_plot_placeholder` の入出力契約と処理意図を定義する。
+
 def _plot_placeholder(out_png: Path, *, title: str) -> None:
     _set_japanese_font()
     fig = plt.figure(figsize=(10, 4))
@@ -433,6 +463,8 @@ def _plot_placeholder(out_png: Path, *, title: str) -> None:
     fig.savefig(out_png, dpi=180, bbox_inches="tight", pad_inches=0.05)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

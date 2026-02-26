@@ -18,13 +18,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -41,6 +46,7 @@ _RE_LMT_TOT = re.compile(
 )
 
 
+# 関数: `_find_two_floats` の入出力契約と処理意図を定義する。
 def _find_two_floats(
     lines: Sequence[str], pattern: re.Pattern[str]
 ) -> Optional[Tuple[int, float, float, str]]:
@@ -60,6 +66,8 @@ def _find_two_floats(
 
     return None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

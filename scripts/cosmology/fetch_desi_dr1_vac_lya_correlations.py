@@ -48,9 +48,12 @@ _DEFAULT_BASE_URL = "https://webdav-hdfs.pic.es/data/public/DESI/DR1/vac/dr1/lya
 _REQ_TIMEOUT: Tuple[int, int] = (30, 1800)  # connect, read
 
 
+# 関数: `_now_utc` の入出力契約と処理意図を定義する。
 def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -61,12 +64,16 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
+
 def _relpath(path: Path) -> str:
     try:
         return path.relative_to(_ROOT).as_posix()
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -89,6 +96,8 @@ def _download(url: str, dst: Path) -> Dict[str, Any]:
     return {"bytes": int(dst.stat().st_size), "sha256": _sha256(dst)}
 
 
+# 関数: `_parse_sha256sum` の入出力契約と処理意図を定義する。
+
 def _parse_sha256sum(text: str) -> Dict[str, str]:
     out: Dict[str, str] = {}
     for line in str(text).splitlines():
@@ -110,6 +119,8 @@ def _parse_sha256sum(text: str) -> Dict[str, str]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch DESI DR1 VAC: lya-correlations (v1.0) into data/ cache.")

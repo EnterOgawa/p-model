@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,9 +22,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -46,6 +51,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
 
+# 関数: `_solve_bound_x` の入出力契約と処理意図を定義する。
+
 def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
     """
     Solve x in (pi/2, pi) for the s-wave square-well bound-state condition:
@@ -63,6 +70,7 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
     lo = (math.pi / 2.0) + 1e-7
     hi = math.pi - 1e-7
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(x: float) -> float:
         return (x / math.tan(x)) + (kappa_fm1 * r_fm)
 
@@ -89,6 +97,8 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
     return 0.5 * (lo + hi)
 
 
+# 関数: `_square_well_from_r` の入出力契約と処理意図を定義する。
+
 def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_fm: float) -> dict[str, float]:
     """
     Given B (fixed) and R, solve the well depth V0 by the s-wave bound-state condition.
@@ -105,6 +115,8 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
     v0 = b_mev + (hbarc_mev_fm**2) * (k**2) / (2.0 * mu_mev)
     return {"V0_mev": float(v0), "x": float(x), "k_fm1": float(k), "kappa_fm1": float(kappa)}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

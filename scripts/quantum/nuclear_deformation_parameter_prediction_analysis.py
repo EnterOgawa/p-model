@@ -9,6 +9,7 @@ from statistics import median
 from typing import Any
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(value: Any) -> float:
     try:
         out = float(value)
@@ -17,6 +18,8 @@ def _parse_float(value: Any) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
 
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
@@ -27,6 +30,8 @@ def _safe_median(values: list[float]) -> float:
     return float(median(finite))
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -35,6 +40,8 @@ def _rms(values: list[float]) -> float:
 
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
+
+# 関数: `_pearson` の入出力契約と処理意図を定義する。
 
 def _pearson(xs: list[float], ys: list[float]) -> float:
     paired = [(float(x), float(y)) for x, y in zip(xs, ys) if math.isfinite(float(x)) and math.isfinite(float(y))]
@@ -56,6 +63,8 @@ def _pearson(xs: list[float], ys: list[float]) -> float:
     return float(cov / math.sqrt(vx * vy))
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -69,6 +78,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow([row.get(h) for h in headers])
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -85,6 +96,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_solve_linear_system` の入出力契約と処理意図を定義する。
 
 def _solve_linear_system(matrix: list[list[float]], rhs: list[float]) -> list[float]:
     n = len(rhs)
@@ -126,6 +139,8 @@ def _solve_linear_system(matrix: list[list[float]], rhs: list[float]) -> list[fl
     return b
 
 
+# 関数: `_weighted_linear_fit` の入出力契約と処理意図を定義する。
+
 def _weighted_linear_fit(
     *,
     xs: list[list[float]],
@@ -166,9 +181,13 @@ def _weighted_linear_fit(
     return _solve_linear_system(xtwx, xtwy)
 
 
+# 関数: `_dot` の入出力契約と処理意図を定義する。
+
 def _dot(x: list[float], beta: list[float]) -> float:
     return float(sum(float(a) * float(b) for a, b in zip(x, beta)))
 
+
+# 関数: `_r42_class` の入出力契約と処理意図を定義する。
 
 def _r42_class(value: float) -> str:
     # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
@@ -187,6 +206,8 @@ def _r42_class(value: float) -> str:
 
     return "rotational_like"
 
+
+# 関数: `_read_beta2` の入出力契約と処理意図を定義する。
 
 def _read_beta2(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     payload = json.loads(path.read_text(encoding="utf-8"))
@@ -221,6 +242,8 @@ def _read_beta2(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     return out
 
 
+# 関数: `_read_pairing` の入出力契約と処理意図を定義する。
+
 def _read_pairing(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     out: dict[tuple[int, int], dict[str, Any]] = {}
     with path.open("r", encoding="utf-8", newline="") as f:
@@ -240,6 +263,8 @@ def _read_pairing(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     return out
 
 
+# 関数: `_read_all_nuclei` の入出力契約と処理意図を定義する。
+
 def _read_all_nuclei(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     out: dict[tuple[int, int], dict[str, Any]] = {}
     with path.open("r", encoding="utf-8", newline="") as f:
@@ -256,6 +281,8 @@ def _read_all_nuclei(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     return out
 
 
+# 関数: `_read_excitation` の入出力契約と処理意図を定義する。
+
 def _read_excitation(path: Path) -> dict[tuple[int, int], dict[str, float]]:
     out: dict[tuple[int, int], dict[str, float]] = {}
     with path.open("r", encoding="utf-8", newline="") as f:
@@ -269,6 +296,8 @@ def _read_excitation(path: Path) -> dict[tuple[int, int], dict[str, float]]:
 
     return out
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(*, rows: list[dict[str, Any]], out_png: Path, r42_fit_coeffs: list[float]) -> None:
     import matplotlib.pyplot as plt
@@ -350,6 +379,8 @@ def _build_figure(*, rows: list[dict[str, Any]], out_png: Path, r42_fit_coeffs: 
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

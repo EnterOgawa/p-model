@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # Single-photon interference (Mach–Zehnder): representative telecom wavelength.
@@ -33,6 +34,8 @@ class Config:
     observed_squeezing_db: float = 10.0
 
 
+# 関数: `_sigma_path_nm_from_visibility` の入出力契約と処理意図を定義する。
+
 def _sigma_path_nm_from_visibility(v: float, *, wavelength_nm: float) -> float:
     # For Gaussian path-length noise σL:
     # V = exp(-σφ^2/2), σφ = 2π σL / λ.
@@ -42,9 +45,13 @@ def _sigma_path_nm_from_visibility(v: float, *, wavelength_nm: float) -> float:
     return float(wavelength_nm / (2.0 * math.pi) * math.sqrt(-2.0 * math.log(v)))
 
 
+# 関数: `_variance_ratio_from_db` の入出力契約と処理意図を定義する。
+
 def _variance_ratio_from_db(db: float) -> float:
     return float(10.0 ** (-db / 10.0))
 
+
+# 関数: `_read_psd_from_zip` の入出力契約と処理意図を定義する。
 
 def _read_psd_from_zip(zip_path: Path, *, csv_name: str) -> tuple[np.ndarray, np.ndarray]:
     # 条件分岐: `not zip_path.exists()` を満たす経路を評価する。
@@ -77,9 +84,13 @@ def _read_psd_from_zip(zip_path: Path, *, csv_name: str) -> tuple[np.ndarray, np
     return np.asarray(freq, dtype=float), np.asarray(psd, dtype=float)
 
 
+# 関数: `_conservative_sigma` の入出力契約と処理意図を定義する。
+
 def _conservative_sigma(plus: float, minus: float) -> float:
     return float(max(abs(plus), abs(minus)))
 
+
+# 関数: `_interp_log_psd` の入出力契約と処理意図を定義する。
 
 def _interp_log_psd(freq_hz: np.ndarray, psd: np.ndarray, target_hz: float) -> float:
     # 条件分岐: `target_hz <= 0` を満たす経路を評価する。
@@ -97,6 +108,8 @@ def _interp_log_psd(freq_hz: np.ndarray, psd: np.ndarray, target_hz: float) -> f
     yt = np.interp(xt, xf, yf)
     return float(10.0 ** yt)
 
+
+# 関数: `_build_hom_squeezed_light_audit` の入出力契約と処理意図を定義する。
 
 def _build_hom_squeezed_light_audit(
     *,
@@ -306,6 +319,8 @@ def _build_hom_squeezed_light_audit(
 
     return out_csv, out_json, out_png
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     cfg = Config()

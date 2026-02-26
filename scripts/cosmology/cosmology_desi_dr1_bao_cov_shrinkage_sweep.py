@@ -43,6 +43,7 @@ from scripts.cosmology import cosmology_bao_catalog_peakfit as _peakfit  # noqa:
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `_Row` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class _Row:
     out_tag: str
@@ -56,6 +57,8 @@ class _Row:
     z_score_combined: float
     z_score_vs_y1data: float
 
+
+# 関数: `_parse_lams` の入出力契約と処理意図を定義する。
 
 def _parse_lams(spec: str) -> List[float]:
     s = str(spec).strip()
@@ -96,6 +99,8 @@ def _parse_lams(spec: str) -> List[float]:
     return uniq
 
 
+# 関数: `_lam_tag` の入出力契約と処理意図を定義する。
+
 def _lam_tag(lam: float) -> str:
     # 0.2 -> 0p2, 1.0 -> 1p0
     s = f"{float(lam):.4f}".rstrip("0").rstrip(".")
@@ -106,14 +111,20 @@ def _lam_tag(lam: float) -> str:
     return s.replace("-", "m").replace(".", "p")
 
 
+# 関数: `_peakfit_metrics_path` の入出力契約と処理意図を定義する。
+
 def _peakfit_metrics_path(*, sample: str, caps: str, out_tag: str, output_suffix: str) -> Path:
     tag = f"{sample}_{caps}__{out_tag}__{output_suffix}"
     return _ROOT / "output" / "private" / "cosmology" / f"cosmology_bao_catalog_peakfit_{tag}_metrics.json"
 
 
+# 関数: `_cross_metrics_path` の入出力契約と処理意図を定義する。
+
 def _cross_metrics_path(*, out_tag: str) -> Path:
     return _ROOT / "output" / "private" / "cosmology" / f"cosmology_desi_dr1_bao_y1data_eps_crosscheck__{out_tag}_metrics.json"
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> float:
     try:
@@ -121,6 +132,8 @@ def _safe_float(x: Any) -> float:
     except Exception:
         return float("nan")
 
+
+# 関数: `_collect_rows` の入出力契約と処理意図を定義する。
 
 def _collect_rows(cross_metrics: Dict[str, Any], *, out_tag: str, lam: float) -> List[_Row]:
     res = cross_metrics.get("results") if isinstance(cross_metrics.get("results"), dict) else {}
@@ -155,6 +168,8 @@ def _collect_rows(cross_metrics: Dict[str, Any], *, out_tag: str, lam: float) ->
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="DESI DR1: covariance shrinkage sweep (epsilon cross-check).")

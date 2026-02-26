@@ -21,13 +21,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -54,9 +59,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -67,6 +76,7 @@ _DAY_S = 86_400.0
 _T_SUN_S = 4.925490947e-6  # GM_sun / c^3 [s] (pulsar timing standard constant)
 
 
+# 関数: `_pbdot_quadrupole_peters_mathews` の入出力契約と処理意図を定義する。
 def _pbdot_quadrupole_peters_mathews(*, Pb_days: float, e: float, m1_msun: float, m2_msun: float) -> float:
     """
     Peters–Mathews (1963) leading-order GR quadrupole orbital period derivative.
@@ -100,10 +110,14 @@ def _pbdot_quadrupole_peters_mathews(*, Pb_days: float, e: float, m1_msun: float
     return -(192.0 * math.pi / 5.0) * base * f_e
 
 
+# 関数: `_sigma_equiv_from_ci95` の入出力契約と処理意図を定義する。
+
 def _sigma_equiv_from_ci95(half_width: float) -> float:
     # 95% two-sided CI half width ~ 1.96 sigma for a Normal distribution
     return float(half_width) / 1.959963984540054
 
+
+# 関数: `_extract_uncertainties` の入出力契約と処理意図を定義する。
 
 def _extract_uncertainties(sysrec: Dict[str, Any]) -> Tuple[float, float, str]:
     unc = sysrec.get("metric", {}).get("uncertainty", {})
@@ -130,6 +144,8 @@ def _extract_uncertainties(sysrec: Dict[str, Any]) -> Tuple[float, float, str]:
 
     return float("nan"), float("nan"), str(unc.get("confidence") or "")
 
+
+# 関数: `_compute_metrics` の入出力契約と処理意図を定義する。
 
 def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -245,6 +261,8 @@ def _compute_metrics(systems: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return out
 
 
+# 関数: `_render_plot` の入出力契約と処理意図を定義する。
+
 def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
 
@@ -311,6 +329,8 @@ def _render_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     fig.savefig(out_png, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_render_public_plot` の入出力契約と処理意図を定義する。
 
 def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
@@ -379,6 +399,8 @@ def _render_public_plot(metrics: List[Dict[str, Any]], out_png: Path) -> None:
     fig.savefig(out_png, dpi=220, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

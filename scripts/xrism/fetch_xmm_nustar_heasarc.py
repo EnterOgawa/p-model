@@ -48,9 +48,12 @@ _XMM_BASE_URL = "https://heasarc.gsfc.nasa.gov/FTP/xmm/data"
 _NUSTAR_BASE_URL = "https://heasarc.gsfc.nasa.gov/FTP/nustar/data/obs"
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -58,6 +61,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -68,6 +73,8 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -75,10 +82,14 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_http_get_text` の入出力契約と処理意図を定義する。
 
 def _http_get_text(url: str) -> str:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -91,6 +102,8 @@ def _http_get_text(url: str) -> str:
     return r.text
 
 
+# 関数: `_http_get_stream` の入出力契約と処理意図を定義する。
+
 def _http_get_stream(url: str) -> requests.Response:  # type: ignore[name-defined]
     # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
@@ -100,6 +113,8 @@ def _http_get_stream(url: str) -> requests.Response:  # type: ignore[name-define
     r.raise_for_status()
     return r
 
+
+# 関数: `_http_head_content_length` の入出力契約と処理意図を定義する。
 
 def _http_head_content_length(url: str) -> Optional[int]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -123,6 +138,7 @@ def _http_head_content_length(url: str) -> Optional[int]:
 _HREF_RE = re.compile(r'href=\"(?P<href>[^\"]+)\"', flags=re.IGNORECASE)
 
 
+# 関数: `_list_apache_dir` の入出力契約と処理意図を定義する。
 def _list_apache_dir(url: str) -> List[Tuple[str, bool]]:
     # 条件分岐: `not url.endswith("/")` を満たす経路を評価する。
     if not url.endswith("/"):
@@ -161,6 +177,8 @@ def _list_apache_dir(url: str) -> List[Tuple[str, bool]]:
 
     return uniq
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, *, dst: Path, force: bool, max_file_bytes: int) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -255,6 +273,8 @@ def _download(url: str, *, dst: Path, force: bool, max_file_bytes: int) -> Dict[
     return {"status": "downloaded", "path": _rel(dst), "bytes": int(n), "sha256": h.hexdigest(), "url": url}
 
 
+# 関数: `_compile_patterns` の入出力契約と処理意図を定義する。
+
 def _compile_patterns(patterns: Sequence[str]) -> List[re.Pattern[str]]:
     out: List[re.Pattern[str]] = []
     for s in patterns:
@@ -268,6 +288,8 @@ def _compile_patterns(patterns: Sequence[str]) -> List[re.Pattern[str]]:
     return out
 
 
+# 関数: `_matches_any` の入出力契約と処理意図を定義する。
+
 def _matches_any(patterns: Sequence[re.Pattern[str]], s: str) -> bool:
     # 条件分岐: `not patterns` を満たす経路を評価する。
     if not patterns:
@@ -276,9 +298,13 @@ def _matches_any(patterns: Sequence[re.Pattern[str]], s: str) -> bool:
     return any(p.search(s) for p in patterns)
 
 
+# 関数: `_matches_any_exclude` の入出力契約と処理意図を定義する。
+
 def _matches_any_exclude(patterns: Sequence[re.Pattern[str]], s: str) -> bool:
     return any(p.search(s) for p in patterns)
 
+
+# 関数: `_obsid_xmm` の入出力契約と処理意図を定義する。
 
 def _obsid_xmm(s: str) -> str:
     s0 = str(s).strip()
@@ -289,6 +315,8 @@ def _obsid_xmm(s: str) -> str:
     return s0
 
 
+# 関数: `_obsid_nustar` の入出力契約と処理意図を定義する。
+
 def _obsid_nustar(s: str) -> str:
     s0 = str(s).strip()
     # 条件分岐: `not re.match(r"^[0-9]{11}$", s0)` を満たす経路を評価する。
@@ -298,12 +326,16 @@ def _obsid_nustar(s: str) -> str:
     return s0
 
 
+# 関数: `_nustar_remote_root` の入出力契約と処理意図を定義する。
+
 def _nustar_remote_root(obsid: str) -> str:
     s = _obsid_nustar(obsid)
     sub = s[1:3]
     lead = s[0]
     return f"{_NUSTAR_BASE_URL}/{sub}/{lead}/{s}/"
 
+
+# 関数: `_safe_rel` の入出力契約と処理意図を定義する。
 
 def _safe_rel(url: str, *, anchor: str) -> Optional[str]:
     p = urlparse(url).path
@@ -320,6 +352,8 @@ def _safe_rel(url: str, *, anchor: str) -> Optional[str]:
     return rel
 
 
+# クラス: `FetchItem` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class FetchItem:
     mission: str
@@ -329,6 +363,8 @@ class FetchItem:
     rel: str
     url: str
 
+
+# 関数: `_plan_xmm` の入出力契約と処理意図を定義する。
 
 def _plan_xmm(
     obsid: str,
@@ -388,6 +424,8 @@ def _plan_xmm(
     return items
 
 
+# 関数: `_plan_nustar` の入出力契約と処理意図を定義する。
+
 def _plan_nustar(
     obsid: str,
     *,
@@ -443,6 +481,8 @@ def _plan_nustar(
     return items
 
 
+# 関数: `_default_xmm_include_regex` の入出力契約と処理意図を定義する。
+
 def _default_xmm_include_regex(obsid: str) -> List[str]:
     s = _obsid_xmm(obsid)
     return [
@@ -462,6 +502,8 @@ def _default_xmm_include_regex(obsid: str) -> List[str]:
     ]
 
 
+# 関数: `_default_nustar_include_regex` の入出力契約と処理意図を定義する。
+
 def _default_nustar_include_regex(obsid: str) -> List[str]:
     s = _obsid_nustar(obsid)
     return [
@@ -472,6 +514,8 @@ def _default_nustar_include_regex(obsid: str) -> List[str]:
         rf"^auxil/nu{s}_.*\.(fits|gz)$",
     ]
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

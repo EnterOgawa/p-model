@@ -26,9 +26,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(v: Any) -> float:
     try:
@@ -38,6 +41,8 @@ def _safe_float(v: Any) -> float:
 
     return x
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(v: Any, digits: int = 6) -> str:
     x = _safe_float(v)
@@ -58,14 +63,20 @@ def _fmt(v: Any, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -92,6 +103,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row_out)
 
 
+# 関数: `_parse_detectors` の入出力契約と処理意図を定義する。
+
 def _parse_detectors(raw: Any) -> Set[str]:
     text = str(raw or "").strip()
     # 条件分岐: `not text` を満たす経路を評価する。
@@ -104,6 +117,8 @@ def _parse_detectors(raw: Any) -> Set[str]:
     out = {token.strip().upper() for token in text.split(",") if token.strip()}
     return out
 
+
+# 関数: `_inventory_for_slug` の入出力契約と処理意図を定義する。
 
 def _inventory_for_slug(slug: str, max_files: int = 128) -> Dict[str, Any]:
     folder = _ROOT / "data" / "gw" / str(slug)
@@ -140,6 +155,8 @@ def _inventory_for_slug(slug: str, max_files: int = 128) -> Dict[str, Any]:
         "truncated": bool(total_files > len(files)),
     }
 
+
+# 関数: `_load_three_detector_events` の入出力契約と処理意図を定義する。
 
 def _load_three_detector_events(event_list_path: Path) -> List[Dict[str, Any]]:
     # 条件分岐: `not event_list_path.exists()` を満たす経路を評価する。
@@ -189,6 +206,8 @@ def _load_three_detector_events(event_list_path: Path) -> List[Dict[str, Any]]:
     return out
 
 
+# 関数: `_input_signature` の入出力契約と処理意図を定義する。
+
 def _input_signature(events: List[Dict[str, Any]], event_list_path: Path) -> Dict[str, Any]:
     canonical_events = [
         {
@@ -218,6 +237,8 @@ def _input_signature(events: List[Dict[str, Any]], event_list_path: Path) -> Dic
     }
 
 
+# 関数: `_load_state` の入出力契約と処理意図を定義する。
+
 def _load_state(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -230,6 +251,8 @@ def _load_state(path: Path) -> Dict[str, Any]:
 
     return obj if isinstance(obj, dict) else {}
 
+
+# 関数: `_extract_coverage_metrics` の入出力契約と処理意図を定義する。
 
 def _extract_coverage_metrics(payload: Dict[str, Any]) -> Dict[str, Any]:
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
@@ -246,6 +269,8 @@ def _extract_coverage_metrics(payload: Dict[str, Any]) -> Dict[str, Any]:
         "best_u2_subset_events": str(best_u2_all.get("subset_events", "")),
     }
 
+
+# 関数: `_run_coverage_expansion` の入出力契約と処理意図を定義する。
 
 def _run_coverage_expansion(
     *,
@@ -325,6 +350,8 @@ def _run_coverage_expansion(
     }
 
 
+# 関数: `_plot_summary` の入出力契約と処理意図を定義する。
+
 def _plot_summary(row: Dict[str, Any], out_png: Path) -> None:
     labels0 = ["3-det events", "hash changed", "rerun"]
     vals0 = np.asarray(
@@ -375,6 +402,8 @@ def _plot_summary(row: Dict[str, Any], out_png: Path) -> None:
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(

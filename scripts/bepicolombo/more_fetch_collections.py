@@ -37,9 +37,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -55,6 +58,8 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_http_status` の入出力契約と処理意図を定義する。
+
 def _http_status(url: str, *, timeout_sec: float) -> Tuple[Optional[int], Optional[str]]:
     req = Request(url, method="HEAD")
     try:
@@ -65,6 +70,8 @@ def _http_status(url: str, *, timeout_sec: float) -> Tuple[Optional[int], Option
     except Exception as e:
         return None, str(e)
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -91,6 +98,8 @@ def _download(url: str, dst: Path, *, timeout_sec: float) -> Dict[str, Any]:
         "sha256": _sha256(dst),
     }
 
+
+# 関数: `_parse_apache_index_rows` の入出力契約と処理意図を定義する。
 
 def _parse_apache_index_rows(html_text: str) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
@@ -138,6 +147,8 @@ def _parse_apache_index_rows(html_text: str) -> List[Dict[str, str]]:
     return out
 
 
+# 関数: `_is_metadata_file` の入出力契約と処理意図を定義する。
+
 def _is_metadata_file(name: str) -> bool:
     """
     Default policy: be conservative.
@@ -166,6 +177,8 @@ def _is_metadata_file(name: str) -> bool:
     return False
 
 
+# 関数: `_parse_size_hint_to_bytes` の入出力契約と処理意図を定義する。
+
 def _parse_size_hint_to_bytes(size_hint: str) -> Optional[int]:
     # Apache listing uses e.g. "21M", "549", "806K". Best-effort.
     s = (size_hint or "").strip()
@@ -193,6 +206,8 @@ def _parse_size_hint_to_bytes(size_hint: str) -> Optional[int]:
 
     return int(val * mult)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Fetch PSA bc_mpo_more collection/label metadata when available")

@@ -21,6 +21,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -46,14 +47,20 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(value: Any) -> Optional[float]:
     try:
@@ -69,6 +76,8 @@ def _to_float(value: Any) -> Optional[float]:
     return parsed
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(value: float, digits: int = 6) -> str:
     # 条件分岐: `value == 0.0` を満たす経路を評価する。
     if value == 0.0:
@@ -81,6 +90,8 @@ def _fmt_float(value: float, digits: int = 6) -> str:
 
     return f"{value:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_extract_channels` の入出力契約と処理意図を定義する。
 
 def _extract_channels(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
     geodetic_row: Dict[str, Any] = {}
@@ -168,6 +179,8 @@ def _extract_channels(gpb_payload: Dict[str, Any], frame_payload: Dict[str, Any]
     return geodetic_row, frame_rows
 
 
+# 関数: `_fit_kappa_rot` の入出力契約と処理意図を定義する。
+
 def _fit_kappa_rot(frame_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     numerator = 0.0
     denominator = 0.0
@@ -207,6 +220,8 @@ def _fit_kappa_rot(frame_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_score_status` の入出力契約と処理意図を定義する。
+
 def _score_status(z_score: Optional[float], z_reject: float) -> str:
     # 条件分岐: `z_score is None` を満たす経路を評価する。
     if z_score is None:
@@ -214,6 +229,8 @@ def _score_status(z_score: Optional[float], z_reject: float) -> str:
 
     return "reject" if abs(z_score) > z_reject else "pass"
 
+
+# 関数: `_build_rows` の入出力契約と処理意図を定義する。
 
 def _build_rows(
     *,
@@ -289,6 +306,8 @@ def _build_rows(
     return rows
 
 
+# 関数: `_branch_summary` の入出力契約と処理意図を定義する。
+
 def _branch_summary(rows: Sequence[Dict[str, Any]], z_reject: float) -> Dict[str, Any]:
     frame_rows = [row for row in rows if str(row.get("kind") or "") == "frame_dragging"]
     pass_count = sum(1 for row in frame_rows if row.get("status") == "pass")
@@ -317,6 +336,8 @@ def _branch_summary(rows: Sequence[Dict[str, Any]], z_reject: float) -> Dict[str
         "max_abs_z": max_abs_z,
     }
 
+
+# 関数: `_build_gates` の入出力契約と処理意図を定義する。
 
 def _build_gates(
     *,
@@ -393,6 +414,8 @@ def _build_gates(
         "gates": gates,
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     scalar_rows: Sequence[Dict[str, Any]],
@@ -484,6 +507,8 @@ def _plot(
     plt.close(figure)
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -530,6 +555,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     default_gpb_data = _ROOT / "data" / "theory" / "gpb_scalar_limit_audit.json"

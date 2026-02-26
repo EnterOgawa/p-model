@@ -17,9 +17,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -37,14 +40,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_sigma_sym` の入出力契約と処理意図を定義する。
 
 def _sigma_sym(sigma_minus: float, sigma_plus: float, *, mode: str) -> float:
     sm = float(sigma_minus)
@@ -66,6 +75,8 @@ def _sigma_sym(sigma_minus: float, sigma_plus: float, *, mode: str) -> float:
     return float("nan")
 
 
+# クラス: `RingMeasurement` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class RingMeasurement:
     epoch: str
@@ -75,6 +86,8 @@ class RingMeasurement:
     sigma_plus_uas: float
     source_key: str
 
+
+# 関数: `_extract_m87_ring_measurements` の入出力契約と処理意図を定義する。
 
 def _extract_m87_ring_measurements(eht: Dict[str, Any]) -> List[RingMeasurement]:
     objects = eht.get("objects") if isinstance(eht.get("objects"), list) else []
@@ -144,6 +157,8 @@ def _extract_m87_ring_measurements(eht: Dict[str, Any]) -> List[RingMeasurement]
     return out
 
 
+# 関数: `_find_epoch` の入出力契約と処理意図を定義する。
+
 def _find_epoch(measurements: List[RingMeasurement], epoch: str) -> RingMeasurement:
     for m in measurements:
         # 条件分岐: `m.epoch == epoch` を満たす経路を評価する。
@@ -152,6 +167,8 @@ def _find_epoch(measurements: List[RingMeasurement], epoch: str) -> RingMeasurem
 
     raise RuntimeError(f"missing measurement for epoch={epoch!r}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

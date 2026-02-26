@@ -39,6 +39,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_parse_indices` の入出力契約と処理意図を定義する。
 def _parse_indices(spec: str) -> List[int]:
     s = str(spec).strip()
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -90,12 +91,16 @@ def _parse_indices(spec: str) -> List[int]:
     return uniq
 
 
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
+
 def _relpath(p: Path) -> str:
     try:
         return p.relative_to(_ROOT).as_posix()
     except Exception:
         return p.as_posix()
 
+
+# 関数: `_load_manifest` の入出力契約と処理意図を定義する。
 
 def _load_manifest(data_dir: Path) -> Dict[str, Any]:
     mp = data_dir / "manifest.json"
@@ -105,6 +110,8 @@ def _load_manifest(data_dir: Path) -> Dict[str, Any]:
 
     return json.loads(mp.read_text(encoding="utf-8"))
 
+
+# 関数: `_manifest_item` の入出力契約と処理意図を定義する。
 
 def _manifest_item(manifest: Dict[str, Any], *, sample: str, cap: str) -> Dict[str, Any]:
     key = f"{sample}:{cap}"
@@ -121,6 +128,8 @@ def _manifest_item(manifest: Dict[str, Any], *, sample: str, cap: str) -> Dict[s
     return it
 
 
+# 関数: `_infer_combined_random_name` の入出力契約と処理意図を定義する。
+
 def _infer_combined_random_name(raw_or_npz_name: str, *, idx_tag: str, target_rows: int, seed: int) -> str:
     s = str(raw_or_npz_name)
     # Prefer a stable replacement of the trailing _<idx>_clustering.ran.fits...
@@ -136,6 +145,8 @@ def _infer_combined_random_name(raw_or_npz_name: str, *, idx_tag: str, target_ro
     stem = Path(s).name
     return f"{stem}.mix_reservoir_{int(target_rows)}_seed{int(seed)}_{idx_tag}.npz"
 
+
+# 関数: `_combine_random_npz` の入出力契約と処理意図を定義する。
 
 def _combine_random_npz(
     *,
@@ -236,6 +247,8 @@ def _combine_random_npz(
         "keys": keys,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser()

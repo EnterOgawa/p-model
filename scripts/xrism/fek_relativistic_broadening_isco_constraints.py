@@ -64,9 +64,12 @@ from scripts.cosmology.boss_dr12v5_fits import (  # noqa: E402
 )
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -75,6 +78,8 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -82,14 +87,20 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+# 関数: `_as_bool01` の入出力契約と処理意図を定義する。
+
 def _as_bool01(x: bool) -> str:
     return "1" if x else "0"
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -108,6 +119,8 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
 
     return rows
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: object) -> Optional[float]:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -136,11 +149,14 @@ def _maybe_float(x: object) -> Optional[float]:
 _RIN_BOUND_RE = re.compile(r"r_in_bound[:=](upper|lower)", flags=re.IGNORECASE)
 
 
+# 関数: `_isco_gr_schwarzschild_rg` の入出力契約と処理意図を定義する。
 def _isco_gr_schwarzschild_rg() -> float:
     # diskline の r_in は通常 r_g=GM/c^2 単位（Schwarzschild）で与えられるため、
     # 参照枠として a*=0 の ISCO=6 r_g を基準線にする。
     return 6.0
 
+
+# 関数: `_isco_pmodel_exponential_metric_rg` の入出力契約と処理意図を定義する。
 
 def _isco_pmodel_exponential_metric_rg() -> float:
     # P-model の強場側の最小候補として「exponential metric」（Yilmaz型）
@@ -153,6 +169,8 @@ def _isco_pmodel_exponential_metric_rg() -> float:
     x_isco = 3.0 + math.sqrt(5.0)
     return x_isco * math.exp(1.0 / x_isco)
 
+
+# 関数: `_compute_z_fields` の入出力契約と処理意図を定義する。
 
 def _compute_z_fields(
     *,
@@ -183,6 +201,8 @@ def _compute_z_fields(
         "z_pmodel": f"{(d_p / sigma):.6g}",
     }
 
+
+# 関数: `_extract_sys_components_from_detail_json` の入出力契約と処理意図を定義する。
 
 def _extract_sys_components_from_detail_json(detail_json: str) -> Dict[str, str]:
     # 条件分岐: `not detail_json` を満たす経路を評価する。
@@ -234,6 +254,8 @@ def _extract_sys_components_from_detail_json(detail_json: str) -> Dict[str, str]
 
     return out
 
+
+# 関数: `_load_cached_nustar_proxy_detail_json` の入出力契約と処理意図を定義する。
 
 def _load_cached_nustar_proxy_detail_json(detail_json: Path) -> Optional[Dict[str, Any]]:
     try:
@@ -291,6 +313,8 @@ def _load_cached_nustar_proxy_detail_json(detail_json: Path) -> Optional[Dict[st
     }
 
 
+# 関数: `_compute_error_fields` の入出力契約と処理意図を定義する。
+
 def _compute_error_fields(*, r_in_bound: str, r_in_rg_stat: str, r_in_rg_sys: str) -> Dict[str, str]:
     # 条件分岐: `r_in_bound` を満たす経路を評価する。
     if r_in_bound:
@@ -313,6 +337,8 @@ def _compute_error_fields(*, r_in_bound: str, r_in_rg_stat: str, r_in_rg_sys: st
         "sys_stat_ratio": f"{ratio:.6g}" if math.isfinite(ratio) else "",
     }
 
+
+# 関数: `_plot_isco_constraints` の入出力契約と処理意図を定義する。
 
 def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
@@ -470,6 +496,8 @@ def _plot_isco_constraints(rows: List[Dict[str, str]], *, out_png: Path) -> None
     plt.close(fig)
 
 
+# 関数: `_detect_cache_xmm` の入出力契約と処理意図を定義する。
+
 def _detect_cache_xmm(cache_root: Path, *, obsid: str, rev: str) -> bool:
     p = cache_root / "xmm" / rev / obsid / "PPS"
     # 条件分岐: `not p.exists()` を満たす経路を評価する。
@@ -479,6 +507,8 @@ def _detect_cache_xmm(cache_root: Path, *, obsid: str, rev: str) -> bool:
     return any(p.glob("*.FTZ")) or any(p.glob("*.HTM"))
 
 
+# 関数: `_detect_cache_nustar` の入出力契約と処理意図を定義する。
+
 def _detect_cache_nustar(cache_root: Path, *, obsid: str) -> bool:
     p = cache_root / "nustar" / obsid / "event_cl"
     # 条件分岐: `not p.exists()` を満たす経路を評価する。
@@ -487,6 +517,8 @@ def _detect_cache_nustar(cache_root: Path, *, obsid: str) -> bool:
 
     return any(p.glob("*.evt.gz")) or any(p.glob("*.fits.gz")) or any(p.glob("*.gz"))
 
+
+# 関数: `_parse_header_kv` の入出力契約と処理意図を定義する。
 
 def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     kv: Dict[str, str] = {}
@@ -503,6 +535,8 @@ def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     return kv
 
 
+# 関数: `_fits_read_spectrum_header` の入出力契約と処理意図を定義する。
+
 def _fits_read_spectrum_header(path: Path) -> Dict[str, str]:
     opener = gzip.open if path.name.lower().endswith(".ftz") or path.name.lower().endswith(".gz") else Path.open
     with opener(path, "rb") as f:  # type: ignore[arg-type]
@@ -511,6 +545,8 @@ def _fits_read_spectrum_header(path: Path) -> Dict[str, str]:
 
     return _parse_header_kv(hdr)
 
+
+# 関数: `_fits_read_spectrum_counts` の入出力契約と処理意図を定義する。
 
 def _fits_read_spectrum_counts(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     opener = gzip.open if path.name.lower().endswith(".ftz") or path.name.lower().endswith(".gz") else Path.open
@@ -522,6 +558,8 @@ def _fits_read_spectrum_counts(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     counts = np.asarray(cols["COUNTS"], dtype=float)
     return ch, counts
 
+
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 
 def _parse_float(kv: Dict[str, str], key: str, default: float = float("nan")) -> float:
     v = kv.get(key)
@@ -536,6 +574,8 @@ def _parse_float(kv: Dict[str, str], key: str, default: float = float("nan")) ->
         return float(default)
 
 
+# 関数: `_parse_str` の入出力契約と処理意図を定義する。
+
 def _parse_str(kv: Dict[str, str], key: str, default: str = "") -> str:
     v = kv.get(key)
     # 条件分岐: `v is None` を満たす経路を評価する。
@@ -544,6 +584,8 @@ def _parse_str(kv: Dict[str, str], key: str, default: str = "") -> str:
 
     return str(v).strip().strip("'")
 
+
+# 関数: `_energy_from_pi_channel` の入出力契約と処理意図を定義する。
 
 def _energy_from_pi_channel(channel: np.ndarray, *, detchans: int) -> np.ndarray:
     # XMM EPIC PI bins are typically 5 eV; for DETCHANS=2400 this maps to 0–12 keV.
@@ -554,6 +596,8 @@ def _energy_from_pi_channel(channel: np.ndarray, *, detchans: int) -> np.ndarray
     return (ch + 0.5) * step_keV
 
 
+# 関数: `_energy_from_nustar_pi` の入出力契約と処理意図を定義する。
+
 def _energy_from_nustar_pi(pi: np.ndarray) -> np.ndarray:
     # NuSTAR PI channels are typically 40 eV (0.04 keV) bins.
     # We use this as a proxy mapping (no RMF folding) to allow offline reproducibility.
@@ -561,6 +605,8 @@ def _energy_from_nustar_pi(pi: np.ndarray) -> np.ndarray:
     step_keV = 0.04
     return (ch + 0.5) * step_keV
 
+
+# 関数: `_fits_read_event_pi` の入出力契約と処理意図を定義する。
 
 def _fits_read_event_pi(path: Path) -> np.ndarray:
     opener = gzip.open if path.name.lower().endswith(".gz") else Path.open
@@ -580,6 +626,8 @@ def _fits_read_event_pi(path: Path) -> np.ndarray:
     pi = pi[pi >= 0]
     return pi
 
+
+# 関数: `_fits_read_event_columns` の入出力契約と処理意図を定義する。
 
 def _fits_read_event_columns(path: Path, columns: Sequence[str]) -> Dict[str, np.ndarray]:
     """
@@ -609,6 +657,8 @@ def _fits_read_event_columns(path: Path, columns: Sequence[str]) -> Dict[str, np
     return out
 
 
+# 関数: `_accumulate_bincount` の入出力契約と処理意図を定義する。
+
 def _accumulate_bincount(acc: np.ndarray, bc: np.ndarray) -> np.ndarray:
     # 条件分岐: `bc.size > acc.size` を満たす経路を評価する。
     if bc.size > acc.size:
@@ -617,6 +667,8 @@ def _accumulate_bincount(acc: np.ndarray, bc: np.ndarray) -> np.ndarray:
     acc[: int(bc.size)] += bc.astype(float)
     return acc
 
+
+# 関数: `_nustar_det1_peak_center` の入出力契約と処理意図を定義する。
 
 def _nustar_det1_peak_center(
     event_files: Sequence[Path],
@@ -694,6 +746,8 @@ def _nustar_det1_peak_center(
     dbg["center_det1"] = [float(cx), float(cy)]
     return (float(cx), float(cy)), dbg
 
+
+# 関数: `_nustar_extract_net_spectrum_det1` の入出力契約と処理意図を定義する。
 
 def _nustar_extract_net_spectrum_det1(
     event_files: Sequence[Path],
@@ -836,6 +890,7 @@ _DS9_CIRCLE_RE = re.compile(
 )
 
 
+# 関数: `_parse_ds9_circle_region` の入出力契約と処理意図を定義する。
 def _parse_ds9_circle_region(path: Path) -> Optional[Tuple[float, float, float]]:
     """
     Parse a minimal DS9 region file containing a single circle, e.g.:
@@ -867,6 +922,8 @@ def _parse_ds9_circle_region(path: Path) -> Optional[Tuple[float, float, float]]
 
     return float(x), float(y), float(r)
 
+
+# 関数: `_nustar_extract_net_spectrum_xy_circle` の入出力契約と処理意図を定義する。
 
 def _nustar_extract_net_spectrum_xy_circle(
     event_files: Sequence[Path],
@@ -993,6 +1050,8 @@ def _nustar_extract_net_spectrum_xy_circle(
     return {"src_counts": src_counts, "bkg_counts": bkg_counts, "net_counts": net, "var_counts": var}, dbg
 
 
+# 関数: `_rebin_min_counts` の入出力契約と処理意図を定義する。
+
 def _rebin_min_counts(
     energy: np.ndarray,
     net_counts: np.ndarray,
@@ -1045,6 +1104,8 @@ def _rebin_min_counts(
 
     return np.asarray(out_e, dtype=float), np.asarray(out_y, dtype=float), np.asarray(out_v, dtype=float)
 
+
+# 関数: `_rebin_min_counts_groups` の入出力契約と処理意図を定義する。
 
 def _rebin_min_counts_groups(
     energy: np.ndarray,
@@ -1111,6 +1172,8 @@ def _rebin_min_counts_groups(
     starts = np.asarray(out_starts, dtype=np.int64)
     return np.asarray(out_e, dtype=float), np.asarray(out_y, dtype=float), np.asarray(out_v, dtype=float), starts
 
+
+# 関数: `_rebin_min_counts_weighted` の入出力契約と処理意図を定義する。
 
 def _rebin_min_counts_weighted(
     energy: np.ndarray,
@@ -1180,6 +1243,8 @@ def _rebin_min_counts_weighted(
 
     return np.asarray(out_e, dtype=float), np.asarray(out_y, dtype=float), np.asarray(out_v, dtype=float)
 
+
+# 関数: `_diskline_profile_grid` の入出力契約と処理意図を定義する。
 
 def _diskline_profile_grid(
     *,
@@ -1260,6 +1325,8 @@ def _diskline_profile_grid(
     return prof
 
 
+# 関数: `_interp_profile` の入出力契約と処理意図を定義する。
+
 def _interp_profile(r_in: float, r_grid: np.ndarray, prof_grid: np.ndarray) -> np.ndarray:
     rg = np.asarray(r_grid, dtype=float)
     # 条件分岐: `r_in <= float(rg[0])` を満たす経路を評価する。
@@ -1278,6 +1345,8 @@ def _interp_profile(r_in: float, r_grid: np.ndarray, prof_grid: np.ndarray) -> n
     t = (float(r_in) - r0) / (r1 - r0) if r1 != r0 else 0.0
     return (1.0 - t) * np.asarray(prof_grid[j], dtype=float) + t * np.asarray(prof_grid[j + 1], dtype=float)
 
+
+# 関数: `_fit_powerlaw_only_proxy` の入出力契約と処理意図を定義する。
 
 def _fit_powerlaw_only_proxy(
     *,
@@ -1338,9 +1407,12 @@ def _fit_powerlaw_only_proxy(
     lo = np.asarray([0.0, 0.0], dtype=float)
     hi = np.asarray([np.inf, 5.0], dtype=float)
 
+    # 関数: `_model` の入出力契約と処理意図を定義する。
     def _model(params: np.ndarray) -> np.ndarray:
         A, gamma = [float(x) for x in params]
         return A * (np.clip(e, 1e-3, None) ** (-gamma))
+
+    # 関数: `_resid` の入出力契約と処理意図を定義する。
 
     def _resid(params: np.ndarray) -> np.ndarray:
         return (y - _model(params)) / sigma
@@ -1362,6 +1434,8 @@ def _fit_powerlaw_only_proxy(
         "fit": {"chi2": float(chi2), "dof": int(dof), "redchi2": float(redchi2), "nfev": int(res.nfev)},
     }
 
+
+# 関数: `_fit_powerlaw_plus_diskline_proxy` の入出力契約と処理意図を定義する。
 
 def _fit_powerlaw_plus_diskline_proxy(
     *,
@@ -1457,12 +1531,15 @@ def _fit_powerlaw_plus_diskline_proxy(
     lo = np.asarray([0.0, 0.0, 0.0, 2.5], dtype=float)
     hi = np.asarray([np.inf, 5.0, np.inf, 50.0], dtype=float)
 
+    # 関数: `_model` の入出力契約と処理意図を定義する。
     def _model(params: np.ndarray) -> np.ndarray:
         A, gamma, n_line, r_in = [float(x) for x in params]
         cont = A * (np.clip(e, 1e-3, None) ** (-gamma))
         prof = _interp_profile(r_in, r_grid, prof_grid)
         line = n_line * prof
         return cont + line
+
+    # 関数: `_resid` の入出力契約と処理意図を定義する。
 
     def _resid(params: np.ndarray) -> np.ndarray:
         return (y - _model(params)) / sigma
@@ -1533,6 +1610,8 @@ def _fit_powerlaw_plus_diskline_proxy(
         "fit": {"chi2": float(chi2), "dof": int(dof), "redchi2": float(redchi2), "nfev": int(res.nfev)},
     }
 
+
+# 関数: `_fit_powerlaw_only_rmf` の入出力契約と処理意図を定義する。
 
 def _fit_powerlaw_only_rmf(
     *,
@@ -1632,6 +1711,7 @@ def _fit_powerlaw_only_rmf(
     lo = np.asarray([0.0, 0.0], dtype=float)
     hi = np.asarray([np.inf, 5.0], dtype=float)
 
+    # 関数: `_predict` の入出力契約と処理意図を定義する。
     def _predict(params: np.ndarray) -> np.ndarray:
         A, gamma = [float(x) for x in params]
         photons = A * (np.clip(e_model, 1e-6, None) ** (-gamma)) * dE
@@ -1653,6 +1733,8 @@ def _fit_powerlaw_only_rmf(
 
         out = np.add.reduceat(pred_sel, starts)
         return np.asarray(out[: int(y_reb.size)], dtype=float)
+
+    # 関数: `_resid` の入出力契約と処理意図を定義する。
 
     def _resid(params: np.ndarray) -> np.ndarray:
         return (y_reb - _predict(params)) / sigma
@@ -1676,6 +1758,8 @@ def _fit_powerlaw_only_rmf(
         "debug": {"n_data_rebinned": int(y_reb.size), "thr_proxy": float(thr), "counts_pos": float(counts_pos)},
     }
 
+
+# 関数: `_fit_powerlaw_plus_diskline_rmf` の入出力契約と処理意図を定義する。
 
 def _fit_powerlaw_plus_diskline_rmf(
     *,
@@ -1799,6 +1883,7 @@ def _fit_powerlaw_plus_diskline_rmf(
     lo = np.asarray([0.0, 0.0, 0.0, 2.5], dtype=float)
     hi = np.asarray([np.inf, 5.0, np.inf, 50.0], dtype=float)
 
+    # 関数: `_predict` の入出力契約と処理意図を定義する。
     def _predict(params: np.ndarray) -> np.ndarray:
         A, gamma, n_line, r_in = [float(x) for x in params]
         cont = A * (np.clip(e_model, 1e-6, None) ** (-gamma)) * dE
@@ -1823,6 +1908,8 @@ def _fit_powerlaw_plus_diskline_rmf(
 
         out = np.add.reduceat(pred_sel, starts)
         return np.asarray(out[: int(y_reb.size)], dtype=float)
+
+    # 関数: `_resid` の入出力契約と処理意図を定義する。
 
     def _resid(params: np.ndarray) -> np.ndarray:
         return (y_reb - _predict(params)) / sigma
@@ -1892,6 +1979,8 @@ def _fit_powerlaw_plus_diskline_rmf(
     }
 
 
+# 関数: `_choose_xmm_target_spectra` の入出力契約と処理意図を定義する。
+
 def _choose_xmm_target_spectra(
     pps_dir: Path, *, obsid: str, inst_tag: str, band_keV: Tuple[float, float]
 ) -> Tuple[Optional[Path], Dict[str, Any]]:
@@ -1928,6 +2017,8 @@ def _choose_xmm_target_spectra(
     debug["best"] = {"path": _rel(best) if best else None, "score_counts": best_score}
     return best, debug
 
+
+# 関数: `_load_xmm_net_spectrum` の入出力契約と処理意図を定義する。
 
 def _load_xmm_net_spectrum(spec_path: Path) -> Dict[str, Any]:
     hdr = _fits_read_spectrum_header(spec_path)
@@ -1985,6 +2076,8 @@ def _load_xmm_net_spectrum(spec_path: Path) -> Dict[str, Any]:
     }
 
 
+# 関数: `_fits_read_arf` の入出力契約と処理意図を定義する。
+
 def _fits_read_arf(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     opener = gzip.open if path.name.lower().endswith(".ftz") or path.name.lower().endswith(".gz") else Path.open
     with opener(path, "rb") as f:  # type: ignore[arg-type]
@@ -2001,6 +2094,8 @@ def _fits_read_arf(path: Path) -> Tuple[np.ndarray, np.ndarray]:
     e_mid = 0.5 * (lo + hi)
     return np.asarray(e_mid, dtype=float), np.asarray(a, dtype=float)
 
+
+# クラス: `_OgipRmf` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _OgipRmf:
@@ -2022,6 +2117,7 @@ class _OgipRmf:
 _TFORM_CODE_RE = re.compile(r"^\s*(?P<rep>\d*)(?P<code>[A-Z]|[PQ][A-Z])\s*$")
 
 
+# 関数: `_parse_int` の入出力契約と処理意図を定義する。
 def _parse_int(kv: Dict[str, str], key: str, default: int = 0) -> int:
     v = _parse_float(kv, key, default=float(default))
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
@@ -2030,6 +2126,8 @@ def _parse_int(kv: Dict[str, str], key: str, default: int = 0) -> int:
 
     return int(float(v))
 
+
+# 関数: `_fits_hdu_data_size_bytes` の入出力契約と処理意図を定義する。
 
 def _fits_hdu_data_size_bytes(kv: Dict[str, str]) -> int:
     xt = _parse_str(kv, "XTENSION", default="").upper()
@@ -2064,11 +2162,15 @@ def _fits_hdu_data_size_bytes(kv: Dict[str, str]) -> int:
     return int(n) * int(bytes_per)
 
 
+# 関数: `_fits_skip_padded` の入出力契約と処理意図を定義する。
+
 def _fits_skip_padded(stream: io.BytesIO, n_bytes: int) -> None:
     n = int(max(n_bytes, 0))
     pad = (-n) % 2880
     stream.seek(stream.tell() + n + pad)
 
+
+# 関数: `_tform_spec` の入出力契約と処理意図を定義する。
 
 def _tform_spec(tform: str) -> Dict[str, Any]:
     s = str(tform or "").strip()
@@ -2133,6 +2235,8 @@ def _tform_spec(tform: str) -> Dict[str, Any]:
     return {"repeat": rep, "is_var": False, "base": base, "row_width": int(width)}
 
 
+# 関数: `_tform_numpy_dtype` の入出力契約と処理意図を定義する。
+
 def _tform_numpy_dtype(base: str, *, repeat: int) -> np.dtype:
     b = str(base or "").strip().upper()
     rep = int(repeat)
@@ -2178,6 +2282,8 @@ def _tform_numpy_dtype(base: str, *, repeat: int) -> np.dtype:
     raise ValueError(f"unsupported base dtype: {base!r}")
 
 
+# 関数: `_fits_parse_bintable_layout` の入出力契約と処理意図を定義する。
+
 def _fits_parse_bintable_layout(kv: Dict[str, str], *, row_bytes: int) -> Tuple[Dict[str, int], Dict[str, str], Dict[str, Dict[str, Any]]]:
     tfields = _parse_int(kv, "TFIELDS", default=0)
     # 条件分岐: `tfields <= 0` を満たす経路を評価する。
@@ -2208,6 +2314,8 @@ def _fits_parse_bintable_layout(kv: Dict[str, str], *, row_bytes: int) -> Tuple[
 
     return offsets, tforms, specs
 
+
+# 関数: `_fits_find_bintable` の入出力契約と処理意図を定義する。
 
 def _fits_find_bintable(buf: bytes, *, extname: str) -> Tuple[Dict[str, str], int, int, int, int, int, Dict[str, int], Dict[str, str], Dict[str, Dict[str, Any]]]:
     s = io.BytesIO(buf)
@@ -2242,6 +2350,8 @@ def _fits_find_bintable(buf: bytes, *, extname: str) -> Tuple[Dict[str, str], in
 
         _fits_skip_padded(s, _fits_hdu_data_size_bytes(kv))
 
+
+# 関数: `_rmf_load_ogip` の入出力契約と処理意図を定義する。
 
 def _rmf_load_ogip(path: Path) -> _OgipRmf:
     # 条件分岐: `sp is None` を満たす経路を評価する。
@@ -2535,6 +2645,7 @@ def _rmf_load_ogip(path: Path) -> _OgipRmf:
 _RMF_CACHE: Dict[str, _OgipRmf] = {}
 
 
+# 関数: `_rmf_cached` の入出力契約と処理意図を定義する。
 def _rmf_cached(path: Path) -> _OgipRmf:
     key = str(path.resolve())
     # 条件分岐: `key in _RMF_CACHE` を満たす経路を評価する。
@@ -2545,6 +2656,8 @@ def _rmf_cached(path: Path) -> _OgipRmf:
     _RMF_CACHE[key] = rmf
     return rmf
 
+
+# 関数: `_xmm_local_rmf_path` の入出力契約と処理意図を定義する。
 
 def _xmm_local_rmf_path(respfile: str) -> Optional[Path]:
     name = str(respfile or "").strip().strip("'")
@@ -2565,6 +2678,8 @@ def _xmm_local_rmf_path(respfile: str) -> Optional[Path]:
 
     return None
 
+
+# 関数: `_rebin_spectrum_to_detchans` の入出力契約と処理意図を定義する。
 
 def _rebin_spectrum_to_detchans(
     channel: np.ndarray,
@@ -2629,6 +2744,8 @@ def _rebin_spectrum_to_detchans(
     )
 
 
+# 関数: `_interp_arf_area` の入出力契約と処理意図を定義する。
+
 def _interp_arf_area(energy_keV: np.ndarray, *, arf_e_mid: np.ndarray, arf_area: np.ndarray) -> np.ndarray:
     e = np.asarray(energy_keV, dtype=float)
     x = np.asarray(arf_e_mid, dtype=float)
@@ -2642,6 +2759,8 @@ def _interp_arf_area(energy_keV: np.ndarray, *, arf_e_mid: np.ndarray, arf_area:
     y = y[order]
     return np.asarray(np.interp(e, x, y, left=0.0, right=0.0), dtype=float)
 
+
+# 関数: `_fit_xmm_obsid_diskline` の入出力契約と処理意図を定義する。
 
 def _fit_xmm_obsid_diskline(
     cache_root: Path, *, obsid: str, rev: str, out_dir: Path
@@ -2870,6 +2989,7 @@ def _fit_xmm_obsid_diskline(
 
             r0 = float(fit0_rmf.get("r_in_rg", float("nan")))
 
+            # 関数: `_sys_component` の入出力契約と処理意図を定義する。
             def _sys_component(selector: Iterable[Dict[str, Any]]) -> float:
                 vals = []
                 for it in selector:
@@ -3070,6 +3190,7 @@ def _fit_xmm_obsid_diskline(
 
     r0 = float(fit0.get("r_in_rg", float("nan")))
 
+    # 関数: `_sys_component` の入出力契約と処理意図を定義する。
     def _sys_component(selector: Iterable[Dict[str, Any]]) -> float:
         vals = []
         for it in selector:
@@ -3142,6 +3263,8 @@ def _fit_xmm_obsid_diskline(
     return out, debug
 
 
+# 関数: `_fit_nustar_obsid_proxy` の入出力契約と処理意図を定義する。
+
 def _fit_nustar_obsid_proxy(
     cache_root: Path,
     *,
@@ -3180,6 +3303,7 @@ def _fit_nustar_obsid_proxy(
 
     band_default = (3.0, 10.0)
 
+    # 関数: `_build_spectrum_none` の入出力契約と処理意図を定義する。
     def _build_spectrum_none() -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
         counts0 = np.zeros(0, dtype=float)
         n_events0 = 0
@@ -3213,6 +3337,8 @@ def _fit_nustar_obsid_proxy(
         debug["files"] = files0
         return e0, y0, v0, {"mode": "none", "note": "no region selection; full-FOV PI histogram"}
 
+    # 関数: `_build_spectrum_auto_det1` の入出力契約と処理意図を定義する。
+
     def _build_spectrum_auto_det1() -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
         spec_dbg0: Dict[str, Any] = {}
         center, cdbg = _nustar_det1_peak_center(cands, bin_size=int(det1_bin_size), det1_max=int(det1_max))
@@ -3239,6 +3365,8 @@ def _fit_nustar_obsid_proxy(
         ch0 = np.arange(int(counts0.size), dtype=float)
         e0 = _energy_from_nustar_pi(ch0)
         return e0, counts0, var0, spec_dbg0
+
+    # 関数: `_build_spectrum_src_reg` の入出力契約と処理意図を定義する。
 
     def _build_spectrum_src_reg() -> Tuple[np.ndarray, np.ndarray, np.ndarray, Dict[str, Any]]:
         """
@@ -3446,6 +3574,7 @@ def _fit_nustar_obsid_proxy(
 
     r0 = float(fit0.get("r_in_rg", float("nan")))
 
+    # 関数: `_sys_component` の入出力契約と処理意図を定義する。
     def _sys_component(selector: Iterable[Dict[str, Any]]) -> float:
         vals = []
         for it in selector:
@@ -3564,6 +3693,8 @@ def _fit_nustar_obsid_proxy(
     return out, debug
 
 
+# 関数: `_systematics_template` の入出力契約と処理意図を定義する。
+
 def _systematics_template() -> Dict[str, Any]:
     return {
         "version": "isco_constraints_v7",
@@ -3634,6 +3765,8 @@ def _systematics_template() -> Dict[str, Any]:
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

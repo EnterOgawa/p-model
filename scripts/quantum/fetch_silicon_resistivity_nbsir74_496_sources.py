@@ -14,13 +14,18 @@ from urllib.request import Request, urlopen
 from pypdf import PdfReader
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -35,6 +40,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -89,12 +96,15 @@ _NUM_TRANSLATE = str.maketrans(
 )
 
 
+# 関数: `_clean_ascii` の入出力契約と処理意図を定義する。
 def _clean_ascii(s: str) -> str:
     ss = s.replace("\u2212", "-").replace("\u2013", "-").replace("\u2014", "-")
     ss = ss.replace("\u00b0", "°")
     ss = re.sub(r"\s+", " ", ss)
     return ss.strip()
 
+
+# 関数: `_parse_temp_c` の入出力契約と処理意図を定義する。
 
 def _parse_temp_c(token: str) -> Optional[float]:
     t = str(token).strip().translate(_TEMP_TRANSLATE)
@@ -113,6 +123,8 @@ def _parse_temp_c(token: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_parse_nbs_float` の入出力契約と処理意図を定義する。
 
 def _parse_nbs_float(token: str) -> Optional[float]:
     s = str(token).strip().translate(_NUM_TRANSLATE)
@@ -142,6 +154,8 @@ def _parse_nbs_float(token: str) -> Optional[float]:
         return None
 
 
+# 関数: `_compact` の入出力契約と処理意図を定義する。
+
 def _compact(s: str) -> str:
     return re.sub(r"\s+", "", s).upper()
 
@@ -158,6 +172,7 @@ _SPLIT_NBS_NUMBER_REPAIRS: list[tuple[re.Pattern[str], str]] = [
 ]
 
 
+# 関数: `_repair_split_nbs_numbers` の入出力契約と処理意図を定義する。
 def _repair_split_nbs_numbers(clean_line: str) -> str:
     out = clean_line
     for _ in range(3):
@@ -173,6 +188,8 @@ def _repair_split_nbs_numbers(clean_line: str) -> str:
     return out
 
 
+# 関数: `_find_appendix_e_start` の入出力契約と処理意図を定義する。
+
 def _find_appendix_e_start(reader: PdfReader) -> Optional[int]:
     for i, p in enumerate(reader.pages):
         t = p.extract_text() or ""
@@ -183,6 +200,8 @@ def _find_appendix_e_start(reader: PdfReader) -> Optional[int]:
 
     return None
 
+
+# 関数: `_split_pos_for_page` の入出力契約と処理意図を定義する。
 
 def _split_pos_for_page(lines: list[str]) -> Optional[int]:
     # In layout extraction, many intra-column gaps exist. We estimate the inter-column split
@@ -207,6 +226,8 @@ def _split_pos_for_page(lines: list[str]) -> Optional[int]:
     return int(round(median(candidates)))
 
 
+# 関数: `_split_columns` の入出力契約と処理意図を定義する。
+
 def _split_columns(line: str, split_pos: Optional[int]) -> tuple[str, str]:
     # 条件分岐: `split_pos is None or split_pos <= 0` を満たす経路を評価する。
     if split_pos is None or split_pos <= 0:
@@ -216,6 +237,8 @@ def _split_columns(line: str, split_pos: Optional[int]) -> tuple[str, str]:
     right = line[split_pos:].strip()
     return left, right
 
+
+# 関数: `_is_sample_header` の入出力契約と処理意図を定義する。
 
 def _is_sample_header(line: str) -> bool:
     u = line.upper()
@@ -228,6 +251,8 @@ def _is_sample_header(line: str) -> bool:
 
     return bool(re.search(r"\bP\s*-?\s*TYP", u) or re.search(r"\bN\s*-?\s*TYP", u))
 
+
+# 関数: `_infer_type` の入出力契約と処理意図を定義する。
 
 def _infer_type(line: str) -> Optional[str]:
     u = line.upper()
@@ -242,6 +267,8 @@ def _infer_type(line: str) -> Optional[str]:
 
     return None
 
+
+# 関数: `_infer_doping` の入出力契約と処理意図を定義する。
 
 def _infer_doping(line: str, *, sample_type: Optional[str]) -> Optional[str]:
     u = line.upper()
@@ -259,6 +286,7 @@ def _infer_doping(line: str, *, sample_type: Optional[str]) -> Optional[str]:
 _RANGE_HEADER_RE = re.compile(r"\brange\b\s*\bof\b", flags=re.IGNORECASE)
 
 
+# クラス: `RangeRow` の責務と境界条件を定義する。
 @dataclass
 class RangeRow:
     t_c: float
@@ -267,6 +295,8 @@ class RangeRow:
     rho_hi: Optional[float]
     raw: str
 
+
+# 関数: `_parse_range_row` の入出力契約と処理意図を定義する。
 
 def _parse_range_row(line: str) -> Optional[RangeRow]:
     raw_clean = _clean_ascii(line)
@@ -308,12 +338,15 @@ def _parse_range_row(line: str) -> Optional[RangeRow]:
     return RangeRow(t_c=float(t_c), rho=float(rho), rho_lo=rho_lo, rho_hi=rho_hi, raw=raw_clean)
 
 
+# 関数: `_extract_samples_from_stream` の入出力契約と処理意図を定義する。
+
 def _extract_samples_from_stream(lines: list[str], *, source_pages: list[int]) -> list[dict[str, Any]]:
     samples: list[dict[str, Any]] = []
     cur: dict[str, Any] | None = None
     reading = False
     rows: list[RangeRow] = []
 
+    # 関数: `flush` の入出力契約と処理意図を定義する。
     def flush() -> None:
         nonlocal cur, reading, rows
         # 条件分岐: `cur is None` を満たす経路を評価する。
@@ -404,6 +437,8 @@ def _extract_samples_from_stream(lines: list[str], *, source_pages: list[int]) -
     return samples
 
 
+# 関数: `_extract_samples` の入出力契約と処理意図を定義する。
+
 def _extract_samples(pdf_path: Path) -> dict[str, Any]:
     reader = PdfReader(str(pdf_path))
     start = _find_appendix_e_start(reader)
@@ -449,6 +484,8 @@ def _extract_samples(pdf_path: Path) -> dict[str, Any]:
         "samples": samples,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

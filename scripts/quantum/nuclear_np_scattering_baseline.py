@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,9 +22,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_get_value` の入出力契約と処理意図を定義する。
 
 def _get_value(d: dict, key: str) -> float:
     obj = d.get(key)
@@ -34,6 +39,8 @@ def _get_value(d: dict, key: str) -> float:
     raise KeyError(key)
 
 
+# 関数: `_get_sigma` の入出力契約と処理意図を定義する。
+
 def _get_sigma(d: dict, key: str) -> float | None:
     obj = d.get(key)
     # 条件分岐: `not isinstance(obj, dict)` を満たす経路を評価する。
@@ -43,6 +50,8 @@ def _get_sigma(d: dict, key: str) -> float | None:
     sigma = obj.get("sigma")
     return float(sigma) if isinstance(sigma, (int, float)) else None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -101,6 +110,7 @@ def main() -> None:
     r_deuteron_m = (1.0 / alpha) if (alpha and math.isfinite(alpha) and alpha > 0) else float("nan")
     r_deuteron_fm = r_deuteron_m * 1e15
 
+    # 関数: `r_t_from_binding_and_a_t` の入出力契約と処理意図を定義する。
     def r_t_from_binding_and_a_t(*, a_t_fm: float) -> float:
         # Eq.(10–11) style relation in the paper:
         #   r_t = 2 R (1 - R / a_t), with R = 1/alpha.

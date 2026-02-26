@@ -50,6 +50,7 @@ MU_SUN = 1.3271244e20  # m^3/s^2
 R_SUN = 6.957e8  # m
 
 
+# クラス: `EventRow` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class EventRow:
     event_index: int
@@ -62,9 +63,13 @@ class EventRow:
     y_peak_eq2: Optional[float]
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -92,6 +97,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_wn_intervals` の入出力契約と処理意図を定義する。
+
 def _wn_intervals(window) -> List[Tuple[float, float]]:
     out: List[Tuple[float, float]] = []
     n = int(sp.wncard(window))
@@ -102,6 +109,8 @@ def _wn_intervals(window) -> List[Tuple[float, float]]:
     return out
 
 
+# 関数: `_spk_time_bounds` の入出力契約と処理意図を定義する。
+
 def _spk_time_bounds(spk_path: Path, obj_id: int) -> Tuple[float, float]:
     cov = sp.spkcov(str(spk_path), int(obj_id))
     intervals = _wn_intervals(cov)
@@ -111,6 +120,8 @@ def _spk_time_bounds(spk_path: Path, obj_id: int) -> Tuple[float, float]:
 
     return min(a for a, _ in intervals), max(b for _, b in intervals)
 
+
+# 関数: `_load_kernels_from_meta` の入出力契約と処理意図を定義する。
 
 def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     meta_path = kernels_dir / "kernels_meta.json"
@@ -145,12 +156,16 @@ def _load_kernels_from_meta(kernels_dir: Path) -> Dict[str, Any]:
     return {"meta_path": str(meta_path), "meta": meta, "loaded": loaded}
 
 
+# 関数: `_state_m` の入出力契約と処理意図を定義する。
+
 def _state_m(target: str, et: float, *, observer: str = "SUN") -> Tuple[np.ndarray, np.ndarray]:
     st, _ = sp.spkezr(target, float(et), "J2000", "NONE", observer)
     r_km = np.array(st[:3], dtype=float)
     v_kmps = np.array(st[3:], dtype=float)
     return r_km * 1000.0, v_kmps * 1000.0
 
+
+# 関数: `_impact_b_and_bdot` の入出力契約と処理意図を定義する。
 
 def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, vS_mps: np.ndarray) -> Tuple[float, float]:
     """
@@ -207,15 +222,21 @@ def _impact_b_and_bdot(rE_m: np.ndarray, vE_mps: np.ndarray, rS_m: np.ndarray, v
     return b, bdot
 
 
+# 関数: `_shapiro_dt_roundtrip` の入出力契約と処理意図を定義する。
+
 def _shapiro_dt_roundtrip(r1_m: float, r2_m: float, b_m: float, *, beta: float) -> float:
     one_plus_gamma = 2.0 * float(beta)  # PPN: (1+gamma)=2β
     return 2.0 * one_plus_gamma * MU_SUN / (C**3) * math.log((4.0 * r1_m * r2_m) / (b_m * b_m))
 
 
+# 関数: `_y_eq2` の入出力契約と処理意図を定義する。
+
 def _y_eq2(b_m: float, bdot_mps: float, *, beta: float) -> float:
     one_plus_gamma = 2.0 * float(beta)
     return 4.0 * one_plus_gamma * MU_SUN / (C**3) * (bdot_mps / b_m)
 
+
+# 関数: `_local_minima_indices` の入出力契約と処理意図を定義する。
 
 def _local_minima_indices(y: np.ndarray) -> List[int]:
     idx: List[int] = []
@@ -239,6 +260,8 @@ def _local_minima_indices(y: np.ndarray) -> List[int]:
 
     return idx
 
+
+# 関数: `_select_event_guesses` の入出力契約と処理意図を定義する。
 
 def _select_event_guesses(ets: np.ndarray, b_m: np.ndarray, *, max_b_m: float, merge_window_s: float) -> List[Tuple[float, float]]:
     mins = _local_minima_indices(b_m)
@@ -266,6 +289,8 @@ def _select_event_guesses(ets: np.ndarray, b_m: np.ndarray, *, max_b_m: float, m
     picked.sort(key=lambda x: x[0])
     return picked
 
+
+# 関数: `_refine_event` の入出力契約と処理意図を定義する。
 
 def _refine_event(
     target: str,
@@ -355,6 +380,8 @@ def _refine_event(
     return row, extra
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[EventRow]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8", newline="") as f:
@@ -385,6 +412,8 @@ def _write_csv(path: Path, rows: List[EventRow]) -> None:
                 ]
             )
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[EventRow], *, title: str) -> None:
     _set_japanese_font()
@@ -437,6 +466,8 @@ def _plot(path: Path, rows: List[EventRow], *, title: str) -> None:
     fig.savefig(path, dpi=160, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="BepiColombo (MPO) conjunction catalog from SPICE kernels.")

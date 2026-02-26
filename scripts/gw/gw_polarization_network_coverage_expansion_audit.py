@@ -26,9 +26,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(v: Any) -> float:
     try:
@@ -38,6 +41,8 @@ def _safe_float(v: Any) -> float:
 
     return x
 
+
+# 関数: `_status_rank` の入出力契約と処理意図を定義する。
 
 def _status_rank(status: str) -> int:
     s = str(status or "")
@@ -63,6 +68,8 @@ def _status_rank(status: str) -> int:
     return -1
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
+
 def _fmt(v: Any, digits: int = 6) -> str:
     x = _safe_float(v)
     # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
@@ -82,9 +89,13 @@ def _fmt(v: Any, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_parse_events` の入出力契約と処理意図を定義する。
+
 def _parse_events(raw: str) -> List[str]:
     return [s.strip() for s in str(raw).split(",") if s.strip()]
 
+
+# 関数: `_parse_float_grid` の入出力契約と処理意図を定義する。
 
 def _parse_float_grid(raw: str) -> List[float]:
     out: List[float] = []
@@ -102,6 +113,8 @@ def _parse_float_grid(raw: str) -> List[float]:
     return sorted(set(out))
 
 
+# 関数: `_parse_int_grid` の入出力契約と処理意図を定義する。
+
 def _parse_int_grid(raw: str) -> List[int]:
     out: List[int] = []
     for token in str(raw).split(","):
@@ -118,6 +131,8 @@ def _parse_int_grid(raw: str) -> List[int]:
     return sorted(set(out))
 
 
+# 関数: `_subset_iter` の入出力契約と処理意図を定義する。
+
 def _subset_iter(events: List[str], min_size: int, max_size: int, anchor_event: str) -> Iterable[Tuple[str, ...]]:
     n = len(events)
     lo = max(1, min_size)
@@ -132,6 +147,8 @@ def _subset_iter(events: List[str], min_size: int, max_size: int, anchor_event: 
             yield subset
 
 
+# 関数: `_row_key_for_gate` の入出力契約と処理意図を定義する。
+
 def _row_key_for_gate(row: Dict[str, Any]) -> Tuple[float, int, int]:
     return (
         _safe_float(row.get("scalar_overlap_proxy")),
@@ -140,6 +157,8 @@ def _row_key_for_gate(row: Dict[str, Any]) -> Tuple[float, int, int]:
     )
 
 
+# 関数: `_row_key_for_coverage` の入出力契約と処理意図を定義する。
+
 def _row_key_for_coverage(row: Dict[str, Any]) -> Tuple[int, int, float]:
     return (
         int(row.get("n_usable_events", 0)),
@@ -147,6 +166,8 @@ def _row_key_for_coverage(row: Dict[str, Any]) -> Tuple[int, int, float]:
         -_safe_float(row.get("scalar_overlap_proxy")),
     )
 
+
+# 関数: `_pick_best` の入出力契約と処理意図を定義する。
 
 def _pick_best(rows: List[Dict[str, Any]], pred) -> Optional[Dict[str, Any]]:
     cand = [row for row in rows if pred(row)]
@@ -158,6 +179,8 @@ def _pick_best(rows: List[Dict[str, Any]], pred) -> Optional[Dict[str, Any]]:
     return cand[0]
 
 
+# 関数: `_pick_best_coverage` の入出力契約と処理意図を定義する。
+
 def _pick_best_coverage(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
@@ -166,6 +189,8 @@ def _pick_best_coverage(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     rows_sorted = sorted(rows, key=_row_key_for_coverage, reverse=True)
     return rows_sorted[0]
 
+
+# 関数: `_pick_best_subset_coverage` の入出力契約と処理意図を定義する。
 
 def _pick_best_subset_coverage(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -183,6 +208,8 @@ def _pick_best_subset_coverage(rows: List[Dict[str, Any]]) -> Optional[Dict[str,
     )
     return rows_sorted[0]
 
+
+# 関数: `_as_metric_row` の入出力契約と処理意図を定義する。
 
 def _as_metric_row(subset: Tuple[str, ...], payload: Dict[str, Any], gate_scalar_max: float, gate_usable_min: int) -> Dict[str, Any]:
     rows = [row for row in payload.get("rows", []) if isinstance(row, dict)]
@@ -227,6 +254,8 @@ def _as_metric_row(subset: Tuple[str, ...], payload: Dict[str, Any], gate_scalar
         "best_coverage_allow_pair_pruning": int(bool(best_cov.get("allow_pair_pruning", False))) if best_cov else 0,
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> None:
     labels = [str(row.get("subset_events", "")) for row in rows]
@@ -276,6 +305,8 @@ def _plot(rows: List[Dict[str, Any]], gate_scalar_max: float, out_png: Path) -> 
     plt.close(fig)
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -300,6 +331,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             }
             writer.writerow(row_out)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(

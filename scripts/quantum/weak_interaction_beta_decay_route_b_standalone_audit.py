@@ -25,9 +25,12 @@ from scripts.quantum import weak_interaction_beta_decay_route_ab_audit as route_
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -35,6 +38,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(v: Any) -> float:
     try:
@@ -44,6 +49,8 @@ def _to_float(v: Any) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_as_bool` の入出力契約と処理意図を定義する。
 
 def _as_bool(v: Any) -> Optional[bool]:
     # 条件分岐: `isinstance(v, bool)` を満たす経路を評価する。
@@ -63,6 +70,8 @@ def _as_bool(v: Any) -> Optional[bool]:
     return None
 
 
+# 関数: `_finite_quantile` の入出力契約と処理意図を定義する。
+
 def _finite_quantile(values: List[float], q: float) -> float:
     arr = np.array([float(v) for v in values if math.isfinite(float(v))], dtype=float)
     # 条件分岐: `arr.size == 0` を満たす経路を評価する。
@@ -72,6 +81,8 @@ def _finite_quantile(values: List[float], q: float) -> float:
     qq = float(max(0.0, min(1.0, q)))
     return float(np.quantile(arr, qq))
 
+
+# 関数: `_channel_sign` の入出力契約と処理意図を定義する。
 
 def _channel_sign(row: Dict[str, Any], fallback: float) -> float:
     channel = str(row.get("channel", "")).strip().lower()
@@ -86,6 +97,8 @@ def _channel_sign(row: Dict[str, Any], fallback: float) -> float:
 
     return 1.0 if fallback >= 0.0 else -1.0
 
+
+# 関数: `_hflavor_transform_value` の入出力契約と処理意図を定義する。
 
 def _hflavor_transform_value(
     *,
@@ -121,6 +134,8 @@ def _hflavor_transform_value(
     alpha = max(0.0, min(1.0, float(sign_blend)))
     return (1.0 - alpha) * q_sat + alpha * q_sign
 
+
+# 関数: `_apply_hflavor_v1` の入出力契約と処理意図を定義する。
 
 def _apply_hflavor_v1(
     *,
@@ -192,6 +207,8 @@ def _apply_hflavor_v1(
     return mapped_rows, mapping_meta
 
 
+# 関数: `_sigma_band_thresholds_from_rows` の入出力契約と処理意図を定義する。
+
 def _sigma_band_thresholds_from_rows(rows: List[Dict[str, Any]]) -> Tuple[float, float]:
     sigma_vals = [
         _to_float(r.get("q_obs_sigma_MeV"))
@@ -212,6 +229,8 @@ def _sigma_band_thresholds_from_rows(rows: List[Dict[str, Any]]) -> Tuple[float,
     return float(s33), float(s67)
 
 
+# 関数: `_sigma_band_label` の入出力契約と処理意図を定義する。
+
 def _sigma_band_label(sig: float, s33: float, s67: float) -> str:
     # 条件分岐: `not math.isfinite(sig) or sig <= 0.0` を満たす経路を評価する。
     if not math.isfinite(sig) or sig <= 0.0:
@@ -230,6 +249,8 @@ def _sigma_band_label(sig: float, s33: float, s67: float) -> str:
     return "sigma_high"
 
 
+# 関数: `_mode_tag_from_row` の入出力契約と処理意図を定義する。
+
 def _mode_tag_from_row(row: Dict[str, Any]) -> str:
     mode_consistent = _as_bool(row.get("mode_consistent"))
     # 条件分岐: `mode_consistent is True` を満たす経路を評価する。
@@ -244,6 +265,8 @@ def _mode_tag_from_row(row: Dict[str, Any]) -> str:
     return "mode_unknown"
 
 
+# 関数: `_transition_class_from_row` の入出力契約と処理意図を定義する。
+
 def _transition_class_from_row(row: Dict[str, Any], *, s33: float, s67: float) -> str:
     channel = str(row.get("channel", "unknown") or "unknown")
     q_sigma = _to_float(row.get("q_obs_sigma_MeV"))
@@ -251,6 +274,8 @@ def _transition_class_from_row(row: Dict[str, Any], *, s33: float, s67: float) -
     mode_tag = _mode_tag_from_row(row)
     return f"{channel}|{band}|{mode_tag}"
 
+
+# 関数: `_apply_transition_class_local_correction` の入出力契約と処理意図を定義する。
 
 def _apply_transition_class_local_correction(
     *,
@@ -413,6 +438,8 @@ def _apply_transition_class_local_correction(
     return mapped_rows, meta
 
 
+# 関数: `_build_candidate_class_gain_scales` の入出力契約と処理意図を定義する。
+
 def _build_candidate_class_gain_scales(
     *,
     candidate: Dict[str, Any],
@@ -438,6 +465,8 @@ def _build_candidate_class_gain_scales(
     return scales
 
 
+# 関数: `_build_candidate_class_sat_scales` の入出力契約と処理意図を定義する。
+
 def _build_candidate_class_sat_scales(
     *,
     candidate: Dict[str, Any],
@@ -461,6 +490,8 @@ def _build_candidate_class_sat_scales(
 
     return scales
 
+
+# 関数: `_build_candidate_class_blend_profiles` の入出力契約と処理意図を定義する。
 
 def _build_candidate_class_blend_profiles(
     *,
@@ -495,6 +526,8 @@ def _build_candidate_class_blend_profiles(
 
     return out
 
+
+# 関数: `_build_candidate_class_sign_scales` の入出力契約と処理意図を定義する。
 
 def _build_candidate_class_sign_scales(
     *,
@@ -540,6 +573,8 @@ def _build_candidate_class_sign_scales(
     return scales
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> Optional[str]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -558,6 +593,8 @@ def _sha256(path: Path) -> Optional[str]:
     return h.hexdigest()
 
 
+# 関数: `_file_signature` の入出力契約と処理意図を定義する。
+
 def _file_signature(path: Path) -> Dict[str, Any]:
     payload: Dict[str, Any] = {"path": _rel(path), "exists": bool(path.exists())}
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -571,10 +608,14 @@ def _file_signature(path: Path) -> Dict[str, Any]:
     return payload
 
 
+# 関数: `_load_rows` の入出力契約と処理意図を定義する。
+
 def _load_rows(path: Path) -> List[Dict[str, Any]]:
     with path.open("r", encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
 
+
+# 関数: `_load_route_ab_transition` の入出力契約と処理意図を定義する。
 
 def _load_route_ab_transition(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -593,6 +634,8 @@ def _load_route_ab_transition(path: Path) -> Dict[str, Any]:
         "route_b_watch_pass": decision.get("route_b_watch_pass"),
     }
 
+
+# 関数: `_evaluate_route_b` の入出力契約と処理意図を定義する。
 
 def _evaluate_route_b(
     *,
@@ -723,6 +766,8 @@ def _evaluate_route_b(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -735,6 +780,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+# 関数: `_write_csv_rows` の入出力契約と処理意図を定義する。
+
 def _write_csv_rows(path: Path, rows: List[Dict[str, Any]], fieldnames: List[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -744,6 +791,8 @@ def _write_csv_rows(path: Path, rows: List[Dict[str, Any]], fieldnames: List[str
             writer.writerow({k: row.get(k) for k in fieldnames})
 
 
+# 関数: `_safe_share` の入出力契約と処理意図を定義する。
+
 def _safe_share(numer: int, denom: int) -> float:
     # 条件分岐: `denom <= 0` を満たす経路を評価する。
     if denom <= 0:
@@ -751,6 +800,8 @@ def _safe_share(numer: int, denom: int) -> float:
 
     return float(float(numer) / float(denom))
 
+
+# 関数: `_safe_max` の入出力契約と処理意図を定義する。
 
 def _safe_max(values: List[float]) -> float:
     arr = [float(v) for v in values if math.isfinite(float(v))]
@@ -760,6 +811,8 @@ def _safe_max(values: List[float]) -> float:
 
     return float(max(arr))
 
+
+# 関数: `_aggregate_outlier_group` の入出力契約と処理意図を定義する。
 
 def _aggregate_outlier_group(
     *,
@@ -805,6 +858,8 @@ def _aggregate_outlier_group(
         "priority_score": priority_score,
     }
 
+
+# 関数: `_build_route_b_outlier_decomposition` の入出力契約と処理意図を定義する。
 
 def _build_route_b_outlier_decomposition(
     *,
@@ -874,6 +929,7 @@ def _build_route_b_outlier_decomposition(
         sum(1 for r in rows_scored if math.isfinite(float(r["z_logft"])) and float(r["z_logft"]) > float(z_gate))
     )
 
+    # 関数: `summarize` の入出力契約と処理意図を定義する。
     def summarize(scope: str, key_fn) -> List[Dict[str, Any]]:
         groups: Dict[str, List[Dict[str, Any]]] = {}
         for r in rows_scored:
@@ -934,6 +990,8 @@ def _build_route_b_outlier_decomposition(
         "csv_rows": csv_rows,
     }
 
+
+# 関数: `_plot_outlier_decomposition` の入出力契約と処理意図を定義する。
 
 def _plot_outlier_decomposition(
     *,
@@ -1000,6 +1058,8 @@ def _plot_outlier_decomposition(
     plt.close(fig)
 
 
+# 関数: `_parse_float_list_csv` の入出力契約と処理意図を定義する。
+
 def _parse_float_list_csv(text: str) -> List[float]:
     out: List[float] = []
     for token in str(text).split(","):
@@ -1021,6 +1081,8 @@ def _parse_float_list_csv(text: str) -> List[float]:
     return out
 
 
+# 関数: `_parse_int_list_csv` の入出力契約と処理意図を定義する。
+
 def _parse_int_list_csv(text: str) -> List[int]:
     out: List[int] = []
     for token in str(text).split(","):
@@ -1038,6 +1100,8 @@ def _parse_int_list_csv(text: str) -> List[int]:
 
     return out
 
+
+# 関数: `_parse_str_list_csv` の入出力契約と処理意図を定義する。
 
 def _parse_str_list_csv(text: str) -> List[str]:
     out: List[str] = []
@@ -1059,6 +1123,8 @@ def _parse_str_list_csv(text: str) -> List[str]:
     return out
 
 
+# 関数: `_parse_str_group_list` の入出力契約と処理意図を定義する。
+
 def _parse_str_group_list(text: str) -> List[List[str]]:
     out: List[List[str]] = []
     seen: Set[Tuple[str, ...]] = set()
@@ -1078,6 +1144,8 @@ def _parse_str_group_list(text: str) -> List[List[str]]:
 
     return out
 
+
+# 関数: `_parse_class_weight_map` の入出力契約と処理意図を定義する。
 
 def _parse_class_weight_map(text: str) -> Dict[str, float]:
     out: Dict[str, float] = {}
@@ -1106,6 +1174,8 @@ def _parse_class_weight_map(text: str) -> Dict[str, float]:
     return out
 
 
+# 関数: `_parse_class_int_map` の入出力契約と処理意図を定義する。
+
 def _parse_class_int_map(text: str) -> Dict[str, int]:
     raw = _parse_class_weight_map(text)
     out: Dict[str, int] = {}
@@ -1120,6 +1190,8 @@ def _parse_class_int_map(text: str) -> Dict[str, int]:
     return out
 
 
+# 関数: `_parse_class_nonneg_float_map` の入出力契約と処理意図を定義する。
+
 def _parse_class_nonneg_float_map(text: str) -> Dict[str, float]:
     raw = _parse_class_weight_map(text)
     out: Dict[str, float] = {}
@@ -1133,6 +1205,8 @@ def _parse_class_nonneg_float_map(text: str) -> Dict[str, float]:
 
     return out
 
+
+# 関数: `_pareto_front_indices` の入出力契約と処理意図を定義する。
 
 def _pareto_front_indices(points: List[Tuple[float, float]]) -> List[int]:
     valid = [i for i, (x, y) in enumerate(points) if math.isfinite(x) and math.isfinite(y)]
@@ -1159,6 +1233,8 @@ def _pareto_front_indices(points: List[Tuple[float, float]]) -> List[int]:
     return front
 
 
+# 関数: `_safe_norm` の入出力契約と処理意図を定義する。
+
 def _safe_norm(value: float, min_v: float, max_v: float) -> float:
     # 条件分岐: `not (math.isfinite(value) and math.isfinite(min_v) and math.isfinite(max_v))` を満たす経路を評価する。
     if not (math.isfinite(value) and math.isfinite(min_v) and math.isfinite(max_v)):
@@ -1171,6 +1247,8 @@ def _safe_norm(value: float, min_v: float, max_v: float) -> float:
 
     return float((value - min_v) / span)
 
+
+# 関数: `_build_hflavor_sweep` の入出力契約と処理意図を定義する。
 
 def _build_hflavor_sweep(
     *,
@@ -1322,6 +1400,8 @@ def _build_hflavor_sweep(
     }
 
 
+# 関数: `_plot_hflavor_sweep_pareto` の入出力契約と処理意図を定義する。
+
 def _plot_hflavor_sweep_pareto(
     *,
     sweep: Dict[str, Any],
@@ -1391,6 +1471,8 @@ def _plot_hflavor_sweep_pareto(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_build_local_correction_sweep` の入出力契約と処理意図を定義する。
 
 def _build_local_correction_sweep(
     *,
@@ -1817,6 +1899,8 @@ def _build_local_correction_sweep(
     }
 
 
+# 関数: `_plot_local_correction_sweep_pareto` の入出力契約と処理意図を定義する。
+
 def _plot_local_correction_sweep_pareto(
     *,
     sweep: Dict[str, Any],
@@ -1886,6 +1970,8 @@ def _plot_local_correction_sweep_pareto(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_build_residue_robustness` の入出力契約と処理意図を定義する。
 
 def _build_residue_robustness(
     *,
@@ -2025,6 +2111,8 @@ def _build_residue_robustness(
     }
 
 
+# 関数: `_build_localcorr_residue_reweight` の入出力契約と処理意図を定義する。
+
 def _build_localcorr_residue_reweight(
     *,
     rows_mapped: List[Dict[str, Any]],
@@ -2099,6 +2187,7 @@ def _build_localcorr_residue_reweight(
 
     limit = max(1, int(max_candidates))
 
+    # 関数: `_rank_key` の入出力契約と処理意図を定義する。
     def _rank_key(row: Dict[str, Any]) -> Tuple[float, float, float]:
         rank_c = row.get("rank_constrained")
         rank_w = row.get("rank_weighted")
@@ -2130,6 +2219,7 @@ def _build_localcorr_residue_reweight(
         if str(k).strip() and math.isfinite(_to_float(v))
     }
 
+    # 関数: `_row_class_key` の入出力契約と処理意図を定義する。
     def _row_class_key(row: Dict[str, Any]) -> str:
         class_key = str(row.get("top_priority_class_after", "")).strip()
         # 条件分岐: `not class_key` を満たす経路を評価する。
@@ -2137,6 +2227,8 @@ def _build_localcorr_residue_reweight(
             class_key = str(row.get("residue_class_key", "")).strip()
 
         return class_key or "__unknown__"
+
+    # 関数: `_effective_limit_int` の入出力契約と処理意図を定義する。
 
     def _effective_limit_int(row: Dict[str, Any], *, base_limit: int, by_key: Dict[str, int]) -> int:
         # 条件分岐: `not bool(use_class_key_threshold_guard)` を満たす経路を評価する。
@@ -2149,6 +2241,8 @@ def _build_localcorr_residue_reweight(
             return int(max(0, int(by_key.get(class_key, base_limit))))
 
         return int(base_limit)
+
+    # 関数: `_effective_limit_float` の入出力契約と処理意図を定義する。
 
     def _effective_limit_float(row: Dict[str, Any], *, base_limit: float, by_key: Dict[str, float]) -> float:
         # 条件分岐: `not bool(use_class_key_threshold_guard)` を満たす経路を評価する。
@@ -2960,6 +3054,7 @@ def _build_localcorr_residue_reweight(
 
     mode = "_".join(mode_parts) + ("_guarded" if has_combined else "_relaxed")
 
+    # 関数: `_tier` の入出力契約と処理意図を定義する。
     def _tier(row: Dict[str, Any]) -> tuple[int, int, int, int]:
         q_ok = bool(row.get("qbeta_overfit_guard_pass")) if bool(use_qbeta_overfit_guard) else True
         r_ok = bool(row.get(root_guard_key)) if bool(use_logft_rootcause_guard) else True
@@ -3078,6 +3173,8 @@ def _build_localcorr_residue_reweight(
     }
 
 
+# 関数: `_build_lock_refreeze_policy_from_reweight_policy` の入出力契約と処理意図を定義する。
+
 def _build_lock_refreeze_policy_from_reweight_policy(rw_policy: Dict[str, Any]) -> Dict[str, Any]:
     return {
         "enabled": bool(rw_policy.get("logft_rootcause_refreeze_enabled")),
@@ -3101,6 +3198,8 @@ def _build_lock_refreeze_policy_from_reweight_policy(rw_policy: Dict[str, Any]) 
         ),
     }
 
+
+# 関数: `_build_localcorr_residue_reweight_retune_grid` の入出力契約と処理意図を定義する。
 
 def _build_localcorr_residue_reweight_retune_grid(
     *,
@@ -3228,6 +3327,7 @@ def _build_localcorr_residue_reweight_retune_grid(
     best_rw_pack: Dict[str, Any] = {}
     best_lock_pack: Dict[str, Any] = {}
 
+    # 関数: `_finite_or_inf` の入出力契約と処理意図を定義する。
     def _finite_or_inf(v: Any) -> float:
         x = _to_float(v)
         return float(x) if math.isfinite(x) else float("inf")
@@ -3432,6 +3532,8 @@ def _build_localcorr_residue_reweight_retune_grid(
     }
 
 
+# 関数: `_build_localcorr_residue_reweight_retune_strategy_audit` の入出力契約と処理意図を定義する。
+
 def _build_localcorr_residue_reweight_retune_strategy_audit(
     *,
     rows_mapped: List[Dict[str, Any]],
@@ -3575,6 +3677,7 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
     best_summary: Dict[str, Any] = {}
     best_retune: Dict[str, Any] = {}
 
+    # 関数: `_finite_or_inf` の入出力契約と処理意図を定義する。
     def _finite_or_inf(v: Any) -> float:
         x = _to_float(v)
         return float(x) if math.isfinite(x) else float("inf")
@@ -3744,6 +3847,8 @@ def _build_localcorr_residue_reweight_retune_strategy_audit(
         "applied_best": False,
     }
 
+
+# 関数: `_build_candidate_stability_lock` の入出力契約と処理意図を定義する。
 
 def _build_candidate_stability_lock(
     *,
@@ -4064,6 +4169,8 @@ def _build_candidate_stability_lock(
     }
 
 
+# 関数: `_plot_residue_robustness` の入出力契約と処理意図を定義する。
+
 def _plot_residue_robustness(*, residue_pack: Dict[str, Any], out_png: Path) -> None:
     rows = residue_pack.get("rows")
     # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
@@ -4114,6 +4221,8 @@ def _plot_residue_robustness(*, residue_pack: Dict[str, Any], out_png: Path) -> 
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -4180,6 +4289,8 @@ def _plot(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -5343,6 +5454,7 @@ def main() -> None:
         strategy_defs: List[Dict[str, Any]] = []
         strategy_seen: Set[Tuple[str, ...]] = set()
 
+        # 関数: `_append_strategy` の入出力契約と処理意図を定義する。
         def _append_strategy(mode: str, keys: List[str], top_k: int, label: str) -> None:
             keys_eff = [str(x) for x in keys if str(x).strip() and str(x) in class_scope]
             # 条件分岐: `not keys_eff` を満たす経路を評価する。

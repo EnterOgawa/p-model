@@ -36,9 +36,12 @@ from scripts.summary import worklog
 DEFAULT_BASE_URL = "https://atmos.nmsu.edu/pdsd/archive/data/co-ss-rss-1-sce1-v10"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -48,6 +51,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool, timeout_s: int = 180) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -63,6 +68,8 @@ def _download(url: str, dst: Path, *, force: bool, timeout_s: int = 180) -> None
     tmp.replace(dst)
 
 
+# 関数: `_cors_for_doy` の入出力契約と処理意図を定義する。
+
 def _cors_for_doy(doy: int) -> int:
     # SCE1 2002 DOY 157-186 are split into 4-day volumes:
     # 157-160 => 0021, 161-164 => 0022, ... 185-186 => 0028
@@ -71,6 +78,8 @@ def _cors_for_doy(doy: int) -> int:
 
     return 21 + ((doy - 157) // 4)
 
+
+# 関数: `_extract_dir_links` の入出力契約と処理意図を定義する。
 
 def _extract_dir_links(html: str, *, base_url: str) -> List[str]:
     # Apache autoindex: <a href="name">name</a>
@@ -120,6 +129,8 @@ def _extract_dir_links(html: str, *, base_url: str) -> List[str]:
     return uniq
 
 
+# クラス: `DownloadedFile` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DownloadedFile:
     cors: int
@@ -128,6 +139,8 @@ class DownloadedFile:
     size_bytes: int
     sha256: str
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

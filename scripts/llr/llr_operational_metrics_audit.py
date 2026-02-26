@@ -23,6 +23,7 @@ import pandas as pd
 _ROOT = Path(__file__).resolve().parents[2]
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 def _to_float(x: Any) -> float:
     try:
         return float(x)
@@ -30,12 +31,16 @@ def _to_float(x: Any) -> float:
         return float("nan")
 
 
+# 関数: `_safe_rel` の入出力契約と処理意図を定義する。
+
 def _safe_rel(path: Path, root: Path) -> str:
     try:
         return str(path.resolve().relative_to(root.resolve())).replace("\\", "/")
     except Exception:
         return str(path.resolve()).replace("\\", "/")
 
+
+# 関数: `_read_record11_meta` の入出力契約と処理意図を定義する。
 
 def _read_record11_meta(path: Path, line_numbers: Sequence[int]) -> Dict[int, Dict[str, float]]:
     need = set(int(v) for v in line_numbers if v is not None and np.isfinite(float(v)))
@@ -64,6 +69,8 @@ def _read_record11_meta(path: Path, line_numbers: Sequence[int]) -> Dict[int, Di
 
     return out
 
+
+# 関数: `_augment_with_np_meta` の入出力契約と処理意図を定義する。
 
 def _augment_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
     out = df.copy()
@@ -107,6 +114,8 @@ def _augment_with_np_meta(df: pd.DataFrame, root: Path) -> pd.DataFrame:
     return out
 
 
+# 関数: `_solve_floor_ps` の入出力契約と処理意図を定義する。
+
 def _solve_floor_ps(residual_ps: np.ndarray, sigma_ps: np.ndarray) -> float:
     # 条件分岐: `len(residual_ps) == 0` を満たす経路を評価する。
     if len(residual_ps) == 0:
@@ -127,6 +136,8 @@ def _solve_floor_ps(residual_ps: np.ndarray, sigma_ps: np.ndarray) -> float:
 
     return float(hi)
 
+
+# 関数: `_subset_metrics` の入出力契約と処理意図を定義する。
 
 def _subset_metrics(df: pd.DataFrame) -> Dict[str, Any]:
     # 条件分岐: `df.empty` を満たす経路を評価する。
@@ -177,6 +188,8 @@ def _subset_metrics(df: pd.DataFrame) -> Dict[str, Any]:
     }
 
 
+# 関数: `_write_plot` の入出力契約と処理意図を定義する。
+
 def _write_plot(path: Path, summary_rows: List[Dict[str, Any]]) -> None:
     # 条件分岐: `not summary_rows` を満たす経路を評価する。
     if not summary_rows:
@@ -213,6 +226,8 @@ def _write_plot(path: Path, summary_rows: List[Dict[str, Any]]) -> None:
     fig.savefig(path, dpi=180)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="LLR operational metrics audit (weighted RMS / normalized residual).")

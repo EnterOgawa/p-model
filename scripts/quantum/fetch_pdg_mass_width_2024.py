@@ -9,15 +9,20 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 
+# クラス: `FileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FileSpec:
     url: str
     relpath: str
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -32,6 +37,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -51,6 +58,8 @@ def _download(url: str, out_path: Path) -> None:
 
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

@@ -11,6 +11,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `ChshBest` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ChshBest:
     s_value: float
@@ -19,6 +20,8 @@ class ChshBest:
     swap_b: bool
     sign_matrix: list[list[int]]
 
+
+# 関数: `_chsh_sign_patterns` の入出力契約と処理意図を定義する。
 
 def _chsh_sign_patterns() -> list[np.ndarray]:
     patterns: list[np.ndarray] = []
@@ -40,6 +43,7 @@ def _chsh_sign_patterns() -> list[np.ndarray]:
 _CHSH_SIGNS = _chsh_sign_patterns()
 
 
+# 関数: `_best_chsh` の入出力契約と処理意図を定義する。
 def _best_chsh(E: np.ndarray) -> ChshBest:
     # 条件分岐: `E.shape != (2, 2)` を満たす経路を評価する。
     if E.shape != (2, 2):
@@ -75,10 +79,14 @@ def _best_chsh(E: np.ndarray) -> ChshBest:
     return best
 
 
+# 関数: `_canonical_chsh` の入出力契約と処理意図を定義する。
+
 def _canonical_chsh(E: np.ndarray) -> float:
     # Canonical (one common convention): S = E00 + E01 + E10 - E11
     return float(E[0, 0] + E[0, 1] + E[1, 0] - E[1, 1])
 
+
+# 関数: `_apply_chsh_variant` の入出力契約と処理意図を定義する。
 
 def _apply_chsh_variant(E: np.ndarray, variant: ChshBest) -> float:
     E2 = E.copy()
@@ -95,10 +103,14 @@ def _apply_chsh_variant(E: np.ndarray, variant: ChshBest) -> float:
     return float(np.sum(s * E2))
 
 
+# 関数: `_read_zip_bytes` の入出力契約と処理意図を定義する。
+
 def _read_zip_bytes(zip_path: Path, member: str) -> bytes:
     with zipfile.ZipFile(zip_path) as z:
         return z.read(member)
 
+
+# 関数: `_load_run_arrays` の入出力契約と処理意図を定義する。
 
 def _load_run_arrays(*, src_dir: Path, subdir: str, run: str) -> dict[str, np.ndarray]:
     alice_zip = src_dir / "Alice.zip"
@@ -126,6 +138,8 @@ def _load_run_arrays(*, src_dir: Path, subdir: str, run: str) -> dict[str, np.nd
 
     return {"a_t": a_v, "a_c": a_c, "b_t": b_v, "b_c": b_c}
 
+
+# 関数: `_estimate_offset_s` の入出力契約と処理意図を定義する。
 
 def _estimate_offset_s(t_a: np.ndarray, t_b: np.ndarray, *, sample_max: int = 200_000) -> dict[str, float]:
     # Estimate constant offset by nearest-neighbor dt peak (coarse but robust enough for plotting sweeps).
@@ -173,6 +187,8 @@ def _estimate_offset_s(t_a: np.ndarray, t_b: np.ndarray, *, sample_max: int = 20
     }
 
 
+# 関数: `_extract_setting_and_outcome` の入出力契約と処理意図を定義する。
+
 def _extract_setting_and_outcome(c: int, *, encoding: str) -> tuple[int, int]:
     # c in {0,1,2,3}.
     if encoding == "bit0-setting":
@@ -188,6 +204,8 @@ def _extract_setting_and_outcome(c: int, *, encoding: str) -> tuple[int, int]:
     outcome = 1 if detector == 0 else -1
     return int(setting), int(outcome)
 
+
+# 関数: `_pair_and_accumulate` の入出力契約と処理意図を定義する。
 
 def _pair_and_accumulate(
     t_a: np.ndarray,
@@ -233,6 +251,8 @@ def _pair_and_accumulate(
     return n, sum_prod, pairs_total
 
 
+# 関数: `_safe_div` の入出力契約と処理意図を定義する。
+
 def _safe_div(sum_prod: np.ndarray, n: np.ndarray) -> np.ndarray:
     E = np.full((2, 2), np.nan, dtype=float)
     for a in (0, 1):
@@ -243,6 +263,8 @@ def _safe_div(sum_prod: np.ndarray, n: np.ndarray) -> np.ndarray:
 
     return E
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(

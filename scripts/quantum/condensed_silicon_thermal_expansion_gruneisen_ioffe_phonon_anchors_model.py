@@ -13,6 +13,7 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -37,6 +38,7 @@ from scripts.quantum.condensed_silicon_thermal_expansion_gruneisen_debye_einstei
 )
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -50,6 +52,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_pick_ioffe_phonon_anchors` の入出力契約と処理意図を定義する。
 
 def _pick_ioffe_phonon_anchors(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """
@@ -89,6 +93,8 @@ def _pick_ioffe_phonon_anchors(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+# 関数: `_weighted_sse` の入出力契約と処理意図を定義する。
+
 def _weighted_sse(
     *, idx: list[int], alpha_obs: list[float], alpha_pred: list[float], sigma_fit: list[float]
 ) -> float:
@@ -105,6 +111,8 @@ def _weighted_sse(
 
     return float(sse)
 
+
+# 関数: `_weighted_fit_3branch` の入出力契約と処理意図を定義する。
 
 def _weighted_fit_3branch(
     *,
@@ -153,6 +161,8 @@ def _weighted_fit_3branch(
     a_d, a_e1, a_e2 = sol
     return float(a_d), float(a_e1), float(a_e2)
 
+
+# 関数: `_solve_4x4` の入出力契約と処理意図を定義する。
 
 def _solve_4x4(
     *,
@@ -231,6 +241,8 @@ def _solve_4x4(
     return x1, x2, x3, x4
 
 
+# 関数: `_weighted_fit_4branch` の入出力契約と処理意図を定義する。
+
 def _weighted_fit_4branch(
     *,
     idx: list[int],
@@ -306,6 +318,8 @@ def _weighted_fit_4branch(
     return float(a_d), float(a_e1), float(a_e2), float(a_e3)
 
 
+# 関数: `_metrics_fit_range` の入出力契約と処理意図を定義する。
+
 def _metrics_fit_range(
     *,
     idx: list[int],
@@ -357,6 +371,8 @@ def _metrics_fit_range(
     }
 
 
+# 関数: `_parse_args` の入出力契約と処理意図を定義する。
+
 def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(
         description=(
@@ -373,6 +389,8 @@ def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:
     )
     return p.parse_args(argv)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[list[str]] = None) -> None:
     args = _parse_args(argv)

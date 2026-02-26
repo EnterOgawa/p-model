@@ -40,9 +40,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -62,6 +65,8 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     return rows
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
@@ -69,10 +74,14 @@ def _read_json(path: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: object) -> Optional[float]:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -98,6 +107,8 @@ def _maybe_float(x: object) -> Optional[float]:
     return v if math.isfinite(v) else None
 
 
+# 関数: `_maybe_bool` の入出力契約と処理意図を定義する。
+
 def _maybe_bool(x: object) -> Optional[bool]:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -121,12 +132,16 @@ def _maybe_bool(x: object) -> Optional[bool]:
     return None
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return path.relative_to(_ROOT).as_posix()
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_combine_sigma` の入出力契約と処理意図を定義する。
 
 def _combine_sigma(stat: Optional[float], sys_: Optional[float]) -> Optional[float]:
     # 条件分岐: `stat is None and sys_ is None` を満たす経路を評価する。
@@ -146,6 +161,8 @@ def _combine_sigma(stat: Optional[float], sys_: Optional[float]) -> Optional[flo
     return math.sqrt(s2) if s2 > 0 else 0.0
 
 
+# 関数: `_sys_over_stat` の入出力契約と処理意図を定義する。
+
 def _sys_over_stat(stat: Optional[float], sys_: Optional[float]) -> Optional[float]:
     # 条件分岐: `stat is None or sys_ is None` を満たす経路を評価する。
     if stat is None or sys_ is None:
@@ -159,6 +176,8 @@ def _sys_over_stat(stat: Optional[float], sys_: Optional[float]) -> Optional[flo
     return float(sys_) / float(stat)
 
 
+# 関数: `_gamma_from_beta` の入出力契約と処理意図を定義する。
+
 def _gamma_from_beta(beta: float) -> Optional[float]:
     # 条件分岐: `not math.isfinite(beta)` を満たす経路を評価する。
     if not math.isfinite(beta):
@@ -171,6 +190,8 @@ def _gamma_from_beta(beta: float) -> Optional[float]:
 
     return 1.0 / math.sqrt(1.0 - float(beta) ** 2)
 
+
+# 関数: `_delta_upper_from_gamma` の入出力契約と処理意図を定義する。
 
 def _delta_upper_from_gamma(gamma_obs: float) -> Optional[float]:
     """
@@ -189,9 +210,13 @@ def _delta_upper_from_gamma(gamma_obs: float) -> Optional[float]:
     return 1.0 / denom
 
 
+# 関数: `_load_targets_catalog` の入出力契約と処理意図を定義する。
+
 def _load_targets_catalog(root: Path) -> List[Dict[str, str]]:
     return _read_csv_rows(root / "output" / "private" / "xrism" / "xrism_targets_catalog.csv")
 
+
+# 関数: `_load_event_level_qc_by_obsid` の入出力契約と処理意図を定義する。
 
 def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
     """
@@ -223,6 +248,8 @@ def _load_event_level_qc_by_obsid(root: Path) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_summarize_event_level_qc` の入出力契約と処理意図を定義する。
+
 def _summarize_event_level_qc(qc_by_obsid: Dict[str, Dict[str, Any]], *, obsids: List[str]) -> Dict[str, Any]:
     rows = [qc_by_obsid[o] for o in obsids if o in qc_by_obsid]
     l1 = [float(r["l1_norm_a"]) for r in rows if _maybe_float(r.get("l1_norm_a")) is not None]
@@ -237,6 +264,8 @@ def _summarize_event_level_qc(qc_by_obsid: Dict[str, Dict[str, Any]], *, obsids:
         "note": "Fe-K帯域（5.5–7.5 keV）の products（PI） vs event_cl ヒストグラム差。pixel除外/GTIの手続き差の大きさを固定する目的。",
     }
 
+
+# 関数: `_summarize_bh` の入出力契約と処理意図を定義する。
 
 def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any]:
     qc_by_obsid = _load_event_level_qc_by_obsid(root)
@@ -434,6 +463,8 @@ def _summarize_bh(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any
     }
 
 
+# 関数: `_summarize_cluster` の入出力契約と処理意図を定義する。
+
 def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str, Any]:
     qc_by_obsid = _load_event_level_qc_by_obsid(root)
     path = root / "output" / "private" / "xrism" / "xrism_cluster_redshift_turbulence_summary.csv"
@@ -603,6 +634,8 @@ def _summarize_cluster(root: Path, *, targets: List[Dict[str, str]]) -> Dict[str
     }
 
 
+# 関数: `_plot_resolve_summary` の入出力契約と処理意図を定義する。
+
 def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, Any]) -> bool:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -712,6 +745,8 @@ def _plot_resolve_summary(out_png: Path, bh: Dict[str, Any], cluster: Dict[str, 
     return True
 
 
+# 関数: `build_metrics` の入出力契約と処理意図を定義する。
+
 def build_metrics(root: Path, *, out_dir: Path) -> Dict[str, Any]:
     targets = _load_targets_catalog(root)
     bh = _summarize_bh(root, targets=targets)
@@ -743,6 +778,8 @@ def build_metrics(root: Path, *, out_dir: Path) -> Dict[str, Any]:
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Integrate XRISM fixed outputs and freeze adoption decisions.")

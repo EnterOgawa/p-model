@@ -47,6 +47,7 @@ _WIN_ABS_RE = re.compile(r"^[a-zA-Z]:[\\/]")
 _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
+# 関数: `_resolve_path_like` の入出力契約と処理意図を定義する。
 def _resolve_path_like(p: Any) -> Optional[Path]:
     # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
@@ -81,6 +82,8 @@ def _resolve_path_like(p: Any) -> Optional[Path]:
     return _ROOT / path
 
 
+# クラス: `WedgePoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class WedgePoint:
     sample: str
@@ -101,6 +104,8 @@ class WedgePoint:
     source_json: str
 
 
+# 関数: `_eps_proxy_from_ratio` の入出力契約と処理意図を定義する。
+
 def _eps_proxy_from_ratio(ratio: float) -> float:
     r = float(ratio)
     # 条件分岐: `not (math.isfinite(r) and r > 0.0)` を満たす経路を評価する。
@@ -114,6 +119,8 @@ def _eps_proxy_from_ratio(ratio: float) -> float:
 
     return float(r ** (-1.0 / 3.0) - 1.0)
 
+
+# 関数: `_status_from_abs_eps` の入出力契約と処理意図を定義する。
 
 def _status_from_abs_eps(abs_eps: float, *, ok_max: float = 0.015, mixed_max: float = 0.03) -> str:
     # 条件分岐: `not math.isfinite(float(abs_eps))` を満たす経路を評価する。
@@ -133,6 +140,8 @@ def _status_from_abs_eps(abs_eps: float, *, ok_max: float = 0.015, mixed_max: fl
     return "ng"
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(x: Any) -> Optional[float]:
     try:
         # 条件分岐: `x is None` を満たす経路を評価する。
@@ -143,6 +152,8 @@ def _safe_float(x: Any) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_load_from_metrics` の入出力契約と処理意図を定義する。
 
 def _load_from_metrics(d: Dict[str, Any], *, source_json: str) -> Optional[WedgePoint]:
     params = d.get("params", {}) if isinstance(d.get("params", {}), dict) else {}
@@ -192,6 +203,8 @@ def _load_from_metrics(d: Dict[str, Any], *, source_json: str) -> Optional[Wedge
     )
 
 
+# 関数: `_infer_npz_path` の入出力契約と処理意図を定義する。
+
 def _infer_npz_path(metrics_path: Path, d: Dict[str, Any]) -> Optional[Path]:
     outputs = d.get("outputs", {}) if isinstance(d.get("outputs", {}), dict) else {}
     # 条件分岐: `isinstance(outputs, dict) and outputs.get("npz")` を満たす経路を評価する。
@@ -205,6 +218,8 @@ def _infer_npz_path(metrics_path: Path, d: Dict[str, Any]) -> Optional[Path]:
 
     return None
 
+
+# 関数: `_npz_scalar` の入出力契約と処理意図を定義する。
 
 def _npz_scalar(arr: Any, key: str) -> Optional[float]:
     try:
@@ -221,6 +236,8 @@ def _npz_scalar(arr: Any, key: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_load_from_npz` の入出力契約と処理意図を定義する。
 
 def _load_from_npz(metrics_path: Path, d: Dict[str, Any], *, mu_split_default: float) -> Optional[WedgePoint]:
     params = d.get("params", {}) if isinstance(d.get("params", {}), dict) else {}
@@ -357,6 +374,8 @@ def _load_from_npz(metrics_path: Path, d: Dict[str, Any], *, mu_split_default: f
     )
 
 
+# 関数: `_load_points` の入出力契約と処理意図を定義する。
+
 def _load_points(paths: Iterable[Path], *, mu_split_default: float) -> List[WedgePoint]:
     out: List[WedgePoint] = []
     for p in paths:
@@ -378,6 +397,8 @@ def _load_points(paths: Iterable[Path], *, mu_split_default: float) -> List[Wedg
     return out
 
 
+# 関数: `_group` の入出力契約と処理意図を定義する。
+
 def _group(points: List[WedgePoint]) -> Dict[Tuple[str, str, str], List[WedgePoint]]:
     g: Dict[Tuple[str, str, str], List[WedgePoint]] = {}
     for p in points:
@@ -388,6 +409,8 @@ def _group(points: List[WedgePoint]) -> Dict[Tuple[str, str, str], List[WedgePoi
 
     return g
 
+
+# 関数: `_drift` の入出力契約と処理意図を定義する。
 
 def _drift(values: List[float]) -> Dict[str, float]:
     a = np.asarray(list(values), dtype=np.float64)
@@ -402,6 +425,8 @@ def _drift(values: List[float]) -> Dict[str, float]:
         "span": float(np.max(a) - np.min(a)),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Summarize BAO wedge anisotropy from catalog-based xi outputs.")

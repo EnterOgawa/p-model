@@ -43,19 +43,26 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `KernelRef` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class KernelRef:
     rel_path: str  # relative to spice_kernels/
     url: str
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -65,6 +72,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool, timeout_sec: float) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -81,6 +90,8 @@ def _download(url: str, dst: Path, *, force: bool, timeout_sec: float) -> Dict[s
     return {"url": url, "path": str(dst), "downloaded": True, "bytes": int(dst.stat().st_size), "sha256": _sha256(dst)}
 
 
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
+
 def _fetch_text(url: str, *, timeout_sec: float) -> str:
     req = Request(url, method="GET")
     with urlopen(req, timeout=timeout_sec) as r:
@@ -88,6 +99,8 @@ def _fetch_text(url: str, *, timeout_sec: float) -> str:
 
     return b.decode("utf-8", errors="replace")
 
+
+# 関数: `_parse_apache_index_filenames` の入出力契約と処理意図を定義する。
 
 def _parse_apache_index_filenames(html_text: str) -> List[str]:
     out: List[str] = []
@@ -131,6 +144,8 @@ def _parse_apache_index_filenames(html_text: str) -> List[str]:
     return uniq
 
 
+# 関数: `_pick_latest_meta_kernel` の入出力契約と処理意図を定義する。
+
 def _pick_latest_meta_kernel(names: Iterable[str]) -> Tuple[Optional[str], Optional[int]]:
     best_name = None
     best_v = None
@@ -149,6 +164,8 @@ def _pick_latest_meta_kernel(names: Iterable[str]) -> Tuple[Optional[str], Optio
 
     return best_name, best_v
 
+
+# 関数: `_extract_kernel_paths_from_meta` の入出力契約と処理意図を定義する。
 
 def _extract_kernel_paths_from_meta(meta_text: str) -> List[str]:
     """
@@ -180,6 +197,8 @@ def _extract_kernel_paths_from_meta(meta_text: str) -> List[str]:
     return out
 
 
+# 関数: `_select_minimal_kernel_paths` の入出力契約と処理意図を定義する。
+
 def _select_minimal_kernel_paths(meta_paths: List[str]) -> List[str]:
     """
     Keep only kernels needed to compute Earth/Sun/MPO geometry and Shapiro y(t).
@@ -207,6 +226,8 @@ def _select_minimal_kernel_paths(meta_paths: List[str]) -> List[str]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Fetch minimal BepiColombo SPICE kernels from ESA PSA (bc_spice).")

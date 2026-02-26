@@ -37,13 +37,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import paper_html as _paper_html, worklog
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_mm_to_points` の入出力契約と処理意図を定義する。
+
 def _mm_to_points(mm: float) -> float:
     return float(mm) * 72.0 / 25.4
 
+
+# 関数: `_choose_tmp_docx_path` の入出力契約と処理意図を定義する。
 
 def _choose_tmp_docx_path(target: Path) -> Path:
     """
@@ -55,6 +60,7 @@ def _choose_tmp_docx_path(target: Path) -> Path:
     - We keep the name stable (stem__tmp.docx) when possible to make it easy for users to find.
     """
 
+    # 関数: `_candidate` の入出力契約と処理意図を定義する。
     def _candidate(tag: str) -> Path:
         return target.with_name(f"{target.stem}{tag}{target.suffix}")
 
@@ -75,6 +81,8 @@ def _choose_tmp_docx_path(target: Path) -> Path:
 
     return _candidate(f"__tmp_{os.getpid()}_{int(time.time())}")
 
+
+# 関数: `_promote_tmp_docx` の入出力契約と処理意図を定義する。
 
 def _promote_tmp_docx(tmp_path: Path, target_path: Path) -> Tuple[Path, str]:
     """
@@ -111,6 +119,8 @@ def _promote_tmp_docx(tmp_path: Path, target_path: Path) -> Tuple[Path, str]:
             f"(close it and re-run to overwrite: {target_path}) ({e})"
         )
 
+
+# 関数: `_try_update_open_word_docx_from_tmp` の入出力契約と処理意図を定義する。
 
 def _try_update_open_word_docx_from_tmp(*, target_path: Path, tmp_path: Path) -> Tuple[bool, str]:
     """
@@ -238,6 +248,7 @@ _INTERNAL_BLOCK_RE = re.compile(
 )
 
 
+# 関数: `_mime_from_ext` の入出力契約と処理意図を定義する。
 def _mime_from_ext(ext: str) -> str:
     e = (ext or "").lower()
     # 条件分岐: `e == ".png"` を満たす経路を評価する。
@@ -266,6 +277,8 @@ def _mime_from_ext(ext: str) -> str:
 
     return "application/octet-stream"
 
+
+# 関数: `_resolve_local_image_path` の入出力契約と処理意図を定義する。
 
 def _resolve_local_image_path(html_path: Path, src: str) -> Optional[Path]:
     s = (src or "").strip()
@@ -308,6 +321,8 @@ def _resolve_local_image_path(html_path: Path, src: str) -> Optional[Path]:
         return None
 
 
+# 関数: `_inline_local_images_for_word` の入出力契約と処理意図を定義する。
+
 def _inline_local_images_for_word(html_path: Path) -> Tuple[Path, int, Optional[Path]]:
     """
     Word tends to link (not embed) images referenced by relative paths in HTML.
@@ -319,6 +334,7 @@ def _inline_local_images_for_word(html_path: Path) -> Tuple[Path, int, Optional[
 
     n_inlined = 0
 
+    # 関数: `_repl` の入出力契約と処理意図を定義する。
     def _repl(m: re.Match[str]) -> str:
         nonlocal n_inlined
         prefix, quote, src = m.group(1), m.group(2), m.group(3)
@@ -349,6 +365,8 @@ def _inline_local_images_for_word(html_path: Path) -> Tuple[Path, int, Optional[
     return tmp_path, n_inlined, tmp_path
 
 
+# 関数: `_normalize_latex` の入出力契約と処理意図を定義する。
+
 def _normalize_latex(latex: str) -> str:
     # Same normalization used in scripts/summary/paper_html.py for equation PNG rendering.
     latex_norm = latex.strip().replace("\r\n", "\n")
@@ -363,6 +381,8 @@ def _normalize_latex(latex: str) -> str:
     return latex_norm
 
 
+# 関数: `_extract_math_blocks` の入出力契約と処理意図を定義する。
+
 def _extract_math_blocks(md_text: str) -> List[str]:
     out: List[str] = []
     for m in _MATH_BLOCK_RE.finditer(md_text):
@@ -376,9 +396,12 @@ def _extract_math_blocks(md_text: str) -> List[str]:
     return out
 
 
+# 関数: `_extract_inline_math` の入出力契約と処理意図を定義する。
+
 def _extract_inline_math(md_text: str) -> List[str]:
     out: List[str] = []
 
+    # 関数: `_looks_like_inline_math` の入出力契約と処理意図を定義する。
     def _looks_like_inline_math(expr: str) -> bool:
         s = (expr or "").strip()
         # 条件分岐: `not s` を満たす経路を評価する。
@@ -402,6 +425,8 @@ def _extract_inline_math(md_text: str) -> List[str]:
 
     return out
 
+
+# 関数: `_extract_latex_from_html_images` の入出力契約と処理意図を定義する。
 
 def _extract_latex_from_html_images(*, html_path: Path, alt_text: str) -> List[str]:
     out: List[str] = []
@@ -437,9 +462,13 @@ def _extract_latex_from_html_images(*, html_path: Path, alt_text: str) -> List[s
     return out
 
 
+# 関数: `_strip_internal_blocks_for_publish` の入出力契約と処理意図を定義する。
+
 def _strip_internal_blocks_for_publish(md_text: str) -> str:
     return _INTERNAL_BLOCK_RE.sub("", md_text)
 
+
+# 関数: `_default_mml2omml_xsl` の入出力契約と処理意図を定義する。
 
 def _default_mml2omml_xsl() -> Optional[Path]:
     # Microsoft Word ships MathML→OMML converter XSL with Office installation.
@@ -456,6 +485,8 @@ def _default_mml2omml_xsl() -> Optional[Path]:
 
     return None
 
+
+# 関数: `_replace_equation_images_with_word_equations` の入出力契約と処理意図を定義する。
 
 def _replace_equation_images_with_word_equations(
     *,
@@ -493,6 +524,8 @@ def _replace_equation_images_with_word_equations(
     # 条件分岐: `kind not in ("block", "inline")` を満たす経路を評価する。
     if kind not in ("block", "inline"):
         raise RuntimeError(f"unknown equation_kind: {equation_kind}")
+
+    # 関数: `_extract_math` の入出力契約と処理意図を定義する。
 
     def _extract_math(paths: List[Path]) -> List[str]:
         items: List[str] = []
@@ -714,6 +747,8 @@ def _replace_equation_images_with_word_equations(
     return n_found, n_replaced
 
 
+# 関数: `_try_start_word` の入出力契約と処理意図を定義する。
+
 def _try_start_word() -> Tuple[Optional[object], str]:
     # 条件分岐: `os.name != "nt"` を満たす経路を評価する。
     if os.name != "nt":
@@ -750,6 +785,8 @@ def _try_start_word() -> Tuple[Optional[object], str]:
     return word, ""
 
 
+# 関数: `_apply_page_margins` の入出力契約と処理意図を定義する。
+
 def _apply_page_margins(doc: object, *, margin_mm: float) -> None:
     margin_mm = max(0.0, float(margin_mm))
     points = _mm_to_points(margin_mm)
@@ -781,6 +818,8 @@ def _apply_page_margins(doc: object, *, margin_mm: float) -> None:
             continue
 
 
+# 関数: `_apply_page_orientation` の入出力契約と処理意図を定義する。
+
 def _apply_page_orientation(doc: object, *, orientation: str) -> None:
     o = (orientation or "").strip().lower()
     # WdOrientation: wdOrientPortrait=0, wdOrientLandscape=1
@@ -798,6 +837,8 @@ def _apply_page_orientation(doc: object, *, orientation: str) -> None:
         except Exception:
             continue
 
+
+# 関数: `_max_content_width_points` の入出力契約と処理意図を定義する。
 
 def _max_content_width_points(doc: object) -> Optional[float]:
     try:
@@ -824,7 +865,10 @@ def _max_content_width_points(doc: object) -> Optional[float]:
     return min(widths)
 
 
+# 関数: `_fit_inline_shapes_to_page` の入出力契約と処理意図を定義する。
+
 def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
+    # 関数: `_safe_pos_points` の入出力契約と処理意図を定義する。
     def _safe_pos_points(v: object) -> float:
         try:
             x = float(v)
@@ -916,12 +960,15 @@ def _fit_inline_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
             continue
 
 
+# 関数: `_fit_floating_shapes_to_page` の入出力契約と処理意図を定義する。
+
 def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
     """
     Word's HTML import sometimes creates floating Shapes (not InlineShapes), especially when
     images are placed side-by-side. Resize picture-like Shapes to avoid page overflow.
     """
 
+    # 関数: `_safe_pos_points` の入出力契約と処理意図を定義する。
     def _safe_pos_points(v: object) -> float:
         try:
             x = float(v)
@@ -1022,6 +1069,8 @@ def _fit_floating_shapes_to_page(doc: object, *, max_width_pt: float) -> None:
             continue
 
 
+# 関数: `_table_width_points` の入出力契約と処理意図を定義する。
+
 def _table_width_points(table: object) -> Optional[float]:
     try:
         cols = int(table.Columns.Count)
@@ -1043,6 +1092,8 @@ def _table_width_points(table: object) -> Optional[float]:
     return total
 
 
+# 関数: `_fit_tables_to_page` の入出力契約と処理意図を定義する。
+
 def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
     try:
         count = int(doc.Tables.Count)
@@ -1057,6 +1108,8 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
             doc.Repaginate()
         except Exception:
             pass
+
+    # 関数: `_normalize_table_frame` の入出力契約と処理意図を定義する。
 
     def _normalize_table_frame(t: object) -> None:
         try:
@@ -1076,6 +1129,8 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
             t.Rows.WrapAroundText = False
         except Exception:
             pass
+
+    # 関数: `_insert_break_opportunities_in_table_text` の入出力契約と処理意図を定義する。
 
     def _insert_break_opportunities_in_table_text(t: object) -> None:
         """
@@ -1112,6 +1167,8 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
                 f.Execute(sep, False, False, False, False, False, True, 1, False, sep + zws, 2)
             except Exception:
                 continue
+
+    # 関数: `_freeze_table_layout` の入出力契約と処理意図を定義する。
 
     def _freeze_table_layout(t: object) -> None:
         # Freeze widths so Word won't re-expand the table when opened interactively.
@@ -1196,6 +1253,8 @@ def _fit_tables_to_page(doc: object, *, max_width_pt: float) -> None:
     _repaginate()
 
 
+# 関数: `_disable_table_borders` の入出力契約と処理意図を定義する。
+
 def _disable_table_borders(doc: object) -> int:
     """
     Remove table borders in the exported DOCX.
@@ -1228,16 +1287,21 @@ def _disable_table_borders(doc: object) -> int:
     return n
 
 
+# 関数: `_normalize_heading_style_sizes` の入出力契約と処理意図を定義する。
+
 def _normalize_heading_style_sizes(doc: object) -> int:
     """
     Normalize Heading 4/5 sizes so subitems don't become unreadably small.
     """
 
+    # 関数: `_get_style` の入出力契約と処理意図を定義する。
     def _get_style(name: str) -> Optional[object]:
         try:
             return doc.Styles(name)
         except Exception:
             return None
+
+    # 関数: `_first_style` の入出力契約と処理意図を定義する。
 
     def _first_style(names: Sequence[str]) -> Optional[object]:
         for name in names:
@@ -1264,6 +1328,7 @@ def _normalize_heading_style_sizes(doc: object) -> int:
 
     touched = 0
 
+    # 関数: `_safe_size` の入出力契約と処理意図を定義する。
     def _safe_size(val: object) -> Optional[float]:
         try:
             x = float(val)
@@ -1331,6 +1396,8 @@ def _normalize_heading_style_sizes(doc: object) -> int:
     return touched
 
 
+# 関数: `_tighten_equation_paragraph_spacing` の入出力契約と処理意図を定義する。
+
 def _tighten_equation_paragraph_spacing(doc: object) -> int:
     """
     Reduce "looks like missing equations" whitespace around Word native equations (OMML).
@@ -1373,6 +1440,8 @@ def _tighten_equation_paragraph_spacing(doc: object) -> int:
     return touched
 
 
+# 関数: `_tighten_spacing_around_equations` の入出力契約と処理意図を定義する。
+
 def _tighten_spacing_around_equations(doc: object) -> int:
     """
     Tighten whitespace in the *adjacent* paragraphs around OMML blocks.
@@ -1385,6 +1454,8 @@ def _tighten_spacing_around_equations(doc: object) -> int:
         n = int(paras.Count)
     except Exception:
         return 0
+
+    # 関数: `_is_any_heading` の入出力契約と処理意図を定義する。
 
     def _is_any_heading(style_name: str) -> bool:
         for level in (1, 2, 3, 4, 5, 6):
@@ -1454,6 +1525,8 @@ def _tighten_spacing_around_equations(doc: object) -> int:
     return touched
 
 
+# 関数: `_patch_docx_callout_punctuation` の入出力契約と処理意図を定義する。
+
 def _patch_docx_callout_punctuation(docx_path: Path) -> int:
     """
     Patch DOCX XML directly to restore fullwidth punctuation for key callouts.
@@ -1482,6 +1555,8 @@ def _patch_docx_callout_punctuation(docx_path: Path) -> int:
             if "要請（P内部）帰結" in xml:
                 xml = xml.replace("要請（P内部）帰結", "要請（P内部）→帰結")
                 n += 1
+
+            # 関数: `_replace_colon_after_marker` の入出力契約と処理意図を定義する。
 
             def _replace_colon_after_marker(text: str, marker: str) -> Tuple[str, int]:
                 touched = 0
@@ -1537,6 +1612,8 @@ def _patch_docx_callout_punctuation(docx_path: Path) -> int:
         return 0
 
 
+# 関数: `_patch_docx_force_white_background` の入出力契約と処理意図を定義する。
+
 def _patch_docx_force_white_background(docx_path: Path) -> int:
     """
     Force a white background in the exported DOCX.
@@ -1587,6 +1664,8 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
                 except Exception:
                     xml = xml_bytes.decode("utf-8", errors="ignore")
 
+                # 関数: `_repl_shd` の入出力契約と処理意図を定義する。
+
                 def _repl_shd(m: re.Match[str]) -> str:
                     fill_raw = m.group(2) or ""
                     fill = fill_raw.strip().upper()
@@ -1631,6 +1710,8 @@ def _patch_docx_force_white_background(docx_path: Path) -> int:
         return 0
 
 
+# 関数: `_style_name_local` の入出力契約と処理意図を定義する。
+
 def _style_name_local(paragraph: object) -> str:
     try:
         style = paragraph.Range.Style
@@ -1641,6 +1722,8 @@ def _style_name_local(paragraph: object) -> str:
     except Exception:
         return ""
 
+
+# 関数: `_is_heading` の入出力契約と処理意図を定義する。
 
 def _is_heading(style_name: str, level: int) -> bool:
     s = (style_name or "").strip()
@@ -1660,6 +1743,8 @@ def _is_heading(style_name: str, level: int) -> bool:
 
     return s.endswith(f"見出し {level}")
 
+
+# 関数: `_apply_page_breaks_for_cards` の入出力契約と処理意図を定義する。
 
 def _apply_page_breaks_for_cards(doc: object) -> None:
     """
@@ -1719,6 +1804,8 @@ def _apply_page_breaks_for_cards(doc: object) -> None:
         except Exception:
             continue
 
+
+# 関数: `_apply_page_breaks_for_headings` の入出力契約と処理意図を定義する。
 
 def _apply_page_breaks_for_headings(doc: object, *, levels: Sequence[int]) -> None:
     """
@@ -1799,6 +1886,8 @@ def _apply_page_breaks_for_headings(doc: object, *, levels: Sequence[int]) -> No
             continue
 
 
+# 関数: `_inlineize_picture_shapes` の入出力契約と処理意図を定義する。
+
 def _inlineize_picture_shapes(doc: object) -> int:
     """
     Word's HTML import sometimes creates floating Shapes for pictures (especially when
@@ -1835,6 +1924,8 @@ def _inlineize_picture_shapes(doc: object) -> int:
     return n
 
 
+# 関数: `_scale_equation_images` の入出力契約と処理意図を定義する。
+
 def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
     """
     Word の HTML 取り込みは、PNG の DPI を尊重して「物理サイズ」を決めるため、
@@ -1847,6 +1938,8 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
     # 条件分岐: `not (s > 0.0) or abs(s - 1.0) < 1e-9` を満たす経路を評価する。
     if not (s > 0.0) or abs(s - 1.0) < 1e-9:
         return 0
+
+    # 関数: `_has_alt` の入出力契約と処理意図を定義する。
 
     def _has_alt(v: object) -> bool:
         try:
@@ -1962,6 +2055,8 @@ def _scale_equation_images(doc: object, *, alt_text: str, scale: float) -> int:
     return n
 
 
+# 関数: `_scale_word_equations` の入出力契約と処理意図を定義する。
+
 def _scale_word_equations(doc: object, *, scale: float) -> int:
     """
     Word のネイティブ数式（OMML）のフォントサイズを一律スケールする。
@@ -2013,6 +2108,8 @@ def _scale_word_equations(doc: object, *, scale: float) -> int:
 
     return n
 
+
+# 関数: `_postprocess_docx` の入出力契約と処理意図を定義する。
 
 def _postprocess_docx(
     word: object,
@@ -2124,6 +2221,8 @@ def _postprocess_docx(
             pass
 
 
+# 関数: `_convert_html_to_docx` の入出力契約と処理意図を定義する。
+
 def _convert_html_to_docx(
     word: object,
     html_in: Path,
@@ -2182,6 +2281,8 @@ def _convert_html_to_docx(
 
     raise RuntimeError("DOCX creation timed out (file not materialized)")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Convert a local HTML file to DOCX (Microsoft Word automation).")

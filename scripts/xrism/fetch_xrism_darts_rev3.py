@@ -47,9 +47,12 @@ DEFAULT_BASE_URL = "https://data.darts.isas.jaxa.jp/pub/xrism/data/obs/rev3/"
 _MANIFEST_NAME = "manifest.json"
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -58,9 +61,13 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
@@ -68,6 +75,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -77,6 +86,8 @@ def _sha256_file(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_http_get_text` の入出力契約と処理意図を定義する。
 
 def _http_get_text(url: str) -> str:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -88,6 +99,8 @@ def _http_get_text(url: str) -> str:
     r.encoding = r.encoding or "utf-8"
     return r.text
 
+
+# 関数: `_http_get_stream` の入出力契約と処理意図を定義する。
 
 def _http_get_stream(url: str) -> requests.Response:  # type: ignore[name-defined]
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -102,6 +115,7 @@ def _http_get_stream(url: str) -> requests.Response:  # type: ignore[name-define
 _HREF_RE = re.compile(r'href=\"(?P<href>[^\"]+)\"', flags=re.IGNORECASE)
 
 
+# 関数: `_list_dir` の入出力契約と処理意図を定義する。
 def _list_dir(url: str) -> List[Tuple[str, bool]]:
     """
     Return list of (href, is_dir) under an Apache index directory.
@@ -141,6 +155,8 @@ def _list_dir(url: str) -> List[Tuple[str, bool]]:
     return uniq
 
 
+# 関数: `_obsid_type` の入出力契約と処理意図を定義する。
+
 def _obsid_type(obsid: str) -> str:
     s = str(obsid).strip()
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -154,6 +170,8 @@ def _obsid_type(obsid: str) -> str:
 
     return s[0]
 
+
+# 関数: `_safe_rel_under_obsid` の入出力契約と処理意図を定義する。
 
 def _safe_rel_under_obsid(url: str, *, obsid: str) -> Optional[PurePosixPath]:
     """
@@ -179,6 +197,8 @@ def _safe_rel_under_obsid(url: str, *, obsid: str) -> Optional[PurePosixPath]:
     return PurePosixPath(rel)
 
 
+# 関数: `_matches_any` の入出力契約と処理意図を定義する。
+
 def _matches_any(patterns: Sequence[re.Pattern[str]], s: str) -> bool:
     # 条件分岐: `not patterns` を満たす経路を評価する。
     if not patterns:
@@ -186,6 +206,8 @@ def _matches_any(patterns: Sequence[re.Pattern[str]], s: str) -> bool:
 
     return any(p.search(s) for p in patterns)
 
+
+# 関数: `_download_file` の入出力契約と処理意図を定義する。
 
 def _download_file(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -208,6 +230,8 @@ def _download_file(url: str, *, dst: Path, force: bool) -> Dict[str, Any]:
 
     return {"status": "downloaded", "path": _rel(dst), "bytes": int(n), "sha256": h.hexdigest()}
 
+
+# 関数: `_scope_prefixes` の入出力契約と処理意図を定義する。
 
 def _scope_prefixes(scopes: Sequence[str]) -> List[str]:
     pref: List[str] = []
@@ -249,6 +273,8 @@ def _scope_prefixes(scopes: Sequence[str]) -> List[str]:
 
     return out
 
+
+# 関数: `_traverse_files` の入出力契約と処理意図を定義する。
 
 def _traverse_files(base_url: str, *, obsid: str, allow_prefixes: Sequence[str]) -> List[str]:
     """
@@ -292,6 +318,8 @@ def _traverse_files(base_url: str, *, obsid: str, allow_prefixes: Sequence[str])
     return files
 
 
+# 関数: `_read_target_catalog_obsids` の入出力契約と処理意図を定義する。
+
 def _read_target_catalog_obsids(path: Path) -> List[str]:
     try:
         j = json.loads(path.read_text(encoding="utf-8"))
@@ -316,6 +344,8 @@ def _read_target_catalog_obsids(path: Path) -> List[str]:
 
     return sorted(set(obsids))
 
+
+# 関数: `fetch_one` の入出力契約と処理意図を定義する。
 
 def fetch_one(
     *,
@@ -467,6 +497,8 @@ def fetch_one(
     _write_json(out_path, manifest)
     return manifest
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

@@ -18,9 +18,12 @@ from scripts.eht.eht_shadow_compare import _kerr_shadow_diameter_coeff_avg_width
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -38,14 +41,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_load_beta` の入出力契約と処理意図を定義する。
 
 def _load_beta(root: Path) -> Tuple[float, str]:
     eht_json = root / "data" / "eht" / "eht_black_holes.json"
@@ -80,6 +89,8 @@ def _load_beta(root: Path) -> Tuple[float, str]:
     return float(beta), beta_source
 
 
+# 関数: `_parse_object_constraints` の入出力契約と処理意図を定義する。
+
 def _parse_object_constraints(o: Dict[str, Any]) -> Dict[str, Any]:
     key = str(o.get("key") or "")
     name = str(o.get("display_name") or key or "unknown")
@@ -111,6 +122,8 @@ def _parse_object_constraints(o: Dict[str, Any]) -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_finite_minmax_with_location` の入出力契約と処理意図を定義する。
 
 def _finite_minmax_with_location(
     coeff_grid: List[List[float]],
@@ -165,6 +178,8 @@ def _finite_minmax_with_location(
         "coeff_max_at": {"a_star": float(a_at_max), "inc_deg": float(inc_at_max)},
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Kerr shadow coefficient grid (reference systematic; not an EHT emission fit).")

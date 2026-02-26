@@ -21,22 +21,31 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_block` の入出力契約と処理意図を定義する。
 
 def _find_block(text: str, needle: str, *, window: int = 1100) -> Optional[str]:
     i = text.find(needle)
@@ -49,6 +58,8 @@ def _find_block(text: str, needle: str, *, window: int = 1100) -> Optional[str]:
     return text[a:b]
 
 
+# 関数: `_unwrap_multirow_cell` の入出力契約と処理意図を定義する。
+
 def _unwrap_multirow_cell(s: str) -> str:
     s = str(s).strip()
     m = re.match(r"^\\multirow\{[^}]+\}\{[^}]+\}\{(.+)\}$", s)
@@ -59,6 +70,8 @@ def _unwrap_multirow_cell(s: str) -> str:
     return s
 
 
+# 関数: `_tex_to_plain` の入出力契約と処理意図を定義する。
+
 def _tex_to_plain(s: str) -> str:
     s = str(s)
     s = s.replace("{", "").replace("}", "")
@@ -66,6 +79,8 @@ def _tex_to_plain(s: str) -> str:
     s = re.sub(r"\s+", " ", s)
     return s.strip()
 
+
+# 関数: `_parse_pm_tuple` の入出力契約と処理意図を定義する。
 
 def _parse_pm_tuple(s: str) -> Optional[Tuple[float, float]]:
     """
@@ -100,9 +115,13 @@ def _parse_pm_tuple(s: str) -> Optional[Tuple[float, float]]:
     return (abs(plus), abs(minus))
 
 
+# 関数: `_sym_sigma` の入出力契約と処理意図を定義する。
+
 def _sym_sigma(pm: Tuple[float, float]) -> float:
     return 0.5 * (float(pm[0]) + float(pm[1]))
 
+
+# クラス: `AlphaCalRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class AlphaCalRow:
@@ -115,6 +134,8 @@ class AlphaCalRow:
     sigma_alpha_tot_pm: Tuple[float, float]
     source_anchor: Dict[str, Any]
 
+
+# 関数: `_parse_alphacal_table` の入出力契約と処理意図を定義する。
 
 def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
     label = "\\label{tab:alphacal}"
@@ -162,6 +183,7 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
     buf = ""
     buf_start_lineno: Optional[int] = None
 
+    # 関数: `_flush_row` の入出力契約と処理意図を定義する。
     def _flush_row(row_text: str, *, lineno: int) -> None:
         nonlocal cur_class, rows
         t = str(row_text).strip()
@@ -246,6 +268,8 @@ def _parse_alphacal_table(tex: str, *, source_path: Path) -> List[AlphaCalRow]:
     return rows
 
 
+# 関数: `_summary` の入出力契約と処理意図を定義する。
+
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     x = np.array(list(values), dtype=float)
     x = x[np.isfinite(x)]
@@ -262,6 +286,8 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
         "max": float(np.max(x)),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

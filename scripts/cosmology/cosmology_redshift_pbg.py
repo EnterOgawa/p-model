@@ -42,6 +42,7 @@ _MPC_M = 3.085_677_581_491_367_3e22  # m
 _GYR_S = 1.0e9 * 365.25 * 24.0 * 3600.0
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -67,9 +68,13 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_h0_si_from_km_s_mpc` の入出力契約と処理意図を定義する。
+
 def _h0_si_from_km_s_mpc(h0_km_s_mpc: float) -> float:
     return (float(h0_km_s_mpc) * 1000.0) / _MPC_M
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(

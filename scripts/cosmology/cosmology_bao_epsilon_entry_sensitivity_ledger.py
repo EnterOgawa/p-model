@@ -42,6 +42,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -66,10 +67,14 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     with path.open("r", encoding="utf-8") as f:
         return json.load(f)
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, data: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,6 +82,8 @@ def _write_json(path: Path, data: Dict[str, Any]) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
         f.write("\n")
 
+
+# 関数: `_sigma_from_err` の入出力契約と処理意図を定義する。
 
 def _sigma_from_err(err_lo: float, err_hi: float) -> Optional[float]:
     # 条件分岐: `not isinstance(err_lo, (int, float)) or not isinstance(err_hi, (int, float))` を満たす経路を評価する。
@@ -95,6 +102,8 @@ def _sigma_from_err(err_lo: float, err_hi: float) -> Optional[float]:
 
     return s
 
+
+# 関数: `_combine_sigma` の入出力契約と処理意図を定義する。
 
 def _combine_sigma(s1: Optional[float], s2: Optional[float]) -> Optional[float]:
     # 条件分岐: `s1 is None and s2 is None` を満たす経路を評価する。
@@ -119,6 +128,8 @@ def _combine_sigma(s1: Optional[float], s2: Optional[float]) -> Optional[float]:
     return s
 
 
+# クラス: `MaxDelta` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class MaxDelta:
     abs_sigma: Optional[float]
@@ -126,9 +137,13 @@ class MaxDelta:
     where: Dict[str, Any]
 
 
+# 関数: `_max_delta_init` の入出力契約と処理意図を定義する。
+
 def _max_delta_init() -> MaxDelta:
     return MaxDelta(abs_sigma=None, abs_delta_eps=None, where={})
 
+
+# 関数: `_max_delta_update` の入出力契約と処理意図を定義する。
 
 def _max_delta_update(cur: MaxDelta, *, abs_sigma: Optional[float], abs_delta_eps: Optional[float], where: Dict[str, Any]) -> MaxDelta:
     # Prefer abs_sigma as the primary ordering; fall back to abs_delta_eps.
@@ -171,6 +186,8 @@ def _max_delta_update(cur: MaxDelta, *, abs_sigma: Optional[float], abs_delta_ep
 
     return cur
 
+
+# 関数: `_summarize_eps_map_sensitivity` の入出力契約と処理意図を定義する。
 
 def _summarize_eps_map_sensitivity(
     metrics: Dict[str, Any],
@@ -250,6 +267,8 @@ def _summarize_eps_map_sensitivity(
     }
 
 
+# 関数: `_summarize_coordinate_spec_sensitivity` の入出力契約と処理意図を定義する。
+
 def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str, Any]:
     base_tag = metrics.get("inputs", {}).get("base_out_tag")
     variant_tags = metrics.get("inputs", {}).get("variant_out_tags", [])
@@ -257,6 +276,8 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
     # 条件分岐: `not isinstance(base_tag, str) or not isinstance(variant_tags, list) or not is...` を満たす経路を評価する。
     if not isinstance(base_tag, str) or not isinstance(variant_tags, list) or not isinstance(points, list):
         return {"name": "DESI coordinate spec sensitivity", "status": "missing", "note": "unexpected schema"}
+
+    # 関数: `key` の入出力契約と処理意図を定義する。
 
     def key(p: Dict[str, Any]) -> Tuple[str, float, float, str]:
         return (str(p.get("dist")), float(p.get("z_min")), float(p.get("z_max")), str(p.get("out_tag")))
@@ -339,6 +360,8 @@ def _summarize_coordinate_spec_sensitivity(metrics: Dict[str, Any]) -> Dict[str,
     }
 
 
+# 関数: `_summarize_peakfit_settings_sensitivity` の入出力契約と処理意図を定義する。
+
 def _summarize_peakfit_settings_sensitivity(metrics: Dict[str, Any]) -> Dict[str, Any]:
     scenarios = metrics.get("results", [])
     # 条件分岐: `not isinstance(scenarios, list)` を満たす経路を評価する。
@@ -369,6 +392,8 @@ def _summarize_peakfit_settings_sensitivity(metrics: Dict[str, Any]) -> Dict[str
 
     if base_case is None:
         return {"name": "DESI peakfit settings sensitivity", "status": "missing", "note": "no scenarios"}
+
+    # 関数: `bkey` の入出力契約と処理意図を定義する。
 
     def bkey(r: Dict[str, Any]) -> Tuple[str, str]:
         # (dist, z_range_key)
@@ -449,6 +474,8 @@ def _summarize_peakfit_settings_sensitivity(metrics: Dict[str, Any]) -> Dict[str
     }
 
 
+# 関数: `_summarize_desi_promotion_check` の入出力契約と処理意図を定義する。
+
 def _summarize_desi_promotion_check(d: Dict[str, Any]) -> Dict[str, Any]:
     result = d.get("result", {})
     return {
@@ -461,6 +488,8 @@ def _summarize_desi_promotion_check(d: Dict[str, Any]) -> Dict[str, Any]:
         "target_dist": d.get("params", {}).get("target_dist"),
     }
 
+
+# 関数: `_plot_max_sigmas` の入出力契約と処理意図を定義する。
 
 def _plot_max_sigmas(studies: List[Dict[str, Any]], out_png: Path) -> Optional[str]:
     # Keep only rows with finite abs_sigma.
@@ -498,6 +527,8 @@ def _plot_max_sigmas(studies: List[Dict[str, Any]], out_png: Path) -> Optional[s
     plt.close(fig)
     return str(out_png)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     p = argparse.ArgumentParser()

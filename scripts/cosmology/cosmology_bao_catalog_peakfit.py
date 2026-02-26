@@ -49,6 +49,7 @@ from scripts.summary import worklog  # noqa: E402
 from scripts.cosmology import cosmology_bao_xi_multipole_peakfit as _peakfit  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -74,6 +75,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_resolve_wsl_windows_path` の入出力契約と処理意図を定義する。
+
 def _resolve_wsl_windows_path(p: str) -> Path:
     """
     Resolve a path stored by WSL runs (e.g. /mnt/c/...) into a Windows path.
@@ -98,10 +101,14 @@ def _resolve_wsl_windows_path(p: str) -> Path:
     return Path(s)
 
 
+# 関数: `_iter_metrics_files` の入出力契約と処理意図を定義する。
+
 def _iter_metrics_files() -> Iterable[Path]:
     out_dir = _ROOT / "output" / "private" / "cosmology"
     yield from sorted(out_dir.glob("cosmology_bao_xi_from_catalogs_*_metrics.json"))
 
+
+# 関数: `_sanitize_out_tag` の入出力契約と処理意図を定義する。
 
 def _sanitize_out_tag(tag: str) -> str:
     t = str(tag).strip()
@@ -120,6 +127,8 @@ def _sanitize_out_tag(tag: str) -> str:
     s = "".join(out).strip("._-")
     return s[:80]
 
+
+# 関数: `_estimator_spec_hash_from_params` の入出力契約と処理意図を定義する。
 
 def _estimator_spec_hash_from_params(params: Dict[str, Any]) -> str:
     """
@@ -167,6 +176,8 @@ def _estimator_spec_hash_from_params(params: Dict[str, Any]) -> str:
     return hashlib.sha256(blob).hexdigest()
 
 
+# 関数: `_parse_zbin_id` の入出力契約と処理意図を定義する。
+
 def _parse_zbin_id(z_bin: str) -> Optional[int]:
     zb = str(z_bin).strip().lower()
     # 条件分岐: `not zb or zb == "none"` を満たす経路を評価する。
@@ -190,6 +201,8 @@ def _parse_zbin_id(z_bin: str) -> Optional[int]:
 
     return None
 
+
+# 関数: `_ross_cov_inv_for_s` の入出力契約と処理意図を定義する。
 
 def _ross_cov_inv_for_s(
     *,
@@ -269,6 +282,8 @@ def _ross_cov_inv_for_s(
     return cov_inv, cov_path
 
 
+# 関数: `_satpathy_cov_inv_for_s` の入出力契約と処理意図を定義する。
+
 def _satpathy_cov_inv_for_s(
     *,
     satpathy_dir: Path,
@@ -343,6 +358,8 @@ def _satpathy_cov_inv_for_s(
     return cov_inv, cov_path
 
 
+# クラス: `CatalogCase` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class CatalogCase:
     sample: str
@@ -362,11 +379,14 @@ class CatalogCase:
     npz_path: Path
     metrics_path: Path
 
+    # 関数: `label` の入出力契約と処理意図を定義する。
     @property
     def label(self) -> str:
         ztag = f", {self.z_bin}" if self.z_bin != "none" else ""
         return f"{self.sample}/{self.caps}/{self.dist}{ztag}"
 
+
+# 関数: `_load_cases` の入出力契約と処理意図を定義する。
 
 def _load_cases(
     *,
@@ -473,6 +493,8 @@ def _load_cases(
     return cases
 
 
+# 関数: `_ensure_2d` の入出力契約と処理意図を定義する。
+
 def _ensure_2d(x: np.ndarray, *, n0: int, n1: int, name: str) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     # 条件分岐: `x.size == 0` を満たす経路を評価する。
@@ -500,10 +522,14 @@ def _ensure_2d(x: np.ndarray, *, n0: int, n1: int, name: str) -> np.ndarray:
     raise ValueError(f"{name} invalid ndim: {x.ndim}")
 
 
+# 関数: `_p2` の入出力契約と処理意図を定義する。
+
 def _p2(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=float)
     return 0.5 * (3.0 * mu * mu - 1.0)
 
+
+# 関数: `_approx_var_from_paircounts` の入出力契約と処理意図を定義する。
 
 def _approx_var_from_paircounts(
     *,
@@ -586,6 +612,8 @@ def _approx_var_from_paircounts(
     return var_xi0, var_xi2
 
 
+# 関数: `_diag_cov_inv` の入出力契約と処理意図を定義する。
+
 def _diag_cov_inv(var0: np.ndarray, var2: np.ndarray, *, eps: float = 1e-30) -> np.ndarray:
     var0 = np.asarray(var0, dtype=float).reshape(-1)
     var2 = np.asarray(var2, dtype=float).reshape(-1)
@@ -598,6 +626,8 @@ def _diag_cov_inv(var0: np.ndarray, var2: np.ndarray, *, eps: float = 1e-30) -> 
     d = np.concatenate([inv0, inv2], axis=0)
     return np.diag(d)
 
+
+# 関数: `_cov_shrink_to_diag` の入出力契約と処理意図を定義する。
 
 def _cov_shrink_to_diag(cov: np.ndarray, *, lam: float) -> np.ndarray:
     """
@@ -619,6 +649,8 @@ def _cov_shrink_to_diag(cov: np.ndarray, *, lam: float) -> np.ndarray:
     d = np.diag(np.diag(cov))
     return (1.0 - lam) * cov + lam * d
 
+
+# 関数: `_cov_band_by_s_index` の入出力契約と処理意図を定義する。
 
 def _cov_band_by_s_index(
     cov: np.ndarray,
@@ -694,6 +726,8 @@ def _cov_band_by_s_index(
     return cov_banded, {"keep_fraction": keep_fraction, "kept": kept, "zeroed": zeroed}
 
 
+# 関数: `_cov_zero_xi02_cross` の入出力契約と処理意図を定義する。
+
 def _cov_zero_xi02_cross(
     cov: np.ndarray,
     *,
@@ -722,6 +756,8 @@ def _cov_zero_xi02_cross(
     same_ell = ell[:, None] == ell[None, :]
     return np.where(same_ell, cov, 0.0)
 
+
+# 関数: `_ledoit_wolf_shrinkage_to_diag` の入出力契約と処理意図を定義する。
 
 def _ledoit_wolf_shrinkage_to_diag(y: np.ndarray) -> float:
     """
@@ -784,6 +820,8 @@ def _ledoit_wolf_shrinkage_to_diag(y: np.ndarray) -> float:
     return lam
 
 
+# 関数: `_status_from_abs_sigma` の入出力契約と処理意図を定義する。
+
 def _status_from_abs_sigma(abs_sigma: float | None, *, ok_max: float, mixed_max: float) -> str:
     """
     Convert an (approximately) z-scored metric to ok/mixed/ng.
@@ -812,6 +850,8 @@ def _status_from_abs_sigma(abs_sigma: float | None, *, ok_max: float, mixed_max:
 
     return "ng"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: BAO catalog-based smooth+peak peakfit (alpha, eps).")

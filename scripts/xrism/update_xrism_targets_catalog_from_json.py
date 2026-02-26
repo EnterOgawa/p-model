@@ -30,9 +30,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -52,6 +55,8 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     return rows
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = ["obsid", "target_name", "role", "z_sys", "instrument_prefer", "comment", "remote_cat_hint"]
@@ -61,6 +66,8 @@ def _write_csv(path: Path, rows: List[Dict[str, str]]) -> None:
         for r in rows:
             w.writerow({k: (r.get(k) or "") for k in fieldnames})
 
+
+# 関数: `_load_target_catalog_json` の入出力契約と処理意図を定義する。
 
 def _load_target_catalog_json(path: Path) -> List[Dict[str, Any]]:
     try:
@@ -81,6 +88,8 @@ def _load_target_catalog_json(path: Path) -> List[Dict[str, Any]]:
 
     return out
 
+
+# 関数: `_default_comment` の入出力契約と処理意図を定義する。
 
 def _default_comment(t: Dict[str, Any]) -> str:
     obj = str(t.get("object_name") or "").strip()
@@ -111,6 +120,8 @@ def _default_comment(t: Dict[str, Any]) -> str:
     s = "; ".join(parts)
     return f"{obj}: {s}".strip(": ").strip()
 
+
+# 関数: `update_targets_csv` の入出力契約と処理意図を定義する。
 
 def update_targets_csv(*, catalog_json: Path, targets_csv: Path, overwrite: bool) -> Dict[str, Any]:
     json_targets = _load_target_catalog_json(catalog_json)
@@ -201,6 +212,8 @@ def update_targets_csv(*, catalog_json: Path, targets_csv: Path, overwrite: bool
         "metrics": {"n_added": n_added, "n_updated": n_updated, "n_total": len(out_rows)},
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Iterable[str]] = None) -> int:
     p = argparse.ArgumentParser()

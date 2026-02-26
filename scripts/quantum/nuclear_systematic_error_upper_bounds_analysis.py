@@ -15,6 +15,7 @@ STEP = "7.16.19"
 Z_GATE = 3.0
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(value: Any) -> float:
     try:
         out = float(value)
@@ -24,6 +25,8 @@ def _parse_float(value: Any) -> float:
     return out if math.isfinite(out) else float("nan")
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -32,6 +35,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -49,6 +54,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -63,6 +70,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow([row.get(h) for h in headers])
 
 
+# 関数: `_sigma_sys_required_for_gate` の入出力契約と処理意図を定義する。
+
 def _sigma_sys_required_for_gate(*, residual_scale: float, sigma_stat: float, z_gate: float = Z_GATE) -> float:
     # 条件分岐: `not (math.isfinite(residual_scale) and math.isfinite(sigma_stat) and residual...` を満たす経路を評価する。
     if not (math.isfinite(residual_scale) and math.isfinite(sigma_stat) and residual_scale > 0.0 and sigma_stat >= 0.0):
@@ -75,6 +84,8 @@ def _sigma_sys_required_for_gate(*, residual_scale: float, sigma_stat: float, z_
 
     return float(math.sqrt(max(threshold * threshold - sigma_stat * sigma_stat, 0.0)))
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(
     *,
@@ -133,6 +144,8 @@ def _build_figure(
     fig.savefig(out_png)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

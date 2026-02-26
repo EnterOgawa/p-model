@@ -20,9 +20,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -33,10 +36,14 @@ def _sha256(path: Path) -> str:
     return h.hexdigest().upper()
 
 
+# 関数: `_read_head` の入出力契約と処理意図を定義する。
+
 def _read_head(path: Path, n: int = 8) -> bytes:
     with open(path, "rb") as f:
         return f.read(n)
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -54,6 +61,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     tmp.replace(dst)
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
+
+# 関数: `_safe_extractall` の入出力契約と処理意図を定義する。
 
 def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -74,6 +83,8 @@ def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
 
     tf.extractall(out_dir)
 
+
+# 関数: `_extract_src` の入出力契約と処理意図を定義する。
 
 def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
     # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
@@ -114,6 +125,8 @@ def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
         return False
 
 
+# 関数: `_count_tex_files` の入出力契約と処理意図を定義する。
+
 def _count_tex_files(dir_path: Path) -> Optional[int]:
     # 条件分岐: `not (dir_path.exists() and dir_path.is_dir())` を満たす経路を評価する。
     if not (dir_path.exists() and dir_path.is_dir()):
@@ -121,6 +134,8 @@ def _count_tex_files(dir_path: Path) -> Optional[int]:
 
     return sum(1 for _ in dir_path.rglob("*.tex"))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(

@@ -11,12 +11,15 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 
+# クラス: `FileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FileSpec:
     url: str
     relpath: str
     headers: dict[str, str] | None = None
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -31,6 +34,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, headers: dict[str, str] | None = None) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -69,6 +74,8 @@ def _download(url: str, out_path: Path, *, headers: dict[str, str] | None = None
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_safe_extract_tar` の入出力契約と処理意図を定義する。
+
 def _safe_extract_tar(tar_path: Path, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     with tarfile.open(tar_path, "r:*") as tf:
@@ -81,11 +88,15 @@ def _safe_extract_tar(tar_path: Path, out_dir: Path) -> None:
         tf.extractall(out_dir)
 
 
+# 関数: `_safe_filename` の入出力契約と処理意図を定義する。
+
 def _safe_filename(name: str) -> str:
     # Keep it stable and filesystem-friendly (Windows).
     s = re.sub(r"[^A-Za-z0-9._-]+", "_", name.strip())
     return s[:180] if s else "download"
 
+
+# 関数: `_maybe_fetch_aps_supplemental` の入出力契約と処理意図を定義する。
 
 def _maybe_fetch_aps_supplemental(*, base_dir: Path, url: str) -> dict[str, object]:
     """
@@ -187,6 +198,8 @@ def _maybe_fetch_aps_supplemental(*, base_dir: Path, url: str) -> dict[str, obje
     status["ok"] = True
     return status
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -302,6 +315,7 @@ def main() -> None:
         "files": [],
     }
 
+    # 関数: `add_file` の入出力契約と処理意図を定義する。
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item = {
             "url": url,

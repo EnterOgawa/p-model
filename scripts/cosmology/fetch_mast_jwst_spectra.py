@@ -63,9 +63,12 @@ _DOWNLOAD_URL = "https://mast.stsci.edu/api/v0.1/Download/file"
 _REQ_TIMEOUT = (30, 600)  # (connect, read)
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_mjd_to_utc_iso` の入出力契約と処理意図を定義する。
 
 def _mjd_to_utc_iso(mjd: float) -> str:
     # MJD epoch: 1858-11-17 00:00:00 UTC
@@ -73,10 +76,14 @@ def _mjd_to_utc_iso(mjd: float) -> str:
     return (epoch + timedelta(days=float(mjd))).isoformat()
 
 
+# 関数: `_utc_to_mjd` の入出力契約と処理意図を定義する。
+
 def _utc_to_mjd(dt: datetime) -> float:
     epoch = datetime(1858, 11, 17, tzinfo=timezone.utc)
     return (dt - epoch).total_seconds() / 86400.0
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -86,6 +93,8 @@ def _sha256(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -97,6 +106,8 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_slugify` の入出力契約と処理意図を定義する。
 
 def _slugify(s: str) -> str:
     s = (s or "").strip().lower()
@@ -115,6 +126,8 @@ def _slugify(s: str) -> str:
     return slug or "target"
 
 
+# 関数: `_try_read_json` の入出力契約と処理意図を定義する。
+
 def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
     try:
         obj = json.loads(path.read_text(encoding="utf-8"))
@@ -123,6 +136,8 @@ def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
 
     return obj if isinstance(obj, dict) else None
 
+
+# 関数: `_summarize_z_estimate` の入出力契約と処理意図を定義する。
 
 def _summarize_z_estimate(z: Dict[str, Any], out_json: Path) -> Dict[str, Any]:
     best_in = z.get("best") if isinstance(z.get("best"), dict) else {}
@@ -143,6 +158,8 @@ def _summarize_z_estimate(z: Dict[str, Any], out_json: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_summarize_z_confirmed` の入出力契約と処理意図を定義する。
+
 def _summarize_z_confirmed(z: Dict[str, Any], out_json: Path) -> Dict[str, Any]:
     out: Dict[str, Any] = {
         "ok": bool(z.get("ok")),
@@ -157,6 +174,8 @@ def _summarize_z_confirmed(z: Dict[str, Any], out_json: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_load_z_estimate_summary` の入出力契約と処理意図を定義する。
+
 def _load_z_estimate_summary(out_json: Path) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not out_json.exists()` を満たす経路を評価する。
     if not out_json.exists():
@@ -169,6 +188,8 @@ def _load_z_estimate_summary(out_json: Path) -> Optional[Dict[str, Any]]:
 
     return _summarize_z_estimate(obj, out_json)
 
+
+# 関数: `_load_z_confirmed_summary` の入出力契約と処理意図を定義する。
 
 def _load_z_confirmed_summary(out_json: Path) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not out_json.exists()` を満たす経路を評価する。
@@ -183,6 +204,8 @@ def _load_z_confirmed_summary(out_json: Path) -> Optional[Dict[str, Any]]:
     return _summarize_z_confirmed(obj, out_json)
 
 
+# 関数: `_mast_invoke` の入出力契約と処理意図を定義する。
+
 def _mast_invoke(request_obj: Dict[str, Any]) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
     if requests is None:
@@ -195,6 +218,8 @@ def _mast_invoke(request_obj: Dict[str, Any]) -> Dict[str, Any]:
     except Exception as e:
         raise RuntimeError(f"MAST returned non-JSON response: {e}") from e
 
+
+# 関数: `_mast_download` の入出力契約と処理意図を定義する。
 
 def _mast_download(uri: str, dst: Path) -> Dict[str, Any]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -244,6 +269,8 @@ def _mast_download(uri: str, dst: Path) -> Dict[str, Any]:
 
         return {"ok": False, "status_code": None, "reason": f"exception: {type(e).__name__}: {e}"}
 
+
+# 関数: `_query_jwst_obs_by_target` の入出力契約と処理意図を定義する。
 
 def _query_jwst_obs_by_target(
     target_name: str,
@@ -296,6 +323,8 @@ def _query_jwst_obs_by_target(
     rows = obj.get("data") or []
     return [r for r in rows if isinstance(r, dict)]
 
+
+# 関数: `_query_jwst_obs_by_box` の入出力契約と処理意図を定義する。
 
 def _query_jwst_obs_by_box(
     *,
@@ -358,6 +387,8 @@ def _query_jwst_obs_by_box(
     return [r for r in rows if isinstance(r, dict)]
 
 
+# 関数: `_read_target_config` の入出力契約と処理意図を定義する。
+
 def _read_target_config(path: Path) -> Dict[str, Any]:
     try:
         obj = json.loads(path.read_text(encoding="utf-8"))
@@ -371,6 +402,8 @@ def _read_target_config(path: Path) -> Dict[str, Any]:
 
     return {}
 
+
+# 関数: `_query_jwst_obs_with_fallback` の入出力契約と処理意図を定義する。
 
 def _query_jwst_obs_with_fallback(
     target_name: str,
@@ -519,12 +552,16 @@ def _query_jwst_obs_with_fallback(
     return [], {"method": "target_name", "target_name": target_name, "ok": False, "reason": "no_obs_found"}
 
 
+# 関数: `_query_products_for_obsid` の入出力契約と処理意図を定義する。
+
 def _query_products_for_obsid(obsid: int) -> List[Dict[str, Any]]:
     req = {"service": "Mast.Caom.Products", "params": {"obsid": int(obsid)}, "format": "json"}
     obj = _mast_invoke(req)
     rows = obj.get("data") or []
     return [r for r in rows if isinstance(r, dict)]
 
+
+# 関数: `_select_x1d_products` の入出力契約と処理意図を定義する。
 
 def _select_x1d_products(rows: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     """
@@ -553,6 +590,8 @@ def _select_x1d_products(rows: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any
 
     return x1d_fits, previews
 
+
+# 関数: `_read_x1d_spectrum` の入出力契約と処理意図を定義する。
 
 def _read_x1d_spectrum(fits_path: Path) -> Dict[str, np.ndarray]:
     with fits_path.open("rb") as f:
@@ -586,6 +625,7 @@ _REST_LINES_UM: List[Tuple[str, float]] = [
 ]
 
 
+# 関数: `_moving_average` の入出力契約と処理意図を定義する。
 def _moving_average(y: np.ndarray, win: int) -> np.ndarray:
     win_i = int(win)
     # 条件分岐: `win_i <= 1` を満たす経路を評価する。
@@ -595,6 +635,8 @@ def _moving_average(y: np.ndarray, win: int) -> np.ndarray:
     k = np.ones(win_i, dtype=np.float64) / float(win_i)
     return np.convolve(np.asarray(y, dtype=np.float64), k, mode="same")
 
+
+# 関数: `_robust_sigma` の入出力契約と処理意図を定義する。
 
 def _robust_sigma(y: np.ndarray) -> float:
     yv = np.asarray(y, dtype=np.float64)
@@ -611,6 +653,8 @@ def _robust_sigma(y: np.ndarray) -> float:
 
     return 1.4826 * mad
 
+
+# 関数: `_detect_emission_peaks` の入出力契約と処理意図を定義する。
 
 def _detect_emission_peaks(
     w_um: np.ndarray,
@@ -695,6 +739,8 @@ def _detect_emission_peaks(
     }
 
 
+# 関数: `_score_redshift_candidates` の入出力契約と処理意図を定義する。
+
 def _score_redshift_candidates(
     peaks: List[Dict[str, Any]],
     *,
@@ -713,6 +759,7 @@ def _score_redshift_candidates(
     peak_w = np.array([float(p["w_um"]) for p in peaks], dtype=np.float64)
     peak_snr = np.array([float(p.get("snr") or 0.0) for p in peaks], dtype=np.float64)
 
+    # 関数: `nearest_peak_candidates` の入出力契約と処理意図を定義する。
     def nearest_peak_candidates(pred_um: float) -> List[int]:
         j = int(np.searchsorted(peak_w, pred_um))
         candidates: List[int] = []
@@ -842,6 +889,8 @@ def _score_redshift_candidates(
     }
 
 
+# 関数: `_plot_target_z_diagnostic` の入出力契約と処理意図を定義する。
+
 def _plot_target_z_diagnostic(
     target_slug: str,
     *,
@@ -933,6 +982,8 @@ def _plot_target_z_diagnostic(
     plt.close(fig)
     return {"ok": True, "out_png": _relpath(out_png), "spectrum": _relpath(spectrum_path)}
 
+
+# 関数: `_estimate_target_redshift` の入出力契約と処理意図を定義する。
 
 def _estimate_target_redshift(
     target_slug: str,
@@ -1094,6 +1145,8 @@ def _estimate_target_redshift(
         rec["reason"] = "no_readable_x1d"
         out_json.write_text(json.dumps(rec, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         return rec
+
+    # 関数: `_pick_best` の入出力契約と処理意図を定義する。
 
     def _pick_best(pool: List[Dict[str, Any]], *, prefer_non_mirimage: bool) -> Optional[Dict[str, Any]]:
         src = pool
@@ -1261,9 +1314,13 @@ def _estimate_target_redshift(
     return rec
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_rest_um_from_name` の入出力契約と処理意図を定義する。
 
 def _rest_um_from_name(line: str) -> Optional[float]:
     n = str(line or "").strip()
@@ -1278,6 +1335,8 @@ def _rest_um_from_name(line: str) -> Optional[float]:
 
     return None
 
+
+# 関数: `_measure_line_centroid` の入出力契約と処理意図を定義する。
 
 def _measure_line_centroid(
     w_um: np.ndarray,
@@ -1330,6 +1389,7 @@ def _measure_line_centroid(
 
     is_abs = str(kind or "").lower().startswith("abs")
 
+    # 関数: `_trimmed_median` の入出力契約と処理意図を定義する。
     def _trimmed_median(y_local: np.ndarray) -> Optional[float]:
         y_use = np.asarray(y_local, dtype=np.float64)
         y_use = y_use[np.isfinite(y_use)]
@@ -1345,6 +1405,8 @@ def _measure_line_centroid(
             y_sorted = y_sorted[k:-k]
 
         return float(np.nanmedian(y_sorted))
+
+    # 関数: `_centroid_from_local_window` の入出力契約と処理意図を定義する。
 
     def _centroid_from_local_window(yy_local: np.ndarray, ee_local: Optional[np.ndarray]) -> Optional[Dict[str, Any]]:
         base_local = _trimmed_median(yy_local)
@@ -1490,6 +1552,8 @@ def _measure_line_centroid(
         "prior_sigma_um": base.get("prior_sigma_um"),
     }
 
+
+# 関数: `_confirm_target_redshift` の入出力契約と処理意図を定義する。
 
 def _confirm_target_redshift(
     target_slug: str,
@@ -2227,6 +2291,8 @@ def _confirm_target_redshift(
     return rec
 
 
+# 関数: `_plot_target_qc` の入出力契約と処理意図を定義する。
+
 def _plot_target_qc(target_slug: str, *, x1d_paths: List[Path], out_png: Path) -> Optional[Dict[str, Any]]:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -2284,6 +2350,8 @@ def _plot_target_qc(target_slug: str, *, x1d_paths: List[Path], out_png: Path) -
     return {"ok": True, "spectra_plotted": int(n_ok), "out_png": _relpath(out_png)}
 
 
+# 関数: `_scan_local_x1d_fits` の入出力契約と処理意図を定義する。
+
 def _scan_local_x1d_fits(raw_dir: Path) -> List[Path]:
     # 条件分岐: `not raw_dir.exists()` を満たす経路を評価する。
     if not raw_dir.exists():
@@ -2319,6 +2387,8 @@ def _scan_local_x1d_fits(raw_dir: Path) -> List[Path]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     p = argparse.ArgumentParser()

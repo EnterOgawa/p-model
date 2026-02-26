@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,6 +22,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
     # 条件分岐: `not sorted_vals` を満たす経路を評価する。
@@ -48,6 +51,8 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
+# 関数: `_stats` の入出力契約と処理意図を定義する。
+
 def _stats(vals: list[float]) -> dict[str, float]:
     # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
@@ -63,6 +68,8 @@ def _stats(vals: list[float]) -> dict[str, float]:
     }
 
 
+# 関数: `_a_group` の入出力契約と処理意図を定義する。
+
 def _a_group(a: int) -> str:
     # 条件分岐: `a <= 40` を満たす経路を評価する。
     if a <= 40:
@@ -75,6 +82,8 @@ def _a_group(a: int) -> str:
 
     return "heavy_A_ge_121"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

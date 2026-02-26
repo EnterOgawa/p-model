@@ -8,6 +8,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # From Mueller et al. (arXiv:0710.3768), example: pulse separation time T = 400 ms.
@@ -25,16 +26,22 @@ class Config:
     n_T: int = 200
 
 
+# 関数: `keff_counterprop` の入出力契約と処理意図を定義する。
+
 def keff_counterprop(lambda_m: float) -> float:
     # k = 2π/λ ; for counterpropagating Raman beams, k_eff ≈ 2k = 4π/λ.
     return float(4.0 * math.pi / lambda_m)
 
+
+# 関数: `phase_rad` の入出力契約と処理意図を定義する。
 
 def phase_rad(*, keff: float, g_m_per_s2: float, T_s: float) -> float:
     # Mueller et al. Eq.(1): φ = k_eff g T^2 - φ_L (laser phase term used for readout).
     # Here we report the gravity-dependent magnitude k_eff g T^2.
     return float(keff * g_m_per_s2 * (T_s**2))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(v: object) -> float | None:
     # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
@@ -43,6 +50,8 @@ def _as_float(v: object) -> float | None:
 
     return None
 
+
+# 関数: `_try_load_beta_frozen` の入出力契約と処理意図を定義する。
 
 def _try_load_beta_frozen(root: Path) -> float | None:
     p = root / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -58,6 +67,8 @@ def _try_load_beta_frozen(root: Path) -> float | None:
     beta = _as_float(j.get("beta"))
     return beta
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

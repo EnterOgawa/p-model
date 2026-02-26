@@ -37,9 +37,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -48,11 +51,15 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_d_dx` の入出力契約と処理意図を定義する。
+
 def _d_dx(values: np.ndarray, dx: float) -> np.ndarray:
     n = int(values.size)
     k = 2.0 * np.pi * np.fft.fftfreq(n, d=dx)
     return np.fft.ifft(1j * k * np.fft.fft(values))
 
+
+# 関数: `_criterion` の入出力契約と処理意図を定義する。
 
 def _criterion(
     *,
@@ -74,6 +81,8 @@ def _criterion(
         "note": note,
     }
 
+
+# 関数: `build_pack` の入出力契約と処理意図を定義する。
 
 def build_pack() -> Dict[str, Any]:
     n = 1024
@@ -174,6 +183,8 @@ def build_pack() -> Dict[str, Any]:
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -185,6 +196,8 @@ def _write_csv(path: Path, criteria: List[Dict[str, Any]]) -> None:
         for row in criteria:
             writer.writerow(row)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     audit = payload.get("numerical_audit") if isinstance(payload.get("numerical_audit"), dict) else {}
@@ -218,6 +231,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Generate action-principle EL derivation audit pack.")

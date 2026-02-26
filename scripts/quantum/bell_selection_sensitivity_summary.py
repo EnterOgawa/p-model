@@ -8,13 +8,18 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8", errors="replace"))
 
+
+# 関数: `_manifest_brief` の入出力契約と処理意図を定義する。
 
 def _manifest_brief(path: Path) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -30,6 +35,8 @@ def _manifest_brief(path: Path) -> Optional[Dict[str, Any]]:
     }
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(x: Any) -> Optional[float]:
     try:
         v = float(x)
@@ -44,6 +51,8 @@ def _safe_float(x: Any) -> Optional[float]:
     return v
 
 
+# 関数: `_min_max` の入出力契約と処理意図を定義する。
+
 def _min_max(values: List[float]) -> Tuple[Optional[float], Optional[float]]:
     v = [x for x in values if math.isfinite(x)]
     # 条件分岐: `not v` を満たす経路を評価する。
@@ -52,6 +61,8 @@ def _min_max(values: List[float]) -> Tuple[Optional[float], Optional[float]]:
 
     return float(min(v)), float(max(v))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

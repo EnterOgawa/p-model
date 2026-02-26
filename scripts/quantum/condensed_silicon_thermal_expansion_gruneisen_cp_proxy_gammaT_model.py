@@ -14,9 +14,12 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -32,9 +35,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_alpha_1e8_per_k` の入出力契約と処理意図を定義する。
 
 def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
     """
@@ -72,6 +79,8 @@ def _alpha_1e8_per_k(*, t_k: float, coeffs: dict[str, float]) -> float:
     return float(term1 + term2 + term3)
 
 
+# 関数: `_debye_integrand` の入出力契約と処理意図を定義する。
+
 def _debye_integrand(x: float) -> float:
     # 条件分岐: `x <= 0.0` を満たす経路を評価する。
     if x <= 0.0:
@@ -85,6 +94,8 @@ def _debye_integrand(x: float) -> float:
     inv = 1.0 / em1
     return (x**4) * (inv + inv * inv)
 
+
+# 関数: `_simpson_integrate` の入出力契約と処理意図を定義する。
 
 def _simpson_integrate(f, a: float, b: float, n: int) -> float:
     # 条件分岐: `n < 2` を満たす経路を評価する。
@@ -105,6 +116,8 @@ def _simpson_integrate(f, a: float, b: float, n: int) -> float:
     return s * (h / 3.0)
 
 
+# 関数: `_debye_cv_molar` の入出力契約と処理意図を定義する。
+
 def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     """
     Debye heat capacity Cv for a monatomic solid, per mole.
@@ -122,6 +135,8 @@ def _debye_cv_molar(*, t_k: float, theta_d_k: float) -> float:
     integral = _simpson_integrate(_debye_integrand, 0.0, y_eff, n)
     return 9.0 * r * ((t_k / theta_d_k) ** 3) * integral
 
+
+# 関数: `_theta_d_from_existing_metrics` の入出力契約と処理意図を定義する。
 
 def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     m = root / "output" / "public" / "quantum" / "condensed_silicon_heat_capacity_debye_baseline_metrics.json"
@@ -147,11 +162,15 @@ def _theta_d_from_existing_metrics(root: Path) -> Optional[float]:
     return None
 
 
+# クラス: `CpPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class CpPoint:
     t_k: float
     cp: float
 
+
+# 関数: `_load_janaf_cp_points` の入出力契約と処理意図を定義する。
 
 def _load_janaf_cp_points(*, root: Path) -> list[CpPoint]:
     src = root / "data" / "quantum" / "sources" / "nist_janaf_silicon_si" / "extracted_values.json"
@@ -195,6 +214,8 @@ def _load_janaf_cp_points(*, root: Path) -> list[CpPoint]:
     return out
 
 
+# 関数: `_interp_linear` の入出力契約と処理意図を定義する。
+
 def _interp_linear(points: list[CpPoint], t: float) -> float:
     # 条件分岐: `not points` を満たす経路を評価する。
     if not points:
@@ -233,6 +254,8 @@ def _interp_linear(points: list[CpPoint], t: float) -> float:
     w = (x - x0) / (x1 - x0)
     return float(y0 + (y1 - y0) * w)
 
+
+# 関数: `_load_ioffe_bulk_modulus_model` の入出力契約と処理意図を定義する。
 
 def _load_ioffe_bulk_modulus_model(*, root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
@@ -299,6 +322,8 @@ def _load_ioffe_bulk_modulus_model(*, root: Path) -> dict[str, Any]:
     }
 
 
+# 関数: `_bulk_modulus_pa` の入出力契約と処理意図を定義する。
+
 def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
     """
     Piecewise bulk modulus B(T) in Pa, derived from Ioffe elastic constants.
@@ -323,6 +348,7 @@ def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
         c12_a = float(model["c12_intercept_1e11_dyn_cm2"])
         c12_b = float(model["c12_slope_1e11_dyn_cm2_per_K"])
 
+        # 関数: `b_lin` の入出力契約と処理意図を定義する。
         def b_lin(t_use: float) -> float:
             c11 = float(c11_a + c11_b * t_use)
             c12 = float(c12_a + c12_b * t_use)
@@ -334,6 +360,8 @@ def _bulk_modulus_pa(*, t_k: float, model: dict[str, Any]) -> float:
 
     return float(b_1e11) * 1e10
 
+
+# 関数: `_load_silicon_molar_volume_m3_per_mol` の入出力契約と処理意図を定義する。
 
 def _load_silicon_molar_volume_m3_per_mol(*, root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "nist_codata_2022_silicon_lattice" / "extracted_values.json"
@@ -366,6 +394,8 @@ def _load_silicon_molar_volume_m3_per_mol(*, root: Path) -> dict[str, Any]:
     v_m = n_a * (float(a_m) ** 3) / 8.0
     return {"path": str(src), "sha256": _sha256(src), "a_m": float(a_m), "V_m3_per_mol": float(v_m)}
 
+
+# 関数: `_infer_zero_crossing` の入出力契約と処理意図を定義する。
 
 def _infer_zero_crossing(
     xs: list[float],
@@ -421,6 +451,8 @@ def _infer_zero_crossing(
     return max(candidates, key=lambda c: float(c["x_cross"]))
 
 
+# 関数: `_logspace` の入出力契約と処理意図を定義する。
+
 def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
     # 条件分岐: `n < 2` を満たす経路を評価する。
     if n < 2:
@@ -435,6 +467,8 @@ def _logspace(*, lo: float, hi: float, n: int) -> list[float]:
     l1 = math.log10(float(hi))
     return [10 ** (l0 + (l1 - l0) * i / (n - 1)) for i in range(n)]
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -524,6 +558,7 @@ def main() -> None:
 
     scale_lowT = float(cp_at_100 / cv_debye_100)
 
+    # 関数: `cp_proxy` の入出力契約と処理意図を定義する。
     def cp_proxy(t: float) -> tuple[float, str]:
         x = float(t)
         # 条件分岐: `x < 100.0` を満たす経路を評価する。

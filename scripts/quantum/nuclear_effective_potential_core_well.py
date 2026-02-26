@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,9 +22,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -45,6 +50,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
 
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
+
+# 関数: `_load_np_scattering_sets` の入出力契約と処理意図を定義する。
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
@@ -82,6 +89,8 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     return out
 
 
+# 関数: `_get_value` の入出力契約と処理意図を定義する。
+
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
     # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
@@ -90,6 +99,8 @@ def _get_value(params: dict[str, object], key: str) -> float:
 
     raise KeyError(key)
 
+
+# 関数: `_solve_bound_x` の入出力契約と処理意図を定義する。
 
 def _solve_bound_x(*, kappa_fm1: float, l_fm: float) -> float:
     """
@@ -107,6 +118,7 @@ def _solve_bound_x(*, kappa_fm1: float, l_fm: float) -> float:
     lo = (math.pi / 2.0) + 1e-10
     hi = math.pi - 1e-10
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(x: float) -> float:
         return (x / math.tan(x)) + (kappa_fm1 * l_fm)
 
@@ -133,6 +145,8 @@ def _solve_bound_x(*, kappa_fm1: float, l_fm: float) -> float:
     return 0.5 * (lo + hi)
 
 
+# 関数: `_well_depth_from_l` の入出力契約と処理意図を定義する。
+
 def _well_depth_from_l(*, mu_mev: float, b_mev: float, l_fm: float, hbarc_mev_fm: float) -> dict[str, float]:
     """
     Hard-core + attractive square well:
@@ -154,6 +168,8 @@ def _well_depth_from_l(*, mu_mev: float, b_mev: float, l_fm: float, hbarc_mev_fm
     return {"V0_mev": float(v0), "kappa_fm1": float(kappa), "k_fm1": float(k), "x": float(x)}
 
 
+# 関数: `_scattering_length_hard_core_well` の入出力契約と処理意図を定義する。
+
 def _scattering_length_hard_core_well(*, rc_fm: float, l_fm: float, v0_mev: float, mu_mev: float, hbarc_mev_fm: float) -> float:
     """
     k->0 exact s-wave scattering length for hard-core + attractive well:
@@ -172,6 +188,8 @@ def _scattering_length_hard_core_well(*, rc_fm: float, l_fm: float, v0_mev: floa
 
     return float(r_fm - (math.tan(q * l_fm) / q))
 
+
+# 関数: `_phase_shift_hard_core_well` の入出力契約と処理意図を定義する。
 
 def _phase_shift_hard_core_well(*, k_fm1: float, rc_fm: float, l_fm: float, v0_mev: float, mu_mev: float, hbarc_mev_fm: float) -> float:
     """
@@ -207,6 +225,8 @@ def _phase_shift_hard_core_well(*, k_fm1: float, rc_fm: float, l_fm: float, v0_m
     return float(delta)
 
 
+# 関数: `_solve_3x3` の入出力契約と処理意図を定義する。
+
 def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
     """
     Solve A x = b for 3x3 A using Gaussian elimination with partial pivot.
@@ -239,6 +259,8 @@ def _solve_3x3(a: list[list[float]], b: list[float]) -> list[float]:
 
     return x
 
+
+# 関数: `_fit_kcot_ere` の入出力契約と処理意図を定義する。
 
 def _fit_kcot_ere(
     *, rc_fm: float, l_fm: float, v0_mev: float, mu_mev: float, hbarc_mev_fm: float
@@ -319,6 +341,8 @@ def _fit_kcot_ere(
     }
 
 
+# 関数: `_solve_l_for_triplet_a` の入出力契約と処理意図を定義する。
+
 def _solve_l_for_triplet_a(
     *, rc_fm: float, a_target_fm: float, mu_mev: float, b_mev: float, hbarc_mev_fm: float
 ) -> float:
@@ -378,6 +402,7 @@ def _solve_l_for_triplet_a(
     brackets.sort(key=lambda t: t[2])
     lo, hi, _ = brackets[0]
 
+    # 関数: `f_of_l` の入出力契約と処理意図を定義する。
     def f_of_l(l: float) -> float:
         v = _well_depth_from_l(mu_mev=mu_mev, b_mev=b_mev, l_fm=l, hbarc_mev_fm=hbarc_mev_fm)["V0_mev"]
         a_pred = _scattering_length_hard_core_well(
@@ -409,6 +434,8 @@ def _solve_l_for_triplet_a(
 
     return 0.5 * (lo + hi)
 
+
+# 関数: `_solve_triplet_core_well_geometry` の入出力契約と処理意図を定義する。
 
 def _solve_triplet_core_well_geometry(
     *, a_t_fm: float, r_t_fm: float, mu_mev: float, b_mev: float, hbarc_mev_fm: float
@@ -460,6 +487,8 @@ def _solve_triplet_core_well_geometry(
         if (g0 > 0) != (g1 > 0):
             bracket = (s0["rc"], s1["rc"])
             break
+
+    # 関数: `g_of_rc` の入出力契約と処理意図を定義する。
 
     def g_of_rc(rc: float) -> tuple[float, float, float]:
         l = _solve_l_for_triplet_a(
@@ -541,6 +570,8 @@ def _solve_triplet_core_well_geometry(
     }
 
 
+# 関数: `_solve_depth_for_singlet_a` の入出力契約と処理意図を定義する。
+
 def _solve_depth_for_singlet_a(
     *, a_target_fm: float, rc_fm: float, l_fm: float, mu_mev: float, hbarc_mev_fm: float
 ) -> float:
@@ -557,6 +588,7 @@ def _solve_depth_for_singlet_a(
     q_lo = 1e-9
     q_hi = (math.pi / (2.0 * l_fm)) - 1e-9
 
+    # 関数: `a_of_q` の入出力契約と処理意図を定義する。
     def a_of_q(q: float) -> float:
         return float(r_fm - (math.tan(q * l_fm) / q))
 
@@ -588,6 +620,8 @@ def _solve_depth_for_singlet_a(
     v0 = (hbarc_mev_fm**2) * (q**2) / (2.0 * mu_mev)
     return float(v0)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -743,6 +777,7 @@ def main() -> None:
         ax0 = fig.add_subplot(gs[row, 0])
         r_plot = [i * 0.02 for i in range(0, 501)]  # 0..10 fm
 
+        # 関数: `v_profile` の入出力契約と処理意図を定義する。
         def v_profile(rr: float, *, v0: float) -> float:
             # 条件分岐: `rr < rc` を満たす経路を評価する。
             if rr < rc:

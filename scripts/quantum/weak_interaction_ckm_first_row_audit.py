@@ -22,9 +22,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_iso_now` の入出力契約と処理意図を定義する。
 def _iso_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -42,12 +45,16 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return digest.hexdigest()
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return str(path.relative_to(ROOT)).replace("\\", "/")
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as handle:
@@ -62,6 +69,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow([row.get(h) for h in headers])
 
 
+# 関数: `_ensure_pdf` の入出力契約と処理意図を定義する。
+
 def _ensure_pdf(*, url: str, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -71,6 +80,8 @@ def _ensure_pdf(*, url: str, path: Path) -> None:
     urllib.request.urlretrieve(url, path)
 
 
+# 関数: `_normalize_text` の入出力契約と処理意図を定義する。
+
 def _normalize_text(text: str) -> str:
     out = text.replace("－", "-").replace("–", "-").replace("—", "-").replace("−", "-")
     out = out.replace("×", "x")
@@ -78,11 +89,15 @@ def _normalize_text(text: str) -> str:
     return out
 
 
+# 関数: `_extract_pdf_text` の入出力契約と処理意図を定義する。
+
 def _extract_pdf_text(path: Path) -> str:
     reader = PdfReader(str(path))
     joined = "\n".join((page.extract_text() or "") for page in reader.pages)
     return _normalize_text(joined)
 
+
+# 関数: `_match_required` の入出力契約と処理意図を定義する。
 
 def _match_required(pattern: str, text: str, *, label: str) -> tuple[float, float]:
     hit = re.search(pattern, text, flags=re.IGNORECASE)
@@ -94,6 +109,8 @@ def _match_required(pattern: str, text: str, *, label: str) -> tuple[float, floa
     sigma = float(hit.group(2))
     return value, sigma
 
+
+# 関数: `_build_plot` の入出力契約と処理意図を定義する。
 
 def _build_plot(
     *,
@@ -140,6 +157,8 @@ def _build_plot(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `_correlation_reassessment` の入出力契約と処理意図を定義する。
 
 def _correlation_reassessment(
     *,
@@ -198,6 +217,8 @@ def _correlation_reassessment(
         "watch_lock_reason": watch_lock_reason,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Step 8.7.22: CKM first-row quantitative audit")

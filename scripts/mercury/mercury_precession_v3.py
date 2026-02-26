@@ -24,6 +24,7 @@ a = 0.387098 * AU
 e = 0.205630
 T_orb = 87.969 * 24 * 3600 # seconds
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -48,10 +49,14 @@ def _set_japanese_font() -> None:
     except Exception:
         pass
 
+# 関数: `calc_theoretical_shift_approx` の入出力契約と処理意図を定義する。
+
 def calc_theoretical_shift_approx(c_val):
     # Standard Einstein approximation (valid for small shifts)
     dw_rad = (6 * np.pi * G * M_SUN) / (c_val**2 * a * (1 - e**2))
     return np.degrees(dw_rad) * 3600
+
+# 関数: `deriv_gr` の入出力契約と処理意図を定義する。
 
 def deriv_gr(t, state, G, M, c):
     x, y, vx, vy = state
@@ -63,6 +68,8 @@ def deriv_gr(t, state, G, M, c):
     a_vec = -G * M / (r**3) * r_vec * factor
     return [vx, vy, a_vec[0], a_vec[1]]
 
+# 関数: `deriv_newton` の入出力契約と処理意図を定義する。
+
 def deriv_newton(t, state, G, M):
     x, y, vx, vy = state
     r_vec = np.array([x, y])
@@ -70,6 +77,8 @@ def deriv_newton(t, state, G, M):
     r = np.sqrt(r2)
     a_vec = -G * M / (r**3) * r_vec
     return [vx, vy, a_vec[0], a_vec[1]]
+
+# 関数: `_perihelion_event` の入出力契約と処理意図を定義する。
 
 def _perihelion_event(_t, state, *_args):
     x, y, vx, vy = state
@@ -81,6 +90,7 @@ _perihelion_event.terminal = False  # type: ignore[attr-defined]
 _perihelion_event.direction = 1.0  # type: ignore[attr-defined]
 
 
+# 関数: `_simulate_perihelion_shifts` の入出力契約と処理意図を定義する。
 def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
     # 条件分岐: `model not in ("pmodel", "newton")` を満たす経路を評価する。
     if model not in ("pmodel", "newton"):
@@ -139,6 +149,8 @@ def _simulate_perihelion_shifts(*, model: str, num_orbits: int, c_val: float):
         "shift_arcsec": shift_arcsec,
         "t_ev_s": t_ev,
     }
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
     print("--- Mercury Simulation (Perihelion Precession) ---")

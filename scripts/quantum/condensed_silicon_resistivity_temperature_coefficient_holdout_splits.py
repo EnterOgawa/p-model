@@ -12,9 +12,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     hash_obj = hashlib.sha256()
@@ -30,9 +33,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return hash_obj.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_rho_at` の入出力契約と処理意図を定義する。
 
 def _rho_at(table: list[dict[str, Any]], t_c: float) -> Optional[float]:
     for row in table:
@@ -46,9 +53,13 @@ def _rho_at(table: list[dict[str, Any]], t_c: float) -> Optional[float]:
     return None
 
 
+# 関数: `_coeff_ln_rho_per_k` の入出力契約と処理意図を定義する。
+
 def _coeff_ln_rho_per_k(*, rho20: float, rho30: float) -> float:
     return (math.log(rho30) - math.log(rho20)) / 10.0
 
+
+# 関数: `_metrics_for_idx` の入出力契約と処理意図を定義する。
 
 def _metrics_for_idx(
     *,
@@ -86,6 +97,8 @@ def _metrics_for_idx(
     }
 
 
+# 関数: `_robust_sigma` の入出力契約と処理意図を定義する。
+
 def _robust_sigma(residuals: np.ndarray) -> float:
     values = np.asarray(residuals, dtype=float).reshape(-1)
     values = values[np.isfinite(values)]
@@ -103,6 +116,8 @@ def _robust_sigma(residuals: np.ndarray) -> float:
     return float(std if std > 0 else 1.0)
 
 
+# 関数: `_global_sigma_floor` の入出力契約と処理意図を定義する。
+
 def _global_sigma_floor(*, x_values: np.ndarray, y_values: np.ndarray) -> tuple[float, dict[str, float | str]]:
     indices = np.arange(np.asarray(y_values, dtype=float).reshape(-1).size, dtype=np.int64)
     intercept, slope = _fit_linear(x_values, y_values, indices)
@@ -118,11 +133,15 @@ def _global_sigma_floor(*, x_values: np.ndarray, y_values: np.ndarray) -> tuple[
     }
 
 
+# 関数: `_fit_const` の入出力契約と処理意図を定義する。
+
 def _fit_const(values: np.ndarray, idx: np.ndarray) -> float:
     indices = np.asarray(idx, dtype=np.int64).reshape(-1)
     values = np.asarray(values, dtype=float).reshape(-1)[indices]
     return float(np.mean(values))
 
+
+# 関数: `_fit_linear` の入出力契約と処理意図を定義する。
 
 def _fit_linear(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndarray) -> tuple[float, float]:
     indices = np.asarray(idx, dtype=np.int64).reshape(-1)
@@ -138,6 +157,8 @@ def _fit_linear(x_values: np.ndarray, y_values: np.ndarray, idx: np.ndarray) -> 
     slope = float(beta[1])
     return intercept, slope
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()
@@ -360,6 +381,7 @@ def main() -> None:
     fig, axes = plt.subplots(2, 1, figsize=(10.8, 7.2), dpi=170, gridspec_kw={"height_ratios": [2.0, 1.0]})
     ax0 = axes[0]
 
+    # 関数: `pick_style` の入出力契約と処理意図を定義する。
     def pick_style(sample_type: str, doping_label: str) -> tuple[str, str]:
         # 条件分岐: `sample_type == "p" and doping_label == "Al"` を満たす経路を評価する。
         if sample_type == "p" and doping_label == "Al":

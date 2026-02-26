@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 
+# クラス: `ConstantSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class ConstantSpec:
     code: str
@@ -18,6 +19,8 @@ class ConstantSpec:
     url: str
     relpath: str
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -32,6 +35,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -52,9 +57,13 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_strip_tags` の入出力契約と処理意図を定義する。
+
 def _strip_tags(s: str) -> str:
     return re.sub(r"<[^>]+>", " ", s)
 
+
+# 関数: `_parse_value_cell` の入出力契約と処理意図を定義する。
 
 def _parse_value_cell(html_text: str, *, label: str) -> tuple[Decimal, str, str]:
     """
@@ -88,6 +97,8 @@ def _parse_value_cell(html_text: str, *, label: str) -> tuple[Decimal, str, str]
     return value, unit, cell_txt
 
 
+# 関数: `_extract_constant` の入出力契約と処理意図を定義する。
+
 def _extract_constant(html_text: str, *, expected_codata_year: int | None) -> dict[str, object]:
     mt = re.search(r"<title>\s*CODATA Value:\s*(.*?)</title>", html_text, flags=re.I | re.S)
     # 条件分岐: `not mt` を満たす経路を評価する。
@@ -119,6 +130,8 @@ def _extract_constant(html_text: str, *, expected_codata_year: int | None) -> di
         "raw": {"value_cell_text": raw_value, "sigma_cell_text": raw_sigma},
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

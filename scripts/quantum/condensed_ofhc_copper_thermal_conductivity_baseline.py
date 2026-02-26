@@ -12,9 +12,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -30,9 +33,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_log10k_from_coeffs` の入出力契約と処理意図を定義する。
 
 def _log10k_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray:
     """
@@ -59,9 +66,13 @@ def _log10k_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray
     return num / den
 
 
+# 関数: `_k_w_mk_from_coeffs` の入出力契約と処理意図を定義する。
+
 def _k_w_mk_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray:
     return np.power(10.0, _log10k_from_coeffs(t_k, coeffs))
 
+
+# 関数: `_k_at_t` の入出力契約と処理意図を定義する。
 
 def _k_at_t(*, t_k: float, coeffs: dict[str, float], t_min_k: float, t_max_k: float) -> Optional[float]:
     # 条件分岐: `not (math.isfinite(t_k) and math.isfinite(t_min_k) and math.isfinite(t_max_k))` を満たす経路を評価する。
@@ -76,6 +87,8 @@ def _k_at_t(*, t_k: float, coeffs: dict[str, float], t_min_k: float, t_max_k: fl
     v = float(_k_w_mk_from_coeffs(np.array([float(t_k)], dtype=float), coeffs)[0])
     return v if math.isfinite(v) else None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

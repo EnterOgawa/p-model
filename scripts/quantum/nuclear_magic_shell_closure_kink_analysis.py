@@ -19,6 +19,7 @@ REPRESENTATIVE_CLOSURES = [
 ]
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -35,6 +36,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -44,6 +47,8 @@ def _rms(values: list[float]) -> float:
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -52,6 +57,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_load_all_nuclei_csv` の入出力契約と処理意図を定義する。
 
 def _load_all_nuclei_csv(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     out: dict[tuple[int, int], dict[str, Any]] = {}
@@ -78,6 +85,8 @@ def _load_all_nuclei_csv(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     return out
 
 
+# 関数: `_load_semf_proxy_csv` の入出力契約と処理意図を定義する。
+
 def _load_semf_proxy_csv(path: Path) -> dict[tuple[int, int], float]:
     out: dict[tuple[int, int], float] = {}
     with path.open("r", encoding="utf-8", newline="") as f:
@@ -99,6 +108,8 @@ def _load_semf_proxy_csv(path: Path) -> dict[tuple[int, int], float]:
     return out
 
 
+# 関数: `_build_s2n_map` の入出力契約と処理意図を定義する。
+
 def _build_s2n_map(binding_map: dict[tuple[int, int], float]) -> dict[tuple[int, int], float]:
     out: dict[tuple[int, int], float] = {}
     for (z, n), b_parent in binding_map.items():
@@ -110,6 +121,8 @@ def _build_s2n_map(binding_map: dict[tuple[int, int], float]) -> dict[tuple[int,
     return out
 
 
+# 関数: `_build_s2p_map` の入出力契約と処理意図を定義する。
+
 def _build_s2p_map(binding_map: dict[tuple[int, int], float]) -> dict[tuple[int, int], float]:
     out: dict[tuple[int, int], float] = {}
     for (z, n), b_parent in binding_map.items():
@@ -120,6 +133,8 @@ def _build_s2p_map(binding_map: dict[tuple[int, int], float]) -> dict[tuple[int,
 
     return out
 
+
+# 関数: `_build_gap2n_rows` の入出力契約と処理意図を定義する。
 
 def _build_gap2n_rows(
     s2n_obs: dict[tuple[int, int], float],
@@ -166,6 +181,8 @@ def _build_gap2n_rows(
     return rows
 
 
+# 関数: `_build_gap2p_rows` の入出力契約と処理意図を定義する。
+
 def _build_gap2p_rows(
     s2p_obs: dict[tuple[int, int], float],
     s2p_p: dict[tuple[int, int], float],
@@ -211,6 +228,8 @@ def _build_gap2p_rows(
     return rows
 
 
+# 関数: `_summarize_by_magic` の入出力契約と処理意図を定義する。
+
 def _summarize_by_magic(rows: list[dict[str, Any]], *, axis: str, gap_kind: str) -> list[dict[str, Any]]:
     grouped: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for row in rows:
@@ -240,6 +259,8 @@ def _summarize_by_magic(rows: list[dict[str, Any]], *, axis: str, gap_kind: str)
 
     return out
 
+
+# 関数: `_representative_rows` の入出力契約と処理意図を定義する。
 
 def _representative_rows(
     closures: list[dict[str, Any]],
@@ -277,6 +298,8 @@ def _representative_rows(
     return out
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -290,6 +313,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             w.writerow([row.get(h) for h in headers])
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

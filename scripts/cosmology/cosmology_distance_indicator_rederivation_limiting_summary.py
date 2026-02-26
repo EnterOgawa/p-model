@@ -36,6 +36,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -61,14 +62,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -85,6 +92,8 @@ def _safe_float(x: Any) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_classify_sigma` の入出力契約と処理意図を定義する。
 
 def _classify_sigma(abs_z: Optional[float]) -> str:
     # 条件分岐: `abs_z is None or not math.isfinite(float(abs_z))` を満たす経路を評価する。
@@ -103,6 +112,8 @@ def _classify_sigma(abs_z: Optional[float]) -> str:
 
     return "ng"
 
+
+# 関数: `_extract_fit` の入出力契約と処理意図を定義する。
 
 def _extract_fit(per_ddr: Dict[str, Any], key: str) -> Tuple[Optional[float], str, Optional[float], Optional[float]]:
     """
@@ -126,6 +137,8 @@ def _extract_fit(per_ddr: Dict[str, Any], key: str) -> Tuple[Optional[float], st
     return (max_abs_z, limiting, chi2_dof, chi2)
 
 
+# 関数: `_extract_choice` の入出力契約と処理意図を定義する。
+
 def _extract_choice(per_ddr: Dict[str, Any], key: str) -> Dict[str, Any]:
     block = per_ddr.get(key)
     # 条件分岐: `not isinstance(block, dict)` を満たす経路を評価する。
@@ -146,6 +159,8 @@ def _extract_choice(per_ddr: Dict[str, Any], key: str) -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_limiting_palette` の入出力契約と処理意図を定義する。
 
 def _limiting_palette() -> Tuple[List[str], Dict[str, str], Dict[str, str]]:
     """
@@ -184,6 +199,8 @@ def _limiting_palette() -> Tuple[List[str], Dict[str, str], Dict[str, str]]:
     return (ordered, colors, short)
 
 
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
+
 def _fmt(x: Optional[float], *, digits: int = 3) -> str:
     # 条件分岐: `x is None or not math.isfinite(float(x))` を満たす経路を評価する。
     if x is None or not math.isfinite(float(x)):
@@ -201,6 +218,8 @@ def _fmt(x: Optional[float], *, digits: int = 3) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(

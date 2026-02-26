@@ -9,18 +9,25 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_kj_per_mol_to_ev` の入出力契約と処理意図を定義する。
+
 def _kj_per_mol_to_ev(kj_per_mol: float) -> float:
     # 1 eV per molecule = 96.4853321233 kJ/mol
     return kj_per_mol / 96.4853321233
 
+
+# 関数: `_load_dhf_kj_per_mol` の入出力契約と処理意図を定義する。
 
 def _load_dhf_kj_per_mol(root: Path, slug: str) -> tuple[float, Optional[float], Path]:
     src = root / "data" / "quantum" / "sources" / f"nist_webbook_thermo_{slug}" / "extracted_values.json"
@@ -47,6 +54,8 @@ def _load_dhf_kj_per_mol(root: Path, slug: str) -> tuple[float, Optional[float],
     return float(val), unc_f, src
 
 
+# 関数: `_prop_unc_sum` の入出力契約と処理意図を定義する。
+
 def _prop_unc_sum(terms: list[tuple[float, Optional[float]]]) -> Optional[float]:
     """
     Uncertainty propagation for linear combination Σ a_i x_i:
@@ -66,6 +75,8 @@ def _prop_unc_sum(terms: list[tuple[float, Optional[float]]]) -> Optional[float]
 
     return math.sqrt(ss) if any_unc else None
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()

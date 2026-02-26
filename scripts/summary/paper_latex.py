@@ -26,9 +26,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_escape_tex` の入出力契約と処理意図を定義する。
 
 def _escape_tex(text: str) -> str:
     replacements = {
@@ -46,6 +49,8 @@ def _escape_tex(text: str) -> str:
     return "".join(replacements.get(ch, ch) for ch in text)
 
 
+# 関数: `_safe_label` の入出力契約と処理意図を定義する。
+
 def _safe_label(text: str) -> str:
     t = text.lower()
     t = re.sub(r"[^a-z0-9]+", "-", t).strip("-")
@@ -58,10 +63,13 @@ _GENERIC_SECTION_LABELS = {
 }
 
 
+# 関数: `_extract_heading_number` の入出力契約と処理意図を定義する。
 def _extract_heading_number(raw_title: str) -> str:
     m = re.match(r"^\s*(\d+(?:\.\d+)*)", raw_title)
     return m.group(1) if m else ""
 
+
+# 関数: `_section_label_hint` の入出力契約と処理意図を定義する。
 
 def _section_label_hint(raw_title: str, stripped_title: str) -> str:
     raw_lower = raw_title.lower()
@@ -131,6 +139,8 @@ def _section_label_hint(raw_title: str, stripped_title: str) -> str:
     return ""
 
 
+# 関数: `_build_section_label` の入出力契約と処理意図を定義する。
+
 def _build_section_label(
     raw_title: str,
     stripped_title: str,
@@ -167,11 +177,14 @@ def _build_section_label(
 _HEADING_PREFIX_RE = re.compile(r"^\s*\d{1,2}(?:\.\d{1,2})*(?:[.)：:]|\s)\s*")
 
 
+# 関数: `_strip_heading_prefix` の入出力契約と処理意図を定義する。
 def _strip_heading_prefix(title: str) -> str:
     t = title.strip()
     stripped = _HEADING_PREFIX_RE.sub("", t, count=1).strip()
     return stripped or t
 
+
+# 関数: `_is_abstract_heading` の入出力契約と処理意図を定義する。
 
 def _is_abstract_heading(title: str) -> bool:
     compact = re.sub(r"[\s\u3000\(\)（）\[\]【】<>＜＞:：._\-–—・,，、/]", "", title).lower()
@@ -182,6 +195,7 @@ _HEADING_INLINE_MATH_RE = re.compile(r"\$(.+?)\$")
 _HEADING_LATEX_CMD_RE = re.compile(r"\\[A-Za-z]+")
 
 
+# 関数: `_heading_math_to_pdftext` の入出力契約と処理意図を定義する。
 def _heading_math_to_pdftext(payload: str) -> str:
     text = payload
     text = text.replace(r"\theta", "theta")
@@ -199,6 +213,8 @@ def _heading_math_to_pdftext(payload: str) -> str:
     text = re.sub(r"\s+", " ", text).strip()
     return text
 
+
+# 関数: `_heading_pdf_text` の入出力契約と処理意図を定義する。
 
 def _heading_pdf_text(title: str) -> str:
     text = _HEADING_INLINE_MATH_RE.sub(lambda m: _heading_math_to_pdftext(m.group(1)), title)
@@ -237,6 +253,8 @@ def _heading_pdf_text(title: str) -> str:
     return text or title
 
 
+# 関数: `_normalize_tex_path` の入出力契約と処理意図を定義する。
+
 def _normalize_tex_path(path_text: str) -> str:
     return path_text.replace("\\", "/")
 
@@ -244,11 +262,14 @@ def _normalize_tex_path(path_text: str) -> str:
 _IMAGE_EXTS = (".png", ".jpg", ".jpeg", ".pdf", ".svg", ".bmp", ".webp")
 
 
+# 関数: `_is_image_path` の入出力契約と処理意図を定義する。
 def _is_image_path(path_text: str) -> bool:
     normalized = _normalize_tex_path(path_text.strip())
     lowered = normalized.lower()
     return any(lowered.endswith(ext) for ext in _IMAGE_EXTS)
 
+
+# 関数: `_match_leading_image_line` の入出力契約と処理意図を定義する。
 
 def _match_leading_image_line(line_text: str) -> Optional[tuple[str, str]]:
     s = line_text.strip()
@@ -269,6 +290,8 @@ def _match_leading_image_line(line_text: str) -> Optional[tuple[str, str]]:
     desc_text = (m.group(2) or "").strip()
     return path_text, desc_text
 
+
+# 関数: `_fallback_caption_from_path` の入出力契約と処理意図を定義する。
 
 def _fallback_caption_from_path(raw_path: str) -> str:
     stem = Path(raw_path).stem
@@ -309,6 +332,8 @@ def _fallback_caption_from_path(raw_path: str) -> str:
     return f"{text}の比較結果を示す。"
 
 
+# 関数: `_is_image_markdown_line` の入出力契約と処理意図を定義する。
+
 def _is_image_markdown_line(stripped: str) -> bool:
     # 条件分岐: `_match_leading_image_line(stripped)` を満たす経路を評価する。
     if _match_leading_image_line(stripped):
@@ -316,6 +341,8 @@ def _is_image_markdown_line(stripped: str) -> bool:
 
     return bool(re.match(r"^!\[([^\]]*)\]\(([^)]+)\)\s*$", stripped))
 
+
+# 関数: `_extract_following_caption` の入出力契約と処理意図を定義する。
 
 def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str, int]:
     j = start_index
@@ -366,6 +393,8 @@ def _extract_following_caption(lines: list[str], start_index: int) -> tuple[str,
     return "", 0
 
 
+# 関数: `_resolve_image_path` の入出力契約と処理意図を定義する。
+
 def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
     normalized = _normalize_tex_path(raw_path.strip())
     # 条件分岐: `normalized.startswith("http://") or normalized.startswith("https://")` を満たす経路を評価する。
@@ -375,6 +404,7 @@ def _resolve_image_path(raw_path: str, *, root: Path) -> tuple[str, bool]:
     candidate_paths: list[Path] = []
     candidate_norms: set[str] = set()
 
+    # 関数: `add_candidate` の入出力契約と処理意図を定義する。
     def add_candidate(path_obj: Path) -> None:
         key = str(path_obj.resolve()) if path_obj.is_absolute() else str(path_obj)
         # 条件分岐: `key in candidate_norms` を満たす経路を評価する。
@@ -417,6 +447,7 @@ _REFERENCE_TEXT: dict[str, str] = {}
 _USED_REFERENCE_KEYS: set[str] = set()
 
 
+# 関数: `_load_reference_entries` の入出力契約と処理意図を定義する。
 def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, str]]:
     # 条件分岐: `not references_md.exists()` を満たす経路を評価する。
     if not references_md.exists():
@@ -459,6 +490,8 @@ def _load_reference_entries(references_md: Path) -> tuple[list[str], dict[str, s
     return order, refs
 
 
+# 関数: `_render_bibliography_section` の入出力契約と処理意図を定義する。
+
 def _render_bibliography_section() -> str:
     # 条件分岐: `not _USED_REFERENCE_KEYS` を満たす経路を評価する。
     if not _USED_REFERENCE_KEYS:
@@ -479,6 +512,8 @@ def _render_bibliography_section() -> str:
     lines += [r"\end{thebibliography}", ""]
     return "\n".join(lines)
 
+
+# 関数: `_render_figure_block` の入出力契約と処理意図を定義する。
 
 def _render_figure_block(
     *,
@@ -684,6 +719,7 @@ _PHYSICS_ASCII_GREEK_TOKEN_RE = re.compile(
 )
 
 
+# 関数: `_looks_like_artifact_code` の入出力契約と処理意図を定義する。
 def _looks_like_artifact_code(s: str) -> bool:
     candidate = s.strip()
     # 条件分岐: `not candidate` を満たす経路を評価する。
@@ -836,6 +872,8 @@ def _looks_like_artifact_code(s: str) -> bool:
     return False
 
 
+# 関数: `_looks_like_math_code` の入出力契約と処理意図を定義する。
+
 def _looks_like_math_code(s: str) -> bool:
     candidate = s.strip()
     # 条件分岐: `not candidate` を満たす経路を評価する。
@@ -905,6 +943,8 @@ def _looks_like_math_code(s: str) -> bool:
     return False
 
 
+# 関数: `_format_subscript_token` の入出力契約と処理意図を定義する。
+
 def _format_subscript_token(sub: str) -> str:
     # 条件分岐: `re.fullmatch(r"[A-Za-z0-9]", sub)` を満たす経路を評価する。
     if re.fullmatch(r"[A-Za-z0-9]", sub):
@@ -918,6 +958,8 @@ def _format_subscript_token(sub: str) -> str:
     return r"\mathrm{" + sub + "}"
 
 
+# 関数: `_normalize_word_subscripts` の入出力契約と処理意図を定義する。
+
 def _normalize_word_subscripts(text: str) -> str:
     normalized = text
     normalized = _GREEK_CMD_SUBSCRIPT_RE.sub(
@@ -930,6 +972,8 @@ def _normalize_word_subscripts(text: str) -> str:
     )
     return normalized
 
+
+# 関数: `_looks_like_physics_equation_code` の入出力契約と処理意図を定義する。
 
 def _looks_like_physics_equation_code(s: str) -> bool:
     candidate = s.strip()
@@ -1027,6 +1071,8 @@ def _looks_like_physics_equation_code(s: str) -> bool:
     return False
 
 
+# 関数: `_looks_like_physics_symbol_code` の入出力契約と処理意図を定義する。
+
 def _looks_like_physics_symbol_code(s: str) -> bool:
     candidate = s.strip().replace(r"\_", "_")
     # 条件分岐: `not candidate` を満たす経路を評価する。
@@ -1056,13 +1102,18 @@ def _looks_like_physics_symbol_code(s: str) -> bool:
     return False
 
 
+# 関数: `_replace_plain_symbolic_tokens` の入出力契約と処理意図を定義する。
+
 def _replace_plain_symbolic_tokens(text: str, make_token) -> str:
+    # 関数: `repl_unicode_greek_sub` の入出力契約と処理意図を定義する。
     def repl_unicode_greek_sub(match: re.Match[str]) -> str:
         sym = match.group("sym")
         sub = match.group("sub")
         sym_tex = _normalize_inline_math_payload(sym)
         sub_tex = _format_subscript_token(sub)
         return make_token(f"${sym_tex}_{{{sub_tex}}}$")
+
+    # 関数: `repl_latin_sub` の入出力契約と処理意図を定義する。
 
     def repl_latin_sub(match: re.Match[str]) -> str:
         base = match.group("base")
@@ -1082,6 +1133,8 @@ def _replace_plain_symbolic_tokens(text: str, make_token) -> str:
     )
     return converted
 
+
+# 関数: `_normalize_inline_math_payload` の入出力契約と処理意図を定義する。
 
 def _normalize_inline_math_payload(code_text: str) -> str:
     normalized = code_text.strip()
@@ -1134,6 +1187,8 @@ def _normalize_inline_math_payload(code_text: str) -> str:
     return normalized.strip()
 
 
+# 関数: `_normalize_math_command_spacing` の入出力契約と処理意図を定義する。
+
 def _normalize_math_command_spacing(text: str) -> str:
     normalized = text
     normalized = _GREEK_CMD_GLUE_RE.sub(r"\\\1 ", normalized)
@@ -1148,6 +1203,8 @@ def _normalize_math_command_spacing(text: str) -> str:
     return normalized
 
 
+# 関数: `_postprocess_latex_body` の入出力契約と処理意図を定義する。
+
 def _postprocess_latex_body(body: str) -> str:
     normalized = _normalize_math_command_spacing(body)
     normalized = re.sub(
@@ -1157,6 +1214,7 @@ def _postprocess_latex_body(body: str) -> str:
         flags=re.IGNORECASE,
     )
 
+    # 関数: `repl_texttt_math` の入出力契約と処理意図を定義する。
     def repl_texttt_math(match: re.Match[str]) -> str:
         raw_payload = match.group(1)
         payload = (
@@ -1214,6 +1272,7 @@ def _postprocess_latex_body(body: str) -> str:
         lambda m: r"\texttt{" + m.group(1).replace("_", r"\_") + "}",
         normalized,
     )
+    # 関数: `_texttt_allowbreak` の入出力契約と処理意図を定義する。
     def _texttt_allowbreak(match: re.Match[str]) -> str:
         payload = match.group(1)
         # 条件分岐: `len(payload) < 28 or r"\_" not in payload` を満たす経路を評価する。
@@ -1226,10 +1285,13 @@ def _postprocess_latex_body(body: str) -> str:
     return normalized
 
 
+# 関数: `_convert_inline` の入出力契約と処理意図を定義する。
+
 def _convert_inline(text: str) -> str:
     token_map: dict[str, str] = {}
     token_index = 0
 
+    # 関数: `make_token` の入出力契約と処理意図を定義する。
     def make_token(rendered: str) -> str:
         nonlocal token_index
         key = f"@@TOK{token_index}@@"
@@ -1310,6 +1372,7 @@ def _convert_inline(text: str) -> str:
 
     text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", repl_link, text)
 
+    # 関数: `repl_citation` の入出力契約と処理意図を定義する。
     def repl_citation(match: re.Match[str]) -> str:
         keys = [k.strip() for k in re.split(r"\s*[,;]\s*", match.group("keys")) if k.strip()]
         # 条件分岐: `not keys` を満たす経路を評価する。
@@ -1352,6 +1415,8 @@ def _convert_inline(text: str) -> str:
     return escaped
 
 
+# 関数: `_is_table_separator` の入出力契約と処理意図を定義する。
+
 def _is_table_separator(line: str) -> bool:
     s = line.strip()
     # 条件分岐: `"|" not in s` を満たす経路を評価する。
@@ -1361,6 +1426,8 @@ def _is_table_separator(line: str) -> bool:
     core = s.replace("|", "").replace(":", "").replace(" ", "")
     return bool(core) and set(core) <= {"-"}
 
+
+# 関数: `_parse_table_row` の入出力契約と処理意図を定義する。
 
 def _parse_table_row(line: str) -> list[str]:
     s = line.strip()
@@ -1420,6 +1487,8 @@ def _parse_table_row(line: str) -> list[str]:
     return cells
 
 
+# 関数: `_render_table` の入出力契約と処理意図を定義する。
+
 def _render_table(block_lines: list[str]) -> list[str]:
     # 条件分岐: `len(block_lines) < 2` を満たす経路を評価する。
     if len(block_lines) < 2:
@@ -1470,6 +1539,8 @@ def _render_table(block_lines: list[str]) -> list[str]:
     return out
 
 
+# 関数: `_markdown_to_latex` の入出力契約と処理意図を定義する。
+
 def _markdown_to_latex(
     md_text: str,
     *,
@@ -1495,6 +1566,7 @@ def _markdown_to_latex(
     appendix_started = False
     i = 0
 
+    # 関数: `flush_paragraph` の入出力契約と処理意図を定義する。
     def flush_paragraph() -> None:
         nonlocal paragraph
         # 条件分岐: `paragraph` を満たす経路を評価する。
@@ -1502,6 +1574,8 @@ def _markdown_to_latex(
             out.append(_convert_inline(" ".join(s.strip() for s in paragraph if s.strip())))
             out.append("")
             paragraph = []
+
+    # 関数: `close_list` の入出力契約と処理意図を定義する。
 
     def close_list() -> None:
         nonlocal list_mode
@@ -1992,6 +2066,8 @@ def _markdown_to_latex(
 
     return "\n".join(out).strip() + "\n"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     global _REFERENCE_KEYS, _REFERENCE_ORDER, _REFERENCE_TEXT, _USED_REFERENCE_KEYS

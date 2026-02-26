@@ -46,6 +46,8 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# クラス: `ObjectInput` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ObjectInput:
     key: str
@@ -60,6 +62,8 @@ class ObjectInput:
     asym_min: Optional[float]
     asym_max: Optional[float]
 
+
+# 関数: `_build_axisymmetric_pde_block` の入出力契約と処理意図を定義する。
 
 def _build_axisymmetric_pde_block(
     *,
@@ -170,9 +174,13 @@ def _build_axisymmetric_pde_block(
     }
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -180,6 +188,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(v: Any) -> Optional[float]:
     try:
@@ -195,14 +205,20 @@ def _to_float(v: Any) -> Optional[float]:
     return x
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -213,6 +229,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
             w.writerow({k: row.get(k) for k in fieldnames})
 
 
+# 関数: `_find_first_existing` の入出力契約と処理意図を定義する。
+
 def _find_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Path]:
     for p in paths:
         # 条件分岐: `p.exists()` を満たす経路を評価する。
@@ -221,6 +239,8 @@ def _find_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Path]:
 
     raise FileNotFoundError(f"no input found among: {[str(p) for p in paths]}")
 
+
+# 関数: `_extract_objects` の入出力契約と処理意図を定義する。
 
 def _extract_objects(payload: Dict[str, Any], keys: Sequence[str]) -> Tuple[List[ObjectInput], float]:
     beta = _to_float((payload.get("pmodel") or {}).get("beta"))
@@ -296,6 +316,8 @@ def _extract_objects(payload: Dict[str, Any], keys: Sequence[str]) -> Tuple[List
     return out, float(beta)
 
 
+# 関数: `_build_object_grids` の入出力契約と処理意図を定義する。
+
 def _build_object_grids(
     objects: Sequence[ObjectInput],
     *,
@@ -328,6 +350,8 @@ def _build_object_grids(
     return grids
 
 
+# 関数: `_solve_du_dr_cubic` の入出力契約と処理意図を定義する。
+
 def _solve_du_dr_cubic(q: np.ndarray, eta_nonlinear: float) -> np.ndarray:
     q_arr = np.asarray(q, dtype=float)
     eta = float(max(eta_nonlinear, 0.0))
@@ -343,6 +367,8 @@ def _solve_du_dr_cubic(q: np.ndarray, eta_nonlinear: float) -> np.ndarray:
 
     return p
 
+
+# 関数: `_build_n_profile` の入出力契約と処理意図を定義する。
 
 def _build_n_profile(
     item: Dict[str, Any],
@@ -398,6 +424,8 @@ def _build_n_profile(
         "u_outer": float(u[-1]),
     }
 
+
+# 関数: `_evaluate_from_precomputed` の入出力契約と処理意図を定義する。
 
 def _evaluate_from_precomputed(
     grids: Sequence[Dict[str, Any]],
@@ -481,6 +509,8 @@ def _evaluate_from_precomputed(
     return rows, float(chi2)
 
 
+# 関数: `_fit_parameters` の入出力契約と処理意図を定義する。
+
 def _fit_parameters(
     grids: Sequence[Dict[str, Any]],
     *,
@@ -547,6 +577,8 @@ def _fit_parameters(
     return best_lambda2, best_zeta, best_chi2, best_rows, best_solver_diag
 
 
+# 関数: `_build_checks` の入出力契約と処理意図を定義する。
+
 def _build_checks(
     *,
     n_objects: int,
@@ -563,6 +595,7 @@ def _build_checks(
 ) -> List[Dict[str, Any]]:
     checks: List[Dict[str, Any]] = []
 
+    # 関数: `add` の入出力契約と処理意図を定義する。
     def add(
         cid: str,
         metric: str,
@@ -691,6 +724,8 @@ def _build_checks(
     return checks
 
 
+# 関数: `_decision_from_checks` の入出力契約と処理意図を定義する。
+
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(c.get("id")) for c in checks if str(c.get("gate_level")) == "hard" and not bool(c.get("pass"))]
     watch_ids = [str(c.get("id")) for c in checks if str(c.get("gate_level")) != "hard" and not bool(c.get("pass"))]
@@ -723,6 +758,8 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
         "rule": "Pass if all hard/watch gates pass.",
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     path: Path,
@@ -806,6 +843,8 @@ def _plot(
     plt.close(fig)
 
 
+# 関数: `parse_args` の入出力契約と処理意図を定義する。
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Step 8.7.27.28: rotating BH photon ring direct audit with stationary-axisymmetric vacuum PDE block")
     parser.add_argument(
@@ -865,6 +904,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--step-tag", type=str, default="8.7.27.28", help="Step tag for output payload.")
     return parser.parse_args()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     args = parse_args()

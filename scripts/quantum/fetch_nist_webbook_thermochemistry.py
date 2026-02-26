@@ -12,13 +12,18 @@ from typing import Any, Optional
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -34,12 +39,16 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_sanitize_token` の入出力契約と処理意図を定義する。
+
 def _sanitize_token(s: str) -> str:
     s = str(s).strip().lower()
     s = re.sub(r"\s+", "_", s)
     s = re.sub(r"[^a-z0-9_]+", "", s)
     return s or "unknown"
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -55,7 +64,10 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# クラス: `_HTMLTableParser` の責務と境界条件を定義する。
+
 class _HTMLTableParser(HTMLParser):
+    # 関数: `__init__` の入出力契約と処理意図を定義する。
     def __init__(self) -> None:
         super().__init__()
         self.rows: list[list[str]] = []
@@ -63,6 +75,8 @@ class _HTMLTableParser(HTMLParser):
         self._in_cell = False
         self._cur_row: list[str] = []
         self._cur_cell_parts: list[str] = []
+
+    # 関数: `handle_starttag` の入出力契約と処理意図を定義する。
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         t = tag.lower()
@@ -77,6 +91,8 @@ class _HTMLTableParser(HTMLParser):
         if t in ("td", "th") and self._in_tr:
             self._in_cell = True
             self._cur_cell_parts = []
+
+    # 関数: `handle_endtag` の入出力契約と処理意図を定義する。
 
     def handle_endtag(self, tag: str) -> None:
         t = tag.lower()
@@ -100,11 +116,15 @@ class _HTMLTableParser(HTMLParser):
             self._cur_row = []
             self._in_tr = False
 
+    # 関数: `handle_data` の入出力契約と処理意図を定義する。
+
     def handle_data(self, data: str) -> None:
         # 条件分岐: `self._in_tr and self._in_cell` を満たす経路を評価する。
         if self._in_tr and self._in_cell:
             self._cur_cell_parts.append(data)
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(s: str) -> Optional[float]:
     ss = str(s).strip()
@@ -122,6 +142,8 @@ def _as_float(s: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_parse_value_plusminus` の入出力契約と処理意図を定義する。
 
 def _parse_value_plusminus(s: str) -> tuple[Optional[float], Optional[float]]:
     """
@@ -143,6 +165,8 @@ def _parse_value_plusminus(s: str) -> tuple[Optional[float], Optional[float]]:
     return _as_float(ss), None
 
 
+# クラス: `ThermoRecord` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ThermoRecord:
     kind: str
@@ -150,6 +174,8 @@ class ThermoRecord:
     unc_kj_per_mol: Optional[float]
     evidence: str
 
+
+# 関数: `_extract_thermo_gas_section` の入出力契約と処理意図を定義する。
 
 def _extract_thermo_gas_section(html: str) -> str:
     m = re.search(r'<h2 id="Thermo-Gas">', html, re.IGNORECASE)
@@ -163,9 +189,13 @@ def _extract_thermo_gas_section(html: str) -> str:
     return html[start:end]
 
 
+# 関数: `_extract_tables` の入出力契約と処理意図を定義する。
+
 def _extract_tables(section_html: str) -> list[str]:
     return re.findall(r'<table class="data"[^>]*>.*?</table>', section_html, flags=re.IGNORECASE | re.DOTALL)
 
+
+# 関数: `_select_dhf_kj_per_mol` の入出力契約と処理意図を定義する。
 
 def _select_dhf_kj_per_mol(tables_rows: list[list[list[str]]]) -> tuple[Optional[ThermoRecord], list[dict[str, Any]]]:
     """
@@ -300,6 +330,8 @@ def _select_dhf_kj_per_mol(tables_rows: list[list[list[str]]]) -> tuple[Optional
     best = max(candidates, key=lambda x: x[0])[1]
     return best, debug
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch NIST Chemistry WebBook thermochemistry section and cache ΔfH° values.")

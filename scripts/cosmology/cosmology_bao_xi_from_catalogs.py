@@ -80,6 +80,7 @@ _Z_SOURCE_TO_COLUMN_CANDIDATES: dict[str, list[str]] = {
 }
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         # NOTE: This script is often executed under WSL because Corrfunc is not reliably available on Windows.
@@ -135,6 +136,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_comoving_distance_lcdm_mpc_over_h` の入出力契約と処理意図を定義する。
+
 def _comoving_distance_lcdm_mpc_over_h(
     z: np.ndarray, *, omega_m: float, n_grid: int = 6000, z_grid_max: float | None = None
 ) -> np.ndarray:
@@ -168,6 +171,8 @@ def _comoving_distance_lcdm_mpc_over_h(
     return np.interp(z, z_grid, dm_grid).astype(np.float64, copy=False)
 
 
+# 関数: `_comoving_distance_pbg_static_mpc_over_h` の入出力契約と処理意図を定義する。
+
 def _comoving_distance_pbg_static_mpc_over_h(z: np.ndarray) -> np.ndarray:
     """
     Static background-P (exponential) distance mapping in [Mpc/h]:
@@ -181,6 +186,8 @@ def _comoving_distance_pbg_static_mpc_over_h(z: np.ndarray) -> np.ndarray:
 
     return (_C_OVER_100 * np.log(op)).astype(np.float64, copy=False)
 
+
+# 関数: `_z_cmb_dipole_from_obs_z` の入出力契約と処理意図を定義する。
 
 def _z_cmb_dipole_from_obs_z(
     z_obs: np.ndarray, *, ra_deg: np.ndarray, dec_deg: np.ndarray
@@ -229,6 +236,8 @@ def _z_cmb_dipole_from_obs_z(
     }
     return z_cmb, meta
 
+
+# 関数: `_select_redshift` の入出力契約と処理意図を定義する。
 
 def _select_redshift(cols: Dict[str, np.ndarray], *, z_source: str) -> tuple[np.ndarray, dict[str, Any]]:
     """
@@ -283,6 +292,8 @@ def _select_redshift(cols: Dict[str, np.ndarray], *, z_source: str) -> tuple[np.
     )
 
 
+# 関数: `_comoving_distance_mpc_over_h` の入出力契約と処理意図を定義する。
+
 def _comoving_distance_mpc_over_h(
     z: np.ndarray,
     *,
@@ -326,12 +337,16 @@ def _comoving_distance_mpc_over_h(
     raise ValueError(f"invalid distance model: {model}")
 
 
+# 関数: `_ones_like_any` の入出力契約と処理意図を定義する。
+
 def _ones_like_any(cols: Dict[str, np.ndarray]) -> np.ndarray:
     for v in cols.values():
         return np.ones(int(np.asarray(v).shape[0]), dtype=np.float64)
 
     return np.ones(0, dtype=np.float64)
 
+
+# 関数: `_weights_galaxy` の入出力契約と処理意図を定義する。
 
 def _weights_galaxy(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.ndarray, dict[str, Any]]:
     """
@@ -388,6 +403,8 @@ def _weights_galaxy(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
     raise ValueError(f"invalid weight scheme: {scheme} (expected boss_default/desi_default/fkp_only/none)")
 
 
+# 関数: `_weights_random` の入出力契約と処理意図を定義する。
+
 def _weights_random(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.ndarray, dict[str, Any]]:
     """
     Return per-object weights for the random catalog.
@@ -427,6 +444,8 @@ def _weights_random(cols: Dict[str, np.ndarray], *, scheme: str) -> tuple[np.nda
 
     raise ValueError(f"invalid weight scheme: {scheme} (expected boss_default/desi_default/fkp_only/none)")
 
+
+# 関数: `_weights_galaxy_recon` の入出力契約と処理意図を定義する。
 
 def _weights_galaxy_recon(
     cols: Dict[str, np.ndarray], *, scheme: str, pair_weight_scheme: str
@@ -468,6 +487,8 @@ def _weights_galaxy_recon(
     raise ValueError(f"invalid recon weight scheme: {scheme} (expected same/boss_recon)")
 
 
+# 関数: `_weights_random_recon` の入出力契約と処理意図を定義する。
+
 def _weights_random_recon(
     cols: Dict[str, np.ndarray], *, scheme: str, pair_weight_scheme: str
 ) -> tuple[np.ndarray, dict[str, Any]]:
@@ -495,10 +516,14 @@ def _weights_random_recon(
     raise ValueError(f"invalid recon weight scheme: {scheme} (expected same/boss_recon)")
 
 
+# 関数: `_load_npz` の入出力契約と処理意図を定義する。
+
 def _load_npz(path: Path) -> Dict[str, np.ndarray]:
     with np.load(path) as z:
         return {k: np.asarray(z[k]) for k in z.files}
 
+
+# 関数: `_sector_keys` の入出力契約と処理意図を定義する。
 
 def _sector_keys(cols: Dict[str, np.ndarray], *, sector_key: str) -> np.ndarray | None:
     sector_key = str(sector_key).strip().lower()
@@ -539,6 +564,8 @@ def _sector_keys(cols: Dict[str, np.ndarray], *, sector_key: str) -> np.ndarray 
     raise ValueError(f"invalid sector_key: {sector_key} (expected isect/ipoly_isect)")
 
 
+# 関数: `_resolve_manifest_path` の入出力契約と処理意図を定義する。
+
 def _resolve_manifest_path(p: str) -> Path:
     """
     Resolve manifest paths across Windows/WSL.
@@ -565,6 +592,8 @@ def _resolve_manifest_path(p: str) -> Path:
     return _ROOT / path
 
 
+# 関数: `_growth_rate_lcdm` の入出力契約と処理意図を定義する。
+
 def _growth_rate_lcdm(omega_m0: float, z: float) -> float:
     """
     Approximate linear growth rate f(z) ≈ Ωm(z)^0.55 for flat LCDM.
@@ -581,6 +610,8 @@ def _growth_rate_lcdm(omega_m0: float, z: float) -> float:
     return float(omz**0.55)
 
 
+# 関数: `_radec_to_xyz_mpc_over_h` の入出力契約と処理意図を定義する。
+
 def _radec_to_xyz_mpc_over_h(ra_deg: np.ndarray, dec_deg: np.ndarray, dist_mpc_over_h: np.ndarray) -> np.ndarray:
     ra = np.deg2rad(np.asarray(ra_deg, dtype=np.float64))
     dec = np.deg2rad(np.asarray(dec_deg, dtype=np.float64))
@@ -591,6 +622,8 @@ def _radec_to_xyz_mpc_over_h(ra_deg: np.ndarray, dec_deg: np.ndarray, dist_mpc_o
     z = r * np.sin(dec)
     return np.stack([x, y, z], axis=1).astype(np.float64, copy=False)
 
+
+# 関数: `_xyz_to_radec_mpc_over_h` の入出力契約と処理意図を定義する。
 
 def _xyz_to_radec_mpc_over_h(xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     xyz = np.asarray(xyz, dtype=np.float64)
@@ -605,6 +638,8 @@ def _xyz_to_radec_mpc_over_h(xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray, n
     dec_deg = np.rad2deg(dec).astype(np.float64, copy=False)
     return ra_deg, dec_deg, r.astype(np.float64, copy=False)
 
+
+# 関数: `_build_recon_box` の入出力契約と処理意図を定義する。
 
 def _build_recon_box(
     xyz_all: np.ndarray, *, ngrid: int, pad_fraction: float, box_shape: str
@@ -658,6 +693,8 @@ def _build_recon_box(
     }
     return origin, box, cell, meta
 
+
+# 関数: `_pca_rotation_matrix` の入出力契約と処理意図を定義する。
 
 def _pca_rotation_matrix(xyz_all: np.ndarray) -> tuple[np.ndarray, dict[str, Any]]:
     """
@@ -716,6 +753,8 @@ def _pca_rotation_matrix(xyz_all: np.ndarray) -> tuple[np.ndarray, dict[str, Any
     return r, meta
 
 
+# 関数: `_histogram3d_weighted` の入出力契約と処理意図を定義する。
+
 def _histogram3d_weighted(
     xyz: np.ndarray, w: np.ndarray, *, origin: np.ndarray, box: np.ndarray, ngrid: int
 ) -> np.ndarray:
@@ -738,6 +777,8 @@ def _histogram3d_weighted(
     h, _ = np.histogramdd(xyz, bins=edges, weights=w)
     return np.asarray(h, dtype=np.float32)
 
+
+# 関数: `_histogram3d_weighted_cic` の入出力契約と処理意図を定義する。
 
 def _histogram3d_weighted_cic(
     xyz: np.ndarray, w: np.ndarray, *, origin: np.ndarray, cell: np.ndarray, ngrid: int
@@ -788,6 +829,7 @@ def _histogram3d_weighted_cic(
 
     out = np.zeros((n, n, n), dtype=np.float32)
 
+    # 関数: `_add` の入出力契約と処理意図を定義する。
     def _add(ix: np.ndarray, iy: np.ndarray, iz: np.ndarray, ww: np.ndarray) -> None:
         m = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n) & (iz >= 0) & (iz < n) & np.isfinite(ww)
         # 条件分岐: `not np.any(m)` を満たす経路を評価する。
@@ -808,6 +850,8 @@ def _histogram3d_weighted_cic(
 
     return out
 
+
+# 関数: `_recon_displacement_grid_ngp` の入出力契約と処理意図を定義する。
 
 def _recon_displacement_grid_ngp(
     delta: np.ndarray,
@@ -971,6 +1015,8 @@ def _recon_displacement_grid_ngp(
     return psi_x, psi_y, psi_z, meta
 
 
+# 関数: `_sample_grid_ngp` の入出力契約と処理意図を定義する。
+
 def _sample_grid_ngp(
     psi_x: np.ndarray, psi_y: np.ndarray, psi_z: np.ndarray, *, xyz: np.ndarray, origin: np.ndarray, cell: np.ndarray
 ) -> np.ndarray:
@@ -992,6 +1038,8 @@ def _sample_grid_ngp(
     dz = np.asarray(psi_z[ix, iy, iz], dtype=np.float64)
     return np.stack([dx, dy, dz], axis=1).astype(np.float64, copy=False)
 
+
+# 関数: `_sample_grid_cic` の入出力契約と処理意図を定義する。
 
 def _sample_grid_cic(
     psi_x: np.ndarray, psi_y: np.ndarray, psi_z: np.ndarray, *, xyz: np.ndarray, origin: np.ndarray, cell: np.ndarray
@@ -1031,6 +1079,7 @@ def _sample_grid_cic(
     dy = np.zeros(int(xyz.shape[0]), dtype=np.float64)
     dz = np.zeros(int(xyz.shape[0]), dtype=np.float64)
 
+    # 関数: `_acc` の入出力契約と処理意図を定義する。
     def _acc(ix: np.ndarray, iy: np.ndarray, iz: np.ndarray, ww: np.ndarray) -> None:
         m = (ix >= 0) & (ix < n) & (iy >= 0) & (iy < n) & (iz >= 0) & (iz < n) & np.isfinite(ww)
         # 条件分岐: `not np.any(m)` を満たす経路を評価する。
@@ -1053,6 +1102,8 @@ def _sample_grid_cic(
 
     return np.stack([dx, dy, dz], axis=1).astype(np.float64, copy=False)
 
+
+# 関数: `_apply_reconstruction_grid` の入出力契約と処理意図を定義する。
 
 def _apply_reconstruction_grid(
     *,
@@ -1244,6 +1295,8 @@ def _apply_reconstruction_grid(
         psi_g = _sample_grid_ngp(psi_x, psi_y, psi_z, xyz=xyz_g, origin=origin, cell=cell)
         psi_r = _sample_grid_ngp(psi_x, psi_y, psi_z, xyz=xyz_r, origin=origin, cell=cell)
 
+    # 関数: `_psi_stats` の入出力契約と処理意図を定義する。
+
     def _psi_stats(psi: np.ndarray) -> dict[str, Any]:
         mag = np.linalg.norm(np.asarray(psi, dtype=np.float64), axis=1)
         # 条件分岐: `mag.size == 0` を満たす経路を評価する。
@@ -1332,6 +1385,8 @@ def _apply_reconstruction_grid(
     }
     return (ra_g_rec, dec_g_rec, d_g_rec), (ra_r_rec, dec_r_rec, d_r_rec), meta
 
+
+# 関数: `_apply_reconstruction_mw_multigrid` の入出力契約と処理意図を定義する。
 
 def _apply_reconstruction_mw_multigrid(
     *,
@@ -1441,6 +1496,8 @@ def _apply_reconstruction_mw_multigrid(
     return (ra_g2, dec_g2, d_g2), (ra_r2, dec_r2, d_r2), meta
 
 
+# 関数: `_coordinate_spec_signature` の入出力契約と処理意図を定義する。
+
 def _coordinate_spec_signature(coord: Dict[str, Any]) -> Dict[str, Any]:
     """
     Return a comparison-friendly coordinate_spec signature.
@@ -1478,6 +1535,8 @@ def _coordinate_spec_signature(coord: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_estimator_spec_signature` の入出力契約と処理意図を定義する。
+
 def _estimator_spec_signature(spec: Dict[str, Any]) -> Dict[str, Any]:
     """
     Return a comparison-friendly estimator_spec signature.
@@ -1504,6 +1563,8 @@ def _estimator_spec_signature(spec: Dict[str, Any]) -> Dict[str, Any]:
 
     return out
 
+
+# 関数: `_combine_coordinate_spec_by_cap` の入出力契約と処理意図を定義する。
 
 def _combine_coordinate_spec_by_cap(cap_packs: list[Dict[str, Any]]) -> Dict[str, Any]:
     """
@@ -1540,6 +1601,8 @@ def _combine_coordinate_spec_by_cap(cap_packs: list[Dict[str, Any]]) -> Dict[str
     return base
 
 
+# 関数: `_make_s_bins_file` の入出力契約と処理意図を定義する。
+
 def _make_s_bins_file(out_dir: Path, *, s_min: float, s_max: float, s_step: float) -> Tuple[Path, np.ndarray]:
     edges = np.arange(float(s_min), float(s_max) + 0.5 * float(s_step), float(s_step), dtype=float)
     # 条件分岐: `edges.size < 2` を満たす経路を評価する。
@@ -1559,6 +1622,8 @@ def _make_s_bins_file(out_dir: Path, *, s_min: float, s_max: float, s_step: floa
 
     return path, edges
 
+
+# 関数: `_corrfunc_paircounts_smu` の入出力契約と処理意図を定義する。
 
 def _corrfunc_paircounts_smu(
     *,
@@ -1663,6 +1728,8 @@ def _corrfunc_paircounts_smu(
     return wcounts_pos.reshape(-1)
 
 
+# 関数: `_pycorr_paircounts_smu_ls` の入出力契約と処理意図を定義する。
+
 def _pycorr_paircounts_smu_ls(
     *,
     ra_g: np.ndarray,
@@ -1742,6 +1809,8 @@ def _pycorr_paircounts_smu_ls(
 
     return {"DD_w": dd_pos.reshape(-1), "DR_w": dr_pos.reshape(-1), "RR_w": rr_pos.reshape(-1)}
 
+
+# 関数: `_xi_multipoles_from_catalogs` の入出力契約と処理意図を定義する。
 
 def _xi_multipoles_from_catalogs(
     *,
@@ -2326,6 +2395,8 @@ def _xi_multipoles_from_catalogs(
     }
 
 
+# 関数: `_xi_multipoles_from_paircounts` の入出力契約と処理意図を定義する。
+
 def _xi_multipoles_from_paircounts(
     *,
     dd_w: np.ndarray,
@@ -2368,6 +2439,8 @@ def _xi_multipoles_from_paircounts(
         "mu_edges": mu_edges,
     }
 
+
+# 関数: `_xi_multipoles_from_recon_paircounts` の入出力契約と処理意図を定義する。
 
 def _xi_multipoles_from_recon_paircounts(
     *,
@@ -2426,6 +2499,8 @@ def _xi_multipoles_from_recon_paircounts(
         "mu_edges": mu_edges,
     }
 
+
+# 関数: `_estimate_bao_peak_s2_xi` の入出力契約と処理意図を定義する。
 
 def _estimate_bao_peak_s2_xi(
     *,
@@ -2539,6 +2614,8 @@ def _estimate_bao_peak_s2_xi(
     }
 
 
+# 関数: `_estimate_bao_peak_s2_xi0` の入出力契約と処理意図を定義する。
+
 def _estimate_bao_peak_s2_xi0(
     *,
     s: np.ndarray,
@@ -2558,6 +2635,8 @@ def _estimate_bao_peak_s2_xi0(
         search_range=search_range,
     )
 
+
+# 関数: `_estimate_bao_feature_s2_xi` の入出力契約と処理意図を定義する。
 
 def _estimate_bao_feature_s2_xi(
     *,
@@ -2611,6 +2690,7 @@ def _estimate_bao_feature_s2_xi(
 
     win_idx = np.where(m_win)[0]
 
+    # 関数: `_refine` の入出力契約と処理意図を定義する。
     def _refine(idx: int, *, want_max: bool) -> tuple[float, float]:
         s_star = float(s[idx])
         y_star = float(y_res[idx])
@@ -2671,11 +2751,15 @@ def _estimate_bao_feature_s2_xi(
     }
 
 
+# 関数: `_p2_antiderivative` の入出力契約と処理意図を定義する。
+
 def _p2_antiderivative(mu: float) -> float:
     # ∫ P2(μ) dμ, where P2(μ)=0.5*(3μ^2-1)
     mu = float(mu)
     return 0.5 * (mu * mu * mu - mu)
 
+
+# 関数: `_p2_avg` の入出力契約と処理意図を定義する。
 
 def _p2_avg(mu0: float, mu1: float) -> float:
     mu0 = float(mu0)
@@ -2687,6 +2771,8 @@ def _p2_avg(mu0: float, mu1: float) -> float:
     return (_p2_antiderivative(mu1) - _p2_antiderivative(mu0)) / (mu1 - mu0)
 
 
+# 関数: `_xi_wedge_from_multipoles` の入出力契約と処理意図を定義する。
+
 def _xi_wedge_from_multipoles(*, xi0: np.ndarray, xi2: np.ndarray, mu0: float, mu1: float) -> tuple[np.ndarray, float]:
     """
     Approximate ξ_wedge(s) over μ∈[mu0,mu1] using only ξ0 and ξ2:
@@ -2697,10 +2783,14 @@ def _xi_wedge_from_multipoles(*, xi0: np.ndarray, xi2: np.ndarray, mu0: float, m
     return np.asarray(xi0, dtype=np.float64) + float(c2) * np.asarray(xi2, dtype=np.float64), float(c2)
 
 
+# 関数: `_float_token` の入出力契約と処理意図を定義する。
+
 def _float_token(x: float) -> str:
     s = f"{float(x):.6g}"
     return s.replace("-", "m").replace(".", "p")
 
+
+# 関数: `_zcut_tag` の入出力契約と処理意図を定義する。
 
 def _zcut_tag(*, z_bin: str, z_min: float | None, z_max: float | None) -> str:
     # 条件分岐: `z_min is None and z_max is None` を満たす経路を評価する。
@@ -2725,6 +2815,8 @@ def _zcut_tag(*, z_bin: str, z_min: float | None, z_max: float | None) -> str:
     return "_".join(parts)
 
 
+# 関数: `_sanitize_out_tag` の入出力契約と処理意図を定義する。
+
 def _sanitize_out_tag(tag: str) -> str:
     t = str(tag).strip()
     # 条件分岐: `not t` を満たす経路を評価する。
@@ -2742,6 +2834,8 @@ def _sanitize_out_tag(tag: str) -> str:
     s = "".join(out).strip("._-")
     return s[:80]
 
+
+# 関数: `_append_out_tag` の入出力契約と処理意図を定義する。
 
 def _append_out_tag(tag: str, suffix: str) -> str:
     """
@@ -2770,6 +2864,8 @@ def _append_out_tag(tag: str, suffix: str) -> str:
     return _sanitize_out_tag(f"{tag}_{suffix}")
 
 
+# 関数: `_reconfigure_stdio_best_effort` の入出力契約と処理意図を定義する。
+
 def _reconfigure_stdio_best_effort() -> None:
     """
     Best-effort mitigation for Windows cp932 consoles where argparse help can
@@ -2784,6 +2880,8 @@ def _reconfigure_stdio_best_effort() -> None:
     except Exception:
         pass
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     _reconfigure_stdio_best_effort()
@@ -3676,6 +3774,8 @@ def main(argv: list[str] | None = None) -> int:
                 xi_wedge_radial = np.asarray(xi_r, dtype=np.float64)
                 wedge_method = "xi_l0l2_approx"
 
+            # 関数: `_p2_avg` の入出力契約と処理意図を定義する。
+
             def _p2_avg(mu0: float, mu1: float) -> float:
                 # P2(μ) = (3μ^2-1)/2, ∫P2 dμ = (μ^3-μ)/2
                 mu0 = float(mu0)
@@ -3693,6 +3793,7 @@ def main(argv: list[str] | None = None) -> int:
             # wedge peak is ill-defined (common in low S/N subsamples).
             edge_margin = max(2.0 * float(args.s_step), 5.0)
 
+            # 関数: `_peak_near_edge` の入出力契約と処理意図を定義する。
             def _peak_near_edge(peak: Dict[str, Any]) -> bool:
                 try:
                     w0, w1 = peak.get("search_range", [None, None])
@@ -3914,6 +4015,7 @@ def main(argv: list[str] | None = None) -> int:
         "notes": [],
     }
 
+    # 関数: `_random_sampling_desc` の入出力契約と処理意図を定義する。
     def _random_sampling_desc(path: Path) -> str:
         name = str(path.name)
         # 条件分岐: `".prefix_" in name` を満たす経路を評価する。

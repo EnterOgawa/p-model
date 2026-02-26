@@ -50,6 +50,7 @@ from scripts.summary import worklog  # noqa: E402
 _C_KM_S = 299792.458
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -75,14 +76,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -107,6 +114,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_classify_sigma` の入出力契約と処理意図を定義する。
+
 def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     # 条件分岐: `not math.isfinite(abs_z)` を満たす経路を評価する。
     if not math.isfinite(abs_z):
@@ -125,6 +134,8 @@ def _classify_sigma(abs_z: float) -> Tuple[str, str]:
     return ("ng", "#d62728")
 
 
+# クラス: `BAOPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class BAOPoint:
     id: str
@@ -137,6 +148,8 @@ class BAOPoint:
     corr_dm_h: float
 
 
+# クラス: `DDRConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRConstraint:
     id: str
@@ -145,6 +158,8 @@ class DDRConstraint:
     epsilon0_sigma: float
     uses_bao: bool
 
+
+# クラス: `GaussianConstraint` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class GaussianConstraint:
@@ -156,6 +171,7 @@ class GaussianConstraint:
     uses_cmb: Optional[bool] = None
     assumes_cddr: Optional[bool] = None
 
+    # 関数: `is_independent` の入出力契約と処理意図を定義する。
     def is_independent(self) -> bool:
         # 条件分岐: `self.uses_bao is True` を満たす経路を評価する。
         if self.uses_bao is True:
@@ -173,6 +189,8 @@ class GaussianConstraint:
 
         return True
 
+
+# 関数: `_load_bao_points` の入出力契約と処理意図を定義する。
 
 def _load_bao_points(path: Path) -> List[BAOPoint]:
     rows = _read_json(path).get("constraints") or []
@@ -199,6 +217,8 @@ def _load_bao_points(path: Path) -> List[BAOPoint]:
     return out
 
 
+# 関数: `_load_boss_corr_for_dm_h` の入出力契約と処理意図を定義する。
+
 def _load_boss_corr_for_dm_h(
     boss_cov_path: Path,
     *,
@@ -219,6 +239,8 @@ def _load_boss_corr_for_dm_h(
 
     if len(params) != int(cij_1e4.shape[0]):
         raise ValueError("cij_1e4 size mismatch with parameters")
+
+    # 関数: `match_index` の入出力契約と処理意図を定義する。
 
     def match_index(kind: str, z: float) -> Tuple[int, Dict[str, Any]]:
         best_i = None
@@ -261,6 +283,8 @@ def _load_boss_corr_for_dm_h(
     return corr, matched
 
 
+# 関数: `_bao_pred_dm_h` の入出力契約と処理意図を定義する。
+
 def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
     op = 1.0 + float(z)
     # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
@@ -276,6 +300,8 @@ def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
     h_scaled = B * (op ** (1.0 + float(s_R)))
     return float(dm_scaled), float(h_scaled)
 
+
+# 関数: `_bao_pred_vec` の入出力契約と処理意図を定義する。
 
 def _bao_pred_vec(*, z_points: Sequence[float], s_R: float, B: float, use_dm: bool, use_h: bool) -> np.ndarray:
     # 条件分岐: `not (use_dm or use_h)` を満たす経路を評価する。
@@ -297,9 +323,13 @@ def _bao_pred_vec(*, z_points: Sequence[float], s_R: float, B: float, use_dm: bo
     return np.array(vec, dtype=float)
 
 
+# 関数: `_chi2_from_cov_inv` の入出力契約と処理意図を定義する。
+
 def _chi2_from_cov_inv(residual: np.ndarray, cov_inv: np.ndarray) -> float:
     return float(residual.T @ cov_inv @ residual)
 
+
+# 関数: `_build_covariance` の入出力契約と処理意図を定義する。
 
 def _build_covariance(
     *,
@@ -383,6 +413,8 @@ def _build_covariance(
     raise ValueError(f"unknown covariance mode: {mode}")
 
 
+# 関数: `_fit_bao_s_r` の入出力契約と処理意図を定義する。
+
 def _fit_bao_s_r(
     *,
     bao_points: Sequence[BAOPoint],
@@ -409,9 +441,12 @@ def _fit_bao_s_r(
 
     y_obs = np.array(y_obs_list, dtype=float)
 
+    # 関数: `chi2` の入出力契約と処理意図を定義する。
     def chi2(s_R: float, B: float) -> float:
         y_pred = _bao_pred_vec(z_points=z_points, s_R=float(s_R), B=float(B), use_dm=use_dm, use_h=use_h)
         return _chi2_from_cov_inv(y_obs - y_pred, cov_inv)
+
+    # 関数: `profile_B` の入出力契約と処理意図を定義する。
 
     def profile_B(s_R: float, *, n_grid: int = 2501) -> Tuple[float, float]:
         Bs = np.linspace(float(B_min), float(B_max), int(n_grid), dtype=float)
@@ -495,6 +530,8 @@ def _fit_bao_s_r(
     }
 
 
+# 関数: `_as_gaussian_list` の入出力契約と処理意図を定義する。
+
 def _as_gaussian_list(
     rows: Sequence[Dict[str, Any]],
     *,
@@ -536,6 +573,8 @@ def _as_gaussian_list(
     return out
 
 
+# 関数: `_load_ddr_constraints` の入出力契約と処理意図を定義する。
+
 def _load_ddr_constraints(path: Path) -> List[DDRConstraint]:
     rows = _read_json(path).get("constraints") or []
     out: List[DDRConstraint] = []
@@ -552,6 +591,8 @@ def _load_ddr_constraints(path: Path) -> List[DDRConstraint]:
 
     return out
 
+
+# 関数: `_load_fixed_pt_pe` の入出力契約と処理意図を定義する。
 
 def _load_fixed_pt_pe(
     *,
@@ -596,6 +637,8 @@ def _load_fixed_pt_pe(
 
     return p_t, pe
 
+
+# 関数: `_wls_fit_candidate` の入出力契約と処理意図を定義する。
 
 def _wls_fit_candidate(
     *,
@@ -677,16 +720,22 @@ def _wls_fit_candidate(
     }
 
 
+# 関数: `_choose_best` の入出力契約と処理意図を定義する。
+
 def _choose_best(candidates: Sequence[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not candidates` を満たす経路を評価する。
     if not candidates:
         return None
+
+    # 関数: `key` の入出力契約と処理意図を定義する。
 
     def key(c: Dict[str, Any]) -> Tuple[float, float]:
         return (float(c["fit"]["max_abs_z"]), float(c["fit"]["chi2"]))
 
     return min(candidates, key=key)
 
+
+# 関数: `_evaluate_candidate_for_ddr` の入出力契約と処理意図を定義する。
 
 def _evaluate_candidate_for_ddr(
     *,
@@ -727,6 +776,8 @@ def _evaluate_candidate_for_ddr(
 
     return _choose_best(candidates)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -796,6 +847,8 @@ def _plot(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()

@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -23,9 +24,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nndc_e2plus_keV_by_zn` の入出力契約と処理意図を定義する。
 
 def _load_nndc_e2plus_keV_by_zn(path: Path) -> dict[tuple[int, int], float]:
     extracted = _load_json(path)
@@ -57,6 +62,8 @@ def _load_nndc_e2plus_keV_by_zn(path: Path) -> dict[tuple[int, int], float]:
 
     return out
 
+
+# 関数: `_load_nudat3_spectroscopy_maps` の入出力契約と処理意図を定義する。
 
 def _load_nudat3_spectroscopy_maps(path: Path) -> dict[str, dict[tuple[int, int], float]]:
     """
@@ -111,6 +118,8 @@ def _load_nudat3_spectroscopy_maps(path: Path) -> dict[str, dict[tuple[int, int]
 
     return out
 
+
+# 関数: `_beta2_for_zn` の入出力契約と処理意図を定義する。
 
 def _beta2_for_zn(
     *,
@@ -176,6 +185,8 @@ def _beta2_for_zn(
     return 0.0, "missing"
 
 
+# 関数: `_volume_conserving_spheroid_axes_from_beta2` の入出力契約と処理意図を定義する。
+
 def _volume_conserving_spheroid_axes_from_beta2(*, beta2: float, include_beta2: bool) -> tuple[float, float]:
     """
     Return (a, c) for a volume-conserving axisymmetric spheroid derived from β2.
@@ -213,6 +224,8 @@ def _volume_conserving_spheroid_axes_from_beta2(*, beta2: float, include_beta2: 
 
     return float(a), float(c)
 
+
+# 関数: `_coulomb_shape_factor_from_beta2` の入出力契約と処理意図を定義する。
 
 def _coulomb_shape_factor_from_beta2(*, beta2: float, include_beta2: bool) -> float:
     """
@@ -273,6 +286,8 @@ def _coulomb_shape_factor_from_beta2(*, beta2: float, include_beta2: bool) -> fl
         return (float(q) ** (1.0 / 3.0)) * (math.asin(float(e)) / float(e))
 
 
+# 関数: `_surface_area_factor_from_beta2` の入出力契約と処理意図を定義する。
+
 def _surface_area_factor_from_beta2(*, beta2: float, include_beta2: bool) -> float:
     """
     Dimensionless surface-area factor g(beta2)=S(ellipsoid)/S(sphere) for a volume-conserving spheroid.
@@ -326,6 +341,8 @@ def _surface_area_factor_from_beta2(*, beta2: float, include_beta2: bool) -> flo
     return float(S) / float(S0)
 
 
+# 関数: `_extract_potential_sets` の入出力契約と処理意図を定義する。
+
 def _extract_potential_sets(*, metrics_7138: dict) -> dict[int, dict[str, object]]:
     """
     Extract Step 7.13.8 candidate potentials for eq18/eq19.
@@ -339,6 +356,8 @@ def _extract_potential_sets(*, metrics_7138: dict) -> dict[int, dict[str, object
     # 条件分岐: `not isinstance(results, list) or not results` を満たす経路を評価する。
     if not isinstance(results, list) or not results:
         raise SystemExit("[fail] invalid 7.13.8 metrics: results_by_dataset missing/empty")
+
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
 
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
@@ -400,6 +419,8 @@ def _extract_potential_sets(*, metrics_7138: dict) -> dict[int, dict[str, object
     return out
 
 
+# 関数: `_sharp_radius_from_rms` の入出力契約と処理意図を定義する。
+
 def _sharp_radius_from_rms(r_rms_fm: float) -> float:
     """
     For a uniform sphere of radius R, rms radius is sqrt(3/5) R.
@@ -407,6 +428,8 @@ def _sharp_radius_from_rms(r_rms_fm: float) -> float:
     """
     return math.sqrt(5.0 / 3.0) * float(r_rms_fm)
 
+
+# 関数: `_hf_base_energy_uniform_sphere_mev_per_a` の入出力契約と処理意図を定義する。
 
 def _hf_base_energy_uniform_sphere_mev_per_a(
     *,
@@ -480,6 +503,8 @@ def _hf_base_energy_uniform_sphere_mev_per_a(
     return {"T": float(t_total), "U_H": float(u_h), "U_F": float(u_f), "Coul": float(e_coul), "E_base": float(e_base)}
 
 
+# 関数: `_overlap_integral_J` の入出力契約と処理意図を定義する。
+
 def _overlap_integral_J(*, a: float, b: float, R: float) -> float:
     """
     J(a,b;R) = ∫_a^b r^2 * V_overlap(r;R) dr, where
@@ -500,12 +525,16 @@ def _overlap_integral_J(*, a: float, b: float, R: float) -> float:
     if b2 <= a2:
         return 0.0
 
+    # 関数: `F` の入出力契約と処理意図を定義する。
+
     def F(x: float) -> float:
         # ∫ r^2 V_overlap dr = π/12 * (16/3 R^3 r^3 - 3 R^2 r^4 + r^6/6)
         return (math.pi / 12.0) * ((16.0 / 3.0) * R**3 * x**3 - 3.0 * R**2 * x**4 + x**6 / 6.0)
 
     return float(F(b2) - F(a2))
 
+
+# 関数: `_mean_field_accum_mev_fm6` の入出力契約と処理意図を定義する。
 
 def _mean_field_accum_mev_fm6(
     *,
@@ -547,6 +576,8 @@ def _mean_field_accum_mev_fm6(
     return float(accum)
 
 
+# 関数: `_mean_field_potential_energy_per_particle_mev` の入出力契約と処理意図を定義する。
+
 def _mean_field_potential_energy_per_particle_mev(
     *,
     R_sharp_fm: float,
@@ -581,6 +612,8 @@ def _mean_field_potential_energy_per_particle_mev(
     return float((2.0 * math.pi * float(rho_fm3) / float(V_sphere)) * float(accum))
 
 
+# 関数: `_fermi_kinetic_energy_per_particle_mev` の入出力契約と処理意図を定義する。
+
 def _fermi_kinetic_energy_per_particle_mev(*, rho_fm3: float, hbarc_mev_fm: float, m_nucleon_c2_mev: float) -> tuple[float, float]:
     """
     Non-relativistic symmetric Fermi gas (degeneracy g=4):
@@ -597,6 +630,8 @@ def _fermi_kinetic_energy_per_particle_mev(*, rho_fm3: float, hbarc_mev_fm: floa
     ef = (float(hbarc_mev_fm) ** 2) * (kf**2) / (2.0 * float(m_nucleon_c2_mev))
     return float(kf), float((3.0 / 5.0) * ef)
 
+
+# 関数: `_fermi_kinetic_energy_two_component_mev_per_a` の入出力契約と処理意図を定義する。
 
 def _fermi_kinetic_energy_two_component_mev_per_a(
     *,
@@ -629,6 +664,7 @@ def _fermi_kinetic_energy_two_component_mev_per_a(
     rho_p = float(Z) / float(volume_fm3)
     rho_n = float(N) / float(volume_fm3)
 
+    # 関数: `comp` の入出力契約と処理意図を定義する。
     def comp(*, rho: float) -> tuple[float, float]:
         # g=2 -> kF=(6π^2 ρ / g)^(1/3) = (3π^2 ρ)^(1/3)
         if not (math.isfinite(rho) and rho > 0):
@@ -654,6 +690,8 @@ def _fermi_kinetic_energy_two_component_mev_per_a(
     }
 
 
+# 関数: `_coulomb_energy_uniform_sphere_mev_per_a` の入出力契約と処理意図を定義する。
+
 def _coulomb_energy_uniform_sphere_mev_per_a(*, Z: int, A: int, R_sharp_fm: float) -> float:
     """
     Coulomb self-energy of a uniformly-charged sphere (very rough):
@@ -673,6 +711,8 @@ def _coulomb_energy_uniform_sphere_mev_per_a(*, Z: int, A: int, R_sharp_fm: floa
     e_total = (3.0 / 5.0) * e2_mev_fm * float(Z * (Z - 1)) / float(R_sharp_fm)
     return float(e_total / float(A))
 
+
+# 関数: `_mean_field_potential_energy_two_component_mev_per_a` の入出力契約と処理意図を定義する。
 
 def _mean_field_potential_energy_two_component_mev_per_a(
     *,
@@ -734,6 +774,8 @@ def _mean_field_potential_energy_two_component_mev_per_a(
     return {"rho_p_fm3": float(rho_p), "rho_n_fm3": float(rho_n), "U_pot_MeV_per_A": float(u_per_a)}
 
 
+# 関数: `_j1` の入出力契約と処理意図を定義する。
+
 def _j1(x: float) -> float:
     # spherical Bessel j1(x)
     ax = abs(float(x))
@@ -744,6 +786,8 @@ def _j1(x: float) -> float:
     return math.sin(float(x)) / float(x) ** 2 - math.cos(float(x)) / float(x)
 
 
+# 関数: `_slater_f` の入出力契約と処理意図を定義する。
+
 def _slater_f(x: float) -> float:
     # f(x) = 3 j1(x) / x, with f(0)=1
     ax = abs(float(x))
@@ -753,6 +797,8 @@ def _slater_f(x: float) -> float:
 
     return float(3.0 * _j1(float(x)) / float(x))
 
+
+# 関数: `_integral_I0_mev_fm3` の入出力契約と処理意図を定義する。
 
 def _integral_I0_mev_fm3(*, geometry: dict[str, float], V1_MeV: float, V2_MeV: float, Vb_MeV: float, Vt_MeV: float) -> float:
     """
@@ -770,6 +816,8 @@ def _integral_I0_mev_fm3(*, geometry: dict[str, float], V1_MeV: float, V2_MeV: f
     ]
     return float(4.0 * math.pi * sum(v * (b**3 - a**3) / 3.0 for a, b, v in segs))
 
+
+# 関数: `_integral_Iex_mev_fm3` の入出力契約と処理意図を定義する。
 
 def _integral_Iex_mev_fm3(*, geometry: dict[str, float], V1_MeV: float, V2_MeV: float, Vb_MeV: float, Vt_MeV: float, kf_fm1: float) -> float:
     """
@@ -818,6 +866,8 @@ def _integral_Iex_mev_fm3(*, geometry: dict[str, float], V1_MeV: float, V2_MeV: 
     return float(4.0 * math.pi * total)
 
 
+# 関数: `_resolve_effective_potential_metrics_path` の入出力契約と処理意図を定義する。
+
 def _resolve_effective_potential_metrics_path(*, out_dir: Path) -> Path:
     """
     Resolve the canonical effective-potential metrics used as the fixed nuclear-scale u-profile.
@@ -844,6 +894,8 @@ def _resolve_effective_potential_metrics_path(*, out_dir: Path) -> Path:
     )
 
 
+# 関数: `_potential_metrics_input_entry` の入出力契約と処理意図を定義する。
+
 def _potential_metrics_input_entry(*, metrics_path: Path, metrics_obj: dict | None = None) -> dict[str, object]:
     entry: dict[str, object] = {"path": str(metrics_path), "sha256": _sha256(metrics_path)}
     # 条件分岐: `isinstance(metrics_obj, dict)` を満たす経路を評価する。
@@ -864,6 +916,8 @@ def _potential_metrics_input_entry(*, metrics_path: Path, metrics_obj: dict | No
 
     return entry
 
+
+# 関数: `_load_common_inputs` の入出力契約と処理意図を定義する。
 
 def _load_common_inputs(*, out_dir: Path) -> dict[str, object]:
     metrics_7138_path = _resolve_effective_potential_metrics_path(out_dir=out_dir)
@@ -904,6 +958,8 @@ def _load_common_inputs(*, out_dir: Path) -> dict[str, object]:
         "eq_labels": eq_labels,
     }
 
+
+# 関数: `_run_step_7_13_13` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: float) -> None:
     common = _load_common_inputs(out_dir=out_dir)
@@ -1194,6 +1250,8 @@ def _run_step_7_13_13(*, out_dir: Path, calibrate_key: str, pn_triplet_weight: f
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_14` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: int, derivative_eps_rel: float) -> None:
     common = _load_common_inputs(out_dir=out_dir)
     metrics_7138_path = Path(str(common["metrics_7138_path"]))
@@ -1218,6 +1276,7 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
 
     repulsion_power = 2.0
 
+    # 関数: `eval_base` の入出力契約と処理意図を定義する。
     def eval_base(*, A: int, Z: int, N: int, R_sharp_fm: float, eq: int) -> dict[str, float]:
         # 条件分岐: `not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A)` を満たす経路を評価する。
         if not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A):
@@ -1525,6 +1584,8 @@ def _run_step_7_13_14(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: int, derivative_eps_rel: float) -> None:
     """
     Step 7.13.15 (initial): Explicitly include an exchange/Fock (Pauli) term for like-nucleon pairs
@@ -1554,6 +1615,7 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
 
     repulsion_power = 2.0
 
+    # 関数: `eval_base` の入出力契約と処理意図を定義する。
     def eval_base(*, A: int, Z: int, N: int, R_sharp_fm: float, eq: int) -> dict[str, float]:
         # 条件分岐: `not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A)` を満たす経路を評価する。
         if not (A > 0 and Z >= 0 and N >= 0 and (Z + N) == A):
@@ -1887,6 +1949,8 @@ def _run_step_7_13_15(*, out_dir: Path, pn_triplet_weight: float, freeze_min_a: 
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 関数: `_run_step_7_13_15_2` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_2(*, out_dir: Path) -> None:
     """
@@ -2258,6 +2322,8 @@ def _run_step_7_13_15_2(*, out_dir: Path) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_3` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_3(*, out_dir: Path) -> None:
     """
     Step 7.13.15.3 (initial): Add an additional *dataset/systematic* term that represents the
@@ -2373,6 +2439,8 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
                 "z_mean": float(z),
             }
         )
+
+    # 関数: `_median` の入出力契約と処理意図を定義する。
 
     def _median(vals: list[float]) -> float:
         v = sorted(vals)
@@ -2554,6 +2622,8 @@ def _run_step_7_13_15_3(*, out_dir: Path) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_4` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     """
     Step 7.13.15.4 (initial): Add an independent radii-source systematic for light nuclei where
@@ -2607,6 +2677,8 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     # 条件分岐: `not isinstance(constants, dict)` を満たす経路を評価する。
     if not isinstance(constants, dict):
         raise SystemExit(f"[fail] invalid CODATA extracted_values.json: constants missing/invalid: {codata_path}")
+
+    # 関数: `_codata_r_fm` の入出力契約と処理意図を定義する。
 
     def _codata_r_fm(name: str) -> tuple[float, float]:
         c = constants.get(name)
@@ -2902,6 +2974,8 @@ def _run_step_7_13_15_4(*, out_dir: Path) -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 関数: `_run_step_7_13_15_5` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
     """
@@ -3261,6 +3335,8 @@ def _run_step_7_13_15_5(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_6` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) -> None:
     """
     Step 7.13.15.6 (initial): Expand the dataset (AME2020 × IAEA charge radii join) and
@@ -3387,6 +3463,8 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
             "sigma_B_over_A_obs_MeV": (float(ba_sig_keV) / 1000.0) if math.isfinite(ba_sig_keV) else 0.0,
             "symbol": str(r.get("symbol", "")),
         }
+
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
 
     def fnum(s: str) -> float:
         t = s.strip()
@@ -3649,13 +3727,19 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
     if not out_rows:
         raise SystemExit("[fail] no valid computed rows for Step 7.13.15.6")
 
+    # 関数: `_rms` の入出力契約と処理意図を定義する。
+
     def _rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `_median` の入出力契約と処理意図を定義する。
 
     def _median(vals: list[float]) -> float:
         v = sorted(vals)
         m = len(v) // 2
         return v[m] if (len(v) % 2 == 1) else 0.5 * (v[m - 1] + v[m])
+
+    # 関数: `_mad_to_sigma` の入出力契約と処理意図を定義する。
 
     def _mad_to_sigma(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -3681,6 +3765,7 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
     # A bins (surface proxy)
 
     a_bins = [(2, 16), (16, 40), (40, 100), (100, 200), (200, 10**9)]
+    # 関数: `bin_label` の入出力契約と処理意図を定義する。
     def bin_label(a: int) -> str:
         for lo, hi in a_bins:
             # 条件分岐: `lo <= a < hi` を満たす経路を評価する。
@@ -3968,6 +4053,8 @@ def _run_step_7_13_15_6(*, out_dir: Path, domain_min_a: int, max_nuclei: int) ->
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_7` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_7(
     *,
     out_dir: Path,
@@ -4029,10 +4116,14 @@ def _run_step_7_13_15_7(
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.7 expects per_eq with eq18/eq19; got: {eq_keys}")
 
+    # 関数: `median` の入出力契約と処理意図を定義する。
+
     def median(vals: list[float]) -> float:
         v = sorted(vals)
         m = len(v) // 2
         return v[m] if (len(v) % 2 == 1) else 0.5 * (v[m - 1] + v[m])
+
+    # 関数: `mad_to_sigma` の入出力契約と処理意図を定義する。
 
     def mad_to_sigma(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -4042,6 +4133,8 @@ def _run_step_7_13_15_7(
         m = median(vals)
         mad = median([abs(x - m) for x in vals])
         return float(1.4826 * mad)
+
+    # 関数: `ols_fit` の入出力契約と処理意図を定義する。
 
     def ols_fit(xs: list[float], ys: list[float]) -> tuple[float, float]:
         # y = a + b x
@@ -4280,6 +4373,8 @@ def _run_step_7_13_15_7(
 
     if not out_rows:
         raise SystemExit("[fail] no valid output rows for Step 7.13.15.7")
+
+    # 関数: `rms` の入出力契約と処理意図を定義する。
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
@@ -4521,6 +4616,8 @@ def _run_step_7_13_15_7(
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_8` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.8 (initial): Add an explicit *shell* systematic term (magic Z/N) as a model-error
@@ -4565,10 +4662,14 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
     if set(eq_keys) != {"18", "19"}:
         raise SystemExit(f"[fail] Step 7.13.15.8 expects per_eq with eq18/eq19; got: {eq_keys}")
 
+    # 関数: `median` の入出力契約と処理意図を定義する。
+
     def median(vals: list[float]) -> float:
         v = sorted(vals)
         m2 = len(v) // 2
         return v[m2] if (len(v) % 2 == 1) else 0.5 * (v[m2 - 1] + v[m2])
+
+    # 関数: `mad_to_sigma` の入出力契約と処理意図を定義する。
 
     def mad_to_sigma(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -4736,6 +4837,8 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
 
         item["per_eq"] = per_eq_out
         out_rows.append(item)
+
+    # 関数: `rms` の入出力契約と処理意図を定義する。
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
@@ -4925,6 +5028,8 @@ def _run_step_7_13_15_8(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_9` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.9 (initial): Use separation energies (S_n, S_2n) and shell-gap diagnostics as a
@@ -4978,12 +5083,15 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
 
     MAGIC = {2, 8, 20, 28, 50, 82, 126}
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
 
         return float(x)
+
+    # 関数: `rms` の入出力契約と処理意図を定義する。
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
@@ -5228,6 +5336,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     sn_resid_mean = [float(r["residual_mean_MeV"]) for r in sn_rows]
     s2n_resid_mean = [float(r["residual_mean_MeV"]) for r in s2n_rows]
 
+    # 関数: `summarize_by_magic` の入出力契約と処理意図を定義する。
     def summarize_by_magic(records: list[dict[str, object]]) -> dict[str, object]:
         magic_vals = [float(r["residual_mean_MeV"]) for r in records if bool(r.get("magic_any_pair"))]
         non_vals = [float(r["residual_mean_MeV"]) for r in records if not bool(r.get("magic_any_pair"))]
@@ -5237,6 +5346,8 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
             "magic_any_pair": {"n": len(magic_vals), "rms_MeV": rms(magic_vals)},
             "nonmagic_pair": {"n": len(non_vals), "rms_MeV": rms(non_vals)},
         }
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(rows: list[dict[str, object]], *, key_label: str) -> dict[str, object]:
         by_magic: dict[int, list[dict[str, object]]] = {}
@@ -5276,6 +5387,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 9), constrained_layout=True)
     ax_sn, ax_s2n, ax_gsn, ax_gs2n = axes.flat
 
+    # 関数: `_scatter_residual` の入出力契約と処理意図を定義する。
     def _scatter_residual(ax, records: list[dict[str, object]], *, title: str) -> None:
         # 条件分岐: `not records` を満たす経路を評価する。
         if not records:
@@ -5304,6 +5416,7 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     _scatter_residual(ax_sn, sn_rows, title=f"S_n residuals (domain A>={domain_min_a})")
     _scatter_residual(ax_s2n, s2n_rows, title=f"S_2n residuals (domain A>={domain_min_a})")
 
+    # 関数: `_scatter_gaps` の入出力契約と処理意図を定義する。
     def _scatter_gaps(ax, rows: list[dict[str, object]], *, title: str, xlab: str, ylab: str) -> None:
         # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
@@ -5436,6 +5549,8 @@ def _run_step_7_13_15_9(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_10` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.10 (initial): Promote shell into a *deterministic correction* with the smallest
@@ -5490,6 +5605,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     MAGIC = {2, 8, 20, 28, 50, 82, 126}
     TRAIN_MAGIC_N = {50, 82}
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -5497,8 +5613,12 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
 
         return float(x)
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
+
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `median` の入出力契約と処理意図を定義する。
 
     def median(vals: list[float]) -> float:
         v = sorted(vals)
@@ -5778,16 +5898,20 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                 }
             )
 
+    # 関数: `summarize_pairs` の入出力契約と処理意図を定義する。
+
     def summarize_pairs(obs_pairs: list[dict[str, object]], pred_pairs: list[dict[str, object]], corr_pairs: list[dict[str, object]]) -> dict[str, object]:
         resid_unc = [float(p["value_MeV"]) - float(o["value_MeV"]) for o, p in zip(obs_pairs, pred_pairs, strict=True)]
         resid_cor = [float(c["value_MeV"]) - float(o["value_MeV"]) for o, c in zip(obs_pairs, corr_pairs, strict=True)]
 
+        # 関数: `region_mask` の入出力契約と処理意図を定義する。
         def region_mask(pairs: list[dict[str, object]], key: str) -> list[bool]:
             return [bool(r.get(key)) for r in pairs]
 
         train_mask = region_mask(pred_pairs, "magicN_train_pair")
         other_mask = region_mask(pred_pairs, "magicN_other_pair")
 
+        # 関数: `masked` の入出力契約と処理意図を定義する。
         def masked(vals: list[float], mask: list[bool]) -> list[float]:
             return [v for v, m2 in zip(vals, mask, strict=True) if m2]
 
@@ -5806,6 +5930,8 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
                 "rms_corrected_MeV": rms(masked(resid_cor, other_mask)),
             },
         }
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(rows: list[dict[str, object]]) -> dict[str, object]:
         resid_unc = [float(r["resid_uncorrected_MeV"]) for r in rows]
@@ -5857,6 +5983,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 9), constrained_layout=True)
     ax_sn, ax_s2n, ax_gsn, ax_gs2n = axes.flat
 
+    # 関数: `plot_residuals` の入出力契約と処理意図を定義する。
     def plot_residuals(ax, obs_pairs, pred_pairs, corr_pairs, *, title: str) -> None:
         xs = [int(r["N_parent"]) for r in pred_pairs]
         r_unc = [float(p["value_MeV"]) - float(o["value_MeV"]) for o, p in zip(obs_pairs, pred_pairs, strict=True)]
@@ -5875,6 +6002,7 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     plot_residuals(ax_sn, sn_obs_pairs, sn_pred_pairs, sn_corr_pairs, title=f"S_n residuals (A>={domain_min_a})")
     plot_residuals(ax_s2n, s2n_obs_pairs, s2n_pred_pairs, s2n_corr_pairs, title=f"S_2n residuals (A>={domain_min_a})")
 
+    # 関数: `plot_gaps` の入出力契約と処理意図を定義する。
     def plot_gaps(ax, rows: list[dict[str, object]], *, title: str, xlab: str, ylab: str) -> None:
         # 条件分岐: `not rows` を満たす経路を評価する。
         if not rows:
@@ -6060,6 +6188,8 @@ def _run_step_7_13_15_10(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_11` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.11 (initial): Make shell structure explicit as *quantized bound modes* via a
@@ -6105,6 +6235,8 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
+
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -6112,18 +6244,23 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
 
         return float(x)
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
+
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
     MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
     TRAIN_MAGIC_N = {50, 82}
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
     def hw_mev(A: int) -> float:
         # 条件分岐: `A <= 0` を満たす経路を評価する。
         if A <= 0:
             return float("nan")
 
         return float(41.0 * (float(A) ** (-1.0 / 3.0)))
+
+    # 関数: `shell_S` の入出力契約と処理意図を定義する。
 
     def shell_S(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -6285,6 +6422,7 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     # Fit κ on gap_n for magic N in TRAIN_MAGIC_N.
     fit_pairs: list[tuple[float, float]] = []  # (y, x) for y=(obs - pred_unc), x=delta_gap_per_kappa
 
+    # 関数: `corrected_binding` の入出力契約と処理意図を定義する。
     def corrected_binding(*, kappa: float) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), A in a_by_zn.items():
@@ -6378,6 +6516,7 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
         },
     }
 
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
     def summarize_gaps(obs_gap, pred_unc, pred_cor) -> dict[str, object]:
         rows_all: list[tuple[int, float, float]] = []
         rows_train: list[tuple[int, float, float]] = []
@@ -6397,6 +6536,8 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((int(N0), r_u, r_c))
             else:
                 rows_other.append((int(N0), r_u, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -6426,6 +6567,7 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 9), constrained_layout=True)
     ax_sn, ax_s2n, ax_gsn, ax_gs2n = axes.flat
 
+    # 関数: `scatter_sep` の入出力契約と処理意図を定義する。
     def scatter_sep(ax, obs_map, pred_u, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_c]
         ys_u = [float(pred_u[(Z, N)] - obs_map[(Z, N)]) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_c]
@@ -6444,6 +6586,7 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     scatter_sep(ax_sn, sn_obs, sn_pred_unc, sn_pred_cor, title=f"S_n residuals (A>={domain_min_a})")
     scatter_sep(ax_s2n, s2n_obs, s2n_pred_unc, s2n_pred_cor, title=f"S_2n residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float]] = []  # (N0, obs, u, c)
         for (Z, N0, dN), g_obs in gap_obs.items():
@@ -6555,6 +6698,8 @@ def _run_step_7_13_15_11(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_12` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.12 (initial): Strengthen the shell-quantization mapping by introducing a minimal
@@ -6599,12 +6744,16 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
+
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
 
         return float(x)
+
+    # 関数: `rms` の入出力契約と処理意図を定義する。
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
@@ -6613,8 +6762,11 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     TRAIN_MAGIC_N = {50, 82}
     TRAIN_MAGIC_Z = {50, 82}
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `shell_S` の入出力契約と処理意図を定義する。
 
     def shell_S(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -6744,6 +6896,8 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -6755,6 +6909,8 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (Z, N_magic, step)
@@ -6773,6 +6929,8 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (N, Z_magic, step)
@@ -6895,8 +7053,11 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_cor = build_gap_p(sp_pred_cor, step=1)
     gap_s2p_pred_cor = build_gap_p(s2p_pred_cor, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(obs_gap, pred_unc, pred_cor, *, train_set: set[int]) -> dict[str, object]:
         rows_all: list[tuple[int, float, float]] = []
@@ -6917,6 +7078,8 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((int(N0), r_u, r_c))
             else:
                 rows_other.append((int(N0), r_u, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -6981,6 +7144,7 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 9), constrained_layout=True)
     ax_sn, ax_sp, ax_gsn, ax_gsp = axes.flat
 
+    # 関数: `scatter_sep` の入出力契約と処理意図を定義する。
     def scatter_sep(ax, obs_map, pred_u, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_c]
         ys_u = [float(pred_u[(Z, N)] - obs_map[(Z, N)]) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_c]
@@ -7015,6 +7179,7 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
 
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_cor, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float]] = []  # (N0, obs, u, c)
         for (Z, N0, dN), g_obs in gap_obs.items():
@@ -7117,6 +7282,8 @@ def _run_step_7_13_15_12(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_13` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.13 (initial): Generate shell capacities (degeneracy structure) from a minimal,
@@ -7169,12 +7336,16 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     if not isinstance(rows_in, list) or not rows_in:
         raise SystemExit(f"[fail] invalid 7.13.15.7 metrics: rows missing/empty: {metrics_7157_path}")
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
+
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
             raise SystemExit(f"[fail] missing/invalid numeric value: {ctx}")
 
         return float(x)
+
+    # 関数: `rms` の入出力契約と処理意図を定義する。
 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
@@ -7191,8 +7362,11 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     GAP_FACTOR = 2.0
     ENERGY_TOL = 1e-12
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `_median` の入出力契約と処理意図を定義する。
 
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -7203,6 +7377,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
+    # 関数: `_generate_model_magic` の入出力契約と処理意図を定義する。
+
     def _generate_model_magic(*, max_x: int) -> dict[str, object]:
         """
         Generate shell-boundary cumulative occupancies (MODEL_MAGIC) from a frozen Nilsson-like
@@ -7210,8 +7386,11 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
         """
         s = 0.5
 
+        # 関数: `ldot_s` の入出力契約と処理意図を定義する。
         def ldot_s(l: int, j: float) -> float:
             return float((j * (j + 1.0) - float(l * (l + 1)) - s * (s + 1.0)) / 2.0)
+
+        # 関数: `gen_orbitals` の入出力契約と処理意図を定義する。
 
         def gen_orbitals(max_major: int) -> list[dict[str, float]]:
             orbs: list[dict[str, float]] = []
@@ -7402,6 +7581,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     if not isinstance(MODEL_MAGIC, list) or len(MODEL_MAGIC) < 2:
         raise SystemExit("[fail] could not generate MODEL_MAGIC boundaries")
 
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
+
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
@@ -7464,6 +7645,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -7475,6 +7658,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (Z, N_magic, step)
@@ -7493,6 +7678,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (N, Z_magic, step)
@@ -7614,8 +7801,11 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_cor = build_gap_p(sp_pred_cor, step=1)
     gap_s2p_pred_cor = build_gap_p(s2p_pred_cor, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(obs_gap, pred_unc, pred_cor, *, train_set: set[int]) -> dict[str, object]:
         rows_all: list[tuple[int, float, float]] = []
@@ -7636,6 +7826,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((int(N0), r_u, r_c))
             else:
                 rows_other.append((int(N0), r_u, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -7692,12 +7884,15 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     model_lines_n = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_n]
     model_lines_z = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_z]
 
+    # 関数: `_draw_magic_lines` の入出力契約と処理意図を定義する。
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
 
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
+
+    # 関数: `scatter_sep` の入出力契約と処理意図を定義する。
 
     def scatter_sep(ax, obs_map, pred_u, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_c]
@@ -7730,6 +7925,7 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
 
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_cor, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float]] = []  # (N0, obs, u, c)
         for (Z, N0, dN), g_obs in gap_obs.items():
@@ -7838,6 +8034,8 @@ def _run_step_7_13_15_13(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_14` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.14 (initial): Introduce a minimal pairing (odd-even) correlation term as an
@@ -7912,6 +8110,7 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
 
     fit13 = diag13.get("fit") if isinstance(diag13.get("fit"), dict) else {}
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -7922,11 +8121,16 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     kN = fnum(fit13.get("kN"), ctx="7.13.15.13 diag.fit.kN")
     kZ = fnum(fit13.get("kZ"), ctx="7.13.15.13 diag.fit.kZ")
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
 
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -7969,6 +8173,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
 
         return float(p * (p - g) / float(g))
 
+    # 関数: `parity_sign` の入出力契約と処理意図を定義する。
+
     def parity_sign(Z: int, N: int) -> int:
         z_even = (int(Z) % 2) == 0
         n_even = (int(N) % 2) == 0
@@ -7982,6 +8188,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
             return -1
 
         return 0
+
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
@@ -8072,6 +8280,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     for zn, b0 in b_pred.items():
         b_shell[zn] = float(b0) + float(kN) * float(cN[zn]) + float(kZ) * float(cZ[zn])
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
+
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -8148,6 +8358,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -8159,6 +8371,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (Z, N_magic, step)
@@ -8177,6 +8391,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (N, Z_magic, step)
@@ -8236,8 +8452,11 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_pair = build_gap_p(sp_pred_pair, step=1)
     gap_s2p_pred_pair = build_gap_p(s2p_pred_pair, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps_3` の入出力契約と処理意図を定義する。
 
     def summarize_gaps_3(obs_gap, pred_u, pred_s, pred_p, *, train_set: set[int], key_is_magic: str) -> dict[str, object]:
         rows_all: list[tuple[int, float, float, float]] = []
@@ -8267,6 +8486,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((m0, r_u, r_s, r_p))
             else:
                 rows_other.append((m0, r_u, r_s, r_p))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -8349,12 +8570,15 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     model_lines_n = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_n]
     model_lines_z = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_z]
 
+    # 関数: `_draw_magic_lines` の入出力契約と処理意図を定義する。
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
 
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
+
+    # 関数: `scatter_sep_n` の入出力契約と処理意図を定義する。
 
     def scatter_sep_n(ax, obs_map, pred_u, pred_s, pred_p, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_s and (Z, N) in pred_p]
@@ -8370,6 +8594,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
         ax.set_ylabel("pred - obs (MeV)")
         ax.set_title(title)
         ax.legend(loc="upper right", fontsize=7, ncol=1)
+
+    # 関数: `scatter_sep_p` の入出力契約と処理意図を定義する。
 
     def scatter_sep_p(ax, obs_map, pred_u, pred_s, pred_p, *, title: str) -> None:
         xs = [int(Z) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_s and (Z, N) in pred_p]
@@ -8389,6 +8615,7 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     scatter_sep_n(ax_sn, sn_obs, sn_pred_unc, sn_pred_shell, sn_pred_pair, title=f"S_n residuals (A>={domain_min_a})")
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_shell, sp_pred_pair, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_s, gap_p, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float, float]] = []  # (m0, obs, u, s, p)
         for key, g_obs in gap_obs.items():
@@ -8538,6 +8765,8 @@ def _run_step_7_13_15_14(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_15` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.15 (initial): Keep pairing amplitude a_p fixed (from Step 7.13.15.14),
@@ -8628,6 +8857,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     diag14 = m14.get("diag") if isinstance(m14.get("diag"), dict) else {}
     pairing14 = diag14.get("pairing") if isinstance(diag14.get("pairing"), dict) else {}
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -8637,11 +8867,16 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
 
     a_p = fnum(pairing14.get("a_p_MeV"), ctx="7.13.15.14 diag.pairing.a_p_MeV")
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
 
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -8683,6 +8918,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
             p = g
 
         return float(p * (p - g) / float(g))
+
+    # 関数: `parity_sign` の入出力契約と処理意図を定義する。
 
     def parity_sign(Z: int, N: int) -> int:
         z_even = (int(Z) % 2) == 0
@@ -8797,6 +9034,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -8808,6 +9047,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (Z, N_magic, step)
@@ -8826,6 +9067,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (N, Z_magic, step)
@@ -8956,8 +9199,11 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_cor = build_gap_p(sp_pred_cor, step=1)
     gap_s2p_pred_cor = build_gap_p(s2p_pred_cor, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps_3` の入出力契約と処理意図を定義する。
 
     def summarize_gaps_3(obs_gap, pred_u, pred_b, pred_c, *, train_set: set[int]) -> dict[str, object]:
         rows_all: list[tuple[int, float, float, float]] = []
@@ -8981,6 +9227,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
                 rows_other.append((m0, r_u, r_b, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -9034,12 +9282,15 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     model_lines_n = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_n]
     model_lines_z = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_z]
 
+    # 関数: `_draw_magic_lines` の入出力契約と処理意図を定義する。
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
 
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
+
+    # 関数: `scatter_sep_n` の入出力契約と処理意図を定義する。
 
     def scatter_sep_n(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -9055,6 +9306,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
         ax.set_ylabel("pred - obs (MeV)")
         ax.set_title(title)
         ax.legend(loc="upper right", fontsize=7, ncol=1)
+
+    # 関数: `scatter_sep_p` の入出力契約と処理意図を定義する。
 
     def scatter_sep_p(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(Z) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -9074,6 +9327,7 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     scatter_sep_n(ax_sn, sn_obs, sn_pred_unc, sn_pred_base, sn_pred_cor, title=f"S_n residuals (A>={domain_min_a})")
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_base, sp_pred_cor, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_b, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float, float]] = []
         for key, g_obs in gap_obs.items():
@@ -9197,6 +9451,8 @@ def _run_step_7_13_15_15(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_16` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.16 (initial): Improve the minimal pairing ansatz by allowing odd-A nuclei
@@ -9269,6 +9525,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     if not isinstance(OBS_MAGIC, list) or len(OBS_MAGIC) < 2:
         OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
+
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -9276,11 +9534,17 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
 
         return float(x)
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
+
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
 
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -9323,6 +9587,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
 
         return float(p * (p - g) / float(g))
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
+
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
             # 条件分岐: `abs(int(x) - int(m0)) <= int(tol)` を満たす経路を評価する。
@@ -9330,6 +9596,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
                 return True
 
         return False
+
+    # 関数: `_median` の入出力契約と処理意図を定義する。
 
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -9476,6 +9744,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -9487,6 +9757,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (Z, N_magic, step)
@@ -9505,6 +9777,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (N, Z_magic, step)
@@ -9635,8 +9909,11 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_cor = build_gap_p(sp_pred_cor, step=1)
     gap_s2p_pred_cor = build_gap_p(s2p_pred_cor, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps_3` の入出力契約と処理意図を定義する。
 
     def summarize_gaps_3(obs_gap, pred_u, pred_b, pred_c, *, train_set: set[int]) -> dict[str, object]:
         rows_all: list[tuple[int, float, float, float]] = []
@@ -9660,6 +9937,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
                 rows_other.append((m0, r_u, r_b, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -9721,12 +10000,15 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     model_lines_n = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_n]
     model_lines_z = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_z]
 
+    # 関数: `_draw_magic_lines` の入出力契約と処理意図を定義する。
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
 
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
+
+    # 関数: `scatter_sep_n` の入出力契約と処理意図を定義する。
 
     def scatter_sep_n(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -9742,6 +10024,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
         ax.set_ylabel("pred - obs (MeV)")
         ax.set_title(title)
         ax.legend(loc="upper right", fontsize=7, ncol=1)
+
+    # 関数: `scatter_sep_p` の入出力契約と処理意図を定義する。
 
     def scatter_sep_p(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(Z) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -9761,6 +10045,7 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     scatter_sep_n(ax_sn, sn_obs, sn_pred_unc, sn_pred_base, sn_pred_cor, title=f"S_n residuals (A>={domain_min_a})")
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_base, sp_pred_cor, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_b, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float, float]] = []  # (m0, obs, u, b, c)
         for key, g_obs in gap_obs.items():
@@ -9883,6 +10168,8 @@ def _run_step_7_13_15_16(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_17` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.17 (initial): Add one minimal "essential correlation" proxy (pn-collectivity)
@@ -9957,6 +10244,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     fit16 = diag16.get("fit") if isinstance(diag16.get("fit"), dict) else {}
     pairing16 = diag16.get("pairing") if isinstance(diag16.get("pairing"), dict) else {}
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -9969,11 +10257,16 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     kN = fnum(fit16.get("kN"), ctx="7.13.15.16 diag.fit.kN")
     kZ = fnum(fit16.get("kZ"), ctx="7.13.15.16 diag.fit.kZ")
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
 
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -10015,6 +10308,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
             p = g
 
         return float(p * (p - g) / float(g))
+
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
@@ -10105,6 +10400,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     cN: dict[tuple[int, int], float] = {}
     cZ: dict[tuple[int, int], float] = {}
 
+    # 関数: `shell_open_q` の入出力契約と処理意図を定義する。
     def shell_open_q(x: int) -> float:
         """
         Open-shell indicator q in [0, 1/4], based on the fractional occupancy f=p/g:
@@ -10254,6 +10550,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -10265,6 +10563,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (Z, N_magic, step)
@@ -10283,6 +10583,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         # keyed by (N, Z_magic, step)
@@ -10345,8 +10647,11 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_cor = build_gap_p(sp_pred_cor, step=1)
     gap_s2p_pred_cor = build_gap_p(s2p_pred_cor, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps_3` の入出力契約と処理意図を定義する。
 
     def summarize_gaps_3(obs_gap, pred_u, pred_b, pred_c, *, train_set: set[int]) -> dict[str, object]:
         rows_all: list[tuple[int, float, float, float]] = []
@@ -10370,6 +10675,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
                 rows_other.append((m0, r_u, r_b, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -10440,12 +10747,15 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     model_lines_n = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_n]
     model_lines_z = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_z]
 
+    # 関数: `_draw_magic_lines` の入出力契約と処理意図を定義する。
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
 
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
+
+    # 関数: `scatter_sep_n` の入出力契約と処理意図を定義する。
 
     def scatter_sep_n(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -10461,6 +10771,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
         ax.set_ylabel("pred - obs (MeV)")
         ax.set_title(title)
         ax.legend(loc="upper right", fontsize=7, ncol=1)
+
+    # 関数: `scatter_sep_p` の入出力契約と処理意図を定義する。
 
     def scatter_sep_p(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(Z) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -10480,6 +10792,7 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     scatter_sep_n(ax_sn, sn_obs, sn_pred_unc, sn_pred_base, sn_pred_cor, title=f"S_n residuals (A>={domain_min_a})")
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_base, sp_pred_cor, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_b, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float, float]] = []  # (m0, obs, u, b, c)
         for key, g_obs in gap_obs.items():
@@ -10620,6 +10933,8 @@ def _run_step_7_13_15_17(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_18` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     """
     Step 7.13.15.18 (initial): Extend the correlation proxy with the minimal identifiability-preserving
@@ -10693,6 +11008,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     fit16 = diag16.get("fit") if isinstance(diag16.get("fit"), dict) else {}
     pairing16 = diag16.get("pairing") if isinstance(diag16.get("pairing"), dict) else {}
 
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
     def fnum(x: object, *, ctx: str) -> float:
         # 条件分岐: `not isinstance(x, (int, float)) or not math.isfinite(float(x))` を満たす経路を評価する。
         if not isinstance(x, (int, float)) or not math.isfinite(float(x)):
@@ -10705,11 +11021,16 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     kN = fnum(fit16.get("kN"), ctx="7.13.15.16 diag.fit.kN")
     kZ = fnum(fit16.get("kZ"), ctx="7.13.15.16 diag.fit.kZ")
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
+    # 関数: `hw_mev` の入出力契約と処理意図を定義する。
+
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
 
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
@@ -10752,6 +11073,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
 
         return float(p * (p - g) / float(g))
 
+    # 関数: `shell_open_q` の入出力契約と処理意図を定義する。
+
     def shell_open_q(x: int) -> float:
         # Open-shell indicator q=f(1-f) in [0, 1/4], with f=p/g.
         if x <= 0:
@@ -10792,6 +11115,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
             p = g
 
         return float(p * (g - p) / float(g * g))
+
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
@@ -10994,6 +11319,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -11005,6 +11332,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -11022,6 +11351,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -11083,8 +11414,11 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     gap_sp_pred_cor = build_gap_p(sp_pred_cor, step=1)
     gap_s2p_pred_cor = build_gap_p(s2p_pred_cor, step=2)
 
+    # 関数: `residuals_sep` の入出力契約と処理意図を定義する。
     def residuals_sep(obs_map, pred_map) -> list[float]:
         return [float(pred_map[k] - v) for k, v in obs_map.items() if k in pred_map]
+
+    # 関数: `summarize_gaps_3` の入出力契約と処理意図を定義する。
 
     def summarize_gaps_3(obs_gap, pred_u, pred_b, pred_c, *, train_set: set[int]) -> dict[str, object]:
         rows_all: list[tuple[int, float, float, float]] = []
@@ -11108,6 +11442,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
                 rows_train.append((m0, r_u, r_b, r_c))
             else:
                 rows_other.append((m0, r_u, r_b, r_c))
+
+        # 関数: `rms_from` の入出力契約と処理意図を定義する。
 
         def rms_from(items: list[tuple[int, float, float, float]], idx: int) -> float:
             return rms([float(x[idx]) for x in items]) if items else float("nan")
@@ -11178,12 +11514,15 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     model_lines_n = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_n]
     model_lines_z = [int(x) for x in MODEL_MAGIC[1:] if int(x) <= max_z]
 
+    # 関数: `_draw_magic_lines` の入出力契約と処理意図を定義する。
     def _draw_magic_lines(ax, *, obs: list[int], model: list[int]) -> None:
         for n0 in obs[1:]:
             ax.axvline(int(n0), color="k", lw=0.6, alpha=0.10)
 
         for n0 in model:
             ax.axvline(int(n0), color="#d62728", lw=0.6, alpha=0.10, linestyle="--")
+
+    # 関数: `scatter_sep_n` の入出力契約と処理意図を定義する。
 
     def scatter_sep_n(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(N) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -11199,6 +11538,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
         ax.set_ylabel("pred - obs (MeV)")
         ax.set_title(title)
         ax.legend(loc="upper right", fontsize=7, ncol=1)
+
+    # 関数: `scatter_sep_p` の入出力契約と処理意図を定義する。
 
     def scatter_sep_p(ax, obs_map, pred_u, pred_b, pred_c, *, title: str) -> None:
         xs = [int(Z) for (Z, N) in obs_map.keys() if (Z, N) in pred_u and (Z, N) in pred_b and (Z, N) in pred_c]
@@ -11218,6 +11559,7 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     scatter_sep_n(ax_sn, sn_obs, sn_pred_unc, sn_pred_base, sn_pred_cor, title=f"S_n residuals (A>={domain_min_a})")
     scatter_sep_p(ax_sp, sp_obs, sp_pred_unc, sp_pred_base, sp_pred_cor, title=f"S_p residuals (A>={domain_min_a})")
 
+    # 関数: `scatter_gaps` の入出力契約と処理意図を定義する。
     def scatter_gaps(ax, gap_obs, gap_u, gap_b, gap_c, *, title: str, xlab: str, ylab: str) -> None:
         rows: list[tuple[int, float, float, float, float]] = []  # (m0, obs, u, b, c)
         for key, g_obs in gap_obs.items():
@@ -11358,6 +11700,8 @@ def _run_step_7_13_15_18(*, out_dir: Path, domain_min_a: int) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_19` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_19(*, out_dir: Path) -> None:
     """
     Step 7.13.15.19 (initial): "no-go pack" for shell-gap extrapolation within the current model class.
@@ -11386,13 +11730,19 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
                 "Re-run the corresponding step first (see doc/ROADMAP.md)."
             )
 
+    # 関数: `_as_dict` の入出力契約と処理意図を定義する。
+
     def _as_dict(x: object) -> dict:
         return x if isinstance(x, dict) else {}
+
+    # 関数: `_pick_train_other` の入出力契約と処理意図を定義する。
 
     def _pick_train_other(gap: dict) -> tuple[dict, dict]:
         train = _as_dict(gap.get("train_magic")) or _as_dict(gap.get("train_magicN")) or _as_dict(gap.get("train_magicZ"))
         other = _as_dict(gap.get("other_magic")) or _as_dict(gap.get("other_magicN")) or _as_dict(gap.get("other_magicZ"))
         return train, other
+
+    # 関数: `_pick_rms` の入出力契約と処理意図を定義する。
 
     def _pick_rms(d: dict) -> tuple[float, str]:
         # Prefer the "most corrected" variant when multiple are present.
@@ -11494,6 +11844,7 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
     fig, axes = plt.subplots(2, 2, figsize=(14, 9), constrained_layout=True)
     ax_tn, ax_on, ax_tp, ax_op = axes.flat
 
+    # 関数: `_plot` の入出力契約と処理意図を定義する。
     def _plot(ax, ys, *, title: str, ylabel: str, base: float, tol: float | None = None) -> None:
         ax.plot(xs, ys, marker="o", lw=1.6)
         ax.axhline(base, color="k", lw=1.0, alpha=0.35, linestyle="--", label="baseline")
@@ -11586,6 +11937,8 @@ def _run_step_7_13_15_19(*, out_dir: Path) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_20` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_20(*, out_dir: Path) -> None:
     """
     Step 7.13.15.20 (initial): "next design pack" for the post no-go shell-gap extrapolation problem.
@@ -11616,8 +11969,11 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
 
     TRAIN_MAGIC = {50, 82}
 
+    # 関数: `_rms` の入出力契約と処理意図を定義する。
     def _rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `_mean` の入出力契約と処理意図を定義する。
 
     def _mean(vals: list[float]) -> float:
         return float(sum(vals) / len(vals)) if vals else float("nan")
@@ -11771,6 +12127,7 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
     # Plot: RMS by magic + RMS vs A-min + coverage counts.
     import matplotlib.pyplot as plt
 
+    # 関数: `_plot_by_magic` の入出力契約と処理意図を定義する。
     def _plot_by_magic(ax, *, kind: str, title: str) -> None:
         mags = sorted({int(r["magic"]) for r in by_magic_rows if r["kind"] == kind})
         # 条件分岐: `not mags` を満たす経路を評価する。
@@ -11813,6 +12170,8 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
             color="#444444",
         )
 
+    # 関数: `_plot_rms_vs_amin` の入出力契約と処理意図を定義する。
+
     def _plot_rms_vs_amin(ax) -> None:
         xs = a_mins
         for kind, col in [("gap_Sn", "#1f77b4"), ("gap_Sp", "#d62728")]:
@@ -11830,6 +12189,8 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
         ax.set_title("Other-magic RMS vs A_min (domain stress test)")
         ax.grid(True, alpha=0.25)
         ax.legend(loc="best", fontsize=8)
+
+    # 関数: `_plot_coverage` の入出力契約と処理意図を定義する。
 
     def _plot_coverage(ax) -> None:
         kinds = ["gap_Sn", "gap_Sp"]
@@ -11976,6 +12337,8 @@ def _run_step_7_13_15_20(*, out_dir: Path) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_21` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.21 (initial): Expand shell-gap decision coverage beyond the radii-joined set by
@@ -12111,6 +12474,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     e2_mev_fm = 1.43996448
 
+    # 関数: `coulomb_exchange_slater_mev_per_a` の入出力契約と処理意図を定義する。
     def coulomb_exchange_slater_mev_per_a(*, Z: int, A: int, volume_fm3: float) -> float:
         """
         Coulomb exchange energy (Slater approximation) for a uniform proton gas in a volume V:
@@ -12145,6 +12509,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         {"name": "obs_magic", "magic": list(OBS_MAGIC), "note": "S_shell uses observed magic list (domain-independent mapping)."},
     ]
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -12154,12 +12519,17 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
+
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -12317,6 +12687,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -12334,6 +12705,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -12345,6 +12718,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -12363,6 +12738,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -12379,6 +12756,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -12408,6 +12787,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
 
+        # 関数: `_r` の入出力契約と処理意図を定義する。
+
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
 
@@ -12435,6 +12816,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             },
             "by_magic": by_magic_rows,
         }
+
+    # 関数: `run_config` の入出力契約と処理意図を定義する。
 
     def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
         # Domain slice
@@ -12721,6 +13104,7 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     MODEL_MAGIC = [0, 2, 8, 14, 20, 28, 50, 76, 82, 114, 164, 210]
     TRAIN_MAGIC = {50, 82}
 
+    # 関数: `shell_S_model` の入出力契約と処理意図を定義する。
     def shell_S_model(x: int) -> float:
         # 条件分岐: `x <= 0` を満たす経路を評価する。
         if x <= 0:
@@ -12761,6 +13145,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             p = g
 
         return float(p * (p - g) / float(g))
+
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         for m0 in OBS_MAGIC:
@@ -12925,6 +13311,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N), _A in a_by_zn.items():
@@ -12936,6 +13324,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -12953,6 +13343,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(Z), int(N0), int(step))] = float(sn_map[(Z, int(N0))] - sn_map[nxt])
 
         return out
+
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
 
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -13068,6 +13460,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
+    # 関数: `_summarize_gaps` の入出力契約と処理意図を定義する。
+
     def _summarize_gaps(g_obs: dict, g_unc: dict, g_base: dict, g_cor: dict, *, key_is_magic: str) -> dict[str, object]:
         rows_train: list[tuple[float, float, float]] = []  # (unc, base, cor) residuals
         rows_other: list[tuple[float, float, float]] = []
@@ -13088,6 +13482,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
+
+        # 関数: `_r` の入出力契約と処理意図を定義する。
 
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
@@ -13189,6 +13585,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     if not mags:
         mags = [2, 8, 20, 28, 50, 82, 126]
 
+    # 関数: `_counts` の入出力契約と処理意図を定義する。
+
     def _counts(kind: str, *, src: dict[tuple[str, int], int]) -> list[int]:
         return [int(src.get((kind, int(m)), 0)) for m in mags]
 
@@ -13275,6 +13673,8 @@ def _run_step_7_13_15_21(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 関数: `_run_step_7_13_15_22` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -13397,6 +13797,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
+
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -13457,6 +13859,7 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
     TRAIN_MAGIC = {50, 82}
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
 
@@ -13566,12 +13969,16 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -13615,6 +14022,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return shell_S
 
+    # 関数: `build_sep_n` の入出力契約と処理意図を定義する。
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -13627,6 +14036,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -13638,6 +14049,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -13656,6 +14069,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -13672,6 +14087,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -13701,6 +14118,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
 
+        # 関数: `_r` の入出力契約と処理意図を定義する。
+
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
 
@@ -13728,6 +14147,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             },
             "by_magic": by_magic_rows,
         }
+
+    # 関数: `run_config` の入出力契約と処理意図を定義する。
 
     def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
         # Domain slice
@@ -14107,6 +14528,8 @@ def _run_step_7_13_15_22(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_23` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.23 (initial): Proton-side shell-gap rescue attempt with a minimal independently
@@ -14229,8 +14652,12 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     if not ame_map:
         raise SystemExit("[fail] AME2020 map is empty after parsing (unexpected)")
 
+    # 関数: `_mean` の入出力契約と処理意図を定義する。
+
     def _mean(vals: list[float]) -> float:
         return float(sum(vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `_median` の入出力契約と処理意図を定義する。
 
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
@@ -14312,6 +14739,7 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     OBS_MAGIC = [0, 2, 8, 20, 28, 50, 82, 126, 184]
     TRAIN_MAGIC = {50, 82}
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
 
@@ -14421,12 +14849,16 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -14470,6 +14902,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return shell_S
 
+    # 関数: `build_sep_n` の入出力契約と処理意図を定義する。
+
     def build_sep_n(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dN: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -14482,6 +14916,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -14493,6 +14929,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -14511,6 +14949,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -14527,6 +14967,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -14556,6 +14998,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
 
+        # 関数: `_r` の入出力契約と処理意図を定義する。
+
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
 
@@ -14583,6 +15027,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             },
             "by_magic": by_magic_rows,
         }
+
+    # 関数: `run_config` の入出力契約と処理意図を定義する。
 
     def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
         # Domain slice
@@ -14976,6 +15422,8 @@ def _run_step_7_13_15_23(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_24` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.24 (initial): Add a proton-specific deterministic correction (Coulomb exchange; no free parameter)
@@ -15123,6 +15571,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     e2_mev_fm = 1.43996448
 
+    # 関数: `coulomb_exchange_slater_mev_per_a` の入出力契約と処理意図を定義する。
     def coulomb_exchange_slater_mev_per_a(*, Z: int, A: int, volume_fm3: float) -> float:
         """
         Coulomb exchange energy (Slater approximation) for a uniform proton gas in a volume V:
@@ -15157,6 +15606,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         {"name": "obs_magic", "magic": list(OBS_MAGIC), "note": "S_shell uses observed magic list (domain-independent mapping)."},
     ]
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -15165,6 +15615,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         s = sorted(vals)
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
+
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
 
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
@@ -15274,12 +15726,16 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -15323,6 +15779,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return shell_S
 
+    # 関数: `shell_S_radius_factory` の入出力契約と処理意図を定義する。
+
     def shell_S_radius_factory(magic_list: list[int]):
         """
         A radius-friendly normalization of the bounded occupancy function:
@@ -15330,6 +15788,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -15380,6 +15839,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     radii_shell_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell` の入出力契約と処理意図を定義する。
     def fit_radii_shell(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit a single shell/structure DoF in the radius mapping using IAEA charge radii only.
@@ -15445,6 +15905,7 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         r_shell = float(num / den) if (math.isfinite(den) and den > 0.0 and math.isfinite(num)) else 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -15482,6 +15943,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -15493,6 +15956,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -15511,6 +15976,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -15527,6 +15994,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -15556,6 +16025,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
 
+        # 関数: `_r` の入出力契約と処理意図を定義する。
+
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
 
@@ -15583,6 +16054,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             },
             "by_magic": by_magic_rows,
         }
+
+    # 関数: `run_config` の入出力契約と処理意図を定義する。
 
     def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
         # Domain slice
@@ -15988,6 +16461,8 @@ def _run_step_7_13_15_24(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_25` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.25 (initial): Add proton-specific deterministic Coulomb/finite-size corrections
@@ -16139,6 +16614,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     finite_cache: dict[int, dict[str, float]] = {}
 
+    # 関数: `finite_size_coeffs_for_A` の入出力契約と処理意図を定義する。
     def finite_size_coeffs_for_A(A: int) -> dict[str, float]:
         # 条件分岐: `int(A) in finite_cache` を満たす経路を評価する。
         if int(A) in finite_cache:
@@ -16158,6 +16634,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         c_guess2 = (5.0 / 3.0) * (r_rms**2) - (7.0 / 3.0) * ((math.pi * float(a_diff_fm)) ** 2)
         c_guess = math.sqrt(c_guess2) if c_guess2 > 0 else max(0.1, float(r_rms) * 0.5)
 
+        # 関数: `rms_from_c` の入出力契約と処理意図を定義する。
         def rms_from_c(c_fm: float) -> float:
             # 条件分岐: `not (math.isfinite(c_fm) and c_fm > 0)` を満たす経路を評価する。
             if not (math.isfinite(c_fm) and c_fm > 0):
@@ -16400,6 +16877,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -16412,6 +16890,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         {"name": "obs_magic", "magic": list(OBS_MAGIC), "note": "S_shell uses observed magic list (domain-independent mapping)."},
     ]
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -16421,12 +16900,17 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
+
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -16470,6 +16954,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return shell_S
 
+    # 関数: `shell_S_radius_factory` の入出力契約と処理意図を定義する。
+
     def shell_S_radius_factory(magic_list: list[int]):
         """
         Radius-friendly normalization of the bounded occupancy function:
@@ -16477,6 +16963,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -16527,6 +17014,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     radii_shell_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell` の入出力契約と処理意図を定義する。
     def fit_radii_shell(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit a single shell/structure DoF in the radius mapping using IAEA charge radii only.
@@ -16592,6 +17080,7 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         r_shell = float(num / den) if (math.isfinite(den) and den > 0.0 and math.isfinite(num)) else 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -16629,6 +17118,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -16640,6 +17131,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -16658,6 +17151,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -16674,6 +17169,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -16702,6 +17199,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
+
+        # 関数: `_r` の入出力契約と処理意図を定義する。
 
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
@@ -16735,6 +17234,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `run_config` の入出力契約と処理意図を定義する。
 
     def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
         # Domain slice
@@ -17142,6 +17643,8 @@ def _run_step_7_13_15_25(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_26` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.26 (initial): Combine an independently frozen isospin-dependent charge-radius
@@ -17249,6 +17752,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     sigma_model_delta2r_fm = math.sqrt(6.0) * float(fit_rms) if (math.isfinite(float(fit_rms)) and float(fit_rms) > 0.0) else float("nan")
 
+    # 関数: `r_charge_pred` の入出力契約と処理意図を定義する。
     def r_charge_pred(*, Z: int, N: int) -> float | None:
         A = int(Z) + int(N)
         # 条件分岐: `A < 2 or int(Z) < 1 or int(N) < 0` を満たす経路を評価する。
@@ -17265,6 +17769,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return float(r_charge)
 
+    # 関数: `delta2r_pred_n` の入出力契約と処理意図を定義する。
+
     def delta2r_pred_n(*, Z: int, N0: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z), N=int(N0))
         rLp = r_charge_pred(Z=int(Z), N=int(N0) - int(d))
@@ -17274,6 +17780,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             return None
 
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+    # 関数: `delta2r_pred_z` の入出力契約と処理意図を定義する。
 
     def delta2r_pred_z(*, Z0: int, N: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z0), N=int(N))
@@ -17285,6 +17793,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
+    # 関数: `shell_S_radius_factory` の入出力契約と処理意図を定義する。
+
     def shell_S_radius_factory(magic_list: list[int]):
         """
         Radius-friendly normalization of the bounded occupancy function:
@@ -17292,6 +17802,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -17342,6 +17853,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     radii_shell_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell` の入出力契約と処理意図を定義する。
     def fit_radii_shell(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit a single shell/structure DoF in the radius mapping using IAEA charge radii only.
@@ -17407,6 +17919,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         r_shell = float(num / den) if (math.isfinite(den) and den > 0.0 and math.isfinite(num)) else 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -17432,6 +17945,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     radii_shell_fit_cache_nz: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell_nz` の入出力契約と処理意図を定義する。
     def fit_radii_shell_nz(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit two shell/structure DoFs in the radius mapping using IAEA charge radii only.
@@ -17518,6 +18032,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             r_shell_n = 0.0
             r_shell_z = 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
+
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -17602,6 +18118,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     finite_cache: dict[int, dict[str, float]] = {}
 
+    # 関数: `finite_size_coeffs_for_rms` の入出力契約と処理意図を定義する。
     def finite_size_coeffs_for_rms(*, r_rms_fm: float) -> dict[str, float]:
         key = int(round(float(r_rms_fm) / float(cache_round_fm)))
         # 条件分岐: `key in finite_cache` を満たす経路を評価する。
@@ -17616,6 +18133,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         c_guess2 = (5.0 / 3.0) * (target_r_rms**2) - (7.0 / 3.0) * ((math.pi * float(a_diff_fm)) ** 2)
         c_guess = math.sqrt(c_guess2) if c_guess2 > 0 else max(0.1, float(target_r_rms) * 0.5)
 
+        # 関数: `rms_from_c` の入出力契約と処理意図を定義する。
         def rms_from_c(c_fm: float) -> float:
             # 条件分岐: `not (math.isfinite(c_fm) and c_fm > 0)` を満たす経路を評価する。
             if not (math.isfinite(c_fm) and c_fm > 0):
@@ -17883,6 +18401,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -17895,6 +18414,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         {"name": "obs_magic", "magic": list(OBS_MAGIC), "note": "S_shell uses observed magic list (domain-independent mapping)."},
     ]
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -17904,12 +18424,17 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
+
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -17953,6 +18478,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return shell_S
 
+    # 関数: `shell_S_radius_factory` の入出力契約と処理意図を定義する。
+
     def shell_S_radius_factory(magic_list: list[int]):
         """
         Radius-friendly normalization of the bounded occupancy function:
@@ -17960,6 +18487,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         """
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -18010,6 +18538,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     radii_shell_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell` の入出力契約と処理意図を定義する。
     def fit_radii_shell(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit a single shell/structure DoF in the radius mapping using IAEA charge radii only.
@@ -18075,6 +18604,7 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         r_shell = float(num / den) if (math.isfinite(den) and den > 0.0 and math.isfinite(num)) else 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -18112,6 +18642,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -18123,6 +18655,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -18141,6 +18675,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -18157,6 +18693,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -18185,6 +18723,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
+
+        # 関数: `_r` の入出力契約と処理意図を定義する。
 
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
@@ -18218,6 +18758,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
 
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `run_config` の入出力契約と処理意図を定義する。
 
     def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
         # Domain slice
@@ -18640,6 +19182,8 @@ def _run_step_7_13_15_26(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_27` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_27(
     *,
     out_dir: Path,
@@ -18764,6 +19308,7 @@ def _run_step_7_13_15_27(
     radii_shell_fit_cache_nz: dict[tuple[int, ...], dict[str, object]] = {}
     radii_shell_fit_cache_nz_beta2: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell_nz` の入出力契約と処理意図を定義する。
     def fit_radii_shell_nz(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit two shell/structure DoFs in the radius mapping using IAEA charge radii only.
@@ -18850,6 +19395,8 @@ def _run_step_7_13_15_27(
             r_shell_n = 0.0
             r_shell_z = 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
+
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -18881,6 +19428,8 @@ def _run_step_7_13_15_27(
         }
         radii_shell_fit_cache_nz[key] = out
         return out
+
+    # 関数: `fit_radii_shell_nz_beta2` の入出力契約と処理意図を定義する。
 
     def fit_radii_shell_nz_beta2(*, shell_magic: list[int]) -> dict[str, object]:
         """
@@ -18984,6 +19533,8 @@ def _run_step_7_13_15_27(
         else:
             r_shell_n = 0.0
             r_shell_z = 0.0
+
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
 
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
@@ -19194,6 +19745,8 @@ def _run_step_7_13_15_27(
                     radii_kink_counts["skipped"] += 1
                     continue
 
+                # 関数: `fnum` の入出力契約と処理意図を定義する。
+
                 def fnum(key: str) -> float | None:
                     s = str(row.get(key, "")).strip()
                     # 条件分岐: `not s` を満たす経路を評価する。
@@ -19224,6 +19777,8 @@ def _run_step_7_13_15_27(
 
                 radii_by_zn[(int(Z), int(N))] = (float(r_val), float(r_unc), str(used))
                 radii_kink_counts[str(used)] += 1
+
+    # 関数: `kink_info_n` の入出力契約と処理意図を定義する。
 
     def kink_info_n(*, Z: int, N0: int, d: int = 2) -> tuple[float, float, float] | None:
         # 条件分岐: `not (include_radii_kink or include_radii_kink_delta2r)` を満たす経路を評価する。
@@ -19263,6 +19818,8 @@ def _run_step_7_13_15_27(
             return None
 
         return (abs(float(d2)) / float(sig), float(d2), float(sig))
+
+    # 関数: `kink_info_z` の入出力契約と処理意図を定義する。
 
     def kink_info_z(*, Z0: int, N: int, d: int = 2) -> tuple[float, float, float] | None:
         # 条件分岐: `not (include_radii_kink or include_radii_kink_delta2r)` を満たす経路を評価する。
@@ -19330,6 +19887,7 @@ def _run_step_7_13_15_27(
 
     sigma_model_delta2r_fm = math.sqrt(6.0) * float(fit_rms) if (math.isfinite(float(fit_rms)) and float(fit_rms) > 0.0) else float("nan")
 
+    # 関数: `r_charge_pred` の入出力契約と処理意図を定義する。
     def r_charge_pred(*, Z: int, N: int) -> float | None:
         A = int(Z) + int(N)
         # 条件分岐: `A < 2 or int(Z) < 1 or int(N) < 0` を満たす経路を評価する。
@@ -19346,6 +19904,8 @@ def _run_step_7_13_15_27(
 
         return float(r_charge)
 
+    # 関数: `delta2r_pred_n` の入出力契約と処理意図を定義する。
+
     def delta2r_pred_n(*, Z: int, N0: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z), N=int(N0))
         rLp = r_charge_pred(Z=int(Z), N=int(N0) - int(d))
@@ -19355,6 +19915,8 @@ def _run_step_7_13_15_27(
             return None
 
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+    # 関数: `delta2r_pred_z` の入出力契約と処理意図を定義する。
 
     def delta2r_pred_z(*, Z0: int, N: int, d: int = 2) -> float | None:
         r0p = r_charge_pred(Z=int(Z0), N=int(N))
@@ -19366,6 +19928,8 @@ def _run_step_7_13_15_27(
 
         return float(rRp) - 2.0 * float(r0p) + float(rLp)
 
+    # 関数: `shell_S_radius_factory` の入出力契約と処理意図を定義する。
+
     def shell_S_radius_factory(magic_list: list[int]):
         """
         Radius-friendly normalization of the bounded occupancy function:
@@ -19373,6 +19937,7 @@ def _run_step_7_13_15_27(
         """
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -19423,6 +19988,7 @@ def _run_step_7_13_15_27(
 
     radii_shell_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_shell` の入出力契約と処理意図を定義する。
     def fit_radii_shell(*, shell_magic: list[int]) -> dict[str, object]:
         """
         Fit a single shell/structure DoF in the radius mapping using IAEA charge radii only.
@@ -19488,6 +20054,7 @@ def _run_step_7_13_15_27(
 
         r_shell = float(num / den) if (math.isfinite(den) and den > 0.0 and math.isfinite(num)) else 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -19513,6 +20080,7 @@ def _run_step_7_13_15_27(
 
     radii_odd_even_fit_cache: dict[int, dict[str, object]] = {}
 
+    # 関数: `fit_radii_odd_even` の入出力契約と処理意図を定義する。
     def fit_radii_odd_even() -> dict[str, object]:
         """
         Fit a minimal odd-even offset (two DoFs) in the charge-radius mapping using IAEA radii only.
@@ -19583,6 +20151,8 @@ def _run_step_7_13_15_27(
             r_oe_n = 0.0
             r_oe_z = 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
+
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -19616,6 +20186,7 @@ def _run_step_7_13_15_27(
 
     radii_magic_offset_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_magic_offset` の入出力契約と処理意図を定義する。
     def fit_radii_magic_offset(*, magic: list[int]) -> dict[str, object]:
         """
         Fit a minimal "magic offset" (two DoFs) in the charge-radius mapping using IAEA radii only.
@@ -19706,6 +20277,8 @@ def _run_step_7_13_15_27(
             r_magic_n = 0.0
             r_magic_z = 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
+
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -19740,6 +20313,7 @@ def _run_step_7_13_15_27(
 
     radii_magic_offset_neighbors_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_magic_offset_neighbors` の入出力契約と処理意図を定義する。
     def fit_radii_magic_offset_neighbors(*, magic: list[int], neighbor_weight: float = 0.5, neighbor_step: int = 2) -> dict[str, object]:
         """
         Fit a minimal "magic offset" (two DoFs) in the charge-radius mapping using IAEA radii only,
@@ -19801,6 +20375,8 @@ def _run_step_7_13_15_27(
             }
             radii_magic_offset_neighbors_fit_cache[key] = out
             return out
+
+        # 関数: `w_magic` の入出力契約と処理意図を定義する。
 
         def w_magic(x: int) -> float:
             # 条件分岐: `int(x) in magic_set` を満たす経路を評価する。
@@ -19870,6 +20446,8 @@ def _run_step_7_13_15_27(
             r_magic_n = 0.0
             r_magic_z = 0.0
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
+
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -19908,6 +20486,7 @@ def _run_step_7_13_15_27(
 
     radii_magic_offset_per_magic_fit_cache: dict[tuple[int, ...], dict[str, object]] = {}
 
+    # 関数: `fit_radii_magic_offset_per_magic` の入出力契約と処理意図を定義する。
     def fit_radii_magic_offset_per_magic(*, magic: list[int]) -> dict[str, object]:
         """
         Fit a per-magic-number offset in the charge-radius mapping using IAEA radii only.
@@ -20054,6 +20633,7 @@ def _run_step_7_13_15_27(
         MM = [[float(M[i][j]) for j in active_params] for i in active_params]
         bb = [float(bvec[i]) for i in active_params]
 
+        # 関数: `solve_gauss` の入出力契約と処理意図を定義する。
         def solve_gauss(a: list[list[float]], x: list[float]) -> list[float] | None:
             n = len(x)
             aug = [list(map(float, a[i])) + [float(x[i])] for i in range(n)]
@@ -20112,6 +20692,7 @@ def _run_step_7_13_15_27(
         coeffs_N = {int(m): float(coeffs[int(idx_N[int(m)])]) for m in magic_list}
         coeffs_Z = {int(m): float(coeffs[int(idx_Z[int(m)])]) for m in magic_list}
 
+        # 関数: `rms_sigma` の入出力契約と処理意図を定義する。
         def rms_sigma(vals: list[float]) -> float:
             return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -20190,6 +20771,7 @@ def _run_step_7_13_15_27(
 
     finite_cache: dict[int, dict[str, float]] = {}
 
+    # 関数: `finite_size_coeffs_for_rms` の入出力契約と処理意図を定義する。
     def finite_size_coeffs_for_rms(*, r_rms_fm: float) -> dict[str, float]:
         key = int(round(float(r_rms_fm) / float(cache_round_fm)))
         # 条件分岐: `key in finite_cache` を満たす経路を評価する。
@@ -20204,6 +20786,7 @@ def _run_step_7_13_15_27(
         c_guess2 = (5.0 / 3.0) * (target_r_rms**2) - (7.0 / 3.0) * ((math.pi * float(a_diff_fm)) ** 2)
         c_guess = math.sqrt(c_guess2) if c_guess2 > 0 else max(0.1, float(target_r_rms) * 0.5)
 
+        # 関数: `rms_from_c` の入出力契約と処理意図を定義する。
         def rms_from_c(c_fm: float) -> float:
             # 条件分岐: `not (math.isfinite(c_fm) and c_fm > 0)` を満たす経路を評価する。
             if not (math.isfinite(c_fm) and c_fm > 0):
@@ -20470,6 +21053,7 @@ def _run_step_7_13_15_27(
     scan_a_mins = sorted({int(domain_min_a), 40, 60, 80, 100})
     scan_a_mins = [a for a in scan_a_mins if a >= int(domain_min_a)]
 
+    # 関数: `rms` の入出力契約と処理意図を定義する。
     def rms(vals: list[float]) -> float:
         return math.sqrt(sum(v * v for v in vals) / len(vals)) if vals else float("nan")
 
@@ -20481,6 +21065,7 @@ def _run_step_7_13_15_27(
         {"name": "obs_magic", "magic": list(OBS_MAGIC), "note": "S_shell uses observed magic list (domain-independent mapping)."},
     ]
 
+    # 関数: `_median` の入出力契約と処理意図を定義する。
     def _median(vals: list[float]) -> float:
         # 条件分岐: `not vals` を満たす経路を評価する。
         if not vals:
@@ -20490,12 +21075,17 @@ def _run_step_7_13_15_27(
         mid = len(s) // 2
         return float(s[mid]) if (len(s) % 2) else float(0.5 * (s[mid - 1] + s[mid]))
 
+    # 関数: `near_observed_magic` の入出力契約と処理意図を定義する。
+
     def near_observed_magic(x: int, *, tol: int = 1) -> bool:
         return any(abs(int(x) - int(m0)) <= int(tol) for m0 in OBS_MAGIC)
+
+    # 関数: `shell_S_factory` の入出力契約と処理意図を定義する。
 
     def shell_S_factory(magic_list: list[int]):
         magic = list(magic_list)
 
+        # 関数: `shell_S` の入出力契約と処理意図を定義する。
         def shell_S(x: int) -> float:
             # 条件分岐: `x <= 0` を満たす経路を評価する。
             if x <= 0:
@@ -20558,6 +21148,8 @@ def _run_step_7_13_15_27(
 
         return out
 
+    # 関数: `build_sep_p` の入出力契約と処理意図を定義する。
+
     def build_sep_p(a_by_zn: dict[tuple[int, int], int], b_map: dict[tuple[int, int], float], *, dZ: int) -> dict[tuple[int, int], float]:
         out: dict[tuple[int, int], float] = {}
         for (Z, N) in a_by_zn.keys():
@@ -20569,6 +21161,8 @@ def _run_step_7_13_15_27(
             out[(Z, N)] = float(b_map[(Z, N)] - b_map[child])
 
         return out
+
+    # 関数: `build_gap_n` の入出力契約と処理意図を定義する。
 
     def build_gap_n(sn_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
@@ -20587,6 +21181,8 @@ def _run_step_7_13_15_27(
 
         return out
 
+    # 関数: `build_gap_p` の入出力契約と処理意図を定義する。
+
     def build_gap_p(sp_map: dict[tuple[int, int], float], *, step: int) -> dict[tuple[int, int, int], float]:
         out: dict[tuple[int, int, int], float] = {}
         for Z0 in OBS_MAGIC[1:]:
@@ -20603,6 +21199,8 @@ def _run_step_7_13_15_27(
                 out[(int(N), int(Z0), int(step))] = float(sp_map[(int(Z0), N)] - sp_map[nxt])
 
         return out
+
+    # 関数: `summarize_gaps` の入出力契約と処理意図を定義する。
 
     def summarize_gaps(
         g_obs: dict[tuple[int, int, int], float],
@@ -20631,6 +21229,8 @@ def _run_step_7_13_15_27(
                 rows_train.append((resid_u, resid_b, resid_c))
             else:
                 rows_other.append((resid_u, resid_b, resid_c))
+
+        # 関数: `_r` の入出力契約と処理意図を定義する。
 
         def _r(idx: int, rows: list[tuple[float, float, float]]) -> float:
             return rms([float(r[idx]) for r in rows])
@@ -20664,6 +21264,8 @@ def _run_step_7_13_15_27(
 
     def hw_mev(A: int) -> float:
         return float(41.0 * (float(A) ** (-1.0 / 3.0))) if A > 0 else float("nan")
+
+    # 関数: `fit2d` の入出力契約と処理意図を定義する。
 
     def fit2d(yx0x1: list[tuple[float, float, float]]) -> tuple[float, float]:
         # Solve min ||y - k0*x0 - k1*x1||^2 via 2x2 normal equations.
@@ -20700,7 +21302,10 @@ def _run_step_7_13_15_27(
         k1 = (float(t1) * float(s00) - float(t0) * float(s01)) / float(det)
         return float(k0), float(k1)
 
+    # 関数: `scan_rows` の入出力契約と処理意図を定義する。
+
     def scan_rows(*, b_pred_all_map: dict[tuple[int, int], float]) -> list[dict[str, object]]:
+        # 関数: `run_config` の入出力契約と処理意図を定義する。
         def run_config(*, a_min: int, shell_magic: list[int]) -> dict[str, object]:
             # Domain slice
             a_by_zn = {zn: A for zn, A in a_by_zn_all.items() if int(A) >= int(a_min)}
@@ -20887,6 +21492,7 @@ def _run_step_7_13_15_27(
             pass_spectro = False
             # 条件分岐: `include_e2plus` を満たす経路を評価する。
             if include_e2plus:
+                # 関数: `is_peak_n` の入出力契約と処理意図を定義する。
                 def is_peak_n(*, Z: int, N0: int) -> bool:
                     e0 = e2plus_by_zn.get((int(Z), int(N0)))
                     eL = e2plus_by_zn.get((int(Z), int(N0) - 2))
@@ -20899,6 +21505,8 @@ def _run_step_7_13_15_27(
                         and float(e0) > float(eR)
                     )
 
+                # 関数: `is_peak_z` の入出力契約と処理意図を定義する。
+
                 def is_peak_z(*, Z0: int, N: int) -> bool:
                     e0 = e2plus_by_zn.get((int(Z0), int(N)))
                     eL = e2plus_by_zn.get((int(Z0) - 2, int(N)))
@@ -20910,6 +21518,8 @@ def _run_step_7_13_15_27(
                         and float(e0) > float(eL)
                         and float(e0) > float(eR)
                     )
+
+                # 関数: `summarize_spectro_peaks_n` の入出力契約と処理意図を定義する。
 
                 def summarize_spectro_peaks_n() -> dict[str, object]:
                     n_avail = 0
@@ -20947,6 +21557,8 @@ def _run_step_7_13_15_27(
                         "rms_resid_pairing_only_MeV": float(rms([float(r[1]) for r in rows])) if rows else float("nan"),
                         "rms_resid_pairing_shell_MeV": float(rms([float(r[2]) for r in rows])) if rows else float("nan"),
                     }
+
+                # 関数: `summarize_spectro_peaks_p` の入出力契約と処理意図を定義する。
 
                 def summarize_spectro_peaks_p() -> dict[str, object]:
                     n_avail = 0
@@ -21013,6 +21625,8 @@ def _run_step_7_13_15_27(
                 if spectro_multi_maps is None:
                     raise RuntimeError("include_spectro_multi=True but spectro_multi_maps is None (bug)")
 
+                # 関数: `is_extreme_n` の入出力契約と処理意図を定義する。
+
                 def is_extreme_n(*, metric_by_zn: dict[tuple[int, int], float], Z: int, N0: int, kind: str) -> bool:
                     v0 = metric_by_zn.get((int(Z), int(N0)))
                     vL = metric_by_zn.get((int(Z), int(N0) - 2))
@@ -21032,6 +21646,8 @@ def _run_step_7_13_15_27(
                         return float(v0) < float(vL) and float(v0) < float(vR)
 
                     raise ValueError(f"unsupported kind: {kind}")
+
+                # 関数: `is_extreme_z` の入出力契約と処理意図を定義する。
 
                 def is_extreme_z(*, metric_by_zn: dict[tuple[int, int], float], Z0: int, N: int, kind: str) -> bool:
                     v0 = metric_by_zn.get((int(Z0), int(N)))
@@ -21053,10 +21669,14 @@ def _run_step_7_13_15_27(
 
                     raise ValueError(f"unsupported kind: {kind}")
 
+                # 関数: `summarize_metric` の入出力契約と処理意図を定義する。
+
                 def summarize_metric(*, metric_key: str, metric_label: str, metric_by_zn: dict[tuple[int, int], float], kind: str) -> dict[str, object]:
                     # 条件分岐: `str(kind) not in {"peak", "valley"}` を満たす経路を評価する。
                     if str(kind) not in {"peak", "valley"}:
                         raise ValueError(f"unsupported kind: {kind}")
+
+                    # 関数: `summarize_axis_n` の入出力契約と処理意図を定義する。
 
                     def summarize_axis_n() -> dict[str, object]:
                         n_avail = 0
@@ -21094,6 +21714,8 @@ def _run_step_7_13_15_27(
                             "rms_resid_pairing_only_MeV": float(rms([float(r[1]) for r in rows])) if rows else float("nan"),
                             "rms_resid_pairing_shell_MeV": float(rms([float(r[2]) for r in rows])) if rows else float("nan"),
                         }
+
+                    # 関数: `summarize_axis_z` の入出力契約と処理意図を定義する。
 
                     def summarize_axis_z() -> dict[str, object]:
                         n_avail = 0
@@ -21179,13 +21801,18 @@ def _run_step_7_13_15_27(
             # 条件分岐: `include_radii_kink` を満たす経路を評価する。
             if include_radii_kink:
 
+                # 関数: `is_kink_n` の入出力契約と処理意図を定義する。
                 def is_kink_n(*, Z: int, N0: int) -> bool:
                     info = kink_info_n(Z=int(Z), N0=int(N0), d=2)
                     return bool(info is not None and float(info[0]) >= float(kink_sigma_min))
 
+                # 関数: `is_kink_z` の入出力契約と処理意図を定義する。
+
                 def is_kink_z(*, Z0: int, N: int) -> bool:
                     info = kink_info_z(Z0=int(Z0), N=int(N), d=2)
                     return bool(info is not None and float(info[0]) >= float(kink_sigma_min))
+
+                # 関数: `summarize_radii_kinks_n` の入出力契約と処理意図を定義する。
 
                 def summarize_radii_kinks_n() -> dict[str, object]:
                     n_avail = 0
@@ -21223,6 +21850,8 @@ def _run_step_7_13_15_27(
                         "rms_resid_pairing_only_MeV": float(rms([float(r[1]) for r in rows])) if rows else float("nan"),
                         "rms_resid_pairing_shell_MeV": float(rms([float(r[2]) for r in rows])) if rows else float("nan"),
                     }
+
+                # 関数: `summarize_radii_kinks_p` の入出力契約と処理意図を定義する。
 
                 def summarize_radii_kinks_p() -> dict[str, object]:
                     n_avail = 0
@@ -21319,6 +21948,7 @@ def _run_step_7_13_15_27(
 
                     k_beta2 = 5.0 / (4.0 * math.pi)
 
+                    # 関数: `r_charge_pred_shell_nz_beta2` の入出力契約と処理意図を定義する。
                     def r_charge_pred_shell_nz_beta2(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
                         # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21347,6 +21977,8 @@ def _run_step_7_13_15_27(
 
                         return float(out_r)
 
+                    # 関数: `delta2r_pred_n_shell_nz_beta2` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_shell_nz_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0) - int(d))
@@ -21356,6 +21988,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_shell_nz_beta2` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_shell_nz_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell_nz_beta2(Z=int(Z0), N=int(N))
@@ -21389,6 +22023,7 @@ def _run_step_7_13_15_27(
                     #   (Z,N±1) and (Z±1,N), then (Z±1,N±1); otherwise 0.
                     k_beta2 = 5.0 / (4.0 * math.pi)
 
+                    # 関数: `beta2_for_radius` の入出力契約と処理意図を定義する。
                     def beta2_for_radius(*, Z: int, N: int) -> float:
                         v = beta2_by_zn.get((int(Z), int(N)))
                         # 条件分岐: `v is not None and math.isfinite(float(v))` を満たす経路を評価する。
@@ -21418,6 +22053,8 @@ def _run_step_7_13_15_27(
 
                         return float(sum(vals) / len(vals)) if vals else 0.0
 
+                    # 関数: `r_charge_pred_beta2` の入出力契約と処理意図を定義する。
+
                     def r_charge_pred_beta2(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
                         # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21433,6 +22070,8 @@ def _run_step_7_13_15_27(
 
                         return float(out_r)
 
+                    # 関数: `delta2r_pred_n_beta2` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_beta2(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_beta2(Z=int(Z), N=int(N0) - int(d))
@@ -21442,6 +22081,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_beta2` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_beta2(Z=int(Z0), N=int(N))
@@ -21479,6 +22120,8 @@ def _run_step_7_13_15_27(
                     if not math.isfinite(r_oe_z):
                         r_oe_z = 0.0
 
+                    # 関数: `r_charge_pred_odd_even` の入出力契約と処理意図を定義する。
+
                     def r_charge_pred_odd_even(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
                         # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21494,6 +22137,8 @@ def _run_step_7_13_15_27(
 
                         return float(out_r)
 
+                    # 関数: `delta2r_pred_n_odd_even` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_odd_even(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_odd_even(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_odd_even(Z=int(Z), N=int(N0) - int(d))
@@ -21503,6 +22148,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_odd_even` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_odd_even(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_odd_even(Z=int(Z0), N=int(N))
@@ -21533,6 +22180,8 @@ def _run_step_7_13_15_27(
                     if not math.isfinite(r_magic_z):
                         r_magic_z = 0.0
 
+                    # 関数: `r_charge_pred_magic_offset` の入出力契約と処理意図を定義する。
+
                     def r_charge_pred_magic_offset(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
                         # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21548,6 +22197,8 @@ def _run_step_7_13_15_27(
 
                         return float(out_r)
 
+                    # 関数: `delta2r_pred_n_magic_offset` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_magic_offset(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_magic_offset(Z=int(Z), N=int(N0) - int(d))
@@ -21557,6 +22208,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_magic_offset` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_magic_offset(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset(Z=int(Z0), N=int(N))
@@ -21600,6 +22253,8 @@ def _run_step_7_13_15_27(
                     if neighbor_step <= 0:
                         neighbor_step = 2
 
+                    # 関数: `w_magic` の入出力契約と処理意図を定義する。
+
                     def w_magic(x: int) -> float:
                         # 条件分岐: `int(x) in magic_set` を満たす経路を評価する。
                         if int(x) in magic_set:
@@ -21611,6 +22266,8 @@ def _run_step_7_13_15_27(
                             return float(neighbor_weight)
 
                         return 0.0
+
+                    # 関数: `r_charge_pred_magic_offset_neighbors` の入出力契約と処理意図を定義する。
 
                     def r_charge_pred_magic_offset_neighbors(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
@@ -21631,6 +22288,8 @@ def _run_step_7_13_15_27(
 
                         return float(out_r)
 
+                    # 関数: `delta2r_pred_n_magic_offset_neighbors` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_magic_offset_neighbors(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0) - int(d))
@@ -21640,6 +22299,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_magic_offset_neighbors` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_magic_offset_neighbors(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z0), N=int(N))
@@ -21662,6 +22323,7 @@ def _run_step_7_13_15_27(
                     coeffs_N = coeffs.get("N") if isinstance(coeffs.get("N"), dict) else {}
                     coeffs_Z = coeffs.get("Z") if isinstance(coeffs.get("Z"), dict) else {}
 
+                    # 関数: `r_charge_pred_magic_offset_per_magic` の入出力契約と処理意図を定義する。
                     def r_charge_pred_magic_offset_per_magic(*, Z: int, N: int) -> float | None:
                         base = r_charge_pred(Z=int(Z), N=int(N))
                         # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21676,6 +22338,8 @@ def _run_step_7_13_15_27(
 
                         return float(out_r)
 
+                    # 関数: `delta2r_pred_n_magic_offset_per_magic` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_magic_offset_per_magic(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0) - int(d))
@@ -21685,6 +22349,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_magic_offset_per_magic` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_magic_offset_per_magic(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z0), N=int(N))
@@ -21718,6 +22384,8 @@ def _run_step_7_13_15_27(
                         if not math.isfinite(r_shell_z):
                             r_shell_z = 0.0
 
+                        # 関数: `r_charge_pred_shell` の入出力契約と処理意図を定義する。
+
                         def r_charge_pred_shell(*, Z: int, N: int) -> float | None:
                             base = r_charge_pred(Z=int(Z), N=int(N))
                             # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21743,6 +22411,8 @@ def _run_step_7_13_15_27(
                         if not math.isfinite(r_shell):
                             r_shell = 0.0
 
+                        # 関数: `r_charge_pred_shell` の入出力契約と処理意図を定義する。
+
                         def r_charge_pred_shell(*, Z: int, N: int) -> float | None:
                             base = r_charge_pred(Z=int(Z), N=int(N))
                             # 条件分岐: `base is None` を満たす経路を評価する。
@@ -21761,6 +22431,8 @@ def _run_step_7_13_15_27(
 
                             return float(out_r)
 
+                    # 関数: `delta2r_pred_n_shell` の入出力契約と処理意図を定義する。
+
                     def delta2r_pred_n_shell(*, Z: int, N0: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell(Z=int(Z), N=int(N0))
                         rLp = r_charge_pred_shell(Z=int(Z), N=int(N0) - int(d))
@@ -21770,6 +22442,8 @@ def _run_step_7_13_15_27(
                             return None
 
                         return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+                    # 関数: `delta2r_pred_z_shell` の入出力契約と処理意図を定義する。
 
                     def delta2r_pred_z_shell(*, Z0: int, N: int, d: int = 2) -> float | None:
                         r0p = r_charge_pred_shell(Z=int(Z0), N=int(N))
@@ -21783,6 +22457,8 @@ def _run_step_7_13_15_27(
 
                     delta2r_pred_n_fn = delta2r_pred_n_shell
                     delta2r_pred_z_fn = delta2r_pred_z_shell
+
+                # 関数: `summarize_delta2r_n` の入出力契約と処理意図を定義する。
 
                 def summarize_delta2r_n() -> dict[str, object]:
                     n_avail = 0
@@ -21854,6 +22530,8 @@ def _run_step_7_13_15_27(
                         ],
                         "pass": bool(pass_axis),
                     }
+
+                # 関数: `summarize_delta2r_p` の入出力契約と処理意図を定義する。
 
                 def summarize_delta2r_p() -> dict[str, object]:
                     n_avail = 0
@@ -22515,6 +23193,7 @@ def _run_step_7_13_15_27(
     out_kink_delta2r_csv: Path | None = None
     # 条件分岐: `include_e2plus` を満たす経路を評価する。
     if include_e2plus:
+        # 関数: `is_peak_n` の入出力契約と処理意図を定義する。
         def is_peak_n(*, Z: int, N: int) -> bool:
             e0 = e2plus_by_zn.get((int(Z), int(N)))
             eL = e2plus_by_zn.get((int(Z), int(N) - 2))
@@ -22526,6 +23205,8 @@ def _run_step_7_13_15_27(
                 and float(e0) > float(eL)
                 and float(e0) > float(eR)
             )
+
+        # 関数: `is_peak_z` の入出力契約と処理意図を定義する。
 
         def is_peak_z(*, Z: int, N: int) -> bool:
             e0 = e2plus_by_zn.get((int(Z), int(N)))
@@ -22605,6 +23286,7 @@ def _run_step_7_13_15_27(
     # 条件分岐: `bool(include_spectro_multi and (spectro_multi_maps is not None))` を満たす経路を評価する。
 
     if bool(include_spectro_multi and (spectro_multi_maps is not None)):
+        # 関数: `is_extreme_n` の入出力契約と処理意図を定義する。
         def is_extreme_n(*, metric_by_zn: dict[tuple[int, int], float], Z: int, N: int, kind: str) -> bool:
             v0 = metric_by_zn.get((int(Z), int(N)))
             vL = metric_by_zn.get((int(Z), int(N) - 2))
@@ -22624,6 +23306,8 @@ def _run_step_7_13_15_27(
                 return float(v0) < float(vL) and float(v0) < float(vR)
 
             raise ValueError(f"unsupported kind: {kind}")
+
+        # 関数: `is_extreme_z` の入出力契約と処理意図を定義する。
 
         def is_extreme_z(*, metric_by_zn: dict[tuple[int, int], float], Z: int, N: int, kind: str) -> bool:
             v0 = metric_by_zn.get((int(Z), int(N)))
@@ -22847,6 +23531,7 @@ def _run_step_7_13_15_27(
 
             k_beta2 = 5.0 / (4.0 * math.pi)
 
+            # 関数: `r_charge_pred_shell_nz_beta2` の入出力契約と処理意図を定義する。
             def r_charge_pred_shell_nz_beta2(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
                 # 条件分岐: `base is None` を満たす経路を評価する。
@@ -22875,6 +23560,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_shell_nz_beta2` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_shell_nz_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_shell_nz_beta2(Z=int(Z), N=int(N0) - int(d))
@@ -22884,6 +23571,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_shell_nz_beta2` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_shell_nz_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell_nz_beta2(Z=int(Z0), N=int(N))
@@ -22924,6 +23613,8 @@ def _run_step_7_13_15_27(
                 if not math.isfinite(diag_r_shell):
                     diag_r_shell = 0.0
 
+            # 関数: `r_charge_pred_shell` の入出力契約と処理意図を定義する。
+
             def r_charge_pred_shell(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
                 # 条件分岐: `base is None` を満たす経路を評価する。
@@ -22955,6 +23646,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_shell` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_shell(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_shell(Z=int(Z), N=int(N0) - int(d))
@@ -22964,6 +23657,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_shell` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_shell(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_shell(Z=int(Z0), N=int(N))
@@ -22983,6 +23678,7 @@ def _run_step_7_13_15_27(
         if bool(radii_kink_delta2r_radius_beta2):
             k_beta2 = 5.0 / (4.0 * math.pi)
 
+            # 関数: `beta2_for_radius` の入出力契約と処理意図を定義する。
             def beta2_for_radius(*, Z: int, N: int) -> float:
                 v = beta2_by_zn.get((int(Z), int(N)))
                 # 条件分岐: `v is not None and math.isfinite(float(v))` を満たす経路を評価する。
@@ -23012,6 +23708,8 @@ def _run_step_7_13_15_27(
 
                 return float(sum(vals) / len(vals)) if vals else 0.0
 
+            # 関数: `r_charge_pred_beta2` の入出力契約と処理意図を定義する。
+
             def r_charge_pred_beta2(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
                 # 条件分岐: `base is None` を満たす経路を評価する。
@@ -23027,6 +23725,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_beta2` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_beta2(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_beta2(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_beta2(Z=int(Z), N=int(N0) - int(d))
@@ -23036,6 +23736,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_beta2` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_beta2(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_beta2(Z=int(Z0), N=int(N))
@@ -23065,6 +23767,8 @@ def _run_step_7_13_15_27(
             if not math.isfinite(r_oe_z):
                 r_oe_z = 0.0
 
+            # 関数: `r_charge_pred_odd_even` の入出力契約と処理意図を定義する。
+
             def r_charge_pred_odd_even(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
                 # 条件分岐: `base is None` を満たす経路を評価する。
@@ -23080,6 +23784,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_odd_even` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_odd_even(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_odd_even(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_odd_even(Z=int(Z), N=int(N0) - int(d))
@@ -23089,6 +23795,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_odd_even` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_odd_even(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_odd_even(Z=int(Z0), N=int(N))
@@ -23122,6 +23830,8 @@ def _run_step_7_13_15_27(
             if not math.isfinite(diag_r_magic_z):
                 diag_r_magic_z = 0.0
 
+            # 関数: `r_charge_pred_magic_offset` の入出力契約と処理意図を定義する。
+
             def r_charge_pred_magic_offset(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
                 # 条件分岐: `base is None` を満たす経路を評価する。
@@ -23137,6 +23847,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_magic_offset` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_magic_offset(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_magic_offset(Z=int(Z), N=int(N0) - int(d))
@@ -23146,6 +23858,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_magic_offset` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_magic_offset(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset(Z=int(Z0), N=int(N))
@@ -23190,6 +23904,8 @@ def _run_step_7_13_15_27(
             if int(diag_magic_neighbor_step) <= 0:
                 diag_magic_neighbor_step = 2
 
+            # 関数: `w_magic` の入出力契約と処理意図を定義する。
+
             def w_magic(x: int) -> float:
                 # 条件分岐: `int(x) in magic_set` を満たす経路を評価する。
                 if int(x) in magic_set:
@@ -23201,6 +23917,8 @@ def _run_step_7_13_15_27(
                     return float(diag_magic_neighbor_weight)
 
                 return 0.0
+
+            # 関数: `r_charge_pred_magic_offset_neighbors` の入出力契約と処理意図を定義する。
 
             def r_charge_pred_magic_offset_neighbors(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
@@ -23217,6 +23935,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_magic_offset_neighbors` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_magic_offset_neighbors(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_magic_offset_neighbors(Z=int(Z), N=int(N0) - int(d))
@@ -23226,6 +23946,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_magic_offset_neighbors` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_magic_offset_neighbors(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_neighbors(Z=int(Z0), N=int(N))
@@ -23253,6 +23975,7 @@ def _run_step_7_13_15_27(
             diag_magic_neighbor_weight = float("nan")
             diag_magic_neighbor_step = 2
 
+            # 関数: `r_charge_pred_magic_offset_per_magic` の入出力契約と処理意図を定義する。
             def r_charge_pred_magic_offset_per_magic(*, Z: int, N: int) -> float | None:
                 base = r_charge_pred(Z=int(Z), N=int(N))
                 # 条件分岐: `base is None` を満たす経路を評価する。
@@ -23267,6 +23990,8 @@ def _run_step_7_13_15_27(
 
                 return float(out_r)
 
+            # 関数: `delta2r_pred_n_magic_offset_per_magic` の入出力契約と処理意図を定義する。
+
             def delta2r_pred_n_magic_offset_per_magic(*, Z: int, N0: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0))
                 rLp = r_charge_pred_magic_offset_per_magic(Z=int(Z), N=int(N0) - int(d))
@@ -23276,6 +24001,8 @@ def _run_step_7_13_15_27(
                     return None
 
                 return float(rRp) - 2.0 * float(r0p) + float(rLp)
+
+            # 関数: `delta2r_pred_z_magic_offset_per_magic` の入出力契約と処理意図を定義する。
 
             def delta2r_pred_z_magic_offset_per_magic(*, Z0: int, N: int, d: int = 2) -> float | None:
                 r0p = r_charge_pred_magic_offset_per_magic(Z=int(Z0), N=int(N))
@@ -23906,6 +24633,8 @@ def _run_step_7_13_15_27(
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_28` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_28(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.28 (initial): Add an independently constrained structure input (β2) and re-run the
@@ -23925,6 +24654,8 @@ def _run_step_7_13_15_28(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_29` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_29(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.29 (initial): Reflect β2 also into the surface term and integrate β2 coverage robustness
@@ -23942,6 +24673,8 @@ def _run_step_7_13_15_29(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         beta2_strict_coverage=True,
     )
 
+
+# 関数: `_run_step_7_13_15_30` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_30(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -23963,6 +24696,8 @@ def _run_step_7_13_15_30(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         e2plus_strict_peaks=True,
     )
 
+
+# 関数: `_run_step_7_13_15_31` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_31(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -23990,6 +24725,8 @@ def _run_step_7_13_15_31(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_32` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_32(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.32 (initial): Expand the spectroscopy cross-check to multiple NuDat 3.0 observables
@@ -24015,6 +24752,8 @@ def _run_step_7_13_15_32(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         spectro_multi_fetch_hint="python -B scripts/quantum/fetch_nuclear_spectroscopy_e2plus_sources.py",
     )
 
+
+# 関数: `_run_step_7_13_15_33` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_33(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24047,6 +24786,8 @@ def _run_step_7_13_15_33(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         spectro_multi_fetch_hint="python -B scripts/quantum/fetch_nuclear_spectroscopy_e2plus_sources.py",
     )
 
+
+# 関数: `_run_step_7_13_15_34` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_34(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24082,6 +24823,8 @@ def _run_step_7_13_15_34(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_sigma_min=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_35` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_35(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24120,6 +24863,8 @@ def _run_step_7_13_15_35(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_36` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_36(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.36 (initial): Introduce a minimal shell term (one DoF) into the radius mapping and
@@ -24154,6 +24899,8 @@ def _run_step_7_13_15_36(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_delta2r_resid_sigma_max=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_37` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_37(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24190,6 +24937,8 @@ def _run_step_7_13_15_37(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_38` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_38(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.38 (initial): Apply a deformation-aware (beta2-based) radius correction and
@@ -24224,6 +24973,8 @@ def _run_step_7_13_15_38(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_delta2r_resid_sigma_max=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_39` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_39(*, out_dir: Path) -> None:
     """
@@ -24455,6 +25206,8 @@ def _run_step_7_13_15_39(*, out_dir: Path) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_40` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_40(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.40 (initial): Add a minimal odd-even (pairing-like) radius offset in the
@@ -24487,6 +25240,8 @@ def _run_step_7_13_15_40(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_41` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_41(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.41 (initial): Combine the NZ-separated shell term with a deformation-aware
@@ -24518,6 +25273,8 @@ def _run_step_7_13_15_41(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_delta2r_resid_sigma_max=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_42` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_42(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24555,6 +25312,8 @@ def _run_step_7_13_15_42(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_43` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_43(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.43 (initial): Add a minimal magic-number offset in the charge-radius mapping and
@@ -24590,6 +25349,8 @@ def _run_step_7_13_15_43(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_delta2r_resid_sigma_max=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_44` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_44(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24627,6 +25388,8 @@ def _run_step_7_13_15_44(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_delta2r_resid_sigma_max=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_45` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_45(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
@@ -24666,6 +25429,8 @@ def _run_step_7_13_15_45(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
     )
 
 
+# 関数: `_run_step_7_13_15_46` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_46(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: int) -> None:
     """
     Step 7.13.15.46 (initial): Re-check the shell-closure-only Δ²r (kink) observable using a
@@ -24703,6 +25468,8 @@ def _run_step_7_13_15_46(*, out_dir: Path, domain_min_a: int, radius_fit_min_a: 
         radii_kink_delta2r_resid_sigma_max=3.0,
     )
 
+
+# 関数: `_run_step_7_13_15_48` の入出力契約と処理意図を定義する。
 
 def _run_step_7_13_15_48(*, out_dir: Path) -> None:
     """
@@ -24754,6 +25521,8 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
 
     if not delta2r_csv_path.exists():
         raise SystemExit(f"[fail] missing baseline delta2r csv: {delta2r_csv_path}")
+
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
 
     def fnum(row: dict[str, str], key: str) -> float | None:
         s = str(row.get(key, "")).strip()
@@ -24843,6 +25612,7 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
     n_steps = int(round((rho_max - rho_min) / rho_step))
     rho_values = [round(rho_min + i * rho_step, 5) for i in range(n_steps + 1)]
 
+    # 関数: `sigma_delta2r_ar1` の入出力契約と処理意図を定義する。
     def sigma_delta2r_ar1(*, sigma_left: float, sigma_center: float, sigma_right: float, rho: float) -> float | None:
         sL = float(sigma_left)
         s0 = float(sigma_center)
@@ -24863,6 +25633,8 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
             return None
 
         return math.sqrt(float(var))
+
+    # 関数: `eval_axis` の入出力契約と処理意図を定義する。
 
     def eval_axis(*, axis: str, a_min: int, rho: float) -> dict[str, object]:
         n_available = 0
@@ -25093,6 +25865,8 @@ def _run_step_7_13_15_48(*, out_dir: Path) -> None:
     print(f"  {out_json}")
 
 
+# 関数: `_run_step_7_13_15_49` の入出力契約と処理意図を定義する。
+
 def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     """
     Step 7.13.15.49: Minimal nuclear-structure extension for the Δ²r(kink) strict no-go using
@@ -25202,6 +25976,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             "  python -B scripts/quantum/fetch_nuclear_deformation_be2_sources.py\n"
             f"Expected: {beta2_path}"
         )
+
+    # 関数: `fnum` の入出力契約と処理意図を定義する。
 
     def fnum(x: object) -> float | None:
         s = str(x).strip()
@@ -25353,6 +26129,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     scan_domain_min_a = [16, 40, 60, 80, 100]
     fit_min_a = 40  # fixed protocol (match 7.13.15.23 fit_min_A)
 
+    # 関数: `r_pred_base` の入出力契約と処理意図を定義する。
     def r_pred_base(*, Z: int, N: int) -> float | None:
         A = int(Z) + int(N)
         # 条件分岐: `A < 2 or int(Z) < 1 or int(N) < 0` を満たす経路を評価する。
@@ -25377,6 +26154,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
 
         return float(r) if (math.isfinite(r) and r > 0.0) else None
 
+    # 関数: `r_pred_deformed` の入出力契約と処理意図を定義する。
+
     def r_pred_deformed(*, Z: int, N: int, use_deformation: bool) -> float | None:
         base = r_pred_base(Z=int(Z), N=int(N))
         # 条件分岐: `base is None` を満たす経路を評価する。
@@ -25398,9 +26177,13 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
 
         return float(out_r)
 
+    # 関数: `pair_dn` の入出力契約と処理意図を定義する。
+
     def pair_dn(*, Z: int, N: int) -> float:
         v = dn_by_zn.get((int(Z), int(N)))
         return float(v) if (v is not None and math.isfinite(float(v))) else 0.0
+
+    # 関数: `pair_dp` の入出力契約と処理意図を定義する。
 
     def pair_dp(*, Z: int, N: int) -> float:
         v = dp_by_zn.get((int(Z), int(N)))
@@ -25477,6 +26260,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     if not points:
         raise SystemExit("[fail] no Δ²r points constructed from radii dataset")
 
+    # 関数: `add_model_fields` の入出力契約と処理意図を定義する。
+
     def add_model_fields(*, use_deformation: bool) -> None:
         for p in points:
             axis = str(p["axis"])
@@ -25519,6 +26304,7 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     add_model_fields(use_deformation=False)
     add_model_fields(use_deformation=True)
 
+    # 関数: `fit_kn_kp` の入出力契約と処理意図を定義する。
     def fit_kn_kp(*, use_deformation: bool) -> dict[str, float]:
         key_pred = f"delta2r_pred_fm__deform_{int(bool(use_deformation))}"
         key_dn2 = f"delta2_dn__deform_{int(bool(use_deformation))}"
@@ -25592,6 +26378,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     for a_min in scan_domain_min_a:
         strict_points_by_a_min[int(a_min)] = [p for p in points if bool(p.get("is_kink", False)) and int(p.get("min_A", 0)) >= int(a_min)]
 
+    # 関数: `eval_strict` の入出力契約と処理意図を定義する。
+
     def eval_strict(
         *,
         use_deformation: bool,
@@ -25651,6 +26439,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
             "worst_Sn": worst_n[:10],
             "worst_Sp": worst_z[:10],
         }
+
+    # 関数: `grid_search` の入出力契約と処理意図を定義する。
 
     def grid_search(
         *,
@@ -25865,6 +26655,8 @@ def _run_step_7_13_15_49(*, out_dir: Path) -> None:
     print(f"  {out_csv}")
     print(f"  {out_json}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

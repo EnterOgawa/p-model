@@ -36,9 +36,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -47,9 +50,13 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -65,6 +72,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
+
 def _as_float(value: Any) -> Optional[float]:
     # 条件分岐: `isinstance(value, (int, float))` を満たす経路を評価する。
     if isinstance(value, (int, float)):
@@ -76,6 +85,8 @@ def _as_float(value: Any) -> Optional[float]:
     return None
 
 
+# 関数: `_safe_div` の入出力契約と処理意図を定義する。
+
 def _safe_div(num: Optional[float], den: Optional[float]) -> Optional[float]:
     # 条件分岐: `num is None or den is None or den == 0.0` を満たす経路を評価する。
     if num is None or den is None or den == 0.0:
@@ -83,6 +94,8 @@ def _safe_div(num: Optional[float], den: Optional[float]) -> Optional[float]:
 
     return float(num) / float(den)
 
+
+# 関数: `_score_status` の入出力契約と処理意図を定義する。
 
 def _score_status(score: Optional[float]) -> str:
     # 条件分岐: `score is None` を満たす経路を評価する。
@@ -101,6 +114,8 @@ def _score_status(score: Optional[float]) -> str:
 
     return "reject"
 
+
+# 関数: `_pick_model` の入出力契約と処理意図を定義する。
 
 def _pick_model(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -135,6 +150,8 @@ def _pick_model(rows: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
     return None
 
 
+# 関数: `_extract_nuclear_be` の入出力契約と処理意図を定義する。
+
 def _extract_nuclear_be(minphys: Dict[str, Any]) -> Dict[str, Any]:
     models = minphys.get("models") if isinstance(minphys.get("models"), list) else []
     model = _pick_model(models)
@@ -164,6 +181,8 @@ def _extract_nuclear_be(minphys: Dict[str, Any]) -> Dict[str, Any]:
         },
     }
 
+
+# 関数: `_extract_nuclear_sep_radius` の入出力契約と処理意図を定義する。
 
 def _extract_nuclear_sep_radius(nuclear_pack: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     independent = nuclear_pack.get("independent_cross_checks") if isinstance(nuclear_pack.get("independent_cross_checks"), dict) else {}
@@ -228,6 +247,8 @@ def _extract_nuclear_sep_radius(nuclear_pack: Dict[str, Any]) -> Dict[str, Dict[
     return {"separation": sep_axis, "radius": radius_axis}
 
 
+# 関数: `_extract_condensed` の入出力契約と処理意図を定義する。
+
 def _extract_condensed(condensed_holdout: Dict[str, Any]) -> Dict[str, Any]:
     summary = condensed_holdout.get("summary") if isinstance(condensed_holdout.get("summary"), dict) else {}
     datasets = summary.get("datasets") if isinstance(summary.get("datasets"), list) else []
@@ -285,6 +306,8 @@ def _extract_condensed(condensed_holdout: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_nuclear_holdout_context` の入出力契約と処理意図を定義する。
+
 def _extract_nuclear_holdout_context(nuclear_holdout: Dict[str, Any]) -> Dict[str, Optional[float]]:
     groups = nuclear_holdout.get("groups") if isinstance(nuclear_holdout.get("groups"), list) else []
     context = {
@@ -311,6 +334,8 @@ def _extract_nuclear_holdout_context(nuclear_holdout: Dict[str, Any]) -> Dict[st
 
     return context
 
+
+# 関数: `_build_matrix` の入出力契約と処理意図を定義する。
 
 def _build_matrix(axes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
@@ -342,6 +367,8 @@ def _build_matrix(axes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     return rows
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(out_csv: Path, axes: List[Dict[str, Any]], matrix_rows: List[Dict[str, Any]]) -> None:
     out_csv.parent.mkdir(parents=True, exist_ok=True)
     with out_csv.open("w", encoding="utf-8", newline="") as f:
@@ -366,6 +393,8 @@ def _write_csv(out_csv: Path, axes: List[Dict[str, Any]], matrix_rows: List[Dict
         for row in matrix_rows:
             writer.writerow(["matrix", row.get("axis_i"), row.get("axis_j"), row.get("pair_score_max"), row.get("pair_status")])
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -465,6 +494,8 @@ def _plot(
     plt.close(fig)
 
 
+# 関数: `build_payload` の入出力契約と処理意図を定義する。
+
 def build_payload(
     *,
     minphys_json: Path,
@@ -532,6 +563,8 @@ def build_payload(
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Build Step 8.7.15 nuclear/condensed cross-check matrix.")

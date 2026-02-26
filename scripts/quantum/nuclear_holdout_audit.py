@@ -21,9 +21,12 @@ from scripts.summary import worklog  # noqa: E402
 MAGIC_NUMBERS = (2, 8, 20, 28, 50, 82, 126)
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -39,12 +42,16 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return str(path.relative_to(_ROOT)).replace("\\", "/")
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
 
 def _percentile(sorted_vals: Sequence[float], p: float) -> float:
     """
@@ -76,6 +83,8 @@ def _percentile(sorted_vals: Sequence[float], p: float) -> float:
     return float((1.0 - w) * float(sorted_vals[i0]) + w * float(sorted_vals[i1]))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(vals: Sequence[float]) -> float:
     s = sorted(float(v) for v in vals if math.isfinite(float(v)))
     # 条件分岐: `not s` を満たす経路を評価する。
@@ -85,15 +94,21 @@ def _safe_median(vals: Sequence[float]) -> float:
     return _percentile(s, 50.0)
 
 
+# 関数: `_mad` の入出力契約と処理意図を定義する。
+
 def _mad(vals: Sequence[float], *, center: float) -> float:
     dev = [abs(float(v) - float(center)) for v in vals if math.isfinite(float(v))]
     return _safe_median(dev)
 
 
+# 関数: `_is_truthy` の入出力契約と処理意図を定義する。
+
 def _is_truthy(v: object) -> bool:
     s = str(v).strip().lower()
     return s in ("1", "true", "yes", "y")
 
+
+# 関数: `_edge_class` の入出力契約と処理意図を定義する。
 
 def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
     proton_edge = d_proton <= edge_width
@@ -115,9 +130,13 @@ def _edge_class(*, d_proton: int, d_neutron: int, edge_width: int = 2) -> str:
     return "interior"
 
 
+# 関数: `_is_near_magic` の入出力契約と処理意図を定義する。
+
 def _is_near_magic(*, z: int, n: int, width: int = 2) -> bool:
     return (min(abs(z - m) for m in MAGIC_NUMBERS) <= width) or (min(abs(n - m) for m in MAGIC_NUMBERS) <= width)
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -133,6 +152,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for r in rows:
             w.writerow([r.get(h) for h in headers])
 
+
+# クラス: `NucleusRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class NucleusRow:
@@ -154,6 +175,8 @@ class NucleusRow:
     is_deformed_abs_beta2_ge_0p20: bool
 
 
+# 関数: `_group_stats` の入出力契約と処理意図を定義する。
+
 def _group_stats(rows: Sequence[NucleusRow], *, group_id: str) -> Dict[str, Any]:
     log_vals = [r.log10_ratio for r in rows if math.isfinite(r.log10_ratio)]
     abs_z_vals = [r.abs_z for r in rows if math.isfinite(r.abs_z)]
@@ -174,6 +197,8 @@ def _group_stats(rows: Sequence[NucleusRow], *, group_id: str) -> Dict[str, Any]
         "max_abs_z": float(max(s_absz)) if s_absz else float("nan"),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     out_dir = _ROOT / "output" / "public" / "quantum"

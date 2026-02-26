@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `DemoConfig` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class DemoConfig:
     L: float = 1.0
@@ -19,6 +20,8 @@ class DemoConfig:
     packet_sigma: float = 0.03
     packet_k: float = 120.0  # rad / length
 
+
+# 関数: `_simulate_wave_packet` の入出力契約と処理意図を定義する。
 
 def _simulate_wave_packet(cfg: DemoConfig) -> dict:
     # 1D wave equation: u_tt = c^2 u_xx on [0,L] with Dirichlet boundaries u(0)=u(L)=0.
@@ -78,6 +81,8 @@ def _simulate_wave_packet(cfg: DemoConfig) -> dict:
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(cfg: DemoConfig, sim: dict, *, out_png: Path) -> None:
     import matplotlib.pyplot as plt
 
@@ -119,6 +124,8 @@ def _plot(cfg: DemoConfig, sim: dict, *, out_png: Path) -> None:
     fig.savefig(out_png)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

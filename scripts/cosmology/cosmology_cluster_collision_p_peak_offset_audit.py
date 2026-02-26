@@ -64,6 +64,7 @@ PRIMARY_TEMPLATE_COLUMNS: Tuple[str, ...] = (
 )
 
 
+# クラス: `CollisionObs` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class CollisionObs:
     cluster_id: str
@@ -71,6 +72,8 @@ class CollisionObs:
     lens_gas_offset_kpc_obs: float
     lens_gas_offset_kpc_sigma: float
 
+
+# 関数: `_write_dict_rows_csv` の入出力契約と処理意図を定義する。
 
 def _write_dict_rows_csv(path: Path, fieldnames: Sequence[str], rows: Sequence[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -81,9 +84,13 @@ def _write_dict_rows_csv(path: Path, fieldnames: Sequence[str], rows: Sequence[D
             writer.writerow({k: row.get(k) for k in fieldnames})
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -92,10 +99,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -110,6 +121,8 @@ def _sha256_file(path: Path) -> str:
 
     return h.hexdigest().upper()
 
+
+# 関数: `_file_signature` の入出力契約と処理意図を定義する。
 
 def _file_signature(path: Path) -> Dict[str, Any]:
     payload: Dict[str, Any] = {"exists": bool(path.exists()), "path": _rel(path)}
@@ -131,6 +144,8 @@ def _file_signature(path: Path) -> Dict[str, Any]:
 
     return payload
 
+
+# 関数: `_load_previous_watchpack` の入出力契約と処理意図を定義する。
 
 def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -155,6 +170,8 @@ def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
     return watchpack
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -176,6 +193,8 @@ def _set_japanese_font() -> None:
     except Exception:
         return
 
+
+# 関数: `_load_collision_observations` の入出力契約と処理意図を定義する。
 
 def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], str, List[str], Dict[str, Any]]:
     notes: List[str] = []
@@ -308,6 +327,8 @@ def _load_collision_observations(csv_path: Path) -> Tuple[List[CollisionObs], st
     return fallback, "embedded_proxy", notes, source_diag
 
 
+# 関数: `_derive_primary_registration_readiness` の入出力契約と処理意図を定義する。
+
 def _derive_primary_registration_readiness(source_diag: Dict[str, Any]) -> Dict[str, Any]:
     n_valid_rows = int(source_diag.get("n_valid_rows", 0) or 0)
     missing_columns_raw = source_diag.get("primary_reference_columns_missing")
@@ -363,6 +384,8 @@ def _derive_primary_registration_readiness(source_diag: Dict[str, Any]) -> Dict[
         "next_action": next_action,
     }
 
+
+# 関数: `_build_primary_registration_checklist` の入出力契約と処理意図を定義する。
 
 def _build_primary_registration_checklist(
     *,
@@ -467,6 +490,8 @@ def _build_primary_registration_checklist(
     return checklist, summary
 
 
+# 関数: `_derive_primary_map_update_watchpack` の入出力契約と処理意図を定義する。
+
 def _derive_primary_map_update_watchpack(
     *,
     current_signature: Dict[str, Any],
@@ -568,6 +593,8 @@ def _derive_primary_map_update_watchpack(
     }
 
 
+# 関数: `_write_primary_registration_template` の入出力契約と処理意図を定義する。
+
 def _write_primary_registration_template(path: Path, observations: Sequence[CollisionObs], source_mode: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -588,12 +615,16 @@ def _write_primary_registration_template(path: Path, observations: Sequence[Coll
             )
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
 
+
+# 関数: `_load_sparc_anchor` の入出力契約と処理意図を定義する。
 
 def _load_sparc_anchor(paths: Sequence[Path]) -> Tuple[Dict[str, Any], str]:
     for path in paths:
@@ -628,6 +659,8 @@ def _load_sparc_anchor(paths: Sequence[Path]) -> Tuple[Dict[str, Any], str]:
     }, "built_in_default"
 
 
+# 関数: `_alpha_from_sparc` の入出力契約と処理意図を定義する。
+
 def _alpha_from_sparc(anchor: Dict[str, Any]) -> Dict[str, float]:
     a0 = max(float(anchor.get("a0_m_s2", 1.0e-10)), 1.0e-16)
     ups_p = float(anchor.get("upsilon_pmodel_best", 0.55))
@@ -649,6 +682,8 @@ def _alpha_from_sparc(anchor: Dict[str, Any]) -> Dict[str, float]:
         },
     }
 
+
+# 関数: `_evaluate_model` の入出力契約と処理意図を定義する。
 
 def _evaluate_model(
     obs_rows: Sequence[CollisionObs],
@@ -721,6 +756,8 @@ def _evaluate_model(
     }
 
 
+# 関数: `_status_from_gate` の入出力契約と処理意図を定義する。
+
 def _status_from_gate(passed: bool, gate_level: str) -> str:
     # 条件分岐: `passed` を満たす経路を評価する。
     if passed:
@@ -728,6 +765,8 @@ def _status_from_gate(passed: bool, gate_level: str) -> str:
 
     return "reject" if gate_level == "hard" else "watch"
 
+
+# 関数: `_score_from_status` の入出力契約と処理意図を定義する。
 
 def _score_from_status(status: str) -> float:
     # 条件分岐: `status == "pass"` を満たす経路を評価する。
@@ -742,6 +781,8 @@ def _score_from_status(status: str) -> float:
     return 0.0
 
 
+# 関数: `_build_checks` の入出力契約と処理意図を定義する。
+
 def _build_checks(
     *,
     source_mode: str,
@@ -750,6 +791,7 @@ def _build_checks(
 ) -> List[Dict[str, Any]]:
     checks: List[Dict[str, Any]] = []
 
+    # 関数: `add_check` の入出力契約と処理意図を定義する。
     def add_check(check_id: str, metric: str, value: Any, expected: str, passed: bool, gate_level: str, note: str) -> None:
         status = _status_from_gate(bool(passed), gate_level)
         checks.append(
@@ -828,6 +870,8 @@ def _build_checks(
     return checks
 
 
+# 関数: `_decision_from_checks` の入出力契約と処理意図を定義する。
+
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(row["id"]) for row in checks if row.get("gate_level") == "hard" and row.get("pass") is not True]
     watch_ids = [str(row["id"]) for row in checks if row.get("gate_level") == "watch" and row.get("pass") is not True]
@@ -852,6 +896,8 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     fieldnames = [
         "cluster_id",
@@ -870,6 +916,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]]) -> None:
     ]
     _write_dict_rows_csv(path, fieldnames, rows)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequence[Dict[str, Any]], rows_pmodel: Sequence[Dict[str, Any]], alpha_p: float) -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
@@ -919,6 +967,8 @@ def _plot(path: Path, *, observations: Sequence[CollisionObs], rows_baryon: Sequ
     plt.close(fig)
 
 
+# 関数: `parse_args` の入出力契約と処理意図を定義する。
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Step 8.7.25: cluster collision P-peak offset audit")
     parser.add_argument(
@@ -959,6 +1009,8 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     args = parse_args()

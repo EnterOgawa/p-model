@@ -38,6 +38,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `_Entry` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class _Entry:
     file_name: str
@@ -53,6 +54,7 @@ _RE_RAN = re.compile(r"^(?P<sample>.+)_(?P<cap>NGC|SGC)_(?P<idx>\d+)_clustering\
 _RE_DAT = re.compile(r"^(?P<sample>.+)_(?P<cap>NGC|SGC)_clustering\.dat\.fits$", re.IGNORECASE)
 
 
+# 関数: `_parse_entry` の入出力契約と処理意図を定義する。
 def _parse_entry(path: Path) -> Optional[_Entry]:
     name = path.name
     m_ran = _RE_RAN.match(name)
@@ -89,6 +91,8 @@ def _parse_entry(path: Path) -> Optional[_Entry]:
     return None
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, entries: List[_Entry]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as f:
@@ -107,6 +111,8 @@ def _write_csv(path: Path, entries: List[_Entry]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="DESI DR1 LSS raw inventory (local fits listing).")

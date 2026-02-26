@@ -50,6 +50,7 @@ from scripts.cosmology import (  # noqa: E402
 )
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -75,14 +76,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_parse_scales` の入出力契約と処理意図を定義する。
 
 def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
@@ -106,6 +113,8 @@ def _parse_scales(s: str) -> List[float]:
 
     return sorted(set(out))
 
+
+# 関数: `_crossing_x_log` の入出力契約と処理意図を定義する。
 
 def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
     # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
@@ -159,6 +168,8 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
     return None
 
 
+# 関数: `_classify` の入出力契約と処理意図を定義する。
+
 def _classify(v: float) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
     if not math.isfinite(float(v)):
@@ -176,6 +187,8 @@ def _classify(v: float) -> str:
 
     return "ng"
 
+
+# 関数: `_plot_heatmap` の入出力契約と処理意図を定義する。
 
 def _plot_heatmap(
     ax: Any,
@@ -213,6 +226,8 @@ def _plot_heatmap(
     ax.grid(which="minor", color="#ffffff", linestyle="-", linewidth=1.0, alpha=0.6)
     ax.tick_params(which="minor", bottom=False, left=False)
 
+
+# 関数: `_evaluate_global` の入出力契約と処理意図を定義する。
 
 def _evaluate_global(
     *,
@@ -335,6 +350,8 @@ def _evaluate_global(
     return {"z_grid": z_grid, "meta": meta, "best_ij": (int(best[1]), int(best[2])), "top_pairs": top_pairs}
 
 
+# 関数: `_evaluate_best_pair` の入出力契約と処理意図を定義する。
+
 def _evaluate_best_pair(
     *,
     ddr: Sequence[cand.DDRConstraint],
@@ -421,6 +438,8 @@ def _evaluate_best_pair(
     }
 
 
+# 関数: `_plot_bao_sigma_scan` の入出力契約と処理意図を定義する。
+
 def _plot_bao_sigma_scan(
     *,
     out_png: Path,
@@ -498,6 +517,8 @@ def _plot_bao_sigma_scan(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()

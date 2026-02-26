@@ -30,9 +30,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -40,6 +43,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_run` の入出力契約と処理意図を定義する。
 
 def _run(cmd: List[str]) -> Dict[str, Any]:
     proc = subprocess.run(
@@ -58,6 +63,8 @@ def _run(cmd: List[str]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -66,15 +73,21 @@ def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_status_score` の入出力契約と処理意図を定義する。
+
 def _status_score(status: str) -> float:
     table = {"pass": 1.0, "watch": 0.5, "reject": 0.0}
     return table.get(str(status or "").lower(), 0.0)
 
 
+# 関数: `_status_color` の入出力契約と処理意図を定義する。
+
 def _status_color(status: str) -> str:
     table = {"pass": "#2f9e44", "watch": "#eab308", "reject": "#dc2626"}
     return table.get(str(status or "").lower(), "#6b7280")
 
+
+# 関数: `_metric_row` の入出力契約と処理意図を定義する。
 
 def _metric_row(metric_id: str, metric: str, value: Any, expected: Any, status: str, note: str) -> Dict[str, Any]:
     return {
@@ -88,6 +101,8 @@ def _metric_row(metric_id: str, metric: str, value: Any, expected: Any, status: 
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -99,6 +114,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow(row)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, rows: List[Dict[str, Any]], title: str) -> None:
     labels = [str(r.get("id") or "") for r in rows]
@@ -118,6 +135,8 @@ def _plot(path: Path, rows: List[Dict[str, Any]], title: str) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(

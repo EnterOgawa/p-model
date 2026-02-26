@@ -11,13 +11,18 @@ from typing import Any
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -32,6 +37,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -64,6 +71,8 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
+
 def _parse_float(s: str) -> float:
     x = float(str(s).strip())
     # 条件分岐: `not math.isfinite(x)` を満たす経路を評価する。
@@ -72,6 +81,8 @@ def _parse_float(s: str) -> float:
 
     return float(x)
 
+
+# 関数: `_extract_textarea_table` の入出力契約と処理意図を定義する。
 
 def _extract_textarea_table(html: str) -> list[dict[str, float]]:
     m = re.search(r"<textarea[^>]*>(.*?)</textarea>", html, flags=re.IGNORECASE | re.DOTALL)
@@ -106,6 +117,8 @@ def _extract_textarea_table(html: str) -> list[dict[str, float]]:
     return rows
 
 
+# 関数: `_trapz_xy` の入出力契約と処理意図を定義する。
+
 def _trapz_xy(xs: list[float], ys: list[float]) -> float:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
     if len(xs) != len(ys) or len(xs) < 2:
@@ -122,6 +135,8 @@ def _trapz_xy(xs: list[float], ys: list[float]) -> float:
 
     return float(s)
 
+
+# 関数: `_find_x_at_cum_fraction` の入出力契約と処理意図を定義する。
 
 def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) -> dict[str, float]:
     """
@@ -169,6 +184,8 @@ def _find_x_at_cum_fraction(xs: list[float], ys: list[float], *, frac: float) ->
 
     return {"x": float(xs[-1]), "cum": float(total), "total": float(total)}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

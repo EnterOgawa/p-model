@@ -34,11 +34,14 @@ from typing import Any, Dict, List, Optional, Tuple
 _ROOT = Path(__file__).resolve().parents[2]
 
 
+# クラス: `BaoVal` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class BaoVal:
     mean: float
     sigma: float
 
+
+# 関数: `_parse_pm` の入出力契約と処理意図を定義する。
 
 def _parse_pm(cell: str) -> Optional[BaoVal]:
     t = str(cell).strip()
@@ -57,6 +60,8 @@ def _parse_pm(cell: str) -> Optional[BaoVal]:
     return BaoVal(mean=float(m.group(1)), sigma=float(m.group(2)))
 
 
+# 関数: `_strip_tex_math` の入出力契約と処理意図を定義する。
+
 def _strip_tex_math(cell: str) -> str:
     t = str(cell).strip()
     # 条件分岐: `t.startswith("$") and t.endswith("$")` を満たす経路を評価する。
@@ -65,6 +70,8 @@ def _strip_tex_math(cell: str) -> str:
 
     return t.strip()
 
+
+# 関数: `_parse_float_or_none` の入出力契約と処理意図を定義する。
 
 def _parse_float_or_none(cell: str) -> Optional[float]:
     t = _strip_tex_math(cell)
@@ -75,10 +82,14 @@ def _parse_float_or_none(cell: str) -> Optional[float]:
     return float(t)
 
 
+# 関数: `_parse_int_commas` の入出力契約と処理意図を定義する。
+
 def _parse_int_commas(cell: str) -> int:
     t = str(cell).strip().replace(",", "")
     return int(t)
 
+
+# 関数: `_find_table_y1data` の入出力契約と処理意図を定義する。
 
 def _find_table_y1data(tex_lines: List[str]) -> Tuple[int, int]:
     """
@@ -128,6 +139,8 @@ def _find_table_y1data(tex_lines: List[str]) -> Tuple[int, int]:
 
     return tab_begin, tab_end
 
+
+# 関数: `_parse_rows` の入出力契約と処理意図を定義する。
 
 def _parse_rows(tex_lines: List[str], i0: int, i1: int) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -206,6 +219,8 @@ def _parse_rows(tex_lines: List[str], i0: int, i1: int) -> List[Dict[str, Any]]:
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Extract DESI DR1 BAO Y1data table values from arXiv TeX source.")

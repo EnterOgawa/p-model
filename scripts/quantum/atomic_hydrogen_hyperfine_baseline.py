@@ -8,13 +8,18 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()
@@ -35,6 +40,8 @@ def main() -> None:
     # 条件分岐: `not isinstance(rec, dict)` を満たす経路を評価する。
     if not isinstance(rec, dict):
         raise SystemExit(f"[fail] hydrogen_hyperfine_21cm missing in: {extracted_path}")
+
+    # 関数: `_get_float` の入出力契約と処理意図を定義する。
 
     def _get_float(key: str) -> float:
         v = rec.get(key)

@@ -30,9 +30,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -41,9 +44,13 @@ def _relpath(p: Path) -> str:
         return str(p).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_try_load_frozen_parameters` の入出力契約と処理意図を定義する。
 
 def _try_load_frozen_parameters() -> Dict[str, Any]:
     p = _ROOT / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -70,6 +77,8 @@ def _try_load_frozen_parameters() -> Dict[str, Any]:
     return out
 
 
+# 関数: `_get_nested` の入出力契約と処理意図を定義する。
+
 def _get_nested(d: Dict[str, Any], path: List[str]) -> Any:
     cur: Any = d
     for k in path:
@@ -82,6 +91,8 @@ def _get_nested(d: Dict[str, Any], path: List[str]) -> Any:
     return cur
 
 
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
+
 def _as_float(v: Any) -> Optional[float]:
     # 条件分岐: `isinstance(v, (int, float)) and math.isfinite(float(v))` を満たす経路を評価する。
     if isinstance(v, (int, float)) and math.isfinite(float(v)):
@@ -89,6 +100,8 @@ def _as_float(v: Any) -> Optional[float]:
 
     return None
 
+
+# 関数: `_criterion` の入出力契約と処理意図を定義する。
 
 def _criterion(
     *,
@@ -121,6 +134,8 @@ def _criterion(
     }
 
 
+# 関数: `_eval_ge` の入出力契約と処理意図を定義する。
+
 def _eval_ge(v: Optional[float], thr: float) -> Optional[bool]:
     # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
@@ -128,6 +143,8 @@ def _eval_ge(v: Optional[float], thr: float) -> Optional[bool]:
 
     return bool(v >= thr)
 
+
+# 関数: `_eval_le` の入出力契約と処理意図を定義する。
 
 def _eval_le(v: Optional[float], thr: float) -> Optional[bool]:
     # 条件分岐: `v is None` を満たす経路を評価する。
@@ -137,6 +154,8 @@ def _eval_le(v: Optional[float], thr: float) -> Optional[bool]:
     return bool(v <= thr)
 
 
+# 関数: `_eval_lt` の入出力契約と処理意図を定義する。
+
 def _eval_lt(v: Optional[float], thr: float) -> Optional[bool]:
     # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
@@ -145,6 +164,8 @@ def _eval_lt(v: Optional[float], thr: float) -> Optional[bool]:
     return bool(v < thr)
 
 
+# 関数: `_eval_abs_le` の入出力契約と処理意図を定義する。
+
 def _eval_abs_le(v: Optional[float], thr: float) -> Optional[bool]:
     # 条件分岐: `v is None` を満たす経路を評価する。
     if v is None:
@@ -152,6 +173,8 @@ def _eval_abs_le(v: Optional[float], thr: float) -> Optional[bool]:
 
     return bool(abs(v) <= thr)
 
+
+# 関数: `_try_read_csv_head` の入出力契約と処理意図を定義する。
 
 def _try_read_csv_head(path: Path, *, n: int = 2) -> List[Dict[str, str]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -169,6 +192,8 @@ def _try_read_csv_head(path: Path, *, n: int = 2) -> List[Dict[str, str]]:
 
     return rows
 
+
+# 関数: `build_falsification` の入出力契約と処理意図を定義する。
 
 def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> Dict[str, Any]:
     beta_frozen = _as_float(frozen.get("beta"))
@@ -471,6 +496,8 @@ def build_falsification(consistency: Dict[str, Any], frozen: Dict[str, Any]) -> 
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Generate weak-field falsification criteria evaluation (Phase 6 / Step 6.2.4).")

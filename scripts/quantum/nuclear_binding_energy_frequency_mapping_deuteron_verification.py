@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -22,9 +23,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_solve_kappa_from_ere` の入出力契約と処理意図を定義する。
 
 def _solve_kappa_from_ere(*, a_fm: float, r_fm: float) -> dict[str, float]:
     """
@@ -61,6 +66,8 @@ def _solve_kappa_from_ere(*, a_fm: float, r_fm: float) -> dict[str, float]:
         "kappa_physical_fm1": kappa_small,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

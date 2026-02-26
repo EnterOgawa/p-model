@@ -12,13 +12,18 @@ from urllib.request import Request, urlopen
 from pypdf import PdfReader
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -33,6 +38,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -53,6 +60,8 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_mat_mul` の入出力契約と処理意図を定義する。
+
 def _mat_mul(m1: tuple[float, float, float, float, float, float], m2: tuple[float, float, float, float, float, float]) -> tuple[float, float, float, float, float, float]:
     # PDF affine matrices: (a,b,c,d,e,f)
     a1, b1, c1, d1, e1, f1 = m1
@@ -67,15 +76,21 @@ def _mat_mul(m1: tuple[float, float, float, float, float, float], m2: tuple[floa
     )
 
 
+# 関数: `_mat_apply` の入出力契約と処理意図を定義する。
+
 def _mat_apply(m: tuple[float, float, float, float, float, float], x: float, y: float) -> tuple[float, float]:
     a, b, c, d, e, f = m
     return (a * x + c * y + e, b * x + d * y + f)
 
 
+# 関数: `_is_blue_rgb` の入出力契約と処理意図を定義する。
+
 def _is_blue_rgb(fill: tuple[float, float, float]) -> bool:
     r, g, b = fill
     return abs(b - 1.0) < 1e-6 and abs(r - g) < 1e-6 and (0.0 <= r <= 1.0)
 
+
+# 関数: `_largest_gap_split` の入出力契約と処理意図を定義する。
 
 def _largest_gap_split(values: list[float]) -> float | None:
     # 条件分岐: `len(values) < 2` を満たす経路を評価する。
@@ -94,6 +109,8 @@ def _largest_gap_split(values: list[float]) -> float | None:
 
     return best_mid
 
+
+# 関数: `_extract_blue_markers_from_form` の入出力契約と処理意図を定義する。
 
 def _extract_blue_markers_from_form(
     *,
@@ -139,6 +156,7 @@ def _extract_blue_markers_from_form(
     operand_stack: list[str] = []
     out: list[dict[str, float]] = []
 
+    # 関数: `flush` の入出力契約と処理意図を定義する。
     def flush(op: str) -> None:
         nonlocal path_pts
         # 条件分岐: `not path_pts` を満たす経路を評価する。
@@ -301,6 +319,8 @@ def _extract_blue_markers_from_form(
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

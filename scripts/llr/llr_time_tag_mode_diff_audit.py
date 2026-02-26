@@ -29,9 +29,13 @@ except Exception:
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -40,9 +44,13 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_metrics` の入出力契約と処理意図を定義する。
 
 def _load_metrics(path: Path) -> Tuple[pd.DataFrame, List[str]]:
     df = pd.read_csv(path)
@@ -74,6 +82,8 @@ def _load_metrics(path: Path) -> Tuple[pd.DataFrame, List[str]]:
     return df[keep].copy(), metric_cols
 
 
+# 関数: `_mode_counts` の入出力契約と処理意図を定義する。
+
 def _mode_counts(by_station: Any) -> Dict[str, int]:
     out: Dict[str, int] = {}
     # 条件分岐: `not isinstance(by_station, dict)` を満たす経路を評価する。
@@ -86,6 +96,8 @@ def _mode_counts(by_station: Any) -> Dict[str, int]:
 
     return out
 
+
+# 関数: `_median_map` の入出力契約と処理意図を定義する。
 
 def _median_map(summary: Dict[str, Any]) -> Dict[str, float]:
     src = summary.get("median_rms_ns")
@@ -102,6 +114,8 @@ def _median_map(summary: Dict[str, Any]) -> Dict[str, float]:
 
     return out
 
+
+# 関数: `_build_plot` の入出力契約と処理意図を定義する。
 
 def _build_plot(df: pd.DataFrame, out_png: Path) -> None:
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -139,6 +153,8 @@ def _build_plot(df: pd.DataFrame, out_png: Path) -> None:
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `run` の入出力契約と処理意図を定義する。
 
 def run(args: argparse.Namespace) -> int:
     auto_dir = (ROOT / args.auto_dir).resolve() if not Path(args.auto_dir).is_absolute() else Path(args.auto_dir)
@@ -278,6 +294,8 @@ def run(args: argparse.Namespace) -> int:
 
     return 0
 
+
+# 関数: `build_parser` の入出力契約と処理意図を定義する。
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Compare LLR full-batch results: auto mode vs tx mode.")

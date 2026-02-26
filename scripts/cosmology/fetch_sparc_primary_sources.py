@@ -37,9 +37,13 @@ except Exception:  # pragma: no cover
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -50,10 +54,14 @@ def _sha256(path: Path) -> str:
     return h.hexdigest().upper()
 
 
+# 関数: `_read_head` の入出力契約と処理意図を定義する。
+
 def _read_head(path: Path, n: int = 8) -> bytes:
     with path.open("rb") as f:
         return f.read(n)
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool, max_bytes: int) -> Optional[str]:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -83,6 +91,8 @@ def _download(url: str, dst: Path, *, force: bool, max_bytes: int) -> Optional[s
     return None
 
 
+# 関数: `_safe_extractall` の入出力契約と処理意図を定義する。
+
 def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     for m in tf.getmembers():
@@ -106,6 +116,8 @@ def _safe_extractall(tf: tarfile.TarFile, out_dir: Path) -> None:
     except TypeError:
         tf.extractall(out_dir)
 
+
+# 関数: `_extract_src` の入出力契約と処理意図を定義する。
 
 def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
     # 条件分岐: `out_dir.exists() and any(out_dir.iterdir()) and not force` を満たす経路を評価する。
@@ -138,6 +150,8 @@ def _extract_src(tar_path: Path, out_dir: Path, *, force: bool) -> bool:
     return True
 
 
+# 関数: `_count_tex_files` の入出力契約と処理意図を定義する。
+
 def _count_tex_files(dir_path: Path) -> Optional[int]:
     # 条件分岐: `not (dir_path.exists() and dir_path.is_dir())` を満たす経路を評価する。
     if not (dir_path.exists() and dir_path.is_dir()):
@@ -145,6 +159,8 @@ def _count_tex_files(dir_path: Path) -> Optional[int]:
 
     return sum(1 for _ in dir_path.rglob("*.tex"))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch SPARC/RAR primary papers (arXiv PDF + source tarball).")

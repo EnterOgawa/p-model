@@ -68,6 +68,7 @@ OUT_MERGE_JSON = OUT_DIR / "llr_apol_primary_coord_merge_route.json"
 _EARTHDATA_AUTH_CONTEXT: Dict[str, Any] = {"enabled": False}
 
 
+# 関数: `_first_non_empty_env` の入出力契約と処理意図を定義する。
 def _first_non_empty_env(keys: Tuple[str, ...]) -> Tuple[Optional[str], Optional[str]]:
     for key in keys:
         value = str(os.environ.get(key, "")).strip()
@@ -77,6 +78,8 @@ def _first_non_empty_env(keys: Tuple[str, ...]) -> Tuple[Optional[str], Optional
 
     return None, None
 
+
+# 関数: `_mask_user` の入出力契約と処理意図を定義する。
 
 def _mask_user(user: Optional[str]) -> Optional[str]:
     # 条件分岐: `user is None` を満たす経路を評価する。
@@ -95,6 +98,8 @@ def _mask_user(user: Optional[str]) -> Optional[str]:
 
     return f"{s[:2]}***"
 
+
+# 関数: `_read_earthdata_netrc` の入出力契約と処理意図を定義する。
 
 def _read_earthdata_netrc(netrc_path: Optional[str]) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
     candidates: List[Path] = []
@@ -129,6 +134,8 @@ def _read_earthdata_netrc(netrc_path: Optional[str]) -> Tuple[Optional[str], Opt
 
     return None, None, None, None
 
+
+# 関数: `_configure_earthdata_auth` の入出力契約と処理意図を定義する。
 
 def _configure_earthdata_auth(
     *,
@@ -233,10 +240,14 @@ def _configure_earthdata_auth(
     return diag
 
 
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
+
 def _fetch_text(url: str, timeout_s: int) -> str:
     data, _meta = _fetch_bytes(url, timeout_s=timeout_s)
     return data.decode("utf-8", "replace")
 
+
+# 関数: `_fetch_text_direct` の入出力契約と処理意図を定義する。
 
 def _fetch_text_direct(url: str, timeout_s: int) -> str:
     opener = urllib.request.build_opener()
@@ -247,20 +258,28 @@ def _fetch_text_direct(url: str, timeout_s: int) -> str:
     return data.decode("utf-8", "replace")
 
 
+# 関数: `_looks_like_earthdata_login_html` の入出力契約と処理意図を定義する。
+
 def _looks_like_earthdata_login_html(text: str) -> bool:
     text_head = str(text or "")[:4000]
     return "Earthdata Login" in text_head or "urs.earthdata.nasa.gov" in text_head
 
+
+# 関数: `_is_cddis_slrecc_url` の入出力契約と処理意図を定義する。
 
 def _is_cddis_slrecc_url(url: str) -> bool:
     url_l = str(url or "").lower()
     return "cddis.nasa.gov/archive/slr/slrecc/" in url_l and "slrecc" in url_l
 
 
+# 関数: `_is_cddis_archive_url` の入出力契約と処理意図を定義する。
+
 def _is_cddis_archive_url(url: str) -> bool:
     url_l = str(url or "").lower()
     return "cddis.nasa.gov/archive/" in url_l
 
+
+# 関数: `_prepare_earthdata_curl_context` の入出力契約と処理意図を定義する。
 
 def _prepare_earthdata_curl_context() -> Dict[str, Any]:
     ctx = _EARTHDATA_AUTH_CONTEXT
@@ -310,6 +329,8 @@ def _prepare_earthdata_curl_context() -> Dict[str, Any]:
     return ctx
 
 
+# 関数: `_fetch_bytes_with_earthdata_curl` の入出力契約と処理意図を定義する。
+
 def _fetch_bytes_with_earthdata_curl(url: str, timeout_s: int) -> Tuple[bytes, Dict[str, Any]]:
     ctx = _prepare_earthdata_curl_context()
     cmd = [
@@ -346,6 +367,8 @@ def _fetch_bytes_with_earthdata_curl(url: str, timeout_s: int) -> Tuple[bytes, D
     }
 
 
+# 関数: `_fetch_bytes` の入出力契約と処理意図を定義する。
+
 def _fetch_bytes(url: str, timeout_s: int) -> Tuple[bytes, Dict[str, Any]]:
     # 条件分岐: `_is_cddis_archive_url(url) and bool(_EARTHDATA_AUTH_CONTEXT.get("enabled"))` を満たす経路を評価する。
     if _is_cddis_archive_url(url) and bool(_EARTHDATA_AUTH_CONTEXT.get("enabled")):
@@ -364,9 +387,13 @@ def _fetch_bytes(url: str, timeout_s: int) -> Tuple[bytes, Dict[str, Any]]:
         return data, meta
 
 
+# 関数: `_iter_hrefs` の入出力契約と処理意図を定義する。
+
 def _iter_hrefs(html: str) -> List[str]:
     return re.findall(r'href=[\'"]([^\'"]+)[\'"]', html)
 
+
+# 関数: `_yymmdd_to_yyyymmdd` の入出力契約と処理意図を定義する。
 
 def _yymmdd_to_yyyymmdd(yymmdd: str) -> Optional[str]:
     s = str(yymmdd or "").strip()
@@ -378,6 +405,8 @@ def _yymmdd_to_yyyymmdd(yymmdd: str) -> Optional[str]:
     yyyy = 2000 + yy if yy < 80 else 1900 + yy
     return f"{yyyy:04d}{s[2:]}"
 
+
+# 関数: `_date_age_days_from_yyyymmdd` の入出力契約と処理意図を定義する。
 
 def _date_age_days_from_yyyymmdd(yyyymmdd: Optional[str]) -> Optional[int]:
     s = str(yyyymmdd or "").strip()
@@ -394,6 +423,8 @@ def _date_age_days_from_yyyymmdd(yyyymmdd: Optional[str]) -> Optional[int]:
     return int(delta.days)
 
 
+# 関数: `_extract_float` の入出力契約と処理意図を定義する。
+
 def _extract_float(text: str) -> Optional[float]:
     # 条件分岐: `text is None` を満たす経路を評価する。
     if text is None:
@@ -409,6 +440,8 @@ def _extract_float(text: str) -> Optional[float]:
     except Exception:
         return None
 
+
+# 関数: `_extract_signed_angle` の入出力契約と処理意図を定義する。
 
 def _extract_signed_angle(text: str, pos_letter: str, neg_letter: str) -> Optional[float]:
     # 条件分岐: `text is None` を満たす経路を評価する。
@@ -432,6 +465,8 @@ def _extract_signed_angle(text: str, pos_letter: str, neg_letter: str) -> Option
 
     return value
 
+
+# 関数: `_parse_apol_site_log` の入出力契約と処理意図を定義する。
 
 def _parse_apol_site_log(text: str) -> Dict[str, Any]:
     rec: Dict[str, Any] = {
@@ -501,6 +536,8 @@ def _parse_apol_site_log(text: str) -> Dict[str, Any]:
     return rec
 
 
+# 関数: `_scan_local_logs` の入出力契約と処理意図を定義する。
+
 def _scan_local_logs() -> List[Dict[str, Any]]:
     rows: List[Dict[str, Any]] = []
     for path in sorted(STATIONS_DIR.glob("apol_*.log")):
@@ -520,6 +557,8 @@ def _scan_local_logs() -> List[Dict[str, Any]]:
 
     return rows
 
+
+# 関数: `_list_remote_apol_logs` の入出力契約と処理意図を定義する。
 
 def _list_remote_apol_logs(timeout_s: int) -> List[Tuple[str, str]]:
     html = _fetch_text(EDC_SLRLOG_LIST, timeout_s=timeout_s)
@@ -543,6 +582,8 @@ def _list_remote_apol_logs(timeout_s: int) -> List[Tuple[str, str]]:
     rows.sort(reverse=True)
     return rows
 
+
+# 関数: `_scan_remote_logs` の入出力契約と処理意図を定義する。
 
 def _scan_remote_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any]], Optional[str], int]:
     remote_rows: List[Dict[str, Any]] = []
@@ -588,6 +629,8 @@ def _scan_remote_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any
     return remote_rows, None, n_total
 
 
+# 関数: `_list_remote_apol_oldlog_logs` の入出力契約と処理意図を定義する。
+
 def _list_remote_apol_oldlog_logs(timeout_s: int) -> List[Tuple[str, str]]:
     html = _fetch_text(EDC_SLRLOG_OLDLOG_LIST, timeout_s=timeout_s)
     rows: List[Tuple[str, str]] = []
@@ -610,6 +653,8 @@ def _list_remote_apol_oldlog_logs(timeout_s: int) -> List[Tuple[str, str]]:
     rows.sort(reverse=True)
     return rows
 
+
+# 関数: `_scan_remote_oldlog_logs` の入出力契約と処理意図を定義する。
 
 def _scan_remote_oldlog_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any]], Optional[str], int]:
     remote_rows: List[Dict[str, Any]] = []
@@ -655,6 +700,8 @@ def _scan_remote_oldlog_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[s
     return remote_rows, None, n_total
 
 
+# 関数: `_list_remote_apol_hst_logs` の入出力契約と処理意図を定義する。
+
 def _list_remote_apol_hst_logs(timeout_s: int) -> List[Tuple[str, str]]:
     html = _fetch_text(EDC_SLRHST_LIST, timeout_s=timeout_s)
     rows: List[Tuple[str, str]] = []
@@ -678,6 +725,8 @@ def _list_remote_apol_hst_logs(timeout_s: int) -> List[Tuple[str, str]]:
     return rows
 
 
+# 関数: `_parse_apol_hst_log` の入出力契約と処理意図を定義する。
+
 def _parse_apol_hst_log(text: str) -> Dict[str, Any]:
     t = str(text or "")
     has_xyz = bool(re.search(r"\bX coordinate\b|\bY coordinate\b|\bZ coordinate\b", t, flags=re.IGNORECASE))
@@ -688,6 +737,8 @@ def _parse_apol_hst_log(text: str) -> Dict[str, Any]:
     )
     return {"has_xyz": has_xyz, "has_geodetic": has_geodetic}
 
+
+# 関数: `_scan_slrhst_logs` の入出力契約と処理意図を定義する。
 
 def _scan_slrhst_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any]], Optional[str], int]:
     rows: List[Dict[str, Any]] = []
@@ -741,6 +792,8 @@ def _scan_slrhst_logs(max_logs: int, timeout_s: int) -> Tuple[List[Dict[str, Any
     return rows, None, n_total
 
 
+# 関数: `_list_cddis_apol_logs` の入出力契約と処理意図を定義する。
+
 def _list_cddis_apol_logs(index_url: str, timeout_s: int, kind: str) -> List[Tuple[str, str]]:
     html = _fetch_text(index_url, timeout_s=timeout_s)
     rows: List[Tuple[str, str]] = []
@@ -782,6 +835,8 @@ def _list_cddis_apol_logs(index_url: str, timeout_s: int, kind: str) -> List[Tup
     rows.sort(reverse=True)
     return rows
 
+
+# 関数: `_scan_cddis_site_logs` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_site_logs(
     *,
@@ -930,7 +985,10 @@ def _scan_cddis_site_logs(
     return rows, diag
 
 
+# 関数: `_list_cddis_dir_entries` の入出力契約と処理意図を定義する。
+
 def _list_cddis_dir_entries(index_url: str, timeout_s: int) -> List[str]:
+    # 関数: `_extract_entries` の入出力契約と処理意図を定義する。
     def _extract_entries(html_text: str) -> List[str]:
         entries_local: List[str] = []
         seen_local: set[str] = set()
@@ -973,6 +1031,8 @@ def _list_cddis_dir_entries(index_url: str, timeout_s: int) -> List[str]:
     return entries
 
 
+# 関数: `_scan_cddis_llr_crd_headers` の入出力契約と処理意図を定義する。
+
 def _scan_cddis_llr_crd_headers(
     *,
     apol_code: str,
@@ -998,6 +1058,7 @@ def _scan_cddis_llr_crd_headers(
         ("fr", CDDIS_LLR_FR_CRD_ROOT),
     ]
 
+    # 関数: `_date_key` の入出力契約と処理意図を定義する。
     def _date_key(fname: str) -> str:
         m = re.search(r"_(\d{8})\.", str(fname), flags=re.IGNORECASE)
         # 条件分岐: `m` を満たす経路を評価する。
@@ -1132,6 +1193,8 @@ def _scan_cddis_llr_crd_headers(
     return rows, diag
 
 
+# 関数: `_pick_latest_cddis_pos_eop_files` の入出力契約と処理意図を定義する。
+
 def _pick_latest_cddis_pos_eop_files(file_names: List[str]) -> List[Tuple[str, str, int, str]]:
     latest_by_center: Dict[str, Tuple[str, str, int, str]] = {}
     for name in file_names:
@@ -1153,6 +1216,8 @@ def _pick_latest_cddis_pos_eop_files(file_names: List[str]) -> List[Tuple[str, s
     out.sort(key=lambda v: (str(v[1]), int(v[2]), str(v[0])), reverse=True)
     return out
 
+
+# 関数: `_scan_cddis_products_pos_eop_daily` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_products_pos_eop_daily(
     *,
@@ -1310,6 +1375,8 @@ def _scan_cddis_products_pos_eop_daily(
     return rows, diag
 
 
+# 関数: `_pick_cddis_ilrsac_ops_files` の入出力契約と処理意図を定義する。
+
 def _pick_cddis_ilrsac_ops_files(
     file_names: List[str],
     *,
@@ -1352,6 +1419,8 @@ def _pick_cddis_ilrsac_ops_files(
     return out
 
 
+# 関数: `_pick_cddis_ilrsac_pos_eop_files` の入出力契約と処理意図を定義する。
+
 def _pick_cddis_ilrsac_pos_eop_files(file_names: List[str], max_files: int) -> List[Tuple[str, str, int, str]]:
     out = _pick_cddis_ilrsac_ops_files(file_names, center_hint=None)
     # 条件分岐: `int(max_files) > 0` を満たす経路を評価する。
@@ -1360,6 +1429,8 @@ def _pick_cddis_ilrsac_pos_eop_files(file_names: List[str], max_files: int) -> L
 
     return out
 
+
+# 関数: `_scan_cddis_ilrsac_ops_pos_eop` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_ilrsac_ops_pos_eop(
     *,
@@ -1603,6 +1674,8 @@ def _scan_cddis_ilrsac_ops_pos_eop(
     return rows, diag
 
 
+# 関数: `_extract_date_key_from_resource_name` の入出力契約と処理意図を定義する。
+
 def _extract_date_key_from_resource_name(name: str) -> str:
     text = str(name or "").strip()
     # 条件分岐: `not text` を満たす経路を評価する。
@@ -1632,6 +1705,8 @@ def _extract_date_key_from_resource_name(name: str) -> str:
 
     return "00000000"
 
+
+# 関数: `_pick_cddis_resource_sinex_files` の入出力契約と処理意図を定義する。
 
 def _pick_cddis_resource_sinex_files(file_names: List[str], max_files: int) -> List[Tuple[str, str, str]]:
     candidates: List[Tuple[str, str, str]] = []
@@ -1669,6 +1744,8 @@ def _pick_cddis_resource_sinex_files(file_names: List[str], max_files: int) -> L
 
     return candidates
 
+
+# 関数: `_scan_cddis_resource_coordinate_sinex` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_resource_coordinate_sinex(
     *,
@@ -1810,6 +1887,8 @@ def _scan_cddis_resource_coordinate_sinex(
     return rows, diag
 
 
+# 関数: `_pick_cddis_ac_descriptor_files` の入出力契約と処理意図を定義する。
+
 def _pick_cddis_ac_descriptor_files(file_names: List[str], max_files: int) -> List[Tuple[str, str, str]]:
     candidates: List[Tuple[str, str, str]] = []
     seen: set[str] = set()
@@ -1860,6 +1939,8 @@ def _pick_cddis_ac_descriptor_files(file_names: List[str], max_files: int) -> Li
 
     return candidates
 
+
+# 関数: `_scan_cddis_ac_coordinate_descriptors` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_ac_coordinate_descriptors(
     *,
@@ -2034,6 +2115,8 @@ def _scan_cddis_ac_coordinate_descriptors(
     return rows, diag
 
 
+# 関数: `_parse_slrocc_asof_yyyymmdd` の入出力契約と処理意図を定義する。
+
 def _parse_slrocc_asof_yyyymmdd(text: str) -> Optional[str]:
     m = re.search(r"\bas of\s+(\d{1,2}-[A-Za-z]{3}-\d{4})\b", str(text or ""), flags=re.IGNORECASE)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -2047,6 +2130,8 @@ def _parse_slrocc_asof_yyyymmdd(text: str) -> Optional[str]:
         return None
 
 
+# 関数: `_parse_slrocc_pipe_columns` の入出力契約と処理意図を定義する。
+
 def _parse_slrocc_pipe_columns(line: str) -> List[str]:
     raw = str(line or "").strip()
     # 条件分岐: `"|" not in raw` を満たす経路を評価する。
@@ -2056,6 +2141,8 @@ def _parse_slrocc_pipe_columns(line: str) -> List[str]:
     cols = [v.strip() for v in raw.strip("|").split("|")]
     return cols
 
+
+# 関数: `_scan_cddis_slrocc_coordinate_catalog` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_slrocc_coordinate_catalog(
     *,
@@ -2216,6 +2303,8 @@ def _scan_cddis_slrocc_coordinate_catalog(
     return rows, diag
 
 
+# 関数: `_scan_cddis_slrocc_occupation_catalog` の入出力契約と処理意図を定義する。
+
 def _scan_cddis_slrocc_occupation_catalog(
     *,
     apol_code: str,
@@ -2363,6 +2452,8 @@ def _scan_cddis_slrocc_occupation_catalog(
     )
     return rows, diag
 
+
+# 関数: `_scan_cddis_slrocc_calibration_catalog` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_slrocc_calibration_catalog(
     *,
@@ -2521,6 +2612,8 @@ def _scan_cddis_slrocc_calibration_catalog(
     return rows, diag
 
 
+# 関数: `_looks_like_ecef_xyz` の入出力契約と処理意図を定義する。
+
 def _looks_like_ecef_xyz(x_m: Optional[float], y_m: Optional[float], z_m: Optional[float]) -> bool:
     # 条件分岐: `x_m is None or y_m is None or z_m is None` を満たす経路を評価する。
     if x_m is None or y_m is None or z_m is None:
@@ -2531,6 +2624,8 @@ def _looks_like_ecef_xyz(x_m: Optional[float], y_m: Optional[float], z_m: Option
     except Exception:
         return False
 
+
+# 関数: `_scan_cddis_slrocc_spl_coordinate_catalog` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_slrocc_spl_coordinate_catalog(
     *,
@@ -2685,6 +2780,8 @@ def _scan_cddis_slrocc_spl_coordinate_catalog(
     return rows, diag
 
 
+# 関数: `_scan_cddis_slrocc_calibration_spl_catalog` の入出力契約と処理意図を定義する。
+
 def _scan_cddis_slrocc_calibration_spl_catalog(
     *,
     apol_code: str,
@@ -2838,6 +2935,8 @@ def _scan_cddis_slrocc_calibration_spl_catalog(
     return rows, diag
 
 
+# 関数: `_pick_cddis_slrocc_daily_coordinate_files` の入出力契約と処理意図を定義する。
+
 def _pick_cddis_slrocc_daily_coordinate_files(
     *,
     timeout_s: int,
@@ -2897,6 +2996,8 @@ def _pick_cddis_slrocc_daily_coordinate_files(
     diag["candidate_files"] = [f"{v[3]}/{v[2]}" for v in candidates[:64]]
     return candidates, diag
 
+
+# 関数: `_scan_cddis_slrocc_daily_coordinate_catalog` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_slrocc_daily_coordinate_catalog(
     *,
@@ -3101,6 +3202,8 @@ def _scan_cddis_slrocc_daily_coordinate_catalog(
     return rows, diag
 
 
+# 関数: `_extract_urls` の入出力契約と処理意図を定義する。
+
 def _extract_urls(text: str) -> List[str]:
     urls: List[str] = []
     for raw in re.findall(r"https?://\S+", str(text or "")):
@@ -3111,6 +3214,8 @@ def _extract_urls(text: str) -> List[str]:
 
     return urls
 
+
+# 関数: `_collect_ilrs_primary_product_urls` の入出力契約と処理意図を定義する。
 
 def _collect_ilrs_primary_product_urls(timeout_s: int, max_notices: int) -> Tuple[List[str], Dict[str, Any]]:
     diag: Dict[str, Any] = {
@@ -3194,6 +3299,8 @@ def _collect_ilrs_primary_product_urls(timeout_s: int, max_notices: int) -> Tupl
     return urls, diag
 
 
+# 関数: `_decode_unix_compress_z` の入出力契約と処理意図を定義する。
+
 def _decode_unix_compress_z(data: bytes) -> bytes:
     try:
         import unlzw3  # type: ignore
@@ -3239,6 +3346,8 @@ def _decode_unix_compress_z(data: bytes) -> bytes:
     raise RuntimeError(f"unix_compress_decode_failed: {last_error}")
 
 
+# 関数: `_decode_possible_snx` の入出力契約と処理意図を定義する。
+
 def _decode_possible_snx(data: bytes, url: str) -> str:
     blob = data
     # 条件分岐: `str(url).lower().endswith(".gz")` を満たす経路を評価する。
@@ -3259,6 +3368,8 @@ def _decode_possible_snx(data: bytes, url: str) -> str:
     except Exception:
         return blob.decode("latin-1", "replace")
 
+
+# 関数: `_scan_ilrs_primary_products` の入出力契約と処理意図を定義する。
 
 def _scan_ilrs_primary_products(
     *,
@@ -3442,6 +3553,8 @@ def _scan_ilrs_primary_products(
     return rows, diag
 
 
+# 関数: `_pick_cddis_slrecc_catalog_files` の入出力契約と処理意図を定義する。
+
 def _pick_cddis_slrecc_catalog_files(file_names: List[str], max_files: int) -> List[Tuple[str, str, str]]:
     candidates: List[Tuple[str, str, str]] = []
     seen: set[str] = set()
@@ -3492,6 +3605,8 @@ def _pick_cddis_slrecc_catalog_files(file_names: List[str], max_files: int) -> L
 
     return candidates
 
+
+# 関数: `_scan_cddis_slrecc_catalog` の入出力契約と処理意図を定義する。
 
 def _scan_cddis_slrecc_catalog(
     *,
@@ -3632,6 +3747,8 @@ def _scan_cddis_slrecc_catalog(
     return rows, diag
 
 
+# 関数: `_list_repro_center_files` の入出力契約と処理意図を定義する。
+
 def _list_repro_center_files(center: str, timeout_s: int) -> List[Tuple[str, int, str]]:
     center_l = str(center).strip().lower()
     url = f"{REPRO_ROOT}/{center_l}/"
@@ -3655,10 +3772,14 @@ def _list_repro_center_files(center: str, timeout_s: int) -> List[Tuple[str, int
     return rows
 
 
+# 関数: `_pick_repro_latest` の入出力契約と処理意図を定義する。
+
 def _pick_repro_latest(rows: List[Tuple[str, int, str]]) -> Optional[Tuple[str, int, str]]:
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return None
+
+    # 関数: `_k` の入出力契約と処理意図を定義する。
 
     def _k(v: Tuple[str, int, str]) -> Tuple[int, int]:
         y = _yymmdd_to_yyyymmdd(v[0]) or "00000000"
@@ -3666,6 +3787,8 @@ def _pick_repro_latest(rows: List[Tuple[str, int, str]]) -> Optional[Tuple[str, 
 
     return max(rows, key=_k)
 
+
+# 関数: `_normalize_alias_tokens` の入出力契約と処理意図を定義する。
 
 def _normalize_alias_tokens(alias_tokens: Optional[List[str]]) -> List[str]:
     tokens: List[str] = []
@@ -3688,6 +3811,8 @@ def _normalize_alias_tokens(alias_tokens: Optional[List[str]]) -> List[str]:
     return tokens
 
 
+# 関数: `_build_apol_alias_tokens` の入出力契約と処理意図を定義する。
+
 def _build_apol_alias_tokens(apol_meta: Dict[str, Any]) -> List[str]:
     seeds: List[str] = []
     for key in ("station", "site_name", "name"):
@@ -3707,6 +3832,8 @@ def _build_apol_alias_tokens(apol_meta: Dict[str, Any]) -> List[str]:
     )
     return _normalize_alias_tokens(seeds)
 
+
+# 関数: `_match_alias_in_desc` の入出力契約と処理意図を定義する。
 
 def _match_alias_in_desc(desc_u: str, alias_tokens: List[str]) -> Optional[str]:
     compact_desc = re.sub(r"[^A-Z0-9]+", "", str(desc_u or ""))
@@ -3729,6 +3856,8 @@ def _match_alias_in_desc(desc_u: str, alias_tokens: List[str]) -> Optional[str]:
     return None
 
 
+# 関数: `_parse_sinex_apol_match` の入出力契約と処理意図を定義する。
+
 def _parse_sinex_apol_match(
     text: str,
     *,
@@ -3747,6 +3876,8 @@ def _parse_sinex_apol_match(
     # 条件分岐: `m_domes` を満たす経路を評価する。
     if m_domes:
         domes_prefix = str(m_domes.group(1))
+
+    # 関数: `_triplet` の入出力契約と処理意図を定義する。
 
     def _triplet(vals: Dict[str, float]) -> Optional[Tuple[float, float, float]]:
         try:
@@ -4065,6 +4196,8 @@ def _parse_sinex_apol_match(
     }
 
 
+# 関数: `_build_deterministic_merge_route` の入出力契約と処理意図を定義する。
+
 def _build_deterministic_merge_route(
     *,
     df: pd.DataFrame,
@@ -4356,6 +4489,8 @@ def _build_deterministic_merge_route(
     }
 
 
+# 関数: `_scan_repro_sources` の入出力契約と処理意図を定義する。
+
 def _scan_repro_sources(
     *,
     apol_code: str,
@@ -4478,6 +4613,8 @@ def _scan_repro_sources(
     return rows, diag
 
 
+# 関数: `_scan_llr_crd_header_sources` の入出力契約と処理意図を定義する。
+
 def _scan_llr_crd_header_sources(
     *,
     apol_code: str,
@@ -4513,6 +4650,8 @@ def _scan_llr_crd_header_sources(
     if not isinstance(files, list):
         diag["errors"] = ["manifest_files_not_list"]
         return rows, diag
+
+    # 関数: `_entry_date` の入出力契約と処理意図を定義する。
 
     def _entry_date(v: Dict[str, Any]) -> str:
         name = str(v.get("filename") or "")
@@ -4615,6 +4754,8 @@ def _scan_llr_crd_header_sources(
     )
     return rows, diag
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Audit APOL primary-coordinate route (site-log + REPRO2020 xyz availability).")
@@ -5187,6 +5328,8 @@ def main() -> int:
     if "has_geodetic" not in df.columns:
         df["has_geodetic"] = False
 
+    # 関数: `_log_sort_key` の入出力契約と処理意図を定義する。
+
     def _log_sort_key(v: Any) -> str:
         s = str(v) if v is not None else ""
         return s if re.fullmatch(r"\d{8}", s) else "00000000"
@@ -5199,6 +5342,7 @@ def main() -> int:
     xyz_rows = df[df["has_xyz"] == True].copy()
     geod_rows = df[df["has_geodetic"] == True].copy()
 
+    # 関数: `_latest_log_date` の入出力契約と処理意図を定義する。
     def _latest_log_date(rows: pd.DataFrame) -> Optional[str]:
         vals: List[str] = []
         for v in rows.get("log_date", pd.Series(dtype=object)).tolist():

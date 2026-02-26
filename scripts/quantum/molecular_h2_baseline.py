@@ -9,13 +9,18 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_as_float` の入出力契約と処理意図を定義する。
 
 def _as_float(x: object) -> float | None:
     try:
@@ -28,16 +33,22 @@ def _as_float(x: object) -> float | None:
         return None
 
 
+# 関数: `_cm_inv_to_hz` の入出力契約と処理意図を定義する。
+
 def _cm_inv_to_hz(cm_inv: float) -> float:
     c = 299_792_458.0
     return c * (cm_inv * 100.0)
 
+
+# 関数: `_cm_inv_to_ev` の入出力契約と処理意図を定義する。
 
 def _cm_inv_to_ev(cm_inv: float) -> float:
     h = 6.626_070_15e-34  # exact (SI)
     e_charge = 1.602_176_634e-19  # exact (J/eV)
     return (h * _cm_inv_to_hz(cm_inv)) / e_charge
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

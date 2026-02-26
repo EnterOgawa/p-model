@@ -44,9 +44,12 @@ from scripts.summary import paper_latex as _paper_latex, worklog  # noqa: E402
 FigureAnchorMap = Dict[str, Tuple[str, str]]
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# クラス: `FigureItem` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class FigureItem:
@@ -55,6 +58,8 @@ class FigureItem:
     path: Path
     caption: str
 
+
+# 関数: `_resolve_repo_asset` の入出力契約と処理意図を定義する。
 
 def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
     """
@@ -104,9 +109,13 @@ def _resolve_repo_asset(rel: str, *, root: Path) -> Path:
 
     return root / Path(rel_norm)
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel_url` の入出力契約と処理意図を定義する。
 
 def _rel_url(from_dir: Path, target: Path) -> str:
     try:
@@ -117,9 +126,13 @@ def _rel_url(from_dir: Path, target: Path) -> str:
     return rel.replace("\\", "/")
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# 関数: `_markdown_to_html` の入出力契約と処理意図を定義する。
 
 def _markdown_to_html(md_text: str) -> Tuple[str, str]:
     """
@@ -163,6 +176,7 @@ _INLINE_FIGURE_P_RE = re.compile(
 )
 
 
+# 関数: `_rewrite_repo_relative_asset_urls` の入出力契約と処理意図を定義する。
 def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir: Path) -> str:
     """
     HTML 内の src/href に含まれる `output/...` 等の “repo-root 相対パス” を、
@@ -174,6 +188,7 @@ def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir
     Markdown 草稿側は `output/...` 表記を維持したまま、生成物だけを表示可能にする。
     """
 
+    # 関数: `repl` の入出力契約と処理意図を定義する。
     def repl(m: re.Match[str]) -> str:
         attr = m.group("attr")
         q = m.group("q")
@@ -216,6 +231,8 @@ def _rewrite_repo_relative_asset_urls(rendered_html: str, *, root: Path, out_dir
     return _ASSET_URL_ATTR_RE.sub(repl, rendered_html)
 
 
+# 関数: `_clamp` の入出力契約と処理意図を定義する。
+
 def _clamp(x: float, lo: float, hi: float) -> float:
     try:
         xf = float(x)
@@ -234,6 +251,8 @@ def _clamp(x: float, lo: float, hi: float) -> float:
 
     return xf
 
+
+# 関数: `_hsl_to_hex` の入出力契約と処理意図を定義する。
 
 def _hsl_to_hex(h: float, s: float, l: float) -> str:
     """
@@ -279,6 +298,8 @@ def _hsl_to_hex(h: float, s: float, l: float) -> str:
     return f"#{r:02X}{g:02X}{b:02X}"
 
 
+# 関数: `_score_to_bg_hex` の入出力契約と処理意図を定義する。
+
 def _score_to_bg_hex(score_norm_0_to_3: float) -> str:
     """
     Map discrepancy score to a readable pastel color.
@@ -295,6 +316,7 @@ def _score_to_bg_hex(score_norm_0_to_3: float) -> str:
 _INTERNAL_SOURCE_TOKEN_RE = re.compile(r"(?:\s*/\s*)?source=[^\s/;,)]+", flags=re.IGNORECASE)
 
 
+# 関数: `_strip_internal_source_tokens` の入出力契約と処理意図を定義する。
 def _strip_internal_source_tokens(text: str) -> str:
     """
     Remove internal provenance tokens like "source=...metrics.json" from paper-facing text.
@@ -312,6 +334,8 @@ def _strip_internal_source_tokens(text: str) -> str:
     s = re.sub(r"(?:\s*/\s*)+$", "", s).strip()
     return s
 
+
+# 関数: `_table1_metric_score_norm_astrophysics` の入出力契約と処理意図を定義する。
 
 def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: str) -> Optional[float]:
     """
@@ -429,6 +453,8 @@ def _table1_metric_score_norm_astrophysics(metric_public: str, metric_fallback: 
     return 1.5
 
 
+# 関数: `_table1_metric_score_norm_quantum` の入出力契約と処理意図を定義する。
+
 def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, pmodel: str) -> Optional[float]:
     """
     Return a normalized discrepancy score in [0,3] (smaller is better) for Part III Table 1.
@@ -496,6 +522,8 @@ def _table1_metric_score_norm_quantum(metric_public: str, metric_fallback: str, 
 
     return 1.5
 
+
+# 関数: `_render_table1_html_from_json` の入出力契約と処理意図を定義する。
 
 def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
     """
@@ -576,6 +604,8 @@ def _render_table1_html_from_json(table1_json: Path, *, profile: str) -> str:
     return "\n".join(parts)
 
 
+# 関数: `_inject_table1_after_h3` の入出力契約と処理意図を定義する。
+
 def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
     """
     Insert Table 1 right after "4.1 Table 1（検証サマリ）" heading inside the manuscript HTML.
@@ -595,6 +625,8 @@ def _inject_table1_after_h3(body_html: str, *, insert_html: str) -> str:
 
     return body_html[: m.end(1)] + "\n" + insert_html + "\n" + body_html[m.end(1) :]
 
+
+# 関数: `_inject_pagebreak_before_heading_ids` の入出力契約と処理意図を定義する。
 
 def _inject_pagebreak_before_heading_ids(body_html: str, *, heading_ids: Sequence[str]) -> str:
     """
@@ -618,6 +650,8 @@ def _inject_pagebreak_before_heading_ids(body_html: str, *, heading_ids: Sequenc
     return out
 
 
+# 関数: `_standardize_numbered_heading_ids` の入出力契約と処理意図を定義する。
+
 def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple[str, str]:
     """
     Normalize heading anchors like "#11" or "#1-introduction" into "#section-1-1", etc.
@@ -628,6 +662,8 @@ def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple
     # 条件分岐: `not body_html` を満たす経路を評価する。
     if not body_html:
         return body_html, toc_html
+
+    # 関数: `_heading_text` の入出力契約と処理意図を定義する。
 
     def _heading_text(inner_html: str) -> str:
         t = re.sub(r"<[^>]+>", "", inner_html or "")
@@ -666,6 +702,8 @@ def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple
     if not mapping:
         return body_html, toc_html
 
+    # 関数: `_replace` の入出力契約と処理意図を定義する。
+
     def _replace(s: str) -> str:
         # 条件分岐: `not s` を満たす経路を評価する。
         if not s:
@@ -681,6 +719,8 @@ def _standardize_numbered_heading_ids(*, body_html: str, toc_html: str) -> Tuple
     return _replace(body_html), _replace(toc_html)
 
 
+# 関数: `_linkify_repo_paths` の入出力契約と処理意図を定義する。
+
 def _linkify_repo_paths(
     rendered_html: str,
     *,
@@ -693,6 +733,7 @@ def _linkify_repo_paths(
     Avoid touching code that doesn't look like a repo path.
     """
 
+    # 関数: `_candidate` の入出力契約と処理意図を定義する。
     def _candidate(s: str) -> Optional[str]:
         s = html.unescape(s).strip()
         s = s.replace("\\", "/")
@@ -701,6 +742,8 @@ def _linkify_repo_paths(
             return s
 
         return None
+
+    # 関数: `repl` の入出力契約と処理意図を定義する。
 
     def repl(m: re.Match[str]) -> str:
         raw = m.group(1)
@@ -736,6 +779,7 @@ def _linkify_repo_paths(
 _REF_KEY_RE = re.compile(r"^\s*-\s+\[([A-Za-z][A-Za-z0-9_-]{0,40})\]")
 
 
+# 関数: `_extract_reference_keys` の入出力契約と処理意図を定義する。
 def _extract_reference_keys(md_text: str) -> List[str]:
     """
     Extract citation keys like [Will2014] from the references markdown.
@@ -766,6 +810,7 @@ def _extract_reference_keys(md_text: str) -> List[str]:
 _H2_SECTION_RE = re.compile(r"^\s*##\s+")
 
 
+# 関数: `_filter_md_h2_sections_by_ref_keys` の入出力契約と処理意図を定義する。
 def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> str:
     """
     Keep only H2 (## ...) sections that contain at least one '- [KEY]' bullet whose KEY is in keep_keys.
@@ -784,6 +829,7 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
     cur_lines: List[str] = []
     cur_keys: set[str] = set()
 
+    # 関数: `_flush` の入出力契約と処理意図を定義する。
     def _flush() -> None:
         nonlocal cur_lines, cur_keys
         # 条件分岐: `not cur_lines` を満たす経路を評価する。
@@ -829,6 +875,8 @@ def _filter_md_h2_sections_by_ref_keys(md_text: str, *, keep_keys: set[str]) -> 
     return "\n".join(out).rstrip() + "\n"
 
 
+# 関数: `_inject_reference_anchors` の入出力契約と処理意図を定義する。
+
 def _inject_reference_anchors(md_text: str) -> str:
     """
     Add stable in-page anchors so citations can link to the References section.
@@ -838,6 +886,7 @@ def _inject_reference_anchors(md_text: str) -> str:
 
     line_re = re.compile(r"^(\s*)-\s+\[([A-Za-z][A-Za-z0-9_-]{0,40})\]")
 
+    # 関数: `repl` の入出力契約と処理意図を定義する。
     def repl(m: re.Match[str]) -> str:
         indent = m.group(1)
         key = m.group(2)
@@ -852,6 +901,8 @@ def _inject_reference_anchors(md_text: str) -> str:
     return "\n".join(out_lines)
 
 
+# 関数: `_linkify_citations` の入出力契約と処理意図を定義する。
+
 def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
     """
     Convert "[Will2014]" into links to "#ref-Will2014" when the key exists in References.
@@ -863,6 +914,7 @@ def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
 
     ref_set = set(ref_keys)
 
+    # 関数: `repl` の入出力契約と処理意図を定義する。
     def repl(m: re.Match[str]) -> str:
         key = m.group(1)
         # 条件分岐: `key not in ref_set` を満たす経路を評価する。
@@ -884,6 +936,8 @@ def _linkify_citations(rendered_html: str, *, ref_keys: Sequence[str]) -> str:
     return "".join(parts)
 
 
+# 関数: `_extract_png_paths_from_figures_index` の入出力契約と処理意図を定義する。
+
 def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
     """
     Pull stable figure PNG paths (and optional captions) from doc/paper/01_figures_index.md.
@@ -901,6 +955,7 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
     found: List[FigureItem] = []
     current_section = ""
 
+    # 関数: `_strip_internal_step_refs` の入出力契約と処理意図を定義する。
     def _strip_internal_step_refs(s: str) -> str:
         """
         Drop internal roadmap tokens like "Step 7.13.19.12" from captions.
@@ -957,6 +1012,8 @@ def _extract_png_paths_from_figures_index(root: Path) -> List[FigureItem]:
     return uniq
 
 
+# 関数: `_build_fig_anchor_map` の入出力契約と処理意図を定義する。
+
 def _build_fig_anchor_map(figs: List[FigureItem], *, root: Path) -> FigureAnchorMap:
     """
     Map `output/...png` (repo-relative, POSIX-style) -> ("#fig-001", "図1").
@@ -975,6 +1032,7 @@ def _build_fig_anchor_map(figs: List[FigureItem], *, root: Path) -> FigureAnchor
 _PNG_REL_RE = re.compile(r"(output/[A-Za-z0-9_./-]+?\.png)")
 
 
+# 関数: `_extract_output_png_relpaths_in_order` の入出力契約と処理意図を定義する。
 def _extract_output_png_relpaths_in_order(md_text: str) -> List[str]:
     """
     Extract repo-relative `output/...png` paths in order of first appearance.
@@ -997,6 +1055,8 @@ def _extract_output_png_relpaths_in_order(md_text: str) -> List[str]:
 
     return out
 
+
+# 関数: `_reorder_figs_by_reference_order` の入出力契約と処理意図を定義する。
 
 def _reorder_figs_by_reference_order(
     figs: List[FigureItem],
@@ -1057,6 +1117,7 @@ _INTERNAL_BLOCK_RE = re.compile(
 )
 
 
+# 関数: `_strip_internal_blocks` の入出力契約と処理意図を定義する。
 def _strip_internal_blocks(md_text: str, *, mode: str) -> str:
     """
     publish モードでは、Markdown中の “内部向けブロック” を紙面から除外する。
@@ -1072,6 +1133,7 @@ _INLINE_MATH_PARITY_RE = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)\$(
 _CJK_CHAR_RE = re.compile(r"[\u3040-\u30ff\u3400-\u9fff]")
 
 
+# 関数: `_normalize_inline_markdown_segment_for_parity` の入出力契約と処理意図を定義する。
 def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
     """
     Apply the same inline math heuristics used by paper_latex so publish HTML/DOCX
@@ -1081,12 +1143,15 @@ def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
     token_map: Dict[str, str] = {}
     token_index = 0
 
+    # 関数: `make_token` の入出力契約と処理意図を定義する。
     def make_token(rendered: str) -> str:
         nonlocal token_index
         key = f"@@PHTMLTOK{token_index}@@"
         token_map[key] = rendered
         token_index += 1
         return key
+
+    # 関数: `repl_inline_code` の入出力契約と処理意図を定義する。
 
     def repl_inline_code(match: re.Match[str]) -> str:
         payload = (match.group(1) or "").strip()
@@ -1115,6 +1180,7 @@ def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
 
     normalized = re.sub(r"`([^`]+)`", repl_inline_code, text)
 
+    # 関数: `repl_inline_math` の入出力契約と処理意図を定義する。
     def repl_inline_math(match: re.Match[str]) -> str:
         payload = (match.group(1) or "").strip()
         # 条件分岐: `not payload` を満たす経路を評価する。
@@ -1147,6 +1213,8 @@ def _normalize_inline_markdown_segment_for_parity(text: str) -> str:
 
     return normalized
 
+
+# 関数: `_normalize_markdown_for_tex_docx_parity` の入出力契約と処理意図を定義する。
 
 def _normalize_markdown_for_tex_docx_parity(md_text: str) -> str:
     """
@@ -1208,14 +1276,19 @@ _MATH_BLOCK_RE = re.compile(r"\$\$(.+?)\$\$", flags=re.DOTALL)
 _INLINE_MATH_RE = re.compile(r"(?<!\\)(?<!\$)\$(?!\$)([^$\n]+?)(?<!\\)\$(?!\$)")
 
 
+# 関数: `_read_bytes` の入出力契約と処理意図を定義する。
 def _read_bytes(path: Path) -> bytes:
     return path.read_bytes()
 
+
+# 関数: `_data_uri_png` の入出力契約と処理意図を定義する。
 
 def _data_uri_png(png_bytes: bytes) -> str:
     b64 = base64.b64encode(png_bytes).decode("ascii")
     return f"data:image/png;base64,{b64}"
 
+
+# 関数: `_render_equation_png` の入出力契約と処理意図を定義する。
 
 def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> Path:
     """
@@ -1334,6 +1407,8 @@ def _render_equation_png(*, latex: str, eq_dir: Path, inline: bool = False) -> P
     return out
 
 
+# 関数: `_replace_math_blocks_with_images` の入出力契約と処理意図を定義する。
+
 def _replace_math_blocks_with_images(
     md_text: str,
     *,
@@ -1350,6 +1425,7 @@ def _replace_math_blocks_with_images(
 
     eq_dir = out_dir / "equations"
 
+    # 関数: `repl` の入出力契約と処理意図を定義する。
     def repl(m: re.Match[str]) -> str:
         latex = m.group(1).strip()
         # 条件分岐: `not latex` を満たす経路を評価する。
@@ -1374,6 +1450,7 @@ def _replace_math_blocks_with_images(
 
     replaced = _MATH_BLOCK_RE.sub(repl, md_text)
 
+    # 関数: `_looks_like_inline_math` の入出力契約と処理意図を定義する。
     def _looks_like_inline_math(expr: str) -> bool:
         s = (expr or "").strip()
         # 条件分岐: `not s` を満たす経路を評価する。
@@ -1388,6 +1465,8 @@ def _replace_math_blocks_with_images(
         # so TeX-like markers never leak into Word as raw text.
 
         return True
+
+    # 関数: `repl_inline` の入出力契約と処理意図を定義する。
 
     def repl_inline(m: re.Match[str]) -> str:
         latex = (m.group(1) or "").strip()
@@ -1411,6 +1490,8 @@ def _replace_math_blocks_with_images(
 
     return _INLINE_MATH_RE.sub(repl_inline, replaced)
 
+
+# 関数: `_inline_png_code_snippets` の入出力契約と処理意図を定義する。
 
 def _inline_png_code_snippets(
     rendered_html: str,
@@ -1463,6 +1544,8 @@ def _inline_png_code_snippets(
     if img_cache is None:
         img_cache = {}
 
+    # 関数: `_candidate` の入出力契約と処理意図を定義する。
+
     def _candidate(s: str) -> Optional[str]:
         s = html.unescape(s).strip().replace("\\", "/")
         # 条件分岐: `s.startswith("output/") and s.endswith(".png")` を満たす経路を評価する。
@@ -1470,6 +1553,8 @@ def _inline_png_code_snippets(
             return s
 
         return None
+
+    # 関数: `repl` の入出力契約と処理意図を定義する。
 
     def repl(m: re.Match[str]) -> str:
         raw = m.group(1)
@@ -1535,6 +1620,8 @@ def _inline_png_code_snippets(
 
     return _rewrite_repo_relative_asset_urls(out, root=root, out_dir=out_dir)
 
+
+# 関数: `_render_html` の入出力契約と処理意図を定義する。
 
 def _render_html(
     *,
@@ -1670,6 +1757,8 @@ def _render_html(
     html_path.write_text("\n".join(parts), encoding="utf-8")
     return html_path
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Render paper (Markdown draft) as a single HTML page.")

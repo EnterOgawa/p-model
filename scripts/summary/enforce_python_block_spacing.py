@@ -35,6 +35,7 @@ SKIP_TOKEN_TYPES: Set[int] = {
 }
 
 
+# クラス: `Violation` の責務と境界条件を定義する。
 @dataclass
 class Violation:
     """Represents a single spacing-rule violation."""
@@ -42,6 +43,8 @@ class Violation:
     line: int
     reason: str
 
+
+# クラス: `FileResult` の責務と境界条件を定義する。
 
 @dataclass
 class FileResult:
@@ -51,6 +54,8 @@ class FileResult:
     violations: List[Violation]
     changed: bool
 
+
+# 関数: `_detect_newline_style` の入出力契約と処理意図を定義する。
 
 def _detect_newline_style(source_text: str) -> str:
     """Return the dominant newline style from source text."""
@@ -70,6 +75,8 @@ def _detect_newline_style(source_text: str) -> str:
 
     return "\n"
 
+
+# 関数: `_dedent_target_lines` の入出力契約と処理意図を定義する。
 
 def _dedent_target_lines(source_text: str) -> Set[int]:
     """Collect first code-line numbers that appear immediately after DEDENT tokens."""
@@ -94,6 +101,8 @@ def _dedent_target_lines(source_text: str) -> Set[int]:
     return target_lines
 
 
+# 関数: `_previous_nonempty_line` の入出力契約と処理意図を定義する。
+
 def _previous_nonempty_line(lines: Sequence[str]) -> str | None:
     """Return previous non-empty line from the already-built output buffer."""
     for line_text in reversed(lines):
@@ -104,6 +113,8 @@ def _previous_nonempty_line(lines: Sequence[str]) -> str | None:
     return None
 
 
+# 関数: `_is_continuation_header` の入出力契約と処理意図を定義する。
+
 def _is_continuation_header(stripped_line: str) -> bool:
     """Return True if a line starts an else/elif/except/finally continuation."""
     for prefix in CONTINUATION_PREFIXES:
@@ -113,6 +124,8 @@ def _is_continuation_header(stripped_line: str) -> bool:
 
     return False
 
+
+# 関数: `_needs_blank_line_before` の入出力契約と処理意図を定義する。
 
 def _needs_blank_line_before(
     line_number: int,
@@ -142,6 +155,8 @@ def _needs_blank_line_before(
 
     return "missing blank line after block dedent"
 
+
+# 関数: `_normalize_block_spacing` の入出力契約と処理意図を定義する。
 
 def _normalize_block_spacing(source_text: str, apply_fix: bool) -> tuple[str, List[Violation], bool]:
     """Check/fix one source file and return updated text + violations + changed flag."""
@@ -187,6 +202,8 @@ def _normalize_block_spacing(source_text: str, apply_fix: bool) -> tuple[str, Li
     return normalized_text, violations, changed
 
 
+# 関数: `_iter_python_files` の入出力契約と処理意図を定義する。
+
 def _iter_python_files(paths: Sequence[Path]) -> Iterable[Path]:
     """Yield python files under target paths."""
     for candidate in paths:
@@ -202,6 +219,8 @@ def _iter_python_files(paths: Sequence[Path]) -> Iterable[Path]:
                 yield python_file
 
 
+# 関数: `_run_for_path` の入出力契約と処理意図を定義する。
+
 def _run_for_path(path: Path, apply_fix: bool) -> FileResult:
     """Run spacing audit/fix for one file."""
     source_text = path.read_text(encoding="utf-8")
@@ -213,6 +232,8 @@ def _run_for_path(path: Path, apply_fix: bool) -> FileResult:
 
     return FileResult(path=path, violations=violations, changed=changed and normalized_text != source_text)
 
+
+# 関数: `parse_args` の入出力契約と処理意図を定義する。
 
 def parse_args() -> argparse.Namespace:
     """Parse command-line arguments."""
@@ -230,6 +251,8 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     """CLI entry point."""

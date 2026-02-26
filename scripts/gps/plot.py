@@ -16,6 +16,7 @@ import numpy as np
 C = 299_792_458.0
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -51,15 +52,20 @@ from scripts.summary import worklog  # noqa: E402
 OUT_DIR = ROOT / "output" / "private" / "gps"
 
 
+# 関数: `_to_ns_from_m` の入出力契約と処理意図を定義する。
 def _to_ns_from_m(rms_m: float) -> float:
     return (rms_m / C) * 1e9
 
+
+# 関数: `load_summary` の入出力契約と処理意図を定義する。
 
 def load_summary(summary_csv: Path) -> List[Dict[str, str]]:
     with open(summary_csv, "r", newline="", encoding="utf-8") as f:
         r = csv.DictReader(f)
         return list(r)
 
+
+# 関数: `plot_all_residuals_brdc` の入出力契約と処理意図を定義する。
 
 def plot_all_residuals_brdc(sats: List[str]) -> Path:
     _set_japanese_font()
@@ -98,6 +104,8 @@ def plot_all_residuals_brdc(sats: List[str]) -> Path:
     return out_png
 
 
+# 関数: `plot_residual_compare_g01` の入出力契約と処理意図を定義する。
+
 def plot_residual_compare_g01() -> Optional[Path]:
     path = OUT_DIR / "residual_precise_G01.csv"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -135,6 +143,8 @@ def plot_residual_compare_g01() -> Optional[Path]:
     print(f"[ok] {out_png}")
     return out_png
 
+
+# 関数: `plot_rms_compare` の入出力契約と処理意図を定義する。
 
 def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path], Dict[str, float]]:
     rms_b_ns: List[Tuple[str, float]] = []
@@ -236,6 +246,8 @@ def plot_rms_compare(summary_rows: List[Dict[str, str]]) -> Tuple[Optional[Path]
     return out_png, metrics
 
 
+# 関数: `_detrend_affine` の入出力契約と処理意図を定義する。
+
 def _detrend_affine(t_s: "np.ndarray", y: "np.ndarray") -> "np.ndarray":
     # y - (a + b t)
     if len(t_s) < 2:
@@ -248,6 +260,8 @@ def _detrend_affine(t_s: "np.ndarray", y: "np.ndarray") -> "np.ndarray":
     a, b = coef
     return y - (a + b * tt)
 
+
+# 関数: `_dt_rel_from_r` の入出力契約と処理意図を定義する。
 
 def _dt_rel_from_r(t_s: "np.ndarray", r_m: "np.ndarray") -> "np.ndarray":
     # Standard GNSS relativistic correction (eccentricity term) can be written as:
@@ -268,6 +282,8 @@ def _dt_rel_from_r(t_s: "np.ndarray", r_m: "np.ndarray") -> "np.ndarray":
     rv = r_m * drdt
     return (-2.0 * rv) / (C * C)
 
+
+# 関数: `plot_relativistic_correction_example` の入出力契約と処理意図を定義する。
 
 def plot_relativistic_correction_example(prn: str = "G02") -> Tuple[Optional[Path], Dict[str, float]]:
     path = OUT_DIR / f"residual_precise_{prn}.csv"
@@ -336,6 +352,8 @@ def plot_relativistic_correction_example(prn: str = "G02") -> Tuple[Optional[Pat
     print(f"[ok] {out_png}")
     return out_png, metrics
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)

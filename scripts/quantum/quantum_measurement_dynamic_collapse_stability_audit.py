@@ -25,9 +25,12 @@ from scripts.quantum.quantum_measurement_dynamic_collapse_simulation import _saf
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_parse_float_list` の入出力契約と処理意図を定義する。
 
 def _parse_float_list(text: str) -> List[float]:
     parts = [p.strip() for p in str(text).split(",") if p.strip()]
@@ -43,6 +46,8 @@ def _parse_float_list(text: str) -> List[float]:
     return out
 
 
+# 関数: `_parse_int_list` の入出力契約と処理意図を定義する。
+
 def _parse_int_list(text: str) -> List[int]:
     parts = [p.strip() for p in str(text).split(",") if p.strip()]
     out: List[int] = []
@@ -56,6 +61,8 @@ def _parse_int_list(text: str) -> List[int]:
 
     return out
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(v: float, digits: int = 7) -> str:
     # 条件分岐: `not math.isfinite(float(v))` を満たす経路を評価する。
@@ -74,6 +81,8 @@ def _fmt(v: float, digits: int = 7) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_run_one` の入出力契約と処理意図を定義する。
 
 def _run_one(
     *,
@@ -265,6 +274,8 @@ def _run_one(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
         "run_id",
@@ -310,6 +321,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(values)
 
 
+# 関数: `_status_counts` の入出力契約と処理意図を定義する。
+
 def _status_counts(rows: List[Dict[str, Any]]) -> Dict[str, int]:
     out = {"pass": 0, "watch": 0, "reject": 0}
     for row in rows:
@@ -322,6 +335,8 @@ def _status_counts(rows: List[Dict[str, Any]]) -> Dict[str, int]:
 
     return out
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -388,6 +403,8 @@ def _plot(
     fig.savefig(out_png, dpi=200, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Step 8.7.20: rerun env-coupled dynamic-collapse stability cycle.")

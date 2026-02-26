@@ -41,6 +41,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -58,6 +59,8 @@ def _set_japanese_font() -> None:
     except Exception:
         pass
 
+
+# 関数: `_parse_ross_xi_file` の入出力契約と処理意図を定義する。
 
 def _parse_ross_xi_file(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -89,6 +92,8 @@ def _parse_ross_xi_file(path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]
     return np.asarray(s_list, dtype=float), np.asarray(xi_list, dtype=float), np.asarray(err_list, dtype=float)
 
 
+# 関数: `_read_cov` の入出力契約と処理意図を定義する。
+
 def _read_cov(path: Path) -> np.ndarray:
     rows: list[list[float]] = []
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
@@ -108,6 +113,8 @@ def _read_cov(path: Path) -> np.ndarray:
     return cov
 
 
+# 関数: `_rbc` の入出力契約と処理意図を定義する。
+
 def _rbc(r: np.ndarray, *, bs: float) -> np.ndarray:
     """
     Ross baofit_pub2D.py の bin-centering 補正（殻内平均距離）。
@@ -117,16 +124,22 @@ def _rbc(r: np.ndarray, *, bs: float) -> np.ndarray:
     return 0.75 * ((r + bs / 2.0) ** 4 - (r - bs / 2.0) ** 4) / ((r + bs / 2.0) ** 3 - (r - bs / 2.0) ** 3)
 
 
+# 関数: `_pinv_sym` の入出力契約と処理意図を定義する。
+
 def _pinv_sym(a: np.ndarray) -> np.ndarray:
     a = np.asarray(a, dtype=float)
     a = 0.5 * (a + a.T)
     return np.linalg.pinv(a)
 
 
+# 関数: `_chi2` の入出力契約と処理意図を定義する。
+
 def _chi2(residual: np.ndarray, cov_inv: np.ndarray) -> float:
     r = np.asarray(residual, dtype=float)
     return float(r.T @ cov_inv @ r)
 
+
+# 関数: `_fit_broadband_6param` の入出力契約と処理意図を定義する。
 
 def _fit_broadband_6param(*, r: np.ndarray, residual: np.ndarray, cov_inv: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -166,10 +179,14 @@ def _fit_broadband_6param(*, r: np.ndarray, residual: np.ndarray, cov_inv: np.nd
     return coef.astype(float), fit.astype(float)
 
 
+# 関数: `_p2` の入出力契約と処理意図を定義する。
+
 def _p2(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=float)
     return 0.5 * (3.0 * mu * mu - 1.0)
 
+
+# 関数: `_p4` の入出力契約と処理意図を定義する。
 
 def _p4(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=float)
@@ -177,6 +194,8 @@ def _p4(mu: np.ndarray) -> np.ndarray:
     mu4 = mu2 * mu2
     return 0.125 * (35.0 * mu4 - 30.0 * mu2 + 3.0)
 
+
+# 関数: `_load_ross_template` の入出力契約と処理意図を定義する。
 
 def _load_ross_template(*, base_dir: Path, mod: str, scale: float = 2.1) -> dict[str, np.ndarray]:
     """
@@ -188,6 +207,8 @@ def _load_ross_template(*, base_dir: Path, mod: str, scale: float = 2.1) -> dict
     # 条件分岐: `not (p0.exists() and p2.exists() and p4.exists())` を満たす経路を評価する。
     if not (p0.exists() and p2.exists() and p4.exists()):
         raise FileNotFoundError(f"missing template files under {base_dir} for mod={mod}")
+
+    # 関数: `_read_xy` の入出力契約と処理意図を定義する。
 
     def _read_xy(p: Path) -> tuple[np.ndarray, np.ndarray]:
         x: list[float] = []
@@ -219,12 +240,16 @@ def _load_ross_template(*, base_dir: Path, mod: str, scale: float = 2.1) -> dict
     return {"r": r, "xi0": scale * xi0, "xi2": scale * xi2, "xi4": scale * xi4}
 
 
+# 関数: `_interp1` の入出力契約と処理意図を定義する。
+
 def _interp1(x: np.ndarray, xp: np.ndarray, fp: np.ndarray) -> np.ndarray:
     x = np.asarray(x, dtype=float)
     xp = np.asarray(xp, dtype=float)
     fp = np.asarray(fp, dtype=float)
     return np.interp(x, xp, fp, left=0.0, right=0.0)
 
+
+# 関数: `_ap_multipoles_from_template` の入出力契約と処理意図を定義する。
 
 def _ap_multipoles_from_template(
     *,
@@ -273,6 +298,8 @@ def _ap_multipoles_from_template(
     xi2 = float(5.0 * np.sum(ximu * _p2(mu)) * dmu)
     return xi0, xi2
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Align recon-gap residual evaluation to Ross baofit_pub2D axis.")

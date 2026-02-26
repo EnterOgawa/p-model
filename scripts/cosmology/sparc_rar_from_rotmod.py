@@ -55,9 +55,12 @@ KPC_TO_M = 3.0856775814913673e19
 KM_TO_M = 1.0e3
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -66,10 +69,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# クラス: `RotmodRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class RotmodRow:
@@ -82,6 +89,8 @@ class RotmodRow:
     sbdisk_l_pc2: float
     sbbul_l_pc2: float
 
+
+# 関数: `_parse_rotmod_text` の入出力契約と処理意図を定義する。
 
 def _parse_rotmod_text(lines: Iterable[str]) -> Tuple[Optional[float], List[RotmodRow]]:
     dist_mpc: Optional[float] = None
@@ -141,6 +150,8 @@ def _parse_rotmod_text(lines: Iterable[str]) -> Tuple[Optional[float], List[Rotm
     return dist_mpc, rows
 
 
+# 関数: `_compute_accel_points` の入出力契約と処理意図を定義する。
+
 def _compute_accel_points(
     galaxy: str,
     dist_mpc: Optional[float],
@@ -192,6 +203,8 @@ def _compute_accel_points(
     return out
 
 
+# 関数: `_plot_scatter` の入出力契約と処理意図を定義する。
+
 def _plot_scatter(out_png: Path, points: Sequence[Dict[str, Any]]) -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -217,6 +230,8 @@ def _plot_scatter(out_png: Path, points: Sequence[Dict[str, Any]]) -> None:
     plt.savefig(out_png, dpi=160)
     plt.close()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

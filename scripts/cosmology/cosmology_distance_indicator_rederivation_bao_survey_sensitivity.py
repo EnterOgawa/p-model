@@ -51,6 +51,7 @@ from scripts.cosmology import (  # noqa: E402
 )
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -76,14 +77,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_parse_scales` の入出力契約と処理意図を定義する。
 
 def _parse_scales(s: str) -> List[float]:
     out: List[float] = []
@@ -107,6 +114,8 @@ def _parse_scales(s: str) -> List[float]:
 
     return sorted(set(out))
 
+
+# 関数: `_crossing_x_log` の入出力契約と処理意図を定義する。
 
 def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) -> Optional[float]:
     # 条件分岐: `not xs or len(xs) != len(ys)` を満たす経路を評価する。
@@ -159,6 +168,8 @@ def _crossing_x_log(xs: Sequence[float], ys: Sequence[float], threshold: float) 
 
     return None
 
+
+# 関数: `_evaluate_best_pair` の入出力契約と処理意図を定義する。
 
 def _evaluate_best_pair(
     *,
@@ -246,6 +257,8 @@ def _evaluate_best_pair(
     }
 
 
+# 関数: `_plot_f_bars` の入出力契約と処理意図を定義する。
+
 def _plot_f_bars(
     *,
     out_png: Path,
@@ -257,6 +270,7 @@ def _plot_f_bars(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    # 関数: `_sanitize` の入出力契約と処理意図を定義する。
     def _sanitize(v: Optional[float]) -> float:
         # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
@@ -310,6 +324,8 @@ def _plot_f_bars(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `_compute_required_f_scan` の入出力契約と処理意図を定義する。
 
 def _compute_required_f_scan(
     *,
@@ -373,6 +389,8 @@ def _compute_required_f_scan(
 
     return results
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser()
@@ -472,6 +490,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         )
     except Exception as e:
         raise ValueError("unexpected schema in bao_scaled_distance_fit_metrics.json") from e
+
+    # 関数: `_add_ratio_variant` の入出力契約と処理意図を定義する。
 
     def _add_ratio_variant(key: str, label: str) -> None:
         try:

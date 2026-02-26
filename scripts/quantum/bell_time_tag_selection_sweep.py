@@ -7,6 +7,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `Config` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Config:
     # Simulation size (keep moderate for Windows; deterministic seed for reproducibility).
@@ -42,11 +43,15 @@ class Config:
     bp_deg: float = 67.5
 
 
+# 関数: `_outcome` の入出力契約と処理意図を定義する。
+
 def _outcome(phi: np.ndarray, theta: float) -> np.ndarray:
     # Deterministic local output for polarization-like settings.
     # Using 2*(phi-theta) keeps the periodicity consistent with linear polarizers.
     return np.where(np.cos(2.0 * (phi - theta)) >= 0.0, 1, -1).astype(np.int8)
 
+
+# 関数: `_time_tag` の入出力契約と処理意図を定義する。
 
 def _time_tag(rng: np.random.Generator, phi: np.ndarray, theta: float, *, d: float) -> np.ndarray:
     # Toy time-tag model: setting-dependent delay distribution.
@@ -54,6 +59,8 @@ def _time_tag(rng: np.random.Generator, phi: np.ndarray, theta: float, *, d: flo
     u = rng.random(phi.shape[0])
     return u * (np.abs(np.sin(2.0 * (phi - theta))) ** d)
 
+
+# 関数: `_sweep_pair` の入出力契約と処理意図を定義する。
 
 def _sweep_pair(
     rng: np.random.Generator,
@@ -88,6 +95,8 @@ def _sweep_pair(
 
     return e, acc
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

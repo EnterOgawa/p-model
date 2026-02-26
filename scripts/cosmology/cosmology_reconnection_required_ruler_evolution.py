@@ -75,6 +75,7 @@ from scripts.summary import worklog  # noqa: E402
 _C_KM_S = 299_792.458
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -100,14 +101,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -123,6 +130,8 @@ def _safe_float(x: Any) -> Optional[float]:
     return v
 
 
+# 関数: `_optional_bool` の入出力契約と処理意図を定義する。
+
 def _optional_bool(j: Dict[str, Any], key: str) -> Optional[bool]:
     # 条件分岐: `key not in j` を満たす経路を評価する。
     if key not in j:
@@ -135,6 +144,8 @@ def _optional_bool(j: Dict[str, Any], key: str) -> Optional[bool]:
 
     return bool(v)
 
+
+# 関数: `_load_ddr_systematics_envelope` の入出力契約と処理意図を定義する。
 
 def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     """
@@ -178,6 +189,8 @@ def _load_ddr_systematics_envelope(path: Path) -> Dict[str, Dict[str, Any]]:
     return out
 
 
+# 関数: `_apply_ddr_sigma_policy` の入出力契約と処理意図を定義する。
+
 def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[str, Dict[str, Any]]) -> DDRConstraint:
     # 条件分岐: `policy != "category_sys"` を満たす経路を評価する。
     if policy != "category_sys":
@@ -202,6 +215,8 @@ def _apply_ddr_sigma_policy(ddr: DDRConstraint, *, policy: str, envelope: Dict[s
     )
 
 
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
+
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -220,6 +235,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# クラス: `DDRConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class DDRConstraint:
     id: str
@@ -235,6 +252,7 @@ class DDRConstraint:
     sigma_policy: str = "raw"
     category: Optional[str] = None
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "DDRConstraint":
         sigma = float(j["epsilon0_sigma"])
@@ -251,6 +269,8 @@ class DDRConstraint:
         )
 
 
+# クラス: `OpacityConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class OpacityConstraint:
     id: str
@@ -263,6 +283,7 @@ class OpacityConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "OpacityConstraint":
         return OpacityConstraint(
@@ -278,6 +299,8 @@ class OpacityConstraint:
         )
 
 
+# クラス: `CandleEvoConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class CandleEvoConstraint:
     id: str
@@ -291,6 +314,7 @@ class CandleEvoConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "CandleEvoConstraint":
         return CandleEvoConstraint(
@@ -307,6 +331,8 @@ class CandleEvoConstraint:
         )
 
 
+# クラス: `TimeDilationConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TimeDilationConstraint:
     id: str
@@ -317,6 +343,7 @@ class TimeDilationConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "TimeDilationConstraint":
         return TimeDilationConstraint(
@@ -330,6 +357,8 @@ class TimeDilationConstraint:
         )
 
 
+# クラス: `CMBTemperatureConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class CMBTemperatureConstraint:
     id: str
@@ -340,13 +369,18 @@ class CMBTemperatureConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `p_T` の入出力契約と処理意図を定義する。
     @property
     def p_T(self) -> float:
         return 1.0 - float(self.beta_T)
 
+    # 関数: `p_T_sigma` の入出力契約と処理意図を定義する。
+
     @property
     def p_T_sigma(self) -> float:
         return float(self.beta_T_sigma)
+
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
 
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "CMBTemperatureConstraint":
@@ -361,6 +395,8 @@ class CMBTemperatureConstraint:
         )
 
 
+# クラス: `BAOAnisotropyConstraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class BAOAnisotropyConstraint:
     id: str
@@ -374,6 +410,7 @@ class BAOAnisotropyConstraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "BAOAnisotropyConstraint":
         return BAOAnisotropyConstraint(
@@ -389,6 +426,8 @@ class BAOAnisotropyConstraint:
             source=dict(j.get("source") or {}),
         )
 
+
+# 関数: `_primary_by_sigma` の入出力契約と処理意図を定義する。
 
 def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
     # 条件分岐: `not rows` を満たす経路を評価する。
@@ -418,6 +457,8 @@ def _primary_by_sigma(rows: Sequence[Any], sigma_field: str) -> Any:
     return best
 
 
+# 関数: `_select_primary_opacity` の入出力契約と処理意図を定義する。
+
 def _select_primary_opacity(
     rows: Sequence[OpacityConstraint], *, independent_only: bool
 ) -> Tuple[OpacityConstraint, Dict[str, Any]]:
@@ -432,6 +473,8 @@ def _select_primary_opacity(
         "fallback_used": bool(independent_only and not eligible),
     }
 
+
+# 関数: `_select_primary_candle` の入出力契約と処理意図を定義する。
 
 def _select_primary_candle(
     rows: Sequence[CandleEvoConstraint], *, independent_only: bool
@@ -454,6 +497,8 @@ def _select_primary_candle(
     }
 
 
+# 関数: `_primary_flags` の入出力契約と処理意図を定義する。
+
 def _primary_flags(payload: Any) -> Dict[str, Any]:
     uses_bao = getattr(payload, "uses_bao", None)
     uses_cmb = getattr(payload, "uses_cmb", None)
@@ -464,6 +509,8 @@ def _primary_flags(payload: Any) -> Dict[str, Any]:
         "assumes_cddr": (None if assumes_cddr is None else bool(assumes_cddr)),
     }
 
+
+# 関数: `_required_s_r` の入出力契約と処理意図を定義する。
 
 def _required_s_r(
     *,
@@ -512,6 +559,8 @@ def _required_s_r(
     return s_r, sig
 
 
+# 関数: `_lognormal_quantiles_from_normal` の入出力契約と処理意図を定義する。
+
 def _lognormal_quantiles_from_normal(*, mu: float, sig: float, a: float) -> Dict[str, float]:
     """
     If X ~ Normal(mu, sig), return quantiles of Y = a^X at +-1σ:
@@ -525,6 +574,8 @@ def _lognormal_quantiles_from_normal(*, mu: float, sig: float, a: float) -> Dict
     p84 = math.exp((mu + sig) * ln_a)
     return {"median": float(median), "p16": float(p16), "p84": float(p84)}
 
+
+# 関数: `_bao_pred_dm_h` の入出力契約と処理意図を定義する。
 
 def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
     """
@@ -556,6 +607,8 @@ def _bao_pred_dm_h(*, z: float, s_R: float, B: float) -> Tuple[float, float]:
     return float(dm_scaled), float(h_scaled)
 
 
+# 関数: `_chi2_bao_dm_h` の入出力契約と処理意図を定義する。
+
 def _chi2_bao_dm_h(rows: Sequence[BAOAnisotropyConstraint], *, s_R: float, B: float) -> float:
     chi2 = 0.0
     for r in rows:
@@ -580,6 +633,8 @@ def _chi2_bao_dm_h(rows: Sequence[BAOAnisotropyConstraint], *, s_R: float, B: fl
 
     return float(chi2)
 
+
+# 関数: `_fit_bao_B_for_sR` の入出力契約と処理意図を定義する。
 
 def _fit_bao_B_for_sR(
     rows: Sequence[BAOAnisotropyConstraint],
@@ -606,6 +661,8 @@ def _fit_bao_B_for_sR(
     j = int(np.nanargmin(chi2))
     return float(Bs2[j]), float(chi2[j])
 
+
+# 関数: `_fit_bao_ruler_evolution` の入出力契約と処理意図を定義する。
 
 def _fit_bao_ruler_evolution(
     rows: Sequence[BAOAnisotropyConstraint],
@@ -682,6 +739,8 @@ def _fit_bao_ruler_evolution(
         },
     }
 
+
+# 関数: `_plot_bao_fit` の入出力契約と処理意図を定義する。
 
 def _plot_bao_fit(
     bao_rows: Sequence[BAOAnisotropyConstraint],
@@ -767,6 +826,8 @@ def _plot_bao_fit(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `_compute_rows_out` の入出力契約と処理意図を定義する。
 
 def _compute_rows_out(
     ddr_rows: Sequence[DDRConstraint],
@@ -857,6 +918,8 @@ def _compute_rows_out(
 
     return rows_out
 
+
+# 関数: `_write_variant_outputs` の入出力契約と処理意図を定義する。
 
 def _write_variant_outputs(
     *,
@@ -1146,6 +1209,8 @@ def _write_variant_outputs(
         },
     }
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(
     rows: Sequence[Dict[str, Any]],
     *,
@@ -1236,6 +1301,8 @@ def _plot(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(

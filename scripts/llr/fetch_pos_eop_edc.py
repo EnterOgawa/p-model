@@ -42,13 +42,18 @@ BASE = "https://edc.dgfi.tum.de"
 POS_EOP_ROOT = "/pub/slr/products/pos+eop"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
 
 def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": "waveP-fetch-pos-eop/1.0"})
@@ -58,12 +63,16 @@ def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     return b.decode("utf-8", "replace")
 
 
+# 関数: `_iter_hrefs` の入出力契約と処理意図を定義する。
+
 def _iter_hrefs(html: str) -> Iterable[str]:
     for href in re.findall(r'href=[\'"]([^\'"]+)[\'"]', html):
         # 条件分岐: `href` を満たす経路を評価する。
         if href:
             yield href
 
+
+# 関数: `_list_files` の入出力契約と処理意図を定義する。
 
 def _list_files(year: int, yymmdd: str) -> list[str]:
     url = f"{BASE}{POS_EOP_ROOT}/{year}/{yymmdd}/"
@@ -82,6 +91,8 @@ def _list_files(year: int, yymmdd: str) -> list[str]:
     return sorted(set(files))
 
 
+# クラス: `Picked` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Picked:
     year: int
@@ -98,6 +109,7 @@ _RE_FILE = re.compile(
 )
 
 
+# 関数: `_pick_latest` の入出力契約と処理意図を定義する。
 def _pick_latest(year: int, yymmdd: str, *, preferred_center: str = "nsgf") -> Picked:
     files = _list_files(year, yymmdd)
     # 条件分岐: `not files` を満たす経路を評価する。
@@ -143,13 +155,19 @@ def _pick_latest(year: int, yymmdd: str, *, preferred_center: str = "nsgf") -> P
     return max(pool, key=lambda x: x.version)
 
 
+# 関数: `_dst_snx` の入出力契約と処理意図を定義する。
+
 def _dst_snx(repo_root: Path, year: int, yymmdd: str) -> Path:
     return repo_root / "data" / "llr" / "pos_eop" / "snx" / str(year) / str(yymmdd) / f"pos_eop_{yymmdd}.snx.gz"
 
 
+# 関数: `_dst_meta` の入出力契約と処理意図を定義する。
+
 def _dst_meta(repo_root: Path, year: int, yymmdd: str) -> Path:
     return repo_root / "data" / "llr" / "pos_eop" / "snx" / str(year) / str(yymmdd) / "meta.json"
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
@@ -168,6 +186,8 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
+# 関数: `_parse_yyyymmdd` の入出力契約と処理意図を定義する。
+
 def _parse_yyyymmdd(s: str) -> date:
     # Accept YYYYMMDD or YYMMDD
     s = str(s).strip()
@@ -185,9 +205,13 @@ def _parse_yyyymmdd(s: str) -> date:
     raise ValueError(f"invalid date format: {s!r} (expected YYYYMMDD or YYMMDD)")
 
 
+# 関数: `_yymmdd` の入出力契約と処理意図を定義する。
+
 def _yymmdd(d: date) -> str:
     return f"{d.year % 100:02d}{d.month:02d}{d.day:02d}"
 
+
+# 関数: `_collect_dates_from_points_csv` の入出力契約と処理意図を定義する。
 
 def _collect_dates_from_points_csv(path: Path) -> list[date]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -221,6 +245,8 @@ def _collect_dates_from_points_csv(path: Path) -> list[date]:
 
     return sorted(dates)
 
+
+# 関数: `_collect_dates_from_np2` の入出力契約と処理意図を定義する。
 
 def _collect_dates_from_np2(repo_root: Path) -> list[date]:
     # Parse epoch_utc from NP2 via the existing CRD parser (no network).
@@ -271,6 +297,8 @@ def _collect_dates_from_np2(repo_root: Path) -> list[date]:
 
     return sorted(dates)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

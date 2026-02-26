@@ -50,6 +50,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -75,14 +76,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -98,6 +105,8 @@ def _safe_float(x: Any) -> Optional[float]:
     return v
 
 
+# クラス: `Constraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Constraint:
     id: str
@@ -109,6 +118,7 @@ class Constraint:
     redshift_range_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "Constraint":
         return Constraint(
@@ -122,6 +132,8 @@ class Constraint:
             source=dict(j.get("source") or {}),
         )
 
+
+# 関数: `compute` の入出力契約と処理意図を定義する。
 
 def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
     out: List[Dict[str, Any]] = []
@@ -170,6 +182,8 @@ def compute(rows: Sequence[Constraint]) -> List[Dict[str, Any]]:
 
     return out
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> None:
     _set_japanese_font()
@@ -249,6 +263,8 @@ def _plot(rows: Sequence[Dict[str, Any]], *, out_png: Path, z_max: float) -> Non
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: Tolman surface brightness constraints and rejection condition.")

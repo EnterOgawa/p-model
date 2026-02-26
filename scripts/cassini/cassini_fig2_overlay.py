@@ -38,6 +38,7 @@ CARRIER_HZ_BY_DOWNLINK_BAND_ID = {
 }
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -63,6 +64,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# クラス: `ModelRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ModelRow:
     t: datetime
@@ -74,16 +77,21 @@ class ModelRow:
     r2dot_mps: float
 
 
+# クラス: `Point` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Point:
     t_days: float
     y_obs: float
     y_model: float
 
+    # 関数: `residual` の入出力契約と処理意図を定義する。
     @property
     def residual(self) -> float:
         return self.y_obs - self.y_model
 
+
+# クラス: `OdfObs` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class OdfObs:
@@ -98,9 +106,13 @@ class OdfObs:
     source_file: str
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_try_load_frozen_beta` の入出力契約と処理意図を定義する。
 
 def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
     path = root / "output" / "theory" / "frozen_parameters.json"
@@ -116,6 +128,8 @@ def _try_load_frozen_beta(root: Path) -> Tuple[Optional[float], str]:
         return None, "output/theory/frozen_parameters.json:beta (read failed)"
 
 
+# 関数: `_extract_bits` の入出力契約と処理意図を定義する。
+
 def _extract_bits(v: int, total_bits: int, start_bit: int, bits: int) -> int:
     # PDS3 MSB_BIT_STRING: START_BIT is 1-based from MSB.
     shift = total_bits - (start_bit + bits - 1)
@@ -125,6 +139,8 @@ def _extract_bits(v: int, total_bits: int, start_bit: int, bits: int) -> int:
 
     return (v >> shift) & ((1 << bits) - 1)
 
+
+# 関数: `_signed36_from_sign4_low32` の入出力契約と処理意図を定義する。
 
 def _signed36_from_sign4_low32(sign4: int, low32: int) -> int:
     # Assemble a 36-bit two's complement signed integer from a 4-bit sign extension and 32-bit payload.
@@ -136,6 +152,8 @@ def _signed36_from_sign4_low32(sign4: int, low32: int) -> int:
 
     return int(v)
 
+
+# 関数: `_bin_time_series_mean` の入出力契約と処理意図を定義する。
 
 def _bin_time_series_mean(
     pairs: Sequence[Tuple[float, float]],
@@ -171,6 +189,8 @@ def _bin_time_series_mean(
 
     return out
 
+
+# 関数: `_bin_time_series` の入出力契約と処理意図を定義する。
 
 def _bin_time_series(
     pairs: Sequence[Tuple[float, float]],
@@ -219,6 +239,8 @@ def _bin_time_series(
 
     return out
 
+
+# 関数: `_detrend_polynomial` の入出力契約と処理意図を定義する。
 
 def _detrend_polynomial(
     series: Sequence[Dict[str, float]],
@@ -284,6 +306,8 @@ def _detrend_polynomial(
     return out, info
 
 
+# 関数: `_filter_bins_by_min_count` の入出力契約と処理意図を定義する。
+
 def _filter_bins_by_min_count(series: Sequence[Dict[str, float]], *, min_count: int) -> List[Dict[str, float]]:
     """
     Filter binned time series rows by minimum sample count per bin.
@@ -315,6 +339,8 @@ def _filter_bins_by_min_count(series: Sequence[Dict[str, float]], *, min_count: 
     return out
 
 
+# 関数: `_parse_odf3c_span` の入出力契約と処理意図を定義する。
+
 def _parse_odf3c_span(lbl_text: str) -> Tuple[int, int]:
     # Example:
     #   ^ODF3C_TABLE = ("C32...ODF",6)
@@ -340,6 +366,8 @@ def _parse_odf3c_span(lbl_text: str) -> Tuple[int, int]:
     return start_record_1, rows
 
 
+# 関数: `_iter_cached_odf_files` の入出力契約と処理意図を定義する。
+
 def _iter_cached_odf_files(pds_root: Path, *, doy_start: int, doy_stop: int) -> Iterable[Tuple[int, int, Path]]:
     # Yield (cors, doy, odf_path)
     for odf in sorted(pds_root.glob("cors_*/sce1_*/odf/*.odf")):
@@ -354,6 +382,8 @@ def _iter_cached_odf_files(pds_root: Path, *, doy_start: int, doy_stop: int) -> 
         if doy_start <= doy <= doy_stop:
             yield cors, doy, odf
 
+
+# 関数: `load_odf_doppler_observations` の入出力契約と処理意図を定義する。
 
 def load_odf_doppler_observations(
     pds_root: Path,
@@ -472,6 +502,8 @@ def load_odf_doppler_observations(
     return obs
 
 
+# クラス: `TdfObs` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class TdfObs:
     time_utc: datetime
@@ -497,6 +529,8 @@ class TdfObs:
     source_file: str
 
 
+# 関数: `_parse_tdf5_span` の入出力契約と処理意図を定義する。
+
 def _parse_tdf5_span(lbl_text: str) -> Tuple[int, int]:
     # ^TDF5_TABLE = ("...TDF",3)
     m_ptr = re.search(r"^\^TDF5_TABLE\s*=\s*\(\"[^\"]+\"\s*,\s*(\d+)\s*\)", lbl_text, flags=re.MULTILINE)
@@ -520,6 +554,8 @@ def _parse_tdf5_span(lbl_text: str) -> Tuple[int, int]:
     return start_record_1, rows
 
 
+# 関数: `_iter_cached_tdf_files` の入出力契約と処理意図を定義する。
+
 def _iter_cached_tdf_files(pds_root: Path, *, doy_start: int, doy_stop: int) -> Iterable[Tuple[int, int, Path]]:
     for tdf in sorted(pds_root.glob("cors_*/sce1_*/tdf/*.tdf")):
         try:
@@ -533,6 +569,8 @@ def _iter_cached_tdf_files(pds_root: Path, *, doy_start: int, doy_stop: int) -> 
         if doy_start <= doy <= doy_stop:
             yield cors, doy, tdf
 
+
+# 関数: `load_tdf_doppler_pseudoresiduals` の入出力契約と処理意図を定義する。
 
 def load_tdf_doppler_pseudoresiduals(
     pds_root: Path,
@@ -795,6 +833,8 @@ def load_tdf_doppler_pseudoresiduals(
     return out
 
 
+# 関数: `_choose_best_common_ground_mode` の入出力契約と処理意図を定義する。
+
 def _choose_best_common_ground_mode(
     obs_a: Sequence[TdfObs],
     obs_b: Sequence[TdfObs],
@@ -840,6 +880,8 @@ def _choose_best_common_ground_mode(
 
     return int(best)
 
+
+# 関数: `_auto_filter_tdf_obs_by_mode` の入出力契約と処理意図を定義する。
 
 def _auto_filter_tdf_obs_by_mode(
     obs: Sequence[TdfObs],
@@ -901,6 +943,8 @@ def _auto_filter_tdf_obs_by_mode(
     return filtered, gm, cc
 
 
+# 関数: `parse_dt_utc` の入出力契約と処理意図を定義する。
+
 def parse_dt_utc(s: str) -> datetime:
     # The input should be ISO-8601 with UTC offset.
     dt = datetime.fromisoformat(s)
@@ -910,6 +954,8 @@ def parse_dt_utc(s: str) -> datetime:
 
     return dt.astimezone(timezone.utc)
 
+
+# 関数: `load_model_rows` の入出力契約と処理意図を定義する。
 
 def load_model_rows(path: Path) -> List[ModelRow]:
     with path.open("r", encoding="utf-8") as f:
@@ -936,14 +982,20 @@ def load_model_rows(path: Path) -> List[ModelRow]:
     return rows
 
 
+# 関数: `find_bmin_time` の入出力契約と処理意図を定義する。
+
 def find_bmin_time(rows: Sequence[ModelRow]) -> datetime:
     best = min(rows, key=lambda r: r.b_m)
     return best.t
 
 
+# 関数: `t_days_from_ref` の入出力契約と処理意図を定義する。
+
 def t_days_from_ref(t: datetime, t_ref: datetime) -> float:
     return (t - t_ref).total_seconds() / 86400.0
 
+
+# 関数: `y_full_from_geometry` の入出力契約と処理意図を定義する。
 
 def y_full_from_geometry(row: ModelRow, beta: float) -> float:
     # Full (exact derivative of the b-approx Eq(1)) in observable sign convention:
@@ -956,6 +1008,8 @@ def y_full_from_geometry(row: ModelRow, beta: float) -> float:
         - 2.0 * (row.bdot_mps / row.b_m)
     )
 
+# 関数: `y_eq2_from_geometry` の入出力契約と処理意図を定義する。
+
 def y_eq2_from_geometry(row: ModelRow, beta: float) -> float:
     # Eq(2) approximation used in Cassini (observable sign convention):
     #   y ≈ 4(1+gamma) GM/c^3 * (1/b) db/dt
@@ -963,6 +1017,8 @@ def y_eq2_from_geometry(row: ModelRow, beta: float) -> float:
     coef = 4.0 * (1.0 + gamma) * MU_SUN / (C**3)  # = 8β * MU/c^3
     return coef * (row.bdot_mps / row.b_m)
 
+
+# 関数: `build_model_series` の入出力契約と処理意図を定義する。
 
 def build_model_series(
     rows: Sequence[ModelRow], beta: float, mode: str
@@ -984,6 +1040,8 @@ def build_model_series(
 
     return xs, ys
 
+
+# 関数: `interp_linear` の入出力契約と処理意図を定義する。
 
 def interp_linear(xs: Sequence[float], ys: Sequence[float], x: float) -> Optional[float]:
     # 条件分岐: `not xs` を満たす経路を評価する。
@@ -1017,6 +1075,8 @@ def interp_linear(xs: Sequence[float], ys: Sequence[float], x: float) -> Optiona
     return y0 + (y1 - y0) * u
 
 
+# 関数: `load_digitized_points` の入出力契約と処理意図を定義する。
+
 def load_digitized_points(path: Path) -> List[Tuple[float, float]]:
     with path.open("r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -1032,6 +1092,8 @@ def load_digitized_points(path: Path) -> List[Tuple[float, float]]:
     out.sort(key=lambda p: p[0])
     return out
 
+
+# 関数: `match_points` の入出力契約と処理意図を定義する。
 
 def match_points(
     observed: Sequence[Tuple[float, float]],
@@ -1064,6 +1126,8 @@ def match_points(
     return points
 
 
+# 関数: `rmse` の入出力契約と処理意図を定義する。
+
 def rmse(values: Sequence[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -1072,6 +1136,8 @@ def rmse(values: Sequence[float]) -> float:
     return math.sqrt(sum(v * v for v in values) / len(values))
 
 
+# 関数: `mae` の入出力契約と処理意図を定義する。
+
 def mae(values: Sequence[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -1079,6 +1145,8 @@ def mae(values: Sequence[float]) -> float:
 
     return sum(abs(v) for v in values) / len(values)
 
+
+# 関数: `pearson_corr` の入出力契約と処理意図を定義する。
 
 def pearson_corr(xs: Sequence[float], ys: Sequence[float]) -> float:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -1097,6 +1165,8 @@ def pearson_corr(xs: Sequence[float], ys: Sequence[float]) -> float:
     return cov / math.sqrt(vx * vy)
 
 
+# 関数: `write_points_csv` の入出力契約と処理意図を定義する。
+
 def write_points_csv(path: Path, points: Sequence[Point]) -> None:
     with path.open("w", newline="", encoding="utf-8") as f:
         w = csv.writer(f)
@@ -1105,6 +1175,8 @@ def write_points_csv(path: Path, points: Sequence[Point]) -> None:
             w.writerow([f"{p.t_days:.15g}", f"{p.y_obs:.15e}", f"{p.y_model:.15e}", f"{p.residual:.15e}"])
 
 
+# 関数: `compute_window` の入出力契約と処理意図を定義する。
+
 def compute_window(points: Sequence[Point], window_days: Optional[float]) -> List[Point]:
     # 条件分岐: `window_days is None` を満たす経路を評価する。
     if window_days is None:
@@ -1112,6 +1184,8 @@ def compute_window(points: Sequence[Point], window_days: Optional[float]) -> Lis
 
     return [p for p in points if abs(p.t_days) <= window_days]
 
+
+# 関数: `write_metrics_csv` の入出力契約と処理意図を定義する。
 
 def write_metrics_csv(path: Path, points: Sequence[Point]) -> None:
     windows = [
@@ -1153,6 +1227,8 @@ def write_metrics_csv(path: Path, points: Sequence[Point]) -> None:
                 ]
             )
 
+
+# 関数: `try_plot` の入出力契約と処理意図を定義する。
 
 def try_plot(
     out_dir: Path,
@@ -1232,6 +1308,8 @@ def try_plot(
         plt.close(fig)
 
 
+# 関数: `run_beta_sweep` の入出力契約と処理意図を定義する。
+
 def run_beta_sweep(
     observed: Sequence[Tuple[float, float]],
     rows: Sequence[ModelRow],
@@ -1253,6 +1331,7 @@ def run_beta_sweep(
         model_t_days, model_y = build_model_series(rows, beta=beta, mode=mode)
         points = match_points(observed, model_t_days, model_y, align_offset=align_offset)
 
+        # 関数: `_rmse_for_window` の入出力契約と処理意図を定義する。
         def _rmse_for_window(days: Optional[float]) -> float:
             subset = compute_window(points, days)
             return rmse([p.residual for p in subset])
@@ -1301,6 +1380,8 @@ def run_beta_sweep(
 
     return best_beta, rmse_10
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -2226,6 +2307,7 @@ def main() -> None:
             obs_t = [t for t, _y in observed_pairs]
             obs_y = [_y for _t, _y in observed_pairs]
 
+            # 関数: `_metrics_for_shift` の入出力契約と処理意図を定義する。
             def _metrics_for_shift(shift_days: float) -> Dict[str, float]:
                 diffs: List[float] = []
                 ys_dig: List[float] = []
@@ -2478,11 +2560,14 @@ def main() -> None:
         print(f"[warn] failed to write Cassini run metadata: {e}")
 
     try:
+        # 関数: `_safe_rel` の入出力契約と処理意図を定義する。
         def _safe_rel(p: Path) -> str:
             try:
                 return str(p.relative_to(root)).replace("\\", "/")
             except Exception:
                 return str(p).replace("\\", "/")
+
+        # 関数: `_window_metrics` の入出力契約と処理意図を定義する。
 
         def _window_metrics(window_days: Optional[float]) -> Dict[str, float]:
             subset = compute_window(points, window_days)

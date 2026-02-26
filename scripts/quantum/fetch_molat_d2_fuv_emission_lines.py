@@ -12,23 +12,31 @@ from typing import Any, Optional
 from urllib.request import Request, urlopen
 
 
+# クラス: `MolatD2FuvFileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class MolatD2FuvFileSpec:
     file_id: str
     upper_state_label: str
 
+    # 関数: `url` の入出力契約と処理意図を定義する。
     @property
     def url(self) -> str:
         return f"https://molat.obspm.fr/index.php?page=pages/Molecules/D2/view_data.php&fichier={self.file_id}"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -43,6 +51,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest().upper()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path, *, force: bool) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -61,6 +71,8 @@ def _download(url: str, out_path: Path, *, force: bool) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_extract_pre_block` の入出力契約と処理意図を定義する。
+
 def _extract_pre_block(html: str) -> str:
     m = re.search(r"<pre>\s*(.*?)\s*</pre>", html, flags=re.IGNORECASE | re.DOTALL)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -78,12 +90,16 @@ def _extract_pre_block(html: str) -> str:
     return "\n".join(lines).strip() + "\n"
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(x: str) -> Optional[float]:
     try:
         return float(x)
     except Exception:
         return None
 
+
+# 関数: `_parse_pre_stats` の入出力契約と処理意図を定義する。
 
 def _parse_pre_stats(pre_text: str) -> dict[str, Any]:
     """
@@ -127,6 +143,8 @@ def _parse_pre_stats(pre_text: str) -> dict[str, Any]:
     }
 
 
+# 関数: `_write_manifest` の入出力契約と処理意図を定義する。
+
 def _write_manifest(
     *,
     out_dir: Path,
@@ -159,6 +177,8 @@ def _write_manifest(
     out_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
     return out_path
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Fetch MOLAT D2 FUV emission line lists (view_data) and cache for offline use.")

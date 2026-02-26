@@ -54,13 +54,18 @@ DEFAULT_PUBLIC_LIST_URL = "https://darts.isas.jaxa.jp/pub/xrism/browse/public_li
 DEFAULT_METADATA_URL = "https://data.darts.isas.jaxa.jp/pub/xrism/metadata/xrism_resolve_data.csv"
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_sha256_bytes` の入出力契約と処理意図を定義する。
+
 def _sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -71,6 +76,8 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(path: Path) -> str:
     try:
         return path.relative_to(_ROOT).as_posix()
@@ -78,10 +85,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_http_get_bytes` の入出力契約と処理意図を定義する。
 
 def _http_get_bytes(url: str) -> Tuple[bytes, str]:
     # 条件分岐: `requests is None` を満たす経路を評価する。
@@ -97,10 +108,13 @@ def _http_get_bytes(url: str) -> Tuple[bytes, str]:
 _OBSID_RE = re.compile(r"\b(?P<obsid>[0-9]{9})\b")
 
 
+# 関数: `_extract_obsids_from_public_list` の入出力契約と処理意図を定義する。
 def _extract_obsids_from_public_list(html: str) -> List[str]:
     obsids = sorted({m.group("obsid") for m in _OBSID_RE.finditer(html or "")})
     return obsids
 
+
+# 関数: `_parse_iso_date` の入出力契約と処理意図を定義する。
 
 def _parse_iso_date(s: str) -> Optional[str]:
     s = (s or "").strip()
@@ -113,6 +127,8 @@ def _parse_iso_date(s: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
+# 関数: `_is_public_row` の入出力契約と処理意図を定義する。
+
 def _is_public_row(row: Dict[str, str], *, today_ymd: str) -> bool:
     d = _parse_iso_date(row.get("public_date") or "")
     # 条件分岐: `not d` を満たす経路を評価する。
@@ -122,6 +138,8 @@ def _is_public_row(row: Dict[str, str], *, today_ymd: str) -> bool:
     return d <= today_ymd
 
 
+# クラス: `ResolveRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ResolveRow:
     obsid: str
@@ -130,6 +148,8 @@ class ResolveRow:
     resolve_exposure: str
     processing_version: str
 
+
+# 関数: `_read_resolve_rows` の入出力契約と処理意図を定義する。
 
 def _read_resolve_rows(csv_path: Path) -> List[Dict[str, str]]:
     rows: List[Dict[str, str]] = []
@@ -144,6 +164,8 @@ def _read_resolve_rows(csv_path: Path) -> List[Dict[str, str]]:
 
     return rows
 
+
+# 関数: `_summarize_public_observations` の入出力契約と処理意図を定義する。
 
 def _summarize_public_observations(rows: List[Dict[str, str]]) -> List[ResolveRow]:
     today_ymd = datetime.now(timezone.utc).date().isoformat()
@@ -172,6 +194,8 @@ def _summarize_public_observations(rows: List[Dict[str, str]]) -> List[ResolveRo
     return out
 
 
+# 関数: `_write_public_summary_csv` の入出力契約と処理意図を定義する。
+
 def _write_public_summary_csv(path: Path, rows: List[ResolveRow]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = ["observation_id", "object_name", "public_date", "resolve_exposure", "processing_version"]
@@ -189,6 +213,8 @@ def _write_public_summary_csv(path: Path, rows: List[ResolveRow]) -> None:
                 }
             )
 
+
+# 関数: `_build_manifest` の入出力契約と処理意図を定義する。
 
 def _build_manifest(
     *,
@@ -230,6 +256,8 @@ def _build_manifest(
         ],
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Iterable[str]] = None) -> int:
     p = argparse.ArgumentParser()

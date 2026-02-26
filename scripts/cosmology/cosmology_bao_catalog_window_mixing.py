@@ -41,6 +41,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -59,6 +60,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_legendre_p` の入出力契約と処理意図を定義する。
+
 def _legendre_p(l: int, x: np.ndarray) -> np.ndarray:
     l = int(l)
     # 条件分岐: `l < 0` を満たす経路を評価する。
@@ -69,6 +72,8 @@ def _legendre_p(l: int, x: np.ndarray) -> np.ndarray:
     coeff[l] = 1.0
     return np.polynomial.legendre.legval(np.asarray(x, dtype=float), coeff)
 
+
+# 関数: `_window_coupling_coeffs` の入出力契約と処理意図を定義する。
 
 def _window_coupling_coeffs() -> Dict[Tuple[int, int, int], float]:
     """
@@ -101,6 +106,7 @@ def _window_coupling_coeffs() -> Dict[Tuple[int, int, int], float]:
 _WINDOW_COEFFS = _window_coupling_coeffs()
 
 
+# 関数: `_window_wL` の入出力契約と処理意図を定義する。
 def _window_wL(
     *,
     counts: np.ndarray,
@@ -148,6 +154,8 @@ def _window_wL(
     return out
 
 
+# クラス: `MixingSeries` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class MixingSeries:
     s: np.ndarray
@@ -157,6 +165,8 @@ class MixingSeries:
     m22: np.ndarray
     m24: np.ndarray
 
+
+# 関数: `_mixing_from_w` の入出力契約と処理意図を定義する。
 
 def _mixing_from_w(wL: Dict[int, np.ndarray]) -> MixingSeries:
     s = None
@@ -173,6 +183,7 @@ def _mixing_from_w(wL: Dict[int, np.ndarray]) -> MixingSeries:
 
     ls = (0, 2, 4, 6, 8)
 
+    # 関数: `mix` の入出力契約と処理意図を定義する。
     def mix(n: int, ell: int) -> np.ndarray:
         out = np.zeros_like(s, dtype=np.float64)
         for L in ls:
@@ -200,6 +211,8 @@ def _mixing_from_w(wL: Dict[int, np.ndarray]) -> MixingSeries:
     )
 
 
+# 関数: `_safe_max_abs_in_range` の入出力契約と処理意図を定義する。
+
 def _safe_max_abs_in_range(s: np.ndarray, y: np.ndarray, *, s_min: float, s_max: float) -> float:
     s = np.asarray(s, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
@@ -211,6 +224,8 @@ def _safe_max_abs_in_range(s: np.ndarray, y: np.ndarray, *, s_min: float, s_max:
     return float(np.nanmax(np.abs(y[m])))
 
 
+# 関数: `_path_for` の入出力契約と処理意図を定義する。
+
 def _path_for(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) -> Path:
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}"
     # 条件分岐: `suffix` を満たす経路を評価する。
@@ -220,10 +235,14 @@ def _path_for(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) -> P
     return _ROOT / "output" / "private" / "cosmology" / f"{base}.npz"
 
 
+# 関数: `_load_npz` の入出力契約と処理意図を定義する。
+
 def _load_npz(path: Path) -> Dict[str, np.ndarray]:
     with np.load(path) as z:
         return {k: np.asarray(z[k]) for k in z.files}
 
+
+# 関数: `_xi_l_from_xi_mu` の入出力契約と処理意図を定義する。
 
 def _xi_l_from_xi_mu(*, xi_mu: np.ndarray, mu_edges: np.ndarray, ell: int) -> np.ndarray:
     xi_mu = np.asarray(xi_mu, dtype=np.float64)
@@ -261,6 +280,8 @@ def _xi_l_from_xi_mu(*, xi_mu: np.ndarray, mu_edges: np.ndarray, ell: int) -> np
     return (float(2 * int(ell) + 1) * integ).astype(np.float64)
 
 
+# 関数: `_try_load_recon_gap_rmse` の入出力契約と処理意図を定義する。
+
 def _try_load_recon_gap_rmse() -> Dict[str, Any]:
     path = _ROOT / "output" / "private" / "cosmology" / "cosmology_bao_recon_gap_summary_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -273,6 +294,8 @@ def _try_load_recon_gap_rmse() -> Dict[str, Any]:
     except Exception:
         return {}
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Quantify window mixing impact (xi0<->xi2) from catalog-based RR/SS grids.")

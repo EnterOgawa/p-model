@@ -23,12 +23,15 @@ import pandas as pd
 _ROOT = Path(__file__).resolve().parents[2]
 
 
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 def _to_float(x: Any) -> float:
     try:
         return float(x)
     except Exception:
         return float("nan")
 
+
+# 関数: `_safe_rel` の入出力契約と処理意図を定義する。
 
 def _safe_rel(path: Path, root: Path) -> str:
     try:
@@ -37,9 +40,13 @@ def _safe_rel(path: Path, root: Path) -> str:
         return str(path.resolve()).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_op_metric` の入出力契約と処理意図を定義する。
 
 def _op_metric(op_json: Dict[str, Any], subset: str, key: str) -> float:
     rows = op_json.get("summary")
@@ -60,6 +67,8 @@ def _op_metric(op_json: Dict[str, Any], subset: str, key: str) -> float:
     return float("nan")
 
 
+# 関数: `_precision_check_status` の入出力契約と処理意図を定義する。
+
 def _precision_check_status(precision_json: Dict[str, Any], check_id: str) -> str:
     checks = precision_json.get("checks")
     # 条件分岐: `not isinstance(checks, list)` を満たす経路を評価する。
@@ -78,6 +87,8 @@ def _precision_check_status(precision_json: Dict[str, Any], check_id: str) -> st
 
     return "unknown"
 
+
+# 関数: `_station_meta_diag` の入出力契約と処理意図を定義する。
 
 def _station_meta_diag(meta_json: Dict[str, Any]) -> Dict[str, Any]:
     stations = meta_json.get("stations")
@@ -108,6 +119,8 @@ def _station_meta_diag(meta_json: Dict[str, Any]) -> Dict[str, Any]:
         "by_station": rows,
     }
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, metric_rows: List[Dict[str, Any]], station_rows: List[Dict[str, Any]]) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(13.5, 4.8))
@@ -140,6 +153,8 @@ def _plot(path: Path, metric_rows: List[Dict[str, Any]], station_rows: List[Dict
     fig.savefig(path, dpi=180)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="Audit IERS-unified LLR rerun against baseline.")

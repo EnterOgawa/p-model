@@ -31,9 +31,12 @@ from scripts.summary import public_outputs_manifest_continuity  # noqa: E402
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -42,9 +45,13 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8", errors="replace"))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -59,6 +66,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_git` の入出力契約と処理意図を定義する。
 
 def _git(*args: str) -> Tuple[int, str]:
     try:
@@ -78,6 +87,8 @@ def _git(*args: str) -> Tuple[int, str]:
     return (int(proc.returncode), (proc.stdout or "").strip())
 
 
+# 関数: `_head_short` の入出力契約と処理意図を定義する。
+
 def _head_short() -> str:
     rc, out = _git("rev-parse", "--short", "HEAD")
     # 条件分岐: `rc != 0 or not out` を満たす経路を評価する。
@@ -87,6 +98,8 @@ def _head_short() -> str:
     return out
 
 
+# 関数: `_tag_exists` の入出力契約と処理意図を定義する。
+
 def _tag_exists(tag: str) -> bool:
     # 条件分岐: `not tag or tag == "(none)"` を満たす経路を評価する。
     if not tag or tag == "(none)":
@@ -95,6 +108,8 @@ def _tag_exists(tag: str) -> bool:
     rc, _ = _git("rev-parse", "-q", "--verify", f"refs/tags/{tag}")
     return rc == 0
 
+
+# 関数: `_latest_tag` の入出力契約と処理意図を定義する。
 
 def _latest_tag() -> str:
     rc, out = _git("tag", "--sort=-creatordate")
@@ -106,6 +121,8 @@ def _latest_tag() -> str:
     return tags[0] if tags else ""
 
 
+# 関数: `_origin_url` の入出力契約と処理意図を定義する。
+
 def _origin_url() -> str:
     rc, out = _git("remote", "get-url", "origin")
     # 条件分岐: `rc != 0` を満たす経路を評価する。
@@ -114,6 +131,8 @@ def _origin_url() -> str:
 
     return out.strip()
 
+
+# 関数: `_origin_web_base` の入出力契約と処理意図を定義する。
 
 def _origin_web_base(origin: str) -> str:
     s = origin.strip()
@@ -139,6 +158,8 @@ def _origin_web_base(origin: str) -> str:
     return s.rstrip("/")
 
 
+# 関数: `_artifact` の入出力契約と処理意図を定義する。
+
 def _artifact(path: Path, *, kind: str, generated_utc: Optional[str] = None) -> Dict[str, Any]:
     exists = path.exists()
     return {
@@ -150,6 +171,8 @@ def _artifact(path: Path, *, kind: str, generated_utc: Optional[str] = None) -> 
         "generated_utc": generated_utc,
     }
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -168,6 +191,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
                 ]
             )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Phase 8 / Step 8.7.16.3: lock public-manifest citation set.")

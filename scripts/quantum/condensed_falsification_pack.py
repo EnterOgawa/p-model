@@ -33,9 +33,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(p: Path) -> str:
     try:
@@ -43,6 +46,8 @@ def _relpath(p: Path) -> str:
     except Exception:
         return str(p).replace("\\", "/")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -58,9 +63,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `build_pack` の入出力契約と処理意図を定義する。
 
 def build_pack(*, root: Path, metrics_relpaths: List[str]) -> Dict[str, Any]:
     tests: List[Dict[str, Any]] = []
@@ -112,6 +121,8 @@ def build_pack(*, root: Path, metrics_relpaths: List[str]) -> Dict[str, Any]:
         "tests": tests,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Generate condensed/thermo falsification pack JSON (collect baseline metrics JSON).")

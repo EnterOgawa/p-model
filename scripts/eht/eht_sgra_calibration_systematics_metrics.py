@@ -19,18 +19,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
 
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_find_sentence_block` の入出力契約と処理意図を定義する。
 
 def _find_sentence_block(text: str, needle: str, *, window: int = 700) -> Optional[str]:
     i = text.find(needle)
@@ -43,9 +50,13 @@ def _find_sentence_block(text: str, needle: str, *, window: int = 700) -> Option
     return text[a:b]
 
 
+# 関数: `_sigma_uniform_range` の入出力契約と処理意図を定義する。
+
 def _sigma_uniform_range(lo: float, hi: float) -> float:
     return abs(float(hi) - float(lo)) / math.sqrt(12.0)
 
+
+# 関数: `_summary` の入出力契約と処理意図を定義する。
 
 def _summary(values: Sequence[float]) -> Dict[str, Any]:
     xs = [float(v) for v in values if isinstance(v, (int, float)) and math.isfinite(float(v))]
@@ -74,6 +85,8 @@ def _summary(values: Sequence[float]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_parse_float_or_none` の入出力契約と処理意図を定義する。
+
 def _parse_float_or_none(s: str) -> Optional[float]:
     t = s.strip()
     # 条件分岐: `not t or t in {"---", "--"}` を満たす経路を評価する。
@@ -87,6 +100,8 @@ def _parse_float_or_none(s: str) -> Optional[float]:
         return None
 
 
+# クラス: `SyntheticGainRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class SyntheticGainRow:
     station: str
@@ -98,6 +113,8 @@ class SyntheticGainRow:
     g_p_apr7: Optional[float]
     source: Dict[str, Any]
 
+
+# 関数: `_parse_synthetic_gain_table` の入出力契約と処理意図を定義する。
 
 def _parse_synthetic_gain_table(tex: str, *, source_path: Path) -> Dict[str, Any]:
     rows = []
@@ -139,6 +156,8 @@ def _parse_synthetic_gain_table(tex: str, *, source_path: Path) -> Dict[str, Any
                 )
             )
 
+    # 関数: `_combine` の入出力契約と処理意図を定義する。
+
     def _combine(a: Optional[float], b: Optional[float]) -> Optional[float]:
         # 条件分岐: `a is None or b is None` を満たす経路を評価する。
         if a is None or b is None:
@@ -163,6 +182,8 @@ def _parse_synthetic_gain_table(tex: str, *, source_path: Path) -> Dict[str, Any
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

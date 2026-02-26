@@ -38,6 +38,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `RunResult` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class RunResult:
     random_max_rows: int
@@ -45,6 +46,8 @@ class RunResult:
     metrics_json: Path
     metrics: Dict[str, Any]
 
+
+# 関数: `_parse_int_list` の入出力契約と処理意図を定義する。
 
 def _parse_int_list(s: str) -> List[int]:
     out: List[int] = []
@@ -64,14 +67,20 @@ def _parse_int_list(s: str) -> List[int]:
     return out
 
 
+# 関数: `_run_cmd` の入出力契約と処理意図を定義する。
+
 def _run_cmd(cmd: List[str]) -> None:
     print("[run]", " ".join(cmd), flush=True)
     subprocess.run(cmd, check=True)
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_metrics_path` の入出力契約と処理意図を定義する。
 
 def _metrics_path(*, sample: str, caps: str, dist: str, ztag: str, out_tag: str) -> Path:
     base = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}"
@@ -86,6 +95,8 @@ def _metrics_path(*, sample: str, caps: str, dist: str, ztag: str, out_tag: str)
 
     return _ROOT / "output" / "private" / "cosmology" / f"{base}_metrics.json"
 
+
+# 関数: `_extract_key_metrics` の入出力契約と処理意図を定義する。
 
 def _extract_key_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     derived = d.get("derived", {}) if isinstance(d.get("derived", {}), dict) else {}
@@ -126,6 +137,8 @@ def _extract_key_metrics(d: Dict[str, Any]) -> Dict[str, Any]:
     }
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Convergence test for catalog-based BAO xi metrics under subsampling.")
@@ -274,6 +287,7 @@ def main(argv: list[str] | None = None) -> int:
     y_ds = np.asarray([float(r["wedge_delta_s"]) for r in rows], dtype=float)
     y_ratio = np.asarray([float(r["wedge_ratio"]) for r in rows], dtype=float)
 
+    # 関数: `_cap_series` の入出力契約と処理意図を定義する。
     def _cap_series(key: str) -> np.ndarray:
         vals = []
         for rr in rows:

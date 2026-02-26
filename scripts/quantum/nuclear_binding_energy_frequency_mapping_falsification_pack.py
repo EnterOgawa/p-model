@@ -6,6 +6,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,6 +22,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
 
 def _percentile(sorted_vals: list[float], p: float) -> float:
     """
@@ -52,6 +55,8 @@ def _percentile(sorted_vals: list[float], p: float) -> float:
     return float((1.0 - w) * sorted_vals[i0] + w * sorted_vals[i1])
 
 
+# 関数: `_stats` の入出力契約と処理意図を定義する。
+
 def _stats(vals: list[float]) -> dict[str, float]:
     # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
@@ -66,6 +71,8 @@ def _stats(vals: list[float]) -> dict[str, float]:
     }
 
 
+# 関数: `_robust_sigma_from_p16_p84` の入出力契約と処理意図を定義する。
+
 def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
     # 条件分岐: `not (math.isfinite(p16) and math.isfinite(p84))` を満たす経路を評価する。
     if not (math.isfinite(p16) and math.isfinite(p84)):
@@ -73,6 +80,8 @@ def _robust_sigma_from_p16_p84(*, p16: float, p84: float) -> float:
 
     return 0.5 * (p84 - p16)
 
+
+# 関数: `_median` の入出力契約と処理意図を定義する。
 
 def _median(vals: list[float]) -> float:
     # 条件分岐: `not vals` を満たす経路を評価する。
@@ -83,12 +92,16 @@ def _median(vals: list[float]) -> float:
     return _percentile(vs, 50)
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, object]:
     try:
         return json.loads(path.read_text(encoding="utf-8"))
     except Exception:
         return {}
 
+
+# 関数: `_load_ratios` の入出力契約と処理意図を定義する。
 
 def _load_ratios(*, csv_path: Path) -> dict[str, list[tuple[int, float]]]:
     """
@@ -129,6 +142,8 @@ def _load_ratios(*, csv_path: Path) -> dict[str, list[tuple[int, float]]]:
 
     return out
 
+
+# 関数: `_load_differential_channels` の入出力契約と処理意図を定義する。
 
 def _load_differential_channels(*, out_dir: Path) -> tuple[dict[str, object], dict[str, object], list[dict[str, object]]]:
     theory_path = out_dir / "nuclear_binding_energy_frequency_mapping_theory_diff_metrics.json"
@@ -174,6 +189,8 @@ def _load_differential_channels(*, out_dir: Path) -> tuple[dict[str, object], di
     return j_theory, j_quant, channels
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(value: object) -> float | None:
     try:
         f = float(value)
@@ -188,6 +205,8 @@ def _safe_float(value: object) -> float | None:
     return f
 
 
+# 関数: `_median_or_none` の入出力契約と処理意図を定義する。
+
 def _median_or_none(vals: list[float]) -> float | None:
     # 条件分岐: `not vals` を満たす経路を評価する。
     if not vals:
@@ -195,6 +214,8 @@ def _median_or_none(vals: list[float]) -> float | None:
 
     return _median(vals)
 
+
+# 関数: `_load_separation_crosscheck` の入出力契約と処理意図を定義する。
 
 def _load_separation_crosscheck(*, out_dir: Path) -> dict[str, object]:
     metrics_path = out_dir / "nuclear_a_dependence_hf_three_body_separation_energies_metrics.json"
@@ -252,6 +273,8 @@ def _load_separation_crosscheck(*, out_dir: Path) -> dict[str, object]:
     }
 
 
+# 関数: `_extract_domain_result` の入出力契約と処理意図を定義する。
+
 def _extract_domain_result(metrics: dict[str, object], *, domain_min_a: int) -> dict[str, object]:
     results = metrics.get("results")
     # 条件分岐: `not isinstance(results, list)` を満たす経路を評価する。
@@ -271,6 +294,8 @@ def _extract_domain_result(metrics: dict[str, object], *, domain_min_a: int) -> 
     return {}
 
 
+# 関数: `_extract_radii_block` の入出力契約と処理意図を定義する。
+
 def _extract_radii_block(domain_result: dict[str, object], *, block_key: str) -> dict[str, object]:
     block = domain_result.get(block_key) if isinstance(domain_result.get(block_key), dict) else {}
     metrics = block.get("metrics") if isinstance(block.get("metrics"), dict) else block
@@ -283,6 +308,8 @@ def _extract_radii_block(domain_result: dict[str, object], *, block_key: str) ->
         "k_p_fm_per_mev": _safe_float(fit.get("k_p_fm_per_MeV")),
     }
 
+
+# 関数: `_load_radii_crosscheck` の入出力契約と処理意図を定義する。
 
 def _load_radii_crosscheck(*, out_dir: Path) -> dict[str, object]:
     metrics_path = out_dir / "nuclear_a_dependence_hf_three_body_radii_kink_delta2r_radius_magic_offset_even_even_center_magic_only_pairing_deformation_minimal_metrics.json"
@@ -312,6 +339,8 @@ def _load_radii_crosscheck(*, out_dir: Path) -> dict[str, object]:
         "note": "Charge-radius kink strict check at shell-closure centers (Step 7.13.15.49, A_min=100).",
     }
 
+
+# 関数: `_load_selected_nuclei_rows` の入出力契約と処理意図を定義する。
 
 def _load_selected_nuclei_rows(*, csv_path: Path, keys: list[tuple[int, int]]) -> list[dict[str, object]]:
     keyset = {(z, a) for z, a in keys}
@@ -343,6 +372,8 @@ def _load_selected_nuclei_rows(*, csv_path: Path, keys: list[tuple[int, int]]) -
 
     return out_sorted
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -377,6 +408,7 @@ def main() -> None:
         "note": "Operational thresholds for this repository (not universal physics thresholds).",
     }
 
+    # 関数: `model_summary` の入出力契約と処理意図を定義する。
     def model_summary(model_id: str, pairs: list[tuple[int, float]]) -> dict[str, object]:
         a = [float(x) for x, _ in pairs]
         log10r = [math.log10(r) for _, r in pairs]

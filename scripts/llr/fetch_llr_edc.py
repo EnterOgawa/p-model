@@ -33,9 +33,12 @@ BASE = "https://edc.dgfi.tum.de"
 ROOT_PATH = "/pub/slr/data/npt_crd_v2"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -46,12 +49,16 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
+
 def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     with urllib.request.urlopen(url, timeout=timeout_s) as r:
         b = r.read()
 
     return b.decode("utf-8", "replace")
 
+
+# 関数: `_iter_hrefs` の入出力契約と処理意図を定義する。
 
 def _iter_hrefs(html: str) -> Iterable[str]:
     # EDC listing uses single quotes in href, but accept both.
@@ -60,6 +67,8 @@ def _iter_hrefs(html: str) -> Iterable[str]:
         if href:
             yield href
 
+
+# 関数: `_list_years` の入出力契約と処理意図を定義する。
 
 def _list_years(target: str) -> list[int]:
     url = f"{BASE}{ROOT_PATH}/{target}/"
@@ -80,6 +89,8 @@ def _list_years(target: str) -> list[int]:
     return sorted(set(years))
 
 
+# 関数: `_list_np2_files` の入出力契約と処理意図を定義する。
+
 def _list_np2_files(target: str, year: int) -> list[str]:
     url = f"{BASE}{ROOT_PATH}/{target}/{year}/"
     html = _fetch_text(url)
@@ -97,16 +108,21 @@ def _list_np2_files(target: str, year: int) -> list[str]:
     return sorted(set(files))
 
 
+# クラス: `Picked` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Picked:
     target: str
     year: int
     filename: str
 
+    # 関数: `url` の入出力契約と処理意図を定義する。
     @property
     def url(self) -> str:
         return f"{BASE}{ROOT_PATH}/{self.target}/{self.year}/{self.filename}"
 
+
+# 関数: `_pick_latest_file` の入出力契約と処理意図を定義する。
 
 def _pick_latest_file(target: str) -> Picked:
     years = _list_years(target)
@@ -161,6 +177,8 @@ def _pick_latest_file(target: str) -> Picked:
     return Picked(target=target, year=year, filename=best)
 
 
+# 関数: `_pick_by_ym_or_date` の入出力契約と処理意図を定義する。
+
 def _pick_by_ym_or_date(*, target: str, digits: str) -> Picked:
     # 条件分岐: `not re.fullmatch(r"\d{6,8}", digits)` を満たす経路を評価する。
     if not re.fullmatch(r"\d{6,8}", digits):
@@ -197,6 +215,8 @@ def _pick_by_ym_or_date(*, target: str, digits: str) -> Picked:
     raise FileNotFoundError(f"No file matched digits={digits} for target={target} year={year}")
 
 
+# 関数: `_download` の入出力契約と処理意図を定義する。
+
 def _download(url: str, dst: Path, *, force: bool) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     # 条件分岐: `dst.exists() and not force` を満たす経路を評価する。
@@ -213,11 +233,15 @@ def _download(url: str, dst: Path, *, force: bool) -> None:
     print(f"[ok] saved: {dst} ({dst.stat().st_size} bytes)")
 
 
+# 関数: `_set_primary` の入出力契約と処理意図を定義する。
+
 def _set_primary(*, src: Path, primary_path: Path) -> None:
     primary_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(src, primary_path)
     print(f"[ok] primary: {primary_path}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

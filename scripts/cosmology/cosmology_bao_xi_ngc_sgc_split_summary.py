@@ -41,6 +41,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -63,6 +64,7 @@ _WIN_ABS_RE = re.compile(r"^[a-zA-Z]:[\\/]")
 _WSL_ABS_RE = re.compile(r"^/mnt/([a-zA-Z])/(.+)$")
 
 
+# 関数: `_resolve_path_like` の入出力契約と処理意図を定義する。
 def _resolve_path_like(p: Any) -> Optional[Path]:
     # 条件分岐: `p is None` を満たす経路を評価する。
     if p is None:
@@ -93,9 +95,13 @@ def _resolve_path_like(p: Any) -> Optional[Path]:
     return path if path.is_absolute() else (_ROOT / path)
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_pick` の入出力契約と処理意図を定義する。
 
 def _pick(d: Dict[str, Any], *keys: str, default: Any = None) -> Any:
     cur: Any = d
@@ -109,6 +115,8 @@ def _pick(d: Dict[str, Any], *keys: str, default: Any = None) -> Any:
     return cur
 
 
+# クラス: `Point` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Point:
     zbin: str
@@ -121,6 +129,8 @@ class Point:
     source_npz: Optional[str]
 
 
+# 関数: `_metrics_path` の入出力契約と処理意図を定義する。
+
 def _metrics_path(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) -> Path:
     suffix = str(suffix)
     # 条件分岐: `suffix and not suffix.startswith("__")` を満たす経路を評価する。
@@ -130,6 +140,8 @@ def _metrics_path(*, sample: str, caps: str, dist: str, zbin: str, suffix: str) 
     name = f"cosmology_bao_xi_from_catalogs_{sample}_{caps}_{dist}_{zbin}{suffix}_metrics.json"
     return _ROOT / "output" / "private" / "cosmology" / name
 
+
+# 関数: `_load_point` の入出力契約と処理意図を定義する。
 
 def _load_point(path: Path, *, zbin: str, caps: str) -> Point:
     d = _load_json(path)
@@ -150,6 +162,8 @@ def _load_point(path: Path, *, zbin: str, caps: str) -> Point:
     )
 
 
+# 関数: `_caps_label` の入出力契約と処理意図を定義する。
+
 def _caps_label(caps: str) -> str:
     caps = str(caps)
     # 条件分岐: `caps == "north"` を満たす経路を評価する。
@@ -163,6 +177,8 @@ def _caps_label(caps: str) -> str:
 
     return caps
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Summarize NGC/SGC split for catalog-based BAO xi multipoles.")

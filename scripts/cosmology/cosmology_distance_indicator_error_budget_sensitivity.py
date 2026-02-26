@@ -52,6 +52,7 @@ from scripts.cosmology import cosmology_distance_indicator_error_budget as base 
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -77,6 +78,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
+
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -86,14 +89,20 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_load_pantheonplus_dat` の入出力契約と処理意図を定義する。
 
 def _load_pantheonplus_dat(path: Path) -> pd.DataFrame:
     df = pd.read_csv(path, sep=r"\s+", engine="python")
@@ -104,6 +113,8 @@ def _load_pantheonplus_dat(path: Path) -> pd.DataFrame:
     return df
 
 
+# 関数: `_as_int_series` の入出力契約と処理意図を定義する。
+
 def _as_int_series(df: pd.DataFrame, col: str) -> pd.Series:
     # 条件分岐: `col not in df.columns` を満たす経路を評価する。
     if col not in df.columns:
@@ -112,6 +123,8 @@ def _as_int_series(df: pd.DataFrame, col: str) -> pd.Series:
     s = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
     return s.astype(int, copy=False)
 
+
+# 関数: `_subset_df_and_cov` の入出力契約と処理意図を定義する。
 
 def _subset_df_and_cov(
     df: pd.DataFrame,
@@ -131,6 +144,8 @@ def _subset_df_and_cov(
     cov_tot2 = cov_tot[np.ix_(idx, idx)].copy() if cov_tot is not None else None
     return (df2, cov_stat2, cov_tot2)
 
+
+# 関数: `_pantheonplus_select_unique_cid_indices` の入出力契約と処理意図を定義する。
 
 def _pantheonplus_select_unique_cid_indices(df: pd.DataFrame, *, prefer_sigma: Optional[np.ndarray]) -> np.ndarray:
     """
@@ -164,6 +179,8 @@ def _pantheonplus_select_unique_cid_indices(df: pd.DataFrame, *, prefer_sigma: O
     return picked
 
 
+# 関数: `_pantheonplus_select_sh0es_hf_indices` の入出力契約と処理意図を定義する。
+
 def _pantheonplus_select_sh0es_hf_indices(df: pd.DataFrame) -> np.ndarray:
     """
     Select rows used in SH0ES 2021 Hubble Flow dataset (USED_IN_SH0ES_HF == 1).
@@ -171,6 +188,8 @@ def _pantheonplus_select_sh0es_hf_indices(df: pd.DataFrame) -> np.ndarray:
     used = _as_int_series(df, "USED_IN_SH0ES_HF").to_numpy(dtype=int, copy=False)
     return np.where(used == 1)[0].astype(int)
 
+
+# 関数: `_load_cov_txt` の入出力契約と処理意図を定義する。
 
 def _load_cov_txt(path: Path) -> np.ndarray:
     """
@@ -195,6 +214,8 @@ def _load_cov_txt(path: Path) -> np.ndarray:
 
     return data.reshape((n, n))
 
+
+# 関数: `_compute_sn_binned_budget_pantheonplus` の入出力契約と処理意図を定義する。
 
 def _compute_sn_binned_budget_pantheonplus(
     df: pd.DataFrame,
@@ -304,6 +325,8 @@ def _compute_sn_binned_budget_pantheonplus(
 
     return out
 
+
+# 関数: `_compute_reach_limits_for_sn_bins` の入出力契約と処理意図を定義する。
 
 def _compute_reach_limits_for_sn_bins(
     *,
@@ -463,6 +486,8 @@ def _compute_reach_limits_for_sn_bins(
     }
 
 
+# 関数: `_plot_sensitivity` の入出力契約と処理意図を定義する。
+
 def _plot_sensitivity(
     *,
     out_png: Path,
@@ -482,6 +507,7 @@ def _plot_sensitivity(
     labels = [str(s.get("label") or s.get("id") or "") for s in scenarios]
     x = np.arange(len(labels), dtype=float)
 
+    # 関数: `_pick_limits` の入出力契約と処理意図を定義する。
     def _pick_limits(s: Dict[str, Any], which: str, m: float) -> Tuple[Optional[float], Optional[float]]:
         lim = (((s.get("reach_limits") or {}).get("opt") or {}).get(which) or {}).get(f"{m}sigma")
         lim_tot = (((s.get("reach_limits_total") or {}).get("opt") or {}).get(which) or {}).get(f"{m}sigma")
@@ -584,6 +610,8 @@ def _plot_sensitivity(
     plt.close(fig)
 
 
+# 関数: `_plot_scan_heatmap` の入出力契約と処理意図を定義する。
+
 def _plot_scan_heatmap(
     *,
     out_png: Path,
@@ -634,6 +662,8 @@ def _plot_scan_heatmap(
     fig.savefig(out_png, dpi=170)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
@@ -888,6 +918,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 for s in scenarios_plot
             ]
 
+            # 関数: `_max_or_none` の入出力契約と処理意図を定義する。
             def _max_or_none(vals: List[Optional[float]]) -> Optional[float]:
                 xs = [float(v) for v in vals if v is not None and math.isfinite(float(v))]
                 return max(xs) if xs else None

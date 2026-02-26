@@ -40,6 +40,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -58,10 +59,14 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_l2` の入出力契約と処理意図を定義する。
+
 def _l2(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=np.float64)
     return 0.5 * (3.0 * mu * mu - 1.0)
 
+
+# 関数: `_ratio_r2_over_r0` の入出力契約と処理意図を定義する。
 
 def _ratio_r2_over_r0(*, counts: np.ndarray, mu_edges: np.ndarray) -> np.ndarray:
     """
@@ -95,11 +100,15 @@ def _ratio_r2_over_r0(*, counts: np.ndarray, mu_edges: np.ndarray) -> np.ndarray
     return np.where(np.isfinite(out), out, np.nan)
 
 
+# クラス: `WindowSeries` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class WindowSeries:
     s: np.ndarray
     r2_over_r0: np.ndarray
 
+
+# 関数: `_load_window_series` の入出力契約と処理意図を定義する。
 
 def _load_window_series(path: Path, *, key: str) -> WindowSeries:
     with np.load(path) as z:
@@ -114,6 +123,8 @@ def _load_window_series(path: Path, *, key: str) -> WindowSeries:
     return WindowSeries(s=s, r2_over_r0=_ratio_r2_over_r0(counts=counts, mu_edges=mu_edges))
 
 
+# 関数: `_safe_max_abs_in_range` の入出力契約と処理意図を定義する。
+
 def _safe_max_abs_in_range(s: np.ndarray, y: np.ndarray, *, s_min: float, s_max: float) -> float:
     s = np.asarray(s, dtype=np.float64)
     y = np.asarray(y, dtype=np.float64)
@@ -124,6 +135,8 @@ def _safe_max_abs_in_range(s: np.ndarray, y: np.ndarray, *, s_min: float, s_max:
 
     return float(np.nanmax(np.abs(y[m])))
 
+
+# 関数: `_path_for` の入出力契約と処理意図を定義する。
 
 def _path_for(
     *,
@@ -140,6 +153,8 @@ def _path_for(
 
     return _ROOT / "output" / "private" / "cosmology" / f"{base}.npz"
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[list[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Compute window anisotropy proxy RR2/RR0 from catalog-based BAO NPZ.")

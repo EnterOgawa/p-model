@@ -19,22 +19,31 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_clean_latex_token` の入出力契約と処理意図を定義する。
 
 def _clean_latex_token(s: str) -> str:
     x = s.strip()
@@ -53,6 +62,7 @@ _RE_VAL = re.compile(
 )
 
 
+# 関数: `_parse_pm_val` の入出力契約と処理意図を定義する。
 def _parse_pm_val(token: str) -> Optional[Dict[str, float]]:
     m = _RE_VAL.search(token)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -75,6 +85,8 @@ def _parse_pm_val(token: str) -> Optional[Dict[str, float]]:
     }
 
 
+# クラス: `ParsedRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ParsedRow:
     method: str
@@ -84,6 +96,8 @@ class ParsedRow:
     analytic_non_kerr: Dict[str, float]
     source_anchor: Dict[str, Any]
 
+
+# 関数: `_find_table_block` の入出力契約と処理意図を定義する。
 
 def _find_table_block(lines: List[str], caption_substring: str) -> Optional[Tuple[int, int]]:
     for i, line in enumerate(lines):
@@ -112,6 +126,8 @@ def _find_table_block(lines: List[str], caption_substring: str) -> Optional[Tupl
     return None
 
 
+# 関数: `_extract_tabular_lines` の入出力契約と処理意図を定義する。
+
 def _extract_tabular_lines(block_lines: List[str]) -> Optional[Tuple[int, int]]:
     a = None
     b = None
@@ -139,6 +155,8 @@ def _extract_tabular_lines(block_lines: List[str]) -> Optional[Tuple[int, int]]:
 
     return (a, b)
 
+
+# 関数: `_iter_rows_with_anchors` の入出力契約と処理意図を定義する。
 
 def _iter_rows_with_anchors(
     lines: List[str], *, start_line_no: int, allow_blank_method: bool
@@ -192,6 +210,8 @@ def _iter_rows_with_anchors(
     return rows
 
 
+# 関数: `_parse_dsh_table` の入出力契約と処理意図を定義する。
+
 def _parse_dsh_table(
     *,
     lines: List[str],
@@ -234,6 +254,8 @@ def _parse_dsh_table(
 
     return rows
 
+
+# 関数: `_parse_delta_table` の入出力契約と処理意図を定義する。
 
 def _parse_delta_table(
     *,
@@ -295,6 +317,8 @@ def _parse_delta_table(
     return rows
 
 
+# 関数: `_envelope` の入出力契約と処理意図を定義する。
+
 def _envelope(rows: List[ParsedRow]) -> Dict[str, Any]:
     mids = []
     lo_edges = []
@@ -318,6 +342,8 @@ def _envelope(rows: List[ParsedRow]) -> Dict[str, Any]:
         "ci68_hi_max": float(max(hi_edges)),
     }
 
+
+# 関数: `_summary` の入出力契約と処理意図を定義する。
 
 def _summary(values: List[float]) -> Dict[str, Any]:
     xs: List[float] = []
@@ -365,6 +391,8 @@ def _summary(values: List[float]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_get_sgra_ring_diameter_uas` の入出力契約と処理意図を定義する。
+
 def _get_sgra_ring_diameter_uas(shadow_compare: Dict[str, Any]) -> Optional[float]:
     for r in shadow_compare.get("rows", []):
         # 条件分岐: `isinstance(r, dict) and r.get("key") == "sgra"` を満たす経路を評価する。
@@ -377,6 +405,8 @@ def _get_sgra_ring_diameter_uas(shadow_compare: Dict[str, Any]) -> Optional[floa
 
     return None
 
+
+# 関数: `_kappa_from_dsh` の入出力契約と処理意図を定義する。
 
 def _kappa_from_dsh(*, ring_uas: float, dsh: Dict[str, float]) -> Dict[str, float]:
     mid = ring_uas / float(dsh["mid"])
@@ -395,6 +425,8 @@ def _kappa_from_dsh(*, ring_uas: float, dsh: Dict[str, float]) -> Dict[str, floa
         "rel_sigma_avg": float(sigma / mid) if mid != 0 else float("nan"),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

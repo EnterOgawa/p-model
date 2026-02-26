@@ -10,9 +10,12 @@ from typing import Any
 import matplotlib.pyplot as plt
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -28,9 +31,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_ioffe_elastic_constants` の入出力契約と処理意図を定義する。
 
 def _load_ioffe_elastic_constants(root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
@@ -45,10 +52,14 @@ def _load_ioffe_elastic_constants(root: Path) -> dict[str, Any]:
     return {"path": src, "sha256": _sha256(src), "data": obj}
 
 
+# 関数: `_bulk_modulus_GPa_from_1e11_dyn_cm2` の入出力契約と処理意図を定義する。
+
 def _bulk_modulus_GPa_from_1e11_dyn_cm2(x: float) -> float:
     # 1 dyn/cm^2 = 0.1 Pa => 1e11 dyn/cm^2 = 1e10 Pa = 10 GPa.
     return 10.0 * float(x)
 
+
+# 関数: `_cij_linear` の入出力契約と処理意図を定義する。
 
 def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_max: float) -> float:
     t = float(t_k)
@@ -63,6 +74,8 @@ def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_m
 
     return float(intercept) + float(slope) * t
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = _repo_root()
@@ -103,6 +116,7 @@ def main() -> None:
     c12_a = float(c12.get("intercept_1e11_dyn_cm2"))
     c12_b = float(c12.get("slope_1e11_dyn_cm2_per_K"))
 
+    # 関数: `b_lin_1e11` の入出力契約と処理意図を定義する。
     def b_lin_1e11(t_k: float) -> float:
         c11_t = _cij_linear(t_k=float(t_k), intercept=c11_a, slope=c11_b, t_min=t_lin_min, t_max=t_lin_max)
         c12_t = _cij_linear(t_k=float(t_k), intercept=c12_a, slope=c12_b, t_min=t_lin_min, t_max=t_lin_max)

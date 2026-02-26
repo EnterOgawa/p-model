@@ -50,14 +50,19 @@ _BLOCK = 2880
 _C_KMS = 299_792.458
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(path: Optional[Path]) -> Optional[str]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -69,6 +74,8 @@ def _relpath(path: Optional[Path]) -> Optional[str]:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -87,6 +94,8 @@ def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
 
     return rows
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: object) -> Optional[float]:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -111,6 +120,8 @@ def _maybe_float(x: object) -> Optional[float]:
 
     return v if math.isfinite(v) else None
 
+
+# 関数: `_maybe_bool` の入出力契約と処理意図を定義する。
 
 def _maybe_bool(x: object) -> Optional[bool]:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -140,6 +151,8 @@ def _maybe_bool(x: object) -> Optional[bool]:
     return None
 
 
+# 関数: `_combine_in_quadrature` の入出力契約と処理意図を定義する。
+
 def _combine_in_quadrature(a: Optional[float], b: Optional[float]) -> Optional[float]:
     # 条件分岐: `a is None and b is None` を満たす経路を評価する。
     if a is None and b is None:
@@ -157,6 +170,8 @@ def _combine_in_quadrature(a: Optional[float], b: Optional[float]) -> Optional[f
 
     return math.sqrt(float(a) ** 2 + float(b) ** 2)
 
+
+# 関数: `_load_event_level_qc_summary_by_obsid` の入出力契約と処理意図を定義する。
 
 def _load_event_level_qc_summary_by_obsid(out_dir: Path) -> Dict[str, Dict[str, Any]]:
     """
@@ -185,10 +200,14 @@ def _load_event_level_qc_summary_by_obsid(out_dir: Path) -> Dict[str, Dict[str, 
     return out
 
 
+# 関数: `_iter_cards_from_header_bytes` の入出力契約と処理意図を定義する。
+
 def _iter_cards_from_header_bytes(header_bytes: bytes) -> Iterable[str]:
     for i in range(0, len(header_bytes), _CARD):
         yield header_bytes[i : i + _CARD].decode("ascii", errors="ignore")
 
+
+# 関数: `_read_exact` の入出力契約と処理意図を定義する。
 
 def _read_exact(f, n: int) -> bytes:
     b = f.read(n)
@@ -198,6 +217,8 @@ def _read_exact(f, n: int) -> bytes:
 
     return b
 
+
+# 関数: `_read_header_blocks` の入出力契約と処理意図を定義する。
 
 def _read_header_blocks(f) -> bytes:
     chunks: List[bytes] = []
@@ -213,6 +234,8 @@ def _read_header_blocks(f) -> bytes:
             if card.startswith("END"):
                 return b"".join(chunks)
 
+
+# 関数: `_parse_header_kv` の入出力契約と処理意図を定義する。
 
 def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     kv: Dict[str, str] = {}
@@ -232,6 +255,7 @@ def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
 _TFORM_RE = re.compile(r"^\s*(?P<rep>\d*)(?P<code>[A-Z])\s*$")
 
 
+# 関数: `_tform_to_numpy_dtype` の入出力契約と処理意図を定義する。
 def _tform_to_numpy_dtype(tform: str) -> Tuple[np.dtype, int, int]:
     m = _TFORM_RE.match(tform)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -287,6 +311,8 @@ def _tform_to_numpy_dtype(tform: str) -> Tuple[np.dtype, int, int]:
     raise ValueError(f"unsupported TFORM code: {code!r} (tform={tform!r})")
 
 
+# 関数: `_skip_hdu_data` の入出力契約と処理意図を定義する。
+
 def _skip_hdu_data(f, header_kv: Dict[str, str]) -> None:
     naxis = int(header_kv.get("NAXIS", "0") or "0")
     # 条件分岐: `naxis <= 0` を満たす経路を評価する。
@@ -303,6 +329,8 @@ def _skip_hdu_data(f, header_kv: Dict[str, str]) -> None:
     if pad > 0:
         f.seek(pad, 1)
 
+
+# 関数: `_read_ebounds_table` の入出力契約と処理意図を定義する。
 
 def _read_ebounds_table(rmf_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -418,6 +446,8 @@ def _read_ebounds_table(rmf_path: Path) -> Tuple[np.ndarray, np.ndarray]:
             _skip_hdu_data(f, kv)
 
 
+# 関数: `_load_pi_spectrum` の入出力契約と処理意図を定義する。
+
 def _load_pi_spectrum(pi_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     opener = gzip.open if pi_path.name.endswith(".gz") else Path.open
     with opener(pi_path, "rb") as f:  # type: ignore[arg-type]
@@ -432,6 +462,8 @@ def _load_pi_spectrum(pi_path: Path) -> Tuple[np.ndarray, np.ndarray]:
         cols = read_bintable_columns(f, layout=layout, columns=[ch_key, cnt_key])
         return np.asarray(cols[ch_key], dtype=int), np.asarray(cols[cnt_key], dtype=float)
 
+
+# 関数: `_find_local_obs_root` の入出力契約と処理意図を定義する。
 
 def _find_local_obs_root(data_root: Path, obsid: str) -> Tuple[Optional[str], Optional[Path]]:
     direct = data_root / obsid
@@ -450,12 +482,15 @@ def _find_local_obs_root(data_root: Path, obsid: str) -> Tuple[Optional[str], Op
 _PX_RE = re.compile(r"px(?P<px>\d+)", flags=re.IGNORECASE)
 
 
+# 関数: `_px_score` の入出力契約と処理意図を定義する。
 def _px_score(name: str) -> Tuple[int, int, str]:
     m = _PX_RE.search(name)
     px = int(m.group("px")) if m else 10**9
     pref = {1000: 0, 0: 1, 5000: 2}.get(px, 9)
     return pref, px, name
 
+
+# 関数: `_choose_pi_rmf_pair` の入出力契約と処理意図を定義する。
 
 def _choose_pi_rmf_pair(products_dir: Path) -> Tuple[Path, Path]:
     pis = sorted(products_dir.glob("*_src.pi*"))
@@ -484,6 +519,8 @@ def _choose_pi_rmf_pair(products_dir: Path) -> Tuple[Path, Path]:
     pairs.sort(key=lambda x: x[0])
     return pairs[0][1], pairs[0][2]
 
+
+# 関数: `_rebin_min_counts` の入出力契約と処理意図を定義する。
 
 def _rebin_min_counts(energy: np.ndarray, counts: np.ndarray, *, min_counts: float) -> Tuple[np.ndarray, np.ndarray]:
     # 条件分岐: `min_counts <= 0` を満たす経路を評価する。
@@ -517,6 +554,8 @@ def _rebin_min_counts(energy: np.ndarray, counts: np.ndarray, *, min_counts: flo
     return np.asarray(out_e, dtype=float), np.asarray(out_c, dtype=float)
 
 
+# 関数: `_model_counts_const_em_gauss` の入出力契約と処理意図を定義する。
+
 def _model_counts_const_em_gauss(E: np.ndarray, c0: float, amp: float, centroid: float, sigma: float) -> np.ndarray:
     """
     counts(E) = c0 + amp * exp(-(E-centroid)^2/(2*sigma^2)).
@@ -526,6 +565,8 @@ def _model_counts_const_em_gauss(E: np.ndarray, c0: float, amp: float, centroid:
     prof = np.exp(-0.5 * np.square((E - float(centroid)) / max(float(sigma), 1e-6)))
     return float(c0) + float(amp) * prof
 
+
+# 関数: `_fit_emission_line` の入出力契約と処理意図を定義する。
 
 def _fit_emission_line(
     energy_keV: np.ndarray,
@@ -618,6 +659,8 @@ def _fit_emission_line(
     }
 
 
+# 関数: `_z_from_centroid` の入出力契約と処理意図を定義する。
+
 def _z_from_centroid(*, E_rest_keV: float, centroid_keV: float) -> Optional[float]:
     # 条件分岐: `not np.isfinite(E_rest_keV) or E_rest_keV <= 0` を満たす経路を評価する。
     if not np.isfinite(E_rest_keV) or E_rest_keV <= 0:
@@ -630,6 +673,8 @@ def _z_from_centroid(*, E_rest_keV: float, centroid_keV: float) -> Optional[floa
 
     return float(E_rest_keV / centroid_keV - 1.0)
 
+
+# 関数: `_z_err_from_centroid_err` の入出力契約と処理意図を定義する。
 
 def _z_err_from_centroid_err(*, E_rest_keV: float, centroid_keV: float, centroid_err_keV: float) -> Optional[float]:
     # 条件分岐: `not np.isfinite(centroid_err_keV) or centroid_err_keV <= 0` を満たす経路を評価する。
@@ -650,6 +695,8 @@ def _z_err_from_centroid_err(*, E_rest_keV: float, centroid_keV: float, centroid
     return abs(dz_dc) * float(centroid_err_keV)
 
 
+# 関数: `_sigma_instr_keV_from_fwhm_ev` の入出力契約と処理意図を定義する。
+
 def _sigma_instr_keV_from_fwhm_ev(fwhm_ev: float) -> float:
     fwhm_ev = float(fwhm_ev)
     # 条件分岐: `not np.isfinite(fwhm_ev) or fwhm_ev <= 0` を満たす経路を評価する。
@@ -658,6 +705,8 @@ def _sigma_instr_keV_from_fwhm_ev(fwhm_ev: float) -> float:
 
     return (fwhm_ev / 2.355) / 1000.0
 
+
+# 関数: `_sigma_v_kms_from_sigma_E` の入出力契約と処理意図を定義する。
 
 def _sigma_v_kms_from_sigma_E(*, centroid_keV: float, sigma_E_keV: float) -> Optional[float]:
     # 条件分岐: `not np.isfinite(centroid_keV) or centroid_keV <= 0` を満たす経路を評価する。
@@ -672,14 +721,20 @@ def _sigma_v_kms_from_sigma_E(*, centroid_keV: float, sigma_E_keV: float) -> Opt
     return _C_KMS * float(sigma_E_keV) / float(centroid_keV)
 
 
+# 関数: `_window_sweep` の入出力契約と処理意図を定義する。
+
 def _window_sweep(base: Tuple[float, float]) -> List[Tuple[float, float]]:
     lo, hi = float(base[0]), float(base[1])
     return [(max(0.1, lo - 0.2), hi + 0.2), (lo, hi), (lo + 0.2, hi - 0.2)]
 
 
+# 関数: `_gain_sweep` の入出力契約と処理意図を定義する。
+
 def _gain_sweep() -> List[float]:
     return [-1e-3, 0.0, +1e-3]
 
+
+# クラス: `LineSpec` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class LineSpec:
@@ -695,6 +750,7 @@ _LINES: List[LineSpec] = [
 ]
 
 
+# 関数: `_plot_fit` の入出力契約と処理意図を定義する。
 def _plot_fit(out_png: Path, *, energy: np.ndarray, counts: np.ndarray, model: np.ndarray, title: str) -> Optional[str]:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -718,6 +774,8 @@ def _plot_fit(out_png: Path, *, energy: np.ndarray, counts: np.ndarray, model: n
     except Exception as e:
         return str(e)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

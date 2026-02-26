@@ -46,6 +46,7 @@ from scripts.summary import worklog  # noqa: E402
 _C_OVER_100_MPC_OVER_H = 2997.92458  # (km/s) / (100 km/s/Mpc) in Mpc/h
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -71,6 +72,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# クラス: `_AlphaPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class _AlphaPoint:
     z_eff: float
@@ -78,9 +81,13 @@ class _AlphaPoint:
     alpha_sigma: float
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_sigma_from_ci` の入出力契約と処理意図を定義する。
 
 def _sigma_from_ci(ci: Any) -> float:
     try:
@@ -93,6 +100,8 @@ def _sigma_from_ci(ci: Any) -> float:
 
     return float("nan")
 
+
+# 関数: `_extract_dv_over_rd_from_y1data_row` の入出力契約と処理意図を定義する。
 
 def _extract_dv_over_rd_from_y1data_row(r: Dict[str, Any]) -> tuple[float, float, float]:
     dv = r.get("dv_over_rd")
@@ -108,6 +117,8 @@ def _extract_dv_over_rd_from_y1data_row(r: Dict[str, Any]) -> tuple[float, float
 
     return float(r["z_eff"]), float(mu), float(sig)
 
+
+# 関数: `_dv_over_rd_fid_lcdm` の入出力契約と処理意図を定義する。
 
 def _dv_over_rd_fid_lcdm(z_eff: float, *, omega_m: float, n_grid: int, rd_mpc_over_h: float) -> float:
     z = float(z_eff)
@@ -141,6 +152,8 @@ def _dv_over_rd_fid_lcdm(z_eff: float, *, omega_m: float, n_grid: int, rd_mpc_ov
     return float(dv / float(rd_mpc_over_h))
 
 
+# 関数: `_dv_over_rd_fid_pbg` の入出力契約と処理意図を定義する。
+
 def _dv_over_rd_fid_pbg(z_eff: float, *, rd_mpc_over_h: float) -> float:
     z = float(z_eff)
     # 条件分岐: `not (z > 0.0 and math.isfinite(z))` を満たす経路を評価する。
@@ -154,6 +167,8 @@ def _dv_over_rd_fid_pbg(z_eff: float, *, rd_mpc_over_h: float) -> float:
     dv = float((z * dm * dm * dh) ** (1.0 / 3.0))
     return float(dv / float(rd_mpc_over_h))
 
+
+# 関数: `_extract_peakfit_alpha` の入出力契約と処理意図を定義する。
 
 def _extract_peakfit_alpha(
     points: List[Dict[str, Any]],
@@ -204,6 +219,8 @@ def _extract_peakfit_alpha(
     sig = _sigma_from_ci(ci) if ci is not None else float("nan")
     return _AlphaPoint(z_eff=float(best.get("z_eff")), alpha_mean=alpha, alpha_sigma=sig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: List[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="DESI DR1 DV-only: alpha cross-check vs Y1data DV/rd.")

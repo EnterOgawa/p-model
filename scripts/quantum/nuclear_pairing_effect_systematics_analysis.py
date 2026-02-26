@@ -10,6 +10,7 @@ from statistics import median
 from typing import Any
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -26,6 +27,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -34,6 +37,8 @@ def _rms(values: list[float]) -> float:
     return math.sqrt(sum(v * v for v in values) / float(len(values)))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -41,6 +46,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(values))
 
+
+# 関数: `_solve_2x2` の入出力契約と処理意図を定義する。
 
 def _solve_2x2(
     *,
@@ -63,6 +70,8 @@ def _solve_2x2(
     return float(k_n), float(k_p)
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -76,6 +85,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow([row.get(h) for h in headers])
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]
@@ -213,6 +224,8 @@ def main() -> None:
         row["resid_after_MeV"] = resid_after
         row["abs_resid_before_MeV"] = abs(float(row["resid_before_MeV"]))
         row["abs_resid_after_MeV"] = abs(resid_after)
+
+    # 関数: `summarize_group` の入出力契約と処理意図を定義する。
 
     def summarize_group(rows_in: list[dict[str, Any]], key_name: str, key_val: str) -> dict[str, Any]:
         rb = [float(r["resid_before_MeV"]) for r in rows_in if math.isfinite(float(r["resid_before_MeV"]))]

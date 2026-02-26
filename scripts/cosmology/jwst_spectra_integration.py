@@ -30,9 +30,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     try:
@@ -43,10 +46,14 @@ def _read_json(path: Path) -> Dict[str, Any]:
     return obj if isinstance(obj, dict) else {}
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -54,6 +61,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.as_posix()
 
+
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
 
 def _maybe_float(x: object) -> Optional[float]:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -78,6 +87,8 @@ def _maybe_float(x: object) -> Optional[float]:
 
     return v if math.isfinite(v) else None
 
+
+# 関数: `build_metrics` の入出力契約と処理意図を定義する。
 
 def build_metrics(root: Path) -> Dict[str, Any]:
     manifest_all = root / "data" / "cosmology" / "mast" / "jwst_spectra" / "manifest_all.json"
@@ -220,6 +231,8 @@ def build_metrics(root: Path) -> Dict[str, Any]:
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Integrate JWST/MAST x1d pipeline outputs and freeze Table 1 policy.")

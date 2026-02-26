@@ -51,6 +51,7 @@ from scripts.summary import worklog  # noqa: E402
 _C_KM_S = 299_792.458
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -76,14 +77,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -103,6 +110,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# クラス: `Constraint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class Constraint:
     id: str
@@ -116,6 +125,7 @@ class Constraint:
     sigma_note: str
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "Constraint":
         return Constraint(
@@ -132,6 +142,8 @@ class Constraint:
         )
 
 
+# 関数: `_f_ap_obs` の入出力契約と処理意図を定義する。
+
 def _f_ap_obs(
     *,
     DM_mpc: float,
@@ -147,12 +159,16 @@ def _f_ap_obs(
     return float(f), float(math.sqrt(var)) if var > 0 else float("nan")
 
 
+# 関数: `_f_ap_pbg_exponential` の入出力契約と処理意図を定義する。
+
 def _f_ap_pbg_exponential(z: np.ndarray) -> np.ndarray:
     z = np.asarray(z, dtype=float)
     one_p = 1.0 + z
     # F_AP = (1+z) ln(1+z)
     return one_p * np.log(one_p)
 
+
+# 関数: `_f_ap_lcdm_flat` の入出力契約と処理意図を定義する。
 
 def _f_ap_lcdm_flat(
     z: np.ndarray,
@@ -188,6 +204,8 @@ def _f_ap_lcdm_flat(
     Hz = h0_km_s_mpc * Ez
     return (Dm_z * Hz) / _C_KM_S
 
+
+# 関数: `compute` の入出力契約と処理意図を定義する。
 
 def compute(
     rows: Sequence[Constraint],
@@ -234,6 +252,8 @@ def compute(
 
     return out
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     rows: Sequence[Dict[str, Any]],
@@ -317,6 +337,8 @@ def _plot(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: Alcock–Paczynski (F_AP) constraints vs static background-P.")

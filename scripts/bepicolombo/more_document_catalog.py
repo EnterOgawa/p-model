@@ -33,9 +33,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now_iso` の入出力契約と処理意図を定義する。
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_as_int` の入出力契約と処理意図を定義する。
 
 def _as_int(x: str) -> Optional[int]:
     try:
@@ -44,11 +47,14 @@ def _as_int(x: str) -> Optional[int]:
         return None
 
 
+# 関数: `_parse_lblx` の入出力契約と処理意図を定義する。
+
 def _parse_lblx(lblx_path: Path) -> Dict[str, Any]:
     ns = {"p": "http://pds.nasa.gov/pds4/pds/v1"}
     tree = ET.parse(lblx_path)
     root = tree.getroot()
 
+    # 関数: `t` の入出力契約と処理意図を定義する。
     def t(path: str, default: str = "") -> str:
         v = root.findtext(path, default=default, namespaces=ns)
         return str(v).strip()
@@ -87,6 +93,8 @@ def _parse_lblx(lblx_path: Path) -> Dict[str, Any]:
         "pdf_path": str(pdf_path.resolve()) if (pdf_path and pdf_path.exists()) else None,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Index PSA bc_mpo_more document/*.lblx into JSON/CSV (offline)")

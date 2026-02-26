@@ -35,9 +35,13 @@ except Exception:  # pragma: no cover
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -46,14 +50,20 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> str:
     h = hashlib.sha256()
@@ -64,6 +74,8 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_artifact_record` の入出力契約と処理意図を定義する。
+
 def _artifact_record(path: Path) -> Dict[str, Any]:
     return {
         "path": _rel(path),
@@ -71,6 +83,8 @@ def _artifact_record(path: Path) -> Dict[str, Any]:
         "bytes": int(path.stat().st_size) if path.exists() else None,
     }
 
+
+# 関数: `_copy_file` の入出力契約と処理意図を定義する。
 
 def _copy_file(src: Path, dst: Path, *, overwrite: bool) -> None:
     # 条件分岐: `not src.exists()` を満たす経路を評価する。
@@ -84,6 +98,8 @@ def _copy_file(src: Path, dst: Path, *, overwrite: bool) -> None:
 
     shutil.copy2(src, dst)
 
+
+# 関数: `_rewrite_paths` の入出力契約と処理意図を定義する。
 
 def _rewrite_paths(obj: Any) -> Any:
     """
@@ -112,6 +128,7 @@ def _rewrite_paths(obj: Any) -> Any:
         ("output/gps/", "output/public/gps/"),
     )
 
+    # 関数: `_rw_str` の入出力契約と処理意図を定義する。
     def _rw_str(s: str) -> str:
         # 条件分岐: `"output/public/" in s` を満たす経路を評価する。
         if "output/public/" in s:
@@ -145,6 +162,8 @@ def _rewrite_paths(obj: Any) -> Any:
 
     return obj
 
+
+# 関数: `_sanitize_test_matrix` の入出力契約と処理意図を定義する。
 
 def _sanitize_test_matrix(matrix: Dict[str, Any]) -> Dict[str, Any]:
     """
@@ -189,6 +208,7 @@ def _sanitize_test_matrix(matrix: Dict[str, Any]) -> Dict[str, Any]:
 
         tid = t.get("id")
 
+        # 関数: `_filter_items` の入出力契約と処理意図を定義する。
         def _filter_items(items: Any) -> List[Dict[str, Any]]:
             out: List[Dict[str, Any]] = []
             # 条件分岐: `not isinstance(items, list)` を満たす経路を評価する。
@@ -260,6 +280,8 @@ def _sanitize_test_matrix(matrix: Dict[str, Any]) -> Dict[str, Any]:
     return _rewrite_paths(m)
 
 
+# 関数: `_copy_topic` の入出力契約と処理意図を定義する。
+
 def _copy_topic(
     *,
     topic: str,
@@ -277,6 +299,8 @@ def _copy_topic(
 
     return copied
 
+
+# 関数: `run` の入出力契約と処理意図を定義する。
 
 def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
     warnings: List[str] = []
@@ -478,6 +502,8 @@ def run(*, overwrite: bool) -> Tuple[Path, List[str]]:
 
     return pack_path, warnings
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Promote weak-field artifacts into output/public and build an integrated pack.")

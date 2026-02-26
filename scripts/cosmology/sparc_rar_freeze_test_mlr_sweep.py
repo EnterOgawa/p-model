@@ -53,9 +53,12 @@ KPC_TO_M = 3.0856775814913673e19
 KM_TO_M = 1.0e3
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -64,10 +67,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_parse_grid` の入出力契約と処理意図を定義する。
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step...` を満たす経路を評価する。
@@ -85,13 +92,19 @@ def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     return [float(x) for x in vv.tolist()]
 
 
+# 関数: `_unique_sorted` の入出力契約と処理意図を定義する。
+
 def _unique_sorted(values: Sequence[float]) -> List[float]:
     return sorted({float(x) for x in values if np.isfinite(x)})
 
 
+# 関数: `_splits` の入出力契約と処理意図を定義する。
+
 def _splits(seeds: Sequence[int], train_fracs: Sequence[float]) -> List[Tuple[int, float]]:
     return [(int(s), float(f)) for s in seeds for f in train_fracs]
 
+
+# クラス: `_RawRow` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _RawRow:
@@ -103,6 +116,8 @@ class _RawRow:
     g_obs_m_s2: float
     g_obs_sigma_m_s2: float
 
+
+# 関数: `_read_raw_rows` の入出力契約と処理意図を定義する。
 
 def _read_raw_rows(rar_csv: Path) -> List[_RawRow]:
     rows: List[_RawRow] = []
@@ -144,6 +159,8 @@ def _read_raw_rows(rar_csv: Path) -> List[_RawRow]:
     return rows
 
 
+# 関数: `_points_for_upsilon` の入出力契約と処理意図を定義する。
+
 def _points_for_upsilon(rows: Sequence[_RawRow], *, upsilon_disk: float, upsilon_bulge: float) -> List[Point]:
     sd = float(max(float(upsilon_disk), 0.0))
     sb = float(max(float(upsilon_bulge), 0.0))
@@ -176,6 +193,8 @@ def _points_for_upsilon(rows: Sequence[_RawRow], *, upsilon_disk: float, upsilon
 
     return pts
 
+
+# 関数: `_plot_heatmap` の入出力契約と処理意図を定義する。
 
 def _plot_heatmap(
     *,
@@ -241,6 +260,8 @@ def _plot_heatmap(
     fig.savefig(out_png, dpi=160)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()
@@ -411,6 +432,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if cand_env.get("status") == "ok":
         robust_adopted = bool(float(cand_env.get("min")) >= 0.95)
 
+    # 関数: `_grid_pass_rate` の入出力契約と処理意図を定義する。
+
     def _grid_pass_rate(model: str) -> Dict[Tuple[float, float], float]:
         grid: Dict[Tuple[float, float], float] = {}
         for v in variants:
@@ -432,6 +455,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 grid[(float(ud), float(ub))] = float(pr)
 
         return grid
+
+    # 関数: `_marginal_by_disk` の入出力契約と処理意図を定義する。
 
     def _marginal_by_disk(*, grid: Dict[Tuple[float, float], float]) -> List[Dict[str, Any]]:
         rows: List[Dict[str, Any]] = []
@@ -461,6 +486,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             )
 
         return rows
+
+    # 関数: `_marginal_by_bulge` の入出力契約と処理意図を定義する。
 
     def _marginal_by_bulge(*, grid: Dict[Tuple[float, float], float]) -> List[Dict[str, Any]]:
         rows: List[Dict[str, Any]] = []

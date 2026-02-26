@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -19,6 +20,7 @@ def _repo_root() -> Path:
 _ROOT = _repo_root()
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -33,9 +35,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_ioffe_elastic_constants` の入出力契約と処理意図を定義する。
 
 def _load_ioffe_elastic_constants(root: Path) -> dict[str, Any]:
     src = root / "data" / "quantum" / "sources" / "ioffe_silicon_mechanical_properties" / "extracted_values.json"
@@ -50,10 +56,14 @@ def _load_ioffe_elastic_constants(root: Path) -> dict[str, Any]:
     return {"path": src, "sha256": _sha256(src), "data": obj}
 
 
+# 関数: `_bulk_modulus_GPa_from_1e11_dyn_cm2` の入出力契約と処理意図を定義する。
+
 def _bulk_modulus_GPa_from_1e11_dyn_cm2(x: float) -> float:
     # 1 dyn/cm^2 = 0.1 Pa => 1e11 dyn/cm^2 = 1e10 Pa = 10 GPa.
     return 10.0 * float(x)
 
+
+# 関数: `_cij_linear` の入出力契約と処理意図を定義する。
 
 def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_max: float) -> float:
     t = float(t_k)
@@ -69,10 +79,14 @@ def _cij_linear(*, t_k: float, intercept: float, slope: float, t_min: float, t_m
     return float(intercept) + float(slope) * t
 
 
+# 関数: `_sigma_b_proxy_gpa` の入出力契約と処理意図を定義する。
+
 def _sigma_b_proxy_gpa(b_gpa: float) -> float:
     # Ioffe page does not provide a strict uncertainty; use a conservative operational proxy.
     return float(max(0.005 * float(b_gpa), 0.5))
 
+
+# 関数: `_metrics_for_idx` の入出力契約と処理意図を定義する。
 
 def _metrics_for_idx(
     *,
@@ -110,6 +124,8 @@ def _metrics_for_idx(
     }
 
 
+# 関数: `_fit_const` の入出力契約と処理意図を定義する。
+
 def _fit_const(*, y: np.ndarray, sigma: np.ndarray, idx: np.ndarray) -> float:
     ii = np.asarray(idx, dtype=np.int64).reshape(-1)
     yy = np.asarray(y, dtype=float).reshape(-1)[ii]
@@ -117,6 +133,8 @@ def _fit_const(*, y: np.ndarray, sigma: np.ndarray, idx: np.ndarray) -> float:
     w = 1.0 / np.maximum(1e-30, ss * ss)
     return float(np.sum(w * yy) / np.sum(w))
 
+
+# 関数: `_fit_linear` の入出力契約と処理意図を定義する。
 
 def _fit_linear(*, x: np.ndarray, y: np.ndarray, sigma: np.ndarray, idx: np.ndarray) -> tuple[float, float]:
     ii = np.asarray(idx, dtype=np.int64).reshape(-1)
@@ -140,10 +158,14 @@ def _fit_linear(*, x: np.ndarray, y: np.ndarray, sigma: np.ndarray, idx: np.ndar
     return a, slope
 
 
+# 関数: `_idx_in_range` の入出力契約と処理意図を定義する。
+
 def _idx_in_range(temps_k: np.ndarray, *, t0: float, t1: float) -> np.ndarray:
     t = np.asarray(temps_k, dtype=float).reshape(-1)
     return np.where((t >= float(t0)) & (t <= float(t1)))[0].astype(np.int64)
 
+
+# 関数: `_ref_curve_from_ioffe` の入出力契約と処理意図を定義する。
 
 def _ref_curve_from_ioffe(*, t_k: np.ndarray, obj: dict[str, Any]) -> np.ndarray:
     vals = obj.get("values", {})
@@ -177,6 +199,7 @@ def _ref_curve_from_ioffe(*, t_k: np.ndarray, obj: dict[str, Any]) -> np.ndarray
     c12_a = float(c12.get("intercept_1e11_dyn_cm2"))
     c12_b = float(c12.get("slope_1e11_dyn_cm2_per_K"))
 
+    # 関数: `b_lin_1e11` の入出力契約と処理意図を定義する。
     def b_lin_1e11(tk: float) -> float:
         c11_t = _cij_linear(t_k=float(tk), intercept=c11_a, slope=c11_b, t_min=t_lin_min, t_max=t_lin_max)
         c12_t = _cij_linear(t_k=float(tk), intercept=c12_a, slope=c12_b, t_min=t_lin_min, t_max=t_lin_max)
@@ -199,6 +222,8 @@ def _ref_curve_from_ioffe(*, t_k: np.ndarray, obj: dict[str, Any]) -> np.ndarray
 
     return np.asarray(out, dtype=float)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     out_dir = _ROOT / "output" / "public" / "quantum"

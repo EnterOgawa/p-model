@@ -8,11 +8,14 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 
+# クラス: `FileSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class FileSpec:
     url: str
     relpath: str
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -27,6 +30,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -47,6 +52,8 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_rank_reference` の入出力契約と処理意図を定義する。
+
 def _rank_reference(ref: str) -> int:
     # Prefer the 2016 evaluation over the 2001 one when both are present.
     order = {
@@ -55,6 +62,8 @@ def _rank_reference(ref: str) -> int:
     }
     return int(order.get(str(ref), 0))
 
+
+# 関数: `_rank_entry_type` の入出力契約と処理意図を定義する。
 
 def _rank_entry_type(entry_type: str) -> int:
     # Prefer model-independent when duplicates exist.
@@ -65,6 +74,8 @@ def _rank_entry_type(entry_type: str) -> int:
     }
     return int(order.get(str(entry_type), 0))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(
@@ -367,6 +378,7 @@ def main() -> None:
         "files": [],
     }
 
+    # 関数: `add_file` の入出力契約と処理意図を定義する。
     def add_file(*, url: str | None, path: Path, extra: dict[str, object] | None = None) -> None:
         item: dict[str, object] = {"url": url, "path": str(path), "bytes": int(path.stat().st_size), "sha256": _sha256(path)}
         # 条件分岐: `extra` を満たす経路を評価する。

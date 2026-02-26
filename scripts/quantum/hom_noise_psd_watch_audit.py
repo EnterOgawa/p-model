@@ -22,14 +22,19 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: float, digits: int = 6) -> str:
     # 条件分岐: `x == 0.0` を満たす経路を評価する。
@@ -43,6 +48,8 @@ def _fmt_float(x: float, digits: int = 6) -> str:
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -68,6 +75,8 @@ def _set_japanese_font() -> None:
     except Exception:
         return
 
+
+# 関数: `_read_psd_from_zip` の入出力契約と処理意図を定義する。
 
 def _read_psd_from_zip(zip_path: Path, csv_name: str) -> Tuple[np.ndarray, np.ndarray]:
     freq: List[float] = []
@@ -95,6 +104,8 @@ def _read_psd_from_zip(zip_path: Path, csv_name: str) -> Tuple[np.ndarray, np.nd
     return np.asarray(freq, dtype=float), np.asarray(psd, dtype=float)
 
 
+# 関数: `_interp_log_psd` の入出力契約と処理意図を定義する。
+
 def _interp_log_psd(freq_hz: np.ndarray, psd: np.ndarray, target_hz: float) -> Optional[float]:
     mask = (freq_hz > 0) & (psd > 0)
     # 条件分岐: `np.count_nonzero(mask) < 3 or target_hz <= 0` を満たす経路を評価する。
@@ -112,6 +123,8 @@ def _interp_log_psd(freq_hz: np.ndarray, psd: np.ndarray, target_hz: float) -> O
     return val
 
 
+# 関数: `_fit_loglog_trend` の入出力契約と処理意図を定義する。
+
 def _fit_loglog_trend(freq_hz: np.ndarray, psd: np.ndarray, fmin: float, fmax: float) -> Optional[Tuple[float, float]]:
     mask = (freq_hz >= fmin) & (freq_hz <= fmax) & (freq_hz > 0) & (psd > 0)
     # 条件分岐: `np.count_nonzero(mask) < 10` を満たす経路を評価する。
@@ -128,6 +141,8 @@ def _fit_loglog_trend(freq_hz: np.ndarray, psd: np.ndarray, fmin: float, fmax: f
     return float(slope), float(intercept)
 
 
+# 関数: `_trend_value` の入出力契約と処理意図を定義する。
+
 def _trend_value(target_hz: float, trend: Tuple[float, float]) -> Optional[float]:
     # 条件分岐: `target_hz <= 0` を満たす経路を評価する。
     if target_hz <= 0:
@@ -143,6 +158,8 @@ def _trend_value(target_hz: float, trend: Tuple[float, float]) -> Optional[float
     return v
 
 
+# 関数: `_band_median` の入出力契約と処理意図を定義する。
+
 def _band_median(freq_hz: np.ndarray, psd: np.ndarray, fmin: float, fmax: float) -> Optional[float]:
     mask = (freq_hz >= fmin) & (freq_hz <= fmax) & (psd > 0)
     # 条件分岐: `np.count_nonzero(mask) < 3` を満たす経路を評価する。
@@ -152,6 +169,8 @@ def _band_median(freq_hz: np.ndarray, psd: np.ndarray, fmin: float, fmax: float)
     val = float(np.median(psd[mask]))
     return val if math.isfinite(val) and val > 0 else None
 
+
+# 関数: `_run_audit` の入出力契約と処理意図を定義する。
 
 def _run_audit(
     *,
@@ -278,6 +297,8 @@ def _run_audit(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     rows = payload.get("pair_sensitivity") if isinstance(payload.get("pair_sensitivity"), list) else []
@@ -305,6 +326,8 @@ def _write_csv(path: Path, payload: Dict[str, Any]) -> None:
                 ]
             )
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     _set_japanese_font()
@@ -360,6 +383,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     default_hom_metrics = ROOT / "output" / "public" / "quantum" / "hom_squeezed_light_unified_audit_metrics.json"

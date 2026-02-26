@@ -18,10 +18,13 @@ OBS_ORDER = ["S_n", "S_p", "S_2n", "S_2p"]
 GAP_ORDER = ["gap_n", "gap_2n", "gap_p", "gap_2p"]
 
 
+# 関数: `_parse_bool` の入出力契約と処理意図を定義する。
 def _parse_bool(value: str) -> bool:
     token = str(value).strip().lower()
     return token in {"1", "true", "t", "yes", "y"}
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -39,6 +42,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_rms` の入出力契約と処理意図を定義する。
+
 def _rms(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -48,6 +53,8 @@ def _rms(values: list[float]) -> float:
     return math.sqrt(sum(v * v for v in finite) / float(len(finite)))
 
 
+# 関数: `_safe_median` の入出力契約と処理意図を定義する。
+
 def _safe_median(values: list[float]) -> float:
     finite = [float(v) for v in values if math.isfinite(float(v))]
     # 条件分岐: `not finite` を満たす経路を評価する。
@@ -56,6 +63,8 @@ def _safe_median(values: list[float]) -> float:
 
     return float(median(finite))
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -70,6 +79,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow([row.get(h) for h in headers])
 
+
+# 関数: `_edge_class` の入出力契約と処理意図を定義する。
 
 def _edge_class(*, dist_min: int, dist_max: int, edge_width: int = EDGE_WIDTH) -> str:
     min_edge = dist_min <= edge_width
@@ -90,6 +101,8 @@ def _edge_class(*, dist_min: int, dist_max: int, edge_width: int = EDGE_WIDTH) -
 
     return "interior"
 
+
+# 関数: `_read_per_nucleus_input` の入出力契約と処理意図を定義する。
 
 def _read_per_nucleus_input(path: Path) -> dict[tuple[int, int], dict[str, Any]]:
     out: dict[tuple[int, int], dict[str, Any]] = {}
@@ -120,6 +133,8 @@ def _read_per_nucleus_input(path: Path) -> dict[tuple[int, int], dict[str, Any]]
 
     return out
 
+
+# 関数: `_compute_separation_rows` の入出力契約と処理意図を定義する。
 
 def _compute_separation_rows(
     *,
@@ -227,6 +242,8 @@ def _compute_separation_rows(
     return rows, lookup
 
 
+# 関数: `_build_magic_gap_rows` の入出力契約と処理意図を定義する。
+
 def _build_magic_gap_rows(
     *,
     sep_lookup: dict[str, dict[tuple[int, int], dict[str, float]]],
@@ -235,6 +252,7 @@ def _build_magic_gap_rows(
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
 
+    # 関数: `_append_gap` の入出力契約と処理意図を定義する。
     def _append_gap(
         *,
         gap_name: str,
@@ -336,6 +354,8 @@ def _build_magic_gap_rows(
     return rows
 
 
+# 関数: `_summarize_observables` の入出力契約と処理意図を定義する。
+
 def _summarize_observables(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for obs in OBS_ORDER:
@@ -380,6 +400,8 @@ def _summarize_observables(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+# 関数: `_summarize_edges` の入出力契約と処理意図を定義する。
+
 def _summarize_edges(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     edge_labels = ["interior", "min_edge", "max_edge", "both_edges"]
@@ -403,6 +425,8 @@ def _summarize_edges(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
+# 関数: `_summarize_gaps` の入出力契約と処理意図を定義する。
+
 def _summarize_gaps(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for gap_name in GAP_ORDER:
@@ -423,6 +447,8 @@ def _summarize_gaps(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
     return out
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(
     *,
@@ -490,6 +516,8 @@ def _build_figure(
     fig.savefig(out_png, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

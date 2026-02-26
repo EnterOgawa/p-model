@@ -38,14 +38,20 @@ OUTPUT_SUMMARY = OUT_DIR / "summary_batch.csv"
 def parse_float(s: str) -> float:
     return float(s.replace("D", "E").replace("d", "e"))
 
+# 関数: `time_to_utc` の入出力契約と処理意図を定義する。
+
 def time_to_utc(year, month, day, hour, minute, second):
     return datetime(year, month, day, hour, minute, int(second), 
                     microsecond=int((second - int(second))*1e6), tzinfo=timezone.utc)
+
+# 関数: `rms` の入出力契約と処理意図を定義する。
 
 def rms(data):
     if not data: return 0.0
     s = sum(x*x for x in data)
     return math.sqrt(s / len(data))
+
+# 関数: `linreg_affine` の入出力契約と処理意図を定義する。
 
 def linreg_affine(x, y):
     n = len(x)
@@ -60,6 +66,8 @@ def linreg_affine(x, y):
     return a, b
 
 
+# 関数: `pmodel_rate` の入出力契約と処理意図を定義する。
+
 def pmodel_rate(mu: float, r_m: float, v_m_s: float, delta: float) -> float:
     # P-model clock rate (dimensionless):
     #   core: dτ/dt = exp(-mu/(c^2 r)) * sqrt(1 - v^2/c^2)
@@ -69,21 +77,31 @@ def pmodel_rate(mu: float, r_m: float, v_m_s: float, delta: float) -> float:
     return g * vfac
 
 
+# 関数: `_sub` の入出力契約と処理意図を定義する。
+
 def _sub(a, b):
     return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
 
+
+# 関数: `_add` の入出力契約と処理意図を定義する。
 
 def _add(a, b):
     return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
 
 
+# 関数: `_mul` の入出力契約と処理意図を定義する。
+
 def _mul(a, s: float):
     return (a[0] * s, a[1] * s, a[2] * s)
 
 
+# 関数: `_norm` の入出力契約と処理意図を定義する。
+
 def _norm(a) -> float:
     return math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2])
 
+
+# 関数: `inertial_speed_from_sp3_ecef` の入出力契約と処理意図を定義する。
 
 def inertial_speed_from_sp3_ecef(
     times, positions_xyz_m, omega_e_rad_s: float
@@ -124,6 +142,8 @@ def inertial_speed_from_sp3_ecef(
 
     return speeds
 
+
+# 関数: `dt_rel_from_radius_series` の入出力契約と処理意図を定義する。
 
 def dt_rel_from_radius_series(tsec: list[float], r_m: list[float]) -> list[float]:
     # Standard GNSS relativistic correction term (eccentricity effect):
@@ -177,6 +197,8 @@ def load_igs_clk(filepath):
 
     return data
 
+# 関数: `load_igs_sp3` の入出力契約と処理意図を定義する。
+
 def load_igs_sp3(filepath):
     data = {}
     print(f"Loading SP3: {filepath} ...")
@@ -202,6 +224,8 @@ def load_igs_sp3(filepath):
                     continue
 
     return data
+
+# 関数: `load_brdc` の入出力契約と処理意図を定義する。
 
 def load_brdc(filepath):
     """ 
@@ -261,6 +285,8 @@ def load_brdc(filepath):
             continue
             
     return nav_data
+
+# 関数: `get_brdc_clk` の入出力契約と処理意図を定義する。
 
 def get_brdc_clk(prn, t, nav_db):
     if prn not in nav_db: return None

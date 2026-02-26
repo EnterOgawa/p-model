@@ -26,9 +26,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -55,6 +58,8 @@ def _set_japanese_font() -> None:
         return
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(value: Any) -> float:
     try:
         out = float(value)
@@ -63,6 +68,8 @@ def _safe_float(value: Any) -> float:
 
     return out
 
+
+# 関数: `_fmt` の入出力契約と処理意図を定義する。
 
 def _fmt(value: Any, digits: int = 7) -> str:
     # 条件分岐: `isinstance(value, (int, np.integer))` を満たす経路を評価する。
@@ -92,6 +99,8 @@ def _fmt(value: Any, digits: int = 7) -> str:
     return f"{numeric_value:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_parse_float_grid` の入出力契約と処理意図を定義する。
+
 def _parse_float_grid(text: str) -> List[float]:
     out: List[float] = []
     for token in str(text).split(","):
@@ -105,6 +114,8 @@ def _parse_float_grid(text: str) -> List[float]:
     return out
 
 
+# 関数: `_parse_int_grid` の入出力契約と処理意図を定義する。
+
 def _parse_int_grid(text: str) -> List[int]:
     out: List[int] = []
     for token in str(text).split(","):
@@ -117,6 +128,8 @@ def _parse_int_grid(text: str) -> List[int]:
 
     return out
 
+
+# 関数: `_parse_bool_grid` の入出力契約と処理意図を定義する。
 
 def _parse_bool_grid(text: str) -> List[bool]:
     mapping = {"0": False, "1": True, "false": False, "true": True, "no": False, "yes": True}
@@ -136,6 +149,8 @@ def _parse_bool_grid(text: str) -> List[bool]:
 
     return out
 
+
+# 関数: `_status_bucket` の入出力契約と処理意図を定義する。
 
 def _status_bucket(status: str) -> str:
     text = str(status or "")
@@ -161,6 +176,8 @@ def _status_bucket(status: str) -> str:
     return "other"
 
 
+# 関数: `_status_rank` の入出力契約と処理意図を定義する。
+
 def _status_rank(status: str) -> int:
     bucket = _status_bucket(status)
     # 条件分岐: `bucket == "pass"` を満たす経路を評価する。
@@ -185,6 +202,8 @@ def _status_rank(status: str) -> int:
     return -1
 
 
+# 関数: `_scalar_rank` の入出力契約と処理意図を定義する。
+
 def _scalar_rank(value: float) -> float:
     # 条件分岐: `not math.isfinite(value)` を満たす経路を評価する。
     if not math.isfinite(value):
@@ -192,6 +211,8 @@ def _scalar_rank(value: float) -> float:
 
     return -float(value)
 
+
+# 関数: `_objective_key` の入出力契約と処理意図を定義する。
 
 def _objective_key(row: Dict[str, Any]) -> Tuple[int, int, int, float, int]:
     status = str(row.get("status", ""))
@@ -207,6 +228,8 @@ def _objective_key(row: Dict[str, Any]) -> Tuple[int, int, int, float, int]:
         -pair_pruned_events,
     )
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     headers = [
@@ -241,6 +264,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
 
             writer.writerow(values)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(rows: List[Dict[str, Any]], status_counts: Dict[str, int], pair_summary: List[Dict[str, Any]], out_png: Path) -> None:
     _set_japanese_font()
@@ -305,6 +330,8 @@ def _plot(rows: List[Dict[str, Any]], status_counts: Dict[str, int], pair_summar
     plt.close(figure)
 
 
+# 関数: `_aggregate_pair_bottlenecks` の入出力契約と処理意図を定義する。
+
 def _aggregate_pair_bottlenecks(trial_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     pair_accumulator: Dict[str, Dict[str, float]] = {}
     for row in trial_rows:
@@ -346,9 +373,13 @@ def _aggregate_pair_bottlenecks(trial_rows: List[Dict[str, Any]]) -> List[Dict[s
     return output
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser(

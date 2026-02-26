@@ -10,13 +10,18 @@ from typing import Any
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -31,6 +36,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -51,6 +58,8 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_extract_first_float` の入出力契約と処理意図を定義する。
+
 def _extract_first_float(html: str, *, pattern: str, label: str) -> float:
     m = re.search(pattern, html, flags=re.IGNORECASE | re.DOTALL)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -59,6 +68,8 @@ def _extract_first_float(html: str, *, pattern: str, label: str) -> float:
 
     return float(m.group(1))
 
+
+# 関数: `_extract_linear_cij` の入出力契約と処理意図を定義する。
 
 def _extract_linear_cij(html: str, *, ij: str) -> dict[str, float]:
     """
@@ -82,6 +93,8 @@ def _extract_linear_cij(html: str, *, ij: str) -> dict[str, float]:
     return {"intercept_1e11_dyn_cm2": float(intercept), "slope_1e11_dyn_cm2_per_K": float(slope)}
 
 
+# 関数: `_decode_phonon_label` の入出力契約と処理意図を定義する。
+
 def _decode_phonon_label(label_html: str) -> str:
     s = str(label_html)
     # Entities used in the Ioffe table.
@@ -93,6 +106,8 @@ def _decode_phonon_label(label_html: str) -> str:
     s = re.sub(r"\s+", "", s)
     return s
 
+
+# 関数: `_extract_phonon_frequencies` の入出力契約と処理意図を定義する。
 
 def _extract_phonon_frequencies(html: str) -> dict[str, Any]:
     """
@@ -164,6 +179,8 @@ def _extract_phonon_frequencies(html: str) -> dict[str, Any]:
         "rows": rows,
     }
 
+
+# 関数: `_parse_mechanic_html` の入出力契約と処理意図を定義する。
 
 def _parse_mechanic_html(html: str) -> dict[str, Any]:
     # Keep HTML entities (e.g., &middot;, &asymp;, &lt;) intact for robust regex parsing.
@@ -239,6 +256,8 @@ def _parse_mechanic_html(html: str) -> dict[str, Any]:
         ],
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

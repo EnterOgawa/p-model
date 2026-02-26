@@ -5,6 +5,7 @@ import math
 from pathlib import Path
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
 
@@ -21,9 +22,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_load_nist_codata_constants` の入出力契約と処理意図を定義する。
 
 def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
     src_dir = root / "data" / "quantum" / "sources" / "nist_codata_2022_nuclear_baseline"
@@ -45,6 +50,8 @@ def _load_nist_codata_constants(*, root: Path) -> dict[str, dict[str, object]]:
 
     return {k: v for k, v in consts.items() if isinstance(v, dict)}
 
+
+# 関数: `_load_np_scattering_sets` の入出力契約と処理意図を定義する。
 
 def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     extracted = root / "data" / "quantum" / "sources" / "np_scattering_low_energy_arxiv_0704_1024v1_extracted.json"
@@ -82,6 +89,8 @@ def _load_np_scattering_sets(*, root: Path) -> dict[int, dict[str, object]]:
     return out
 
 
+# 関数: `_get_value` の入出力契約と処理意図を定義する。
+
 def _get_value(params: dict[str, object], key: str) -> float:
     obj = params.get(key)
     # 条件分岐: `isinstance(obj, dict) and "value" in obj` を満たす経路を評価する。
@@ -90,6 +99,8 @@ def _get_value(params: dict[str, object], key: str) -> float:
 
     raise KeyError(key)
 
+
+# 関数: `_solve_bound_x` の入出力契約と処理意図を定義する。
 
 def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
     """
@@ -108,6 +119,7 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
     lo = (math.pi / 2.0) + 1e-7
     hi = math.pi - 1e-7
 
+    # 関数: `f` の入出力契約と処理意図を定義する。
     def f(x: float) -> float:
         return (x / math.tan(x)) + (kappa_fm1 * r_fm)
 
@@ -134,6 +146,8 @@ def _solve_bound_x(*, kappa_fm1: float, r_fm: float) -> float:
     return 0.5 * (lo + hi)
 
 
+# 関数: `_square_well_from_r` の入出力契約と処理意図を定義する。
+
 def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_fm: float) -> dict[str, float]:
     """
     Given B (fixed) and R, solve the well depth V0 by the bound-state condition.
@@ -151,6 +165,8 @@ def _square_well_from_r(*, mu_mev: float, b_mev: float, r_fm: float, hbarc_mev_f
     return {"V0_mev": float(v0), "x": float(x), "k_fm1": float(k), "kappa_fm1": float(kappa)}
 
 
+# 関数: `_square_well_scattering_length` の入出力契約と処理意図を定義する。
+
 def _square_well_scattering_length(*, mu_mev: float, v0_mev: float, r_fm: float, hbarc_mev_fm: float) -> float:
     # Exact k->0 expression for an attractive square well.
     q0 = math.sqrt(2.0 * mu_mev * v0_mev) / hbarc_mev_fm
@@ -160,6 +176,8 @@ def _square_well_scattering_length(*, mu_mev: float, v0_mev: float, r_fm: float,
 
     return float(r_fm - (math.tan(q0 * r_fm) / q0))
 
+
+# 関数: `_fit_square_well_to_b_and_a` の入出力契約と処理意図を定義する。
 
 def _fit_square_well_to_b_and_a(
     *,
@@ -235,6 +253,7 @@ def _fit_square_well_to_b_and_a(
     candidates.sort(key=lambda t: t[2])
     lo_r, hi_r, _ = candidates[0]
 
+    # 関数: `g_of_r` の入出力契約と処理意図を定義する。
     def g_of_r(r: float) -> float:
         bound = _square_well_from_r(mu_mev=mu_mev, b_mev=b_mev, r_fm=r, hbarc_mev_fm=hbarc_mev_fm)
         a_pred = _square_well_scattering_length(mu_mev=mu_mev, v0_mev=bound["V0_mev"], r_fm=r, hbarc_mev_fm=hbarc_mev_fm)
@@ -281,6 +300,8 @@ def _fit_square_well_to_b_and_a(
     }
 
 
+# 関数: `_phase_shift_square_well` の入出力契約と処理意図を定義する。
+
 def _phase_shift_square_well(*, k_fm1: float, mu_mev: float, v0_mev: float, r_fm: float, hbarc_mev_fm: float) -> float:
     """
     s-wave phase shift for an attractive square well.
@@ -306,6 +327,8 @@ def _phase_shift_square_well(*, k_fm1: float, mu_mev: float, v0_mev: float, r_fm
 
     return float(delta)
 
+
+# 関数: `_fit_effective_range_expansion` の入出力契約と処理意図を定義する。
 
 def _fit_effective_range_expansion(
     *, mu_mev: float, v0_mev: float, r_fm: float, hbarc_mev_fm: float
@@ -366,6 +389,8 @@ def _fit_effective_range_expansion(
         "points": points,
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

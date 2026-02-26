@@ -10,13 +10,18 @@ from typing import Any
 from pypdf import PdfReader
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_normalize_text` の入出力契約と処理意図を定義する。
 
 def _normalize_text(s: str) -> str:
     # Unify common unicode variants for robust regex parsing.
@@ -29,6 +34,8 @@ def _normalize_text(s: str) -> str:
     return out.strip()
 
 
+# 関数: `_extract_pdf_text` の入出力契約と処理意図を定義する。
+
 def _extract_pdf_text(pdf_path: Path) -> str:
     reader = PdfReader(str(pdf_path))
     chunks: list[str] = []
@@ -37,6 +44,8 @@ def _extract_pdf_text(pdf_path: Path) -> str:
 
     return _normalize_text("\n".join(chunks))
 
+
+# 関数: `_extract_first_float` の入出力契約と処理意図を定義する。
 
 def _extract_first_float(text: str, *, pattern: str, label: str) -> float:
     m = re.search(pattern, text, flags=re.IGNORECASE)
@@ -47,6 +56,8 @@ def _extract_first_float(text: str, *, pattern: str, label: str) -> float:
     return float(m.group(1))
 
 
+# 関数: `_extract_first_two_floats` の入出力契約と処理意図を定義する。
+
 def _extract_first_two_floats(text: str, *, pattern: str, label: str) -> tuple[float, float]:
     m = re.search(pattern, text, flags=re.IGNORECASE)
     # 条件分岐: `not m` を満たす経路を評価する。
@@ -55,6 +66,8 @@ def _extract_first_two_floats(text: str, *, pattern: str, label: str) -> tuple[f
 
     return (float(m.group(1)), float(m.group(2)))
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

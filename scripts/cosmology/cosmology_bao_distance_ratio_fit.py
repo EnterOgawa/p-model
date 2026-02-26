@@ -51,6 +51,7 @@ from scripts.summary import worklog  # noqa: E402
 _C_KM_S = 299_792.458
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -76,14 +77,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -108,6 +115,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 6) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# クラス: `BAORatioPoint` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class BAORatioPoint:
     id: str
@@ -120,6 +129,7 @@ class BAORatioPoint:
     corr_dm_dh: float
     source: Dict[str, Any]
 
+    # 関数: `from_json` の入出力契約と処理意図を定義する。
     @staticmethod
     def from_json(j: Dict[str, Any]) -> "BAORatioPoint":
         return BAORatioPoint(
@@ -135,6 +145,8 @@ class BAORatioPoint:
         )
 
 
+# 関数: `_pred_dm_dh_over_rd` の入出力契約と処理意図を定義する。
+
 def _pred_dm_dh_over_rd(*, z: float, s_R: float, Q: float) -> Tuple[float, float]:
     op = 1.0 + float(z)
     # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
@@ -147,6 +159,8 @@ def _pred_dm_dh_over_rd(*, z: float, s_R: float, Q: float) -> Tuple[float, float
     dh = Q * (op ** (-(1.0 + s_R)))
     return float(dm), float(dh)
 
+
+# 関数: `_inv_cov_2x2` の入出力契約と処理意図を定義する。
 
 def _inv_cov_2x2(*, sig1: float, sig2: float, corr: float) -> Tuple[float, float, float]:
     sig1 = float(sig1)
@@ -165,6 +179,8 @@ def _inv_cov_2x2(*, sig1: float, sig2: float, corr: float) -> Tuple[float, float
     inv12 = -cov / det
     return float(inv11), float(inv12), float(inv22)
 
+
+# 関数: `_profile_Q_for_sR` の入出力契約と処理意図を定義する。
 
 def _profile_Q_for_sR(points: Sequence[BAORatioPoint], *, s_R: float) -> Dict[str, float]:
     """
@@ -212,6 +228,8 @@ def _profile_Q_for_sR(points: Sequence[BAORatioPoint], *, s_R: float) -> Dict[st
 
     return {"Q_best": float(Q), "Q_sigma": float(Q_sig), "chi2": float(chi2)}
 
+
+# 関数: `_fit_sR_Q` の入出力契約と処理意図を定義する。
 
 def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max: float = 2.0) -> Dict[str, Any]:
     # 条件分岐: `not points` を満たす経路を評価する。
@@ -354,6 +372,8 @@ def _fit_sR_Q(points: Sequence[BAORatioPoint], *, s_R_min: float = -1.0, s_R_max
     }
 
 
+# 関数: `_plot` の入出力契約と処理意図を定義する。
+
 def _plot(
     *,
     out_png: Path,
@@ -368,6 +388,7 @@ def _plot(
     _set_japanese_font()
     import matplotlib.pyplot as plt
 
+    # 関数: `_curve` の入出力契約と処理意図を定義する。
     def _curve(fit: Dict[str, Any], z_curve: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         s = float(((fit.get("best_fit") or {}).get("s_R")) or float("nan"))
         Q = float(((fit.get("best_fit") or {}).get("Q")) or float("nan"))
@@ -379,6 +400,8 @@ def _plot(
             dh.append(d2)
 
         return np.array(dm, dtype=float), np.array(dh, dtype=float)
+
+    # 関数: `_g` の入出力契約と処理意図を定義する。
 
     def _g(points: Sequence[BAORatioPoint]) -> Dict[str, np.ndarray]:
         z = np.array([p.z_eff for p in points], dtype=float)
@@ -447,6 +470,7 @@ def _plot(
     ax1.legend(loc="best", fontsize=9, frameon=True)
     ax2.legend(loc="best", fontsize=9, frameon=True)
 
+    # 関数: `_sline` の入出力契約と処理意図を定義する。
     def _sline(fit: Dict[str, Any]) -> str:
         bf = dict(fit.get("best_fit") or {})
         s = bf.get("s_R")
@@ -471,6 +495,8 @@ def _plot(
     plt.close(fig)
 
 
+# 関数: `_plot_residuals` の入出力契約と処理意図を定義する。
+
 def _plot_residuals(
     *,
     out_png: Path,
@@ -490,6 +516,7 @@ def _plot_residuals(
 
     rows.sort(key=lambda r: float(r.get("z_eff") or 0.0))
 
+    # 関数: `_cat` の入出力契約と処理意図を定義する。
     def _cat(pid: str) -> str:
         pid = str(pid or "")
         # 条件分岐: `pid.startswith("boss_dr12")` を満たす経路を評価する。
@@ -581,6 +608,8 @@ def _plot_residuals(
     plt.close(fig)
 
 
+# 関数: `_plot_leave_one_out` の入出力契約と処理意図を定義する。
+
 def _plot_leave_one_out(
     *,
     out_png: Path,
@@ -598,6 +627,8 @@ def _plot_leave_one_out(
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         return
+
+    # 関数: `_cat` の入出力契約と処理意図を定義する。
 
     def _cat(pid: str) -> str:
         pid = str(pid or "")
@@ -740,6 +771,8 @@ def _plot_leave_one_out(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: BAO distance-ratio fit for s_R (Step 14.2.29).")

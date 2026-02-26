@@ -37,6 +37,7 @@ from scripts.cosmology.boss_dr12v5_fits import (
 _PX_RE = re.compile(r"px(?P<px>\d+)", flags=re.IGNORECASE)
 
 
+# 関数: `_px_score` の入出力契約と処理意図を定義する。
 def _px_score(name: str) -> Tuple[int, int, str]:
     m = _PX_RE.search(name)
     px = int(m.group("px")) if m else 10**9
@@ -44,6 +45,8 @@ def _px_score(name: str) -> Tuple[int, int, str]:
     pref = {1000: 0, 0: 1, 5000: 2}.get(px, 9)
     return pref, px, name
 
+
+# 関数: `choose_event_file` の入出力契約と処理意図を定義する。
 
 def choose_event_file(event_cl_dir: Path) -> Path:
     """
@@ -58,6 +61,8 @@ def choose_event_file(event_cl_dir: Path) -> Path:
     cands.sort(key=lambda p: _px_score(p.name))
     return cands[0]
 
+
+# 関数: `_build_channel_index_map` の入出力契約と処理意図を定義する。
 
 def _build_channel_index_map(channels: np.ndarray) -> np.ndarray:
     ch = np.asarray(channels, dtype=int)
@@ -75,6 +80,8 @@ def _build_channel_index_map(channels: np.ndarray) -> np.ndarray:
     idx[ch[ok]] = np.arange(int(ch.size), dtype=int)[ok]
     return idx
 
+
+# 関数: `load_gti_intervals` の入出力契約と処理意図を定義する。
 
 def load_gti_intervals(gti_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -109,6 +116,8 @@ def load_gti_intervals(gti_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     return np.asarray(start[order], dtype=float), np.asarray(stop[order], dtype=float)
 
 
+# 関数: `_read_exact` の入出力契約と処理意図を定義する。
+
 def _read_exact(f, n: int) -> bytes:  # type: ignore[no-untyped-def]
     b = f.read(n)
     # 条件分岐: `b is None` を満たす経路を評価する。
@@ -118,10 +127,14 @@ def _read_exact(f, n: int) -> bytes:  # type: ignore[no-untyped-def]
     return b
 
 
+# 関数: `_iter_cards_from_header_bytes` の入出力契約と処理意図を定義する。
+
 def _iter_cards_from_header_bytes(header_bytes: bytes) -> Iterable[str]:
     for i in range(0, len(header_bytes), _CARD):
         yield header_bytes[i : i + _CARD].decode("ascii", errors="ignore")
 
+
+# 関数: `_read_header_blocks` の入出力契約と処理意図を定義する。
 
 def _read_header_blocks(f) -> bytes:  # type: ignore[no-untyped-def]
     chunks: List[bytes] = []
@@ -138,6 +151,8 @@ def _read_header_blocks(f) -> bytes:  # type: ignore[no-untyped-def]
                 return b"".join(chunks)
 
 
+# 関数: `_parse_header_kv` の入出力契約と処理意図を定義する。
+
 def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
     kv: Dict[str, str] = {}
     for card in _iter_cards_from_header_bytes(header_bytes):
@@ -152,6 +167,8 @@ def _parse_header_kv(header_bytes: bytes) -> Dict[str, str]:
 
     return kv
 
+
+# 関数: `_skip_hdu_data` の入出力契約と処理意図を定義する。
 
 def _skip_hdu_data(f, header_kv: Dict[str, str]) -> None:  # type: ignore[no-untyped-def]
     naxis = int(float(header_kv.get("NAXIS", "0") or "0"))
@@ -169,6 +186,8 @@ def _skip_hdu_data(f, header_kv: Dict[str, str]) -> None:  # type: ignore[no-unt
     if pad > 0:
         f.seek(pad, 1)
 
+
+# 関数: `load_gti_intervals_from_event` の入出力契約と処理意図を定義する。
 
 def load_gti_intervals_from_event(event_path: Path) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -277,6 +296,8 @@ def load_gti_intervals_from_event(event_path: Path) -> Tuple[np.ndarray, np.ndar
     return np.asarray(start[order], dtype=float), np.asarray(stop[order], dtype=float)
 
 
+# 関数: `_mask_in_gti` の入出力契約と処理意図を定義する。
+
 def _mask_in_gti(times: np.ndarray, start: np.ndarray, stop: np.ndarray) -> np.ndarray:
     # 条件分岐: `start.size == 0 or stop.size == 0` を満たす経路を評価する。
     if start.size == 0 or stop.size == 0:
@@ -290,12 +311,16 @@ def _mask_in_gti(times: np.ndarray, start: np.ndarray, stop: np.ndarray) -> np.n
     return out
 
 
+# クラス: `EventSpectrumResult` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class EventSpectrumResult:
     channels: np.ndarray
     counts: np.ndarray
     qc: Dict[str, Any]
 
+
+# 関数: `extract_pi_spectrum_from_event` の入出力契約と処理意図を定義する。
 
 def extract_pi_spectrum_from_event(
     event_path: Path,
@@ -425,6 +450,8 @@ def extract_pi_spectrum_from_event(
     return EventSpectrumResult(channels=ch, counts=counts, qc=qc)
 
 
+# 関数: `compute_spectrum_diff_metrics` の入出力契約と処理意図を定義する。
+
 def compute_spectrum_diff_metrics(
     *,
     channels: np.ndarray,
@@ -445,6 +472,8 @@ def compute_spectrum_diff_metrics(
     if ch.size != a.size or ch.size != b.size or e.size != ch.size:
         raise ValueError("shape mismatch in compute_spectrum_diff_metrics")
 
+    # 関数: `_l1` の入出力契約と処理意図を定義する。
+
     def _l1(x: np.ndarray, y: np.ndarray) -> float:
         denom = float(np.nansum(np.abs(x))) if float(np.nansum(np.abs(x))) > 0 else 1.0
         return float(np.nansum(np.abs(x - y)) / denom)
@@ -454,6 +483,8 @@ def compute_spectrum_diff_metrics(
     # 条件分岐: `not np.any(m)` を満たす経路を評価する。
     if not np.any(m):
         return {"ok": False, "reason": "empty band"}
+
+    # 関数: `_mean_E` の入出力契約と処理意図を定義する。
 
     def _mean_E(x: np.ndarray) -> float:
         w = np.clip(x, 0.0, None)

@@ -19,17 +19,24 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_default_jsonl_path` の入出力契約と処理意図を定義する。
+
 def _default_jsonl_path(root: Path) -> Path:
     return root / "output" / "private" / "summary" / "work_history.jsonl"
+
+# 関数: `_lock_path_for` の入出力契約と処理意図を定義する。
 
 def _lock_path_for(jsonl_path: Path) -> Path:
     # Cross-platform append lock (prevents interleaved JSON when multiple scripts run concurrently).
     return jsonl_path.with_suffix(jsonl_path.suffix + ".lock")
 
+
+# 関数: `_ensure_lock_file` の入出力契約と処理意図を定義する。
 
 def _ensure_lock_file(lock_path: Path) -> None:
     lock_path.parent.mkdir(parents=True, exist_ok=True)
@@ -45,6 +52,8 @@ def _ensure_lock_file(lock_path: Path) -> None:
             f.flush()
 
 
+# 関数: `_lock_file` の入出力契約と処理意図を定義する。
+
 def _lock_file(f) -> None:  # type: ignore[no-untyped-def]
     # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
     if os.name == "nt":
@@ -58,6 +67,8 @@ def _lock_file(f) -> None:  # type: ignore[no-untyped-def]
 
     fcntl.flock(f.fileno(), fcntl.LOCK_EX)
 
+
+# 関数: `_unlock_file` の入出力契約と処理意図を定義する。
 
 def _unlock_file(f) -> None:  # type: ignore[no-untyped-def]
     # 条件分岐: `os.name == "nt"` を満たす経路を評価する。
@@ -73,12 +84,16 @@ def _unlock_file(f) -> None:  # type: ignore[no-untyped-def]
     fcntl.flock(f.fileno(), fcntl.LOCK_UN)
 
 
+# 関数: `_rel` の入出力契約と処理意図を定義する。
+
 def _rel(root: Path, p: Path) -> str:
     try:
         return str(p.relative_to(root)).replace("\\", "/")
     except Exception:
         return str(p).replace("\\", "/")
 
+
+# 関数: `append_event` の入出力契約と処理意図を定義する。
 
 def append_event(event: Dict[str, Any], *, jsonl_path: Optional[Path] = None) -> Path:
     """
@@ -92,6 +107,7 @@ def append_event(event: Dict[str, Any], *, jsonl_path: Optional[Path] = None) ->
     ev: Dict[str, Any] = dict(event)
     ev.setdefault("generated_utc", datetime.now(timezone.utc).isoformat())
 
+    # 関数: `_norm` の入出力契約と処理意図を定義する。
     def _norm(v: Any) -> Any:
         # 条件分岐: `isinstance(v, Path)` を満たす経路を評価する。
         if isinstance(v, Path):

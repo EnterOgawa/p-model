@@ -19,13 +19,18 @@ DEFAULT_TIMEOUT_S = 25
 DEFAULT_ATTEMPTS = 2
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# 関数: `_stable_sha256_text` の入出力契約と処理意図を定義する。
+
 def _stable_sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
+
+# 関数: `_fetch_json` の入出力契約と処理意図を定義する。
 
 def _fetch_json(url: str, *, timeout_s: int = 60) -> Any:
     req = Request(url, headers={"User-Agent": "waveP/quantum-search"})
@@ -33,11 +38,15 @@ def _fetch_json(url: str, *, timeout_s: int = 60) -> Any:
         return json.loads(r.read().decode("utf-8"))
 
 
+# 関数: `_fetch_text` の入出力契約と処理意図を定義する。
+
 def _fetch_text(url: str, *, timeout_s: int = 60) -> str:
     req = Request(url, headers={"User-Agent": "Mozilla/5.0 (waveP/quantum-search)"})
     with urlopen(req, timeout=timeout_s) as r:
         return r.read().decode("utf-8", errors="replace")
 
+
+# 関数: `_fetch_json_retry` の入出力契約と処理意図を定義する。
 
 def _fetch_json_retry(url: str, *, timeout_s: int | None = None, attempts: int | None = None, sleep_s: float = 1.0) -> Any:
     timeout_s = int(DEFAULT_TIMEOUT_S if timeout_s is None else timeout_s)
@@ -57,6 +66,8 @@ def _fetch_json_retry(url: str, *, timeout_s: int | None = None, attempts: int |
     raise RuntimeError(f"fetch failed after {attempts} attempts: {url} ({type(last_err).__name__}: {last_err})")
 
 
+# 関数: `_fetch_text_retry` の入出力契約と処理意図を定義する。
+
 def _fetch_text_retry(url: str, *, timeout_s: int | None = None, attempts: int | None = None, sleep_s: float = 1.0) -> str:
     timeout_s = int(DEFAULT_TIMEOUT_S if timeout_s is None else timeout_s)
     attempts = int(DEFAULT_ATTEMPTS if attempts is None else attempts)
@@ -75,10 +86,14 @@ def _fetch_text_retry(url: str, *, timeout_s: int | None = None, attempts: int |
     raise RuntimeError(f"fetch failed after {attempts} attempts: {url} ({type(last_err).__name__}: {last_err})")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_zenodo_search` の入出力契約と処理意図を定義する。
 
 def _zenodo_search(*, q: str, size: int = 10) -> dict[str, Any]:
     url = f"https://zenodo.org/api/records/?q={quote(q)}&size={int(size)}"
@@ -110,6 +125,8 @@ def _zenodo_search(*, q: str, size: int = 10) -> dict[str, Any]:
     return {"platform": "zenodo", "q": q, "url": url, "total": total, "items": out_items}
 
 
+# 関数: `_osf_search` の入出力契約と処理意図を定義する。
+
 def _osf_search(*, q: str, size: int = 10) -> dict[str, Any]:
     # OSF search is very broad; we record only the top few hits and then filter offline.
     url = f"https://api.osf.io/v2/search/?q={quote(q)}&page[size]={int(size)}"
@@ -138,6 +155,8 @@ def _osf_search(*, q: str, size: int = 10) -> dict[str, Any]:
     return {"platform": "osf", "q": q, "url": url, "total": total, "items": items}
 
 
+# 関数: `_datacite_search` の入出力契約と処理意図を定義する。
+
 def _datacite_search(*, q: str, size: int = 10) -> dict[str, Any]:
     url = f"https://api.datacite.org/dois?query={quote(q)}&page[size]={int(size)}"
     obj = _fetch_json_retry(url)
@@ -164,6 +183,8 @@ def _datacite_search(*, q: str, size: int = 10) -> dict[str, Any]:
 
     return {"platform": "datacite", "q": q, "url": url, "total": total, "items": items}
 
+
+# 関数: `_crossref_search` の入出力契約と処理意図を定義する。
 
 def _crossref_search(*, q: str, size: int = 10) -> dict[str, Any]:
     url = f"https://api.crossref.org/works?query={quote(q)}&rows={int(size)}"
@@ -193,6 +214,8 @@ def _crossref_search(*, q: str, size: int = 10) -> dict[str, Any]:
 
     return {"platform": "crossref", "q": q, "url": url, "total": total, "items": items}
 
+
+# 関数: `_openalex_search` の入出力契約と処理意図を定義する。
 
 def _openalex_search(*, q: str, size: int = 10) -> dict[str, Any]:
     # OpenAlex API (no key required). Use per-page; fall back to per_page if needed.
@@ -227,6 +250,8 @@ def _openalex_search(*, q: str, size: int = 10) -> dict[str, Any]:
     return {"platform": "openalex", "q": q, "url": url, "total": total, "items": items}
 
 
+# 関数: `_figshare_search` の入出力契約と処理意図を定義する。
+
 def _figshare_search(*, q: str, size: int = 10) -> dict[str, Any]:
     # Figshare public API: broad; we record the first page of hits.
     url = f"https://api.figshare.com/v2/articles?search_for={quote(q)}&page_size={int(size)}&page=1"
@@ -254,6 +279,8 @@ def _figshare_search(*, q: str, size: int = 10) -> dict[str, Any]:
 
     return {"platform": "figshare", "q": q, "url": url, "total": None, "items": items}
 
+
+# 関数: `_harvard_dataverse_search` の入出力契約と処理意図を定義する。
 
 def _harvard_dataverse_search(*, q: str, size: int = 10) -> dict[str, Any]:
     # There is no central Dataverse search; Harvard is a reasonable public baseline.
@@ -294,10 +321,13 @@ _PIRACY_HOST_SUBSTRINGS = [
 ]
 
 
+# 関数: `_is_piracy_url` の入出力契約と処理意図を定義する。
 def _is_piracy_url(url: str) -> bool:
     host = urlparse(url).netloc.lower()
     return any(s in host for s in _PIRACY_HOST_SUBSTRINGS)
 
+
+# 関数: `_ddg_unwrap_redirect` の入出力契約と処理意図を定義する。
 
 def _ddg_unwrap_redirect(url: str) -> str:
     # DuckDuckGo result links are usually of the form:
@@ -321,11 +351,14 @@ def _ddg_unwrap_redirect(url: str) -> str:
     return u
 
 
+# 関数: `_duckduckgo_html_search` の入出力契約と処理意図を定義する。
+
 def _duckduckgo_html_search(*, q: str, size: int = 10) -> dict[str, Any]:
     # DuckDuckGo HTML endpoint (no JS) for best-effort web search.
     url = f"https://html.duckduckgo.com/html/?q={quote(q)}"
     html = _fetch_text_retry(url)
 
+    # 関数: `strip_tags` の入出力契約と処理意図を定義する。
     def strip_tags(s: str) -> str:
         return re.sub(r"<[^>]+>", "", s).strip()
 
@@ -353,6 +386,8 @@ def _duckduckgo_html_search(*, q: str, size: int = 10) -> dict[str, Any]:
 
     return {"platform": "duckduckgo_html", "q": q, "url": url, "total": None, "items": items}
 
+
+# 関数: `_to_text` の入出力契約と処理意図を定義する。
 
 def _to_text(v: Any) -> str:
     # 条件分岐: `v is None` を満たす経路を評価する。
@@ -384,6 +419,8 @@ def _to_text(v: Any) -> str:
     return str(v)
 
 
+# 関数: `_is_plausible_item` の入出力契約と処理意図を定義する。
+
 def _is_plausible_item(item: dict[str, Any]) -> bool:
     hay = " ".join(
         [
@@ -410,6 +447,8 @@ def _is_plausible_item(item: dict[str, Any]) -> bool:
     return False
 
 
+# 関数: `_is_target_work_hit` の入出力契約と処理意図を定義する。
+
 def _is_target_work_hit(item: dict[str, Any]) -> bool:
     hay = " ".join(
         [
@@ -422,6 +461,8 @@ def _is_target_work_hit(item: dict[str, Any]) -> bool:
     ).lower()
     return ("10.1103/physrevlett.115.250401" in hay) or ("arxiv.1511.03190" in hay) or ("1511.03190" in hay)
 
+
+# 関数: `_looks_like_dataset_url` の入出力契約と処理意図を定義する。
 
 def _looks_like_dataset_url(url: str) -> bool:
     u = url.lower()
@@ -448,6 +489,8 @@ def _looks_like_dataset_url(url: str) -> bool:
     ]
     return any(r in u for r in repos)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser()

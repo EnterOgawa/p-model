@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 
+# 関数: `_split_history_blocks` の入出力契約と処理意図を定義する。
 def _split_history_blocks(text: str) -> tuple[str, list[str]]:
     match = re.search(r"^##\s+20\d\d-\d\d-\d\d", text, flags=re.M)
     # 条件分岐: `not match` を満たす経路を評価する。
@@ -36,6 +37,8 @@ def _split_history_blocks(text: str) -> tuple[str, list[str]]:
     return header, blocks
 
 
+# 関数: `_make_recent_header` の入出力契約と処理意図を定義する。
+
 def _make_recent_header() -> str:
     return (
         "# WORK HISTORY RECENT\n"
@@ -51,6 +54,8 @@ def _make_recent_header() -> str:
         "\n"
     )
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

@@ -19,18 +19,25 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
+
+# 関数: `_ks_two_sample_dcrit` の入出力契約と処理意図を定義する。
 
 def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
     # 条件分岐: `n <= 0 or m <= 0` を満たす経路を評価する。
@@ -58,6 +65,8 @@ def _ks_two_sample_dcrit(alpha: float, n: int, m: int) -> Optional[float]:
 
     return float(c * math.sqrt((n + m) / (n * m)))
 
+
+# 関数: `_autocorr` の入出力契約と処理意図を定義する。
 
 def _autocorr(x: np.ndarray, lag: int) -> Optional[float]:
     # 条件分岐: `lag <= 0` を満たす経路を評価する。
@@ -89,6 +98,8 @@ def _autocorr(x: np.ndarray, lag: int) -> Optional[float]:
     return float(np.corrcoef(a, b)[0, 1])
 
 
+# 関数: `_effective_n_from_rhos` の入出力契約と処理意図を定義する。
+
 def _effective_n_from_rhos(n: int, rhos: Dict[str, Any]) -> Optional[float]:
     # 条件分岐: `n <= 0` を満たす経路を評価する。
     if n <= 0:
@@ -119,6 +130,8 @@ def _effective_n_from_rhos(n: int, rhos: Dict[str, Any]) -> Optional[float]:
 
     return float(n / denom)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     root = _repo_root()

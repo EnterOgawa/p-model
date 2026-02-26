@@ -21,6 +21,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# クラス: `Task` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Task:
     key: str
@@ -31,13 +32,19 @@ class Task:
     optional: bool = False
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_has_cache` の入出力契約と処理意図を定義する。
+
 def _has_cache(root: Path, pattern: str) -> bool:
     return any((root / pattern).parent.glob(Path(pattern).name))
 
+
+# 関数: `_load_gw_event_list` の入出力契約と処理意図を定義する。
 
 def _load_gw_event_list(root: Path) -> List[Dict[str, object]]:
     path = root / "data" / "gw" / "event_list.json"
@@ -114,6 +121,8 @@ def _load_gw_event_list(root: Path) -> List[Dict[str, object]]:
 
     return out
 
+
+# 関数: `_build_gw_tasks` の入出力契約と処理意図を定義する。
 
 def _build_gw_tasks(*, root: Path, py: str, offline: bool, cwd: Path) -> List[Task]:
     script = root / "scripts" / "gw" / "gw150914_chirp_phase.py"
@@ -193,6 +202,8 @@ def _build_gw_tasks(*, root: Path, py: str, offline: bool, cwd: Path) -> List[Ta
     return tasks
 
 
+# 関数: `_run_task` の入出力契約と処理意図を定義する。
+
 def _run_task(task: Task, env: Dict[str, str], log_dir: Path) -> Dict[str, object]:
     log_path = log_dir / f"{task.key}.log"
     started = time.perf_counter()
@@ -230,6 +241,8 @@ def _run_task(task: Task, env: Dict[str, str], log_dir: Path) -> Dict[str, objec
         "tail": "".join(lines[-40:]),
     }
 
+
+# 関数: `_run_task_quiet` の入出力契約と処理意図を定義する。
 
 def _run_task_quiet(task: Task, env: Dict[str, str], log_dir: Path) -> Dict[str, object]:
     """
@@ -271,6 +284,8 @@ def _run_task_quiet(task: Task, env: Dict[str, str], log_dir: Path) -> Dict[str,
         "tail": "".join(lines[-40:]),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()
@@ -562,6 +577,16 @@ def main() -> int:
         Task(
             key="theory_pmodel_core_concept_comparison",
             argv=[py, "-B", str(root / "scripts" / "theory" / "pmodel_core_concept_comparison.py")],
+            cwd=cwd,
+        ),
+        Task(
+            key="theory_pmodel_rejection_protocol_flowchart",
+            argv=[py, "-B", str(root / "scripts" / "theory" / "pmodel_rejection_protocol_flowchart.py")],
+            cwd=cwd,
+        ),
+        Task(
+            key="theory_pmodel_beta_freeze_rationale",
+            argv=[py, "-B", str(root / "scripts" / "theory" / "pmodel_beta_freeze_rationale.py")],
             cwd=cwd,
         ),
         Task(
@@ -1863,6 +1888,7 @@ def main() -> int:
 
     failures = 0
 
+    # 関数: `_skip_record` の入出力契約と処理意図を定義する。
     def _skip_record(t: Task) -> Optional[Dict[str, object]]:
         # 条件分岐: `offline and t.requires_cache_globs` を満たす経路を評価する。
         if offline and t.requires_cache_globs:
@@ -1935,6 +1961,7 @@ def main() -> int:
         net_lock = Lock()
         task_records: List[Optional[Dict[str, object]]] = [None] * len(tasks)
 
+        # 関数: `_group_name` の入出力契約と処理意図を定義する。
         def _group_name(key: str) -> str:
             return key.split("_", 1)[0]
 
@@ -1947,6 +1974,8 @@ def main() -> int:
                 continue
 
             groups.setdefault(_group_name(t.key), []).append(i)
+
+        # 関数: `_run_group` の入出力契約と処理意図を定義する。
 
         def _run_group(group: str, indices: List[int]) -> None:
             for i in indices:

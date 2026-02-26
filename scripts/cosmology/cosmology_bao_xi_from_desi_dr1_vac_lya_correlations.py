@@ -58,6 +58,7 @@ from scripts.cosmology.boss_dr12v5_fits import read_bintable_columns, read_first
 from scripts.summary import worklog  # noqa: E402
 
 
+# クラス: `_Component` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class _Component:
     key: str
@@ -73,9 +74,12 @@ _COMPONENTS = [
 ]
 
 
+# 関数: `_now_utc` の入出力契約と処理意図を定義する。
 def _now_utc() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_relpath` の入出力契約と処理意図を定義する。
 
 def _relpath(path: Path) -> str:
     try:
@@ -84,9 +88,13 @@ def _relpath(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_sha256_bytes` の入出力契約と処理意図を定義する。
+
 def _sha256_bytes(b: bytes) -> str:
     return hashlib.sha256(b).hexdigest()
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
@@ -97,10 +105,14 @@ def _sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+# 関数: `_p2` の入出力契約と処理意図を定義する。
+
 def _p2(mu: np.ndarray) -> np.ndarray:
     mu = np.asarray(mu, dtype=float)
     return 0.5 * (3.0 * mu * mu - 1.0)
 
+
+# 関数: `_fmt_tag` の入出力契約と処理意図を定義する。
 
 def _fmt_tag(x: float) -> str:
     s = f"{float(x):.6g}".rstrip("0").rstrip(".")
@@ -110,6 +122,8 @@ def _fmt_tag(x: float) -> str:
 
     return s.replace("-", "m").replace(".", "p")
 
+
+# 関数: `_dm_lcdm_dimless` の入出力契約と処理意図を定義する。
 
 def _dm_lcdm_dimless(z: float, *, omega_m: float, n_grid: int) -> float:
     z = float(z)
@@ -134,6 +148,8 @@ def _dm_lcdm_dimless(z: float, *, omega_m: float, n_grid: int) -> float:
     return float(integral)
 
 
+# 関数: `_dh_lcdm_dimless` の入出力契約と処理意図を定義する。
+
 def _dh_lcdm_dimless(z: float, *, omega_m: float) -> float:
     z = float(z)
     # 条件分岐: `z < 0` を満たす経路を評価する。
@@ -144,6 +160,8 @@ def _dh_lcdm_dimless(z: float, *, omega_m: float) -> float:
     return float(1.0 / ez) if ez > 0 else float("nan")
 
 
+# 関数: `_dm_pbg_dimless` の入出力契約と処理意図を定義する。
+
 def _dm_pbg_dimless(z: float) -> float:
     op = 1.0 + float(z)
     # 条件分岐: `not (op > 0.0)` を満たす経路を評価する。
@@ -152,6 +170,8 @@ def _dm_pbg_dimless(z: float) -> float:
 
     return float(math.log(op))
 
+
+# 関数: `_dh_pbg_dimless` の入出力契約と処理意図を定義する。
 
 def _dh_pbg_dimless(z: float) -> float:
     op = 1.0 + float(z)
@@ -162,11 +182,14 @@ def _dh_pbg_dimless(z: float) -> float:
     return float(1.0 / op)
 
 
+# 関数: `_read_omegam_from_cf_header` の入出力契約と処理意図を定義する。
+
 def _read_omegam_from_cf_header(path: Path) -> float:
     # Minimal FITS header scan: primary header + first extension header.
     CARD = 80
     BLOCK = 2880
 
+    # 関数: `read_header_blocks` の入出力契約と処理意図を定義する。
     def read_header_blocks(f) -> bytes:
         chunks: List[bytes] = []
         while True:
@@ -181,6 +204,8 @@ def _read_omegam_from_cf_header(path: Path) -> float:
                 # 条件分岐: `card.startswith("END")` を満たす経路を評価する。
                 if card.startswith("END"):
                     return b"".join(chunks)
+
+    # 関数: `iter_cards` の入出力契約と処理意図を定義する。
 
     def iter_cards(hdr: bytes) -> Iterable[str]:
         for i in range(0, len(hdr), CARD):
@@ -213,6 +238,8 @@ def _read_omegam_from_cf_header(path: Path) -> float:
 
     return float("nan")
 
+
+# 関数: `_load_components` の入出力契約と処理意図を定義する。
 
 def _load_components(*, raw_dir: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray, List[str], List[int]]:
     """
@@ -269,6 +296,8 @@ def _load_components(*, raw_dir: Path) -> Tuple[np.ndarray, np.ndarray, np.ndarr
         offsets,
     )
 
+
+# 関数: `_covariance_submatrix` の入出力契約と処理意図を定義する。
 
 def _covariance_submatrix(
     *,
@@ -350,6 +379,8 @@ def _covariance_submatrix(
     cov_sel = 0.5 * (cov_sel + cov_sel.T)
     return cov_sel
 
+
+# 関数: `_fit_multipoles_and_T` の入出力契約と処理意図を定義する。
 
 def _fit_multipoles_and_T(
     *,
@@ -532,6 +563,8 @@ def _fit_multipoles_and_T(
     return xi0, xi2, T, weight_sums
 
 
+# 関数: `_combine_components` の入出力契約と処理意図を定義する。
+
 def _combine_components(
     *,
     xi0: np.ndarray,
@@ -602,6 +635,8 @@ def _combine_components(
     }
     return xi0_c, xi2_c, cov_c, meta
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="DESI DR1 VAC lya-correlations: project to xi0/xi2 + cov for peakfit.")

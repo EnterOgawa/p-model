@@ -13,13 +13,18 @@ from pypdf import PdfReader
 from pypdf.generic import ContentStream
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -34,6 +39,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_trapz_xy` の入出力契約と処理意図を定義する。
 
 def _trapz_xy(xs: list[float], ys: list[float]) -> float:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -52,6 +59,8 @@ def _trapz_xy(xs: list[float], ys: list[float]) -> float:
     return float(s)
 
 
+# 関数: `_mat_mul` の入出力契約と処理意図を定義する。
+
 def _mat_mul(m1: tuple[float, float, float, float, float, float], m2: tuple[float, float, float, float, float, float]) -> tuple[float, float, float, float, float, float]:
     a1, b1, c1, d1, e1, f1 = m1
     a2, b2, c2, d2, e2, f2 = m2
@@ -65,10 +74,14 @@ def _mat_mul(m1: tuple[float, float, float, float, float, float], m2: tuple[floa
     )
 
 
+# 関数: `_mat_apply` の入出力契約と処理意図を定義する。
+
 def _mat_apply(m: tuple[float, float, float, float, float, float], x: float, y: float) -> tuple[float, float]:
     a, b, c, d, e, f = m
     return (a * float(x) + c * float(y) + e, b * float(x) + d * float(y) + f)
 
+
+# 関数: `_extract_stroke_paths` の入出力契約と処理意図を定義する。
 
 def _extract_stroke_paths(page, reader: PdfReader) -> list[dict[str, object]]:
     cs = ContentStream(page.get_contents(), reader)
@@ -157,6 +170,8 @@ def _extract_stroke_paths(page, reader: PdfReader) -> list[dict[str, object]]:
     return out
 
 
+# 関数: `_extract_axis_ticks_from_strokes` の入出力契約と処理意図を定義する。
+
 def _extract_axis_ticks_from_strokes(strokes: list[dict[str, object]]) -> dict[str, list[float]]:
     """
     Infer plot axis ticks from stroke segments.
@@ -189,6 +204,8 @@ def _extract_axis_ticks_from_strokes(strokes: list[dict[str, object]]) -> dict[s
         if dy < 0.2 and 1.6 <= dx <= 2.6 and xmin <= 110.0 and 250.0 <= ymin <= 800.0:
             y_ticks.append(0.5 * (ymin + ymax))
 
+    # 関数: `unique_sorted` の入出力契約と処理意図を定義する。
+
     def unique_sorted(vals: list[float], *, tol: float) -> list[float]:
         out: list[float] = []
         for v in sorted(float(x) for x in vals):
@@ -202,6 +219,8 @@ def _extract_axis_ticks_from_strokes(strokes: list[dict[str, object]]) -> dict[s
     y_ticks_u = unique_sorted(y_ticks, tol=0.5)
     return {"x_ticks": x_ticks_u, "y_ticks": y_ticks_u}
 
+
+# 関数: `_find_best_major_y_ticks` の入出力契約と処理意図を定義する。
 
 def _find_best_major_y_ticks(y_ticks: list[float]) -> list[float]:
     """
@@ -236,6 +255,8 @@ def _find_best_major_y_ticks(y_ticks: list[float]) -> list[float]:
 
     return [float(y) for y in best]
 
+
+# 関数: `_filter_curves` の入出力契約と処理意図を定義する。
 
 def _filter_curves(
     strokes: list[dict[str, object]],
@@ -283,6 +304,8 @@ def _filter_curves(
     curves.sort(key=lambda c: float(c["ymin"]))
     return curves
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

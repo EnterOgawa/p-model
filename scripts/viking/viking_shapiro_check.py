@@ -23,6 +23,7 @@ from scripts.summary import worklog
 C = 299792458.0
 MU_SUN = 1.3271244e20  # m^3/s^2 (太陽の重力定数)
 
+# 関数: `_make_ssl_context` の入出力契約と処理意図を定義する。
 def _make_ssl_context() -> ssl.SSLContext:
     """
     - HORIZONS_INSECURE=1 なら検証無効（最終手段）
@@ -53,10 +54,13 @@ def _make_ssl_context() -> ssl.SSLContext:
 
 SSL_CTX = _make_ssl_context()
 
+# 関数: `_cache_key` の入出力契約と処理意図を定義する。
 def _cache_key(command: str, start: str, stop: str, step: str, center: str) -> str:
     s = f"cmd={command}|center={center}|start={start}|stop={stop}|step={step}|type=VECTORS|ref=ICRF|units=KM-S|csv=YES"
     return hashlib.sha256(s.encode("utf-8")).hexdigest()[:16]
 
+
+# 関数: `fetch_horizons` の入出力契約と処理意図を定義する。
 
 def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@10") -> str:
     """NASA JPL Horizons APIからエフェメリス(Vector)を取得"""
@@ -80,6 +84,8 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
     with urllib.request.urlopen(url, timeout=180, context=SSL_CTX) as resp:
         return resp.read().decode("utf-8", errors="ignore")
 
+
+# 関数: `fetch_horizons_cached` の入出力契約と処理意図を定義する。
 
 def fetch_horizons_cached(
     command: str,
@@ -127,6 +133,8 @@ def fetch_horizons_cached(
     print(f"[cache] Saved {txt_path}")
     return txt
 
+# 関数: `parse_vectors_csv` の入出力契約と処理意図を定義する。
+
 def parse_vectors_csv(txt: str):
     """HorizonsのCSV出力をパースして (time, r, v) のリストを返す"""
     # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
@@ -155,7 +163,9 @@ def parse_vectors_csv(txt: str):
 # --- ベクトル演算関数 ---
 
 def dot(a,b): return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]
+# 関数: `sub` の入出力契約と処理意図を定義する。
 def sub(a,b): return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+# 関数: `norm` の入出力契約と処理意図を定義する。
 def norm(a): return math.sqrt(dot(a,a))
 
 # --- Shapiro遅延計算 (片道) ---
@@ -165,6 +175,8 @@ def shapiro_oneway(r1, r2, R, gamma=1.0):
     """
     val = (r1 + r2 + R) / (r1 + r2 - R)
     return (1.0+gamma)*MU_SUN/(C**3) * math.log(val)
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
     out_dir = _ROOT / "output" / "private" / "viking"

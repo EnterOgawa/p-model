@@ -40,9 +40,13 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -50,6 +54,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return path.resolve().as_posix()
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(v: Any, default: float = float("nan")) -> float:
     try:
@@ -60,10 +66,14 @@ def _to_float(v: Any, default: float = float("nan")) -> float:
     return float(out) if np.isfinite(out) else float(default)
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[str]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -74,6 +84,8 @@ def _write_csv(path: Path, rows: Sequence[Dict[str, Any]], fieldnames: Sequence[
             w.writerow({k: row.get(k) for k in fieldnames})
 
 
+# 関数: `_cumtrapz_forward` の入出力契約と処理意図を定義する。
+
 def _cumtrapz_forward(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     out = np.zeros_like(y, dtype=float)
     for i in range(1, y.size):
@@ -82,10 +94,14 @@ def _cumtrapz_forward(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     return out
 
 
+# 関数: `_integral_from_i_to_end` の入出力契約と処理意図を定義する。
+
 def _integral_from_i_to_end(y: np.ndarray, x: np.ndarray) -> np.ndarray:
     rev = _cumtrapz_forward(y[::-1], x[::-1])
     return rev[::-1]
 
+
+# 関数: `_spherical_average_theta` の入出力契約と処理意図を定義する。
 
 def _spherical_average_theta(field_rt: np.ndarray, theta: np.ndarray) -> np.ndarray:
     sin_t = np.sin(theta)
@@ -93,6 +109,8 @@ def _spherical_average_theta(field_rt: np.ndarray, theta: np.ndarray) -> np.ndar
     num = np.trapezoid(field_rt * sin_t[None, :], theta, axis=1)
     return 0.5 * num
 
+
+# 関数: `_solve_du_dr_cubic` の入出力契約と処理意図を定義する。
 
 def _solve_du_dr_cubic(q: np.ndarray, eta_nonlinear: float) -> np.ndarray:
     q_arr = np.asarray(q, dtype=float)
@@ -109,6 +127,8 @@ def _solve_du_dr_cubic(q: np.ndarray, eta_nonlinear: float) -> np.ndarray:
 
     return p
 
+
+# 関数: `_solve_u_base_radial` の入出力契約と処理意図を定義する。
 
 def _solve_u_base_radial(*, r: np.ndarray, lambda2: float, eta_nonlinear: float) -> Tuple[np.ndarray, np.ndarray]:
     r_outer = float(r[-1])
@@ -127,6 +147,8 @@ def _solve_u_base_radial(*, r: np.ndarray, lambda2: float, eta_nonlinear: float)
 
     return u, du
 
+
+# 関数: `_build_profiles` の入出力契約と処理意図を定義する。
 
 def _build_profiles(
     *,
@@ -182,6 +204,8 @@ def _build_profiles(
     }
 
 
+# 関数: `_solve_delta_p0_from_source` の入出力契約と処理意図を定義する。
+
 def _solve_delta_p0_from_source(
     *,
     r: np.ndarray,
@@ -194,6 +218,8 @@ def _solve_delta_p0_from_source(
     delta = -_integral_from_i_to_end(ddelta_dr, r)  # delta(r_out)=0
     return delta, ddelta_dr
 
+
+# 関数: `_ring_coeff_from_u` の入出力契約と処理意図を定義する。
 
 def _ring_coeff_from_u(
     *,
@@ -246,6 +272,8 @@ def _ring_coeff_from_u(
     mean_coeff = float(np.mean(coeffs)) if coeffs else float("nan")
     return out_rows, mean_coeff
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     *,
@@ -306,6 +334,8 @@ def _plot(
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Explicit N0^(2) source-term audit and perturbative P0 solution.")

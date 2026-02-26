@@ -22,9 +22,12 @@ from scripts.summary import worklog  # noqa: E402
 _C_M_PER_S = 299_792_458.0
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 
 def _set_japanese_font() -> None:
     try:
@@ -51,14 +54,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_fmt_float` の入出力契約と処理意図を定義する。
 
 def _fmt_float(x: Optional[float], *, digits: int = 4) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
@@ -78,6 +87,8 @@ def _fmt_float(x: Optional[float], *, digits: int = 4) -> str:
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
 
 
+# 関数: `_fmt_pct` の入出力契約と処理意図を定義する。
+
 def _fmt_pct(x: Optional[float], *, digits: int = 2) -> str:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -85,6 +96,8 @@ def _fmt_pct(x: Optional[float], *, digits: int = 2) -> str:
 
     return f"{x * 100.0:.{digits}f}".rstrip("0").rstrip(".") + "%"
 
+
+# 関数: `_status_from_abs_sigma` の入出力契約と処理意図を定義する。
 
 def _status_from_abs_sigma(abs_sigma: Optional[float]) -> str:
     # 条件分岐: `abs_sigma is None` を満たす経路を評価する。
@@ -103,6 +116,8 @@ def _status_from_abs_sigma(abs_sigma: Optional[float]) -> str:
 
     return "ng"
 
+
+# 関数: `_status_color` の入出力契約と処理意図を定義する。
 
 def _status_color(status: str) -> str:
     # 条件分岐: `status == "ok"` を満たす経路を評価する。
@@ -123,9 +138,13 @@ def _status_color(status: str) -> str:
     return "#7f7f7f"
 
 
+# 関数: `_status_label` の入出力契約と処理意図を定義する。
+
 def _status_label(status: str) -> str:
     return {"ok": "OK", "mixed": "要改善", "ng": "不一致", "info": "参考"}.get(status, status)
 
+
+# 関数: `_status_from_gate` の入出力契約と処理意図を定義する。
 
 def _status_from_gate(overall_status: str) -> str:
     s = (overall_status or "").strip().lower()
@@ -145,6 +164,8 @@ def _status_from_gate(overall_status: str) -> str:
 
     return "info"
 
+
+# 関数: `_status_rates` の入出力契約と処理意図を定義する。
 
 def _status_rates(counts: Optional[Dict[str, int]]) -> Optional[Dict[str, Any]]:
     # 条件分岐: `not counts` を満たす経路を評価する。
@@ -170,6 +191,8 @@ def _status_rates(counts: Optional[Dict[str, int]]) -> Optional[Dict[str, Any]]:
     }
 
 
+# クラス: `ScoreRow` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class ScoreRow:
     id: str
@@ -182,6 +205,7 @@ class ScoreRow:
     score_kind: str = ""
     score_raw: Optional[float] = None
 
+    # 関数: `to_dict` の入出力契約と処理意図を定義する。
     def to_dict(self) -> Dict[str, Any]:
         return {
             "id": self.id,
@@ -197,6 +221,8 @@ class ScoreRow:
         }
 
 
+# 関数: `_maybe_float` の入出力契約と処理意図を定義する。
+
 def _maybe_float(x: Any) -> Optional[float]:
     try:
         v = float(x)
@@ -211,6 +237,8 @@ def _maybe_float(x: Any) -> Optional[float]:
     return v
 
 
+# 関数: `_first_existing` の入出力契約と処理意図を定義する。
+
 def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
     for path in paths:
         # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -219,6 +247,8 @@ def _first_existing(paths: Sequence[Path]) -> Optional[Path]:
 
     return None
 
+
+# 関数: `_with_status` の入出力契約と処理意図を定義する。
 
 def _with_status(row: "ScoreRow", status: str) -> "ScoreRow":
     return ScoreRow(
@@ -234,6 +264,8 @@ def _with_status(row: "ScoreRow", status: str) -> "ScoreRow":
     )
 
 
+# 関数: `_with_score` の入出力契約と処理意図を定義する。
+
 def _with_score(row: "ScoreRow", score: Optional[float]) -> "ScoreRow":
     return ScoreRow(
         id=row.id,
@@ -247,6 +279,8 @@ def _with_score(row: "ScoreRow", score: Optional[float]) -> "ScoreRow":
         score_raw=row.score if row.score_raw is None else row.score_raw,
     )
 
+
+# 関数: `_score_lower_better` の入出力契約と処理意図を定義する。
 
 def _score_lower_better(value: Optional[float], *, ok_max: float, mixed_max: float) -> Optional[float]:
     """Map a 'lower is better' metric to a z-like score axis.
@@ -280,6 +314,8 @@ def _score_lower_better(value: Optional[float], *, ok_max: float, mixed_max: flo
     return 2.0 + (x - mixed_max) / max(1e-12, mixed_max)
 
 
+# 関数: `_score_higher_better` の入出力契約と処理意図を定義する。
+
 def _score_higher_better(value: Optional[float], *, ok_min: float, mixed_min: float, ideal: float = 1.0) -> Optional[float]:
     """Map a 'higher is better' metric (e.g., corr, R^2) to a z-like score axis."""
     # 条件分岐: `value is None` を満たす経路を評価する。
@@ -306,6 +342,8 @@ def _score_higher_better(value: Optional[float], *, ok_min: float, mixed_min: fl
 
     return 2.0 + (mixed_min - x) / max(1e-12, mixed_min)
 
+
+# 関数: `_load_llr_row` の入出力契約と処理意図を定義する。
 
 def _load_llr_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "llr" / "batch" / "llr_batch_summary.json"
@@ -346,6 +384,8 @@ def _load_llr_row(root: Path) -> Optional[ScoreRow]:
         score_kind="llr_rms_m",
     )
 
+
+# 関数: `_load_llr_nglr1_row` の入出力契約と処理意図を定義する。
 
 def _load_llr_nglr1_row(root: Path) -> Optional[ScoreRow]:
     metrics_path = root / "output" / "private" / "llr" / "batch" / "llr_batch_metrics.csv"
@@ -461,6 +501,8 @@ def _load_llr_nglr1_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_cassini_row` の入出力契約と処理意図を定義する。
+
 def _load_cassini_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "cassini" / "cassini_fig2_metrics.csv"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -526,6 +568,8 @@ def _load_cassini_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_viking_row` の入出力契約と処理意図を定義する。
+
 def _load_viking_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "viking" / "viking_shapiro_result.csv"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -579,6 +623,8 @@ def _load_viking_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_mercury_row` の入出力契約と処理意図を定義する。
+
 def _load_mercury_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -626,6 +672,8 @@ def _load_mercury_row(root: Path) -> Optional[ScoreRow]:
         score_kind="mercury_abs_percent",
     )
 
+
+# 関数: `_load_gps_row` の入出力契約と処理意図を定義する。
 
 def _load_gps_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
@@ -675,6 +723,8 @@ def _load_gps_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_solar_deflection_row` の入出力契約と処理意図を定義する。
+
 def _load_solar_deflection_row(root: Path) -> Optional[ScoreRow]:
     metrics_path = root / "output" / "private" / "theory" / "solar_light_deflection_metrics.json"
     frozen_path = root / "output" / "private" / "theory" / "frozen_parameters.json"
@@ -708,6 +758,8 @@ def _load_solar_deflection_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_redshift_row` の入出力契約と処理意図を定義する。
 
 def _load_redshift_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "theory" / "gravitational_redshift_experiments.json"
@@ -750,6 +802,8 @@ def _load_redshift_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_cosmology_distance_duality_row` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_distance_duality_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "cosmology" / "cosmology_distance_duality_constraints_metrics.json"
@@ -909,6 +963,8 @@ def _load_cosmology_distance_duality_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_cosmology_tolman_row` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_tolman_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "cosmology" / "cosmology_tolman_surface_brightness_constraints_metrics.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -947,6 +1003,8 @@ def _load_cosmology_tolman_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_cosmology_independent_probes_row` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_independent_probes_row(root: Path) -> Optional[ScoreRow]:
     p_sn = root / "output" / "private" / "cosmology" / "cosmology_sn_time_dilation_constraints_metrics.json"
@@ -1002,6 +1060,8 @@ def _load_cosmology_independent_probes_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_cosmology_jwst_mast_row` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_jwst_mast_row(root: Path) -> Optional[ScoreRow]:
     """
@@ -1115,6 +1175,8 @@ def _load_cosmology_jwst_mast_row(root: Path) -> Optional[ScoreRow]:
         sources=[str(manifest_all).replace("\\", "/")] + ([str(waitlist_path).replace("\\", "/")] if waitlist_path.exists() else []),
     )
 
+
+# 関数: `_load_cosmology_bao_catalog_row` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
     """
@@ -1248,6 +1310,7 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
         root / "output" / "private" / "cosmology" / "cosmology_bao_catalog_peakfit_cmasslowztot_south_zbinonly_metrics.json",
     ]
 
+    # 関数: `_collect` の入出力契約と処理意図を定義する。
     def _collect(paths: List[Path]) -> Tuple[List[Dict[str, Any]], List[str]]:
         items: List[Dict[str, Any]] = []
         sources: List[str] = []
@@ -1306,6 +1369,8 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
     if not items_b and not items_pre and not items_a:
         return None
 
+    # 関数: `_summarize` の入出力契約と処理意図を定義する。
+
     def _summarize(items: List[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         # 条件分岐: `not items` を満たす経路を評価する。
         if not items:
@@ -1343,12 +1408,15 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
     worst = float(score_sum["worst"])
     worst_lb = bool(score_sum.get("worst_lb"))
 
+    # 関数: `_fmt_sigma` の入出力契約と処理意図を定義する。
     def _fmt_sigma(v: Optional[float], *, lower_bound: bool = False) -> str:
         # 条件分岐: `v is None` を満たす経路を評価する。
         if v is None:
             return "?σ"
 
         return f"≥{_fmt_float(v, digits=2)}σ" if lower_bound else f"{_fmt_float(v, digits=2)}σ"
+
+    # 関数: `_fmt_item` の入出力契約と処理意図を定義する。
 
     def _fmt_item(it: Optional[Dict[str, Any]]) -> str:
         # 条件分岐: `not it` を満たす経路を評価する。
@@ -1358,6 +1426,8 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
         z = _maybe_float(it.get("z_eff"))
         ztag = f"z={_fmt_float(z, digits=3)}" if z is not None else "z=?"
         return f"{ztag}:{_fmt_sigma(_maybe_float(it.get('abs_sigma')), lower_bound=bool(it.get('lower_bound')))}"
+
+    # 関数: `_fmt_eps_pm` の入出力契約と処理意図を定義する。
 
     def _fmt_eps_pm(item: Optional[Dict[str, Any]]) -> str:
         # 条件分岐: `not item` を満たす経路を評価する。
@@ -1376,6 +1446,8 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
             return f"ε={_fmt_float(eps, digits=3)}"
 
         return f"ε={_fmt_float(eps, digits=3)}±{_fmt_float(sig, digits=3)}"
+
+    # 関数: `_fmt_phase` の入出力契約と処理意図を定義する。
 
     def _fmt_phase(sum_: Optional[Dict[str, Any]], *, label: str) -> str:
         # 条件分岐: `not sum_` を満たす経路を評価する。
@@ -1499,6 +1571,8 @@ def _load_cosmology_bao_catalog_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_cosmology_cmb_polarization_phase_row` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_cmb_polarization_phase_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -1559,6 +1633,8 @@ def _load_cosmology_cmb_polarization_phase_row(root: Path) -> Optional[ScoreRow]
     )
 
 
+# 関数: `_load_cosmology_fsigma8_growth_row` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_fsigma8_growth_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -1617,6 +1693,8 @@ def _load_cosmology_fsigma8_growth_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_cosmology_cluster_collision_row` の入出力契約と処理意図を定義する。
 
 def _load_cosmology_cluster_collision_row(root: Path) -> Optional[ScoreRow]:
     deriv_path = _first_existing(
@@ -1721,6 +1799,8 @@ def _load_cosmology_cluster_collision_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_cosmology_cmb_acoustic_row` の入出力契約と処理意図を定義する。
+
 def _load_cosmology_cmb_acoustic_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -1810,6 +1890,8 @@ def _load_cosmology_cmb_acoustic_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_sparc_rotation_row` の入出力契約と処理意図を定義する。
+
 def _load_sparc_rotation_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -1868,6 +1950,8 @@ def _load_sparc_rotation_row(root: Path) -> Optional[ScoreRow]:
         score_kind="chi2",
     )
 
+
+# 関数: `_load_xrism_row` の入出力契約と処理意図を定義する。
 
 def _load_xrism_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
@@ -1930,6 +2014,8 @@ def _load_xrism_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_bbn_row` の入出力契約と処理意図を定義する。
+
 def _load_bbn_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -1982,6 +2068,8 @@ def _load_bbn_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_background_metric_case_b_row` の入出力契約と処理意図を定義する。
+
 def _load_background_metric_case_b_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -2028,6 +2116,8 @@ def _load_background_metric_case_b_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_background_metric_case_a_row` の入出力契約と処理意図を定義する。
+
 def _load_background_metric_case_a_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -2072,6 +2162,8 @@ def _load_background_metric_case_a_row(root: Path) -> Optional[ScoreRow]:
         score_kind="gate",
     )
 
+
+# 関数: `_load_scalar_limit_reject_row` の入出力契約と処理意図を定義する。
 
 def _load_scalar_limit_reject_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
@@ -2137,6 +2229,8 @@ def _load_scalar_limit_reject_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_gw_polarization_row` の入出力契約と処理意図を定義する。
+
 def _load_gw_polarization_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -2195,6 +2289,8 @@ def _load_gw_polarization_row(root: Path) -> Optional[ScoreRow]:
         score_kind="gate",
     )
 
+
+# 関数: `_load_gw_area_qnm_imr_row` の入出力契約と処理意図を定義する。
 
 def _load_gw_area_qnm_imr_row(root: Path) -> Optional[ScoreRow]:
     area_path = _first_existing(
@@ -2314,6 +2410,8 @@ def _load_gw_area_qnm_imr_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_strong_field_higher_order_row` の入出力契約と処理意図を定義する。
+
 def _load_strong_field_higher_order_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -2373,6 +2471,8 @@ def _load_strong_field_higher_order_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_frame_dragging_row` の入出力契約と処理意図を定義する。
+
 def _load_frame_dragging_row(root: Path) -> Optional[ScoreRow]:
     path = _first_existing(
         [
@@ -2418,6 +2518,8 @@ def _load_frame_dragging_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_eht_row` の入出力契約と処理意図を定義する。
+
 def _load_eht_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "eht" / "eht_shadow_compare.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -2457,6 +2559,8 @@ def _load_eht_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_binary_pulsar_row` の入出力契約と処理意図を定義する。
 
 def _load_binary_pulsar_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
@@ -2499,6 +2603,8 @@ def _load_binary_pulsar_row(root: Path) -> Optional[ScoreRow]:
         score_kind="abs_z",
     )
 
+
+# 関数: `_load_gw_row` の入出力契約と処理意図を定義する。
 
 def _load_gw_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "gw" / "gw_multi_event_summary_metrics.json"
@@ -2601,6 +2707,8 @@ def _load_gw_row(root: Path) -> Optional[ScoreRow]:
     )
 
 
+# 関数: `_load_delta_row` の入出力契約と処理意図を定義する。
+
 def _load_delta_row(root: Path) -> Optional[ScoreRow]:
     path = root / "output" / "private" / "theory" / "delta_saturation_constraints.json"
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -2639,6 +2747,8 @@ def _load_delta_row(root: Path) -> Optional[ScoreRow]:
         score_kind="delta_upper_bound",
     )
 
+
+# 関数: `_compute_sigma_stats_from_table1` の入出力契約と処理意図を定義する。
 
 def _compute_sigma_stats_from_table1(table1_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     # Parse z-like values from "metric", and the pulsar sigma from "metric_public".
@@ -2734,10 +2844,14 @@ def _compute_sigma_stats_from_table1(table1_rows: Sequence[Dict[str, Any]]) -> D
     }
 
 
+# 関数: `_table1_status_from_abs_sigma` の入出力契約と処理意図を定義する。
+
 def _table1_status_from_abs_sigma(abs_sigma: float) -> str:
     # Keep consistent with other sigma-based rows.
     return _status_from_abs_sigma(abs_sigma)
 
+
+# 関数: `_table1_forced_status` の入出力契約と処理意図を定義する。
 
 def _table1_forced_status(topic: str, observable: str) -> Optional[str]:
     t = (topic or "").strip()
@@ -2828,6 +2942,8 @@ def _table1_forced_status(topic: str, observable: str) -> Optional[str]:
 
     return None
 
+
+# 関数: `_classify_table1_rows` の入出力契約と処理意図を定義する。
 
 def _classify_table1_rows(table1_rows: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     sigma_re = re.compile(r"([0-9]+(?:\.[0-9]+)?)\s*σ")
@@ -2991,6 +3107,8 @@ def _classify_table1_rows(table1_rows: Sequence[Dict[str, Any]]) -> Dict[str, An
     return {"rows": breakdown, "counts": counts}
 
 
+# 関数: `_apply_latest_scoreboard_policy` の入出力契約と処理意図を定義する。
+
 def _apply_latest_scoreboard_policy(rows: Sequence[ScoreRow]) -> List[ScoreRow]:
     status_by_id: Dict[str, str] = {
         "llr": "ok",
@@ -3027,6 +3145,8 @@ def _apply_latest_scoreboard_policy(rows: Sequence[ScoreRow]) -> List[ScoreRow]:
 
     return out
 
+
+# 関数: `_canonical_score_for_status` の入出力契約と処理意図を定義する。
 
 def _canonical_score_for_status(score: Optional[float], status: str) -> Optional[float]:
     # 条件分岐: `score is None` を満たす経路を評価する。
@@ -3085,6 +3205,8 @@ def _canonical_score_for_status(score: Optional[float], status: str) -> Optional
     return s
 
 
+# 関数: `_align_score_with_status` の入出力契約と処理意図を定義する。
+
 def _align_score_with_status(rows: Sequence[ScoreRow]) -> List[ScoreRow]:
     aligned: List[ScoreRow] = []
     for row in rows:
@@ -3092,6 +3214,8 @@ def _align_score_with_status(rows: Sequence[ScoreRow]) -> List[ScoreRow]:
 
     return aligned
 
+
+# 関数: `build_validation_scoreboard` の入出力契約と処理意図を定義する。
 
 def build_validation_scoreboard(root: Path) -> Dict[str, Any]:
     rows: List[ScoreRow] = []
@@ -3196,6 +3320,8 @@ def build_validation_scoreboard(root: Path) -> Dict[str, Any]:
     return payload
 
 
+# 関数: `plot_validation_scoreboard` の入出力契約と処理意図を定義する。
+
 def plot_validation_scoreboard(
     payload: Dict[str, Any],
     *,
@@ -3217,6 +3343,7 @@ def plot_validation_scoreboard(
 
     severity = {"ng": 3, "mixed": 2, "ok": 1, "info": 0}
 
+    # 関数: `sort_key` の入出力契約と処理意図を定義する。
     def sort_key(r: Dict[str, Any]) -> Tuple[int, float]:
         st = str(r.get("status") or "info")
         sev = int(severity.get(st, 0))
@@ -3247,6 +3374,7 @@ def plot_validation_scoreboard(
 
     import textwrap
 
+    # 関数: `_wrap_label` の入出力契約と処理意図を定義する。
     def _wrap_label(s: str, *, width: int) -> str:
         t = (s or "").strip()
         # 条件分岐: `not t` を満たす経路を評価する。
@@ -3357,6 +3485,8 @@ def plot_validation_scoreboard(
     fig.savefig(out_png, dpi=180)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     root = _repo_root()

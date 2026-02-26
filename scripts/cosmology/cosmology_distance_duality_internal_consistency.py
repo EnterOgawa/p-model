@@ -18,6 +18,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -43,14 +44,20 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
 
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
 
 def _safe_float(x: Any) -> Optional[float]:
     try:
@@ -69,6 +76,8 @@ def _safe_float(x: Any) -> Optional[float]:
 
     return v
 
+
+# 関数: `_category` の入出力契約と処理意図を定義する。
 
 def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     uses_bao = bool(row.get("uses_bao", False))
@@ -102,6 +111,8 @@ def _category(row: Dict[str, Any]) -> Tuple[str, str]:
     return ("other", "#7f7f7f")
 
 
+# 関数: `_pairwise_abs_z_matrix` の入出力契約と処理意図を定義する。
+
 def _pairwise_abs_z_matrix(eps: np.ndarray, sigma: np.ndarray) -> np.ndarray:
     n = int(eps.shape[0])
     m = np.zeros((n, n), dtype=float)
@@ -123,6 +134,8 @@ def _pairwise_abs_z_matrix(eps: np.ndarray, sigma: np.ndarray) -> np.ndarray:
     return m
 
 
+# 関数: `_epsilon0_from_eta0` の入出力契約と処理意図を定義する。
+
 def _epsilon0_from_eta0(eta0: float, z_ref: float, *, nonlinear: bool) -> Optional[float]:
     # 条件分岐: `z_ref <= 0` を満たす経路を評価する。
     if z_ref <= 0:
@@ -143,6 +156,8 @@ def _epsilon0_from_eta0(eta0: float, z_ref: float, *, nonlinear: bool) -> Option
     return math.log(eta) / math.log(1.0 + z_ref)
 
 
+# 関数: `_epsilon0_sigma_from_eta0` の入出力契約と処理意図を定義する。
+
 def _epsilon0_sigma_from_eta0(
     eta0: float, eta0_sigma: float, z_ref: float, *, nonlinear: bool
 ) -> Optional[float]:
@@ -154,6 +169,8 @@ def _epsilon0_sigma_from_eta0(
 
     return abs(hi - lo) / 2.0
 
+
+# 関数: `_anchor_sensitivity` の入出力契約と処理意図を定義する。
 
 def _anchor_sensitivity(
     constraints: List[Dict[str, Any]],
@@ -212,6 +229,8 @@ def _anchor_sensitivity(
 
     return out
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     ap = argparse.ArgumentParser(

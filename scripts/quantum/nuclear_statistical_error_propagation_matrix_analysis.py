@@ -18,6 +18,7 @@ SIGMA_ALPHA_BETA2 = 0.10
 RNG_SEED = 71618
 
 
+# 関数: `_parse_float` の入出力契約と処理意図を定義する。
 def _parse_float(value: Any) -> float:
     try:
         out = float(value)
@@ -26,6 +27,8 @@ def _parse_float(value: Any) -> float:
 
     return out if math.isfinite(out) else float("nan")
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     import hashlib
@@ -43,6 +46,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         # 条件分岐: `not rows` を満たす経路を評価する。
@@ -57,6 +62,8 @@ def _write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
             writer.writerow([row.get(h) for h in headers])
 
 
+# 関数: `_write_matrix_csv` の入出力契約と処理意図を定義する。
+
 def _write_matrix_csv(path: Path, labels: list[str], matrix: list[list[float]]) -> None:
     with path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.writer(f)
@@ -64,6 +71,8 @@ def _write_matrix_csv(path: Path, labels: list[str], matrix: list[list[float]]) 
         for name, row in zip(labels, matrix):
             writer.writerow([name] + [float(v) for v in row])
 
+
+# 関数: `_percentile` の入出力契約と処理意図を定義する。
 
 def _percentile(values: list[float], q: float) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
@@ -96,6 +105,8 @@ def _percentile(values: list[float], q: float) -> float:
     return float(ordered[lo] * (1.0 - frac) + ordered[hi] * frac)
 
 
+# 関数: `_mean` の入出力契約と処理意図を定義する。
+
 def _mean(values: list[float]) -> float:
     # 条件分岐: `not values` を満たす経路を評価する。
     if not values:
@@ -103,6 +114,8 @@ def _mean(values: list[float]) -> float:
 
     return float(sum(values) / float(len(values)))
 
+
+# 関数: `_variance` の入出力契約と処理意図を定義する。
 
 def _variance(values: list[float], mean_value: float | None = None) -> float:
     # 条件分岐: `len(values) < 2` を満たす経路を評価する。
@@ -112,6 +125,8 @@ def _variance(values: list[float], mean_value: float | None = None) -> float:
     m = mean_value if mean_value is not None else _mean(values)
     return float(sum((float(v) - m) ** 2 for v in values) / float(len(values) - 1))
 
+
+# 関数: `_covariance` の入出力契約と処理意図を定義する。
 
 def _covariance(xs: list[float], ys: list[float], mx: float | None = None, my: float | None = None) -> float:
     # 条件分岐: `len(xs) != len(ys) or len(xs) < 2` を満たす経路を評価する。
@@ -126,6 +141,8 @@ def _covariance(xs: list[float], ys: list[float], mx: float | None = None, my: f
 
     return float(acc / float(len(xs) - 1))
 
+
+# 関数: `_moments` の入出力契約と処理意図を定義する。
 
 def _moments(r0: list[float], c_n: list[float], c_p: list[float]) -> dict[str, float]:
     n = len(r0)
@@ -143,6 +160,8 @@ def _moments(r0: list[float], c_n: list[float], c_p: list[float]) -> dict[str, f
     return {"a": a, "b": b, "c": c, "d": d, "e": e, "f": f, "n": float(n)}
 
 
+# 関数: `_rms_from_moments` の入出力契約と処理意図を定義する。
+
 def _rms_from_moments(m: dict[str, float], *, k_n: float, k_p: float, extra_var: float = 0.0) -> float:
     r2 = (
         float(m["a"])
@@ -156,6 +175,8 @@ def _rms_from_moments(m: dict[str, float], *, k_n: float, k_p: float, extra_var:
     return math.sqrt(max(r2, 0.0))
 
 
+# 関数: `_dr_dk_n` の入出力契約と処理意図を定義する。
+
 def _dr_dk_n(m: dict[str, float], *, k_n: float, k_p: float, rms: float) -> float:
     # 条件分岐: `rms <= 0.0` を満たす経路を評価する。
     if rms <= 0.0:
@@ -164,6 +185,8 @@ def _dr_dk_n(m: dict[str, float], *, k_n: float, k_p: float, rms: float) -> floa
     return float((float(m["b"]) + 2.0 * float(m["d"]) * k_n + float(m["f"]) * k_p) / (2.0 * rms))
 
 
+# 関数: `_dr_dk_p` の入出力契約と処理意図を定義する。
+
 def _dr_dk_p(m: dict[str, float], *, k_n: float, k_p: float, rms: float) -> float:
     # 条件分岐: `rms <= 0.0` を満たす経路を評価する。
     if rms <= 0.0:
@@ -171,6 +194,8 @@ def _dr_dk_p(m: dict[str, float], *, k_n: float, k_p: float, rms: float) -> floa
 
     return float((float(m["c"]) + 2.0 * float(m["e"]) * k_p + float(m["f"]) * k_n) / (2.0 * rms))
 
+
+# 関数: `_fit_pairing_parameters` の入出力契約と処理意図を定義する。
 
 def _fit_pairing_parameters(
     *,
@@ -234,6 +259,8 @@ def _fit_pairing_parameters(
     return float(k_n), float(k_p), float(var_k_n), float(var_k_p), float(cov_k_nk_p)
 
 
+# 関数: `_read_pairing_per_nucleus` の入出力契約と処理意図を定義する。
+
 def _read_pairing_per_nucleus(path: Path) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     by_zn: dict[tuple[int, int], dict[str, Any]] = {}
@@ -260,6 +287,8 @@ def _read_pairing_per_nucleus(path: Path) -> dict[str, Any]:
 
     return {"rows": rows, "by_zn": by_zn}
 
+
+# 関数: `_build_separation_moments` の入出力契約と処理意図を定義する。
 
 def _build_separation_moments(
     *,
@@ -317,6 +346,8 @@ def _build_separation_moments(
 
     return _moments(r0, c_n, c_p)
 
+
+# 関数: `_build_q_moments` の入出力契約と処理意図を定義する。
 
 def _build_q_moments(
     *,
@@ -383,6 +414,8 @@ def _build_q_moments(
     return out
 
 
+# 関数: `_build_beta2_moments` の入出力契約と処理意図を定義する。
+
 def _build_beta2_moments(beta2_csv: Path) -> dict[str, float]:
     residuals: list[float] = []
     sigmas: list[float] = []
@@ -416,6 +449,8 @@ def _build_beta2_moments(beta2_csv: Path) -> dict[str, float]:
         "sigma_sq_mean": float(sigma_sq_mean if math.isfinite(sigma_sq_mean) else 0.0),
     }
 
+
+# 関数: `_build_figure` の入出力契約と処理意図を定義する。
 
 def _build_figure(
     *,
@@ -491,6 +526,8 @@ def _build_figure(
     fig.savefig(out_png)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     root = Path(__file__).resolve().parents[2]

@@ -16,6 +16,7 @@ SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False
 SSL_CTX.verify_mode = ssl.CERT_NONE
 
+# 関数: `fetch_horizons` の入出力契約と処理意図を定義する。
 def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@10") -> str:
     params = {
         "format": "text",
@@ -35,6 +36,8 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
     url = "https://ssd.jpl.nasa.gov/api/horizons.api?" + urllib.parse.urlencode(params)
     with urllib.request.urlopen(url, timeout=180, context=SSL_CTX) as resp:
         return resp.read().decode("utf-8", errors="ignore")
+
+# 関数: `parse_vectors_csv` の入出力契約と処理意図を定義する。
 
 def parse_vectors_csv(txt: str):
     # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
@@ -57,14 +60,22 @@ def parse_vectors_csv(txt: str):
 
     return rows
 
+# 関数: `dot` の入出力契約と処理意図を定義する。
+
 def dot(a,b): return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]
+# 関数: `cross` の入出力契約と処理意図を定義する。
 def cross(a,b):
     return (a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0])
 
+# 関数: `norm` の入出力契約と処理意図を定義する。
+
 def norm(a): return math.sqrt(dot(a,a))
+# 関数: `sub` の入出力契約と処理意図を定義する。
 def sub(a,b): return (a[0]-b[0], a[1]-b[1], a[2]-b[2])
+# 関数: `add` の入出力契約と処理意図を定義する。
 def add(a,b): return (a[0]+b[0], a[1]+b[1], a[2]+b[2])
 
+# 関数: `impact_b_and_bdot` の入出力契約と処理意図を定義する。
 def impact_b_and_bdot(rE, vE, rS, vS):
     dr = sub(rS, rE)
     dv = sub(vS, vE)
@@ -85,18 +96,26 @@ def impact_b_and_bdot(rE, vE, rS, vS):
     bdot = (D*dU - U*dD) / (D*D)
     return b, bdot
 
+# 関数: `shapiro_dt` の入出力契約と処理意図を定義する。
+
 def shapiro_dt(r1, r2, b, gamma=1.0):
     # Cassini Eq(1): round-trip delay (b approximation)
     return 2.0*(1.0+gamma)*MU_SUN/(C**3) * math.log((4.0*r1*r2)/(b*b))
+
+# 関数: `y_eq2` の入出力契約と処理意図を定義する。
 
 def y_eq2(b, bdot, gamma=1.0):
     # Cassini Eq(2) approximation
     return 4.0*(1.0+gamma)*MU_SUN/(C**3) * (bdot/b)
 
+# 関数: `y_full` の入出力契約と処理意図を定義する。
+
 def y_full(r1, r1dot, r2, r2dot, b, bdot, gamma=1.0):
     # Cassini Doppler observable (round-trip) uses: y = - d(Delta_t)/dt
     coef = 2.0*(1.0+gamma)*MU_SUN/(C**3)
     return -coef * ((r1dot/r1) + (r2dot/r2) - 2.0*(bdot/b))
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
     root = Path(__file__).resolve().parents[2]

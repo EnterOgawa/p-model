@@ -61,9 +61,13 @@ except Exception:  # pragma: no cover
     worklog = None
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -72,10 +76,14 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_parse_grid` の入出力契約と処理意図を定義する。
 
 def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     # 条件分岐: `not (np.isfinite(start) and np.isfinite(stop) and np.isfinite(step) and step...` を満たす経路を評価する。
@@ -93,14 +101,20 @@ def _parse_grid(start: float, stop: float, step: float) -> List[float]:
     return [float(x) for x in vv.tolist()]
 
 
+# 関数: `_unique_sorted` の入出力契約と処理意図を定義する。
+
 def _unique_sorted(values: Sequence[float]) -> List[float]:
     out = sorted({float(x) for x in values if np.isfinite(x)})
     return out
 
 
+# 関数: `_splits` の入出力契約と処理意図を定義する。
+
 def _splits(seeds: Sequence[int], train_fracs: Sequence[float]) -> List[Tuple[int, float]]:
     return [(int(s), float(f)) for s in seeds for f in train_fracs]
 
+
+# 関数: `_extract_low_accel_z` の入出力契約と処理意図を定義する。
 
 def _extract_low_accel_z(metrics: Dict[str, Any], model_name: str) -> float:
     for m in metrics.get("models", []):
@@ -114,6 +128,8 @@ def _extract_low_accel_z(metrics: Dict[str, Any], model_name: str) -> float:
     return float("nan")
 
 
+# 関数: `_extract_sigma_int` の入出力契約と処理意図を定義する。
+
 def _extract_sigma_int(metrics: Dict[str, Any], model_name: str) -> float:
     for m in metrics.get("models", []):
         # 条件分岐: `m.get("name") != model_name` を満たす経路を評価する。
@@ -126,9 +142,13 @@ def _extract_sigma_int(metrics: Dict[str, Any], model_name: str) -> float:
     return float("nan")
 
 
+# 関数: `_a0_from_kappa` の入出力契約と処理意図を定義する。
+
 def _a0_from_kappa(kappa: float, h0_si: float) -> float:
     return float(kappa) * float(C_LIGHT_M_S) * float(h0_si)
 
+
+# 関数: `_run_split` の入出力契約と処理意図を定義する。
 
 def _run_split(
     pts: Sequence[Point],
@@ -209,6 +229,8 @@ def _run_split(
     return out
 
 
+# 関数: `_plot_pass_rate` の入出力契約と処理意図を定義する。
+
 def _plot_pass_rate(
     rows: List[Dict[str, Any]],
     *,
@@ -247,6 +269,8 @@ def _plot_pass_rate(
     fig.savefig(out_png, dpi=160)
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     p = argparse.ArgumentParser()

@@ -32,9 +32,12 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -42,6 +45,8 @@ def _rel(path: Path) -> str:
     except Exception:
         return str(path).replace("\\", "/")
 
+
+# 関数: `_run_text` の入出力契約と処理意図を定義する。
 
 def _run_text(cmd: List[str]) -> Dict[str, Any]:
     try:
@@ -56,6 +61,8 @@ def _run_text(cmd: List[str]) -> Dict[str, Any]:
         return {"ok": False, "error": f"{type(e).__name__}: {e}"}
 
 
+# 関数: `_pip_version` の入出力契約と処理意図を定義する。
+
 def _pip_version() -> Optional[str]:
     res = _run_text([sys.executable, "-m", "pip", "--version"])
     # 条件分岐: `not res.get("ok")` を満たす経路を評価する。
@@ -66,6 +73,8 @@ def _pip_version() -> Optional[str]:
     return s or None
 
 
+# 関数: `_pip_freeze` の入出力契約と処理意図を定義する。
+
 def _pip_freeze() -> Dict[str, Any]:
     res = _run_text([sys.executable, "-m", "pip", "freeze"])
     # 条件分岐: `not res.get("ok")` を満たす経路を評価する。
@@ -75,6 +84,8 @@ def _pip_freeze() -> Dict[str, Any]:
     lines = [ln.strip() for ln in str(res.get("stdout") or "").splitlines() if ln.strip()]
     return {"ok": True, "packages": lines}
 
+
+# 関数: `build_fingerprint` の入出力契約と処理意図を定義する。
 
 def build_fingerprint(*, include_freeze: bool) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
@@ -96,6 +107,8 @@ def build_fingerprint(*, include_freeze: bool) -> Dict[str, Any]:
 
     return payload
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Phase 8 / Step 8.3: write environment fingerprint JSON.")

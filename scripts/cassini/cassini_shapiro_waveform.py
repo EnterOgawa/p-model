@@ -15,6 +15,7 @@ SSL_CTX = ssl.create_default_context()
 SSL_CTX.check_hostname = False
 SSL_CTX.verify_mode = ssl.CERT_NONE
 
+# 関数: `fetch_horizons` の入出力契約と処理意図を定義する。
 def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@10") -> str:
     params = {
         "format": "text",
@@ -39,6 +40,8 @@ def fetch_horizons(command: str, start: str, stop: str, step: str, center="500@1
         print("HORIZONS URL (for debugging):")
         print(url)
         raise
+
+# 関数: `parse_vectors_csv` の入出力契約と処理意図を定義する。
 
 def parse_vectors_csv(txt: str):
     # 条件分岐: `"$$SOE" not in txt or "$$EOE" not in txt` を満たす経路を評価する。
@@ -69,8 +72,12 @@ def parse_vectors_csv(txt: str):
 
     return rows
 
+# 関数: `norm3` の入出力契約と処理意図を定義する。
+
 def norm3(x,y,z):
     return math.sqrt(x*x+y*y+z*z)
+
+# 関数: `impact_parameter_b` の入出力契約と処理意図を定義する。
 
 def impact_parameter_b(rE, rS):
     # b = |rE x rS| / |rS - rE|
@@ -82,6 +89,8 @@ def impact_parameter_b(rE, rS):
     dx=x2-x1; dy=y2-y1; dz=z2-z1
     den=math.sqrt(dx*dx+dy*dy+dz*dz)
     return num/den
+
+# 関数: `central_diff` の入出力契約と処理意図を定義する。
 
 def central_diff(vals, dt):
     n=len(vals)
@@ -97,6 +106,8 @@ def central_diff(vals, dt):
             out[i]=(vals[n-1]-vals[n-2])/dt
 
     return out
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main():
     root = Path(__file__).resolve().parents[2]

@@ -40,6 +40,7 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
 def _set_japanese_font() -> None:
     try:
         import japanize_matplotlib  # type: ignore  # noqa: F401
@@ -63,6 +64,8 @@ def _set_japanese_font() -> None:
         mpl.rcParams["axes.unicode_minus"] = False
 
 
+# 関数: `_safe_float` の入出力契約と処理意図を定義する。
+
 def _safe_float(x: Any) -> Optional[float]:
     # 条件分岐: `x is None` を満たす経路を評価する。
     if x is None:
@@ -73,6 +76,8 @@ def _safe_float(x: Any) -> Optional[float]:
     except Exception:
         return None
 
+
+# クラス: `PeakfitPoint` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class PeakfitPoint:
@@ -86,6 +91,8 @@ class PeakfitPoint:
     status: str
     source_metrics: str
 
+
+# 関数: `_load_peakfit_points` の入出力契約と処理意図を定義する。
 
 def _load_peakfit_points(metrics_path: Path) -> List[PeakfitPoint]:
     d = json.loads(metrics_path.read_text(encoding="utf-8"))
@@ -144,6 +151,8 @@ def _load_peakfit_points(metrics_path: Path) -> List[PeakfitPoint]:
     return out
 
 
+# 関数: `_dist_style` の入出力契約と処理意図を定義する。
+
 def _dist_style(dist: str) -> Tuple[str, str]:
     dist = str(dist)
     # 条件分岐: `dist == "lcdm"` を満たす経路を評価する。
@@ -157,6 +166,8 @@ def _dist_style(dist: str) -> Tuple[str, str]:
 
     return "#7f7f7f", "D"
 
+
+# 関数: `_sample_label` の入出力契約と処理意図を定義する。
 
 def _sample_label(sample: str) -> str:
     # Keep names compact and stable.
@@ -181,6 +192,8 @@ def _sample_label(sample: str) -> str:
     return sample
 
 
+# 関数: `_caps_label` の入出力契約と処理意図を定義する。
+
 def _caps_label(caps: str) -> str:
     # 条件分岐: `caps == "combined"` を満たす経路を評価する。
     if caps == "combined":
@@ -198,6 +211,8 @@ def _caps_label(caps: str) -> str:
 
     return caps
 
+
+# 関数: `_calc_delta_z` の入出力契約と処理意図を定義する。
 
 def _calc_delta_z(
     a: PeakfitPoint | None, b: PeakfitPoint | None
@@ -220,6 +235,8 @@ def _calc_delta_z(
     delta = float(a.eps) - float(b.eps)
     return delta, sigma_delta, float(delta / sigma_delta)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Cosmology: BAO multi-systematics summary (BOSS/eBOSS peakfit eps + cap tension).")
@@ -272,6 +289,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if not by_key:
         raise SystemExit(f"no inputs found (missing={missing})")
+
+    # 関数: `get` の入出力契約と処理意図を定義する。
 
     def get(sample: str, caps: str, dist: str) -> PeakfitPoint | None:
         return by_key.get((sample, caps, dist))

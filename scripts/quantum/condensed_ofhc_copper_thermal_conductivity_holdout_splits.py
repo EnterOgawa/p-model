@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
@@ -19,6 +20,7 @@ def _repo_root() -> Path:
 _ROOT = _repo_root()
 
 
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -33,9 +35,13 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_log10k_from_coeffs` の入出力契約と処理意図を定義する。
 
 def _log10k_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray:
     t = np.asarray(t_k, dtype=float)
@@ -58,9 +64,13 @@ def _log10k_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray
     return num / den
 
 
+# 関数: `_k_from_coeffs` の入出力契約と処理意図を定義する。
+
 def _k_from_coeffs(t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray:
     return np.power(10.0, _log10k_from_coeffs(t_k, coeffs=coeffs))
 
+
+# 関数: `_metrics_for_idx` の入出力契約と処理意図を定義する。
 
 def _metrics_for_idx(
     *,
@@ -98,6 +108,8 @@ def _metrics_for_idx(
     }
 
 
+# 関数: `_fit_rational9_linearized` の入出力契約と処理意図を定義する。
+
 def _fit_rational9_linearized(*, t_k: np.ndarray, y_log10k: np.ndarray, train_idx: np.ndarray) -> dict[str, float]:
     t = np.asarray(t_k, dtype=float).reshape(-1)
     y = np.asarray(y_log10k, dtype=float).reshape(-1)
@@ -122,9 +134,13 @@ def _fit_rational9_linearized(*, t_k: np.ndarray, y_log10k: np.ndarray, train_id
     return {"a": a, "b": b, "c": c, "d": d, "e": e, "f": f, "g": g, "h": h, "i": i}
 
 
+# 関数: `_predict_rational9` の入出力契約と処理意図を定義する。
+
 def _predict_rational9(*, t_k: np.ndarray, coeffs: dict[str, float]) -> np.ndarray:
     return _k_from_coeffs(np.asarray(t_k, dtype=float), coeffs=coeffs)
 
+
+# 関数: `_fit_logpoly2` の入出力契約と処理意図を定義する。
 
 def _fit_logpoly2(*, t_k: np.ndarray, y_log10k: np.ndarray, train_idx: np.ndarray) -> dict[str, float]:
     t = np.asarray(t_k, dtype=float).reshape(-1)
@@ -141,12 +157,16 @@ def _fit_logpoly2(*, t_k: np.ndarray, y_log10k: np.ndarray, train_idx: np.ndarra
     return {"a0": a0, "a1": a1, "a2": a2}
 
 
+# 関数: `_predict_logpoly2` の入出力契約と処理意図を定義する。
+
 def _predict_logpoly2(*, t_k: np.ndarray, params: dict[str, float]) -> np.ndarray:
     t = np.asarray(t_k, dtype=float).reshape(-1)
     u = np.log10(np.maximum(1e-30, t))
     y = float(params["a0"]) + float(params["a1"]) * u + float(params["a2"]) * (u * u)
     return np.power(10.0, y)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     out_dir = _ROOT / "output" / "public" / "quantum"
@@ -209,6 +229,7 @@ def main() -> None:
         err_rel = max(0.001, float(err_pct) / 100.0)
         sigma_k = (err_rel * np.abs(k_obs)).astype(float)
 
+        # 関数: `_idx_range` の入出力契約と処理意図を定義する。
         def _idx_range(t0: float, t1: float) -> np.ndarray:
             m = (t_grid >= float(t0)) & (t_grid <= float(t1))
             return np.nonzero(m)[0].astype(np.int64, copy=False)

@@ -14,6 +14,7 @@ _FFTW_VERSION = "3.3.10"
 _FFTW_URL = f"https://www.fftw.org/fftw-{_FFTW_VERSION}.tar.gz"
 
 
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 def _sha256_file(path: Path) -> str:
     h = hashlib.sha256()
     with path.open("rb") as f:
@@ -22,6 +23,8 @@ def _sha256_file(path: Path) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_run` の入出力契約と処理意図を定義する。
 
 def _run(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
@@ -35,6 +38,8 @@ def _run(cmd: list[str], *, cwd: Path | None = None, env: dict[str, str] | None 
     )
 
 
+# 関数: `_ensure_git_clone` の入出力契約と処理意図を定義する。
+
 def _ensure_git_clone(*, root: Path, url: str, dst: Path) -> None:
     # 条件分岐: `dst.exists()` を満たす経路を評価する。
     if dst.exists():
@@ -43,6 +48,8 @@ def _ensure_git_clone(*, root: Path, url: str, dst: Path) -> None:
     dst.parent.mkdir(parents=True, exist_ok=True)
     _run(["git", "clone", "--depth", "1", url, str(dst)], cwd=root)
 
+
+# 関数: `_ensure_fftw` の入出力契約と処理意図を定義する。
 
 def _ensure_fftw(*, root: Path, deps_dir: Path, jobs: int, force: bool) -> tuple[Path, Path]:
     tar_path = deps_dir / f"fftw-{_FFTW_VERSION}.tar.gz"
@@ -105,6 +112,8 @@ def _ensure_fftw(*, root: Path, deps_dir: Path, jobs: int, force: bool) -> tuple
 
     return inc_dir, lib_dir
 
+
+# 関数: `_ensure_recon_mw_binary` の入出力契約と処理意図を定義する。
 
 def _ensure_recon_mw_binary(
     *,
@@ -185,6 +194,8 @@ def _ensure_recon_mw_binary(
     return bin_path
 
 
+# 関数: `_write_ascii_catalog` の入出力契約と処理意図を定義する。
+
 def _write_ascii_catalog(path: Path, ra: np.ndarray, dec: np.ndarray, col3: np.ndarray, w: np.ndarray, *, col3_name: str) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as f:
@@ -204,6 +215,8 @@ def _write_ascii_catalog(path: Path, ra: np.ndarray, dec: np.ndarray, col3: np.n
             np.savetxt(f, block, fmt="%.8f %.8f %.8f %.8f")
 
 
+# 関数: `_xyz_to_radec_dist` の入出力契約と処理意図を定義する。
+
 def _xyz_to_radec_dist(xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     x = xyz[:, 0].astype(np.float64, copy=False)
     y = xyz[:, 1].astype(np.float64, copy=False)
@@ -214,6 +227,8 @@ def _xyz_to_radec_dist(xyz: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndar
     dec = np.degrees(np.arcsin(np.clip(z / (dist + 1e-30), -1.0, 1.0)))
     return ra, dec, dist
 
+
+# 関数: `run_mw_recon` の入出力契約と処理意図を定義する。
 
 def run_mw_recon(
     *,

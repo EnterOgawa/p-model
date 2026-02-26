@@ -11,13 +11,18 @@ from typing import Any
 from urllib.request import Request, urlopen
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
+
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -32,6 +37,8 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
 
     return h.hexdigest()
 
+
+# 関数: `_download` の入出力契約と処理意図を定義する。
 
 def _download(url: str, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -52,10 +59,14 @@ def _download(url: str, out_path: Path) -> None:
     print(f"[ok] downloaded: {out_path} ({out_path.stat().st_size} bytes)")
 
 
+# 関数: `_strip_tags` の入出力契約と処理意図を定義する。
+
 def _strip_tags(s: str) -> str:
     # Avoid stripping comparison operators like "< 50K" that appear in plain text.
     return re.sub(r"</?[A-Za-z][^>]*>", " ", s)
 
+
+# 関数: `_extract_tables` の入出力契約と処理意図を定義する。
 
 def _extract_tables(html: str, *, class_name: str) -> list[str]:
     return re.findall(
@@ -65,11 +76,15 @@ def _extract_tables(html: str, *, class_name: str) -> list[str]:
     )
 
 
+# 関数: `_cell_text` の入出力契約と処理意図を定義する。
+
 def _cell_text(cell_html: str) -> str:
     txt = _strip_tags(unescape(cell_html)).replace("\u00a0", " ")
     txt = re.sub(r"\s+", " ", txt).strip()
     return txt
 
+
+# 関数: `_parse_thermal_conductivity_table` の入出力契約と処理意図を定義する。
 
 def _parse_thermal_conductivity_table(*, html: str) -> dict[str, Any]:
     """
@@ -106,6 +121,7 @@ def _parse_thermal_conductivity_table(*, html: str) -> dict[str, Any]:
     ranges_by_rrr: dict[int, dict[str, float]] = {}
     fit_error_by_rrr: dict[int, float] = {}
 
+    # 関数: `_ensure_rrrs` の入出力契約と処理意図を定義する。
     def _ensure_rrrs(ncols: int) -> None:
         nonlocal rrrs
         # 条件分岐: `rrrs` を満たす経路を評価する。
@@ -269,6 +285,8 @@ def _parse_thermal_conductivity_table(*, html: str) -> dict[str, Any]:
         },
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser(

@@ -51,6 +51,7 @@ from scripts.cosmology.cosmology_bao_xi_multipole_peakfit import (  # noqa: E402
 )
 
 
+# クラス: `_EpsPoint` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class _EpsPoint:
     tracer: str
@@ -58,6 +59,8 @@ class _EpsPoint:
     eps_mean: float
     eps_sigma: float
 
+
+# クラス: `_DmDh` の責務と境界条件を定義する。
 
 @dataclass(frozen=True)
 class _DmDh:
@@ -69,9 +72,13 @@ class _DmDh:
     corr: float
 
 
+# 関数: `_load_json` の入出力契約と処理意図を定義する。
+
 def _load_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_mc_eps_from_dm_dh` の入出力契約と処理意図を定義する。
 
 def _mc_eps_from_dm_dh(
     *,
@@ -106,6 +113,8 @@ def _mc_eps_from_dm_dh(
     return float(np.mean(eps)), float(np.std(eps, ddof=1))
 
 
+# 関数: `_sigma_from_ci` の入出力契約と処理意図を定義する。
+
 def _sigma_from_ci(ci: List[float]) -> float:
     try:
         lo, hi = float(ci[0]), float(ci[1])
@@ -117,6 +126,8 @@ def _sigma_from_ci(ci: List[float]) -> float:
 
     return float("nan")
 
+
+# 関数: `_extract_peakfit_eps` の入出力契約と処理意図を定義する。
 
 def _extract_peakfit_eps(points: List[Dict[str, Any]], *, dist: str, z_target: float, z_tol: float) -> Optional[_EpsPoint]:
     dist = str(dist)
@@ -144,6 +155,8 @@ def _extract_peakfit_eps(points: List[Dict[str, Any]], *, dist: str, z_target: f
     sig = _sigma_from_ci(ci) if isinstance(ci, list) else float("nan")
     return _EpsPoint(tracer="(from_peakfit)", z_eff=float(best["z_eff"]), eps_mean=eps, eps_sigma=sig)
 
+
+# 関数: `_extract_wedge_eps_proxy` の入出力契約と処理意図を定義する。
 
 def _extract_wedge_eps_proxy(
     wedge_metrics: Dict[str, Any],
@@ -191,6 +204,8 @@ def _extract_wedge_eps_proxy(
         return None
 
 
+# 関数: `_extract_dm_dh_from_y1data_row` の入出力契約と処理意図を定義する。
+
 def _extract_dm_dh_from_y1data_row(r: Dict[str, Any]) -> _DmDh:
     z_eff = float(r["z_eff"])
     dm = r["dm_over_rd"]
@@ -209,6 +224,8 @@ def _extract_dm_dh_from_y1data_row(r: Dict[str, Any]) -> _DmDh:
         corr=corr,
     )
 
+
+# 関数: `_extract_dm_dh_from_bao_data` の入出力契約と処理意図を定義する。
 
 def _extract_dm_dh_from_bao_data(bao: Dict[str, Any], *, dataset_name: str) -> _DmDh:
     ds = None
@@ -259,6 +276,8 @@ def _extract_dm_dh_from_bao_data(bao: Dict[str, Any], *, dataset_name: str) -> _
     return _DmDh(z_eff=z_eff, dm_mean=dm_mean, dm_sigma=dm_sig, dh_mean=dh_mean, dh_sigma=dh_sig, corr=corr)
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -283,6 +302,8 @@ def _set_japanese_font() -> None:
     except Exception:
         pass
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="DESI DR1 BAO Y1data -> eps cross-check vs catalog peakfit.")

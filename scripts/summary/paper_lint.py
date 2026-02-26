@@ -32,13 +32,18 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
 
+# 関数: `_read_text` の入出力契約と処理意図を定義する。
+
 def _read_text(path: Path) -> str:
     return path.read_text(encoding="utf-8", errors="replace")
 
+
+# 関数: `_resolve_output_path` の入出力契約と処理意図を定義する。
 
 def _resolve_output_path(root: Path, rel: str) -> Path:
     rel_norm = rel.replace("\\", "/")
@@ -99,6 +104,7 @@ _SECTION_REF_RE = re.compile(r"(?<![0-9])([0-9]+(?:\.[0-9]+)+)節")
 _CROSS_PART_HINT_RE = re.compile(r"\bPart\s*(?:I|II|III|IV|1|2|3|4)\b", re.IGNORECASE)
 
 
+# 関数: `_extract_reference_keys` の入出力契約と処理意図を定義する。
 def _extract_reference_keys(ref_md: str) -> List[str]:
     keys: List[str] = []
     for line in ref_md.splitlines():
@@ -123,13 +129,19 @@ def _extract_reference_keys(ref_md: str) -> List[str]:
     return uniq
 
 
+# 関数: `_extract_used_citations` の入出力契約と処理意図を定義する。
+
 def _extract_used_citations(md_text: str) -> Set[str]:
     return set(_CITE_RE.findall(md_text))
 
 
+# 関数: `_extract_png_refs` の入出力契約と処理意図を定義する。
+
 def _extract_png_refs(md_text: str) -> Set[str]:
     return set(_PNG_CODE_RE.findall(md_text))
 
+
+# 関数: `_extract_fig_index_pngs` の入出力契約と処理意図を定義する。
 
 def _extract_fig_index_pngs(fig_index_md: str) -> List[Tuple[str, str]]:
     """
@@ -160,9 +172,13 @@ def _extract_fig_index_pngs(fig_index_md: str) -> List[Tuple[str, str]]:
     return uniq
 
 
+# 関数: `_extract_delta_units` の入出力契約と処理意図を定義する。
+
 def _extract_delta_units(md_text: str) -> List[Tuple[str, str]]:
     return [(m.group(1), m.group(2)) for m in _DELTA_UNIT_BLOCK_RE.finditer(md_text)]
 
+
+# 関数: `_count_falsification_lines` の入出力契約と処理意図を定義する。
 
 def _count_falsification_lines(block_text: str) -> int:
     lines = block_text.splitlines()
@@ -201,6 +217,8 @@ def _count_falsification_lines(block_text: str) -> int:
     return 0
 
 
+# 関数: `_extract_heading_numbers` の入出力契約と処理意図を定義する。
+
 def _extract_heading_numbers(md_text: str) -> Set[str]:
     nums: Set[str] = set()
     for line in md_text.splitlines():
@@ -213,6 +231,8 @@ def _extract_heading_numbers(md_text: str) -> Set[str]:
 
     return nums
 
+
+# 関数: `_find_unresolved_section_refs` の入出力契約と処理意図を定義する。
 
 def _find_unresolved_section_refs(md_text: str) -> List[str]:
     heading_nums = _extract_heading_numbers(md_text)
@@ -234,14 +254,19 @@ def _find_unresolved_section_refs(md_text: str) -> List[str]:
     return findings
 
 
+# クラス: `_LintResult` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class _LintResult:
     errors: List[str]
     warnings: List[str]
 
+    # 関数: `ok` の入出力契約と処理意図を定義する。
     def ok(self) -> bool:
         return not self.errors
 
+
+# 関数: `_lint` の入出力契約と処理意図を定義する。
 
 def _lint(
     *,
@@ -377,6 +402,8 @@ def _lint(
     return _LintResult(errors=errors, warnings=warnings)
 
 
+# 関数: `_print_block` の入出力契約と処理意図を定義する。
+
 def _print_block(title: str, items: Iterable[str]) -> None:
     items_list = list(items)
     # 条件分岐: `not items_list` を満たす経路を評価する。
@@ -387,6 +414,8 @@ def _print_block(title: str, items: Iterable[str]) -> None:
     for item in items_list:
         print(f"- {item}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(

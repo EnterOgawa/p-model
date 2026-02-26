@@ -28,18 +28,25 @@ MARK_END = "<!-- DELTA_UNIT:END table1_part4_label_parity_82351 -->"
 SECTION_HEADER = "### 2.1 Table 1 行ラベル整合（8.2.35.1）"
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
 
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -56,13 +63,19 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
             writer.writerow(row)
 
 
+# 関数: `_escape_cell` の入出力契約と処理意図を定義する。
+
 def _escape_cell(text: str) -> str:
     return str(text).replace("|", "&#124;").replace("\n", " ").strip()
 
 
+# 関数: `_unescape_cell` の入出力契約と処理意図を定義する。
+
 def _unescape_cell(text: str) -> str:
     return str(text).replace("&#124;", "|").strip()
 
+
+# 関数: `_part4_section_for_topic` の入出力契約と処理意図を定義する。
 
 def _part4_section_for_topic(topic: str) -> str:
     t = str(topic)
@@ -108,6 +121,8 @@ def _part4_section_for_topic(topic: str) -> str:
     return "-"
 
 
+# 関数: `_build_marker_block` の入出力契約と処理意図を定義する。
+
 def _build_marker_block(rows: List[Dict[str, Any]], *, public_png_ref: str) -> str:
     lines: List[str] = [
         MARK_START,
@@ -132,6 +147,8 @@ def _build_marker_block(rows: List[Dict[str, Any]], *, public_png_ref: str) -> s
     lines.append(MARK_END)
     return "\n".join(lines)
 
+
+# 関数: `_sync_part4` の入出力契約と処理意図を定義する。
 
 def _sync_part4(path: Path, block: str) -> Dict[str, Any]:
     text = path.read_text(encoding="utf-8")
@@ -160,6 +177,8 @@ def _sync_part4(path: Path, block: str) -> Dict[str, Any]:
     path.write_text(new_text, encoding="utf-8")
     return {"mode": mode}
 
+
+# 関数: `_extract_block_pairs` の入出力契約と処理意図を定義する。
 
 def _extract_block_pairs(text: str) -> List[Tuple[str, str]]:
     start_idx = text.find(MARK_START)
@@ -202,6 +221,8 @@ def _extract_block_pairs(text: str) -> List[Tuple[str, str]]:
     return pairs
 
 
+# 関数: `_plot_summary` の入出力契約と処理意図を定義する。
+
 def _plot_summary(*, out_png: Path, n_rows: int, n_ok: int, n_missing: int, n_extra: int) -> None:
     labels = ["table1 rows", "matched", "missing", "extra"]
     values = np.asarray([float(n_rows), float(n_ok), float(n_missing), float(n_extra)], dtype=float)
@@ -219,6 +240,8 @@ def _plot_summary(*, out_png: Path, n_rows: int, n_ok: int, n_missing: int, n_ex
     fig.savefig(out_png, dpi=180, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

@@ -15,6 +15,7 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[2]
 
 
+# クラス: `SourceSpec` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class SourceSpec:
     name: str
@@ -22,9 +23,13 @@ class SourceSpec:
     out_name: str
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     h = hashlib.sha256()
@@ -40,11 +45,15 @@ def _sha256(path: Path, *, chunk_bytes: int = 8 * 1024 * 1024) -> str:
     return h.hexdigest()
 
 
+# 関数: `_http_get_bytes` の入出力契約と処理意図を定義する。
+
 def _http_get_bytes(url: str, *, timeout_s: int = 60) -> bytes:
     req = Request(url, headers={"User-Agent": "waveP/quantum-fetch"})
     with urlopen(req, timeout=timeout_s) as resp:
         return resp.read()
 
+
+# 関数: `_http_head_status` の入出力契約と処理意図を定義する。
 
 def _http_head_status(url: str, *, timeout_s: int = 30) -> int | None:
     try:
@@ -59,6 +68,8 @@ def _http_head_status(url: str, *, timeout_s: int = 30) -> int | None:
     except (URLError, TimeoutError):
         return None
 
+
+# 関数: `_fetch_with_retries` の入出力契約と処理意図を定義する。
 
 def _fetch_with_retries(url: str, *, timeout_s: int = 60, attempts: int = 4, sleep_s: float = 1.0) -> bytes:
     last_err: Exception | None = None
@@ -76,14 +87,20 @@ def _fetch_with_retries(url: str, *, timeout_s: int = 60, attempts: int = 4, sle
     raise RuntimeError(f"fetch failed after {attempts} attempts: {url} ({type(last_err).__name__}: {last_err})")
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, obj: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(obj, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_extract_utheses_doc` の入出力契約と処理意図を定義する。
 
 def _extract_utheses_doc(solr: dict[str, Any]) -> dict[str, Any]:
     resp = solr.get("response") if isinstance(solr.get("response"), dict) else {}
@@ -92,10 +109,14 @@ def _extract_utheses_doc(solr: dict[str, Any]) -> dict[str, Any]:
     return doc
 
 
+# 関数: `_extract_phaidra_info` の入出力契約と処理意図を定義する。
+
 def _extract_phaidra_info(obj: dict[str, Any]) -> dict[str, Any]:
     info = obj.get("info") if isinstance(obj.get("info"), dict) else {}
     return info
 
+
+# 関数: `_extract_phaidra_jsonld_summary` の入出力契約と処理意図を定義する。
 
 def _extract_phaidra_jsonld_summary(obj: dict[str, Any]) -> dict[str, Any]:
     md = obj.get("metadata") if isinstance(obj.get("metadata"), dict) else {}
@@ -114,10 +135,14 @@ def _extract_phaidra_jsonld_summary(obj: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+# 関数: `_safe_pid_token` の入出力契約と処理意図を定義する。
+
 def _safe_pid_token(pid: str) -> str:
     # e.g. "o:1331601" -> "o1331601" for filenames
     return pid.replace(":", "")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     ap = argparse.ArgumentParser()

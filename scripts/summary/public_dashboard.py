@@ -25,9 +25,12 @@ LLR_SHORT_NAME = "月レーザー測距（LLR）"
 INCLUDE_BEPICOLOMBO_IN_PUBLIC_REPORT = os.environ.get("WAVEP_INCLUDE_BEPICOLOMBO", "0").strip() == "1"
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_remap_output_path` の入出力契約と処理意図を定義する。
 
 def _remap_output_path(path: Path) -> Path:
     """Map legacy output paths to the new output layout.
@@ -78,6 +81,8 @@ def _remap_output_path(path: Path) -> Path:
     return path
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     try:
         import matplotlib as mpl
@@ -103,6 +108,8 @@ def _set_japanese_font() -> None:
         pass
 
 
+# 関数: `_try_read_json` の入出力契約と処理意図を定義する。
+
 def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
     try:
         path = _remap_output_path(path)
@@ -111,6 +118,8 @@ def _try_read_json(path: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
+# 関数: `_try_read_text` の入出力契約と処理意図を定義する。
+
 def _try_read_text(path: Path) -> Optional[str]:
     try:
         path = _remap_output_path(path)
@@ -118,6 +127,8 @@ def _try_read_text(path: Path) -> Optional[str]:
     except Exception:
         return None
 
+
+# 関数: `_try_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _try_read_csv_rows(path: Path, *, max_rows: int = 200) -> List[Dict[str, str]]:
     try:
@@ -138,6 +149,8 @@ def _try_read_csv_rows(path: Path, *, max_rows: int = 200) -> List[Dict[str, str
     except Exception:
         return []
 
+
+# 関数: `_try_compute_llr_inlier_rms` の入出力契約と処理意図を定義する。
 
 def _try_compute_llr_inlier_rms(points_csv: Path) -> Optional[Dict[str, Any]]:
     """Compute global RMS (inlier-only) for key LLR residual columns.
@@ -193,6 +206,8 @@ def _try_compute_llr_inlier_rms(points_csv: Path) -> Optional[Dict[str, Any]]:
                     sums_sq[out_k] += v * v
                     counts[out_k] += 1
 
+        # 関数: `_rms` の入出力契約と処理意図を定義する。
+
         def _rms(k: str) -> Optional[float]:
             c = counts.get(k, 0)
             # 条件分岐: `not c` を満たす経路を評価する。
@@ -209,6 +224,8 @@ def _try_compute_llr_inlier_rms(points_csv: Path) -> Optional[Dict[str, Any]]:
     except Exception:
         return None
 
+
+# 関数: `_format_num` の入出力契約と処理意図を定義する。
 
 def _format_num(x: Any, *, digits: int = 3) -> str:
     # 条件分岐: `isinstance(x, bool) or x is None` を満たす経路を評価する。
@@ -228,9 +245,13 @@ def _format_num(x: Any, *, digits: int = 3) -> str:
     return str(x)
 
 
+# 関数: `_as_str` の入出力契約と処理意図を定義する。
+
 def _as_str(x: Any) -> str:
     return "" if x is None else str(x)
 
+
+# 関数: `_extract_cassini_metrics` の入出力契約と処理意図を定義する。
 
 def _extract_cassini_metrics(root: Path) -> Dict[str, Any]:
     metrics_csv = root / "output" / "cassini" / "cassini_fig2_metrics.csv"
@@ -268,6 +289,8 @@ def _extract_cassini_metrics(root: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_extract_viking_peak` の入出力契約と処理意図を定義する。
+
 def _extract_viking_peak(root: Path) -> Dict[str, Any]:
     csv_path = _remap_output_path(root / "output" / "viking" / "viking_shapiro_result.csv")
     # 条件分岐: `not csv_path.exists()` を満たす経路を評価する。
@@ -303,6 +326,8 @@ def _extract_viking_peak(root: Path) -> Dict[str, Any]:
         return {}
 
 
+# 関数: `_format_sci` の入出力契約と処理意図を定義する。
+
 def _format_sci(x: Any, *, digits: int = 2) -> str:
     try:
         v = float(x)
@@ -322,6 +347,8 @@ def _format_sci(x: Any, *, digits: int = 2) -> str:
     return f"{v:.{digits}e}"
 
 
+# 関数: `_panel_text` の入出力契約と処理意図を定義する。
+
 def _panel_text(title: str, lines: List[str]) -> str:
     s = title
     for ln in lines:
@@ -329,6 +356,8 @@ def _panel_text(title: str, lines: List[str]) -> str:
 
     return s
 
+
+# 関数: `_rel_url` の入出力契約と処理意図を定義する。
 
 def _rel_url(from_dir: Path, target: Path) -> str:
     try:
@@ -338,6 +367,8 @@ def _rel_url(from_dir: Path, target: Path) -> str:
 
     return rel.replace("\\", "/")
 
+
+# 関数: `_rel_repo_path` の入出力契約と処理意図を定義する。
 
 def _rel_repo_path(root: Path, target: Path) -> str:
     try:
@@ -352,6 +383,7 @@ _REPO_PATH_RE = re.compile(r"(?P<path>(?:output|doc|scripts|data)/[^\s<>'\"`]+)"
 _TRAIL_TRIM = set(".,;:)]}>）】」』、。")
 
 
+# 関数: `_render_text_with_links` の入出力契約と処理意図を定義する。
 def _render_text_with_links(text: str, *, root: Path, out_dir: Path) -> str:
     """Render plain text as HTML with repo-path linkification (safe)."""
     s = "" if text is None else str(text)
@@ -407,6 +439,8 @@ def _render_text_with_links(text: str, *, root: Path, out_dir: Path) -> str:
     return "".join(parts)
 
 
+# 関数: `_extract_cassini_best_beta` の入出力契約と処理意図を定義する。
+
 def _extract_cassini_best_beta(root: Path) -> Dict[str, Any]:
     # Prefer the latest run metadata so we don't accidentally show stale sweep results
     # when the most recent Cassini run was executed with --no-sweep.
@@ -445,6 +479,7 @@ def _extract_cassini_best_beta(root: Path) -> Dict[str, Any]:
 
     header = lines[0].split(",")
 
+    # 関数: `_f` の入出力契約と処理意図を定義する。
     def _f(r: Dict[str, str], k: str) -> Optional[float]:
         v = r.get(k)
         # 条件分岐: `v is None` を満たす経路を評価する。
@@ -479,11 +514,15 @@ def _extract_cassini_best_beta(root: Path) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_extract_bepicolombo_more_psa_status` の入出力契約と処理意図を定義する。
+
 def _extract_bepicolombo_more_psa_status(root: Path) -> Dict[str, Any]:
     p = root / "output" / "bepicolombo" / "more_psa_status.json"
     j = _try_read_json(p)
     return j if isinstance(j, dict) else {}
 
+
+# 関数: `_extract_bepicolombo_spice_psa_status` の入出力契約と処理意図を定義する。
 
 def _extract_bepicolombo_spice_psa_status(root: Path) -> Dict[str, Any]:
     p = root / "output" / "bepicolombo" / "spice_psa_status.json"
@@ -491,11 +530,15 @@ def _extract_bepicolombo_spice_psa_status(root: Path) -> Dict[str, Any]:
     return j if isinstance(j, dict) else {}
 
 
+# 関数: `_extract_bepicolombo_shapiro_predict` の入出力契約と処理意図を定義する。
+
 def _extract_bepicolombo_shapiro_predict(root: Path) -> Dict[str, Any]:
     p = root / "output" / "bepicolombo" / "bepicolombo_shapiro_geometry_summary.json"
     j = _try_read_json(p)
     return j if isinstance(j, dict) else {}
 
+
+# 関数: `_extract_bepicolombo_conjunction_catalog` の入出力契約と処理意図を定義する。
 
 def _extract_bepicolombo_conjunction_catalog(root: Path) -> Dict[str, Any]:
     p = root / "output" / "bepicolombo" / "bepicolombo_conjunction_catalog_summary.json"
@@ -503,11 +546,15 @@ def _extract_bepicolombo_conjunction_catalog(root: Path) -> Dict[str, Any]:
     return j if isinstance(j, dict) else {}
 
 
+# 関数: `_extract_bepicolombo_more_document_catalog` の入出力契約と処理意図を定義する。
+
 def _extract_bepicolombo_more_document_catalog(root: Path) -> Dict[str, Any]:
     p = root / "output" / "bepicolombo" / "more_document_catalog.json"
     j = _try_read_json(p)
     return j if isinstance(j, dict) else {}
 
+
+# 関数: `_llr_residual_vs_elevation_cards` の入出力契約と処理意図を定義する。
 
 def _llr_residual_vs_elevation_cards(root: Path) -> List[Dict[str, Any]]:
     out_llr = root / "output" / "llr" / "batch"
@@ -587,6 +634,8 @@ def _llr_residual_vs_elevation_cards(root: Path) -> List[Dict[str, Any]]:
     return cards
 
 
+# 関数: `_pick_llr_stem` の入出力契約と処理意図を定義する。
+
 def _pick_llr_stem(root: Path) -> str:
     out_llr = root / "output" / "llr"
     for stem in ("llr_primary", "demo_llr_like"):
@@ -607,6 +656,8 @@ def _pick_llr_stem(root: Path) -> str:
 
     return "demo_llr_like"
 
+
+# 関数: `_render_public_html` の入出力契約と処理意図を定義する。
 
 def _render_public_html(
     *,
@@ -776,6 +827,8 @@ def _render_public_html(
     return html_path
 
 
+# 関数: `_extract_roadmap_table` の入出力契約と処理意図を定義する。
+
 def _extract_roadmap_table(root: Path) -> Dict[str, Any]:
     status_path = root / "doc" / "STATUS.md"
     text = _try_read_text(status_path) or ""
@@ -822,6 +875,8 @@ def _extract_roadmap_table(root: Path) -> Dict[str, Any]:
         "status_path": status_path,
     }
 
+
+# 関数: `_extract_paper_table1_card` の入出力契約と処理意図を定義する。
 
 def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
     json_path = root / "output" / "private" / "summary" / "paper_table1_results.json"
@@ -905,6 +960,8 @@ def _extract_paper_table1_card(root: Path) -> Dict[str, Any]:
         "table": {"headers": headers, "rows": rows, "caption": "検証サマリ（Table 1, 自動生成）"} if rows else None,
     }
 
+
+# 関数: `_extract_decisive_scoreboard_card` の入出力契約と処理意図を定義する。
 
 def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
     json_path = root / "output" / "private" / "summary" / "decisive_scoreboard.json"
@@ -1021,6 +1078,8 @@ def _extract_decisive_scoreboard_card(root: Path) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_validation_scoreboard_card` の入出力契約と処理意図を定義する。
+
 def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
     json_path = root / "output" / "private" / "summary" / "validation_scoreboard.json"
     png_path = root / "output" / "private" / "summary" / "validation_scoreboard.png"
@@ -1045,6 +1104,7 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
     table1_breakdown = j.get("table1_breakdown") if isinstance(j.get("table1_breakdown"), list) else []
     rows = j.get("rows") if isinstance(j.get("rows"), list) else []
 
+    # 関数: `find_metric` の入出力契約と処理意図を定義する。
     def find_metric(row_id: str) -> Optional[str]:
         for r in rows:
             # 条件分岐: `not isinstance(r, dict)` を満たす経路を評価する。
@@ -1168,6 +1228,8 @@ def _extract_validation_scoreboard_card(root: Path) -> Dict[str, Any]:
         **({"table": table} if table else {}),
     }
 
+
+# 関数: `_extract_decisive_falsification_card` の入出力契約と処理意図を定義する。
 
 def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
     json_path = root / "output" / "private" / "summary" / "decisive_falsification.json"
@@ -1339,6 +1401,7 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
         z_now_ks = r.get("z_separation_now_with_kappa_scattering_sigma")
         src = _as_str(r.get("source_keys"))
 
+        # 関数: `_f` の入出力契約と処理意図を定義する。
         def _f(v: Any, digits: int = 4) -> str:
             try:
                 return _format_num(float(v), digits=digits) if v is not None else ""
@@ -1426,6 +1489,8 @@ def _extract_decisive_falsification_card(root: Path) -> Dict[str, Any]:
         "table": eht_table,
     }
 
+
+# 関数: `_extract_decisive_candidates_card` の入出力契約と処理意図を定義する。
 
 def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
     json_path = root / "output" / "private" / "summary" / "decisive_candidates.json"
@@ -1588,6 +1653,8 @@ def _extract_decisive_candidates_card(root: Path) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_paper_html_card` の入出力契約と処理意図を定義する。
+
 def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
     paper_html = root / "output" / "private" / "summary" / "pmodel_paper.html"
     manuscript_md = root / "doc" / "paper" / "10_manuscript.md"
@@ -1628,6 +1695,8 @@ def _extract_paper_html_card(root: Path) -> Dict[str, Any]:
         ],
     }
 
+
+# 関数: `_extract_recent_worklog_table` の入出力契約と処理意図を定義する。
 
 def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[str, Any]]:
     path = root / "output" / "private" / "summary" / "work_history.jsonl"
@@ -1690,6 +1759,8 @@ def _extract_recent_worklog_table(root: Path, *, n: int = 10) -> Optional[Dict[s
         "caption": "機械可読ログ output/private/summary/work_history.jsonl の直近イベント（重複作業の防止用）。",
     }
 
+
+# 関数: `_extract_run_all_status_card` の入出力契約と処理意図を定義する。
 
 def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
     status_path = root / "output" / "private" / "summary" / "run_all_status.json"
@@ -1772,6 +1843,8 @@ def _extract_run_all_status_card(root: Path) -> Optional[Dict[str, Any]]:
     }
 
 
+# 関数: `_render_llr_detail_html` の入出力契約と処理意図を定義する。
+
 def _render_llr_detail_html(
     *,
     out_dir: Path,
@@ -1788,8 +1861,11 @@ def _render_llr_detail_html(
     title = f"{LLR_LONG_NAME}詳細解説"
     subtitle = f"一覧ページの{LLR_SHORT_NAME}グラフを、図ごとに「何を見ているか」「どう解釈するか」を結びつけて説明します。"
 
+    # 関数: `_as_str` の入出力契約と処理意図を定義する。
     def _as_str(x: Any) -> str:
         return "" if x is None else str(x)
+
+    # 関数: `_h` の入出力契約と処理意図を定義する。
 
     def _h(text: Any) -> str:
         return html.escape(_as_str(text))
@@ -2060,6 +2136,8 @@ def _render_llr_detail_html(
     return html_path
 
 
+# 関数: `_extract_quantum_public_cards` の入出力契約と処理意図を定義する。
+
 def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     out_q = root / "output" / "public" / "quantum"
 
@@ -2082,6 +2160,7 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
         }
     )
 
+    # 関数: `_safe_float` の入出力契約と処理意図を定義する。
     def _safe_float(x: Any) -> Optional[float]:
         try:
             v = float(x)
@@ -2488,6 +2567,8 @@ def _extract_quantum_public_cards(root: Path) -> List[Dict[str, Any]]:
     return cards
 
 
+# 関数: `main` の入出力契約と処理意図を定義する。
+
 def main() -> int:
     root = _repo_root()
     out_dir = root / "output" / "private" / "summary"
@@ -2717,6 +2798,8 @@ def main() -> int:
         if isinstance(labels, dict):
             cassini_obs_label = str(labels.get("obs_label") or "")
 
+    # 関数: `_cassini_obs_kind` の入出力契約と処理意図を定義する。
+
     def _cassini_obs_kind() -> str:
         # 条件分岐: `cassini_effective_source.startswith("pds_tdf")` を満たす経路を評価する。
         if cassini_effective_source.startswith("pds_tdf"):
@@ -2824,6 +2907,7 @@ def main() -> int:
                 dmid = r.get("abs_delta_centered_mid_ns", "")
                 src = f"{r.get('source_file','')}:{r.get('lineno','')}".strip(":")
 
+                # 関数: `_fmt_float` の入出力契約と処理意図を定義する。
                 def _fmt_float(v: str, digits: int = 4) -> str:
                     try:
                         return _format_num(float(v), digits=digits)
@@ -2864,12 +2948,16 @@ def main() -> int:
     except Exception:
         llr_outliers_diag_table = None
 
+    # 関数: `_fmt_ns_to_us` の入出力契約と処理意図を定義する。
+
     def _fmt_ns_to_us(x: Any) -> str:
         # 条件分岐: `not isinstance(x, (int, float))` を満たす経路を評価する。
         if not isinstance(x, (int, float)):
             return "n/a"
 
         return _format_num(float(x) / 1e3, digits=4)
+
+    # 関数: `_llr_best_time_tag_summary_lines` の入出力契約と処理意図を定義する。
 
     def _llr_best_time_tag_summary_lines() -> List[str]:
         # 条件分岐: `not llr_time_tag_best` を満たす経路を評価する。
@@ -2891,6 +2979,8 @@ def main() -> int:
             return [f"最適time-tag（局別）: {s}", f"評価指標: {metric}"]
 
         return [f"最適time-tag（局別）: {s}"]
+
+    # 関数: `_llr_outliers_diag_summary_lines` の入出力契約と処理意図を定義する。
 
     def _llr_outliers_diag_summary_lines() -> List[str]:
         # 条件分岐: `not llr_outliers_diag_summary` を満たす経路を評価する。
@@ -2941,6 +3031,8 @@ def main() -> int:
         lines.append("一覧: output/llr/batch/llr_outliers_diagnosis.csv")
         return lines
 
+    # 関数: `_llr_outliers_target_mixing_summary_lines` の入出力契約と処理意図を定義する。
+
     def _llr_outliers_target_mixing_summary_lines() -> List[str]:
         # 条件分岐: `not llr_outliers_diag_summary` を満たす経路を評価する。
         if not llr_outliers_diag_summary:
@@ -2963,6 +3055,8 @@ def main() -> int:
                 pass
 
         return lines
+
+    # 関数: `_bepicolombo_more_psa_summary_lines` の入出力契約と処理意図を定義する。
 
     def _bepicolombo_more_psa_summary_lines() -> List[str]:
         # 条件分岐: `not bepi_more_psa` を満たす経路を評価する。
@@ -2998,6 +3092,8 @@ def main() -> int:
 
         return lines
 
+    # 関数: `_bepicolombo_spice_psa_summary_lines` の入出力契約と処理意図を定義する。
+
     def _bepicolombo_spice_psa_summary_lines() -> List[str]:
         # 条件分岐: `not bepi_spice_psa` を満たす経路を評価する。
         if not bepi_spice_psa:
@@ -3030,6 +3126,8 @@ def main() -> int:
             )
 
         return lines
+
+    # 関数: `_bepicolombo_shapiro_predict_summary_lines` の入出力契約と処理意図を定義する。
 
     def _bepicolombo_shapiro_predict_summary_lines() -> List[str]:
         # 条件分岐: `not bepi_shapiro_pred` を満たす経路を評価する。
@@ -3072,6 +3170,8 @@ def main() -> int:
             lines.append(f"参考: 窓内の最小b（無制限）={_format_num(raw_b, digits=4)} R_sun")
 
         return lines
+
+    # 関数: `_bepicolombo_conjunction_catalog_summary_lines` の入出力契約と処理意図を定義する。
 
     def _bepicolombo_conjunction_catalog_summary_lines() -> List[str]:
         # 条件分岐: `not bepi_conj_catalog` を満たす経路を評価する。

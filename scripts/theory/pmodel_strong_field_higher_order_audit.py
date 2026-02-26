@@ -43,6 +43,8 @@ except Exception:  # pragma: no cover
     plt = None
 
 
+# クラス: `LambdaObs` の責務と境界条件を定義する。
+
 @dataclass(frozen=True)
 class LambdaObs:
     channel: str
@@ -53,9 +55,13 @@ class LambdaObs:
     note: str
 
 
+# 関数: `_utc_now` の入出力契約と処理意図を定義する。
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -64,14 +70,20 @@ def _rel(path: Path) -> str:
         return path.as_posix()
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_read_csv_rows` の入出力契約と処理意図を定義する。
 
 def _read_csv_rows(path: Path) -> List[Dict[str, str]]:
     with path.open("r", encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
 
+
+# 関数: `_sha256_file` の入出力契約と処理意図を定義する。
 
 def _sha256_file(path: Path) -> Optional[str]:
     h = hashlib.sha256()
@@ -89,6 +101,8 @@ def _sha256_file(path: Path) -> Optional[str]:
 
     return h.hexdigest().upper()
 
+
+# 関数: `_file_signature` の入出力契約と処理意図を定義する。
 
 def _file_signature(path: Optional[Path]) -> Dict[str, Any]:
     # 条件分岐: `path is None` を満たす経路を評価する。
@@ -115,6 +129,8 @@ def _file_signature(path: Optional[Path]) -> Dict[str, Any]:
     return payload
 
 
+# 関数: `_load_previous_watchpack` の入出力契約と処理意図を定義する。
+
 def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -138,6 +154,8 @@ def _load_previous_watchpack(path: Path) -> Dict[str, Any]:
     return watchpack
 
 
+# 関数: `_load_first_existing` の入出力契約と処理意図を定義する。
+
 def _load_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Path]:
     for path in paths:
         # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -146,6 +164,8 @@ def _load_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Path]:
 
     raise FileNotFoundError(f"No input found among: {[str(p) for p in paths]}")
 
+
+# 関数: `_load_optional_first_existing` の入出力契約と処理意図を定義する。
 
 def _load_optional_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any], Optional[Path]]:
     for path in paths:
@@ -156,6 +176,8 @@ def _load_optional_first_existing(paths: Sequence[Path]) -> Tuple[Dict[str, Any]
     return {}, None
 
 
+# 関数: `_load_optional_csv_first_existing` の入出力契約と処理意図を定義する。
+
 def _load_optional_csv_first_existing(paths: Sequence[Path]) -> Tuple[List[Dict[str, str]], Optional[Path]]:
     for path in paths:
         # 条件分岐: `path.exists()` を満たす経路を評価する。
@@ -164,6 +186,8 @@ def _load_optional_csv_first_existing(paths: Sequence[Path]) -> Tuple[List[Dict[
 
     return [], None
 
+
+# 関数: `_to_float` の入出力契約と処理意図を定義する。
 
 def _to_float(v: Any) -> Optional[float]:
     try:
@@ -178,6 +202,8 @@ def _to_float(v: Any) -> Optional[float]:
 
     return val
 
+
+# 関数: `_resolve_existing_path` の入出力契約と処理意図を定義する。
 
 def _resolve_existing_path(path_like: Any) -> Optional[Path]:
     # 条件分岐: `path_like is None` を満たす経路を評価する。
@@ -208,6 +234,8 @@ def _resolve_existing_path(path_like: Any) -> Optional[Path]:
     return None
 
 
+# 関数: `_load_planck_tt_binned_sigma` の入出力契約と処理意図を定義する。
+
 def _load_planck_tt_binned_sigma(path: Path) -> Optional[Tuple[np.ndarray, np.ndarray]]:
     try:
         arr = np.loadtxt(path)
@@ -231,6 +259,8 @@ def _load_planck_tt_binned_sigma(path: Path) -> Optional[Tuple[np.ndarray, np.nd
     return ell[mask], sigma[mask]
 
 
+# 関数: `_nearest_planck_sigma` の入出力契約と処理意図を定義する。
+
 def _nearest_planck_sigma(ell_grid: np.ndarray, sigma_grid: np.ndarray, ell_target: float) -> Optional[float]:
     # 条件分岐: `ell_grid.size == 0 or sigma_grid.size == 0` を満たす経路を評価する。
     if ell_grid.size == 0 or sigma_grid.size == 0:
@@ -244,6 +274,8 @@ def _nearest_planck_sigma(ell_grid: np.ndarray, sigma_grid: np.ndarray, ell_targ
 
     return sig
 
+
+# 関数: `_sigma_from_p16_p84` の入出力契約と処理意図を定義する。
 
 def _sigma_from_p16_p84(block: Dict[str, Any]) -> Optional[float]:
     p16_p84 = block.get("p16_p84")
@@ -269,6 +301,8 @@ def _sigma_from_p16_p84(block: Dict[str, Any]) -> Optional[float]:
 
     return float(sig)
 
+
+# 関数: `_extract_eht_observables` の入出力契約と処理意図を定義する。
 
 def _extract_eht_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     rows = payload.get("rows")
@@ -313,6 +347,8 @@ def _extract_eht_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
 
     return out
 
+
+# 関数: `_extract_gw_observables` の入出力契約と処理意図を定義する。
 
 def _extract_gw_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     out: List[LambdaObs] = []
@@ -403,6 +439,8 @@ def _extract_gw_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     return out
 
 
+# 関数: `_extract_gw_premger_overlap` の入出力契約と処理意図を定義する。
+
 def _extract_gw_premger_overlap(payload: Dict[str, Any]) -> Dict[str, Any]:
     dets = payload.get("detectors")
     # 条件分岐: `not isinstance(dets, list)` を満たす経路を評価する。
@@ -438,6 +476,8 @@ def _extract_gw_premger_overlap(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_gw_primary_homology` の入出力契約と処理意図を定義する。
+
 def _extract_gw_primary_homology(payload: Dict[str, Any]) -> Dict[str, Any]:
     metrics = payload.get("metrics") if isinstance(payload.get("metrics"), dict) else {}
     ratio = metrics.get("ratio") if isinstance(metrics.get("ratio"), dict) else {}
@@ -463,6 +503,8 @@ def _extract_gw_primary_homology(payload: Dict[str, Any]) -> Dict[str, Any]:
     return out
 
 
+# 関数: `_extract_gw_multi_event_homology` の入出力契約と処理意図を定義する。
+
 def _extract_gw_multi_event_homology(payload: Dict[str, Any]) -> Dict[str, Any]:
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
     n_usable = _to_float(summary.get("n_usable_events"))
@@ -478,6 +520,8 @@ def _extract_gw_multi_event_homology(payload: Dict[str, Any]) -> Dict[str, Any]:
         "ok": median_corr is not None,
     }
 
+
+# 関数: `_extract_gw_area_theorem` の入出力契約と処理意図を定義する。
 
 def _extract_gw_area_theorem(payload: Dict[str, Any]) -> Dict[str, Any]:
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
@@ -495,6 +539,8 @@ def _extract_gw_area_theorem(payload: Dict[str, Any]) -> Dict[str, Any]:
         "ok": sigma_combined is not None,
     }
 
+
+# 関数: `_extract_gw_polarization_stage_readiness` の入出力契約と処理意図を定義する。
 
 def _extract_gw_polarization_stage_readiness(payload: Dict[str, Any]) -> Dict[str, Any]:
     summary = payload.get("summary") if isinstance(payload.get("summary"), dict) else {}
@@ -547,6 +593,8 @@ def _extract_gw_polarization_stage_readiness(payload: Dict[str, Any]) -> Dict[st
     }
 
 
+# 関数: `_derive_aic_support_recovery_target` の入出力契約と処理意図を定義する。
+
 def _derive_aic_support_recovery_target(fit_joint: Dict[str, Any]) -> Dict[str, Any]:
     chi2_base = _to_float(fit_joint.get("chi2_baseline"))
     chi2_fit = _to_float(fit_joint.get("chi2_fit"))
@@ -565,6 +613,7 @@ def _derive_aic_support_recovery_target(fit_joint: Dict[str, Any]) -> Dict[str, 
     required_abs_z_single_if_half_sigma_residual = float(math.sqrt(missing_delta_chi2_gain + 0.25))
     required_abs_z_single_if_one_sigma_residual = float(math.sqrt(missing_delta_chi2_gain + 1.0))
 
+    # 関数: `_n_needed` の入出力契約と処理意図を定義する。
     def _n_needed(avg_abs_z: float) -> int:
         # 条件分岐: `avg_abs_z <= 0.0` を満たす経路を評価する。
         if avg_abs_z <= 0.0:
@@ -595,6 +644,8 @@ def _derive_aic_support_recovery_target(fit_joint: Dict[str, Any]) -> Dict[str, 
         ),
     }
 
+
+# 関数: `_extract_gw_polarization_high_tension_candidates` の入出力契約と処理意図を定義する。
 
 def _extract_gw_polarization_high_tension_candidates(
     payload_entries: Sequence[Tuple[str, Dict[str, Any]]],
@@ -689,6 +740,8 @@ def _extract_gw_polarization_high_tension_candidates(
         ),
     }
 
+
+# 関数: `_build_gw_polarization_injected_observables` の入出力契約と処理意図を定義する。
 
 def _build_gw_polarization_injected_observables(
     registry: Dict[str, Any],
@@ -827,6 +880,8 @@ def _build_gw_polarization_injected_observables(
         ),
     }
 
+
+# 関数: `_extract_cross_domain_high_tension_candidates` の入出力契約と処理意図を定義する。
 
 def _extract_cross_domain_high_tension_candidates(
     *,
@@ -991,6 +1046,8 @@ def _extract_cross_domain_high_tension_candidates(
     }
 
 
+# 関数: `_build_cross_domain_injected_observables` の入出力契約と処理意図を定義する。
+
 def _build_cross_domain_injected_observables(
     registry: Dict[str, Any],
     base_observables: Sequence[LambdaObs],
@@ -1088,6 +1145,8 @@ def _build_cross_domain_injected_observables(
     }
 
 
+# 関数: `_extract_cross_domain_direct_observables` の入出力契約と処理意図を定義する。
+
 def _extract_cross_domain_direct_observables(
     *,
     frame_dragging_scalar_limit: Dict[str, Any],
@@ -1099,8 +1158,11 @@ def _extract_cross_domain_direct_observables(
     sigma_source_counts: Dict[str, int] = {}
     covariance_pairs: List[Dict[str, Any]] = []
 
+    # 関数: `_count_sigma_source` の入出力契約と処理意図を定義する。
     def _count_sigma_source(source: str) -> None:
         sigma_source_counts[source] = int(sigma_source_counts.get(source, 0) + 1)
+
+    # 関数: `_add_covariance_pair` の入出力契約と処理意図を定義する。
 
     def _add_covariance_pair(source_i: str, source_j: str, cov_lambda: float, origin: str) -> None:
         # 条件分岐: `not source_i or not source_j or source_i == source_j` を満たす経路を評価する。
@@ -1536,6 +1598,8 @@ def _extract_cross_domain_direct_observables(
     }
 
 
+# 関数: `_extract_pulsar_observables` の入出力契約と処理意図を定義する。
+
 def _extract_pulsar_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
     rows = payload.get("metrics")
     # 条件分岐: `not isinstance(rows, list)` を満たす経路を評価する。
@@ -1569,6 +1633,8 @@ def _extract_pulsar_observables(payload: Dict[str, Any]) -> List[LambdaObs]:
 
     return out
 
+
+# 関数: `_extract_xray_isco_observables` の入出力契約と処理意図を定義する。
 
 def _extract_xray_isco_observables(rows: Sequence[Dict[str, Any]]) -> List[LambdaObs]:
     out: List[LambdaObs] = []
@@ -1618,6 +1684,8 @@ def _extract_xray_isco_observables(rows: Sequence[Dict[str, Any]]) -> List[Lambd
 
     return out
 
+
+# 関数: `_extract_lambda_h_n0_bridge` の入出力契約と処理意図を定義する。
 
 def _extract_lambda_h_n0_bridge(payload: Dict[str, Any]) -> Dict[str, Any]:
     budget = payload.get("ring_coefficient_budget") if isinstance(payload.get("ring_coefficient_budget"), dict) else {}
@@ -1697,6 +1765,8 @@ def _extract_lambda_h_n0_bridge(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_extract_eht_kappa_precision` の入出力契約と処理意図を定義する。
+
 def _extract_eht_kappa_precision(payload: Dict[str, Any]) -> Dict[str, Any]:
     rows = payload.get("rows") if isinstance(payload.get("rows"), dict) else {}
     row = rows.get("sgra") if isinstance(rows.get("sgra"), dict) else {}
@@ -1754,6 +1824,8 @@ def _extract_eht_kappa_precision(payload: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_derive_eht_kappa_readiness` の入出力契約と処理意図を定義する。
+
 def _derive_eht_kappa_readiness(eht_kappa_precision: Dict[str, Any]) -> Dict[str, Any]:
     required = _to_float(eht_kappa_precision.get("required_sigma"))
     conservative = _to_float(eht_kappa_precision.get("conservative_sigma"))
@@ -1802,6 +1874,8 @@ def _derive_eht_kappa_readiness(eht_kappa_precision: Dict[str, Any]) -> Dict[str
         ),
     }
 
+
+# 関数: `_derive_eht_kappa_update_watchpack` の入出力契約と処理意図を定義する。
 
 def _derive_eht_kappa_update_watchpack(
     *,
@@ -1888,6 +1962,8 @@ def _derive_eht_kappa_update_watchpack(
     }
 
 
+# 関数: `_weighted_fit` の入出力契約と処理意図を定義する。
+
 def _weighted_fit(observables: Sequence[LambdaObs]) -> Dict[str, Any]:
     # 条件分岐: `not observables` を満たす経路を評価する。
     if not observables:
@@ -1954,6 +2030,8 @@ def _weighted_fit(observables: Sequence[LambdaObs]) -> Dict[str, Any]:
         "delta_aic_fit_minus_baseline": delta_aic,
     }
 
+
+# 関数: `_weighted_fit_with_covariance` の入出力契約と処理意図を定義する。
 
 def _weighted_fit_with_covariance(
     observables: Sequence[LambdaObs],
@@ -2112,6 +2190,8 @@ def _weighted_fit_with_covariance(
     }
 
 
+# 関数: `_build_design_matrix` の入出力契約と処理意図を定義する。
+
 def _build_design_matrix(observables: Sequence[LambdaObs], model_id: str) -> Tuple[List[str], np.ndarray]:
     channels = [str(o.channel).upper() for o in observables]
     n = len(channels)
@@ -2148,6 +2228,8 @@ def _build_design_matrix(observables: Sequence[LambdaObs], model_id: str) -> Tup
 
     raise ValueError(f"Unknown model_id: {model_id}")
 
+
+# 関数: `_weighted_linear_fit` の入出力契約と処理意図を定義する。
 
 def _weighted_linear_fit(
     observables: Sequence[LambdaObs],
@@ -2210,6 +2292,8 @@ def _weighted_linear_fit(
         "bic": float(bic),
     }
 
+
+# 関数: `_ansatz_extension_model_matrix` の入出力契約と処理意図を定義する。
 
 def _ansatz_extension_model_matrix(observables: Sequence[LambdaObs], fit_joint: Dict[str, Any]) -> Dict[str, Any]:
     chi2_baseline = _to_float(fit_joint.get("chi2_baseline"))
@@ -2325,6 +2409,8 @@ def _ansatz_extension_model_matrix(observables: Sequence[LambdaObs], fit_joint: 
     }
 
 
+# 関数: `_aic_support_scenario_matrix` の入出力契約と処理意図を定義する。
+
 def _aic_support_scenario_matrix(
     *,
     obs_eht: Sequence[LambdaObs],
@@ -2396,6 +2482,8 @@ def _aic_support_scenario_matrix(
     }
 
 
+# 関数: `_status_from_gate` の入出力契約と処理意図を定義する。
+
 def _status_from_gate(passed: bool, gate_level: str) -> str:
     # 条件分岐: `passed` を満たす経路を評価する。
     if passed:
@@ -2403,6 +2491,8 @@ def _status_from_gate(passed: bool, gate_level: str) -> str:
 
     return "reject" if gate_level == "hard" else "watch"
 
+
+# 関数: `_score_from_status` の入出力契約と処理意図を定義する。
 
 def _score_from_status(status: str) -> float:
     # 条件分岐: `status == "pass"` を満たす経路を評価する。
@@ -2416,6 +2506,8 @@ def _score_from_status(status: str) -> float:
 
     return 0.0
 
+
+# 関数: `_build_checks` の入出力契約と処理意図を定義する。
 
 def _build_checks(
     *,
@@ -2432,6 +2524,7 @@ def _build_checks(
 ) -> List[Dict[str, Any]]:
     checks: List[Dict[str, Any]] = []
 
+    # 関数: `add_check` の入出力契約と処理意図を定義する。
     def add_check(check_id: str, metric: str, value: Any, expected: str, passed: bool, gate_level: str, note: str) -> None:
         status = _status_from_gate(bool(passed), gate_level)
         checks.append(
@@ -2638,6 +2731,8 @@ def _build_checks(
     return checks
 
 
+# 関数: `_decision_from_checks` の入出力契約と処理意図を定義する。
+
 def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     hard_fail_ids = [str(c["id"]) for c in checks if c.get("gate_level") == "hard" and c.get("pass") is not True]
     watch_ids = [str(c["id"]) for c in checks if c.get("gate_level") == "watch" and c.get("pass") is not True]
@@ -2662,10 +2757,14 @@ def _decision_from_checks(checks: Sequence[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 
+# 関数: `_write_json` の入出力契約と処理意図を定義する。
+
 def _write_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
+
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
 
 def _write_csv(path: Path, rows: Sequence[LambdaObs], lambda_joint: float) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -2697,6 +2796,8 @@ def _write_csv(path: Path, rows: Sequence[LambdaObs], lambda_joint: float) -> No
             )
 
 
+# 関数: `_set_japanese_font` の入出力契約と処理意図を定義する。
+
 def _set_japanese_font() -> None:
     # 条件分岐: `plt is None` を満たす経路を評価する。
     if plt is None:
@@ -2718,6 +2819,8 @@ def _set_japanese_font() -> None:
     except Exception:
         return
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(
     path: Path,
@@ -2834,6 +2937,8 @@ def _plot(
     fig.savefig(path, dpi=160)
     plt.close(fig)
 
+
+# 関数: `parse_args` の入出力契約と処理意図を定義する。
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Step 8.7.27 strong-field higher-order audit")
@@ -3118,6 +3223,8 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> int:
     args = parse_args()

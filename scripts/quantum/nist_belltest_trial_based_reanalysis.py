@@ -9,6 +9,7 @@ from pathlib import Path
 import numpy as np
 
 
+# クラス: `TrialCounts` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class TrialCounts:
     n_trials: np.ndarray  # (2,2) by (a_setting, b_setting)
@@ -22,6 +23,8 @@ class TrialCounts:
     n_invalid_settings: int
 
 
+# 関数: `_map_setting_bits` の入出力契約と処理意図を定義する。
+
 def _map_setting_bits(x: np.ndarray) -> np.ndarray:
     # In processed_compressed/hdf5 builds, setting is stored as a bitmask:
     #   1 => setting 0
@@ -29,6 +32,8 @@ def _map_setting_bits(x: np.ndarray) -> np.ndarray:
     # Other values are rare anomalies (both or neither fired).
     return np.where(x == 1, 0, np.where(x == 2, 1, -1)).astype(np.int8, copy=False)
 
+
+# 関数: `_compute_trial_counts` の入出力契約と処理意図を定義する。
 
 def _compute_trial_counts(
     *,
@@ -92,6 +97,8 @@ def _compute_trial_counts(
     )
 
 
+# 関数: `_ch_j_variants` の入出力契約と処理意図を定義する。
+
 def _ch_j_variants(counts: TrialCounts) -> dict[str, dict[str, float | int]]:
     # Clauser–Horne (CH) form for binary outcomes A,B ∈ {0,1}:
     #   J = P11(A1,B1)+P11(A1,B2)+P11(A2,B1)-P11(A2,B2) - P1(A1) - P1(B1) <= 0 (local)
@@ -134,11 +141,15 @@ def _ch_j_variants(counts: TrialCounts) -> dict[str, dict[str, float | int]]:
     return out
 
 
+# 関数: `_load_coincidence_sweep` の入出力契約と処理意図を定義する。
+
 def _load_coincidence_sweep(csv_path: Path) -> dict[str, np.ndarray]:
     rows = list(csv.DictReader(csv_path.read_text(encoding="utf-8").splitlines()))
     # 条件分岐: `not rows` を満たす経路を評価する。
     if not rows:
         raise ValueError(f"empty csv: {csv_path}")
+
+    # 関数: `col` の入出力契約と処理意図を定義する。
 
     def col(name: str, t=float) -> np.ndarray:
         return np.asarray([t(r[name]) for r in rows])
@@ -152,6 +163,8 @@ def _load_coincidence_sweep(csv_path: Path) -> dict[str, np.ndarray]:
         "c11": col("c11", int).astype(np.int64),
     }
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main() -> None:
     parser = argparse.ArgumentParser(

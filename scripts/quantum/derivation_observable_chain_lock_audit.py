@@ -35,9 +35,12 @@ if str(ROOT) not in sys.path:
 from scripts.summary import worklog  # noqa: E402
 
 
+# 関数: `_iso_utc_now` の入出力契約と処理意図を定義する。
 def _iso_utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
+
+# 関数: `_rel` の入出力契約と処理意図を定義する。
 
 def _rel(path: Path) -> str:
     try:
@@ -46,6 +49,8 @@ def _rel(path: Path) -> str:
         return str(path).replace("\\", "/")
 
 
+# 関数: `_read_json` の入出力契約と処理意図を定義する。
+
 def _read_json(path: Path) -> Dict[str, Any]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
     if not path.exists():
@@ -53,6 +58,8 @@ def _read_json(path: Path) -> Dict[str, Any]:
 
     return json.loads(path.read_text(encoding="utf-8"))
 
+
+# 関数: `_sha256` の入出力契約と処理意図を定義する。
 
 def _sha256(path: Path) -> Optional[str]:
     # 条件分岐: `not path.exists()` を満たす経路を評価する。
@@ -67,6 +74,8 @@ def _sha256(path: Path) -> Optional[str]:
     return digest.hexdigest()
 
 
+# 関数: `_as_list_of_str` の入出力契約と処理意図を定義する。
+
 def _as_list_of_str(value: Any) -> List[str]:
     # 条件分岐: `not isinstance(value, list)` を満たす経路を評価する。
     if not isinstance(value, list):
@@ -74,6 +83,8 @@ def _as_list_of_str(value: Any) -> List[str]:
 
     return [str(x) for x in value if isinstance(x, str)]
 
+
+# 関数: `_status_from_pass` の入出力契約と処理意図を定義する。
 
 def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
     # 条件分岐: `passed is True` を満たす経路を評価する。
@@ -92,6 +103,8 @@ def _status_from_pass(passed: Optional[bool], gate_level: str) -> str:
 
     return "watch"
 
+
+# 関数: `_row` の入出力契約と処理意図を定義する。
 
 def _row(
     *,
@@ -118,6 +131,8 @@ def _row(
     }
 
 
+# 関数: `_all_true` の入出力契約と処理意図を定義する。
+
 def _all_true(rows: Any) -> Optional[bool]:
     # 条件分岐: `not isinstance(rows, list) or not rows` を満たす経路を評価する。
     if not isinstance(rows, list) or not rows:
@@ -140,6 +155,8 @@ def _all_true(rows: Any) -> Optional[bool]:
     return all(flags)
 
 
+# 関数: `_bridge_watch_ids` の入出力契約と処理意図を定義する。
+
 def _bridge_watch_ids(bridge: Dict[str, Any]) -> List[str]:
     rows = bridge.get("rows") if isinstance(bridge.get("rows"), list) else []
     out: List[str] = []
@@ -158,6 +175,8 @@ def _bridge_watch_ids(bridge: Dict[str, Any]) -> List[str]:
 
     return sorted(set(out))
 
+
+# 関数: `build_payload` の入出力契約と処理意図を定義する。
 
 def build_payload(
     *,
@@ -504,6 +523,8 @@ def build_payload(
     }
 
 
+# 関数: `_write_csv` の入出力契約と処理意図を定義する。
+
 def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:
@@ -526,6 +547,8 @@ def _write_csv(path: Path, rows: List[Dict[str, Any]]) -> None:
         for row in rows:
             writer.writerow(row)
 
+
+# 関数: `_plot` の入出力契約と処理意図を定義する。
 
 def _plot(path: Path, payload: Dict[str, Any]) -> None:
     rows = payload.get("checks") if isinstance(payload.get("checks"), list) else []
@@ -572,6 +595,8 @@ def _plot(path: Path, payload: Dict[str, Any]) -> None:
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Generate derivation-observable chain lock audit (Step 8.7.13).")
@@ -637,6 +662,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    # 関数: `_resolve` の入出力契約と処理意図を定義する。
     def _resolve(path_text: str) -> Path:
         p = Path(path_text)
         # 条件分岐: `p.is_absolute()` を満たす経路を評価する。

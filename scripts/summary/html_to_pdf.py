@@ -32,15 +32,20 @@ if str(_ROOT) not in sys.path:
 from scripts.summary import worklog
 
 
+# クラス: `Browser` の責務と境界条件を定義する。
 @dataclass(frozen=True)
 class Browser:
     name: str
     exe: Path
 
 
+# 関数: `_repo_root` の入出力契約と処理意図を定義する。
+
 def _repo_root() -> Path:
     return _ROOT
 
+
+# 関数: `_find_edge_windows` の入出力契約と処理意図を定義する。
 
 def _find_edge_windows() -> Optional[Browser]:
     which = shutil.which("msedge") or shutil.which("msedge.exe")
@@ -72,6 +77,8 @@ def _find_edge_windows() -> Optional[Browser]:
     return None
 
 
+# 関数: `_find_browser` の入出力契約と処理意図を定義する。
+
 def _find_browser(kind: str) -> Optional[Browser]:
     kind = (kind or "").strip().lower()
 
@@ -89,9 +96,13 @@ def _find_browser(kind: str) -> Optional[Browser]:
     return None
 
 
+# 関数: `_to_file_uri` の入出力契約と処理意図を定義する。
+
 def _to_file_uri(path: Path) -> str:
     return path.resolve().as_uri()
 
+
+# 関数: `_run_edge_print` の入出力契約と処理意図を定義する。
 
 def _run_edge_print(browser: Browser, html_in: Path, pdf_out: Path, *, timeout_s: int) -> None:
     pdf_out.parent.mkdir(parents=True, exist_ok=True)
@@ -181,6 +192,8 @@ def _run_edge_print(browser: Browser, html_in: Path, pdf_out: Path, *, timeout_s
 
     raise RuntimeError(f"edge print failed:\n{last_err}")
 
+
+# 関数: `main` の入出力契約と処理意図を定義する。
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     ap = argparse.ArgumentParser(description="Convert a local HTML file to PDF (headless Edge).")
