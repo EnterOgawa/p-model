@@ -128,7 +128,7 @@ P-modelは、真のオープンサイエンスと「人間の恣意的な介入�
 * **Part I（コア理論）:** 万物の公理と基準書、時間波密度と重力・光伝播の基礎写像のソース生成。
   > `python -B scripts/summary/paper_build.py --profile paper --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
 * **Part II（宇宙物理編）:** 太陽系テスト、重力波、赤方偏移の再計算とソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part2_astro --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+  > `python -B scripts/summary/paper_build.py --profile part2_astrophysics --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
 * **Part III（量子物理編）:** ベルテスト生データの網羅的再解析と、非局所性棄却のソース生成。
   > `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
 * **Part IV（検証資料）:** 再現性プロトコルとハッシュ台帳のソース生成。
