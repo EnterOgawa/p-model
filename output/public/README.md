@@ -1,5 +1,5 @@
 # P-model: A Unified Theory of Time-Wave Dynamics
-**時間波ダイナミクスに基づく局所的決定論的な統一理論**
+**時間波ダイナミクスに基づく局所的・決定論的な統一理論**
 
 [![Release](https://img.shields.io/github/v/release/EnterOgawa/p-model?label=Latest%20Release)](https://github.com/EnterOgawa/p-model/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,7 +7,8 @@
 
 ## 👤 Author
 - **Shunji Ogawa**
-- **ENTERSYSTEM Co., Ltd., Osaka, Japan**
+- **ENTERSYSTEM Co., Ltd.**
+- **Email:** `s_ogawa@entersystem.co.jp`
 
 ## 🌐 For English Readers (English version coming soon)
 **P-model** is a novel, deterministic, and local unified theory based on "Time-Wave Dynamics" ($P_\mu$). It unifies macroscopic gravity and microscopic quantum phenomena without assuming dark matter, spatial expansion, or quantum non-locality. 
@@ -16,7 +17,7 @@ The full English translation of our four-part paper series and validation script
 
 ---
 
-## 🕊 Foreword: 理念と先人たちへの敬意
+## 🕊️ Foreword: 理念と先人たちへの敬意
 P-modelは、既存の物理学を否定するためのものではありません。
 アインシュタインを筆頭に、これまで物理学という巨大な山に挑み、人類の知を切り拓いてきたすべての先人たちに対し、最大限の感謝と深い尊敬の念を抱いています。彼らの偉大な観測データの蓄積と、緻密に組み上げられた基礎理論の礎がなければ、このモデルが決して産声を上げることはありませんでした。
 
@@ -26,18 +27,20 @@ P-modelは、既存の物理学を否定するためのものではありませ�
 ---
 
 ## 🌌 The Paradigm Shift
-現代物理学は長きにわたり、「一般相対性理論（曲がった時空の幾何学）」と「量子力学（確率と非局所性）」という、異なる2つの理論体系によって記述されてきました。
+現代物理学は長きにわたり、マクロな宇宙を支配する「**一般相対性理論**（曲がった時空の幾何学）」と、ミクロな世界を記述する「量子力学（**シュレーディンガー方程式**に代表される確率と波動の力学）」という、根本的に相容れない2つの理論体系によって分断されてきました。
 
 **P-model** は、これらを統合するための新しい理論枠組みです。
-空間の膨張や暗黒物質、多世界解釈や非局所性を前提とせず、**「時間は波である（4元ベクトル時間波 $P_\mu$）」**というたった一つの基底方程式から出発します。このアプローチにより、太陽系の重力異常から素粒子の崩壊に至るまでの物理現象を、決定論的かつ局所的なプロセスとして統一的に記述することを試みています。
+空間の膨張や暗黒物質、多世界解釈や非局所性を前提とせず「**時間は波である（4元ベクトル時間波 $P_\mu$）**」というたった一つの基底方程式から出発します。
 
-本リポジトリは、P-modelの理論体系を一次観測データから検証するためのコード（スクリプト群）と、その計算結果（公開成果物）を管理公開する**検証フレームワーク専用のリポジトリ**です。
+驚くべきことに、この時間波の空間勾配はマクロな「重力」として振る舞い、その波の微小な揺らぎと固有時の遅れは、ミクロな「シュレーディンガー方程式（量子位相の干渉）」として自然に導出されます。このアプローチにより、太陽系の重力異常から素粒子の崩壊に至るまでの物理現象を、決定論的かつ局所的なプロセスとして統一的に記述することを試みています。
+
+本リポジトリは、P-modelの理論体系を一次観測データから検証するためのコード（スクリプト群）と、その計算結果（公開成果物）を管理・公開する**検証フレームワーク専用のリポジトリ**です。
 
 ---
 
 ## 📚 The Four-Part Series (論文四部作)
 
-P-modelの全容は、理論と実証を解説する3つの論文（Part I ~ III）と、検証再現性を担保する論文（Part IV）の、**計4つの論文（四部作）**によって構成されています。
+P-modelの全容は、理論と実証を解説する3つの論文（Part I ~ III）と、検証・再現性を担保する論文（Part IV）の、**計4つの論文（四部作）**によって構成されています。
 
 * **[Part I] コア理論：万物の公理と基準書**
   時間波密度 $P$ を定義し、重力、光の屈折、量子位相（Schrödinger方程式）への写像を固定します。また、4次元ベクトル拡張 $P_\mu$ によるラグランジアンを提示します。
@@ -48,12 +51,12 @@ P-modelの全容は、理論と実証を解説する3つの論文（Part I ~ III
 * **[Part IV] 検証資料と再現性プロトコル（本リポジトリ連動）**
   論文内のすべての結果を一次データから完全に再現するためのコード群、ハッシュ台帳、および未来観測による差分予測のマイルストーンを定義します。
 
-> ** 論文本文（Part I 〜 IV）へのリンク**
+> **※ 論文本文（Part I 〜 IV）へのリンク**
 > *（現在、論文本文はプレプリントサーバー等への公開準備中です。公開され次第、ここにリンクを追記します）*
 
 ---
 
-##  Key Discoveries (主要な発見)
+## ⚡ Key Discoveries (主要な発見)
 
 P-modelの重要な特徴は、事後的なパラメータ調整（Over-fitting）を必要としない一貫性にあります。
 
@@ -91,7 +94,7 @@ P-modelは、既存理論と結果が分岐する以下の「差分予測」を�
 * **ngEHTによる強場非線形項の検証:** 次世代EHTの精度向上により、P-model固有の空間勾配の非線形項が分離可能になります。
 * **重力波（GW）の偏光とスカラー縮退の検証:** 高S/Nの重力波イベントにおいて、P-modelの「4次元ベクトル射影」がテンソル波（GR）よりも整合性が高いかどうかが検証されます。
 * **高赤方偏移銀河の年齢（JWST）:** 空間膨張を仮定しないP-modelは、「成熟した巨大銀河の年齢矛盾」に対して自然な説明を提供します。
-* **完全ブラインドでのベルテスト検証:** 解析時の「同時計数窓」を事前に固定した完全ブラインドテストにより、非局所的な相関の実在性が客観的に証明されます。
+* **完全ブラインドでのベルテスト検証:** 解析時の「同時計数窓」を事前に固定した完全ブラインド・テストにより、非局所的な相関の実在性が客観的に証明されます。
 
 ---
 
@@ -107,39 +110,48 @@ P-modelは、既存理論と結果が分岐する以下の「差分予測」を�
 
 ---
 
-##  Core Scripts Architecture (検証スクリプトの実行方法)
+## ⚙️ Core Scripts Architecture (端から端までの完全な再現性)
 
-P-modelの各パートに対応する検証スクリプトは、以下のコマンドで一括実行およびPDF生成が可能です。Python環境（`pandas`, `numpy`, `matplotlib`等）とLaTeX環境（`lualatex`）が必要です。
+P-modelは、真のオープンサイエンスと「人間の恣意的な介入（チェリーピッキング）」の排除を体現するため、データ解析から論文ソースの生成までを自動化する「**Executable Paper（実行可能な論文）**」形式を採用しています。
 
-1. **全体の一括実行**
-   `python scripts/summary/run_all.py`
-2. **Part II（宇宙物理編）の検証実行**
-   `python -B scripts/summary/paper_build.py --profile part2_astro --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
-3. **Part III（量子物理編）の検証実行**
-   `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
-4. **Part IV（検証資料）のコンパイル**
-   `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
+以下のコマンドを実行することで、一次データの取得・再解析から、論文を構成するすべての図表・数値データの計算、そして**最終的な論文のソースファイル（`.tex`）の組み上げに至るまで**の全プロセスがあなたのローカルPC上で自動的かつ物理的に再現されます。
 
-*各スクリプトの詳細な出力結果は `output/public/` および `output/private/summary/` に生成されます。*
+*(※生成された `.tex` ファイルは、組版レイアウトや数式の最終確認をご自身で行えるよう、あえて自動PDF化は行っていません。お好みのLaTeX環境（`lualatex`推奨）で手動コンパイルして完成させてください)*
+
+**1. 全ての検証と論文ソースの一括生成**
+宇宙論から量子相関に至る全計算を実行し、結果を反映した完全な論文ソース（`.tex`）を生成します。
+> `python scripts/summary/run_all.py`
+
+**2. 各パートの個別検証とソース生成**
+特定の領域にフォーカスして検証を行い、そのパートのソースファイルをビルドします。
+
+* **Part II（宇宙物理編）:** 太陽系テスト、重力波、赤方偏移の再計算とソース生成。
+  > `python -B scripts/summary/paper_build.py --profile part2_astro --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+* **Part III（量子物理編）:** ベルテスト生データの網羅的再解析と、非局所性棄却のソース生成。
+  > `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+* **Part IV（検証資料）:** 再現性プロトコルとハッシュ台帳のソース生成。
+  > `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
+
+各スクリプトが生成した詳細な検証ログ、図表データ、およびコンパイル前の論文ソースファイルは、`output/public/` および `output/private/summary/` ディレクトリに格納されます。
 
 ---
 
 ## 🚀 Getting Started
 
-1. **理論を読む:** 別媒体で公開されているP-modelの論文（Part I〜IV）をお読みください（公開準備中）。
-2. **データを検証する:** 本リポジトリの `scripts/` および `output/` フォルダ内のコードやデータ（Part IVの検証環境）を参照実行し、ご自身の環境で検証を行ってください。
+1. **理論を読む:** 別媒体で公開されているP-modelの論文（Part I〜IV）をお読みください（※公開準備中）。
+2. **データを検証する:** 本リポジトリの `scripts/` および `output/` フォルダ内のコードやデータ（Part IVの検証環境）を参照・実行し、ご自身の環境で検証を行ってください。
 3. **議論に参加する:** 理論に対する建設的な反証、データ解析のバグ報告については、GitHub Issuesをご利用ください。
 
 ---
 
-##  License (ライセンス)
+## ⚖️ License (ライセンス)
 
 本プロジェクトは、学術的テキストと検証コードの役割を明確に分けるため、デュアルライセンスを採用しています。
 
 * **論文ドキュメントおよびテキスト (Papers and Text):**
-  外部で公開されている論文ファイル（Part I〜IV）、本リポジトリ内の図表、および本READMEのテキストは、[Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) の下でライセンスされています。原著作者（Shunji Ogawa / ENTERSYSTEM Co., Ltd.）のクレジットを明記する限りにおいて共有を歓迎しますが、**理論のテキストや数式、図表を改変したものを配布することは固く禁じます。** *(本リポジトリのスクリプトを用いて論文データを生成した場合であっても、理論の根幹をなす著作物の改変禁止の制限は維持されます)*
+  外部で公開されている論文ファイル（Part I〜IV）、本リポジトリ内の図表、および本READMEのテキストは、[Creative Commons Attribution-NoDerivatives 4.0 International (CC BY-ND 4.0)](https://creativecommons.org/licenses/by-nd/4.0/) の下でライセンスされています。原著作者（Shunji Ogawa / ENTERSYSTEM Co., Ltd.）のクレジットを明記する限りにおいて共有を歓迎しますが、**理論のテキストや数式、図表を改変したものを配布することは固く禁じます。** *(※本リポジトリのスクリプトを用いて論文データを生成した場合であっても、理論の根幹をなす著作物の改変禁止の制限は維持されます)*
   
-* **検証コードデータ (Code and Data):**
-  本リポジトリ内の検証スクリプト（`scripts/`）、出力データ（`output/`）等のプログラムコードは、[MIT License](https://opensource.org/licenses/MIT) の下でライセンスされています。透明性のある科学的検証と議論を促進するため、自由にコードを実行利用改変することができます。
+* **検証コード・データ (Code and Data):**
+  本リポジトリ内の検証スクリプト（`scripts/`）、出力データ（`output/`）等のプログラムコードは、[MIT License](https://opensource.org/licenses/MIT) の下でライセンスされています。透明性のある科学的検証と議論を促進するため、自由にコードを実行・利用・改変することができます。
 
-> *"自然は究極的にはシンプルである。時間は幾何学の次元ではなく、波であり、マクロな星の自転も、ミクロな素粒子のスピンも、すべてはその波の局所的な渦に過ぎない。"*
+> *"全ての事象はシンプルである。時間は幾何学の次元ではなく、波であり、マクロな星の自転も、ミクロな素粒子のスピンも、すべてはその波の局所的な渦に過ぎない。"*

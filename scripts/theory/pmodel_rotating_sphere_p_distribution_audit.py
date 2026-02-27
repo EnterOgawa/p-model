@@ -37,12 +37,17 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
-        # 条件分岐: `not chosen` を満たす経路を評価する。
-        if not chosen:
-            return
+        # 条件分岐: `chosen` を満たす経路を評価する。
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
+        mpl.rcParams["font.size"] = 13.0
+        mpl.rcParams["axes.titlesize"] = 18.0
+        mpl.rcParams["axes.labelsize"] = 14.0
+        mpl.rcParams["xtick.labelsize"] = 12.0
+        mpl.rcParams["ytick.labelsize"] = 12.0
+        mpl.rcParams["legend.fontsize"] = 12.0
     except Exception:
         return
 
@@ -426,9 +431,10 @@ def _plot(
 ) -> None:
     _set_japanese_font()
 
-    fig = plt.figure(figsize=(13.0, 4.8))
+    fig = plt.figure(figsize=(16.4, 13.2))
+    grid = fig.add_gridspec(2, 2, height_ratios=[1.0, 1.18], hspace=0.34, wspace=0.20)
 
-    ax0 = fig.add_subplot(1, 3, 1)
+    ax0 = fig.add_subplot(grid[0, 0])
     theta = np.linspace(0.0, math.pi, 200)
     r_ratio = 1.5
     static_profile = np.ones_like(theta)
@@ -438,13 +444,14 @@ def _plot(
     else:
         rot_profile = 1.0 + kappa_rot * (r_ratio ** -3) * (np.sin(theta) ** 2)
 
-    ax0.plot(theta * 180.0 / math.pi, static_profile, color="#444444", linestyle="--", label="δP_rot=0")
-    ax0.plot(theta * 180.0 / math.pi, rot_profile, color="#1f77b4", linewidth=2.0, label="δP_rot≠0")
-    ax0.set_xlabel("polar angle θ [deg]")
-    ax0.set_ylabel("P/P_static (r=1.5R)")
-    ax0.set_title("Rotational P-profile (minimal ansatz)")
+    ax0.plot(theta * 180.0 / math.pi, static_profile, color="#2f2f2f", linestyle="--", linewidth=2.6, label="δP_rot=0")
+    ax0.plot(theta * 180.0 / math.pi, rot_profile, color="#1f77b4", linewidth=3.0, label="δP_rot≠0")
+    ax0.set_xlabel("polar angle θ [deg]", fontsize=15.0)
+    ax0.set_ylabel(r"$P/P_{\mathrm{static}}$ ($r=1.5R$)", fontsize=15.0)
+    ax0.set_title("Rotational P-profile (minimal ansatz)", fontsize=19.0, pad=11.0)
     ax0.grid(True, alpha=0.25)
-    ax0.legend(loc="best")
+    ax0.tick_params(axis="both", labelsize=12.5)
+    ax0.legend(loc="lower right")
 
     frame_static = [r for r in static_rows if str(r.get("kind") or "") == "frame_dragging"]
     frame_rot = [r for r in rot_rows if str(r.get("kind") or "") == "frame_dragging"]
@@ -462,21 +469,31 @@ def _plot(
         static_ratio.append(float("nan") if pred_static is None or ref is None or abs(ref) == 0 else pred_static / ref)
         rot_ratio.append(float("nan") if pred_rot is None or ref is None or abs(ref) == 0 else pred_rot / ref)
 
-    ax1 = fig.add_subplot(1, 3, 2)
+    ax1 = fig.add_subplot(grid[0, 1])
     x = np.arange(len(labels), dtype=float)
-    width = 0.26
+    width = 0.30
     ax1.bar(x - width, obs_ratio, width=width, color="#1f77b4", label="observed/reference")
     ax1.bar(x, static_ratio, width=width, color="#d62728", alpha=0.9, label="δP_rot=0 prediction")
     ax1.bar(x + width, rot_ratio, width=width, color="#2ca02c", alpha=0.9, label="δP_rot≠0 prediction")
     ax1.axhline(1.0, color="#555555", linestyle="--", linewidth=1.0)
     ax1.set_xticks(x)
-    ax1.set_xticklabels(labels, rotation=12, ha="right")
-    ax1.set_ylabel("dimensionless ratio")
-    ax1.set_title("Frame-dragging ratio audit")
+    ax1.set_xticklabels(labels, rotation=10, ha="right", fontsize=12.0)
+    ax1.set_ylabel("dimensionless ratio", fontsize=15.0)
+    ax1.set_title("Frame-dragging ratio audit", fontsize=19.0, pad=11.0)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="best", fontsize=8.8)
+    ax1.tick_params(axis="both", labelsize=12.5)
+    ax1.legend(loc="lower left", fontsize=11.8)
+    yvals = [v for v in obs_ratio + static_ratio + rot_ratio if np.isfinite(v)]
+    if yvals:
+        y_center = float(np.mean(yvals))
+        y_span = max(0.03, 1.2 * max(abs(v - y_center) for v in yvals))
+        ax1.set_ylim(y_center - y_span, y_center + y_span)
+    for xpos, values_plot in zip([x - width, x, x + width], [obs_ratio, static_ratio, rot_ratio]):
+        for xi, yi in zip(xpos, values_plot):
+            if np.isfinite(yi):
+                ax1.text(xi, yi + 0.007, f"{yi:.3f}", ha="center", va="bottom", fontsize=10.6, color="0.22")
 
-    ax2 = fig.add_subplot(1, 3, 3)
+    ax2 = fig.add_subplot(grid[1, :])
     z_static = [float(r["z_score"]) if r.get("z_score") is not None else 0.0 for r in frame_static]
     z_rot = [float(r["z_score"]) if r.get("z_score") is not None else 0.0 for r in frame_rot]
     bars_static = ax2.bar(x - width / 2.0, z_static, width=width, color="#d62728", alpha=0.92, label="δP_rot=0")
@@ -485,11 +502,12 @@ def _plot(
     ax2.axhline(-z_reject, color="#333333", linestyle="--", linewidth=1.0)
     ax2.axhline(0.0, color="#666666", linestyle="-", linewidth=0.9)
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=12, ha="right")
-    ax2.set_ylabel("z = (obs - pred) / sigma")
-    ax2.set_title("Precession gate comparison")
+    ax2.set_xticklabels(labels, rotation=10, ha="right", fontsize=12.0)
+    ax2.set_ylabel("z = (obs - pred) / sigma", fontsize=15.0)
+    ax2.set_title("Precession gate comparison", fontsize=19.0, pad=11.0)
     ax2.grid(True, axis="y", alpha=0.25)
-    ax2.legend(loc="best")
+    ax2.tick_params(axis="both", labelsize=12.5)
+    ax2.legend(loc="upper right")
     max_abs_z_panel = max([abs(v) for v in z_static + z_rot] + [abs(z_reject), 1e-6])
     y_margin = 0.08 * max_abs_z_panel
     ax2.set_ylim(-(max_abs_z_panel + y_margin), max_abs_z_panel + y_margin)
@@ -498,9 +516,9 @@ def _plot(
         x_center = bar.get_x() + bar.get_width() * 0.5
         y_text = h + (0.015 * max_abs_z_panel if h >= 0.0 else -0.03 * max_abs_z_panel)
         va = "bottom" if h >= 0.0 else "top"
-        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=8.5, color="0.20")
+        ax2.text(x_center, y_text, f"{h:.2f}", ha="center", va=va, fontsize=10.8, color="0.20")
 
-    fig.tight_layout()
+    fig.subplots_adjust(left=0.065, right=0.985, top=0.94, bottom=0.075, hspace=0.32, wspace=0.20)
     out_png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
@@ -567,6 +585,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     default_strong_field_audit_json = root / "output" / "public" / "theory" / "pmodel_rotating_bh_photon_ring_direct_audit.json"
     default_outdir = root / "output" / "private" / "theory"
     default_public_outdir = root / "output" / "public" / "theory"
+    default_canon_outdir = root / "output" / "theory"
 
     ap = argparse.ArgumentParser(
         description="Rotating-sphere P-distribution and precession audit (deltaP_rot=0 vs deltaP_rot!=0)."
@@ -592,6 +611,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output directory.")
     ap.add_argument("--public-outdir", type=str, default=str(default_public_outdir), help="Public output directory.")
+    ap.add_argument("--canon-outdir", type=str, default=str(default_canon_outdir), help="Canonical output directory.")
     ap.add_argument("--z-reject", type=float, default=3.0, help="Reject gate on |z|.")
     ap.add_argument(
         "--flux-closure-threshold",
@@ -608,8 +628,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     strong_field_audit_json = Path(args.strong_field_audit_json)
     outdir = Path(args.outdir)
     public_outdir = Path(args.public_outdir)
+    canon_outdir = Path(args.canon_outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     public_outdir.mkdir(parents=True, exist_ok=True)
+    canon_outdir.mkdir(parents=True, exist_ok=True)
 
     gpb_payload = _read_json(gpb_data)
     frame_payload = _read_json(frame_data)
@@ -732,6 +754,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_csv(out_csv, all_rows)
 
     copied: List[Path] = []
+    canon_copied: List[Path] = []
+    for src in (out_json, out_csv, out_png):
+        dst = canon_outdir / src.name
+        # 条件分岐: `src.resolve() == dst.resolve()` を満たす経路を評価する。
+        if src.resolve() == dst.resolve():
+            continue
+
+        shutil.copy2(src, dst)
+        canon_copied.append(dst)
+
     # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
@@ -749,6 +781,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "rows_json": out_json,
                     "rows_csv": out_csv,
                     "plot_png": out_png,
+                    "canon_copies": canon_copied,
                     "public_copies": copied,
                 },
                 "metrics": {
@@ -770,6 +803,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `canon_copied` を満たす経路を評価する。
+    if canon_copied:
+        print(f"[ok] canon copies : {len(canon_copied)} files -> {canon_outdir}")
+
     # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")

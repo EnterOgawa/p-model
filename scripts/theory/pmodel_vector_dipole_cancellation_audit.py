@@ -37,12 +37,17 @@ def _set_japanese_font() -> None:
         ]
         available = {f.name for f in fm.fontManager.ttflist}
         chosen = [name for name in preferred if name in available]
-        # 条件分岐: `not chosen` を満たす経路を評価する。
-        if not chosen:
-            return
+        # 条件分岐: `chosen` を満たす経路を評価する。
+        if chosen:
+            mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
 
-        mpl.rcParams["font.family"] = chosen + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
+        mpl.rcParams["font.size"] = 13.0
+        mpl.rcParams["axes.titlesize"] = 17.0
+        mpl.rcParams["axes.labelsize"] = 14.0
+        mpl.rcParams["xtick.labelsize"] = 12.0
+        mpl.rcParams["ytick.labelsize"] = 12.0
+        mpl.rcParams["legend.fontsize"] = 12.0
     except Exception:
         return
 
@@ -89,6 +94,18 @@ def _fmt_float(x: float, digits: int = 6) -> str:
         return f"{x:.{digits}g}"
 
     return f"{x:.{digits}f}".rstrip("0").rstrip(".")
+
+
+# 関数: `_pretty_pulsar_name` の入出力契約と処理意図を定義する。
+def _pretty_pulsar_name(psr_id: str) -> str:
+    alias = {
+        "psr_b1913p16": "B1913+16\n(Hulse-Taylor)",
+        "psr_j0737m3039ab": "J0737-3039A/B\n(Double Pulsar)",
+        "psr_j1738p0333": "J1738+0333",
+        "psr_j0348p0432": "J0348+0432",
+    }
+    key = (psr_id or "").strip().lower()
+    return alias.get(key, psr_id)
 
 
 # 関数: `_extract_rows` の入出力契約と処理意図を定義する。
@@ -254,7 +271,8 @@ def _gate_payload(rows: Sequence[Dict[str, Any]], z_reject: float, dipole_tol: f
 
 def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> None:
     _set_japanese_font()
-    labels = [str(r.get("id") or f"row{i+1}") for i, r in enumerate(rows)]
+    labels_raw = [str(r.get("id") or f"row{i+1}") for i, r in enumerate(rows)]
+    labels = [_pretty_pulsar_name(label) for label in labels_raw]
     x = np.arange(len(rows), dtype=float)
 
     z = np.array([float(r["z_R"]) if r.get("z_R") is not None else np.nan for r in rows], dtype=float)
@@ -262,8 +280,8 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
     dip_c = np.array([float(r.get("dipole_norm_counterfactual") or 0.0) for r in rows], dtype=float)
     eps_lim = np.array([float(r["epsilon_limit_95"]) if r.get("epsilon_limit_95") is not None else np.nan for r in rows], dtype=float)
 
-    fig, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(11.6, 10.0), sharex=True)
-    fig.suptitle("P_μ minimal extension: dipole-cancellation audit (equivalence-principle condition)")
+    fig, (ax0, ax1, ax2) = plt.subplots(3, 1, figsize=(14.8, 13.9), sharex=True)
+    fig.suptitle("P_μ minimal extension: dipole-cancellation audit (equivalence-principle condition)", fontsize=19.0)
 
     ax0.bar(x, np.nan_to_num(z, nan=0.0), color="#1f77b4", alpha=0.9)
     ax0.axhline(z_reject, color="#333333", linestyle="--", linewidth=1.0)
@@ -276,7 +294,7 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
         "3σ (Reject)",
         ha="left",
         va="bottom",
-        fontsize=8.5,
+        fontsize=11.0,
         color="#333333",
         bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 1.2},
         clip_on=False,
@@ -287,31 +305,49 @@ def _plot(rows: Sequence[Dict[str, Any]], z_reject: float, out_png: Path) -> Non
         "-3σ (Reject)",
         ha="left",
         va="top",
-        fontsize=8.5,
+        fontsize=11.0,
         color="#333333",
         bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.8, "pad": 1.2},
         clip_on=False,
     )
-    ax0.set_ylabel("z = (R-1)/σ")
-    ax0.set_title("Binary-pulsar consistency under dipole=0 (quadrupole-leading)")
+    ax0.set_ylabel("z = (R-1)/σ", fontsize=15.0)
+    ax0.set_title("Binary-pulsar consistency under dipole=0 (quadrupole-leading)", fontsize=17.8, pad=10.0)
     ax0.grid(True, axis="y", alpha=0.25)
+    ax0.tick_params(axis="both", labelsize=12.5)
+    max_abs_z = float(np.nanmax(np.abs(np.nan_to_num(z, nan=0.0)))) if len(z) else 1.0
+    for xi, zi, label in zip(x, np.nan_to_num(z, nan=0.0), labels):
+        y_offset = 0.12 + 0.03 * max_abs_z
+        y_text = zi + y_offset if zi >= 0.0 else zi - y_offset
+        va_text = "bottom" if zi >= 0.0 else "top"
+        ax0.text(xi, y_text, label.split("\n")[0], ha="center", va=va_text, fontsize=10.5, color="0.22")
 
     width = 0.36
     ax1.bar(x - width / 2.0, dip_u, width=width, color="#2ca02c", alpha=0.9, label="universal η (expected ~0)")
     ax1.bar(x + width / 2.0, dip_c, width=width, color="#ff7f0e", alpha=0.9, label="counterfactual η2=η1(1+ε)")
     ax1.set_yscale("log")
-    ax1.set_ylabel("|d|/(η M r)")
-    ax1.set_title("Dipole moment normalization")
+    ax1.set_ylabel("|d|/(η M r)", fontsize=15.0)
+    ax1.set_title("Dipole moment normalization", fontsize=17.8, pad=10.0)
     ax1.grid(True, axis="y", alpha=0.25)
-    ax1.legend(loc="best")
+    ax1.tick_params(axis="both", labelsize=12.5)
+    ax1.legend(loc="upper right")
+    inset = ax1.inset_axes([0.64, 0.12, 0.33, 0.40])
+    inset.bar(x, dip_u, width=0.42, color="#2ca02c", alpha=0.95)
+    inset.set_yscale("linear")
+    inset.set_xticks([])
+    inset.set_title("zoom: universal η", fontsize=10.0)
+    max_u = float(np.max(dip_u)) if len(dip_u) else 0.0
+    inset.set_ylim(0.0, max(1e-18, 1.15 * max_u))
+    inset.grid(True, axis="y", alpha=0.20)
 
     ax2.bar(x, np.nan_to_num(eps_lim, nan=0.0), color="#9467bd", alpha=0.9)
-    ax2.set_ylabel("sqrt(non-GR upper95)")
-    ax2.set_title("Inferred universality tolerance (95%)")
+    ax2.set_ylabel("sqrt(non-GR upper95)", fontsize=15.0)
+    ax2.set_title("Inferred universality tolerance (95%)", fontsize=17.8, pad=10.0)
     ax2.grid(True, axis="y", alpha=0.25)
+    ax2.tick_params(axis="both", labelsize=12.5)
 
     ax2.set_xticks(x)
-    ax2.set_xticklabels(labels, rotation=18, ha="right")
+    ax2.set_xticklabels(labels, rotation=8, ha="right", fontsize=12.0)
+    ax2.set_xlabel("binary pulsar systems", fontsize=14.0)
 
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.97))
     out_png.parent.mkdir(parents=True, exist_ok=True)
@@ -370,6 +406,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     default_in_private = root / "output" / "private" / "pulsar" / "binary_pulsar_orbital_decay_metrics.json"
     default_outdir = root / "output" / "private" / "theory"
     default_public_outdir = root / "output" / "public" / "theory"
+    default_canon_outdir = root / "output" / "theory"
 
     ap = argparse.ArgumentParser(description="Dipole-radiation cancellation audit under equivalence-principle condition.")
     ap.add_argument("--in-json", type=str, default=str(default_in_public), help="Binary pulsar metrics JSON path.")
@@ -381,6 +418,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     ap.add_argument("--outdir", type=str, default=str(default_outdir), help="Output directory.")
     ap.add_argument("--public-outdir", type=str, default=str(default_public_outdir), help="Public output directory.")
+    ap.add_argument("--canon-outdir", type=str, default=str(default_canon_outdir), help="Canonical output directory.")
     ap.add_argument("--eta0", type=float, default=1.0, help="Universal coupling ratio baseline.")
     ap.add_argument(
         "--epsilon-counterfactual",
@@ -416,8 +454,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     outdir = Path(args.outdir)
     public_outdir = Path(args.public_outdir)
+    canon_outdir = Path(args.canon_outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     public_outdir.mkdir(parents=True, exist_ok=True)
+    canon_outdir.mkdir(parents=True, exist_ok=True)
 
     payload = _read_json(in_json)
     rows = _extract_rows(payload)
@@ -471,6 +511,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     _write_json(out_json, payload_out)
 
     copied: List[Path] = []
+    canon_copied: List[Path] = []
+    for src in (out_json, out_csv, out_png):
+        dst = canon_outdir / src.name
+        # 条件分岐: `src.resolve() == dst.resolve()` を満たす経路を評価する。
+        if src.resolve() == dst.resolve():
+            continue
+
+        shutil.copy2(src, dst)
+        canon_copied.append(dst)
+
     # 条件分岐: `not args.no_public_copy` を満たす経路を評価する。
     if not args.no_public_copy:
         for src in (out_json, out_csv, out_png):
@@ -488,6 +538,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                     "rows_json": out_json,
                     "rows_csv": out_csv,
                     "plot_png": out_png,
+                    "canon_copies": canon_copied,
                     "public_copies": copied,
                 },
                 "metrics": {
@@ -507,6 +558,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     print(f"[ok] json : {out_json}")
     print(f"[ok] csv  : {out_csv}")
     print(f"[ok] png  : {out_png}")
+    # 条件分岐: `canon_copied` を満たす経路を評価する。
+    if canon_copied:
+        print(f"[ok] canon copies : {len(canon_copied)} files -> {canon_outdir}")
+
     # 条件分岐: `copied` を満たす経路を評価する。
     if copied:
         print(f"[ok] public copies: {len(copied)} files -> {public_outdir}")

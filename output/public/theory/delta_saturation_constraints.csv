@@ -1,0 +1,4 @@
+key,label,energy_ev,rest_mass_ev,gamma_obs,log10_gamma_obs,delta_upper_from_gamma,log10_delta_upper,gamma_max_for_delta_adopted,log10_gamma_max_for_delta_adopted,margin_gamma_max_over_gamma_obs,notes,source
+lhc_proton_7tev,LHCの陽子（7 TeV）,7000000000000.0,938272081.3,7460.52252807237,3.872769246120291,1.7966418660486763e-08,-7.7455384844378665,1e+30,30.0,1.3403886875714286e+26,LHCのビームエネルギー（代表値）。,CERN/LHC（ビームエネルギーの公開情報）
+uhecr_proton_1e20ev,超高エネルギー宇宙線（陽子 10^20 eV）,1e+20,938272081.3,106578893258.17671,11.027671206106035,8.803544985470337e-23,-22.05534241221207,1e+30,30.0,9.382720813e+18,代表的な最大級イベント（オーダー）。,UHECR（代表値・オーダー）
+icecube_neutrino_10pev_m0p1ev,高エネルギーν（10 PeV, m=0.1 eV仮定）,1e+16,0.1,1e+17,17.0,1.0000000000000001e-34,-34.0,1e+30,30.0,10000000000000.0,ν質量は仮定。γ=E/(mc^2)なので m を変えると γ と δ上限がスケールする。,IceCube等（エネルギースケール）＋ν質量は仮定

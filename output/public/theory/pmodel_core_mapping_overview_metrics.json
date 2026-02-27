@@ -1,9 +1,13 @@
 {
-  "generated_utc": "2026-02-11T10:04:18.763089+00:00",
+  "generated_utc": "2026-02-26T22:43:05.614304+00:00",
   "script": "scripts/theory/pmodel_core_mapping_overview.py",
   "outputs": {
-    "png": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview.png",
-    "metrics_json": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview_metrics.json"
+    "png_canon": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview.png",
+    "png_private": "C:\\develop\\waveP\\output\\private\\theory\\pmodel_core_mapping_overview.png",
+    "png_public": "C:\\develop\\waveP\\output\\public\\theory\\pmodel_core_mapping_overview.png",
+    "metrics_json_canon": "C:\\develop\\waveP\\output\\theory\\pmodel_core_mapping_overview_metrics.json",
+    "metrics_json_private": "C:\\develop\\waveP\\output\\private\\theory\\pmodel_core_mapping_overview_metrics.json",
+    "metrics_json_public": "C:\\develop\\waveP\\output\\public\\theory\\pmodel_core_mapping_overview_metrics.json"
   },
   "figure_index_path": "output/theory/pmodel_core_mapping_overview.png",
   "notes": [

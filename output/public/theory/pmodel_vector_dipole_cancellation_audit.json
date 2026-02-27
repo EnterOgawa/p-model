@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-02-20T07:07:11.931335+00:00",
+  "generated_utc": "2026-02-27T02:18:11.229895+00:00",
   "schema": "wavep.theory.pmodel_vector_dipole_cancellation_audit.v1",
   "title": "P_μ minimal extension audit: dipole cancellation under equivalence principle",
   "intent": "Show that universal time-wave source-to-inertial-mass ratio cancels dipole radiation in COM frame, leaving quadrupole as the leading binary-radiation term.",

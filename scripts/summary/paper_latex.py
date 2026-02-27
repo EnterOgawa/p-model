@@ -2162,7 +2162,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         r"\author{" "\n"
         r"  Shunji Ogawa \\" "\n"
         r"  \vspace{0.2em}" "\n"
-        r"  \small ENTERSYSTEM Co., Ltd., Osaka, Japan" "\n"
+        r"  \small ENTERSYSTEM Co., Ltd." "\n"
         r"}"
     )
 

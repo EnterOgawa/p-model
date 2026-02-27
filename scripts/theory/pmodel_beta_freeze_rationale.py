@@ -37,12 +37,17 @@ def _set_japanese_font() -> None:
         ]
         available = {font.name for font in fm.fontManager.ttflist}
         selected = [name for name in preferred if name in available]
-        # 条件分岐: `not selected` を満たす経路を評価する。
-        if not selected:
-            return
+        # 条件分岐: `selected` を満たす経路を評価する。
+        if selected:
+            mpl.rcParams["font.family"] = selected + ["DejaVu Sans"]
 
-        mpl.rcParams["font.family"] = selected + ["DejaVu Sans"]
         mpl.rcParams["axes.unicode_minus"] = False
+        mpl.rcParams["font.size"] = 13.0
+        mpl.rcParams["axes.titlesize"] = 18.0
+        mpl.rcParams["axes.labelsize"] = 14.0
+        mpl.rcParams["xtick.labelsize"] = 12.0
+        mpl.rcParams["ytick.labelsize"] = 12.0
+        mpl.rcParams["legend.fontsize"] = 12.0
     except Exception:
         return
 
@@ -144,39 +149,66 @@ def main() -> int:
     labels = [row["label"] for row in rows]
     values = np.array([float(row["beta"]) for row in rows], dtype=float)
     errors = np.array([float(row["sigma"]) for row in rows], dtype=float)
+    values_shift = values - 1.0
 
     freeze_value = float(rows[2]["beta"])
+    freeze_shift = freeze_value - 1.0
     z_scores = np.abs(values - freeze_value) / np.where(errors > 0, errors, 1.0)
 
-    figure, axes = plt.subplots(1, 2, figsize=(13.8, 4.8), dpi=200, gridspec_kw={"width_ratios": [2.2, 1.2]})
+    figure, axes = plt.subplots(1, 2, figsize=(16.4, 8.6), dpi=220, gridspec_kw={"width_ratios": [2.45, 1.10]})
 
     ax0 = axes[0]
     positions = np.arange(len(rows))
-    ax0.errorbar(
-        values,
-        positions,
-        xerr=errors,
-        fmt="o",
-        capsize=5,
-        linewidth=1.3,
-        color="#1f77b4",
-        markerfacecolor="#1f77b4",
+    marker_styles = ["s", "D", "o"]
+    marker_colors = ["#1f77b4", "#2ca02c", "#ff7f0e"]
+    for index, row in enumerate(rows):
+        ax0.errorbar(
+            [values_shift[index]],
+            [positions[index]],
+            xerr=[errors[index]],
+            fmt=marker_styles[index],
+            markersize=9.8,
+            capsize=5,
+            linewidth=1.45,
+            color=marker_colors[index],
+            markerfacecolor=marker_colors[index],
+        )
+
+    ax0.axvline(
+        freeze_shift,
+        color="tab:orange",
+        linestyle="--",
+        linewidth=1.4,
+        label=f"β_frozen={freeze_value:.7f}",
     )
-    ax0.axvline(freeze_value, color="tab:orange", linestyle="--", linewidth=1.2, label="frozen β")
     ax0.set_yticks(positions)
     ax0.set_yticklabels(labels)
     ax0.invert_yaxis()
-    ax0.set_xlabel("β value")
-    ax0.set_title("β凍結の根拠（Cassini拘束 + VLBI独立チェック）")
+    ax0.set_xlabel("β - 1 （unity offset）", fontsize=15.0)
+    ax0.set_title("β凍結の根拠（Cassini拘束 + VLBI独立チェック）", fontsize=19.0, pad=12.0)
     ax0.grid(alpha=0.25, axis="x")
-    ax0.legend(loc="lower right", fontsize=9)
+    ax0.tick_params(axis="both", labelsize=13.0)
+    ax0.legend(loc="upper left", bbox_to_anchor=(-0.02, 1.02), fontsize=12.0, frameon=True)
+    ax0.text(
+        0.02,
+        0.08,
+        f"β_frozen={freeze_value:.7f}",
+        transform=ax0.transAxes,
+        ha="left",
+        va="bottom",
+        fontsize=12.0,
+        color="tab:orange",
+        bbox={"facecolor": "white", "alpha": 0.85, "edgecolor": "none", "pad": 1.4},
+    )
+    span = float(np.max(np.abs(values_shift) + errors))
+    ax0.set_xlim(min(freeze_shift - 1.2 * span, np.min(values_shift - errors) - 0.05 * span), np.max(values_shift + errors) + 0.05 * span)
 
     for index, row in enumerate(rows):
         ax0.text(
-            values[index] + max(errors[index], 3.0e-5) * 1.25,
+            values_shift[index] + max(errors[index], 3.0e-5) * 1.25,
             positions[index] - 0.05,
             row["note"],
-            fontsize=8.6,
+            fontsize=11.3,
             color="0.28",
             va="center",
         )
@@ -184,18 +216,23 @@ def main() -> int:
     ax1 = axes[1]
     colors = ["#4c78a8", "#59a14f", "#f28e2b"]
     ax1.barh(positions, z_scores, color=colors, alpha=0.9)
-    ax1.axvline(1.0, color="0.45", linestyle=":", linewidth=1.0)
+    ax1.axvline(1.0, color="0.35", linestyle=":", linewidth=1.0, label="1σ")
+    ax1.axvline(3.0, color="0.20", linestyle="--", linewidth=1.0, label="3σ")
     ax1.set_yticks(positions)
     ax1.set_yticklabels([])
     ax1.invert_yaxis()
-    ax1.set_xlabel("abs(β - β_frozen)/σ")
-    ax1.set_title("凍結値との一貫性")
+    ax1.set_xlabel(r"$|\beta-\beta_{\mathrm{frozen}}|/\sigma$", fontsize=15.0)
+    ax1.set_title("凍結値との一貫性", fontsize=19.0, pad=12.0)
     ax1.grid(alpha=0.25, axis="x")
+    ax1.tick_params(axis="both", labelsize=13.0)
+    ax1.legend(loc="lower right", fontsize=12.0)
+    x_max = max(3.4, float(np.nanmax(z_scores)) + 0.4)
+    ax1.set_xlim(0.0, x_max)
 
     for index, score in enumerate(z_scores):
-        ax1.text(score + 0.02, positions[index], f"{score:.2f}", va="center", fontsize=8.8, color="0.22")
+        ax1.text(score + 0.05, positions[index], f"{score:.2f}σ", va="center", fontsize=12.0, color="0.22")
 
-    figure.tight_layout()
+    figure.tight_layout(rect=(0.03, 0.01, 1.0, 1.0))
     _save_figure(figure, public_path=out_png_public, private_path=out_png_private)
     plt.close(figure)
 
