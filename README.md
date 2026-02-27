@@ -100,7 +100,7 @@ P-modelは、既存理論と結果が分岐する以下の「差分予測」を�
 
 ## 🔬 Reproducibility & Rejection Protocol (再現性と反証可能性)
 
-本プロジェクトでは、すべての検証に対して**「Rejection Protocol（棄却手順）」**を厳格に適用しています。
+本プロジェクトでは、すべての検証に対して「**Rejection Protocol（棄却手順）**」を厳格に適用しています。
 
 1. **Input:** 使用する一次データ（NASA, LIGO, NISTなどからの公開データ）。
 2. **Frozen:** 過去のデータで固定され、以後絶対に動かさない「凍結パラメータ（$\beta$ など）」。
