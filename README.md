@@ -60,11 +60,14 @@ P-modelが既存の物理学に提示するパラダイムシフトの核心は�
 P-modelの全容は、理論と実証を解説する3つの論文（Part I ~ III）と、検証・再現性を担保する論文（Part IV）の**計4つの論文**（**四部作**）によって構成されています。
 
 * **[Part I] コア理論：理論的基礎と写像原理**<br>
-  時間波密度 $P$ を定義し、重力、光の屈折、量子位相（Schrödinger方程式）への写像を固定します。また、4次元ベクトル拡張 $P_\mu$ によるラグランジアンを提示します。<br>
+  時間波密度 $P$ を定義し、重力、光の屈折、量子位相（Schrödinger方程式）への写像を固定します。また、4次元ベクトル拡張 $P_\mu$ によるラグランジアンを提示します。
+  
 * **[Part II] 宇宙物理編：宇宙物理学および宇宙論的検証**<br>
-  太陽系テストから、ブラックホールの影、重力波、そして宇宙論スケール（BAO, CMB）に至るまでの観測事実を検証します。<br>
+  太陽系テストから、ブラックホールの影、重力波、そして宇宙論スケール（BAO, CMB）に至るまでの観測事実を検証します。
+  
 * **[Part III] 量子物理編：微視的および量子的現象の再評価**<br>
-  ベルテストの生データ再解析を通じて非局所性を系統誤差として解体し、核力（テンソル力）と弱い相互作用（パリティの破れ）を $P_\mu$ から導出します。<br>
+  ベルテストの生データ再解析を通じて非局所性を系統誤差として解体し、核力（テンソル力）と弱い相互作用（パリティの破れ）を $P_\mu$ から導出します。
+  
 * **[Part IV] 検証資料と再現性プロトコル（本リポジトリ連動）**<br>
   論文内のすべての結果を一次データから完全に再現するためのコード群、ハッシュ台帳、および未来観測による差分予測のマイルストーンを定義します。
 
@@ -109,11 +112,14 @@ P-modelでは、量子コンピューターの計算能力を「多世界での�
 P-modelは、既存理論と結果が分岐する以下の「差分予測」を提示し、今後の観測データによる検証を待ち受けます。
 
 * **ngEHTによる強場非線形項の検証**<br>
-次世代EHTの精度向上により、P-model固有の空間勾配の非線形項が分離可能になります。<br>
-* **重力波（GW）の偏光とスカラー縮退の検証**<br>
-高S/Nの重力波イベントにおいて、P-modelの「4次元ベクトル射影」がテンソル波（GR）よりも整合性が高いかどうかが検証されます。<br>
+次世代EHTの精度向上により、P-model固有の空間勾配の非線形項が分離可能になります。
+
+* **重力波（GW）の偏光とスカラー縮退の検証**
+高S/Nの重力波イベントにおいて、P-modelの「4次元ベクトル射影」がテンソル波（GR）よりも整合性が高いかどうかが検証されます。
+
 * **高赤方偏移銀河の年齢（JWST）**<br>
-空間膨張を仮定しないP-modelは、「成熟した巨大銀河の年齢矛盾」に対して自然な説明を提供します。<br>
+空間膨張を仮定しないP-modelは、「成熟した巨大銀河の年齢矛盾」に対して自然な説明を提供します。
+
 * **完全ブラインドでのベルテスト検証**<br>
 解析時の「同時計数窓」を事前に固定した完全ブラインド・テストにより、非局所的な相関の実在性が客観的に証明されます。
 
@@ -145,11 +151,14 @@ P-modelは、真のオープンサイエンスと「人間の恣意的な介入�
 特定の領域にフォーカスして検証を行い、そのパートのソースファイルをビルドします。
 
 * **Part I（コア理論）:** 万物の公理と基準書、時間波密度と重力・光伝播の基礎写像のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile paper --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`<br>
+  > `python -B scripts/summary/paper_build.py --profile paper --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+  > 
 * **Part II（宇宙物理編）:** 太陽系テスト、重力波、赤方偏移の再計算とソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part2_astrophysics --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`<br>
+  > `python -B scripts/summary/paper_build.py --profile part2_astrophysics --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+  > 
 * **Part III（量子物理編）:** ベルテスト生データの網羅的再解析と、非局所性棄却のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`<br>
+  > `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+  > 
 * **Part IV（検証資料）:** 再現性プロトコルとハッシュ台帳のソース生成。
   > `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
 
@@ -160,11 +169,13 @@ P-modelは、真のオープンサイエンスと「人間の恣意的な介入�
 ## 🚀 Getting Started
 
 1. **理論を読む**<br>
-別媒体で公開されているP-modelの論文（Part I〜IV）をお読みください（※公開準備中）。<br>
-2. **データを検証する**<br>
-本リポジトリの `scripts/` および `output/` フォルダ内のコードやデータ（Part IVの検証環境）を参照・実行し、ご自身の環境で検証を行ってください。<br>
-3. **議論に参加する**<br>
-理論に対する建設的な反証、データ解析のバグ報告については、GitHub Issuesをご利用ください。<br>
+別媒体で公開されているP-modelの論文（Part I〜IV）をお読みください（※公開準備中）。
+
+3. **データを検証する**<br>
+本リポジトリの `scripts/` および `output/` フォルダ内のコードやデータ（Part IVの検証環境）を参照・実行し、ご自身の環境で検証を行ってください。
+
+5. **議論に参加する**<br>
+理論に対する建設的な反証、データ解析のバグ報告については、GitHub Issuesをご利用ください。
 
 ---
 
