@@ -1,5 +1,5 @@
 # P-model: A Unified Theory of Time-Wave Dynamics
-**時間波ダイナミクスに基づく局所的・決定論的な統一理論**
+**時間波ダイナミクスに基づく統一理論 (The P-model)**
 
 [![Release](https://img.shields.io/github/v/release/EnterOgawa/p-model?label=Latest%20Release)](https://github.com/EnterOgawa/p-model/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
