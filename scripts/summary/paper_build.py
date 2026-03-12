@@ -89,6 +89,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         help="Locale for helper-managed figure text (default: auto; Part III defaults to ja).",
     )
     ap.add_argument(
+        "--figure-font-scale",
+        type=float,
+        default=1.0,
+        help="Global scale applied to the shared figure font profile (default: 1.0).",
+    )
+    ap.add_argument(
         "--no-embed-images",
         action="store_true",
         help="Do not embed images in publish HTML (pass-through to paper_html).",
@@ -198,13 +204,37 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
     profile = str(args.profile)
     requested_figure_lang = str(args.figure_lang)
+    figure_font_scale = float(args.figure_font_scale)
+    if figure_font_scale <= 0:
+        print("[err] --figure-font-scale は 0 より大きい値が必要です。")
+        return 2
+
     env_figure_lang = os.environ.get("WAVEP_FIGURE_LANG", "").strip().lower()
     auto_figure_lang = env_figure_lang if env_figure_lang in {"ja", "en"} else "ja"
     auto_lang_profiles = {"part3_quantum", "part4_verification", "part5_future_predictions"}
     figure_lang = auto_figure_lang if (requested_figure_lang == "auto" and profile in auto_lang_profiles) else requested_figure_lang
+    font_profile_by_build_profile = {
+        "paper": "paper",
+        "part2_astrophysics": "part2_astrophysics",
+        "part3_quantum": "part3_quantum",
+        "part4_verification": "part4_verification",
+        "part5_future_predictions": "part5_future_predictions",
+    }
+    font_floor_by_build_profile = {
+        "paper": ("12.2", "12.2"),
+        "part2_astrophysics": ("13.2", "13.2"),
+        "part3_quantum": ("12.2", "12.2"),
+        "part4_verification": ("14.0", "14.0"),
+        "part5_future_predictions": ("12.8", "12.8"),
+    }
+
     os.environ.setdefault("WAVEP_MPL_AUTOSAVE_VECTOR_PDF", "1")
+    os.environ.setdefault("WAVEP_MPL_FONT_PROFILE", font_profile_by_build_profile.get(profile, "paper"))
+    os.environ["WAVEP_MPL_FONT_SCALE"] = str(figure_font_scale)
+    text_floor, legend_note_floor = font_floor_by_build_profile.get(profile, ("12.2", "12.2"))
+    os.environ.setdefault("WAVEP_MPL_TEXT_MIN_FONT", text_floor)
+    os.environ.setdefault("WAVEP_MPL_LEGEND_NOTE_MIN_FONT", legend_note_floor)
     if profile == "part3_quantum":
-        os.environ.setdefault("WAVEP_MPL_LEGEND_NOTE_MIN_FONT", "11")
         if requested_figure_lang == "auto":
             os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
             if figure_lang == "ja":
@@ -219,8 +249,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                 os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
     elif profile == "part4_verification":
         # Part4 は図5/6基準で可読性を確保しつつ、過大な文字重なりを避ける。
-        os.environ.setdefault("WAVEP_MPL_TEXT_MIN_FONT", "14")
-        os.environ.setdefault("WAVEP_MPL_LEGEND_NOTE_MIN_FONT", "14")
         if requested_figure_lang == "auto":
             os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
         else:
@@ -231,8 +259,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         else:
             os.environ.pop("WAVEP_MPL_FORCE_JA_TEXT", None)
     elif profile == "part5_future_predictions":
-        os.environ.setdefault("WAVEP_MPL_TEXT_MIN_FONT", "12")
-        os.environ.setdefault("WAVEP_MPL_LEGEND_NOTE_MIN_FONT", "12")
         if requested_figure_lang == "auto":
             os.environ.setdefault("WAVEP_FIGURE_LANG", figure_lang)
         else:

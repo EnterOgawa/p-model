@@ -1,8 +1,12 @@
 """
 sitecustomize.py
 
-環境変数 `WAVEP_MPL_LEGEND_NOTE_MIN_FONT` が設定されている場合のみ、
-Matplotlib の凡例・注記フォント下限パッチを有効化する。
+環境変数で指定された Matplotlib 共通フックを、build 時に自動適用する。
+
+- `WAVEP_MPL_FONT_PROFILE`: 役割別 font profile（title / axis / tick / legend / note / suptitle）
+- `WAVEP_MPL_FONT_SCALE`: profile 全体の倍率
+- `WAVEP_MPL_LEGEND_NOTE_MIN_FONT`: 凡例・注記の後方互換 floor
+- `WAVEP_MPL_TEXT_MIN_FONT`: 文字全体の後方互換 floor
 """
 
 from __future__ import annotations
@@ -12,6 +16,30 @@ import sys
 import re
 from pathlib import Path
 from typing import Any
+
+
+# 関数: `_apply_wavep_font_profile_if_enabled` の入出力契約と処理意図を定義する。
+def _apply_wavep_font_profile_if_enabled() -> None:
+    raw = os.getenv("WAVEP_MPL_FONT_PROFILE", "").strip()
+    if not raw:
+        return
+
+    scale_raw = os.getenv("WAVEP_MPL_FONT_SCALE", "1.0").strip()
+    try:
+        scale = float(scale_raw)
+    except Exception:
+        scale = 1.0
+
+    try:
+        from scripts.utils.plot_style import install_wavep_font_profile
+
+        install_wavep_font_profile(profile_name=raw, scale=scale)
+    except Exception:
+        # sitecustomize では描画不能より build 継続を優先する。
+        return
+
+
+_apply_wavep_font_profile_if_enabled()
 
 
 # 関数: `_apply_wavep_font_floor_if_enabled` の入出力契約と処理意図を定義する。

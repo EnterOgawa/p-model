@@ -77,7 +77,7 @@ set "PDF_COMMON_ARGS=--engine auto --require-engine --sync-papers --papers-dir p
 
 echo.
 echo === sync_public_readme ===
-python -B scripts\summary\sync_public_readme.py --direction public-to-root --bootstrap
+python -B scripts\summary\sync_public_readme.py --direction root-to-public
 if errorlevel 1 goto fail
 
 set "PROFILE="
