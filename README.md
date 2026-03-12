@@ -81,6 +81,10 @@ P-modelの核心は、たったひとつの視点の転換です。
 
 > *論文本文はプレプリントサーバーへの公開準備中です。公開され次第、ここにリンクを追記します。*
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18981367.svg)](https://doi.org/10.5281/zenodo.18981367)
+
+📄 **[論文 PDF（Part IV）はこちら  Zenodo](https://doi.org/10.5281/zenodo.18981367)**
+
 ---
 
 ## 🔮 未来への予測決着は、これから
