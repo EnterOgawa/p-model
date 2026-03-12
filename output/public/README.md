@@ -2,6 +2,7 @@
 **時間波ダイナミクスに基づく統一理論 (The P-model)**
 
 [![Release](https://img.shields.io/github/v/release/EnterOgawa/p-model?label=Latest%20Release)](https://github.com/EnterOgawa/p-model/releases)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18981366.svg)](https://doi.org/10.5281/zenodo.18981366)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC_BY--ND_4.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
 
@@ -81,9 +82,7 @@ P-modelの核心は、たったひとつの視点の転換です。
 
 > *論文本文はプレプリントサーバーへの公開準備中です。公開され次第、ここにリンクを追記します。*
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18981367.svg)](https://doi.org/10.5281/zenodo.18981367)
-
-📄 **[論文 PDF（Part IV）はこちら  Zenodo](https://doi.org/10.5281/zenodo.18981367)**
+📄 **[論文 PDF（Part I-V）はこちら  Zenodo](https://doi.org/10.5281/zenodo.18981366)**
 
 ---
 
