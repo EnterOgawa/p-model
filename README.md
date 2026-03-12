@@ -132,6 +132,8 @@ P-modelの核心は、たったひとつの視点の転換です。
 python -B scripts/summary/run_all.py --offline --jobs 2
 ```
 
+補足: キャッシュ未整備で一次データ取得が必要な場合は `--offline` を `--online` に置き換えてください。
+
 **パートごとの個別生成**
 ```bash
 # Part I（コア理論）
@@ -151,6 +153,7 @@ python -B scripts/summary/paper_build.py --profile part5_future_predictions --fi
 ```
 
 生成された公開データは `output/public/` に、HTML / `.tex` / PDF は `output/private/summary/` に、最終論文 PDF のみは `papers/` に配置されます。
+`paper_build.py` は既定で DOCX を生成しないため、`--skip-docx` は現行運用を明示するための互換オプションです。
 Bell 再解析で使う `output/public/quantum/bell/*/normalized_events.npz` は Git 本体ではなく Release assets から取得してください。
 
 ---
