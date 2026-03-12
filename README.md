@@ -148,21 +148,23 @@ P-modelは、真のオープンサイエンスと「人間の恣意的な介入�
 > `python scripts/summary/run_all.py`
 
 **2. 各パートの個別検証とソース生成**
-特定の領域にフォーカスして検証を行い、そのパートのソースファイルをビルドします。
+特定の領域にフォーカスして検証を行う場合は、現在の標準入口である `paper_build.py` を使用します。
+以下のコマンドは、対象パートの HTML / `.tex` / PDF を `output/private/summary/` に生成し、PDF を `papers/` にも同期します。
+DOCX は既定で生成しません。
 
-* **Part I（コア理論）:** 万物の公理と基準書、時間波密度と重力・光伝播の基礎写像のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile paper --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+* **Part I（コア理論）:** 万物の公理と基準書、時間波密度と重力・光伝播の基礎写像を個別に再構成します。
+  > `python -B scripts/summary/paper_build.py --profile paper --mode publish --outdir output/private/summary --skip-docx`
   > 
-* **Part II（宇宙物理編）:** 太陽系テスト、重力波、赤方偏移の再計算とソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part2_astrophysics --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+* **Part II（宇宙物理編）:** 太陽系テスト、重力波、EHT、宇宙論検証を個別に再構成します。
+  > `python -B scripts/summary/paper_build.py --profile part2_astrophysics --mode publish --outdir output/private/summary --skip-docx`
   > 
-* **Part III（量子物理編）:** ベルテスト生データの網羅的再解析と、非局所性棄却のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part3_quantum --skip-lint --tex-audit-engine lualatex --tex-audit-require-engine`
+* **Part III（量子物理編）:** ベルテスト再解析、干渉、核・物性・熱の検証を個別に再構成します。
+  > `python -B scripts/summary/paper_build.py --profile part3_quantum --figure-lang ja --mode publish --outdir output/private/summary --skip-docx`
   > 
-* **Part IV（検証資料）:** 再現性プロトコルとハッシュ台帳のソース生成。
-  > `python -B scripts/summary/paper_build.py --profile part4_verification --tex-audit-engine lualatex --tex-audit-require-engine`
+* **Part IV（検証資料）:** 再現性プロトコル、監査図、ハッシュ台帳を個別に再構成します。
+  > `python -B scripts/summary/paper_build.py --profile part4_verification --figure-lang ja --mode publish --outdir output/private/summary --skip-docx`
 
-各スクリプトが生成した詳細な検証ログ、図表データ、およびコンパイル前の論文ソースファイルは、`output/public/` および `output/private/summary/` ディレクトリに格納されます。
+公開用の図・CSV・JSON は `output/public/` に、各パートの HTML / `.tex` / PDF は `output/private/summary/` に出力されます。
 
 ---
 
